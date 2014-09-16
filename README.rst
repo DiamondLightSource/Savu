@@ -1,8 +1,8 @@
-savu
+Savu
 ----
 
-Savu pythons are known for their small size, good temperament, easy feeding habbits and tolerance for a wide range of temperatures.[1]
-The Savu Toography reconstruction pipleine project aims to mimic these behaviors being a small package, which is easy to use and reliable, chomps its way through vast ammounts of data, and finaly is protable to a wide range of systems. 
+Savu pythons are known for their small size, good temperament, easy feeding habits and tolerance for a wide range of temperatures.[1]
+The Savu Tomography reconstruction pipeline project aims to mimic these behaviours being a small package, which is easy to use and reliable, chomps its way through vast amounts of data, and finally is portable to a wide range of systems. 
 
 To use ::
 
