@@ -14,6 +14,22 @@
     :undoc-members:
     :show-inheritance:
 
+:mod:`savu.data` Package
+========================
+
+.. automodule:: savu.data.__init__
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`savu.data.structures` Module
+----------------------------------
+
+.. automodule:: savu.data.structures
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 :mod:`savu.plugins` Package
 ===========================
 
@@ -23,7 +39,7 @@
     :show-inheritance:
     
 :mod:`savu.plugins.utils` Module
----------------------------------
+--------------------------------
 
 .. automodule:: savu.plugins.utils
     :members:
@@ -38,10 +54,10 @@
     :undoc-members:
     :show-inheritance:
 
-:mod:`savu.tests` Package
+:mod:`savu.test` Package
 =========================
 
-.. automodule:: savu.tests.__init__
+.. automodule:: savu.test.__init__
     :members:
     :undoc-members:
     :show-inheritance:
