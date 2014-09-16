@@ -13,9 +13,32 @@
 # limitations under the License.
 
 """
-All the plugin architecture for Savu is contained here
-
+.. module:: plugins_util_test
+   :platform: Unix
+   :synopsis: unittest test class for plugin utils
 
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
+
+import unittest
+
+from savu.plugins import utils as pu
+from savu.plugins import plugin as test_plugin
+
+
+class Test(unittest.TestCase):
+
+    def testGetPlugin(self):
+        plugin = pu.load_plugin(None, "savu.plugins.plugin")
+        self.assertEqual(plugin.__class__, test_plugin.Plugin,
+                         "Failed to load the correct class")
+        try:
+            plugin.setup(None)
+            self.fail("The setup method should throw an exception")
+        except NotImplementedError:
+            pass
+
+
+if __name__ == "__main__":
+    unittest.main()

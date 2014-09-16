@@ -13,9 +13,30 @@
 # limitations under the License.
 
 """
-All the plugin architecture for Savu is contained here
-
+.. module:: plugin
+   :platform: Unix
+   :synopsis: Base class for all plugins used by Savu
 
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
+
+import logging
+
+
+class Plugin(object):
+    """
+    The base class from which all plugins should inherit.
+
+    """
+
+    def __init__(self):
+        super(Plugin, self).__init__()
+
+    def setup(self, data):
+        """
+        This method is called after the plugin has been created by the
+        pipeline framework
+        """
+        logging.error("Setup needs to be implemented")
+        raise NotImplementedError("Setup needs to be implemented")

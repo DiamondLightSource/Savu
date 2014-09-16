@@ -21,6 +21,22 @@
     :members:
     :undoc-members:
     :show-inheritance:
+    
+:mod:`savu.plugins.utils` Module
+---------------------------------
+
+.. automodule:: savu.plugins.utils
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`savu.plugins.plugin` Module
+---------------------------------
+
+.. automodule:: savu.plugins.plugin
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 :mod:`savu.tests` Package
 =========================

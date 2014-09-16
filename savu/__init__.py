@@ -4,6 +4,6 @@ use with :
 
 import savu
 
-.. moduleauthor:: Andrew Carter <andrew@invalid.com>
+.. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
