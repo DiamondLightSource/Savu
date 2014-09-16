@@ -22,6 +22,8 @@
 
 """
 
+import h5py
+
 
 class RawData(object):
     """
@@ -33,7 +35,20 @@ class RawData(object):
         self.data = None
         self.image_key = None
         self.rotation_angle = None
-        self.norm = None
+        self.control = None
+
+    def populate_from_nexus(self, path):
+        """Load a plugin.
+
+        :param path: The full path of the NeXus file to load
+        :type path: str.
+
+        """
+        f = h5py.File(path, 'r')
+        self.data = f['entry1/tomo_entry/instrument/detector/data']
+        self.image_key = f['entry1/tomo_entry/instrument/detector/image_key']
+        self.rotation_angle = f['entry1/tomo_entry/sample/rotation_angle']
+        self.control = f['entry1/tomo_entry/control/data']
 
 
 class ProjectionData(object):

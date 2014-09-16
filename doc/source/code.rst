@@ -61,3 +61,11 @@
     :members:
     :undoc-members:
     :show-inheritance:
+
+:mod:`savu.test.test_utils` Module
+----------------------------------
+
+.. automodule:: savu.test.test_utils
+    :members:
+    :undoc-members:
+    :show-inheritance:
