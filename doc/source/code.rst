@@ -1,29 +1,29 @@
-:mod:`Savu` Package
---------------------
+:mod:`savu` Package
+*******************
 
 .. automodule:: savu.__init__
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`core` Package
----------------------------------
+:mod:`savu.core` Package
+========================
 
 .. automodule:: savu.core.__init__
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`plugins` Package
----------------------------------
+:mod:`savu.plugins` Package
+===========================
 
 .. automodule:: savu.plugins.__init__
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`tests` Package
----------------------------------
+:mod:`savu.tests` Package
+=========================
 
 .. automodule:: savu.tests.__init__
     :members:
