@@ -26,6 +26,8 @@ import unittest
 from savu.plugins import utils as pu
 from savu.test import test_utils as tu
 
+from savu.data.structures import RawTimeseriesData
+
 base_class_name = "savu.plugins.plugin"
 
 
@@ -44,9 +46,14 @@ class PluginTest(unittest.TestCase):
             self.assertRaises(NotImplementedError, plugin.process,
                               "test", 1, 1)
             return
-        # get the data
-        data = tu.get_nexus_test_data()
+        # load appropriate data
+        data = None
+        if plugin.required_data_type() == RawTimeseriesData:
+            data = tu.get_nexus_test_data()
+        self.assertIsNotNone(data, "Cannot find appropriate test data")
+
         plugin.process(data, 1, 0)
+
 
 
 class TimeseriesFieldCorrectionsTest(PluginTest):

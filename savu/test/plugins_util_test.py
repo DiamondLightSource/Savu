@@ -35,7 +35,7 @@ class Test(unittest.TestCase):
                          "Failed to load the correct class")
         self.assertRaises(NotImplementedError, plugin.process, "test", 1, 1)
         self.assertRaises(NotImplementedError, plugin.required_resource)
-        self.assertRaises(NotImplementedError, plugin.required_data)
+        self.assertRaises(NotImplementedError, plugin.required_data_type)
 
 if __name__ == "__main__":
     unittest.main()

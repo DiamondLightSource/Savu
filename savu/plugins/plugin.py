@@ -57,11 +57,20 @@ class Plugin(object):
         logging.error("required_resource needs to be implemented")
         raise NotImplementedError("required_resource needs to be implemented")
 
-    def required_data(self):
+    def required_data_type(self):
         """Gets the input data type which is required for the plugin
 
         :returns:  the class of the data which is expectd
 
         """
-        logging.error("required_data needs to be implemented")
-        raise NotImplementedError("required_data needs to be implemented")
+        logging.error("required_data_type needs to be implemented")
+        raise NotImplementedError("required_data_type needs to be implemented")
+
+    def output_data_type(self):
+        """Gets the output data type which is provided by the plugin
+
+        :returns:  the class of the data which will be provided
+
+        """
+        logging.error("output_data_type needs to be implemented")
+        raise NotImplementedError("output_data_type needs to be implemented")

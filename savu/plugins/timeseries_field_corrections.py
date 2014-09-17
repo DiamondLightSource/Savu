@@ -21,7 +21,7 @@
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
-from savu.data.structures import RawTimeseriesData
+from savu.data.structures import RawTimeseriesData, ProjectionData
 from savu.plugins.plugin import Plugin
 
 import numpy as np
@@ -58,17 +58,22 @@ class TimeseriesFieldCorrections(Plugin):
             # write the frame to disk
 
     def required_resource(self):
-        """This plugin needs to use the CPU to work
-
+        """
+        This plugin needs to use the CPU to work
         :returns:  CPU
-
         """
         return "CPU"
 
-    def required_data(self):
-        """The input for this plugin is RawTimeseriesData
-
+    def required_data_type(self):
+        """
+        The input for this plugin is RawTimeseriesData
         :returns:  RawTimeseriesData
-
         """
         return RawTimeseriesData
+
+    def output_data_type(self):
+        """
+        The output of this plugin is ProjectionData
+        :returns:  ProjectionData
+        """
+        return ProjectionData
