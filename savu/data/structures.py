@@ -25,17 +25,19 @@
 import h5py
 
 
-class RawData(object):
+class RawTimeseriesData(object):
     """
-    Descriptor for raw data
+    Descriptor for raw timeseries data
     """
 
     def __init__(self):
-        super(RawData, self).__init__()
+        super(RawTimeseriesData, self).__init__()
         self.data = None
         self.image_key = None
         self.rotation_angle = None
         self.control = None
+        self.projection_axis = (0, 0)
+        self.rotation_axis = (0,)
 
     def populate_from_nexus(self, path):
         """Load a plugin.
@@ -49,6 +51,8 @@ class RawData(object):
         self.image_key = f['entry1/tomo_entry/instrument/detector/image_key']
         self.rotation_angle = f['entry1/tomo_entry/sample/rotation_angle']
         self.control = f['entry1/tomo_entry/control/data']
+        self.projection_axis = (1, 2)
+        self.rotation_axis = (0,)
 
 
 class ProjectionData(object):
@@ -57,7 +61,7 @@ class ProjectionData(object):
     """
 
     def __init__(self):
-        super(RawData, self).__init__()
+        super(ProjectionData, self).__init__()
         self.data = None
         self.rotation_angle = None
 
@@ -68,5 +72,5 @@ class VolumeData(object):
     """
 
     def __init__(self):
-        super(RawData, self).__init__()
+        super(VolumeData, self).__init__()
         self.data = None

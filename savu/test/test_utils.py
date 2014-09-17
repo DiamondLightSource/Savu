@@ -23,27 +23,29 @@
 
 import inspect
 import os
-from savu.data.structures import RawData
+from savu.data.structures import RawTimeseriesData
 
 
-def get_test_data_path():
+def get_test_data_path(name):
     """Gets the full path to the test data
 
+    :param name: The name of the test file.
+    :type name: str
     :returns:  The full path to the example data.
 
     """
     path = inspect.stack()[0][1]
     return '/'.join(os.path.split(path)[0].split(os.sep)[:-2] +
-                    ['test_data', '24737.nxs'])
+                    ['test_data', name])
 
 
-def get_test_raw_data():
+def get_nexus_test_data():
     """Gets the test data and returns it in the RawData Structure
 
     :returns:  a RawData Object containing the example data.
 
     """
-    path = get_test_data_path()
-    raw_data = RawData()
-    raw_data.populate_from_nexus(path)
-    return raw_data
+    path = get_test_data_path('24737.nxs')
+    raw_timeseries_data = RawTimeseriesData()
+    raw_timeseries_data.populate_from_nexus(path)
+    return raw_timeseries_data
