@@ -33,10 +33,35 @@ class Plugin(object):
     def __init__(self):
         super(Plugin, self).__init__()
 
-    def setup(self, data):
+    def process(self, data, processes, process):
         """
         This method is called after the plugin has been created by the
         pipeline framework
+        :param data: The input data object.
+        :type data: savu.data.structures
+        :param processes: The number of processes which will be doing the work
+        :type path: int
+        :param path: The specific process which we are
+        :type path: int
         """
-        logging.error("Setup needs to be implemented")
-        raise NotImplementedError("Setup needs to be implemented")
+        logging.error("process needs to be implemented for proc %i of %i : %s",
+                      process, processes, data.__class__)
+        raise NotImplementedError("process needs to be implemented")
+
+    def required_resource(self):
+        """Gets the architecture the plugin needs to work
+
+        :returns:  the string CPU or GPU
+
+        """
+        logging.error("required_resource needs to be implemented")
+        raise NotImplementedError("required_resource needs to be implemented")
+
+    def required_data(self):
+        """Gets the input data type which is required for the plugin
+
+        :returns:  the class of the data which is expectd
+
+        """
+        logging.error("required_data needs to be implemented")
+        raise NotImplementedError("required_data needs to be implemented")

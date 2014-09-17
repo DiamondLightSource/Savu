@@ -42,6 +42,17 @@ def load_plugin(path, name):
     components = name.split('.')
     for comp in components[1:]:
         mod = getattr(mod, comp)
-    clazz = getattr(mod, (name.split('.')[-1]).capitalize())
+    clazz = getattr(mod, module2class(name.split('.')[-1]))
     instance = clazz()
     return instance
+
+
+def module2class(module_name):
+    """Converts a module name to a class name
+
+    :param module_name: The lowercase_module_name of the module
+    :type path: str
+    :returns:  the module name in CamelCase
+
+    """
+    return ''.join(x.capitalize() for x in module_name.split('_'))

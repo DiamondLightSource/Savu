@@ -24,18 +24,36 @@
 import unittest
 
 from savu.plugins import utils as pu
-from savu.plugins import plugin as test_plugin
+from savu.test import test_utils as tu
+
+base_class_name = "savu.plugins.plugin"
 
 
-class Test(unittest.TestCase):
+class PluginTest(unittest.TestCase):
 
-    def testGetPlugin(self):
-        plugin = pu.load_plugin(None, "savu.plugins.plugin")
-        self.assertEqual(plugin.__class__, test_plugin.Plugin,
-                         "Failed to load the correct class")
-        self.assertRaises(NotImplementedError, plugin.process, "test", 1, 1)
-        self.assertRaises(NotImplementedError, plugin.required_resource)
-        self.assertRaises(NotImplementedError, plugin.required_data)
+    def setUp(self):
+        self.plugin_name = base_class_name
+
+    def test_get_plugin(self):
+        plugin = pu.load_plugin(None, self.plugin_name)
+        self.assertIsNotNone(plugin)
+
+    def test_process(self):
+        plugin = pu.load_plugin(None, self.plugin_name)
+        if self.plugin_name == base_class_name:
+            self.assertRaises(NotImplementedError, plugin.process,
+                              "test", 1, 1)
+            return
+        # get the data
+        data = tu.get_nexus_test_data()
+        plugin.process(data, 1, 0)
+
+
+class TimeseriesFieldCorrectionsTest(PluginTest):
+
+    def setUp(self):
+        self.plugin_name = "savu.plugins.timeseries_field_corrections"
+
 
 if __name__ == "__main__":
     unittest.main()
