@@ -28,6 +28,7 @@ import h5py
 import numpy as np
 
 from savu.data.structures import SliceAvailableWrapper
+from savu.data.structures import SliceAlwaysAvailableWrapper
 
 base_class_name = "savu.plugins.plugin"
 
@@ -46,8 +47,30 @@ class WrapperTest(unittest.TestCase):
         self.saw[1, :] = np.arange(10)
         self.assertIsNotNone(self.saw[1, :])
 
+    def test_deligate(self):
+        self.assertEqual(self.saw.shape, (10, 10),
+                         "Data.shape not correct is " + str(self.saw.shape))
+        self.assertEqual(self.saw.dtype, np.double,
+                         "Data.dtype not correct is " + str(self.saw.dtype))
+
     def tearDown(self):
         self.f.close()
+
+
+class WrapperAlwaysAvailableTest(unittest.TestCase):
+
+    def setUp(self):
+        bb = np.random.rand(10, 10)
+        self.saw = SliceAlwaysAvailableWrapper(bb)
+
+    def test_basics(self):
+        self.assertIsNotNone(self.saw[1, :])
+
+    def test_deligate(self):
+        self.assertEqual(self.saw.shape, (10, 10),
+                         "Data.shape not correct is " + str(self.saw.shape))
+        self.assertEqual(self.saw.dtype, np.double,
+                         "Data.dtype not correct is " + str(self.saw.dtype))
 
 if __name__ == "__main__":
     unittest.main()

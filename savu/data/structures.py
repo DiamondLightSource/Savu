@@ -53,6 +53,13 @@ class SliceAvailableWrapper(object):
         self.data[item] = value
         self.avail[item] = True
 
+    def __getattr__(self, name):
+        """
+        Delegate everything else to the data class
+        """
+        value = self.data.__getattribute__(name)
+        return value
+
 
 class SliceAlwaysAvailableWrapper(SliceAvailableWrapper):
     """
@@ -179,13 +186,13 @@ class ProjectionData(object):
                 data.get_projection_shape()
             data_type = np.double
             rotation_angle_shape = (data.get_number_of_projections(),)
-            rotation_angle_type = data.rotation_angle.data.dtype
+            rotation_angle_type = data.rotation_angle.dtype
 
         elif data.__class__ == ProjectionData:
-            data_shape = data.data.shape()
+            data_shape = data.shape()
             data_type = np.double
-            rotation_angle_shape = data.rotation_angle.data.shape
-            rotation_angle_type = data.rotation_angle.data.dtype
+            rotation_angle_shape = data.rotation_angle.shape
+            rotation_angle_type = data.rotation_angle.dtype
 
         group = self.backing_file.create_group(plugin_name)
         data = group.create_dataset('data', data_shape, data_type)
