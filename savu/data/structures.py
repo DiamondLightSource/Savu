@@ -50,8 +50,8 @@ class SliceAvailableWrapper(object):
             return None
 
     def __setitem__(self, item, value):
-        self.avail[item] = True
         self.data[item] = value
+        self.avail[item] = True
 
 
 class RawTimeseriesData(object):
