@@ -55,7 +55,6 @@ class PluginTest(unittest.TestCase):
         plugin.process(data, 1, 0)
 
 
-
 class TimeseriesFieldCorrectionsTest(PluginTest):
 
     def setUp(self):
