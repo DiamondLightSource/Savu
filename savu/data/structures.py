@@ -25,6 +25,8 @@
 import numpy as np
 import h5py
 
+from mpi4py import MPI
+
 
 class SliceAvailableWrapper(object):
     """
@@ -156,7 +158,7 @@ class ProjectionData(object):
         self.data = None
         self.rotation_angle = None
 
-    def create_backing_h5(self, path, plugin_name, data, mpi=None):
+    def create_backing_h5(self, path, plugin_name, data, mpi=False):
         """
         Create a h5 backend for this ProjectionData
         :param path: The full path of the NeXus file to use as a backend
@@ -167,11 +169,11 @@ class ProjectionData(object):
         :type mpi: package
         """
         self.backing_file = None
-        if mpi is None:
-            self.backing_file = h5py.File(path, 'w')
-        else:
+        if mpi:
             self.backing_file = h5py.File(path, 'w', driver='mpio',
-                                          comm=mpi.COMM_WORLD)
+                                          comm=MPI.COMM_WORLD)
+        else:
+            self.backing_file = h5py.File(path, 'w')
 
         if self.backing_file is None:
             raise IOError("Failed to open the hdf5 file")

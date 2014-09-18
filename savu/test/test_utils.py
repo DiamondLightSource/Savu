@@ -52,12 +52,15 @@ def get_nexus_test_data():
     return raw_timeseries_data
 
 
-def get_temp_projection_data(plugin_name, data, mpi=None):
+def get_temp_projection_data(plugin_name, data, mpi=False, file_name=None):
     """
     Gets a temporary, file backed, projection data object
     :returns:  a ProjectionData Object containing the example data.
     """
     projection_data = ProjectionData()
-    temp_file = tempfile.NamedTemporaryFile(suffix='.h5', delete=False)
-    projection_data.create_backing_h5(temp_file.name, plugin_name, data, mpi)
+    temp_file = file_name
+    if temp_file is None:
+        temp_file = tempfile.NamedTemporaryFile(suffix='.h5', delete=False)
+        temp_file = temp_file.name
+    projection_data.create_backing_h5(temp_file, plugin_name, data, mpi)
     return projection_data
