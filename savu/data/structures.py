@@ -54,6 +54,26 @@ class SliceAvailableWrapper(object):
         self.avail[item] = True
 
 
+class SliceAlwaysAvailableWrapper(SliceAvailableWrapper):
+    """
+    This class takes 1 data ndarray.  Its purpose is to provide slices from the
+    data array in the same way as the SliceAvailableWrapper but assuming the
+    data is always available (for example in the case of the input file)
+    """
+    def __init__(self, data):
+        """
+        :param data: The data ndArray
+        :type data: any ndArray
+        """
+        super(SliceAlwaysAvailableWrapper, self).__init__(None, data)
+
+    def __getitem__(self, item):
+        return self.data[item]
+
+    def __setitem__(self, item, value):
+        self.data[item] = value
+
+
 class RawTimeseriesData(object):
     """
     Descriptor for raw timeseries data
@@ -61,6 +81,8 @@ class RawTimeseriesData(object):
 
     def __init__(self):
         super(RawTimeseriesData, self).__init__()
+        self.nexus_file = None
+
         self.data = None
         self.image_key = None
         self.rotation_angle = None
@@ -74,13 +96,45 @@ class RawTimeseriesData(object):
         :param path: The full path of the NeXus file to load.
         :type path: str
         """
-        f = h5py.File(path, 'r')
-        self.data = f['entry1/tomo_entry/instrument/detector/data']
-        self.image_key = f['entry1/tomo_entry/instrument/detector/image_key']
-        self.rotation_angle = f['entry1/tomo_entry/sample/rotation_angle']
-        self.control = f['entry1/tomo_entry/control/data']
+        self.nexus_file = h5py.File(path, 'r')
+        data = self.nexus_file['entry1/tomo_entry/instrument/detector/data']
+        self.data = SliceAlwaysAvailableWrapper(data)
+
+        image_key = \
+            self.nexus_file['entry1/tomo_entry/instrument/detector/image_key']
+        self.image_key = SliceAlwaysAvailableWrapper(image_key)
+
+        rotation_angle = \
+            self.nexus_file['entry1/tomo_entry/sample/rotation_angle']
+        self.rotation_angle = SliceAlwaysAvailableWrapper(rotation_angle)
+
+        control = self.nexus_file['entry1/tomo_entry/control/data']
+        self.control = SliceAlwaysAvailableWrapper(control)
+
         self.projection_axis = (1, 2)
         self.rotation_axis = (0,)
+
+    def get_number_of_projections(self):
+        """
+        Gets the real number of projections excluding calibration data
+        :returns: integer number of data frames
+        """
+        return (self.image_key.data[:] == 0).sum()
+
+    def get_projection_shape(self):
+        """
+        Gets the shape of a projection
+        :returns: a tuple of the shape of a single projection
+        """
+        return self.data.data.shape[1:3]
+
+    def complete(self):
+        """
+        Closes the backing file and completes work
+        """
+        if self.nexus_file is not None:
+            self.nexus_file.close()
+            self.nexus_file = None
 
 
 class ProjectionData(object):
@@ -90,38 +144,71 @@ class ProjectionData(object):
 
     def __init__(self):
         super(ProjectionData, self).__init__()
-        self.data = None
-        self.data_avail = None
-        self.rotation_angle = None
-        self.rotation_angle_avail = None
+        self.backing_file = None
 
-    def create_backing_h5(self, path, plugin_name, data_shape, data_type,
-                          rotation_angle_shape, rotation_angle_type, mpi=None):
+        self.data = None
+        self.rotation_angle = None
+
+    def create_backing_h5(self, path, plugin_name, data, mpi=None):
         """
         Create a h5 backend for this ProjectionData
         :param path: The full path of the NeXus file to use as a backend
         :type path: str
+        :param data: The structure from which this can be created
+        :type data: savu.structure
         :param mpi: if an MPI process, provide MPI package here, default None
         :type mpi: package
         """
-        f = None
+        self.backing_file = None
         if mpi is None:
-            f = h5py.File(path, 'w')
+            self.backing_file = h5py.File(path, 'w')
         else:
-            f = h5py.File(path, 'w', driver='mpio', comm=mpi.COMM_WORLD)
+            self.backing_file = h5py.File(path, 'w', driver='mpio',
+                                          comm=mpi.COMM_WORLD)
 
-        if f is None:
+        if self.backing_file is None:
             raise IOError("Failed to open the hdf5 file")
 
-        group = f.create_group(plugin_name)
-        self.data = group.create_dataset('data', data_shape, data_type)
-        self.data_avail = group.create_dataset('data_avail',
-                                               data_shape, np.bool_)
+        data_shape = None
+        data_type = None
+        rotation_angle_shape = None
+        rotation_angle_type = None
+
+        if data.__class__ == RawTimeseriesData:
+            data_shape = (data.get_number_of_projections(),) +\
+                data.get_projection_shape()
+            data_type = np.double
+            rotation_angle_shape = (data.get_number_of_projections(),)
+            rotation_angle_type = data.rotation_angle.data.dtype
+
+        elif data.__class__ == ProjectionData:
+            data_shape = data.data.shape()
+            data_type = np.double
+            rotation_angle_shape = data.rotation_angle.data.shape
+            rotation_angle_type = data.rotation_angle.data.dtype
+
+        group = self.backing_file.create_group(plugin_name)
+        data = group.create_dataset('data', data_shape, data_type)
+        data_avail = group.create_dataset('data_avail',
+                                          data_shape, np.bool_)
+        self.data = SliceAvailableWrapper(data_avail, data)
+
+        rotation_angle = \
+            group.create_dataset('rotation_angle',
+                                 rotation_angle_shape, rotation_angle_type)
+        rotation_angle_avail = \
+            group.create_dataset('rotation_angle_avail',
+                                 rotation_angle_shape, np.bool_)
         self.rotation_angle = \
-            group.create_dataset('rotation_angle', rotation_angle_shape,
-                                 rotation_angle_type)
-        self.rotation_angle_avail = \
-            group.create_dataset('rotation_angle_avail', data_shape, np.bool_)
+            SliceAvailableWrapper(rotation_angle_avail, rotation_angle)
+
+    def complete(self):
+        """
+        Closes the backing file and completes work
+        """
+        if self.backing_file is not None:
+            self.backing_file.close()
+            self.backing_file = None
 
 
 class VolumeData(object):

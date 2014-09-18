@@ -33,7 +33,8 @@ class Test(unittest.TestCase):
         plugin = pu.load_plugin(None, "savu.plugins.plugin")
         self.assertEqual(plugin.__class__, test_plugin.Plugin,
                          "Failed to load the correct class")
-        self.assertRaises(NotImplementedError, plugin.process, "test", 1, 1)
+        self.assertRaises(NotImplementedError, plugin.process,
+                          "test", "test", 1, 1)
         self.assertRaises(NotImplementedError, plugin.required_resource)
         self.assertRaises(NotImplementedError, plugin.required_data_type)
 

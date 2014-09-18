@@ -34,9 +34,10 @@ class TimeseriesFieldCorrections(Plugin):
     """
 
     def __init__(self):
-        super(TimeseriesFieldCorrections, self).__init__()
+        super(TimeseriesFieldCorrections,
+              self).__init__("TimeseriesFieldCorrections")
 
-    def process(self, data, processes, process):
+    def process(self, data, output, processes, process):
         """
         """
         image_key = data.image_key[...]
@@ -52,10 +53,14 @@ class TimeseriesFieldCorrections(Plugin):
 
         frames = np.array_split(output_frames, processes)[process]
 
+        # The rotation angle can just be pulled out of the file so write that
+        rotation_angle = data.rotation_angle[image_key == 0]
+        output.rotation_angle[:] = rotation_angle
+
         for frame in frames:
             projection = data.data[projection_frames[frame], :, :]
             projection = (projection-dark)/flat  # (flat-dark)
-            # write the frame to disk
+            output.data[frame, :, :] = projection
 
     def required_resource(self):
         """

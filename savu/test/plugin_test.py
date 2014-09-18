@@ -44,7 +44,7 @@ class PluginTest(unittest.TestCase):
         plugin = pu.load_plugin(None, self.plugin_name)
         if self.plugin_name == base_class_name:
             self.assertRaises(NotImplementedError, plugin.process,
-                              "test", 1, 1)
+                              "test", "test", 1, 1)
             return
         # load appropriate data
         data = None
@@ -52,7 +52,14 @@ class PluginTest(unittest.TestCase):
             data = tu.get_nexus_test_data()
         self.assertIsNotNone(data, "Cannot find appropriate test data")
 
-        plugin.process(data, 1, 0)
+        # generate somewehere for the data to go
+        output = tu.get_temp_projection_data(plugin.name, data)
+        plugin.process(data, output, 1, 0)
+
+        print output.backing_file.filename
+
+        data.complete()
+        output.complete()
 
 
 class TimeseriesFieldCorrectionsTest(PluginTest):

@@ -23,25 +23,25 @@
 
 import unittest
 
-import test_utils as tu
+import savu.test.test_utils as tu
 
 
 class Test(unittest.TestCase):
 
     def testGetExampleData(self):
         raw_data = tu.get_nexus_test_data()
-        self.assertEqual(raw_data.data.shape, (111, 135, 160),
+        self.assertEqual(raw_data.data.data.shape, (111, 135, 160),
                          "Data is not the correct shape, was " +
-                         str(raw_data.data.shape))
-        self.assertEqual(raw_data.control.shape, (111,),
+                         str(raw_data.data.data.shape))
+        self.assertEqual(raw_data.control.data.shape, (111,),
                          "Control is not the correct shape, was " +
-                         str(raw_data.control.shape))
-        self.assertEqual(raw_data.image_key.shape, (111,),
+                         str(raw_data.control.data.shape))
+        self.assertEqual(raw_data.image_key.data.shape, (111,),
                          "Image_key is not the correct shape, was " +
-                         str(raw_data.image_key.shape))
-        self.assertEqual(raw_data.rotation_angle.shape, (111,),
+                         str(raw_data.image_key.data.shape))
+        self.assertEqual(raw_data.rotation_angle.data.shape, (111,),
                          "Rotation_Angle is not the correct shape, was " +
-                         str(raw_data.rotation_angle.shape))
+                         str(raw_data.rotation_angle.data.shape))
 
 if __name__ == "__main__":
     unittest.main()

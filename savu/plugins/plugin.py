@@ -27,25 +27,28 @@ import logging
 class Plugin(object):
     """
     The base class from which all plugins should inherit.
-
     """
 
-    def __init__(self):
+    def __init__(self, name='Plugin'):
         super(Plugin, self).__init__()
+        self.name = name
 
-    def process(self, data, processes, process):
+    def process(self, data, output, processes, process):
         """
         This method is called after the plugin has been created by the
         pipeline framework
         :param data: The input data object.
+        :type data: savu.data.structures
+        :param data: The output data object
         :type data: savu.data.structures
         :param processes: The number of processes which will be doing the work
         :type path: int
         :param path: The specific process which we are
         :type path: int
         """
-        logging.error("process needs to be implemented for proc %i of %i : %s",
-                      process, processes, data.__class__)
+        logging.error("process needs to be implemented for proc %i of %i :" +
+                      " input is %s and output is %s",
+                      process, processes, data.__class__, output.__class__)
         raise NotImplementedError("process needs to be implemented")
 
     def required_resource(self):

@@ -22,8 +22,9 @@
 """
 
 import inspect
+import tempfile
 import os
-from savu.data.structures import RawTimeseriesData
+from savu.data.structures import RawTimeseriesData, ProjectionData
 
 
 def get_test_data_path(name):
@@ -42,10 +43,21 @@ def get_test_data_path(name):
 def get_nexus_test_data():
     """Gets the test data and returns it in the RawData Structure
 
-    :returns:  a RawData Object containing the example data.
+    :returns:  a RawTimeseriesData Object containing the example data.
 
     """
     path = get_test_data_path('24737.nxs')
     raw_timeseries_data = RawTimeseriesData()
     raw_timeseries_data.populate_from_nexus(path)
     return raw_timeseries_data
+
+
+def get_temp_projection_data(plugin_name, data, mpi=None):
+    """
+    Gets a temporary, file backed, projection data object
+    :returns:  a ProjectionData Object containing the example data.
+    """
+    projection_data = ProjectionData()
+    temp_file = tempfile.NamedTemporaryFile(suffix='.h5', delete=False)
+    projection_data.create_backing_h5(temp_file.name, plugin_name, data, mpi)
+    return projection_data
