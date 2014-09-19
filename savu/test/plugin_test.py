@@ -26,7 +26,8 @@ import unittest
 from savu.plugins import utils as pu
 from savu.test import test_utils as tu
 
-from savu.data.structures import RawTimeseriesData, ProjectionData, Data
+from savu.data.structures import Data
+from savu.data.structures import RawTimeseriesData, ProjectionData, VolumeData
 
 base_class_name = "savu.plugins.plugin"
 
@@ -47,20 +48,13 @@ class PluginTest(unittest.TestCase):
                               "test", "test", 1, 1)
             return
         # load appropriate data
-        data = []
-        if plugin.required_data_type() == RawTimeseriesData:
-            data.append(tu.get_nexus_test_data())
-        elif plugin.required_data_type() == Data:
-            data.append(tu.get_nexus_test_data())
-        self.assertIsNotNone(data, "Cannot find appropriate test data")
+        data = tu.get_appropriate_input_data(plugin)
+        self.assertGreater(len(data), 0, "Cannot find appropriate test data")
 
         # generate somewehere for the data to go
-        output = []
-        if plugin.output_data_type() == ProjectionData:
-            output.append(tu.get_temp_projection_data(plugin.name, data[0]))
-        elif plugin.output_data_type() == Data:
-            output.append(tu.get_temp_raw_data(plugin.name, data[0]))
-        self.assertIsNotNone(data, "Cannot create appropriate output data")
+        output = tu.get_appropriate_output_data(plugin, data)
+        self.assertGreater(len(output), 0,
+                           "Cannot create appropriate output data")
 
         for i in range(len(data)):
             plugin.process(data[i], output[i], 1, 0)
@@ -82,6 +76,11 @@ class Median3x3FilterTest(PluginTest):
     def setUp(self):
         self.plugin_name = "savu.plugins.median_3x3_filter"
 
+
+class SimpleReconTest(PluginTest):
+
+    def setUp(self):
+        self.plugin_name = "savu.plugins.simple_recon"
 
 if __name__ == "__main__":
     unittest.main()

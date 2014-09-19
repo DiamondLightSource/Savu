@@ -105,12 +105,7 @@ if __name__ == '__main__':
 
         # load appropriate data
         logging.debug("Loading test data")
-        data = None
-        if plugin.required_data_type() == RawTimeseriesData:
-            data = tu.get_nexus_test_data()
-        elif plugin.required_data_type() == Data:
-            data = tu.get_nexus_test_data()
-
+        data = tu.get_appropriate_input_data(plugin)
         if data is None:
             logging.error("Cannot create appropriate input data")
             raise Exception("Cannot create appropriate input data")
@@ -118,28 +113,23 @@ if __name__ == '__main__':
         # generate somewhere for the data to go
         logging.debug("Sorting out output data")
 
-        output = None
-        if plugin.output_data_type() == ProjectionData:
-            output =\
-                tu.get_temp_projection_data(plugin.name, data, mpi=MPI,
-                                            file_name=global_data['file_name'])
-        elif plugin.output_data_type() == Data:
-            output =\
-                tu.get_temp_raw_data(plugin.name, data, mpi=MPI,
-                                     file_name=global_data['file_name'])
-
+        output = \
+            tu.get_appropriate_output_data(plugin, data, mpi=True,
+                                           file_name=global_data['file_name'])
         if output is None:
             logging.error("Cannot create appropriate output data")
             raise Exception("Cannot create appropriate output data")
 
-        logging.debug("processing")
-        plugin.process(data, output, SIZE, RANK)
+        for i in range(len(data)):
+            logging.debug("processing")
+            plugin.process(data[i], output[i], SIZE, RANK)
 
-        logging.debug("Processed to file : %s", output.backing_file.filename)
+            logging.debug("Processed to file : %s",
+                          output[i].backing_file.filename)
 
-        data.complete()
-        output.complete()
+            data[i].complete()
+            output[i].complete()
 
-        logging.debug("All files closed")
+            logging.debug("All files closed")
 
     MPI.COMM_WORLD.barrier()

@@ -260,7 +260,7 @@ class ProjectionData(Data):
             rotation_angle_type = data.rotation_angle.dtype
 
         elif data.__class__ == ProjectionData:
-            data_shape = data.shape()
+            data_shape = data.data.shape
             data_type = np.double
             rotation_angle_shape = data.rotation_angle.shape
             rotation_angle_type = data.rotation_angle.dtype
@@ -280,6 +280,27 @@ class ProjectionData(Data):
         self.rotation_angle = \
             SliceAvailableWrapper(rotation_angle_avail, rotation_angle)
 
+    def populate_from_h5(self, path):
+        """
+        Populate the contents of this object from a file
+        :param path: The full path of the h5 file to load.
+        :type path: str
+        """
+        self.backing_file = h5py.File(path, 'r')
+        data = self.backing_file['TimeseriesFieldCorrections/data']
+        self.data = SliceAlwaysAvailableWrapper(data)
+
+        rotation_angle = \
+            self.backing_file['TimeseriesFieldCorrections/rotation_angle']
+        self.rotation_angle = SliceAlwaysAvailableWrapper(rotation_angle)
+
+    def get_number_of_sinograms(self):
+        """
+        Gets the real number sinograms
+        :returns: integer number of sinogram frames
+        """
+        return self.data.shape[1]
+
 
 class VolumeData(Data):
     """
@@ -288,3 +309,32 @@ class VolumeData(Data):
 
     def __init__(self):
         super(VolumeData, self).__init__()
+
+    def create_backing_h5(self, path, plugin_name, data_shape, data_type,
+                          mpi=False):
+        """
+        Create a h5 backend for this ProjectionData
+        :param path: The full path of the NeXus file to use as a backend
+        :type path: str
+        :param data_shape: The shape of the data block
+        :type data: tuple
+        :param data_type: The type of the data block
+        :type data: np.dtype
+        :param mpi: if an MPI process, provide MPI package here, default None
+        :type mpi: package
+        """
+        self.backing_file = None
+        if mpi:
+            self.backing_file = h5py.File(path, 'w', driver='mpio',
+                                          comm=MPI.COMM_WORLD)
+        else:
+            self.backing_file = h5py.File(path, 'w')
+
+        if self.backing_file is None:
+            raise IOError("Failed to open the hdf5 file")
+
+        group = self.backing_file.create_group(plugin_name)
+        data = group.create_dataset('data', data_shape, data_type)
+        data_avail = group.create_dataset('data_avail',
+                                          data_shape, np.bool_)
+        self.data = SliceAvailableWrapper(data_avail, data)
