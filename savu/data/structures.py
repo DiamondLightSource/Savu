@@ -83,16 +83,33 @@ class SliceAlwaysAvailableWrapper(SliceAvailableWrapper):
         self.data[item] = value
 
 
-class RawTimeseriesData(object):
+class Data(object):
+    """
+    Baseclass for all data
+    """
+
+    def __init__(self):
+        super(Data, self).__init__()
+        self.backing_file = None
+        self.data = None
+
+    def complete(self):
+        """
+        Closes the backing file and completes work
+        """
+        if self.backing_file is not None:
+            self.backing_file.close()
+            self.backing_file = None
+
+
+class RawTimeseriesData(Data):
     """
     Descriptor for raw timeseries data
     """
 
     def __init__(self):
         super(RawTimeseriesData, self).__init__()
-        self.nexus_file = None
 
-        self.data = None
         self.image_key = None
         self.rotation_angle = None
         self.control = None
@@ -105,19 +122,19 @@ class RawTimeseriesData(object):
         :param path: The full path of the NeXus file to load.
         :type path: str
         """
-        self.nexus_file = h5py.File(path, 'r')
-        data = self.nexus_file['entry1/tomo_entry/instrument/detector/data']
+        self.backing_file = h5py.File(path, 'r')
+        data = self.backing_file['entry1/tomo_entry/instrument/detector/data']
         self.data = SliceAlwaysAvailableWrapper(data)
 
-        image_key = \
-            self.nexus_file['entry1/tomo_entry/instrument/detector/image_key']
+        image_key = self.backing_file[
+            'entry1/tomo_entry/instrument/detector/image_key']
         self.image_key = SliceAlwaysAvailableWrapper(image_key)
 
         rotation_angle = \
-            self.nexus_file['entry1/tomo_entry/sample/rotation_angle']
+            self.backing_file['entry1/tomo_entry/sample/rotation_angle']
         self.rotation_angle = SliceAlwaysAvailableWrapper(rotation_angle)
 
-        control = self.nexus_file['entry1/tomo_entry/control/data']
+        control = self.backing_file['entry1/tomo_entry/control/data']
         self.control = SliceAlwaysAvailableWrapper(control)
 
         self.projection_axis = (1, 2)
@@ -137,25 +154,14 @@ class RawTimeseriesData(object):
         """
         return self.data.data.shape[1:3]
 
-    def complete(self):
-        """
-        Closes the backing file and completes work
-        """
-        if self.nexus_file is not None:
-            self.nexus_file.close()
-            self.nexus_file = None
 
-
-class ProjectionData(object):
+class ProjectionData(Data):
     """
     Descriptor for corrected projection data
     """
 
     def __init__(self):
         super(ProjectionData, self).__init__()
-        self.backing_file = None
-
-        self.data = None
         self.rotation_angle = None
 
     def create_backing_h5(self, path, plugin_name, data, mpi=False):
@@ -211,20 +217,11 @@ class ProjectionData(object):
         self.rotation_angle = \
             SliceAvailableWrapper(rotation_angle_avail, rotation_angle)
 
-    def complete(self):
-        """
-        Closes the backing file and completes work
-        """
-        if self.backing_file is not None:
-            self.backing_file.close()
-            self.backing_file = None
 
-
-class VolumeData(object):
+class VolumeData(Data):
     """
     Descriptor for volume data
     """
 
     def __init__(self):
         super(VolumeData, self).__init__()
-        self.data = None
