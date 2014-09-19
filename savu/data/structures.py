@@ -154,6 +154,15 @@ class RawTimeseriesData(Data):
         """
         return self.data.data.shape[1:3]
 
+    def get_clusterd_frame_list(self):
+        """
+        Gets a list of index arrays grouped by sequential image_key
+        :returns: a list of integer index arrays
+        """
+        diff = np.abs(np.diff(self.image_key))
+        pos = np.where(diff > 0)[0] + 1
+        return np.split(np.arange(self.image_key.shape[0]), pos)
+
 
 class ProjectionData(Data):
     """

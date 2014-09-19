@@ -29,6 +29,7 @@ import numpy as np
 
 from savu.data.structures import SliceAvailableWrapper
 from savu.data.structures import SliceAlwaysAvailableWrapper
+from savu.test import test_utils as tu
 
 base_class_name = "savu.plugins.plugin"
 
@@ -71,6 +72,36 @@ class WrapperAlwaysAvailableTest(unittest.TestCase):
                          "Data.shape not correct is " + str(self.saw.shape))
         self.assertEqual(self.saw.dtype, np.double,
                          "Data.dtype not correct is " + str(self.saw.dtype))
+
+
+class RawTimeseriesDataTest(unittest.TestCase):
+
+    def setUp(self):
+        self.data = tu.get_nexus_test_data()
+
+    def test_get_clusterd_frame_list(self):
+        frame_list = self.data.get_clusterd_frame_list()
+        self.assertEqual(len(frame_list), 5,
+                         "Length of framelist is actually %i"
+                         % len(frame_list))
+        self.assertEqual(frame_list[0].min(), 0,
+                         "Start of region 0 is actually %i"
+                         % frame_list[0].min())
+        self.assertEqual(frame_list[1].min(), 5,
+                         "Start of region 1 is actually %i"
+                         % frame_list[1].min())
+        self.assertEqual(frame_list[2].min(), 10,
+                         "Start of region 2 is actually %i"
+                         % frame_list[2].min())
+        self.assertEqual(frame_list[3].min(), 101,
+                         "Start of region 3 is actually %i"
+                         % frame_list[3].min())
+        self.assertEqual(frame_list[4].min(), 106,
+                         "Start of region 4 is actually %i"
+                         % frame_list[4].min())
+
+    def tearDown(self):
+        self.data.complete()
 
 if __name__ == "__main__":
     unittest.main()
