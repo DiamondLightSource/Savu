@@ -90,6 +90,7 @@ class SimpleRecon(Plugin):
     def required_resource(self):
         """
         This plugin needs to use the CPU to work
+
         :returns:  CPU
         """
         return "CPU"
@@ -97,6 +98,7 @@ class SimpleRecon(Plugin):
     def required_data_type(self):
         """
         The input for this plugin is ProjectionData
+
         :returns:  ProjectionData
         """
         return ProjectionData
@@ -104,6 +106,7 @@ class SimpleRecon(Plugin):
     def output_data_type(self):
         """
         The output of this plugin is VolumeData
+
         :returns:  VolumeData
         """
         return VolumeData

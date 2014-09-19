@@ -70,6 +70,7 @@ def get_projection_test_data():
 def get_temp_projection_data(plugin_name, data, mpi=False, file_name=None):
     """
     Gets a temporary, file backed, projection data object
+
     :returns:  a ProjectionData Object containing the example data.
     """
     projection_data = ProjectionData()
@@ -84,6 +85,7 @@ def get_temp_projection_data(plugin_name, data, mpi=False, file_name=None):
 def get_temp_raw_data(plugin_name, data, mpi=False, file_name=None):
     """
     Gets a temporary, file backed, projection data object
+
     :returns:  a ProjectionData Object containing the example data.
     """
     raw_data = RawTimeseriesData()
@@ -98,6 +100,7 @@ def get_temp_raw_data(plugin_name, data, mpi=False, file_name=None):
 def get_temp_volume_data(plugin_name, data, mpi=False, file_name=None):
     """
     Gets a temporary, file backed, projection data object
+
     :returns:  a ProjectionData Object containing the example data.
     """
     volume_data = VolumeData()

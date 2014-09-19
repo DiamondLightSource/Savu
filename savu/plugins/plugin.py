@@ -48,10 +48,10 @@ class Plugin(object):
         """
         This method is called after the plugin has been created by the
         pipeline framework
-        
+
         :param parameters: A dictionary of the parameters for this plugin, or
-        None if no customisation is required
-        :type data: dict
+            None if no customisation is required
+        :type parameters: dict
         """
         self.parameters = {}
         self.populate_default_parameters()

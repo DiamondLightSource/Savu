@@ -14,6 +14,7 @@
 
 """
 .. module:: filter
+
    :platform: Unix
    :synopsis: A base class for all standard filters
 
@@ -49,6 +50,7 @@ class Filter(Plugin):
     def filter_frame(self, data):
         """
         Should be overloaded by filter classes extending this one
+
         :param data: The data to filter
         :type data: ndarray
         :returns:  The filtered image
@@ -79,6 +81,7 @@ class Filter(Plugin):
     def required_resource(self):
         """
         This plugin needs to use the CPU to work
+
         :returns:  CPU
         """
         return "CPU"
@@ -86,13 +89,15 @@ class Filter(Plugin):
     def required_data_type(self):
         """
         The input for this plugin is RawTimeseriesData
-        :returns:  RawTimeseriesData
+
+        :returns:  Data
         """
         return Data
 
     def output_data_type(self):
         """
         The output of this plugin is ProjectionData
-        :returns:  ProjectionData
+
+        :returns:  Data
         """
         return Data

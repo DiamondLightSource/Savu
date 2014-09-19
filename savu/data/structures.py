@@ -37,6 +37,7 @@ class SliceAvailableWrapper(object):
     """
     def __init__(self, avail, data):
         """
+
         :param avail: The available boolean ndArray
         :type avail: boolean ndArray
         :param data: The data ndArray
@@ -71,6 +72,7 @@ class SliceAlwaysAvailableWrapper(SliceAvailableWrapper):
     """
     def __init__(self, data):
         """
+
         :param data: The data ndArray
         :type data: any ndArray
         """
@@ -119,6 +121,7 @@ class RawTimeseriesData(Data):
     def populate_from_nexus(self, path):
         """
         Load a plugin.
+
         :param path: The full path of the NeXus file to load.
         :type path: str
         """
@@ -143,6 +146,7 @@ class RawTimeseriesData(Data):
     def create_backing_h5(self, path, plugin_name, data, mpi=False):
         """
         Create a h5 backend for this RawTimeseriesData
+
         :param path: The full path of the NeXus file to use as a backend
         :type path: str
         :param data: The structure from which this can be created
@@ -197,6 +201,7 @@ class RawTimeseriesData(Data):
     def get_number_of_projections(self):
         """
         Gets the real number of projections excluding calibration data
+
         :returns: integer number of data frames
         """
         return (self.image_key.data[:] == 0).sum()
@@ -204,6 +209,7 @@ class RawTimeseriesData(Data):
     def get_projection_shape(self):
         """
         Gets the shape of a projection
+
         :returns: a tuple of the shape of a single projection
         """
         return self.data.data.shape[1:3]
@@ -211,6 +217,7 @@ class RawTimeseriesData(Data):
     def get_clusterd_frame_list(self):
         """
         Gets a list of index arrays grouped by sequential image_key
+
         :returns: a list of integer index arrays
         """
         diff = np.abs(np.diff(self.image_key))
@@ -230,6 +237,7 @@ class ProjectionData(Data):
     def create_backing_h5(self, path, plugin_name, data, mpi=False):
         """
         Create a h5 backend for this ProjectionData
+
         :param path: The full path of the NeXus file to use as a backend
         :type path: str
         :param data: The structure from which this can be created
@@ -283,6 +291,7 @@ class ProjectionData(Data):
     def populate_from_h5(self, path):
         """
         Populate the contents of this object from a file
+
         :param path: The full path of the h5 file to load.
         :type path: str
         """
@@ -297,6 +306,7 @@ class ProjectionData(Data):
     def get_number_of_sinograms(self):
         """
         Gets the real number sinograms
+
         :returns: integer number of sinogram frames
         """
         return self.data.shape[1]
@@ -314,6 +324,7 @@ class VolumeData(Data):
                           mpi=False):
         """
         Create a h5 backend for this ProjectionData
+
         :param path: The full path of the NeXus file to use as a backend
         :type path: str
         :param data_shape: The shape of the data block
