@@ -13,10 +13,10 @@
 # limitations under the License.
 
 """
-.. module:: Timeseries_field_corrections
+.. module:: simple_recon
    :platform: Unix
-   :synopsis: A Plugin to apply a simple dark and flatfield correction to some
-       raw timeseries data
+   :synopsis: A simple implementation a reconstruction routine for testing
+       purposes
 
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 

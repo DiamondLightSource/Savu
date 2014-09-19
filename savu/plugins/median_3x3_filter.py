@@ -22,7 +22,7 @@
 """
 from savu.plugins.filter import Filter
 
-import scipy.signal as sig
+import scipy.signal.signaltools as sig
 
 
 class Median3x3Filter(Filter):

@@ -7,7 +7,6 @@
     :show-inheritance:
 
 
-
 :mod:`savu.core`
 ================
 
@@ -15,7 +14,6 @@
     :members:
     :undoc-members:
     :show-inheritance:
-
 
 
 :mod:`savu.data`
@@ -33,7 +31,6 @@
     :members:
     :undoc-members:
     :show-inheritance:
-
 
 
 :mod:`savu.plugins`
@@ -76,6 +73,13 @@
     :undoc-members:
     :show-inheritance:
 
+:mod:`savu.plugins.simple_recon`
+------------------------------------------------
+
+.. automodule:: savu.plugins.simple_recon
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 :mod:`savu.test`
 ================

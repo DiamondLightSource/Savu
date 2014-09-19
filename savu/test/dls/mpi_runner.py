@@ -36,7 +36,6 @@ from mpi4py import MPI
 
 import savu.plugins.utils as pu
 import savu.test.test_utils as tu
-from savu.data.structures import RawTimeseriesData, Data, ProjectionData
 
 if __name__ == '__main__':
 

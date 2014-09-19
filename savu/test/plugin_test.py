@@ -26,9 +26,6 @@ import unittest
 from savu.plugins import utils as pu
 from savu.test import test_utils as tu
 
-from savu.data.structures import Data
-from savu.data.structures import RawTimeseriesData, ProjectionData, VolumeData
-
 base_class_name = "savu.plugins.plugin"
 
 
