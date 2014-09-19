@@ -36,7 +36,7 @@ from mpi4py import MPI
 
 import savu.plugins.utils as pu
 import savu.test.test_utils as tu
-from savu.data.structures import RawTimeseriesData
+from savu.data.structures import RawTimeseriesData, Data, ProjectionData
 
 if __name__ == '__main__':
 
@@ -63,7 +63,10 @@ if __name__ == '__main__':
 
     RANK = MPI.COMM_WORLD.rank
     SIZE = MPI.COMM_WORLD.size
-    MACHINES = SIZE/len(RANK_NAMES)
+    RANK_NAMES_SIZE = len(RANK_NAMES)
+    if RANK_NAMES_SIZE > SIZE:
+        RANK_NAMES_SIZE = SIZE
+    MACHINES = SIZE/RANK_NAMES_SIZE
     MACHINE_RANK = RANK/MACHINES
     MACHINE_RANK_NAME = RANK_NAMES[MACHINE_RANK]
     MACHINE_NUMBER = RANK % MACHINES
@@ -105,15 +108,30 @@ if __name__ == '__main__':
         data = None
         if plugin.required_data_type() == RawTimeseriesData:
             data = tu.get_nexus_test_data()
+        elif plugin.required_data_type() == Data:
+            data = tu.get_nexus_test_data()
 
         if data is None:
-            logging.error("Data is None")
+            logging.error("Cannot create appropriate input data")
+            raise Exception("Cannot create appropriate input data")
 
         # generate somewhere for the data to go
         logging.debug("Sorting out output data")
-        output = \
-            tu.get_temp_projection_data(plugin.name, data, mpi=MPI,
-                                        file_name=global_data['file_name'])
+
+        output = None
+        if plugin.output_data_type() == ProjectionData:
+            output =\
+                tu.get_temp_projection_data(plugin.name, data, mpi=MPI,
+                                            file_name=global_data['file_name'])
+        elif plugin.output_data_type() == Data:
+            output =\
+                tu.get_temp_raw_data(plugin.name, data, mpi=MPI,
+                                     file_name=global_data['file_name'])
+
+        if output is None:
+            logging.error("Cannot create appropriate output data")
+            raise Exception("Cannot create appropriate output data")
+
         logging.debug("processing")
         plugin.process(data, output, SIZE, RANK)
 

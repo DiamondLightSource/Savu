@@ -68,6 +68,14 @@
     :undoc-members:
     :show-inheritance:
 
+:mod:`savu.plugins.median_3x3_filter`
+------------------------------------------------
+
+.. automodule:: savu.plugins.median_3x3_filter
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 :mod:`savu.test`
 ================

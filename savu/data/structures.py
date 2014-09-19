@@ -140,6 +140,60 @@ class RawTimeseriesData(Data):
         self.projection_axis = (1, 2)
         self.rotation_axis = (0,)
 
+    def create_backing_h5(self, path, plugin_name, data, mpi=False):
+        """
+        Create a h5 backend for this RawTimeseriesData
+        :param path: The full path of the NeXus file to use as a backend
+        :type path: str
+        :param data: The structure from which this can be created
+        :type data: savu.structure.RawTimeseriesData
+        :param mpi: if an MPI process, provide MPI package here, default None
+        :type mpi: package
+        """
+        self.backing_file = None
+        if mpi:
+            self.backing_file = h5py.File(path, 'w', driver='mpio',
+                                          comm=MPI.COMM_WORLD)
+        else:
+            self.backing_file = h5py.File(path, 'w')
+
+        if self.backing_file is None:
+            raise IOError("Failed to open the hdf5 file")
+
+        if not isinstance(data, RawTimeseriesData):
+            raise ValueError("data is not a RawTimeseriesData")
+
+        data_shape = data.data.shape
+        data_type = np.double
+        rotation_angle_shape = data.rotation_angle.shape
+        rotation_angle_type = data.rotation_angle.dtype
+        control_shape = data.control.shape
+        control_type = data.control.dtype
+
+        group = self.backing_file.create_group(plugin_name)
+        data = group.create_dataset('data', data_shape, data_type)
+        data_avail = group.create_dataset('data_avail',
+                                          data_shape, np.bool_)
+        self.data = SliceAvailableWrapper(data_avail, data)
+
+        rotation_angle = \
+            group.create_dataset('rotation_angle',
+                                 rotation_angle_shape, rotation_angle_type)
+        rotation_angle_avail = \
+            group.create_dataset('rotation_angle_avail',
+                                 rotation_angle_shape, np.bool_)
+        self.rotation_angle = \
+            SliceAvailableWrapper(rotation_angle_avail, rotation_angle)
+
+        control = \
+            group.create_dataset('control',
+                                 control_shape, control_type)
+        control_avail = \
+            group.create_dataset('control_avail',
+                                 control_shape, np.bool_)
+        self.control = \
+            SliceAvailableWrapper(control_avail, control)
+
     def get_number_of_projections(self):
         """
         Gets the real number of projections excluding calibration data

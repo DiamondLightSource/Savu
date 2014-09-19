@@ -26,7 +26,7 @@ import unittest
 from savu.plugins import utils as pu
 from savu.test import test_utils as tu
 
-from savu.data.structures import RawTimeseriesData
+from savu.data.structures import RawTimeseriesData, ProjectionData, Data
 
 base_class_name = "savu.plugins.plugin"
 
@@ -47,25 +47,40 @@ class PluginTest(unittest.TestCase):
                               "test", "test", 1, 1)
             return
         # load appropriate data
-        data = None
+        data = []
         if plugin.required_data_type() == RawTimeseriesData:
-            data = tu.get_nexus_test_data()
+            data.append(tu.get_nexus_test_data())
+        elif plugin.required_data_type() == Data:
+            data.append(tu.get_nexus_test_data())
         self.assertIsNotNone(data, "Cannot find appropriate test data")
 
         # generate somewehere for the data to go
-        output = tu.get_temp_projection_data(plugin.name, data)
-        plugin.process(data, output, 1, 0)
+        output = []
+        if plugin.output_data_type() == ProjectionData:
+            output.append(tu.get_temp_projection_data(plugin.name, data[0]))
+        elif plugin.output_data_type() == Data:
+            output.append(tu.get_temp_raw_data(plugin.name, data[0]))
+        self.assertIsNotNone(data, "Cannot create appropriate output data")
 
-        print output.backing_file.filename
+        for i in range(len(data)):
+            plugin.process(data[i], output[i], 1, 0)
+            print("Output from plugin under test ( %s ) is in %s" %
+                  (plugin.name, output[i].backing_file.filename))
 
-        data.complete()
-        output.complete()
+            data[i].complete()
+            output[i].complete()
 
 
 class TimeseriesFieldCorrectionsTest(PluginTest):
 
     def setUp(self):
         self.plugin_name = "savu.plugins.timeseries_field_corrections"
+
+
+class Median3x3FilterTest(PluginTest):
+
+    def setUp(self):
+        self.plugin_name = "savu.plugins.median_3x3_filter"
 
 
 if __name__ == "__main__":
