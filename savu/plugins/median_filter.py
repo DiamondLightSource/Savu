@@ -25,14 +25,17 @@ from savu.plugins.filter import Filter
 import scipy.signal.signaltools as sig
 
 
-class Median3x3Filter(Filter):
+class MedianFilter(Filter):
     """
     A plugin to filter each frame with a 3x3 median filter
     """
 
     def __init__(self):
-        super(Median3x3Filter,
+        super(MedianFilter,
               self).__init__("Median3x3Filter")
 
+    def populate_default_parameters(self):
+        self.parameters['kernel_size'] = (3, 3)
+
     def filter_frame(self, data):
-        return sig.medfilt(data, 3)
+        return sig.medfilt(data, self.parameters['kernel_size'])

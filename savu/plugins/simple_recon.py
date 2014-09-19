@@ -35,6 +35,9 @@ class SimpleRecon(Plugin):
     def __init__(self):
         super(SimpleRecon, self).__init__("SimpleRecon")
 
+    def populate_default_parameters(self):
+        self.parameters['center_of_rotation'] = 86
+
     def _filter(self, sinogram):
         ff = np.arange(sinogram.shape[0])
         ff -= sinogram.shape[0]/2
@@ -68,7 +71,7 @@ class SimpleRecon(Plugin):
     def process(self, data, output, processes, process):
         """
         """
-        centre_of_rotation = 86  # TODO pull this out into some kind of input
+        centre_of_rotation = self.parameters['center_of_rotation']
 
         sinogram_frames = np.arange(data.get_number_of_sinograms())
 

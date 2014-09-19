@@ -119,6 +119,8 @@ if __name__ == '__main__':
             logging.error("Cannot create appropriate output data")
             raise Exception("Cannot create appropriate output data")
 
+        plugin.set_parameters(None)
+
         for i in range(len(data)):
             logging.debug("processing")
             plugin.process(data[i], output[i], SIZE, RANK)

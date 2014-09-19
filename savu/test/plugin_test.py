@@ -53,6 +53,8 @@ class PluginTest(unittest.TestCase):
         self.assertGreater(len(output), 0,
                            "Cannot create appropriate output data")
 
+        plugin.set_parameters(None)
+
         for i in range(len(data)):
             plugin.process(data[i], output[i], 1, 0)
             print("Output from plugin under test ( %s ) is in %s" %
@@ -68,10 +70,10 @@ class TimeseriesFieldCorrectionsTest(PluginTest):
         self.plugin_name = "savu.plugins.timeseries_field_corrections"
 
 
-class Median3x3FilterTest(PluginTest):
+class MedianFilterTest(PluginTest):
 
     def setUp(self):
-        self.plugin_name = "savu.plugins.median_3x3_filter"
+        self.plugin_name = "savu.plugins.median_filter"
 
 
 class SimpleReconTest(PluginTest):

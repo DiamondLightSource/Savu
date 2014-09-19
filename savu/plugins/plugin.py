@@ -32,11 +32,43 @@ class Plugin(object):
     def __init__(self, name='Plugin'):
         super(Plugin, self).__init__()
         self.name = name
+        self.parameters = {}
+
+    def populate_default_parameters(self):
+        """
+        This method should populate all the required parameters with default
+        values.  it is used for checking to see if new parameter values are
+        appropriate
+        """
+        logging.error("populate_default_parameters needs to be implemented")
+        raise NotImplementedError("populate_default_parameters " +
+                                  "needs to be implemented")
+
+    def set_parameters(self, parameters):
+        """
+        This method is called after the plugin has been created by the
+        pipeline framework
+        
+        :param parameters: A dictionary of the parameters for this plugin, or
+        None if no customisation is required
+        :type data: dict
+        """
+        self.parameters = {}
+        self.populate_default_parameters()
+        if parameters is not None:
+            for key in parameters.keys():
+                if key in self.parameters.keys():
+                    self.parameters[key] = parameters[key]
+                else:
+                    raise ValueError("Parameter " + key +
+                                     "is not a valid parameter for plugin " +
+                                     self.name)
 
     def process(self, data, output, processes, process):
         """
         This method is called after the plugin has been created by the
         pipeline framework
+
         :param data: The input data object.
         :type data: savu.data.structures
         :param data: The output data object
