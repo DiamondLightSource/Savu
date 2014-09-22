@@ -20,4 +20,4 @@ echo "Processes running are : ${processes}"
 
 mpirun -np ${processes} \
        --hostfile ${UNIQHOSTS} \
-       $PYTHON /home/ssg37927/Savu/savu/mpi_test/dls/mpi_runner.py $@
+       $PYTHON /home/ssg37927/Savu/savu/mpi_test/dls/plugin_test_runner.py $@
