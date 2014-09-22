@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: plugins_util_test
+.. module:: plugins_test
    :platform: Unix
-   :synopsis: unittest test class for plugin utils
+   :synopsis: unittest test classes for plugins
 
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
