@@ -64,7 +64,12 @@ class Filter(Plugin):
         """
         if isinstance(data, ProjectionData):
             # process the data frame by frame
-            pass
+            output.rotation_angle[:] = data.rotation_angle[:]
+
+            # make an array of all the frames to process
+            frames = np.arange(data.get_number_of_projections())
+            self._filter_chunk(frames, data, output, processes, process)
+
         elif isinstance(data, RawTimeseriesData):
             # pass the unchanged data through
             output.rotation_angle[:] = data.rotation_angle[:]
@@ -75,8 +80,9 @@ class Filter(Plugin):
             for chunk in chunks:
                 self._filter_chunk(chunk, data, output, processes, process)
         elif isinstance(data, VolumeData):
-            # Need to think about this
-            pass
+            # make an array of all the frames to process
+            frames = np.arange(data.get_volume_shape()[0])
+            self._filter_chunk(frames, data, output, processes, process)
 
     def required_resource(self):
         """

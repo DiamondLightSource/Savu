@@ -169,16 +169,30 @@ class RawTimeseriesData(Data):
 
         data_shape = data.data.shape
         data_type = np.double
+        image_key_shape = data.image_key.shape
+        image_key_type = data.image_key.dtype
         rotation_angle_shape = data.rotation_angle.shape
         rotation_angle_type = data.rotation_angle.dtype
         control_shape = data.control.shape
         control_type = data.control.dtype
 
         group = self.backing_file.create_group(plugin_name)
-        data = group.create_dataset('data', data_shape, data_type)
+        data_value = group.create_dataset('data', data_shape, data_type)
         data_avail = group.create_dataset('data_avail',
                                           data_shape, np.bool_)
-        self.data = SliceAvailableWrapper(data_avail, data)
+        self.data = SliceAvailableWrapper(data_avail, data_value)
+
+        # Create and prepopulate the following, as they are likely to be
+        # Unchanged during the processing
+        image_key = \
+            group.create_dataset('image_key',
+                                 image_key_shape, image_key_type)
+        image_key_avail = \
+            group.create_dataset('image_key_avail',
+                                 image_key_shape, np.bool_)
+        self.image_key = \
+            SliceAvailableWrapper(image_key_avail, image_key)
+        self.image_key[:] = data.image_key[:]
 
         rotation_angle = \
             group.create_dataset('rotation_angle',
@@ -188,6 +202,7 @@ class RawTimeseriesData(Data):
                                  rotation_angle_shape, np.bool_)
         self.rotation_angle = \
             SliceAvailableWrapper(rotation_angle_avail, rotation_angle)
+        self.rotation_angle[:] = data.rotation_angle[:]
 
         control = \
             group.create_dataset('control',
@@ -197,6 +212,7 @@ class RawTimeseriesData(Data):
                                  control_shape, np.bool_)
         self.control = \
             SliceAvailableWrapper(control_avail, control)
+        self.control[:] = data.control[:]
 
     def get_number_of_projections(self):
         """
@@ -311,6 +327,14 @@ class ProjectionData(Data):
         """
         return self.data.shape[1]
 
+    def get_number_of_projections(self):
+        """
+        Gets the real number projections
+
+        :returns: integer number of projection frames
+        """
+        return self.data.shape[0]
+
 
 class VolumeData(Data):
     """
@@ -349,3 +373,11 @@ class VolumeData(Data):
         data_avail = group.create_dataset('data_avail',
                                           data_shape, np.bool_)
         self.data = SliceAvailableWrapper(data_avail, data)
+
+    def get_volume_shape(self):
+        """
+        Gets the real number sinograms
+
+        :returns: integer number of sinogram frames
+        """
+        return self.data.shape

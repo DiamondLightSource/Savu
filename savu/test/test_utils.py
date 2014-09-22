@@ -139,7 +139,14 @@ def get_appropriate_output_data(plugin, data, mpi=False, file_name=None):
         output.append(get_temp_volume_data(plugin.name, data[0],
                                            mpi, file_name))
     elif plugin.output_data_type() == Data:
-        output.append(get_temp_raw_data(plugin.name, data[0], mpi, file_name))
-        output.append(get_temp_projection_data(plugin.name, data[1],
-                                               mpi, file_name))
+        for datum in data:
+            if isinstance(datum, RawTimeseriesData):
+                output.append(get_temp_raw_data(plugin.name, datum,
+                                                mpi, file_name))
+            elif isinstance(datum, ProjectionData):
+                output.append(get_temp_projection_data(plugin.name, datum,
+                                                       mpi, file_name))
+            elif isinstance(datum, VolumeData):
+                output.append(get_temp_volume_data(plugin.name, datum,
+                                                   mpi, file_name))
     return output
