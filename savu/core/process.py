@@ -22,11 +22,15 @@
 """
 
 import os
+import logging
+
+from mpi4py import MPI
 
 import savu.plugins.utils as pu
 
 
-def run_plugin_chain(input_data, plugin_list, processing_dir, mpi=False):
+def run_plugin_chain(input_data, plugin_list, processing_dir, mpi=False,
+                     processes=1, process=0):
     """Runs a chain of plugins
 
     :param input_data: The input data to give to the chain
@@ -42,19 +46,26 @@ def run_plugin_chain(input_data, plugin_list, processing_dir, mpi=False):
     output = None
     count = 0
     for plugin_name in plugin_list:
+        logging.debug("Loading plugin %s", plugin_name)
         plugin = pu.load_plugin(None, plugin_name)
 
         # generate somewhere for the data to go
         file_name = os.path.join(processing_dir,
-                                 "%02i%s" % (count, plugin_name))
+                                 "%02i_%s.h5" % (count, plugin_name))
         output = pu.create_output_data(plugin, in_data, file_name, mpi)
 
         plugin.set_parameters(None)
 
-        plugin.process(in_data, output, 1, 0)
+        logging.debug("Starting processing  plugin %s", plugin_name)
+        plugin.process(in_data, output, processes, process)
+        logging.debug("Completed processing plugin %s", plugin_name)
 
         in_data.complete()
         in_data = output
+
+        if mpi:
+            logging.debug("MPI awaiting barrier")
+            MPI.COMM_WORLD.barrier()
 
         count += 1
 
