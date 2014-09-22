@@ -15,6 +15,14 @@
     :undoc-members:
     :show-inheritance:
 
+:mod:`savu.core.process`
+---------------------------
+
+.. automodule:: savu.core.process
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 :mod:`savu.data`
 ================
@@ -57,6 +65,14 @@
     :undoc-members:
     :show-inheritance:
 
+:mod:`savu.plugins.filter`
+--------------------------
+
+.. automodule:: savu.plugins.filter
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 :mod:`savu.plugins.timeseries_field_corrections`
 ------------------------------------------------
 
@@ -66,7 +82,7 @@
     :show-inheritance:
 
 :mod:`savu.plugins.median_filter`
-------------------------------------------------
+---------------------------------
 
 .. automodule:: savu.plugins.median_filter
     :members:
@@ -74,7 +90,7 @@
     :show-inheritance:
 
 :mod:`savu.plugins.simple_recon`
-------------------------------------------------
+--------------------------------
 
 .. automodule:: savu.plugins.simple_recon
     :members:

@@ -14,7 +14,6 @@
 
 """
 .. module:: filter
-
    :platform: Unix
    :synopsis: A base class for all standard filters
 

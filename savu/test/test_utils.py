@@ -21,11 +21,12 @@
 
 """
 
-import numpy as np
-
 import inspect
 import tempfile
 import os
+
+import savu.plugins.utils as pu
+
 from savu.data.structures import Data
 from savu.data.structures import RawTimeseriesData, ProjectionData, VolumeData
 
@@ -67,54 +68,6 @@ def get_projection_test_data():
     return projection_data
 
 
-def get_temp_projection_data(plugin_name, data, mpi=False, file_name=None):
-    """
-    Gets a temporary, file backed, projection data object
-
-    :returns:  a ProjectionData Object containing the example data.
-    """
-    projection_data = ProjectionData()
-    temp_file = file_name
-    if temp_file is None:
-        temp_file = tempfile.NamedTemporaryFile(suffix='.h5', delete=False)
-        temp_file = temp_file.name
-    projection_data.create_backing_h5(temp_file, plugin_name, data, mpi)
-    return projection_data
-
-
-def get_temp_raw_data(plugin_name, data, mpi=False, file_name=None):
-    """
-    Gets a temporary, file backed, projection data object
-
-    :returns:  a ProjectionData Object containing the example data.
-    """
-    raw_data = RawTimeseriesData()
-    temp_file = file_name
-    if temp_file is None:
-        temp_file = tempfile.NamedTemporaryFile(suffix='.h5', delete=False)
-        temp_file = temp_file.name
-    raw_data.create_backing_h5(temp_file, plugin_name, data, mpi)
-    return raw_data
-
-
-def get_temp_volume_data(plugin_name, data, mpi=False, file_name=None):
-    """
-    Gets a temporary, file backed, projection data object
-
-    :returns:  a ProjectionData Object containing the example data.
-    """
-    volume_data = VolumeData()
-    temp_file = file_name
-    if temp_file is None:
-        temp_file = tempfile.NamedTemporaryFile(suffix='.h5', delete=False)
-        temp_file = temp_file.name
-    data_shape = (data.data.shape[2], data.data.shape[1], data.data.shape[2])
-    data_type = np.double
-    volume_data.create_backing_h5(temp_file, plugin_name, data_shape,
-                                  data_type, mpi)
-    return volume_data
-
-
 def get_appropriate_input_data(plugin):
     data = []
     if plugin.required_data_type() == RawTimeseriesData:
@@ -129,24 +82,37 @@ def get_appropriate_input_data(plugin):
 
 def get_appropriate_output_data(plugin, data, mpi=False, file_name=None):
     output = []
+    temp_file = file_name
+    if temp_file is None:
+        temp_file = tempfile.NamedTemporaryFile(suffix='.h5', delete=False)
+        temp_file = temp_file.name
+
     if plugin.output_data_type() == RawTimeseriesData:
-        output.append(get_temp_raw_data(plugin.name, data[0],
-                                        mpi, file_name))
+        output.append(pu.get_raw_data(plugin.name, data[0], temp_file, mpi))
+
     elif plugin.output_data_type() == ProjectionData:
-        output.append(get_temp_projection_data(plugin.name, data[0],
-                                               mpi, file_name))
+        output.append(pu.get_projection_data(plugin.name, data[0], temp_file,
+                                             mpi))
+
     elif plugin.output_data_type() == VolumeData:
-        output.append(get_temp_volume_data(plugin.name, data[0],
-                                           mpi, file_name))
+        output.append(pu.get_volume_data(plugin.name, data[0], temp_file, mpi))
+
     elif plugin.output_data_type() == Data:
         for datum in data:
+            if file_name is None:
+                temp_file = tempfile.NamedTemporaryFile(suffix='.h5',
+                                                        delete=False)
+                temp_file = temp_file.name
+
             if isinstance(datum, RawTimeseriesData):
-                output.append(get_temp_raw_data(plugin.name, datum,
-                                                mpi, file_name))
+                output.append(pu.get_raw_data(plugin.name, datum, temp_file,
+                                              mpi))
+
             elif isinstance(datum, ProjectionData):
-                output.append(get_temp_projection_data(plugin.name, datum,
-                                                       mpi, file_name))
+                output.append(pu.get_projection_data(plugin.name, datum,
+                                                     temp_file, mpi))
+
             elif isinstance(datum, VolumeData):
-                output.append(get_temp_volume_data(plugin.name, datum,
-                                                   mpi, file_name))
+                output.append(pu.get_volume_data(plugin.name, datum, temp_file,
+                                                 mpi))
     return output

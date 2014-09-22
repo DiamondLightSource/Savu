@@ -22,7 +22,9 @@
 """
 
 import unittest
+import tempfile
 
+from savu.core import process
 from savu.plugins import utils as pu
 from savu.test import test_utils as tu
 
@@ -35,37 +37,12 @@ class PluginTest(unittest.TestCase):
         self.plugin_list = [base_class_name]
 
     def test_pipeline(self):
-        input_data = None
-        output = None
-        for plugin_name in self.plugin_list:
-            plugin = pu.load_plugin(None, plugin_name)
-            if plugin_name == base_class_name:
-                self.assertRaises(NotImplementedError, plugin.process,
-                                  "test", "test", 1, 1)
-                continue
-
-            # load appropriate data
-            if input_data is None:
-                input_data = tu.get_appropriate_input_data(plugin)[0]
-                self.assertIsNotNone(input_data,
-                                     "Cannot find appropriate test data")
-
-            # generate somewhere for the data to go
-            output = tu.get_appropriate_output_data(plugin, [input_data])[0]
-            self.assertIsNotNone(output,
-                                 "Cannot create appropriate test output")
-
-            plugin.set_parameters(None)
-
-            plugin.process(input_data, output, 1, 0)
-            print("Output from plugin under test ( %s ) is in %s" %
-                  (plugin.name, output.backing_file.filename))
-
-            input_data.complete()
-            input_data = output
-
-        if output is not None:
-            output.complete()
+        temp_dir = tempfile.gettempdir()
+        first_plugin = pu.load_plugin(None, self.plugin_list[0])
+        if self.plugin_list[0] == base_class_name:
+            return
+        input_data = tu.get_appropriate_input_data(first_plugin)[0]
+        process.run_plugin_chain(input_data, self.plugin_list, temp_dir)
 
 
 class SimpleReconstructionTest(PluginTest):

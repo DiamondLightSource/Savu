@@ -23,6 +23,11 @@
 
 import sys
 
+import numpy as np
+
+from savu.data.structures import Data
+from savu.data.structures import RawTimeseriesData, ProjectionData, VolumeData
+
 
 def load_plugin(path, name):
     """Load a plugin.
@@ -56,3 +61,61 @@ def module2class(module_name):
 
     """
     return ''.join(x.capitalize() for x in module_name.split('_'))
+
+
+def get_raw_data(plugin_name, input_data, file_name, mpi=False):
+    """
+    Gets a file backed, Raw data object
+
+    :returns:  a RawTimeseriesData Object containing the example data.
+    """
+    data = RawTimeseriesData()
+    data.create_backing_h5(file_name, plugin_name, input_data, mpi)
+    return data
+
+
+def get_projection_data(plugin_name, input_data, file_name, mpi=False):
+    """
+    Gets a file backed, Raw data object
+
+    :returns:  a RawTimeseriesData Object containing the example data.
+    """
+    data = ProjectionData()
+    data.create_backing_h5(file_name, plugin_name, input_data, mpi)
+    return data
+
+
+def get_volume_data(plugin_name, input_data, file_name, mpi=False):
+    """
+    Gets a file backed, Raw data object
+
+    :returns:  a RawTimeseriesData Object containing the example data.
+    """
+    data = VolumeData()
+    data_shape = (input_data.data.shape[2], input_data.data.shape[1],
+                  input_data.data.shape[2])
+    data_type = np.double
+    data.create_backing_h5(file_name, plugin_name, data_shape,
+                           data_type, mpi)
+    return data
+
+
+def create_output_data(plugin, input_data, file_name, mpi=False):
+    if plugin.output_data_type() == RawTimeseriesData:
+        return get_raw_data(plugin.name, input_data, file_name, mpi)
+
+    elif plugin.output_data_type() == ProjectionData:
+        return get_projection_data(plugin.name, input_data, file_name, mpi)
+
+    elif plugin.output_data_type() == VolumeData:
+        return get_volume_data(plugin.name, input_data, file_name, mpi)
+
+    elif plugin.output_data_type() == Data:
+        if isinstance(input_data, RawTimeseriesData):
+            return get_raw_data(plugin.name, input_data, file_name, mpi)
+
+        elif isinstance(input_data, ProjectionData):
+            return get_projection_data(plugin.name, input_data, file_name, mpi)
+
+        elif isinstance(input_data, VolumeData):
+            return get_volume_data(plugin.name, input_data, file_name, mpi)
