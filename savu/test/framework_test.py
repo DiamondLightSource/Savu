@@ -31,7 +31,7 @@ from savu.test import test_utils as tu
 base_class_name = "savu.plugins.plugin"
 
 
-class PluginTest(unittest.TestCase):
+class FrameworkTest(unittest.TestCase):
 
     def setUp(self):
         self.plugin_list = [base_class_name]
@@ -45,14 +45,14 @@ class PluginTest(unittest.TestCase):
         process.run_plugin_chain(input_data, self.plugin_list, temp_dir)
 
 
-class SimpleReconstructionTest(PluginTest):
+class SimpleReconstructionTest(FrameworkTest):
 
     def setUp(self):
         self.plugin_list = ["savu.plugins.timeseries_field_corrections",
                             "savu.plugins.simple_recon"]
 
 
-class SimpleReconWithRawMedianFilteringTest(PluginTest):
+class SimpleReconWithRawMedianFilteringTest(FrameworkTest):
 
     def setUp(self):
         self.plugin_list = ["savu.plugins.median_filter",
@@ -60,7 +60,7 @@ class SimpleReconWithRawMedianFilteringTest(PluginTest):
                             "savu.plugins.simple_recon"]
 
 
-class SimpleReconWithProjectionMedianFilteringTest(PluginTest):
+class SimpleReconWithProjectionMedianFilteringTest(FrameworkTest):
 
     def setUp(self):
         self.plugin_list = ["savu.plugins.timeseries_field_corrections",
@@ -68,7 +68,7 @@ class SimpleReconWithProjectionMedianFilteringTest(PluginTest):
                             "savu.plugins.simple_recon"]
 
 
-class SimpleReconWithVolumeMedianFilteringTest(PluginTest):
+class SimpleReconWithVolumeMedianFilteringTest(FrameworkTest):
 
     def setUp(self):
         self.plugin_list = ["savu.plugins.timeseries_field_corrections",
@@ -76,7 +76,7 @@ class SimpleReconWithVolumeMedianFilteringTest(PluginTest):
                             "savu.plugins.median_filter"]
 
 
-class SimpleReconWithMedianFilteringTest(PluginTest):
+class SimpleReconWithMedianFilteringTest(FrameworkTest):
 
     def setUp(self):
         self.plugin_list = ["savu.plugins.median_filter",
@@ -84,5 +84,6 @@ class SimpleReconWithMedianFilteringTest(PluginTest):
                             "savu.plugins.median_filter",
                             "savu.plugins.simple_recon",
                             "savu.plugins.median_filter"]
+
 if __name__ == "__main__":
     unittest.main()

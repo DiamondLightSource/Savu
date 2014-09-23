@@ -71,3 +71,48 @@ def run_plugin_chain(input_data, plugin_list, processing_dir, mpi=False,
 
     if output is not None:
         output.complete()
+
+
+def run_process_list(input_data, process_list, processing_dir, mpi=False,
+                     processes=1, process=0):
+    """Runs a chain of plugins
+
+    :param input_data: The input data to give to the chain
+    :type input_data: savu.data.structure.
+    :param process_list: Process list.
+    :type process_list: savu.data.structure.ProcessList.
+    :param processing_dir: Location of the processing directory.
+    :type processing_dir: str.
+    :param mpi: Whether this is running in mpi, default is false.
+    :type mpi: bool.
+    """
+    in_data = input_data
+    output = None
+    count = 0
+    for process_dict in process_list.process_list:
+        logging.debug("Loading plugin %s", process_dict['id'])
+        plugin = pu.load_plugin(None, process_dict['id'])
+
+        # generate somewhere for the data to go
+        file_name = os.path.join(processing_dir,
+                                 "%s%02i_%s.h5" % (process_list.name, count,
+                                                   process_dict['id']))
+        output = pu.create_output_data(plugin, in_data, file_name, mpi)
+
+        plugin.set_parameters(process_dict['data'])
+
+        logging.debug("Starting processing  plugin %s", process_dict['id'])
+        plugin.process(in_data, output, processes, process)
+        logging.debug("Completed processing plugin %s", process_dict['id'])
+
+        in_data.complete()
+        in_data = output
+
+        if mpi:
+            logging.debug("MPI awaiting barrier")
+            MPI.COMM_WORLD.barrier()
+
+        count += 1
+
+    if output is not None:
+        output.complete()
