@@ -86,6 +86,11 @@ def run_process_list(input_data, process_list, processing_dir, mpi=False,
     :param mpi: Whether this is running in mpi, default is false.
     :type mpi: bool.
     """
+    filename = os.path.basename(input_data.backing_file.filename)
+    filename = os.path.splitext(filename)[0]
+    output_filename = os.path.join(processing_dir,
+                                   "%s_processed.nxs" % (filename))
+    process_list.save_list_to_file(output_filename)
     in_data = input_data
     output = None
     count = 0
@@ -111,6 +116,12 @@ def run_process_list(input_data, process_list, processing_dir, mpi=False,
         if mpi:
             logging.debug("MPI awaiting barrier")
             MPI.COMM_WORLD.barrier()
+
+        if process == 0:
+            cite_info = plugin.get_citation_inforamtion()
+            if cite_info is not None:
+                process_list.add_process_citation(output_filename, count,
+                                                  cite_info)
 
         count += 1
 

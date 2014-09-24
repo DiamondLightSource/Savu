@@ -74,3 +74,46 @@ class ProcessList(object):
                                          data_array.dtype, data_array)
             count += 1
         process_file.close()
+
+    def add_process_citation(self, filename, process_number, citation):
+        process_file = h5py.File(filename, 'w')
+        process_entry = process_file['entry/process/%i' % process_number]
+        citation.write(process_entry)
+        process_file.close()
+
+
+class CitationInfomration(object):
+    """
+    Descriptor of Citation Information for processes
+    """
+
+    def __init__(self):
+        super(CitationInfomration, self).__init__()
+        self.description = "Default Description"
+        self.doi = "Default DOI"
+        self.endnote = "Default Endnote"
+        self.bibtex = "Default Bibtex"
+
+    def write(self, hdf_group):
+        citation_group = hdf_group.create_group('citation')
+        citation_group.attrs[NX_CLASS] = 'NXcite'
+        description_array = np.array([self.description])
+        citation_group.create_dataset('description',
+                                      description_array.shape,
+                                      description_array.dtype,
+                                      description_array)
+        doi_array = np.array([self.doi])
+        citation_group.create_dataset('doi',
+                                      doi_array.shape,
+                                      doi_array.dtype,
+                                      doi_array)
+        endnote_array = np.array([self.endnote])
+        citation_group.create_dataset('endnote',
+                                      endnote_array.shape,
+                                      endnote_array.dtype,
+                                      endnote_array)
+        bibtex_array = np.array([self.bibtex])
+        citation_group.create_dataset('bibtex',
+                                      bibtex_array.shape,
+                                      bibtex_array.dtype,
+                                      bibtex_array)

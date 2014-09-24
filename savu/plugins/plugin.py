@@ -109,3 +109,11 @@ class Plugin(object):
         """
         logging.error("output_data_type needs to be implemented")
         raise NotImplementedError("output_data_type needs to be implemented")
+
+    def get_citation_inforamtion(self):
+        """Gets teh Citation Information for a plugin
+
+        :returns:  A puopulated savu.data.process_data.CitationInfomration
+
+        """
+        return None
