@@ -21,6 +21,7 @@
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
+from savu.data.process_data import CitationInfomration
 from savu.data.structures import ProjectionData, VolumeData
 from savu.plugins.plugin import Plugin
 
@@ -110,3 +111,23 @@ class SimpleRecon(Plugin):
         :returns:  VolumeData
         """
         return VolumeData
+
+    def get_citation_inforamtion(self):
+        cite_info = CitationInfomration()
+        cite_info.description = "The Tomographic reconstruction performed in \
+            this processing chain is derived from this work."
+        cite_info.bibtex = "@book{avinash2001principles,\n\
+                title={Principles of computerized tomographic imaging},\n\
+                author={Avinash C.. Kak and Slaney, Malcolm},\n\
+                year={2001},\n\
+                publisher={Society for Industrial and Applied Mathematics}\n\
+            }"
+        cite_info.endnote = "%0 Book \
+            %T Principles of computerized tomographic imaging \n\
+            %A Avinash C.. Kak \n\
+            %A Slaney, Malcolm \n\
+            %@ 089871494X \n\
+            %D 2001 \n\
+            %I Society for Industrial and Applied Mathematics"
+        cite_info.doi = "http://dx.doi.org/10.1137/1.9780898719277"
+        return cite_info

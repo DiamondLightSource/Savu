@@ -76,7 +76,7 @@ class ProcessList(object):
         process_file.close()
 
     def add_process_citation(self, filename, process_number, citation):
-        process_file = h5py.File(filename, 'w')
+        process_file = h5py.File(filename, 'a')
         process_entry = process_file['entry/process/%i' % process_number]
         citation.write(process_entry)
         process_file.close()
