@@ -24,7 +24,7 @@
 import unittest
 import tempfile
 
-from savu.data.structures import ProcessList
+from savu.data.process_data import ProcessList
 
 from savu.core import process
 from savu.plugins import utils as pu
@@ -62,6 +62,31 @@ class Process02Test(FrameworkTest):
 
     def setUp(self):
         self.process_filename = tu.get_test_data_path('process02.nxs')
+
+
+class Process03Test(FrameworkTest):
+
+    def setUp(self):
+        self.process_filename = tu.get_test_data_path('process03.nxs')
+
+
+class Process04Test(FrameworkTest):
+
+    def setUp(self):
+        self.process_filename = tu.get_test_data_path('process04.nxs')
+
+
+class Process05Test(FrameworkTest):
+
+    def setUp(self):
+        self.process_filename = tu.get_test_data_path('process05.nxs')
+
+
+class Process06Test(FrameworkTest):
+
+    def setUp(self):
+        self.process_filename = tu.get_test_data_path('process06.nxs')
+
 
 if __name__ == "__main__":
     unittest.main()

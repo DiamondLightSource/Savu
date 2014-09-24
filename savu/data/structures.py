@@ -24,8 +24,6 @@
 
 import numpy as np
 import h5py
-import json
-import os
 
 from mpi4py import MPI
 
@@ -383,26 +381,3 @@ class VolumeData(Data):
         :returns: integer number of sinogram frames
         """
         return self.data.shape
-
-
-class ProcessList(object):
-    """
-    Descriptor for process lists loaded from file
-    """
-
-    def __init__(self):
-        super(ProcessList, self).__init__()
-        self.process_list = []
-        self.name = "Default"
-
-    def populate_process_list(self, filename):
-        process_file = h5py.File(filename, 'r')
-        self.name = os.path.basename(filename)
-        process_group = process_file['entry/process']
-        for key in process_group.keys():
-            process = {}
-            process['name'] = process_group[key]['name'][0]
-            process['id'] = process_group[key]['id'][0]
-            process['data'] = json.loads(process_group[key]['data'][0])
-            self.process_list.append(process)
-        process_file.close()
