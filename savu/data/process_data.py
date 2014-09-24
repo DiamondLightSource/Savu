@@ -81,6 +81,16 @@ class ProcessList(object):
         citation.write(process_entry)
         process_file.close()
 
+    def add_intermediate_data_link(self, filename, process_number,
+                                   output_data):
+        process_file = h5py.File(filename, 'a')
+        inter_entry = process_file['entry'].require_group('intermediate')
+        inter_entry.attrs[NX_CLASS] = 'NXcollection'
+        process_entry = inter_entry.require_group('%i' % process_number)
+        process_entry.attrs[NX_CLASS] = 'NXdata'
+        process_entry['data'] = output_data.external_link()
+        process_file.close()
+
 
 class CitationInfomration(object):
     """

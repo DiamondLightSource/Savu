@@ -94,6 +94,7 @@ class Data(object):
         super(Data, self).__init__()
         self.backing_file = None
         self.data = None
+        self.base_path = None
 
     def complete(self):
         """
@@ -102,6 +103,10 @@ class Data(object):
         if self.backing_file is not None:
             self.backing_file.close()
             self.backing_file = None
+
+    def external_link(self):
+        return h5py.ExternalLink(self.backing_file.filename,
+                                 self.base_path)
 
 
 class RawTimeseriesData(Data):
@@ -177,6 +182,7 @@ class RawTimeseriesData(Data):
         control_type = data.control.dtype
 
         group = self.backing_file.create_group(plugin_name)
+        self.base_path = plugin_name
         data_value = group.create_dataset('data', data_shape, data_type)
         data_avail = group.create_dataset('data_avail',
                                           data_shape, np.bool_)
@@ -290,6 +296,7 @@ class ProjectionData(Data):
             rotation_angle_type = data.rotation_angle.dtype
 
         group = self.backing_file.create_group(plugin_name)
+        self.base_path = plugin_name
         data = group.create_dataset('data', data_shape, data_type)
         data_avail = group.create_dataset('data_avail',
                                           data_shape, np.bool_)
@@ -369,6 +376,7 @@ class VolumeData(Data):
             raise IOError("Failed to open the hdf5 file")
 
         group = self.backing_file.create_group(plugin_name)
+        self.base_path = plugin_name
         data = group.create_dataset('data', data_shape, data_type)
         data_avail = group.create_dataset('data_avail',
                                           data_shape, np.bool_)

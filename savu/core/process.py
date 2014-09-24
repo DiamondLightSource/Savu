@@ -125,6 +125,8 @@ def run_process_list(input_data, process_list, processing_dir, mpi=False,
             if cite_info is not None:
                 process_list.add_process_citation(output_filename, count,
                                                   cite_info)
+            process_list.add_intermediate_data_link(output_filename, count,
+                                                    output)
 
         count += 1
 
