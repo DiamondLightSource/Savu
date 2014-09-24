@@ -23,6 +23,7 @@
 
 import os
 import logging
+import time
 
 from mpi4py import MPI
 
@@ -88,8 +89,10 @@ def run_process_list(input_data, process_list, processing_dir, mpi=False,
     """
     filename = os.path.basename(input_data.backing_file.filename)
     filename = os.path.splitext(filename)[0]
-    output_filename = os.path.join(processing_dir,
-                                   "%s_processed.nxs" % (filename))
+    output_filename = \
+        os.path.join(processing_dir,
+                     "%s_processed_%s.nxs" % (filename,
+                                              time.strftime("%Y%m%d%H%M%S")))
     process_list.save_list_to_file(output_filename)
     in_data = input_data
     output = None
