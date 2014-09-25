@@ -27,6 +27,8 @@ import h5py
 
 from mpi4py import MPI
 
+NX_CLASS = 'NX_class'
+
 
 class SliceAvailableWrapper(object):
     """
@@ -182,8 +184,10 @@ class RawTimeseriesData(Data):
         control_type = data.control.dtype
 
         group = self.backing_file.create_group(group_name)
+        group.attrs[NX_CLASS] = 'NXdata'
         self.base_path = group_name
         data_value = group.create_dataset('data', data_shape, data_type)
+        data_value.attrs['signal'] = 1
         data_avail = group.create_dataset('data_avail',
                                           data_shape, np.bool_)
         self.data = SliceAvailableWrapper(data_avail, data_value)
@@ -296,11 +300,13 @@ class ProjectionData(Data):
             rotation_angle_type = data.rotation_angle.dtype
 
         group = self.backing_file.create_group(group_name)
+        group.attrs[NX_CLASS] = 'NXdata'
         self.base_path = group_name
-        data = group.create_dataset('data', data_shape, data_type)
+        data_value = group.create_dataset('data', data_shape, data_type)
+        data_value.attrs['signal'] = 1
         data_avail = group.create_dataset('data_avail',
                                           data_shape, np.bool_)
-        self.data = SliceAvailableWrapper(data_avail, data)
+        self.data = SliceAvailableWrapper(data_avail, data_value)
 
         rotation_angle = \
             group.create_dataset('rotation_angle',
@@ -376,11 +382,13 @@ class VolumeData(Data):
             raise IOError("Failed to open the hdf5 file")
 
         group = self.backing_file.create_group(group_name)
+        group.attrs[NX_CLASS] = 'NXdata'
         self.base_path = group_name
-        data = group.create_dataset('data', data_shape, data_type)
+        data_value = group.create_dataset('data', data_shape, data_type)
+        data_value.attrs['signal'] = 1
         data_avail = group.create_dataset('data_avail',
                                           data_shape, np.bool_)
-        self.data = SliceAvailableWrapper(data_avail, data)
+        self.data = SliceAvailableWrapper(data_avail, data_value)
 
     def get_volume_shape(self):
         """
