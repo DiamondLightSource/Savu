@@ -88,14 +88,16 @@ def get_appropriate_output_data(plugin, data, mpi=False, file_name=None):
         temp_file = temp_file.name
 
     if plugin.output_data_type() == RawTimeseriesData:
-        output.append(pu.get_raw_data(plugin.name, data[0], temp_file, mpi))
+        output.append(pu.get_raw_data(data[0], temp_file,
+                                      plugin.name, mpi))
 
     elif plugin.output_data_type() == ProjectionData:
-        output.append(pu.get_projection_data(plugin.name, data[0], temp_file,
-                                             mpi))
+        output.append(pu.get_projection_data(data[0], temp_file,
+                                             plugin.name, mpi))
 
     elif plugin.output_data_type() == VolumeData:
-        output.append(pu.get_volume_data(plugin.name, data[0], temp_file, mpi))
+        output.append(pu.get_volume_data(data[0], temp_file,
+                                         plugin.name, mpi))
 
     elif plugin.output_data_type() == Data:
         for datum in data:
@@ -105,14 +107,15 @@ def get_appropriate_output_data(plugin, data, mpi=False, file_name=None):
                 temp_file = temp_file.name
 
             if isinstance(datum, RawTimeseriesData):
-                output.append(pu.get_raw_data(plugin.name, datum, temp_file,
-                                              mpi))
+                output.append(pu.get_raw_data(datum, temp_file,
+                                              plugin.name, mpi))
 
             elif isinstance(datum, ProjectionData):
-                output.append(pu.get_projection_data(plugin.name, datum,
-                                                     temp_file, mpi))
+                output.append(pu.get_projection_data(datum,
+                                                     temp_file, plugin.name,
+                                                     mpi))
 
             elif isinstance(datum, VolumeData):
-                output.append(pu.get_volume_data(plugin.name, datum, temp_file,
-                                                 mpi))
+                output.append(pu.get_volume_data(datum, temp_file,
+                                                 plugin.name, mpi))
     return output

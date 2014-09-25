@@ -148,7 +148,7 @@ class RawTimeseriesData(Data):
         self.projection_axis = (1, 2)
         self.rotation_axis = (0,)
 
-    def create_backing_h5(self, path, plugin_name, data, mpi=False):
+    def create_backing_h5(self, path, group_name, data, mpi=False):
         """
         Create a h5 backend for this RawTimeseriesData
 
@@ -181,8 +181,8 @@ class RawTimeseriesData(Data):
         control_shape = data.control.shape
         control_type = data.control.dtype
 
-        group = self.backing_file.create_group(plugin_name)
-        self.base_path = plugin_name
+        group = self.backing_file.create_group(group_name)
+        self.base_path = group_name
         data_value = group.create_dataset('data', data_shape, data_type)
         data_avail = group.create_dataset('data_avail',
                                           data_shape, np.bool_)
@@ -256,7 +256,7 @@ class ProjectionData(Data):
         super(ProjectionData, self).__init__()
         self.rotation_angle = None
 
-    def create_backing_h5(self, path, plugin_name, data, mpi=False):
+    def create_backing_h5(self, path, group_name, data, mpi=False):
         """
         Create a h5 backend for this ProjectionData
 
@@ -295,8 +295,8 @@ class ProjectionData(Data):
             rotation_angle_shape = data.rotation_angle.shape
             rotation_angle_type = data.rotation_angle.dtype
 
-        group = self.backing_file.create_group(plugin_name)
-        self.base_path = plugin_name
+        group = self.backing_file.create_group(group_name)
+        self.base_path = group_name
         data = group.create_dataset('data', data_shape, data_type)
         data_avail = group.create_dataset('data_avail',
                                           data_shape, np.bool_)
@@ -351,8 +351,8 @@ class VolumeData(Data):
     def __init__(self):
         super(VolumeData, self).__init__()
 
-    def create_backing_h5(self, path, plugin_name, data_shape, data_type,
-                          mpi=False):
+    def create_backing_h5(self, path, group_name, data_shape,
+                          data_type, mpi=False):
         """
         Create a h5 backend for this ProjectionData
 
@@ -375,8 +375,8 @@ class VolumeData(Data):
         if self.backing_file is None:
             raise IOError("Failed to open the hdf5 file")
 
-        group = self.backing_file.create_group(plugin_name)
-        self.base_path = plugin_name
+        group = self.backing_file.create_group(group_name)
+        self.base_path = group_name
         data = group.create_dataset('data', data_shape, data_type)
         data_avail = group.create_dataset('data_avail',
                                           data_shape, np.bool_)

@@ -53,7 +53,8 @@ def run_plugin_chain(input_data, plugin_list, processing_dir, mpi=False,
         # generate somewhere for the data to go
         file_name = os.path.join(processing_dir,
                                  "%02i_%s.h5" % (count, plugin_name))
-        output = pu.create_output_data(plugin, in_data, file_name, mpi)
+        output = pu.create_output_data(plugin, in_data, file_name, plugin.name,
+                                       mpi)
 
         plugin.set_parameters(None)
 
@@ -105,7 +106,9 @@ def run_process_list(input_data, process_list, processing_dir, mpi=False,
         file_name = os.path.join(processing_dir,
                                  "%s%02i_%s.h5" % (process_list.name, count,
                                                    process_dict['id']))
-        output = pu.create_output_data(plugin, in_data, file_name, mpi)
+        group_name = "%i-%s" % (count, plugin.name)
+        output = pu.create_output_data(plugin, in_data, file_name, group_name,
+                                       mpi)
 
         plugin.set_parameters(process_dict['data'])
 
@@ -125,8 +128,8 @@ def run_process_list(input_data, process_list, processing_dir, mpi=False,
             if cite_info is not None:
                 process_list.add_process_citation(output_filename, count,
                                                   cite_info)
-            process_list.add_intermediate_data_link(output_filename, count,
-                                                    output)
+            process_list.add_intermediate_data_link(output_filename,
+                                                    output, group_name)
 
         count += 1
 
