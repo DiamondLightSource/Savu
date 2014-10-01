@@ -97,6 +97,8 @@ def run_process_list(input_data, process_list, processing_dir, mpi=False,
     process_list.save_list_to_file(output_filename)
     in_data = input_data
     output = None
+
+    files = []
     count = 0
     for process_dict in process_list.process_list:
         logging.debug("Loading plugin %s", process_dict['id'])
@@ -110,18 +112,7 @@ def run_process_list(input_data, process_list, processing_dir, mpi=False,
         output = pu.create_output_data(plugin, in_data, file_name, group_name,
                                        mpi)
 
-        plugin.set_parameters(process_dict['data'])
-
-        logging.debug("Starting processing  plugin %s", process_dict['id'])
-        plugin.process(in_data, output, processes, process)
-        logging.debug("Completed processing plugin %s", process_dict['id'])
-
-        in_data.complete()
-        in_data = output
-
-        if mpi:
-            logging.debug("MPI awaiting barrier")
-            MPI.COMM_WORLD.barrier()
+        files.append(output)
 
         if process == 0:
             cite_info = plugin.get_citation_inforamtion()
@@ -130,6 +121,26 @@ def run_process_list(input_data, process_list, processing_dir, mpi=False,
                                                   cite_info)
             process_list.add_intermediate_data_link(output_filename,
                                                     output, group_name)
+
+        in_data = output
+        count += 1
+
+    in_data = input_data
+    count = 0
+    for process_dict in process_list.process_list:
+        logging.debug("Loading plugin %s", process_dict['id'])
+        plugin = pu.load_plugin(None, process_dict['id'])
+
+        output = files[count]
+
+        plugin.set_parameters(process_dict['data'])
+
+        logging.debug("Starting processing  plugin %s", process_dict['id'])
+        plugin.process(in_data, output, processes, process)
+        logging.debug("Completed processing plugin %s", process_dict['id'])
+
+        in_data.complete()
+        in_data = output
 
         count += 1
 
