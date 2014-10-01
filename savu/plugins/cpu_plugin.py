@@ -13,29 +13,23 @@
 # limitations under the License.
 
 """
-.. module:: plugins_util_test
+.. module:: cpu_plugin
    :platform: Unix
-   :synopsis: unittest test class for plugin utils
+   :synopsis: Base class for all plugins which use a CPU on the target machine
 
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
-
-import unittest
-
-from savu.plugins import utils as pu
-from savu.plugins import plugin as test_plugin
+from savu.plugins.plugin import Plugin
 
 
-class Test(unittest.TestCase):
+class CpuPlugin(Plugin):
+    """
+    The base class from which all plugins should inherit.
+    """
 
-    def testGetPlugin(self):
-        plugin = pu.load_plugin(None, "savu.plugins.plugin")
-        self.assertEqual(plugin.__class__, test_plugin.Plugin,
-                         "Failed to load the correct class")
-        self.assertRaises(NotImplementedError, plugin.process,
-                          "test", "test", 1, 1)
-        self.assertRaises(NotImplementedError, plugin.required_data_type)
+    def __init__(self, name='Cpu_Plugin'):
+        super(CpuPlugin, self).__init__(name)
 
-if __name__ == "__main__":
-    unittest.main()
+    def run_process(self, data, output, processes, process):
+        return self.process(data, output, processes, process)

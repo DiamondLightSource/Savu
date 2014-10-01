@@ -123,7 +123,7 @@ if __name__ == '__main__':
 
         for i in range(len(data)):
             logging.debug("processing")
-            plugin.process(data[i], output[i], SIZE, RANK)
+            plugin.run_process(data[i], output[i], SIZE, RANK)
 
             logging.debug("Processed to file : %s",
                           output[i].backing_file.filename)

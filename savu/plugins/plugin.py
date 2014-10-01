@@ -64,6 +64,9 @@ class Plugin(object):
                                      "is not a valid parameter for plugin " +
                                      self.name)
 
+    def run_process(self, data, output, processes, process):
+        return self.process(data, output, processes, process)
+
     def process(self, data, output, processes, process):
         """
         This method is called after the plugin has been created by the
@@ -82,15 +85,6 @@ class Plugin(object):
                       " input is %s and output is %s",
                       process, processes, data.__class__, output.__class__)
         raise NotImplementedError("process needs to be implemented")
-
-    def required_resource(self):
-        """Gets the architecture the plugin needs to work
-
-        :returns:  the string CPU or GPU
-
-        """
-        logging.error("required_resource needs to be implemented")
-        raise NotImplementedError("required_resource needs to be implemented")
 
     def required_data_type(self):
         """Gets the input data type which is required for the plugin

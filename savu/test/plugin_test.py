@@ -56,7 +56,7 @@ class PluginTest(unittest.TestCase):
         plugin.set_parameters(None)
 
         for i in range(len(data)):
-            plugin.process(data[i], output[i], 1, 0)
+            plugin.run_process(data[i], output[i], 1, 0)
             print("Output from plugin under test ( %s ) is in %s" %
                   (plugin.name, output[i].backing_file.filename))
 

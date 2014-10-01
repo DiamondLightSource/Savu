@@ -22,12 +22,12 @@
 
 """
 from savu.data.structures import RawTimeseriesData, ProjectionData
-from savu.plugins.plugin import Plugin
+from savu.plugins.cpu_plugin import CpuPlugin
 
 import numpy as np
 
 
-class TimeseriesFieldCorrections(Plugin):
+class TimeseriesFieldCorrections(CpuPlugin):
     """
     A Plugin to apply a simple dark and flatfield correction to some
     raw timeseries data

@@ -59,7 +59,7 @@ def run_plugin_chain(input_data, plugin_list, processing_dir, mpi=False,
         plugin.set_parameters(None)
 
         logging.debug("Starting processing  plugin %s", plugin_name)
-        plugin.process(in_data, output, processes, process)
+        plugin.run_process(in_data, output, processes, process)
         logging.debug("Completed processing plugin %s", plugin_name)
 
         in_data.complete()
@@ -136,7 +136,7 @@ def run_process_list(input_data, process_list, processing_dir, mpi=False,
         plugin.set_parameters(process_dict['data'])
 
         logging.debug("Starting processing  plugin %s", process_dict['id'])
-        plugin.process(in_data, output, processes, process)
+        plugin.run_process(in_data, output, processes, process)
         logging.debug("Completed processing plugin %s", process_dict['id'])
 
         in_data.complete()
