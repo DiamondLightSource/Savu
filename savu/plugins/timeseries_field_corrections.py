@@ -54,7 +54,7 @@ class TimeseriesFieldCorrections(CpuPlugin):
         projection_frames = np.arange(len(image_key))[image_key == 0]
         output_frames = np.arange(len(projection_frames))
 
-        frames = np.array_split(output_frames, processes)[process]
+        frames = np.array_split(output_frames, len(processes))[process]
 
         # The rotation angle can just be pulled out of the file so write that
         rotation_angle = data.rotation_angle[image_key == 0]

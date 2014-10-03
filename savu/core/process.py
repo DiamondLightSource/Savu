@@ -31,7 +31,7 @@ import savu.plugins.utils as pu
 
 
 def run_plugin_chain(input_data, plugin_list, processing_dir, mpi=False,
-                     processes=1, process=0):
+                     processes=["CPU0"], process=0):
     """Runs a chain of plugins
 
     :param input_data: The input data to give to the chain
@@ -76,7 +76,7 @@ def run_plugin_chain(input_data, plugin_list, processing_dir, mpi=False,
 
 
 def run_process_list(input_data, process_list, processing_dir, mpi=False,
-                     processes=1, process=0):
+                     processes=["CPU0"], process=0):
     """Runs a chain of plugins
 
     :param input_data: The input data to give to the chain

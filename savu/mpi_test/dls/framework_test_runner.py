@@ -72,6 +72,9 @@ if __name__ == '__main__':
     MACHINE_RANK_NAME = RANK_NAMES[MACHINE_RANK]
     MACHINE_NUMBER = RANK % MACHINES
     MACHINE_NUMBER_STRING = "%03i" % (MACHINE_NUMBER)
+    ALL_PROCESSES = []
+    for i in range(MACHINES):
+        ALL_PROCESSES.extend(RANK_NAMES)
 
     logging.basicConfig(level=0, format='L %(asctime)s.%(msecs)03d M' +
                         MACHINE_NUMBER_STRING + ' ' + MACHINE_RANK_NAME +
@@ -111,6 +114,7 @@ if __name__ == '__main__':
         input_data = tu.get_appropriate_input_data(first_plugin)[0]
         logging.debug("Running plugin chain")
         process.run_plugin_chain(input_data, plugin_list, options.directory,
-                                 mpi=True, processes=SIZE, process=RANK)
+                                 mpi=True, processes=ALL_PROCESSES,
+                                 process=RANK)
 
     MPI.COMM_WORLD.barrier()

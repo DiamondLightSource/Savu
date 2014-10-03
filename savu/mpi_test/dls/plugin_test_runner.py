@@ -43,7 +43,7 @@ if __name__ == '__main__':
     version = "%prog 0.1"
     parser = optparse.OptionParser(usage=usage, version=version)
     parser.add_option("-n", "--names", dest="names", help="Process names",
-                      default="CPU1,CPU2,CPU3,CPU4,CPU5,CPU6,CPU7,CPU8",
+                      default="CPU0,CPU1,CPU2,CPU3,CPU4,CPU5,CPU6,CPU7",
                       type='string')
     parser.add_option("-p", "--plugin", dest="plugin", help="Plugin name",
                       default="savu.plugins.timeseries_field_corrections",
@@ -54,11 +54,7 @@ if __name__ == '__main__':
                       type='string')
     (options, args) = parser.parse_args()
 
-    RANK_NAMES = {}
-    count = 0
-    for name in options.names.split(','):
-        RANK_NAMES[count] = name
-        count += 1
+    RANK_NAMES = options.names.split(',')
 
     RANK = MPI.COMM_WORLD.rank
     SIZE = MPI.COMM_WORLD.size
@@ -70,6 +66,9 @@ if __name__ == '__main__':
     MACHINE_RANK_NAME = RANK_NAMES[MACHINE_RANK]
     MACHINE_NUMBER = RANK % MACHINES
     MACHINE_NUMBER_STRING = "%03i" % (MACHINE_NUMBER)
+    ALL_PROCESSES = []
+    for i in range(MACHINES):
+        ALL_PROCESSES.extend(RANK_NAMES)
 
     logging.basicConfig(level=0, format='L %(asctime)s.%(msecs)03d M' +
                         MACHINE_NUMBER_STRING + ' ' + MACHINE_RANK_NAME +
@@ -123,7 +122,7 @@ if __name__ == '__main__':
 
         for i in range(len(data)):
             logging.debug("processing")
-            plugin.run_process(data[i], output[i], SIZE, RANK)
+            plugin.run_process(data[i], output[i], ALL_PROCESSES, RANK)
 
             logging.debug("Processed to file : %s",
                           output[i].backing_file.filename)

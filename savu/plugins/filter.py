@@ -67,7 +67,7 @@ class Filter(CpuPlugin):
 
             # make an array of all the frames to process
             frames = np.arange(data.get_number_of_projections())
-            self._filter_chunk(frames, data, output, processes, process)
+            self._filter_chunk(frames, data, output, len(processes), process)
 
         elif isinstance(data, RawTimeseriesData):
             # pass the unchanged data through
@@ -77,11 +77,12 @@ class Filter(CpuPlugin):
             # process the data frame by frame in chunks
             chunks = data.get_clusterd_frame_list()
             for chunk in chunks:
-                self._filter_chunk(chunk, data, output, processes, process)
+                self._filter_chunk(chunk, data, output, len(processes),
+                                   process)
         elif isinstance(data, VolumeData):
             # make an array of all the frames to process
             frames = np.arange(data.get_volume_shape()[0])
-            self._filter_chunk(frames, data, output, processes, process)
+            self._filter_chunk(frames, data, output, len(processes), process)
 
     def required_resource(self):
         """

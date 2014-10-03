@@ -32,4 +32,16 @@ class CpuPlugin(Plugin):
         super(CpuPlugin, self).__init__(name)
 
     def run_process(self, data, output, processes, process):
-        return self.process(data, output, processes, process)
+        count = 0
+        cpu_processes = []
+        for i in ["CPU" in i for i in processes]:
+            if i:
+                cpu_processes.append(count)
+                count += 1
+            else:
+                cpu_processes.append(-1)
+        if cpu_processes[process] >= 0:
+            return self.process(data, output,
+                                [i for i in processes if "CPU" in i],
+                                cpu_processes[process])
+        return

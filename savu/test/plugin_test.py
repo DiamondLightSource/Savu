@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 """
 .. module:: plugins_test
    :platform: Unix
@@ -25,6 +26,7 @@ import unittest
 
 from savu.plugins import utils as pu
 from savu.test import test_utils as tu
+from savu.plugins.cpu_plugin import CpuPlugin
 
 base_class_name = "savu.plugins.plugin"
 
@@ -56,12 +58,85 @@ class PluginTest(unittest.TestCase):
         plugin.set_parameters(None)
 
         for i in range(len(data)):
-            plugin.run_process(data[i], output[i], 1, 0)
+            plugin.run_process(data[i], output[i], "CPU0", 0)
             print("Output from plugin under test ( %s ) is in %s" %
                   (plugin.name, output[i].backing_file.filename))
 
             data[i].complete()
             output[i].complete()
+
+
+class CpuPluginWrapper(CpuPlugin):
+
+    def __init__(self):
+        super(CpuPluginWrapper, self).__init__('CpuPluginWrapper')
+        self.data = None
+        self.output = None
+        self.processes = None
+        self.process_number = None
+
+    def process(self, data, output, processes, process):
+        self.data = data
+        self.output = output
+        self.processes = processes
+        self.process_number = process
+
+
+class CpuPluginTest(unittest.TestCase):
+
+    def setUp(self):
+        self.plugin = None
+
+    def test_run_process(self):
+        self.plugin = CpuPluginWrapper()
+        self.plugin.run_process("data", "out", ["CPU0"], 0)
+        self.assertEqual(self.plugin.processes, ["CPU0"])
+        self.assertEqual(self.plugin.process_number, 0)
+
+        self.plugin = CpuPluginWrapper()
+        self.plugin.run_process("data", "out",
+                                ["CPU0", "CPU1", "CPU2", "CPU3"], 0)
+        self.assertEqual(self.plugin.processes,
+                         ["CPU0", "CPU1", "CPU2", "CPU3"])
+        self.assertEqual(self.plugin.process_number, 0)
+
+        self.plugin = CpuPluginWrapper()
+        self.plugin.run_process("data", "out",
+                                ["CPU0", "CPU1", "CPU2", "CPU3"], 1)
+        self.assertEqual(self.plugin.processes,
+                         ["CPU0", "CPU1", "CPU2", "CPU3"])
+        self.assertEqual(self.plugin.process_number, 1)
+
+        self.plugin = CpuPluginWrapper()
+        self.plugin.run_process("data", "out",
+                                ["CPU0", "CPU1", "CPU2", "CPU3"], 3)
+        self.assertEqual(self.plugin.processes,
+                         ["CPU0", "CPU1", "CPU2", "CPU3"])
+        self.assertEqual(self.plugin.process_number, 3)
+
+        self.plugin = CpuPluginWrapper()
+        self.plugin.run_process("data", "out",
+                                ["CPU0", "GPU0", "CPU1", "GPU1"], 0)
+        self.assertEqual(self.plugin.processes, ["CPU0", "CPU1"])
+        self.assertEqual(self.plugin.process_number, 0)
+
+        self.plugin = CpuPluginWrapper()
+        self.plugin.run_process("data", "out",
+                                ["CPU0", "GPU0", "CPU1", "GPU1"], 1)
+        self.assertEqual(self.plugin.processes, None)
+        self.assertEqual(self.plugin.process_number, None)
+
+        self.plugin = CpuPluginWrapper()
+        self.plugin.run_process("data", "out",
+                                ["CPU0", "GPU0", "CPU1", "GPU1"], 2)
+        self.assertEqual(self.plugin.processes, ["CPU0", "CPU1"])
+        self.assertEqual(self.plugin.process_number, 1)
+
+        self.plugin = CpuPluginWrapper()
+        self.plugin.run_process("data", "out",
+                                ["CPU0", "GPU0", "CPU1", "GPU1"], 3)
+        self.assertEqual(self.plugin.processes, None)
+        self.assertEqual(self.plugin.process_number, None)
 
 
 class TimeseriesFieldCorrectionsTest(PluginTest):

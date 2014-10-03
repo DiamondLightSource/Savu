@@ -76,7 +76,7 @@ class SimpleRecon(CpuPlugin):
 
         sinogram_frames = np.arange(data.get_number_of_sinograms())
 
-        frames = np.array_split(sinogram_frames, processes)[process]
+        frames = np.array_split(sinogram_frames, len(processes))[process]
 
         for frame in frames:
             sinogram = data.data[:, frame, :]
