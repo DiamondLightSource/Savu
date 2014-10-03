@@ -24,6 +24,7 @@
 
 import numpy as np
 import h5py
+import logging
 
 from mpi4py import MPI
 
@@ -49,10 +50,12 @@ class SliceAvailableWrapper(object):
         self.data = data
 
     def __getitem__(self, item):
-        if self.avail[item].all():
-            return self.data[item]
-        else:
-            return None
+        return self.data[item]
+#         TODO should add this back in!
+#         if self.avail[item].all():
+#             return self.data[item]
+#         else:
+#             return None
 
     def __setitem__(self, item, value):
         self.data[item] = value
@@ -102,6 +105,8 @@ class Data(object):
         """
         Closes the backing file and completes work
         """
+        logging.debug("Completing file %s %s", self.base_path,
+                      self.backing_file.filename)
         if self.backing_file is not None:
             self.backing_file.close()
             self.backing_file = None
@@ -133,6 +138,8 @@ class RawTimeseriesData(Data):
         :type path: str
         """
         self.backing_file = h5py.File(path, 'r')
+        logging.debug("Creating file '%s' '%s'", 'tomo_entry',
+                      self.backing_file.filename)
         data = self.backing_file['entry1/tomo_entry/instrument/detector/data']
         self.data = SliceAlwaysAvailableWrapper(data)
 
@@ -171,6 +178,10 @@ class RawTimeseriesData(Data):
         if self.backing_file is None:
             raise IOError("Failed to open the hdf5 file")
 
+        logging.debug("Creating file '%s' '%s'", self.base_path,
+                      self.backing_file.filename)
+
+        self.base_path = group_name
         if not isinstance(data, RawTimeseriesData):
             raise ValueError("data is not a RawTimeseriesData")
 
@@ -185,7 +196,6 @@ class RawTimeseriesData(Data):
 
         group = self.backing_file.create_group(group_name)
         group.attrs[NX_CLASS] = 'NXdata'
-        self.base_path = group_name
         data_value = group.create_dataset('data', data_shape, data_type)
         data_value.attrs['signal'] = 1
         data_avail = group.create_dataset('data_avail',
@@ -281,6 +291,10 @@ class ProjectionData(Data):
         if self.backing_file is None:
             raise IOError("Failed to open the hdf5 file")
 
+        self.base_path = group_name
+        logging.debug("Creating file '%s' '%s'", self.base_path,
+                      self.backing_file.filename)
+
         data_shape = None
         data_type = None
         rotation_angle_shape = None
@@ -301,7 +315,6 @@ class ProjectionData(Data):
 
         group = self.backing_file.create_group(group_name)
         group.attrs[NX_CLASS] = 'NXdata'
-        self.base_path = group_name
         data_value = group.create_dataset('data', data_shape, data_type)
         data_value.attrs['signal'] = 1
         data_avail = group.create_dataset('data_avail',
@@ -325,6 +338,10 @@ class ProjectionData(Data):
         :type path: str
         """
         self.backing_file = h5py.File(path, 'r')
+
+        logging.debug("Creating file '%s' '%s'", 'TimeseriesFieldCorrections',
+                      self.backing_file.filename)
+
         data = self.backing_file['TimeseriesFieldCorrections/data']
         self.data = SliceAlwaysAvailableWrapper(data)
 
@@ -381,9 +398,12 @@ class VolumeData(Data):
         if self.backing_file is None:
             raise IOError("Failed to open the hdf5 file")
 
+        self.base_path = group_name
+        logging.debug("Creating file '%s' '%s'", self.base_path,
+                      self.backing_file.filename)
+
         group = self.backing_file.create_group(group_name)
         group.attrs[NX_CLASS] = 'NXdata'
-        self.base_path = group_name
         data_value = group.create_dataset('data', data_shape, data_type)
         data_value.attrs['signal'] = 1
         data_avail = group.create_dataset('data_avail',

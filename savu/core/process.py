@@ -88,16 +88,21 @@ def run_process_list(input_data, process_list, processing_dir, mpi=False,
     :param mpi: Whether this is running in mpi, default is false.
     :type mpi: bool.
     """
+    logging.debug("Running process list")
     filename = os.path.basename(input_data.backing_file.filename)
     filename = os.path.splitext(filename)[0]
     output_filename = \
         os.path.join(processing_dir,
                      "%s_processed_%s.nxs" % (filename,
                                               time.strftime("%Y%m%d%H%M%S")))
-    process_list.save_list_to_file(output_filename)
+    if process == 0:
+        logging.debug("Running Process List.save_list_to_file")
+        process_list.save_list_to_file(output_filename)
+
     in_data = input_data
     output = None
 
+    logging.debug("generating all output files")
     files = []
     count = 0
     for process_dict in process_list.process_list:
@@ -109,21 +114,16 @@ def run_process_list(input_data, process_list, processing_dir, mpi=False,
                                  "%s%02i_%s.h5" % (process_list.name, count,
                                                    process_dict['id']))
         group_name = "%i-%s" % (count, plugin.name)
+        logging.debug("Creating output file %s", file_name)
         output = pu.create_output_data(plugin, in_data, file_name, group_name,
                                        mpi)
 
         files.append(output)
 
-        if process == 0:
-            cite_info = plugin.get_citation_inforamtion()
-            if cite_info is not None:
-                process_list.add_process_citation(output_filename, count,
-                                                  cite_info)
-            process_list.add_intermediate_data_link(output_filename,
-                                                    output, group_name)
-
         in_data = output
         count += 1
+
+    logging.debug("processing Plugins")
 
     in_data = input_data
     count = 0
@@ -141,6 +141,19 @@ def run_process_list(input_data, process_list, processing_dir, mpi=False,
 
         in_data.complete()
         in_data = output
+
+        if mpi:
+            logging.debug("Blocking till all processes complete")
+            MPI.COMM_WORLD.Barrier()
+
+        if process == 0:
+            cite_info = plugin.get_citation_inforamtion()
+            if cite_info is not None:
+                process_list.add_process_citation(output_filename, count,
+                                                  cite_info)
+            group_name = "%i-%s" % (count, plugin.name)
+            process_list.add_intermediate_data_link(output_filename,
+                                                    output, group_name)
 
         count += 1
 

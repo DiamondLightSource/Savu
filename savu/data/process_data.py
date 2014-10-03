@@ -24,6 +24,7 @@
 import h5py
 import json
 import os
+import logging
 
 import numpy as np
 
@@ -76,12 +77,14 @@ class ProcessList(object):
         process_file.close()
 
     def add_process_citation(self, filename, process_number, citation):
+        logging.debug("Adding Citation to file %s", filename)
         process_file = h5py.File(filename, 'a')
         process_entry = process_file['entry/process/%i' % process_number]
         citation.write(process_entry)
         process_file.close()
 
     def add_intermediate_data_link(self, filename, output_data, group_name):
+        logging.debug("Adding link to file %s", filename)
         process_file = h5py.File(filename, 'a')
         inter_entry = process_file['entry'].require_group('intermediate')
         inter_entry.attrs[NX_CLASS] = 'NXcollection'
