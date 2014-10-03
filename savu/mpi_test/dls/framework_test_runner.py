@@ -56,11 +56,7 @@ if __name__ == '__main__':
                       type='string')
     (options, args) = parser.parse_args()
 
-    RANK_NAMES = {}
-    count = 0
-    for name in options.names.split(','):
-        RANK_NAMES[count] = name
-        count += 1
+    RANK_NAMES = options.names.split(',')
 
     RANK = MPI.COMM_WORLD.rank
     SIZE = MPI.COMM_WORLD.size
@@ -79,6 +75,9 @@ if __name__ == '__main__':
     logging.basicConfig(level=0, format='L %(asctime)s.%(msecs)03d M' +
                         MACHINE_NUMBER_STRING + ' ' + MACHINE_RANK_NAME +
                         ' %(levelname)-6s %(message)s', datefmt='%H:%M:%S')
+
+    logging.info(RANK_NAMES)
+    logging.info(ALL_PROCESSES)
 
     plugin_list = options.plugins.split(',')
 
@@ -107,14 +106,13 @@ if __name__ == '__main__':
 
     logging.debug("Output file name is  : %s", global_data['file_name'])
 
-    if 'CPU' in MACHINE_RANK_NAME:
-        logging.debug("Loading first plugin %s", plugin_list[0])
-        first_plugin = pu.load_plugin(None, plugin_list[0])
-        logging.debug("Getting input data")
-        input_data = tu.get_appropriate_input_data(first_plugin)[0]
-        logging.debug("Running plugin chain")
-        process.run_plugin_chain(input_data, plugin_list, options.directory,
-                                 mpi=True, processes=ALL_PROCESSES,
-                                 process=RANK)
+    logging.debug("Loading first plugin %s", plugin_list[0])
+    first_plugin = pu.load_plugin(None, plugin_list[0])
+    logging.debug("Getting input data")
+    input_data = tu.get_appropriate_input_data(first_plugin)[0]
+    logging.debug("Running plugin chain")
+    process.run_plugin_chain(input_data, plugin_list, options.directory,
+                             mpi=True, processes=ALL_PROCESSES,
+                             process=RANK)
 
     MPI.COMM_WORLD.barrier()
