@@ -93,5 +93,11 @@ class Process07Test(FrameworkTest):
     def setUp(self):
         self.process_filename = tu.get_test_data_path('process07.nxs')
 
+
+class Process08Test(FrameworkTest):
+
+    def setUp(self):
+        self.process_filename = tu.get_test_data_path('process08.nxs')
+
 if __name__ == "__main__":
     unittest.main()
