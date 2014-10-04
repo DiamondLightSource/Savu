@@ -20,6 +20,8 @@
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
+import logging
+
 from savu.plugins.plugin import Plugin
 
 
@@ -41,7 +43,13 @@ class CpuPlugin(Plugin):
             else:
                 cpu_processes.append(-1)
         if cpu_processes[process] >= 0:
-            return self.process(data, output,
-                                [i for i in processes if "CPU" in i],
+            logging.debug("Running the CPU Process %i", process)
+            new_processes = [i for i in processes if "CPU" in i]
+            logging.debug(new_processes)
+            logging.debug(cpu_processes)
+            logging.debug("Process is %s",
+                          new_processes[cpu_processes[process]])
+            return self.process(data, output, new_processes,
                                 cpu_processes[process])
+        logging.debug("Not Running the task as not CPU")
         return

@@ -138,6 +138,22 @@ class CpuPluginTest(unittest.TestCase):
         self.assertEqual(self.plugin.processes, None)
         self.assertEqual(self.plugin.process_number, None)
 
+    def test_run_cpu6_gpu2(self):
+        all_procs = ["CPU0", "CPU1", "CPU2", "CPU3",
+                     "CPU4", "CPU5", "GPU0", "GPU1"]
+        cpu_procs = ["CPU0", "CPU1", "CPU2",
+                     "CPU3", "CPU4", "CPU5"]
+
+        for i in range(8):
+            self.plugin = CpuPluginWrapper()
+            self.plugin.run_process("data", "out", all_procs, i)
+            if i < 6:
+                self.assertEqual(self.plugin.processes, cpu_procs)
+                self.assertEqual(self.plugin.process_number, i)
+            else:
+                self.assertEqual(self.plugin.processes, None)
+                self.assertEqual(self.plugin.process_number, None)
+
 
 class TimeseriesFieldCorrectionsTest(PluginTest):
 

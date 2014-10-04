@@ -31,6 +31,8 @@ import logging
 import optparse
 import socket
 
+from itertools import chain
+
 from mpi4py import MPI
 from savu.core import process
 
@@ -69,9 +71,8 @@ if __name__ == '__main__':
     MACHINE_RANK_NAME = RANK_NAMES[MACHINE_RANK]
     MACHINE_NUMBER = RANK % MACHINES
     MACHINE_NUMBER_STRING = "%03i" % (MACHINE_NUMBER)
-    ALL_PROCESSES = []
-    for i in range(MACHINES):
-        ALL_PROCESSES.extend(RANK_NAMES)
+    ALL_PROCESSES = [[i]*MACHINES for i in RANK_NAMES]
+    ALL_PROCESSES = list(chain.from_iterable(ALL_PROCESSES))
 
     logging.basicConfig(level=0, format='L %(asctime)s.%(msecs)03d M' +
                         MACHINE_NUMBER_STRING + ' ' + MACHINE_RANK_NAME +
@@ -80,6 +81,8 @@ if __name__ == '__main__':
     MPI.COMM_WORLD.barrier()
 
     logging.info("Starting the test process")
+
+    logging.debug("Rank : %i - Size : %i", RANK, SIZE)
 
     IP = socket.gethostbyname(socket.gethostname())
 
