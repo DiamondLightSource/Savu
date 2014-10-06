@@ -84,14 +84,6 @@ class Filter(Plugin):
             frames = np.arange(data.get_volume_shape()[0])
             self._filter_chunk(frames, data, output, len(processes), process)
 
-    def required_resource(self):
-        """
-        This plugin needs to use the CPU to work
-
-        :returns:  CPU
-        """
-        return "CPU"
-
     def required_data_type(self):
         """
         The input for this plugin is RawTimeseriesData
