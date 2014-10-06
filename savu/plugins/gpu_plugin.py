@@ -22,16 +22,14 @@
 """
 import logging
 
-from savu.plugins.plugin import Plugin
 
-
-class GpuPlugin(Plugin):
+class GpuPlugin(object):
     """
     The base class from which all plugins should inherit.
     """
 
-    def __init__(self, name='Gpu_Plugin'):
-        super(GpuPlugin, self).__init__(name)
+    def __init__(self):
+        super(GpuPlugin, self).__init__()
 
     def run_process(self, data, output, processes, process):
         count = 0
@@ -54,3 +52,22 @@ class GpuPlugin(Plugin):
                                 gpu_processes[process])
         logging.debug("Not Running the task as not GPU")
         return
+
+    def process(self, data, output, processes, process):
+        """
+        This method is called after the plugin has been created by the
+        pipeline framework
+
+        :param data: The input data object.
+        :type data: savu.data.structures
+        :param data: The output data object
+        :type data: savu.data.structures
+        :param processes: The number of processes which will be doing the work
+        :type path: int
+        :param path: The specific process which we are
+        :type path: int
+        """
+        logging.error("process needs to be implemented for proc %i of %i :" +
+                      " input is %s and output is %s",
+                      process, processes, data.__class__, output.__class__)
+        raise NotImplementedError("process needs to be implemented")

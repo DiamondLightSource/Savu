@@ -64,9 +64,6 @@ class Plugin(object):
                                      "is not a valid parameter for plugin " +
                                      self.name)
 
-    def run_process(self, data, output, processes, process):
-        return self.process(data, output, processes, process)
-
     def process(self, data, output, processes, process):
         """
         This method is called after the plugin has been created by the
@@ -105,9 +102,9 @@ class Plugin(object):
         raise NotImplementedError("output_data_type needs to be implemented")
 
     def get_citation_inforamtion(self):
-        """Gets teh Citation Information for a plugin
+        """Gets the Citation Information for a plugin
 
-        :returns:  A puopulated savu.data.process_data.CitationInfomration
+        :returns:  A populated savu.data.process_data.CitationInfomration
 
         """
         return None

@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from savu.plugins.plugin import Plugin
 
 
 """
@@ -66,10 +67,10 @@ class PluginTest(unittest.TestCase):
             output[i].complete()
 
 
-class CpuPluginWrapper(CpuPlugin):
+class CpuPluginWrapper(Plugin, CpuPlugin):
 
     def __init__(self):
-        super(CpuPluginWrapper, self).__init__('CpuPluginWrapper')
+        super(CpuPluginWrapper, self).__init__()
         self.data = None
         self.output = None
         self.processes = None

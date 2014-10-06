@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from savu.plugins.plugin import Plugin
 
 """
 .. module:: simple_fake_gpu_recon
@@ -25,7 +26,7 @@ from savu.plugins.gpu_plugin import GpuPlugin
 from savu.plugins.simple_recon import SimpleRecon
 
 
-class SimpleFakeGpuRecon(GpuPlugin):
+class SimpleFakeGpuRecon(Plugin, GpuPlugin):
     """
     A Plugin to apply a simple reconstruction with no dependancies
     """

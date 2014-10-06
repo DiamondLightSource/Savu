@@ -21,11 +21,12 @@
 
 """
 from savu.plugins.filter import Filter
+from savu.plugins.cpu_plugin import CpuPlugin
 
 import scipy.signal.signaltools as sig
 
 
-class MedianFilter(Filter):
+class MedianFilter(Filter, CpuPlugin):
     """
     A plugin to filter each frame with a 3x3 median filter
     """

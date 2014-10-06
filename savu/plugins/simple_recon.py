@@ -23,12 +23,13 @@
 """
 from savu.data.process_data import CitationInfomration
 from savu.data.structures import ProjectionData, VolumeData
+from savu.plugins.plugin import Plugin
 from savu.plugins.cpu_plugin import CpuPlugin
 
 import numpy as np
 
 
-class SimpleRecon(CpuPlugin):
+class SimpleRecon(Plugin, CpuPlugin):
     """
     A Plugin to apply a simple reconstruction with no dependancies
     """
