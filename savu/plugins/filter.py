@@ -38,11 +38,32 @@ class Filter(Plugin):
         super(Filter,
               self).__init__(name)
 
+    def get_filter_width(self):
+        """
+        Should be overridden to define how wide the frame should be
+
+        :returns:  The width of the frame to be filtered
+        """
+        return 0
+
     def _filter_chunk(self, chunk, data, output, processes, process):
         frames = np.array_split(chunk, processes)[process]
 
+        width = self.get_filter_width()
         for frame in frames:
-            projection = data.data[frame, :, :]
+            min = frame-width
+            max = frame+width+1
+            minpad = 0
+            maxpad = 0
+            if min < 0:
+                minpad = min*-1
+                min = 0
+            if max > data.data.shape[0]:
+                maxpad = (max-data.data.shape[0]) + 1
+                max = data.data.shape[0] - 1
+            projection = data.data[min:max, :, :]
+            projection = np.pad(projection, ((minpad, maxpad), (0, 0), (0, 0)),
+                                mode='edge')
             result = self.filter_frame(projection)
             output.data[frame, :, :] = result
 

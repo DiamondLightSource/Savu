@@ -33,10 +33,15 @@ class MedianFilter(Filter, CpuPlugin):
 
     def __init__(self):
         super(MedianFilter,
-              self).__init__("Median3x3Filter")
+              self).__init__("MedianFilter")
 
     def populate_default_parameters(self):
-        self.parameters['kernel_size'] = (3, 3)
+        self.parameters['kernel_size'] = (3, 3, 3)
+
+    def get_filter_width(self):
+        width = (self.parameters['kernel_size'][0]-1)/2
+        return width
 
     def filter_frame(self, data):
-        return sig.medfilt(data, self.parameters['kernel_size'])
+        result = sig.medfilt(data, self.parameters['kernel_size'])
+        return result[result.shape[0]/2, :, :]
