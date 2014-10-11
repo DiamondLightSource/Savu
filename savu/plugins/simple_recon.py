@@ -21,24 +21,20 @@
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
+from savu.plugins.base_recon import BaseRecon
 from savu.data.process_data import CitationInfomration
-from savu.data.structures import ProjectionData, VolumeData
-from savu.plugins.plugin import Plugin
 from savu.plugins.cpu_plugin import CpuPlugin
 
 import numpy as np
 
 
-class SimpleRecon(Plugin, CpuPlugin):
+class SimpleRecon(BaseRecon, CpuPlugin):
     """
     A Plugin to apply a simple reconstruction with no dependancies
     """
 
     def __init__(self):
         super(SimpleRecon, self).__init__("SimpleRecon")
-
-    def populate_default_parameters(self):
-        self.parameters['center_of_rotation'] = 86
 
     def _filter(self, sinogram):
         ff = np.arange(sinogram.shape[0])
@@ -57,7 +53,7 @@ class SimpleRecon(Plugin, CpuPlugin):
                            np.arange(-center[1], shape[1]-center[1]))
         return x*np.cos(theta) - y*np.sin(theta)
 
-    def _reconstruct(self, sinogram, centre_of_rotation, shape, center):
+    def reconstruct(self, sinogram, centre_of_rotation, shape, center):
         result = np.zeros(shape)
         for i in range(sinogram.shape[0]):
             theta = i * (np.pi/sinogram.shape[0])
@@ -69,55 +65,6 @@ class SimpleRecon(Plugin, CpuPlugin):
                 self._back_project(mapping_array, filt,
                                    (centre_of_rotation + sinogram.shape[1]))
         return result
-
-    def process(self, data, output, processes, process):
-        """
-        """
-        centre_of_rotation = data.center_of_rotation[:]
-        if centre_of_rotation is None:
-            centre_of_rotation = np.zeros(data.get_number_of_sinograms())
-            centre_of_rotation *= self.parameters['center_of_rotation']
-
-        sinogram_frames = np.arange(data.get_number_of_sinograms())
-
-        frames = np.array_split(sinogram_frames, len(processes))[process]
-        centre_of_rotations =\
-            np.array_split(centre_of_rotation, len(processes))[process]
-
-        for i in range(len(frames)):
-            frame_centre_of_rotation = centre_of_rotations[i]
-            sinogram = data.data[:, frames[i], :]
-            sinogram = np.log(sinogram)
-            reconstruction = \
-                self._reconstruct(sinogram, frame_centre_of_rotation,
-                                  (output.data.shape[0], output.data.shape[2]),
-                                  (output.data.shape[0]/2,
-                                   output.data.shape[2]/2))
-            output.data[:, frames[i], :] = reconstruction
-
-    def required_resource(self):
-        """
-        This plugin needs to use the CPU to work
-
-        :returns:  CPU
-        """
-        return "CPU"
-
-    def required_data_type(self):
-        """
-        The input for this plugin is ProjectionData
-
-        :returns:  ProjectionData
-        """
-        return ProjectionData
-
-    def output_data_type(self):
-        """
-        The output of this plugin is VolumeData
-
-        :returns:  VolumeData
-        """
-        return VolumeData
 
     def get_citation_inforamtion(self):
         cite_info = CitationInfomration()
