@@ -139,7 +139,8 @@ def run_process_list(input_data, process_list, processing_dir, mpi=False,
         plugin.run_process(in_data, output, processes, process)
         logging.debug("Completed processing plugin %s", process_dict['id'])
 
-        in_data.complete()
+        if in_data is not output:
+            in_data.complete()
         in_data = output
 
         if mpi:

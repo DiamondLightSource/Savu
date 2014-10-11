@@ -73,21 +73,27 @@ class SimpleRecon(Plugin, CpuPlugin):
     def process(self, data, output, processes, process):
         """
         """
-        centre_of_rotation = self.parameters['center_of_rotation']
+        centre_of_rotation = data.center_of_rotation[:]
+        if centre_of_rotation is None:
+            centre_of_rotation = np.zeros(data.get_number_of_sinograms())
+            centre_of_rotation *= self.parameters['center_of_rotation']
 
         sinogram_frames = np.arange(data.get_number_of_sinograms())
 
         frames = np.array_split(sinogram_frames, len(processes))[process]
+        centre_of_rotations =\
+            np.array_split(centre_of_rotation, len(processes))[process]
 
-        for frame in frames:
-            sinogram = data.data[:, frame, :]
+        for i in range(len(frames)):
+            frame_centre_of_rotation = centre_of_rotations[i]
+            sinogram = data.data[:, frames[i], :]
             sinogram = np.log(sinogram)
             reconstruction = \
-                self._reconstruct(sinogram, centre_of_rotation,
+                self._reconstruct(sinogram, frame_centre_of_rotation,
                                   (output.data.shape[0], output.data.shape[2]),
                                   (output.data.shape[0]/2,
                                    output.data.shape[2]/2))
-            output.data[:, frame, :] = reconstruction
+            output.data[:, frames[i], :] = reconstruction
 
     def required_resource(self):
         """

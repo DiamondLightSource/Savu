@@ -25,7 +25,7 @@ import sys
 
 import numpy as np
 
-from savu.data.structures import Data
+from savu.data.structures import Data, PassThrough
 from savu.data.structures import RawTimeseriesData, ProjectionData, VolumeData
 
 
@@ -115,6 +115,8 @@ def create_output_data(plugin, input_data, file_name, group_name, mpi=False):
     :type mpi: bool
     :returns:  The output data object
     """
+    if plugin.output_data_type() == PassThrough:
+        return input_data
     if plugin.output_data_type() == RawTimeseriesData:
         return get_raw_data(input_data, file_name,
                             group_name, mpi)

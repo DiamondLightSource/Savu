@@ -90,6 +90,16 @@ class SliceAlwaysAvailableWrapper(SliceAvailableWrapper):
         self.data[item] = value
 
 
+class PassThrough(object):
+    """
+    Interface Class describing when the input data of a plugin is also the
+    output
+    """
+
+    def __init__(self):
+        super(PassThrough, self).__init__()
+
+
 class Data(object):
     """
     Baseclass for all data
@@ -127,6 +137,7 @@ class RawTimeseriesData(Data):
         self.image_key = None
         self.rotation_angle = None
         self.control = None
+        self.center_of_rotation = None
         self.projection_axis = (0, 0)
         self.rotation_axis = (0,)
 
@@ -193,6 +204,8 @@ class RawTimeseriesData(Data):
         rotation_angle_type = data.rotation_angle.dtype
         control_shape = data.control.shape
         control_type = data.control.dtype
+        cor_shape = (data.data.shape[self.projection_axis[0]],)
+        cor_type = np.double
 
         group = self.backing_file.create_group(group_name)
         group.attrs[NX_CLASS] = 'NXdata'
@@ -234,6 +247,15 @@ class RawTimeseriesData(Data):
             SliceAvailableWrapper(control_avail, control)
         self.control[:] = data.control[:]
 
+        cor = \
+            group.create_dataset('center_of_rotation',
+                                 cor_shape, cor_type)
+        cor_avail = \
+            group.create_dataset('center_of_rotation_avail',
+                                 cor_shape, np.bool_)
+        self.center_of_rotation = \
+            SliceAvailableWrapper(cor_avail, cor)
+
     def get_number_of_projections(self):
         """
         Gets the real number of projections excluding calibration data
@@ -269,6 +291,7 @@ class ProjectionData(Data):
     def __init__(self):
         super(ProjectionData, self).__init__()
         self.rotation_angle = None
+        self.center_of_rotation = None
 
     def create_backing_h5(self, path, group_name, data, mpi=False):
         """
@@ -299,6 +322,8 @@ class ProjectionData(Data):
         data_type = None
         rotation_angle_shape = None
         rotation_angle_type = None
+        cor_shape = None
+        cor_type = np.double
 
         if data.__class__ == RawTimeseriesData:
             data_shape = (data.get_number_of_projections(),) +\
@@ -306,12 +331,14 @@ class ProjectionData(Data):
             data_type = np.double
             rotation_angle_shape = (data.get_number_of_projections(),)
             rotation_angle_type = data.rotation_angle.dtype
+            cor_shape = (data.data.shape[1],)
 
         elif data.__class__ == ProjectionData:
             data_shape = data.data.shape
             data_type = np.double
             rotation_angle_shape = data.rotation_angle.shape
             rotation_angle_type = data.rotation_angle.dtype
+            cor_shape = (data.data.shape[1],)
 
         group = self.backing_file.create_group(group_name)
         group.attrs[NX_CLASS] = 'NXdata'
@@ -329,6 +356,15 @@ class ProjectionData(Data):
                                  rotation_angle_shape, np.bool_)
         self.rotation_angle = \
             SliceAvailableWrapper(rotation_angle_avail, rotation_angle)
+
+        cor = \
+            group.create_dataset('center_of_rotation',
+                                 cor_shape, cor_type)
+        cor_avail = \
+            group.create_dataset('center_of_rotation_avail',
+                                 cor_shape, np.bool_)
+        self.center_of_rotation = \
+            SliceAvailableWrapper(cor_avail, cor)
 
     def populate_from_h5(self, path):
         """
@@ -364,6 +400,14 @@ class ProjectionData(Data):
         :returns: integer number of projection frames
         """
         return self.data.shape[0]
+
+    def get_data_shape(self):
+        """
+        Gets the real number projections
+
+        :returns: integer number of projection frames
+        """
+        return self.data.shape
 
 
 class VolumeData(Data):
