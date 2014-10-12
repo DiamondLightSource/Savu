@@ -62,6 +62,12 @@ def module2class(module_name):
     return ''.join(x.capitalize() for x in module_name.split('_'))
 
 
+def load_raw_data(filename):
+    data = RawTimeseriesData()
+    data.populate_from_nexus(filename)
+    return data
+
+
 def get_raw_data(input_data, file_name, group_name, mpi=False):
     """
     Gets a file backed, Raw data object
