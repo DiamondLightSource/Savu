@@ -40,7 +40,7 @@ class BaseRecon(Plugin):
     def populate_default_parameters(self):
         self.parameters['center_of_rotation'] = 86
 
-    def reconstruct(self, sinogram, centre_of_rotation, shape, center):
+    def reconstruct(self, sinogram, centre_of_rotation, angles, shape, center):
         """
         Reconstruct a single sinogram with the provided center of rotation
         """
@@ -62,12 +62,14 @@ class BaseRecon(Plugin):
         centre_of_rotations =\
             np.array_split(centre_of_rotation, len(processes))[process]
 
+        angles = data.rotation_angle.data[:]
+
         for i in range(len(frames)):
             frame_centre_of_rotation = centre_of_rotations[i]
             sinogram = data.data[:, frames[i], :]
             sinogram = np.log(sinogram)
             reconstruction = \
-                self.reconstruct(sinogram, frame_centre_of_rotation,
+                self.reconstruct(sinogram, frame_centre_of_rotation, angles,
                                  (output.data.shape[0], output.data.shape[2]),
                                  (output.data.shape[0]/2,
                                   output.data.shape[2]/2))

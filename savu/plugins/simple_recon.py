@@ -53,7 +53,7 @@ class SimpleRecon(BaseRecon, CpuPlugin):
                            np.arange(-center[1], shape[1]-center[1]))
         return x*np.cos(theta) - y*np.sin(theta)
 
-    def reconstruct(self, sinogram, centre_of_rotation, shape, center):
+    def reconstruct(self, sinogram, centre_of_rotation, angles, shape, center):
         result = np.zeros(shape)
         for i in range(sinogram.shape[0]):
             theta = i * (np.pi/sinogram.shape[0])

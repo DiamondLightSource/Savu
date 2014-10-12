@@ -33,5 +33,12 @@ class Process09Test(FrameworkTest):
     def setUp(self):
         self.process_filename = tu.get_test_data_path('process09.nxs')
 
+
+class Process10Test(FrameworkTest):
+
+    def setUp(self):
+        self.process_filename = tu.get_test_data_path('process10.nxs')
+
+
 if __name__ == "__main__":
     unittest.main()
