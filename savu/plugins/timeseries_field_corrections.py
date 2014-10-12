@@ -46,8 +46,16 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         """
         image_key = data.image_key[...]
         # pull out the average dark and flat data
-        dark = np.mean(data.data[image_key == 2, :, :], 0)
-        flat = np.mean(data.data[image_key == 1, :, :], 0)
+        dark = None
+        try:
+            dark = np.mean(data.data[image_key == 2, :, :], 0)
+        except:
+            dark = np.zeros((data.data.shape[1], data.data.shape[2]))
+        flat = None
+        try:
+            flat = np.mean(data.data[image_key == 1, :, :], 0)
+        except:
+            flat = np.ones((data.data.shape[1], data.data.shape[2]))
         # shortcut to reduce processing
         flat = flat - dark
 
