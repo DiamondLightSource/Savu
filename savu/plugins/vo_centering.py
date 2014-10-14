@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from savu.data.process_data import CitationInfomration
 
 """
 .. module:: vo_centering
@@ -79,3 +80,39 @@ class VoCentering(PassThroughPlugin, CpuPlugin):
 
         cor = (data.shape[1]/2.0) - point
         return {'center_of_rotation': cor}
+
+    def get_citation_inforamtion(self):
+        cite_info = CitationInfomration()
+        cite_info.description = \
+            ("The center of rotation for this reconstruction was calculated " +
+             "automatically using the method described in this work")
+        cite_info.bibtex = \
+            ("@article{vo2014reliable,\n" +
+             "title={Reliable method for calculating the center of rotation " +
+             "in parallel-beam tomography},\n" +
+             "author={Vo, Nghia T and Drakopoulos, Michael and Atwood, " +
+             "Robert C and Reinhard, Christina},\n" +
+             "journal={Optics Express},\n" +
+             "volume={22},\n" +
+             "number={16},\n" +
+             "pages={19078--19086},\n" +
+             "year={2014},\n" +
+             "publisher={Optical Society of America}\n" +
+             "}")
+        cite_info.endnote = \
+            ("%0 Journal Article\n" +
+             "%T Reliable method for calculating the center of rotation in " +
+             "parallel-beam tomography\n" +
+             "%A Vo, Nghia T\n" +
+             "%A Drakopoulos, Michael\n" +
+             "%A Atwood, Robert C\n" +
+             "%A Reinhard, Christina\n" +
+             "%J Optics Express\n" +
+             "%V 22\n" +
+             "%N 16\n" +
+             "%P 19078-19086\n" +
+             "%@ 1094-4087\n" +
+             "%D 2014\n" +
+             "%I Optical Society of America")
+        cite_info.doi = "http://dx.doi.org/10.1364/OE.22.019078"
+        return cite_info
