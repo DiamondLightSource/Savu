@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from savu.plugins.base_recon import BaseRecon
+from savu.data.process_data import CitationInfomration
 
 """
 .. module:: astra_recon
@@ -96,3 +97,38 @@ class AstraRecon(BaseRecon, CpuPlugin):
         astra.data2d.delete(sinogram_id)
 
         return rec
+
+    def get_citation_inforamtion(self):
+        cite_info = CitationInfomration()
+        cite_info.description = \
+            ("The reconstruction used to create this output is described in " +
+             "this publication")
+        cite_info.bibtex = \
+            ("@article{palenstijn2011performance,\n" +
+             "title={Performance improvements for iterative electron " +
+             "tomography reconstruction using graphics processing units " +
+             "(GPUs)},\n" +
+             "author={Palenstijn, WJ and Batenburg, KJ and Sijbers, J},\n" +
+             "journal={Journal of structural biology},\n" +
+             "volume={176},\n" +
+             "number={2},\n" +
+             "pages={250--253},\n" +
+             "year={2011},\n" +
+             "publisher={Elsevier}\n" +
+             "}")
+        cite_info.endnote = \
+            ("%0 Journal Article\n" +
+             "%T Performance improvements for iterative electron tomography " +
+             "reconstruction using graphics processing units (GPUs)\n" +
+             "%A Palenstijn, WJ\n" +
+             "%A Batenburg, KJ\n" +
+             "%A Sijbers, J\n" +
+             "%J Journal of structural biology\n" +
+             "%V 176\n" +
+             "%N 2\n" +
+             "%P 250-253\n" +
+             "%@ 1047-8477\n" +
+             "%D 2011\n" +
+             "%I Elsevier")
+        cite_info.doi = "http://dx.doi.org/10.1016/j.jsb.2011.07.017"
+        return cite_info
