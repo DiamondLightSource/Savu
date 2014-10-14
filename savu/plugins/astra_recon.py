@@ -55,8 +55,7 @@ class AstraRecon(BaseRecon, CpuPlugin):
             plow = (blen - alen) + pad
             phigh = pad
 
-        sino = (sino-sino.min())+1
-        logdata = -np.log(sino)
+        logdata = np.log(sino+1)
         sinogram = np.pad(logdata, ((0, 0), (plow, phigh)), mode='reflect')
 
         width = sinogram.shape[1]

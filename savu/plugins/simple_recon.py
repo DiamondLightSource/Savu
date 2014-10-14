@@ -55,12 +55,14 @@ class SimpleRecon(BaseRecon, CpuPlugin):
 
     def reconstruct(self, sinogram, centre_of_rotation, angles, shape, center):
         result = np.zeros(shape)
+        sino = np.nan_to_num(sinogram)
+        sino = np.log(sino+1)
         for i in range(sinogram.shape[0]):
             theta = i * (np.pi/sinogram.shape[0])
             mapping_array = self._mapping_array(shape, center, theta)
             filt = np.zeros(sinogram.shape[1]*3)
             filt[sinogram.shape[1]:sinogram.shape[1]*2] = \
-                self._filter(sinogram[i, :])
+                self._filter(sino[i, :])
             result += \
                 self._back_project(mapping_array, filt,
                                    (centre_of_rotation + sinogram.shape[1]))

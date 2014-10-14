@@ -50,12 +50,10 @@ class SliceAvailableWrapper(object):
         self.data = data
 
     def __getitem__(self, item):
-        return self.data[item]
-#         TODO should add this back in!
-#         if self.avail[item].all():
-#             return self.data[item]
-#         else:
-#             return None
+        if self.avail[item].all():
+            return self.data[item]
+        else:
+            return None
 
     def __setitem__(self, item, value):
         self.data[item] = value

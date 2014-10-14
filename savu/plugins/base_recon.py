@@ -53,8 +53,8 @@ class BaseRecon(Plugin):
         """
         centre_of_rotation = data.center_of_rotation[:]
         if centre_of_rotation is None:
-            centre_of_rotation = np.zeros(data.get_number_of_sinograms())
-            centre_of_rotation *= self.parameters['center_of_rotation']
+            centre_of_rotation = np.ones(data.get_number_of_sinograms())
+            centre_of_rotation = centre_of_rotation * self.parameters['center_of_rotation']
 
         sinogram_frames = np.arange(data.get_number_of_sinograms())
 
@@ -67,7 +67,6 @@ class BaseRecon(Plugin):
         for i in range(len(frames)):
             frame_centre_of_rotation = centre_of_rotations[i]
             sinogram = data.data[:, frames[i], :]
-            sinogram = np.log(sinogram)
             reconstruction = \
                 self.reconstruct(sinogram, frame_centre_of_rotation, angles,
                                  (output.data.shape[0], output.data.shape[2]),

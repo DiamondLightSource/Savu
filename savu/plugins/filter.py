@@ -51,17 +51,19 @@ class Filter(Plugin):
 
         width = self.get_filter_width()
         for frame in frames:
-            min = frame-width
-            max = frame+width+1
+            minval = frame-width
+            maxval = frame+width+1
             minpad = 0
             maxpad = 0
-            if min < 0:
-                minpad = min*-1
-                min = 0
-            if max > data.data.shape[0]:
-                maxpad = (max-data.data.shape[0]) + 1
-                max = data.data.shape[0] - 1
-            projection = data.data[min:max, :, :]
+            if minval < 0:
+                minpad = minval*-1
+                minval = 0
+            if maxval > data.data.shape[0]:
+                maxpad = (maxval-data.data.shape[0]) + 1
+                maxval = data.data.shape[0] - 1
+            projection = data.data[minval:maxval, :, :]
+            logging.debug("projection shape is %s", str(projection.shape))
+            logging.debug("max and min are %i, %i", minval, maxval)
             projection = np.pad(projection, ((minpad, maxpad), (0, 0), (0, 0)),
                                 mode='edge')
             result = self.filter_frame(projection)
