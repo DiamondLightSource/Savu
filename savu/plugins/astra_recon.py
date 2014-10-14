@@ -35,6 +35,11 @@ class AstraRecon(BaseRecon, CpuPlugin):
     def __init__(self):
         super(AstraRecon, self).__init__("AstraRecon")
 
+    def populate_default_parameters(self):
+        super(AstraRecon, self).populate_default_parameters()
+        self.parameters['number_of_itterations'] = 20
+        self.parameters['reconstruction_type'] = 'SIRT'
+
     def reconstruct(self, sinogram, centre_of_rotation, angles, shape, center):
 
         ctr = centre_of_rotation
@@ -71,7 +76,7 @@ class AstraRecon(BaseRecon, CpuPlugin):
 
         proj_id = astra.create_projector('strip', proj_geom, vol_geom)
 
-        cfg = astra.astra_dict('SIRT')
+        cfg = astra.astra_dict(self.parameters['reconstruction_type'])
         cfg['ReconstructionDataId'] = rec_id
         cfg['ProjectionDataId'] = sinogram_id
         cfg['ProjectorId'] = proj_id
@@ -79,7 +84,7 @@ class AstraRecon(BaseRecon, CpuPlugin):
         # Create the algorithm object from the configuration structure
         alg_id = astra.algorithm.create(cfg)
         # Run 20 iterations of the algorithm
-        itterations = 20
+        itterations = int(self.parameters['number_of_itterations'])
         # This will have a runtime in the order of 10 seconds.
         astra.algorithm.run(alg_id, itterations)
         # Get the result
