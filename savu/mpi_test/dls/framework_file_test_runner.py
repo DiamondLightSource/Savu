@@ -90,6 +90,11 @@ if __name__ == '__main__':
 
     MPI.COMM_WORLD.barrier()
 
+    import os
+    logging.debug(os.getenv('LD_LIBRARY_PATH'))
+
+    MPI.COMM_WORLD.barrier()
+
     process_filename = tu.get_test_data_path(options.process_filename)
 
     process_list = ProcessList()
