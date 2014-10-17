@@ -18,5 +18,6 @@ processes=`bc <<< "$uniqslots*8"`
 echo "Processes running are : ${processes}"
 
 mpirun -np ${processes} \
+       -x LD_LIBRARY_PATH \
        --hostfile ${UNIQHOSTS} \
        python /home/ssg37927/Savu/savu/tomo_recon_mpi.py $@

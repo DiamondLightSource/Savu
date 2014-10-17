@@ -1,6 +1,6 @@
 module load global/cluster
 
-qsub -N mpi_test -sync y -j y -pe openmpi 16 -q medium.q@@com01 /home/ssg37927/Savu/bin/savu_mpijob.sh $@ > tmp.txt
+qsub -N mpi_test -sync y -j y -pe openmpi 80 -q medium.q@@com01 /home/ssg37927/Savu/bin/savu_mpijob.sh $@ > tmp.txt
 
 filename=`echo mpi_test.o`
 jobnumber=`awk '{print $3}' tmp.txt | head -n 1`
