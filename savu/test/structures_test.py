@@ -44,8 +44,6 @@ class WrapperTest(unittest.TestCase):
         self.saw = SliceAvailableWrapper(aa, bb)
 
     def test_basics(self):
-        #TODO Should add this back in.
-        #self.assertIsNone(self.saw[1, :])
         self.saw[1, :] = np.arange(10)
         self.assertIsNotNone(self.saw[1, :])
 
