@@ -36,7 +36,7 @@ class MedianFilter(Filter, CpuPlugin):
               self).__init__("MedianFilter")
 
     def populate_default_parameters(self):
-        self.parameters['kernel_size'] = (3, 3, 3)
+        self.parameters['kernel_size'] = (1, 3, 3)
 
     def get_filter_width(self):
         width = (self.parameters['kernel_size'][0]-1)/2
