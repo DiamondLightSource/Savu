@@ -43,6 +43,7 @@ def run_plugin_chain(input_data, plugin_list, processing_dir, mpi=False,
     :param mpi: Whether this is running in mpi, default is false.
     :type mpi: bool.
     """
+    logging.debug("Starting run_plugin_chain")
     in_data = input_data
     output = None
     count = 0
@@ -53,6 +54,7 @@ def run_plugin_chain(input_data, plugin_list, processing_dir, mpi=False,
         # generate somewhere for the data to go
         file_name = os.path.join(processing_dir,
                                  "%02i_%s.h5" % (count, plugin_name))
+        logging.debug("Creating output file : %s", file_name)
         output = pu.create_output_data(plugin, in_data, file_name, plugin.name,
                                        mpi)
 

@@ -38,12 +38,14 @@ class FrameworkTest(unittest.TestCase):
             self.plugin_list = [base_class_name]
 
     def test_pipeline(self):
+        logging.debug("Starting test_pipeline")
         if not hasattr(self, 'temp_dir'):
             self.temp_dir = tempfile.gettempdir()
         first_plugin = pu.load_plugin(self.plugin_list[0])
         if self.plugin_list[0] == base_class_name:
             return
         input_data = tu.get_appropriate_input_data(first_plugin)[0]
+        logging.debug("Starting to run the processing chain")
         process.run_plugin_chain(input_data, self.plugin_list, self.temp_dir)
 
 
@@ -91,6 +93,8 @@ if __name__ == "__main__":
     import optparse
     import os
     import sys
+    import logging
+
     usage = "%prog [options] output_directory"
     version = "%prog 0.1"
     parser = optparse.OptionParser(usage=usage, version=version)
@@ -108,10 +112,21 @@ if __name__ == "__main__":
         print("path to output directory %s does not exist" % args[0]);
         sys.exit(2)
 
+    logging.basicConfig(filename=os.path.join(args[0],"log.log"),
+                        filemode='w',
+                        format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                        datefmt='%H:%M:%S',
+                        level=logging.DEBUG)
+
+    logging.debug("Files all present and correct")
+
     suite = unittest.TestSuite()
     ft = FrameworkTest('test_pipeline')
     ft.plugin_list = [options.plugin]
     ft.temp_dir = args[0]
     suite.addTest(ft)
+
+    logging.debug("Test suite setup, ready to run")
+
     unittest.TextTestRunner().run(suite)
 

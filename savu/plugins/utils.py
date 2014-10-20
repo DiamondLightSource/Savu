@@ -23,6 +23,7 @@
 
 import sys
 import os
+import logging
 
 import numpy as np
 
@@ -40,9 +41,12 @@ def load_plugin(plugin_name):
     :returns:  An instance of the class described by the named plugin
 
     """
-
+    logging.debug("Running load_plugin")
     path, name = os.path.split(plugin_name)
+    logging.debug("Path is : %s", path)
+    logging.debug("Name is : %s", name)
     if (path is not '') and (path not in sys.path):
+        logging.debug("Appending path")
         sys.path.append(path)
     mod = __import__(name)
     components = name.split('.')
