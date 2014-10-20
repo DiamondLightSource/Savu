@@ -100,7 +100,7 @@ if __name__ == "__main__":
                       type='string')
     (options, args) = parser.parse_args()
 
-    if len(args) > 0:
+    if len(args) is not 1:
         print "output path needs to be specified"
         sys.exit(1)
 
