@@ -22,6 +22,7 @@
 """
 
 import sys
+import os
 
 import numpy as np
 
@@ -29,19 +30,19 @@ from savu.data.structures import Data, PassThrough
 from savu.data.structures import RawTimeseriesData, ProjectionData, VolumeData
 
 
-def load_plugin(path, name):
+def load_plugin(plugin_name):
     """Load a plugin.
 
-    :param path: The full path in which the plugin resides,\
-                    or None if an internal plugin.
-    :type path: str.
-    :param name: Name of the plugin to import.
-    :type name: str.
+    :param plugin_name: Name of the plugin to import /path/loc/then.plugin.name
+                    if there is no path, then the assumptiuon is an internal
+                    plugin
+    :type plugin_name: str.
     :returns:  An instance of the class described by the named plugin
 
     """
 
-    if (path is not None) and (path not in sys.path):
+    path, name = os.path.split(plugin_name)
+    if (path is not '') and (path not in sys.path):
         sys.path.append(path)
     mod = __import__(name)
     components = name.split('.')

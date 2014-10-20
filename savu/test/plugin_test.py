@@ -38,11 +38,11 @@ class PluginTest(unittest.TestCase):
         self.plugin_name = base_class_name
 
     def test_get_plugin(self):
-        plugin = pu.load_plugin(None, self.plugin_name)
+        plugin = pu.load_plugin(self.plugin_name)
         self.assertIsNotNone(plugin)
 
     def test_process(self):
-        plugin = pu.load_plugin(None, self.plugin_name)
+        plugin = pu.load_plugin(self.plugin_name)
         if self.plugin_name == base_class_name:
             self.assertRaises(NotImplementedError, plugin.process,
                               "test", "test", 1, 1)

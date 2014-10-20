@@ -30,7 +30,7 @@ from savu.plugins import plugin as test_plugin
 class Test(unittest.TestCase):
 
     def testGetPlugin(self):
-        plugin = pu.load_plugin(None, "savu.plugins.plugin")
+        plugin = pu.load_plugin("savu.plugins.plugin")
         self.assertEqual(plugin.__class__, test_plugin.Plugin,
                          "Failed to load the correct class")
         self.assertRaises(NotImplementedError, plugin.process,

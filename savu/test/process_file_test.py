@@ -46,7 +46,7 @@ class FrameworkTest(unittest.TestCase):
         process_list = ProcessList()
         process_list.populate_process_list(self.process_filename)
 
-        first_plugin = pu.load_plugin(None, process_list.process_list[0]['id'])
+        first_plugin = pu.load_plugin(process_list.process_list[0]['id'])
         input_data = tu.get_appropriate_input_data(first_plugin)[0]
 
         process.run_process_list(input_data, process_list, temp_dir)
