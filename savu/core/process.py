@@ -48,7 +48,7 @@ def run_plugin_chain(input_data, plugin_list, processing_dir, mpi=False,
     count = 0
     for plugin_name in plugin_list:
         logging.debug("Loading plugin %s", plugin_name)
-        plugin = pu.load_plugin(None, plugin_name)
+        plugin = pu.load_plugin(plugin_name)
 
         # generate somewhere for the data to go
         file_name = os.path.join(processing_dir,
@@ -107,7 +107,7 @@ def run_process_list(input_data, process_list, processing_dir, mpi=False,
     count = 0
     for process_dict in process_list.process_list:
         logging.debug("Loading plugin %s", process_dict['id'])
-        plugin = pu.load_plugin(None, process_dict['id'])
+        plugin = pu.load_plugin(process_dict['id'])
 
         # generate somewhere for the data to go
         file_name = os.path.join(processing_dir,
@@ -129,7 +129,7 @@ def run_process_list(input_data, process_list, processing_dir, mpi=False,
     count = 0
     for process_dict in process_list.process_list:
         logging.debug("Loading plugin %s", process_dict['id'])
-        plugin = pu.load_plugin(None, process_dict['id'])
+        plugin = pu.load_plugin(process_dict['id'])
 
         output = files[count]
 
