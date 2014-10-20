@@ -34,15 +34,17 @@ base_class_name = "savu.plugins.plugin"
 class FrameworkTest(unittest.TestCase):
 
     def setUp(self):
-        self.plugin_list = [base_class_name]
+        if not hasattr(self, 'plugin_list'):
+            self.plugin_list = [base_class_name]
 
     def test_pipeline(self):
-        temp_dir = tempfile.gettempdir()
-        first_plugin = pu.load_plugin(None, self.plugin_list[0])
+        if not hasattr(self, 'temp_dir'):
+            self.temp_dir = tempfile.gettempdir()
+        first_plugin = pu.load_plugin(self.plugin_list[0])
         if self.plugin_list[0] == base_class_name:
             return
         input_data = tu.get_appropriate_input_data(first_plugin)[0]
-        process.run_plugin_chain(input_data, self.plugin_list, temp_dir)
+        process.run_plugin_chain(input_data, self.plugin_list, self.temp_dir)
 
 
 class SimpleReconstructionTest(FrameworkTest):
@@ -86,4 +88,30 @@ class SimpleReconWithMedianFilteringTest(FrameworkTest):
                             "savu.plugins.median_filter"]
 
 if __name__ == "__main__":
-    unittest.main()
+    import optparse
+    import os
+    import sys
+    usage = "%prog [options] output_directory"
+    version = "%prog 0.1"
+    parser = optparse.OptionParser(usage=usage, version=version)
+    parser.add_option("-p", "--plugin", dest="plugin", help="plugin name e.g" +
+                      "/path/to/base/plugin.name.including.packages",
+                      default="savu.plugins.median_filter",
+                      type='string')
+    (options, args) = parser.parse_args()
+
+    if len(args) > 0:
+        print "output path needs to be specified"
+        sys.exit(1)
+
+    if not os.path.exists(args[0]):
+        print("path to output directory %s does not exist" % args[0]);
+        sys.exit(2)
+
+    suite = unittest.TestSuite()
+    ft = FrameworkTest('test_pipeline')
+    ft.plugin_list = [options.plugin]
+    ft.temp_dir = args[0]
+    suite.addTest(ft)
+    unittest.TextTestRunner().run(suite)
+
