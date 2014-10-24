@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: median_3x3_filter
+.. module:: ExampleMedianFilter
    :platform: Unix
-   :synopsis: A plugin to filter each frame with a 3x3 median filter
+   :synopsis: A plugin to filter each frame with a median filter
 
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
@@ -30,7 +30,7 @@ import scipy.signal.signaltools as sig
 
 class ExampleMedianFilter(Filter, CpuPlugin):
     """
-    A plugin to filter each frame with a 3x3 median filter
+    A plugin to filter each frame with a median filter
     """
 
     def __init__(self):
