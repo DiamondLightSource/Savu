@@ -23,6 +23,7 @@
 
 import unittest
 import tempfile
+import logging
 
 from savu.core import process
 from savu.plugins import utils as pu
@@ -93,7 +94,6 @@ if __name__ == "__main__":
     import optparse
     import os
     import sys
-    import logging
 
     usage = "%prog [options] output_directory"
     version = "%prog 0.1"
