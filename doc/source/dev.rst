@@ -27,32 +27,15 @@ available in the main Savu repository under the plugin_examples folder.
    :linenos:
 
 As you can see this is a pretty small implementation, and the key features of
-it are as follows
+which are detailed in the comments associated with the code.
 
-**Line 31**
-   This is where the class is desined, and we inherit from 2 classes, the 
-   first is the Filter class, which deals with splitting the job up for us, and 
-   provides some simple methods which we need to overload.  The second is the 
-   CpuPlugin class which tells the framework that the processing that you are doing
-   here runs on 1 cpu.
+Testing the new plugin
+======================
 
-**line 41**
-   All plugins have the populate_default_patamters method, in this you 
-   need to add to the self.parameters dictionaly any parameters which you wish
-   the end user to ultimatly be able to change, in this case we will let them
-   define the size of the kernel we will use for out 3D median filter.  We initialise
-   this with a good default value, in this case a tuple of (3, 3, 3)
+So now that you have the new plugin written, you can test it using the following
+command, you will need to make sure that savu is installed or included in your
+$PYTHON_PATH
 
-**line 45**
-   This is the first of the Filter class methods we need to implement.
-   This basicaly says to the system how wide (how many frames) we want to see per
-   filter step, a width of 0 means just the frame of interest, width 1 means 1 
-   frame either side as well, etc.  In this case we need to ask for as many frames
-   are required by the kernel size in the step direction.
+.. code:: bash
 
-**line 50**
-   The second method we need to implement from the Filter class and the 
-   part of the code that actually does all the work.  the input here 'data' will 
-   contain the 3D block of data to process, and we need to return the data for the
-   single frame in the middle of this.  In this case we use the scipy median filter
-   with the 'kernmel_size' parameter, and return the middle slice.
+   python $SAVU_HOME/savu/test/framework_test.py -p $SAVU_HOME/plugin_examples/example_median_filter /tmp/savu_output/
