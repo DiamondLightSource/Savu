@@ -5,7 +5,7 @@ def readme():
         return f.read()
 
 setup(name='savu',
-      version='0.1',
+      version='0.1.1',
       description='Savu Python Tomography Pipeline',
       long_description=readme(),
       classifiers=[
