@@ -21,3 +21,7 @@ import savu
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
+
+from . import core
+from . import data
+from . import plugins
