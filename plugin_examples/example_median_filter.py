@@ -73,10 +73,10 @@ class ExampleMedianFilter(Filter, CpuPlugin):
     def filter_frame(self, data):
         """
         The second method we need to implement from the Filter class and the
-        part of the code that actually does all the work. the input here ‘data’
+        part of the code that actually does all the work. the input here 'data'
         will contain the 3D block of data to process, and we need to return the
         data for the single frame in the middle of this. In this case we use the
-        scipy median filter with the ‘kernmel_size’ parameter, and return the
+        scipy median filter with the 'kernmel_size' parameter, and return the
         middle slice.
         """
         logging.debug("Getting the filter frame of Example Median Filter")
