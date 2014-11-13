@@ -38,6 +38,13 @@ class Filter(Plugin):
         super(Filter,
               self).__init__(name)
 
+    def populate_default_parameters(self):
+        """
+        Slice direction tells the pass through plugin which direction to slice
+        through the data before passing it on
+        """
+        self.parameters['slice_direction'] = 0
+
     def get_filter_width(self):
         """
         Should be overridden to define how wide the frame should be
@@ -49,6 +56,9 @@ class Filter(Plugin):
     def _filter_chunk(self, chunk, data, output, processes, process):
         frames = np.array_split(chunk, processes)[process]
 
+        frame_slice = [slice(None)] * len(data.data.shape)
+        slice_dir = self.parameters['slice_direction']
+
         width = self.get_filter_width()
         for frame in frames:
             minval = frame-width
@@ -58,10 +68,11 @@ class Filter(Plugin):
             if minval < 0:
                 minpad = minval*-1
                 minval = 0
-            if maxval > data.data.shape[0]:
-                maxpad = (maxval-data.data.shape[0]) + 1
-                maxval = data.data.shape[0] - 1
-            projection = data.data[minval:maxval, :, :]
+            if maxval > data.data.shape[slice_dir]:
+                maxpad = (maxval-data.data.shape[slice_dir]) + 1
+                maxval = data.data.shape[slice_dir] - 1
+            frame_slice[slice_dir] = slice(minval, maxval)
+            projection = data.data[tuple(frame_slice)]
             logging.debug("projection shape is %s", str(projection.shape))
             logging.debug("max and min are %i, %i", minval, maxval)
             projection = np.pad(projection, ((minpad, maxpad), (0, 0), (0, 0)),
