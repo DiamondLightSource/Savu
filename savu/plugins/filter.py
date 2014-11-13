@@ -65,12 +65,12 @@ class Filter(Plugin):
             maxval = frame+width+1
             minpad = 0
             maxpad = 0
-            if minval < 0:
-                minpad = minval*-1
-                minval = 0
-            if maxval > data.data.shape[slice_dir]:
-                maxpad = (maxval-data.data.shape[slice_dir]) + 1
-                maxval = data.data.shape[slice_dir] - 1
+            if minval < chunk[0]:
+                minpad = chunk[0] - minval
+                minval = chunk[0]
+            if maxval > chunk[-1]:
+                maxpad = (maxval-chunk[-1]) - 1 
+                maxval = chunk[-1] + 1
             frame_slice[slice_dir] = slice(minval, maxval)
             projection = data.data[tuple(frame_slice)]
             logging.debug("projection shape is %s", str(projection.shape))
