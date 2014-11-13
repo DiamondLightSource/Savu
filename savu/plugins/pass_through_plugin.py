@@ -39,6 +39,10 @@ class PassThroughPlugin(Plugin):
         super(PassThroughPlugin, self).__init__(name)
 
     def populate_default_parameters(self):
+        """
+        Slice direction tells the pass through plugin which direction to slice
+        through the data before passing it on
+        """
         self.parameters['slice_direction'] = 0
 
     def _process_chunk(self, chunk, data, output, processes, process):

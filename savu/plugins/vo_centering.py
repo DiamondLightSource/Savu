@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from savu.data.process_data import CitationInfomration
+from savu.data.structures import ProjectionData
 
 """
 .. module:: vo_centering
@@ -27,6 +28,7 @@ from savu.plugins.cpu_plugin import CpuPlugin
 import scipy.ndimage as ndi
 
 import numpy as np
+import scipy.fftpack as fft
 
 
 class VoCentering(PassThroughPlugin, CpuPlugin):
@@ -58,7 +60,7 @@ class VoCentering(PassThroughPlugin, CpuPlugin):
         for i in cor_positions:
             ssino = ndi.interpolation.shift(sino, (0, i), mode='wrap')
             fsino = np.vstack([ssino, ssino[:, ::-1]])
-            fftsino = np.fft.fftshift(np.fft.fft2(fsino))
+            fftsino = fft.fftshift(fft.fft2(fsino))
             values.append(np.sum(np.abs(fftsino)*mask))
         vv = np.array(values)
         vv = abs(vv)
@@ -66,6 +68,14 @@ class VoCentering(PassThroughPlugin, CpuPlugin):
 
     def populate_default_parameters(self):
         self.parameters['slice_direction'] = 1
+
+    def required_data_type(self):
+        """
+        The input for this plugin is ProjectionData as it needs to be corrected
+
+        :returns:  ProjectionData
+        """
+        return ProjectionData
 
     def process_frame(self, data):
         width = data.shape[1]/4
