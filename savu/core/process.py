@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
+""" Methods for running a chain of plugins
+
 .. module:: process
    :platform: Unix
    :synopsis: Methods for running a chain of plugins

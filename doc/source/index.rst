@@ -5,7 +5,8 @@
 
 .. include:: ../../README.rst
 
-Contents:
+User and Developer Guide
+========================
 
 .. toctree::
    :maxdepth: 2
@@ -13,7 +14,8 @@ Contents:
    user
    dev
 
-.. toctree::
+Code Documentation
+==================
 
 .. autosummary::
    :toctree: _autosummary
@@ -38,7 +40,7 @@ Contents:
    savu.plugins.astra_recon
    savu.plugins.simple_fake_gpu_recon
    savu.plugins.simple_recon
-   
+
 
 
 Indices and tables
