@@ -62,7 +62,7 @@ class Filter(Plugin):
 
         padding = self.get_filter_padding()
 
-        block_size = 2
+        block_size = 8
         frame_sections = [frames[x:x+block_size] for x in
                           xrange(0, len(frames), block_size)]
 
