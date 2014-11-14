@@ -68,9 +68,9 @@ class ExampleMedianFilter(Filter, CpuPlugin):
         logging.debug("Populating Example Median Filter default parameters")
         self.parameters['kernel_size'] = (3, 3, 3)
 
-    def get_filter_width(self):
+    def get_filter_padding(self):
         """
-        Plugins which extend the Filter class have a get_filter_width call
+        Plugins which extend the Filter class have a get_filter_padding call
         which Specifies the number of slices which get passed to the
         filter_frame method.  if this is zero, a 1 x n x m dataset will be
         passed, but if this is 5, then an 11 x n x m dataset will get passed
@@ -92,4 +92,6 @@ class ExampleMedianFilter(Filter, CpuPlugin):
         """
         logging.debug("Getting the filter frame of Example Median Filter")
         result = sig.medfilt(data, self.parameters['kernel_size'])
-        return result[result.shape[0]/2, :, :]
+        padding = self.get_filter_padding()
+        result = result[padding:result.shape[0]-padding, :, :]
+        return result

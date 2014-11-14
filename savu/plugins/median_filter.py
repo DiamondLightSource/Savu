@@ -20,6 +20,8 @@
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
+import logging
+
 from savu.plugins.filter import Filter
 from savu.plugins.cpu_plugin import CpuPlugin
 
@@ -32,6 +34,7 @@ class MedianFilter(Filter, CpuPlugin):
     """
 
     def __init__(self):
+        logging.debug("Starting Median Filter")
         super(MedianFilter,
               self).__init__("MedianFilter")
 
@@ -40,10 +43,13 @@ class MedianFilter(Filter, CpuPlugin):
               self).populate_default_parameters()
         self.parameters['kernel_size'] = (1, 3, 3)
 
-    def get_filter_width(self):
-        width = (self.parameters['kernel_size'][0]-1)/2
-        return width
+    def get_filter_padding(self):
+        padding = (self.parameters['kernel_size'][0]-1)/2
+        return padding
 
     def filter_frame(self, data):
+        logging.debug("Running Filter data")
         result = sig.medfilt(data, self.parameters['kernel_size'])
-        return result[result.shape[0]/2, :, :]
+        padding = self.get_filter_padding()
+        result = result[padding:result.shape[0]-padding, :, :]
+        return result

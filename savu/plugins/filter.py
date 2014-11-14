@@ -45,7 +45,7 @@ class Filter(Plugin):
         """
         self.parameters['slice_direction'] = 0
 
-    def get_filter_width(self):
+    def get_filter_padding(self):
         """
         Should be overridden to define how wide the frame should be
 
@@ -54,31 +54,40 @@ class Filter(Plugin):
         return 0
 
     def _filter_chunk(self, chunk, data, output, processes, process):
+        logging.debug("Running filter._filter_chunk")
         frames = np.array_split(chunk, processes)[process]
 
         frame_slice = [slice(None)] * len(data.data.shape)
         slice_dir = self.parameters['slice_direction']
 
-        width = self.get_filter_width()
-        for frame in frames:
-            minval = frame-width
-            maxval = frame+width+1
+        padding = self.get_filter_padding()
+
+        block_size = 2
+        frame_sections = [frames[x:x+block_size] for x in
+                          xrange(0, len(frames), block_size)]
+
+        for frame_section in frame_sections:
+            logging.debug("Frame section is : %s", str(frame_section))
+            minval = frame_section[0]-padding
+            maxval = frame_section[-1]+padding+1
             minpad = 0
             maxpad = 0
             if minval < chunk[0]:
                 minpad = chunk[0] - minval
                 minval = chunk[0]
             if maxval > chunk[-1]:
-                maxpad = (maxval-chunk[-1]) - 1 
+                maxpad = (maxval-chunk[-1]) - 1
                 maxval = chunk[-1] + 1
             frame_slice[slice_dir] = slice(minval, maxval)
             projection = data.data[tuple(frame_slice)]
             logging.debug("projection shape is %s", str(projection.shape))
             logging.debug("max and min are %i, %i", minval, maxval)
-            projection = np.pad(projection, ((minpad, maxpad), (0, 0), (0, 0)),
-                                mode='edge')
+            if minpad != 0 or maxpad != 0:
+                projection = np.pad(projection,
+                                    ((minpad, maxpad), (0, 0), (0, 0)),
+                                    mode='edge')
             result = self.filter_frame(projection)
-            output.data[frame, :, :] = result
+            output.data[frame_section[0]:frame_section[-1]+1, :, :] = result
 
     def filter_frame(self, data):
         """
