@@ -20,12 +20,6 @@
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
-# First to pick up the DLS controls environment and versioned libraries
-#from pkg_resources import require
-#require('mpi4py==1.3.1')
-#require('h5py==2.2.0')
-#require('numpy')  # h5py need to be able to import numpy
-#require('scipy')
 
 import logging
 import optparse
@@ -100,7 +94,7 @@ if __name__ == '__main__':
     process_list = ProcessList()
     process_list.populate_process_list(process_filename)
 
-    first_plugin = pu.load_plugin(None, process_list.process_list[0]['id'])
+    first_plugin = pu.load_plugin(process_list.process_list[0]['id'])
     input_data = tu.get_appropriate_input_data(first_plugin)[0]
 
     process.run_process_list(input_data, process_list, options.directory,
