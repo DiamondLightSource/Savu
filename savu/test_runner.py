@@ -62,7 +62,8 @@ if __name__ == "__main__":
 
     suite = unittest.TestSuite()
     ft = FrameworkTest('test_pipeline')
-    ft.plugin_list = ','.split(options.plugins)
+    logging.debug("options.plugins = %s", options.plugins)
+    ft.plugin_list = (options.plugins.split(','))
     logging.debug("Plugin list is %s", str(ft.plugin_list))
     ft.temp_dir = args[0]
     suite.addTest(ft)
