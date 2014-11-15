@@ -65,7 +65,8 @@ def run_plugin_chain(input_data, plugin_list, processing_dir, mpi=False,
         plugin.run_process(in_data, output, processes, process)
         logging.debug("Completed processing plugin %s", plugin_name)
 
-        in_data.complete()
+        if in_data is not output:
+            in_data.complete()
         in_data = output
 
         if mpi:

@@ -89,3 +89,11 @@ class SimpleReconWithMedianFilteringTest(FrameworkTest):
                             "savu.plugins.median_filter",
                             "savu.plugins.simple_recon",
                             "savu.plugins.median_filter"]
+
+
+class PassThroughTest(FrameworkTest):
+
+    def setUp(self):
+        self.plugin_list = ["savu.plugins.timeseries_field_corrections",
+                            "savu.plugins.vo_centering",
+                            "savu.plugins.simple_recon"]
