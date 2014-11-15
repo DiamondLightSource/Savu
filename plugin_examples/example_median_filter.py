@@ -90,7 +90,8 @@ class ExampleMedianFilter(Filter, CpuPlugin):
         the scipy median filter with the 'kernmel_size' parameter, and return
         the middle slice (the result of the filtering process for this slice).
         """
-        logging.debug("Getting the filter frame of Example Median Filter")
+        logging.debug("Data frame recieved for processing of shape %s",
+                      str(data.shape))
         result = sig.medfilt(data, self.parameters['kernel_size'])
         padding = self.get_filter_padding()
         result = result[padding:result.shape[0]-padding, :, :]
