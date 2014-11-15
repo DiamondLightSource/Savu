@@ -54,7 +54,7 @@ if __name__ == "__main__":
 
     logging.basicConfig(filename=os.path.join(args[0],"log.log"),
                         filemode='w',
-                        format='%(relativeCreated)d %(name)s %(levelname)s %(message)s',
+                        format='%(relativeCreated)08d %(name)s %(levelname)s %(message)s',
                         datefmt='%H:%M:%S',
                         level=logging.DEBUG)
 
