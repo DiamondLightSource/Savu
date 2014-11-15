@@ -36,8 +36,10 @@ if __name__ == "__main__":
     usage = "%prog [options] output_directory"
     version = "%prog 0.1"
     parser = optparse.OptionParser(usage=usage, version=version)
-    parser.add_option("-p", "--plugin", dest="plugin", help="plugin name e.g" +
-                      "/path/to/base/plugin.name.including.packages",
+    parser.add_option("-p", "--plugins", dest="plugins",
+                      help="plugin names, comma separated. e.g "+
+                      "/path/to/base/plugin.name.including.packages" +
+                      ",savu.core.plugin",
                       default="savu.plugins.median_filter",
                       type='string')
     (options, args) = parser.parse_args()
@@ -60,7 +62,8 @@ if __name__ == "__main__":
 
     suite = unittest.TestSuite()
     ft = FrameworkTest('test_pipeline')
-    ft.plugin_list = [options.plugin]
+    ft.plugin_list = ','.split(options.plugin)
+    logging.debug("Plugin list is %s", str(ft.plugin_list))
     ft.temp_dir = args[0]
     suite.addTest(ft)
 
