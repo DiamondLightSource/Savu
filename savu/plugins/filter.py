@@ -80,9 +80,8 @@ class Filter(Plugin):
                 maxval = chunk[-1] + 1
             frame_slice[slice_dir] = slice(minval, maxval)
             projection = data.data[tuple(frame_slice)]
-            logging.debug("projection shape is %s", str(projection.shape))
-            logging.debug("max and min are %i, %i", minval, maxval)
             if minpad != 0 or maxpad != 0:
+                logging.debug("Frame padded by (%i, %i)", minpad, maxpad)
                 projection = np.pad(projection,
                                     ((minpad, maxpad), (0, 0), (0, 0)),
                                     mode='edge')
