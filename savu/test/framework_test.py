@@ -28,6 +28,7 @@ import logging
 from savu.core import process
 from savu.plugins import utils as pu
 from savu.test import test_utils as tu
+from savu.data.structures import RawTimeseriesData
 
 base_class_name = "savu.plugins.plugin"
 
@@ -42,10 +43,15 @@ class FrameworkTest(unittest.TestCase):
         logging.debug("Starting test_pipeline")
         if not hasattr(self, 'temp_dir'):
             self.temp_dir = tempfile.gettempdir()
+        input_data = None
         first_plugin = pu.load_plugin(self.plugin_list[0])
         if self.plugin_list[0] == base_class_name:
             return
-        input_data = tu.get_appropriate_input_data(first_plugin)[0]
+        if not hasattr(self, 'input_file'):
+            input_data = tu.get_appropriate_input_data(first_plugin)[0]
+        else:
+            input_data = RawTimeseriesData()
+            input_data.populate_from_nexus(self.input_file)
         logging.debug("Starting to run the processing chain")
         process.run_plugin_chain(input_data, self.plugin_list, self.temp_dir)
 

@@ -42,6 +42,9 @@ if __name__ == "__main__":
                       ",savu.core.plugin",
                       default="savu.plugins.median_filter",
                       type='string')
+    parser.add_option("-i", "--input_file", dest="input_file",
+                      help="Name of input file if not default",
+                      default=None, type='string')
     (options, args) = parser.parse_args()
 
     if len(args) is not 1:
@@ -52,7 +55,7 @@ if __name__ == "__main__":
         print("path to output directory %s does not exist" % args[0]);
         sys.exit(2)
 
-    logging.basicConfig(filename=os.path.join(args[0],"log.log"),
+    logging.basicConfig(filename=os.path.join(args[0], "log.log"),
                         filemode='w',
                         format='%(relativeCreated)08d %(name)s %(levelname)s %(message)s',
                         datefmt='%H:%M:%S',
@@ -66,6 +69,8 @@ if __name__ == "__main__":
     ft.plugin_list = (options.plugins.split(','))
     logging.debug("Plugin list is %s", str(ft.plugin_list))
     ft.temp_dir = args[0]
+    if options.input_file is not None:
+        ft.input_file = options.input_file
     suite.addTest(ft)
 
     logging.debug("Test suite setup, ready to run")
