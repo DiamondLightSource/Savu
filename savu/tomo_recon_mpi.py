@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: tomo_recon
+.. module:: tomo_recon_mpi
    :platform: Unix
-   :synopsis: runner for tests using the MPI framework
+   :synopsis: runner for full reconstruction pilpeline using the MPI framework
 
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
@@ -23,30 +23,47 @@
 import logging
 import optparse
 import socket
+import sys
+import os
 
 from itertools import chain
-
 from mpi4py import MPI
-from savu.core import process
 
+from savu.core import process
 from savu.data.process_data import ProcessList
 
 import savu.plugins.utils as pu
-import savu.test.test_utils as tu
 
 if __name__ == '__main__':
 
-    usage = "%prog [options] input_file output_directory"
+    usage = "%prog [options] nxs_file_to_reconstruct process_file output_dir"
     version = "%prog 0.1"
     parser = optparse.OptionParser(usage=usage, version=version)
     parser.add_option("-n", "--names", dest="names", help="Process names",
                       default="CPU1,CPU2,CPU3,CPU4,CPU5,CPU6,CPU7,CPU8",
                       type='string')
-    parser.add_option("-f", "--filename", dest="process_filename",
-                      help="The filename of the process file",
-                      default="/home/ssg37927/Savu/test_data/process01.nxs",
-                      type='string')
     (options, args) = parser.parse_args()
+
+    # Check basic items for completeness
+    if len(args) is not 3:
+        print "filename, process file and output path needs to be specified"
+        print "Exiting with error code 1 - incorrect number of inputs"
+        sys.exit(1)
+
+    if not os.path.exists(args[0]):
+        print("Input file '%s' does not exist" % args[0])
+        print("Exiting with error code 2 - Input file missing")
+        sys.exit(2)
+
+    if not os.path.exists(args[1]):
+        print("Processing file '%s' does not exist" % args[1])
+        print("Exiting with error code 3 - Processing file missing")
+        sys.exit(3)
+
+    if not os.path.exists(args[2]):
+        print("Output Directory '%s' does not exist" % args[2])
+        print("Exiting with error code 4 - Output Directory missing")
+        sys.exit(4)
 
     RANK_NAMES = options.names.split(',')
 
@@ -63,13 +80,13 @@ if __name__ == '__main__':
     ALL_PROCESSES = [[i]*MACHINES for i in RANK_NAMES]
     ALL_PROCESSES = list(chain.from_iterable(ALL_PROCESSES))
 
-    logging.basicConfig(level=0, format='L %(asctime)s.%(msecs)03d M' +
+    logging.basicConfig(level=0, format='L %(relativeCreated)12d M' +
                         MACHINE_NUMBER_STRING + ' ' + MACHINE_RANK_NAME +
                         ' %(levelname)-6s %(message)s', datefmt='%H:%M:%S')
 
     MPI.COMM_WORLD.barrier()
 
-    logging.info("Starting tomo_recon process")
+    logging.info("Starting the reconstruction pipeline process")
 
     logging.debug("Rank : %i - Size : %i", RANK, SIZE)
 
@@ -79,14 +96,16 @@ if __name__ == '__main__':
 
     MPI.COMM_WORLD.barrier()
 
-    # TODO Check all the files at this point
+    logging.debug("LD_LIBRARY_PATH is %s",  os.getenv('LD_LIBRARY_PATH'))
+
+    MPI.COMM_WORLD.barrier()
 
     process_filename = options.process_filename
 
     process_list = ProcessList()
     process_list.populate_process_list(process_filename)
 
-    first_plugin = pu.load_plugin(None, process_list.process_list[0]['id'])
+    first_plugin = pu.load_plugin(process_list.process_list[0]['id'])
     input_data = pu.load_raw_data(args[0])
 
     process.run_process_list(input_data, process_list, args[1],
@@ -94,3 +113,5 @@ if __name__ == '__main__':
                              process=RANK)
 
     MPI.COMM_WORLD.barrier()
+
+    logging.info("Python MPI script complete")
