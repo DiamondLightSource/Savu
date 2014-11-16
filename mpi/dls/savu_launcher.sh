@@ -1,5 +1,3 @@
-module load global/cluster
-
 echo "SAVU_LAUNCHER:: Running Job"
 
 cd /dls/tmp/savu/
