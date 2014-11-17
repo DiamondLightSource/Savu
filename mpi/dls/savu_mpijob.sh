@@ -1,9 +1,15 @@
 #!/bin/bash
 module load global/cluster
-module load python/ana
+module load savu
 source activate mpi2
 module load openmpi/1.6.5
-module load savu
+
+echo "Start Check Output"
+which mpicc
+which mpirun
+echo $LD_LIBRARY_PATH
+which python
+echo "END Check Output"
 
 UNIQHOSTS=${TMPDIR}/machines-u
 awk '{print $1 }' ${PE_HOSTFILE} | uniq > ${UNIQHOSTS}

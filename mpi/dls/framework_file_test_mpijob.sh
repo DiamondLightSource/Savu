@@ -8,6 +8,7 @@ module load openmpi/1.6.5
 
 echo "Start Check Output"
 which mpicc
+which mpirun
 echo $LD_LIBRARY_PATH
 which python
 echo "END Check Output"
