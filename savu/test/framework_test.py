@@ -103,3 +103,9 @@ class PassThroughTest(FrameworkTest):
         self.plugin_list = ["savu.plugins.timeseries_field_corrections",
                             "savu.plugins.vo_centering",
                             "savu.plugins.simple_recon"]
+
+
+class DenoiseTest(FrameworkTest):
+
+    def setUp(self):
+        self.plugin_list = ["savu.plugins.denoise_bregman_filter"]
