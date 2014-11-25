@@ -25,6 +25,7 @@ import unittest
 import tempfile
 import h5py
 
+from savu.data import structures
 import numpy as np
 
 from savu.data.structures import SliceAvailableWrapper
@@ -76,7 +77,7 @@ class WrapperAlwaysAvailableTest(unittest.TestCase):
 class RawTimeseriesDataTest(unittest.TestCase):
 
     def setUp(self):
-        self.data = tu.get_nexus_test_data()
+        self.data = tu.get_nx_tomo_test_data()
 
     def test_get_clusterd_frame_list(self):
         frame_list = self.data.get_clusterd_frame_list()
@@ -101,6 +102,55 @@ class RawTimeseriesDataTest(unittest.TestCase):
 
     def tearDown(self):
         self.data.complete()
+
+
+class DataTest(unittest.TestCase):
+
+    def setUp(self):
+        self.nx_tomo_data = tu.get_nx_tomo_test_data()
+        self.projection_data = tu.get_projection_test_data()
+
+    def _check_points_in_list(self, data, slice_list, shape):
+        for i in slice_list[::(len(slice_list)/10)]:
+            self.assertEqual(data[i].shape, shape)
+
+    def test_get_frame_list_nx_tomo(self):
+        test_list = self.nx_tomo_data.get_slice_list(structures.CD_PATTERN)
+        self.assertIsNone(test_list, "This should be none as there are no patterns here")
+
+        test_list = self.nx_tomo_data.get_slice_list(structures.CD_PROJECTION)
+        self.assertEqual(len(test_list), 111)
+        self._check_points_in_list(self.nx_tomo_data.data, test_list, (135,160))
+        
+        test_list = self.nx_tomo_data.get_slice_list(structures.CD_SINOGRAM)
+        self.assertEqual(len(test_list), 135)
+        self._check_points_in_list(self.nx_tomo_data.data, test_list, (111,160))
+        
+        test_list = self.nx_tomo_data.get_slice_list(structures.CD_ROTATION_AXIS)
+        self.assertEqual(len(test_list), 21600)
+        self._check_points_in_list(self.nx_tomo_data.data, test_list, (111,))
+        return
+
+    def test_get_frame_list_projection(self):
+        test_list = self.projection_data.get_slice_list(structures.CD_PATTERN)
+        self.assertIsNone(test_list, "This should be none as there are no patterns here")
+
+        test_list = self.projection_data.get_slice_list(structures.CD_PROJECTION)
+        self.assertEqual(len(test_list), 91)
+        self._check_points_in_list(self.projection_data.data, test_list, (135,160))
+        
+        test_list = self.projection_data.get_slice_list(structures.CD_SINOGRAM)
+        self.assertEqual(len(test_list), 135)
+        self._check_points_in_list(self.projection_data.data, test_list, (91,160))
+        
+        test_list = self.projection_data.get_slice_list(structures.CD_ROTATION_AXIS)
+        self.assertEqual(len(test_list), 21600)
+        self._check_points_in_list(self.projection_data.data, test_list, (91,))
+        return
+
+    def tearDown(self):
+        self.nx_tomo_data.complete()
+        self.projection_data.complete()
 
 if __name__ == "__main__":
     unittest.main()

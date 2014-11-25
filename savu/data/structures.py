@@ -30,6 +30,12 @@ from mpi4py import MPI
 
 NX_CLASS = 'NX_class'
 
+# Core Direction Keywords
+CD_PROJECTION = 'core_dir_projection'
+CD_SINOGRAM = 'core_dir_sinogram'
+CD_ROTATION_AXIS = 'core_dir_rotation_axis'
+CD_PATTERN = 'core_dir_pattern'
+
 
 class SliceAvailableWrapper(object):
     """
@@ -108,6 +114,7 @@ class Data(object):
         self.backing_file = None
         self.data = None
         self.base_path = None
+        self.core_directions = {}
 
     def complete(self):
         """
@@ -123,6 +130,27 @@ class Data(object):
         return h5py.ExternalLink(self.backing_file.filename,
                                  self.base_path)
 
+    def get_slice_list(self, frame_type):
+        if frame_type in self.core_directions.keys():
+            it = np.nditer(self.data, flags=['multi_index'])
+            dirs_to_remove = list(self.core_directions[frame_type])
+            dirs_to_remove.sort(reverse=True)
+            for dir in dirs_to_remove:
+                it.remove_axis(dir);
+            mapping_list = range(len(it.multi_index))
+            dirs_to_remove.sort()
+            for dir in dirs_to_remove:
+                mapping_list.insert(dir, -1)
+            mapping_array = np.array(mapping_list)
+            slice_list = []
+            while not it.finished:
+                tup = it.multi_index + (slice(None),)
+                slice_list.append(tuple(np.array(tup)[mapping_array]))
+                it.iternext()
+            return slice_list
+        return None
+
+
 
 class RawTimeseriesData(Data):
     """
@@ -136,12 +164,10 @@ class RawTimeseriesData(Data):
         self.rotation_angle = None
         self.control = None
         self.center_of_rotation = None
-        self.projection_axis = (0, 0)
-        self.rotation_axis = (0,)
 
-    def populate_from_nexus(self, path):
+    def populate_from_nx_tomo(self, path):
         """
-        Load a plugin.
+        Populate the RawTimeseriesData from an NXTomo defined NeXus file
 
         :param path: The full path of the NeXus file to load.
         :type path: str
@@ -163,8 +189,9 @@ class RawTimeseriesData(Data):
         control = self.backing_file['entry1/tomo_entry/control/data']
         self.control = SliceAlwaysAvailableWrapper(control)
 
-        self.projection_axis = (1, 2)
-        self.rotation_axis = (0,)
+        self.core_directions[CD_PROJECTION] = (1, 2)
+        self.core_directions[CD_SINOGRAM] = (0, 2)
+        self.core_directions[CD_ROTATION_AXIS] = (0, )
 
     def create_backing_h5(self, path, group_name, data, mpi=False):
         """
@@ -194,6 +221,10 @@ class RawTimeseriesData(Data):
         if not isinstance(data, RawTimeseriesData):
             raise ValueError("data is not a RawTimeseriesData")
 
+        self.core_directions[CD_PROJECTION] = (1, 2)
+        self.core_directions[CD_SINOGRAM] = (0, 2)
+        self.core_directions[CD_ROTATION_AXIS] = 0
+
         data_shape = data.data.shape
         data_type = np.double
         image_key_shape = data.image_key.shape
@@ -202,7 +233,7 @@ class RawTimeseriesData(Data):
         rotation_angle_type = data.rotation_angle.dtype
         control_shape = data.control.shape
         control_type = data.control.dtype
-        cor_shape = (data.data.shape[self.projection_axis[0]],)
+        cor_shape = (data.data.shape[self.core_directions[CD_ROTATION_AXIS]],)
         cor_type = np.double
 
         group = self.backing_file.create_group(group_name)
@@ -300,7 +331,7 @@ class ProjectionData(Data):
         :param data: The structure from which this can be created
         :type data: savu.structure
         :param mpi: if an MPI process, provide MPI package here, default None
-        :type mpi: package
+        :type boolean: package
         """
         self.backing_file = None
         if mpi:
@@ -364,6 +395,8 @@ class ProjectionData(Data):
         self.center_of_rotation = \
             SliceAvailableWrapper(cor_avail, cor)
 
+        self.core_directions = data.core_directions
+
     def populate_from_h5(self, path):
         """
         Populate the contents of this object from a file
@@ -382,6 +415,10 @@ class ProjectionData(Data):
         rotation_angle = \
             self.backing_file['TimeseriesFieldCorrections/rotation_angle']
         self.rotation_angle = SliceAlwaysAvailableWrapper(rotation_angle)
+
+        self.core_directions[CD_PROJECTION] = (1, 2)
+        self.core_directions[CD_SINOGRAM] = (0, 2)
+        self.core_directions[CD_ROTATION_AXIS] = (0,)
 
     def get_number_of_sinograms(self):
         """

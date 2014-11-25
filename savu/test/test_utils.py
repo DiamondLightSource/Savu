@@ -44,15 +44,15 @@ def get_test_data_path(name):
                     ['test_data', name])
 
 
-def get_nexus_test_data():
-    """Gets the test data and returns it in the RawData Structure
+def get_nx_tomo_test_data():
+    """Gets the nx_tomo test data and returns it in the RawData Structure
 
     :returns:  a RawTimeseriesData Object containing the example data.
 
     """
     path = get_test_data_path('24737.nxs')
     raw_timeseries_data = RawTimeseriesData()
-    raw_timeseries_data.populate_from_nexus(path)
+    raw_timeseries_data.populate_from_nx_tomo(path)
     return raw_timeseries_data
 
 
@@ -71,11 +71,11 @@ def get_projection_test_data():
 def get_appropriate_input_data(plugin):
     data = []
     if plugin.required_data_type() == RawTimeseriesData:
-        data.append(get_nexus_test_data())
+        data.append(get_nx_tomo_test_data())
     elif plugin.required_data_type() == ProjectionData:
         data.append(get_projection_test_data())
     elif plugin.required_data_type() == Data:
-        data.append(get_nexus_test_data())
+        data.append(get_nx_tomo_test_data())
         data.append(get_projection_test_data())
     return data
 
