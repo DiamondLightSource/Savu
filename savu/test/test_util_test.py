@@ -28,8 +28,8 @@ import savu.test.test_utils as tu
 
 class Test(unittest.TestCase):
 
-    def testGetExampleData(self):
-        raw_data = tu.get_nexus_test_data()
+    def testGetNXTomoExampleData(self):
+        raw_data = tu.get_nx_tomo_test_data()
         self.assertEqual(raw_data.data.data.shape, (111, 135, 160),
                          "Data is not the correct shape, was " +
                          str(raw_data.data.data.shape))
@@ -40,6 +40,15 @@ class Test(unittest.TestCase):
                          "Image_key is not the correct shape, was " +
                          str(raw_data.image_key.data.shape))
         self.assertEqual(raw_data.rotation_angle.data.shape, (111,),
+                         "Rotation_Angle is not the correct shape, was " +
+                         str(raw_data.rotation_angle.data.shape))
+
+    def testGetProjectionExampleData(self):
+        raw_data = tu.get_projection_test_data()
+        self.assertEqual(raw_data.data.data.shape, (91, 135, 160),
+                         "Data is not the correct shape, was " +
+                         str(raw_data.data.data.shape))
+        self.assertEqual(raw_data.rotation_angle.data.shape, (91,),
                          "Rotation_Angle is not the correct shape, was " +
                          str(raw_data.rotation_angle.data.shape))
 
