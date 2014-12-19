@@ -24,6 +24,7 @@ from savu.data.structures import ProjectionData
 """
 from savu.plugins.pass_through_plugin import PassThroughPlugin
 from savu.plugins.cpu_plugin import CpuPlugin
+from savu.data import structures
 
 import scipy.ndimage as ndi
 
@@ -66,8 +67,21 @@ class VoCentering(PassThroughPlugin, CpuPlugin):
         vv = abs(vv)
         return cor_positions[vv.argmin()]
 
-    def populate_default_parameters(self):
-        self.parameters['slice_direction'] = 1
+    def get_filter_frame_type(self):
+        """
+        This filter processes sinograms
+
+         :returns:  structures.CD_SINOGRAM
+        """
+        return structures.CD_SINOGRAM
+
+    def get_max_frames(self):
+        """
+        This filter processes 1 frame at a time
+
+         :returns:  1
+        """
+        return 1
 
     def required_data_type(self):
         """
@@ -78,6 +92,7 @@ class VoCentering(PassThroughPlugin, CpuPlugin):
         return ProjectionData
 
     def process_frame(self, data):
+        data = data.squeeze()
         width = data.shape[1]/4
         step = width/10.
         point = 0.0

@@ -40,9 +40,7 @@ class Plugin(object):
         values.  it is used for checking to see if new parameter values are
         appropriate
         """
-        logging.error("populate_default_parameters needs to be implemented")
-        raise NotImplementedError("populate_default_parameters " +
-                                  "needs to be implemented")
+        return
 
     def set_parameters(self, parameters):
         """

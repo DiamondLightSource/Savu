@@ -27,7 +27,7 @@ import os
 
 import savu.plugins.utils as pu
 
-from savu.data.structures import Data
+from savu.data.structures import Data, PassThrough
 from savu.data.structures import RawTimeseriesData, ProjectionData, VolumeData
 
 
@@ -82,6 +82,10 @@ def get_appropriate_input_data(plugin):
 
 def get_appropriate_output_data(plugin, data, mpi=False, file_name=None):
     output = []
+    
+    if plugin.output_data_type() == PassThrough:
+        output.append(data[0])
+    
     temp_file = file_name
     if temp_file is None:
         temp_file = tempfile.NamedTemporaryFile(suffix='.h5', delete=False)

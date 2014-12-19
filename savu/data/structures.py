@@ -120,9 +120,9 @@ class Data(object):
         """
         Closes the backing file and completes work
         """
-        logging.debug("Completing file %s %s", self.base_path,
-                      self.backing_file.filename)
         if self.backing_file is not None:
+            logging.debug("Completing file %s %s", self.base_path,
+                          self.backing_file.filename)
             self.backing_file.close()
             self.backing_file = None
 
@@ -135,12 +135,12 @@ class Data(object):
             it = np.nditer(self.data, flags=['multi_index'])
             dirs_to_remove = list(self.core_directions[frame_type])
             dirs_to_remove.sort(reverse=True)
-            for dir in dirs_to_remove:
-                it.remove_axis(dir);
+            for direction in dirs_to_remove:
+                it.remove_axis(direction);
             mapping_list = range(len(it.multi_index))
             dirs_to_remove.sort()
-            for dir in dirs_to_remove:
-                mapping_list.insert(dir, -1)
+            for direction in dirs_to_remove:
+                mapping_list.insert(direction, -1)
             mapping_array = np.array(mapping_list)
             slice_list = []
             while not it.finished:

@@ -24,7 +24,8 @@
 import logging
 
 import numpy as np
-
+from savu.data import structures
+from savu.data import utils as du
 from savu.data.structures import Data, PassThrough
 from savu.data.structures import RawTimeseriesData, ProjectionData, VolumeData
 from savu.plugins.plugin import Plugin
@@ -38,24 +39,35 @@ class PassThroughPlugin(Plugin):
     def __init__(self, name='PassThroughPlugin'):
         super(PassThroughPlugin, self).__init__(name)
 
-    def populate_default_parameters(self):
+    def get_filter_frame_type(self):
         """
-        Slice direction tells the pass through plugin which direction to slice
-        through the data before passing it on
+        get_filter_frame_type tells the pass through plugin which direction to
+        slice through the data before passing it on
+
+         :returns:  the savu.structure core_direction describing the frames to
+                    filter
         """
-        self.parameters['slice_direction'] = 0
+        return structures.CD_PROJECTION
 
-    def _process_chunk(self, chunk, data, output, processes, process):
-        frames = np.array_split(chunk, processes)[process]
+    def get_max_frames(self):
+        """
+        get_max_frames tells the pass through plugin how many frames to give to 
+        the plugins process method at a time, the default is a stack of 8
 
-        frame_slice = [slice(None)] * len(data.data.shape)
+         :returns:  The number of frames to process per call to process (8)
+        """
+        return 8
 
-        for frame in frames:
-            frame_slice[self.parameters['slice_direction']] = frame
-            projection = data.data[tuple(frame_slice)]
+    def _process_chunks(self, slice_list, data, output, processes, process):
+        
+        process_slice_list = du.get_slice_list_per_process(slice_list, process, processes)
+
+        for sl in process_slice_list:
+            projection = data.data[sl]
             result = self.process_frame(projection)
             for key in result.keys():
                 if key == 'center_of_rotation':
+                    frame = du.get_orthogonal_slice(sl, data.core_directions[self.get_filter_frame_type()])
                     output.center_of_rotation[frame] = result[key]
 
     def process_frame(self, data):
@@ -84,30 +96,9 @@ class PassThroughPlugin(Plugin):
         :param path: The specific process which we are
         :type path: int
         """
-        if isinstance(data, ProjectionData):
-            # process the data frame by frame
-            output.rotation_angle[:] = data.rotation_angle[:]
-
-            # make an array of all the frames to process
-            frames = np.arange(data.get_data_shape()
-                               [self.parameters['slice_direction']])
-            self._process_chunk(frames, data, output, len(processes), process)
-
-        elif isinstance(data, RawTimeseriesData):
-            # pass the unchanged data through
-            output.rotation_angle[:] = data.rotation_angle[:]
-            output.control[:] = data.control[:]
-
-            # process the data frame by frame in chunks
-            chunks = data.get_clusterd_frame_list()
-            for chunk in chunks:
-                self._process_chunk(chunk, data, output, len(processes),
-                                    process)
-        elif isinstance(data, VolumeData):
-            # make an array of all the frames to process
-            frames = np.arange(data.get_volume_shape()
-                               [self.parameters['slice_direction']])
-            self._process_chunk(frames, data, output, len(processes), process)
+        # FIXME Need to fix hardcoded frame max here
+        slice_list = du.get_grouped_slice_list(data, self.get_filter_frame_type(), self.get_max_frames())
+        self._process_chunks(slice_list, data, output, len(processes), process)
 
     def required_data_type(self):
         """
