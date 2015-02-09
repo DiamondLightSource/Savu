@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """
 .. module:: utils
    :platform: Unix
@@ -20,7 +19,6 @@
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
-
 
 import numpy as np
 
@@ -107,6 +105,110 @@ def get_slice_list_per_process(slice_list, process, processes):
     frame_index = np.arange(len(slice_list))
     frames = np.array_split(frame_index, processes)[process]
     return slice_list[frames[0]:frames[-1]+1]
+
+def calculate_slice_padding(in_slice, pad_ammount, data_stop):
+    sl = in_slice
+
+    if not type(sl) == slice:
+        # turn the value into a slice and pad it
+        sl = slice(sl, sl+1, 1)
+
+    minval = None
+    maxval = None
+
+    if sl.start != None :
+        minval = sl.start-pad_ammount
+    if sl.stop != None :
+        maxval = sl.stop+pad_ammount
+
+    minpad = 0
+    maxpad = 0
+    if minval == None:
+        minpad = pad_ammount
+    elif minval < 0:
+        minpad = 0 - minval
+        minval = 0
+    if maxval == None:
+        maxpad = pad_ammount
+    if maxval > data_stop:
+        maxpad = (maxval-data_stop) - 1
+        maxval = data_stop + 1
+
+    out_slice = slice(minval, maxval, sl.step)
+
+    return (out_slice, (minpad, maxpad))
+
+def get_pad_data(slice_tup, pad_tup, data):
+    slice_list = []
+    pad_list = []
+    for i in range(len(slice_tup)):
+        if type(slice_tup[i]) == slice:
+            slice_list.append(slice_tup[i])
+            pad_list.append(pad_tup[i])
+        else :
+            if pad_tup[i][0] == 0 and pad_tup[i][0] == 0:
+                slice_list.append(slice_tup[i])
+            else :
+                slice_list.append(slice(slice_tup[i], slice_tup[i]+1, 1))
+                pad_list.append(pad_tup[i])
+
+    data_slice = data[tuple(slice_list)]
+    data_slice = np.pad(data_slice, tuple(pad_list), mode='edge')
+    return data_slice
+
+
+def get_padded_slice_data(input_slice_list, padding_dict, data):
+    slice_list = list(input_slice_list)
+    pad_list = []
+    for i in range(len(slice_list)):
+        pad_list.append((0,0))
+    
+    for key in padding_dict.keys():
+        if key in data.core_directions.keys():
+            for direction in data.core_directions[key]: 
+                slice_list[direction], pad_list[direction] = calculate_slice_padding(slice_list[direction], padding_dict[key], data.data.shape[direction])
+
+    return get_pad_data(tuple(slice_list), tuple(pad_list), data.data) 
+
+
+def get_unpadded_slice_data(input_slice_list, padding_dict, data, padded_dataset):
+    slice_list = list(input_slice_list)
+    pad_list = []
+    expand_list = []
+    for i in range(len(slice_list)):
+        pad_list.append((0,0))
+        expand_list.append(0)
+    for key in padding_dict.keys():
+        if key in data.core_directions.keys():
+            for direction in data.core_directions[key]: 
+                slice_list[direction], pad_list[direction] = calculate_slice_padding(slice_list[direction], padding_dict[key], data.data.shape[direction])
+                expand_list[direction] = padding_dict[key]
+    
+    slice_list_2 = []
+    pad_list_2 = []
+    for i in range(len(slice_list)):
+        if type(slice_list[i]) == slice:
+            slice_list_2.append(slice_list[i])
+            pad_list_2.append(pad_list[i])
+        else :
+            if pad_list[i][0] == 0 and pad_list[i][0] == 0:
+                slice_list_2.append(slice_list[i])
+            else :
+                slice_list_2.append(slice(slice_list[i], slice_list[i]+1, 1))
+                pad_list_2.append(pad_list[i])
+
+    slice_list_3 = []
+    for i in range(len(padded_dataset.shape)):
+        start = None
+        stop = None
+        if expand_list[i] > 0:
+            start = expand_list[i]
+            stop = -expand_list[i]
+        sl = slice(start, stop, None)
+        slice_list_3.append(sl)
+
+    result = padded_dataset[tuple(slice_list_3)]
+    return result.squeeze()
 
 def get_orthogonal_slice(full_slice, core_direction):
     dirs = range(len(full_slice))
