@@ -51,6 +51,10 @@ class BaseRecon(Plugin):
     def process(self, data, output, processes, process):
         """
         """
+        if data.center_of_rotation is None:
+            centre_of_rotation = np.ones(data.get_number_of_sinograms())
+            centre_of_rotation = centre_of_rotation * self.parameters['center_of_rotation']
+        
         centre_of_rotation = data.center_of_rotation[:]
         if centre_of_rotation is None:
             centre_of_rotation = np.ones(data.get_number_of_sinograms())

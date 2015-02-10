@@ -48,7 +48,7 @@ class DenoiseBregmanFilter(Filter, CpuPlugin):
         self.parameters['isotropic'] = False
 
     def get_filter_padding(self):
-        return 0
+        return {}
 
     def filter_frame(self, data):
         logging.debug("Running Denoise")

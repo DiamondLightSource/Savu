@@ -98,6 +98,8 @@ def group_slice_list(slice_list, max_frames):
 
 def get_grouped_slice_list(data, frame_type, max_frames):
     sl = get_slice_list(data, frame_type)
+    if sl == None:
+        raise Exception("data type %s does not support slicing in the %s direction" % (type(data), frame_type))
     gsl = group_slice_list(sl, max_frames)
     return gsl
 

@@ -24,6 +24,8 @@ from savu.data.structures import Data
 from savu.data.structures import RawTimeseriesData, ProjectionData, VolumeData
 from savu.plugins.plugin import Plugin
 
+from savu.data import structures
+from savu.data import utils as du 
 import numpy as np
 import logging
 
@@ -38,55 +40,42 @@ class Filter(Plugin):
         super(Filter,
               self).__init__(name)
 
-    def populate_default_parameters(self):
+    def get_filter_frame_type(self):
         """
-        Slice direction tells the pass through plugin which direction to slice
-        through the data before passing it on
+        get_filter_frame_type tells the pass through plugin which direction to
+        slice through the data before passing it on
+
+         :returns:  the savu.structure core_direction describing the frames to
+                    filter
         """
-        self.parameters['slice_direction'] = 0
+        return structures.CD_PROJECTION
 
     def get_filter_padding(self):
         """
         Should be overridden to define how wide the frame should be
 
-        :returns:  The width of the frame to be filtered
+        :returns:  a dictionary containing the axis to pad in and the amount
         """
-        return 0
+        return {}
 
-    def _filter_chunk(self, chunk, data, output, processes, process):
+    def get_max_frames(self):
+        """
+        Should be overridden to define the max number of frames to process at a time
+
+        :returns:  an integer of the number of frames
+        """
+        return 8
+
+    def _filter_chunk(self, slice_list, data, output, processes, process):
         logging.debug("Running filter._filter_chunk")
-        frames = np.array_split(chunk, processes)[process]
-
-        frame_slice = [slice(None)] * len(data.data.shape)
-        slice_dir = self.parameters['slice_direction']
+        process_slice_list = du.get_slice_list_per_process(slice_list, process, processes)
 
         padding = self.get_filter_padding()
 
-        block_size = 8
-        frame_sections = [frames[x:x+block_size] for x in
-                          xrange(0, len(frames), block_size)]
-
-        for frame_section in frame_sections:
-            logging.debug("Frame section is : %s", str(frame_section))
-            minval = frame_section[0]-padding
-            maxval = frame_section[-1]+padding+1
-            minpad = 0
-            maxpad = 0
-            if minval < chunk[0]:
-                minpad = chunk[0] - minval
-                minval = chunk[0]
-            if maxval > chunk[-1]:
-                maxpad = (maxval-chunk[-1]) - 1
-                maxval = chunk[-1] + 1
-            frame_slice[slice_dir] = slice(minval, maxval)
-            projection = data.data[tuple(frame_slice)]
-            if minpad != 0 or maxpad != 0:
-                logging.debug("Frame padded by (%i, %i)", minpad, maxpad)
-                projection = np.pad(projection,
-                                    ((minpad, maxpad), (0, 0), (0, 0)),
-                                    mode='edge')
-            result = self.filter_frame(projection)
-            output.data[frame_section[0]:frame_section[-1]+1, :, :] = result
+        for sl in process_slice_list:
+            section = du.get_padded_slice_data(sl, padding, data)
+            result = self.filter_frame(section)
+            output.data[sl] = du.get_unpadded_slice_data(sl, padding, data, result)
 
     def filter_frame(self, data):
         """
@@ -103,36 +92,8 @@ class Filter(Plugin):
     def process(self, data, output, processes, process):
         """
         """
-        if isinstance(data, ProjectionData):
-            # process the data frame by frame
-            output.rotation_angle[:] = data.rotation_angle[:]
-
-            # make an array of all the frames to process
-            frames = \
-                np.arange(data.data.shape[self.parameters['slice_direction']])
-            self._filter_chunk(frames, data, output, len(processes), process)
-
-        elif isinstance(data, RawTimeseriesData):
-            # pass the unchanged data through
-            output.rotation_angle[:] = data.rotation_angle[:]
-            output.control[:] = data.control[:]
-
-            # process the data frame by frame in chunks
-            if self.parameters['slice_direction'] == 0:
-                chunks = data.get_clusterd_frame_list()
-                for chunk in chunks:
-                    self._filter_chunk(chunk, data, output, len(processes),
-                                       process)
-            else:
-                frames = np.arange(
-                    data.data.shape[self.parameters['slice_direction']])
-                self._filter_chunk(frames, data, output,
-                                   len(processes), process)
-        elif isinstance(data, VolumeData):
-            # make an array of all the frames to process
-            frames = np.arange(
-                data.get_volume_shape()[self.parameters['slice_direction']])
-            self._filter_chunk(frames, data, output, len(processes), process)
+        slice_list = du.get_grouped_slice_list(data, self.get_filter_frame_type(), self.get_max_frames())
+        self._filter_chunk(slice_list, data, output, len(processes), process)
 
     def required_data_type(self):
         """

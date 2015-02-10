@@ -96,7 +96,6 @@ class PassThroughPlugin(Plugin):
         :param path: The specific process which we are
         :type path: int
         """
-        # FIXME Need to fix hardcoded frame max here
         slice_list = du.get_grouped_slice_list(data, self.get_filter_frame_type(), self.get_max_frames())
         self._process_chunks(slice_list, data, output, len(processes), process)
 

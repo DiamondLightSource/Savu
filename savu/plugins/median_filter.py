@@ -25,6 +25,8 @@ import logging
 from savu.plugins.filter import Filter
 from savu.plugins.cpu_plugin import CpuPlugin
 
+from savu.data import structures as st
+
 import scipy.signal.signaltools as sig
 
 
@@ -45,11 +47,9 @@ class MedianFilter(Filter, CpuPlugin):
 
     def get_filter_padding(self):
         padding = (self.parameters['kernel_size'][0]-1)/2
-        return padding
+        return {st.CD_PROJECTION:padding}
 
     def filter_frame(self, data):
         logging.debug("Running Filter data")
         result = sig.medfilt(data, self.parameters['kernel_size'])
-        padding = self.get_filter_padding()
-        result = result[padding:result.shape[0]-padding, :, :]
         return result

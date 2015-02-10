@@ -79,22 +79,13 @@ class SimpleReconWithProjectionMedianFilteringTest(FrameworkTest):
                             "savu.plugins.simple_recon"]
 
 
-class SimpleReconWithVolumeMedianFilteringTest(FrameworkTest):
-
-    def setUp(self):
-        self.plugin_list = ["savu.plugins.timeseries_field_corrections",
-                            "savu.plugins.simple_recon",
-                            "savu.plugins.median_filter"]
-
-
 class SimpleReconWithMedianFilteringTest(FrameworkTest):
 
     def setUp(self):
         self.plugin_list = ["savu.plugins.median_filter",
                             "savu.plugins.timeseries_field_corrections",
                             "savu.plugins.median_filter",
-                            "savu.plugins.simple_recon",
-                            "savu.plugins.median_filter"]
+                            "savu.plugins.simple_recon"]
 
 
 class PassThroughTest(FrameworkTest):
