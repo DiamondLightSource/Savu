@@ -105,7 +105,6 @@ if __name__ == '__main__':
     process_list = ProcessList()
     process_list.populate_process_list(process_filename)
 
-    first_plugin = pu.load_plugin(process_list.process_list[0]['id'])
     input_data = pu.load_raw_data(args[0])
 
     process.run_process_list(input_data, process_list, args[2],

@@ -69,7 +69,7 @@ def module2class(module_name):
 
 def load_raw_data(filename):
     data = RawTimeseriesData()
-    data.populate_from_nexus(filename)
+    data.populate_from_nx_tomo(filename)
     return data
 
 

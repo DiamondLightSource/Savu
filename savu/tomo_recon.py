@@ -22,6 +22,8 @@
 """
 import logging
 import optparse
+import sys
+import os
 
 from savu.core import process
 
@@ -45,14 +47,31 @@ if __name__ == '__main__':
 
     logging.info("Starting tomo_recon process")
 
-    # TODO Check all the files at this point
+    # Check basic items for completeness
+    if len(args) is not 3:
+        print("filename, process file and output path needs to be specified")
+        print("Exiting with error code 1 - incorrect number of inputs")
+        sys.exit(1)
 
+    if not os.path.exists(args[0]):
+        print("Input file '%s' does not exist" % args[0])
+        print("Exiting with error code 2 - Input file missing")
+        sys.exit(2)
+
+    if not os.path.exists(args[1]):
+        print("Processing file '%s' does not exist" % args[1])
+        print("Exiting with error code 3 - Processing file missing")
+        sys.exit(3)
+
+    if not os.path.exists(args[2]):
+        print("Output Directory '%s' does not exist" % args[2])
+        print("Exiting with error code 4 - Output Directory missing")
+        sys.exit(4)
     process_filename = options.process_filename
 
     process_list = ProcessList()
     process_list.populate_process_list(process_filename)
 
-    first_plugin = pu.load_plugin(None, process_list.process_list[0]['id'])
     input_data = pu.load_raw_data(args[0])
 
-    process.run_process_list(input_data, process_list, args[1])
+    process.run_process_list(input_data, process_list, args[2])
