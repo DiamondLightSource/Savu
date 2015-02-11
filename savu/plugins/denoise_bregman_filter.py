@@ -32,6 +32,12 @@ from savu.plugins.cpu_plugin import CpuPlugin
 
 class DenoiseBregmanFilter(Filter, CpuPlugin):
     """
+    Split Bregman method for solving the denoising Total Variation ROF model.
+    
+    :param weight: Denoising factor. Default: 2.
+    :param max_iterations: Total number of iterations. Default: 100.
+    :param error_threshold: Convergence threshold. Default: 0.001.
+    :param isotropic: Isotropic or Anisotropic filtering. Default: False.
     """
 
     def __init__(self):

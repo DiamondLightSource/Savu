@@ -24,6 +24,7 @@
 import sys
 import os
 import logging
+import re
 
 import numpy as np
 
@@ -58,13 +59,27 @@ def load_plugin(plugin_name):
 
 
 def module2class(module_name):
-    """Converts a module name to a class name
+    """
+    Converts a module name to a class name
 
     :param module_name: The lowercase_module_name of the module
     :type module_name: str
     :returns:  the module name in CamelCase
     """
     return ''.join(x.capitalize() for x in module_name.split('_'))
+
+
+def find_args(dclass):
+    """
+    Finds the parameters list from the docstring
+    """
+    if not dclass.__doc__:
+        return []
+    lines = dclass.__doc__.split('\n')
+    param_regexp = re.compile('^:param (?P<param>\w+):\s?(?P<doc>\w.*[^ ])\s?Default:\s?(?P<default>.*[^ ])$')
+    args = [param_regexp.findall(line.strip(' .')) for line in lines]
+    args = [arg[0] for arg in args if len(arg)]
+    return [{'dtype': type(value), 'name': a[0], 'desc': a[1], 'default': value} for a in args for value in [eval(a[2])]]
 
 
 def load_raw_data(filename):

@@ -36,6 +36,11 @@ class Test(unittest.TestCase):
         self.assertRaises(NotImplementedError, plugin.process,
                           "test", "test", 1, 1)
         self.assertRaises(NotImplementedError, plugin.required_data_type)
+    
+    def testfind_args(self):
+        plugin = pu.load_plugin("savu.plugins.denoise_bregman_filter")
+        params = pu.find_args(plugin)
+        self.assertEqual(len(params), 4)
 
 if __name__ == "__main__":
     unittest.main()
