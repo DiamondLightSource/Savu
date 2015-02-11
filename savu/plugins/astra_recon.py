@@ -33,7 +33,7 @@ class AstraRecon(BaseRecon, CpuPlugin):
     A Plugin to run the astra reconstruction
     
     :param number_of_iterations: Number of Iterations if an iterative method is used . Default: 20.
-    :param reconstruction_type: Reconstruction type (SIRT|SIRT). Default: SIRT.
+    :param reconstruction_type: Reconstruction type (SIRT|SIRT). Default: 'SIRT'.
     """
 
     def __init__(self):
