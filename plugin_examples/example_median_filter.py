@@ -25,6 +25,8 @@ import logging
 from savu.plugins.filter import Filter
 from savu.plugins.cpu_plugin import CpuPlugin
 
+from savu.data import structures as st
+
 import scipy.signal.signaltools as sig
 
 
@@ -78,8 +80,8 @@ class ExampleMedianFilter(Filter, CpuPlugin):
         does not need to consider this.
         """
         logging.debug("Getting the filter width of Example Median Filter")
-        width = (self.parameters['kernel_size'][0] - 1) / 2
-        return width
+        padding = (self.parameters['kernel_size'][0] - 1) / 2
+        return {st.CD_PROJECTION:padding}
 
     def filter_frame(self, data):
         """
@@ -88,11 +90,9 @@ class ExampleMedianFilter(Filter, CpuPlugin):
         will contain the 3D block of data to process, and we need to return the
         data for the single frame in the middle of this. In this case we use
         the scipy median filter with the 'kernmel_size' parameter, and return
-        the middle slice (the result of the filtering process for this slice).
+        the same size data as you had originally.
         """
         logging.debug("Data frame recieved for processing of shape %s",
                       str(data.shape))
         result = sig.medfilt(data, self.parameters['kernel_size'])
-        padding = self.get_filter_padding()
-        result = result[padding:result.shape[0]-padding, :, :]
         return result
