@@ -33,17 +33,14 @@ import scipy.signal.signaltools as sig
 class MedianFilter(Filter, CpuPlugin):
     """
     A plugin to filter each frame with a 3x3 median filter
+    
+    :param kernel_size: Kernel size for the filter. Default: (1, 3, 3).
     """
 
     def __init__(self):
         logging.debug("Starting Median Filter")
         super(MedianFilter,
               self).__init__("MedianFilter")
-
-    def populate_default_parameters(self):
-        super(MedianFilter,
-              self).populate_default_parameters()
-        self.parameters['kernel_size'] = (1, 3, 3)
 
     def get_filter_padding(self):
         padding = (self.parameters['kernel_size'][0]-1)/2

@@ -32,13 +32,12 @@ import numpy as np
 class BaseRecon(Plugin):
     """
     A Plugin to apply a simple reconstruction with no dependancies
+    
+    :param center_of_rotation: Center of rotation to use for the reconstruction). Default: 86.
     """
 
     def __init__(self, name='BaseRecon'):
         super(BaseRecon, self).__init__(name)
-
-    def populate_default_parameters(self):
-        self.parameters['center_of_rotation'] = 86
 
     def reconstruct(self, sinogram, centre_of_rotation, angles, shape, center):
         """

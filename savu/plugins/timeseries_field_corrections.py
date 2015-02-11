@@ -38,9 +38,6 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         super(TimeseriesFieldCorrections,
               self).__init__("TimeseriesFieldCorrections")
 
-    def populate_default_parameters(self):
-        pass
-
     def process(self, data, output, processes, process):
         """
         """

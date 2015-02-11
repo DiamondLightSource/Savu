@@ -31,15 +31,13 @@ import astra
 class AstraRecon(BaseRecon, CpuPlugin):
     """
     A Plugin to run the astra reconstruction
+    
+    :param number_of_iterations: Number of Iterations if an iterative method is used . Default: 20.
+    :param reconstruction_type: Reconstruction type (SIRT|SIRT). Default: SIRT.
     """
 
     def __init__(self):
         super(AstraRecon, self).__init__("AstraRecon")
-
-    def populate_default_parameters(self):
-        super(AstraRecon, self).populate_default_parameters()
-        self.parameters['number_of_itterations'] = 20
-        self.parameters['reconstruction_type'] = 'SIRT'
 
     def reconstruct(self, sinogram, centre_of_rotation, angles, shape, center):
 
@@ -86,7 +84,7 @@ class AstraRecon(BaseRecon, CpuPlugin):
         # Create the algorithm object from the configuration structure
         alg_id = astra.algorithm.create(cfg)
         # Run 20 iterations of the algorithm
-        itterations = int(self.parameters['number_of_itterations'])
+        itterations = int(self.parameters['number_of_iterations'])
         # This will have a runtime in the order of 10 seconds.
         astra.algorithm.run(alg_id, itterations)
         # Get the result

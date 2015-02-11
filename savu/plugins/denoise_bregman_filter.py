@@ -13,18 +13,16 @@
 # limitations under the License.
 
 """
-.. module:: denoise using the bregman method
+.. module:: denoise using the split bregman method
    :platform: Unix
-   :synopsis: A plugin to filter each frame with a 3x3 median filter
+   :synopsis: A plugin to denoise 2D slices of data by using the Split Bregman
+              to solve the Total Variation ROF model
 
-.. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
-
+.. moduleauthor:: Imanol Luengo <scientificsoftware@diamond.ac.uk>
 """
 import logging
 
-import numpy as np
-
-import skimage.filter
+from skimage.restoration import denoise_tv_bregman
 
 from savu.plugins.filter import Filter
 from savu.plugins.cpu_plugin import CpuPlugin
@@ -34,7 +32,7 @@ class DenoiseBregmanFilter(Filter, CpuPlugin):
     """
     Split Bregman method for solving the denoising Total Variation ROF model.
     
-    :param weight: Denoising factor. Default: 2.
+    :param weight: Denoising factor. Default: 2.0
     :param max_iterations: Total number of iterations. Default: 100.
     :param error_threshold: Convergence threshold. Default: 0.001.
     :param isotropic: Isotropic or Anisotropic filtering. Default: False.
@@ -42,27 +40,19 @@ class DenoiseBregmanFilter(Filter, CpuPlugin):
 
     def __init__(self):
         logging.debug("Starting Denoise Bregman Filter")
-        super(DenoiseBregmanFilter,
-              self).__init__("DenoiseBregmanFilter")
-
-    def populate_default_parameters(self):
-        super(DenoiseBregmanFilter,
-              self).populate_default_parameters()
-        self.parameters['weight'] = 2
-        self.parameters['max_iterations'] = 100
-        self.parameters['error_threshold'] = 0.001
-        self.parameters['isotropic'] = False
+        super(DenoiseBregmanFilter, self).__init__("DenoiseBregmanFilter")
 
     def get_filter_padding(self):
         return {}
+    
+    def get_max_frames(self):
+        return 1
 
     def filter_frame(self, data):
         logging.debug("Running Denoise")
-        result = []
-        for i in range(data.shape[0]):
-            result.append(skimage.filter.denoise_tv_bregman(data[i, :, :],
-                                                            self.parameters['weight'],
-                                                            max_iter=self.parameters['max_iterations'],
-                                                            eps=self.parameters['error_threshold'],
-                                                            isotropic=self.parameters['isotropic']))
-        return np.transpose(np.dstack(result), (2, 0, 1))
+        weight = self.parameters['weight']
+        max_iter = self.parameters['max_iterations']
+        eps = self.parameters['error_threshold']
+        isotropic = self.parameters['isotropic']
+        return denoise_tv_bregman(data[0, ...], weight, max_iter=max_iter,
+                                  eps=eps, isotropic=isotropic)

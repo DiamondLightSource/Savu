@@ -22,7 +22,9 @@
 """
 
 import logging
+import inspect
 
+from savu.plugins import utils as pu
 
 class Plugin(object):
     """
@@ -40,7 +42,11 @@ class Plugin(object):
         values.  it is used for checking to see if new parameter values are
         appropriate
         """
-        return
+        for clazz in inspect.getmro(self.__class__):
+            if clazz != object:
+                full_description = pu.find_args(clazz);
+                for item in full_description:
+                    self.parameters[item['name']] = item['default']
 
     def set_parameters(self, parameters):
         """
