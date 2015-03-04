@@ -41,6 +41,10 @@ class Plugin(object):
         This method should populate all the required parameters with default
         values.  it is used for checking to see if new parameter values are
         appropriate
+        
+        It makes use of the classes including parameter information in the 
+        class docstring such as this 
+        :param error_threshold: Convergence threshold. Default: 0.001.
         """
         for clazz in inspect.getmro(self.__class__):
             if clazz != object:
