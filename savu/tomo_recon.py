@@ -25,6 +25,7 @@ import optparse
 import sys
 import os
 
+from savu.log_handler.handler import SQLiteHandler
 from savu.core import process
 
 from savu.data.process_data import ProcessList
@@ -45,7 +46,6 @@ if __name__ == '__main__':
                       type='string')
     (options, args) = parser.parse_args()
 
-    logging.info("Starting tomo_recon process")
 
     # Check basic items for completeness
     if len(args) is not 3:
@@ -67,6 +67,16 @@ if __name__ == '__main__':
         print("Output Directory '%s' does not exist" % args[2])
         print("Exiting with error code 4 - Output Directory missing")
         sys.exit(4)
+
+    #logging.basicConfig(level=logging.DEBUG)
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+    sqlh = SQLiteHandler(db=os.path.join(args[2],'log.db'))
+    logger.addHandler(sqlh)
+
+    logging.info("Starting tomo_recon process")
+
+    
     process_filename = options.process_filename
 
     process_list = ProcessList()
