@@ -26,3 +26,7 @@ Logo credit ::
 
 .. [1] http://www.reptilesmagazine.com/Breeding-Snakes/Breeding-Savu-Python/
 .. [2] http://blogs.thatpetplace.com/thatreptileblog/2014/06/19/savu-python-care-keeping-one-worlds-smallest-pythons/
+
+.. image:: https://badges.gitter.im/Join%20Chat.svg
+   :alt: Join the chat at https://gitter.im/DiamondLightSource/Savu
+   :target: https://gitter.im/DiamondLightSource/Savu?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
