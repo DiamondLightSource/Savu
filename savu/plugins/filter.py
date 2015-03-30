@@ -21,12 +21,10 @@
 
 """
 from savu.data.structures import Data
-from savu.data.structures import RawTimeseriesData, ProjectionData, VolumeData
 from savu.plugins.plugin import Plugin
 
 from savu.data import structures
 from savu.data import utils as du 
-import numpy as np
 import logging
 
 
