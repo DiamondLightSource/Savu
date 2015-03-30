@@ -32,6 +32,10 @@ from savu.data.process_data import ProcessList
 
 import savu.plugins.utils as pu
 
+MACHINE_NUMBER_STRING = '0'
+MACHINE_RANK_NAME = 'cpu1'
+
+
 if __name__ == '__main__':
 
     usage = "%prog [options] input_file output_directory"
@@ -44,6 +48,10 @@ if __name__ == '__main__':
                       help="The filename of the process file",
                       default="/home/ssg37927/Savu/test_data/process01.nxs",
                       type='string')
+    parser.add_option("-l", "--log2db", dest="log2db",
+                      help="Set logging to go to a database",
+                      default=False,
+                      action="store_true")
     (options, args) = parser.parse_args()
 
 
@@ -68,11 +76,17 @@ if __name__ == '__main__':
         print("Exiting with error code 4 - Output Directory missing")
         sys.exit(4)
 
-    #logging.basicConfig(level=logging.DEBUG)
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
-    sqlh = SQLiteHandler(db=os.path.join(args[2],'log.db'))
-    logger.addHandler(sqlh)
+    if options.log2db:
+        sqlh = SQLiteHandler(db=os.path.join(args[2],'log.db'))
+        logger.addHandler(sqlh)
+    else :
+        fh = logging.FileHandler(os.path.join(args[2],'log.txt'), mode='w')
+        fh.setFormatter(logging.Formatter('L %(relativeCreated)12d M' +
+                MACHINE_NUMBER_STRING + ' ' + MACHINE_RANK_NAME +
+                ' %(levelname)-6s %(message)s'))
+        logger.addHandler(fh)
 
     logging.info("Starting tomo_recon process")
 
