@@ -7,6 +7,7 @@ before_install:
   - sudo apt-get install liblapack-dev
   - sudo apt-get install gfortran
   - sudo apt-get install libhdf5-serial-dev
+  - sudo apt-get install libcr-dev mpich2 mpich2-doc
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install: travis_wait pip install -r requirements.txt --use-mirrors
 # command to run tests, e.g. python setup.py test
