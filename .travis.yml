@@ -11,11 +11,11 @@ before_install:
 
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install: 
-  - travis_wait pip install pytest --use-mirrors
-  - travis_wait pip install numpy --use-mirrors
-  - travis_wait pip install scipy --use-mirrors
-  - travis_wait pip install h5py --use-mirrors
-  - travis_wait pip install mpi4py --use-mirrors
+  - travis_wait pip install pytest --use-mirrors -q
+  - travis_wait pip install numpy --use-mirrors -q
+  - travis_wait pip install scipy --use-mirrors -q
+  - travis_wait pip install h5py --use-mirrors -q
+  - travis_wait pip install mpi4py --use-mirrors -q
 
 # command to run tests, e.g. python setup.py test
 script:  py.test savu/test
