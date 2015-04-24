@@ -1,5 +1,0 @@
-pytest
-numpy
-scipy
-h5py
-mpi4py
