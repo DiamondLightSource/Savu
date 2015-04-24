@@ -16,6 +16,7 @@ install:
   - travis_wait pip install scipy --use-mirrors -q
   - travis_wait pip install h5py --use-mirrors -q
   - travis_wait pip install mpi4py --use-mirrors -q
+  - travis_wait pip install scikit-image --use-mirrors -q
 
 # command to run tests, e.g. python setup.py test
 script:  py.test savu/test
