@@ -48,7 +48,7 @@ class PaganinFilter(Filter, CpuPlugin):
             distance = self.parameters['Distance']
             energy = self.parameters['Energy']*keV
             resolution = self.parameters['Resolution']*micron
-            wavelength = (1240.0/energy)*np.power(10.0, -9)
+            wavelength = (1240.0/energy)*10.0**(-9)
             ratio = self.parameters['Ratio']
             # Define the paganin filter
             dpx = 1.0/(width*resolution)
@@ -63,22 +63,20 @@ class PaganinFilter(Filter, CpuPlugin):
             filter1 = 1.0+ratio*pd
             self.filtercomplex = filter1+filter1*1j
 
-    def _paganin(self, data):
+    def _paganin(self, data, axes):
+        data = np.nan_to_num(data)  # Noted performance
+        data[data == 0] = 1.0
         pci1 = np.fft.fft2(np.float32(data))
         pci2 = np.fft.fftshift(pci1)/self.filtercomplex
         fpci = np.abs(np.fft.ifft2(pci2))
-        result = -0.5*self.parameters['Ratio']*np.log(fpci+0.1)
+        result = -0.5*self.parameters['Ratio']*np.log(fpci+1.0)
         return result
 
     def filter_frame(self, data):
         logging.debug("Getting the filter frame of Paganin Filter")
         (depth, height, width) = data.shape
-        result = np.zeros((depth, height, width), dtype=np.float32)
         self._setup_paganin(width, height)
-        for i in range(depth):
-            sanitised = np.nan_to_num(data[i])
-            sanitised[sanitised == 0] = 1.0
-            result[i] = self._paganin(sanitised)
+        result = np.apply_over_axes(self._paganin, data, 0)
         return result[result.shape[0]/2, :, :]
 
     def required_data_type(self):
