@@ -4,8 +4,8 @@ from savu.data.process_data import CitationInfomration
 from savu.plugins.cpu_plugin import CpuPlugin
 
 import skimage.transform as transform
-
 import numpy as np
+from scipy import ndimage
 
 
 class ExampleFilterBackProjection(BaseRecon, CpuPlugin):
@@ -33,18 +33,26 @@ class ExampleFilterBackProjection(BaseRecon, CpuPlugin):
         super(ExampleFilterBackProjection,
               self).__init__("ExampleFilterBackProjection")
 
+    def _shift(self, sinogram, centre_of_rotation):
+        centre_of_rotation_shift = (sinogram.shape[0]/2) - centre_of_rotation
+        return ndimage.interpolation.shift(sinogram,
+                                           centre_of_rotation_shift)
+
     def reconstruct(self, sinogram, centre_of_rotation,
-                            angles, shape, center):
+                    angles, shape, center):
         print sinogram.shape
-        result = np.zeros(shape)
+        sinogram = np.swapaxes(sinogram, 0, 1)
+        sinogram = self._shift(sinogram, centre_of_rotation)
         sino = np.nan_to_num(sinogram)
         theta = np.linspace(0, 180, sinogram.shape[1])
         result = \
             transform.iradon(sino, theta=theta,
-                             output_size=(sinogram.shape[1]),#self.parameters['output_size'],
-                             filter='ramp',#self.parameters['filter'],
-                             interpolation='linear',#self.parameters['linear'],
-                             circle=False)#self.parameters[False])
+                             output_size=(sinogram.shape[0]),
+                             # self.parameters['output_size'],
+                             filter='ramp',  # self.parameters['filter'],
+                             interpolation='linear',
+                             # self.parameters['linear'],
+                             circle=False)  # self.parameters[False])
         return result
 
     def get_citation_inforamtion(self):
