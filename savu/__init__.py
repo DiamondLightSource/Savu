@@ -26,3 +26,29 @@ import savu
 from . import core
 from . import data
 from . import plugins
+
+
+def run_tests():
+    import unittest
+    import os
+    from . import test
+
+    path = os.path.split(test.__file__)[0]
+    testmodules = ['savu.test.%s' % (os.path.splitext(p)[0]) for p in os.listdir(path)]
+    suite = unittest.TestSuite()
+
+    for t in testmodules:
+        try:
+            mod = __import__(t, globals(), locals(), ['suite'])
+            suitefn = getattr(mod, 'suite')
+            suite.addTest(suitefn())
+        except (ImportError, AttributeError):
+            # else, just load all the test cases from the module.
+            suite.addTest(unittest.defaultTestLoader.loadTestsFromName(t))
+
+    print "Tests will run shortly, and may take some time to complete"
+    print "The tests may raise errors, please don't worry about these as " + \
+        "they may be raised deliberatly"
+    print "The key information is in the final test results"
+
+    unittest.TextTestRunner().run(suite)
