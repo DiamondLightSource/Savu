@@ -13,6 +13,7 @@ Be aware though, the following is also true "Savu Pythons are typically calm in 
 To use ::
 
     >>> import savu
+    >>> savu.run_tests()
 
 
 Logo credit ::
