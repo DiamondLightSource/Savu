@@ -34,4 +34,4 @@ echo "Processes running are : ${processes}"
 mpirun -np ${processes} \
        -x LD_LIBRARY_PATH \
        --hostfile ${UNIQHOSTS} \
-       python /home/ssg37927/Savu/savu/mpi_test/dls/framework_file_test_runner.py $@
+       python /home/ssg37927/savu/Savu/savu/mpi_test/dls/framework_file_test_runner.py $@

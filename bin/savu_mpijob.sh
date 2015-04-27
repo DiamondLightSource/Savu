@@ -4,7 +4,7 @@ module load python/ana
 source activate mpi2
 module load openmpi/1.6.5
 
-export PYTHONPATH=/home/ssg37927/Savu:$PYTHONPATH
+export PYTHONPATH=/home/ssg37927/savu/Savu:$PYTHONPATH
 
 UNIQHOSTS=${TMPDIR}/machines-u
 awk '{print $1 }' ${PE_HOSTFILE} | uniq > ${UNIQHOSTS}
@@ -20,4 +20,4 @@ echo "Processes running are : ${processes}"
 mpirun -np ${processes} \
        -x LD_LIBRARY_PATH \
        --hostfile ${UNIQHOSTS} \
-       python /home/ssg37927/Savu/savu/tomo_recon_mpi.py $@
+       python /home/ssg37927/savu/Savu/savu/tomo_recon_mpi.py $@
