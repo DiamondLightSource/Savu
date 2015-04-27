@@ -76,10 +76,13 @@ def find_args(dclass):
     if not dclass.__doc__:
         return []
     lines = dclass.__doc__.split('\n')
-    param_regexp = re.compile('^:param (?P<param>\w+):\s?(?P<doc>\w.*[^ ])\s?Default:\s?(?P<default>.*[^ ])$')
+    param_regexp = re.compile('^:param (?P<param>\w+):\s?(?P<doc>\w.*[^ ])\s' +
+                              '?Default:\s?(?P<default>.*[^ ])$')
     args = [param_regexp.findall(line.strip(' .')) for line in lines]
     args = [arg[0] for arg in args if len(arg)]
-    return [{'dtype': type(value), 'name': a[0], 'desc': a[1], 'default': value} for a in args for value in [eval(a[2])]]
+    return [{'dtype': type(value),
+             'name': a[0], 'desc': a[1],
+             'default': value} for a in args for value in [eval(a[2])]]
 
 
 def load_raw_data(filename):
@@ -88,19 +91,19 @@ def load_raw_data(filename):
     return data
 
 
-def get_raw_data(input_data, file_name, group_name, mpi=False):
+def get_raw_data(input_data, file_name, group_name, mpi=False, new_shape=None):
     """
     Gets a file backed, Raw data object
 
     :returns:  a RawTimeseriesData Object containing the example data.
     """
     data = RawTimeseriesData()
-    data.create_backing_h5(file_name, group_name, input_data, mpi)
+    data.create_backing_h5(file_name, group_name, input_data, mpi, new_shape)
     return data
 
 
 def get_projection_data(input_data, file_name, group_name,
-                        mpi=False):
+                        mpi=False, new_shape=None):
     """
     Gets a file backed, Raw data object
 
@@ -111,22 +114,26 @@ def get_projection_data(input_data, file_name, group_name,
     return data
 
 
-def get_volume_data(input_data, file_name, group_name, mpi=False):
+def get_volume_data(input_data, file_name, group_name, mpi=False,
+                    new_shape=None):
     """
     Gets a file backed, Raw data object
 
     :returns:  a RawTimeseriesData Object containing the example data.
     """
     data = VolumeData()
-    data_shape = (input_data.data.shape[2], input_data.data.shape[1],
-                  input_data.data.shape[2])
+    data_shape = new_shape
+    if data_shape is None:
+        data_shape = (input_data.data.shape[2], input_data.data.shape[1],
+                      input_data.data.shape[2])
     data_type = np.double
     data.create_backing_h5(file_name, group_name, data_shape,
                            data_type, mpi)
     return data
 
 
-def create_output_data(plugin, input_data, file_name, group_name, mpi=False):
+def create_output_data(plugin, input_data, file_name, group_name, mpi=False,
+                       new_shape=None):
     """Creates an output file of the appopriate type for a specified plugin
 
     :param plugin: The plugin for which the data is being created.
@@ -145,25 +152,25 @@ def create_output_data(plugin, input_data, file_name, group_name, mpi=False):
         return input_data
     if plugin.output_data_type() == RawTimeseriesData:
         return get_raw_data(input_data, file_name,
-                            group_name, mpi)
+                            group_name, mpi, new_shape)
 
     elif plugin.output_data_type() == ProjectionData:
         return get_projection_data(input_data, file_name,
-                                   group_name, mpi)
+                                   group_name, mpi, new_shape)
 
     elif plugin.output_data_type() == VolumeData:
         return get_volume_data(input_data, file_name,
-                               group_name, mpi)
+                               group_name, mpi, new_shape)
 
     elif plugin.output_data_type() == Data:
         if isinstance(input_data, RawTimeseriesData):
             return get_raw_data(input_data, file_name,
-                                group_name, mpi)
+                                group_name, mpi, new_shape)
 
         elif isinstance(input_data, ProjectionData):
             return get_projection_data(input_data, file_name,
-                                       group_name, mpi)
+                                       group_name, mpi, new_shape)
 
         elif isinstance(input_data, VolumeData):
             return get_volume_data(input_data, file_name,
-                                   group_name, mpi)
+                                   group_name, mpi, new_shape)

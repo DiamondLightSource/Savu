@@ -136,7 +136,7 @@ class Data(object):
             dirs_to_remove = list(self.core_directions[frame_type])
             dirs_to_remove.sort(reverse=True)
             for direction in dirs_to_remove:
-                it.remove_axis(direction);
+                it.remove_axis(direction)
             mapping_list = range(len(it.multi_index))
             dirs_to_remove.sort()
             for direction in dirs_to_remove:
@@ -149,7 +149,6 @@ class Data(object):
                 it.iternext()
             return slice_list
         return None
-
 
 
 class RawTimeseriesData(Data):
@@ -193,7 +192,8 @@ class RawTimeseriesData(Data):
         self.core_directions[CD_SINOGRAM] = (0, 2)
         self.core_directions[CD_ROTATION_AXIS] = (0, )
 
-    def create_backing_h5(self, path, group_name, data, mpi=False):
+    def create_backing_h5(self, path, group_name, data, mpi=False,
+                          new_shape=None):
         """
         Create a h5 backend for this RawTimeseriesData
 
@@ -225,7 +225,9 @@ class RawTimeseriesData(Data):
         self.core_directions[CD_SINOGRAM] = (0, 2)
         self.core_directions[CD_ROTATION_AXIS] = 0
 
-        data_shape = data.data.shape
+        data_shape = new_shape
+        if data_shape is None:
+            data_shape = data.data.shape
         data_type = np.double
         image_key_shape = data.image_key.shape
         image_key_type = data.image_key.dtype
@@ -322,7 +324,8 @@ class ProjectionData(Data):
         self.rotation_angle = None
         self.center_of_rotation = None
 
-    def create_backing_h5(self, path, group_name, data, mpi=False):
+    def create_backing_h5(self, path, group_name, data, mpi=False,
+                          new_shape=None):
         """
         Create a h5 backend for this ProjectionData
 
@@ -347,7 +350,7 @@ class ProjectionData(Data):
         logging.debug("Creating file '%s' '%s'", self.base_path,
                       self.backing_file.filename)
 
-        data_shape = None
+        data_shape = new_shape
         data_type = None
         rotation_angle_shape = None
         rotation_angle_type = None
@@ -355,15 +358,17 @@ class ProjectionData(Data):
         cor_type = np.double
 
         if data.__class__ == RawTimeseriesData:
-            data_shape = (data.get_number_of_projections(),) +\
-                data.get_projection_shape()
+            if data_shape is None:
+                data_shape = (data.get_number_of_projections(),) +\
+                    data.get_projection_shape()
             data_type = np.double
             rotation_angle_shape = (data.get_number_of_projections(),)
             rotation_angle_type = data.rotation_angle.dtype
             cor_shape = (data.data.shape[1],)
 
         elif data.__class__ == ProjectionData:
-            data_shape = data.data.shape
+            if data_shape is None:
+                data_shape = data.data.shape
             data_type = np.double
             rotation_angle_shape = data.rotation_angle.shape
             rotation_angle_type = data.rotation_angle.dtype
