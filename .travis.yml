@@ -20,4 +20,8 @@ install:
   - travis_wait pip install coveralls --use-mirrors -q
 
 # command to run tests, e.g. python setup.py test
-script:  py.test savu/test
+script:  
+  py.test --cov coveralls --cov-report savu/test
+
+after_success:
+  coveralls
