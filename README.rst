@@ -37,3 +37,6 @@ Logo credit ::
 .. image:: https://readthedocs.org/projects/savu/badge/?version=latest
    :target: https://readthedocs.org/projects/savu/?badge=latest
    :alt: Documentation Status
+
+.. image:: https://travis-ci.org/DiamondLightSource/Savu.svg?branch=master
+    :target: https://travis-ci.org/DiamondLightSource/Savu
