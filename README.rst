@@ -33,3 +33,7 @@ Logo credit ::
 .. image:: https://badges.gitter.im/Join%20Chat.svg
    :alt: Join the chat at https://gitter.im/DiamondLightSource/Savu
    :target: https://gitter.im/DiamondLightSource/Savu?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+
+.. image:: https://readthedocs.org/projects/savu/badge/?version=latest
+:target: https://readthedocs.org/projects/savu/?badge=latest
+:alt: Documentation Status
