@@ -44,5 +44,6 @@ Logo credit ::
 .. image:: https://zenodo.org/badge/doi/10.5281/zenodo.16507.svg
     :target: http://dx.doi.org/10.5281/zenodo.16507
 
-.. image:: https://coveralls.io/repos/DiamondLightSource/Savu/badge.svg
-  :target: https://coveralls.io/r/DiamondLightSource/Savu
+.. image:: https://coveralls.io/repos/DiamondLightSource/Savu/badge.svg?branch=master
+    :target: https://coveralls.io/r/DiamondLightSource/Savu?branch=master
+
