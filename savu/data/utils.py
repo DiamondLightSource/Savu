@@ -210,7 +210,7 @@ def get_unpadded_slice_data(input_slice_list, padding_dict, data, padded_dataset
         slice_list_3.append(sl)
 
     result = padded_dataset[tuple(slice_list_3)]
-    return result.squeeze()
+    return result#.squeeze()
 
 def get_orthogonal_slice(full_slice, core_direction):
     dirs = range(len(full_slice))
