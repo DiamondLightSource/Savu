@@ -25,4 +25,4 @@ script:
   - py.test savu/test -v --cov coveralls --cov-report term-missing
 
 after_success:
-  - coveralls
+  - coveralls debug
