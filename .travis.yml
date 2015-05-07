@@ -12,6 +12,7 @@ before_install:
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install: 
   - travis_wait pip install pytest --use-mirrors -q
+  - travis_wait pip install pytest-cov --use-mirrors -q
   - travis_wait pip install numpy --use-mirrors -q
   - travis_wait pip install scipy --use-mirrors -q
   - travis_wait pip install h5py --use-mirrors -q
