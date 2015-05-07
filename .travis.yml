@@ -22,7 +22,7 @@ install:
 
 # command to run tests, e.g. python setup.py test
 script:  
-  py.test --cov coveralls --cov-report savu/test
+  - py.test savu/test --cov coveralls --cov-report term-missing
 
 after_success:
-  coveralls
+  - coveralls
