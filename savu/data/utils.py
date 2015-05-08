@@ -22,13 +22,14 @@
 
 import numpy as np
 
+
 def get_slice_list(data, frame_type):
     if frame_type in data.core_directions.keys():
         it = np.nditer(data.data, flags=['multi_index'])
         dirs_to_remove = list(data.core_directions[frame_type])
         dirs_to_remove.sort(reverse=True)
         for direction in dirs_to_remove:
-            it.remove_axis(direction);
+            it.remove_axis(direction)
         mapping_list = range(len(it.multi_index))
         dirs_to_remove.sort()
         for direction in dirs_to_remove:
@@ -42,6 +43,7 @@ def get_slice_list(data, frame_type):
         return slice_list
     return None
 
+
 def calc_step(slice_a, slice_b):
     result = []
     for i in range(len(slice_a)):
@@ -50,6 +52,7 @@ def calc_step(slice_a, slice_b):
         else:
             result.append(slice_b[i] - slice_a[i])
     return result
+
 
 def group_slice_list(slice_list, max_frames):
     banked = []
@@ -62,26 +65,26 @@ def group_slice_list(slice_list, max_frames):
         elif step == -1:
             new_step = calc_step(batch[-1], sl)
             # check stepping in 1 direction
-            if (np.array(new_step)>0).sum() > 1:
+            if (np.array(new_step) > 0).sum() > 1:
                 # we are stepping in multiple directions, end the batch
                 banked.append((step, batch))
                 batch = []
                 batch.append(sl)
                 step = -1
-            else :
+            else:
                 batch.append(sl)
                 step = new_step
-        else :
+        else:
             new_step = calc_step(batch[-1], sl)
-            if new_step == step :
+            if new_step == step:
                 batch.append(sl)
-            else :
+            else:
                 banked.append((step, batch))
                 batch = []
                 batch.append(sl)
                 step = -1
     banked.append((step, batch))
-    
+
     # now combine the groups into single slices
     grouped = []
     for step, group in banked:
@@ -98,15 +101,18 @@ def group_slice_list(slice_list, max_frames):
 
 def get_grouped_slice_list(data, frame_type, max_frames):
     sl = get_slice_list(data, frame_type)
-    if sl == None:
-        raise Exception("data type %s does not support slicing in the %s direction" % (type(data), frame_type))
+    if sl is None:
+        raise Exception("data type %s does not support slicing in the "
+                        "%s direction" % (type(data), frame_type))
     gsl = group_slice_list(sl, max_frames)
     return gsl
+
 
 def get_slice_list_per_process(slice_list, process, processes):
     frame_index = np.arange(len(slice_list))
     frames = np.array_split(frame_index, processes)[process]
     return slice_list[frames[0]:frames[-1]+1]
+
 
 def calculate_slice_padding(in_slice, pad_ammount, data_stop):
     sl = in_slice
@@ -118,19 +124,19 @@ def calculate_slice_padding(in_slice, pad_ammount, data_stop):
     minval = None
     maxval = None
 
-    if sl.start != None :
+    if sl.start is not None:
         minval = sl.start-pad_ammount
-    if sl.stop != None :
+    if sl.stop is not None:
         maxval = sl.stop+pad_ammount
 
     minpad = 0
     maxpad = 0
-    if minval == None:
+    if minval is None:
         minpad = pad_ammount
     elif minval < 0:
         minpad = 0 - minval
         minval = 0
-    if maxval == None:
+    if maxval is None:
         maxpad = pad_ammount
     if maxval > data_stop:
         maxpad = (maxval-data_stop) - 1
@@ -140,6 +146,7 @@ def calculate_slice_padding(in_slice, pad_ammount, data_stop):
 
     return (out_slice, (minpad, maxpad))
 
+
 def get_pad_data(slice_tup, pad_tup, data):
     slice_list = []
     pad_list = []
@@ -147,10 +154,10 @@ def get_pad_data(slice_tup, pad_tup, data):
         if type(slice_tup[i]) == slice:
             slice_list.append(slice_tup[i])
             pad_list.append(pad_tup[i])
-        else :
+        else:
             if pad_tup[i][0] == 0 and pad_tup[i][0] == 0:
                 slice_list.append(slice_tup[i])
-            else :
+            else:
                 slice_list.append(slice(slice_tup[i], slice_tup[i]+1, 1))
                 pad_list.append(pad_tup[i])
 
@@ -163,39 +170,46 @@ def get_padded_slice_data(input_slice_list, padding_dict, data):
     slice_list = list(input_slice_list)
     pad_list = []
     for i in range(len(slice_list)):
-        pad_list.append((0,0))
-    
+        pad_list.append((0, 0))
+
     for key in padding_dict.keys():
         if key in data.core_directions.keys():
-            for direction in data.core_directions[key]: 
-                slice_list[direction], pad_list[direction] = calculate_slice_padding(slice_list[direction], padding_dict[key], data.data.shape[direction])
+            for direction in data.core_directions[key]:
+                slice_list[direction], pad_list[direction] = \
+                    calculate_slice_padding(slice_list[direction],
+                                            padding_dict[key],
+                                            data.data.shape[direction])
 
-    return get_pad_data(tuple(slice_list), tuple(pad_list), data.data) 
+    return get_pad_data(tuple(slice_list), tuple(pad_list), data.data)
 
 
-def get_unpadded_slice_data(input_slice_list, padding_dict, data, padded_dataset):
+def get_unpadded_slice_data(input_slice_list, padding_dict, data,
+                            padded_dataset):
     slice_list = list(input_slice_list)
     pad_list = []
     expand_list = []
     for i in range(len(slice_list)):
-        pad_list.append((0,0))
+        pad_list.append((0, 0))
         expand_list.append(0)
     for key in padding_dict.keys():
         if key in data.core_directions.keys():
-            for direction in data.core_directions[key]: 
-                slice_list[direction], pad_list[direction] = calculate_slice_padding(slice_list[direction], padding_dict[key], data.data.shape[direction])
+            for direction in data.core_directions[key]:
+                slice_list[direction], pad_list[direction] = \
+                    calculate_slice_padding(slice_list[direction],
+                                            padding_dict[key],
+                                            padded_dataset.shape[direction])
                 expand_list[direction] = padding_dict[key]
-    
+
     slice_list_2 = []
     pad_list_2 = []
     for i in range(len(slice_list)):
         if type(slice_list[i]) == slice:
             slice_list_2.append(slice_list[i])
             pad_list_2.append(pad_list[i])
-        else :
+        else:
             if pad_list[i][0] == 0 and pad_list[i][0] == 0:
                 slice_list_2.append(slice_list[i])
-            else :
+            else:
                 slice_list_2.append(slice(slice_list[i], slice_list[i]+1, 1))
                 pad_list_2.append(pad_list[i])
 
@@ -210,7 +224,8 @@ def get_unpadded_slice_data(input_slice_list, padding_dict, data, padded_dataset
         slice_list_3.append(sl)
 
     result = padded_dataset[tuple(slice_list_3)]
-    return result#.squeeze()
+    return result
+
 
 def get_orthogonal_slice(full_slice, core_direction):
     dirs = range(len(full_slice))

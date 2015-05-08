@@ -104,15 +104,25 @@ class Plugin(object):
         """Gets the output data type which is provided by the plugin
 
         :returns:  the class of the data which will be provided
-
+        
         """
         logging.error("output_data_type needs to be implemented")
         raise NotImplementedError("output_data_type needs to be implemented")
+
+    def get_output_shape(self, input_data):
+        """
+        Gets the output data shape which is provided by the plugin
+        This defaults to the standard size of the data previously generated
+
+        :returns:  the shape of the data which will be output by this plugin
+        
+        """
+        return input_data.get_data_shape()
 
     def get_citation_inforamtion(self):
         """Gets the Citation Information for a plugin
 
         :returns:  A populated savu.data.process_data.CitationInfomration
-
+        
         """
         return None

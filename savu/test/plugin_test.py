@@ -51,7 +51,7 @@ class PluginTest(unittest.TestCase):
         data = tu.get_appropriate_input_data(plugin)
         self.assertGreater(len(data), 0, "Cannot find appropriate test data")
 
-        # generate somewehere for the data to go
+        # generate somewhere for the data to go
         output = tu.get_appropriate_output_data(plugin, data)
         self.assertGreater(len(output), 0,
                            "Cannot create appropriate output data")

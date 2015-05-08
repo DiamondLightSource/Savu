@@ -55,6 +55,7 @@ def load_plugin(plugin_name):
         mod = getattr(mod, comp)
     clazz = getattr(mod, module2class(name.split('.')[-1]))
     instance = clazz()
+    instance.populate_default_parameters()
     return instance
 
 
@@ -110,7 +111,7 @@ def get_projection_data(input_data, file_name, group_name,
     :returns:  a RawTimeseriesData Object containing the example data.
     """
     data = ProjectionData()
-    data.create_backing_h5(file_name, group_name, input_data, mpi)
+    data.create_backing_h5(file_name, group_name, input_data, mpi, new_shape)
     return data
 
 
@@ -128,7 +129,7 @@ def get_volume_data(input_data, file_name, group_name, mpi=False,
                       input_data.data.shape[2])
     data_type = np.double
     data.create_backing_h5(file_name, group_name, data_shape,
-                           data_type, mpi)
+                           data_type, mpi, new_shape)
     return data
 
 

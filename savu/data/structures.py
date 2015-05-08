@@ -150,6 +150,12 @@ class Data(object):
             return slice_list
         return None
 
+    def get_data_shape(self):
+        """
+        Simply returns the shape of the main data array
+        """
+        return self.data.shape
+
 
 class RawTimeseriesData(Data):
     """
@@ -440,14 +446,6 @@ class ProjectionData(Data):
         :returns: integer number of projection frames
         """
         return self.data.shape[0]
-
-    def get_data_shape(self):
-        """
-        Gets the real number projections
-
-        :returns: integer number of projection frames
-        """
-        return self.data.shape
 
 
 class VolumeData(Data):
