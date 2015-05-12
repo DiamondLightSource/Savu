@@ -129,7 +129,7 @@ def get_volume_data(input_data, file_name, group_name, mpi=False,
                       input_data.data.shape[2])
     data_type = np.double
     data.create_backing_h5(file_name, group_name, data_shape,
-                           data_type, mpi, new_shape)
+                           data_type, mpi)
     return data
 
 
