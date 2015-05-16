@@ -28,6 +28,8 @@ import logging
 
 from mpi4py import MPI
 
+from savu.core.utils import logmethod
+
 NX_CLASS = 'NX_class'
 
 # Core Direction Keywords
@@ -87,9 +89,11 @@ class SliceAlwaysAvailableWrapper(SliceAvailableWrapper):
         """
         super(SliceAlwaysAvailableWrapper, self).__init__(None, data)
 
+    @logmethod
     def __getitem__(self, item):
         return self.data[item]
 
+    @logmethod
     def __setitem__(self, item, value):
         self.data[item] = value
 
@@ -116,6 +120,7 @@ class Data(object):
         self.base_path = None
         self.core_directions = {}
 
+    @logmethod
     def complete(self):
         """
         Closes the backing file and completes work
@@ -170,6 +175,7 @@ class RawTimeseriesData(Data):
         self.control = None
         self.center_of_rotation = None
 
+    @logmethod
     def populate_from_nx_tomo(self, path):
         """
         Populate the RawTimeseriesData from an NXTomo defined NeXus file
@@ -198,6 +204,7 @@ class RawTimeseriesData(Data):
         self.core_directions[CD_SINOGRAM] = (0, 2)
         self.core_directions[CD_ROTATION_AXIS] = (0, )
 
+    @logmethod
     def create_backing_h5(self, path, group_name, data, mpi=False,
                           new_shape=None):
         """
@@ -330,6 +337,7 @@ class ProjectionData(Data):
         self.rotation_angle = None
         self.center_of_rotation = None
 
+    @logmethod
     def create_backing_h5(self, path, group_name, data, mpi=False,
                           new_shape=None):
         """
@@ -408,6 +416,7 @@ class ProjectionData(Data):
 
         self.core_directions = data.core_directions
 
+    @logmethod
     def populate_from_h5(self, path):
         """
         Populate the contents of this object from a file
@@ -456,6 +465,7 @@ class VolumeData(Data):
     def __init__(self):
         super(VolumeData, self).__init__()
 
+    @logmethod
     def create_backing_h5(self, path, group_name, data_shape,
                           data_type, mpi=False):
         """

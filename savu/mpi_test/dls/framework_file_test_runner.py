@@ -75,7 +75,7 @@ if __name__ == '__main__':
 
     MPI.COMM_WORLD.barrier()
 
-    logging.info("Starting the test process")
+    logging.info("Starting the test process, true dat")
 
     logging.debug("Rank : %i - Size : %i", RANK, SIZE)
 
