@@ -36,9 +36,9 @@ def logfunction(func):
 def logmethod(func):
     """decorator to add logging information around calls for use with ."""
     def _wrapper(self, *args, **kwds):
-        logging.info("Start::%s:%s" % (func.__module__, func.__name__))
+        logging.info("Start::%s.%s:%s" % (func.__module__, self.__class__.__name__, func.__name__))
         returnval = func(self, *args, **kwds)
-        logging.info("Finish::%s:%s" % (func.__module__, func.__name__))
+        logging.info("Finish::%s.%s:%s" % (func.__module__, self.__class__.__name__, func.__name__))
         return returnval
     return _wrapper
 

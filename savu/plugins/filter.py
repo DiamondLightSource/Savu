@@ -24,7 +24,8 @@ from savu.data.structures import Data
 from savu.plugins.plugin import Plugin
 
 from savu.data import structures
-from savu.data import utils as du 
+from savu.data import utils as du
+from savu.core.utils import logmethod
 import logging
 
 
@@ -87,6 +88,7 @@ class Filter(Plugin):
                       data.__class__)
         raise NotImplementedError("filter_frame needs to be implemented")
 
+    @logmethod
     def process(self, data, output, processes, process):
         """
         """

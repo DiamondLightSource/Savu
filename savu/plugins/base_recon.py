@@ -25,6 +25,7 @@ import logging
 
 from savu.data.structures import ProjectionData, VolumeData
 from savu.plugins.plugin import Plugin
+from savu.core.utils import logmethod
 
 import numpy as np
 
@@ -47,6 +48,7 @@ class BaseRecon(Plugin):
         raise NotImplementedError("reconstruct " +
                                   "needs to be implemented")
 
+    @logmethod
     def process(self, data, output, processes, process):
         """
         """

@@ -35,7 +35,9 @@ def process_file(filename="../../test_data/trimmed_out.log"):
             df = df.set_index('function')
             threadpds[thread] = df
         machinepds[machine] = pandas.concat(threadpds)
-    return pandas.concat(machinepds)
+    result = pandas.concat(machinepds)
+    result.index = result.index.reorder_levels((2, 0, 1))
+    return result.sort_index(0)
 
 df = process_file()
 print df
