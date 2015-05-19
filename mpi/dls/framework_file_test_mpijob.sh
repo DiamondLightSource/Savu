@@ -26,7 +26,7 @@ echo "number of uniq hosts: ${uniqslots}"
 echo "running on these hosts:"
 cat ${UNIQHOSTS}
 
-processes=`bc <<< "$uniqslots*1"`
+processes=`bc <<< "$uniqslots*6"`
 
 echo "Processes running are : ${processes}"
 

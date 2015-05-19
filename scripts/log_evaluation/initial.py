@@ -40,4 +40,6 @@ def process_file(filename="../../test_data/trimmed_out.log"):
     return result.sort_index(0)
 
 df = process_file()
+pandas.set_option('display.height',1000)
+pandas.set_option('display.max_rows',1000)
 print df
