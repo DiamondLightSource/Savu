@@ -4,30 +4,27 @@ Created on 21 May 2015
 @author: ssg37927
 '''
 
-import savu
 import os
-import h5py
+
+from savu.data.process_data import ProcessList
+
 
 class Content(object):
 
     def __init__(self, filename):
-        self.filename = filename
-        if os.path.exists(self.filename):
-            print "Opening file %s" % (self.filename)
-
-
-    def print_attrs(self, name, obj):
-        print name
+        self.process_list = ProcessList()
+        if os.path.exists(filename):
+            print "Opening file %s" % (filename)
+            self.process_list.populate_process_list(filename)
 
     def display(self):
-        f = h5py.File(self.filename)
-        f.visititems(self.print_attrs)
-        f.close()
+        print self.process_list.process_list
 
 def help(content, arg):
     print "  commands available are:"
     print "    help : this help"
     print "    open : opens or creates a new configuration file"
+    print "    disp : display the processes in the list"
     return content
 
 def open(content, arg):
