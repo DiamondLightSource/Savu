@@ -27,10 +27,14 @@ from . import core
 from . import data
 from . import plugins
 
+import os
+import sys
+
+savuPath = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(os.path.join(savuPath + "/../lib"))
 
 def run_tests():
     import unittest
-    import os
     from . import test
 
     path = os.path.split(test.__file__)[0]

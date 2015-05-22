@@ -36,6 +36,7 @@ class BaseRecon(Plugin):
     
     :param center_of_rotation: Center of rotation to use for the reconstruction). Default: 86.
     """
+    count = 0
 
     def __init__(self, name='BaseRecon'):
         super(BaseRecon, self).__init__(name)
@@ -79,6 +80,9 @@ class BaseRecon(Plugin):
                                  (output.data.shape[0]/2,
                                   output.data.shape[2]/2))
             output.data[:, frames[i], :] = reconstruction
+            self.count+=1
+            print self.count
+            
 
     def required_data_type(self):
         """
