@@ -60,7 +60,7 @@ class BaseAstraRecon(BaseRecon):
         width = sinogram.shape[1]
         pad = 50
 
-        sino = np.nan_to_num(sinogram)
+        sino = np.nan_to_num(1./sinogram)
 
         # pad the array so that the centre of rotation is in the middle
         alen = ctr
