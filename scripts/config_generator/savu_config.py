@@ -18,25 +18,28 @@ class Content(object):
             self.process_list.populate_process_list(filename)
 
     def display(self):
-        print self.process_list.process_list
+        print self.process_list.get_string()
 
-def help(content, arg):
+
+def _help(content, arg):
     print "  commands available are:"
     print "    help : this help"
     print "    open : opens or creates a new configuration file"
     print "    disp : display the processes in the list"
     return content
 
-def open(content, arg):
+
+def _open(content, arg):
     return Content(arg)
 
-def disp(content, arg):
+
+def _disp(content, arg):
     content.display()
     return content
 
-commands = {'open': open,
-            'help': help,
-            'disp': disp}
+commands = {'open': _open,
+            'help': _help,
+            'disp': _disp}
 
 if __name__ == '__main__':
     print "Starting Savu Config tool"
