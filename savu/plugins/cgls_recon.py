@@ -30,6 +30,10 @@ import numpy as np
 
 import ccpi
 
+from savu.plugins.utils import register_plugin
+
+
+@register_plugin
 class CglsRecon(BaseRecon, CpuPlugin):
     """
      A Plugin to run the CCPi cgls reconstruction

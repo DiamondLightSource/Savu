@@ -7,6 +7,9 @@ Created on 21 May 2015
 import os
 
 from savu.data.process_data import ProcessList
+from savu.plugins import utils as pu
+import pkgutil
+import savu
 
 
 class Content(object):
@@ -20,29 +23,54 @@ class Content(object):
     def display(self):
         print self.process_list.get_string()
 
+    def save(self, filename):
+        self.process_list.save_list_to_file(filename)
+
 
 def _help(content, arg):
-    print "  commands available are:"
-    print "    help : this help"
-    print "    open : opens or creates a new configuration file"
-    print "    disp : display the processes in the list"
+    """Display the help information"""
+    for key in commands.keys():
+        print "%s : %s" % (key, commands[key].__doc__)
     return content
 
 
 def _open(content, arg):
+    """Opens or creates a new configuration file with the given filename"""
     return Content(arg)
 
 
 def _disp(content, arg):
+    """Displays the process in the current list"""
     content.display()
     return content
 
+
+def _list(content, arg):
+    """List the plugins which have been registered for use"""
+    for key in pu.plugins.keys():
+        print key
+    return content
+
+
+def _save(content, arg):
+    """Save the current list to disk with the filename given"""
+    content.save(arg)
+
 commands = {'open': _open,
             'help': _help,
-            'disp': _disp}
+            'disp': _disp,
+            'list': _list,
+            'save': _save}
 
 if __name__ == '__main__':
     print "Starting Savu Config tool"
+
+    # load all the packages in the plugins directory to register classes
+    for loader, module_name, is_pkg in pkgutil.walk_packages(savu.plugins.__path__):
+        try:
+            module = loader.find_module(module_name).load_module(module_name)
+        except:
+            pass
 
     # set up things
     input_string = "startup"

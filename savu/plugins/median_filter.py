@@ -29,11 +29,14 @@ from savu.data import structures as st
 
 import scipy.signal.signaltools as sig
 
+from savu.plugins.utils import register_plugin
 
+
+@register_plugin
 class MedianFilter(Filter, CpuPlugin):
     """
     A plugin to filter each frame with a 3x3 median filter
-    
+
     :param kernel_size: Kernel size for the filter. Default: (1, 3, 3).
     """
 

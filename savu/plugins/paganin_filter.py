@@ -7,7 +7,10 @@ from savu.data import structures
 import numpy as np
 import math
 
+from savu.plugins.utils import register_plugin
 
+
+@register_plugin
 class PaganinFilter(Filter, CpuPlugin):
     """
     A plugin to apply Paganin filter (contrast enhancement) on projections

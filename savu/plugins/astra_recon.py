@@ -23,7 +23,10 @@ from savu.data.process_data import CitationInfomration
 """
 from savu.plugins.cpu_plugin import CpuPlugin
 
+from savu.plugins.utils import register_plugin
 
+
+@register_plugin
 class AstraRecon(BaseAstraRecon, CpuPlugin):
     """
     A Plugin to run the astra reconstruction

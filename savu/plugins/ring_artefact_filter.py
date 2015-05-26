@@ -27,6 +27,10 @@ from savu.plugins.cpu_plugin import CpuPlugin
 
 import ccpi
 
+from savu.plugins.utils import register_plugin
+
+
+@register_plugin
 class RingArtefactFilter(Filter, CpuPlugin):
     """
     A plugin to perform ring artefact removal
