@@ -1,3 +1,6 @@
+.. image:: https://badge.waffle.io/diamondlightsource/savu.png?label=ready&title=Ready 
+ :target: https://waffle.io/diamondlightsource/savu
+ :alt: 'Stories in Ready'
 Savu : Tomography Reconstructon Pipeline
 ========================================
 
