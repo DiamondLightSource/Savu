@@ -71,11 +71,34 @@ class Plugin(object):
                     raise ValueError("Parameter " + key +
                                      "is not a valid parameter for plugin " +
                                      self.name)
+                                     
+                                     
+    def pre_process(self, data_size):
+        """
+        This method is called after the plugin has been created by the
+        pipeline framework as a pre-processing step
+
+        :param parameters: A dictionary of the parameters for this plugin, or
+            None if no customisation is required
+        :type parameters: dict
+        """
+        pass
+
+    def post_process(self):
+        """
+        This method is called after the plugin has been created by the
+        pipeline framework as a post-processing step
+
+        :param parameters: A dictionary of the parameters for this plugin, or
+            None if no customisation is required
+        :type parameters: dict
+        """
+        pass
 
     def process(self, data, output, processes, process):
         """
         This method is called after the plugin has been created by the
-        pipeline framework
+        pipeline framework and forms the main processing step
 
         :param data: The input data object.
         :type data: savu.data.structures

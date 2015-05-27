@@ -80,7 +80,7 @@ class PaganinFilter(Filter, CpuPlugin):
 
     def required_data_type(self):
         """
-        The input for this plugin is RawTimeseriesData
+        The input for this plugin is ProjectionData
         :returns: Data
         """
         return structures.ProjectionData

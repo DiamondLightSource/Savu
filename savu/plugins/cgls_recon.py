@@ -34,7 +34,7 @@ class CglsRecon(BaseRecon, CpuPlugin):
     """
      A Plugin to run the CCPi cgls reconstruction
     
-    :param number_of_iterations: Number of Iterations if an iterative method is used . Default: 5.
+    :param number_of_iterations: Number of Iterations if an iterative method is used . Default: 1.
     :param resolution: Determines the number of output voxels where resolution = n_pixels/n_voxels. Default: 1.
     :param number_of_threads: Number of OMP threads. Default: 1
     """
@@ -50,13 +50,11 @@ class CglsRecon(BaseRecon, CpuPlugin):
         resolution = self.parameters['resolution']
 
         pixels = np.hstack([np.reshape(sinogram.astype(np.float32), (sinogram.shape[0], 1, sinogram.shape[1]))]*4)
-        
-        
-        voxels = ccpi.cgls(np.log(pixels), angles.astype(np.float32), centre_of_rotation, \
+
+        voxels = ccpi.cgls(pixels, angles.astype(np.float32), centre_of_rotation, \
                            resolution, num_iterations, nthreads)
                            
-#        voxels = np.lib.pad(voxels[:160,:160,2], (37,37), 'constant', constant_values=0)
-        voxels = voxels[:160,:160,2]
-        
+        voxels = voxels[:160,:160,1]   
+         
         return voxels
         

@@ -94,19 +94,23 @@ class Filter(Plugin):
         """
         slice_list = du.get_grouped_slice_list(data, self.get_filter_frame_type(), self.get_max_frames())
         self._filter_chunk(slice_list, data, output, len(processes), process)
+        
 
     def required_data_type(self):
         """
-        The input for this plugin is RawTimeseriesData
+        The input data type for this plugin
 
         :returns:  Data
         """
         return Data
 
+        
     def output_data_type(self):
         """
-        The output of this plugin is ProjectionData
+        The output data type of this plugin
 
         :returns:  Data
         """
         return Data
+
+        

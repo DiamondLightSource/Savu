@@ -18,7 +18,7 @@
    :platform: Unix
    :synopsis: unittest test classes for plugins
 
-.. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
+.. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
 

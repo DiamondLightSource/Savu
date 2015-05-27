@@ -36,7 +36,7 @@ class DezingFilter(Filter, CpuPlugin):
     A plugin
     
     :param outlier_mu: Magnitude of parameter for detecting outlier. Default: 10.0.
-    :param kernel_size: Number of frames included in average. Default 5 
+    :param kernel_size: Number of frames included in average. Default: 5. 
     """
 
     def __init__(self):
@@ -44,15 +44,13 @@ class DezingFilter(Filter, CpuPlugin):
         super(DezingFilter,
               self).__init__("DezingFilter")
 
-    # FIXME Need to add this into plugin
-    #need to know the padding size
     def pre_process(self, data_size):
         logging.debug("Running Dezing Setup")
-        dezing.setup_size(data_size,outlier_mu,self.padding)
+        self.padding  = (self.parameters['kernel_size']-1)/2
+        dezing.setup_size(data_size,self.parameters['outlier_mu'],self.padding)
         logging.debug("Finished Dezing Setup")
         pass
 
-    # FIXME Need to add this into plugin
     def post_process(self):
         logging.debug("Running Dezing Cleanup")
         dezing.cleanup()
@@ -60,7 +58,6 @@ class DezingFilter(Filter, CpuPlugin):
 
 
     def get_filter_padding(self):
-        self.padding=(self.parameters['kernel_size']-1)/2
         padding = self.padding
         return {st.CD_PROJECTION:padding}
 
@@ -70,3 +67,10 @@ class DezingFilter(Filter, CpuPlugin):
         dezing.run(data,result)
         logging.debug("Finished Dezing Frame")
         return result
+
+    def required_data_type(self):
+        return st.RawTimeseriesData
+        
+    def output_data_type(self):
+        return st.RawTimeseriesData
+        

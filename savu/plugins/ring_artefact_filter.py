@@ -25,21 +25,47 @@ import logging
 from savu.plugins.filter import Filter
 from savu.plugins.cpu_plugin import CpuPlugin
 
+import numpy as np
+
 import ccpi
 
 class RingArtefactFilter(Filter, CpuPlugin):
     """
     A plugin to perform ring artefact removal
     
+    :param param_n: To be defined (param_n >= 1e-10). Default: 0.001.
+    :param param_r: To be defined (param_r >= 1e-8). Default: 0.001.
+    :param num_series: To be defined (1 <= num_series <= 100). Default: 20
     """
 
     def __init__(self):
-        logging.debug("Starting ring artefact Filter")
+        logging.debug("Starting ring artefact filter")
         super(RingArtefactFilter,
               self).__init__("RingArtefactFilter")
 
 
     def filter_frame(self, data):
         logging.debug("Running Filter data")
-        result = ccpi.aml_ring_artefacts(data, param_n, param_r, num_series)
-        return result
+        
+        param_n = self.parameters['param_n']
+        param_r = self.parameters['param_r']
+        num_series = self.parameters['num_series']
+        
+        self.param_check(param_n, param_r, num_series)         
+        data = data.astype(np.float64)
+
+        #ccpi.aml_ring_artefacts(data, param_n, param_r, num_series)
+        
+        return data
+
+
+    def param_check(self, p1, p2, p3):
+        if p1 < 1e-10:
+            raise ValueError('param_n is too small')
+            
+        if p2 < 1e-8:
+            raise ValueError('param_r is too small')
+            
+        if p3 < 1 or p3 > 100:
+            print p3
+            raise ValueError('num_series is out of bounds')
