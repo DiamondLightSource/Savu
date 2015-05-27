@@ -31,6 +31,14 @@ import numpy as np
 from savu.data.structures import Data, PassThrough
 from savu.data.structures import RawTimeseriesData, ProjectionData, VolumeData
 
+plugins = {}
+
+
+def register_plugin(clazz):
+    """decorator to add logging information around calls for use with ."""
+    plugins[clazz.__name__] = clazz
+    return clazz
+
 
 def load_plugin(plugin_name):
     """Load a plugin.

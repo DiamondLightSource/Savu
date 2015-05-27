@@ -98,7 +98,7 @@ class ProcessList(object):
             count += 1
             description = "%2i) %s(%s)" % (count, process['name'], process['id'])
             for key in process['data'].keys():
-                description += "\n  %20s : %s" % (key, process['data'][key])
+                description += "\n     %20s : %s" % (key, process['data'][key])
             out_string.append(description)
         return '\n'.join(out_string)
 

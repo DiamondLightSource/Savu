@@ -47,3 +47,9 @@ Logo credit ::
 .. image:: https://coveralls.io/repos/DiamondLightSource/Savu/badge.svg?branch=master
     :target: https://coveralls.io/r/DiamondLightSource/Savu?branch=master
 
+.. image:: https://badge.waffle.io/diamondlightsource/savu.png?label=ready&title=Ready 
+    :target: https://waffle.io/diamondlightsource/savu
+    :alt: 'Stories in Ready'
+
+.. image:: https://badge.fury.io/py/savu.svg
+    :target: http://badge.fury.io/py/savu
