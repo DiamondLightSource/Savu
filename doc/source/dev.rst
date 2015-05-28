@@ -62,3 +62,20 @@ of the data, providing a check of whether the process has worked successfully.
 
 The output file is saved in a tmp directory as a .h5 file, e.g.
 "/tmp/tmp32bexK.h5".  This can be viewed in DAWN.
+
+
+Adding C/C++ extensions to a plugin
+===================================
+
+There are numerous ways to create python bindings to external C/C++ libraries, which may be useful to recycle existing code or to improve performance.  Two different approaches have currently been tested: Cython (to link to external C code) and Boost.Python (to link to external C++ code).  Cython is essentially python with C-types and requires a C-API, a python wrapper and a makefile?, whilst Boost.Python is a wrapper for the Python/C API and requires a wrapper and a makefile. By building the makefiles an .so file is created and can be added to the \lib directory in the Savu framework and imported as a python module.  
+
+Cython example
+==============
+http://docs.cython.org/src/tutorial/clibraries.html
+
+(1) Interface: A *.pxd file, which is similar to a C header file, providing C function definitions required in the python code.
+
+e.g. cdezing.pxd
+
+
+
