@@ -67,15 +67,37 @@ The output file is saved in a tmp directory as a .h5 file, e.g.
 Adding C/C++ extensions to a plugin
 ===================================
 
-There are numerous ways to create python bindings to external C/C++ libraries, which may be useful to recycle existing code or to improve performance.  Two different approaches have currently been tested: Cython (to link to external C code) and Boost.Python (to link to external C++ code).  Cython is essentially python with C-types and requires a C-API, a python wrapper and a makefile?, whilst Boost.Python is a wrapper for the Python/C API and requires a wrapper and a makefile. By building the makefiles an .so file is created and can be added to the \lib directory in the Savu framework and imported as a python module.  
+There are numerous ways to create python bindings to external C/C++ libraries, which may be useful to recycle existing code or to improve performance.  Two different approaches have currently been tested: Cython (to link to external C code) and Boost.Python (to link to external C++ code).  Cython is essentially python with C-types and requires a C-API, a python wrapper and a makefile, whilst Boost.Python is a wrapper for the Python/C API and requires a wrapper and a makefile. By building the makefile a shared library (*.so) file is created and can be added to the \lib directory in the Savu framework and imported as a python module.  
 
 Cython example
-==============
+--------------
 http://docs.cython.org/src/tutorial/clibraries.html
 
-(1) Interface: A *.pxd file, which is similar to a C header file, providing C function definitions required in the python code.
+1) Interface: A *.pxd file, which is similar to a C header file, providing C function definitions required in the python code.
 
 e.g. cdezing.pxd
 
+.. literalinclude:: ../../extension_examples/cdezing.pyd
+
+2) A python wrapper: A *.pyx file that must have a different name to the *.pyd file above. 
+
+e.g. dezing.pyx
+
+.. literalinclude:: ../../extension_examples/dezing.pyx
+
+3) Makefile: In python this is a setup.py file.
+
+e.g. setup.py
+
+.. literalinclude:: ../../extension_examples/setup.py
+
+Compile this file, passing appropriate C compiler flags if necessary, to obtain a *.so file.
+
+e.g.
+export CFLAGS="-I . $CFLAGS" \
+export LDFLAGS="-L . $LDFLAGS" \
+python setup.py build_ext -i
+
+The output file for this example is a dezing.so file.  Transfer this file to \lib and import as a python module, e.g. import dezing
 
 
