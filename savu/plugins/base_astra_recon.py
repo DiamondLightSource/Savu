@@ -28,6 +28,8 @@ import astra
 
 import numpy as np
 
+import math
+
 
 class BaseAstraRecon(BaseRecon):
     """
@@ -35,6 +37,7 @@ class BaseAstraRecon(BaseRecon):
     
     :param center_of_rotation: Center of rotation to use for the reconstruction). Default: 86.
     """
+    res = 0
 
     def __init__(self, name='BaseAstraRecon'):
         super(BaseAstraRecon, self).__init__(name)
@@ -89,16 +92,16 @@ class BaseAstraRecon(BaseRecon):
         # Create a data object for the reconstruction
         rec_id = astra.data2d.create('-vol', vol_geom)
 
-        proj_id = astra.create_projector('strip', proj_geom, vol_geom)
-
         params = self.get_parameters();
         
         cfg = astra.astra_dict(params[0])
         cfg['ReconstructionDataId'] = rec_id
         cfg['ProjectionDataId'] = sinogram_id
-        cfg['ProjectorId'] = proj_id
         
-        
+        if not "CUDA" in params[0]:
+            proj_id = astra.create_projector('strip', proj_geom, vol_geom)
+            cfg['ProjectorId'] = proj_id
+         
         # Create the algorithm object from the configuration structure
         alg_id = astra.algorithm.create(cfg)
 
@@ -106,6 +109,10 @@ class BaseAstraRecon(BaseRecon):
         
         # This will have a runtime in the order of 10 seconds.
         astra.algorithm.run(alg_id, iterations)
+        
+        if "CUDA" in params[0] and "FBP" not in params[0]:
+                self.res += astra.algorithm.get_res_norm(alg_id)**2
+                print math.sqrt(self.res)
         
         # Get the result
         rec = astra.data2d.get(rec_id)
