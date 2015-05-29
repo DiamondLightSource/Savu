@@ -56,7 +56,11 @@ def _disp(content, arg):
 def _list(content, arg):
     """List the plugins which have been registered for use"""
     for key in pu.plugins.keys():
-        print key
+        print(key)
+        plugin = pu.plugins[key]()
+        plugin.populate_default_parameters()
+        for p_key in plugin.parameters.keys():
+            print("    %20s : %s" % (p_key, plugin.parameters[p_key]))
     return content
 
 
