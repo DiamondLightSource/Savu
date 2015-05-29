@@ -26,6 +26,14 @@ class Content(object):
     def save(self, filename):
         self.process_list.save_list_to_file(filename)
 
+    def modify(self, element, subelement, value):
+        data_elements = self.process_list.process_list[element-1]['data']
+        if subelement in data_elements.keys():
+            data_elements[subelement] = value
+        else:
+            print("Sorry, element %i does not have a %s parameter" %
+                  (element, subelement))
+
 
 def _help(content, arg):
     """Display the help information"""
@@ -56,11 +64,26 @@ def _save(content, arg):
     """Save the current list to disk with the filename given"""
     content.save(arg)
 
+
+def _mod(content, arg):
+    """Modifies the target value e.g. 'mod 1.value 27'"""
+    try:
+        element = int(arg.split()[0].split('.')[0])
+        subelement = arg.split()[0].split('.')[1]
+        value = None
+        exec("value = " + arg.split()[1])
+        content.modify(element, subelement, value)
+    except:
+        print("Sorry i can't process the argument '%s'" % (arg))
+    return content
+
+
 commands = {'open': _open,
             'help': _help,
             'disp': _disp,
             'list': _list,
-            'save': _save}
+            'save': _save,
+            'mod': _mod}
 
 if __name__ == '__main__':
     print "Starting Savu Config tool"
