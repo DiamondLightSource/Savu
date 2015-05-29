@@ -73,23 +73,20 @@ Cython example
 --------------
 http://docs.cython.org/src/tutorial/clibraries.html
 
-1) A C interface: A *.pxd file, which is similar to a C header file, providing C function definitions required in the python code.
-
-e.g. cdezing.pxd
+1) A C interface: A *.pxd file, which is similar to a C header file, providing C function definitions required in the python code. For example, cdexing.pxd:
 
 .. literalinclude:: ../../extension_examples/cdezing.pyd
+   :linenos:
 
-2) A python wrapper: A *.pyx file that must have a different name to the *.pyd file above. 
-
-e.g. dezing.pyx
+2) A python wrapper: A *.pyx file that must have a different name to the *.pyd file above. For example, dezing.pyx:
 
 .. literalinclude:: ../../extension_examples/dezing.pyx
+   :linenos:
 
-3) Makefile: In python this is a setup.py file.
-
-e.g. setup.py
+3) Makefile: In python this is a setup.py file.  For example, setup.py:
 
 .. literalinclude:: ../../extension_examples/setup.py
+   :linenos:
 
 Compile this file, passing appropriate C compiler flags if necessary, to obtain a *.so file.
 
