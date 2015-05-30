@@ -34,17 +34,29 @@ class Content(object):
             print("Sorry, element %i does not have a %s parameter" %
                   (element, subelement))
 
+    def insert(self, plugin, pos):
+        process = {}
+        process['name'] = plugin.name
+        process['id'] = plugin.__module__
+        process['data'] = plugin.parameters
+        self.process_list.process_list.insert(pos, process)
+
+    def remove(self, pos):
+        self.process_list.process_list.pop(pos)
+
 
 def _help(content, arg):
     """Display the help information"""
     for key in commands.keys():
-        print "%s : %s" % (key, commands[key].__doc__)
+        print "%4s : %s" % (key, commands[key].__doc__)
     return content
 
 
 def _open(content, arg):
     """Opens or creates a new configuration file with the given filename"""
-    return Content(arg)
+    ct = Content(arg)
+    ct.display()
+    return ct
 
 
 def _disp(content, arg):
@@ -67,27 +79,53 @@ def _list(content, arg):
 def _save(content, arg):
     """Save the current list to disk with the filename given"""
     content.save(arg)
+    return content
 
 
 def _mod(content, arg):
     """Modifies the target value e.g. 'mod 1.value 27'"""
     try:
-        element = int(arg.split()[0].split('.')[0])
-        subelement = arg.split()[0].split('.')[1]
+        element,  subelement = arg.split()[0].split('.')
         value = None
         exec("value = " + arg.split()[1])
-        content.modify(element, subelement, value)
+        content.modify(int(element), subelement, value)
+        content.display()
     except:
         print("Sorry i can't process the argument '%s'" % (arg))
     return content
 
+
+def _add(content, arg):
+    """Adds the named plugin before the specified location 'MedianFilter 2'"""
+    try:
+        name, pos = arg.split()
+        if name in pu.plugins.keys():
+            plugin = pu.plugins[name]()
+            plugin.populate_default_parameters()
+            content.insert(plugin, int(pos)-1)
+            content.display()
+        else:
+            print("Sorry the plugin %s is not in my list, pick one form list" %
+                  (name))
+    except:
+        print("Sorry i can't process the argument '%s'" % (arg))
+    return content
+
+
+def _rem(content, arg):
+    """Remove the numbered item from the list"""
+    content.remove(int(arg)-1)
+    content.display()
+    return content
 
 commands = {'open': _open,
             'help': _help,
             'disp': _disp,
             'list': _list,
             'save': _save,
-            'mod': _mod}
+            'mod': _mod,
+            'add': _add,
+            'rem': _rem}
 
 if __name__ == '__main__':
     print "Starting Savu Config tool"
