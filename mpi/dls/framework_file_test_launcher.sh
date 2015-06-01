@@ -1,6 +1,6 @@
 module load global/cluster
 
-qsub -N mpi_test -sync y -j y -pe openmpi 16 -q medium.q@@com01 -l tesla /home/ssg37927/Savu/mpi/dls/framework_file_test_mpijob.sh $@ > tmp.txt
+qsub -N mpi_test -sync y -j y -pe openmpi 48 -q medium.q@@com06 /home/ssg37927/savu/Savu/mpi/dls/framework_file_test_mpijob.sh $@ > tmp.txt
 
 filename=`echo mpi_test.o`
 jobnumber=`awk '{print $3}' tmp.txt | head -n 1`
@@ -12,6 +12,8 @@ do
 done
 
 cat $filename
+
+grep "L " $filename > log_$filename
 
 sleep 20
 echo qacct -j ${jobnumber}

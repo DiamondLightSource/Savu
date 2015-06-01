@@ -28,6 +28,8 @@ import logging
 
 from mpi4py import MPI
 
+from savu.core.utils import logmethod
+
 NX_CLASS = 'NX_class'
 
 # Core Direction Keywords
@@ -87,9 +89,11 @@ class SliceAlwaysAvailableWrapper(SliceAvailableWrapper):
         """
         super(SliceAlwaysAvailableWrapper, self).__init__(None, data)
 
+    @logmethod
     def __getitem__(self, item):
         return self.data[item]
 
+    @logmethod
     def __setitem__(self, item, value):
         self.data[item] = value
 
@@ -116,6 +120,7 @@ class Data(object):
         self.base_path = None
         self.core_directions = {}
 
+    @logmethod
     def complete(self):
         """
         Closes the backing file and completes work
@@ -136,7 +141,7 @@ class Data(object):
             dirs_to_remove = list(self.core_directions[frame_type])
             dirs_to_remove.sort(reverse=True)
             for direction in dirs_to_remove:
-                it.remove_axis(direction);
+                it.remove_axis(direction)
             mapping_list = range(len(it.multi_index))
             dirs_to_remove.sort()
             for direction in dirs_to_remove:
@@ -150,6 +155,11 @@ class Data(object):
             return slice_list
         return None
 
+    def get_data_shape(self):
+        """
+        Simply returns the shape of the main data array
+        """
+        return self.data.shape
 
 
 class RawTimeseriesData(Data):
@@ -165,6 +175,7 @@ class RawTimeseriesData(Data):
         self.control = None
         self.center_of_rotation = None
 
+    @logmethod
     def populate_from_nx_tomo(self, path):
         """
         Populate the RawTimeseriesData from an NXTomo defined NeXus file
@@ -193,7 +204,9 @@ class RawTimeseriesData(Data):
         self.core_directions[CD_SINOGRAM] = (0, 2)
         self.core_directions[CD_ROTATION_AXIS] = (0, )
 
-    def create_backing_h5(self, path, group_name, data, mpi=False):
+    @logmethod
+    def create_backing_h5(self, path, group_name, data, mpi=False,
+                          new_shape=None):
         """
         Create a h5 backend for this RawTimeseriesData
 
@@ -225,7 +238,9 @@ class RawTimeseriesData(Data):
         self.core_directions[CD_SINOGRAM] = (0, 2)
         self.core_directions[CD_ROTATION_AXIS] = 0
 
-        data_shape = data.data.shape
+        data_shape = new_shape
+        if data_shape is None:
+            data_shape = data.data.shape
         data_type = np.double
         image_key_shape = data.image_key.shape
         image_key_type = data.image_key.dtype
@@ -322,7 +337,9 @@ class ProjectionData(Data):
         self.rotation_angle = None
         self.center_of_rotation = None
 
-    def create_backing_h5(self, path, group_name, data, mpi=False):
+    @logmethod
+    def create_backing_h5(self, path, group_name, data, mpi=False,
+                          new_shape=None):
         """
         Create a h5 backend for this ProjectionData
 
@@ -347,7 +364,7 @@ class ProjectionData(Data):
         logging.debug("Creating file '%s' '%s'", self.base_path,
                       self.backing_file.filename)
 
-        data_shape = None
+        data_shape = new_shape
         data_type = None
         rotation_angle_shape = None
         rotation_angle_type = None
@@ -355,15 +372,17 @@ class ProjectionData(Data):
         cor_type = np.double
 
         if data.__class__ == RawTimeseriesData:
-            data_shape = (data.get_number_of_projections(),) +\
-                data.get_projection_shape()
+            if data_shape is None:
+                data_shape = (data.get_number_of_projections(),) +\
+                    data.get_projection_shape()
             data_type = np.double
             rotation_angle_shape = (data.get_number_of_projections(),)
             rotation_angle_type = data.rotation_angle.dtype
             cor_shape = (data.data.shape[1],)
 
         elif data.__class__ == ProjectionData:
-            data_shape = data.data.shape
+            if data_shape is None:
+                data_shape = data.data.shape
             data_type = np.double
             rotation_angle_shape = data.rotation_angle.shape
             rotation_angle_type = data.rotation_angle.dtype
@@ -397,6 +416,7 @@ class ProjectionData(Data):
 
         self.core_directions = data.core_directions
 
+    @logmethod
     def populate_from_h5(self, path):
         """
         Populate the contents of this object from a file
@@ -436,14 +456,6 @@ class ProjectionData(Data):
         """
         return self.data.shape[0]
 
-    def get_data_shape(self):
-        """
-        Gets the real number projections
-
-        :returns: integer number of projection frames
-        """
-        return self.data.shape
-
 
 class VolumeData(Data):
     """
@@ -453,6 +465,7 @@ class VolumeData(Data):
     def __init__(self):
         super(VolumeData, self).__init__()
 
+    @logmethod
     def create_backing_h5(self, path, group_name, data_shape,
                           data_type, mpi=False):
         """

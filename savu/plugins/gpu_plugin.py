@@ -48,8 +48,12 @@ class GpuPlugin(object):
             logging.debug(gpu_processes)
             logging.debug("Process is %s",
                           new_processes[gpu_processes[process]])
-            return self.process(data, output, new_processes,
+            self.pre_process(data.get_data_shape())
+            self.process(data, output, new_processes,
                                 gpu_processes[process])
+            self.post_process()
+            return
+            
         logging.debug("Not Running the task as not GPU")
         return
 

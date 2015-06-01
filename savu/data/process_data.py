@@ -91,6 +91,17 @@ class ProcessList(object):
         inter_entry[group_name] = output_data.external_link()
         process_file.close()
 
+    def get_string(self):
+        out_string = []
+        count = 0
+        for process in self.process_list:
+            count += 1
+            description = "%2i) %s(%s)" % (count, process['name'], process['id'])
+            for key in process['data'].keys():
+                description += "\n     %20s : %s" % (key, process['data'][key])
+            out_string.append(description)
+        return '\n'.join(out_string)
+
 
 class CitationInfomration(object):
     """

@@ -21,12 +21,11 @@
 
 """
 from savu.data.structures import Data
-from savu.data.structures import RawTimeseriesData, ProjectionData, VolumeData
 from savu.plugins.plugin import Plugin
 
 from savu.data import structures
-from savu.data import utils as du 
-import numpy as np
+from savu.data import utils as du
+from savu.core.utils import logmethod
 import logging
 
 
@@ -68,14 +67,23 @@ class Filter(Plugin):
 
     def _filter_chunk(self, slice_list, data, output, processes, process):
         logging.debug("Running filter._filter_chunk")
-        process_slice_list = du.get_slice_list_per_process(slice_list, process, processes)
+        process_slice_list = du.get_slice_list_per_process(slice_list,
+                                                           process, processes)
 
         padding = self.get_filter_padding()
 
         for sl in process_slice_list:
             section = du.get_padded_slice_data(sl, padding, data)
             result = self.filter_frame(section)
-            output.data[sl] = du.get_unpadded_slice_data(sl, padding, data, result)
+            if type(result) == dict:
+                for key in result.keys():
+                    if key == 'center_of_rotation':
+                        frame = du.get_orthogonal_slice(sl, data.core_directions[self.get_filter_frame_type()])
+                        output.center_of_rotation[frame] = result[key]
+                    elif key == 'data':
+                        output.data[sl] = du.get_unpadded_slice_data(sl, padding, data, result)
+            else:
+                output.data[sl] = du.get_unpadded_slice_data(sl, padding, data, result)
 
     def filter_frame(self, data):
         """
@@ -89,24 +97,29 @@ class Filter(Plugin):
                       data.__class__)
         raise NotImplementedError("filter_frame needs to be implemented")
 
+    @logmethod
     def process(self, data, output, processes, process):
         """
         """
         slice_list = du.get_grouped_slice_list(data, self.get_filter_frame_type(), self.get_max_frames())
         self._filter_chunk(slice_list, data, output, len(processes), process)
+        
 
     def required_data_type(self):
         """
-        The input for this plugin is RawTimeseriesData
+        The input data type for this plugin
 
         :returns:  Data
         """
         return Data
 
+        
     def output_data_type(self):
         """
-        The output of this plugin is ProjectionData
+        The output data type of this plugin
 
         :returns:  Data
         """
         return Data
+
+        

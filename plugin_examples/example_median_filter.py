@@ -25,7 +25,7 @@ import logging
 from savu.plugins.filter import Filter
 from savu.plugins.cpu_plugin import CpuPlugin
 
-from savu.data import structures as st
+from savu.data import structures
 
 import scipy.signal.signaltools as sig
 
@@ -36,6 +36,10 @@ class ExampleMedianFilter(Filter, CpuPlugin):
     be the CammelCase equivalent of the '_' separated filename, so for example
     this file needs to be called
     'example_median_filter.py'
+    the params defined here are not just for documention but are also stored 
+    in the self.parameters dictionary, for example the one specified below can
+    be accessed by self.parameters['kernel_size']
+    :param kernel_size: Kernel size for the filter. Default: (1, 3, 3).
     """
 
     def __init__(self):
@@ -52,23 +56,15 @@ class ExampleMedianFilter(Filter, CpuPlugin):
         super(ExampleMedianFilter,
               self).__init__("ExampleMedianFilter")
 
-    def populate_default_parameters(self):
+    def get_filter_frame_type(self):
         """
-        All plugins have the populate_default_patamters method, in this you
-        need to add to the self.parameters dictionary any parameters which you
-        wish the end user to ultimately be able to change, in this case we will
-        let them define the size of the kernel we will use for out 3D median
-        filter. We initialise this with a good default value, in this case a
-        tuple of (3, 3, 3) If you wish to change the direction that the filter
-        travels across the data, then you need to adjust the
-        self.parameters['slice_direction'] = 0 
-        entry to be a different value,
-        i.e. 1 for sinogram direction.
+        get_filter_frame_type tells the plugin which direction to
+        slice through the data before passing it on
+
+         :returns:  the savu.structure core_direction describing the frames to
+                    filter
         """
-        logging.debug("Populating parameters from superclasses, must be done!")
-        super(ExampleMedianFilter, self).populate_default_parameters()
-        logging.debug("Populating Example Median Filter default parameters")
-        self.parameters['kernel_size'] = (3, 3, 3)
+        return structures.CD_PROJECTION
 
     def get_filter_padding(self):
         """
@@ -81,7 +77,7 @@ class ExampleMedianFilter(Filter, CpuPlugin):
         """
         logging.debug("Getting the filter width of Example Median Filter")
         padding = (self.parameters['kernel_size'][0] - 1) / 2
-        return {st.CD_PROJECTION:padding}
+        return {structures.CD_PROJECTION:padding}
 
     def filter_frame(self, data):
         """

@@ -17,7 +17,7 @@ echo "END Check Output"
 #MPIRUN=/dls_sw/prod/tools/RHEL6-x86_64/openmpi/1-6-5/prefix/bin/mpirun
 #PYTHON=/dls_sw/prod/tools/RHEL6-x86_64/defaults/bin/dls-python
 
-export PYTHONPATH=/home/ssg37927/Savu:$PYTHONPATH
+export PYTHONPATH=/home/ssg37927/savu/Savu:$PYTHONPATH
 
 UNIQHOSTS=${TMPDIR}/machines-u
 awk '{print $1 }' ${PE_HOSTFILE} | uniq > ${UNIQHOSTS}
@@ -26,7 +26,7 @@ echo "number of uniq hosts: ${uniqslots}"
 echo "running on these hosts:"
 cat ${UNIQHOSTS}
 
-processes=`bc <<< "$uniqslots*8"`
+processes=`bc <<< "$uniqslots*6"`
 
 echo "Processes running are : ${processes}"
 
@@ -34,4 +34,4 @@ echo "Processes running are : ${processes}"
 mpirun -np ${processes} \
        -x LD_LIBRARY_PATH \
        --hostfile ${UNIQHOSTS} \
-       python /home/ssg37927/Savu/savu/mpi_test/dls/framework_file_test_runner.py $@
+       python /home/ssg37927/savu/Savu/savu/mpi_test/dls/framework_file_test_runner.py $@

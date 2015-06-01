@@ -68,13 +68,13 @@ if __name__ == '__main__':
     ALL_PROCESSES = [[i]*MACHINES for i in RANK_NAMES]
     ALL_PROCESSES = list(chain.from_iterable(ALL_PROCESSES))
 
-    logging.basicConfig(level=0, format='L %(asctime)s.%(msecs)03d M' +
+    logging.basicConfig(level=0, format='L %(relativeCreated)12d M' +
                         MACHINE_NUMBER_STRING + ' ' + MACHINE_RANK_NAME +
                         ' %(levelname)-6s %(message)s', datefmt='%H:%M:%S')
 
     MPI.COMM_WORLD.barrier()
 
-    logging.info("Starting the test process")
+    logging.info("Starting the test process, true dat")
 
     logging.debug("Rank : %i - Size : %i", RANK, SIZE)
 
