@@ -5,6 +5,8 @@ Savu : Tomography Reconstructon Pipeline
 :Version: 0.1
 :Authors: Mark Basham - *Diamond Light Source*
 
+This documentation in full is available at https://savu.readthedocs.org/en/latest/
+
 Savu pythons are known for their small size, good temperament, easy feeding habits and tolerance for a wide range of temperatures. [1]_
 The Savu Tomography reconstruction pipeline project aims to mimic these behaviours being a small package, which is easy to use and reliable, chomps its way through vast amounts of data, and finally is portable to a wide range of systems. 
 
@@ -13,6 +15,7 @@ Be aware though, the following is also true "Savu Pythons are typically calm in 
 To use ::
 
     >>> import savu
+    >>> savu.run_tests()
 
 
 Logo credit ::
@@ -30,3 +33,23 @@ Logo credit ::
 .. image:: https://badges.gitter.im/Join%20Chat.svg
    :alt: Join the chat at https://gitter.im/DiamondLightSource/Savu
    :target: https://gitter.im/DiamondLightSource/Savu?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+
+.. image:: https://readthedocs.org/projects/savu/badge/?version=latest
+   :target: https://readthedocs.org/projects/savu/?badge=latest
+   :alt: Documentation Status
+
+.. image:: https://travis-ci.org/DiamondLightSource/Savu.svg?branch=master
+    :target: https://travis-ci.org/DiamondLightSource/Savu
+
+.. image:: https://zenodo.org/badge/doi/10.5281/zenodo.16507.svg
+    :target: http://dx.doi.org/10.5281/zenodo.16507
+
+.. image:: https://coveralls.io/repos/DiamondLightSource/Savu/badge.svg?branch=master
+    :target: https://coveralls.io/r/DiamondLightSource/Savu?branch=master
+
+.. image:: https://badge.waffle.io/diamondlightsource/savu.png?label=ready&title=Ready 
+    :target: https://waffle.io/diamondlightsource/savu
+    :alt: 'Stories in Ready'
+
+.. image:: https://badge.fury.io/py/savu.svg
+    :target: http://badge.fury.io/py/savu

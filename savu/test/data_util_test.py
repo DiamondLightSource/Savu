@@ -134,13 +134,36 @@ class Test(unittest.TestCase):
         
         raw0 = data.data[sl[0]]
         psl0_un = du.get_unpadded_slice_data(sl[0], padding_dict, data, psl0_0)
-        self.assertEqual(psl0_un.shape, raw0.shape)
+        self.assertEqual(psl0_un.squeeze().shape, raw0.shape)
+        self.assertEqual(psl0_un.sum(), raw0.sum())
+        
+        raw5 = data.data[sl[5]]
+        psl5_un = du.get_unpadded_slice_data(sl[5], padding_dict, data, psl5_0)
+        self.assertEqual(psl5_un.squeeze().shape, raw5.shape)
+        self.assertEqual(psl5_un.sum(), raw5.sum())
+
+    def test_get_unpadded_slice_data_2(self):
+        data = tu.get_nx_tomo_test_data()
+        sl = du.get_grouped_slice_list(data, struct.CD_SINOGRAM, 1)
+        
+        padding_dict = {}
+        #padding_dict[struct.CD_PROJECTION] = 1
+        
+        psl0_0 = du.get_padded_slice_data(sl[0], padding_dict, data)
+        psl5_0 = du.get_padded_slice_data(sl[5], padding_dict, data)
+        self.assertEqual(psl0_0.shape, (111, 1, 160))
+        self.assertEqual(psl5_0.shape, (111, 1, 160))
+        
+        raw0 = data.data[sl[0]]
+        psl0_un = du.get_unpadded_slice_data(sl[0], padding_dict, data, psl0_0)
+        self.assertEqual(psl0_un.shape, raw0.shape) # here
         self.assertEqual(psl0_un.sum(), raw0.sum())
         
         raw5 = data.data[sl[5]]
         psl5_un = du.get_unpadded_slice_data(sl[5], padding_dict, data, psl5_0)
         self.assertEqual(psl5_un.shape, raw5.shape)
         self.assertEqual(psl5_un.sum(), raw5.sum())
+
 
 if __name__ == "__main__":
     unittest.main()

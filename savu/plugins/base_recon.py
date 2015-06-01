@@ -25,6 +25,7 @@ import logging
 
 from savu.data.structures import ProjectionData, VolumeData
 from savu.plugins.plugin import Plugin
+from savu.core.utils import logmethod
 
 import numpy as np
 
@@ -35,6 +36,7 @@ class BaseRecon(Plugin):
     
     :param center_of_rotation: Center of rotation to use for the reconstruction). Default: 86.
     """
+    count = 0
 
     def __init__(self, name='BaseRecon'):
         super(BaseRecon, self).__init__(name)
@@ -47,6 +49,7 @@ class BaseRecon(Plugin):
         raise NotImplementedError("reconstruct " +
                                   "needs to be implemented")
 
+    @logmethod
     def process(self, data, output, processes, process):
         """
         """
@@ -77,6 +80,9 @@ class BaseRecon(Plugin):
                                  (output.data.shape[0]/2,
                                   output.data.shape[2]/2))
             output.data[:, frames[i], :] = reconstruction
+            self.count+=1
+            print self.count
+            
 
     def required_data_type(self):
         """
