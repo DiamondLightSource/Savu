@@ -32,5 +32,11 @@ class SimpleReconTest(PluginTest):
     def setUp(self):
         self.plugin_name = "savu.plugins.example_filter_back_projection"
 
+
+class SinogramAlignmentTest(PluginTest):
+
+    def setUp(self):
+        self.plugin_name = "savu.plugins.sinogram_alignment"
+
 if __name__ == "__main__":
     unittest.main()
