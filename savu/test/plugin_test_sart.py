@@ -27,16 +27,16 @@ import unittest
 from savu.test.plugin_test import PluginTest
 
 
-"""class SimpleReconTest(PluginTest):
+class SimpleReconTest(PluginTest):
+
+    def setUp(self):
+        self.plugin_name = "savu.plugins.simple_recon"
+
+
+class ScikitimageSartTest(PluginTest):
 
     def setUp(self):
         self.plugin_name = "savu.plugins.scikitimage_sart"
-"""
-
-class SinogramAlignmentTest(PluginTest):
-
-    def setUp(self):
-        self.plugin_name = "savu.plugins.sinogram_alignment"
 
 if __name__ == "__main__":
     unittest.main()
