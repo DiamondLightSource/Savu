@@ -29,7 +29,10 @@ from savu.data import structures as st
 
 from scipy.ndimage.filters import gaussian_filter
 
+from savu.plugins.utils import register_plugin
 
+
+@register_plugin
 class BandPass(Filter, CpuPlugin):
     """
     A plugin to filter each frame with a BandPass T

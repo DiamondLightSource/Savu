@@ -7,7 +7,10 @@ import skimage.transform as transform
 import numpy as np
 from scipy import ndimage
 
+from savu.plugins.utils import register_plugin
 
+
+@register_plugin
 class ScikitimageSart(BaseRecon, CpuPlugin):
     """
     A Plugin to reconstruct an image by filter back projection

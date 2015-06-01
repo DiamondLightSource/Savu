@@ -31,6 +31,10 @@ import scipy.signal.signaltools as sig
 import numpy as np
 import dezing
 
+from savu.plugins.utils import register_plugin
+
+
+@register_plugin
 class DezingFilter(Filter, CpuPlugin):
     """
     A plugin

@@ -10,7 +10,10 @@ from scipy.optimize import curve_fit
 
 import numpy as np
 
+from savu.plugins.utils import register_plugin
 
+
+@register_plugin
 class SinogramAlignment(Filter, CpuPlugin):
     """
     A plugin to determine the centre of rotation of a sinogram and to align the
