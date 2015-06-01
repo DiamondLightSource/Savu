@@ -41,7 +41,6 @@ So now you can use the standard runners to launch a savu pipleine
 
     >>> python $SAVU_HOME/savu/tomo_recon.py --help
     Usage: tomo_recon.py [options] input_file output_directory
-    
     Options:
       --version             show program's version number and exit
       -h, --help            show this help message and exit
