@@ -29,6 +29,7 @@ import time
 from mpi4py import MPI
 
 import savu.plugins.utils as pu
+from savu.core.utils import logfunction
 
 
 def run_plugin_chain(input_data, plugin_list, processing_dir, mpi=False,
@@ -79,6 +80,7 @@ def run_plugin_chain(input_data, plugin_list, processing_dir, mpi=False,
         output.complete()
 
 
+@logfunction
 def run_process_list(input_data, process_list, processing_dir, mpi=False,
                      processes=["CPU0"], process=0):
     """Runs a chain of plugins
@@ -92,7 +94,7 @@ def run_process_list(input_data, process_list, processing_dir, mpi=False,
     :param mpi: Whether this is running in mpi, default is false.
     :type mpi: bool.
     """
-    logging.debug("Running process list")
+    logging.debug("Running process list, just a check")
     filename = os.path.basename(input_data.backing_file.filename)
     filename = os.path.splitext(filename)[0]
     output_filename = \

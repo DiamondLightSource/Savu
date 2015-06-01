@@ -72,10 +72,9 @@ if __name__ == '__main__':
                         MACHINE_NUMBER_STRING + ' ' + MACHINE_RANK_NAME +
                         ' %(levelname)-6s %(message)s', datefmt='%H:%M:%S')
 
-
     MPI.COMM_WORLD.barrier()
 
-    logging.info("Starting the test process")
+    logging.info("Starting the test process, true dat")
 
     logging.debug("Rank : %i - Size : %i", RANK, SIZE)
 

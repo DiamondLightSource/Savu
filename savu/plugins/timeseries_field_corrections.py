@@ -24,10 +24,14 @@
 from savu.data.structures import RawTimeseriesData, ProjectionData
 from savu.plugins.cpu_plugin import CpuPlugin
 from savu.plugins.plugin import Plugin
+from savu.core.utils import logmethod
 
 import numpy as np
 
+from savu.plugins.utils import register_plugin
 
+
+@register_plugin
 class TimeseriesFieldCorrections(Plugin, CpuPlugin):
     """
     A Plugin to apply a simple dark and flatfield correction to some
@@ -38,6 +42,7 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         super(TimeseriesFieldCorrections,
               self).__init__("TimeseriesFieldCorrections")
 
+    @logmethod
     def process(self, data, output, processes, process):
         """
         """

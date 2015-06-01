@@ -82,10 +82,10 @@ def get_appropriate_input_data(plugin):
 
 def get_appropriate_output_data(plugin, data, mpi=False, file_name=None):
     output = []
-    
+
     if plugin.output_data_type() == PassThrough:
         output.append(data[0])
-    
+
     temp_file = file_name
     if temp_file is None:
         temp_file = tempfile.NamedTemporaryFile(suffix='.h5', delete=False)
@@ -93,17 +93,22 @@ def get_appropriate_output_data(plugin, data, mpi=False, file_name=None):
 
     if plugin.output_data_type() == RawTimeseriesData:
         output.append(pu.get_raw_data(data[0], temp_file,
-                                      plugin.name, mpi))
+                                      plugin.name, mpi,
+                                      plugin.get_output_shape(data[0])))
 
     elif plugin.output_data_type() == ProjectionData:
         output.append(pu.get_projection_data(data[0], temp_file,
-                                             plugin.name, mpi))
+                                             plugin.name, mpi,
+                                             plugin.get_output_shape(data[0])))
 
     elif plugin.output_data_type() == VolumeData:
         output.append(pu.get_volume_data(data[0], temp_file,
-                                         plugin.name, mpi))
+                                         plugin.name, mpi,
+                                         plugin.get_output_shape(data[0])))
 
     elif plugin.output_data_type() == Data:
+        if type(data) is not list:
+            data = [data]
         for datum in data:
             if file_name is None:
                 temp_file = tempfile.NamedTemporaryFile(suffix='.h5',
@@ -112,14 +117,18 @@ def get_appropriate_output_data(plugin, data, mpi=False, file_name=None):
 
             if isinstance(datum, RawTimeseriesData):
                 output.append(pu.get_raw_data(datum, temp_file,
-                                              plugin.name, mpi))
+                                              plugin.name, mpi,
+                                              plugin.get_output_shape(datum)))
 
             elif isinstance(datum, ProjectionData):
-                output.append(pu.get_projection_data(datum,
-                                                     temp_file, plugin.name,
-                                                     mpi))
+                output.append(pu.get_projection_data(datum, temp_file,
+                                                     plugin.name, mpi,
+                                                     plugin.get_output_shape(
+                                                         datum)))
 
             elif isinstance(datum, VolumeData):
                 output.append(pu.get_volume_data(datum, temp_file,
-                                                 plugin.name, mpi))
+                                                 plugin.name, mpi,
+                                                 plugin.get_output_shape(
+                                                     datum)))
     return output

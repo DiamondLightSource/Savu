@@ -31,7 +31,10 @@ import scipy.ndimage as ndi
 import numpy as np
 import scipy.fftpack as fft
 
+from savu.plugins.utils import register_plugin
 
+
+@register_plugin
 class VoCentering(PassThroughPlugin, CpuPlugin):
     """
     A plugin to calculate the center of rotation using the Vo Method

@@ -46,9 +46,13 @@ class CpuPlugin(object):
             logging.debug(new_processes)
             logging.debug(cpu_processes)
             logging.debug("Process is %s",
-                          new_processes[cpu_processes[process]])
-            return self.process(data, output, new_processes,
+                          new_processes[cpu_processes[process]])       
+            self.pre_process(0 if isinstance(data, str) else data.get_data_shape())
+            self.process(data, output, new_processes,
                                 cpu_processes[process])
+            self.post_process()
+            return
+            
         logging.debug("Not Running the task as not CPU")
         return
 

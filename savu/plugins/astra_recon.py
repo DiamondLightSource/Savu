@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from savu.plugins.base_recon import BaseRecon
+from savu.plugins.base_astra_recon import BaseAstraRecon
 from savu.data.process_data import CitationInfomration
 
 """
@@ -23,79 +23,25 @@ from savu.data.process_data import CitationInfomration
 """
 from savu.plugins.cpu_plugin import CpuPlugin
 
-import numpy as np
-
-import astra
+from savu.plugins.utils import register_plugin
 
 
-class AstraRecon(BaseRecon, CpuPlugin):
+@register_plugin
+class AstraRecon(BaseAstraRecon, CpuPlugin):
     """
     A Plugin to run the astra reconstruction
     
-    :param number_of_iterations: Number of Iterations if an iterative method is used . Default: 20.
-    :param reconstruction_type: Reconstruction type (SIRT|SIRT). Default: 'SIRT'.
+    :param number_of_iterations: Number of Iterations if an iterative method is used . Default: 1.
+    :param reconstruction_type: Reconstruction type (SIRT|FBP). Default: 'FBP'.
     """
 
     def __init__(self):
         super(AstraRecon, self).__init__("AstraRecon")
 
-    def reconstruct(self, sinogram, centre_of_rotation, angles, shape, center):
+    def get_parameters(self):
+        return [self.parameters['reconstruction_type'], \
+                self.parameters['number_of_iterations']]
 
-        ctr = centre_of_rotation
-        width = sinogram.shape[1]
-        pad = 50
-
-        sino = np.nan_to_num(sinogram)
-
-        # pad the array so that the centre of rotation is in the middle
-        alen = ctr
-        blen = width - ctr
-        mid = width / 2.0
-
-        if (ctr > mid):
-            plow = pad
-            phigh = (alen - blen) + pad
-        else:
-            plow = (blen - alen) + pad
-            phigh = pad
-
-        logdata = np.log(sino+1)
-        sinogram = np.pad(logdata, ((0, 0), (int(plow), int(phigh))),
-                          mode='reflect')
-
-        width = sinogram.shape[1]
-
-        vol_geom = astra.create_vol_geom(shape[0], shape[1])
-        proj_geom = astra.create_proj_geom('parallel', 1.0, width,
-                                           np.deg2rad(angles))
-
-        sinogram_id = astra.data2d.create("-sino", proj_geom, sinogram)
-
-        # Create a data object for the reconstruction
-        rec_id = astra.data2d.create('-vol', vol_geom)
-
-        proj_id = astra.create_projector('strip', proj_geom, vol_geom)
-
-        cfg = astra.astra_dict(self.parameters['reconstruction_type'])
-        cfg['ReconstructionDataId'] = rec_id
-        cfg['ProjectionDataId'] = sinogram_id
-        cfg['ProjectorId'] = proj_id
-
-        # Create the algorithm object from the configuration structure
-        alg_id = astra.algorithm.create(cfg)
-        # Run 20 iterations of the algorithm
-        itterations = int(self.parameters['number_of_iterations'])
-        # This will have a runtime in the order of 10 seconds.
-        astra.algorithm.run(alg_id, itterations)
-        # Get the result
-        rec = astra.data2d.get(rec_id)
-
-        # Clean up.
-        astra.algorithm.delete(alg_id)
-        astra.data2d.delete(rec_id)
-        astra.data2d.delete(sinogram_id)
-
-        return rec
 
     def get_citation_inforamtion(self):
         cite_info = CitationInfomration()

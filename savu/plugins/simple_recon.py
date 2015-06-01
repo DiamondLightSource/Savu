@@ -27,7 +27,10 @@ from savu.plugins.cpu_plugin import CpuPlugin
 
 import numpy as np
 
+from savu.plugins.utils import register_plugin
 
+
+@register_plugin
 class SimpleRecon(BaseRecon, CpuPlugin):
     """
     A Plugin to apply a simple reconstruction with no dependancies
