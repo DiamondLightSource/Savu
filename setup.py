@@ -5,11 +5,11 @@ def readme():
         return f.read()
 
 setup(name='savu',
-      version='0.1.1',
+      version='0.2',
       description='Savu Python Tomography Pipeline',
       long_description=readme(),
       classifiers=[
-        'Development Status :: 1 - Planning',
+        'Development Status :: 3 - Alpha',
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: Apache Software License',
         'Natural Language :: English',
@@ -22,6 +22,7 @@ setup(name='savu',
       packages=['savu',
                 'savu.core',
                 'savu.data',
+                'savu.log_handler',
                 'savu.mpi_test',
                 'savu.mpi_test.dls',
                 'savu.plugins',
