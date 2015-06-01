@@ -67,14 +67,23 @@ class Filter(Plugin):
 
     def _filter_chunk(self, slice_list, data, output, processes, process):
         logging.debug("Running filter._filter_chunk")
-        process_slice_list = du.get_slice_list_per_process(slice_list, process, processes)
+        process_slice_list = du.get_slice_list_per_process(slice_list,
+                                                           process, processes)
 
         padding = self.get_filter_padding()
 
         for sl in process_slice_list:
             section = du.get_padded_slice_data(sl, padding, data)
             result = self.filter_frame(section)
-            output.data[sl] = du.get_unpadded_slice_data(sl, padding, data, result)
+            if type(result) == dict:
+                for key in result.keys():
+                    if key == 'center_of_rotation':
+                        frame = du.get_orthogonal_slice(sl, data.core_directions[self.get_filter_frame_type()])
+                        output.center_of_rotation[frame] = result[key]
+                    elif key == 'data':
+                        output.data[sl] = du.get_unpadded_slice_data(sl, padding, data, result)
+            else:
+                output.data[sl] = du.get_unpadded_slice_data(sl, padding, data, result)
 
     def filter_frame(self, data):
         """
