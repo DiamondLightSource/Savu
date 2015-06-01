@@ -51,12 +51,11 @@ class SinogramAlignment(Filter, CpuPlugin):
 
     def _shift(self, sinogram, com_x, com_y):
         fitpars, covmat = curve_fit(self._sinfunc, com_x, com_y,
-                                    p0=(1.0, 0.2, 22))
+                                    p0=(1.0, 0.2, 20))
         variances = covmat.diagonal()
         std_devs = np.sqrt(variances)
-        residual = sinogram[1] - self._sinfunc(sinogram[0], *fitpars)
-        centre_of_rotation_shift = \
-            (sinogram.shape[0]/2) + residual + fitpars[2]
+        residual = com_y - self._sinfunc(com_x, *fitpars)
+        centre_of_rotation_shift = residual
         np.array_split(sinogram, sinogram.shape[0], axis=0)
         n = 0
         shifted_sinogram = []
