@@ -27,7 +27,7 @@ from savu.plugins.cpu_plugin import CpuPlugin
 
 import numpy as np
 
-import ccpi
+import ccpi_reconstruction
 
 from savu.plugins.utils import register_plugin
 
@@ -58,7 +58,7 @@ class RingArtefactFilter(Filter, CpuPlugin):
         self.param_check(param_n, param_r, num_series)         
         data = data.astype(np.float64)
 
-        #ccpi.aml_ring_artefacts(data, param_n, param_r, num_series)
+        #ccpi_reconstruction.aml_ring_artefacts(data, param_n, param_r, num_series)
         
         return data
 

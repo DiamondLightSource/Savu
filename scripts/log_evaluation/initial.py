@@ -22,7 +22,8 @@ def evaluate(selected_data):
     return (summed, count)
 
 
-def process_file(filename="../../test_data/trimmed_out.log"):
+#def process_file(filename="../../test_data/trimmed_out.log"):
+def process_file(filename="log_mpi_test.o8608876"):
     data = pandas.io.parsers.read_fwf(filename, widths=[2, 13, 5, 5, 6, 1000], header=None)
     machinepds = {}
     for machine in data[2].unique():

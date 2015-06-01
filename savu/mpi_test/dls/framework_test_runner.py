@@ -52,7 +52,7 @@ if __name__ == '__main__':
                       type='string')
     parser.add_option("-d", "--dir", dest="directory",
                       help="Temp direcotry name",
-                      default="/dls/tmp/ssg37927/cluster",
+                      default="/dls/tmp/nic_savu/cluster",
                       type='string')
     (options, args) = parser.parse_args()
 

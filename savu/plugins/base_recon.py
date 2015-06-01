@@ -83,6 +83,13 @@ class BaseRecon(Plugin):
             self.count+=1
             print self.count
             
+    def get_max_frames(self):
+        """
+        Should be overridden to define the max number of frames to process at a time
+
+        :returns:  an integer of the number of frames
+        """
+        return 8
 
     def required_data_type(self):
         """

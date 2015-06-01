@@ -28,7 +28,7 @@ from savu.plugins.cpu_plugin import CpuPlugin
 
 import numpy as np
 
-import ccpi
+import ccpi_reconstruction
 
 from savu.plugins.utils import register_plugin
 
@@ -53,10 +53,12 @@ class CglsRecon(BaseRecon, CpuPlugin):
         num_iterations = self.parameters['number_of_iterations']
         resolution = self.parameters['resolution']
 
-        pixels = np.hstack([np.reshape(sinogram.astype(np.float32), (sinogram.shape[0], 1, sinogram.shape[1]))]*4)
+        pixels = np.hstack([np.reshape(sinogram.astype(np.float32), \
+                            (sinogram.shape[0], 1, sinogram.shape[1]))]*4)
 
-        voxels = ccpi.cgls(pixels, angles.astype(np.float32), centre_of_rotation, \
-                           resolution, num_iterations, nthreads)
+        voxels = ccpi_reconstruction.cgls(pixels, angles.astype(np.float32), \
+                                            centre_of_rotation, resolution, \
+                                            num_iterations, nthreads)
                            
         voxels = voxels[:160,:160,1]   
          
