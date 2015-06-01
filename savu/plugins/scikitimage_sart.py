@@ -8,11 +8,12 @@ import numpy as np
 from scipy import ndimage
 
 
-class ExampleFilterBackProjection(BaseRecon, CpuPlugin):
+class ScikitimageSart(BaseRecon, CpuPlugin):
     """
     A Plugin to reconstruct an image by filter back projection
     using the inverse radon transform from scikit-image.
 
+    :param iterations: Number of iterations in the reconstruction. Default: 1.
     :param output_size: Number of rows and columns in the
     reconstruction. Default: None.
     :param filter: Filter used in frequency domain filtering
@@ -24,14 +25,29 @@ class ExampleFilterBackProjection(BaseRecon, CpuPlugin):
     :param circle: Assume the reconstructed image is zero outside the inscribed
     circle. Also changes the default output_size to match the behaviour of
     radon called with circle=True. Default: False.
+    :param image: 2D array, dtype=float, optional.  Image containing an initial
+    reconstruction estimate. Shape of this array should be
+    (radon_image.shape[0], radon_image.shape[0]). The default is a filter back
+    projection using scikit.image.iradon as "result"
+    :param projection_shifts : 1D array, dtype=float. Shift the projections
+    contained in radon_image (the sinogram) by this many pixels before
+    reconstructing the image. The i'th value defines the shift of the i'th
+    column of radon_image.  Default: None.
+    :param clip : length-2 sequence of floats. Force all values in the
+    reconstructed tomogram to lie in the range [clip[0], clip[1]].
+    Default: None.
+    :param relaxation : float. Relaxation parameter for the update step.
+    A higher value can improve the convergence rate, but one runs the risk of
+    instabilities. Values close to or higher than 1 are not recommended.
+    Default: None.
     """
 
     def __init__(self):
-        logging.debug("initialising Example Filter Back Projection")
+        logging.debug("initialising Scikitimage SART")
         logging.debug("Calling super to make sure that all superclasses are " +
                       " initialised")
-        super(ExampleFilterBackProjection,
-              self).__init__("ExampleFilterBackProjection")
+        super(ScikitimageSart,
+              self).__init__("Scikitimage SART")
 
     def _shift(self, sinogram, centre_of_rotation):
         centre_of_rotation_shift = (sinogram.shape[0]/2) - centre_of_rotation
@@ -53,6 +69,17 @@ class ExampleFilterBackProjection(BaseRecon, CpuPlugin):
                              interpolation='linear',
                              # self.parameters['linear'],
                              circle=False)  # self.parameters[False])
+        for i in range(self.parameters["iterations"]):
+            print "Iteration %i" % i
+            result = transform.iradon_sart(sino, theta=theta, image=result,
+                                           # self.parameters['result'],
+                                           projection_shifts=None,
+                                           # self.parameters['None'],
+                                           clip=None,
+                                           # self.parameters[None],
+                                           relaxation=0.15
+                                           # self.parameters[0.15])
+                                           )
         return result
 
     def get_citation_inforamtion(self):
