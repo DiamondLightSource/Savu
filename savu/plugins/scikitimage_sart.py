@@ -1,7 +1,7 @@
 import logging
 from savu.plugins.base_recon import BaseRecon
 from savu.data.process_data import CitationInfomration
-from savu.plugins.cpu_plugin import CpuPlugin
+from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 import skimage.transform as transform
 import numpy as np

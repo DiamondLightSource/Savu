@@ -22,7 +22,7 @@ from savu.plugins.plugin import Plugin
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
-from savu.plugins.gpu_plugin import GpuPlugin
+from savu.plugins.driver.gpu_plugin import GpuPlugin
 from savu.plugins.simple_recon import SimpleRecon
 
 

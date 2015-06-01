@@ -22,7 +22,7 @@
 
 """
 from savu.data.structures import RawTimeseriesData, ProjectionData
-from savu.plugins.cpu_plugin import CpuPlugin
+from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.plugin import Plugin
 from savu.core.utils import logmethod
 

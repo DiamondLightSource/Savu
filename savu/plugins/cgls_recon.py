@@ -20,11 +20,9 @@ from savu.data.process_data import CitationInfomration
    :synopsis: Wrapper around the CCPi cgls reconstruction
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
-from savu.plugins.cpu_plugin import CpuPlugin
-
 """
 
-from savu.plugins.cpu_plugin import CpuPlugin
+from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 import numpy as np
 

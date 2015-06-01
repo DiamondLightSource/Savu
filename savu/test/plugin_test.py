@@ -27,7 +27,7 @@ import unittest
 
 from savu.plugins import utils as pu
 from savu.test import test_utils as tu
-from savu.plugins.cpu_plugin import CpuPlugin
+from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 base_class_name = "savu.plugins.plugin"
 

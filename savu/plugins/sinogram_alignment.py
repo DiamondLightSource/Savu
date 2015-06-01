@@ -1,7 +1,7 @@
 import logging
 from savu.plugins.filter import Filter
 from savu.data.process_data import CitationInfomration
-from savu.plugins.cpu_plugin import CpuPlugin
+from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.data import structures
 
 from scipy import ndimage

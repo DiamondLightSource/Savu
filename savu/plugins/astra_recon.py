@@ -21,7 +21,7 @@ from savu.data.process_data import CitationInfomration
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
-from savu.plugins.cpu_plugin import CpuPlugin
+from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 from savu.plugins.utils import register_plugin
 
