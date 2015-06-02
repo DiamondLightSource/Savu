@@ -23,7 +23,7 @@
 import logging
 
 from savu.plugins.filter import Filter
-from savu.plugins.cpu_plugin import CpuPlugin
+from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 from savu.data import structures as st
 
@@ -31,6 +31,10 @@ import scipy.signal.signaltools as sig
 import numpy as np
 import dezing
 
+from savu.plugins.utils import register_plugin
+
+
+@register_plugin
 class DezingFilter(Filter, CpuPlugin):
     """
     A plugin

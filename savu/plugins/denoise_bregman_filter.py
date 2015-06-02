@@ -25,7 +25,7 @@ import logging
 from skimage.restoration import denoise_tv_bregman
 
 from savu.plugins.filter import Filter
-from savu.plugins.cpu_plugin import CpuPlugin
+from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 from savu.plugins.utils import register_plugin
 

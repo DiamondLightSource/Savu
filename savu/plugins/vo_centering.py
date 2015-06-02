@@ -23,7 +23,7 @@ from savu.data.structures import ProjectionData
 
 """
 from savu.plugins.pass_through_plugin import PassThroughPlugin
-from savu.plugins.cpu_plugin import CpuPlugin
+from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.data import structures
 
 import scipy.ndimage as ndi

@@ -23,7 +23,7 @@
 import logging
 
 from savu.plugins.filter import Filter
-from savu.plugins.cpu_plugin import CpuPlugin
+from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 import numpy as np
 

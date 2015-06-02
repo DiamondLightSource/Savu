@@ -1,14 +1,17 @@
 import logging
 from savu.plugins.base_recon import BaseRecon
 from savu.data.process_data import CitationInfomration
-from savu.plugins.cpu_plugin import CpuPlugin
+from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 import skimage.transform as transform
 import numpy as np
 from scipy import ndimage
 
+from savu.plugins.utils import register_plugin
 
-class ExampleFilterBackProjection(BaseRecon, CpuPlugin):
+
+@register_plugin
+class ScikitimageFilterBackProjection(BaseRecon, CpuPlugin):
     """
     A Plugin to reconstruct an image by filter back projection
     using the inverse radon transform from scikit-image.
@@ -27,11 +30,11 @@ class ExampleFilterBackProjection(BaseRecon, CpuPlugin):
     """
 
     def __init__(self):
-        logging.debug("initialising Example Filter Back Projection")
+        logging.debug("initialising Scikitimage Filter Back Projection")
         logging.debug("Calling super to make sure that all superclasses are " +
                       " initialised")
-        super(ExampleFilterBackProjection,
-              self).__init__("ExampleFilterBackProjection")
+        super(ScikitimageFilterBackProjection,
+              self).__init__("ScikitimageFilterBackProjection")
 
     def _shift(self, sinogram, centre_of_rotation):
         centre_of_rotation_shift = (sinogram.shape[0]/2) - centre_of_rotation
