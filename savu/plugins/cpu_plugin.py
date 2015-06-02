@@ -32,6 +32,7 @@ class CpuPlugin(object):
         super(CpuPlugin, self).__init__()
 
     def run_process(self, data, output, processes, process):
+        print processes
         count = 0
         cpu_processes = []
         for i in ["CPU" in i for i in processes]:
