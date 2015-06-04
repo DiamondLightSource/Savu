@@ -9,15 +9,21 @@ put the .sh file into the install directory and then run
 
     >>> bash Anaconda-2.2.0-Linux-x86_64.sh
 
-you will need to update this a little with the following things
-    
-    pip install mpi4py
+We need MPI to run Savu, so this needs to be installed and on your path
 
-Once you have installed this, now get the code from github
+    >>> export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/location/of/openmpi/1.4.3/64/lib/
+
+This allows us to add this tou our python, and you might need to set up your proxy to do this
+    
+    >>> export https_proxy=proxy_location:port
+    >>> pip install mpi4py
+
+Once you have installed this, now get the code from github, run this where you want 
+the code to be checked out
 
     >>> git clone https://github.com/DiamondLightSource/Savu.git
 
-you should probably keep a record of the place where this is
+For ease, record this location in an enviroment variable for later use.
 
     >>> export SAVU_HOME=/path/to/Savu
 
@@ -33,6 +39,10 @@ now you should be able to run up your python interpreter, and call
 running the tests simply makes sure that everything is OK.  Watch out for
 failures as this will highlight if there are any modules which you should
 inlcude, for example the astra toolbox if you want to use it.
+
+If you just want to run a specific test, then you can run that with the following command
+
+    >>> ana/bin/python $SAVU_HOME/savu/test/cgls_recon_test.py 
 
 Running the pipeline
 ********************
