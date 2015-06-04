@@ -41,28 +41,31 @@ def convert(filename):
 
     threads = {}
 
+#    read_lines = 2000
+#    with open(filename, 'r') as ff:
+#        for _ in range(read_lines):
+#            line = ff.readline()
     ff = open(filename, 'r')
-    for line in ff:
-        #print(line)
+
+    for line in ff:         
         s = line.split()
-        key = s[1]
-        print(key)
+        key = s[2]+s[3]
         if not threads.has_key(key):
             threads[key] = []
-        threads[key].append( (s[0].split(':') , line.split(s[2])[1] ) )
-
+        if "DEBUG" in s[4]:
+            threads[key].append((s[1], line.split(s[4])[1] ) )
+            
     test = []
 
     kk = threads.keys()
     kk.sort()
     for key in kk:
-        print key
+        timeShift = int(threads[key][0][0])
         for i in range(len(threads[key])-1):
             try :
-                print 'p  %s' % (threads[key][i][1].strip())
-                test.append(( key, threads[key][i][1].strip(),
-                    'new Date(0,0,0,%s,%s,%s,%s)'%(threads[key][i][0][0],threads[key][i][0][1],threads[key][i][0][2].split('.')[0], threads[key][i][0][2].split('.')[1]),
-                    'new Date(0,0,0,%s,%s,%s,%d)'%(threads[key][i+1][0][0],threads[key][i+1][0][1],threads[key][i+1][0][2].split('.')[0], int(threads[key][i+1][0][2].split('.')[1])+1) ))
+                test.append(( key, threads[key][i][1].strip().replace("'",""),
+                    'new Date(0,0,0,%d,%d,%d,%d)'%(get_time(int(threads[key][i][0])-timeShift)),
+                    'new Date(0,0,0,%d,%d,%d,%d)'%(get_time(int(threads[key][i+1][0])+1-timeShift))))
             except:
                 print "Failed to work with line"
                 print threads[key][i]
@@ -73,10 +76,40 @@ def convert(filename):
     f2.write(template.render(vals=test))
 
     f2.close()
-    
+        
     return test
 
 
+def evaluate(selected_data):
+    starts = selected_data[selected_data[5].str.startswith("Start::")]
+    ends = selected_data[selected_data[5].str.startswith("Finish::")]
+
+    summed = {}
+    count = {}
+
+    for i in range(len(starts)):
+        start = starts[i:i+1]
+        aa = ends[ends[1] >= start[1].base[0]]
+        key = start[5].base[0].split("Start::")[1].strip()
+        end = aa[aa[5].str.contains(key)]
+        if key not in summed:
+            summed[key] = 0
+            count[key] = 0
+        elapsed = end[1].base[0] - start[1].base[0]
+        summed[key] += elapsed
+        count[key] += 1
+    return (summed, count)
+    
+    
+def get_time(ms):
+    
+    s,ms = divmod(ms,1000)
+    m,s = divmod(s,60)
+    h,m = divmod(m,60)
+    d,h = divmod(h,24) 
+    
+    return h,m,s,ms
+    
 if __name__ == "__main__":
     import optparse
     usage = "%prog [options] input_file"
