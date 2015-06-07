@@ -22,7 +22,8 @@ install:
   - travis_wait pip install coveralls --use-mirrors -q
 
 # command to run tests, e.g. python setup.py test
-script:  
+script:
+  - ln -s /usr/lib/x86_64-linux-gnu/libboost_python.so.5 /usr/lib/x86_64-linux-gnu/libboost_python.so
   - echo $LD_LIBRARY_PATH
   - py.test savu/test -v --cov savu --cov-report term-missing
 
