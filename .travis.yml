@@ -23,6 +23,7 @@ install:
 
 # command to run tests, e.g. python setup.py test
 script:  
+  - echo $LD_LIBRARY_PATH
   - py.test savu/test -v --cov savu --cov-report term-missing
 
 after_success:
