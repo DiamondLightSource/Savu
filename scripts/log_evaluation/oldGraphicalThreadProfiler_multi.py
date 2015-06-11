@@ -25,9 +25,8 @@ def set_template_string(chart_width):
          ]);
 
       var options = {
-      timeline: { colorByRowLabel: false },
-        backgroundColor: '#ffd',
-        avoidOverlappingGridLines: true
+      timeline: { colorByRowLabel: true },
+        backgroundColor: '#ffd'
         };
 
       var chart = new google.visualization.Timeline(document.getElementById('gantt_div'));
@@ -38,7 +37,7 @@ def set_template_string(chart_width):
 
     <div id="gantt_div">
 
-    <style> #gantt_div {width:1300px; height:1000px;}
+    <style> #gantt_div {width:1000px; height:1000px;}
 
     '''
     return template_string
@@ -46,22 +45,22 @@ def set_template_string(chart_width):
 
 def convert(filename):
     from jinja2 import Template
-    
+    import sys
+    import pandas
+
     machine_out = ""#CPU0"
-    timeInterval = 50 # millisecs
 
     threads = {}
 
-#    read_lines = 2000
-#    with open(filename, 'r') as ff:
-#        for _ in range(read_lines):
-#            line = ff.readline()
+    print("***",sys.argv)
 
+    print type(sys.argv)
+    
+    
     ff = open(filename, 'r')
-
+    
     for line in ff:         
         s = line.split()
-        print s
         key = s[2]+s[3]
         if not threads.has_key(key):
             threads[key] = []
@@ -78,16 +77,15 @@ def convert(filename):
         if machine_out in kk[idx]:
             timeShift = int(threads[key][0][0])
             for i in range(len(threads[key])-1):
-                if ((int(threads[key][i+1][0])-timeShift) - (int(threads[key][i][0])-timeShift)) > timeInterval:
-                    try :
-        #                test.append(( key, threads[key][i][1].strip().replace("'",""),
-        #                    'new Date(0,0,0,%d,%d,%d,%d)'%(get_time(int(threads[key][i][0])-timeShift)),
-        #                    'new Date(0,0,0,%d,%d,%d,%d)'%(get_time(int(threads[key][i+1][0])+1-timeShift))))
-                        test.append(( key, threads[key][i][1].strip().replace("'",""),
-                            int(threads[key][i][0])-timeShift, int(threads[key][i+1][0])-timeShift))
-                    except:
-                        print "Failed to work with line"
-                        print threads[key][i]
+                try :
+    #                test.append(( key, threads[key][i][1].strip().replace("'",""),
+    #                    'new Date(0,0,0,%d,%d,%d,%d)'%(get_time(int(threads[key][i][0])-timeShift)),
+    #                    'new Date(0,0,0,%d,%d,%d,%d)'%(get_time(int(threads[key][i+1][0])+1-timeShift))))
+                    test.append(( key, threads[key][i][1].strip().replace("'",""),
+                        int(threads[key][i][0])-timeShift, int(threads[key][i+1][0])+1-timeShift))
+                except:
+                    print "Failed to work with line"
+                    print threads[key][i]
 
     f_out = open(filename+'.html','w')
     template = Template(set_template_string(100))
@@ -96,26 +94,6 @@ def convert(filename):
 
     return test
 
-
-def evaluate(selected_data):
-    starts = selected_data[selected_data[5].str.startswith("Start::")]
-    ends = selected_data[selected_data[5].str.startswith("Finish::")]
-
-    summed = {}
-    count = {}
-
-    for i in range(len(starts)):
-        start = starts[i:i+1]
-        aa = ends[ends[1] >= start[1].base[0]]
-        key = start[5].base[0].split("Start::")[1].strip()
-        end = aa[aa[5].str.contains(key)]
-        if key not in summed:
-            summed[key] = 0
-            count[key] = 0
-        elapsed = end[1].base[0] - start[1].base[0]
-        summed[key] += elapsed
-        count[key] += 1
-    return (summed, count)
     
     
 def get_time(ms):
