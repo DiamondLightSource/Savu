@@ -46,8 +46,8 @@ class AllCpusPlugin(object):
         if cpu_processes[process] >= 0:
             logging.debug("Running the CPUS Process %i", process)
             new_processes = [i for i in processes if "CPU0" in i]
-            logging.debug(new_processes)
-            logging.debug(cpu_processes)
+            #logging.debug(new_processes)
+            #logging.debug(cpu_processes)
             logging.debug("Process is %s",
                           new_processes[cpu_processes[process]])
             self.pre_process(0 if isinstance(data, str) else data.get_data_shape())

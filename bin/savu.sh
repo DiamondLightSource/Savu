@@ -1,5 +1,5 @@
 module load python/ana
 
-export PYTHONPATH=/home/ssg37927/Savu:$PYTHONPATH
+export PYTHONPATH=/home/qmm55171/Documents/Git/git_repos/Savu:$PYTHONPATH
 
-python /home/ssg37927/Savu/savu/tomo_recon.py $@
+python /home/qmm55171/Documents/Git/git_repos/Savu/savu/tomo_recon.py $@

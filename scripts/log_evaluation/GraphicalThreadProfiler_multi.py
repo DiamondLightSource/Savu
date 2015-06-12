@@ -51,7 +51,7 @@ def convert(filename):
 
     
     the_key = ""#CPU0"
-    the_interval = 1 # millisecs
+    the_interval = 50 # millisecs
 
     all_frames = []
     
@@ -119,6 +119,7 @@ def get_average_duration(frames):
     avg_frames = avg_frames[~np.isnan(avg_frames)]
 
     return avg_frames
+    
     
 if __name__ == "__main__":
     import optparse

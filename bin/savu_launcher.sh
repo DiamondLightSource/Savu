@@ -1,10 +1,25 @@
 module load global/cluster
 
-qsub -N mpi_test -sync y -j y -pe openmpi 120 -q medium.q@@com06 /home/ssg37927/savu/Savu/bin/savu_mpijob.sh $@ > tmp.txt
+echo "running the mpi job" 
 
-filename=`echo mpi_test.o`
+savupath=$1
+datafile=$2
+processfile=$3
+outpath=$4
+outname=$5
+nNodes=$6
+nCPUs=$7
+
+filepath=$savupath/bin/savu_mpijob.sh
+M=$nNodes*12
+
+qsub -N $outname -sync y -j y -pe openmpi $M -q medium.q@@com06 $filepath $savupath $datafile $processfile $outpath $nCPUs > tmp.txt
+
+
+filename=`echo $outname.o`
 jobnumber=`awk '{print $3}' tmp.txt | head -n 1`
 filename=$filename$jobnumber
+echo $filename
 
 while [ ! -f $filename ]
 do
@@ -13,6 +28,9 @@ done
 
 cat $filename
 
+grep "L " $filename > log_$filename
+
 sleep 20
 echo qacct -j ${jobnumber}
 qacct -j ${jobnumber}
+

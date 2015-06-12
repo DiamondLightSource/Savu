@@ -26,7 +26,7 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 import numpy as np
 
-import ccpi_reconstruction
+import ccpi
 
 from savu.plugins.utils import register_plugin
 
@@ -36,7 +36,7 @@ class CglsRecon(BaseRecon, CpuPlugin):
     """
      A Plugin to run the CCPi cgls reconstruction
     
-    :param number_of_iterations: Number of Iterations if an iterative method is used . Default: 1.
+    :param number_of_iterations: Number of Iterations if an iterative method is used . Default: 5.
     :param resolution: Determines the number of output voxels where resolution = n_pixels/n_voxels. Default: 1.
     :param number_of_threads: Number of OMP threads. Default: 1
     """
@@ -54,10 +54,10 @@ class CglsRecon(BaseRecon, CpuPlugin):
         pixels = np.hstack([np.reshape(sinogram.astype(np.float32), \
                             (sinogram.shape[0], 1, sinogram.shape[1]))]*4)
 
-        voxels = ccpi_reconstruction.cgls(pixels, angles.astype(np.float32), \
+        voxels = ccpi.cgls(pixels, angles.astype(np.float32), \
                                             centre_of_rotation, resolution, \
                                             num_iterations, nthreads)
-                           
+
         voxels = voxels[:160,:160,1]   
          
         return voxels

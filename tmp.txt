@@ -1,0 +1,2 @@
+Your job 8612338 ("mpi_test") has been submitted
+Job 8612338 exited with exit code 0.

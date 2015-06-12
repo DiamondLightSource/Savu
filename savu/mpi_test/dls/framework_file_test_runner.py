@@ -31,9 +31,18 @@ from mpi4py import MPI
 from savu.core import process
 
 from savu.data.process_data import ProcessList
+from savu.core.utils import logfunction
 
 import savu.plugins.utils as pu
 import savu.test.test_utils as tu
+
+
+
+@logfunction
+def call_mpi_barrier():
+    logging.debug("Waiting at the barrier")
+    MPI.COMM_WORLD.barrier()
+
 
 if __name__ == '__main__':
 
@@ -74,7 +83,7 @@ if __name__ == '__main__':
 
     MPI.COMM_WORLD.barrier()
 
-    logging.info("Starting the test process, true dat")
+    logging.info("Starting the test process")
 
     logging.debug("Rank : %i - Size : %i", RANK, SIZE)
 
@@ -82,12 +91,12 @@ if __name__ == '__main__':
 
     logging.debug("ip address is : %s", IP)
 
-    MPI.COMM_WORLD.barrier()
+    call_mpi_barrier()
 
     import os
     logging.debug(os.getenv('LD_LIBRARY_PATH'))
 
-    MPI.COMM_WORLD.barrier()
+    call_mpi_barrier()
 
     process_filename = tu.get_test_data_path(options.process_filename)
 
@@ -101,4 +110,6 @@ if __name__ == '__main__':
                              mpi=True, processes=ALL_PROCESSES,
                              process=RANK)
 
-    MPI.COMM_WORLD.barrier()
+    call_mpi_barrier()
+
+    

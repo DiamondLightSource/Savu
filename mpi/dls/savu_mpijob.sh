@@ -18,11 +18,11 @@ echo "number of uniq hosts: ${uniqslots}"
 echo "running on these hosts:"
 cat ${UNIQHOSTS}
 
-processes=`bc <<< "$uniqslots*12"`
+processes=`bc <<< "$uniqslots*6"`
 
 echo "Processes running are : ${processes}"
 
 mpirun -np ${processes} \
        -x LD_LIBRARY_PATH \
        --hostfile ${UNIQHOSTS} \
-       python $SAVU_HOME/savu/tomo_recon_mpi.py $@
+       python /home/qmm55171/Documents/Git/git_repos/Savu/savu/tomo_recon_mpi.py $@
