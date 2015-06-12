@@ -11,9 +11,9 @@ nNodes=$6
 nCPUs=$7
 
 filepath=$savupath/bin/savu_mpijob.sh
-M=$nNodes*12
-
-qsub -N $outname -sync y -j y -pe openmpi $M -q medium.q@@com06 $filepath $savupath $datafile $processfile $outpath $nCPUs > tmp.txt
+M=$((nNodes*12))
+echo $M
+echo "qsub -N $outname -sync y -j y -pe openmpi $M -q medium.q@@com06 $filepath $savupath $datafile $processfile $outpath $nCPUs > tmp.txt"
 
 
 filename=`echo $outname.o`
@@ -30,7 +30,7 @@ cat $filename
 
 grep "L " $filename > log_$filename
 
-sleep 20
-echo qacct -j ${jobnumber}
-qacct -j ${jobnumber}
+#sleep 20
+#echo qacct -j ${jobnumber}
+#qacct -j ${jobnumber}
 
