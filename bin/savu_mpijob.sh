@@ -24,10 +24,14 @@ processes=`bc <<< "$((uniqslots*nCPUs))"`
 
 nCPUs=$((nCPUs-1))
 CPUs=CPU0
-for i in $(eval echo {1..$nCPUs})
-  do
-	CPUs=$CPUs,CPU$i
-done
+
+if nCPUs > 0; then
+	for i in $(eval echo {1..$nCPUs})
+  	do
+		echo $i
+		CPUs=$CPUs,CPU$i
+	done
+fi
 
 
 echo "Processes running are : ${processes}"
