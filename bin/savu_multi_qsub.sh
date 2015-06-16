@@ -15,10 +15,16 @@
 #clear 
 
 while read -r a b c d; do
+
+	if [ ! -z "$a" ]; then
+
 	nNodes=$a
 	nCPUs=$b
 	nRuns=$c
 	fname=$d
+
+	echo $nNodes $nCPUs $nRuns $fname
+
 
 	DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 	x=$DIR
@@ -32,10 +38,11 @@ while read -r a b c d; do
 
 	for i in $(eval echo {1..$nRuns})
   		do
-   		 $savupath$runfile $savupath $datafile $processfile $outpath $outname $nNodes $nCPUs
+   		  $savupath$runfile $savupath $datafile $processfile $outpath $outname $nNodes $nCPUs
 	done
 
 	python $savupath/scripts/log_evaluation/GraphicalThreadProfiler_multi.py "$outpath/"log_${outname}*""
 
+	fi	
 done < ../input_params.txt
 
