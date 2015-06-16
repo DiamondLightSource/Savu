@@ -20,8 +20,6 @@ while read -r a b c d; do
 	nRuns=$c
 	fname=$d
 
-	echo $nNodes $nCPUs $nRuns $fname
-
 	DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 	x=$DIR
 	savupath=${x%/bin}

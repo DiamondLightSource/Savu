@@ -12,14 +12,12 @@ nCPUs=$7
 
 filepath=$savupath/bin/savu_mpijob.sh
 M=$((nNodes*12))
-echo $M
-echo "qsub -N $outname -sync y -j y -pe openmpi $M -q medium.q@@com06 $filepath $savupath $datafile $processfile $outpath $nCPUs > tmp.txt"
 
+qsub -N $outname -sync y -j y -pe openmpi $M -q medium.q@@com06 $filepath $savupath $datafile $processfile $outpath $nCPUs > tmp.txt
 
 filename=`echo $outname.o`
 jobnumber=`awk '{print $3}' tmp.txt | head -n 1`
 filename=$filename$jobnumber
-echo $filename
 
 while [ ! -f $filename ]
 do

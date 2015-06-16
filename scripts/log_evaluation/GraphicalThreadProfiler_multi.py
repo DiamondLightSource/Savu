@@ -47,8 +47,6 @@ import pandas as pd
 import numpy as np    
 
 def convert(filename):
-    from jinja2 import Template
-
     
     the_key = ""#CPU0"
     the_interval = 50 # millisecs
@@ -59,7 +57,6 @@ def convert(filename):
         print files
         frame = get_frame(files, the_key)
         [index, nth] = get_index(frame)
-    
         frame.Time_end[frame.index[np.cumsum(nth)-1]] = frame.Time.max()
         frame = frame.reset_index(drop=True)
 
@@ -71,19 +68,14 @@ def convert(filename):
         all_frames.append(temp)
     
     avg_duration = get_average_duration(all_frames)
-    
+    output_stats(all_frames, filename)
+
     frame.Time_end = avg_duration
     frame.Time = frame.Time_end.shift(1)
     frame.Time.iloc[0] = 0
-    
-    frame = map(list, frame[(frame.Time_end - frame.Time) > the_interval].values)
-  
-    f_out = open(filename[0].split('.')[0] + '_avg' + `len(filename)` + '.html','w')
-    print filename[0].split('.')[0] + '_avg' + `len(filename)` + '.html'
-    template = Template(set_template_string(100))
-    f_out.write(template.render(vals=frame))
-    f_out.close()
 
+    render_template(frame, the_interval, filename)
+    
     return frame
 
 
@@ -109,8 +101,8 @@ def get_index(frame):
         index.append(range(nth[i]))
     
     return [index, nth]
-
-
+    
+    
 def get_average_duration(frames):
     avg_frames = pd.Panel({n: df for n, df in enumerate(frames)})
     avg_frames = (avg_frames.mean(axis=0)).cumsum(0)
@@ -119,6 +111,41 @@ def get_average_duration(frames):
     avg_frames = avg_frames[~np.isnan(avg_frames)]
 
     return avg_frames
+
+
+def render_template(frame, the_interval, filename):  
+    from jinja2 import Template
+    frame = frame[(frame.Time_end - frame.Time) > the_interval].values
+
+    f_out = open(filename[0].split('.')[0] + '_avg' + `len(filename)` + '.html','w')
+    print filename[0].split('.')[0] + '_avg' + `len(filename)` + '.html'
+    template = Template(set_template_string(100))
+
+    f_out.write(template.render(vals = map(list, frame[:,0:4])))    
+    f_out.close()
+    
+    return frame
+    
+    
+def output_stats(frames, filename):
+    temp = []
+    for frame in frames:
+        temp.append(frame.max())
+    
+    total = pd.concat([i for i in temp], axis = 0)
+    total_stats = total.describe()
+    print total_stats
+
+    # stats per machine    
+#    temp = pd.DataFrame({n: df for n, df in enumerate(temp)})        
+#    stats = pd.concat([temp.mean(axis=1), temp.std(axis=1)], axis = 1)
+#    stats.columns = ['Mean' ,'Std']       
+    
+    fname = filename[0].split('.')[0] + '_avg' + `len(filename)` + '_stats.csv'
+    print filename[0].split('.')[0] + '_avg' + `len(filename)` + '_stats.csv'
+    total_stats.to_csv(fname)
+
+    return     
     
     
 if __name__ == "__main__":

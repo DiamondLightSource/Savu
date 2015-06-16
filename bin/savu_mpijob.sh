@@ -25,7 +25,7 @@ processes=`bc <<< "$((uniqslots*nCPUs))"`
 nCPUs=$((nCPUs-1))
 CPUs=CPU0
 
-if nCPUs > 0; then
+if [ $nCPUs -gt 0 ]; then
 	for i in $(eval echo {1..$nCPUs})
   	do
 		echo $i
