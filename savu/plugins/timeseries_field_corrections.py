@@ -74,15 +74,8 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         for frame in frames:
             projection = data.data[projection_frames[frame], :, :]
             projection = (projection-dark)/flat  # (flat-dark)
+			projection[projection <= 0] = 1;
             output.data[frame, :, :] = projection
-
-    def required_resource(self):
-        """
-        This plugin needs to use the CPU to work
-
-        :returns:  CPU
-        """
-        return "CPU"
 
     def required_data_type(self):
         """
