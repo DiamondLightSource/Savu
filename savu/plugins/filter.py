@@ -103,7 +103,6 @@ class Filter(Plugin):
         """
         slice_list = du.get_grouped_slice_list(data, self.get_filter_frame_type(), self.get_max_frames())
         self._filter_chunk(slice_list, data, output, len(processes), process)
-        
 
     def required_data_type(self):
         """
@@ -113,7 +112,6 @@ class Filter(Plugin):
         """
         return Data
 
-        
     def output_data_type(self):
         """
         The output data type of this plugin
@@ -121,5 +119,3 @@ class Filter(Plugin):
         :returns:  Data
         """
         return Data
-
-        

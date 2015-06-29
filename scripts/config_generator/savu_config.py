@@ -37,7 +37,7 @@ class Content(object):
     def insert(self, plugin, pos):
         process = {}
         process['name'] = plugin.name
-        process['id'] = plugin.__module__
+        process['id'] = "savu.plugins." + plugin.__module__
         process['data'] = plugin.parameters
         self.process_list.process_list.insert(pos, process)
 
