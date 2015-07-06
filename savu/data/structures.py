@@ -33,10 +33,10 @@ from savu.core.utils import logmethod
 NX_CLASS = 'NX_class'
 
 # Core Direction Keywords
-CD_PROJECTION = 'core_dir_projection'
-CD_SINOGRAM = 'core_dir_sinogram'
-CD_ROTATION_AXIS = 'core_dir_rotation_axis'
-CD_PATTERN = 'core_dir_pattern'
+CD_PROJECTION = 'core_dir_projection'# What axes will my projection shape be?
+CD_SINOGRAM = 'core_dir_sinogram'# What axes will the sinogram be along?
+CD_ROTATION_AXIS = 'core_dir_rotation_axis'# What axes will look down the rotation axis?
+CD_PATTERN = 'core_dir_pattern'# What axis looks down the pattern axis?
 
 
 class SliceAvailableWrapper(object):
