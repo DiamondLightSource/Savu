@@ -59,7 +59,8 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         except:
             flat = np.ones((data.data.shape[1], data.data.shape[2]))
         # shortcut to reduce processing
-        flat = flat - dark
+            
+        flat[flat == 0.0] = 1
 
         # get a list of all the frames
         projection_frames = np.arange(len(image_key))[image_key == 0]
@@ -74,7 +75,7 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         for frame in frames:
             projection = data.data[projection_frames[frame], :, :]
             projection = (projection-dark)/flat  # (flat-dark)
-			projection[projection <= 0] = 1;
+            projection[projection <= 0.0] = 1;
             output.data[frame, :, :] = projection
 
     def required_data_type(self):
