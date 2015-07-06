@@ -1,4 +1,4 @@
-# Copyright 2014 Diamond Light Source Ltd.
+# Copyright 2015 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -51,18 +51,7 @@ class RawTimeseriesData(DataInterface):
         self.data_shape = None
 
     @logmethod
-    def complete(self):
-        """
-        Closes the backing file and completes work
-        """
-        if self.backing_file is not None:
-            logging.debug("Completing file %s %s", self.base_path,
-                          self.backing_file.filename)
-            self.backing_file.close()
-            self.backing_file = None
-
-    @logmethod
-    def load_from_file(self, path):
+    def link_to_file(self, path):
         """
         Populate the RawTimeseriesData from an NXTomo defined NeXus file
 
@@ -89,9 +78,20 @@ class RawTimeseriesData(DataInterface):
         self.core_directions[CD_SINOGRAM] = (0, 2)
         self.core_directions[CD_ROTATION_AXIS] = (0, )
 
+    @logmethod
+    def complete(self):
+        """
+        Closes the backing file and completes work if required
+        """
+        if self.backing_file is not None:
+            logging.debug("Completing file %s %s", self.base_path,
+                          self.backing_file.filename)
+            self.backing_file.close()
+            self.backing_file = None
+
     def link_to_transport_mechanism(self, transport):
         """
-        Create a h5 backend for this RawTimeseriesData
+        Create a transport backend for the NXTomo standard.
 
         :param path: The full path of the NeXus file to use as a backend
         :type path: str

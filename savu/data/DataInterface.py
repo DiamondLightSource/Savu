@@ -1,4 +1,4 @@
-# Copyright 2014 Diamond Light Source Ltd.
+# Copyright 2015 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@
 
 class DataInterface(object):
 
-    def load_from_file(self, path):
+    def link_to_file(self, path):
         """
         Populate the Data object with the contents of the file
 
