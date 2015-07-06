@@ -115,8 +115,8 @@ class RawTimeseriesData(DataInterface):
         energy_type = self.data.energy.dtype
         x_shape = self.data.x.shape#first translation axis
         x_type = self.data.x.dtype
-        y_shape = self.data.x.shape#y translation axis
-        y_type = self.data.x.dtype
+        y_shape = self.data.y.shape#y translation axis
+        y_type = self.data.y.dtype
         monitor_shape = self.data.monitor.shape# I0
         monitor_type = self.data.monitor.dtype
         mono_shape = self.data.mono.shape
