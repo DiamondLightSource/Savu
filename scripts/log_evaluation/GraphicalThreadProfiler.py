@@ -1,139 +1,95 @@
-
-def set_template_string(chart_width):
-    template_string = '''
-        <script type="text/javascript" src="https://www.google.com/jsapi?autoload={'modules':[{'name':'visualization',
-       'version':'1','packages':['timeline']}]}"></script>
-
-        <script type="text/javascript" src="http://canvg.googlecode.com/svn/trunk/rgbcolor.js"></script> 
-        <script type="text/javascript" src="http://canvg.googlecode.com/svn/trunk/StackBlur.js"></script>
-        <script type="text/javascript" src="http://canvg.googlecode.com/svn/trunk/canvg.js"></script>
-
-        <script type="text/javascript">
-
-        google.setOnLoadCallback(drawChart);
-
-        function drawChart() {
-        var dataTable = new google.visualization.DataTable();
-        dataTable.addColumn({ type: 'string', id: 'Room' });
-        dataTable.addColumn({ type: 'string', id: 'Name' });
-        dataTable.addColumn({ type: 'number', id: 'Start' });
-        dataTable.addColumn({ type: 'number', id: 'End' });
-        dataTable.addRows([
-        {% for val in vals %}
-        [ '{{val[0]}}' , '{{val[1]}}', {{val[2]}}, {{val[3]}} ], 
-         {% endfor %}
-         ]);
-
-      var options = {
-      timeline: { colorByRowLabel: false },
-        backgroundColor: '#ffd',
-        avoidOverlappingGridLines: true
-        };
-
-      var chart = new google.visualization.Timeline(document.getElementById('gantt_div'));
-      chart.draw(dataTable, options);
-
-    }
-    </script>
-
-    <div id="gantt_div">
-
-    <style> #gantt_div {width:1300px; height:1000px;}
-
-    '''
-    return template_string
-    
+import pandas as pd
+import os
 
 def convert(filename):
+
+    for file in filename:
+        print file
+        the_key = ""#CPU0"
+        the_interval = 0.8 # millisecs        
+        frame = get_frame(file, the_key)
+
+        machine_names = get_machine_names(frame)
+        render_template(frame, machine_names, the_interval, set_file_name(file))
+    
+    return frame
+
+
+def get_frame(file, the_key):
+    import itertools
+    
+    names= ['L', 'Time', 'Machine', 'CPU', 'Type', 'Message']
+    data = pd.io.parsers.read_fwf(file, widths=[2, 13, 5, 5, 6, 1000], names=names)
+    data['Key'] = data['Machine'] + data['CPU']
+    frame = ((data[data.Type == "DEBUG"])[data.columns[[6,5,1]]]).sort('Key')  
+
+    frame = frame.sort('Key')    
+    startTime = (frame.groupby('Key').first()).Time
+    nElems = frame.groupby('Key').size()
+ 
+    shift = []
+    for i in range(len(nElems)):
+        shift.append([startTime[i]]*nElems[i]) 
+    shift = list(itertools.chain(*shift))
+
+    frame.Time = frame.Time - shift  
+    frame = frame[frame.Key.str.contains(the_key)]
+    frame.insert(3,"Time_end", frame.Time.shift(-1))
+    frame.Message = frame.Message.str.strip('\n')
+    frame.Message = frame.Message.str.replace("'","")
+  
+    return frame
+
+
+def get_machine_names(frame):
+    machine_names = frame.copy(deep=True)
+    machine_names = machine_names[frame.Message.str.contains('Rank')]
+    machine_names.Message = [m.split(':')[-1].strip() for m in frame.Message if 'Rank' in m]     
+    machine_names = machine_names.drop(['Time','Time_end'], axis=1)
+    machine_names.Key = [k.split('CPU')[0] for k in machine_names.Key]
+    machine_names = machine_names.groupby('Key').first()
+    machine_names['Machine'] = machine_names.index.values
+    
+    return machine_names
+        
+
+def render_template(frame, machine_names, the_interval, outfilename):  
     from jinja2 import Template
-    
-    machine_out = ""#CPU0"
-    timeInterval = 50 # millisecs
+    import template_strings as ts
 
-    threads = {}
+    frame = frame[(frame.Time_end - frame.Time) > the_interval].values
 
-#    read_lines = 2000
-#    with open(filename, 'r') as ff:
-#        for _ in range(read_lines):
-#            line = ff.readline()
-
-    ff = open(filename, 'r')
-
-    for line in ff:         
-        s = line.split()
-        print s
-        key = s[2]+s[3]
-        if not threads.has_key(key):
-            threads[key] = []
-        if "DEBUG" in s[4]:
-            threads[key].append((s[1], line.split(s[4])[1] ) )
-            
-    test = []
-
-    kk = threads.keys()
-    kk.sort()
-    idx = -1
-    for key in kk:
-        idx+=1
-        if machine_out in kk[idx]:
-            timeShift = int(threads[key][0][0])
-            for i in range(len(threads[key])-1):
-                if ((int(threads[key][i+1][0])-timeShift) - (int(threads[key][i][0])-timeShift)) > timeInterval:
-                    try :
-        #                test.append(( key, threads[key][i][1].strip().replace("'",""),
-        #                    'new Date(0,0,0,%d,%d,%d,%d)'%(get_time(int(threads[key][i][0])-timeShift)),
-        #                    'new Date(0,0,0,%d,%d,%d,%d)'%(get_time(int(threads[key][i+1][0])+1-timeShift))))
-                        test.append(( key, threads[key][i][1].strip().replace("'",""),
-                            int(threads[key][i][0])-timeShift, int(threads[key][i+1][0])-timeShift))
-                    except:
-                        print "Failed to work with line"
-                        print threads[key][i]
-
-    f_out = open(filename+'.html','w')
-    template = Template(set_template_string(100))
-    f_out.write(template.render(vals=test))
+    f_out = open(outfilename,'w')
+    print outfilename
+    style = os.path.dirname(__file__) + '/style_sheet.css'
+    template = Template(ts.set_template_string_single(1300))
+    f_out.write(template.render(vals = map(list, frame[:,0:4]), 
+                                machines = map(list, machine_names.values),
+                                style_sheet=style))    
     f_out.close()
-
-    return test
-
-
-def evaluate(selected_data):
-    starts = selected_data[selected_data[5].str.startswith("Start::")]
-    ends = selected_data[selected_data[5].str.startswith("Finish::")]
-
-    summed = {}
-    count = {}
-
-    for i in range(len(starts)):
-        start = starts[i:i+1]
-        aa = ends[ends[1] >= start[1].base[0]]
-        key = start[5].base[0].split("Start::")[1].strip()
-        end = aa[aa[5].str.contains(key)]
-        if key not in summed:
-            summed[key] = 0
-            count[key] = 0
-        elapsed = end[1].base[0] - start[1].base[0]
-        summed[key] += elapsed
-        count[key] += 1
-    return (summed, count)
     
+    return frame
+
+
+def set_file_name(filename):
+
+    dir_path = os.path.dirname(filename)
+    temp = os.path.basename(filename).split('.')
+    filename = temp[0] + '_' + temp[1] + '.html'
+    outfilename = dir_path + '/' + filename
     
-def get_time(ms):
-    
-    s,ms = divmod(ms,1000)
-    m,s = divmod(s,60)
-    h,m = divmod(m,60)
-    d,h = divmod(h,24) 
-    
-    return h,m,s,ms
+    return outfilename 
     
     
 if __name__ == "__main__":
     import optparse
+    import os 
+    
     usage = "%prog [options] input_file"
     parser = optparse.OptionParser(usage=usage)
     
     (options, args) = parser.parse_args()
     
-    convert(args[0])
+    filename = [os.getcwd() + '/' + args[0]]
+    convert(filename)
 

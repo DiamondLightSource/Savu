@@ -1,61 +1,18 @@
-
-def set_template_string(chart_width):
-    template_string = '''
-        <script type="text/javascript" src="https://www.google.com/jsapi?autoload={'modules':[{'name':'visualization',
-       'version':'1','packages':['timeline']}]}"></script>
-
-        <script type="text/javascript" src="http://canvg.googlecode.com/svn/trunk/rgbcolor.js"></script> 
-        <script type="text/javascript" src="http://canvg.googlecode.com/svn/trunk/StackBlur.js"></script>
-        <script type="text/javascript" src="http://canvg.googlecode.com/svn/trunk/canvg.js"></script>
-
-        <script type="text/javascript">
-
-        google.setOnLoadCallback(drawChart);
-
-        function drawChart() {
-        var dataTable = new google.visualization.DataTable();
-        dataTable.addColumn({ type: 'string', id: 'Room' });
-        dataTable.addColumn({ type: 'string', id: 'Name' });
-        dataTable.addColumn({ type: 'number', id: 'Start' });
-        dataTable.addColumn({ type: 'number', id: 'End' });
-        dataTable.addRows([
-        {% for val in vals %}
-        [ '{{val[0]}}' , '{{val[1]}}', {{val[2]}}, {{val[3]}} ], 
-         {% endfor %}
-         ]);
-
-      var options = {
-      timeline: { colorByRowLabel: false },
-        backgroundColor: '#ffd',
-        avoidOverlappingGridLines: true
-        };
-
-      var chart = new google.visualization.Timeline(document.getElementById('gantt_div'));
-      chart.draw(dataTable, options);
-
-    }
-    </script>
-
-    <div id="gantt_div">
-
-    <style> #gantt_div {width:1300px; height:1000px;}
-
-    '''
-    return template_string
-    
 import pandas as pd
 import numpy as np    
+import GraphicalThreadProfiler as gtp
+import os
 
 def convert(filename):
     
     the_key = ""#CPU0"
-    the_interval = 50 # millisecs
+    the_interval = 0.8 # millisecs
 
     all_frames = []
-    
+    print filename
     for files in filename:
         print files
-        frame = get_frame(files, the_key)
+        frame = gtp.get_frame(files, the_key)
         [index, nth] = get_index(frame)
         frame.Time_end[frame.index[np.cumsum(nth)-1]] = frame.Time.max()
         frame = frame.reset_index(drop=True)
@@ -68,28 +25,14 @@ def convert(filename):
         all_frames.append(temp)
     
     avg_duration = get_average_duration(all_frames)
-    output_stats(all_frames, filename)
+    stats = output_stats(all_frames, filename)
 
     frame.Time_end = avg_duration
     frame.Time = frame.Time_end.shift(1)
     frame.Time.iloc[0] = 0
 
-    render_template(frame, the_interval, filename)
+    render_template(frame, the_interval, set_file_name(filename), get_links(filename), stats)
     
-    return frame
-
-
-def get_frame(file, the_key):
-    names= ['L', 'Time', 'Machine', 'CPU', 'Type', 'Message']
-    data = pd.io.parsers.read_fwf(file, widths=[2, 13, 5, 5, 6, 1000], names=names)
-    data['Key'] = data['Machine'] + data['CPU']
-    frame = ((data[data.Type == "DEBUG"])[data.columns[[6,5,1]]]).sort('Key')  
-    
-    frame = frame[frame.Key.str.contains(the_key)]
-    frame.insert(3,"Time_end", frame.Time.shift(-1))
-    frame.Message = frame.Message.str.strip('\n')
-    frame.Message = frame.Message.str.replace("'","")
-  
     return frame
     
 
@@ -111,17 +54,40 @@ def get_average_duration(frames):
     avg_frames = avg_frames[~np.isnan(avg_frames)]
 
     return avg_frames
+    
+
+def set_file_name(filename):    
+    
+    [dir_path, name] = get_base_path(filename)
+    
+    name = name[0].split('.')[0] + '_avg' + `len(filename)` + '.html'
+    outfilename = dir_path + name
+    
+    return outfilename    
 
 
-def render_template(frame, the_interval, filename):  
+def get_links(filename):
+
+    [dir_path, fname] = get_base_path(filename) 
+    
+    name = [gtp.set_file_name(file) for file in fname]
+    links = [(dir_path + n) for n in name]
+        
+    return links
+    
+
+def render_template(frame, the_interval, outfilename, theLinks, theStats):  
     from jinja2 import Template
+    import template_strings as ts
+
     frame = frame[(frame.Time_end - frame.Time) > the_interval].values
 
-    f_out = open(filename[0].split('.')[0] + '_avg' + `len(filename)` + '.html','w')
-    print filename[0].split('.')[0] + '_avg' + `len(filename)` + '.html'
-    template = Template(set_template_string(100))
-
-    f_out.write(template.render(vals = map(list, frame[:,0:4])))    
+    f_out = open(outfilename,'w')
+    print outfilename
+    style = os.path.dirname(__file__) + '/style_sheet.css'
+    template = Template(ts.set_template_string_multi(1300))
+    f_out.write(template.render(vals = map(list, frame[:,0:4]), links=theLinks, 
+                                stats=theStats, style_sheet=style))    
     f_out.close()
     
     return frame
@@ -130,22 +96,34 @@ def render_template(frame, the_interval, filename):
 def output_stats(frames, filename):
     temp = []
     for frame in frames:
-        temp.append(frame.max())
+        temp.append(frame.sum())
     
     total = pd.concat([i for i in temp], axis = 0)
     total_stats = total.describe()
-    print total_stats
 
-    # stats per machine    
-#    temp = pd.DataFrame({n: df for n, df in enumerate(temp)})        
-#    stats = pd.concat([temp.mean(axis=1), temp.std(axis=1)], axis = 1)
-#    stats.columns = ['Mean' ,'Std']       
+    [dir_path, name] = get_base_path(filename)
+    name = name[0].split('.')[0] + '_avg' + `len(filename)` + '_stats.csv'  
+    outfilename = dir_path + name
+
+    total_stats.to_csv(outfilename)
+
+    return total_stats
     
-    fname = filename[0].split('.')[0] + '_avg' + `len(filename)` + '_stats.csv'
-    print filename[0].split('.')[0] + '_avg' + `len(filename)` + '_stats.csv'
-    total_stats.to_csv(fname)
-
-    return     
+    
+def get_machine_names(all_frames):
+    
+            
+    return 
+    
+    
+def get_base_path(filename):
+    if len(filename[0].split('/')) is 0:
+        dir_path = os.getcwd()
+    else:
+        dir_path = os.path.dirname(filename[0])
+        filename = [(os.path.basename(f)) for f in filename]
+    
+    return [dir_path + '/', filename]
     
     
 if __name__ == "__main__":
@@ -154,6 +132,7 @@ if __name__ == "__main__":
     parser = optparse.OptionParser(usage=usage)
     
     (options, args) = parser.parse_args()
-    
-    convert(args)
+    print args
+    filename = [(os.getcwd() + '/' + file) for file in args]
+    convert(filename)
 
