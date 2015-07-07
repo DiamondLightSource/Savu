@@ -26,6 +26,8 @@ import numpy as np
 import h5py
 import logging
 
+print h5py.version.info
+
 from mpi4py import MPI
 
 from savu.core.utils import logmethod
@@ -218,6 +220,7 @@ class RawTimeseriesData(Data):
         :type mpi: package
         """
         self.backing_file = None
+
         if mpi:
             self.backing_file = h5py.File(path, 'w', driver='mpio',
                                           comm=MPI.COMM_WORLD)
@@ -391,6 +394,7 @@ class ProjectionData(Data):
         group = self.backing_file.create_group(group_name)
         group.attrs[NX_CLASS] = 'NXdata'
         data_value = group.create_dataset('data', data_shape, data_type)
+
         data_value.attrs['signal'] = 1
         data_avail = group.create_dataset('data_avail',
                                           data_shape, np.bool_)
@@ -497,6 +501,7 @@ class VolumeData(Data):
         group = self.backing_file.create_group(group_name)
         group.attrs[NX_CLASS] = 'NXdata'
         data_value = group.create_dataset('data', data_shape, data_type)
+        data_value.attrs['signal'] = 1
         data_value.attrs['signal'] = 1
         data_avail = group.create_dataset('data_avail',
                                           data_shape, np.bool_)
