@@ -1,0 +1,226 @@
+
+        <html>
+        <head>
+         <link rel="stylesheet" type="text/css" href="style_sheet.css">
+         
+        <title> Savu MPI performance tests </title>
+        
+        <script type="text/javascript" src="https://www.google.com/jsapi?autoload={'modules':[{'name':'visualization',
+       'version':'1','packages':['corechart']}]}"></script>
+
+        <script type="text/javascript" src="http://canvg.googlecode.com/svn/trunk/rgbcolor.js"></script> 
+        <script type="text/javascript" src="http://canvg.googlecode.com/svn/trunk/StackBlur.js"></script>
+        <script type="text/javascript" src="http://canvg.googlecode.com/svn/trunk/canvg.js"></script>
+
+        <script type="text/javascript">
+
+        google.setOnLoadCallback(drawSeriesChart);
+
+        function drawSeriesChart() {      
+            
+
+                        
+            var data0 = google.visualization.arrayToDataTable([
+            ['file system', '#Cores', 'Time (mean)', '#Nodes', 'Time (std)', 'link'],
+              
+                [ '', 10, 1.528, 1, 0.09, 'file:///dls/science/users/qmm55171/final_logs/original_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N1_C10_mpi_test_avg3.html'], 
+              
+                [ '', 12, 3.395, 4, 0.282, 'file:///dls/science/users/qmm55171/final_logs/original_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N4_C3_mpi_test_avg3.html'], 
+              
+                [ '', 4, 3.145, 1, 0.084, 'file:///dls/science/users/qmm55171/final_logs/original_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N1_C4_mpi_test_avg3.html'], 
+              
+                [ '', 3, 14.594, 1, 4.365, 'file:///dls/science/users/qmm55171/final_logs/original_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N1_C3_mpi_test_avg3.html'], 
+              
+                [ '', 8, 1.725, 1, 0.041, 'file:///dls/science/users/qmm55171/final_logs/original_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N1_C8_mpi_test_avg3.html'], 
+              
+                [ '', 12, 1.494, 1, 0.096, 'file:///dls/science/users/qmm55171/final_logs/original_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N1_C12_mpi_test_avg3.html'], 
+              
+                [ '', 1, 14.033, 1, 1.335, 'file:///dls/science/users/qmm55171/final_logs/original_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N1_C1_mpi_test_avg3.html'], 
+              
+                [ '', 6, 2.452, 1, 0.389, 'file:///dls/science/users/qmm55171/final_logs/original_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N1_C6_mpi_test_avg6.html'], 
+              
+                [ '', 24, 2.384, 4, 0.241, 'file:///dls/science/users/qmm55171/final_logs/original_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N4_C6_mpi_test_avg3.html'], 
+              
+                [ '', 2, 7.92, 1, 1.067, 'file:///dls/science/users/qmm55171/final_logs/original_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N1_C2_mpi_test_avg3.html'], 
+              
+                [ '', 24, 1.965, 2, 0.339, 'file:///dls/science/users/qmm55171/final_logs/original_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N2_C12_mpi_test_avg3.html'], 
+              
+                [ '', 8, 3.824, 2, 0.349, 'file:///dls/science/users/qmm55171/final_logs/original_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N2_C4_mpi_test_avg3.html'], 
+              
+                [ '', 20, 2.38, 2, 0.293, 'file:///dls/science/users/qmm55171/final_logs/original_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N2_C10_mpi_test_avg3.html'], 
+              
+                [ '', 4, 7.296, 4, 0.924, 'file:///dls/science/users/qmm55171/final_logs/original_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N4_C1_mpi_test_avg3.html'], 
+              
+                [ '', 2, 12.946, 2, 0.211, 'file:///dls/science/users/qmm55171/final_logs/original_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N2_C1_mpi_test_avg3.html'], 
+              
+                [ '', 12, 2.728, 2, 0.131, 'file:///dls/science/users/qmm55171/final_logs/original_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N2_C6_mpi_test_avg3.html'], 
+              
+                [ '', 4, 5.491, 2, 0.327, 'file:///dls/science/users/qmm55171/final_logs/original_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N2_C2_mpi_test_avg3.html'], 
+              
+                [ '', 16, 2.401, 2, 0.385, 'file:///dls/science/users/qmm55171/final_logs/original_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N2_C8_mpi_test_avg3.html'], 
+              
+            ]);
+            
+        var view0 = new google.visualization.DataView(data0);
+        view0.setColumns([0, 1, 2, 3, 4]);
+
+
+        var options0 = {
+        chartArea: {'width': '75%', 'height': '75%'},
+        colorAxis: {colors: ['yellow', 'red']},
+        title: 'Original MPI parameters',
+        titleTextStyle: {fontSize: '15'},
+        hAxis:
+	  {
+          title: 'Total cores',
+          titleTextStyle: {fontSize: '15'},
+          viewWindow: {min: 0, max: 50},
+        },
+        vAxis: 
+        {
+          title: 'Mean time (seconds)', 
+          titleTextStyle: {fontSize: '15'}
+        },
+        bubble: {textStyle: {fontSize: 13}},
+        sizeAxis: {maxValue: 20, minValue: 0, maxSize: 80, minSize: 5}
+      };
+
+            var chart0 = new google.visualization.BubbleChart(document.getElementById('chart0'));
+            chart0.draw(view0, options0);
+            
+         var selectHandler0 = function(e) {
+         window.location = data0.getValue(chart0.getSelection()[0]['row'], 5 );
+        }
+
+        google.visualization.events.addListener(chart0, 'select', selectHandler0);           
+            
+                    
+            var data1 = google.visualization.arrayToDataTable([
+            ['file system', '#Cores', 'Time (mean)', '#Nodes', 'Time (std)', 'link'],
+              
+                [ '', 10, 1.576, 1, 0.153, 'file:///dls/science/users/qmm55171/final_logs/new_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N1_C10_mpi_test_avg3.html'], 
+              
+                [ '', 12, 1.584, 1, 0.113, 'file:///dls/science/users/qmm55171/final_logs/new_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N1_C12_mpi_test_avg3.html'], 
+              
+                [ '', 1, 13.446, 1, 0.195, 'file:///dls/science/users/qmm55171/final_logs/new_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N1_C1_mpi_test_avg3.html'], 
+              
+                [ '', 2, 6.294, 1, 0.293, 'file:///dls/science/users/qmm55171/final_logs/new_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N1_C2_mpi_test_avg3.html'], 
+              
+                [ '', 4, 3.716, 1, 0.396, 'file:///dls/science/users/qmm55171/final_logs/new_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N1_C4_mpi_test_avg3.html'], 
+              
+                [ '', 6, 2.139, 1, 0.082, 'file:///dls/science/users/qmm55171/final_logs/new_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N1_C6_mpi_test_avg3.html'], 
+              
+                [ '', 8, 1.724, 1, 0.065, 'file:///dls/science/users/qmm55171/final_logs/new_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N1_C8_mpi_test_avg3.html'], 
+              
+                [ '', 20, 2.456, 2, 0.249, 'file:///dls/science/users/qmm55171/final_logs/new_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N2_C10_mpi_test_avg3.html'], 
+              
+                [ '', 24, 2.107, 2, 0.268, 'file:///dls/science/users/qmm55171/final_logs/new_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N2_C12_mpi_test_avg3.html'], 
+              
+                [ '', 2, 12.21, 2, 1.161, 'file:///dls/science/users/qmm55171/final_logs/new_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N2_C1_mpi_test_avg3.html'], 
+              
+                [ '', 4, 5.496, 2, 0.362, 'file:///dls/science/users/qmm55171/final_logs/new_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N2_C2_mpi_test_avg3.html'], 
+              
+                [ '', 8, 4.095, 2, 0.342, 'file:///dls/science/users/qmm55171/final_logs/new_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N2_C4_mpi_test_avg3.html'], 
+              
+                [ '', 12, 3.367, 2, 0.2, 'file:///dls/science/users/qmm55171/final_logs/new_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N2_C6_mpi_test_avg3.html'], 
+              
+                [ '', 16, 2.772, 2, 0.259, 'file:///dls/science/users/qmm55171/final_logs/new_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N2_C8_mpi_test_avg3.html'], 
+              
+                [ '', 30, 2.368, 3, 0.355, 'file:///dls/science/users/qmm55171/final_logs/new_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N3_C10_mpi_test_avg3.html'], 
+              
+                [ '', 36, 1.881, 3, 0.301, 'file:///dls/science/users/qmm55171/final_logs/new_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N3_C12_mpi_test_avg3.html'], 
+              
+                [ '', 3, 9.074, 3, 0.849, 'file:///dls/science/users/qmm55171/final_logs/new_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N3_C1_mpi_test_avg3.html'], 
+              
+                [ '', 6, 4.163, 3, 0.279, 'file:///dls/science/users/qmm55171/final_logs/new_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N3_C2_mpi_test_avg3.html'], 
+              
+                [ '', 12, 3.295, 3, 0.248, 'file:///dls/science/users/qmm55171/final_logs/new_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N3_C4_mpi_test_avg3.html'], 
+              
+                [ '', 18, 2.539, 3, 0.251, 'file:///dls/science/users/qmm55171/final_logs/new_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N3_C6_mpi_test_avg3.html'], 
+              
+                [ '', 24, 2.283, 3, 0.187, 'file:///dls/science/users/qmm55171/final_logs/new_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N3_C8_mpi_test_avg3.html'], 
+              
+                [ '', 40, 1.735, 4, 0.221, 'file:///dls/science/users/qmm55171/final_logs/new_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N4_C10_mpi_test_avg3.html'], 
+              
+                [ '', 48, 1.891, 4, 0.32, 'file:///dls/science/users/qmm55171/final_logs/new_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N4_C12_mpi_test_avg3.html'], 
+              
+                [ '', 4, 6.253, 4, 0.441, 'file:///dls/science/users/qmm55171/final_logs/new_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N4_C1_mpi_test_avg3.html'], 
+              
+                [ '', 8, 4.781, 4, 1.243, 'file:///dls/science/users/qmm55171/final_logs/new_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N4_C2_mpi_test_avg3.html'], 
+              
+                [ '', 16, 2.634, 4, 0.195, 'file:///dls/science/users/qmm55171/final_logs/new_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N4_C4_mpi_test_avg3.html'], 
+              
+                [ '', 24, 2.125, 4, 0.363, 'file:///dls/science/users/qmm55171/final_logs/new_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N4_C6_mpi_test_avg3.html'], 
+              
+                [ '', 32, 2.021, 4, 0.254, 'file:///dls/science/users/qmm55171/final_logs/new_mpi_params/no_chunking/html_files/averaged/log_lustre03_Pro01_N4_C8_mpi_test_avg3.html'], 
+              
+            ]);
+            
+        var view1 = new google.visualization.DataView(data1);
+        view1.setColumns([0, 1, 2, 3, 4]);
+
+
+        var options1 = {
+        chartArea: {'width': '75%', 'height': '75%'},
+        colorAxis: {colors: ['yellow', 'red']},
+        title: 'New MPI parameters',
+        titleTextStyle: {fontSize: '15'},
+        hAxis:
+	  {
+          title: 'Total cores',
+          titleTextStyle: {fontSize: '15'},
+          viewWindow: {min: 0, max: 50},
+        },
+        vAxis: 
+        {
+          title: 'Mean time (seconds)', 
+          titleTextStyle: {fontSize: '15'}
+        },
+        bubble: {textStyle: {fontSize: 13}},
+        sizeAxis: {maxValue: 20, minValue: 0, maxSize: 80, minSize: 5}
+      };
+
+            var chart1 = new google.visualization.BubbleChart(document.getElementById('chart1'));
+            chart1.draw(view1, options1);
+            
+         var selectHandler1 = function(e) {
+         window.location = data1.getValue(chart1.getSelection()[0]['row'], 5 );
+        }
+
+        google.visualization.events.addListener(chart1, 'select', selectHandler1);           
+            
+        
+        }  
+        </script>
+
+        
+        
+        
+        <div id="chart0" style="position: absolute; right: 50.0%; top:15.0%;
+        width: 50.0%; height: 85.0%;"></div>
+        
+        
+        
+        <div id="chart1" style="position: absolute; right: 0.0%; top:15.0%;
+        width: 50.0%; height: 85.0%;"></div>
+        
+
+    </head>
+    <body>
+        <h1> Savu MPI performance tests </h1>
+        
+        <div class="boxed">
+            ---------
+            
+            Process : 01 ---------
+            
+            File system : lustre01 ---------
+            
+            Chunk : false ---------
+            
+            Data size : (91,135,160) ---------
+            
+        </div>
+    </body>       
+    </html>
+    

@@ -1,6 +1,6 @@
 import logging
 from savu.plugins.base_recon import BaseRecon
-from savu.data.process_data import CitationInfomration
+from savu.data.plugin_info import CitationInfomration
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 import skimage.transform as transform
@@ -58,8 +58,8 @@ class ScikitimageFilterBackProjection(BaseRecon, CpuPlugin):
                              circle=False)  # self.parameters[False])
         return result
 
-    def get_citation_inforamtion(self):
-        cite_info = CitationInfomration()
+    def get_citation_information(self):
+        cite_info = CitationInformation()
         cite_info.description = \
             ("The Tomographic reconstruction performed in this processing " +
              "chain is derived from this work.")

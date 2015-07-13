@@ -31,7 +31,7 @@ class GpuPlugin(object):
     def __init__(self):
         super(GpuPlugin, self).__init__()
 
-    def run_process(self, data, output, processes, process):
+    def run_plugin(self, data, output, processes, plugin):
         count = 0
         gpu_processes = []
         gpu_list = ["GPU" in i for i in processes]
@@ -41,23 +41,23 @@ class GpuPlugin(object):
                 count += 1
             else:
                 gpu_processes.append(-1)
-        if gpu_processes[process] >= 0:
-            logging.debug("Running the GPU Process %i", process)
+        if gpu_processes[plugin] >= 0:
+            logging.debug("Running the GPU Process %i", plugin)
             new_processes = [i for i in processes if "GPU" in i]
             logging.debug(new_processes)
             logging.debug(gpu_processes)
             logging.debug("Process is %s",
-                          new_processes[gpu_processes[process]])
+                          new_processes[gpu_processes[plugin]])
             self.pre_process(data.get_data_shape())
             self.process(data, output, new_processes,
-                                gpu_processes[process])
+                                gpu_processes[plugin])
             self.post_process()
             return
             
         logging.debug("Not Running the task as not GPU")
         return
 
-    def process(self, data, output, processes, process):
+    def process(self, data, output, processes, plugin):
         """
         This method is called after the plugin has been created by the
         pipeline framework
@@ -73,5 +73,5 @@ class GpuPlugin(object):
         """
         logging.error("process needs to be implemented for proc %i of %i :" +
                       " input is %s and output is %s",
-                      process, processes, data.__class__, output.__class__)
+                      plugin, processes, data.__class__, output.__class__)
         raise NotImplementedError("process needs to be implemented")

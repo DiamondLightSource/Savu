@@ -31,9 +31,10 @@ while read -r a b c d; do
 	savupath=${x%/bin}
 
 	runfile=/bin/savu_launcher.sh
-	datafile=/test_data/24737.nxs
-	processfile=/test_data/process01.nxs
 	outpath=$PWD #outputting to the current folder
+	#datafile=$outpath/../test_data/24888.nxs
+	datafile=$outpath/../test_data/24737.nxs
+	processfile=$outpath/../test_data/process14.nxs
 	outname="${fname}N${nNodes}_C${nCPUs}_mpi_test"
 
 	for i in $(eval echo {1..$nRuns})
@@ -41,8 +42,20 @@ while read -r a b c d; do
    		  $savupath$runfile $savupath $datafile $processfile $outpath $outname $nNodes $nCPUs
 	done
 
-	python $savupath/scripts/log_evaluation/GraphicalThreadProfiler_multi.py "$outpath/"log_${outname}*""
 
+    
+      #************ Delete if auto-profiling is not required ******************
+      #****************** This can be done offline ****************************
+    
+      #cd Profiling
+	#python $savupath/scripts/log_evaluation/VisualiseProfileData.py
+      #cd ../
+
+      #************************************************************************
+
+
+      echo "completed profiling"
 	fi	
-done < ../input_params.txt
+
+done < ../test.txt
 

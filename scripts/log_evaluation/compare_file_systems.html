@@ -1,0 +1,228 @@
+
+        <html>
+        <head>
+         <link rel="stylesheet" type="text/css" href="/home/qmm55171/Documents/Git/git_repos/Savu/scripts/log_evaluation/style_sheet.css">
+         
+        <title> Savu MPI performance tests </title>
+        
+        <script type="text/javascript" src="https://www.google.com/jsapi?autoload={'modules':[{'name':'visualization',
+       'version':'1','packages':['corechart']}]}"></script>
+
+        <script type="text/javascript" src="http://canvg.googlecode.com/svn/trunk/rgbcolor.js"></script> 
+        <script type="text/javascript" src="http://canvg.googlecode.com/svn/trunk/StackBlur.js"></script>
+        <script type="text/javascript" src="http://canvg.googlecode.com/svn/trunk/canvg.js"></script>
+
+        <script type="text/javascript">
+
+        google.setOnLoadCallback(drawSeriesChart);
+
+        function drawSeriesChart() {      
+            
+
+                        
+            var data0 = google.visualization.arrayToDataTable([
+            ['file system', '#Cores', 'Time (mean)', '#Nodes', 'Time (std)', 'link'],
+              
+                [ '', 4, 0.594, 1, 0.031, 'file:///home/qmm55171/Documents/temp_docs/Profiling/process12/log_lustre03_Pro12_chunks1x68x160_N1_C4_mpi_test_avg3.html'], 
+              
+                [ '', 16, 0.786, 2, 0.206, 'file:///home/qmm55171/Documents/temp_docs/Profiling/process12/log_lustre03_Pro12_chunks1x68x160_N2_C8_mpi_test_avg3.html'], 
+              
+                [ '', 8, 0.846, 2, 0.018, 'file:///home/qmm55171/Documents/temp_docs/Profiling/process12/log_lustre03_Pro12_chunks1x68x160_N2_C4_mpi_test_avg3.html'], 
+              
+                [ '', 8, 0.431, 1, 0.014, 'file:///home/qmm55171/Documents/temp_docs/Profiling/process12/log_lustre03_Pro12_chunks1x68x160_N1_C8_mpi_test_avg3.html'], 
+              
+                [ '', 2, 0.916, 1, 0.087, 'file:///home/qmm55171/Documents/temp_docs/Profiling/process12/log_lustre03_Pro12_chunks1x68x160_N1_C2_mpi_test_avg3.html'], 
+              
+                [ '', 16, 0.401, 1, 0.035, 'file:///home/qmm55171/Documents/temp_docs/Profiling/process12/log_lustre03_Pro12_chunks1x68x160_N1_C16_mpi_test_avg3.html'], 
+              
+                [ '', 4, 0.898, 2, 0.028, 'file:///home/qmm55171/Documents/temp_docs/Profiling/process12/log_lustre03_Pro12_chunks1x68x160_N2_C2_mpi_test_avg3.html'], 
+              
+                [ '', 32, 1.568, 2, 0.221, 'file:///home/qmm55171/Documents/temp_docs/Profiling/process12/log_lustre03_Pro12_chunks1x68x160_N2_C16_mpi_test_avg3.html'], 
+              
+            ]);
+            
+        var view0 = new google.visualization.DataView(data0);
+        view0.setColumns([0, 1, 2, 3, 4]);
+
+
+        var options0 = {
+        
+        chartArea: {'width': '85%', 'height': '85%'},
+        colorAxis: {colors: ['yellow', 'red']},
+        title: 'chunks1x68x160',
+        titleTextStyle: {fontSize: '15'},
+        hAxis:
+	  {
+          title: 'Total cores',
+          titleTextStyle: {fontSize: '15'},
+          viewWindow: {min: 0, max: 50},
+        },
+        vAxis: 
+        {
+          title: 'Mean time (seconds)', 
+          titleTextStyle: {fontSize: '15'},
+        },
+        bubble: {textStyle: {fontSize: 13}},
+        sizeAxis: {maxValue: 0.431, minValue: 0, maxSize: 40, minSize: 5}
+      };
+
+            var chart0 = new google.visualization.BubbleChart(document.getElementById('chart0'));
+            chart0.draw(view0, options0);
+            
+         var selectHandler0 = function(e) {
+         window.location = data0.getValue(chart0.getSelection()[0]['row'], 5 );
+        }
+
+        google.visualization.events.addListener(chart0, 'select', selectHandler0);           
+            
+                    
+            var data1 = google.visualization.arrayToDataTable([
+            ['file system', '#Cores', 'Time (mean)', '#Nodes', 'Time (std)', 'link'],
+              
+                [ '', 8, 0.555, 2, 0.076, 'file:///home/qmm55171/Documents/temp_docs/Profiling/process12/log_lustre03_Pro12_chunksOFF_N2_C4_mpi_test_avg3.html'], 
+              
+                [ '', 4, 0.617, 1, 0.014, 'file:///home/qmm55171/Documents/temp_docs/Profiling/process12/log_lustre03_Pro12_chunksOFF_N1_C4_mpi_test_avg3.html'], 
+              
+                [ '', 16, 0.508, 1, 0.206, 'file:///home/qmm55171/Documents/temp_docs/Profiling/process12/log_lustre03_Pro12_chunksOFF_N1_C16_mpi_test_avg3.html'], 
+              
+                [ '', 4, 0.687, 2, 0.063, 'file:///home/qmm55171/Documents/temp_docs/Profiling/process12/log_lustre03_Pro12_chunksOFF_N2_C2_mpi_test_avg3.html'], 
+              
+                [ '', 32, 0.86, 2, 0.01, 'file:///home/qmm55171/Documents/temp_docs/Profiling/process12/log_lustre03_Pro12_chunksOFF_N2_C16_mpi_test_avg3.html'], 
+              
+                [ '', 8, 0.43, 1, 0.032, 'file:///home/qmm55171/Documents/temp_docs/Profiling/process12/log_lustre03_Pro12_chunksOFF_N1_C8_mpi_test_avg3.html'], 
+              
+                [ '', 16, 0.467, 2, 0.012, 'file:///home/qmm55171/Documents/temp_docs/Profiling/process12/log_lustre03_Pro12_chunksOFF_N2_C8_mpi_test_avg3.html'], 
+              
+                [ '', 2, 0.987, 1, 0.021, 'file:///home/qmm55171/Documents/temp_docs/Profiling/process12/log_lustre03_Pro12_chunksOFF_N1_C2_mpi_test_avg3.html'], 
+              
+            ]);
+            
+        var view1 = new google.visualization.DataView(data1);
+        view1.setColumns([0, 1, 2, 3, 4]);
+
+
+        var options1 = {
+        
+        chartArea: {'width': '85%', 'height': '85%'},
+        colorAxis: {colors: ['yellow', 'red']},
+        title: 'chunksOFF',
+        titleTextStyle: {fontSize: '15'},
+        hAxis:
+	  {
+          title: 'Total cores',
+          titleTextStyle: {fontSize: '15'},
+          viewWindow: {min: 0, max: 50},
+        },
+        vAxis: 
+        {
+          title: 'Mean time (seconds)', 
+          titleTextStyle: {fontSize: '15'},
+        },
+        bubble: {textStyle: {fontSize: 13}},
+        sizeAxis: {maxValue: 0.431, minValue: 0, maxSize: 40, minSize: 5}
+      };
+
+            var chart1 = new google.visualization.BubbleChart(document.getElementById('chart1'));
+            chart1.draw(view1, options1);
+            
+         var selectHandler1 = function(e) {
+         window.location = data1.getValue(chart1.getSelection()[0]['row'], 5 );
+        }
+
+        google.visualization.events.addListener(chart1, 'select', selectHandler1);           
+            
+                    
+            var data2 = google.visualization.arrayToDataTable([
+            ['file system', '#Cores', 'Time (mean)', '#Nodes', 'Time (std)', 'link'],
+              
+                [ '', 4, 0.736, 1, 0.051, 'file:///home/qmm55171/Documents/temp_docs/Profiling/process12/log_lustre03_Pro12_chunksTrue_N1_C4_mpi_test_avg3.html'], 
+              
+                [ '', 32, 1.432, 2, 0.015, 'file:///home/qmm55171/Documents/temp_docs/Profiling/process12/log_lustre03_Pro12_chunksTrue_N2_C16_mpi_test_avg3.html'], 
+              
+                [ '', 8, 0.525, 1, 0.017, 'file:///home/qmm55171/Documents/temp_docs/Profiling/process12/log_lustre03_Pro12_chunksTrue_N1_C8_mpi_test_avg3.html'], 
+              
+                [ '', 16, 0.457, 1, 0.031, 'file:///home/qmm55171/Documents/temp_docs/Profiling/process12/log_lustre03_Pro12_chunksTrue_N1_C16_mpi_test_avg3.html'], 
+              
+                [ '', 2, 1.476, 1, 0.431, 'file:///home/qmm55171/Documents/temp_docs/Profiling/process12/log_lustre03_Pro12_chunksTrue_N1_C2_mpi_test_avg3.html'], 
+              
+                [ '', 16, 1.104, 2, 0.047, 'file:///home/qmm55171/Documents/temp_docs/Profiling/process12/log_lustre03_Pro12_chunksTrue_N2_C8_mpi_test_avg3.html'], 
+              
+                [ '', 8, 0.921, 2, 0.04, 'file:///home/qmm55171/Documents/temp_docs/Profiling/process12/log_lustre03_Pro12_chunksTrue_N2_C4_mpi_test_avg3.html'], 
+              
+                [ '', 4, 1.526, 2, 0.222, 'file:///home/qmm55171/Documents/temp_docs/Profiling/process12/log_lustre03_Pro12_chunksTrue_N2_C2_mpi_test_avg3.html'], 
+              
+            ]);
+            
+        var view2 = new google.visualization.DataView(data2);
+        view2.setColumns([0, 1, 2, 3, 4]);
+
+
+        var options2 = {
+        
+        chartArea: {'width': '85%', 'height': '85%'},
+        colorAxis: {colors: ['yellow', 'red']},
+        title: 'chunksTrue',
+        titleTextStyle: {fontSize: '15'},
+        hAxis:
+	  {
+          title: 'Total cores',
+          titleTextStyle: {fontSize: '15'},
+          viewWindow: {min: 0, max: 50},
+        },
+        vAxis: 
+        {
+          title: 'Mean time (seconds)', 
+          titleTextStyle: {fontSize: '15'},
+        },
+        bubble: {textStyle: {fontSize: 13}},
+        sizeAxis: {maxValue: 0.431, minValue: 0, maxSize: 40, minSize: 5}
+      };
+
+            var chart2 = new google.visualization.BubbleChart(document.getElementById('chart2'));
+            chart2.draw(view2, options2);
+            
+         var selectHandler2 = function(e) {
+         window.location = data2.getValue(chart2.getSelection()[0]['row'], 5 );
+        }
+
+        google.visualization.events.addListener(chart2, 'select', selectHandler2);           
+            
+        
+        }  
+        </script>
+
+        
+        
+        
+        <div id="chart0" style="position: absolute; left: 7.5%; top:11.5%;
+        width: 42.0%; height: 42.0%;"></div>
+        
+        
+        
+        <div id="chart1" style="position: absolute; left: 50.5%; top:11.5%;
+        width: 42.0%; height: 42.0%;"></div>
+        
+        
+        
+        <div id="chart2" style="position: absolute; left: 7.5%; top:54.5%;
+        width: 42.0%; height: 42.0%;"></div>
+        
+
+    </head>
+    <body>
+        <h1> Savu MPI performance tests </h1>
+        
+        
+        
+        <div class="boxed">
+            ---------
+            
+            Process : 12 ---------
+            
+            Data size : (91,135,160) ---------
+            
+        </div>
+        
+    </body>       
+    </html>
+    

@@ -26,8 +26,6 @@ import numpy as np
 import h5py
 import logging
 
-print h5py.version.info
-
 from mpi4py import MPI
 
 from savu.core.utils import logmethod

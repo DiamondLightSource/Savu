@@ -20,7 +20,7 @@
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
-from savu.data.process_data import CitationInfomration
+from savu.data.plugin_info import CitationInfomration
 from savu.data.structures import ProjectionData, VolumeData
 from savu.plugins.gpu_filter import GpuFilter
 
@@ -76,8 +76,8 @@ class ManchesterRecon(GpuFilter):
         """
         return VolumeData
 
-    def get_citation_inforamtion(self):
-        cite_info = CitationInfomration()
+    def get_citation_information(self):
+        cite_info = CitationInformation()
         cite_info.description = \
             ("TO POPULATE")
         cite_info.bibtex = \

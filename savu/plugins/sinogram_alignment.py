@@ -1,6 +1,6 @@
 import logging
 from savu.plugins.filter import Filter
-from savu.data.process_data import CitationInfomration
+from savu.data.plugin_info import CitationInformation
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.data import structures
 
@@ -121,8 +121,8 @@ class SinogramAlignment(Filter, CpuPlugin):
         """
         return structures.ProjectionData
 
-    def get_citation_inforamtion(self):
-        cite_info = CitationInfomration()
+    def get_citation_information(self):
+        cite_info = CitationInformation()
         cite_info.description = \
             ("The Tomographic filtering performed in this processing " +
              "chain is derived from this work.")

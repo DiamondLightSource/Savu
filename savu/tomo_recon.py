@@ -25,10 +25,9 @@ import optparse
 import sys
 import os
 
-from savu.log_handler.handler import SQLiteHandler
 from savu.core import process
 
-from savu.data.process_data import ProcessList
+from savu.data.plugin_info import PluginList
 
 import savu.plugins.utils as pu
 
@@ -55,6 +54,8 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
 
 
+    print len(args)
+
     # Check basic items for completeness
     if len(args) is not 3:
         print("filename, process file and output path needs to be specified")
@@ -78,24 +79,21 @@ if __name__ == '__main__':
 
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
-    if options.log2db:
-        sqlh = SQLiteHandler(db=os.path.join(args[2],'log.db'))
-        logger.addHandler(sqlh)
-    else :
-        fh = logging.FileHandler(os.path.join(args[2],'log.txt'), mode='w')
-        fh.setFormatter(logging.Formatter('L %(relativeCreated)12d M' +
-                MACHINE_NUMBER_STRING + ' ' + MACHINE_RANK_NAME +
-                ' %(levelname)-6s %(message)s'))
-        logger.addHandler(fh)
+
+    fh = logging.FileHandler(os.path.join(args[2],'log.txt'), mode='w')
+    fh.setFormatter(logging.Formatter('L %(relativeCreated)12d M' +
+            MACHINE_NUMBER_STRING + ' ' + MACHINE_RANK_NAME +
+            ' %(levelname)-6s %(message)s'))
+    logger.addHandler(fh)
 
     logging.info("Starting tomo_recon process")
 
     
     process_filename = options.process_filename
 
-    process_list = ProcessList()
-    process_list.populate_process_list(process_filename)
+    plugin_list = PluginList()
+    plugin_list.populate_plugin_list(process_filename)
 
     input_data = pu.load_raw_data(args[0])
 
-    process.run_process_list(input_data, process_list, args[2])
+    process.run_plugin_list(input_data, plugin_list, args[2])

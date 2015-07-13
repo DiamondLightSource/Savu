@@ -30,7 +30,7 @@ from itertools import chain
 from mpi4py import MPI
 
 from savu.core import process
-from savu.data.process_data import ProcessList
+from savu.data.plugin_info import PluginList
 from savu.core.utils import logfunction
 
 import savu.plugins.utils as pu
@@ -96,7 +96,7 @@ if __name__ == '__main__':
 
     logging.info("Starting the reconstruction pipeline process")
 
-    logging.debug("Rank : %i - Size : %i", RANK, SIZE)
+    logging.debug("Rank : %i - Size : %i - host : %s", RANK, SIZE, socket.gethostname())
 
     IP = socket.gethostbyname(socket.gethostname())
 
@@ -110,12 +110,12 @@ if __name__ == '__main__':
 
     process_filename = args[1]
 
-    process_list = ProcessList()
-    process_list.populate_process_list(process_filename)
+    plugin_list = PluginList()
+    plugin_list.populate_process_list(process_filename)
 
     input_data = pu.load_raw_data(args[0])
 
-    process.run_process_list(input_data, process_list, args[2],
+    process.run_process_list(input_data, plugin_list, args[2],
                              mpi=True, processes=ALL_PROCESSES,
                              process=RANK)
 

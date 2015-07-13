@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from savu.data.process_data import CitationInfomration
+from savu.data.plugin_info import CitationInformation
 from savu.data.structures import ProjectionData
 
 """
@@ -109,8 +109,8 @@ class VoCentering(PassThroughPlugin, CpuPlugin):
         cor = (data.shape[1]/2.0) - point
         return {'center_of_rotation': cor}
 
-    def get_citation_inforamtion(self):
-        cite_info = CitationInfomration()
+    def get_citation_information(self):
+        cite_info = CitationInformation()
         cite_info.description = \
             ("The center of rotation for this reconstruction was calculated " +
              "automatically using the method described in this work")

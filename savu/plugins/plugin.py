@@ -142,10 +142,10 @@ class Plugin(object):
         """
         return None
 
-    def get_citation_inforamtion(self):
+    def get_citation_information(self):
         """Gets the Citation Information for a plugin
 
-        :returns:  A populated savu.data.process_data.CitationInfomration
+        :returns:  A populated savu.data.plugin_info.CitationInfomration
 
         """
         return None

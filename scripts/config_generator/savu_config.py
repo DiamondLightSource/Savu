@@ -6,7 +6,7 @@ Created on 21 May 2015
 
 import os
 
-from savu.data.process_data import ProcessList
+from savu.data.plugin_info import PluginList
 from savu.plugins import utils as pu
 import pkgutil
 import savu
@@ -15,19 +15,19 @@ import savu
 class Content(object):
 
     def __init__(self, filename):
-        self.process_list = ProcessList()
+        self.plugin_list = Plugin_list()
         if os.path.exists(filename):
             print "Opening file %s" % (filename)
-            self.process_list.populate_process_list(filename)
+            self.plugin_list.populate_process_list(filename)
 
     def display(self):
-        print self.process_list.get_string()
+        print self.plugin_list.get_string()
 
     def save(self, filename):
-        self.process_list.save_list_to_file(filename)
+        self.plugin_list.save_list_to_file(filename)
 
     def modify(self, element, subelement, value):
-        data_elements = self.process_list.process_list[element-1]['data']
+        data_elements = self.plugin_list.plugin_list[element-1]['data']
         if subelement in data_elements.keys():
             data_elements[subelement] = value
         else:
@@ -39,10 +39,10 @@ class Content(object):
         process['name'] = plugin.name
         process['id'] = "savu.plugins." + plugin.__module__
         process['data'] = plugin.parameters
-        self.process_list.process_list.insert(pos, process)
+        self.plugin_list.plugin_list.insert(pos, process)
 
     def remove(self, pos):
-        self.process_list.process_list.pop(pos)
+        self.plugin_list.plugin_list.pop(pos)
 
 
 def _help(content, arg):

@@ -1,4 +1,4 @@
-module load global/cluster
+module load global/testcluster
 
 echo "running the mpi job" 
 
@@ -11,9 +11,13 @@ nNodes=$6
 nCPUs=$7
 
 filepath=$savupath/bin/savu_mpijob.sh
-M=$((nNodes*12))
+M=$((nNodes*20))
 
-qsub -N $outname -sync y -j y -pe openmpi $M -q medium.q@@com06 $filepath $savupath $datafile $processfile $outpath $nCPUs > tmp.txt
+qsub -N $outname -sync y -j y -pe openmpi $M -q test-medium.q -l infiniband $filepath $savupath $datafile $processfile $outpath $nCPUs > tmp.txt
+
+if [ ! -d $outpath/Profiling ]; then
+    mkdir -p $outpath/Profiling;
+fi
 
 filename=`echo $outname.o`
 jobnumber=`awk '{print $3}' tmp.txt | head -n 1`
@@ -26,7 +30,7 @@ done
 
 cat $filename
 
-grep "L " $filename > log_$filename
+grep "L " $filename > Profiling/log_$filename
 
 #sleep 20
 #echo qacct -j ${jobnumber}

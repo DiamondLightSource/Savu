@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from savu.plugins.base_astra_recon import BaseAstraRecon
-from savu.data.process_data import CitationInfomration
+from savu.data.plugin_info import CitationInfomration
 
 """
 .. module:: astra_recon
@@ -43,8 +43,8 @@ class AstraReconCpu(BaseAstraRecon, CpuPlugin):
                 self.parameters['number_of_iterations']]
 
 
-    def get_citation_inforamtion(self):
-        cite_info = CitationInfomration()
+    def get_citation_information(self):
+        cite_info = CitationInformation()
         cite_info.description = \
             ("The reconstruction used to create this output is described in " +
              "this publication")

@@ -30,7 +30,7 @@ from itertools import chain
 from mpi4py import MPI
 from savu.core import process
 
-from savu.data.process_data import ProcessList
+from savu.data.plugin_info import PluginList
 from savu.core.utils import logfunction
 
 import savu.plugins.utils as pu
@@ -100,7 +100,7 @@ if __name__ == '__main__':
 
     process_filename = tu.get_test_data_path(options.process_filename)
 
-    process_list = ProcessList()
+    process_list = PluginList()
     process_list.populate_process_list(process_filename)
 
     first_plugin = pu.load_plugin(process_list.process_list[0]['id'])

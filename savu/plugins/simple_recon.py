@@ -22,7 +22,7 @@
 
 """
 from savu.plugins.base_recon import BaseRecon
-from savu.data.process_data import CitationInfomration
+from savu.data.plugin_info import CitationInformation
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 import numpy as np
@@ -71,8 +71,8 @@ class SimpleRecon(BaseRecon, CpuPlugin):
                                    (centre_of_rotation + sinogram.shape[1]))
         return result
 
-    def get_citation_inforamtion(self):
-        cite_info = CitationInfomration()
+    def get_citation_information(self):
+        cite_info = CitationInformation()
         cite_info.description = \
             ("The Tomographic reconstruction performed in this processing " +
              "chain is derived from this work.")

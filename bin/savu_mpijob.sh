@@ -1,8 +1,10 @@
 #!/bin/bash
-module load global/cluster
+module load global/testcluster
 module load python/ana
-source activate mpi2
+#source activate mpi2
+source activate mpi4
 module load openmpi/1.6.5
+#export LD_LIBRARY_PATH=/dls_sw/prod/tools/RHEL6-x86_64/openmpi/1-6-5/prefix/lib:$LD_LIBRARY_PATH
 
 savupath=$1
 datafile=$2
@@ -28,7 +30,6 @@ CPUs=CPU0
 if [ $nCPUs -gt 0 ]; then
 	for i in $(eval echo {1..$nCPUs})
   	do
-		echo $i
 		CPUs=$CPUs,CPU$i
 	done
 fi
@@ -37,7 +38,9 @@ fi
 echo "Processes running are : ${processes}"
 
 mpirun -np ${processes} \
+       -mca btl self,openib,sm \
+       -mca orte_forward_job_control 1 \
        -x LD_LIBRARY_PATH \
        --hostfile ${UNIQHOSTS} \
-       python $filename $savupath$datafile $savupath$processfile $outfile -n $CPUs
+       python $filename $datafile $processfile $outfile -n $CPUs
 

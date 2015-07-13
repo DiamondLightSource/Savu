@@ -31,7 +31,7 @@ class CpuPlugin(object):
     def __init__(self):
         super(CpuPlugin, self).__init__()
 
-    def run_process(self, data, output, processes, process):
+    def run_plugin(self, data, output, processes, process):
         count = 0
         cpu_processes = []
         for i in ["CPU" in i for i in processes]:
@@ -45,8 +45,8 @@ class CpuPlugin(object):
             new_processes = [i for i in processes if "CPU" in i]
             #logging.debug(new_processes)
             #logging.debug(cpu_processes)
-            #logging.debug("Process is %s",
-            #              new_processes[cpu_processes[process]])
+            #logging.debug("Plugin is %s",
+            #              new_processes[cpu_processes[plugin]])
             
             logging.debug("Pre-processing")
             self.pre_process(0 if isinstance(data, str) else data.get_data_shape())
@@ -62,7 +62,7 @@ class CpuPlugin(object):
 
     def process(self, data, output, processes, process):
         """
-        This method is called after the plugin has been created by the
+        This method is called after the process has been created by the
         pipeline framework
 
         :param data: The input data object.

@@ -24,7 +24,7 @@
 import unittest
 import tempfile
 
-from savu.data.process_data import ProcessList
+from savu.data.plugin_info import PluginList
 
 from savu.core import process
 from savu.plugins import utils as pu
@@ -42,15 +42,16 @@ class FrameworkTest(unittest.TestCase):
         if self.process_filename is None:
             return
 
+        print self.process_filename
         temp_dir = tempfile.gettempdir()
-        process_list = ProcessList()
-        process_list.populate_process_list(self.process_filename)
+        plugin_list = PluginList()
+        plugin_list.populate_plugin_list(self.process_filename)
 
-        first_plugin = pu.load_plugin(process_list.process_list[0]['id'])
+        first_plugin = pu.load_plugin(plugin_list.plugin_list[0]['id'])
         input_data = tu.get_appropriate_input_data(first_plugin)[0]
 
         try :
-            process.run_process_list(input_data, process_list, temp_dir)
+            process.run_plugin_list(input_data, plugin_list, temp_dir)
         except ImportError as e:
             print("Failed to run plugin test as libraries not available (%s), passing test" % (e))
             pass

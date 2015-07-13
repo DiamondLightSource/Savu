@@ -64,7 +64,7 @@ class PluginTest(unittest.TestCase):
             plugin.set_parameters(None)
 
             for i in range(len(data)):
-                plugin.run_process(data[i], output[i], ["CPU0"], 0)
+                plugin.run_plugin(data[i], output[i], ["CPU0"], 0)
                 print("Output from plugin under test ( %s ) is in %s" %
                       (plugin.name, output[i].backing_file.filename))
 
@@ -97,53 +97,53 @@ class CpuPluginTest(unittest.TestCase):
     def setUp(self):
         self.plugin = None
 
-    def test_run_process(self):
+    def test_run_plugin(self):
         self.plugin = CpuPluginWrapper()
-        self.plugin.run_process("data", "out", ["CPU0"], 0)
+        self.plugin.run_plugin("data", "out", ["CPU0"], 0)
         self.assertEqual(self.plugin.processes, ["CPU0"])
         self.assertEqual(self.plugin.process_number, 0)
 
         self.plugin = CpuPluginWrapper()
-        self.plugin.run_process("data", "out",
+        self.plugin.run_plugin("data", "out",
                                 ["CPU0", "CPU1", "CPU2", "CPU3"], 0)
         self.assertEqual(self.plugin.processes,
                          ["CPU0", "CPU1", "CPU2", "CPU3"])
         self.assertEqual(self.plugin.process_number, 0)
 
         self.plugin = CpuPluginWrapper()
-        self.plugin.run_process("data", "out",
+        self.plugin.run_plugin("data", "out",
                                 ["CPU0", "CPU1", "CPU2", "CPU3"], 1)
         self.assertEqual(self.plugin.processes,
                          ["CPU0", "CPU1", "CPU2", "CPU3"])
         self.assertEqual(self.plugin.process_number, 1)
 
         self.plugin = CpuPluginWrapper()
-        self.plugin.run_process("data", "out",
+        self.plugin.run_plugin("data", "out",
                                 ["CPU0", "CPU1", "CPU2", "CPU3"], 3)
         self.assertEqual(self.plugin.processes,
                          ["CPU0", "CPU1", "CPU2", "CPU3"])
         self.assertEqual(self.plugin.process_number, 3)
 
         self.plugin = CpuPluginWrapper()
-        self.plugin.run_process("data", "out",
+        self.plugin.run_plugin("data", "out",
                                 ["CPU0", "GPU0", "CPU1", "GPU1"], 0)
         self.assertEqual(self.plugin.processes, ["CPU0", "CPU1"])
         self.assertEqual(self.plugin.process_number, 0)
 
         self.plugin = CpuPluginWrapper()
-        self.plugin.run_process("data", "out",
+        self.plugin.run_plugin("data", "out",
                                 ["CPU0", "GPU0", "CPU1", "GPU1"], 1)
         self.assertEqual(self.plugin.processes, None)
         self.assertEqual(self.plugin.process_number, None)
 
         self.plugin = CpuPluginWrapper()
-        self.plugin.run_process("data", "out",
+        self.plugin.run_plugin("data", "out",
                                 ["CPU0", "GPU0", "CPU1", "GPU1"], 2)
         self.assertEqual(self.plugin.processes, ["CPU0", "CPU1"])
         self.assertEqual(self.plugin.process_number, 1)
 
         self.plugin = CpuPluginWrapper()
-        self.plugin.run_process("data", "out",
+        self.plugin.run_plugin("data", "out",
                                 ["CPU0", "GPU0", "CPU1", "GPU1"], 3)
         self.assertEqual(self.plugin.processes, None)
         self.assertEqual(self.plugin.process_number, None)
@@ -156,7 +156,7 @@ class CpuPluginTest(unittest.TestCase):
 
         for i in range(8):
             self.plugin = CpuPluginWrapper()
-            self.plugin.run_process("data", "out", all_procs, i)
+            self.plugin.run_plugin("data", "out", all_procs, i)
             if i < 6:
                 self.assertEqual(self.plugin.processes, cpu_procs)
                 self.assertEqual(self.plugin.process_number, i)

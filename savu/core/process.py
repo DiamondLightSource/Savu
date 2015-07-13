@@ -63,7 +63,7 @@ def run_plugin_chain(input_data, plugin_list, processing_dir, mpi=False,
         plugin.set_parameters(None)
 
         logging.debug("Starting processing  plugin %s", plugin_name)
-        plugin.run_process(in_data, output, processes, process)
+        plugin.run_plugin(in_data, output, processes, process)
         logging.debug("Completed processing plugin %s", plugin_name)
 
         if in_data is not output:
@@ -81,20 +81,20 @@ def run_plugin_chain(input_data, plugin_list, processing_dir, mpi=False,
 
 
 @logfunction
-def run_process_list(input_data, process_list, processing_dir, mpi=False,
+def run_plugin_list(input_data, plugin_list, processing_dir, mpi=False,
                      processes=["CPU0"], process=0):
     """Runs a chain of plugins
 
     :param input_data: The input data to give to the chain
     :type input_data: savu.data.structure.
-    :param process_list: Process list.
-    :type process_list: savu.data.structure.ProcessList.
+    :param plugin_list: Plugin list.
+    :type plugin_list: savu.data.structure.PluginList.
     :param processing_dir: Location of the processing directory.
     :type processing_dir: str.
     :param mpi: Whether this is running in mpi, default is false.
     :type mpi: bool.
     """
-    logging.debug("Running process list, just a check")
+    logging.debug("Running plugin list, just a check")
     filename = os.path.basename(input_data.backing_file.filename)
     filename = os.path.splitext(filename)[0]
     output_filename = \
@@ -102,8 +102,8 @@ def run_process_list(input_data, process_list, processing_dir, mpi=False,
                      "%s_processed_%s.nxs" % (filename,
                                               time.strftime("%Y%m%d%H%M%S")))
     if process == 0:
-        logging.debug("Running Process List.save_list_to_file")
-        process_list.save_list_to_file(output_filename)
+        logging.debug("Running process List.save_list_to_file")
+        plugin_list.save_list_to_file(output_filename)
 
     in_data = input_data
     output = None
@@ -111,14 +111,14 @@ def run_process_list(input_data, process_list, processing_dir, mpi=False,
     logging.debug("generating all output files")
     files = []
     count = 0
-    for process_dict in process_list.process_list:
-        logging.debug("Loading plugin %s", process_dict['id'])
-        plugin = pu.load_plugin(process_dict['id'])
+    for plugin_dict in plugin_list.plugin_list:
+        logging.debug("Loading plugin %s", plugin_dict['id'])
+        plugin = pu.load_plugin(plugin_dict['id'])
 
         # generate somewhere for the data to go
         file_name = os.path.join(processing_dir,
-                                 "%s%02i_%s.h5" % (process_list.name, count,
-                                                   process_dict['id']))
+                                 "%s%02i_%s.h5" % (plugin_list.name, count,
+                                                   plugin_dict['id']))
         group_name = "%i-%s" % (count, plugin.name)
         logging.debug("Creating output file %s", file_name)
         output = pu.create_output_data(plugin, in_data, file_name, group_name,
@@ -133,17 +133,17 @@ def run_process_list(input_data, process_list, processing_dir, mpi=False,
 
     in_data = input_data
     count = 0
-    for process_dict in process_list.process_list:
-        logging.debug("Loading plugin %s", process_dict['id'])
-        plugin = pu.load_plugin(process_dict['id'])
+    for plugin_dict in plugin_list.plugin_list:
+        logging.debug("Loading plugin %s", plugin_dict['id'])
+        plugin = pu.load_plugin(plugin_dict['id'])
 
         output = files[count]
 
-        plugin.set_parameters(process_dict['data'])
+        plugin.set_parameters(plugin_dict['data'])
 
-        logging.debug("Starting processing  plugin %s", process_dict['id'])
-        plugin.run_process(in_data, output, processes, process)
-        logging.debug("Completed processing plugin %s", process_dict['id'])
+        logging.debug("Starting processing  plugin %s", plugin_dict['id'])
+        plugin.run_plugin(in_data, output, processes, process)
+        logging.debug("Completed processing plugin %s", plugin_dict['id'])
 
         if in_data is not output:
             in_data.complete()
@@ -153,13 +153,13 @@ def run_process_list(input_data, process_list, processing_dir, mpi=False,
             logging.debug("Blocking till all processes complete")
             MPI.COMM_WORLD.Barrier()
 
-        if process == 0:
-            cite_info = plugin.get_citation_inforamtion()
+        if plugin == 0:
+            cite_info = plugin.get_citation_information()
             if cite_info is not None:
-                process_list.add_process_citation(output_filename, count,
+                plugin_list.add_plugin_citation(output_filename, count,
                                                   cite_info)
             group_name = "%i-%s" % (count, plugin.name)
-            process_list.add_intermediate_data_link(output_filename,
+            plugin_list.add_intermediate_data_link(output_filename,
                                                     output, group_name)
 
         count += 1

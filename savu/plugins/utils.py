@@ -153,7 +153,7 @@ def create_output_data(plugin, input_data, file_name, group_name, mpi=False,
     :type file_name: path
     :param group_name: the group name which all the data will be put into
     :type group_name: str
-    :param mpi: Whether this is running in the MPI enviroment
+    :param mpi: Whether this is running in the MPI environment
     :type mpi: bool
     :returns:  The output data object
     """
