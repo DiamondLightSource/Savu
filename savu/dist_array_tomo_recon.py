@@ -26,8 +26,6 @@ import sys
 import os
 
 from savu.data.plugin_info import PluginList
-import savu.plugins.utils as pu
-import savu.data.transports.dist_array_transport as transport
 
 MACHINE_NUMBER_STRING = '0'
 MACHINE_RANK_NAME = 'cpu1'
@@ -42,12 +40,12 @@ if __name__ == '__main__':
                       type='string')
     parser.add_option("-f", "--filename", dest="process_filename",
                       help="The filename of the process file",
-                      default="/home/ssg37927/Savu/test_data/process01.nxs",
+                      default=  + "/test_data/process01.nxs",
                       type='string')
-    parser.add_option("-l", "--log2db", dest="log2db",
-                      help="Set logging to go to a database",
-                      default=False,
-                      action="store_true")
+    parser.add_option("-t", "--transport", dest="transport_str",
+                      help="Set the transport mechanism",
+                      default="hdf5",
+                      type='string')
     (options, args) = parser.parse_args()
 
 
@@ -72,6 +70,7 @@ if __name__ == '__main__':
         print("Exiting with error code 4 - Output Directory missing")
         sys.exit(4)
 
+    # set up logging 
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
 
@@ -83,7 +82,18 @@ if __name__ == '__main__':
 
     logging.info("Starting tomo_recon process")
 
+    # set up transport
+    if options.transport_str is "hdf5":
+        from savu.data.transports.hdf5_transport import Hdf5Transport as Transport
+    elif options.transport_str is "distArray":
+        from savu.data.transports.dist_array_transport import dist_array_transport as Transport
+    else:
+        print("The transport mechanism", options.transport_str, "is not recognised")
+        print("Exiting with error code 5 - Unrecognised transport mechanism")
+        sys.exit(5)
+    
     plugin_list = PluginList()
     plugin_list.populate_plugin_list(options.process_filename)
-    pu.load_transport(transport(), plugin_list, args)
+    transport = Transport()
+    transport.run_plugin_list(args[0], plugin_list, args[2])
     

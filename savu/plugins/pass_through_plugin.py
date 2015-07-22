@@ -82,7 +82,7 @@ class PassThroughPlugin(Plugin):
                       data.__class__)
         raise NotImplementedError("filter_frame needs to be implemented")
 
-    def process(self, data, output, processes, process):
+    def process(self, data, output, processes, process, transport):
         """
         This method is called after the plugin has been created by the
         pipeline framework

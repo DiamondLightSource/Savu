@@ -28,6 +28,7 @@ import unittest
 from savu.plugins import utils as pu
 from savu.test import test_utils as tu
 from savu.plugins.driver.cpu_plugin import CpuPlugin
+from savu.data.transports.hdf5_transport import Hdf5Transport as Transport
 
 base_class_name = "savu.plugins.plugin"
 
@@ -84,8 +85,9 @@ class CpuPluginWrapper(Plugin, CpuPlugin):
         self.output = None
         self.processes = None
         self.process_number = None
+        self.transport = Transport()
 
-    def process(self, data, output, processes, process):
+    def process(self, data, output, processes, process, transport):
         self.data = data
         self.output = output
         self.processes = processes

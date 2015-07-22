@@ -38,11 +38,8 @@ from distarray.globalapi.distarray import DistArray as da
 import savu.data.transports.dist_array_utils as du
 
 class DistArrayTransport(TransportMechanism):
+        
 
-    def __init__(self, plugin_list, args):
-        self.run_plugin_list(args[0], plugin_list, args[2]) 
-        
-        
     @logfunction
     def run_plugin_list(self, input_file, plugin_list, processing_dir, 
                         processes=["CPU0"], process=0):

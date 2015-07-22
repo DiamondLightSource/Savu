@@ -98,7 +98,7 @@ class Filter(Plugin):
         raise NotImplementedError("filter_frame needs to be implemented")
 
     @logmethod
-    def process(self, data, output, processes, process):
+    def process(self, data, output, processes, process, transport):
         """
         """
         slice_list = du.get_grouped_slice_list(data, self.get_filter_frame_type(), self.get_max_frames())
