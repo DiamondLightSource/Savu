@@ -31,7 +31,7 @@ class CpuPlugin(object):
     def __init__(self):
         super(CpuPlugin, self).__init__()
 
-    def run_plugin(self, data, output, processes, process):
+    def run_plugin(self, data, output, processes, process, transport):
         count = 0
         cpu_processes = []
         for i in ["CPU" in i for i in processes]:
@@ -43,16 +43,12 @@ class CpuPlugin(object):
         if cpu_processes[process] >= 0:
             logging.debug("Running the CPU Process %i", process)
             new_processes = [i for i in processes if "CPU" in i]
-            #logging.debug(new_processes)
-            #logging.debug(cpu_processes)
-            #logging.debug("Plugin is %s",
-            #              new_processes[cpu_processes[plugin]])
-            
+
             logging.debug("Pre-processing")
             self.pre_process(0 if isinstance(data, str) else data.get_data_shape())
             logging.debug("Main processing: process %s", self.__class__)
-            self.process(data, output, new_processes,
-                                cpu_processes[process])
+            self.process(data, output, new_processes, 
+                         cpu_processes[process], transport)
             logging.debug("Post-processing")
             self.post_process()
             return

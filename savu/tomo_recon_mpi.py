@@ -115,9 +115,9 @@ if __name__ == '__main__':
 
     input_data = pu.load_raw_data(args[0])
 
-    process.run_process_list(input_data, plugin_list, args[2],
-                             mpi=True, processes=ALL_PROCESSES,
-                             process=RANK)
+#    process.run_process_list(input_data, plugin_list, args[2],
+#                             mpi=True, processes=ALL_PROCESSES,
+#                             process=RANK)
 
     call_mpi_barrier()
 

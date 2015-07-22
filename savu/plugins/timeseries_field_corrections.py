@@ -43,7 +43,37 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
               self).__init__("TimeseriesFieldCorrections")
 
     @logmethod
-    def process(self, data, output, processes, process):
+    def process(self, data, output, processes, process, transport):
+        """
+        """
+        image_key = data.image_key[...]
+        # pull out the average dark and flat data
+        dark = None
+        try:
+            dark = np.mean(data.data[image_key == 2, :, :], 0)
+        except:
+            dark = np.zeros((data.data.shape[1], data.data.shape[2]))
+        flat = None
+        try:
+            flat = np.mean(data.data[image_key == 1, :, :], 0)
+        except:
+            flat = np.ones((data.data.shape[1], data.data.shape[2]))
+        # shortcut to reduce processing
+            
+        flat[flat == 0.0] = 1
+        
+        params = [dark, flat]
+        transport.process(self, 
+                          data, 
+                          output, 
+                          processes, 
+                          process, 
+                          params, 
+                          "timeseries_correction_set_up")
+
+
+    @logmethod
+    def hdf5_process(self, data, output, processes, process):
         """
         """
         image_key = data.image_key[...]
@@ -77,7 +107,8 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
             projection = (projection-dark)/flat  # (flat-dark)
             projection[projection <= 0.0] = 1;
             output.data[frame, :, :] = projection
-
+            
+            
     def required_data_type(self):
         """
         The input for this plugin is RawTimeseriesData

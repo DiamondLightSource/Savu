@@ -26,6 +26,8 @@ import numpy as np
 import h5py
 import logging
 
+from mpi4py import MPI
+
 from savu.core.utils import logmethod
 
 NX_CLASS = 'NX_class'
@@ -117,7 +119,6 @@ class Data(object):
         self.data = None
         self.base_path = None
         self.core_directions = {}
-        self.current_dist = None # for DistArray
 
     @logmethod
     def complete(self):
@@ -159,7 +160,6 @@ class Data(object):
         Simply returns the shape of the main data array
         """
         return self.data.shape
-
 
 
 class RawTimeseriesData(Data):
@@ -204,6 +204,102 @@ class RawTimeseriesData(Data):
         self.core_directions[CD_SINOGRAM] = (0, 2)
         self.core_directions[CD_ROTATION_AXIS] = (0, )
 
+    @logmethod
+    def create_backing_h5(self, path, group_name, data, mpi=False,
+                          new_shape=None):
+        """
+        Create a h5 backend for this RawTimeseriesData
+
+        :param path: The full path of the NeXus file to use as a backend
+        :type path: str
+        :param data: The structure from which this can be created
+        :type data: savu.structure.RawTimeseriesData
+        :param mpi: if an MPI process, provide MPI package here, default None
+        :type mpi: package
+        """
+        self.backing_file = None
+
+        if mpi:
+            self.backing_file = h5py.File(path, 'w', driver='mpio',
+                                          comm=MPI.COMM_WORLD)
+        else:
+            self.backing_file = h5py.File(path, 'w')
+
+        if self.backing_file is None:
+            raise IOError("Failed to open the hdf5 file")
+
+        logging.debug("Creating file '%s' '%s'", self.base_path,
+                      self.backing_file.filename)
+
+        self.base_path = group_name
+        if not isinstance(data, RawTimeseriesData):
+            raise ValueError("data is not a RawTimeseriesData")
+
+        self.core_directions[CD_PROJECTION] = (1, 2)
+        self.core_directions[CD_SINOGRAM] = (0, 2)
+        self.core_directions[CD_ROTATION_AXIS] = 0
+
+        data_shape = new_shape
+        if data_shape is None:
+            data_shape = data.data.shape
+        data_type = np.double
+        image_key_shape = data.image_key.shape
+        image_key_type = data.image_key.dtype
+        rotation_angle_shape = data.rotation_angle.shape
+        rotation_angle_type = data.rotation_angle.dtype
+        control_shape = data.control.shape
+        control_type = data.control.dtype
+        cor_shape = (data.data.shape[self.core_directions[CD_ROTATION_AXIS]],)
+        cor_type = np.double
+
+        group = self.backing_file.create_group(group_name)
+        group.attrs[NX_CLASS] = 'NXdata'
+        data_value = group.create_dataset('data', data_shape, data_type)
+        data_value.attrs['signal'] = 1
+        data_avail = group.create_dataset('data_avail',
+                                          data_shape, np.bool_)
+        self.data = SliceAvailableWrapper(data_avail, data_value)
+
+        # Create and prepopulate the following, as they are likely to be
+        # Unchanged during the processing
+        image_key = \
+            group.create_dataset('image_key',
+                                 image_key_shape, image_key_type)
+        image_key_avail = \
+            group.create_dataset('image_key_avail',
+                                 image_key_shape, np.bool_)
+        self.image_key = \
+            SliceAvailableWrapper(image_key_avail, image_key)
+        self.image_key[:] = data.image_key[:]
+
+        rotation_angle = \
+            group.create_dataset('rotation_angle',
+                                 rotation_angle_shape, rotation_angle_type)
+        rotation_angle_avail = \
+            group.create_dataset('rotation_angle_avail',
+                                 rotation_angle_shape, np.bool_)
+        self.rotation_angle = \
+            SliceAvailableWrapper(rotation_angle_avail, rotation_angle)
+        self.rotation_angle[:] = data.rotation_angle[:]
+
+        control = \
+            group.create_dataset('control',
+                                 control_shape, control_type)
+        control_avail = \
+            group.create_dataset('control_avail',
+                                 control_shape, np.bool_)
+        self.control = \
+            SliceAvailableWrapper(control_avail, control)
+        self.control[:] = data.control[:]
+
+        cor = \
+            group.create_dataset('center_of_rotation',
+                                 cor_shape, cor_type)
+        cor_avail = \
+            group.create_dataset('center_of_rotation_avail',
+                                 cor_shape, np.bool_)
+        self.center_of_rotation = \
+            SliceAvailableWrapper(cor_avail, cor)
 
     def get_number_of_projections(self):
         """
@@ -241,6 +337,86 @@ class ProjectionData(Data):
         super(ProjectionData, self).__init__()
         self.rotation_angle = None
         self.center_of_rotation = None
+
+    @logmethod
+    def create_backing_h5(self, path, group_name, data, mpi=False,
+                          new_shape=None):
+        """
+        Create a h5 backend for this ProjectionData
+
+        :param path: The full path of the NeXus file to use as a backend
+        :type path: str
+        :param data: The structure from which this can be created
+        :type data: savu.structure
+        :param mpi: if an MPI process, provide MPI package here, default None
+        :type boolean: package
+        """
+        self.backing_file = None
+        if mpi:
+            self.backing_file = h5py.File(path, 'w', driver='mpio',
+                                          comm=MPI.COMM_WORLD)
+        else:
+            self.backing_file = h5py.File(path, 'w')
+
+        if self.backing_file is None:
+            raise IOError("Failed to open the hdf5 file")
+
+        self.base_path = group_name
+        logging.debug("Creating file '%s' '%s'", self.base_path,
+                      self.backing_file.filename)
+
+        data_shape = new_shape
+        data_type = None
+        rotation_angle_shape = None
+        rotation_angle_type = None
+        cor_shape = None
+        cor_type = np.double
+
+        if data.__class__ == RawTimeseriesData:
+            if data_shape is None:
+                data_shape = (data.get_number_of_projections(),) +\
+                    data.get_projection_shape()
+            data_type = np.double
+            rotation_angle_shape = (data.get_number_of_projections(),)
+            rotation_angle_type = data.rotation_angle.dtype
+            cor_shape = (data.data.shape[1],)
+
+        elif data.__class__ == ProjectionData:
+            if data_shape is None:
+                data_shape = data.data.shape
+            data_type = np.double
+            rotation_angle_shape = data.rotation_angle.shape
+            rotation_angle_type = data.rotation_angle.dtype
+            cor_shape = (data.data.shape[1],)
+
+        group = self.backing_file.create_group(group_name)
+        group.attrs[NX_CLASS] = 'NXdata'
+        data_value = group.create_dataset('data', data_shape, data_type)
+
+        data_value.attrs['signal'] = 1
+        data_avail = group.create_dataset('data_avail',
+                                          data_shape, np.bool_)
+        self.data = SliceAvailableWrapper(data_avail, data_value)
+
+        rotation_angle = \
+            group.create_dataset('rotation_angle',
+                                 rotation_angle_shape, rotation_angle_type)
+        rotation_angle_avail = \
+            group.create_dataset('rotation_angle_avail',
+                                 rotation_angle_shape, np.bool_)
+        self.rotation_angle = \
+            SliceAvailableWrapper(rotation_angle_avail, rotation_angle)
+
+        cor = \
+            group.create_dataset('center_of_rotation',
+                                 cor_shape, cor_type)
+        cor_avail = \
+            group.create_dataset('center_of_rotation_avail',
+                                 cor_shape, np.bool_)
+        self.center_of_rotation = \
+            SliceAvailableWrapper(cor_avail, cor)
+
+        self.core_directions = data.core_directions
 
     @logmethod
     def populate_from_h5(self, path):
@@ -291,6 +467,43 @@ class VolumeData(Data):
     def __init__(self):
         super(VolumeData, self).__init__()
 
+    @logmethod
+    def create_backing_h5(self, path, group_name, data_shape,
+                          data_type, mpi=False):
+        """
+        Create a h5 backend for this ProjectionData
+
+        :param path: The full path of the NeXus file to use as a backend
+        :type path: str
+        :param data_shape: The shape of the data block
+        :type data: tuple
+        :param data_type: The type of the data block
+        :type data: np.dtype
+        :param mpi: if an MPI process, provide MPI package here, default None
+        :type mpi: package
+        """
+        self.backing_file = None
+        if mpi:
+            self.backing_file = h5py.File(path, 'w', driver='mpio',
+                                          comm=MPI.COMM_WORLD)
+        else:
+            self.backing_file = h5py.File(path, 'w')
+
+        if self.backing_file is None:
+            raise IOError("Failed to open the hdf5 file")
+
+        self.base_path = group_name
+        logging.debug("Creating file '%s' '%s'", self.base_path,
+                      self.backing_file.filename)
+
+        group = self.backing_file.create_group(group_name)
+        group.attrs[NX_CLASS] = 'NXdata'
+        data_value = group.create_dataset('data', data_shape, data_type)
+        data_value.attrs['signal'] = 1
+        data_value.attrs['signal'] = 1
+        data_avail = group.create_dataset('data_avail',
+                                          data_shape, np.bool_)
+        self.data = SliceAvailableWrapper(data_avail, data_value)
 
     def get_volume_shape(self):
         """

@@ -49,8 +49,9 @@ class BaseRecon(Plugin):
         raise NotImplementedError("reconstruct " +
                                   "needs to be implemented")
 
+    
     @logmethod
-    def process(self, data, output, processes, process):
+    def process(self, data, output, processes, process, transport):
         """
         """
         print "in the process function"
@@ -64,13 +65,28 @@ class BaseRecon(Plugin):
             centre_of_rotation = np.ones(data.get_number_of_sinograms())
             centre_of_rotation = centre_of_rotation * self.parameters['center_of_rotation']
 
+        angles = data.rotation_angle.data[:]
+        centre_of_rotations = np.array_split(centre_of_rotation, len(processes))[process]
+                
+        params = [centre_of_rotations, angles] 
+        transport.process(self, 
+                          data, 
+                          output, 
+                          processes, 
+                          process, 
+                          params, 
+                          "reconstruction_set_up")                
+
+
+
+    def hdf5_process(self, centre_of_rotations, angles, data, output, processes, process):
+        """
+        """
+        print "in the hdf5_process function"
         sinogram_frames = np.arange(data.get_number_of_sinograms())
 
         frames = np.array_split(sinogram_frames, len(processes))[process]
-        centre_of_rotations =\
-            np.array_split(centre_of_rotation, len(processes))[process]
-
-        angles = data.rotation_angle.data[:]
+  
 
         for i in range(len(frames)):
             frame_centre_of_rotation = centre_of_rotations[i]
@@ -83,6 +99,7 @@ class BaseRecon(Plugin):
             output.data[:, frames[i], :] = reconstruction
             self.count+=1
             print self.count
+
             
     def get_max_frames(self):
         """
