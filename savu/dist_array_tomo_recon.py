@@ -25,6 +25,7 @@ import optparse
 import sys
 import os
 
+import savu
 from savu.data.plugin_info import PluginList
 import savu.plugins.utils as pu
 
@@ -84,6 +85,6 @@ if __name__ == '__main__':
 
     plugin_list = PluginList()
     plugin_list.populate_plugin_list(options.process_filename)
-    transport = '/home/qmm55171/Documents/Git/git_repos/Savu/savu/data/transports/dist_array_transport'
+    transport = os.path.dirname(savu.__file__) + '/data/transports/dist_array_transport'
     pu.load_transport(transport, plugin_list, args)
     

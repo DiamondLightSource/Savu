@@ -63,52 +63,10 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         flat[flat == 0.0] = 1
         
         params = [dark, flat]
-        transport.process(self, 
-                          data, 
-                          output, 
-                          processes, 
-                          process, 
-                          params, 
-                          "timeseries_correction_set_up")
+        transport.process(self, data, output, processes, process, 
+                          params, "timeseries_correction_set_up")
 
 
-    @logmethod
-    def hdf5_process(self, data, output, processes, process):
-        """
-        """
-        image_key = data.image_key[...]
-        # pull out the average dark and flat data
-        dark = None
-        try:
-            dark = np.mean(data.data[image_key == 2, :, :], 0)
-        except:
-            dark = np.zeros((data.data.shape[1], data.data.shape[2]))
-        flat = None
-        try:
-            flat = np.mean(data.data[image_key == 1, :, :], 0)
-        except:
-            flat = np.ones((data.data.shape[1], data.data.shape[2]))
-        # shortcut to reduce processing
-            
-        flat[flat == 0.0] = 1
-
-        # get a list of all the frames
-        projection_frames = np.arange(len(image_key))[image_key == 0]
-        output_frames = np.arange(len(projection_frames))
-
-        frames = np.array_split(output_frames, len(processes))[process]
-
-        # The rotation angle can just be pulled out of the file so write that
-        rotation_angle = data.rotation_angle[image_key == 0]
-        output.rotation_angle[:] = rotation_angle
-
-        for frame in frames:
-            projection = data.data[projection_frames[frame], :, :]
-            projection = (projection-dark)/flat  # (flat-dark)
-            projection[projection <= 0.0] = 1;
-            output.data[frame, :, :] = projection
-            
-            
     def required_data_type(self):
         """
         The input for this plugin is RawTimeseriesData

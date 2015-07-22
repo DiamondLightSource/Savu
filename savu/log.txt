@@ -1,0 +1,241 @@
+L          362 M0 cpu1 INFO   Starting tomo_recon process
+L          373 M0 cpu1 INFO   Start::savu.data.structures.RawTimeseriesData:populate_from_nx_tomo
+L          374 M0 cpu1 DEBUG  Creating file 'tomo_entry' '../test_data/24737.nxs'
+L          374 M0 cpu1 INFO   Finish::savu.data.structures.RawTimeseriesData:populate_from_nx_tomo
+L          374 M0 cpu1 DEBUG  Running plugin list, just a check
+L          374 M0 cpu1 DEBUG  Running process List.save_list_to_file
+L          384 M0 cpu1 DEBUG  generating all output files
+L          384 M0 cpu1 DEBUG  Loading plugin savu.plugins.timeseries_field_corrections
+L          414 M0 cpu1 DEBUG  Creating output file ./process01.nxs00_savu.plugins.timeseries_field_corrections.h5
+L          414 M0 cpu1 INFO   Start::savu.data.structures.ProjectionData:create_backing_h5
+L          418 M0 cpu1 DEBUG  Creating file '0-TimeseriesFieldCorrections' './process01.nxs00_savu.plugins.timeseries_field_corrections.h5'
+L          420 M0 cpu1 INFO   Finish::savu.data.structures.ProjectionData:create_backing_h5
+L          421 M0 cpu1 DEBUG  Loading plugin savu.plugins.simple_recon
+L          423 M0 cpu1 DEBUG  Creating output file ./process01.nxs01_savu.plugins.simple_recon.h5
+L          424 M0 cpu1 INFO   Start::savu.data.structures.VolumeData:create_backing_h5
+L          426 M0 cpu1 DEBUG  Creating file '1-SimpleRecon' './process01.nxs01_savu.plugins.simple_recon.h5'
+L          427 M0 cpu1 INFO   Finish::savu.data.structures.VolumeData:create_backing_h5
+L          427 M0 cpu1 DEBUG  processing Plugins
+L          427 M0 cpu1 DEBUG  Loading plugin savu.plugins.timeseries_field_corrections
+L          427 M0 cpu1 DEBUG  Starting processing  plugin savu.plugins.timeseries_field_corrections
+L          427 M0 cpu1 DEBUG  Running the CPU Process 0
+L          428 M0 cpu1 DEBUG  Pre-processing
+L          428 M0 cpu1 DEBUG  Main processing: process <class 'savu.plugins.timeseries_field_corrections.TimeseriesFieldCorrections'>
+L          428 M0 cpu1 INFO   Start::savu.plugins.timeseries_field_corrections.TimeseriesFieldCorrections:process
+L          428 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          428 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          428 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          429 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          430 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          431 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          432 M0 cpu1 INFO   Start::hdf5_transport.Hdf5Transport:timeseries_correction_set_up
+L          432 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          432 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          432 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          433 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          433 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          434 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          442 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          442 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          450 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          451 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          459 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          459 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          467 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          468 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          476 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          477 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          485 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          485 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          494 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          495 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          504 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          504 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          513 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          513 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          522 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          522 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          531 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          531 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          540 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          540 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          549 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          549 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          558 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          558 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          567 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          567 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          576 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          576 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          585 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          585 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          594 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          594 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          604 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          604 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          613 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          613 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          622 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          622 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          631 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          631 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          640 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          640 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          648 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          649 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          658 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          658 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          666 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          667 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          675 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          676 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          684 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          684 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          693 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          693 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          702 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          702 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          722 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          722 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          733 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          733 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          742 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          742 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          751 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          751 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          760 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          760 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          769 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          769 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          778 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          778 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          787 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          787 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          796 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          796 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          805 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          805 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          814 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          814 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          823 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          823 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          832 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          832 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          841 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          841 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          849 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          850 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          863 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          863 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          873 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          873 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          882 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          882 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          891 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          891 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          899 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          900 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          908 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          909 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          918 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          918 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          927 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          927 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          936 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          936 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          945 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          945 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          953 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          954 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          962 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          963 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          972 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          972 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          991 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L          991 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1000 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1000 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1009 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1009 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1018 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1018 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1027 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1027 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1036 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1036 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1045 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1045 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1053 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1054 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1062 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1063 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1071 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1072 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1080 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1080 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1089 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1090 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1098 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1099 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1110 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1110 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1119 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1120 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1129 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1129 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1138 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1138 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1147 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1147 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1156 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1156 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1173 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1173 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1183 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1183 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1194 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1194 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1203 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1204 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1213 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1214 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1223 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1223 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1233 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1233 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1243 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1243 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1252 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1253 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1261 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1262 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1271 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1271 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1281 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1281 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1290 M0 cpu1 INFO   Start::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1291 M0 cpu1 INFO   Finish::savu.data.structures.SliceAlwaysAvailableWrapper:__getitem__
+L         1299 M0 cpu1 INFO   Finish::hdf5_transport.Hdf5Transport:timeseries_correction_set_up
+L         1299 M0 cpu1 INFO   Finish::savu.plugins.timeseries_field_corrections.TimeseriesFieldCorrections:process
+L         1299 M0 cpu1 DEBUG  Post-processing
+L         1299 M0 cpu1 DEBUG  Completed processing plugin savu.plugins.timeseries_field_corrections
+L         1299 M0 cpu1 INFO   Start::savu.data.structures.RawTimeseriesData:complete
+L         1299 M0 cpu1 DEBUG  Completing file None ../test_data/24737.nxs
+L         1300 M0 cpu1 INFO   Finish::savu.data.structures.RawTimeseriesData:complete
+L         1300 M0 cpu1 DEBUG  Loading plugin savu.plugins.simple_recon
+L         1300 M0 cpu1 DEBUG  Starting processing  plugin savu.plugins.simple_recon
+L         1300 M0 cpu1 DEBUG  Running the CPU Process 0
+L         1300 M0 cpu1 DEBUG  Pre-processing
+L         1300 M0 cpu1 DEBUG  Main processing: process <class 'savu.plugins.simple_recon.SimpleRecon'>
+L         1300 M0 cpu1 INFO   Start::savu.plugins.base_recon.SimpleRecon:process
+L         1301 M0 cpu1 INFO   Start::hdf5_transport.Hdf5Transport:reconstruction_set_up
+L        11736 M0 cpu1 INFO   Finish::hdf5_transport.Hdf5Transport:reconstruction_set_up
+L        11736 M0 cpu1 INFO   Finish::savu.plugins.base_recon.SimpleRecon:process
+L        11736 M0 cpu1 DEBUG  Post-processing
+L        11736 M0 cpu1 DEBUG  Completed processing plugin savu.plugins.simple_recon
+L        11736 M0 cpu1 INFO   Start::savu.data.structures.ProjectionData:complete
+L        11736 M0 cpu1 DEBUG  Completing file 0-TimeseriesFieldCorrections ./process01.nxs00_savu.plugins.timeseries_field_corrections.h5
+L        11921 M0 cpu1 INFO   Finish::savu.data.structures.ProjectionData:complete
+L        11921 M0 cpu1 INFO   Start::savu.data.structures.VolumeData:complete
+L        11921 M0 cpu1 DEBUG  Completing file 1-SimpleRecon ./process01.nxs01_savu.plugins.simple_recon.h5
+L        12233 M0 cpu1 INFO   Finish::savu.data.structures.VolumeData:complete

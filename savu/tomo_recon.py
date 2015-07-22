@@ -25,10 +25,8 @@ import optparse
 import sys
 import os
 
-from savu.core import process
-
+import savu
 from savu.data.plugin_info import PluginList
-
 import savu.plugins.utils as pu
 
 MACHINE_NUMBER_STRING = '0'
@@ -53,8 +51,6 @@ if __name__ == '__main__':
                       action="store_true")
     (options, args) = parser.parse_args()
 
-
-    print len(args)
 
     # Check basic items for completeness
     if len(args) is not 3:
@@ -89,11 +85,9 @@ if __name__ == '__main__':
     logging.info("Starting tomo_recon process")
 
     
-    process_filename = options.process_filename
-
     plugin_list = PluginList()
-    plugin_list.populate_plugin_list(process_filename)
+    plugin_list.populate_plugin_list(options.process_filename)
 
-    input_data = pu.load_raw_data(args[0])
-
-    process.run_plugin_list(input_data, plugin_list, args[2])
+    transport = os.path.dirname(savu.__file__) + '/data/transports/hdf5_transport'
+    pu.load_transport(transport, plugin_list, args)    
+       

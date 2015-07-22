@@ -181,7 +181,8 @@ class DistArrayTransport(TransportMechanism):
         elif data_type == VolumeData:
             return VolumeData()            
         else:
-            print "data type undefined in data.transport.distArray.create_data_object()"    
+            print "data type undefined in data.transport.distArray.create_data_object()"
+            sys.exit(1)
                                 
                                     
     def process(self, plugin, data, output, processes, process, params, kernel):
