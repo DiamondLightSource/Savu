@@ -38,9 +38,6 @@ from savu.core.utils import logmethod
 # TODO tidy up the NeXus format parts of this
 class Hdf5Transport(TransportMechanism):
 
-    def __init__(self, plugin_list, args):
-        self.run_plugin_list(args[0], plugin_list, args[2])
-        
         
     def run_plugin_list(self, input_file, plugin_list, processing_dir, mpi=False,
                      processes=["CPU0"], process=0):

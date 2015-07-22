@@ -25,9 +25,9 @@ import optparse
 import sys
 import os
 
-import savu
 from savu.data.plugin_info import PluginList
 import savu.plugins.utils as pu
+from savu.data.transports.hdf5_transport import Hdf5Transport as Transport
 
 MACHINE_NUMBER_STRING = '0'
 MACHINE_RANK_NAME = 'cpu1'
@@ -87,7 +87,7 @@ if __name__ == '__main__':
     
     plugin_list = PluginList()
     plugin_list.populate_plugin_list(options.process_filename)
+    transport = Transport()
+    transport.run_plugin_list(args[0], plugin_list, args[2])
 
-    transport = os.path.dirname(savu.__file__) + '/data/transports/hdf5_transport'
-    pu.load_transport(transport, plugin_list, args)    
        

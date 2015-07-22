@@ -67,36 +67,6 @@ def load_plugin(plugin_name):
     return instance
 
 
-def load_transport(transport_name, plugin_list, args):
-    """Load a transport_mechanism.
-
-    :param transport_name: Name of the transport mechanism to import /path/loc/then.transport.name
-    :type transport_name: str.
-    :param plugin_list: List of plugins to pass to the transport mechanism
-    :type plugin_list: List.    
-    :param args: A list of input arguments to pass to the transport mechanism 
-    :type args: List.
-    :returns:  An instance of the class described by the named transport_mechanism
-
-    """
-    path, name = os.path.split(transport_name)
-
-    print path, name
-
-    if (path is not '') and (path not in sys.path):
-        sys.path.append(path)
-
-    mod = __import__(name)
-    components = name.split('.')
-
-    for comp in components[1:]:
-        mod = getattr(mod, comp)
-    clazz = getattr(mod, module2class(name.split('.')[-1]))
-    instance = clazz(plugin_list, args)
-
-    return instance
-
-
 def module2class(module_name):
     """
     Converts a module name to a class name
