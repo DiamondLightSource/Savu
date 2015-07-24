@@ -59,7 +59,7 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         except:
             flat = np.ones((data.data.shape[1], data.data.shape[2]))
         # shortcut to reduce processing
-            
+        flat = flat - dark        
         flat[flat == 0.0] = 1
         
         params = [dark, flat]
@@ -82,3 +82,21 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         :returns:  ProjectionData
         """
         return ProjectionData
+
+    def input_dist(self):
+        """
+        The input DistArray distribution for this plugin is "bnn"
+        (i.e. block in the first dimension)
+
+        :returns:  DistArray distribution
+        """
+        return "bnn"
+
+    def output_dist(self):
+        """
+        The output DistArray distribution for this plugin is "bnn"
+        (i.e. block in the first dimension)
+
+        :returns:  DistArray distribution
+        """
+        return "bnn"
