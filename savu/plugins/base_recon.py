@@ -54,7 +54,6 @@ class BaseRecon(Plugin):
     def process(self, data, output, processes, process, transport):
         """
         """
-        print "in the process function"
         if data.center_of_rotation is None:
             centre_of_rotation = np.ones(data.get_number_of_sinograms())
             centre_of_rotation = centre_of_rotation * self.parameters['center_of_rotation']
@@ -69,9 +68,10 @@ class BaseRecon(Plugin):
         centre_of_rotations = np.array_split(centre_of_rotation, len(processes))[process]
                 
         params = [centre_of_rotations, angles] 
+        
         transport.process(self, data, output, processes, process, 
                           params, "reconstruction_set_up")                
-
+                          
             
     def get_max_frames(self):
         """
@@ -96,3 +96,21 @@ class BaseRecon(Plugin):
         :returns:  VolumeData
         """
         return VolumeData
+
+    def input_dist(self):
+        """
+        The input DistArray distribution for this plugin is "nbn"
+        (i.e. block in the second dimension)
+
+        :returns:  DistArray distribution
+        """
+        return "nbn"
+
+    def output_dist(self):
+        """
+        The output DistArray distribution for this plugin is "nbn"
+        (i.e. block in the second dimension)
+
+        :returns:  DistArray distribution
+        """
+        return "nbn"

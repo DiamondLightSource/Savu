@@ -47,11 +47,15 @@ class Testing(object):
         self.data = None
 
 
-def numpy_julia_calc(la):
+def numpy_julia_calc(la, la2):
+
     la = np.asarray(la)
-    b = la*3
-    print type(b)
-    return b
+    la2=np.asarray(la2)
+    print ('la2:', la2.shape)
+    la2[0,:] = la[1,1:11,1]*3
+    print ('la2:', la2.shape)
+    return la2
+
 
 def load_hdf5_distarray(context):
     
@@ -75,7 +79,6 @@ def load_hdf5_distarray(context):
     print('Loaded.')
     return data
 
-
         
 def create_complex_plane(context):  
     nparr = np.random.randint(5,size=(100,30))
@@ -84,17 +87,17 @@ def create_complex_plane(context):
     return darr
 
 
-def local_julia_calc(la, kernel):
+def local_julia_calc(la, la2, kernel):
     from distarray.localapi import LocalArray
-    counts = kernel(la)
-    res = LocalArray(la.distribution, buf=counts)
+    counts = kernel(la, la2)
+    res = LocalArray(la2.distribution, buf=counts)
     return proxyize(res) # noqa
     
 
-def distributed_julia_calc(la, kernel=numpy_julia_calc):
+def distributed_julia_calc(la, la2, kernel=numpy_julia_calc):
     context = la.context
     context.register(kernel)
-    iters_key = context.apply(local_julia_calc, (la.key,), {'kernel': kernel})
+    iters_key = context.apply(local_julia_calc, (la.key, la2.key), {'kernel': kernel})
     iters_da = DistArray.from_localarrays(iters_key[0], context=context, dtype=np.int32)
     #return iters_da
     return iters_da
@@ -171,5 +174,10 @@ if __name__ == '__main__':
         #A = create_complex_plane(context)
         in_data = load_hdf5_distarray(context)
         A = in_data.data
-        result = distributed_julia_calc(A, kernel=kernel)
+        nparr = np.zeros([10, 10])
+        print nparr
+        dist = Distribution(context, (10,10), dist='bn')
+        B = context.fromarray(nparr)
+        print B
+        result = distributed_julia_calc(A, B, kernel=kernel)
                 

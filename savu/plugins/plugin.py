@@ -132,6 +132,26 @@ class Plugin(object):
         logging.error("output_data_type needs to be implemented")
         raise NotImplementedError("output_data_type needs to be implemented")
 
+    def input_dist(self):
+        """Gets the DistArray distribution which is required to create the 
+        distributed input array for the plugin
+
+        :returns:  the DistArray distribution of the input to the plugin
+
+        """
+        logging.error("input_dist needs to be implemented")
+        raise NotImplementedError("input_dist needs to be implemented")
+
+    def output_dist(self):
+        """Gets the DistArray distribution which is required to create the 
+        distributed output array for the plugin
+
+        :returns:  the DistArray distribution of the output to the plugin
+
+        """
+        logging.error("output_dist needs to be implemented")
+        raise NotImplementedError("output_dist needs to be implemented")
+        
     def get_output_shape(self, input_data):
         """
         Gets the output data shape which is provided by the plugin

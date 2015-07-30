@@ -26,6 +26,8 @@ import sys
 import os
 
 from savu.data.plugin_info import PluginList
+from savu.data.transports.dist_array_transport import DistArrayTransport as Transport
+
 
 MACHINE_NUMBER_STRING = '0'
 MACHINE_RANK_NAME = 'cpu1'
@@ -40,11 +42,7 @@ if __name__ == '__main__':
                       type='string')
     parser.add_option("-f", "--filename", dest="process_filename",
                       help="The filename of the process file",
-                      default=  + "/test_data/process01.nxs",
-                      type='string')
-    parser.add_option("-t", "--transport", dest="transport_str",
-                      help="Set the transport mechanism",
-                      default="hdf5",
+                      default= "/home/ssg37927/Savu/test_data/process01.nxs",
                       type='string')
     (options, args) = parser.parse_args()
 
@@ -81,16 +79,6 @@ if __name__ == '__main__':
     logger.addHandler(fh)
 
     logging.info("Starting tomo_recon process")
-
-    # set up transport
-    if options.transport_str is "hdf5":
-        from savu.data.transports.hdf5_transport import Hdf5Transport as Transport
-    elif options.transport_str is "distArray":
-        from savu.data.transports.dist_array_transport import dist_array_transport as Transport
-    else:
-        print("The transport mechanism", options.transport_str, "is not recognised")
-        print("Exiting with error code 5 - Unrecognised transport mechanism")
-        sys.exit(5)
     
     plugin_list = PluginList()
     plugin_list.populate_plugin_list(options.process_filename)

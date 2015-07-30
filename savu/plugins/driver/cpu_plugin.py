@@ -48,8 +48,7 @@ class CpuPlugin(object):
             logging.debug("Pre-processing")
             self.pre_process(0 if isinstance(data, str) else data.get_data_shape())
             logging.debug("Main processing: process %s", self.__class__)
-            self.process(data, output, new_processes, 
-                         cpu_processes[process], transport)
+            self.process(data, output, new_processes, cpu_processes[process], transport)
             logging.debug("Post-processing")
             self.post_process()
             return

@@ -24,89 +24,97 @@
 import numpy as np
 
 
-def distributed_process(plugin, data, output, processes, process, params, kernel):
-    print "IN THE DISTRIBUTED_PROCESS FUNCTION"
-    params = set_params(output, params, kernel, plugin)
-
-    context = data.data.context
+def distributed_process(plugin, in_data, out_data, processes, process, params, kernel):
+    params = set_params(in_data, out_data, params, kernel, plugin)
+    context = in_data.data.context
     context.register(kernel)
     print ("The kernel", kernel, "has been registered")
-    iters_key = context.apply(local_process, (data.data.key, params), {'kernel': kernel})
-    
+    iters_key = context.apply(local_process, (in_data.data.key, out_data.data.key, params), {'kernel': kernel})
     return iters_key
     
-def local_process(frames, params, kernel):
-    print "IN THE LOCAL PROCESS FUNCTION"
+    
+def local_process(frames, output, params, kernel):
     from distarray.localapi import LocalArray
-    recon = kernel(frames, params)
-    res = LocalArray(frames.distribution, buf=recon)        
+    recon = kernel(frames, output, params)
+    res = LocalArray(output.distribution, buf=recon)        
     return proxyize(res)  # noqa
     
     
-def reconstruction_set_up(d_array, params):
-    print "IN reconstruction_set_up FUNCTION"   
+def timeseries_correction_set_up(in_darray, out_darray, params):
+    print "***IN TIMESERIES CORRECTION SET UP***"
+    image_key = params[0]
+    plugin = params[1]
 
-    frames = np.asarray(d_array)
+    frames = np.asarray(in_darray, dtype=np.float32)
+    print (frames.shape, frames.dtype, frames.nbytes)
 
-    param_name = ['centre_of_rotations', 'angles', 'output', 'plugin']
-    for name in param_name: 
-        for p in params:
-            globals()[name] = p
+    data = frames[image_key == 0, :, :]
+
+    # pull out the average dark and flat data
+    dark = None
+    try:
+        dark = np.mean(frames[image_key == 2, :, :], 0)
+    except:
+        dark = np.zeros((frames.shape[1], frames.shape[2]))
+    flat = None
+    try:
+        flat = np.mean(frames[image_key == 1, :, :], 0)
+    except:
+        flat = np.ones((frames.shape[1], frames.shape[2]))
+    # shortcut to reduce processing
+    flat = flat - dark        
+    flat[flat == 0.0] = 1.0
+        
+    for i in range(frames.shape[1]): #*** need to change this to find the direction from the plugin (hard coded for now)
+        out_darray[:, i, :] = plugin.correction(data[:,i,:], dark[i,:], flat[i,:])
     
-    temp_output = np.zeros_like(frames)#, dtype=np.int32) # *** what type?
-    for i in range(len(frames)):
-        frame_centre_of_rotation = centre_of_rotations[i]
-        sinogram = frames[:, i, :]
-        reconstruction = \
-            plugin.reconstruct(sinogram, frame_centre_of_rotation, angles,
-                             (output.data.shape[0], output.data.shape[2]),
-                             (output.data.shape[0]/2,
-                              output.data.shape[2]/2))
-        temp_output[:, i, :] = reconstruction
+    return out_darray
+
+
+def reconstruction_set_up(in_darray, out_darray, params):
+    print "IN RECONSTRUCTION SET-UP"
+    import resource
+    print ("the memory usage for this process is", resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+    frames = np.asarray(in_darray, dtype=np.float32)
+    print (frames.shape, frames.dtype, frames.nbytes)
+    print "creating output array"
+    result = np.asarray(out_darray, dtype=np.float32)
+    print (frames.shape, frames.dtype, frames.nbytes)
+    print "done"
+
+    print frames.shape
+    print result.shape
     
-    return temp_output
+    print frames.nbytes
+
+    centre_of_rotations = params[0]
+    angles = params[1]
+    shape = params[2]
+    plugin = params[3]
+    
+
+    for i in range(frames.shape[1]): #*** need to change this to find the direction from the plugin (hard coded for now)
+        print i
+        out_darray[:, i, :] = \
+            plugin.reconstruct(frames[:,i,:], result[:,i,:], centre_of_rotations[i], angles,
+                             (shape[0], shape[2]), #*** change this (originally output.data.shape)
+                             (shape[0]/2, shape[2]/2))    
+    return out_darray
     
     
-def filter_set_up(d_array, params):
-    frames = np.asarray(d_array)
-    param_name = []
-    for name in param_name: 
-        for p in params:
-            globals()[name] = p
+def filter_set_up(in_darray, out_darray, params):
+    frames = np.asarray(in_darray)
          
     # *** to be completed
     pass 
-    
-
-def timeseries_correction_set_up(d_array, params):
-    print "IN TIMESERIES_CORRECTION_SET_UP FUNCTION"
-
-    frames = np.asarray(d_array)
-
-    param_name = ['dark', 'flat']
-    for name in param_name: 
-        for p in params:
-            globals()[name] = p
-            
-    temp_output = np.zeros_like(frames)#, dtype=np.int32) # *** what type?
-
-    #*** why was rotation angle in here?
-
-    for i in range(len(frames)):
-        projection = frames[i, :, :]
-        projection = (projection-dark)/flat  # (flat-dark)
-        projection[projection <= 0.0] = 1;
-        temp_output[i, :, :] = projection
-    
-    return temp_output
 
 
-def set_params(output, params, kernel, plugin):
+def set_params(data, output, params, kernel, plugin):
     str_kernel = str(kernel)
     if 'reconstruction' in str_kernel:
-        params = [params[0], params[1], output, plugin]
+        params = [params[0], params[1], output.shape, plugin] #*** change this to be output data shape
     elif 'timeseries' in str_kernel:
-        params = [params[0], params[1]]
+        params = [params[0], plugin]
     elif 'filter' in str_kernel:
         params = [params[0], params[1]]
     return params   

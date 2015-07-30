@@ -114,3 +114,21 @@ class PassThroughPlugin(Plugin):
         :returns:  Data
         """
         return PassThrough
+
+    def input_dist(self):
+        """
+        The input DistArray distribution for this plugin is "nbn"
+        (i.e. block in the second dimension)
+
+        :returns:  DistArray distribution
+        """
+        return "bnn"
+
+    def output_dist(self):
+        """
+        The output DistArray distribution for this plugin is "nbn"
+        (i.e. block in the second dimension)
+
+        :returns:  DistArray distribution
+        """
+        return "bnn"

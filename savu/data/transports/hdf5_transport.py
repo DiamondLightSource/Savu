@@ -129,14 +129,14 @@ class Hdf5Transport(TransportMechanism):
             output.complete()
 
 
-    def process(self, plugin, data, output, processes, process, params, kernel):
+    def process(self, plugin, data, output, processes, process, params, kernel):    
         
         if 'reconstruction' in kernel:
             params = [params[0], params[1], data, output, plugin, processes, process]
             self.reconstruction_set_up(params)
         elif 'timeseries' in kernel:
-            params = [params[0], params[1], data, output, processes, process]
-            self.timeseries_correction_set_up(params)
+            params = [plugin, processes, process]
+            self.timeseries_correction_set_up(data, output, params)
         elif 'filter' in kernel:
             params = [params[0], params[1], processes, process]
             self.filter_set_up()
@@ -176,32 +176,38 @@ class Hdf5Transport(TransportMechanism):
 
     
     @logmethod
-    def timeseries_correction_set_up(self, params):
+    def timeseries_correction_set_up(self, data, output, params):
 
-        dark = params[0]
-        flat = params[1]
-        data = params[2]
-        output = params[3]
-        processes = params[4]
-        process = params[5]
+        plugin = params[0]
+        processes = params[1]
+        process = params[2]
         
         image_key = data.image_key[...]
-
+        # pull out the average dark and flat data
+        dark = None
+        try:
+            dark = np.mean(data.data[image_key == 2, :, :], 0)
+        except:
+            dark = np.zeros((data.data.shape[1], data.data.shape[2]))
+        flat = None
+        try:
+            flat = np.mean(data.data[image_key == 1, :, :], 0)
+        except:
+            flat = np.ones((data.data.shape[1], data.data.shape[2]))
+        # shortcut to reduce processing
+        flat = flat - dark
+        flat[flat == 0.0] = 1
+        
         # get a list of all the frames
-        projection_frames = np.arange(len(image_key))[image_key == 0]
-        output_frames = np.arange(len(projection_frames))
-
+        output_frames = np.arange(data.data.shape[1])
         frames = np.array_split(output_frames, len(processes))[process]
 
         # The rotation angle can just be pulled out of the file so write that
         rotation_angle = data.rotation_angle[image_key == 0]
         output.rotation_angle[:] = rotation_angle
 
-        for frame in frames:
-            projection = data.data[projection_frames[frame], :, :]
-            projection = (projection-dark)/flat  # (flat-dark)
-            projection[projection <= 0.0] = 1;
-            output.data[frame, :, :] = projection
+        for i in frames:
+            output.data[:, i, :] = plugin.correction(data.data[image_key == 0, i,:], dark[i,:], flat[i,:])
 
            
     @logmethod

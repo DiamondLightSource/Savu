@@ -28,13 +28,14 @@ while read -r a b c d; do
 
 	DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 	x=$DIR
+	echo $x
 	savupath=${x%/bin}
 
-	runfile=/bin/savu_launcher.sh
+	runfile=/bin/savu_distArray_launcher.sh
 	outpath=$PWD #outputting to the current folder
-	#datafile=$outpath/../test_data/24888.nxs
-	datafile=$outpath/../test_data/24737.nxs
-	processfile=$outpath/../test_data/process14.nxs
+	datafile=$outpath/../test_data/24888.nxs
+	#datafile=$outpath/../test_data/24737.nxs
+	processfile=$outpath/../test_data/process01.nxs
 	outname="${fname}N${nNodes}_C${nCPUs}_mpi_test"
 
 	for i in $(eval echo {1..$nRuns})

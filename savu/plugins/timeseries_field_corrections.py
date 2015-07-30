@@ -41,30 +41,21 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
     def __init__(self):
         super(TimeseriesFieldCorrections,
               self).__init__("TimeseriesFieldCorrections")
+              
+              
+    def correction(self, data, dark, flat):
+        dark = np.tile(dark, (data.shape[0], 1))
+        flat = np.tile(flat, (data.shape[0], 1))
+        data = (data-dark)/flat  # flat = (flat-dark) already calculated for efficiency
+        data[data <= 0.0] = 1.0;
+        return data
+              
 
     @logmethod
     def process(self, data, output, processes, process, transport):
         """
         """
-        image_key = data.image_key[...]
-        # pull out the average dark and flat data
-        dark = None
-        try:
-            dark = np.mean(data.data[image_key == 2, :, :], 0)
-        except:
-            dark = np.zeros((data.data.shape[1], data.data.shape[2]))
-        flat = None
-        try:
-            flat = np.mean(data.data[image_key == 1, :, :], 0)
-        except:
-            flat = np.ones((data.data.shape[1], data.data.shape[2]))
-        # shortcut to reduce processing
-        flat = flat - dark        
-        flat[flat == 0.0] = 1
-        
-        params = [dark, flat]
-        transport.process(self, data, output, processes, process, 
-                          params, "timeseries_correction_set_up")
+        transport.process(self, data, output, processes, process, [], "timeseries_correction_set_up")
 
 
     def required_data_type(self):
@@ -90,7 +81,7 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
 
         :returns:  DistArray distribution
         """
-        return "bnn"
+        return "nbn"
 
     def output_dist(self):
         """
@@ -99,4 +90,4 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
 
         :returns:  DistArray distribution
         """
-        return "bnn"
+        return "nbn"

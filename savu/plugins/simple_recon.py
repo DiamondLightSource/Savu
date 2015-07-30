@@ -69,7 +69,9 @@ class SimpleRecon(BaseRecon, CpuPlugin):
             result += \
                 self._back_project(mapping_array, filt,
                                    (centre_of_rotation + sinogram.shape[1]))
+        
         return result
+        
 
     def get_citation_information(self):
         cite_info = CitationInformation()
