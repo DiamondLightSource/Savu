@@ -500,7 +500,6 @@ class VolumeData(Data):
         group.attrs[NX_CLASS] = 'NXdata'
         data_value = group.create_dataset('data', data_shape, data_type)
         data_value.attrs['signal'] = 1
-        data_value.attrs['signal'] = 1
         data_avail = group.create_dataset('data_avail',
                                           data_shape, np.bool_)
         self.data = SliceAvailableWrapper(data_avail, data_value)

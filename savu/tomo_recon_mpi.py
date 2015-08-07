@@ -29,7 +29,6 @@ import os
 from itertools import chain
 from mpi4py import MPI
 
-from savu.core import process
 from savu.data.plugin_info import PluginList
 from savu.core.utils import logfunction
 

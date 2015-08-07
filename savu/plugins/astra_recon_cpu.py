@@ -15,7 +15,7 @@ from savu.plugins.base_astra_recon import BaseAstraRecon
 from savu.data.plugin_info import CitationInfomration
 
 """
-.. module:: astra_recon
+.. module:: astra_recon_cpu
    :platform: Unix
    :synopsis: Wrapper around the Astra toolbox for reconstruction
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>

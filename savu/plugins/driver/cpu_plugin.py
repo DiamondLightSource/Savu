@@ -21,7 +21,6 @@
 
 """
 import logging
-from savu.data.transports.hdf5_transport import Hdf5Transport as Transport
 
 class CpuPlugin(object):
     """
@@ -31,8 +30,11 @@ class CpuPlugin(object):
     def __init__(self):
         super(CpuPlugin, self).__init__()
 
-    def run_plugin(self, data, output, processes, process, transport=Transport()):
+    def run_plugin(self, exp, transport):
             
+        processes = exp.info["processes"]
+        process = exp.info["process"]
+        
         count = 0
         cpu_processes = []
         for i in ["CPU" in i for i in processes]:
@@ -46,9 +48,10 @@ class CpuPlugin(object):
             new_processes = [i for i in processes if "CPU" in i]
 
             logging.debug("Pre-processing")
-            self.pre_process(0 if isinstance(data, str) else data.get_data_shape())
+            self.pre_process()
             logging.debug("Main processing: process %s", self.__class__)
-            self.process(data, output, new_processes, cpu_processes[process], transport)
+            #self.process(exp, new_processes, cpu_processes[process])
+            self.process(exp, transport)
             logging.debug("Post-processing")
             self.post_process()
             return

@@ -20,36 +20,28 @@
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
-import logging
 import optparse
 import sys
 import os
 
-from savu.data.plugin_info import PluginList
+from savu.core.plugin_runner import PluginRunner
 
-MACHINE_NUMBER_STRING = '0'
-MACHINE_RANK_NAME = 'cpu1'
-
-
-if __name__ == '__main__':
-
+def option_parser():
     usage = "%prog [options] input_file output_directory"
     version = "%prog 0.1"
     parser = optparse.OptionParser(usage=usage, version=version)
     parser.add_option("-n", "--names", dest="names", help="Process names",
-                      default="CPU1,CPU2,CPU3,CPU4,CPU5,CPU6,CPU7,CPU8",
+                      default="CPU0",
                       type='string')
-    parser.add_option("-f", "--filename", dest="process_filename",
-                      help="The filename of the process file",
-                      default="/home/ssg37927/Savu/test_data/process01.nxs",
-                      type='string')
-    parser.add_option("-t", "--transport", dest="transport_str",
+    parser.add_option("-t", "--transport", dest="transport",
                       help="Set the transport mechanism",
                       default="hdf5",
                       type='string')
     (options, args) = parser.parse_args()
+    return [options, args]
 
 
+def check_input_params(args):  
     # Check basic items for completeness
     if len(args) is not 3:
         print("filename, process file and output path needs to be specified")
@@ -71,32 +63,22 @@ if __name__ == '__main__':
         print("Exiting with error code 4 - Output Directory missing")
         sys.exit(4)
 
-    logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
 
-    fh = logging.FileHandler(os.path.join(args[2],'log.txt'), mode='w')
-    fh.setFormatter(logging.Formatter('L %(relativeCreated)12d M' +
-            MACHINE_NUMBER_STRING + ' ' + MACHINE_RANK_NAME +
-            ' %(levelname)-6s %(message)s'))
-    logger.addHandler(fh)
+def set_options(opt, args):
+    options = {}
+    options["transport"] = opt.transport
+    options["process_names"] = opt.names
+    options["data_file"] = args[0]
+    options["process_file"] = args[1]
+    options["out_path"] = args[2]
+    return options
 
-    logging.info("Starting tomo_recon process")
-        
-    # set up transport
-    if 'hdf5' in options.transport_str:
-        from savu.data.transports.hdf5_transport import Hdf5Transport as Transport
-        print "The transport mechanism is: HDF5"
-    elif 'distArray' in options.transport_str:
-        from savu.data.transports.dist_array_transport import DistArrayTransport as Transport
-        print "The transport mechanism is: DistArray"
-    else:
-        print("The transport mechanism", options.transport_str, "is not recognised")
-        print("Exiting with error code 5 - Unrecognised transport mechanism")
-        sys.exit(5)
+if __name__ == '__main__':
+
+    [options, args] = option_parser()
+
+    check_input_params(args)
     
-    plugin_list = PluginList()
-    plugin_list.populate_plugin_list(options.process_filename)
-    transport = Transport()
-    transport.run_plugin_list(args[0], plugin_list, args[2])
+    PluginRunner(set_options(options, args))
 
        

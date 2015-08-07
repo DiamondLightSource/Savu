@@ -21,7 +21,7 @@
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
-from savu.data.structures import RawTimeseriesData, ProjectionData
+
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.plugin import Plugin
 from savu.core.utils import logmethod
@@ -29,6 +29,7 @@ from savu.core.utils import logmethod
 import numpy as np
 
 from savu.plugins.utils import register_plugin
+import savu.data.data_structures as ds
 
 
 @register_plugin
@@ -44,6 +45,7 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
               
               
     def correction(self, data, dark, flat):
+        
         dark = np.tile(dark, (data.shape[0], 1))
         flat = np.tile(flat, (data.shape[0], 1))
         data = (data-dark)/flat  # flat = (flat-dark) already calculated for efficiency
@@ -52,42 +54,29 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
               
 
     @logmethod
-    def process(self, data, output, processes, process, transport):
+    def process(self, exp, transport):
         """
         """
-        transport.process(self, data, output, processes, process, [], "timeseries_correction_set_up")
+        in_data = exp.index["in_data"]["tomo"]
+        out_data = exp.index["out_data"]["tomo"]
+        [dark, flat] = in_data.get_dark_and_flat()
+        transport.timeseries_field_correction(self, in_data, out_data, 
+                                                 exp.info, dark, flat)
 
 
-    def required_data_type(self):
-        """
-        The input for this plugin is RawTimeseriesData
-
-        :returns:  RawTimeseriesData
-        """
-        return RawTimeseriesData
-
-    def output_data_type(self):
-        """
-        The output of this plugin is ProjectionData
-
-        :returns:  ProjectionData
-        """
-        return ProjectionData
-
-    def input_dist(self):
-        """
-        The input DistArray distribution for this plugin is "bnn"
-        (i.e. block in the first dimension)
-
-        :returns:  DistArray distribution
-        """
-        return "nbn"
-
-    def output_dist(self):
-        """
-        The output DistArray distribution for this plugin is "bnn"
-        (i.e. block in the first dimension)
-
-        :returns:  DistArray distribution
-        """
-        return "nbn"
+    def setup(self, experiment):
+        # get the in_data object and set the required in_data type.
+        in_data = experiment.index["in_data"]["tomo"]
+        in_data.set_type(ds.Raw)
+        # check the in_data type exists        
+        in_data.check_data_type_exists()
+        
+        # create the out data object and set the out_data type
+        print ds.Sinogram
+        base_classes = [ds.Sinogram, ds.Projection]
+        experiment.create_data_object("out_data", "tomo", base_classes)
+        out_data = experiment.index["out_data"]["tomo"]
+        out_data.set_type(ds.Sinogram)
+        # set the out_data shape
+        out_data.set_shape(out_data.remove_dark_and_flat(in_data))
+        

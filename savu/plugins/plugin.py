@@ -35,6 +35,21 @@ class Plugin(object):
         super(Plugin, self).__init__()
         self.name = name
         self.parameters = {}
+        
+        
+    def setup(self, experiment):
+        """
+        This method is first to be called after the plugin has been created. 
+
+        :param in_data: The input data object (set to "None" if this is a loader)
+        :type in_data: savu.data.experiment
+        :param out_data: The output data object
+        :type out_data: savu.data.experiment
+        """
+        logging.error("set_up needs to be implemented for proc %i of %i :" +
+                      " input is %s and output is %s", experiment.__class__)
+        raise NotImplementedError("setup needs to be implemented")
+        
 
     def populate_default_parameters(self):
         """
@@ -73,7 +88,7 @@ class Plugin(object):
                                      self.name)
                                      
                                      
-    def pre_process(self, data_size):
+    def pre_process(self):
         """
         This method is called after the plugin has been created by the
         pipeline framework as a pre-processing step

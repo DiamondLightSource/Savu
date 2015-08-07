@@ -23,9 +23,9 @@
 """
 import logging
 
-from savu.data.structures import ProjectionData, VolumeData
 from savu.plugins.plugin import Plugin
 from savu.core.utils import logmethod
+import savu.data.data_structures as ds
 
 import numpy as np
 
@@ -34,7 +34,7 @@ class BaseRecon(Plugin):
     """
     A Plugin to apply a simple reconstruction with no dependancies
     
-    :param center_of_rotation: Center of rotation to use for the reconstruction). Default: 86.
+    :param center_of_rotation: Centre of rotation to use for the reconstruction). Default: 86.
     """
     count = 0
 
@@ -51,27 +51,33 @@ class BaseRecon(Plugin):
 
     
     @logmethod
-    def process(self, data, output, processes, process, transport):
+    def process(self, exp, transport):
         """
         """
-        if data.center_of_rotation is None:
-            centre_of_rotation = np.ones(data.get_number_of_sinograms())
-            centre_of_rotation = centre_of_rotation * self.parameters['center_of_rotation']
-        else :
-            centre_of_rotation = data.center_of_rotation[:]
-        
-        if centre_of_rotation is None:
-            centre_of_rotation = np.ones(data.get_number_of_sinograms())
-            centre_of_rotation = centre_of_rotation * self.parameters['center_of_rotation']
+        in_data = exp.index["in_data"]["tomo"]
+        out_data = exp.index["out_data"]["tomo"]
 
-        angles = data.rotation_angle.data[:]
-        centre_of_rotations = np.array_split(centre_of_rotation, len(processes))[process]
-                
-        params = [centre_of_rotations, angles] 
+        if "centre_of_rotation" not in exp.info:
+            centre_of_rotation = np.ones(in_data.get_nSinograms(
+                        exp.info["data_directions"]["SINOGRAM"]["slice_dir"]))
+            centre_of_rotation = centre_of_rotation * self.parameters['center_of_rotation']
+            exp.meta_data.set_meta_data("centre_of_rotation", centre_of_rotation)
+            
+        transport.reconstruction_setup(self, in_data, out_data, exp.info)                        
+
+
+    def setup(self, experiment):
         
-        transport.process(self, data, output, processes, process, 
-                          params, "reconstruction_set_up")                
-                          
+        in_data = experiment.index["in_data"]["tomo"]
+        in_data.set_type(ds.Projection)
+        in_data.check_data_type_exists()
+        
+        base_classes = [ds.Volume]
+        experiment.create_data_object("out_data", "tomo", base_classes)
+        out_data = experiment.index["out_data"]["tomo"]
+        out_data.set_type(ds.Volume)
+        out_data.set_shape(out_data.get_volume_shape(in_data.get_shape()))
+
             
     def get_max_frames(self):
         """
@@ -80,37 +86,3 @@ class BaseRecon(Plugin):
         :returns:  an integer of the number of frames
         """
         return 8
-
-    def required_data_type(self):
-        """
-        The input for this plugin is ProjectionData
-
-        :returns:  ProjectionData
-        """
-        return ProjectionData
-
-    def output_data_type(self):
-        """
-        The output of this plugin is VolumeData
-
-        :returns:  VolumeData
-        """
-        return VolumeData
-
-    def input_dist(self):
-        """
-        The input DistArray distribution for this plugin is "nbn"
-        (i.e. block in the second dimension)
-
-        :returns:  DistArray distribution
-        """
-        return "nbn"
-
-    def output_dist(self):
-        """
-        The output DistArray distribution for this plugin is "nbn"
-        (i.e. block in the second dimension)
-
-        :returns:  DistArray distribution
-        """
-        return "nbn"
