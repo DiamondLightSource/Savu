@@ -24,21 +24,22 @@ import logging
 import numpy as np
 import socket
 import os
+import copy
 
 from mpi4py import MPI
 from itertools import chain
-
 from savu.core.utils import logfunction
 from savu.data.structures import NX_CLASS
 from savu.data.transport_mechanism import TransportMechanism
 from savu.core.utils import logmethod
-from savu.data.transport_data.hdf5_transport_data import SliceAlwaysAvailableWrapper
+
 
 class Hdf5Transport(TransportMechanism): 
     
 
     def transport_control_setup(self, options):
         processes = options["process_names"].split(',')
+
 
         if len(processes) is 1:
             options["mpi"] = False
@@ -49,10 +50,11 @@ class Hdf5Transport(TransportMechanism):
             options["mpi"] = "True"
             self.mpi_setup(options)
 
+        
 
     def mpi_setup(self, options):
         
-        RANK_NAMES = options["processes"].split(',')     
+        RANK_NAMES = options["process_names"].split(',')     
         RANK = MPI.COMM_WORLD.rank
         SIZE = MPI.COMM_WORLD.size
         RANK_NAMES_SIZE = len(RANK_NAMES)
@@ -105,19 +107,17 @@ class Hdf5Transport(TransportMechanism):
 
     def transport_run_plugin_list(self, exp):
         """Runs a chain of plugins
-        """
+        """        
         #*** check base saver is to hdf5 file?
-        for key in exp.index['in_data'].keys():
-            in_data = exp.index["in_data"][key]
-            in_data.data = SliceAlwaysAvailableWrapper(in_data.data)
-
+        in_data = exp.index["in_data"][exp.index["in_data"].keys()[0]]
         out_data_objects = in_data.load_data(self, exp)
 
         # clear all out_data objects in experiment dictionary
-        exp.index["out_data"] = {}
+        exp.index["out_data"] = {}        
         
         count = 0
         for plugin_dict in exp.info["plugin_list"][1:-1]:
+            
             
             logging.debug("Loading plugin %s", plugin_dict['id'])
             plugin_id = plugin_dict["id"]
@@ -126,20 +126,29 @@ class Hdf5Transport(TransportMechanism):
 
             plugin.setup(exp)
 
-            exp.index["out_data"] = out_data_objects[count]
-
+            for key in out_data_objects[count]:
+                exp.index["out_data"][key] = out_data_objects[count][key]
+      
             plugin.set_parameters(plugin_dict['data'])
 
-            logging.debug("Starting processing  plugin %s", plugin_dict['id'])
+            logging.debug("Starting processing  plugin %s", plugin_id)
             plugin.run_plugin(exp, self)
-            logging.debug("Completed processing plugin %s", plugin_dict['id'])
+            logging.debug("Completed processing plugin %s", plugin_id)
+
+            for out_objs in exp.info["plugin_objects"]["out_data"]:
+                if out_objs in exp.index["in_data"].keys():
+                    exp.index["in_data"][out_objs].save_data()
 
             for key in exp.index["out_data"]:
-                exp.index["in_data"][key] = exp.index["out_data"][key]
-        
+                exp.index["in_data"][key] = \
+                               copy.deepcopy(exp.index["out_data"][key])
+                    
             if exp.info['mpi'] is True:
                 logging.debug("Blocking till all processes complete")
                 MPI.COMM_WORLD.Barrier()
+    
+            count += 1    
+
     
 #            if plugin == 0:
 #                cite_info = plugin.get_citation_information()
@@ -149,49 +158,53 @@ class Hdf5Transport(TransportMechanism):
 #                group_name = "%i-%s" % (count, plugin.name)
 #                plugin_list.add_intermediate_data_link(output_filename,
 #                                                        output, group_name)
-#    
-#            count += 1
-#    
-#        if output is not None:
-#            output.complete()
-
- 
-    @logmethod
-    def reconstruction_setup(self, plugin, in_data, out_data, info):
-        processes = info["processes"]
-        process = info["process"]
-        angles = info["rotation_angle"]
-        ddirs = info["data_directions"]
-        
-        centre_of_rotations = np.array_split(info["centre_of_rotation"], len(processes))[process]
-                
-        sinogram_frames = np.arange(in_data.get_nSinograms(ddirs["SINOGRAM"]["slice_dir"]))
+#
+        for key in exp.index["in_data"].keys():
+            exp.index["in_data"][key].save_data()
     
-        frames = np.array_split(sinogram_frames, len(processes))[process]
-            
-        for i in range(len(frames)):
-            out_data.get_pattern([i], ddirs) = \
-                plugin.reconstruct(in_data.get_pattern("SINOGRAM", [i], ddirs),
-                                   centre_of_rotations[i],
-                                   angles,
-                                   in_data.get_sinogram_shape(ddirs),
-                                   tuple([out_data.get.shape[0]/2]*2))
-            plugin.count+=1
-            print plugin.count
-
     
     @logmethod
-    def timeseries_field_correction(self, plugin, in_data, out_data, info, dark, flat):
+    def timeseries_field_correction(self, plugin, in_data, out_data, info):
+   
+        dark = in_data.info["dark"]
+        flat = in_data.info["flat"]   
    
         # get a list of all the frames
         output_frames = np.arange(in_data.get_shape()[1])
         frames = np.array_split(output_frames, 
-                                len(info["processes"]))[info["process"]]
-        
-        #*** call get_sinogram here?!
+                                len(info["processes"]))[info["process"]]                            
+
         for i in frames: 
-            out_data.data[:, i, :] = plugin.correction(
-               in_data.data[in_data.get_image_key() == 0, i,:], dark[i,:], flat[i,:])
+            out_data.data[out_data.get_index([i])] = plugin.correction(
+            in_data.get_frame_raw([i]), dark[i,:], flat[i,:])
+            
+            
+    @logmethod
+    def reconstruction_setup(self, plugin, in_data, out_data, info):       
+
+        processes = info["processes"]
+        process = info["process"]
+        angles = info["rotation_angle"]
+        
+        centre_of_rotations = np.array_split(info["centre_of_rotation"], len(processes))[process]
+                
+        sinogram_frames = np.arange(in_data.get_nPattern())
+    
+        frames = np.array_split(sinogram_frames, len(processes))[process]
+        
+        print out_data.get_pattern_shape()
+        
+        for i in range(len(frames)):
+            out_data.data[out_data.get_index([i])] = \
+                plugin.reconstruct(in_data.get_frame([i]),
+                                   centre_of_rotations[i],
+                                   angles,
+                                   out_data.get_pattern_shape(),
+                                   tuple([out_data.get_pattern_shape()[0]/2]*2))
+            plugin.count+=1
+            print plugin.count
+    
+
 
            
     @logmethod

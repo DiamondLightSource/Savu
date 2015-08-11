@@ -33,8 +33,13 @@ class MetaData(object):
    
     def __init__(self, options):
         self.dict = options
+        self.set_up_dict()
         self.load_experiment_collection()
         self.plugin_list = PluginList(self)
+
+
+    def set_up_dict(self):
+        self.set_meta_data("plugin_objects", {})
 
 
     def load_experiment_collection(self):
@@ -56,6 +61,10 @@ class MetaData(object):
         return self.dict[name]        
     
     
+    def set_plugin_objects(self, name, objs):
+        self.dict["plugin_objects"][name] = objs
+
+    
     def get_dictionary(self):
         return self.dict
         
@@ -66,10 +75,6 @@ class Hdf5Experiment():
     runtime and performs initial setup of metadata
     """    
     def set_transport_meta_data(self):
-        
-        # load dark, flat
-        #self.set_meta_data("dark", dark)
-        #self.set_meta_data("flat", flat)
         pass
     
 
@@ -79,7 +84,4 @@ class distArrayExperiment():
     runtime and performs initial setup of metadata
     """
     def set_transport_meta_data(self):    
-        # load dark, flat, rotation angle?
-        self.set_meta_data("dark", dark)
-        self.set_meta_data("flat", flat)
-
+        pass

@@ -52,7 +52,7 @@ class TomographySavers(object):
             backing_file = self.create_backing_h5(key, exp.info)
             group = self.create_entries(backing_file, out_data, exp.info, key, dtype)
 
-            if out_data.get_type() is not ds.Volume:
+            if out_data.get_pattern_name() is not "VOLUME":
                 self.output_meta_data(group, out_data, exp.info, dtype)
     
 
@@ -88,12 +88,12 @@ class TomographySavers(object):
 
 
     def output_meta_data(self, group, data, info, dtype):
-        theDict = {}
-        theDict[ds.Raw] = ["image_key", "control", "rotation_angle"] # *** ADD COR
-        theDict[ds.Projection] = ["rotation_angle"]
-        theDict[ds.Sinogram] = theDict[ds.Projection]
+        if isinstance(data, ds.Raw):
+            theDict = ["image_key", "control", "rotation_angle"] # *** ADD COR
+        else:
+            theDict = ["rotation_angle"]
         
-        for name in theDict[data.get_type()]:
+        for name in theDict:
             params = self.set_name(name)
             self.output_data_to_file(group, params, info[name].shape, dtype)
             params['name1'][...] = info[name]

@@ -47,29 +47,30 @@ class SimpleRecon(BaseRecon, CpuPlugin):
         ffs = fs*ff
         return np.fft.ifft(ffs).real
 
-    def _back_project(self, mapping, sino_element, center):
-        mapping_array = mapping+center
+    def _back_project(self, mapping, sino_element, centre):
+        mapping_array = mapping+centre
         return sino_element[mapping_array.astype('int')]
 
     def _mapping_array(self, shape, center, theta):
         x, y = np.meshgrid(np.arange(-center[0], shape[0] - center[0]),
-                           np.arange(-center[1], shape[1]-center[1]))
+                           np.arange(-center[1], shape[1] - center[1]))
         return x*np.cos(theta) - y*np.sin(theta)
 
-    def reconstruct(self, sinogram, centre_of_rotation, angles, shape, center):
-        result = np.zeros(shape)
-        sino = np.nan_to_num(sinogram)
-        sino = np.log(sino+1)
+
+    def reconstruct(self, sinogram, centre_of_rotation, angles, shape, centre):
+        result = np.zeros(shape, dtype=np.float32)      
+
+        print sinogram.shape[0]
         for i in range(sinogram.shape[0]):
-            theta = i * (np.pi/sinogram.shape[0])
-            mapping_array = self._mapping_array(shape, center, theta)
-            filt = np.zeros(sinogram.shape[1]*3)
+            theta = i*(np.pi/sinogram.shape[0])
+            mapping_array = self._mapping_array(shape, centre, theta)
+            filt = np.zeros(sinogram.shape[1]*3, dtype=np.float32)
             filt[sinogram.shape[1]:sinogram.shape[1]*2] = \
-                self._filter(sino[i, :])
+                self._filter(np.log(np.nan_to_num(sinogram)+1)[i, :])
+                
             result += \
                 self._back_project(mapping_array, filt,
                                    (centre_of_rotation + sinogram.shape[1]))
-        
         return result
         
 

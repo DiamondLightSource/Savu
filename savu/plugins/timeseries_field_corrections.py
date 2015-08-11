@@ -49,7 +49,6 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         dark = np.tile(dark, (data.shape[0], 1))
         flat = np.tile(flat, (data.shape[0], 1))
         data = (data-dark)/flat  # flat = (flat-dark) already calculated for efficiency
-        data[data <= 0.0] = 1.0;
         return data
               
 
@@ -59,24 +58,29 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         """
         in_data = exp.index["in_data"]["tomo"]
         out_data = exp.index["out_data"]["tomo"]
-        [dark, flat] = in_data.get_dark_and_flat()
-        transport.timeseries_field_correction(self, in_data, out_data, 
-                                                 exp.info, dark, flat)
+        transport.timeseries_field_correction(self, in_data, out_data, exp.info)
 
 
     def setup(self, experiment):
-        # get the in_data object and set the required in_data type.
+        
+        # set all in_data objects required in this plugin 
+        experiment.meta_data.set_plugin_objects("in_data", ["tomo"])
+        # for each of the required in_data objects...
+        # get the in_data object and set the required in_data pattern.
         in_data = experiment.index["in_data"]["tomo"]
-        in_data.set_type(ds.Raw)
+        in_data.set_pattern_name("SINOGRAM")
         # check the in_data type exists        
         in_data.check_data_type_exists()
         
-        # create the out data object and set the out_data type
-        print ds.Sinogram
-        base_classes = [ds.Sinogram, ds.Projection]
-        experiment.create_data_object("out_data", "tomo", base_classes)
-        out_data = experiment.index["out_data"]["tomo"]
-        out_data.set_type(ds.Sinogram)
-        # set the out_data shape
-        out_data.set_shape(out_data.remove_dark_and_flat(in_data))
         
+        # set all in_data objects required in this plugin 
+        experiment.meta_data.set_plugin_objects("out_data", ["tomo"])
+        # for each of the required out_data objects...
+        # create the out_data object and set the pattern and shape
+        out_data = experiment.create_data_object("out_data", "tomo")
+        out_data.copy_patterns(in_data.info["data_patterns"])
+        out_data.set_shape(out_data.remove_dark_and_flat(in_data))
+        out_data.set_pattern_name("SINOGRAM") # already know this exists
+
+        
+     

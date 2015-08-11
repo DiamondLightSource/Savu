@@ -25,6 +25,7 @@ import h5py
 import logging
 
 import savu.data.data_structures as ds
+from savu.data.transport_data.hdf5_transport_data import SliceAlwaysAvailableWrapper
 
 class TomographyLoaders(object):
     """
@@ -38,14 +39,14 @@ class TomographyLoaders(object):
 
     def loader_setup(self, exp):
         
-        base_classes = [ds.Raw, ds.Pattern]
+        base_classes = [ds.Raw]
         exp.info["base_classes"] = base_classes
         data_obj = exp.create_data_object("in_data", "tomo", base_classes)
                 
-        data_obj.set_pattern("PROJECTION", core_dir = (1, 2), slice_dir = (0,))
-        data_obj.set_pattern("SINOGRAM", core_dir = (0, 2), slice_dir = (1,))
-        #exp.meta_data.set_pattern("ROTATION_AXIS", core_dir = (0,)) # *** do I need this?
-            
+        data_obj.add_pattern("PROJECTION", core_dir = (1, 2), slice_dir = (0,))
+        data_obj.add_pattern("SINOGRAM", core_dir = (0, 2), slice_dir = (1,))
+        data_obj.add_pattern("VOLUME_XZ", core_dir = (0, 2), slice_dir = (1,))
+        
     
     def load_from_nx_tomo(self, exp):
         """
@@ -56,7 +57,7 @@ class TomographyLoaders(object):
         """
         
         data_obj = exp.index["in_data"]["tomo"]
-        
+
         data_obj.backing_file = h5py.File(exp.info["data_file"], 'r')
         exp.meta_data.set_meta_data("backing_file", data_obj.backing_file)
         logging.debug("Creating file '%s' '%s'", 'tomo_entry', data_obj.backing_file.filename)
@@ -75,3 +76,7 @@ class TomographyLoaders(object):
 
         data_obj.set_shape(data_obj.data.shape)
         
+        for key in exp.index['in_data'].keys():
+            in_data = exp.index["in_data"][key]
+            in_data.data = SliceAlwaysAvailableWrapper(in_data.data)
+            

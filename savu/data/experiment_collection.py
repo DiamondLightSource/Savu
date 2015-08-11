@@ -38,10 +38,11 @@ class Experiment(object):
         self.index = {"in_data": {}, "out_data": {}}
         
 
-    def create_data_object(self, dtype, name, bases):      
+    def create_data_object(self, dtype, name, bases=None): 
         transport_data = self.get_transport_data()
         self.index[dtype][name] = Data(self.import_class(transport_data))
-        self.index[dtype][name].add_base_classes(bases)
+        if bases is not None:
+            self.index[dtype][name].add_base_classes(bases)        
         return self.index[dtype][name]
         
 

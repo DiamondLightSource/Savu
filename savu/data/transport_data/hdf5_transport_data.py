@@ -24,6 +24,8 @@
 import os
 import logging 
 
+import numpy as np
+
 from savu.core.utils import logmethod
 
 class Hdf5TransportData(object):
@@ -57,6 +59,7 @@ class Hdf5TransportData(object):
             saver_plugin.setup(exp)
             
             out_data_objects.append(exp.index["out_data"].copy())
+            
             count += 1
             
         return out_data_objects
@@ -66,9 +69,9 @@ class Hdf5TransportData(object):
         exp.info["filename"] = {}
         exp.info["group_name"] = {}
         for key in exp.index["out_data"].keys():
-            filename = os.path.join(exp.info["out_path"],"%s%02i_%s.h5" % \
+            filename = os.path.join(exp.info["out_path"],"%s%02i_%s" % \
                           (exp.info["process_filename"], count, plugin_id))
-            filename = filename + "_" + key
+            filename = filename + "_" + key + ".h5"
             group_name = "%i-%s" % (count, plugin.name)
             logging.debug("Creating output file %s", filename)
             exp.info["filename"][key] = filename
@@ -76,11 +79,13 @@ class Hdf5TransportData(object):
 
         
     def save_data(self):
-        pass
-        
-    def complete(self):
-        #from structures: close the hdf5 file
-        pass
+        """
+        Closes the backing file and completes work
+        """
+        if self.backing_file is not None:
+            logging.debug("Completing file %s",self.backing_file.filename)
+            self.backing_file.close()
+            self.backing_file = None
 
 
 class SliceAvailableWrapper(object):
@@ -100,16 +105,20 @@ class SliceAvailableWrapper(object):
         self.avail = avail
         self.data = data
 
+
     def __getitem__(self, item):
         if self.avail[item].all():
-            return self.data[item]
+            return np.squeeze(self.data[item])
         else:
             return None
 
-    def __setitem__(self, item, value):
-        self.data[item] = value
-        self.avail[item] = True
 
+    def __setitem__(self, item, value):
+        self.data[item] = value.reshape(self.data[item].shape)
+        self.avail[item] = True
+        return np.squeeze(self.data[item])
+        
+        
     def __getattr__(self, name):
         """
         Delegate everything else to the data class

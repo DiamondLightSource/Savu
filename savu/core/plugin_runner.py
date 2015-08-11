@@ -64,7 +64,7 @@ class PluginRunner(object):
         experiment = Experiment(options)
         plugin_list = experiment.info["plugin_list"]
 
-        self.check_loaders_and_savers(experiment, plugin_list)     
+        self.check_loaders_and_savers(experiment, plugin_list)
 
         self.set_outfilename(experiment)
         if experiment.info["process"] is 0:
@@ -80,7 +80,7 @@ class PluginRunner(object):
         first_plugin = plugin_list[0]
         plugin = self.load_plugin(first_plugin['id'])   
         
-        #*** temporary fix!!!        
+        #*** temporary fix!!!
         plugins = []
         temp = {}
         temp['name'] = "nxtomo_loader"
@@ -101,7 +101,7 @@ class PluginRunner(object):
         first_plugin = plugin_list[0]
         end_plugin = plugin_list[-1]
 
-        plugin = self.load_plugin(first_plugin['id'])                
+        plugin = self.load_plugin(first_plugin['id'])           
         # check the first plugin is a loader
         if isinstance(plugin, BaseLoader):
             plugin.setup(experiment)

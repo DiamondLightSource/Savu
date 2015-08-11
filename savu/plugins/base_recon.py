@@ -58,26 +58,30 @@ class BaseRecon(Plugin):
         out_data = exp.index["out_data"]["tomo"]
 
         if "centre_of_rotation" not in exp.info:
-            centre_of_rotation = np.ones(in_data.get_nSinograms(
-                        exp.info["data_directions"]["SINOGRAM"]["slice_dir"]))
+            centre_of_rotation = np.ones(in_data.get_nPattern())
             centre_of_rotation = centre_of_rotation * self.parameters['center_of_rotation']
             exp.meta_data.set_meta_data("centre_of_rotation", centre_of_rotation)
-            
+                        
         transport.reconstruction_setup(self, in_data, out_data, exp.info)                        
 
 
     def setup(self, experiment):
         
         in_data = experiment.index["in_data"]["tomo"]
-        in_data.set_type(ds.Projection)
+        in_data.set_pattern_name("SINOGRAM")
         in_data.check_data_type_exists()
-        
-        base_classes = [ds.Volume]
-        experiment.create_data_object("out_data", "tomo", base_classes)
-        out_data = experiment.index["out_data"]["tomo"]
-        out_data.set_type(ds.Volume)
-        out_data.set_shape(out_data.get_volume_shape(in_data.get_shape()))
 
+        base_classes = [ds.Pattern]
+        experiment.info["base_classes"] = base_classes
+        out_data = experiment.create_data_object("out_data", "tomo", base_classes)            
+        out_data.copy_patterns(in_data.info["data_patterns"])
+
+        out_data = experiment.index["out_data"]["tomo"]
+        out_data.set_pattern_name("VOLUME_XZ")
+        out_data.check_data_type_exists()
+        shape = in_data.get_shape()
+        out_data.set_shape((shape[2], shape[1], shape[2]))
+     
             
     def get_max_frames(self):
         """
