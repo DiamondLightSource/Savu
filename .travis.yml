@@ -1,7 +1,18 @@
+#sudo: false
 language: python
 python:
   - "2.7"
 # before the install
+#addons:
+#  apt:
+#   packages:
+#    - libblas-dev
+#    - liblapack-dev
+#    - gfortran
+#    - libhdf5-serial-dev
+#    - libcr-dev mpich2 mpich2-doc
+#    - libboost-all-dev
+
 before_install:
   - sudo apt-get install libblas-dev
   - sudo apt-get install liblapack-dev
@@ -23,7 +34,7 @@ install:
 
 # command to run tests, e.g. python setup.py test
 script:
-  - sudo ln -s /usr/lib/x86_64-linux-gnu/libboost_python.so.5 /usr/lib/x86_64-linux-gnu/libboost_python.so
+  #- sudo ln -s /usr/lib/x86_64-linux-gnu/libboost_python.so.5 /usr/lib/x86_64-linux-gnu/libboost_python.so
   - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/x86_64-linux-gnu/
   - echo $LD_LIBRARY_PATH
   - py.test savu/test -v --cov savu --cov-report term-missing
