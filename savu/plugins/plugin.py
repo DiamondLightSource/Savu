@@ -88,7 +88,7 @@ class Plugin(object):
                                      self.name)
                                      
                                      
-    def pre_process(self):
+    def pre_process(self, exp):
         """
         This method is called after the plugin has been created by the
         pipeline framework as a pre-processing step
@@ -110,7 +110,7 @@ class Plugin(object):
         """
         pass
 
-    def process(self, data, output, processes, process):
+    def process(self, experiment, transport, params):
         """
         This method is called after the plugin has been created by the
         pipeline framework and forms the main processing step
@@ -126,7 +126,7 @@ class Plugin(object):
         """
         logging.error("process needs to be implemented for proc %i of %i :" +
                       " input is %s and output is %s",
-                      process, processes, data.__class__, output.__class__)
+                        experiment.__class__, transport.__class__)
         raise NotImplementedError("process needs to be implemented")
 
     def required_data_type(self):

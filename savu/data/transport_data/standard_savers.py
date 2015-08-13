@@ -49,12 +49,12 @@ class TomographySavers(object):
         dtype = np.float32 #*** changed from double
         for key in exp.index["out_data"].keys():
             out_data = exp.index["out_data"][key]
-            backing_file = self.create_backing_h5(key, exp.info)
-            group = self.create_entries(backing_file, out_data, exp.info, key, dtype)
+            out_data.backing_file = self.create_backing_h5(key, exp.info)
+            group = self.create_entries(out_data.backing_file, out_data, exp.info, key, dtype)
 
             if out_data.get_pattern_name() is not "VOLUME":
                 self.output_meta_data(group, out_data, exp.info, dtype)
-    
+
 
     def create_backing_h5(self, key, info):
         """

@@ -29,7 +29,6 @@ from savu.core.utils import logmethod
 import numpy as np
 
 from savu.plugins.utils import register_plugin
-import savu.data.data_structures as ds
 
 
 @register_plugin
@@ -44,7 +43,7 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
               self).__init__("TimeseriesFieldCorrections")
               
               
-    def correction(self, data, dark, flat):
+    def correction(self, data, dark, flat, params):
         
         dark = np.tile(dark, (data.shape[0], 1))
         flat = np.tile(flat, (data.shape[0], 1))
@@ -53,12 +52,13 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
               
 
     @logmethod
-    def process(self, exp, transport):
+    def process(self, exp, transport, params):
         """
         """
         in_data = exp.index["in_data"]["tomo"]
         out_data = exp.index["out_data"]["tomo"]
-        transport.timeseries_field_correction(self, in_data, out_data, exp.info)
+        transport.timeseries_field_correction(self, in_data, out_data, 
+                                              exp.info, params)
 
 
     def setup(self, experiment):
@@ -71,7 +71,6 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         in_data.set_pattern_name("SINOGRAM")
         # check the in_data type exists        
         in_data.check_data_type_exists()
-        
         
         # set all in_data objects required in this plugin 
         experiment.meta_data.set_plugin_objects("out_data", ["tomo"])

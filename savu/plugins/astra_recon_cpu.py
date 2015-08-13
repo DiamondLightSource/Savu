@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from savu.plugins.base_astra_recon import BaseAstraRecon
-from savu.data.plugin_info import CitationInfomration
+from savu.data.plugin_info import CitationInformation
 
 """
 .. module:: astra_recon_cpu
@@ -21,7 +21,7 @@ from savu.data.plugin_info import CitationInfomration
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
-from savu.plugins.cpu_plugin import CpuPlugin
+from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 from savu.plugins.utils import register_plugin
 
@@ -37,6 +37,7 @@ class AstraReconCpu(BaseAstraRecon, CpuPlugin):
 
     def __init__(self):
         super(AstraReconCpu, self).__init__("AstraReconCpu")
+
 
     def get_parameters(self):
         return [self.parameters['reconstruction_type'], \

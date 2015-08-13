@@ -42,7 +42,7 @@ class Experiment(object):
         transport_data = self.get_transport_data()
         self.index[dtype][name] = Data(self.import_class(transport_data))
         if bases is not None:
-            self.index[dtype][name].add_base_classes(bases)        
+            self.index[dtype][name].add_base_classes(bases)
         return self.index[dtype][name]
         
 

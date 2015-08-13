@@ -41,7 +41,8 @@ class BaseRecon(Plugin):
     def __init__(self, name='BaseRecon'):
         super(BaseRecon, self).__init__(name)
 
-    def reconstruct(self, sinogram, centre_of_rotation, angles, shape, center):
+
+    def reconstruct(self, sinogram, centre_of_rotations, vol_shape, params):
         """
         Reconstruct a single sinogram with the provided center of rotation
         """
@@ -51,7 +52,7 @@ class BaseRecon(Plugin):
 
     
     @logmethod
-    def process(self, exp, transport):
+    def process(self, exp, transport, params):
         """
         """
         in_data = exp.index["in_data"]["tomo"]
@@ -61,21 +62,28 @@ class BaseRecon(Plugin):
             centre_of_rotation = np.ones(in_data.get_nPattern())
             centre_of_rotation = centre_of_rotation * self.parameters['center_of_rotation']
             exp.meta_data.set_meta_data("centre_of_rotation", centre_of_rotation)
-                        
-        transport.reconstruction_setup(self, in_data, out_data, exp.info)                        
+            
+        transport.reconstruction_setup(self, in_data, out_data, exp.info, params)
 
 
     def setup(self, experiment):
         
+        # set all in_data objects required in this plugin 
+        experiment.meta_data.set_plugin_objects("in_data", ["tomo"])
+
+        # for each in_data object: Set the pattern name        
         in_data = experiment.index["in_data"]["tomo"]
         in_data.set_pattern_name("SINOGRAM")
         in_data.check_data_type_exists()
 
-        base_classes = [ds.Pattern]
-        experiment.info["base_classes"] = base_classes
-        out_data = experiment.create_data_object("out_data", "tomo", base_classes)            
-        out_data.copy_patterns(in_data.info["data_patterns"])
+        # set all in_data objects required in this plugin 
+        experiment.meta_data.set_plugin_objects("out_data", ["tomo"])
 
+        # for each out_data object: Create the object
+        out_data = experiment.create_data_object("out_data", "tomo")            
+        out_data.copy_patterns(in_data.info["data_patterns"])
+        
+        # for each out_data object: Set the pattern name and data shape
         out_data = experiment.index["out_data"]["tomo"]
         out_data.set_pattern_name("VOLUME_XZ")
         out_data.check_data_type_exists()

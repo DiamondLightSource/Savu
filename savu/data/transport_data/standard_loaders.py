@@ -24,8 +24,11 @@
 import h5py
 import logging
 
+import numpy as np
+
 import savu.data.data_structures as ds
 from savu.data.transport_data.hdf5_transport_data import SliceAlwaysAvailableWrapper
+
 
 class TomographyLoaders(object):
     """
@@ -69,7 +72,7 @@ class TomographyLoaders(object):
         exp.meta_data.set_meta_data("image_key", data_obj.get_image_key())
         
         rotation_angle = data_obj.backing_file['entry1/tomo_entry/sample/rotation_angle']
-        exp.meta_data.set_meta_data("rotation_angle", rotation_angle[...])        
+        exp.meta_data.set_meta_data("rotation_angle", rotation_angle[exp.info["image_key"]==0,...])
 
         control = data_obj.backing_file['entry1/tomo_entry/control/data']
         exp.meta_data.set_meta_data("control", control[...])

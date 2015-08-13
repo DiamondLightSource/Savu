@@ -57,20 +57,26 @@ class SimpleRecon(BaseRecon, CpuPlugin):
         return x*np.cos(theta) - y*np.sin(theta)
 
 
-    def reconstruct(self, sinogram, centre_of_rotation, angles, shape, centre):
-        result = np.zeros(shape, dtype=np.float32)      
+    def pre_process(self, exp):
+        centre = (exp.info["out_data"]["tomo"].get_pattern_shape)/2
+        params = [centre]
+        return params
+        
 
-        print sinogram.shape[0]
+    def reconstruct(self, sinogram, centre_of_rotations, vol_shape, params):        
+        centre = params[0]
+        result = np.zeros(vol_shape, dtype=np.float32)
+
         for i in range(sinogram.shape[0]):
             theta = i*(np.pi/sinogram.shape[0])
-            mapping_array = self._mapping_array(shape, centre, theta)
+            mapping_array = self._mapping_array(vol_shape, centre, theta)
             filt = np.zeros(sinogram.shape[1]*3, dtype=np.float32)
             filt[sinogram.shape[1]:sinogram.shape[1]*2] = \
                 self._filter(np.log(np.nan_to_num(sinogram)+1)[i, :])
                 
             result += \
                 self._back_project(mapping_array, filt,
-                                   (centre_of_rotation + sinogram.shape[1]))
+                                   (centre_of_rotations + sinogram.shape[1]))
         return result
         
 

@@ -131,9 +131,11 @@ class Data(object):
             self.backing_file.close()
             self.backing_file = None
 
+
     def external_link(self):
         return h5py.ExternalLink(self.backing_file.filename,
                                  self.base_path)
+
 
     def get_slice_list(self, frame_type):
         if frame_type in self.core_directions.keys():
@@ -154,6 +156,7 @@ class Data(object):
                 it.iternext()
             return slice_list
         return None
+
 
     def get_data_shape(self):
         """

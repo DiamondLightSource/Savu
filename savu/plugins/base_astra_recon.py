@@ -51,14 +51,21 @@ class BaseAstraRecon(BaseRecon):
                                   "needs to be implemented")
        
 
-    def reconstruct(self, sinogram, centre_of_rotation, angles, shape, center):
+    def pre_process(self, exp):
+        angles = exp.info["rotation_angle"]
+        params = [angles]
+        return params
+        
+
+    def reconstruct(self, sinogram, centre_of_rotations, vol_shape, params):
+        angles = params[0]
         
         nSinos = self.get_max_frames()
-        params = self.get_parameters()
-        alg_name = params[0]
-        iterations = params[1]
+        lparams = self.get_parameters()
+        alg_name = lparams[0]
+        iterations = lparams[1]
         
-        ctr = centre_of_rotation
+        ctr = centre_of_rotations
         width = sinogram.shape[1]
         pad = 50
 
@@ -80,13 +87,16 @@ class BaseAstraRecon(BaseRecon):
         
         sinogram = np.pad(logdata, ((0, 0), (int(plow), int(phigh))),
                           mode='reflect')
-                            
+                                                      
         if not "3D" in alg_name:
-            rec = self.reconstruct2D(sinogram, angles, shape, alg_name, iterations)
+            rec = self.reconstruct2D(sinogram, angles, vol_shape, alg_name, 
+                                     iterations)
         else:
             sinogram = np.tile(sinogram.reshape((1,)+sinogram.shape), (8, 1, 1))
-            rec = self.reconstruct3D(sinogram, angles, shape, nSinos, alg_name, iterations) 
+            rec = self.reconstruct3D(sinogram, angles, vol_shape, nSinos, 
+                                     alg_name, iterations) 
         return rec
+
         
 
     def reconstruct2D(self, sinogram, angles, shape, alg_name, iterations):
@@ -156,7 +166,6 @@ class BaseAstraRecon(BaseRecon):
         
         # This will have a runtime in the order of 10 seconds.
         astra.algorithm.run(alg_id, iterations)
-        
         
         #if "CUDA" in params[0] and "FBP" not in params[0]:
         #self.res += astra.algorithm.get_res_norm(alg_id)**2

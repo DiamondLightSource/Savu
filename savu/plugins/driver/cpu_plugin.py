@@ -48,12 +48,18 @@ class CpuPlugin(object):
             new_processes = [i for i in processes if "CPU" in i]
 
             logging.debug("Pre-processing")
-            self.pre_process()
+
+            params = self.pre_process(exp)
+            if params is None:
+                params = []
+
             logging.debug("Main processing: process %s", self.__class__)
             #self.process(exp, new_processes, cpu_processes[process])
-            self.process(exp, transport)
+            self.process(exp, transport, params)
+
             logging.debug("Post-processing")
             self.post_process()
+
             return
             
         logging.debug("Not Running the task as not CPU")

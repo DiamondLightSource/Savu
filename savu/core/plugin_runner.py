@@ -88,7 +88,12 @@ class PluginRunner(object):
         temp['data'] = {}
         plugins.append(temp)
         plugins.append(experiment.info["plugin_list"][0])
-        plugins.append(experiment.info["plugin_list"][1])
+        temp = {}
+        temp['name'] = "astra_FBP_recon"
+        temp['id'] = 'savu.plugins.astra_recon_cpu'
+        temp['data'] = {}        
+        plugins.append(temp)
+        #plugins.append(experiment.info["plugin_list"][1])
         temp = {}
         temp['name'] = "hdf5_tomo_saver"
         temp['id'] = 'savu.plugins.hdf5_tomo_saver'

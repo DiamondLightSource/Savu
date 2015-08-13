@@ -29,7 +29,6 @@ import copy
 from mpi4py import MPI
 from itertools import chain
 from savu.core.utils import logfunction
-from savu.data.structures import NX_CLASS
 from savu.data.transport_mechanism import TransportMechanism
 from savu.core.utils import logmethod
 
@@ -47,11 +46,10 @@ class Hdf5Transport(TransportMechanism):
             options["processes"] = processes
             self.set_logger_single(options)
         else:
-            options["mpi"] = "True"
+            options["mpi"] = True
             self.mpi_setup(options)
 
         
-
     def mpi_setup(self, options):
         
         RANK_NAMES = options["process_names"].split(',')     
@@ -135,6 +133,7 @@ class Hdf5Transport(TransportMechanism):
             plugin.run_plugin(exp, self)
             logging.debug("Completed processing plugin %s", plugin_id)
 
+
             for out_objs in exp.info["plugin_objects"]["out_data"]:
                 if out_objs in exp.index["in_data"].keys():
                     exp.index["in_data"][out_objs].save_data()
@@ -142,14 +141,13 @@ class Hdf5Transport(TransportMechanism):
             for key in exp.index["out_data"]:
                 exp.index["in_data"][key] = \
                                copy.deepcopy(exp.index["out_data"][key])
-                    
-            if exp.info['mpi'] is True:
-                logging.debug("Blocking till all processes complete")
-                MPI.COMM_WORLD.Barrier()
-    
-            count += 1    
 
-    
+            if exp.info['mpi'] is True: # do i need this block?
+                MPI.COMM_WORLD.Barrier()
+                logging.debug("Blocking till all processes complete")
+                
+            count += 1    
+ 
 #            if plugin == 0:
 #                cite_info = plugin.get_citation_information()
 #                if cite_info is not None:
@@ -164,7 +162,7 @@ class Hdf5Transport(TransportMechanism):
     
     
     @logmethod
-    def timeseries_field_correction(self, plugin, in_data, out_data, info):
+    def timeseries_field_correction(self, plugin, in_data, out_data, info, params):
    
         dark = in_data.info["dark"]
         flat = in_data.info["flat"]   
@@ -176,37 +174,31 @@ class Hdf5Transport(TransportMechanism):
 
         for i in frames: 
             out_data.data[out_data.get_index([i])] = plugin.correction(
-            in_data.get_frame_raw([i]), dark[i,:], flat[i,:])
+            in_data.get_frame_raw([i]), dark[i,:], flat[i,:], params)
             
             
     @logmethod
-    def reconstruction_setup(self, plugin, in_data, out_data, info):       
+    def reconstruction_setup(self, plugin, in_data, out_data, info, params):
 
         processes = info["processes"]
         process = info["process"]
-        angles = info["rotation_angle"]
         
         centre_of_rotations = np.array_split(info["centre_of_rotation"], len(processes))[process]
-                
-        sinogram_frames = np.arange(in_data.get_nPattern())
-    
+        sinogram_frames = np.arange(in_data.get_nPattern())    
         frames = np.array_split(sinogram_frames, len(processes))[process]
-        
-        print out_data.get_pattern_shape()
-        
-        for i in range(len(frames)):
+            
+        count = 0
+        for i in frames:
             out_data.data[out_data.get_index([i])] = \
                 plugin.reconstruct(in_data.get_frame([i]),
-                                   centre_of_rotations[i],
-                                   angles,
-                                   out_data.get_pattern_shape(),
-                                   tuple([out_data.get_pattern_shape()[0]/2]*2))
+                                   centre_of_rotations[count],
+                                   out_data.get_pattern_shape(), 
+                                   params)
+            count += 1
             plugin.count+=1
             print plugin.count
     
 
-
-           
     @logmethod
     def filter_set_up(self, params):    
         param_name = []
@@ -215,24 +207,3 @@ class Hdf5Transport(TransportMechanism):
                 globals()[name] = p
         pass
     
-
-    def setup(self, path, name):
-        self.backing_file = h5py.File(path, 'w')
-        if self.backing_file is None:
-            raise IOError("Failed to open the hdf5 file")
-        self.group = self.backing_file.create_group(name)
-        self.group.attrs[NX_CLASS] = 'NXdata'
-        
-
-    def add_data_block(self, name, shape, dtype):
-        self.group.create_dataset(name, shape, dtype)
-
-
-    def get_data_block(self, name):
-        return self.group[name]
-
-
-    def finalise(self):
-        if self.backing_file is not None:
-            self.backing_file.close()
-            self.backing_file = None
