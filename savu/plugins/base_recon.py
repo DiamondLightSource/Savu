@@ -67,29 +67,36 @@ class BaseRecon(Plugin):
 
 
     def setup(self, experiment):
+
+        #-------------------setup input datasets-------------------------
+
+        # get a list of input dataset names required for this plugin
+        in_data_list = experiment.info["plugin_datasets"]["in_data"]
         
-        # set all in_data objects required in this plugin 
-        experiment.meta_data.set_plugin_objects("in_data", ["tomo"])
-
-        # for each in_data object: Set the pattern name        
-        in_data = experiment.index["in_data"]["tomo"]
-        in_data.set_pattern_name("SINOGRAM")
-        in_data.check_data_type_exists()
-
-        # set all in_data objects required in this plugin 
-        experiment.meta_data.set_plugin_objects("out_data", ["tomo"])
-
-        # for each out_data object: Create the object
-        out_data = experiment.create_data_object("out_data", "tomo")            
-        out_data.copy_patterns(in_data.info["data_patterns"])
+        # get all input dataset objects
+        in_d1 = experiment.index["in_data"][in_data_list[0]]
         
-        # for each out_data object: Set the pattern name and data shape
-        out_data = experiment.index["out_data"]["tomo"]
-        out_data.set_pattern_name("VOLUME_XZ")
-        out_data.check_data_type_exists()
-        shape = in_data.get_shape()
-        out_data.set_shape((shape[2], shape[1], shape[2]))
-     
+        # set all input data patterns
+        in_d1.set_pattern_name("SINOGRAM")
+
+        #-------------------------------------------------------------
+
+        #------------------setup output datasets-------------------------
+
+        # get a list of output dataset names created by this plugin
+        out_data_list = experiment.info["plugin_datasets"]["out_data"]
+
+        # create all out_data objects and associated patterns
+        # patterns can be copied, added or both
+        out_d1 = experiment.create_data_object("out_data", out_data_list[0])
+        out_d1.copy_patterns(in_d1.info["data_patterns"])
+
+        # set pattern for this plugin and the shape
+        out_d1.set_pattern_name("VOLUME_XZ")
+        shape = in_d1.get_shape()
+        out_d1.set_shape((shape[2], shape[1], shape[2]))
+
+        #-------------------------------------------------------------
             
     def get_max_frames(self):
         """
@@ -98,3 +105,12 @@ class BaseRecon(Plugin):
         :returns:  an integer of the number of frames
         """
         return 8
+
+       
+    def nInput_datasets(self):
+        return 1
+         
+         
+    def nOutput_datasets(self):
+        return 1
+    

@@ -67,6 +67,7 @@ class Plugin(object):
                 for item in full_description:
                     self.parameters[item['name']] = item['default']
 
+
     def set_parameters(self, parameters):
         """
         This method is called after the plugin has been created by the
@@ -129,53 +130,26 @@ class Plugin(object):
                         experiment.__class__, transport.__class__)
         raise NotImplementedError("process needs to be implemented")
 
-    def required_data_type(self):
-        """Gets the input data type which is required for the plugin
-
-        :returns:  the class of the data which is expectd
-
-        """
-        logging.error("required_data_type needs to be implemented")
-        raise NotImplementedError("required_data_type needs to be implemented")
-
-    def output_data_type(self):
-        """Gets the output data type which is provided by the plugin
-
-        :returns:  the class of the data which will be provided
-
-        """
-        logging.error("output_data_type needs to be implemented")
-        raise NotImplementedError("output_data_type needs to be implemented")
-
-    def input_dist(self):
-        """Gets the DistArray distribution which is required to create the 
-        distributed input array for the plugin
-
-        :returns:  the DistArray distribution of the input to the plugin
-
-        """
-        logging.error("input_dist needs to be implemented")
-        raise NotImplementedError("input_dist needs to be implemented")
-
-    def output_dist(self):
-        """Gets the DistArray distribution which is required to create the 
-        distributed output array for the plugin
-
-        :returns:  the DistArray distribution of the output to the plugin
-
-        """
-        logging.error("output_dist needs to be implemented")
-        raise NotImplementedError("output_dist needs to be implemented")
         
-    def get_output_shape(self, input_data):
+    def nInput_datasets(self):
         """
-        Gets the output data shape which is provided by the plugin
-        This defaults to the standard size of the data previously generated
+        The number of datasets required as input to the plugin
 
-        :returns:  the shape of the data which will be output by this plugin
+        :returns:  Number of input datasets
 
         """
-        return None
+        raise NotImplementedError("nInputs_datasets needs to be implemented")
+
+
+    def nOutput_datasets(self):
+        """
+        The number of datasets created by the plugin
+
+        :returns:  Number of output datasets
+
+        """
+        raise NotImplementedError("nInputs_datasets needs to be implemented")
+        
 
     def get_citation_information(self):
         """Gets the Citation Information for a plugin

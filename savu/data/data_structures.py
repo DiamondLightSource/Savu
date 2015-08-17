@@ -31,16 +31,27 @@ class Pattern(object):
 
     def __init__(self):
         self.name = None
+        self.pattern_list = []
+        self.set_available_patterns()
         
-
-    def add_pattern(self, dtype, **kargs) :
-        if "data_patterns" not in self.info:
-            self.info["data_patterns"] = {}
         
-        data_dirs = self.info["data_patterns"]
-        data_dirs[dtype] = {}
-        for args in kargs:
-            data_dirs[dtype][args] = kargs[args]
+    def set_available_patterns(self):
+        self.pattern_list = ["SINOGRAM", "PROJECTION", "VOLUME_XZ"]
+                
+    
+    def add_pattern(self, dtype, **kargs):
+        if dtype in self.pattern_list:
+            if "data_patterns" not in self.info:
+                self.info["data_patterns"] = {}
+            
+            data_dirs = self.info["data_patterns"]
+            data_dirs[dtype] = {}
+            for args in kargs:
+                data_dirs[dtype][args] = kargs[args]
+        else:
+            errorMsg = "The data pattern " + dtype + " does not exist.  Please choose " + \
+            " from the following list: \n" + str(self.pattern_list)
+            sys.exit(errorMsg)
 
 
     def get_nPattern(self):
@@ -57,6 +68,7 @@ class Pattern(object):
     
     def set_pattern_name(self, name):
         self.name = name
+        self.check_data_type_exists()
                
 
     def get_pattern_name(self):
@@ -122,6 +134,7 @@ class Data(Pattern):
     """
 
     def __init__(self, transport):
+        super(Data, self).__init__()
         self.backing_file = None
         self.data = None
         self.add_base(transport)
