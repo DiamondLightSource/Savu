@@ -26,6 +26,9 @@ import logging
 import time
 import sys
 
+from mpi4py import MPI
+import copy
+
 from savu.data.experiment_collection import Experiment
 from savu.plugins.base_loader import BaseLoader
 from savu.plugins.base_saver import BaseSaver
@@ -61,24 +64,9 @@ class PluginRunner(object):
 
 
     def run_plugin_list(self, options):
+                
         experiment = Experiment(options)
         plugin_list = experiment.info["plugin_list"]
-
-        self.check_loaders_and_savers(experiment, plugin_list)
-
-        self.set_outfilename(experiment)
-        if experiment.info["process"] is 0:
-            logging.debug("Running process List.save_list_to_file")
-            experiment.meta_data.plugin_list.save_plugin_list()
-        
-        # load relevant metadata 
-        experiment.meta_data.set_transport_meta_data() #*** do I need this?
-        self.transport_run_plugin_list(experiment)
-
-
-    def check_loaders_and_savers(self, experiment, plugin_list):
-        first_plugin = plugin_list[0]
-        plugin = self.load_plugin(first_plugin['id'])   
         
         #*** temporary fix!!!
         plugins = []
@@ -91,7 +79,9 @@ class PluginRunner(object):
         temp = {}
         temp['name'] = "astra_FBP_recon"
         temp['id'] = 'savu.plugins.astra_recon_cpu'
-        temp['data'] = {}        
+        temp['data'] = {}
+        temp['in_dataset'] = ["tomo"] # a list of data_sets
+        temp['out_dataset'] = ["tomo"]
         plugins.append(temp)
         #plugins.append(experiment.info["plugin_list"][1])
         temp = {}
@@ -100,17 +90,104 @@ class PluginRunner(object):
         temp['data'] = {}
         plugins.append(temp)
         experiment.meta_data.set_meta_data("plugin_list", plugins)
-        #***
+        plugin_list = experiment.meta_data.get_meta_data("plugin_list")        
+        #***        
+        
+        self.run_plugin_list_check(experiment, plugin_list)
 
-        plugin_list = experiment.meta_data.get_meta_data("plugin_list")
+        self.run_loader(experiment, plugin_list[0]['id'])
+        
+        self.set_outfilename(experiment)
+        if experiment.info["process"] is 0:
+            logging.debug("Running process List.save_list_to_file")
+            experiment.meta_data.plugin_list.save_plugin_list()
+        
+        # load relevant metadata 
+        experiment.meta_data.set_transport_meta_data() #*** do I need this?
+        # divert to transport process and run process list
+        self.transport_run_plugin_list(experiment)
+
+
+    def run_loader(self, experiment, loader_plugin):
+        plugin = self.load_plugin(loader_plugin)
+        plugin.setup(experiment)
+
+
+    def run_plugin_list_check(self, exp, plugin_list):
+        self.check_loaders_and_savers(exp, plugin_list)
+        
+        self.run_loader(exp, plugin_list[0]['id'])
+        
+        count = 0
+        for plugin_dict in exp.info["plugin_list"][1:-1]:
+
+            self.set_datasets(exp, plugin_dict, "in_datasets")
+            self.set_datasets(exp, plugin_dict, "out_datasets")
+            
+            plugin_id = plugin_dict["id"]
+            plugin = self.load_plugin(plugin_id)
+            plugin.setup(exp)
+
+            for out_objs in exp.info["plugin_datasets"]["out_data"]:
+                if out_objs in exp.index["in_data"].keys():
+                    exp.index["in_data"][out_objs].save_data()
+
+            for key in exp.index["out_data"]:
+                exp.index["in_data"][key] = \
+                               copy.deepcopy(exp.index["out_data"][key])
+
+            if exp.info['mpi'] is True: # do i need this block?
+                MPI.COMM_WORLD.Barrier()
+                logging.debug("Blocking till all processes complete")
+                
+            count += 1
+            
+        exp.index["in_data"] = {}
+        exp.index["out_data"] = {}
+         
+
+    def set_datasets(self, exp, plugin_dict, index):
+        
+        plugin = self.load_plugin(plugin_dict['id'])
+        
+        if index is "in_datasets":
+            name = "in_data"
+            nDatasets = plugin.nInput_datasets()
+            errorMsg = "***ERROR: Broken plugin chain. \n Please name the " + str(nDatasets) + \
+                "datasets required for input to the plugin" + plugin_dict['id'] + \
+                " in the process file."
+        else:
+            name = "out_data"
+            nDatasets = plugin.nInput_datasets()
+            errorMsg = "***ERROR: Broken plugin chain. \n Please name the " + str(nDatasets) + \
+                " datasets created as output to the plugin " + plugin_dict['id'] + \
+                " in the process file."
+
+        try:
+            data_names = plugin_dict[index]
+        except KeyError:
+            if len(exp.index["in_data"]) is 1:
+                data_names = [exp.index["in_data"].keys()[0]]
+            else:
+                sys.exit(errorMsg)
+
+        if len(data_names) is not nDatasets:
+            sys.exit(errorMsg)
+        
+        if "plugin_datasets" not in exp.info.keys():
+            exp.info["plugin_datasets"] = {}
+            
+        exp.info["plugin_datasets"][name] = data_names
+                    
+
+    def check_loaders_and_savers(self, experiment, plugin_list):
+
         first_plugin = plugin_list[0]
         end_plugin = plugin_list[-1]
 
         plugin = self.load_plugin(first_plugin['id'])           
         # check the first plugin is a loader
-        if isinstance(plugin, BaseLoader):
-            plugin.setup(experiment)
-        else:
+        if not isinstance(plugin, BaseLoader):
             sys.exit("The first plugin in the process must inherit from BaseLoader")
     
         plugin = self.load_plugin(end_plugin['id'])

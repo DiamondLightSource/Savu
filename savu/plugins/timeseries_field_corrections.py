@@ -44,7 +44,7 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
               
               
     def correction(self, data, dark, flat, params):
-        
+
         dark = np.tile(dark, (data.shape[0], 1))
         flat = np.tile(flat, (data.shape[0], 1))
         data = (data-dark)/flat  # flat = (flat-dark) already calculated for efficiency
@@ -62,24 +62,40 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
 
 
     def setup(self, experiment):
-        
-        # set all in_data objects required in this plugin 
-        experiment.meta_data.set_plugin_objects("in_data", ["tomo"])
-        # for each of the required in_data objects...
-        # get the in_data object and set the required in_data pattern.
-        in_data = experiment.index["in_data"]["tomo"]
-        in_data.set_pattern_name("SINOGRAM")
-        # check the in_data type exists        
-        in_data.check_data_type_exists()
-        
-        # set all in_data objects required in this plugin 
-        experiment.meta_data.set_plugin_objects("out_data", ["tomo"])
-        # for each of the required out_data objects...
-        # create the out_data object and set the pattern and shape
-        out_data = experiment.create_data_object("out_data", "tomo")
-        out_data.copy_patterns(in_data.info["data_patterns"])
-        out_data.set_shape(out_data.remove_dark_and_flat(in_data))
-        out_data.set_pattern_name("SINOGRAM") # already know this exists
 
+        #-------------------setup input datasets-------------------------
+
+        # get a list of input dataset names required for this plugin
+        in_data_list = experiment.info["plugin_datasets"]["in_data"]
         
-     
+        # get all input dataset objects
+        in_d1 = experiment.index["in_data"][in_data_list[0]]        
+        # set all input data patterns
+        in_d1.set_pattern_name("SINOGRAM")
+        
+        #-------------------------------------------------------------
+
+        #------------------setup output datasets-------------------------
+
+        # get a list of output dataset names created by this plugin
+        out_data_list = experiment.info["plugin_datasets"]["out_data"]
+
+        # create all out_data objects and associated patterns
+        # patterns can be copied, added or both
+        out_d1 = experiment.create_data_object("out_data", out_data_list[0])
+        out_d1.copy_patterns(in_d1.info["data_patterns"])
+
+        # set pattern for this plugin and the shape
+        out_d1.set_pattern_name("SINOGRAM")
+        out_d1.set_shape(out_d1.remove_dark_and_flat(in_d1))
+
+        #-------------------------------------------------------------
+        
+    def nInput_datasets(self):
+        return 1
+         
+         
+    def nOutput_datasets(self):
+        return 1
+    
+    

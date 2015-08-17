@@ -134,7 +134,7 @@ class Hdf5Transport(TransportMechanism):
             logging.debug("Completed processing plugin %s", plugin_id)
 
 
-            for out_objs in exp.info["plugin_objects"]["out_data"]:
+            for out_objs in exp.info["plugin_datasets"]["out_data"]:
                 if out_objs in exp.index["in_data"].keys():
                     exp.index["in_data"][out_objs].save_data()
 
@@ -170,7 +170,7 @@ class Hdf5Transport(TransportMechanism):
         # get a list of all the frames
         output_frames = np.arange(in_data.get_shape()[1])
         frames = np.array_split(output_frames, 
-                                len(info["processes"]))[info["process"]]                            
+                                len(info["processes"]))[info["process"]]
 
         for i in frames: 
             out_data.data[out_data.get_index([i])] = plugin.correction(
