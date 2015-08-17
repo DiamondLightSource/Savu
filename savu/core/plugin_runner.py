@@ -83,22 +83,22 @@ class PluginRunner(object):
         #*** temporary fix!!!
         plugins = []
         temp = {}
-        temp['name'] = "nxtomo_loader"
-        temp['id'] = 'savu.plugins.nxtomo_loader'
+        temp['name'] = "nxfluo_loader"
+        temp['id'] = 'savu.plugins.nxfluo_loader'
         temp['data'] = {}
         plugins.append(temp)
-        plugins.append(experiment.info["plugin_list"][0])
-        temp = {}
-        temp['name'] = "astra_FBP_recon"
-        temp['id'] = 'savu.plugins.astra_recon_cpu'
-        temp['data'] = {}        
-        plugins.append(temp)
-        #plugins.append(experiment.info["plugin_list"][1])
-        temp = {}
-        temp['name'] = "hdf5_tomo_saver"
-        temp['id'] = 'savu.plugins.hdf5_tomo_saver'
-        temp['data'] = {}
-        plugins.append(temp)
+#         plugins.append(experiment.info["plugin_list"][0])
+#         temp = {}
+#         temp['name'] = "astra_FBP_recon"
+#         temp['id'] = 'savu.plugins.astra_recon_cpu'
+#         temp['data'] = {}        
+#         plugins.append(temp)
+#         #plugins.append(experiment.info["plugin_list"][1])
+#         temp = {}
+#         temp['name'] = "hdf5_tomo_saver"
+#         temp['id'] = 'savu.plugins.hdf5_tomo_saver'
+#         temp['data'] = {}
+#         plugins.append(temp)
         experiment.meta_data.set_meta_data("plugin_list", plugins)
         #***
 
@@ -113,10 +113,10 @@ class PluginRunner(object):
         else:
             sys.exit("The first plugin in the process must inherit from BaseLoader")
     
-        plugin = self.load_plugin(end_plugin['id'])
-        # check the first plugin is a loader
-        if not isinstance(plugin, BaseSaver):
-            sys.exit("The final plugin in the process must inherit from BaseSaver")
+#         plugin = self.load_plugin(end_plugin['id'])
+#         # check the first plugin is a loader
+#         if not isinstance(plugin, BaseSaver):
+#             sys.exit("The final plugin in the process must inherit from BaseSaver")
     
     
     def set_outfilename(self, exp):
@@ -187,4 +187,3 @@ class CitationInformation(object):
                                       bibtex_array.shape,
                                       bibtex_array.dtype,
                                       bibtex_array)
-    
