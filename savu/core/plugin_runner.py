@@ -74,8 +74,10 @@ class PluginRunner(object):
         temp['name'] = "nxxrd_loader"
         temp['id'] = 'savu.plugins.nxxrd_loader'
         temp['data'] = {}
+        temp['loader_params'] = {}
+        temp['loader_params']['calibration_path'] = ''
         plugins.append(temp)
-        plugins.append(experiment.info["plugin_list"][0])
+#        plugins.append(experiment.info["plugin_list"][0])
         temp = {}
         temp['name'] = "astra_FBP_recon"
         temp['id'] = 'savu.plugins.astra_recon_cpu'
