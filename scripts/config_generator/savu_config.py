@@ -6,7 +6,7 @@ Created on 21 May 2015
 
 import os
 
-from savu.data.plugin_info import PluginList
+from savu.data.plugin_list import PluginList
 from savu.plugins import utils as pu
 import pkgutil
 import savu
@@ -15,7 +15,7 @@ import savu
 class Content(object):
 
     def __init__(self, filename):
-        self.plugin_list = Plugin_list()
+        self.plugin_list = PluginList()
         if os.path.exists(filename):
             print "Opening file %s" % (filename)
             self.plugin_list.populate_process_list(filename)
