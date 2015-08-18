@@ -71,16 +71,18 @@ class PluginRunner(object):
         #*** temporary fix!!!
         plugins = []
         temp = {}
-        temp['name'] = "nxtomo_loader"
-        temp['id'] = 'savu.plugins.nxtomo_loader'
+        temp['name'] = "nxxrd_loader"
+        temp['id'] = 'savu.plugins.nxxrd_loader'
         temp['data'] = {}
+        temp['loader_params'] = {}
+        temp['loader_params']['calibration_path'] = ''
         plugins.append(temp)
-        plugins.append(experiment.info["plugin_list"][0])
+#        plugins.append(experiment.info["plugin_list"][0])
         temp = {}
         temp['name'] = "astra_FBP_recon"
         temp['id'] = 'savu.plugins.astra_recon_cpu'
         temp['data'] = {}
-        temp['in_dataset'] = ["tomo"] # a list of data_sets
+        temp['in_dataset'] = ["fluo"] # a list of data_sets
         temp['out_dataset'] = ["tomo"]
         plugins.append(temp)
         #plugins.append(experiment.info["plugin_list"][1])

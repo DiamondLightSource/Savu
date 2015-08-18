@@ -23,6 +23,7 @@
 """
 
 import sys
+import logging
 
 import numpy as np
 
@@ -37,7 +38,7 @@ class Pattern(object):
         
         
     def set_available_patterns(self):
-        self.pattern_list = ["SINOGRAM", "PROJECTION", "VOLUME_XZ"]
+        self.pattern_list = ["SINOGRAM", "PROJECTION", "VOLUME_XZ", "SPECTRUM"] # added spectrum adp 17th August
                 
     
     def add_pattern(self, dtype, **kargs):
@@ -93,8 +94,7 @@ class Pattern(object):
 
     def check_data_type_exists(self):
         if self.get_pattern_name() not in self.info["data_patterns"].keys():
-            sys.exit(("Error: The Data class does not contain an instance of ", self.get_pattern_name()))
-            
+            raise Exception(("Error: The Data class does not contain an instance of ", self.get_pattern_name()))
             
     def set_nFrames(self, nFrames):
         self.nFrames = nFrames
@@ -102,7 +102,6 @@ class Pattern(object):
         
     def get_nFrames(self, nFrames):
         return self.nFrames
-
 
     def get_frame(self, indices):
         index = self.get_index(indices)
@@ -188,7 +187,9 @@ class Data(Pattern):
             new_shape  = shape[0] - len(image_key[image_key != 0])
             return (new_shape, shape[1], shape[2])
         else:
-            sys.exit("Error in remove_dark_and_flat(): No image_key found")
+            logging.warn("Error in remove_dark_and_flat(): No image_key found")
+            shape = data.get_shape()
+            return (shape, shape[1], shape[2])#Mark Corrected 17th August
         
         
         
@@ -206,7 +207,10 @@ class Raw(object):
 
 
     def get_image_key(self):
-        return self.image_key[...]
+        try:
+            return self.image_key[...]
+        except:
+            return None
                         
                         
     def set_image_key_slice(self):
