@@ -91,7 +91,7 @@ def _mod(content, arg):
         content.modify(int(element), subelement, value)
         content.display()
     except:
-        print("Sorry i can't process the argument '%s'" % (arg))
+        print("Sorry I can't process the argument '%s'" % (arg))
     return content
 
 
@@ -108,7 +108,7 @@ def _add(content, arg):
             print("Sorry the plugin %s is not in my list, pick one form list" %
                   (name))
     except:
-        print("Sorry i can't process the argument '%s'" % (arg))
+        print("Sorry I can't process the argument '%s'" % (arg))
     return content
 
 
