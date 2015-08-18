@@ -31,6 +31,7 @@ class Pattern(object):
 
     def __init__(self):
         self.name = None
+        self.nFrames = 1
         self.pattern_list = []
         self.set_available_patterns()
         
@@ -93,6 +94,14 @@ class Pattern(object):
     def check_data_type_exists(self):
         if self.get_pattern_name() not in self.info["data_patterns"].keys():
             sys.exit(("Error: The Data class does not contain an instance of ", self.get_pattern_name()))
+            
+            
+    def set_nFrames(self, nFrames):
+        self.nFrames = nFrames
+        
+        
+    def get_nFrames(self, nFrames):
+        return self.nFrames
 
 
     def get_frame(self, indices):

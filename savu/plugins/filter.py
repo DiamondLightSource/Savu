@@ -65,25 +65,6 @@ class Filter(Plugin):
         """
         return 8
 
-    def _filter_chunk(self, slice_list, data, output, processes, process):
-        logging.debug("Running filter._filter_chunk")
-        process_slice_list = du.get_slice_list_per_process(slice_list,
-                                                           process, processes)
-
-        padding = self.get_filter_padding()
-
-        for sl in process_slice_list:
-            section = du.get_padded_slice_data(sl, padding, data)
-            result = self.filter_frame(section)
-            if type(result) == dict:
-                for key in result.keys():
-                    if key == 'center_of_rotation':
-                        frame = du.get_orthogonal_slice(sl, data.core_directions[self.get_filter_frame_type()])
-                        output.center_of_rotation[frame] = result[key]
-                    elif key == 'data':
-                        output.data[sl] = du.get_unpadded_slice_data(sl, padding, data, result)
-            else:
-                output.data[sl] = du.get_unpadded_slice_data(sl, padding, data, result)
 
     def filter_frame(self, data):
         """
@@ -98,42 +79,10 @@ class Filter(Plugin):
         raise NotImplementedError("filter_frame needs to be implemented")
 
     @logmethod
-    def process(self, data, output, processes, process, transport):
+    def process(self, exp, transport, params):
         """
         """
-        slice_list = du.get_grouped_slice_list(data, self.get_filter_frame_type(), self.get_max_frames())
-        self._filter_chunk(slice_list, data, output, len(processes), process)
+        [in_data, out_data] = self.get_data_obj_list()
+        slice_list = du.get_grouped_slice_list(in_data[0], self.get_filter_frame_type(), self.get_max_frames())
+        transport.filter_chunk(slice_list, in_data, out_data)
 
-    def required_data_type(self):
-        """
-        The input data type for this plugin
-
-        :returns:  Data
-        """
-        return Data
-
-    def output_data_type(self):
-        """
-        The output data type of this plugin
-
-        :returns:  Data
-        """
-        return Data
-
-    def input_dist(self):
-        """
-        The input DistArray distribution for this plugin is "nbn"
-        (i.e. block in the second dimension)
-
-        :returns:  DistArray distribution
-        """
-        return "nbn"
-
-    def output_dist(self):
-        """
-        The output DistArray distribution for this plugin is "nbn"
-        (i.e. block in the second dimension)
-
-        :returns:  DistArray distribution
-        """
-        return "nbn"

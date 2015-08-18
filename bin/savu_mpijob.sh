@@ -1,5 +1,6 @@
 #!/bin/bash
-module load global/testcluster
+#module load global/testcluster
+module load global/cluster
 module load python/ana
 #source activate mpi2
 source activate mpi4
@@ -13,7 +14,7 @@ outfile=$4
 nCPUs=$5
 
 export PYTHONPATH=$savupath:$PYTHONPATH
-filename=$savupath/savu/tomo_recon_mpi.py
+filename=$savupath/savu/tomo_recon.py
 
 UNIQHOSTS=${TMPDIR}/machines-u
 awk '{print $1 }' ${PE_HOSTFILE} | uniq > ${UNIQHOSTS}

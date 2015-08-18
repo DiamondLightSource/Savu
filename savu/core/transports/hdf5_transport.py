@@ -121,7 +121,6 @@ class Hdf5Transport(TransportMechanism):
             plugin_id = plugin_dict["id"]
 
             plugin = self.load_plugin(plugin_id)
-
             plugin.setup(exp)
 
             for key in out_data_objects[count]:
@@ -186,6 +185,7 @@ class Hdf5Transport(TransportMechanism):
         centre_of_rotations = np.array_split(info["centre_of_rotation"], len(processes))[process]
         sinogram_frames = np.arange(in_data.get_nPattern())    
         frames = np.array_split(sinogram_frames, len(processes))[process]
+
             
         count = 0
         for i in frames:
@@ -199,11 +199,21 @@ class Hdf5Transport(TransportMechanism):
             print plugin.count
     
 
-    @logmethod
-    def filter_set_up(self, params):    
-        param_name = []
-        for name in param_name: 
-            for p in params:
-                globals()[name] = p
-        pass
-    
+    def filter_chunk(self, slice_list, data, output):
+        logging.debug("Running filter._filter_chunk")
+        process_slice_list = du.get_slice_list_per_process(slice_list)
+
+        padding = self.get_filter_padding()
+
+        for sl in process_slice_list:
+            section = du.get_padded_slice_data(sl, padding, data)
+            result = self.filter_frame(section)
+            if type(result) == dict:
+                for key in result.keys():
+                    if key == 'center_of_rotation':
+                        frame = du.get_orthogonal_slice(sl, data.core_directions[self.get_filter_frame_type()])
+                        output.center_of_rotation[frame] = result[key]
+                    elif key == 'data':
+                        output.data[sl] = du.get_unpadded_slice_data(sl, padding, data, result)
+            else:
+                output.data[sl] = du.get_unpadded_slice_data(sl, padding, data, result)

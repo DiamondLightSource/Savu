@@ -33,9 +33,9 @@ class Plugin(object):
 
     def __init__(self, name='Plugin'):
         super(Plugin, self).__init__()
+        self.set_up()
         self.name = name
-        self.parameters = {}
-        
+        self.parameters = {}        
         
     def setup(self, experiment):
         """
@@ -129,7 +129,31 @@ class Plugin(object):
                       " input is %s and output is %s",
                         experiment.__class__, transport.__class__)
         raise NotImplementedError("process needs to be implemented")
+        
 
+    def set_data_objs_list(self, exp):
+        in_data_list = exp.info["plugin_datasets"]["in_data"]
+        in_data_objs = self.get_data_objects(exp.index["in_data"], in_data_list)
+        
+        out_data_list = exp.info["plugin_datasets"]["out_data"]
+        out_data_objs = self.get_data_objects(exp.index["out_data"], out_data_list)
+        
+        self.parameters["in_data_objs"] = [in_data_objs]
+        self.parameters["out_data_objs"] = [out_data_objs]
+        
+        
+    def get_data_objs_list(self, exp):
+        in_data_objs = self.parameters["in_data_objs"]
+        out_data_objs = self.parameters["out_data_objs"]
+        return [in_data_objs, out_data_objs]
+
+        
+    def get_data_objects(dobjs, data_list, dtype):
+        data_objs = []
+        for data in data_list:
+            data_objs.append(dobjs[dtype][data])
+        return data_objs
+        
         
     def nInput_datasets(self):
         """
