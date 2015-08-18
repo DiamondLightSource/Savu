@@ -41,6 +41,7 @@ class PluginRunner(object):
     """
     
     def __init__(self, options):
+        print("CAlling the Init method")
         class_name = "savu.core.transports." + options["transport"] + "_transport"
         self.add_base(self.import_class(class_name))
         self.transport_control_setup(options)

@@ -1,4 +1,4 @@
-module load global/testcluster
+module load global/cluster
 
 echo "running the mpi job" 
 
@@ -11,9 +11,9 @@ nNodes=$6
 nCPUs=$7
 
 filepath=$savupath/bin/savu_mpijob.sh
-M=$((nNodes*20))
+M=$((nNodes*16))
 
-qsub -N $outname -sync y -j y -pe openmpi $M -q test-medium.q -l infiniband $filepath $savupath $datafile $processfile $outpath $nCPUs > tmp.txt
+qsub -N $outname -sync y -j y -pe openmpi $M -q medium.q@@com06 -l infiniband $filepath $savupath $datafile $processfile $outpath $nCPUs > tmp.txt
 
 if [ ! -d $outpath/Profiling ]; then
     mkdir -p $outpath/Profiling;

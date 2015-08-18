@@ -1,4 +1,5 @@
 #!/bin/bash
+module load global/cluster
 
 echo "SAVU_LAUNCHER:: Running Job"
 
@@ -6,7 +7,7 @@ cd /dls/tmp/savu/
 
 echo "SAVU_LAUNCHER:: Changed to temporary directory - /dls/tmp/savu"
 
-qsub -N mpi_test -sync y -j y -pe openmpi 24 -q medium.q@@com07 -l tesla64 $SAVU_HOME/mpi/dls/savu_mpijob.sh $@ > tmp.txt
+qsub -N mpi_test -sync y -j y -pe openmpi 24 -q medium.q@@com06 -V $SAVU_HOME/mpi/dls/savu_mpijob.sh $@ > tmp.txt
 
 echo "SAVU_LAUNCHER:: Job Complete, preparing output..."
 
