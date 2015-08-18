@@ -20,7 +20,6 @@
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
-from savu.data.structures import Data
 from savu.plugins.plugin import Plugin
 
 from savu.data import structures
@@ -36,8 +35,7 @@ class Filter(Plugin):
     """
 
     def __init__(self, name):
-        super(Filter,
-              self).__init__(name)
+        super(Filter, self).__init__(name)
 
     def get_filter_frame_type(self):
         """
@@ -82,8 +80,8 @@ class Filter(Plugin):
     def process(self, exp, transport, params):
         """
         """
-        [in_data, out_data] = self.get_data_obj_list()
-        slice_list = du.get_grouped_slice_list(in_data[0], self.get_filter_frame_type(), self.get_max_frames())
+        [in_data, out_data] = self.get_data_objs_list()
+        slice_list = get_grouped_slice_list(in_data[0], self.get_filter_frame_type(), self.get_max_frames())
         transport.filter_chunk(slice_list, in_data, out_data)
 
           
@@ -112,9 +110,8 @@ class Filter(Plugin):
         out_d1.copy_patterns(in_d1.info["data_patterns"])
 
         # set pattern for this plugin and the shape
-        out_d1.set_pattern_name("VOLUME_XZ")
-        shape = in_d1.get_shape()
-        out_d1.set_shape((shape[2], shape[1], shape[2]))
+        out_d1.set_pattern_name("SINOGRAM")
+        out_d1.set_shape(in_d1.get_shape())
 
         #------------------------------------------------------------- 
         

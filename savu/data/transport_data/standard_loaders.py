@@ -65,7 +65,6 @@ class TomographyLoaders(object):
                 
         data_obj.add_pattern("PROJECTION", core_dir = (1, 2), slice_dir = (0,))
         data_obj.add_pattern("SINOGRAM", core_dir = (0, -1), slice_dir = (1,))
-        data_obj.add_pattern("VOLUME_XZ", core_dir = (0, 2), slice_dir = (1,))
         
     
     def load_from_nx_tomo(self, exp):

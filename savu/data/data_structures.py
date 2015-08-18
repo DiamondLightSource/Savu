@@ -38,7 +38,12 @@ class Pattern(object):
         
         
     def set_available_patterns(self):
-        self.pattern_list = ["SINOGRAM", "PROJECTION", "VOLUME_XZ", "SPECTRUM"] # added spectrum adp 17th August
+        self.pattern_list = ["SINOGRAM", 
+                             "PROJECTION",
+                             "VOLUME_YZ",
+                             "VOLUME_XZ", 
+                             "VOLUME_XY",
+                             "SPECTRUM"] # added spectrum adp 17th August
                 
     
     def add_pattern(self, dtype, **kargs):
@@ -66,6 +71,12 @@ class Pattern(object):
         
     def copy_patterns(self, patterns):
         self.info["data_patterns"] = patterns
+
+
+    def add_volume_patterns(self):
+        self.add_pattern("VOLUME_YZ", core_dir = (1, 2), slice_dir = (0,))
+        self.add_pattern("VOLUME_XZ", core_dir = (0, 2), slice_dir = (1,))
+        self.add_pattern("VOLUME_XY", core_dir = (0, 1), slice_dir = (2,))
         
     
     def set_pattern_name(self, name):
@@ -95,6 +106,7 @@ class Pattern(object):
     def check_data_type_exists(self):
         if self.get_pattern_name() not in self.info["data_patterns"].keys():
             raise Exception(("Error: The Data class does not contain an instance of ", self.get_pattern_name()))
+
             
     def set_nFrames(self, nFrames):
         self.nFrames = nFrames
@@ -102,6 +114,7 @@ class Pattern(object):
         
     def get_nFrames(self, nFrames):
         return self.nFrames
+
 
     def get_frame(self, indices):
         index = self.get_index(indices)
