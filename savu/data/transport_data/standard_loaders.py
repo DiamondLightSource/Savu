@@ -355,7 +355,7 @@ class XRDLoaders(object):
                     motors.append(data_obj.backing_file[xrd_entry.name+'/data/'+xrd_entry['data'].attrs["axes"][ii]])
                     exp.meta_data.set_meta_data("is_tomo",True)
                     motor_type.append('rotation')
-                    logging.debug("xrd reader: '%s' '%s'", "Is a tomo scan")
+                    logging.debug("xrd reader: '%s'", "Is a tomo scan")
                 elif (xrd_entry['data/'+xrd_entry['data'].attrs["axes"][ii]].attrs['transformation_type']=="translation"):# look for translations too!
                     cts+=1# increase the order of the map
                     #what axes are these? Would be good to have for hte pattern stuff
@@ -400,4 +400,13 @@ class XRDLoaders(object):
             data_obj.add_pattern("SINOGRAM", core_dir = (rotation,projdir[-1]), slice_dir = projdir[:-1])#rotation and fast axis
         
         # now to load the calibration file
+        calibrationfile = h5py.File(exp.info["loader_params"]['calibration_path'], 'r')
+        
+        exp.meta_data.set_meta_data("beam_center_x", calibrationfile['/entry/instrument/detector/beam_center_x'])
+        exp.meta_data.set_meta_data("beam_center_y", calibrationfile['/entry/instrument/detector/beam_center_y'])
+        exp.meta_data.set_meta_data("distance", calibrationfile['/entry/instrument/detector/distance'])
+        exp.meta_data.set_meta_data("incident_wavelength", calibrationfile['/entry/calibration_sample/beam/incident_wavelength'])
+        exp.meta_data.set_meta_data("x_pixel_size", calibrationfile['/entry/instrument/detector/x_pixel_size'])
+        exp.meta_data.set_meta_data("detector_orientation", calibrationfile['/entry/instrument/detector/detector_orientation'])
+
         
