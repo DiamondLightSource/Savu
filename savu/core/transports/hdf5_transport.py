@@ -37,6 +37,7 @@ class Hdf5Transport(TransportMechanism):
     
 
     def transport_control_setup(self, options):
+        print("Are we calling this?")
         processes = options["process_names"].split(',')
 
 
@@ -47,11 +48,13 @@ class Hdf5Transport(TransportMechanism):
             self.set_logger_single(options)
         else:
             options["mpi"] = True
+            print("Options for mpi are")
+            print(options)
             self.mpi_setup(options)
 
         
     def mpi_setup(self, options):
-        
+        print("Running mpi_setup")
         RANK_NAMES = options["process_names"].split(',')     
         RANK = MPI.COMM_WORLD.rank
         SIZE = MPI.COMM_WORLD.size
@@ -236,4 +239,3 @@ class Hdf5Transport(TransportMechanism):
                         out_data.data[sl] = in_data.get_unpadded_slice_data(sl, padding, in_data, result)
             else:
                 out_data.data[sl] = in_data.get_unpadded_slice_data(sl, padding, result)
-                

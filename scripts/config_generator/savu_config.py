@@ -18,7 +18,7 @@ class Content(object):
         self.plugin_list = PluginList()
         if os.path.exists(filename):
             print "Opening file %s" % (filename)
-            self.plugin_list.populate_process_list(filename)
+            self.plugin_list.populate_plugin_list(filename)
 
     def display(self):
         print self.plugin_list.get_string()
@@ -145,8 +145,12 @@ if __name__ == '__main__':
         input_string = raw_input(">>> ").strip()
         print "command is '%s'" % (input_string)
 
-        command = input_string.split()[0]
-        arg = ' '.join(input_string.split()[1:])
+        if len(input_string) == 0:
+            command = 'help'
+            arg = ""
+        else:
+            command = input_string.split()[0]
+            arg = ' '.join(input_string.split()[1:])
 
         if 'exit' in command:
             break

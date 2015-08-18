@@ -35,8 +35,12 @@ class Plugin(object):
         super(Plugin, self).__init__()
         self.name = name
         self.parameters = {}
-        self.data_objs = {}
-        
+        self.data_objs = {}       
+
+    #TODO is this needed?
+    def set_up(self):
+        pass
+
     def setup(self, experiment):
         """
         This method is first to be called after the plugin has been created. 
