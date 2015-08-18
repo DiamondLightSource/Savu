@@ -201,8 +201,8 @@ class FluorescenceLoaders(object):
             data_obj.add_pattern("PROJECTION", core_dir = projdir, slice_dir = projsli)# two translation axes
         if exp.meta_data.get_meta_data("is_tomo"):
             data_obj.add_pattern("SINOGRAM", core_dir = (rotation,projdir[-1]), slice_dir = projdir[:-1])#rotation and fast axis
-            data_obj.add_pattern("VOLUME_XZ", core_dir = (rotation,projdir[-1]), slice_dir = projdir[:-1])
-        
+
+
 
 class STXMLoaders(object):
     """
