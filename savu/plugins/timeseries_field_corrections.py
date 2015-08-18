@@ -81,7 +81,7 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         in_d1.set_pattern_name("SINOGRAM")
         # set frame chunk
         in_d1.set_nFrames(chunk_size)
-        
+
         #----------------------------------------------------------------
 
         #------------------setup output datasets-------------------------
@@ -101,9 +101,7 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         out_d1.set_nFrames(chunk_size)
 
         #----------------------------------------------------------------
-        
-        self.set_data_objs(experiment)
-        
+                        
 
     def nInput_datasets(self):
         return 1

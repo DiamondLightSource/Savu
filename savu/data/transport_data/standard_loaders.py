@@ -24,8 +24,6 @@
 import h5py
 import logging
 
-import numpy as np
-
 import savu.data.data_structures as ds
 from savu.data.transport_data.hdf5_transport_data import SliceAlwaysAvailableWrapper
 

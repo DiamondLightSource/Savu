@@ -37,9 +37,10 @@ class PluginList(object):
     citation information for the plugin
     """
    
-    def __init__(self, meta_data):
-        self.info = meta_data.dict
-        self.populate_plugin_list(meta_data)
+    def __init__(self, meta_data=None):
+        if meta_data is not None:
+            self.info = meta_data.dict
+            self.populate_plugin_list(meta_data)
         
         
     def populate_plugin_list(self, meta_data):
