@@ -60,7 +60,7 @@ class PluginList(object):
         plugins_group = entry_group.create_group('plugin')
         plugins_group.attrs[NX_CLASS] = 'NXplugin'
         count = 0
-        for plugin in self.info["plugin_list"]:
+        for plugin in self.plugin_list:
             plugin_group = plugins_group.create_group("%i" % count)
             plugin_group.attrs[NX_CLASS] = 'NXnote'
             id_array = np.array([plugin['id']])

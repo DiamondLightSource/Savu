@@ -69,7 +69,8 @@ class Hdf5TransportData(object):
         exp.info["group_name"] = {}
         for key in exp.index["out_data"].keys():
             filename = os.path.join(exp.info["out_path"],"%s%02i_%s" % \
-                          (exp.info["process_filename"], count, plugin_id))
+                                    (os.path.basename(exp.meta_data.dict["process_file"]),
+                                    count, plugin_id))
             filename = filename + "_" + key + ".h5"
             group_name = "%i-%s" % (count, plugin.name)
             logging.debug("Creating output file %s", filename)

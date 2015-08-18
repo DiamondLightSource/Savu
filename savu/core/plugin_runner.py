@@ -71,15 +71,15 @@ class PluginRunner(object):
         #*** temporary fix!!!
         plugins = []
         temp = {}
-#        temp['name'] = "nxtomo_loader"
-#        temp['id'] = 'savu.plugins.nxtomo_loader'
-#        temp['data'] = {}
-#        plugins.append(temp)
-        temp['name'] = "nxxrd_loader"
-        temp['id'] = 'savu.plugins.nxxrd_loader'
+        temp['name'] = "nxtomo_loader"
+        temp['id'] = 'savu.plugins.nxtomo_loader'
         temp['data'] = {}
-        temp['loader_params'] = {'calibration_path': ''}
         plugins.append(temp)
+#        temp['name'] = "nxxrd_loader"
+#        temp['id'] = 'savu.plugins.nxxrd_loader'
+#        temp['data'] = {}
+#        temp['loader_params'] = {'calibration_path': ''}
+#        plugins.append(temp)
         plugins.append(plugin_list[0])
         temp = {}
         temp['name'] = "astra_FBP_recon"
@@ -106,7 +106,7 @@ class PluginRunner(object):
         if experiment.info["process"] is 0:
             logging.debug("Running process List.save_list_to_file")
             experiment.meta_data.plugin_list.save_plugin_list(
-                experiment.meta_data.dict["out_filename"])
+                experiment.meta_data.dict["out_filename"].values()[0])
 
         # load relevant metadata 
         experiment.meta_data.set_transport_meta_data() #*** do I need this?
