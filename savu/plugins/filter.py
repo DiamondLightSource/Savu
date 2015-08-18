@@ -81,8 +81,7 @@ class Filter(Plugin):
         """
         """
         [in_data, out_data] = self.get_data_objs_list()
-        slice_list = get_grouped_slice_list(in_data[0], self.get_filter_frame_type(), self.get_max_frames())
-        transport.filter_chunk(slice_list, in_data, out_data)
+        transport.filter_chunk(self, in_data, out_data)
 
           
     def setup(self, experiment):

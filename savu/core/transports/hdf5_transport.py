@@ -211,6 +211,10 @@ class Hdf5Transport(TransportMechanism):
     def filter_chunk(self, slice_list, in_data, out_data):
         logging.debug("Running filter._filter_chunk")
         
+        
+        
+        
+        slice_list = get_grouped_slice_list(in_data[0], self.get_filter_frame_type(), self.get_max_frames())
                 
         
         in_data = in_data[0]
