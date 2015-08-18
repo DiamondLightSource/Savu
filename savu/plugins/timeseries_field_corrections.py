@@ -64,8 +64,7 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         """
         Initial setup of all datasets required as input and output to the 
         plugin.  This method is called before the process method in the plugin
-        chain. Currently, all datasets should set the same chunking size - 
-        but this can be changed if required. 
+        chain.  
         """
 
         chunk_size = self.get_max_frames()
@@ -91,7 +90,7 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
 
         # create all out_data objects and associated patterns
         # patterns can be copied, added or both
-        out_d1 = experiment.create_data_object("out_data", out_data_list[0])
+        out_d1 = experiment.create_data_object("out_data", out_data_list[0])        
         out_d1.copy_patterns(in_d1.info["data_patterns"])
 
         # set pattern for this plugin and the shape

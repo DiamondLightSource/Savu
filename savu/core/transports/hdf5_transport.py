@@ -127,8 +127,6 @@ class Hdf5Transport(TransportMechanism):
 
             for key in out_data_objects[count]:
                 exp.index["out_data"][key] = out_data_objects[count][key]
-
-            print "transport_run_plugin_list:", type(exp.index["out_data"]["tomo"].data)
                       
             plugin.set_parameters(plugin_dict['data'])
             plugin.set_data_objs_list(exp)
@@ -210,21 +208,30 @@ class Hdf5Transport(TransportMechanism):
             print plugin.count
     
 
-    def filter_chunk(self, slice_list, data, output):
+    def filter_chunk(self, slice_list, in_data, out_data):
         logging.debug("Running filter._filter_chunk")
-        process_slice_list = du.get_slice_list_per_process(slice_list)
+        
+                
+        
+        in_data = in_data[0]
+        out_data = out_data[0]
+        
+        slice_list = get_grouped_slice_list(in_data[0], self.get_filter_frame_type(), self.get_max_frames())
 
+        process_slice_list = in_data.get_slice_list_per_process(slice_list)
         padding = self.get_filter_padding()
 
         for sl in process_slice_list:
-            section = du.get_padded_slice_data(sl, padding, data)
+            section = in_data.get_padded_slice_data(sl, padding, in_data)
             result = self.filter_frame(section)
+            print result
+            
             if type(result) == dict:
                 for key in result.keys():
                     if key == 'center_of_rotation':
-                        frame = du.get_orthogonal_slice(sl, data.core_directions[self.get_filter_frame_type()])
-                        output.center_of_rotation[frame] = result[key]
+                        frame = in_data.get_orthogonal_slice(sl, in_data.core_directions[self.get_filter_frame_type()])
+                        out_data.center_of_rotation[frame] = result[key]
                     elif key == 'data':
-                        output.data[sl] = du.get_unpadded_slice_data(sl, padding, data, result)
+                        out_data.data[sl] = in_data.get_unpadded_slice_data(sl, padding, in_data, result)
             else:
-                output.data[sl] = du.get_unpadded_slice_data(sl, padding, data, result)
+                out_data.data[sl] = in_data.get_unpadded_slice_data(sl, padding, result)
