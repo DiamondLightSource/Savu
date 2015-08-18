@@ -71,21 +71,21 @@ class PluginRunner(object):
         #*** temporary fix!!!
         plugins = []
         temp = {}
-#        temp['name'] = "nxtomo_loader"
-#        temp['id'] = 'savu.plugins.nxtomo_loader'
-#        temp['data'] = {}
-#        plugins.append(temp)
-        temp['name'] = "nxxrd_loader"
-        temp['id'] = 'savu.plugins.nxxrd_loader'
+        temp['name'] = "nxtomo_loader"
+        temp['id'] = 'savu.plugins.nxtomo_loader'
         temp['data'] = {}
-        temp['loader_params'] = {'calibration_path': '/home/clb02321/DAWN_stable/Savu/test_data/LaB6_calibration_output.nxs'}
         plugins.append(temp)
+#        temp['name'] = "nxxrd_loader"
+#        temp['id'] = 'savu.plugins.nxxrd_loader'
+#        temp['data'] = {}
+#        temp['loader_params'] = {'calibration_path': '/home/clb02321/DAWN_stable/Savu/test_data/LaB6_calibration_output.nxs'}
+#        plugins.append(temp)
 #        plugins.append(experiment.info["plugin_list"][0])
-##        temp = {}
-##        temp['name'] = "median_filter"
-##        temp['id'] = 'savu.plugins.median_filter'
-##        temp['data'] = {}
-##        plugins.append(temp)
+        temp = {}
+        temp['name'] = "median_filter"
+        temp['id'] = 'savu.plugins.median_filter'
+        temp['data'] = {}
+        plugins.append(temp)
         temp = {}
         temp['name'] = "astra_FBP_recon"
         temp['id'] = 'savu.plugins.astra_recon_cpu'
