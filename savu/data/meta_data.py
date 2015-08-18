@@ -35,7 +35,8 @@ class MetaData(object):
         self.dict = options
         self.set_up_dict()
         self.load_experiment_collection()
-        self.plugin_list = PluginList(self)
+        self.plugin_list = PluginList()
+        self.plugin_list.populate_plugin_list(options["process_file"])
 
 
     def set_up_dict(self):
@@ -43,7 +44,7 @@ class MetaData(object):
 
 
     def load_experiment_collection(self):
-        transport_collection = self.dict["transport"] + "_experiment"                    
+        transport_collection = self.dict["transport"] + "_experiment"
         class_name = ''.join(x.capitalize() for x in transport_collection.split('_'))
         self.add_base(globals()[class_name])
         

@@ -31,43 +31,36 @@ import numpy as np
 
 NX_CLASS = 'NX_class'
 
+
 class PluginList(object):
     """
     The PluginList class handles the plugin list - loading, saving and adding
     citation information for the plugin
     """
-   
-    def __init__(self, meta_data=None):
-        if meta_data is not None:
-            self.info = meta_data.dict
-            self.populate_plugin_list(meta_data)
-        
-        
-    def populate_plugin_list(self, meta_data):
-        filename = self.info["process_file"]
+
+    def __init__(self):
+        self.plugin_list = []
+
+    def populate_plugin_list(self, filename):
         plugin_file = h5py.File(filename, 'r')
-        meta_data.set_meta_data("process_filename", os.path.basename(filename))
         plugin_group = plugin_file['entry/process']
-        plugin_list = []
+        self.plugin_list = []
         for key in plugin_group.keys():
             plugin = {}
             plugin['name'] = plugin_group[key]['name'][0]
             plugin['id'] = plugin_group[key]['id'][0]
             plugin['data'] = json.loads(plugin_group[key]['data'][0])
-            plugin_list.append(plugin)
+            self.plugin_list.append(plugin)
         plugin_file.close()
-        meta_data.set_meta_data("plugin_list", plugin_list)
 
-
-    def save_plugin_list(self):
-        out_filename = self.info["out_filename"][self.info["out_filename"].keys()[0]]
+    def save_plugin_list(self, out_filename):
         plugin_file = h5py.File(out_filename, 'w')
         entry_group = plugin_file.create_group('entry')
         entry_group.attrs[NX_CLASS] = 'NXentry'
         plugins_group = entry_group.create_group('plugin')
         plugins_group.attrs[NX_CLASS] = 'NXplugin'
         count = 0
-        for plugin in self.info["plugin_list"]:
+        for plugin in self.plugin_list:
             plugin_group = plugins_group.create_group("%i" % count)
             plugin_group.attrs[NX_CLASS] = 'NXnote'
             id_array = np.array([plugin['id']])
@@ -82,14 +75,12 @@ class PluginList(object):
             count += 1
         plugin_file.close()
 
-
     def add_plugin_citation(self, filename, plugin_number, citation):
         logging.debug("Adding Citation to file %s", filename)
         plugin_file = h5py.File(filename, 'a')
         plugin_entry = plugin_file['entry/process/%i' % plugin_number]
         citation.write(plugin_entry)
         plugin_file.close()
-
 
     def add_intermediate_data_link(self, filename, output_data, group_name):
         logging.debug("Adding link to file %s", filename)
@@ -98,7 +89,6 @@ class PluginList(object):
         inter_entry.attrs[NX_CLASS] = 'NXcollection'
         inter_entry[group_name] = output_data.external_link()
         plugin_file.close()
-
 
     def get_string(self):
         out_string = []

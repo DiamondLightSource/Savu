@@ -41,6 +41,7 @@ class PluginRunner(object):
     """
     
     def __init__(self, options):
+        print("CAlling the Init method")
         class_name = "savu.core.transports." + options["transport"] + "_transport"
         self.add_base(self.import_class(class_name))
         self.transport_control_setup(options)
@@ -62,30 +63,30 @@ class PluginRunner(object):
         cls = self.__class__
         self.__class__ = cls.__class__(cls.__name__, (cls, ExtraBase), {})
 
-
     def run_plugin_list(self, options):
-                
         experiment = Experiment(options)
-        plugin_list = experiment.info["plugin_list"]
-        
+        #plugin_list = experiment.info["plugin_list"]
+        plugin_list = experiment.meta_data.plugin_list.plugin_list
+
         #*** temporary fix!!!
         plugins = []
         temp = {}
-#        temp['name'] = "nxtomo_loader"
-#        temp['id'] = 'savu.plugins.nxtomo_loader'
-#        temp['data'] = {}
-#        plugins.append(temp)
-        temp['name'] = "nxxrd_loader"
-        temp['id'] = 'savu.plugins.nxxrd_loader'
+        temp['name'] = "nxtomo_loader"
+        temp['id'] = 'savu.plugins.nxtomo_loader'
         temp['data'] = {}
         temp['loader_params'] = {'calibration_path': '/home/clb02321/DAWN_stable/Savu/test_data/LaB6_calibration_output.nxs'}
         plugins.append(temp)
 #        plugins.append(experiment.info["plugin_list"][0])
+##        temp = {}
+##        temp['name'] = "median_filter"
+##        temp['id'] = 'savu.plugins.median_filter'
+##        temp['data'] = {}
+##        plugins.append(temp)
         temp = {}
         temp['name'] = "astra_FBP_recon"
         temp['id'] = 'savu.plugins.astra_recon_cpu'
         temp['data'] = {}
-        temp['in_dataset'] = ["fluo"] # a list of data_sets
+        temp['in_dataset'] = ["tomo"] # a list of data_sets
         temp['out_dataset'] = ["tomo"]
         plugins.append(temp)
         #plugins.append(experiment.info["plugin_list"][1])
@@ -97,16 +98,17 @@ class PluginRunner(object):
         experiment.meta_data.set_meta_data("plugin_list", plugins)
         plugin_list = experiment.meta_data.get_meta_data("plugin_list")        
         #***        
-        
+
         self.run_plugin_list_check(experiment, plugin_list)
 
         self.run_loader(experiment, plugin_list[0]['id'])
-        
+
         self.set_outfilename(experiment)
         if experiment.info["process"] is 0:
             logging.debug("Running process List.save_list_to_file")
-            experiment.meta_data.plugin_list.save_plugin_list()
-        
+            experiment.meta_data.plugin_list.save_plugin_list(
+                experiment.meta_data.dict["out_filename"].values()[0])
+
         # load relevant metadata 
         experiment.meta_data.set_transport_meta_data() #*** do I need this?
         # divert to transport process and run process list
@@ -197,10 +199,9 @@ class PluginRunner(object):
         else:
             try:
                 experiment.meta_data.set_meta_data("loader_params", first_plugin['loader_params'])
-            except:
+            except KeyError:
                 experiment.meta_data.set_meta_data("loader_params", [])
                     
-        print experiment.info["loader_params"]
         plugin = self.load_plugin(end_plugin['id'])
         # check the first plugin is a loader
         if not isinstance(plugin, BaseSaver):
