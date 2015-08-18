@@ -54,9 +54,9 @@ class BaseRecon(Plugin):
     @logmethod
     def process(self, exp, transport, params):
         """
-        """
-        in_data = exp.index["in_data"]["tomo"]
-        out_data = exp.index["out_data"]["tomo"]
+        Perform the main processing step for the plugin
+        """        
+        [in_data, out_data] = self.get_data_objs_list()
 
         if "centre_of_rotation" not in exp.info:
             centre_of_rotation = np.ones(in_data.get_nPattern())
@@ -97,6 +97,9 @@ class BaseRecon(Plugin):
         out_d1.set_shape((shape[2], shape[1], shape[2]))
 
         #-------------------------------------------------------------
+
+        self.set_data_objs(experiment)
+        
             
     def get_max_frames(self):
         """

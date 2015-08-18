@@ -1,9 +1,9 @@
 #!/bin/bash
+#module load global/testcluster
 module load global/cluster
 module load python/ana
-echo "Activating mpi2"
-source activate mpi2
-#source activate mpi4
+#source activate mpi2
+source activate mpi4
 module load openmpi/1.6.5
 #export LD_LIBRARY_PATH=/dls_sw/prod/tools/RHEL6-x86_64/openmpi/1-6-5/prefix/lib:$LD_LIBRARY_PATH
 
@@ -14,7 +14,7 @@ outfile=$4
 nCPUs=$5
 
 export PYTHONPATH=$savupath:$PYTHONPATH
-filename=$savupath/savu/tomo_recon_mpi.py
+filename=$savupath/savu/tomo_recon.py
 
 UNIQHOSTS=${TMPDIR}/machines-u
 awk '{print $1 }' ${PE_HOSTFILE} | uniq > ${UNIQHOSTS}

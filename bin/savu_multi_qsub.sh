@@ -1,19 +1,5 @@
 #!/bin/bash
 
-#echo "Enter the number of nodes to use:"
-#read nNodes
-
-#echo "Enter the number of CPUs per node:"
-#read nCPUs
-
-#echo "Enter the number of runs for averaging:"
-#read nRuns
-
-#echo "Enter start of output filename:"
-#read fname
-
-#clear 
-
 while read -r a b c d; do
 
 	if [ ! -z "$a" ]; then
@@ -31,7 +17,8 @@ while read -r a b c d; do
 	echo $x
 	savupath=${x%/bin}
 
-	runfile=/bin/savu_distArray_launcher.sh
+	#runfile=/bin/savu_distArray_launcher.sh
+	runfile=/bin/savu_launcher.sh
 	outpath=$PWD #outputting to the current folder
 	datafile=$outpath/../test_data/24888.nxs
 	#datafile=$outpath/../test_data/24737.nxs
@@ -49,13 +36,13 @@ while read -r a b c d; do
       #****************** This can be done offline ****************************
     
       #cd Profiling
-	#python $savupath/scripts/log_evaluation/VisualiseProfileData.py
+	  #python $savupath/scripts/log_evaluation/VisualiseProfileData.py
       #cd ../
 
       #************************************************************************
 
 
-      echo "completed profiling"
+      #echo "completed profiling"
 	fi	
 
 done < ../test.txt

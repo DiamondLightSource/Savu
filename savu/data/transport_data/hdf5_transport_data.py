@@ -51,7 +51,6 @@ class Hdf5TransportData(object):
             plugin_id = plugin_dict["id"]
             logging.debug("Loading plugin %s", plugin_id)
             plugin = plugin_runner.load_plugin(plugin_id)
-    
             plugin.setup(exp)
             
             self.set_filenames(exp, plugin, plugin_id, count)

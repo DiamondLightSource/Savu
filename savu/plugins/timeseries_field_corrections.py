@@ -55,13 +55,20 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
     def process(self, exp, transport, params):
         """
         """
-        in_data = exp.index["in_data"]["tomo"]
-        out_data = exp.index["out_data"]["tomo"]
+        [in_data, out_data] = self.get_data_objs_list()
         transport.timeseries_field_correction(self, in_data, out_data, 
                                               exp.info, params)
 
 
     def setup(self, experiment):
+        """
+        Initial setup of all datasets required as input and output to the 
+        plugin.  This method is called before the process method in the plugin
+        chain. Currently, all datasets should set the same chunking size - 
+        but this can be changed if required. 
+        """
+
+        chunk_size = self.get_max_frames()
 
         #-------------------setup input datasets-------------------------
 
@@ -69,11 +76,13 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         in_data_list = experiment.info["plugin_datasets"]["in_data"]
         
         # get all input dataset objects
-        in_d1 = experiment.index["in_data"][in_data_list[0]]        
+        in_d1 = experiment.index["in_data"][in_data_list[0]]
         # set all input data patterns
         in_d1.set_pattern_name("SINOGRAM")
+        # set frame chunk
+        in_d1.set_nFrames(chunk_size)
         
-        #-------------------------------------------------------------
+        #----------------------------------------------------------------
 
         #------------------setup output datasets-------------------------
 
@@ -88,9 +97,14 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         # set pattern for this plugin and the shape
         out_d1.set_pattern_name("SINOGRAM")
         out_d1.set_shape(out_d1.remove_dark_and_flat(in_d1))
+        # set frame chunk
+        out_d1.set_nFrames(chunk_size)
 
-        #-------------------------------------------------------------
+        #----------------------------------------------------------------
         
+        self.set_data_objs(experiment)
+        
+
     def nInput_datasets(self):
         return 1
          
@@ -98,4 +112,7 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
     def nOutput_datasets(self):
         return 1
     
+    
+    def get_max_frames(self):
+        return 8
     
