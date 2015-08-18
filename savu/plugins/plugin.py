@@ -33,9 +33,9 @@ class Plugin(object):
 
     def __init__(self, name='Plugin'):
         super(Plugin, self).__init__()
-        self.set_up()
         self.name = name
-        self.parameters = {}        
+        self.parameters = {}
+        self.data_objs = {}       
 
     #TODO is this needed?
     def set_up(self):
@@ -142,20 +142,21 @@ class Plugin(object):
         out_data_list = exp.info["plugin_datasets"]["out_data"]
         out_data_objs = self.get_data_objects(exp.index["out_data"], out_data_list)
         
-        self.parameters["in_data_objs"] = [in_data_objs]
-        self.parameters["out_data_objs"] = [out_data_objs]
+        self.data_objs["in_data_objs"] = in_data_objs
+        self.data_objs["out_data_objs"] = out_data_objs
         
         
-    def get_data_objs_list(self, exp):
-        in_data_objs = self.parameters["in_data_objs"]
-        out_data_objs = self.parameters["out_data_objs"]
+    def get_data_objs_list(self):
+        in_data_objs = self.data_objs["in_data_objs"]
+        out_data_objs = self.data_objs["out_data_objs"]
         return [in_data_objs, out_data_objs]
 
         
-    def get_data_objects(dobjs, data_list, dtype):
+    def get_data_objects(self, dtype, data_list):
+        
         data_objs = []
         for data in data_list:
-            data_objs.append(dobjs[dtype][data])
+            data_objs.append(dtype[data])
         return data_objs
         
         

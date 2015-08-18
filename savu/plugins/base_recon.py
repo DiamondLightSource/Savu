@@ -25,7 +25,6 @@ import logging
 
 from savu.plugins.plugin import Plugin
 from savu.core.utils import logmethod
-import savu.data.data_structures as ds
 
 import numpy as np
 
@@ -59,7 +58,7 @@ class BaseRecon(Plugin):
         [in_data, out_data] = self.get_data_objs_list()
 
         if "centre_of_rotation" not in exp.info:
-            centre_of_rotation = np.ones(in_data.get_nPattern())
+            centre_of_rotation = np.ones(in_data[0].get_nPattern())
             centre_of_rotation = centre_of_rotation * self.parameters['center_of_rotation']
             exp.meta_data.set_meta_data("centre_of_rotation", centre_of_rotation)
             
@@ -97,8 +96,6 @@ class BaseRecon(Plugin):
         out_d1.set_shape((shape[2], shape[1], shape[2]))
 
         #-------------------------------------------------------------
-
-        self.set_data_objs(experiment)
         
             
     def get_max_frames(self):

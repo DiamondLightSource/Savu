@@ -117,8 +117,7 @@ class Hdf5Transport(TransportMechanism):
         exp.index["out_data"] = {}        
         
         count = 0
-        for plugin_dict in exp.info["plugin_list"][1:-1]:
-            
+        for plugin_dict in exp.info["plugin_list"][1:-1]:            
             
             logging.debug("Loading plugin %s", plugin_dict['id'])
             plugin_id = plugin_dict["id"]
@@ -128,8 +127,11 @@ class Hdf5Transport(TransportMechanism):
 
             for key in out_data_objects[count]:
                 exp.index["out_data"][key] = out_data_objects[count][key]
-      
+
+            print "transport_run_plugin_list:", type(exp.index["out_data"]["tomo"].data)
+                      
             plugin.set_parameters(plugin_dict['data'])
+            plugin.set_data_objs_list(exp)
 
             logging.debug("Starting processing  plugin %s", plugin_id)
             plugin.run_plugin(exp, self)
@@ -166,6 +168,9 @@ class Hdf5Transport(TransportMechanism):
     @logmethod
     def timeseries_field_correction(self, plugin, in_data, out_data, info, params):
    
+        in_data = in_data[0]
+        out_data = out_data[0]
+
         dark = in_data.info["dark"]
         flat = in_data.info["flat"]   
    
@@ -182,11 +187,14 @@ class Hdf5Transport(TransportMechanism):
     @logmethod
     def reconstruction_setup(self, plugin, in_data, out_data, info, params):
 
+        in_data = in_data[0]
+        out_data = out_data[0]
+
         processes = info["processes"]
         process = info["process"]
         
         centre_of_rotations = np.array_split(info["centre_of_rotation"], len(processes))[process]
-        sinogram_frames = np.arange(in_data.get_nPattern())    
+        sinogram_frames = np.arange(in_data.get_nPattern())
         frames = np.array_split(sinogram_frames, len(processes))[process]
 
             

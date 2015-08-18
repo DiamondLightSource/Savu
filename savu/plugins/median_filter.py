@@ -52,36 +52,3 @@ class MedianFilter(Filter, CpuPlugin):
         logging.debug("Running Filter data")
         result = sig.medfilt(data, self.parameters['kernel_size'])
         return result
-
-          
-    def setup(self, experiment):
-
-        #-------------------setup input datasets-------------------------
-
-        # get a list of input dataset names required for this plugin
-        in_data_list = experiment.info["plugin_datasets"]["in_data"]
-        
-        # get all input dataset objects
-        in_d1 = experiment.index["in_data"][in_data_list[0]]
-        
-        # set all input data patterns
-        in_d1.set_pattern_name("SINOGRAM")
-
-        #-------------------------------------------------------------
-
-        #------------------setup output datasets-------------------------
-
-        # get a list of output dataset names created by this plugin
-        out_data_list = experiment.info["plugin_datasets"]["out_data"]
-
-        # create all out_data objects and associated patterns
-        # patterns can be copied, added or both
-        out_d1 = experiment.create_data_object("out_data", out_data_list[0])
-        out_d1.copy_patterns(in_d1.info["data_patterns"])
-
-        # set pattern for this plugin and the shape
-        out_d1.set_pattern_name("VOLUME_XZ")
-        shape = in_d1.get_shape()
-        out_d1.set_shape((shape[2], shape[1], shape[2]))
-
-        #------------------------------------------------------------- 

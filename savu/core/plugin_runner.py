@@ -71,9 +71,14 @@ class PluginRunner(object):
         #*** temporary fix!!!
         plugins = []
         temp = {}
-        temp['name'] = "nxtomo_loader"
-        temp['id'] = 'savu.plugins.nxtomo_loader'
+#        temp['name'] = "nxtomo_loader"
+#        temp['id'] = 'savu.plugins.nxtomo_loader'
+#        temp['data'] = {}
+#        plugins.append(temp)
+        temp['name'] = "nxxrd_loader"
+        temp['id'] = 'savu.plugins.nxxrd_loader'
         temp['data'] = {}
+        temp['loader_params'] = {'calibration_path': ''}
         plugins.append(temp)
         plugins.append(plugin_list[0])
         temp = {}
@@ -190,7 +195,13 @@ class PluginRunner(object):
         # check the first plugin is a loader
         if not isinstance(plugin, BaseLoader):
             sys.exit("The first plugin in the process must inherit from BaseLoader")
-    
+        else:
+            try:
+                experiment.meta_data.set_meta_data("loader_params", first_plugin['loader_params'])
+            except:
+                experiment.meta_data.set_meta_data("loader_params", [])
+                    
+        print experiment.info["loader_params"]
         plugin = self.load_plugin(end_plugin['id'])
         # check the first plugin is a loader
         if not isinstance(plugin, BaseSaver):
