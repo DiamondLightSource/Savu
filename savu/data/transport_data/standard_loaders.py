@@ -401,3 +401,6 @@ class XRDLoaders(object):
             data_obj.add_pattern("PROJECTION", core_dir = projdir, slice_dir = projsli)# two translation axes
         if exp.meta_data.get_meta_data("is_tomo"):
             data_obj.add_pattern("SINOGRAM", core_dir = (rotation,projdir[-1]), slice_dir = projdir[:-1])#rotation and fast axis
+        
+        # now to load the calibration file
+        
