@@ -28,7 +28,7 @@ from savu.plugins import utils as pu
 
 class Plugin(object):
     """
-    The base class from which all plugins should inherit.
+    The base class from which all plugins should inherit.    
     """
 
     def __init__(self, name='Plugin'):
@@ -36,10 +36,6 @@ class Plugin(object):
         self.name = name
         self.parameters = {}
         self.data_objs = {}       
-
-    #TODO is this needed?
-    def set_up(self):
-        pass
 
     def setup(self, experiment):
         """
@@ -167,7 +163,7 @@ class Plugin(object):
         :returns:  Number of input datasets
 
         """
-        raise NotImplementedError("nInputs_datasets needs to be implemented")
+        raise NotImplementedError("nInput_datasets needs to be implemented")
 
 
     def nOutput_datasets(self):
@@ -177,7 +173,7 @@ class Plugin(object):
         :returns:  Number of output datasets
 
         """
-        raise NotImplementedError("nInputs_datasets needs to be implemented")
+        raise NotImplementedError("nOutput_datasets needs to be implemented")
         
 
     def get_citation_information(self):

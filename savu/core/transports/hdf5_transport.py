@@ -37,9 +37,7 @@ class Hdf5Transport(TransportMechanism):
     
 
     def transport_control_setup(self, options):
-        print("Are we calling this?")
         processes = options["process_names"].split(',')
-
 
         if len(processes) is 1:
             options["mpi"] = False
@@ -136,10 +134,10 @@ class Hdf5Transport(TransportMechanism):
             plugin.run_plugin(exp, self)
             logging.debug("Completed processing plugin %s", plugin_id)
 
-
-            for out_objs in exp.info["plugin_datasets"]["out_data"]:
-                if out_objs in exp.index["in_data"].keys():
-                    exp.index["in_data"][out_objs].save_data()
+# What is this doing?
+#            for out_objs in exp.info["plugin_datasets"]["out_data"]:
+#                if out_objs in exp.index["in_data"].keys():
+#                    exp.index["in_data"][out_objs].save_data()
 
             for key in exp.index["out_data"]:
                 exp.index["in_data"][key] = \

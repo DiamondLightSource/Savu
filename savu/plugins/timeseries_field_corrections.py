@@ -35,7 +35,10 @@ from savu.plugins.utils import register_plugin
 class TimeseriesFieldCorrections(Plugin, CpuPlugin):
     """
     A Plugin to apply a simple dark and flatfield correction to some
-    raw timeseries data
+    raw timeseries data    
+    :param in_datasets: Create a list of the dataset(s) to process. Default: [].
+    :param out_datasets: Create a list of the dataset(s) to process. Default: [].
+
     """
 
     def __init__(self):

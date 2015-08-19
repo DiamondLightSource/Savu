@@ -41,5 +41,5 @@ class Hdf5TomoSaver(BaseSaver):
         
     @logmethod
     def setup(self, experiment):
-        saver = sSaver.TomographySavers(experiment)
+        saver = sSaver.TomographySavers(experiment, self.parameters)
         return saver.save_to_hdf5(experiment)

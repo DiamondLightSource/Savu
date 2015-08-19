@@ -37,9 +37,9 @@ class TomographySavers(object):
     It deals with saving of the data to different standard formats
     """
     
-    def __init__(self, exp):
+    def __init__(self, exp, params):
         self.saver_setup(exp)
-
+        self.parameters = params
 
     def saver_setup(self, exp):
         pass
@@ -51,9 +51,8 @@ class TomographySavers(object):
             out_data = exp.index["out_data"][key]
             out_data.backing_file = self.create_backing_h5(key, exp.info)
             group = self.create_entries(out_data.backing_file, out_data, exp.info, key, dtype)
-
-            if out_data.get_pattern_name() is not "VOLUME":
-                self.output_meta_data(group, out_data, exp.info, dtype)
+    
+            self.output_meta_data(group, out_data, exp.info, dtype)
 
 
     def create_backing_h5(self, key, info):
@@ -88,18 +87,56 @@ class TomographySavers(object):
 
 
     def output_meta_data(self, group, data, info, dtype):
-        if isinstance(data, ds.Raw):
-            theDict = ["image_key", "control", "rotation_angle"] # *** ADD COR
-        else:
-            theDict = ["rotation_angle"]
-        
-        for name in theDict:
+        output_list = self.get_output_list(info, data)
+
+    #dt = h5py.special_dtype(vlen=str)
+
+        for key in info.keys():
+            ttype = type(info[key])
+            if ttype is list:
+                print info[key]
+
+        for name in output_list:
             params = self.set_name(name)
-            self.output_data_to_file(group, params, info[name].shape, dtype)
-            params['name1'][...] = info[name]
+            value = info[name]
+            [shape, dtype] = self.get_type(value)
+            # calculate shape
+            # determine type            
+            
+            self.output_data_to_file(group, params)#, info[name].shape, dtype)
+            params['name1'][...] = value
         
 
+    def get_output_list(self, info, data):
+        if self.parameters is False:           
+            pattern = data.get_pattern_name()
+            if isinstance(data, ds.Raw):
+                pattern = "RAW"
+            return self.get_pattern_meta_data(data, pattern)
+        else:
+            meta_data = []
+            for key in info.keys():
+                meta_data.append(key)
+            return meta_data
+        
+
+    # temporary need to move this somewhere else        
+    def get_pattern_meta_data(self, pattern):
+        theDict = {}
+        theDict['RAW'] = ["image_key", "control", "rotation_angle"] # *** ADD COR
+        theDict['PROJECTION'] = ["rotation_angle"]
+        theDict['SINOGRAM'] = theDict['PROJECTION']
+        
+        try:
+            return theDict['pattern']
+        except KeyError:
+            print "Warning: No meta_data output is associated with the \
+                                                            pattern:", pattern
+            return []
+        
+        
     def output_data_to_file(self, group, params, shape, dtype):
+        
         params['name1'] = group.create_dataset(params['name1'], shape, dtype)
         params['name1'].attrs['signal'] = 1
         params['name2'] = group.create_dataset(params['name2'], shape, np.bool_)

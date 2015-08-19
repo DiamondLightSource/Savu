@@ -33,7 +33,10 @@ class BaseRecon(Plugin):
     """
     A Plugin to apply a simple reconstruction with no dependancies
     
-    :param center_of_rotation: Centre of rotation to use for the reconstruction). Default: 86.
+    :param center_of_rotation: Centre of rotation to use for the reconstruction). Default: 86.        
+    :param in_datasets: Create a list of the dataset(s) to process. Default: [].
+    :param out_datasets: Create a list of the dataset(s) to process. Default: [].
+
     """
     count = 0
 
