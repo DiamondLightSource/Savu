@@ -27,10 +27,13 @@ import logging
 
 import numpy as np
 
+from savu.data.meta_data import MetaData
+
 
 class Pattern(object):
 
     def __init__(self):
+        self.meta_data = MetaData()
         self.name = None
         self.nFrames = 1
         self.pattern_list = []

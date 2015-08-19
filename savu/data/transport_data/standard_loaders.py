@@ -60,8 +60,9 @@ class TomographyLoaders(object):
     def loader_setup(self, exp):
         
         base_classes = [ds.Raw]
-        exp.info["base_classes"] = base_classes
         data_obj = exp.create_data_object("in_data", "tomo", base_classes)
+        data_obj.meta_data.set_meta_data("base_classes", base_classes)
+        print data_obj.meta_data.get_meta_data("base_classes")
                 
         data_obj.add_pattern("PROJECTION", core_dir = (1, 2), slice_dir = (0,))
         data_obj.add_pattern("SINOGRAM", core_dir = (0, -1), slice_dir = (1,))

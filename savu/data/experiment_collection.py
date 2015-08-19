@@ -22,6 +22,7 @@
 
 """
 
+from savu.data.plugin_list import PluginList
 from savu.data.data_structures import Data
 from savu.data.meta_data import MetaData
 
@@ -34,9 +35,17 @@ class Experiment(object):
    
     def __init__(self, options):
         self.meta_data = MetaData(options)
+        self.meta_data_setup(options["process_file"])
         self.info = self.meta_data.dict 
         self.index = {"in_data": {}, "out_data": {}}
-        
+  
+
+    def meta_data_setup(self, process_file):
+        self.meta_data.load_experiment_collection()
+        self.meta_data.plugin_list = PluginList()
+        self.meta_data.plugin_list.populate_plugin_list(process_file)
+        self.meta_data.set_meta_data("plugin_objects", {})
+
 
     def create_data_object(self, dtype, name, bases=None): 
         transport_data = self.get_transport_data()

@@ -22,7 +22,6 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
-from savu.data.plugin_list import PluginList
 
 class MetaData(object):
     """
@@ -31,16 +30,8 @@ class MetaData(object):
     PluginList.
     """
    
-    def __init__(self, options):
+    def __init__(self, options={}):
         self.dict = options
-        self.set_up_dict()
-        self.load_experiment_collection()
-        self.plugin_list = PluginList()
-        self.plugin_list.populate_plugin_list(options["process_file"])
-
-
-    def set_up_dict(self):
-        self.set_meta_data("plugin_objects", {})
 
 
     def load_experiment_collection(self):
