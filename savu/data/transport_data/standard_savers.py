@@ -89,22 +89,13 @@ class TomographySavers(object):
     def output_meta_data(self, group, data, info, dtype):
         output_list = self.get_output_list(info, data)
 
-    #dt = h5py.special_dtype(vlen=str)
-
-        for key in info.keys():
-            ttype = type(info[key])
-            if ttype is list:
-                print info[key]
-
         for name in output_list:
             params = self.set_name(name)
             value = info[name]
-            [shape, dtype] = self.get_type(value)
-            # calculate shape
-            # determine type            
-            
-            self.output_data_to_file(group, params)#, info[name].shape, dtype)
-            params['name1'][...] = value
+            # just numpy arrays for now
+            if (type(value).__module__ ) in np.__name__:
+                self.output_data_to_file(group, params, info[name].shape, dtype)
+                params['name1'][...] = value
         
 
     def get_output_list(self, info, data):
@@ -120,7 +111,7 @@ class TomographySavers(object):
             return meta_data
         
 
-    # temporary need to move this somewhere else        
+    # Temporary: Need to move this somewhere else?
     def get_pattern_meta_data(self, pattern):
         theDict = {}
         theDict['RAW'] = ["image_key", "control", "rotation_angle"] # *** ADD COR
