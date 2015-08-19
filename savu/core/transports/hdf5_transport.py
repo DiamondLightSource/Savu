@@ -109,6 +109,7 @@ class Hdf5Transport(TransportMechanism):
     def transport_run_plugin_list(self, exp):
         """Runs a chain of plugins
         """        
+        plugin_list = exp.meta_data.plugin_list.plugin_list
         #*** check base saver is to hdf5 file?
         in_data = exp.index["in_data"][exp.index["in_data"].keys()[0]]
         out_data_objects = in_data.load_data(self, exp)
@@ -117,7 +118,7 @@ class Hdf5Transport(TransportMechanism):
         exp.index["out_data"] = {}        
         
         count = 0
-        for plugin_dict in exp.info["plugin_list"][1:-1]:            
+        for plugin_dict in plugin_list[1:-1]:            
             
             logging.debug("Loading plugin %s", plugin_dict['id'])
             plugin_id = plugin_dict["id"]

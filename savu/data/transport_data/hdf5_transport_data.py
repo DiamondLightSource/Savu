@@ -40,13 +40,14 @@ class Hdf5TransportData(object):
     
     def load_data(self, plugin_runner, exp):
 
-        final_plugin = exp.info["plugin_list"][-1]
+        plugin_list = exp.meta_data.plugin_list.plugin_list
+        final_plugin = plugin_list[-1]
         saver_plugin = plugin_runner.load_plugin(final_plugin["id"])
 
         logging.debug("generating all output files")
         out_data_objects = []
         count = 0
-        for plugin_dict in exp.info["plugin_list"][1:-1]:
+        for plugin_dict in plugin_list[1:-1]:
             
             plugin_id = plugin_dict["id"]
             logging.debug("Loading plugin %s", plugin_id)

@@ -33,6 +33,9 @@ from savu.plugins.utils import register_plugin
 class NxxrdLoader(BaseLoader):
     """
     A class to load tomography data from an NXxrd file
+        
+    :param calibration_path: path to the calibration file. Default: "../../test_data/LaB6_calibration_output.nxs"
+
     """
             
     def __init__(self, name='NxstxmLoader'):
@@ -41,6 +44,6 @@ class NxxrdLoader(BaseLoader):
         
     @logmethod
     def setup(self, experiment):
-        loader = sLoader.XRDLoaders(experiment)
+        loader = sLoader.XRDLoaders(experiment, self.parameters)
         loader.load_from_nx_xrd(experiment)
         

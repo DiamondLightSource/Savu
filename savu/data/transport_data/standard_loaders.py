@@ -306,11 +306,13 @@ class XRDLoaders(object):
     This class is called from an XRD loader to use a standard loader. It 
     deals with loading of the data for different formats (e.g. hdf5,...)
     A.D Parsons 17th August 2015
-    """
     
-    def __init__(self, exp):
+    """    
+    
+    def __init__(self, exp, params):
         self.loader_setup(exp)
         self.load_from_nx_xrd(exp)
+        self.parameters = params
 
     def loader_setup(self, exp):
         
@@ -400,7 +402,7 @@ class XRDLoaders(object):
             data_obj.add_pattern("SINOGRAM", core_dir = (rotation,projdir[-1]), slice_dir = projdir[:-1])#rotation and fast axis
         
         # now to load the calibration file
-        calibrationfile = h5py.File(exp.info["loader_params"]['calibration_path'], 'r')
+        calibrationfile = h5py.File(self.parameters['calibration_path'], 'r')
         
         exp.meta_data.set_meta_data("beam_center_x", calibrationfile['/entry/instrument/detector/beam_center_x'])
         exp.meta_data.set_meta_data("beam_center_y", calibrationfile['/entry/instrument/detector/beam_center_y'])

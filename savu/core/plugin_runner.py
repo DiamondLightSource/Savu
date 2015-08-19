@@ -69,39 +69,39 @@ class PluginRunner(object):
         plugin_list = experiment.meta_data.plugin_list.plugin_list
 
         #*** temporary fix!!!
-        plugins = []
-        temp = {}
-        temp['name'] = "nxtomo_loader"
-        temp['id'] = 'savu.plugins.nxtomo_loader'
-        temp['data'] = {}
-        plugins.append(temp)
-#        temp['name'] = "nxxrd_loader"
-#        temp['id'] = 'savu.plugins.nxxrd_loader'
+#        plugins = []
+#        temp = {}
+#        temp['name'] = "nxtomo_loader"
+#        temp['id'] = 'savu.plugins.nxtomo_loader'
 #        temp['data'] = {}
-#        temp['loader_params'] = {'calibration_path': '/home/clb02321/DAWN_stable/Savu/test_data/LaB6_calibration_output.nxs'}
 #        plugins.append(temp)
-#        plugins.append(experiment.info["plugin_list"][0])
-        temp = {}
-        temp['name'] = "median_filter"
-        temp['id'] = 'savu.plugins.median_filter'
-        temp['data'] = {}
-        plugins.append(temp)
-        temp = {}
-        temp['name'] = "astra_FBP_recon"
-        temp['id'] = 'savu.plugins.astra_recon_cpu'
-        temp['data'] = {}
-        temp['in_dataset'] = ["tomo"] # a list of data_sets
-        temp['out_dataset'] = ["tomo"]
-        plugins.append(temp)
-        #plugins.append(experiment.info["plugin_list"][1])
-        temp = {}
-        temp['name'] = "hdf5_tomo_saver"
-        temp['id'] = 'savu.plugins.hdf5_tomo_saver'
-        temp['data'] = {}
-        plugins.append(temp)
-        experiment.meta_data.set_meta_data("plugin_list", plugins)
-        plugin_list = experiment.meta_data.get_meta_data("plugin_list")        
-        #***        
+##        temp['name'] = "nxxrd_loader"
+##        temp['id'] = 'savu.plugins.nxxrd_loader'
+##        temp['data'] = {}
+##        temp['loader_params'] = {'calibration_path': '/home/clb02321/DAWN_stable/Savu/test_data/LaB6_calibration_output.nxs'}
+##        plugins.append(temp)
+##        plugins.append(experiment.info["plugin_list"][0])
+#        temp = {}
+#        temp['name'] = "median_filter"
+#        temp['id'] = 'savu.plugins.median_filter'
+#        temp['data'] = {}
+#        plugins.append(temp)
+#        temp = {}
+#        temp['name'] = "astra_FBP_recon"
+#        temp['id'] = 'savu.plugins.astra_recon_cpu'
+#        temp['data'] = {}
+#        temp['in_dataset'] = ["tomo"] # a list of data_sets
+#        temp['out_dataset'] = ["tomo"]
+#        plugins.append(temp)
+#        #plugins.append(experiment.info["plugin_list"][1])
+#        temp = {}
+#        temp['name'] = "hdf5_tomo_saver"
+#        temp['id'] = 'savu.plugins.hdf5_tomo_saver'
+#        temp['data'] = {}
+#        plugins.append(temp)
+#        experiment.meta_data.set_meta_data("plugin_list", plugins)
+#        plugin_list = experiment.meta_data.get_meta_data("plugin_list")        
+#        #***        
 
         self.run_plugin_list_check(experiment, plugin_list)
 
@@ -130,7 +130,7 @@ class PluginRunner(object):
         self.run_loader(exp, plugin_list[0]['id'])
         
         count = 0
-        for plugin_dict in exp.info["plugin_list"][1:-1]:
+        for plugin_dict in plugin_list[1:-1]:
 
             self.set_datasets(exp, plugin_dict, "in_datasets")
             self.set_datasets(exp, plugin_dict, "out_datasets")
