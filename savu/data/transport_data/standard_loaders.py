@@ -62,7 +62,6 @@ class TomographyLoaders(object):
         base_classes = [ds.Raw]
         data_obj = exp.create_data_object("in_data", "tomo", base_classes)
         data_obj.meta_data.set_meta_data("base_classes", base_classes)
-        print data_obj.meta_data.get_meta_data("base_classes")
                 
         data_obj.add_pattern("PROJECTION", core_dir = (1, 2), slice_dir = (0,))
         data_obj.add_pattern("SINOGRAM", core_dir = (0, -1), slice_dir = (1,))
@@ -75,24 +74,25 @@ class TomographyLoaders(object):
         :param path: The full path of the NeXus file to load.
         :type path: str
         """
-        
+                
         data_obj = exp.index["in_data"]["tomo"]
+        mData = data_obj.meta_data        
 
         data_obj.backing_file = h5py.File(exp.info["data_file"], 'r')
-        exp.meta_data.set_meta_data("backing_file", data_obj.backing_file)
+        mData.set_meta_data("backing_file", data_obj.backing_file)
         logging.debug("Creating file '%s' '%s'", 'tomo_entry', data_obj.backing_file.filename)
         
         data_obj.data = data_obj.backing_file['entry1/tomo_entry/instrument/detector/data']
         data_obj.set_image_key(data_obj.backing_file\
                         ['entry1/tomo_entry/instrument/detector/image_key'])
                         
-        exp.meta_data.set_meta_data("image_key", data_obj.get_image_key())
+        mData.set_meta_data("image_key", data_obj.get_image_key())
         
         rotation_angle = data_obj.backing_file['entry1/tomo_entry/sample/rotation_angle']
-        exp.meta_data.set_meta_data("rotation_angle", rotation_angle[exp.info["image_key"]==0,...])
+        mData.set_meta_data("rotation_angle", rotation_angle[(mData.get_meta_data("image_key"))==0,...])
 
         control = data_obj.backing_file['entry1/tomo_entry/control/data']
-        exp.meta_data.set_meta_data("control", control[...])
+        mData.set_meta_data("control", control[...])
 
         data_obj.set_shape(data_obj.data.shape)
         
@@ -115,8 +115,8 @@ class FluorescenceLoaders(object):
     def loader_setup(self, exp):
         
         base_classes = [ds.Raw]
-        exp.info["base_classes"] = base_classes
         data_obj = exp.create_data_object("in_data", "fluo", base_classes)
+        data_obj.meta_data.set_meta_data("base_classes", base_classes)
 
     def load_from_nx_fluo(self, exp):
         """
@@ -127,8 +127,10 @@ class FluorescenceLoaders(object):
         """
         # set up the file handles
         data_obj = exp.index["in_data"]["fluo"]
+        mData = data_obj.meta_data
+        
         data_obj.backing_file = h5py.File(exp.info["data_file"], 'r')
-        exp.meta_data.set_meta_data("backing_file", data_obj.backing_file)
+        mData.set_meta_data("backing_file", data_obj.backing_file)
         logging.debug("Creating file '%s' '%s'", 'fluo_entry', data_obj.backing_file.filename)
         # now lets extract the fluo entry so we can figure out our geometries!
         finder = _NXAppFinder()
@@ -218,8 +220,9 @@ class STXMLoaders(object):
     def loader_setup(self, exp):
         
         base_classes = [ds.Raw]
-        exp.info["base_classes"] = base_classes
         data_obj = exp.create_data_object("in_data", "stxm", base_classes)
+        data_obj.meta_data.set_meta_data("base_classes", base_classes)
+
 
     def load_from_nx_stxm(self, exp):
         """
@@ -318,8 +321,8 @@ class XRDLoaders(object):
     def loader_setup(self, exp):
         
         base_classes = [ds.Raw]
-        exp.info["base_classes"] = base_classes
         data_obj = exp.create_data_object("in_data", "xrd", base_classes)
+        data_obj.meta_data.set_meta_data("base_classes", base_classes)
 
     def load_from_nx_xrd(self, exp):
         """
