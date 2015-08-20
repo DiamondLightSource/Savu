@@ -31,8 +31,8 @@ class MetaData(object):
     """
    
     def __init__(self, options={}):
-        self.dict = options
-
+        self.dict = options.copy()
+        
 
     def load_experiment_collection(self):
         transport_collection = self.dict["transport"] + "_experiment"
@@ -73,7 +73,7 @@ class MetaData(object):
 
 
     def copy_dictionary(self, new_dict):
-        self.dict = new_dict
+        self.dict = new_dict.copy()
 
     
     def get_dictionary(self):

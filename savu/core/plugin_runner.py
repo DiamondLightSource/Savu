@@ -65,9 +65,11 @@ class PluginRunner(object):
     def run_plugin_list(self, options):
         experiment = Experiment(options)
         plugin_list = experiment.meta_data.plugin_list.plugin_list
+
         self.run_plugin_list_check(experiment, plugin_list)
         self.plugin_loader(experiment, plugin_list[0], True)
         self.set_outfilename(experiment)
+
         expInfo = experiment.meta_data
         if expInfo.get_meta_data("process") is 0:
             logging.debug("Running process List.save_list_to_file")

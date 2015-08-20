@@ -59,6 +59,7 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         """
         """
         [in_data, out_data] = self.get_data_objs_list()
+        print in_data[0].get_patterns()
         in_data[0].get_slice_list()
         transport.timeseries_field_correction(self, in_data, out_data, 
                                               exp.info, params)
@@ -84,17 +85,16 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         in_d1.set_current_pattern_name("SINOGRAM")
         # set frame chunk
         in_d1.set_nFrames(chunk_size)
-
+        
         #----------------------------------------------------------------
 
         #------------------setup output datasets-------------------------
 
         # get a list of output dataset names created by this plugin
         out_data_list = expInfo.get_meta_data(["plugin_datasets", "out_data"])
-
         # create all out_data objects and associated patterns and meta_data
         # patterns can be copied, added or both
-        out_d1 = experiment.create_data_object("out_data", out_data_list[0])        
+        out_d1 = experiment.create_data_object("out_data", out_data_list[0]) 
         out_d1.copy_patterns(in_d1.get_patterns())
         out_d1.meta_data.copy_dictionary(in_d1.meta_data.get_dictionary())
 

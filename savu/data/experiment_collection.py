@@ -46,7 +46,7 @@ class Experiment(object):
         self.meta_data.set_meta_data("plugin_objects", {})
 
 
-    def create_data_object(self, dtype, name, bases=None): 
+    def create_data_object(self, dtype, name, bases=None):
         transport_data = self.get_transport_data()
         self.index[dtype][name] = Data(self.import_class(transport_data))
         if bases is not None:

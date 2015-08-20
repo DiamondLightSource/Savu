@@ -92,7 +92,8 @@ class Hdf5TransportData(object):
 
     def get_slice_list(self):
             
-                    
+        print self.get_patterns()
+        #[self.get_current_pattern_name()]
             
         # frame_type = SINOGRAM/PROJECTION       
         it = np.nditer(self.data, flags=['multi_index'])

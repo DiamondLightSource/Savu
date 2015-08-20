@@ -107,13 +107,18 @@ class Hdf5Transport(TransportMechanism):
     def transport_run_plugin_list(self, exp):
         """Runs a chain of plugins
         """        
+        
         plugin_list = exp.meta_data.plugin_list.plugin_list
         #*** check base saver is to hdf5 file?
         in_data = exp.index["in_data"][exp.index["in_data"].keys()[0]]
         out_data_objects = in_data.load_data(self, exp)
 
         # clear all out_data objects in experiment dictionary
-        exp.index["out_data"] = {}        
+        exp.index["out_data"] = {}
+        exp.index["in_data"] = {}
+        
+        # re-run the loader since it now contains incorrect data
+        self.plugin_loader(exp, plugin_list[0], True)
         
         count = 0
         for plugin_dict in plugin_list[1:-1]:            
@@ -129,7 +134,7 @@ class Hdf5Transport(TransportMechanism):
                       
             plugin.set_parameters(plugin_dict['data'])
             plugin.set_data_objs_list(exp)
-
+            
             logging.debug("Starting processing  plugin %s", plugin_id)
             plugin.run_plugin(exp, self)
             logging.debug("Completed processing plugin %s", plugin_id)
