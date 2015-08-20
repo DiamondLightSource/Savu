@@ -29,10 +29,7 @@ from savu.core.plugin_runner import PluginRunner
 
 class PluginRunnerTest(unittest.TestCase):
 
-    def setUp(self):
-        pass
-
-    def test_basics(self):
+    def test_tomo(self):
         options = {
             "transport": "hdf5",
             "process_names": "CPU0",
@@ -42,5 +39,16 @@ class PluginRunnerTest(unittest.TestCase):
             }
         PluginRunner(options)
 
-    def tearDown(self):
-        pass
+    def test_stxm(self):
+        options = {
+            "transport": "hdf5",
+            "process_names": "CPU0",
+            "data_file": tu.get_test_data_path('stxm.nxs'),
+            "process_file": tu.get_test_data_path('basic_stxm_process.nxs'),
+            "out_path": tempfile.mkdtemp()
+            }
+        PluginRunner(options)
+
+
+if __name__ == "__main__":
+    unittest.main()
