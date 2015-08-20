@@ -46,12 +46,27 @@ class MetaData(object):
         
 
     def set_meta_data(self, name, value):
-        self.dict[name] = value
-    
+        if type(name) is not list:
+            self.dict[name] = value
+        else:
+            temp = self.dict
+            for key in name[:-1]:
+                try:
+                    temp = temp[key]
+                except KeyError:
+                    temp[key] = {}
+            temp[name[-1]] = value
+            
 
     def get_meta_data(self, name):
-        return self.dict[name]        
-    
+        if type(name) is not list:
+            return self.dict[name]     
+        else:
+            temp = self.dict
+            for key in name:
+                temp = temp[key]
+            return temp
+            
     
     def set_plugin_objects(self, name, objs):
         self.dict["plugin_objects"][name] = objs

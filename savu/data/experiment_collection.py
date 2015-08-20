@@ -36,7 +36,6 @@ class Experiment(object):
     def __init__(self, options):
         self.meta_data = MetaData(options)
         self.meta_data_setup(options["process_file"])
-        self.info = self.meta_data.dict 
         self.index = {"in_data": {}, "out_data": {}}
   
 
@@ -56,13 +55,13 @@ class Experiment(object):
         
 
     def get_transport_data(self):
-        transport_data = "savu.data.transport_data." + self.info["transport"] \
-                            + "_transport_data"
+        transport_data = "savu.data.transport_data." + \
+            self.meta_data.get_meta_data("transport") + "_transport_data"
         return transport_data
   
 
     def load_experiment_collection(self):
-        transport_collection = self.info["transport"] + "_experiment"                    
+        transport_collection = self.meta_data.get_meta_data("transport") + "_experiment"                    
         class_name = ''.join(x.capitalize() for x in transport_collection.split('_'))
         self.add_base(globals()[class_name])
         

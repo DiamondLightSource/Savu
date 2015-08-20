@@ -76,23 +76,24 @@ class TomographyLoaders(object):
         """
                 
         data_obj = exp.index["in_data"]["tomo"]
-        mData = data_obj.meta_data        
+        objInfo = data_obj.meta_data
+        expInfo = exp.meta_data
 
-        data_obj.backing_file = h5py.File(exp.info["data_file"], 'r')
-        mData.set_meta_data("backing_file", data_obj.backing_file)
+        data_obj.backing_file = h5py.File(expInfo.get_meta_data("data_file"), 'r')
+        objInfo.set_meta_data("backing_file", data_obj.backing_file)
         logging.debug("Creating file '%s' '%s'", 'tomo_entry', data_obj.backing_file.filename)
         
         data_obj.data = data_obj.backing_file['entry1/tomo_entry/instrument/detector/data']
         data_obj.set_image_key(data_obj.backing_file\
                         ['entry1/tomo_entry/instrument/detector/image_key'])
                         
-        mData.set_meta_data("image_key", data_obj.get_image_key())
+        objInfo.set_meta_data("image_key", data_obj.get_image_key())
         
         rotation_angle = data_obj.backing_file['entry1/tomo_entry/sample/rotation_angle']
-        mData.set_meta_data("rotation_angle", rotation_angle[(mData.get_meta_data("image_key"))==0,...])
+        objInfo.set_meta_data("rotation_angle", rotation_angle[(objInfo.get_meta_data("image_key"))==0,...])
 
         control = data_obj.backing_file['entry1/tomo_entry/control/data']
-        mData.set_meta_data("control", control[...])
+        objInfo.set_meta_data("control", control[...])
 
         data_obj.set_shape(data_obj.data.shape)
         

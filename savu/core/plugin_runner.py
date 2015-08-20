@@ -67,15 +67,15 @@ class PluginRunner(object):
         plugin_list = experiment.meta_data.plugin_list.plugin_list
         self.run_plugin_list_check(experiment, plugin_list)
         self.plugin_loader(experiment, plugin_list[0], True)
-
         self.set_outfilename(experiment)
-        if experiment.info["process"] is 0:
+        expInfo = experiment.meta_data
+        if expInfo.get_meta_data("process") is 0:
             logging.debug("Running process List.save_list_to_file")
-            experiment.meta_data.plugin_list.save_plugin_list(
-                experiment.meta_data.dict["out_filename"].values()[0])
+            expInfo.plugin_list.save_plugin_list(
+                expInfo.get_meta_data("out_filename").values()[0])
 
         # load relevant metadata 
-        experiment.meta_data.set_transport_meta_data() #*** do I need this?
+        expInfo.set_transport_meta_data() #*** do I need this?
         # divert to transport process and run process list
         self.transport_run_plugin_list(experiment)
 
@@ -143,11 +143,13 @@ class PluginRunner(object):
             else:
                 raise Exception(errorMsg)
 
+        expInfo = exp.meta_data
  
-        if "plugin_datasets" not in exp.info.keys():
-            exp.info["plugin_datasets"] = {}
-            
-        exp.info["plugin_datasets"][name] = data_names
+        if "plugin_datasets" not in expInfo.get_dictionary().keys():
+            expInfo.set_meta_data("plugin_datasets",{})
+
+        expInfo.set_meta_data(["plugin_datasets", name], data_names)
+        
                     
 
     def set_all_datasets(self, exp, name):
@@ -174,12 +176,14 @@ class PluginRunner(object):
     
     
     def set_outfilename(self, exp):
-        exp.info["out_filename"] = {}
+        expInfo = exp.meta_data
+        expInfo.set_meta_data("out_filename", {})
         for name in exp.index["in_data"].keys():
             filename = os.path.basename(exp.index["in_data"][name].backing_file.filename)
             filename = os.path.splitext(filename)[0]
-            exp.info["out_filename"][name] = os.path.join(exp.info["out_path"],
+            filename = os.path.join(expInfo.get_meta_data("out_path"),
              "%s_processed_%s.nxs" % (filename, time.strftime("%Y%m%d%H%M%S")))
+            expInfo.set_meta_data(["out_filename", name], filename)
         
     
     def load_plugin(self, plugin_name):

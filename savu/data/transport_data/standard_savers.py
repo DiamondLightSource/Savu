@@ -49,18 +49,19 @@ class TomographySavers(object):
         dtype = np.float32 #*** changed from double
         for key in exp.index["out_data"].keys():
             out_data = exp.index["out_data"][key]
-            out_data.backing_file = self.create_backing_h5(key, exp.info)
-            group = self.create_entries(out_data.backing_file, out_data, exp.info, key, dtype)
+            out_data.backing_file = self.create_backing_h5(key, exp.meta_data)
+            group = self.create_entries(out_data.backing_file, out_data, 
+                                                    exp.meta_data, key, dtype)
     
-            self.output_meta_data(group, out_data, exp.info, dtype)
+            self.output_meta_data(group, out_data, exp.meta_data, dtype)
 
 
-    def create_backing_h5(self, key, info):
+    def create_backing_h5(self, key, expInfo):
         """
         Create a h5 backend for output data
         """
-        filename = info["filename"][key]
-        if info["mpi"] is True:
+        filename = expInfo.get_meta_data(["filename", key])
+        if expInfo.get_meta_data("mpi") is True:
             backing_file = h5py.File(filename, 'w', driver='mpio', 
                                                          comm=MPI.COMM_WORLD)
         else:
@@ -69,15 +70,15 @@ class TomographySavers(object):
         if backing_file is None:
             raise IOError("Failed to open the hdf5 file")
 
-        logging.debug("Creating file '%s' '%s'", info["group_name"], 
+        logging.debug("Creating file '%s' '%s'", expInfo.get_meta_data("group_name"), 
                                                          backing_file.filename)
         
         return backing_file
         
 
-    def create_entries(self, backing_file, data, info, key, dtype):
+    def create_entries(self, backing_file, data, expInfo, key, dtype):
         from savu.data.transport_data.hdf5_transport_data import SliceAvailableWrapper
-        group = backing_file.create_group(info["group_name"][key])
+        group = backing_file.create_group(expInfo.get_meta_data(["group_name", key]))
         group.attrs[NX_CLASS] = 'NXdata'
 
         params = self.set_name("data_value")
@@ -86,19 +87,19 @@ class TomographySavers(object):
         return group
 
 
-    def output_meta_data(self, group, data, info, dtype):
-        output_list = self.get_output_list(info, data)
+    def output_meta_data(self, group, data, expInfo, dtype):
+        output_list = self.get_output_list(expInfo, data)
 
         for name in output_list:
             params = self.set_name(name)
-            value = info[name]
+            value = expInfo.get_meta_data(name)
             # just numpy arrays for now
             if (type(value).__module__ ) in np.__name__:
-                self.output_data_to_file(group, params, info[name].shape, dtype)
+                self.output_data_to_file(group, params, value.shape, dtype)
                 params['name1'][...] = value
         
 
-    def get_output_list(self, info, data):
+    def get_output_list(self, expInfo, data):
         if self.parameters is False:           
             pattern = data.get_pattern_name()
             if isinstance(data, ds.Raw):
@@ -106,7 +107,7 @@ class TomographySavers(object):
             return self.get_pattern_meta_data(data, pattern)
         else:
             meta_data = []
-            for key in info.keys():
+            for key in expInfo.get_dictionary().keys():
                 meta_data.append(key)
             return meta_data
         
