@@ -71,6 +71,10 @@ class MetaData(object):
     def set_plugin_objects(self, name, objs):
         self.dict["plugin_objects"][name] = objs
 
+
+    def copy_dictionary(self, new_dict):
+        self.dict = new_dict
+
     
     def get_dictionary(self):
         return self.dict

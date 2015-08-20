@@ -92,10 +92,11 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         # get a list of output dataset names created by this plugin
         out_data_list = expInfo.get_meta_data(["plugin_datasets", "out_data"])
 
-        # create all out_data objects and associated patterns
+        # create all out_data objects and associated patterns and meta_data
         # patterns can be copied, added or both
         out_d1 = experiment.create_data_object("out_data", out_data_list[0])        
         out_d1.copy_patterns(in_d1.get_patterns())
+        out_d1.meta_data.copy_dictionary(in_d1.meta_data.get_dictionary())
 
         # set pattern for this plugin and the shape
         out_d1.set_current_pattern_name("SINOGRAM")

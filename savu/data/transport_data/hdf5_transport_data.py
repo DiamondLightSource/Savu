@@ -92,23 +92,25 @@ class Hdf5TransportData(object):
 
     def get_slice_list(self):
             
+                    
+            
         # frame_type = SINOGRAM/PROJECTION       
         it = np.nditer(self.data, flags=['multi_index'])
-        
-        dirs_to_remove = list(data.core_directions[frame_type])
-        dirs_to_remove.sort(reverse=True)
-        for direction in dirs_to_remove:
-            it.remove_axis(direction)
-        mapping_list = range(len(it.multi_index))
-        dirs_to_remove.sort()
-        for direction in dirs_to_remove:
-            mapping_list.insert(direction, -1)
-        mapping_array = np.array(mapping_list)
-        slice_list = []
-        while not it.finished:
-            tup = it.multi_index + (slice(None),)
-            slice_list.append(tuple(np.array(tup)[mapping_array]))
-            it.iternext()
+#        core_directions = self.
+#        dirs_to_remove = list(data.core_directions[frame_type])
+#        dirs_to_remove.sort(reverse=True)
+#        for direction in dirs_to_remove:
+#            it.remove_axis(direction)
+#        mapping_list = range(len(it.multi_index))
+#        dirs_to_remove.sort()
+#        for direction in dirs_to_remove:
+#            mapping_list.insert(direction, -1)
+#        mapping_array = np.array(mapping_list)
+#        slice_list = []
+#        while not it.finished:
+#            tup = it.multi_index + (slice(None),)
+#            slice_list.append(tuple(np.array(tup)[mapping_array]))
+#            it.iternext()
         #return slice_list
 
 

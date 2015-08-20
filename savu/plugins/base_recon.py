@@ -93,6 +93,7 @@ class BaseRecon(Plugin):
         # patterns can be copied, added or both
         out_d1 = experiment.create_data_object("out_data", out_data_list[0])
         out_d1.add_volume_patterns()
+        out_d1.meta_data.copy_dictionary(in_d1.meta_data.get_dictionary())
 
         # set pattern for this plugin and the shape
         out_d1.set_current_pattern_name("VOLUME_XZ")
