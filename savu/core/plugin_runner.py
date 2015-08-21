@@ -71,10 +71,10 @@ class PluginRunner(object):
         #*** temporary fix!!!
         plugins = []
         temp = {}
-        temp['name'] = "nxtomo_loader"
-        temp['id'] = 'savu.plugins.nxtomo_loader'
+        temp['name'] = "nxfluo_loader"
+        temp['id'] = 'savu.plugins.nxfluo_loader'
         temp['data'] = {}
-        temp['loader_params'] = {'calibration_path': '/home/clb02321/DAWN_stable/Savu/test_data/LaB6_calibration_output.nxs'}
+#        temp['loader_params'] = {'calibration_path': '/home/clb02321/DAWN_stable/Savu/test_data/LaB6_calibration_output.nxs'}
         plugins.append(temp)
 #        plugins.append(experiment.info["plugin_list"][0])
 ##        temp = {}
