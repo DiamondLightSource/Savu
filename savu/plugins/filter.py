@@ -80,6 +80,7 @@ class Filter(Plugin):
                       data.__class__)
         raise NotImplementedError("filter_frame needs to be implemented")
 
+
     @logmethod
     def process(self, exp, transport, params):
         """

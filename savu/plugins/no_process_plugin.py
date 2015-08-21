@@ -13,54 +13,35 @@
 # limitations under the License.
 
 """
-.. module:: Timeseries_field_corrections
+.. module:: no_process_plugin
    :platform: Unix
-   :synopsis: A Plugin to apply a simple dark and flatfield correction to some
-       raw timeseries data
-
-.. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
+   :synopsis: Plugin to test loading and saving without processing 
+   
+.. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
-
-from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.plugin import Plugin
-from savu.core.utils import logmethod
-
-import numpy as np
-
 from savu.plugins.utils import register_plugin
+from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 
 @register_plugin
-class TimeseriesFieldCorrections(Plugin, CpuPlugin):
+class NoProcessPlugin(Plugin, CpuPlugin):
     """
-    A Plugin to apply a simple dark and flatfield correction to some
-    raw timeseries data    
+    The base class from which all plugins should inherit.
     :param in_datasets: Create a list of the dataset(s) to process. Default: [].
     :param out_datasets: Create a list of the dataset(s) to process. Default: [].
-
     """
 
     def __init__(self):
-        super(TimeseriesFieldCorrections,
-              self).__init__("TimeseriesFieldCorrections")
-              
-              
-    def correction(self, data, dark, flat, params):
+        super(NoProcessPlugin, self).__init__("NoProcessPlugin")
 
-        dark = np.tile(dark, (data.shape[0], 1))
-        flat = np.tile(flat, (data.shape[0], 1))
-        data = (data-dark)/flat  # flat = (flat-dark) already calculated for efficiency
-        return data
-              
-
-    @logmethod
     def process(self, exp, transport, params):
-        """
-        """
         [in_data, out_data] = self.get_data_objs_list()
-        transport.timeseries_field_correction(self, in_data, out_data, 
-                                              exp.meta_data, params)
+        
+        slice_list = in_data[0].get_slice_list()
+        for sl in slice_list:
+            out_data[0].data[sl] = in_data[0].data[sl]
 
 
     def setup(self, experiment):
@@ -69,7 +50,6 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         plugin.  This method is called before the process method in the plugin
         chain.  
         """
-
         chunk_size = self.get_max_frames()
         expInfo = experiment.meta_data
 
@@ -95,10 +75,11 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         out_d1 = experiment.create_data_object("out_data", out_data_list[0]) 
         out_d1.copy_patterns(in_d1.get_patterns())
         out_d1.meta_data.copy_dictionary(in_d1.meta_data.get_dictionary())
-
+        out_d1.data = in_d1.data
+         
         # set pattern for this plugin and the shape
         out_d1.set_current_pattern_name("SINOGRAM")
-        out_d1.set_shape(out_d1.remove_dark_and_flat(in_d1))
+        out_d1.set_shape(in_d1.get_shape())
         # set frame chunk
         out_d1.set_nFrames(chunk_size)
 

@@ -122,12 +122,32 @@ class Pattern(object):
             raise Exception(("Error: The Data class does not contain an \
                         instance of ", self.get_current_pattern_name()))
 
+
+    def get_slice_directions(self):
+        slice_dir = self.get_patterns()[self.get_current_pattern_name()]['slice_dir']
+        return self.non_negative_directions(slice_dir)
+
+
+    def get_core_directions(self):
+        core_dir = self.get_patterns()[self.get_current_pattern_name()]['core_dir']
+        return self.non_negative_directions(core_dir)
+        
+
+    def non_negative_directions(self, ddirs):
+        nDims = len(self.get_shape())
+        index = [i for i in range(len(ddirs)) if ddirs[i] < 0]
+        list_ddirs = list(ddirs)
+        for i in index:
+            list_ddirs[i] = nDims + ddirs[i]
+        index = tuple(list_ddirs)
+        return index
+
             
     def set_nFrames(self, nFrames):
         self.meta_data.set_meta_data("nFrames", nFrames)
         
         
-    def get_nFrames(self, nFrames):
+    def get_nFrames(self):
         self.meta_data.get_meta_data("nFrames")
 
 
