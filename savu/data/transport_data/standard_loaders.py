@@ -130,7 +130,7 @@ class FluorescenceLoaders(object):
         data_obj = exp.index["in_data"]["fluo"]
         mData = data_obj.meta_data # the application meta data
         
-        data_obj.backing_file = h5py.File(exp.info["data_file"], 'r')
+        data_obj.backing_file = h5py.File(exp.meta_data.get_meta_data("data_file"), 'r')
         mData.set_meta_data("backing_file", data_obj.backing_file)
         logging.debug("Creating file '%s' '%s'", 'fluo_entry', data_obj.backing_file.filename)
         # now lets extract the fluo entry so we can figure out our geometries!
@@ -234,7 +234,7 @@ class STXMLoaders(object):
         """
         # set up the file handles
         data_obj = exp.index["in_data"]["stxm"]
-        data_obj.backing_file = h5py.File(exp.info["data_file"], 'r')
+        data_obj.backing_file = h5py.File(exp.meta_data.get_meta_data("data_file"), 'r')
         exp.meta_data.set_meta_data("backing_file", data_obj.backing_file)
         logging.debug("Creating file '%s' '%s'", 'stxm_entry', data_obj.backing_file.filename)
         # now lets extract the fluo entry so we can figure out our geometries!
@@ -335,7 +335,7 @@ class XRDLoaders(object):
         """
         # set up the file handles
         data_obj = exp.index["in_data"]["xrd"]
-        data_obj.backing_file = h5py.File(exp.info["data_file"], 'r')
+        data_obj.backing_file = h5py.File(exp.meta_data.get_meta_data("data_file"), 'r')
         exp.meta_data.set_meta_data("backing_file", data_obj.backing_file)
         logging.debug("Creating file '%s' '%s'", 'xrd_entry', data_obj.backing_file.filename)
         # now lets extract the fluo entry so we can figure out our geometries!
