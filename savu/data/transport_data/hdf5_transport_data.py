@@ -92,27 +92,27 @@ class Hdf5TransportData(object):
 
     def get_slice_list(self):
             
-        print self.get_patterns()
-        #[self.get_current_pattern_name()]
-            
         # frame_type = SINOGRAM/PROJECTION       
         it = np.nditer(self.data, flags=['multi_index'])
-#        core_directions = self.
-#        dirs_to_remove = list(data.core_directions[frame_type])
-#        dirs_to_remove.sort(reverse=True)
-#        for direction in dirs_to_remove:
-#            it.remove_axis(direction)
-#        mapping_list = range(len(it.multi_index))
-#        dirs_to_remove.sort()
-#        for direction in dirs_to_remove:
-#            mapping_list.insert(direction, -1)
-#        mapping_array = np.array(mapping_list)
-#        slice_list = []
-#        while not it.finished:
-#            tup = it.multi_index + (slice(None),)
-#            slice_list.append(tuple(np.array(tup)[mapping_array]))
-#            it.iternext()
-        #return slice_list
+        print self.data.shape   
+        
+        dirs_to_remove = list(self.get_core_directions())
+        print dirs_to_remove
+        dirs_to_remove.sort(reverse=True)
+        for direction in dirs_to_remove:
+            it.remove_axis(direction)
+        mapping_list = range(len(it.multi_index))
+        dirs_to_remove.sort()
+        for direction in dirs_to_remove:
+            mapping_list.insert(direction, -1)
+        mapping_array = np.array(mapping_list)
+        slice_list = []
+        while not it.finished:
+            tup = it.multi_index + (slice(None),)
+            slice_list.append(tuple(np.array(tup)[mapping_array]))
+            it.iternext()
+        print slice_list()
+       #return slice_list
 
 
 class SliceAvailableWrapper(object):
