@@ -102,6 +102,8 @@ class TomographyLoaders(object):
             in_data.data = SliceAlwaysAvailableWrapper(in_data.data)
             
 
+#AARON DIT: I will refactor the following code in the future. At the moment it is massively redundant.
+
 class FluorescenceLoaders(object):
     """
     This class is called from a fluorescence loader to use a standard loader. It 
@@ -111,7 +113,7 @@ class FluorescenceLoaders(object):
     
     def __init__(self, exp):
         self.loader_setup(exp)
-        self.load_from_nx_fluo(exp)
+
 
     def loader_setup(self, exp):
         
@@ -216,7 +218,6 @@ class STXMLoaders(object):
     
     def __init__(self, exp):
         self.loader_setup(exp)
-        self.load_from_nx_stxm(exp)
 
     def loader_setup(self, exp):
         
@@ -263,7 +264,7 @@ class STXMLoaders(object):
                     motors.append(data_obj.backing_file[stxm_entry.name+'/data/'+stxm_entry['data'].attrs["axes"][ii]])
                     mData.set_meta_data("is_tomo",True)
                     motor_type.append('rotation')
-                    logging.debug("STXM reader: '%s' '%s'", "Is a tomo scan")
+                    logging.debug("STXM reader: '%s' ", "Is a tomo scan")
                 elif (stxm_entry['data/'+stxm_entry['data'].attrs["axes"][ii]].attrs['transformation_type']=="translation"):# look for translations too!
                     cts+=1# increase the order of the map
                     #what axes are these? Would be good to have for hte pattern stuff
@@ -317,7 +318,6 @@ class XRDLoaders(object):
     
     def __init__(self, exp, params):
         self.loader_setup(exp)
-        self.load_from_nx_xrd(exp)
         self.parameters = params
 
     def loader_setup(self, exp):
@@ -417,3 +417,5 @@ class XRDLoaders(object):
         beam.set_meta_data("incident_wavelength", calibrationfile['/entry/calibration_sample/beam/incident_wavelength'])
         mData.set_meta_data("x_pixel_size", calibrationfile['/entry/instrument/detector/x_pixel_size'])
         mData.set_meta_data("detector_orientation", calibrationfile['/entry/instrument/detector/detector_orientation'])
+
+

@@ -22,6 +22,9 @@
 
 """
 
+# The following is the start of a really dirty hack to get a multimodal dataset in. This is not how it should be done, but is just to get things moving for now.
+#It will be replaced when the code is refactored. Aaron.
+# PS. Sorry Mark and Nic for making the pretty thing ugly....
 from savu.core.utils import logmethod
 from savu.plugins.base_loader import BaseLoader
 import savu.data.transport_data.standard_loaders as sLoader
@@ -30,20 +33,21 @@ from savu.plugins.utils import register_plugin
 
 
 @register_plugin
-class NxxrdLoader(BaseLoader):
+class MmLoader(BaseLoader):
     """
-    A class to load tomography data from an NXxrd file
-        
+    A class to load tomography data from an NXTomo file
     :param calibration_path: path to the calibration file. Default: "../../test_data/LaB6_calibration_output.nxs"
-
     """
             
-    def __init__(self, name='NxxrdLoader'):
-        super(NxxrdLoader, self).__init__(name)
+    def __init__(self, name='MmLoader'):
+        super(MmLoader, self).__init__(name)
         
         
     @logmethod
     def setup(self, experiment):
-        loader = sLoader.XRDLoaders(experiment, self.parameters)
-        loader.load_from_nx_xrd(experiment)
-        
+        loader1 = sLoader.FluorescenceLoaders(experiment)
+        loader1.load_from_nx_fluo(experiment)
+        loader2 = sLoader.XRDLoaders(experiment, self.parameters)
+        loader2.load_from_nx_xrd(experiment)
+        loader3 = sLoader.STXMLoaders(experiment)
+        loader3.load_from_nx_stxm(experiment)
