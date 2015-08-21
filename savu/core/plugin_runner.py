@@ -135,13 +135,14 @@ class PluginRunner(object):
             data_names = plugin_dict["data"][index]
         except KeyError:
             data_names = None
-                                 
+
         try:
             if data_names[0] in "all":
                 data_names = self.set_all_datasets(exp, name)                                                                    
         except IndexError:
             pass
-                        
+
+        
         if len(data_names) is not nDatasets:
             if len(exp.index["in_data"]) is 1:
                 data_names = [exp.index["in_data"].keys()[0]]
