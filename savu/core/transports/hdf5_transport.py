@@ -172,19 +172,18 @@ class Hdf5Transport(TransportMechanism):
     
     @logmethod
     def timeseries_field_correction(self, plugin, in_data, out_data, expInfo, params):
-#   
-#        in_data = in_data[0]
-#        out_data = out_data[0]
-#
-#        dark = in_data.meta_data.get_meta_data("dark")
-#        flat = in_data.meta_data.get_meta_data("flat")   
-#   
-#        process_slice_list = in_data.get_slice_list_per_process(expInfo, plugin)
-#   
-#        for sl in process_slice_list:
-#            out_data.data[sl] = plugin.correction(in_data.get_frame_raw([sl]), 
-#                                                dark[sl,:], flat[sl,:], params)
-        pass
+   
+        in_data = in_data[0]
+        out_data = out_data[0]
+
+        dark = in_data.meta_data.get_meta_data("dark")
+        flat = in_data.meta_data.get_meta_data("flat")   
+   
+        process_slice_list = in_data.get_slice_list_per_process(expInfo)
+   
+        for sl in process_slice_list:
+            out_data.data[sl] = plugin.correction(in_data.get_frame_raw([sl]), 
+                                                dark[sl,:], flat[sl,:], params)
 
             
     @logmethod

@@ -82,7 +82,7 @@ class PluginRunner(object):
         self.transport_run_plugin_list(experiment)
         
         print "Sorry for the wait..."
-        print "You will be happy to know that you processing has now completed."
+        print "You will be happy to know that your processing has now completed."
         print "Please have a nice day."
 
     def plugin_loader(self, experiment, plugin_dict, flag = False):                     
@@ -145,6 +145,7 @@ class PluginRunner(object):
         if len(data_names) is not nDatasets:
             if len(exp.index["in_data"]) is 1:
                 data_names = [exp.index["in_data"].keys()[0]]
+#            elif len(data_names) > nDatasets:               
             else:
                 raise Exception(errorMsg)
 

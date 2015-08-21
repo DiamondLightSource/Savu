@@ -169,6 +169,8 @@ class Hdf5TransportData(object):
     
     def get_grouped_slice_list(self):
         max_frames = self.get_nFrames()
+        max_frames = (1 if max_frames is None else max_frames)
+
         sl = self.get_slice_list()
         if sl is None:
 #            raise Exception("data type %s does not support slicing in the "
@@ -181,12 +183,13 @@ class Hdf5TransportData(object):
         return gsl
 
 
-    def get_slice_list_per_process(self, expInfo, plugin):
+    def get_slice_list_per_process(self, expInfo):
         processes = expInfo.get_meta_data("processes")
+        process = expInfo.get_meta_data("process")
         slice_list = self.get_grouped_slice_list()
         
         frame_index = np.arange(len(slice_list))
-        frames = np.array_split(frame_index, processes)[plugin]
+        frames = np.array_split(frame_index, processes)[process]
         return slice_list[frames[0]:frames[-1]+1]
     
     
