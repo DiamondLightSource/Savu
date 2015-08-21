@@ -60,8 +60,8 @@ class TomographyLoaders(object):
     def loader_setup(self, exp):
         
         base_classes = [ds.Raw]
-        exp.info["base_classes"] = base_classes
         data_obj = exp.create_data_object("in_data", "tomo", base_classes)
+        data_obj.meta_data.set_meta_data("base_classes", base_classes)
                 
         data_obj.add_pattern("PROJECTION", core_dir = (1, 2), slice_dir = (0,))
         data_obj.add_pattern("SINOGRAM", core_dir = (0, -1), slice_dir = (1,))
@@ -74,24 +74,26 @@ class TomographyLoaders(object):
         :param path: The full path of the NeXus file to load.
         :type path: str
         """
-        
+                
         data_obj = exp.index["in_data"]["tomo"]
+        objInfo = data_obj.meta_data
+        expInfo = exp.meta_data
 
-        data_obj.backing_file = h5py.File(exp.info["data_file"], 'r')
-        exp.meta_data.set_meta_data("backing_file", data_obj.backing_file)
+        data_obj.backing_file = h5py.File(expInfo.get_meta_data("data_file"), 'r')
+        objInfo.set_meta_data("backing_file", data_obj.backing_file)
         logging.debug("Creating file '%s' '%s'", 'tomo_entry', data_obj.backing_file.filename)
         
         data_obj.data = data_obj.backing_file['entry1/tomo_entry/instrument/detector/data']
         data_obj.set_image_key(data_obj.backing_file\
                         ['entry1/tomo_entry/instrument/detector/image_key'])
                         
-        exp.meta_data.set_meta_data("image_key", data_obj.get_image_key())
+        objInfo.set_meta_data("image_key", data_obj.get_image_key())
         
         rotation_angle = data_obj.backing_file['entry1/tomo_entry/sample/rotation_angle']
-        exp.meta_data.set_meta_data("rotation_angle", rotation_angle[exp.info["image_key"]==0,...])
+        objInfo.set_meta_data("rotation_angle", rotation_angle[(objInfo.get_meta_data("image_key"))==0,...])
 
         control = data_obj.backing_file['entry1/tomo_entry/control/data']
-        exp.meta_data.set_meta_data("control", control[...])
+        objInfo.set_meta_data("control", control[...])
 
         data_obj.set_shape(data_obj.data.shape)
         
@@ -114,8 +116,8 @@ class FluorescenceLoaders(object):
     def loader_setup(self, exp):
         
         base_classes = [ds.Raw]
-        exp.info["base_classes"] = base_classes
         data_obj = exp.create_data_object("in_data", "fluo", base_classes)
+        data_obj.meta_data.set_meta_data("base_classes", base_classes)
 
     def load_from_nx_fluo(self, exp):
         """
@@ -126,8 +128,10 @@ class FluorescenceLoaders(object):
         """
         # set up the file handles
         data_obj = exp.index["in_data"]["fluo"]
+        mData = data_obj.meta_data
+        
         data_obj.backing_file = h5py.File(exp.info["data_file"], 'r')
-        exp.meta_data.set_meta_data("backing_file", data_obj.backing_file)
+        mData.set_meta_data("backing_file", data_obj.backing_file)
         logging.debug("Creating file '%s' '%s'", 'fluo_entry', data_obj.backing_file.filename)
         # now lets extract the fluo entry so we can figure out our geometries!
         finder = _NXAppFinder()
@@ -217,8 +221,9 @@ class STXMLoaders(object):
     def loader_setup(self, exp):
         
         base_classes = [ds.Raw]
-        exp.info["base_classes"] = base_classes
         data_obj = exp.create_data_object("in_data", "stxm", base_classes)
+        data_obj.meta_data.set_meta_data("base_classes", base_classes)
+
 
     def load_from_nx_stxm(self, exp):
         """
@@ -306,17 +311,19 @@ class XRDLoaders(object):
     This class is called from an XRD loader to use a standard loader. It 
     deals with loading of the data for different formats (e.g. hdf5,...)
     A.D Parsons 17th August 2015
-    """
     
-    def __init__(self, exp):
+    """    
+    
+    def __init__(self, exp, params):
         self.loader_setup(exp)
         self.load_from_nx_xrd(exp)
+        self.parameters = params
 
     def loader_setup(self, exp):
         
         base_classes = [ds.Raw]
-        exp.info["base_classes"] = base_classes
         data_obj = exp.create_data_object("in_data", "xrd", base_classes)
+        data_obj.meta_data.set_meta_data("base_classes", base_classes)
 
     def load_from_nx_xrd(self, exp):
         """
@@ -400,7 +407,7 @@ class XRDLoaders(object):
             data_obj.add_pattern("SINOGRAM", core_dir = (rotation,projdir[-1]), slice_dir = projdir[:-1])#rotation and fast axis
         
         # now to load the calibration file
-        calibrationfile = h5py.File(exp.info["loader_params"]['calibration_path'], 'r')
+        calibrationfile = h5py.File(self.parameters['calibration_path'], 'r')
         
         exp.meta_data.set_meta_data("beam_center_x", calibrationfile['/entry/instrument/detector/beam_center_x'])
         exp.meta_data.set_meta_data("beam_center_y", calibrationfile['/entry/instrument/detector/beam_center_y'])

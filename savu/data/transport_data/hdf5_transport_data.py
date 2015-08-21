@@ -40,13 +40,14 @@ class Hdf5TransportData(object):
     
     def load_data(self, plugin_runner, exp):
 
-        final_plugin = exp.info["plugin_list"][-1]
+        plugin_list = exp.meta_data.plugin_list.plugin_list
+        final_plugin = plugin_list[-1]
         saver_plugin = plugin_runner.load_plugin(final_plugin["id"])
 
         logging.debug("generating all output files")
         out_data_objects = []
         count = 0
-        for plugin_dict in exp.info["plugin_list"][1:-1]:
+        for plugin_dict in plugin_list[1:-1]:
             
             plugin_id = plugin_dict["id"]
             logging.debug("Loading plugin %s", plugin_id)
@@ -65,17 +66,18 @@ class Hdf5TransportData(object):
 
     
     def set_filenames(self, exp, plugin, plugin_id, count):
-        exp.info["filename"] = {}
-        exp.info["group_name"] = {}
+        expInfo = exp.meta_data
+        expInfo.set_meta_data("filename", {})
+        expInfo.set_meta_data("group_name", {})
         for key in exp.index["out_data"].keys():
-            filename = os.path.join(exp.info["out_path"],"%s%02i_%s" % \
-                                    (os.path.basename(exp.meta_data.dict["process_file"]),
+            filename = os.path.join(expInfo.get_meta_data("out_path"),"%s%02i_%s" % \
+                                    (os.path.basename(expInfo.get_meta_data("process_file")),
                                     count, plugin_id))
             filename = filename + "_" + key + ".h5"
             group_name = "%i-%s" % (count, plugin.name)
             logging.debug("Creating output file %s", filename)
-            exp.info["filename"][key] = filename
-            exp.info["group_name"][key] = group_name
+            expInfo.set_meta_data(["filename", key], filename)
+            expInfo.set_meta_data(["group_name", key], group_name)
 
         
     def save_data(self):
@@ -86,6 +88,31 @@ class Hdf5TransportData(object):
             logging.debug("Completing file %s",self.backing_file.filename)
             self.backing_file.close()
             self.backing_file = None
+
+
+    def get_slice_list(self):
+            
+        print self.get_patterns()
+        #[self.get_current_pattern_name()]
+            
+        # frame_type = SINOGRAM/PROJECTION       
+        it = np.nditer(self.data, flags=['multi_index'])
+#        core_directions = self.
+#        dirs_to_remove = list(data.core_directions[frame_type])
+#        dirs_to_remove.sort(reverse=True)
+#        for direction in dirs_to_remove:
+#            it.remove_axis(direction)
+#        mapping_list = range(len(it.multi_index))
+#        dirs_to_remove.sort()
+#        for direction in dirs_to_remove:
+#            mapping_list.insert(direction, -1)
+#        mapping_array = np.array(mapping_list)
+#        slice_list = []
+#        while not it.finished:
+#            tup = it.multi_index + (slice(None),)
+#            slice_list.append(tuple(np.array(tup)[mapping_array]))
+#            it.iternext()
+        #return slice_list
 
 
 class SliceAvailableWrapper(object):

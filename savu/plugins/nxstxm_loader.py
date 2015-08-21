@@ -26,6 +26,10 @@ from savu.core.utils import logmethod
 from savu.plugins.base_loader import BaseLoader
 import savu.data.transport_data.standard_loaders as sLoader
 
+from savu.plugins.utils import register_plugin
+
+
+@register_plugin
 class NxstxmLoader(BaseLoader):
     """
     A class to load tomography data from an NXFluo file

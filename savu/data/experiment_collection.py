@@ -22,6 +22,7 @@
 
 """
 
+from savu.data.plugin_list import PluginList
 from savu.data.data_structures import Data
 from savu.data.meta_data import MetaData
 
@@ -34,11 +35,18 @@ class Experiment(object):
    
     def __init__(self, options):
         self.meta_data = MetaData(options)
-        self.info = self.meta_data.dict 
+        self.meta_data_setup(options["process_file"])
         self.index = {"in_data": {}, "out_data": {}}
-        
+  
 
-    def create_data_object(self, dtype, name, bases=None): 
+    def meta_data_setup(self, process_file):
+        self.meta_data.load_experiment_collection()
+        self.meta_data.plugin_list = PluginList()
+        self.meta_data.plugin_list.populate_plugin_list(process_file)
+        self.meta_data.set_meta_data("plugin_objects", {})
+
+
+    def create_data_object(self, dtype, name, bases=None):
         transport_data = self.get_transport_data()
         self.index[dtype][name] = Data(self.import_class(transport_data))
         if bases is not None:
@@ -47,13 +55,13 @@ class Experiment(object):
         
 
     def get_transport_data(self):
-        transport_data = "savu.data.transport_data." + self.info["transport"] \
-                            + "_transport_data"
+        transport_data = "savu.data.transport_data." + \
+            self.meta_data.get_meta_data("transport") + "_transport_data"
         return transport_data
   
 
     def load_experiment_collection(self):
-        transport_collection = self.info["transport"] + "_experiment"                    
+        transport_collection = self.meta_data.get_meta_data("transport") + "_experiment"                    
         class_name = ''.join(x.capitalize() for x in transport_collection.split('_'))
         self.add_base(globals()[class_name])
         

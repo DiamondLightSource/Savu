@@ -24,7 +24,7 @@ class Content(object):
         print self.plugin_list.get_string()
 
     def save(self, filename):
-        self.plugin_list.save_list_to_file(filename)
+        self.plugin_list.save_plugin_list(filename)
 
     def modify(self, element, subelement, value):
         data_elements = self.plugin_list.plugin_list[element-1]['data']
@@ -91,7 +91,7 @@ def _mod(content, arg):
         content.modify(int(element), subelement, value)
         content.display()
     except:
-        print("Sorry i can't process the argument '%s'" % (arg))
+        print("Sorry I can't process the argument '%s'" % (arg))
     return content
 
 
@@ -108,7 +108,7 @@ def _add(content, arg):
             print("Sorry the plugin %s is not in my list, pick one form list" %
                   (name))
     except:
-        print("Sorry i can't process the argument '%s'" % (arg))
+        print("Sorry I can't process the argument '%s'" % (arg))
     return content
 
 

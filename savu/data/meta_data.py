@@ -22,7 +22,6 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
-from savu.data.plugin_list import PluginList
 
 class MetaData(object):
     """
@@ -31,17 +30,9 @@ class MetaData(object):
     PluginList.
     """
    
-    def __init__(self, options):
-        self.dict = options
-        self.set_up_dict()
-        self.load_experiment_collection()
-        self.plugin_list = PluginList()
-        self.plugin_list.populate_plugin_list(options["process_file"])
-
-
-    def set_up_dict(self):
-        self.set_meta_data("plugin_objects", {})
-
+    def __init__(self, options={}):
+        self.dict = options.copy()
+        
 
     def load_experiment_collection(self):
         transport_collection = self.dict["transport"] + "_experiment"
@@ -55,15 +46,34 @@ class MetaData(object):
         
 
     def set_meta_data(self, name, value):
-        self.dict[name] = value
-    
+        if type(name) is not list:
+            self.dict[name] = value
+        else:
+            temp = self.dict
+            for key in name[:-1]:
+                try:
+                    temp = temp[key]
+                except KeyError:
+                    temp[key] = {}
+            temp[name[-1]] = value
+            
 
     def get_meta_data(self, name):
-        return self.dict[name]        
-    
+        if type(name) is not list:
+            return self.dict[name]     
+        else:
+            temp = self.dict
+            for key in name:
+                temp = temp[key]
+            return temp
+            
     
     def set_plugin_objects(self, name, objs):
         self.dict["plugin_objects"][name] = objs
+
+
+    def copy_dictionary(self, new_dict):
+        self.dict = new_dict.copy()
 
     
     def get_dictionary(self):

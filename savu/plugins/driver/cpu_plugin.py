@@ -31,9 +31,10 @@ class CpuPlugin(object):
         super(CpuPlugin, self).__init__()
 
     def run_plugin(self, exp, transport):
-            
-        processes = exp.info["processes"]
-        process = exp.info["process"]
+        
+        expInfo = exp.meta_data
+        processes = expInfo.get_meta_data("processes")
+        process = expInfo.get_meta_data("process")
         
         count = 0
         cpu_processes = []

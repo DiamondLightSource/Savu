@@ -27,50 +27,63 @@ import logging
 
 import numpy as np
 
+from savu.data.meta_data import MetaData
+
 
 class Pattern(object):
 
     def __init__(self):
-        self.name = None
-        self.nFrames = 1
-        self.pattern_list = []
-        self.set_available_patterns()
+        self.meta_data_setup()
+
         
+    def meta_data_setup(self):
+        pattern_list = self.set_available_pattern_list()
+        self.meta_data.set_meta_data("pattern_list", pattern_list)
+        self.meta_data.set_meta_data("nFrames", 1)
+        self.meta_data.set_meta_data("name", None)
+        self.meta_data.set_meta_data("data_patterns", {})
+
         
-    def set_available_patterns(self):
-        self.pattern_list = ["SINOGRAM", 
-                             "PROJECTION",
-                             "VOLUME_YZ",
-                             "VOLUME_XZ", 
-                             "VOLUME_XY",
-                             "SPECTRUM"] # added spectrum adp 17th August
+    def set_available_pattern_list(self):
+        pattern_list = ["SINOGRAM", 
+                        "PROJECTION",
+                        "VOLUME_YZ",
+                        "VOLUME_XZ", 
+                        "VOLUME_XY",
+                        "SPECTRUM"] # added spectrum adp 17th August
+        return pattern_list                        
                 
+                
+    def get_available_pattern_list(self):
+        return self.meta_data.get_meta_data("pattern_list")
+        
     
     def add_pattern(self, dtype, **kargs):
-        if dtype in self.pattern_list:
-            if "data_patterns" not in self.info:
-                self.info["data_patterns"] = {}
-            
-            data_dirs = self.info["data_patterns"]
+        if dtype in self.get_available_pattern_list():            
+            data_dirs = self.get_patterns()
             data_dirs[dtype] = {}
             for args in kargs:
                 data_dirs[dtype][args] = kargs[args]
         else:
             errorMsg = "The data pattern " + dtype + " does not exist.  Please choose " + \
-            " from the following list: \n" + str(self.pattern_list)
+            " from the following list: \n" + str(self.get_available_pattern_list())
             sys.exit(errorMsg)
+
+
+    def get_patterns(self):
+        return self.meta_data.get_meta_data("data_patterns")
 
 
     def get_nPattern(self):
         temp = 1
-        slice_dir = self.info["data_patterns"][self.get_pattern_name()]["slice_dir"]
+        slice_dir = self.get_patterns()[self.get_pattern_name()]["slice_dir"]
         for tslice in slice_dir:
             temp *= self.get_shape()[tslice]
         return temp
         
         
     def copy_patterns(self, patterns):
-        self.info["data_patterns"] = patterns
+        self.meta_data.set_meta_data("data_patterns", patterns)
 
 
     def add_volume_patterns(self):
@@ -79,20 +92,21 @@ class Pattern(object):
         self.add_pattern("VOLUME_XY", core_dir = (0, 1), slice_dir = (2,))
         
     
-    def set_pattern_name(self, name):
-        self.name = name
+    def set_current_pattern_name(self, name):
+        self.meta_data.set_meta_data("name", name)
         self.check_data_type_exists()
                
 
-    def get_pattern_name(self):
-        if self.name is not None:
-            return self.name
+    def get_current_pattern_name(self):
+        name = self.meta_data.get_meta_data("name")
+        if name is not None:
+            return name
         else:
-            sys.exit("The pattern name has not been set.")
+            raise Exception("The pattern name has not been set.")
 
 
     def get_pattern_shape(self):
-        return self.get_sub_shape(self.get_pattern_name())
+        return self.get_sub_shape(self.get_current_pattern_name())
 
 
     def check_dimensions(self, indices, core_dir, slice_dir, nDims):
@@ -104,16 +118,17 @@ class Pattern(object):
 
 
     def check_data_type_exists(self):
-        if self.get_pattern_name() not in self.info["data_patterns"].keys():
-            raise Exception(("Error: The Data class does not contain an instance of ", self.get_pattern_name()))
+        if self.get_current_pattern_name() not in self.get_available_pattern_list():
+            raise Exception(("Error: The Data class does not contain an \
+                        instance of ", self.get_current_pattern_name()))
 
             
     def set_nFrames(self, nFrames):
-        self.nFrames = nFrames
+        self.meta_data.set_meta_data("nFrames", nFrames)
         
         
     def get_nFrames(self, nFrames):
-        return self.nFrames
+        self.meta_data.get_meta_data("nFrames")
 
 
     def get_frame(self, indices):
@@ -155,11 +170,11 @@ class Data(Pattern):
     """
 
     def __init__(self, transport):
+        self.meta_data = MetaData()
         super(Data, self).__init__()
         self.backing_file = None
         self.data = None
         self.add_base(transport)
-        self.info = {}
     
     
     def __deepcopy__(self, memo):
@@ -178,19 +193,19 @@ class Data(Pattern):
 
 
     def set_shape(self, shape):
-        self.info['shape'] = shape
+        self.meta_data.set_meta_data('shape', shape)
         
    
     def get_shape(self):
-        return self.info['shape']
+        return self.meta_data.get_meta_data('shape')
 
 
     def set_dist(self, dist):
-        self.info['dist'] = dist
+        self.meta_data.set_meta_data('dist', dist)
         
     
     def get_dist(self):
-        return self.info["dist"]
+        return self.meta_data.get_meta_data('dist')
 
         
     def remove_dark_and_flat(self, data):
@@ -257,8 +272,8 @@ class Raw(object):
         flat = flat - dark
         flat[flat == 0.0] = 1
 
-        self.info["dark"] = dark
-        self.info["flat"] = flat
+        self.meta_data.set_meta_data("dark", dark)
+        self.meta_data.set_meta_data("flat", flat)
         
         
     def get_frame_raw(self, indices):

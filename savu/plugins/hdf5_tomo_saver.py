@@ -26,6 +26,10 @@ from savu.core.utils import logmethod
 from savu.plugins.base_saver import BaseSaver
 import savu.data.transport_data.standard_savers as sSaver
 
+from savu.plugins.utils import register_plugin
+
+
+@register_plugin
 class Hdf5TomoSaver(BaseSaver):
     """
     A class to save tomography data to a hdf5 file
@@ -37,5 +41,5 @@ class Hdf5TomoSaver(BaseSaver):
         
     @logmethod
     def setup(self, experiment):
-        saver = sSaver.TomographySavers(experiment)
+        saver = sSaver.TomographySavers(experiment, self.parameters)
         return saver.save_to_hdf5(experiment)

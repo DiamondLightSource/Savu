@@ -24,6 +24,9 @@ import numpy as np
 
 
 def get_slice_list(data, frame_type):
+        
+    # frame_type = SINOGRAM/PROJECTION
+    
     if frame_type in data.core_directions.keys():
         it = np.nditer(data.data, flags=['multi_index'])
         dirs_to_remove = list(data.core_directions[frame_type])

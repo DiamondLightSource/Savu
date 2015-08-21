@@ -37,9 +37,7 @@ class Hdf5Transport(TransportMechanism):
     
 
     def transport_control_setup(self, options):
-        print("Are we calling this?")
         processes = options["process_names"].split(',')
-
 
         if len(processes) is 1:
             options["mpi"] = False
@@ -109,15 +107,21 @@ class Hdf5Transport(TransportMechanism):
     def transport_run_plugin_list(self, exp):
         """Runs a chain of plugins
         """        
+        
+        plugin_list = exp.meta_data.plugin_list.plugin_list
         #*** check base saver is to hdf5 file?
         in_data = exp.index["in_data"][exp.index["in_data"].keys()[0]]
         out_data_objects = in_data.load_data(self, exp)
 
         # clear all out_data objects in experiment dictionary
-        exp.index["out_data"] = {}        
+        exp.index["out_data"] = {}
+        exp.index["in_data"] = {}
+        
+        # re-run the loader since it now contains incorrect data
+        self.plugin_loader(exp, plugin_list[0], True)
         
         count = 0
-        for plugin_dict in exp.info["plugin_list"][1:-1]:            
+        for plugin_dict in plugin_list[1:-1]:            
             
             logging.debug("Loading plugin %s", plugin_dict['id'])
             plugin_id = plugin_dict["id"]
@@ -130,12 +134,12 @@ class Hdf5Transport(TransportMechanism):
                       
             plugin.set_parameters(plugin_dict['data'])
             plugin.set_data_objs_list(exp)
-
+            
             logging.debug("Starting processing  plugin %s", plugin_id)
             plugin.run_plugin(exp, self)
             logging.debug("Completed processing plugin %s", plugin_id)
 
-
+            # close any files that are no longer required
             for out_objs in exp.info["plugin_datasets"]["out_data"]:
                 if out_objs in exp.index["in_data"].keys():
                     exp.index["in_data"][out_objs].save_data()
@@ -211,6 +215,7 @@ class Hdf5Transport(TransportMechanism):
     def filter_chunk(self, slice_list, in_data, out_data):
         logging.debug("Running filter._filter_chunk")
         
+        slice_list = get_grouped_slice_list(in_data[0], self.get_filter_frame_type(), self.get_max_frames())
                 
         
         in_data = in_data[0]

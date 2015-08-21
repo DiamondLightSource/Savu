@@ -43,7 +43,7 @@ class PluginList(object):
 
     def populate_plugin_list(self, filename):
         plugin_file = h5py.File(filename, 'r')
-        plugin_group = plugin_file['entry/process']
+        plugin_group = plugin_file['entry/plugin']
         self.plugin_list = []
         for key in plugin_group.keys():
             plugin = {}
