@@ -134,21 +134,22 @@ class Hdf5Transport(TransportMechanism):
                       
             plugin.set_parameters(plugin_dict['data'])
             plugin.set_data_objs_list(exp)
-            
             logging.debug("Starting processing  plugin %s", plugin_id)
             plugin.run_plugin(exp, self)
             logging.debug("Completed processing plugin %s", plugin_id)
 
             # close any files that are no longer required
-            for out_objs in exp.info["plugin_datasets"]["out_data"]:
+            for out_objs in exp.meta_data.get_meta_data(["plugin_datasets", "out_data"]):
                 if out_objs in exp.index["in_data"].keys():
                     exp.index["in_data"][out_objs].save_data()
+
 
             for key in exp.index["out_data"]:
                 exp.index["in_data"][key] = \
                                copy.deepcopy(exp.index["out_data"][key])
 
-            if exp.info['mpi'] is True: # do i need this block?
+
+            if exp.meta_data.get_meta_data('mpi') is True: # do i need this block?
                 MPI.COMM_WORLD.Barrier()
                 logging.debug("Blocking till all processes complete")
                 
@@ -165,26 +166,26 @@ class Hdf5Transport(TransportMechanism):
 #
         for key in exp.index["in_data"].keys():
             exp.index["in_data"][key].save_data()
+        
+        return 
     
     
     @logmethod
-    def timeseries_field_correction(self, plugin, in_data, out_data, info, params):
-   
-        in_data = in_data[0]
-        out_data = out_data[0]
+    def timeseries_field_correction(self, plugin, in_data, out_data, expInfo, params):
+#   
+#        in_data = in_data[0]
+#        out_data = out_data[0]
+#
+#        dark = in_data.meta_data.get_meta_data("dark")
+#        flat = in_data.meta_data.get_meta_data("flat")   
+#   
+#        process_slice_list = in_data.get_slice_list_per_process(expInfo, plugin)
+#   
+#        for sl in process_slice_list:
+#            out_data.data[sl] = plugin.correction(in_data.get_frame_raw([sl]), 
+#                                                dark[sl,:], flat[sl,:], params)
+        pass
 
-        dark = in_data.info["dark"]
-        flat = in_data.info["flat"]   
-   
-        # get a list of all the frames
-        output_frames = np.arange(in_data.get_shape()[1])
-        frames = np.array_split(output_frames, 
-                                len(info["processes"]))[info["process"]]
-
-        for i in frames: 
-            out_data.data[out_data.get_index([i])] = plugin.correction(
-            in_data.get_frame_raw([i]), dark[i,:], flat[i,:], params)
-            
             
     @logmethod
     def reconstruction_setup(self, plugin, in_data, out_data, info, params):

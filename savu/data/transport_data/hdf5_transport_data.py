@@ -91,17 +91,14 @@ class Hdf5TransportData(object):
 
 
     def get_slice_list(self):
-            
-        # frame_type = SINOGRAM/PROJECTION       
-        it = np.nditer(self.data, flags=['multi_index'])
-        print self.data.shape   
         
+        it = np.nditer(self.data, flags=['multi_index'])
         dirs_to_remove = list(self.get_core_directions())
-        print dirs_to_remove
+        
         dirs_to_remove.sort(reverse=True)
         for direction in dirs_to_remove:
             it.remove_axis(direction)
-        mapping_list = range(len(it.multi_index))
+        mapping_list = range(len(it.multi_index))        
         dirs_to_remove.sort()
         for direction in dirs_to_remove:
             mapping_list.insert(direction, -1)
@@ -111,9 +108,88 @@ class Hdf5TransportData(object):
             tup = it.multi_index + (slice(None),)
             slice_list.append(tuple(np.array(tup)[mapping_array]))
             it.iternext()
-        print slice_list()
-       #return slice_list
+            
+        return slice_list
 
+    
+    def calc_step(self, slice_a, slice_b):
+        result = []
+        for i in range(len(slice_a)):
+            if slice_a[i] == slice_b[i]:
+                result.append(0)
+            else:
+                result.append(slice_b[i] - slice_a[i])
+        return result
+
+
+    def group_slice_list(self, slice_list, max_frames):
+        banked = []
+        batch = []
+        step = -1
+        for sl in slice_list:
+            if len(batch) == 0:
+                batch.append(sl)
+                step = -1
+            elif step == -1:
+                new_step = self.calc_step(batch[-1], sl)
+                # check stepping in 1 direction
+                if (np.array(new_step) > 0).sum() > 1:
+                    # we are stepping in multiple directions, end the batch
+                    banked.append((step, batch))
+                    batch = []
+                    batch.append(sl)
+                    step = -1
+                else:
+                    batch.append(sl)
+                    step = new_step
+            else:
+                new_step = self.calc_step(batch[-1], sl)
+                if new_step == step:
+                    batch.append(sl)
+                else:
+                    banked.append((step, batch))
+                    batch = []
+                    batch.append(sl)
+                    step = -1
+        banked.append((step, batch))
+    
+        # now combine the groups into single slices
+        grouped = []
+        for step, group in banked:
+            working_slice = list(group[0])
+            step_dir = step.index(max(step))
+            start = group[0][step_dir]
+            stop = group[-1][step_dir]
+            for i in range(start, stop, max_frames):
+                new_slice = slice(i, i+max_frames, step[step_dir])
+                working_slice[step_dir] = new_slice
+                grouped.append(tuple(working_slice))
+        return grouped
+    
+    
+    def get_grouped_slice_list(self):
+        max_frames = self.get_nFrames()
+        sl = self.get_slice_list()
+        if sl is None:
+#            raise Exception("data type %s does not support slicing in the "
+#                            "%s direction" % (type(self.data), frame_type))
+            raise Exception("Data type", self.get_current_pattern_name(), 
+                            "does not support slicing in directions", 
+                            self.get_slice_directions())
+            
+        gsl = self.group_slice_list(sl, max_frames)
+        return gsl
+
+
+    def get_slice_list_per_process(self, expInfo, plugin):
+        processes = expInfo.get_meta_data("processes")
+        slice_list = self.get_grouped_slice_list()
+        
+        frame_index = np.arange(len(slice_list))
+        frames = np.array_split(frame_index, processes)[plugin]
+        return slice_list[frames[0]:frames[-1]+1]
+    
+    
 
 class SliceAvailableWrapper(object):
     """
@@ -132,7 +208,11 @@ class SliceAvailableWrapper(object):
         self.avail = avail
         self.data = data
 
-
+        
+    def __deepcopy__(self, memo):
+        return self
+        
+        
     def __getitem__(self, item):
         if self.avail[item].all():
             return np.squeeze(self.data[item])

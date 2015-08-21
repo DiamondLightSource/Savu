@@ -80,7 +80,10 @@ class PluginRunner(object):
         expInfo.set_transport_meta_data() #*** do I need this?
         # divert to transport process and run process list
         self.transport_run_plugin_list(experiment)
-
+        
+        print "Sorry for the wait..."
+        print "You will be happy to know that you processing has now completed."
+        print "Please have a nice day."
 
     def plugin_loader(self, experiment, plugin_dict, flag = False):                     
         plugin = self.load_plugin(plugin_dict['id'])      
@@ -166,7 +169,7 @@ class PluginRunner(object):
         first_plugin = plugin_list[0]
         end_plugin = plugin_list[-1]
 
-        plugin = self.load_plugin(first_plugin['id'])           
+        plugin = self.load_plugin(first_plugin['id'])     
         # check the first plugin is a loader
         if not isinstance(plugin, BaseLoader):
             sys.exit("The first plugin in the process must inherit from BaseLoader")

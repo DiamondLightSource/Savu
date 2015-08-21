@@ -147,7 +147,7 @@ class Pattern(object):
         self.meta_data.set_meta_data("nFrames", nFrames)
         
         
-    def get_nFrames(self, nFrames):
+    def get_nFrames(self):
         self.meta_data.get_meta_data("nFrames")
 
 

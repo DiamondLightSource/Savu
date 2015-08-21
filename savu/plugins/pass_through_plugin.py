@@ -16,9 +16,7 @@
 .. module:: plugin
    :platform: Unix
    :synopsis: Base class for all plugins used by Savu
-
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
-
 """
 
 import logging
@@ -43,7 +41,6 @@ class PassThroughPlugin(Plugin):
         """
         get_filter_frame_type tells the pass through plugin which direction to
         slice through the data before passing it on
-
          :returns:  the savu.structure core_direction describing the frames to
                     filter
         """
@@ -53,7 +50,6 @@ class PassThroughPlugin(Plugin):
         """
         get_max_frames tells the pass through plugin how many frames to give to 
         the plugins process method at a time, the default is a stack of 8
-
          :returns:  The number of frames to process per call to process (8)
         """
         return 8
@@ -73,7 +69,6 @@ class PassThroughPlugin(Plugin):
     def process_frame(self, data):
         """
         Should be overloaded by filter classes extending this one
-
         :param data: The data to filter
         :type data: ndarray
         :returns:  The filtered image
@@ -86,7 +81,6 @@ class PassThroughPlugin(Plugin):
         """
         This method is called after the plugin has been created by the
         pipeline framework
-
         :param data: The input data object.
         :type data: savu.data.structures
         :param data: The output data object
@@ -102,7 +96,6 @@ class PassThroughPlugin(Plugin):
     def required_data_type(self):
         """
         The input for this plugin is Data
-
         :returns:  Data
         """
         return Data
@@ -110,7 +103,6 @@ class PassThroughPlugin(Plugin):
     def output_data_type(self):
         """
         The output of this plugin is Data
-
         :returns:  Data
         """
         return PassThrough
@@ -119,7 +111,6 @@ class PassThroughPlugin(Plugin):
         """
         The input DistArray distribution for this plugin is "nbn"
         (i.e. block in the second dimension)
-
         :returns:  DistArray distribution
         """
         return "bnn"
@@ -128,7 +119,7 @@ class PassThroughPlugin(Plugin):
         """
         The output DistArray distribution for this plugin is "nbn"
         (i.e. block in the second dimension)
-
         :returns:  DistArray distribution
         """
         return "bnn"
+        
