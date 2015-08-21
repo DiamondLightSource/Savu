@@ -128,28 +128,28 @@ class FluorescenceLoaders(object):
         """
         # set up the file handles
         data_obj = exp.index["in_data"]["fluo"]
-        mData = data_obj.meta_data
+        mData = data_obj.meta_data # the application meta data
         
-        data_obj.backing_file = h5py.File(exp.info["data_file"], 'r')
+        data_obj.backing_file = h5py.File(exp.meta_data.get_meta_data("data_file"), 'r')
         mData.set_meta_data("backing_file", data_obj.backing_file)
         logging.debug("Creating file '%s' '%s'", 'fluo_entry', data_obj.backing_file.filename)
         # now lets extract the fluo entry so we can figure out our geometries!
         finder = _NXAppFinder()
         fluo_entry = finder.get_NXapp(data_obj.backing_file, 'entry1/')[0]
-        
+        beam = exp.meta_data
         #lets get the data out
         data_obj.data = data_obj.backing_file[fluo_entry.name+'/instrument/fluorescence/data']
         data_obj.set_shape(data_obj.data.shape) # and set its shape
         # and the energy axis
         energy = data_obj.backing_file[fluo_entry.name+'/data/energy']
         mono_energy = data_obj.backing_file[fluo_entry.name+'/instrument/monochromator/energy']
-        exp.meta_data.set_meta_data("energy", energy)
-        exp.meta_data.set_meta_data("mono_energy", mono_energy)
+        mData.set_meta_data("energy", energy)
+        beam.set_meta_data("mono_energy", mono_energy) # global since it is to do with the beam
         #and get the mono energy
         
         # now lets extract the map, if there is one!
-        exp.meta_data.set_meta_data("is_tomo",False) # to begin with
-        exp.meta_data.set_meta_data("is_map",False) # will change to the order of the map
+        mData.set_meta_data("is_tomo",False) # to begin with
+        mData.set_meta_data("is_map",False) # will change to the order of the map
         cts = 0
         motors = []
         motor_type = []
@@ -158,7 +158,7 @@ class FluorescenceLoaders(object):
                 if (fluo_entry['data/'+fluo_entry['data'].attrs["axes"][ii]].attrs['transformation_type']=="rotation"):# find the rotation axis
                     #what axis is this? Could we store it?
                     motors.append(data_obj.backing_file[fluo_entry.name+'/data/'+fluo_entry['data'].attrs["axes"][ii]])
-                    exp.meta_data.set_meta_data("is_tomo",True)
+                    mData.set_meta_data("is_tomo",True)
                     motor_type.append('rotation')
                     logging.debug("Fluo reader: '%s'", "Is a tomo scan")
                 elif (fluo_entry['data/'+fluo_entry['data'].attrs["axes"][ii]].attrs['transformation_type']=="translation"):# look for translations too!
@@ -169,10 +169,10 @@ class FluorescenceLoaders(object):
         else:
             logging.debug("Fluo reader: '%s' '%s'", "No maps found!")
             pass # no map
-        exp.meta_data.set_meta_data("motors", motors)
-        exp.meta_data.set_meta_data("motor_type", motor_type)
+        mData.set_meta_data("motors", motors)
+        mData.set_meta_data("motor_type", motor_type)
         if (cts):
-            exp.meta_data.set_meta_data("is_map",cts) # set the map counts to be the number of linear scan dimensions
+            mData.set_meta_data("is_map",cts) # set the map counts to be the number of linear scan dimensions
             # chuck to meta
         else:
             logging.debug("Fluo reader: '%s' '%s'", "No translations found!")
@@ -180,7 +180,7 @@ class FluorescenceLoaders(object):
         
         #Now the beam fluctuations
         control = data_obj.backing_file[fluo_entry.name+'/monitor/data']# the ion chamber "normalisation"
-        exp.meta_data.set_meta_data("control", control)
+        beam.set_meta_data("control", control) # this is global since it is to do with the beam
 
         for key in exp.index['in_data'].keys():
             in_data = exp.index["in_data"][key]
@@ -200,12 +200,12 @@ class FluorescenceLoaders(object):
         projdir = tuple(projection)
         projsli = tuple(projection_slice)
         data_obj.add_pattern("SPECTRUM", core_dir = (-1,), slice_dir = data_obj.data.shape[:-1])
-        if exp.meta_data.get_meta_data("is_map"):
+        if mData.get_meta_data("is_map"):
             data_obj.add_pattern("PROJECTION", core_dir = projdir, slice_dir = projsli)# two translation axes
-        if exp.meta_data.get_meta_data("is_tomo"):
+        if mData.get_meta_data("is_tomo"):
             data_obj.add_pattern("SINOGRAM", core_dir = (rotation,projdir[-1]), slice_dir = projdir[:-1])#rotation and fast axis
-            data_obj.add_pattern("VOLUME_XZ", core_dir = (rotation,projdir[-1]), slice_dir = projdir[:-1])
-        
+
+
 
 class STXMLoaders(object):
     """
@@ -234,24 +234,25 @@ class STXMLoaders(object):
         """
         # set up the file handles
         data_obj = exp.index["in_data"]["stxm"]
-        data_obj.backing_file = h5py.File(exp.info["data_file"], 'r')
+        data_obj.backing_file = h5py.File(exp.meta_data.get_meta_data("data_file"), 'r')
         exp.meta_data.set_meta_data("backing_file", data_obj.backing_file)
         logging.debug("Creating file '%s' '%s'", 'stxm_entry', data_obj.backing_file.filename)
         # now lets extract the fluo entry so we can figure out our geometries!
         finder = _NXAppFinder(application="NXstxm")
         stxm_entry = finder.get_NXapp(data_obj.backing_file, 'entry1/')[0]
-        
+        mData = data_obj.meta_data
+        beam = exp.meta_data
         #lets get the data out
         data_obj.data = data_obj.backing_file[stxm_entry.name+'/instrument/detector/data']
         data_obj.set_shape(data_obj.data.shape) # and set its shape
         # and the energy axis
         mono_energy = data_obj.backing_file[stxm_entry.name+'/instrument/monochromator/energy']
-        exp.meta_data.set_meta_data("mono_energy", mono_energy)
+        beam.set_meta_data("mono_energy", mono_energy)
         #and get the mono energy
         
         # now lets extract the map, if there is one!
-        exp.meta_data.set_meta_data("is_tomo",False) # to begin with
-        exp.meta_data.set_meta_data("is_map",False) # will change to the order of the map
+        mData.set_meta_data("is_tomo",False) # to begin with
+        mData.set_meta_data("is_map",False) # will change to the order of the map
         cts = 0
         motors = []
         motor_type = []
@@ -260,7 +261,7 @@ class STXMLoaders(object):
                 if (stxm_entry['data/'+stxm_entry['data'].attrs["axes"][ii]].attrs['transformation_type']=="rotation"):# find the rotation axis
                     #what axis is this? Could we store it?
                     motors.append(data_obj.backing_file[stxm_entry.name+'/data/'+stxm_entry['data'].attrs["axes"][ii]])
-                    exp.meta_data.set_meta_data("is_tomo",True)
+                    mData.set_meta_data("is_tomo",True)
                     motor_type.append('rotation')
                     logging.debug("STXM reader: '%s' '%s'", "Is a tomo scan")
                 elif (stxm_entry['data/'+stxm_entry['data'].attrs["axes"][ii]].attrs['transformation_type']=="translation"):# look for translations too!
@@ -271,10 +272,10 @@ class STXMLoaders(object):
         else:
             logging.debug("STXM reader: '%s' '%s'", "No maps found!")
             pass # no map
-        exp.meta_data.set_meta_data("motors", motors)
-        exp.meta_data.set_meta_data("motor_type", motor_type)
+        mData.set_meta_data("motors", motors)
+        mData.set_meta_data("motor_type", motor_type)
         if (cts):
-            exp.meta_data.set_meta_data("is_map",cts) # set the map counts to be the number of linear scan dimensions
+            mData.set_meta_data("is_map",cts) # set the map counts to be the number of linear scan dimensions
             # chuck to meta
         else:
             logging.debug("STXM reader: '%s' '%s'", "No translations found!")
@@ -282,7 +283,7 @@ class STXMLoaders(object):
         
         #Now the beam fluctuations
         control = data_obj.backing_file[stxm_entry.name+'/monitor/data']# the ion chamber "normalisation"
-        exp.meta_data.set_meta_data("control", control)
+        beam.set_meta_data("control", control)
 
         for key in exp.index['in_data'].keys():
             in_data = exp.index["in_data"][key]
@@ -301,9 +302,9 @@ class STXMLoaders(object):
                 rotation = item # we will assume one rotation for now to save my headache
         projdir = tuple(projection)
         projsli = tuple(projection_slice)
-        if exp.meta_data.get_meta_data("is_map"):
+        if mData.get_meta_data("is_map"):
             data_obj.add_pattern("PROJECTION", core_dir = projdir, slice_dir = projsli)# two translation axes
-        if exp.meta_data.get_meta_data("is_tomo"):
+        if mData.get_meta_data("is_tomo"):
             data_obj.add_pattern("SINOGRAM", core_dir = (rotation,projdir[-1]), slice_dir = projdir[:-1])#rotation and fast axis
             
 class XRDLoaders(object):
@@ -334,24 +335,25 @@ class XRDLoaders(object):
         """
         # set up the file handles
         data_obj = exp.index["in_data"]["xrd"]
-        data_obj.backing_file = h5py.File(exp.info["data_file"], 'r')
+        data_obj.backing_file = h5py.File(exp.meta_data.get_meta_data("data_file"), 'r')
         exp.meta_data.set_meta_data("backing_file", data_obj.backing_file)
         logging.debug("Creating file '%s' '%s'", 'xrd_entry', data_obj.backing_file.filename)
         # now lets extract the fluo entry so we can figure out our geometries!
         finder = _NXAppFinder(application="NXxrd")
         xrd_entry = finder.get_NXapp(data_obj.backing_file, 'entry1/')[0]
-        
+        mData = data_obj.meta_data
+        beam = exp.meta_data
         #lets get the data out
         data_obj.data = data_obj.backing_file[xrd_entry.name+'/instrument/detector/data']
         data_obj.set_shape(data_obj.data.shape) # and set its shape
         # and the energy axis
         mono_energy = data_obj.backing_file[xrd_entry.name+'/instrument/monochromator/energy']
-        exp.meta_data.set_meta_data("mono_energy", mono_energy)
+        beam.set_meta_data("mono_energy", mono_energy)
         #and get the mono energy
         
         # now lets extract the map, if there is one!
-        exp.meta_data.set_meta_data("is_tomo",False) # to begin with
-        exp.meta_data.set_meta_data("is_map",False) # will change to the order of the map
+        mData.set_meta_data("is_tomo",False) # to begin with
+        mData.set_meta_data("is_map",False) # will change to the order of the map
         cts = 0
         motors = []
         motor_type = []
@@ -360,7 +362,7 @@ class XRDLoaders(object):
                 if (xrd_entry['data/'+xrd_entry['data'].attrs["axes"][ii]].attrs['transformation_type']=="rotation"):# find the rotation axis
                     #what axis is this? Could we store it?
                     motors.append(data_obj.backing_file[xrd_entry.name+'/data/'+xrd_entry['data'].attrs["axes"][ii]])
-                    exp.meta_data.set_meta_data("is_tomo",True)
+                    beam.set_meta_data("is_tomo",True)
                     motor_type.append('rotation')
                     logging.debug("xrd reader: '%s'", "Is a tomo scan")
                 elif (xrd_entry['data/'+xrd_entry['data'].attrs["axes"][ii]].attrs['transformation_type']=="translation"):# look for translations too!
@@ -371,10 +373,10 @@ class XRDLoaders(object):
         else:
             logging.debug("xrd reader: '%s' '%s'", "No maps found!")
             pass # no map
-        exp.meta_data.set_meta_data("motors", motors)
-        exp.meta_data.set_meta_data("motor_type", motor_type)
+        mData.set_meta_data("motors", motors)
+        mData.set_meta_data("motor_type", motor_type)
         if (cts):
-            exp.meta_data.set_meta_data("is_map",cts) # set the map counts to be the number of linear scan dimensions
+            mData.set_meta_data("is_map",cts) # set the map counts to be the number of linear scan dimensions
             # chuck to meta
         else:
             logging.debug("xrd reader: '%s' '%s'", "No translations found!")
@@ -382,7 +384,7 @@ class XRDLoaders(object):
         
         #Now the beam fluctuations
         control = data_obj.backing_file[xrd_entry.name+'/monitor/data']# the ion chamber "normalisation"
-        exp.meta_data.set_meta_data("control", control)
+        beam.set_meta_data("control", control)
 
         for key in exp.index['in_data'].keys():
             in_data = exp.index["in_data"][key]
@@ -401,19 +403,17 @@ class XRDLoaders(object):
                 rotation = item # we will assume one rotation for now to save my headache
         projdir = tuple(projection)
         projsli = tuple(projection_slice)
-        if exp.meta_data.get_meta_data("is_map"):
+        if mData.get_meta_data("is_map"):
             data_obj.add_pattern("PROJECTION", core_dir = projdir, slice_dir = projsli)# two translation axes
-        if exp.meta_data.get_meta_data("is_tomo"):
+        if mData.get_meta_data("is_tomo"):
             data_obj.add_pattern("SINOGRAM", core_dir = (rotation,projdir[-1]), slice_dir = projdir[:-1])#rotation and fast axis
         
         # now to load the calibration file
         calibrationfile = h5py.File(self.parameters['calibration_path'], 'r')
         
-        exp.meta_data.set_meta_data("beam_center_x", calibrationfile['/entry/instrument/detector/beam_center_x'])
-        exp.meta_data.set_meta_data("beam_center_y", calibrationfile['/entry/instrument/detector/beam_center_y'])
-        exp.meta_data.set_meta_data("distance", calibrationfile['/entry/instrument/detector/distance'])
-        exp.meta_data.set_meta_data("incident_wavelength", calibrationfile['/entry/calibration_sample/beam/incident_wavelength'])
-        exp.meta_data.set_meta_data("x_pixel_size", calibrationfile['/entry/instrument/detector/x_pixel_size'])
-        exp.meta_data.set_meta_data("detector_orientation", calibrationfile['/entry/instrument/detector/detector_orientation'])
-
-        
+        mData.set_meta_data("beam_center_x", calibrationfile['/entry/instrument/detector/beam_center_x'])
+        mData.set_meta_data("beam_center_y", calibrationfile['/entry/instrument/detector/beam_center_y'])
+        mData.set_meta_data("distance", calibrationfile['/entry/instrument/detector/distance'])
+        beam.set_meta_data("incident_wavelength", calibrationfile['/entry/calibration_sample/beam/incident_wavelength'])
+        mData.set_meta_data("x_pixel_size", calibrationfile['/entry/instrument/detector/x_pixel_size'])
+        mData.set_meta_data("detector_orientation", calibrationfile['/entry/instrument/detector/detector_orientation'])
