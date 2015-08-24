@@ -43,42 +43,11 @@ class Experiment(object):
         self.meta_data.load_experiment_collection()
         self.meta_data.plugin_list = PluginList()
         self.meta_data.plugin_list.populate_plugin_list(process_file)
-        self.meta_data.set_meta_data("plugin_objects", {})
 
 
-    def create_data_object(self, dtype, name, bases=None):
-        transport_data = self.get_transport_data()
-        self.index[dtype][name] = Data(self.import_class(transport_data))
-        if bases is not None:
-            self.index[dtype][name].add_base_classes(bases)
+    def create_data_object(self, dtype, name, bases=[]):
+        self.index[dtype][name] = Data()
+        data_obj = self.index[dtype][name]
+        bases.append(data_obj.get_transport_data(self.meta_data.get_meta_data("transport")))
+        data_obj.add_base_classes(bases)        
         return self.index[dtype][name]
-        
-
-    def get_transport_data(self):
-        transport_data = "savu.data.transport_data." + \
-            self.meta_data.get_meta_data("transport") + "_transport_data"
-        return transport_data
-  
-
-    def load_experiment_collection(self):
-        transport_collection = self.meta_data.get_meta_data("transport") + "_experiment"                    
-        class_name = ''.join(x.capitalize() for x in transport_collection.split('_'))
-        self.add_base(globals()[class_name])
-        
-    
-    def import_class(self, class_name):
-        name = class_name
-        mod = __import__(name)
-        components = name.split('.')
-        for comp in components[1:]:
-            mod = getattr(mod, comp)
-        temp = name.split('.')[-1]
-        module2class = ''.join(x.capitalize() for x in temp.split('_'))
-        return getattr(mod, module2class.split('.')[-1])
-        
-        
-    def add_base(self, transport):
-        cls = self.__class__
-        self.__class__ = cls.__class__(cls.__name__, (cls, transport), {})
-
-            

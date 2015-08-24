@@ -47,9 +47,8 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
               
               
     def correction(self, data, dark, flat, params):
-
-        dark = np.tile(dark, (data.shape[0], 1))
-        flat = np.tile(flat, (data.shape[0], 1))
+        dark = np.tile(dark, (data.shape[0], 1, 1))
+        flat = np.tile(flat, (data.shape[0], 1, 1))
         data = (data-dark)/flat  # flat = (flat-dark) already calculated for efficiency
         return data
               
@@ -98,7 +97,7 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
 
         # set pattern for this plugin and the shape
         out_d1.set_current_pattern_name("SINOGRAM")
-        out_d1.set_shape(out_d1.remove_dark_and_flat(in_d1))
+        out_d1.set_shape(in_d1.remove_dark_and_flat())
         # set frame chunk
         out_d1.set_nFrames(chunk_size)
 

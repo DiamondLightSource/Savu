@@ -60,14 +60,21 @@ class BaseRecon(Plugin):
         """        
         [in_data, out_data] = self.get_data_objs_list()
 
-        if "centre_of_rotation" not in exp.info:
+        try:
+            centre_of_rotation = in_data[0].meta_data.get_meta_data("centre_of_rotation")
+        except KeyError:
             centre_of_rotation = np.ones(in_data[0].get_nPattern())
             centre_of_rotation = centre_of_rotation * self.parameters['center_of_rotation']
-            exp.meta_data.set_meta_data("centre_of_rotation", centre_of_rotation)
+            in_data[0].meta_data.set_meta_data("centre_of_rotation", centre_of_rotation)            
             
-        transport.reconstruction_setup(self, in_data, out_data, exp.info, params)
+        transport.reconstruction_setup(self, in_data, out_data, exp.meta_data, params)
 
-
+            reconstruction = \
+                plugin.reconstruct(sinogram, frame_centre_of_rotation, angles,
+                                 (output.data.shape[0], output.data.shape[2]),
+                                 (output.data.shape[0]/2,
+                                  output.data.shape[2]/2))
+                                  
     def setup(self, experiment):
         chunk_size = self.get_max_frames()
         expInfo = experiment.meta_data

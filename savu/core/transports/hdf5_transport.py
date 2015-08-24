@@ -177,40 +177,37 @@ class Hdf5Transport(TransportMechanism):
         out_data = out_data[0]
 
         dark = in_data.meta_data.get_meta_data("dark")
-        flat = in_data.meta_data.get_meta_data("flat")   
-   
-        process_slice_list = in_data.get_slice_list_per_process(expInfo)
-   
-        for sl in process_slice_list:
-            out_data.data[sl] = plugin.correction(in_data.get_frame_raw([sl]), 
-                                                dark[sl,:], flat[sl,:], params)
+        flat = in_data.meta_data.get_meta_data("flat")
+
+        [in_slice_list, frame_list] = in_data.get_slice_list_per_process(expInfo)
+        [out_slice_list, frame_list] = out_data.get_slice_list_per_process(expInfo)
+        
+        for count in range(len(in_slice_list)):
+            idx = frame_list[count]
+            out_data.data[out_slice_list[count]] = \
+                      plugin.correction(in_data.data[in_slice_list[count]], 
+                                        dark[idx,:], flat[idx,:], params)
 
             
     @logmethod
-    def reconstruction_setup(self, plugin, in_data, out_data, info, params):
+    def reconstruction_setup(self, plugin, in_data, out_data, expInfo, params):
 
         in_data = in_data[0]
         out_data = out_data[0]
 
-        processes = info["processes"]
-        process = info["process"]
-        
-        centre_of_rotations = np.array_split(info["centre_of_rotation"], len(processes))[process]
-        sinogram_frames = np.arange(in_data.get_nPattern())
-        frames = np.array_split(sinogram_frames, len(processes))[process]
+        [slice_list, frame_list] = in_data.get_slice_list_per_process(expInfo)
+        print in_data.meta_data.get_dictionary().keys()
+        cor = in_data.meta_data.get_meta_data("centre_of_rotation")[frame_list]
 
-            
         count = 0
-        for i in frames:
-            out_data.data[out_data.get_index([i])] = \
-                plugin.reconstruct(in_data.get_frame([i]),
-                                   centre_of_rotations[count],
-                                   out_data.get_pattern_shape(), 
-                                   params)
+        for sl in slice_list:
+            out_data.data[sl] = plugin.reconstruct(in_data.data[sl], 
+                                                   cor[count]),
+
             count += 1
-            plugin.count+=1
+            plugin.count += 1
             print plugin.count
-    
+                
 
     def filter_chunk(self, slice_list, in_data, out_data):
         logging.debug("Running filter._filter_chunk")

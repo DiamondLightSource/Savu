@@ -52,7 +52,8 @@ class BaseAstraRecon(BaseRecon):
        
 
     def pre_process(self, exp):
-        angles = exp.info["rotation_angle"]
+        [in_data, out_data] = self.get_data_objs_list()
+        angles = in_data[0].meta_data.get_meta_data("rotation_angle")
         params = [angles]
         return params
         

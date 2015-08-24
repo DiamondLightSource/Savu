@@ -26,6 +26,7 @@ import logging
 
 import numpy as np
 
+import savu.data.data_structures as ds
 from savu.core.utils import logmethod
 
 class Hdf5TransportData(object):
@@ -172,9 +173,11 @@ class Hdf5TransportData(object):
         max_frames = (1 if max_frames is None else max_frames)
 
         sl = self.get_slice_list()
+        
+        if isinstance(self, ds.TomoRaw):
+            sl = self.get_frame_raw(sl)
+        
         if sl is None:
-#            raise Exception("data type %s does not support slicing in the "
-#                            "%s direction" % (type(self.data), frame_type))
             raise Exception("Data type", self.get_current_pattern_name(), 
                             "does not support slicing in directions", 
                             self.get_slice_directions())
@@ -189,10 +192,9 @@ class Hdf5TransportData(object):
         slice_list = self.get_grouped_slice_list()
         
         frame_index = np.arange(len(slice_list))
-        frames = np.array_split(frame_index, processes)[process]
-        return slice_list[frames[0]:frames[-1]+1]
-    
-    
+        frames = np.array_split(frame_index, len(processes))[process]
+        return [ slice_list[frames[0]:frames[-1]+1], frame_index ]
+        
 
 class SliceAvailableWrapper(object):
     """
@@ -218,13 +220,15 @@ class SliceAvailableWrapper(object):
         
     def __getitem__(self, item):
         if self.avail[item].all():
-            return np.squeeze(self.data[item])
+            #return np.squeeze(self.data[item])
+            return self.data[item]
         else:
             return None
 
 
     def __setitem__(self, item, value):
-        self.data[item] = value.reshape(self.data[item].shape)
+        #self.data[item] = value.reshape(self.data[item].shape)
+        self.data[item] = value
         self.avail[item] = True
         return np.squeeze(self.data[item])
         

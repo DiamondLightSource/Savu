@@ -123,7 +123,7 @@ class PluginRunner(object):
 
     def set_all_datasets(self, expIndex, name):
         data_names = []
-        for key in expIndex[name].keys():
+        for key in expIndex["in_data"].keys():
             data_names.append(key)
         return data_names
         
@@ -141,7 +141,8 @@ class PluginRunner(object):
 
         names = ([names] if type(names) is not list else names)
         if len(names) is not nSets:
-            raise Exception(errorMsg)                
+            raise Exception(errorMsg)
+        return names
 
 
     def set_datasets(self, plugin, exp, plugin_dict):
@@ -151,23 +152,13 @@ class PluginRunner(object):
         in_names = ('all' if len(in_names) is 0 else in_names)
         out_names = (in_names if len(out_names) is 0 else out_names)
 
-        print in_names, out_names
-
-        self.check_nDatasets(exp.index, in_names, plugin_dict["id"],
-                             plugin.nInput_datasets(), "in_data")
-        self.check_nDatasets(exp.index, out_names, plugin_dict["id"],
-                             plugin.nOutput_datasets(), "out_data")
-
-
+        in_names = self.check_nDatasets(exp.index, in_names, plugin_dict["id"],
+                                        plugin.nInput_datasets(), "in_data")
+        out_names = self.check_nDatasets(exp.index, out_names, plugin_dict["id"],
+                                         plugin.nOutput_datasets(), "out_data")
         expInfo = exp.meta_data
- 
-#        if "plugin_datasets" not in expInfo.get_dictionary().keys():
-#            expInfo.set_meta_data("plugin_datasets",{})
-
         expInfo.set_meta_data(["plugin_datasets", "in_data"], in_names)
         expInfo.set_meta_data(["plugin_datasets", "out_data"], out_names)
-        print "in_data is ", expInfo.get_meta_data(["plugin_datasets", "in_data"])
-        print "out_data is ", expInfo.get_meta_data(["plugin_datasets", "out_data"])
 
 
     def check_loaders_and_savers(self, experiment, plugin_list):

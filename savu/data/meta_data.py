@@ -46,27 +46,31 @@ class MetaData(object):
         
     
     def set_meta_data(self, name, value):
-        maplist = (name if name is list else [name])
-        self.get_meta_data(maplist[:-1])[maplist[-1]] = value
+        maplist = (name if type(name) is list else [name])
+        self.get_meta_data(maplist[:-1], True)[maplist[-1]] = value
+        
     
-    def get_meta_data(self, maplist):
+    def get_meta_data(self, maplist, setFlag=False):
         if not maplist:
             return self.dict
         else:           
             function = lambda k, d: d[k]
-            maplist = (maplist if maplist is list else [maplist])
+            maplist = (maplist if type(maplist) is list else [maplist])
             it = iter(maplist)
             accum_value = self.dict
             for x in it:
-                try:
-                    accum_value = function(x, accum_value)
-                except KeyError:
-                    accum_value = {}
+                while True:
+                    try:
+                        accum_value = function(x, accum_value)
+                    except KeyError:
+                        if setFlag is True:
+                            accum_value[x] = {}
+                            continue
+                        else:
+                            errorStr = 'The metadata ' + str(maplist) + ' does not exist'
+                            raise KeyError(errorStr)
+                    break
             return accum_value
-            
-    
-    def set_plugin_objects(self, name, objs):
-        self.dict["plugin_objects"][name] = objs
 
 
     def copy_dictionary(self, new_dict):

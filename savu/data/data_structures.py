@@ -76,7 +76,7 @@ class Pattern(object):
 
     def get_nPattern(self):
         temp = 1
-        slice_dir = self.get_patterns()[self.get_pattern_name()]["slice_dir"]
+        slice_dir = self.get_patterns()[self.get_current_pattern_name()]["slice_dir"]
         for tslice in slice_dir:
             temp *= self.get_shape()[tslice]
         return temp
@@ -159,8 +159,8 @@ class Pattern(object):
     def get_index(self, indices):
         shape = self.get_shape()
         nDims = len(shape)      
-        name = self.get_pattern_name()
-        ddirs = self.info["data_patterns"]
+        name = self.get_current_pattern_name()
+        ddirs = self.meta_data.get_meta_data("data_patterns")
         core_dir = ddirs[name]["core_dir"]
         slice_dir = ddirs[name]["slice_dir"]
 
@@ -189,13 +189,28 @@ class Data(Pattern):
     at runtime and holds the data array.
     """
 
-    def __init__(self, transport):
+    def __init__(self):
         self.meta_data = MetaData()
         super(Data, self).__init__()
         self.backing_file = None
         self.data = None
-        self.add_base(transport)
     
+
+    def get_transport_data(self, transport): 
+        transport_data = "savu.data.transport_data." + transport + "_transport_data"
+        return self.import_class(transport_data)
+
+    
+    def import_class(self, class_name):
+        name = class_name
+        mod = __import__(name)
+        components = name.split('.')
+        for comp in components[1:]:
+            mod = getattr(mod, comp)
+        temp = name.split('.')[-1]
+        module2class = ''.join(x.capitalize() for x in temp.split('_'))
+        return getattr(mod, module2class.split('.')[-1])       
+        
     
     def __deepcopy__(self, memo):
         return self
@@ -228,24 +243,14 @@ class Data(Pattern):
         return self.meta_data.get_meta_data('dist')
 
         
-    def remove_dark_and_flat(self, data):
-        if data.get_image_key() is not None:
-            shape = data.get_shape()
-            image_key = data.get_image_key()
-            new_shape  = shape[0] - len(image_key[image_key != 0])
-            return (new_shape, shape[1], shape[2])
-        else:
-            logging.warn("Error in remove_dark_and_flat(): No image_key found")
-            shape = data.get_shape()
-            return (shape, shape[1], shape[2])#Mark Corrected 17th August
         
         
-        
-class Raw(object):
+class TomoRaw(object):
 
     def __init__(self):
         self.image_key = None
         self.image_key_slice = None
+        self.frame_list = []
 
 
     def set_image_key(self, image_key):
@@ -261,11 +266,16 @@ class Raw(object):
             return None
                         
                         
+    def set_frame_list(self, start, end):
+        self.frame_list = [start, end]
+        
+                        
     def set_image_key_slice(self):
         image_key_bool = self.get_image_key() == 0
         image_key_index = np.where(image_key_bool)[0]
         start = image_key_index[0]
         end = image_key_index[-1]
+        self.set_frame_list(start, end)
         self.image_key_slice = slice(start, end + 1, 1)
 
 
@@ -295,15 +305,35 @@ class Raw(object):
         self.meta_data.set_meta_data("dark", dark)
         self.meta_data.set_meta_data("flat", flat)
         
-        
-    def get_frame_raw(self, indices):
-        index = self.get_index(indices)
-        temp = []
-        for i in index:
-            temp.append(i)
-        direction = self.info["data_patterns"][self.get_pattern_name()]["core_dir"][0]
-        temp[direction] = self.get_image_key_slice()
-        return np.squeeze(self.data[tuple(temp)])
-        
+
+    def remove_dark_and_flat(self):
+        if self.get_image_key() is not None:
+            shape = self.get_shape()
+            image_key = self.get_image_key()
+            new_shape  = shape[0] - len(image_key[image_key != 0])
+            return (new_shape, shape[1], shape[2])
+        else:
+            logging.warn("Error in remove_dark_and_flat(): No image_key found")
+            shape = self.get_shape()
+            return (shape, shape[1], shape[2])#Mark Corrected 17th August
+            
+            
+    def get_frame_raw(self, slice_list):
+        pattern = self.get_current_pattern_name()
+        image_slice = self.get_image_key_slice()
+        new_slice_list = []
+        if pattern is "SINOGRAM":
+            for sl in slice_list:
+                sl = list(sl)
+                sl[0] = image_slice
+                sl = tuple(sl)
+                new_slice_list.append(sl)
+        elif pattern is "PROJECTION":            
+            new_slice_list = slice_list[self.frame_list[0]:self.frame_list[1]]
+        else:
+            raise Exception("The pattern", pattern, " is not recognized \
+                             by", self.__name__)
+
+        return new_slice_list
 
         

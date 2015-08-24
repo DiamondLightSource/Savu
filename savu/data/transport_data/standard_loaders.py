@@ -59,7 +59,7 @@ class TomographyLoaders(object):
 
     def loader_setup(self, exp):
         
-        base_classes = [ds.Raw]
+        base_classes = [ds.TomoRaw]
         data_obj = exp.create_data_object("in_data", "tomo", base_classes)
         data_obj.meta_data.set_meta_data("base_classes", base_classes)
                 
