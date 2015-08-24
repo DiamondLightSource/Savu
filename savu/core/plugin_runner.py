@@ -85,14 +85,12 @@ class PluginRunner(object):
         print "You will be happy to know that your processing has now completed."
         print "Please have a nice day."
 
+
     def plugin_loader(self, experiment, plugin_dict, flag = False):                     
         plugin = self.load_plugin(plugin_dict['id'])      
         
         if flag is False:
-             self.set_input_datasets(plugin, experiment, 
-                                         "in_datasets", plugin_dict)
-             self.set_output_datasets(plugin, experiment, 
-                                        "out_datasets", plugin_dict)
+             self.set_datasets(plugin, experiment, plugin_dict)
                                         
         plugin.set_parameters(plugin_dict['data'])
         plugin.setup(experiment)
@@ -114,56 +112,62 @@ class PluginRunner(object):
         exp.index["out_data"] = {}
         print "Plugin list check complete!"
          
-         
-    def set_input_datasets(self, plugin, exp, index, plugin_dict):
-        nData = plugin.nInput_datasets()
-        self.set_datasets(exp, index, "in_data", nData, plugin_dict)         
-         
-
-    def set_output_datasets(self, plugin, exp, index, plugin_dict):
-        nData = plugin.nOutput_datasets()
-        self.set_datasets(exp, index, "out_data", nData, plugin_dict)
-                                             
-                                             
-    def set_datasets(self, exp, index, name, nDatasets, plugin_dict):
-
-        errorMsg = "***ERROR: Broken plugin chain. \n Please name the " + \
-            str(nDatasets) + " " + name + " sets associated with the plugin " + \
-            plugin_dict['id'] + " in the process file."
-
+                                                                                          
+    def get_names(self, names):         
         try:
-            data_names = plugin_dict["data"][index]
+            data_names = names
         except KeyError:
-            data_names = None
+            data_names = []
+        return data_names
 
+
+    def set_all_datasets(self, expIndex, name):
+        data_names = []
+        for key in expIndex[name].keys():
+            data_names.append(key)
+        return data_names
+        
+        
+    def check_nDatasets(self, exp, names, plugin_id, nSets, dtype):
         try:
-            if data_names[0] in "all":
-                data_names = self.set_all_datasets(exp, name)                                                                    
+            if names[0] in "all":
+                names = self.set_all_datasets(exp, dtype)
         except IndexError:
             pass
-
         
-        if len(data_names) is not nDatasets:
-            if len(exp.index["in_data"]) is 1:
-                data_names = [exp.index["in_data"].keys()[0]]
-#            elif len(data_names) > nDatasets:               
-            else:
-                raise Exception(errorMsg)
+        errorMsg = "***ERROR: Broken plugin chain. \n Please name the " + \
+            str(nSets) + " " + dtype + " sets associated with the plugin " + \
+            plugin_id + " in the process file."
+
+        names = ([names] if type(names) is not list else names)
+        if len(names) is not nSets:
+            raise Exception(errorMsg)                
+
+
+    def set_datasets(self, plugin, exp, plugin_dict):
+        in_names = self.get_names(plugin_dict["data"]["in_datasets"])
+        out_names = self.get_names(plugin_dict["data"]["out_datasets"])
+
+        in_names = ('all' if len(in_names) is 0 else in_names)
+        out_names = (in_names if len(out_names) is 0 else out_names)
+
+        print in_names, out_names
+
+        self.check_nDatasets(exp.index, in_names, plugin_dict["id"],
+                             plugin.nInput_datasets(), "in_data")
+        self.check_nDatasets(exp.index, out_names, plugin_dict["id"],
+                             plugin.nOutput_datasets(), "out_data")
+
 
         expInfo = exp.meta_data
  
-        if "plugin_datasets" not in expInfo.get_dictionary().keys():
-            expInfo.set_meta_data("plugin_datasets",{})
+#        if "plugin_datasets" not in expInfo.get_dictionary().keys():
+#            expInfo.set_meta_data("plugin_datasets",{})
 
-        expInfo.set_meta_data(["plugin_datasets", name], data_names)
-        
-                    
-
-    def set_all_datasets(self, exp, name):
-        data_names = []
-        for key in exp.index[name].keys():
-            data_names.append(key)
-        return data_names
+        expInfo.set_meta_data(["plugin_datasets", "in_data"], in_names)
+        expInfo.set_meta_data(["plugin_datasets", "out_data"], out_names)
+        print "in_data is ", expInfo.get_meta_data(["plugin_datasets", "in_data"])
+        print "out_data is ", expInfo.get_meta_data(["plugin_datasets", "out_data"])
 
 
     def check_loaders_and_savers(self, experiment, plugin_list):

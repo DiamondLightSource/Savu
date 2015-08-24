@@ -44,28 +44,25 @@ class MetaData(object):
         cls = self.__class__
         self.__class__ = cls.__class__(cls.__name__, (cls, transport), {})
         
-
+    
     def set_meta_data(self, name, value):
-        if type(name) is not list:
-            self.dict[name] = value
-        else:
-            temp = self.dict
-            for key in name[:-1]:
+        maplist = (name if name is list else [name])
+        self.get_meta_data(maplist[:-1])[maplist[-1]] = value
+    
+    def get_meta_data(self, maplist):
+        if not maplist:
+            return self.dict
+        else:           
+            function = lambda k, d: d[k]
+            maplist = (maplist if maplist is list else [maplist])
+            it = iter(maplist)
+            accum_value = self.dict
+            for x in it:
                 try:
-                    temp = temp[key]
+                    accum_value = function(x, accum_value)
                 except KeyError:
-                    temp[key] = {}
-            temp[name[-1]] = value
-            
-
-    def get_meta_data(self, name):
-        if type(name) is not list:
-            return self.dict[name]     
-        else:
-            temp = self.dict
-            for key in name:
-                temp = temp[key]
-            return temp
+                    accum_value = {}
+            return accum_value
             
     
     def set_plugin_objects(self, name, objs):
