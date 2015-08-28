@@ -72,7 +72,6 @@ class Pattern(object):
     def get_patterns(self):
         return self.meta_data.get_meta_data("data_patterns")
 
-
     def get_nPattern(self):
         temp = 1
         slice_dir = self.get_patterns()[self.get_current_pattern_name()]["slice_dir"]
