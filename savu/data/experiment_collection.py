@@ -21,6 +21,8 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
+import os 
+import time
 
 from savu.data.plugin_list import PluginList
 from savu.data.data_structures import Data
@@ -46,8 +48,29 @@ class Experiment(object):
 
 
     def create_data_object(self, dtype, name, bases=[]):
-        self.index[dtype][name] = Data()
-        data_obj = self.index[dtype][name]
-        bases.append(data_obj.get_transport_data(self.meta_data.get_meta_data("transport")))
-        data_obj.add_base_classes(bases)        
+        try:
+            self.index[dtype][name]
+        except KeyError:            
+            self.index[dtype][name] = Data(name)
+            data_obj = self.index[dtype][name]
+            bases.append(data_obj.get_transport_data(self.meta_data.get_meta_data("transport")))
+            data_obj.add_base_classes(bases)        
         return self.index[dtype][name]
+
+
+    def set_nxs_filename(self):
+        name = self.index["in_data"].keys()[0]
+        filename = os.path.basename(self.index["in_data"][name].backing_file.filename)
+        filename = os.path.splitext(filename)[0]
+        filename = os.path.join(self.meta_data.get_meta_data("out_path"),
+         "%s_processed_%s.nxs" % (filename, time.strftime("%Y%m%d%H%M%S")))
+        self.meta_data.set_meta_data("nxs_filename", filename)
+        
+            
+    def clear_data_objects(self):
+        self.index["out_data"] = {}
+        self.index["in_data"] = {}
+
+
+    def clear_out_data_objects(self):
+        self.index["out_data"] = {}

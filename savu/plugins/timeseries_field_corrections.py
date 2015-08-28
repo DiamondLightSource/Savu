@@ -53,13 +53,33 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         return data
               
 
-    @logmethod
+#    @logmethod
+#    def process(self, exp, transport, params):
+#        """
+#        """
+#        in_data = self.get_data_objects(exp.index, "in_data")
+#        out_data = self.get_data_objects(exp.index, "out_data")
+#        transport.timeseries_field_correction(self, in_data, out_data, exp.meta_data, params)
+
+
     def process(self, exp, transport, params):
-        """
-        """
-        [in_data, out_data] = self.get_data_objs_list()
-        transport.timeseries_field_correction(self, in_data, out_data, 
-                                              exp.meta_data, params)
+        
+        in_data = self.get_data_objects(exp.index, "in_data")
+        out_data = self.get_data_objects(exp.index, "out_data")
+        transport.timeseries_field_correction(self, in_data, out_data, exp.meta_data, params)
+#
+#        in_data = in_data[0]
+#        out_data = out_data[0]
+#                
+#        print in_data.backing_file
+#        print out_data.backing_file                
+#                
+#        print "performing the processing"
+#        slice_list = in_data.get_slice_list()
+#        for sl in slice_list:
+#            temp = in_data.data[sl]
+#            out_data.data[sl] = temp
+
 
 
     def setup(self, experiment):
@@ -70,12 +90,11 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         """
 
         chunk_size = self.get_max_frames()
-        expInfo = experiment.meta_data
 
         #-------------------setup input datasets-------------------------
 
         # get a list of input dataset names required for this plugin
-        in_data_list = expInfo.get_meta_data(["plugin_datasets", "in_data"])
+        in_data_list = self.parameters["in_datasets"]
         # get all input dataset objects
         in_d1 = experiment.index["in_data"][in_data_list[0]]
         # set all input data patterns
@@ -88,12 +107,19 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         #------------------setup output datasets-------------------------
 
         # get a list of output dataset names created by this plugin
-        out_data_list = expInfo.get_meta_data(["plugin_datasets", "out_data"])
+        out_data_list = self.parameters["out_datasets"]
+        
         # create all out_data objects and associated patterns and meta_data
         # patterns can be copied, added or both
-        out_d1 = experiment.create_data_object("out_data", out_data_list[0]) 
+        out_d1 = experiment.create_data_object("out_data", out_data_list[0])
+        
         out_d1.copy_patterns(in_d1.get_patterns())
-        out_d1.meta_data.copy_dictionary(in_d1.meta_data.get_dictionary())
+        # copy the entire in_data dictionary (image_key, dark and flat will 
+        #be removed since out_data is no longer an instance of TomoRaw)
+        # If you do not want to copy the whole dictionary pass the key word
+        # argument copyKeys = [your list of keys to copy], or alternatively, 
+        # removeKeys = [your list of keys to remove]
+        out_d1.meta_data.copy_dictionary(in_d1.meta_data.get_dictionary(), rawFlag=True)
 
         # set pattern for this plugin and the shape
         out_d1.set_current_pattern_name("SINOGRAM")

@@ -59,3 +59,4 @@ class DenoiseBregmanFilter(Filter, CpuPlugin):
         isotropic = self.parameters['isotropic']
         return denoise_tv_bregman(data[0, ...], weight, max_iter=max_iter,
                                   eps=eps, isotropic=isotropic)
+        

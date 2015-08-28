@@ -58,7 +58,8 @@ class SimpleRecon(BaseRecon, CpuPlugin):
 
 
     def pre_process(self, exp):
-        centre = (exp.info["out_data"]["tomo"].get_pattern_shape)/2
+        out_data = self.get_data_objects(exp.index, "out_data")
+        centre = tuple((np.asarray(out_data[0].get_pattern_shape()))/2)
         params = [centre]
         return params
         

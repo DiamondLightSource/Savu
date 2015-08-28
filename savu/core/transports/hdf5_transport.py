@@ -102,91 +102,95 @@ class Hdf5Transport(TransportMechanism):
                             ' %(levelname)-6s %(message)s', datefmt='%H:%M:%S')
         logging.info("Starting the reconstruction pipeline process")
     
-    
 
     def transport_run_plugin_list(self, exp):
         """Runs a chain of plugins
         """        
-        
         plugin_list = exp.meta_data.plugin_list.plugin_list
-        #*** check base saver is to hdf5 file?
+        # run the loader plugin
+        self.plugin_loader(exp, plugin_list[0])
+        # create all output data_objects and backing files        
         in_data = exp.index["in_data"][exp.index["in_data"].keys()[0]]
         out_data_objects = in_data.load_data(self, exp)
 
         # clear all out_data objects in experiment dictionary
-        exp.index["out_data"] = {}
-        exp.index["in_data"] = {}
+        exp.clear_data_objects()
         
-        # re-run the loader since it now contains incorrect data
-        self.plugin_loader(exp, plugin_list[0], True)
+        print "running the plugins"
+        self.plugin_loader(exp, plugin_list[0])
         
-        count = 0
-        for plugin_dict in plugin_list[1:-1]:            
+        for i in range(1, len(plugin_list)-1):
+            print plugin_list[i]["id"]
             
-            logging.debug("Loading plugin %s", plugin_dict['id'])
-            plugin_id = plugin_dict["id"]
+            for key in out_data_objects[i-1]:
+                exp.index["out_data"][key] = out_data_objects[i-1][key]
 
-            plugin = self.load_plugin(plugin_id)
-            plugin.setup(exp)
-
-            for key in out_data_objects[count]:
-                exp.index["out_data"][key] = out_data_objects[count][key]
-                      
-            plugin.set_parameters(plugin_dict['data'])
-            plugin.set_data_objs_list(exp)
-            logging.debug("Starting processing  plugin %s", plugin_id)
+            plugin = self.plugin_loader(exp, plugin_list[i], pos=i)
             plugin.run_plugin(exp, self)
-            logging.debug("Completed processing plugin %s", plugin_id)
-
-            # close any files that are no longer required
-            for out_objs in exp.meta_data.get_meta_data(["plugin_datasets", "out_data"]):
-                if out_objs in exp.index["in_data"].keys():
-                    exp.index["in_data"][out_objs].save_data()
-
-
-            for key in exp.index["out_data"]:
-                exp.index["in_data"][key] = \
-                               copy.deepcopy(exp.index["out_data"][key])
 
 
             if exp.meta_data.get_meta_data('mpi') is True: # do i need this block?
                 MPI.COMM_WORLD.Barrier()
                 logging.debug("Blocking till all processes complete")
-                
-            count += 1    
- 
-#            if plugin == 0:
-#                cite_info = plugin.get_citation_information()
-#                if cite_info is not None:
-#                    plugin_list.add_plugin_citation(output_filename, count,
-#                                                      cite_info)
-#                group_name = "%i-%s" % (count, plugin.name)
-#                plugin_list.add_intermediate_data_link(output_filename,
-#                                                        output, group_name)
-#
+        
+            # close any files that are no longer required
+            for out_objs in plugin.parameters["out_datasets"]:
+                if out_objs in exp.index["in_data"].keys():
+                    exp.index["in_data"][out_objs].save_data()
+            
+            for key in exp.index["out_data"]:
+                exp.index["in_data"][key] = \
+                               copy.deepcopy(exp.index["out_data"][key])                               
+
+##            if plugin == 0:
+##                cite_info = plugin.get_citation_information()
+##                if cite_info is not None:
+##                    plugin_list.add_plugin_citation(output_filename, count,
+##                                                      cite_info)
+##                group_name = "%i-%s" % (count, plugin.name)
+##                plugin_list.add_intermediate_data_link(output_filename,
+##                                                        output, group_name)
+            exp.clear_out_data_objects()
+
+        # close all remaining files
         for key in exp.index["in_data"].keys():
             exp.index["in_data"][key].save_data()
         
         return 
-    
-    
+        
+        
     @logmethod
     def timeseries_field_correction(self, plugin, in_data, out_data, expInfo, params):
-   
+
         in_data = in_data[0]
-        out_data = out_data[0]
-
-        dark = in_data.meta_data.get_meta_data("dark")
-        flat = in_data.meta_data.get_meta_data("flat")
-
-        [in_slice_list, frame_list] = in_data.get_slice_list_per_process(expInfo)
-        [out_slice_list, frame_list] = out_data.get_slice_list_per_process(expInfo)
+        out_data = out_data[0]            
         
-        for count in range(len(in_slice_list)):
-            idx = frame_list[count]
-            out_data.data[out_slice_list[count]] = \
-                      plugin.correction(in_data.data[in_slice_list[count]], 
-                                        dark[idx,:], flat[idx,:], params)
+        print in_data
+        print out_data
+        print in_data.name, out_data.name
+        
+        print "performing the processing"
+        slice_list = in_data.get_slice_list()
+        for sl in slice_list:
+            temp = in_data.data[sl]
+            print temp
+            temp = temp[10:101,:]
+#            print temp.shape
+#            print out_data.data[sl].shape
+#            print out_data.get_shape()
+            out_data.data[sl] = temp
+            
+#        dark = in_data.meta_data.get_meta_data("dark")
+#        flat = in_data.meta_data.get_meta_data("flat")
+#
+#        [in_slice_list, frame_list] = in_data.get_slice_list_per_process(expInfo)
+#        [out_slice_list, frame_list] = out_data.get_slice_list_per_process(expInfo)
+#
+#        for count in range(len(in_slice_list)):
+#            idx = frame_list[count]
+#            out_data.data[out_slice_list[count]] = \
+#                      plugin.correction(in_data.data[in_slice_list[count]], 
+#                                        dark[idx,:], flat[idx,:], params)
 
             
     @logmethod
@@ -196,44 +200,38 @@ class Hdf5Transport(TransportMechanism):
         out_data = out_data[0]
 
         [slice_list, frame_list] = in_data.get_slice_list_per_process(expInfo)
-        print in_data.meta_data.get_dictionary().keys()
         cor = in_data.meta_data.get_meta_data("centre_of_rotation")[frame_list]
 
         count = 0
         for sl in slice_list:
-            out_data.data[sl] = plugin.reconstruct(in_data.data[sl], 
-                                                   cor[count]),
-
+            out_data.data[sl] = \
+                       plugin.reconstruct(np.squeeze(in_data.data[sl]), cor[count], 
+                                          out_data.get_pattern_shape(), params)[:,np.newaxis,:]
             count += 1
             plugin.count += 1
             print plugin.count
-                
+    
 
-    def filter_chunk(self, slice_list, in_data, out_data):
+    def filter_chunk(self, plugin, in_data, out_data, expInfo, params):
         logging.debug("Running filter._filter_chunk")
-        
-        slice_list = get_grouped_slice_list(in_data[0], self.get_filter_frame_type(), self.get_max_frames())
-                
         
         in_data = in_data[0]
         out_data = out_data[0]
+                                
+        [slice_list, frame_list] = in_data.get_slice_list_per_process(expInfo)
         
-        slice_list = get_grouped_slice_list(in_data[0], self.get_filter_frame_type(), self.get_max_frames())
+        padding = plugin.get_filter_padding()
 
-        process_slice_list = in_data.get_slice_list_per_process(slice_list)
-        padding = self.get_filter_padding()
-
-        for sl in process_slice_list:
+        for sl in slice_list:
             section = in_data.get_padded_slice_data(sl, padding, in_data)
-            result = self.filter_frame(section)
-            print result
+            result = plugin.filter_frame(section)
             
             if type(result) == dict:
                 for key in result.keys():
                     if key == 'center_of_rotation':
-                        frame = in_data.get_orthogonal_slice(sl, in_data.core_directions[self.get_filter_frame_type()])
+                        frame = in_data.get_orthogonal_slice(sl, in_data.core_directions[plugin.get_filter_frame_type()])
                         out_data.center_of_rotation[frame] = result[key]
                     elif key == 'data':
                         out_data.data[sl] = in_data.get_unpadded_slice_data(sl, padding, in_data, result)
             else:
-                out_data.data[sl] = in_data.get_unpadded_slice_data(sl, padding, result)
+                out_data.data[sl] = in_data.get_unpadded_slice_data(sl, padding, in_data, result)

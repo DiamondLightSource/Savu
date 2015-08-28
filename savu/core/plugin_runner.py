@@ -21,12 +21,11 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
-import os
 import logging 
-import time
 import sys
-
 import copy
+
+from mpi4py import MPI
 
 from savu.data.experiment_collection import Experiment
 from savu.plugins.base_loader import BaseLoader
@@ -67,14 +66,12 @@ class PluginRunner(object):
         plugin_list = experiment.meta_data.plugin_list.plugin_list
 
         self.run_plugin_list_check(experiment, plugin_list)
-        self.plugin_loader(experiment, plugin_list[0], True)
-        self.set_outfilename(experiment)
 
         expInfo = experiment.meta_data
         if expInfo.get_meta_data("process") is 0:
             logging.debug("Running process List.save_list_to_file")
             expInfo.plugin_list.save_plugin_list(
-                expInfo.get_meta_data("out_filename").values()[0])
+                expInfo.get_meta_data("nxs_filename"))
 
         # load relevant metadata 
         expInfo.set_transport_meta_data() #*** do I need this?
@@ -86,33 +83,43 @@ class PluginRunner(object):
         print "Please have a nice day."
 
 
-    def plugin_loader(self, experiment, plugin_dict, flag = False):                     
-        plugin = self.load_plugin(plugin_dict['id'])      
+    def plugin_loader(self, exp, plugin_dict, **kwargs):
+        plugin = self.load_plugin(plugin_dict['id'])
         
-        if flag is False:
-             self.set_datasets(plugin, experiment, plugin_dict)
-                                        
+        pos = (kwargs["pos"] if "pos" in kwargs else None)
+        check_flag = (kwargs["check"] if "check" in kwargs else False)
+
+        if check_flag is True:
+            try:
+                plugin_dict["data"]["in_datasets"]
+                self.set_datasets(plugin, exp, plugin_dict, pos)
+            except KeyError:
+                pass
+
         plugin.set_parameters(plugin_dict['data'])
-        plugin.setup(experiment)
+        plugin.setup(exp)
+        
+        return plugin
+        
 
+    def run_plugins(self, exp, plugin_list, **kwargs):
+        self.plugin_loader(exp, plugin_list[0])
+        exp.set_nxs_filename()
 
+        check = (kwargs["check"] if "check" in kwargs else False)
+
+        for i in range(1, len(plugin_list)-1):
+            self.plugin_loader(exp, plugin_list[i], pos=i, check=check)                   
+                           
+                           
     def run_plugin_list_check(self, exp, plugin_list):
         self.check_loaders_and_savers(exp, plugin_list)
-        self.plugin_loader(exp, plugin_list[0], True)
-        
-        for plugin_dict in plugin_list[1:-1]:
-            self.plugin_loader(exp, plugin_dict)
-
-            for key in exp.index["out_data"]:
-                exp.index["in_data"][key] = \
-                               copy.deepcopy(exp.index["out_data"][key])
-    
-        # empty the data object dictionaries            
-        exp.index["in_data"] = {}
-        exp.index["out_data"] = {}
+        self.run_plugins(exp, plugin_list, check=True)
+        # empty the data object dictionaries
+        exp.clear_data_objects()
         print "Plugin list check complete!"
          
-                                                                                          
+
     def get_names(self, names):         
         try:
             data_names = names
@@ -126,12 +133,13 @@ class PluginRunner(object):
         for key in expIndex["in_data"].keys():
             data_names.append(key)
         return data_names
-        
-        
-    def check_nDatasets(self, exp, names, plugin_id, nSets, dtype):
+                
+
+    def check_nDatasets(self, exp, names, plugin_id, nSets, dtype, pos):
         try:
             if names[0] in "all":
                 names = self.set_all_datasets(exp, dtype)
+                #self.copy_plugin_to_list(names, pos)
         except IndexError:
             pass
         
@@ -145,7 +153,7 @@ class PluginRunner(object):
         return names
 
 
-    def set_datasets(self, plugin, exp, plugin_dict):
+    def set_datasets(self, plugin, exp, plugin_dict, pos):
         in_names = self.get_names(plugin_dict["data"]["in_datasets"])
         out_names = self.get_names(plugin_dict["data"]["out_datasets"])
 
@@ -153,12 +161,13 @@ class PluginRunner(object):
         out_names = (in_names if len(out_names) is 0 else out_names)
 
         in_names = self.check_nDatasets(exp.index, in_names, plugin_dict["id"],
-                                        plugin.nInput_datasets(), "in_data")
+                                    plugin.nInput_datasets(), "in_data", pos)
         out_names = self.check_nDatasets(exp.index, out_names, plugin_dict["id"],
-                                         plugin.nOutput_datasets(), "out_data")
-        expInfo = exp.meta_data
-        expInfo.set_meta_data(["plugin_datasets", "in_data"], in_names)
-        expInfo.set_meta_data(["plugin_datasets", "out_data"], out_names)
+                                    plugin.nOutput_datasets(), "out_data", pos)
+                                    
+        plugin_dict["data"]["in_datasets"] = in_names
+        plugin_dict["data"]["out_datasets"] = out_names
+                      
 
 
     def check_loaders_and_savers(self, experiment, plugin_list):
@@ -176,16 +185,6 @@ class PluginRunner(object):
         if not isinstance(plugin, BaseSaver):
             sys.exit("The final plugin in the process must inherit from BaseSaver")
     
-    
-    def set_outfilename(self, exp):
-        expInfo = exp.meta_data
-        expInfo.set_meta_data("out_filename", {})
-        for name in exp.index["in_data"].keys():
-            filename = os.path.basename(exp.index["in_data"][name].backing_file.filename)
-            filename = os.path.splitext(filename)[0]
-            filename = os.path.join(expInfo.get_meta_data("out_path"),
-             "%s_processed_%s.nxs" % (filename, time.strftime("%Y%m%d%H%M%S")))
-            expInfo.set_meta_data(["out_filename", name], filename)
         
     
     def load_plugin(self, plugin_name):
@@ -206,41 +205,3 @@ class PluginRunner(object):
         instance = clazz()
         instance.populate_default_parameters()
         return instance
-
-
-class CitationInformation(object):
-    """
-    Descriptor of Citation Information for plugins
-    """
-
-    def __init__(self):
-        super(CitationInformation, self).__init__()
-        self.description = "Default Description"
-        self.doi = "Default DOI"
-        self.endnote = "Default Endnote"
-        self.bibtex = "Default Bibtex"
-
-    def write(self, hdf_group):
-        citation_group = hdf_group.create_group('citation')
-        citation_group.attrs[NX_CLASS] = 'NXcite'
-        description_array = np.array([self.description])
-        citation_group.create_dataset('description',
-                                      description_array.shape,
-                                      description_array.dtype,
-                                      description_array)
-        doi_array = np.array([self.doi])
-        citation_group.create_dataset('doi',
-                                      doi_array.shape,
-                                      doi_array.dtype,
-                                      doi_array)
-        endnote_array = np.array([self.endnote])
-        citation_group.create_dataset('endnote',
-                                      endnote_array.shape,
-                                      endnote_array.dtype,
-                                      endnote_array)
-        bibtex_array = np.array([self.bibtex])
-        citation_group.create_dataset('bibtex',
-                                      bibtex_array.shape,
-                                      bibtex_array.dtype,
-                                      bibtex_array)
-    

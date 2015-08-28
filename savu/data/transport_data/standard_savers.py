@@ -77,13 +77,14 @@ class TomographySavers(object):
         
 
     def create_entries(self, backing_file, data, expInfo, key, dtype):
-        from savu.data.transport_data.hdf5_transport_data import SliceAvailableWrapper
+        #from savu.data.transport_data.hdf5_transport_data import SliceAvailableWrapper
         group = backing_file.create_group(expInfo.get_meta_data(["group_name", key]))
         group.attrs[NX_CLASS] = 'NXdata'
 
-        params = self.set_name("data_value")
-        self.output_data_to_file(group, params, data.get_shape(), dtype)        
-        data.data = SliceAvailableWrapper(params['name2'], params['name1'])
+        params = self.set_name("data")
+        self.output_data_to_file(group, params, data.get_shape(), dtype)
+        data.data = params["name"]
+        #data.data = SliceAvailableWrapper(params['name2'], params['name1'])
         return group
 
 
@@ -96,7 +97,7 @@ class TomographySavers(object):
             # just numpy arrays for now
             if (type(value).__module__ ) in np.__name__:
                 self.output_data_to_file(group, params, value.shape, dtype)
-                params['name1'][...] = value
+                params['name'][...] = value
         
 
     def get_output_list(self, expInfo, data):
@@ -128,15 +129,14 @@ class TomographySavers(object):
         
         
     def output_data_to_file(self, group, params, shape, dtype):
-        
-        params['name1'] = group.create_dataset(params['name1'], shape, dtype)
-        params['name1'].attrs['signal'] = 1
-        params['name2'] = group.create_dataset(params['name2'], shape, np.bool_)
+        params['name'] = group.create_dataset(params['name'], shape, dtype)
+        params['name'].attrs['signal'] = 1
+        #params['name2'] = group.create_dataset(params['name2'], shape, np.bool_)
 
 
     def set_name(self, name):
         params = {}
-        params['name1'] = name
-        params['name2'] = name + "_avail"
+        params['name'] = name
+        #params['name2'] = name + "_avail"
         return params
 

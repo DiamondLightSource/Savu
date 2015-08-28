@@ -25,7 +25,7 @@ import h5py
 import logging
 
 import savu.data.data_structures as ds
-from savu.data.transport_data.hdf5_transport_data import SliceAlwaysAvailableWrapper
+#from savu.data.transport_data.hdf5_transport_data import SliceAlwaysAvailableWrapper
 
 class _NXAppFinder(object):
     '''
@@ -80,10 +80,11 @@ class TomographyLoaders(object):
         expInfo = exp.meta_data
 
         data_obj.backing_file = h5py.File(expInfo.get_meta_data("data_file"), 'r')
-        objInfo.set_meta_data("backing_file", data_obj.backing_file)
+        #objInfo.set_meta_data("backing_file", data_obj.backing_file)
         logging.debug("Creating file '%s' '%s'", 'tomo_entry', data_obj.backing_file.filename)
         
         data_obj.data = data_obj.backing_file['entry1/tomo_entry/instrument/detector/data']
+
         data_obj.set_image_key(data_obj.backing_file\
                         ['entry1/tomo_entry/instrument/detector/image_key'])
                         
@@ -96,13 +97,9 @@ class TomographyLoaders(object):
         objInfo.set_meta_data("control", control[...])
 
         data_obj.set_shape(data_obj.data.shape)
-        
-        for key in exp.index['in_data'].keys():
-            in_data = exp.index["in_data"][key]
-            in_data.data = SliceAlwaysAvailableWrapper(in_data.data)
             
 
-#AARON DIT: I will refactor the following code in the future. At the moment it is massively redundant.
+#AARON DIT: I will refactor the following code in the future. At the moment it is massively redundant - This is unacceptable!
 
 class FluorescenceLoaders(object):
     """
@@ -117,7 +114,7 @@ class FluorescenceLoaders(object):
 
     def loader_setup(self, exp):
         
-        base_classes = [ds.Raw]
+        base_classes = [ds.TomoRaw]
         data_obj = exp.create_data_object("in_data", "fluo", base_classes)
         data_obj.meta_data.set_meta_data("base_classes", base_classes)
 
@@ -183,10 +180,6 @@ class FluorescenceLoaders(object):
         #Now the beam fluctuations
         control = data_obj.backing_file[fluo_entry.name+'/monitor/data']# the ion chamber "normalisation"
         beam.set_meta_data("control", control) # this is global since it is to do with the beam
-
-        for key in exp.index['in_data'].keys():
-            in_data = exp.index["in_data"][key]
-            in_data.data = SliceAlwaysAvailableWrapper(in_data.data)
         
         
         # now we will set up the core directions that we need for processing
@@ -221,7 +214,7 @@ class STXMLoaders(object):
 
     def loader_setup(self, exp):
         
-        base_classes = [ds.Raw]
+        base_classes = [ds.TomoRaw]
         data_obj = exp.create_data_object("in_data", "stxm", base_classes)
         data_obj.meta_data.set_meta_data("base_classes", base_classes)
 
@@ -286,10 +279,6 @@ class STXMLoaders(object):
         control = data_obj.backing_file[stxm_entry.name+'/monitor/data']# the ion chamber "normalisation"
         beam.set_meta_data("control", control)
 
-        for key in exp.index['in_data'].keys():
-            in_data = exp.index["in_data"][key]
-            in_data.data = SliceAlwaysAvailableWrapper(in_data.data)
-        
         
         # now we will set up the core directions that we need for processing
         projection = []
@@ -322,7 +311,7 @@ class XRDLoaders(object):
 
     def loader_setup(self, exp):
         
-        base_classes = [ds.Raw]
+        base_classes = [ds.TomoRaw]
         data_obj = exp.create_data_object("in_data", "xrd", base_classes)
         data_obj.meta_data.set_meta_data("base_classes", base_classes)
 
@@ -385,10 +374,6 @@ class XRDLoaders(object):
         #Now the beam fluctuations
         control = data_obj.backing_file[xrd_entry.name+'/monitor/data']# the ion chamber "normalisation"
         beam.set_meta_data("control", control)
-
-        for key in exp.index['in_data'].keys():
-            in_data = exp.index["in_data"][key]
-            in_data.data = SliceAlwaysAvailableWrapper(in_data.data)
         
         
         # now we will set up the core directions that we need for processing

@@ -52,15 +52,16 @@ class BaseAstraRecon(BaseRecon):
        
 
     def pre_process(self, exp):
-        [in_data, out_data] = self.get_data_objs_list()
+        in_data = self.get_data_objects(exp.index, "in_data")
         angles = in_data[0].meta_data.get_meta_data("rotation_angle")
         params = [angles]
         return params
         
 
     def reconstruct(self, sinogram, centre_of_rotations, vol_shape, params):
-        angles = params[0]
         
+        angles = params[0]
+   
         nSinos = self.get_max_frames()
         lparams = self.get_parameters()
         alg_name = lparams[0]
@@ -84,7 +85,7 @@ class BaseAstraRecon(BaseRecon):
             plow = (blen - alen) + pad
             phigh = pad
 
-        logdata = np.log(sino+1)
+        logdata = np.squeeze(np.log(sino+1))
         
         sinogram = np.pad(logdata, ((0, 0), (int(plow), int(phigh))),
                           mode='reflect')
@@ -96,6 +97,8 @@ class BaseAstraRecon(BaseRecon):
             sinogram = np.tile(sinogram.reshape((1,)+sinogram.shape), (8, 1, 1))
             rec = self.reconstruct3D(sinogram, angles, vol_shape, nSinos, 
                                      alg_name, iterations) 
+                                     
+        rec = rec[:,np.newaxis,:]
         return rec
 
         

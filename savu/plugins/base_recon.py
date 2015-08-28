@@ -58,8 +58,9 @@ class BaseRecon(Plugin):
         """
         Perform the main processing step for the plugin
         """        
-        [in_data, out_data] = self.get_data_objs_list()
-
+        in_data = self.get_data_objects(exp.index, "in_data")
+        out_data = self.get_data_objects(exp.index, "out_data")
+        
         try:
             centre_of_rotation = in_data[0].meta_data.get_meta_data("centre_of_rotation")
         except KeyError:
@@ -69,19 +70,13 @@ class BaseRecon(Plugin):
             
         transport.reconstruction_setup(self, in_data, out_data, exp.meta_data, params)
 
-            reconstruction = \
-                plugin.reconstruct(sinogram, frame_centre_of_rotation, angles,
-                                 (output.data.shape[0], output.data.shape[2]),
-                                 (output.data.shape[0]/2,
-                                  output.data.shape[2]/2))
                                   
     def setup(self, experiment):
         chunk_size = self.get_max_frames()
-        expInfo = experiment.meta_data
         #-------------------setup input datasets-------------------------
 
         # get a list of input dataset names required for this plugin
-        in_data_list = expInfo.get_meta_data(["plugin_datasets", "in_data"])
+        in_data_list = self.parameters["in_datasets"]
         
         # get all input dataset objects
         in_d1 = experiment.index["in_data"][in_data_list[0]]        
@@ -94,13 +89,14 @@ class BaseRecon(Plugin):
         #------------------setup output datasets-------------------------
 
         # get a list of output dataset names created by this plugin
-        out_data_list = expInfo.get_meta_data(["plugin_datasets", "out_data"])
+        out_data_list = self.parameters["in_datasets"]
 
         # create all out_data objects and associated patterns
         # patterns can be copied, added or both
+        #****** MUST BE DONE IN THIS ORDER ******
         out_d1 = experiment.create_data_object("out_data", out_data_list[0])
-        out_d1.add_volume_patterns()
         out_d1.meta_data.copy_dictionary(in_d1.meta_data.get_dictionary())
+        out_d1.add_volume_patterns()
 
         # set pattern for this plugin and the shape
         out_d1.set_current_pattern_name("VOLUME_XZ")

@@ -52,15 +52,16 @@ class Hdf5TransportData(object):
             
             plugin_id = plugin_dict["id"]
             logging.debug("Loading plugin %s", plugin_id)
-            plugin = plugin_runner.load_plugin(plugin_id)
-            plugin.setup(exp)
+            
+            plugin = plugin_runner.plugin_loader(exp, plugin_dict)
             
             self.set_filenames(exp, plugin, plugin_id, count)
-
+            
             saver_plugin.setup(exp)
             
             out_data_objects.append(exp.index["out_data"].copy())
-            
+            exp.clear_out_data_objects()
+         
             count += 1
             
         return out_data_objects
@@ -86,29 +87,66 @@ class Hdf5TransportData(object):
         Closes the backing file and completes work
         """
         if self.backing_file is not None:
-            logging.debug("Completing file %s",self.backing_file.filename)
-            self.backing_file.close()
-            self.backing_file = None
+            try:
+                logging.debug("Completing file %s",self.backing_file.filename)
+                self.backing_file.close()
+                self.backing_file = None
+            except:
+                pass
+                
 
+    def get_slice_dirs_index(self, slice_dirs, shape):
+        # create the indexing array 
+        sshape = [shape[sslice] for sslice in slice_dirs]
+    
+        idx_list= []
+        for dim in range(len(slice_dirs)):
+            chunk = np.prod(shape[0:dim])
+            length = shape[dim]
+            repeat = np.prod(sshape[dim+1:])
+            idx = np.ravel(np.kron(np.arange(length), np.ones((repeat, chunk))))
+            idx_list.append(idx.astype(int))
+                    
+        return np.array(idx_list)
+
+
+    def empty_array_slice_list(self):
+        slice_dirs = self.get_slice_directions()
+        shape = self.get_shape()
+        nDims = len(shape)
+        index = self.get_slice_dirs_index(slice_dirs, np.array(shape))
+        nSlices = index.shape[1]
+
+        slice_list = []
+        for i in range(nSlices):
+            getitem = [slice(None)]*nDims
+            for sdir in range(len(slice_dirs)):
+                getitem[slice_dirs[sdir]] = index[sdir, i]
+                slice_list.append(getitem)
+        return slice_list
+
+        
 
     def get_slice_list(self):
-        
-        it = np.nditer(self.data, flags=['multi_index'])
+        it = np.nditer(self.data, flags=['multi_index', 'refs_ok']) # what does this mean?
         dirs_to_remove = list(self.get_core_directions())
-        
-        dirs_to_remove.sort(reverse=True)
-        for direction in dirs_to_remove:
-            it.remove_axis(direction)
-        mapping_list = range(len(it.multi_index))        
-        dirs_to_remove.sort()
-        for direction in dirs_to_remove:
-            mapping_list.insert(direction, -1)
-        mapping_array = np.array(mapping_list)
-        slice_list = []
-        while not it.finished:
-            tup = it.multi_index + (slice(None),)
-            slice_list.append(tuple(np.array(tup)[mapping_array]))
-            it.iternext()
+
+        if it.ndim is 0:
+            slice_list = self.empty_array_slice_list()
+        else:
+            dirs_to_remove.sort(reverse=True)
+            for direction in dirs_to_remove:
+                it.remove_axis(direction)
+            mapping_list = range(len(it.multi_index))        
+            dirs_to_remove.sort()
+            for direction in dirs_to_remove:
+                mapping_list.insert(direction, -1)
+            mapping_array = np.array(mapping_list)
+            slice_list = []
+            while not it.finished:
+                tup = it.multi_index + (slice(None),)
+                slice_list.append(tuple(np.array(tup)[mapping_array]))
+                it.iternext()
             
         return slice_list
 
@@ -180,8 +218,7 @@ class Hdf5TransportData(object):
         if sl is None:
             raise Exception("Data type", self.get_current_pattern_name(), 
                             "does not support slicing in directions", 
-                            self.get_slice_directions())
-            
+                            self.get_slice_directions())            
         gsl = self.group_slice_list(sl, max_frames)
         return gsl
 
@@ -196,69 +233,183 @@ class Hdf5TransportData(object):
         return [ slice_list[frames[0]:frames[-1]+1], frame_index ]
         
 
-class SliceAvailableWrapper(object):
-    """
-    This class takes 2 datasets, one available boolean ndarray, and 1 data
-    ndarray.  Its purpose is to provide slices from the data array only if data
-    has been put there, and to allow a convenient way to put slices into the
-    data array, and set the available array to True
-    """
-    def __init__(self, avail, data):
-        """
-        :param avail: The available boolean ndArray
-        :type avail: boolean ndArray
-        :param data: The data ndArray
-        :type data: any ndArray
-        """
-        self.avail = avail
-        self.data = data
 
-        
-    def __deepcopy__(self, memo):
-        return self
-        
-        
-    def __getitem__(self, item):
-        if self.avail[item].all():
-            #return np.squeeze(self.data[item])
-            return self.data[item]
-        else:
-            return None
+    def calculate_slice_padding(self, in_slice, pad_ammount, data_stop):
+        sl = in_slice
+    
+        if not type(sl) == slice:
+            # turn the value into a slice and pad it
+            sl = slice(sl, sl+1, 1)
+    
+        minval = None
+        maxval = None
+    
+        if sl.start is not None:
+            minval = sl.start-pad_ammount
+        if sl.stop is not None:
+            maxval = sl.stop+pad_ammount
+    
+        minpad = 0
+        maxpad = 0
+        if minval is None:
+            minpad = pad_ammount
+        elif minval < 0:
+            minpad = 0 - minval
+            minval = 0
+        if maxval is None:
+            maxpad = pad_ammount
+        if maxval > data_stop:
+            maxpad = (maxval-data_stop) - 1
+            maxval = data_stop + 1
+    
+        out_slice = slice(minval, maxval, sl.step)
+    
+        return (out_slice, (minpad, maxpad))
+    
+    
+    def get_pad_data(self, slice_tup, pad_tup, data):
+        slice_list = []
+        pad_list = []
+        for i in range(len(slice_tup)):
+            if type(slice_tup[i]) == slice:
+                slice_list.append(slice_tup[i])
+                pad_list.append(pad_tup[i])
+            else:
+                if pad_tup[i][0] == 0 and pad_tup[i][0] == 0:
+                    slice_list.append(slice_tup[i])
+                else:
+                    slice_list.append(slice(slice_tup[i], slice_tup[i]+1, 1))
+                    pad_list.append(pad_tup[i])
+    
+        data_slice = data[tuple(slice_list)]
+        data_slice = np.pad(data_slice, tuple(pad_list), mode='edge')
+        return data_slice
+    
+    
+    def get_padded_slice_data(self, input_slice_list, padding_dict, data):
+        slice_list = list(input_slice_list)
+        pad_list = []
+        for i in range(len(slice_list)):
+            pad_list.append((0, 0))
+    
+        for key in padding_dict.keys():
+            if key in data.core_directions.keys():
+                for direction in data.core_directions[key]:
+                    slice_list[direction], pad_list[direction] = \
+                        self.calculate_slice_padding(slice_list[direction],
+                                                padding_dict[key],
+                                                self.data.shape[direction])
+    
+        return self.get_pad_data(tuple(slice_list), tuple(pad_list), data.data)        
 
 
-    def __setitem__(self, item, value):
-        #self.data[item] = value.reshape(self.data[item].shape)
-        self.data[item] = value
-        self.avail[item] = True
-        return np.squeeze(self.data[item])
-        
-        
-    def __getattr__(self, name):
-        """
-        Delegate everything else to the data class
-        """
-        value = self.data.__getattribute__(name)
-        return value
+    def get_unpadded_slice_data(self, input_slice_list, padding_dict, data,
+                                    padded_dataset):
+        slice_list = list(input_slice_list)
+        pad_list = []
+        expand_list = []
+        for i in range(len(slice_list)):
+            pad_list.append((0, 0))
+            expand_list.append(0)
+        for key in padding_dict.keys():
+            if key in data.core_directions.keys():
+                for direction in data.core_directions[key]:
+                    slice_list[direction], pad_list[direction] = \
+                        self.calculate_slice_padding(slice_list[direction],
+                                                padding_dict[key],
+                                                padded_dataset.shape[direction])
+                    expand_list[direction] = padding_dict[key]
+    
+        slice_list_2 = []
+        pad_list_2 = []
+        for i in range(len(slice_list)):
+            if type(slice_list[i]) == slice:
+                slice_list_2.append(slice_list[i])
+                pad_list_2.append(pad_list[i])
+            else:
+                if pad_list[i][0] == 0 and pad_list[i][0] == 0:
+                    slice_list_2.append(slice_list[i])
+                else:
+                    slice_list_2.append(slice(slice_list[i], slice_list[i]+1, 1))
+                    pad_list_2.append(pad_list[i])
+    
+        slice_list_3 = []
+        for i in range(len(padded_dataset.shape)):
+            start = None
+            stop = None
+            if expand_list[i] > 0:
+                start = expand_list[i]
+                stop = -expand_list[i]
+            sl = slice(start, stop, None)
+            slice_list_3.append(sl)
+    
+        result = padded_dataset[tuple(slice_list_3)]
+        return result
 
-
-class SliceAlwaysAvailableWrapper(SliceAvailableWrapper):
-    """
-    This class takes 1 data ndarray.  Its purpose is to provide slices from the
-    data array in the same way as the SliceAvailableWrapper but assuming the
-    data is always available (for example in the case of the input file)
-    """
-    def __init__(self, data):
-        """
-
-        :param data: The data ndArray
-        :type data: any ndArray
-        """
-        super(SliceAlwaysAvailableWrapper, self).__init__(None, data)
-
-    @logmethod
-    def __getitem__(self, item):
-        return self.data[item]
-
-    @logmethod
-    def __setitem__(self, item, value):
-        self.data[item] = value
+#class SliceAvailableWrapper(object):
+#    """
+#    This class takes 2 datasets, one available boolean ndarray, and 1 data
+#    ndarray.  Its purpose is to provide slices from the data array only if data
+#    has been put there, and to allow a convenient way to put slices into the
+#    data array, and set the available array to True
+#    """
+#    def __init__(self, avail, data):
+#        """
+#        :param avail: The available boolean ndArray
+#        :type avail: boolean ndArray
+#        :param data: The data ndArray
+#        :type data: any ndArray
+#        """
+#        self.avail = avail
+#        self.data = data
+#
+#        
+#    def __deepcopy__(self, memo):
+#        return self
+#        
+#        
+#    def __getitem__(self, item):
+#        if self.avail[item].all():
+#            #return np.squeeze(self.data[item])
+#            return self.data[item]
+#        else:
+#            return None
+#
+#
+#    def __setitem__(self, item, value):
+#        #self.data[item] = value.reshape(self.data[item].shape)
+#        self.data[item] = value
+#        self.avail[item] = True
+#        return self.data[item]
+#        #return np.squeeze(self.data[item])
+#        
+#        
+#    def __getattr__(self, name):
+#        """
+#        Delegate everything else to the data class
+#        """
+#        value = self.data.__getattribute__(name)
+#        return value
+#
+#
+#class SliceAlwaysAvailableWrapper(SliceAvailableWrapper):
+#    """
+#    This class takes 1 data ndarray.  Its purpose is to provide slices from the
+#    data array in the same way as the SliceAvailableWrapper but assuming the
+#    data is always available (for example in the case of the input file)
+#    """
+#    def __init__(self, data):
+#        """
+#
+#        :param data: The data ndArray
+#        :type data: any ndArray
+#        """
+#        super(SliceAlwaysAvailableWrapper, self).__init__(None, data)
+#
+#    @logmethod
+#    def __getitem__(self, item):
+#        return self.data[item]
+#
+#    @logmethod
+#    def __setitem__(self, item, value):
+#        self.data[item] = value

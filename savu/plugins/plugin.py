@@ -129,31 +129,15 @@ class Plugin(object):
                       " input is %s and output is %s",
                         experiment.__class__, transport.__class__)
         raise NotImplementedError("process needs to be implemented")
-        
-
-    def set_data_objs_list(self, exp):
-        expInfo = exp.meta_data
-        in_data_list = expInfo.get_meta_data(["plugin_datasets", "in_data"])
-        in_data_objs = self.get_data_objects(exp.index["in_data"], in_data_list)
-        
-        out_data_list = expInfo.get_meta_data(["plugin_datasets", "out_data"])
-        out_data_objs = self.get_data_objects(exp.index["out_data"], out_data_list)
-        
-        self.data_objs["in_data_objs"] = in_data_objs
-        self.data_objs["out_data_objs"] = out_data_objs
-        
-        
-    def get_data_objs_list(self):
-        in_data_objs = self.data_objs["in_data_objs"]
-        out_data_objs = self.data_objs["out_data_objs"]
-        return [in_data_objs, out_data_objs]
 
         
-    def get_data_objects(self, dtype, data_list):
-        
+    def get_data_objects(self, expIndex, dtype):
+        data_list = (self.parameters["in_datasets"] if dtype is "in_data" 
+                                    else self.parameters["out_datasets"])
+        print "get_data_objects", data_list
         data_objs = []
         for data in data_list:
-            data_objs.append(dtype[data])
+            data_objs.append(expIndex[dtype][data])
         return data_objs
         
         

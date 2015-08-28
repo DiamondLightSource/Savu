@@ -36,12 +36,23 @@ class NoProcessPlugin(Plugin, CpuPlugin):
     def __init__(self):
         super(NoProcessPlugin, self).__init__("NoProcessPlugin")
 
+
     def process(self, exp, transport, params):
-        [in_data, out_data] = self.get_data_objs_list()
+
+        in_data = self.get_data_objects(exp.index, "in_data")
+        out_data = self.get_data_objects(exp.index, "out_data")
         
-        slice_list = in_data[0].get_slice_list()
+        in_data = in_data[0]
+        out_data = out_data[0]
+        print in_data.get_shape, out_data.get_shape
+
+        print "performing the processing"
+        slice_list = in_data.get_slice_list()
         for sl in slice_list:
-            out_data[0].data[sl] = in_data[0].data[sl]
+            temp = in_data.data[sl]
+            out_data.data[sl] = temp        
+        
+        print in_data.data.shape, out_data.data.shape
 
 
     def setup(self, experiment):
@@ -50,13 +61,13 @@ class NoProcessPlugin(Plugin, CpuPlugin):
         plugin.  This method is called before the process method in the plugin
         chain.  
         """
+
         chunk_size = self.get_max_frames()
-        expInfo = experiment.meta_data
 
         #-------------------setup input datasets-------------------------
 
         # get a list of input dataset names required for this plugin
-        in_data_list = expInfo.get_meta_data(["plugin_datasets", "in_data"])
+        in_data_list = self.parameters["in_datasets"]
         # get all input dataset objects
         in_d1 = experiment.index["in_data"][in_data_list[0]]
         # set all input data patterns
@@ -69,14 +80,20 @@ class NoProcessPlugin(Plugin, CpuPlugin):
         #------------------setup output datasets-------------------------
 
         # get a list of output dataset names created by this plugin
-        out_data_list = expInfo.get_meta_data(["plugin_datasets", "out_data"])
+        out_data_list = self.parameters["out_datasets"]
+        
         # create all out_data objects and associated patterns and meta_data
         # patterns can be copied, added or both
-        out_d1 = experiment.create_data_object("out_data", out_data_list[0]) 
+        out_d1 = experiment.create_data_object("out_data", out_data_list[0])
+        
         out_d1.copy_patterns(in_d1.get_patterns())
-        out_d1.meta_data.copy_dictionary(in_d1.meta_data.get_dictionary())
-        out_d1.data = in_d1.data
-         
+        # copy the entire in_data dictionary (image_key, dark and flat will 
+        #be removed since out_data is no longer an instance of TomoRaw)
+        # If you do not want to copy the whole dictionary pass the key word
+        # argument copyKeys = [your list of keys to copy], or alternatively, 
+        # removeKeys = [your list of keys to remove]
+        out_d1.meta_data.copy_dictionary(in_d1.meta_data.get_dictionary(), rawFlag=True)
+
         # set pattern for this plugin and the shape
         out_d1.set_current_pattern_name("SINOGRAM")
         out_d1.set_shape(in_d1.get_shape())
@@ -84,7 +101,7 @@ class NoProcessPlugin(Plugin, CpuPlugin):
         out_d1.set_nFrames(chunk_size)
 
         #----------------------------------------------------------------
-                        
+
 
     def nInput_datasets(self):
         return 1
@@ -96,4 +113,4 @@ class NoProcessPlugin(Plugin, CpuPlugin):
     
     def get_max_frames(self):
         return 8
-    
+        

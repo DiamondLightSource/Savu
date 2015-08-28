@@ -59,11 +59,9 @@ class Pattern(object):
         
     
     def add_pattern(self, dtype, **kargs):
-        if dtype in self.get_available_pattern_list():            
-            data_dirs = self.get_patterns()
-            data_dirs[dtype] = {}
+        if dtype in self.get_available_pattern_list():
             for args in kargs:
-                data_dirs[dtype][args] = kargs[args]
+                self.meta_data.set_meta_data(["data_patterns", dtype, args], kargs[args])
         else:
             errorMsg = "The data pattern " + dtype + " does not exist.  Please choose " + \
             " from the following list: \n" + str(self.get_available_pattern_list())
@@ -151,14 +149,14 @@ class Pattern(object):
         self.meta_data.get_meta_data("nFrames")
 
 
-    def get_frame(self, indices):
-        index = self.get_index(indices)
-        return np.squeeze(self.data[index])
+#    def get_frame(self, indices):
+#        index = self.get_index(indices)
+#        return np.squeeze(self.data[index])
 
 
     def get_index(self, indices):
         shape = self.get_shape()
-        nDims = len(shape)      
+        nDims = len(shape)
         name = self.get_current_pattern_name()
         ddirs = self.meta_data.get_meta_data("data_patterns")
         core_dir = ddirs[name]["core_dir"]
@@ -176,12 +174,12 @@ class Pattern(object):
 
 
     def get_sub_shape(self, name):
-        core_dir = self.info["data_patterns"][name]["core_dir"]
+        core_dir = self.get_core_directions()
         shape = []
         for core in core_dir:
             shape.append(self.get_shape()[core])
         return tuple(shape)
-        
+
         
 class Data(Pattern):
     """
@@ -189,9 +187,10 @@ class Data(Pattern):
     at runtime and holds the data array.
     """
 
-    def __init__(self):
+    def __init__(self, name):
         self.meta_data = MetaData()
         super(Data, self).__init__()
+        self.name = name
         self.backing_file = None
         self.data = None
     
@@ -211,7 +210,7 @@ class Data(Pattern):
         module2class = ''.join(x.capitalize() for x in temp.split('_'))
         return getattr(mod, module2class.split('.')[-1])       
         
-    
+            
     def __deepcopy__(self, memo):
         return self
 
@@ -243,6 +242,9 @@ class Data(Pattern):
         return self.meta_data.get_meta_data('dist')
 
         
+    def set_data_params(self, pattern, chunk_size, **kwargs):
+        self.set_current_pattern_name(pattern)
+        self.set_nFrames(chunk_size)
         
         
 class TomoRaw(object):

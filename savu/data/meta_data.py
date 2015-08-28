@@ -23,6 +23,8 @@
 
 """
 
+from copy import copy
+
 class MetaData(object):
     """
     The MetaData class creates a dictionary of all meta data which can be 
@@ -73,8 +75,51 @@ class MetaData(object):
             return accum_value
 
 
-    def copy_dictionary(self, new_dict):
-        self.dict = new_dict.copy()
+    def copy_dictionary(self, new_dict, **kwargs):
+        """ Copy keys from one dictionary to another. 
+        
+        Keyword arguments:
+        timestamp     -- the format string (default '')
+        priority      -- priority number (default '')
+        priority_name -- priority name (default '')
+        message       -- message to display (default '')
+    
+        :param timestamp: formatted date to display
+        :param priority: priority number
+        :param priority_name: priority name
+        :param message: message to display
+        :returns: formatted string
+        """
+
+        to_remove = self.dict.keys()
+        to_remove = set(to_remove).union(["name", "shape", "base_classes", "nFrames"])
+
+        try:
+            rawFlag = kwargs["rawFlag"]
+        except KeyError:
+            rawFlag = False
+                                
+        if rawFlag is True:
+            to_remove = to_remove.union(["dark", "flat", "image_key"])
+            
+        try:
+            copy_keys = set(kwargs["copyKeys"])
+        except KeyError:
+            copy_keys = set(new_dict.keys())
+            
+        try:
+            remove_keys = set(kwargs["removeKeys"])
+            to_remove = to_remove.union(remove_keys)
+        except KeyError:
+            pass
+         
+        copy_keys = to_remove.symmetric_difference(copy_keys)
+        for key in copy_keys:
+            try:
+                self.dict[key] = copy(new_dict[key])
+            except KeyError:
+                pass
+
 
     
     def get_dictionary(self):
