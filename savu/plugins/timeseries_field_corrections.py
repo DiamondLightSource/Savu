@@ -52,34 +52,12 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         data = (data-dark)/flat  # flat = (flat-dark) already calculated for efficiency
         return data
               
-
-#    @logmethod
-#    def process(self, exp, transport, params):
-#        """
-#        """
-#        in_data = self.get_data_objects(exp.index, "in_data")
-#        out_data = self.get_data_objects(exp.index, "out_data")
-#        transport.timeseries_field_correction(self, in_data, out_data, exp.meta_data, params)
-
-
+              
     def process(self, exp, transport, params):
         
         in_data = self.get_data_objects(exp.index, "in_data")
         out_data = self.get_data_objects(exp.index, "out_data")
         transport.timeseries_field_correction(self, in_data, out_data, exp.meta_data, params)
-#
-#        in_data = in_data[0]
-#        out_data = out_data[0]
-#                
-#        print in_data.backing_file
-#        print out_data.backing_file                
-#                
-#        print "performing the processing"
-#        slice_list = in_data.get_slice_list()
-#        for sl in slice_list:
-#            temp = in_data.data[sl]
-#            out_data.data[sl] = temp
-
 
 
     def setup(self, experiment):

@@ -163,34 +163,19 @@ class Hdf5Transport(TransportMechanism):
     def timeseries_field_correction(self, plugin, in_data, out_data, expInfo, params):
 
         in_data = in_data[0]
-        out_data = out_data[0]            
-        
-        print in_data
-        print out_data
-        print in_data.name, out_data.name
-        
-        print "performing the processing"
-        slice_list = in_data.get_slice_list()
-        for sl in slice_list:
-            temp = in_data.data[sl]
-            print temp
-            temp = temp[10:101,:]
-#            print temp.shape
-#            print out_data.data[sl].shape
-#            print out_data.get_shape()
-            out_data.data[sl] = temp
+        out_data = out_data[0]                    
             
-#        dark = in_data.meta_data.get_meta_data("dark")
-#        flat = in_data.meta_data.get_meta_data("flat")
-#
-#        [in_slice_list, frame_list] = in_data.get_slice_list_per_process(expInfo)
-#        [out_slice_list, frame_list] = out_data.get_slice_list_per_process(expInfo)
-#
-#        for count in range(len(in_slice_list)):
-#            idx = frame_list[count]
-#            out_data.data[out_slice_list[count]] = \
-#                      plugin.correction(in_data.data[in_slice_list[count]], 
-#                                        dark[idx,:], flat[idx,:], params)
+        dark = in_data.meta_data.get_meta_data("dark")
+        flat = in_data.meta_data.get_meta_data("flat")
+
+        [in_slice_list, frame_list] = in_data.get_slice_list_per_process(expInfo)
+        [out_slice_list, frame_list] = out_data.get_slice_list_per_process(expInfo)
+
+        for count in range(len(in_slice_list)):
+            idx = frame_list[count]
+            out_data.data[out_slice_list[count]] = \
+                      plugin.correction(in_data.data[in_slice_list[count]], 
+                                        dark[idx,:], flat[idx,:], params)
 
             
     @logmethod
