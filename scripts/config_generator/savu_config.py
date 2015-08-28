@@ -35,6 +35,9 @@ class Content(object):
                   (element, subelement))
 
     def insert(self, plugin, pos):
+        print plugin
+        print plugin.name
+        print plugin.__module__
         process = {}
         process['name'] = plugin.name
         process['id'] = "savu.plugins." + plugin.__module__
@@ -97,6 +100,7 @@ def _mod(content, arg):
 
 def _add(content, arg):
     """Adds the named plugin before the specified location 'MedianFilter 2'"""
+    print content, arg
     try:
         name, pos = arg.split()
         if name in pu.plugins.keys():
