@@ -233,7 +233,9 @@ class STXMLoaders(object):
         logging.debug("Creating file '%s' '%s'", 'stxm_entry', data_obj.backing_file.filename)
         # now lets extract the fluo entry so we can figure out our geometries!
         finder = _NXAppFinder(application="NXstxm")
-        stxm_entry = finder.get_NXapp(data_obj.backing_file, 'entry1/')[0]
+
+        stxm_entry = finder.get_NXapp(data_obj.backing_file, 'entry1/')
+        print stxm_entry.name
         mData = data_obj.meta_data
         beam = exp.meta_data
         #lets get the data out

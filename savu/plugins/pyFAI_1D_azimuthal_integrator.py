@@ -52,7 +52,7 @@ class PyFAI1DAzimuthalIntegrator(Filter, CpuPlugin):
 
     def filter_frame(self, data):
         logging.debug("Running azimuthal integration")
-        mData = data_obj.meta_data # the metadata
+        mData = in_d1.meta_data # the metadata
         ai = pyFAI.AzimuthalIntegrator()# get me an integrator object
         ### prep the goemtry
         bc = [mData.get_meta_data("beam_center_x"), mData.get_meta_data("beam_center_y")]
