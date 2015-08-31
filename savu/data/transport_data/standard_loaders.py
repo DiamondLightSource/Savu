@@ -394,6 +394,7 @@ class XRDLoaders(object):
             data_obj.add_pattern("PROJECTION", core_dir = projdir, slice_dir = projsli)# two translation axes
         if mData.get_meta_data("is_tomo"):
             data_obj.add_pattern("SINOGRAM", core_dir = (rotation,projdir[-1]), slice_dir = projdir[:-2])#rotation and fast axis
+        #data_obj.add_pattern("DIFFRACTION", core_dir = (-2,-1), slice_dir = data_obj.data.shape[:-2])
         data_obj.add_pattern("DIFFRACTION", core_dir = (-2,-1), slice_dir = data_obj.data.shape[:-2])
         # now to load the calibration file
         calibrationfile = h5py.File(self.parameters['calibration_path'], 'r')

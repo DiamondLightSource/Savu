@@ -72,7 +72,8 @@ class PyfaiAzimuthalIntegrator(Filter, CpuPlugin):
         else:
             mask = np.zeros(data.shape)
         # now integrate in radius (1D)
-        fit=ai.integrate1d(data,1005,mask=mask, unit="q_nm^-1", error_model="poisson")
+        npts = np.round(np.sqrt(data.shape[0]**2 + data.shape[1]**2))
+        fit=ai.integrate1d(data,npts,mask=mask, unit="q_nm^-1", error_model="poisson")
         mData.set_meta_data('integrated_diffraction_angle',fit[0])
         mData.set_meta_data('integrated_diffraction_noise',fit[2])
         return fit[1]
@@ -113,6 +114,8 @@ class PyfaiAzimuthalIntegrator(Filter, CpuPlugin):
 
         # set pattern for this plugin and the shape
         out_d1.set_current_pattern_name("SPECTRUM")# output a spectrum
-        out_d1.set_shape(in_d1.remove_dark_and_flat())
+        sh = in_d1.get_shape()
+        npts = int(np.round(np.sqrt(sh[-1]**2+sh[-2]**2))) # get the maximum pixel width
+        out_d1.set_shape(sh[:3] + (npts,))# need to figure how to do this properly
         # set frame chunk
         out_d1.set_nFrames(chunk_size)
