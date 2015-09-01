@@ -209,7 +209,7 @@ class Hdf5Transport(TransportMechanism):
 
         for sl in slice_list:
             section = in_data.get_padded_slice_data(sl, padding, in_data)
-            result = plugin.filter_frame(section)
+            result = plugin.filter_frame(section, params)
             
             if type(result) == dict:
                 for key in result.keys():

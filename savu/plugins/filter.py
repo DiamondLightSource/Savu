@@ -58,7 +58,7 @@ class Filter(Plugin):
         return 8
 
 
-    def filter_frame(self, data):
+    def filter_frame(self, data, params):
         """
         Should be overloaded by filter classes extending this one
 

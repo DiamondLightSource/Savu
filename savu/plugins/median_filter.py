@@ -48,7 +48,7 @@ class MedianFilter(Filter, CpuPlugin):
         padding = (self.parameters['kernel_size'][0]-1)/2
         return {st.CD_PROJECTION:padding} # change this
 
-    def filter_frame(self, data):
+    def filter_frame(self, data, params):
         logging.debug("Running Filter data")
         result = sig.medfilt(data, self.parameters['kernel_size'])
         return result
