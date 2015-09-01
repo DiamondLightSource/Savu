@@ -35,11 +35,17 @@ class FastxrfFitting(Filter, CpuPlugin):
     """
     fast fluorescence fitting with FastXRF. Needs to be on the path
     
+    :param fit_elements: The elements to fit. Default: ['Zn', 'Cu', 'Fe', 'Cr', 'Cl', 'Br', 'Kr'].
+    :param detector_type: The type of detector we are using. Default: 'Vortex_SDD_Xspress'
     :param sample_attenuators: A dictionary of the attentuators used and their thickness. Default: ''.
     :param detector_distance: sample distance to the detector in mm. Default: 70.
-    :param detector_distance: Distance to the detector in mm. Default: 70.
-    :param fit_elements: The elements to fit. Default: ['Zn', 'Cu', 'Fe', 'Cr', 'Cl', 'Br', 'Kr'].
-    :param exit_angle: Distance to the detector in mm. Default: 70.
+    :param exit_angle: in degrees. Default: 90.
+    :param incident_angle: in degrees. Default: 0.
+    :param flux: flux in. Default: 649055.0
+    :param background: type of background subtraction. Default: 'strip'
+    :param fit_range: energy of the fit range. Default: [2., 18.]
+    :param include_pileup: Should we included pileup effects. Default: 1
+    :param include_escape: Should we included escape peaks in the fit. Default: 1
     """
 
     def __init__(self):
@@ -55,11 +61,7 @@ class FastxrfFitting(Filter, CpuPlugin):
     def pre_process(self, exp):
         """
         This method is called after the plugin has been created by the
-        pipeline framework as a pre-processing step
-
-        :param parameters: A dictionary of the parameters for this plugin, or
-            None if no customisation is required
-        :type parameters: dict
+        pipeline framework as a pre-processing step.
         """
         in_data_list = self.parameters["in_datasets"]
         in_d1 = exp.index["in_data"][in_data_list[0]]
@@ -72,7 +74,7 @@ class FastxrfFitting(Filter, CpuPlugin):
         datadict["Experiment"]["incident_energy_keV"] = mData.get_meta_data["mono_energy"]
         datadict["Experiment"]["collection_time"] = 1
         datadict["Detectors"]={}
-        datadict["Detectors"]["type"] = dettype
+        datadict["Detectors"]["type"] = self.parameters[]
         
         xrfd=XRFDataset()
         xrfd._createSpectraMatrix()
