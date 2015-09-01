@@ -133,11 +133,13 @@ class PyfaiAzimuthalIntegrator(Filter, CpuPlugin):
         # argument copyKeys = [your list of keys to copy], or alternatively, 
         # removeKeys = [your list of keys to remove]
         out_d1.meta_data.copy_dictionary(in_d1.meta_data.get_dictionary(), rawFlag=True)
-
-        # set pattern for this plugin and the shape
-        out_d1.set_current_pattern_name("SPECTRUM")# output a spectrum
         sh = in_d1.get_shape()
         npts = int(np.round(np.sqrt(sh[-1]**2+sh[-2]**2))) # get the maximum pixel width
         out_d1.set_shape(sh[:3] + (npts,))# need to figure how to do this properly
+        
+        out_d1.add_pattern("SPECTRUM", core_dir = (len(in_d1.get_shape()),), slice_dir = range(0,len(in_d1.get_shape())-1,1))
+        # set pattern for this plugin and the shape
+        out_d1.set_current_pattern_name("SPECTRUM")# output a spectrum
+
         # set frame chunk
         out_d1.set_nFrames(chunk_size)
