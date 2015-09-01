@@ -147,7 +147,7 @@ class Hdf5TransportData(object):
                 tup = it.multi_index + (slice(None),)
                 slice_list.append(tuple(np.array(tup)[mapping_array]))
                 it.iternext()
-            
+
         return slice_list
 
     
@@ -162,6 +162,7 @@ class Hdf5TransportData(object):
 
 
     def group_slice_list(self, slice_list, max_frames):
+        print "max_frames", max_frames
         banked = []
         batch = []
         step = -1
@@ -208,6 +209,7 @@ class Hdf5TransportData(object):
     
     def get_grouped_slice_list(self):
         max_frames = self.get_nFrames()
+        print "max frames is", max_frames
         max_frames = (1 if max_frames is None else max_frames)
 
         sl = self.get_slice_list()
@@ -218,8 +220,10 @@ class Hdf5TransportData(object):
         if sl is None:
             raise Exception("Data type", self.get_current_pattern_name(), 
                             "does not support slicing in directions", 
-                            self.get_slice_directions())            
+                            self.get_slice_directions())
+    
         gsl = self.group_slice_list(sl, max_frames)
+
         return gsl
 
 
@@ -346,70 +350,3 @@ class Hdf5TransportData(object):
         result = padded_dataset[tuple(slice_list_3)]
         return result
 
-#class SliceAvailableWrapper(object):
-#    """
-#    This class takes 2 datasets, one available boolean ndarray, and 1 data
-#    ndarray.  Its purpose is to provide slices from the data array only if data
-#    has been put there, and to allow a convenient way to put slices into the
-#    data array, and set the available array to True
-#    """
-#    def __init__(self, avail, data):
-#        """
-#        :param avail: The available boolean ndArray
-#        :type avail: boolean ndArray
-#        :param data: The data ndArray
-#        :type data: any ndArray
-#        """
-#        self.avail = avail
-#        self.data = data
-#
-#        
-#    def __deepcopy__(self, memo):
-#        return self
-#        
-#        
-#    def __getitem__(self, item):
-#        if self.avail[item].all():
-#            #return np.squeeze(self.data[item])
-#            return self.data[item]
-#        else:
-#            return None
-#
-#
-#    def __setitem__(self, item, value):
-#        #self.data[item] = value.reshape(self.data[item].shape)
-#        self.data[item] = value
-#        self.avail[item] = True
-#        return self.data[item]
-#        #return np.squeeze(self.data[item])
-#        
-#        
-#    def __getattr__(self, name):
-#        """
-#        Delegate everything else to the data class
-#        """
-#        value = self.data.__getattribute__(name)
-#        return value
-#
-#
-#class SliceAlwaysAvailableWrapper(SliceAvailableWrapper):
-#    """
-#    This class takes 1 data ndarray.  Its purpose is to provide slices from the
-#    data array in the same way as the SliceAvailableWrapper but assuming the
-#    data is always available (for example in the case of the input file)
-#    """
-#    def __init__(self, data):
-#        """
-#
-#        :param data: The data ndArray
-#        :type data: any ndArray
-#        """
-#        super(SliceAlwaysAvailableWrapper, self).__init__(None, data)
-#
-#    @logmethod
-#    def __getitem__(self, item):
-#        return self.data[item]
-#
-#    @logmethod
-#    def __setitem__(self, item, value):
-#        self.data[item] = value

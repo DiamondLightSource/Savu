@@ -103,7 +103,7 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         out_d1.set_current_pattern_name("SINOGRAM")
         out_d1.set_shape(in_d1.remove_dark_and_flat())
         # set frame chunk
-        out_d1.set_nFrames(chunk_size)
+        out_d1.set_nFrames(chunk_size)        
 
         #----------------------------------------------------------------
                         

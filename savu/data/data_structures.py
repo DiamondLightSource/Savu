@@ -146,12 +146,7 @@ class Pattern(object):
         
         
     def get_nFrames(self):
-        self.meta_data.get_meta_data("nFrames")
-
-
-#    def get_frame(self, indices):
-#        index = self.get_index(indices)
-#        return np.squeeze(self.data[index])
+        return self.meta_data.get_meta_data("nFrames")
 
 
     def get_index(self, indices):
@@ -323,6 +318,7 @@ class TomoRaw(object):
     def get_frame_raw(self, slice_list):
         pattern = self.get_current_pattern_name()
         image_slice = self.get_image_key_slice()
+        print image_slice
         new_slice_list = []
         if pattern is "SINOGRAM":
             for sl in slice_list:
