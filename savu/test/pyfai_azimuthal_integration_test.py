@@ -27,34 +27,14 @@ from savu.test import test_utils as tu
 from savu.core.plugin_runner import PluginRunner
 
 
-class PluginRunnerTest(unittest.TestCase):
+class PyfaiAzimuthalIntegrationTest(unittest.TestCase):
 
-    def test_tomo(self):
-        options = {
-            "transport": "hdf5",
-            "process_names": "CPU0",
-            "data_file": tu.get_test_data_path('24737.nxs'),
-            "process_file": tu.get_test_data_path('basic_tomo_process.nxs'),
-            "out_path": tempfile.mkdtemp()
-            }
-        PluginRunner(options)
-
-    def test_stxm(self):
-        options = {
-            "transport": "hdf5",
-            "process_names": "CPU0",
-            "data_file": tu.get_test_data_path('stxm.nxs'),
-            "process_file": tu.get_test_data_path('basic_stxm_process.nxs'),
-            "out_path": tempfile.mkdtemp()
-            }
-        PluginRunner(options)
-
-    def test_xrd(self):
+    def test_Pyfai(self):
         options = {
             "transport": "hdf5",
             "process_names": "CPU0",
             "data_file": tu.get_test_data_path('xrd_test.nxs'),
-            "process_file": tu.get_test_data_path('basic_stxm_process.nxs'),
+            "process_file": tu.get_test_data_path('PyFAI_azimuth_test.nxs'),
             "out_path": tempfile.mkdtemp()
             }
         PluginRunner(options)

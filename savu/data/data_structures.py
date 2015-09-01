@@ -50,7 +50,8 @@ class Pattern(object):
                         "VOLUME_YZ",
                         "VOLUME_XZ", 
                         "VOLUME_XY",
-                        "SPECTRUM"] # added spectrum adp 17th August
+                        "SPECTRUM",
+                        "DIFFRACTION"] # added spectrum adp 17th August, Added diffraction 28th August adp
         return pattern_list                        
                 
                 
@@ -70,7 +71,6 @@ class Pattern(object):
 
     def get_patterns(self):
         return self.meta_data.get_meta_data("data_patterns")
-
 
     def get_nPattern(self):
         temp = 1

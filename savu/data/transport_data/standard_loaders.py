@@ -113,10 +113,8 @@ class FluorescenceLoaders(object):
 
 
     def loader_setup(self, exp):
-        
-        base_classes = [ds.TomoRaw]
-        data_obj = exp.create_data_object("in_data", "fluo", base_classes)
-        data_obj.meta_data.set_meta_data("base_classes", base_classes)
+        exp.create_data_object("in_data", "fluo")
+
 
     def load_from_nx_fluo(self, exp):
         """
@@ -213,10 +211,8 @@ class STXMLoaders(object):
         self.loader_setup(exp)
 
     def loader_setup(self, exp):
+        exp.create_data_object("in_data", "stxm")
         
-        base_classes = [ds.TomoRaw]
-        data_obj = exp.create_data_object("in_data", "stxm", base_classes)
-        data_obj.meta_data.set_meta_data("base_classes", base_classes)
 
 
     def load_from_nx_stxm(self, exp):
@@ -233,7 +229,9 @@ class STXMLoaders(object):
         logging.debug("Creating file '%s' '%s'", 'stxm_entry', data_obj.backing_file.filename)
         # now lets extract the fluo entry so we can figure out our geometries!
         finder = _NXAppFinder(application="NXstxm")
-        stxm_entry = finder.get_NXapp(data_obj.backing_file, 'entry1/')[0]
+
+        stxm_entry = finder.get_NXapp(data_obj.backing_file, 'entry1/')
+        print stxm_entry.name
         mData = data_obj.meta_data
         beam = exp.meta_data
         #lets get the data out
@@ -311,9 +309,7 @@ class XRDLoaders(object):
 
     def loader_setup(self, exp):
         
-        base_classes = [ds.TomoRaw]
-        data_obj = exp.create_data_object("in_data", "xrd", base_classes)
-        data_obj.meta_data.set_meta_data("base_classes", base_classes)
+        exp.create_data_object("in_data", "xrd")
 
     def load_from_nx_xrd(self, exp):
         """
@@ -391,15 +387,16 @@ class XRDLoaders(object):
         if mData.get_meta_data("is_map"):
             data_obj.add_pattern("PROJECTION", core_dir = projdir, slice_dir = projsli)# two translation axes
         if mData.get_meta_data("is_tomo"):
-            data_obj.add_pattern("SINOGRAM", core_dir = (rotation,projdir[-1]), slice_dir = projdir[:-1])#rotation and fast axis
-        
+            data_obj.add_pattern("SINOGRAM", core_dir = (rotation,projdir[-1]), slice_dir = projdir[:-2])#rotation and fast axis
+        #data_obj.add_pattern("DIFFRACTION", core_dir = (-2,-1), slice_dir = data_obj.data.shape[:-2])
+        data_obj.add_pattern("DIFFRACTION", core_dir = (-2,-1), slice_dir = data_obj.data.shape[:-2])
         # now to load the calibration file
         calibrationfile = h5py.File(self.parameters['calibration_path'], 'r')
         
         mData.set_meta_data("beam_center_x", calibrationfile['/entry/instrument/detector/beam_center_x'])
         mData.set_meta_data("beam_center_y", calibrationfile['/entry/instrument/detector/beam_center_y'])
         mData.set_meta_data("distance", calibrationfile['/entry/instrument/detector/distance'])
-        beam.set_meta_data("incident_wavelength", calibrationfile['/entry/calibration_sample/beam/incident_wavelength'])
+        mData.set_meta_data("incident_wavelength", calibrationfile['/entry/calibration_sample/beam/incident_wavelength'])
         mData.set_meta_data("x_pixel_size", calibrationfile['/entry/instrument/detector/x_pixel_size'])
         mData.set_meta_data("detector_orientation", calibrationfile['/entry/instrument/detector/detector_orientation'])
 
