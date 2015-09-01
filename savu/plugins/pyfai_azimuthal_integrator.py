@@ -72,14 +72,17 @@ class PyfaiAzimuthalIntegrator(Filter, CpuPlugin):
         #Transform
         yaw = math.degrees(-math.atan2(orien[2,0], orien[2,2]))
         roll = math.degrees(-math.atan2(orien[0,1], orien[1,1]))
+        print yaw, roll 
         #set
         ai.setFit2D(distance, bc[0],bc[1], -yaw, roll, px, px, None)
         ai.set_wavelength(wl)
+        
         sh = in_d1.get_shape()
+        
         if (self.parameters["use_mask"]):
             mask = mData.get_meta_data("mask")
         else:
-            mask = np.zeros(sh)
+            mask = np.zeros((sh[-2],sh[-1]))
         # now integrate in radius (1D)
         npts = int(np.round(np.sqrt(sh[-1]**2+sh[-2]**2)))
         params = [mask,npts,mData,ai]
@@ -91,8 +94,8 @@ class PyfaiAzimuthalIntegrator(Filter, CpuPlugin):
         mask =params[0]
         ai = params[3]
         logging.debug("Running azimuthal integration")
-        
-        fit=ai.integrate1d(data,npts,mask=mask, unit="q_nm^-1", error_model="poisson")
+
+        fit=ai.integrate1d(data=data[0,...],npt=npts,mask=mask, unit="q_nm^-1", error_model="poisson")
         mData.set_meta_data('integrated_diffraction_angle',fit[0])
         mData.set_meta_data('integrated_diffraction_noise',fit[2])
         return fit[1]

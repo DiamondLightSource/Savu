@@ -35,8 +35,11 @@ class FastxrfFitting(Filter, CpuPlugin):
     """
     fast fluorescence fitting with FastXRF. Needs to be on the path
     
-    :param use_mask: Should we mask. Default: True.
-
+    :param sample_attenuators: A dictionary of the attentuators used and their thickness. Default: ''.
+    :param detector_distance: sample distance to the detector in mm. Default: 70.
+    :param detector_distance: Distance to the detector in mm. Default: 70.
+    :param fit_elements: The elements to fit. Default: ['Zn', 'Cu', 'Fe', 'Cr', 'Cl', 'Br', 'Kr'].
+    :param exit_angle: Distance to the detector in mm. Default: 70.
     """
 
     def __init__(self):
