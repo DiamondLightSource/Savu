@@ -203,20 +203,25 @@ class Hdf5Transport(TransportMechanism):
         in_data = in_data[0]
         out_data = out_data[0]
                                 
-        [slice_list, frame_list] = in_data.get_slice_list_per_process(expInfo)
-        
+        [in_slice_list, frame_list] = in_data.get_slice_list_per_process(expInfo)
+        [out_slice_list, frame_list] = out_data.get_slice_list_per_process(expInfo)
         padding = plugin.get_filter_padding()
 
-        for sl in slice_list:
-            section = in_data.get_padded_slice_data(sl, padding, in_data)
+        for count in range(len(in_slice_list)):
+            section = in_data.get_padded_slice_data(in_slice_list, padding, in_data)
             result = plugin.filter_frame(section, params)
             
             if type(result) == dict:
                 for key in result.keys():
                     if key == 'center_of_rotation':
-                        frame = in_data.get_orthogonal_slice(sl, in_data.core_directions[plugin.get_filter_frame_type()])
+                        frame = in_data.get_orthogonal_slice(in_slice_list, 
+                        in_data.core_directions[plugin.get_filter_frame_type()])
                         out_data.center_of_rotation[frame] = result[key]
                     elif key == 'data':
-                        out_data.data[sl] = in_data.get_unpadded_slice_data(sl, padding, in_data, result)
+                        out_data.data[out_slice_list[count]] = \
+                        in_data.get_unpadded_slice_data(in_slice_list, padding,
+                                                            in_data, result)
             else:
-                out_data.data[sl] = in_data.get_unpadded_slice_data(sl, padding, in_data, result)
+                out_data.data[out_slice_list[count]] = \
+                in_data.get_unpadded_slice_data(in_slice_list, padding, 
+                                                in_data, result)
