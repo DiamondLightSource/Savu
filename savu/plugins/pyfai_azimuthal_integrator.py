@@ -48,17 +48,26 @@ class PyfaiAzimuthalIntegrator(Filter, CpuPlugin):
     
     def get_max_frames(self):
         return 1
+    
+    def pre_process(self, exp):
+        """
+        This method is called after the plugin has been created by the
+        pipeline framework as a pre-processing step
 
-    def filter_frame(self, data):
-        logging.debug("Running azimuthal integration")
+        :param parameters: A dictionary of the parameters for this plugin, or
+            None if no customisation is required
+        :type parameters: dict
+        """
+        in_data_list = self.parameters["in_datasets"]
+        in_d1 = exp.index["in_data"][in_data_list[0]]
         mData = in_d1.meta_data # the metadata
         ai = pyFAI.AzimuthalIntegrator()# get me an integrator object
         ### prep the goemtry
-        bc = [mData.get_meta_data("beam_center_x"), mData.get_meta_data("beam_center_y")]
-        distance = mData.get_meta_data('distance')
-        wl = mData.get_meta_data('incident_wavelength')*1e-9
-        px = mData.get_meta_data('/entry/instrument/detector/x_pixel_size')*1e3
-        orien = mData.get_meta_data('/entry/instrument/detector/detector_orientation').reshape((3,3))
+        bc = [mData.get_meta_data("beam_center_x")[...], mData.get_meta_data("beam_center_y")[...]]
+        distance = mData.get_meta_data('distance')[...]
+        wl = mData.get_meta_data('incident_wavelength')[...]*1e-9
+        px = mData.get_meta_data('x_pixel_size')[...]*1e3
+        orien = mData.get_meta_data('detector_orientation')[...].reshape((3,3))
          
         #Transform
         yaw = math.degrees(-math.atan2(orien[2,0], orien[2,2]))
@@ -66,13 +75,23 @@ class PyfaiAzimuthalIntegrator(Filter, CpuPlugin):
         #set
         ai.setFit2D(distance, bc[0],bc[1], -yaw, roll, px, px, None)
         ai.set_wavelength(wl)
-        
+        sh = in_d1.get_shape()
         if (self.parameters["use_mask"]):
             mask = mData.get_meta_data("mask")
         else:
-            mask = np.zeros(data.shape)
+            mask = np.zeros(sh)
         # now integrate in radius (1D)
-        npts = np.round(np.sqrt(data.shape[0]**2 + data.shape[1]**2))
+        npts = int(np.round(np.sqrt(sh[-1]**2+sh[-2]**2)))
+        params = [mask,npts,mData,ai]
+        return params
+        
+    def filter_frame(self, data, params):
+        mData = params[2]
+        npts = params[1]
+        mask =params[0]
+        ai = params[3]
+        logging.debug("Running azimuthal integration")
+        
         fit=ai.integrate1d(data,npts,mask=mask, unit="q_nm^-1", error_model="poisson")
         mData.set_meta_data('integrated_diffraction_angle',fit[0])
         mData.set_meta_data('integrated_diffraction_noise',fit[2])
