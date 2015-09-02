@@ -106,8 +106,10 @@ class FastxrfFitting(Filter, CpuPlugin):
         xrfd = params['xrfd']
         xrfd.datadict['data'] = data[0,...]
         xrfd.fitbatch()
-        fit = xrfd.fitdict
-        return fit
+        characteristic_curves=xrfd.matrixdict["Total_Matrix"]
+        weights = xrfd.fitdict['parameters']
+        op = characteristic_curves*weights
+        return op
          
     def setup(self, experiment):
 
@@ -144,13 +146,82 @@ class FastxrfFitting(Filter, CpuPlugin):
         xrfd.fitdict['chisq'] - NUMBER
         xrfd.fitdict['resid']   SPECTRUM
         - the rest is easy (ish)
-        '''
+        for now, will just hack it slightly...(sorry :-S)
+        '''        
+        # will force the code to tell me what it will output!DO IT
+        mData = in_d1.meta_data
+        datadict = {}
+        xrfd=XRFDataset()
+        # first chuck in the fitting parameters
+        xrfd.paramdict["FitParams"]["background"] = self.parameters['background']
+        xrfd.paramdict["FitParams"]["fitted_energy_range_keV"] = self.parameters['fit_range']
+        xrfd.paramdict["FitParams"]["include_pileup"] = self.parameters['include_pileup']
+        xrfd.paramdict["FitParams"]["include_escape"] = self.parameters['include_escape']
+        xrfd.paramdict["Experiment"]['elements'] = self.parameters['fit_elements']
+        datadict["cols"] = 1
+        datadict["rows"] = 1
+        datadict["Experiment"]={}
+        datadict["Experiment"]["incident_energy_keV"] = mData.get_meta_data["mono_energy"]
+        datadict["Experiment"]["collection_time"] =1. #or indeed anything. This isn't used!
+        datadict["Detectors"]={}
+        datadict["Detectors"]["type"] = self.parameters['detector_type']
+        npts = xrfd.paramdict['Detectors'][datadict["Detectors"]["type"]]['no_of_pixels']
+        datadict["average_spectrum"] = np.zeros((npts,))
+        xrfd.xrfdata(datadict)
+        
+        xrfd._createSpectraMatrix()
+        
+        metadata=xrfd.matrixdict['Descriptions']
+        num_els = len(xrfd.matrixdict['Descriptions'])
+        spectrum_length = len(xrfd.paramdict["FitParams"]["mca_channels_used"][0])
+        
+        
         out_data_list = self.parameters["out_datasets"]
         out_d1 = experiment.create_data_object("out_data", out_data_list[0])
-        out_d1.copy_patterns(in_d1.get_patterns())
+
         out_d1.meta_data.copy_dictionary(in_d1.meta_data.get_dictionary(), rawFlag=True)
+        out_d1.meta_data.add_meta_data('Curve_names',metadata)
+        characteristic_curves=xrfd.matrixdict["Total_Matrix"]
+        out_d1.meta_data.add_meta_data('Characteristic_curves',characteristic_curves)
         # set pattern for this plugin and the shape
-        out_d1.set_current_pattern_name("SPECTRUM")# output a spectrum
-        out_d1.set_shape(in_d1.get_shape())# need to figure how to do this properly
+        inshape = in_d1.get_shape()
+        outshape = inshape[:3]+(num_els, spectrum_length)
+        out_d1.set_shape(outshape)#
+        
+        # now to set the output data patterns
+        out_d1.add_pattern("SPECTRUM", core_dir = (-1,), slice_dir = range(len(out_d1.getshape())-1))
+        out_d1.add_pattern("CHANNEL", core_dir = (-2,), slice_dir = range(len(out_d1.getshape())-2).append(-1))
+        # we haven't changed the motors yet so...
+        motor_type=mData.get_meta_data("motor_type")
+        projection = []
+        projection_slice = []
+        for item,key in enumerate(motor_type):
+            if key == 'translation':
+                projection.append(item)
+            elif key !='translation':
+                projection_slice.append(item)
+            if key == 'rotation':
+                rotation = item # we will assume one rotation for now to save my headache
+        projdir = tuple(projection)
+        projsli = tuple(projection_slice)
+
+
+        if mData.get_meta_data("is_map"):
+            ndims = range(len(out_d1.getshape()))
+            ovs = []
+            for i in ndims:
+                if i!=projdir[0]:
+                    if i!=projdir[1]:
+                        ovs.append(i)
+            out_d1.add_pattern("PROJECTION", core_dir = projdir, slice_dir = ovs)# two translation axes
+            
+        if mData.get_meta_data("is_tomo"):
+            ndims = range(len(out_d1.getshape()))
+            ovs = []
+            for i in ndims:
+                if i!=rotation:
+                    if i!=projdir[1]:
+                        ovs.append(i)
+            out_d1.add_pattern("SINOGRAM", core_dir = (rotation,projdir[-1]), slice_dir = ovs)#rotation and fast axis
         # set frame chunk
         out_d1.set_nFrames(chunk_size)

@@ -51,7 +51,8 @@ class Pattern(object):
                         "VOLUME_XZ", 
                         "VOLUME_XY",
                         "SPECTRUM",
-                        "DIFFRACTION"] # added spectrum adp 17th August, Added diffraction 28th August adp
+                        "DIFFRACTION",
+                        "CHANNEL"] # added spectrum adp 17th August, Added diffraction 28th August adp
         return pattern_list                        
                 
                 
