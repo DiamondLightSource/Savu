@@ -34,7 +34,7 @@ class PyfaiAzimuthalIntegrationTest(unittest.TestCase):
             "transport": "hdf5",
             "process_names": "CPU0",
             "data_file": tu.get_test_data_path('xrd_test.nxs'),
-            "process_file": tu.get_test_data_path('PyFAI_azimuth_test.nxs'),
+            "process_file": tu.get_test_data_path('PyFAI_azimuth_test2.nxs'),
             "out_path": tempfile.mkdtemp()
             }
         PluginRunner(options)
