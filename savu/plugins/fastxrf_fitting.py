@@ -73,27 +73,29 @@ class FastxrfFitting(Filter, CpuPlugin):
         xrfd=XRFDataset()
         # now to overide the experiment
         xrfd.paramdict["Experiment"]={}
-        xrfd.paramdict["Experiment"]["incident_energy_keV"] = mData.get_meta_data["mono_energy"]
+        xrfd.paramdict["Experiment"]["incident_energy_keV"] = 17.#mData.get_meta_data("mono_energy")
         xrfd.paramdict["Experiment"]["collection_time"] = 1
-        xrfd.paramdict["Experiment"]['Attenuators'] = self.parameters['sample_attenuators']
-        xrfd.paramdict["Experiment"]['detector_distance'] = self.parameters['detector_distance']
-        xrfd.paramdict["Experiment"]['elements'] = self.parameters['fit_elements']
-        xrfd.paramdict["Experiment"]['incident_angle'] = self.parameters['incident_angle']
-        xrfd.paramdict["Experiment"]['exit_angle'] = self.parameters['exit_angle']
-        xrfd.paramdict["Experiment"]['photon_flux'] = self.parameters['flux']
+        xrfd.paramdict["Experiment"]['Attenuators'] = ''#self.parameters['sample_attenuators']
+        xrfd.paramdict["Experiment"]['detector_distance'] = 70.#self.parameters['detector_distance']
+        xrfd.paramdict["Experiment"]['elements'] = ['Zn', 'Cu', 'Fe', 'Cr', 'Cl', 'Br', 'Kr']#self.parameters['fit_elements']
+        xrfd.paramdict["Experiment"]['incident_angle'] = 0.#self.parameters['incident_angle']
+        xrfd.paramdict["Experiment"]['exit_angle'] = 90.#self.parameters['exit_angle']
+        xrfd.paramdict["Experiment"]['photon_flux'] = 649055.0#self.parameters['flux']
         # overide the detector
-        xrfd.paramdict["Detectors"]={}
-        xrfd.paramdict["Detectors"]["type"] = self.parameters['detector_type']
+#         xrfd.paramdict["Detectors"]={}
+#         xrfd.paramdict["Detectors"]["type"] = 'Vortex_SDD_Xspress'#str(self.parameters['detector_type'])
         # overide the fitting parameters
-        xrfd.paramdict["FitParams"]["background"] = self.parameters['background']
-        xrfd.paramdict["FitParams"]["fitted_energy_range_keV"] = self.parameters['fit_range']
-        xrfd.paramdict["FitParams"]["include_pileup"] = self.parameters['include_pileup']
-        xrfd.paramdict["FitParams"]["include_escape"] = self.parameters['include_escape']
+        xrfd.paramdict["FitParams"]["background"] = 'strip'#self.parameters['background']
+        xrfd.paramdict["FitParams"]["fitted_energy_range_keV"] = [2., 18.]#self.parameters['fit_range']
+        xrfd.paramdict["FitParams"]["include_pileup"] = 1#self.parameters['include_pileup']
+        xrfd.paramdict["FitParams"]["include_escape"] = 1#self.parameters['include_escape']
         
         datadict = {}
         datadict["rows"] = self.get_max_frames()
         datadict["cols"] = 1
-        datadict["average_spectrum"] = self.parameters['average_spectrum']
+        datadict["average_spectrum"] = np.ones((4096,))#self.parameters['average_spectrum']
+        datadict["Detectors"]={}
+        datadict["Detectors"]["type"] = 'Vortex_SDD_Xspress'
         xrfd.xrfdata(datadict)
         xrfd._createSpectraMatrix()
         #I only know the output shape here!xrfd.matrixdict['Total_Matrix'].shape
@@ -103,12 +105,13 @@ class FastxrfFitting(Filter, CpuPlugin):
         
     def filter_frame(self, data, params):
         logging.debug("Running azimuthal integration")
-        xrfd = params['xrfd']
+        xrfd = params[0]
         xrfd.datadict['data'] = data[0,...]
         xrfd.fitbatch()
         characteristic_curves=xrfd.matrixdict["Total_Matrix"]
         weights = xrfd.fitdict['parameters']
         op = characteristic_curves*weights
+        op = op.swapaxes(0,1)
         return op
          
     def setup(self, experiment):
@@ -153,22 +156,23 @@ class FastxrfFitting(Filter, CpuPlugin):
         datadict = {}
         xrfd=XRFDataset()
         # first chuck in the fitting parameters
-        xrfd.paramdict["FitParams"]["background"] = self.parameters['background']
+        xrfd.paramdict["FitParams"]["background"] = 'strip'#self.parameters['background']
         xrfd.paramdict["FitParams"]["fitted_energy_range_keV"] = self.parameters['fit_range']
-        xrfd.paramdict["FitParams"]["include_pileup"] = self.parameters['include_pileup']
-        xrfd.paramdict["FitParams"]["include_escape"] = self.parameters['include_escape']
-        xrfd.paramdict["Experiment"]['elements'] = self.parameters['fit_elements']
+        xrfd.paramdict["FitParams"]["include_pileup"] = 1#self.parameters['include_pileup']
+        xrfd.paramdict["FitParams"]["include_escape"] = 1#self.parameters['include_escape']
+        xrfd.paramdict["Experiment"]['elements'] = ['Zn', 'Cu', 'Fe', 'Cr', 'Cl', 'Br', 'Kr']#self.parameters['fit_elements']
+        print type(self.parameters['fit_elements'])
         datadict["cols"] = 1
         datadict["rows"] = 1
         datadict["Experiment"]={}
-        datadict["Experiment"]["incident_energy_keV"] = mData.get_meta_data["mono_energy"]
+        datadict["Experiment"]["incident_energy_keV"] = 18.#mData.get_meta_data("mono_energy")
         datadict["Experiment"]["collection_time"] =1. #or indeed anything. This isn't used!
         datadict["Detectors"]={}
-        datadict["Detectors"]["type"] = self.parameters['detector_type']
+        datadict["Detectors"]["type"] = 'Vortex_SDD_Xspress'#self.parameters['detector_type']
         npts = xrfd.paramdict['Detectors'][datadict["Detectors"]["type"]]['no_of_pixels']
         datadict["average_spectrum"] = np.zeros((npts,))
         xrfd.xrfdata(datadict)
-        
+        print type(datadict["Experiment"]["incident_energy_keV"])
         xrfd._createSpectraMatrix()
         
         metadata=xrfd.matrixdict['Descriptions']
@@ -180,17 +184,19 @@ class FastxrfFitting(Filter, CpuPlugin):
         out_d1 = experiment.create_data_object("out_data", out_data_list[0])
 
         out_d1.meta_data.copy_dictionary(in_d1.meta_data.get_dictionary(), rawFlag=True)
-        out_d1.meta_data.add_meta_data('Curve_names',metadata)
+        out_d1.meta_data.set_meta_data('Curve_names',metadata)
         characteristic_curves=xrfd.matrixdict["Total_Matrix"]
-        out_d1.meta_data.add_meta_data('Characteristic_curves',characteristic_curves)
+        out_d1.meta_data.set_meta_data('Characteristic_curves',characteristic_curves)
         # set pattern for this plugin and the shape
+        out_d1.set_current_pattern_name("SPECTRUM_STACK")
         inshape = in_d1.get_shape()
         outshape = inshape[:3]+(num_els, spectrum_length)
         out_d1.set_shape(outshape)#
         
         # now to set the output data patterns
-        out_d1.add_pattern("SPECTRUM", core_dir = (-1,), slice_dir = range(len(out_d1.getshape())-1))
-        out_d1.add_pattern("CHANNEL", core_dir = (-2,), slice_dir = range(len(out_d1.getshape())-2).append(-1))
+        out_d1.add_pattern("SPECTRUM_STACK", core_dir = (-2,-1), slice_dir = range(len(outshape)-2))# for some reason I HAVE to have this.... annoying
+        out_d1.add_pattern("SPECTRUM", core_dir = (-1,), slice_dir = range(len(outshape)-1))
+        out_d1.add_pattern("CHANNEL", core_dir = (-2,), slice_dir = range(len(outshape)-2).append(-1))
         # we haven't changed the motors yet so...
         motor_type=mData.get_meta_data("motor_type")
         projection = []
@@ -207,7 +213,7 @@ class FastxrfFitting(Filter, CpuPlugin):
 
 
         if mData.get_meta_data("is_map"):
-            ndims = range(len(out_d1.getshape()))
+            ndims = range(len(outshape))
             ovs = []
             for i in ndims:
                 if i!=projdir[0]:
@@ -216,7 +222,7 @@ class FastxrfFitting(Filter, CpuPlugin):
             out_d1.add_pattern("PROJECTION", core_dir = projdir, slice_dir = ovs)# two translation axes
             
         if mData.get_meta_data("is_tomo"):
-            ndims = range(len(out_d1.getshape()))
+            ndims = range(len(outshape))
             ovs = []
             for i in ndims:
                 if i!=rotation:
@@ -224,4 +230,5 @@ class FastxrfFitting(Filter, CpuPlugin):
                         ovs.append(i)
             out_d1.add_pattern("SINOGRAM", core_dir = (rotation,projdir[-1]), slice_dir = ovs)#rotation and fast axis
         # set frame chunk
+        print outshape
         out_d1.set_nFrames(chunk_size)

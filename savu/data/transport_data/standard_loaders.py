@@ -139,9 +139,9 @@ class FluorescenceLoaders(object):
         data_obj.set_shape(data_obj.data.shape) # and set its shape
         # and the energy axis
         energy = data_obj.backing_file[fluo_entry.name+'/data/energy']
-        mono_energy = data_obj.backing_file[fluo_entry.name+'/instrument/monochromator/energy']
+        mono_energy = data_obj.backing_file[fluo_entry.name+'/instrument/monochromator/energy'].value
         mData.set_meta_data("energy", energy)
-        beam.set_meta_data("mono_energy", mono_energy) # global since it is to do with the beam
+        mData.set_meta_data("mono_energy", mono_energy) # global since it is to do with the beam
         #and get the mono energy
         
         # now lets extract the map, if there is one!

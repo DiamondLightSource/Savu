@@ -33,7 +33,7 @@ class FastxrfTest(unittest.TestCase):
         options = {
             "transport": "hdf5",
             "process_names": "CPU0",
-            "data_file": tu.get_test_data_path('xrd_test.nxs'),
+            "data_file": tu.get_test_data_path('fluo.nxs'),
             "process_file": tu.get_test_data_path('basic_fastxrf_process.nxs'),
             "out_path": tempfile.mkdtemp()
             }
