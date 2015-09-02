@@ -137,7 +137,7 @@ class PyfaiAzimuthalIntegrator(Filter, CpuPlugin):
         npts = int(np.round(np.sqrt(sh[-1]**2+sh[-2]**2))) # get the maximum pixel width
         out_d1.set_shape(sh[:3] + (npts,))# need to figure how to do this properly
         
-        out_d1.add_pattern("SPECTRUM", core_dir = (len(in_d1.get_shape()),), slice_dir = range(0,len(in_d1.get_shape())-1,1))
+        out_d1.add_pattern("SPECTRUM", core_dir = (len(in_d1.get_shape()) - 2,), slice_dir = range(0,len(in_d1.get_shape())-2,1))
         # set pattern for this plugin and the shape
         out_d1.set_current_pattern_name("SPECTRUM")# output a spectrum
 

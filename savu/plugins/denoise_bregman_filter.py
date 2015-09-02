@@ -49,7 +49,7 @@ class DenoiseBregmanFilter(Filter, CpuPlugin):
         return {}
     
     def get_max_frames(self):
-        return
+        return 8
 
     def filter_frame(self, data, params):
         logging.debug("Running Denoise")
