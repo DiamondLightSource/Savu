@@ -98,6 +98,7 @@ class PyfaiAzimuthalIntegrator(Filter, CpuPlugin):
         fit=ai.integrate1d(data=data[0,...],npt=npts,mask=mask, unit="q_nm^-1", error_model="poisson")
         mData.set_meta_data('integrated_diffraction_angle',fit[0])
         mData.set_meta_data('integrated_diffraction_noise',fit[2])
+        print "I ran"
         return fit[1]
         
     def setup(self, experiment):
@@ -138,7 +139,7 @@ class PyfaiAzimuthalIntegrator(Filter, CpuPlugin):
         out_d1.set_shape(sh[:3] + (npts,))# need to figure how to do this properly
         
         core_dir = (len(in_d1.get_shape())-2,)
-        #print core_dir
+        
         out_d1.add_pattern("SPECTRUM", core_dir = core_dir, slice_dir = range(0,core_dir[0],1))
 
 
