@@ -46,6 +46,7 @@ class FastxrfFitting(Filter, CpuPlugin):
     :param fit_range: energy of the fit range. Default: [2., 18.]
     :param include_pileup: Should we included pileup effects. Default: 1
     :param include_escape: Should we included escape peaks in the fit. Default: 1
+    :param average_spectrum: pass it an average to do the strip/snipping on. Default: None
     """
 
     def __init__(self):
@@ -66,25 +67,42 @@ class FastxrfFitting(Filter, CpuPlugin):
         in_data_list = self.parameters["in_datasets"]
         in_d1 = exp.index["in_data"][in_data_list[0]]
         mData = in_d1.meta_data # the metadata
-        datadict = {}
-        datadict["rows"] = 1
-        datadict["cols"] = 1
-        datadict["average_spectrum"] = dataSum
-        datadict["Experiment"]={}
-        datadict["Experiment"]["incident_energy_keV"] = mData.get_meta_data["mono_energy"]
-        datadict["Experiment"]["collection_time"] = 1
-        datadict["Detectors"]={}
-        datadict["Detectors"]["type"] = self.parameters[]
+        # populate the dictionary from the input parameters
+
         
         xrfd=XRFDataset()
+        # now to overide the experiment
+        xrfd.paramdict["Experiment"]={}
+        xrfd.paramdict["Experiment"]["incident_energy_keV"] = mData.get_meta_data["mono_energy"]
+        xrfd.paramdict["Experiment"]["collection_time"] = 1
+        xrfd.paramdict["Experiment"]['Attenuators'] = self.parameters['sample_attenuators']
+        xrfd.paramdict["Experiment"]['detector_distance'] = self.parameters['detector_distance']
+        xrfd.paramdict["Experiment"]['elements'] = self.parameters['fit_elements']
+        xrfd.paramdict["Experiment"]['incident_angle'] = self.parameters['incident_angle']
+        xrfd.paramdict["Experiment"]['exit_angle'] = self.parameters['exit_angle']
+        xrfd.paramdict["Experiment"]['photon_flux'] = self.parameters['flux']
+        # overide the detector
+        xrfd.paramdict["Detectors"]={}
+        xrfd.paramdict["Detectors"]["type"] = self.parameters['detector_type']
+        # overide the fitting parameters
+        xrfd.paramdict["FitParams"]["background"] = self.parameters['background']
+        xrfd.paramdict["FitParams"]["fitted_energy_range_keV"] = self.parameters['fit_range']
+        xrfd.paramdict["FitParams"]["include_pileup"] = self.parameters['include_pileup']
+        xrfd.paramdict["FitParams"]["include_escape"] = self.parameters['include_escape']
+        
+        datadict = {}
+        datadict["rows"] = self.get_max_frames()
+        datadict["cols"] = 1
+        datadict["average_spectrum"] = self.parameters['average_spectrum']
         xrfd._createSpectraMatrix()
         xrfd.xrfdata(datadict)
         params = [xrfd]
         return params
         
     def filter_frame(self, data, params):
-        xrfd = params['xrfd']
         logging.debug("Running azimuthal integration")
+        xrfd = params['xrfd']
+        xrfd.datadict['data'] = data[0,...]
         xrfd.fitbatch()
         fit = xrfd.fitdict
         return fit
@@ -100,7 +118,7 @@ class FastxrfFitting(Filter, CpuPlugin):
         # get all input dataset objects
         in_d1 = experiment.index["in_data"][in_data_list[0]]
         # set all input data patterns
-        in_d1.set_current_pattern_name("DIFFRACTION") # we take in a pattern
+        in_d1.set_current_pattern_name("SPECTRUM") # we take in a pattern
         # set frame chunk
         in_d1.set_nFrames(chunk_size)
         
