@@ -94,8 +94,10 @@ class FastxrfFitting(Filter, CpuPlugin):
         datadict["rows"] = self.get_max_frames()
         datadict["cols"] = 1
         datadict["average_spectrum"] = self.parameters['average_spectrum']
-        xrfd._createSpectraMatrix()
         xrfd.xrfdata(datadict)
+        xrfd._createSpectraMatrix()
+        #I only know the output shape here!xrfd.matrixdict['Total_Matrix'].shape
+        
         params = [xrfd]
         return params
         
@@ -126,25 +128,29 @@ class FastxrfFitting(Filter, CpuPlugin):
 
         #------------------setup output datasets-------------------------
 
-        # get a list of output dataset names created by this plugin
+        # get a list of output dataset names created by this plugin        
+        '''
+        This type of dataset should output a few things I think.
+        1/ Concentration/sum map (including the channel name)
+        2/ The average fit
+        3/ The background/scattering fit
+        4/ The chisq
+        5/ The residual (another spectrum I guess...)
+       
+        if I have these:
+        for i,j in enumerate(xrfd.matrixdict['Descriptions']):print i,j DICT -descriptions
+        xrfd.matrixdict['Total_Matrix'] # CHARACTERISTIC CURVES
+        xrfd.fitdict['parameters'] # WEIGHTS
+        xrfd.fitdict['chisq'] - NUMBER
+        xrfd.fitdict['resid']   SPECTRUM
+        - the rest is easy (ish)
+        '''
         out_data_list = self.parameters["out_datasets"]
-        
-        # create all out_data objects and associated patterns and meta_data
-        # patterns can be copied, added or both
         out_d1 = experiment.create_data_object("out_data", out_data_list[0])
-        
         out_d1.copy_patterns(in_d1.get_patterns())
-        # copy the entire in_data dictionary (image_key, dark and flat will 
-        #be removed since out_data is no longer an instance of TomoRaw)
-        # If you do not want to copy the whole dictionary pass the key word
-        # argument copyKeys = [your list of keys to copy], or alternatively, 
-        # removeKeys = [your list of keys to remove]
         out_d1.meta_data.copy_dictionary(in_d1.meta_data.get_dictionary(), rawFlag=True)
-
         # set pattern for this plugin and the shape
         out_d1.set_current_pattern_name("SPECTRUM")# output a spectrum
-        sh = in_d1.get_shape()
-        npts = int(np.round(np.sqrt(sh[-1]**2+sh[-2]**2))) # get the maximum pixel width
-        out_d1.set_shape(sh[:3] + (npts,))# need to figure how to do this properly
+        out_d1.set_shape(in_d1.get_shape())# need to figure how to do this properly
         # set frame chunk
         out_d1.set_nFrames(chunk_size)
