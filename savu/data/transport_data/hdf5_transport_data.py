@@ -251,9 +251,14 @@ class Hdf5TransportData(object):
         processes = expInfo.get_meta_data("processes")
         process = expInfo.get_meta_data("process")
         #slice_list = self.get_grouped_slice_list()
+
+        # *** The next 3 lines are temporary to remove group slicing until fixed.
+        # Using empty_array_slice_list() because get_slice_list() doesn't return 
+        # dimensions of length 1 and it was easier for me to adapt my version to do this.
         slice_list = self.empty_array_slice_list()
         if isinstance(self, ds.TomoRaw):
             slice_list = self.get_frame_raw(slice_list)
+
         
         frame_index = np.arange(len(slice_list))
         frames = np.array_split(frame_index, len(processes))[process]
