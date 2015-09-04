@@ -123,11 +123,13 @@ class FluorescenceLoaders(object):
         :param path: The full path of the NeXus file to load.
         :type path: str
         """
+        import numpy as np
         # set up the file handles
         data_obj = exp.index["in_data"]["fluo"]
         mData = data_obj.meta_data # the application meta data
         
         data_obj.backing_file = h5py.File(exp.meta_data.get_meta_data("data_file"), 'r')
+        
         mData.set_meta_data("backing_file", data_obj.backing_file)
         logging.debug("Creating file '%s' '%s'", 'fluo_entry', data_obj.backing_file.filename)
         # now lets extract the fluo entry so we can figure out our geometries!
@@ -136,12 +138,16 @@ class FluorescenceLoaders(object):
         beam = exp.meta_data
         #lets get the data out
         data_obj.data = data_obj.backing_file[fluo_entry.name+'/instrument/fluorescence/data']
+        
         data_obj.set_shape(data_obj.data.shape) # and set its shape
+
+        average = np.mean(np.mean(np.mean(data_obj.data, axis=0),axis=0),axis=0)
         # and the energy axis
         energy = data_obj.backing_file[fluo_entry.name+'/data/energy']
         mono_energy = data_obj.backing_file[fluo_entry.name+'/instrument/monochromator/energy'].value
         mData.set_meta_data("energy", energy)
         mData.set_meta_data("mono_energy", mono_energy) # global since it is to do with the beam
+        mData.set_meta_data("average", average)
         #and get the mono energy
         
         # now lets extract the map, if there is one!
@@ -230,8 +236,7 @@ class STXMLoaders(object):
         # now lets extract the fluo entry so we can figure out our geometries!
         finder = _NXAppFinder(application="NXstxm")
 
-        stxm_entry = finder.get_NXapp(data_obj.backing_file, 'entry1/')
-        print stxm_entry.name
+        stxm_entry = finder.get_NXapp(data_obj.backing_file, 'entry1/')[0]
         mData = data_obj.meta_data
         beam = exp.meta_data
         #lets get the data out

@@ -93,7 +93,7 @@ class FastxrfFitting(Filter, CpuPlugin):
         datadict = {}
         datadict["rows"] = self.get_max_frames()
         datadict["cols"] = 1
-        datadict["average_spectrum"] = np.ones((4096,))#self.parameters['average_spectrum']
+        datadict["average_spectrum"] = mData.get_meta_data("average")#self.parameters['average_spectrum']
         datadict["Detectors"]={}
         datadict["Detectors"]["type"] = 'Vortex_SDD_Xspress'
         xrfd.xrfdata(datadict)
@@ -170,7 +170,7 @@ class FastxrfFitting(Filter, CpuPlugin):
         datadict["Detectors"]={}
         datadict["Detectors"]["type"] = self.parameters['detector_type']
         npts = xrfd.paramdict['Detectors'][datadict["Detectors"]["type"]]['no_of_pixels']
-        datadict["average_spectrum"] = np.zeros((npts,))
+        datadict["average_spectrum"] = mData.get_meta_data("average")
         xrfd.xrfdata(datadict)
         print type(datadict["Experiment"]["incident_energy_keV"])
         xrfd._createSpectraMatrix()
