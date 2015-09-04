@@ -198,7 +198,8 @@ class Hdf5TransportData(object):
             raise Exception("Data type", self.get_current_pattern_name(), 
                             "does not support slicing in directions", 
                             self.get_slice_directions())
-                            
+                     
+         # *** Temporarily removedS            
 #        gsl = self.grouped_slice_list(sl, max_frames)
 #        return gsl
         return sl
