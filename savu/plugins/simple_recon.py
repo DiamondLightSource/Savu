@@ -40,12 +40,10 @@ class SimpleRecon(BaseRecon, CpuPlugin):
         super(SimpleRecon, self).__init__("SimpleRecon")
 
     def _filter(self, sinogram):
-        print sinogram.shape
         ff = np.arange(sinogram.shape[0])
         ff -= sinogram.shape[0]/2
         ff = np.abs(ff)
         fs = np.fft.fft(sinogram)
-        print fs.shape, ff.shape
         ffs = fs*ff
         return np.fft.ifft(ffs).real
 

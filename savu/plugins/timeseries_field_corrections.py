@@ -117,5 +117,5 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
     
     
     def get_max_frames(self):
-        return 8
+        return 1
     

@@ -169,13 +169,16 @@ class Hdf5Transport(TransportMechanism):
         flat = in_data.meta_data.get_meta_data("flat")
 
         [in_slice_list, frame_list] = in_data.get_slice_list_per_process(expInfo)
-        [out_slice_list, frame_list] = out_data.get_slice_list_per_process(expInfo)        
+        [out_slice_list, frame_list] = out_data.get_slice_list_per_process(expInfo)
 
         for count in range(len(in_slice_list)):
             idx = frame_list[count]
             out_data.data[out_slice_list[count]] = \
                       plugin.correction(in_data.data[in_slice_list[count]], 
                                         dark[idx,:], flat[idx,:], params)
+        
+        in_slice_list = in_data.get_grouped_slice_list()
+
         
             
     @logmethod
@@ -202,9 +205,12 @@ class Hdf5Transport(TransportMechanism):
         
         in_data = in_data[0]
         out_data = out_data[0]
-                                
+                          
+                          
+        
         [in_slice_list, frame_list] = in_data.get_slice_list_per_process(expInfo)
         [out_slice_list, frame_list] = out_data.get_slice_list_per_process(expInfo)
+
         padding = plugin.get_filter_padding()        
 
         for count in range(len(in_slice_list)):
