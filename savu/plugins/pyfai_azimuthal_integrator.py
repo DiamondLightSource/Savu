@@ -35,7 +35,7 @@ class PyfaiAzimuthalIntegrator(Filter, CpuPlugin):
     """
     1D azimuthal integrator by pyFAI
     
-    :param use_mask: Should we mask. Default: True.
+    :param use_mask: Should we mask. Default: False.
 
     """
 
@@ -94,8 +94,8 @@ class PyfaiAzimuthalIntegrator(Filter, CpuPlugin):
         mask =params[0]
         ai = params[3]
         logging.debug("Running azimuthal integration")
-
-        fit=ai.integrate1d(data=data[0,...],npt=npts,mask=mask, unit="q_nm^-1", error_model="poisson")
+        print np.squeeze(data).shape
+        fit=ai.integrate1d(data=np.squeeze(data),npt=npts,mask=mask, unit="q_nm^-1", error_model="poisson")
         mData.set_meta_data('integrated_diffraction_angle',fit[0])
         mData.set_meta_data('integrated_diffraction_noise',fit[2])
         print "I ran"

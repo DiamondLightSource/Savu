@@ -54,7 +54,17 @@ class PluginRunnerTest(unittest.TestCase):
             "transport": "hdf5",
             "process_names": "CPU0",
             "data_file": tu.get_test_data_path('xrd_test.nxs'),
-            "process_file": tu.get_test_data_path('basic_stxm_process.nxs'),
+            "process_file": tu.get_test_data_path('basic_xrd_process.nxs'),
+            "out_path": tempfile.mkdtemp()
+            }
+        PluginRunner(options)
+        
+    def test_multimodal(self):
+        options = {
+            "transport": "hdf5",
+            "process_names": "CPU0",
+            "data_file": tu.get_test_data_path('mm.nxs'),
+            "process_file": tu.get_test_data_path('MMtest.nxs'),
             "out_path": tempfile.mkdtemp()
             }
         PluginRunner(options)
