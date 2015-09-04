@@ -198,7 +198,7 @@ class FluorescenceLoaders(object):
                 rotation = item # we will assume one rotation for now to save my headache
         projdir = tuple(projection)
         projsli = tuple(projection_slice)
-        data_obj.add_pattern("SPECTRUM", core_dir = (-1,), slice_dir = data_obj.data.shape[:-1])
+        data_obj.add_pattern("SPECTRUM", core_dir = (-1,), slice_dir = range(len(data_obj.data.shape)-1))
         if mData.get_meta_data("is_map"):
             data_obj.add_pattern("PROJECTION", core_dir = projdir, slice_dir = projsli)# two translation axes
         if mData.get_meta_data("is_tomo"):

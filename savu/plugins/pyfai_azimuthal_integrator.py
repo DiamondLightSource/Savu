@@ -98,7 +98,6 @@ class PyfaiAzimuthalIntegrator(Filter, CpuPlugin):
         fit=ai.integrate1d(data=np.squeeze(data),npt=npts,mask=mask, unit="q_nm^-1", error_model="poisson")
         mData.set_meta_data('integrated_diffraction_angle',fit[0])
         mData.set_meta_data('integrated_diffraction_noise',fit[2])
-        print "I ran"
         return fit[1]
         
     def setup(self, experiment):

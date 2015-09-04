@@ -39,8 +39,8 @@ class FastxrfFitting(Filter, CpuPlugin):
     :param detector_type: The type of detector we are using. Default: 'Vortex_SDD_Xspress'.
     :param sample_attenuators: A dictionary of the attentuators used and their thickness. Default: ''.
     :param detector_distance: sample distance to the detector in mm. Default: 70.
-    :param exit_angle: in degrees. Default: 90.
-    :param incident_angle: in degrees. Default: 0.
+    :param exit_angle: in degrees. Default: 90.0.
+    :param incident_angle: in degrees. Default: 0.0.
     :param flux: flux in. Default: 649055.0.
     :param background: type of background subtraction. Default: 'strip'.
     :param fit_range: energy of the fit range. Default: [2., 18.].
@@ -77,7 +77,7 @@ class FastxrfFitting(Filter, CpuPlugin):
         xrfd.paramdict["Experiment"]["collection_time"] = 1
         xrfd.paramdict["Experiment"]['Attenuators'] = self.parameters['sample_attenuators']
         xrfd.paramdict["Experiment"]['detector_distance'] = self.parameters['detector_distance']
-        xrfd.paramdict["Experiment"]['elements'] = self.parameters['fit_elements'][0].split(',')#['Zn', 'Cu', 'Fe', 'Cr', 'Cl', 'Br', 'Kr']#
+        xrfd.paramdict["Experiment"]['elements'] = self.parameters['fit_elements'].split(',')#['Zn', 'Cu', 'Fe', 'Cr', 'Cl', 'Br', 'Kr']#
         xrfd.paramdict["Experiment"]['incident_angle'] = self.parameters['incident_angle']
         xrfd.paramdict["Experiment"]['exit_angle'] = self.parameters['exit_angle']
         xrfd.paramdict["Experiment"]['photon_flux'] = self.parameters['flux']
@@ -106,7 +106,9 @@ class FastxrfFitting(Filter, CpuPlugin):
     def filter_frame(self, data, params):
         logging.debug("Running azimuthal integration")
         xrfd = params[0]
-        xrfd.datadict['data'] = data[0,...]
+        print np.squeeze(data).shape
+        xrfd.datadict['data'] = np.squeeze(data)
+        print "I'm here"
         xrfd.fitbatch()
         characteristic_curves=xrfd.matrixdict["Total_Matrix"]
         weights = xrfd.fitdict['parameters']
@@ -160,8 +162,8 @@ class FastxrfFitting(Filter, CpuPlugin):
         xrfd.paramdict["FitParams"]["fitted_energy_range_keV"] = self.parameters['fit_range']
         xrfd.paramdict["FitParams"]["include_pileup"] = self.parameters['include_pileup']
         xrfd.paramdict["FitParams"]["include_escape"] = self.parameters['include_escape']
-        xrfd.paramdict["Experiment"]['elements'] = self.parameters['fit_elements'][0].split(',')
-        print type(self.parameters['fit_elements'])
+        xrfd.paramdict["Experiment"]['elements'] = self.parameters['fit_elements'].split(',')
+        print xrfd.paramdict["Experiment"]['elements'],type(xrfd.paramdict["Experiment"]['elements'])
         datadict["cols"] = 1
         datadict["rows"] = 1
         datadict["Experiment"]={}
@@ -170,9 +172,9 @@ class FastxrfFitting(Filter, CpuPlugin):
         datadict["Detectors"]={}
         datadict["Detectors"]["type"] = self.parameters['detector_type']
         npts = xrfd.paramdict['Detectors'][datadict["Detectors"]["type"]]['no_of_pixels']
-        datadict["average_spectrum"] = mData.get_meta_data("average")
+        datadict["average_spectrum"] = np.zeros((npts,))#mData.get_meta_data("average")
         xrfd.xrfdata(datadict)
-        print type(datadict["Experiment"]["incident_energy_keV"])
+        #print type(datadict["Experiment"]["incident_energy_keV"])
         xrfd._createSpectraMatrix()
         
         metadata=xrfd.matrixdict['Descriptions']
