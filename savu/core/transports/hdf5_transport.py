@@ -218,8 +218,8 @@ class Hdf5Transport(TransportMechanism):
 
         padding = plugin.get_filter_padding()        
 
-        section = []
         for count in range(len(in_slice_list[0])):            
+            section = []
             for ind in range(len(in_data)):
                 section.append(in_data[ind].get_padded_slice_data(
                             in_slice_list[ind][count], padding, in_data[ind]))

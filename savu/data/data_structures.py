@@ -269,8 +269,6 @@ class Data(Pattern):
             shape = tuple(shape)
         except KeyError:
             pass
-        
-        print "getting the shape", shape
         return shape
 
 
