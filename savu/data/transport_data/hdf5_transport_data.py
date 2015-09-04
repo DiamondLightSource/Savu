@@ -27,7 +27,6 @@ import logging
 import numpy as np
 
 import savu.data.data_structures as ds
-from savu.core.utils import logmethod
 
 class Hdf5TransportData(object):
     """
@@ -161,33 +160,52 @@ class Hdf5TransportData(object):
             end = start + length[0]
             banked.append(slice_list[start:end])
         
-        return banked
+        return [banked, length[0], slice_dirs[0]]
 
 
     def grouped_slice_list(self, slice_list, max_frames):
-        banked = self.banked_list(slice_list)
+        #**** A work in progress - Mark you may like to delete this and start again ;-)
+        [banked, length, slice_dir] = self.banked_list(slice_list)
 
-        # now combine the groups into single slices
         grouped = []
-        for step, group in banked:
-            # get the group of slices and the slice step ready
-            working_slice = list(group[0])
-            step_dir = step.index(max(step))
-            start = group[0][step_dir]
-            stop = group[-1][step_dir]
-            # using the start and stop points, step through in steps of 
-            # max_slice
-            #******************************************************************
-            # FIXME THIS IS ALMOST CERTAINLY WRONG AS IT DOSE NOT WORK FOR 
-            # LISTS WHICH ARE NOT MULTIPLES OF MAX_FRAMES
-            #******************************************************************
-            for i in range(start, stop, max_frames):
-                new_slice = slice(i, i+max_frames, step[step_dir])
-                working_slice[step_dir] = new_slice
+        for group in banked:
+            index = len(group) if (length % max_frames) is 0 else (len(group)-1)
+            frames = index*max_frames
+            working_slice = list(group[0])            
+            
+            for i in range(0, frames, max_frames):
+                new_slice = slice(i, i+max_frames, 1)
+                working_slice[slice_dir] = new_slice
                 grouped.append(tuple(working_slice))
-        return grouped
-        banked = []
-
+                
+            if index is not len(group):
+                new_slice = slice(i+max_frames, len(group))
+                
+#        grouped = []
+#        for group in index:
+            
+                
+#        # now combine the groups into single slices
+#        grouped = []
+#        for step, group in banked:
+#            # get the group of slices and the slice step ready
+#            working_slice = list(group[0])
+#            step_dir = step.index(max(step))
+#            start = group[0][step_dir]
+#            stop = group[-1][step_dir]
+#            # using the start and stop points, step through in steps of 
+#            # max_slice
+#            #******************************************************************
+#            # FIXME THIS IS ALMOST CERTAINLY WRONG AS IT DOSE NOT WORK FOR 
+#            # LISTS WHICH ARE NOT MULTIPLES OF MAX_FRAMES
+#            #******************************************************************
+#            for i in range(start, stop, max_frames):
+#                new_slice = slice(i, i+max_frames, step[step_dir])
+#                working_slice[step_dir] = new_slice
+#                grouped.append(tuple(working_slice))
+#        return grouped
+#        banked = []
+        pass
 
     def get_grouped_slice_list(self):
         max_frames = self.get_nFrames()
@@ -203,8 +221,8 @@ class Hdf5TransportData(object):
                             "does not support slicing in directions", 
                             self.get_slice_directions())
                      
-         # *** Temporarily removedS            
-#        gsl = self.grouped_slice_list(sl, max_frames)
+         # *** Temporarily removed
+        #gsl = self.grouped_slice_list(sl, max_frames)
 #        return gsl
         return sl
         

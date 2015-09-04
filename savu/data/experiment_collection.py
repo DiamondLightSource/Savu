@@ -74,3 +74,4 @@ class Experiment(object):
 
     def clear_out_data_objects(self):
         self.index["out_data"] = {}
+        
