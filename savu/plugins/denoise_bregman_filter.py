@@ -52,6 +52,7 @@ class DenoiseBregmanFilter(Filter, CpuPlugin):
         return 8
 
     def filter_frame(self, data, params):
+        data = data[0]
         logging.debug("Running Denoise")
         weight = self.parameters['weight']
         max_iter = self.parameters['max_iterations']
