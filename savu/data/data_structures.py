@@ -34,7 +34,6 @@ class Pattern(object):
 
     def __init__(self):
         self.meta_data_setup()
-
         
     def meta_data_setup(self):
         pattern_list = self.set_available_pattern_list()
@@ -123,14 +122,47 @@ class Pattern(object):
                         instance of ", self.get_current_pattern_name()))
 
 
-    def get_slice_directions(self):
-        slice_dir = self.get_patterns()[self.get_current_pattern_name()]['slice_dir']
-        return self.non_negative_directions(slice_dir)
+    def get_slice_directions(self):                
+        try:
+            [fix_dirs, value] = self.get_fixed_directions()
+        except KeyError:
+            fix_dirs = []
+            
+        slice_dirs = self.get_patterns()[self.get_current_pattern_name()]['slice_dir']
+        to_slice = set(list(slice_dirs)).symmetric_difference(set(fix_dirs))
+        return self.non_negative_directions(tuple(to_slice))
 
 
     def get_core_directions(self):
         core_dir = self.get_patterns()[self.get_current_pattern_name()]['core_dir']
         return self.non_negative_directions(core_dir)
+
+
+    def set_fixed_directions(self, dims, values):
+        slice_dirs = self.get_slice_directions()
+        for dim in dims:
+            if dim in slice_dirs:
+                self.meta_data.set_meta_data("fixed_directions", dims)
+                self.meta_data.set_meta_data("fixed_directions_values", values)
+            else:
+                raise Exception("You are trying to fix a direction that is not a slicing direction")
+
+        
+    def get_fixed_directions(self):
+        try:
+            fixed = self.meta_data.get_meta_data("fixed_directions")
+            values = self.meta_data.get_meta_data("fixed_directions_values")
+        except KeyError:
+            fixed = []; values = []
+        return [fixed, values]
+        
+
+    def delete_fixed_directions(self):
+        try:
+            del self.meta_data.dict["fixed_directions"]
+            del self.meta_data.dict["fixed_directions_values"]
+        except KeyError:
+            pass
         
 
     def non_negative_directions(self, ddirs):
@@ -228,7 +260,18 @@ class Data(Pattern):
         
    
     def get_shape(self):
-        return self.meta_data.get_meta_data('shape')
+        shape = self.meta_data.get_meta_data('shape')
+        try:
+            dirs = self.meta_data.get_meta_data("fixed_directions")
+            shape = list(shape)
+            for ddir in dirs:
+                shape[ddir] = 1
+            shape = tuple(shape)
+        except KeyError:
+            pass
+        
+        print "getting the shape", shape
+        return shape
 
 
     def set_dist(self, dist):

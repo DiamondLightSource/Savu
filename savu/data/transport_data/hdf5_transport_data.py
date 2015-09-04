@@ -105,7 +105,8 @@ class Hdf5TransportData(object):
             repeat: how many times does the sequence of chunked numbers repeat        
         :rtype: [int, int, int]
         """        
-        sshape = [shape[sslice] for sslice in slice_dirs]        
+        sshape = [shape[sslice] for sslice in slice_dirs]
+        print slice_dirs, sshape
         chunk = []; length = []; repeat = []
         for dim in range(len(slice_dirs)):
             chunk.append(int(np.prod(shape[0:dim])))
@@ -131,14 +132,17 @@ class Hdf5TransportData(object):
 
     def single_slice_list(self):
         slice_dirs = self.get_slice_directions()
+        [fix_dirs, value] = self.get_fixed_directions() 
         shape = self.get_shape()
         index = self.get_slice_dirs_index(slice_dirs, np.array(shape))
         nSlices = index.shape[1]
         nDims = len(shape)
 
         slice_list = []
-        for i in range(nSlices):
+        for i in range(nSlices):            
             getitem = [slice(None)]*nDims
+            for f in range(len(fix_dirs)):
+                getitem[fix_dirs[f]] = slice(value[f], value[f] + 1, 1)
             for sdir in range(len(slice_dirs)):
                 getitem[slice_dirs[sdir]] = slice(index[sdir, i], index[sdir, i] + 1, 1)
             slice_list.append(tuple(getitem))        

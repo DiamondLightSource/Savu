@@ -133,6 +133,11 @@ class Hdf5Transport(TransportMechanism):
                 MPI.COMM_WORLD.Barrier()
                 logging.debug("Blocking till all processes complete")
         
+            # delete fixed directions, as this is related only to the finished 
+            # plugin and not to the dataset 
+            for in_objs in plugin.parameters["in_datasets"]:
+                exp.index["in_data"][in_objs].delete_fixed_directions()
+        
             # close any files that are no longer required
             for out_objs in plugin.parameters["out_datasets"]:
                 if out_objs in exp.index["in_data"].keys():
