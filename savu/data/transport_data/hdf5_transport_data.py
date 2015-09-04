@@ -94,120 +94,75 @@ class Hdf5TransportData(object):
             except:
                 pass
                 
+                                
+    def chunk_length_repeat(self, slice_dirs, shape):
+        """
+        For each slice dimension, determine 3 values relevant to the slicing.
+                :param avail: The available boolean ndArray
+        :returns: chunk, length, repeat
+            chunk: how many repeats of the same index value before an increment
+            length: the slice dimension length (sequence length)
+            repeat: how many times does the sequence of chunked numbers repeat        
+        :rtype: [int, int, int]
+        """        
+        sshape = [shape[sslice] for sslice in slice_dirs]        
+        chunk = []; length = []; repeat = []
+        for dim in range(len(slice_dirs)):
+            chunk.append(int(np.prod(shape[0:dim])))
+            length.append(sshape[dim])
+            repeat.append(int(np.prod(sshape[dim+1:])))
+            
+        return [chunk, length, repeat]
+                
 
     def get_slice_dirs_index(self, slice_dirs, shape):
+        # returns a list of arrays for each slice dimension , where each array
+        # gives the indices for that slice dimension
         # create the indexing array 
-        sshape = [shape[sslice] for sslice in slice_dirs]
-    
+        [chunk, length, repeat] = self.chunk_length_repeat(slice_dirs, shape)
         idx_list= []
         for dim in range(len(slice_dirs)):
-            chunk = np.prod(shape[0:dim])
-            length = sshape[dim]
-            repeat = np.prod(sshape[dim+1:])
-            idx = np.ravel(np.kron(np.arange(length), np.ones((repeat, chunk))))
+            c = chunk[dim]; l = length[dim]; r = repeat[dim]
+            idx = np.ravel(np.kron(np.arange(l), np.ones((r, c))))
             idx_list.append(idx.astype(int))
                     
         return np.array(idx_list)
 
 
-    def empty_array_slice_list(self):
+    def single_slice_list(self):
         slice_dirs = self.get_slice_directions()
         shape = self.get_shape()
-        nDims = len(shape)
         index = self.get_slice_dirs_index(slice_dirs, np.array(shape))
         nSlices = index.shape[1]
+        nDims = len(shape)
 
         slice_list = []
         for i in range(nSlices):
             getitem = [slice(None)]*nDims
             for sdir in range(len(slice_dirs)):
                 getitem[slice_dirs[sdir]] = slice(index[sdir, i], index[sdir, i] + 1, 1)
-            slice_list.append(tuple(getitem))
-
-        return slice_list
-
+            slice_list.append(tuple(getitem))        
         
-
-    def get_slice_list(self):
-        it = np.nditer(self.data, flags=['multi_index', 'refs_ok']) # what does this mean?
-        dirs_to_remove = list(self.get_core_directions())
-
-        if it.ndim is 0:
-            slice_list = self.empty_array_slice_list()
-        else:
-            dirs_to_remove.sort(reverse=True)
-            for direction in dirs_to_remove:
-                it.remove_axis(direction)
-            mapping_list = range(len(it.multi_index))        
-            dirs_to_remove.sort()
-            for direction in dirs_to_remove:
-                mapping_list.insert(direction, -1)
-            mapping_array = np.array(mapping_list)
-            slice_list = []
-            while not it.finished:
-                tup = it.multi_index + (slice(None),)
-                slice_list.append(tuple(np.array(tup)[mapping_array]))
-                it.iternext()
-
         return slice_list
 
-    
-    def calc_step(self, slice_a, slice_b):
-        result = []
-        for i in range(len(slice_a)):
-            if slice_a[i] == slice_b[i]:
-                result.append(0)
-            else:
-                result.append(slice_b[i] - slice_a[i])
-                
-        return result
 
-
-    def group_slice_list(self, slice_list, max_frames):
+    def banked_list(self, slice_list):
+        shape = self.get_shape()
+        slice_dirs = self.get_slice_directions()         
+        [chunk, length, repeat] = self.chunk_length_repeat(slice_dirs, shape)
+        
         banked = []
-        batch = []
-        step = -1
-        for sl in slice_list:
-            # set up for the first slice or after a batch has been appended
-            if len(batch) == 0:
-                batch.append(sl)
-                step = -1
-            # there is an unknown step size so find out what the step is
-            elif step == -1:
-                new_step = self.calc_step(batch[-1], sl)
-                # check stepping in 1 direction
-                if (np.array(new_step) > 0).sum() > 1:
-                    # we are stepping in multiple directions, end the batch
-                    # append it to the banked batches
-                    banked.append((step, batch))
-                    # reset the batch to an empty list
-                    batch = []
-                    # add the current slice to the batch
-                    batch.append(sl)
-                    # set the step as we dont know it
-                    step = -1
-                else:
-                    # we are stepping in one dimention so add this slice to the
-                    # batch and set the step size correctly
-                    batch.append(sl)
-                    step = new_step
-            else:
-                # we know the step size, so carry on with getting a batch of 
-                # data
-                new_step = self.calc_step(batch[-1], sl)
-                # make sure the steps are the same                
-                if new_step == step:
-                    # if so append the slice to the batch
-                    batch.append(sl)
-                else:
-                    # somthing has changed so add this step and batch to the 
-                    # banked list as before
-                    banked.append((step, batch))
-                    batch = []
-                    batch.append(sl)
-                    step = -1
-        banked.append((step, batch))
-    
+        for rep in range(repeat[0]):
+            start = rep*length[0]
+            end = start + length[0]
+            banked.append(slice_list[start:end])
+        
+        return banked
+
+
+    def grouped_slice_list(self, slice_list, max_frames):
+        banked = self.banked_list(slice_list)
+
         # now combine the groups into single slices
         grouped = []
         for step, group in banked:
@@ -227,13 +182,14 @@ class Hdf5TransportData(object):
                 working_slice[step_dir] = new_slice
                 grouped.append(tuple(working_slice))
         return grouped
-    
-    
+        banked = []
+
+
     def get_grouped_slice_list(self):
         max_frames = self.get_nFrames()
         max_frames = (1 if max_frames is None else max_frames)
 
-        sl = self.get_slice_list()
+        sl = self.single_slice_list()
 
         if isinstance(self, ds.TomoRaw):
             sl = self.get_frame_raw(sl)
@@ -243,24 +199,136 @@ class Hdf5TransportData(object):
                             "does not support slicing in directions", 
                             self.get_slice_directions())
                             
-        gsl = self.group_slice_list(sl, max_frames)
- 
-        return gsl
+#        gsl = self.grouped_slice_list(sl, max_frames)
+#        return gsl
+        return sl
+        
+
+#    def get_slice_list(self):
+#        it = np.nditer(self.data, flags=['multi_index', 'refs_ok']) # what does this mean?
+#        dirs_to_remove = list(self.get_core_directions())
+#
+#        if it.ndim is 0:
+#            slice_list = self.empty_array_slice_list()
+#        else:
+#            dirs_to_remove.sort(reverse=True)
+#            for direction in dirs_to_remove:
+#                it.remove_axis(direction)
+#            mapping_list = range(len(it.multi_index))        
+#            dirs_to_remove.sort()
+#            for direction in dirs_to_remove:
+#                mapping_list.insert(direction, -1)
+#            mapping_array = np.array(mapping_list)
+#            slice_list = []
+#            while not it.finished:
+#                tup = it.multi_index + (slice(None),)
+#                slice_list.append(tuple(np.array(tup)[mapping_array]))
+#                it.iternext()
+#
+#        return slice_list
+
+    
+#    def calc_step(self, slice_a, slice_b):
+#        result = []
+#        for i in range(len(slice_a)):
+#            if slice_a[i] == slice_b[i]:
+#                result.append(0)
+#            else:
+#                result.append(slice_b[i] - slice_a[i])
+#                
+#        return result
+#
+#
+#    def group_slice_list(self, slice_list, max_frames):
+#        banked = []
+#        batch = []
+#        step = -1
+#        for sl in slice_list:
+#            # set up for the first slice or after a batch has been appended
+#            if len(batch) == 0:
+#                batch.append(sl)
+#                step = -1
+#            # there is an unknown step size so find out what the step is
+#            elif step == -1:
+#                new_step = self.calc_step(batch[-1], sl)
+#                # check stepping in 1 direction
+#                if (np.array(new_step) > 0).sum() > 1:
+#                    # we are stepping in multiple directions, end the batch
+#                    # append it to the banked batches
+#                    banked.append((step, batch))
+#                    # reset the batch to an empty list
+#                    batch = []
+#                    # add the current slice to the batch
+#                    batch.append(sl)
+#                    # set the step as we dont know it
+#                    step = -1
+#                else:
+#                    # we are stepping in one dimention so add this slice to the
+#                    # batch and set the step size correctly
+#                    batch.append(sl)
+#                    step = new_step
+#            else:
+#                # we know the step size, so carry on with getting a batch of 
+#                # data
+#                new_step = self.calc_step(batch[-1], sl)
+#                # make sure the steps are the same                
+#                if new_step == step:
+#                    # if so append the slice to the batch
+#                    batch.append(sl)
+#                else:
+#                    # somthing has changed so add this step and batch to the 
+#                    # banked list as before
+#                    banked.append((step, batch))
+#                    batch = []
+#                    batch.append(sl)
+#                    step = -1
+#        banked.append((step, batch))
+#    
+#        # now combine the groups into single slices
+#        grouped = []
+#        for step, group in banked:
+#            # get the group of slices and the slice step ready
+#            working_slice = list(group[0])
+#            step_dir = step.index(max(step))
+#            start = group[0][step_dir]
+#            stop = group[-1][step_dir]
+#            # using the start and stop points, step through in steps of 
+#            # max_slice
+#            #******************************************************************
+#            # FIXME THIS IS ALMOST CERTAINLY WRONG AS IT DOSE NOT WORK FOR 
+#            # LISTS WHICH ARE NOT MULTIPLES OF MAX_FRAMES
+#            #******************************************************************
+#            for i in range(start, stop, max_frames):
+#                new_slice = slice(i, i+max_frames, step[step_dir])
+#                working_slice[step_dir] = new_slice
+#                grouped.append(tuple(working_slice))
+#        return grouped
+#    
+#    
+#    def get_grouped_slice_list(self):
+#        max_frames = self.get_nFrames()
+#        max_frames = (1 if max_frames is None else max_frames)
+#
+#        sl = self.get_slice_list()
+#
+#        if isinstance(self, ds.TomoRaw):
+#            sl = self.get_frame_raw(sl)
+#      
+#        if sl is None:
+#            raise Exception("Data type", self.get_current_pattern_name(), 
+#                            "does not support slicing in directions", 
+#                            self.get_slice_directions())
+#                            
+#        gsl = self.group_slice_list(sl, max_frames)
+# 
+#        return gsl
 
 
     def get_slice_list_per_process(self, expInfo):
         processes = expInfo.get_meta_data("processes")
         process = expInfo.get_meta_data("process")
-        #slice_list = self.get_grouped_slice_list()
+        slice_list = self.get_grouped_slice_list()
 
-        # *** The next 3 lines are temporary to remove group slicing until fixed.
-        # Using empty_array_slice_list() because get_slice_list() doesn't return 
-        # dimensions of length 1 and it was easier for me to adapt my version to do this.
-        slice_list = self.empty_array_slice_list()
-        if isinstance(self, ds.TomoRaw):
-            slice_list = self.get_frame_raw(slice_list)
-
-        
         frame_index = np.arange(len(slice_list))
         frames = np.array_split(frame_index, len(processes))[process]
         return [ slice_list[frames[0]:frames[-1]+1], frame_index ]

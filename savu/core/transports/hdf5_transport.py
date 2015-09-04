@@ -177,6 +177,9 @@ class Hdf5Transport(TransportMechanism):
                       plugin.correction(in_data.data[in_slice_list[count]], 
                                         dark[idx,:], flat[idx,:], params)
         
+        in_slice_list = in_data.get_grouped_slice_list()
+
+        
             
     @logmethod
     def reconstruction_setup(self, plugin, in_data, out_data, expInfo, params):
@@ -202,7 +205,9 @@ class Hdf5Transport(TransportMechanism):
         
         in_data = in_data[0]
         out_data = out_data[0]
-                                
+                          
+                          
+        
         [in_slice_list, frame_list] = in_data.get_slice_list_per_process(expInfo)
         [out_slice_list, frame_list] = out_data.get_slice_list_per_process(expInfo)
 
