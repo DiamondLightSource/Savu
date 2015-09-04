@@ -122,7 +122,8 @@ class Hdf5TransportData(object):
             getitem = [slice(None)]*nDims
             for sdir in range(len(slice_dirs)):
                 getitem[slice_dirs[sdir]] = slice(index[sdir, i], index[sdir, i] + 1, 1)
-                slice_list.append(tuple(getitem))
+            slice_list.append(tuple(getitem))
+
         return slice_list
 
         
@@ -158,6 +159,7 @@ class Hdf5TransportData(object):
                 result.append(0)
             else:
                 result.append(slice_b[i] - slice_a[i])
+                
         return result
 
 
@@ -206,7 +208,6 @@ class Hdf5TransportData(object):
                     step = -1
         banked.append((step, batch))
     
-
         # now combine the groups into single slices
         grouped = []
         for step, group in banked:
