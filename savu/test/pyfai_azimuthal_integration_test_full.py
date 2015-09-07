@@ -33,7 +33,7 @@ class PyfaiAzimuthalIntegrationTestFull(unittest.TestCase):
         options = {
             "transport": "hdf5",
             "process_names": "CPU0",
-            "data_file": '/media/My Passport/Steve_data/xrd_tester.nxs',
+            "data_file": '/media/My Passport/Steve_data/xrd_tester2.nxs',
             "process_file": tu.get_test_data_path('PyFAI_azimuth_test.nxs'),
             "out_path": tempfile.mkdtemp()
             }

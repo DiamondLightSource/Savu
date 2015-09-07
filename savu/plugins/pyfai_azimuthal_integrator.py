@@ -66,14 +66,12 @@ class PyfaiAzimuthalIntegrator(Filter, CpuPlugin):
         bc = [mData.get_meta_data("beam_center_x")[...], mData.get_meta_data("beam_center_y")[...]]
         distance = mData.get_meta_data('distance')[...]
         wl = mData.get_meta_data('incident_wavelength')[...]
-        px = mData.get_meta_data('x_pixel_size')[...]*1e3
+        px = mData.get_meta_data('x_pixel_size')[...]
         orien = mData.get_meta_data('detector_orientation')[...].reshape((3,3))
         #Transform
         yaw = math.degrees(-math.atan2(orien[2,0], orien[2,2]))
         roll = math.degrees(-math.atan2(orien[0,1], orien[1,1]))
-        print yaw, roll 
-        ai.setFit2D(200, 0,0, 0, 0, px, px, None)
-        #ai.setFit2D(distance, bc[0],bc[1], -yaw, roll, px, px, None)
+        ai.setFit2D(distance, bc[0],bc[1], -yaw, roll, px, px, None)
         ai.set_wavelength(wl)
         
         
