@@ -43,12 +43,9 @@ class NoProcessPlugin(Plugin, CpuPlugin):
         out_data = self.get_data_objects(exp.index, "out_data")
         
         in_data = in_data[0]
-        print "here"+str(in_data.data)
         out_data = out_data[0]
-        print in_data.get_shape(), out_data.get_shape()
-        thing = [method for method in dir(in_data) if callable(getattr(in_data, method))]
+
         print "performing the processing"
-        print thing
         slice_list = in_data.single_slice_list() #  I changed this to single_slice_list, from get_slice_list since for some reason get_slice_list wasn't found. adp 
         for sl in slice_list:
             temp = in_data.data[sl]
