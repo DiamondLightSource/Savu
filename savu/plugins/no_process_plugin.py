@@ -38,16 +38,18 @@ class NoProcessPlugin(Plugin, CpuPlugin):
 
 
     def process(self, exp, transport, params):
-
+        
         in_data = self.get_data_objects(exp.index, "in_data")
         out_data = self.get_data_objects(exp.index, "out_data")
         
         in_data = in_data[0]
+        print "here"+str(in_data.data)
         out_data = out_data[0]
-        print in_data.get_shape, out_data.get_shape
-
+        print in_data.get_shape(), out_data.get_shape()
+        thing = [method for method in dir(in_data) if callable(getattr(in_data, method))]
         print "performing the processing"
-        slice_list = in_data.get_slice_list()
+        print thing
+        slice_list = in_data.single_slice_list() #  I changed this to single_slice_list, from get_slice_list since for some reason get_slice_list wasn't found. adp 
         for sl in slice_list:
             temp = in_data.data[sl]
             out_data.data[sl] = temp        
@@ -71,7 +73,7 @@ class NoProcessPlugin(Plugin, CpuPlugin):
         # get all input dataset objects
         in_d1 = experiment.index["in_data"][in_data_list[0]]
         # set all input data patterns
-        in_d1.set_current_pattern_name("SINOGRAM")
+        in_d1.set_current_pattern_name(in_d1.get_patterns().keys()[0]) # have changed this to work on the first element of the pattern list rather SINOGRAM, since some datasets don't havea singoram adp
         # set frame chunk
         in_d1.set_nFrames(chunk_size)
         
@@ -95,7 +97,7 @@ class NoProcessPlugin(Plugin, CpuPlugin):
         out_d1.meta_data.copy_dictionary(in_d1.meta_data.get_dictionary(), rawFlag=True)
 
         # set pattern for this plugin and the shape
-        out_d1.set_current_pattern_name("SINOGRAM")
+        out_d1.set_current_pattern_name(in_d1.get_patterns().keys()[0])
         out_d1.set_shape(in_d1.get_shape())
         # set frame chunk
         out_d1.set_nFrames(chunk_size)

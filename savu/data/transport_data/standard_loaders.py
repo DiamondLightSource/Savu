@@ -21,9 +21,10 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
+import os.path as os
 import h5py
 import logging
-
+from savu.test import test_utils as tu
 import savu.data.data_structures as ds
 #from savu.data.transport_data.hdf5_transport_data import SliceAlwaysAvailableWrapper
 
@@ -235,8 +236,9 @@ class STXMLoaders(object):
         logging.debug("Creating file '%s' '%s'", 'stxm_entry', data_obj.backing_file.filename)
         # now lets extract the fluo entry so we can figure out our geometries!
         finder = _NXAppFinder(application="NXstxm")
-
+        print data_obj.backing_file
         stxm_entry = finder.get_NXapp(data_obj.backing_file, 'entry1/')[0]
+        print stxm_entry
         mData = data_obj.meta_data
         beam = exp.meta_data
         #lets get the data out
@@ -253,8 +255,8 @@ class STXMLoaders(object):
         cts = 0
         motors = []
         motor_type = []
-        if ((len(stxm_entry['data'].attrs["axes"])-1)>0):# the -1 here comes from the fact that the data is the last axis only
-            for ii in range(len(stxm_entry['data'].attrs["axes"])-1):
+        if ((len(stxm_entry['data'].attrs["axes"]))>0):# the -1 here comes from the fact that the data is the last axis only
+            for ii in range(len(stxm_entry['data'].attrs["axes"])):
                 if (stxm_entry['data/'+stxm_entry['data'].attrs["axes"][ii]].attrs['transformation_type']=="rotation"):# find the rotation axis
                     #what axis is this? Could we store it?
                     motors.append(data_obj.backing_file[stxm_entry.name+'/data/'+stxm_entry['data'].attrs["axes"][ii]])
@@ -296,9 +298,18 @@ class STXMLoaders(object):
         projdir = tuple(projection)
         projsli = tuple(projection_slice)
         if mData.get_meta_data("is_map"):
+            logging.debug("map")
             data_obj.add_pattern("PROJECTION", core_dir = projdir, slice_dir = projsli)# two translation axes
+            logging.debug("datshape="+str(data_obj.data.shape))
+            logging.debug("projection directions"+str(projdir))
+            logging.debug("slice directions"+str(projsli))
+            #logging.debug("slice directions %s",projsli)
         if mData.get_meta_data("is_tomo"):
+            logging.debug("tomo")
             data_obj.add_pattern("SINOGRAM", core_dir = (rotation,projdir[-1]), slice_dir = projdir[:-1])#rotation and fast axis
+            print("datshape="+str(data_obj.data.shape))
+            print("sinogram directions"+str((rotation,projdir[-1])))
+            print("slice directions"+str(projdir[:-1]))
             
 class XRDLoaders(object):
     """
@@ -394,11 +405,19 @@ class XRDLoaders(object):
         if mData.get_meta_data("is_tomo"):
             data_obj.add_pattern("SINOGRAM", core_dir = (rotation,projdir[-1]), slice_dir = projdir[:-2])#rotation and fast axis
         #data_obj.add_pattern("DIFFRACTION", core_dir = (-2,-1), slice_dir = data_obj.data.shape[:-2])
-        
-        data_obj.add_pattern("DIFFRACTION", core_dir = (-2,-1), slice_dir = range(len(data_obj.data.shape)-2))
+        slicedir=range(len(data_obj.data.shape)-2)
+        print slicedir
+        data_obj.add_pattern("DIFFRACTION", core_dir = (-2,-1), slice_dir =slicedir)
         # now to load the calibration file
-
-        calibrationfile = h5py.File(self.parameters['calibration_path'], 'r')
+        if os.exists(self.parameters['calibration_path']):
+            logging.info("Using the calibration file in the working directory")
+            calibration_path=self.parameters['calibration_path']
+        elif os.exists(tu.get_test_data_path(self.parameters['calibration_path'])):
+            logging.info("Using the calibration path in the test directory")
+            calibration_path=tu.get_test_data_path(self.parameters['calibration_path'])
+        else:
+            logging.info("No calibration file found!")
+        calibrationfile = h5py.File(calibration_path, 'r')
         
         mData.set_meta_data("beam_center_x", calibrationfile['/entry/instrument/detector/beam_center_x'])
         mData.set_meta_data("beam_center_y", calibrationfile['/entry/instrument/detector/beam_center_y'])
