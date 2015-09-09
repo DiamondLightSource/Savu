@@ -39,6 +39,7 @@ class FrameworkTest(unittest.TestCase):
         if not hasattr(self, 'plugin_list'):
             self.plugin_list = [base_class_name]
 
+    @unittest.skip("New Pipeline available, should we remove this test")
     def test_pipeline(self):
         logging.debug("Starting test_pipeline")
         if not hasattr(self, 'temp_dir'):

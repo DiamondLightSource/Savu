@@ -38,6 +38,7 @@ class FrameworkTest(unittest.TestCase):
     def setUp(self):
         self.process_filename = None
 
+    @unittest.skip("This is superceeded by the new plugin runner, and should be migrated")
     def test_pipeline(self):
         if self.process_filename is None:
             return

@@ -29,6 +29,7 @@ from savu.core.plugin_runner import PluginRunner
 
 class PyfaiAzimuthalIntegrationTestFull(unittest.TestCase):
 
+    @unittest.skip("Local files in test data, needs to be fixed")
     def test_Pyfai(self):
         options = {
             "transport": "hdf5",
