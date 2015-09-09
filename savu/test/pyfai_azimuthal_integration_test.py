@@ -24,12 +24,12 @@ import unittest
 import tempfile
 from savu.test import test_utils as tu
 
-from savu.core.plugin_runner import PluginRunner
+from savu.test.plugin_runner_test import PluginRunnerTest
 
 
-class PyfaiAzimuthalIntegrationTest(unittest.TestCase):
+class PyfaiAzimuthalIntegrationTest(PluginRunnerTest):
 
-    def test_Pyfai(self):
+    def get_options(self):
         options = {
             "transport": "hdf5",
             "process_names": "CPU0",
@@ -37,12 +37,7 @@ class PyfaiAzimuthalIntegrationTest(unittest.TestCase):
             "process_file": tu.get_test_data_path('PyFAI_azimuth_test.nxs'),
             "out_path": tempfile.mkdtemp()
             }
-        try:
-            PluginRunner(options)
-        except ImportError as e:
-            print("Failed to run test as libraries not available (%s)," % (e) +
-                  " passing test")
-            pass
+        return options
 
 if __name__ == "__main__":
     unittest.main()
