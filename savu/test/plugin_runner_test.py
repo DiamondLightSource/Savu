@@ -40,8 +40,8 @@ class PluginRunnerTest(unittest.TestCase):
         try:
             PluginRunner(options)
         except ImportError as e:
-            print("Failed to run test as libraries not available (%s)," +
-                  " passing test" % (e))
+            print("Failed to run test as libraries not available (%s)," % (e) +
+                  " passing test")
             pass
 
     def test_stxm(self):
@@ -55,8 +55,8 @@ class PluginRunnerTest(unittest.TestCase):
         try :
             PluginRunner(options)
         except ImportError as e:
-            print("Failed to run test as libraries not available (%s)," +
-                  " passing test" % (e))
+            print("Failed to run test as libraries not available (%s)," % (e) +
+                  " passing test")
             pass
 
     def test_xrd(self):
@@ -70,8 +70,8 @@ class PluginRunnerTest(unittest.TestCase):
         try:
             PluginRunner(options)
         except ImportError as e:
-            print("Failed to run test as libraries not available (%s)," +
-                  " passing test" % (e))
+            print("Failed to run test as libraries not available (%s)," % (e) +
+                  " passing test")
             pass
 
     def test_multimodal(self):
@@ -85,8 +85,8 @@ class PluginRunnerTest(unittest.TestCase):
         try:
             PluginRunner(options)
         except ImportError as e:
-            print("Failed to run test as libraries not available (%s)," +
-                  " passing test" % (e))
+            print("Failed to run test as libraries not available (%s)," % (e) +
+                  " passing test")
             pass
 
 if __name__ == "__main__":
