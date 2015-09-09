@@ -22,7 +22,6 @@ before_install:
   - sudo apt-get install libboost-all-dev
   - sudo apt-get install python-numpy python-scipy
   - sudo apt-get install python-h5py
-  - sudo apt-get install python-skimage
 
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install: 
@@ -30,11 +29,11 @@ install:
   - travis_wait pip install pytest-cov --use-mirrors -q
   - travis_wait pip install mpi4py --use-mirrors -q
   - travis_wait pip install coveralls --use-mirrors -q
-
+  - travis_wait pip install scikit-image --use-mirrors -q
+  
 #  - travis_wait pip install numpy --use-mirrors -q
 #  - travis_wait pip install scipy --use-mirrors -q
 #  - travis_wait pip install h5py --use-mirrors -q
-#  - travis_wait pip install scikit-image --use-mirrors -q
 
 # command to run tests, e.g. python setup.py test
 script:
