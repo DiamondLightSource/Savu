@@ -28,38 +28,15 @@ from savu.core.plugin_runner import PluginRunner
 
 
 class PluginRunnerTest(unittest.TestCase):
+    """
+    Base class to extend for other tests, but also tests the multimodal
+    process
+    """
 
-    def test_tomo(self):
-        options = {
-            "transport": "hdf5",
-            "process_names": "CPU0",
-            "data_file": tu.get_test_data_path('24737.nxs'),
-            "process_file": tu.get_test_data_path('basic_tomo_process.nxs'),
-            "out_path": tempfile.mkdtemp()
-            }
-        PluginRunner(options)
-
-    def test_stxm(self):
-        options = {
-            "transport": "hdf5",
-            "process_names": "CPU0",
-            "data_file": tu.get_test_data_path('stxm.nxs'),
-            "process_file": tu.get_test_data_path('basic_stxm_process.nxs'),
-            "out_path": tempfile.mkdtemp()
-            }
-        PluginRunner(options)
-
-    def test_xrd(self):
-        options = {
-            "transport": "hdf5",
-            "process_names": "CPU0",
-            "data_file": tu.get_test_data_path('xrd_test.nxs'),
-            "process_file": tu.get_test_data_path('basic_xrd_process.nxs'),
-            "out_path": tempfile.mkdtemp()
-            }
-        PluginRunner(options)
-        
-    def test_multimodal(self):
+    def get_options(self):
+        """
+        This should be overloaded in inhereted tests
+        """
         options = {
             "transport": "hdf5",
             "process_names": "CPU0",
@@ -67,7 +44,56 @@ class PluginRunnerTest(unittest.TestCase):
             "process_file": tu.get_test_data_path('MMtest.nxs'),
             "out_path": tempfile.mkdtemp()
             }
-        PluginRunner(options)
+        return options
+
+    def test_process(self):
+        options = self.get_options()
+        try:
+            PluginRunner(options)
+        except ImportError as e:
+            print("Failed to run test as libraries not available (%s)," % (e) +
+                  " passing test")
+            pass
+
+
+class PluginRunnerTomoTest(PluginRunnerTest):
+
+    def get_options(self):
+        options = {
+            "transport": "hdf5",
+            "process_names": "CPU0",
+            "data_file": tu.get_test_data_path('24737.nxs'),
+            "process_file": tu.get_test_data_path('basic_tomo_process.nxs'),
+            "out_path": tempfile.mkdtemp()
+            }
+        return options
+
+
+class PluginRunnerSTXMTest(PluginRunnerTest):
+
+    def get_options(self):
+        options = {
+            "transport": "hdf5",
+            "process_names": "CPU0",
+            "data_file": tu.get_test_data_path('stxm.nxs'),
+            "process_file": tu.get_test_data_path('basic_stxm_process.nxs'),
+            "out_path": tempfile.mkdtemp()
+            }
+        return options
+
+
+class PluginRunnerXRDTest(PluginRunnerTest):
+
+    def get_options(self):
+        options = {
+            "transport": "hdf5",
+            "process_names": "CPU0",
+            "data_file": tu.get_test_data_path('xrd_test.nxs'),
+            "process_file": tu.get_test_data_path('basic_xrd_process.nxs'),
+            "out_path": tempfile.mkdtemp()
+            }
+        return options
+
 
 if __name__ == "__main__":
     unittest.main()

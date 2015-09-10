@@ -160,16 +160,15 @@ class Hdf5Transport(TransportMechanism):
         # close all remaining files
         for key in exp.index["in_data"].keys():
             exp.index["in_data"][key].save_data()
-        
+
         return 
-        
-        
+
     @logmethod
     def timeseries_field_correction(self, plugin, in_data, out_data, expInfo, params):
 
         in_data = in_data[0]
-        out_data = out_data[0]                    
-            
+        out_data = out_data[0]
+
         dark = in_data.meta_data.get_meta_data("dark")
         flat = in_data.meta_data.get_meta_data("flat")
 
@@ -180,12 +179,11 @@ class Hdf5Transport(TransportMechanism):
             idx = frame_list[count]
             out_data.data[out_slice_list[count]] = \
                       plugin.correction(in_data.data[in_slice_list[count]], 
-                                        dark[idx,:], flat[idx,:], params)
-        
+                                        dark[idx, :], flat[idx, :], params)
+
         in_slice_list = in_data.get_grouped_slice_list()
 
-        
-            
+
     @logmethod
     def reconstruction_setup(self, plugin, in_data, out_data, expInfo, params):
 
@@ -197,13 +195,14 @@ class Hdf5Transport(TransportMechanism):
 
         count = 0
         for sl in slice_list:
-            out_data.data[sl] = \
-                       plugin.reconstruct(np.squeeze(in_data.data[sl]), cor[count], 
-                                          out_data.get_pattern_shape(), params)[:,np.newaxis,:]
+            frame = plugin.reconstruct(np.squeeze(in_data.data[sl]),
+                                       cor[count],
+                                       out_data.get_pattern_shape(),
+                                       params)
+            out_data.data[sl] = frame
             count += 1
             plugin.count += 1
             print plugin.count
-    
 
     def filter_chunk(self, plugin, in_data, out_data, expInfo, params):
         logging.debug("Running filter._filter_chunk")
@@ -212,19 +211,19 @@ class Hdf5Transport(TransportMechanism):
         for ind in range(len(in_data)):
             [slice_list, frame_list] = in_data[ind].get_slice_list_per_process(expInfo)
             in_slice_list.append(slice_list)
-                                
+
         out_data = out_data[0]
         [out_slice_list, frame_list] = out_data.get_slice_list_per_process(expInfo)
 
-        padding = plugin.get_filter_padding()        
+        padding = plugin.get_filter_padding()
 
-        for count in range(len(in_slice_list[0])):            
+        for count in range(len(in_slice_list[0])):
             section = []
             for ind in range(len(in_data)):
                 section.append(in_data[ind].get_padded_slice_data(
                             in_slice_list[ind][count], padding, in_data[ind]))
             result = plugin.filter_frame(section, params)
-            
+
             if type(result) == dict:
                 for key in result.keys():
                     if key == 'center_of_rotation':

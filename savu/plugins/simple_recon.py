@@ -56,15 +56,13 @@ class SimpleRecon(BaseRecon, CpuPlugin):
                            np.arange(-center[1], shape[1] - center[1]))
         return x*np.cos(theta) - y*np.sin(theta)
 
-
     def pre_process(self, exp):
         out_data = self.get_data_objects(exp.index, "out_data")
         centre = tuple((np.asarray(out_data[0].get_pattern_shape()))/2)
         params = [centre]
         return params
-        
 
-    def reconstruct(self, sinogram, centre_of_rotations, vol_shape, params):        
+    def reconstruct(self, sinogram, centre_of_rotations, vol_shape, params):
         centre = params[0]
         result = np.zeros(vol_shape, dtype=np.float32)
 
@@ -74,12 +72,12 @@ class SimpleRecon(BaseRecon, CpuPlugin):
             filt = np.zeros(sinogram.shape[1]*3, dtype=np.float32)
             filt[sinogram.shape[1]:sinogram.shape[1]*2] = \
                 self._filter(np.log(np.nan_to_num(sinogram)+1)[i, :])
-                
+
             result += \
                 self._back_project(mapping_array, filt,
                                    (centre_of_rotations + sinogram.shape[1]))
+        result = result[:, np.newaxis, :]
         return result
-        
 
     def get_citation_information(self):
         cite_info = CitationInformation()

@@ -26,6 +26,7 @@ import os
 
 from savu.core.plugin_runner import PluginRunner
 
+
 def option_parser():
     usage = "%prog [options] input_file output_directory"
     version = "%prog 0.1"
@@ -74,11 +75,6 @@ def set_options(opt, args):
     return options
 
 if __name__ == '__main__':
-
     [options, args] = option_parser()
-
     check_input_params(args)
-    
     PluginRunner(set_options(options, args))
-
-       

@@ -1,7 +1,7 @@
 #sudo: false
 language: python
 python:
-  - "2.7"
+  - "2.7_with_system_site_packages"
 # before the install
 #addons:
 #  apt:
@@ -20,17 +20,20 @@ before_install:
   - sudo apt-get install libhdf5-serial-dev
   - sudo apt-get install libcr-dev mpich2 mpich2-doc
   - sudo apt-get install libboost-all-dev
+  - sudo apt-get install python-numpy python-scipy
+  - sudo apt-get install python-h5py
 
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install: 
   - travis_wait pip install pytest --use-mirrors -q
   - travis_wait pip install pytest-cov --use-mirrors -q
-  - travis_wait pip install numpy --use-mirrors -q
-  - travis_wait pip install scipy --use-mirrors -q
-  - travis_wait pip install h5py --use-mirrors -q
   - travis_wait pip install mpi4py --use-mirrors -q
-  - travis_wait pip install scikit-image --use-mirrors -q
   - travis_wait pip install coveralls --use-mirrors -q
+  - travis_wait pip install scikit-image --use-mirrors -q
+  
+#  - travis_wait pip install numpy --use-mirrors -q
+#  - travis_wait pip install scipy --use-mirrors -q
+#  - travis_wait pip install h5py --use-mirrors -q
 
 # command to run tests, e.g. python setup.py test
 script:
