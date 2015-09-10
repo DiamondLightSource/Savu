@@ -116,7 +116,8 @@ class Filter(Plugin):
 
         # set pattern for this plugin and the shape
         out_d1.set_current_pattern_name("PROJECTION")
-        out_d1.set_shape(in_d1.remove_dark_and_flat())
+        #out_d1.set_shape(in_d1.remove_dark_and_flat())
+        out_d1.set_shape(in_d1.get_shape())
         # set frame chunk
         out_d1.set_nFrames(chunk_size)
 

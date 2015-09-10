@@ -1,9 +1,30 @@
+# Copyright 2014 Diamond Light Source Ltd.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""
+.. module:: paganin_filter
+   :platform: Unix
+   :synopsis: A plugin to apply the Paganin filter
+
+.. moduleauthor:: Nghia Vo <scientificsoftware@diamond.ac.uk>
+
+"""
 import logging
 
 from savu.plugins.filter import Filter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
-from savu.data import structures
 import numpy as np
 import math
 
@@ -14,7 +35,7 @@ from savu.plugins.utils import register_plugin
 class PaganinFilter(Filter, CpuPlugin):
     """
     A plugin to apply Paganin filter (contrast enhancement) on projections
-    
+
     :param Energy: Given X-ray energy in keV. Default: 20.
     :param Distance: Distance from sample to detection - Unit is metre. Default: 1.0.
     :param Resolution: Pixel size - Unit is micron. Default: 21.46.
@@ -23,7 +44,7 @@ class PaganinFilter(Filter, CpuPlugin):
     :param Padleftright: Pad to the left and right of projection. Default: 10.
     :param Padmethod: Method of padding. Default: 'edge'.
     """
-    
+
     def __init__(self):
         logging.debug("initialising Paganin Filter")
         logging.debug("Calling super to make sure that all superclases are " +
@@ -67,30 +88,21 @@ class PaganinFilter(Filter, CpuPlugin):
         result = -0.5*self.parameters['Ratio']*np.log(fpci+1.0)
         return result
 
-    def filter_frame(self, data):
+    def filter_frame(self, data_list, params):
         logging.debug("Getting the filter frame of Paganin Filter")
+        data = data_list[0]
         (depth, height, width) = data.shape
         self._setup_paganin(width, height)
         data = np.nan_to_num(data)  # Noted performance
         data[data == 0] = 1.0
         padtopbottom = self.parameters['Padtopbottom']
         padleftright = self.parameters['Padleftright']
-        padmethod = self.parameters['Padmethod']
-        #data1 = np.lib.pad(data, ((padtopbottom, padtopbottom), (padleftright, padleftright)), padmethod)
-        data = np.lib.pad(data, ((0, 0), (padtopbottom, padtopbottom), (padleftright, padleftright)), padmethod)
+        padmethod = str(self.parameters['Padmethod'])
+        data = np.lib.pad(data, ((0, 0), (padtopbottom, padtopbottom),
+                                 (padleftright, padleftright)), padmethod)
         result = np.apply_over_axes(self._paganin, data, 0)
-        return result[result.shape[0]/2, padtopbottom:-padtopbottom, padleftright: -padleftright]
+        return result[result.shape[0]/2,
+                      padtopbottom:-padtopbottom,
+                      padleftright: -padleftright]
 
-    def required_data_type(self):
-        """
-        The input for this plugin is ProjectionData
-        :returns: Data
-        """
-        return structures.ProjectionData
-
-    def output_data_type(self):
-        """
-        The output of this plugin is ProjectionData
-        :returns: Data
-        """
-        return structures.ProjectionData
+# TODO Add the citation information here
