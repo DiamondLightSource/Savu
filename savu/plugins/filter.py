@@ -82,6 +82,7 @@ class Filter(Plugin):
           
     def setup(self, experiment):
 
+        experiment.log(self.name + " Start")
         chunk_size = self.get_max_frames()
 
         #-------------------setup input datasets-------------------------
@@ -122,7 +123,7 @@ class Filter(Plugin):
         out_d1.set_nFrames(chunk_size)
 
         #----------------------------------------------------------------
-        
+        experiment.log(self.name + " End")
         
     def nInput_datasets(self):
         return 1

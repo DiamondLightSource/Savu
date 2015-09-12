@@ -24,12 +24,12 @@ import unittest
 import tempfile
 from savu.test import test_utils as tu
 
-from savu.test.plugin_runner_test import PluginRunnerTest
+from savu.test.plugin_runner_test import run_protected_plugin_runner
 
 
-class SimpleTomoTest(PluginRunnerTest):
+class SimpleTomoTest(unittest.TestCase):
 
-    def get_options(self):
+    def test_process(self):
         options = {
             "transport": "hdf5",
             "process_names": "CPU0",
@@ -37,7 +37,7 @@ class SimpleTomoTest(PluginRunnerTest):
             "process_file": tu.get_test_data_path('simple_recon_test_process.nxs'),
             "out_path": tempfile.mkdtemp()
             }
-        return options
+        run_protected_plugin_runner(options)
 
 if __name__ == "__main__":
     unittest.main()

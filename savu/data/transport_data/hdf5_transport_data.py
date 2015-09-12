@@ -52,15 +52,21 @@ class Hdf5TransportData(object):
             plugin_id = plugin_dict["id"]
             logging.debug("Loading plugin %s", plugin_id)
             
+            exp.log("Point 1")
+            
             plugin = plugin_runner.plugin_loader(exp, plugin_dict)
+            
+            exp.log("Point 2")
             
             self.set_filenames(exp, plugin, plugin_id, count)
             
             saver_plugin.setup(exp)
             
             out_data_objects.append(exp.index["out_data"].copy())
-            exp.clear_out_data_objects()
-         
+            #exp.clear_out_data_objects()
+            exp.set_out_data_to_in()
+
+            exp.log("Point 3")
             count += 1
             
         return out_data_objects

@@ -101,6 +101,7 @@ class PaganinFilter(Filter, CpuPlugin):
         data = np.lib.pad(data, ((0, 0), (padtopbottom, padtopbottom),
                                  (padleftright, padleftright)), padmethod)
         result = np.apply_over_axes(self._paganin, data, 0)
+        result = np.abs(result)
         return result[result.shape[0]/2,
                       padtopbottom:-padtopbottom,
                       padleftright: -padleftright]
