@@ -219,8 +219,8 @@ class Hdf5TransportData(object):
 
         sl = self.single_slice_list()
 
-        if isinstance(self, ds.TomoRaw):
-            sl = self.get_frame_raw(sl)
+#        if isinstance(self, ds.TomoRaw):
+#            sl = self.get_frame_raw(sl)
       
         if sl is None:
             raise Exception("Data type", self.get_current_pattern_name(), 
