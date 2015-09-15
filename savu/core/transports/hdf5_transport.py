@@ -94,18 +94,18 @@ class Hdf5Transport(TransportMechanism):
                                           ' %(levelname)-6s %(message)s'))
         logger.addHandler(fh)
         logging.info("Starting the reconstruction pipeline process")
-    
-       
+
     def set_logger_parallel(self, number, rank):
         logging.basicConfig(level=0, format='L %(relativeCreated)12d M' +
                             number + ' ' + rank +
                             ' %(levelname)-6s %(message)s', datefmt='%H:%M:%S')
         logging.info("Starting the reconstruction pipeline process")
-    
+
 
     def transport_run_plugin_list(self, exp):
-        """Runs a chain of plugins
-        """        
+        """
+        Runs a chain of plugins
+        """
         plugin_list = exp.meta_data.plugin_list.plugin_list
         # run the loader plugin
         self.plugin_loader(exp, plugin_list[0])
@@ -115,24 +115,27 @@ class Hdf5Transport(TransportMechanism):
 
         # clear all out_data objects in experiment dictionary
         exp.clear_data_objects()
-        
+
         print "running the plugins"
         self.plugin_loader(exp, plugin_list[0])
-        
+
+        exp.barrier()
+
         for i in range(1, len(plugin_list)-1):
             print plugin_list[i]["id"]
-            
+
+            exp.barrier()
+
             for key in out_data_objects[i-1]:
                 exp.index["out_data"][key] = out_data_objects[i-1][key]
+
+            exp.barrier()
 
             plugin = self.plugin_loader(exp, plugin_list[i], pos=i)
             plugin.run_plugin(exp, self)
 
+            exp.barrier()
 
-            if exp.meta_data.get_meta_data('mpi') is True: # do i need this block?
-                MPI.COMM_WORLD.Barrier()
-                logging.debug("Blocking till all processes complete")
-        
             # delete fixed directions, as this is related only to the finished 
             # plugin and not to the dataset 
             for in_objs in plugin.parameters["in_datasets"]:
@@ -145,7 +148,7 @@ class Hdf5Transport(TransportMechanism):
             
             for key in exp.index["out_data"]:
                 exp.index["in_data"][key] = \
-                               copy.deepcopy(exp.index["out_data"][key])                               
+                               copy.deepcopy(exp.index["out_data"][key])
 
 ##            if plugin == 0:
 ##                cite_info = plugin.get_citation_information()
