@@ -25,6 +25,8 @@ import os
 import time
 import logging
 
+from mpi4py import MPI
+
 from savu.data.plugin_list import PluginList
 from savu.data.data_structures import Data
 from savu.data.meta_data import MetaData
@@ -76,6 +78,12 @@ class Experiment(object):
     def set_out_data_to_in(self):
         self.index["in_data"] = self.index["out_data"]
         self.index["out_data"] = {}
+
+    def barrier(self):
+        if self.meta_data.get_meta_data('mpi') is True:
+            logging.debug("About to hit a barrier")
+            MPI.COMM_WORLD.Barrier()
+            logging.debug("Past the barrier")
 
     def log(self, log_tag, log_level=logging.DEBUG):
         """
