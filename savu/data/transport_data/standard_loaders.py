@@ -66,39 +66,44 @@ class TomographyLoaders(object):
                 
         data_obj.add_pattern("PROJECTION", core_dir = (1, 2), slice_dir = (0,))
         data_obj.add_pattern("SINOGRAM", core_dir = (0, -1), slice_dir = (1,))
-        
-    
+
+
     def load_from_nx_tomo(self, exp):
         """
          Define the input nexus file
-        
-        :param path: The full path of the NeXus file to load.
-        :type path: str
+
+        :param exp: The Experiment object
         """
-                
+
         data_obj = exp.index["in_data"]["tomo"]
         objInfo = data_obj.meta_data
         expInfo = exp.meta_data
 
-        data_obj.backing_file = h5py.File(expInfo.get_meta_data("data_file"), 'r')
-        #objInfo.set_meta_data("backing_file", data_obj.backing_file)
-        logging.debug("Creating file '%s' '%s'", 'tomo_entry', data_obj.backing_file.filename)
-        
-        data_obj.data = data_obj.backing_file['entry1/tomo_entry/instrument/detector/data']
+        data_obj.backing_file = h5py.File(expInfo.get_meta_data("data_file"),
+                                          'r')
+        logging.debug("Creating file '%s' '%s'", 'tomo_entry',
+                      data_obj.backing_file.filename)
+
+        data_obj.data = data_obj.backing_file['entry1/tomo_entry/data/data']
 
         data_obj.set_image_key(data_obj.backing_file\
-                        ['entry1/tomo_entry/instrument/detector/image_key'])
-                        
-        objInfo.set_meta_data("image_key", data_obj.get_image_key())
-        
-        rotation_angle = data_obj.backing_file['entry1/tomo_entry/sample/rotation_angle']
-        objInfo.set_meta_data("rotation_angle", rotation_angle[(objInfo.get_meta_data("image_key"))==0,...])
+                               ['entry1/tomo_entry/instrument/detector/image_key'])
 
-        control = data_obj.backing_file['entry1/tomo_entry/control/data']
-        objInfo.set_meta_data("control", control[...])
+        objInfo.set_meta_data("image_key", data_obj.get_image_key())
+
+        rotation_angle = \
+            data_obj.backing_file['entry1/tomo_entry/data/rotation_angle']
+        objInfo.set_meta_data("rotation_angle",
+                              rotation_angle[(objInfo.get_meta_data("image_key"))==0,...])
+
+        try:
+            control = data_obj.backing_file['entry1/tomo_entry/control/data']
+            objInfo.set_meta_data("control", control[...])
+        except:
+            logging.warn("No Control information available")
 
         data_obj.set_shape(data_obj.data.shape)
-            
+
 
 #AARON DIT: I will refactor the following code in the future. At the moment it is massively redundant - This is unacceptable!
 
