@@ -23,6 +23,8 @@
 """
 import logging
 
+logging.debug("Importing packages in base_recon")
+
 from savu.plugins.plugin import Plugin
 from savu.core.utils import logmethod
 
@@ -105,8 +107,8 @@ class BaseRecon(Plugin):
         out_d1.set_nFrames(chunk_size)
 
         #-------------------------------------------------------------
-        
-            
+
+
     def get_max_frames(self):
         """
         Should be overridden to define the max number of frames to process at a time
@@ -122,4 +124,6 @@ class BaseRecon(Plugin):
          
     def nOutput_datasets(self):
         return 1
-    
+
+
+logging.debug("Completed base_recon import")

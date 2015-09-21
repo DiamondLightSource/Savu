@@ -57,20 +57,28 @@ class PluginRunner(object):
         self.__class__ = cls.__class__(cls.__name__, (cls, ExtraBase), {})
 
     def run_plugin_list(self, options):
+        logging.info("Starting to run the plugin list")
         experiment = Experiment(options)
         plugin_list = experiment.meta_data.plugin_list.plugin_list
 
+        experiment.barrier()
+        logging.info("Preparing to run the plugin list check")
         self.run_plugin_list_check(experiment, plugin_list)
 
+        experiment.barrier()
+        logging.info("Initialising metadata")
         expInfo = experiment.meta_data
         if expInfo.get_meta_data("process") is 0:
             logging.debug("Running process List.save_list_to_file")
             expInfo.plugin_list.save_plugin_list(
                 expInfo.get_meta_data("nxs_filename"))
 
-        # load relevant metadata
+        experiment.barrier()
+        logging.info("load relevant metadata")
         expInfo.set_transport_meta_data()  # *** do I need this?
-        # divert to transport process and run process list
+
+        experiment.barrier()
+        logging.info("divert to transport process and run process list")
         self.transport_run_plugin_list(experiment)
 
         print "Sorry for the wait..."
@@ -78,11 +86,19 @@ class PluginRunner(object):
         print "Please have a nice day."
 
     def plugin_loader(self, exp, plugin_dict, **kwargs):
-        plugin = self.load_plugin(plugin_dict['id'])
+        logging.debug("Running plugin loader")
 
+        try:
+            plugin = self.load_plugin(plugin_dict['id'])
+        except Exception as e:
+            logging.error("failed to load the plugin")
+            logging.error(e)
+
+        logging.debug("Getting pos and checkflag")
         pos = (kwargs["pos"] if "pos" in kwargs else None)
         check_flag = (kwargs["check"] if "check" in kwargs else False)
 
+        logging.debug("Doing something with the check flag")
         if check_flag is True:
             try:
                 plugin_dict["data"]["in_datasets"]
@@ -90,9 +106,13 @@ class PluginRunner(object):
             except KeyError:
                 pass
 
+        logging.debug("setting parameters")
         plugin.set_parameters(plugin_dict['data'])
+
+        logging.debug("Running plugin setup")
         plugin.setup(exp)
 
+        logging.debug("finished plugin loader")
         return plugin
 
     def run_plugins(self, exp, plugin_list, **kwargs):
@@ -102,13 +122,25 @@ class PluginRunner(object):
         check = (kwargs["check"] if "check" in kwargs else False)
 
         for i in range(1, len(plugin_list)-1):
+            exp.barrier()
+            logging.info("Checking Plugin %s" % plugin_list[i]['name'])
             self.plugin_loader(exp, plugin_list[i], pos=i, check=check)
 
     def run_plugin_list_check(self, exp, plugin_list):
+        exp.barrier()
+        logging.info("Checking loaders and Savers")
         self.check_loaders_and_savers(exp, plugin_list)
+
+        exp.barrier()
+        logging.info("Running plugins with the check flag")
         self.run_plugins(exp, plugin_list, check=True)
-        # empty the data object dictionaries
+
+        exp.barrier()
+        logging.info("empty the data object dictionaries")
         exp.clear_data_objects()
+
+        exp.barrier()
+        logging.info("Plugin list check complete!")
         print "Plugin list check complete!"
 
     def get_names(self, names):
@@ -185,8 +217,29 @@ class PluginRunner(object):
         :returns:  An instance of the class described by the named plugin
 
         """
-        clazz = self.import_class(plugin_name)
-        return self.get_class_instance(clazz)
+        logging.debug("getting class")
+        logging.debug("plugin name is %s" % plugin_name)
+        #clazz = self.import_class(plugin_name)
+
+        name = plugin_name
+        logging.debug("about to import the module")
+        # TODO This appears to be the failing line.
+        mod = __import__(name)
+        components = name.split('.')
+        logging.debug("Getting the module")
+        for comp in components[1:]:
+            mod = getattr(mod, comp)
+        logging.debug("about to split the name")
+        temp = name.split('.')[-1]
+        logging.debug("getting the classname from the module")
+        module2class = ''.join(x.capitalize() for x in temp.split('_'))
+        logging.debug("getting the class from the classname")
+        clazz = getattr(mod, module2class.split('.')[-1])
+        
+        logging.debug("getting class instance")
+        instance = self.get_class_instance(clazz)
+        logging.debug("returning class instance")
+        return instance
 
     def get_class_instance(self, clazz):
         instance = clazz()

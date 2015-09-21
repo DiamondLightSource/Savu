@@ -82,7 +82,8 @@ class Hdf5TransportData(object):
                                     count, plugin_id))
             filename = filename + "_" + key + ".h5"
             group_name = "%i-%s" % (count, plugin.name)
-            logging.debug("Creating output file %s", filename)
+            exp.barrier()
+            logging.debug("(set_filenames) Creating output file after barrier %s", filename)
             expInfo.set_meta_data(["filename", key], filename)
             expInfo.set_meta_data(["group_name", key], group_name)
 

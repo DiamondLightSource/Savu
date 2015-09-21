@@ -11,8 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from savu.plugins.base_astra_recon import BaseAstraRecon
-from savu.data.process_data import CitationInfomration
 
 """
 .. module:: astra_recon
@@ -21,10 +19,14 @@ from savu.data.process_data import CitationInfomration
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
+import logging
+
+logging.debug("Importing packages in astra_recon")
+
+from savu.plugins.base_astra_recon import BaseAstraRecon
+from savu.data.process_data import CitationInfomration
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-
 from savu.plugins.utils import register_plugin
-
 
 @register_plugin
 class AstraRecon(BaseAstraRecon, CpuPlugin):
@@ -79,3 +81,6 @@ class AstraRecon(BaseAstraRecon, CpuPlugin):
              "%I Elsevier")
         cite_info.doi = "http://dx.doi.org/10.1016/j.jsb.2011.07.017"
         return cite_info
+
+
+logging.debug("Completed base_astra_recon import")

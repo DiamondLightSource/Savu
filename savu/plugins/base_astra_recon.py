@@ -20,15 +20,20 @@
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
-from savu.plugins.base_recon import BaseRecon
-
 import logging
 
+logging.debug("Importing packages in base_astra_recon")
+
+from savu.plugins.base_recon import BaseRecon
+
 import astra
+logging.debug("Imported astra")
 
 import numpy as np
+logging.debug("Imported numpy")
 
 import math
+logging.debug("Imported math")
 
 
 class BaseAstraRecon(BaseRecon):
@@ -194,3 +199,6 @@ class BaseAstraRecon(BaseRecon):
         frames = 8 if "3D" in params[0] else 1
 
         return frames
+
+
+logging.debug("Completed base_astra_recon import")

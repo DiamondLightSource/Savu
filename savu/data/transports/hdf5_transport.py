@@ -34,6 +34,12 @@ from savu.data.structures import NX_CLASS
 from savu.data.TransportMechanism import TransportMechanism
 from savu.core.utils import logmethod
 
+def barrier(mpi):
+    if mpi is True:
+        logging.debug("About to hit a barrier")
+        MPI.COMM_WORLD.Barrier()
+        logging.debug("Past the barrier")
+
 
 # TODO tidy up the NeXus format parts of this
 class Hdf5Transport(TransportMechanism):
@@ -81,7 +87,8 @@ class Hdf5Transport(TransportMechanism):
                                      "%s%02i_%s.h5" % (plugin_list.name, count,
                                                        plugin_dict['id']))
             group_name = "%i-%s" % (count, plugin.name)
-            logging.debug("Creating output file %s", file_name)
+            barrier(mpi)
+            logging.debug("(run_plugin_list) Creating output file after barrier %s", file_name)
             output = pu.create_output_data(plugin, in_data, file_name, group_name,
                                            mpi)
     
