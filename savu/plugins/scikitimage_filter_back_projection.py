@@ -1,6 +1,6 @@
 import logging
 from savu.plugins.base_recon import BaseRecon
-from savu.data.plugin_info import CitationInfomration
+from savu.data.plugin_info import CitationInformation
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 import skimage.transform as transform
@@ -8,7 +8,6 @@ import numpy as np
 from scipy import ndimage
 
 from savu.plugins.utils import register_plugin
-
 
 @register_plugin
 class ScikitimageFilterBackProjection(BaseRecon, CpuPlugin):
@@ -41,11 +40,10 @@ class ScikitimageFilterBackProjection(BaseRecon, CpuPlugin):
         return ndimage.interpolation.shift(sinogram,
                                            centre_of_rotation_shift)
 
-    def reconstruct(self, sinogram, centre_of_rotation,
-                    angles, shape, center):
-        print sinogram.shape
+    def reconstruct(self, sinogram, centre_of_rotations,
+                    vol_shape, params):
         sinogram = np.swapaxes(sinogram, 0, 1)
-        sinogram = self._shift(sinogram, centre_of_rotation)
+        sinogram = self._shift(sinogram, centre_of_rotations)
         sino = np.nan_to_num(sinogram)
         theta = np.linspace(0, 180, sinogram.shape[1])
         result = \
@@ -56,6 +54,7 @@ class ScikitimageFilterBackProjection(BaseRecon, CpuPlugin):
                              interpolation='linear',
                              # self.parameters['linear'],
                              circle=False)  # self.parameters[False])
+        result = result[:, np.newaxis, :]
         return result
 
     def get_citation_information(self):
