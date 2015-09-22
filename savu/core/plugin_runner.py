@@ -93,6 +93,7 @@ class PluginRunner(object):
         except Exception as e:
             logging.error("failed to load the plugin")
             logging.error(e)
+            raise e
 
         logging.debug("Getting pos and checkflag")
         pos = (kwargs["pos"] if "pos" in kwargs else None)
