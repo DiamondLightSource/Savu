@@ -94,84 +94,98 @@ class Hdf5Transport(TransportMechanism):
                                           ' %(levelname)-6s %(message)s'))
         logger.addHandler(fh)
         logging.info("Starting the reconstruction pipeline process")
-    
-       
+
     def set_logger_parallel(self, number, rank):
         logging.basicConfig(level=0, format='L %(relativeCreated)12d M' +
                             number + ' ' + rank +
                             ' %(levelname)-6s %(message)s', datefmt='%H:%M:%S')
         logging.info("Starting the reconstruction pipeline process")
-    
 
     def transport_run_plugin_list(self, exp):
-        """Runs a chain of plugins
-        """        
+        """
+        Runs a chain of plugins
+        """
+        exp.barrier()
+        logging.info("Starting the HDF5 plugin list runner")
         plugin_list = exp.meta_data.plugin_list.plugin_list
-        # run the loader plugin
+
+        exp.barrier()
+        logging.info("run the loader plugin")
         self.plugin_loader(exp, plugin_list[0])
-        # create all output data_objects and backing files        
+
+        exp.barrier()
+        logging.info("create all output data_objects and backing files")
         in_data = exp.index["in_data"][exp.index["in_data"].keys()[0]]
         out_data_objects = in_data.load_data(self, exp)
 
-        # clear all out_data objects in experiment dictionary
+        exp.barrier()
+        logging.info("clear all out_data objects in experiment dictionary")
         exp.clear_data_objects()
-        
-        print "running the plugins"
+
+        exp.barrier()
+        logging.info("Load all the plugins")
         self.plugin_loader(exp, plugin_list[0])
-        
+
+        exp.barrier()
+        logging.info("Running all the plugins")
+
         for i in range(1, len(plugin_list)-1):
-            print plugin_list[i]["id"]
-            
+            logging.info("Running Plugin %s" % plugin_list[i]["id"])
+            exp.barrier()
+
+            logging.info("Initialise output data")
             for key in out_data_objects[i-1]:
                 exp.index["out_data"][key] = out_data_objects[i-1][key]
 
+            exp.barrier()
+            logging.info("Load the plugin")
             plugin = self.plugin_loader(exp, plugin_list[i], pos=i)
+
+            exp.barrier()
+            logging.info("run the plugin")
             plugin.run_plugin(exp, self)
 
-
-            if exp.meta_data.get_meta_data('mpi') is True: # do i need this block?
-                MPI.COMM_WORLD.Barrier()
-                logging.debug("Blocking till all processes complete")
-        
-            # delete fixed directions, as this is related only to the finished 
-            # plugin and not to the dataset 
+            exp.barrier()
+            logging.info("Clean up input datasets")
+            # delete fixed directions, as this is related only to the finished
+            # plugin and not to the dataset
             for in_objs in plugin.parameters["in_datasets"]:
                 exp.index["in_data"][in_objs].delete_fixed_directions()
-        
-            # close any files that are no longer required
+
+            exp.barrier()
+            logging.info("close any files that are no longer required")
             for out_objs in plugin.parameters["out_datasets"]:
                 if out_objs in exp.index["in_data"].keys():
                     exp.index["in_data"][out_objs].save_data()
-            
+
+            exp.barrier()
+            logging.info("Copy out data to in data")
             for key in exp.index["out_data"]:
                 exp.index["in_data"][key] = \
-                               copy.deepcopy(exp.index["out_data"][key])                               
+                    copy.deepcopy(exp.index["out_data"][key])
 
-##            if plugin == 0:
-##                cite_info = plugin.get_citation_information()
-##                if cite_info is not None:
-##                    plugin_list.add_plugin_citation(output_filename, count,
-##                                                      cite_info)
-##                group_name = "%i-%s" % (count, plugin.name)
-##                plugin_list.add_intermediate_data_link(output_filename,
-##                                                        output, group_name)
+            exp.barrier()
+            logging.info("Clear up all data objects")
             exp.clear_out_data_objects()
 
-        # close all remaining files
+        exp.barrier()
+        logging.info("close all remaining files")
         for key in exp.index["in_data"].keys():
             exp.index["in_data"][key].save_data()
-        
-        return 
-        
-        
+
+        exp.barrier()
+        logging.info("Completing the HDF5 plugin list runner")
+        return
+
     @logmethod
     def timeseries_field_correction(self, plugin, in_data, out_data, expInfo, params):
 
         in_data = in_data[0]
-        out_data = out_data[0]                    
-            
+        out_data = out_data[0]
+
         dark = in_data.meta_data.get_meta_data("dark")
         flat = in_data.meta_data.get_meta_data("flat")
+        image_keys = in_data.meta_data.get_meta_data("image_key")
 
         [in_slice_list, frame_list] = in_data.get_slice_list_per_process(expInfo)
         [out_slice_list, frame_list] = out_data.get_slice_list_per_process(expInfo)
@@ -180,12 +194,11 @@ class Hdf5Transport(TransportMechanism):
             idx = frame_list[count]
             out_data.data[out_slice_list[count]] = \
                       plugin.correction(in_data.data[in_slice_list[count]], 
-                                        dark[idx,:], flat[idx,:], params)
-        
+                                        image_keys, params)
+
         in_slice_list = in_data.get_grouped_slice_list()
 
-        
-            
+
     @logmethod
     def reconstruction_setup(self, plugin, in_data, out_data, expInfo, params):
 
@@ -197,13 +210,14 @@ class Hdf5Transport(TransportMechanism):
 
         count = 0
         for sl in slice_list:
-            out_data.data[sl] = \
-                       plugin.reconstruct(np.squeeze(in_data.data[sl]), cor[count], 
-                                          out_data.get_pattern_shape(), params)[:,np.newaxis,:]
+            frame = plugin.reconstruct(np.squeeze(in_data.data[sl]),
+                                       cor[count],
+                                       out_data.get_pattern_shape(),
+                                       params)
+            out_data.data[sl] = frame
             count += 1
             plugin.count += 1
-            print plugin.count
-    
+            logging.debug("Reconstruction progres (%i of %i)" % (plugin.count, len(slice_list)))
 
     def filter_chunk(self, plugin, in_data, out_data, expInfo, params):
         logging.debug("Running filter._filter_chunk")
@@ -212,19 +226,19 @@ class Hdf5Transport(TransportMechanism):
         for ind in range(len(in_data)):
             [slice_list, frame_list] = in_data[ind].get_slice_list_per_process(expInfo)
             in_slice_list.append(slice_list)
-                                
+
         out_data = out_data[0]
         [out_slice_list, frame_list] = out_data.get_slice_list_per_process(expInfo)
 
-        padding = plugin.get_filter_padding()        
+        padding = plugin.get_filter_padding()
 
-        for count in range(len(in_slice_list[0])):            
+        for count in range(len(in_slice_list[0])):
             section = []
             for ind in range(len(in_data)):
                 section.append(in_data[ind].get_padded_slice_data(
                             in_slice_list[ind][count], padding, in_data[ind]))
             result = plugin.filter_frame(section, params)
-            
+
             if type(result) == dict:
                 for key in result.keys():
                     if key == 'center_of_rotation':

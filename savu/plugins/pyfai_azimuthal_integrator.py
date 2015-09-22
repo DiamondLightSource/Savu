@@ -65,17 +65,15 @@ class PyfaiAzimuthalIntegrator(Filter, CpuPlugin):
         ### prep the goemtry
         bc = [mData.get_meta_data("beam_center_x")[...], mData.get_meta_data("beam_center_y")[...]]
         distance = mData.get_meta_data('distance')[...]
-        wl = mData.get_meta_data('incident_wavelength')[...]*1e-9
-        px = mData.get_meta_data('x_pixel_size')[...]*1e3
+        wl = mData.get_meta_data('incident_wavelength')[...]
+        px = mData.get_meta_data('x_pixel_size')[...]
         orien = mData.get_meta_data('detector_orientation')[...].reshape((3,3))
-         
         #Transform
         yaw = math.degrees(-math.atan2(orien[2,0], orien[2,2]))
         roll = math.degrees(-math.atan2(orien[0,1], orien[1,1]))
-        print yaw, roll 
-        #set
         ai.setFit2D(distance, bc[0],bc[1], -yaw, roll, px, px, None)
         ai.set_wavelength(wl)
+        
         
         sh = in_d1.get_shape()
         
@@ -95,9 +93,10 @@ class PyfaiAzimuthalIntegrator(Filter, CpuPlugin):
         ai = params[3]
         logging.debug("Running azimuthal integration")
         print np.squeeze(data).shape
-        fit=ai.integrate1d(data=np.squeeze(data),npt=npts,mask=mask, unit="q_nm^-1", error_model="poisson")
+        print "I'm here"
+        fit=ai.xrpd(data=np.squeeze(data),npt=npts)
         mData.set_meta_data('integrated_diffraction_angle',fit[0])
-        mData.set_meta_data('integrated_diffraction_noise',fit[2])
+#        mData.set_meta_data('integrated_diffraction_noise',fit[2])
         return fit[1]
         
     def setup(self, experiment):

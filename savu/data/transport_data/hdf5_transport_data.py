@@ -52,15 +52,21 @@ class Hdf5TransportData(object):
             plugin_id = plugin_dict["id"]
             logging.debug("Loading plugin %s", plugin_id)
             
+            exp.log("Point 1")
+            
             plugin = plugin_runner.plugin_loader(exp, plugin_dict)
+            
+            exp.log("Point 2")
             
             self.set_filenames(exp, plugin, plugin_id, count)
             
             saver_plugin.setup(exp)
             
             out_data_objects.append(exp.index["out_data"].copy())
-            exp.clear_out_data_objects()
-         
+            #exp.clear_out_data_objects()
+            exp.set_out_data_to_in()
+
+            exp.log("Point 3")
             count += 1
             
         return out_data_objects
@@ -76,7 +82,8 @@ class Hdf5TransportData(object):
                                     count, plugin_id))
             filename = filename + "_" + key + ".h5"
             group_name = "%i-%s" % (count, plugin.name)
-            logging.debug("Creating output file %s", filename)
+            exp.barrier()
+            logging.debug("(set_filenames) Creating output file after barrier %s", filename)
             expInfo.set_meta_data(["filename", key], filename)
             expInfo.set_meta_data(["group_name", key], group_name)
 
@@ -213,8 +220,8 @@ class Hdf5TransportData(object):
 
         sl = self.single_slice_list()
 
-        if isinstance(self, ds.TomoRaw):
-            sl = self.get_frame_raw(sl)
+#        if isinstance(self, ds.TomoRaw):
+#            sl = self.get_frame_raw(sl)
       
         if sl is None:
             raise Exception("Data type", self.get_current_pattern_name(), 

@@ -82,6 +82,7 @@ class Filter(Plugin):
           
     def setup(self, experiment):
 
+        experiment.log(self.name + " Start")
         chunk_size = self.get_max_frames()
 
         #-------------------setup input datasets-------------------------
@@ -116,12 +117,13 @@ class Filter(Plugin):
 
         # set pattern for this plugin and the shape
         out_d1.set_current_pattern_name("PROJECTION")
-        out_d1.set_shape(in_d1.remove_dark_and_flat())
+        #out_d1.set_shape(in_d1.remove_dark_and_flat())
+        out_d1.set_shape(in_d1.get_shape())
         # set frame chunk
         out_d1.set_nFrames(chunk_size)
 
         #----------------------------------------------------------------
-        
+        experiment.log(self.name + " End")
         
     def nInput_datasets(self):
         return 1

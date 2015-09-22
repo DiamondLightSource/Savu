@@ -35,7 +35,7 @@ from savu.plugins.utils import register_plugin
 class TimeseriesFieldCorrections(Plugin, CpuPlugin):
     """
     A Plugin to apply a simple dark and flatfield correction to some
-    raw timeseries data    
+    raw timeseries data
     :param in_datasets: Create a list of the dataset(s) to process. Default: [].
     :param out_datasets: Create a list of the dataset(s) to process. Default: [].
 
@@ -44,21 +44,22 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
     def __init__(self):
         super(TimeseriesFieldCorrections,
               self).__init__("TimeseriesFieldCorrections")
-              
-              
-    def correction(self, data, dark, flat, params):
-        dark = np.tile(dark, (data.shape[0], 1, 1))
-        flat = np.tile(flat, (data.shape[0], 1, 1))
-        data = (data-dark)/flat  # flat = (flat-dark) already calculated for efficiency
+
+    def correction(self, data, image_keys, params):
+        trimmed_data = data[image_keys == 0]
+        dark = data[image_keys == 2]
+        dark = dark.mean(0)
+        dark = np.tile(dark, (trimmed_data.shape[0], 1, 1))
+        flat = data[image_keys == 1]
+        flat = flat.mean(0)
+        flat = np.tile(flat, (trimmed_data.shape[0], 1, 1))
+        data = (trimmed_data-dark)/(flat-dark)
         return data
-              
-              
+
     def process(self, exp, transport, params):
-        
         in_data = self.get_data_objects(exp.index, "in_data")
         out_data = self.get_data_objects(exp.index, "out_data")
         transport.timeseries_field_correction(self, in_data, out_data, exp.meta_data, params)
-
 
     def setup(self, experiment):
         """
@@ -79,18 +80,18 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         in_d1.set_current_pattern_name("SINOGRAM")
         # set frame chunk
         in_d1.set_nFrames(chunk_size)
-        
+
         #----------------------------------------------------------------
 
         #------------------setup output datasets-------------------------
 
         # get a list of output dataset names created by this plugin
         out_data_list = self.parameters["out_datasets"]
-        
+
         # create all out_data objects and associated patterns and meta_data
         # patterns can be copied, added or both
         out_d1 = experiment.create_data_object("out_data", out_data_list[0])
-        
+
         out_d1.copy_patterns(in_d1.get_patterns())
         # copy the entire in_data dictionary (image_key, dark and flat will 
         #be removed since out_data is no longer an instance of TomoRaw)
@@ -103,19 +104,15 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         out_d1.set_current_pattern_name("SINOGRAM")
         out_d1.set_shape(in_d1.remove_dark_and_flat())
         # set frame chunk
-        out_d1.set_nFrames(chunk_size)        
+        out_d1.set_nFrames(chunk_size)
 
         #----------------------------------------------------------------
-                        
 
     def nInput_datasets(self):
         return 1
-         
-         
+
     def nOutput_datasets(self):
         return 1
-    
-    
+
     def get_max_frames(self):
         return 1
-    

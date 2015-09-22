@@ -24,20 +24,20 @@ import unittest
 import tempfile
 from savu.test import test_utils as tu
 
-from savu.core.plugin_runner import PluginRunner
+from savu.test.plugin_runner_test import run_protected_plugin_runner
 
 
 class PyfaiAzimuthalIntegrationTest(unittest.TestCase):
 
-    def test_Pyfai(self):
+    def test_process(self):
         options = {
             "transport": "hdf5",
             "process_names": "CPU0",
             "data_file": tu.get_test_data_path('xrd_test.nxs'),
-            "process_file": tu.get_test_data_path('PyFAI_azimuth_test2.nxs'),
+            "process_file": tu.get_test_data_path('PyFAI_azimuth_test.nxs'),
             "out_path": tempfile.mkdtemp()
             }
-        PluginRunner(options)
+        run_protected_plugin_runner(options)
 
 if __name__ == "__main__":
     unittest.main()

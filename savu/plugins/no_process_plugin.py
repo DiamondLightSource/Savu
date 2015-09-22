@@ -38,16 +38,15 @@ class NoProcessPlugin(Plugin, CpuPlugin):
 
 
     def process(self, exp, transport, params):
-
+        
         in_data = self.get_data_objects(exp.index, "in_data")
         out_data = self.get_data_objects(exp.index, "out_data")
         
         in_data = in_data[0]
         out_data = out_data[0]
-        print in_data.get_shape, out_data.get_shape
 
         print "performing the processing"
-        slice_list = in_data.get_slice_list()
+        slice_list = in_data.single_slice_list() #  I changed this to single_slice_list, from get_slice_list since for some reason get_slice_list wasn't found. adp 
         for sl in slice_list:
             temp = in_data.data[sl]
             out_data.data[sl] = temp        
@@ -64,43 +63,25 @@ class NoProcessPlugin(Plugin, CpuPlugin):
 
         chunk_size = self.get_max_frames()
 
-        #-------------------setup input datasets-------------------------
-
-        # get a list of input dataset names required for this plugin
-        in_data_list = self.parameters["in_datasets"]
         # get all input dataset objects
-        in_d1 = experiment.index["in_data"][in_data_list[0]]
-        # set all input data patterns
-        in_d1.set_current_pattern_name("SINOGRAM")
-        # set frame chunk
-        in_d1.set_nFrames(chunk_size)
-        
-        #----------------------------------------------------------------
+        in_data = experiment.index["in_data"]
+        for key, data in in_data.iteritems():#[in_data_list[0]]
+            # set all input data patterns
+            data.set_current_pattern_name(data.get_patterns().keys()[0]) # have changed this to work on the first element of the pattern list rather SINOGRAM, since some datasets don't havea singoram adp
+            # set frame chunk
+            data.set_nFrames(chunk_size)
 
-        #------------------setup output datasets-------------------------
+            out_data = experiment.create_data_object("out_data", key)
 
-        # get a list of output dataset names created by this plugin
-        out_data_list = self.parameters["out_datasets"]
-        
-        # create all out_data objects and associated patterns and meta_data
-        # patterns can be copied, added or both
-        out_d1 = experiment.create_data_object("out_data", out_data_list[0])
-        
-        out_d1.copy_patterns(in_d1.get_patterns())
-        # copy the entire in_data dictionary (image_key, dark and flat will 
-        #be removed since out_data is no longer an instance of TomoRaw)
-        # If you do not want to copy the whole dictionary pass the key word
-        # argument copyKeys = [your list of keys to copy], or alternatively, 
-        # removeKeys = [your list of keys to remove]
-        out_d1.meta_data.copy_dictionary(in_d1.meta_data.get_dictionary(), rawFlag=True)
+            out_data.copy_patterns(data.get_patterns())
 
-        # set pattern for this plugin and the shape
-        out_d1.set_current_pattern_name("SINOGRAM")
-        out_d1.set_shape(in_d1.get_shape())
-        # set frame chunk
-        out_d1.set_nFrames(chunk_size)
+            out_data.meta_data.copy_dictionary(data.meta_data.get_dictionary(),
+                                               rawFlag=True)
 
-        #----------------------------------------------------------------
+            out_data.set_current_pattern_name(data.get_patterns().keys()[0])
+            out_data.set_shape(data.get_shape())
+            # set frame chunk
+            out_data.set_nFrames(chunk_size)
 
 
     def nInput_datasets(self):

@@ -125,9 +125,10 @@ class Plugin(object):
         :param path: The specific process which we are
         :type path: int
         """
-        logging.error("process needs to be implemented for proc %i of %i :" +
-                      " input is %s and output is %s",
-                        experiment.__class__, transport.__class__)
+        if experiment is not None and transport is not None :
+            logging.error("process needs to be implemented for proc %i of %i :" +
+                          " input is %s and output is %s",
+                          experiment.__class__, transport.__class__)
         raise NotImplementedError("process needs to be implemented")
 
         
