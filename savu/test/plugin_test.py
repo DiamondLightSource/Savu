@@ -28,7 +28,7 @@ import unittest
 from savu.plugins import utils as pu
 from savu.test import test_utils as tu
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-from savu.data.transports.hdf5_transport import Hdf5Transport as Transport
+#from savu.data.transports.hdf5_transport import Hdf5Transport as Transport
 
 base_class_name = "savu.plugins.plugin"
 
@@ -50,31 +50,46 @@ class PluginTest(unittest.TestCase):
         try:
             plugin = pu.load_plugin(self.plugin_name)
             if self.plugin_name == base_class_name:
-                self.assertRaises(NotImplementedError, plugin.process,
-                                  "test", "test", 1, 1)
+                self.assertRaises(NotImplementedError, plugin.process, "test", "test", "test")
                 return
-            # load appropriate data
-            data = tu.get_appropriate_input_data(plugin)
-            self.assertGreater(len(data), 0, "Cannot find appropriate test data")
+                                                                
+            exp = tu.set_experiment(self.data_type)
+            plugin_list = tu.set_plugin_list(exp)
+            transport = tu.set_transport()
 
-            # generate somewhere for the data to go
-            output = tu.get_appropriate_output_data(plugin, data)
-            self.assertGreater(len(output), 0,
-                               "Cannot create appropriate output data")
-
-            plugin.set_parameters(None)
-
-            for i in range(len(data)):
-                plugin.run_plugin(data[i], output[i], ["CPU0"], 0)
-                print("Output from plugin under test ( %s ) is in %s" %
-                      (plugin.name, output[i].backing_file.filename))
-
-                data[i].complete()
-                output[i].complete()
+            transport.transport_run_plugin_list(exp)
 
         except ImportError as e:
             print("Failed to run plugin test as libraries not available (%s), passing test" % (e))
             pass
+
+
+#            # load appropriate data
+#            try:
+#                data = self.test_data
+#            except AttributeError:
+#                raise Exception("The test dataset is undefined.")
+#                                
+#            self.assertGreater(len(data), 0, "Cannot find appropriate test data")
+#
+#            # generate somewhere for the data to go
+#            output = tu.get_appropriate_output_data(plugin, data)
+#            self.assertGreater(len(output), 0,
+#                               "Cannot create appropriate output data")
+#
+#            plugin.set_parameters(None)
+#
+#            for i in range(len(data)):
+#                plugin.run_plugin(data[i], output[i], ["CPU0"], 0)
+#                print("Output from plugin under test ( %s ) is in %s" %
+#                      (plugin.name, output[i].backing_file.filename))
+#
+#                data[i].complete()
+#                output[i].complete()
+#
+#        except ImportError as e:
+#            print("Failed to run plugin test as libraries not available (%s), passing test" % (e))
+#            pass
 
 
 class CpuPluginWrapper(Plugin, CpuPlugin):

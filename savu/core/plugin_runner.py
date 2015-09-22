@@ -23,9 +23,6 @@
 """
 import logging 
 import sys
-import copy
-
-from mpi4py import MPI
 
 from savu.data.experiment_collection import Experiment
 from savu.plugins.base_loader import BaseLoader
@@ -109,7 +106,7 @@ class PluginRunner(object):
         check = (kwargs["check"] if "check" in kwargs else False)
 
         for i in range(1, len(plugin_list)-1):
-            self.plugin_loader(exp, plugin_list[i], pos=i, check=check)                   
+            self.plugin_loader(exp, plugin_list[i], pos=i, check=check)                 
                            
                            
     def run_plugin_list_check(self, exp, plugin_list):

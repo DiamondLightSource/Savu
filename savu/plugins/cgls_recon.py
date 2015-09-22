@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from savu.plugins.base_recon import BaseRecon
-from savu.data.plugin_info import CitationInfomration
+#from savu.data.plugin_info import CitationInfomration
 
 """
 .. module:: cgls_recon
@@ -25,8 +25,6 @@ from savu.data.plugin_info import CitationInfomration
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 import numpy as np
-
-import ccpi
 
 from savu.plugins.utils import register_plugin
 

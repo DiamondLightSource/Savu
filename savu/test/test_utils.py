@@ -22,14 +22,10 @@
 """
 
 import inspect
-import tempfile
 import os
 
 import savu.plugins.utils as pu
-
-from savu.data.structures import Data, PassThrough
-from savu.data.structures import RawTimeseriesData, ProjectionData, VolumeData
-
+from savu.data.experiment_collection import Experiment
 
 def get_test_data_path(name):
     """Gets the full path to the test data
@@ -44,91 +40,116 @@ def get_test_data_path(name):
                     ['test_data', name])
 
 
-def get_nx_tomo_test_data():
-    """Gets the nx_tomo test data and returns it in the RawData Structure
-
-    :returns:  a RawTimeseriesData Object containing the example data.
-
-    """
-    path = get_test_data_path('24737.nxs')
-    raw_timeseries_data = RawTimeseriesData()
-    raw_timeseries_data.populate_from_nx_tomo(path)
-    return raw_timeseries_data
+def set_experiment(exp_type):    
+    if exp_type is "tomo":
+        exp = set_tomo_experiment()
+    return exp
 
 
-def get_projection_test_data():
-    """Gets the test data and returns it in the ProjectionData Structure
+def set_tomo_experiment():
+    # create experiment
+    exp = Experiment(set_options(get_test_data_path('24737.nxs')))
+    exp.set_meta_data('plugin_datasets', set_data_dict(['tomo'], ['tomo']))
+    exp.set_meta_data('loader', 'savu.plugins.nxtomo_loader')
+    exp.set_meta_data('saver', 'savu.plugins.hdf5_saver')
 
-    :returns:  a ProjectionData Object containing the example data.
+    return exp
 
-    """
-    path = get_test_data_path('projections.h5')
-    projection_data = ProjectionData()
-    projection_data.populate_from_h5(path)
-    return projection_data
+        
+def set_options(path):
+    options = {}
+    options["transport"] = 'hdf5'
+    options["process_names"] = 'CPU0'
+    options["data_file"] = path
+    options["process_file"] = ''
+    options["out_path"] = '/tmp'
+    return options
+    
+
+def set_data_dict(in_datasets, out_datasets):
+    return {'data': {'in_datasets': in_datasets, 'out_datasets': out_datasets}}
+    
+
+def set_plugin_list(exp):
+    plugin_list = []
+    pu. = 
+    
+
+    return plugin_list    
+    
+#def get_projection_test_data():
+#    """Gets the test data and returns it in the ProjectionData Structure
+#
+#    :returns:  a ProjectionData Object containing the example data.
+#
+#    """
+#    path = get_test_data_path('projections.h5')
+#    projection_data = ProjectionData()
+#    projection_data.populate_from_h5(path)
+#    return projection_data
 
 
-def get_appropriate_input_data(plugin):
-    data = []
-    if plugin.required_data_type() == RawTimeseriesData:
-        data.append(get_nx_tomo_test_data())
-    elif plugin.required_data_type() == ProjectionData:
-        data.append(get_projection_test_data())
-    elif plugin.required_data_type() == Data:
-        data.append(get_nx_tomo_test_data())
-        data.append(get_projection_test_data())
-    return data
+#def get_appropriate_input_data(plugin):
+#    data = []
+#    if plugin.required_data_type() == RawTimeseriesData:
+#        data.append(get_nx_tomo_test_data())
+#    elif plugin.required_data_type() == ProjectionData:
+#        data.append(get_projection_test_data())
+#    elif plugin.required_data_type() == Data:
+#        data.append(get_nx_tomo_test_data())
+#        data.append(get_projection_test_data())
+#    return data
 
 
-def get_appropriate_output_data(plugin, data, mpi=False, file_name=None):
-    output = []
-
-    if plugin.output_data_type() == PassThrough:
-        output.append(data[0])
-
-    temp_file = file_name
-    if temp_file is None:
-        temp_file = tempfile.NamedTemporaryFile(suffix='.h5', delete=False)
-        temp_file = temp_file.name
-
-    if plugin.output_data_type() == RawTimeseriesData:
-        output.append(pu.get_raw_data(data[0], temp_file,
-                                      plugin.name, mpi,
-                                      plugin.get_output_shape(data[0])))
-
-    elif plugin.output_data_type() == ProjectionData:
-        output.append(pu.get_projection_data(data[0], temp_file,
-                                             plugin.name, mpi,
-                                             plugin.get_output_shape(data[0])))
-
-    elif plugin.output_data_type() == VolumeData:
-        output.append(pu.get_volume_data(data[0], temp_file,
-                                         plugin.name, mpi,
-                                         plugin.get_output_shape(data[0])))
-
-    elif plugin.output_data_type() == Data:
-        if type(data) is not list:
-            data = [data]
-        for datum in data:
-            if file_name is None:
-                temp_file = tempfile.NamedTemporaryFile(suffix='.h5',
-                                                        delete=False)
-                temp_file = temp_file.name
-
-            if isinstance(datum, RawTimeseriesData):
-                output.append(pu.get_raw_data(datum, temp_file,
-                                              plugin.name, mpi,
-                                              plugin.get_output_shape(datum)))
-
-            elif isinstance(datum, ProjectionData):
-                output.append(pu.get_projection_data(datum, temp_file,
-                                                     plugin.name, mpi,
-                                                     plugin.get_output_shape(
-                                                         datum)))
-
-            elif isinstance(datum, VolumeData):
-                output.append(pu.get_volume_data(datum, temp_file,
-                                                 plugin.name, mpi,
-                                                 plugin.get_output_shape(
-                                                     datum)))
-    return output
+#def get_appropriate_output_data(plugin, data, mpi=False, file_name=None):
+#    output = []
+#
+#    if plugin.output_data_type() == PassThrough:
+#        output.append(data[0])
+#
+#    temp_file = file_name
+#    if temp_file is None:
+#        temp_file = tempfile.NamedTemporaryFile(suffix='.h5', delete=False)
+#        temp_file = temp_file.name
+#
+#    if plugin.output_data_type() == RawTimeseriesData:
+#        output.append(pu.get_raw_data(data[0], temp_file,
+#                                      plugin.name, mpi,
+#                                      plugin.get_output_shape(data[0])))
+#
+#    elif plugin.output_data_type() == ProjectionData:
+#        output.append(pu.get_projection_data(data[0], temp_file,
+#                                             plugin.name, mpi,
+#                                             plugin.get_output_shape(data[0])))
+#
+#    elif plugin.output_data_type() == VolumeData:
+#        output.append(pu.get_volume_data(data[0], temp_file,
+#                                         plugin.name, mpi,
+#                                         plugin.get_output_shape(data[0])))
+#
+#    elif plugin.output_data_type() == Data:
+#        if type(data) is not list:
+#            data = [data]
+#        for datum in data:
+#            if file_name is None:
+#                temp_file = tempfile.NamedTemporaryFile(suffix='.h5',
+#                                                        delete=False)
+#                temp_file = temp_file.name
+#
+#            if isinstance(datum, RawTimeseriesData):
+#                output.append(pu.get_raw_data(datum, temp_file,
+#                                              plugin.name, mpi,
+#                                              plugin.get_output_shape(datum)))
+#
+#            elif isinstance(datum, ProjectionData):
+#                output.append(pu.get_projection_data(datum, temp_file,
+#                                                     plugin.name, mpi,
+#                                                     plugin.get_output_shape(
+#                                                         datum)))
+#
+#            elif isinstance(datum, VolumeData):
+#                output.append(pu.get_volume_data(datum, temp_file,
+#                                                 plugin.name, mpi,
+#                                                 plugin.get_output_shape(
+#                                                     datum)))
+#    return output
