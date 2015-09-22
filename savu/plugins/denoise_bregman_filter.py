@@ -21,6 +21,7 @@
 .. moduleauthor:: Imanol Luengo <scientificsoftware@diamond.ac.uk>
 """
 import logging
+import numpy as np
 
 from skimage.restoration import denoise_tv_bregman
 
@@ -34,7 +35,7 @@ from savu.plugins.utils import register_plugin
 class DenoiseBregmanFilter(Filter, CpuPlugin):
     """
     Split Bregman method for solving the denoising Total Variation ROF model.
-    
+
     :param weight: Denoising factor. Default: 2.0
     :param max_iterations: Total number of iterations. Default: 100.
     :param error_threshold: Convergence threshold. Default: 0.001.
@@ -47,7 +48,7 @@ class DenoiseBregmanFilter(Filter, CpuPlugin):
 
     def get_filter_padding(self):
         return {}
-    
+
     def get_max_frames(self):
         return 8
 
@@ -58,6 +59,7 @@ class DenoiseBregmanFilter(Filter, CpuPlugin):
         max_iter = self.parameters['max_iterations']
         eps = self.parameters['error_threshold']
         isotropic = self.parameters['isotropic']
-        return denoise_tv_bregman(data[0, ...], weight, max_iter=max_iter,
-                                  eps=eps, isotropic=isotropic)
-        
+        data = np.nan_to_num(data[0, ...])
+        result = denoise_tv_bregman(data, weight, max_iter=max_iter,
+                                    eps=eps, isotropic=isotropic)
+        return result
