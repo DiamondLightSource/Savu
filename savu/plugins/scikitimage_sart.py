@@ -57,12 +57,12 @@ class ScikitimageSart(BaseRecon, CpuPlugin):
         return ndimage.interpolation.shift(sinogram,
                                            centre_of_rotation_shift)
 
-    def reconstruct(self, sinogram, centre_of_rotation,
-                    angles, shape, center):
-        print sinogram.shape
+    def reconstruct(self, sinogram, centre_of_rotations,
+                    vol_shape, params):
         sinogram = np.swapaxes(sinogram, 0, 1)
-        sinogram = self._shift(sinogram, centre_of_rotation)
+        sinogram = self._shift(sinogram, centre_of_rotations)
         sino = np.nan_to_num(sinogram)
+        sino = sino.astype(np.float64)
         theta = np.linspace(0, 180, sinogram.shape[1])
         result = \
             transform.iradon(sino, theta=theta,
@@ -83,6 +83,7 @@ class ScikitimageSart(BaseRecon, CpuPlugin):
                                            relaxation=0.15
                                            # self.parameters[0.15])
                                            )
+        result = result[:, np.newaxis, :]
         return result
 
     def get_citation_information(self):
