@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright 2014 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,6 +31,7 @@ from savu.test.plugin_test import PluginTest
 class AstraReconCpuTest(PluginTest):
     
     def setUp(self):
+	self.data_type = "tomo"
         self.plugin_name = "savu.plugins.astra_recon_cpu"
 
 if __name__ == "__main__":
