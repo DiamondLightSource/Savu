@@ -47,11 +47,11 @@ class PluginList(object):
         plugin_group = plugin_file['entry/plugin']
         self.plugin_list = []
         for key in plugin_group.keys():
-	    plugin = {}
+            plugin = {}
             plugin['name'] = plugin_group[key]['name'][0]
             plugin['id'] = plugin_group[key]['id'][0]
             plugin['data'] = json.loads(plugin_group[key]['data'][0])
-	    self.plugin_list.append(plugin)
+            self.plugin_list.append(plugin)
         plugin_file.close()
 
     def save_plugin_list(self, out_filename):
