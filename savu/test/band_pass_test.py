@@ -30,6 +30,7 @@ from savu.test.plugin_test import PluginTest
 class BandPassTest(PluginTest):
 
     def setUp(self):
+        self.data_type = "tomo"
         self.plugin_name = "savu.plugins.band_pass"
 
 if __name__ == "__main__":

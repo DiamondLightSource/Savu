@@ -47,6 +47,7 @@ class PluginTest(unittest.TestCase):
             print("Failed to run plugin test as libraries not available (%s), passing test" % (e))
             pass
 
+#    @unittest.skip("This whole system has changed, so this test needs to be updated")
     def test_process(self):
         print "Running the test process"
 

@@ -25,24 +25,37 @@
 import inspect
 import os
 
-import savu.plugins.utils as pu
-from savu.data.experiment_collection import Experiment
-
 def get_test_data_path(name):
     path = inspect.stack()[0][1]
     return '/'.join(os.path.split(path)[0].split(os.sep)[:-2] +
                     ['test_data', name])
 
+def get_experiment_types():
+    exp_dict = {}
+    exp_dict['tomoRaw'] = 'set_tomoRaw_experiment'
+    exp_dict['tomo'] = 'set_tomo_experiment'
+    return exp_dict
 
 def set_experiment(exp_type):
-    if exp_type is "tomo":
-        exp = set_tomo_experiment()
-    return exp
+    exp_types = get_experiment_types()
+    try:
+        options = globals()[exp_types[exp_type]]()
+    except KeyError:
+        raise Exception("The experiment type ", exp_type, " is not recognised")
+    return options
+
+def set_tomoRaw_experiment():
+    # create experiment
+    options = set_options(get_test_data_path('24737.nxs'))        
+    options['loader'] = 'savu.plugins.nxtomo_loader'
+    options['saver'] = 'savu.plugins.hdf5_tomo_saver'
+    options['plugin_datasets'] = set_data_dict(['tomo'], ['tomo'])
+    return options
 
 def set_tomo_experiment():
     # create experiment
-    options = set_options(get_test_data_path('24737.nxs'))
-    options['loader'] = 'savu.plugins.nxtomo_loader'
+    options = set_options(get_test_data_path('projections.h5'))
+    options['loader'] = 'savu.plugins.projection_tomo_loader'
     options['saver'] = 'savu.plugins.hdf5_tomo_saver'
     options['plugin_datasets'] = set_data_dict(['tomo'], ['tomo'])
     return options
