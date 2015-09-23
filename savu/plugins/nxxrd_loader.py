@@ -44,6 +44,6 @@ class NxxrdLoader(BaseLoader):
         
     @logmethod
     def setup(self, experiment):
-        loader = sLoader.XRDLoaders(experiment, self.parameters)
+        loader = sLoader.XRDLoaders(self.parameters)
         loader.load_from_nx_xrd(experiment)
         

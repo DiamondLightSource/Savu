@@ -45,9 +45,9 @@ class MmLoader(BaseLoader):
         
     @logmethod
     def setup(self, experiment):
-        loader1 = sLoader.FluorescenceLoaders(experiment)
+        loader1 = sLoader.FluorescenceLoaders()
         loader1.load_from_nx_fluo(experiment)
-        loader2 = sLoader.XRDLoaders(experiment, self.parameters)
+        loader2 = sLoader.XRDLoaders(self.parameters)
         loader2.load_from_nx_xrd(experiment)
-        loader3 = sLoader.STXMLoaders(experiment)
+        loader3 = sLoader.STXMLoaders()
         loader3.load_from_nx_stxm(experiment)

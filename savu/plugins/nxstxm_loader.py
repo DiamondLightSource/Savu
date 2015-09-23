@@ -41,6 +41,6 @@ class NxstxmLoader(BaseLoader):
         
     @logmethod
     def setup(self, experiment):
-        loader = sLoader.STXMLoaders(experiment)
+        loader = sLoader.STXMLoaders()
         loader.load_from_nx_stxm(experiment)
         

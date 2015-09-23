@@ -41,6 +41,6 @@ class NxtomoLoader(BaseLoader):
         
     @logmethod
     def setup(self, experiment):
-        loader = sLoader.TomographyLoaders(experiment)
+        loader = sLoader.TomographyLoaders()
         loader.load_from_nx_tomo(experiment)
         

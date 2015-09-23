@@ -41,6 +41,6 @@ class NxfluoLoader(BaseLoader):
         
     @logmethod
     def setup(self, experiment):
-        loader = sLoader.FluorescenceLoaders(experiment)
+        loader = sLoader.FluorescenceLoaders()
         loader.load_from_nx_fluo(experiment)
         

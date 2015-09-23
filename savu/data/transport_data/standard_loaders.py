@@ -53,20 +53,6 @@ class TomographyLoaders(object):
     This class is called from a tomography loader to use a standard loader. It 
     deals with loading of the data for different formats (e.g. hdf5, tiff,...)
     """
-    
-    def __init__(self, exp):
-        self.loader_setup(exp)
-
-
-    def loader_setup(self, exp):
-        
-        base_classes = [ds.TomoRaw]
-        data_obj = exp.create_data_object("in_data", "tomo", base_classes)
-        data_obj.meta_data.set_meta_data("base_classes", base_classes)
-                
-        data_obj.add_pattern("PROJECTION", core_dir = (1, 2), slice_dir = (0,))
-        data_obj.add_pattern("SINOGRAM", core_dir = (0, -1), slice_dir = (1,))
-
 
     def load_from_nx_tomo(self, exp):
         """
@@ -74,27 +60,32 @@ class TomographyLoaders(object):
 
         :param exp: The Experiment object
         """
+        base_classes = [ds.TomoRaw]
+        data_obj = exp.create_data_object("in_data", "tomo", base_classes)
+        data_obj.meta_data.set_meta_data("base_classes", base_classes)
+                
+        data_obj.add_pattern("PROJECTION", core_dir = (1, 2), slice_dir = (0,))
+        data_obj.add_pattern("SINOGRAM", core_dir = (0, -1), slice_dir = (1,))
 
-        data_obj = exp.index["in_data"]["tomo"]
         objInfo = data_obj.meta_data
         expInfo = exp.meta_data
 
-        data_obj.backing_file = h5py.File(expInfo.get_meta_data("data_file"),
-                                          'r')
+        data_obj.backing_file = h5py.File(expInfo.get_meta_data("data_file"),'r')
+        
         logging.debug("Creating file '%s' '%s'", 'tomo_entry',
                       data_obj.backing_file.filename)
 
         data_obj.data = data_obj.backing_file['entry1/tomo_entry/data/data']
 
         data_obj.set_image_key(data_obj.backing_file\
-                               ['entry1/tomo_entry/instrument/detector/image_key'])
+                           ['entry1/tomo_entry/instrument/detector/image_key'])
 
         objInfo.set_meta_data("image_key", data_obj.get_image_key())
 
         rotation_angle = \
             data_obj.backing_file['entry1/tomo_entry/data/rotation_angle']
         objInfo.set_meta_data("rotation_angle",
-                              rotation_angle[(objInfo.get_meta_data("image_key"))==0,...])
+                   rotation_angle[(objInfo.get_meta_data("image_key"))==0,...])
 
         try:
             control = data_obj.backing_file['entry1/tomo_entry/control/data']
@@ -103,6 +94,28 @@ class TomographyLoaders(object):
             logging.warn("No Control information available")
 
         data_obj.set_shape(data_obj.data.shape)
+                
+    def load_projection_data(self, exp):
+
+        data_obj = exp.create_data_object("in_data", "tomo")                
+        data_obj.add_pattern("PROJECTION", core_dir = (1, 2), slice_dir = (0,))
+        data_obj.add_pattern("SINOGRAM", core_dir = (0, -1), slice_dir = (1,))
+
+        objInfo = data_obj.meta_data
+        expInfo = exp.meta_data
+
+        data_obj.backing_file = h5py.File(expInfo.get_meta_data("data_file"),'r')
+        logging.debug("Creating file '%s' '%s'", 'tomo_entry',
+                                              data_obj.backing_file.filename)
+
+        data_obj.data = data_obj.backing_file['TimeseriesFieldCorrections/data']
+
+        rotation_angle = \
+            data_obj.backing_file['TimeseriesFieldCorrections/rotation_angle']
+        objInfo.set_meta_data("rotation_angle", rotation_angle[...])
+
+        data_obj.set_shape(data_obj.data.shape)
+               
 
 
 #AARON DIT: I will refactor the following code in the future. At the moment it is massively redundant - This is unacceptable!
@@ -113,14 +126,6 @@ class FluorescenceLoaders(object):
     deals with loading of the data for different formats (e.g. hdf5, tiff,...)
     A.D Parsons 13th August 2015
     """
-    
-    def __init__(self, exp):
-        self.loader_setup(exp)
-
-
-    def loader_setup(self, exp):
-        exp.create_data_object("in_data", "fluo")
-
 
     def load_from_nx_fluo(self, exp):
         """
@@ -130,8 +135,9 @@ class FluorescenceLoaders(object):
         :type path: str
         """
         import numpy as np
+        
         # set up the file handles
-        data_obj = exp.index["in_data"]["fluo"]
+        data_obj = exp.create_data_object("in_data", "fluo")
         mData = data_obj.meta_data # the application meta data
         
         data_obj.backing_file = h5py.File(exp.meta_data.get_meta_data("data_file"), 'r')
@@ -219,14 +225,6 @@ class STXMLoaders(object):
     A.D Parsons 17th August 2015
     """
     
-    def __init__(self, exp):
-        self.loader_setup(exp)
-
-    def loader_setup(self, exp):
-        exp.create_data_object("in_data", "stxm")
-        
-
-
     def load_from_nx_stxm(self, exp):
         """
          Define the input nexus file
@@ -235,7 +233,7 @@ class STXMLoaders(object):
         :type path: str
         """
         # set up the file handles
-        data_obj = exp.index["in_data"]["stxm"]
+        data_obj = exp.create_data_object("in_data", "stxm")
         data_obj.backing_file = h5py.File(exp.meta_data.get_meta_data("data_file"), 'r')
         exp.meta_data.set_meta_data("backing_file", data_obj.backing_file)
         logging.debug("Creating file '%s' '%s'", 'stxm_entry', data_obj.backing_file.filename)
@@ -324,13 +322,8 @@ class XRDLoaders(object):
     
     """    
     
-    def __init__(self, exp, params):
-        self.loader_setup(exp)
+    def __init__(self, params):
         self.parameters = params
-
-    def loader_setup(self, exp):
-        
-        exp.create_data_object("in_data", "xrd")
 
     def load_from_nx_xrd(self, exp):
         """
@@ -340,7 +333,7 @@ class XRDLoaders(object):
         :type path: str
         """
         # set up the file handles
-        data_obj = exp.index["in_data"]["xrd"]
+        data_obj = exp.create_data_object("in_data", "xrd")
         data_obj.backing_file = h5py.File(exp.meta_data.get_meta_data("data_file"), 'r')
         exp.meta_data.set_meta_data("backing_file", data_obj.backing_file)
         logging.debug("Creating file '%s' '%s'", 'xrd_entry', data_obj.backing_file.filename)
