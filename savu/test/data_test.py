@@ -26,7 +26,6 @@ import unittest
 import savu.test.test_utils as tu
 import savu.plugins.utils as pu
 
-
 class Test(unittest.TestCase):
 
     @unittest.skip("This test should be updated to use the new setup system")
@@ -38,3 +37,4 @@ class Test(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+

@@ -30,6 +30,7 @@ from savu.test.plugin_test import PluginTest
 class CopyPluginTest(PluginTest):
 
     def setUp(self):
+        self.data_type = "tomo"
         self.plugin_name = "savu.plugins.test.copy_plugin"
 
 if __name__ == "__main__":
