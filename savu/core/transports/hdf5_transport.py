@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright 2015 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -212,6 +213,8 @@ class Hdf5Transport(TransportMechanism):
 
         count = 0
         for sl in slice_list:
+	    print sl
+	    print np.squeeze(in_data.data[sl]).shape
             frame = plugin.reconstruct(np.squeeze(in_data.data[sl]),
                                        cor[count],
                                        out_data.get_pattern_shape(),
@@ -219,7 +222,7 @@ class Hdf5Transport(TransportMechanism):
             out_data.data[sl] = frame
             count += 1
             plugin.count += 1
-            logging.debug("Reconstruction progres (%i of %i)" % (plugin.count, len(slice_list)))
+            logging.debug("Reconstruction progress (%i of %i)" % (plugin.count, len(slice_list)))
 
     def filter_chunk(self, plugin, in_data, out_data, expInfo, params):
         logging.debug("Running filter._filter_chunk")

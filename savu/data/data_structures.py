@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright 2014 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -377,4 +378,14 @@ class TomoRaw(object):
 
         return new_slice_list
 
-        
+    def get_rotation_angles(self, mData):
+	# pad the rotation angles if this is a test on data with an image key
+	# i.e. dark and flat fields have not been removed
+	angles = self.meta_data.get_meta_data('rotation_angle')
+	try:
+	    if mData.get_meta_data('run_type') is 'test':
+		pad = self.get_shape()[0] - angles.shape[0]
+		angles = np.pad(angles, (0,pad), 'edge')
+	except KeyError:
+	    pass 
+	return angles

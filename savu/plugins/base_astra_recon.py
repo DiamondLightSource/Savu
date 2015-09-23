@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright 2014 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -58,7 +59,7 @@ class BaseAstraRecon(BaseRecon):
 
     def pre_process(self, exp):
         in_data = self.get_data_objects(exp.index, "in_data")
-        angles = in_data[0].meta_data.get_meta_data("rotation_angle")
+        angles = in_data[0].get_rotation_angles(exp.meta_data)
         params = [angles]
         return params
         
@@ -90,10 +91,12 @@ class BaseAstraRecon(BaseRecon):
             plow = (blen - alen) + pad
             phigh = pad
 
-        logdata = np.squeeze(np.log(sino+1))
+        logdata = np.log(sino+1)
         
         sinogram = np.pad(logdata, ((0, 0), (int(plow), int(phigh))),
                           mode='reflect')
+
+	print sinogram.shape
                                                       
         if not "3D" in alg_name:
             rec = self.reconstruct2D(sinogram, angles, vol_shape, alg_name, 

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright 2014 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -62,7 +63,7 @@ class BaseRecon(Plugin):
         """        
         in_data = self.get_data_objects(exp.index, "in_data")
         out_data = self.get_data_objects(exp.index, "out_data")
-        
+
         try:
             centre_of_rotation = in_data[0].meta_data.get_meta_data("centre_of_rotation")
         except KeyError:
