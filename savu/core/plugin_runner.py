@@ -245,3 +245,4 @@ class PluginRunner(object):
         instance = clazz()
         instance.populate_default_parameters()
         return instance
+

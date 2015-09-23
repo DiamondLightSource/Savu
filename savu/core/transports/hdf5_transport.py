@@ -105,6 +105,8 @@ class Hdf5Transport(TransportMechanism):
         """
         Runs a chain of plugins
         """
+
+        print "**** Running the plugin chain"
         exp.barrier()
         logging.info("Starting the HDF5 plugin list runner")
         plugin_list = exp.meta_data.plugin_list.plugin_list

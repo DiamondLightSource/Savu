@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright 2014 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,7 +26,7 @@ from savu.plugins.base_recon import BaseRecon
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 import numpy as np
-
+import ccpi_reconstruction
 from savu.plugins.utils import register_plugin
 
 
@@ -42,9 +43,14 @@ class CglsRecon(BaseRecon, CpuPlugin):
     def __init__(self):
         super(CglsRecon, self).__init__("CglsRecon") 
         
+    def pre_process(self, exp):
+        in_data = self.get_data_objects(exp.index, "in_data")
+        angles = in_data[0].meta_data.get_meta_data("rotation_angle")
+        params = [angles]
+        return params
 
-    def reconstruct(self, sinogram, centre_of_rotation, angles, shape, center):
-        
+    def reconstruct(self, sinogram, centre_of_rotations, vol_shape, params):
+        angles = params[0]
         nthreads = self.parameters['number_of_threads']
         num_iterations = self.parameters['number_of_iterations']
         resolution = self.parameters['resolution']
@@ -52,11 +58,11 @@ class CglsRecon(BaseRecon, CpuPlugin):
         pixels = np.hstack([np.reshape(sinogram.astype(np.float32), \
                             (sinogram.shape[0], 1, sinogram.shape[1]))]*4)
 
-        voxels = ccpi.cgls(pixels, angles.astype(np.float32), \
-                                            centre_of_rotation, resolution, \
+        voxels = ccpi_reconstruction.cgls(pixels, angles.astype(np.float32), \
+                                            centre_of_rotations, resolution, \
                                             num_iterations, nthreads)
 
-        voxels = voxels[:160,:160,1]   
+        #voxels = voxels[:160,:160,1]   
          
         return voxels
         

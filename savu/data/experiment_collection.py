@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright 2014 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -46,7 +47,16 @@ class Experiment(object):
     def meta_data_setup(self, process_file):
         self.meta_data.load_experiment_collection()
         self.meta_data.plugin_list = PluginList()
-        self.meta_data.plugin_list.populate_plugin_list(process_file)
+
+        try:
+            rtype = self.meta_data.get_meta_data('run_type')
+            if rtype is 'test':
+                self.meta_data.plugin_list.plugin_list = self.meta_data.get_meta_data('plugin_list')
+            else:
+                raise Exception('the run_type is unknown in Experiment class')
+        except keyError:
+            self.meta_data.plugin_list.populate_plugin_list(process_file)
+
 
     def create_data_object(self, dtype, name, bases=[]):
         try:
@@ -57,7 +67,6 @@ class Experiment(object):
             bases.append(data_obj.get_transport_data(self.meta_data.get_meta_data("transport")))
             data_obj.add_base_classes(bases)
         return self.index[dtype][name]
-
 
     def set_nxs_filename(self):
         name = self.index["in_data"].keys()[0]
@@ -96,3 +105,4 @@ class Experiment(object):
         for key, value in self.index["in_data"].iteritems():
             logging.log(log_level, "out data (%s) shape = %s", key,
                         value.get_shape())
+
