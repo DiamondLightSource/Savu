@@ -135,7 +135,6 @@ class Plugin(object):
     def get_data_objects(self, expIndex, dtype):
         data_list = (self.parameters["in_datasets"] if dtype is "in_data" 
                                     else self.parameters["out_datasets"])
-        print "get_data_objects", data_list
         data_objs = []
         for data in data_list:
             data_objs.append(expIndex[dtype][data])

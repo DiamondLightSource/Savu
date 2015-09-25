@@ -30,6 +30,7 @@ from savu.test.plugin_test import PluginTest
 class DezingFilterTest(PluginTest):
     
     def setUp(self):
+        self.data_type = "tomo"
         self.plugin_name = "savu.plugins.dezing_filter"
 
 if __name__ == "__main__":

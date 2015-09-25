@@ -25,8 +25,6 @@ import logging
 from savu.plugins.filter import Filter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
-from savu.data import structures as st
-
 import scipy.signal.signaltools as sig
 
 from savu.plugins.utils import register_plugin

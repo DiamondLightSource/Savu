@@ -50,6 +50,7 @@ class CglsRecon(BaseRecon, CpuPlugin):
         return params
 
     def reconstruct(self, sinogram, centre_of_rotations, vol_shape, params):
+        print "sinogram shape is", sinogram.shape
         angles = params[0]
         nthreads = self.parameters['number_of_threads']
         num_iterations = self.parameters['number_of_iterations']
@@ -61,8 +62,7 @@ class CglsRecon(BaseRecon, CpuPlugin):
         voxels = ccpi_reconstruction.cgls(pixels, angles.astype(np.float32), \
                                             centre_of_rotations, resolution, \
                                             num_iterations, nthreads)
-
-        #voxels = voxels[:160,:160,1]   
+        voxels = voxels[:160, np.newaxis, :160,1]
          
         return voxels
         

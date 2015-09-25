@@ -32,29 +32,30 @@ def get_test_data_path(name):
 
 def get_experiment_types():
     exp_dict = {}
-    exp_dict['tomoRaw'] = 'set_tomoRaw_experiment'
-    exp_dict['tomo'] = 'set_tomo_experiment'
+    exp_dict['tomoRaw'] = {'func': 'set_tomoRaw_experiment', 'filename': '24737.nxs'}
+    exp_dict['tomo'] = {'func': 'set_tomo_experiment', 'filename': 'projections.h5'}
     return exp_dict
 
 def set_experiment(exp_type):
     exp_types = get_experiment_types()
     try:
-        options = globals()[exp_types[exp_type]]()
+        options = globals()[exp_types[exp_type]['func']] \
+                                            (exp_types[exp_type]['filename'])
     except KeyError:
         raise Exception("The experiment type ", exp_type, " is not recognised")
     return options
 
-def set_tomoRaw_experiment():
+def set_tomoRaw_experiment(filename):
     # create experiment
-    options = set_options(get_test_data_path('24737.nxs'))        
+    options = set_options(get_test_data_path(filename))
     options['loader'] = 'savu.plugins.nxtomo_loader'
     options['saver'] = 'savu.plugins.hdf5_tomo_saver'
     options['plugin_datasets'] = set_data_dict(['tomo'], ['tomo'])
     return options
 
-def set_tomo_experiment():
+def set_tomo_experiment(filename):
     # create experiment
-    options = set_options(get_test_data_path('projections.h5'))
+    options = set_options(get_test_data_path(filename))
     options['loader'] = 'savu.plugins.projection_tomo_loader'
     options['saver'] = 'savu.plugins.hdf5_tomo_saver'
     options['plugin_datasets'] = set_data_dict(['tomo'], ['tomo'])
@@ -105,4 +106,6 @@ def load_class(name):
     clazz = getattr(mod, mod2class.split('.')[-1])
     instance = get_class_instance(clazz)
     return instance
+
+
 

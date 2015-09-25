@@ -70,6 +70,6 @@ class CopyPlugin(Filter, CpuPlugin):
         logging.debug("Number of frames is set to %i" % self.parameters['number_of_frames'])
         return self.parameters['number_of_frames']
 
-    def filter_frame(self, data):
+    def filter_frame(self, data, params):
         logging.debug("Running Copy Frame")
-        return data
+        return data[0]

@@ -47,9 +47,9 @@ class DownsampleFilter(Filter, CpuPlugin):
                 (input_shape[1]+1)/self.parameters['bin_size'],
                 (input_shape[2]+1)/self.parameters['bin_size'])
 
-    def filter_frame(self, data):
+    def filter_frame(self, data, params):
         logging.debug("Running Downsample data")
-        result = data[:,
-                      ::self.parameters['bin_size'],
-                      ::self.parameters['bin_size']]
+        result = data[0][:,
+                         ::self.parameters['bin_size'],
+                         ::self.parameters['bin_size']]
         return result

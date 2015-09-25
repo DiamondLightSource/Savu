@@ -71,7 +71,7 @@ class BaseRecon(Plugin):
             centre_of_rotation = centre_of_rotation * self.parameters['center_of_rotation']
             in_data[0].meta_data.set_meta_data("centre_of_rotation", centre_of_rotation)            
             
-        transport.reconstruction_setup(self, in_data, out_data, exp.meta_data, params)
+        transport.reconstruction_setup(self, in_data[0], out_data[0], exp.meta_data, params)
 
                                   
     def setup(self, experiment):

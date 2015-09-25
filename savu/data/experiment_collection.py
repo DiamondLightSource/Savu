@@ -54,7 +54,7 @@ class Experiment(object):
                 self.meta_data.plugin_list.plugin_list = self.meta_data.get_meta_data('plugin_list')
             else:
                 raise Exception('the run_type is unknown in Experiment class')
-        except keyError:
+        except KeyError:
             self.meta_data.plugin_list.populate_plugin_list(process_file)
 
 

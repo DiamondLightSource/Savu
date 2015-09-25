@@ -59,7 +59,7 @@ class BaseAstraRecon(BaseRecon):
 
     def pre_process(self, exp):
         in_data = self.get_data_objects(exp.index, "in_data")
-        angles = in_data[0].get_rotation_angles(exp.meta_data)
+        angles = in_data[0].meta_data.get_meta_data('rotation_angle')
         params = [angles]
         return params
         

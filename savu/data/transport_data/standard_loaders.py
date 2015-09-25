@@ -26,7 +26,6 @@ import h5py
 import logging
 from savu.test import test_utils as tu
 import savu.data.data_structures as ds
-#from savu.data.transport_data.hdf5_transport_data import SliceAlwaysAvailableWrapper
 
 class _NXAppFinder(object):
     '''
@@ -65,7 +64,9 @@ class TomographyLoaders(object):
         data_obj.meta_data.set_meta_data("base_classes", base_classes)
                 
         data_obj.add_pattern("PROJECTION", core_dir = (1, 2), slice_dir = (0,))
-        data_obj.add_pattern("SINOGRAM", core_dir = (0, -1), slice_dir = (1,))
+        data_obj.add_pattern("SINOGRAM", core_dir = (0, 2), slice_dir = (1,))
+        data_obj.set_direction_parallel_to_rotation_axis(0)
+        data_obj.set_direction_perp_to_rotation_axis(1)
 
         objInfo = data_obj.meta_data
         expInfo = exp.meta_data
@@ -95,9 +96,9 @@ class TomographyLoaders(object):
 
         data_obj.set_shape(data_obj.data.shape)
                 
-    def load_projection_data(self, exp):
+    def load_test_projection_data(self, exp):
 
-        data_obj = exp.create_data_object("in_data", "tomo")                
+        data_obj = exp.create_data_object("in_data", "tomo")
         data_obj.add_pattern("PROJECTION", core_dir = (1, 2), slice_dir = (0,))
         data_obj.add_pattern("SINOGRAM", core_dir = (0, -1), slice_dir = (1,))
 

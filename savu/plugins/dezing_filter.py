@@ -21,18 +21,13 @@
 
 """
 import logging
-
-from savu.plugins.filter import Filter
-from savu.plugins.driver.cpu_plugin import CpuPlugin
-
-from savu.data import structures as st
-
-import scipy.signal.signaltools as sig
 import numpy as np
 import dezing
 
+from savu.plugins.filter import Filter
+from savu.plugins.driver.cpu_plugin import CpuPlugin
+from savu.data.data_structures import Padding
 from savu.plugins.utils import register_plugin
-
 
 @register_plugin
 class DezingFilter(Filter, CpuPlugin):
@@ -48,33 +43,31 @@ class DezingFilter(Filter, CpuPlugin):
         super(DezingFilter,
               self).__init__("DezingFilter")
 
-    def pre_process(self, data_size):
+    def pre_process(self, exp):
+        in_data = self.get_data_objects(exp.index, "in_data")[0]
+        data_size = in_data.get_shape()
         logging.debug("Running Dezing Setup")
         self.padding  = (self.parameters['kernel_size']-1)/2
         dezing.setup_size(data_size,self.parameters['outlier_mu'],self.padding)
         logging.debug("Finished Dezing Setup")
-        pass
 
     def post_process(self):
         logging.debug("Running Dezing Cleanup")
         dezing.cleanup()
-        logging.debug("Finished  Dezing Cleanup")
+        logging.debug("Finished Dezing Cleanup")
 
+    def set_filter_padding(self, in_data):
+        padding = Padding(in_data[0].get_current_pattern())
+        padding.pad_multi_frames(self.padding)
+        padding.pad_frame_edges(self.padding)
+        in_data[0].padding = padding.get_padding_directions()
 
-    def get_filter_padding(self):
-        padding = self.padding
-        return {st.CD_PROJECTION:padding}
-
-    def filter_frame(self, data):
+    def filter_frame(self, data, params):
         logging.debug("Running Dezing Frame")
-        result=np.empty_like(data)
-        dezing.run(data,result)
+        result=np.empty_like(data[0])
+        dezing.run(data[0],result)
         logging.debug("Finished Dezing Frame")
         return result
 
-    def required_data_type(self):
-        return st.RawTimeseriesData
-        
-    def output_data_type(self):
-        return st.RawTimeseriesData
+
         

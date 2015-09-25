@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2015 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,6 +31,7 @@ from itertools import chain
 from savu.core.utils import logfunction
 from savu.data.transport_mechanism import TransportMechanism
 from savu.core.utils import logmethod
+from savu.data.data_structures import TomoRaw
 
 
 class Hdf5Transport(TransportMechanism): 
@@ -186,35 +186,29 @@ class Hdf5Transport(TransportMechanism):
         in_data = in_data[0]
         out_data = out_data[0]
 
-        dark = in_data.meta_data.get_meta_data("dark")
-        flat = in_data.meta_data.get_meta_data("flat")
-        image_keys = in_data.meta_data.get_meta_data("image_key")
-
         [in_slice_list, frame_list] = in_data.get_slice_list_per_process(expInfo)
         [out_slice_list, frame_list] = out_data.get_slice_list_per_process(expInfo)
 
         for count in range(len(in_slice_list)):
-            idx = frame_list[count]
             out_data.data[out_slice_list[count]] = \
                       plugin.correction(in_data.data[in_slice_list[count]], 
-                                        image_keys, params)
+                                        in_data.get_image_key(), params)
 
         in_slice_list = in_data.get_grouped_slice_list()
 
 
     @logmethod
     def reconstruction_setup(self, plugin, in_data, out_data, expInfo, params):
-
-        in_data = in_data[0]
-        out_data = out_data[0]
-
-        [slice_list, frame_list] = in_data.get_slice_list_per_process(expInfo)
+        
+        if isinstance(in_data, TomoRaw):
+            raise Exception("The input data to a reconstruction plugin cannot \
+            be Raw data. Have you performed a timeseries_field_correction?")
+        
+        [slice_list, frame_list] = in_data.get_slice_list_per_process(expInfo, frameList=True)
         cor = in_data.meta_data.get_meta_data("centre_of_rotation")[frame_list]
 
         count = 0
         for sl in slice_list:
-	    print sl
-	    print np.squeeze(in_data.data[sl]).shape
             frame = plugin.reconstruct(np.squeeze(in_data.data[sl]),
                                        cor[count],
                                        out_data.get_pattern_shape(),
@@ -224,37 +218,62 @@ class Hdf5Transport(TransportMechanism):
             plugin.count += 1
             logging.debug("Reconstruction progress (%i of %i)" % (plugin.count, len(slice_list)))
 
+
+    @logmethod
     def filter_chunk(self, plugin, in_data, out_data, expInfo, params):
         logging.debug("Running filter._filter_chunk")
 
         in_slice_list = []
         for ind in range(len(in_data)):
-            [slice_list, frame_list] = in_data[ind].get_slice_list_per_process(expInfo)
+            slice_list = in_data[ind].get_slice_list_per_process(expInfo)
             in_slice_list.append(slice_list)
-
+            
         out_data = out_data[0]
-        [out_slice_list, frame_list] = out_data.get_slice_list_per_process(expInfo)
-
-        padding = plugin.get_filter_padding()
+        out_slice_list = out_data.get_slice_list_per_process(expInfo)
 
         for count in range(len(in_slice_list[0])):
             section = []
-            for ind in range(len(in_data)):
-                section.append(in_data[ind].get_padded_slice_data(
-                            in_slice_list[ind][count], padding, in_data[ind]))
+            for ind in range(len(in_data)):        
+                section.append(in_data[ind].get_padded_slice_data(in_slice_list[ind][count]))
             result = plugin.filter_frame(section, params)
 
-            if type(result) == dict:
-                for key in result.keys():
-                    if key == 'center_of_rotation':
-                        frame = in_data[0].get_orthogonal_slice(in_slice_list[count], 
-                        in_data[0].core_directions[plugin.get_filter_frame_type()])
-                        out_data.center_of_rotation[frame] = result[key]
-                    elif key == 'data':
-                        out_data.data[out_slice_list[count]] = \
-                        in_data[0].get_unpadded_slice_data(in_slice_list[count], 
-                                                    padding, in_data[0], result)
-            else:
-                out_data.data[out_slice_list[count]] = \
-                in_data[0].get_unpadded_slice_data(in_slice_list[0][count], padding, 
-                                                in_data[0], result)
+            out_data.data[out_slice_list[count]] = \
+            in_data[0].get_unpadded_slice_data(in_slice_list[0][count], result)
+                                            
+
+#    def filter_chunk(self, plugin, in_data, out_data, expInfo, params):
+#        logging.debug("Running filter._filter_chunk")
+#
+#        in_slice_list = []
+#        for ind in range(len(in_data)):
+#            [slice_list, frame_list] = in_data[ind].get_slice_list_per_process(expInfo)
+#            in_slice_list.append(slice_list)
+#
+#        out_data = out_data[0]
+#        [out_slice_list, frame_list] = out_data.get_slice_list_per_process(expInfo)
+#
+#        padding = plugin.get_filter_padding()
+#
+#        for count in range(len(in_slice_list[0])):
+#            section = []
+#            for ind in range(len(in_data)):
+#                print in_slice_list[ind][count]
+#                print "*** IN THE LOOP"
+#                section.append(in_data[ind].get_padded_slice_data(
+#                            in_slice_list[ind][count], padding, in_data[ind]))
+#            result = plugin.filter_frame(section, params)
+#
+#            if type(result) == dict:
+#                for key in result.keys():
+#                    if key == 'center_of_rotation':
+#                        frame = in_data[0].get_orthogonal_slice(in_slice_list[count], 
+#                        in_data[0].core_directions[plugin.get_filter_frame_type()])
+#                        out_data.center_of_rotation[frame] = result[key]
+#                    elif key == 'data':
+#                        out_data.data[out_slice_list[count]] = \
+#                        in_data[0].get_unpadded_slice_data(in_slice_list[count], 
+#                                                    padding, in_data[0], result)
+#            else:
+#                out_data.data[out_slice_list[count]] = \
+#                in_data[0].get_unpadded_slice_data(in_slice_list[0][count], padding, 
+#                                                in_data[0], result)

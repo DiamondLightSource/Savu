@@ -25,6 +25,7 @@
 
 import sys
 import logging
+import warnings
 
 import numpy as np
 
@@ -35,6 +36,7 @@ class Pattern(object):
 
     def __init__(self):
         self.meta_data_setup()
+        self.padding = None
         
     def meta_data_setup(self):
         pattern_list = self.set_available_pattern_list()
@@ -81,7 +83,67 @@ class Pattern(object):
             temp *= self.get_shape()[tslice]
         return temp
         
+    def set_direction_parallel_to_rotation_axis(self, tdir):
+        self.check_direction(tdir, 'parallel_to_rotation_axis')
+        self.set_main_axis(tdir, 'PROJECTION')
         
+    def set_direction_perp_to_rotation_axis(self, tdir):
+        self.check_direction(tdir, 'perp_to_rotation_axis')
+        self.set_main_axis(tdir, 'SINOGRAM')
+        
+    def check_direction(self, tdir, dname):    
+        if not isinstance(tdir, int):
+            raise TypeError('The should be an integer.')
+        
+        patterns = self.meta_data.get_meta_data("data_patterns")
+        if not patterns:
+            raise Exception("Please add available patterns before setting the"
+                            " direction ", dname)        
+
+    def set_main_axis(self, tdir, pname):
+        try:
+            self.meta_data.get_meta_data(['data_patterns', pname])
+            self.meta_data.set_meta_data(['data_patterns', pname, 'main_dir'], tdir)
+        except KeyError:
+            warnings.warn('The main_dir ' + str(tdir) + ' cannot be associated'
+                          ' with the pattern ' + str(pname) + ' as it does not'
+                          ' exist. ')                          
+        
+#    def set_rotation_axis(self, rot_dir):
+#        if not isinstance(rot_dir, int):
+#            raise TypeError('The rotation direction should be an integer.')
+#            
+#        patterns = self.meta_data.get_meta_data("data_patterns")
+#        if not patterns:
+#            raise Exception("Please add available patterns before setting the"
+#                            " rotation direction.")
+#        
+#        check_patterns = {'PROJECTION': 'slice_dir', 'SINOGRAM': 'core_dir'}
+#        error = []
+#        for key in check_patterns.keys():
+#            try:
+#                if rot_dir not in patterns[key][check_patterns[key]]:
+#                    raise ValueError
+#            except Exception as e:
+#                error.append(type(e))
+#        if len(error) > 1:
+#            warnings.warn("Unable to verify the rotation axis.")
+#                                      
+#        self.meta_data.set_meta_data(['data_patterns', 'rotation_axis'], rot_dir)        
+#        
+#    def get_rotation_axis(self):
+#        try:
+#            rot_dir = self.meta_data.get_meta_data(['data_patterns', 'rotation_axis'])
+#        except KeyError:
+#            try:
+#                proj_slice = self.meta_data.get_meta_data(['data_patterns', 'PROJECTION', 'slice_dir'])
+#                if len(proj_slice) is 1:
+#                    rot_dir = proj_slice
+#            except KeyError:
+#                raise ValueError("The rotation axis has not been defined.")
+#        return rot_dir                    
+            
+            
     def copy_patterns(self, patterns):
         self.meta_data.set_meta_data("data_patterns", patterns)
 
@@ -103,7 +165,10 @@ class Pattern(object):
             return name
         else:
             raise Exception("The pattern name has not been set.")
-
+            
+    def get_current_pattern(self):
+        pattern_name = self.get_current_pattern_name()
+        return {pattern_name: self.get_patterns()[pattern_name]}
 
     def get_pattern_shape(self):
         return self.get_sub_shape(self.get_current_pattern_name())
@@ -297,20 +362,16 @@ class TomoRaw(object):
     def set_image_key(self, image_key):
         self.image_key = image_key;
         self.set_image_key_slice()
-        self.get_dark_and_flat()
-
 
     def get_image_key(self):
         try:
             return self.image_key[...]
         except:
             return None
-                        
-                        
+                                                
     def set_frame_list(self, start, end):
         self.frame_list = [start, end]
-        
-                        
+                                
     def set_image_key_slice(self):
         image_key_bool = self.get_image_key() == 0
         image_key_index = np.where(image_key_bool)[0]
@@ -319,33 +380,8 @@ class TomoRaw(object):
         self.set_frame_list(start, end)
         self.image_key_slice = slice(start, end + 1, 1)
 
-
     def get_image_key_slice(self):
-        return self.image_key_slice
-                                                
-
-    def get_dark_and_flat(self):
-        dark = None
-        try:
-            dark = np.mean(self.data[self.get_image_key() == 2, :, :], 0)
-        except:
-            print "Setting the dark data to zero"
-            dark = np.zeros((self.get_shape()[1], self.get_shape()[2]))
-
-        flat = None
-        try:
-            flat = np.mean(self.data[self.get_image_key() == 1, :, :], 0)
-        except:
-            print "Setting the light data to one"
-            flat = np.ones((self.get_shape()[1], self.get_shape()[2]))
-
-        # shortcut to reduce processing
-        flat = flat - dark
-        flat[flat == 0.0] = 1
-
-        self.meta_data.set_meta_data("dark", dark)
-        self.meta_data.set_meta_data("flat", flat)
-        
+        return self.image_key_slice        
 
     def remove_dark_and_flat(self):
         if self.get_image_key() is not None:
@@ -362,7 +398,6 @@ class TomoRaw(object):
     def get_frame_raw(self, slice_list):
         pattern = self.get_current_pattern_name()
         image_slice = self.get_image_key_slice()
-        print image_slice
         new_slice_list = []
         if pattern is "SINOGRAM":
             for sl in slice_list:
@@ -378,14 +413,46 @@ class TomoRaw(object):
 
         return new_slice_list
 
-    def get_rotation_angles(self, mData):
-	# pad the rotation angles if this is a test on data with an image key
-	# i.e. dark and flat fields have not been removed
-	angles = self.meta_data.get_meta_data('rotation_angle')
-	try:
-	    if mData.get_meta_data('run_type') is 'test':
-		pad = self.get_shape()[0] - angles.shape[0]
-		angles = np.pad(angles, (0,pad), 'edge')
-	except KeyError:
-	    pass 
-	return angles
+
+class Padding(object):
+    
+    def __init__(self, pattern):
+        self.padding_dirs = {}
+        self.pattern_name = pattern.keys()[0]
+        self.pattern = pattern[self.pattern_name]
+        self.dims = self.set_dims()
+        
+    def set_dims(self):
+        dims = []
+        for key in self.pattern.keys():
+            temp = self.pattern[key]
+            for dim in (temp,) if type(temp) is int else temp:
+                dims.append(int(dim))                
+        dims = list(set(dims))
+        return dims
+        
+    def pad_frame_edges(self, padding):
+        core_dirs = self.pattern['core_dir']
+        for core in core_dirs:
+            self.pad_direction(core, padding)
+        
+    def pad_multi_frames(self, padding):
+        try:
+            main_dir = self.pattern['main_dir']
+        except KeyError:
+            raise Exception('There is no main_dir associated with this pattern')
+        self.pad_direction(main_dir, padding)
+        
+    def pad_direction(self, pdir, padding):
+        if pdir not in self.dims:
+            warnings.warn('Dimension ' + str(pdir) + ' is not associated '
+                       ' with the pattern ' + self.pattern_name, '. IGNORING!')
+        elif pdir in self.padding_dirs:
+            warnings.warn('Padding.add_dir(): The direction '+ str(pdir) + 
+                     ' has already been added to the padding list.')
+        else:
+            self.padding_dirs[pdir] = padding
+        
+    def get_padding_directions(self):
+        return self.padding_dirs
+        

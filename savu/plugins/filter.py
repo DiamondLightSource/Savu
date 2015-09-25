@@ -22,8 +22,6 @@
 """
 from savu.plugins.plugin import Plugin
 
-from savu.data import structures
-from savu.data import utils as du
 from savu.core.utils import logmethod
 import logging
 
@@ -41,11 +39,10 @@ class Filter(Plugin):
     def __init__(self, name):
         super(Filter, self).__init__(name)
 
-    def get_filter_padding(self):
+    def set_filter_padding(self):
         """
-        Should be overridden to define how wide the frame should be
-
-        :returns:  a dictionary containing the axis to pad in and the amount
+        Should be overridden to define how wide the frame should be for each 
+        input data set
         """
         return {}
 
@@ -56,7 +53,6 @@ class Filter(Plugin):
         :returns:  an integer of the number of frames
         """
         return 8
-
 
     def filter_frame(self, data, params):
         """
@@ -74,10 +70,14 @@ class Filter(Plugin):
     @logmethod
     def process(self, exp, transport, params):
         """
-        """        
+        """
         in_data = self.get_data_objects(exp.index, "in_data")
         out_data = self.get_data_objects(exp.index, "out_data")
+        self.set_filter_padding(in_data)
         transport.filter_chunk(self, in_data, out_data, exp.meta_data, params)
+        # reset padding to none
+        for data in in_data:
+            data.padding = None
 
           
     def setup(self, experiment):
@@ -90,7 +90,7 @@ class Filter(Plugin):
         # get a list of input dataset names required for this plugin
         in_data_list = self.parameters["in_datasets"]
         # get all input dataset objects
-        in_d1 = experiment.index["in_data"][in_data_list[0]]
+        in_d1 = experiment.index["in_data"][in_data_list[0]]        
         # set all input data patterns
         in_d1.set_current_pattern_name("PROJECTION")
         # set frame chunk
@@ -109,7 +109,7 @@ class Filter(Plugin):
         
         out_d1.copy_patterns(in_d1.get_patterns())
         # copy the entire in_data dictionary (image_key, dark and flat will 
-        #be removed since out_data is no longer an instance of TomoRaw)
+        # be removed since out_data is no longer an instance of TomoRaw)
         # If you do not want to copy the whole dictionary pass the key word
         # argument copyKeys = [your list of keys to copy], or alternatively, 
         # removeKeys = [your list of keys to remove]

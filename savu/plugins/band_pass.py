@@ -56,7 +56,7 @@ class BandPass(Filter, CpuPlugin):
               self).__init__("BandPass")
               
 
-    def filter_frame(self, data):
+    def filter_frame(self, data, params):
         """
         The second method we need to implement from the Filter class and the
         part of the code that actually does all the work. the input here 'data'
@@ -64,7 +64,8 @@ class BandPass(Filter, CpuPlugin):
         data for the single frame in the middle of this. In this case we use
         the scipy median filter with the 'kernmel_size' parameter, and return
         the same size data as you had originally.
-        """
+        """        
+        data = data[0]
         logging.debug("Data frame recieved for processing of shape %s",
                       str(data.shape))
         if self.parameters['type']=='Low':
