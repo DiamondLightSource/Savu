@@ -46,7 +46,7 @@ install:
 
 # command to run tests, e.g. python setup.py test
 script:
-  - if $PEP ; then pep8 --statistics -qq savu ; else py.test savu/test -v --cov savu --cov-report term-missing ; fi
+  - if $PEP ; then pep8 --statistics savu ; else py.test savu/test -v --cov savu --cov-report term-missing ; fi
 
 after_script:
   - if ! $PEP ; then coveralls ; fi 
