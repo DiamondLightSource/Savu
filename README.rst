@@ -30,8 +30,6 @@ Logo credit ::
 .. [1] http://www.reptilesmagazine.com/Breeding-Snakes/Breeding-Savu-Python/
 .. [2] http://blogs.thatpetplace.com/thatreptileblog/2014/06/19/savu-python-care-keeping-one-worlds-smallest-pythons/
 
-[![Build Status](https://travis-matrix-badges.herokuapp.com/repos/bjfish/grails-ci-build-matrix-example/branches/master)](https://travis-ci.org/DiamondLightSource/Savu)
-
 .. image:: https://badges.gitter.im/Join%20Chat.svg
    :alt: Join the chat at https://gitter.im/DiamondLightSource/Savu
    :target: https://gitter.im/DiamondLightSource/Savu?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
