@@ -49,4 +49,4 @@ script:
   - if $PEP ; then pep8 savu ; else py.test savu/test -v --cov savu --cov-report term-missing ; fi
 
 after_script:
-  - coveralls
+  - if ! $PEP ; then coveralls ; fi 
