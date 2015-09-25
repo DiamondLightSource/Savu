@@ -13,6 +13,14 @@ python:
 #    - libcr-dev mpich2 mpich2-doc
 #    - libboost-all-dev
 
+env:
+  - PEP=true
+  - PEP=false
+
+matrix:
+  allow_failures:
+  - env: PEP=true
+
 before_install:
   - sudo apt-get install libblas-dev
   - sudo apt-get install liblapack-dev
@@ -27,6 +35,7 @@ before_install:
 install: 
   - travis_wait pip install pytest --use-mirrors -q
   - travis_wait pip install pytest-cov --use-mirrors -q
+  - travis_wait pip install pep8 --use-mirrors -q
   - travis_wait pip install mpi4py --use-mirrors -q
   - travis_wait pip install coveralls --use-mirrors -q
   - travis_wait pip install scikit-image --use-mirrors -q
@@ -37,9 +46,7 @@ install:
 
 # command to run tests, e.g. python setup.py test
 script:
-  #- sudo ln -s /usr/lib/x86_64-linux-gnu/libboost_python.so.5 /usr/lib/x86_64-linux-gnu/libboost_python.so
-  - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/x86_64-linux-gnu/
-  - echo $LD_LIBRARY_PATH
+  - if $PEP ; then pep8 savu ; fi
   - py.test savu/test -v --cov savu --cov-report term-missing
 
 after_script:
