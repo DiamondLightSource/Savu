@@ -20,8 +20,6 @@
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
-import warnings 
-
 from savu.plugins.plugin import Plugin
 
 from savu.core.utils import logmethod
@@ -56,7 +54,7 @@ class Filter(Plugin):
         """
         return 8
 
-    def filter_frame(self, data, params):
+    def filter_frame(self, data):
         """
         Should be overloaded by filter classes extending this one
 
@@ -70,13 +68,13 @@ class Filter(Plugin):
 
 
     @logmethod
-    def process(self, exp, transport, params):
+    def process(self, exp, transport):
         """
         """
         in_data = self.get_data_objects(exp.index, "in_data")
         out_data = self.get_data_objects(exp.index, "out_data")
         self.set_filter_padding(in_data, out_data)
-        transport.filter_chunk(self, in_data, out_data, exp.meta_data, params)
+        transport.filter_chunk(self, in_data, out_data, exp.meta_data)
         # reset padding to none
         for data in in_data:
             data.padding = None

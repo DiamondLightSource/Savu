@@ -146,7 +146,14 @@ class Hdf5Transport(TransportMechanism):
 
             exp.barrier()
             logging.info("run the plugin")
-            plugin.run_plugin(exp, self)
+            return_dict = plugin.run_plugin(exp, self)
+
+            try:
+                return_dict['transfer_to_meta_data']
+                remove_data_set = self.transfer_to_meta_data(return_dict['transfer_to_meta_data'])
+            except KeyError:
+                remove_data_set = []
+                pass
 
             exp.barrier()
             logging.info("Clean up input datasets")
@@ -160,12 +167,16 @@ class Hdf5Transport(TransportMechanism):
             for out_objs in plugin.parameters["out_datasets"]:
                 if out_objs in exp.index["in_data"].keys():
                     exp.index["in_data"][out_objs].save_data()
+                elif out_objs in remove_data_set:
+                    exp.index["out_data"][out_objs].save_data()
+                    del exp.index["out_data"][out_objs]                    
 
             exp.barrier()
             logging.info("Copy out data to in data")
             for key in exp.index["out_data"]:
+                print "copying the output data ", key
                 exp.index["in_data"][key] = \
-                    copy.deepcopy(exp.index["out_data"][key])
+                                    copy.deepcopy(exp.index["out_data"][key])
 
             exp.barrier()
             logging.info("Clear up all data objects")
@@ -181,7 +192,7 @@ class Hdf5Transport(TransportMechanism):
         return
 
     @logmethod
-    def timeseries_field_correction(self, plugin, in_data, out_data, expInfo, params):
+    def timeseries_field_correction(self, plugin, in_data, out_data, expInfo):
 
         in_data = in_data[0]
         out_data = out_data[0]
@@ -192,13 +203,13 @@ class Hdf5Transport(TransportMechanism):
         for count in range(len(in_slice_list)):
             out_data.data[out_slice_list[count]] = \
                       plugin.correction(in_data.data[in_slice_list[count]], 
-                                        in_data.get_image_key(), params)
+                                        in_data.get_image_key())
 
         in_slice_list = in_data.get_grouped_slice_list()
 
 
     @logmethod
-    def reconstruction_setup(self, plugin, in_data, out_data, expInfo, params):
+    def reconstruction_setup(self, plugin, in_data, out_data, expInfo):
         
         if isinstance(in_data, TomoRaw):
             raise Exception("The input data to a reconstruction plugin cannot \
@@ -210,9 +221,7 @@ class Hdf5Transport(TransportMechanism):
         count = 0
         for sl in slice_list:
             frame = plugin.reconstruct(np.squeeze(in_data.data[sl]),
-                                       cor[count],
-                                       out_data.get_pattern_shape(),
-                                       params)
+                                       cor[count],out_data.get_pattern_shape())
             out_data.data[sl] = frame
             count += 1
             plugin.count += 1
@@ -220,16 +229,16 @@ class Hdf5Transport(TransportMechanism):
 
 
     @logmethod
-    def filter_chunk(self, plugin, in_data, out_data, expInfo, params):
+    def filter_chunk(self, plugin, in_data, out_data, expInfo):
         logging.debug("Running filter._filter_chunk")
 
         in_slice_list = self.get_all_slice_lists(in_data, expInfo)
         out_slice_list = self.get_all_slice_lists(out_data, expInfo)
 
-        for count in range(len(in_slice_list[0])):
+        for count in range(5):#range(len(in_slice_list[0])):
             print count
             section = self.get_all_padded_data(in_data, in_slice_list, count)
-            result = plugin.filter_frame(section, params)
+            result = plugin.filter_frame(section)
             self.set_out_data(out_data, out_slice_list, result, count)
 #
 #            if type(result) == dict:
@@ -265,4 +274,12 @@ class Hdf5Transport(TransportMechanism):
             data[idx].data[slice_list[idx][count]] = \
                 data[idx].get_unpadded_slice_data(slice_list[idx][count], 
                                                                  result[idx])
-        
+                                                                 
+    def transfer_to_meta_data(self, return_dict):
+        remove_data_sets = []
+        for data_key in return_dict.keys():
+            for name in return_dict[data_key].keys():
+                convert_data = return_dict[data_key][name]
+                remove_data_sets.append(convert_data.name)
+                data_key.meta_data.set_meta_data(name, convert_data.data[...])
+        return remove_data_sets

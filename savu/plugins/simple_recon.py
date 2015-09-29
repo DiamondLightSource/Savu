@@ -59,11 +59,10 @@ class SimpleRecon(BaseRecon, CpuPlugin):
     def pre_process(self, exp):
         out_data = self.get_data_objects(exp.index, "out_data")
         centre = tuple((np.asarray(out_data[0].get_pattern_shape()))/2)
-        params = [centre]
-        return params
+        self.kwargs = {'centre':centre}
 
-    def reconstruct(self, sinogram, centre_of_rotations, vol_shape, params):
-        centre = params[0]
+    def reconstruct(self, sinogram, centre_of_rotations, vol_shape):
+        centre = self.kwargs['centre']
         result = np.zeros(vol_shape, dtype=np.float32)
 
         for i in range(sinogram.shape[0]):

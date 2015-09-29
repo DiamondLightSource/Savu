@@ -68,7 +68,7 @@ class VoCentering(Filter, CpuPlugin):
         vv = abs(vv)
         return cor_positions[vv.argmin()]
 
-    def filter_frame(self, data, params):
+    def filter_frame(self, data):
         data = data[0].squeeze()
         width = data.shape[1]/4
         step = width/10.
@@ -86,9 +86,14 @@ class VoCentering(Filter, CpuPlugin):
         
         return [cor_raw, cor_fit]
 
-    def post_process(self, **kwargs):
-        pass        
-
+    def post_process(self, exp):
+        # do some curve fitting here
+        in_data = self.get_data_objects(exp.index, "out_data")
+        out_data = self.get_data_objects(exp.index, "out_data")
+        cor_raw = out_data[0].data[...]
+        out_data[1].data[...] = cor_raw + 10
+        output_dict = {'cor_raw':out_data[0], 'cor_fit':out_data[1]}
+        return {'transfer_to_meta_data':{in_data[0]:output_dict}} 
 
     def setup(self, experiment):
 
