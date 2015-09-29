@@ -27,13 +27,14 @@ import logging
 from savu.test import test_utils as tu
 import savu.data.data_structures as ds
 
+
 class _NXAppFinder(object):
     '''
     Returns a given application entry
     '''
-    def __init__(self,application="NXfluo"):
+    def __init__(self, application="NXfluo"):
         self.hits = []
-        self.appl=application
+        self.appl = application
 
     def _visit_NXapp(self, name, obj):
         if "NX_class" in obj.attrs.keys():
@@ -41,15 +42,16 @@ class _NXAppFinder(object):
                 if "definition" in obj.keys():
                     if obj["definition"].value == self.appl:
                         self.hits.append(obj)
-    
+
     def get_NXapp(self, nx_file, entry):
         self.hits = []
         nx_file[entry].visititems(self._visit_NXapp)
         return self.hits
 
+
 class TomographyLoaders(object):
     """
-    This class is called from a tomography loader to use a standard loader. It 
+    This class is called from a tomography loader to use a standard loader. It
     deals with loading of the data for different formats (e.g. hdf5, tiff,...)
     """
 
@@ -62,31 +64,33 @@ class TomographyLoaders(object):
         base_classes = [ds.TomoRaw]
         data_obj = exp.create_data_object("in_data", "tomo", base_classes)
         data_obj.meta_data.set_meta_data("base_classes", base_classes)
-                
-        data_obj.add_pattern("PROJECTION", core_dir = (1, 2), slice_dir = (0,))
-        data_obj.add_pattern("SINOGRAM", core_dir = (0, 2), slice_dir = (1,))
+
+        data_obj.add_pattern("PROJECTION", core_dir=(1, 2), slice_dir=(0,))
+        data_obj.add_pattern("SINOGRAM", core_dir=(0, 2), slice_dir=(1,))
         data_obj.set_direction_parallel_to_rotation_axis(0)
         data_obj.set_direction_perp_to_rotation_axis(1)
 
         objInfo = data_obj.meta_data
         expInfo = exp.meta_data
 
-        data_obj.backing_file = h5py.File(expInfo.get_meta_data("data_file"),'r')
-        
+        data_obj.backing_file = \
+            h5py.File(expInfo.get_meta_data("data_file"), 'r')
+
         logging.debug("Creating file '%s' '%s'", 'tomo_entry',
                       data_obj.backing_file.filename)
 
         data_obj.data = data_obj.backing_file['entry1/tomo_entry/data/data']
 
-        data_obj.set_image_key(data_obj.backing_file\
-                           ['entry1/tomo_entry/instrument/detector/image_key'])
+        data_obj.set_image_key(data_obj.backing_file
+                               ['entry1/tomo_entry/instrument/detector/'
+                                'image_key'])
 
         objInfo.set_meta_data("image_key", data_obj.get_image_key())
 
         rotation_angle = \
             data_obj.backing_file['entry1/tomo_entry/data/rotation_angle']
-        objInfo.set_meta_data("rotation_angle",
-                   rotation_angle[(objInfo.get_meta_data("image_key"))==0,...])
+        objInfo.set_meta_data("rotation_angle", rotation_angle
+                              [(objInfo.get_meta_data("image_key")) == 0, ...])
 
         try:
             control = data_obj.backing_file['entry1/tomo_entry/control/data']
@@ -95,85 +99,101 @@ class TomographyLoaders(object):
             logging.warn("No Control information available")
 
         data_obj.set_shape(data_obj.data.shape)
-                
+
     def load_test_projection_data(self, exp):
 
         data_obj = exp.create_data_object("in_data", "tomo")
-        data_obj.add_pattern("PROJECTION", core_dir = (1, 2), slice_dir = (0,))
-        data_obj.add_pattern("SINOGRAM", core_dir = (0, -1), slice_dir = (1,))
+        data_obj.add_pattern("PROJECTION", core_dir=(1, 2), slice_dir=(0,))
+        data_obj.add_pattern("SINOGRAM", core_dir=(0, -1), slice_dir=(1,))
 
         objInfo = data_obj.meta_data
         expInfo = exp.meta_data
 
-        data_obj.backing_file = h5py.File(expInfo.get_meta_data("data_file"),'r')
+        data_obj.backing_file = \
+            h5py.File(expInfo.get_meta_data("data_file"), 'r')
         logging.debug("Creating file '%s' '%s'", 'tomo_entry',
-                                              data_obj.backing_file.filename)
+                      data_obj.backing_file.filename)
 
-        data_obj.data = data_obj.backing_file['TimeseriesFieldCorrections/data']
+        data_obj.data = \
+            data_obj.backing_file['TimeseriesFieldCorrections/data']
 
         rotation_angle = \
             data_obj.backing_file['TimeseriesFieldCorrections/rotation_angle']
         objInfo.set_meta_data("rotation_angle", rotation_angle[...])
 
         data_obj.set_shape(data_obj.data.shape)
-               
 
 
-#AARON DIT: I will refactor the following code in the future. At the moment it is massively redundant - This is unacceptable!
+#AARON DIT: I will refactor the following code in the future. At the moment it
+# is massively redundant - This is unacceptable!
 
 class FluorescenceLoaders(object):
     """
-    This class is called from a fluorescence loader to use a standard loader. It 
-    deals with loading of the data for different formats (e.g. hdf5, tiff,...)
-    A.D Parsons 13th August 2015
+    This class is called from a fluorescence loader to use a standard loader.
+    It deals with loading of the data for different formats
+    (e.g. hdf5, tiff,...) A.D Parsons 13th August 2015
     """
 
     def load_from_nx_fluo(self, exp):
         """
          Define the input nexus file
-        
+
         :param path: The full path of the NeXus file to load.
         :type path: str
         """
         import numpy as np
-        
+
         # set up the file handles
         data_obj = exp.create_data_object("in_data", "fluo")
-        mData = data_obj.meta_data # the application meta data
-        
-        data_obj.backing_file = h5py.File(exp.meta_data.get_meta_data("data_file"), 'r')
-        
+        # the application meta data
+        mData = data_obj.meta_data
+
+        data_obj.backing_file = \
+            h5py.File(exp.meta_data.get_meta_data("data_file"), 'r')
+
         mData.set_meta_data("backing_file", data_obj.backing_file)
-        logging.debug("Creating file '%s' '%s'", 'fluo_entry', data_obj.backing_file.filename)
+        logging.debug("Creating file '%s' '%s'", 'fluo_entry',
+                      data_obj.backing_file.filename)
         # now lets extract the fluo entry so we can figure out our geometries!
         finder = _NXAppFinder()
         fluo_entry = finder.get_NXapp(data_obj.backing_file, 'entry1/')[0]
         beam = exp.meta_data
         #lets get the data out
-        data_obj.data = data_obj.backing_file[fluo_entry.name+'/instrument/fluorescence/data']
-        
-        data_obj.set_shape(data_obj.data.shape) # and set its shape
+        data_obj.data = data_obj.backing_file[fluo_entry.name +
+                                              '/instrument/fluorescence/data']
 
-        average = np.mean(np.mean(np.mean(data_obj.data, axis=0),axis=0),axis=0)
+        # and set its shape
+        data_obj.set_shape(data_obj.data.shape)
+
+        average = np.mean(np.mean(np.mean(data_obj.data, axis=0), axis=0),
+                          axis=0)
         # and the energy axis
         energy = data_obj.backing_file[fluo_entry.name+'/data/energy']
-        mono_energy = data_obj.backing_file[fluo_entry.name+'/instrument/monochromator/energy'].value
+        mono_energy = data_obj.backing_file[fluo_entry.name +
+                                            '/instrument/monochromator/energy'
+                                            ].value
         mData.set_meta_data("energy", energy)
-        mData.set_meta_data("mono_energy", mono_energy) # global since it is to do with the beam
+        # global since it is to do with the beam
+        mData.set_meta_data("mono_energy", mono_energy)
         mData.set_meta_data("average", average)
         #and get the mono energy
-        
+
         # now lets extract the map, if there is one!
-        mData.set_meta_data("is_tomo",False) # to begin with
-        mData.set_meta_data("is_map",False) # will change to the order of the map
+        # to begin with
+        mData.set_meta_data("is_tomo", False)
+        # will change to the order of the map
+        mData.set_meta_data("is_map", False)
         cts = 0
         motors = []
         motor_type = []
-        if ((len(fluo_entry['data'].attrs["axes"])-1)>0):# the -1 here comes from the fact that the data is the last axis only
+        # the -1 here comes from the fact that the data is the last axis only
+        if ((len(fluo_entry['data'].attrs["axes"])-1) > 0):
             for ii in range(len(fluo_entry['data'].attrs["axes"])-1):
-                if (fluo_entry['data/'+fluo_entry['data'].attrs["axes"][ii]].attrs['transformation_type']=="rotation"):# find the rotation axis
+                # find the rotation axis
+                if (fluo_entry['data/' + fluo_entry['data'].attrs["axes"][ii]]
+                        .attrs['transformation_type'] == "rotation"):
                     #what axis is this? Could we store it?
-                    motors.append(data_obj.backing_file[fluo_entry.name+'/data/'+fluo_entry['data'].attrs["axes"][ii]])
+                    motors.append(data_obj.backing_file[fluo_entry.name + '/data/'+fluo_entry['data'].attrs["axes"][ii]])
                     mData.set_meta_data("is_tomo",True)
                     motor_type.append('rotation')
                     logging.debug("Fluo reader: '%s'", "Is a tomo scan")
