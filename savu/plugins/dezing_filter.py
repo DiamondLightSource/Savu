@@ -26,7 +26,6 @@ import dezing
 
 from savu.plugins.filter import Filter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-from savu.data.data_structures import Padding
 from savu.plugins.utils import register_plugin
 
 @register_plugin
@@ -56,11 +55,13 @@ class DezingFilter(Filter, CpuPlugin):
         dezing.cleanup()
         logging.debug("Finished Dezing Cleanup")
 
-    def set_filter_padding(self, in_data):
-        padding = Padding(in_data[0].get_current_pattern())
-        padding.pad_multi_frames(self.padding)
-        padding.pad_frame_edges(self.padding)
-        in_data[0].padding = padding.get_padding_directions()
+    def set_filter_padding(self, in_data, out_data):
+        pad = self.padding
+        in_data[0].padding = {'pad_multi_frames':pad}
+        out_data[0].padding = {'pad_multi_frames':pad}
+# other examples        
+#        data.padding = {'pad_multi_frames':pad, 'pad_frame_edges':pad}
+#        data.padding = {'pad_direction':[ddir, pad]}}
 
     def filter_frame(self, data, params):
         logging.debug("Running Dezing Frame")

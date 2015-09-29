@@ -30,6 +30,7 @@ from savu.test.plugin_test import PluginTest
 class AstraReconTest(PluginTest):
     
     def setUp(self):
+        self.data_type = "tomo"
         self.plugin_name = "savu.plugins.astra_recon"
 
 if __name__ == "__main__":

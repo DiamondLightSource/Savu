@@ -25,8 +25,6 @@ import logging
 from savu.plugins.filter import Filter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
-from savu.data import structures as st
-
 from scipy.ndimage.filters import gaussian_filter
 
 from savu.plugins.utils import register_plugin
@@ -76,9 +74,4 @@ class BandPass(Filter, CpuPlugin):
             
         return result
 
-    def required_data_type(self):
-        return st.ProjectionData
-        
-    def output_data_type(self):
-        return st.ProjectionData
         

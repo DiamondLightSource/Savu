@@ -20,6 +20,8 @@
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
+import warnings 
+
 from savu.plugins.plugin import Plugin
 
 from savu.core.utils import logmethod
@@ -39,7 +41,7 @@ class Filter(Plugin):
     def __init__(self, name):
         super(Filter, self).__init__(name)
 
-    def set_filter_padding(self):
+    def set_filter_padding(self, in_data, out_data):
         """
         Should be overridden to define how wide the frame should be for each 
         input data set
@@ -73,7 +75,7 @@ class Filter(Plugin):
         """
         in_data = self.get_data_objects(exp.index, "in_data")
         out_data = self.get_data_objects(exp.index, "out_data")
-        self.set_filter_padding(in_data)
+        self.set_filter_padding(in_data, out_data)
         transport.filter_chunk(self, in_data, out_data, exp.meta_data, params)
         # reset padding to none
         for data in in_data:
@@ -113,7 +115,7 @@ class Filter(Plugin):
         # If you do not want to copy the whole dictionary pass the key word
         # argument copyKeys = [your list of keys to copy], or alternatively, 
         # removeKeys = [your list of keys to remove]
-        out_d1.meta_data.copy_dictionary(in_d1.meta_data.get_dictionary(), rawFlag=True)
+        out_d1.meta_data.copy_dictionary(in_d1.meta_data.get_dictionary())
 
         # set pattern for this plugin and the shape
         out_d1.set_current_pattern_name("PROJECTION")

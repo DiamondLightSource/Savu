@@ -40,7 +40,6 @@ class PluginRunner(object):
         class_name = "savu.core.transports." + options["transport"] + "_transport"
         self.add_base(self.import_class(class_name))
         self.transport_control_setup(options)
-        self.run_plugin_list(options)
 
     def import_class(self, class_name):
         name = class_name
@@ -57,6 +56,7 @@ class PluginRunner(object):
         self.__class__ = cls.__class__(cls.__name__, (cls, ExtraBase), {})
 
     def run_plugin_list(self, options):
+        
         logging.info("Starting to run the plugin list")
         experiment = Experiment(options)
         plugin_list = experiment.meta_data.plugin_list.plugin_list
@@ -84,6 +84,7 @@ class PluginRunner(object):
         print "Sorry for the wait..."
         print "You will be happy to know that your processing has now completed."
         print "Please have a nice day."
+        return experiment
 
     def plugin_loader(self, exp, plugin_dict, **kwargs):
         logging.debug("Running plugin loader")
@@ -96,11 +97,11 @@ class PluginRunner(object):
             raise e
 
         logging.debug("Getting pos and checkflag")
-        pos = (kwargs["pos"] if "pos" in kwargs else None)
-        check_flag = (kwargs["check"] if "check" in kwargs else False)
+        pos = kwargs.get('pos', None)
+        check_flag = kwargs.get('check', False)
 
         logging.debug("Doing something with the check flag")
-        if check_flag is True:
+        if check_flag:
             try:
                 plugin_dict["data"]["in_datasets"]
                 self.set_datasets(plugin, exp, plugin_dict, pos)
@@ -120,8 +121,8 @@ class PluginRunner(object):
         self.plugin_loader(exp, plugin_list[0])
         exp.set_nxs_filename()
 
-        check = (kwargs["check"] if "check" in kwargs else False)
-
+        check = kwargs.get('check', False)
+        
         for i in range(1, len(plugin_list)-1):
             exp.barrier()
             logging.info("Checking Plugin %s" % plugin_list[i]['name'])

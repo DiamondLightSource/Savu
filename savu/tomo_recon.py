@@ -77,4 +77,6 @@ def set_options(opt, args):
 if __name__ == '__main__':
     [options, args] = option_parser()
     check_input_params(args)
-    PluginRunner(set_options(options, args))
+    options = set_options(options, args)
+    plugin_runner = PluginRunner(options)
+    plugin_runner.run_plugin_list(options)

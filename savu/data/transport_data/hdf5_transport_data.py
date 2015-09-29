@@ -25,6 +25,7 @@ import os
 import logging 
 
 import numpy as np
+from savu.data.data_structures import Padding
 
 class Hdf5TransportData(object):
     """
@@ -116,7 +117,7 @@ class Hdf5TransportData(object):
             length.append(sshape[dim])
             repeat.append(int(np.prod(sshape[dim+1:])))
             
-        return [chunk, length, repeat]
+        return chunk, length, repeat
                 
 
     def get_slice_dirs_index(self, slice_dirs, shape):
@@ -142,74 +143,54 @@ class Hdf5TransportData(object):
         nDims = len(shape)
 
         slice_list = []
-        for i in range(nSlices):            
+        for i in range(nSlices):
             getitem = [slice(None)]*nDims
             for f in range(len(fix_dirs)):
                 getitem[fix_dirs[f]] = slice(value[f], value[f] + 1, 1)
             for sdir in range(len(slice_dirs)):
                 getitem[slice_dirs[sdir]] = slice(index[sdir, i], index[sdir, i] + 1, 1)
             slice_list.append(tuple(getitem))        
-        
+
         return slice_list
 
 
     def banked_list(self, slice_list):
         shape = self.get_shape()
         slice_dirs = self.get_slice_directions()         
-        [chunk, length, repeat] = self.chunk_length_repeat(slice_dirs, shape)
+        chunk, length, repeat = self.chunk_length_repeat(slice_dirs, shape)
         
-        banked = []
-        for rep in range(repeat[0]):
-            start = rep*length[0]
-            end = start + length[0]
-            banked.append(slice_list[start:end])
+        banked = []; banked_length = []; start = 0        
+        for i in range(len(slice_dirs)):
+            for rep in range(repeat[i]):
+                start += rep*length[i]
+                end = start + length[i]
+                banked.append(slice_list[start:end])
+                banked_length.append(length[i])
         
-        return [banked, length[0], slice_dirs[0]]
+        return banked, banked_length, slice_dirs
 
 
     def grouped_slice_list(self, slice_list, max_frames):
-        #**** A work in progress - Mark you may like to delete this and start again ;-)
-        [banked, length, slice_dir] = self.banked_list(slice_list)
+        banked, length, slice_dir = self.banked_list(slice_list)
 
-        grouped = []
+        grouped = []; count = 0
         for group in banked:
-            index = len(group) if (length % max_frames) is 0 else (len(group)-1)
-            frames = index*max_frames
+            full_frames = int(length[count]/float(max_frames))
+            rem = 1 if (length[count] % max_frames) else 0
             working_slice = list(group[0])            
             
-            for i in range(0, frames, max_frames):
+            for i in range(0, (full_frames*max_frames), max_frames):
                 new_slice = slice(i, i+max_frames, 1)
-                working_slice[slice_dir] = new_slice
+                working_slice[slice_dir[count]] = new_slice
                 grouped.append(tuple(working_slice))
-                
-            if index is not len(group):
-                new_slice = slice(i+max_frames, len(group))
-                
-#        grouped = []
-#        for group in index:
-            
-                
-#        # now combine the groups into single slices
-#        grouped = []
-#        for step, group in banked:
-#            # get the group of slices and the slice step ready
-#            working_slice = list(group[0])
-#            step_dir = step.index(max(step))
-#            start = group[0][step_dir]
-#            stop = group[-1][step_dir]
-#            # using the start and stop points, step through in steps of 
-#            # max_slice
-#            #******************************************************************
-#            # FIXME THIS IS ALMOST CERTAINLY WRONG AS IT DOSE NOT WORK FOR 
-#            # LISTS WHICH ARE NOT MULTIPLES OF MAX_FRAMES
-#            #******************************************************************
-#            for i in range(start, stop, max_frames):
-#                new_slice = slice(i, i+max_frames, step[step_dir])
-#                working_slice[step_dir] = new_slice
-#                grouped.append(tuple(working_slice))
-#        return grouped
-#        banked = []
-        pass
+
+            if rem:
+                new_slice = slice(i+max_frames, len(group), 1)
+                working_slice[slice_dir[count]] = new_slice
+                grouped.append(tuple(working_slice))
+            count += 1
+
+        return grouped
 
     def get_grouped_slice_list(self):
         max_frames = self.get_nFrames()
@@ -225,130 +206,7 @@ class Hdf5TransportData(object):
                             "does not support slicing in directions", 
                             self.get_slice_directions())
                      
-         # *** Temporarily removed
-        #gsl = self.grouped_slice_list(sl, max_frames)
-#        return gsl
-        return sl
-        
-
-#    def get_slice_list(self):
-#        it = np.nditer(self.data, flags=['multi_index', 'refs_ok']) # what does this mean?
-#        dirs_to_remove = list(self.get_core_directions())
-#
-#        if it.ndim is 0:
-#            slice_list = self.empty_array_slice_list()
-#        else:
-#            dirs_to_remove.sort(reverse=True)
-#            for direction in dirs_to_remove:
-#                it.remove_axis(direction)
-#            mapping_list = range(len(it.multi_index))        
-#            dirs_to_remove.sort()
-#            for direction in dirs_to_remove:
-#                mapping_list.insert(direction, -1)
-#            mapping_array = np.array(mapping_list)
-#            slice_list = []
-#            while not it.finished:
-#                tup = it.multi_index + (slice(None),)
-#                slice_list.append(tuple(np.array(tup)[mapping_array]))
-#                it.iternext()
-#
-#        return slice_list
-
-    
-#    def calc_step(self, slice_a, slice_b):
-#        result = []
-#        for i in range(len(slice_a)):
-#            if slice_a[i] == slice_b[i]:
-#                result.append(0)
-#            else:
-#                result.append(slice_b[i] - slice_a[i])
-#                
-#        return result
-#
-#
-#    def group_slice_list(self, slice_list, max_frames):
-#        banked = []
-#        batch = []
-#        step = -1
-#        for sl in slice_list:
-#            # set up for the first slice or after a batch has been appended
-#            if len(batch) == 0:
-#                batch.append(sl)
-#                step = -1
-#            # there is an unknown step size so find out what the step is
-#            elif step == -1:
-#                new_step = self.calc_step(batch[-1], sl)
-#                # check stepping in 1 direction
-#                if (np.array(new_step) > 0).sum() > 1:
-#                    # we are stepping in multiple directions, end the batch
-#                    # append it to the banked batches
-#                    banked.append((step, batch))
-#                    # reset the batch to an empty list
-#                    batch = []
-#                    # add the current slice to the batch
-#                    batch.append(sl)
-#                    # set the step as we dont know it
-#                    step = -1
-#                else:
-#                    # we are stepping in one dimention so add this slice to the
-#                    # batch and set the step size correctly
-#                    batch.append(sl)
-#                    step = new_step
-#            else:
-#                # we know the step size, so carry on with getting a batch of 
-#                # data
-#                new_step = self.calc_step(batch[-1], sl)
-#                # make sure the steps are the same                
-#                if new_step == step:
-#                    # if so append the slice to the batch
-#                    batch.append(sl)
-#                else:
-#                    # somthing has changed so add this step and batch to the 
-#                    # banked list as before
-#                    banked.append((step, batch))
-#                    batch = []
-#                    batch.append(sl)
-#                    step = -1
-#        banked.append((step, batch))
-#    
-#        # now combine the groups into single slices
-#        grouped = []
-#        for step, group in banked:
-#            # get the group of slices and the slice step ready
-#            working_slice = list(group[0])
-#            step_dir = step.index(max(step))
-#            start = group[0][step_dir]
-#            stop = group[-1][step_dir]
-#            # using the start and stop points, step through in steps of 
-#            # max_slice
-#            #******************************************************************
-#            # FIXME THIS IS ALMOST CERTAINLY WRONG AS IT DOSE NOT WORK FOR 
-#            # LISTS WHICH ARE NOT MULTIPLES OF MAX_FRAMES
-#            #******************************************************************
-#            for i in range(start, stop, max_frames):
-#                new_slice = slice(i, i+max_frames, step[step_dir])
-#                working_slice[step_dir] = new_slice
-#                grouped.append(tuple(working_slice))
-#        return grouped
-#    
-#    
-#    def get_grouped_slice_list(self):
-#        max_frames = self.get_nFrames()
-#        max_frames = (1 if max_frames is None else max_frames)
-#
-#        sl = self.get_slice_list()
-#
-#        if isinstance(self, ds.TomoRaw):
-#            sl = self.get_frame_raw(sl)
-#      
-#        if sl is None:
-#            raise Exception("Data type", self.get_current_pattern_name(), 
-#                            "does not support slicing in directions", 
-#                            self.get_slice_directions())
-#                            
-#        gsl = self.group_slice_list(sl, max_frames)
-# 
-#        return gsl
+        return self.grouped_slice_list(sl, max_frames)        
 
 
     def get_slice_list_per_process(self, expInfo, **kwargs):
@@ -361,14 +219,12 @@ class Hdf5TransportData(object):
         if frameList:
             frame_index = np.arange(len(slice_list))
             frames = np.array_split(frame_index, len(processes))[process]
-            return [ slice_list[frames[0]:frames[-1]+1], frame_index ]
+            return [slice_list[frames[0]:frames[-1]+1], frame_index]
         else:
             return slice_list
-        
 
 
     def calculate_slice_padding(self, in_slice, pad_ammount, data_stop):
-        print in_slice, pad_ammount, data_stop
         sl = in_slice
     
         if not type(sl) == slice:
@@ -382,9 +238,7 @@ class Hdf5TransportData(object):
             minval = sl.start-pad_ammount
         if sl.stop is not None:
             maxval = sl.stop+pad_ammount
-            
-        print "min and max vals", minval, maxval
-    
+                
         minpad = 0
         maxpad = 0
         if minval is None:
@@ -423,31 +277,35 @@ class Hdf5TransportData(object):
         return data_slice
     
     
+    def get_padding_dict(self):
+        padding = Padding(self.get_current_pattern())
+        for key in self.padding.keys():
+            getattr(padding, key)(self.padding[key])
+        return padding.get_padding_directions()
+
     def get_padded_slice_data(self, input_slice_list):
         slice_list = list(input_slice_list)
-        try:
-            padding_dict = self.padding
-        except ValueError:
+        if self.padding is None:
             return self.data[tuple(slice_list)]
-            
+        padding_dict = self.get_padding_dict()
+        
         pad_list = []
         for i in range(len(slice_list)):
             pad_list.append((0, 0))
-   
+
         for direction in padding_dict.keys():
             slice_list[direction], pad_list[direction] = \
                     self.calculate_slice_padding(slice_list[direction], 
                                                  padding_dict[direction], 
                                                  self.get_shape()[direction])
-
+        
         return self.get_pad_data(tuple(slice_list), tuple(pad_list))        
 
-
     def get_unpadded_slice_data(self, input_slice_list, padded_dataset):
-        try:
-            padding_dict = self.padding
-        except ValueError:
-            return padded_dataset
+        padding_dict = self.padding
+        if self.padding is None:
+            return self.data[tuple(input_slice_list)]
+        padding_dict = self.get_padding_dict()
             
         slice_list = list(input_slice_list)
         pad_list = []

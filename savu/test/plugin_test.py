@@ -66,6 +66,25 @@ class PluginTest(unittest.TestCase):
             pass
 
 
+    def check_data_padding(self, in_data, out_data):
+        """
+        Checks the input and output data sets for padding and prints a warning
+        if there is a chance an error has been made
+        """
+        # check if input and output data sets are/are not padded
+        in_padding = False; out_padding = False
+        for data in in_data:
+            if data.padding is not None:
+                in_padding = True
+        
+        for data in out_data:
+            if data.padding is not None:
+                out_padding = True
+
+        if (in_padding != out_padding) || ():
+            warnings.warn("Padding on in_datasets is " + str(in_padding) +
+                          " but on out_datasets is " + str(out_padding))
+
 class CpuPluginWrapper(Plugin, CpuPlugin):
 
     def __init__(self):

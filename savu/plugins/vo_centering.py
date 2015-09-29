@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from savu.data.plugin_info import CitationInformation
-from savu.data.structures import ProjectionData
 
 """
 .. module:: vo_centering
@@ -22,9 +21,7 @@ from savu.data.structures import ProjectionData
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
-from savu.plugins.pass_through_plugin import PassThroughPlugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-from savu.data import structures
 
 import scipy.ndimage as ndi
 
@@ -32,10 +29,11 @@ import numpy as np
 import scipy.fftpack as fft
 
 from savu.plugins.utils import register_plugin
+from savu.plugins.filter import Filter
 
 
 @register_plugin
-class VoCentering(PassThroughPlugin, CpuPlugin):
+class VoCentering(Filter, CpuPlugin):
     """
     A plugin to calculate the center of rotation using the Vo Method
     """
@@ -70,32 +68,8 @@ class VoCentering(PassThroughPlugin, CpuPlugin):
         vv = abs(vv)
         return cor_positions[vv.argmin()]
 
-    def get_filter_frame_type(self):
-        """
-        This filter processes sinograms
-
-         :returns:  structures.CD_SINOGRAM
-        """
-        return structures.CD_SINOGRAM
-
-    def get_max_frames(self):
-        """
-        This filter processes 1 frame at a time
-
-         :returns:  1
-        """
-        return 1
-
-    def required_data_type(self):
-        """
-        The input for this plugin is ProjectionData as it needs to be corrected
-
-        :returns:  ProjectionData
-        """
-        return ProjectionData
-
-    def process_frame(self, data):
-        data = data.squeeze()
+    def filter_frame(self, data, params):
+        data = data[0].squeeze()
         width = data.shape[1]/4
         step = width/10.
         point = 0.0
@@ -107,8 +81,69 @@ class VoCentering(PassThroughPlugin, CpuPlugin):
             step = width/10.
 
         cor = (data.shape[1]/2.0) - point
-        return {'center_of_rotation': cor}
+        return cor
 
+
+    def setup(self, experiment):
+
+        experiment.log(self.name + " Start")
+        chunk_size = self.get_max_frames()
+
+        #-------------------setup input datasets-------------------------
+
+        # get a list of input dataset names required for this plugin
+        in_data_list = self.parameters["in_datasets"]
+        # get all input dataset objects
+        in_d1 = experiment.index["in_data"][in_data_list[0]]        
+        # set all input data patterns
+        in_d1.set_current_pattern_name("SINOGRAM")
+        # set frame chunk
+        in_d1.set_nFrames(chunk_size)
+        
+        #----------------------------------------------------------------
+
+        #------------------setup output datasets-------------------------
+
+        # get a list of output dataset names created by this plugin
+        out_data_list = self.parameters["out_datasets"]
+
+        # create all out_data objects and associated patterns and meta_data
+        # patterns can be copied, added or both
+        out_d1 = experiment.create_data_object("out_data", out_data_list[0])
+        out_d1.add_pattern("1D_METADATA", slice_dir = (0,))
+        out_d1.meta_data.copy_dictionary(in_d1.meta_data.get_dictionary())
+        # set pattern for this plugin and the shape
+        out_d1.set_current_pattern_name("1D_METADATA")
+        out_d1.set_shape((in_d1.get_shape()[0],))
+        # set frame chunk
+        out_d1.set_nFrames(chunk_size)
+        
+#        out_d2 = experiment.create_data_object("out_data", out_data_list[1])
+#        out_d2.add_pattern("1D_METADATA", slice_dir = (0,))
+#        out_d2.meta_data.copy_dictionary(in_d1.meta_data.get_dictionary(), rawFlag=True)
+#        # set pattern for this plugin and the shape
+#        out_d2.set_current_pattern_name("1D_METADATA")
+#        out_d2.set_shape(in_d1.get_shape()[0])
+#        # set frame chunk
+#        out_d2.set_nFrames(chunk_size)
+
+        #----------------------------------------------------------------
+        experiment.log(self.name + " End")
+        
+        
+    def nOutput_datasets(self):
+        return 1
+        
+        
+    def get_max_frames(self):
+        """
+        This filter processes 1 frame at a time
+
+         :returns:  1
+        """
+        return 1
+        
+        
     def get_citation_information(self):
         cite_info = CitationInformation()
         cite_info.description = \

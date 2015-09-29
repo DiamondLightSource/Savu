@@ -55,7 +55,8 @@ class Pattern(object):
                         "SPECTRUM",
                         "DIFFRACTION",
                         "CHANNEL",
-                        "SPECTRUM_STACK"] # added spectrum adp 17th August, Added diffraction 28th August adp
+                        "SPECTRUM_STACK",
+                        "1D_METADATA"] # added spectrum adp 17th August, Added diffraction 28th August adp
         return pattern_list                        
                 
                 
@@ -108,41 +109,6 @@ class Pattern(object):
             warnings.warn('The main_dir ' + str(tdir) + ' cannot be associated'
                           ' with the pattern ' + str(pname) + ' as it does not'
                           ' exist. ')                          
-        
-#    def set_rotation_axis(self, rot_dir):
-#        if not isinstance(rot_dir, int):
-#            raise TypeError('The rotation direction should be an integer.')
-#            
-#        patterns = self.meta_data.get_meta_data("data_patterns")
-#        if not patterns:
-#            raise Exception("Please add available patterns before setting the"
-#                            " rotation direction.")
-#        
-#        check_patterns = {'PROJECTION': 'slice_dir', 'SINOGRAM': 'core_dir'}
-#        error = []
-#        for key in check_patterns.keys():
-#            try:
-#                if rot_dir not in patterns[key][check_patterns[key]]:
-#                    raise ValueError
-#            except Exception as e:
-#                error.append(type(e))
-#        if len(error) > 1:
-#            warnings.warn("Unable to verify the rotation axis.")
-#                                      
-#        self.meta_data.set_meta_data(['data_patterns', 'rotation_axis'], rot_dir)        
-#        
-#    def get_rotation_axis(self):
-#        try:
-#            rot_dir = self.meta_data.get_meta_data(['data_patterns', 'rotation_axis'])
-#        except KeyError:
-#            try:
-#                proj_slice = self.meta_data.get_meta_data(['data_patterns', 'PROJECTION', 'slice_dir'])
-#                if len(proj_slice) is 1:
-#                    rot_dir = proj_slice
-#            except KeyError:
-#                raise ValueError("The rotation axis has not been defined.")
-#        return rot_dir                    
-            
             
     def copy_patterns(self, patterns):
         self.meta_data.set_meta_data("data_patterns", patterns)
@@ -434,16 +400,17 @@ class Padding(object):
     def pad_frame_edges(self, padding):
         core_dirs = self.pattern['core_dir']
         for core in core_dirs:
-            self.pad_direction(core, padding)
+            self.pad_direction([core, padding])
         
     def pad_multi_frames(self, padding):
         try:
             main_dir = self.pattern['main_dir']
         except KeyError:
             raise Exception('There is no main_dir associated with this pattern')
-        self.pad_direction(main_dir, padding)
+        self.pad_direction([main_dir, padding])
         
-    def pad_direction(self, pdir, padding):
+    def pad_direction(self, pad_list):
+        pdir = pad_list[0]; padding = pad_list[1]
         if pdir not in self.dims:
             warnings.warn('Dimension ' + str(pdir) + ' is not associated '
                        ' with the pattern ' + self.pattern_name, '. IGNORING!')

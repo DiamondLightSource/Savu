@@ -22,6 +22,7 @@
 
 """
 
+from savu.core.plugin_runner import PluginRunner
 import inspect
 import os
 
@@ -107,5 +108,18 @@ def load_class(name):
     instance = get_class_instance(clazz)
     return instance
 
-
-
+def load_test_data(exp_type):
+    options = set_experiment(exp_type)
+    
+    plugin_list = []    
+    ID = options['loader']; name = module2class(ID.split('.')[-1])
+    plugin_list.append(set_plugin_entry(name, ID, {}))
+    ID = options['saver']; name = module2class(ID.split('.')[-1])
+    plugin_list.append(set_plugin_entry(name, ID, {}))
+    
+    # currently assuming an empty parameters dictionary
+    options['plugin_list'] = plugin_list
+    plugin_runner = PluginRunner(options)
+    exp = plugin_runner.run_plugin_list(options)
+    return exp.index['in_data'][exp.index['in_data'].keys()[0]]
+        

@@ -186,8 +186,8 @@ class Hdf5Transport(TransportMechanism):
         in_data = in_data[0]
         out_data = out_data[0]
 
-        [in_slice_list, frame_list] = in_data.get_slice_list_per_process(expInfo)
-        [out_slice_list, frame_list] = out_data.get_slice_list_per_process(expInfo)
+        [in_slice_list, frame_list] = in_data.get_slice_list_per_process(expInfo, frameList=True)
+        [out_slice_list, frame_list] = out_data.get_slice_list_per_process(expInfo, frameList=True)
 
         for count in range(len(in_slice_list)):
             out_data.data[out_slice_list[count]] = \
@@ -230,16 +230,19 @@ class Hdf5Transport(TransportMechanism):
             
         out_data = out_data[0]
         out_slice_list = out_data.get_slice_list_per_process(expInfo)
-
+        print len(in_slice_list[0]), len(out_slice_list)        
+        
         for count in range(len(in_slice_list[0])):
             section = []
-            for ind in range(len(in_data)):        
-                section.append(in_data[ind].get_padded_slice_data(in_slice_list[ind][count]))
+            for ind in range(len(in_data)):
+                temp = (in_data[ind].get_padded_slice_data(in_slice_list[ind][count]))
+                section.append(temp)
             result = plugin.filter_frame(section, params)
-
+#            out_data.data[out_slice_list[count]] = \
+#            in_data[0].get_unpadded_slice_data(in_slice_list[0][count], result)
             out_data.data[out_slice_list[count]] = \
-            in_data[0].get_unpadded_slice_data(in_slice_list[0][count], result)
-                                            
+            out_data.get_unpadded_slice_data(out_slice_list[count], result)
+#            temp = out_data.get_unpadded_slice_data(out_slice_list[count], result)
 
 #    def filter_chunk(self, plugin, in_data, out_data, expInfo, params):
 #        logging.debug("Running filter._filter_chunk")
