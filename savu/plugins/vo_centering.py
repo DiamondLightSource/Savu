@@ -80,8 +80,14 @@ class VoCentering(Filter, CpuPlugin):
             width = step
             step = width/10.
 
-        cor = (data.shape[1]/2.0) - point
-        return cor
+        cor_raw = (data.shape[1]/2.0) - point
+        # temporary for testing
+        cor_fit = (data.shape[1]/2.0) - point
+        
+        return [cor_raw, cor_fit]
+
+    def post_process(self, **kwargs):
+        pass        
 
 
     def setup(self, experiment):
@@ -114,25 +120,25 @@ class VoCentering(Filter, CpuPlugin):
         out_d1.meta_data.copy_dictionary(in_d1.meta_data.get_dictionary())
         # set pattern for this plugin and the shape
         out_d1.set_current_pattern_name("1D_METADATA")
-        out_d1.set_shape((in_d1.get_shape()[0],))
+        out_d1.set_shape((in_d1.get_shape()[1],))
         # set frame chunk
         out_d1.set_nFrames(chunk_size)
         
-#        out_d2 = experiment.create_data_object("out_data", out_data_list[1])
-#        out_d2.add_pattern("1D_METADATA", slice_dir = (0,))
-#        out_d2.meta_data.copy_dictionary(in_d1.meta_data.get_dictionary(), rawFlag=True)
-#        # set pattern for this plugin and the shape
-#        out_d2.set_current_pattern_name("1D_METADATA")
-#        out_d2.set_shape(in_d1.get_shape()[0])
-#        # set frame chunk
-#        out_d2.set_nFrames(chunk_size)
+        out_d2 = experiment.create_data_object("out_data", out_data_list[1])
+        out_d2.add_pattern("1D_METADATA", slice_dir = (0,))
+        out_d2.meta_data.copy_dictionary(in_d1.meta_data.get_dictionary(), rawFlag=True)
+        # set pattern for this plugin and the shape
+        out_d2.set_current_pattern_name("1D_METADATA")
+        out_d2.set_shape((in_d1.get_shape()[1],))
+        # set frame chunk
+        out_d2.set_nFrames(chunk_size)
 
         #----------------------------------------------------------------
         experiment.log(self.name + " End")
         
         
     def nOutput_datasets(self):
-        return 1
+        return 2
         
         
     def get_max_frames(self):

@@ -223,48 +223,14 @@ class Hdf5Transport(TransportMechanism):
     def filter_chunk(self, plugin, in_data, out_data, expInfo, params):
         logging.debug("Running filter._filter_chunk")
 
-        in_slice_list = []
-        for ind in range(len(in_data)):
-            slice_list = in_data[ind].get_slice_list_per_process(expInfo)
-            in_slice_list.append(slice_list)
-            
-        out_data = out_data[0]
-        out_slice_list = out_data.get_slice_list_per_process(expInfo)
-        print len(in_slice_list[0]), len(out_slice_list)        
-        
-        for count in range(len(in_slice_list[0])):
-            section = []
-            for ind in range(len(in_data)):
-                temp = (in_data[ind].get_padded_slice_data(in_slice_list[ind][count]))
-                section.append(temp)
-            result = plugin.filter_frame(section, params)
-#            out_data.data[out_slice_list[count]] = \
-#            in_data[0].get_unpadded_slice_data(in_slice_list[0][count], result)
-            out_data.data[out_slice_list[count]] = \
-            out_data.get_unpadded_slice_data(out_slice_list[count], result)
-#            temp = out_data.get_unpadded_slice_data(out_slice_list[count], result)
+        in_slice_list = self.get_all_slice_lists(in_data, expInfo)
+        out_slice_list = self.get_all_slice_lists(out_data, expInfo)
 
-#    def filter_chunk(self, plugin, in_data, out_data, expInfo, params):
-#        logging.debug("Running filter._filter_chunk")
-#
-#        in_slice_list = []
-#        for ind in range(len(in_data)):
-#            [slice_list, frame_list] = in_data[ind].get_slice_list_per_process(expInfo)
-#            in_slice_list.append(slice_list)
-#
-#        out_data = out_data[0]
-#        [out_slice_list, frame_list] = out_data.get_slice_list_per_process(expInfo)
-#
-#        padding = plugin.get_filter_padding()
-#
-#        for count in range(len(in_slice_list[0])):
-#            section = []
-#            for ind in range(len(in_data)):
-#                print in_slice_list[ind][count]
-#                print "*** IN THE LOOP"
-#                section.append(in_data[ind].get_padded_slice_data(
-#                            in_slice_list[ind][count], padding, in_data[ind]))
-#            result = plugin.filter_frame(section, params)
+        for count in range(len(in_slice_list[0])):
+            print count
+            section = self.get_all_padded_data(in_data, in_slice_list, count)
+            result = plugin.filter_frame(section, params)
+            self.set_out_data(out_data, out_slice_list, result, count)
 #
 #            if type(result) == dict:
 #                for key in result.keys():
@@ -280,3 +246,23 @@ class Hdf5Transport(TransportMechanism):
 #                out_data.data[out_slice_list[count]] = \
 #                in_data[0].get_unpadded_slice_data(in_slice_list[0][count], padding, 
 #                                                in_data[0], result)
+
+    def get_all_slice_lists(self, data_list, expInfo):
+        slice_list = []
+        for data in data_list:
+            slice_list.append(data.get_slice_list_per_process(expInfo))            
+        return slice_list
+        
+    def get_all_padded_data(self, data, slice_list, count):
+        section = []
+        for idx in range(len(data)):
+            section.append(data[idx].get_padded_slice_data(slice_list[idx][count]))
+        return section
+
+    def set_out_data(self, data, slice_list, result, count):
+        result = [result] if type(result) is not list else result
+        for idx in range(len(data)):
+            data[idx].data[slice_list[idx][count]] = \
+                data[idx].get_unpadded_slice_data(slice_list[idx][count], 
+                                                                 result[idx])
+        

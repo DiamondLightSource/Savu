@@ -84,7 +84,6 @@ class TomographySavers(object):
         params = self.set_name("data")
         self.output_data_to_file(group, params, data.get_shape(), dtype)
         data.data = params["name"]
-        #data.data = SliceAvailableWrapper(params['name2'], params['name1'])
         return group
 
 
