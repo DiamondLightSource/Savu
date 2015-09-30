@@ -16,8 +16,8 @@
 """
 .. module:: plugin_list
    :platform: Unix
-   :synopsis: Contains the PluginList class, which deals with loading and 
-   saving the plugin list, and the CitationInformation class. An instance is 
+   :synopsis: Contains the PluginList class, which deals with loading and
+   saving the plugin list, and the CitationInformation class. An instance is
    held by the MetaData class.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
@@ -25,7 +25,6 @@
 """
 import h5py
 import json
-import os
 import logging
 
 import numpy as np
@@ -66,13 +65,13 @@ class PluginList(object):
             plugin_group.attrs[NX_CLASS] = 'NXnote'
             id_array = np.array([plugin['id']])
             plugin_group.create_dataset('id', id_array.shape, id_array.dtype,
-                                         id_array)
+                                        id_array)
             name_array = np.array([plugin['name']])
             plugin_group.create_dataset('name', name_array.shape,
-                                         name_array.dtype, name_array)
+                                        name_array.dtype, name_array)
             data_array = np.array([json.dumps(plugin['data'])])
             plugin_group.create_dataset('data', data_array.shape,
-                                         data_array.dtype, data_array)
+                                        data_array.dtype, data_array)
             count += 1
         plugin_file.close()
 

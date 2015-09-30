@@ -26,22 +26,23 @@ import inspect
 
 from savu.plugins import utils as pu
 
+
 class Plugin(object):
     """
-    The base class from which all plugins should inherit.    
+    The base class from which all plugins should inherit.
     """
 
     def __init__(self, name='Plugin'):
         super(Plugin, self).__init__()
         self.name = name
         self.parameters = {}
-        self.data_objs = {}       
+        self.data_objs = {}
 
     def setup(self, experiment):
         """
-        This method is first to be called after the plugin has been created. 
+        This method is first to be called after the plugin has been created.
 
-        :param in_data: The input data object (set to "None" if this is a loader)
+        :param in_data: Input data object(set to "None" if this is a loader)
         :type in_data: savu.data.experiment
         :param out_data: The output data object
         :type out_data: savu.data.experiment
@@ -49,24 +50,22 @@ class Plugin(object):
         logging.error("set_up needs to be implemented for proc %i of %i :" +
                       " input is %s and output is %s", experiment.__class__)
         raise NotImplementedError("setup needs to be implemented")
-        
 
     def populate_default_parameters(self):
         """
         This method should populate all the required parameters with default
         values.  it is used for checking to see if new parameter values are
         appropriate
-        
-        It makes use of the classes including parameter information in the 
-        class docstring such as this 
+
+        It makes use of the classes including parameter information in the
+        class docstring such as this
         :param error_threshold: Convergence threshold. Default: 0.001.
         """
         for clazz in inspect.getmro(self.__class__):
             if clazz != object:
-                full_description = pu.find_args(clazz);
+                full_description = pu.find_args(clazz)
                 for item in full_description:
                     self.parameters[item['name']] = item['default']
-
 
     def set_parameters(self, parameters):
         """
@@ -87,8 +86,7 @@ class Plugin(object):
                     raise ValueError("Parameter " + key +
                                      "is not a valid parameter for plugin " +
                                      self.name)
-                                     
-                                     
+
     def pre_process(self, exp):
         """
         This method is called after the plugin has been created by the
@@ -125,22 +123,20 @@ class Plugin(object):
         :param path: The specific process which we are
         :type path: int
         """
-        if experiment is not None and transport is not None :
-            logging.error("process needs to be implemented for proc %i of %i :" +
-                          " input is %s and output is %s",
+        if experiment is not None and transport is not None:
+            logging.error("process needs to be implemented for proc %i of " +
+                          "%i : input is %s and output is %s",
                           experiment.__class__, transport.__class__)
         raise NotImplementedError("process needs to be implemented")
 
-        
     def get_data_objects(self, expIndex, dtype):
-        data_list = (self.parameters["in_datasets"] if dtype is "in_data" 
-                                    else self.parameters["out_datasets"])
+        data_list = (self.parameters["in_datasets"] if dtype is "in_data"
+                     else self.parameters["out_datasets"])
         data_objs = []
         for data in data_list:
             data_objs.append(expIndex[dtype][data])
         return data_objs
-        
-        
+
     def nInput_datasets(self):
         """
         The number of datasets required as input to the plugin
@@ -150,7 +146,6 @@ class Plugin(object):
         """
         raise NotImplementedError("nInput_datasets needs to be implemented")
 
-
     def nOutput_datasets(self):
         """
         The number of datasets created by the plugin
@@ -159,7 +154,6 @@ class Plugin(object):
 
         """
         raise NotImplementedError("nOutput_datasets needs to be implemented")
-        
 
     def get_citation_information(self):
         """Gets the Citation Information for a plugin
