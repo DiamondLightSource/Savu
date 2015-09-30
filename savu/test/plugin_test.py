@@ -44,29 +44,31 @@ class PluginTest(unittest.TestCase):
             plugin = tu.load_class(self.plugin_name)
             self.assertIsNotNone(plugin)
         except ImportError as e:
-            print("Failed to run plugin test as libraries not available (%s), passing test" % (e))
+            print("Failed to run plugin test as libraries not available (%s), "
+                  "passing test" % (e))
             pass
 
 #    @unittest.skip("This whole system has changed, so this test needs to be updated")
     def test_process(self):
-        print "Running the test process"
+        print "in the test process"
 
         try:
             plugin = tu.load_class(self.plugin_name)
             if self.plugin_name == base_class_name:
-                self.assertRaises(NotImplementedError, plugin.process, "test", "test", "test")
+                self.assertRaises(NotImplementedError, plugin.process, "test", "test")
                 return
 
             options = tu.set_experiment(self.data_type)
             tu.set_plugin_list(options, self.plugin_name)
-	    PluginRunner(options)
-
+            plugin_runner = PluginRunner(options)
+            plugin_runner.run_plugin_list(options)
+        
         except ImportError as e:
             print("Failed to run plugin test as libraries not available (%s), passing test" % (e))
             pass
 
-
-    def check_data_padding(self, in_data, out_data):
+    @unittest.skip("Originally added in the main framework - requires completion in testing.")
+    def test_check_data_padding(self, in_data, out_data):
         """
         Checks the input and output data sets for padding and prints a warning
         if there is a chance an error has been made
@@ -80,10 +82,10 @@ class PluginTest(unittest.TestCase):
         for data in out_data:
             if data.padding is not None:
                 out_padding = True
-
-        if (in_padding != out_padding) || ():
-            warnings.warn("Padding on in_datasets is " + str(in_padding) +
-                          " but on out_datasets is " + str(out_padding))
+#
+#        if (in_padding != out_padding) || ():
+#            warnings.warn("Padding on in_datasets is " + str(in_padding) +
+#                          " but on out_datasets is " + str(out_padding))
 
 class CpuPluginWrapper(Plugin, CpuPlugin):
 
@@ -180,18 +182,21 @@ class CpuPluginTest(unittest.TestCase):
 class TimeseriesFieldCorrectionsTest(PluginTest):
 
     def setUp(self):
+        self.data_type = 'tomoRaw'
         self.plugin_name = "savu.plugins.timeseries_field_corrections"
 
 
 class MedianFilterTest(PluginTest):
 
     def setUp(self):
+        self.data_type = 'tomo'
         self.plugin_name = "savu.plugins.median_filter"
 
 
 class SimpleReconTest(PluginTest):
 
     def setUp(self):
+        self.data_type = 'tomo'
         self.plugin_name = "savu.plugins.simple_recon"
 
 if __name__ == "__main__":

@@ -33,8 +33,10 @@ def get_test_data_path(name):
 
 def get_experiment_types():
     exp_dict = {}
-    exp_dict['tomoRaw'] = {'func': 'set_tomoRaw_experiment', 'filename': '24737.nxs'}
-    exp_dict['tomo'] = {'func': 'set_tomo_experiment', 'filename': 'projections.h5'}
+    exp_dict['tomoRaw'] = {'func': 'set_tomoRaw_experiment',
+                           'filename': '24737.nxs'}
+    exp_dict['tomo'] = {'func': 'set_tomo_experiment',
+                        'filename': 'projections.h5'}
     return exp_dict
 
 def set_experiment(exp_type):
@@ -120,6 +122,11 @@ def load_test_data(exp_type):
     # currently assuming an empty parameters dictionary
     options['plugin_list'] = plugin_list
     plugin_runner = PluginRunner(options)
-    exp = plugin_runner.run_plugin_list(options)
+    return plugin_runner.run_plugin_list(options)
+
+def get_data_object(exp):    
     return exp.index['in_data'][exp.index['in_data'].keys()[0]]
-        
+
+def set_process(exp, process, processes):
+    exp.meta_data.set_meta_data('process', process)
+    exp.meta_data.set_meta_data('processes', processes)

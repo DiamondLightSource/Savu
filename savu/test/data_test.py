@@ -24,16 +24,18 @@
 import unittest
 
 import savu.test.test_utils as tu
-import savu.plugins.utils as pu
+from savu.core.plugin_runner import PluginRunner
+
 
 class Test(unittest.TestCase):
 
-    @unittest.skip("This test should be updated to use the new setup system")
     def test_create_smaller_data_block(self):
-        data = tu.get_nx_tomo_test_data()
-        plugin = pu.load_plugin("savu.plugins.downsample_filter")
-        output = tu.get_appropriate_output_data(plugin, data)[0]
-        self.assertEqual(output.get_data_shape(), (111, 68, 80))
+        options = tu.set_experiment('tomo')
+        tu.set_plugin_list(options, 'savu.plugins.downsample_filter')
+        plugin_runner = PluginRunner(options)
+        exp = plugin_runner.run_plugin_list(options)
+        self.assertEqual(exp.index['in_data']['tomo'].get_shape(),
+                         (91, 68, 80))
 
 if __name__ == "__main__":
     unittest.main()

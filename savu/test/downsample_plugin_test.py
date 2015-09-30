@@ -29,6 +29,7 @@ from savu.test.plugin_test import PluginTest
 class DownsampleTest(PluginTest):
 
     def setUp(self):
+        self.data_type = 'tomo'
         self.plugin_name = "savu.plugins.downsample_filter"
 
 if __name__ == "__main__":
