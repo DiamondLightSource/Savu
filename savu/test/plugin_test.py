@@ -68,7 +68,7 @@ class PluginTest(unittest.TestCase):
             pass
 
     @unittest.skip("Originally added in the main framework - requires completion in testing.")
-    def test_check_data_padding(self, in_data, out_data):
+    def test_data_padding(self, in_data, out_data):
         """
         Checks the input and output data sets for padding and prints a warning
         if there is a chance an error has been made

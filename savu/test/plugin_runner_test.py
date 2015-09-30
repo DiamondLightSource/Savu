@@ -29,7 +29,8 @@ from savu.core.plugin_runner import PluginRunner
 
 def run_protected_plugin_runner(options):
     try:
-        PluginRunner(options)
+        plugin_runner = PluginRunner(options)
+        plugin_runner.run_plugin_list(options)
     except ImportError as e:
         print("Failed to run test as libraries not available (%s)," % (e) +
               " passing test")
