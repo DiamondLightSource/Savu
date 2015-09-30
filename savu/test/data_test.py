@@ -36,6 +36,12 @@ class Test(unittest.TestCase):
         exp = plugin_runner.run_plugin_list(options)
         self.assertEqual(exp.index['in_data']['tomo'].get_shape(),
                          (91, 68, 80))
+#        options = tu.set_experiment('tomo')
+#        tu.set_plugin_list(options, 'savu.plugins.downsample_filter')
+#        plugin_runner = PluginRunner(options)
+#        exp = plugin_runner.run_plugin_list(options)
+#        self.assertEqual(exp.index['in_data']['tomo'].get_shape(),
+#                         (91, 68, 80))
 
 if __name__ == "__main__":
     unittest.main()

@@ -39,30 +39,47 @@ def get_experiment_types():
                         'filename': 'projections.h5'}
     return exp_dict
 
-def set_experiment(exp_type):
+def set_experiment(exp_type, plugin):
     exp_types = get_experiment_types()
     try:
         options = globals()[exp_types[exp_type]['func']] \
-                                            (exp_types[exp_type]['filename'])
+                                (exp_types[exp_type]['filename'], plugin)
     except KeyError:
         raise Exception("The experiment type ", exp_type, " is not recognised")
     return options
 
-def set_tomoRaw_experiment(filename):
+def set_tomoRaw_experiment(filename, plugin):
     # create experiment
     options = set_options(get_test_data_path(filename))
     options['loader'] = 'savu.plugins.nxtomo_loader'
     options['saver'] = 'savu.plugins.hdf5_tomo_saver'
-    options['plugin_datasets'] = set_data_dict(['tomo'], ['tomo'])
+    options['plugin_datasets'] = set_data_dict(['tomo'],
+                                               get_output_datasets(plugin))
+    print options['plugin_datasets']
+    print plugin.__module__  
+    set_plugin_list(options, plugin.__module__)
+    print options['plugin_list']
     return options
 
-def set_tomo_experiment(filename):
+def set_tomo_experiment(filename, plugin):
+    print "*****Setting the tomography experiment"
     # create experiment
     options = set_options(get_test_data_path(filename))
     options['loader'] = 'savu.plugins.projection_tomo_loader'
     options['saver'] = 'savu.plugins.hdf5_tomo_saver'
-    options['plugin_datasets'] = set_data_dict(['tomo'], ['tomo'])
+    options['plugin_datasets'] = set_data_dict(['tomo'],
+                                               get_output_datasets(plugin))
+    print options['plugin_datasets']
+    print plugin.__module__                                               
+    set_plugin_list(options, plugin.__module__)                                               
     return options
+
+def get_output_datasets(plugin) :
+    n_out = plugin.nOutput_datasets()
+    out_data = []
+    for n in range(n_out):
+        out_data.append('test' + str(n))
+    return out_data
 
 def set_plugin_list(options, plugin_name):
     options['plugin_list'] = []
@@ -121,8 +138,7 @@ def load_test_data(exp_type):
     
     # currently assuming an empty parameters dictionary
     options['plugin_list'] = plugin_list
-    plugin_runner = PluginRunner(options)
-    return plugin_runner.run_plugin_list(options)
+    plugin_runner(options)
 
 def get_data_object(exp):    
     return exp.index['in_data'][exp.index['in_data'].keys()[0]]
@@ -130,3 +146,8 @@ def get_data_object(exp):
 def set_process(exp, process, processes):
     exp.meta_data.set_meta_data('process', process)
     exp.meta_data.set_meta_data('processes', processes)
+    
+def plugin_runner(options):
+    plugin_runner = PluginRunner(options)
+    return plugin_runner.run_plugin_list(options)
+        

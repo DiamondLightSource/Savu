@@ -28,7 +28,6 @@ import unittest
 
 from savu.test import test_utils as tu
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-from savu.core.plugin_runner import PluginRunner
 
 base_class_name = "savu.plugins.plugin"
 
@@ -50,29 +49,32 @@ class PluginTest(unittest.TestCase):
 
 #    @unittest.skip("This whole system has changed, so this test needs to be updated")
     def test_process(self):
-        print "in the test process"
-
+        print "***", self.plugin_name, "***"
         try:
             plugin = tu.load_class(self.plugin_name)
             if self.plugin_name == base_class_name:
                 self.assertRaises(NotImplementedError, plugin.process, "test", "test")
                 return
 
-            options = tu.set_experiment(self.data_type)
-            tu.set_plugin_list(options, self.plugin_name)
-            plugin_runner = PluginRunner(options)
-            plugin_runner.run_plugin_list(options)
-        
+            options = tu.set_experiment(self.data_type, plugin)
+            tu.plugin_runner(options)
+
         except ImportError as e:
             print("Failed to run plugin test as libraries not available (%s), passing test" % (e))
             pass
 
+
+class PluginFilterTest(PluginTest):
+
     @unittest.skip("Originally added in the main framework - requires completion in testing.")
-    def test_data_padding(self, in_data, out_data):
+    def test_data_padding(self):
         """
         Checks the input and output data sets for padding and prints a warning
         if there is a chance an error has been made
-        """
+        """                
+        # get input and output data sets
+        # is Filter a base class of the plugin?
+        
         # check if input and output data sets are/are not padded
         in_padding = False; out_padding = False
         for data in in_data:
