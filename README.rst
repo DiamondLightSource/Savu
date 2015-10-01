@@ -4,19 +4,22 @@ Savu : Tomography Reconstructon Pipeline
 :Date: 2014-11-14
 :Version: 0.1
 :Authors: Mark Basham - *Diamond Light Source*
+:Authors: Nicola Wadeson - *Diamond Light Source*
+
 
 This documentation in full is available at https://savu.readthedocs.org/en/latest/
 
-Savu pythons are known for their small size, good temperament, easy feeding habits and tolerance for a wide range of temperatures. [1]_
+Savu is a Python package to assist with reconstructing tomography data.  The project was started at Diamond Light Source when a new pipeline was required for dealing with the more complex tomography reconstruction processes that were appearing at the facility. [1]_
+
+The project is named 'Savu', after a python subspecies  known for their small size, good temperament, easy feeding habits and tolerance for a wide range of temperatures. [2]_
+
 The Savu Tomography reconstruction pipeline project aims to mimic these behaviours being a small package, which is easy to use and reliable, chomps its way through vast amounts of data, and finally is portable to a wide range of systems. 
 
-Be aware though, the following is also true "Savu Pythons are typically calm in disposition, and generally tolerate gentle handling. Like all snakes, however, care must be exercised when working around them." [2]_
+Be aware though, the following is also true "Savu Pythons are typically calm in disposition, and generally tolerate gentle handling. Like all snakes, however, care must be exercised when working around them." [3]_
 
-To use ::
-
-    >>> import savu
-    >>> savu.run_tests()
-
+.. [1] https://dx.doi.org/10.1098/rsta.2014.0398
+.. [2] http://www.reptilesmagazine.com/Breeding-Snakes/Breeding-Savu-Python/
+.. [3] http://blogs.thatpetplace.com/thatreptileblog/2014/06/19/savu-python-care-keeping-one-worlds-smallest-pythons/
 
 Logo credit ::
 
@@ -26,9 +29,6 @@ Logo credit ::
     License       "CC BY 2.0" - http://creativecommons.org/licenses/by/2.0/
     Modification  "Cropped from original"
 
-
-.. [1] http://www.reptilesmagazine.com/Breeding-Snakes/Breeding-Savu-Python/
-.. [2] http://blogs.thatpetplace.com/thatreptileblog/2014/06/19/savu-python-care-keeping-one-worlds-smallest-pythons/
 
 .. image:: https://badges.gitter.im/Join%20Chat.svg
    :alt: Join the chat at https://gitter.im/DiamondLightSource/Savu

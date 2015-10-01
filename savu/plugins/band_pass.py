@@ -15,7 +15,7 @@
 """
 .. module:: lowpass
    :platform: Unix
-   :synopsis: A plugin to low pass each frame with a gaussian 
+   :synopsis: A plugin to low pass each frame with a gaussian
 
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
@@ -34,7 +34,7 @@ from savu.plugins.utils import register_plugin
 class BandPass(Filter, CpuPlugin):
     """
     A plugin to filter each frame with a BandPass T
-    
+
     :param blur_width: Kernel Size. Default: (0 ,3 ,3).
     :param type: filter type (High|Low). Default: 'High'.
     """
@@ -52,7 +52,6 @@ class BandPass(Filter, CpuPlugin):
                       " initialised")
         super(BandPass,
               self).__init__("BandPass")
-              
 
     def filter_frame(self, data, params):
         """
@@ -62,16 +61,14 @@ class BandPass(Filter, CpuPlugin):
         data for the single frame in the middle of this. In this case we use
         the scipy median filter with the 'kernmel_size' parameter, and return
         the same size data as you had originally.
-        """        
+        """
         data = data[0]
         logging.debug("Data frame recieved for processing of shape %s",
                       str(data.shape))
-        if self.parameters['type']=='Low':
-            result = gaussian_filter(data,self.parameters['blur_width'])
-        elif self.parameters['type']=='High':
-            lp = gaussian_filter(data,self.parameters['blur_width'])
+        if self.parameters['type'] == 'Low':
+            result = gaussian_filter(data, self.parameters['blur_width'])
+        elif self.parameters['type'] == 'High':
+            lp = gaussian_filter(data, self.parameters['blur_width'])
             result = data - lp
-            
-        return result
 
-        
+        return result

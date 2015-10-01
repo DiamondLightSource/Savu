@@ -28,13 +28,14 @@ from savu.plugins.filter import Filter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 
+
 @register_plugin
 class DezingFilter(Filter, CpuPlugin):
     """
     A plugin
-    
-    :param outlier_mu: Magnitude of parameter for detecting outlier. Default: 10.0.
-    :param kernel_size: Number of frames included in average. Default: 5. 
+
+    :param outlier_mu: Magnitude for detecting outlier. Default: 10.0.
+    :param kernel_size: Number of frames included in average. Default: 5.
     """
 
     def __init__(self):
@@ -46,8 +47,9 @@ class DezingFilter(Filter, CpuPlugin):
         in_data = self.get_data_objects(exp.index, "in_data")[0]
         data_size = in_data.get_shape()
         logging.debug("Running Dezing Setup")
-        self.padding  = (self.parameters['kernel_size']-1)/2
-        dezing.setup_size(data_size,self.parameters['outlier_mu'],self.padding)
+        self.padding = (self.parameters['kernel_size'] - 1) / 2
+        dezing.setup_size(data_size, self.parameters['outlier_mu'],
+                          self.padding)
         logging.debug("Finished Dezing Setup")
 
     def post_process(self):
@@ -57,18 +59,15 @@ class DezingFilter(Filter, CpuPlugin):
 
     def set_filter_padding(self, in_data, out_data):
         pad = self.padding
-        in_data[0].padding = {'pad_multi_frames':pad}
-        out_data[0].padding = {'pad_multi_frames':pad}
-# other examples        
+        in_data[0].padding = {'pad_multi_frames': pad}
+        out_data[0].padding = {'pad_multi_frames': pad}
+# other examples
 #        data.padding = {'pad_multi_frames':pad, 'pad_frame_edges':pad}
 #        data.padding = {'pad_direction':[ddir, pad]}}
 
     def filter_frame(self, data, params):
         logging.debug("Running Dezing Frame")
-        result=np.empty_like(data[0])
-        dezing.run(data[0],result)
+        result = np.empty_like(data[0])
+        dezing.run(data[0], result)
         logging.debug("Finished Dezing Frame")
         return result
-
-
-        
