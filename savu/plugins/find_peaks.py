@@ -28,6 +28,7 @@ from savu.plugins.filter import Filter
 import peakutils as pe
 import numpy as np
 
+
 @register_plugin
 class FindPeaks(Filter, CpuPlugin):
     """
@@ -44,12 +45,22 @@ class FindPeaks(Filter, CpuPlugin):
     def filter_frame(self, data):
         in_meta_data, out_meta_data = self.get_meta_data()
         data = data[0].squeeze()
-        PeakIndex = in_meta_data[0].get_meta_data('PeakIndex')
-        PeakIndexNew = pe.indexes(data,thres=self.parameters['thresh'],min_dist=self.parameters['min_distance']).astype(list)
-        tmp = [x for x in PeakIndexNew not in PeakIndex]
-        PeakIndex.append(tmp)
-        PeakIndex = in_meta_data[0].set_meta_data('PeakIndex',PeakIndex)
-        return 0;
+        PeakIndex = list(out_meta_data[0].get_meta_data('PeakIndex'))
+        PeakIndexNew = list(pe.indexes(data, thres=self.parameters['thresh'],
+                                  min_dist=self.parameters['min_distance']
+                                  ))
+        print type(PeakIndex),'boo',type(PeakIndexNew)
+        if not(len(PeakIndex)):
+            tmp = PeakIndex
+        else:
+            PeakIndexNew = list(PeakIndexNew)
+            tmp = set(PeakIndexNew) - set(PeakIndex)
+            tmp = list(tmp)
+        print tmp
+# 
+#         PeakIndex.append(tmp)
+#         PeakIndex = out_meta_data[0].set_meta_data('PeakIndex',PeakIndex)
+        return 0
 
     def setup(self, experiment):
 
@@ -66,7 +77,7 @@ class FindPeaks(Filter, CpuPlugin):
         in_d1.set_current_pattern_name("SPECTRUM") # have changed this to work on the first element of the pattern list rather SINOGRAM, since some datasets don't havea singoram adp
         # set frame chunk
         in_d1.set_nFrames(chunk_size)
-        in_d1.meta_data.set_meta_data('PeakIndex',[])
+        
         
         #----------------------------------------------------------------
 
@@ -83,6 +94,7 @@ class FindPeaks(Filter, CpuPlugin):
         out_d1.add_pattern("PROJECTION", core_dir = (0,), slice_dir = (0,))
         out_d1.add_pattern("1D_METADATA", slice_dir = (0,))
         out_d1.set_current_pattern_name("1D_METADATA")
+        out_d1.meta_data.set_meta_data('PeakIndex',[])
         # copy the entire in_data dictionary (image_key, dark and flat will 
         #be removed since out_data is no longer an instance of TomoRaw)
         # If you do not want to copy the whole dictionary pass the key word
