@@ -79,7 +79,8 @@ class FindPeaks(Filter, CpuPlugin):
         out_d1 = experiment.create_data_object("out_data", out_data_list[0])
         
         out_d1.copy_patterns(in_d1.get_patterns())
-        out_d1.set_current_pattern_name("SPECTRUM")
+        out_d1.add_pattern("PROJECTION", core_dir = (0,), slice_dir = (0,)
+        out_d1.set_current_pattern_name("1D_METADATA")
         # copy the entire in_data dictionary (image_key, dark and flat will 
         #be removed since out_data is no longer an instance of TomoRaw)
         # If you do not want to copy the whole dictionary pass the key word
