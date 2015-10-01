@@ -226,18 +226,12 @@ class Hdf5Transport(TransportMechanism):
                          (plugin.count, len(slice_list)))
 
     @logmethod
-    def filter_chunk(self, plugin, in_data, out_data, expInfo):
+    def filter_chunk(self, plugin, in_data, out_data):
         logging.debug("Running filter._filter_chunk")
 
+        expInfo = plugin.exp.meta_data
         in_slice_list = self.get_all_slice_lists(in_data, expInfo)
         out_slice_list = self.get_all_slice_lists(out_data, expInfo)
-
-        for sl in in_slice_list[0]:
-            print sl
-            
-        print "***************************"
-        for sl in out_slice_list[0]:
-            print sl
 
         for count in range(len(in_slice_list[0])):
             section = self.get_all_padded_data(in_data, in_slice_list, count)

@@ -50,17 +50,17 @@ class CpuPlugin(object):
 
             logging.debug("Pre-processing")
 
-            self.pre_process(exp)
+            self.pre_process()
 
             logging.debug("Main processing: process %s", self.__class__)
             #self.process(exp, new_processes, cpu_processes[process])
-            self.process(exp, transport)
+            self.process(transport)
 
             exp.barrier()
             logging.debug("Post-processing")
-            return_dict = self.post_process(exp)
+            return_dict = self.post_process()
 
-            self.organise_metadata(exp)
+            self.organise_metadata()
 
             return return_dict
             

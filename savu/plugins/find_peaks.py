@@ -42,18 +42,18 @@ class FindPeaks(Filter, CpuPlugin):
         super(FindPeaks, self).__init__("FindPeaks")
 
     def filter_frame(self, data):
-        print "I'm here"
+        in_meta_data, out_meta_data = self.get_meta_data()
         data = data[0].squeeze()
-        PeakIndex = data.meta_data.get_meta_data('PeakIndex')
+        PeakIndex = in_meta_data[0].get_meta_data('PeakIndex')
         PeakIndexNew = pe.indexes(data,thres=self.parameters['thresh'],min_dist=self.parameters['min_distance']).astype(list)
         tmp = [x for x in PeakIndexNew not in PeakIndex]
         PeakIndex.append(tmp)
-        PeakIndex = data.meta_data.set_meta_data('PeakIndex',PeakIndex)
+        PeakIndex = in_meta_data[0].set_meta_data('PeakIndex',PeakIndex)
         return 0;
 
     def setup(self, experiment):
 
-
+        self.set_experiment(experiment)
         chunk_size = self.get_max_frames()
 
         #-------------------setup input datasets-------------------------
@@ -66,6 +66,7 @@ class FindPeaks(Filter, CpuPlugin):
         in_d1.set_current_pattern_name("SPECTRUM") # have changed this to work on the first element of the pattern list rather SINOGRAM, since some datasets don't havea singoram adp
         # set frame chunk
         in_d1.set_nFrames(chunk_size)
+        in_d1.meta_data.set_meta_data('PeakIndex',[])
         
         #----------------------------------------------------------------
 
@@ -79,7 +80,8 @@ class FindPeaks(Filter, CpuPlugin):
         out_d1 = experiment.create_data_object("out_data", out_data_list[0])
         
         out_d1.copy_patterns(in_d1.get_patterns())
-        out_d1.add_pattern("PROJECTION", core_dir = (0,), slice_dir = (0,)
+        out_d1.add_pattern("PROJECTION", core_dir = (0,), slice_dir = (0,))
+        out_d1.add_pattern("1D_METADATA", slice_dir = (0,))
         out_d1.set_current_pattern_name("1D_METADATA")
         # copy the entire in_data dictionary (image_key, dark and flat will 
         #be removed since out_data is no longer an instance of TomoRaw)
@@ -87,7 +89,6 @@ class FindPeaks(Filter, CpuPlugin):
         # argument copyKeys = [your list of keys to copy], or alternatively, 
         # removeKeys = [your list of keys to remove]
         out_d1.meta_data.copy_dictionary(in_d1.meta_data.get_dictionary(), rawFlag=True)
-        in_d1.meta_data.set_meta_data('PeakIndex',[])
         # set pattern for this plugin and the shape
         out_d1.set_shape((1,))
         # set frame chunk

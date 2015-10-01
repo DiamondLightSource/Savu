@@ -25,7 +25,7 @@ import logging
 import inspect
 
 from savu.plugins import utils as pu
-
+from savu.data.data_structures import Pattern
 
 class Plugin(object):
     """
@@ -35,6 +35,7 @@ class Plugin(object):
     def __init__(self, name='Plugin'):
         super(Plugin, self).__init__()
         self.name = name
+        self.exp = None
         self.parameters = {}
         self.data_objs = {}
 
@@ -86,7 +87,7 @@ class Plugin(object):
                                      "is not a valid parameter for plugin " +
                                      self.name)
 
-    def pre_process(self, exp):
+    def pre_process(self):
         """
         This method is called after the plugin has been created by the
         pipeline framework as a pre-processing step
@@ -96,7 +97,7 @@ class Plugin(object):
         """
         pass
 
-    def process(self, experiment, transport):
+    def process(self, transport):
         """
         This method is called after the plugin has been created by the
         pipeline framework and forms the main processing step
@@ -114,7 +115,7 @@ class Plugin(object):
         logging.error("process needs to be implemented")
         raise NotImplementedError("process needs to be implemented")
         
-    def post_process(self, exp):
+    def post_process(self):
         """
         This method is called after the process function in the pipeline
         framework as a post-processing step. All processes will have finished
@@ -125,7 +126,7 @@ class Plugin(object):
         """
         pass
     
-    def organise_metadata(self, exp):
+    def organise_metadata(self):
         """
         This method is called after the post_process function to organise the
         metadata that is passed from input datasets to output datasets
@@ -161,30 +162,56 @@ class Plugin(object):
 
         """
         return None
+        
+    def set_experiment(self, exp):
+        self.exp = exp        
 
-    def get_data_objects(self, exp, dtype):
+    def get_data_objects(self, dtype):
         data_list = (self.parameters["in_datasets"] if dtype is "in_data" 
                                     else self.parameters["out_datasets"])
         data_objs = []
         for data in data_list:
-            data_objs.append(exp.index[dtype][data])
+            data_objs.append(self.exp.index[dtype][data])
         return data_objs
         
-    def get_in_datasets(self, exp):
-        return self.get_data_objects(exp, 'in_data')
+    def get_in_datasets(self):
+        return self.get_data_objects('in_data')
         
-    def get_out_datasets(self, exp):
+    def get_out_datasets(self):
         try:
-            out_data = self.get_data_objects(exp, 'out_data')
+            out_data = self.get_data_objects('out_data')
         except KeyError:
             out_data = []
             for data in self.parameters['out_datasets']:
-                exp.create_data_object("out_data", data)
-            out_data = self.get_data_objects(exp, 'out_data')
+                self.exp.create_data_object("out_data", data)
+            out_data = self.get_data_objects('out_data')
         return out_data
+
+    def set_pattern(self, data_list):
+        pattern_list = []
+        for data in data_list:
+            pattern_list.append(Pattern(data))
+
+    def set_plugin_datasets(self):
+        plugin_in_data = self.set_pattern(self.get_in_datasets())
+        plugin_out_data = self.set_pattern(self.get_out_datasets())
+        self.parameters['in_datasets'] = plugin_in_data
+        self.parameters['out_datasets'] = plugin_out_data        
+        return plugin_in_data, plugin_out_data
         
-    def get_datasets(self, exp):
-        in_data = self.get_data_objects(exp, 'in_data')
-        out_data = self.get_data_objects(exp, 'out_data')
+    def get_datasets(self):
+        in_data = self.get_data_objects('in_data')
+        out_data = self.get_data_objects('out_data')
         return in_data, out_data
+
+    def get_meta_data(self):
+        in_data, out_data = self.get_datasets()
+        in_meta_data = self.set_meta_data(in_data, 'in_data')
+        out_meta_data = self.set_meta_data(out_data, 'out_data')
+        return in_meta_data, out_meta_data 
         
+    def set_meta_data(self, data_list, dtype):
+        meta_data = []
+        for data in data_list:
+            meta_data.append(data.meta_data)
+        return meta_data

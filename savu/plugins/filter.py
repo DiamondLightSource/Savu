@@ -68,13 +68,12 @@ class Filter(Plugin):
 
 
     @logmethod
-    def process(self, exp, transport):
+    def process(self, transport):
         """
-        """
-        in_data = self.get_data_objects(exp.index, "in_data")
-        out_data = self.get_data_objects(exp.index, "out_data")
+        """        
+        in_data, out_data = self.get_datasets()
         self.set_filter_padding(in_data, out_data)
-        transport.filter_chunk(self, in_data, out_data, exp.meta_data)
+        transport.filter_chunk(self, in_data, out_data)
         # reset padding to none
         for data in in_data:
             data.padding = None

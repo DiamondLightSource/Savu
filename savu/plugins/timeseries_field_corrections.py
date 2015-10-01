@@ -66,19 +66,20 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         chain.  
         """
         # get all data objects associated with the plugin
-        in_data = self.get_in_datasets(experiment)
-        out_data = self.get_out_datasets(experiment)
+        self.set_experiment(experiment)
+        in_data, out_data = self.set_plugin_datasets()
 
         print in_data[0].meta_data.get_dictionary()
             
         # set details for all input data sets
-        in_data[0].in_data_setup(pattern_name='SINOGRAM', 
-                                 chunk=self.get_max_frames())
+        # create an instance of pattern class here
+        in_data[0].plugin_setup(pattern_name='SINOGRAM',
+                                chunk=self.get_max_frames())
 
         # set details for all output data sets
-        out_data[0].out_data_setup(pattern_name='SINOGRAM',
-                                   chunk=self.get_max_frames(),
-                                   shape=in_data[0].remove_dark_and_flat())
+        out_data[0].plugin_setup(pattern_name='SINOGRAM', 
+                                 chunk=self.get_max_frames(),
+                                 shape=in_data[0].remove_dark_and_flat())                                 
         # copy or add patterns related to this dataset
         out_data[0].copy_patterns(in_data[0].get_patterns())
         
