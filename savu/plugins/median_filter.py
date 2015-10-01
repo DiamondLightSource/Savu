@@ -42,15 +42,15 @@ class MedianFilter(Filter, CpuPlugin):
         logging.debug("Starting Median Filter")
         super(MedianFilter, self).__init__("MedianFilter")
 
-    def get_filter_padding(self):
-        padding = (self.parameters['kernel_size'][0]-1)/2
-        #return {st.CD_PROJECTION:padding} # change this
-        return {'0':padding,'1':padding}
-
     def filter_frame(self, data, params):
         logging.debug("Running Filter data")
         result = sig.medfilt(data, self.parameters['kernel_size'])
         return result
+
+    def set_filter_padding(self):
+        padding = (self.parameters['kernel_size'][0]-1)/2
+        #return {st.CD_PROJECTION:padding} # change this
+        return {'0':padding,'1':padding}
 
     def setup(self, experiment):
         """

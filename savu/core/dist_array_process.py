@@ -82,7 +82,7 @@ def run_plugin_chain(input_data, plugin_list, processing_dir, mpi=False,
 
 @logfunction
 def run_plugin_list(input_data, plugin_list, processing_dir, mpi=False,
-                     processes=["CPU0"], process=0):
+                    processes=["CPU0"], process=0):
     """Runs a chain of plugins
 
     :param input_data: The input data to give to the chain
@@ -157,10 +157,10 @@ def run_plugin_list(input_data, plugin_list, processing_dir, mpi=False,
             cite_info = plugin.get_citation_information()
             if cite_info is not None:
                 plugin_list.add_plugin_citation(output_filename, count,
-                                                  cite_info)
+                                                cite_info)
             group_name = "%i-%s" % (count, plugin.name)
             plugin_list.add_intermediate_data_link(output_filename,
-                                                    output, group_name)
+                                                   output, group_name)
 
         count += 1
 

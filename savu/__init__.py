@@ -23,22 +23,20 @@ import savu
 
 """
 
-from . import core
-from . import data
-from . import plugins
-
 import os
 import sys
 
 savuPath = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(savuPath + "/../lib"))
 
+
 def run_tests():
     import unittest
     from . import test
 
     path = os.path.split(test.__file__)[0]
-    testmodules = ['savu.test.%s' % (os.path.splitext(p)[0]) for p in os.listdir(path)]
+    testmodules = ['savu.test.%s' % (os.path.splitext(p)[0]) for p in
+                   os.listdir(path)]
     suite = unittest.TestSuite()
 
     for t in testmodules:

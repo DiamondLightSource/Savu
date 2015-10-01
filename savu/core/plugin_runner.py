@@ -37,7 +37,8 @@ class PluginRunner(object):
     """
 
     def __init__(self, options):
-        class_name = "savu.core.transports." + options["transport"] + "_transport"
+        class_name = "savu.core.transports." + options["transport"] \
+                     + "_transport"
         self.add_base(self.import_class(class_name))
         self.transport_control_setup(options)
 
@@ -56,7 +57,6 @@ class PluginRunner(object):
         self.__class__ = cls.__class__(cls.__name__, (cls, ExtraBase), {})
 
     def run_plugin_list(self, options):
-        
         logging.info("Starting to run the plugin list")
         experiment = Experiment(options)
         plugin_list = experiment.meta_data.plugin_list.plugin_list
@@ -81,9 +81,9 @@ class PluginRunner(object):
         logging.info("divert to transport process and run process list")
         self.transport_run_plugin_list(experiment)
 
-        print "Sorry for the wait..."
-        print "You will be happy to know that your processing has now completed."
-        print "Please have a nice day."
+        print "***********************"
+        print "* Processing Complete *"
+        print "***********************"
         return experiment
 
     def plugin_loader(self, exp, plugin_dict, **kwargs):
@@ -122,7 +122,7 @@ class PluginRunner(object):
         exp.set_nxs_filename()
 
         check = kwargs.get('check', False)
-        
+
         for i in range(1, len(plugin_list)-1):
             exp.barrier()
             logging.info("Checking Plugin %s" % plugin_list[i]['name'])
@@ -202,19 +202,21 @@ class PluginRunner(object):
         plugin = self.load_plugin(first_plugin['id'])
         # check the first plugin is a loader
         if not isinstance(plugin, BaseLoader):
-            sys.exit("The first plugin in the process must inherit from BaseLoader")
+            sys.exit("The first plugin in the process must "
+                     "inherit from BaseLoader")
 
         plugin = self.load_plugin(end_plugin['id'])
         # check the first plugin is a loader
         if not isinstance(plugin, BaseSaver):
-            sys.exit("The final plugin in the process must inherit from BaseSaver")
+            sys.exit("The final plugin in the process must "
+                     "inherit from BaseSaver")
 
     def load_plugin(self, plugin_name):
         """Load a plugin.
 
-        :param plugin_name: Name of the plugin to import /path/loc/then.plugin.name
-                        if there is no path, then the assumptiuon is an internal
-                        plugin
+        :param plugin_name: Name of the plugin to import
+                        path/loc/then.plugin.name if there is no path, then the
+                        assumptiuon is an internal plugin
         :type plugin_name: str.
         :returns:  An instance of the class described by the named plugin
 
@@ -237,7 +239,6 @@ class PluginRunner(object):
         module2class = ''.join(x.capitalize() for x in temp.split('_'))
         logging.debug("getting the class from the classname")
         clazz = getattr(mod, module2class.split('.')[-1])
-        
         logging.debug("getting class instance")
         instance = self.get_class_instance(clazz)
         logging.debug("returning class instance")
@@ -247,4 +248,3 @@ class PluginRunner(object):
         instance = clazz()
         instance.populate_default_parameters()
         return instance
-

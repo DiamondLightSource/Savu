@@ -34,8 +34,7 @@ from savu.core.utils import logmethod
 from savu.data.data_structures import TomoRaw
 
 
-class Hdf5Transport(TransportMechanism): 
-    
+class Hdf5Transport(TransportMechanism):
 
     def transport_control_setup(self, options):
         processes = options["process_names"].split(',')
@@ -51,10 +50,9 @@ class Hdf5Transport(TransportMechanism):
             print(options)
             self.mpi_setup(options)
 
-        
     def mpi_setup(self, options):
         print("Running mpi_setup")
-        RANK_NAMES = options["process_names"].split(',')     
+        RANK_NAMES = options["process_names"].split(',')
         RANK = MPI.COMM_WORLD.rank
         SIZE = MPI.COMM_WORLD.size
         RANK_NAMES_SIZE = len(RANK_NAMES)
@@ -68,29 +66,29 @@ class Hdf5Transport(TransportMechanism):
         ALL_PROCESSES = [[i]*MACHINES for i in RANK_NAMES]
         options["processes"] = list(chain.from_iterable(ALL_PROCESSES))
         options["process"] = RANK
-    
+
         self.set_logger_parallel(MACHINE_NUMBER_STRING, MACHINE_RANK_NAME)
-        
-        MPI.COMM_WORLD.barrier()  
-        logging.info("Starting the reconstruction pipeline process")   
-        logging.debug("Rank : %i - Size : %i - host : %s", RANK, SIZE, socket.gethostname())   
-        IP = socket.gethostbyname(socket.gethostname())   
-        logging.debug("ip address is : %s", IP)   
-        self.call_mpi_barrier()       
-        logging.debug("LD_LIBRARY_PATH is %s",  os.getenv('LD_LIBRARY_PATH'))   
+
+        MPI.COMM_WORLD.barrier()
+        logging.info("Starting the reconstruction pipeline process")
+        logging.debug("Rank : %i - Size : %i - host : %s", RANK, SIZE,
+                      socket.gethostname())
+        IP = socket.gethostbyname(socket.gethostname())
+        logging.debug("ip address is : %s", IP)
         self.call_mpi_barrier()
-        
-        
+        logging.debug("LD_LIBRARY_PATH is %s",  os.getenv('LD_LIBRARY_PATH'))
+        self.call_mpi_barrier()
+
     @logfunction
     def call_mpi_barrier(self):
         logging.debug("Waiting at the barrier")
         MPI.COMM_WORLD.barrier()
 
-       
     def set_logger_single(self, options):
         logger = logging.getLogger()
-        logger.setLevel(logging.DEBUG)    
-        fh = logging.FileHandler(os.path.join(options["out_path"],'log.txt'), mode='w')
+        logger.setLevel(logging.DEBUG)
+        fh = logging.FileHandler(os.path.join(options["out_path"], 'log.txt'),
+                                 mode='w')
         fh.setFormatter(logging.Formatter('L %(relativeCreated)12d M CPU0 0' +
                                           ' %(levelname)-6s %(message)s'))
         logger.addHandler(fh)
@@ -106,8 +104,6 @@ class Hdf5Transport(TransportMechanism):
         """
         Runs a chain of plugins
         """
-
-        print "**** Running the plugin chain"
         exp.barrier()
         logging.info("Starting the HDF5 plugin list runner")
         plugin_list = exp.meta_data.plugin_list.plugin_list
@@ -150,8 +146,9 @@ class Hdf5Transport(TransportMechanism):
 
             try:
                 return_dict['transfer_to_meta_data']
-                remove_data_set = self.transfer_to_meta_data(return_dict['transfer_to_meta_data'])
-            except KeyError:
+                remove_data_set = self.transfer_to_meta_data
+                (return_dict['transfer_to_meta_data'])
+            except (KeyError, TypeError):
                 remove_data_set = []
                 pass
 
@@ -169,14 +166,13 @@ class Hdf5Transport(TransportMechanism):
                     exp.index["in_data"][out_objs].save_data()
                 elif out_objs in remove_data_set:
                     exp.index["out_data"][out_objs].save_data()
-                    del exp.index["out_data"][out_objs]                    
+                    del exp.index["out_data"][out_objs]
 
             exp.barrier()
             logging.info("Copy out data to in data")
             for key in exp.index["out_data"]:
-                print "copying the output data ", key
                 exp.index["in_data"][key] = \
-                                    copy.deepcopy(exp.index["out_data"][key])
+                    copy.deepcopy(exp.index["out_data"][key])
 
             exp.barrier()
             logging.info("Clear up all data objects")
@@ -197,36 +193,37 @@ class Hdf5Transport(TransportMechanism):
         in_data = in_data[0]
         out_data = out_data[0]
 
-        [in_slice_list, frame_list] = in_data.get_slice_list_per_process(expInfo, frameList=True)
-        [out_slice_list, frame_list] = out_data.get_slice_list_per_process(expInfo, frameList=True)
+        in_slice_list, frame_list = \
+            in_data.get_slice_list_per_process(expInfo, frameList=True)
+        out_slice_list, frame_list = \
+            out_data.get_slice_list_per_process(expInfo, frameList=True)
 
         for count in range(len(in_slice_list)):
-            out_data.data[out_slice_list[count]] = \
-                      plugin.correction(in_data.data[in_slice_list[count]], 
-                                        in_data.get_image_key())
-
-        in_slice_list = in_data.get_grouped_slice_list()
-
+            result = plugin.correction(in_data.data[in_slice_list[count]],
+                                  in_data.get_image_key())
+            out_data.data[out_slice_list[count]] = result
 
     @logmethod
     def reconstruction_setup(self, plugin, in_data, out_data, expInfo):
-        
+
         if isinstance(in_data, TomoRaw):
             raise Exception("The input data to a reconstruction plugin cannot \
             be Raw data. Have you performed a timeseries_field_correction?")
-        
-        [slice_list, frame_list] = in_data.get_slice_list_per_process(expInfo, frameList=True)
+
+        [slice_list, frame_list] = \
+            in_data.get_slice_list_per_process(expInfo, frameList=True)
         cor = in_data.meta_data.get_meta_data("centre_of_rotation")[frame_list]
 
         count = 0
         for sl in slice_list:
             frame = plugin.reconstruct(np.squeeze(in_data.data[sl]),
-                                       cor[count],out_data.get_pattern_shape())
+                                       cor[count],
+                                       out_data.get_pattern_shape())
             out_data.data[sl] = frame
             count += 1
             plugin.count += 1
-            logging.debug("Reconstruction progress (%i of %i)" % (plugin.count, len(slice_list)))
-
+            logging.debug("Reconstruction progress (%i of %i)" %
+                         (plugin.count, len(slice_list)))
 
     @logmethod
     def filter_chunk(self, plugin, in_data, out_data, expInfo):
@@ -235,46 +232,54 @@ class Hdf5Transport(TransportMechanism):
         in_slice_list = self.get_all_slice_lists(in_data, expInfo)
         out_slice_list = self.get_all_slice_lists(out_data, expInfo)
 
-        for count in range(5):#range(len(in_slice_list[0])):
-            print count
+        for sl in in_slice_list[0]:
+            print sl
+            
+        print "***************************"
+        for sl in out_slice_list[0]:
+            print sl
+
+        for count in range(len(in_slice_list[0])):
             section = self.get_all_padded_data(in_data, in_slice_list, count)
             result = plugin.filter_frame(section)
             self.set_out_data(out_data, out_slice_list, result, count)
 #
-#            if type(result) == dict:
-#                for key in result.keys():
-#                    if key == 'center_of_rotation':
-#                        frame = in_data[0].get_orthogonal_slice(in_slice_list[count], 
-#                        in_data[0].core_directions[plugin.get_filter_frame_type()])
-#                        out_data.center_of_rotation[frame] = result[key]
-#                    elif key == 'data':
-#                        out_data.data[out_slice_list[count]] = \
-#                        in_data[0].get_unpadded_slice_data(in_slice_list[count], 
-#                                                    padding, in_data[0], result)
-#            else:
+#    if type(result) == dict:
+#        for key in result.keys():
+#            if key == 'center_of_rotation':
+#                frame = in_data[0].get_orthogonal_slice(in_slice_list[count],
+#                in_data[0].core_directions[plugin.get_filter_frame_type()])
+#                out_data.center_of_rotation[frame] = result[key]
+#            elif key == 'data':
 #                out_data.data[out_slice_list[count]] = \
-#                in_data[0].get_unpadded_slice_data(in_slice_list[0][count], padding, 
-#                                                in_data[0], result)
+#                in_data[0].get_unpadded_slice_data(in_slice_list[count],
+#                                            padding, in_data[0], result)
+#    else:
+#        out_data.data[out_slice_list[count]] = \
+#        in_data[0].get_unpadded_slice_data(in_slice_list[0][count], padding,
+#                                        in_data[0], result)
 
     def get_all_slice_lists(self, data_list, expInfo):
         slice_list = []
         for data in data_list:
-            slice_list.append(data.get_slice_list_per_process(expInfo))            
+            slice_list.append(data.get_slice_list_per_process(expInfo))
         return slice_list
-        
+
     def get_all_padded_data(self, data, slice_list, count):
         section = []
         for idx in range(len(data)):
-            section.append(data[idx].get_padded_slice_data(slice_list[idx][count]))
+            section.append(data[idx].get_padded_slice_data
+                          (slice_list[idx][count]))
         return section
 
     def set_out_data(self, data, slice_list, result, count):
         result = [result] if type(result) is not list else result
         for idx in range(len(data)):
+            print idx, count
             data[idx].data[slice_list[idx][count]] = \
-                data[idx].get_unpadded_slice_data(slice_list[idx][count], 
-                                                                 result[idx])
-                                                                 
+                data[idx].get_unpadded_slice_data(slice_list[idx][count],
+                                                  result[idx])
+
     def transfer_to_meta_data(self, return_dict):
         remove_data_sets = []
         for data_key in return_dict.keys():

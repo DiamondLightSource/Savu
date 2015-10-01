@@ -88,12 +88,13 @@ class VoCentering(Filter, CpuPlugin):
 
     def post_process(self, exp):
         # do some curve fitting here
-        in_data = self.get_data_objects(exp.index, "out_data")
-        out_data = self.get_data_objects(exp.index, "out_data")
+        in_data, out_data = self.get_dataset()
         cor_raw = out_data[0].data[...]
         out_data[1].data[...] = cor_raw + 10
+        # do this if you wish to add an output dataset to metadata and not keep
+        # it in the plugin chain
         output_dict = {'cor_raw':out_data[0], 'cor_fit':out_data[1]}
-        return {'transfer_to_meta_data':{in_data[0]:output_dict}} 
+        return {'transfer_to_meta_data':{in_data[0]:output_dict}}
 
     def setup(self, experiment):
 

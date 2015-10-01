@@ -85,13 +85,7 @@ class Pattern(object):
             temp *= self.get_shape()[tslice]
         return temp
 
-    def set_direction_parallel_to_rotation_axis(self, tdir):
-        self.check_direction(tdir, 'parallel_to_rotation_axis')
-        self.set_main_axis(tdir, 'PROJECTION')
 
-    def set_direction_perp_to_rotation_axis(self, tdir):
-        self.check_direction(tdir, 'perp_to_rotation_axis')
-        self.set_main_axis(tdir, 'SINOGRAM')
 
     def check_direction(self, tdir, dname):
         if not isinstance(tdir, int):
@@ -234,6 +228,23 @@ class Pattern(object):
             shape.append(self.get_shape()[core])
         return tuple(shape)
 
+    def in_data_setup(self, **kwargs):
+        try:
+            self.set_current_pattern_name(kwargs['pattern_name'])
+            self.set_nFrames(kwargs['chunk'])
+        except KeyError:
+            raise Exception("When calling in_data_setup(), pattern_name and "
+                            "chunk are required as kwargs.")
+
+    def out_data_setup(self, **kwargs):
+        try:
+            self.set_current_pattern_name(kwargs['pattern_name'])
+            self.set_nFrames(kwargs['chunk'])
+            self.set_shape(kwargs['shape'])
+        except KeyError:
+            raise Exception("When calling out_data_setup(), pattern_name, "
+                            "shape and chunk are required as kwargs.")
+
 
 class Data(Pattern):
     """
@@ -299,6 +310,14 @@ class Data(Pattern):
     def set_data_params(self, pattern, chunk_size, **kwargs):
         self.set_current_pattern_name(pattern)
         self.set_nFrames(chunk_size)
+
+    def set_direction_parallel_to_rotation_axis(self, tdir):
+        self.check_direction(tdir, 'parallel_to_rotation_axis')
+        self.set_main_axis(tdir, 'PROJECTION')
+
+    def set_direction_perp_to_rotation_axis(self, tdir):
+        self.check_direction(tdir, 'perp_to_rotation_axis')
+        self.set_main_axis(tdir, 'SINOGRAM')
 
 
 class TomoRaw(object):

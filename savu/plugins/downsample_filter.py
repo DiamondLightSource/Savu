@@ -24,7 +24,6 @@ import logging
 
 from savu.plugins.filter import Filter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-
 from savu.plugins.utils import register_plugin
 
 
@@ -42,14 +41,51 @@ class DownsampleFilter(Filter, CpuPlugin):
               self).__init__("DownsampleFilter")
 
     def get_output_shape(self, input_data):
-        input_shape = input_data.get_data_shape()
+        input_shape = input_data.get_shape()
         return (input_shape[0],
                 (input_shape[1]+1)/self.parameters['bin_size'],
                 (input_shape[2]+1)/self.parameters['bin_size'])
 
-    def filter_frame(self, data, params):
+    def filter_frame(self, data):
         logging.debug("Running Downsample data")
         result = data[0][:,
                          ::self.parameters['bin_size'],
                          ::self.parameters['bin_size']]
         return result
+
+    def setup(self, experiment):
+
+        experiment.log(self.name + " Start")
+        chunk_size = self.get_max_frames()
+
+        #-------------------setup input datasets-------------------------
+
+        # get a list of input dataset names required for this plugin
+        in_data_list = self.parameters["in_datasets"]
+        # get all input dataset objects
+        in_d1 = experiment.index["in_data"][in_data_list[0]]
+        # set all input data patterns
+        in_d1.set_current_pattern_name("PROJECTION")
+        # set frame chunk
+        in_d1.set_nFrames(chunk_size)
+        
+        #----------------------------------------------------------------
+
+        #------------------setup output datasets-------------------------
+
+        # get a list of output dataset names created by this plugin
+        out_data_list = self.parameters["out_datasets"]
+
+        # create all out_data objects and associated patterns and meta_data
+        # patterns can be copied, added or both
+        out_d1 = experiment.create_data_object("out_data", out_data_list[0])
+        out_d1.copy_patterns(in_d1.get_patterns())
+        out_d1.meta_data.copy_dictionary(in_d1.meta_data.get_dictionary())
+        # set pattern for this plugin and the shape
+        out_d1.set_current_pattern_name("PROJECTION")
+        out_d1.set_shape(self.get_output_shape(in_d1))
+        # set frame chunk
+        out_d1.set_nFrames(chunk_size)
+
+        #----------------------------------------------------------------
+        experiment.log(self.name + " End")

@@ -162,35 +162,30 @@ class Hdf5TransportData(object):
         chunk, length, repeat = self.chunk_length_repeat(slice_dirs, shape)
 
         banked = []
-        banked_length = []
-        start = 0
-        for i in range(len(slice_dirs)):
-            for rep in range(repeat[i]):
-                start += rep*length[i]
-                end = start + length[i]
-                banked.append(slice_list[start:end])
-                banked_length.append(length[i])
-
-        return banked, banked_length, slice_dirs
+        for rep in range(repeat[0]):
+            start = rep*length[0]
+            end = start + length[0]
+            banked.append(slice_list[start:end])
+                
+        return banked, length[0], slice_dirs
 
     def grouped_slice_list(self, slice_list, max_frames):
         banked, length, slice_dir = self.banked_list(slice_list)
-
         grouped = []
         count = 0
         for group in banked:
-            full_frames = int(length[count]/float(max_frames))
-            rem = 1 if (length[count] % max_frames) else 0
+            full_frames = int(length/float(max_frames))
+            rem = 1 if (length % max_frames) else 0
             working_slice = list(group[0])
 
             for i in range(0, (full_frames*max_frames), max_frames):
                 new_slice = slice(i, i+max_frames, 1)
-                working_slice[slice_dir[count]] = new_slice
+                working_slice[slice_dir[0]] = new_slice
                 grouped.append(tuple(working_slice))
 
             if rem:
                 new_slice = slice(i+max_frames, len(group), 1)
-                working_slice[slice_dir[count]] = new_slice
+                working_slice[slice_dir[0]] = new_slice
                 grouped.append(tuple(working_slice))
             count += 1
 

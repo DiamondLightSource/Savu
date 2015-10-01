@@ -46,8 +46,7 @@ class Plugin(object):
         :param out_data: The output data object
         :type out_data: savu.data.experiment
         """
-        logging.error("set_up needs to be implemented for proc %i of %i :" +
-                      " input is %s and output is %s", experiment.__class__)
+        logging.error("set_up needs to be implemented")
         raise NotImplementedError("setup needs to be implemented")
         
 
@@ -94,24 +93,12 @@ class Plugin(object):
         This method is called after the plugin has been created by the
         pipeline framework as a pre-processing step
 
-        :param parameters: A dictionary of the parameters for this plugin, or
-            None if no customisation is required
-        :type parameters: dict
+        :param exp: An experiment object, holding input and output datasets
+        :type exp: experiment class instance
         """
         pass
 
-    def post_process(self):
-        """
-        This method is called after the plugin has been created by the
-        pipeline framework as a post-processing step
-
-        :param parameters: A dictionary of the parameters for this plugin, or
-            None if no customisation is required
-        :type parameters: dict
-        """
-        pass
-
-    def process(self, experiment, transport, params):
+    def process(self, experiment, transport):
         """
         This method is called after the plugin has been created by the
         pipeline framework and forms the main processing step
@@ -125,21 +112,30 @@ class Plugin(object):
         :param path: The specific process which we are
         :type path: int
         """
-        if experiment is not None and transport is not None :
-            logging.error("process needs to be implemented for proc %i of %i :" +
-                          " input is %s and output is %s",
-                          experiment.__class__, transport.__class__)
+        logging.error("process needs to be implemented")
         raise NotImplementedError("process needs to be implemented")
+        
+    def post_process(self, exp):
+        """
+        This method is called after the process function in the pipeline
+        framework as a post-processing step. All processes will have finished
+        performing the main processing at this stage. 
 
-        
-    def get_data_objects(self, expIndex, dtype):
-        data_list = (self.parameters["in_datasets"] if dtype is "in_data" 
-                                    else self.parameters["out_datasets"])
-        data_objs = []
-        for data in data_list:
-            data_objs.append(expIndex[dtype][data])
-        return data_objs
-        
+        :param exp: An experiment object, holding input and output datasets
+        :type exp: experiment class instance
+        """
+        pass
+    
+    def organise_metadata(self, exp):
+        """
+        This method is called after the post_process function to organise the
+        metadata that is passed from input datasets to output datasets
+
+        :param exp: An experiment object, holding input and output datasets
+        :type exp: experiment class instance
+        """
+        logging.error("organise_metadata() needs to be implemented")
+        raise NotImplementedError("organise_metadata() needs to be implemented")
         
     def nInput_datasets(self):
         """
@@ -150,7 +146,6 @@ class Plugin(object):
         """
         raise NotImplementedError("nInput_datasets needs to be implemented")
 
-
     def nOutput_datasets(self):
         """
         The number of datasets created by the plugin
@@ -160,7 +155,6 @@ class Plugin(object):
         """
         raise NotImplementedError("nOutput_datasets needs to be implemented")
         
-
     def get_citation_information(self):
         """Gets the Citation Information for a plugin
 
@@ -168,3 +162,30 @@ class Plugin(object):
 
         """
         return None
+
+    def get_data_objects(self, exp, dtype):
+        data_list = (self.parameters["in_datasets"] if dtype is "in_data" 
+                                    else self.parameters["out_datasets"])
+        data_objs = []
+        for data in data_list:
+            data_objs.append(exp.index[dtype][data])
+        return data_objs
+        
+    def get_in_datasets(self, exp):
+        return self.get_data_objects(exp, 'in_data')
+        
+    def get_out_datasets(self, exp):
+        try:
+            out_data = self.get_data_objects(exp, 'out_data')
+        except KeyError:
+            out_data = []
+            for data in self.parameters['out_datasets']:
+                exp.create_data_object("out_data", data)
+            out_data = self.get_data_objects(exp, 'out_data')
+        return out_data
+        
+    def get_datasets(self, exp):
+        in_data = self.get_data_objects(exp, 'in_data')
+        out_data = self.get_data_objects(exp, 'out_data')
+        return in_data, out_data
+        

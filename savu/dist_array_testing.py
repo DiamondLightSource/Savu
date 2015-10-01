@@ -42,7 +42,7 @@ from distarray.globalapi.distarray import DistArray
 
 
 class Testing(object):
-    
+
     def __init__(self):
         self.data = None
 
@@ -50,15 +50,15 @@ class Testing(object):
 def numpy_julia_calc(la, la2):
 
     la = np.asarray(la)
-    la2=np.asarray(la2)
+    la2 = np.asarray(la2)
     print ('la2:', la2.shape)
-    la2[0,:] = la[1,1:11,1]*3
+    la2[0, :] = la[1, 1:11, 1]*3
     print ('la2:', la2.shape)
     return la2
 
 
 def load_hdf5_distarray(context):
-    
+
     data = Testing()
     filename = "/mnt/lustre03/testdir/dasc/qmm55171/test_data/24737.nxs"
     data_key = 'entry1/tomo_entry/instrument/detector/data'
@@ -72,16 +72,16 @@ def load_hdf5_distarray(context):
     data.data = context.load_hdf5(filename,
                                   distribution=distribution,
                                   key=data_key)
-                                  
+
     print data.data.context.targets
     print data.data.key
 
     print('Loaded.')
     return data
 
-        
-def create_complex_plane(context):  
-    nparr = np.random.randint(5,size=(100,30))
+
+def create_complex_plane(context):
+    nparr = np.random.randint(5, size=(100, 30))
     darr = context.fromarray(nparr)
     print darr
     return darr
@@ -91,17 +91,19 @@ def local_julia_calc(la, la2, kernel):
     from distarray.localapi import LocalArray
     counts = kernel(la, la2)
     res = LocalArray(la2.distribution, buf=counts)
-    return proxyize(res) # noqa
-    
+    return proxyize(res)
+
 
 def distributed_julia_calc(la, la2, kernel=numpy_julia_calc):
     context = la.context
     context.register(kernel)
-    iters_key = context.apply(local_julia_calc, (la.key, la2.key), {'kernel': kernel})
-    iters_da = DistArray.from_localarrays(iters_key[0], context=context, dtype=np.int32)
+    iters_key = context.apply(local_julia_calc, (la.key, la2.key),
+                              {'kernel': kernel})
+    iters_da = DistArray.from_localarrays(iters_key[0], context=context,
+                                          dtype=np.int32)
     #return iters_da
     return iters_da
-    
+
 
 if __name__ == '__main__':
 
@@ -120,7 +122,6 @@ if __name__ == '__main__':
                       default=False,
                       action="store_true")
     (options, args) = parser.parse_args()
-
 
     # Check basic items for completeness
     if len(args) is not 3:
@@ -146,26 +147,27 @@ if __name__ == '__main__':
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
 
-    fh = logging.FileHandler(os.path.join(args[2],'log.txt'), mode='w')
+    fh = logging.FileHandler(os.path.join(args[2], 'log.txt'), mode='w')
     fh.setFormatter(logging.Formatter('L %(relativeCreated)12d M' +
-            MACHINE_NUMBER_STRING + ' ' + MACHINE_RANK_NAME +
-            ' %(levelname)-6s %(message)s'))
+                    MACHINE_NUMBER_STRING + ' ' + MACHINE_RANK_NAME +
+                    ' %(levelname)-6s %(message)s'))
     logger.addHandler(fh)
 
     logging.info("Starting tomo_recon process")
 
     plugin_list = PluginList()
     plugin_list.populate_plugin_list(options.process_filename)
-    transport = '/home/qmm55171/Documents/Git/git_repos/Savu/savu/data/transports/dist_array'
+    transport = '/home/qmm55171/Documents/Git/git_repos/Savu/savu/data/'\
+                'transports/dist_array'
     #pu.load_transport(transport, plugin_list, args)
-    
+
     kernel = numpy_julia_calc
-    dist_list = ['bn', 'cn', 'bb', 'cc']    
-    
+    dist_list = ['bn', 'cn', 'bb', 'cc']
+
     with closing(Context()) as context:
         # use all available targets
-        engine_count_list = list(range(1, len(context.targets) + 1))     
-        
+        engine_count_list = list(range(1, len(context.targets) + 1))
+
     engine_count_list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     targets = list(range(max(engine_count_list)))
 
@@ -176,8 +178,7 @@ if __name__ == '__main__':
         A = in_data.data
         nparr = np.zeros([10, 10])
         print nparr
-        dist = Distribution(context, (10,10), dist='bn')
+        dist = Distribution(context, (10, 10), dist='bn')
         B = context.fromarray(nparr)
         print B
         result = distributed_julia_calc(A, B, kernel=kernel)
-                
