@@ -27,6 +27,8 @@ from savu.plugins.utils import register_plugin
 from savu.plugins.filter import Filter
 import peakutils as pe
 import numpy as np
+from scipy.signal import savgol_filter
+from itertools import chain
 
 
 @register_plugin
@@ -44,18 +46,22 @@ class FindPeaks(Filter, CpuPlugin):
 
     def filter_frame(self, data):
         _in_meta_data, out_meta_data = self.get_meta_data()
-        data = data[0].squeeze()
+        data = savgol_filter(data[0].squeeze(), 51, 3)
         PeakIndex = list(out_meta_data[0].get_meta_data('PeakIndex'))
         PeakIndexNew = list(pe.indexes(data, thres=self.parameters['thresh'],
                             min_dist=self.parameters['min_distance']))
         # print type(PeakIndex), 'boo', type(PeakIndexNew)
         # print 'Im here'
         PeakIndexNew = list(PeakIndexNew)
-        tmp = set(PeakIndexNew) - set(PeakIndex)
+        wind = self.parameters['min_distance']
+        set2 = set(list(chain.from_iterable(range(x-wind/2,
+                                                  x+wind/2, 1)
+                                            for x in PeakIndex)))
+        tmp = set(PeakIndexNew) - set2
         tmp = list(tmp)
-        # print 'temp is ', sorted(tmp)
-        # print 'New index is', sorted(PeakIndexNew)
-        # print 'old index is', sorted(PeakIndex)
+        print 'temp is ', sorted(tmp)
+        print 'New index is', sorted(PeakIndexNew)
+        print 'old index is', sorted(PeakIndex)
         PeakIndex.extend(tmp)
         PeakIndex = out_meta_data[0].set_meta_data('PeakIndex', PeakIndex)
         return 0
