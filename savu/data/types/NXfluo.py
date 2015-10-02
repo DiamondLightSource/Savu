@@ -49,6 +49,7 @@ class RawTimeseriesData(DataInterface):
         self.monitor = None
         self.data_shape = None
         self.mono_energy = None
+
     @logmethod
     def complete(self):
         """
@@ -88,7 +89,7 @@ class RawTimeseriesData(DataInterface):
             'entry1/fluo_entry/monitor/data']
         self.mono = self.backing_file[
             'entry1/fluo_entry/instrument/monochromator/energy']
-        
+
         self.core_directions[CD_PROJECTION] = (0, 1)
         self.core_directions[CD_PATTERN] = (2, )
 
@@ -106,18 +107,18 @@ class RawTimeseriesData(DataInterface):
 
         self.core_directions[CD_PROJECTION] = (0, 1)
         self.core_directions[CD_PATTERN] = (2, )
-        #TODO need to sort out data shape
+        # TODO need to sort out data shape
         data_shape = self.data_shape
         if data_shape is None:
             data_shape = self.data.data.shape
         data_type = np.double
-        energy_shape = self.data.energy.shape# energy axis
+        energy_shape = self.data.energy.shape  # energy axis
         energy_type = self.data.energy.dtype
-        x_shape = self.data.x.shape#first translation axis
+        x_shape = self.data.x.shape  # first translation axis
         x_type = self.data.x.dtype
-        y_shape = self.data.y.shape#y translation axis
+        y_shape = self.data.y.shape  # y translation axis
         y_type = self.data.y.dtype
-        monitor_shape = self.data.monitor.shape# I0
+        monitor_shape = self.data.monitor.shape  # I0
         monitor_type = self.data.monitor.dtype
         mono_shape = self.data.mono.shape
         mono_type = self.data.mono.dtype
