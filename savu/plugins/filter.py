@@ -30,7 +30,7 @@ class Filter(Plugin):
     """
     A Plugin to apply a simple dark and flatfield correction to some
     raw timeseries data
-            
+
     :param in_datasets: Create a list of the dataset(s) to process. Default: [].
     :param out_datasets: Create a list of the dataset(s) to process. Default: [].
 
@@ -41,14 +41,15 @@ class Filter(Plugin):
 
     def set_filter_padding(self, in_data, out_data):
         """
-        Should be overridden to define how wide the frame should be for each 
+        Should be overridden to define how wide the frame should be for each
         input data set
         """
         return {}
 
     def get_max_frames(self):
         """
-        Should be overridden to define the max number of frames to process at a time
+        Should be overridden to define the max number of frames to process at
+        a time
 
         :returns:  an integer of the number of frames
         """
@@ -66,11 +67,10 @@ class Filter(Plugin):
                       data.__class__)
         raise NotImplementedError("filter_frame needs to be implemented")
 
-
     @logmethod
     def process(self, transport):
         """
-        """        
+        """
         in_data, out_data = self.get_datasets()
         self.set_filter_padding(in_data, out_data)
         transport.filter_chunk(self, in_data, out_data)
@@ -78,56 +78,29 @@ class Filter(Plugin):
         for data in in_data:
             data.padding = None
 
-          
-    def setup(self, experiment):
+    def setup(self):
+        self.exp.log(self.name + " Start")
 
-        experiment.log(self.name + " Start")
-        chunk_size = self.get_max_frames()
+        # Input datasets setup
+        in_data, out_data = self.get_plugin_datasets()
+        in_data[0].plugin_data_setup(pattern_name='PROJECTION',
+                                     chunk=self.get_max_frames())
 
-        #-------------------setup input datasets-------------------------
+        # set details for all output data sets
+        out_data[0].plugin_data_setup(pattern_name='PROJECTION',
+                                      chunk=self.get_max_frames(),
+                                      shape=in_data[0].data_obj.
+                                      get_shape())
 
-        # get a list of input dataset names required for this plugin
-        in_data_list = self.parameters["in_datasets"]
-        # get all input dataset objects
-        in_d1 = experiment.index["in_data"][in_data_list[0]]        
-        # set all input data patterns
-        in_d1.set_current_pattern_name("PROJECTION")
-        # set frame chunk
-        in_d1.set_nFrames(chunk_size)
-        
-        #----------------------------------------------------------------
+        # copy or add patterns related to this dataset
+        out_data[0].data_obj.copy_patterns(in_data[0].data_obj.get_patterns())
+        self.exp.log(self.name + " End")
 
-        #------------------setup output datasets-------------------------
+    def organise_metadata(self):
+        pass
 
-        # get a list of output dataset names created by this plugin
-        out_data_list = self.parameters["out_datasets"]
-        
-        # create all out_data objects and associated patterns and meta_data
-        # patterns can be copied, added or both
-        out_d1 = experiment.create_data_object("out_data", out_data_list[0])
-        
-        out_d1.copy_patterns(in_d1.get_patterns())
-        # copy the entire in_data dictionary (image_key, dark and flat will 
-        # be removed since out_data is no longer an instance of TomoRaw)
-        # If you do not want to copy the whole dictionary pass the key word
-        # argument copyKeys = [your list of keys to copy], or alternatively, 
-        # removeKeys = [your list of keys to remove]
-        out_d1.meta_data.copy_dictionary(in_d1.meta_data.get_dictionary())
-
-        # set pattern for this plugin and the shape
-        out_d1.set_current_pattern_name("PROJECTION")
-        #out_d1.set_shape(in_d1.remove_dark_and_flat())
-        out_d1.set_shape(in_d1.get_shape())
-        # set frame chunk
-        out_d1.set_nFrames(chunk_size)
-
-        #----------------------------------------------------------------
-        experiment.log(self.name + " End")
-        
     def nInput_datasets(self):
         return 1
-         
-         
+
     def nOutput_datasets(self):
         return 1
-        

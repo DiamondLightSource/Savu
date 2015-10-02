@@ -52,27 +52,6 @@ class MedianFilter(Filter, CpuPlugin):
         in_data[0].padding = {'pad_multi_frames': padding}
         out_data[0].padding = {'pad_multi_frames': padding}
 
-    def setup(self):
-        self.exp.log(self.name + " Start")
-
-        # Input datasets setup
-        in_data, out_data = self.get_plugin_datasets()
-        in_data[0].plugin_data_setup(pattern_name='PROJECTION',
-                                     chunk=self.get_max_frames())
-
-        # set details for all output data sets
-        out_data[0].plugin_data_setup(pattern_name='PROJECTION',
-                                      chunk=self.get_max_frames(),
-                                      shape=in_data[0].data_obj.
-                                      get_shape())
-
-        # copy or add patterns related to this dataset
-        out_data[0].data_obj.copy_patterns(in_data[0].data_obj.get_patterns())
-        self.exp.log(self.name + " End")
-
-    def organise_metadata(self):
-        pass
-
     def nInput_datasets(self):
         return 1
 
