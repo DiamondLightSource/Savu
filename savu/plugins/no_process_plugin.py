@@ -15,8 +15,7 @@
 """
 .. module:: no_process_plugin
    :platform: Unix
-   :synopsis: Plugin to test loading and saving without processing 
-   
+   :synopsis: Plugin to test loading and saving without processing
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
@@ -29,19 +28,18 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 class NoProcessPlugin(Plugin, CpuPlugin):
     """
     The base class from which all plugins should inherit.
-    :param in_datasets: Create a list of the dataset(s) to process. Default: [].
-    :param out_datasets: Create a list of the dataset(s) to process. Default: [].
+    :param in_datasets: A list of the dataset(s) to process. Default: [].
+    :param out_datasets: A list of the dataset(s) to process. Default: [].
     """
 
     def __init__(self):
         super(NoProcessPlugin, self).__init__("NoProcessPlugin")
 
-
     def process(self, exp, transport, params):
-        
+
         in_data = self.get_data_objects(exp.index, "in_data")
         out_data = self.get_data_objects(exp.index, "out_data")
-        
+
         in_data = in_data[0]
         out_data = out_data[0]
 
@@ -49,10 +47,9 @@ class NoProcessPlugin(Plugin, CpuPlugin):
         slice_list = in_data.single_slice_list() #  I changed this to single_slice_list, from get_slice_list since for some reason get_slice_list wasn't found. adp 
         for sl in slice_list:
             temp = in_data.data[sl]
-            out_data.data[sl] = temp        
-        
-        print in_data.data.shape, out_data.data.shape
+            out_data.data[sl] = temp
 
+        print in_data.data.shape, out_data.data.shape
 
     def setup(self, experiment):
         """
@@ -65,9 +62,12 @@ class NoProcessPlugin(Plugin, CpuPlugin):
 
         # get all input dataset objects
         in_data = experiment.index["in_data"]
-        for key, data in in_data.iteritems():#[in_data_list[0]]
+        for key, data in in_data.iteritems():  # [in_data_list[0]]
             # set all input data patterns
-            data.set_current_pattern_name(data.get_patterns().keys()[0]) # have changed this to work on the first element of the pattern list rather SINOGRAM, since some datasets don't havea singoram adp
+            # have changed this to work on the first element of the pattern
+            # list rather SINOGRAM, since some datasets don't have a singoram
+            # adp
+            data.set_current_pattern_name(data.get_patterns().keys()[0])
             # set frame chunk
             data.set_nFrames(chunk_size)
 
@@ -83,15 +83,11 @@ class NoProcessPlugin(Plugin, CpuPlugin):
             # set frame chunk
             out_data.set_nFrames(chunk_size)
 
-
     def nInput_datasets(self):
         return 1
-         
-         
+
     def nOutput_datasets(self):
         return 1
-    
-    
+
     def get_max_frames(self):
         return 8
-        

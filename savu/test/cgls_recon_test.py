@@ -26,8 +26,9 @@ import unittest
 
 from savu.test.plugin_test import PluginTest
 
+
 class CglsReconTest(PluginTest):
-    
+
     def setUp(self):
         self.data_type = "tomo"
         self.plugin_name = "savu.plugins.cgls_recon"

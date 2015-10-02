@@ -28,24 +28,25 @@ from savu.data.process_data import CitationInfomration
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 
+
 @register_plugin
 class AstraRecon(BaseAstraRecon, CpuPlugin):
     """
     A Plugin to run the astra reconstruction
-    
-    :param number_of_iterations: Number of Iterations if an iterative method is used . Default: 1.
+
+    :param number_of_iterations: Number of Iterations if an iterative method \
+                                is used. Default: 1.
     :param reconstruction_type: Reconstruction type (FBP|SIRT|SART|ART|CGLS| \
-                                                     FBP_CUDA|SIRT_CUDA|SART_CUDA|CGLS_CUDA| \
-                                                     SIRT3D_CUDA|CGLS3D_CUDA). Default: 'CGLS_CUDA'.
+                                FBP_CUDA|SIRT_CUDA|SART_CUDA|CGLS_CUDA| \
+                                SIRT3D_CUDA|CGLS3D_CUDA). Default: 'CGLS_CUDA'.
     """
 
     def __init__(self):
         super(AstraRecon, self).__init__("AstraRecon")
 
     def get_parameters(self):
-        return [self.parameters['reconstruction_type'], \
+        return [self.parameters['reconstruction_type'],
                 self.parameters['number_of_iterations']]
-
 
     def get_citation_inforamtion(self):
         cite_info = CitationInfomration()
@@ -81,6 +82,5 @@ class AstraRecon(BaseAstraRecon, CpuPlugin):
              "%I Elsevier")
         cite_info.doi = "http://dx.doi.org/10.1016/j.jsb.2011.07.017"
         return cite_info
-
 
 logging.debug("Completed base_astra_recon import")

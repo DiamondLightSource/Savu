@@ -27,14 +27,16 @@ from savu.plugins.utils import register_plugin
 from savu.plugins.filter import Filter
 import peakutils as pe
 import numpy as np
+from scipy.signal import savgol_filter
+from itertools import chain
 
 
 @register_plugin
 class FindPeaks(Filter, CpuPlugin):
     """
-    This plugin uses peakutils to find peaks in spectra. This is then added to the metadata.
-    :param in_datasets: Create a list of the dataset(s) to process. Default: [].
-    :param out_datasets: Create a list of the dataset(s) to process. Default: [].
+    This plugin uses peakutils to find peaks in spectra. This is then metadata.
+    :param in_datasets: Create a list of the dataset(s). Default: [].
+    :param out_datasets: Create a list of the dataset(s). Default: [].
     :param thresh: Threshold for peak detection Default: 0.03.
     :param min_distance: Minimum distance for peak detection. Default: 15.
     """
@@ -43,23 +45,25 @@ class FindPeaks(Filter, CpuPlugin):
         super(FindPeaks, self).__init__("FindPeaks")
 
     def filter_frame(self, data):
-        in_meta_data, out_meta_data = self.get_meta_data()
-        data = data[0].squeeze()
+        _in_meta_data, out_meta_data = self.get_meta_data()
+        data = savgol_filter(data[0].squeeze(), 51, 3)
         PeakIndex = list(out_meta_data[0].get_meta_data('PeakIndex'))
         PeakIndexNew = list(pe.indexes(data, thres=self.parameters['thresh'],
-                                  min_dist=self.parameters['min_distance']
-                                  ))
-        print type(PeakIndex),'boo',type(PeakIndexNew)
-        if not(len(PeakIndex)):
-            tmp = PeakIndex
-        else:
-            PeakIndexNew = list(PeakIndexNew)
-            tmp = set(PeakIndexNew) - set(PeakIndex)
-            tmp = list(tmp)
-        print tmp
-# 
-#         PeakIndex.append(tmp)
-#         PeakIndex = out_meta_data[0].set_meta_data('PeakIndex',PeakIndex)
+                            min_dist=self.parameters['min_distance']))
+        # print type(PeakIndex), 'boo', type(PeakIndexNew)
+        # print 'Im here'
+        PeakIndexNew = list(PeakIndexNew)
+        wind = self.parameters['min_distance']
+        set2 = set(list(chain.from_iterable(range(x-wind/2,
+                                                  x+wind/2, 1)
+                                            for x in PeakIndex)))
+        tmp = set(PeakIndexNew) - set2
+        tmp = list(tmp)
+        print 'temp is ', sorted(tmp)
+        print 'New index is', sorted(PeakIndexNew)
+        print 'old index is', sorted(PeakIndex)
+        PeakIndex.extend(tmp)
+        PeakIndex = out_meta_data[0].set_meta_data('PeakIndex', PeakIndex)
         return 0
 
     def setup(self, experiment):
@@ -67,47 +71,37 @@ class FindPeaks(Filter, CpuPlugin):
         self.set_experiment(experiment)
         chunk_size = self.get_max_frames()
 
-        #-------------------setup input datasets-------------------------
-
         # get a list of input dataset names required for this plugin
         in_data_list = self.parameters["in_datasets"]
         # get all input dataset objects
         in_d1 = experiment.index["in_data"][in_data_list[0]]
         # set all input data patterns
-        in_d1.set_current_pattern_name("SPECTRUM") # have changed this to work on the first element of the pattern list rather SINOGRAM, since some datasets don't havea singoram adp
+        in_d1.set_current_pattern_name("SPECTRUM")
         # set frame chunk
         in_d1.set_nFrames(chunk_size)
-        
-        
-        #----------------------------------------------------------------
-
-        #------------------setup output datasets-------------------------
 
         # get a list of output dataset names created by this plugin
         out_data_list = self.parameters["out_datasets"]
-        
+
         # create all out_data objects and associated patterns and meta_data
         # patterns can be copied, added or both
         out_d1 = experiment.create_data_object("out_data", out_data_list[0])
-        
+
         out_d1.copy_patterns(in_d1.get_patterns())
-        out_d1.add_pattern("PROJECTION", core_dir = (0,), slice_dir = (0,))
-        out_d1.add_pattern("1D_METADATA", slice_dir = (0,))
+        out_d1.add_pattern("PROJECTION", core_dir=(0,), slice_dir=(0,))
+        out_d1.add_pattern("1D_METADATA", slice_dir=(0,))
         out_d1.set_current_pattern_name("1D_METADATA")
-        out_d1.meta_data.set_meta_data('PeakIndex',[])
-        # copy the entire in_data dictionary (image_key, dark and flat will 
-        #be removed since out_data is no longer an instance of TomoRaw)
-        # If you do not want to copy the whole dictionary pass the key word
-        # argument copyKeys = [your list of keys to copy], or alternatively, 
-        # removeKeys = [your list of keys to remove]
-        out_d1.meta_data.copy_dictionary(in_d1.meta_data.get_dictionary(), rawFlag=True)
+        out_d1.meta_data.set_meta_data('PeakIndex', [])
+        out_d1.meta_data.copy_dictionary(in_d1.meta_data.get_dictionary(),
+                                         rawFlag=True)
         # set pattern for this plugin and the shape
-        out_d1.set_shape((1,))
+        out_d1.set_shape((np.prod(in_d1.data.shape[:-1]),))
         # set frame chunk
         out_d1.set_nFrames(chunk_size)
 
+    def organise_metadata(self):
+        pass
 
-        
     def get_max_frames(self):
         """
         This filter processes 1 frame at a time
@@ -115,4 +109,3 @@ class FindPeaks(Filter, CpuPlugin):
          :returns:  1
         """
         return 1
-        
