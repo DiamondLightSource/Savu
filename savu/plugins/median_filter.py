@@ -42,72 +42,42 @@ class MedianFilter(Filter, CpuPlugin):
         logging.debug("Starting Median Filter")
         super(MedianFilter, self).__init__("MedianFilter")
 
-    def filter_frame(self, data, params):
+    def filter_frame(self, data):
         logging.debug("Running Filter data")
-        result = sig.medfilt(data, self.parameters['kernel_size'])
+        result = sig.medfilt(data[0], self.parameters['kernel_size'])
         return result
 
-    def set_filter_padding(self):
+    def set_filter_padding(self, in_data, out_data):
         padding = (self.parameters['kernel_size'][0]-1)/2
-        #return {st.CD_PROJECTION:padding} # change this
-        return {'0':padding,'1':padding}
+        in_data[0].padding = {'pad_multi_frames': padding}
+        out_data[0].padding = {'pad_multi_frames': padding}
 
-    def setup(self, experiment):
-        """
-        Initial setup of all datasets required as input and output to the 
-        plugin.  This method is called before the process method in the plugin
-        chain.  
-        """
+    def setup(self):
+        self.exp.log(self.name + " Start")
 
-        chunk_size = self.get_max_frames()
+        # Input datasets setup
+        in_data, out_data = self.get_plugin_datasets()
+        in_data[0].plugin_data_setup(pattern_name='PROJECTION',
+                                     chunk=self.get_max_frames())
 
-        #-------------------setup input datasets-------------------------
+        # set details for all output data sets
+        out_data[0].plugin_data_setup(pattern_name='PROJECTION',
+                                      chunk=self.get_max_frames(),
+                                      shape=in_data[0].data_obj.
+                                      get_shape())
 
-        # get a list of input dataset names required for this plugin
-        in_data_list = self.parameters["in_datasets"]
-        # get all input dataset objects
-        in_d1 = experiment.index["in_data"][in_data_list[0]]
-        # set all input data patterns
-        in_d1.set_current_pattern_name('PROJECTION') # have changed this to work on the first element of the pattern list rather SINOGRAM, since some datasets don't havea singoram adp
-        # set frame chunk
-        in_d1.set_nFrames(chunk_size)
-        
-        #----------------------------------------------------------------
+        # copy or add patterns related to this dataset
+        out_data[0].data_obj.copy_patterns(in_data[0].data_obj.get_patterns())
+        self.exp.log(self.name + " End")
 
-        #------------------setup output datasets-------------------------
-
-        # get a list of output dataset names created by this plugin
-        out_data_list = self.parameters["out_datasets"]
-        
-        # create all out_data objects and associated patterns and meta_data
-        # patterns can be copied, added or both
-        out_d1 = experiment.create_data_object("out_data", out_data_list[0])
-        
-        out_d1.copy_patterns(in_d1.get_patterns())
-        # copy the entire in_data dictionary (image_key, dark and flat will 
-        #be removed since out_data is no longer an instance of TomoRaw)
-        # If you do not want to copy the whole dictionary pass the key word
-        # argument copyKeys = [your list of keys to copy], or alternatively, 
-        # removeKeys = [your list of keys to remove]
-        out_d1.meta_data.copy_dictionary(in_d1.meta_data.get_dictionary(), rawFlag=True)
-
-        # set pattern for this plugin and the shape
-        out_d1.set_current_pattern_name('PROJECTION')
-        out_d1.set_shape(in_d1.get_shape())
-        # set frame chunk
-        out_d1.set_nFrames(chunk_size)
-
-        #----------------------------------------------------------------
-
+    def organise_metadata(self):
+        pass
 
     def nInput_datasets(self):
         return 1
-         
-         
+
     def nOutput_datasets(self):
         return 1
-    
-    
+
     def get_max_frames(self):
         return 8
-        

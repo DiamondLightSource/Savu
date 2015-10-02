@@ -15,8 +15,8 @@
 """
 .. module:: projection_tomo_loader
    :platform: Unix
-   :synopsis: A class for loading tomography data that is already calibrated and
-   normalised (i.e. projection data not raw data)
+   :synopsis: A class for loading tomography data that is already calibrated
+   and normalised (i.e. projection data not raw data)
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
@@ -34,12 +34,12 @@ class ProjectionTomoLoader(BaseLoader):
     """
     A class to load tomography data from an NXTomo file
     """
-            
+
     def __init__(self, name='ProjectionTomoLoader'):
         super(ProjectionTomoLoader, self).__init__(name)
-                
+
     @logmethod
-    def setup(self, experiment):
+    def setup(self):
         loader = sLoader.TomographyLoaders()
-        loader.load_test_projection_data(experiment)
-        
+        loader.load_test_projection_data(self.exp)
+
