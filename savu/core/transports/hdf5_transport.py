@@ -146,9 +146,8 @@ class Hdf5Transport(TransportMechanism):
             return_dict = plugin.run_plugin(exp, self)
 
             try:
-                return_dict['transfer_to_meta_data']
-                remove_data_set = self.transfer_to_meta_data
-                (return_dict['transfer_to_meta_data'])
+                remove_data_set = self.transfer_to_meta_data(
+                    return_dict['transfer_to_meta_data'])
             except (KeyError, TypeError):
                 remove_data_set = []
                 pass
@@ -234,6 +233,7 @@ class Hdf5Transport(TransportMechanism):
         out_slice_list = self.get_all_slice_lists(out_data, expInfo)
 
         for count in range(len(in_slice_list[0])):
+            print count
             section = self.get_all_padded_data(in_data, in_slice_list, count)
             result = plugin.filter_frame(section)
             self.set_out_data(out_data, out_slice_list, result, count)
@@ -267,11 +267,8 @@ class Hdf5Transport(TransportMechanism):
         return section
 
     def set_out_data(self, data, slice_list, result, count):
-        print slice_list
         result = [result] if type(result) is not list else result
-        print len(data), len(slice_list), len(result)
         for idx in range(len(data)):
-            print idx, count
             data[idx].data[slice_list[idx][count]] = \
                 data[idx].get_unpadded_slice_data(slice_list[idx][count],
                                                   result[idx])

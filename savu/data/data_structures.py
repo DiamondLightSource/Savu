@@ -51,7 +51,7 @@ class Data(object):
     def set_plugin_data(self, plugin_data_obj):
         self._plugin_data_obj = plugin_data_obj
 
-    def clear_plugin_data(self, plugin_data_obj):
+    def clear_plugin_data(self):
         self._plugin_data_obj = None
 
     def get_plugin_data(self):
@@ -186,7 +186,7 @@ class PluginData(object):
     def __init__(self, data_obj):
         self.data_obj = data_obj
         self.data_obj.set_plugin_data(self)
-        self.plugin_meta_data = MetaData()
+        self.meta_data = MetaData()
         self.padding = None
 
     def get_total_frames(self):
@@ -198,11 +198,11 @@ class PluginData(object):
         return temp
 
     def set_pattern_name(self, name):
-        self.plugin_meta_data.set_meta_data("name", name)
+        self.meta_data.set_meta_data("name", name)
         self.check_data_type_exists()
 
     def get_pattern_name(self):
-        name = self.plugin_meta_data.get_meta_data("name")
+        name = self.meta_data.get_meta_data("name")
         if name is not None:
             return name
         else:
@@ -257,8 +257,8 @@ class PluginData(object):
 
     def get_fixed_directions(self):
         try:
-            fixed = self.plugin_meta_data.get_meta_data("fixed_directions")
-            values = self.plugin_meta_dat.\
+            fixed = self.meta_data.get_meta_data("fixed_directions")
+            values = self.meta_data.\
                 get_meta_data("fixed_directions_values")
         except KeyError:
             fixed = []
@@ -283,10 +283,10 @@ class PluginData(object):
 
     def set_frame_chunk(self, nFrames):
         # number of frames to process at a time
-        self.plugin_meta_data.set_meta_data("nFrames", nFrames)
+        self.meta_data.set_meta_data("nFrames", nFrames)
 
     def get_frame_chunk(self):
-        return self.plugin_meta_data.get_meta_data("nFrames")
+        return self.meta_data.get_meta_data("nFrames")
 
     def get_index(self, indices):
         shape = self.get_shape()

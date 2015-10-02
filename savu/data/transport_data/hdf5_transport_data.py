@@ -96,10 +96,10 @@ class Hdf5TransportData(object):
         if self.backing_file is not None:
             try:
                 logging.debug("Completing file %s", self.backing_file.filename)
+                #self.meta_data.output_meta_data()
+                #self.get_plugin_data().plugin_meta_data.output_meta_data()
                 self.backing_file.close()
                 self.backing_file = None
-                self.meta_data.output_meta_data()
-                self.get_plugin_data().plugin_meta_data.output_meta_data()
             except:
                 pass
 
@@ -170,7 +170,7 @@ class Hdf5TransportData(object):
             start = rep*length[0]
             end = start + length[0]
             banked.append(slice_list[start:end])
-                
+
         return banked, length[0], slice_dirs
 
     def grouped_slice_list(self, slice_list, max_frames):
@@ -284,7 +284,7 @@ class Hdf5TransportData(object):
 
     def get_padded_slice_data(self, input_slice_list):
         slice_list = list(input_slice_list)
-        if self.padding is None:
+        if self.get_plugin_data().padding is None:
             return self.data[tuple(slice_list)]
         padding_dict = self.get_padding_dict()
 
@@ -301,8 +301,8 @@ class Hdf5TransportData(object):
         return self.get_pad_data(tuple(slice_list), tuple(pad_list))
 
     def get_unpadded_slice_data(self, input_slice_list, padded_dataset):
-        padding_dict = self.padding
-        if self.padding is None:
+        padding_dict = self.get_plugin_data().padding
+        if padding_dict is None:
             return self.data[tuple(input_slice_list)]
         padding_dict = self.get_padding_dict()
 

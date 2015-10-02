@@ -83,70 +83,47 @@ class VoCentering(Filter, CpuPlugin):
         cor_raw = (data.shape[1]/2.0) - point
         # temporary for testing
         cor_fit = (data.shape[1]/2.0) - point
-        
+
         return [cor_raw, cor_fit]
 
-    def post_process(self, exp):
+    def post_process(self):
         # do some curve fitting here
-        in_data, out_data = self.get_dataset()
-        cor_raw = out_data[0].data[...]
-        out_data[1].data[...] = cor_raw + 10
+        in_data, out_data = self.get_plugin_datasets()
+        cor_raw = out_data[0].data_obj.data[...]
+        out_data[1].data_obj.data[...] = cor_raw + 10
         # do this if you wish to add an output dataset to metadata and not keep
         # it in the plugin chain
-        output_dict = {'cor_raw':out_data[0], 'cor_fit':out_data[1]}
-        return {'transfer_to_meta_data':{in_data[0]:output_dict}}
+        output_dict = {'cor_raw': out_data[0].data_obj,
+                       'cor_fit': out_data[1].data_obj}
+        return {'transfer_to_meta_data': {in_data[0]: output_dict}}
 
-    def setup(self, experiment):
+    def setup(self):
 
-        experiment.log(self.name + " Start")
-        chunk_size = self.get_max_frames()
+        self.exp.log(self.name + " Start")
 
-        #-------------------setup input datasets-------------------------
+        in_data, out_data = self.get_plugin_datasets()
+        in_data[0].plugin_data_setup(pattern_name='SINOGRAM',
+                                     chunk=self.get_max_frames())
 
-        # get a list of input dataset names required for this plugin
-        in_data_list = self.parameters["in_datasets"]
-        # get all input dataset objects
-        in_d1 = experiment.index["in_data"][in_data_list[0]]        
-        # set all input data patterns
-        in_d1.set_current_pattern_name("SINOGRAM")
-        # set frame chunk
-        in_d1.set_nFrames(chunk_size)
-        
-        #----------------------------------------------------------------
+        fullData = in_data[0].data_obj
+        out_data[0].data_obj.add_pattern("1D_METADATA", slice_dir=(0,))
+        out_data[0].plugin_data_setup(pattern_name='1D_METADATA',
+                                      chunk=self.get_max_frames(),
+                                      shape=(fullData.get_shape()[1],))
 
-        #------------------setup output datasets-------------------------
+        out_data[1].data_obj.add_pattern("1D_METADATA", slice_dir=(0,))
+        out_data[1].plugin_data_setup(pattern_name='1D_METADATA',
+                                      chunk=self.get_max_frames(),
+                                      shape=(fullData.get_shape()[1],))
 
-        # get a list of output dataset names created by this plugin
-        out_data_list = self.parameters["out_datasets"]
+        self.exp.log(self.name + " End")
 
-        # create all out_data objects and associated patterns and meta_data
-        # patterns can be copied, added or both
-        out_d1 = experiment.create_data_object("out_data", out_data_list[0])
-        out_d1.add_pattern("1D_METADATA", slice_dir = (0,))
-        out_d1.meta_data.copy_dictionary(in_d1.meta_data.get_dictionary())
-        # set pattern for this plugin and the shape
-        out_d1.set_current_pattern_name("1D_METADATA")
-        out_d1.set_shape((in_d1.get_shape()[1],))
-        # set frame chunk
-        out_d1.set_nFrames(chunk_size)
-        
-        out_d2 = experiment.create_data_object("out_data", out_data_list[1])
-        out_d2.add_pattern("1D_METADATA", slice_dir = (0,))
-        out_d2.meta_data.copy_dictionary(in_d1.meta_data.get_dictionary(), rawFlag=True)
-        # set pattern for this plugin and the shape
-        out_d2.set_current_pattern_name("1D_METADATA")
-        out_d2.set_shape((in_d1.get_shape()[1],))
-        # set frame chunk
-        out_d2.set_nFrames(chunk_size)
+    def organise_metadata(self):
+        pass
 
-        #----------------------------------------------------------------
-        experiment.log(self.name + " End")
-        
-        
     def nOutput_datasets(self):
         return 2
-        
-        
+
     def get_max_frames(self):
         """
         This filter processes 1 frame at a time
@@ -154,8 +131,7 @@ class VoCentering(Filter, CpuPlugin):
          :returns:  1
         """
         return 1
-        
-        
+
     def get_citation_information(self):
         cite_info = CitationInformation()
         cite_info.description = \

@@ -31,11 +31,11 @@ class CpuPlugin(object):
         super(CpuPlugin, self).__init__()
 
     def run_plugin(self, exp, transport):
-        
+
         expInfo = exp.meta_data
         processes = expInfo.get_meta_data("processes")
         process = expInfo.get_meta_data("process")
-        
+
         count = 0
         cpu_processes = []
         for i in ["CPU" in i for i in processes]:
@@ -60,7 +60,7 @@ class CpuPlugin(object):
             logging.debug("Post-processing")
             return_dict = self.post_process()
 
-            self.organise_metadata()
+            self.clean_up()
 
             return return_dict
             

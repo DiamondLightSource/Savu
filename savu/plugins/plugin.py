@@ -133,6 +133,12 @@ class Plugin(object):
         """
         pass
 
+    def clean_up(self):
+        self.organise_metadata()
+        self.clean_up_plugin_data()
+
+    # Does this function have to be implemented: make default here that copies
+    # the dictionary from the in data...
     def organise_metadata(self):
         """
         This method is called after the post_process function to organise the
@@ -144,6 +150,12 @@ class Plugin(object):
         logging.error("organise_metadata() needs to be implemented")
         raise NotImplementedError("organise_metadata() needs to be "
                                   "implemented")
+
+    def clean_up_plugin_data(self):
+        in_data, out_data = self.get_datasets()
+        data_object_list = in_data + out_data
+        for data in data_object_list:
+            data.clear_plugin_data()
 
     def nInput_datasets(self):
         """
@@ -231,8 +243,3 @@ class Plugin(object):
         for data in data_list:
             meta_data.append(data.meta_data)
         return meta_data
-
-    def clean_up_plugin_datasets(self):
-        in_data, out_data = self.get_datasets
-        data_sets = in_data.append(out_data)
-        print data_sets
