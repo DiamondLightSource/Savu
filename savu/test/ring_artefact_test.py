@@ -28,7 +28,7 @@ from savu.test.plugin_test import PluginTest
 
 
 class RingArtefactTest(PluginTest):
-    
+
     def setUp(self):
         self.plugin_name = "savu.plugins.ring_artefact_filter"
 
