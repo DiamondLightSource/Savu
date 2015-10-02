@@ -26,7 +26,7 @@ import unittest
 from savu.test.plugin_test import PluginTest
 
 
-class DownsampleTest(PluginTest):
+class DownsampleTest(PluginTest, unittest.TestCase):
 
     def setUp(self):
         self.data_type = 'tomo'

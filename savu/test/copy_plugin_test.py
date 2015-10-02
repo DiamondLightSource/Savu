@@ -27,7 +27,7 @@ import unittest
 from savu.test.plugin_test import PluginTest
 
 
-class CopyPluginTest(PluginTest):
+class CopyPluginTest(PluginTest, unittest.TestCase):
 
     def setUp(self):
         self.data_type = "tomo"

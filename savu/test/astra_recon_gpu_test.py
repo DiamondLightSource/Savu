@@ -27,8 +27,8 @@ import unittest
 from savu.test.plugin_test import PluginTest
 
 
-class AstraReconGpuTest(PluginTest):
-    
+class AstraReconGpuTest(PluginTest, unittest.TestCase):
+
     def setUp(self):
         self.plugin_name = "savu.plugins.astra_recon_gpu"
 

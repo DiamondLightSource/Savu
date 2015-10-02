@@ -26,7 +26,7 @@ import unittest
 from savu.test.plugin_test import PluginTest
 
 
-class SimpleReconTest(PluginTest):
+class SimpleReconTest(PluginTest, unittest.TestCase):
 
     def setUp(self):
         self.plugin_name = "savu.plugins.paganin_filter"

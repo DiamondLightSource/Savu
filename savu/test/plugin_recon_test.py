@@ -27,13 +27,7 @@ import unittest
 from savu.test.plugin_test import PluginTest
 
 
-"""class SimpleReconTest(PluginTest):
-
-    def setUp(self):
-        self.plugin_name = "savu.plugins.scikitimage_sart"
-"""
-
-class SinogramAlignmentTest(PluginTest):
+class SinogramAlignmentTest(PluginTest, unittest.TestCase):
 
     def setUp(self):
         self.plugin_name = "savu.plugins.sinogram_alignment"
