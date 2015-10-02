@@ -15,7 +15,7 @@
 """
 .. module:: tomography_loader
    :platform: Unix
-   :synopsis: A class for loading tomography data using the standard loaders 
+   :synopsis: A class for loading tomography data using the standard loaders
    library.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
@@ -34,13 +34,11 @@ class NxtomoLoader(BaseLoader):
     """
     A class to load tomography data from an NXTomo file
     """
-            
+
     def __init__(self, name='NxtomoLoader'):
         super(NxtomoLoader, self).__init__(name)
-        
-        
+
     @logmethod
-    def setup(self, experiment):
+    def setup(self):
         loader = sLoader.TomographyLoaders()
-        loader.load_from_nx_tomo(experiment)
-        
+        loader.load_from_nx_tomo(self.exp)

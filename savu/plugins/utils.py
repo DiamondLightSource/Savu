@@ -23,7 +23,6 @@
 
 import sys
 import os
-import logging
 import re
 
 import numpy as np

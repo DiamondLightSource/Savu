@@ -24,6 +24,7 @@
 import logging
 import sys
 
+import savu.core.utils as cu
 from savu.data.experiment_collection import Experiment
 from savu.plugins.base_loader import BaseLoader
 from savu.plugins.base_saver import BaseSaver
@@ -39,54 +40,41 @@ class PluginRunner(object):
     def __init__(self, options):
         class_name = "savu.core.transports." + options["transport"] \
                      + "_transport"
-        self.add_base(self.import_class(class_name))
+        cu.add_base(self, cu.import_class(self, class_name))
         self.transport_control_setup(options)
-
-    def import_class(self, class_name):
-        name = class_name
-        mod = __import__(name)
-        components = name.split('.')
-        for comp in components[1:]:
-            mod = getattr(mod, comp)
-        temp = name.split('.')[-1]
-        module2class = ''.join(x.capitalize() for x in temp.split('_'))
-        return getattr(mod, module2class.split('.')[-1])
-
-    def add_base(self, ExtraBase):
-        cls = self.__class__
-        self.__class__ = cls.__class__(cls.__name__, (cls, ExtraBase), {})
+        self.exp = None
 
     def run_plugin_list(self, options):
         logging.info("Starting to run the plugin list")
-        experiment = Experiment(options)
-        plugin_list = experiment.meta_data.plugin_list.plugin_list
+        self.exp = Experiment(options)
+        plugin_list = self.exp.meta_data.plugin_list.plugin_list
 
-        experiment.barrier()
+        self.exp.barrier()
         logging.info("Preparing to run the plugin list check")
-        self.run_plugin_list_check(experiment, plugin_list)
+        self.run_plugin_list_check(plugin_list)
 
-        experiment.barrier()
+        self.exp.barrier()
         logging.info("Initialising metadata")
-        expInfo = experiment.meta_data
+        expInfo = self.exp.meta_data
         if expInfo.get_meta_data("process") is 0:
             logging.debug("Running process List.save_list_to_file")
             expInfo.plugin_list.save_plugin_list(
                 expInfo.get_meta_data("nxs_filename"))
 
-        experiment.barrier()
+        self.exp.barrier()
         logging.info("load relevant metadata")
         expInfo.set_transport_meta_data()  # *** do I need this?
 
-        experiment.barrier()
+        self.exp.barrier()
         logging.info("divert to transport process and run process list")
-        self.transport_run_plugin_list(experiment)
+        self.transport_run_plugin_list()
 
         print "***********************"
         print "* Processing Complete *"
         print "***********************"
-        return experiment
+        return self.exp
 
-    def plugin_loader(self, exp, plugin_dict, **kwargs):
+    def plugin_loader(self, plugin_dict, **kwargs):
         logging.debug("Running plugin loader")
 
         try:
@@ -96,52 +84,48 @@ class PluginRunner(object):
             logging.error(e)
             raise e
 
-        logging.debug("Getting pos and checkflag")
-        pos = kwargs.get('pos', None)
+        logging.debug("Getting checkflag")
         check_flag = kwargs.get('check', False)
 
         logging.debug("Doing something with the check flag")
         if check_flag:
             try:
                 plugin_dict["data"]["in_datasets"]
-                self.set_datasets(plugin, exp, plugin_dict, pos)
+                self.set_datasets(plugin, plugin_dict)
             except KeyError:
                 pass
 
-        logging.debug("setting parameters")
-        plugin.set_parameters(plugin_dict['data'])
-
-        logging.debug("Running plugin setup")
-        plugin.setup(exp)
+        logging.debug("Running plugin main setup")
+        plugin.main_setup(self.exp, plugin_dict['data'])
 
         logging.debug("finished plugin loader")
         return plugin
 
-    def run_plugins(self, exp, plugin_list, **kwargs):
-        self.plugin_loader(exp, plugin_list[0])
-        exp.set_nxs_filename()
+    def run_plugins(self, plugin_list, **kwargs):
+        self.plugin_loader(plugin_list[0])
+        self.exp.set_nxs_filename()
 
         check = kwargs.get('check', False)
 
         for i in range(1, len(plugin_list)-1):
-            exp.barrier()
+            self.exp.barrier()
             logging.info("Checking Plugin %s" % plugin_list[i]['name'])
-            self.plugin_loader(exp, plugin_list[i], pos=i, check=check)
+            self.plugin_loader(plugin_list[i], check=check)
 
-    def run_plugin_list_check(self, exp, plugin_list):
-        exp.barrier()
+    def run_plugin_list_check(self, plugin_list):
+        self.exp.barrier()
         logging.info("Checking loaders and Savers")
-        self.check_loaders_and_savers(exp, plugin_list)
+        self.check_loaders_and_savers(plugin_list)
 
-        exp.barrier()
+        self.exp.barrier()
         logging.info("Running plugins with the check flag")
-        self.run_plugins(exp, plugin_list, check=True)
+        self.run_plugins(plugin_list, check=True)
 
-        exp.barrier()
+        self.exp.barrier()
         logging.info("empty the data object dictionaries")
-        exp.clear_data_objects()
+        self.exp.clear_data_objects()
 
-        exp.barrier()
+        self.exp.barrier()
         logging.info("Plugin list check complete!")
         print "Plugin list check complete!"
 
@@ -152,17 +136,16 @@ class PluginRunner(object):
             data_names = []
         return data_names
 
-    def set_all_datasets(self, expIndex, name):
+    def set_all_datasets(self, name):
         data_names = []
-        for key in expIndex["in_data"].keys():
+        for key in self.exp.index["in_data"].keys():
             data_names.append(key)
         return data_names
 
-    def check_nDatasets(self, exp, names, plugin_id, nSets, dtype, pos):
+    def check_nDatasets(self, names, plugin_id, nSets, dtype):
         try:
             if names[0] in "all":
-                names = self.set_all_datasets(exp, dtype)
-                # self.copy_plugin_to_list(names, pos)
+                names = self.set_all_datasets(dtype)
         except IndexError:
             pass
 
@@ -175,26 +158,22 @@ class PluginRunner(object):
             raise Exception(errorMsg)
         return names
 
-    def set_datasets(self, plugin, exp, plugin_dict, pos):
+    def set_datasets(self, plugin, plugin_dict):
         in_names = self.get_names(plugin_dict["data"]["in_datasets"])
         out_names = self.get_names(plugin_dict["data"]["out_datasets"])
 
         in_names = ('all' if len(in_names) is 0 else in_names)
         out_names = (in_names if len(out_names) is 0 else out_names)
 
-        in_names = self.check_nDatasets(exp.index, in_names, plugin_dict["id"],
-                                        plugin.nInput_datasets(), "in_data",
-                                        pos)
-        out_names = self.check_nDatasets(exp.index, out_names,
-                                         plugin_dict["id"],
-                                         plugin.nOutput_datasets(),
-                                         "out_data",
-                                         pos)
+        in_names = self.check_nDatasets(in_names, plugin_dict["id"],
+                                        plugin.nInput_datasets(), "in_data")
+        out_names = self.check_nDatasets(out_names, plugin_dict["id"],
+                                         plugin.nOutput_datasets(), "out_data")
 
         plugin_dict["data"]["in_datasets"] = in_names
         plugin_dict["data"]["out_datasets"] = out_names
 
-    def check_loaders_and_savers(self, experiment, plugin_list):
+    def check_loaders_and_savers(self, plugin_list):
 
         first_plugin = plugin_list[0]
         end_plugin = plugin_list[-1]
@@ -206,7 +185,7 @@ class PluginRunner(object):
                      "inherit from BaseLoader")
 
         plugin = self.load_plugin(end_plugin['id'])
-        # check the first plugin is a loader
+        # check the final plugin is a saver
         if not isinstance(plugin, BaseSaver):
             sys.exit("The final plugin in the process must "
                      "inherit from BaseSaver")

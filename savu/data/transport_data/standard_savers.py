@@ -86,6 +86,7 @@ class TomographySavers(object):
         return group
 
     def output_meta_data(self, group, data, expInfo, dtype):
+        print "*** outputting meta data ***"
         output_list = self.get_output_list(expInfo, data)
 
         for name in output_list:

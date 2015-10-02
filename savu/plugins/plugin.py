@@ -25,7 +25,8 @@ import logging
 import inspect
 
 from savu.plugins import utils as pu
-from savu.data.data_structures import Pattern
+from savu.data.data_structures import PluginData
+
 
 class Plugin(object):
     """
@@ -39,7 +40,13 @@ class Plugin(object):
         self.parameters = {}
         self.data_objs = {}
 
-    def setup(self, experiment):
+    def main_setup(self, exp, params):
+        self.exp = exp
+        self.set_parameters(params)
+        self.set_plugin_datasets(exp)
+        self.setup()
+
+    def setup(self):
         """
         This method is first to be called after the plugin has been created.
 
@@ -114,18 +121,18 @@ class Plugin(object):
 
         logging.error("process needs to be implemented")
         raise NotImplementedError("process needs to be implemented")
-        
+
     def post_process(self):
         """
         This method is called after the process function in the pipeline
         framework as a post-processing step. All processes will have finished
-        performing the main processing at this stage. 
+        performing the main processing at this stage.
 
         :param exp: An experiment object, holding input and output datasets
         :type exp: experiment class instance
         """
         pass
-    
+
     def organise_metadata(self):
         """
         This method is called after the post_process function to organise the
@@ -135,8 +142,9 @@ class Plugin(object):
         :type exp: experiment class instance
         """
         logging.error("organise_metadata() needs to be implemented")
-        raise NotImplementedError("organise_metadata() needs to be implemented")
-        
+        raise NotImplementedError("organise_metadata() needs to be "
+                                  "implemented")
+
     def nInput_datasets(self):
         """
         The number of datasets required as input to the plugin
@@ -162,21 +170,17 @@ class Plugin(object):
 
         """
         return None
-        
-    def set_experiment(self, exp):
-        self.exp = exp        
 
     def get_data_objects(self, dtype):
-        data_list = (self.parameters["in_datasets"] if dtype is "in_data" 
-                                    else self.parameters["out_datasets"])
+        data_list = self.parameters[dtype + 'sets']
         data_objs = []
         for data in data_list:
             data_objs.append(self.exp.index[dtype][data])
         return data_objs
-        
+
     def get_in_datasets(self):
         return self.get_data_objects('in_data')
-        
+
     def get_out_datasets(self):
         try:
             out_data = self.get_data_objects('out_data')
@@ -187,31 +191,48 @@ class Plugin(object):
             out_data = self.get_data_objects('out_data')
         return out_data
 
-    def set_pattern(self, data_list):
+    def get_plugin_data(self, data_list):
         pattern_list = []
         for data in data_list:
-            pattern_list.append(Pattern(data))
+            pattern_list.append(PluginData(data))
+        return pattern_list
 
-    def set_plugin_datasets(self):
-        plugin_in_data = self.set_pattern(self.get_in_datasets())
-        plugin_out_data = self.set_pattern(self.get_out_datasets())
-        self.parameters['in_datasets'] = plugin_in_data
-        self.parameters['out_datasets'] = plugin_out_data        
-        return plugin_in_data, plugin_out_data
-        
+    def set_plugin_datasets(self, experiment):
+        """
+        Convert in/out_dataset strings to objects and create PluginData objects
+        for each.
+        """
+        try:
+            self.parameters['in_datasets'] = self.get_in_datasets()
+            self.parameters['out_datasets'] = self.get_out_datasets()
+            self.parameters['plugin_in_datasets'] = \
+                self.get_plugin_data(self.parameters['in_datasets'])
+            self.parameters['plugin_out_datasets'] = \
+                self.get_plugin_data(self.parameters['out_datasets'])
+        except KeyError:
+            pass
+
+    def get_plugin_datasets(self):
+        plugin_in = self.parameters['plugin_in_datasets']
+        plugin_out = self.parameters['plugin_out_datasets']
+        return plugin_in, plugin_out
+
     def get_datasets(self):
-        in_data = self.get_data_objects('in_data')
-        out_data = self.get_data_objects('out_data')
-        return in_data, out_data
+        return self.parameters['in_datasets'], self.parameters['out_datasets']
 
     def get_meta_data(self):
         in_data, out_data = self.get_datasets()
         in_meta_data = self.set_meta_data(in_data, 'in_data')
         out_meta_data = self.set_meta_data(out_data, 'out_data')
-        return in_meta_data, out_meta_data 
-        
+        return in_meta_data, out_meta_data
+
     def set_meta_data(self, data_list, dtype):
         meta_data = []
         for data in data_list:
             meta_data.append(data.meta_data)
         return meta_data
+
+    def clean_up_plugin_datasets(self):
+        in_data, out_data = self.get_datasets
+        data_sets = in_data.append(out_data)
+        print data_sets

@@ -55,45 +55,43 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         data = (trimmed_data-dark)/(flat-dark)
         return data
 
-    def process(self, exp, transport):
-        in_data, out_data = self.get_datasets(exp)
-        transport.timeseries_field_correction(self, in_data, out_data, exp.meta_data)
+    def process(self, transport):
+        in_data, out_data = self.get_plugin_datasets()
+        transport.timeseries_field_correction(self, in_data, out_data)
 
-    def setup(self, experiment):
+    def setup(self):
         """
-        Initial setup of all datasets required as input and output to the 
+        Initial setup of all datasets required as input and output to the
         plugin.  This method is called before the process method in the plugin
-        chain.  
+        chain.
         """
         # get all data objects associated with the plugin
-        self.set_experiment(experiment)
-        in_data, out_data = self.set_plugin_datasets()
+        in_data, out_data = self.get_plugin_datasets()
 
-        print in_data[0].meta_data.get_dictionary()
-            
         # set details for all input data sets
         # create an instance of pattern class here
-        in_data[0].plugin_setup(pattern_name='SINOGRAM',
-                                chunk=self.get_max_frames())
+        in_data[0].plugin_data_setup(pattern_name='SINOGRAM',
+                                     chunk=self.get_max_frames())
 
         # set details for all output data sets
-        out_data[0].plugin_setup(pattern_name='SINOGRAM', 
-                                 chunk=self.get_max_frames(),
-                                 shape=in_data[0].remove_dark_and_flat())                                 
+        out_data[0].plugin_data_setup(pattern_name='SINOGRAM',
+                                      chunk=self.get_max_frames(),
+                                      shape=in_data[0].data_obj.
+                                      remove_dark_and_flat())
         # copy or add patterns related to this dataset
-        out_data[0].copy_patterns(in_data[0].get_patterns())
-        
-    def organise_metadata(self, exp):
-        in_data, out_data = self.get_datasets(exp)
-        
+        out_data[0].data_obj.copy_patterns(in_data[0].data_obj.get_patterns())
+
+    def organise_metadata(self):
+        in_data, out_data = self.get_datasets()
+        in_pData, out_pData = self.get_plugin_datasets()
+
         print "*** in_data dictionary ***"
         for keys in in_data[0].meta_data.get_dictionary().keys():
             print keys
         # copy the entire in_data dictionary
         # If you do not want to copy the whole dictionary pass the key word
-        # argument copyKeys = [your list of keys to copy], or alternatively, 
+        # argument copyKeys = [your list of keys to copy], or alternatively,
         # removeKeys = [your list of keys to remove]
-        # use this function to remove anything you no longer need from the metadata
 
     def nInput_datasets(self):
         return 1

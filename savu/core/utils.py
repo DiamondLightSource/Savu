@@ -22,7 +22,6 @@
 
 import logging
 
-
 def logfunction(func):
     """decorator to add logging information around calls for use with ."""
     def _wrapper(*args, **kwds):
@@ -43,6 +42,22 @@ def logmethod(func):
                     (func.__module__, self.__class__.__name__, func.__name__))
         return returnval
     return _wrapper
+
+
+def import_class(clazz, class_name):
+    name = class_name
+    mod = __import__(name)
+    components = name.split('.')
+    for comp in components[1:]:
+        mod = getattr(mod, comp)
+    temp = name.split('.')[-1]
+    module2class = ''.join(x.capitalize() for x in temp.split('_'))
+    return getattr(mod, module2class.split('.')[-1])
+
+
+def add_base(clazz, ExtraBase):
+    cls = clazz.__class__
+    clazz.__class__ = cls.__class__(cls.__name__, (cls, ExtraBase), {})
 
 
 @logfunction

@@ -37,8 +37,8 @@ class Hdf5TransportData(object):
     def __init__(self):
         self.backing_file = None
 
-    def load_data(self, plugin_runner, exp):
-
+    def load_data(self, plugin_runner):
+        exp = self.exp
         plugin_list = exp.meta_data.plugin_list.plugin_list
         final_plugin = plugin_list[-1]
         saver_plugin = plugin_runner.load_plugin(final_plugin["id"])
@@ -53,11 +53,11 @@ class Hdf5TransportData(object):
 
             exp.log("Point 1")
 
-            plugin = plugin_runner.plugin_loader(exp, plugin_dict)
+            plugin = plugin_runner.plugin_loader(plugin_dict)
 
             exp.log("Point 2")
 
-            self.set_filenames(exp, plugin, plugin_id, count)
+            self.set_filenames(plugin, plugin_id, count)
 
             saver_plugin.setup(exp)
 
@@ -70,7 +70,8 @@ class Hdf5TransportData(object):
 
         return out_data_objects
 
-    def set_filenames(self, exp, plugin, plugin_id, count):
+    def set_filenames(self, plugin, plugin_id, count):
+            exp = self.exp
             expInfo = exp.meta_data
             expInfo.set_meta_data("filename", {})
             expInfo.set_meta_data("group_name", {})
@@ -97,6 +98,8 @@ class Hdf5TransportData(object):
                 logging.debug("Completing file %s", self.backing_file.filename)
                 self.backing_file.close()
                 self.backing_file = None
+                self.meta_data.output_meta_data()
+                self.get_plugin_data().plugin_meta_data.output_meta_data()
             except:
                 pass
 
@@ -137,8 +140,9 @@ class Hdf5TransportData(object):
         return np.array(idx_list)
 
     def single_slice_list(self):
-        slice_dirs = self.get_slice_directions()
-        [fix_dirs, value] = self.get_fixed_directions()
+        pData = self.get_plugin_data()
+        slice_dirs = pData.get_slice_directions()
+        [fix_dirs, value] = pData.get_fixed_directions()
         shape = self.get_shape()
         index = self.get_slice_dirs_index(slice_dirs, np.array(shape))
         nSlices = index.shape[1]
@@ -158,7 +162,7 @@ class Hdf5TransportData(object):
 
     def banked_list(self, slice_list):
         shape = self.get_shape()
-        slice_dirs = self.get_slice_directions()
+        slice_dirs = self.get_plugin_data().get_slice_directions()
         chunk, length, repeat = self.chunk_length_repeat(slice_dirs, shape)
 
         banked = []
@@ -192,7 +196,7 @@ class Hdf5TransportData(object):
         return grouped
 
     def get_grouped_slice_list(self):
-        max_frames = self.get_nFrames()
+        max_frames = self.get_plugin_data().get_frame_chunk()
         max_frames = (1 if max_frames is None else max_frames)
 
         sl = self.single_slice_list()

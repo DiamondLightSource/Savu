@@ -100,22 +100,23 @@ class Hdf5Transport(TransportMechanism):
                             ' %(levelname)-6s %(message)s', datefmt='%H:%M:%S')
         logging.info("Starting the reconstruction pipeline process")
 
-    def transport_run_plugin_list(self, exp):
+    def transport_run_plugin_list(self):
         """
         Runs a chain of plugins
         """
+        exp = self.exp
         exp.barrier()
         logging.info("Starting the HDF5 plugin list runner")
         plugin_list = exp.meta_data.plugin_list.plugin_list
 
         exp.barrier()
         logging.info("run the loader plugin")
-        self.plugin_loader(exp, plugin_list[0])
+        self.plugin_loader(plugin_list[0])
 
         exp.barrier()
         logging.info("create all output data_objects and backing files")
         in_data = exp.index["in_data"][exp.index["in_data"].keys()[0]]
-        out_data_objects = in_data.load_data(self, exp)
+        out_data_objects = in_data.load_data(self)
 
         exp.barrier()
         logging.info("clear all out_data objects in experiment dictionary")
@@ -123,7 +124,7 @@ class Hdf5Transport(TransportMechanism):
 
         exp.barrier()
         logging.info("Load all the plugins")
-        self.plugin_loader(exp, plugin_list[0])
+        self.plugin_loader(plugin_list[0])
 
         exp.barrier()
         logging.info("Running all the plugins")
@@ -138,7 +139,7 @@ class Hdf5Transport(TransportMechanism):
 
             exp.barrier()
             logging.info("Load the plugin")
-            plugin = self.plugin_loader(exp, plugin_list[i], pos=i)
+            plugin = self.plugin_loader(plugin_list[i], pos=i)
 
             exp.barrier()
             logging.info("run the plugin")
@@ -154,10 +155,6 @@ class Hdf5Transport(TransportMechanism):
 
             exp.barrier()
             logging.info("Clean up input datasets")
-            # delete fixed directions, as this is related only to the finished
-            # plugin and not to the dataset
-            for in_objs in plugin.parameters["in_datasets"]:
-                exp.index["in_data"][in_objs].delete_fixed_directions()
 
             exp.barrier()
             logging.info("close any files that are no longer required")
@@ -188,20 +185,23 @@ class Hdf5Transport(TransportMechanism):
         return
 
     @logmethod
-    def timeseries_field_correction(self, plugin, in_data, out_data, expInfo):
+    def timeseries_field_correction(self, plugin, in_data, out_data):
 
+        expInfo = plugin.exp.meta_data
         in_data = in_data[0]
         out_data = out_data[0]
 
-        in_slice_list, frame_list = \
-            in_data.get_slice_list_per_process(expInfo, frameList=True)
-        out_slice_list, frame_list = \
-            out_data.get_slice_list_per_process(expInfo, frameList=True)
+        in_slice_list, frame_list = in_data.data_obj.\
+            get_slice_list_per_process(expInfo, frameList=True)
+        out_slice_list, frame_list = out_data.data_obj.\
+            get_slice_list_per_process(expInfo, frameList=True)
 
         for count in range(len(in_slice_list)):
-            result = plugin.correction(in_data.data[in_slice_list[count]],
-                                  in_data.get_image_key())
-            out_data.data[out_slice_list[count]] = result
+            print count
+            result = plugin.correction(in_data.data_obj.
+                                       data[in_slice_list[count]],
+                                       in_data.data_obj.get_image_key())
+            out_data.data_obj.data[out_slice_list[count]] = result
 
     @logmethod
     def reconstruction_setup(self, plugin, in_data, out_data, expInfo):
@@ -267,7 +267,9 @@ class Hdf5Transport(TransportMechanism):
         return section
 
     def set_out_data(self, data, slice_list, result, count):
+        print slice_list
         result = [result] if type(result) is not list else result
+        print len(data), len(slice_list), len(result)
         for idx in range(len(data)):
             print idx, count
             data[idx].data[slice_list[idx][count]] = \

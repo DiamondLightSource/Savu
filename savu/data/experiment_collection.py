@@ -16,7 +16,7 @@
 """
 .. module:: experiment_collection
    :platform: Unix
-   :synopsis: Contains the Experiment class and all possible experiment 
+   :synopsis: Contains the Experiment class and all possible experiment
    collections from which Experiment can inherit at run time.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
@@ -32,9 +32,10 @@ from savu.data.plugin_list import PluginList
 from savu.data.data_structures import Data
 from savu.data.meta_data import MetaData
 
+
 class Experiment(object):
     """
-    One instance of this class is created at the beginning of the 
+    One instance of this class is created at the beginning of the
     processing chain and remains until the end.  It holds the current data
     object and a dictionary containing all metadata.
     """
@@ -51,30 +52,32 @@ class Experiment(object):
         try:
             rtype = self.meta_data.get_meta_data('run_type')
             if rtype is 'test':
-                self.meta_data.plugin_list.plugin_list = self.meta_data.get_meta_data('plugin_list')
+                self.meta_data.plugin_list.plugin_list = \
+                    self.meta_data.get_meta_data('plugin_list')
             else:
                 raise Exception('the run_type is unknown in Experiment class')
         except KeyError:
             self.meta_data.plugin_list.populate_plugin_list(process_file)
 
-
     def create_data_object(self, dtype, name, bases=[]):
         try:
             self.index[dtype][name]
         except KeyError:
-            self.index[dtype][name] = Data(name)
+            self.index[dtype][name] = Data(name, self)
             data_obj = self.index[dtype][name]
-            bases.append(data_obj.get_transport_data(self.meta_data.get_meta_data("transport")))
+            bases.append(data_obj.get_transport_data(
+                self.meta_data.get_meta_data("transport")))
             data_obj.add_base_classes(bases)
         return self.index[dtype][name]
 
     def set_nxs_filename(self):
         name = self.index["in_data"].keys()[0]
-        filename = os.path.basename(self.index["in_data"][name].backing_file.filename)
+        filename = os.path.basename(self.index["in_data"][name].
+                                    backing_file.filename)
         filename = os.path.splitext(filename)[0]
         filename = os.path.join(self.meta_data.get_meta_data("out_path"),
-                                "%s_processed_%s.nxs" % (filename,
-                                time.strftime("%Y%m%d%H%M%S")))
+                                "%s_processed_%s.nxs" %
+                                (filename, time.strftime("%Y%m%d%H%M%S")))
         self.meta_data.set_meta_data("nxs_filename", filename)
 
     def clear_data_objects(self):
@@ -105,4 +108,3 @@ class Experiment(object):
         for key, value in self.index["in_data"].iteritems():
             logging.log(log_level, "out data (%s) shape = %s", key,
                         value.get_shape())
-
