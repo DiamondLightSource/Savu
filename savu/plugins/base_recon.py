@@ -35,8 +35,8 @@ import numpy as np
 class BaseRecon(Plugin):
     """
     A Plugin to apply a simple reconstruction with no dependancies
-    
-    :param center_of_rotation: Centre of rotation to use for the reconstruction). Default: 86.        
+
+    :param center_of_rotation: Centre of rotation to use for the reconstruction). Default: 86.
     :param in_datasets: Create a list of the dataset(s) to process. Default: [].
     :param out_datasets: Create a list of the dataset(s) to process. Default: [].
 
@@ -46,8 +46,7 @@ class BaseRecon(Plugin):
     def __init__(self, name='BaseRecon'):
         super(BaseRecon, self).__init__(name)
 
-
-    def reconstruct(self, sinogram, centre_of_rotations, vol_shape, params):
+    def reconstruct(self, sinogram, centre_of_rotations, vol_shape):
         """
         Reconstruct a single sinogram with the provided center of rotation
         """
@@ -55,59 +54,50 @@ class BaseRecon(Plugin):
         raise NotImplementedError("reconstruct " +
                                   "needs to be implemented")
 
-    
     @logmethod
-    def process(self, exp, transport, params):
+    def process(self, transport):
         """
         Perform the main processing step for the plugin
-        """        
-        in_data = self.get_data_objects(exp.index, "in_data")
-        out_data = self.get_data_objects(exp.index, "out_data")
+        """
+        in_data, out_data = self.get_datasets()
+
 
         try:
-            centre_of_rotation = in_data[0].meta_data.get_meta_data("centre_of_rotation")
+            centre_of_rotation = \
+                in_data[0].meta_data.get_meta_data("centre_of_rotation")
         except KeyError:
-            centre_of_rotation = np.ones(in_data[0].get_nPattern())
-            centre_of_rotation = centre_of_rotation * self.parameters['center_of_rotation']
-            in_data[0].meta_data.set_meta_data("centre_of_rotation", centre_of_rotation)            
-            
-        transport.reconstruction_setup(self, in_data[0], out_data[0], exp.meta_data, params)
+            centre_of_rotation = np.ones(in_data[0].get_shape()[1])
+            centre_of_rotation *= self.parameters['center_of_rotation']
+            in_data[0].meta_data.set_meta_data("centre_of_rotation",
+                                               centre_of_rotation)
 
-                                  
-    def setup(self, experiment):
-        chunk_size = self.get_max_frames()
-        #-------------------setup input datasets-------------------------
+        transport.reconstruction_setup(self, in_data[0], out_data[0],
+                                       self.exp)
 
-        # get a list of input dataset names required for this plugin
-        in_data_list = self.parameters["in_datasets"]
-        
-        # get all input dataset objects
-        in_d1 = experiment.index["in_data"][in_data_list[0]]        
-        # set all input data patterns
-        in_d1.set_current_pattern_name("SINOGRAM")
-        # set frame chunk
-        in_d1.set_nFrames(chunk_size)
-        #-------------------------------------------------------------
+    def setup(self):
+        self.exp.log(self.name + " Start")
 
-        #------------------setup output datasets-------------------------
+        # Input datasets setup
+        in_data, out_data = self.get_plugin_datasets()
+        in_data[0].plugin_data_setup(pattern_name='SINOGRAM',
+                                     chunk=self.get_max_frames())
 
-        # get a list of output dataset names created by this plugin
-        out_data_list = self.parameters["in_datasets"]
+        # set details for all output data sets
+        shape = in_data[0].data_obj.get_shape()
+        out_data[0].plugin_data_setup(pattern_name='VOLUME_XZ',
+                                      chunk=self.get_max_frames(),
+                                      shape=(shape[2], shape[1], shape[2]))
 
-        # create all out_data objects and associated patterns
-        # patterns can be copied, added or both
-        #****** MUST BE DONE IN THIS ORDER ******
-        out_d1 = experiment.create_data_object("out_data", out_data_list[0])
-        out_d1.meta_data.copy_dictionary(in_d1.meta_data.get_dictionary())
-        out_d1.add_volume_patterns()
+        # copy or add patterns related to this dataset
+        #out_data[0].data_obj.copy_patterns(in_data[0].data_obj.get_patterns())
+        out_data[0].meta_data.copy_dictionary(
+            in_data[0].meta_data.get_dictionary())
+        out_data[0].data_obj.add_volume_patterns()
 
-        # set pattern for this plugin and the shape
-        out_d1.set_current_pattern_name("VOLUME_XZ")
-        shape = in_d1.get_shape()
-        out_d1.set_shape((shape[2], shape[1], shape[2]))
-        out_d1.set_nFrames(chunk_size)
+        self.exp.log(self.name + " End")
 
-        #-------------------------------------------------------------
+    def organise_metadata(self):
+        pass
 
 
     def get_max_frames(self):
@@ -118,13 +108,10 @@ class BaseRecon(Plugin):
         """
         return 8
 
-       
     def nInput_datasets(self):
         return 1
-         
-         
+
     def nOutput_datasets(self):
         return 1
-
 
 logging.debug("Completed base_recon import")

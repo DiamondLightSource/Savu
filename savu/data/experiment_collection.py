@@ -45,6 +45,9 @@ class Experiment(object):
         self.meta_data_setup(options["process_file"])
         self.index = {"in_data": {}, "out_data": {}}
 
+    def get_meta_data(self):
+        return self.meta_data
+
     def meta_data_setup(self, process_file):
         self.meta_data.load_experiment_collection()
         self.meta_data.plugin_list = PluginList()

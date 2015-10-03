@@ -217,7 +217,7 @@ class Hdf5Transport(TransportMechanism):
         for sl in slice_list:
             frame = plugin.reconstruct(np.squeeze(in_data.data[sl]),
                                        cor[count],
-                                       out_data.get_pattern_shape())
+                                       out_data.get_plugin_data().get_shape())
             out_data.data[sl] = frame
             count += 1
             plugin.count += 1

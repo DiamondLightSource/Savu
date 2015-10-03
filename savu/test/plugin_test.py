@@ -64,7 +64,7 @@ class PluginTest():
             pass
 
 
-class PluginFilterTest(PluginTest, unittest.TestCase):
+class PluginFilterTest(PluginTest):
 
     @unittest.skip("Originally added in the main framework - requires completion in testing.")
     def test_data_padding(self):
