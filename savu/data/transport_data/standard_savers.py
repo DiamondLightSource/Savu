@@ -53,7 +53,7 @@ class TomographySavers(object):
             group = self.create_entries(out_data.backing_file, out_data,
                                         exp.meta_data, key, dtype)
 
-            self.output_meta_data(group, out_data, exp.meta_data, dtype)
+            #self.output_meta_data(group, out_data, exp.meta_data, dtype)
 
     def create_backing_h5(self, key, expInfo):
         """

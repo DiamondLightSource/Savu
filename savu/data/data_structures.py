@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2014 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,11 +39,11 @@ class Data(object):
 
     def __init__(self, name, exp):
         self.meta_data = MetaData()
-        pattern_list = self.set_available_pattern_list()
-        self.meta_data.set_meta_data("pattern_list", pattern_list)
+        self.pattern_list = self.set_available_pattern_list()
         self.name = name
         self.backing_file = None
         self.data = None
+        self.shape = None
         self._plugin_data_obj = None
         self.exp = exp
 
@@ -89,13 +88,13 @@ class Data(object):
             self.add_base(base)
 
     def set_shape(self, shape):
-        self.meta_data.set_meta_data('shape', shape)
+        self.shape = shape
 
     def get_shape(self):
-        shape = self.meta_data.get_meta_data('shape')
+        shape = self.shape
         try:
             dirs = self.meta_data.get_meta_data("fixed_directions")
-            shape = list(shape)
+            shape = list(self.shape)
             for ddir in dirs:
                 shape[ddir] = 1
             shape = tuple(shape)
@@ -128,18 +127,15 @@ class Data(object):
                         # Added diffraction 28th August adp
         return pattern_list
 
-    def get_available_pattern_list(self):
-        return self.meta_data.get_meta_data("pattern_list")
-
     def add_pattern(self, dtype, **kargs):
-        if dtype in self.get_available_pattern_list():
-            for args in kargs:
+        if dtype in self.pattern_list:
+            for args in kargs:               
                 self.meta_data.set_meta_data(["data_patterns", dtype, args],
                                              kargs[args])
         else:
             errorMsg = "The data pattern " + dtype + " does not exist. " + \
                        " Please choose from the following list: \n" + \
-                       str(self.get_available_pattern_list())
+                       str(self.pattern_list)
             sys.exit(errorMsg)
 
     def add_volume_patterns(self):
@@ -225,7 +221,7 @@ class PluginData(object):
 
     def check_data_type_exists(self):
         if self.get_pattern_name() not in \
-                self.data_obj.get_available_pattern_list():
+                self.data_obj.pattern_list:
             raise Exception(("Error: The Data class does not contain an \
                         instance of ", self.get_pattern_name()))
 

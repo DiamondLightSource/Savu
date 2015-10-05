@@ -22,7 +22,7 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
-
+import savu
 from copy import copy
 
 
@@ -73,46 +73,29 @@ class MetaData(object):
                     break
             return accum_value
 
-    def copy_dictionary(self, new_dict, **kwargs):
+    def copy_dictionary(self, data_obj, **kwargs):
         """ Copy keys from one dictionary to another.
 
         Keyword arguments:
-        timestamp     -- the format string (default '')
-        priority      -- priority number (default '')
-        priority_name -- priority name (default '')
-        message       -- message to display (default '')
-
-        :param timestamp: formatted date to display
-        :param priority: priority number
+        :param rawFlag: Indicate that the dictionary to copy contains
+        information relating to raw tomography data (inherits from TomoRaw)
         :param priority_name: priority name
         :param message: message to display
         :returns: formatted string
         """
 
+        new_dict = data_obj.meta_data.get_dictionary()
         to_remove = self.dict.keys()
-        to_remove = set(to_remove).union(["name", "shape", "base_classes",
-                                          "nFrames"])
-
-        try:
-            rawFlag = kwargs["rawFlag"]
-        except KeyError:
-            rawFlag = False
+        rawFlag = True if isinstance(data_obj, savu.data.data_structures.TomoRaw) else False
+        copy_keys = kwargs.get(set("copyKeys"), set(new_dict.keys()))
+        remove_keys = kwargs.get(set("removeKeys"), [])
 
         if rawFlag is True:
-            to_remove = to_remove.union(["dark", "flat", "image_key"])
+            to_remove = to_remove.union(["image_key"])
 
-        try:
-            copy_keys = set(kwargs["copyKeys"])
-        except KeyError:
-            copy_keys = set(new_dict.keys())
-
-        try:
-            remove_keys = set(kwargs["removeKeys"])
-            to_remove = to_remove.union(remove_keys)
-        except KeyError:
-            pass
-
+        to_remove = to_remove.union(remove_keys)
         copy_keys = to_remove.symmetric_difference(copy_keys)
+
         for key in copy_keys:
             try:
                 self.dict[key] = copy(new_dict[key])

@@ -83,29 +83,11 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
 
     def organise_metadata(self):
         in_data, out_data = self.get_datasets()
-        in_pData, out_pData = self.get_plugin_datasets()
-
-        print in_pData[0].meta_data.get_dictionary()
-        print "*** in_data dictionary ***"
-        for keys in in_data[0].meta_data.get_dictionary().keys():
-            print keys
-
-        print "*** in_plugin_data dictionary ***"
-        for keys in in_pData[0].meta_data.get_dictionary().keys():
-            print keys
-
-        print "*** out_data dictionary ***"
-        for keys in out_data[0].meta_data.get_dictionary().keys():
-            print keys
-
-        print "*** in_plugin_data dictionary ***"
-        for keys in out_pData[0].meta_data.get_dictionary().keys():
-            print keys
-
-        # copy the entire in_data dictionary
+        # copy the entire in_data dictionary to out_data dictionary
         # If you do not want to copy the whole dictionary pass the key word
         # argument copyKeys = [your list of keys to copy], or alternatively,
         # removeKeys = [your list of keys to remove]
+        out_data[0].meta_data.copy_dictionary(in_data[0])
 
     def nInput_datasets(self):
         return 1

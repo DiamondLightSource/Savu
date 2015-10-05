@@ -96,8 +96,6 @@ class Hdf5TransportData(object):
         if self.backing_file is not None:
             try:
                 logging.debug("Completing file %s", self.backing_file.filename)
-                #self.meta_data.output_meta_data()
-                #self.get_plugin_data().plugin_meta_data.output_meta_data()
                 self.backing_file.close()
                 self.backing_file = None
             except:
