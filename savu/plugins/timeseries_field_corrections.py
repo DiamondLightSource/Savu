@@ -64,30 +64,17 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         plugin.  This method is called before the process method in the plugin
         chain.
         """
-        # get all data objects associated with the plugin
+        # set up the output dataset that is created by the plugin
+        in_dataset, out_dataset = self.get_datasets()
+
+        # copy all required information from in_dataset[0]
+        out_dataset[0].create_dataset(in_dataset[0])
+
+        # set information relating to the plugin data
         in_pData, out_pData = self.get_plugin_datasets()
-
-        # set details for all input data sets
-        # create an instance of pattern class here
-        in_pData[0].plugin_data_setup(pattern_name='SINOGRAM',
-                                      chunk=self.get_max_frames())
-
-        # set details for all output data sets
-        out_pData[0].plugin_data_setup(pattern_name='SINOGRAM',
-                                       chunk=self.get_max_frames(),
-                                       shape=in_pData[0].data_obj.
-                                       remove_dark_and_flat())
-        # copy or add patterns related to this dataset
-        out_pData[0].data_obj.copy_patterns(in_pData[0].
-                                            data_obj.get_patterns())
-
-    def organise_metadata(self):
-        in_data, out_data = self.get_datasets()
-        # copy the entire in_data dictionary to out_data dictionary
-        # If you do not want to copy the whole dictionary pass the key word
-        # argument copyKeys = [your list of keys to copy], or alternatively,
-        # removeKeys = [your list of keys to remove]
-        out_data[0].meta_data.copy_dictionary(in_data[0])
+        # set pattern_name and nframes to process for all datasets
+        in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
+        out_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
 
     def nInput_datasets(self):
         return 1

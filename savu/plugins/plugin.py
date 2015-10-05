@@ -142,14 +142,23 @@ class Plugin(object):
     def organise_metadata(self):
         """
         This method is called after the post_process function to organise the
-        metadata that is passed from input datasets to output datasets
-
-        :param exp: An experiment object, holding input and output datasets
-        :type exp: experiment class instance
+        metadata that is passed from input datasets to output datasets.
         """
-        logging.error("organise_metadata() needs to be implemented")
-        raise NotImplementedError("organise_metadata() needs to be "
-                                  "implemented")
+        in_data, out_data = self.get_datasets()
+        for data in out_data:
+            axis_labels = data.meta_data.get_dictionary()['axis_labels']
+            for al in axis_labels:
+                key = al.keys()[0]
+                count = 0
+                while (count < len(in_data)):
+                    mData = in_data[count].meta_data
+                    try:
+                        data.meta_data.\
+                            set_meta_data(key, mData.get_dictionary()[key])
+                        break
+                    except:
+                        pass
+                    count += 1
 
     def clean_up_plugin_data(self):
         in_data, out_data = self.get_datasets()
