@@ -235,7 +235,7 @@ class SimpleFit(Filter, CpuPlugin):
         detector = paramdict["Detectors"][detectortype]
         detectortype = detector["detector_type"]
         no_of_transitions = 17
-        fitelements = 'Zn', 'Cu', 'Cr', 'Ar', 'Fe'
+        fitelements = paramdict["Experiment"]['elements']
         no_of_elements = len(fitelements)
         temp_array = np.zeros((3, no_of_elements, no_of_transitions))
         peakpos = []
