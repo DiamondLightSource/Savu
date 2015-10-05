@@ -28,7 +28,7 @@ import unittest
 from savu.test.plugin_test import PluginTest
 
 
-class AstraReconCpuTest(PluginTest):
+class AstraReconCpuTest(PluginTest, unittest.TestCase):
 
     def setUp(self):
         self.data_type = "tomo"

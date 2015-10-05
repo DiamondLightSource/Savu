@@ -27,13 +27,13 @@ import unittest
 from savu.test.plugin_test import PluginTest
 
 
-class SimpleReconTest(PluginTest):
+class SimpleReconTest(PluginTest, unittest.TestCase):
 
     def setUp(self):
         self.plugin_name = "savu.plugins.simple_recon"
 
 
-class ScikitimageSartTest(PluginTest):
+class ScikitimageSartTest(PluginTest, unittest.TestCase):
 
     def setUp(self):
         self.plugin_name = "savu.plugins.scikitimage_sart"

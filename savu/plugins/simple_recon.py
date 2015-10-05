@@ -56,26 +56,31 @@ class SimpleRecon(BaseRecon, CpuPlugin):
                            np.arange(-center[1], shape[1] - center[1]))
         return x*np.cos(theta) - y*np.sin(theta)
 
-    def pre_process(self, exp):
-        out_data = self.get_data_objects(exp.index, "out_data")
-        centre = tuple((np.asarray(out_data[0].get_pattern_shape()))/2)
-        self.kwargs = {'centre':centre}
+#     def pre_process(self):
+#         in_data, out_data = self.get_plugin_datasets()
+#         centre = tuple((np.asarray(out_data[0].get_pattern_shape()))/2)
+#         self.kwargs = {'centre': centre}
 
     def reconstruct(self, sinogram, centre_of_rotations, vol_shape):
-        centre = self.kwargs['centre']
-        result = np.zeros(vol_shape, dtype=np.float32)
+        try:
+            centre = self.kwargs['centre']
+        except:
+            centre = (vol_shape[0]/2, vol_shape[1]/2)
 
-        for i in range(sinogram.shape[0]):
-            theta = i*(np.pi/sinogram.shape[0])
-            mapping_array = self._mapping_array(vol_shape, centre, theta)
-            filt = np.zeros(sinogram.shape[1]*3, dtype=np.float32)
-            filt[sinogram.shape[1]:sinogram.shape[1]*2] = \
-                self._filter(np.log(np.nan_to_num(sinogram)+1)[i, :])
-
-            result += \
-                self._back_project(mapping_array, filt,
-                                   (centre_of_rotations + sinogram.shape[1]))
-        result = result[:, np.newaxis, :]
+        results = []
+        for j in range(sinogram.shape[1]):
+            result = np.zeros(vol_shape, dtype=np.float32)
+            for i in range(sinogram.shape[0]):
+                theta = i*(np.pi/sinogram.shape[0])
+                mapping_array = self._mapping_array(vol_shape, centre, theta)
+                filt = np.zeros(sinogram.shape[2]*3, dtype=np.float32)
+                filt[sinogram.shape[2]:sinogram.shape[2]*2] = \
+                    self._filter(np.log(np.nan_to_num(sinogram[i, j, :])+1))
+                result += \
+                    self._back_project(mapping_array, filt,
+                                       (centre_of_rotations + sinogram.shape[2]))
+            results.append(result[:, np.newaxis, :])
+        result = np.hstack(results)
         return result
 
     def get_citation_information(self):

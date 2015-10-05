@@ -306,7 +306,7 @@ class PluginData(object):
         core_dir = self.get_core_directions()
         shape = []
         for core in core_dir:
-            shape.append(self.get_shape()[core])
+            shape.append(self.data_obj.get_shape()[core])
         return tuple(shape)
 
     def plugin_data_setup(self, **kwargs):

@@ -32,7 +32,7 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 base_class_name = "savu.plugins.plugin"
 
 
-class PluginTest(unittest.TestCase):
+class PluginTest():
 
     def setUp(self):
         self.plugin_name = base_class_name
@@ -181,21 +181,21 @@ class CpuPluginTest(unittest.TestCase):
                 self.assertEqual(self.plugin.process_number, None)
 
 
-class TimeseriesFieldCorrectionsTest(PluginTest):
+class TimeseriesFieldCorrectionsTest(PluginTest, unittest.TestCase):
 
     def setUp(self):
         self.data_type = 'tomoRaw'
         self.plugin_name = "savu.plugins.timeseries_field_corrections"
 
 
-class MedianFilterTest(PluginTest):
+class MedianFilterTest(PluginTest, unittest.TestCase):
 
     def setUp(self):
         self.data_type = 'tomo'
         self.plugin_name = "savu.plugins.median_filter"
 
 
-class SimpleReconTest(PluginTest):
+class SimpleReconTest(PluginTest, unittest.TestCase):
 
     def setUp(self):
         self.data_type = 'tomo'

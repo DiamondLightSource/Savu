@@ -27,7 +27,7 @@ import unittest
 from savu.test.plugin_test import PluginTest
 
 
-class BandPassTest(PluginTest):
+class BandPassTest(PluginTest, unittest.TestCase):
 
     def setUp(self):
         self.data_type = "tomo"
