@@ -35,7 +35,7 @@ class SimpleFit(Filter, CpuPlugin):
     """
     This plugin fits peaks. Either XRD or XRF for now.
     :param in_datasets: Create a list of the dataset(s). Default: [].
-    :param out_datasets: Default: [weights, widths, areas].
+    :param out_datasets: Default: [weights, widths, areas, residuals].
     :param fit_elements. List of elements of fit. Default: [].
     :param fit_range. Min max pair of fit range. Default: [].
     :params width_guess. An initial guess at the width. Default: 0.02.
@@ -94,8 +94,10 @@ class SimpleFit(Filter, CpuPlugin):
                        args=(data[0].squeeze(), axis, positions))
         weights, widths, areas = self.getAreas(self.parameters['peak_shape'],
                                                axis, positions, lsq1[0])
-
-        return [weights, widths, areas]
+        residuals = self._resid(lsq1[0], data[0].squeeze(), axis, positions)
+        # all fitting routines will output the same format.
+        # nchannels long, with 3 elements. Each can be a subarray.
+        return [weights, widths, areas, residuals]
 
     def setup(self, experiment):
 
@@ -156,6 +158,11 @@ class SimpleFit(Filter, CpuPlugin):
                               slice_dir=range(len(outshape)-1))
         FitWidths.set_current_pattern_name("CHANNEL")
 
+        residuals = experiment.create_data_object("out_data", "residuals")
+        residuals.set_shape(outshape+(len(positions),))
+        residuals.add_pattern("CHANNEL", core_dir=(-1,),
+                              slice_dir=range(len(outshape)-1))
+        residuals.set_current_pattern_name("CHANNEL")
         # now the tomo/map stuff
         for out_d1 in self.parameters["out_datasets"]:
             motor_type = in_meta_data.get_meta_data("motor_type")
