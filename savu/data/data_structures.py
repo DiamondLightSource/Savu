@@ -88,7 +88,11 @@ class Data(object):
             self.add_base(base)
 
     def set_shape(self, shape):
-        self.shape = shape
+        if len(shape) == self.meta_data.get_meta_data("nDims"):
+            self.shape = shape
+        else:
+            raise Exception("The number of axis labels does not coincide with "
+                            "the number of data dimensions.")
 
     def get_shape(self):
         shape = self.shape
@@ -127,11 +131,16 @@ class Data(object):
                         # Added diffraction 28th August adp
         return pattern_list
 
-    def add_pattern(self, dtype, **kargs):
+    def add_pattern(self, dtype, **kwargs):
         if dtype in self.pattern_list:
-            for args in kargs:               
+            nDims = 0
+            for args in kwargs:
+                nDims += len(kwargs[args])
                 self.meta_data.set_meta_data(["data_patterns", dtype, args],
-                                             kargs[args])
+                                             kwargs[args])
+            if nDims != self.meta_data.get_meta_data("nDims"):
+                raise Exception("The pattern " + dtype + " has an incorrect "
+                                " number of dimensions.")
         else:
             errorMsg = "The data pattern " + dtype + " does not exist. " + \
                        " Please choose from the following list: \n" + \
@@ -143,17 +152,25 @@ class Data(object):
         self.add_pattern("VOLUME_XZ", core_dir=(0, 2), slice_dir=(1,))
         self.add_pattern("VOLUME_XY", core_dir=(0, 1), slice_dir=(2,))
 
+    def set_axes_labels(self, *args):
+        self.meta_data.set_meta_data('nDims', len(args))
+        axes_labels = []
+        for arg in args:
+            axis = arg.split('.')
+            axes_labels.append({axis[0]: axis[1]})
+        self.meta_data.set_meta_data('axes_labels', axes_labels)
+
     def set_direction_parallel_to_rotation_axis(self, tdir):
         self.check_direction(tdir, 'parallel_to_rotation_axis')
-        self.set_main_axis(tdir, 'PROJECTION')
+        self.set_main_axis(tdir, 'SINOGRAM')
 
     def set_direction_perp_to_rotation_axis(self, tdir):
         self.check_direction(tdir, 'perp_to_rotation_axis')
-        self.set_main_axis(tdir, 'SINOGRAM')
+        self.set_main_axis(tdir, 'PROJECTION')
 
     def check_direction(self, tdir, dname):
         if not isinstance(tdir, int):
-            raise TypeError('The should be an integer.')
+            raise TypeError('The direction should be an integer.')
 
         patterns = self.meta_data.get_meta_data("data_patterns")
         if not patterns:
@@ -330,6 +347,8 @@ class PluginData(object):
         try:
             self.set_pattern_name(kwargs['pattern_name'])
             self.set_frame_chunk(kwargs['chunk'])
+            self.data_obj.meta_data.set_meta_data('nDims',
+                                                  len(kwargs['shape']))
             self.data_obj.set_shape(kwargs['shape'])
         except KeyError:
             raise Exception("When calling out_data_setup(), pattern_name, "

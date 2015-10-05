@@ -62,13 +62,16 @@ class TomographyLoaders(object):
         :param exp: The Experiment object
         """
         base_classes = [ds.TomoRaw]
-        data_obj = exp.create_data_object("in_data", "tomo", base_classes)
+        data_obj = exp.create_data_object('in_data', 'tomo', base_classes)
 
-        data_obj.add_pattern("PROJECTION", core_dir=(1, 2), slice_dir=(0,))
-        data_obj.add_pattern("SINOGRAM", core_dir=(0, 2), slice_dir=(1,),
-                             axes={'rotation_angle': 'degs'})
-        data_obj.set_direction_parallel_to_rotation_axis(0)
-        data_obj.set_direction_perp_to_rotation_axis(1)
+        data_obj.set_axes_labels('detector_x.number',
+                                 'detector_y.number',
+                                 'rotation_angle.degrees')
+
+        data_obj.add_pattern('PROJECTION', core_dir=(1, 2), slice_dir=(0,))
+        data_obj.add_pattern('SINOGRAM', core_dir=(0, 2), slice_dir=(1,))
+        data_obj.set_direction_parallel_to_rotation_axis(1)
+        data_obj.set_direction_perp_to_rotation_axis(0)
 
         objInfo = data_obj.meta_data
         expInfo = exp.meta_data
