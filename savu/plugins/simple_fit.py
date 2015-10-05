@@ -160,9 +160,6 @@ class SimpleFit(Filter, CpuPlugin):
 
         residuals = experiment.create_data_object("out_data", "residuals")
         residuals.set_shape(outshape+(len(positions),))
-        residuals.add_pattern("CHANNEL", core_dir=(-1,),
-                              slice_dir=range(len(outshape)-1))
-        residuals.set_current_pattern_name("CHANNEL")
         # now the tomo/map stuff
         for out_d1 in self.parameters["out_datasets"]:
             motor_type = in_meta_data.get_meta_data("motor_type")
