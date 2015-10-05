@@ -87,6 +87,44 @@ class Data(object):
         for base in bases:
             self.add_base(base)
 
+    def create_dataset(self, *args, **kwargs):
+        """
+        Set up required information when an output dataset has been created by
+        a plugin
+        """
+        if len(args) is 1:
+            copy_data = args[0]
+            patterns = copy_data.meta_data.get_meta_data('data_patterns')
+            self.meta_data.set_meta_data('data_patterns', patterns)
+            self.copy_labels(copy_data)
+            if isinstance(copy_data, TomoRaw):
+                shape = copy_data.remove_dark_and_flat()
+            else:
+                shape = copy_data.get_shape()
+            self.set_shape(shape)
+        else:
+            try:
+                axis_labels = kwargs['axis_labels']
+                shape = kwargs['shape']
+            except KeyError:
+                raise Exception("Please state axis labels and shape when "
+                                "creating a new dataset")
+            if isinstance(axis_labels, Data):
+                self.copy_labels(axis_labels)
+            else:
+                self.set_axis_labels(*axis_labels)
+
+            if isinstance(shape, Data):
+                self.set_shape(Data.get_shape())
+            else:
+                self.set_shape(shape)
+
+    def copy_labels(self, copy_data):
+        nDims = copy_data.meta_data.get_meta_data('nDims')
+        self.meta_data.set_meta_data('nDims', nDims)
+        axis_labels = copy_data.meta_data.get_meta_data('axis_labels')
+        self.meta_data.set_meta_data('axis_labels', axis_labels)
+
     def set_shape(self, shape):
         if len(shape) == self.meta_data.get_meta_data("nDims"):
             self.shape = shape
@@ -152,13 +190,13 @@ class Data(object):
         self.add_pattern("VOLUME_XZ", core_dir=(0, 2), slice_dir=(1,))
         self.add_pattern("VOLUME_XY", core_dir=(0, 1), slice_dir=(2,))
 
-    def set_axes_labels(self, *args):
+    def set_axis_labels(self, *args):
         self.meta_data.set_meta_data('nDims', len(args))
-        axes_labels = []
+        axis_labels = []
         for arg in args:
             axis = arg.split('.')
-            axes_labels.append({axis[0]: axis[1]})
-        self.meta_data.set_meta_data('axes_labels', axes_labels)
+            axis_labels.append({axis[0]: axis[1]})
+        self.meta_data.set_meta_data('axis_labels', axis_labels)
 
     def set_direction_parallel_to_rotation_axis(self, tdir):
         self.check_direction(tdir, 'parallel_to_rotation_axis')
@@ -189,9 +227,6 @@ class Data(object):
 
     def get_patterns(self):
         return self.meta_data.get_meta_data("data_patterns")
-
-    def copy_patterns(self, patterns):
-        self.meta_data.set_meta_data("data_patterns", patterns)
 
 
 class PluginData(object):
@@ -326,33 +361,13 @@ class PluginData(object):
             shape.append(self.data_obj.get_shape()[core])
         return tuple(shape)
 
-    def plugin_data_setup(self, **kwargs):
-        if len(kwargs) is 2:
-            self.in_data_setup(**kwargs)
-        elif len(kwargs) is 3:
-            self.out_data_setup(**kwargs)
-        else:
-            raise Exception("Incorrect number of arguments passed to "
-                            "plugin_data_setup()")
-
-    def in_data_setup(self, **kwargs):
+    def plugin_data_setup(self, pattern_name, chunk):
         try:
-            self.set_pattern_name(kwargs['pattern_name'])
-            self.set_frame_chunk(kwargs['chunk'])
+            self.set_pattern_name(pattern_name)
+            self.set_frame_chunk(chunk)
         except KeyError:
-            raise Exception("When calling in_data_setup(), pattern_name and "
-                            "chunk are required as kwargs.")
-
-    def out_data_setup(self, **kwargs):
-        try:
-            self.set_pattern_name(kwargs['pattern_name'])
-            self.set_frame_chunk(kwargs['chunk'])
-            self.data_obj.meta_data.set_meta_data('nDims',
-                                                  len(kwargs['shape']))
-            self.data_obj.set_shape(kwargs['shape'])
-        except KeyError:
-            raise Exception("When calling out_data_setup(), pattern_name, "
-                            "shape and chunk are required as kwargs.")
+            raise Exception("When calling plugin_data_setup(), pattern_name "
+                            "and chunk are required as kwargs.")
 
 
 class TomoRaw(object):

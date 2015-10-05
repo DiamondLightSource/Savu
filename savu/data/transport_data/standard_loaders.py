@@ -64,7 +64,7 @@ class TomographyLoaders(object):
         base_classes = [ds.TomoRaw]
         data_obj = exp.create_data_object('in_data', 'tomo', base_classes)
 
-        data_obj.set_axes_labels('detector_x.number',
+        data_obj.set_axis_labels('detector_x.number',
                                  'detector_y.number',
                                  'rotation_angle.degrees')
 
