@@ -35,7 +35,7 @@ class SimpleFit(Filter, CpuPlugin):
     """
     This plugin fits peaks. Either XRD or XRF for now.
     :param in_datasets: Create a list of the dataset(s). Default: [].
-    :param out_datasets: Create a list of the dataset(s). Default: [].
+    :param out_datasets: Default: [weights, widths, areas].
     :param fit_elements. List of elements of fit. Default: [].
     :param fit_range. Min max pair of fit range. Default: [].
     :params width_guess. An initial guess at the width. Default: 0.02.
@@ -60,18 +60,23 @@ class SimpleFit(Filter, CpuPlugin):
                 paramdict = {}
                 axis = np.arange(0.01, 2048*0.01, 0.01)
                 step = axis[3]-axis[2]
-                paramdict["Experiment"]['elements'] = self.parameters['fit_elements'].split(',')
+                paramdict["Experiment"]['elements'] = \
+                    self.parameters['fit_elements'].split(',')
                 if self.parameters['fit_range']:
-                    paramdict["FitParams"]["fitted_energy_range_keV"] = self.parameters['fit_range']
+                    paramdict["FitParams"]["fitted_energy_range_keV"] = \
+                        self.parameters['fit_range']
                 else:
                     #  all of them
-                    paramdict["FitParams"]["fitted_energy_range_keV"] = [axis[0], axis[-1]]
-                paramdict["Experiment"]["incident_energy_keV"] = in_meta_data.get_meta_data("mono_energy")
+                    paramdict["FitParams"]["fitted_energy_range_keV"] = \
+                        [axis[0], axis[-1]]
+                paramdict["Experiment"]["incident_energy_keV"] = \
+                    in_meta_data.get_meta_data("mono_energy")
                 idx = self.findLines(XRFDataset().paramdict)
                 idx = (np.array(idx)/step).astype(int)
                 #  for now
             elif isinstance(positions, list):
-                axis = in_meta_data.get_meta_data('integrated_diffraction_angle')
+                axis = \
+                    in_meta_data.get_meta_data('integrated_diffraction_angle')
         else:
             positions = in_meta_data.get_meta_data('PeakIndex')
 
@@ -85,15 +90,18 @@ class SimpleFit(Filter, CpuPlugin):
         p.extend(data[0].squeeze()[positions])
         p.extend(self.parameters['width_guess']*np.ones_like(positions))
         #  now the fit
-        lsq1 = leastsq(self._resid, p, args=(data[0].squeeze(), axis, positions))
+        lsq1 = leastsq(self._resid, p,
+                       args=(data[0].squeeze(), axis, positions))
+        weights, widths, areas = self.getAreas(self.parameters['peak_shape'],
+                                               axis, positions, lsq1[0])
 
-        return lsq1[0]
+        return [weights, widths, areas]
 
     def setup(self, experiment):
 
         self.set_experiment(experiment)
         chunk_size = self.get_max_frames()
-
+        in_meta_data, _out_meta_data = self.get_meta_data()
         # get a list of input dataset names required for this plugin
         in_data_list = self.parameters["in_datasets"]
         # get all input dataset objects
@@ -101,25 +109,85 @@ class SimpleFit(Filter, CpuPlugin):
         # set all input data patterns
         in_d1.set_current_pattern_name("SPECTRUM")
         # set frame chunk
+        outshape = in_d1.get_shape()
         in_d1.set_nFrames(chunk_size)
+        # Ok.So how many peaks will we fit?
+        if not in_meta_data.get_meta_data('PeakIndex'):
+            positions = self.parameters['fit_elements']
+            if isinstance(positions, str):
+                from flupy.xrf_data_handling import XRFDataset
+                # assume it is like fast xrf
+                paramdict = {}
+                axis = np.arange(0.01, 2048*0.01, 0.01)
+                step = axis[3]-axis[2]
+                paramdict["Experiment"]['elements'] = \
+                    self.parameters['fit_elements'].split(',')
+                if self.parameters['fit_range']:
+                    paramdict["FitParams"]["fitted_energy_range_keV"] = \
+                        self.parameters['fit_range']
+                else:
+                    #  all of them
+                    paramdict["FitParams"]["fitted_energy_range_keV"] = \
+                        [axis[0], axis[-1]]
+                paramdict["Experiment"]["incident_energy_keV"] = \
+                    in_meta_data.get_meta_data("mono_energy")
+                idx = self.findLines(XRFDataset().paramdict)
+                idx = (np.array(idx)/step).astype(int)
+                #  for now
+            elif isinstance(positions, list):
+                axis = \
+                    in_meta_data.get_meta_data('integrated_diffraction_angle')
+        else:
+            positions = in_meta_data.get_meta_data('PeakIndex')
 
-        # get a list of output dataset names created by this plugin
-        out_data_list = self.parameters["out_datasets"]
+        FitAreas = experiment.create_data_object("out_data", "FitAreas")
+        FitAreas.set_shape(outshape+(len(positions),))
+        FitAreas.add_pattern("CHANNEL", core_dir=(-1,),
+                             slice_dir=range(len(outshape)-1))
+        FitAreas.set_current_pattern_name("CHANNEL")
+        FitHeights = experiment.create_data_object("out_data", "FitHeights")
+        FitHeights.set_shape(outshape+(len(positions),))
+        FitHeights.add_pattern("CHANNEL", core_dir=(-1,),
+                               slice_dir=range(len(outshape)-1))
+        FitHeights.set_current_pattern_name("CHANNEL")
+        FitWidths = experiment.create_data_object("out_data", "FitWidths")
+        FitWidths.set_shape(outshape+(len(positions),))
+        FitWidths.add_pattern("CHANNEL", core_dir=(-1,),
+                              slice_dir=range(len(outshape)-1))
+        FitWidths.set_current_pattern_name("CHANNEL")
 
-        # create all out_data objects and associated patterns and meta_data
-        # patterns can be copied, added or both
-        out_d1 = experiment.create_data_object("out_data", out_data_list[0])
-
-        out_d1.copy_patterns(in_d1.get_patterns())
-        out_d1.add_pattern("PROJECTION", core_dir=(0,), slice_dir=(0,))
-        out_d1.set_current_pattern_name("1D_METADATA")
-        out_d1.meta_data.set_meta_data('PeakIndex', [])
-        out_d1.meta_data.copy_dictionary(in_d1.meta_data.get_dictionary(),
-                                         rawFlag=True)
-        # set pattern for this plugin and the shape
-        out_d1.set_shape((np.prod(in_d1.data.shape[:-1]),))
-        # set frame chunk
-        out_d1.set_nFrames(chunk_size)
+        # now the tomo/map stuff
+        for out_d1 in self.parameters["out_datasets"]:
+            motor_type = in_meta_data.get_meta_data("motor_type")
+            projection = []
+            projection_slice = []
+            for item, key in enumerate(motor_type):
+                if key == 'translation':
+                    projection.append(item)
+                elif key != 'translation':
+                    projection_slice.append(item)
+                if key == 'rotation':
+                    rotation = item  # we will assume one rotation for now
+            projdir = tuple(projection)
+            if in_meta_data.get_meta_data("is_map"):
+                ndims = range(len(outshape))
+                ovs = []
+                for i in ndims:
+                    if i != projdir[0]:
+                        if i != projdir[1]:
+                            ovs.append(i)
+                out_d1.add_pattern("PROJECTION", core_dir=projdir,
+                                   slice_dir=ovs)
+            if in_meta_data.get_meta_data("is_tomo"):
+                ndims = range(len(outshape))
+                ovs = []
+                for i in ndims:
+                    if i != rotation:
+                        if i != projdir[1]:
+                            ovs.append(i)
+                out_d1.add_pattern("SINOGRAM",
+                                   core_dir=(rotation, projdir[-1]),
+                                   slice_dir=ovs)
 
     def organise_metadata(self):
         pass
@@ -134,7 +202,8 @@ class SimpleFit(Filter, CpuPlugin):
 
     def _resid(self, p, y, x, positions):
         p = np.abs(p)
-        r = y-self._spectrum_sum(self.parameters['peak_shape'], x, positions, *p)
+        r = y-self._spectrum_sum(self.parameters['peak_shape'],
+                                 x, positions, *p)
         return r
 
     def _spectrum_sum(self, fun, x, positions, *p):
@@ -152,10 +221,10 @@ class SimpleFit(Filter, CpuPlugin):
             spec += fun(x, weights[ii], positions[ii], widths[ii])
         return spec
 
-
     def findLines(self, paramdict):
         import _xraylib as xl
-        from flupy.algorithms.xrf_calculations.transitions_and_shells import shells, transitions
+        from flupy.algorithms.xrf_calculations.transitions_and_shells \
+            import (shells, transitions)
         from flupy.algorithms.xrf_calculations.escape import *
         fitting_range = paramdict["FitParams"]["fitted_energy_range_keV"]
         energy = paramdict["Experiment"]["incident_energy_keV"]
@@ -164,28 +233,17 @@ class SimpleFit(Filter, CpuPlugin):
         include_escape = 1
         detectortype = 'Vortex_SDD_Xspress'
         detector = paramdict["Detectors"][detectortype]
-        sigma = detector["xrf_sigma"]
-        tail = detector["xrf_tail_amplitude"]
-        slope = detector["xrf_slope"]
-        step = detector["xrf_step"]
         detectortype = detector["detector_type"]
         no_of_transitions = 17
         fitelements = 'Zn', 'Cu', 'Cr', 'Ar', 'Fe'
         no_of_elements = len(fitelements)
-        DB_descript = []
         temp_array = np.zeros((3, no_of_elements, no_of_transitions))
         peakpos = []
         for j, el in enumerate(fitelements):
-            #
-            # loop over shells for that element
             print el
             z = xl.SymbolToAtomicNumber(str(el))
             for i, shell in enumerate(shells):
-                #
-                # check the edge is < energy, i.e. that it can be excited
                 if(xl.EdgeEnergy(z, shell) < energy-0.5):
-                    # Check the transition from that edge are
-                    # within the energy range used
                     linepos = 0.0
                     count = 0.0
                     for line in transitions[i]:
@@ -201,10 +259,6 @@ class SimpleFit(Filter, CpuPlugin):
                     if(linepos > fitting_range[0]
                        and linepos < fitting_range[1]):
                         temp_array[0][j][i] = 1
-                        #
-                        # is the pileup peak for this element in the
-                        # fitted energy range ?
-                        # Considering only double pileup..
                         peakpos.append(linepos)
                         if(include_pileup):
                             if(2.*linepos > fitting_range[0]
@@ -221,6 +275,24 @@ class SimpleFit(Filter, CpuPlugin):
                                 peakpos.append(escape_energy[0])
                                 temp_array[2][j][i] = 1.
         return peakpos
+
+    def getAreas(self, fun, x, positions, fitmatrix):
+        rest = fitmatrix
+        numargsinp = len(howmany(fun)[0])-2  # 2 in
+        npts = len(fitmatrix) / numargsinp
+        print npts
+        weights = rest[:npts]
+        print(len(weights))
+        widths = rest[npts:2*npts]
+        print widths
+        print(len(widths))
+        areas = []
+        for ii in range(len(weights)):
+            areas.append(np.sum(fun(x,
+                                    weights[ii],
+                                    positions[ii],
+                                    widths[ii])))
+        return weights, widths, areas
 
 
 def gaussian(x, weights, positions, widths):
