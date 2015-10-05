@@ -54,7 +54,7 @@ class CpuPlugin(object):
 
             logging.debug("Main processing: process %s", self.__class__)
             #self.process(exp, new_processes, cpu_processes[process])
-            self.process(transport)
+            transport.process(self)
 
             exp.barrier()
             logging.debug("Post-processing")

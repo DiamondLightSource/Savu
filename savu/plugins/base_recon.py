@@ -59,17 +59,17 @@ class BaseRecon(Plugin):
         """
         Perform the main processing step for the plugin
         """
-        in_data, out_data = self.get_datasets()
-
+        in_data, out_data = self.get_plugin_datasets()
+        in_meta_data, out_meta_data = self.get_meta_data()
 
         try:
             centre_of_rotation = \
-                in_data[0].meta_data.get_meta_data("centre_of_rotation")
+                in_meta_data[0].get_meta_data("centre_of_rotation")
         except KeyError:
-            centre_of_rotation = np.ones(in_data[0].get_shape()[1])
+            centre_of_rotation = np.ones(in_data[0].data_obj.get_shape()[1])
             centre_of_rotation *= self.parameters['center_of_rotation']
-            in_data[0].meta_data.set_meta_data("centre_of_rotation",
-                                               centre_of_rotation)
+            in_meta_data[0].set_meta_data("centre_of_rotation",
+                                          centre_of_rotation)
 
         transport.reconstruction_setup(self, in_data[0], out_data[0],
                                        self.exp)
@@ -78,31 +78,28 @@ class BaseRecon(Plugin):
         self.exp.log(self.name + " Start")
 
         # Input datasets setup
-        in_data, out_data = self.get_plugin_datasets()
-        in_data[0].plugin_data_setup(pattern_name='SINOGRAM',
-                                     chunk=self.get_max_frames())
+        in_pData, out_pData = self.get_plugin_datasets()
+        in_pData[0].plugin_data_setup(pattern_name='SINOGRAM',
+                                      chunk=self.get_max_frames())
 
         # set details for all output data sets
-        shape = in_data[0].data_obj.get_shape()
-        out_data[0].plugin_data_setup(pattern_name='VOLUME_XZ',
-                                      chunk=self.get_max_frames(),
-                                      shape=(shape[2], shape[1], shape[2]))
+        shape = in_pData[0].data_obj.get_shape()
+        out_pData[0].plugin_data_setup(pattern_name='VOLUME_XZ',
+                                       chunk=self.get_max_frames(),
+                                       shape=(shape[2], shape[1], shape[2]))
 
         # copy or add patterns related to this dataset
-        #out_data[0].data_obj.copy_patterns(in_data[0].data_obj.get_patterns())
-        out_data[0].meta_data.copy_dictionary(
-            in_data[0].meta_data.get_dictionary())
-        out_data[0].data_obj.add_volume_patterns()
+        out_pData[0].data_obj.add_volume_patterns()
 
         self.exp.log(self.name + " End")
 
     def organise_metadata(self):
         pass
 
-
     def get_max_frames(self):
         """
-        Should be overridden to define the max number of frames to process at a time
+        Should be overridden to define the max number of frames to process at
+        a time
 
         :returns:  an integer of the number of frames
         """

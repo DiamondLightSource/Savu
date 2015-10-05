@@ -78,7 +78,8 @@ class SimpleRecon(BaseRecon, CpuPlugin):
                     self._filter(np.log(np.nan_to_num(sinogram[i, j, :])+1))
                 result += \
                     self._back_project(mapping_array, filt,
-                                       (centre_of_rotations + sinogram.shape[2]))
+                                       (centre_of_rotations +
+                                           sinogram.shape[2]))
             results.append(result[:, np.newaxis, :])
         result = np.hstack(results)
         return result

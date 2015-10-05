@@ -212,8 +212,8 @@ class Hdf5TransportData(object):
     def get_slice_list_per_process(self, expInfo, **kwargs):
         frameList = kwargs.get('frameList', False)
 
-        processes = expInfo.get_meta_data().get_meta_data("processes")
-        process = expInfo.get_meta_data().get_meta_data("process")
+        processes = expInfo.get_meta_data("processes")
+        process = expInfo.get_meta_data("process")
         slice_list = self.get_grouped_slice_list()
         frame_index = np.arange(len(slice_list))
         frames = np.array_split(frame_index, len(processes))[process]
@@ -301,7 +301,7 @@ class Hdf5TransportData(object):
     def get_unpadded_slice_data(self, input_slice_list, padded_dataset):
         padding_dict = self.get_plugin_data().padding
         if padding_dict is None:
-            return self.data[tuple(input_slice_list)]
+            return padded_dataset
         padding_dict = self.get_padding_dict()
 
         slice_list = list(input_slice_list)

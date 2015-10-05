@@ -104,7 +104,7 @@ class Plugin(object):
         """
         pass
 
-    def process(self, transport):
+    def process_frames(self, data):
         """
         This method is called after the plugin has been created by the
         pipeline framework and forms the main processing step

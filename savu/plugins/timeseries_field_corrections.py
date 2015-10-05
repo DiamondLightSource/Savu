@@ -44,7 +44,10 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         super(TimeseriesFieldCorrections,
               self).__init__("TimeseriesFieldCorrections")
 
-    def correction(self, data, image_keys):
+    def process_frames(self, data):
+        in_meta_data, out_meta_data = self.get_meta_data()
+        data = data[0]
+        image_keys = in_meta_data[0].get_meta_data('image_key')
         trimmed_data = data[image_keys == 0]
         dark = data[image_keys == 2]
         dark = dark.mean(0)
@@ -55,10 +58,6 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         data = (trimmed_data-dark)/(flat-dark)
         return data
 
-    def process(self, transport):
-        in_data, out_data = self.get_plugin_datasets()
-        transport.timeseries_field_correction(self, in_data, out_data)
-
     def setup(self):
         """
         Initial setup of all datasets required as input and output to the
@@ -66,20 +65,21 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         chain.
         """
         # get all data objects associated with the plugin
-        in_data, out_data = self.get_plugin_datasets()
+        in_pData, out_pData = self.get_plugin_datasets()
 
         # set details for all input data sets
         # create an instance of pattern class here
-        in_data[0].plugin_data_setup(pattern_name='SINOGRAM',
-                                     chunk=self.get_max_frames())
+        in_pData[0].plugin_data_setup(pattern_name='SINOGRAM',
+                                      chunk=self.get_max_frames())
 
         # set details for all output data sets
-        out_data[0].plugin_data_setup(pattern_name='SINOGRAM',
-                                      chunk=self.get_max_frames(),
-                                      shape=in_data[0].data_obj.
-                                      remove_dark_and_flat())
+        out_pData[0].plugin_data_setup(pattern_name='SINOGRAM',
+                                       chunk=self.get_max_frames(),
+                                       shape=in_pData[0].data_obj.
+                                       remove_dark_and_flat())
         # copy or add patterns related to this dataset
-        out_data[0].data_obj.copy_patterns(in_data[0].data_obj.get_patterns())
+        out_pData[0].data_obj.copy_patterns(in_pData[0].
+                                            data_obj.get_patterns())
 
     def organise_metadata(self):
         in_data, out_data = self.get_datasets()

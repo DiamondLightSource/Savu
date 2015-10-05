@@ -26,10 +26,12 @@ from savu.core.plugin_runner import PluginRunner
 import inspect
 import os
 
+
 def get_test_data_path(name):
     path = inspect.stack()[0][1]
     return '/'.join(os.path.split(path)[0].split(os.sep)[:-2] +
                     ['test_data', name])
+
 
 def get_experiment_types():
     exp_dict = {}
@@ -39,14 +41,16 @@ def get_experiment_types():
                         'filename': 'projections.h5'}
     return exp_dict
 
+
 def set_experiment(exp_type, plugin):
     exp_types = get_experiment_types()
     try:
-        options = globals()[exp_types[exp_type]['func']] \
-                                (exp_types[exp_type]['filename'], plugin)
+        options = globals()[exp_types[exp_type]['func']](
+            exp_types[exp_type]['filename'], plugin)
     except KeyError:
         raise Exception("The experiment type ", exp_type, " is not recognised")
     return options
+
 
 def set_tomoRaw_experiment(filename, plugin):
     # create experiment
@@ -56,10 +60,11 @@ def set_tomoRaw_experiment(filename, plugin):
     options['plugin_datasets'] = set_data_dict(['tomo'],
                                                get_output_datasets(plugin))
     print options['plugin_datasets']
-    print plugin.__module__  
+    print plugin.__module__
     set_plugin_list(options, plugin.__module__)
     print options['plugin_list']
     return options
+
 
 def set_tomo_experiment(filename, plugin):
     print "*****Setting the tomography experiment"
@@ -69,17 +74,17 @@ def set_tomo_experiment(filename, plugin):
     options['saver'] = 'savu.plugins.hdf5_tomo_saver'
     options['plugin_datasets'] = set_data_dict(['tomo'],
                                                get_output_datasets(plugin))
-    print options['plugin_datasets']
-    print plugin.__module__                                               
-    set_plugin_list(options, plugin.__module__)                                               
+    set_plugin_list(options, plugin.__module__)
     return options
 
-def get_output_datasets(plugin) :
+
+def get_output_datasets(plugin):
     n_out = plugin.nOutput_datasets()
     out_data = []
     for n in range(n_out):
         out_data.append('test' + str(n))
     return out_data
+
 
 def set_plugin_list(options, plugin_name):
     options['plugin_list'] = []
@@ -89,12 +94,14 @@ def set_plugin_list(options, plugin_name):
         name = module2class(ID[i].split('.')[-1])
         options['plugin_list'].append(set_plugin_entry(name, ID[i], data[i]))
 
+
 def set_plugin_entry(name, ID, data):
     plugin = {}
     plugin['name'] = name
     plugin['id'] = ID
     plugin['data'] = data
-    return plugin 
+    return plugin
+
 
 def set_options(path):
     options = {}
@@ -105,16 +112,20 @@ def set_options(path):
     options['out_path'] = '/tmp'
     options['run_type'] = 'test'
     return options
-    
+
+
 def set_data_dict(in_data, out_data):
     return {'in_datasets': in_data, 'out_datasets': out_data}
+
 
 def get_class_instance(clazz):
     instance = clazz()
     return instance
 
+
 def module2class(module_name):
     return ''.join(x.capitalize() for x in module_name.split('_'))
+
 
 def load_class(name):
     mod = __import__(name)
@@ -127,27 +138,32 @@ def load_class(name):
     instance = get_class_instance(clazz)
     return instance
 
+
 def load_test_data(exp_type):
     options = set_experiment(exp_type)
-    
-    plugin_list = []    
-    ID = options['loader']; name = module2class(ID.split('.')[-1])
+
+    plugin_list = []
+    ID = options['loader']
+    name = module2class(ID.split('.')[-1])
     plugin_list.append(set_plugin_entry(name, ID, {}))
-    ID = options['saver']; name = module2class(ID.split('.')[-1])
+    ID = options['saver']
+    name = module2class(ID.split('.')[-1])
     plugin_list.append(set_plugin_entry(name, ID, {}))
-    
+
     # currently assuming an empty parameters dictionary
     options['plugin_list'] = plugin_list
     plugin_runner(options)
 
-def get_data_object(exp):    
+
+def get_data_object(exp):
     return exp.index['in_data'][exp.index['in_data'].keys()[0]]
+
 
 def set_process(exp, process, processes):
     exp.meta_data.set_meta_data('process', process)
     exp.meta_data.set_meta_data('processes', processes)
-    
+
+
 def plugin_runner(options):
     plugin_runner = PluginRunner(options)
     return plugin_runner.run_plugin_list(options)
-        
