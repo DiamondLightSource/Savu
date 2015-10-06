@@ -50,9 +50,9 @@ class TomographySavers(object):
         for key in exp.index["out_data"].keys():
             out_data = exp.index["out_data"][key]
             out_data.backing_file = self.create_backing_h5(key, exp.meta_data)
-            group = self.create_entries(out_data.backing_file, out_data,
-                                        exp.meta_data, key, dtype)
-
+            out_data.group_name = self.create_entries(out_data.backing_file,
+                                                      out_data, exp.meta_data,
+                                                      key, dtype)
             #self.output_meta_data(group, out_data, exp.meta_data, dtype)
 
     def create_backing_h5(self, key, expInfo):
@@ -66,6 +66,7 @@ class TomographySavers(object):
         else:
             backing_file = h5py.File(filename, 'w')
 
+        print "creating file", filename
         if backing_file is None:
             raise IOError("Failed to open the hdf5 file")
 
@@ -76,51 +77,51 @@ class TomographySavers(object):
         return backing_file
 
     def create_entries(self, backing_file, data, expInfo, key, dtype):
-        group = backing_file.create_group(
-            expInfo.get_meta_data(["group_name", key]))
+        group_name = expInfo.get_meta_data(["group_name", key])
+        group = backing_file.create_group(group_name)
         group.attrs[NX_CLASS] = 'NXdata'
 
         params = self.set_name("data")
         self.output_data_to_file(group, params, data.get_shape(), dtype)
         data.data = params["name"]
-        return group
-
-    def output_meta_data(self, group, data, expInfo, dtype):
-        output_list = self.get_output_list(expInfo, data)
-
-        for name in output_list:
-            params = self.set_name(name)
-            value = expInfo.get_meta_data(name)
-            # just numpy arrays for now
-            if (type(value).__module__) in np.__name__:
-                self.output_data_to_file(group, params, value.shape, dtype)
-                params['name'][...] = value
-
-    def get_output_list(self, expInfo, data):
-        if self.parameters is False:
-            pattern = data.get_pattern_name()
-            if isinstance(data, ds.Raw):
-                pattern = "RAW"
-            return self.get_pattern_meta_data(data, pattern)
-        else:
-            meta_data = []
-            for key in expInfo.get_dictionary().keys():
-                meta_data.append(key)
-            return meta_data
-
-    # Temporary: Need to move this somewhere else?
-    def get_pattern_meta_data(self, pattern):
-        theDict = {}
-        theDict['RAW'] = ["image_key", "control", "rotation_angle"]
-        theDict['PROJECTION'] = ["rotation_angle"]
-        theDict['SINOGRAM'] = theDict['PROJECTION']
-
-        try:
-            return theDict['pattern']
-        except KeyError:
-            print "Warning: No meta_data output is associated with the \
-                                                            pattern:", pattern
-            return []
+        return group_name
+#
+#    def output_meta_data(self, group, data, expInfo, dtype):
+#        output_list = self.get_output_list(expInfo, data)
+#
+#        for name in output_list:
+#            params = self.set_name(name)
+#            value = expInfo.get_meta_data(name)
+#            # just numpy arrays for now
+#            if (type(value).__module__) in np.__name__:
+#                self.output_data_to_file(group, params, value.shape, dtype)
+#                params['name'][...] = value
+#
+#    def get_output_list(self, expInfo, data):
+#        if self.parameters is False:
+#            pattern = data.get_pattern_name()
+#            if isinstance(data, ds.Raw):
+#                pattern = "RAW"
+#            return self.get_pattern_meta_data(data, pattern)
+#        else:
+#            meta_data = []
+#            for key in expInfo.get_dictionary().keys():
+#                meta_data.append(key)
+#            return meta_data
+#
+#    # Temporary: Need to move this somewhere else?
+#    def get_pattern_meta_data(self, pattern):
+#        theDict = {}
+#        theDict['RAW'] = ["image_key", "control", "rotation_angle"]
+#        theDict['PROJECTION'] = ["rotation_angle"]
+#        theDict['SINOGRAM'] = theDict['PROJECTION']
+#
+#        try:
+#            return theDict['pattern']
+#        except KeyError:
+#            print "Warning: No meta_data output is associated with the \
+#                                                            pattern:", pattern
+#            return []
 
     def output_data_to_file(self, group, params, shape, dtype):
         params['name'] = group.create_dataset(params['name'], shape, dtype)

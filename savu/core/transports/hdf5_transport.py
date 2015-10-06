@@ -21,7 +21,6 @@
 """
 
 import logging
-import numpy as np
 import socket
 import os
 import copy
@@ -31,7 +30,6 @@ from itertools import chain
 from savu.core.utils import logfunction
 from savu.data.transport_mechanism import TransportMechanism
 from savu.core.utils import logmethod
-from savu.data.data_structures import TomoRaw
 
 
 class Hdf5Transport(TransportMechanism):
@@ -167,8 +165,12 @@ class Hdf5Transport(TransportMechanism):
             exp.barrier()
             logging.info("Copy out data to in data")
             for key in exp.index["out_data"]:
-                exp.index["in_data"][key] = \
-                    copy.deepcopy(exp.index["out_data"][key])
+                nxs_filename = exp.meta_data.get_meta_data('nxs_filename')
+                output = exp.index["out_data"][key]
+                exp.meta_data.plugin_list.\
+                    add_intermediate_data_link(nxs_filename, output,
+                                               output.group_name)
+                exp.index["in_data"][key] = copy.deepcopy(output)
 
             exp.barrier()
             logging.info("Clear up all data objects")

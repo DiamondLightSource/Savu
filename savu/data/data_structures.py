@@ -26,6 +26,7 @@ import sys
 import logging
 import warnings
 
+import h5py
 import numpy as np
 
 from savu.data.meta_data import MetaData
@@ -41,6 +42,7 @@ class Data(object):
         self.meta_data = MetaData()
         self.pattern_list = self.set_available_pattern_list()
         self.name = name
+        self.group_name = None
         self.backing_file = None
         self.data = None
         self.shape = None
@@ -86,6 +88,9 @@ class Data(object):
     def add_base_classes(self, bases):
         for base in bases:
             self.add_base(base)
+
+    def external_link(self):
+        return h5py.ExternalLink(self.backing_file.filename, self.group_name)
 
     def create_dataset(self, *args, **kwargs):
         """

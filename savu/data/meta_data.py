@@ -22,8 +22,6 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
-import savu
-from copy import copy
 
 
 class MetaData(object):
@@ -72,35 +70,6 @@ class MetaData(object):
                             raise KeyError(errorStr)
                     break
             return accum_value
-
-    def copy_dictionary(self, data_obj, **kwargs):
-        """ Copy keys from one dictionary to another.
-
-        Keyword arguments:
-        :param rawFlag: Indicate that the dictionary to copy contains
-        information relating to raw tomography data (inherits from TomoRaw)
-        :param priority_name: priority name
-        :param message: message to display
-        :returns: formatted string
-        """
-
-        new_dict = data_obj.meta_data.get_dictionary()
-        to_remove = self.dict.keys()
-        rawFlag = True if isinstance(data_obj, savu.data.data_structures.TomoRaw) else False
-        copy_keys = kwargs.get(set("copyKeys"), set(new_dict.keys()))
-        remove_keys = kwargs.get(set("removeKeys"), [])
-
-        if rawFlag is True:
-            to_remove = to_remove.union(["image_key"])
-
-        to_remove = to_remove.union(remove_keys)
-        copy_keys = to_remove.symmetric_difference(copy_keys)
-
-        for key in copy_keys:
-            try:
-                self.dict[key] = copy(new_dict[key])
-            except KeyError:
-                pass
 
     def get_dictionary(self):
         return self.dict
