@@ -23,9 +23,12 @@
 """
 import os
 import logging
-
+import h5py
 import numpy as np
+
 from savu.data.data_structures import Padding
+
+NX_CLASS = 'NX_class'
 
 
 class Hdf5TransportData(object):
@@ -89,7 +92,41 @@ class Hdf5TransportData(object):
                 expInfo.set_meta_data(["filename", key], filename)
                 expInfo.set_meta_data(["group_name", key], group_name)
 
-    def save_data(self):
+    def add_data_link_and_attributes(self, linkType):
+        nxs_filename = self.exp.meta_data.get_meta_data('nxs_filename')
+        logging.debug("Adding link to file %s", nxs_filename)
+        plugin_file = h5py.File(nxs_filename, 'a')
+
+        if linkType is 'final_result':
+            entry = self.group
+            entry.attrs[NX_CLASS] = 'NXdata'
+        else:
+            entry = plugin_file['entry'].require_group('intermediate')
+            entry.attrs[NX_CLASS] = 'NXcollection'
+        entry[self.group_name] = self.external_link()
+        plugin_file.close()
+        return entry
+
+    def output_metadata(self, entry):
+        axis_labels = self.meta_data.get_meta_data("axis_labels")
+        axes = []
+        count = 0
+        for labels in axis_labels:
+            axes.append(labels.keys()[0])
+            entry.attrs[labels.keys()[0]] = count
+#            try:
+#                self.meta_data.get_meta_data(labels.keys()[0])
+#                # output the dataset
+#            except:
+#                pass  # change this pass to count the data
+#            count += 1
+        entry.attrs['axes'] = axes
+
+    def save_data(self, link_type):
+        entry = self.add_data_link_and_attributes(link_type)
+        #self.output_metadata(entry)
+
+    def close_file(self):
         """
         Closes the backing file and completes work
         """

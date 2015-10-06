@@ -27,8 +27,6 @@ import logging
 from mpi4py import MPI
 import numpy as np
 
-import savu.data.data_structures as ds
-
 NX_CLASS = 'NX_class'
 
 
@@ -50,9 +48,9 @@ class TomographySavers(object):
         for key in exp.index["out_data"].keys():
             out_data = exp.index["out_data"][key]
             out_data.backing_file = self.create_backing_h5(key, exp.meta_data)
-            out_data.group_name = self.create_entries(out_data.backing_file,
-                                                      out_data, exp.meta_data,
-                                                      key, dtype)
+            out_data.group_name, out_data.group = \
+                self.create_entries(out_data.backing_file, out_data,
+                                    exp.meta_data, key, dtype)
             #self.output_meta_data(group, out_data, exp.meta_data, dtype)
 
     def create_backing_h5(self, key, expInfo):
@@ -80,11 +78,12 @@ class TomographySavers(object):
         group_name = expInfo.get_meta_data(["group_name", key])
         group = backing_file.create_group(group_name)
         group.attrs[NX_CLASS] = 'NXdata'
+        group.attrs['signal'] = 'data'
 
         params = self.set_name("data")
         self.output_data_to_file(group, params, data.get_shape(), dtype)
         data.data = params["name"]
-        return group_name
+        return group_name, group
 #
 #    def output_meta_data(self, group, data, expInfo, dtype):
 #        output_list = self.get_output_list(expInfo, data)
@@ -124,8 +123,8 @@ class TomographySavers(object):
 #            return []
 
     def output_data_to_file(self, group, params, shape, dtype):
+        group.attrs['signal'] = params['name']
         params['name'] = group.create_dataset(params['name'], shape, dtype)
-        params['name'].attrs['signal'] = 1
 
     def set_name(self, name):
         params = {}

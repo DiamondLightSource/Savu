@@ -82,14 +82,6 @@ class PluginList(object):
         citation.write(plugin_entry)
         plugin_file.close()
 
-    def add_intermediate_data_link(self, filename, output_data, group_name):
-        logging.debug("Adding link to file %s", filename)
-        plugin_file = h5py.File(filename, 'a')
-        inter_entry = plugin_file['entry'].require_group('intermediate')
-        inter_entry.attrs[NX_CLASS] = 'NXcollection'
-        inter_entry[group_name] = output_data.external_link()
-        plugin_file.close()
-
     def get_string(self):
         out_string = []
         count = 0

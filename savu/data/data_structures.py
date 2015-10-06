@@ -43,6 +43,7 @@ class Data(object):
         self.pattern_list = self.set_available_pattern_list()
         self.name = name
         self.group_name = None
+        self.group = None
         self.backing_file = None
         self.data = None
         self.shape = None

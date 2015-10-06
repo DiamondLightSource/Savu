@@ -128,6 +128,9 @@ class Hdf5Transport(TransportMechanism):
         logging.info("Running all the plugins")
 
         for i in range(1, len(plugin_list)-1):
+            link_type = "final_result" if i is len(plugin_list)-2 else \
+                "intermediate"
+
             logging.info("Running Plugin %s" % plugin_list[i]["id"])
             exp.barrier()
 
@@ -157,19 +160,16 @@ class Hdf5Transport(TransportMechanism):
             logging.info("close any files that are no longer required")
             for out_objs in plugin.parameters["out_datasets"]:
                 if out_objs in exp.index["in_data"].keys():
-                    exp.index["in_data"][out_objs].save_data()
+                    exp.index["in_data"][out_objs].close_file()
                 elif out_objs in remove_data_set:
-                    exp.index["out_data"][out_objs].save_data()
+                    exp.index["out_data"][out_objs].close_file()
                     del exp.index["out_data"][out_objs]
 
             exp.barrier()
             logging.info("Copy out data to in data")
             for key in exp.index["out_data"]:
-                nxs_filename = exp.meta_data.get_meta_data('nxs_filename')
                 output = exp.index["out_data"][key]
-                exp.meta_data.plugin_list.\
-                    add_intermediate_data_link(nxs_filename, output,
-                                               output.group_name)
+                output.save_data(link_type)
                 exp.index["in_data"][key] = copy.deepcopy(output)
 
             exp.barrier()
@@ -179,7 +179,7 @@ class Hdf5Transport(TransportMechanism):
         exp.barrier()
         logging.info("close all remaining files")
         for key in exp.index["in_data"].keys():
-            exp.index["in_data"][key].save_data()
+            exp.index["in_data"][key].close_file()
 
         exp.barrier()
         logging.info("Completing the HDF5 plugin list runner")
