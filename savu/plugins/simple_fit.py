@@ -101,9 +101,18 @@ class SimpleFit(Filter, CpuPlugin):
 
     def setup(self, experiment):
 
-        self.set_experiment(experiment)
+        # set up the output dataset that is created by the plugin
+        in_dataset, out_dataset = self.get_datasets()
+        in_meta_data, out_meta_data = self.get_meta_data()
+
+        out_dataset[0].create_dataset(in_dataset[0])
+        outshape = in_dataset[0].get_shape()
+        positions = self.getPositions(in_meta_data[0])
+        out_dataset[0].set_shape(outshape+(len(positions),))
+        out_meta_data[0][]
+
+
         chunk_size = self.get_max_frames()
-        in_meta_data, _out_meta_data = self.get_meta_data()
         # get a list of input dataset names required for this plugin
         in_data_list = self.parameters["in_datasets"]
         # get all input dataset objects
@@ -114,33 +123,8 @@ class SimpleFit(Filter, CpuPlugin):
         outshape = in_d1.get_shape()
         in_d1.set_nFrames(chunk_size)
         # Ok.So how many peaks will we fit?
-        if not in_meta_data.get_meta_data('PeakIndex'):
-            positions = self.parameters['fit_elements']
-            if isinstance(positions, str):
-                from flupy.xrf_data_handling import XRFDataset
-                # assume it is like fast xrf
-                paramdict = {}
-                axis = np.arange(0.01, 2048*0.01, 0.01)
-                step = axis[3]-axis[2]
-                paramdict["Experiment"]['elements'] = \
-                    self.parameters['fit_elements'].split(',')
-                if self.parameters['fit_range']:
-                    paramdict["FitParams"]["fitted_energy_range_keV"] = \
-                        self.parameters['fit_range']
-                else:
-                    #  all of them
-                    paramdict["FitParams"]["fitted_energy_range_keV"] = \
-                        [axis[0], axis[-1]]
-                paramdict["Experiment"]["incident_energy_keV"] = \
-                    in_meta_data.get_meta_data("mono_energy")
-                idx = self.findLines(XRFDataset().paramdict)
-                idx = (np.array(idx)/step).astype(int)
-                #  for now
-            elif isinstance(positions, list):
-                axis = \
-                    in_meta_data.get_meta_data('integrated_diffraction_angle')
-        else:
-            positions = in_meta_data.get_meta_data('PeakIndex')
+
+        positions = self.getPositions(in_meta_data)
 
         FitAreas = experiment.create_data_object("out_data", "FitAreas")
         FitAreas.set_shape(outshape+(len(positions),))
@@ -224,6 +208,36 @@ class SimpleFit(Filter, CpuPlugin):
         for ii in range(len(weights)):
             spec += fun(x, weights[ii], positions[ii], widths[ii])
         return spec
+
+    def getPositions(self, in_meta_data):
+        if not in_meta_data.get_meta_data('PeakIndex'):
+            positions = self.parameters['fit_elements']
+            if isinstance(positions, str):
+                from flupy.xrf_data_handling import XRFDataset
+                # assume it is like fast xrf
+                paramdict = {}
+                axis = np.arange(0.01, 2048*0.01, 0.01)
+                step = axis[3]-axis[2]
+                paramdict["Experiment"]['elements'] = \
+                    self.parameters['fit_elements'].split(',')
+                if self.parameters['fit_range']:
+                    paramdict["FitParams"]["fitted_energy_range_keV"] = \
+                        self.parameters['fit_range']
+                else:
+                    #  all of them
+                    paramdict["FitParams"]["fitted_energy_range_keV"] = \
+                        [axis[0], axis[-1]]
+                paramdict["Experiment"]["incident_energy_keV"] = \
+                    in_meta_data.get_meta_data("mono_energy")
+                idx = self.findLines(XRFDataset().paramdict)
+                idx = (np.array(idx)/step).astype(int)
+                #  for now
+            elif isinstance(positions, list):
+                axis = \
+                    in_meta_data.get_meta_data('integrated_diffraction_angle')
+        else:
+            positions = in_meta_data.get_meta_data('PeakIndex')
+        return positions
 
     def findLines(self, paramdict):
         fitting_range = paramdict["FitParams"]["fitted_energy_range_keV"]
