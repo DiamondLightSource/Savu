@@ -27,7 +27,12 @@ from savu.plugins.utils import register_plugin
 from savu.plugins.filter import Filter
 import numpy as np
 from scipy.optimize import leastsq
-import inspect.getargspec as howmany
+from inspect import getargspec as howmany
+import peakutils as pe
+import _xraylib as xl
+from flupy.algorithms.xrf_calculations.transitions_and_shells import \
+    shells, transitions
+from flupy.algorithms.xrf_calculations.escape import *
 
 
 @register_plugin
@@ -35,22 +40,17 @@ class SimpleFit(Filter, CpuPlugin):
     """
     This plugin fits peaks. Either XRD or XRF for now.
     :param in_datasets: Create a list of the dataset(s). Default: [].
-    :param out_datasets: Default: [weights, widths, areas, residuals].
-    :param fit_elements. List of elements of fit. Default: [].
-    :param fit_range. Min max pair of fit range. Default: [].
-    :params width_guess. An initial guess at the width. Default: 0.02.
-    :params peak_shape. Which shape do you want. lorentzian|gaussian
+    :param out_datasets: A. Default: ["FitWeights", "FitWidths", "FitAreas", "residuals"].
+    :param fit_elements: List of elements of fit. Default: [].
+    :param fit_range: Min max pair of fit range. Default: [].
+    :param width_guess: An initial guess at the width. Default: 0.02.
+    :param peak_shape: Which shape do you want. Default: "gaussian".
     """
 
     def __init__(self):
         super(SimpleFit, self).__init__("SimpleFit")
 
-    def pre_process(self, exp):
-        """
-        Let's figure out what arguments we should be passing.
-        :param exp: An experiment object, holding input and output datasets
-        :type exp: experiment class instance
-        """
+    def pre_process(self):
         in_meta_data, _out_meta_data = self.get_meta_data()
         if not in_meta_data.get_meta_data('PeakIndex'):
             positions = self.parameters['fit_elements']
@@ -226,10 +226,6 @@ class SimpleFit(Filter, CpuPlugin):
         return spec
 
     def findLines(self, paramdict):
-        import _xraylib as xl
-        from flupy.algorithms.xrf_calculations.transitions_and_shells \
-            import (shells, transitions)
-        from flupy.algorithms.xrf_calculations.escape import *
         fitting_range = paramdict["FitParams"]["fitted_energy_range_keV"]
         energy = paramdict["Experiment"]["incident_energy_keV"]
         pileup_cut_off = 5.
@@ -298,14 +294,11 @@ class SimpleFit(Filter, CpuPlugin):
                                     widths[ii])))
         return weights, widths, areas
 
+    def gaussian(self, x, weights, positions, widths):
+        return pe.gaussian(x, weights, positions, widths)
 
-def gaussian(x, weights, positions, widths):
-    import peakutils as pe
-    return pe.gaussian(x, weights, positions, widths)
-
-
-def lorentzian(x, a, c, w):
-    foo = (c-x)/(w/2.)
-    curve = 1./(1.+foo**2)
-    curve = a*curve
-    return curve
+    def lorentzian(self, x, a, c, w):
+        foo = (c-x)/(w/2.)
+        curve = 1./(1.+foo**2)
+        curve = a*curve
+        return curve
