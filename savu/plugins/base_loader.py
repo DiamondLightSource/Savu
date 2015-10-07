@@ -23,12 +23,25 @@
 
 from savu.plugins.plugin import Plugin
 
+
 class BaseLoader(Plugin):
     """
     A base plugin from which all data loader plugins should inherit.
     """
-            
+
     def __init__(self, name='BaseLoader'):
+        self.hits = []
+        self.application = None
         super(BaseLoader, self).__init__(name)
-        
-    
+
+    def get_NXapp(self, ltype, nx_file, entry):
+        self.application = ltype
+        nx_file[entry].visititems(self._visit_NXapp)
+        return self.hits
+
+    def _visit_NXapp(self, name, obj):
+        if "NX_class" in obj.attrs.keys():
+            if obj.attrs["NX_class"] in ["NXentry", "NXsubentry"]:
+                if "definition" in obj.keys():
+                    if obj["definition"].value == self.application:
+                        self.hits.append(obj)

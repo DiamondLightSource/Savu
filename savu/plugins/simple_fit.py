@@ -75,17 +75,14 @@ class SimpleFit(Filter, CpuPlugin):
                 idx = (np.array(idx)/step).astype(int)
                 #  for now
             elif isinstance(positions, list):
-                axis = \
+                self.axis = \
                     in_meta_data.get_meta_data('integrated_diffraction_angle')
         else:
-            positions = in_meta_data.get_meta_data('PeakIndex')
+            self.positions = in_meta_data.get_meta_data('PeakIndex')
 
-        params = [positions, axis]
-        return params
-
-    def filter_frame(self, data, params):
-        positions = params[0]
-        axis = params[0]
+    def filter_frame(self, data):
+        positions = self.positions
+        axis = self.axis
         p = []
         p.extend(data[0].squeeze()[positions])
         p.extend(self.parameters['width_guess']*np.ones_like(positions))
@@ -101,84 +98,117 @@ class SimpleFit(Filter, CpuPlugin):
 
     def setup(self, experiment):
 
-        # set up the output dataset that is created by the plugin
-        in_dataset, out_dataset = self.get_datasets()
-        in_meta_data, out_meta_data = self.get_meta_data()
+        # set up the output datasets that are created by the plugin
+        in_datasets, out_datasets = self.get_datasets()
+        mData = in_datasets[0].meta_data.get_dictionary()
+        
+        axis_labels = [in_datasets[0], '-1.name.unit']
+        positions = self.get_positions(mData)
+        shape = in_dataset[0].get_shape() + (len(positions),)
+        channel = {'core_dir': (-1,), 'slice_dir': range(len(outshape)-1)}
+        acq_patterns = in_dataset[0].get_patterns_based_on_acquisition()
+        print "acquisition based patterns", acq_patterns
 
-        out_dataset[0].create_dataset(in_dataset[0])
-        outshape = in_dataset[0].get_shape()
-        positions = self.getPositions(in_meta_data[0])
-        out_dataset[0].set_shape(outshape+(len(positions),))
-        out_meta_data[0][]
-
-
-        chunk_size = self.get_max_frames()
-        # get a list of input dataset names required for this plugin
-        in_data_list = self.parameters["in_datasets"]
-        # get all input dataset objects
-        in_d1 = experiment.index["in_data"][in_data_list[0]]
-        # set all input data patterns
-        in_d1.set_current_pattern_name("SPECTRUM")
-        # set frame chunk
-        outshape = in_d1.get_shape()
-        in_d1.set_nFrames(chunk_size)
-        # Ok.So how many peaks will we fit?
-
-        positions = self.getPositions(in_meta_data)
-
-        FitAreas = experiment.create_data_object("out_data", "FitAreas")
-        FitAreas.set_shape(outshape+(len(positions),))
-        FitAreas.add_pattern("CHANNEL", core_dir=(-1,),
-                             slice_dir=range(len(outshape)-1))
-        FitAreas.set_current_pattern_name("CHANNEL")
-        FitHeights = experiment.create_data_object("out_data", "FitHeights")
-        FitHeights.set_shape(outshape+(len(positions),))
-        FitHeights.add_pattern("CHANNEL", core_dir=(-1,),
-                               slice_dir=range(len(outshape)-1))
-        FitHeights.set_current_pattern_name("CHANNEL")
-        FitWidths = experiment.create_data_object("out_data", "FitWidths")
-        FitWidths.set_shape(outshape+(len(positions),))
-        FitWidths.add_pattern("CHANNEL", core_dir=(-1,),
-                              slice_dir=range(len(outshape)-1))
-        FitWidths.set_current_pattern_name("CHANNEL")
-
-        residuals = experiment.create_data_object("out_data", "residuals")
+        for out_data in out_datasets[:-1]:
+            out_data.create_dataset(patterns=in_dataset[0],
+                                    axis_labels=axis_labels, shape=shape)
+            out_data.add_pattern("CHANNEL", **channel)
+            for acq in acq_patterns:
+                out_data.add_pattern(acq.keys()[0], acq[acq.keys()[0]]
+        
+        residuals = out_datasets[-1]
         residuals.set_shape(outshape+(len(positions),))
-        # now the tomo/map stuff
-        for out_d1 in self.parameters["out_datasets"]:
-            motor_type = in_meta_data.get_meta_data("motor_type")
-            projection = []
-            projection_slice = []
-            for item, key in enumerate(motor_type):
-                if key == 'translation':
-                    projection.append(item)
-                elif key != 'translation':
-                    projection_slice.append(item)
-                if key == 'rotation':
-                    rotation = item  # we will assume one rotation for now
-            projdir = tuple(projection)
-            if in_meta_data.get_meta_data("is_map"):
-                ndims = range(len(outshape))
-                ovs = []
-                for i in ndims:
-                    if i != projdir[0]:
-                        if i != projdir[1]:
-                            ovs.append(i)
-                out_d1.add_pattern("PROJECTION", core_dir=projdir,
-                                   slice_dir=ovs)
-            if in_meta_data.get_meta_data("is_tomo"):
-                ndims = range(len(outshape))
-                ovs = []
-                for i in ndims:
-                    if i != rotation:
-                        if i != projdir[1]:
-                            ovs.append(i)
-                out_d1.add_pattern("SINOGRAM",
-                                   core_dir=(rotation, projdir[-1]),
-                                   slice_dir=ovs)
+        residuals.add_pattern("SPECTRUM",core_dir=(-1,),slice_dir=) # copy all patterns from in_data
+        # add spectrum and set current pattern name to be spectrum, axis labels?
+        # add acq_patterns
 
-    def organise_metadata(self):
-        pass
+        # set information relating to the plugin data
+        in_pData, out_pData = self.get_plugin_datasets()
+
+        in_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
+
+        for out_data in out_datasets[:-1]
+            out_pData[0].plugin_data_setup('CHANNEL', self.get_max_frames())
+
+        out_pData[-1].plugin_data_setup('SPECTRUM', self.get_max_frames())
+
+#    def setup(self, experiment):
+#
+#        # set up the output dataset that is created by the plugin
+#        in_dataset, out_dataset = self.get_datasets()
+#        in_meta_data, out_meta_data = self.get_meta_data()
+#
+#        out_dataset[0].create_dataset(in_dataset[0])
+#        outshape = in_dataset[0].get_shape()
+#        positions = self.getPositions(in_meta_data[0])
+#        out_dataset[0].set_shape(outshape+(len(positions),))
+#        out_meta_data[0][]
+#
+#
+#        chunk_size = self.get_max_frames()
+#        # get a list of input dataset names required for this plugin
+#        in_data_list = self.parameters["in_datasets"]
+#        # get all input dataset objects
+#        in_d1 = experiment.index["in_data"][in_data_list[0]]
+#        # set all input data patterns
+#        in_d1.set_current_pattern_name("SPECTRUM")
+#        # set frame chunk
+#        outshape = in_d1.get_shape()
+#        in_d1.set_nFrames(chunk_size)
+#        # Ok.So how many peaks will we fit?
+#
+#        positions = self.getPositions(in_meta_data)
+#
+#        FitAreas = experiment.create_data_object("out_data", "FitAreas")
+#        FitAreas.set_shape(outshape+(len(positions),))
+#        FitAreas.add_pattern("CHANNEL", core_dir=(-1,),
+#                             slice_dir=range(len(outshape)-1))
+#        FitAreas.set_current_pattern_name("CHANNEL")
+#        FitHeights = experiment.create_data_object("out_data", "FitHeights")
+#        FitHeights.set_shape(outshape+(len(positions),))
+#        FitHeights.add_pattern("CHANNEL", core_dir=(-1,),
+#                               slice_dir=range(len(outshape)-1))
+#        FitHeights.set_current_pattern_name("CHANNEL")
+#        FitWidths = experiment.create_data_object("out_data", "FitWidths")
+#        FitWidths.set_shape(outshape+(len(positions),))
+#        FitWidths.add_pattern("CHANNEL", core_dir=(-1,),
+#                              slice_dir=range(len(outshape)-1))
+#        FitWidths.set_current_pattern_name("CHANNEL")
+#
+#        residuals = experiment.create_data_object("out_data", "residuals")
+#        residuals.set_shape(outshape+(len(positions),))
+#        # now the tomo/map stuff
+#        for out_d1 in self.parameters["out_datasets"]:
+#            motor_type = in_meta_data.get_meta_data("motor_type")
+#            projection = []
+#            projection_slice = []
+#            for item, key in enumerate(motor_type):
+#                if key == 'translation':
+#                    projection.append(item)
+#                elif key != 'translation':
+#                    projection_slice.append(item)
+#                if key == 'rotation':
+#                    rotation = item  # we will assume one rotation for now
+#            projdir = tuple(projection)
+#            if in_meta_data.get_meta_data("is_map"):
+#                ndims = range(len(outshape))
+#                ovs = []
+#                for i in ndims:
+#                    if i != projdir[0]:
+#                        if i != projdir[1]:
+#                            ovs.append(i)
+#                out_d1.add_pattern("PROJECTION", core_dir=projdir,
+#                                   slice_dir=ovs)
+#            if in_meta_data.get_meta_data("is_tomo"):
+#                ndims = range(len(outshape))
+#                ovs = []
+#                for i in ndims:
+#                    if i != rotation:
+#                        if i != projdir[1]:
+#                            ovs.append(i)
+#                out_d1.add_pattern("SINOGRAM",
+#                                   core_dir=(rotation, projdir[-1]),
+#                                   slice_dir=ovs)
 
     def get_max_frames(self):
         """

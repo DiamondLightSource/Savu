@@ -15,32 +15,34 @@
 """
 .. module:: tomography_loader
    :platform: Unix
-   :synopsis: A class for loading tomography data using the standard loaders 
+   :synopsis: A class for loading tomography data using the standard loaders
    library.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
 
-from savu.core.utils import logmethod
-from savu.plugins.base_loader import BaseLoader
-import savu.data.transport_data.standard_loaders as sLoader
+from savu.plugins.base_multi_modal_loader import BaseMultiModalLoader
 
 from savu.plugins.utils import register_plugin
 
 
 @register_plugin
-class NxstxmLoader(BaseLoader):
+class NxstxmLoader(BaseMultiModalLoader):
     """
-    A class to load tomography data from an NXFluo file
+    A class to load tomography data from an NXstxm file
     """
-            
+
     def __init__(self, name='NxstxmLoader'):
         super(NxstxmLoader, self).__init__(name)
-        
-        
-    @logmethod
-    def setup(self, experiment):
-        loader = sLoader.STXMLoaders()
-        loader.load_from_nx_stxm(experiment)
-        
+
+    def setup(self):
+        data_str = '/instrument/detector/data'
+        kwargs = {'application': 'NXstxm'}
+        data_obj, stxm_entry = self.multi_modal_setup('NXstxm', data_str,
+                                                      kwargs)
+        mono_energy = data_obj.backing_file[
+            stxm_entry.name + '/instrument/monochromator/energy']
+        self.exp.meta_data.set_meta_data("mono_energy", mono_energy)
+        self.set_motors(data_obj, stxm_entry, 'stxm')
+        self.add_patterns_based_on_acquisition(data_obj, 'stxm')

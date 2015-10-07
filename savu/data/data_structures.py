@@ -99,37 +99,54 @@ class Data(object):
         a plugin
         """
         if len(args) is 1:
-            copy_data = args[0]
-            patterns = copy_data.meta_data.get_meta_data('data_patterns')
-            self.meta_data.set_meta_data('data_patterns', patterns)
-            self.copy_labels(copy_data)
-            if isinstance(copy_data, TomoRaw):
-                shape = copy_data.remove_dark_and_flat()
-            else:
-                shape = copy_data.get_shape()
-            self.set_shape(shape)
+            self.copy_dataset(args[0])
         else:
             try:
-                axis_labels = kwargs['axis_labels']
-                shape = kwargs['shape']
+                copy_data = kwargs['patterns']
+                patterns = copy_data.meta_data.get_meta_data('data_patterns')
+                self.meta_data.set_meta_data('data_patterns', patterns)
             except KeyError:
-                raise Exception("Please state axis labels and shape when "
-                                "creating a new dataset")
-            if isinstance(axis_labels, Data):
-                self.copy_labels(axis_labels)
-            else:
-                self.set_axis_labels(*axis_labels)
+                pass
 
-            if isinstance(shape, Data):
-                self.set_shape(Data.get_shape())
-            else:
-                self.set_shape(shape)
+            try:
+                self.create_axis_labels(kwargs['axis_labels'])
+                shape = kwargs['shape']
+                if isinstance(shape, Data):
+                    self.set_shape(Data.get_shape())
+                else:
+                    self.set_shape(shape)
+            except KeyError:
+                raise Exception("Please state axis_labels and shape when "
+                                "creating a new dataset")
+
+    def copy_dataset(self, copy_data):
+        patterns = copy_data.meta_data.get_meta_data('data_patterns')
+        self.meta_data.set_meta_data('data_patterns', patterns)
+        self.copy_labels(copy_data)
+        if isinstance(copy_data, TomoRaw):
+            shape = copy_data.remove_dark_and_flat()
+        else:
+            shape = copy_data.get_shape()
+        self.set_shape(shape)
+
+    def create_axis_labels(self, axis_labels):
+        if isinstance(axis_labels[0], Data):
+            self.copy_labels(axis_labels)
+            self.add_axis_labels(axis_labels[1:])
+        else:
+            self.set_axis_labels(*axis_labels)
 
     def copy_labels(self, copy_data):
         nDims = copy_data.meta_data.get_meta_data('nDims')
         self.meta_data.set_meta_data('nDims', nDims)
         axis_labels = copy_data.meta_data.get_meta_data('axis_labels')
         self.meta_data.set_meta_data('axis_labels', axis_labels)
+
+    def add_axis_labels(self, *args):
+        axis_labels = self.meta_data.get_meta_data('axis_labels')
+        for arg in args:
+            label = arg.split('.')
+            axis_labels.insert(int(label[0]), {label[1]: label[2]})
 
     def set_shape(self, shape):
         if len(shape) == self.meta_data.get_meta_data("nDims"):
@@ -190,6 +207,53 @@ class Data(object):
                        " Please choose from the following list: \n" + \
                        str(self.pattern_list)
             sys.exit(errorMsg)
+
+
+#
+#        for out_d1 in self.parameters["out_datasets"]:
+#            motor_type = in_meta_data.get_meta_data("motor_type")
+#            projection = []
+#            projection_slice = []
+#            for item, key in enumerate(motor_type):
+#                if key == 'translation':
+#                    projection.append(item)
+#                elif key != 'translation':
+#                    projection_slice.append(item)
+#                if key == 'rotation':
+#                    rotation = item  # we will assume one rotation for now
+#            projdir = tuple(projection)
+#            if in_meta_data.get_meta_data("is_map"):
+#                ndims = range(len(outshape))
+#                ovs = []
+#                for i in ndims:
+#                    if i != projdir[0]:
+#                        if i != projdir[1]:
+#                            ovs.append(i)
+#                out_d1.add_pattern("PROJECTION", core_dir=projdir,
+#                                   slice_dir=ovs)
+#            if in_meta_data.get_meta_data("is_tomo"):
+#                ndims = range(len(outshape))
+#                ovs = []
+#                for i in ndims:
+#                    if i != rotation:
+#                        if i != projdir[1]:
+#                            ovs.append(i)
+#                out_d1.add_pattern("SINOGRAM",
+#                                   core_dir=(rotation, projdir[-1]),
+#                                   slice_dir=ovs)
+                                   
+  
+    def get_projection_direction(self, motor_type):
+        projection = []
+        projection_slice = []
+        for item, key in enumerate(motor_type):
+            if key == 'translation':
+                projection.append(item)
+            elif key != 'translation':
+                projection_slice.append(item)
+            elif key == 'rotation':
+                rotation = item
+        return tuple(projection)
 
     def add_volume_patterns(self):
         self.add_pattern("VOLUME_YZ", core_dir=(1, 2), slice_dir=(0,))
@@ -482,3 +546,41 @@ class Padding(object):
 
     def get_padding_directions(self):
         return self.padding_dirs
+
+
+class DataMapping(object):
+
+    def __init__(self, pattern):
+        self.is_tomo = None
+        self.is_map = None
+
+    def get_patterns_based_on_acquisition(self):
+        motor_type = self.meta_data.get_meta_data("motor_type")
+        proj_dir, rotation = self.get_projection_direction(motor_type)
+        p1 = self.check_is_map(proj_dir)
+        p2 = self.check_is_tomo(proj_dir, rotation)
+        return list(p1) + list(p2)
+
+    def check_is_map(self, proj_dir):
+        pattern = []
+        if self.get_meta_data("is_map"):
+            ovs = []
+            for i in self.get_shape():
+                if i != proj_dir[0]:
+                    if i != proj_dir[1]:
+                        ovs.append(i)
+            pattern = {"PROJECTION", {'core_dir': proj_dir, 'slice_dir': ovs}}
+        return pattern
+
+    def check_is_tomo(self, proj_dir, rotation):
+        pattern = []
+        if self.get_meta_data("is_tomo"):
+            ovs = []
+            for i in self.get_shape():
+                if i != rotation:
+                    if i != proj_dir[1]:
+                        ovs.append(i)
+            pattern = {"SINOGRAM", {'core_dir': (rotation, proj_dir[-1]),
+                                    'slice_dir': ovs}}
+        return pattern
+        
