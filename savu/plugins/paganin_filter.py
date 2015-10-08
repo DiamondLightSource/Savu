@@ -49,8 +49,7 @@ class PaganinFilter(BaseFilter, CpuPlugin):
         logging.debug("initialising Paganin Filter")
         logging.debug("Calling super to make sure that all superclases are " +
                       " initialised")
-        super(PaganinFilter,
-              self).__init__("PaganinFilter")
+        super(PaganinFilter, self).__init__("PaganinFilter")
         self.filtercomplex = None
 
     def _setup_paganin(self, width, height):
@@ -88,9 +87,9 @@ class PaganinFilter(BaseFilter, CpuPlugin):
         result = -0.5*self.parameters['Ratio']*np.log(fpci+1.0)
         return result
 
-    def filter_frame(self, data_list, params):
+    def filter_frames(self, data):
         logging.debug("Getting the filter frame of Paganin Filter")
-        data = data_list[0]
+        data = data[0]
         (depth, height, width) = data.shape
         self._setup_paganin(width, height)
         data = np.nan_to_num(data)  # Noted performance

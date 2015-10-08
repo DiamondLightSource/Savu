@@ -287,7 +287,7 @@ class PluginData(object):
 
     def get_pattern(self):
         pattern_name = self.get_pattern_name()
-        return {pattern_name: self.get_patterns()[pattern_name]}
+        return {pattern_name: self.data_obj.get_patterns()[pattern_name]}
 
     def get_shape(self):
         return self.get_sub_shape(self.get_pattern_name())

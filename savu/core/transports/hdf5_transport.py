@@ -194,109 +194,39 @@ class Hdf5Transport(TransportMechanism):
         in_data, out_data = plugin.get_datasets()
 
         expInfo = plugin.exp.meta_data
-        in_slice_list, frame_list = \
-            self.get_all_slice_lists(in_data, expInfo)
-        out_slice_list, frame_list = \
-            self.get_all_slice_lists(out_data, expInfo)
+        in_slice_list = self.get_all_slice_lists(in_data, expInfo)
+        out_slice_list = self.get_all_slice_lists(out_data, expInfo)
 
         for count in range(len(in_slice_list[0])):
             print count
-            section, flist = self.get_all_padded_data(in_data, in_slice_list,
-                                                      frame_list, count)
-            result = plugin.process_frames(section, flist)
+            section, slice_list = \
+                self.get_all_padded_data(in_data, in_slice_list, count)
+            result = plugin.process_frames(section, slice_list)
             self.set_out_data(out_data, out_slice_list, result, count)
-
-#    @logmethod
-#    def timeseries_field_correction(self, plugin, in_data, out_data):
-#
-#        expInfo = plugin.exp.meta_data
-#        in_data = in_data[0]
-#        out_data = out_data[0]
-#
-#        in_slice_list, frame_list = in_data.\
-#            get_slice_list_per_process(expInfo, frameList=True)
-#        out_slice_list, frame_list = out_data.\
-#            get_slice_list_per_process(expInfo, frameList=True)
-#
-#        for count in range(len(in_slice_list)):
-#            print count
-#            result = plugin.correction(in_data.data[in_slice_list[count]],
-#                                       in_data.get_image_key())
-#            out_data.data[out_slice_list[count]] = result
-#
-#    @logmethod
-#    def reconstruction_setup(self, plugin, in_data, out_data, expInfo):
-#
-#        [slice_list, frame_list] = \
-#            in_data.get_slice_list_per_process(expInfo, frameList=True)
-#        cor = in_data.meta_data.get_meta_data("centre_of_rotation")[frame_list]
-#
-#        count = 0
-#        for sl in slice_list:
-#            frame = plugin.reconstruct(np.squeeze(in_data.data[sl]),
-#                                       cor[count],
-#                                       out_data.get_plugin_data().get_shape())
-#            out_data.data[sl] = frame
-#            count += 1
-#            plugin.count += 1
-#            logging.debug("Reconstruction progress (%i of %i)" %
-#                         (plugin.count, len(slice_list)))
-#
-#    @logmethod
-#    def filter_chunk(self, plugin, in_data, out_data):
-#        logging.debug("Running filter._filter_chunk")
-#
-#        expInfo = plugin.exp.meta_data
-#        in_slice_list = self.get_all_slice_lists(in_data, expInfo)
-#        out_slice_list = self.get_all_slice_lists(out_data, expInfo)
-#
-#        for count in range(len(in_slice_list[0])):
-#            print count
-#            section = self.get_all_padded_data(in_data, in_slice_list, count)
-#            result = plugin.filter_frame(section)
-#            self.set_out_data(out_data, out_slice_list, result, count)
-#
-#    if type(result) == dict:
-#        for key in result.keys():
-#            if key == 'center_of_rotation':
-#                frame = in_data[0].get_orthogonal_slice(in_slice_list[count],
-#                in_data[0].core_directions[plugin.get_filter_frame_type()])
-#                out_data.center_of_rotation[frame] = result[key]
-#            elif key == 'data':
-#                out_data.data[out_slice_list[count]] = \
-#                in_data[0].get_unpadded_slice_data(in_slice_list[count],
-#                                            padding, in_data[0], result)
-#    else:
-#        out_data.data[out_slice_list[count]] = \
-#        in_data[0].get_unpadded_slice_data(in_slice_list[0][count], padding,
-#                                        in_data[0], result)
 
     def process_checks(self):
         pass
-                # if plugin inherits from base_recon and the data inherits from tomoraw
+        # if plugin inherits from base_recon and the data inherits from tomoraw
         # then throw an exception
 #        if isinstance(in_data, TomoRaw):
-#            raise Exception("The input data to a reconstruction plugin cannot \
-#            be Raw data. Have you performed a timeseries_field_correction?")    
+#            raise Exception("The input data to a reconstruction plugin cannot
+#            be Raw data. Have you performed a timeseries_field_correction?")
 # call a new process called process_check?
 
     def get_all_slice_lists(self, data_list, expInfo):
         slice_list = []
-        frame_list = []
         for data in data_list:
-            slist, flist = data.get_slice_list_per_process(expInfo)
-            slice_list.append(slist)
-            frame_list.append(flist)
-        return slice_list, frame_list
+            slice_list.append(data.get_slice_list_per_process(expInfo))
+        return slice_list
 
-    def get_all_padded_data(self, data, slice_list, frame_list, count):
+    def get_all_padded_data(self, data, slice_list, count):
         section = []
-        flist = []
+        slist = []
         for idx in range(len(data)):
             section.append(data[idx].get_padded_slice_data
                           (slice_list[idx][count]))
-            flist.append(frame_list[idx][count])
-        return section, flist
+            slist.append(slice_list[idx][count])
+        return section, slist
 
     def set_out_data(self, data, slice_list, result, count):
         result = [result] if type(result) is not list else result

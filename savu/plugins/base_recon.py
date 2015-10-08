@@ -47,12 +47,13 @@ class BaseRecon(Plugin):
         super(BaseRecon, self).__init__(name)
 
     @logmethod
-    def process_frames(self, data, frame_list):
+    def process_frames(self, data, slice_list):
         """
         Reconstruct a single sinogram with the provided center of rotation
         """
         sinogram = data[0]
-        vol_shape = self.get_plugin_out_datasets()[0].get_shape()
+        in_pData, out_pData = self.get_plugin_datasets()
+        vol_shape = out_pData[0].get_shape()
         in_meta_data = self.get_in_meta_data()[0]
 
         try:
@@ -62,6 +63,8 @@ class BaseRecon(Plugin):
             cor *= self.parameters['center_of_rotation']
             in_meta_data.set_meta_data("centre_of_rotation", cor)
 
+        main_dir = in_pData[0].get_pattern()['SINOGRAM']['main_dir']
+        frame_list = slice_list[0][main_dir]
         angles = in_meta_data.get_meta_data('rotation_angle')
         cor = in_meta_data.get_meta_data("centre_of_rotation")[frame_list]
 

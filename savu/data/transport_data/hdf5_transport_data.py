@@ -254,7 +254,7 @@ class Hdf5TransportData(object):
         frame_index = np.arange(len(slice_list))
         frames = np.array_split(frame_index, len(processes))[process]
 
-        return slice_list[frames[0]:frames[-1]+1], frame_index
+        return slice_list[frames[0]:frames[-1]+1]
 
     def calculate_slice_padding(self, in_slice, pad_ammount, data_stop):
         sl = in_slice

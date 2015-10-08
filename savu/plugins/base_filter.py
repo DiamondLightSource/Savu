@@ -54,17 +54,11 @@ class BaseFilter(Plugin):
         """
         return 8
 
-    def process_frames(self, data):
+    def process_frames(self, data, slice_list):
         """
-        Should be overloaded by filter classes extending this one
-
-        :param data: The data to filter
-        :type data: ndarray
-        :returns:  The filtered image
+        Calls the main filter processing function
         """
-        logging.error("filter_frame needs to be implemented for %s",
-                      data.__class__)
-        raise NotImplementedError("filter_frame needs to be implemented")
+        return self.filter_frames(data)
 
     def setup(self):
         self.exp.log(self.name + " Start")
@@ -80,9 +74,6 @@ class BaseFilter(Plugin):
         out_pData[0].plugin_data_setup('PROJECTION', self.get_max_frames())
 
         self.exp.log(self.name + " End")
-
-    def organise_metadata(self):
-        pass
 
     def nInput_datasets(self):
         return 1
