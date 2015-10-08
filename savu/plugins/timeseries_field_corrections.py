@@ -44,7 +44,7 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         super(TimeseriesFieldCorrections,
               self).__init__("TimeseriesFieldCorrections")
 
-    def process_frames(self, data):
+    def process_frames(self, data, frame_list):
         in_meta_data, out_meta_data = self.get_meta_data()
         data = data[0]
         image_keys = in_meta_data[0].get_meta_data('image_key')

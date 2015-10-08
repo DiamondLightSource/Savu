@@ -61,6 +61,14 @@ class NxfluoLoader(BaseMultiModalLoader):
         #and get the mono energy
 
         self.set_motors(data_obj, fluo_entry, 'fluo')
+        motor_type = data_obj.data_mapping.get_motor_type()
+        print "motor type", motor_type
+
+        data_obj.set_axis_labels('test.None',
+                                 'test.None',
+                                 'test.None',
+                                 'test.None')
+
         self.add_patterns_based_on_acquisition(data_obj, 'fluo')
 
         data_obj.add_pattern("SPECTRUM", core_dir=(-1,),

@@ -36,6 +36,7 @@ class BaseLoader(Plugin):
 
     def get_NXapp(self, ltype, nx_file, entry):
         self.application = ltype
+        print "***Application is ", ltype
         nx_file[entry].visititems(self._visit_NXapp)
         return self.hits
 

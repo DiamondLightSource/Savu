@@ -98,7 +98,7 @@ class Hdf5TransportData(object):
         plugin_file = h5py.File(nxs_filename, 'a')
 
         if linkType is 'final_result':
-            entry = self.group
+            entry = plugin_file['entry'].require_group('final_result')
             entry.attrs[NX_CLASS] = 'NXdata'
         else:
             entry = plugin_file['entry'].require_group('intermediate')
@@ -123,6 +123,7 @@ class Hdf5TransportData(object):
         entry.attrs['axes'] = axes
 
     def save_data(self, link_type):
+        print link_type
         entry = self.add_data_link_and_attributes(link_type)
         #self.output_metadata(entry)
 
@@ -246,19 +247,14 @@ class Hdf5TransportData(object):
 
         return self.grouped_slice_list(sl, max_frames)
 
-    def get_slice_list_per_process(self, expInfo, **kwargs):
-        frameList = kwargs.get('frameList', False)
-
+    def get_slice_list_per_process(self, expInfo):
         processes = expInfo.get_meta_data("processes")
         process = expInfo.get_meta_data("process")
         slice_list = self.get_grouped_slice_list()
         frame_index = np.arange(len(slice_list))
         frames = np.array_split(frame_index, len(processes))[process]
 
-        if frameList:
-            return [slice_list[frames[0]:frames[-1]+1], frame_index]
-        else:
-            return slice_list[frames[0]:frames[-1]+1]
+        return slice_list[frames[0]:frames[-1]+1], frame_index
 
     def calculate_slice_padding(self, in_slice, pad_ammount, data_stop):
         sl = in_slice

@@ -169,6 +169,7 @@ class Hdf5Transport(TransportMechanism):
             logging.info("Copy out data to in data")
             for key in exp.index["out_data"]:
                 output = exp.index["out_data"][key]
+                print "Saving the data link to the Nexus file"
                 output.save_data(link_type)
                 exp.index["in_data"][key] = copy.deepcopy(output)
 
@@ -193,13 +194,16 @@ class Hdf5Transport(TransportMechanism):
         in_data, out_data = plugin.get_datasets()
 
         expInfo = plugin.exp.meta_data
-        in_slice_list = self.get_all_slice_lists(in_data, expInfo)
-        out_slice_list = self.get_all_slice_lists(out_data, expInfo)
+        in_slice_list, frame_list = \
+            self.get_all_slice_lists(in_data, expInfo)
+        out_slice_list, frame_list = \
+            self.get_all_slice_lists(out_data, expInfo)
 
         for count in range(len(in_slice_list[0])):
             print count
-            section = self.get_all_padded_data(in_data, in_slice_list, count)
-            result = plugin.process_frames(section)
+            section, flist = self.get_all_padded_data(in_data, in_slice_list,
+                                                      frame_list, count)
+            result = plugin.process_frames(section, flist)
             self.set_out_data(out_data, out_slice_list, result, count)
 
 #    @logmethod
@@ -278,16 +282,21 @@ class Hdf5Transport(TransportMechanism):
 
     def get_all_slice_lists(self, data_list, expInfo):
         slice_list = []
+        frame_list = []
         for data in data_list:
-            slice_list.append(data.get_slice_list_per_process(expInfo))
-        return slice_list
+            slist, flist = data.get_slice_list_per_process(expInfo)
+            slice_list.append(slist)
+            frame_list.append(flist)
+        return slice_list, frame_list
 
-    def get_all_padded_data(self, data, slice_list, count):
+    def get_all_padded_data(self, data, slice_list, frame_list, count):
         section = []
+        flist = []
         for idx in range(len(data)):
             section.append(data[idx].get_padded_slice_data
                           (slice_list[idx][count]))
-        return section
+            flist.append(frame_list[idx][count])
+        return section, flist
 
     def set_out_data(self, data, slice_list, result, count):
         result = [result] if type(result) is not list else result

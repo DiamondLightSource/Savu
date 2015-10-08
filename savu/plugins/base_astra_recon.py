@@ -64,7 +64,7 @@ class BaseAstraRecon(BaseRecon):
         return params
         
 
-    def reconstruct(self, sinogram, centre_of_rotations, vol_shape, params):
+    def process_frames(self, sinogram, centre_of_rotations, vol_shape, params):
         
         angles = params[0]
    

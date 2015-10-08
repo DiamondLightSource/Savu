@@ -48,6 +48,7 @@ class Data(object):
         self.data = None
         self.shape = None
         self._plugin_data_obj = None
+        self.data_mapping = None
         self.exp = exp
 
     def set_plugin_data(self, plugin_data_obj):
@@ -149,11 +150,8 @@ class Data(object):
             axis_labels.insert(int(label[0]), {label[1]: label[2]})
 
     def set_shape(self, shape):
-        if len(shape) == self.meta_data.get_meta_data("nDims"):
-            self.shape = shape
-        else:
-            raise Exception("The number of axis labels does not coincide with "
-                            "the number of data dimensions.")
+        self.shape = shape
+        self.check_dims()
 
     def get_shape(self):
         shape = self.shape
@@ -166,6 +164,14 @@ class Data(object):
         except KeyError:
             pass
         return shape
+
+    def check_dims(self):
+        try:
+            if len(self.shape) != self.meta_data.get_meta_data("nDims"):
+                raise Exception("The number of axis labels does not coincide "
+                                "with the number of data dimensions.")
+        except KeyError:
+            pass
 
     def set_dist(self, dist):
         self.meta_data.set_meta_data('dist', dist)
@@ -200,60 +206,13 @@ class Data(object):
                 self.meta_data.set_meta_data(["data_patterns", dtype, args],
                                              kwargs[args])
             if nDims != self.meta_data.get_meta_data("nDims"):
-                raise Exception("The pattern " + dtype + " has an incorrect "
-                                " number of dimensions.")
+                print "nDims", nDims, self.meta_data.get_meta_data("nDims")
+                raise Exception("The pattern '%s' has an incorrect number of "
+                                "dimensions.", dtype)
         else:
-            errorMsg = "The data pattern " + dtype + " does not exist. " + \
-                       " Please choose from the following list: \n" + \
-                       str(self.pattern_list)
-            sys.exit(errorMsg)
-
-
-#
-#        for out_d1 in self.parameters["out_datasets"]:
-#            motor_type = in_meta_data.get_meta_data("motor_type")
-#            projection = []
-#            projection_slice = []
-#            for item, key in enumerate(motor_type):
-#                if key == 'translation':
-#                    projection.append(item)
-#                elif key != 'translation':
-#                    projection_slice.append(item)
-#                if key == 'rotation':
-#                    rotation = item  # we will assume one rotation for now
-#            projdir = tuple(projection)
-#            if in_meta_data.get_meta_data("is_map"):
-#                ndims = range(len(outshape))
-#                ovs = []
-#                for i in ndims:
-#                    if i != projdir[0]:
-#                        if i != projdir[1]:
-#                            ovs.append(i)
-#                out_d1.add_pattern("PROJECTION", core_dir=projdir,
-#                                   slice_dir=ovs)
-#            if in_meta_data.get_meta_data("is_tomo"):
-#                ndims = range(len(outshape))
-#                ovs = []
-#                for i in ndims:
-#                    if i != rotation:
-#                        if i != projdir[1]:
-#                            ovs.append(i)
-#                out_d1.add_pattern("SINOGRAM",
-#                                   core_dir=(rotation, projdir[-1]),
-#                                   slice_dir=ovs)
-                                   
-  
-    def get_projection_direction(self, motor_type):
-        projection = []
-        projection_slice = []
-        for item, key in enumerate(motor_type):
-            if key == 'translation':
-                projection.append(item)
-            elif key != 'translation':
-                projection_slice.append(item)
-            elif key == 'rotation':
-                rotation = item
-        return tuple(projection)
+            raise Exception("The data pattern '%s'does not exist. Please "
+                            "choose from the following list: \n'%s'",
+                            dtype, str(self.pattern_list))
 
     def add_volume_patterns(self):
         self.add_pattern("VOLUME_YZ", core_dir=(1, 2), slice_dir=(0,))
@@ -345,7 +304,7 @@ class PluginData(object):
         if self.get_pattern_name() not in \
                 self.data_obj.pattern_list:
             raise Exception(("Error: The Data class does not contain an \
-                        instance of ", self.get_pattern_name()))
+                              instance of ", self.get_pattern_name()))
 
     def get_slice_directions(self):
         try:
@@ -550,9 +509,35 @@ class Padding(object):
 
 class DataMapping(object):
 
-    def __init__(self, pattern):
+    def __init__(self):
         self.is_tomo = None
         self.is_map = None
+        self.motors = None
+        self.motor_type = None
+
+    def set_motors(self, motors):
+        self.motors = motors
+
+    def get_motors(self):
+        return self.motors
+
+    def set_motor_type(self, motor_type):
+        self.motor_type = motor_type
+
+    def get_motor_type(self):
+        return self.motor_type
+
+    def get_projection_direction(self, motor_type):
+        projection = []
+        projection_slice = []
+        for item, key in enumerate(motor_type):
+            if key == 'translation':
+                projection.append(item)
+            elif key != 'translation':
+                projection_slice.append(item)
+            elif key == 'rotation':
+                rotation = item
+        return tuple(projection)
 
     def get_patterns_based_on_acquisition(self):
         motor_type = self.meta_data.get_meta_data("motor_type")

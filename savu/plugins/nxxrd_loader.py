@@ -45,8 +45,7 @@ class NxxrdLoader(BaseMultiModalLoader):
     @logmethod
     def setup(self):
         data_str = '/instrument/detector/data'
-        kwargs = {'application': 'NXxrd'}
-        data_obj, xrd_entry = self.multi_modal_setup('NXxrd', data_str, kwargs)
+        data_obj, xrd_entry = self.multi_modal_setup('NXxrd', data_str)
         mono_energy = data_obj.backing_file[
             xrd_entry.name + '/instrument/monochromator/energy']
         self.exp.meta_data.set_meta_data("mono_energy", mono_energy)
