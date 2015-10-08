@@ -199,10 +199,10 @@ class Plugin(object):
             data_objs.append(self.exp.index[dtype][data])
         return data_objs
 
-    def get_in_datasets(self):
+    def set_in_datasets(self):
         return self.get_data_objects('in_data')
 
-    def get_out_datasets(self):
+    def set_out_datasets(self):
         try:
             out_data = self.get_data_objects('out_data')
         except KeyError:
@@ -224,8 +224,8 @@ class Plugin(object):
         for each.
         """
         try:
-            self.parameters['in_datasets'] = self.get_in_datasets()
-            self.parameters['out_datasets'] = self.get_out_datasets()
+            self.parameters['in_datasets'] = self.set_in_datasets()
+            self.parameters['out_datasets'] = self.set_out_datasets()
             self.parameters['plugin_in_datasets'] = \
                 self.get_plugin_data(self.parameters['in_datasets'])
             self.parameters['plugin_out_datasets'] = \
@@ -233,19 +233,32 @@ class Plugin(object):
         except KeyError:
             pass
 
+    def get_plugin_in_datasets(self):
+        return self.parameters['plugin_in_datasets']
+
+    def get_plugin_out_datasets(self):
+        return self.parameters['plugin_out_datasets']
+
     def get_plugin_datasets(self):
-        plugin_in = self.parameters['plugin_in_datasets']
-        plugin_out = self.parameters['plugin_out_datasets']
-        return plugin_in, plugin_out
+        return self.get_plugin_in_datasets(), self.get_plugin_out_datasets()
+
+    def get_in_datasets(self):
+        return self.parameters['in_datasets']
+
+    def get_out_datasets(self):
+        return self.parameters['out_datasets']
 
     def get_datasets(self):
-        return self.parameters['in_datasets'], self.parameters['out_datasets']
+        return self.get_in_datasets(), self.get_out_datasets()
+
+    def get_in_meta_data(self):
+        return self.set_meta_data(self.parameters['in_datasets'], 'in_data')
+
+    def get_out_meta_data(self):
+        return self.set_meta_data(self.parameters['out_datasets'], 'out_data')
 
     def get_meta_data(self):
-        in_data, out_data = self.get_datasets()
-        in_meta_data = self.set_meta_data(in_data, 'in_data')
-        out_meta_data = self.set_meta_data(out_data, 'out_data')
-        return in_meta_data, out_meta_data
+        return self.get_in_meta_data(), self.get_out_meta_data()
 
     def set_meta_data(self, data_list, dtype):
         meta_data = []

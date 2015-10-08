@@ -46,45 +46,37 @@ class BaseRecon(Plugin):
     def __init__(self, name='BaseRecon'):
         super(BaseRecon, self).__init__(name)
 
-    def process_frames(self, sinogram, frame_list):
+    @logmethod
+    def process_frames(self, data, frame_list):
         """
         Reconstruct a single sinogram with the provided center of rotation
         """
-        logging.error("reconstruct needs to be implemented")
-        raise NotImplementedError("reconstruct " +
-                                  "needs to be implemented")
+        sinogram = data[0]
+        vol_shape = self.get_plugin_out_datasets()[0].get_shape()
+        in_meta_data = self.get_in_meta_data()[0]
 
-#    @logmethod
-#    def process(self, transport):
-#        """
-#        Perform the main processing step for the plugin
-#        """
-#        in_data, out_data = self.get_plugin_datasets()
-#        in_meta_data, out_meta_data = self.get_meta_data()
-#
-#        try:
-#            centre_of_rotation = \
-#                in_meta_data[0].get_meta_data("centre_of_rotation")
-#        except KeyError:
-#            centre_of_rotation = np.ones(in_data[0].data_obj.get_shape()[1])
-#            centre_of_rotation *= self.parameters['center_of_rotation']
-#            in_meta_data[0].set_meta_data("centre_of_rotation",
-#                                          centre_of_rotation)
-#
-#        transport.reconstruction_setup(self, in_data[0], out_data[0],
-#                                       self.exp)
+        try:
+            cor = in_meta_data.get_meta_data("centre_of_rotation")
+        except KeyError:
+            cor = np.ones(self.get_in_datasets()[0].get_shape()[1])
+            cor *= self.parameters['center_of_rotation']
+            in_meta_data.set_meta_data("centre_of_rotation", cor)
+
+        angles = in_meta_data.get_meta_data('rotation_angle')
+        cor = in_meta_data.get_meta_data("centre_of_rotation")[frame_list]
+
+        return self.reconstruct(np.squeeze(sinogram), cor, angles, vol_shape)
 
     def setup(self):
         # set up the output dataset that is created by the plugin
         in_dataset, out_dataset = self.get_datasets()
         # copy all required information from in_dataset[0]
 
-        out_dataset[0].add_volume_patterns()
         axis_labels = ['voxel_x.units', 'voxel_y.units', 'voxel_z.units']
         shape = in_dataset[0].get_shape()
-
         out_dataset[0].create_dataset(axis_labels=axis_labels,
                                       shape=(shape[2], shape[1], shape[2]))
+        out_dataset[0].add_volume_patterns()
 
         # set information relating to the plugin data
         in_pData, out_pData = self.get_plugin_datasets()
