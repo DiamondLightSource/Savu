@@ -46,29 +46,30 @@ class BaseRecon(Plugin):
     def __init__(self, name='BaseRecon'):
         super(BaseRecon, self).__init__(name)
 
+    def pre_process(self):
+        in_dataset = self.get_in_datasets()[0]
+        in_meta_data = self.get_in_meta_data()[0]
+        try:
+            cor = in_meta_data.get_meta_data("centre_of_rotation")
+        except KeyError:
+            cor = np.ones(in_dataset.get_shape()[1])
+            cor *= self.parameters['center_of_rotation']
+            in_meta_data.set_meta_data("centre_of_rotation", cor)
+        self.exp.log(self.name + " End")
+        self.cor = cor
+        in_pData, out_pData = self.get_plugin_datasets()
+        self.vol_shape = out_pData[0].get_shape()
+        self.main_dir = in_pData[0].get_pattern()['SINOGRAM']['main_dir']
+        self.angles = in_meta_data.get_meta_data('rotation_angle')
+
     @logmethod
     def process_frames(self, data, slice_list):
         """
         Reconstruct a single sinogram with the provided center of rotation
         """
-        sinogram = data[0]
-        in_pData, out_pData = self.get_plugin_datasets()
-        vol_shape = out_pData[0].get_shape()
-        in_meta_data = self.get_in_meta_data()[0]
-
-        try:
-            cor = in_meta_data.get_meta_data("centre_of_rotation")
-        except KeyError:
-            cor = np.ones(self.get_in_datasets()[0].get_shape()[1])
-            cor *= self.parameters['center_of_rotation']
-            in_meta_data.set_meta_data("centre_of_rotation", cor)
-
-        main_dir = in_pData[0].get_pattern()['SINOGRAM']['main_dir']
-        frame_list = slice_list[0][main_dir]
-        angles = in_meta_data.get_meta_data('rotation_angle')
-        cor = in_meta_data.get_meta_data("centre_of_rotation")[frame_list]
-
-        return self.reconstruct(np.squeeze(sinogram), cor, angles, vol_shape)
+        cor = self.cor[slice_list[0][self.main_dir]]
+        return self.reconstruct(np.squeeze(data[0]), cor, self.angles,
+                                self.vol_shape)
 
     def setup(self):
         # set up the output dataset that is created by the plugin
@@ -86,8 +87,6 @@ class BaseRecon(Plugin):
         # set pattern_name and nframes to process for all datasets
         in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
         out_pData[0].plugin_data_setup('VOLUME_XZ', self.get_max_frames())
-
-        self.exp.log(self.name + " End")
 
     def get_max_frames(self):
         """
