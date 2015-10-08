@@ -22,14 +22,14 @@
 import logging
 from scipy.signal import savgol_filter
 import numpy as np
-from savu.plugins.filter import Filter
+from savu.plugins.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 from savu.plugins.utils import register_plugin
 
 
 @register_plugin
-class StripBackground(Filter, CpuPlugin):
+class StripBackground(BaseFilter, CpuPlugin):
     """
     1D background removal. PyMca magic function
     

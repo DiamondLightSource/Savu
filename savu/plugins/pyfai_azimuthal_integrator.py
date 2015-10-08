@@ -24,14 +24,14 @@ import logging
 import math
 import pyFAI
 import numpy as np
-from savu.plugins.filter import Filter
+from savu.plugins.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 from savu.plugins.utils import register_plugin
 
 
 @register_plugin
-class PyfaiAzimuthalIntegrator(Filter, CpuPlugin):
+class PyfaiAzimuthalIntegrator(BaseFilter, CpuPlugin):
     """
     1D azimuthal integrator by pyFAI
     

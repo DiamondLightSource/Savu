@@ -24,7 +24,7 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 
 from savu.plugins.utils import register_plugin
-from savu.plugins.filter import Filter
+from savu.plugins.base_filter import BaseFilter
 import numpy as np
 from scipy.optimize import leastsq
 from inspect import getargspec as howmany
@@ -36,7 +36,7 @@ from flupy.algorithms.xrf_calculations.escape import *
 
 
 @register_plugin
-class SimpleFit(Filter, CpuPlugin):
+class SimpleFit(BaseFilter, CpuPlugin):
     """
     This plugin fits peaks. Either XRD or XRF for now.
     :param in_datasets: Create a list of the dataset(s). Default: [].

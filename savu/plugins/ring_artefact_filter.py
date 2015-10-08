@@ -22,7 +22,7 @@
 """
 import logging
 
-from savu.plugins.filter import Filter
+from savu.plugins.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 import numpy as np
@@ -33,7 +33,7 @@ from savu.plugins.utils import register_plugin
 
 
 @register_plugin
-class RingArtefactFilter(Filter, CpuPlugin):
+class RingArtefactFilter(BaseFilter, CpuPlugin):
     """
     A plugin to perform ring artefact removal
     

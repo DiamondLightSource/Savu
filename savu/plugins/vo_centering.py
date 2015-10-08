@@ -29,11 +29,11 @@ import numpy as np
 import scipy.fftpack as fft
 
 from savu.plugins.utils import register_plugin
-from savu.plugins.filter import Filter
+from savu.plugins.base_filter import BaseFilter
 
 
 @register_plugin
-class VoCentering(Filter, CpuPlugin):
+class VoCentering(BaseFilter, CpuPlugin):
     """
     A plugin to calculate the center of rotation using the Vo Method
     """

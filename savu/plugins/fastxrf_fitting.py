@@ -22,14 +22,14 @@
 import logging
 from flupy.xrf_data_handling import XRFDataset
 import numpy as np
-from savu.plugins.filter import Filter
+from savu.plugins.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 from savu.plugins.utils import register_plugin
 
 
 @register_plugin
-class FastxrfFitting(Filter, CpuPlugin):
+class FastxrfFitting(BaseFilter, CpuPlugin):
     """
     fast fluorescence fitting with FastXRF. Needs to be on the path
     :param fit_elements: The elements to fit. Default: 'Zn,Cu,Fe,Cr,Cl,Br,Kr'.

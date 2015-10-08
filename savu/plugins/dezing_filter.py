@@ -24,13 +24,13 @@ import logging
 import numpy as np
 import dezing
 
-from savu.plugins.filter import Filter
+from savu.plugins.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 
 
 @register_plugin
-class DezingFilter(Filter, CpuPlugin):
+class DezingFilter(BaseFilter, CpuPlugin):
     """
     A plugin
 

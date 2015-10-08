@@ -22,13 +22,13 @@
 """
 import logging
 
-from savu.plugins.filter import Filter
+from savu.plugins.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 
 
 @register_plugin
-class DownsampleFilter(Filter, CpuPlugin):
+class DownsampleFilter(BaseFilter, CpuPlugin):
     """
     A plugin to reduce the data in the selected direction by a proportion
 
