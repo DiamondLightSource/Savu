@@ -45,6 +45,10 @@ class Plugin(object):
         self.set_parameters(params)
         self.set_plugin_datasets(exp)
         self.setup()
+        try:
+            self.set_filter_padding(*(self.get_plugin_datasets()))
+        except AttributeError:
+            pass
 
     def setup(self):
         """
