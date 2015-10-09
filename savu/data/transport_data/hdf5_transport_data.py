@@ -99,35 +99,40 @@ class Hdf5TransportData(object):
         plugin_file = h5py.File(nxs_filename, 'a')
 
         if linkType is 'final_result':
-            entry = plugin_file['entry'].require_group('final_result')
+            entry = plugin_file['entry']
             entry.attrs[NX_CLASS] = 'NXdata'
+            entry['final_result'] = self.external_link()
+            entry = plugin_file['entry'].require_group('final_result')
         else:
             entry = plugin_file['entry'].require_group('intermediate')
             entry.attrs[NX_CLASS] = 'NXcollection'
-        entry[self.group_name] = self.external_link()
-        plugin_file.close()
-        return entry
+            entry[self.group_name] = self.external_link()
+        return plugin_file, entry
 
     def output_metadata(self, entry):
         axis_labels = self.meta_data.get_meta_data("axis_labels")
         axes = []
         count = 0
         for labels in axis_labels:
-            axes.append(labels.keys()[0])
-            entry.attrs[labels.keys()[0]] = count
-#            try:
-#                self.meta_data.get_meta_data(labels.keys()[0])
-#                # output the dataset
-#            except:
-#                pass  # change this pass to count the data
-#            count += 1
+            name = labels.keys()[0]
+            axes.append(name)
+            entry.attrs[name + '_indices'] = count
+
+            try:
+                mData = self.meta_data.get_meta_data(name)
+            except KeyError:
+                mData = np.arange(self.get_shape()[count])
+            temp = self.group.create_dataset(name, mData.shape, mData.dtype)
+            temp[...] = mData[...]
+            count += 1
         entry.attrs['axes'] = axes
 
     def save_data(self, link_type):
         process = self.exp.meta_data.get_meta_data('process')
         if process is 0:
-            entry = self.add_data_link_and_attributes(link_type)
-            #self.output_metadata(entry)
+            plugin_file, entry = self.add_data_link_and_attributes(link_type)
+            self.output_metadata(entry)
+            plugin_file.close()
 
     def close_file(self):
         """

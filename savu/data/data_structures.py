@@ -205,10 +205,13 @@ class Data(object):
                 nDims += len(kwargs[args])
                 self.meta_data.set_meta_data(["data_patterns", dtype, args],
                                              kwargs[args])
-            if nDims != self.meta_data.get_meta_data("nDims"):
-                print "nDims", nDims, self.meta_data.get_meta_data("nDims")
-                raise Exception("The pattern '%s' has an incorrect number of "
-                                "dimensions.", dtype)
+            try:
+                if nDims != self.meta_data.get_meta_data("nDims"):
+                    print "nDims", nDims, self.meta_data.get_meta_data("nDims")
+                    raise Exception("The pattern '%s' has an incorrect number "
+                                    "of dimensions.", dtype)
+            except KeyError:
+                self.meta_data.set_meta_data('nDims', nDims)
         else:
             raise Exception("The data pattern '%s'does not exist. Please "
                             "choose from the following list: \n'%s'",
@@ -227,6 +230,25 @@ class Data(object):
             axis_labels.append({axis[0]: axis[1]})
         self.meta_data.set_meta_data('axis_labels', axis_labels)
 
+    def finalise_patterns(self):
+        check = 0
+        check += self.check_pattern('SINOGRAM')
+        check += self.check_pattern('PROJECTION')
+        if check is 2:
+            self.set_main_axis('SINOGRAM')
+            self.set_main_axis('PROJECTION')
+        elif check is 1:
+            raise Exception("Cannot set up SINOGRAM and PROJECTION "
+                            "main_directions as both patterns do no exist")
+
+    def check_pattern(self, pattern_name):
+        patterns = self.get_patterns()
+        try:
+            patterns[pattern_name]
+        except KeyError:
+            return 0
+        return 1
+
     def set_direction_parallel_to_rotation_axis(self, tdir):
         self.check_direction(tdir, 'parallel_to_rotation_axis')
         self.set_main_axis(tdir, 'SINOGRAM')
@@ -244,15 +266,15 @@ class Data(object):
             raise Exception("Please add available patterns before setting the"
                             " direction ", dname)
 
-    def set_main_axis(self, tdir, pname):
-        try:
-            self.meta_data.get_meta_data(['data_patterns', pname])
-            self.meta_data.set_meta_data(['data_patterns', pname, 'main_dir'],
-                                         tdir)
-        except KeyError:
-            warnings.warn('The main_dir ' + str(tdir) + ' cannot be associated'
-                          ' with the pattern ' + str(pname) + ' as it does not'
-                          ' exist. ')
+    def set_main_axis(self, pname):
+        patterns = self.get_patterns()
+        n1 = 'PROJECTION' if pname is 'SINOGRAM' else 'SINOGRAM'
+        d1 = patterns[n1]['core_dir']
+        d2 = patterns[pname]['slice_dir']
+        tdir = set(d1).intersection(set(d2))
+        self.meta_data.set_meta_data(['data_patterns', pname, 'main_dir'],
+                                     tdir)
+        print pname, int(list(tdir)[0])
 
     def get_patterns(self):
         return self.meta_data.get_meta_data("data_patterns")

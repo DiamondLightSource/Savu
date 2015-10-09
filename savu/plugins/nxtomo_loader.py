@@ -47,14 +47,19 @@ class NxtomoLoader(BaseLoader):
         base_classes = [ds.TomoRaw]
         data_obj = exp.create_data_object('in_data', 'tomo', base_classes)
 
-        data_obj.set_axis_labels('detector_x.pixel',
+        # from nexus file determine rotation angle
+        rot = 0
+        detY = 1
+        detX = 2
+        data_obj.set_axis_labels('rotation_angle.degrees',
                                  'detector_y.pixel',
-                                 'rotation_angle.degrees')
+                                 'detector_x.pixel')
 
-        data_obj.add_pattern('PROJECTION', core_dir=(1, 2), slice_dir=(0,))
-        data_obj.add_pattern('SINOGRAM', core_dir=(0, 2), slice_dir=(1,))
-        data_obj.set_direction_parallel_to_rotation_axis(1)
-        data_obj.set_direction_perp_to_rotation_axis(0)
+        data_obj.add_pattern('PROJECTION', core_dir=(detX, detY),
+                             slice_dir=(rot,))
+        data_obj.add_pattern('SINOGRAM', core_dir=(detX, rot),
+                             slice_dir=(detY,))
+        data_obj.finalise_patterns()
 
         objInfo = data_obj.meta_data
         expInfo = exp.meta_data
