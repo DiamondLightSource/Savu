@@ -26,10 +26,6 @@ import sys
 import os
 
 from savu.data.plugin_info import PluginList
-import savu.plugins.utils as pu
-
-MACHINE_NUMBER_STRING = '0'
-MACHINE_RANK_NAME = 'cpu1'
 
 import json
 from time import time
@@ -40,6 +36,10 @@ import numpy
 
 from distarray.globalapi import Context, Distribution
 from distarray.globalapi.distarray import DistArray
+
+MACHINE_NUMBER_STRING = '0'
+MACHINE_RANK_NAME = 'cpu1'
+
 
 def numpy_julia_calc(z, c, z_max, n_max):
     z = numpy.asarray(z)
@@ -87,7 +87,8 @@ def local_julia_calc(la, c, z_max, n_max, kernel):
     return proxyize(res)  # noqa
 
 
-def distributed_julia_calc(distarray, c, z_max, n_max, kernel=numpy_julia_calc):
+def distributed_julia_calc(distarray, c, z_max, n_max,
+                           kernel=numpy_julia_calc):
 
     context = distarray.context
     iters_key = context.apply(local_julia_calc,
@@ -126,8 +127,10 @@ def do_julia_run(context, dist, dimensions, c, complex_plane, z_max, n_max,
 
     return (t0, t1, dist_text, dimensions[0], str(c), num_engines, iters_list)
 
-def do_julia_runs(repeat_count, engine_count_list, dist_list, resolution_list,
-                  c_list, re_ax, im_ax, z_max, n_max, output_filename,
+
+def do_julia_runs(repeat_count, engine_count_list, dist_list,
+                  resolution_list, c_list, re_ax, im_ax, 
+                  z_max, n_max, output_filename,
                   kernel=numpy_julia_calc, scaling="strong"):
 
     max_engine_count = max(engine_count_list)
@@ -161,9 +164,10 @@ def do_julia_runs(repeat_count, engine_count_list, dist_list, resolution_list,
                     result = do_julia_run(context, 'numpy', dimensions, c,
                                           complex_plane, z_max, n_max,
                                           benchmark_numpy=True, kernel=kernel)
-                    #results.append({h: r for h, r in zip(hdr, result)})
+                    # results.append({h: r for h, r in zip(hdr, result)})
                     n += 1
-                    print(prog_fmt.format(n, n_runs, result[1] - result[0]), result)
+                    print(prog_fmt.format(n, n_runs, result[1] - result[0]),
+                          result)
                 for engine_count in engine_count_list:
                     if scaling == "weak":
                         factor = sqrt(engine_count)
@@ -181,9 +185,12 @@ def do_julia_runs(repeat_count, engine_count_list, dist_list, resolution_list,
                                                   complex_plane, z_max, n_max,
                                                   benchmark_numpy=False,
                                                   kernel=kernel)
-                            #results.append({h: r for h, r in zip(hdr, result)})
+                            # results.append({h: r for h, r in zip(hdr,
+                            #                                      result)})
                             n += 1
-                            print(prog_fmt.format(n, n_runs, result[1] - result[0]), result)
+                            print(prog_fmt.format(n, n_runs,
+                                                  result[1] - result[0]),
+                                  result)
                             with open(output_filename, 'wt') as fp:
                                 json.dump(results, fp, sort_keys=True,
                                           indent=4, separators=(',', ': '))
@@ -208,7 +215,6 @@ if __name__ == '__main__':
                       action="store_true")
     (options, args) = parser.parse_args()
 
-
     # Check basic items for completeness
     if len(args) is not 3:
         print("filename, process file and output path needs to be specified")
@@ -230,32 +236,33 @@ if __name__ == '__main__':
         print("Exiting with error code 4 - Output Directory missing")
         sys.exit(4)
 
-
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
 
-    fh = logging.FileHandler(os.path.join(args[2],'log.txt'), mode='w')
+    fh = logging.FileHandler(os.path.join(args[2], 'log.txt'), mode='w')
     fh.setFormatter(logging.Formatter('L %(relativeCreated)12d M' +
-            MACHINE_NUMBER_STRING + ' ' + MACHINE_RANK_NAME +
-            ' %(levelname)-6s %(message)s'))
+                                      MACHINE_NUMBER_STRING + ' ' +
+                                      MACHINE_RANK_NAME +
+                                      ' %(levelname)-6s %(message)s'))
     logger.addHandler(fh)
 
     logging.info("Starting tomo_recon process")
 
     plugin_list = PluginList()
     plugin_list.populate_plugin_list(options.process_filename)
-    transport = '/home/qmm55171/Documents/Git/git_repos/Savu/savu/data/transports/dist_array'
-    #pu.load_transport(transport, plugin_list, args)
-    
+    transport = '/home/qmm55171/Documents/Git/git_repos/"+\
+        "Savu/savu/data/transports/dist_array'
+    # pu.load_transport(transport, plugin_list, args)
+
     with closing(Context()) as context:
         # use all available targets
         engine_count_list = list(range(1, len(context.targets) + 1))
         print context.targets
-        
+
     engine_count_list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     dist_list = ['bn', 'cn', 'bb', 'cc']
-    c_list = [complex(-0.045, 0.45)]  # This Julia set has many points inside
-                                      # needing all iterations.
+    c_list = [complex(-0.045, 0.45)]
+    # This Julia set has many points inside needing all iterations.
     re_ax = (-1.5, 1.5)
     im_ax = (-1.5, 1.5)
     z_max = 2.0
@@ -263,8 +270,8 @@ if __name__ == '__main__':
     repeat_count = 1
     resolution_list = [100]
     output_filename = 'testing'
-    scaling = 1    
-    
+    scaling = 1
+
     results = do_julia_runs(repeat_count, engine_count_list, dist_list,
                             resolution_list, c_list, re_ax, im_ax, z_max,
                             n_max, output_filename=output_filename,
