@@ -249,13 +249,13 @@ class Data(object):
             return 0
         return 1
 
-    def set_direction_parallel_to_rotation_axis(self, tdir):
-        self.check_direction(tdir, 'parallel_to_rotation_axis')
-        self.set_main_axis(tdir, 'SINOGRAM')
-
-    def set_direction_perp_to_rotation_axis(self, tdir):
-        self.check_direction(tdir, 'perp_to_rotation_axis')
-        self.set_main_axis(tdir, 'PROJECTION')
+#    def set_direction_parallel_to_rotation_axis(self, tdir):
+#        self.check_direction(tdir, 'parallel_to_rotation_axis')
+#        self.set_main_axis(tdir, 'SINOGRAM')
+#
+#    def set_direction_perp_to_rotation_axis(self, tdir):
+#        self.check_direction(tdir, 'perp_to_rotation_axis')
+#        self.set_main_axis(tdir, 'PROJECTION')
 
     def check_direction(self, tdir, dname):
         if not isinstance(tdir, int):
@@ -273,8 +273,7 @@ class Data(object):
         d2 = patterns[pname]['slice_dir']
         tdir = set(d1).intersection(set(d2))
         self.meta_data.set_meta_data(['data_patterns', pname, 'main_dir'],
-                                     tdir)
-        print pname, int(list(tdir)[0])
+                                     list(tdir)[0])
 
     def get_patterns(self):
         return self.meta_data.get_meta_data("data_patterns")

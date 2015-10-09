@@ -46,6 +46,13 @@ class Plugin(object):
         self.set_plugin_datasets(exp)
         self.setup()
         try:
+            in_datasets, out_datasets = self.get_datasets()
+            for data in in_datasets + out_datasets:
+                data.finalise_patterns()
+        except KeyError:
+            pass
+
+        try:
             self.set_filter_padding(*(self.get_plugin_datasets()))
         except AttributeError:
             pass

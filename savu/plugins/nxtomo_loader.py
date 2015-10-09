@@ -59,7 +59,6 @@ class NxtomoLoader(BaseLoader):
                              slice_dir=(rot,))
         data_obj.add_pattern('SINOGRAM', core_dir=(detX, rot),
                              slice_dir=(detY,))
-        data_obj.finalise_patterns()
 
         objInfo = data_obj.meta_data
         expInfo = exp.meta_data
