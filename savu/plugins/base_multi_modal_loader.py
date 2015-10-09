@@ -60,13 +60,13 @@ class BaseMultiModalLoader(BaseLoader):
         # to begin with
         data_obj.data_mapping = ds.DataMapping()
 
+        axes = entry['data'].attrs['axes']
         if ltype is 'stxm':
-            nAxes = len(entry['data'].attrs["axes"])
+            nAxes = len(axes)
         else:
             # the -1 here comes as data is the last axis only
-            nAxes = len(entry['data'].attrs["axes"])-1
+            nAxes = len(axes)-1
 
-        print "nAxes", nAxes
         cts = 0
         motors = []
         motor_type = []

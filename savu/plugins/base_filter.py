@@ -60,6 +60,14 @@ class BaseFilter(Plugin):
         """
         return self.filter_frames(data)
 
+    def filter_frames(data):
+        """
+        This is the main processing method for all plugins that inherit from
+        base recon.  The plugin must implement this method.
+        """
+        logging.error("process needs to be implemented")
+        raise NotImplementedError("process needs to be implemented")
+
     def setup(self):
         self.exp.log(self.name + " Start")
         # set up the output dataset that is created by the plugin

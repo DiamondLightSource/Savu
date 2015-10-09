@@ -103,12 +103,13 @@ def set_plugin_entry(name, ID, data):
     return plugin
 
 
-def set_options(path):
+def set_options(path, **kwargs):
+    process_file = kwargs.get('process_file', '')
     options = {}
     options['transport'] = 'hdf5'
     options['process_names'] = 'CPU0'
     options['data_file'] = path
-    options['process_file'] = ''
+    options['process_file'] = process_file
     options['out_path'] = '/tmp'
     options['run_type'] = 'test'
     return options

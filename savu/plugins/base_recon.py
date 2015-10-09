@@ -71,6 +71,14 @@ class BaseRecon(Plugin):
         return self.reconstruct(np.squeeze(data[0]), cor, self.angles,
                                 self.vol_shape)
 
+    def reconstruct(self, data, cor, angles, shape):
+        """
+        This is the main processing method for all plugins that inherit from
+        base recon.  The plugin must implement this method.
+        """
+        logging.error("process needs to be implemented")
+        raise NotImplementedError("process needs to be implemented")
+
     def setup(self):
         # set up the output dataset that is created by the plugin
         in_dataset, out_dataset = self.get_datasets()

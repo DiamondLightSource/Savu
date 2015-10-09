@@ -93,6 +93,7 @@ class Hdf5TransportData(object):
                 expInfo.set_meta_data(["group_name", key], group_name)
 
     def add_data_link_and_attributes(self, linkType):
+
         nxs_filename = self.exp.meta_data.get_meta_data('nxs_filename')
         logging.debug("Adding link to file %s", nxs_filename)
         plugin_file = h5py.File(nxs_filename, 'a')
@@ -123,9 +124,10 @@ class Hdf5TransportData(object):
         entry.attrs['axes'] = axes
 
     def save_data(self, link_type):
-        print link_type
-        entry = self.add_data_link_and_attributes(link_type)
-        #self.output_metadata(entry)
+        process = self.exp.meta_data.get_meta_data('process')
+        if process is 0:
+            entry = self.add_data_link_and_attributes(link_type)
+            #self.output_metadata(entry)
 
     def close_file(self):
         """
