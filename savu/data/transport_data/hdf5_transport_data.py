@@ -99,11 +99,13 @@ class Hdf5TransportData(object):
         plugin_file = h5py.File(nxs_filename, 'a')
 
         if linkType is 'final_result':
-            entry = plugin_file['entry']
+            print "***setting a final_result entry in the nexus file***"
+            entry = plugin_file['entry'].create_group('final_result')
             entry.attrs[NX_CLASS] = 'NXdata'
             entry['final_result'] = self.external_link()
             entry = plugin_file['entry'].require_group('final_result')
         else:
+            print "***setting an intermediate entry in the nexus file***"
             entry = plugin_file['entry'].require_group('intermediate')
             entry.attrs[NX_CLASS] = 'NXcollection'
             entry[self.group_name] = self.external_link()
@@ -130,6 +132,7 @@ class Hdf5TransportData(object):
     def save_data(self, link_type):
         process = self.exp.meta_data.get_meta_data('process')
         if process is 0:
+            print "***PROCESS 0 is adding link and metadata***"
             plugin_file, entry = self.add_data_link_and_attributes(link_type)
             self.output_metadata(entry)
             plugin_file.close()
@@ -259,9 +262,12 @@ class Hdf5TransportData(object):
         process = expInfo.get_meta_data("process")
         slice_list = self.get_grouped_slice_list()
         frame_index = np.arange(len(slice_list))
-        frames = np.array_split(frame_index, len(processes))[process]
-
-        return slice_list[frames[0]:frames[-1]+1]
+        try:
+            frames = np.array_split(frame_index, len(processes))[process]
+            process_slice_list = slice_list[frames[0]:frames[-1]+1]
+        except IndexError:
+            process_slice_list = []
+        return process_slice_list
 
     def calculate_slice_padding(self, in_slice, pad_ammount, data_stop):
         sl = in_slice
