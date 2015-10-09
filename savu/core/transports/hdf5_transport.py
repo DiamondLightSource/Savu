@@ -169,7 +169,6 @@ class Hdf5Transport(TransportMechanism):
             logging.info("Copy out data to in data")
             for key in exp.index["out_data"]:
                 output = exp.index["out_data"][key]
-                print "Saving the data link to the Nexus file"
                 output.save_data(link_type)
                 exp.index["in_data"][key] = copy.deepcopy(output)
 
