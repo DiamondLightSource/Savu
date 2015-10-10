@@ -260,10 +260,10 @@ class Hdf5TransportData(object):
         process = expInfo.get_meta_data("process")
         slice_list = self.get_grouped_slice_list()
         frame_index = np.arange(len(slice_list))
-        if len(processes) > process:
+        try:
             frames = np.array_split(frame_index, len(processes))[process]
             process_slice_list = slice_list[frames[0]:frames[-1]+1]
-        else:
+        except IndexError:
             process_slice_list = []
         return process_slice_list
 
