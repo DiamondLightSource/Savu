@@ -222,8 +222,8 @@ class Hdf5Transport(TransportMechanism):
         section = []
         slist = []
         for idx in range(len(data)):
-            section.append(data[idx].get_padded_slice_data
-                          (slice_list[idx][count]))
+            section.append(
+                data[idx].get_padded_slice_data(slice_list[idx][count]))
             slist.append(slice_list[idx][count])
         return section, slist
 
