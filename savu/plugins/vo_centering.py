@@ -11,8 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from savu.data.plugin_info import CitationInformation
-
 """
 .. module:: vo_centering
    :platform: Unix
@@ -30,6 +28,8 @@ import scipy.fftpack as fft
 
 from savu.plugins.utils import register_plugin
 from savu.plugins.base_filter import BaseFilter
+
+from savu.data.plugin_info import CitationInformation
 
 
 @register_plugin
@@ -68,7 +68,7 @@ class VoCentering(BaseFilter, CpuPlugin):
         vv = abs(vv)
         return cor_positions[vv.argmin()]
 
-    def filter_frame(self, data):
+    def filter_frames(self, data):
         data = data[0].squeeze()
         width = data.shape[1]/4
         step = width/10.
@@ -101,20 +101,29 @@ class VoCentering(BaseFilter, CpuPlugin):
 
         self.exp.log(self.name + " Start")
 
+        # set up the output dataset that is created by the plugin
+        in_dataset, out_dataset = self.get_datasets()
+        # copy all required information from in_dataset[0]
+        fullData = in_dataset[0]
+        out_dataset[0].create_dataset(pattern_name='1D_METADATA',
+                                      chunk=self.get_max_frames(),
+                                      shape=(fullData.get_shape()[1],),
+                                      axis_labels=('y.pixels',))
+
+        out_dataset[1].create_dataset(pattern_name='1D_METADATA',
+                                      chunk=self.get_max_frames(),
+                                      shape=(fullData.get_shape()[1],),
+                                      axis_labels=('y.pixels',))
+
         in_data, out_data = self.get_plugin_datasets()
         in_data[0].plugin_data_setup(pattern_name='SINOGRAM',
                                      chunk=self.get_max_frames())
 
-        fullData = in_data[0].data_obj
         out_data[0].data_obj.add_pattern("1D_METADATA", slice_dir=(0,))
-        out_data[0].plugin_data_setup(pattern_name='1D_METADATA',
-                                      chunk=self.get_max_frames(),
-                                      shape=(fullData.get_shape()[1],))
+        out_data[0].plugin_data_setup('1D_METADATA', self.get_max_frames())
 
         out_data[1].data_obj.add_pattern("1D_METADATA", slice_dir=(0,))
-        out_data[1].plugin_data_setup(pattern_name='1D_METADATA',
-                                      chunk=self.get_max_frames(),
-                                      shape=(fullData.get_shape()[1],))
+        out_data[1].plugin_data_setup('1D_METADATA', self.get_max_frames())
 
         self.exp.log(self.name + " End")
 

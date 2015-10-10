@@ -60,7 +60,7 @@ class BaseFilter(Plugin):
         """
         return self.filter_frames(data)
 
-    def filter_frames(data):
+    def filter_frames(self, data):
         """
         This is the main processing method for all plugins that inherit from
         base recon.  The plugin must implement this method.
