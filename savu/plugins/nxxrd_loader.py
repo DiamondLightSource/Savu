@@ -21,7 +21,7 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
-import os
+import os.path as os
 import logging
 import h5py
 
@@ -51,6 +51,13 @@ class NxxrdLoader(BaseMultiModalLoader):
         self.exp.meta_data.set_meta_data("mono_energy", mono_energy)
 
         self.set_motors(data_obj, xrd_entry, 'xrd')
+
+        data_obj.set_axis_labels('test.None',
+                                 'test.None',
+                                 'test.None',
+                                 'test.None',
+                                 'test.None')
+
         self.add_patterns_based_on_acquisition(data_obj, 'xrd')
 
         slicedir = range(len(data_obj.data.shape)-2)

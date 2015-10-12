@@ -61,11 +61,8 @@ class BaseMultiModalLoader(BaseLoader):
         data_obj.data_mapping = ds.DataMapping()
 
         axes = entry['data'].attrs['axes']
-        if ltype is 'stxm':
-            nAxes = len(axes)
-        else:
-            # the -1 here comes as data is the last axis only
-            nAxes = len(axes)-1
+        data_obj.data_mapping.set_axes(axes)
+        nAxes = len(axes)
 
         cts = 0
         motors = []
@@ -74,22 +71,26 @@ class BaseMultiModalLoader(BaseLoader):
             # find the rotation axis
             data_axis = 'data/' + entry['data'].attrs["axes"][ii]
             entry_axis = entry[data_axis]
-            if (entry_axis.attrs['transformation_type'] == "rotation"):
-                #what axis is this? Could we store it?
-                print entry.name + '/' + data_axis
-                motors.append(data_obj.backing_file[entry.name + '/' +
-                                                    data_axis])
-                data_obj.data_mapping.is_tomo = True
-                motor_type.append('rotation')
-                logging.debug(ltype + " reader: '%s'", "is a tomo scan")
-            elif (entry_axis.attrs['transformation_type'] == "translation"):
-                cts += 1  # increase the order of the map
-                # what axes are these? Would be good to have for the
-                # pattern stuff
-                # attach this to the scan map
-                motors.append(data_obj.backing_file[entry.name + '/' +
-                                                    data_axis])
-                motor_type.append('translation')
+
+            try:
+                mType = entry_axis.attrs['transformation_type']
+                if (mType == "rotation"):
+                    #what axis is this? Could we store it?
+                    motors.append(data_obj.backing_file[entry.name + '/' +
+                                                        data_axis])
+                    data_obj.data_mapping.is_tomo = True
+                    motor_type.append('rotation')
+                    logging.debug(ltype + " reader: '%s'", "is a tomo scan")
+                elif (mType == "translation"):
+                    cts += 1  # increase the order of the map
+                    # what axes are these? Would be good to have for the
+                    # pattern stuff
+                    # attach this to the scan map
+                    motors.append(data_obj.backing_file[entry.name + '/' +
+                                                        data_axis])
+                    motor_type.append('translation')
+            except KeyError:
+                motor_type.append('None')
 
         if not motors:
             logging.debug("'%s' reader: No maps found!", ltype)
@@ -106,32 +107,29 @@ class BaseMultiModalLoader(BaseLoader):
 
     def add_patterns_based_on_acquisition(self, data_obj, ltype):
         motor_type = data_obj.data_mapping.get_motor_type()
+        dims = range(len(motor_type))
+
+        # cheating for now since the dimensions of the data do not correspond
+        # to the number of axes in the test xrd data file
+        if ltype is 'xrd':
+            dims = range(len(motor_type) + 1)
+
         # now we will set up the core directions that we need for processing
         projection = []
-        projection_slice = []
         for item, key in enumerate(motor_type):
             if key == 'translation':
                 projection.append(item)
-            elif key != 'translation':
-                projection_slice.append(item)
-            if key == 'rotation':
-                # we will assume one rotation for now to save my headache
+            elif key == 'rotation':
                 rotation = item
-        projdir = tuple(projection)
-        projsli = tuple(projection_slice)
 
-        print "projdir", projdir, "projsli", projsli
-
-        end = -2 if ltype is 'xrd' else -1
-
+        proj_dir = tuple(projection)
         if data_obj.data_mapping.is_map:
-            print "ADDING THE PROJECTION PATTERN", ltype
             # two translation axes
-            data_obj.add_pattern("PROJECTION", core_dir=projdir,
-                                 slice_dir=projsli)
+            data_obj.add_pattern("PROJECTION", core_dir=proj_dir,
+                                 slice_dir=tuple(set(dims) - set(proj_dir)))
 
+        sino_dir = (rotation, proj_dir[-1])
         if data_obj.data_mapping.is_tomo:
-            print "ADDING THE SINOGRAM PATTERN", ltype
             #rotation and fast axis
-            data_obj.add_pattern("SINOGRAM", core_dir=(rotation, projdir[-1]),
-                                 slice_dir = projdir[:end])
+            data_obj.add_pattern("SINOGRAM", core_dir=sino_dir,
+                                 slice_dir=tuple(set(dims) - set(sino_dir)))

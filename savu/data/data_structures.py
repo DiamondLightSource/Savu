@@ -531,10 +531,11 @@ class Padding(object):
 class DataMapping(object):
 
     def __init__(self):
-        self.is_tomo = None
-        self.is_map = None
-        self.motors = None
-        self.motor_type = None
+        self._is_tomo = None
+        self._is_map = None
+        self._motors = None
+        self._motor_type = None
+        self._axes = None
 
     def set_motors(self, motors):
         self.motors = motors
@@ -547,6 +548,12 @@ class DataMapping(object):
 
     def get_motor_type(self):
         return self.motor_type
+        
+    def set_axes(self, axes):
+        self.axes = axes
+        
+    def get_axes(self):
+        return self.axes
 
     def get_projection_direction(self, motor_type):
         projection = []
