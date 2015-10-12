@@ -75,6 +75,10 @@ class TomographySavers(object):
 
     def create_entries(self, backing_file, data, expInfo, key, dtype):
         group_name = expInfo.get_meta_data(["group_name", key])
+        try:
+            group_name = group_name + '_' + data.name
+        except AttributeError:
+            pass
         group = backing_file.create_group(group_name)
         group.attrs[NX_CLASS] = 'NXdata'
         group.attrs['signal'] = 'data'

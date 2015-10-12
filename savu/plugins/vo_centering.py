@@ -115,20 +115,16 @@ class VoCentering(BaseFilter, CpuPlugin):
                                       shape=(fullData.get_shape()[1],),
                                       axis_labels=('y.pixels',))
 
-        in_data, out_data = self.get_plugin_datasets()
-        in_data[0].plugin_data_setup(pattern_name='SINOGRAM',
-                                     chunk=self.get_max_frames())
+        in_pData, out_pData = self.get_plugin_datasets()
+        in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
 
-        out_data[0].data_obj.add_pattern("1D_METADATA", slice_dir=(0,))
-        out_data[0].plugin_data_setup('1D_METADATA', self.get_max_frames())
+        out_pData[0].data_obj.add_pattern("1D_METADATA", slice_dir=(0,))
+        out_pData[0].plugin_data_setup('1D_METADATA', self.get_max_frames())
 
-        out_data[1].data_obj.add_pattern("1D_METADATA", slice_dir=(0,))
-        out_data[1].plugin_data_setup('1D_METADATA', self.get_max_frames())
+        out_pData[1].data_obj.add_pattern("1D_METADATA", slice_dir=(0,))
+        out_pData[1].plugin_data_setup('1D_METADATA', self.get_max_frames())
 
         self.exp.log(self.name + " End")
-
-    def organise_metadata(self):
-        pass
 
     def nOutput_datasets(self):
         return 2

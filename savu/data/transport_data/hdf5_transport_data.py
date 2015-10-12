@@ -92,21 +92,24 @@ class Hdf5TransportData(object):
                 expInfo.set_meta_data(["filename", key], filename)
                 expInfo.set_meta_data(["group_name", key], group_name)
 
-    def add_data_link_and_attributes(self, linkType):
+    def add_data_links(self, linkType):
 
         nxs_filename = self.exp.meta_data.get_meta_data('nxs_filename')
         logging.debug("Adding link to file %s", nxs_filename)
         plugin_file = h5py.File(nxs_filename, 'a')
 
+        print "Adding the link type", linkType
+
         if linkType is 'final_result':
-            entry = plugin_file['entry'].create_group('final_result')
+            name = 'final_result_' + self.name
+            entry = plugin_file['entry']
             entry.attrs[NX_CLASS] = 'NXdata'
-            entry['final_result'] = self.external_link()
-            entry = plugin_file['entry'].require_group('final_result')
+            entry[name] = self.external_link()
         else:
+            name = self.group_name + '_' + self.name
             entry = plugin_file['entry'].require_group('intermediate')
             entry.attrs[NX_CLASS] = 'NXcollection'
-            entry[self.group_name] = self.external_link()
+            entry[name] = self.external_link()
         return plugin_file, entry
 
     def output_metadata(self, entry):
@@ -131,7 +134,7 @@ class Hdf5TransportData(object):
         process = self.exp.meta_data.get_meta_data('process')
         if process is 0:
             logging.info("PROCESS 0 is adding data link and metadata")
-            plugin_file, entry = self.add_data_link_and_attributes(link_type)
+            plugin_file, entry = self.add_data_links(link_type)
             #self.output_metadata(entry)
             #plugin_file.close()
 
