@@ -50,6 +50,8 @@ class Data(object):
         self._plugin_data_obj = None
         self.data_mapping = None
         self.exp = exp
+        self.variable_length_flag = False
+        self.dtype = None
 
     def set_plugin_data(self, plugin_data_obj):
         self._plugin_data_obj = plugin_data_obj
@@ -99,6 +101,7 @@ class Data(object):
         Set up required information when an output dataset has been created by
         a plugin
         """
+        self.dtype = kwargs.get('dtype', np.float32)
         if len(args) is 1:
             self.copy_dataset(args[0])
         else:
@@ -114,6 +117,9 @@ class Data(object):
                 shape = kwargs['shape']
                 if isinstance(shape, Data):
                     self.set_shape(Data.get_shape())
+                elif type(shape) is dict:
+                    self.set_variable_flag()
+                    self.set_shape(shape[shape.keys()[0]])
                 else:
                     self.set_shape(shape)
             except KeyError:
@@ -165,11 +171,20 @@ class Data(object):
             pass
         return shape
 
+    def set_variable_flag(self):
+        self.variable_length_flag = True
+
+    def get_variable_flag(self):
+        return self.variable_length_flag
+
     def check_dims(self):
         try:
-            if len(self.shape) != self.meta_data.get_meta_data("nDims"):
-                raise Exception("The number of axis labels does not coincide "
-                                "with the number of data dimensions.")
+            nDims = self.meta_data.get_meta_data("nDims")
+            if self.get_variable_flag() is False:
+                if len(self.shape) != nDims:
+                    raise Exception("The number of axis labels does not "
+                                    "coincide with the number of data "
+                                    "dimensions.")
         except KeyError:
             pass
 
@@ -290,9 +305,9 @@ class PluginData(object):
     def get_total_frames(self):
         temp = 1
         slice_dir = \
-            self.get_patterns()[self.get_pattern_name()]["slice_dir"]
+            self.data_obj.get_patterns()[self.get_pattern_name()]["slice_dir"]
         for tslice in slice_dir:
-            temp *= self.get_shape()[tslice]
+            temp *= self.data_obj.get_shape()[tslice]
         return temp
 
     def set_pattern_name(self, name):

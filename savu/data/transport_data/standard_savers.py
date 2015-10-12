@@ -44,13 +44,11 @@ class TomographySavers(object):
         pass
 
     def save_to_hdf5(self, exp):
-        dtype = np.float32
         for key in exp.index["out_data"].keys():
             out_data = exp.index["out_data"][key]
             out_data.backing_file = self.create_backing_h5(key, exp.meta_data)
             out_data.group_name, out_data.group = \
-                self.create_entries(out_data.backing_file, out_data,
-                                    exp.meta_data, key, dtype)
+                self.create_entries(out_data, exp.meta_data, key)
 
     def create_backing_h5(self, key, expInfo):
         """
@@ -73,14 +71,21 @@ class TomographySavers(object):
 
         return backing_file
 
-    def create_entries(self, backing_file, data, expInfo, key, dtype):
+    def create_entries(self, data, expInfo, key):
+
         group_name = expInfo.get_meta_data(["group_name", key])
         try:
             group_name = group_name + '_' + data.name
         except AttributeError:
             pass
-        group = backing_file.create_group(group_name)
+        group = data.backing_file.create_group(group_name)
         group.attrs[NX_CLASS] = 'NXdata'
         group.attrs['signal'] = 'data'
+
+        if data.get_variable_flag() is True:
+            dtype = h5py.special_dtype(vlen=data.dtype)
+        else:
+            dtype = data.dtype
+
         data.data = group.create_dataset('data', data.get_shape(), dtype)
         return group_name, group

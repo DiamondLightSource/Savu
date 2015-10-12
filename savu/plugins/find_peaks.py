@@ -64,24 +64,27 @@ class FindPeaks(BaseFilter, CpuPlugin):
         print 'old index is', sorted(PeakIndex)
         PeakIndex.extend(tmp)
         out_meta_data[0].set_meta_data('PeakIndex', PeakIndex)
-        return 0
-        
+        return np.array(PeakIndex)
+
     def post_process(self):
-        pass
+        # remove the output dataset from the processing chain
+        self.exp.remove_dataset(self.get_out_datasets()[0])
 
     def setup(self):
         # set up the output dataset that is created by the plugin
         in_dataset, out_dataset = self.get_datasets()
-        shape = np.prod(in_dataset[0].get_shape()[:-1])
-        out_dataset[0].create_dataset(axis_labels=('y.pixels',), # the axis label needs changing
-                                      shape=(shape,))
-        out_dataset[0].add_pattern("1D_METADATA", slice_dir=(0,))
-        out_dataset[0].meta_data.set_meta_data('PeakIndex', [])
-
         # set information relating to the plugin data
         in_pData, out_pData = self.get_plugin_datasets()
         # set pattern_name and nframes to process for all datasets
         in_pData[0].plugin_data_setup("SPECTRUM", self.get_max_frames())
+
+        nFrames = in_pData[0].get_total_frames()
+        out_dataset[0].create_dataset(axis_labels=('y.pixels',), # the axis label needs changing
+                                      shape={'variable': (nFrames,)},
+                                      dtype=np.int)  # default is float32
+        out_dataset[0].add_pattern("1D_METADATA", slice_dir=(0,))
+        out_dataset[0].meta_data.set_meta_data('PeakIndex', [])
+
         out_pData[0].plugin_data_setup("1D_METADATA", self.get_max_frames())
 
     def get_max_frames(self):
