@@ -182,7 +182,9 @@ class Plugin(object):
         for mData in in_meta_data:
             temp = mData.get_dictionary().copy()
             copy_dict.update(temp)
-            print copy_dict
+
+        for mData in out_meta_data:
+            mData.update(copy_dict)
 
     def clean_up_plugin_data(self):
         in_data, out_data = self.get_datasets()
