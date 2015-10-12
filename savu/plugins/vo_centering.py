@@ -88,14 +88,21 @@ class VoCentering(BaseFilter, CpuPlugin):
 
     def post_process(self):
         # do some curve fitting here
-        in_data, out_data = self.get_plugin_datasets()
-        cor_raw = out_data[0].data_obj.data[...]
-        out_data[1].data_obj.data[...] = cor_raw + 10
-        # do this if you wish to add an output dataset to metadata and not keep
-        # it in the plugin chain
-        output_dict = {'cor_raw': out_data[0].data_obj,
-                       'cor_fit': out_data[1].data_obj}
-        return {'transfer_to_meta_data': {in_data[0]: output_dict}}
+        in_datasets, out_datasets = self.get_datasets()
+        cor_raw = out_datasets[0].data[...]
+        cor_fit = out_datasets[1].data[...]
+
+        # for testing
+        cor_fit = cor_raw + 100
+
+        # add to metadata
+        in_meta_data = self.get_in_meta_data()[0]
+        in_meta_data.set_meta_data("cor_raw", cor_raw)
+        in_meta_data.set_meta_data("cor_raw", cor_fit)
+
+        # remove the output datasets from the processing chain
+        self.exp.remove_dataset(out_datasets[0])
+        self.exp.remove_dataset(out_datasets[1])
 
     def setup(self):
 
@@ -106,12 +113,10 @@ class VoCentering(BaseFilter, CpuPlugin):
         # copy all required information from in_dataset[0]
         fullData = in_dataset[0]
         out_dataset[0].create_dataset(pattern_name='1D_METADATA',
-                                      chunk=self.get_max_frames(),
                                       shape=(fullData.get_shape()[1],),
                                       axis_labels=('y.pixels',))
 
         out_dataset[1].create_dataset(pattern_name='1D_METADATA',
-                                      chunk=self.get_max_frames(),
                                       shape=(fullData.get_shape()[1],),
                                       axis_labels=('y.pixels',))
 

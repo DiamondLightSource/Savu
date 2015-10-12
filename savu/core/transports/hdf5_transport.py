@@ -144,26 +144,13 @@ class Hdf5Transport(TransportMechanism):
 
             exp.barrier()
             logging.info("run the plugin")
-            return_dict = plugin.run_plugin(exp, self)
-
-            try:
-                remove_data_set = self.transfer_to_meta_data(
-                    return_dict['transfer_to_meta_data'])
-            except (KeyError, TypeError):
-                remove_data_set = []
-                pass
-
-            exp.barrier()
-            logging.info("Clean up input datasets")
+            plugin.run_plugin(exp, self)
 
             exp.barrier()
             logging.info("close any files that are no longer required")
             for out_objs in plugin.parameters["out_datasets"]:
                 if out_objs in exp.index["in_data"].keys():
                     exp.index["in_data"][out_objs].close_file()
-                elif out_objs in remove_data_set:
-                    exp.index["out_data"][out_objs].close_file()
-                    del exp.index["out_data"][out_objs]
 
             exp.barrier()
             logging.info("Copy out data to in data")

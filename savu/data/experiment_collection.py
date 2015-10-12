@@ -83,6 +83,10 @@ class Experiment(object):
                                 (filename, time.strftime("%Y%m%d%H%M%S")))
         self.meta_data.set_meta_data("nxs_filename", filename)
 
+    def remove_dataset(self, data_obj):
+        data_obj.close_file()
+        del self.index["out_data"][data_obj.name]
+
     def clear_data_objects(self):
         self.index["out_data"] = {}
         self.index["in_data"] = {}

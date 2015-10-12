@@ -44,7 +44,7 @@ class FindPeaks(BaseFilter, CpuPlugin):
     def __init__(self):
         super(FindPeaks, self).__init__("FindPeaks")
 
-    def filter_frame(self, data):
+    def filter_frames(self, data):
         _in_meta_data, out_meta_data = self.get_meta_data()
         data = savgol_filter(data[0].squeeze(), 51, 3)
         PeakIndex = list(out_meta_data[0].get_meta_data('PeakIndex'))
@@ -63,44 +63,26 @@ class FindPeaks(BaseFilter, CpuPlugin):
         print 'New index is', sorted(PeakIndexNew)
         print 'old index is', sorted(PeakIndex)
         PeakIndex.extend(tmp)
-        PeakIndex = out_meta_data[0].set_meta_data('PeakIndex', PeakIndex)
+        out_meta_data[0].set_meta_data('PeakIndex', PeakIndex)
         return 0
-
-    def setup(self, experiment):
-
-        self.set_experiment(experiment)
-        chunk_size = self.get_max_frames()
-
-        # get a list of input dataset names required for this plugin
-        in_data_list = self.parameters["in_datasets"]
-        # get all input dataset objects
-        in_d1 = experiment.index["in_data"][in_data_list[0]]
-        # set all input data patterns
-        in_d1.set_current_pattern_name("SPECTRUM")
-        # set frame chunk
-        in_d1.set_nFrames(chunk_size)
-
-        # get a list of output dataset names created by this plugin
-        out_data_list = self.parameters["out_datasets"]
-
-        # create all out_data objects and associated patterns and meta_data
-        # patterns can be copied, added or both
-        out_d1 = experiment.create_data_object("out_data", out_data_list[0])
-
-        out_d1.copy_patterns(in_d1.get_patterns())
-        out_d1.add_pattern("PROJECTION", core_dir=(0,), slice_dir=(0,))
-        out_d1.add_pattern("1D_METADATA", slice_dir=(0,))
-        out_d1.set_current_pattern_name("1D_METADATA")
-        out_d1.meta_data.set_meta_data('PeakIndex', [])
-        out_d1.meta_data.copy_dictionary(in_d1.meta_data.get_dictionary(),
-                                         rawFlag=True)
-        # set pattern for this plugin and the shape
-        out_d1.set_shape((np.prod(in_d1.data.shape[:-1]),))
-        # set frame chunk
-        out_d1.set_nFrames(chunk_size)
-
-    def organise_metadata(self):
+        
+    def post_process(self):
         pass
+
+    def setup(self):
+        # set up the output dataset that is created by the plugin
+        in_dataset, out_dataset = self.get_datasets()
+        shape = np.prod(in_dataset[0].get_shape()[:-1])
+        out_dataset[0].create_dataset(axis_labels=('y.pixels',), # the axis label needs changing
+                                      shape=(shape,))
+        out_dataset[0].add_pattern("1D_METADATA", slice_dir=(0,))
+        out_dataset[0].meta_data.set_meta_data('PeakIndex', [])
+
+        # set information relating to the plugin data
+        in_pData, out_pData = self.get_plugin_datasets()
+        # set pattern_name and nframes to process for all datasets
+        in_pData[0].plugin_data_setup("SPECTRUM", self.get_max_frames())
+        out_pData[0].plugin_data_setup("1D_METADATA", self.get_max_frames())
 
     def get_max_frames(self):
         """

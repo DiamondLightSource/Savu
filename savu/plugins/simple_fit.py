@@ -29,10 +29,10 @@ import numpy as np
 from scipy.optimize import leastsq
 from inspect import getargspec as howmany
 import peakutils as pe
-import _xraylib as xl
-from flupy.algorithms.xrf_calculations.transitions_and_shells import \
-    shells, transitions
-from flupy.algorithms.xrf_calculations.escape import *
+#import _xraylib as xl
+#from flupy.algorithms.xrf_calculations.transitions_and_shells import \
+#    shells, transitions
+#from flupy.algorithms.xrf_calculations.escape import *
 
 
 @register_plugin
@@ -80,7 +80,7 @@ class SimpleFit(BaseFilter, CpuPlugin):
         else:
             self.positions = in_meta_data.get_meta_data('PeakIndex')
 
-    def filter_frame(self, data):
+    def filter_frames(self, data):
         positions = self.positions
         axis = self.axis
         p = []
@@ -96,41 +96,48 @@ class SimpleFit(BaseFilter, CpuPlugin):
         # nchannels long, with 3 elements. Each can be a subarray.
         return [weights, widths, areas, residuals]
 
-    def setup(self, experiment):
-
+    def setup(self):
+        print "in the simple fit setup"
         # set up the output datasets that are created by the plugin
         in_datasets, out_datasets = self.get_datasets()
-        mData = in_datasets[0].meta_data.get_dictionary()
+        in_meta_data = self.get_in_meta_data()[0]        
+#        out_datasets[0].create_dataset(axis_labels=('y.pixels',),
+#                                        shape=(shape,))        
+
         
         axis_labels = [in_datasets[0], '-1.name.unit']
-        positions = self.get_positions(mData)
-        shape = in_dataset[0].get_shape() + (len(positions),)
-        channel = {'core_dir': (-1,), 'slice_dir': range(len(outshape)-1)}
-        acq_patterns = in_dataset[0].get_patterns_based_on_acquisition()
-        print "acquisition based patterns", acq_patterns
+        positions = self.getPositions(in_meta_data)
+        print positions
+#        shape = in_dataset[0].get_shape() + (len(positions),)
+#        channel = {'core_dir': (-1,), 'slice_dir': range(len(outshape)-1)}
+#        acq_patterns = in_dataset[0].get_patterns_based_on_acquisition()
+#        print "acquisition based patterns", acq_patterns
+#
+#        for out_data in out_datasets[:-1]:
+#            out_data.create_dataset(patterns=in_dataset[0],
+#                                    axis_labels=axis_labels, shape=shape)
+#            out_data.add_pattern("CHANNEL", **channel)
+#            for acq in acq_patterns:
+#                out_data.add_pattern(acq.keys()[0], acq[acq.keys()[0]]
+#        
+#        residuals = out_datasets[-1]
+#        residuals.set_shape(outshape+(len(positions),))
+#        residuals.add_pattern("SPECTRUM",core_dir=(-1,),slice_dir=) # copy all patterns from in_data
+#        # add spectrum and set current pattern name to be spectrum, axis labels?
+#        # add acq_patterns
+#
+#        # set information relating to the plugin data
+#        in_pData, out_pData = self.get_plugin_datasets()
+#
+#        in_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
+#
+#        for out_data in out_datasets[:-1]
+#            out_pData[0].plugin_data_setup('CHANNEL', self.get_max_frames())
+#
+#        out_pData[-1].plugin_data_setup('SPECTRUM', self.get_max_frames())
 
-        for out_data in out_datasets[:-1]:
-            out_data.create_dataset(patterns=in_dataset[0],
-                                    axis_labels=axis_labels, shape=shape)
-            out_data.add_pattern("CHANNEL", **channel)
-            for acq in acq_patterns:
-                out_data.add_pattern(acq.keys()[0], acq[acq.keys()[0]]
-        
-        residuals = out_datasets[-1]
-        residuals.set_shape(outshape+(len(positions),))
-        residuals.add_pattern("SPECTRUM",core_dir=(-1,),slice_dir=) # copy all patterns from in_data
-        # add spectrum and set current pattern name to be spectrum, axis labels?
-        # add acq_patterns
 
-        # set information relating to the plugin data
-        in_pData, out_pData = self.get_plugin_datasets()
 
-        in_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
-
-        for out_data in out_datasets[:-1]
-            out_pData[0].plugin_data_setup('CHANNEL', self.get_max_frames())
-
-        out_pData[-1].plugin_data_setup('SPECTRUM', self.get_max_frames())
 
 #    def setup(self, experiment):
 #

@@ -69,8 +69,9 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         # copy all required information from in_dataset[0]
         out_dataset[0].create_dataset(in_dataset[0])
 
-        # set up new axis
-        #out_dataset[0].map_axis(parms['q_axis_name'], base=parms['energy_axis_name'])
+#        # set up new axis
+#        out_dataset[0].map_axis(parms['q_axis_name'],
+#                                base=parms['energy_axis_name'])
 
         # set information relating to the plugin data
         in_pData, out_pData = self.get_plugin_datasets()

@@ -35,7 +35,6 @@ class BaseMultiModalLoader(BaseLoader):
     """
 
     def multi_modal_setup(self, ltype, data_str):
-        print "*** in the BaseMultiModalLoader setup method!"
         # set up the file handles
         exp = self.exp
         data_obj = exp.create_data_object("in_data", ltype)

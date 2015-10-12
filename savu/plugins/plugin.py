@@ -145,31 +145,44 @@ class Plugin(object):
         pass
 
     def clean_up(self):
-        self.organise_metadata()
+        print "cleaning up"
+        #self.organise_metadata()
+        self.copy_meta_data()
         self.clean_up_plugin_data()
 
     # Does this function have to be implemented: make default here that copies
     # the dictionary from the in data...
-    def organise_metadata(self):
-        """
-        This method is called after the post_process function to organise the
-        metadata that is passed from input datasets to output datasets.
-        """
-        in_data, out_data = self.get_datasets()
-        for data in out_data:
-            axis_labels = data.meta_data.get_dictionary()['axis_labels']
-            for al in axis_labels:
-                key = al.keys()[0]
-                count = 0
-                while (count < len(in_data)):
-                    mData = in_data[count].meta_data
-                    try:
-                        data.meta_data.\
-                            set_meta_data(key, mData.get_dictionary()[key])
-                        break
-                    except:
-                        pass
-                    count += 1
+#    def organise_metadata(self):
+#        """
+#        This method is called after the post_process function to organise the
+#        metadata that is passed from input datasets to output datasets.
+#        """
+#        in_data, out_data = self.get_datasets()
+#        for data in out_data:
+#            axis_labels = data.meta_data.get_dictionary()['axis_labels']
+#            for al in axis_labels:
+#                key = al.keys()[0]
+#                count = 0
+#                while (count < len(in_data)):
+#                    mData = in_data[count].meta_data
+#                    try:
+#                        data.meta_data.\
+#                            set_meta_data(key, mData.get_dictionary()[key])
+#                        break
+#                    except:
+#                        pass
+#                    count += 1
+
+    # this method can be overwritten in the plugin, but as a default all
+    # metadata will be transferred from all input data sets to all output data
+    # sets
+    def copy_meta_data(self):
+        in_meta_data, out_meta_data = self.get_meta_data()
+        copy_dict = {}
+        for mData in in_meta_data:
+            temp = mData.get_dictionary().copy()
+            copy_dict.update(temp)
+            print copy_dict
 
     def clean_up_plugin_data(self):
         in_data, out_data = self.get_datasets()
