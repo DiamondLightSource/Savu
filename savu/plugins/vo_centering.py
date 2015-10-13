@@ -92,13 +92,37 @@ class VoCentering(BaseFilter, CpuPlugin):
         cor_raw = out_datasets[0].data[...]
         cor_fit = out_datasets[1].data[...]
 
-        # for testing
-        cor_fit = cor_raw + 100
+        # now fit the result
+        x = np.arange(cor_raw.shape[0])
+
+        # first clean all points where the derivative is too high
+        diff = np.abs(np.diff(cor_raw))
+        x_clean = x[diff < 0.2]
+        cor_clean = cor_raw[diff < 0.2]
+
+        # set up for the iterative clean on the fit
+        cor_fit = cor_clean
+        max_disp = 10
+        p = None
+
+        # keep fitting and removing points until the fit is within
+        # the tollerences
+        while max_disp > 0.1:
+            mask = (np.abs(cor_fit-cor_clean)) < (max_disp / 2.)
+            x_clean = x_clean[mask]
+            cor_clean = cor_clean[mask]
+            z = np.polyfit(x_clean, cor_clean, 1)
+            p = np.poly1d(z)
+            cor_fit = p(x_clean)
+            max_disp = (np.abs(cor_fit-cor_clean)).max()
+
+        # build a full array for the output fit
+        cor_fit = p(x)
 
         # add to metadata
         in_meta_data = self.get_in_meta_data()[0]
         in_meta_data.set_meta_data("cor_raw", cor_raw)
-        in_meta_data.set_meta_data("cor_raw", cor_fit)
+        in_meta_data.set_meta_data("cor_fit", cor_fit)
 
         # remove the output datasets from the processing chain
         self.exp.remove_dataset(out_datasets[0])
