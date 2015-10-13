@@ -36,7 +36,7 @@ class FindPeaks(BaseFilter, CpuPlugin):
     """
     This plugin uses peakutils to find peaks in spectra. This is then metadata.
     :param in_datasets: Create a list of the dataset(s). Default: [].
-    :param out_datasets: Create a list of the dataset(s). Default: [].
+    :param out_datasets: Create a list of the dataset(s). Default: ['Peaks'].
     :param thresh: Threshold for peak detection Default: 0.03.
     :param min_distance: Minimum distance for peak detection. Default: 15.
     """
@@ -44,10 +44,14 @@ class FindPeaks(BaseFilter, CpuPlugin):
     def __init__(self):
         super(FindPeaks, self).__init__("FindPeaks")
 
+    def pre_process(self):
+        out_meta_data = self.get_out_meta_data()[0]
+        out_meta_data.set_meta_data('PeakIndex', [])
+
     def filter_frames(self, data):
-        _in_meta_data, out_meta_data = self.get_meta_data()
+        out_meta_data = self.get_out_meta_data()[0]
         data = savgol_filter(data[0].squeeze(), 51, 3)
-        PeakIndex = list(out_meta_data[0].get_meta_data('PeakIndex'))
+        PeakIndex = list(out_meta_data.get_meta_data('PeakIndex'))
         PeakIndexNew = list(pe.indexes(data, thres=self.parameters['thresh'],
                             min_dist=self.parameters['min_distance']))
         # print type(PeakIndex), 'boo', type(PeakIndexNew)
@@ -63,12 +67,14 @@ class FindPeaks(BaseFilter, CpuPlugin):
         print 'New index is', sorted(PeakIndexNew)
         print 'old index is', sorted(PeakIndex)
         PeakIndex.extend(tmp)
-        out_meta_data[0].set_meta_data('PeakIndex', PeakIndex)
+        out_meta_data.set_meta_data('PeakIndex', PeakIndex)
         return np.array(PeakIndex)
 
     def post_process(self):
-        # remove the output dataset from the processing chain
-        self.exp.remove_dataset(self.get_out_datasets()[0])
+        out_datasets = self.get_out_datasets()
+        # transfer to in_data metadata
+        in_meta_data = self.get_in_meta_data()[0]
+        in_meta_data.set_meta_data('PeakIndex', out_datasets[0].data[-1])
 
     def setup(self):
         # set up the output dataset that is created by the plugin
@@ -79,11 +85,13 @@ class FindPeaks(BaseFilter, CpuPlugin):
         in_pData[0].plugin_data_setup("SPECTRUM", self.get_max_frames())
 
         nFrames = in_pData[0].get_total_frames()
-        out_dataset[0].create_dataset(axis_labels=('y.pixels',), # the axis label needs changing
+        out_dataset[0].create_dataset(axis_labels=('peaks.pixels',),
                                       shape={'variable': (nFrames,)},
-                                      dtype=np.int)  # default is float32
+                                      dtype=np.int,  # default is float32
+                                      # remove from the processing chain
+                                      remove=True)
+
         out_dataset[0].add_pattern("1D_METADATA", slice_dir=(0,))
-        out_dataset[0].meta_data.set_meta_data('PeakIndex', [])
 
         out_pData[0].plugin_data_setup("1D_METADATA", self.get_max_frames())
 

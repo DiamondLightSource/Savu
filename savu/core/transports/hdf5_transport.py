@@ -23,7 +23,6 @@
 import logging
 import socket
 import os
-import copy
 
 from mpi4py import MPI
 from itertools import chain
@@ -102,6 +101,7 @@ class Hdf5Transport(TransportMechanism):
         """
         Runs a chain of plugins
         """
+        print "***IN THE TRANSPORT LAYER: RUN PLUGIN LIST***"
         exp = self.exp
         exp.barrier()
         logging.info("Starting the HDF5 plugin list runner")
@@ -116,16 +116,18 @@ class Hdf5Transport(TransportMechanism):
         in_data = exp.index["in_data"][exp.index["in_data"].keys()[0]]
         out_data_objects = in_data.load_data(self)
 
-        exp.barrier()
-        logging.info("clear all out_data objects in experiment dictionary")
-        exp.clear_data_objects()
+#        exp.barrier()
+#        logging.info("clear all out_data objects in experiment dictionary")
+#        exp.clear_data_objects()
+
+        print "***RUNNING THE FINAL PROCESSING***"
 
         exp.barrier()
-        logging.info("Load all the plugins")
+        logging.info("Load the loader plugin")
         self.plugin_loader(plugin_list[0])
 
         exp.barrier()
-        logging.info("Running all the plugins")
+        logging.info("Running all the data processing plugins")
 
         for i in range(1, len(plugin_list)-1):
             link_type = "final_result" if i is len(plugin_list)-2 else \
@@ -148,20 +150,9 @@ class Hdf5Transport(TransportMechanism):
 
             exp.barrier()
             logging.info("close any files that are no longer required")
-            for out_objs in plugin.parameters["out_datasets"]:
-                if out_objs in exp.index["in_data"].keys():
-                    exp.index["in_data"][out_objs].close_file()
+            out_datasets = plugin.parameters["out_datasets"]
 
-            exp.barrier()
-            logging.info("Copy out data to in data")
-            for key in exp.index["out_data"]:
-                output = exp.index["out_data"][key]
-                output.save_data(link_type)
-                exp.index["in_data"][key] = copy.deepcopy(output)
-
-            exp.barrier()
-            logging.info("Clear up all data objects")
-            exp.clear_out_data_objects()
+            self.reorganise_datasets(out_datasets, link_type)
 
         exp.barrier()
         logging.info("close all remaining files")
@@ -217,8 +208,6 @@ class Hdf5Transport(TransportMechanism):
     def set_out_data(self, data, slice_list, result, count):
         result = [result] if type(result) is not list else result
         for idx in range(len(data)):
-            print slice_list[idx][count]
-            print len(result[idx])
             data[idx].data[slice_list[idx][count]] = \
                 data[idx].get_unpadded_slice_data(slice_list[idx][count],
                                                   result[idx])

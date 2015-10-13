@@ -51,34 +51,7 @@ class SimpleFit(BaseFilter, CpuPlugin):
         super(SimpleFit, self).__init__("SimpleFit")
 
     def pre_process(self):
-        in_meta_data, _out_meta_data = self.get_meta_data()
-        if not in_meta_data.get_meta_data('PeakIndex'):
-            positions = self.parameters['fit_elements']
-            if isinstance(positions, str):
-                from flupy.xrf_data_handling import XRFDataset
-                # assume it is like fast xrf
-                paramdict = {}
-                axis = np.arange(0.01, 2048*0.01, 0.01)
-                step = axis[3]-axis[2]
-                paramdict["Experiment"]['elements'] = \
-                    self.parameters['fit_elements'].split(',')
-                if self.parameters['fit_range']:
-                    paramdict["FitParams"]["fitted_energy_range_keV"] = \
-                        self.parameters['fit_range']
-                else:
-                    #  all of them
-                    paramdict["FitParams"]["fitted_energy_range_keV"] = \
-                        [axis[0], axis[-1]]
-                paramdict["Experiment"]["incident_energy_keV"] = \
-                    in_meta_data.get_meta_data("mono_energy")
-                idx = self.findLines(XRFDataset().paramdict)
-                idx = (np.array(idx)/step).astype(int)
-                #  for now
-            elif isinstance(positions, list):
-                self.axis = \
-                    in_meta_data.get_meta_data('integrated_diffraction_angle')
-        else:
-            self.positions = in_meta_data.get_meta_data('PeakIndex')
+        self.setPositions(self.get_in_meta_data()[0])
 
     def filter_frames(self, data):
         positions = self.positions
@@ -97,17 +70,21 @@ class SimpleFit(BaseFilter, CpuPlugin):
         return [weights, widths, areas, residuals]
 
     def setup(self):
-        print "in the simple fit setup"
         # set up the output datasets that are created by the plugin
-        in_datasets, out_datasets = self.get_datasets()
-        in_meta_data = self.get_in_meta_data()[0]        
-#        out_datasets[0].create_dataset(axis_labels=('y.pixels',),
-#                                        shape=(shape,))        
+        in_dataset, out_datasets = self.get_datasets()
 
-        
-        axis_labels = [in_datasets[0], '-1.name.unit']
-        positions = self.getPositions(in_meta_data)
-        print positions
+        out_datasets[0].create_dataset(in_dataset[0])
+
+        shape = in_dataset[0].get_shape()
+        out_datasets[0].add_pattern("CHANNEL", core_dir=(-1,),
+                                    slice_dir=range(len(shape)-1))
+
+        in_pData, out_pData = self.get_plugin_datasets()
+        in_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
+        out_pData[0].plugin_data_setup('CHANNEL', self.get_max_frames())
+
+
+#        in_meta_data = self.get_in_meta_data()[0]
 #        shape = in_dataset[0].get_shape() + (len(positions),)
 #        channel = {'core_dir': (-1,), 'slice_dir': range(len(outshape)-1)}
 #        acq_patterns = in_dataset[0].get_patterns_based_on_acquisition()
@@ -246,9 +223,12 @@ class SimpleFit(BaseFilter, CpuPlugin):
             spec += fun(x, weights[ii], positions[ii], widths[ii])
         return spec
 
-    def getPositions(self, in_meta_data):
-        if not in_meta_data.get_meta_data('PeakIndex'):
+    def setPositions(self, in_meta_data):
+        try:
+            positions = in_meta_data.get_meta_data('PeakIndex')
+        except KeyError:
             positions = self.parameters['fit_elements']
+
             if isinstance(positions, str):
                 from flupy.xrf_data_handling import XRFDataset
                 # assume it is like fast xrf
@@ -272,9 +252,38 @@ class SimpleFit(BaseFilter, CpuPlugin):
             elif isinstance(positions, list):
                 axis = \
                     in_meta_data.get_meta_data('integrated_diffraction_angle')
-        else:
-            positions = in_meta_data.get_meta_data('PeakIndex')
-        return positions
+
+        self.positions = positions
+
+#    def getPositions(self, in_meta_data):
+#        if not in_meta_data.get_meta_data('PeakIndex'):
+#            positions = self.parameters['fit_elements']
+#            if isinstance(positions, str):
+#                from flupy.xrf_data_handling import XRFDataset
+#                # assume it is like fast xrf
+#                paramdict = {}
+#                axis = np.arange(0.01, 2048*0.01, 0.01)
+#                step = axis[3]-axis[2]
+#                paramdict["Experiment"]['elements'] = \
+#                    self.parameters['fit_elements'].split(',')
+#                if self.parameters['fit_range']:
+#                    paramdict["FitParams"]["fitted_energy_range_keV"] = \
+#                        self.parameters['fit_range']
+#                else:
+#                    #  all of them
+#                    paramdict["FitParams"]["fitted_energy_range_keV"] = \
+#                        [axis[0], axis[-1]]
+#                paramdict["Experiment"]["incident_energy_keV"] = \
+#                    in_meta_data.get_meta_data("mono_energy")
+#                idx = self.findLines(XRFDataset().paramdict)
+#                idx = (np.array(idx)/step).astype(int)
+#                #  for now
+#            elif isinstance(positions, list):
+#                axis = \
+#                    in_meta_data.get_meta_data('integrated_diffraction_angle')
+#        else:
+#            positions = in_meta_data.get_meta_data('PeakIndex')
+#        return positions
 
     def findLines(self, paramdict):
         fitting_range = paramdict["FitParams"]["fitted_energy_range_keV"]

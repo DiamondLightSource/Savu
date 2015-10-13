@@ -25,7 +25,6 @@ import h5py
 import logging
 
 from mpi4py import MPI
-import numpy as np
 
 NX_CLASS = 'NX_class'
 

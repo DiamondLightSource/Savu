@@ -94,8 +94,10 @@ class Experiment(object):
     def clear_out_data_objects(self):
         self.index["out_data"] = {}
 
-    def set_out_data_to_in(self):
-        self.index["in_data"] = self.index["out_data"]
+    def merge_out_data_to_in(self):
+        for key, data in self.index["out_data"].iteritems():
+            if data.remove is False:
+                self.index['in_data'][key] = data
         self.index["out_data"] = {}
 
     def barrier(self):

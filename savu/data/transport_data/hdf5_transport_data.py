@@ -65,8 +65,8 @@ class Hdf5TransportData(object):
             saver_plugin.setup(exp)
 
             out_data_objects.append(exp.index["out_data"].copy())
-            #exp.clear_out_data_objects()
-            exp.set_out_data_to_in()
+
+            exp.merge_out_data_to_in()
 
             exp.log("Point 3")
             count += 1
@@ -147,6 +147,7 @@ class Hdf5TransportData(object):
                 logging.debug("Completing file %s", self.backing_file.filename)
                 self.backing_file.close()
                 self.backing_file = None
+                print "closing the backing file"
             except:
                 pass
 

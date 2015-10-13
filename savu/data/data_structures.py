@@ -52,6 +52,7 @@ class Data(object):
         self.exp = exp
         self.variable_length_flag = False
         self.dtype = None
+        self.remove = False
 
     def set_plugin_data(self, plugin_data_obj):
         self._plugin_data_obj = plugin_data_obj
@@ -102,6 +103,7 @@ class Data(object):
         a plugin
         """
         self.dtype = kwargs.get('dtype', np.float32)
+        self.remove = kwargs.get('remove', False)
         if len(args) is 1:
             self.copy_dataset(args[0])
         else:
@@ -254,7 +256,7 @@ class Data(object):
             self.set_main_axis('PROJECTION')
         elif check is 1:
             raise Exception("Cannot set up SINOGRAM and PROJECTION "
-                            "main_directions as both patterns do no exist")
+                            "main_directions as both patterns do not exist")
 
     def check_pattern(self, pattern_name):
         patterns = self.get_patterns()
