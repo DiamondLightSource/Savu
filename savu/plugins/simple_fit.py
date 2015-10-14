@@ -84,7 +84,7 @@ class SimpleFit(BaseFilter, CpuPlugin):
         in_dataset, out_datasets = self.get_datasets()
 
         shape = in_dataset[0].get_shape()
-        axis_labels = {in_dataset[0]: '-1.test.unit'}
+        axis_labels = {in_dataset[0]: '-1.peak.pixel'}
         pattern_list = ['SINOGRAM', 'PROJECTION']
 
         fitAreas = out_datasets[0]
@@ -183,36 +183,6 @@ class SimpleFit(BaseFilter, CpuPlugin):
                     in_meta_data.get_meta_data('integrated_diffraction_angle')
 
         self.positions = positions
-
-#    def getPositions(self, in_meta_data):
-#        if not in_meta_data.get_meta_data('PeakIndex'):
-#            positions = self.parameters['fit_elements']
-#            if isinstance(positions, str):
-#                from flupy.xrf_data_handling import XRFDataset
-#                # assume it is like fast xrf
-#                paramdict = {}
-#                axis = np.arange(0.01, 2048*0.01, 0.01)
-#                step = axis[3]-axis[2]
-#                paramdict["Experiment"]['elements'] = \
-#                    self.parameters['fit_elements'].split(',')
-#                if self.parameters['fit_range']:
-#                    paramdict["FitParams"]["fitted_energy_range_keV"] = \
-#                        self.parameters['fit_range']
-#                else:
-#                    #  all of them
-#                    paramdict["FitParams"]["fitted_energy_range_keV"] = \
-#                        [axis[0], axis[-1]]
-#                paramdict["Experiment"]["incident_energy_keV"] = \
-#                    in_meta_data.get_meta_data("mono_energy")
-#                idx = self.findLines(XRFDataset().paramdict)
-#                idx = (np.array(idx)/step).astype(int)
-#                #  for now
-#            elif isinstance(positions, list):
-#                axis = \
-#                    in_meta_data.get_meta_data('integrated_diffraction_angle')
-#        else:
-#            positions = in_meta_data.get_meta_data('PeakIndex')
-#        return positions
 
     def findLines(self, paramdict):
         fitting_range = paramdict["FitParams"]["fitted_energy_range_keV"]
