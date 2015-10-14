@@ -115,9 +115,9 @@ class Hdf5Transport(TransportMechanism):
         in_data = exp.index["in_data"][exp.index["in_data"].keys()[0]]
         out_data_objects = in_data.load_data(self)
 
-#        exp.barrier()
-#        logging.info("clear all out_data objects in experiment dictionary")
-#        exp.clear_data_objects()
+        exp.barrier()
+        logging.info("clear all out_data objects in experiment dictionary")
+        exp.clear_data_objects()
 
         exp.barrier()
         logging.info("Load the loader plugin")
