@@ -83,7 +83,8 @@ class Plugin(object):
         class docstring such as this
         :param error_threshold: Convergence threshold. Default: 0.001.
         """
-        for clazz in inspect.getmro(self.__class__):
+        print "\n*** in populate_default_parameters"
+        for clazz in inspect.getmro(self.__class__)[::-1]:
             if clazz != object:
                 full_description = pu.find_args(clazz)
                 for item in full_description:
@@ -100,6 +101,7 @@ class Plugin(object):
         """
         self.parameters = {}
         self.populate_default_parameters()
+        print self, self.parameters
         if parameters is not None:
             for key in parameters.keys():
                 if key in self.parameters.keys():

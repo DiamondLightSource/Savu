@@ -164,6 +164,13 @@ class PluginRunner(object):
         in_names = self.get_names(plugin_dict["data"]["in_datasets"])
         out_names = self.get_names(plugin_dict["data"]["out_datasets"])
 
+        default_in_names = plugin.parameters['in_datasets']
+        default_out_names = plugin.parameters['out_datasets']
+#        print in_names, out_names, default_in_names, default_out_names
+
+#        plugin.set_parameters(plugin_dict["data"])
+#        print in_names, out_names, default_in_names, default_out_names
+
         in_names = ('all' if len(in_names) is 0 else in_names)
         out_names = (in_names if len(out_names) is 0 else out_names)
 
