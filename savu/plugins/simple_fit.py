@@ -53,31 +53,32 @@ class SimpleFit(BaseFilter, CpuPlugin):
     def pre_process(self):
         self.setPositions(self.get_in_meta_data()[0])
 
-#    def filter_frames(self, data):
-#        positions = self.positions
-#        axis = self.axis
-#        p = []
-#        p.extend(data[0].squeeze()[positions])
-#        p.extend(self.parameters['width_guess']*np.ones_like(positions))
-#        #  now the fit
-#        lsq1 = leastsq(self._resid, p,
-#                       args=(data[0].squeeze(), axis, positions))
-#        weights, widths, areas = self.getAreas(self.parameters['peak_shape'],
-#                                               axis, positions, lsq1[0])
-#        residuals = self._resid(lsq1[0], data[0].squeeze(), axis, positions)
-#        # all fitting routines will output the same format.
-#        # nchannels long, with 3 elements. Each can be a subarray.
-#        return [weights, widths, areas, residuals]
-
     def filter_frames(self, data):
         positions = self.positions
-
-        weights = positions
-        widths = positions
-        areas = positions
-        residuals = data
-
+        axis = self.axis # this needs to be the x axis of the data. 
+        # This should come straight from the 
+        p = []
+        p.extend(data[0].squeeze()[positions])
+        p.extend(self.parameters['width_guess']*np.ones_like(positions))
+        #  now the fit
+        lsq1 = leastsq(self._resid, p,
+                       args=(data[0].squeeze(), axis, positions))
+        weights, widths, areas = self.getAreas(self.parameters['peak_shape'],
+                                               axis, positions, lsq1[0])
+        residuals = self._resid(lsq1[0], data[0].squeeze(), axis, positions)
+        # all fitting routines will output the same format.
+        # nchannels long, with 3 elements. Each can be a subarray.
         return [weights, widths, areas, residuals]
+
+#     def filter_frames(self, data):
+#         positions = self.positions
+# 
+#         weights = positions
+#         widths = positions
+#         areas = positions
+#         residuals = data
+# 
+#         return [weights, widths, areas, residuals]
 
     def setup(self):
         # set up the output datasets that are created by the plugin

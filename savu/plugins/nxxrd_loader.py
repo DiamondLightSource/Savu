@@ -49,14 +49,14 @@ class NxxrdLoader(BaseMultiModalLoader):
         mono_energy = data_obj.backing_file[
             xrd_entry.name + '/instrument/monochromator/energy']
         self.exp.meta_data.set_meta_data("mono_energy", mono_energy)
-
+        print xrd_entry
         self.set_motors(data_obj, xrd_entry, 'xrd')
-
-        data_obj.set_axis_labels('test.None',
-                                 'test.None',
-                                 'test.None',
-                                 'test.None',
-                                 'test.None')
+        # hard coded for now, but we can change it to fram nx transformations in future.
+        data_obj.set_axis_labels('theta.degrees',
+                                 'x.mm',
+                                 'y.mm',
+                                 'detector_x.mm',
+                                 'detector_y.mm')
 
         self.add_patterns_based_on_acquisition(data_obj, 'xrd')
 
