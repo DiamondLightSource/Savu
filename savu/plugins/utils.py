@@ -96,7 +96,6 @@ def find_args(dclass):
     """
     Finds the parameters list from the docstring
     """
-    print "In finding args:", dclass
     if not dclass.__doc__:
         return []
     lines = dclass.__doc__.split('\n')
@@ -104,12 +103,10 @@ def find_args(dclass):
                               '?Default:\s?(?P<default>.*[^ ])$')
     args = [param_regexp.findall(line.strip(' .')) for line in lines]
     args = [arg[0] for arg in args if len(arg)]
-    temp = [{'dtype': type(value),
+    return [{'dtype': type(value),
              'name': a[0], 'desc': a[1],
              'default': value} for a in args for value in [eval(a[2])]]
-    for t in temp:
-        print t
-    return temp
+
 
 def load_raw_data(filename):
     data = RawTimeseriesData()
