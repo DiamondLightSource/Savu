@@ -98,8 +98,6 @@ class Hdf5TransportData(object):
         logging.debug("Adding link to file %s", nxs_filename)
         plugin_file = h5py.File(nxs_filename, 'a')
 
-        print "Adding the link type", linkType
-
         if linkType is 'final_result':
             name = 'final_result_' + self.name
             entry = plugin_file['entry']
@@ -147,7 +145,6 @@ class Hdf5TransportData(object):
                 logging.debug("Completing file %s", self.backing_file.filename)
                 self.backing_file.close()
                 self.backing_file = None
-                print "closing the backing file"
             except:
                 pass
 

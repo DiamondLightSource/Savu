@@ -83,25 +83,25 @@ class SimpleFit(BaseFilter, CpuPlugin):
         # set up the output datasets that are created by the plugin
         in_dataset, out_datasets = self.get_datasets()
 
-        shape = in_dataset[0].get_shape()[:-1]
-        axis_labels = {in_dataset[0], '-1.test.unit'}
+        shape = in_dataset[0].get_shape()
+        axis_labels = {in_dataset[0]: '-1.test.unit'}
         pattern_list = ['SINOGRAM', 'PROJECTION']
 
         fitAreas = out_datasets[0]
         fitHeights = out_datasets[1]
         fitWidths = out_datasets[2]
 
-        fitAreas.create_dataset(patterns={in_dataset[0], pattern_list},
+        fitAreas.create_dataset(patterns={in_dataset[0]: pattern_list},
                                 axis_labels=axis_labels,
-                                shape={'variable', shape})
+                                shape={'variable': shape[:-1]})
 
-        fitHeights.create_dataset(patterns={in_dataset[0], pattern_list},
+        fitHeights.create_dataset(patterns={in_dataset[0]: pattern_list},
                                   axis_labels=axis_labels,
-                                  shape={'variable', shape})
+                                  shape={'variable': shape[:-1]})
 
-        fitWidths.create_dataset(patterns={in_dataset[0], pattern_list},
+        fitWidths.create_dataset(patterns={in_dataset[0]: pattern_list},
                                  axis_labels=axis_labels,
-                                 shape={'variable', shape})
+                                 shape={'variable': shape[:-1]})
 
         channel = {'core_dir': (-1,), 'slice_dir': range(len(shape)-1)}
         fitAreas.add_pattern("CHANNEL", **channel)

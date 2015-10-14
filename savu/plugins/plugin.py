@@ -42,13 +42,9 @@ class Plugin(object):
 
     def main_setup(self, exp, params):
         self.exp = exp
-#        print "\n before setup", self, self.exp.index
         self.set_parameters(params)
         self.set_plugin_datasets(exp)
         self.setup()
-
-#        print "after setup", self, self.exp.index, "\n"
-
         try:
             in_datasets, out_datasets = self.get_datasets()
             for data in in_datasets + out_datasets:
@@ -149,7 +145,6 @@ class Plugin(object):
         pass
 
     def clean_up(self):
-        print "cleaning up"
         #self.organise_metadata()
         self.copy_meta_data()
         self.clean_up_plugin_data()

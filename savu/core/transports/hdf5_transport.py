@@ -101,7 +101,6 @@ class Hdf5Transport(TransportMechanism):
         """
         Runs a chain of plugins
         """
-        print "***IN THE TRANSPORT LAYER: RUN PLUGIN LIST***"
         exp = self.exp
         exp.barrier()
         logging.info("Starting the HDF5 plugin list runner")
@@ -119,8 +118,6 @@ class Hdf5Transport(TransportMechanism):
 #        exp.barrier()
 #        logging.info("clear all out_data objects in experiment dictionary")
 #        exp.clear_data_objects()
-
-        print "***RUNNING THE FINAL PROCESSING***"
 
         exp.barrier()
         logging.info("Load the loader plugin")
@@ -144,9 +141,12 @@ class Hdf5Transport(TransportMechanism):
             logging.info("Load the plugin")
             plugin = self.plugin_loader(plugin_list[i], pos=i)
 
+            plugin_name = (plugin.__module__).split('.')[-1]
             exp.barrier()
             logging.info("run the plugin")
+            print "\n* Plugin", plugin_name, "has started *"
             plugin.run_plugin(exp, self)
+            print "* Plugin", plugin_name, "has completed *\n"
 
             exp.barrier()
             logging.info("close any files that are no longer required")

@@ -108,9 +108,7 @@ class Data(object):
             self.copy_dataset(args[0])
         else:
             try:
-                copy_data = kwargs['patterns']
-                patterns = copy_data.meta_data.get_meta_data('data_patterns')
-                self.meta_data.set_meta_data('data_patterns', patterns)
+                self.copy_patterns(kwargs['patterns'])
             except KeyError:
                 pass
 
@@ -128,6 +126,18 @@ class Data(object):
                 raise Exception("Please state axis_labels and shape when "
                                 "creating a new dataset")
 
+    def copy_patterns(self, copy_data):
+        if isinstance(copy_data, Data):
+            patterns = copy_data.meta_data.get_meta_data('data_patterns')
+        else:
+            data = copy_data.keys()[0]
+            pattern_list = copy_data[data]
+            all_patterns = data.meta_data.get_meta_data('data_patterns')
+            patterns = {}
+            for pattern in pattern_list:
+                patterns[pattern] = all_patterns[pattern]
+        self.meta_data.set_meta_data('data_patterns', patterns)
+
     def copy_dataset(self, copy_data):
         patterns = copy_data.meta_data.get_meta_data('data_patterns')
         self.meta_data.set_meta_data('data_patterns', patterns)
@@ -139,9 +149,12 @@ class Data(object):
         self.set_shape(shape)
 
     def create_axis_labels(self, axis_labels):
-        if isinstance(axis_labels[0], Data):
+        if isinstance(axis_labels, Data):
             self.copy_labels(axis_labels)
-            self.add_axis_labels(axis_labels[1:])
+        elif isinstance(axis_labels, dict):
+            data = axis_labels.keys()[0]
+            self.copy_labels(data)
+            self.add_axis_labels(axis_labels[data])
         else:
             self.set_axis_labels(*axis_labels)
 
@@ -224,7 +237,6 @@ class Data(object):
                                              kwargs[args])
             try:
                 if nDims != self.meta_data.get_meta_data("nDims"):
-                    print "nDims", nDims, self.meta_data.get_meta_data("nDims")
                     raise Exception("The pattern '%s' has an incorrect number "
                                     "of dimensions.", dtype)
             except KeyError:

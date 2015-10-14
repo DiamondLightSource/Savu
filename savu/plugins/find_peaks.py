@@ -63,9 +63,9 @@ class FindPeaks(BaseFilter, CpuPlugin):
                                             for x in PeakIndex)))
         tmp = set(PeakIndexNew) - set2
         tmp = list(tmp)
-        print 'temp is ', sorted(tmp)
-        print 'New index is', sorted(PeakIndexNew)
-        print 'old index is', sorted(PeakIndex)
+#        print 'temp is ', sorted(tmp)
+#        print 'New index is', sorted(PeakIndexNew)
+#        print 'old index is', sorted(PeakIndex)
         PeakIndex.extend(tmp)
         out_meta_data.set_meta_data('PeakIndex', PeakIndex)
         return np.array(PeakIndex)
@@ -85,7 +85,7 @@ class FindPeaks(BaseFilter, CpuPlugin):
         in_pData[0].plugin_data_setup("SPECTRUM", self.get_max_frames())
 
         nFrames = in_pData[0].get_total_frames()
-        out_dataset[0].create_dataset(axis_labels=('peaks.pixels',),
+        out_dataset[0].create_dataset(axis_labels=['peaks.pixels'],
                                       shape={'variable': (nFrames,)},
                                       dtype=np.int,  # default is float32
                                       # remove from the processing chain

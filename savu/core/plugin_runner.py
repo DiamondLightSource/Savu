@@ -170,8 +170,6 @@ class PluginRunner(object):
         in_names = in_names if in_names else default_in_names
         out_names = out_names if out_names else default_out_names
 
-        print in_names, out_names
-
         in_names = ('all' if len(in_names) is 0 else in_names)
         out_names = (in_names if len(out_names) is 0 else out_names)
 
