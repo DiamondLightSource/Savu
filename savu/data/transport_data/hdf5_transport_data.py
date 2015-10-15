@@ -232,7 +232,6 @@ class Hdf5TransportData(object):
                 new_slice = slice(i, i+max_frames, 1)
                 working_slice[slice_dir[0]] = new_slice
                 grouped.append(tuple(working_slice))
-
             if rem:
                 new_slice = slice(i+max_frames, len(group), 1)
                 working_slice[slice_dir[0]] = new_slice
