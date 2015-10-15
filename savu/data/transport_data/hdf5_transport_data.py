@@ -27,6 +27,7 @@ import h5py
 import numpy as np
 
 from savu.data.data_structures import Padding
+from savu.data.data_structures import TomoRaw
 
 NX_CLASS = 'NX_class'
 
@@ -246,8 +247,9 @@ class Hdf5TransportData(object):
 
         sl = self.single_slice_list()
 
-#        if isinstance(self, ds.TomoRaw):
-#            sl = self.get_frame_raw(sl)
+#        if isinstance(self, TomoRaw):
+#            if self.get_raw_flag() is False:
+#                sl = self.get_frame_raw(sl)
 
         if sl is None:
             raise Exception("Data type", self.get_current_pattern_name(),

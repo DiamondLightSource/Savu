@@ -103,7 +103,7 @@ class Data(object):
         a plugin
         """
         self.dtype = kwargs.get('dtype', np.float32)
-        self.remove = kwargs.get('remove', False)
+        self.remove = kwargs.get('remove', False) # remove from the plugin chain
         if len(args) is 1:
             self.copy_dataset(args[0])
         else:
@@ -142,10 +142,11 @@ class Data(object):
         patterns = copy_data.meta_data.get_meta_data('data_patterns')
         self.meta_data.set_meta_data('data_patterns', patterns)
         self.copy_labels(copy_data)
-        if isinstance(copy_data, TomoRaw):
-            shape = copy_data.remove_dark_and_flat()
-        else:
-            shape = copy_data.get_shape()
+#        if isinstance(copy_data, TomoRaw):
+#            shape = copy_data.remove_dark_and_flat()
+#        else:
+#            shape = copy_data.get_shape()
+        shape = copy_data.get_shape()
         self.set_shape(shape)
 
     def create_axis_labels(self, axis_labels):
@@ -455,6 +456,24 @@ class TomoRaw(object):
         self.image_key = None
         self.image_key_slice = None
         self.frame_list = []
+        self.raw_flag = False
+
+#    def set_all_raw_data_flag(self):
+#        self.get_all_raw_data = True
+#
+#    def get_all_raw_data_flag(self):
+#        return self.image_key
+#
+#    def set_raw_flag(self):
+#        """
+#        if raw flag is set then all data is including in the slicing,
+#        including dark/flat fields etc.
+#        """
+#        self.raw_flag = True
+#        print self.raw_flag
+        
+    def get_raw_flag(self):
+        return self.raw_flag
 
     def set_image_key(self, image_key):
         self.image_key = image_key

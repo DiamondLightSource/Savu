@@ -208,6 +208,7 @@ class Hdf5Transport(TransportMechanism):
     def set_out_data(self, data, slice_list, result, count):
         result = [result] if type(result) is not list else result
         for idx in range(len(data)):
+            #print slice_list[idx], result[idx].shape
             data[idx].data[slice_list[idx][count]] = \
                 data[idx].get_unpadded_slice_data(slice_list[idx][count],
                                                   result[idx])

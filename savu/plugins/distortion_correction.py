@@ -45,15 +45,39 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
         unwarp.setctr(*(self.parameters['centre']))
 
     def filter_frames(self, data):
-        result = np.empty_like(data[0])
-        print "running setup***"
-        unwarp.setup(data[0], result)
-        print "running run***"
-        unwarp.run(data[0], result)
+#        if isinstance(data[0], TomoRaw):
+#            in_meta_data = self.get_in_meta_data()
+#            image_key = in_meta_data.get_meta_data('image_key')
+#            data = data[0][image_key == 0]
+#        else:
+#            data = data[0]
+        data = data[0]
+
+        result = np.empty_like(data)
+        unwarp.setup(data, result)
+        unwarp.run(data, result)
         return result
 
-    def post_process(self, data):
+    def post_process(self):
         unwarp.cleanup()
 
+    def setup(self):
+        self.exp.log(self.name + " Start")
+        # set up the output dataset that is created by the plugin
+        in_dataset, out_dataset = self.get_datasets()
+        # get only frames where image key is zero
+        in_dataset[0].set_image_key(0)
+
+        # copy all required information from in_dataset[0]
+        out_dataset[0].create_dataset(in_dataset[0])
+
+        # set information relating to the plugin data
+        in_pData, out_pData = self.get_plugin_datasets()
+        # set pattern_name and nframes to process for all datasets
+        in_pData[0].plugin_data_setup('PROJECTION', self.get_max_frames())
+        out_pData[0].plugin_data_setup('PROJECTION', self.get_max_frames())
+
+        self.exp.log(self.name + " End")
+        
     def get_max_frames(self):
         return 3
