@@ -247,9 +247,15 @@ class Hdf5TransportData(object):
 
         sl = self.single_slice_list()
 
-#        if isinstance(self, TomoRaw):
-#            if self.get_raw_flag() is False:
+        print self.get_tomo_raw().data_only_flag
+        if self.get_tomo_raw().data_only_flag is True:
+            print "the flag is true"
+        
+#        try:
+#            if self.get_tomo_raw().data_only_flag is True:
 #                sl = self.get_frame_raw(sl)
+#        except:
+#            print "An exception"
 
         if sl is None:
             raise Exception("Data type", self.get_current_pattern_name(),

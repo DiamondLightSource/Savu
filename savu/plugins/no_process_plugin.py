@@ -39,25 +39,11 @@ class NoProcessPlugin(Plugin, CpuPlugin):
 
         return data[0]
 
-#        in_data = self.get_data_objects(exp.index, "in_data")
-#        out_data = self.get_data_objects(exp.index, "out_data")
-#
-#        in_data = in_data[0]
-#        out_data = out_data[0]
-#
-#        print "performing the processing"
-#        slice_list = in_data.single_slice_list() #  I changed this to single_slice_list, from get_slice_list since for some reason get_slice_list wasn't found. adp 
-#        for sl in slice_list:
-#            temp = in_data.data[sl]
-#            out_data.data[sl] = temp
-#
-#        print in_data.data.shape, out_data.data.shape
-
     def setup(self):
         """
-        Initial setup of all datasets required as input and output to the 
+        Initial setup of all datasets required as input and output to the
         plugin.  This method is called before the process method in the plugin
-        chain.  
+        chain.
         """
         in_dataset, out_dataset = self.get_datasets()
         out_dataset[0].create_dataset(in_dataset[0])

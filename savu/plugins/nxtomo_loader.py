@@ -44,8 +44,8 @@ class NxtomoLoader(BaseLoader):
     @logmethod
     def setup(self):
         exp = self.exp
-        base_classes = [ds.TomoRaw]
-        data_obj = exp.create_data_object('in_data', 'tomo', base_classes)
+        data_obj = exp.create_data_object('in_data', 'tomo')
+        ds.TomoRaw(data_obj)
 
         # from nexus file determine rotation angle
         rot = 0
@@ -71,11 +71,11 @@ class NxtomoLoader(BaseLoader):
 
         data_obj.data = data_obj.backing_file['entry1/tomo_entry/data/data']
 
-        data_obj.set_image_key(data_obj.backing_file
-                               ['entry1/tomo_entry/instrument/detector/'
-                                'image_key'])
+        data_obj.get_tomo_raw().set_image_key(data_obj.backing_file[
+            'entry1/tomo_entry/instrument/detector/''image_key'])
 
-        objInfo.set_meta_data("image_key", data_obj.get_image_key())
+        objInfo.set_meta_data("image_key",
+                              data_obj.get_tomo_raw().get_image_key())
 
         rotation_angle = \
             data_obj.backing_file['entry1/tomo_entry/data/rotation_angle']

@@ -25,6 +25,7 @@
 import sys
 import logging
 import warnings
+import copy
 
 import h5py
 import numpy as np
@@ -48,6 +49,7 @@ class Data(object):
         self.data = None
         self.shape = None
         self._plugin_data_obj = None
+        self._tomo_raw_obj = None
         self.data_mapping = None
         self.exp = exp
         self.variable_length_flag = False
@@ -65,6 +67,20 @@ class Data(object):
             return self._plugin_data_obj
         else:
             raise Exception("There is no PluginData object associated with "
+                            "the Data object.")
+
+    def set_tomo_raw(self, tomo_raw_obj):
+        print "setting tomo_raw", tomo_raw_obj
+        self._tomo_raw_obj = tomo_raw_obj
+
+    def clear_tomo_raw(self):
+        self._tomo_raw_obj = None
+
+    def get_tomo_raw(self):
+        if self._tomo_raw_obj is not None:
+            return self._tomo_raw_obj
+        else:
+            raise Exception("There is no TomoRaw object associated with "
                             "the Data object.")
 
     def get_transport_data(self, transport):
@@ -103,9 +119,14 @@ class Data(object):
         a plugin
         """
         self.dtype = kwargs.get('dtype', np.float32)
-        self.remove = kwargs.get('remove', False) # remove from the plugin chain
+        # remove from the plugin chain
+        self.remove = kwargs.get('remove', False)
         if len(args) is 1:
             self.copy_dataset(args[0])
+            temp = args[0].get_tomo_raw()
+            temp2 = copy.deepcopy(temp)
+            print temp, temp2
+            self.set_tomo_raw(temp2)
         else:
             try:
                 self.copy_patterns(kwargs['patterns'])
@@ -142,10 +163,6 @@ class Data(object):
         patterns = copy_data.meta_data.get_meta_data('data_patterns')
         self.meta_data.set_meta_data('data_patterns', patterns)
         self.copy_labels(copy_data)
-#        if isinstance(copy_data, TomoRaw):
-#            shape = copy_data.remove_dark_and_flat()
-#        else:
-#            shape = copy_data.get_shape()
         shape = copy_data.get_shape()
         self.set_shape(shape)
 
@@ -452,26 +469,23 @@ class PluginData(object):
 
 class TomoRaw(object):
 
-    def __init__(self):
+    def __init__(self, data_obj):
+        self.data_obj = data_obj
+        self.data_obj.set_tomo_raw(self)
         self.image_key = None
         self.image_key_slice = None
         self.frame_list = []
-        self.raw_flag = False
+        # this flag determines which data is passed. If false then just the
+        # data, if true then all data including dark and flat fields.
+        self.data_only_flag = False
 
-#    def set_all_raw_data_flag(self):
-#        self.get_all_raw_data = True
-#
-#    def get_all_raw_data_flag(self):
-#        return self.image_key
-#
-#    def set_raw_flag(self):
-#        """
-#        if raw flag is set then all data is including in the slicing,
-#        including dark/flat fields etc.
-#        """
-#        self.raw_flag = True
-#        print self.raw_flag
-        
+    def __deepcopy__(self, memo):
+        return self
+
+    def set_image_key_to_zero(self):
+        self.raw_flag = False
+        self.data_obj.clear_tomo_raw()
+
     def get_raw_flag(self):
         return self.raw_flag
 
@@ -596,31 +610,31 @@ class DataMapping(object):
 
     def get_motor_type(self):
         return self.motor_type
-        
+
     def set_axes(self, axes):
         self.axes = axes
-        
+
     def get_axes(self):
         return self.axes
 
-    def get_projection_direction(self, motor_type):
-        projection = []
-        projection_slice = []
-        for item, key in enumerate(motor_type):
-            if key == 'translation':
-                projection.append(item)
-            elif key != 'translation':
-                projection_slice.append(item)
-            elif key == 'rotation':
-                rotation = item
-        return tuple(projection)
-
-    def get_patterns_based_on_acquisition(self):
-        motor_type = self.meta_data.get_meta_data("motor_type")
-        proj_dir, rotation = self.get_projection_direction(motor_type)
-        p1 = self.check_is_map(proj_dir)
-        p2 = self.check_is_tomo(proj_dir, rotation)
-        return list(p1) + list(p2)
+#    def get_projection_direction(self, motor_type):
+#        projection = []
+#        projection_slice = []
+#        for item, key in enumerate(motor_type):
+#            if key == 'translation':
+#                projection.append(item)
+#            elif key != 'translation':
+#                projection_slice.append(item)
+#            elif key == 'rotation':
+#                rotation = item
+#        return tuple(projection)
+#
+#    def get_patterns_based_on_acquisition(self):
+#        motor_type = self.meta_data.get_meta_data("motor_type")
+#        proj_dir, rotation = self.get_projection_direction(motor_type)
+#        p1 = self.check_is_map(proj_dir)
+#        p2 = self.check_is_tomo(proj_dir, rotation)
+#        return list(p1) + list(p2)
 
     def check_is_map(self, proj_dir):
         pattern = []
