@@ -43,11 +43,6 @@ class PyfaiAzimuthalIntegrator(BaseFilter, CpuPlugin):
         logging.debug("Starting 1D azimuthal integrationr")
         super(PyfaiAzimuthalIntegrator, self).__init__("PyfaiAzimuthalIntegrator")
 
-    def get_filter_padding(self):
-        return {}
-    
-    def get_max_frames(self):
-        return 1
     
     def pre_process(self, exp):
         """
@@ -58,9 +53,9 @@ class PyfaiAzimuthalIntegrator(BaseFilter, CpuPlugin):
             None if no customisation is required
         :type parameters: dict
         """
-        in_data_list = self.parameters["in_datasets"]
-        in_d1 = exp.index["in_data"][in_data_list[0]]
-        mData = in_d1.meta_data # the metadata
+        in_dataset, out_datasets = self.get_datasets()
+        mData= self.get_in_meta_data()[0]
+        in_d1 = in_dataset[0]
         ai = pyFAI.AzimuthalIntegrator()# get me an integrator object
         ### prep the goemtry
         bc = [mData.get_meta_data("beam_center_x")[...], mData.get_meta_data("beam_center_y")[...]]
@@ -83,66 +78,98 @@ class PyfaiAzimuthalIntegrator(BaseFilter, CpuPlugin):
             mask = np.zeros((sh[-2],sh[-1]))
         # now integrate in radius (1D)
         npts = int(np.round(np.sqrt(sh[-1]**2+sh[-2]**2)))
-        params = [mask,npts,mData,ai]
-        return params
+        self.params = [mask,npts,mData,ai]
+
         
-    def filter_frame(self, data, params):
-        mData = params[2]
-        npts = params[1]
-        mask =params[0]
-        ai = params[3]
+    def filter_frame(self, data):
+        mData = self.params[2]
+        npts = self.params[1]
+        mask =self.params[0]
+        ai = self.params[3]
         logging.debug("Running azimuthal integration")
         print np.squeeze(data).shape
         print "I'm here"
         fit=ai.xrpd(data=np.squeeze(data),npt=npts)
-        mData.set_meta_data('integrated_diffraction_angle',fit[0])
+        mData.set_meta_data('Q',fit[0])
 #        mData.set_meta_data('integrated_diffraction_noise',fit[2])
         return fit[1]
-        
-    def setup(self, experiment):
 
-        chunk_size = self.get_max_frames()
+    def setup(self):
+        print "Hi"
+        in_dataset, out_datasets = self.get_datasets()
+        in_pData, out_pData = self.get_plugin_datasets()
+        shape = in_dataset[0].get_shape()
+        # it will always be in Q for this plugin
+        # Doesnt this get rid of the other two axes?
+        axis_labels = {in_dataset[0]: '-1.Q.nm^-1'}
+        # I just want diffraction data
+        in_pData[0].plugin_data_setup('DIFFRACTION', self.get_max_frames())
+        spectra = out_datasets[0]
+        # what does this do?
+        SINO =  
+        spectra.create_dataset(patterns={in_dataset[0]: ['SPECTRUM']},
+                               axis_labels=axis_labels,
+                               shape={'variable': shape[:-1]})
 
-        #-------------------setup input datasets-------------------------
+        # this get the right data in...
+        out_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
+        # and this sets up the output patterns
+        spectrum = {'core_dir': (-1,), 'slice_dir': range(len(shape)-2)}
+        spectra.add_pattern("SPECTRUM", **spectrum)
 
-        # get a list of input dataset names required for this plugin
-        in_data_list = self.parameters["in_datasets"]
-        # get all input dataset objects
-        in_d1 = experiment.index["in_data"][in_data_list[0]]
-        # set all input data patterns
-        in_d1.set_current_pattern_name("DIFFRACTION") # we take in a pattern
-        # set frame chunk
-        in_d1.set_nFrames(chunk_size)
-        
-        #----------------------------------------------------------------
+    def get_max_frames(self):
+        """
+        This filter processes 1 frame at a time
+         :returns:  1
+        """
+        return 1
 
-        #------------------setup output datasets-------------------------
-
-        # get a list of output dataset names created by this plugin
-        out_data_list = self.parameters["out_datasets"]
-        
-        # create all out_data objects and associated patterns and meta_data
-        # patterns can be copied, added or both
-        out_d1 = experiment.create_data_object("out_data", out_data_list[0])
-        
-        out_d1.copy_patterns(in_d1.get_patterns())
-        # copy the entire in_data dictionary (image_key, dark and flat will 
-        #be removed since out_data is no longer an instance of TomoRaw)
-        # If you do not want to copy the whole dictionary pass the key word
-        # argument copyKeys = [your list of keys to copy], or alternatively, 
-        # removeKeys = [your list of keys to remove]
-        out_d1.meta_data.copy_dictionary(in_d1.meta_data.get_dictionary(), rawFlag=True)
-        sh = in_d1.get_shape()
-        npts = int(np.round(np.sqrt(sh[-1]**2+sh[-2]**2))) # get the maximum pixel width
-        out_d1.set_shape(sh[:3] + (npts,))# need to figure how to do this properly
-        
-        core_dir = (len(in_d1.get_shape())-2,)
-        
-        out_d1.add_pattern("SPECTRUM", core_dir = core_dir, slice_dir = range(0,core_dir[0],1))
-
-
-        # set pattern for this plugin and the shape
-        out_d1.set_current_pattern_name("SPECTRUM")# output a spectrum
-
-        # set frame chunk
-        out_d1.set_nFrames(chunk_size)
+    def nOutput_datasets(self):
+        return 1
+#     def setup(self, experiment):
+# 
+#         chunk_size = self.get_max_frames()
+# 
+#         #-------------------setup input datasets-------------------------
+# 
+#         # get a list of input dataset names required for this plugin
+#         in_data_list = self.parameters["in_datasets"]
+#         # get all input dataset objects
+#         in_d1 = experiment.index["in_data"][in_data_list[0]]
+#         # set all input data patterns
+#         in_d1.set_current_pattern_name("DIFFRACTION") # we take in a pattern
+#         # set frame chunk
+#         in_d1.set_nFrames(chunk_size)
+#         
+#         #----------------------------------------------------------------
+# 
+#         #------------------setup output datasets-------------------------
+# 
+#         # get a list of output dataset names created by this plugin
+#         out_data_list = self.parameters["out_datasets"]
+#         
+#         # create all out_data objects and associated patterns and meta_data
+#         # patterns can be copied, added or both
+#         out_d1 = experiment.create_data_object("out_data", out_data_list[0])
+#         
+#         out_d1.copy_patterns(in_d1.get_patterns())
+#         # copy the entire in_data dictionary (image_key, dark and flat will 
+#         #be removed since out_data is no longer an instance of TomoRaw)
+#         # If you do not want to copy the whole dictionary pass the key word
+#         # argument copyKeys = [your list of keys to copy], or alternatively, 
+#         # removeKeys = [your list of keys to remove]
+#         out_d1.meta_data.copy_dictionary(in_d1.meta_data.get_dictionary(), rawFlag=True)
+#         sh = in_d1.get_shape()
+#         npts = int(np.round(np.sqrt(sh[-1]**2+sh[-2]**2))) # get the maximum pixel width
+#         out_d1.set_shape(sh[:3] + (npts,))# need to figure how to do this properly
+#         
+#         core_dir = (len(in_d1.get_shape())-2,)
+#         
+#         out_d1.add_pattern("SPECTRUM", core_dir = core_dir, slice_dir = range(0,core_dir[0],1))
+# 
+# 
+#         # set pattern for this plugin and the shape
+#         out_d1.set_current_pattern_name("SPECTRUM")# output a spectrum
+# 
+#         # set frame chunk
+#         out_d1.set_nFrames(chunk_size)

@@ -105,6 +105,7 @@ class SimpleFit(BaseFilter, CpuPlugin):
                                  shape={'variable': shape[:-1]})
 
         channel = {'core_dir': (-1,), 'slice_dir': range(len(shape)-1)}
+        
         fitAreas.add_pattern("CHANNEL", **channel)
         fitHeights.add_pattern("CHANNEL", **channel)
         fitWidths.add_pattern("CHANNEL", **channel)
