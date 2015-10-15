@@ -75,7 +75,7 @@ class SimpleFit(BaseFilter, CpuPlugin):
         p.extend(weights)
         p.extend(widths)
         curvetype = self.lookup[str(self.parameters['peak_shape'])]
-        lsq1 = leastsq(self._resid, p, args=(curvetype, data, self.axis, positions), Dfun=dfunc, col_deriv=1)
+        lsq1 = leastsq(self._resid, p, args=(curvetype, data, self.axis, positions))#, Dfun=dfunc, col_deriv=1)
         print "done one"
         weights, widths, areas = self.getAreas(curvetype,
                                                self.axis, positions, lsq1[0])
@@ -158,7 +158,9 @@ class SimpleFit(BaseFilter, CpuPlugin):
         rest = p
         npts = len(p) / 2
         weights = rest[:npts]
+        #print weights
         widths = rest[npts:2*npts]
+        #print widths
         spec = np.zeros((len(x),))
         for ii in range(len(weights)):
             spec += fun(weights[ii], widths[ii], x, positions[ii])
@@ -169,7 +171,8 @@ class SimpleFit(BaseFilter, CpuPlugin):
             positions = in_meta_data.get_meta_data('PeakIndex')
             print "using peak index"
         except KeyError:
-            elements = self.parameters['fit_elements'][0].split(',')# a hack for now until the unicode problem is fixed
+            elements = self.parameters['fit_elements'].split(',')# a hack for now until the unicode problem is fixed
+            print elements
             if isinstance(elements, list):
                 from flupy.xrf_data_handling import XRFDataset
                 # assume it is like fast xrf
@@ -270,9 +273,9 @@ class SimpleFit(BaseFilter, CpuPlugin):
         npts = len(fitmatrix) / numargsinp
         #print npts
         weights = rest[:npts]
-        #print 'the weights are'+str(weights)
+        print 'the weights are'+str(weights)
         widths = rest[npts:2*npts]
-        #print 'the widths are'+str(widths)
+        print 'the widths are'+str(widths)
         #print(len(widths))
         areas = []
         for ii in range(len(weights)):
