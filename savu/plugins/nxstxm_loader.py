@@ -37,13 +37,20 @@ class NxstxmLoader(BaseMultiModalLoader):
         super(NxstxmLoader, self).__init__(name)
 
     def setup(self):
+        """
+         Define the input nexus file
+
+        :param path: The full path of the NeXus file to load.
+        :type path: str
+        """
+
         data_str = '/instrument/detector/data'
         data_obj, stxm_entry = self.multi_modal_setup('NXstxm', data_str)
         mono_energy = data_obj.backing_file[
             stxm_entry.name + '/instrument/monochromator/energy']
         self.exp.meta_data.set_meta_data("mono_energy", mono_energy)
         self.set_motors(data_obj, stxm_entry, 'stxm')
-        data_obj.set_axis_labels('test.None',
-                                 'test.None',
-                                 'test.None')
+        data_obj.set_axis_labels('theta.degrees',
+                                 'x.mm',
+                                 'y.mm')
         self.add_patterns_based_on_acquisition(data_obj, 'stxm')

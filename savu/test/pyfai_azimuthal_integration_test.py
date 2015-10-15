@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: tomo_recon
+.. module:: pyfai_azimuthal_integration_test
    :platform: Unix
    :synopsis: runner for tests using the MPI framework
 
@@ -33,11 +33,12 @@ class PyfaiAzimuthalIntegrationTest(unittest.TestCase):
         options = {
             "transport": "hdf5",
             "process_names": "CPU0",
-            "data_file": tu.get_test_data_path('xrd_test.nxs'),
+            "data_file": tu.get_test_data_path('mm.nxs'),
             "process_file": tu.get_test_data_path('PyFAI_azimuth_test.nxs'),
             "out_path": tempfile.mkdtemp()
             }
         run_protected_plugin_runner(options)
 
 if __name__ == "__main__":
+    print "booms"
     unittest.main()

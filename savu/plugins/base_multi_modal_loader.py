@@ -69,6 +69,7 @@ class BaseMultiModalLoader(BaseLoader):
         for ii in range(nAxes):
             # find the rotation axis
             data_axis = 'data/' + entry['data'].attrs["axes"][ii]
+            print data_axis
             entry_axis = entry[data_axis]
 
             try:

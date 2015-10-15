@@ -62,10 +62,10 @@ class NxfluoLoader(BaseMultiModalLoader):
 
         self.set_motors(data_obj, fluo_entry, 'fluo')
 
-        data_obj.set_axis_labels('test.None',
-                                 'test.None',
-                                 'test.None',
-                                 'test.None')
+        data_obj.set_axis_labels('theta.degrees',
+                                 'x.mm',
+                                 'y.mm',
+                                 'energy.eV')
 
         self.add_patterns_based_on_acquisition(data_obj, 'fluo')
 
