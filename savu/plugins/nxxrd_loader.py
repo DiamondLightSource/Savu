@@ -58,12 +58,15 @@ class NxxrdLoader(BaseMultiModalLoader):
                                  'detector_x.mm',
                                  'detector_y.mm')
 
-        self.add_patterns_based_on_acquisition(data_obj, 'xrd')
+        #self.add_patterns_based_on_acquisition(data_obj, 'xrd')
 
-        slicedir = range(len(data_obj.data.shape)-2)
+        slicedir = tuple(range(len(data_obj.data.shape)-2))
         data_obj.add_pattern("DIFFRACTION", core_dir=(-2, -1),
                              slice_dir=slicedir)
-
+        data_obj.add_pattern("SINOGRAM", core_dir=(0, 1),
+                             slice_dir=(2,3,4))
+        data_obj.add_pattern("PROJECTION", core_dir=(1, 2),
+                             slice_dir=(0,3,4))
         # now to load the calibration file
         if os.exists(self.parameters['calibration_path']):
             logging.info("Using the calibration file in the working directory")
