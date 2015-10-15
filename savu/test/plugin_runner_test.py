@@ -77,7 +77,7 @@ class PluginRunnerSTXMTest(unittest.TestCase):
 
 
 class PluginRunnerXRDTest(unittest.TestCase):
-
+ 
     def test_process(self):
         options = {
             "transport": "hdf5",
