@@ -123,10 +123,10 @@ class Data(object):
         self.remove = kwargs.get('remove', False)
         if len(args) is 1:
             self.copy_dataset(args[0])
-#            temp = args[0].get_tomo_raw()
-#            temp2 = copy.deepcopy(temp)
-#            print temp, temp2
-#            self.set_tomo_raw(temp2)
+            temp = args[0].get_tomo_raw()
+            temp2 = copy.deepcopy(temp)
+            print temp, temp2
+            self.set_tomo_raw(temp2)
         else:
             try:
                 self.copy_patterns(kwargs['patterns'])
@@ -480,7 +480,12 @@ class TomoRaw(object):
         self.data_only_flag = False
 
     def __deepcopy__(self, memo):
-        return self
+        newobj = TomoRaw(self.data_obj)
+        newobj.image_key = self.image_key
+        newobj.image_key_slice = copy.deepcopy(self.image_key_slice)
+        newobj.frame_list = copy.deepcopy(self.frame_list)
+        newobj.data_only_flag = copy.deepcopy(self.data_only_flag)
+        return newobj
 
     def set_image_key_to_zero(self):
         self.raw_flag = False
