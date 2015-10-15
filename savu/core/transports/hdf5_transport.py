@@ -169,8 +169,6 @@ class Hdf5Transport(TransportMechanism):
         self.process_checks()
 
         in_data, out_data = plugin.get_datasets()
-        print "in process", in_data[0].get_tomo_raw()
-        print "in process", out_data[0].get_tomo_raw()
 
         expInfo = plugin.exp.meta_data
         in_slice_list = self.get_all_slice_lists(in_data, expInfo)

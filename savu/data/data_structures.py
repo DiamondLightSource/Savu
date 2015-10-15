@@ -123,10 +123,10 @@ class Data(object):
         self.remove = kwargs.get('remove', False)
         if len(args) is 1:
             self.copy_dataset(args[0])
-            temp = args[0].get_tomo_raw()
-            temp2 = copy.deepcopy(temp)
-            print temp, temp2
-            self.set_tomo_raw(temp2)
+#            temp = args[0].get_tomo_raw()
+#            temp2 = copy.deepcopy(temp)
+#            print temp, temp2
+#            self.set_tomo_raw(temp2)
         else:
             try:
                 self.copy_patterns(kwargs['patterns'])

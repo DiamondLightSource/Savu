@@ -164,7 +164,7 @@ class Hdf5TransportData(object):
         length = []
         repeat = []
         for dim in range(len(slice_dirs)):
-            chunk.append(int(np.prod(shape[0:dim])))
+            chunk.append(int(np.prod(sshape[0:dim])))
             length.append(sshape[dim])
             repeat.append(int(np.prod(sshape[dim+1:])))
 
@@ -182,6 +182,7 @@ class Hdf5TransportData(object):
             r = repeat[dim]
             idx = np.ravel(np.kron(np.arange(l), np.ones((r, c))))
             idx_list.append(idx.astype(int))
+            print idx.shape
 
         return np.array(idx_list)
 
@@ -246,9 +247,9 @@ class Hdf5TransportData(object):
 
         sl = self.single_slice_list()
 
-        print self.get_tomo_raw().data_only_flag
-        if self.get_tomo_raw().data_only_flag is True:
-            print "the flag is true"
+#        print self.get_tomo_raw().data_only_flag
+#        if self.get_tomo_raw().data_only_flag is True:
+#            print "the flag is true"
         
 #        try:
 #            if self.get_tomo_raw().data_only_flag is True:
