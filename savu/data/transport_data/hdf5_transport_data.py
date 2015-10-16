@@ -249,6 +249,7 @@ class Hdf5TransportData(object):
         sl = self.single_slice_list()
 
         if self.get_plugin_data().selected_data is True:
+            print "selected_data is true"
             sl = self.get_tomo_raw().get_frame_raw(sl)
 
         if sl is None:

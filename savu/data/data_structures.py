@@ -43,6 +43,7 @@ class Data(object):
         self.meta_data = MetaData()
         self.pattern_list = self.set_available_pattern_list()
         self.name = name
+        self.exp = exp
         self.group_name = None
         self.group = None
         self.backing_file = None
@@ -51,7 +52,6 @@ class Data(object):
         self._plugin_data_obj = None
         self.tomo_raw_obj = None
         self.data_mapping = None
-        self.exp = exp
         self.variable_length_flag = False
         self.dtype = None
         self.remove = False
@@ -99,6 +99,14 @@ class Data(object):
 
     def __deepcopy__(self, memo):
         return self
+
+#    def __deepcopy__(self, memo):
+#        newobj = TomoRaw(self.data_obj)
+#        newobj.image_key = self.image_key
+#        newobj.image_key_slice = copy.deepcopy(self.image_key_slice)
+#        newobj.frame_list = copy.deepcopy(self.frame_list)
+#        newobj.data_only_flag = copy.deepcopy(self.data_only_flag)
+#        return newobj
 
     def add_base(self, ExtraBase):
         cls = self.__class__
@@ -325,6 +333,14 @@ class Data(object):
     def get_patterns(self):
         return self.meta_data.get_meta_data("data_patterns")
 
+    def trim_input_data(self, **kwargs):
+        if self.tomo_raw_obj:
+            self.get_tomo_raw().select_image_key(**kwargs)
+
+    def trim_output_data(self, copy_obj, **kwargs):
+        if self.tomo_raw_obj:
+            self.get_tomo_raw().remove_image_key(copy_obj, **kwargs)
+
 
 class PluginData(object):
 
@@ -478,31 +494,23 @@ class TomoRaw(object):
         self.image_key_slice = None
         self.frame_list = []
 
-    def data_with_image_key(self, **kwargs):
-        value = kwargs['value']
+    def select_image_key(self, **kwargs):
+        image_key = kwargs['image_key']
         self.data_obj.get_plugin_data().selected_data = True
-        self.set_image_key_slice(value)
-
-#    def __deepcopy__(self, memo):
-#        newobj = TomoRaw(self.data_obj)
-#        newobj.image_key = self.image_key
-#        newobj.image_key_slice = copy.deepcopy(self.image_key_slice)
-#        newobj.frame_list = copy.deepcopy(self.frame_list)
-#        newobj.data_only_flag = copy.deepcopy(self.data_only_flag)
-#        return newobj
+        self.set_image_key_slice(image_key)
 
     def remove_image_key(self, copy_obj, **kwargs):
-        value = kwargs.get('value', 0)
-        if value is 0:
-            self.data_obj.set_shape(
-                copy_obj.get_tomo_raw().remove_dark_and_flat())
-            self.data_obj.clear_tomo_raw()
+        image_key = kwargs.get('image_key', 0)
+        if image_key is 0:
+            if copy_obj.tomo_raw_obj:
+                self.data_obj.set_shape(
+                    copy_obj.get_tomo_raw().remove_dark_and_flat())
+                self.data_obj.clear_tomo_raw()
 
     def get_raw_flag(self):
         return self.raw_flag
 
     def set_image_key(self, image_key):
-        print "setting the image_key"
         self.data_obj.meta_data.set_meta_data('image_key', image_key)
 
     def get_image_key(self):
@@ -625,25 +633,6 @@ class DataMapping(object):
 
     def get_axes(self):
         return self.axes
-
-#    def get_projection_direction(self, motor_type):
-#        projection = []
-#        projection_slice = []
-#        for item, key in enumerate(motor_type):
-#            if key == 'translation':
-#                projection.append(item)
-#            elif key != 'translation':
-#                projection_slice.append(item)
-#            elif key == 'rotation':
-#                rotation = item
-#        return tuple(projection)
-#
-#    def get_patterns_based_on_acquisition(self):
-#        motor_type = self.meta_data.get_meta_data("motor_type")
-#        proj_dir, rotation = self.get_projection_direction(motor_type)
-#        p1 = self.check_is_map(proj_dir)
-#        p2 = self.check_is_tomo(proj_dir, rotation)
-#        return list(p1) + list(p2)
 
     def check_is_map(self, proj_dir):
         pattern = []

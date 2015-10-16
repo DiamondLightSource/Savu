@@ -66,12 +66,11 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         """
         # set up the output dataset that is created by the plugin
         in_dataset, out_dataset = self.get_datasets()
-
         # copy all required information from in_dataset[0]
         out_dataset[0].create_dataset(in_dataset[0])
 
         # removes dark and flat fields
-        out_dataset[0].get_tomo_raw().remove_image_key(in_dataset[0], value=0)
+        out_dataset[0].trim_output_data(in_dataset[0], image_key=0)
 
 #        # set up new axis
 #        out_dataset[0].map_axis(parms['q_axis_name'],
