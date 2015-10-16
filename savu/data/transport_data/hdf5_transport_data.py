@@ -171,8 +171,10 @@ class Hdf5TransportData(object):
         return chunk, length, repeat
 
     def get_slice_dirs_index(self, slice_dirs, shape):
-        # returns a list of arrays for each slice dimension , where each array
-        # gives the indices for that slice dimension
+        """
+        returns a list of arrays for each slice dimension, where each array
+        gives the indices for that slice dimension.
+        """
         # create the indexing array
         [chunk, length, repeat] = self.chunk_length_repeat(slice_dirs, shape)
         idx_list = []
@@ -182,7 +184,6 @@ class Hdf5TransportData(object):
             r = repeat[dim]
             idx = np.ravel(np.kron(np.arange(l), np.ones((r, c))))
             idx_list.append(idx.astype(int))
-            print idx.shape
 
         return np.array(idx_list)
 
@@ -247,15 +248,8 @@ class Hdf5TransportData(object):
 
         sl = self.single_slice_list()
 
-#        print self.get_tomo_raw().data_only_flag
-#        if self.get_tomo_raw().data_only_flag is True:
-#            print "the flag is true"
-        
-#        try:
-#            if self.get_tomo_raw().data_only_flag is True:
-#                sl = self.get_frame_raw(sl)
-#        except:
-#            print "An exception"
+        if self.get_plugin_data().selected_data is True:
+            sl = self.get_tomo_raw().get_frame_raw(sl)
 
         if sl is None:
             raise Exception("Data type", self.get_current_pattern_name(),

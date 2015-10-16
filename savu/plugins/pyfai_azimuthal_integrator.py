@@ -105,11 +105,21 @@ class PyfaiAzimuthalIntegrator(BaseFilter, CpuPlugin):
         # I just want diffraction data
         in_pData[0].plugin_data_setup('DIFFRACTION', self.get_max_frames())
         spectra = out_datasets[0]
+
         # what does this do?
-        SINO =  
-        spectra.create_dataset(patterns={in_dataset[0]: ['SPECTRUM']},
+        #remove an axis from all patterns
+
+        # copy all patterns that do not have the -1th dimension as a core
+        # dimension or -1th dimension as the only slicing dimension.
+        # Remove the -1th dimension from slice_dimensions
+        patterns = ['*.-1,-2']
+        spectra.create_dataset(patterns={in_dataset[0]: patterns},
                                axis_labels=axis_labels,
                                shape={'variable': shape[:-1]})
+        
+#        spectra.create_dataset(patterns={in_dataset[0]: ['SPECTRUM']},
+#                               axis_labels=axis_labels,
+#                               shape={'variable': shape[:-1]})
 
         # this get the right data in...
         out_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())

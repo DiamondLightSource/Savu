@@ -71,11 +71,10 @@ class NxtomoLoader(BaseLoader):
 
         data_obj.data = data_obj.backing_file['entry1/tomo_entry/data/data']
 
-        data_obj.get_tomo_raw().set_image_key(data_obj.backing_file[
-            'entry1/tomo_entry/instrument/detector/''image_key'])
+        image_key = data_obj.backing_file[
+            'entry1/tomo_entry/instrument/detector/''image_key']
 
-        objInfo.set_meta_data("image_key",
-                              data_obj.get_tomo_raw().get_image_key())
+        data_obj.get_tomo_raw().set_image_key(image_key[...])
 
         rotation_angle = \
             data_obj.backing_file['entry1/tomo_entry/data/rotation_angle']

@@ -49,7 +49,7 @@ class Data(object):
         self.data = None
         self.shape = None
         self._plugin_data_obj = None
-        self._tomo_raw_obj = None
+        self.tomo_raw_obj = None
         self.data_mapping = None
         self.exp = exp
         self.variable_length_flag = False
@@ -70,15 +70,14 @@ class Data(object):
                             "the Data object.")
 
     def set_tomo_raw(self, tomo_raw_obj):
-        print "setting tomo_raw", tomo_raw_obj
-        self._tomo_raw_obj = tomo_raw_obj
+        self.tomo_raw_obj = tomo_raw_obj
 
     def clear_tomo_raw(self):
-        self._tomo_raw_obj = None
+        self.tomo_raw_obj = None
 
     def get_tomo_raw(self):
-        if self._tomo_raw_obj is not None:
-            return self._tomo_raw_obj
+        if self.tomo_raw_obj is not None:
+            return self.tomo_raw_obj
         else:
             raise Exception("There is no TomoRaw object associated with "
                             "the Data object.")
@@ -122,11 +121,10 @@ class Data(object):
         # remove from the plugin chain
         self.remove = kwargs.get('remove', False)
         if len(args) is 1:
-            self.copy_dataset(args[0])
-#            temp = args[0].get_tomo_raw()
-#            temp2 = copy.deepcopy(temp)
-#            print temp, temp2
-#            self.set_tomo_raw(temp2)
+            self.copy_dataset(args[0], removeDim=kwargs.get('removeDim', []))
+            if args[0].tomo_raw_obj:
+                self.set_tomo_raw(copy.deepcopy(args[0].get_tomo_raw()))
+                self.get_tomo_raw().data_obj = self
         else:
             try:
                 self.copy_patterns(kwargs['patterns'])
@@ -153,13 +151,15 @@ class Data(object):
         else:
             data = copy_data.keys()[0]
             pattern_list = copy_data[data]
+#            for p in pattern_list:
+#                for time, value in p.split('.')[]:
             all_patterns = data.meta_data.get_meta_data('data_patterns')
             patterns = {}
             for pattern in pattern_list:
                 patterns[pattern] = all_patterns[pattern]
         self.meta_data.set_meta_data('data_patterns', patterns)
 
-    def copy_dataset(self, copy_data):
+    def copy_dataset(self, copy_data, **kwargs):
         patterns = copy_data.meta_data.get_meta_data('data_patterns')
         self.meta_data.set_meta_data('data_patterns', patterns)
         self.copy_labels(copy_data)
@@ -333,6 +333,9 @@ class PluginData(object):
         self.data_obj.set_plugin_data(self)
         self.meta_data = MetaData()
         self.padding = None
+        # this flag determines which data is passed. If false then just the
+        # data, if true then all data including dark and flat fields.
+        self.selected_data = False
 
     def get_total_frames(self):
         temp = 1
@@ -472,38 +475,36 @@ class TomoRaw(object):
     def __init__(self, data_obj):
         self.data_obj = data_obj
         self.data_obj.set_tomo_raw(self)
-        self.image_key = None
         self.image_key_slice = None
         self.frame_list = []
-        # this flag determines which data is passed. If false then just the
-        # data, if true then all data including dark and flat fields.
-        self.data_only_flag = False
 
-    def __deepcopy__(self, memo):
-        return self
+    def data_with_image_key(self, **kwargs):
+        value = kwargs['value']
+        self.data_obj.get_plugin_data().selected_data = True
+        self.set_image_key_slice(value)
 
-    def set_image_key_to_zero(self):
-        self.raw_flag = False
-        self.data_obj.clear_tomo_raw()
+    def remove_image_key(self, copy_obj, **kwargs):
+        value = kwargs.get('value', 0)
+        if value is 0:
+            self.data_obj.set_shape(
+                copy_obj.get_tomo_raw().remove_dark_and_flat())
+            self.data_obj.clear_tomo_raw()
 
     def get_raw_flag(self):
         return self.raw_flag
 
     def set_image_key(self, image_key):
-        self.image_key = image_key
-        self.set_image_key_slice()
+        print "setting the image_key"
+        self.data_obj.meta_data.set_meta_data('image_key', image_key)
 
     def get_image_key(self):
-        try:
-            return self.image_key[...]
-        except:
-            return None
+        return self.data_obj.meta_data.get_meta_data('image_key')
 
     def set_frame_list(self, start, end):
         self.frame_list = [start, end]
 
-    def set_image_key_slice(self):
-        image_key_bool = self.get_image_key() == 0
+    def set_image_key_slice(self, value):
+        image_key_bool = self.get_image_key() == value
         image_key_index = np.where(image_key_bool)[0]
         start = image_key_index[0]
         end = image_key_index[-1]
@@ -515,7 +516,7 @@ class TomoRaw(object):
 
     def remove_dark_and_flat(self):
         if self.get_image_key() is not None:
-            shape = self.get_shape()
+            shape = self.data_obj.get_shape()
             image_key = self.get_image_key()
             new_shape = shape[0] - len(image_key[image_key != 0])
             return (new_shape, shape[1], shape[2])
@@ -525,7 +526,7 @@ class TomoRaw(object):
             return (shape, shape[1], shape[2])
 
     def get_frame_raw(self, slice_list):
-        pattern = self.get_current_pattern_name()
+        pattern = self.data_obj.get_plugin_data().get_pattern_name()
         image_slice = self.get_image_key_slice()
         new_slice_list = []
         if pattern is "SINOGRAM":
