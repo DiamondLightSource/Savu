@@ -160,22 +160,40 @@ class Data(object):
             data = copy_data.keys()[0]
             pattern_list = copy_data[data]
 
+            all_patterns = data.meta_data.get_meta_data('data_patterns')
             if len(pattern_list[0].split('.')) > 1:
-                patterns = self.copy_patterns_removing_dimensions(pattern_list)
+                patterns = self.copy_patterns_removing_dimensions(
+                    pattern_list, all_patterns, len(data.get_shape()))
             else:
-                all_patterns = data.meta_data.get_meta_data('data_patterns')
                 patterns = {}
                 for pattern in pattern_list:
                     patterns[pattern] = all_patterns[pattern]
         self.meta_data.set_meta_data('data_patterns', patterns)
 
-    def copy_patterns_removing_dimensions(self, pattern_list):
-        all_patterns = data.meta_data.get_meta_data('data_patterns')
+    def copy_patterns_removing_dimensions(self, pattern_list, all_patterns,
+                                          nDims):
+        copy_patterns = {}
         for new_pattern in pattern_list:
             name, all_dims = new_pattern.split('.')
-            for old_pattern in all_patterns:
-                old_pattern
-                
+            if name is '*':
+                copy_patterns = all_patterns
+            else:
+                copy_patterns[name] = all_patterns[name]
+            dims = tuple(map(int, all_dims.split(',')))
+            dims = self.non_negative_directions(dims, nDims=nDims)
+
+        patterns = {}
+        for name, pattern_dict in copy_patterns.iteritems():
+            empty_flag = False
+            for ddir in pattern_dict:
+                s_dims = self.non_negative_directions(
+                    pattern_dict[ddir], nDims=nDims)
+                new_dims = (sd for sd in s_dims if sd not in dims)
+                pattern_dict[ddir] = new_dims
+                if not new_dims:
+                    empty_flag = True
+            if empty_flag is False:
+                patterns[name] = pattern_dict
 
     def copy_dataset(self, copy_data, **kwargs):
         patterns = copy_data.meta_data.get_meta_data('data_patterns')
@@ -185,12 +203,14 @@ class Data(object):
         self.set_shape(shape)
 
     def create_axis_labels(self, axis_labels):
+        print axis_labels
         if isinstance(axis_labels, Data):
             self.copy_labels(axis_labels)
         elif isinstance(axis_labels, dict):
+            print "is a dict"
             data = axis_labels.keys()[0]
             self.copy_labels(data)
-            self.add_axis_labels(axis_labels[data])
+            self.amend_axis_labels(axis_labels[data])
         else:
             self.set_axis_labels(*axis_labels)
 
@@ -200,7 +220,7 @@ class Data(object):
         axis_labels = copy_data.meta_data.get_meta_data('axis_labels')
         self.meta_data.set_meta_data('axis_labels', axis_labels)
 
-    def add_axis_labels(self, *args):
+    def amend_axis_labels(self, *args):
         axis_labels = self.meta_data.get_meta_data('axis_labels')
         for arg in args:
             label = arg.split('.')
@@ -314,6 +334,18 @@ class Data(object):
             return 0
         return 1
 
+    def non_negative_directions(self, ddirs, **kwargs):
+        try:
+            nDims = kwargs['nDims']
+        except KeyError:
+            nDims = len(self.get_shape())
+        index = [i for i in range(len(ddirs)) if ddirs[i] < 0]
+        list_ddirs = list(ddirs)
+        for i in index:
+            list_ddirs[i] = nDims + ddirs[i]
+        index = tuple(list_ddirs)
+        return index
+
 #    def set_direction_parallel_to_rotation_axis(self, tdir):
 #        self.check_direction(tdir, 'parallel_to_rotation_axis')
 #        self.set_main_axis(tdir, 'SINOGRAM')
@@ -410,14 +442,14 @@ class PluginData(object):
             fix_dirs = []
         slice_dirs = \
             self.data_obj.get_patterns()[self.get_pattern_name()]['slice_dir']
-        to_slice = set(list(slice_dirs)).symmetric_difference(set(fix_dirs))
-        temp = self.non_negative_directions(tuple(to_slice))
+        to_slice = [sd for sd in slice_dirs if sd not in fix_dirs]
+        temp = self.data_obj.non_negative_directions(tuple(to_slice))
         return temp
 
     def get_core_directions(self):
         core_dir = \
             self.data_obj.get_patterns()[self.get_pattern_name()]['core_dir']
-        return self.non_negative_directions(core_dir)
+        return self.data_obj.non_negative_directions(core_dir)
 
     def set_fixed_directions(self, dims, values):
         slice_dirs = self.get_slice_directions()
@@ -445,15 +477,6 @@ class PluginData(object):
             del self.meta_data.dict["fixed_directions_values"]
         except KeyError:
             pass
-
-    def non_negative_directions(self, ddirs):
-        nDims = len(self.data_obj.get_shape())
-        index = [i for i in range(len(ddirs)) if ddirs[i] < 0]
-        list_ddirs = list(ddirs)
-        for i in index:
-            list_ddirs[i] = nDims + ddirs[i]
-        index = tuple(list_ddirs)
-        return index
 
     def set_frame_chunk(self, nFrames):
         # number of frames to process at a time

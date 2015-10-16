@@ -1,0 +1,222 @@
+                self.exp.remove_dataset(out_objs)
+./core/plugin_runner.py
+Binary file ./core/plugin_runner.pyc matches
+./core/plugin_runner.pyc
+        self.group.create_dataset(name, shape, dtype)
+./core/transports/MPI_PHDF5.py
+Binary file ./core/transports/dist_array.pyc matches
+./core/transports/dist_array.pyc
+Binary file ./core/transports/dist_array_transport.pyc matches
+./core/transports/dist_array_transport.pyc
+        self.group.create_dataset(name, shape, dtype)
+#        self.group.create_dataset(name, shape, dtype)
+./core/transports/dist_array_transport.py
+Binary file ./core/transports/HDF5.pyc matches
+./core/transports/HDF5.pyc
+        self.group.create_dataset(name, shape, dtype)
+./core/transports/HDF5.py~
+        data_value = group.create_dataset('data', data_shape, data_type)
+        data_avail = group.create_dataset('data_avail',
+            group.create_dataset('image_key',
+            group.create_dataset('image_key_avail',
+            group.create_dataset('rotation_angle',
+            group.create_dataset('rotation_angle_avail',
+            group.create_dataset('control',
+            group.create_dataset('control_avail',
+            group.create_dataset('center_of_rotation',
+            group.create_dataset('center_of_rotation_avail',
+        data_value = group.create_dataset('data', data_shape, data_type)
+        data_avail = group.create_dataset('data_avail',
+            group.create_dataset('rotation_angle',
+            group.create_dataset('rotation_angle_avail',
+            group.create_dataset('center_of_rotation',
+            group.create_dataset('center_of_rotation_avail',
+        data_value = group.create_dataset('data', data_shape, data_type)
+        data_avail = group.create_dataset('data_avail',
+./data/structures.py
+            plugin_group.create_dataset('id', id_array.shape, id_array.dtype,
+            plugin_group.create_dataset('name', name_array.shape,
+            plugin_group.create_dataset('data', data_array.shape,
+        citation_group.create_dataset('description',
+        citation_group.create_dataset('doi',
+        citation_group.create_dataset('endnote',
+        citation_group.create_dataset('bibtex',
+./data/plugin_info.py
+        data_value = group.create_dataset('data', data_shape, data_type)
+        data_avail = group.create_dataset('data_avail',
+            group.create_dataset('image_key',
+            group.create_dataset('image_key_avail',
+            group.create_dataset('rotation_angle',
+            group.create_dataset('rotation_angle_avail',
+            group.create_dataset('control',
+            group.create_dataset('control_avail',
+            group.create_dataset('center_of_rotation',
+            group.create_dataset('center_of_rotation_avail',
+        data_value = group.create_dataset('data', data_shape, data_type)
+        data_avail = group.create_dataset('data_avail',
+            group.create_dataset('rotation_angle',
+            group.create_dataset('rotation_angle_avail',
+            group.create_dataset('center_of_rotation',
+            group.create_dataset('center_of_rotation_avail',
+        data_value = group.create_dataset('data', data_shape, data_type)
+        data_avail = group.create_dataset('data_avail',
+./data/structures.py~
+            temp = self.group.create_dataset(name, mData.shape, mData.dtype)
+./data/transport_data/hdf5_transport_data.py
+        data.data = group.create_dataset('data', data.get_shape(), dtype)
+./data/transport_data/standard_savers.py
+            plugin_group.create_dataset('id', id_array.shape, id_array.dtype,
+            plugin_group.create_dataset('name', name_array.shape,
+            plugin_group.create_dataset('data', data_array.shape,
+        citation_group.create_dataset('description',
+        citation_group.create_dataset('doi',
+        citation_group.create_dataset('endnote',
+        citation_group.create_dataset('bibtex',
+./data/plugin_info.py~
+    def create_dataset(self, *args, **kwargs):
+            self.copy_dataset(args[0], removeDim=kwargs.get('removeDim', []))
+                new_dims = tuple(set(s_dims).difference(set(dims)))
+    def copy_dataset(self, copy_data, **kwargs):
+        tdir = set(d1).intersection(set(d2))
+        to_slice = set(list(slice_dirs)).symmetric_difference(set(fix_dirs))
+        dims = list(set(dims))
+./data/data_structures.py
+    def remove_dataset(self, data_obj):
+./data/experiment_collection.py
+            plugin_group.create_dataset('id', id_array.shape, id_array.dtype,
+            plugin_group.create_dataset('name', name_array.shape,
+            plugin_group.create_dataset('data', data_array.shape,
+        citation_group.create_dataset('description',
+        citation_group.create_dataset('doi',
+        citation_group.create_dataset('endnote',
+        citation_group.create_dataset('bibtex',
+./data/plugin_list.py
+        self.group.create_dataset(name, shape, dtype)
+./data/transports/hdf5_transport.py
+        self.group.create_dataset(name, shape, dtype)
+./data/transports/HDF5.py
+        self.group.create_dataset(name, shape, dtype)
+./data/transports/MPI_PHDF5.py
+        self.group.create_dataset(name, shape, dtype)
+./data/transports/dist_array_transport.py
+            plugin_group.create_dataset('id', id_array.shape, id_array.dtype,
+            plugin_group.create_dataset('name', name_array.shape,
+            plugin_group.create_dataset('data', data_array.shape,
+        citation_group.create_dataset('description',
+        citation_group.create_dataset('doi',
+        citation_group.create_dataset('endnote',
+        citation_group.create_dataset('bibtex',
+./data/plugin_list.py~
+    def create_dataset(self, *args, **kwargs):
+            self.copy_dataset(args[0], removeDim=kwargs.get('removeDim', []))
+    def copy_dataset(self, copy_data, **kwargs):
+        tdir = set(d1).intersection(set(d2))
+        to_slice = set(list(slice_dirs)).symmetric_difference(set(fix_dirs))
+        dims = list(set(dims))
+./data/data_structures.py~
+        data_value = group.create_dataset('data', data_shape, data_type)
+        data_avail = group.create_dataset('data_avail',
+            group.create_dataset('image_key',
+            group.create_dataset('image_key_avail',
+            group.create_dataset('rotation_angle',
+            group.create_dataset('rotation_angle_avail',
+            group.create_dataset('control',
+            group.create_dataset('control_avail',
+            group.create_dataset('center_of_rotation',
+            group.create_dataset('center_of_rotation_avail',
+        data_value = group.create_dataset('data', data_shape, data_type)
+        data_avail = group.create_dataset('data_avail',
+            group.create_dataset('rotation_angle',
+            group.create_dataset('rotation_angle_avail',
+            group.create_dataset('center_of_rotation',
+            group.create_dataset('center_of_rotation_avail',
+        data_value = group.create_dataset('data', data_shape, data_type)
+        data_avail = group.create_dataset('data_avail',
+./data/hdf5_structures.py
+            process_group.create_dataset('id', id_array.shape, id_array.dtype,
+            process_group.create_dataset('name', name_array.shape,
+            process_group.create_dataset('data', data_array.shape,
+        citation_group.create_dataset('description',
+        citation_group.create_dataset('doi',
+        citation_group.create_dataset('endnote',
+        citation_group.create_dataset('bibtex',
+./data/process_data.py
+        to_slice = set(list(slice_dirs)).symmetric_difference(set(fix_dirs))
+        dims = list(set(dims))
+./data/old_data_structures.py
+    :param in_datasets: Create a list of the dataset(s) to process. Default: [].
+    :param out_datasets: Create a list of the dataset(s) to process. Default: [].
+        out_dataset[0].create_dataset(axis_labels=axis_labels,
+./plugins/base_recon.py
+Binary file ./plugins/timeseries_field_corrections.pyc matches
+./plugins/timeseries_field_corrections.pyc
+Binary file ./plugins/filter.pyc matches
+./plugins/filter.pyc
+    :param in_datasets: Create a list of the dataset(s) to process. Default: [].
+    :param out_datasets: Create a list of the dataset(s) to process. Default: [].
+        out_dataset[0].create_dataset(in_dataset[0])
+./plugins/timeseries_field_corrections.py
+#        self.exp.remove_dataset(out_datasets[0])
+#        self.exp.remove_dataset(out_datasets[1])
+        out_dataset[0].create_dataset(pattern_name='1D_METADATA',
+        out_dataset[1].create_dataset(pattern_name='1D_METADATA',
+./plugins/vo_centering.py
+Binary file ./plugins/base_recon.pyc matches
+./plugins/base_recon.pyc
+Binary file ./plugins/base_filter.pyc matches
+./plugins/base_filter.pyc
+        spectra.create_dataset(patterns={in_dataset[0]: patterns},
+#        spectra.create_dataset(patterns={in_dataset[0]: ['SPECTRUM']},
+./plugins/pyfai_azimuthal_integrator.py
+        xrfd = XRFDataset()
+        xrfd = XRFDataset()
+./plugins/fastxrf_fitting.py~
+        xrfd = XRFDataset()
+        xrfd = XRFDataset()
+./plugins/fastxrf_fitting.py
+        stripped.create_dataset(in_dataset[0])
+./plugins/strip_background.py
+Binary file ./plugins/fastxrf_fitting.pyc matches
+./plugins/fastxrf_fitting.pyc
+Binary file ./plugins/find_peaks.pyc matches
+./plugins/find_peaks.pyc
+        out_dataset[0].create_dataset(in_dataset[0])
+./plugins/distortion_correction.py
+    :param in_datasets: A list of the dataset(s) to process. Default: [].
+    :param out_datasets: A list of the dataset(s) to process. Default: [].
+        out_dataset[0].create_dataset(in_dataset[0])
+./plugins/no_process_plugin.py
+    :param in_datasets: Create a list of the dataset(s) to process. Default: [].
+    :param out_datasets: Create a list of the dataset(s) to process. Default: [].
+        out_dataset[0].create_dataset(in_dataset[0])
+./plugins/base_filter.py
+Binary file ./plugins/no_process_plugin.pyc matches
+./plugins/no_process_plugin.pyc
+Binary file ./plugins/simple_fit.pyc matches
+./plugins/simple_fit.pyc
+                                 slice_dir=tuple(set(dims) - set(proj_dir)))
+                                 slice_dir=tuple(set(dims) - set(sino_dir)))
+./plugins/base_multi_modal_loader.py
+    :param in_datasets: Create a list of the dataset(s). Default: [].
+    :param out_datasets: Create a list of the dataset(s). Default: ['Peaks'].
+        set2 = set(list(chain.from_iterable(range(x-wind/2,
+        tmp = set(PeakIndexNew) - set2
+        out_dataset[0].create_dataset(axis_labels=['peaks.pixels'],
+./plugins/find_peaks.py
+    :param in_datasets: Create a list of the dataset(s). Default: [].
+        fitAreas.create_dataset(patterns={in_dataset[0]: pattern_list},
+        fitHeights.create_dataset(patterns={in_dataset[0]: pattern_list},
+        fitWidths.create_dataset(patterns={in_dataset[0]: pattern_list},
+        residuals.create_dataset(in_dataset[0])
+                paramdict = XRFDataset().paramdict
+./plugins/simple_fit.py
+    :param in_datasets: Create a list of the dataset(s) to process. Default: [].
+    :param out_datasets: Create a list of the dataset(s) to process. Default: [].
+./plugins/multiple_input_data_test.py
+Binary file ./plugins/multiple_input_data_test.pyc matches
+./plugins/multiple_input_data_test.pyc
+Binary file ./plugins/simple_ls_XRD_fitting.pyc matches
+./plugins/simple_ls_XRD_fitting.pyc
+        aa = self.f.create_dataset('avail', shape=(10, 10), dtype=np.bool)
+        bb = self.f.create_dataset('data', shape=(10, 10), dtype=np.double)
+./test/structures_test.py
