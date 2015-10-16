@@ -323,9 +323,10 @@ class Hdf5TransportData(object):
         return data_slice
 
     def get_padding_dict(self):
-        padding = Padding(self.get_current_pattern())
-        for key in self.padding.keys():
-            getattr(padding, key)(self.padding[key])
+        pData = self.get_plugin_data()
+        padding = Padding(pData.get_pattern())
+        for key in pData.padding.keys():
+            getattr(padding, key)(pData.padding[key])
         return padding.get_padding_directions()
 
     def get_padded_slice_data(self, input_slice_list):

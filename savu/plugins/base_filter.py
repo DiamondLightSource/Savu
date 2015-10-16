@@ -68,6 +68,9 @@ class BaseFilter(Plugin):
         logging.error("process needs to be implemented")
         raise NotImplementedError("process needs to be implemented")
 
+    def get_plugin_pattern(self):
+        return 'PROJECTION'
+
     def setup(self):
         self.exp.log(self.name + " Start")
         # set up the output dataset that is created by the plugin
@@ -78,8 +81,9 @@ class BaseFilter(Plugin):
         # set information relating to the plugin data
         in_pData, out_pData = self.get_plugin_datasets()
         # set pattern_name and nframes to process for all datasets
-        in_pData[0].plugin_data_setup('PROJECTION', self.get_max_frames())
-        out_pData[0].plugin_data_setup('PROJECTION', self.get_max_frames())
+        plugin_pattern = self.get_plugin_pattern()
+        in_pData[0].plugin_data_setup(plugin_pattern, self.get_max_frames())
+        out_pData[0].plugin_data_setup(plugin_pattern, self.get_max_frames())
 
         self.exp.log(self.name + " End")
 

@@ -42,7 +42,7 @@ class Plugin(object):
 
     def main_setup(self, exp, params):
         self.exp = exp
-        self.set_parameters(params)
+        self.set_parameters(params)        
         self.set_plugin_datasets(exp)
         self.setup()
         try:
