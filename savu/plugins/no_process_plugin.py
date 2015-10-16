@@ -51,7 +51,7 @@ class NoProcessPlugin(Plugin, CpuPlugin):
 
         in_pData, out_pData = self.get_plugin_datasets()
         pattern = in_dataset[0].get_patterns().keys()[0]
-        print pattern
+        
         in_pData[0].plugin_data_setup(pattern, self.get_max_frames())
         out_pData[0].plugin_data_setup(pattern, self.get_max_frames())
 

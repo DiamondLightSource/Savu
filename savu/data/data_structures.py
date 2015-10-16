@@ -483,6 +483,14 @@ class TomoRaw(object):
         self.data_obj.get_plugin_data().selected_data = True
         self.set_image_key_slice(value)
 
+#    def __deepcopy__(self, memo):
+#        newobj = TomoRaw(self.data_obj)
+#        newobj.image_key = self.image_key
+#        newobj.image_key_slice = copy.deepcopy(self.image_key_slice)
+#        newobj.frame_list = copy.deepcopy(self.frame_list)
+#        newobj.data_only_flag = copy.deepcopy(self.data_only_flag)
+#        return newobj
+
     def remove_image_key(self, copy_obj, **kwargs):
         value = kwargs.get('value', 0)
         if value is 0:
