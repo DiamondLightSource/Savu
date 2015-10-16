@@ -196,18 +196,17 @@ class Data(object):
                 patterns[name] = pattern_dict
 
     def copy_dataset(self, copy_data, **kwargs):
-        patterns = copy_data.meta_data.get_meta_data('data_patterns')
+        patterns = copy.copy(
+            copy_data.meta_data.get_meta_data('data_patterns'))
         self.meta_data.set_meta_data('data_patterns', patterns)
         self.copy_labels(copy_data)
         shape = copy_data.get_shape()
         self.set_shape(shape)
 
     def create_axis_labels(self, axis_labels):
-        print axis_labels
         if isinstance(axis_labels, Data):
             self.copy_labels(axis_labels)
         elif isinstance(axis_labels, dict):
-            print "is a dict"
             data = axis_labels.keys()[0]
             self.copy_labels(data)
             self.amend_axis_labels(axis_labels[data])
@@ -215,16 +214,20 @@ class Data(object):
             self.set_axis_labels(*axis_labels)
 
     def copy_labels(self, copy_data):
-        nDims = copy_data.meta_data.get_meta_data('nDims')
+        nDims = copy.copy(copy_data.meta_data.get_meta_data('nDims'))
         self.meta_data.set_meta_data('nDims', nDims)
-        axis_labels = copy_data.meta_data.get_meta_data('axis_labels')
+        axis_labels = copy.copy(
+            copy_data.meta_data.get_meta_data('axis_labels'))
         self.meta_data.set_meta_data('axis_labels', axis_labels)
 
     def amend_axis_labels(self, *args):
         axis_labels = self.meta_data.get_meta_data('axis_labels')
-        for arg in args:
+        for arg in args[0]:
             label = arg.split('.')
-            axis_labels.insert(int(label[0]), {label[1]: label[2]})
+            if len(label) is 1:
+                del axis_labels[int(label[0])]
+            else:
+                axis_labels.insert(int(label[0]), {label[1]: label[2]})
 
     def set_shape(self, shape):
         self.shape = shape

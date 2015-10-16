@@ -109,17 +109,16 @@ class PyfaiAzimuthalIntegrator(BaseFilter, CpuPlugin):
         # what does this do?
         #remove an axis from all patterns
 
-
         # copy all patterns, removing dimension -1 from the core and slice
         # directions, and returning only those that are not empty
         patterns = ['SINOGRAM.-1', 'PROJECTION.-1']
         # stating only 'dimension' will remove the axis label, stating
         # 'dimension.name.unit' name and unit will add or replace it
-        axis_labels = {in_dataset[0], '-1', '-2.name.unit'}
+        axis_labels = ['-1', '-2.name.unit']
         spectra.create_dataset(patterns={in_dataset[0]: patterns},
-                               axis_labels=axis_labels,
+                               axis_labels={in_dataset[0]: axis_labels},
                                shape={'variable': shape[:-1]})
-        
+
 #        spectra.create_dataset(patterns={in_dataset[0]: ['SPECTRUM']},
 #                               axis_labels=axis_labels,
 #                               shape={'variable': shape[:-1]})
