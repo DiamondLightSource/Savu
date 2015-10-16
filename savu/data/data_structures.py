@@ -159,13 +159,23 @@ class Data(object):
         else:
             data = copy_data.keys()[0]
             pattern_list = copy_data[data]
-#            for p in pattern_list:
-#                for time, value in p.split('.')[]:
-            all_patterns = data.meta_data.get_meta_data('data_patterns')
-            patterns = {}
-            for pattern in pattern_list:
-                patterns[pattern] = all_patterns[pattern]
+
+            if len(pattern_list[0].split('.')) > 1:
+                patterns = self.copy_patterns_removing_dimensions(pattern_list)
+            else:
+                all_patterns = data.meta_data.get_meta_data('data_patterns')
+                patterns = {}
+                for pattern in pattern_list:
+                    patterns[pattern] = all_patterns[pattern]
         self.meta_data.set_meta_data('data_patterns', patterns)
+
+    def copy_patterns_removing_dimensions(self, pattern_list):
+        all_patterns = data.meta_data.get_meta_data('data_patterns')
+        for new_pattern in pattern_list:
+            name, all_dims = new_pattern.split('.')
+            for old_pattern in all_patterns:
+                old_pattern
+                
 
     def copy_dataset(self, copy_data, **kwargs):
         patterns = copy_data.meta_data.get_meta_data('data_patterns')

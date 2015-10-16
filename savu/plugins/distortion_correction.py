@@ -45,20 +45,15 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
         unwarp.setctr(*(self.parameters['centre']))
 
     def filter_frames(self, data):
-#        if isinstance(data[0], TomoRaw):
-#            in_meta_data = self.get_in_meta_data()
-#            image_key = in_meta_data.get_meta_data('image_key')
-#            data = data[0][image_key == 0]
-#        else:
-#            data = data[0]
         data = data[0]
-
         result = np.empty_like(data)
+        # should the setup function be called here?
         unwarp.setup(data, result)
         unwarp.run(data, result)
         return result
 
     def post_process(self):
+        # should this be called here?
         unwarp.cleanup()
 
     def setup(self):
@@ -78,6 +73,6 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
         out_pData[0].plugin_data_setup('PROJECTION', self.get_max_frames())
 
         self.exp.log(self.name + " End")
-        
+
     def get_max_frames(self):
         return 3

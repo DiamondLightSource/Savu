@@ -119,14 +119,15 @@ class VoCentering(BaseFilter, CpuPlugin):
         # build a full array for the output fit
         cor_fit = p(x)
 
+        out_datasets[1].data[:] = cor_fit[:]
         # add to metadata
         in_meta_data = self.get_in_meta_data()[0]
         in_meta_data.set_meta_data("cor_raw", cor_raw)
         in_meta_data.set_meta_data("centre_of_rotation", cor_fit)
 
-        # remove the output datasets from the processing chain
-        self.exp.remove_dataset(out_datasets[0])
-        self.exp.remove_dataset(out_datasets[1])
+#        # remove the output datasets from the processing chain
+#        self.exp.remove_dataset(out_datasets[0])
+#        self.exp.remove_dataset(out_datasets[1])
 
     def setup(self):
 
@@ -138,11 +139,11 @@ class VoCentering(BaseFilter, CpuPlugin):
         fullData = in_dataset[0]
         out_dataset[0].create_dataset(pattern_name='1D_METADATA',
                                       shape=(fullData.get_shape()[1],),
-                                      axis_labels=('y.pixels',))
+                                      axis_labels=('y.pixels',), remove=True)
 
         out_dataset[1].create_dataset(pattern_name='1D_METADATA',
                                       shape=(fullData.get_shape()[1],),
-                                      axis_labels=('y.pixels',))
+                                      axis_labels=('y.pixels',), remove=True)
 
         in_pData, out_pData = self.get_plugin_datasets()
         in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
