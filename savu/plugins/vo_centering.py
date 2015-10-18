@@ -97,8 +97,11 @@ class VoCentering(BaseFilter, CpuPlugin):
 
         # first clean all points where the derivative is too high
         diff = np.abs(np.diff(cor_raw))
-        x_clean = x[diff < 0.2]
-        cor_clean = cor_raw[diff < 0.2]
+
+        tollerence = np.median(diff)
+
+        x_clean = x[diff < tollerence * 2.0]
+        cor_clean = cor_raw[diff < tollerence * 2.0]
 
         # set up for the iterative clean on the fit
         cor_fit = cor_clean
@@ -107,7 +110,7 @@ class VoCentering(BaseFilter, CpuPlugin):
 
         # keep fitting and removing points until the fit is within
         # the tollerences
-        while max_disp > 0.1:
+        while max_disp > tollerence:
             mask = (np.abs(cor_fit-cor_clean)) < (max_disp / 2.)
             x_clean = x_clean[mask]
             cor_clean = cor_clean[mask]
