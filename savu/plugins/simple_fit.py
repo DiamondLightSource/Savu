@@ -75,7 +75,7 @@ class SimpleFit(BaseFilter, CpuPlugin):
         p.extend(weights)
         p.extend(widths)
         curvetype = self.lookup[str(self.parameters['peak_shape'])]
-        lsq1 = leastsq(self._resid, p, args=(curvetype, data, self.axis, positions))#, Dfun=dfunc, col_deriv=1)
+        lsq1 = leastsq(self._resid, p, args=(curvetype, data, self.axis, positions), Dfun=dfunc, col_deriv=1)
         print "done one"
         weights, widths, areas = self.getAreas(curvetype,
                                                self.axis, positions, lsq1[0])
@@ -208,7 +208,7 @@ class SimpleFit(BaseFilter, CpuPlugin):
                 self.axis = tmp # now cropped to the fitting range
 #                 print tmp
                 idx = (np.array(engy)/step).astype(int) - offset
-#                 print 'index '+str(idx)
+                print 'index '+str(sorted(idx)+offset)
                 in_meta_data.set_meta_data('PeakIndex', idx)
                 #  for now
             #elif isinstance(positions, list):
@@ -308,7 +308,7 @@ def spectrum_sum_dfun(fun, multiplier, x, pos, *p):
     return spec
 
 def dfunc( p, fun, y, x, pos):
-    if fun.__name__ == 'gaussian' or fun.__name__ == 'lorentzian': # took the lorentzian out. Weird
+    if fun.__name__ == 'gaussian' or fun.__name__ == 'lorentzian': 
         #print fun.__name__
         rest = p
         #print "parameter shape is "+ str(p.shape)

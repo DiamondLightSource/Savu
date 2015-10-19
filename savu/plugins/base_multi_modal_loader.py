@@ -44,6 +44,7 @@ class BaseMultiModalLoader(BaseLoader):
                       data_obj.backing_file.filename, ltype)
         # now lets extract the entry so we can figure out our geometries!
         entry = self.get_NXapp(ltype, data_obj.backing_file, 'entry1/')[0]
+        print entry
         #lets get the data out
         data_obj.data = data_obj.backing_file[entry.name + data_str]
         data_obj.set_shape(data_obj.data.shape)
