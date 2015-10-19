@@ -37,7 +37,7 @@ class RavenFilter(BaseFilter, CpuPlugin):
     :param uvalue: To define the shape of filter. Default: 30.
     :param vvalue: How many rows to be applied the filter. Default: 1.
     :param nvalue: To define the shape of filter. Default: 8.
-    :param padFT: Padding for Fourier transform. Default: 100.
+    :param padFT: Padding for Fourier transform. Default: 20.
     """
 
     def __init__(self):
@@ -63,31 +63,31 @@ class RavenFilter(BaseFilter, CpuPlugin):
         # Create filter
         centerx = np.ceil(width1/2.0)-1.0
         centery = np.int16(np.ceil(height1/2.0)-1)
-        row1 = centery - v0
-        row2 = centery + v0+1
+        self.row1 = centery - v0
+        self.row2 = centery + v0+1
         listx = np.arange(width1)-centerx
         filtershape = 1.0/(1.0 + np.power(listx/u0, 2*n))
-        filtershapepad2d = np.zeros((row2-row1, filtershape.size))
+        filtershapepad2d = np.zeros((self.row2 - self.row1, filtershape.size))
         filtershapepad2d[:] = np.float64(filtershape)
         self.filtercomplex = filtershapepad2d + filtershapepad2d*1j
 
         a = pyfftw.n_byte_align_empty((height1, width1), 16, 'complex128')
-        b = pyfftw.n_byte_align_empty((height1, width1), 16, 'complex128')
-        c = pyfftw.n_byte_align_empty((height1, width1), 16, 'complex128')
-        d = pyfftw.n_byte_align_empty((height1, width1), 16, 'complex128')
-        self.fft_object = pyfftw.FFTW(a, b, axes=(0, 1))
-        self.ifft_object = pyfftw.FFTW(c, d, axes=(0, 1),
+        self.fft_object = pyfftw.FFTW(a, a, axes=(0, 1))
+        self.ifft_object = pyfftw.FFTW(a, a, axes=(0, 1),
                                        direction='FFTW_BACKWARD')
 
     def filter_frames(self, data):
-        sino2 = np.fft.fftshift(self.fft_object(data[0]))
-        sino2 = sino2*self.filtercomplex
+        data2d = data[0].squeeze()
+        sino2 = np.fft.fftshift(self.fft_object(data2d))
+        sino2[self.row1:self.row2] = \
+            sino2[self.row1:self.row2] * self.filtercomplex
         sino3 = np.fft.ifftshift(sino2)
-        sino4 = self.ifft_object(sino3)
+        sino4 = self.ifft_object(sino3).real
+        sino4 = sino4[:, np.newaxis, :]
         return sino4
 
     def get_plugin_pattern(self):
         return 'SINOGRAM'
 
     def get_max_frames(self):
-        return 8
+        return 1

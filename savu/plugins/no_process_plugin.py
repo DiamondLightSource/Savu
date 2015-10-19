@@ -46,7 +46,7 @@ class NoProcessPlugin(Plugin, CpuPlugin):
         chain.
         """
         in_dataset, out_dataset = self.get_datasets()
-
+        print in_dataset[0], type(in_dataset[0])
         out_dataset[0].create_dataset(in_dataset[0])
 
         in_pData, out_pData = self.get_plugin_datasets()
