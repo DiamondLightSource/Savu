@@ -135,11 +135,6 @@ class Data(object):
                 self.get_tomo_raw().data_obj = self
         else:
             try:
-                self.copy_patterns(kwargs['patterns'])
-            except KeyError:
-                pass
-
-            try:
                 self.create_axis_labels(kwargs['axis_labels'])
                 shape = kwargs['shape']
                 if isinstance(shape, Data):
@@ -152,6 +147,10 @@ class Data(object):
             except KeyError:
                 raise Exception("Please state axis_labels and shape when "
                                 "creating a new dataset")
+            try:
+                self.copy_patterns(kwargs['patterns'])
+            except KeyError:
+                pass
 
     def copy_patterns(self, copy_data):
         if isinstance(copy_data, Data):
@@ -168,6 +167,7 @@ class Data(object):
                 patterns = {}
                 for pattern in pattern_list:
                     patterns[pattern] = all_patterns[pattern]
+
         self.meta_data.set_meta_data('data_patterns', patterns)
 
     def copy_patterns_removing_dimensions(self, pattern_list, all_patterns,
@@ -188,12 +188,13 @@ class Data(object):
             for ddir in pattern_dict:
                 s_dims = self.non_negative_directions(
                     pattern_dict[ddir], nDims=nDims)
-                new_dims = (sd for sd in s_dims if sd not in dims)
+                new_dims = tuple([sd for sd in s_dims if sd not in dims])
                 pattern_dict[ddir] = new_dims
                 if not new_dims:
                     empty_flag = True
             if empty_flag is False:
                 patterns[name] = pattern_dict
+        return patterns
 
     def copy_dataset(self, copy_data, **kwargs):
         patterns = copy.copy(
@@ -226,6 +227,8 @@ class Data(object):
             label = arg.split('.')
             if len(label) is 1:
                 del axis_labels[int(label[0])]
+                self.meta_data.set_meta_data(
+                    'nDims', self.meta_data.get_meta_data('nDims') - 1)
             else:
                 axis_labels.insert(int(label[0]), {label[1]: label[2]})
 
@@ -296,8 +299,11 @@ class Data(object):
                                              kwargs[args])
             try:
                 if nDims != self.meta_data.get_meta_data("nDims"):
-                    raise Exception("The pattern '%s' has an incorrect number "
-                                    "of dimensions.", dtype)
+                    actualDims = self.meta_data.get_meta_data('nDims')
+                    err_msg = ("The pattern %s has an incorrect number of "
+                               "dimensions: %d required but %d specified."
+                               % (dtype, actualDims, nDims))
+                    raise Exception(err_msg)
             except KeyError:
                 self.meta_data.set_meta_data('nDims', nDims)
         else:

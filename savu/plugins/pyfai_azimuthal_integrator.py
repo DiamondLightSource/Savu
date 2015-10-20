@@ -34,17 +34,17 @@ from savu.plugins.utils import register_plugin
 class PyfaiAzimuthalIntegrator(BaseFilter, CpuPlugin):
     """
     1D azimuthal integrator by pyFAI
-    
+
     :param use_mask: Should we mask. Default: False.
 
     """
 
     def __init__(self):
         logging.debug("Starting 1D azimuthal integrationr")
-        super(PyfaiAzimuthalIntegrator, self).__init__("PyfaiAzimuthalIntegrator")
+        super(PyfaiAzimuthalIntegrator,
+              self).__init__("PyfaiAzimuthalIntegrator")
 
-    
-    def pre_process(self, exp):
+    def pre_process(self):
         """
         This method is called after the plugin has been created by the
         pipeline framework as a pre-processing step
@@ -54,34 +54,34 @@ class PyfaiAzimuthalIntegrator(BaseFilter, CpuPlugin):
         :type parameters: dict
         """
         in_dataset, out_datasets = self.get_datasets()
-        mData= self.get_in_meta_data()[0]
+        mData = self.get_in_meta_data()[0]
         in_d1 = in_dataset[0]
-        ai = pyFAI.AzimuthalIntegrator()# get me an integrator object
+        ai = pyFAI.AzimuthalIntegrator()  # get me an integrator object
         ### prep the goemtry
-        bc = [mData.get_meta_data("beam_center_x")[...], mData.get_meta_data("beam_center_y")[...]]
+        bc = [mData.get_meta_data("beam_center_x")[...],
+              mData.get_meta_data("beam_center_y")[...]]
         distance = mData.get_meta_data('distance')[...]
         wl = mData.get_meta_data('incident_wavelength')[...]
         px = mData.get_meta_data('x_pixel_size')[...]
-        orien = mData.get_meta_data('detector_orientation')[...].reshape((3,3))
+        orien = mData.get_meta_data(
+            'detector_orientation')[...].reshape((3, 3))
         #Transform
-        yaw = math.degrees(-math.atan2(orien[2,0], orien[2,2]))
-        roll = math.degrees(-math.atan2(orien[0,1], orien[1,1]))
-        ai.setFit2D(distance, bc[0],bc[1], -yaw, roll, px, px, None)
+        yaw = math.degrees(-math.atan2(orien[2, 0], orien[2, 2]))
+        roll = math.degrees(-math.atan2(orien[0, 1], orien[1, 1]))
+        ai.setFit2D(distance, bc[0], bc[1], -yaw, roll, px, px, None)
         ai.set_wavelength(wl)
-        
-        
+
         sh = in_d1.get_shape()
-        
+
         if (self.parameters["use_mask"]):
             mask = mData.get_meta_data("mask")
         else:
-            mask = np.zeros((sh[-2],sh[-1]))
+            mask = np.zeros((sh[-2], sh[-1]))
         # now integrate in radius (1D)
         npts = int(np.round(np.sqrt(sh[-1]**2+sh[-2]**2)))
-        self.params = [mask,npts,mData,ai]
+        self.params = [mask, npts, mData, ai]
 
-        
-    def filter_frame(self, data):
+    def filter_frames(self, data):
         mData = self.params[2]
         npts = self.params[1]
         mask =self.params[0]
@@ -89,8 +89,8 @@ class PyfaiAzimuthalIntegrator(BaseFilter, CpuPlugin):
         logging.debug("Running azimuthal integration")
         print np.squeeze(data).shape
         print "I'm here"
-        fit=ai.xrpd(data=np.squeeze(data),npt=npts)
-        mData.set_meta_data('Q',fit[0])
+        fit = ai.xrpd(data=np.squeeze(data), npt=npts)
+        mData.set_meta_data('Q', fit[0])
 #        mData.set_meta_data('integrated_diffraction_noise',fit[2])
         return fit[1]
 
@@ -119,15 +119,15 @@ class PyfaiAzimuthalIntegrator(BaseFilter, CpuPlugin):
                                axis_labels={in_dataset[0]: axis_labels},
                                shape={'variable': shape[:-1]})
 
+        spectra.add_pattern("SPECTRUM", core_dir=(-1,),
+                            slice_dir=tuple(range(len(shape)-2)))
+
 #        spectra.create_dataset(patterns={in_dataset[0]: ['SPECTRUM']},
 #                               axis_labels=axis_labels,
 #                               shape={'variable': shape[:-1]})
 
         # this get the right data in...
         out_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
-        # and this sets up the output patterns
-        spectrum = {'core_dir': (-1,), 'slice_dir': range(len(shape)-2)}
-        spectra.add_pattern("SPECTRUM", **spectrum)
 
     def get_max_frames(self):
         """
