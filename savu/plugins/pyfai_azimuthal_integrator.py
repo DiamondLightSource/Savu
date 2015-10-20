@@ -101,7 +101,7 @@ class PyfaiAzimuthalIntegrator(BaseFilter, CpuPlugin):
         shape = in_dataset[0].get_shape()
         # it will always be in Q for this plugin
         # Doesnt this get rid of the other two axes?
-        axis_labels = {in_dataset[0]: '-1.Q.nm^-1'}
+        #axis_labels = {in_dataset[0]: '-1.Q.nm^-1'}
         # I just want diffraction data
         in_pData[0].plugin_data_setup('DIFFRACTION', self.get_max_frames())
         spectra = out_datasets[0]
