@@ -34,11 +34,10 @@ class Hdf5TomoSaver(BaseSaver):
     """
     A class to save tomography data to a hdf5 file
     """
-            
+
     def __init__(self, name='Hdf5TomoSaver'):
         super(Hdf5TomoSaver, self).__init__(name)
-        
-        
+
     @logmethod
     def setup(self, experiment):
         saver = sSaver.TomographySavers(experiment, self.parameters)

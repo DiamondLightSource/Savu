@@ -20,8 +20,6 @@
 .. moduleauthor:: Aaron Parsons <scientificsoftware@diamond.ac.uk>
 
 """
-from savu.plugins.driver.cpu_plugin import CpuPlugin
-
 import logging
 from savu.plugins.base_filter import BaseFilter
 import numpy as np
@@ -29,7 +27,9 @@ import peakutils as pe
 from scipy.optimize import leastsq
 
 
+
 class BaseFitter(BaseFilter, CpuPlugin):
+
     """
     This plugin fits peaks. Either XRD or XRF for now.
     :param in_datasets: Create a list of the dataset(s). Default: [].
