@@ -34,7 +34,7 @@ class SimpleFitTest(unittest.TestCase):
         options = {
             "transport": "hdf5",
             "process_names": "CPU0",
-            "data_file": tu.get_test_data_path('fluo.nxs'),
+            "data_file": tu.get_test_data_path('mm.nxs'),
             "process_file": tu.get_test_data_path('simplefittest.nxs'),
             "out_path": tempfile.mkdtemp()
             }
