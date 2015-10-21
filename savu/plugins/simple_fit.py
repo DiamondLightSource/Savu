@@ -21,7 +21,7 @@
 
 """
 from savu.plugins.utils import register_plugin
-from savu.plugins.base_fluo_fitter import BaseFluoFitter
+from savu.plugins.base_fluo_fitter import BaseFitter
 import numpy as np
 from scipy.optimize import leastsq
 
@@ -36,7 +36,7 @@ class SimpleFit(BaseFitter):
     :param peak_shape: Which shape do you want. Default: "lorentzian".
     """
 
-    def __init__(self, name="SimpleFit"):
+    def __init__(self):
         super(SimpleFit, self).__init__("SimpleFit")
 
     def filter_frames(self, data):

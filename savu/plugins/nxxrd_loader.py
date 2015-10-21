@@ -39,8 +39,8 @@ class NxxrdLoader(BaseMultiModalLoader):
     :param calibration_path: path to the calibration file. Default: "../../test_data/LaB6_calibration_output.nxs"
     """
 
-    def __init__(self, name='NxxrdLoader'):
-        super(NxxrdLoader, self).__init__(name)
+    def __init__(self):
+        super(NxxrdLoader, self).__init__("NxxrdLoader")
 
     @logmethod
     def setup(self):

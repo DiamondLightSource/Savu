@@ -27,7 +27,6 @@ from savu.plugins.utils import register_plugin
 from savu.plugins.base_filter import BaseFilter
 import numpy as np
 import peakutils as pe
-from inspect import getargspec as howmany
 
 @register_plugin
 class BaseFitter(BaseFilter, CpuPlugin):
@@ -220,7 +219,7 @@ class BaseFitter(BaseFilter, CpuPlugin):
 
     def getAreas(self, fun, x, positions, fitmatrix):
         rest = fitmatrix
-        numargsinp = len(howmany(fun)[0])-2  # 2 in
+        numargsinp = 2  # 2 in
         npts = len(fitmatrix) / numargsinp
         #print npts
         weights = rest[:npts]
