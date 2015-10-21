@@ -21,12 +21,12 @@
 
 """
 from savu.plugins.utils import register_plugin
-from savu.plugins.base_fluo_fitter import BaseFluoFitter
+from savu.plugins.base_fluo_fitter import BaseFitter
 import numpy as np
 from scipy.optimize import leastsq
 
 @register_plugin
-class SimpleFit(BaseFluoFitter):
+class SimpleFit(BaseFitter):
     """
     This plugin fits peaks. Either XRD or XRF for now.
     :param in_datasets: Create a list of the dataset(s). Default: [].
@@ -36,7 +36,7 @@ class SimpleFit(BaseFluoFitter):
     :param peak_shape: Which shape do you want. Default: "lorentzian".
     """
 
-    def __init__(self, name="SimpleFit"):
+    def __init__(self):
         super(SimpleFit, self).__init__("SimpleFit")
 
     def filter_frames(self, data):
