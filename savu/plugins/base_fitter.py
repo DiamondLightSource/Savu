@@ -25,7 +25,7 @@ from savu.plugins.base_filter import BaseFilter
 import numpy as np
 import peakutils as pe
 from scipy.optimize import leastsq
-
+from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 
 class BaseFitter(BaseFilter, CpuPlugin):
