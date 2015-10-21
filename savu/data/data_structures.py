@@ -311,10 +311,23 @@ class Data(object):
                             "choose from the following list: \n'%s'",
                             dtype, str(self.pattern_list))
 
-    def add_volume_patterns(self):
-        self.add_pattern("VOLUME_YZ", core_dir=(1, 2), slice_dir=(0,))
-        self.add_pattern("VOLUME_XZ", core_dir=(0, 2), slice_dir=(1,))
-        self.add_pattern("VOLUME_XY", core_dir=(0, 1), slice_dir=(2,))
+    def add_volume_patterns(self, x, y, z):
+        self.add_pattern("VOLUME_YZ", **self.get_dirs_for_volume(y, z))
+        self.add_pattern("VOLUME_XZ", **self.get_dirs_for_volume(x, z))
+        self.add_pattern("VOLUME_XY", **self.get_dirs_for_volume(x, y))
+
+    def get_dirs_for_volume(self, dim1, dim2):
+        all_dims = len(self.get_shape())
+        vol_dict = {}
+        vol_dict['core_dir'] = (dim1, dim2)
+        slice_dir = tuple([a for a in all_dims if a not in [dim1, dim2]])
+        vol_dict['slice_dir'] = slice_dir
+        return vol_dict
+
+#    def add_volume_patterns(self):
+#        self.add_pattern("VOLUME_YZ", core_dir=(1, 2), slice_dir=(0,))
+#        self.add_pattern("VOLUME_XZ", core_dir=(0, 2), slice_dir=(1,))
+#        self.add_pattern("VOLUME_XY", core_dir=(0, 1), slice_dir=(2,))
 
     def set_axis_labels(self, *args):
         self.meta_data.set_meta_data('nDims', len(args))

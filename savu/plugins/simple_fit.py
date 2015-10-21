@@ -26,7 +26,7 @@ import numpy as np
 from scipy.optimize import leastsq
 
 @register_plugin
-class SimpleFit(BaseFluoFitter):
+class SimpleFit(BaseFitter):
     """
     This plugin fits peaks. Either XRD or XRF for now.
     :param in_datasets: Create a list of the dataset(s). Default: [].
