@@ -205,7 +205,7 @@ class PluginRunner(object):
 
         self.exp.barrier()
         logging.info("Copy out data to in data")
-        self.copy_out_data_to_in_data(link_type, out_data_objs)
+        self.copy_out_data_to_in_data(link_type)
 
         self.exp.barrier()
         logging.info("Clear up all data objects")
@@ -222,10 +222,11 @@ class PluginRunner(object):
             if out_objs in self.exp.index["in_data"].keys():
                 self.exp.index["in_data"][out_objs].close_file()
 
-    def copy_out_data_to_in_data(self, link_type, out_data_obj):
-        for output in out_data_obj:
+    def copy_out_data_to_in_data(self, link_type):
+        for key in self.exp.index["out_data"]:
+            output = self.exp.index["out_data"][key]
             output.save_data(link_type)
-            self.exp.index["in_data"][output.name] = copy.deepcopy(output)
+            self.exp.index["in_data"][key] = copy.deepcopy(output)
 
 #    def reorganise_datasets(self, out_datasets, link_type):
 #        self.close_unwanted_files(out_datasets)
@@ -250,11 +251,7 @@ class PluginRunner(object):
 #            if out_objs in self.exp.index["in_data"].keys():
 #                self.exp.index["in_data"][out_objs].close_file()
 #
-#    def copy_out_data_to_in_data(self, link_type):
-#        for key in self.exp.index["out_data"]:
-#            output = self.exp.index["out_data"][key]
-#            output.save_data(link_type)
-#            self.exp.index["in_data"][key] = copy.deepcopy(output)
+
 
     def load_plugin(self, plugin_name):
         """Load a plugin.

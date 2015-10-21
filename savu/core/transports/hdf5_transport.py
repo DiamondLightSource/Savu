@@ -151,8 +151,6 @@ class Hdf5Transport(TransportMechanism):
             exp.barrier()
             logging.info("close any files that are no longer required")
             out_datasets = plugin.parameters["out_datasets"]
-            print out_datasets[0].name           
-            print out_datasets[0].meta_data.get_meta_data('data_patterns')
 
             self.reorganise_datasets(out_datasets, link_type)
 
