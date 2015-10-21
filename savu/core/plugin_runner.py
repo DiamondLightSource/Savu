@@ -110,9 +110,11 @@ class PluginRunner(object):
 
         for i in range(1, len(plugin_list)-1):
             self.exp.barrier()
+            print "loading plugin", plugin_list[i]['name']
             logging.info("Checking Plugin %s" % plugin_list[i]['name'])
             self.plugin_loader(plugin_list[i], check=check)
             self.exp.merge_out_data_to_in()
+            print "complete"
 
     def run_plugin_list_check(self, plugin_list):
         self.exp.barrier()
