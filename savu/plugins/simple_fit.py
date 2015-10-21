@@ -21,9 +21,10 @@
 
 """
 from savu.plugins.utils import register_plugin
-from savu.plugins.base_fluo_fitter import BaseFitter
+from savu.plugins.base_fitter import BaseFitter
 import numpy as np
 from scipy.optimize import leastsq
+
 
 @register_plugin
 class SimpleFit(BaseFitter):

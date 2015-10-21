@@ -122,13 +122,13 @@ class PyfaiAzimuthalIntegrator(BaseFilter, CpuPlugin):
         print "mmmm"+str(shape[:-1])
         spectrum = {'core_dir': (-1,), 'slice_dir': tuple(range(len(shape)-2))}
         spectra.add_pattern("SPECTRUM", **spectrum)
-
+        
 #        spectra.create_dataset(patterns={in_dataset[0]: ['SPECTRUM']},
 #                               axis_labels=axis_labels,
 #                               shape={'variable': shape[:-1]})
         # this get the right data in...
         out_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
-
+        
     def get_max_frames(self):
         """
         This filter processes 1 frame at a time

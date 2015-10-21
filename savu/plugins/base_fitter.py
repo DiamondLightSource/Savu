@@ -23,12 +23,12 @@
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 import logging
-from savu.plugins.utils import register_plugin
 from savu.plugins.base_filter import BaseFilter
 import numpy as np
 import peakutils as pe
+from scipy.optimize import leastsq
 
-@register_plugin
+
 class BaseFitter(BaseFilter, CpuPlugin):
     """
     This plugin fits peaks. Either XRD or XRF for now.
@@ -40,8 +40,8 @@ class BaseFitter(BaseFilter, CpuPlugin):
     :param peak_shape: Which shape do you want. Default: "gaussian".
     """
 
-    def __init__(self):
-        super(BaseFitter, self).__init__("BaseFitter")
+    def __init__(self, name='BaseFitter'):
+        super(BaseFitter, self).__init__(name)
 
     def pre_process(self):
         logging.debug("The position index is now in the metadata")
@@ -198,6 +198,7 @@ class BaseFitter(BaseFilter, CpuPlugin):
                 op = np.concatenate([-da, -dsig])
                 #print "op.shape is "+str(op.shape)
         return op
+
     def _spectrum_sum(self, fun, x, positions, *p):
         rest = p
         npts = len(p) / 2
