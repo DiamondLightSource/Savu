@@ -146,7 +146,7 @@ class Plugin(object):
 
     def clean_up(self):
         #self.organise_metadata()
-        self.copy_meta_data()
+        #self.copy_meta_data()
         self.clean_up_plugin_data()
 
     # Does this function have to be implemented: make default here that copies
@@ -174,7 +174,8 @@ class Plugin(object):
 
     # this method can be overwritten in the plugin, but as a default all
     # metadata will be transferred from all input data sets to all output data
-    # sets
+    # sets - ***This is not good as there are entries that should not be
+    # copied e.g. "data_patterns"
     def copy_meta_data(self):
         in_meta_data, out_meta_data = self.get_meta_data()
         copy_dict = {}

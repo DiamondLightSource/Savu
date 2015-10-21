@@ -106,7 +106,6 @@ class PyfaiAzimuthalIntegrator(BaseFilter, CpuPlugin):
         # I just want diffraction data
         in_pData[0].plugin_data_setup('DIFFRACTION', self.get_max_frames())
         spectra = out_datasets[0]
-
         # what does this do?
         #remove an axis from all patterns
 
@@ -122,6 +121,9 @@ class PyfaiAzimuthalIntegrator(BaseFilter, CpuPlugin):
         print "mmmm"+str(shape[:-1])
         spectrum = {'core_dir': (-1,), 'slice_dir': tuple(range(len(shape)-2))}
         spectra.add_pattern("SPECTRUM", **spectrum)
+
+        print "***NAME outdata in pyfai:", out_datasets[0].name
+        print out_datasets[0].meta_data.get_meta_data('data_patterns')
 
 #        spectra.create_dataset(patterns={in_dataset[0]: ['SPECTRUM']},
 #                               axis_labels=axis_labels,

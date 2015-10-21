@@ -110,11 +110,9 @@ class PluginRunner(object):
 
         for i in range(1, len(plugin_list)-1):
             self.exp.barrier()
-            print "loading plugin", plugin_list[i]['name']
             logging.info("Checking Plugin %s" % plugin_list[i]['name'])
             self.plugin_loader(plugin_list[i], check=check)
             self.exp.merge_out_data_to_in()
-            print "complete"
 
     def run_plugin_list_check(self, plugin_list):
         self.exp.barrier()
@@ -200,34 +198,63 @@ class PluginRunner(object):
             sys.exit("The final plugin in the process must "
                      "inherit from BaseSaver")
 
-    def reorganise_datasets(self, out_datasets, link_type):
-        self.close_unwanted_files(out_datasets)
-        self.remove_unwanted_data(out_datasets)
+    def reorganise_datasets(self, out_data_objs, link_type):
+        out_data_list = self.exp.index["out_data"]
+        self.close_unwanted_files(out_data_list)
+        self.remove_unwanted_data(out_data_objs)
 
         self.exp.barrier()
         logging.info("Copy out data to in data")
-        self.copy_out_data_to_in_data(link_type)
+        self.copy_out_data_to_in_data(link_type, out_data_objs)
 
         self.exp.barrier()
         logging.info("Clear up all data objects")
         self.exp.clear_out_data_objects()
 
-    def remove_unwanted_data(self, out_datasets):
+    def remove_unwanted_data(self, out_data_objs):
         logging.info("Remove unwanted data from the plugin chain")
-        for out_objs in out_datasets:
+        for out_objs in out_data_objs:
             if out_objs.remove is True:
                 self.exp.remove_dataset(out_objs)
 
-    def close_unwanted_files(self, out_datasets):
-        for out_objs in out_datasets:
+    def close_unwanted_files(self, out_data_list):
+        for out_objs in out_data_list:
             if out_objs in self.exp.index["in_data"].keys():
                 self.exp.index["in_data"][out_objs].close_file()
 
-    def copy_out_data_to_in_data(self, link_type):
-        for key in self.exp.index["out_data"]:
-            output = self.exp.index["out_data"][key]
+    def copy_out_data_to_in_data(self, link_type, out_data_obj):
+        for output in out_data_obj:
             output.save_data(link_type)
-            self.exp.index["in_data"][key] = copy.deepcopy(output)
+            self.exp.index["in_data"][output.name] = copy.deepcopy(output)
+
+#    def reorganise_datasets(self, out_datasets, link_type):
+#        self.close_unwanted_files(out_datasets)
+#        self.remove_unwanted_data(out_datasets)
+#
+#        self.exp.barrier()
+#        logging.info("Copy out data to in data")
+#        self.copy_out_data_to_in_data(link_type)
+#
+#        self.exp.barrier()
+#        logging.info("Clear up all data objects")
+#        self.exp.clear_out_data_objects()
+#
+#    def remove_unwanted_data(self, out_datasets):
+#        logging.info("Remove unwanted data from the plugin chain")
+#        for out_objs in out_datasets:
+#            if out_objs.remove is True:
+#                self.exp.remove_dataset(out_objs)
+#
+#    def close_unwanted_files(self, out_datasets):
+#        for out_objs in out_datasets:
+#            if out_objs in self.exp.index["in_data"].keys():
+#                self.exp.index["in_data"][out_objs].close_file()
+#
+#    def copy_out_data_to_in_data(self, link_type):
+#        for key in self.exp.index["out_data"]:
+#            output = self.exp.index["out_data"][key]
+#            output.save_data(link_type)
+#            self.exp.index["in_data"][key] = copy.deepcopy(output)
 
     def load_plugin(self, plugin_name):
         """Load a plugin.

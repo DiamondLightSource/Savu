@@ -22,6 +22,7 @@
 """
 import logging
 
+
 class CpuPlugin(object):
     """
     The base class from which all plugins should inherit.
