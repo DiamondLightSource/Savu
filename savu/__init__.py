@@ -28,7 +28,8 @@ import sys
 
 savuPath = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(savuPath + "/../lib"))
-
+# add xraylib
+sys.path.append(os.path.join(savuPath + "/dls_sw/apps/xraylib/3.0.0/64/lib/python2.7/site-packages"))
 
 def run_tests():
     import unittest
