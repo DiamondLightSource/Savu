@@ -279,7 +279,7 @@ class Data(object):
     def set_name(self, name):
         self.data_info.set_meta_data('name', name)
 
-    def get_name(self, name):
+    def get_name(self):
         return self.data_info.get_meta_data('name')
 
     def set_data_params(self, pattern, chunk_size, **kwargs):
