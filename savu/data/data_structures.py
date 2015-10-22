@@ -406,7 +406,8 @@ class Data(object):
         d1 = patterns[n1]['core_dir']
         d2 = patterns[pname]['slice_dir']
         tdir = set(d1).intersection(set(d2))
-        self.data_info.set_meta_data([pname, 'main_dir'], list(tdir)[0])
+        self.data_info.set_meta_data(['data_patterns', pname, 'main_dir'],
+                                     list(tdir)[0])
 
     def trim_input_data(self, **kwargs):
         if self.tomo_raw_obj:

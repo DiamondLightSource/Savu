@@ -89,18 +89,21 @@ class BaseRecon(Plugin):
 
         shape = in_dataset[0].get_shape()
 
-        x, z = in_pData[0].get_core_directions()
-        y = in_pData[0].get_slice_directions()[0]
-        print shape, x, y, z
-        list(shape)[x] = shape[z]
-        print shape, x, y, z
+        dim_detX, dim_rotAngle = in_pData[0].get_core_directions()
+        dim_detY = in_pData[0].get_slice_directions()[0]
+        list(shape)[dim_rotAngle] = shape[dim_detX]
 
-        axis_labels = {str(x) + 'voxel_x.units',
-                       str(y) + 'voxel_y.units', str(z) + 'voxel_z.units'}
+        dim_volX = dim_rotAngle
+        dim_volY = dim_detY
+        dim_volZ = dim_detX
+
+        axis_labels = {str(dim_volX) + 'voxel_x.units',
+                       str(dim_volY) + 'voxel_y.units',
+                       str(dim_volZ) + 'voxel_z.units'}
 
         out_dataset[0].create_dataset(axis_labels=axis_labels,
                                       shape=shape)
-        out_dataset[0].add_volume_patterns(x, y, z)
+        out_dataset[0].add_volume_patterns(dim_volX, dim_volY, dim_volZ)
 
         # set pattern_name and nframes to process for all datasets
         out_pData[0].plugin_data_setup('VOLUME_XZ', self.get_max_frames())
