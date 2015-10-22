@@ -22,7 +22,6 @@
 """
 
 import logging
-from savu.plugins.utils import register_plugin
 from savu.plugins.base_fitter import BaseFitter
 import numpy as np
 import _xraylib as xl
@@ -31,8 +30,8 @@ from flupy.algorithms.xrf_calculations.transitions_and_shells import \
 from flupy.algorithms.xrf_calculations.escape import *
 
 
-@register_plugin
-class BaseFluoFitter(BaseFitter):
+
+class BaseFluoFitter(BaseFitter,name='BaseFluoFitter'):
     """
     This plugin fits peaks. Either XRD or XRF for now.
     :param in_datasets: Create a list of the dataset(s). Default: [].
@@ -44,7 +43,7 @@ class BaseFluoFitter(BaseFitter):
     """
 
     def __init__(self, name='BaseFluoFitter'):
-        super(BaseFitter, self).__init__("BaseFitter")
+        super(BaseFluoFitter, self).__init__("BaseFluoFitter")
 
     def filter_frames(self, data):
         databig = data[0].squeeze()

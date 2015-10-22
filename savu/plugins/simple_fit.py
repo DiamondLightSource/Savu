@@ -21,7 +21,7 @@
 
 """
 from savu.plugins.utils import register_plugin
-from savu.plugins.base_fluo_fitter import BaseFitter
+from savu.plugins.base_fitter import BaseFitter
 import numpy as np
 from scipy.optimize import leastsq
 
@@ -52,7 +52,8 @@ class SimpleFit(BaseFitter):
         p.extend(weights)
         p.extend(widths)
         curvetype = self.getFitFunction(str(self.parameters['peak_shape']))
-        lsq1 = leastsq(self._resid, p, args=(curvetype, data, self.axis, positions),
+        lsq1 = leastsq(self._resid, p,
+                       args=(curvetype, data, self.axis, positions),
                        Dfun=self.dfunc, col_deriv=1)
         print "done one"
         weights, widths, areas = self.getAreas(curvetype,

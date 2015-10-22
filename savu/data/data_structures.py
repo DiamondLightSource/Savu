@@ -331,7 +331,7 @@ class Data(object):
         self.add_pattern("VOLUME_XY", **self.get_dirs_for_volume(x, y))
 
     def get_dirs_for_volume(self, dim1, dim2):
-        all_dims = len(self.get_shape())
+        all_dims = range(len(self.get_shape()))
         vol_dict = {}
         vol_dict['core_dir'] = (dim1, dim2)
         slice_dir = tuple([a for a in all_dims if a not in [dim1, dim2]])
@@ -347,8 +347,12 @@ class Data(object):
         self.meta_data.set_meta_data('nDims', len(args))
         axis_labels = []
         for arg in args:
-            axis = arg.split('.')
-            axis_labels.append({axis[0]: axis[1]})
+            try:
+                axis = arg.split('.')
+                axis_labels.append({axis[0]: axis[1]})
+            except:
+                # data arrives here, but that may be an error
+                pass
         self.meta_data.set_meta_data('axis_labels', axis_labels)
 
     def finalise_patterns(self):

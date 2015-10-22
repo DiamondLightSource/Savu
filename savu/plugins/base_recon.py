@@ -95,7 +95,7 @@ class BaseRecon(Plugin):
         list(shape)[x] = shape[z]
         print shape, x, y, z
 
-        axis_labels = {in_dataset[0], str(x) + 'voxel_x.units',
+        axis_labels = {str(x) + 'voxel_x.units',
                        str(y) + 'voxel_y.units', str(z) + 'voxel_z.units'}
 
         out_dataset[0].create_dataset(axis_labels=axis_labels,
