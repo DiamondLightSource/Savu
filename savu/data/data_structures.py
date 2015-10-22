@@ -42,6 +42,7 @@ class Data(object):
     def __init__(self, name, exp):
         self.meta_data = MetaData()
         self.pattern_list = self.set_available_pattern_list()
+        self.data_patterns = {}
         self.name = name
         self.exp = exp
         self.group_name = None
@@ -154,12 +155,12 @@ class Data(object):
 
     def copy_patterns(self, copy_data):
         if isinstance(copy_data, Data):
-            patterns = copy_data.meta_data.get_meta_data('data_patterns')
+            patterns = copy_data.get_data_patterns()
         else:
             data = copy_data.keys()[0]
             pattern_list = copy_data[data]
 
-            all_patterns = data.meta_data.get_meta_data('data_patterns')
+            all_patterns = data.get_data_patterns()
             if len(pattern_list[0].split('.')) > 1:
                 patterns = self.copy_patterns_removing_dimensions(
                     pattern_list, all_patterns, len(data.get_shape()))
@@ -168,7 +169,7 @@ class Data(object):
                 for pattern in pattern_list:
                     patterns[pattern] = all_patterns[pattern]
 
-        self.meta_data.set_meta_data('data_patterns', patterns)
+        self.set_data_patterns(patterns)
 
     def copy_patterns_removing_dimensions(self, pattern_list, all_patterns,
                                           nDims):
@@ -198,8 +199,8 @@ class Data(object):
 
     def copy_dataset(self, copy_data, **kwargs):
         patterns = copy.copy(
-            copy_data.meta_data.get_meta_data('data_patterns'))
-        self.meta_data.set_meta_data('data_patterns', patterns)
+            copy_data.get_data_patterns()
+        self.set_data_patterns(patterns)
         self.copy_labels(copy_data)
         shape = copy_data.get_shape()
         self.set_shape(shape)
@@ -231,6 +232,19 @@ class Data(object):
                     'nDims', self.meta_data.get_meta_data('nDims') - 1)
             else:
                 axis_labels.insert(int(label[0]), {label[1]: label[2]})
+
+    def add_data_pattern(self, key_list, value):
+        key_list = key_list if isinstance(key_list, list) else [key_list]
+        entry = self.data_patterns
+        for keys in key_list:
+            entry = entry[key]
+        entry = value
+
+    def set_data_patterns(self, patterns):
+        self.data_patterns = patterns
+
+    def get_data_patterns(self):
+        return self.data_patterns()
 
     def set_shape(self, shape):
         self.shape = shape
@@ -295,8 +309,8 @@ class Data(object):
             nDims = 0
             for args in kwargs:
                 nDims += len(kwargs[args])
-                self.meta_data.set_meta_data(["data_patterns", dtype, args],
-                                             kwargs[args])
+                self.add_data_patterns(["data_patterns", dtype, args],
+                                             kwargs[args])                
             try:
                 if nDims != self.meta_data.get_meta_data("nDims"):
                     actualDims = self.meta_data.get_meta_data('nDims')
@@ -380,7 +394,7 @@ class Data(object):
         if not isinstance(tdir, int):
             raise TypeError('The direction should be an integer.')
 
-        patterns = self.meta_data.get_meta_data("data_patterns")
+        patterns = self.get_data_patterns()
         if not patterns:
             raise Exception("Please add available patterns before setting the"
                             " direction ", dname)
@@ -391,11 +405,8 @@ class Data(object):
         d1 = patterns[n1]['core_dir']
         d2 = patterns[pname]['slice_dir']
         tdir = set(d1).intersection(set(d2))
-        self.meta_data.set_meta_data(['data_patterns', pname, 'main_dir'],
+        self.set_data_patterns(['data_patterns', pname, 'main_dir'],
                                      list(tdir)[0])
-
-    def get_patterns(self):
-        return self.meta_data.get_meta_data("data_patterns")
 
     def trim_input_data(self, **kwargs):
         if self.tomo_raw_obj:
