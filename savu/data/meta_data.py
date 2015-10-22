@@ -74,6 +74,9 @@ class MetaData(object):
     def get_dictionary(self):
         return self.dict
 
+    def set_dictionary(self, ddict):
+        self.dict = ddict
+
 
 class Hdf5Experiment():
     """

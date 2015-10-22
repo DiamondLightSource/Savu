@@ -42,7 +42,7 @@ class Data(object):
     def __init__(self, name, exp):
         self.meta_data = MetaData()
         self.pattern_list = self.set_available_pattern_list()
-        self.data_patterns = {}
+        self.data_patterns = MetaData()
         self.name = name
         self.exp = exp
         self.group_name = None
@@ -198,8 +198,7 @@ class Data(object):
         return patterns
 
     def copy_dataset(self, copy_data, **kwargs):
-        patterns = copy.copy(
-            copy_data.get_data_patterns()
+        patterns = copy.copy(copy_data.get_data_patterns())
         self.set_data_patterns(patterns)
         self.copy_labels(copy_data)
         shape = copy_data.get_shape()
@@ -233,18 +232,11 @@ class Data(object):
             else:
                 axis_labels.insert(int(label[0]), {label[1]: label[2]})
 
-    def add_data_pattern(self, key_list, value):
-        key_list = key_list if isinstance(key_list, list) else [key_list]
-        entry = self.data_patterns
-        for keys in key_list:
-            entry = entry[key]
-        entry = value
-
     def set_data_patterns(self, patterns):
-        self.data_patterns = patterns
+        self.data_patterns.set_dictionary(patterns)
 
     def get_data_patterns(self):
-        return self.data_patterns()
+        return self.data_patterns.get_dictionary()
 
     def set_shape(self, shape):
         self.shape = shape
@@ -309,8 +301,7 @@ class Data(object):
             nDims = 0
             for args in kwargs:
                 nDims += len(kwargs[args])
-                self.add_data_patterns(["data_patterns", dtype, args],
-                                             kwargs[args])                
+                self.data_patterns.set_meta_data([dtype, args], kwargs[args])
             try:
                 if nDims != self.meta_data.get_meta_data("nDims"):
                     actualDims = self.meta_data.get_meta_data('nDims')
@@ -367,7 +358,7 @@ class Data(object):
                             "main_directions as both patterns do not exist")
 
     def check_pattern(self, pattern_name):
-        patterns = self.get_patterns()
+        patterns = self.get_data_patterns()
         try:
             patterns[pattern_name]
         except KeyError:
@@ -404,13 +395,12 @@ class Data(object):
                             " direction ", dname)
 
     def set_main_axis(self, pname):
-        patterns = self.get_patterns()
+        patterns = self.get_data_patterns()
         n1 = 'PROJECTION' if pname is 'SINOGRAM' else 'SINOGRAM'
         d1 = patterns[n1]['core_dir']
         d2 = patterns[pname]['slice_dir']
         tdir = set(d1).intersection(set(d2))
-        self.set_data_patterns(['data_patterns', pname, 'main_dir'],
-                                     list(tdir)[0])
+        self.data_patterns.set_meta_data([pname, 'main_dir'], list(tdir)[0])
 
     def trim_input_data(self, **kwargs):
         if self.tomo_raw_obj:
@@ -453,7 +443,7 @@ class PluginData(object):
 
     def get_pattern(self):
         pattern_name = self.get_pattern_name()
-        return {pattern_name: self.data_obj.get_patterns()[pattern_name]}
+        return {pattern_name: self.data_obj.get_data_patterns()[pattern_name]}
 
     def get_shape(self):
         return self.get_sub_shape(self.get_pattern_name())
@@ -477,15 +467,15 @@ class PluginData(object):
             [fix_dirs, value] = self.get_fixed_directions()
         except KeyError:
             fix_dirs = []
-        slice_dirs = \
-            self.data_obj.get_patterns()[self.get_pattern_name()]['slice_dir']
+        slice_dirs = self.data_obj.get_data_patterns()[
+            self.get_pattern_name()]['slice_dir']
         to_slice = [sd for sd in slice_dirs if sd not in fix_dirs]
         temp = self.data_obj.non_negative_directions(tuple(to_slice))
         return temp
 
     def get_core_directions(self):
-        core_dir = \
-            self.data_obj.get_patterns()[self.get_pattern_name()]['core_dir']
+        core_dir = self.data_obj.get_data_patterns()[
+            self.get_pattern_name()]['core_dir']
         return self.data_obj.non_negative_directions(core_dir)
 
     def set_fixed_directions(self, dims, values):
@@ -526,7 +516,7 @@ class PluginData(object):
         shape = self.get_shape()
         nDims = len(shape)
         name = self.get_current_pattern_name()
-        ddirs = self.meta_data.get_meta_data("data_patterns")
+        ddirs = self.get_data_patterns()
         core_dir = ddirs[name]["core_dir"]
         slice_dir = ddirs[name]["slice_dir"]
 
