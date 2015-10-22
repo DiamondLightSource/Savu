@@ -147,6 +147,7 @@ class Plugin(object):
     def clean_up(self):
         #self.organise_metadata()
         self.copy_meta_data()
+        self.organise_axis_labels()
         self.clean_up_plugin_data()
 
     # Does this function have to be implemented: make default here that copies
@@ -177,12 +178,12 @@ class Plugin(object):
     # sets - ***This is not good as there are entries that should not be
     # copied e.g. "data_patterns"
     def copy_meta_data(self):
+        """
+        Copy all metadata from input datasets to output datasets
+        """
         in_meta_data, out_meta_data = self.get_meta_data()
-        print "in_data dict", in_meta_data[0].get_dictionary().keys(),
-        print "out_data_dict", out_meta_data[0].get_dictionary().keys()
         copy_dict = {}
         for mData in in_meta_data:
-            print mData
             temp = mData.get_dictionary().copy()
             copy_dict.update(temp)
 
@@ -190,8 +191,21 @@ class Plugin(object):
             temp = copy_dict.copy()
             mData.get_dictionary().update(temp)
 
-        print "in_data dict", in_meta_data[0].get_dictionary().keys(),
-        print "out_data_dict", out_meta_data[0].get_dictionary().keys()
+    def organise_axis_labels(self):
+        """
+        Remove any meta_data entries corresponding to axis labels that are not
+        copied over to the output datasets
+        """
+        in_datasets, out_datasets = self.get_datasets()
+        all_in_labels = []
+        for data in in_datasets:
+            axis_labels = data.data_info.get_meta_data('axis_labels').keys()
+            all_in_labels = all_in_labels + axis_labels
+
+        for data in out_datasets:
+            axis_labels = data.data_info.get_meta_data('axis_labels').keys()
+            remove_labels = set(all_in_labels).difference(set(axis_labels))
+            print remove_labels
 
     def clean_up_plugin_data(self):
         in_data, out_data = self.get_datasets()
