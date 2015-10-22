@@ -266,21 +266,21 @@ class Data(object):
         return self.variable_length_flag
 
     def check_dims(self):
-        try:
-            nDims = self.data_info.get_meta_data("nDims")
+        nDims = self.data_info.get_meta_data("nDims")
+        if nDims:
             if self.get_variable_flag() is False:
-                if len(self.data_info.get_meta_data('shape')) != nDims:
-                    raise Exception("The number of axis labels does not "
-                                    "coincide with the number of data "
-                                    "dimensions.")
-        except KeyError:
-            pass
+                shape = self.data_info.get_meta_data('shape')
+                if len(shape) != nDims:
+                    error_msg = ("The number of axis labels, %d, does not "
+                                 "coincide with the number of data "
+                                 "dimensions %d." % (nDims, shape))
+                    raise Exception(error_msg)
 
-#    def set_dist(self, dist):
-#        self.meta_data.set_meta_data('dist', dist)
-#
-#    def get_dist(self):
-#        return self.meta_data.get_meta_data('dist')
+    def set_name(self, name):
+        self.data_info.set_meta_data('name', name)
+
+    def get_name(self, name):
+        return self.data_info.get_meta_data('name')
 
     def set_data_params(self, pattern, chunk_size, **kwargs):
         self.set_current_pattern_name(pattern)
@@ -440,7 +440,8 @@ class PluginData(object):
     def get_total_frames(self):
         temp = 1
         slice_dir = \
-            self.data_obj.get_patterns()[self.get_pattern_name()]["slice_dir"]
+            self.data_obj.get_data_patterns()[
+                self.get_pattern_name()]["slice_dir"]
         for tslice in slice_dir:
             temp *= self.data_obj.get_shape()[tslice]
         return temp

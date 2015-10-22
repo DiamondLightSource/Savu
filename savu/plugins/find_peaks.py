@@ -87,9 +87,6 @@ class FindPeaks(BaseFilter, CpuPlugin):
         # set information relating to the plugin data
         in_pData, out_pData = self.get_plugin_datasets()
 
-        print "***NAME indata in findPeaks:", in_dataset[0].name
-        print in_dataset[0].meta_data.get_meta_data('data_patterns')
-
         # set pattern_name and nframes to process for all datasets
         in_pData[0].plugin_data_setup("SPECTRUM", self.get_max_frames())
 

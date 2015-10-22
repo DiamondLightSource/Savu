@@ -85,7 +85,7 @@ class Experiment(object):
 
     def remove_dataset(self, data_obj):
         data_obj.close_file()
-        del self.index["out_data"][data_obj.name]
+        del self.index["out_data"][data_obj.data_info.get_meta_data('name')]
 
     def clear_data_objects(self):
         self.index["out_data"] = {}
