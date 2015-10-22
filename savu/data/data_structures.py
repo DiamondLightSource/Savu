@@ -416,6 +416,14 @@ class Data(object):
         if self.tomo_raw_obj:
             self.get_tomo_raw().remove_image_key(copy_obj, **kwargs)
 
+    def get_axis_label_keys(self):
+        axis_labels = self.data_info.get_meta_data('axis_labels')
+        axis_label_keys = []
+        for labels in axis_labels:
+            for key in labels.keys():
+                axis_label_keys.append(key)
+        return axis_label_keys
+
 
 class PluginData(object):
 
