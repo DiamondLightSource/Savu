@@ -100,7 +100,7 @@ class Hdf5TransportData(object):
         plugin_file = h5py.File(nxs_filename, 'a')
 
         if linkType is 'final_result':
-            name = 'final_result_' + self.name
+            name = 'final_result_' + self.get_name()
             entry = plugin_file['entry']
             entry.attrs[NX_CLASS] = 'NXdata'
             entry[name] = self.external_link()

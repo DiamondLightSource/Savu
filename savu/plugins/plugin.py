@@ -191,7 +191,8 @@ class Plugin(object):
         for i in range(len(out_meta_data)):
             temp = copy_dict.copy()
             for key in remove_keys[i]:
-                del temp[key]
+                if temp.get(key, None) is not None:
+                    del temp[key]
             out_meta_data[i].get_dictionary().update(temp)
 
     def remove_axis_data(self):
