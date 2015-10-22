@@ -101,6 +101,8 @@ class BaseRecon(Plugin):
                        str(dim_volY) + 'voxel_y.units',
                        str(dim_volZ) + 'voxel_z.units'}
 
+        shape = (shape[2], shape[1], shape[2])
+
         out_dataset[0].create_dataset(axis_labels=axis_labels,
                                       shape=shape)
         out_dataset[0].add_volume_patterns(dim_volX, dim_volY, dim_volZ)
