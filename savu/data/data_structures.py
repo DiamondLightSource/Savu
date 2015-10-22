@@ -42,20 +42,25 @@ class Data(object):
     def __init__(self, name, exp):
         self.meta_data = MetaData()
         self.pattern_list = self.set_available_pattern_list()
-        self.data_patterns = MetaData()
-        self.name = name
+        self.data_info = MetaData()
+        self.initialise_data_info(name)
         self.exp = exp
         self.group_name = None
         self.group = None
         self.backing_file = None
         self.data = None
-        self.shape = None
         self._plugin_data_obj = None
         self.tomo_raw_obj = None
         self.data_mapping = None
         self.variable_length_flag = False
         self.dtype = None
         self.remove = False
+
+    def initialise_data_info(self, name):
+        self.data_info.set_meta_data('name', name)
+        self.data_info.set_meta_data('data_patterns', {})
+        self.data_info.set_meta_data('shape', None)
+        self.data_info.set_meta_data('nDims', None)
 
     def set_plugin_data(self, plugin_data_obj):
         self._plugin_data_obj = plugin_data_obj
@@ -215,35 +220,35 @@ class Data(object):
             self.set_axis_labels(*axis_labels)
 
     def copy_labels(self, copy_data):
-        nDims = copy.copy(copy_data.meta_data.get_meta_data('nDims'))
-        self.meta_data.set_meta_data('nDims', nDims)
+        nDims = copy.copy(copy_data.data_info.get_meta_data('nDims'))
+        self.data_info.set_meta_data('nDims', nDims)
         axis_labels = copy.copy(
-            copy_data.meta_data.get_meta_data('axis_labels'))
-        self.meta_data.set_meta_data('axis_labels', axis_labels)
+            copy_data.data_info.get_meta_data('axis_labels'))
+        self.data_info.set_meta_data('axis_labels', axis_labels)
 
     def amend_axis_labels(self, *args):
-        axis_labels = self.meta_data.get_meta_data('axis_labels')
+        axis_labels = self.data_info.get_meta_data('axis_labels')
         for arg in args[0]:
             label = arg.split('.')
             if len(label) is 1:
                 del axis_labels[int(label[0])]
-                self.meta_data.set_meta_data(
-                    'nDims', self.meta_data.get_meta_data('nDims') - 1)
+                self.data_info.set_meta_data(
+                    'nDims', self.data_info.get_meta_data('nDims') - 1)
             else:
                 axis_labels.insert(int(label[0]), {label[1]: label[2]})
 
     def set_data_patterns(self, patterns):
-        self.data_patterns.set_dictionary(patterns)
+        self.data_info.set_meta_data('data_patterns', patterns)
 
     def get_data_patterns(self):
-        return self.data_patterns.get_dictionary()
+        return self.data_info.get_meta_data('data_patterns')
 
     def set_shape(self, shape):
-        self.shape = shape
+        self.data_info.set_meta_data('shape', shape)
         self.check_dims()
 
     def get_shape(self):
-        shape = self.shape
+        shape = self.data_info.get_meta_data('shape')
         try:
             dirs = self.meta_data.get_meta_data("fixed_directions")
             shape = list(self.shape)
@@ -262,20 +267,20 @@ class Data(object):
 
     def check_dims(self):
         try:
-            nDims = self.meta_data.get_meta_data("nDims")
+            nDims = self.data_info.get_meta_data("nDims")
             if self.get_variable_flag() is False:
-                if len(self.shape) != nDims:
+                if len(self.data_info.get_meta_data('shape')) != nDims:
                     raise Exception("The number of axis labels does not "
                                     "coincide with the number of data "
                                     "dimensions.")
         except KeyError:
             pass
 
-    def set_dist(self, dist):
-        self.meta_data.set_meta_data('dist', dist)
-
-    def get_dist(self):
-        return self.meta_data.get_meta_data('dist')
+#    def set_dist(self, dist):
+#        self.meta_data.set_meta_data('dist', dist)
+#
+#    def get_dist(self):
+#        return self.meta_data.get_meta_data('dist')
 
     def set_data_params(self, pattern, chunk_size, **kwargs):
         self.set_current_pattern_name(pattern)
@@ -301,16 +306,17 @@ class Data(object):
             nDims = 0
             for args in kwargs:
                 nDims += len(kwargs[args])
-                self.data_patterns.set_meta_data([dtype, args], kwargs[args])
+                self.data_info.set_meta_data(['data_patterns', dtype, args],
+                                             kwargs[args])
             try:
-                if nDims != self.meta_data.get_meta_data("nDims"):
-                    actualDims = self.meta_data.get_meta_data('nDims')
+                if nDims != self.data_info.get_meta_data("nDims"):
+                    actualDims = self.data_info.get_meta_data('nDims')
                     err_msg = ("The pattern %s has an incorrect number of "
                                "dimensions: %d required but %d specified."
                                % (dtype, actualDims, nDims))
                     raise Exception(err_msg)
             except KeyError:
-                self.meta_data.set_meta_data('nDims', nDims)
+                self.data_info.set_meta_data('nDims', nDims)
         else:
             raise Exception("The data pattern '%s'does not exist. Please "
                             "choose from the following list: \n'%s'",
@@ -335,7 +341,7 @@ class Data(object):
 #        self.add_pattern("VOLUME_XY", core_dir=(0, 1), slice_dir=(2,))
 
     def set_axis_labels(self, *args):
-        self.meta_data.set_meta_data('nDims', len(args))
+        self.data_info.set_meta_data('nDims', len(args))
         axis_labels = []
         for arg in args:
             try:
@@ -344,7 +350,7 @@ class Data(object):
             except:
                 # data arrives here, but that may be an error
                 pass
-        self.meta_data.set_meta_data('axis_labels', axis_labels)
+        self.data_info.set_meta_data('axis_labels', axis_labels)
 
     def finalise_patterns(self):
         check = 0
@@ -400,7 +406,7 @@ class Data(object):
         d1 = patterns[n1]['core_dir']
         d2 = patterns[pname]['slice_dir']
         tdir = set(d1).intersection(set(d2))
-        self.data_patterns.set_meta_data([pname, 'main_dir'], list(tdir)[0])
+        self.data_info.set_meta_data([pname, 'main_dir'], list(tdir)[0])
 
     def trim_input_data(self, **kwargs):
         if self.tomo_raw_obj:

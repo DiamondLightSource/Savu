@@ -42,7 +42,7 @@ class Plugin(object):
 
     def main_setup(self, exp, params):
         self.exp = exp
-        self.set_parameters(params)        
+        self.set_parameters(params)
         self.set_plugin_datasets(exp)
         self.setup()
         try:
@@ -146,7 +146,7 @@ class Plugin(object):
 
     def clean_up(self):
         #self.organise_metadata()
-        #self.copy_meta_data()
+        self.copy_meta_data()
         self.clean_up_plugin_data()
 
     # Does this function have to be implemented: make default here that copies
@@ -178,14 +178,20 @@ class Plugin(object):
     # copied e.g. "data_patterns"
     def copy_meta_data(self):
         in_meta_data, out_meta_data = self.get_meta_data()
+        print "in_data dict", in_meta_data[0].get_dictionary().keys(),
+        print "out_data_dict", out_meta_data[0].get_dictionary().keys()
         copy_dict = {}
         for mData in in_meta_data:
+            print mData
             temp = mData.get_dictionary().copy()
             copy_dict.update(temp)
 
         for mData in out_meta_data:
             temp = copy_dict.copy()
             mData.get_dictionary().update(temp)
+
+        print "in_data dict", in_meta_data[0].get_dictionary().keys(),
+        print "out_data_dict", out_meta_data[0].get_dictionary().keys()
 
     def clean_up_plugin_data(self):
         in_data, out_data = self.get_datasets()

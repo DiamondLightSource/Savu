@@ -105,7 +105,7 @@ class Hdf5TransportData(object):
             entry.attrs[NX_CLASS] = 'NXdata'
             entry[name] = self.external_link()
         else:
-            name = self.group_name + '_' + self.name
+            name = self.group_name + '_' + self.data_info.get_meta_data('name')
             entry = plugin_file['entry'].require_group('intermediate')
             entry.attrs[NX_CLASS] = 'NXcollection'
             entry[name] = self.external_link()
