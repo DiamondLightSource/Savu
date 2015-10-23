@@ -38,6 +38,10 @@ class BaseFilter(Plugin):
     def __init__(self, name):
         super(BaseFilter, self).__init__(name)
 
+    def main_setup(self):
+        super.main_setup()
+        self.set_filter_padding(*(self.get_plugin_datasets()))
+
     def set_filter_padding(self, in_data, out_data):
         """
         Should be overridden to define how wide the frame should be for each
