@@ -50,10 +50,11 @@ class FindPeaks(BaseFilter, CpuPlugin):
         out_meta_data.set_meta_data('PeakIndex', [])
 
     def filter_frames(self, data):
-        print "In filter frames", data
+        data = data[0][0][0][0].squeeze()
+
         out_meta_data = self.get_out_meta_data()[0]
         # filter to smooth noise
-        data = savgol_filter(data[0].squeeze(), 51, 3)
+        data = savgol_filter(data, 51, 3)
         # get the initial peak index and output a list
         PeakIndex = list(out_meta_data.get_meta_data('PeakIndex'))
         # find the peak positions for the current spectra
