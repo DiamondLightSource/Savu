@@ -45,17 +45,10 @@ class Plugin(object):
         self.set_parameters(params)
         self.set_plugin_datasets(exp)
         self.setup()
-        try:
-            in_datasets, out_datasets = self.get_datasets()
-            for data in in_datasets + out_datasets:
-                data.finalise_patterns()
-        except KeyError:
-            pass
 
-        try:
-            self.set_filter_padding(*(self.get_plugin_datasets()))
-        except AttributeError:
-            pass
+        in_datasets, out_datasets = self.get_datasets()
+        for data in in_datasets + out_datasets:
+            data.finalise_patterns()
 
     def setup(self):
         """
@@ -276,15 +269,12 @@ class Plugin(object):
         Convert in/out_dataset strings to objects and create PluginData objects
         for each.
         """
-        try:
-            self.parameters['in_datasets'] = self.set_in_datasets()
-            self.parameters['out_datasets'] = self.set_out_datasets()
-            self.parameters['plugin_in_datasets'] = \
-                self.get_plugin_data(self.parameters['in_datasets'])
-            self.parameters['plugin_out_datasets'] = \
-                self.get_plugin_data(self.parameters['out_datasets'])
-        except:
-            pass
+        self.parameters['in_datasets'] = self.set_in_datasets()
+        self.parameters['out_datasets'] = self.set_out_datasets()
+        self.parameters['plugin_in_datasets'] = \
+            self.get_plugin_data(self.parameters['in_datasets'])
+        self.parameters['plugin_out_datasets'] = \
+            self.get_plugin_data(self.parameters['out_datasets'])
 
     def get_plugin_in_datasets(self):
         return self.parameters['plugin_in_datasets']

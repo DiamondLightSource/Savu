@@ -491,6 +491,20 @@ class PluginData(object):
         temp = self.data_obj.non_negative_directions(tuple(to_slice))
         return temp
 
+    def set_slicing_order(self, order):
+        """
+        Reorder the slice directions.  The fastest changing slice direction
+        will always be the first one. The input param is a tuple stating the
+        desired order of slicing directions relative to the current order.
+        """
+        slice_dirs = self.get_slice_directions()
+        if len(slice_dirs) < len(order):
+            raise Exception("Incorrect number of dimensions specifed.")
+        ordered = [slice_dirs[o] for o in order]
+        remaining = [s for s in slice_dirs if s not in ordered]
+        new_slice_dirs = tuple(ordered + remaining)
+        self.get_current_pattern()['slice_dir'] = new_slice_dirs
+
     def get_core_directions(self):
         core_dir = self.data_obj.get_data_patterns()[
             self.get_pattern_name()]['core_dir']

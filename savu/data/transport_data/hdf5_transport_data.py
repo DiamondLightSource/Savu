@@ -45,7 +45,7 @@ class Hdf5TransportData(object):
         exp = self.exp
         plugin_list = exp.meta_data.plugin_list.plugin_list
         final_plugin = plugin_list[-1]
-        saver_plugin = plugin_runner.load_plugin(final_plugin["id"])
+        saver_plugin = plugin_runner.plugin_loader(final_plugin)
 
         logging.debug("generating all output files")
         out_data_objects = []
@@ -63,7 +63,7 @@ class Hdf5TransportData(object):
 
             self.set_filenames(plugin, plugin_id, count)
 
-            saver_plugin.setup(exp)
+            saver_plugin.setup()
 
             out_data_objects.append(exp.index["out_data"].copy())
 
