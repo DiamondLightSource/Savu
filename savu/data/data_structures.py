@@ -149,9 +149,7 @@ class Data(object):
                     self.set_shape(Data.get_shape())
                 elif type(shape) is dict:
                     self.set_variable_flag()
-                    print shape
                     self.set_shape((shape[shape.keys()[0]] + ('var',)))
-                    print self.get_shape()
                 else:
                     self.set_shape(shape)
             except KeyError:
@@ -270,10 +268,8 @@ class Data(object):
         return self.variable_length_flag
 
     def check_dims(self):
-        print "checking the dimensions", self.get_variable_flag()
         nDims = self.data_info.get_meta_data("nDims")
         shape = self.data_info.get_meta_data('shape')
-        print nDims, shape
         if nDims:
             if self.get_variable_flag() is False:
                 if len(shape) != nDims:

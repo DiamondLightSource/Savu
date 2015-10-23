@@ -192,6 +192,7 @@ class Hdf5TransportData(object):
         slice_dirs = pData.get_slice_directions()
         [fix_dirs, value] = pData.get_fixed_directions()
         shape = self.get_shape()
+        shape = [s for s in list(shape) if isinstance(s, int)]
         index = self.get_slice_dirs_index(slice_dirs, np.array(shape))
         nSlices = index.shape[1]
         nDims = len(shape)
@@ -249,7 +250,6 @@ class Hdf5TransportData(object):
         sl = self.single_slice_list()
 
         if self.get_plugin_data().selected_data is True:
-            print "selected_data is true"
             sl = self.get_tomo_raw().get_frame_raw(sl)
 
         if sl is None:
