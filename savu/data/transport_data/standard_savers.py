@@ -83,8 +83,10 @@ class TomographySavers(object):
 
         if data.get_variable_flag() is True:
             dtype = h5py.special_dtype(vlen=data.dtype)
+            shape = data.get_shape()[:-1]
         else:
             dtype = data.dtype
+            shape = data.get_shape()
 
-        data.data = group.create_dataset('data', data.get_shape(), dtype)
+        data.data = group.create_dataset('data', shape, dtype)
         return group_name, group

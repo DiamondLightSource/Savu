@@ -139,6 +139,8 @@ class Data(object):
             if args[0].tomo_raw_obj:
                 self.set_tomo_raw(copy.deepcopy(args[0].get_tomo_raw()))
                 self.get_tomo_raw().data_obj = self
+            if args[0].get_variable_flag():
+                self.set_variable_flag()
         else:
             try:
                 self.create_axis_labels(kwargs['axis_labels'])
@@ -147,7 +149,9 @@ class Data(object):
                     self.set_shape(Data.get_shape())
                 elif type(shape) is dict:
                     self.set_variable_flag()
-                    self.set_shape(shape[shape.keys()[0]])
+                    print shape
+                    self.set_shape((shape[shape.keys()[0]] + ('var',)))
+                    print self.get_shape()
                 else:
                     self.set_shape(shape)
             except KeyError:
@@ -266,20 +270,22 @@ class Data(object):
         return self.variable_length_flag
 
     def check_dims(self):
+        print "checking the dimensions", self.get_variable_flag()
         nDims = self.data_info.get_meta_data("nDims")
+        shape = self.data_info.get_meta_data('shape')
+        print nDims, shape
         if nDims:
             if self.get_variable_flag() is False:
-                shape = self.data_info.get_meta_data('shape')
                 if len(shape) != nDims:
                     error_msg = ("The number of axis labels, %d, does not "
                                  "coincide with the number of data "
-                                 "dimensions %d." % (nDims, shape))
+                                 "dimensions %d." % (nDims, len(shape)))
                     raise Exception(error_msg)
 
     def set_name(self, name):
         self.data_info.set_meta_data('name', name)
 
-    def get_name(self, name):
+    def get_name(self):
         return self.data_info.get_meta_data('name')
 
     def set_data_params(self, pattern, chunk_size, **kwargs):

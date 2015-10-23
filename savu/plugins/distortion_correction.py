@@ -35,7 +35,8 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
     """
     A plugin to apply distortion correction
 
-    :param centre: First param information. Default: (1000,1000).
+    :param polynomial_coeffs: Parameters of the radial distortion function. Default: (1, 0, 0, 0, 0).
+    :param centre: Centre of distortion. Default: (1000, 1000)
     """
 
     def __init__(self):
@@ -43,12 +44,16 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
 
     def pre_process(self):
         unwarp.setctr(*(self.parameters['centre']))
+        #pass two empty arrays of frame chunk size
+        unwarp.setcoeff(*self.parameters['polynomial_coeffs']) # need to unwrap the tuple
+        unwarp.setctr(*self.parameters['centre'])
+        unwarp.setup(data, result)
+        
 
     def filter_frames(self, data):
         data = data[0]
         result = np.empty_like(data)
         # should the setup function be called here?
-        unwarp.setup(data, result)
         unwarp.run(data, result)
         return result
 
@@ -75,4 +80,4 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
         self.exp.log(self.name + " End")
 
     def get_max_frames(self):
-        return 3
+        return 8

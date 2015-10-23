@@ -117,7 +117,8 @@ class PyfaiAzimuthalIntegrator(BaseFilter, CpuPlugin):
         axis_labels = ['-1', '-2.name.unit']
         spectra.create_dataset(patterns={in_dataset[0]: patterns},
                                axis_labels={in_dataset[0]: axis_labels},
-                               shape=shape[:-2]+(1005,))
+                               shape={'variable': shape[:-2]})
+#                               shape=shape[:-2]+(1005,))
         print "mmmm"+str(shape[:-1])
         spectrum = {'core_dir': (-1,), 'slice_dir': tuple(range(len(shape)-2))}
         spectra.add_pattern("SPECTRUM", **spectrum)

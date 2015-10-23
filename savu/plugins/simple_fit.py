@@ -62,4 +62,3 @@ class SimpleFit(BaseFitter):
         # all fitting routines will output the same format.
         # nchannels long, with 3 elements. Each can be a subarray.
         return [weights, widths, areas, residuals]
-
