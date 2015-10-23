@@ -43,46 +43,6 @@ class BaseFitter(BaseFilter, CpuPlugin):
     def __init__(self, name='BaseFitter'):
         super(BaseFitter, self).__init__(name)
 
-    def pre_process(self):
-        logging.debug("The position index is now in the metadata")
-        in_meta_data = self.get_in_meta_data()[0]
-        self.setPositions(in_meta_data)
-        self.positions = in_meta_data.get_meta_data('PeakIndex')
-        self.fitrange = np.ones(len(self.axis))
-        self.fitrange[self.axis<self.parameters['fit_range'][0]] = 0
-        self.fitrange[self.axis>self.parameters['fit_range'][1]] = 0
-
-    def filter_frames(self, data):
-        databig = data[0].squeeze()
-        data = databig[self.fitrange == 1]
-        weights = data[self.positions]
-        #print weights
-        positions = self.axis[self.positions]
-        widths = np.ones_like(positions)*0.02
-        #print widths
-        p = []
-        p.extend(weights)
-        p.extend(widths)
-        curvetype = self.lookup[str(self.parameters['peak_shape'])]
-        lsq1 = leastsq(self._resid, p, args=(curvetype, data, self.axis, positions), Dfun=self.dfunc, col_deriv=1)
-        print "done one"
-        weights, widths, areas = self.getAreas(curvetype,
-                                               self.axis, positions, lsq1[0])
-        residuals = self._resid(lsq1[0], curvetype, data, self.axis, positions)
-        # all fitting routines will output the same format.
-        # nchannels long, with 3 elements. Each can be a subarray.
-        return [weights, widths, areas, residuals]
-
-#     def filter_frames(self, data):
-#         positions = self.positions
-# 
-#         weights = positions
-#         widths = positions
-#         areas = positions
-#         residuals = data
-# 
-#         return [weights, widths, areas, residuals]
-
     def setup(self):
         # set up the output datasets that are created by the plugin
         in_dataset, out_datasets = self.get_datasets()
@@ -146,7 +106,6 @@ class BaseFitter(BaseFilter, CpuPlugin):
             logging.debug('Using the pre-defined PeakIndex metadata')
         except KeyError:
             logging.error('No peaks defined!')
- 
 
     def _resid(self, p, fun, y, x, pos):
         #print fun.__name__
@@ -217,10 +176,17 @@ class BaseFitter(BaseFilter, CpuPlugin):
                        "gaussian": gaussian
                        }
         return self.lookup[key]
+    
+    def getFitFunctionNumArgs(self,key):
+        self.lookup = {
+                       "lorentzian": 2,
+                       "gaussian": 2
+                       }
+        return self.lookup[key]
 
     def getAreas(self, fun, x, positions, fitmatrix):
         rest = fitmatrix
-        numargsinp = 2  # 2 in
+        numargsinp = self.getFitFunctionNumArgs(str(fun))  # 2 in
         npts = len(fitmatrix) / numargsinp
         #print npts
         weights = rest[:npts]
@@ -236,6 +202,7 @@ class BaseFitter(BaseFilter, CpuPlugin):
                                     positions[ii],
                                     )))
         return weights, widths, areas
+
 
 def spectrum_sum_dfun(fun, multiplier, x, pos, *p):
     rest = p
