@@ -100,12 +100,12 @@ class Hdf5TransportData(object):
         plugin_file = h5py.File(nxs_filename, 'a')
 
         if linkType is 'final_result':
-            name = 'final_result_' + self.name
+            name = 'final_result_' + self.get_name()
             entry = plugin_file['entry']
             entry.attrs[NX_CLASS] = 'NXdata'
             entry[name] = self.external_link()
         else:
-            name = self.group_name + '_' + self.name
+            name = self.group_name + '_' + self.data_info.get_meta_data('name')
             entry = plugin_file['entry'].require_group('intermediate')
             entry.attrs[NX_CLASS] = 'NXcollection'
             entry[name] = self.external_link()
@@ -192,6 +192,7 @@ class Hdf5TransportData(object):
         slice_dirs = pData.get_slice_directions()
         [fix_dirs, value] = pData.get_fixed_directions()
         shape = self.get_shape()
+        shape = [s for s in list(shape) if isinstance(s, int)]
         index = self.get_slice_dirs_index(slice_dirs, np.array(shape))
         nSlices = index.shape[1]
         nDims = len(shape)
@@ -249,7 +250,6 @@ class Hdf5TransportData(object):
         sl = self.single_slice_list()
 
         if self.get_plugin_data().selected_data is True:
-            print "selected_data is true"
             sl = self.get_tomo_raw().get_frame_raw(sl)
 
         if sl is None:

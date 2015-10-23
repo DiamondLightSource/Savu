@@ -42,7 +42,7 @@ class Plugin(object):
 
     def main_setup(self, exp, params):
         self.exp = exp
-        self.set_parameters(params)        
+        self.set_parameters(params)
         self.set_plugin_datasets(exp)
         self.setup()
         try:
@@ -146,7 +146,7 @@ class Plugin(object):
 
     def clean_up(self):
         #self.organise_metadata()
-        #self.copy_meta_data()
+        self.copy_meta_data()
         self.clean_up_plugin_data()
 
     # Does this function have to be implemented: make default here that copies
@@ -177,15 +177,41 @@ class Plugin(object):
     # sets - ***This is not good as there are entries that should not be
     # copied e.g. "data_patterns"
     def copy_meta_data(self):
+        """
+        Copy all metadata from input datasets to output datasets, except axis
+        # data that is no longer valid.
+        """
+        remove_keys = self.remove_axis_data()
         in_meta_data, out_meta_data = self.get_meta_data()
         copy_dict = {}
         for mData in in_meta_data:
             temp = mData.get_dictionary().copy()
             copy_dict.update(temp)
 
-        for mData in out_meta_data:
+        for i in range(len(out_meta_data)):
             temp = copy_dict.copy()
-            mData.get_dictionary().update(temp)
+            for key in remove_keys[i]:
+                if temp.get(key, None) is not None:
+                    del temp[key]
+            out_meta_data[i].get_dictionary().update(temp)
+
+    def remove_axis_data(self):
+        """
+        Returns a list of meta_data entries corresponding to axis labels that
+        are not copied over to the output datasets
+        """
+        in_datasets, out_datasets = self.get_datasets()
+        all_in_labels = []
+        for data in in_datasets:
+            axis_keys = data.get_axis_label_keys()
+            all_in_labels = all_in_labels + axis_keys
+
+        remove_keys = []
+        for data in out_datasets:
+            axis_keys = data.get_axis_label_keys()
+            remove_keys.append(set(all_in_labels).difference(set(axis_keys)))
+
+        return remove_keys
 
     def clean_up_plugin_data(self):
         in_data, out_data = self.get_datasets()

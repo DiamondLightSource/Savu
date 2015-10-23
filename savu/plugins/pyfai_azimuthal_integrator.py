@@ -92,7 +92,7 @@ class PyfaiAzimuthalIntegrator(BaseFilter, CpuPlugin):
         fit = ai.xrpd(data=np.squeeze(data), npt=npts)
         mData.set_meta_data('Q', fit[0])
 #        mData.set_meta_data('integrated_diffraction_noise',fit[2])
-        print fit[1].shape 
+        print fit[1].shape
         return fit[1]
 
     def setup(self):
@@ -117,13 +117,11 @@ class PyfaiAzimuthalIntegrator(BaseFilter, CpuPlugin):
         axis_labels = ['-1', '-2.name.unit']
         spectra.create_dataset(patterns={in_dataset[0]: patterns},
                                axis_labels={in_dataset[0]: axis_labels},
-                               shape=shape[:-2]+(1005,))
-        print "mmmm"+str(shape[:-1])
+                               shape={'variable': shape[:-2]})
+#                               shape=shape[:-2]+(1005,))
+
         spectrum = {'core_dir': (-1,), 'slice_dir': tuple(range(len(shape)-2))}
         spectra.add_pattern("SPECTRUM", **spectrum)
-
-        print "***NAME outdata in pyfai:", out_datasets[0].name
-        print out_datasets[0].meta_data.get_meta_data('data_patterns')
 
 
 #        spectra.create_dataset(patterns={in_dataset[0]: ['SPECTRUM']},
@@ -131,7 +129,7 @@ class PyfaiAzimuthalIntegrator(BaseFilter, CpuPlugin):
 #                               shape={'variable': shape[:-1]})
         # this get the right data in...
         out_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
-        
+
     def get_max_frames(self):
         """
         This filter processes 1 frame at a time

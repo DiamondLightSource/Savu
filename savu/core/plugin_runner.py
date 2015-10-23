@@ -228,31 +228,6 @@ class PluginRunner(object):
             output.save_data(link_type)
             self.exp.index["in_data"][key] = copy.deepcopy(output)
 
-#    def reorganise_datasets(self, out_datasets, link_type):
-#        self.close_unwanted_files(out_datasets)
-#        self.remove_unwanted_data(out_datasets)
-#
-#        self.exp.barrier()
-#        logging.info("Copy out data to in data")
-#        self.copy_out_data_to_in_data(link_type)
-#
-#        self.exp.barrier()
-#        logging.info("Clear up all data objects")
-#        self.exp.clear_out_data_objects()
-#
-#    def remove_unwanted_data(self, out_datasets):
-#        logging.info("Remove unwanted data from the plugin chain")
-#        for out_objs in out_datasets:
-#            if out_objs.remove is True:
-#                self.exp.remove_dataset(out_objs)
-#
-#    def close_unwanted_files(self, out_datasets):
-#        for out_objs in out_datasets:
-#            if out_objs in self.exp.index["in_data"].keys():
-#                self.exp.index["in_data"][out_objs].close_file()
-#
-
-
     def load_plugin(self, plugin_name):
         """Load a plugin.
 

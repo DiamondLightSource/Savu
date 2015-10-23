@@ -105,4 +105,7 @@ class PaganinFilter(BaseFilter, CpuPlugin):
                       padtopbottom:-padtopbottom,
                       padleftright: -padleftright]
 
+    def get_max_frames(self):
+        return 1
+
 # TODO Add the citation information here

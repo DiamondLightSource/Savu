@@ -50,9 +50,11 @@ class FindPeaks(BaseFilter, CpuPlugin):
         out_meta_data.set_meta_data('PeakIndex', [])
 
     def filter_frames(self, data):
+        data = data[0][0][0][0].squeeze()
+
         out_meta_data = self.get_out_meta_data()[0]
         # filter to smooth noise
-        data = savgol_filter(data[0].squeeze(), 51, 3)
+        data = savgol_filter(data, 51, 3)
         # get the initial peak index and output a list
         PeakIndex = list(out_meta_data.get_meta_data('PeakIndex'))
         # find the peak positions for the current spectra
@@ -86,9 +88,6 @@ class FindPeaks(BaseFilter, CpuPlugin):
         in_dataset, out_dataset = self.get_datasets()
         # set information relating to the plugin data
         in_pData, out_pData = self.get_plugin_datasets()
-
-        print "***NAME indata in findPeaks:", in_dataset[0].name
-        print in_dataset[0].meta_data.get_meta_data('data_patterns')
 
         # set pattern_name and nframes to process for all datasets
         in_pData[0].plugin_data_setup("SPECTRUM", self.get_max_frames())
