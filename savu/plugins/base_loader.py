@@ -29,6 +29,14 @@ class BaseLoader(Plugin):
     A base plugin from which all data loader plugins should inherit.
     """
 
+    def main_setup(self, exp, params):
+        """
+        Overwrites the main_setup function in plugin.py as the loader is a
+        special case of plugin that doesn't required setup of in/out_datasets
+        """
+        self.exp = exp
+        self.setup()
+
     def __init__(self, name='BaseLoader'):
         self.hits = []
         self.application = None
