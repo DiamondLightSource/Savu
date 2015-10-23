@@ -19,10 +19,13 @@
 
 .. moduleauthor:: Aaron D. Parsons <scientificsoftware@diamond.ac.uk>
 """
+
 import logging
 
 import math
+
 import pyFAI
+
 import numpy as np
 from savu.plugins.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin

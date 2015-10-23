@@ -51,7 +51,7 @@ class StripBackground(BaseFilter, CpuPlugin):
         smoothed = self.parameters['SG_filter_iterations']
         SGwidth = self.parameters['SG_width']
         SGpoly = self.parameters['SG_polyorder']
-        data = data[0].squeeze()
+        data = data[0][0][0][0].squeeze()
         npts = len(data)
         filtered = savgol_filter(data, SGwidth, SGpoly)
         aved = np.zeros_like(filtered)

@@ -31,11 +31,9 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 class BaseFitter(BaseFilter, CpuPlugin):
 
     """
-    This plugin fits peaks. Either XRD or XRF for now.
+    This plugin fits peaks.
     :param in_datasets: Create a list of the dataset(s). Default: [].
     :param out_datasets: A. Default: ["FitWeights", "FitWidths", "FitAreas", "residuals"].
-    :param fit_elements: List of elements of fit. Default: [].
-    :param fit_range: Min max pair of fit range. Default: [].
     :param width_guess: An initial guess at the width. Default: 0.02.
     :param peak_shape: Which shape do you want. Default: "gaussian".
     """
@@ -124,7 +122,7 @@ class BaseFitter(BaseFilter, CpuPlugin):
         #    print "len mu"+str(len(mu))
         #    print "len x"+str(len(x))
             if fun.__name__ == 'gaussian':
-                print "I'm a gaussian"
+                #print "I'm a gaussian"
                 da = spectrum_sum_dfun(fun, 1./a, x, mu, *p)
                 #dmu_mult = np.zeros((len(mu), len(x)))
                 dsig_mult = np.zeros((len(mu), len(x)))
@@ -137,7 +135,7 @@ class BaseFitter(BaseFilter, CpuPlugin):
                 op = np.concatenate([-da, -dsig])
                 #print "op.shape is "+str(op.shape)
             elif fun.__name__ == 'lorentzian':
-                print "I'm a lorentzian"
+                #print "I'm a lorentzian"
                 #print "hey"
                 da = spectrum_sum_dfun(fun, 1./a, x, mu, *p).astype('float64')
                 #dmu_mult = np.zeros((len(mu), len(x)))
@@ -186,13 +184,13 @@ class BaseFitter(BaseFilter, CpuPlugin):
 
     def getAreas(self, fun, x, positions, fitmatrix):
         rest = fitmatrix
-        numargsinp = self.getFitFunctionNumArgs(str(fun))  # 2 in
+        numargsinp = self.getFitFunctionNumArgs(str(fun.__name__))  # 2 in
         npts = len(fitmatrix) / numargsinp
         #print npts
         weights = rest[:npts]
-        print 'the weights are'+str(weights)
+        #print 'the weights are'+str(weights)
         widths = rest[npts:2*npts]
-        print 'the widths are'+str(widths)
+        #print 'the widths are'+str(widths)
         #print(len(widths))
         areas = []
         for ii in range(len(weights)):
@@ -209,9 +207,9 @@ def spectrum_sum_dfun(fun, multiplier, x, pos, *p):
     npts = len(p) / 2
 #    print npts
     weights = rest[:npts]
-    print weights
+    #print weights
     widths = rest[npts:2*npts]
-    print widths
+    #print widths
     positions = pos
 #    print(len(positions))
     spec = np.zeros((npts, len(x))).astype('float64')

@@ -21,29 +21,27 @@
 
 """
 from savu.plugins.utils import register_plugin
-from savu.plugins.base_fitter import BaseFitter
+from savu.plugins.base_fluo_fitter import BaseFluoFitter
 import numpy as np
 from scipy.optimize import leastsq
 
 
 @register_plugin
-class SimpleFit(BaseFitter):
+class SimpleFitXrf(BaseFluoFitter):
     """
-    This plugin fits peaks.
+    This plugin fits XRF peaks.
     :param width_guess: An initial guess at the width. Default: 0.02.
 
     """
 
     def __init__(self):
-        super(SimpleFit, self).__init__("SimpleFit")
+        super(SimpleFitXrf, self).__init__("SimpleFitXrf")
 
     def filter_frames(self, data):
-        data = data[0][0][0][0].squeeze()
+        data = data[0].squeeze()
         in_meta_data = self.get_in_meta_data()[0]
         positions = in_meta_data.get_meta_data("PeakIndex")
-        #print sorted(positions)
-        axis = in_meta_data.get_meta_data("Q")
-        print len(axis)
+        axis = in_meta_data.get_meta_data("energy")
         weights = data[positions]
         widths = np.ones_like(positions)*self.parameters["width_guess"]
         p = []
