@@ -50,7 +50,7 @@ class NxfluoLoader(BaseMultiModalLoader):
         average = np.mean(np.mean(np.mean(data_obj.data, axis=0), axis=0),
                           axis=0)
         # and the energy axis
-        energy = data_obj.backing_file[fluo_entry.name+'/data/energy']
+        energy = data_obj.backing_file[fluo_entry.name+'/data/energy'][...]
         mono_energy = data_obj.backing_file[fluo_entry.name +
                                             '/instrument/monochromator/energy'
                                             ].value

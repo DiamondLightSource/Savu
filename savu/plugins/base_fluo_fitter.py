@@ -42,7 +42,7 @@ class BaseFluoFitter(BaseFitter):
     :param include_pileup: Include pileup. Default: 1.
     :param include_escape: Include escape. Default: 1.
     :param fitted_energy_range_keV: The fitted energy range. Default: [2.,18.].
-    :param elements: The fitted elements. Default: Zn','Cu', 'Ar'.
+    :param elements: The fitted elements. Default: ['Zn','Cu', 'Ar'].
     """
 
     def __init__(self, name='BaseFluoFitter'):
@@ -56,32 +56,33 @@ class BaseFluoFitter(BaseFitter):
         except KeyError:
             logging.debug("No Peak Index in the metadata")
             logging.debug("Calculating the positions from energy")
-            in_meta_data.set_meta_data('PeakIndex',
-                                       self.setPositions(in_meta_data))
+            idx = self.setPositions(in_meta_data)
+            print "The index is"+str(idx)
+            in_meta_data.set_meta_data('PeakIndex', idx)
 
     def setPositions(self, in_meta_data):
-        try:
-            paramdict = XRFDataset().paramdict
-            paramdict["FitParams"]["pileup_cutoff_keV"] = \
-                self.parameters["pileup_cutoff_keV"]
-            paramdict["FitParams"]["include_pileup"] = \
-                self.parameters["include_pileup"]
-            paramdict["FitParams"]["include_escape"] = \
-                self.parameters["include_escape"]
-            paramdict["FitParams"]["fitted_energy_range_keV"] = \
-                self.parameters["fitted_energy_range_keV"]
-            paramdict["Experiment"]["incident_energy_keV"] = \
-                in_meta_data.get_meta_data("mono_energy")
-            paramdict["Experiment"]["elements"] = \
-                self.parameters["elements"]
-            engy = self.findLines(paramdict)
+        paramdict = XRFDataset().paramdict
+        paramdict["FitParams"]["pileup_cutoff_keV"] = \
+            self.parameters["pileup_cutoff_keV"]
+        paramdict["FitParams"]["include_pileup"] = \
+            self.parameters["include_pileup"]
+        paramdict["FitParams"]["include_escape"] = \
+            self.parameters["include_escape"]
+        paramdict["FitParams"]["fitted_energy_range_keV"] = \
+            self.parameters["fitted_energy_range_keV"]
+        paramdict["Experiment"]["incident_energy_keV"] = \
+            in_meta_data.get_meta_data("mono_energy")
+        paramdict["Experiment"]["elements"] = \
+            self.parameters["elements"]
+        engy = self.findLines(paramdict)
 #                 print engy
-            # make it an index since this is what find peaks will also give us
-            axis = in_meta_data.get_meta_data("energy")
-            dq = axis[1]-axis[0]
-            idx = np.round(engy/dq).astype(int)
-        except Exception:
-            logging.error(Exception)
+        # make it an index since this is what find peaks will also give us
+        axis = in_meta_data.get_meta_data("energy")
+        print axis
+        dq = axis[1]-axis[0]
+        idx = np.round(engy/dq).astype(int)
+        print "I'm here"
+        print idx
         return idx
 
     def findLines(self, paramdict=XRFDataset().paramdict):
@@ -96,6 +97,7 @@ class BaseFluoFitter(BaseFitter):
         fitting_range = paramdict["FitParams"]["fitted_energy_range_keV"]
 #         x = paramdict["FitParams"]["mca_energies_used"]
         energy = paramdict["Experiment"]["incident_energy_keV"]
+        detectortype = 'Vortex_SDD_Xspress'
         fitelements = paramdict["Experiment"]["elements"]
         peakpos = []
         escape_peaks = []
@@ -126,7 +128,6 @@ class BaseFluoFitter(BaseFitter):
         peaks.extend(peakpos)
         if(include_escape):
             for i in range(len(peakpos)):
-                detectortype = paramdict["Detectors"]["detector_type"]
                 escape_energy = calc_escape_energy(peakpos[i], detectortype)[0]
                 if (escape_energy > fitting_range[0]):
                     if (escape_energy < fitting_range[1]):

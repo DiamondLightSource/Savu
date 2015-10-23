@@ -80,6 +80,7 @@ class PluginRunner(object):
 
         try:
             plugin = self.load_plugin(plugin_dict['id'])
+            print plugin_dict['id']
         except Exception as e:
             logging.error("failed to load the plugin")
             logging.error(e)

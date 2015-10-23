@@ -21,13 +21,13 @@
 
 """
 from savu.plugins.utils import register_plugin
-from savu.plugins.base_fitter import BaseFitter
+from savu.plugins.base_fluo_fitter import BaseFluoFitter
 import numpy as np
 from scipy.optimize import leastsq
 
 
 @register_plugin
-class SimpleFitXRF(BaseFitter):
+class SimpleFitXrf(BaseFluoFitter):
     """
     This plugin fits XRF peaks.
     :param width_guess: An initial guess at the width. Default: 0.02.
@@ -35,7 +35,7 @@ class SimpleFitXRF(BaseFitter):
     """
 
     def __init__(self):
-        super(SimpleFitXRF, self).__init__("SimpleFitXRF")
+        super(SimpleFitXrf, self).__init__("SimpleFitXrf")
 
     def filter_frames(self, data):
         data = data[0].squeeze()

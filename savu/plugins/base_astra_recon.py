@@ -40,7 +40,7 @@ logging.debug("Imported math")
 class BaseAstraRecon(BaseRecon):
     """
     A Plugin to perform Astra toolbox reconstruction
-    
+    level
     :param center_of_rotation: Center of rotation to use for the reconstruction). Default: 86.
     """
     res = 0

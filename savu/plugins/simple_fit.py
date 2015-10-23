@@ -29,36 +29,35 @@ from scipy.optimize import leastsq
 @register_plugin
 class SimpleFit(BaseFitter):
     """
-    This plugin fits peaks. Either XRD or XRF for now.
-    :param in_datasets: Create a list of the dataset(s). Default: [].
-    :param out_datasets: A. Default: ["FitWeights", "FitWidths", "FitAreas", "residuals"].
-    :param fit_range: Min max pair of fit range. Default: [].
+    This plugin fits peaks.
     :param width_guess: An initial guess at the width. Default: 0.02.
-    :param peak_shape: Which shape do you want. Default: "lorentzian".
+
     """
 
     def __init__(self):
         super(SimpleFit, self).__init__("SimpleFit")
 
     def filter_frames(self, data):
-        databig = data[0].squeeze()
-        data = databig[self.fitrange == 1]
-        weights = data[self.positions]
-        #print weights
-        positions = self.axis[self.positions]
-        widths = np.ones_like(positions)*0.02
-        #print widths
+        data = data[0][0][0][0].squeeze()
+        in_meta_data = self.get_in_meta_data()[0]
+        positions = in_meta_data.get_meta_data("PeakIndex")
+        #print sorted(positions)
+        axis = in_meta_data.get_meta_data("Q")
+        print len(axis)
+        weights = data[positions]
+        widths = np.ones_like(positions)*self.parameters["width_guess"]
         p = []
         p.extend(weights)
         p.extend(widths)
         curvetype = self.getFitFunction(str(self.parameters['peak_shape']))
         lsq1 = leastsq(self._resid, p,
-                       args=(curvetype, data, self.axis, positions),
+                       args=(curvetype, data, axis, positions),
                        Dfun=self.dfunc, col_deriv=1)
         print "done one"
         weights, widths, areas = self.getAreas(curvetype,
-                                               self.axis, positions, lsq1[0])
-        residuals = self._resid(lsq1[0], curvetype, data, self.axis, positions)
+                                               axis, positions, lsq1[0])
+        residuals = self._resid(lsq1[0], curvetype, data, axis, positions)
         # all fitting routines will output the same format.
         # nchannels long, with 3 elements. Each can be a subarray.
         return [weights, widths, areas, residuals]
+
