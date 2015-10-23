@@ -28,106 +28,81 @@ import _xraylib as xl
 from flupy.algorithms.xrf_calculations.transitions_and_shells import \
     shells, transitions
 from flupy.algorithms.xrf_calculations.escape import *
+from flupy.xrf_data_handling import XRFDataset
 
 
-
-class BaseFluoFitter(BaseFitter,name='BaseFluoFitter'):
+class BaseFluoFitter(BaseFitter):
     """
     This plugin fits peaks. Either XRD or XRF for now.
     :param in_datasets: Create a list of the dataset(s). Default: [].
     :param out_datasets: A. Default: ["FitWeights", "FitWidths", "FitAreas", "residuals"].
-    :param fit_elements: List of elements of fit. Default: [].
-    :param fit_range: Min max pair of fit range. Default: [].
     :param width_guess: An initial guess at the width. Default: 0.02.
     :param peak_shape: Which shape do you want. Default: "gaussian".
+    :param pileup_cutoff_keV: The cut off. Default: 5.5.
+    :param include_pileup: Include pileup. Default: 1.
+    :param include_escape: Include escape. Default: 1.
+    :param fitted_energy_range_keV: The fitted energy range. Default: [2.,18.].
+    :param elements: The fitted elements. Default: Zn','Cu', 'Ar'.
     """
 
     def __init__(self, name='BaseFluoFitter'):
         super(BaseFluoFitter, self).__init__("BaseFluoFitter")
 
-    def filter_frames(self, data):
-        databig = data[0].squeeze()
-        data = databig[self.fitrange == 1]
-        weights = data[self.positions]
-        #print weights
-        positions = self.axis[self.positions]
-        widths = np.ones_like(positions)*0.02
-        #print widths
-        p = []
-        p.extend(weights)
-        p.extend(widths)
-        curvetype = self.lookup[str(self.parameters['peak_shape'])]
-        lsq1 = leastsq(self._resid, p, args=(curvetype, data, self.axis, positions), Dfun=dfunc, col_deriv=1)
-        print "done one"
-        weights, widths, areas = self.getAreas(curvetype,
-                                               self.axis, positions, lsq1[0])
-        residuals = self._resid(lsq1[0], curvetype, data, self.axis, positions)
-        # all fitting routines will output the same format.
-        # nchannels long, with 3 elements. Each can be a subarray.
-        return [weights, widths, areas, residuals]
+    def pre_process(self):
+        in_meta_data = self.get_in_meta_data()[0]
+        try:
+            _foo = in_meta_data.get_meta_data("PeakIndex")[0]
+            logging.debug('Using the positions in the peak index')
+        except KeyError:
+            logging.debug("No Peak Index in the metadata")
+            logging.debug("Calculating the positions from energy")
+            in_meta_data.set_meta_data('PeakIndex',
+                                       self.setPositions(in_meta_data))
 
     def setPositions(self, in_meta_data):
         try:
-            elements = self.parameters['fit_elements'].split(',')# a hack for now until the unicode problem is fixed
-            logging.debug(elements)
-            from flupy.xrf_data_handling import XRFDataset
-            # assume it is like fast xrf
             paramdict = XRFDataset().paramdict
-            self.axis = np.arange(0.01, 4097*0.01, 0.01)
-            step = self.axis[3]-self.axis[2]
-            paramdict["Experiment"]['elements'] = elements
-            if self.parameters['fit_range']:
-                paramdict["FitParams"]["fitted_energy_range_keV"] = \
-                    self.parameters['fit_range']
-#                     print paramdict["FitParams"]["fitted_energy_range_keV"]
-            else:
-                #  all of them
-                paramdict["FitParams"]["fitted_energy_range_keV"] = \
-                    [self.axis[0], self.axis[-1]]
+            paramdict["FitParams"]["pileup_cutoff_keV"] = \
+                self.parameters["pileup_cutoff_keV"]
+            paramdict["FitParams"]["include_pileup"] = \
+                self.parameters["include_pileup"]
+            paramdict["FitParams"]["include_escape"] = \
+                self.parameters["include_escape"]
+            paramdict["FitParams"]["fitted_energy_range_keV"] = \
+                self.parameters["fitted_energy_range_keV"]
             paramdict["Experiment"]["incident_energy_keV"] = \
                 in_meta_data.get_meta_data("mono_energy")
-            #print paramdict["Experiment"]["incident_energy_keV"]
-#                 gives the line energy
+            paramdict["Experiment"]["elements"] = \
+                self.parameters["elements"]
             engy = self.findLines(paramdict)
 #                 print engy
             # make it an index since this is what find peaks will also give us
-            tmp = self.axis
-            tmp2 = np.zeros(len(self.axis))
-#                 print tmp2[self.axis < self.parameters['fit_range'][0]]
-            tmp2[self.axis < self.parameters['fit_range'][0]] = 1.0
-            offset = np.sum(tmp2).astype(int)
-#                 print tmp2
-#                 print "offset is"+str(offset)
-            tmp2[self.axis > self.parameters['fit_range'][1]] = 1.0
-#                 print tmp2
-            tmp = self.axis[tmp2 == 0]
-            self.axis = tmp # now cropped to the fitting range
-#                 print tmp
-            idx = (np.array(engy)/step).astype(int) - offset
-            logging.debug('index '+str(sorted(idx)+offset))
-            in_meta_data.set_meta_data('PeakIndex', idx)
+            axis = in_meta_data.get_meta_data("energy")
+            dq = axis[1]-axis[0]
+            idx = np.round(engy/dq).astype(int)
         except Exception:
             logging.error(Exception)
+        return idx
 
-    def findLines(self, paramdict):
+    def findLines(self, paramdict=XRFDataset().paramdict):
+        """
+        Calculates the line energies to fit
+        """
+        # Incident Energy  used in the experiment
+        # Energy range to use for fitting
+        pileup_cut_off = paramdict["FitParams"]["pileup_cutoff_keV"]
+        include_pileup = paramdict["FitParams"]["include_pileup"]
+        include_escape = paramdict["FitParams"]["include_escape"]
         fitting_range = paramdict["FitParams"]["fitted_energy_range_keV"]
+#         x = paramdict["FitParams"]["mca_energies_used"]
         energy = paramdict["Experiment"]["incident_energy_keV"]
-        pileup_cut_off = 5.
-        include_pileup = 1
-        include_escape = 1
-        detectortype = 'Vortex_SDD_Xspress'
-        detector = paramdict["Detectors"][detectortype]
-        detectortype = detector["detector_type"]
-        no_of_transitions = 17
-        fitelements = paramdict["Experiment"]['elements']
-        no_of_elements = len(fitelements)
-        temp_array = np.zeros((3, no_of_elements, no_of_transitions))
+        fitelements = paramdict["Experiment"]["elements"]
         peakpos = []
-        for j, el in enumerate(fitelements):
-            #print el
+        escape_peaks = []
+        for _j, el in enumerate(fitelements):
             z = xl.SymbolToAtomicNumber(str(el))
             for i, shell in enumerate(shells):
-                if(xl.EdgeEnergy(z, shell) < energy-0.5):
+                if(xl.EdgeEnergy(z, shell) < energy - 0.5):
                     linepos = 0.0
                     count = 0.0
                     for line in transitions[i]:
@@ -135,27 +110,47 @@ class BaseFluoFitter(BaseFitter,name='BaseFluoFitter'):
                         if(en > 0.0):
                             linepos += en
                             count += 1.0
-                            #print en
                     if(count == 0.0):
                         break
                     linepos = linepos/count
-
-                    if(linepos > fitting_range[0]
-                       and linepos < fitting_range[1]):
-                        temp_array[0][j][i] = 1
+                    if(linepos > fitting_range[0] and
+                            linepos < fitting_range[1]):
                         peakpos.append(linepos)
-                        if(include_pileup):
-                            if(2.*linepos > fitting_range[0]
-                               and 2.*linepos < fitting_range[1]
-                               and 2.*linepos > pileup_cut_off):
-                                temp_array[1][j][i] = 1
-                                peakpos.append(2*linepos)
+        peakpos = np.array(peakpos)
+        too_low = set(list(peakpos[peakpos > fitting_range[0]]))
+        too_high = set(list(peakpos[peakpos < fitting_range[1]]))
+        bar = list(too_low and too_high)
+        bar = np.unique(bar)
+        peakpos = list(bar)
+        peaks = []
+        peaks.extend(peakpos)
+        if(include_escape):
+            for i in range(len(peakpos)):
+                detectortype = paramdict["Detectors"]["detector_type"]
+                escape_energy = calc_escape_energy(peakpos[i], detectortype)[0]
+                if (escape_energy > fitting_range[0]):
+                    if (escape_energy < fitting_range[1]):
+                        escape_peaks.extend([escape_energy])
+    #         print escape_peaks
+            peaks.extend(escape_peaks)
 
-                        if(include_escape):
-                            escape_energy = calc_escape_energy(linepos,
-                                                               detectortype)
-                            if(escape_energy[0] > fitting_range[0]
-                               and escape_energy[0] < fitting_range[1]):
-                                peakpos.append(escape_energy[0])
-                                temp_array[2][j][i] = 1.
+        if(include_pileup):  # applies just to the fluorescence lines
+            pileup_peaks = []
+            peakpos1 = np.array(peakpos)
+            peakpos_high = peakpos1[peakpos1 > pileup_cut_off]
+            peakpos_high = list(peakpos_high)
+            for i in range(len(peakpos_high)):
+                foo = [peakpos_high[i] + x for x in peakpos_high[i:]]
+                foo = np.array(foo)
+                pileup_peaks.extend(foo)
+            pileup_peaks = np.unique(sorted(pileup_peaks))
+            peaks.extend(pileup_peaks)
+        peakpos = peaks
+        peakpos = np.array(peakpos)
+        too_low = set(list(peakpos[peakpos > fitting_range[0]]))
+        too_high = set(list(peakpos[peakpos < fitting_range[1] - 0.5]))
+        bar = list(too_low and too_high)
+        bar = np.unique(bar)
+        peakpos = list(bar)
+        peakpos = np.unique(peakpos)
         return peakpos
