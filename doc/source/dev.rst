@@ -1,6 +1,18 @@
 Savu Developer Guide
 ********************
 
+Release Strategy
+================
+
+When a new release is required the following process should be done.  
+Make a new branch for convinience if fixes are needed, it should be called vX.Y-release i.e v0.1-release.
+After the branch is made, move to it and then create a release tag for it called vX.Y.Z i.e v0.1.0, where Z starts at 0, and future minor release verisons can be made with v0.1.1 etc later on down the branch.
+
+Once this is done, Zenodo.org will automatically create and archive an artefact.
+
+We should then update the pypi stuff.
+
+
 Developing new Plugins
 ======================
 
