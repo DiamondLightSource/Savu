@@ -20,5 +20,6 @@ setup(name='savu',
       author_email='scientificsoftware@diamond.ac.uk',
       license='Apache License, Version 2.0',
       packages=['savu'],
+      data_files=[('test_data', ['*.nxs', '*.h5'])],
       include_package_data=True,
       zip_safe=False)
