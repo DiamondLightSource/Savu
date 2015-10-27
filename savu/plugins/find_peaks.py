@@ -96,8 +96,13 @@ class FindPeaks(BaseFilter, CpuPlugin):
 
         nFrames = in_pData[0].get_total_frames()
 
-        out_dataset[0].create_dataset(axis_labels=['frames.frames', 'peaks.pixels'],
-                                      shape=((nFrames, 55)),
+#        out_dataset[0].create_dataset(axis_labels=['frames.frames', 'peaks.pixels'],
+#                                      shape=((nFrames, 55)),
+#                                      dtype=np.int,  # default is float32
+#                                      # remove from the processing chain
+#                                      remove=True)
+        out_dataset[0].create_dataset(axis_labels=['peaks.pixels'],
+                                      shape={'variable': (nFrames,)},
                                       dtype=np.int,  # default is float32
                                       # remove from the processing chain
                                       remove=True)

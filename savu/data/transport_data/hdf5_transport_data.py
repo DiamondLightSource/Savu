@@ -82,6 +82,7 @@ class Hdf5TransportData(object):
 #        logging.debug("generating all output files")
 #        out_data_objects = []
 #        count = 0
+#        stop = start
 #        for plugin_dict in plugin_list[start:-1]:
 #
 #            plugin_id = plugin_dict["id"]
@@ -98,8 +99,9 @@ class Hdf5TransportData(object):
 #            exp.merge_out_data_to_in()
 #
 #            count += 1
+#            stop += 1
 #
-#        return out_data_objects
+#        return out_data_objects, stop
 
     def set_filenames(self, plugin, plugin_id, count):
             exp = self.exp

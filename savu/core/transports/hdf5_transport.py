@@ -120,7 +120,7 @@ class Hdf5Transport(TransportMechanism):
 #            out_data_objs, stop = in_data.load_data(self, start)
 #            exp.clear_data_objects()
 #            self.exp.index['in_data'] = start_in_data
-#            self.run_plugins(plugin_list, out_data_objs, start, stop)
+#            self.real_plugin_run(plugin_list, out_data_objs, start, stop)
 #            self.fix_variable_length_array()  # which data objects
 #            start = stop + 1
 #
@@ -133,7 +133,7 @@ class Hdf5Transport(TransportMechanism):
 #        logging.info("Completing the HDF5 plugin list runner")
 #        return
 #
-#    def run_plugins(self, plugin_list, out_data_objs, start, stop):
+#    def real_plugin_run(self, plugin_list, out_data_objs, start, stop):
 #        exp = self.exp
 #        for i in range(start, stop):
 #            link_type = "final_result" if i is len(plugin_list)-2 else \
