@@ -80,7 +80,7 @@ class PyfaiAzimuthalIntegrator(BaseFilter, CpuPlugin):
             mask = mData.get_meta_data("mask")
         else:
             mask = np.zeros((sh[-2], sh[-1]))
-        # now integrate in radius (1D)
+        # now integrate in radius (1D)print "hello"
         npts = int(np.round(np.sqrt(sh[-1]**2+sh[-2]**2)))
         self.params = [mask, npts, mData, ai]
 
@@ -118,9 +118,11 @@ class PyfaiAzimuthalIntegrator(BaseFilter, CpuPlugin):
         # stating only 'dimension' will remove the axis label, stating
         # 'dimension.name.unit' name and unit will add or replace it
         axis_labels = ['-1', '-2.name.unit']
+        new_shape = shape[:-2] + (1005,)
+        print new_shape
         spectra.create_dataset(patterns={in_dataset[0]: patterns},
                                axis_labels={in_dataset[0]: axis_labels},
-                               shape={'variable': shape[:-2]})
+                               shape=new_shape)
 #                               shape=shape[:-2]+(1005,))
 
         spectrum = {'core_dir': (-1,), 'slice_dir': tuple(range(len(shape)-2))}

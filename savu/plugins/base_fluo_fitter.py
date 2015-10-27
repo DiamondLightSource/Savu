@@ -57,7 +57,7 @@ class BaseFluoFitter(BaseFitter):
             logging.debug("No Peak Index in the metadata")
             logging.debug("Calculating the positions from energy")
             idx = self.setPositions(in_meta_data)
-            print "The index is"+str(idx)
+            #print "The index is"+str(idx)
             in_meta_data.set_meta_data('PeakIndex', idx)
 
     def setPositions(self, in_meta_data):
@@ -77,11 +77,13 @@ class BaseFluoFitter(BaseFitter):
         engy = self.findLines(paramdict)
 #                 print engy
         # make it an index since this is what find peaks will also give us
-        axis = in_meta_data.get_meta_data("energy")
-        print axis
+        axis = (in_meta_data.get_meta_data("energy")/2.0)*1e-3
+        print engy
+        print "the axis is"+str(axis)
         dq = axis[1]-axis[0]
+        print 'dq is '+str(dq)
         idx = np.round(engy/dq).astype(int)
-        print "I'm here"
+        print "The index is"
         print idx
         return idx
 
@@ -154,4 +156,5 @@ class BaseFluoFitter(BaseFitter):
         bar = np.unique(bar)
         peakpos = list(bar)
         peakpos = np.unique(peakpos)
+        print peakpos
         return peakpos
