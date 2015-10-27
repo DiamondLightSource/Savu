@@ -71,6 +71,7 @@ class NxxrdLoader(BaseMultiModalLoader):
         data_obj.add_pattern("PROJECTION", core_dir=(1, 2),
                              slice_dir=(0,3,4))
         # now to load the calibration file
+        print self.parameters['calibration_path']
         if os.exists(self.parameters['calibration_path']):
             logging.info("Using the calibration file in the working directory")
             calibration_path = self.parameters['calibration_path']

@@ -24,7 +24,7 @@ from savu.plugins.utils import register_plugin
 from savu.plugins.base_fitter import BaseFitter
 import numpy as np
 from scipy.optimize import leastsq
-
+import time
 
 @register_plugin
 class SimpleFit(BaseFitter):
@@ -38,10 +38,11 @@ class SimpleFit(BaseFitter):
         super(SimpleFit, self).__init__("SimpleFit")
 
     def filter_frames(self, data):
-        data = data[0][0][0][0].squeeze()
+        t1 = time.time()
+        data = data[0].squeeze()
         in_meta_data = self.get_in_meta_data()[0]
         positions = in_meta_data.get_meta_data("PeakIndex")
-        #print sorted(positions)
+        print sorted(positions)
         axis = in_meta_data.get_meta_data("Q")
         print len(axis)
         weights = data[positions]
@@ -54,11 +55,14 @@ class SimpleFit(BaseFitter):
                        args=(curvetype, data, axis, positions),
                        Dfun=self.dfunc, col_deriv=1)
         print "done one"
+        
         weights, widths, areas = self.getAreas(curvetype,
                                                axis, positions, lsq1[0])
         residuals = self._resid(lsq1[0], curvetype, data, axis, positions)
         # all fitting routines will output the same format.
         # nchannels long, with 3 elements. Each can be a subarray.
+        t2 = time.time()
+        print "Simple fit iteration took:"+str((t2-t1)*1e3)+"ms"
         return [weights, widths, areas, residuals]
 
 # dump this here for now to fix the variable length issue
@@ -73,7 +77,7 @@ class SimpleFit(BaseFitter):
         fitAreas = out_datasets[0]
         fitHeights = out_datasets[1]
         fitWidths = out_datasets[2]
-        new_shape = shape[:-1] + (55,)
+        new_shape = shape[:-1] + (46,)
         print new_shape
         fitAreas.create_dataset(patterns={in_dataset[0]: pattern_list},
                                 axis_labels={in_dataset[0]: axis_labels},

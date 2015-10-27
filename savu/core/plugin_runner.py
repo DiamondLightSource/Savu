@@ -195,6 +195,7 @@ class PluginRunner(object):
                      "inherit from BaseLoader")
 
         plugin = self.load_plugin(end_plugin['id'])
+        #print plugin
         # check the final plugin is a saver
         if not isinstance(plugin, BaseSaver):
             sys.exit("The final plugin in the process must "
