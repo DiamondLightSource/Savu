@@ -32,7 +32,6 @@ class BaseFilter(Plugin):
 
     :param in_datasets: Create a list of the dataset(s) to process. Default: [].
     :param out_datasets: Create a list of the dataset(s) to process. Default: [].
-
     """
 
     def __init__(self, name):

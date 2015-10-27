@@ -98,6 +98,9 @@ class Plugin(object):
                                      "is not a valid parameter for plugin " +
                                      self.name)
 
+    def get_parameters(self, name):
+        return self.parameters[name]
+
     def pre_process(self):
         """
         This method is called after the plugin has been created by the

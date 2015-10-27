@@ -27,7 +27,6 @@ import h5py
 import numpy as np
 
 from savu.data.data_structures import Padding
-from savu.data.data_structures import TomoRaw
 
 NX_CLASS = 'NX_class'
 
@@ -159,7 +158,7 @@ class Hdf5TransportData(object):
             repeat: how many times does the sequence of chunked numbers repeat
         :rtype: [int, int, int]
         """
-        sshape = [shape[sslice] for sslice in slice_dirs]
+        sshape = self.get_shape_of_slice_dirs(slice_dirs, shape)
         chunk = []
         length = []
         repeat = []
@@ -169,6 +168,23 @@ class Hdf5TransportData(object):
             repeat.append(int(np.prod(sshape[dim+1:])))
 
         return chunk, length, repeat
+
+    def get_shape_of_slice_dirs(self, slice_dirs, shape):
+        sshape = [shape[sslice] for sslice in slice_dirs]
+        if 'var' in sshape:
+            shape = list(shape)
+            for index, value in enumerate(shape):
+                if isinstance(value, str):
+                    shape[index] = \
+                        len(self.data_info.get_meta_data('axis_labels')[index])
+                    self.unravel_array(index)
+            shape = tuple(shape)
+            sshape = [shape[sslice] for sslice in slice_dirs]
+        return sshape
+
+    def unravel_array(self, index):
+        self.unravel = lambda x: self.unravel(x[0]) if isinstance(x, list) \
+            else x
 
     def get_slice_dirs_index(self, slice_dirs, shape):
         """
@@ -192,8 +208,9 @@ class Hdf5TransportData(object):
         slice_dirs = pData.get_slice_directions()
         [fix_dirs, value] = pData.get_fixed_directions()
         shape = self.get_shape()
-        shape = [s for s in list(shape) if isinstance(s, int)]
-        index = self.get_slice_dirs_index(slice_dirs, np.array(shape))
+        index = self.get_slice_dirs_index(slice_dirs, shape)
+        if 'var' not in [shape[i] for i in slice_dirs]:
+            shape = [s for s in list(shape) if isinstance(s, int)]
         nSlices = index.shape[1]
         nDims = len(shape)
 
@@ -333,6 +350,12 @@ class Hdf5TransportData(object):
         slice_list = list(input_slice_list)
         if self.get_plugin_data().padding is None:
             return self.data[tuple(slice_list)]
+#            try:
+#                return self.data[tuple(slice_list)]
+#            except TypeError:
+#                temp = self.data[tuple(slice_list[:-1])]
+#                temp2 = self.unravel(temp)[slice_list[-1]]
+
         padding_dict = self.get_padding_dict()
 
         pad_list = []

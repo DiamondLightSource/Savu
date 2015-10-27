@@ -152,6 +152,8 @@ class Data(object):
                     self.set_shape((shape[shape.keys()[0]] + ('var',)))
                 else:
                     self.set_shape(shape)
+                    if 'var' in shape:
+                        self.set_variable_flag()
             except KeyError:
                 raise Exception("Please state axis_labels and shape when "
                                 "creating a new dataset")
@@ -230,14 +232,21 @@ class Data(object):
 
     def amend_axis_labels(self, *args):
         axis_labels = self.data_info.get_meta_data('axis_labels')
+        removed_dims = 0
         for arg in args[0]:
             label = arg.split('.')
             if len(label) is 1:
-                del axis_labels[int(label[0])]
+                print "deleting", int(label[0]) + removed_dims
+                del axis_labels[int(label[0]) + removed_dims]
+                removed_dims += 1
                 self.data_info.set_meta_data(
                     'nDims', self.data_info.get_meta_data('nDims') - 1)
             else:
-                axis_labels.insert(int(label[0]), {label[1]: label[2]})
+                if int(label[0]) < 0:
+                    axis_labels[int(label[0]) + removed_dims] = \
+                        {label[1]: label[2]}
+                else:
+                    axis_labels.insert(int(label[0]), {label[1]: label[2]})
 
     def set_data_patterns(self, patterns):
         self.data_info.set_meta_data('data_patterns', patterns)
@@ -336,11 +345,6 @@ class Data(object):
         slice_dir = tuple([a for a in all_dims if a not in [dim1, dim2]])
         vol_dict['slice_dir'] = slice_dir
         return vol_dict
-
-#    def add_volume_patterns(self):
-#        self.add_pattern("VOLUME_YZ", core_dir=(1, 2), slice_dir=(0,))
-#        self.add_pattern("VOLUME_XZ", core_dir=(0, 2), slice_dir=(1,))
-#        self.add_pattern("VOLUME_XY", core_dir=(0, 1), slice_dir=(2,))
 
     def set_axis_labels(self, *args):
         self.data_info.set_meta_data('nDims', len(args))

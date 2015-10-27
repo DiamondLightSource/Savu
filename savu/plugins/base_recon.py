@@ -39,7 +39,6 @@ class BaseRecon(Plugin):
     :param center_of_rotation: Centre of rotation to use for the reconstruction). Default: 86.
     :param in_datasets: Create a list of the dataset(s) to process. Default: [].
     :param out_datasets: Create a list of the dataset(s) to process. Default: [].
-
     """
     count = 0
 
@@ -91,17 +90,14 @@ class BaseRecon(Plugin):
 
         dim_detX, dim_rotAngle = in_pData[0].get_core_directions()
         dim_detY = in_pData[0].get_slice_directions()[0]
-        list(shape)[dim_rotAngle] = shape[dim_detX]
 
         dim_volX = dim_rotAngle
         dim_volY = dim_detY
         dim_volZ = dim_detX
 
-        axis_labels = {str(dim_volX) + 'voxel_x.units',
-                       str(dim_volY) + 'voxel_y.units',
-                       str(dim_volZ) + 'voxel_z.units'}
-
-        shape = (shape[2], shape[1], shape[2])
+        axis_labels = {in_dataset[0]: [str(dim_volX) + '.voxel_x.units',
+                       str(dim_volY) + '.voxel_y.units',
+                       str(dim_volZ) + '.voxel_z.units']}
 
         out_dataset[0].create_dataset(axis_labels=axis_labels,
                                       shape=shape)
