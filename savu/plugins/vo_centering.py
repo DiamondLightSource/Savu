@@ -36,6 +36,7 @@ from savu.data.plugin_info import CitationInformation
 class VoCentering(BaseFilter, CpuPlugin):
     """
     A plugin to calculate the center of rotation using the Vo Method
+    :param datasets_to_populate: A list of datasets which require this information. Default: [].    
     """
 
     def __init__(self):
@@ -124,11 +125,19 @@ class VoCentering(BaseFilter, CpuPlugin):
 
         out_datasets[1].data[:] = cor_fit[:]
         # add to metadata
-        self.add_to_all_objects_meta_data('cor_raw', cor_raw)
-        self.add_to_all_objects("centre_of_rotation", cor_fit)
-#        in_meta_data = self.get_in_meta_data()[0]
-#        in_meta_data.set_meta_data("cor_raw", cor_raw)
-#        in_meta_data.set_meta_data("centre_of_rotation", cor_fit)
+        in_meta_data = self.get_in_meta_data()[0]
+        self.populate_meta_data('cor_raw', cor_raw)
+        self.populate_meta_data('centre_of_rotation', cor_fit)
+#        # remove the output datasets from the processing chain
+#        self.exp.remove_dataset(out_datasets[0])
+#        self.exp.remove_dataset(out_datasets[1])
+
+    def populate_meta_data(self, key, value):
+        datasets = self.parameters['datasets_to_populate']
+        in_meta_data = self.get_in_meta_data()[0]
+        in_meta_data.set_meta_data(key, value)
+        for name in datasets:
+            self.exp.index['in_data'][key].meta_data.set_meta_data(key, value)
 
     def setup(self):
 
