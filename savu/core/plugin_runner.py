@@ -185,6 +185,8 @@ class PluginRunner(object):
 
     def check_loaders_and_savers(self, plugin_list):
 
+        for p in plugin_list:
+            print p
         first_plugin = plugin_list[0]
         end_plugin = plugin_list[-1]
 

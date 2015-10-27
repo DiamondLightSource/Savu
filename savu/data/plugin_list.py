@@ -61,7 +61,7 @@ class PluginList(object):
         plugins_group.attrs[NX_CLASS] = 'NXplugin'
         count = 0
         for plugin in self.plugin_list:
-            plugin_group = plugins_group.create_group("%i" % count)
+            plugin_group = plugins_group.create_group("%*i" % (4, count))
             plugin_group.attrs[NX_CLASS] = 'NXnote'
             id_array = np.array([plugin['id']])
             plugin_group.create_dataset('id', id_array.shape, id_array.dtype,
