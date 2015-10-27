@@ -124,13 +124,11 @@ class VoCentering(BaseFilter, CpuPlugin):
 
         out_datasets[1].data[:] = cor_fit[:]
         # add to metadata
-        in_meta_data = self.get_in_meta_data()[0]
-        in_meta_data.set_meta_data("cor_raw", cor_raw)
-        in_meta_data.set_meta_data("centre_of_rotation", cor_fit)
-
-#        # remove the output datasets from the processing chain
-#        self.exp.remove_dataset(out_datasets[0])
-#        self.exp.remove_dataset(out_datasets[1])
+        self.add_to_all_objects_meta_data('cor_raw', cor_raw)
+        self.add_to_all_objects("centre_of_rotation", cor_fit)
+#        in_meta_data = self.get_in_meta_data()[0]
+#        in_meta_data.set_meta_data("cor_raw", cor_raw)
+#        in_meta_data.set_meta_data("centre_of_rotation", cor_fit)
 
     def setup(self):
 

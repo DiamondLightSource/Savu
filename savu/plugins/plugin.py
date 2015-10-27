@@ -311,3 +311,8 @@ class Plugin(object):
         for data in data_list:
             meta_data.append(data.meta_data)
         return meta_data
+
+    def add_to_all_objects_meta_data(self, key, value):
+        in_datasets = self.exp.index["in_data"]
+        for key in in_datasets.keys():
+            in_datasets[key].meta_data.set_meta_data(key, value)
