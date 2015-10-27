@@ -56,7 +56,6 @@ class ScikitimageFilterBackProjection(BaseRecon, CpuPlugin):
                              interpolation='linear',
                              # self.parameters['linear'],
                              circle=False)  # self.parameters[False])
-        result = result[:, np.newaxis, :]
         return result
 
     def get_max_frames(self):

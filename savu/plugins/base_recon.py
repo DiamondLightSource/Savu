@@ -90,11 +90,10 @@ class BaseRecon(Plugin):
         # copy all required information from in_dataset[0]
         in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
 
-        print in_dataset[0].data_info.get_meta_data('axis_labels')
-        shape = in_dataset[0].get_shape()
-
         dim_detX, dim_rotAngle = in_pData[0].get_core_directions()
         dim_detY = in_pData[0].get_slice_directions()[0]
+        shape = list(in_dataset[0].get_shape())
+        shape[dim_rotAngle] = shape[dim_detX]
 
         dim_volX = dim_rotAngle
         dim_volY = dim_detY
@@ -105,7 +104,7 @@ class BaseRecon(Plugin):
                        str(dim_volZ) + '.voxel_z.units']}
 
         out_dataset[0].create_dataset(axis_labels=axis_labels,
-                                      shape=shape)
+                                      shape=tuple(shape))
         out_dataset[0].add_volume_patterns(dim_volX, dim_volY, dim_volZ)
 
         # set pattern_name and nframes to process for all datasets
