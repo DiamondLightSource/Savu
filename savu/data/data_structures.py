@@ -276,6 +276,14 @@ class Data(object):
     def get_variable_flag(self):
         return self.variable_length_flag
 
+    def remove_variable_length(self, length):
+        self.variable_length_flag = False
+        shape = list(self.get_shape())
+        index = [i for i in range(len(shape)) if i is 'var']
+        shape[index] = length
+        print "the index", index, shape
+        self.set_shape(tuple(shape))
+
     def check_dims(self):
         nDims = self.data_info.get_meta_data("nDims")
         shape = self.data_info.get_meta_data('shape')
@@ -382,6 +390,7 @@ class Data(object):
             nDims = kwargs['nDims']
         except KeyError:
             nDims = len(self.get_shape())
+        print "ddirs", ddirs
         index = [i for i in range(len(ddirs)) if ddirs[i] < 0]
         list_ddirs = list(ddirs)
         for i in index:
