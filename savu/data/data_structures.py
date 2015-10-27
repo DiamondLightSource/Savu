@@ -390,7 +390,6 @@ class Data(object):
             nDims = kwargs['nDims']
         except KeyError:
             nDims = len(self.get_shape())
-        print "ddirs", ddirs
         index = [i for i in range(len(ddirs)) if ddirs[i] < 0]
         list_ddirs = list(ddirs)
         for i in index:

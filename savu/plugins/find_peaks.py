@@ -51,7 +51,7 @@ class FindPeaks(BaseFilter, CpuPlugin):
 
     def filter_frames(self, data):
         data = data[0][0][0][0].squeeze()
-        foo = np.zeros(46,)
+        foo = np.zeros(55,)
         out_meta_data = self.get_out_meta_data()[0]
         # filter to smooth noise
         data = savgol_filter(data, 51, 3)
@@ -97,9 +97,9 @@ class FindPeaks(BaseFilter, CpuPlugin):
         in_pData[0].plugin_data_setup("SPECTRUM", self.get_max_frames())
 
         nFrames = in_pData[0].get_total_frames()
-
+        print "***", nFrames
         out_dataset[0].create_dataset(axis_labels=['frames.frames', 'peaks.pixels'],
-                                      shape=((nFrames, 55)),
+                                      shape=(nFrames, 55),
                                       dtype=np.int,  # default is float32
                                       # remove from the processing chain
                                       remove=True)

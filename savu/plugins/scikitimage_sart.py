@@ -82,7 +82,6 @@ class ScikitimageSart(BaseRecon, CpuPlugin):
                                            relaxation=0.15
                                            # self.parameters[0.15])
                                            )
-        result = result[:, np.newaxis, :]
         return result
 
     def get_max_frames(self):
