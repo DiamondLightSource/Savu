@@ -235,7 +235,7 @@ class PluginRunner(object):
 
         :param plugin_name: Name of the plugin to import
                         path/loc/then.plugin.name if there is no path, then the
-                        assumptiuon is an internal plugin
+                        assumption is an internal plugin
         :type plugin_name: str.
         :returns:  An instance of the class described by the named plugin
 

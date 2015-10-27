@@ -34,7 +34,6 @@ class BaseSaver(Plugin):
         Overwrites the main_setup function in plugin.py as the saver is a
         special case of plugin that doesn't required setup of in/out_datasets
         """
-        print "****in the saver main_setup function"
         self.exp = exp
         self.setup()
 
