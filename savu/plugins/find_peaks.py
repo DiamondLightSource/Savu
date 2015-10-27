@@ -51,7 +51,7 @@ class FindPeaks(BaseFilter, CpuPlugin):
 
     def filter_frames(self, data):
         data = data[0][0][0][0].squeeze()
-        foo = np.zeros(55,)
+        foo = np.zeros(46,)
         out_meta_data = self.get_out_meta_data()[0]
         # filter to smooth noise
         data = savgol_filter(data, 51, 3)
@@ -74,6 +74,7 @@ class FindPeaks(BaseFilter, CpuPlugin):
 #        print 'old index is', sorted(PeakIndex)
         PeakIndex.extend(tmp)
         out_meta_data.set_meta_data('PeakIndex', PeakIndex)
+        print "The length of the peak index is:"+str(len(PeakIndex))
         foo[:len(np.array(PeakIndex))] = np.array(PeakIndex)# hacky hack hack
         return foo
 
@@ -83,7 +84,8 @@ class FindPeaks(BaseFilter, CpuPlugin):
         in_meta_data = self.get_in_meta_data()[0]
 #        print sorted(out_datasets[0].data[-1])
         in_meta_data.set_meta_data('PeakIndex', out_datasets[0].data[-1])
-        print len(in_meta_data.get_meta_data('PeakIndex'))
+        print "the peak index is: "+str(in_meta_data.get_meta_data('PeakIndex'))
+        print "its length is: "+str(len(in_meta_data.get_meta_data('PeakIndex')))
 
     def setup(self):
         # set up the output dataset that is created by the plugin
@@ -97,7 +99,7 @@ class FindPeaks(BaseFilter, CpuPlugin):
         nFrames = in_pData[0].get_total_frames()
 
         out_dataset[0].create_dataset(axis_labels=['frames.frames', 'peaks.pixels'],
-                                      shape=((nFrames, 55)),
+                                      shape=((nFrames, 46)),
                                       dtype=np.int,  # default is float32
                                       # remove from the processing chain
                                       remove=True)

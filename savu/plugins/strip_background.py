@@ -24,7 +24,7 @@ from scipy.signal import savgol_filter
 import numpy as np
 from savu.plugins.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-
+import time
 from savu.plugins.utils import register_plugin
 
 
@@ -46,6 +46,7 @@ class StripBackground(BaseFilter, CpuPlugin):
         super(StripBackground, self).__init__("StripBackground")
 
     def filter_frames(self, data):
+        t1 = time.time()
         its = self.parameters['iterations']
         w = self.parameters['window']
         smoothed = self.parameters['SG_filter_iterations']
@@ -66,6 +67,8 @@ class StripBackground(BaseFilter, CpuPlugin):
             filtered[aved < filtered] = aved[aved < filtered]
             if not (k/float(smoothed)-k/int(smoothed)):
                 filtered = savgol_filter(filtered, SGwidth, SGpoly)
+        t2 = time.time()
+        print "Strip iteration took:"+str((t2-t1)*1e3)+"ms"
         return data-filtered
 
     def setup(self):

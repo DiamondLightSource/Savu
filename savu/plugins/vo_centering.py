@@ -37,6 +37,7 @@ class VoCentering(BaseFilter, CpuPlugin):
     """
     A plugin to calculate the center of rotation using the Vo Method
     :param datasets_to_populate: A list of datasets which require this information. Default: [].    
+    :param out_datasets: The default names. Default: ['cor_raw','cor_fit'].
     """
 
     def __init__(self):
@@ -137,7 +138,7 @@ class VoCentering(BaseFilter, CpuPlugin):
         in_meta_data = self.get_in_meta_data()[0]
         in_meta_data.set_meta_data(key, value)
         for name in datasets:
-            self.exp.index['in_data'][key].meta_data.set_meta_data(key, value)
+            self.exp.index['in_data'][name].meta_data.set_meta_data(key, value)
 
     def setup(self):
 

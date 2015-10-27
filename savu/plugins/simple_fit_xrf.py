@@ -24,7 +24,7 @@ from savu.plugins.utils import register_plugin
 from savu.plugins.base_fluo_fitter import BaseFluoFitter
 import numpy as np
 from scipy.optimize import leastsq
-
+import time
 
 @register_plugin
 class SimpleFitXrf(BaseFluoFitter):
@@ -38,9 +38,11 @@ class SimpleFitXrf(BaseFluoFitter):
         super(SimpleFitXrf, self).__init__("SimpleFitXrf")
 
     def filter_frames(self, data):
-        data = data[0].squeeze()[0:2048]
+        t1 = time.time()
+        data = data[0].squeeze()
+        print "the shape is: "+str(data.shape)
         in_meta_data = self.get_in_meta_data()[0]
-        axis = (in_meta_data.get_meta_data("energy")[0:2048]*1e-3)/2.0
+        axis = (in_meta_data.get_meta_data("energy")*1e-3)/2.0
         idx = in_meta_data.get_meta_data("PeakIndex")
         positions = axis[idx]
         weights = data[idx]
@@ -52,12 +54,14 @@ class SimpleFitXrf(BaseFluoFitter):
         lsq1 = leastsq(self._resid, p,
                        args=(curvetype, data, axis, positions),
                        Dfun=self.dfunc, col_deriv=1)
-        
+
         print "done one"
         weights, widths, areas = self.getAreas(curvetype,
                                                axis, positions, lsq1[0])
         print lsq1[0]
         residuals = self._resid(lsq1[0], curvetype, data, axis, positions)
+        t2 = time.time()
+        print "Simple fit iteration took:"+str((t2-t1)*1e3)+"ms"
         # all fitting routines will output the same format.
         # nchannels long, with 3 elements. Each can be a subarray.
         return [weights, widths, areas, residuals]

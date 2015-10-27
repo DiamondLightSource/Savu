@@ -60,6 +60,52 @@ class BaseFluoFitter(BaseFitter):
             #print "The index is"+str(idx)
             in_meta_data.set_meta_data('PeakIndex', idx)
 
+    def setup(self):
+        # set up the output datasets that are created by the plugin
+        in_dataset, out_datasets = self.get_datasets()
+
+        shape = in_dataset[0].get_shape()
+        axis_labels = ['-1.PeakIndex.pixel.unit']
+        pattern_list = ['SINOGRAM', 'PROJECTION']
+
+        fitAreas = out_datasets[0]
+        fitHeights = out_datasets[1]
+        fitWidths = out_datasets[2]
+        numpeaks = 10 
+        new_shape = shape[:-1] + (numpeaks,)
+        print new_shape
+        fitAreas.create_dataset(patterns={in_dataset[0]: pattern_list},
+                                axis_labels={in_dataset[0]: axis_labels},
+                                shape=new_shape)
+
+        fitHeights.create_dataset(patterns={in_dataset[0]: pattern_list},
+                                  axis_labels={in_dataset[0]: axis_labels},
+                                  shape=new_shape)
+
+        fitWidths.create_dataset(patterns={in_dataset[0]: pattern_list},
+                                 axis_labels={in_dataset[0]: axis_labels},
+                                 shape=new_shape)
+
+        channel = {'core_dir': (-1,), 'slice_dir': range(len(shape)-1)}
+        
+        fitAreas.add_pattern("CHANNEL", **channel)
+        fitHeights.add_pattern("CHANNEL", **channel)
+        fitWidths.add_pattern("CHANNEL", **channel)
+        #residlabels = in_dataset[0].meta_data.get_meta_data('axis_labels')[0:3]
+        #print residlabels.append(residlabels[-1])
+        residuals = out_datasets[3]
+        residuals.create_dataset(in_dataset[0])
+
+
+        # setup plugin datasets
+        in_pData, out_pData = self.get_plugin_datasets()
+        in_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
+
+        out_pData[0].plugin_data_setup('CHANNEL', self.get_max_frames())
+        out_pData[1].plugin_data_setup('CHANNEL', self.get_max_frames())
+        out_pData[2].plugin_data_setup('CHANNEL', self.get_max_frames())
+        out_pData[3].plugin_data_setup('SPECTRUM', self.get_max_frames())
+
     def setPositions(self, in_meta_data):
         paramdict = XRFDataset().paramdict
         paramdict["FitParams"]["pileup_cutoff_keV"] = \
@@ -84,7 +130,7 @@ class BaseFluoFitter(BaseFitter):
         print 'dq is '+str(dq)
         idx = np.round(engy/dq).astype(int)
         print "The index is"
-        print idx
+        print len(idx)
         return idx
 
     def findLines(self, paramdict=XRFDataset().paramdict):

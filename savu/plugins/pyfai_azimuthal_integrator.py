@@ -32,7 +32,7 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 from savu.plugins.utils import register_plugin
 
-
+import time
 @register_plugin
 class PyfaiAzimuthalIntegrator(BaseFilter, CpuPlugin):
     """
@@ -85,6 +85,7 @@ class PyfaiAzimuthalIntegrator(BaseFilter, CpuPlugin):
         self.params = [mask, npts, mData, ai]
 
     def filter_frames(self, data):
+        t1 = time.time()
         mData = self.params[2]
         npts = self.params[1]
         mask =self.params[0]
@@ -96,6 +97,8 @@ class PyfaiAzimuthalIntegrator(BaseFilter, CpuPlugin):
         mData.set_meta_data('Q', fit[0])
 #        mData.set_meta_data('integrated_diffraction_noise',fit[2])
         print fit[1].shape
+        t2 = time.time()
+        print "PyFAI iteration took:"+str((t2-t1)*1e3)+"ms"
         return fit[1]
 
     def setup(self):
