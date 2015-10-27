@@ -92,7 +92,6 @@ class BaseAstraRecon(BaseRecon):
                                (8, 1, 1))
             rec = self.reconstruct3D(sinogram, angles, vol_shape, nSinos,
                                      alg_name, iterations)
-        rec = rec[:, np.newaxis, :]
         return rec
 
     def reconstruct2D(self, sinogram, angles, shape, alg_name, iterations):

@@ -60,6 +60,7 @@ class BaseRecon(Plugin):
         self.vol_shape = out_pData[0].get_shape()
         self.main_dir = in_pData[0].get_pattern()['SINOGRAM']['main_dir']
         self.angles = in_meta_data.get_meta_data('rotation_angle')
+        self.slice_dirs = out_pData[0].get_slice_directions()
 
     @logmethod
     def process_frames(self, data, slice_list):
@@ -67,8 +68,11 @@ class BaseRecon(Plugin):
         Reconstruct a single sinogram with the provided center of rotation
         """
         cor = self.cor[slice_list[0][self.main_dir]]
-        return self.reconstruct(np.squeeze(data[0]), cor, self.angles,
-                                self.vol_shape)
+        result = self.reconstruct(np.squeeze(data[0]), cor, self.angles,
+                                  self.vol_shape)
+        for sdir in self.slice_dirs:
+            result = np.expand_dims(result, sdir)
+        return result
 
     def reconstruct(self, data, cor, angles, shape):
         """
@@ -86,6 +90,7 @@ class BaseRecon(Plugin):
         # copy all required information from in_dataset[0]
         in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
 
+        print in_dataset[0].data_info.get_meta_data('axis_labels')
         shape = in_dataset[0].get_shape()
 
         dim_detX, dim_rotAngle = in_pData[0].get_core_directions()
