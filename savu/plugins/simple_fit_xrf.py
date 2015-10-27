@@ -38,11 +38,12 @@ class SimpleFitXrf(BaseFluoFitter):
         super(SimpleFitXrf, self).__init__("SimpleFitXrf")
 
     def filter_frames(self, data):
-        data = data[0].squeeze()
+        data = data[0].squeeze()[0:2048]
         in_meta_data = self.get_in_meta_data()[0]
-        positions = in_meta_data.get_meta_data("PeakIndex")
-        axis = in_meta_data.get_meta_data("energy")
-        weights = data[positions]
+        axis = (in_meta_data.get_meta_data("energy")[0:2048]*1e-3)/2.0
+        idx = in_meta_data.get_meta_data("PeakIndex")
+        positions = axis[idx]
+        weights = data[idx]
         widths = np.ones_like(positions)*self.parameters["width_guess"]
         p = []
         p.extend(weights)
@@ -51,9 +52,11 @@ class SimpleFitXrf(BaseFluoFitter):
         lsq1 = leastsq(self._resid, p,
                        args=(curvetype, data, axis, positions),
                        Dfun=self.dfunc, col_deriv=1)
+        
         print "done one"
         weights, widths, areas = self.getAreas(curvetype,
                                                axis, positions, lsq1[0])
+        print lsq1[0]
         residuals = self._resid(lsq1[0], curvetype, data, axis, positions)
         # all fitting routines will output the same format.
         # nchannels long, with 3 elements. Each can be a subarray.

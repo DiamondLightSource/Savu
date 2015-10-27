@@ -110,8 +110,9 @@ class BaseFitter(BaseFilter, CpuPlugin):
         r = y-self._spectrum_sum(fun, x, pos, *p)
         
         return r
+    
     def dfunc(self, p, fun, y, x, pos):
-        if fun.__name__ == 'gaussian' or fun.__name__ == 'lorentzian':
+        if fun.__name__ == 'gaussian' or fun.__name__ == 'lorentzian': # took the lorentzian out. Weird
             #print fun.__name__
             rest = p
             #print "parameter shape is "+ str(p.shape)
@@ -122,25 +123,23 @@ class BaseFitter(BaseFilter, CpuPlugin):
         #    print "len mu"+str(len(mu))
         #    print "len x"+str(len(x))
             if fun.__name__ == 'gaussian':
-                #print "I'm a gaussian"
-                da = spectrum_sum_dfun(fun, 1./a, x, mu, *p)
+                da = self.spectrum_sum_dfun(fun, 1./a, x, mu, *p)
                 #dmu_mult = np.zeros((len(mu), len(x)))
-                dsig_mult = np.zeros((len(mu), len(x)))
-                for i in range(len(mu)):
+                dsig_mult = np.zeros((npts, len(x)))
+                for i in range(npts):
                     #dmu_mult[i] = x+mu[i]
                     dsig_mult[i] = ((x-mu[i])/sig[i])-1.
                 #dmu = spectrum_sum_dfun(fun, dmu_mult, x, mu, *p)
-                dsig = spectrum_sum_dfun(fun, dsig_mult, x, mu, *p)
+                dsig = self.spectrum_sum_dfun(fun, dsig_mult, x, mu, *p)
         #        print "shape of da"+str(da.shape)
-                op = np.concatenate([-da, -dsig])
+                op = np.concatenate([da, dsig])
                 #print "op.shape is "+str(op.shape)
             elif fun.__name__ == 'lorentzian':
-                #print "I'm a lorentzian"
                 #print "hey"
-                da = spectrum_sum_dfun(fun, 1./a, x, mu, *p).astype('float64')
+                da = self.spectrum_sum_dfun(fun, 1./a, x, mu, *p).astype('float64')
                 #dmu_mult = np.zeros((len(mu), len(x)))
-                dsig_mult = np.zeros((len(mu), len(x))).astype('float64')
-                for i in range(len(mu)):
+                dsig_mult = np.zeros((npts, len(x))).astype('float64')
+                for i in range(npts):
                     #dmu_mult[i] = 2.0*(x-mu[i])/((x-mu[i])**2+sig[i]**2)
                     nom =  (2.0*(x-mu[i])**2)
                     denom = (sig[i]*((x-mu[i])**2+sig[i]**2))
@@ -149,15 +148,17 @@ class BaseFitter(BaseFilter, CpuPlugin):
                 
                 #print dsig_mult
                 #dmu = spectrum_sum_dfun(fun, dmu_mult, x, mu, *p)
-                dsig = spectrum_sum_dfun(fun, dsig_mult, x, mu, *p)
+                dsig = self.spectrum_sum_dfun(fun, dsig_mult, x, mu, *p)
                 #print sig
         #        print "shape of da"+str(da.shape)
                 op = np.concatenate([-da, -dsig])
                 #print "op.shape is "+str(op.shape)
+        else:
+            op = None
         return op
 
     def _spectrum_sum(self, fun, x, positions, *p):
-        rest = p
+        rest = np.abs(p)
         npts = len(p) / 2
         weights = rest[:npts]
         #print weights
@@ -201,27 +202,26 @@ class BaseFitter(BaseFilter, CpuPlugin):
                                     )))
         return weights, widths, areas
 
-
-def spectrum_sum_dfun(fun, multiplier, x, pos, *p):
-    rest = p
-    npts = len(p) / 2
-#    print npts
-    weights = rest[:npts]
-    #print weights
-    widths = rest[npts:2*npts]
-    #print widths
-    positions = pos
-#    print(len(positions))
-    spec = np.zeros((npts, len(x))).astype('float64')
-    #print "len x is "+str(len(spec))
-#    print len(spec), type(spec)
-#    print len(positions), type(positions)
-#    print len(weights), type(weights)
-    for ii in range(len(weights)):
-        spec[ii] = multiplier[ii]*fun(weights[ii].astype('float64'),
-                                      widths[ii].astype('float64'),
-                                      x, positions[ii].astype('float64'))
-    return spec
+    def spectrum_sum_dfun(self, fun, multiplier, x, pos, *p):
+        rest = p
+        npts = len(p) / 2
+    #    print npts
+        weights = rest[:npts]
+        #print weights
+        widths = rest[npts:2*npts]
+        #print widths
+        positions = pos
+    #    print(len(positions))
+        spec = np.zeros((npts, len(x))).astype('float64')
+        #print "len x is "+str(len(spec))
+    #    print len(spec), type(spec)
+    #    print len(positions), type(positions)
+    #    print len(weights), type(weights)
+        for ii in range(len(weights)):
+            spec[ii] = multiplier[ii]*fun(weights[ii].astype('float64'),
+                                          widths[ii].astype('float64'),
+                                          x, positions[ii].astype('float64'))
+        return spec
 
 
 def lorentzian(a, w, x, c):
