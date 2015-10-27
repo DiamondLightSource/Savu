@@ -46,7 +46,7 @@ class BaseFitter(BaseFilter, CpuPlugin):
         in_dataset, out_datasets = self.get_datasets()
 
         shape = in_dataset[0].get_shape()
-        axis_labels = ['-1.peak.pixel.unit']
+        axis_labels = ['-1.PeakIndex.pixel.unit']
         pattern_list = ['SINOGRAM', 'PROJECTION']
 
         fitAreas = out_datasets[0]

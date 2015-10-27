@@ -88,8 +88,11 @@ class PluginList(object):
         for plugin in self.plugin_list:
             count += 1
             description = "%2i) %s(%s)" % (count, plugin['name'], plugin['id'])
+            keycount = 0
             for key in plugin['data'].keys():
-                description += "\n     %20s : %s" % (key, plugin['data'][key])
+                keycount += 1
+                description += "\n  %2i)   %20s : %s" % (keycount, key,
+                                                          plugin['data'][key])
             out_string.append(description)
         return '\n'.join(out_string)
 

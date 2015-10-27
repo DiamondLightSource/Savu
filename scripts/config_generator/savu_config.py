@@ -28,11 +28,15 @@ class Content(object):
 
     def modify(self, element, subelement, value):
         data_elements = self.plugin_list.plugin_list[element-1]['data']
-        if subelement in data_elements.keys():
-            data_elements[subelement] = value
-        else:
-            print("Sorry, element %i does not have a %s parameter" %
-                  (element, subelement))
+        try:
+            position = int(subelement) - 1
+            data_elements[data_elements.keys()[position]] = value
+        except:
+            if subelement in data_elements.keys():
+                data_elements[subelement] = value
+            else:
+                print("Sorry, element %i does not have a %s parameter" %
+                      (element, subelement))
 
     def insert(self, plugin, pos):
         print plugin

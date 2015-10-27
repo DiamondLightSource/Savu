@@ -52,12 +52,15 @@ class NxxrdLoader(BaseMultiModalLoader):
         print xrd_entry
         self.set_motors(data_obj, xrd_entry, 'xrd')
         # hard coded for now, but we can change it to fram nx transformations in future.
-        data_obj.set_axis_labels('theta.degrees',
+        data_obj.set_axis_labels('rotation_angle.degrees',
                                  'x.mm',
                                  'y.mm',
                                  'detector_x.mm',
                                  'detector_y.mm')
 
+        rotation_angle = \
+            data_obj.backing_file[xrd_entry.name + '/sample/theta']
+        data_obj.meta_data.set_meta_data('rotation_angle', rotation_angle[...])
         #self.add_patterns_based_on_acquisition(data_obj, 'xrd')
 
         slicedir = tuple(range(len(data_obj.data.shape)-2))
