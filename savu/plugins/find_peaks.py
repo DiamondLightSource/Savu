@@ -74,7 +74,6 @@ class FindPeaks(BaseFilter, CpuPlugin):
 #        print 'old index is', sorted(PeakIndex)
         PeakIndex.extend(tmp)
         out_meta_data.set_meta_data('PeakIndex', PeakIndex)
-        print "The length of the peak index is:"+str(len(PeakIndex))
 #        foo[:len(np.array(PeakIndex))] = np.array(PeakIndex)# hacky hack hack
 #        return foo
         return np.array(PeakIndex)
@@ -85,8 +84,6 @@ class FindPeaks(BaseFilter, CpuPlugin):
         in_meta_data = self.get_in_meta_data()[0]
 #        print sorted(out_datasets[0].data[-1])
         in_meta_data.set_meta_data('PeakIndex', out_datasets[0].data[-1])
-        print "the peak index is: "+str(in_meta_data.get_meta_data('PeakIndex'))
-        print "its length is: "+str(len(in_meta_data.get_meta_data('PeakIndex')))
 
     def setup(self):
         # set up the output dataset that is created by the plugin

@@ -98,7 +98,6 @@ class PluginRunner(object):
                 pass
 
         logging.debug("Running plugin main setup")
-        print "the plugin is:", plugin
         plugin.main_setup(self.exp, plugin_dict['data'])
 
         logging.debug("finished plugin loader")

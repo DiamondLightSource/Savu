@@ -115,7 +115,6 @@ class BaseRecon(Plugin):
         core_dirs = data.get_plugin_data().get_core_directions()
         dim_detX = list(set(core_dirs).difference(set((dim_rotAngle,))))[0]
 
-        print dim_rotAngle, dim_detY, dim_detX
         dim_volX = dim_rotAngle
         dim_volY = dim_detY
         dim_volZ = dim_detX

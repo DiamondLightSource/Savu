@@ -110,17 +110,20 @@ class Hdf5Transport(TransportMechanism):
         exp.barrier()
         logging.info("run the loader plugin")
         self.plugin_loader(plugin_list[0])
+        print '\n\n\n\n'
 
         start = 1
         stop = start
         n_plugins = len(plugin_list[start:-1]) + 1
         while True:
-            print "**** in the loading loop"
+            print "******************* in the loading loop *******************"
             start_in_data = copy.deepcopy(exp.index['in_data'])
+            print start_in_data[start_in_data.keys()[0]].get_data_patterns()
             in_data = exp.index["in_data"][exp.index["in_data"].keys()[0]]
             out_data_objs, stop = in_data.load_data(self, start)
             exp.clear_data_objects()
             self.exp.index['in_data'] = start_in_data
+            print self.exp.index['in_data'][start_in_data.keys()[0]].get_data_patterns()
             self.real_plugin_run(plugin_list, out_data_objs, start, stop)
             print n_plugins, stop
             if n_plugins != stop:
