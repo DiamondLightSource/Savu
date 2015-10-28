@@ -50,7 +50,10 @@ class NxstxmLoader(BaseMultiModalLoader):
             stxm_entry.name + '/instrument/monochromator/energy']
         self.exp.meta_data.set_meta_data("mono_energy", mono_energy)
         self.set_motors(data_obj, stxm_entry, 'stxm')
-        data_obj.set_axis_labels('theta.degrees',
+        rotation_angle = \
+            data_obj.backing_file[stxm_entry.name + '/sample/theta']
+        data_obj.meta_data.set_meta_data('rotation_angle', rotation_angle[...])
+        data_obj.set_axis_labels('rotation_angle.degrees',
                                  'x.mm',
                                  'y.mm')
         self.add_patterns_based_on_acquisition(data_obj, 'stxm')
