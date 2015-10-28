@@ -236,7 +236,6 @@ class Data(object):
         for arg in args[0]:
             label = arg.split('.')
             if len(label) is 1:
-                print "deleting", int(label[0]) + removed_dims
                 del axis_labels[int(label[0]) + removed_dims]
                 removed_dims += 1
                 self.data_info.set_meta_data(
@@ -281,7 +280,6 @@ class Data(object):
         shape = list(self.get_shape())
         index = [i for i in range(len(shape)) if i is 'var']
         shape[index] = length
-        print "the index", index, shape
         self.set_shape(tuple(shape))
 
     def check_dims(self):

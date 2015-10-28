@@ -97,7 +97,7 @@ class FindPeaks(BaseFilter, CpuPlugin):
         in_pData[0].plugin_data_setup("SPECTRUM", self.get_max_frames())
 
         nFrames = in_pData[0].get_total_frames()
-        print "***", nFrames
+
         out_dataset[0].create_dataset(axis_labels=['frames.frames', 'peaks.pixels'],
                                       shape=(nFrames, 55),
                                       dtype=np.int,  # default is float32
