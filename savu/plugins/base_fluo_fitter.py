@@ -45,8 +45,8 @@ class BaseFluoFitter(BaseFitter):
     :param elements: The fitted elements. Default: ['Zn','Cu', 'Ar'].
     """
 
-    def __init__(self, name='BaseFluoFitter'):
-        super(BaseFluoFitter, self).__init__("BaseFluoFitter")
+    def __init__(self, name="BaseFluoFitter"):
+        super(BaseFluoFitter, self).__init__(name)
 
     def pre_process(self):
         in_meta_data = self.get_in_meta_data()[0]

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: simple_fit
+.. module:: simple_fit_xrf
    :platform: Unix
    :synopsis: A plugin to fit peaks
 
@@ -26,6 +26,7 @@ import numpy as np
 from scipy.optimize import leastsq
 import time
 
+
 @register_plugin
 class SimpleFitXrf(BaseFluoFitter):
     """
@@ -33,7 +34,6 @@ class SimpleFitXrf(BaseFluoFitter):
     :param width_guess: An initial guess at the width. Default: 0.02.
 
     """
-
     def __init__(self):
         super(SimpleFitXrf, self).__init__("SimpleFitXrf")
 
