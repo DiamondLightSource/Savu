@@ -61,8 +61,11 @@ class NxfluoLoader(BaseMultiModalLoader):
         #and get the mono energy
 
         self.set_motors(data_obj, fluo_entry, 'fluo')
+        rotation_angle = \
+            data_obj.backing_file[fluo_entry.name + '/sample/theta']
+        data_obj.meta_data.set_meta_data('rotation_angle', rotation_angle[...])
 
-        data_obj.set_axis_labels('theta.degrees',
+        data_obj.set_axis_labels('rotation_angle.degrees',
                                  'x.mm',
                                  'y.mm',
                                  'energy.eV')
