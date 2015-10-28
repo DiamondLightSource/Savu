@@ -110,19 +110,12 @@ class BaseRecon(Plugin):
         out_pData[0].plugin_data_setup('VOLUME_XZ', self.get_max_frames())
 
     def map_volume_dimensions(self, data):
-        dim_rotAngle = data.find_axis_label_dimension('rotation_angle')
-        dim_detX = data.find_axis_label_dimension('x')
-        c1, c2 = data.get_plugin_data().get_core_directions()
-        if set([dim_rotAngle, dim_detX]) != set([c1, c2]):
-            raise Exception("The sinogram core dimensions are not as "
-                            "expected.")
+        dim_rotAngle = data.get_data_patterns()['PROJECTION']['main_dir']
+        dim_detY = data.get_data_patterns()['SINOGRAM']['main_dir']
+        core_dirs = data.get_plugin_data().get_core_directions()
+        dim_detX = list(set(core_dirs).difference(set((dim_rotAngle,))))[0]
 
-        dim_detY = data.find_axis_label_dimension('y')
-        slice_dirs = data.get_plugin_data().get_slice_directions()
-        if dim_detY not in slice_dirs:
-            raise Exception("The sinogram slice dimensions are not as "
-                            "expected.")
-
+        print dim_rotAngle, dim_detY, dim_detX
         dim_volX = dim_rotAngle
         dim_volY = dim_detY
         dim_volZ = dim_detX

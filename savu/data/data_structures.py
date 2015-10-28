@@ -402,14 +402,6 @@ class Data(object):
         index = tuple(list_ddirs)
         return index
 
-#    def set_direction_parallel_to_rotation_axis(self, tdir):
-#        self.check_direction(tdir, 'parallel_to_rotation_axis')
-#        self.set_main_axis(tdir, 'SINOGRAM')
-#
-#    def set_direction_perp_to_rotation_axis(self, tdir):
-#        self.check_direction(tdir, 'perp_to_rotation_axis')
-#        self.set_main_axis(tdir, 'PROJECTION')
-
     def check_direction(self, tdir, dname):
         if not isinstance(tdir, int):
             raise TypeError('The direction should be an integer.')
