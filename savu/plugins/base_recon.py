@@ -90,10 +90,17 @@ class BaseRecon(Plugin):
         # copy all required information from in_dataset[0]
         in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
 
-        dim_detX, dim_rotAngle = in_pData[0].get_core_directions()
+        axis_labels = in_dataset[0].data_info.get_meta_data('axis_labels')[0]
+        dim = find_axis_label('rotation_angle')
+#        dim_detX, dim_rotAngle = in_pData[0].get_core_directions()
+        c1, c2 = in_pData[0].get_core_directions()
+        print axis_labels.keys().index('rotation_angle')
         dim_detY = in_pData[0].get_slice_directions()[0]
+        print"***********************************************",  dim_detX, dim_rotAngle, dim_detY
         shape = list(in_dataset[0].get_shape())
+        print shape
         shape[dim_rotAngle] = shape[dim_detX]
+        print shape
 
         dim_volX = dim_rotAngle
         dim_volY = dim_detY
