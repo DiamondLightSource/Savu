@@ -112,6 +112,14 @@ class Hdf5Transport(TransportMechanism):
         self.plugin_loader(plugin_list[0])
         print '\n\n\n\n'
 
+        exp.barrier()
+        logging.info("clear all out_data objects in experiment dictionary")
+        exp.clear_data_objects()
+
+        exp.barrier()
+        logging.info("Load the loader plugin")
+        self.plugin_loader(plugin_list[0])
+
         start = 1
         stop = start
         n_plugins = len(plugin_list[start:-1]) + 1
