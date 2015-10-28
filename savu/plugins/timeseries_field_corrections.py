@@ -44,7 +44,7 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         super(TimeseriesFieldCorrections,
               self).__init__("TimeseriesFieldCorrections")
 
-    def process_frames(self, data):
+    def process_frames(self, data, frame_list):
         in_meta_data, out_meta_data = self.get_meta_data()
         data = data[0]
         image_keys = in_meta_data[0].get_meta_data('image_key')
@@ -66,9 +66,15 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         """
         # set up the output dataset that is created by the plugin
         in_dataset, out_dataset = self.get_datasets()
-
         # copy all required information from in_dataset[0]
         out_dataset[0].create_dataset(in_dataset[0])
+
+        # removes dark and flat fields
+        out_dataset[0].trim_output_data(in_dataset[0], image_key=0)
+
+#        # set up new axis
+#        out_dataset[0].map_axis(parms['q_axis_name'],
+#                                base=parms['energy_axis_name'])
 
         # set information relating to the plugin data
         in_pData, out_pData = self.get_plugin_datasets()

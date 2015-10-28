@@ -23,15 +23,23 @@
 """
 
 import unittest
+import tempfile
+from savu.test import test_utils as tu
 
-from savu.test.plugin_test import PluginTest
+from savu.test.plugin_runner_test import run_protected_plugin_runner
 
 
-class BandPassTest(PluginTest, unittest.TestCase):
+class BandPassTest(unittest.TestCase):
 
-    def setUp(self):
-        self.data_type = "tomo"
-        self.plugin_name = "savu.plugins.band_pass"
+    def test_process(self):
+        options = {
+            "transport": "hdf5",
+            "process_names": "CPU0",
+            "data_file": tu.get_test_data_path('24737.nxs'),
+            "process_file": tu.get_test_data_path('band_pass_test.nxs'),
+            "out_path": tempfile.mkdtemp()
+            }
+        run_protected_plugin_runner(options)
 
 if __name__ == "__main__":
     unittest.main()

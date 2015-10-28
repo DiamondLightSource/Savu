@@ -25,14 +25,14 @@ import numpy as np
 
 from skimage.restoration import denoise_tv_bregman
 
-from savu.plugins.filter import Filter
+from savu.plugins.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 from savu.plugins.utils import register_plugin
 
 
 @register_plugin
-class DenoiseBregmanFilter(Filter, CpuPlugin):
+class DenoiseBregmanFilter(BaseFilter, CpuPlugin):
     """
     Split Bregman method for solving the denoising Total Variation ROF model.
 

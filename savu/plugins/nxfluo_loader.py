@@ -15,32 +15,59 @@
 """
 .. module:: tomography_loader
    :platform: Unix
-   :synopsis: A class for loading tomography data using the standard loaders 
+   :synopsis: A class for loading tomography data using the standard loaders
    library.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
 
-from savu.core.utils import logmethod
-from savu.plugins.base_loader import BaseLoader
-import savu.data.transport_data.standard_loaders as sLoader
+from savu.plugins.base_multi_modal_loader import BaseMultiModalLoader
 
 from savu.plugins.utils import register_plugin
 
 
 @register_plugin
-class NxfluoLoader(BaseLoader):
+class NxfluoLoader(BaseMultiModalLoader):
     """
     A class to load tomography data from an NXFluo file
     """
-            
     def __init__(self, name='NxfluoLoader'):
         super(NxfluoLoader, self).__init__(name)
-        
-        
-    @logmethod
-    def setup(self, experiment):
-        loader = sLoader.FluorescenceLoaders()
-        loader.load_from_nx_fluo(experiment)
-        
+
+    def setup(self):
+        """
+         Define the input nexus file
+
+        :param path: The full path of the NeXus file to load.
+        :type path: str
+        """
+        import numpy as np
+        data_str = '/instrument/fluorescence/data'
+        data_obj, fluo_entry = self.multi_modal_setup('NXfluo', data_str)
+        # the application meta data
+        mData = data_obj.meta_data
+        average = np.mean(np.mean(np.mean(data_obj.data, axis=0), axis=0),
+                          axis=0)
+        # and the energy axis
+        energy = data_obj.backing_file[fluo_entry.name+'/data/energy'][...]
+        mono_energy = data_obj.backing_file[fluo_entry.name +
+                                            '/instrument/monochromator/energy'
+                                            ].value
+        mData.set_meta_data("energy", energy)
+        # global since it is to do with the beam
+        mData.set_meta_data("mono_energy", mono_energy)
+        mData.set_meta_data("average", average)
+        #and get the mono energy
+
+        self.set_motors(data_obj, fluo_entry, 'fluo')
+
+        data_obj.set_axis_labels('theta.degrees',
+                                 'x.mm',
+                                 'y.mm',
+                                 'energy.eV')
+
+        self.add_patterns_based_on_acquisition(data_obj, 'fluo')
+
+        data_obj.add_pattern("SPECTRUM", core_dir=(-1,),
+                             slice_dir=range(len(data_obj.data.shape)-1))

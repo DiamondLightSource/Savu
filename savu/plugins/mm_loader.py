@@ -15,19 +15,18 @@
 """
 .. module:: tomography_loader
    :platform: Unix
-   :synopsis: A class for loading tomography data using the standard loaders 
+   :synopsis: A class for loading tomography data using the standard loaders
    library.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
 
-# The following is the start of a really dirty hack to get a multimodal dataset in. This is not how it should be done, but is just to get things moving for now.
-#It will be replaced when the code is refactored. Aaron.
-# PS. Sorry Mark and Nic for making the pretty thing ugly....
 from savu.core.utils import logmethod
 from savu.plugins.base_loader import BaseLoader
-import savu.data.transport_data.standard_loaders as sLoader
+from savu.plugins.nxfluo_loader import NxfluoLoader
+from savu.plugins.nxxrd_loader import NxxrdLoader
+from savu.plugins.nxstxm_loader import NxstxmLoader
 
 from savu.plugins.utils import register_plugin
 
@@ -36,18 +35,20 @@ from savu.plugins.utils import register_plugin
 class MmLoader(BaseLoader):
     """
     A class to load tomography data from an NXTomo file
-    :param calibration_path: path to the calibration file. Default: "../test_data/LaB6_calibration_output.nxs"
+    :param calibration_path: path to the calibration file. Default: "../test_data/LaB6_calibration_output.nxs".
     """
-            
+
     def __init__(self, name='MmLoader'):
         super(MmLoader, self).__init__(name)
-        
-        
+
     @logmethod
-    def setup(self, experiment):
-        loader1 = sLoader.FluorescenceLoaders()
-        loader1.load_from_nx_fluo(experiment)
-        loader2 = sLoader.XRDLoaders(self.parameters)
-        loader2.load_from_nx_xrd(experiment)
-        loader3 = sLoader.STXMLoaders()
-        loader3.load_from_nx_stxm(experiment)
+    def setup(self):
+        fluo = NxfluoLoader()
+        fluo.main_setup(self.exp, {})
+        fluo.setup()
+        xrd = NxxrdLoader()
+        xrd.main_setup(self.exp, self.parameters)
+        xrd.setup()
+        stxm = NxstxmLoader()
+        stxm.main_setup(self.exp, {})
+        stxm.setup()

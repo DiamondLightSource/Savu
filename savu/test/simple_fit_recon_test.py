@@ -20,30 +20,25 @@
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
+
 import unittest
 import tempfile
 from savu.test import test_utils as tu
 
-from savu.core.plugin_runner import PluginRunner
+from savu.test.plugin_runner_test import run_protected_plugin_runner
 
 
-class PyfaiAzimuthalIntegrationTestFull(unittest.TestCase):
+class SimpleFitReconTest(unittest.TestCase):
 
-    @unittest.skip("Local files in test data, needs to be fixed")
-    def test_Pyfai(self):
+    def test_process(self):
         options = {
             "transport": "hdf5",
             "process_names": "CPU0",
-            "data_file": '/media/My Passport/Steve_data/xrd_tester2.nxs',
-            "process_file": tu.get_test_data_path('PyFAI_azimuth_test.nxs'),
+            "data_file": tu.get_test_data_path('mm.nxs'),
+            "process_file": tu.get_test_data_path('simplefitreconstest.nxs'),
             "out_path": tempfile.mkdtemp()
             }
-        try:
-            PluginRunner(options)
-        except ImportError as e:
-            print("Failed to run test as libraries not available (%s)," % (e) +
-                  " passing test")
-            pass
+        run_protected_plugin_runner(options)
 
 if __name__ == "__main__":
     unittest.main()

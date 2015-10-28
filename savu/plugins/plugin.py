@@ -46,6 +46,10 @@ class Plugin(object):
         self.set_plugin_datasets(exp)
         self.setup()
 
+        in_datasets, out_datasets = self.get_datasets()
+        for data in in_datasets + out_datasets:
+            data.finalise_patterns()
+
     def setup(self):
         """
         This method is first to be called after the plugin has been created.
@@ -68,7 +72,7 @@ class Plugin(object):
         class docstring such as this
         :param error_threshold: Convergence threshold. Default: 0.001.
         """
-        for clazz in inspect.getmro(self.__class__):
+        for clazz in inspect.getmro(self.__class__)[::-1]:
             if clazz != object:
                 full_description = pu.find_args(clazz)
                 for item in full_description:
@@ -94,6 +98,9 @@ class Plugin(object):
                                      "is not a valid parameter for plugin " +
                                      self.name)
 
+    def get_parameters(self, name):
+        return self.parameters[name]
+
     def pre_process(self):
         """
         This method is called after the plugin has been created by the
@@ -104,7 +111,7 @@ class Plugin(object):
         """
         pass
 
-    def process_frames(self, data):
+    def process_frames(self, data, frame_list):
         """
         This method is called after the plugin has been created by the
         pipeline framework and forms the main processing step
@@ -134,31 +141,73 @@ class Plugin(object):
         pass
 
     def clean_up(self):
-        self.organise_metadata()
+        #self.organise_metadata()
+        self.copy_meta_data()
         self.clean_up_plugin_data()
 
     # Does this function have to be implemented: make default here that copies
     # the dictionary from the in data...
-    def organise_metadata(self):
+#    def organise_metadata(self):
+#        """
+#        This method is called after the post_process function to organise the
+#        metadata that is passed from input datasets to output datasets.
+#        """
+#        in_data, out_data = self.get_datasets()
+#        for data in out_data:
+#            axis_labels = data.meta_data.get_dictionary()['axis_labels']
+#            for al in axis_labels:
+#                key = al.keys()[0]
+#                count = 0
+#                while (count < len(in_data)):
+#                    mData = in_data[count].meta_data
+#                    try:
+#                        data.meta_data.\
+#                            set_meta_data(key, mData.get_dictionary()[key])
+#                        break
+#                    except:
+#                        pass
+#                    count += 1
+
+    # this method can be overwritten in the plugin, but as a default all
+    # metadata will be transferred from all input data sets to all output data
+    # sets - ***This is not good as there are entries that should not be
+    # copied e.g. "data_patterns"
+    def copy_meta_data(self):
         """
-        This method is called after the post_process function to organise the
-        metadata that is passed from input datasets to output datasets.
+        Copy all metadata from input datasets to output datasets, except axis
+        # data that is no longer valid.
         """
-        in_data, out_data = self.get_datasets()
-        for data in out_data:
-            axis_labels = data.meta_data.get_dictionary()['axis_labels']
-            for al in axis_labels:
-                key = al.keys()[0]
-                count = 0
-                while (count < len(in_data)):
-                    mData = in_data[count].meta_data
-                    try:
-                        data.meta_data.\
-                            set_meta_data(key, mData.get_dictionary()[key])
-                        break
-                    except:
-                        pass
-                    count += 1
+        remove_keys = self.remove_axis_data()
+        in_meta_data, out_meta_data = self.get_meta_data()
+        copy_dict = {}
+        for mData in in_meta_data:
+            temp = mData.get_dictionary().copy()
+            copy_dict.update(temp)
+
+        for i in range(len(out_meta_data)):
+            temp = copy_dict.copy()
+            for key in remove_keys[i]:
+                if temp.get(key, None) is not None:
+                    del temp[key]
+            out_meta_data[i].get_dictionary().update(temp)
+
+    def remove_axis_data(self):
+        """
+        Returns a list of meta_data entries corresponding to axis labels that
+        are not copied over to the output datasets
+        """
+        in_datasets, out_datasets = self.get_datasets()
+        all_in_labels = []
+        for data in in_datasets:
+            axis_keys = data.get_axis_label_keys()
+            all_in_labels = all_in_labels + axis_keys
+
+        remove_keys = []
+        for data in out_datasets:
+            axis_keys = data.get_axis_label_keys()
+            remove_keys.append(set(all_in_labels).difference(set(axis_keys)))
+
+        return remove_keys
 
     def clean_up_plugin_data(self):
         in_data, out_data = self.get_datasets()
@@ -199,10 +248,10 @@ class Plugin(object):
             data_objs.append(self.exp.index[dtype][data])
         return data_objs
 
-    def get_in_datasets(self):
+    def set_in_datasets(self):
         return self.get_data_objects('in_data')
 
-    def get_out_datasets(self):
+    def set_out_datasets(self):
         try:
             out_data = self.get_data_objects('out_data')
         except KeyError:
@@ -223,29 +272,39 @@ class Plugin(object):
         Convert in/out_dataset strings to objects and create PluginData objects
         for each.
         """
-        try:
-            self.parameters['in_datasets'] = self.get_in_datasets()
-            self.parameters['out_datasets'] = self.get_out_datasets()
-            self.parameters['plugin_in_datasets'] = \
-                self.get_plugin_data(self.parameters['in_datasets'])
-            self.parameters['plugin_out_datasets'] = \
-                self.get_plugin_data(self.parameters['out_datasets'])
-        except KeyError:
-            pass
+        self.parameters['in_datasets'] = self.set_in_datasets()
+        self.parameters['out_datasets'] = self.set_out_datasets()
+        self.parameters['plugin_in_datasets'] = \
+            self.get_plugin_data(self.parameters['in_datasets'])
+        self.parameters['plugin_out_datasets'] = \
+            self.get_plugin_data(self.parameters['out_datasets'])
+
+    def get_plugin_in_datasets(self):
+        return self.parameters['plugin_in_datasets']
+
+    def get_plugin_out_datasets(self):
+        return self.parameters['plugin_out_datasets']
 
     def get_plugin_datasets(self):
-        plugin_in = self.parameters['plugin_in_datasets']
-        plugin_out = self.parameters['plugin_out_datasets']
-        return plugin_in, plugin_out
+        return self.get_plugin_in_datasets(), self.get_plugin_out_datasets()
+
+    def get_in_datasets(self):
+        return self.parameters['in_datasets']
+
+    def get_out_datasets(self):
+        return self.parameters['out_datasets']
 
     def get_datasets(self):
-        return self.parameters['in_datasets'], self.parameters['out_datasets']
+        return self.get_in_datasets(), self.get_out_datasets()
+
+    def get_in_meta_data(self):
+        return self.set_meta_data(self.parameters['in_datasets'], 'in_data')
+
+    def get_out_meta_data(self):
+        return self.set_meta_data(self.parameters['out_datasets'], 'out_data')
 
     def get_meta_data(self):
-        in_data, out_data = self.get_datasets()
-        in_meta_data = self.set_meta_data(in_data, 'in_data')
-        out_meta_data = self.set_meta_data(out_data, 'out_data')
-        return in_meta_data, out_meta_data
+        return self.get_in_meta_data(), self.get_out_meta_data()
 
     def set_meta_data(self, data_list, dtype):
         meta_data = []

@@ -21,7 +21,6 @@
 """
 
 import logging
-import numpy as np
 import socket
 import os
 import copy
@@ -31,7 +30,6 @@ from itertools import chain
 from savu.core.utils import logfunction
 from savu.data.transport_mechanism import TransportMechanism
 from savu.core.utils import logmethod
-from savu.data.data_structures import TomoRaw
 
 
 class Hdf5Transport(TransportMechanism):
@@ -100,6 +98,75 @@ class Hdf5Transport(TransportMechanism):
                             ' %(levelname)-6s %(message)s', datefmt='%H:%M:%S')
         logging.info("Starting the reconstruction pipeline process")
 
+#    def transport_run_plugin_list(self):
+#        """
+#        Runs a chain of plugins
+#        """
+#        exp = self.exp
+#        exp.barrier()
+#        logging.info("Starting the HDF5 plugin list runner")
+#        plugin_list = exp.meta_data.plugin_list.plugin_list
+#
+#        exp.barrier()
+#        logging.info("run the loader plugin")
+#        self.plugin_loader(plugin_list[0])
+#
+#        start = 1
+#        stop = start
+#        n_plugins = len(plugin_list[start:-1])
+#        while True:
+#            print "**** in the loading loop"
+#            start_in_data = copy.deepcopy(exp.index['in_data'])
+#            in_data = exp.index["in_data"][exp.index["in_data"].keys()[0]]
+#            out_data_objs, stop = in_data.load_data(self, start)
+#            exp.clear_data_objects()
+#            self.exp.index['in_data'] = start_in_data
+#            self.real_plugin_run(plugin_list, out_data_objs, start, stop)
+#            if n_plugins != stop:
+#                self.fix_variable_length_array()  # which data objects
+#            else:
+#                break
+#            start = stop + 1
+#
+#        exp.barrier()
+#        logging.info("close all remaining files")
+#        for key in exp.index["in_data"].keys():
+#            exp.index["in_data"][key].close_file()
+#
+#        exp.barrier()
+#        logging.info("Completing the HDF5 plugin list runner")
+#        return
+#
+#    def real_plugin_run(self, plugin_list, out_data_objs, start, stop):
+#        exp = self.exp
+#        for i in range(start, stop):
+#            link_type = "final_result" if i is len(plugin_list)-2 else \
+#                "intermediate"
+#
+#            logging.info("Running Plugin %s" % plugin_list[i]["id"])
+#            exp.barrier()
+#
+#            logging.info("Initialise output data")
+#            for key in out_data_objs[i-1]:
+#                exp.index["out_data"][key] = out_data_objs[i-1][key]
+#
+#            exp.barrier()
+#            logging.info("Load the plugin")
+#            plugin = self.plugin_loader(plugin_list[i], pos=i)
+#
+#            plugin_name = (plugin.__module__).split('.')[-1]
+#            exp.barrier()
+#            logging.info("run the plugin")
+#            print "\n* Plugin", plugin_name, "has started *"
+#            plugin.run_plugin(exp, self)
+#            print "* Plugin", plugin_name, "has completed *\n"
+#
+#            exp.barrier()
+#            logging.info("close any files that are no longer required")
+#            out_datasets = plugin.parameters["out_datasets"]
+#
+#            self.reorganise_datasets(out_datasets, link_type)
+
     def transport_run_plugin_list(self):
         """
         Runs a chain of plugins
@@ -123,13 +190,16 @@ class Hdf5Transport(TransportMechanism):
         exp.clear_data_objects()
 
         exp.barrier()
-        logging.info("Load all the plugins")
+        logging.info("Load the loader plugin")
         self.plugin_loader(plugin_list[0])
 
         exp.barrier()
-        logging.info("Running all the plugins")
+        logging.info("Running all the data processing plugins")
 
         for i in range(1, len(plugin_list)-1):
+            link_type = "final_result" if i is len(plugin_list)-2 else \
+                "intermediate"
+
             logging.info("Running Plugin %s" % plugin_list[i]["id"])
             exp.barrier()
 
@@ -141,43 +211,23 @@ class Hdf5Transport(TransportMechanism):
             logging.info("Load the plugin")
             plugin = self.plugin_loader(plugin_list[i], pos=i)
 
+            plugin_name = (plugin.__module__).split('.')[-1]
             exp.barrier()
             logging.info("run the plugin")
-            return_dict = plugin.run_plugin(exp, self)
-
-            try:
-                remove_data_set = self.transfer_to_meta_data(
-                    return_dict['transfer_to_meta_data'])
-            except (KeyError, TypeError):
-                remove_data_set = []
-                pass
-
-            exp.barrier()
-            logging.info("Clean up input datasets")
+            print "\n* Plugin", plugin_name, "has started *"
+            plugin.run_plugin(exp, self)
+            print "* Plugin", plugin_name, "has completed *\n"
 
             exp.barrier()
             logging.info("close any files that are no longer required")
-            for out_objs in plugin.parameters["out_datasets"]:
-                if out_objs in exp.index["in_data"].keys():
-                    exp.index["in_data"][out_objs].save_data()
-                elif out_objs in remove_data_set:
-                    exp.index["out_data"][out_objs].save_data()
-                    del exp.index["out_data"][out_objs]
+            out_datasets = plugin.parameters["out_datasets"]
 
-            exp.barrier()
-            logging.info("Copy out data to in data")
-            for key in exp.index["out_data"]:
-                exp.index["in_data"][key] = \
-                    copy.deepcopy(exp.index["out_data"][key])
-
-            exp.barrier()
-            logging.info("Clear up all data objects")
-            exp.clear_out_data_objects()
+            self.reorganise_datasets(out_datasets, link_type)
 
         exp.barrier()
         logging.info("close all remaining files")
         for key in exp.index["in_data"].keys():
-            exp.index["in_data"][key].save_data()
+            exp.index["in_data"][key].close_file()
 
         exp.barrier()
         logging.info("Completing the HDF5 plugin list runner")
@@ -196,82 +246,18 @@ class Hdf5Transport(TransportMechanism):
 
         for count in range(len(in_slice_list[0])):
             print count
-            section = self.get_all_padded_data(in_data, in_slice_list, count)
-            result = plugin.process_frames(section)
+            section, slice_list = \
+                self.get_all_padded_data(in_data, in_slice_list, count)
+            result = plugin.process_frames(section, slice_list)
             self.set_out_data(out_data, out_slice_list, result, count)
-
-#    @logmethod
-#    def timeseries_field_correction(self, plugin, in_data, out_data):
-#
-#        expInfo = plugin.exp.meta_data
-#        in_data = in_data[0]
-#        out_data = out_data[0]
-#
-#        in_slice_list, frame_list = in_data.\
-#            get_slice_list_per_process(expInfo, frameList=True)
-#        out_slice_list, frame_list = out_data.\
-#            get_slice_list_per_process(expInfo, frameList=True)
-#
-#        for count in range(len(in_slice_list)):
-#            print count
-#            result = plugin.correction(in_data.data[in_slice_list[count]],
-#                                       in_data.get_image_key())
-#            out_data.data[out_slice_list[count]] = result
-#
-#    @logmethod
-#    def reconstruction_setup(self, plugin, in_data, out_data, expInfo):
-#
-#        [slice_list, frame_list] = \
-#            in_data.get_slice_list_per_process(expInfo, frameList=True)
-#        cor = in_data.meta_data.get_meta_data("centre_of_rotation")[frame_list]
-#
-#        count = 0
-#        for sl in slice_list:
-#            frame = plugin.reconstruct(np.squeeze(in_data.data[sl]),
-#                                       cor[count],
-#                                       out_data.get_plugin_data().get_shape())
-#            out_data.data[sl] = frame
-#            count += 1
-#            plugin.count += 1
-#            logging.debug("Reconstruction progress (%i of %i)" %
-#                         (plugin.count, len(slice_list)))
-#
-#    @logmethod
-#    def filter_chunk(self, plugin, in_data, out_data):
-#        logging.debug("Running filter._filter_chunk")
-#
-#        expInfo = plugin.exp.meta_data
-#        in_slice_list = self.get_all_slice_lists(in_data, expInfo)
-#        out_slice_list = self.get_all_slice_lists(out_data, expInfo)
-#
-#        for count in range(len(in_slice_list[0])):
-#            print count
-#            section = self.get_all_padded_data(in_data, in_slice_list, count)
-#            result = plugin.filter_frame(section)
-#            self.set_out_data(out_data, out_slice_list, result, count)
-#
-#    if type(result) == dict:
-#        for key in result.keys():
-#            if key == 'center_of_rotation':
-#                frame = in_data[0].get_orthogonal_slice(in_slice_list[count],
-#                in_data[0].core_directions[plugin.get_filter_frame_type()])
-#                out_data.center_of_rotation[frame] = result[key]
-#            elif key == 'data':
-#                out_data.data[out_slice_list[count]] = \
-#                in_data[0].get_unpadded_slice_data(in_slice_list[count],
-#                                            padding, in_data[0], result)
-#    else:
-#        out_data.data[out_slice_list[count]] = \
-#        in_data[0].get_unpadded_slice_data(in_slice_list[0][count], padding,
-#                                        in_data[0], result)
 
     def process_checks(self):
         pass
-                # if plugin inherits from base_recon and the data inherits from tomoraw
+        # if plugin inherits from base_recon and the data inherits from tomoraw
         # then throw an exception
 #        if isinstance(in_data, TomoRaw):
-#            raise Exception("The input data to a reconstruction plugin cannot \
-#            be Raw data. Have you performed a timeseries_field_correction?")    
+#            raise Exception("The input data to a reconstruction plugin cannot
+#            be Raw data. Have you performed a timeseries_field_correction?")
 # call a new process called process_check?
 
     def get_all_slice_lists(self, data_list, expInfo):
@@ -282,10 +268,12 @@ class Hdf5Transport(TransportMechanism):
 
     def get_all_padded_data(self, data, slice_list, count):
         section = []
+        slist = []
         for idx in range(len(data)):
-            section.append(data[idx].get_padded_slice_data
-                          (slice_list[idx][count]))
-        return section
+            section.append(
+                data[idx].get_padded_slice_data(slice_list[idx][count]))
+            slist.append(slice_list[idx][count])
+        return section, slist
 
     def set_out_data(self, data, slice_list, result, count):
         result = [result] if type(result) is not list else result

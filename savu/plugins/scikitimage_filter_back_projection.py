@@ -37,8 +37,10 @@ class ScikitimageFilterBackProjection(BaseRecon, CpuPlugin):
 
     def _shift(self, sinogram, centre_of_rotation):
         centre_of_rotation_shift = (sinogram.shape[0]/2) - centre_of_rotation
-        return ndimage.interpolation.shift(sinogram,
-                                           centre_of_rotation_shift)
+        result = ndimage.interpolation.shift(sinogram,
+                                             (centre_of_rotation_shift[0],
+                                              0))
+        return result
 
     def reconstruct(self, sinogram, centre_of_rotations,
                     vol_shape, params):
@@ -54,8 +56,16 @@ class ScikitimageFilterBackProjection(BaseRecon, CpuPlugin):
                              interpolation='linear',
                              # self.parameters['linear'],
                              circle=False)  # self.parameters[False])
-        result = result[:, np.newaxis, :]
         return result
+
+    def get_max_frames(self):
+        """
+        Should be overridden to define the max number of frames to process at
+        a time
+
+        :returns:  an integer of the number of frames
+        """
+        return 1
 
     def get_citation_information(self):
         cite_info = CitationInformation()

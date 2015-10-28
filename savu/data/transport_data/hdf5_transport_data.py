@@ -23,9 +23,12 @@
 """
 import os
 import logging
-
+import h5py
 import numpy as np
+
 from savu.data.data_structures import Padding
+
+NX_CLASS = 'NX_class'
 
 
 class Hdf5TransportData(object):
@@ -41,7 +44,7 @@ class Hdf5TransportData(object):
         exp = self.exp
         plugin_list = exp.meta_data.plugin_list.plugin_list
         final_plugin = plugin_list[-1]
-        saver_plugin = plugin_runner.load_plugin(final_plugin["id"])
+        saver_plugin = plugin_runner.plugin_loader(final_plugin)
 
         logging.debug("generating all output files")
         out_data_objects = []
@@ -59,16 +62,39 @@ class Hdf5TransportData(object):
 
             self.set_filenames(plugin, plugin_id, count)
 
-            saver_plugin.setup(exp)
+            saver_plugin.setup()
 
             out_data_objects.append(exp.index["out_data"].copy())
-            #exp.clear_out_data_objects()
-            exp.set_out_data_to_in()
+
+            exp.merge_out_data_to_in()
 
             exp.log("Point 3")
             count += 1
 
         return out_data_objects
+#
+#    def load_data(self, plugin_runner, start):
+#        exp = self.exp
+#        plugin_list = exp.meta_data.plugin_list.plugin_list
+#        final_plugin = plugin_list[-1]
+#        saver_plugin = plugin_runner.plugin_loader(final_plugin)
+#
+#        logging.debug("generating all output files")
+#        out_data_objects = []
+#        count = start
+#        for plugin_dict in plugin_list[start:-1]:
+#
+#            plugin_id = plugin_dict["id"]
+#            logging.debug("Loading plugin %s", plugin_id)
+#            plugin = plugin_runner.plugin_loader(plugin_dict)
+#            self.set_filenames(plugin, plugin_id, count)
+#            saver_plugin.setup()
+#            out_data_objects.append(exp.index["out_data"].copy())
+#            exp.merge_out_data_to_in()
+#
+#            count += 1
+#
+#        return out_data_objects, count
 
     def set_filenames(self, plugin, plugin_id, count):
             exp = self.exp
@@ -89,7 +115,51 @@ class Hdf5TransportData(object):
                 expInfo.set_meta_data(["filename", key], filename)
                 expInfo.set_meta_data(["group_name", key], group_name)
 
-    def save_data(self):
+    def add_data_links(self, linkType):
+
+        nxs_filename = self.exp.meta_data.get_meta_data('nxs_filename')
+        logging.debug("Adding link to file %s", nxs_filename)
+        plugin_file = h5py.File(nxs_filename, 'a')
+
+        if linkType is 'final_result':
+            name = 'final_result_' + self.get_name()
+            entry = plugin_file['entry']
+            entry.attrs[NX_CLASS] = 'NXdata'
+            entry[name] = self.external_link()
+        else:
+            name = self.group_name + '_' + self.data_info.get_meta_data('name')
+            entry = plugin_file['entry'].require_group('intermediate')
+            entry.attrs[NX_CLASS] = 'NXcollection'
+            entry[name] = self.external_link()
+        return plugin_file, entry
+
+    def output_metadata(self, entry):
+        axis_labels = self.meta_data.get_meta_data("axis_labels")
+        axes = []
+        count = 0
+        for labels in axis_labels:
+            name = labels.keys()[0]
+            axes.append(name)
+            entry.attrs[name + '_indices'] = count
+
+            try:
+                mData = self.meta_data.get_meta_data(name)
+            except KeyError:
+                mData = np.arange(self.get_shape()[count])
+            temp = self.group.create_dataset(name, mData.shape, mData.dtype)
+            temp[...] = mData[...]
+            count += 1
+        entry.attrs['axes'] = axes
+
+    def save_data(self, link_type):
+        process = self.exp.meta_data.get_meta_data('process')
+        if process is 0:
+            logging.info("PROCESS 0 is adding data link and metadata")
+            plugin_file, entry = self.add_data_links(link_type)
+            #self.output_metadata(entry)
+            #plugin_file.close()
+
+    def close_file(self):
         """
         Closes the backing file and completes work
         """
@@ -111,20 +181,39 @@ class Hdf5TransportData(object):
             repeat: how many times does the sequence of chunked numbers repeat
         :rtype: [int, int, int]
         """
-        sshape = [shape[sslice] for sslice in slice_dirs]
+        sshape = self.get_shape_of_slice_dirs(slice_dirs, shape)
         chunk = []
         length = []
         repeat = []
         for dim in range(len(slice_dirs)):
-            chunk.append(int(np.prod(shape[0:dim])))
+            chunk.append(int(np.prod(sshape[0:dim])))
             length.append(sshape[dim])
             repeat.append(int(np.prod(sshape[dim+1:])))
 
         return chunk, length, repeat
 
+    def get_shape_of_slice_dirs(self, slice_dirs, shape):
+        sshape = [shape[sslice] for sslice in slice_dirs]
+        if 'var' in sshape:
+            shape = list(shape)
+            for index, value in enumerate(shape):
+                if isinstance(value, str):
+                    shape[index] = \
+                        len(self.data_info.get_meta_data('axis_labels')[index])
+                    self.unravel_array(index)
+            shape = tuple(shape)
+            sshape = [shape[sslice] for sslice in slice_dirs]
+        return sshape
+
+    def unravel_array(self, index):
+        self.unravel = lambda x: self.unravel(x[0]) if isinstance(x, list) \
+            else x
+
     def get_slice_dirs_index(self, slice_dirs, shape):
-        # returns a list of arrays for each slice dimension , where each array
-        # gives the indices for that slice dimension
+        """
+        returns a list of arrays for each slice dimension, where each array
+        gives the indices for that slice dimension.
+        """
         # create the indexing array
         [chunk, length, repeat] = self.chunk_length_repeat(slice_dirs, shape)
         idx_list = []
@@ -142,7 +231,9 @@ class Hdf5TransportData(object):
         slice_dirs = pData.get_slice_directions()
         [fix_dirs, value] = pData.get_fixed_directions()
         shape = self.get_shape()
-        index = self.get_slice_dirs_index(slice_dirs, np.array(shape))
+        index = self.get_slice_dirs_index(slice_dirs, shape)
+        if 'var' not in [shape[i] for i in slice_dirs]:
+            shape = [s for s in list(shape) if isinstance(s, int)]
         nSlices = index.shape[1]
         nDims = len(shape)
 
@@ -184,7 +275,6 @@ class Hdf5TransportData(object):
                 new_slice = slice(i, i+max_frames, 1)
                 working_slice[slice_dir[0]] = new_slice
                 grouped.append(tuple(working_slice))
-
             if rem:
                 new_slice = slice(i+max_frames, len(group), 1)
                 working_slice[slice_dir[0]] = new_slice
@@ -199,8 +289,8 @@ class Hdf5TransportData(object):
 
         sl = self.single_slice_list()
 
-#        if isinstance(self, ds.TomoRaw):
-#            sl = self.get_frame_raw(sl)
+        if self.get_plugin_data().selected_data is True:
+            sl = self.get_tomo_raw().get_frame_raw(sl)
 
         if sl is None:
             raise Exception("Data type", self.get_current_pattern_name(),
@@ -209,19 +299,17 @@ class Hdf5TransportData(object):
 
         return self.grouped_slice_list(sl, max_frames)
 
-    def get_slice_list_per_process(self, expInfo, **kwargs):
-        frameList = kwargs.get('frameList', False)
-
+    def get_slice_list_per_process(self, expInfo):
         processes = expInfo.get_meta_data("processes")
         process = expInfo.get_meta_data("process")
         slice_list = self.get_grouped_slice_list()
         frame_index = np.arange(len(slice_list))
-        frames = np.array_split(frame_index, len(processes))[process]
-
-        if frameList:
-            return [slice_list[frames[0]:frames[-1]+1], frame_index]
-        else:
-            return slice_list[frames[0]:frames[-1]+1]
+        try:
+            frames = np.array_split(frame_index, len(processes))[process]
+            process_slice_list = slice_list[frames[0]:frames[-1]+1]
+        except IndexError:
+            process_slice_list = []
+        return process_slice_list
 
     def calculate_slice_padding(self, in_slice, pad_ammount, data_stop):
         sl = in_slice
@@ -275,15 +363,22 @@ class Hdf5TransportData(object):
         return data_slice
 
     def get_padding_dict(self):
-        padding = Padding(self.get_current_pattern())
-        for key in self.padding.keys():
-            getattr(padding, key)(self.padding[key])
+        pData = self.get_plugin_data()
+        padding = Padding(pData.get_pattern())
+        for key in pData.padding.keys():
+            getattr(padding, key)(pData.padding[key])
         return padding.get_padding_directions()
 
     def get_padded_slice_data(self, input_slice_list):
         slice_list = list(input_slice_list)
         if self.get_plugin_data().padding is None:
             return self.data[tuple(slice_list)]
+#            try:
+#                return self.data[tuple(slice_list)]
+#            except TypeError:
+#                temp = self.data[tuple(slice_list[:-1])]
+#                temp2 = self.unravel(temp)[slice_list[-1]]
+
         padding_dict = self.get_padding_dict()
 
         pad_list = []

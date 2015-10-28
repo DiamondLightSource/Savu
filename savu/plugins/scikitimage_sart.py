@@ -53,12 +53,11 @@ class ScikitimageSart(BaseRecon, CpuPlugin):
               self).__init__("Scikitimage SART")
 
     def _shift(self, sinogram, centre_of_rotation):
-        centre_of_rotation_shift = (sinogram.shape[0]/2) - centre_of_rotation
-        return ndimage.interpolation.shift(sinogram,
-                                           centre_of_rotation_shift)
+        centre_of_rotation_shift = (sinogram.shape[0]/2) - \
+            float(centre_of_rotation)
+        return ndimage.interpolation.shift(sinogram, centre_of_rotation_shift)
 
-    def reconstruct(self, sinogram, centre_of_rotations,
-                    vol_shape, params):
+    def reconstruct(self, sinogram, centre_of_rotations, angles, vol_shape):
         sinogram = np.swapaxes(sinogram, 0, 1)
         sinogram = self._shift(sinogram, centre_of_rotations)
         sino = np.nan_to_num(sinogram)
@@ -83,8 +82,10 @@ class ScikitimageSart(BaseRecon, CpuPlugin):
                                            relaxation=0.15
                                            # self.parameters[0.15])
                                            )
-        result = result[:, np.newaxis, :]
         return result
+
+    def get_max_frames(self):
+        return 1
 
     def get_citation_information(self):
         cite_info = CitationInformation()

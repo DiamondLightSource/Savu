@@ -83,6 +83,10 @@ class Experiment(object):
                                 (filename, time.strftime("%Y%m%d%H%M%S")))
         self.meta_data.set_meta_data("nxs_filename", filename)
 
+    def remove_dataset(self, data_obj):
+        data_obj.close_file()
+        del self.index["out_data"][data_obj.data_info.get_meta_data('name')]
+
     def clear_data_objects(self):
         self.index["out_data"] = {}
         self.index["in_data"] = {}
@@ -90,8 +94,10 @@ class Experiment(object):
     def clear_out_data_objects(self):
         self.index["out_data"] = {}
 
-    def set_out_data_to_in(self):
-        self.index["in_data"] = self.index["out_data"]
+    def merge_out_data_to_in(self):
+        for key, data in self.index["out_data"].iteritems():
+            if data.remove is False:
+                self.index['in_data'][key] = data
         self.index["out_data"] = {}
 
     def barrier(self):

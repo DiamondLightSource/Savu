@@ -61,7 +61,7 @@ class PluginList(object):
         plugins_group.attrs[NX_CLASS] = 'NXplugin'
         count = 0
         for plugin in self.plugin_list:
-            plugin_group = plugins_group.create_group("%i" % count)
+            plugin_group = plugins_group.create_group("%*i" % (4, count))
             plugin_group.attrs[NX_CLASS] = 'NXnote'
             id_array = np.array([plugin['id']])
             plugin_group.create_dataset('id', id_array.shape, id_array.dtype,
@@ -82,22 +82,17 @@ class PluginList(object):
         citation.write(plugin_entry)
         plugin_file.close()
 
-    def add_intermediate_data_link(self, filename, output_data, group_name):
-        logging.debug("Adding link to file %s", filename)
-        plugin_file = h5py.File(filename, 'a')
-        inter_entry = plugin_file['entry'].require_group('intermediate')
-        inter_entry.attrs[NX_CLASS] = 'NXcollection'
-        inter_entry[group_name] = output_data.external_link()
-        plugin_file.close()
-
     def get_string(self):
         out_string = []
         count = 0
         for plugin in self.plugin_list:
             count += 1
             description = "%2i) %s(%s)" % (count, plugin['name'], plugin['id'])
+            keycount = 0
             for key in plugin['data'].keys():
-                description += "\n     %20s : %s" % (key, plugin['data'][key])
+                keycount += 1
+                description += "\n  %2i)   %20s : %s" % (keycount, key,
+                                                          plugin['data'][key])
             out_string.append(description)
         return '\n'.join(out_string)
 

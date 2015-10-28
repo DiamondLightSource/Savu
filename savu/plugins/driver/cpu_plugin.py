@@ -22,6 +22,7 @@
 """
 import logging
 
+
 class CpuPlugin(object):
     """
     The base class from which all plugins should inherit.
@@ -58,12 +59,10 @@ class CpuPlugin(object):
 
             exp.barrier()
             logging.debug("Post-processing")
-            return_dict = self.post_process()
+            self.post_process()
 
             self.clean_up()
 
-            return return_dict
-            
         logging.debug("Not Running the task as not CPU")
         return
 

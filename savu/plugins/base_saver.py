@@ -23,13 +23,19 @@
 
 from savu.plugins.plugin import Plugin
 
+
 class BaseSaver(Plugin):
     """
-    A base plugin from which all data saver plugins should inherit.    
-    
-    :param output_all_metadata: Dump all metadata to file when saving regardless of data type. Default: False.   
-
+    A base plugin from which all data saver plugins should inherit.
     """
-            
+
+    def main_setup(self, exp, params):
+        """
+        Overwrites the main_setup function in plugin.py as the saver is a
+        special case of plugin that doesn't required setup of in/out_datasets
+        """
+        self.exp = exp
+        self.setup()
+
     def __init__(self, name='BaseSaver'):
         super(BaseSaver, self).__init__(name)

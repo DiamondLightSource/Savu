@@ -1,5 +1,5 @@
 import logging
-from savu.plugins.filter import Filter
+from savu.plugins.base_filter import BaseFilter
 from savu.data.plugin_info import CitationInformation
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.data import structures
@@ -14,7 +14,7 @@ from savu.plugins.utils import register_plugin
 
 
 @register_plugin
-class SinogramAlignment(Filter, CpuPlugin):
+class SinogramAlignment(BaseFilter, CpuPlugin):
     """
     A plugin to determine the centre of rotation of a sinogram and to align the
     rows of a sinogram, e.g. in the case of motor backlash.  The centre of mass

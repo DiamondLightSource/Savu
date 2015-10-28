@@ -22,7 +22,7 @@
 """
 import logging
 
-from savu.plugins.filter import Filter
+from savu.plugins.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 import scipy.signal.signaltools as sig
@@ -31,7 +31,7 @@ from savu.plugins.utils import register_plugin
 
 
 @register_plugin
-class MedianFilter(Filter, CpuPlugin):
+class MedianFilter(BaseFilter, CpuPlugin):
     """
     A plugin to filter each frame with a 3x3 median filter
 

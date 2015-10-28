@@ -39,62 +39,76 @@ class BaseRecon(Plugin):
     :param center_of_rotation: Centre of rotation to use for the reconstruction). Default: 86.
     :param in_datasets: Create a list of the dataset(s) to process. Default: [].
     :param out_datasets: Create a list of the dataset(s) to process. Default: [].
-
     """
     count = 0
 
     def __init__(self, name='BaseRecon'):
         super(BaseRecon, self).__init__(name)
 
-    def reconstruct(self, sinogram, centre_of_rotations, vol_shape):
+    def pre_process(self):
+        in_dataset = self.get_in_datasets()[0]
+        in_meta_data = self.get_in_meta_data()[0]
+        try:
+            cor = in_meta_data.get_meta_data("centre_of_rotation")
+        except KeyError:
+            cor = np.ones(in_dataset.get_shape()[1])
+            cor *= self.parameters['center_of_rotation']
+            in_meta_data.set_meta_data("centre_of_rotation", cor)
+        self.exp.log(self.name + " End")
+        self.cor = cor
+        in_pData, out_pData = self.get_plugin_datasets()
+        self.vol_shape = out_pData[0].get_shape()
+        self.main_dir = in_pData[0].get_pattern()['SINOGRAM']['main_dir']
+        self.angles = in_meta_data.get_meta_data('rotation_angle')
+        self.slice_dirs = out_pData[0].get_slice_directions()
+
+    @logmethod
+    def process_frames(self, data, slice_list):
         """
         Reconstruct a single sinogram with the provided center of rotation
         """
-        logging.error("reconstruct needs to be implemented")
-        raise NotImplementedError("reconstruct " +
-                                  "needs to be implemented")
+        cor = self.cor[slice_list[0][self.main_dir]]
+        result = self.reconstruct(np.squeeze(data[0]), cor, self.angles,
+                                  self.vol_shape)
+        for sdir in self.slice_dirs:
+            result = np.expand_dims(result, sdir)
+        return result
 
-    @logmethod
-    def process(self, transport):
+    def reconstruct(self, data, cor, angles, shape):
         """
-        Perform the main processing step for the plugin
+        This is the main processing method for all plugins that inherit from
+        base recon.  The plugin must implement this method.
         """
-        in_data, out_data = self.get_plugin_datasets()
-        in_meta_data, out_meta_data = self.get_meta_data()
-
-        try:
-            centre_of_rotation = \
-                in_meta_data[0].get_meta_data("centre_of_rotation")
-        except KeyError:
-            centre_of_rotation = np.ones(in_data[0].data_obj.get_shape()[1])
-            centre_of_rotation *= self.parameters['center_of_rotation']
-            in_meta_data[0].set_meta_data("centre_of_rotation",
-                                          centre_of_rotation)
-
-        transport.reconstruction_setup(self, in_data[0], out_data[0],
-                                       self.exp)
+        logging.error("process needs to be implemented")
+        raise NotImplementedError("process needs to be implemented")
 
     def setup(self):
-        self.exp.log(self.name + " Start")
-
-        # Input datasets setup
+        # set up the output dataset that is created by the plugin
+        in_dataset, out_dataset = self.get_datasets()
+        # set information relating to the plugin data
         in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup(pattern_name='SINOGRAM',
-                                      chunk=self.get_max_frames())
+        # copy all required information from in_dataset[0]
+        in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
 
-        # set details for all output data sets
-        shape = in_pData[0].data_obj.get_shape()
-        out_pData[0].plugin_data_setup(pattern_name='VOLUME_XZ',
-                                       chunk=self.get_max_frames(),
-                                       shape=(shape[2], shape[1], shape[2]))
+        dim_detX, dim_rotAngle = in_pData[0].get_core_directions()
+        dim_detY = in_pData[0].get_slice_directions()[0]
+        shape = list(in_dataset[0].get_shape())
+        shape[dim_rotAngle] = shape[dim_detX]
 
-        # copy or add patterns related to this dataset
-        out_pData[0].data_obj.add_volume_patterns()
+        dim_volX = dim_rotAngle
+        dim_volY = dim_detY
+        dim_volZ = dim_detX
 
-        self.exp.log(self.name + " End")
+        axis_labels = {in_dataset[0]: [str(dim_volX) + '.voxel_x.units',
+                       str(dim_volY) + '.voxel_y.units',
+                       str(dim_volZ) + '.voxel_z.units']}
 
-    def organise_metadata(self):
-        pass
+        out_dataset[0].create_dataset(axis_labels=axis_labels,
+                                      shape=tuple(shape))
+        out_dataset[0].add_volume_patterns(dim_volX, dim_volY, dim_volZ)
+
+        # set pattern_name and nframes to process for all datasets
+        out_pData[0].plugin_data_setup('VOLUME_XZ', self.get_max_frames())
 
     def get_max_frames(self):
         """

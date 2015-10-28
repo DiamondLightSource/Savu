@@ -25,9 +25,6 @@ import h5py
 import logging
 
 from mpi4py import MPI
-import numpy as np
-
-import savu.data.data_structures as ds
 
 NX_CLASS = 'NX_class'
 
@@ -46,14 +43,11 @@ class TomographySavers(object):
         pass
 
     def save_to_hdf5(self, exp):
-        dtype = np.float32
         for key in exp.index["out_data"].keys():
             out_data = exp.index["out_data"][key]
             out_data.backing_file = self.create_backing_h5(key, exp.meta_data)
-            group = self.create_entries(out_data.backing_file, out_data,
-                                        exp.meta_data, key, dtype)
-
-            #self.output_meta_data(group, out_data, exp.meta_data, dtype)
+            out_data.group_name, out_data.group = \
+                self.create_entries(out_data, exp.meta_data, key)
 
     def create_backing_h5(self, key, expInfo):
         """
@@ -66,6 +60,7 @@ class TomographySavers(object):
         else:
             backing_file = h5py.File(filename, 'w')
 
+        print "creating file", filename
         if backing_file is None:
             raise IOError("Failed to open the hdf5 file")
 
@@ -75,58 +70,22 @@ class TomographySavers(object):
 
         return backing_file
 
-    def create_entries(self, backing_file, data, expInfo, key, dtype):
-        group = backing_file.create_group(
-            expInfo.get_meta_data(["group_name", key]))
-        group.attrs[NX_CLASS] = 'NXdata'
+    def create_entries(self, data, expInfo, key):
 
-        params = self.set_name("data")
-        self.output_data_to_file(group, params, data.get_shape(), dtype)
-        data.data = params["name"]
-        return group
-
-    def output_meta_data(self, group, data, expInfo, dtype):
-        output_list = self.get_output_list(expInfo, data)
-
-        for name in output_list:
-            params = self.set_name(name)
-            value = expInfo.get_meta_data(name)
-            # just numpy arrays for now
-            if (type(value).__module__) in np.__name__:
-                self.output_data_to_file(group, params, value.shape, dtype)
-                params['name'][...] = value
-
-    def get_output_list(self, expInfo, data):
-        if self.parameters is False:
-            pattern = data.get_pattern_name()
-            if isinstance(data, ds.Raw):
-                pattern = "RAW"
-            return self.get_pattern_meta_data(data, pattern)
-        else:
-            meta_data = []
-            for key in expInfo.get_dictionary().keys():
-                meta_data.append(key)
-            return meta_data
-
-    # Temporary: Need to move this somewhere else?
-    def get_pattern_meta_data(self, pattern):
-        theDict = {}
-        theDict['RAW'] = ["image_key", "control", "rotation_angle"]
-        theDict['PROJECTION'] = ["rotation_angle"]
-        theDict['SINOGRAM'] = theDict['PROJECTION']
-
+        group_name = expInfo.get_meta_data(["group_name", key])
         try:
-            return theDict['pattern']
-        except KeyError:
-            print "Warning: No meta_data output is associated with the \
-                                                            pattern:", pattern
-            return []
+            group_name = group_name + '_' + data.name
+        except AttributeError:
+            pass
+        group = data.backing_file.create_group(group_name)
+        group.attrs[NX_CLASS] = 'NXdata'
+        group.attrs['signal'] = 'data'
 
-    def output_data_to_file(self, group, params, shape, dtype):
-        params['name'] = group.create_dataset(params['name'], shape, dtype)
-        params['name'].attrs['signal'] = 1
+        if data.get_variable_flag() is True:
+            dt = h5py.special_dtype(vlen=data.dtype)
+            data.data = group.create_dataset('data', data.get_shape()[:-1], dt)
+        else:
+            data.data = group.create_dataset('data', data.get_shape(),
+                                             data.dtype)
 
-    def set_name(self, name):
-        params = {}
-        params['name'] = name
-        return params
+        return group_name, group

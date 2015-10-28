@@ -22,7 +22,7 @@
 """
 import logging
 
-from savu.plugins.filter import Filter
+from savu.plugins.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 import numpy as np
@@ -32,7 +32,7 @@ from savu.plugins.utils import register_plugin
 
 
 @register_plugin
-class PaganinFilter(Filter, CpuPlugin):
+class PaganinFilter(BaseFilter, CpuPlugin):
     """
     A plugin to apply Paganin filter (contrast enhancement) on projections
 
@@ -49,8 +49,7 @@ class PaganinFilter(Filter, CpuPlugin):
         logging.debug("initialising Paganin Filter")
         logging.debug("Calling super to make sure that all superclases are " +
                       " initialised")
-        super(PaganinFilter,
-              self).__init__("PaganinFilter")
+        super(PaganinFilter, self).__init__("PaganinFilter")
         self.filtercomplex = None
 
     def _setup_paganin(self, width, height):
@@ -88,9 +87,9 @@ class PaganinFilter(Filter, CpuPlugin):
         result = -0.5*self.parameters['Ratio']*np.log(fpci+1.0)
         return result
 
-    def filter_frame(self, data_list, params):
+    def filter_frames(self, data):
         logging.debug("Getting the filter frame of Paganin Filter")
-        data = data_list[0]
+        data = data[0]
         (depth, height, width) = data.shape
         self._setup_paganin(width, height)
         data = np.nan_to_num(data)  # Noted performance
@@ -105,5 +104,8 @@ class PaganinFilter(Filter, CpuPlugin):
         return result[result.shape[0]/2,
                       padtopbottom:-padtopbottom,
                       padleftright: -padleftright]
+
+    def get_max_frames(self):
+        return 1
 
 # TODO Add the citation information here

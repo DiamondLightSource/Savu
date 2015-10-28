@@ -11,8 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from savu.data.plugin_info import CitationInformation
-
 """
 .. module:: vo_centering
    :platform: Unix
@@ -29,13 +27,17 @@ import numpy as np
 import scipy.fftpack as fft
 
 from savu.plugins.utils import register_plugin
-from savu.plugins.filter import Filter
+from savu.plugins.base_filter import BaseFilter
+
+from savu.data.plugin_info import CitationInformation
 
 
 @register_plugin
-class VoCentering(Filter, CpuPlugin):
+class VoCentering(BaseFilter, CpuPlugin):
     """
     A plugin to calculate the center of rotation using the Vo Method
+    :param datasets_to_populate: A list of datasets which require this information. Default: [].    
+    :param out_datasets: The default names. Default: ['cor_raw','cor_fit'].
     """
 
     def __init__(self):
@@ -68,7 +70,7 @@ class VoCentering(Filter, CpuPlugin):
         vv = abs(vv)
         return cor_positions[vv.argmin()]
 
-    def filter_frame(self, data):
+    def filter_frames(self, data):
         data = data[0].squeeze()
         width = data.shape[1]/4
         step = width/10.
@@ -88,38 +90,82 @@ class VoCentering(Filter, CpuPlugin):
 
     def post_process(self):
         # do some curve fitting here
-        in_data, out_data = self.get_plugin_datasets()
-        cor_raw = out_data[0].data_obj.data[...]
-        out_data[1].data_obj.data[...] = cor_raw + 10
-        # do this if you wish to add an output dataset to metadata and not keep
-        # it in the plugin chain
-        output_dict = {'cor_raw': out_data[0].data_obj,
-                       'cor_fit': out_data[1].data_obj}
-        return {'transfer_to_meta_data': {in_data[0]: output_dict}}
+        in_datasets, out_datasets = self.get_datasets()
+        cor_raw = out_datasets[0].data[...]
+        cor_fit = out_datasets[1].data[...]
+
+        # now fit the result
+        x = np.arange(cor_raw.shape[0])
+
+        # first clean all points where the derivative is too high
+        diff = np.abs(np.diff(cor_raw))
+
+        tollerence = np.median(diff)
+
+        x_clean = x[diff < tollerence * 2.0]
+        cor_clean = cor_raw[diff < tollerence * 2.0]
+
+        # set up for the iterative clean on the fit
+        cor_fit = cor_clean
+        max_disp = 10
+        p = None
+
+        # keep fitting and removing points until the fit is within
+        # the tollerences
+        while max_disp > tollerence:
+            mask = (np.abs(cor_fit-cor_clean)) < (max_disp / 2.)
+            x_clean = x_clean[mask]
+            cor_clean = cor_clean[mask]
+            z = np.polyfit(x_clean, cor_clean, 1)
+            p = np.poly1d(z)
+            cor_fit = p(x_clean)
+            max_disp = (np.abs(cor_fit-cor_clean)).max()
+
+        # build a full array for the output fit
+        cor_fit = p(x)
+
+        out_datasets[1].data[:] = cor_fit[:]
+        # add to metadata
+        in_meta_data = self.get_in_meta_data()[0]
+        self.populate_meta_data('cor_raw', cor_raw)
+        self.populate_meta_data('centre_of_rotation', cor_fit)
+#        # remove the output datasets from the processing chain
+#        self.exp.remove_dataset(out_datasets[0])
+#        self.exp.remove_dataset(out_datasets[1])
+
+    def populate_meta_data(self, key, value):
+        datasets = self.parameters['datasets_to_populate']
+        in_meta_data = self.get_in_meta_data()[0]
+        in_meta_data.set_meta_data(key, value)
+        for name in datasets:
+            self.exp.index['in_data'][name].meta_data.set_meta_data(key, value)
 
     def setup(self):
 
         self.exp.log(self.name + " Start")
 
-        in_data, out_data = self.get_plugin_datasets()
-        in_data[0].plugin_data_setup(pattern_name='SINOGRAM',
-                                     chunk=self.get_max_frames())
+        # set up the output dataset that is created by the plugin
+        in_dataset, out_dataset = self.get_datasets()
+        # copy all required information from in_dataset[0]
+        fullData = in_dataset[0]
+        out_dataset[0].create_dataset(pattern_name='1D_METADATA',
+                                      shape=(fullData.get_shape()[1],),
+                                      axis_labels=('y.pixels',), remove=True)
 
-        fullData = in_data[0].data_obj
-        out_data[0].data_obj.add_pattern("1D_METADATA", slice_dir=(0,))
-        out_data[0].plugin_data_setup(pattern_name='1D_METADATA',
-                                      chunk=self.get_max_frames(),
-                                      shape=(fullData.get_shape()[1],))
+        out_dataset[1].create_dataset(pattern_name='1D_METADATA',
+                                      shape=(fullData.get_shape()[1],),
+                                      axis_labels=('y.pixels',), remove=True)
 
-        out_data[1].data_obj.add_pattern("1D_METADATA", slice_dir=(0,))
-        out_data[1].plugin_data_setup(pattern_name='1D_METADATA',
-                                      chunk=self.get_max_frames(),
-                                      shape=(fullData.get_shape()[1],))
+        in_pData, out_pData = self.get_plugin_datasets()
+        in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
+
+        out_pData[0].data_obj.add_pattern("1D_METADATA", slice_dir=(0,))
+        out_pData[0].plugin_data_setup('1D_METADATA', self.get_max_frames())
+
+        out_pData[1].data_obj.add_pattern("1D_METADATA", slice_dir=(0,))
+        out_pData[1].plugin_data_setup('1D_METADATA', self.get_max_frames())
 
         self.exp.log(self.name + " End")
-
-    def organise_metadata(self):
-        pass
 
     def nOutput_datasets(self):
         return 2

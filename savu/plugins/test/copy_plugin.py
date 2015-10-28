@@ -22,7 +22,7 @@
 """
 import logging
 
-from savu.plugins.filter import Filter
+from savu.plugins.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 from savu.data import structures
@@ -31,7 +31,7 @@ from savu.plugins.utils import register_plugin
 
 
 @register_plugin
-class CopyPlugin(Filter, CpuPlugin):
+class CopyPlugin(BaseFilter, CpuPlugin):
     """
     A plugin to copy data with no opperation, for testing only
 

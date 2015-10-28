@@ -69,7 +69,7 @@ class PluginRunnerSTXMTest(unittest.TestCase):
         options = {
             "transport": "hdf5",
             "process_names": "CPU0",
-            "data_file": tu.get_test_data_path('stxm.nxs'),
+            "data_file": tu.get_test_data_path('mm.nxs'),
             "process_file": tu.get_test_data_path('basic_stxm_process.nxs'),
             "out_path": tempfile.mkdtemp()
             }
@@ -77,16 +77,30 @@ class PluginRunnerSTXMTest(unittest.TestCase):
 
 
 class PluginRunnerXRDTest(unittest.TestCase):
+ 
+    def test_process(self):
+        options = {
+            "transport": "hdf5",
+            "process_names": "CPU0",
+            "data_file": tu.get_test_data_path('mm.nxs'),
+            "process_file": tu.get_test_data_path('basic_xrd_process.nxs'),
+            "out_path": tempfile.mkdtemp()
+            }
+        run_protected_plugin_runner(options)
+
+
+class PluginRunnerFluoTest(unittest.TestCase):
 
     def test_process(self):
         options = {
             "transport": "hdf5",
             "process_names": "CPU0",
-            "data_file": tu.get_test_data_path('xrd_test.nxs'),
-            "process_file": tu.get_test_data_path('basic_xrd_process.nxs'),
+            "data_file": tu.get_test_data_path('mm.nxs'),
+            "process_file": tu.get_test_data_path('basic_fluo_process.nxs'),
             "out_path": tempfile.mkdtemp()
             }
         run_protected_plugin_runner(options)
+
 
 if __name__ == "__main__":
     unittest.main()

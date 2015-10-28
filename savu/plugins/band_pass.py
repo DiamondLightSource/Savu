@@ -22,7 +22,7 @@
 """
 import logging
 
-from savu.plugins.filter import Filter
+from savu.plugins.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 from scipy.ndimage.filters import gaussian_filter
@@ -31,7 +31,7 @@ from savu.plugins.utils import register_plugin
 
 
 @register_plugin
-class BandPass(Filter, CpuPlugin):
+class BandPass(BaseFilter, CpuPlugin):
     """
     A plugin to filter each frame with a BandPass T
 
@@ -53,7 +53,7 @@ class BandPass(Filter, CpuPlugin):
         super(BandPass,
               self).__init__("BandPass")
 
-    def filter_frame(self, data, params):
+    def filter_frames(self, data):
         """
         The second method we need to implement from the Filter class and the
         part of the code that actually does all the work. the input here 'data'
@@ -70,5 +70,4 @@ class BandPass(Filter, CpuPlugin):
         elif self.parameters['type'] == 'High':
             lp = gaussian_filter(data, self.parameters['blur_width'])
             result = data - lp
-
         return result

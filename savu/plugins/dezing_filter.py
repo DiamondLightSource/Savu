@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: median_3x3_filter
+.. module:: dezing_filter
    :platform: Unix
-   :synopsis: A plugin to filter each frame with a 3x3 median filter
+   :synopsis: A plugin to remove dezingers
 
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
@@ -24,13 +24,13 @@ import logging
 import numpy as np
 import dezing
 
-from savu.plugins.filter import Filter
+from savu.plugins.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 
 
 @register_plugin
-class DezingFilter(Filter, CpuPlugin):
+class DezingFilter(BaseFilter, CpuPlugin):
     """
     A plugin
 
@@ -65,7 +65,7 @@ class DezingFilter(Filter, CpuPlugin):
 #        data.padding = {'pad_multi_frames':pad, 'pad_frame_edges':pad}
 #        data.padding = {'pad_direction':[ddir, pad]}}
 
-    def filter_frame(self, data, params):
+    def filter_frame(self, data):
         logging.debug("Running Dezing Frame")
         result = np.empty_like(data[0])
         dezing.run(data[0], result)

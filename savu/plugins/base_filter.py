@@ -22,22 +22,24 @@
 """
 from savu.plugins.plugin import Plugin
 
-from savu.core.utils import logmethod
 import logging
 
 
-class Filter(Plugin):
+class BaseFilter(Plugin):
     """
     A Plugin to apply a simple dark and flatfield correction to some
     raw timeseries data
 
     :param in_datasets: Create a list of the dataset(s) to process. Default: [].
     :param out_datasets: Create a list of the dataset(s) to process. Default: [].
-
     """
 
     def __init__(self, name):
-        super(Filter, self).__init__(name)
+        super(BaseFilter, self).__init__(name)
+
+    def main_setup(self, exp, params):
+        super(BaseFilter, self).main_setup(exp, params)
+        self.set_filter_padding(*(self.get_plugin_datasets()))
 
     def set_filter_padding(self, in_data, out_data):
         """
@@ -55,49 +57,38 @@ class Filter(Plugin):
         """
         return 8
 
-    def filter_frame(self, data):
+    def process_frames(self, data, slice_list):
         """
-        Should be overloaded by filter classes extending this one
+        Calls the main filter processing function
+        """
+        return self.filter_frames(data)
 
-        :param data: The data to filter
-        :type data: ndarray
-        :returns:  The filtered image
+    def filter_frames(self, data):
         """
-        logging.error("filter_frame needs to be implemented for %s",
-                      data.__class__)
-        raise NotImplementedError("filter_frame needs to be implemented")
+        This is the main processing method for all plugins that inherit from
+        base recon.  The plugin must implement this method.
+        """
+        logging.error("process needs to be implemented")
+        raise NotImplementedError("process needs to be implemented")
 
-    @logmethod
-    def process(self, transport):
-        """
-        """
-        in_data, out_data = self.get_datasets()
-        self.set_filter_padding(in_data, out_data)
-        transport.filter_chunk(self, in_data, out_data)
-        # reset padding to none
-        for data in in_data:
-            data.padding = None
+    def get_plugin_pattern(self):
+        return 'PROJECTION'
 
     def setup(self):
         self.exp.log(self.name + " Start")
+        # set up the output dataset that is created by the plugin
+        in_dataset, out_dataset = self.get_datasets()
+        # copy all required information from in_dataset[0]
+        out_dataset[0].create_dataset(in_dataset[0])
 
-        # Input datasets setup
-        in_data, out_data = self.get_plugin_datasets()
-        in_data[0].plugin_data_setup(pattern_name='PROJECTION',
-                                     chunk=self.get_max_frames())
+        # set information relating to the plugin data
+        in_pData, out_pData = self.get_plugin_datasets()
+        # set pattern_name and nframes to process for all datasets
+        plugin_pattern = self.get_plugin_pattern()
+        in_pData[0].plugin_data_setup(plugin_pattern, self.get_max_frames())
+        out_pData[0].plugin_data_setup(plugin_pattern, self.get_max_frames())
 
-        # set details for all output data sets
-        out_data[0].plugin_data_setup(pattern_name='PROJECTION',
-                                      chunk=self.get_max_frames(),
-                                      shape=in_data[0].data_obj.
-                                      get_shape())
-
-        # copy or add patterns related to this dataset
-        out_data[0].data_obj.copy_patterns(in_data[0].data_obj.get_patterns())
         self.exp.log(self.name + " End")
-
-    def organise_metadata(self):
-        pass
 
     def nInput_datasets(self):
         return 1
