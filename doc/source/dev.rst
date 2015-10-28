@@ -1,6 +1,51 @@
 Savu Developer Guide
 ********************
 
+Release Strategy
+================
+
+When a new release is required the following process should be done.  
+Make a new branch for convinience if fixes are needed, it should be called vX.Y-release i.e v0.1-release.
+After the branch is made, move to it and then create a release tag for it called vX.Y.Z i.e v0.1.0, where Z starts at 0, and future minor release verisons can be made with v0.1.1 etc later on down the branch.
+
+Once this is done, Zenodo.org will automatically create and archive an artefact.
+
+We should then update the pypi stuff.
+
+
+Developing on a feature branch
+==============================
+
+Make a new Branch for development and move to it
+	git checkout -b new_branch
+
+Make modifications and commit as normal
+	git commit -m "test commit"
+	
+push this branch up to github
+	git push --set-upstream origin new_branch
+	
+get all the latest data from github on all branches
+	git fetch
+
+to keep up to date, merge recent changes from master into the development branch and fix issues if there are any
+	git merge origin/master
+	
+Continue working with the branch untill you are happy with the new feature, merge master into it as shown before and fix up issues, then merge the branch into master
+	
+move to master
+	git checkout master
+
+update
+	git pull
+
+merge in the new branch
+	git merge new_branch
+
+there should be no problems if you have merge master in first, so just push back up
+	git push
+
+
 Developing new Plugins
 ======================
 

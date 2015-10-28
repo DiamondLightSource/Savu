@@ -70,7 +70,6 @@ class BaseRecon(Plugin):
         cor = self.cor[slice_list[0][self.main_dir]]
         result = self.reconstruct(np.squeeze(data[0]), cor, self.angles,
                                   self.vol_shape)
-        print "result shape", result.shape, self.slice_dirs
         for sdir in self.slice_dirs:
             result = np.expand_dims(result, sdir)
         return result
@@ -110,7 +109,6 @@ class BaseRecon(Plugin):
 
         # set pattern_name and nframes to process for all datasets
         out_pData[0].plugin_data_setup('VOLUME_XZ', self.get_max_frames())
-        print "in the base recon", in_dataset[0].get_shape(), out_dataset[0].get_shape()
 
     def get_max_frames(self):
         """
