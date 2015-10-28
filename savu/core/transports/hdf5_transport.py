@@ -113,7 +113,7 @@ class Hdf5Transport(TransportMechanism):
 
         start = 1
         stop = start
-        n_plugins = len(plugin_list[start:-1])
+        n_plugins = len(plugin_list[start:-1]) + 1
         while True:
             print "**** in the loading loop"
             start_in_data = copy.deepcopy(exp.index['in_data'])
@@ -122,6 +122,7 @@ class Hdf5Transport(TransportMechanism):
             exp.clear_data_objects()
             self.exp.index['in_data'] = start_in_data
             self.real_plugin_run(plugin_list, out_data_objs, start, stop)
+            print n_plugins, stop
             if n_plugins != stop:
                 self.fix_variable_length_array()  # which data objects
             else:
