@@ -26,6 +26,7 @@ import numpy as np
 from scipy.optimize import leastsq
 import time
 
+
 @register_plugin
 class SimpleFit(BaseFitter):
     """
