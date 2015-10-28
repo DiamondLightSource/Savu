@@ -39,6 +39,7 @@ class Plugin(object):
         self.exp = None
         self.parameters = {}
         self.data_objs = {}
+        self.variable_data_flag = False
 
     def main_setup(self, exp, params):
         self.exp = exp

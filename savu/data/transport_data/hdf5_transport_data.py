@@ -91,10 +91,19 @@ class Hdf5TransportData(object):
             saver_plugin.setup()
             out_data_objects.append(exp.index["out_data"].copy())
             exp.merge_out_data_to_in()
-
             count += 1
+            if self.variable_data_check(plugin):
+                return out_data_objects, count
 
         return out_data_objects, count
+
+    def variable_data_check(self, plugin):
+        in_datasets = plugin.get_in_datasets()
+        flag = False
+        for data in in_datasets:
+            if data.get_variable_flag:
+                flag = True
+        return flag
 
     def set_filenames(self, plugin, plugin_id, count):
             exp = self.exp
