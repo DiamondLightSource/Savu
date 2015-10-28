@@ -90,21 +90,17 @@ class BaseRecon(Plugin):
         # copy all required information from in_dataset[0]
         in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
 
-        dim_detX, dim_rotAngle = in_pData[0].get_core_directions()
-        dim_detY = in_pData[0].get_slice_directions()[0]
-        shape = list(in_dataset[0].get_shape())
-        shape[dim_rotAngle] = shape[dim_detX]
+        axis_labels = in_dataset[0].data_info.get_meta_data('axis_labels')[0]
 
-        dim_volX = dim_rotAngle
-        dim_volY = dim_detY
-        dim_volZ = dim_detX
-        print "x is"+str(dim_volX)
-        print "Y is"+str(dim_volY)
-        print "Z is"+str(dim_volZ)
+        dim_volX, dim_volY, dim_volZ = \
+            self.map_volume_dimensions(in_dataset[0])
 
         axis_labels = {in_dataset[0]: [str(dim_volX) + '.voxel_x.units',
                        str(dim_volY) + '.voxel_y.units',
                        str(dim_volZ) + '.voxel_z.units']}
+
+        shape = list(in_dataset[0].get_shape())
+        shape[dim_volX] = shape[dim_volZ]
 
         out_dataset[0].create_dataset(axis_labels=axis_labels,
                                       shape=tuple(shape))
@@ -112,6 +108,18 @@ class BaseRecon(Plugin):
 
         # set pattern_name and nframes to process for all datasets
         out_pData[0].plugin_data_setup('VOLUME_XZ', self.get_max_frames())
+
+    def map_volume_dimensions(self, data):
+        dim_rotAngle = data.get_data_patterns()['PROJECTION']['main_dir']
+        dim_detY = data.get_data_patterns()['SINOGRAM']['main_dir']
+        core_dirs = data.get_plugin_data().get_core_directions()
+        dim_detX = list(set(core_dirs).difference(set((dim_rotAngle,))))[0]
+
+        print dim_rotAngle, dim_detY, dim_detX
+        dim_volX = dim_rotAngle
+        dim_volY = dim_detY
+        dim_volZ = dim_detX
+        return dim_volX, dim_volY, dim_volZ
 
     def get_max_frames(self):
         """

@@ -364,6 +364,13 @@ class Data(object):
                 pass
         self.data_info.set_meta_data('axis_labels', axis_labels)
 
+    def find_axis_label_dimension(self, name):
+        axis_labels = self.data_info.get_meta_data('axis_labels')
+        for i in range(len(axis_labels)):
+            if name in axis_labels[i].keys():
+                return i
+        raise Exception("Cannot find the specifed axis label.")
+
     def finalise_patterns(self):
         check = 0
         check += self.check_pattern('SINOGRAM')
@@ -394,14 +401,6 @@ class Data(object):
             list_ddirs[i] = nDims + ddirs[i]
         index = tuple(list_ddirs)
         return index
-
-#    def set_direction_parallel_to_rotation_axis(self, tdir):
-#        self.check_direction(tdir, 'parallel_to_rotation_axis')
-#        self.set_main_axis(tdir, 'SINOGRAM')
-#
-#    def set_direction_perp_to_rotation_axis(self, tdir):
-#        self.check_direction(tdir, 'perp_to_rotation_axis')
-#        self.set_main_axis(tdir, 'PROJECTION')
 
     def check_direction(self, tdir, dname):
         if not isinstance(tdir, int):
