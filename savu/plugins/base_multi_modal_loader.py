@@ -130,7 +130,7 @@ class BaseMultiModalLoader(BaseLoader):
             data_obj.add_pattern("PROJECTION", core_dir=proj_dir,
                                  slice_dir=tuple(set(dims) - set(proj_dir)))
 
-        sino_dir = (rotation, proj_dir[0])
+        sino_dir = (rotation, proj_dir[-1])
         print "sinograms are:"+str(sino_dir)
         if data_obj.data_mapping.is_tomo:
             #rotation and fast axis

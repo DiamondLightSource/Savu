@@ -364,6 +364,9 @@ class Data(object):
                 pass
         self.data_info.set_meta_data('axis_labels', axis_labels)
 
+    def find_axis_label(self):
+        axis_labels = self.data_info.get_meta_data('axis_labels')
+
     def finalise_patterns(self):
         check = 0
         check += self.check_pattern('SINOGRAM')
