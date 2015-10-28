@@ -98,6 +98,9 @@ class BaseRecon(Plugin):
         dim_volX = dim_rotAngle
         dim_volY = dim_detY
         dim_volZ = dim_detX
+        print "x is"+str(dim_volX)
+        print "Y is"+str(dim_volY)
+        print "Z is"+str(dim_volZ)
 
         axis_labels = {in_dataset[0]: [str(dim_volX) + '.voxel_x.units',
                        str(dim_volY) + '.voxel_y.units',
