@@ -160,10 +160,8 @@ class Data(object):
                 if isinstance(shape, Data):
                     self.set_shape(shape.get_shape())
                 elif type(shape) is dict:
-                    print "setting the variable flag"
                     self.set_variable_flag()
                     self.set_shape((shape[shape.keys()[0]] + ('var',)))
-                    print self.get_shape()
                 else:
                     self.set_shape(shape)
                     if 'var' in shape:

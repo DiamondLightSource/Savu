@@ -121,7 +121,7 @@ class Hdf5Transport(TransportMechanism):
             exp.clear_data_objects()
             self.exp.index['in_data'] = copy.deepcopy(start_in_data)
             self.real_plugin_run(plugin_list, out_data_objs, start, stop)
-            start = stop + 1
+            start = stop
 
         exp.barrier()
         logging.info("close all remaining files")

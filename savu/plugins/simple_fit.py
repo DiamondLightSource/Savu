@@ -43,9 +43,7 @@ class SimpleFit(BaseFitter):
         data = data[0].squeeze()
         in_meta_data = self.get_in_meta_data()[0]
         positions = in_meta_data.get_meta_data("PeakIndex")
-        print sorted(positions)
         axis = in_meta_data.get_meta_data("Q")
-        print len(axis)
         weights = data[positions]
         widths = np.ones_like(positions)*self.parameters["width_guess"]
         p = []
@@ -55,8 +53,7 @@ class SimpleFit(BaseFitter):
         lsq1 = leastsq(self._resid, p,
                        args=(curvetype, data, axis, positions),
                        Dfun=self.dfunc, col_deriv=1)
-        print "done one"
-        
+
         weights, widths, areas = self.getAreas(curvetype,
                                                axis, positions, lsq1[0])
         residuals = self._resid(lsq1[0], curvetype, data, axis, positions)
@@ -66,7 +63,6 @@ class SimpleFit(BaseFitter):
         print "Simple fit iteration took:"+str((t2-t1)*1e3)+"ms"
         return [weights, widths, areas, residuals]
 
-# dump this here for now to fix the variable length issue
     def setup(self):
         # set up the output datasets that are created by the plugin
         in_dataset, out_datasets = self.get_datasets()
@@ -78,7 +74,7 @@ class SimpleFit(BaseFitter):
         fitAreas = out_datasets[0]
         fitHeights = out_datasets[1]
         fitWidths = out_datasets[2]
-#        new_shape = shape[:-1] + (55,)
+
         new_shape = shape[:-1] + \
             self.set_unknown_shape(in_dataset[0], 'PeakIndex')
 
@@ -99,11 +95,9 @@ class SimpleFit(BaseFitter):
         fitAreas.add_pattern("CHANNEL", **channel)
         fitHeights.add_pattern("CHANNEL", **channel)
         fitWidths.add_pattern("CHANNEL", **channel)
-        #residlabels = in_dataset[0].meta_data.get_meta_data('axis_labels')[0:3]
-        #print residlabels.append(residlabels[-1])
+
         residuals = out_datasets[3]
         residuals.create_dataset(in_dataset[0])
-
 
         # setup plugin datasets
         in_pData, out_pData = self.get_plugin_datasets()

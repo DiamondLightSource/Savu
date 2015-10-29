@@ -106,8 +106,6 @@ class FindPeaks(BaseFilter, CpuPlugin):
                                       dtype=np.int,  # default is float32
                                       # remove from the processing chain
                                       remove=True)
-                                      
-        print out_dataset[0].get_shape()
 
         #out_dataset[0].add_pattern("1D_METADATA", slice_dir=(0,))
         out_dataset[0].add_pattern("SPECTRUM", slice_dir=(0,), core_dir= (1,))
