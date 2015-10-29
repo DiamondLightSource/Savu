@@ -35,7 +35,8 @@ class SimpleFitReconTest(unittest.TestCase):
             "transport": "hdf5",
             "process_names": "CPU0",
             "data_file": tu.get_test_data_path('mm.nxs'),
-            "process_file": tu.get_test_data_path('simplefitreconstest.nxs'),
+#            "process_file": tu.get_test_data_path('simplefitreconstest.nxs'),
+            "process_file": tu.get_test_data_path('testing_mm_sart_recon.nxs'),
             "out_path": tempfile.mkdtemp()
             }
         run_protected_plugin_runner(options)
