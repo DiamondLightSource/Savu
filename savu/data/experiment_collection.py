@@ -68,8 +68,7 @@ class Experiment(object):
         except KeyError:
             self.index[dtype][name] = Data(name, self)
             data_obj = self.index[dtype][name]
-            bases.append(data_obj.get_transport_data(
-                self.meta_data.get_meta_data("transport")))
+            bases.append(data_obj.get_transport_data())
             data_obj.add_base_classes(bases)
         return self.index[dtype][name]
 

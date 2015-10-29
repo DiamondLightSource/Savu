@@ -312,3 +312,9 @@ class Plugin(object):
         for data in data_list:
             meta_data.append(data.meta_data)
         return meta_data
+
+    def set_unknown_shape(self, data, key):
+        try:
+            return (len(data.meta_data.get_meta_data(key)),)
+        except KeyError:
+            return (0,)

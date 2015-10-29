@@ -40,39 +40,6 @@ class Hdf5TransportData(object):
     def __init__(self):
         self.backing_file = None
 
-#    def load_data(self, plugin_runner):
-#        exp = self.exp
-#        plugin_list = exp.meta_data.plugin_list.plugin_list
-#        final_plugin = plugin_list[-1]
-#        saver_plugin = plugin_runner.plugin_loader(final_plugin)
-#
-#        logging.debug("generating all output files")
-#        out_data_objects = []
-#        count = 0
-#        for plugin_dict in plugin_list[1:-1]:
-#
-#            plugin_id = plugin_dict["id"]
-#            logging.debug("Loading plugin %s", plugin_id)
-#
-#            exp.log("Point 1")
-#
-#            plugin = plugin_runner.plugin_loader(plugin_dict)
-#
-#            exp.log("Point 2")
-#
-#            self.set_filenames(plugin, plugin_id, count)
-#
-#            saver_plugin.setup()
-#
-#            out_data_objects.append(exp.index["out_data"].copy())
-#
-#            exp.merge_out_data_to_in()
-#
-#            exp.log("Point 3")
-#            count += 1
-#
-#        return out_data_objects
-
     def load_data(self, plugin_runner, start):
         exp = self.exp
         plugin_list = exp.meta_data.plugin_list.plugin_list
@@ -90,18 +57,18 @@ class Hdf5TransportData(object):
             self.set_filenames(plugin, plugin_id, count)
             saver_plugin.setup()
             out_data_objects.append(exp.index["out_data"].copy())
-            exp.merge_out_data_to_in()
             count += 1
             if self.variable_data_check(plugin):
                 return out_data_objects, count
+            exp.merge_out_data_to_in()
 
         return out_data_objects, count
 
     def variable_data_check(self, plugin):
-        in_datasets = plugin.get_in_datasets()
+        out_datasets = plugin.get_out_datasets()
         flag = False
-        for data in in_datasets:
-            if data.get_variable_flag:
+        for data in out_datasets:
+            if data.get_variable_flag():
                 flag = True
         return flag
 

@@ -90,7 +90,7 @@ class FindPeaks(BaseFilter, CpuPlugin):
         in_dataset, out_dataset = self.get_datasets()
         # set information relating to the plugin data
         in_pData, out_pData = self.get_plugin_datasets()
-        
+
         # set pattern_name and nframes to process for all datasets
         in_pData[0].plugin_data_setup("SPECTRUM", self.get_max_frames())
 
@@ -102,10 +102,12 @@ class FindPeaks(BaseFilter, CpuPlugin):
 #                                      # remove from the processing chain
 #                                      remove=True)
         out_dataset[0].create_dataset(axis_labels=['frames.frames', 'peaks.pixels'],
-                                      shape={'variable', (nFrames,)},
+                                      shape={'variable': (nFrames,)},
                                       dtype=np.int,  # default is float32
                                       # remove from the processing chain
                                       remove=True)
+                                      
+        print out_dataset[0].get_shape()
 
         #out_dataset[0].add_pattern("1D_METADATA", slice_dir=(0,))
         out_dataset[0].add_pattern("SPECTRUM", slice_dir=(0,), core_dir= (1,))

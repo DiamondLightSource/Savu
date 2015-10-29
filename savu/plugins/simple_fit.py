@@ -78,7 +78,9 @@ class SimpleFit(BaseFitter):
         fitAreas = out_datasets[0]
         fitHeights = out_datasets[1]
         fitWidths = out_datasets[2]
-        new_shape = shape[:-1] + (55,)
+#        new_shape = shape[:-1] + (55,)
+        new_shape = shape[:-1] + \
+            self.set_unknown_shape(in_dataset[0], 'PeakIndex')
 
         fitAreas.create_dataset(patterns={in_dataset[0]: pattern_list},
                                 axis_labels={in_dataset[0]: axis_labels},
@@ -93,7 +95,7 @@ class SimpleFit(BaseFitter):
                                  shape=new_shape)
 
         channel = {'core_dir': (-1,), 'slice_dir': range(len(shape)-1)}
-        
+
         fitAreas.add_pattern("CHANNEL", **channel)
         fitHeights.add_pattern("CHANNEL", **channel)
         fitWidths.add_pattern("CHANNEL", **channel)
