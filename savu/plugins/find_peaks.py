@@ -50,7 +50,9 @@ class FindPeaks(BaseFilter, CpuPlugin):
         out_meta_data.set_meta_data('PeakIndex', [])
 
     def filter_frames(self, data):
+        print data[0]
         data = data[0][0][0][0].squeeze()
+        print data
         foo = np.zeros(55,)
         out_meta_data = self.get_out_meta_data()[0]
         # filter to smooth noise
