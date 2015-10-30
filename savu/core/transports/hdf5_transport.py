@@ -30,6 +30,7 @@ from itertools import chain
 from savu.core.utils import logfunction
 from savu.data.transport_mechanism import TransportMechanism
 from savu.core.utils import logmethod
+import savu.plugins.utils as pu
 
 
 class Hdf5Transport(TransportMechanism):
@@ -109,7 +110,7 @@ class Hdf5Transport(TransportMechanism):
 
         exp.barrier()
         logging.info("run the loader plugin")
-        self.plugin_loader(plugin_list[0])
+        pu.plugin_loader(exp, plugin_list[0])
 
         start = 1
         stop = start
@@ -147,7 +148,7 @@ class Hdf5Transport(TransportMechanism):
 
             exp.barrier()
             logging.info("Load the plugin")
-            plugin = self.plugin_loader(plugin_list[i])
+            plugin = pu.plugin_loader(exp, plugin_list[i])
 
             plugin_name = (plugin.__module__).split('.')[-1]
             exp.barrier()
@@ -160,7 +161,7 @@ class Hdf5Transport(TransportMechanism):
             logging.info("close any files that are no longer required")
             out_datasets = plugin.parameters["out_datasets"]
 
-            self.reorganise_datasets(out_datasets, link_type)
+            exp.reorganise_datasets(out_datasets, link_type)
 
     @logmethod
     def process(self, plugin):

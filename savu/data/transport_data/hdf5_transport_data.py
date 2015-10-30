@@ -26,6 +26,7 @@ import logging
 import h5py
 import numpy as np
 
+import savu.plugins.utils as pu
 from savu.data.data_structures import Padding
 
 NX_CLASS = 'NX_class'
@@ -44,7 +45,7 @@ class Hdf5TransportData(object):
         exp = self.exp
         plugin_list = exp.meta_data.plugin_list.plugin_list
         final_plugin = plugin_list[-1]
-        saver_plugin = plugin_runner.plugin_loader(final_plugin)
+        saver_plugin = pu.plugin_loader(exp, final_plugin)
 
         logging.debug("generating all output files")
         out_data_objects = []
@@ -53,7 +54,7 @@ class Hdf5TransportData(object):
 
             plugin_id = plugin_dict["id"]
             logging.debug("Loading plugin %s", plugin_id)
-            plugin = plugin_runner.plugin_loader(plugin_dict)
+            plugin = pu.plugin_loader(exp, plugin_dict)
             self.set_filenames(plugin, plugin_id, count)
             saver_plugin.setup()
             out_data_objects.append(exp.index["out_data"].copy())

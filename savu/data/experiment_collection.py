@@ -25,6 +25,7 @@
 import os
 import time
 import logging
+import copy
 
 from mpi4py import MPI
 
@@ -101,6 +102,42 @@ class Experiment(object):
                         self.index['in_data'][key].meta_data.get_dictionary())
                 self.index['in_data'][key] = data
         self.index["out_data"] = {}
+
+    def reorganise_datasets(self, out_data_objs, link_type):
+        out_data_list = self.index["out_data"]
+        self.close_unwanted_files(out_data_list)
+        self.remove_unwanted_data(out_data_objs)
+
+        self.barrier()
+        logging.info("Copy out data to in data")
+        self.copy_out_data_to_in_data(link_type)
+
+        self.barrier()
+        logging.info("Clear up all data objects")
+        self.clear_out_data_objects()
+
+    def remove_unwanted_data(self, out_data_objs):
+        logging.info("Remove unwanted data from the plugin chain")
+        for out_objs in out_data_objs:
+            if out_objs.remove is True:
+                self.remove_dataset(out_objs)
+
+    def close_unwanted_files(self, out_data_list):
+        for out_objs in out_data_list:
+            if out_objs in self.index["in_data"].keys():
+                self.index["in_data"][out_objs].close_file()
+
+    def copy_out_data_to_in_data(self, link_type):
+        for key in self.index["out_data"]:
+            output = self.index["out_data"][key]
+            output.save_data(link_type)
+            self.index["in_data"][key] = copy.deepcopy(output)
+
+    def set_all_datasets(self, name):
+        data_names = []
+        for key in self.index["in_data"].keys():
+            data_names.append(key)
+        return data_names
 
     def barrier(self):
         if self.meta_data.get_meta_data('mpi') is True:

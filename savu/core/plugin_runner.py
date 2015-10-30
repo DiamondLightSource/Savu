@@ -23,9 +23,9 @@
 """
 import logging
 import sys
-import copy
 
 import savu.core.utils as cu
+import savu.plugins.utils as pu
 from savu.data.experiment_collection import Experiment
 from savu.plugins.base_loader import BaseLoader
 from savu.plugins.base_saver import BaseSaver
@@ -75,38 +75,6 @@ class PluginRunner(object):
         print "***********************"
         return self.exp
 
-    def plugin_loader(self, plugin_dict, **kwargs):
-        logging.debug("Running plugin loader")
-
-        try:
-            plugin = self.load_plugin(plugin_dict['id'])
-        except Exception as e:
-            logging.error("failed to load the plugin")
-            logging.error(e)
-            raise e
-
-        check_flag = kwargs.get('check', False)
-        if check_flag:
-            plugin_dict["data"]["in_datasets"]
-            self.set_datasets(plugin, plugin_dict)
-
-        logging.debug("Running plugin main setup")
-        plugin.main_setup(self.exp, plugin_dict['data'])
-
-        logging.debug("finished plugin loader")
-        return plugin
-
-    def run_plugins(self, plugin_list, **kwargs):
-        self.plugin_loader(plugin_list[0])
-        self.exp.set_nxs_filename()
-
-        check = kwargs.get('check', False)
-        for i in range(1, len(plugin_list)-1):
-            self.exp.barrier()
-            logging.info("Checking Plugin %s" % plugin_list[i]['name'])
-            self.plugin_loader(plugin_list[i], check=check)
-            self.exp.merge_out_data_to_in()
-
     def run_plugin_list_check(self, plugin_list):
         self.exp.barrier()
         logging.info("Checking loaders and Savers")
@@ -114,7 +82,7 @@ class PluginRunner(object):
 
         self.exp.barrier()
         logging.info("Running plugins with the check flag")
-        self.run_plugins(plugin_list, check=True)
+        pu.run_plugins(self.exp, plugin_list, check=True)
 
         self.exp.barrier()
         logging.info("empty the data object dictionaries")
@@ -124,138 +92,19 @@ class PluginRunner(object):
         logging.info("Plugin list check complete!")
         print "Plugin list check complete!"
 
-    def get_names(self, names):
-        try:
-            data_names = names
-        except KeyError:
-            data_names = []
-        return data_names
-
-    def set_all_datasets(self, name):
-        data_names = []
-        for key in self.exp.index["in_data"].keys():
-            data_names.append(key)
-        return data_names
-
-    def check_nDatasets(self, names, plugin_id, nSets, dtype):
-        try:
-            if names[0] in "all":
-                names = self.set_all_datasets(dtype)
-        except IndexError:
-            pass
-
-        errorMsg = "***ERROR: Broken plugin chain. \n Please name the " + \
-            str(nSets) + " " + dtype + " sets associated with the plugin " + \
-            plugin_id + " in the process file."
-
-        names = ([names] if type(names) is not list else names)
-        if len(names) is not nSets:
-            raise Exception(errorMsg)
-        return names
-
-    def set_datasets(self, plugin, plugin_dict):
-        in_names = self.get_names(plugin_dict["data"]["in_datasets"])
-        out_names = self.get_names(plugin_dict["data"]["out_datasets"])
-
-        default_in_names = plugin.parameters['in_datasets']
-        default_out_names = plugin.parameters['out_datasets']
-
-        in_names = in_names if in_names else default_in_names
-        out_names = out_names if out_names else default_out_names
-
-        in_names = ('all' if len(in_names) is 0 else in_names)
-        out_names = (in_names if len(out_names) is 0 else out_names)
-
-        in_names = self.check_nDatasets(in_names, plugin_dict["id"],
-                                        plugin.nInput_datasets(), "in_data")
-        out_names = self.check_nDatasets(out_names, plugin_dict["id"],
-                                         plugin.nOutput_datasets(), "out_data")
-
-        plugin_dict["data"]["in_datasets"] = in_names
-        plugin_dict["data"]["out_datasets"] = out_names
-
     def check_loaders_and_savers(self, plugin_list):
 
         first_plugin = plugin_list[0]
         end_plugin = plugin_list[-1]
 
-        plugin = self.load_plugin(first_plugin['id'])
+        plugin = pu.load_plugin(first_plugin['id'])
         # check the first plugin is a loader
         if not isinstance(plugin, BaseLoader):
             sys.exit("The first plugin in the process must "
                      "inherit from BaseLoader")
 
-        plugin = self.load_plugin(end_plugin['id'])
-        #print plugin
+        plugin = pu.load_plugin(end_plugin['id'])
         # check the final plugin is a saver
         if not isinstance(plugin, BaseSaver):
             sys.exit("The final plugin in the process must "
                      "inherit from BaseSaver")
-
-    def reorganise_datasets(self, out_data_objs, link_type):
-        out_data_list = self.exp.index["out_data"]
-        self.close_unwanted_files(out_data_list)
-        self.remove_unwanted_data(out_data_objs)
-
-        self.exp.barrier()
-        logging.info("Copy out data to in data")
-        self.copy_out_data_to_in_data(link_type)
-
-        self.exp.barrier()
-        logging.info("Clear up all data objects")
-        self.exp.clear_out_data_objects()
-
-    def remove_unwanted_data(self, out_data_objs):
-        logging.info("Remove unwanted data from the plugin chain")
-        for out_objs in out_data_objs:
-            if out_objs.remove is True:
-                self.exp.remove_dataset(out_objs)
-
-    def close_unwanted_files(self, out_data_list):
-        for out_objs in out_data_list:
-            if out_objs in self.exp.index["in_data"].keys():
-                self.exp.index["in_data"][out_objs].close_file()
-
-    def copy_out_data_to_in_data(self, link_type):
-        for key in self.exp.index["out_data"]:
-            output = self.exp.index["out_data"][key]
-            output.save_data(link_type)
-            self.exp.index["in_data"][key] = copy.deepcopy(output)
-
-    def load_plugin(self, plugin_name):
-        """Load a plugin.
-
-        :param plugin_name: Name of the plugin to import
-                        path/loc/then.plugin.name if there is no path, then the
-                        assumption is an internal plugin
-        :type plugin_name: str.
-        :returns:  An instance of the class described by the named plugin
-
-        """
-        logging.debug("getting class")
-        logging.debug("plugin name is %s" % plugin_name)
-        #clazz = self.import_class(plugin_name)
-
-        name = plugin_name
-        logging.debug("about to import the module")
-        # TODO This appears to be the failing line.
-        mod = __import__(name)
-        components = name.split('.')
-        logging.debug("Getting the module")
-        for comp in components[1:]:
-            mod = getattr(mod, comp)
-        logging.debug("about to split the name")
-        temp = name.split('.')[-1]
-        logging.debug("getting the classname from the module")
-        module2class = ''.join(x.capitalize() for x in temp.split('_'))
-        logging.debug("getting the class from the classname")
-        clazz = getattr(mod, module2class.split('.')[-1])
-        logging.debug("getting class instance")
-        instance = self.get_class_instance(clazz)
-        logging.debug("returning class instance")
-        return instance
-
-    def get_class_instance(self, clazz):
-        instance = clazz()
-        instance.populate_default_parameters()
-        return instance

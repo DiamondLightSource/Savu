@@ -21,11 +21,8 @@
 
 """
 
-import sys
-import os
 import re
-
-import numpy as np
+import logging
 
 plugins = {}
 
@@ -39,39 +36,117 @@ def register_plugin(clazz):
 def load_plugin(plugin_name):
     """Load a plugin.
 
-    :param plugin_name: Name of the plugin to import /path/loc/then.plugin.name
-                    if there is no path, then the assumptiuon is an internal
-                    plugin
+    :param plugin_name: Name of the plugin to import
+                    path/loc/then.plugin.name if there is no path, then the
+                    assumption is an internal plugin
     :type plugin_name: str.
     :returns:  An instance of the class described by the named plugin
 
     """
-    # logging.debug("Running load_plugin")
-    path, name = os.path.split(plugin_name)
-    # logging.debug("Path is : %s", path)
-    # logging.debug("Name is : %s", name)
-    if (path is not '') and (path not in sys.path):
-        # logging.debug("Appending path")
-        sys.path.append(path)
+    logging.debug("getting class")
+    logging.debug("plugin name is %s" % plugin_name)
+    #clazz = self.import_class(plugin_name)
+
+    name = plugin_name
+    logging.debug("importing the module")
+    # TODO This appears to be the failing line.
     mod = __import__(name)
     components = name.split('.')
     for comp in components[1:]:
         mod = getattr(mod, comp)
-    clazz = getattr(mod, module2class(name.split('.')[-1]))
+    temp = name.split('.')[-1]
+    module2class = ''.join(x.capitalize() for x in temp.split('_'))
+    clazz = getattr(mod, module2class.split('.')[-1])
+    instance = get_class_instance(clazz)
+    logging.debug("returning class instance")
+    return instance
+
+
+def get_class_instance(clazz):
     instance = clazz()
     instance.populate_default_parameters()
     return instance
 
 
-def module2class(module_name):
-    """
-    Converts a module name to a class name
+def plugin_loader(exp, plugin_dict, **kwargs):
+    logging.debug("Running plugin loader")
 
-    :param module_name: The lowercase_module_name of the module
-    :type module_name: str
-    :returns:  the module name in CamelCase
-    """
-    return ''.join(x.capitalize() for x in module_name.split('_'))
+    try:
+        plugin = load_plugin(plugin_dict['id'])
+    except Exception as e:
+        logging.error("failed to load the plugin")
+        logging.error(e)
+        raise e
+
+    check_flag = kwargs.get('check', False)
+    if check_flag:
+        set_datasets(exp, plugin, plugin_dict)
+
+    logging.debug("Running plugin main setup")
+    plugin.main_setup(exp, plugin_dict['data'])
+
+    logging.debug("finished plugin loader")
+    return plugin
+
+
+def run_plugins(exp, plugin_list, **kwargs):
+    plugin_loader(exp, plugin_list[0])
+    exp.set_nxs_filename()
+
+    check = kwargs.get('check', False)
+    for i in range(1, len(plugin_list)-1):
+        exp.barrier()
+        logging.info("Checking Plugin %s" % plugin_list[i]['name'])
+        plugin_loader(exp, plugin_list[i], check=check)
+        exp.merge_out_data_to_in()
+
+
+def set_datasets(exp, plugin, plugin_dict):
+    in_names = get_names(plugin_dict["data"]["in_datasets"])
+    out_names = get_names(plugin_dict["data"]["out_datasets"])
+
+    default_in_names = plugin.parameters['in_datasets']
+    default_out_names = plugin.parameters['out_datasets']
+
+    in_names = in_names if in_names else default_in_names
+    out_names = out_names if out_names else default_out_names
+
+    in_names = ('all' if len(in_names) is 0 else in_names)
+    out_names = (in_names if len(out_names) is 0 else out_names)
+
+    in_names = check_nDatasets(exp, in_names, plugin_dict["id"],
+                               plugin.nInput_datasets(), "in_data")
+    out_names = check_nDatasets(exp, out_names, plugin_dict["id"],
+                                plugin.nOutput_datasets(), "out_data")
+
+    plugin_dict["data"]["in_datasets"] = in_names
+    plugin_dict["data"]["out_datasets"] = out_names
+
+
+def get_names(names):
+    try:
+        data_names = names
+    except KeyError:
+        data_names = []
+    return data_names
+
+
+def check_nDatasets(exp, names, plugin_id, nSets, dtype):
+    try:
+        if names[0] in "all":
+            names = exp.set_all_datasets(dtype)
+    except IndexError:
+        pass
+
+    errorMsg = "***ERROR: Broken plugin chain. \n Please name the " + \
+        str(nSets) + " " + dtype + " sets associated with the plugin " + \
+        plugin_id + " in the process file."
+
+    names = ([names] if type(names) is not list else names)
+    if len(names) is not nSets:
+        raise Exception(errorMsg)
+    return names
+
 
 def find_args(dclass):
     """
@@ -87,4 +162,3 @@ def find_args(dclass):
     return [{'dtype': type(value),
              'name': a[0], 'desc': a[1],
              'default': value} for a in args for value in [eval(a[2])]]
-
