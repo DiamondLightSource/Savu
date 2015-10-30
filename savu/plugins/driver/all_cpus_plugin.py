@@ -65,9 +65,9 @@ class AllCpusPlugin(object):
         cpus which can be used by this process
 
         :param data: The input data object.
-        :type data: savu.data.structures
+        :type data: savu.data.data_structures
         :param data: The output data object
-        :type data: savu.data.structures
+        :type data: savu.data.data_structures
         :param processes: The number of processes which will be doing the work
         :type path: int
         :param path: The specific process which we are
