@@ -153,9 +153,7 @@ class Hdf5Transport(TransportMechanism):
             plugin_name = (plugin.__module__).split('.')[-1]
             exp.barrier()
             logging.info("run the plugin")
-            print "\n* Plugin", plugin_name, "has started *"
             plugin.run_plugin(exp, self)
-            print "* Plugin", plugin_name, "has completed *\n"
 
             exp.barrier()
             logging.info("close any files that are no longer required")
@@ -173,6 +171,9 @@ class Hdf5Transport(TransportMechanism):
         expInfo = plugin.exp.meta_data
         in_slice_list = self.get_all_slice_lists(in_data, expInfo)
         out_slice_list = self.get_all_slice_lists(out_data, expInfo)
+
+        print in_slice_list[0], '\n\n'
+        print out_slice_list[0], '\n\n'
 
         for count in range(len(in_slice_list[0])):
             print count

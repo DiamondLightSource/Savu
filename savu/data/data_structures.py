@@ -55,6 +55,7 @@ class Data(object):
         self.remove = False
         self.backing_file = None
         self.data = None
+        self.next_shape = None
 
     def initialise_data_info(self, name):
         self.data_info.set_meta_data('name', name)
@@ -123,6 +124,7 @@ class Data(object):
         new_obj.group = self.group
         new_obj.backing_file = self.backing_file
         new_obj.data = self.data
+        new_obj.next_shape = copy.deepcopy(self.next_shape)
         return new_obj
 
     def add_base(self, ExtraBase):
@@ -158,7 +160,7 @@ class Data(object):
                 self.create_axis_labels(kwargs['axis_labels'])
                 shape = kwargs['shape']
                 if isinstance(shape, Data):
-                    self.set_shape(shape.get_shape())
+                    self.find_and_set_shape(shape)
                 elif type(shape) is dict:
                     self.set_variable_flag()
                     self.set_shape((shape[shape.keys()[0]] + ('var',)))
@@ -222,8 +224,7 @@ class Data(object):
         patterns = copy.copy(copy_data.get_data_patterns())
         self.set_data_patterns(patterns)
         self.copy_labels(copy_data)
-        shape = copy_data.get_shape()
-        self.set_shape(shape)
+        self.find_and_set_shape(copy_data)
 
     def create_axis_labels(self, axis_labels):
         if isinstance(axis_labels, Data):
@@ -281,6 +282,17 @@ class Data(object):
             pass
         return shape
 
+    def find_and_set_shape(self, data):
+        try:
+            data.get_shape().index('var')
+            if data.next_shape:
+                new_shape = data.next_shape
+            else:
+                new_shape = data.get_shape()
+        except ValueError:
+            new_shape = data.get_shape()
+        self.set_shape(new_shape)
+
     def set_variable_flag(self):
         self.variable_length_flag = True
 
@@ -295,14 +307,14 @@ class Data(object):
             if isinstance(shape[i], str):
                 shape[i] = var_size[count]
                 count += 1
-        self.set_shape(tuple(shape))
+        self.next_shape = tuple(shape)
 
-    def remove_variable_length(self, length):
-        self.variable_length_flag = False
-        shape = list(self.get_shape())
-        index = [i for i in range(len(shape)) if i is 'var']
-        shape[index] = length
-        self.set_shape(tuple(shape))
+#    def remove_variable_length(self, length):
+#        self.variable_length_flag = False
+#        shape = list(self.get_shape())
+#        index = [i for i in range(len(shape)) if isinstance(shape[i], str)]
+#        shape[index[0]] = length
+#        self.next_shape = tuple(shape)
 
     def check_dims(self):
         nDims = self.data_info.get_meta_data("nDims")

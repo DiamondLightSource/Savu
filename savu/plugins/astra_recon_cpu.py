@@ -33,7 +33,7 @@ from savu.plugins.utils import register_plugin
 class AstraReconCpu(BaseAstraRecon, CpuPlugin):
     """
     A Plugin to run the astra reconstruction
-    
+
     :param number_of_iterations: Number of Iterations if an iterative method is used . Default: 1.
     :param reconstruction_type: Reconstruction type (FBP|SIRT|SART|ART|CGLS|). Default: 'FBP'.
     """
@@ -41,11 +41,9 @@ class AstraReconCpu(BaseAstraRecon, CpuPlugin):
     def __init__(self):
         super(AstraReconCpu, self).__init__("AstraReconCpu")
 
-
     def get_parameters(self):
-        return [self.parameters['reconstruction_type'], \
+        return [self.parameters['reconstruction_type'],
                 self.parameters['number_of_iterations']]
-
 
     def get_citation_information(self):
         cite_info = CitationInformation()

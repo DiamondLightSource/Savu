@@ -51,7 +51,6 @@ class Hdf5TransportData(object):
         out_data_objects = []
         count = start
         for plugin_dict in plugin_list[start:-1]:
-
             plugin_id = plugin_dict["id"]
             logging.debug("Loading plugin %s", plugin_id)
             plugin = pu.plugin_loader(exp, plugin_dict)
@@ -346,7 +345,7 @@ class Hdf5TransportData(object):
             getattr(padding, key)(pData.padding[key])
         return padding.get_padding_directions()
 
-    def get_padded_slice_data(self, input_slice_list):
+    def get_padded_slice_data(self, input_slice_list):        
         slice_list = list(input_slice_list)
         if self.get_plugin_data().padding is None:
             return self.data[tuple(slice_list)]

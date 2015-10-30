@@ -25,7 +25,6 @@ import unittest
 import tempfile
 import logging
 
-from savu.core import process
 from savu.plugins import utils as pu
 from savu.test import test_utils as tu
 from savu.data.structures import RawTimeseriesData
@@ -44,6 +43,12 @@ class FrameworkTest(unittest.TestCase):
         logging.debug("Starting test_pipeline")
         if not hasattr(self, 'temp_dir'):
             self.temp_dir = tempfile.gettempdir()
+
+        
+
+
+
+
         input_data = None
         first_plugin = pu.load_plugin(self.plugin_list[0])
         if self.plugin_list[0] == base_class_name:
@@ -101,3 +106,4 @@ class DenoiseTest(FrameworkTest):
 
     def setUp(self):
         self.plugin_list = ["savu.plugins.denoise_bregman_filter"]
+

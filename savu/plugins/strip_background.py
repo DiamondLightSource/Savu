@@ -53,6 +53,7 @@ class StripBackground(BaseFilter, CpuPlugin):
         SGwidth = self.parameters['SG_width']
         SGpoly = self.parameters['SG_polyorder']
         data = data[0][0][0][0].squeeze()
+        print "in the strip_background plugin"
         npts = len(data)
         filtered = savgol_filter(data, SGwidth, SGpoly)
         aved = np.zeros_like(filtered)
@@ -69,12 +70,13 @@ class StripBackground(BaseFilter, CpuPlugin):
                 filtered = savgol_filter(filtered, SGwidth, SGpoly)
         t2 = time.time()
         print "Strip iteration took:"+str((t2-t1)*1e3)+"ms"
-        return data-filtered
+        return data - filtered
 
     def setup(self):
         in_dataset, out_datasets = self.get_datasets()
         stripped = out_datasets[0]
         stripped.create_dataset(in_dataset[0])
+
         in_pData, out_pData = self.get_plugin_datasets()
         in_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
         out_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
