@@ -49,6 +49,7 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         data = data[0]
         image_keys = in_meta_data[0].get_meta_data('image_key')
         trimmed_data = data[image_keys == 0]
+
         dark = data[image_keys == 2]
         dark = dark.mean(0)
         dark = np.tile(dark, (trimmed_data.shape[0], 1, 1))
@@ -56,6 +57,10 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         flat = flat.mean(0)
         flat = np.tile(flat, (trimmed_data.shape[0], 1, 1))
         data = (trimmed_data-dark)/(flat-dark)
+
+        if frame_list[0] == (slice(None), slice(0, 1, 1), slice(None)):
+            data[:, 0, 0] = data[:, 0, 1]
+
         return data
 
     def setup(self):
