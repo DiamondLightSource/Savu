@@ -172,9 +172,6 @@ class Hdf5Transport(TransportMechanism):
         in_slice_list = self.get_all_slice_lists(in_data, expInfo)
         out_slice_list = self.get_all_slice_lists(out_data, expInfo)
 
-        print in_slice_list[0], '\n\n\n'
-        print out_slice_list[0], '\n\n\n'
-
         for count in range(len(in_slice_list[0])):
             print count
             section, slice_list = \

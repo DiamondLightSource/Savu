@@ -84,9 +84,7 @@ class PyfaiAzimuthalIntegrator(BaseFilter, CpuPlugin):
         self.npts = int(np.round(np.sqrt(sh[-1]**2+sh[-2]**2)))
         self.params = [mask, self.npts, mData, ai]
 
-
     def filter_frames(self, data):
-        print data[0].shape
         t1 = time.time()
         mData = self.params[2]
         mask =self.params[0]
