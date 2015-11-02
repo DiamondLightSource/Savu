@@ -59,9 +59,9 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         data = (trimmed_data-dark)/(flat-dark)
 
         # finally clean up and trim the data
+        data = np.nan_to_num(data)
         data[data < 0] = 0
         data[data > 2] = 2
-        data = np.nan_to_num(data)
 
         return data
 
@@ -92,4 +92,4 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         return 1
 
     def get_max_frames(self):
-        return 1
+        return 4
