@@ -58,7 +58,6 @@ class ScikitimageSart(BaseRecon, CpuPlugin):
         return ndimage.interpolation.shift(sinogram, centre_of_rotation_shift)
 
     def reconstruct(self, sinogram, centre_of_rotations, angles, vol_shape):
-        print sinogram
         sinogram = np.swapaxes(sinogram, 0, 1)
         sinogram = self._shift(sinogram, centre_of_rotations)
         sino = np.nan_to_num(sinogram)
