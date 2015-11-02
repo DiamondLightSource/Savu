@@ -173,15 +173,14 @@ class Hdf5Transport(TransportMechanism):
         in_slice_list = self.get_all_slice_lists(in_data, expInfo)
         out_slice_list = self.get_all_slice_lists(out_data, expInfo)
 
-        re_slice_dict = self.set_re_slicing_functions(out_data)
+        #re_slice_dict = self.set_re_slicing_functions(out_data)
 
         for count in range(len(in_slice_list[0])):
             print count
             section, slice_list = \
                 self.get_all_padded_data(in_data, in_slice_list, count)
             result = plugin.process_frames(section, slice_list)
-            self.set_out_data(out_data, out_slice_list, result, count,
-                              re_slice_dict)
+            self.set_out_data(out_data, out_slice_list, result, count)
 
     def process_checks(self):
         pass
@@ -234,13 +233,16 @@ class Hdf5Transport(TransportMechanism):
 #            slist.append(slice_list[idx][count])
 #        return section, slist
 
-    def set_out_data(self, data, slice_list, result, count, reslice_dict):
+    def set_out_data(self, data, slice_list, result, count):
         result = [result] if type(result) is not list else result
         for idx in range(len(data)):
             temp = data[idx].get_unpadded_slice_data(slice_list[idx][count],
                                                      result[idx])
-            print temp[(None, None, slice(None))]
-            data[idx].data[slice_list[idx][count]] = reslice_dict[idx](temp)
+            print temp.dtype
+            temp2 = temp[np.newaxis, np.newaxis, np.newaxis, :]
+            print temp2.dtype
+            data[idx].data[slice_list[idx][count]] = temp
+            print data[idx].data[slice_list[idx][count]][(None, None, None, slice(None))].dtype
 
     def transfer_to_meta_data(self, return_dict):
         remove_data_sets = []
