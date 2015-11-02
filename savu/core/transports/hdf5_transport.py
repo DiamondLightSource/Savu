@@ -206,9 +206,9 @@ class Hdf5Transport(TransportMechanism):
         for sl in slice_dirs:
             new_slice[sl] = None
 
-        if data.variable_length_flag:
-            unravel = lambda x: self.unravel(x[0]) if isinstance(x, list) else x
-            return lambda x: unravel(x[new_slice])
+#        if data.variable_length_flag:
+#            unravel = lambda x: self.unravel(x[0]) if isinstance(x, list) else x
+#            return lambda x: unravel(x[new_slice])
         return lambda x: x[new_slice]
 
     def get_all_slice_lists(self, data_list, expInfo):
@@ -239,6 +239,7 @@ class Hdf5Transport(TransportMechanism):
         for idx in range(len(data)):
             temp = data[idx].get_unpadded_slice_data(slice_list[idx][count],
                                                      result[idx])
+            print temp[(None, None, slice(None))]
             data[idx].data[slice_list[idx][count]] = reslice_dict[idx](temp)
 
     def transfer_to_meta_data(self, return_dict):

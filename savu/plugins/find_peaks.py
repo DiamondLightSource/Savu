@@ -52,10 +52,7 @@ class FindPeaks(BaseFilter, CpuPlugin):
     def filter_frames(self, data):
         #data = data[0][0][0][0].squeeze()
         #data = data[0].squeeze()
-        print data[0].shape
-        print data[0].dtype, type(data[0])
-        data = data[0].astype(np.float64)
-        print "here"
+        data = data[0]
         out_meta_data = self.get_out_meta_data()[0]
         # filter to smooth noise
         data = savgol_filter(data, 51, 3)
