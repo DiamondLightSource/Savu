@@ -172,8 +172,8 @@ class Hdf5Transport(TransportMechanism):
         in_slice_list = self.get_all_slice_lists(in_data, expInfo)
         out_slice_list = self.get_all_slice_lists(out_data, expInfo)
 
-        print in_slice_list[0], '\n\n'
-        print out_slice_list[0], '\n\n'
+        print in_slice_list[0], '\n\n\n'
+        print out_slice_list[0], '\n\n\n'
 
         for count in range(len(in_slice_list[0])):
             print count
@@ -209,6 +209,7 @@ class Hdf5Transport(TransportMechanism):
     def set_out_data(self, data, slice_list, result, count):
         result = [result] if type(result) is not list else result
         for idx in range(len(data)):
+            data[idx].data[slice_list[idx][count]] = 0
             data[idx].data[slice_list[idx][count]] = \
                 data[idx].get_unpadded_slice_data(slice_list[idx][count],
                                                   result[idx])

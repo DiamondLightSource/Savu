@@ -86,6 +86,7 @@ class PyfaiAzimuthalIntegrator(BaseFilter, CpuPlugin):
 
 
     def filter_frames(self, data):
+        print data[0].shape
         t1 = time.time()
         mData = self.params[2]
         mask =self.params[0]
@@ -96,6 +97,7 @@ class PyfaiAzimuthalIntegrator(BaseFilter, CpuPlugin):
 #        mData.set_meta_data('integrated_diffraction_noise',fit[2])
         t2 = time.time()
         print "PyFAI iteration took:"+str((t2-t1)*1e3)+"ms"
+        print fit[1].shape
         return fit[1]
 
     def post_process(self):
