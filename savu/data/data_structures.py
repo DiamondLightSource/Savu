@@ -153,8 +153,6 @@ class Data(object):
             if args[0].tomo_raw_obj:
                 self.set_tomo_raw(copy.deepcopy(args[0].get_tomo_raw()))
                 self.get_tomo_raw().data_obj = self
-            if args[0].get_variable_flag():
-                self.set_variable_flag()
         else:
             try:
                 self.create_axis_labels(kwargs['axis_labels'])

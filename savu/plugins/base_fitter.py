@@ -200,7 +200,7 @@ class BaseFitter(BaseFilter, CpuPlugin):
                                     x,
                                     positions[ii],
                                     )))
-        return weights, widths, areas
+        return weights, widths, np.array(areas)
 
     def spectrum_sum_dfun(self, fun, multiplier, x, pos, *p):
         rest = p

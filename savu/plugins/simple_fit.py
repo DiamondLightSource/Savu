@@ -40,7 +40,7 @@ class SimpleFit(BaseFitter):
 
     def filter_frames(self, data):
         t1 = time.time()
-        data = data[0].squeeze()
+        data = data[0]
         in_meta_data = self.get_in_meta_data()[0]
         positions = in_meta_data.get_meta_data("PeakIndex")
         axis = in_meta_data.get_meta_data("Q")

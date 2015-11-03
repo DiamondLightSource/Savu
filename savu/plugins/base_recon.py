@@ -68,8 +68,7 @@ class BaseRecon(Plugin):
         Reconstruct a single sinogram with the provided center of rotation
         """
         cor = self.cor[slice_list[0][self.main_dir]]
-        result = self.reconstruct(np.squeeze(data[0]), cor, self.angles,
-                                  self.vol_shape)
+        result = self.reconstruct(data[0], cor, self.angles, self.vol_shape)
         for sdir in self.slice_dirs:
             result = np.expand_dims(result, sdir)
         return result
