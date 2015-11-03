@@ -41,15 +41,19 @@ Logo credit ::
 .. image:: https://travis-ci.org/DiamondLightSource/Savu.svg?branch=master
     :target: https://travis-ci.org/DiamondLightSource/Savu
 
-.. image:: https://zenodo.org/badge/doi/10.5281/zenodo.16507.svg
-    :target: http://dx.doi.org/10.5281/zenodo.16507
+.. image:: https://zenodo.org/badge/doi/10.5281/zenodo.32840.svg
+    :target: http://dx.doi.org/10.5281/zenodo.32840
 
 .. image:: https://coveralls.io/repos/DiamondLightSource/Savu/badge.svg?branch=master
     :target: https://coveralls.io/r/DiamondLightSource/Savu?branch=master
 
-.. image:: https://badge.waffle.io/diamondlightsource/savu.png?label=ready&title=Ready 
+.. image:: https://badge.waffle.io/diamondlightsource/savu.png?label=ready&title=Ready
     :target: https://waffle.io/diamondlightsource/savu
     :alt: 'Stories in Ready'
 
+.. image:: https://scrutinizer-ci.com/g/DiamondLightSource/Savu/badges/quality-score.png?b=master
+    :target: https://scrutinizer-ci.com/g/DiamondLightSource/Savu/?branch=master
+
 .. image:: https://badge.fury.io/py/savu.svg
     :target: http://badge.fury.io/py/savu
+
