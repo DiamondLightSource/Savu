@@ -53,24 +53,39 @@ class StripBackground(BaseFilter, CpuPlugin):
         smoothed = self.parameters['SG_filter_iterations']
         SGwidth = self.parameters['SG_width']
         SGpoly = self.parameters['SG_polyorder']
-        print "in the strip_background plugin"
+
         npts = len(data)
-        filtered = savgol_filter(data, SGwidth, SGpoly)
+        x = np.arange(npts) # set up some x indices
+        filtered = savgol_filter(data,35,5) # make the start a bit a bit smoother
+        # lets do it the crap, slow way first
         aved = np.zeros_like(filtered)
+        bottomedgemain=x<w
+        bottomedgerest = (x>=w) & (x<2*w)
+        
+        mainpart = (x>=w) & (x<(npts-w))
+        mainpartbottom = (x>=0) & (x<(npts-2*w))
+        mainparttop = (x>=2*w) & (x<(npts))
+        
+        topedgemain = x>=(npts-w)
+        topedgerest = (x>=(npts-2*w)) & (x>=(npts-w))
+        
         for k in range(its):
-            for i in range(npts):
-                if (i-w) < 0:
-                    aved[i] = (filtered[i] + filtered[i+w])/2.
-                elif (i+w) > (len(data)-1):
-                    aved[i] = (filtered[i] + filtered[i-w])/2.
-                else:
-                    aved[i] = (filtered[i-w] + filtered[i] + filtered[i+w])/3.
-            filtered[aved < filtered] = aved[aved < filtered]
+            aved[mainpart] = (filtered[mainpartbottom] + filtered[mainpart] + filtered[mainparttop])/3. # works
+            aved[bottomedgemain] = (filtered[bottomedgemain] + filtered[bottomedgerest])/2.
+            aved[topedgemain] = (filtered[topedgemain] + filtered[topedgerest])/2.
+            filtered[aved<filtered] = aved[aved<filtered]
             if not (k/float(smoothed)-k/int(smoothed)):
-                filtered = savgol_filter(filtered, SGwidth, SGpoly)
+                print k
+                filtered=savgol_filter(filtered,35,5)
+
         t2 = time.time()
+<<<<<<< HEAD
         print "Strip iteration took:"+str((t2-t1)*1e3)+"ms"
         return data - filtered
+=======
+        logging.debug("Strip iteration took: %s ms", str((t2-t1)*1e3))
+        return data-filtered
+>>>>>>> origin/master
 
     def setup(self):
         in_dataset, out_datasets = self.get_datasets()

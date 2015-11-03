@@ -204,17 +204,15 @@ class Hdf5Transport(TransportMechanism):
 
     def create_expand_function(self, data):
         slice_dirs = data.get_plugin_data().get_slice_directions()
-        core_dirs = data.get_plugin_data().get_core_directions()
-        possible_slices = []
-        print len(slice_dirs), len(core_dirs)
-        for i in range(len(slice_dirs)-len(core_dirs), len(slice_dirs)+1, -1):
-            print i
-            new_slice = [slice(None)]*(len(core_dirs)+i)
-            for sl in slice_dirs[i:]:
-                new_slice[sl] = None
-            possible_slices.append(new_slice)
+        new_slice = [slice(None)]*len(data.get_shape())
+        possible_slices = [copy.copy(new_slice)]
+        for sl in slice_dirs:
+            new_slice[sl] = None
+            possible_slices.append(copy.copy(new_slice))
+        possible_slices = possible_slices[::-1]
         print possible_slices
-        return lambda x: x[new_slice]
+        print "Number of possible slices", len(possible_slices)
+        return lambda x: x[possible_slices[len(x.shape)-1]]
 
     def create_squeeze_function(self, data):
         if data.variable_length_flag:
@@ -237,12 +235,13 @@ class Hdf5Transport(TransportMechanism):
             slist.append(slice_list[idx][count])
         return section, slist
 
-    def set_out_data(self, data, slice_list, result, count, re_slice_dict):
+    def set_out_data(self, data, slice_list, result, count, expand_dict):
         result = [result] if type(result) is not list else result
         for idx in range(len(data)):
             temp = data[idx].get_unpadded_slice_data(slice_list[idx][count],
                                                      result[idx])
-            data[idx].data[slice_list[idx][count]] = re_slice_dict[idx](temp)
+            print "shape is", len(temp.shape)
+            data[idx].data[slice_list[idx][count]] = expand_dict[idx](temp)
 
     def transfer_to_meta_data(self, return_dict):
         remove_data_sets = []
