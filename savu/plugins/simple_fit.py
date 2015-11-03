@@ -20,32 +20,37 @@
 .. moduleauthor:: Aaron Parsons <scientificsoftware@diamond.ac.uk>
 
 """
+import logging
 from savu.plugins.utils import register_plugin
 from savu.plugins.base_fitter import BaseFitter
 import numpy as np
 from scipy.optimize import leastsq
 import time
-
+import math
 
 @register_plugin
 class SimpleFit(BaseFitter):
     """
     This plugin fits peaks.
     :param width_guess: An initial guess at the width. Default: 0.02.
-
+    :param PeakIndex: the peak index. Default: [38,57,78,114,206,230,392,457,526,651,765,1015,1281,1312,1498,1582,1642,1785,2116,2176,2301,2447,2554,2694,2987,3134,3182,3300,3435,3602,4090,4117].
     """
 
     def __init__(self):
         super(SimpleFit, self).__init__("SimpleFit")
+
+    def pre_process(self):
+        in_meta_data = self.get_in_meta_data()[0]
+        in_meta_data.set_meta_data("PeakIndex", self.parameters["PeakIndex"])
 
     def filter_frames(self, data):
         t1 = time.time()
         data = data[0].squeeze()
         in_meta_data = self.get_in_meta_data()[0]
         positions = in_meta_data.get_meta_data("PeakIndex")
-        print sorted(positions)
+
         axis = in_meta_data.get_meta_data("Q")
-        print len(axis)
+
         weights = data[positions]
         widths = np.ones_like(positions)*self.parameters["width_guess"]
         p = []
@@ -55,15 +60,19 @@ class SimpleFit(BaseFitter):
         lsq1 = leastsq(self._resid, p,
                        args=(curvetype, data, axis, positions),
                        Dfun=self.dfunc, col_deriv=1)
-        print "done one"
-        
+        logging.debug("done one")
+        params = lsq1[0]
+        if np.isnan(params).any():
+            logging.debug('Nans were detected here')
+            params = np.zeros(len(params))
+
         weights, widths, areas = self.getAreas(curvetype,
-                                               axis, positions, lsq1[0])
-        residuals = self._resid(lsq1[0], curvetype, data, axis, positions)
+                                               axis, positions, params)
+        residuals = self._resid(params, curvetype, data, axis, positions)
         # all fitting routines will output the same format.
         # nchannels long, with 3 elements. Each can be a subarray.
         t2 = time.time()
-        print "Simple fit iteration took:"+str((t2-t1)*1e3)+"ms"
+        logging.debug("Simple fit iteration took: %s ms", str((t2-t1)*1e3))
         return [weights, widths, areas, residuals]
 
 # dump this here for now to fix the variable length issue
@@ -78,7 +87,7 @@ class SimpleFit(BaseFitter):
         fitAreas = out_datasets[0]
         fitHeights = out_datasets[1]
         fitWidths = out_datasets[2]
-        new_shape = shape[:-1] + (55,)
+        new_shape = shape[:-1] + (32,)
 
         fitAreas.create_dataset(patterns={in_dataset[0]: pattern_list},
                                 axis_labels={in_dataset[0]: axis_labels},

@@ -117,9 +117,9 @@ class BaseFitter(BaseFilter, CpuPlugin):
             rest = p
             #print "parameter shape is "+ str(p.shape)
             npts = len(p) / 2
-            a = rest[:npts].astype('float64')
-            sig = rest[npts:2*npts].astype('float64')
-            mu = pos.astype('float64')
+            a = rest[:npts]
+            sig = rest[npts:2*npts]
+            mu = pos
         #    print "len mu"+str(len(mu))
         #    print "len x"+str(len(x))
             if fun.__name__ == 'gaussian':
@@ -136,9 +136,9 @@ class BaseFitter(BaseFilter, CpuPlugin):
                 #print "op.shape is "+str(op.shape)
             elif fun.__name__ == 'lorentzian':
                 #print "hey"
-                da = self.spectrum_sum_dfun(fun, 1./a, x, mu, *p).astype('float64')
+                da = self.spectrum_sum_dfun(fun, 1./a, x, mu, *p)
                 #dmu_mult = np.zeros((len(mu), len(x)))
-                dsig_mult = np.zeros((npts, len(x))).astype('float64')
+                dsig_mult = np.zeros((npts, len(x)))
                 for i in range(npts):
                     #dmu_mult[i] = 2.0*(x-mu[i])/((x-mu[i])**2+sig[i]**2)
                     nom =  (2.0*(x-mu[i])**2)
@@ -212,15 +212,15 @@ class BaseFitter(BaseFilter, CpuPlugin):
         #print widths
         positions = pos
     #    print(len(positions))
-        spec = np.zeros((npts, len(x))).astype('float64')
+        spec = np.zeros((npts, len(x)))
         #print "len x is "+str(len(spec))
     #    print len(spec), type(spec)
     #    print len(positions), type(positions)
     #    print len(weights), type(weights)
         for ii in range(len(weights)):
-            spec[ii] = multiplier[ii]*fun(weights[ii].astype('float64'),
-                                          widths[ii].astype('float64'),
-                                          x, positions[ii].astype('float64'))
+            spec[ii] = multiplier[ii]*fun(weights[ii],
+                                          widths[ii],
+                                          x, positions[ii])
         return spec
 
 

@@ -31,8 +31,9 @@ from savu.plugins.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 from savu.plugins.utils import register_plugin
-
 import time
+
+
 @register_plugin
 class PyfaiAzimuthalIntegrator(BaseFilter, CpuPlugin):
     """
@@ -121,7 +122,8 @@ class PyfaiAzimuthalIntegrator(BaseFilter, CpuPlugin):
         # stating only 'dimension' will remove the axis label, stating
         # 'dimension.name.unit' name and unit will add or replace it
         axis_labels = ['-1', '-2.name.unit']
-        new_shape = shape[:-2] + (1005,)
+        #new_shape = shape[:-2] + (1005,)4643
+        new_shape = shape[:-2] + (4643,)
         print new_shape
         spectra.create_dataset(patterns={in_dataset[0]: patterns},
                                axis_labels={in_dataset[0]: axis_labels},

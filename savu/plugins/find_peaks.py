@@ -21,7 +21,7 @@
 
 """
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-
+import logging
 
 from savu.plugins.utils import register_plugin
 from savu.plugins.base_filter import BaseFilter
@@ -51,7 +51,7 @@ class FindPeaks(BaseFilter, CpuPlugin):
 
     def filter_frames(self, data):
         data = data[0][0][0][0].squeeze()
-        foo = np.zeros(55,)
+        foo = np.zeros(146,)
         out_meta_data = self.get_out_meta_data()[0]
         # filter to smooth noise
         data = savgol_filter(data, 51, 3)
@@ -72,10 +72,14 @@ class FindPeaks(BaseFilter, CpuPlugin):
 #        print 'temp is ', sorted(tmp)
 #        print 'New index is', sorted(PeakIndexNew)
 #        print 'old index is', sorted(PeakIndex)
-        PeakIndex.extend(tmp)
-        out_meta_data.set_meta_data('PeakIndex', PeakIndex)
-        print "The length of the peak index is:"+str(len(PeakIndex))
-        foo[:len(np.array(PeakIndex))] = np.array(PeakIndex)# hacky hack hack
+        PeakIndexUpdated = PeakIndex
+        PeakIndexUpdated.extend(tmp)
+        if len(PeakIndexUpdated) < 146:
+            logging.debug("The length of the peak index is: %s", str(len(PeakIndex)))
+            foo[:len(np.array(PeakIndexUpdated))] = np.array(PeakIndexUpdated)# hacky hack hack
+            out_meta_data.set_meta_data('PeakIndex', foo)
+        else:
+            foo = PeakIndex
         return foo
 
     def post_process(self):
@@ -84,8 +88,8 @@ class FindPeaks(BaseFilter, CpuPlugin):
         in_meta_data = self.get_in_meta_data()[0]
 #        print sorted(out_datasets[0].data[-1])
         in_meta_data.set_meta_data('PeakIndex', out_datasets[0].data[-1])
-        print "the peak index is: "+str(in_meta_data.get_meta_data('PeakIndex'))
-        print "its length is: "+str(len(in_meta_data.get_meta_data('PeakIndex')))
+        logging.debug("the peak index is: %s", str(in_meta_data.get_meta_data('PeakIndex')))
+        logging.debug("its length is: "+str(len(in_meta_data.get_meta_data('PeakIndex'))))
 
     def setup(self):
         # set up the output dataset that is created by the plugin
@@ -99,7 +103,7 @@ class FindPeaks(BaseFilter, CpuPlugin):
         nFrames = in_pData[0].get_total_frames()
 
         out_dataset[0].create_dataset(axis_labels=['frames.frames', 'peaks.pixels'],
-                                      shape=(nFrames, 55),
+                                      shape=(nFrames, 146),
                                       dtype=np.int,  # default is float32
                                       # remove from the processing chain
                                       remove=True)

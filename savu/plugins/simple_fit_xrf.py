@@ -20,6 +20,7 @@
 .. moduleauthor:: Aaron Parsons <scientificsoftware@diamond.ac.uk>
 
 """
+import logging
 from savu.plugins.utils import register_plugin
 from savu.plugins.base_fluo_fitter import BaseFluoFitter
 import numpy as np
@@ -40,7 +41,6 @@ class SimpleFitXrf(BaseFluoFitter):
     def filter_frames(self, data):
         t1 = time.time()
         data = data[0].squeeze()
-        print "the shape is: "+str(data.shape)
         in_meta_data = self.get_in_meta_data()[0]
         axis = (in_meta_data.get_meta_data("energy")*1e-3)/2.0
         idx = in_meta_data.get_meta_data("PeakIndex")
@@ -54,14 +54,16 @@ class SimpleFitXrf(BaseFluoFitter):
         lsq1 = leastsq(self._resid, p,
                        args=(curvetype, data, axis, positions),
                        Dfun=self.dfunc, col_deriv=1)
-
-        print "done one"
+        params = lsq1[0]
+        logging.debug("done one")
+        if np.isnan(params).any():
+            logging.debug('Nans were detected here')
+            params = np.zeros(len(params))
         weights, widths, areas = self.getAreas(curvetype,
-                                               axis, positions, lsq1[0])
-        print lsq1[0]
-        residuals = self._resid(lsq1[0], curvetype, data, axis, positions)
+                                               axis, positions, params)
+        residuals = self._resid(params, curvetype, data, axis, positions)
         t2 = time.time()
-        print "Simple fit iteration took:"+str((t2-t1)*1e3)+"ms"
+        logging.debug("Simple fit iteration took: %s ms", str((t2-t1)*1e3))
         # all fitting routines will output the same format.
         # nchannels long, with 3 elements. Each can be a subarray.
         return [weights, widths, areas, residuals]
