@@ -68,10 +68,7 @@ class BaseRecon(Plugin):
         Reconstruct a single sinogram with the provided center of rotation
         """
         cor = self.cor[slice_list[0][self.main_dir]]
-        result = self.reconstruct(np.squeeze(data[0]), cor, self.angles,
-                                  self.vol_shape)
-        for sdir in self.slice_dirs:
-            result = np.expand_dims(result, sdir)
+        result = self.reconstruct(data[0], cor, self.angles, self.vol_shape)
         return result
 
     def reconstruct(self, data, cor, angles, shape):
@@ -110,8 +107,10 @@ class BaseRecon(Plugin):
         out_pData[0].plugin_data_setup('VOLUME_XZ', self.get_max_frames())
 
     def map_volume_dimensions(self, data):
+        data.finalise_patterns()
         dim_rotAngle = data.get_data_patterns()['PROJECTION']['main_dir']
         dim_detY = data.get_data_patterns()['SINOGRAM']['main_dir']
+        
         core_dirs = data.get_plugin_data().get_core_directions()
         dim_detX = list(set(core_dirs).difference(set((dim_rotAngle,))))[0]
 

@@ -50,13 +50,14 @@ class FindPeaks(BaseFilter, CpuPlugin):
         out_meta_data.set_meta_data('PeakIndex', [])
 
     def filter_frames(self, data):
-        data = data[0][0][0][0].squeeze()
-        foo = np.zeros(146,)
+        data = data[0]
+        #foo = np.zeros(146,)
         out_meta_data = self.get_out_meta_data()[0]
         # filter to smooth noise
         data = savgol_filter(data, 51, 3)
         # get the initial peak index and output a list
         PeakIndex = list(out_meta_data.get_meta_data('PeakIndex'))
+
         # find the peak positions for the current spectra
         PeakIndexNew = list(pe.indexes(data, thres=self.parameters['thresh'],
                             min_dist=self.parameters['min_distance']))
@@ -64,24 +65,13 @@ class FindPeaks(BaseFilter, CpuPlugin):
         # print 'Im here'
         PeakIndexNew = list(PeakIndexNew)
         wind = self.parameters['min_distance']
-        set2 = set(list(chain.from_iterable(range(x-wind/2,
-                                                  x+wind/2, 1)
-                                            for x in PeakIndex)))
+        set2 = set(list(chain.from_iterable(range(x-wind/2, x+wind/2, 1) for x in PeakIndex)))
         tmp = set(PeakIndexNew) - set2
-        tmp = list(tmp)
-#        print 'temp is ', sorted(tmp)
-#        print 'New index is', sorted(PeakIndexNew)
-#        print 'old index is', sorted(PeakIndex)
 
         PeakIndexUpdated = PeakIndex
-        PeakIndexUpdated.extend(tmp)
-        if len(PeakIndexUpdated) < 146:
-            logging.debug("The length of the peak index is: %s", str(len(PeakIndex)))
-            foo[:len(np.array(PeakIndexUpdated))] = np.array(PeakIndexUpdated)# hacky hack hack
-            out_meta_data.set_meta_data('PeakIndex', foo)
-        else:
-            foo = PeakIndex
-        return foo
+        PeakIndexUpdated.extend(list(tmp))
+
+        return np.array(PeakIndexUpdated)
 
 
     def post_process(self):
@@ -104,19 +94,13 @@ class FindPeaks(BaseFilter, CpuPlugin):
         in_pData[0].plugin_data_setup("SPECTRUM", self.get_max_frames())
 
         nFrames = in_pData[0].get_total_frames()
-
-#        out_dataset[0].create_dataset(axis_labels=['frames.frames', 'peaks.pixels'],
-#                                      shape=(nFrames, 55),
-#                                      dtype=np.int,  # default is float32
-#                                      # remove from the processing chain
-#                                      remove=True)
-        out_dataset[0].create_dataset(axis_labels=['frames.frames', 'peaks.pixels'],
+        axis_labels = ['frames.frames', 'peaks.pixels']
+        out_dataset[0].create_dataset(axis_labels=axis_labels,
                                       shape={'variable': (nFrames,)},
                                       dtype=np.int,  # default is float32
                                       # remove from the processing chain
                                       remove=True)
 
-        #out_dataset[0].add_pattern("1D_METADATA", slice_dir=(0,))
         out_dataset[0].add_pattern("SPECTRUM", slice_dir=(0,), core_dir= (1,))
         out_pData[0].plugin_data_setup("SPECTRUM", self.get_max_frames())
 

@@ -24,12 +24,14 @@ import logging
 import socket
 import os
 import copy
+import numpy as np
 
 from mpi4py import MPI
 from itertools import chain
 from savu.core.utils import logfunction
 from savu.data.transport_mechanism import TransportMechanism
 from savu.core.utils import logmethod
+import savu.plugins.utils as pu
 
 
 class Hdf5Transport(TransportMechanism):
@@ -109,7 +111,7 @@ class Hdf5Transport(TransportMechanism):
 
         exp.barrier()
         logging.info("run the loader plugin")
-        self.plugin_loader(plugin_list[0])
+        pu.plugin_loader(exp, plugin_list[0])
 
         start = 1
         stop = start
@@ -147,20 +149,17 @@ class Hdf5Transport(TransportMechanism):
 
             exp.barrier()
             logging.info("Load the plugin")
-            plugin = self.plugin_loader(plugin_list[i])
+            plugin = pu.plugin_loader(exp, plugin_list[i])
 
-            plugin_name = (plugin.__module__).split('.')[-1]
             exp.barrier()
             logging.info("run the plugin")
-            print "\n* Plugin", plugin_name, "has started *"
             plugin.run_plugin(exp, self)
-            print "* Plugin", plugin_name, "has completed *\n"
 
             exp.barrier()
             logging.info("close any files that are no longer required")
             out_datasets = plugin.parameters["out_datasets"]
 
-            self.reorganise_datasets(out_datasets, link_type)
+            exp.reorganise_datasets(out_datasets, link_type)
 
     @logmethod
     def process(self, plugin):
@@ -172,13 +171,17 @@ class Hdf5Transport(TransportMechanism):
         expInfo = plugin.exp.meta_data
         in_slice_list = self.get_all_slice_lists(in_data, expInfo)
         out_slice_list = self.get_all_slice_lists(out_data, expInfo)
+        squeeze_dict = self.set_functions(in_data, 'squeeze')
+        expand_dict = self.set_functions(out_data, 'expand')
 
         for count in range(len(in_slice_list[0])):
             print count
             section, slice_list = \
-                self.get_all_padded_data(in_data, in_slice_list, count)
+                self.get_all_padded_data(in_data, in_slice_list, count,
+                                         squeeze_dict)
             result = plugin.process_frames(section, slice_list)
-            self.set_out_data(out_data, out_slice_list, result, count)
+            self.set_out_data(out_data, out_slice_list, result, count,
+                              expand_dict)
 
     def process_checks(self):
         pass
@@ -189,27 +192,54 @@ class Hdf5Transport(TransportMechanism):
 #            be Raw data. Have you performed a timeseries_field_correction?")
 # call a new process called process_check?
 
+    def set_functions(self, data_list, name):
+        str_name = 'self.' + name + '_output'
+        function = {'expand': self.create_expand_function,
+                    'squeeze': self.create_squeeze_function}
+        ddict = {}
+        for i in range(len(data_list)):
+            ddict[i] = {i: str_name + str(i)}
+            ddict[i] = function[name](data_list[i])
+        return ddict
+
+    def create_expand_function(self, data):
+        slice_dirs = data.get_plugin_data().get_slice_directions()
+        n_core_dirs = len(data.get_plugin_data().get_core_directions())
+        new_slice = [slice(None)]*len(data.get_shape())
+        possible_slices = [copy.copy(new_slice)]
+        for sl in slice_dirs:
+            new_slice[sl] = None
+            possible_slices.append(copy.copy(new_slice))
+        possible_slices = possible_slices[::-1]
+        return lambda x: x[possible_slices[len(x.shape)-n_core_dirs]]
+
+    def create_squeeze_function(self, data):
+        if data.variable_length_flag:
+            unravel = lambda x, i: unravel(x[0], i-1) if i > 0 else x
+            return lambda x: np.squeeze(unravel(x, len(data.get_shape())-1))
+        return lambda x: np.squeeze(x)
+
     def get_all_slice_lists(self, data_list, expInfo):
         slice_list = []
         for data in data_list:
             slice_list.append(data.get_slice_list_per_process(expInfo))
         return slice_list
 
-    def get_all_padded_data(self, data, slice_list, count):
+    def get_all_padded_data(self, data, slice_list, count, squeeze_dict):
         section = []
         slist = []
         for idx in range(len(data)):
-            section.append(
-                data[idx].get_padded_slice_data(slice_list[idx][count]))
+            section.append(squeeze_dict[idx](
+                data[idx].get_padded_slice_data(slice_list[idx][count])))
             slist.append(slice_list[idx][count])
         return section, slist
 
-    def set_out_data(self, data, slice_list, result, count):
+    def set_out_data(self, data, slice_list, result, count, expand_dict):
         result = [result] if type(result) is not list else result
         for idx in range(len(data)):
-            data[idx].data[slice_list[idx][count]] = \
-                data[idx].get_unpadded_slice_data(slice_list[idx][count],
-                                                  result[idx])
+            temp = data[idx].get_unpadded_slice_data(slice_list[idx][count],
+                                                     result[idx])
+            data[idx].data[slice_list[idx][count]] = expand_dict[idx](temp)
 
     def transfer_to_meta_data(self, return_dict):
         remove_data_sets = []

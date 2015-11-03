@@ -46,17 +46,17 @@ class StripBackground(BaseFilter, CpuPlugin):
         super(StripBackground, self).__init__("StripBackground")
 
     def filter_frames(self, data):
+        data = data[0]
         t1 = time.time()
         its = self.parameters['iterations']
         w = self.parameters['window']
         smoothed = self.parameters['SG_filter_iterations']
         SGwidth = self.parameters['SG_width']
         SGpoly = self.parameters['SG_polyorder']
-        data = data[0].squeeze()
-        
+
         npts = len(data)
         x = np.arange(npts) # set up some x indices
-        filtered = savgol_filter(data,35,5) # make the start a bit a bit smoother
+        filtered = savgol_filter(data, 35, 5) # make the start a bit a bit smoother
         # lets do it the crap, slow way first
         aved = np.zeros_like(filtered)
         bottomedgemain=x<w
@@ -75,17 +75,18 @@ class StripBackground(BaseFilter, CpuPlugin):
             aved[topedgemain] = (filtered[topedgemain] + filtered[topedgerest])/2.
             filtered[aved<filtered] = aved[aved<filtered]
             if not (k/float(smoothed)-k/int(smoothed)):
-                print k
                 filtered=savgol_filter(filtered,35,5)
 
         t2 = time.time()
         logging.debug("Strip iteration took: %s ms", str((t2-t1)*1e3))
-        return data-filtered
+        print (data - filtered).shape
+        return data - filtered
 
     def setup(self):
         in_dataset, out_datasets = self.get_datasets()
         stripped = out_datasets[0]
         stripped.create_dataset(in_dataset[0])
+
         in_pData, out_pData = self.get_plugin_datasets()
         in_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
         out_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())

@@ -25,12 +25,17 @@ import savu
 
 import os
 import sys
-
+import logging
 savuPath = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(savuPath + "/../lib"))
 
 # add xraylib
 sys.path.append("/dls_sw/apps/xraylib/3.0.0/64/lib/python2.7/site-packages")
+try:
+    sys.path.append("/dls/science/groups/das/Aaron/FastXRF/src")
+except Exception:
+    logging.warn("Fluo tools not on path")
+    
 
 def run_tests():
     import unittest
