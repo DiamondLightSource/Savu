@@ -39,6 +39,7 @@ class Plugin(object):
         self.exp = None
         self.parameters = {}
         self.data_objs = {}
+        self.variable_data_flag = False
 
     def main_setup(self, exp, params):
         self.exp = exp
@@ -311,3 +312,9 @@ class Plugin(object):
         for data in data_list:
             meta_data.append(data.meta_data)
         return meta_data
+
+    def set_unknown_shape(self, data, key):
+        try:
+            return (len(data.meta_data.get_meta_data(key)),)
+        except KeyError:
+            return (0,)

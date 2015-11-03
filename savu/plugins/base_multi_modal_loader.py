@@ -45,6 +45,7 @@ class BaseMultiModalLoader(BaseLoader):
         # now lets extract the entry so we can figure out our geometries!
         entry = self.get_NXapp(ltype, data_obj.backing_file, 'entry1/')[0]
         logging.debug(str(entry))
+
         #lets get the data out
         data_obj.data = data_obj.backing_file[entry.name + data_str]
         data_obj.set_shape(data_obj.data.shape)
@@ -70,7 +71,9 @@ class BaseMultiModalLoader(BaseLoader):
         for ii in range(nAxes):
             # find the rotation axis
             data_axis = 'data/' + entry['data'].attrs["axes"][ii]
+
             logging.debug(str(data_axis))
+
             entry_axis = entry[data_axis]
 
             try:
@@ -124,14 +127,18 @@ class BaseMultiModalLoader(BaseLoader):
                 rotation = item
 
         proj_dir = tuple(projection)
+
         logging.debug("projections are: %s", str(proj_dir))
+
         if data_obj.data_mapping.is_map:
             # two translation axes
             data_obj.add_pattern("PROJECTION", core_dir=proj_dir,
                                  slice_dir=tuple(set(dims) - set(proj_dir)))
 
         sino_dir = (rotation, proj_dir[-1])
+
         logging.debug("sinograms are: %s", str(sino_dir))
+
         if data_obj.data_mapping.is_tomo:
             #rotation and fast axis
             data_obj.add_pattern("SINOGRAM", core_dir=sino_dir,

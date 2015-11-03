@@ -111,23 +111,30 @@ class Hdf5Transport(TransportMechanism):
         logging.info("run the loader plugin")
         self.plugin_loader(plugin_list[0])
 
-        exp.barrier()
-        logging.info("create all output data_objects and backing files")
-        in_data = exp.index["in_data"][exp.index["in_data"].keys()[0]]
-        out_data_objects = in_data.load_data(self)
+        start = 1
+        stop = start
+        n_plugins = len(plugin_list[start:-1]) + 1
+        while n_plugins != stop:
+            start_in_data = copy.deepcopy(self.exp.index['in_data'])
+            in_data = exp.index["in_data"][exp.index["in_data"].keys()[0]]
+            out_data_objs, stop = in_data.load_data(self, start)
+            exp.clear_data_objects()
+            self.exp.index['in_data'] = copy.deepcopy(start_in_data)
+            self.real_plugin_run(plugin_list, out_data_objs, start, stop)
+            start = stop
 
         exp.barrier()
-        logging.info("clear all out_data objects in experiment dictionary")
-        exp.clear_data_objects()
+        logging.info("close all remaining files")
+        for key in exp.index["in_data"].keys():
+            exp.index["in_data"][key].close_file()
 
         exp.barrier()
-        logging.info("Load the loader plugin")
-        self.plugin_loader(plugin_list[0])
+        logging.info("Completing the HDF5 plugin list runner")
+        return
 
-        exp.barrier()
-        logging.info("Running all the data processing plugins")
-
-        for i in range(1, len(plugin_list)-1):
+    def real_plugin_run(self, plugin_list, out_data_objs, start, stop):
+        exp = self.exp
+        for i in range(start, stop):
             link_type = "final_result" if i is len(plugin_list)-2 else \
                 "intermediate"
 
@@ -135,12 +142,12 @@ class Hdf5Transport(TransportMechanism):
             exp.barrier()
 
             logging.info("Initialise output data")
-            for key in out_data_objects[i-1]:
-                exp.index["out_data"][key] = out_data_objects[i-1][key]
+            for key in out_data_objs[i - start]:
+                exp.index["out_data"][key] = out_data_objs[i - start][key]
 
             exp.barrier()
             logging.info("Load the plugin")
-            plugin = self.plugin_loader(plugin_list[i], pos=i)
+            plugin = self.plugin_loader(plugin_list[i])
 
             plugin_name = (plugin.__module__).split('.')[-1]
             exp.barrier()
@@ -154,15 +161,6 @@ class Hdf5Transport(TransportMechanism):
             out_datasets = plugin.parameters["out_datasets"]
 
             self.reorganise_datasets(out_datasets, link_type)
-
-        exp.barrier()
-        logging.info("close all remaining files")
-        for key in exp.index["in_data"].keys():
-            exp.index["in_data"][key].close_file()
-
-        exp.barrier()
-        logging.info("Completing the HDF5 plugin list runner")
-        return
 
     @logmethod
     def process(self, plugin):

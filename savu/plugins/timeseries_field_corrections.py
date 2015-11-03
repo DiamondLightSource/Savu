@@ -35,8 +35,8 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
     """
     A Plugin to apply a simple dark and flatfield correction to some
     raw timeseries data
-    :param in_datasets: Create a list of the dataset(s) to process. Default: [].
-    :param out_datasets: Create a list of the dataset(s) to process. Default: [].
+    :param in_datasets: a list of the dataset(s) to process. Default: [].
+    :param out_datasets: a list of the dataset(s) to process. Default: [].
 
     """
 
@@ -49,6 +49,7 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         data = data[0]
         image_keys = in_meta_data[0].get_meta_data('image_key')
         trimmed_data = data[image_keys == 0]
+
         dark = data[image_keys == 2]
         dark = dark.mean(0)
         dark = np.tile(dark, (trimmed_data.shape[0], 1, 1))
@@ -56,6 +57,12 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         flat = flat.mean(0)
         flat = np.tile(flat, (trimmed_data.shape[0], 1, 1))
         data = (trimmed_data-dark)/(flat-dark)
+
+        # finally clean up and trim the data
+        data = np.nan_to_num(data)
+        data[data < 0] = 0
+        data[data > 2] = 2
+
         return data
 
     def setup(self):
@@ -72,10 +79,6 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         # removes dark and flat fields
         out_dataset[0].trim_output_data(in_dataset[0], image_key=0)
 
-#        # set up new axis
-#        out_dataset[0].map_axis(parms['q_axis_name'],
-#                                base=parms['energy_axis_name'])
-
         # set information relating to the plugin data
         in_pData, out_pData = self.get_plugin_datasets()
         # set pattern_name and nframes to process for all datasets
@@ -89,4 +92,4 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         return 1
 
     def get_max_frames(self):
-        return 1
+        return 4

@@ -92,18 +92,14 @@ class PyfaiAzimuthalIntegrator(BaseFilter, CpuPlugin):
         mask =self.params[0]
         ai = self.params[3]
         logging.debug("Running azimuthal integration")
-        print np.squeeze(data).shape
-        print "I'm here"
         fit = ai.xrpd(data=np.squeeze(data), npt=npts)
         mData.set_meta_data('Q', fit[0])
 #        mData.set_meta_data('integrated_diffraction_noise',fit[2])
-        print fit[1].shape
         t2 = time.time()
         print "PyFAI iteration took:"+str((t2-t1)*1e3)+"ms"
         return fit[1]
 
     def setup(self):
-        print "Hi"
         in_dataset, out_datasets = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
         shape = in_dataset[0].get_shape()
@@ -122,9 +118,10 @@ class PyfaiAzimuthalIntegrator(BaseFilter, CpuPlugin):
         # stating only 'dimension' will remove the axis label, stating
         # 'dimension.name.unit' name and unit will add or replace it
         axis_labels = ['-1', '-2.name.unit']
-        #new_shape = shape[:-2] + (1005,)4643
+
         new_shape = shape[:-2] + (4643,)
         print new_shape
+
         spectra.create_dataset(patterns={in_dataset[0]: patterns},
                                axis_labels={in_dataset[0]: axis_labels},
                                shape=new_shape)

@@ -1,0 +1,478 @@
+============================= test session starts ==============================
+platform linux2 -- Python 2.7.10 -- pytest-2.3.5
+collected 110 items
+
+savu/test/CGLS_astra_test.py .
+savu/test/astra_recon_cpu_test.py .F..
+savu/test/astra_recon_gpu_test.py ....
+savu/test/astra_recon_test.py .F..
+savu/test/band_pass_test.py .F..
+savu/test/cgls_recon_test.py .F..
+savu/test/copy_plugin_test.py .F..
+savu/test/data_test.py s
+savu/test/data_util_test.py FFFFFFFF
+savu/test/denoise_bregman_test.py .
+savu/test/dezing_filter_test.py .F..
+savu/test/downsample_plugin_test.py .F..
+savu/test/fastxrf_test.py s
+savu/test/framework_test.py sssssss
+savu/test/paganin_plugin_test.py .F..
+savu/test/paganin_test.py .
+savu/test/plugin_recon_test.py .F..
+savu/test/plugin_runner_test.py ....
+savu/test/plugin_sart_test.py .F.F..
+savu/test/plugin_test.py ..ss.F.F.F
+savu/test/plugins_util_test.py ..
+savu/test/process_file_test.py sssssssss
+savu/test/pyfai_azimuthal_integration_test.py .
+savu/test/ring_artefact_test.py ...F
+savu/test/scikit_image_recon_test.py ..
+savu/test/simple_tomo_test.py .
+savu/test/structures_test.py ....FFF
+savu/test/test_util_test.py FF
+savu/test/vo_centering_test.py ss
+
+=================================== FAILURES ===================================
+________________________ AstraReconCpuTest.test_process ________________________
+
+self = <savu.test.astra_recon_cpu_test.AstraReconCpuTest testMethod=test_process>
+
+    def test_process(self):
+        print "Running the test process"
+    
+        try:
+            plugin = tu.load_class(self.plugin_name)
+            if self.plugin_name == base_class_name:
+                self.assertRaises(NotImplementedError, plugin.process, "test", "test", "test")
+                return
+    
+>           options = tu.set_experiment(self.data_type)
+
+savu/test/plugin_test.py:60: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+exp_type = 'tomo'
+
+    def set_experiment(exp_type):
+        exp_types = get_experiment_types()
+        try:
+>           options = globals()[exp_types[exp_type['func']]](exp_type['filename'])
+E           TypeError: string indices must be integers, not str
+
+savu/test/test_utils.py:42: TypeError
+------------------------------- Captured stdout --------------------------------
+Running the test process
+_________________________ AstraReconTest.test_process __________________________
+
+self = <savu.test.astra_recon_test.AstraReconTest testMethod=test_process>
+
+    def test_process(self):
+        print "Running the test process"
+    
+        try:
+            plugin = tu.load_class(self.plugin_name)
+            if self.plugin_name == base_class_name:
+                self.assertRaises(NotImplementedError, plugin.process, "test", "test", "test")
+                return
+    
+>           options = tu.set_experiment(self.data_type)
+E           AttributeError: 'AstraReconTest' object has no attribute 'data_type'
+
+savu/test/plugin_test.py:60: AttributeError
+------------------------------- Captured stdout --------------------------------
+Running the test process
+__________________________ BandPassTest.test_process ___________________________
+
+self = <savu.test.band_pass_test.BandPassTest testMethod=test_process>
+
+    def test_process(self):
+        print "Running the test process"
+    
+        try:
+            plugin = tu.load_class(self.plugin_name)
+            if self.plugin_name == base_class_name:
+                self.assertRaises(NotImplementedError, plugin.process, "test", "test", "test")
+                return
+    
+>           options = tu.set_experiment(self.data_type)
+
+savu/test/plugin_test.py:60: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+exp_type = 'tomo'
+
+    def set_experiment(exp_type):
+        exp_types = get_experiment_types()
+        try:
+>           options = globals()[exp_types[exp_type['func']]](exp_type['filename'])
+E           TypeError: string indices must be integers, not str
+
+savu/test/test_utils.py:42: TypeError
+------------------------------- Captured stdout --------------------------------
+Running the test process
+__________________________ CglsReconTest.test_process __________________________
+
+self = <savu.test.cgls_recon_test.CglsReconTest testMethod=test_process>
+
+    def test_process(self):
+        print "Running the test process"
+    
+        try:
+            plugin = tu.load_class(self.plugin_name)
+            if self.plugin_name == base_class_name:
+                self.assertRaises(NotImplementedError, plugin.process, "test", "test", "test")
+                return
+    
+>           options = tu.set_experiment(self.data_type)
+
+savu/test/plugin_test.py:60: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+exp_type = 'tomo'
+
+    def set_experiment(exp_type):
+        exp_types = get_experiment_types()
+        try:
+>           options = globals()[exp_types[exp_type['func']]](exp_type['filename'])
+E           TypeError: string indices must be integers, not str
+
+savu/test/test_utils.py:42: TypeError
+------------------------------- Captured stdout --------------------------------
+Running the test process
+_________________________ CopyPluginTest.test_process __________________________
+
+self = <savu.test.copy_plugin_test.CopyPluginTest testMethod=test_process>
+
+    def test_process(self):
+        print "Running the test process"
+    
+        try:
+            plugin = tu.load_class(self.plugin_name)
+            if self.plugin_name == base_class_name:
+                self.assertRaises(NotImplementedError, plugin.process, "test", "test", "test")
+                return
+    
+>           options = tu.set_experiment(self.data_type)
+
+savu/test/plugin_test.py:60: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+exp_type = 'tomo'
+
+    def set_experiment(exp_type):
+        exp_types = get_experiment_types()
+        try:
+>           options = globals()[exp_types[exp_type['func']]](exp_type['filename'])
+E           TypeError: string indices must be integers, not str
+
+savu/test/test_utils.py:42: TypeError
+------------------------------- Captured stdout --------------------------------
+Running the test process
+_______________________ Test.test_get_padded_slice_data ________________________
+
+self = <savu.test.data_util_test.Test testMethod=test_get_padded_slice_data>
+
+    def test_get_padded_slice_data(self):
+>       data = tu.get_nx_tomo_test_data()
+E       AttributeError: 'module' object has no attribute 'get_nx_tomo_test_data'
+
+savu/test/data_util_test.py:86: AttributeError
+______________________ Test.test_get_padded_slice_data_2 _______________________
+
+self = <savu.test.data_util_test.Test testMethod=test_get_padded_slice_data_2>
+
+    def test_get_padded_slice_data_2(self):
+>       data = tu.get_nx_tomo_test_data()
+E       AttributeError: 'module' object has no attribute 'get_nx_tomo_test_data'
+
+savu/test/data_util_test.py:98: AttributeError
+______________________ Test.test_get_padded_slice_data_3 _______________________
+
+self = <savu.test.data_util_test.Test testMethod=test_get_padded_slice_data_3>
+
+    def test_get_padded_slice_data_3(self):
+>       data = tu.get_nx_tomo_test_data()
+E       AttributeError: 'module' object has no attribute 'get_nx_tomo_test_data'
+
+savu/test/data_util_test.py:111: AttributeError
+_____________________ Test.test_get_slice_list_per_process _____________________
+
+self = <savu.test.data_util_test.Test testMethod=test_get_slice_list_per_process>
+
+    def test_get_slice_list_per_process(self):
+>       data = tu.get_nx_tomo_test_data()
+E       AttributeError: 'module' object has no attribute 'get_nx_tomo_test_data'
+
+savu/test/data_util_test.py:60: AttributeError
+______________________ Test.test_get_unpadded_slice_data _______________________
+
+self = <savu.test.data_util_test.Test testMethod=test_get_unpadded_slice_data>
+
+    def test_get_unpadded_slice_data(self):
+>       data = tu.get_nx_tomo_test_data()
+E       AttributeError: 'module' object has no attribute 'get_nx_tomo_test_data'
+
+savu/test/data_util_test.py:124: AttributeError
+_____________________ Test.test_get_unpadded_slice_data_2 ______________________
+
+self = <savu.test.data_util_test.Test testMethod=test_get_unpadded_slice_data_2>
+
+    def test_get_unpadded_slice_data_2(self):
+>       data = tu.get_nx_tomo_test_data()
+E       AttributeError: 'module' object has no attribute 'get_nx_tomo_test_data'
+
+savu/test/data_util_test.py:146: AttributeError
+____________________________ Test.test_slice_group _____________________________
+
+self = <savu.test.data_util_test.Test testMethod=test_slice_group>
+
+    def test_slice_group(self):
+>       data = tu.get_nx_tomo_test_data()
+E       AttributeError: 'module' object has no attribute 'get_nx_tomo_test_data'
+
+savu/test/data_util_test.py:42: AttributeError
+_____________________________ Test.test_slice_list _____________________________
+
+self = <savu.test.data_util_test.Test testMethod=test_slice_list>
+
+    def test_slice_list(self):
+>       data = tu.get_nx_tomo_test_data()
+E       AttributeError: 'module' object has no attribute 'get_nx_tomo_test_data'
+
+savu/test/data_util_test.py:33: AttributeError
+________________________ DezingFilterTest.test_process _________________________
+
+self = <savu.test.dezing_filter_test.DezingFilterTest testMethod=test_process>
+
+    def test_process(self):
+        print "Running the test process"
+    
+        try:
+            plugin = tu.load_class(self.plugin_name)
+            if self.plugin_name == base_class_name:
+                self.assertRaises(NotImplementedError, plugin.process, "test", "test", "test")
+                return
+    
+>           options = tu.set_experiment(self.data_type)
+E           AttributeError: 'DezingFilterTest' object has no attribute 'data_type'
+
+savu/test/plugin_test.py:60: AttributeError
+------------------------------- Captured stdout --------------------------------
+Running the test process
+_________________________ DownsampleTest.test_process __________________________
+
+self = <savu.test.downsample_plugin_test.DownsampleTest testMethod=test_process>
+
+    def test_process(self):
+        print "Running the test process"
+    
+        try:
+            plugin = tu.load_class(self.plugin_name)
+            if self.plugin_name == base_class_name:
+                self.assertRaises(NotImplementedError, plugin.process, "test", "test", "test")
+                return
+    
+>           options = tu.set_experiment(self.data_type)
+E           AttributeError: 'DownsampleTest' object has no attribute 'data_type'
+
+savu/test/plugin_test.py:60: AttributeError
+------------------------------- Captured stdout --------------------------------
+Running the test process
+_________________________ SimpleReconTest.test_process _________________________
+
+self = <savu.test.paganin_plugin_test.SimpleReconTest testMethod=test_process>
+
+    def test_process(self):
+        print "Running the test process"
+    
+        try:
+            plugin = tu.load_class(self.plugin_name)
+            if self.plugin_name == base_class_name:
+                self.assertRaises(NotImplementedError, plugin.process, "test", "test", "test")
+                return
+    
+>           options = tu.set_experiment(self.data_type)
+E           AttributeError: 'SimpleReconTest' object has no attribute 'data_type'
+
+savu/test/plugin_test.py:60: AttributeError
+------------------------------- Captured stdout --------------------------------
+Running the test process
+______________________ SinogramAlignmentTest.test_process ______________________
+
+self = <savu.test.plugin_recon_test.SinogramAlignmentTest testMethod=test_process>
+
+    def test_process(self):
+        print "Running the test process"
+    
+        try:
+            plugin = tu.load_class(self.plugin_name)
+            if self.plugin_name == base_class_name:
+                self.assertRaises(NotImplementedError, plugin.process, "test", "test", "test")
+                return
+    
+>           options = tu.set_experiment(self.data_type)
+E           AttributeError: 'SinogramAlignmentTest' object has no attribute 'data_type'
+
+savu/test/plugin_test.py:60: AttributeError
+------------------------------- Captured stdout --------------------------------
+Running the test process
+_________________________ SimpleReconTest.test_process _________________________
+
+self = <savu.test.plugin_sart_test.SimpleReconTest testMethod=test_process>
+
+    def test_process(self):
+        print "Running the test process"
+    
+        try:
+            plugin = tu.load_class(self.plugin_name)
+            if self.plugin_name == base_class_name:
+                self.assertRaises(NotImplementedError, plugin.process, "test", "test", "test")
+                return
+    
+>           options = tu.set_experiment(self.data_type)
+E           AttributeError: 'SimpleReconTest' object has no attribute 'data_type'
+
+savu/test/plugin_test.py:60: AttributeError
+------------------------------- Captured stdout --------------------------------
+Running the test process
+_______________________ ScikitimageSartTest.test_process _______________________
+
+self = <savu.test.plugin_sart_test.ScikitimageSartTest testMethod=test_process>
+
+    def test_process(self):
+        print "Running the test process"
+    
+        try:
+            plugin = tu.load_class(self.plugin_name)
+            if self.plugin_name == base_class_name:
+                self.assertRaises(NotImplementedError, plugin.process, "test", "test", "test")
+                return
+    
+>           options = tu.set_experiment(self.data_type)
+E           AttributeError: 'ScikitimageSartTest' object has no attribute 'data_type'
+
+savu/test/plugin_test.py:60: AttributeError
+------------------------------- Captured stdout --------------------------------
+Running the test process
+_________________ TimeseriesFieldCorrectionsTest.test_process __________________
+
+self = <savu.test.plugin_test.TimeseriesFieldCorrectionsTest testMethod=test_process>
+
+    def test_process(self):
+        print "Running the test process"
+    
+        try:
+            plugin = tu.load_class(self.plugin_name)
+            if self.plugin_name == base_class_name:
+                self.assertRaises(NotImplementedError, plugin.process, "test", "test", "test")
+                return
+    
+>           options = tu.set_experiment(self.data_type)
+E           AttributeError: 'TimeseriesFieldCorrectionsTest' object has no attribute 'data_type'
+
+savu/test/plugin_test.py:60: AttributeError
+------------------------------- Captured stdout --------------------------------
+Running the test process
+________________________ MedianFilterTest.test_process _________________________
+
+self = <savu.test.plugin_test.MedianFilterTest testMethod=test_process>
+
+    def test_process(self):
+        print "Running the test process"
+    
+        try:
+            plugin = tu.load_class(self.plugin_name)
+            if self.plugin_name == base_class_name:
+                self.assertRaises(NotImplementedError, plugin.process, "test", "test", "test")
+                return
+    
+>           options = tu.set_experiment(self.data_type)
+E           AttributeError: 'MedianFilterTest' object has no attribute 'data_type'
+
+savu/test/plugin_test.py:60: AttributeError
+------------------------------- Captured stdout --------------------------------
+Running the test process
+_________________________ SimpleReconTest.test_process _________________________
+
+self = <savu.test.plugin_test.SimpleReconTest testMethod=test_process>
+
+    def test_process(self):
+        print "Running the test process"
+    
+        try:
+            plugin = tu.load_class(self.plugin_name)
+            if self.plugin_name == base_class_name:
+                self.assertRaises(NotImplementedError, plugin.process, "test", "test", "test")
+                return
+    
+>           options = tu.set_experiment(self.data_type)
+E           AttributeError: 'SimpleReconTest' object has no attribute 'data_type'
+
+savu/test/plugin_test.py:60: AttributeError
+------------------------------- Captured stdout --------------------------------
+Running the test process
+________________________ RingArtefactTest.test_process _________________________
+
+self = <savu.test.ring_artefact_test.RingArtefactTest testMethod=test_process>
+
+    def test_process(self):
+        print "Running the test process"
+    
+        try:
+            plugin = tu.load_class(self.plugin_name)
+            if self.plugin_name == base_class_name:
+                self.assertRaises(NotImplementedError, plugin.process, "test", "test", "test")
+                return
+    
+>           options = tu.set_experiment(self.data_type)
+E           AttributeError: 'RingArtefactTest' object has no attribute 'data_type'
+
+savu/test/plugin_test.py:60: AttributeError
+------------------------------- Captured stdout --------------------------------
+Running the test process
+______________ RawTimeseriesDataTest.test_get_clusterd_frame_list ______________
+
+self = <savu.test.structures_test.RawTimeseriesDataTest testMethod=test_get_clusterd_frame_list>
+
+    def setUp(self):
+>       self.data = tu.get_nx_tomo_test_data()
+E       AttributeError: 'module' object has no attribute 'get_nx_tomo_test_data'
+
+savu/test/structures_test.py:80: AttributeError
+_____________________ DataTest.test_get_frame_list_nx_tomo _____________________
+
+self = <savu.test.structures_test.DataTest testMethod=test_get_frame_list_nx_tomo>
+
+    def setUp(self):
+>       self.nx_tomo_data = tu.get_nx_tomo_test_data()
+E       AttributeError: 'module' object has no attribute 'get_nx_tomo_test_data'
+
+savu/test/structures_test.py:110: AttributeError
+___________________ DataTest.test_get_frame_list_projection ____________________
+
+self = <savu.test.structures_test.DataTest testMethod=test_get_frame_list_projection>
+
+    def setUp(self):
+>       self.nx_tomo_data = tu.get_nx_tomo_test_data()
+E       AttributeError: 'module' object has no attribute 'get_nx_tomo_test_data'
+
+savu/test/structures_test.py:110: AttributeError
+________________________ Test.testGetNXTomoExampleData _________________________
+
+self = <savu.test.test_util_test.Test testMethod=testGetNXTomoExampleData>
+
+    def testGetNXTomoExampleData(self):
+>       raw_data = tu.get_nx_tomo_test_data()
+E       AttributeError: 'module' object has no attribute 'get_nx_tomo_test_data'
+
+savu/test/test_util_test.py:32: AttributeError
+______________________ Test.testGetProjectionExampleData _______________________
+
+self = <savu.test.test_util_test.Test testMethod=testGetProjectionExampleData>
+
+    def testGetProjectionExampleData(self):
+>       raw_data = tu.get_projection_test_data()
+E       AttributeError: 'module' object has no attribute 'get_projection_test_data'
+
+savu/test/test_util_test.py:47: AttributeError
+============== 28 failed, 60 passed, 22 skipped in 227.45 seconds ==============

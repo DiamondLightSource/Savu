@@ -68,8 +68,7 @@ class Experiment(object):
         except KeyError:
             self.index[dtype][name] = Data(name, self)
             data_obj = self.index[dtype][name]
-            bases.append(data_obj.get_transport_data(
-                self.meta_data.get_meta_data("transport")))
+            bases.append(data_obj.get_transport_data())
             data_obj.add_base_classes(bases)
         return self.index[dtype][name]
 
@@ -97,6 +96,9 @@ class Experiment(object):
     def merge_out_data_to_in(self):
         for key, data in self.index["out_data"].iteritems():
             if data.remove is False:
+                if key in self.index['in_data'].keys():
+                    data.meta_data.set_dictionary(
+                        self.index['in_data'][key].meta_data.get_dictionary())
                 self.index['in_data'][key] = data
         self.index["out_data"] = {}
 

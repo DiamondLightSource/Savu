@@ -48,9 +48,7 @@ class SimpleFit(BaseFitter):
         data = data[0].squeeze()
         in_meta_data = self.get_in_meta_data()[0]
         positions = in_meta_data.get_meta_data("PeakIndex")
-
         axis = in_meta_data.get_meta_data("Q")
-
         weights = data[positions]
         widths = np.ones_like(positions)*self.parameters["width_guess"]
         p = []
@@ -75,7 +73,6 @@ class SimpleFit(BaseFitter):
         logging.debug("Simple fit iteration took: %s ms", str((t2-t1)*1e3))
         return [weights, widths, areas, residuals]
 
-# dump this here for now to fix the variable length issue
     def setup(self):
         # set up the output datasets that are created by the plugin
         in_dataset, out_datasets = self.get_datasets()
@@ -87,7 +84,9 @@ class SimpleFit(BaseFitter):
         fitAreas = out_datasets[0]
         fitHeights = out_datasets[1]
         fitWidths = out_datasets[2]
-        new_shape = shape[:-1] + (32,)
+
+        new_shape = shape[:-1] + \
+            self.set_unknown_shape(in_dataset[0], 'PeakIndex')
 
         fitAreas.create_dataset(patterns={in_dataset[0]: pattern_list},
                                 axis_labels={in_dataset[0]: axis_labels},
@@ -102,15 +101,13 @@ class SimpleFit(BaseFitter):
                                  shape=new_shape)
 
         channel = {'core_dir': (-1,), 'slice_dir': range(len(shape)-1)}
-        
+
         fitAreas.add_pattern("CHANNEL", **channel)
         fitHeights.add_pattern("CHANNEL", **channel)
         fitWidths.add_pattern("CHANNEL", **channel)
-        #residlabels = in_dataset[0].meta_data.get_meta_data('axis_labels')[0:3]
-        #print residlabels.append(residlabels[-1])
+
         residuals = out_datasets[3]
         residuals.create_dataset(in_dataset[0])
-
 
         # setup plugin datasets
         in_pData, out_pData = self.get_plugin_datasets()

@@ -47,14 +47,14 @@ class Data(object):
         self.exp = exp
         self.group_name = None
         self.group = None
-        self.backing_file = None
-        self.data = None
         self._plugin_data_obj = None
         self.tomo_raw_obj = None
         self.data_mapping = None
         self.variable_length_flag = False
         self.dtype = None
         self.remove = False
+        self.backing_file = None
+        self.data = None
 
     def initialise_data_info(self, name):
         self.data_info.set_meta_data('name', name)
@@ -88,7 +88,9 @@ class Data(object):
             raise Exception("There is no TomoRaw object associated with "
                             "the Data object.")
 
-    def get_transport_data(self, transport):
+    def get_transport_data(self):
+        transport = self.exp.meta_data.get_meta_data("transport")
+        "SETTING UP THE TRANSPORT DATA"
         transport_data = "savu.data.transport_data." + transport + \
                          "_transport_data"
         return self.import_class(transport_data)
@@ -104,15 +106,24 @@ class Data(object):
         return getattr(mod, module2class.split('.')[-1])
 
     def __deepcopy__(self, memo):
-        return self
-
-#    def __deepcopy__(self, memo):
-#        newobj = TomoRaw(self.data_obj)
-#        newobj.image_key = self.image_key
-#        newobj.image_key_slice = copy.deepcopy(self.image_key_slice)
-#        newobj.frame_list = copy.deepcopy(self.frame_list)
-#        newobj.data_only_flag = copy.deepcopy(self.data_only_flag)
-#        return newobj
+        name = self.data_info.get_meta_data('name')
+        new_obj = Data(name, self.exp)
+        new_obj.add_base_classes(self.get_transport_data())
+        new_obj.meta_data = self.meta_data
+        new_obj.pattern_list = copy.deepcopy(self.pattern_list)
+        new_obj.data_info = copy.deepcopy(self.data_info)
+        new_obj.exp = self.exp
+        new_obj._plugin_data_obj = self._plugin_data_obj
+        new_obj.tomo_raw_obj = self.tomo_raw_obj
+        new_obj.data_mapping = self.data_mapping
+        new_obj.variable_length_flag = copy.deepcopy(self.variable_length_flag)
+        new_obj.dtype = copy.deepcopy(self.dtype)
+        new_obj.remove = copy.deepcopy(self.remove)
+        new_obj.group_name = self.group_name
+        new_obj.group = self.group
+        new_obj.backing_file = self.backing_file
+        new_obj.data = self.data
+        return new_obj
 
     def add_base(self, ExtraBase):
         cls = self.__class__
@@ -120,6 +131,7 @@ class Data(object):
         ExtraBase().__init__()
 
     def add_base_classes(self, bases):
+        bases = bases if isinstance(bases, list) else [bases]
         for base in bases:
             self.add_base(base)
 
@@ -146,7 +158,7 @@ class Data(object):
                 self.create_axis_labels(kwargs['axis_labels'])
                 shape = kwargs['shape']
                 if isinstance(shape, Data):
-                    self.set_shape(Data.get_shape())
+                    self.set_shape(shape.get_shape())
                 elif type(shape) is dict:
                     self.set_variable_flag()
                     self.set_shape((shape[shape.keys()[0]] + ('var',)))
@@ -274,6 +286,16 @@ class Data(object):
 
     def get_variable_flag(self):
         return self.variable_length_flag
+
+    def set_variable_array_length(self, var_size):
+        var_size = var_size if isinstance(var_size, list) else [var_size]
+        shape = list(self.get_shape())
+        count = 0
+        for i in range(len(shape)):
+            if isinstance(shape[i], str):
+                shape[i] = var_size[count]
+                count += 1
+        self.set_shape(tuple(shape))
 
     def remove_variable_length(self, length):
         self.variable_length_flag = False

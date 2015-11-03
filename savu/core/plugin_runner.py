@@ -80,25 +80,17 @@ class PluginRunner(object):
 
         try:
             plugin = self.load_plugin(plugin_dict['id'])
-            print plugin_dict['id']
         except Exception as e:
             logging.error("failed to load the plugin")
             logging.error(e)
             raise e
 
-        logging.debug("Getting checkflag")
         check_flag = kwargs.get('check', False)
-
-        logging.debug("Doing something with the check flag")
         if check_flag:
-            try:
-                plugin_dict["data"]["in_datasets"]
-                self.set_datasets(plugin, plugin_dict)
-            except KeyError:
-                pass
+            plugin_dict["data"]["in_datasets"]
+            self.set_datasets(plugin, plugin_dict)
 
         logging.debug("Running plugin main setup")
-        print "the plugin is:", plugin
         plugin.main_setup(self.exp, plugin_dict['data'])
 
         logging.debug("finished plugin loader")
@@ -109,7 +101,6 @@ class PluginRunner(object):
         self.exp.set_nxs_filename()
 
         check = kwargs.get('check', False)
-
         for i in range(1, len(plugin_list)-1):
             self.exp.barrier()
             logging.info("Checking Plugin %s" % plugin_list[i]['name'])
