@@ -33,15 +33,16 @@ class SimpleFit(BaseFitter):
     """
     This plugin fits peaks.
     :param width_guess: An initial guess at the width. Default: 0.02.
-    :param PeakIndex: the peak index. Default: [38,57,78,114,206,230,392,457,526,651,765,1015,1281,1312,1498,1582,1642,1785,2116,2176,2301,2447,2554,2694,2987,3134,3182,3300,3435,3602,4090,4117].
+    :param PeakIndex: the peak index. Default: [].
     """
 
     def __init__(self):
         super(SimpleFit, self).__init__("SimpleFit")
 
     def pre_process(self):
-        in_meta_data = self.get_in_meta_data()[0]
-        in_meta_data.set_meta_data("PeakIndex", self.parameters["PeakIndex"])
+        pass
+        #in_meta_data = self.get_in_meta_data()[0]
+        #in_meta_data.set_meta_data("PeakIndex", self.parameters["PeakIndex"])
 
     def filter_frames(self, data):
         t1 = time.time()

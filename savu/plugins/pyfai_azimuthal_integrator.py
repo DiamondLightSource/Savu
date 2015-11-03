@@ -96,7 +96,6 @@ class PyfaiAzimuthalIntegrator(BaseFilter, CpuPlugin):
 #        mData.set_meta_data('integrated_diffraction_noise',fit[2])
         t2 = time.time()
         print "PyFAI iteration took:"+str((t2-t1)*1e3)+"ms"
-        print fit[1].shape
         return fit[1]
 
     def post_process(self):
@@ -123,20 +122,13 @@ class PyfaiAzimuthalIntegrator(BaseFilter, CpuPlugin):
         # 'dimension.name.unit' name and unit will add or replace it
         axis_labels = ['-1', '-2.name.unit']
 
-#        new_shape = shape[:-2] + (4643,)
-
         spectra.create_dataset(patterns={in_dataset[0]: patterns},
                                axis_labels={in_dataset[0]: axis_labels},
                                shape={'variable': shape[:-2]})
-#                               shape=shape[:-2]+(1005,))
 
         spectrum = {'core_dir': (-1,), 'slice_dir': tuple(range(len(shape)-2))}
         spectra.add_pattern("SPECTRUM", **spectrum)
 
-#        spectra.create_dataset(patterns={in_dataset[0]: ['SPECTRUM']},
-#                               axis_labels=axis_labels,
-#                               shape={'variable': shape[:-1]})
-        # this get the right data in...
         out_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
 
     def get_max_frames(self):

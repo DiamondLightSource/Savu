@@ -75,11 +75,11 @@ class StripBackground(BaseFilter, CpuPlugin):
             aved[topedgemain] = (filtered[topedgemain] + filtered[topedgerest])/2.
             filtered[aved<filtered] = aved[aved<filtered]
             if not (k/float(smoothed)-k/int(smoothed)):
-                print k
                 filtered=savgol_filter(filtered,35,5)
 
         t2 = time.time()
         logging.debug("Strip iteration took: %s ms", str((t2-t1)*1e3))
+        print (data - filtered).shape
         return data - filtered
 
     def setup(self):

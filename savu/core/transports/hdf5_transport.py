@@ -204,15 +204,14 @@ class Hdf5Transport(TransportMechanism):
 
     def create_expand_function(self, data):
         slice_dirs = data.get_plugin_data().get_slice_directions()
+        n_core_dirs = len(data.get_plugin_data().get_core_directions())
         new_slice = [slice(None)]*len(data.get_shape())
         possible_slices = [copy.copy(new_slice)]
         for sl in slice_dirs:
             new_slice[sl] = None
             possible_slices.append(copy.copy(new_slice))
         possible_slices = possible_slices[::-1]
-        print possible_slices
-        print "Number of possible slices", len(possible_slices)
-        return lambda x: x[possible_slices[len(x.shape)-1]]
+        return lambda x: x[possible_slices[len(x.shape)-n_core_dirs]]
 
     def create_squeeze_function(self, data):
         if data.variable_length_flag:
@@ -241,6 +240,8 @@ class Hdf5Transport(TransportMechanism):
             temp = data[idx].get_unpadded_slice_data(slice_list[idx][count],
                                                      result[idx])
             print "shape is", len(temp.shape)
+            print temp.shape
+            print expand_dict[idx](temp).shape
             data[idx].data[slice_list[idx][count]] = expand_dict[idx](temp)
 
     def transfer_to_meta_data(self, return_dict):
