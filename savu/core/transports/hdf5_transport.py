@@ -239,9 +239,6 @@ class Hdf5Transport(TransportMechanism):
         for idx in range(len(data)):
             temp = data[idx].get_unpadded_slice_data(slice_list[idx][count],
                                                      result[idx])
-            print "shape is", len(temp.shape)
-            print temp.shape
-            print expand_dict[idx](temp).shape
             data[idx].data[slice_list[idx][count]] = expand_dict[idx](temp)
 
     def transfer_to_meta_data(self, return_dict):
