@@ -1,10 +1,11 @@
 #!/bin/bash
-#module load global/testcluster
-module load global/cluster
+module load global/testcluster
+#module load global/cluster
 module load python/ana
 #source activate mpi2
-source activate mpi4
+source activate mpi5
 module load openmpi/1.6.5
+export PYTHONPATH=$PYTHONPATH:/home/clb02321/DAWN_stable/FastXRF/src/
 #export LD_LIBRARY_PATH=/dls_sw/prod/tools/RHEL6-x86_64/openmpi/1-6-5/prefix/lib:$LD_LIBRARY_PATH
 
 savupath=$1
