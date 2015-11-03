@@ -56,7 +56,7 @@ class StripBackground(BaseFilter, CpuPlugin):
 
         npts = len(data)
         x = np.arange(npts) # set up some x indices
-        filtered = savgol_filter(data,35,5) # make the start a bit a bit smoother
+        filtered = savgol_filter(data, 35, 5) # make the start a bit a bit smoother
         # lets do it the crap, slow way first
         aved = np.zeros_like(filtered)
         bottomedgemain=x<w
@@ -79,13 +79,8 @@ class StripBackground(BaseFilter, CpuPlugin):
                 filtered=savgol_filter(filtered,35,5)
 
         t2 = time.time()
-<<<<<<< HEAD
-        print "Strip iteration took:"+str((t2-t1)*1e3)+"ms"
-        return data - filtered
-=======
         logging.debug("Strip iteration took: %s ms", str((t2-t1)*1e3))
-        return data-filtered
->>>>>>> origin/master
+        return data - filtered
 
     def setup(self):
         in_dataset, out_datasets = self.get_datasets()
