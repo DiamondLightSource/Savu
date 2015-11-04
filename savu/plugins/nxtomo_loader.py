@@ -88,26 +88,3 @@ class NxtomoLoader(BaseLoader):
             logging.warn("No Control information available")
 
         data_obj.set_shape(data_obj.data.shape)
-
-    def load_test_projection_data(self):
-
-        data_obj = self.exp.create_data_object("in_data", "tomo")
-        data_obj.add_pattern("PROJECTION", core_dir=(1, 2), slice_dir=(0,))
-        data_obj.add_pattern("SINOGRAM", core_dir=(0, -1), slice_dir=(1,))
-
-        objInfo = data_obj.meta_data
-        expInfo = self.exp.meta_data
-
-        data_obj.backing_file = \
-            h5py.File(expInfo.get_meta_data("data_file"), 'r')
-        logging.debug("Creating file '%s' '%s'", 'tomo_entry',
-                      data_obj.backing_file.filename)
-
-        data_obj.data = \
-            data_obj.backing_file['TimeseriesFieldCorrections/data']
-
-        rotation_angle = \
-            data_obj.backing_file['TimeseriesFieldCorrections/rotation_angle']
-        objInfo.set_meta_data("rotation_angle", rotation_angle[...])
-
-        data_obj.set_shape(data_obj.data.shape)

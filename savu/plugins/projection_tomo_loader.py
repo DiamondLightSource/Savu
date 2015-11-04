@@ -22,9 +22,11 @@
 
 """
 
+import logging
+import h5py
+
 from savu.core.utils import logmethod
 from savu.plugins.base_loader import BaseLoader
-import savu.data.transport_data.standard_loaders as sLoader
 
 from savu.plugins.utils import register_plugin
 
@@ -40,6 +42,33 @@ class ProjectionTomoLoader(BaseLoader):
 
     @logmethod
     def setup(self):
-        loader = sLoader.TomographyLoaders()
-        loader.load_test_projection_data(self.exp)
 
+        data_obj = self.exp.create_data_object("in_data", "tomo")
+        rot = 0
+        detY = 1
+        detX = 2
+        data_obj.set_axis_labels('rotation_angle.degrees',
+                                 'detector_y.pixel',
+                                 'detector_x.pixel')
+
+        data_obj.add_pattern('PROJECTION', core_dir=(detX, detY),
+                             slice_dir=(rot,))
+        data_obj.add_pattern('SINOGRAM', core_dir=(detX, rot),
+                             slice_dir=(detY,))
+
+        objInfo = data_obj.meta_data
+        expInfo = self.exp.meta_data
+
+        data_obj.backing_file = \
+            h5py.File(expInfo.get_meta_data("data_file"), 'r')
+        logging.debug("Creating file '%s' '%s'", 'tomo_entry',
+                      data_obj.backing_file.filename)
+
+        data_obj.data = \
+            data_obj.backing_file['TimeseriesFieldCorrections/data']
+
+        rotation_angle = \
+            data_obj.backing_file['TimeseriesFieldCorrections/rotation_angle']
+        objInfo.set_meta_data("rotation_angle", rotation_angle[...])
+
+        data_obj.set_shape(data_obj.data.shape)

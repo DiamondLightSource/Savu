@@ -42,39 +42,28 @@ def get_experiment_types():
     return exp_dict
 
 
-def set_experiment(exp_type, plugin):
+def set_experiment(exp_type):
     exp_types = get_experiment_types()
     try:
         options = globals()[exp_types[exp_type]['func']](
-            exp_types[exp_type]['filename'], plugin)
+            exp_types[exp_type]['filename'])
     except KeyError:
         raise Exception("The experiment type ", exp_type, " is not recognised")
     return options
 
 
-def set_tomoRaw_experiment(filename, plugin):
+def set_tomoRaw_experiment(filename):
     # create experiment
     options = set_options(get_test_data_path(filename))
     options['loader'] = 'savu.plugins.nxtomo_loader'
     options['saver'] = 'savu.plugins.hdf5_tomo_saver'
-    options['plugin_datasets'] = set_data_dict(['tomo'],
-                                               get_output_datasets(plugin))
-    print options['plugin_datasets']
-    print plugin.__module__
-    set_plugin_list(options, plugin.__module__)
-    print options['plugin_list']
     return options
 
 
-def set_tomo_experiment(filename, plugin):
-    print "*****Setting the tomography experiment"
-    # create experiment
+def set_tomo_experiment(filename):
     options = set_options(get_test_data_path(filename))
     options['loader'] = 'savu.plugins.projection_tomo_loader'
     options['saver'] = 'savu.plugins.hdf5_tomo_saver'
-    options['plugin_datasets'] = set_data_dict(['tomo'],
-                                               get_output_datasets(plugin))
-    set_plugin_list(options, plugin.__module__)
     return options
 
 
@@ -86,10 +75,16 @@ def get_output_datasets(plugin):
     return out_data
 
 
-def set_plugin_list(options, plugin_name):
+def set_plugin_list(options, pnames):
+    plugin_names = pnames if isinstance(pnames, list) else [pnames]
     options['plugin_list'] = []
-    ID = [options['loader'], plugin_name, options['saver']]
-    data = [{}, options['plugin_datasets'], {}]
+    ID = [options['loader'], options['saver']]
+    data = [{}, {}]
+    for i in range(len(plugin_names)):
+        ID.insert(i+1, plugin_names[i])
+        plugin = load_class(plugin_names[i])
+        data.insert(i+1, set_data_dict(['tomo'], get_output_datasets(plugin)))
+
     for i in range(len(ID)):
         name = module2class(ID[i].split('.')[-1])
         options['plugin_list'].append(set_plugin_entry(name, ID[i], data[i]))

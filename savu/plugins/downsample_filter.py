@@ -46,46 +46,46 @@ class DownsampleFilter(BaseFilter, CpuPlugin):
                 (input_shape[1]+1)/self.parameters['bin_size'],
                 (input_shape[2]+1)/self.parameters['bin_size'])
 
-    def filter_frame(self, data):
+    def filter_frames(self, data):
         logging.debug("Running Downsample data")
-        result = data[0][:,
-                         ::self.parameters['bin_size'],
-                         ::self.parameters['bin_size']]
+        new_slice = self.new_slice(data[0].shape)
+        print new_slice
+        result = data[0][new_slice]
+        print data[0].shape, result.shape
         return result
 
-    def setup(self, experiment):
+    def new_slice(self, data_shape):
+        pData = self.get_plugin_in_datasets()[0]
+        core_dirs = pData.get_core_directions()
+        slice_dirs = pData.get_core_directions()
+        new_slice = [slice(None)]*len(data_shape)
+        print new_slice, core_dirs
+        for dim in core_dirs:
+            this_slice = slice(0, data_shape[dim], self.parameters['bin_size'])
+            new_slice[dim] = this_slice
+        return new_slice
 
-        experiment.log(self.name + " Start")
-        chunk_size = self.get_max_frames()
+    def setup(self):
+        # get all in and out datasets required by the plugin
+        in_dataset, out_dataset = self.get_datasets()
+        # get plugin specific instances of these datasets
+        in_pData, out_pData = self.get_plugin_datasets()
 
-        #-------------------setup input datasets-------------------------
+        plugin_pattern = self.get_plugin_pattern()
+        in_pData[0].plugin_data_setup(plugin_pattern, self.get_max_frames())
 
-        # get a list of input dataset names required for this plugin
-        in_data_list = self.parameters["in_datasets"]
-        # get all input dataset objects
-        in_d1 = experiment.index["in_data"][in_data_list[0]]
-        # set all input data patterns
-        in_d1.set_current_pattern_name("PROJECTION")
-        # set frame chunk
-        in_d1.set_nFrames(chunk_size)
-        
-        #----------------------------------------------------------------
+        new_shape = self.new_shape(in_dataset[0].get_shape(), in_pData[0])
 
-        #------------------setup output datasets-------------------------
+        out_dataset[0].create_dataset(patterns=in_dataset[0],
+                                      axis_labels=in_dataset[0],
+                                      shape=new_shape)
 
-        # get a list of output dataset names created by this plugin
-        out_data_list = self.parameters["out_datasets"]
+        out_pData[0].plugin_data_setup(plugin_pattern, self.get_max_frames())
 
-        # create all out_data objects and associated patterns and meta_data
-        # patterns can be copied, added or both
-        out_d1 = experiment.create_data_object("out_data", out_data_list[0])
-        out_d1.copy_patterns(in_d1.get_patterns())
-        out_d1.meta_data.copy_dictionary(in_d1.meta_data.get_dictionary())
-        # set pattern for this plugin and the shape
-        out_d1.set_current_pattern_name("PROJECTION")
-        out_d1.set_shape(self.get_output_shape(in_d1))
-        # set frame chunk
-        out_d1.set_nFrames(chunk_size)
-
-        #----------------------------------------------------------------
-        experiment.log(self.name + " End")
+    def new_shape(self, full_shape, pData):
+        core_dirs = pData.get_core_directions()
+        new_shape = list(full_shape)
+        for dim in core_dirs:
+            new_shape[dim] = full_shape[dim]/self.parameters['bin_size'] \
+                + full_shape[dim] % self.parameters['bin_size']
+        return tuple(new_shape)
