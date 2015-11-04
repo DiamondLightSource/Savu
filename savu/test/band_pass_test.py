@@ -34,7 +34,6 @@ class PluginRunnerBandPassTest(unittest.TestCase):
     def test_band_pass(self):
         options = tu.set_experiment('tomo')
         plugin = 'savu.plugins.filters.band_pass'
-        tu.set_plugin_list(options, plugin)
         run_protected_plugin_runner(options)
 
 if __name__ == "__main__":
