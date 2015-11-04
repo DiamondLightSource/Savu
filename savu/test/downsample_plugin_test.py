@@ -23,14 +23,17 @@
 
 import unittest
 
-from savu.test.plugin_test import PluginTest
+import savu.test.test_utils as tu
+from savu.test.plugin_runner_test import run_protected_plugin_runner
 
 
-class DownsampleTest(PluginTest, unittest.TestCase):
+class PluginRunnerDownsampleCorrectionTest(unittest.TestCase):
 
-    def setUp(self):
-        self.data_type = 'tomo'
-        self.plugin_name = "savu.plugins.downsample_filter"
+    def test_downsample_correction(self):
+        data_file = tu.get_test_data_path('24737.nxs')
+        process_file = tu.get_test_data_path('downsample_correction_test.nxs')
+        options = tu.set_options(data_file, process_file=process_file)
+        run_protected_plugin_runner(options)
 
 if __name__ == "__main__":
     unittest.main()

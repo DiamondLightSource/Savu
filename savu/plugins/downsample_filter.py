@@ -49,9 +49,7 @@ class DownsampleFilter(BaseFilter, CpuPlugin):
     def filter_frames(self, data):
         logging.debug("Running Downsample data")
         new_slice = self.new_slice(data[0].shape)
-        print new_slice
         result = data[0][new_slice]
-        print data[0].shape, result.shape
         return result
 
     def new_slice(self, data_shape):
@@ -59,7 +57,6 @@ class DownsampleFilter(BaseFilter, CpuPlugin):
         core_dirs = pData.get_core_directions()
         slice_dirs = pData.get_core_directions()
         new_slice = [slice(None)]*len(data_shape)
-        print new_slice, core_dirs
         for dim in core_dirs:
             this_slice = slice(0, data_shape[dim], self.parameters['bin_size'])
             new_slice[dim] = this_slice
