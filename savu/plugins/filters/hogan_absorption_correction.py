@@ -24,12 +24,12 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 
 from savu.plugins.utils import register_plugin
-from savu.plugins.filter import Filter
+from savu.plugins.base_filter import BaseFilter
 import numpy as np
 
 
 @register_plugin
-class HoganAbsorptionCorrection(Filter, CpuPlugin):
+class HoganAbsorptionCorrection(BaseFilter, CpuPlugin):
     """
     This plugin corrects the absorption in XRF peaks
     :param in_datasets: Create a list of the dataset(s). Default: [].
