@@ -25,7 +25,7 @@ import tempfile
 from savu.test import test_utils as tu
 
 from savu.test.plugin_runner_test import run_protected_plugin_runner
-from savu.core.plugin_runner import PluginRunner
+
 
 class PluginRunnerTomoTest(unittest.TestCase):
 
@@ -38,9 +38,7 @@ class PluginRunnerTomoTest(unittest.TestCase):
             "process_file": tu.get_test_process_path(process),
             "out_path": tempfile.mkdtemp()
             }
-        plugin_runner = PluginRunner(options)
-        plugin_runner.run_plugin_list(options)
-        #run_protected_plugin_runner(options)
+        run_protected_plugin_runner(options)
 
 
 if __name__ == "__main__":

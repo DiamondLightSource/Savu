@@ -34,35 +34,24 @@ from savu.plugins.utils import register_plugin
 class CglsRecon(BaseRecon, CpuPlugin):
     """
      A Plugin to run the CCPi cgls reconstruction
-    
+
     :param number_of_iterations: Number of Iterations if an iterative method is used . Default: 5.
     :param resolution: Determines the number of output voxels where resolution = n_pixels/n_voxels. Default: 1.
     :param number_of_threads: Number of OMP threads. Default: 1
     """
-    
-    def __init__(self):
-        super(CglsRecon, self).__init__("CglsRecon") 
-        
-    def pre_process(self, exp):
-        in_data = self.get_data_objects(exp.index, "in_data")
-        angles = in_data[0].meta_data.get_meta_data("rotation_angle")
-        params = [angles]
-        return params
 
-    def reconstruct(self, sinogram, centre_of_rotations, vol_shape, params):
-        print "sinogram shape is", sinogram.shape
-        angles = params[0]
+    def __init__(self):
+        super(CglsRecon, self).__init__("CglsRecon")
+
+    def reconstruct(self, sinogram, centre_of_rotations, angles, vol_shape):
         nthreads = self.parameters['number_of_threads']
         num_iterations = self.parameters['number_of_iterations']
         resolution = self.parameters['resolution']
 
-        pixels = np.hstack([np.reshape(sinogram.astype(np.float32), \
-                            (sinogram.shape[0], 1, sinogram.shape[1]))]*4)
+        voxels = ccpi_reconstruction.cgls(sinogram.astype(np.float32),
+                                          angles.astype(np.float32),
+                                          centre_of_rotations[0], resolution,
+                                          num_iterations, nthreads)
+        voxels = voxels[:160, np.newaxis, :160, 1]
 
-        voxels = ccpi_reconstruction.cgls(pixels, angles.astype(np.float32), \
-                                            centre_of_rotations, resolution, \
-                                            num_iterations, nthreads)
-        voxels = voxels[:160, np.newaxis, :160,1]
-         
         return voxels
-        

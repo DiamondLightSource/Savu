@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright 2014 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,20 +19,23 @@
    :platform: Unix
    :synopsis: unittest test classes for plugins
 
-.. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
+.. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
 
 import unittest
 
-from savu.test.plugin_test import PluginTest
+import savu.test.test_utils as tu
+from savu.test.plugin_runner_test import run_protected_plugin_runner
 
 
-class CglsReconTest(PluginTest, unittest.TestCase):
+class PluginRunnerCGLSReconTest(unittest.TestCase):
 
-    def setUp(self):
-        self.data_type = "tomo"
-        self.plugin_name = "savu.plugins.cgls_recon"
+    def test_cgls_recon(self):
+        options = tu.set_experiment('tomo')
+        plugin = 'savu.plugins.reconstructions.cgls_recon'
+        tu.set_plugin_list(options, plugin)
+        run_protected_plugin_runner(options)
 
 if __name__ == "__main__":
     unittest.main()

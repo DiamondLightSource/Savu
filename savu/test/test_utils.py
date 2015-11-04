@@ -37,7 +37,7 @@ def get_test_data_path(name):
 def get_test_process_path(name):
     path = inspect.stack()[0][1]
     return '/'.join(os.path.split(path)[0].split(os.sep)[:-2] +
-                    ['test_data/test_process_lists', name])
+                    ['test_data/process_lists', name])
 
 
 def get_experiment_types():
