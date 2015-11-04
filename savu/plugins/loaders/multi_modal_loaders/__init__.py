@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2014 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,29 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 """
-.. module:: plugins_test
-   :platform: Unix
-   :synopsis: unittest test classes for plugins
+All the plugin architecture for Savu is contained here
+
 
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
 
-import unittest
-
-import savu.test.test_utils as tu
-from savu.test.plugin_runner_test import run_protected_plugin_runner
-
-
-class PluginRunnerAstraReconCPUTest(unittest.TestCase):
-
-    def test_astra_recon_cpu(self):
-        options = tu.set_experiment('tomo')
-        plugin = 'savu.plugins.reconstructions.astra_reconstructions.astra_recon_cpu'
-        tu.set_plugin_list(options, plugin)
-        run_protected_plugin_runner(options)
-
-if __name__ == "__main__":
-    unittest.main()
