@@ -122,27 +122,6 @@ def set_data_dict(in_data, out_data):
     return {'in_datasets': in_data, 'out_datasets': out_data}
 
 
-#def get_class_instance(clazz):
-#    instance = clazz()
-#    return instance
-#
-#
-#def module2class(module_name):
-#    return ''.join(x.capitalize() for x in module_name.split('_'))
-#
-#
-#def load_class(name):
-#    mod = __import__(name)
-#    components = name.split('.')
-#    for comp in components[1:]:
-#        mod = getattr(mod, comp)
-#    temp = name.split('.')[-1]
-#    mod2class = module2class(temp)
-#    clazz = getattr(mod, mod2class.split('.')[-1])
-#    instance = get_class_instance(clazz)
-#    return instance
-
-
 def load_test_data(exp_type):
     options = set_experiment(exp_type)
 
@@ -156,7 +135,7 @@ def load_test_data(exp_type):
 
     # currently assuming an empty parameters dictionary
     options['plugin_list'] = plugin_list
-    plugin_runner(options)
+    return plugin_runner(options)
 
 
 def get_data_object(exp):
