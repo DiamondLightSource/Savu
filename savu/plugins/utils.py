@@ -34,6 +34,12 @@ def register_plugin(clazz):
 
 
 def load_plugin(plugin_name):
+    import os.path, pkgutil
+    import savu.plugins
+    pkgpath = os.path.dirname(savu.plugins.__file__)
+    print pkgutil.iter_modules([pkgpath])
+    print [name for _, name, _ in pkgutil.iter_modules(['savu.plugins'])]
+    print [name for _, name, _ in pkgutil.iter_modules([pkgpath])]
     """Load a plugin.
 
     :param plugin_name: Name of the plugin to import

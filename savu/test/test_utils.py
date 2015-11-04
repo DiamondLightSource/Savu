@@ -21,10 +21,11 @@
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
-
-from savu.core.plugin_runner import PluginRunner
 import inspect
 import os
+
+from savu.core.plugin_runner import PluginRunner
+import savu.plugins.utils as pu
 
 
 def get_test_data_path(name):
@@ -88,11 +89,11 @@ def set_plugin_list(options, pnames):
     data = [{}, {}]
     for i in range(len(plugin_names)):
         ID.insert(i+1, plugin_names[i])
-        plugin = load_class(plugin_names[i])
+        plugin = pu.load_plugin(plugin_names[i])
         data.insert(i+1, set_data_dict(['tomo'], get_output_datasets(plugin)))
 
     for i in range(len(ID)):
-        name = module2class(ID[i].split('.')[-1])
+        name = pu.module2class(ID[i].split('.')[-1])
         options['plugin_list'].append(set_plugin_entry(name, ID[i], data[i]))
 
 
@@ -120,36 +121,15 @@ def set_data_dict(in_data, out_data):
     return {'in_datasets': in_data, 'out_datasets': out_data}
 
 
-def get_class_instance(clazz):
-    instance = clazz()
-    return instance
-
-
-def module2class(module_name):
-    return ''.join(x.capitalize() for x in module_name.split('_'))
-
-
-def load_class(name):
-    mod = __import__(name)
-    components = name.split('.')
-    for comp in components[1:]:
-        mod = getattr(mod, comp)
-    temp = name.split('.')[-1]
-    mod2class = module2class(temp)
-    clazz = getattr(mod, mod2class.split('.')[-1])
-    instance = get_class_instance(clazz)
-    return instance
-
-
 def load_test_data(exp_type):
     options = set_experiment(exp_type)
 
     plugin_list = []
     ID = options['loader']
-    name = module2class(ID.split('.')[-1])
+    name = pu.module2class(ID.split('.')[-1])
     plugin_list.append(set_plugin_entry(name, ID, {}))
     ID = options['saver']
-    name = module2class(ID.split('.')[-1])
+    name = pu.module2class(ID.split('.')[-1])
     plugin_list.append(set_plugin_entry(name, ID, {}))
 
     # currently assuming an empty parameters dictionary
