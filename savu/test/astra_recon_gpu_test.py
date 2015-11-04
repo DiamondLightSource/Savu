@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright 2014 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,13 +25,17 @@
 
 import unittest
 
-from savu.test.plugin_test import PluginTest
+import savu.test.test_utils as tu
+from savu.test.plugin_runner_test import run_protected_plugin_runner
 
 
-class AstraReconGpuTest(PluginTest, unittest.TestCase):
+class PluginRunnerAstraReconGPUTest(unittest.TestCase):
 
-    def setUp(self):
-        self.plugin_name = "savu.plugins.astra_recon_gpu"
+    def test_astra_recon_gpu(self):
+        options = tu.set_experiment('tomo')
+        plugin = 'savu.plugins.astra_recon_gpu'
+        tu.set_plugin_list(options, plugin)
+        run_protected_plugin_runner(options)
 
 if __name__ == "__main__":
     unittest.main()
