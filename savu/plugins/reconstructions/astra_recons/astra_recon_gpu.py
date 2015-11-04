@@ -11,8 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from savu.plugins.base_astra_recon import BaseAstraRecon
-from savu.data.plugin_info import CitationInfomration
 
 """
 .. module:: astra_recon
@@ -21,8 +19,10 @@ from savu.data.plugin_info import CitationInfomration
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
-from savu.plugins.gpu_plugin import GpuPlugin
 
+from savu.plugins.reconstructions.base_astra_recon import BaseAstraRecon
+from savu.plugins.driver.gpu_plugin import GpuPlugin
+from savu.data.plugin_list import CitationInformation
 from savu.plugins.utils import register_plugin
 
 
@@ -40,9 +40,8 @@ class AstraReconGpu(BaseAstraRecon, GpuPlugin):
         super(AstraReconGpu, self).__init__("AstraReconGpu")
 
     def get_parameters(self):
-        return [self.parameters['reconstruction_type'], \
+        return [self.parameters['reconstruction_type'],
                 self.parameters['number_of_iterations']]
-
 
     def get_citation_information(self):
         cite_info = CitationInformation()

@@ -27,13 +27,14 @@ import unittest
 
 import savu.test.test_utils as tu
 from savu.test.plugin_runner_test import run_protected_plugin_runner
+import savu.plugins.reconstructions.astra_recons as astra_recons
 
 
 class PluginRunnerAstraReconGPUTest(unittest.TestCase):
 
     def test_astra_recon_gpu(self):
-        options = tu.set_experiment('tomo')
-        plugin = 'savu.plugins.astra_recon_gpu'
+        options = tu.set_experiment('tomo', process_names='GPU0')
+        plugin = astra_recons.__name__ + '.astra_recon_gpu'
         tu.set_plugin_list(options, plugin)
         run_protected_plugin_runner(options)
 

@@ -49,28 +49,28 @@ def get_experiment_types():
     return exp_dict
 
 
-def set_experiment(exp_type):
+def set_experiment(exp_type, **kwargs):
     exp_types = get_experiment_types()
     try:
         options = globals()[exp_types[exp_type]['func']](
-            exp_types[exp_type]['filename'])
+            exp_types[exp_type]['filename'], **kwargs)
     except KeyError:
         raise Exception("The experiment type ", exp_type, " is not recognised")
     return options
 
 
-def set_tomoRaw_experiment(filename):
+def set_tomoRaw_experiment(filename, **kwargs):
     # create experiment
     options = set_options(get_test_data_path(filename))
-    options['loader'] = 'savu.plugins.nxtomo_loader'
-    options['saver'] = 'savu.plugins.hdf5_tomo_saver'
+    options['loader'] = 'savu.plugins.loaders.nxtomo_loader'
+    options['saver'] = 'savu.plugins.savers.hdf5_tomo_saver'
     return options
 
 
-def set_tomo_experiment(filename):
-    options = set_options(get_test_data_path(filename))
-    options['loader'] = 'savu.plugins.projection_tomo_loader'
-    options['saver'] = 'savu.plugins.hdf5_tomo_saver'
+def set_tomo_experiment(filename, **kwargs):
+    options = set_options(get_test_data_path(filename), **kwargs)
+    options['loader'] = 'savu.plugins.loaders.projection_tomo_loader'
+    options['saver'] = 'savu.plugins.savers.hdf5_tomo_saver'
     return options
 
 
@@ -107,9 +107,10 @@ def set_plugin_entry(name, ID, data):
 
 def set_options(path, **kwargs):
     process_file = kwargs.get('process_file', '')
+    process_names = kwargs.get('process_names', 'CPU0')
     options = {}
     options['transport'] = 'hdf5'
-    options['process_names'] = 'CPU0'
+    options['process_names'] = process_names
     options['data_file'] = path
     options['process_file'] = process_file
     options['out_path'] = '/tmp'
@@ -119,6 +120,27 @@ def set_options(path, **kwargs):
 
 def set_data_dict(in_data, out_data):
     return {'in_datasets': in_data, 'out_datasets': out_data}
+
+
+#def get_class_instance(clazz):
+#    instance = clazz()
+#    return instance
+#
+#
+#def module2class(module_name):
+#    return ''.join(x.capitalize() for x in module_name.split('_'))
+#
+#
+#def load_class(name):
+#    mod = __import__(name)
+#    components = name.split('.')
+#    for comp in components[1:]:
+#        mod = getattr(mod, comp)
+#    temp = name.split('.')[-1]
+#    mod2class = module2class(temp)
+#    clazz = getattr(mod, mod2class.split('.')[-1])
+#    instance = get_class_instance(clazz)
+#    return instance
 
 
 def load_test_data(exp_type):

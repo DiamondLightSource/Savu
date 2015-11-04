@@ -23,8 +23,9 @@ import logging
 
 logging.debug("Importing packages in astra_recon_cpu")
 
-from savu.plugins.base_astra_recon import BaseAstraRecon
-from savu.data.plugin_info import CitationInformation
+
+from savu.plugins.reconstructions.base_astra_recon import BaseAstraRecon
+from savu.data.plugin_list import CitationInformation
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 

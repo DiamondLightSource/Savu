@@ -31,29 +31,38 @@ class GpuPlugin(object):
     def __init__(self):
         super(GpuPlugin, self).__init__()
 
-    def run_plugin(self, data, output, processes, plugin):
+    def run_plugin(self, exp, transport):
+
+        expInfo = exp.meta_data
+        processes = expInfo.get_meta_data("processes")
+        process = expInfo.get_meta_data("process")
+
         count = 0
         gpu_processes = []
-        gpu_list = ["GPU" in i for i in processes]
-        for i in gpu_list:
+        for i in ["GPU" in i for i in processes]:
             if i:
                 gpu_processes.append(count)
                 count += 1
             else:
                 gpu_processes.append(-1)
-        if gpu_processes[plugin] >= 0:
-            logging.debug("Running the GPU Process %i", plugin)
+        if gpu_processes[process] >= 0:
+            logging.debug("Running the CPU Process %i", process)
             new_processes = [i for i in processes if "GPU" in i]
-            logging.debug(new_processes)
-            logging.debug(gpu_processes)
-            logging.debug("Process is %s",
-                          new_processes[gpu_processes[plugin]])
-            self.pre_process(data.get_data_shape())
-            self.process(data, output, new_processes,
-                                gpu_processes[plugin])
+
+            logging.debug("Pre-processing")
+
+            self.pre_process()
+
+            logging.debug("Main processing: process %s", self.__class__)
+            #self.process(exp, new_processes, cpu_processes[process])
+            transport.process(self)
+
+            exp.barrier()
+            logging.debug("Post-processing")
             self.post_process()
-            return
-            
+
+            self.clean_up()
+
         logging.debug("Not Running the task as not GPU")
         return
 

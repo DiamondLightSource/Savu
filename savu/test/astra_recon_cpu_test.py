@@ -27,13 +27,13 @@ import unittest
 
 import savu.test.test_utils as tu
 from savu.test.plugin_runner_test import run_protected_plugin_runner
-
+import savu.plugins.reconstructions.astra_recons as astra_recons
 
 class PluginRunnerAstraReconCPUTest(unittest.TestCase):
 
     def test_astra_recon_cpu(self):
         options = tu.set_experiment('tomo')
-        plugin = 'savu.plugins.reconstructions.astra_reconstructions.astra_recon_cpu'
+        plugin = astra_recons.__name__ + '.astra_recon_cpu'
         tu.set_plugin_list(options, plugin)
         run_protected_plugin_runner(options)
 
