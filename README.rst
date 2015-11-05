@@ -41,7 +41,7 @@ Logo credit ::
 .. image:: https://travis-ci.org/DiamondLightSource/Savu.svg?branch=master
     :target: https://travis-ci.org/DiamondLightSource/Savu
 
-.. image:: https://zenodo.org/badge/doi/10.5281/zenodo.32840.svg
+.. image:: https://zenodo.org/badge/doi/10.5281/zenodo.32840.png
     :target: http://dx.doi.org/10.5281/zenodo.32840
 
 .. image:: https://coveralls.io/repos/DiamondLightSource/Savu/badge.svg?branch=master
