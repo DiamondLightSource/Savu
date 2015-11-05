@@ -1,6 +1,6 @@
 import logging
 from savu.plugins.base_recon import BaseRecon
-from savu.data.plugin_info import CitationInformation
+from savu.data.plugin_list import CitationInformation
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 import skimage.transform as transform
