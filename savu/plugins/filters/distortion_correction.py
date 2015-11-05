@@ -45,19 +45,21 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
     def pre_process(self):
         unwarp.setctr(*(self.parameters['centre']))
         #pass two empty arrays of frame chunk size
-        unwarp.setcoeff(*self.parameters['polynomial_coeffs']) # need to unwrap the tuple
+        unwarp.setcoeff(*self.parameters['polynomial_coeffs'])
         unwarp.setctr(*self.parameters['centre'])
-        unwarp.setup(data, result)
+
+        plugin_data_shape = self.get_plugin_in_datasets()[0].get_shape()
+
+        unwarp.setup(np.empty(plugin_data_shape), np.empty(plugin_data_shape))
 
     def filter_frames(self, data):
         data = data[0]
+        print type(data)
         result = np.empty_like(data)
-        # should the setup function be called here?
         unwarp.run(data, result)
         return result
 
     def post_process(self):
-        # should this be called here?
         unwarp.cleanup()
 
     def setup(self):

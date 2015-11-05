@@ -479,6 +479,7 @@ class PluginData(object):
         # this flag determines which data is passed. If false then just the
         # data, if true then all data including dark and flat fields.
         self.selected_data = False
+        self.shape = None
 
     def get_total_frames(self):
         temp = 1
@@ -505,7 +506,7 @@ class PluginData(object):
         return {pattern_name: self.data_obj.get_data_patterns()[pattern_name]}
 
     def get_shape(self):
-        return self.get_sub_shape(self.get_pattern_name())
+        return self.shape
 
     def check_dimensions(self, indices, core_dir, slice_dir, nDims):
         if len(indices) is not len(slice_dir):
@@ -603,17 +604,20 @@ class PluginData(object):
 
         return tuple(index)
 
-    def get_sub_shape(self, name):
+    def set_shape(self, name):
         core_dir = self.get_core_directions()
+        slice_dir = self.get_slice_directions()
         shape = []
         for core in core_dir:
             shape.append(self.data_obj.get_shape()[core])
-        return tuple(shape)
+        shape[slice_dir[0]] = self.get_frame_chunk()
+        self.shape = tuple(shape)
 
     def plugin_data_setup(self, pattern_name, chunk):
         try:
             self.set_pattern_name(pattern_name)
             self.set_frame_chunk(chunk)
+            self.set_shape()
         except KeyError:
             raise Exception("When calling plugin_data_setup(), pattern_name "
                             "and chunk are required as kwargs.")
