@@ -28,8 +28,7 @@ import scipy.fftpack as fft
 
 from savu.plugins.utils import register_plugin
 from savu.plugins.base_filter import BaseFilter
-
-from savu.data.plugin_info import CitationInformation
+from savu.data.plugin_list import CitationInformation
 
 
 @register_plugin
@@ -86,11 +85,12 @@ class VoCentering(BaseFilter, CpuPlugin):
         # temporary for testing
         cor_fit = (data.shape[1]/2.0) - point
 
-        return [cor_raw, cor_fit]
+        return [np.array([cor_raw]), np.array([cor_fit])]
 
     def post_process(self):
         # do some curve fitting here
         in_datasets, out_datasets = self.get_datasets()
+
         cor_raw = out_datasets[0].data[...]
         cor_fit = out_datasets[1].data[...]
 
@@ -126,12 +126,8 @@ class VoCentering(BaseFilter, CpuPlugin):
 
         out_datasets[1].data[:] = cor_fit[:]
         # add to metadata
-        in_meta_data = self.get_in_meta_data()[0]
         self.populate_meta_data('cor_raw', cor_raw)
         self.populate_meta_data('centre_of_rotation', cor_fit)
-#        # remove the output datasets from the processing chain
-#        self.exp.remove_dataset(out_datasets[0])
-#        self.exp.remove_dataset(out_datasets[1])
 
     def populate_meta_data(self, key, value):
         datasets = self.parameters['datasets_to_populate']
@@ -148,22 +144,18 @@ class VoCentering(BaseFilter, CpuPlugin):
         in_dataset, out_dataset = self.get_datasets()
         # copy all required information from in_dataset[0]
         fullData = in_dataset[0]
-        out_dataset[0].create_dataset(pattern_name='1D_METADATA',
-                                      shape=(fullData.get_shape()[1],),
-                                      axis_labels=('y.pixels',), remove=True)
 
-        out_dataset[1].create_dataset(pattern_name='1D_METADATA',
-                                      shape=(fullData.get_shape()[1],),
-                                      axis_labels=('y.pixels',), remove=True)
+        out_dataset[0].create_dataset(shape=(fullData.get_shape()[1], 1),
+                                      axis_labels=['x.pixels', 'y.pixels'],
+                                      remove=True)
+        out_dataset[0].add_pattern("METADATA", core_dir=(1,), slice_dir=(0,))
+
+        out_dataset[1].create_dataset(out_dataset[0])
 
         in_pData, out_pData = self.get_plugin_datasets()
         in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
-
-        out_pData[0].data_obj.add_pattern("1D_METADATA", slice_dir=(0,))
-        out_pData[0].plugin_data_setup('1D_METADATA', self.get_max_frames())
-
-        out_pData[1].data_obj.add_pattern("1D_METADATA", slice_dir=(0,))
-        out_pData[1].plugin_data_setup('1D_METADATA', self.get_max_frames())
+        out_pData[0].plugin_data_setup('METADATA', self.get_max_frames())
+        out_pData[1].plugin_data_setup('METADATA', self.get_max_frames())
 
         self.exp.log(self.name + " End")
 

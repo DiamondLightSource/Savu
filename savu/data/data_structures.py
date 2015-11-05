@@ -345,7 +345,7 @@ class Data(object):
                         "DIFFRACTION",
                         "CHANNEL",
                         "SPECTRUM_STACK",
-                        "1D_METADATA"]
+                        "METADATA"]
                         # added spectrum adp 17th August,
                         # Added diffraction 28th August adp
         return pattern_list
@@ -515,7 +515,8 @@ class PluginData(object):
         for core in core_dir:
             shape.append(self.data_obj.get_shape()[core])
         self.set_core_shape(tuple(shape))
-        shape.insert(slice_idx, self.get_frame_chunk())
+        if self.get_frame_chunk() > 1:
+            shape.insert(slice_idx, self.get_frame_chunk())
         self.shape = tuple(shape)
 
     def get_shape(self):
@@ -624,13 +625,9 @@ class PluginData(object):
         return tuple(index)
 
     def plugin_data_setup(self, pattern_name, chunk):
-        try:
-            self.set_pattern_name(pattern_name)
-            self.set_frame_chunk(chunk)
-            self.set_shape()
-        except KeyError:
-            raise Exception("When calling plugin_data_setup(), pattern_name "
-                            "and chunk are required as kwargs.")
+        self.set_pattern_name(pattern_name)
+        self.set_frame_chunk(chunk)
+        self.set_shape()
 
 
 class TomoRaw(object):
