@@ -26,6 +26,7 @@ import os
 
 from savu.core.plugin_runner import PluginRunner
 import savu.plugins.utils as pu
+from savu.data.data_structures import PluginData
 
 
 def get_test_data_path(name):
@@ -139,7 +140,10 @@ def load_test_data(exp_type):
 
 
 def get_data_object(exp):
-    return exp.index['in_data'][exp.index['in_data'].keys()[0]]
+    data = exp.index['in_data'][exp.index['in_data'].keys()[0]]
+    data.set_plugin_data(PluginData(data))
+    pData = data.get_plugin_data()
+    return data, pData
 
 
 def set_process(exp, process, processes):

@@ -29,40 +29,38 @@ from savu.data.data_structures import Padding
 class Test(unittest.TestCase):
 
     def test_slice(self):
-        data = tu.get_data_object(tu.load_test_data("tomo"))
-        # create an instance of plugin data and set n frames
-        data.set_nFrames(1)
-        data.set_current_pattern_name("PROJECTION")
+        data, pData = tu.get_data_object(tu.load_test_data("tomo"))
+
+        pData.plugin_data_setup('PROJECTION', 1)
         gsl = data.get_grouped_slice_list()
         self.assertEqual(len(gsl), 91)
         self.assertEqual(len(gsl[0]), 3)
 
-        data.set_current_pattern_name("SINOGRAM")
+        pData.plugin_data_setup('SINOGRAM', 1)
         gsl = data.get_grouped_slice_list()
         self.assertEqual(len(gsl), 135)
         self.assertEqual(len(gsl[0]), 3)
 
     def test_slice_group(self):
-        data = tu.get_data_object(tu.load_test_data("tomo"))
-        data.set_nFrames(8)
-        data.set_current_pattern_name("PROJECTION")
+        data, pData = tu.get_data_object(tu.load_test_data("tomo"))
+
+        pData.plugin_data_setup('PROJECTION', 8)
         gsl = data.get_grouped_slice_list()
         self.assertEqual(len(gsl), 12)
         self.assertEqual(len(gsl[0]), 3)
 
-        data.set_current_pattern_name("SINOGRAM")
+        pData.plugin_data_setup('SINOGRAM', 8)
         gsl = data.get_grouped_slice_list()
         self.assertEqual(len(gsl), 17)
         self.assertEqual(len(gsl[0]), 3)
 
     def test_get_slice_list_per_process(self):
         exp = tu.load_test_data("tomo")
-        data = tu.get_data_object(exp)
-        data.set_nFrames(1)
+        data, pData = tu.get_data_object(exp)
 
         processes = ['t', 't', 't', 't']
 
-        data.set_current_pattern_name("PROJECTION")
+        pData.plugin_data_setup('PROJECTION', 1)
         sl = data.single_slice_list()
         total = []
         for i in range(len(processes)):
@@ -70,7 +68,7 @@ class Test(unittest.TestCase):
             total.append(data.get_slice_list_per_process(exp.meta_data))
         self.assertEqual(len(sl), sum(len(t) for t in total))
 
-        data.set_current_pattern_name("SINOGRAM")
+        pData.plugin_data_setup('SINOGRAM', 1)
         sl = data.single_slice_list()
         total = []
         for i in range(len(processes)):
@@ -78,7 +76,7 @@ class Test(unittest.TestCase):
             total.append(data.get_slice_list_per_process(exp.meta_data))
         self.assertEqual(len(sl), sum(len(t) for t in total))
 
-        data.set_nFrames(8)
+        pData.plugin_data_setup('PROJECTION', 8)
         sl = data.get_grouped_slice_list()
         total = []
         for i in range(len(processes)):
@@ -86,8 +84,7 @@ class Test(unittest.TestCase):
             total.append(data.get_slice_list_per_process(exp.meta_data))
         self.assertEqual(len(sl), sum(len(t) for t in total))
 
-        data.set_current_pattern_name("PROJECTION")
-        data.set_nFrames(8)
+        pData.plugin_data_setup('SINOGRAM', 1)
         sl = data.get_grouped_slice_list()
         total = []
         for i in range(len(processes)):
@@ -96,12 +93,12 @@ class Test(unittest.TestCase):
         self.assertEqual(len(sl), sum(len(t) for t in total))
 
     def test_get_padded_slice_data(self):
-        data = tu.get_data_object(tu.load_test_data("tomo"))
-        data.set_nFrames(1)
-        data.set_current_pattern_name("PROJECTION")
+        data, pData = tu.get_data_object(tu.load_test_data("tomo"))
 
+        data.finalise_patterns()
+        pData.plugin_data_setup('PROJECTION', 1)
         data.padding = {'pad_multi_frames': 10}
-        padding = Padding(data.get_current_pattern())
+        padding = Padding(pData.get_pattern())
         padding.get_padding_directions()
         for key in data.padding.keys():
             getattr(padding, key)(data.padding[key])
