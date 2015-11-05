@@ -53,7 +53,12 @@ class RavenFilter(BaseFilter, CpuPlugin):
 
     def pre_process(self):
         in_pData = self.get_plugin_in_datasets()[0]
-        sino_shape = in_pData.get_shape()
+        core_dirs = in_pData.get_core_directions()
+        plugin_data_shape = list(in_pData.get_shape())
+        sino_shape = in_pData.get_core_shape()
+        for dims in core_dirs:
+
+
         width1 = sino_shape[0] + 2*self.pad
         height1 = sino_shape[1] + 2*self.pad
 

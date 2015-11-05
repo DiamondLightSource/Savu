@@ -480,6 +480,7 @@ class PluginData(object):
         # data, if true then all data including dark and flat fields.
         self.selected_data = False
         self.shape = None
+        self.core_shape = None
 
     def get_total_frames(self):
         temp = 1
@@ -505,8 +506,26 @@ class PluginData(object):
         pattern_name = self.get_pattern_name()
         return {pattern_name: self.data_obj.get_data_patterns()[pattern_name]}
 
+    def set_shape(self):
+        core_dir = self.get_core_directions()
+        slice_dir = self.get_slice_directions()
+        dirs = list(set(core_dir + (slice_dir[0],)))
+        slice_idx = dirs.index(slice_dir[0])
+        shape = []
+        for core in core_dir:
+            shape.append(self.data_obj.get_shape()[core])
+        self.set_core_shape(tuple(shape))
+        shape.insert(slice_idx, self.get_frame_chunk())
+        self.shape = tuple(shape)
+
     def get_shape(self):
         return self.shape
+
+    def set_core_shape(self, shape):
+        self.core_shape = shape
+
+    def get_core_shape(self):
+        return self.core_shape
 
     def check_dimensions(self, indices, core_dir, slice_dir, nDims):
         if len(indices) is not len(slice_dir):
@@ -603,15 +622,6 @@ class PluginData(object):
             count += 1
 
         return tuple(index)
-
-    def set_shape(self, name):
-        core_dir = self.get_core_directions()
-        slice_dir = self.get_slice_directions()
-        shape = []
-        for core in core_dir:
-            shape.append(self.data_obj.get_shape()[core])
-        shape[slice_dir[0]] = self.get_frame_chunk()
-        self.shape = tuple(shape)
 
     def plugin_data_setup(self, pattern_name, chunk):
         try:
