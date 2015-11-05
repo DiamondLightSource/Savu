@@ -27,14 +27,14 @@ from savu.test import test_utils as tu
 from savu.test.plugin_runner_test import run_protected_plugin_runner
 
 
-class PluginRunnerDenoiseBregmanTest(unittest.TestCase):
+class PluginRunnerFullReconTest(unittest.TestCase):
 
     def test_fbp(self):
         options = {
             "transport": "hdf5",
             "process_names": "CPU0",
             "data_file": tu.get_test_data_path('24737.nxs'),
-            "process_file": tu.get_test_data_path('miro_test.nxs'),
+            "process_file": tu.get_test_process_path('miro_test.nxs'),
             "out_path": tempfile.mkdtemp()
             }
         run_protected_plugin_runner(options)
