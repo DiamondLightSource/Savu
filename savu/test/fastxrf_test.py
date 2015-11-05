@@ -24,21 +24,20 @@ import unittest
 import tempfile
 from savu.test import test_utils as tu
 
-from savu.core.plugin_runner import PluginRunner
+from savu.test.plugin_runner_test import run_protected_plugin_runner
 
 
 class FastxrfTest(unittest.TestCase):
 
-    @unittest.skip("Seems like this should work, but there is an import error")
     def test_FastXrf(self):
         options = {
             "transport": "hdf5",
             "process_names": "CPU0",
             "data_file": tu.get_test_data_path('fluo.nxs'),
-            "process_file": tu.get_test_data_path('basic_fastxrf_process.nxs'),
+            "process_file": tu.get_test_process_path('basic_fastxrf_process.nxs'),
             "out_path": tempfile.mkdtemp()
             }
-        PluginRunner(options)
+        run_protected_plugin_runner(options)
 
 if __name__ == "__main__":
     unittest.main()
