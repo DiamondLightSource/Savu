@@ -49,10 +49,7 @@ class DenoiseBregmanFilter(BaseFilter, CpuPlugin):
     def get_filter_padding(self):
         return {}
 
-    def get_max_frames(self):
-        return 8
-
-    def filter_frame(self, data):
+    def filter_frames(self, data):
         data = data[0]
         logging.debug("Running Denoise")
         weight = self.parameters['weight']
@@ -63,3 +60,6 @@ class DenoiseBregmanFilter(BaseFilter, CpuPlugin):
         result = denoise_tv_bregman(data, weight, max_iter=max_iter,
                                     eps=eps, isotropic=isotropic)
         return result
+
+    def get_max_frames(self):
+        return 8

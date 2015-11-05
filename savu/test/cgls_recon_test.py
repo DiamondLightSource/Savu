@@ -26,7 +26,8 @@
 import unittest
 
 import savu.test.test_utils as tu
-from savu.test.plugin_runner_test import run_protected_plugin_runner
+from savu.test.plugin_runner_test import \
+    run_protected_plugin_runner_no_process_list
 
 
 class PluginRunnerCGLSReconTest(unittest.TestCase):
@@ -34,8 +35,7 @@ class PluginRunnerCGLSReconTest(unittest.TestCase):
     def test_cgls_recon(self):
         options = tu.set_experiment('tomo')
         plugin = 'savu.plugins.reconstructions.cgls_recon'
-        tu.set_plugin_list(options, plugin)
-        run_protected_plugin_runner(options)
+        run_protected_plugin_runner_no_process_list(options, plugin)
 
 if __name__ == "__main__":
     unittest.main()

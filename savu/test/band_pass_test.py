@@ -26,7 +26,8 @@
 import unittest
 
 import savu.test.test_utils as tu
-from savu.test.plugin_runner_test import run_protected_plugin_runner
+from savu.test.plugin_runner_test import \
+    run_protected_plugin_runner_no_process_list
 
 
 class PluginRunnerBandPassTest(unittest.TestCase):
@@ -34,7 +35,7 @@ class PluginRunnerBandPassTest(unittest.TestCase):
     def test_band_pass(self):
         options = tu.set_experiment('tomo')
         plugin = 'savu.plugins.filters.band_pass'
-        run_protected_plugin_runner(options)
+        run_protected_plugin_runner_no_process_list(options, plugin)
 
 if __name__ == "__main__":
     unittest.main()
