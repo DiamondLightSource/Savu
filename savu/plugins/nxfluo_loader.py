@@ -54,9 +54,13 @@ class NxfluoLoader(BaseMultiModalLoader):
         mono_energy = data_obj.backing_file[fluo_entry.name +
                                             '/instrument/monochromator/energy'
                                             ].value
+        monitor = data_obj.backing_file[fluo_entry.name +
+                                        '/monitor/data'
+                                        ].value
         mData.set_meta_data("energy", energy)
         # global since it is to do with the beam
         mData.set_meta_data("mono_energy", mono_energy)
+        mData.set_meta_data("monitor", monitor)
         mData.set_meta_data("average", average)
         #and get the mono energy
 
