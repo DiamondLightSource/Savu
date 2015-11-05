@@ -50,11 +50,11 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
 
         plugin_data_shape = self.get_plugin_in_datasets()[0].get_shape()
 
-        unwarp.setup(np.empty(plugin_data_shape), np.empty(plugin_data_shape))
+        temp_array = np.empty(plugin_data_shape, dtype=np.uint16)
+        unwarp.setup(temp_array, temp_array)
 
     def filter_frames(self, data):
         data = data[0]
-        print type(data)
         result = np.empty_like(data)
         unwarp.run(data, result)
         return result
@@ -67,7 +67,7 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
         # set up the output dataset that is created by the plugin
         in_dataset, out_dataset = self.get_datasets()
         # get only frames where image key is zero
-        in_dataset[0].set_image_key(0)
+        in_dataset[0].trim_input_data(image_key=0)
 
         # copy all required information from in_dataset[0]
         out_dataset[0].create_dataset(in_dataset[0])
