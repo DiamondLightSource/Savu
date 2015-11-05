@@ -90,20 +90,22 @@ class PaganinFilter(BaseFilter, CpuPlugin):
     def filter_frames(self, data):
         logging.debug("Getting the filter frame of Paganin Filter")
         data = data[0]
-        (depth, height, width) = data.shape
+        logging.debug("Paganin Filter input shape %s" % str(data.shape))
+        height, width = data.shape
         self._setup_paganin(width, height)
         data = np.nan_to_num(data)  # Noted performance
         data[data == 0] = 1.0
         padtopbottom = self.parameters['Padtopbottom']
         padleftright = self.parameters['Padleftright']
         padmethod = str(self.parameters['Padmethod'])
-        data = np.lib.pad(data, ((0, 0), (padtopbottom, padtopbottom),
+        data = np.lib.pad(data, ((padtopbottom, padtopbottom),
                                  (padleftright, padleftright)), padmethod)
         result = np.apply_over_axes(self._paganin, data, 0)
         result = np.abs(result)
-        return result[result.shape[0]/2,
-                      padtopbottom:-padtopbottom,
-                      padleftright: -padleftright]
+        result = result[padtopbottom:-padtopbottom,
+                        padleftright: -padleftright]
+        logging.debug("Paganin Filter output shape %s" % str(result.shape))
+        return result.squeeze()
 
     def get_max_frames(self):
         return 1
