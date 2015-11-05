@@ -26,7 +26,7 @@ import logging
 import h5py
 
 from savu.core.utils import logmethod
-from savu.plugins.base_multi_modal_loader import BaseMultiModalLoader
+from savu.plugins.loaders.base_multi_modal_loader import BaseMultiModalLoader
 from savu.test import test_utils as tu
 from savu.plugins.utils import register_plugin
 
@@ -36,7 +36,7 @@ class NxxrdLoader(BaseMultiModalLoader):
     """
     A class to load tomography data from an NXxrd file
 
-    :param calibration_path: path to the calibration file. Default: "../../test_data/LaB6_calibration_output.nxs"
+    :param calibration_path: path to the calibration file. Default: "../../test_data/data/LaB6_calibration_output.nxs"
     """
 
     def __init__(self):
@@ -72,7 +72,7 @@ class NxxrdLoader(BaseMultiModalLoader):
                              slice_dir=(0,3,4))
         # now to load the calibration file
         print self.parameters['calibration_path']
-        if os.exists(self.parameters['calibration_path']):
+        if self.parameters['calibration_path']:
             logging.info("Using the calibration file in the working directory")
             calibration_path = self.parameters['calibration_path']
         elif os.exists(tu.get_test_data_path(
@@ -81,7 +81,8 @@ class NxxrdLoader(BaseMultiModalLoader):
             calibration_path = tu.get_test_data_path(
                 self.parameters['calibration_path'])
         else:
-            logging.info("No calibration file found!")
+            raise Exception("No calibration file found!")
+
         calibrationfile = h5py.File(calibration_path, 'r')
 
         mData = data_obj.meta_data

@@ -34,7 +34,7 @@ class BaseLoader(Plugin):
         Overwrites the main_setup function in plugin.py as the loader is a
         special case of plugin that doesn't required setup of in/out_datasets
         """
-        self.parameters = params # I added this since I couldn't find it otherwise.adp
+        self.set_parameters(params)
         self.exp = exp
         self.setup()
 
