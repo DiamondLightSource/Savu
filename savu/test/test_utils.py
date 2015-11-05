@@ -22,6 +22,7 @@
 
 """
 import inspect
+import tempfile
 import os
 
 from savu.core.plugin_runner import PluginRunner
@@ -47,6 +48,8 @@ def get_experiment_types():
                            'filename': '24737.nxs'}
     exp_dict['tomo'] = {'func': 'set_tomo_experiment',
                         'filename': 'projections.h5'}
+    exp_dict['fluo'] = {'func': 'set_fluo_experiment',
+                        'filename': 'fluo.nxs'}
     return exp_dict
 
 
@@ -71,6 +74,13 @@ def set_tomoRaw_experiment(filename, **kwargs):
 def set_tomo_experiment(filename, **kwargs):
     options = set_options(get_test_data_path(filename), **kwargs)
     options['loader'] = 'savu.plugins.loaders.projection_tomo_loader'
+    options['saver'] = 'savu.plugins.savers.hdf5_tomo_saver'
+    return options
+
+
+def set_fluo_experiment(filename, **kwargs):
+    options = set_options(get_test_data_path(filename), **kwargs)
+    options['loader'] = 'savu.plugins.loaders.nxfluo_loader'
     options['saver'] = 'savu.plugins.savers.hdf5_tomo_saver'
     return options
 
@@ -114,7 +124,7 @@ def set_options(path, **kwargs):
     options['process_names'] = process_names
     options['data_file'] = path
     options['process_file'] = process_file
-    options['out_path'] = '/tmp'
+    options['out_path'] = tempfile.mkdtemp()
     options['run_type'] = 'test'
     return options
 
