@@ -48,7 +48,6 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
         unwarp.setcoeff(*self.parameters['polynomial_coeffs']) # need to unwrap the tuple
         unwarp.setctr(*self.parameters['centre'])
         unwarp.setup(data, result)
-        
 
     def filter_frames(self, data):
         data = data[0]
