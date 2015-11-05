@@ -45,7 +45,6 @@ def load_plugin(plugin_name):
     """
     logging.debug("getting class")
     logging.debug("plugin name is %s" % plugin_name)
-    #clazz = self.import_class(plugin_name)
 
     name = plugin_name
     logging.debug("importing the module")

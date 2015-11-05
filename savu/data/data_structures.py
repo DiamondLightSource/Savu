@@ -31,6 +31,7 @@ import h5py
 import numpy as np
 
 from savu.data.meta_data import MetaData
+from savu.core.utils import import_class
 
 
 class Data(object):
@@ -94,17 +95,7 @@ class Data(object):
         "SETTING UP THE TRANSPORT DATA"
         transport_data = "savu.data.transport_data." + transport + \
                          "_transport_data"
-        return self.import_class(transport_data)
-
-    def import_class(self, class_name):
-        name = class_name
-        mod = __import__(name)
-        components = name.split('.')
-        for comp in components[1:]:
-            mod = getattr(mod, comp)
-        temp = name.split('.')[-1]
-        module2class = ''.join(x.capitalize() for x in temp.split('_'))
-        return getattr(mod, module2class.split('.')[-1])
+        return import_class(transport_data)
 
     def __deepcopy__(self, memo):
         name = self.data_info.get_meta_data('name')

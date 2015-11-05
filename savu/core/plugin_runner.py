@@ -41,7 +41,7 @@ class PluginRunner(object):
     def __init__(self, options):
         class_name = "savu.core.transports." + options["transport"] \
                      + "_transport"
-        cu.add_base(self, cu.import_class(self, class_name))
+        cu.add_base(self, cu.import_class(class_name))
         self.transport_control_setup(options)
         self.exp = None
 
