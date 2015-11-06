@@ -55,7 +55,7 @@ class PluginRunnerMultiModalTest(unittest.TestCase):
             "transport": "hdf5",
             "process_names": "CPU0",
             "data_file": tu.get_test_data_path('mm.nxs'),
-            "process_file": tu.get_test_data_path('MMtest.nxs'),
+            "process_file": tu.get_test_process_path('MMtest.nxs'),
             "out_path": tempfile.mkdtemp()
             }
         run_protected_plugin_runner(options)
@@ -68,7 +68,7 @@ class PluginRunnerTomoTest(unittest.TestCase):
             "transport": "hdf5",
             "process_names": "CPU0",
             "data_file": tu.get_test_data_path('24737.nxs'),
-            "process_file": tu.get_test_data_path('basic_tomo_process.nxs'),
+            "process_file": tu.get_test_process_path('basic_tomo_process.nxs'),
             "out_path": tempfile.mkdtemp()
             }
         run_protected_plugin_runner(options)
@@ -81,7 +81,7 @@ class PluginRunnerSTXMTest(unittest.TestCase):
             "transport": "hdf5",
             "process_names": "CPU0",
             "data_file": tu.get_test_data_path('mm.nxs'),
-            "process_file": tu.get_test_data_path('basic_stxm_process.nxs'),
+            "process_file": tu.get_test_process_path('basic_stxm_process.nxs'),
             "out_path": tempfile.mkdtemp()
             }
         run_protected_plugin_runner(options)
@@ -94,7 +94,7 @@ class PluginRunnerXRDTest(unittest.TestCase):
             "transport": "hdf5",
             "process_names": "CPU0",
             "data_file": tu.get_test_data_path('mm.nxs'),
-            "process_file": tu.get_test_data_path('basic_xrd_process.nxs'),
+            "process_file": tu.get_test_process_path('basic_xrd_process.nxs'),
             "out_path": tempfile.mkdtemp()
             }
         run_protected_plugin_runner(options)
@@ -107,7 +107,7 @@ class PluginRunnerFluoTest(unittest.TestCase):
             "transport": "hdf5",
             "process_names": "CPU0",
             "data_file": tu.get_test_data_path('mm.nxs'),
-            "process_file": tu.get_test_data_path('basic_fluo_process.nxs'),
+            "process_file": tu.get_test_process_path('basic_fluo_process.nxs'),
             "out_path": tempfile.mkdtemp()
             }
         run_protected_plugin_runner(options)
