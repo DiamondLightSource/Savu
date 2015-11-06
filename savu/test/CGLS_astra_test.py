@@ -29,12 +29,13 @@ from savu.test.plugin_runner_test import run_protected_plugin_runner
 
 class PluginRunnerTomoTest(unittest.TestCase):
 
-    def test_process(self):
+    def test_cgls_astra(self):
+        process = 'basic_tomo_iterative_process.nxs'
         options = {
             "transport": "hdf5",
             "process_names": "CPU0",
             "data_file": tu.get_test_data_path('24737.nxs'),
-            "process_file": tu.get_test_data_path('basic_tomo_itterative_process.nxs'),
+            "process_file": tu.get_test_process_path(process),
             "out_path": tempfile.mkdtemp()
             }
         run_protected_plugin_runner(options)

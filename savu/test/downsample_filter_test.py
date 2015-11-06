@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2014 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,13 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 """
-.. module:: plugins_test
+.. module:: Downsample test
    :platform: Unix
    :synopsis: unittest test classes for plugins
 
-.. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
+.. moduleauthor:: Mark Basham <mark.basham@diamond.ac.uk>
 
 """
 
@@ -28,14 +26,13 @@ import unittest
 import savu.test.test_utils as tu
 from savu.test.plugin_runner_test import \
     run_protected_plugin_runner_no_process_list
-import savu.plugins.reconstructions.astra_recons as astra_recons
 
 
-class PluginRunnerAstraReconCPUTest(unittest.TestCase):
+class PluginRunnerDownsamplePluginTest(unittest.TestCase):
 
-    def test_astra_recon_cpu(self):
+    def test_downsample_correction(self):
         options = tu.set_experiment('tomo')
-        plugin = astra_recons.__name__ + '.astra_recon_cpu'
+        plugin = 'savu.plugins.filters.downsample_filter'
         run_protected_plugin_runner_no_process_list(options, plugin)
 
 if __name__ == "__main__":

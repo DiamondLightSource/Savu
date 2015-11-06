@@ -23,16 +23,16 @@
 import unittest
 from savu.test import test_utils as tu
 
-from savu.test.plugin_runner_test import run_protected_plugin_runner
+from savu.test.plugin_runner_test import \
+    run_protected_plugin_runner_no_process_list
 
 
 class PluginRunnerDistortionCorrectionTest(unittest.TestCase):
 
     def test_distortion_correction(self):
-        data_file = tu.get_test_data_path('24737.nxs')
-        process_file = tu.get_test_data_path('distortion_correction_test.nxs')
-        options = tu.set_options(data_file, process_file=process_file)
-        run_protected_plugin_runner(options)
+        options = tu.set_experiment('tomoRaw')
+        plugin = 'savu.plugins.filters.distortion_correction'
+        run_protected_plugin_runner_no_process_list(options, plugin)
 
 if __name__ == "__main__":
     unittest.main()

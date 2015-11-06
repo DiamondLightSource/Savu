@@ -16,6 +16,7 @@ class Content(object):
 
     def __init__(self, filename):
         self.plugin_list = PluginList()
+        self.filename = filename
         if os.path.exists(filename):
             print "Opening file %s" % (filename)
             self.plugin_list.populate_plugin_list(filename)
@@ -24,6 +25,11 @@ class Content(object):
         print self.plugin_list.get_string()
 
     def save(self, filename):
+        if filename == "":
+            filename = self.filename
+        else:
+            self.filename = filename
+        print "Saving file %s" % (filename)
         self.plugin_list.save_plugin_list(filename)
 
     def modify(self, element, subelement, value):

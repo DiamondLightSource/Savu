@@ -13,32 +13,24 @@ python:
 #    - libcr-dev mpich2 mpich2-doc
 #    - libboost-all-dev
 
-env:
-  - PEP=true
-  - PEP=false
-
-matrix:
-  allow_failures:
-  - env: PEP=true
-
 before_install:
-  - if ! $PEP ; then sudo apt-get install libblas-dev ; fi
-  - if ! $PEP ; then sudo apt-get install liblapack-dev ; fi
-  - if ! $PEP ; then sudo apt-get install gfortran ; fi
-  - if ! $PEP ; then sudo apt-get install libhdf5-serial-dev ; fi
-  - if ! $PEP ; then sudo apt-get install libcr-dev mpich2 mpich2-doc ; fi
-  - if ! $PEP ; then sudo apt-get install libboost-all-dev ; fi
-  - if ! $PEP ; then sudo apt-get install python-numpy python-scipy ; fi
-  - if ! $PEP ; then sudo apt-get install python-h5py ; fi
+  - sudo apt-get install libblas-dev
+  - sudo apt-get install liblapack-dev
+  - sudo apt-get install gfortran
+  - sudo apt-get install libhdf5-serial-dev
+  - sudo apt-get install libcr-dev mpich2 mpich2-doc
+  - sudo apt-get install libboost-all-dev
+  - sudo apt-get install python-numpy python-scipy
+  - sudo apt-get install python-h5py
 
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install: 
   - travis_wait pip install pep8 --use-mirrors -q
-  - if ! $PEP ; then travis_wait pip install pytest --use-mirrors -q ; fi
-  - if ! $PEP ; then travis_wait pip install pytest-cov --use-mirrors -q ; fi
-  - if ! $PEP ; then travis_wait pip install mpi4py --use-mirrors -q ; fi
-  - if ! $PEP ; then travis_wait pip install coveralls --use-mirrors -q ; fi
-  - if ! $PEP ; then travis_wait pip install scikit-image --use-mirrors -q ; fi
+  - travis_wait pip install pytest --use-mirrors -q
+  - travis_wait pip install pytest-cov --use-mirrors -q
+  - travis_wait pip install mpi4py --use-mirrors -q
+  - travis_wait pip install coveralls --use-mirrors -q
+  - travis_wait pip install scikit-image --use-mirrors -q
   
 #  - travis_wait pip install numpy --use-mirrors -q
 #  - travis_wait pip install scipy --use-mirrors -q
@@ -46,7 +38,7 @@ install:
 
 # command to run tests, e.g. python setup.py test
 script:
-  - if $PEP ; then pep8 --statistics savu ; else py.test savu/test -v --cov savu --cov-report term-missing ; fi
+  - py.test savu/test -v --cov savu --cov-report term-missing
 
 after_script:
-  - if ! $PEP ; then coveralls ; fi 
+  - coveralls

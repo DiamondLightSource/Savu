@@ -110,7 +110,7 @@ class BaseRecon(Plugin):
         data.finalise_patterns()
         dim_rotAngle = data.get_data_patterns()['PROJECTION']['main_dir']
         dim_detY = data.get_data_patterns()['SINOGRAM']['main_dir']
-        
+
         core_dirs = data.get_plugin_data().get_core_directions()
         dim_detX = list(set(core_dirs).difference(set((dim_rotAngle,))))[0]
 

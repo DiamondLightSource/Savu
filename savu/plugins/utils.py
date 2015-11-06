@@ -55,10 +55,9 @@ def load_plugin(plugin_name):
     for comp in components[1:]:
         mod = getattr(mod, comp)
     temp = name.split('.')[-1]
-    module2class = ''.join(x.capitalize() for x in temp.split('_'))
-    clazz = getattr(mod, module2class.split('.')[-1])
+    mod2class = module2class(temp)
+    clazz = getattr(mod, mod2class.split('.')[-1])
     instance = get_class_instance(clazz)
-    logging.debug("returning class instance")
     return instance
 
 
@@ -66,6 +65,10 @@ def get_class_instance(clazz):
     instance = clazz()
     instance.populate_default_parameters()
     return instance
+
+
+def module2class(module_name):
+    return ''.join(x.capitalize() for x in module_name.split('_'))
 
 
 def plugin_loader(exp, plugin_dict, **kwargs):

@@ -31,18 +31,15 @@ class Test(unittest.TestCase):
 
     def test_create_smaller_data_block(self):
         options = tu.set_experiment('tomo')
-        tu.set_plugin_list(options, 'savu.plugins.downsample_filter')
+        plugin = 'savu.plugins.filters.downsample_filter'
+        tu.set_plugin_list(options, plugin)
+
+        out_data_name = options['plugin_list'][1]['data']['out_datasets'][0]
         plugin_runner = PluginRunner(options)
         exp = plugin_runner.run_plugin_list(options)
-        self.assertEqual(exp.index['in_data']['tomo'].get_shape(),
+
+        self.assertEqual(exp.index['in_data'][out_data_name].get_shape(),
                          (91, 68, 80))
-#        options = tu.set_experiment('tomo')
-#        tu.set_plugin_list(options, 'savu.plugins.downsample_filter')
-#        plugin_runner = PluginRunner(options)
-#        exp = plugin_runner.run_plugin_list(options)
-#        self.assertEqual(exp.index['in_data']['tomo'].get_shape(),
-#                         (91, 68, 80))
 
 if __name__ == "__main__":
     unittest.main()
-

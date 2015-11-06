@@ -24,14 +24,17 @@
 
 import unittest
 
-from savu.test.plugin_test import PluginTest
+import savu.test.test_utils as tu
+from savu.test.plugin_runner_test import \
+    run_protected_plugin_runner_no_process_list
 
 
-class DezingFilterTest(PluginTest, unittest.TestCase):
+class DezingFilterTest(unittest.TestCase):
 
-    def setUp(self):
-        self.data_type = "tomo"
-        self.plugin_name = "savu.plugins.dezing_filter"
+    def test_dezing_filter(self):
+        options = tu.set_experiment('tomo')
+        plugin = 'savu.plugins.filter.dezing_filter'
+        run_protected_plugin_runner_no_process_list(options, plugin)
 
 if __name__ == "__main__":
     unittest.main()

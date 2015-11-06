@@ -345,7 +345,7 @@ class Data(object):
                         "DIFFRACTION",
                         "CHANNEL",
                         "SPECTRUM_STACK",
-                        "1D_METADATA"]
+                        "METADATA"]
                         # added spectrum adp 17th August,
                         # Added diffraction 28th August adp
         return pattern_list
@@ -479,6 +479,8 @@ class PluginData(object):
         # this flag determines which data is passed. If false then just the
         # data, if true then all data including dark and flat fields.
         self.selected_data = False
+        self.shape = None
+        self.core_shape = None
 
     def get_total_frames(self):
         temp = 1
@@ -504,8 +506,27 @@ class PluginData(object):
         pattern_name = self.get_pattern_name()
         return {pattern_name: self.data_obj.get_data_patterns()[pattern_name]}
 
+    def set_shape(self):
+        core_dir = self.get_core_directions()
+        slice_dir = self.get_slice_directions()
+        dirs = list(set(core_dir + (slice_dir[0],)))
+        slice_idx = dirs.index(slice_dir[0])
+        shape = []
+        for core in core_dir:
+            shape.append(self.data_obj.get_shape()[core])
+        self.set_core_shape(tuple(shape))
+        if self.get_frame_chunk() > 1:
+            shape.insert(slice_idx, self.get_frame_chunk())
+        self.shape = tuple(shape)
+
     def get_shape(self):
-        return self.get_sub_shape(self.get_pattern_name())
+        return self.shape
+
+    def set_core_shape(self, shape):
+        self.core_shape = shape
+
+    def get_core_shape(self):
+        return self.core_shape
 
     def check_dimensions(self, indices, core_dir, slice_dir, nDims):
         if len(indices) is not len(slice_dir):
@@ -603,20 +624,10 @@ class PluginData(object):
 
         return tuple(index)
 
-    def get_sub_shape(self, name):
-        core_dir = self.get_core_directions()
-        shape = []
-        for core in core_dir:
-            shape.append(self.data_obj.get_shape()[core])
-        return tuple(shape)
-
     def plugin_data_setup(self, pattern_name, chunk):
-        try:
-            self.set_pattern_name(pattern_name)
-            self.set_frame_chunk(chunk)
-        except KeyError:
-            raise Exception("When calling plugin_data_setup(), pattern_name "
-                            "and chunk are required as kwargs.")
+        self.set_pattern_name(pattern_name)
+        self.set_frame_chunk(chunk)
+        self.set_shape()
 
 
 class TomoRaw(object):

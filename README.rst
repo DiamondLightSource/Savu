@@ -57,3 +57,7 @@ Logo credit ::
 .. image:: https://badge.fury.io/py/savu.svg
     :target: http://badge.fury.io/py/savu
 
+.. image:: https://landscape.io/github/DiamondLightSource/Savu/master/landscape.svg?style=flat
+    :target: https://landscape.io/github/DiamondLightSource/Savu/master
+    :alt: Code Health
+
