@@ -41,12 +41,6 @@ Code Documentation
    savu.plugins.simple_fake_gpu_recon
    savu.plugins.simple_recon
 
-Another Try at autodoc
-======================
-
-.. automodule:: savu
-   :members:
-
 
 Indices and tables
 ==================
