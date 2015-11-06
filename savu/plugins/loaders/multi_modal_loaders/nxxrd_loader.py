@@ -26,7 +26,7 @@ import logging
 import h5py
 
 from savu.core.utils import logmethod
-from savu.plugins.base_multi_modal_loader import BaseMultiModalLoader
+from savu.plugins.loaders.base_multi_modal_loader import BaseMultiModalLoader
 from savu.test import test_utils as tu
 from savu.plugins.utils import register_plugin
 

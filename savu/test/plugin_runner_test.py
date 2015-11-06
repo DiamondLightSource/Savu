@@ -88,7 +88,7 @@ class PluginRunnerSTXMTest(unittest.TestCase):
 
 
 class PluginRunnerXRDTest(unittest.TestCase):
-
+ 
     def test_process(self):
         options = {
             "transport": "hdf5",
@@ -112,6 +112,18 @@ class PluginRunnerFluoTest(unittest.TestCase):
             }
         run_protected_plugin_runner(options)
 
+
+class PluginRunnerMonitorTest(unittest.TestCase):
+
+    def test_process(self):
+        options = {
+            "transport": "hdf5",
+            "process_names": "CPU0",
+            "data_file": tu.get_test_data_path('mm.nxs'),
+            "process_file": tu.get_test_process_path('basic_monitor_process.nxs'),
+            "out_path": tempfile.mkdtemp()
+            }
+        run_protected_plugin_runner(options)
 
 if __name__ == "__main__":
     unittest.main()
