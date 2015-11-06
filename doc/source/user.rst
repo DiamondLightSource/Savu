@@ -81,3 +81,10 @@ The following plugins are available through savu for processing of tomographic d
    
    savu.plugins.timeseries_field_corrections.TimeseriesFieldCorrections
 
+
+Test
+****
+
+.. autoclass:: savu.plugins.timeseries_field_corrections.TimeseriesFieldCorrections
+    :members:
+    :inherited-members:
