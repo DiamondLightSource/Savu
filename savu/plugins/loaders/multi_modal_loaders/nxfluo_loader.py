@@ -22,7 +22,7 @@
 
 """
 
-from savu.plugins.base_multi_modal_loader import BaseMultiModalLoader
+from savu.plugins.loaders.base_multi_modal_loader import BaseMultiModalLoader
 
 from savu.plugins.utils import register_plugin
 

@@ -24,9 +24,9 @@
 
 from savu.core.utils import logmethod
 from savu.plugins.base_loader import BaseLoader
-from savu.plugins.nxfluo_loader import NxfluoLoader
-from savu.plugins.nxxrd_loader import NxxrdLoader
-from savu.plugins.nxstxm_loader import NxstxmLoader
+from savu.plugins.loaders.multi_modal_loaders.nxfluo_loader import NxfluoLoader
+from savu.plugins.loaders.multi_modal_loaders.nxxrd_loader import NxxrdLoader
+from savu.plugins.loaders.multi_modal_loaders.nxstxm_loader import NxstxmLoader
 
 from savu.plugins.utils import register_plugin
 
