@@ -22,24 +22,14 @@ Code Documentation
    
    savu
    savu.core
-   savu.core.process
    savu.data
-   savu.data.process_data
-   savu.data.structures
+   savu.data.data_structures
    savu.plugins
    savu.plugins.utils
    savu.plugins.plugin
-   savu.plugins.cpu_plugin
-   savu.plugins.gpu_plugin
    savu.plugins.timeseries_field_corrections
-   savu.plugins.filter
-   savu.plugins.median_filter
-   savu.plugins.pass_through_plugin
-   savu.plugins.vo_centering
+   savu.plugins.base_filter
    savu.plugins.base_recon
-   savu.plugins.astra_recon
-   savu.plugins.simple_fake_gpu_recon
-   savu.plugins.simple_recon
 
 
 Indices and tables
