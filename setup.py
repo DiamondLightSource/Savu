@@ -19,6 +19,6 @@ setup(name='savu',
       author='Mark Basham',
       author_email='scientificsoftware@diamond.ac.uk',
       license='Apache License, Version 2.0',
-      packages=['savu'],
+      packages=['savu','savu.plugins.timeseries_field_corrections'],
       include_package_data=True,
       zip_safe=False)
