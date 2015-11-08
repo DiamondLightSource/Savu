@@ -48,7 +48,6 @@ class Content(object):
         print plugin
         print plugin.name
         print plugin.__module__
-        print "oi"
         process = {}
         process['name'] = plugin.name
         process['id'] = "savu.plugins." + plugin.__module__
@@ -149,6 +148,7 @@ if __name__ == '__main__':
     for loader, module_name, is_pkg in pkgutil.walk_packages(savu.plugins.__path__):
         try:
             module = loader.find_module(module_name).load_module(module_name)
+            #print module
         except:
             pass
 

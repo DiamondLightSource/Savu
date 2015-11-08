@@ -22,7 +22,7 @@
 """
 import logging
 from savu.plugins.utils import register_plugin
-from savu.plugins.base_fluo_fitter import BaseFluoFitter
+from savu.plugins.filters.fitters.base_fluo_fitter import BaseFluoFitter
 import numpy as np
 from scipy.optimize import leastsq
 import time
@@ -61,6 +61,7 @@ class SimpleFitXrf(BaseFluoFitter):
             params = np.zeros(len(params))
         weights, widths, areas = self.getAreas(curvetype,
                                                axis, positions, params)
+        areas/=np.sum(data)
         residuals = self._resid(params, curvetype, data, axis, positions)
         t2 = time.time()
         logging.debug("Simple fit iteration took: %s ms", str((t2-t1)*1e3))

@@ -22,7 +22,7 @@
 """
 
 import logging
-from savu.plugins.base_fitter import BaseFitter
+from savu.plugins.filters.base_fitter import BaseFitter
 import numpy as np
 import _xraylib as xl
 from flupy.algorithms.xrf_calculations.transitions_and_shells import \
@@ -71,7 +71,7 @@ class BaseFluoFitter(BaseFitter):
         fitAreas = out_datasets[0]
         fitHeights = out_datasets[1]
         fitWidths = out_datasets[2]
-        numpeaks = 10 
+        numpeaks = 23
         new_shape = shape[:-1] + (numpeaks,)
         print new_shape
         fitAreas.create_dataset(patterns={in_dataset[0]: pattern_list},
@@ -128,7 +128,8 @@ class BaseFluoFitter(BaseFitter):
         print "the axis is"+str(axis)
         dq = axis[1]-axis[0]
         print 'dq is '+str(dq)
-        idx = np.round(engy/dq).astype(int)
+        offset = np.round(axis[0]/dq).astype(int)
+        idx = np.round(engy/dq).astype(int) - offset
         print "The index is"
         print len(idx)
         return idx
