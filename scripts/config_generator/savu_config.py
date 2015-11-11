@@ -48,6 +48,7 @@ class Content(object):
         print plugin
         print plugin.name
         print plugin.__module__
+        print "oi"
         process = {}
         process['name'] = plugin.name
         process['id'] = "savu.plugins." + plugin.__module__

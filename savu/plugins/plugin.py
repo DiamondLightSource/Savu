@@ -71,6 +71,7 @@ class Plugin(object):
 
         It makes use of the classes including parameter information in the
         class docstring such as this
+
         :param error_threshold: Convergence threshold. Default: 0.001.
         """
         for clazz in inspect.getmro(self.__class__)[::-1]:

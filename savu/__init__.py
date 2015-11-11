@@ -36,6 +36,9 @@ try:
 except Exception:
     logging.warn("Fluo tools not on path")
     
+from . import core
+from . import data
+from . import plugins
 
 def run_tests():
     import unittest

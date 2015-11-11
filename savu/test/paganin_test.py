@@ -24,8 +24,8 @@ import unittest
 import tempfile
 from savu.test import test_utils as tu
 
-import logging
-#logging.basicConfig(level=logging.DEBUG)
+# import logging
+# logging.basicConfig(level=logging.DEBUG)
 
 from savu.test.plugin_runner_test import run_protected_plugin_runner
 

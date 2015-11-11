@@ -70,3 +70,21 @@ config generator found in the scripts directory of
 
     >>> python $SAVU_HOME/scripts/config_generator/savu_config.py
 
+
+Available Plugins
+*****************
+
+The following plugins are available through savu for processing of tomographic datasets
+
+.. autosummary::
+   :toctree: _autosummary
+   
+   savu.plugins.timeseries_field_corrections.TimeseriesFieldCorrections
+
+
+Test
+****
+
+.. autoclass:: savu.plugins.timeseries_field_corrections.TimeseriesFieldCorrections
+    :members:
+    :inherited-members:
