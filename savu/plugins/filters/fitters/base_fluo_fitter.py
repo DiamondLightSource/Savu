@@ -22,7 +22,7 @@
 """
 
 import logging
-from savu.plugins.base_fitter import BaseFitter
+from savu.plugins.filters.base_fitter import BaseFitter
 import numpy as np
 import _xraylib as xl
 from flupy.algorithms.xrf_calculations.transitions_and_shells import \

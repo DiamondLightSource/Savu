@@ -91,8 +91,8 @@ class VoCentering(BaseFilter, CpuPlugin):
         # do some curve fitting here
         in_datasets, out_datasets = self.get_datasets()
 
-        cor_raw = out_datasets[0].data[...]
-        cor_fit = out_datasets[1].data[...]
+        cor_raw = np.squeeze(out_datasets[0].data[...])
+        cor_fit = np.squeeze(out_datasets[1].data[...])
 
         # now fit the result
         x = np.arange(cor_raw.shape[0])
@@ -100,10 +100,10 @@ class VoCentering(BaseFilter, CpuPlugin):
         # first clean all points where the derivative is too high
         diff = np.abs(np.diff(cor_raw))
 
-        tollerence = np.median(diff)
+        tolerance = np.median(diff)
 
-        x_clean = x[diff < tollerence * 2.0]
-        cor_clean = cor_raw[diff < tollerence * 2.0]
+        x_clean = x[diff < tolerance * 2.0]
+        cor_clean = cor_raw[diff < tolerance * 2.0]
 
         # set up for the iterative clean on the fit
         cor_fit = cor_clean
@@ -111,8 +111,8 @@ class VoCentering(BaseFilter, CpuPlugin):
         p = None
 
         # keep fitting and removing points until the fit is within
-        # the tollerences
-        while max_disp > tollerence:
+        # the tolerances
+        while max_disp > tolerance:
             mask = (np.abs(cor_fit-cor_clean)) < (max_disp / 2.)
             x_clean = x_clean[mask]
             cor_clean = cor_clean[mask]
@@ -124,7 +124,7 @@ class VoCentering(BaseFilter, CpuPlugin):
         # build a full array for the output fit
         cor_fit = p(x)
 
-        out_datasets[1].data[:] = cor_fit[:]
+        out_datasets[1].data[:] = cor_fit[:, np.newaxis]
         # add to metadata
         self.populate_meta_data('cor_raw', cor_raw)
         self.populate_meta_data('centre_of_rotation', cor_fit)

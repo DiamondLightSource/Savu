@@ -40,9 +40,8 @@ class SimpleFit(BaseFitter):
         super(SimpleFit, self).__init__("SimpleFit")
 
     def pre_process(self):
-        pass
-        #in_meta_data = self.get_in_meta_data()[0]
-        #in_meta_data.set_meta_data("PeakIndex", self.parameters["PeakIndex"])
+        in_meta_data = self.get_in_meta_data()[0]
+        in_meta_data.set_meta_data("PeakIndex", self.parameters["PeakIndex"])
 
     def filter_frames(self, data):
         t1 = time.time()

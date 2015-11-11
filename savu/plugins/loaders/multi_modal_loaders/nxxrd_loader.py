@@ -36,7 +36,7 @@ class NxxrdLoader(BaseMultiModalLoader):
     """
     A class to load tomography data from an NXxrd file
 
-    :param calibration_path: path to the calibration file. Default: "savu/test_data/data/LaB6_calibration_output.nxs"
+    :param calibration_path: path to the calibration file. Default: "test_data/data/LaB6_calibration_output.nxs"
     """
 
     def __init__(self):
@@ -51,7 +51,8 @@ class NxxrdLoader(BaseMultiModalLoader):
         self.exp.meta_data.set_meta_data("mono_energy", mono_energy)
         print xrd_entry
         self.set_motors(data_obj, xrd_entry, 'xrd')
-        # hard coded for now, but we can change it to fram nx transformations in future.
+        # hard coded for now, but we can change it to fram nx transformations
+        # in future.
         data_obj.set_axis_labels('rotation_angle.degrees',
                                  'x.mm',
                                  'y.mm',
@@ -67,21 +68,17 @@ class NxxrdLoader(BaseMultiModalLoader):
         data_obj.add_pattern("DIFFRACTION", core_dir=(-2, -1),
                              slice_dir=slicedir)
         data_obj.add_pattern("SINOGRAM", core_dir=(0, 1),
-                             slice_dir=(2,3,4))
+                             slice_dir=(2, 3, 4))
         data_obj.add_pattern("PROJECTION", core_dir=(1, 2),
-                             slice_dir=(0,3,4))
-        # now to load the calibration file
-        print self.parameters['calibration_path']
-        if self.parameters['calibration_path']:
-            logging.info("Using the calibration file in the working directory")
-            calibration_path = self.parameters['calibration_path']
-        elif os.exists(tu.get_test_data_path(
-                self.parameters['calibration_path'])):
-            logging.info("Using the calibration path in the test directory")
-            calibration_path = tu.get_test_data_path(
-                self.parameters['calibration_path'])
-        else:
-            raise Exception("No calibration file found!")
+                             slice_dir=(0, 3, 4))
+
+        calibration_path = self.parameters['calibration_path']
+        print calibration_path.split('/')[0]
+        if calibration_path.split('/')[0] == 'test_data':
+            calibration_path = \
+                os.realpath('.').split('savu')[0] + calibration_path
+
+        print calibration_path
 
         calibrationfile = h5py.File(calibration_path, 'r')
 
