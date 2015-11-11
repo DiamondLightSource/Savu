@@ -210,6 +210,7 @@ class Hdf5TransportData(object):
         index = self.get_slice_dirs_index(slice_dirs, shape)
         if 'var' not in [shape[i] for i in slice_dirs]:
             shape = [s for s in list(shape) if isinstance(s, int)]
+        nSlices = index.shape[1]
         nDims = len(shape)
 
         slice_list = []
@@ -222,8 +223,30 @@ class Hdf5TransportData(object):
                                                   index[sdir, i] + 1, 1)
             slice_list.append(tuple(getitem))
 
-        print slice_list
         return slice_list
+
+#    def single_slice_list(self):
+#        pData = self.get_plugin_data()
+#        slice_dirs = pData.get_slice_directions()
+#        [fix_dirs, value] = pData.get_fixed_directions()
+#        shape = self.get_shape()
+#        index = self.get_slice_dirs_index(slice_dirs, shape)
+#        if 'var' not in [shape[i] for i in slice_dirs]:
+#            shape = [s for s in list(shape) if isinstance(s, int)]
+#        nSlices = index.shape[1]
+#        nDims = len(shape)
+#
+#        slice_list = []
+#        for i in range(nSlices):
+#            getitem = [slice(None)]*nDims
+#            for f in range(len(fix_dirs)):
+#                getitem[fix_dirs[f]] = slice(value[f], value[f] + 1, 1)
+#            for sdir in range(len(slice_dirs)):
+#                getitem[slice_dirs[sdir]] = slice(index[sdir, i],
+#                                                  index[sdir, i] + 1, 1)
+#            slice_list.append(tuple(getitem))
+#
+#        return slice_list
 
     def banked_list(self, slice_list):
         shape = self.get_shape()
@@ -247,6 +270,8 @@ class Hdf5TransportData(object):
             rem = 1 if (length % max_frames) else 0
             working_slice = list(group[0])
 
+            print full_frames, length, max_frames
+            #i = 0
             for i in range(0, (full_frames*max_frames), max_frames):
                 new_slice = slice(i, i+max_frames, 1)
                 working_slice[slice_dir[0]] = new_slice
@@ -345,18 +370,12 @@ class Hdf5TransportData(object):
             getattr(padding, key)(pData.padding[key])
         return padding.get_padding_directions()
 
-    def get_padded_slice_data(self, input_slice_list):        
+    def get_padded_slice_data(self, input_slice_list):
         slice_list = list(input_slice_list)
         if self.get_plugin_data().padding is None:
             return self.data[tuple(slice_list)]
-#            try:
-#                return self.data[tuple(slice_list)]
-#            except TypeError:
-#                temp = self.data[tuple(slice_list[:-1])]
-#                temp2 = self.unravel(temp)[slice_list[-1]]
 
         padding_dict = self.get_padding_dict()
-
         pad_list = []
         for i in range(len(slice_list)):
             pad_list.append((0, 0))

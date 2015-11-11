@@ -483,9 +483,12 @@ class PluginData(object):
             temp *= self.data_obj.get_shape()[tslice]
         return temp
 
-    def set_pattern_name(self, name):
+    def set_pattern(self, name):
+        pattern = self.data_obj.get_data_patterns()[name]
         self.meta_data.set_meta_data("name", name)
-        self.check_data_type_exists()
+        self.meta_data.set_meta_data("core_dir", pattern['core_dir'])
+        slice_dir = self.data_obj.non_negative_directions(pattern['slice_dir'])
+        self.meta_data.set_meta_data("slice_dir", slice_dir)
 
     def get_pattern_name(self):
         name = self.meta_data.get_meta_data("name")
@@ -528,22 +531,19 @@ class PluginData(object):
         if (len(core_dir)+len(slice_dir)) is not nDims:
             sys.exit("Incorrect number of data dimensions specified.")
 
-    def check_data_type_exists(self):
-        if self.get_pattern_name() not in \
-                self.data_obj.pattern_list:
-            raise Exception(("Error: The Data class does not contain an \
-                              instance of ", self.get_pattern_name()))
+#    def get_slice_directions(self):
+#        try:
+#            [fix_dirs, value] = self.get_fixed_directions()
+#        except KeyError:
+#            fix_dirs = []
+#        slice_dirs = self.data_obj.get_data_patterns()[
+#            self.get_pattern_name()]['slice_dir']
+#        to_slice = [sd for sd in slice_dirs if sd not in fix_dirs]
+#        temp = self.data_obj.non_negative_directions(tuple(to_slice))
+#        return temp
 
     def get_slice_directions(self):
-        try:
-            [fix_dirs, value] = self.get_fixed_directions()
-        except KeyError:
-            fix_dirs = []
-        slice_dirs = self.data_obj.get_data_patterns()[
-            self.get_pattern_name()]['slice_dir']
-        to_slice = [sd for sd in slice_dirs if sd not in fix_dirs]
-        temp = self.data_obj.non_negative_directions(tuple(to_slice))
-        return temp
+        return self.meta_data.get_meta_data('slice_dir')
 
     def set_slicing_order(self, order):
         """
@@ -566,13 +566,11 @@ class PluginData(object):
 
     def set_fixed_directions(self, dims, values):
         slice_dirs = self.get_slice_directions()
-        for dim in dims:
-            if dim in slice_dirs:
-                self.meta_data.set_meta_data("fixed_directions", dims)
-                self.meta_data.set_meta_data("fixed_directions_values", values)
-            else:
-                raise Exception("You are trying to fix a direction that is not"
-                                " a slicing direction")
+        if set(slice_dirs).symmetric_difference(set(dims)):
+            raise Exception("You are trying to fix a direction that is not"
+                            " a slicing direction")
+        self.meta_data.set_meta_data("fixed_directions", dims)
+        self.meta_data.set_meta_data("fixed_directions_values", values)
 
     def get_fixed_directions(self):
         try:
@@ -610,7 +608,7 @@ class PluginData(object):
         return tuple(index)
 
     def plugin_data_setup(self, pattern_name, chunk):
-        self.set_pattern_name(pattern_name)
+        self.set_pattern(pattern_name)
         self.set_frame_chunk(chunk)
         self.set_shape()
 

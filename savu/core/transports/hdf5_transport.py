@@ -137,7 +137,6 @@ class Hdf5Transport(TransportMechanism):
     def real_plugin_run(self, plugin_list, out_data_objs, start, stop):
         exp = self.exp
         for i in range(start, stop):
-            print "START", start, "STOP", stop
             link_type = "final_result" if i is len(plugin_list)-2 else \
                 "intermediate"
 

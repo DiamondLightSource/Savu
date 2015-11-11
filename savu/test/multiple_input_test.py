@@ -36,7 +36,7 @@ class MultipleInputTest(unittest.TestCase):
             "process_names": "CPU0",
             "data_file": tu.get_test_data_path('mm.nxs'),
             "process_file": tu.get_test_process_path(
-                'multiple_tomo_inputs_test.nxs'),
+                'multiple_mm_inputs_test.nxs'),
             "out_path": tempfile.mkdtemp()
             }
         run_protected_plugin_runner(options)
@@ -47,7 +47,7 @@ class MultipleInputTest(unittest.TestCase):
             "process_names": "CPU0",
             "data_file": tu.get_test_data_path('24737.nxs'),
             "process_file": tu.get_test_process_path(
-                'multiple_mm_inputs_test.nxs'),
+                'multiple_tomo_inputs_test.nxs'),
             "out_path": tempfile.mkdtemp()
             }
         run_protected_plugin_runner(options)

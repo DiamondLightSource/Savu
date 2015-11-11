@@ -76,13 +76,14 @@ class MultipleInputDataTest(Plugin, CpuPlugin):
         in_pData, out_pData = self.get_plugin_datasets()
 
         in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
-        slice_dirs = in_pData[0].get_slice_directions()
-        print "BEFORE", slice_dirs
-        in_pData[0].set_fixed_directions(slice_dirs, [0, 0])
-        print "AFTER", in_pData[0].get_slice_directions()
+        print in_datasets[0].get_data_patterns()
+        #slice_dirs = in_pData[0].get_slice_directions()
+        #print "BEFORE", slice_dirs
+        #in_pData[0].set_fixed_directions(slice_dirs, [0, 0])
+        #print "AFTER", in_pData[0].get_slice_directions()
 
         in_pData[1].plugin_data_setup('SINOGRAM', self.get_max_frames())
-        in_pData[1].set_fixed_directions(slice_dirs, [0, 0])
+        #in_pData[1].set_fixed_directions(slice_dirs, [0, 0])
 
         out_datasets[0].create_dataset(in_datasets[0])
         out_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
