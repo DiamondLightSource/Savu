@@ -31,7 +31,7 @@ from savu.test.plugin_runner_test import \
 import savu.plugins.reconstructions.astra_recons as astra_recons
 
 
-class PluginRunnerAstraReconGPUTest(unittest.TestCase):
+class AstraReconGPUTest(unittest.TestCase):
 
     def test_astra_recon_gpu(self):
         options = tu.set_experiment('tomo', process_names='GPU0')

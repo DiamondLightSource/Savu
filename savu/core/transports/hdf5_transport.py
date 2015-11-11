@@ -153,6 +153,7 @@ class Hdf5Transport(TransportMechanism):
 
             exp.barrier()
             logging.info("run the plugin")
+            print "\n*running the", plugin_list[i]['id'], "plugin*\n"
             plugin.run_plugin(exp, self)
 
             exp.barrier()

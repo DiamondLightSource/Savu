@@ -30,7 +30,7 @@ from savu.test.plugin_runner_test import \
     run_protected_plugin_runner_no_process_list
 
 
-class PluginRunnerBandPassTest(unittest.TestCase):
+class BandPassTest(unittest.TestCase):
 
     def test_band_pass(self):
         options = tu.set_experiment('tomo')

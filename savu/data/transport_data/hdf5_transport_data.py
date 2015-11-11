@@ -192,7 +192,6 @@ class Hdf5TransportData(object):
         """
         # create the indexing array
         [chunk, length, repeat] = self.chunk_length_repeat(slice_dirs, shape)
-        print chunk, length, repeat, slice_dirs, shape
         idx_list = []
         for dim in range(len(slice_dirs)):
             c = chunk[dim]

@@ -40,6 +40,8 @@ class PyfaiAzimuthalIntegrator(BaseFilter, CpuPlugin):
     1D azimuthal integrator by pyFAI
 
     :param use_mask: Should we mask. Default: False.
+    :param data_size: Set the size of the output data. Default: 1005.
+
 
     """
 
@@ -122,12 +124,14 @@ class PyfaiAzimuthalIntegrator(BaseFilter, CpuPlugin):
         # 'dimension.name.unit' name and unit will add or replace it
         axis_labels = ['-1', '-2.name.unit']
 
-#         spectra.create_dataset(patterns={in_dataset[0]: patterns},
-#                                axis_labels={in_dataset[0]: axis_labels},
-#                                shape={'variable': shape[:-2]})
+#        spectra.create_dataset(patterns={in_dataset[0]: patterns},
+#                               axis_labels={in_dataset[0]: axis_labels},
+#                               shape={'variable': shape[:-2]})
+
+        new_shape = shape[:-2] + (self.parameters['data_size'],)
         spectra.create_dataset(patterns={in_dataset[0]: patterns},
                                axis_labels={in_dataset[0]: axis_labels},
-                               shape=shape[:-2]+(4643,))
+                               shape=new_shape)
 
         spectrum = {'core_dir': (-1,), 'slice_dir': tuple(range(len(shape)-2))}
         spectra.add_pattern("SPECTRUM", **spectrum)
