@@ -336,6 +336,7 @@ class Data(object):
                         "DIFFRACTION",
                         "CHANNEL",
                         "SPECTRUM_STACK",
+                        "PROJECTION_STACK",
                         "METADATA"]
                         # added spectrum adp 17th August,
                         # Added diffraction 28th August adp
