@@ -128,7 +128,7 @@ class Plugin(object):
         :type path: int
         """
 
-        logging.error("process needs to be implemented")
+        logging.error("process frames needs to be implemented")
         raise NotImplementedError("process needs to be implemented")
 
     def post_process(self):
