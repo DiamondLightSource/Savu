@@ -19,3 +19,5 @@ Specificaly these data classes are backed by hdf5 and h5py classes.
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
+
+from . import transport_data

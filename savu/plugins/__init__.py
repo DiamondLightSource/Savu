@@ -20,3 +20,8 @@ All the plugin architecture for Savu is contained here
 
 """
 
+from . import driver
+from . import filters
+from . import loaders
+from . import reconstructions
+from . import savers

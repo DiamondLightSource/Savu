@@ -47,14 +47,14 @@ class CpuPlugin(object):
                 cpu_processes.append(-1)
         if cpu_processes[process] >= 0:
             logging.debug("Running the CPU Process %i", process)
-            new_processes = [i for i in processes if "CPU" in i]
+            # new_processes = [i for i in processes if "CPU" in i]
 
             logging.debug("Pre-processing")
 
             self.pre_process()
 
             logging.debug("Main processing: process %s", self.__class__)
-            #self.process(exp, new_processes, cpu_processes[process])
+            # self.process(exp, new_processes, cpu_processes[process])
             transport.process(self)
 
             exp.barrier()
