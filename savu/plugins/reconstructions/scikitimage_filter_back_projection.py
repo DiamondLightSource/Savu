@@ -1,6 +1,6 @@
 import logging
 from savu.plugins.base_recon import BaseRecon
-from savu.data.plugin_info import CitationInformation
+from savu.data.plugin_list import CitationInformation
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 import skimage.transform as transform
@@ -15,11 +15,8 @@ class ScikitimageFilterBackProjection(BaseRecon, CpuPlugin):
     A Plugin to reconstruct an image by filter back projection
     using the inverse radon transform from scikit-image.
 
-    :param output_size: Number of rows and columns in the
-    reconstruction. Default: None.
-    :param filter: Filter used in frequency domain filtering
-    Ramp filter used by default. Filters available: ramp, shepp-logan,
-    cosine, hamming, hann. Assign None to use no filter. Default: 'ramp'.
+    :param output_size: Number of rows and columns in the reconstruction. Default: None.
+    :param filter: Filter used in frequency domain filtering Ramp filter used by default. Filters available: ramp, shepp-logan, cosine, hamming, hann. Assign None to use no filter. Default: 'ramp'.
     :param interpolation: interpolation method used in reconstruction.
     Methods available: 'linear', 'nearest', and 'cubic' ('cubic' is slow).
     Default: 'linear'.
@@ -37,17 +34,22 @@ class ScikitimageFilterBackProjection(BaseRecon, CpuPlugin):
 
     def _shift(self, sinogram, centre_of_rotation):
         centre_of_rotation_shift = (sinogram.shape[0]/2) - centre_of_rotation
+        print "the centre of rotation has shape:"+str(centre_of_rotation.shape)
+        print "the centre of rotation shift has shape:"+str(centre_of_rotation_shift.shape)
         result = ndimage.interpolation.shift(sinogram,
-                                             (centre_of_rotation_shift[0],
+                                             (centre_of_rotation_shift,
                                               0))
         return result
 
     def reconstruct(self, sinogram, centre_of_rotations,
                     vol_shape, params):
+        print "here"
+        print "sinograms have shape:"+str(sinogram.shape)
+        in_meta_data = self.get_in_meta_data()[0]
         sinogram = np.swapaxes(sinogram, 0, 1)
         sinogram = self._shift(sinogram, centre_of_rotations)
         sino = np.nan_to_num(sinogram)
-        theta = np.linspace(0, 180, sinogram.shape[1])
+        theta = in_meta_data.get_meta_data('rotation_angle')
         result = \
             transform.iradon(sino, theta=theta,
                              output_size=(sinogram.shape[0]),

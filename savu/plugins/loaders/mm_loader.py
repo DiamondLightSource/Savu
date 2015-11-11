@@ -27,6 +27,7 @@ from savu.plugins.base_loader import BaseLoader
 from savu.plugins.loaders.multi_modal_loaders.nxfluo_loader import NxfluoLoader
 from savu.plugins.loaders.multi_modal_loaders.nxxrd_loader import NxxrdLoader
 from savu.plugins.loaders.multi_modal_loaders.nxstxm_loader import NxstxmLoader
+from savu.plugins.loaders.multi_modal_loaders.nxmonitor_loader import NxmonitorLoader
 
 from savu.plugins.utils import register_plugin
 
@@ -52,3 +53,6 @@ class MmLoader(BaseLoader):
         stxm = NxstxmLoader()
         stxm.main_setup(self.exp, {})
         stxm.setup()
+        monitor = NxmonitorLoader()
+        monitor.main_setup(self.exp, {})
+        monitor.setup()

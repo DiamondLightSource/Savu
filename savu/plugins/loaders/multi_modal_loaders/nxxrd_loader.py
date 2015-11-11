@@ -66,8 +66,8 @@ class NxxrdLoader(BaseMultiModalLoader):
         slicedir = tuple(range(len(data_obj.data.shape)-2))
         data_obj.add_pattern("DIFFRACTION", core_dir=(-2, -1),
                              slice_dir=slicedir)
-        data_obj.add_pattern("SINOGRAM", core_dir=(0, 1),
-                             slice_dir=(2,3,4))
+        data_obj.add_pattern("SINOGRAM", core_dir=(0, 2),
+                             slice_dir=(1,3,4))
         data_obj.add_pattern("PROJECTION", core_dir=(1, 2),
                              slice_dir=(0,3,4))
         # now to load the calibration file
