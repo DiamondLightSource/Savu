@@ -210,7 +210,6 @@ class Hdf5TransportData(object):
         index = self.get_slice_dirs_index(slice_dirs, shape)
         if 'var' not in [shape[i] for i in slice_dirs]:
             shape = [s for s in list(shape) if isinstance(s, int)]
-        nSlices = index.shape[1]
         nDims = len(shape)
 
         slice_list = []
@@ -223,6 +222,7 @@ class Hdf5TransportData(object):
                                                   index[sdir, i] + 1, 1)
             slice_list.append(tuple(getitem))
 
+        print slice_list
         return slice_list
 
     def banked_list(self, slice_list):

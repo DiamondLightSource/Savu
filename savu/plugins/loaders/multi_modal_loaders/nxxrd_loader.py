@@ -49,7 +49,6 @@ class NxxrdLoader(BaseMultiModalLoader):
         mono_energy = data_obj.backing_file[
             xrd_entry.name + '/instrument/monochromator/energy']
         self.exp.meta_data.set_meta_data("mono_energy", mono_energy)
-        print xrd_entry
         self.set_motors(data_obj, xrd_entry, 'xrd')
         # hard coded for now, but we can change it to fram nx transformations
         # in future.
@@ -73,12 +72,9 @@ class NxxrdLoader(BaseMultiModalLoader):
                              slice_dir=(0, 3, 4))
 
         calibration_path = self.parameters['calibration_path']
-        print calibration_path.split('/')[0]
         if calibration_path.split('/')[0] == 'test_data':
             calibration_path = \
                 os.realpath('.').split('savu')[0] + calibration_path
-
-        print calibration_path
 
         calibrationfile = h5py.File(calibration_path, 'r')
 

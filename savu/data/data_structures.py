@@ -584,13 +584,6 @@ class PluginData(object):
             values = []
         return [fixed, values]
 
-    def delete_fixed_directions(self):
-        try:
-            del self.meta_data.dict["fixed_directions"]
-            del self.meta_data.dict["fixed_directions_values"]
-        except KeyError:
-            pass
-
     def set_frame_chunk(self, nFrames):
         # number of frames to process at a time
         self.meta_data.set_meta_data("nFrames", nFrames)
