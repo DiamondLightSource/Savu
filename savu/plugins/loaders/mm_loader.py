@@ -27,7 +27,8 @@ from savu.plugins.base_loader import BaseLoader
 from savu.plugins.loaders.multi_modal_loaders.nxfluo_loader import NxfluoLoader
 from savu.plugins.loaders.multi_modal_loaders.nxxrd_loader import NxxrdLoader
 from savu.plugins.loaders.multi_modal_loaders.nxstxm_loader import NxstxmLoader
-from savu.plugins.loaders.multi_modal_loaders.nxmonitor_loader import NxmonitorLoader
+from savu.plugins.loaders.multi_modal_loaders.nxmonitor_loader \
+    import NxmonitorLoader
 
 from savu.plugins.utils import register_plugin
 
@@ -45,15 +46,17 @@ class MmLoader(BaseLoader):
 
     @logmethod
     def setup(self):
-        fluo = NxfluoLoader()
-        fluo.main_setup(self.exp, {})
-        fluo.setup()
-        xrd = NxxrdLoader()
-        xrd.main_setup(self.exp, self.parameters)
-        xrd.setup()
-        stxm = NxstxmLoader()
-        stxm.main_setup(self.exp, {})
-        stxm.setup()
-        monitor = NxmonitorLoader()
-        monitor.main_setup(self.exp, {})
-        monitor.setup()
+        new_dict = self.amend_dictionary()
+        self.setup_loader(NxfluoLoader(), new_dict)
+        self.setup_loader(NxxrdLoader(), self.parameters)
+        self.setup_loader(NxstxmLoader(), new_dict)
+        self.setup_loader(NxmonitorLoader(), new_dict)
+
+    def setup_loader(self, loader, params):
+        loader.main_setup(self.exp, params)
+        loader.setup()
+
+    def amend_dictionary(self):
+        new_dict = self.parameters.copy()
+        del new_dict['calibration_path']
+        return new_dict

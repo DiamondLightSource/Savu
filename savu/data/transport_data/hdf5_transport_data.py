@@ -147,31 +147,6 @@ class Hdf5TransportData(object):
             except:
                 pass
 
-#    def chunk_length_repeat(self, slice_dirs, shape):
-#        """
-#        For each slice dimension, determine 3 values relevant to the slicing.
-#
-#        :returns: chunk, length, repeat
-#            chunk: how many repeats of the same index value before an increment
-#            length: the slice dimension length (sequence length)
-#            repeat: how many times does the sequence of chunked numbers repeat
-#        :rtype: [int, int, int]
-#        """
-#        sshape = self.get_shape_of_slice_dirs(slice_dirs, shape)
-#
-#        if not slice_dirs:
-#            return [1], [1], [1]
-#
-#        chunk = []
-#        length = []
-#        repeat = []
-#        for dim in range(len(slice_dirs)):
-#            chunk.append(int(np.prod(sshape[0:dim])))
-#            length.append(sshape[dim])
-#            repeat.append(int(np.prod(sshape[dim+1:])))
-#
-#        return chunk, length, repeat
-
     def chunk_length_repeat(self, slice_dirs, shape):
         """
         For each slice dimension, determine 3 values relevant to the slicing.
@@ -183,8 +158,6 @@ class Hdf5TransportData(object):
         :rtype: [int, int, int]
         """
         sshape = self.get_shape_of_slice_dirs(slice_dirs, shape)
-        starts, stops, steps = self.get_starts_stops_steps()
-
         if not slice_dirs:
             return [1], [1], [1]
 
@@ -224,9 +197,10 @@ class Hdf5TransportData(object):
         chunk, length, repeat = self.chunk_length_repeat(slice_dirs, shape)
         starts, stops, steps = self.get_starts_stops_steps()
         idx_list = []
-        for dim in range(len(slice_dirs)):
-            c = chunk[dim]
-            r = repeat[dim]
+        for i in range(len(slice_dirs)):
+            c = chunk[i]
+            r = repeat[i]
+            dim = slice_dirs[i]
             values = np.arange(starts[dim], stops[dim], steps[dim])
             idx = np.ravel(np.kron(values, np.ones((r, c))))
             idx_list.append(idx.astype(int))
@@ -238,6 +212,7 @@ class Hdf5TransportData(object):
         slice_dirs = pData.get_slice_directions()
         shape = self.get_shape()
         index = self.get_slice_dirs_index(slice_dirs, shape)
+        print "***", index.shape
         if 'var' not in [shape[i] for i in slice_dirs]:
             shape = [s for s in list(shape) if isinstance(s, int)]
 
@@ -268,33 +243,6 @@ class Hdf5TransportData(object):
             banked.append(slice_list[start:end])
 
         return banked, length[0], slice_dirs
-
-#    def grouped_slice_list(self, slice_list, max_frames):
-#        banked, length, slice_dir = self.banked_list(slice_list)
-#        starts, stops, steps = self.get_starts_stops_steps()
-#        group_dim = self.get_slice_directions()[0]
-#        start = starts[group_dim]
-#        stop = stops[group_dim]
-#        step = steps[group_dim]
-#        grouped = []
-#        count = 0
-#        for group in banked:
-#            full_frames = int(length/float(max_frames))
-#            rem = 1 if (length % max_frames) else 0
-#            working_slice = list(group[0])
-#
-#            i = -max_frames
-#            for i in range(0, (full_frames*max_frames), max_frames):
-#                new_slice = slice(i, i+max_frames, 1)
-#                working_slice[slice_dir[0]] = new_slice
-#                grouped.append(tuple(working_slice))
-#            if rem:
-#                new_slice = slice(i+max_frames, len(group), 1)
-#                working_slice[slice_dir[0]] = new_slice
-#                grouped.append(tuple(working_slice))
-#            count += 1
-#
-#        return grouped
 
     def grouped_slice_list(self, slice_list, max_frames):
         banked, length, slice_dir = self.banked_list(slice_list)

@@ -40,33 +40,6 @@ class MultipleInputDataTest(Plugin, CpuPlugin):
 
     def process_frames(self, data, frame_list):
         return data[0] + data[1]
-#        in_data = self.get_data_objects(self.exp.index, "in_data")
-#        out_data = self.get_data_objects(self.exp.index, "out_data")
-#
-#        in_data = in_data[0]
-#        out_data = out_data[0]
-#
-#        slice_list = in_data.single_slice_list()
-#        count = 0
-#        for sl in slice_list:
-#            temp = in_data.data[sl]
-#            out_data.data[sl] = temp
-#            count = count + 1
-#
-#        print "plugin complete"
-
-#    def setup(self):
-#        in_datasets, out_datasets = self.get_datasets()
-#        in_pData, out_pData = self.get_plugin_datasets()
-##         print in_pData[0].meta_data.get_meta_data('SINOGRAM')#
-#        tobecorrected = in_datasets[0]
-#        monitor = in_datasets[1]
-#        corrected = out_datasets[0]
-#        corrected.create_dataset(tobecorrected)
-#        in_pData, out_pData = self.get_plugin_datasets()
-#        in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
-#        in_pData[1].plugin_data_setup('SINOGRAM', self.get_max_frames())
-#        out_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
 
     def setup(self):
         """
