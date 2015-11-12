@@ -147,6 +147,31 @@ class Hdf5TransportData(object):
             except:
                 pass
 
+#    def chunk_length_repeat(self, slice_dirs, shape):
+#        """
+#        For each slice dimension, determine 3 values relevant to the slicing.
+#
+#        :returns: chunk, length, repeat
+#            chunk: how many repeats of the same index value before an increment
+#            length: the slice dimension length (sequence length)
+#            repeat: how many times does the sequence of chunked numbers repeat
+#        :rtype: [int, int, int]
+#        """
+#        sshape = self.get_shape_of_slice_dirs(slice_dirs, shape)
+#
+#        if not slice_dirs:
+#            return [1], [1], [1]
+#
+#        chunk = []
+#        length = []
+#        repeat = []
+#        for dim in range(len(slice_dirs)):
+#            chunk.append(int(np.prod(sshape[0:dim])))
+#            length.append(sshape[dim])
+#            repeat.append(int(np.prod(sshape[dim+1:])))
+#
+#        return chunk, length, repeat
+
     def chunk_length_repeat(self, slice_dirs, shape):
         """
         For each slice dimension, determine 3 values relevant to the slicing.
@@ -158,6 +183,12 @@ class Hdf5TransportData(object):
         :rtype: [int, int, int]
         """
         sshape = self.get_shape_of_slice_dirs(slice_dirs, shape)
+#        stepping = self.get_steps()
+#        start = self.get_starts()
+#        end = self.get_ends()
+        stepping = 2
+        start = 0
+        end = 1
 
         if not slice_dirs:
             return [1], [1], [1]

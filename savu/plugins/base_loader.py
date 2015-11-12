@@ -36,7 +36,16 @@ class BaseLoader(Plugin):
         """
         self.set_parameters(params)
         self.exp = exp
-        self.setup()
+        data_obj = self.setup()
+        self.set_data_reduction_params(data_obj)
+
+    def set_data_reduction_params(self, data_obj):
+        pDict = self.parameters
+        shape = data_obj.get_shape()
+        starts = pDict['starts'] if 'starts' in pDict else [0]*len(shape)
+        stops = pDict['stops'] if 'stops' in pDict else [1]*len(shape)
+        steps = pDict['steps'] if 'steps' in pDict else shape
+        data_obj.set_starts_stops_ends(starts, stops, steps)
 
     def __init__(self, name='BaseLoader'):
         self.hits = []
