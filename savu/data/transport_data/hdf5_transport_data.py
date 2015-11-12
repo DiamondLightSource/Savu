@@ -212,7 +212,6 @@ class Hdf5TransportData(object):
         slice_dirs = pData.get_slice_directions()
         shape = self.get_shape()
         index = self.get_slice_dirs_index(slice_dirs, shape)
-        print "***", index.shape
         if 'var' not in [shape[i] for i in slice_dirs]:
             shape = [s for s in list(shape) if isinstance(s, int)]
 
