@@ -93,3 +93,4 @@ class NxxrdLoader(BaseMultiModalLoader):
                             calibrationfile[det_str + '/x_pixel_size'])
         mData.set_meta_data("detector_orientation",
                             calibrationfile[det_str + '/detector_orientation'])
+        self.set_data_reduction_params(data_obj)

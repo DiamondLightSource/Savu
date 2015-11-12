@@ -89,4 +89,4 @@ class NxtomoLoader(BaseLoader):
 
         data_obj.set_shape(data_obj.data.shape)
 
-        return data_obj
+        self.set_data_reduction_params(data_obj)

@@ -72,3 +72,4 @@ class ProjectionTomoLoader(BaseLoader):
         objInfo.set_meta_data("rotation_angle", rotation_angle[...])
 
         data_obj.set_shape(data_obj.data.shape)
+        self.set_data_reduction_params(data_obj)

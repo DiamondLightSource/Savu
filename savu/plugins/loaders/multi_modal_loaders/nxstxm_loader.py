@@ -57,3 +57,4 @@ class NxstxmLoader(BaseMultiModalLoader):
                                  'x.mm',
                                  'y.mm')
         self.add_patterns_based_on_acquisition(data_obj, 'stxm')
+        self.set_data_reduction_params(data_obj)

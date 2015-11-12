@@ -33,6 +33,10 @@ class BaseLoader(Plugin):
         """
         Overwrites the main_setup function in plugin.py as the loader is a
         special case of plugin that doesn't required setup of in/out_datasets
+
+        :param starts: A list of start values for each dimension. Default: [].
+        :param stops: A list of stop values for each dimension. Default: [].
+        :param steps: A list of step values for each dimension. Default: [].
         """
         self.set_parameters(params)
         self.exp = exp
@@ -42,9 +46,9 @@ class BaseLoader(Plugin):
     def set_data_reduction_params(self, data_obj):
         pDict = self.parameters
         shape = data_obj.get_shape()
-        starts = pDict['starts'] if 'starts' in pDict else [0]*len(shape)
-        stops = pDict['stops'] if 'stops' in pDict else [1]*len(shape)
-        steps = pDict['steps'] if 'steps' in pDict else shape
+        starts = pDict['starts'] if pDict['starts'] else [0]*len(shape)
+        stops = pDict['stops'] if pDict['stops'] else [1]*len(shape)
+        steps = pDict['steps'] if pDict['steps'] else shape
         data_obj.set_starts_stops_ends(starts, stops, steps)
 
     def __init__(self, name='BaseLoader'):
