@@ -183,12 +183,7 @@ class Hdf5TransportData(object):
         :rtype: [int, int, int]
         """
         sshape = self.get_shape_of_slice_dirs(slice_dirs, shape)
-#        stepping = self.get_steps()
-#        start = self.get_starts()
-#        end = self.get_ends()
-        stepping = 2
-        start = 0
-        end = 1
+        starts, stops, steps = self.get_starts_stops_steps()
 
         if not slice_dirs:
             return [1], [1], [1]
@@ -226,13 +221,14 @@ class Hdf5TransportData(object):
         gives the indices for that slice dimension.
         """
         # create the indexing array
-        [chunk, length, repeat] = self.chunk_length_repeat(slice_dirs, shape)
+        chunk, length, repeat = self.chunk_length_repeat(slice_dirs, shape)
+        starts, stops, steps = self.get_starts_stops_steps()
         idx_list = []
         for dim in range(len(slice_dirs)):
             c = chunk[dim]
-            l = length[dim]
             r = repeat[dim]
-            idx = np.ravel(np.kron(np.arange(l), np.ones((r, c))))
+            values = np.arange(starts[dim], stops[dim], steps[dim])
+            idx = np.ravel(np.kron(values, np.ones((r, c))))
             idx_list.append(idx.astype(int))
 
         return np.array(idx_list)
@@ -273,22 +269,55 @@ class Hdf5TransportData(object):
 
         return banked, length[0], slice_dirs
 
+#    def grouped_slice_list(self, slice_list, max_frames):
+#        banked, length, slice_dir = self.banked_list(slice_list)
+#        starts, stops, steps = self.get_starts_stops_steps()
+#        group_dim = self.get_slice_directions()[0]
+#        start = starts[group_dim]
+#        stop = stops[group_dim]
+#        step = steps[group_dim]
+#        grouped = []
+#        count = 0
+#        for group in banked:
+#            full_frames = int(length/float(max_frames))
+#            rem = 1 if (length % max_frames) else 0
+#            working_slice = list(group[0])
+#
+#            i = -max_frames
+#            for i in range(0, (full_frames*max_frames), max_frames):
+#                new_slice = slice(i, i+max_frames, 1)
+#                working_slice[slice_dir[0]] = new_slice
+#                grouped.append(tuple(working_slice))
+#            if rem:
+#                new_slice = slice(i+max_frames, len(group), 1)
+#                working_slice[slice_dir[0]] = new_slice
+#                grouped.append(tuple(working_slice))
+#            count += 1
+#
+#        return grouped
+
     def grouped_slice_list(self, slice_list, max_frames):
         banked, length, slice_dir = self.banked_list(slice_list)
+        starts, stops, steps = self.get_starts_stops_steps()
+        group_dim = self.get_plugin_data().get_slice_directions()[0]
+        start = starts[group_dim]
+        step = steps[group_dim]
+        jump = max_frames*step
         grouped = []
         count = 0
         for group in banked:
             full_frames = int(length/float(max_frames))
             rem = 1 if (length % max_frames) else 0
             working_slice = list(group[0])
-
-            i = -max_frames
+            print full_frames, rem, working_slice
+            slice_start = start - jump
             for i in range(0, (full_frames*max_frames), max_frames):
-                new_slice = slice(i, i+max_frames, 1)
+                slice_start = start + i*jump
+                new_slice = slice(slice_start, slice_start + jump, step)
                 working_slice[slice_dir[0]] = new_slice
                 grouped.append(tuple(working_slice))
             if rem:
-                new_slice = slice(i+max_frames, len(group), 1)
+                new_slice = slice(slice_start+jump, (len(group)-1)*step, step)
                 working_slice[slice_dir[0]] = new_slice
                 grouped.append(tuple(working_slice))
             count += 1

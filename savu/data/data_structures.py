@@ -164,6 +164,7 @@ class Data(object):
                 self.copy_patterns(kwargs['patterns'])
             except KeyError:
                 pass
+        self.set_starts_stops_steps(None, None, None)
 
     def copy_patterns(self, copy_data):
         if isinstance(copy_data, Data):
@@ -261,15 +262,31 @@ class Data(object):
 
     def get_shape(self):
         shape = self.data_info.get_meta_data('shape')
-        try:
-            dirs = self.meta_data.get_meta_data("fixed_directions")
-            shape = list(self.shape)
-            for ddir in dirs:
-                shape[ddir] = 1
-            shape = tuple(shape)
-        except KeyError:
-            pass
+
         return shape
+
+    def set_starts_stops_steps(self, starts, stops, steps):
+        shape = self.get_shape()
+        starts = starts if starts else [0]*len(shape)
+        stops = stops if stops else shape
+        steps = steps if steps else [1]*len(shape)
+        self.data_info.set_meta_data('starts', starts)
+        self.data_info.set_meta_data('stops', stops)
+        self.data_info.set_meta_data('steps', steps)
+        self.set_reduced_shape(shape, starts, stops, steps)
+
+    def get_starts_stops_steps(self):
+        starts = self.data_info.get_meta_data('starts')
+        stops = self.data_info.get_meta_data('stops')
+        steps = self.data_info.get_meta_data('steps')
+        return starts, stops, steps
+
+    def set_reduced_shape(self, shape, starts, stops, steps):
+        # put some checks in here
+        shape = list(shape)
+        for dim in range(len(shape)):
+            shape[dim] = (stops[dim] - starts[dim])/steps[dim]
+        self.set_shape(tuple(shape))
 
     def find_and_set_shape(self, data):
         try:
@@ -563,15 +580,18 @@ class PluginData(object):
         self.meta_data.set_meta_data("fixed_directions", dims)
         self.meta_data.set_meta_data("fixed_directions_values", values)
         self.set_slice_directions()
+        shape = list(self.get_shape())
+        for dim in dims:
+            shape[dim] = 1
+        self.data_obj.set_shape(tuple(shape))
+        self.set_shape()
 
     def get_fixed_directions(self):
-        try:
+        fixed = []
+        values = []
+        if 'fixed_directions' in self.meta_data.get_dictionary():
             fixed = self.meta_data.get_meta_data("fixed_directions")
-            values = self.meta_data.\
-                get_meta_data("fixed_directions_values")
-        except KeyError:
-            fixed = []
-            values = []
+            values = self.meta_data.get_meta_data("fixed_directions_values")
         return [fixed, values]
 
     def set_frame_chunk(self, nFrames):

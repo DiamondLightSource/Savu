@@ -27,29 +27,25 @@ from savu.plugins.plugin import Plugin
 class BaseLoader(Plugin):
     """
     A base plugin from which all data loader plugins should inherit.
+
+    :param starts: A list of start values for each dimension. Default: [].
+    :param stops: A list of stop values for each dimension. Default: [].
+    :param steps: A list of step values for each dimension. Default: [].
     """
 
     def main_setup(self, exp, params):
         """
         Overwrites the main_setup function in plugin.py as the loader is a
         special case of plugin that doesn't required setup of in/out_datasets
-
-        :param starts: A list of start values for each dimension. Default: [].
-        :param stops: A list of stop values for each dimension. Default: [].
-        :param steps: A list of step values for each dimension. Default: [].
         """
         self.set_parameters(params)
         self.exp = exp
-        data_obj = self.setup()
-        self.set_data_reduction_params(data_obj)
+        self.setup()
 
     def set_data_reduction_params(self, data_obj):
         pDict = self.parameters
-        shape = data_obj.get_shape()
-        starts = pDict['starts'] if pDict['starts'] else [0]*len(shape)
-        stops = pDict['stops'] if pDict['stops'] else [1]*len(shape)
-        steps = pDict['steps'] if pDict['steps'] else shape
-        data_obj.set_starts_stops_ends(starts, stops, steps)
+        data_obj.set_starts_stops_steps(pDict['starts'], pDict['stops'],
+                                        pDict['steps'])
 
     def __init__(self, name='BaseLoader'):
         self.hits = []
