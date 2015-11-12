@@ -158,6 +158,10 @@ class Hdf5TransportData(object):
         :rtype: [int, int, int]
         """
         sshape = self.get_shape_of_slice_dirs(slice_dirs, shape)
+
+        if not slice_dirs:
+            return [1], [1], [1]
+
         chunk = []
         length = []
         repeat = []
@@ -176,14 +180,14 @@ class Hdf5TransportData(object):
                 if isinstance(value, str):
                     shape[index] = \
                         len(self.data_info.get_meta_data('axis_labels')[index])
-                    self.unravel_array(index)
+                    #self.unravel_array(index)
             shape = tuple(shape)
             sshape = [shape[sslice] for sslice in slice_dirs]
         return sshape
 
-    def unravel_array(self, index):
-        self.unravel = lambda x: self.unravel(x[0]) if isinstance(x, list) \
-            else x
+#    def unravel_array(self, index):
+#        self.unravel = lambda x: self.unravel(x[0]) if isinstance(x, list) \
+#            else x
 
     def get_slice_dirs_index(self, slice_dirs, shape):
         """
@@ -205,12 +209,13 @@ class Hdf5TransportData(object):
     def single_slice_list(self):
         pData = self.get_plugin_data()
         slice_dirs = pData.get_slice_directions()
-        [fix_dirs, value] = pData.get_fixed_directions()
         shape = self.get_shape()
         index = self.get_slice_dirs_index(slice_dirs, shape)
         if 'var' not in [shape[i] for i in slice_dirs]:
             shape = [s for s in list(shape) if isinstance(s, int)]
-        nSlices = index.shape[1]
+
+        [fix_dirs, value] = pData.get_fixed_directions()
+        nSlices = index.shape[1] if index.size else len(fix_dirs)
         nDims = len(shape)
 
         slice_list = []
@@ -225,34 +230,10 @@ class Hdf5TransportData(object):
 
         return slice_list
 
-#    def single_slice_list(self):
-#        pData = self.get_plugin_data()
-#        slice_dirs = pData.get_slice_directions()
-#        [fix_dirs, value] = pData.get_fixed_directions()
-#        shape = self.get_shape()
-#        index = self.get_slice_dirs_index(slice_dirs, shape)
-#        if 'var' not in [shape[i] for i in slice_dirs]:
-#            shape = [s for s in list(shape) if isinstance(s, int)]
-#        nSlices = index.shape[1]
-#        nDims = len(shape)
-#
-#        slice_list = []
-#        for i in range(nSlices):
-#            getitem = [slice(None)]*nDims
-#            for f in range(len(fix_dirs)):
-#                getitem[fix_dirs[f]] = slice(value[f], value[f] + 1, 1)
-#            for sdir in range(len(slice_dirs)):
-#                getitem[slice_dirs[sdir]] = slice(index[sdir, i],
-#                                                  index[sdir, i] + 1, 1)
-#            slice_list.append(tuple(getitem))
-#
-#        return slice_list
-
     def banked_list(self, slice_list):
         shape = self.get_shape()
         slice_dirs = self.get_plugin_data().get_slice_directions()
         chunk, length, repeat = self.chunk_length_repeat(slice_dirs, shape)
-
         banked = []
         for rep in range(repeat[0]):
             start = rep*length[0]
@@ -270,8 +251,7 @@ class Hdf5TransportData(object):
             rem = 1 if (length % max_frames) else 0
             working_slice = list(group[0])
 
-            print full_frames, length, max_frames
-            #i = 0
+            i = -max_frames
             for i in range(0, (full_frames*max_frames), max_frames):
                 new_slice = slice(i, i+max_frames, 1)
                 working_slice[slice_dir[0]] = new_slice

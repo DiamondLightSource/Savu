@@ -298,13 +298,6 @@ class Data(object):
                 count += 1
         self.next_shape = tuple(shape)
 
-#    def remove_variable_length(self, length):
-#        self.variable_length_flag = False
-#        shape = list(self.get_shape())
-#        index = [i for i in range(len(shape)) if isinstance(shape[i], str)]
-#        shape[index[0]] = length
-#        self.next_shape = tuple(shape)
-
     def check_dims(self):
         nDims = self.data_info.get_meta_data("nDims")
         shape = self.data_info.get_meta_data('shape')
@@ -338,8 +331,6 @@ class Data(object):
                         "SPECTRUM_STACK",
                         "PROJECTION_STACK",
                         "METADATA"]
-                        # added spectrum adp 17th August,
-                        # Added diffraction 28th August adp
         return pattern_list
 
     def add_pattern(self, dtype, **kwargs):
@@ -487,8 +478,7 @@ class PluginData(object):
         pattern = self.data_obj.get_data_patterns()[name]
         self.meta_data.set_meta_data("name", name)
         self.meta_data.set_meta_data("core_dir", pattern['core_dir'])
-        slice_dir = self.data_obj.non_negative_directions(pattern['slice_dir'])
-        self.meta_data.set_meta_data("slice_dir", slice_dir)
+        self.set_slice_directions()
 
     def get_pattern_name(self):
         name = self.meta_data.get_meta_data("name")
@@ -531,16 +521,17 @@ class PluginData(object):
         if (len(core_dir)+len(slice_dir)) is not nDims:
             sys.exit("Incorrect number of data dimensions specified.")
 
-#    def get_slice_directions(self):
+    def set_slice_directions(self):
 #        try:
 #            [fix_dirs, value] = self.get_fixed_directions()
 #        except KeyError:
 #            fix_dirs = []
-#        slice_dirs = self.data_obj.get_data_patterns()[
-#            self.get_pattern_name()]['slice_dir']
-#        to_slice = [sd for sd in slice_dirs if sd not in fix_dirs]
-#        temp = self.data_obj.non_negative_directions(tuple(to_slice))
-#        return temp
+        slice_dirs = self.data_obj.get_data_patterns()[
+            self.get_pattern_name()]['slice_dir']
+        #to_slice = [sd for sd in slice_dirs if sd not in fix_dirs]
+        #slice_dirs = self.data_obj.non_negative_directions(tuple(to_slice))
+        slice_dirs = self.data_obj.non_negative_directions(tuple(slice_dirs))
+        self.meta_data.set_meta_data('slice_dir', slice_dirs)
 
     def get_slice_directions(self):
         return self.meta_data.get_meta_data('slice_dir')
@@ -571,6 +562,7 @@ class PluginData(object):
                             " a slicing direction")
         self.meta_data.set_meta_data("fixed_directions", dims)
         self.meta_data.set_meta_data("fixed_directions_values", values)
+        self.set_slice_directions()
 
     def get_fixed_directions(self):
         try:
