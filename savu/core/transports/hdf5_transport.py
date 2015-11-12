@@ -175,16 +175,14 @@ class Hdf5Transport(TransportMechanism):
         squeeze_dict = self.set_functions(in_data, 'squeeze')
         expand_dict = self.set_functions(out_data, 'expand')
 
-        print in_slice_list[0]
-#
-#        for count in range(len(in_slice_list[0])):
-#            print count
-#            section, slice_list = \
-#                self.get_all_padded_data(in_data, in_slice_list, count,
-#                                         squeeze_dict)
-#            result = plugin.process_frames(section, slice_list)
-#            self.set_out_data(out_data, out_slice_list, result, count,
-#                              expand_dict)
+        for count in range(len(in_slice_list[0])):
+            print count
+            section, slice_list = \
+                self.get_all_padded_data(in_data, in_slice_list, count,
+                                         squeeze_dict)
+            result = plugin.process_frames(section, slice_list)
+            self.set_out_data(out_data, out_slice_list, result, count,
+                              expand_dict)
 
     def process_checks(self):
         pass

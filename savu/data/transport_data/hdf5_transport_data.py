@@ -303,21 +303,20 @@ class Hdf5TransportData(object):
         start = starts[group_dim]
         step = steps[group_dim]
         jump = max_frames*step
+
         grouped = []
         count = 0
         for group in banked:
             full_frames = int(length/float(max_frames))
             rem = 1 if (length % max_frames) else 0
             working_slice = list(group[0])
-            print full_frames, rem, working_slice
-            slice_start = start - jump
-            for i in range(0, (full_frames*max_frames), max_frames):
-                slice_start = start + i*jump
-                new_slice = slice(slice_start, slice_start + jump, step)
+            i = start - jump
+            for i in range(0, (full_frames*max_frames*step), max_frames*step):
+                new_slice = slice(i, i+jump, step)
                 working_slice[slice_dir[0]] = new_slice
                 grouped.append(tuple(working_slice))
             if rem:
-                new_slice = slice(slice_start+jump, (len(group)-1)*step, step)
+                new_slice = slice(i+jump, (len(group)-1)*step, step)
                 working_slice[slice_dir[0]] = new_slice
                 grouped.append(tuple(working_slice))
             count += 1
