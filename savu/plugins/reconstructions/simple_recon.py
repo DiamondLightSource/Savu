@@ -48,7 +48,6 @@ class SimpleRecon(BaseRecon, CpuPlugin):
         return np.fft.ifft(ffs).real
 
     def _back_project(self, mapping, sino_element, centre):
-        print mapping.shape, centre.shape
         mapping_array = mapping+centre
         return sino_element[mapping_array.astype('int')]
 
@@ -57,12 +56,8 @@ class SimpleRecon(BaseRecon, CpuPlugin):
                            np.arange(-center[1], shape[1] - center[1]))
         return x*np.cos(theta) - y*np.sin(theta)
 
-#     def pre_process(self):
-#         in_data, out_data = self.get_plugin_datasets()
-#         centre = tuple((np.asarray(out_data[0].get_pattern_shape()))/2)
-#         self.kwargs = {'centre': centre}
-
     def reconstruct(self, sinogram, centre_of_rotations, angles, vol_shape):
+        sinogram = sinogram[:, np.newaxis, :]
         try:
             centre = self.kwargs['centre']
         except:
@@ -84,6 +79,9 @@ class SimpleRecon(BaseRecon, CpuPlugin):
             results.append(result[:, np.newaxis, :])
         result = np.hstack(results)
         return result
+
+    def get_max_frames(self):
+        return 1
 
     def get_citation_information(self):
         cite_info = CitationInformation()

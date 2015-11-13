@@ -35,7 +35,8 @@ class SimpleStxmTomoTest(unittest.TestCase):
             "transport": "hdf5",
             "process_names": "CPU0",
             "data_file": tu.get_test_data_path('mm.nxs'),
-            "process_file": tu.get_test_data_path('simplestxmtomotest.nxs'),
+            "process_file": tu.get_test_process_path(
+                'simple_stxm_tomo_test.nxs'),
             "out_path": tempfile.mkdtemp()
             }
         run_protected_plugin_runner(options)
