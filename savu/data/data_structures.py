@@ -262,7 +262,6 @@ class Data(object):
 
     def get_shape(self):
         shape = self.data_info.get_meta_data('shape')
-
         return shape
 
     def set_starts_stops_steps(self, starts, stops, steps):
@@ -270,15 +269,14 @@ class Data(object):
         starts = self.neg_to_pos(starts) if starts else [0]*len(shape)
         stops = self.neg_to_pos(stops) if stops else shape
         steps = self.neg_to_pos(steps) if steps else [1]*len(shape)
-        print starts, stops, steps
         self.data_info.set_meta_data('starts', starts)
         self.data_info.set_meta_data('stops', stops)
         self.data_info.set_meta_data('steps', steps)
         self.set_reduced_shape(shape, starts, stops, steps)
 
     def neg_to_pos(self, value):
-        print value, self.get_shape()
-        value = [value[i] if value[i] > 0 else self.get_shape()[i]+1+value[i] for i in range(len(value))]
+        value = [value[i] if value[i] > 0 else self.get_shape()[i]+1+value[i]
+                 for i in range(len(value))]
         return value
 
     def get_starts_stops_steps(self):

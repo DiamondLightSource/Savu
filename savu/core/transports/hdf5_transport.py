@@ -175,15 +175,6 @@ class Hdf5Transport(TransportMechanism):
         squeeze_dict = self.set_functions(in_data, 'squeeze')
         expand_dict = self.set_functions(out_data, 'expand')
 
-        for sl in in_slice_list[0]:
-            print sl
-        print '\n\n\n'
-        
-        for sl in out_slice_list[0]:
-            print sl
-        print '\n\n\n'
-        
-
         for count in range(len(in_slice_list[0])):
             print count
             section, slice_list = \
