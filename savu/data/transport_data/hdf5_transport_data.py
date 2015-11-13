@@ -210,18 +210,22 @@ class Hdf5TransportData(object):
     def single_slice_list(self):
         pData = self.get_plugin_data()
         slice_dirs = pData.get_slice_directions()
+        core_dirs = pData.get_core_directions()
         shape = self.get_shape()
         index = self.get_slice_dirs_index(slice_dirs, shape)
         if 'var' not in [shape[i] for i in slice_dirs]:
             shape = [s for s in list(shape) if isinstance(s, int)]
 
-        [fix_dirs, value] = pData.get_fixed_directions()
+        fix_dirs, value = pData.get_fixed_directions()
+        starts, stops, steps = self.get_starts_stops_steps()
         nSlices = index.shape[1] if index.size else len(fix_dirs)
         nDims = len(shape)
 
         slice_list = []
         for i in range(nSlices):
             getitem = [slice(None)]*nDims
+            for c in core_dirs:
+                getitem[c] = slice(starts[c], stops[c], steps[c])
             for f in range(len(fix_dirs)):
                 getitem[fix_dirs[f]] = slice(value[f], value[f] + 1, 1)
             for sdir in range(len(slice_dirs)):
@@ -263,7 +267,8 @@ class Hdf5TransportData(object):
                 working_slice[slice_dir[0]] = new_slice
                 grouped.append(tuple(working_slice))
             if rem:
-                new_slice = slice(i+jump, (len(group)-1)*step, step)
+                new_slice = slice(i+jump, start + (len(group)-1)*step + 1,
+                                  step)
                 working_slice[slice_dir[0]] = new_slice
                 grouped.append(tuple(working_slice))
             count += 1

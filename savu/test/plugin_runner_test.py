@@ -27,9 +27,9 @@ from savu.test import test_utils as tu
 from savu.core.plugin_runner import PluginRunner
 
 
-def run_protected_plugin_runner_no_process_list(options, plugin):
+def run_protected_plugin_runner_no_process_list(options, plugin, args):
     try:
-        tu.set_plugin_list(options, plugin)
+        tu.set_plugin_list(options, plugin, args)
         plugin_runner = PluginRunner(options)
         plugin_runner.run_plugin_list(options)
     except ImportError as e:
@@ -46,10 +46,10 @@ def run_protected_plugin_runner(options):
         print("Failed to run test as libraries not available (%s)," % (e) +
               " passing test")
         pass
- 
-  
+
+
 class PluginRunnerMultiModalTest(unittest.TestCase):
-  
+
     def test_process(self):
         options = {
             "transport": "hdf5",
@@ -59,10 +59,10 @@ class PluginRunnerMultiModalTest(unittest.TestCase):
             "out_path": tempfile.mkdtemp()
             }
         run_protected_plugin_runner(options)
-  
-  
+
+
 class PluginRunnerTomoTest(unittest.TestCase):
-  
+
     def test_process(self):
         options = {
             "transport": "hdf5",
@@ -72,10 +72,10 @@ class PluginRunnerTomoTest(unittest.TestCase):
             "out_path": tempfile.mkdtemp()
             }
         run_protected_plugin_runner(options)
-  
-  
+
+
 class PluginRunnerSTXMTest(unittest.TestCase):
-  
+
     def test_process(self):
         options = {
             "transport": "hdf5",
@@ -85,10 +85,10 @@ class PluginRunnerSTXMTest(unittest.TestCase):
             "out_path": tempfile.mkdtemp()
             }
         run_protected_plugin_runner(options)
-  
-  
+
+
 class PluginRunnerXRDTest(unittest.TestCase):
-   
+
     def test_process(self):
         options = {
             "transport": "hdf5",
@@ -98,10 +98,10 @@ class PluginRunnerXRDTest(unittest.TestCase):
             "out_path": tempfile.mkdtemp()
             }
         run_protected_plugin_runner(options)
-  
-  
+
+
 class PluginRunnerFluoTest(unittest.TestCase):
-  
+
     def test_process(self):
         options = {
             "transport": "hdf5",
@@ -120,7 +120,8 @@ class PluginRunnerMonitorTest(unittest.TestCase):
             "transport": "hdf5",
             "process_names": "CPU0",
             "data_file": tu.get_test_data_path('mm.nxs'),
-            "process_file": tu.get_test_process_path('basic_monitor_process.nxs'),
+            "process_file": tu.get_test_process_path(
+                'basic_monitor_process.nxs'),
             "out_path": tempfile.mkdtemp()
             }
         run_protected_plugin_runner(options)

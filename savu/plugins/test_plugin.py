@@ -13,9 +13,10 @@
 # limitations under the License.
 
 """
-.. module:: multiple_input_data_test
+.. module:: test_plugin
    :platform: Unix
-   :synopsis: Plugin to test multiple input data sets are passed to process
+   :synopsis: Plugin to test multiple input data sets are passed to process,
+   fixed directions and data reduction
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
@@ -28,7 +29,7 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 
 @register_plugin
-class MultipleInputDataTest(Plugin, CpuPlugin):
+class TestPlugin(Plugin, CpuPlugin):
     """
     The base class from which all plugins should inherit.
     :param in_datasets: Create a list of the dataset(s) to process. Default: [].
@@ -36,7 +37,7 @@ class MultipleInputDataTest(Plugin, CpuPlugin):
     """
 
     def __init__(self):
-        super(MultipleInputDataTest, self).__init__("MultipleInputDataTest")
+        super(TestPlugin, self).__init__("TestPlugin")
 
     def process_frames(self, data, frame_list):
         return data[0] + data[1]
