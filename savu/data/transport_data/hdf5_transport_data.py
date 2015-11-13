@@ -258,10 +258,11 @@ class Hdf5TransportData(object):
         grouped = []
         count = 0
         for group in banked:
-            full_frames = int((length-1)/max_frames)
+            full_frames = int((length)/max_frames)
             full_frames_end = start + full_frames*step*max_frames
-            
+            end = start+(len(group)-1)*step+1
             rem = 1 if (length % max_frames) else 0
+
             working_slice = list(group[0])
             i = start - jump
             for i in range(start, full_frames_end, jump):
@@ -269,7 +270,7 @@ class Hdf5TransportData(object):
                 working_slice[slice_dir[0]] = new_slice
                 grouped.append(tuple(working_slice))
             if rem:
-                new_slice = slice(i+jump, start+(len(group)-1)*step+1, step)
+                new_slice = slice(i+jump, end, step)
                 working_slice[slice_dir[0]] = new_slice
                 grouped.append(tuple(working_slice))
             count += 1
@@ -296,12 +297,14 @@ class Hdf5TransportData(object):
         processes = expInfo.get_meta_data("processes")
         process = expInfo.get_meta_data("process")
         slice_list = self.get_grouped_slice_list()
+        
         frame_index = np.arange(len(slice_list))
         try:
             frames = np.array_split(frame_index, len(processes))[process]
             process_slice_list = slice_list[frames[0]:frames[-1]+1]
         except IndexError:
             process_slice_list = []
+
         return process_slice_list
 
     def calculate_slice_padding(self, in_slice, pad_ammount, data_stop):

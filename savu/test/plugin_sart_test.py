@@ -24,19 +24,31 @@
 
 import unittest
 
-from savu.test.plugin_test import PluginTest
+import savu.test.test_utils as tu
+from savu.test.plugin_runner_test import \
+    run_protected_plugin_runner_no_process_list
 
 
-class SimpleReconTest(PluginTest, unittest.TestCase):
+class SimpleReconTest(unittest.TestCase):
 
-    def setUp(self):
-        self.plugin_name = "savu.plugins.simple_recon"
+    def test_simple_recon(self):
+        options = tu.set_experiment('tomo')
+        plugin = 'savu.plugins.reconstructions.simple_recon'
+        run_protected_plugin_runner_no_process_list(options, plugin)
 
-
-class ScikitimageSartTest(PluginTest, unittest.TestCase):
-
-    def setUp(self):
-        self.plugin_name = "savu.plugins.scikitimage_sart"
+#
+#class ScikitimageSartTest(unittest.TestCase):
+#
+#    def test_scikit_sart(self):
+#        options = tu.set_experiment('tomo')
+#        plugin = 'savu.plugins.reconstructions.scikitimage_sart'
+#        loader_dict = {'starts': [0, 0, 0],
+#                       'stops': [-1, -1, -1],
+#                       'steps': [20, 20, 20]}
+#        data_dict = {'in_datasets': ['tomo'], 'out_datasets': ['test']}
+#        saver_dict = {}
+#        all_dicts = [loader_dict, data_dict, saver_dict]
+#        run_protected_plugin_runner_no_process_list(options, plugin, all_dicts)
 
 if __name__ == "__main__":
     unittest.main()

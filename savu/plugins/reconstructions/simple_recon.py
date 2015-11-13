@@ -22,7 +22,7 @@
 
 """
 from savu.plugins.base_recon import BaseRecon
-from savu.data.plugin_info import CitationInformation
+from savu.data.plugin_list import CitationInformation
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 import numpy as np
@@ -61,7 +61,7 @@ class SimpleRecon(BaseRecon, CpuPlugin):
 #         centre = tuple((np.asarray(out_data[0].get_pattern_shape()))/2)
 #         self.kwargs = {'centre': centre}
 
-    def reconstruct(self, sinogram, centre_of_rotations, vol_shape):
+    def reconstruct(self, sinogram, centre_of_rotations, angles, vol_shape):
         try:
             centre = self.kwargs['centre']
         except:

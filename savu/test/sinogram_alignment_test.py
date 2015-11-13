@@ -24,13 +24,17 @@
 
 import unittest
 
-from savu.test.plugin_test import PluginTest
+import savu.test.test_utils as tu
+from savu.test.plugin_runner_test import \
+    run_protected_plugin_runner_no_process_list
 
 
-class SinogramAlignmentTest(PluginTest, unittest.TestCase):
+class SinogramAlignmentTest(unittest.TestCase):
 
-    def setUp(self):
-        self.plugin_name = "savu.plugins.sinogram_alignment"
+    def test_sinogram_alignment(self):
+        options = tu.set_experiment('tomo')
+        plugin = 'savu.plugins.filters.sinogram_alignment'
+        run_protected_plugin_runner_no_process_list(options, plugin)
 
 if __name__ == "__main__":
     unittest.main()

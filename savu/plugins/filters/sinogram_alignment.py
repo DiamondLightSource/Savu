@@ -1,8 +1,7 @@
 import logging
 from savu.plugins.base_filter import BaseFilter
-from savu.data.plugin_info import CitationInformation
+from savu.data.plugin_list import CitationInformation
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-from savu.data import structures
 
 from scipy import ndimage
 from scipy import optimize
@@ -30,24 +29,23 @@ class SinogramAlignment(BaseFilter, CpuPlugin):
         super(SinogramAlignment,
               self).__init__("SinogramAlignment")
 
-    def get_filter_frame_type(self):
+    def filter_frames(self, data):
         """
-        get_filter_frame_type tells the pass through plugin which direction to
-        slice through the data before passing it on
+        Should be overloaded by filter classes extending this one
 
-         :returns:  the savu.structure core_direction describing the frames to
-                    filter
+        :param data: The data to filter
+        :type data: ndarray
+        :returns:  The filtered image
         """
-        return structures.CD_SINOGRAM
-
-    def get_max_frames(self):
-        """
-        Should be overridden to define the max number of frames to process at 
-        a time
-
-        :returns:  an integer of the number of frames
-        """
-        return 1
+        sinogram = data[0]
+        # as dealing with one slice we can squeeze
+        sino = sinogram.squeeze()
+        sino = np.nan_to_num(sino)
+        com_x = self._com_x(sino)
+        com_y = self._com_y(sino)
+        result = self._shift(sino, com_x, com_y)
+        result = result.reshape(result.shape[0], 1, result.shape[1])
+        return result
 
     def _sinfunc(self, data, a, b, c):
         return (a*np.sin(np.deg2rad(data-b)))+c
@@ -88,38 +86,17 @@ class SinogramAlignment(BaseFilter, CpuPlugin):
         xdata = rotation
         return xdata
 
-    def filter_frame(self, sinogram):
-        """
-        Should be overloaded by filter classes extending this one
+    def get_plugin_pattern(self):
+        return 'SINOGRAM'
 
-        :param data: The data to filter
-        :type data: ndarray
-        :returns:  The filtered image
+    def get_max_frames(self):
         """
-        # as dealing with one slice we can squeeze
-        sino = sinogram.squeeze()
-        sino = np.nan_to_num(sino)
-        com_x = self._com_x(sino)
-        com_y = self._com_y(sino)
-        result = self._shift(sino, com_x, com_y)
-        result = result.reshape(result.shape[0], 1, result.shape[1])
-        return result
+        Should be overridden to define the max number of frames to process at
+        a time
 
-    def required_data_type(self):
+        :returns:  an integer of the number of frames
         """
-        The input for this plugin is RawTimeseriesData
-
-        :returns:  Data
-        """
-        return structures.ProjectionData
-
-    def output_data_type(self):
-        """
-        The output of this plugin is ProjectionData
-
-        :returns:  Data
-        """
-        return structures.ProjectionData
+        return 1
 
     def get_citation_information(self):
         cite_info = CitationInformation()
