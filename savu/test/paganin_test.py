@@ -21,26 +21,23 @@
 
 """
 import unittest
-import tempfile
 from savu.test import test_utils as tu
 
-# import logging
-# logging.basicConfig(level=logging.DEBUG)
-
-from savu.test.plugin_runner_test import run_protected_plugin_runner
+from savu.test.plugin_runner_test \
+    import run_protected_plugin_runner_no_process_list
 
 
 class PaganinTest(unittest.TestCase):
 
-    def test_process(self):
-        options = {
-            "transport": "hdf5",
-            "process_names": "CPU0",
-            "data_file": tu.get_test_data_path('24737.nxs'),
-            "process_file": tu.get_test_data_path('paganin_test_process.nxs'),
-            "out_path": tempfile.mkdtemp()
-            }
-        run_protected_plugin_runner(options)
+    def test_paganin1(self):
+        options = tu.set_experiment('tomoRaw')
+        plugin = 'savu.plugins.paganin_filter'
+        run_protected_plugin_runner_no_process_list(options, plugin)
+
+    def test_paganin2(self):
+        options = tu.set_experiment('tomo')
+        plugin = 'savu.plugins.filters.paganin_filter'
+        run_protected_plugin_runner_no_process_list(options, plugin)
 
 if __name__ == "__main__":
     unittest.main()

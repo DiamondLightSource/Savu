@@ -27,7 +27,7 @@ from savu.test import test_utils as tu
 from savu.core.plugin_runner import PluginRunner
 
 
-def run_protected_plugin_runner_no_process_list(options, plugin, args):
+def run_protected_plugin_runner_no_process_list(options, plugin, *args):
     try:
         tu.set_plugin_list(options, plugin, args)
         plugin_runner = PluginRunner(options)
