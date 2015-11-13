@@ -175,18 +175,6 @@ class Hdf5Transport(TransportMechanism):
         squeeze_dict = self.set_functions(in_data, 'squeeze')
         expand_dict = self.set_functions(out_data, 'expand')
 
-        for sl in in_slice_list[0][-10:]:
-            print sl
-        print '\n\n\n'
-
-        for sl in in_slice_list[1][-10:]:
-            print sl
-        print '\n\n\n'
-        
-        for sl in out_slice_list[0][-10:]:
-            print sl
-        print '\n\n\n'
-
         for count in range(len(in_slice_list[0])):
             print count
             section, slice_list = \
@@ -227,12 +215,7 @@ class Hdf5Transport(TransportMechanism):
         possible_slices.append(copy.copy(new_slice))
         new_slice[slice_dirs[0]] = None
         possible_slices.append(copy.copy(new_slice))
-#        for sl in slice_dirs:
-#            new_slice[sl] = None
-#            possible_slices.append(copy.copy(new_slice))
         possible_slices = possible_slices[::-1]
-        for p in possible_slices:
-            print p
         return lambda x: x[possible_slices[len(x.shape)-n_core_dirs]]
 
     def create_squeeze_function(self, data):
@@ -261,8 +244,6 @@ class Hdf5Transport(TransportMechanism):
         for idx in range(len(data)):
             temp = data[idx].get_unpadded_slice_data(slice_list[idx][count],
                                                      result[idx])
-            print temp.shape
-            print expand_dict[idx](temp).shape
             data[idx].data[slice_list[idx][count]] = expand_dict[idx](temp)
 
     def transfer_to_meta_data(self, return_dict):

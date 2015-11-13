@@ -60,10 +60,6 @@ class TestPlugin(Plugin, CpuPlugin):
 
         out_datasets[0].create_dataset(in_datasets[0])
         out_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
-        
-        print in_pData[0].get_slice_directions()
-        print in_pData[1].get_slice_directions()
-        
 
     def nInput_datasets(self):
         return 2
