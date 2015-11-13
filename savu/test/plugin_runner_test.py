@@ -27,9 +27,12 @@ from savu.test import test_utils as tu
 from savu.core.plugin_runner import PluginRunner
 
 
-def run_protected_plugin_runner_no_process_list(options, plugin, *args):
+def run_protected_plugin_runner_no_process_list(options, plugin, **kwargs):
     try:
-        tu.set_plugin_list(options, plugin, args)
+        if 'data' in kwargs.keys():
+            tu.set_plugin_list(options, plugin, kwargs['data'])
+        else:
+            tu.set_plugin_list(options, plugin)
         plugin_runner = PluginRunner(options)
         plugin_runner.run_plugin_list(options)
     except ImportError as e:

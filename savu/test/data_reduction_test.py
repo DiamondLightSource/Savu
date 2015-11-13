@@ -50,7 +50,8 @@ class TestDataReduction(unittest.TestCase):
         data_dict = {'in_datasets': ['tomo', 'tomo'], 'out_datasets': ['test']}
         saver_dict = {}
         all_dicts = [loader_dict, data_dict, saver_dict]
-        run_protected_plugin_runner_no_process_list(options, plugin, all_dicts)
+        run_protected_plugin_runner_no_process_list(options, plugin,
+                                                    data=all_dicts)
 
     def test_tomo2(self):
         options = tu.set_experiment('tomo')
@@ -61,7 +62,8 @@ class TestDataReduction(unittest.TestCase):
         data_dict = {'in_datasets': ['tomo', 'tomo'], 'out_datasets': ['test']}
         saver_dict = {}
         all_dicts = [loader_dict, data_dict, saver_dict]
-        run_protected_plugin_runner_no_process_list(options, plugin, all_dicts)
+        run_protected_plugin_runner_no_process_list(options, plugin,
+                                                    data=all_dicts)
 
     def test_tomo3(self):
         options = tu.set_experiment('tomo')
@@ -72,7 +74,8 @@ class TestDataReduction(unittest.TestCase):
         data_dict = {'in_datasets': ['tomo', 'tomo'], 'out_datasets': ['test']}
         saver_dict = {}
         all_dicts = [loader_dict, data_dict, saver_dict]
-        run_protected_plugin_runner_no_process_list(options, plugin, all_dicts)
+        run_protected_plugin_runner_no_process_list(options, plugin,
+                                                    data=all_dicts)
 
     def test_tomo4(self):
         options = tu.set_experiment('tomo')
@@ -83,7 +86,8 @@ class TestDataReduction(unittest.TestCase):
         data_dict = {'in_datasets': ['tomo', 'tomo'], 'out_datasets': ['test']}
         saver_dict = {}
         all_dicts = [loader_dict, data_dict, saver_dict]
-        run_protected_plugin_runner_no_process_list(options, plugin, all_dicts)
+        run_protected_plugin_runner_no_process_list(options, plugin,
+                                                    data=all_dicts)
 
 if __name__ == "__main__":
     unittest.main()
