@@ -289,7 +289,8 @@ class Data(object):
         # put some checks in here
         shape = list(shape)
         for dim in range(len(shape)):
-            shape[dim] = (stops[dim] - starts[dim] - 1)/steps[dim] + 1
+            if isinstance(shape[dim], int):
+                shape[dim] = (stops[dim] - starts[dim] - 1)/steps[dim] + 1
         self.set_shape(tuple(shape))
 
     def find_and_set_shape(self, data):

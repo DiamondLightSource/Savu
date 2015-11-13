@@ -213,11 +213,13 @@ class Hdf5TransportData(object):
         core_dirs = pData.get_core_directions()
         shape = self.get_shape()
         index = self.get_slice_dirs_index(slice_dirs, shape)
-        if 'var' not in [shape[i] for i in slice_dirs]:
-            shape = [s for s in list(shape) if isinstance(s, int)]
+
+#        if 'var' not in [shape[i] for i in slice_dirs]:
+#            shape = [s for s in list(shape) if isinstance(s, int)]
 
         fix_dirs, value = pData.get_fixed_directions()
         starts, stops, steps = self.get_starts_stops_steps()
+
         nSlices = index.shape[1] if index.size else len(fix_dirs)
         nDims = len(shape)
 
@@ -233,6 +235,17 @@ class Hdf5TransportData(object):
                                                   index[sdir, i] + 1, 1)
             slice_list.append(tuple(getitem))
 
+        slice_list = self.remove_var_length_dimension(slice_list)
+        return slice_list
+
+    def remove_var_length_dimension(self, slice_list):
+        shape = self.get_shape()
+        if 'var' in shape:
+            var_dim = list(shape).index('var')
+            for i in range(len(slice_list)):
+                sl = list(slice_list[i])
+                del sl[var_dim]
+                slice_list[i] = sl
         return slice_list
 
     def banked_list(self, slice_list):
