@@ -135,7 +135,6 @@ def get_names(names):
 
 
 def check_nDatasets(exp, names, plugin_id, nSets, dtype):
-    print names, plugin_id
     try:
         if names[0] in "all":
             names = exp.set_all_datasets(dtype)

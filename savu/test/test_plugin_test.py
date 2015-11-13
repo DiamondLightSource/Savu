@@ -30,40 +30,60 @@ from savu.test.plugin_runner_test \
     import run_protected_plugin_runner_no_process_list
 
 
-class TestPluginTests(unittest.TestCase):
+class TestDataReduction(unittest.TestCase):
 
-#    def test_process(self):
-#        options = {
-#            "transport": "hdf5",
-#            "process_names": "CPU0",
-#            "data_file": tu.get_test_data_path('mm.nxs'),
-#            "process_file": tu.get_test_process_path(
-#                'multiple_mm_inputs_test.nxs'),
-#            "out_path": tempfile.mkdtemp()
-#            }
-#        run_protected_plugin_runner(options)
+    def test_process(self):
+        options = {
+            "transport": "hdf5",
+            "process_names": "CPU0",
+            "data_file": tu.get_test_data_path('mm.nxs'),
+            "process_file": tu.get_test_process_path(
+                'multiple_mm_inputs_test.nxs'),
+            "out_path": tempfile.mkdtemp()
+            }
+        run_protected_plugin_runner(options)
 #
 #    def test_process2(self):
-#        options = {
-#            "transport": "hdf5",
-#            "process_names": "CPU0",
-#            "data_file": tu.get_test_data_path('24737.nxs'),
-#            "process_file": tu.get_test_process_path(
-#                'multiple_tomo_inputs_test.nxs'),
-#            "out_path": tempfile.mkdtemp()
-#            }
-#        run_protected_plugin_runner(options)
-
-    def test_process3(self):
-        options = tu.set_experiment('tomo')
-        plugin = 'savu.plugins.test_plugin'
-        loader_dict = {'starts': [10, 10, 10],
-                       'stops': [-1, -1, -1],
-                       'steps': [1, 1, 1]}
-        data_dict = {'in_datasets': ['tomo', 'tomo'], 'out_datasets': ['test']}
-        saver_dict = {}
-        all_dicts = [loader_dict, data_dict, saver_dict]
-        run_protected_plugin_runner_no_process_list(options, plugin, all_dicts)
-
+#        options = tu.set_experiment('tomo')
+#        plugin = 'savu.plugins.test_plugin'
+#        loader_dict = {}
+#        data_dict = {'in_datasets': ['tomo', 'tomo'], 'out_datasets': ['test']}
+#        saver_dict = {}
+#        all_dicts = [loader_dict, data_dict, saver_dict]
+#        run_protected_plugin_runner_no_process_list(options, plugin, all_dicts)
+#
+#    def test_process3(self):
+#        options = tu.set_experiment('tomo')
+#        plugin = 'savu.plugins.test_plugin'
+#        loader_dict = {'starts': [10, 10, 10],
+#                       'stops': [-1, -1, -1],
+#                       'steps': [1, 1, 1]}
+#        data_dict = {'in_datasets': ['tomo', 'tomo'], 'out_datasets': ['test']}
+#        saver_dict = {}
+#        all_dicts = [loader_dict, data_dict, saver_dict]
+#        run_protected_plugin_runner_no_process_list(options, plugin, all_dicts)
+#
+#    def test_process4(self):
+#        options = tu.set_experiment('tomo')
+#        plugin = 'savu.plugins.test_plugin'
+#        loader_dict = {'starts': [10, 10, 10],
+#                       'stops': [-1, -1, -1],
+#                       'steps': [10, 10, 10]}
+#        data_dict = {'in_datasets': ['tomo', 'tomo'], 'out_datasets': ['test']}
+#        saver_dict = {}
+#        all_dicts = [loader_dict, data_dict, saver_dict]
+#        run_protected_plugin_runner_no_process_list(options, plugin, all_dicts)
+#
+#    def test_process5(self):
+#        options = tu.set_experiment('tomo')
+#        plugin = 'savu.plugins.test_plugin'
+#        loader_dict = {'starts': [10, 10, 10],
+#                       'stops': [-10, -10, -10],
+#                       'steps': [10, 10, 10]}
+#        data_dict = {'in_datasets': ['tomo', 'tomo'], 'out_datasets': ['test']}
+#        saver_dict = {}
+#        all_dicts = [loader_dict, data_dict, saver_dict]
+#        run_protected_plugin_runner_no_process_list(options, plugin, all_dicts)
+        
 if __name__ == "__main__":
     unittest.main()
