@@ -48,6 +48,7 @@ class SimpleRecon(BaseRecon, CpuPlugin):
         return np.fft.ifft(ffs).real
 
     def _back_project(self, mapping, sino_element, centre):
+        print mapping.shape, centre.shape
         mapping_array = mapping+centre
         return sino_element[mapping_array.astype('int')]
 

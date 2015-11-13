@@ -100,12 +100,11 @@ def get_output_datasets(plugin):
 
 
 def set_plugin_list(options, pnames, *args):
-    args = args[0]
+    args = args[0] if args else None
     plugin_names = pnames if isinstance(pnames, list) else [pnames]
     options['plugin_list'] = []
     ID = [options['loader'], options['saver']]
     data = [{}, {}] if not args else [args[0], args[-1]]
-    print data
     for i in range(len(plugin_names)):
         ID.insert(i+1, plugin_names[i])
         plugin = pu.load_plugin(plugin_names[i])
