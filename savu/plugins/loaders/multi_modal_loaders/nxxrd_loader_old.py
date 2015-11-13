@@ -30,8 +30,6 @@ from savu.plugins.loaders.base_multi_modal_loader import BaseMultiModalLoader
 from savu.test import test_utils as tu
 from savu.plugins.utils import register_plugin
 
-
-@register_plugin
 class NxxrdLoader(BaseMultiModalLoader):
     """
     A class to load tomography data from an NXxrd file
