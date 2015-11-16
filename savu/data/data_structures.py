@@ -211,10 +211,18 @@ class Data(object):
         return patterns
 
     def copy_dataset(self, copy_data, **kwargs):
+        mapping = False
+        copy_name = self.copy_data.data_info.get_meta_data('name')
+        if 'mapping' in self.exp.index.keys():
+            if copy_name in self.exp.index['mapping'].keys():
+                copy_data = self.exp.index['mapping'][copy_name]
+                mapping = True
         patterns = copy.copy(copy_data.get_data_patterns())
         self.set_data_patterns(patterns)
         self.copy_labels(copy_data)
         self.find_and_set_shape(copy_data)
+        if mapping:
+            
 
     def create_axis_labels(self, axis_labels):
         if isinstance(axis_labels, Data):

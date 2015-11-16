@@ -34,7 +34,7 @@ import numpy as np
 
 class BaseRecon(Plugin):
     """
-    A Plugin to apply a simple reconstruction with no dependancies
+    A base class for reconstruction plugins
 
     :param center_of_rotation: Centre of rotation to use for the reconstruction). Default: 86.
     :param in_datasets: Create a list of the dataset(s) to process. Default: [].

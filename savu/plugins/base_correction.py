@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright 2014 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,57 +14,45 @@
 # limitations under the License.
 
 """
-.. module:: Timeseries_field_corrections
+.. module:: base_correction
    :platform: Unix
-   :synopsis: A Plugin to apply a simple dark and flatfield correction to some
-       raw timeseries data
+   :synopsis: A base class for dark and flat field corrections
 
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
+import logging
 
-from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.plugin import Plugin
-
-import numpy as np
-
-from savu.plugins.utils import register_plugin
+from savu.core.utils import logmethod
 
 
-@register_plugin
-class TimeseriesFieldCorrections(Plugin, CpuPlugin):
+class BaseCorrection(Plugin):
     """
-    A Plugin to apply a simple dark and flatfield correction to some
-    raw timeseries data
+    A base class for dark and flat field correction plugins
 
-    :param in_datasets: a list of the dataset(s) to process. Default: [].
-    :param out_datasets: a list of the dataset(s) to process. Default: [].
+    :param in_datasets: Create a list of the dataset(s) to process. Default: [].
+    :param out_datasets: Create a list of the dataset(s) to process. Default: [].
     """
+    count = 0
 
-    def __init__(self):
-        super(TimeseriesFieldCorrections,
-              self).__init__("TimeseriesFieldCorrections")
+    def __init__(self, name='BaseCorrection'):
+        super(BaseCorrection, self).__init__(name)
 
-    def process_frames(self, data, frame_list):
-        in_meta_data, out_meta_data = self.get_meta_data()
-        data = data[0]
-        image_keys = in_meta_data[0].get_meta_data('image_key')
-        trimmed_data = data[image_keys == 0]
+    @logmethod
+    def process_frames(self, data, slice_list):
+        """
+        Perform the correction
+        """
+        return self.correct(data[0])
 
-        dark = data[image_keys == 2]
-        dark = dark.mean(0)
-        dark = np.tile(dark, (trimmed_data.shape[0], 1, 1))
-        flat = data[image_keys == 1]
-        flat = flat.mean(0)
-        flat = np.tile(flat, (trimmed_data.shape[0], 1, 1))
-        data = (trimmed_data-dark)/(flat-dark)
-
-        # finally clean up and trim the data
-        data = np.nan_to_num(data)
-        data[data < 0] = 0
-        data[data > 2] = 2
-
-        return data
+    def correct(self, data):
+        """
+        This is the main processing method for all plugins that inherit from
+        base correction.  The plugin must implement this method.
+        """
+        logging.error("process needs to be implemented")
+        raise NotImplementedError("process needs to be implemented")
 
     def setup(self):
         """
@@ -92,4 +81,10 @@ class TimeseriesFieldCorrections(Plugin, CpuPlugin):
         return 1
 
     def get_max_frames(self):
+        """
+        Should be overridden to define the max number of frames to process at
+        a time
+
+        :returns:  an integer of the number of frames
+        """
         return 4
