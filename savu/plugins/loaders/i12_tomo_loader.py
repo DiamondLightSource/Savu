@@ -66,11 +66,13 @@ class I12TomoLoader(BaseLoader):
         data_obj.backing_file = \
             h5py.File(expInfo.get_meta_data("data_file"), 'r')
 
+        print expInfo.get_meta_data("data_file")
+
         logging.debug("Creating file '%s' '%s'", 'tomo_entry',
                       data_obj.backing_file.filename)
 
         data_obj.data = \
-            data_obj.backing_file['entry1/instrument/detector/data']
+            data_obj.backing_file['entry/instrument/detector/data']
 
         data_obj.set_shape(data_obj.data.shape)
         self.set_data_reduction_params(data_obj)

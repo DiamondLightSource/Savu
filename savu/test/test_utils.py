@@ -56,6 +56,12 @@ def get_experiment_types():
                         'filename': 'projections.h5'}
     exp_dict['fluo'] = {'func': 'set_fluo_experiment',
                         'filename': 'fluo.nxs'}
+
+    i12_file_path = '/dls/science/groups/das/ExampleData/i12/savu_data/' + \
+                    'ee12581-1_test/pc2_KRA_530_ramp_00000.hdf'
+    exp_dict['i12tomo'] = {'func': 'set_i12tomo_experiment',
+                           'filename': i12_file_path}
+
     return exp_dict
 
 
@@ -87,6 +93,13 @@ def set_tomo_experiment(filename, **kwargs):
 def set_fluo_experiment(filename, **kwargs):
     options = set_options(get_test_data_path(filename), **kwargs)
     options['loader'] = 'savu.plugins.loaders.nxfluo_loader'
+    options['saver'] = 'savu.plugins.savers.hdf5_tomo_saver'
+    return options
+
+
+def set_i12tomo_experiment(filename, **kwargs):
+    options = set_options(filename, **kwargs)
+    options['loader'] = 'savu.plugins.loaders.i12_tomo_loader'
     options['saver'] = 'savu.plugins.savers.hdf5_tomo_saver'
     return options
 
