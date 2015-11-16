@@ -64,9 +64,6 @@ class I12DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
         # copy all required information from in_dataset[0]
         out_dataset[0].create_dataset(in_dataset[0])
 
-        # removes dark and flat fields
-        out_dataset[0].trim_output_data(in_dataset[0], image_key=0)
-
         # set information relating to the plugin data
         in_pData, out_pData = self.get_plugin_datasets()
         # set pattern_name and nframes to process for all datasets

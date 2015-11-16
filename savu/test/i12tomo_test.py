@@ -44,7 +44,8 @@ class I12TomoTest(unittest.TestCase):
 
     def test_i12tomo(self):
         options = tu.set_experiment('i12tomo')
-        tu.set_plugin_list(options, [])
+        plugin = 'savu.plugins.corrections.i12_dark_flat_field_correction'
+        tu.set_plugin_list(options, plugin)
         run_protected_plugin_runner(options)
 
 if __name__ == "__main__":

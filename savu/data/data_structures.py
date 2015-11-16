@@ -212,8 +212,9 @@ class Data(object):
 
     def copy_dataset(self, copy_data, **kwargs):
         mapping = False
-        copy_name = self.copy_data.data_info.get_meta_data('name')
+        copy_name = copy_data.data_info.get_meta_data('name')
         if 'mapping' in self.exp.index.keys():
+            print "**************mapping**************"
             if copy_name in self.exp.index['mapping'].keys():
                 copy_data = self.exp.index['mapping'][copy_name]
                 mapping = True
@@ -222,7 +223,7 @@ class Data(object):
         self.copy_labels(copy_data)
         self.find_and_set_shape(copy_data)
         if mapping:
-            
+            del self.exp.index['mapping'][copy_name]
 
     def create_axis_labels(self, axis_labels):
         if isinstance(axis_labels, Data):
@@ -424,8 +425,8 @@ class Data(object):
             self.set_main_axis('SINOGRAM')
             self.set_main_axis('PROJECTION')
         elif check is 1:
-            raise Exception("Cannot set up SINOGRAM and PROJECTION "
-                            "main_directions as both patterns do not exist")
+            logging.warn("Cannot set up SINOGRAM and PROJECTION "
+                         "main_directions as both patterns do not exist")
 
     def check_pattern(self, pattern_name):
         patterns = self.get_data_patterns()
