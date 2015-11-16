@@ -295,9 +295,11 @@ class Data(object):
         steps = len(preview_list)*[None]
         for i in range(len(preview_list)):
             starts[i], stops[i], steps[i] = preview_list[i].split(':')
+        print "after", starts, stops, steps
         self.convert_indices(starts)
         self.convert_indices(stops)
         self.convert_indices(steps)
+        print "after", starts, stops, steps
         return starts, stops, steps
 
     def convert_indices(self, idx):
@@ -305,6 +307,7 @@ class Data(object):
         for i in range(len(idx)):
             try:
                 idx[i] = int(idx[i])
+                idx[i] = idx[i] if idx[i] > -1 else shape[i]+1+idx[i]
             except ValueError:
                 if idx[i] == 'end':
                     idx[i] = shape[i]
@@ -312,11 +315,6 @@ class Data(object):
                     idx[i] = shape[i]/2 + int(idx[i].split('mid')[1])
                 else:
                     raise Exception("Preview index is unknown")
-
-    def neg_to_pos(self, value):
-        value = [value[i] if value[i] > 0 else self.get_shape()[i]+1+value[i]
-                 for i in range(len(value))]
-        return value
 
     def get_starts_stops_steps(self):
         starts = self.data_info.get_meta_data('starts')

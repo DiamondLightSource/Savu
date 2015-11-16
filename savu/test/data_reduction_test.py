@@ -57,38 +57,38 @@ class TestDataReduction(unittest.TestCase):
     def test_tomo2(self):
         options = tu.set_experiment('tomo')
         plugin = 'savu.plugins.test_plugin'
-        loader_dict = {'starts': [10, 10, 10],
-                       'stops': [-1, -1, -1],
-                       'steps': [1, 1, 1]}
+        preview = ['10:-1:1', '10:-1:1', '10:-1:1']
+        loader_dict = {'preview': preview}
         data_dict = {'in_datasets': ['tomo', 'tomo'], 'out_datasets': ['test']}
-        saver_dict = {}
-        all_dicts = [loader_dict, data_dict, saver_dict]
-        run_protected_plugin_runner_no_process_list(options, plugin,
-                                                    data=all_dicts)
+        all_dicts = [loader_dict, data_dict, {}]
+        exp = run_protected_plugin_runner_no_process_list(options, plugin,
+                                                          data=all_dicts)
+        self.assertEqual(exp.index['in_data']['test'].get_shape(),
+                         (81, 125, 150))
 
     def test_tomo3(self):
         options = tu.set_experiment('tomo')
         plugin = 'savu.plugins.test_plugin'
-        loader_dict = {'starts': [10, 10, 10],
-                       'stops': [-1, -1, -1],
-                       'steps': [10, 10, 10]}
+        preview = ['10:-1:10', '10:-1:10', '10:-1:10']
+        loader_dict = {'preview': preview}
         data_dict = {'in_datasets': ['tomo', 'tomo'], 'out_datasets': ['test']}
-        saver_dict = {}
-        all_dicts = [loader_dict, data_dict, saver_dict]
-        run_protected_plugin_runner_no_process_list(options, plugin,
-                                                    data=all_dicts)
+        all_dicts = [loader_dict, data_dict, {}]
+        exp = run_protected_plugin_runner_no_process_list(options, plugin,
+                                                          data=all_dicts)
+        exp = self.assertEqual(exp.index['in_data']['test'].get_shape(),
+                              (9, 13, 15))
 
     def test_tomo4(self):
         options = tu.set_experiment('tomo')
         plugin = 'savu.plugins.test_plugin'
-        loader_dict = {'starts': [10, 10, 10],
-                       'stops': [-10, -10, -10],
-                       'steps': [10, 10, 10]}
+        preview = ['10:-10:10', '10:-10:10', '10:-10:10']
+        loader_dict = {'preview': preview}
         data_dict = {'in_datasets': ['tomo', 'tomo'], 'out_datasets': ['test']}
-        saver_dict = {}
-        all_dicts = [loader_dict, data_dict, saver_dict]
-        run_protected_plugin_runner_no_process_list(options, plugin,
-                                                    data=all_dicts)
+        all_dicts = [loader_dict, data_dict, {}]
+        exp = run_protected_plugin_runner_no_process_list(options, plugin,
+                                                          data=all_dicts)
+        exp = self.assertEqual(exp.index['in_data']['test'].get_shape(),
+                              (8, 12, 15))
 
 if __name__ == "__main__":
     unittest.main()
