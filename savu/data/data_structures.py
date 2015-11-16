@@ -164,7 +164,7 @@ class Data(object):
                 self.copy_patterns(kwargs['patterns'])
             except KeyError:
                 pass
-        self.set_starts_stops_steps(None, None, None)
+        self.set_preview([])
 
     def copy_patterns(self, copy_data):
         if isinstance(copy_data, Data):
@@ -273,15 +273,45 @@ class Data(object):
         shape = self.data_info.get_meta_data('shape')
         return shape
 
-    def set_starts_stops_steps(self, starts, stops, steps):
+    def set_preview(self, preview_list):
         shape = self.get_shape()
-        starts = self.neg_to_pos(starts) if starts else [0]*len(shape)
-        stops = self.neg_to_pos(stops) if stops else shape
-        steps = self.neg_to_pos(steps) if steps else [1]*len(shape)
+        if preview_list:
+            starts, stops, steps = self.get_preview_indices(preview_list)
+        else:
+            starts, stops, steps = [[0]*len(shape), shape, [1]*len(shape)]
+        self.set_starts_stops_steps(starts, stops, steps)
+
+    def set_starts_stops_steps(self, starts, stops, steps):
         self.data_info.set_meta_data('starts', starts)
         self.data_info.set_meta_data('stops', stops)
         self.data_info.set_meta_data('steps', steps)
-        self.set_reduced_shape(shape, starts, stops, steps)
+        self.set_reduced_shape(starts, stops, steps)
+
+    def get_preview_indices(self, preview_list):
+        print "before", preview_list
+        print len(preview_list)
+        starts = len(preview_list)*[None]
+        stops = len(preview_list)*[None]
+        steps = len(preview_list)*[None]
+        for i in range(len(preview_list)):
+            starts[i], stops[i], steps[i] = preview_list[i].split(':')
+        self.convert_indices(starts)
+        self.convert_indices(stops)
+        self.convert_indices(steps)
+        return starts, stops, steps
+
+    def convert_indices(self, idx):
+        shape = self.get_shape()
+        for i in range(len(idx)):
+            try:
+                idx[i] = int(idx[i])
+            except ValueError:
+                if idx[i] == 'end':
+                    idx[i] = shape[i]
+                elif 'mid' in idx[i]:
+                    idx[i] = shape[i]/2 + int(idx[i].split('mid')[1])
+                else:
+                    raise Exception("Preview index is unknown")
 
     def neg_to_pos(self, value):
         value = [value[i] if value[i] > 0 else self.get_shape()[i]+1+value[i]
@@ -294,9 +324,9 @@ class Data(object):
         steps = self.data_info.get_meta_data('steps')
         return starts, stops, steps
 
-    def set_reduced_shape(self, shape, starts, stops, steps):
+    def set_reduced_shape(self, starts, stops, steps):
         # put some checks in here
-        shape = list(shape)
+        shape = list(self.get_shape())
         for dim in range(len(shape)):
             if isinstance(shape[dim], int):
                 shape[dim] = (stops[dim] - starts[dim] - 1)/steps[dim] + 1

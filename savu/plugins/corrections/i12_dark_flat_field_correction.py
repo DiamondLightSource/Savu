@@ -34,10 +34,8 @@ from savu.plugins.utils import register_plugin
 class I12DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
     """
     A Plugin to apply a simple dark and flatfield correction to i12 projection
-    data and convert data from 3D to 4D
+    data.
 
-    :param in_datasets: a list of the dataset(s) to process. Default: [].
-    :param out_datasets: a list of the dataset(s) to process. Default: [].
     :param dark: Path to the dark field data file. Default: []. 
     :param flat: Path to the flat field data file. Default: [].
     """

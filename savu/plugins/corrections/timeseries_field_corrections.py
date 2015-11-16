@@ -35,9 +35,6 @@ class TimeseriesFieldCorrections(BaseCorrection, CpuPlugin):
     """
     A Plugin to apply a simple dark and flatfield correction to some
     raw timeseries data
-
-    :param in_datasets: a list of the dataset(s) to process. Default: [].
-    :param out_datasets: a list of the dataset(s) to process. Default: [].
     """
 
     def __init__(self):

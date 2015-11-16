@@ -29,9 +29,6 @@ class BaseLoader(Plugin):
     A base plugin from which all data loader plugins should inherit.
 
     :param preview: A slice list of required frames. Default: [].
-    :param starts: A list of start values for each dimension. Default: [].
-    :param stops: A list of stop values for each dimension. Default: [].
-    :param steps: A list of step values for each dimension. Default: [].
     """
 
     def main_setup(self, exp, params):
@@ -45,8 +42,7 @@ class BaseLoader(Plugin):
 
     def set_data_reduction_params(self, data_obj):
         pDict = self.parameters
-        data_obj.set_starts_stops_steps(pDict['starts'], pDict['stops'],
-                                        pDict['steps'])
+        data_obj.set_preview(pDict['preview'])
 
     def __init__(self, name='BaseLoader'):
         self.hits = []

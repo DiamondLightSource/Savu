@@ -66,8 +66,6 @@ class I12TomoLoader(BaseLoader):
         data_obj.backing_file = \
             h5py.File(expInfo.get_meta_data("data_file"), 'r')
 
-        print expInfo.get_meta_data("data_file")
-
         logging.debug("Creating file '%s' '%s'", 'tomo_entry',
                       data_obj.backing_file.filename)
 
@@ -88,10 +86,21 @@ class I12TomoLoader(BaseLoader):
                                     'detector_y.pixel',
                                     'detector_x.pixel',
                                     'scan.number')
+
         rot = 0
         detY = 1
         detX = 2
         scan = 3
+
+        starts, stops, steps = exp.index['in_data']['tomo']
+        proj_range = stops[rot] - starts[rot]
+        n_scans = proj_range/len(rotation_angle)
+        n_scans = n_scans if n_scans > 0 else 1
+
+        # amend rotation angle to new stepping and add to metadata
+        rotation_angle = \
+            rotation_angle[np.arange(0, len(rotation_angle)+1, steps[rot])]
+        exp.meta_data.set_meta_data('rotation_angle', rotation_angle)
 
         mapping_obj.add_pattern('PROJECTION', core_dir=(detX, detY),
                                 slice_dir=(rot, scan))
@@ -99,10 +108,9 @@ class I12TomoLoader(BaseLoader):
         mapping_obj.add_pattern('SINOGRAM', core_dir=(detX, rot),
                                 slice_dir=(detY, scan))
 
-        exp.meta_data.set_meta_data('rotation_angle', rotation_angle)
-
         loaded_shape = exp.index['in_data']['tomo'].get_shape()
-        n_scans = loaded_shape[0]/len(rotation_angle)
+        #n_scans = loaded_shape[0]/len(rotation_angle)
+
         shape = (rotation_angle.shape + loaded_shape[1:3] + (n_scans,))
 
         mapping_obj.set_shape(shape)
