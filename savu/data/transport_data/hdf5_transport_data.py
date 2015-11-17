@@ -195,17 +195,26 @@ class Hdf5TransportData(object):
         """
         # create the indexing array
         chunk, length, repeat = self.chunk_length_repeat(slice_dirs, shape)
-        starts, stops, steps = self.get_starts_stops_steps()
         idx_list = []
         for i in range(len(slice_dirs)):
             c = chunk[i]
             r = repeat[i]
             dim = slice_dirs[i]
-            values = np.arange(starts[dim], stops[dim], steps[dim])
+            values = self.get_slice_dir_index(dim)
+            print values
+            #values = np.arange(starts[dim], stops[dim], steps[dim])
             idx = np.ravel(np.kron(values, np.ones((r, c))))
             idx_list.append(idx.astype(int))
 
         return np.array(idx_list)
+
+    def get_slice_dir_index(self, dim):
+        starts, stops, steps, chunks = self.get_starts_stops_steps()
+        print starts, stops, steps, chunks
+        chunk = chunks[dim]
+        a = np.tile(np.arange(starts[dim], stops[dim], steps[dim]), (chunk, 1))
+        b = np.transpose(np.tile(np.arange(chunk)-chunk/2, (a.shape[1], 1)))
+        return np.transpose(a + b)
 
     def single_slice_list(self):
         pData = self.get_plugin_data()

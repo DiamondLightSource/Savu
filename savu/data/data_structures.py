@@ -291,31 +291,32 @@ class Data(object):
         stops = len(preview_list)*[None]
         steps = len(preview_list)*[None]
         chunks = len(preview_list)*[None]
-        print preview_list
         for i in range(len(preview_list)):
-            print preview_list[i]
-            print preview_list[i].split(':')
             starts[i], stops[i], steps[i], chunks[i] = \
-                self.convert_indices(preview_list[i].split(':'))
+                self.convert_indices(preview_list[i].split(':'), i)
         return starts, stops, steps, chunks
 
-    def convert_indices(self, idx):
+    def convert_indices(self, idx, dim):
         shape = self.get_shape()
+        name = self.data_info.get_meta_data('name')
+        if name in self.exp.index['mapping']:
+            map_shape = self.exp.index['mapping'][name].get_shape()
+
         for i in range(len(idx)):
             try:
                 idx[i] = int(idx[i])
-                idx[i] = idx[i] if idx[i] > -1 else shape[i]+1+idx[i]
+                idx[i] = idx[i] if idx[i] > -1 else shape[dim]+1+idx[i]
             except ValueError:
                 if idx[i] == 'end':
-                    idx[i] = shape[i]
+                    idx[i] = shape[dim]
                 elif 'mid' in idx[i]:
                     mid = 'mid' if idx[i] == 'mid' else 'midmap'
-                    if idx[i] == 'midmap':
-                        name = self.data_info.get_meta_data('name')
-                        shape = self.exp.index['mapping'][name].get_shape()
+                    tshape = shape if mid == 'mid' else map_shape
                     incr = idx[i].split(mid)[1]
                     value = 0 if incr == '' else int(incr)
-                    idx[i] = shape[i]/2 + value
+                    idx[i] = tshape[dim]/2 + value
+                elif 'full' in idx[i]:
+                    idx[i] = shape[dim] if idx[i] == 'full' else map_shape[dim]
                 else:
                     raise Exception("Preview index is unknown")
         return idx

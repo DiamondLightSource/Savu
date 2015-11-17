@@ -51,7 +51,8 @@ class I12TomoTest(unittest.TestCase):
         # starts:stops:steps:chunks for each dimension
         #selection = ['midmap-2:midmap+2:1:1', '0:end:10:1', '0:end:10:1']
         #OR
-        selection = ['midmap:midmap:1:5', '0:end:10:1', '0:end:10:1']
+        #selection = ['midmap:midmap+1:1:5', '0:end:10:1', '0:end:10:1']
+        selection = ['midmap:end:fullmap:5', '0:end:10:1', '0:end:10:1']
         loader_dict = {'preview': selection}
         data_dict = {'in_datasets': ['tomo'], 'out_datasets': ['test']}
         all_dicts = [loader_dict, data_dict, {}]
