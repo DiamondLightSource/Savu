@@ -39,6 +39,8 @@ class I12TomoLoader(BaseLoader):
     A class to load i12 tomography data from a hdf5 file
 
     :param angular_spacing: Angular spacing between successive projections. Default: 0.2.
+    :param dark: Path to the dark field data file. Default: '/dls/science/groups/das/ExampleData/i12/savu_data/ee12581-1_test/45657.nxs'. 
+    :param flat: Path to the flat field data file. Default: '/dls/science/groups/das/ExampleData/i12/savu_data/ee12581-1_test/45658.nxs'.    
     """
 
     def __init__(self, name='I12TomoLoader'):
@@ -72,11 +74,18 @@ class I12TomoLoader(BaseLoader):
         data_obj.data = \
             data_obj.backing_file['entry/instrument/detector/data']
 
+        dark_file = h5py.File(self.parameters['dark'], 'r')
+        dark = dark_file['entry1/pco4000_dio_hdf/data']
+        expInfo.set_meta_data('dark', dark[:].mean(0))
+
+        flat_file = h5py.File(self.parameters['flat'], 'r')
+        flat = flat_file['entry1/pco4000_dio_hdf/data']
+        expInfo.set_meta_data('flat', flat[:].mean(0))
+
         data_obj.set_shape(data_obj.data.shape)
         self.set_data_reduction_params(data_obj)
 
     def data_mapping(self):
-
         exp = self.exp
         mapping_obj = exp.create_data_object('mapping', 'tomo')
 
@@ -92,14 +101,6 @@ class I12TomoLoader(BaseLoader):
         detX = 2
         scan = 3
 
-        starts, stops, steps = exp.index['in_data']['tomo']
-        proj_range = stops[rot] - starts[rot]
-        n_scans = proj_range/len(rotation_angle)
-        n_scans = n_scans if n_scans > 0 else 1
-
-        # amend rotation angle to new stepping and add to metadata
-        rotation_angle = \
-            rotation_angle[np.arange(0, len(rotation_angle)+1, steps[rot])]
         exp.meta_data.set_meta_data('rotation_angle', rotation_angle)
 
         mapping_obj.add_pattern('PROJECTION', core_dir=(detX, detY),
@@ -109,8 +110,46 @@ class I12TomoLoader(BaseLoader):
                                 slice_dir=(detY, scan))
 
         loaded_shape = exp.index['in_data']['tomo'].get_shape()
-        #n_scans = loaded_shape[0]/len(rotation_angle)
-
+        n_scans = loaded_shape[0]/len(rotation_angle)
         shape = (rotation_angle.shape + loaded_shape[1:3] + (n_scans,))
 
         mapping_obj.set_shape(shape)
+
+#    def data_mapping(self):
+#        exp = self.exp
+#        mapping_obj = exp.create_data_object('mapping', 'tomo')
+#
+#        angular_spacing = self.parameters['angular_spacing']
+#        rotation_angle = np.arange(0, 180+angular_spacing, angular_spacing)
+#        mapping_obj.set_axis_labels('rotation_angle.degrees',
+#                                    'detector_y.pixel',
+#                                    'detector_x.pixel',
+#                                    'scan.number')
+#
+#        rot = 0
+#        detY = 1
+#        detX = 2
+#        scan = 3
+#
+#        starts, stops, steps = \
+#            exp.index['in_data']['tomo'].get_starts_stops_steps()
+#        proj_range = stops[rot] - starts[rot]
+#        n_scans = proj_range/len(rotation_angle)
+#        n_scans = n_scans if n_scans > 0 else 1
+#
+#        # amend rotation angle to new stepping and add to metadata
+#        rotation_angle = \
+#            rotation_angle[np.arange(0, len(rotation_angle), steps[rot])]
+#        exp.meta_data.set_meta_data('rotation_angle', rotation_angle)
+#
+#        mapping_obj.add_pattern('PROJECTION', core_dir=(detX, detY),
+#                                slice_dir=(rot, scan))
+#
+#        mapping_obj.add_pattern('SINOGRAM', core_dir=(detX, rot),
+#                                slice_dir=(detY, scan))
+#
+#        loaded_shape = exp.index['in_data']['tomo'].get_shape()
+#        n_scans = loaded_shape[0]/len(rotation_angle)
+#        shape = (rotation_angle.shape + loaded_shape[1:3] + (n_scans,))
+#
+#        mapping_obj.set_shape(shape)

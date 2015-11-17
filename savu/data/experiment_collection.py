@@ -44,7 +44,7 @@ class Experiment(object):
     def __init__(self, options):
         self.meta_data = MetaData(options)
         self.meta_data_setup(options["process_file"])
-        self.index = {"in_data": {}, "out_data": {}}
+        self.index = {"in_data": {}, "out_data": {}, "mapping": {}}
 
     def get_meta_data(self):
         return self.meta_data

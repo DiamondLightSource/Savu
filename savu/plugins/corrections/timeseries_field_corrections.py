@@ -61,12 +61,3 @@ class TimeseriesFieldCorrections(BaseCorrection, CpuPlugin):
         data[data > 2] = 2
 
         return data
-
-    def nInput_datasets(self):
-        return 1
-
-    def nOutput_datasets(self):
-        return 1
-
-    def get_max_frames(self):
-        return 4

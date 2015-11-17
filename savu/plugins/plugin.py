@@ -146,6 +146,16 @@ class Plugin(object):
         #self.organise_metadata()
         self.copy_meta_data()
         self.clean_up_plugin_data()
+        #delete mapping dataset here
+        self.delete_mappings()
+
+    def delete_mappings(self):
+        in_datasets = self.get_in_datasets()
+        mapping_dict = self.exp.index['mapping']
+        for data in in_datasets:
+            name = data.data_info.get_meta_data('name')
+            if name in mapping_dict.keys():
+                del self.exp.index['mapping'][name]
 
     def copy_meta_data(self):
         """

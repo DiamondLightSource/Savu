@@ -211,19 +211,14 @@ class Data(object):
         return patterns
 
     def copy_dataset(self, copy_data, **kwargs):
-        mapping = False
         copy_name = copy_data.data_info.get_meta_data('name')
         if 'mapping' in self.exp.index.keys():
-            print "**************mapping**************"
             if copy_name in self.exp.index['mapping'].keys():
                 copy_data = self.exp.index['mapping'][copy_name]
-                mapping = True
         patterns = copy.copy(copy_data.get_data_patterns())
         self.set_data_patterns(patterns)
         self.copy_labels(copy_data)
         self.find_and_set_shape(copy_data)
-        if mapping:
-            del self.exp.index['mapping'][copy_name]
 
     def create_axis_labels(self, axis_labels):
         if isinstance(axis_labels, Data):
@@ -276,31 +271,33 @@ class Data(object):
     def set_preview(self, preview_list):
         shape = self.get_shape()
         if preview_list:
-            starts, stops, steps = self.get_preview_indices(preview_list)
+            starts, stops, steps, chunks = \
+                self.get_preview_indices(preview_list)
+            print starts, stops, steps, chunks
         else:
-            starts, stops, steps = [[0]*len(shape), shape, [1]*len(shape)]
-        self.set_starts_stops_steps(starts, stops, steps)
+            starts, stops, steps, chunks = \
+                [[0]*len(shape), shape, [1]*len(shape), [1]*len(shape)]
+        self.set_starts_stops_steps(starts, stops, steps, chunks)
 
-    def set_starts_stops_steps(self, starts, stops, steps):
+    def set_starts_stops_steps(self, starts, stops, steps, chunks):
         self.data_info.set_meta_data('starts', starts)
         self.data_info.set_meta_data('stops', stops)
         self.data_info.set_meta_data('steps', steps)
-        self.set_reduced_shape(starts, stops, steps)
+        self.data_info.set_meta_data('chunks', chunks)
+        self.set_reduced_shape(starts, stops, steps, chunks)
 
     def get_preview_indices(self, preview_list):
-        print "before", preview_list
-        print len(preview_list)
         starts = len(preview_list)*[None]
         stops = len(preview_list)*[None]
         steps = len(preview_list)*[None]
+        chunks = len(preview_list)*[None]
+        print preview_list
         for i in range(len(preview_list)):
-            starts[i], stops[i], steps[i] = preview_list[i].split(':')
-        print "after", starts, stops, steps
-        self.convert_indices(starts)
-        self.convert_indices(stops)
-        self.convert_indices(steps)
-        print "after", starts, stops, steps
-        return starts, stops, steps
+            print preview_list[i]
+            print preview_list[i].split(':')
+            starts[i], stops[i], steps[i], chunks[i] = \
+                self.convert_indices(preview_list[i].split(':'))
+        return starts, stops, steps, chunks
 
     def convert_indices(self, idx):
         shape = self.get_shape()
@@ -312,17 +309,25 @@ class Data(object):
                 if idx[i] == 'end':
                     idx[i] = shape[i]
                 elif 'mid' in idx[i]:
-                    idx[i] = shape[i]/2 + int(idx[i].split('mid')[1])
+                    mid = 'mid' if idx[i] == 'mid' else 'midmap'
+                    if idx[i] == 'midmap':
+                        name = self.data_info.get_meta_data('name')
+                        shape = self.exp.index['mapping'][name].get_shape()
+                    incr = idx[i].split(mid)[1]
+                    value = 0 if incr == '' else int(incr)
+                    idx[i] = shape[i]/2 + value
                 else:
                     raise Exception("Preview index is unknown")
+        return idx
 
     def get_starts_stops_steps(self):
         starts = self.data_info.get_meta_data('starts')
         stops = self.data_info.get_meta_data('stops')
         steps = self.data_info.get_meta_data('steps')
-        return starts, stops, steps
+        chunks = self.data_info.get_meta_data('chunks')
+        return starts, stops, steps, chunks
 
-    def set_reduced_shape(self, starts, stops, steps):
+    def set_reduced_shape(self, starts, stops, steps, chunks):
         # put some checks in here
         shape = list(self.get_shape())
         for dim in range(len(shape)):

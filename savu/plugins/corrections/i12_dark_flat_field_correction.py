@@ -35,9 +35,6 @@ class I12DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
     """
     A Plugin to apply a simple dark and flatfield correction to i12 projection
     data.
-
-    :param dark: Path to the dark field data file. Default: []. 
-    :param flat: Path to the flat field data file. Default: [].
     """
 
     def __init__(self):
@@ -45,10 +42,11 @@ class I12DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
               self).__init__("I12DarkFlatFieldCorrection")
 
     def pre_process(self):
-        # load dark and flat field data
-        pass
+        self.dark = self.exp.meta_data.get_meta_data('dark')
+        self.flat = self.exp.meta_data.get_meta_data('flat')
 
     def correct(self, data):
+        print data.shape, self.dark.shape, self.flat.shape
         return data
 
     def setup(self):
@@ -67,12 +65,8 @@ class I12DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
         # set pattern_name and nframes to process for all datasets
         in_pData[0].plugin_data_setup('PROJECTION', self.get_max_frames())
         out_pData[0].plugin_data_setup('PROJECTION', self.get_max_frames())
-
-    def nInput_datasets(self):
-        return 1
-
-    def nOutput_datasets(self):
-        return 1
+        
+        print "^^^^^^^^^^^^^^^^^^", in_dataset[0].get_shape(), out_dataset[0].get_shape()
 
     def get_max_frames(self):
         return 4
