@@ -200,21 +200,19 @@ class Hdf5TransportData(object):
             c = chunk[i]
             r = repeat[i]
             dim = slice_dirs[i]
-            values = self.get_slice_dir_index(dim)
-            print values
+            values = np.ravel(self.get_slice_dir_index(dim))
             #values = np.arange(starts[dim], stops[dim], steps[dim])
-            idx = np.ravel(np.kron(values, np.ones((r, c))))
+            idx = np.transpose(np.ravel(np.kron(values, np.ones((r, c)))))
             idx_list.append(idx.astype(int))
 
         return np.array(idx_list)
 
     def get_slice_dir_index(self, dim):
         starts, stops, steps, chunks = self.get_starts_stops_steps()
-        print starts, stops, steps, chunks
         chunk = chunks[dim]
         a = np.tile(np.arange(starts[dim], stops[dim], steps[dim]), (chunk, 1))
         b = np.transpose(np.tile(np.arange(chunk)-chunk/2, (a.shape[1], 1)))
-        return np.transpose(a + b)
+        return a + b
 
     def single_slice_list(self):
         pData = self.get_plugin_data()
@@ -227,15 +225,17 @@ class Hdf5TransportData(object):
 #            shape = [s for s in list(shape) if isinstance(s, int)]
 
         fix_dirs, value = pData.get_fixed_directions()
-        starts, stops, steps = self.get_starts_stops_steps()
+        starts, stops, steps, chunks = self.get_starts_stops_steps()
 
         nSlices = index.shape[1] if index.size else len(fix_dirs)
         nDims = len(shape)
 
+        #***********CHANGE THIS***************** add chunks to core dimensions
         slice_list = []
         for i in range(nSlices):
             getitem = [slice(None)]*nDims
             for c in core_dirs:
+                # change this to np.array
                 getitem[c] = slice(starts[c], stops[c], steps[c])
             for f in range(len(fix_dirs)):
                 getitem[fix_dirs[f]] = slice(value[f], value[f] + 1, 1)
