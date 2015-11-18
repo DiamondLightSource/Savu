@@ -44,6 +44,7 @@ class I12DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
     def pre_process(self):
         self.dark = self.exp.meta_data.get_meta_data('dark')
         self.flat = self.exp.meta_data.get_meta_data('flat')
+        #reduce data to the correct size here
 
     def correct(self, data):
         print data.shape, self.dark.shape, self.flat.shape
@@ -65,8 +66,7 @@ class I12DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
         # set pattern_name and nframes to process for all datasets
         in_pData[0].plugin_data_setup('PROJECTION', self.get_max_frames())
         out_pData[0].plugin_data_setup('PROJECTION', self.get_max_frames())
-        
-        print "^^^^^^^^^^^^^^^^^^", in_dataset[0].get_shape(), out_dataset[0].get_shape()
+        print "^^^^^^^^^^^^^^^^^^^^^", in_dataset[0].get_shape(), out_dataset[0].get_shape()
 
     def get_max_frames(self):
         return 4

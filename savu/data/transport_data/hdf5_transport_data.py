@@ -199,20 +199,37 @@ class Hdf5TransportData(object):
         for i in range(len(slice_dirs)):
             c = chunk[i]
             r = repeat[i]
-            dim = slice_dirs[i]
-            values = np.ravel(self.get_slice_dir_index(dim))
-            #values = np.arange(starts[dim], stops[dim], steps[dim])
-            idx = np.transpose(np.ravel(np.kron(values, np.ones((r, c)))))
+            values = self.get_slice_dir_index(slice_dirs[i])
+            idx = np.ravel(np.kron(values, np.ones((r, c))))
             idx_list.append(idx.astype(int))
 
         return np.array(idx_list)
 
-    def get_slice_dir_index(self, dim):
+    def get_slice_dir_index(self, dim, boolean=False):
+        starts, stops, steps, chunks = self.get_starts_stops_steps()
+        if chunks[dim] > 1:
+            dir_idx = np.ravel(np.transpose(self.get_slice_dir_matrix(dim)))
+            if boolean:
+                return self.get_bool_slice_dir_index(dim, dir_idx)
+            return dir_idx
+        else:
+            return np.arange(starts[dim], stops[dim], steps[dim])
+
+    def get_bool_slice_dir_index(self, dim, dir_idx):
+        shape = self.data_info.get_meta_data('orig_shape')[dim]
+        bool_idx = np.ones(shape, dtype=bool)
+        bool_idx[dir_idx] = True
+        return bool_idx
+
+    def get_slice_dir_matrix(self, dim):
         starts, stops, steps, chunks = self.get_starts_stops_steps()
         chunk = chunks[dim]
         a = np.tile(np.arange(starts[dim], stops[dim], steps[dim]), (chunk, 1))
         b = np.transpose(np.tile(np.arange(chunk)-chunk/2, (a.shape[1], 1)))
-        return a + b
+        dim_idx = a + b
+        if dim_idx[dim_idx < 0]:
+            raise Exception('Cannot have a negative value in the slice list.')
+        return dim_idx
 
     def single_slice_list(self):
         pData = self.get_plugin_data()
@@ -220,7 +237,6 @@ class Hdf5TransportData(object):
         core_dirs = pData.get_core_directions()
         shape = self.get_shape()
         index = self.get_slice_dirs_index(slice_dirs, shape)
-
 #        if 'var' not in [shape[i] for i in slice_dirs]:
 #            shape = [s for s in list(shape) if isinstance(s, int)]
 
@@ -230,12 +246,11 @@ class Hdf5TransportData(object):
         nSlices = index.shape[1] if index.size else len(fix_dirs)
         nDims = len(shape)
 
-        #***********CHANGE THIS***************** add chunks to core dimensions
+        #*** vectorise this!
         slice_list = []
         for i in range(nSlices):
             getitem = [slice(None)]*nDims
             for c in core_dirs:
-                # change this to np.array
                 getitem[c] = slice(starts[c], stops[c], steps[c])
             for f in range(len(fix_dirs)):
                 getitem[fix_dirs[f]] = slice(value[f], value[f] + 1, 1)
@@ -261,17 +276,27 @@ class Hdf5TransportData(object):
         shape = self.get_shape()
         slice_dirs = self.get_plugin_data().get_slice_directions()
         chunk, length, repeat = self.chunk_length_repeat(slice_dirs, shape)
+
+        map_data = False
+        name = self.data_info.get_meta_data('name')
+        if name in self.exp.index['mapping']:
+            map_data = True
+            data_block = self.data_info.get_meta_data('chunks')[slice_dirs[0]]
+
+        repeat = length[0]/data_block if map_data else repeat[0]
+        length = data_block if map_data else length[0]
+
         banked = []
-        for rep in range(repeat[0]):
-            start = rep*length[0]
-            end = start + length[0]
+        for rep in range(repeat):
+            start = rep*length
+            end = start + length
             banked.append(slice_list[start:end])
 
-        return banked, length[0], slice_dirs
+        return banked, length, slice_dirs
 
     def grouped_slice_list(self, slice_list, max_frames):
         banked, length, slice_dir = self.banked_list(slice_list)
-        starts, stops, steps = self.get_starts_stops_steps()
+        starts, stops, steps, chunks = self.get_starts_stops_steps()
         group_dim = self.get_plugin_data().get_slice_directions()[0]
         start = starts[group_dim]
         step = steps[group_dim]
@@ -319,7 +344,7 @@ class Hdf5TransportData(object):
         processes = expInfo.get_meta_data("processes")
         process = expInfo.get_meta_data("process")
         slice_list = self.get_grouped_slice_list()
-        
+
         frame_index = np.arange(len(slice_list))
         try:
             frames = np.array_split(frame_index, len(processes))[process]

@@ -270,11 +270,9 @@ class Data(object):
 
     def set_preview(self, preview_list):
         shape = self.get_shape()
-        print shape
         if preview_list:
             starts, stops, steps, chunks = \
                 self.get_preview_indices(preview_list)
-            print starts, stops, steps, chunks
         else:
             starts, stops, steps, chunks = \
                 [[0]*len(shape), shape, [1]*len(shape), [1]*len(shape)]
@@ -331,9 +329,10 @@ class Data(object):
 
     def set_reduced_shape(self, starts, stops, steps, chunks):
         orig_shape = self.get_shape()
+        self.data_info.set_meta_data('orig_shape', orig_shape)
         new_shape = []
         for dim in range(len(starts)):
-            new_shape.append(np.prod((self.get_slice_dir_index(dim).shape)))
+            new_shape.append(np.prod((self.get_slice_dir_matrix(dim).shape)))
         self.set_shape(tuple(new_shape))
 
         # reduce shape of mapping data if it exists
@@ -347,9 +346,7 @@ class Data(object):
         not_mapping_dim = np.where(diff == 0)[0]
         mapping_dim = np.where(diff != 0)[0]
         map_shape[not_mapping_dim] = np.array(new_shape)[not_mapping_dim]
-        map_shape[mapping_dim] = self.get_slice_dir_index(mapping_dim).shape[0]
-
-        print "map_shape", map_shape
+        map_shape[mapping_dim] = self.get_slice_dir_matrix(mapping_dim).shape[0]
         self.exp.index['mapping'][name].set_shape(tuple(map_shape))
 
     def find_and_set_shape(self, data):

@@ -52,14 +52,14 @@ class I12TomoTest(unittest.TestCase):
         #selection = ['midmap-2:midmap+2:1:1', '0:end:10:1', '0:end:10:1']
         #OR
         #selection = ['midmap:midmap+1:1:5', '0:end:10:1', '0:end:10:1']
-        selection = ['midmap:end:fullmap:5', '0:end:10:3', '0:end:10:1']
+        selection = ['midmap:midmap+1:fullmap:5', '0:end:10:1', '0:end:10:1']
         loader_dict = {'preview': selection}
         data_dict = {'in_datasets': ['tomo'], 'out_datasets': ['test']}
         all_dicts = [loader_dict, data_dict, {}]
         exp = run_protected_plugin_runner_no_process_list(options, plugin,
                                                           data=all_dicts)
         self.assertEqual(exp.index['in_data']['test'].get_shape(),
-                         (4, 216, 256, 1))
+                         (5, 216, 256, 24))
 
 #    def test_i12tomo3(self):
 #        options = tu.set_experiment('i12tomo')
