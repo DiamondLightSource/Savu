@@ -51,6 +51,7 @@ class I12DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
         self.n_core_dirs = len(in_pData.get_core_directions())
 
     def correct(self, data):
+        print data[0].shape
         return data[0]
 
     def setup(self):
@@ -69,6 +70,7 @@ class I12DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
         # set pattern_name and nframes to process for all datasets
         in_pData[0].plugin_data_setup('PROJECTION', self.get_max_frames())
         out_pData[0].plugin_data_setup('PROJECTION', self.get_max_frames())
+        print "^^^^^^^^^^^^^^^^^", in_dataset[0].get_shape(), out_dataset[0].get_shape()
 
     def get_max_frames(self):
         return 4
