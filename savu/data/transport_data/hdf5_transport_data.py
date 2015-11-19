@@ -277,14 +277,12 @@ class Hdf5TransportData(object):
         slice_dirs = self.get_plugin_data().get_slice_directions()
         chunk, length, repeat = self.chunk_length_repeat(slice_dirs, shape)
 
-        map_data = False
-        name = self.data_info.get_meta_data('name')
-        if name in self.exp.index['mapping']:
-            map_data = True
-            data_block = self.data_info.get_meta_data('chunks')[slice_dirs[0]]
+        if self.mapping:
+            map_obj = self.exp.index['mapping'][self.get_name()]
+            new_length = map_obj.data_info.get_meta_data('map_dim_len')
 
-        repeat = length[0]/data_block if map_data else repeat[0]
-        length = data_block if map_data else length[0]
+        repeat = length[0]/new_length if self.mapping else repeat[0]
+        length = new_length if self.mapping else length[0]
 
         banked = []
         for rep in range(repeat):
@@ -298,9 +296,15 @@ class Hdf5TransportData(object):
         banked, length, slice_dir = self.banked_list(slice_list)
         starts, stops, steps, chunks = self.get_starts_stops_steps()
         group_dim = self.get_plugin_data().get_slice_directions()[0]
+        chunk = chunks[group_dim]
         start = starts[group_dim]
-        step = steps[group_dim]
+        start = start if chunk == 1 else start-chunk/2
+        step = steps[group_dim] if chunk == 1 else 1
         jump = max_frames*step
+
+        if self.mapping:
+            map_obj = self.exp.index['mapping'][self.get_name()]
+            map_len = map_obj.data_info.get_meta_data('full_map_dim_len')[0]
 
         grouped = []
         count = 0
@@ -321,6 +325,9 @@ class Hdf5TransportData(object):
                 working_slice[slice_dir[0]] = new_slice
                 grouped.append(tuple(working_slice))
             count += 1
+
+            if self.mapping:
+                start = start + map_len
 
         return grouped
 

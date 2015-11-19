@@ -57,6 +57,7 @@ class Data(object):
         self.backing_file = None
         self.data = None
         self.next_shape = None
+        self.mapping = None
 
     def initialise_data_info(self, name):
         self.data_info.set_meta_data('name', name)
@@ -116,6 +117,7 @@ class Data(object):
         new_obj.backing_file = self.backing_file
         new_obj.data = self.data
         new_obj.next_shape = copy.deepcopy(self.next_shape)
+        new_obj.mapping = self.mapping
         return new_obj
 
     def add_base(self, ExtraBase):
@@ -211,10 +213,9 @@ class Data(object):
         return patterns
 
     def copy_dataset(self, copy_data, **kwargs):
-        copy_name = copy_data.data_info.get_meta_data('name')
-        if 'mapping' in self.exp.index.keys():
-            if copy_name in self.exp.index['mapping'].keys():
-                copy_data = self.exp.index['mapping'][copy_name]
+        copy_name = copy_data.get_name()
+        if copy_data.mapping:
+            copy_data = self.exp.index['mapping'][copy_name]
         patterns = copy.copy(copy_data.get_data_patterns())
         self.set_data_patterns(patterns)
         self.copy_labels(copy_data)
@@ -297,27 +298,17 @@ class Data(object):
 
     def convert_indices(self, idx, dim):
         shape = self.get_shape()
-        name = self.data_info.get_meta_data('name')
-        if name in self.exp.index['mapping']:
-            map_shape = self.exp.index['mapping'][name].get_shape()
+        mid = shape[dim]/2
+        end = shape[dim]
 
-        for i in range(len(idx)):
-            try:
-                idx[i] = int(idx[i])
-                idx[i] = idx[i] if idx[i] > -1 else shape[dim]+1+idx[i]
-            except ValueError:
-                if idx[i] == 'end':
-                    idx[i] = shape[dim]
-                elif 'mid' in idx[i]:
-                    mid = 'mid' if idx[i] == 'mid' else 'midmap'
-                    tshape = shape if mid == 'mid' else map_shape
-                    incr = idx[i].split(mid)[1]
-                    value = 0 if incr == '' else int(incr)
-                    idx[i] = tshape[dim]/2 + value
-                elif 'full' in idx[i]:
-                    idx[i] = shape[dim] if idx[i] == 'full' else map_shape[dim]
-                else:
-                    raise Exception("Preview index is unknown")
+        if self.mapping:
+            map_shape = self.exp.index['mapping'][self.get_name()].get_shape()
+            midmap = map_shape[dim]/2
+            endmap = map_shape[dim]
+
+        idx = [eval(equ) for equ in idx]
+        idx = [idx[i] if idx[i] > -1 else shape[dim]+1+idx[i] for i in
+               range(len(idx))]
         return idx
 
     def get_starts_stops_steps(self):
@@ -336,17 +327,27 @@ class Data(object):
         self.set_shape(tuple(new_shape))
 
         # reduce shape of mapping data if it exists
-        name = self.data_info.get_meta_data('name')
-        if name in self.exp.index['mapping']:
-            self.set_mapping_reduced_shape(orig_shape, new_shape, name)
+        if self.mapping:
+            self.set_mapping_reduced_shape(orig_shape, new_shape,
+                                           self.get_name())
 
     def set_mapping_reduced_shape(self, orig_shape, new_shape, name):
-        map_shape = np.array(self.exp.index['mapping'][name].get_shape())
+        map_obj = self.exp.index['mapping'][name]
+        map_shape = np.array(map_obj.get_shape())
         diff = np.array(orig_shape) - map_shape[:len(orig_shape)]
-        not_mapping_dim = np.where(diff == 0)[0]
-        mapping_dim = np.where(diff != 0)[0]
-        map_shape[not_mapping_dim] = np.array(new_shape)[not_mapping_dim]
-        map_shape[mapping_dim] = self.get_slice_dir_matrix(mapping_dim).shape[0]
+        not_map_dim = np.where(diff == 0)[0]
+        map_dim = np.where(diff != 0)[0]
+        map_obj.data_info.set_meta_data('full_map_dim_len', map_shape[map_dim])
+        map_shape[not_map_dim] = np.array(new_shape)[not_map_dim]
+        # assuming only one extra dimension added for now
+        starts, stops, steps, chunks = self.get_starts_stops_steps()
+        start = starts[map_dim] % map_shape[map_dim]
+        stop = min(stops[map_dim], map_shape[map_dim])
+
+        temp = len(np.arange(start, stop, steps[map_dim]))*chunks[map_dim]
+        map_shape[len(orig_shape)] = np.ceil(new_shape[map_dim]/temp)
+        map_shape[map_dim] = new_shape[map_dim]/map_shape[len(orig_shape)]
+        map_obj.data_info.set_meta_data('map_dim_len', map_shape[map_dim])
         self.exp.index['mapping'][name].set_shape(tuple(map_shape))
 
     def find_and_set_shape(self, data):

@@ -146,7 +146,7 @@ def set_options(path, **kwargs):
     options['process_names'] = process_names
     options['data_file'] = path
     options['process_file'] = process_file
-    options['out_path'] = tempfile.mkdtemp()
+    options['out_path'] = '/dls/tmp/qmm55171'#tempfile.mkdtemp()
     options['run_type'] = 'test'
     return options
 

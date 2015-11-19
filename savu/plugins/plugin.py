@@ -151,11 +151,10 @@ class Plugin(object):
 
     def delete_mappings(self):
         in_datasets = self.get_in_datasets()
-        mapping_dict = self.exp.index['mapping']
         for data in in_datasets:
-            name = data.data_info.get_meta_data('name')
-            if name in mapping_dict.keys():
-                del self.exp.index['mapping'][name]
+            if data.mapping:
+                del self.exp.index['mapping'][data.get_name()]
+                self.mapping = False
 
     def copy_meta_data(self):
         """

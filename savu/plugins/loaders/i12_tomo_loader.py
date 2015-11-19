@@ -87,6 +87,8 @@ class I12TomoLoader(BaseLoader):
 
     def data_mapping(self):
         exp = self.exp
+        data_obj = exp.index['in_data']['tomo']
+        data_obj.mapping = True
         mapping_obj = exp.create_data_object('mapping', 'tomo')
 
         angular_spacing = self.parameters['angular_spacing']
@@ -109,7 +111,7 @@ class I12TomoLoader(BaseLoader):
         mapping_obj.add_pattern('SINOGRAM', core_dir=(detX, rot),
                                 slice_dir=(detY, scan))
 
-        loaded_shape = exp.index['in_data']['tomo'].get_shape()
+        loaded_shape = data_obj.get_shape()
         n_scans = loaded_shape[0]/len(rotation_angle)
         shape = (rotation_angle.shape + loaded_shape[1:3] + (n_scans,))
 
