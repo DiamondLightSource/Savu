@@ -175,10 +175,6 @@ class Hdf5Transport(TransportMechanism):
         squeeze_dict = self.set_functions(in_data, 'squeeze')
         expand_dict = self.set_functions(out_data, 'expand')
 
-        for sl in in_slice_list[0]:
-            print sl
-        print '\n\n\n'
-
         for count in range(len(in_slice_list[0])):
             print count
             section, slice_list = \
@@ -223,10 +219,21 @@ class Hdf5Transport(TransportMechanism):
         return lambda x: x[possible_slices[len(x.shape)-n_core_dirs]]
 
     def create_squeeze_function(self, data):
+        max_frames = data.get_plugin_data().get_frame_chunk()
+        if data.mapping:
+            map_obj = self.exp.index['mapping'][data.get_name()]
+            map_dim_len = map_obj.data_info.get_meta_data('map_dim_len')
+            max_frames = min(max_frames, map_dim_len)
+            data.get_plugin_data().set_frame_chunk(max_frames)
+
+        squeeze_dims = data.get_plugin_data().get_slice_directions()
+        if max_frames > 1:
+            squeeze_dims = squeeze_dims[1:]
         if data.variable_length_flag:
             unravel = lambda x, i: unravel(x[0], i-1) if i > 0 else x
-            return lambda x: np.squeeze(unravel(x, len(data.get_shape())-1))
-        return lambda x: np.squeeze(x)
+            return lambda x: np.squeeze(unravel(x, len(data.get_shape())-1),
+                                        axis=squeeze_dims)
+        return lambda x: np.squeeze(x, axis=squeeze_dims)
 
     def get_all_slice_lists(self, data_list, expInfo):
         slice_list = []

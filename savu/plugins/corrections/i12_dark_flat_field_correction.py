@@ -44,15 +44,21 @@ class I12DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
     def pre_process(self):
         in_pData = self.get_plugin_in_datasets()[0]
         new_slice = self.get_new_slice(in_pData)
+        tile = in_pData.get_frame_chunk()
+        first_sdir = in_pData.get_slice_directions()[0]
+        core_dir = in_pData.get_core_directions()
+        tile_dim = list(set(core_dir + (first_sdir,))).index(first_sdir)
+        tile_list = np.ones(len(core_dir) + 1)
+        tile_list[tile_dim] = tile
+
+        expInfo = self.exp.meta_data
         self.dark = \
-            np.transpose(self.exp.meta_data.get_meta_data('dark'))[new_slice]
-        self.flat = \
-            np.transpose(self.exp.meta_data.get_meta_data('flat'))[new_slice]
-        self.n_core_dirs = len(in_pData.get_core_directions())
+            np.tile(expInfo.get_meta_data('dark')[new_slice], tile_list)
+        flat = np.tile(expInfo.get_meta_data('flat')[new_slice], tile_list)
+        self.cal_flat = flat - self.dark
 
     def correct(self, data):
-        print data[0].shape
-        return data[0]
+        return (np.nan_to_num(data) - self.dark)/self.cal_flat
 
     def setup(self):
         """
@@ -70,13 +76,12 @@ class I12DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
         # set pattern_name and nframes to process for all datasets
         in_pData[0].plugin_data_setup('PROJECTION', self.get_max_frames())
         out_pData[0].plugin_data_setup('PROJECTION', self.get_max_frames())
-        print "^^^^^^^^^^^^^^^^^", in_dataset[0].get_shape(), out_dataset[0].get_shape()
 
     def get_max_frames(self):
         return 4
 
     def get_new_slice(self, pData):
-        core_dir = pData.get_core_directions()
+        core_dir = set(pData.get_core_directions())
         starts, stops, steps, chunks = pData.data_obj.get_starts_stops_steps()
         new_slice = [slice(starts[d], stops[d], steps[d]) for d in core_dir]
         return new_slice

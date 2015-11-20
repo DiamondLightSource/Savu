@@ -421,8 +421,18 @@ class Hdf5TransportData(object):
 
     def get_padded_slice_data(self, input_slice_list):
         slice_list = list(input_slice_list)
-        if self.get_plugin_data().padding is None:
-            return self.data[tuple(slice_list)]
+        pData = self.get_plugin_data()
+        if pData.padding is None:
+            data = self.data[tuple(slice_list)]
+            shape = data.shape
+            first_sdir = pData.get_slice_directions()[0]
+            if shape[first_sdir] == pData.get_frame_chunk():
+                return data
+            else:
+                nPad = self.get_frame_chunks() - shape[first_sdir]
+                pad_list = [(0, 0)]*len(shape)
+                pad_list[first_sdir][1] = nPad
+                return np.lib.pad(data, pad_list, 'constant')
 
         padding_dict = self.get_padding_dict()
         pad_list = []
