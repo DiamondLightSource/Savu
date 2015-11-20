@@ -82,17 +82,27 @@ class PluginList(object):
         citation.write(plugin_entry)
         plugin_file.close()
 
-    def get_string(self):
+    def get_string(self, **kwargs):
         out_string = []
-        count = 0
-        for plugin in self.plugin_list:
+
+        start = kwargs.get('start', 0)
+        stop = kwargs.get('stop', len(self.plugin_list))
+        if stop == -1:
+            stop = len(self.plugin_list)
+        disp_params = kwargs.get('params', True)
+
+        print start, stop
+        count = start
+        plugin_list = self.plugin_list[start:stop]
+        for plugin in plugin_list:
             count += 1
             description = "%2i) %s(%s)" % (count, plugin['name'], plugin['id'])
-            keycount = 0
-            for key in plugin['data'].keys():
-                keycount += 1
-                description += "\n  %2i)   %20s : %s" % (keycount, key,
-                                                         plugin['data'][key])
+            if disp_params:
+                keycount = 0
+                for key in plugin['data'].keys():
+                    keycount += 1
+                    description += "\n  %2i)   %20s : %s" % \
+                        (keycount, key, plugin['data'][key])
             out_string.append(description)
         return '\n'.join(out_string)
 

@@ -21,8 +21,8 @@ class Content(object):
             print "Opening file %s" % (filename)
             self.plugin_list.populate_plugin_list(filename)
 
-    def display(self):
-        print self.plugin_list.get_string()
+    def display(self, **kwargs):
+        print '\n', self.plugin_list.get_string(**kwargs), '\n'
 
     def save(self, filename):
         if filename == "":
@@ -45,9 +45,6 @@ class Content(object):
                       (element, subelement))
 
     def insert(self, plugin, pos):
-        print plugin
-        print plugin.name
-        print plugin.__module__
         process = {}
         process['name'] = plugin.name
         process['id'] = "savu.plugins." + plugin.__module__
@@ -73,28 +70,55 @@ def _open(content, arg):
 
 
 def _disp(content, arg):
-    """Displays the process in the current list"""
-    content.display()
+    """Displays the process in the current list.
+       Optional arguments:
+            i(int): Display the ith item in the list.
+            i(int) j(int): Display list items i to j.
+            names: Display process names only."""
+    idx = {'start': 0, 'stop': -1}
+    if arg:
+        split_arg = arg.split(' ')
+        len_args = len(split_arg)
+        if len_args > 0:
+            if split_arg[0] == 'names':
+                idx['params'] = False
+            else:
+                try:
+                    idx['start'] = int(split_arg[0]) - 1
+                    idx['stop'] = \
+                        idx['start']+1 if len_args == 1 else int(split_arg[1])
+                except ValueError:
+                    print("The arguments %s are unknown", arg)
+    content.display(**idx)
     return content
 
 
 def _list(content, arg):
-    """List the plugins which have been registered for use"""
+    """List the plugins which have been registered for use.
+       Optional arguments:
+            type(str): Display 'type' plugins. Where type can be 'loaders',
+            'corrections', 'filters', 'reconstructions' or 'savers'.
+            type(str) names: Display type selection with process names only.
+    """
+    if arg:
+        arg = arg.split(' ')
+        if len(arg) == 2:
+            if arg[1] != 'names':
+                print("The arguments %s are unknown", arg)
+                return content
+
+    print "-----------------------------------------"
     for key, value in pu.plugins_path.iteritems():
         if not arg:
             print key
-        if value.split('.')[0] == arg:
+        elif value.split('.')[0] == arg[0]:
             print key
-            plugin = pu.plugins[key]()
-            plugin.populate_default_parameters()
-            for p_key in plugin.parameters.keys():
-                print("    %20s : %s" % (p_key, plugin.parameters[p_key]))
-#    for key in pu.plugins.keys():
-#        print(key)
-#        plugin = pu.plugins[key]()
-#        plugin.populate_default_parameters()
-#        for p_key in plugin.parameters.keys():
-#            print("    %20s : %s" % (p_key, plugin.parameters[p_key]))
+            if len(arg) < 2:
+                plugin = pu.plugins[key]()
+                plugin.populate_default_parameters()
+                for p_key in plugin.parameters.keys():
+                    print("    %20s : %s" % (p_key, plugin.parameters[p_key]))
+    print "-----------------------------------------"
     return content
 
 
@@ -119,7 +143,6 @@ def _mod(content, arg):
 
 def _add(content, arg):
     """Adds the named plugin before the specified location 'MedianFilter 2'"""
-    print content, arg
     try:
         name, pos = arg.split()
         if name in pu.plugins.keys():
