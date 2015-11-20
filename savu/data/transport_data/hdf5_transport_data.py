@@ -429,7 +429,7 @@ class Hdf5TransportData(object):
             if shape[first_sdir] == pData.get_frame_chunk():
                 return data
             else:
-                nPad = self.get_frame_chunks() - shape[first_sdir]
+                nPad = self.get_frame_chunk() - shape[first_sdir]
                 pad_list = [(0, 0)]*len(shape)
                 pad_list[first_sdir][1] = nPad
                 return np.lib.pad(data, pad_list, 'constant')

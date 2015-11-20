@@ -57,7 +57,7 @@ class TestDataReduction(unittest.TestCase):
     def test_tomo2(self):
         options = tu.set_experiment('tomo')
         plugin = 'savu.plugins.test_plugin'
-        preview = ['10:-1:1', '10:-1:1', '10:-1:1']
+        preview = ['10:-1:1:1', '10:-1:1:1', '10:-1:1:1']
         loader_dict = {'preview': preview}
         data_dict = {'in_datasets': ['tomo', 'tomo'], 'out_datasets': ['test']}
         all_dicts = [loader_dict, data_dict, {}]
@@ -69,7 +69,7 @@ class TestDataReduction(unittest.TestCase):
     def test_tomo3(self):
         options = tu.set_experiment('tomo')
         plugin = 'savu.plugins.test_plugin'
-        preview = ['10:-1:10', '10:-1:10', '10:-1:10']
+        preview = ['10:-1:10:1', '10:-1:10:1', '10:-1:10:1']
         loader_dict = {'preview': preview}
         data_dict = {'in_datasets': ['tomo', 'tomo'], 'out_datasets': ['test']}
         all_dicts = [loader_dict, data_dict, {}]
@@ -81,7 +81,7 @@ class TestDataReduction(unittest.TestCase):
     def test_tomo4(self):
         options = tu.set_experiment('tomo')
         plugin = 'savu.plugins.test_plugin'
-        preview = ['10:-10:10', '10:-10:10', '10:-10:10']
+        preview = ['10:-10:10:1', '10:-10:10:1', '10:-10:10:1']
         loader_dict = {'preview': preview}
         data_dict = {'in_datasets': ['tomo', 'tomo'], 'out_datasets': ['test']}
         all_dicts = [loader_dict, data_dict, {}]
