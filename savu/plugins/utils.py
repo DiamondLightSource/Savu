@@ -25,11 +25,14 @@ import re
 import logging
 
 plugins = {}
+plugins_path = {}
 
 
 def register_plugin(clazz):
     """decorator to add logging information around calls for use with ."""
     plugins[clazz.__name__] = clazz
+    if clazz.__module__.split('.')[0] != 'savu':
+        plugins_path[clazz.__name__] = clazz.__module__
     return clazz
 
 
