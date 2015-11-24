@@ -43,7 +43,6 @@ class TimeseriesFieldCorrections(BaseCorrection, CpuPlugin):
 
     def correct(self, data):
         in_meta_data, out_meta_data = self.get_meta_data()
-        data = data[0]
         image_keys = in_meta_data[0].get_meta_data('image_key')
         trimmed_data = data[image_keys == 0]
 

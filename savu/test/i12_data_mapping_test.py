@@ -33,7 +33,7 @@ from savu.test.plugin_runner_test \
 
 class I12DataMappingTest(unittest.TestCase):
 
-    @unittest.skip('takes too long to run')
+    @unittest.skip('Test data not available')
     def test_i12tomo(self):
         options = tu.set_experiment('i12tomo')
         plugin = 'savu.plugins.corrections.i12_dark_flat_field_correction'
@@ -44,7 +44,7 @@ class I12DataMappingTest(unittest.TestCase):
         self.assertEqual(exp.index['in_data']['test'].get_shape(),
                          (901, 2160, 2560, 24))
 
-    # should send each frame separately and not grouped
+    @unittest.skip('Test data not available')
     def test_i12tomo2(self):
         options = tu.set_experiment('i12tomo')
         plugin = 'savu.plugins.corrections.i12_dark_flat_field_correction'
@@ -57,6 +57,7 @@ class I12DataMappingTest(unittest.TestCase):
         self.assertEqual(exp.index['in_data']['test'].get_shape(),
                          (5, 2160, 2560, 1))
 
+    @unittest.skip('Test data not available')
     def test_i12tomo3(self):
         options = tu.set_experiment('i12tomo')
         plugin = 'savu.plugins.corrections.i12_dark_flat_field_correction'
@@ -69,6 +70,7 @@ class I12DataMappingTest(unittest.TestCase):
         self.assertEqual(exp.index['in_data']['test'].get_shape(),
                          (5, 216, 256, 4))
 
+    @unittest.skip('Test data not available')
     def test_i12tomo4(self):
         options = tu.set_experiment('i12tomo')
         plugin = 'savu.plugins.corrections.i12_dark_flat_field_correction'
@@ -81,6 +83,7 @@ class I12DataMappingTest(unittest.TestCase):
         self.assertEqual(exp.index['in_data']['test'].get_shape(),
                          (1, 216, 256, 4))
 
+    @unittest.skip('Test data not available')
     def test_i12tomo5(self):
         options = tu.set_experiment('i12tomo')
         plugin = 'savu.plugins.corrections.i12_dark_flat_field_correction'
@@ -93,6 +96,7 @@ class I12DataMappingTest(unittest.TestCase):
         self.assertEqual(exp.index['in_data']['test'].get_shape(),
                          (20, 432, 512, 1))
 
+    @unittest.skip('Test data not available')
     def test_i12tomo6(self):
         options = tu.set_experiment('i12tomo')
         plugin = 'savu.plugins.corrections.i12_dark_flat_field_correction'
@@ -105,6 +109,7 @@ class I12DataMappingTest(unittest.TestCase):
         self.assertEqual(exp.index['in_data']['test'].get_shape(),
                          (5, 216, 256, 24))
 
+    @unittest.skip('Test data not available')
     def test_i12tomo7(self):
         options = tu.set_experiment('i12tomo')
         plugin = 'savu.plugins.corrections.i12_dark_flat_field_correction'
@@ -117,6 +122,7 @@ class I12DataMappingTest(unittest.TestCase):
         self.assertEqual(exp.index['in_data']['test'].get_shape(),
                          (2, 216, 256, 2))
 
+    @unittest.skip('Test data not available')
     def test_i12tomo8(self):
         options = tu.set_experiment('i12tomo')
         plugin = 'savu.plugins.corrections.i12_dark_flat_field_correction'
@@ -129,7 +135,7 @@ class I12DataMappingTest(unittest.TestCase):
         self.assertEqual(exp.index['in_data']['test'].get_shape(),
                          (46, 2160, 2560, 1))
 
-    @unittest.skip('takes too long to run')
+    @unittest.skip('Test data not available')
     def test_i12tomo9(self):
         options = tu.set_experiment('i12tomo')
         plugin = 'savu.plugins.corrections.i12_dark_flat_field_correction'

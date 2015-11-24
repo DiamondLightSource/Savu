@@ -42,6 +42,7 @@ class I12TomoPipelineTest(unittest.TestCase):
 #        run_protected_plugin_runner_no_process_list(options, plugin,
 #                                                    data=all_dicts)
 
+    #@unittest.skip('Test data not available')
     def test_process_preview(self):
         options = {
             "transport": "hdf5",
