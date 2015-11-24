@@ -37,6 +37,8 @@ class VoCentering(BaseFilter, CpuPlugin):
     A plugin to calculate the center of rotation using the Vo Method
     :param datasets_to_populate: A list of datasets which require this information. Default: [].    
     :param out_datasets: The default names. Default: ['cor_raw','cor_fit'].
+    :param poly_degree: The polynomial degree of the fit (1 or 0 = gradient or no gradient). Default: 1.
+    :param step: The step length over the rotation axis. Default: 1.
     """
 
     def __init__(self):
@@ -70,7 +72,9 @@ class VoCentering(BaseFilter, CpuPlugin):
         return cor_positions[vv.argmin()]
 
     def filter_frames(self, data):
-        data = data[0].squeeze()
+        print data[0].shape
+        data = data[0][::self.parameters['step']]
+        print data.shape
         width = data.shape[1]/4
         step = width/10.
         point = 0.0
@@ -101,9 +105,10 @@ class VoCentering(BaseFilter, CpuPlugin):
         diff = np.abs(np.diff(cor_raw))
 
         tolerance = np.median(diff)
+        diff = np.append(diff, tolerance)
 
-        x_clean = x[diff < tolerance * 2.0]
-        cor_clean = cor_raw[diff < tolerance * 2.0]
+        x_clean = x[diff <= tolerance * 2.0]
+        cor_clean = cor_raw[diff <= tolerance * 2.0]
 
         # set up for the iterative clean on the fit
         cor_fit = cor_clean
@@ -116,7 +121,7 @@ class VoCentering(BaseFilter, CpuPlugin):
             mask = (np.abs(cor_fit-cor_clean)) < (max_disp / 2.)
             x_clean = x_clean[mask]
             cor_clean = cor_clean[mask]
-            z = np.polyfit(x_clean, cor_clean, 1)
+            z = np.polyfit(x_clean, cor_clean, self.parameters['poly_degree'])
             p = np.poly1d(z)
             cor_fit = p(x_clean)
             max_disp = (np.abs(cor_fit-cor_clean)).max()
@@ -124,6 +129,7 @@ class VoCentering(BaseFilter, CpuPlugin):
         # build a full array for the output fit
         cor_fit = p(x)
 
+        print cor_fit
         out_datasets[1].data[:] = cor_fit[:, np.newaxis]
         # add to metadata
         self.populate_meta_data('cor_raw', cor_raw)

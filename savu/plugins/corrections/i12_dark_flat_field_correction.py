@@ -44,21 +44,21 @@ class I12DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
     def pre_process(self):
         in_pData = self.get_plugin_in_datasets()[0]
         new_slice = self.get_new_slice(in_pData)
-        tile = in_pData.get_frame_chunk()
         first_sdir = in_pData.get_slice_directions()[0]
         core_dir = in_pData.get_core_directions()
-        tile_dim = list(set(core_dir + (first_sdir,))).index(first_sdir)
-        tile_list = np.ones(len(core_dir) + 1)
-        tile_list[tile_dim] = tile
+        self.tile_dim = list(set(core_dir + (first_sdir,))).index(first_sdir)
+        self.tile_list = np.ones(len(core_dir) + 1)
 
         expInfo = self.exp.meta_data
-        self.dark = \
-            np.tile(expInfo.get_meta_data('dark')[new_slice], tile_list)
-        flat = np.tile(expInfo.get_meta_data('flat')[new_slice], tile_list)
+        self.dark = expInfo.get_meta_data('dark')[new_slice]
+        flat = expInfo.get_meta_data('flat')[new_slice]
         self.cal_flat = flat - self.dark
 
     def correct(self, data):
-        return (np.nan_to_num(data) - self.dark)/self.cal_flat
+        self.tile_list[self.tile_dim] = data.shape[self.tile_dim]
+        dark = np.tile(self.dark, self.tile_list)
+        cal_flat = np.tile(self.cal_flat, self.tile_list)
+        return (np.nan_to_num(data) - dark)/cal_flat
 
     def setup(self):
         """

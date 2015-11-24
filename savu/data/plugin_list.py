@@ -91,7 +91,6 @@ class PluginList(object):
             stop = len(self.plugin_list)
         disp_params = kwargs.get('params', True)
 
-        print start, stop
         count = start
         plugin_list = self.plugin_list[start:stop]
         for plugin in plugin_list:

@@ -213,9 +213,18 @@ class Data(object):
         return patterns
 
     def copy_dataset(self, copy_data, **kwargs):
-        copy_name = copy_data.get_name()
         if copy_data.mapping:
-            copy_data = self.exp.index['mapping'][copy_name]
+            # copy label entries from meta data
+            map_data = self.exp.index['mapping'][copy_data.get_name()]
+            map_mData = map_data.meta_data
+            map_axis_labels = map_data.data_info.get_meta_data('axis_labels')
+            for axis_label in map_axis_labels:
+                if axis_label.keys()[0] in map_mData.get_dictionary().keys():
+                    map_label = map_mData.get_meta_data(axis_label.keys()[0])
+                    copy_data.meta_data.set_meta_data(axis_label.keys()[0],
+                                                      map_label)
+            copy_data = map_data
+
         patterns = copy.copy(copy_data.get_data_patterns())
         self.set_data_patterns(patterns)
         self.copy_labels(copy_data)
@@ -685,6 +694,16 @@ class PluginData(object):
         self.set_pattern(pattern_name)
         self.set_frame_chunk(chunk)
         self.set_shape()
+
+    def set_temp_pad_dict(self, pad_dict):
+        self.meta_data.set_meta_data('temp_pad_dict', pad_dict)
+
+    def get_temp_pad_dict(self):
+        if 'temp_pad_dict' in self.meta_data.get_dictionary().keys():
+            return self.meta_data.get_dictionary()['temp_pad_dict']
+
+    def delete_temp_pad_dict(self):
+        del self.meta_data.get_dictionary()['temp_pad_dict']
 
 
 class TomoRaw(object):

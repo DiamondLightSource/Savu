@@ -84,7 +84,7 @@ class Hdf5TransportData(object):
                                     expInfo.get_meta_data("process_file")),
                                     count, plugin_id))
                 filename = filename + "_" + key + ".h5"
-                group_name = "%i-%s" % (count, plugin.name)
+                group_name = "%i-%s-%s" % (count, plugin.name, key)
                 exp.barrier()
                 logging.debug("(set_filenames) Creating output file after "
                               " barrier %s", filename)
@@ -423,16 +423,7 @@ class Hdf5TransportData(object):
         slice_list = list(input_slice_list)
         pData = self.get_plugin_data()
         if pData.padding is None:
-            data = self.data[tuple(slice_list)]
-            shape = data.shape
-            first_sdir = pData.get_slice_directions()[0]
-            if shape[first_sdir] == pData.get_frame_chunk():
-                return data
-            else:
-                nPad = pData.get_frame_chunk() - shape[first_sdir]
-                pad_list = [(0, 0)]*len(shape)
-                pad_list[first_sdir][1] = nPad
-                return np.lib.pad(data, pad_list, 'constant')
+            return self.data[tuple(slice_list)]
 
         padding_dict = self.get_padding_dict()
         pad_list = []
@@ -451,6 +442,7 @@ class Hdf5TransportData(object):
         padding_dict = self.get_plugin_data().padding
         if padding_dict is None:
             return padded_dataset
+
         padding_dict = self.get_padding_dict()
 
         slice_list = list(input_slice_list)

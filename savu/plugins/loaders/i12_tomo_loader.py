@@ -103,7 +103,7 @@ class I12TomoLoader(BaseLoader):
         detX = 2
         scan = 3
 
-        exp.meta_data.set_meta_data('rotation_angle', rotation_angle)
+        mapping_obj.meta_data.set_meta_data('rotation_angle', rotation_angle)
 
         mapping_obj.add_pattern('PROJECTION', core_dir=(detX, detY),
                                 slice_dir=(rot, scan))

@@ -9,6 +9,7 @@ from scipy import ndimage
 
 from savu.plugins.utils import register_plugin
 
+
 @register_plugin
 class ScikitimageFilterBackProjection(BaseRecon, CpuPlugin):
     """
@@ -34,8 +35,8 @@ class ScikitimageFilterBackProjection(BaseRecon, CpuPlugin):
 
     def _shift(self, sinogram, centre_of_rotation):
         centre_of_rotation_shift = (sinogram.shape[0]/2) - centre_of_rotation
-        print "the centre of rotation has shape:"+str(centre_of_rotation.shape)
-        print "the centre of rotation shift has shape:"+str(centre_of_rotation_shift.shape)
+#        print "the centre of rotation has shape:"+str(centre_of_rotation.shape)
+#        print "the centre of rotation shift has shape:"+str(centre_of_rotation_shift.shape)
         result = ndimage.interpolation.shift(sinogram,
                                              (centre_of_rotation_shift,
                                               0))
@@ -43,8 +44,8 @@ class ScikitimageFilterBackProjection(BaseRecon, CpuPlugin):
 
     def reconstruct(self, sinogram, centre_of_rotations,
                     vol_shape, params):
-        print "here"
-        print "sinograms have shape:"+str(sinogram.shape)
+#        print "here"
+#        print "sinograms have shape:"+str(sinogram.shape)
         in_meta_data = self.get_in_meta_data()[0]
         sinogram = np.swapaxes(sinogram, 0, 1)
         sinogram = self._shift(sinogram, centre_of_rotations)

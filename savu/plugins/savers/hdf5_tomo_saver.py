@@ -78,10 +78,13 @@ class Hdf5TomoSaver(BaseSaver):
     def create_entries(self, data, key):
         expInfo = self.exp.meta_data
         group_name = expInfo.get_meta_data(["group_name", key])
+        print group_name
         try:
             group_name = group_name + '_' + data.name
         except AttributeError:
             pass
+
+        print "group name is", expInfo.get_meta_data("group_name")
         group = data.backing_file.create_group(group_name)
         group.attrs[NX_CLASS] = 'NXdata'
         group.attrs['signal'] = 'data'
