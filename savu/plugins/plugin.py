@@ -41,15 +41,20 @@ class Plugin(object):
         self.data_objs = {}
         self.variable_data_flag = False
 
-    def main_setup(self, exp, params):
+    def main_setup(self, exp, params, indices=0):
         self.exp = exp
-        self.set_parameters(params)
+        param_len = self.set_parameters(params)
+        #self.set_parameters_this_instance(param_len, indices)
         self.set_plugin_datasets(exp)
         self.setup()
 
         in_datasets, out_datasets = self.get_datasets()
         for data in in_datasets + out_datasets:
             data.finalise_patterns()
+#
+#    def set_parameters_this_instance(self, params, indices):
+#        for key, value in self.parameters.iteritems():
+#            self.parameters[key]
 
     def setup(self):
         """
@@ -77,7 +82,9 @@ class Plugin(object):
         for clazz in inspect.getmro(self.__class__)[::-1]:
             if clazz != object:
                 full_description = pu.find_args(clazz)
+                #print full_description
                 for item in full_description:
+                    # split parameters into lists here
                     self.parameters[item['name']] = item['default']
 
     def set_parameters(self, parameters):

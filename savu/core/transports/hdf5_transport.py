@@ -119,7 +119,7 @@ class Hdf5Transport(TransportMechanism):
         while n_plugins != stop:
             start_in_data = copy.deepcopy(self.exp.index['in_data'])
             in_data = exp.index["in_data"][exp.index["in_data"].keys()[0]]
-            out_data_objs, stop = in_data.load_data(self, start)
+            out_data_objs, stop = in_data.load_data(start)
             exp.clear_data_objects()
             self.exp.index['in_data'] = copy.deepcopy(start_in_data)
             self.real_plugin_run(plugin_list, out_data_objs, start, stop)

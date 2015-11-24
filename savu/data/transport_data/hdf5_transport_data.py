@@ -41,7 +41,7 @@ class Hdf5TransportData(object):
     def __init__(self):
         self.backing_file = None
 
-    def load_data(self, plugin_runner, start):
+    def load_data(self, start):
         exp = self.exp
         plugin_list = exp.meta_data.plugin_list.plugin_list
         final_plugin = plugin_list[-1]
@@ -73,23 +73,23 @@ class Hdf5TransportData(object):
         return flag
 
     def set_filenames(self, plugin, plugin_id, count):
-            exp = self.exp
-            expInfo = exp.meta_data
-            expInfo.set_meta_data("filename", {})
-            expInfo.set_meta_data("group_name", {})
-            for key in exp.index["out_data"].keys():
-                filename = \
-                    os.path.join(expInfo.get_meta_data("out_path"), "%s%02i_%s"
-                                 % (os.path.basename(
-                                    expInfo.get_meta_data("process_file")),
-                                    count, plugin_id))
-                filename = filename + "_" + key + ".h5"
-                group_name = "%i-%s-%s" % (count, plugin.name, key)
-                exp.barrier()
-                logging.debug("(set_filenames) Creating output file after "
-                              " barrier %s", filename)
-                expInfo.set_meta_data(["filename", key], filename)
-                expInfo.set_meta_data(["group_name", key], group_name)
+        exp = self.exp
+        expInfo = exp.meta_data
+        expInfo.set_meta_data("filename", {})
+        expInfo.set_meta_data("group_name", {})
+        for key in exp.index["out_data"].keys():
+            filename = \
+                os.path.join(expInfo.get_meta_data("out_path"), "%s%02i_%s"
+                             % (os.path.basename(
+                                expInfo.get_meta_data("process_file")),
+                                count, plugin_id))
+            filename = filename + "_" + key + ".h5"
+            group_name = "%i-%s-%s" % (count, plugin.name, key)
+            exp.barrier()
+            logging.debug("(set_filenames) Creating output file after "
+                          " barrier %s", filename)
+            expInfo.set_meta_data(["filename", key], filename)
+            expInfo.set_meta_data(["group_name", key], group_name)
 
     def add_data_links(self, linkType):
 
@@ -234,24 +234,23 @@ class Hdf5TransportData(object):
     def single_slice_list(self):
         pData = self.get_plugin_data()
         slice_dirs = pData.get_slice_directions()
-        core_dirs = pData.get_core_directions()
+        core_dirs = np.array(pData.get_core_directions())
         shape = self.get_shape()
         index = self.get_slice_dirs_index(slice_dirs, shape)
 #        if 'var' not in [shape[i] for i in slice_dirs]:
 #            shape = [s for s in list(shape) if isinstance(s, int)]
 
         fix_dirs, value = pData.get_fixed_directions()
-        starts, stops, steps, chunks = self.get_starts_stops_steps()
 
         nSlices = index.shape[1] if index.size else len(fix_dirs)
         nDims = len(shape)
 
-        #*** vectorise this!
+        core_slice = self.get_core_slices(core_dirs)
+
         slice_list = []
         for i in range(nSlices):
-            getitem = [slice(None)]*nDims
-            for c in core_dirs:
-                getitem[c] = slice(starts[c], stops[c], steps[c])
+            getitem = np.array([slice(None)]*nDims)
+            getitem[core_dirs] = core_slice[np.arange(len(core_dirs))]
             for f in range(len(fix_dirs)):
                 getitem[fix_dirs[f]] = slice(value[f], value[f] + 1, 1)
             for sdir in range(len(slice_dirs)):
@@ -261,6 +260,25 @@ class Hdf5TransportData(object):
 
         slice_list = self.remove_var_length_dimension(slice_list)
         return slice_list
+
+    def get_core_slices(self, core_dirs):
+        core_slice = []
+        starts, stops, steps, chunks = self.get_starts_stops_steps()
+        for c in core_dirs:
+            if (chunks[c]) > 1:
+                if (stops[c] - starts[c] == 1):
+                    start = starts[c] - int(chunks[c]/2)
+                    if start < 0:
+                        raise Exception('Cannot have a negative value in the '
+                                        'slice list.')
+                    stop = starts[c] + (chunks[c] - int(chunks[c]/2))
+                    core_slice.append(slice(start, stop, 1))
+                else:
+                    raise Exception("The core dimension does not support "
+                                    "multiple chunks.")
+            else:
+                core_slice.append(slice(starts[c], stops[c], steps[c]))
+        return np.array(core_slice)
 
     def remove_var_length_dimension(self, slice_list):
         shape = self.get_shape()
@@ -307,7 +325,6 @@ class Hdf5TransportData(object):
             map_len = map_obj.data_info.get_meta_data('full_map_dim_len')[0]
 
         grouped = []
-        count = 0
         for group in banked:
             full_frames = int((length)/max_frames)
             full_frames_end = start + full_frames*step*max_frames
@@ -324,7 +341,6 @@ class Hdf5TransportData(object):
                 new_slice = slice(i+jump, end, step)
                 working_slice[slice_dir[0]] = new_slice
                 grouped.append(tuple(working_slice))
-            count += 1
 
             if self.mapping:
                 start = start + map_len

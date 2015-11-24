@@ -119,8 +119,12 @@ class VoCentering(BaseFilter, CpuPlugin):
         # the tolerances
         while max_disp > tolerance:
             mask = (np.abs(cor_fit-cor_clean)) < (max_disp / 2.)
+            print x_clean, '\n', mask, '\n'
             x_clean = x_clean[mask]
+            print x_clean[mask], '\n'
+            print cor_clean, '\n'
             cor_clean = cor_clean[mask]
+            print cor_clean, '\n'
             z = np.polyfit(x_clean, cor_clean, self.parameters['poly_degree'])
             p = np.poly1d(z)
             cor_fit = p(x_clean)
