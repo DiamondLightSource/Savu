@@ -23,6 +23,7 @@
 
 import re
 import logging
+import numpy as np
 
 plugins = {}
 plugins_path = {}
@@ -168,3 +169,13 @@ def find_args(dclass):
     return [{'dtype': type(value),
              'name': a[0], 'desc': a[1],
              'default': value} for a in args for value in [eval(a[2])]]
+
+
+def calc_param_indices(dims):
+    indices_list = []
+    for i in range(len(dims)):
+        chunk = int(np.prod(dims[0:i]))
+        repeat = int(np.prod(dims[i+1:]))
+        idx = np.ravel(np.kron(range(dims[i]), np.ones((repeat, chunk))))
+        indices_list.append(idx.astype(int))
+    return np.transpose(np.array(indices_list))

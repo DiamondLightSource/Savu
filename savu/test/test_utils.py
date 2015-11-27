@@ -24,8 +24,10 @@
 import inspect
 import tempfile
 import os
+import copy
 
 from savu.core.plugin_runner import PluginRunner
+from savu.data.experiment_collection import Experiment
 import savu.plugins.utils as pu
 from savu.data.data_structures import PluginData
 
@@ -186,3 +188,57 @@ def set_process(exp, process, processes):
 def plugin_runner(options):
     plugin_runner = PluginRunner(options)
     return plugin_runner.run_plugin_list(options)
+
+
+def plugin_runner_load_plugin(options):
+    plugin_runner = PluginRunner(options)
+    plugin_runner.exp = Experiment(options)
+    plugin_list = plugin_runner.exp.meta_data.plugin_list.plugin_list
+
+    exp = plugin_runner.exp
+    pu.plugin_loader(exp, plugin_list[0])
+    exp.set_nxs_filename()
+
+    plugin_dict = plugin_list[1]
+    plugin = pu.load_plugin(plugin_dict['id'])
+    plugin.exp = exp
+
+    return plugin
+
+
+def plugin_setup(plugin):
+    plugin_list = plugin.exp.meta_data.plugin_list.plugin_list
+    plugin_dict = plugin_list[1]
+    pu.set_datasets(plugin.exp, plugin, plugin_dict)
+    plugin.set_parameters(plugin_dict['data'])
+    plugin.set_plugin_datasets()
+    plugin.setup()
+
+
+def plugin_runner_real_plugin_run(options):
+    plugin_runner = PluginRunner(options)
+    plugin_runner.exp = Experiment(options)
+    plugin_list = plugin_runner.exp.meta_data.plugin_list.plugin_list
+    plugin_runner.run_plugin_list_check(plugin_list)
+
+    exp = plugin_runner.exp
+
+    pu.plugin_loader(exp, plugin_list[0])
+
+    start_in_data = copy.deepcopy(exp.index['in_data'])
+    in_data = exp.index["in_data"][exp.index["in_data"].keys()[0]]
+    out_data_objs, stop = in_data.load_data(1)
+    exp.clear_data_objects()
+    exp.index['in_data'] = copy.deepcopy(start_in_data)
+
+    for key in out_data_objs[0]:
+        exp.index["out_data"][key] = out_data_objs[0][key]
+
+    plugin = pu.plugin_loader(exp, plugin_list[1])
+    plugin.run_plugin(exp, plugin_runner)
+
+#    out_datasets = plugin.parameters["out_datasets"]
+#    exp.reorganise_datasets(out_datasets, 'final_result')
+#
+#    for key in exp.index["in_data"].keys():
+#        exp.index["in_data"][key].close_file()

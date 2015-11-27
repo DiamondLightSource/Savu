@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2014 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,8 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from savu.plugins.base_recon import BaseRecon
-#from savu.data.plugin_info import CitationInfomration
 
 """
 .. module:: cgls_recon
@@ -29,14 +26,16 @@ import numpy as np
 import ccpi_reconstruction
 from savu.plugins.utils import register_plugin
 
+from savu.plugins.base_recon import BaseRecon
+
 
 @register_plugin
 class CglsRecon(BaseRecon, CpuPlugin):
     """
      A Plugin to run the CCPi cgls reconstruction
 
-    :param number_of_iterations: Number of Iterations if an iterative method is used . Default: 5.
-    :param resolution: Determines the number of output voxels where resolution = n_pixels/n_voxels. Default: 1.
+    :param number_of_iterations: Number of iterations. Default: 5.
+    :param resolution: #output voxels (res = n_pixels/n_voxels). Default: 1.
     :param number_of_threads: Number of OMP threads. Default: 1
     """
 
@@ -52,6 +51,4 @@ class CglsRecon(BaseRecon, CpuPlugin):
                                           angles.astype(np.float32),
                                           centre_of_rotations[0], resolution,
                                           num_iterations, nthreads)
-        voxels = voxels[:160, np.newaxis, :160, 1]
-
         return voxels

@@ -93,7 +93,6 @@ class PluginRunner(object):
         print "Plugin list check complete!"
 
     def check_loaders_and_savers(self, plugin_list):
-
         first_plugin = plugin_list[0]
         end_plugin = plugin_list[-1]
 

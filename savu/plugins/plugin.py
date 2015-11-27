@@ -23,6 +23,7 @@
 
 import logging
 import inspect
+import numpy as np
 
 from savu.plugins import utils as pu
 from savu.data.data_structures import PluginData
@@ -40,21 +41,29 @@ class Plugin(object):
         self.parameters = {}
         self.data_objs = {}
         self.variable_data_flag = False
+        self.multi_params_dict = {}
+        self.extra_dims = []
 
     def main_setup(self, exp, params, indices=0):
         self.exp = exp
-        param_len = self.set_parameters(params)
-        #self.set_parameters_this_instance(param_len, indices)
-        self.set_plugin_datasets(exp)
+        self.set_parameters(params)
+        self.set_plugin_datasets()
         self.setup()
 
         in_datasets, out_datasets = self.get_datasets()
         for data in in_datasets + out_datasets:
             data.finalise_patterns()
-#
-#    def set_parameters_this_instance(self, params, indices):
-#        for key, value in self.parameters.iteritems():
-#            self.parameters[key]
+
+    def set_parameters_this_instance(self, indices):
+        dims = set(self.multi_params_dict.keys())
+        count = 0
+        for dim in dims:
+            info = self.multi_params_dict[dim]
+            name = info['label'].split('_param')[0]
+            print info, info['values']
+            print indices
+            self.parameters[name] = info['values'][indices[count]]
+            count += 1
 
     def setup(self):
         """
@@ -85,7 +94,9 @@ class Plugin(object):
                 #print full_description
                 for item in full_description:
                     # split parameters into lists here
-                    self.parameters[item['name']] = item['default']
+                    self.parameters[item['name']] = {}
+                    self.parameters[item['name']]['value'] = item['default']
+                    self.parameters[item['name']]['dtype'] = item['dtype']
 
     def set_parameters(self, parameters):
         """
@@ -98,14 +109,29 @@ class Plugin(object):
         """
         self.parameters = {}
         self.populate_default_parameters()
-        if parameters is not None:
-            for key in parameters.keys():
-                if key in self.parameters.keys():
-                    self.parameters[key] = parameters[key]
-                else:
-                    raise ValueError("Parameter " + key +
-                                     "is not a valid parameter for plugin " +
-                                     self.name)
+        for key in parameters.keys():
+            if key in self.parameters.keys():
+                value = self.convert_multi_params(parameters[key], key)
+                self.parameters[key] = value
+            else:
+                raise ValueError("Parameter " + key +
+                                 "is not a valid parameter for plugin " +
+                                 self.name)
+        for key, value in self.parameters.iteritems():
+            self.parameters[key] = value['value']
+
+    def convert_multi_params(self, value, key):
+        dtype = self.parameters[key]['dtype']
+        if isinstance(value, str):
+            value = value.split(';')
+            if type(value[0]) != dtype:
+                value = map(dtype, value)
+            if len(value) > 1:
+                label = key + '_params.' + type(value[0]).__name__
+                self.multi_params_dict[len(self.multi_params_dict)] = \
+                    {'label': label, 'values': value}
+                self.extra_dims.append(len(value))
+        return {'dtype': dtype, 'value': value}
 
     def get_parameters(self, name):
         return self.parameters[name]
@@ -250,15 +276,19 @@ class Plugin(object):
             for data in self.parameters['out_datasets']:
                 self.exp.create_data_object("out_data", data)
             out_data = self.get_data_objects('out_data')
+        for data in out_data:
+            data.extra_dims = self.extra_dims
         return out_data
 
     def get_plugin_data(self, data_list):
         pattern_list = []
         for data in data_list:
             pattern_list.append(PluginData(data))
+            pattern_list[-1].extra_dims = self.extra_dims
+            pattern_list[-1].multi_params_dict = self.multi_params_dict
         return pattern_list
 
-    def set_plugin_datasets(self, experiment):
+    def set_plugin_datasets(self):
         """
         Convert in/out_dataset strings to objects and create PluginData objects
         for each.

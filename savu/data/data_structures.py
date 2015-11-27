@@ -156,7 +156,9 @@ class Data(object):
                     self.set_variable_flag()
                     self.set_shape((shape[shape.keys()[0]] + ('var',)))
                 else:
-                    self.set_shape(shape)
+                    print self.get_data_patterns()
+                    pData = self.get_plugin_data()
+                    self.set_shape(shape + tuple(pData.extra_dims))
                     if 'var' in shape:
                         self.set_variable_flag()
             except KeyError:
@@ -226,6 +228,8 @@ class Data(object):
             copy_data = map_data
 
         patterns = copy.copy(copy_data.get_data_patterns())
+        # add extra dims to slicing dimensions here
+        print patterns
         self.set_data_patterns(patterns)
         self.copy_labels(copy_data)
         self.find_and_set_shape(copy_data)
@@ -242,9 +246,19 @@ class Data(object):
 
     def copy_labels(self, copy_data):
         nDims = copy.copy(copy_data.data_info.get_meta_data('nDims'))
-        self.data_info.set_meta_data('nDims', nDims)
         axis_labels = copy.copy(
             copy_data.data_info.get_meta_data('axis_labels'))
+
+        # add multi_params axis labels from dictionary in pData
+        multi_params_dict = self.get_plugin_data().multi_params_dict
+        axis_labels.extend([0]*len(multi_params_dict))
+        for key, value in multi_params_dict.iteritems():
+            name, unit = value['label'].split('.')
+            axis_labels[nDims + key] = {name: unit}
+            # add parameter values to the meta_data
+            self.meta_data.set_meta_data(name, value['values'])
+
+        self.data_info.set_meta_data('nDims', nDims + len(self.extra_dims))
         self.data_info.set_meta_data('axis_labels', axis_labels)
 
     def amend_axis_labels(self, *args):
@@ -365,7 +379,8 @@ class Data(object):
             if data.next_shape:
                 new_shape = data.next_shape
             else:
-                new_shape = data.get_shape()
+                pData = self.get_plugin_data()
+                new_shape = data.get_shape() + tuple(pData.extra_dims)
         except ValueError:
             new_shape = data.get_shape()
         self.set_shape(new_shape)
@@ -552,6 +567,8 @@ class PluginData(object):
         self.selected_data = False
         self.shape = None
         self.core_shape = None
+        self.multi_params = {}
+        self.extra_dims = []
 
     def get_total_frames(self):
         temp = 1
@@ -645,13 +662,13 @@ class PluginData(object):
 
     def set_fixed_directions(self, dims, values):
         slice_dirs = self.get_slice_directions()
-        if set(slice_dirs).symmetric_difference(set(dims)):
+        if set(dims).difference(set(slice_dirs)):
             raise Exception("You are trying to fix a direction that is not"
                             " a slicing direction")
         self.meta_data.set_meta_data("fixed_directions", dims)
         self.meta_data.set_meta_data("fixed_directions_values", values)
         self.set_slice_directions()
-        shape = list(self.get_shape())
+        shape = list(self.data_obj.get_shape())
         for dim in dims:
             shape[dim] = 1
         self.data_obj.set_shape(tuple(shape))

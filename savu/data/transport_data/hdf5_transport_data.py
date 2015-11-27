@@ -213,7 +213,11 @@ class Hdf5TransportData(object):
                 return self.get_bool_slice_dir_index(dim, dir_idx)
             return dir_idx
         else:
-            return np.arange(starts[dim], stops[dim], steps[dim])
+            fix_dirs, value = self.get_plugin_data().get_fixed_directions()
+            if dim in fix_dirs:
+                return value[fix_dirs.index(dim)]
+            else:
+                return np.arange(starts[dim], stops[dim], steps[dim])
 
     def get_bool_slice_dir_index(self, dim, dir_idx):
         shape = self.data_info.get_meta_data('orig_shape')[dim]
@@ -239,7 +243,6 @@ class Hdf5TransportData(object):
         index = self.get_slice_dirs_index(slice_dirs, shape)
 #        if 'var' not in [shape[i] for i in slice_dirs]:
 #            shape = [s for s in list(shape) if isinstance(s, int)]
-
         fix_dirs, value = pData.get_fixed_directions()
 
         nSlices = index.shape[1] if index.size else len(fix_dirs)
