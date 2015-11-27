@@ -156,7 +156,6 @@ class Data(object):
                     self.set_variable_flag()
                     self.set_shape((shape[shape.keys()[0]] + ('var',)))
                 else:
-                    print self.get_data_patterns()
                     pData = self.get_plugin_data()
                     self.set_shape(shape + tuple(pData.extra_dims))
                     if 'var' in shape:
@@ -228,8 +227,6 @@ class Data(object):
             copy_data = map_data
 
         patterns = copy.copy(copy_data.get_data_patterns())
-        # add extra dims to slicing dimensions here
-        print patterns
         self.set_data_patterns(patterns)
         self.copy_labels(copy_data)
         self.find_and_set_shape(copy_data)
