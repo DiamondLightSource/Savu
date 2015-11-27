@@ -39,6 +39,7 @@ class Plugin(object):
         self.name = name
         self.exp = None
         self.parameters = {}
+        self.parameters_types = {}
         self.data_objs = {}
         self.variable_data_flag = False
         self.multi_params_dict = {}
@@ -60,8 +61,6 @@ class Plugin(object):
         for dim in dims:
             info = self.multi_params_dict[dim]
             name = info['label'].split('_param')[0]
-            print info, info['values']
-            print indices
             self.parameters[name] = info['values'][indices[count]]
             count += 1
 
@@ -94,9 +93,8 @@ class Plugin(object):
                 #print full_description
                 for item in full_description:
                     # split parameters into lists here
-                    self.parameters[item['name']] = {}
-                    self.parameters[item['name']]['value'] = item['default']
-                    self.parameters[item['name']]['dtype'] = item['dtype']
+                    self.parameters[item['name']] = item['default']
+                    self.parameters_types[item['name']] = item['dtype']
 
     def set_parameters(self, parameters):
         """
@@ -108,6 +106,7 @@ class Plugin(object):
         :type parameters: dict
         """
         self.parameters = {}
+        self.parameters_types = {}
         self.populate_default_parameters()
         for key in parameters.keys():
             if key in self.parameters.keys():
@@ -121,8 +120,8 @@ class Plugin(object):
             self.parameters[key] = value['value']
 
     def convert_multi_params(self, value, key):
-        dtype = self.parameters[key]['dtype']
-        if isinstance(value, str):
+        dtype = self.parameters_types[key]
+        if isinstance(value, unicode):
             value = value.split(';')
             if type(value[0]) != dtype:
                 value = map(dtype, value)

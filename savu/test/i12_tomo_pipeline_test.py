@@ -35,14 +35,15 @@ class I12TomoPipelineTest(unittest.TestCase):
 #    def test_i12pipeline(self):
 #        options = tu.set_experiment('i12tomo')
 #        plugin = 'savu.plugins.corrections.i12_dark_flat_field_correction'
-#        selection = ['200:endmap-200:1:1', 'mid-2:mid+3:1:1', '800:end-800:1:1']
+#        selection = ['200:endmap-200:1:1', 'mid-2:mid+3:1:1',
+#                     '800:end-800:1:1']
 #        loader_dict = {'preview': selection}
 #        data_dict = {'in_datasets': ['tomo'], 'out_datasets': ['test']}
 #        all_dicts = [loader_dict, data_dict, {}]
 #        run_protected_plugin_runner_no_process_list(options, plugin,
 #                                                    data=all_dicts)
 
-    #@unittest.skip('Test data not available')
+    @unittest.skip('Test data not available')
     def test_process_preview(self):
         options = {
             "transport": "hdf5",
@@ -55,17 +56,18 @@ class I12TomoPipelineTest(unittest.TestCase):
             }
         run_protected_plugin_runner(options)
 
-#    def test_process(self):
-#        options = {
-#            "transport": "hdf5",
-#            "process_names": "CPU0",
-#            "data_file": '/dls/science/groups/das/ExampleData/i12/savu_data/' +
-#                         'ee12581-1_test/pc2_KRA_530_ramp_00000.hdf',
-#            "process_file": tu.get_test_process_path(
-#                'i12_tomo_pipeline_test.nxs'),
-#            "out_path": tempfile.mkdtemp()
-#            }
-#        run_protected_plugin_runner(options)
+    @unittest.skip('Test data not available')
+    def test_process(self):
+        options = {
+            "transport": "hdf5",
+            "process_names": "CPU0",
+            "data_file": '/dls/science/groups/das/ExampleData/i12/savu_data/' +
+                         'ee12581-1_test/pc2_KRA_530_ramp_00000.hdf',
+            "process_file": tu.get_test_process_path(
+                'i12_tomo_pipeline_test.nxs'),
+            "out_path": tempfile.mkdtemp()
+            }
+        run_protected_plugin_runner(options)
         
 if __name__ == "__main__":
     unittest.main()

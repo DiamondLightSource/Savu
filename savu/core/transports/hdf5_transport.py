@@ -151,6 +151,8 @@ class Hdf5Transport(TransportMechanism):
             logging.info("Load the plugin")
             plugin = pu.plugin_loader(exp, plugin_list[i])
 
+            print "***BEFORE THE RUN***", plugin.parameters
+
             exp.barrier()
             logging.info("run the plugin")
             print "\n*running the", plugin_list[i]['id'], "plugin*\n"
@@ -184,17 +186,20 @@ class Hdf5Transport(TransportMechanism):
 #            self.set_out_data(out_data, out_slice_list, result, count,
 #                              expand_dict)
 
+#    @logmethod
+#    def process(self, plugin):
+#        self.process_checks()
+#        in_data, out_data = plugin.get_datasets()
+#        extra_dims = out_data[0].extra_dims
+#        if extra_dims:
+#            self.process_multi(extra_dims, plugin, in_data, out_data)
+#        else:
+#            self.process_single(plugin, in_data, out_data)
+
     @logmethod
     def process(self, plugin):
         self.process_checks()
         in_data, out_data = plugin.get_datasets()
-        extra_dims = out_data[0].extra_dims
-        if extra_dims:
-            self.process_multi(extra_dims, plugin, in_data, out_data)
-        else:
-            self.process_single(plugin, in_data, out_data)
-
-    def process_single(self, plugin, in_data, out_data):
         expInfo = plugin.exp.meta_data
         in_slice_list = self.get_all_slice_lists(in_data, expInfo)
         out_slice_list = self.get_all_slice_lists(out_data, expInfo)
@@ -210,30 +215,30 @@ class Hdf5Transport(TransportMechanism):
             self.set_out_data(out_data, out_slice_list, result, count,
                               expand_dict)
 
-    def process_multi(self, extra_dims, plugin, in_data, out_data):
-        repeat = np.prod(extra_dims) if extra_dims else 1
-        expInfo = plugin.exp.meta_data
-        in_slice_list = self.get_all_slice_lists(in_data, expInfo)
-        squeeze_dict = self.set_functions(in_data, 'squeeze')
-        expand_dict = self.set_functions(out_data, 'expand')
-
-        param_idx = pu.calc_param_indices(extra_dims)
-        out_data_dims = [len(d.get_shape()) for d in out_data]
-        param_dims = [range(d - len(extra_dims), d) for d in out_data_dims]
-        for i in range(repeat):
-            for j in range(len(out_data)):
-                out_data[j].get_plugin_data()\
-                    .set_fixed_directions(param_dims[j], param_idx[i])
-                out_slice_list = self.get_all_slice_lists(out_data, expInfo)
-                plugin.set_parameters_this_instance(param_idx[i])
-                for count in range(len(in_slice_list[0])):
-                    print i, count
-                    section, slice_list = \
-                        self.get_all_padded_data(in_data, in_slice_list, count,
-                                                 squeeze_dict)
-                    result = plugin.process_frames(section, slice_list)
-                    self.set_out_data(out_data, out_slice_list, result, count,
-                                      expand_dict)
+#    def process_multi(self, extra_dims, plugin, in_data, out_data):
+#        repeat = np.prod(extra_dims) if extra_dims else 1
+#        expInfo = plugin.exp.meta_data
+#        in_slice_list = self.get_all_slice_lists(in_data, expInfo)
+#        squeeze_dict = self.set_functions(in_data, 'squeeze')
+#        expand_dict = self.set_functions(out_data, 'expand')
+#
+#        param_idx = pu.calc_param_indices(extra_dims)
+#        out_data_dims = [len(d.get_shape()) for d in out_data]
+#        param_dims = [range(d - len(extra_dims), d) for d in out_data_dims]
+#        for i in range(repeat):
+#            for j in range(len(out_data)):
+#                out_data[j].get_plugin_data()\
+#                    .set_fixed_directions(param_dims[j], param_idx[i])
+#                out_slice_list = self.get_all_slice_lists(out_data, expInfo)
+#                plugin.set_parameters_this_instance(param_idx[i])
+#                for count in range(len(in_slice_list[0])):
+#                    print i, count
+#                    section, slice_list = \
+#                        self.get_all_padded_data(in_data, in_slice_list, count,
+#                                                 squeeze_dict)
+#                    result = plugin.process_frames(section, slice_list)
+#                    self.set_out_data(out_data, out_slice_list, result, count,
+#                                      expand_dict)
 
     def process_checks(self):
         pass

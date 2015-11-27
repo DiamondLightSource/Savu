@@ -52,6 +52,7 @@ class BaseRecon(Plugin):
             cor = in_meta_data.get_meta_data("centre_of_rotation")
         except KeyError:
             cor = np.ones(in_dataset.get_shape()[1])
+            print self.parameters['center_of_rotation']
             cor *= self.parameters['center_of_rotation']
             in_meta_data.set_meta_data("centre_of_rotation", cor)
         self.exp.log(self.name + " End")

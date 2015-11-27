@@ -36,8 +36,6 @@ from savu.plugins.utils import register_plugin
 class NxtomoLoader(BaseLoader):
     """
     A class to load i12 tomography data from a hdf5 file
-
-    :param data_mapping: A dictionary of dimensions to map: Default: {}.
     """
 
     def __init__(self, name='NxtomoLoader'):
