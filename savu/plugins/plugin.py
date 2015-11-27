@@ -90,9 +90,7 @@ class Plugin(object):
         for clazz in inspect.getmro(self.__class__)[::-1]:
             if clazz != object:
                 full_description = pu.find_args(clazz)
-                #print full_description
                 for item in full_description:
-                    # split parameters into lists here
                     self.parameters[item['name']] = item['default']
                     self.parameters_types[item['name']] = item['dtype']
 
@@ -122,14 +120,15 @@ class Plugin(object):
     def convert_multi_params(self, value, key):
         dtype = self.parameters_types[key]
         if isinstance(value, unicode):
-            value = value.split(';')
-            if type(value[0]) != dtype:
-                value = map(dtype, value)
-            if len(value) > 1:
-                label = key + '_params.' + type(value[0]).__name__
-                self.multi_params_dict[len(self.multi_params_dict)] = \
-                    {'label': label, 'values': value}
-                self.extra_dims.append(len(value))
+            if ';' in value:
+                value = value.split(';')
+                if type(value[0]) != dtype:
+                    value = map(dtype, value)
+                if len(value) > 1:
+                    label = key + '_params.' + type(value[0]).__name__
+                    self.multi_params_dict[len(self.multi_params_dict)] = \
+                        {'label': label, 'values': value}
+                    self.extra_dims.append(len(value))
         return {'dtype': dtype, 'value': value}
 
     def get_parameters(self, name):

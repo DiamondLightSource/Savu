@@ -52,9 +52,8 @@ class BaseRecon(Plugin):
             cor = in_meta_data.get_meta_data("centre_of_rotation")
         except KeyError:
             cor = np.ones(in_dataset.get_shape()[1])
-            print self.parameters['center_of_rotation']
             cor *= self.parameters['center_of_rotation']
-            in_meta_data.set_meta_data("centre_of_rotation", cor)
+
         self.exp.log(self.name + " End")
         self.cor = cor
         in_pData, out_pData = self.get_plugin_datasets()
@@ -93,9 +92,9 @@ class BaseRecon(Plugin):
         dim_volX, dim_volY, dim_volZ = \
             self.map_volume_dimensions(in_dataset[0])
 
-        axis_labels = {in_dataset[0]: [str(dim_volX) + '.voxel_x.units',
-                       str(dim_volY) + '.voxel_y.units',
-                       str(dim_volZ) + '.voxel_z.units']}
+        axis_labels = {in_dataset[0]: [str(dim_volX) + '.voxel_x.voxels',
+                       str(dim_volY) + '.voxel_y.voxels',
+                       str(dim_volZ) + '.voxel_z.voxels']}
 
         shape = list(in_dataset[0].get_shape())
         shape[dim_volX] = shape[dim_volZ]
