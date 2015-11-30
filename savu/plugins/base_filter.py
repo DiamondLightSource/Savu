@@ -87,8 +87,6 @@ class BaseFilter(Plugin):
         plugin_pattern = self.get_plugin_pattern()
         in_pData[0].plugin_data_setup(plugin_pattern, self.get_max_frames())
         out_pData[0].plugin_data_setup(plugin_pattern, self.get_max_frames())
-        print "^^^^^^^^^^^^^^^^^^^", in_dataset[0].get_shape(), out_dataset[0].get_shape()
-        print out_dataset[0].get_data_patterns()
 
         self.exp.log(self.name + " End")
 

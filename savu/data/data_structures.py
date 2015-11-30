@@ -542,6 +542,7 @@ class Data(object):
     def trim_output_data(self, copy_obj, **kwargs):
         if self.tomo_raw_obj:
             self.get_tomo_raw().remove_image_key(copy_obj, **kwargs)
+            self.set_preview([])
 
     def get_axis_label_keys(self):
         axis_labels = self.data_info.get_meta_data('axis_labels')
@@ -599,7 +600,7 @@ class PluginData(object):
         dirs = list(set(core_dir + (slice_dir[0],)))
         slice_idx = dirs.index(slice_dir[0])
         shape = []
-        for core in core_dir:
+        for core in set(core_dir):
             shape.append(self.data_obj.get_shape()[core])
         self.set_core_shape(tuple(shape))
         if self.get_frame_chunk() > 1:

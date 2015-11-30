@@ -105,7 +105,7 @@ class PaganinFilter(BaseFilter, CpuPlugin):
         result = result[padtopbottom:-padtopbottom,
                         padleftright: -padleftright]
         logging.debug("Paganin Filter output shape %s" % str(result.shape))
-        return result.squeeze()
+        return result
 
     def get_max_frames(self):
         return 1

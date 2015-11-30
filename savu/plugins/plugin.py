@@ -106,8 +106,6 @@ class Plugin(object):
         self.parameters = {}
         self.parameters_types = {}
         self.populate_default_parameters()
-        print "default parameters", self.parameters
-        print "input parameters", parameters
         for key in parameters.keys():
             if key in self.parameters.keys():
                 value = self.convert_multi_params(parameters[key], key)
