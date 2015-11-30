@@ -120,8 +120,8 @@ class VoCentering(BaseFilter, CpuPlugin):
         while max_disp > tolerance:
             mask = (np.abs(cor_fit-cor_clean)) < (max_disp / 2.)
             print x_clean, '\n', mask, '\n'
-            x_clean = x_clean[mask]
             print x_clean[mask], '\n'
+            x_clean = x_clean[mask]
             print cor_clean, '\n'
             cor_clean = cor_clean[mask]
             print cor_clean, '\n'
