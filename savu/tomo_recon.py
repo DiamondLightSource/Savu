@@ -28,7 +28,7 @@ from savu.core.plugin_runner import PluginRunner
 
 
 def option_parser():
-    usage = "%prog [options] input_file output_directory"
+    usage = "%prog [options] input_file processing_file output_directory"
     version = "%prog 0.1"
     parser = optparse.OptionParser(usage=usage, version=version)
     parser.add_option("-n", "--names", dest="names", help="Process names",
@@ -42,7 +42,7 @@ def option_parser():
     return [options, args]
 
 
-def check_input_params(args):  
+def check_input_params(args):
     # Check basic items for completeness
     if len(args) is not 3:
         print("filename, process file and output path needs to be specified")
