@@ -106,6 +106,8 @@ class Plugin(object):
         self.parameters = {}
         self.parameters_types = {}
         self.populate_default_parameters()
+        print "default parameters", self.parameters
+        print "input parameters", parameters
         for key in parameters.keys():
             if key in self.parameters.keys():
                 value = self.convert_multi_params(parameters[key], key)
@@ -114,8 +116,6 @@ class Plugin(object):
                 raise ValueError("Parameter " + key +
                                  "is not a valid parameter for plugin " +
                                  self.name)
-        for key, value in self.parameters.iteritems():
-            self.parameters[key] = value['value']
 
     def convert_multi_params(self, value, key):
         dtype = self.parameters_types[key]
@@ -129,7 +129,7 @@ class Plugin(object):
                     self.multi_params_dict[len(self.multi_params_dict)] = \
                         {'label': label, 'values': value}
                     self.extra_dims.append(len(value))
-        return {'dtype': dtype, 'value': value}
+        return value
 
     def get_parameters(self, name):
         return self.parameters[name]

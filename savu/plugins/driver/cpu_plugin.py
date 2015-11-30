@@ -84,7 +84,6 @@ class CpuPlugin(object):
             logging.debug("Post-processing")
             self.post_process()
 
-
     def process(self, data, output, processes, process):
         """
         This method is called after the process has been created by the
