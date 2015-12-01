@@ -72,9 +72,7 @@ class VoCentering(BaseFilter, CpuPlugin):
         return cor_positions[vv.argmin()]
 
     def filter_frames(self, data):
-        print data[0].shape
         data = data[0][::self.parameters['step']]
-        print data.shape
         width = data.shape[1]/4
         step = width/10.
         point = 0.0
@@ -119,12 +117,8 @@ class VoCentering(BaseFilter, CpuPlugin):
         # the tolerances
         while max_disp > tolerance:
             mask = (np.abs(cor_fit-cor_clean)) < (max_disp / 2.)
-            print x_clean, '\n', mask, '\n'
-            print x_clean[mask], '\n'
             x_clean = x_clean[mask]
-            print cor_clean, '\n'
             cor_clean = cor_clean[mask]
-            print cor_clean, '\n'
             z = np.polyfit(x_clean, cor_clean, self.parameters['poly_degree'])
             p = np.poly1d(z)
             cor_fit = p(x_clean)
@@ -133,7 +127,6 @@ class VoCentering(BaseFilter, CpuPlugin):
         # build a full array for the output fit
         cor_fit = p(x)
 
-        print cor_fit
         out_datasets[1].data[:] = cor_fit[:, np.newaxis]
         # add to metadata
         self.populate_meta_data('cor_raw', cor_raw)

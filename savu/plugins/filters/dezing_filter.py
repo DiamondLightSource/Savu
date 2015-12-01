@@ -52,6 +52,13 @@ class DezingFilter(BaseFilter, CpuPlugin):
                           self.padding)
         logging.debug("Finished Dezing Setup")
 
+    def filter_frame(self, data):
+        logging.debug("Running Dezing Frame")
+        result = np.empty_like(data[0])
+        dezing.run(data[0], result)
+        logging.debug("Finished Dezing Frame")
+        return result
+
     def post_process(self):
         logging.debug("Running Dezing Cleanup")
         dezing.cleanup()
@@ -64,10 +71,3 @@ class DezingFilter(BaseFilter, CpuPlugin):
 # other examples
 #        data.padding = {'pad_multi_frames':pad, 'pad_frame_edges':pad}
 #        data.padding = {'pad_direction':[ddir, pad]}}
-
-    def filter_frame(self, data):
-        logging.debug("Running Dezing Frame")
-        result = np.empty_like(data[0])
-        dezing.run(data[0], result)
-        logging.debug("Finished Dezing Frame")
-        return result
