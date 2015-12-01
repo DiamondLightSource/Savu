@@ -174,7 +174,7 @@ class Hdf5Transport(TransportMechanism):
 
         for count in range(len(in_slice_list[0])):
 
-            # print every 10th loop iteration
+            # print every 10th loop iteration to screen
             if (count % 10) == 0:
                 print count
 
