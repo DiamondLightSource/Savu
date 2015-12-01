@@ -20,7 +20,7 @@ echo "SAVU_LAUNCHER:: Job Complete, preparing output..."
 
 filename=`echo $outname.o`
 jobnumber=`awk '{print $3}' /dls/tmp/savu/$USER.out | head -n 1`
-filename=$filename$jobnumber
+filename=/dls/tmp/savu/$filename$jobnumber
 
 while [ ! -f $filename ]
 do
