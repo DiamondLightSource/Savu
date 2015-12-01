@@ -7,12 +7,25 @@ cd /dls/tmp/savu/
 
 echo "SAVU_LAUNCHER:: Changed to temporary directory - /dls/tmp/savu"
 
-qsub -N mpi_test -sync y -j y -pe openmpi 24 -q medium.q@@com06 -V $SAVU_HOME/mpi/dls/savu_mpijob.sh $@ > tmp.txt
+savupath=/dls_sw/apps/savu/master/Savu
+datafile=$1
+processfile=$2
+outpath=$3
+outname=savu
+nNodes=1
+nCPUs=20
+
+filepath=$savupath/bin/savu_mpijob.sh
+M=$((nNodes*20))
+
+echo "SAVU_LAUNCHER:: Running Job, please wait"
+
+qsub -N $outname -sync y -j y -pe openmpi $M -l infiniband -q medium.q@@com10 $filepath $savupath $datafile $processfile $outpath $nCPUs > $USER.out
 
 echo "SAVU_LAUNCHER:: Job Complete, preparing output..."
 
-filename=`echo mpi_test.o`
-jobnumber=`awk '{print $3}' tmp.txt | head -n 1`
+filename=`echo $outname.o`
+jobnumber=`awk '{print $3}' $USER.out | head -n 1`
 filename=$filename$jobnumber
 
 while [ ! -f $filename ]
@@ -24,13 +37,4 @@ echo "SAVU_LAUNCHER:: Output ready, spooling now"
 
 cat $filename
 
-echo "SAVU_LAUNCHER:: Output complete, preparing job statistics"
-
-sleep 20
-
-echo "SAVU_LAUNCHER:: Spooling job statistics"
-
-echo qacct -j ${jobnumber}
-qacct -j ${jobnumber}
-
-echo "SAVU_LAUNCHER:: Process complete, End of Line..."
+echo "SAVU_LAUNCHER:: Process complete"
