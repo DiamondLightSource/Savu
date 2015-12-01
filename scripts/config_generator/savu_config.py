@@ -54,6 +54,8 @@ class Content(object):
     def remove(self, pos):
         self.plugin_list.plugin_list.pop(pos)
 
+    def size(self):
+        return len(self.plugin_list.plugin_list)
 
 def _help(content, arg):
     """Display the help information"""
@@ -144,7 +146,13 @@ def _mod(content, arg):
 def _add(content, arg):
     """Adds the named plugin before the specified location 'MedianFilter 2'"""
     try:
-        name, pos = arg.split()
+        args = arg.split()
+        name = args[0]
+        pos = None
+        if len(args) == 2 :
+            pos = args[1]
+        else:
+            pos = content.size()+1
         if name in pu.plugins.keys():
             plugin = pu.plugins[name]()
             plugin.populate_default_parameters()
