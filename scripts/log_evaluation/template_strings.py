@@ -1,8 +1,8 @@
 
 def set_template_string_single(chart_width):
 
-    pos = [16, 9] 
-    
+    pos = [16, 9]
+
     template_string = '''
         <html>
         <head>
@@ -46,16 +46,15 @@ def set_template_string_single(chart_width):
     {% set position = ''' + str(pos) + ''' %}
     <div id="gantt_div" style="position: absolute; left: {{position[0]}}%; top:{{position[1]}}%;
         width: ''' + str(chart_width) + '''px; height: 1000px;"></div>
-        
-        
+
     </head>
     <body>
         <h1> Savu MPI performance tests </h1>
         <div class="boxedMachines">
             {% for m in machines %}
-            
+
             <br> {{m[1]}} : {{m[0]}}</br>
-  
+
           {% endfor %}
         </div>
     </body>       

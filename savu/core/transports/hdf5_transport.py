@@ -173,7 +173,6 @@ class Hdf5Transport(TransportMechanism):
         expand_dict = self.set_functions(out_data, 'expand')
 
         for count in range(len(in_slice_list[0])):
-
             # print every 10th loop iteration to screen
             if (count % 10) == 0:
                 print count

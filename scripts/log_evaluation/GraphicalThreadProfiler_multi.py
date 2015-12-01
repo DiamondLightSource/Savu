@@ -10,14 +10,11 @@ def convert(filename):
     the_interval = 0.8  # millisecs
 
     all_frames = []
-    print filename
     for files in filename:
-        print files
         frame = gtp.get_frame(files, the_key)
         [index, nth] = get_index(frame)
         frame.Time_end[frame.index[np.cumsum(nth)-1]] = frame.Time.max()
         frame = frame.reset_index(drop=True)
-
         temp = pd.DataFrame(np.array(frame.Time_end - frame.Time),
                             columns=['Time_diff'])
         temp['Key'] = frame.Key

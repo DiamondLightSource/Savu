@@ -24,7 +24,6 @@
 import logging
 
 from savu.plugins.plugin import Plugin
-from savu.core.utils import logmethod
 
 
 class BaseCorrection(Plugin):
@@ -39,7 +38,6 @@ class BaseCorrection(Plugin):
     def __init__(self, name='BaseCorrection'):
         super(BaseCorrection, self).__init__(name)
 
-    @logmethod
     def process_frames(self, data, slice_list):
         """
         Perform the correction

@@ -145,21 +145,24 @@ class VoCentering(BaseFilter, CpuPlugin):
 
         # set up the output dataset that is created by the plugin
         in_dataset, out_dataset = self.get_datasets()
+        in_pData, out_pData = self.get_plugin_datasets()
+        in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
         # copy all required information from in_dataset[0]
         fullData = in_dataset[0]
 
-        out_dataset[0].create_dataset(shape=(fullData.get_shape()[1], 1),
+        slice_dirs = np.array(in_pData[0].get_slice_directions())
+        new_shape = (np.prod(np.array(fullData.get_shape())[slice_dirs]), 1)
+
+        out_dataset[0].create_dataset(shape=new_shape,
                                       axis_labels=['x.pixels', 'y.pixels'],
                                       remove=True)
         out_dataset[0].add_pattern("METADATA", core_dir=(1,), slice_dir=(0,))
 
-        out_dataset[1].create_dataset(shape=(fullData.get_shape()[1], 1),
+        out_dataset[1].create_dataset(shape=new_shape,
                                       axis_labels=['x.pixels', 'y.pixels'],
                                       remove=True)
         out_dataset[1].add_pattern("METADATA", core_dir=(1,), slice_dir=(0,))
 
-        in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
         out_pData[0].plugin_data_setup('METADATA', self.get_max_frames())
         out_pData[1].plugin_data_setup('METADATA', self.get_max_frames())
 

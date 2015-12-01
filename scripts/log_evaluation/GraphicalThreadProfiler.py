@@ -24,9 +24,11 @@ def get_frame(file, the_key):
     data = pd.io.parsers.read_fwf(file, widths=[2, 13, 5, 5, 6, 1000],
                                   names=names)
     data['Key'] = data['Machine'] + data['CPU']
-    frame = ((data[data.Type == "DEBUG"])[data.columns[[6, 5, 1]]]).sort('Key')
+    frame = ((data[data.Type == "DEBUG"])[data.columns[[6, 5, 1]]])
+    frame.insert(0, 'Index', range(len(frame)))
+    frame = frame.sort(['Key', 'Index'])
+    del frame['Index']
 
-    frame = frame.sort('Key')
     startTime = (frame.groupby('Key').first()).Time
     nElems = frame.groupby('Key').size()
 
