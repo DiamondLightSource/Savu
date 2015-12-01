@@ -14,7 +14,7 @@ nCPUs=20
 filepath=$savupath/bin/savu_mpijob.sh
 M=$((nNodes*20))
 
-qsub -N $outname -sync y -j y -o /dls/tmp/savu/$USER -e /dls/tmp/savu/$USER -pe openmpi $M -l infiniband -q medium.q@@com10 $filepath $savupath $datafile $processfile $outpath $nCPUs > /dls/tmp/savu/$USER.out
+qsub -N $outname -sync y -j y -o /dls/tmp/savu/ -e /dls/tmp/savu/ -pe openmpi $M -l infiniband -q medium.q@@com10 $filepath $savupath $datafile $processfile $outpath $nCPUs > /dls/tmp/savu/$USER.out
 
 echo "SAVU_LAUNCHER:: Job Complete, preparing output..."
 
