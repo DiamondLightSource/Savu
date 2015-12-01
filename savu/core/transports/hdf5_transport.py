@@ -173,7 +173,11 @@ class Hdf5Transport(TransportMechanism):
         expand_dict = self.set_functions(out_data, 'expand')
 
         for count in range(len(in_slice_list[0])):
-            print count
+
+            # print every 10th loop iteration
+            if (count % 10) == 0:
+                print count
+
             section, slice_list = \
                 self.get_all_padded_data(in_data, in_slice_list, count,
                                          squeeze_dict)
