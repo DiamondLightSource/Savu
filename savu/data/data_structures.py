@@ -223,33 +223,6 @@ class Data(object):
                     patterns[pattern] = all_patterns[pattern]
 
         self.set_data_patterns(patterns)
-#
-#    def copy_patterns_removing_dimensions(self, pattern_list, all_patterns,
-#                                          nDims):
-#        copy_patterns = {}
-#        for new_pattern in pattern_list:
-#            name, all_dims = new_pattern.split('.')
-#            if name is '*':
-#                copy_patterns = all_patterns
-#            else:
-#                copy_patterns[name] = all_patterns[name]
-#            dims = tuple(map(int, all_dims.split(',')))
-#            dims = self.non_negative_directions(dims, nDims=nDims)
-#
-#        patterns = {}
-#        for name, pattern_dict in copy_patterns.iteritems():
-#            empty_flag = False
-#            for ddir in pattern_dict:
-#                s_dims = self.non_negative_directions(
-#                    pattern_dict[ddir], nDims=nDims)
-#                new_dims = tuple([sd for sd in s_dims if sd not in dims])
-#                pattern_dict[ddir] = new_dims
-#                if not new_dims:
-#                    empty_flag = True
-#            if empty_flag is False:
-#                patterns[name] = pattern_dict
-#        return patterns
-#
 
     def copy_patterns_removing_dimensions(self, pattern_list, all_patterns,
                                           nDims):
