@@ -10,6 +10,7 @@ from savu.data.plugin_list import PluginList
 from savu.plugins import utils as pu
 import pkgutil
 import savu
+import readline
 
 
 class Content(object):
