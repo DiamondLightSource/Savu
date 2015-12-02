@@ -40,7 +40,6 @@ class ProjectionTomoLoader(BaseLoader):
     def __init__(self, name='ProjectionTomoLoader'):
         super(ProjectionTomoLoader, self).__init__(name)
 
-    @logmethod
     def setup(self):
 
         data_obj = self.exp.create_data_object("in_data", "tomo")

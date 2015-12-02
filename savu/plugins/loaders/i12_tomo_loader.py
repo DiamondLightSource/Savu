@@ -46,7 +46,6 @@ class I12TomoLoader(BaseLoader):
     def __init__(self, name='I12TomoLoader'):
         super(I12TomoLoader, self).__init__(name)
 
-    @logmethod
     def setup(self):
         exp = self.exp
         data_obj = exp.create_data_object('in_data', 'tomo')
