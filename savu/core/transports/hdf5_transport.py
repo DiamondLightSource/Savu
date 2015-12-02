@@ -28,7 +28,6 @@ import numpy as np
 
 from mpi4py import MPI
 from itertools import chain
-from savu.core.utils import logfunction
 from savu.data.transport_mechanism import TransportMechanism
 from savu.core.utils import logmethod
 import savu.plugins.utils as pu
@@ -70,7 +69,6 @@ class Hdf5Transport(TransportMechanism):
         self.set_logger_parallel(MACHINE_NUMBER_STRING, MACHINE_RANK_NAME)
 
         MPI.COMM_WORLD.barrier()
-        logging.info("Starting the reconstruction pipeline process")
         logging.debug("Rank : %i - Size : %i - host : %s", RANK, SIZE,
                       socket.gethostname())
         IP = socket.gethostbyname(socket.gethostname())
@@ -79,7 +77,7 @@ class Hdf5Transport(TransportMechanism):
         logging.debug("LD_LIBRARY_PATH is %s",  os.getenv('LD_LIBRARY_PATH'))
         self.call_mpi_barrier()
 
-    @logfunction
+    
     def call_mpi_barrier(self):
         logging.debug("Waiting at the barrier")
         MPI.COMM_WORLD.barrier()
@@ -92,13 +90,11 @@ class Hdf5Transport(TransportMechanism):
         fh.setFormatter(logging.Formatter('L %(relativeCreated)12d M CPU0 0' +
                                           ' %(levelname)-6s %(message)s'))
         logger.addHandler(fh)
-        logging.info("Starting the reconstruction pipeline process")
 
     def set_logger_parallel(self, number, rank):
         logging.basicConfig(level=0, format='L %(relativeCreated)12d M' +
                             number + ' ' + rank +
                             ' %(levelname)-6s %(message)s', datefmt='%H:%M:%S')
-        logging.info("Starting the reconstruction pipeline process")
 
     def transport_run_plugin_list(self):
         """
@@ -106,11 +102,9 @@ class Hdf5Transport(TransportMechanism):
         """
         exp = self.exp
         exp.barrier()
-        logging.info("Starting the HDF5 plugin list runner")
         plugin_list = exp.meta_data.plugin_list.plugin_list
 
         exp.barrier()
-        logging.info("run the loader plugin")
         pu.plugin_loader(exp, plugin_list[0])
 
         start = 1
@@ -126,12 +120,10 @@ class Hdf5Transport(TransportMechanism):
             start = stop
 
         exp.barrier()
-        logging.info("close all remaining files")
         for key in exp.index["in_data"].keys():
             exp.index["in_data"][key].close_file()
 
         exp.barrier()
-        logging.info("Completing the HDF5 plugin list runner")
         return
 
     def real_plugin_run(self, plugin_list, out_data_objs, start, stop):
@@ -140,24 +132,19 @@ class Hdf5Transport(TransportMechanism):
             link_type = "final_result" if i is len(plugin_list)-2 else \
                 "intermediate"
 
-            logging.info("Running Plugin %s" % plugin_list[i]["id"])
             exp.barrier()
 
-            logging.info("Initialise output data")
             for key in out_data_objs[i - start]:
                 exp.index["out_data"][key] = out_data_objs[i - start][key]
 
             exp.barrier()
-            logging.info("Load the plugin")
             plugin = pu.plugin_loader(exp, plugin_list[i])
 
             exp.barrier()
-            logging.info("run the plugin")
             print "\n*running the", plugin_list[i]['id'], "plugin*\n"
             plugin.run_plugin(exp, self)
 
             exp.barrier()
-            logging.info("close any files that are no longer required")
             out_datasets = plugin.parameters["out_datasets"]
 
             exp.reorganise_datasets(out_datasets, link_type)

@@ -130,7 +130,6 @@ class Hdf5TransportData(object):
     def save_data(self, link_type):
         process = self.exp.meta_data.get_meta_data('process')
         if process is 0:
-            logging.info("PROCESS 0 is adding data link and metadata")
             plugin_file, entry = self.add_data_links(link_type)
             #self.output_metadata(entry)
             #plugin_file.close()

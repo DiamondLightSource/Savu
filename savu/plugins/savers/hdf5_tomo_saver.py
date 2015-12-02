@@ -64,7 +64,6 @@ class Hdf5TomoSaver(BaseSaver):
         else:
             backing_file = h5py.File(filename, 'w')
 
-        print "creating file", filename
         if backing_file is None:
             raise IOError("Failed to open the hdf5 file")
 

@@ -103,7 +103,6 @@ def run_plugins(exp, plugin_list, **kwargs):
     check = kwargs.get('check', False)
     for i in range(1, len(plugin_list)-1):
         exp.barrier()
-        logging.info("Checking Plugin %s" % plugin_list[i]['name'])
         plugin_loader(exp, plugin_list[i], check=check)
         exp.merge_out_data_to_in()
 

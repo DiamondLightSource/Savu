@@ -20,6 +20,7 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
+import logging
 
 from savu.plugins.plugin import Plugin
 
@@ -38,6 +39,7 @@ class BaseLoader(Plugin):
         """
         self.set_parameters(params)
         self.exp = exp
+        logging.info("%s.%s", self.__class__.__name__, 'setup')
         self.setup()
 
     def set_data_reduction_params(self, data_obj):

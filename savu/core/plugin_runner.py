@@ -46,16 +46,13 @@ class PluginRunner(object):
         self.exp = None
 
     def run_plugin_list(self, options):
-        logging.info("Starting to run the plugin list")
         self.exp = Experiment(options)
         plugin_list = self.exp.meta_data.plugin_list.plugin_list
 
         self.exp.barrier()
-        logging.info("Preparing to run the plugin list check")
         self.run_plugin_list_check(plugin_list)
 
         self.exp.barrier()
-        logging.info("Initialising metadata")
         expInfo = self.exp.meta_data
         if expInfo.get_meta_data("process") is 0:
             logging.debug("Running process List.save_list_to_file")
@@ -63,7 +60,6 @@ class PluginRunner(object):
                 expInfo.get_meta_data("nxs_filename"))
 
         self.exp.barrier()
-        logging.info("divert to transport process and run process list")
         self.transport_run_plugin_list()
 
         print "***********************"
@@ -73,19 +69,15 @@ class PluginRunner(object):
 
     def run_plugin_list_check(self, plugin_list):
         self.exp.barrier()
-        logging.info("Checking loaders and Savers")
         self.check_loaders_and_savers(plugin_list)
 
         self.exp.barrier()
-        logging.info("Running plugins with the check flag")
         pu.run_plugins(self.exp, plugin_list, check=True)
 
         self.exp.barrier()
-        logging.info("empty the data object dictionaries")
         self.exp.clear_data_objects()
 
         self.exp.barrier()
-        logging.info("Plugin list check complete!")
         print "Plugin list check complete!"
 
     def check_loaders_and_savers(self, plugin_list):
