@@ -162,7 +162,6 @@ class Hdf5Transport(TransportMechanism):
 
             exp.reorganise_datasets(out_datasets, link_type)
 
-    @logmethod
     def process(self, plugin):
         self.process_checks()
         in_data, out_data = plugin.get_datasets()

@@ -75,18 +75,19 @@ class CpuPlugin(object):
                     out_data[j].get_plugin_data()\
                         .set_fixed_directions(param_dims[j], param_idx[i])
 
-            logging.info("Start::%s.%s", self.__module__, 'pre_process')
+            logging.info("%s.%s", self.__module__, 'pre_process')
             self.pre_process()
-            logging.info("Finish::%s:%s", self.__module__, 'pre_process')
 
-            logging.info("Start::%s.%s", self.__module__, 'process')
+            logging.info("%s.%s", self.__module__, 'process')
             transport.process(self)
-            logging.info("Finish::%s:%s", self.__module__, 'process')
 
+            logging.info("%s.%s", self.__module__, 'barrier')
             self.exp.barrier()
-            logging.info("Start::%s.%s", self.__module__, 'post_process')
+
+            logging.info("%s.%s", self.__module__, 'post_process')
             self.post_process()
-            logging.info("Finish::%s:%s", self.__module__, 'post_process')
+
+            logging.info("%s.%s", self.__module__, 'barrier')
 
     def process(self, data, output, processes, process):
         """

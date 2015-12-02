@@ -44,7 +44,6 @@ class Hdf5TomoSaver(BaseSaver):
     def __init__(self, name='Hdf5TomoSaver'):
         super(Hdf5TomoSaver, self).__init__(name)
 
-    @logmethod
     def setup(self):
         exp = self.exp
         for key in exp.index["out_data"].keys():

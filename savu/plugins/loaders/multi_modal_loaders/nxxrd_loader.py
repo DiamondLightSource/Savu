@@ -42,7 +42,6 @@ class NxxrdLoader(BaseMultiModalLoader):
     def __init__(self):
         super(NxxrdLoader, self).__init__("NxxrdLoader")
 
-    @logmethod
     def setup(self):
         data_str = '/instrument/detector/data'
         data_obj, xrd_entry = self.multi_modal_setup('NXxrd', data_str)

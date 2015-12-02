@@ -44,7 +44,6 @@ class MmLoader(BaseLoader):
     def __init__(self, name='MmLoader'):
         super(MmLoader, self).__init__(name)
 
-    @logmethod
     def setup(self):
         new_dict = self.amend_dictionary()
         self.setup_loader(NxfluoLoader(), new_dict)

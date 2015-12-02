@@ -62,7 +62,6 @@ class BaseRecon(Plugin):
         self.angles = in_meta_data.get_meta_data('rotation_angle')
         self.slice_dirs = out_pData[0].get_slice_directions()
 
-    @logmethod
     def process_frames(self, data, slice_list):
         """
         Reconstruct a single sinogram with the provided center of rotation

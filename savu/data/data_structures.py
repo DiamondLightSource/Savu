@@ -133,41 +133,6 @@ class Data(object):
     def external_link(self):
         return h5py.ExternalLink(self.backing_file.filename, self.group_name)
 
-#    def create_dataset(self, *args, **kwargs):
-#        """
-#        Set up required information when an output dataset has been created by
-#        a plugin
-#        """
-#        self.dtype = kwargs.get('dtype', np.float32)
-#        # remove from the plugin chain
-#        self.remove = kwargs.get('remove', False)
-#        if len(args) is 1:
-#            self.copy_dataset(args[0], removeDim=kwargs.get('removeDim', []))
-#            if args[0].tomo_raw_obj:
-#                self.set_tomo_raw(copy.deepcopy(args[0].get_tomo_raw()))
-#                self.get_tomo_raw().data_obj = self
-#        else:
-#            try:
-#                self.create_axis_labels(kwargs['axis_labels'])
-#                shape = kwargs['shape']
-#                if isinstance(shape, Data):
-#                    self.find_and_set_shape(shape)
-#                elif type(shape) is dict:
-#                    self.set_variable_flag()
-#                    self.set_shape((shape[shape.keys()[0]] + ('var',)))
-#                else:
-#                    pData = self.get_plugin_data()
-#                    self.set_shape(shape + tuple(pData.extra_dims))
-#                    if 'var' in shape:
-#                        self.set_variable_flag()
-#            except KeyError:
-#                raise Exception("Please state axis_labels and shape when "
-#                                "creating a new dataset")
-#            try:
-#                self.copy_patterns(kwargs['patterns'])
-#            except KeyError:
-#                pass
-#        self.set_preview([])
 
     def create_dataset(self, *args, **kwargs):
         """
