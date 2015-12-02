@@ -7,7 +7,7 @@ def convert(filename):
     for file in filename:
         print file
         the_key = ""  # CPU0"
-        the_interval = 0.8  # millisecs
+        the_interval = 0  # millisecs
         frame = get_frame(file, the_key)
 
         machine_names = get_machine_names(frame)
@@ -24,7 +24,7 @@ def get_frame(file, the_key):
     data = pd.io.parsers.read_fwf(file, widths=[2, 13, 5, 5, 6, 1000],
                                   names=names)
     data['Key'] = data['Machine'] + data['CPU']
-    frame = ((data[data.Type == "DEBUG"])[data.columns[[6, 5, 1]]])
+    frame = ((data[data.Type == "INFO"])[data.columns[[6, 5, 1]]])
     frame.insert(0, 'Index', range(len(frame)))
     frame = frame.sort(['Key', 'Index'])
     del frame['Index']

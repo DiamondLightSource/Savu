@@ -63,10 +63,6 @@ class PluginRunner(object):
                 expInfo.get_meta_data("nxs_filename"))
 
         self.exp.barrier()
-        logging.info("load relevant metadata")
-        expInfo.set_transport_meta_data()  # *** do I need this?
-
-        self.exp.barrier()
         logging.info("divert to transport process and run process list")
         self.transport_run_plugin_list()
 

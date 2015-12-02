@@ -50,7 +50,7 @@ class Experiment(object):
         return self.meta_data
 
     def meta_data_setup(self, process_file):
-        self.meta_data.load_experiment_collection()
+        #self.meta_data.load_experiment_collection()
         self.meta_data.plugin_list = PluginList()
 
         try:
