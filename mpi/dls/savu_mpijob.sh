@@ -1,16 +1,18 @@
 #!/bin/bash
 module load global/cluster
-#module load savu
 module load python/ana
-source activate mpi4
+source activate mpi5
 module load openmpi/1.6.5
+export PYTHONPATH=$PYTHONPATH:/home/clb02321/DAWN_stable/FastXRF/src/
 
-echo "Start Check Output"
-which mpicc
-which mpirun
-echo $LD_LIBRARY_PATH
-which python
-echo "END Check Output"
+savupath=$1
+datafile=$2
+processfile=$3
+outfile=$4
+nCPUs=$5
+
+export PYTHONPATH=$savupath:$PYTHONPATH
+filename=$savupath/savu/tomo_recon.py
 
 UNIQHOSTS=${TMPDIR}/machines-u
 awk '{print $1 }' ${PE_HOSTFILE} | uniq > ${UNIQHOSTS}
@@ -19,14 +21,24 @@ echo "number of uniq hosts: ${uniqslots}"
 echo "running on these hosts:"
 cat ${UNIQHOSTS}
 
-processes=`bc <<< "$uniqslots*6"`
+processes=`bc <<< "$((uniqslots*nCPUs))"`
+
+nCPUs=$((nCPUs-1))
+CPUs=CPU0
+
+if [ $nCPUs -gt 0 ]; then
+    for i in $(eval echo {1..$nCPUs})
+    do
+        CPUs=$CPUs,CPU$i
+    done
+fi
 
 echo "Processes running are : ${processes}"
 
-echo "SAVU_HOME is : $SAVU_HOME"
-export PYTHONPATH=$SAVU_HOME:$PYTHONPATH
-
 mpirun -np ${processes} \
+       -mca btl self,openib,sm \
+       -mca orte_forward_job_control 1 \
        -x LD_LIBRARY_PATH \
        --hostfile ${UNIQHOSTS} \
-       python $SAVU_HOME/savu/tomo_recon.py $@
+       python $filename $datafile $processfile $outfile -n $CPUs
+
