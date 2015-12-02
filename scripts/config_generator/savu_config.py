@@ -185,6 +185,12 @@ commands = {'open': _open,
             'add': _add,
             'rem': _rem}
 
+list_commands = ['loaders',
+                 'corrections',
+                 'filters',
+                 'reconstructions',
+                 'savers']
+
 
 class Completer(object):
 
@@ -215,19 +221,24 @@ class Completer(object):
         # exact file match terminates this completion
         return [path + ' ']
 
-    def complete_open(self, args):
-        "Completions for the open commands."
+    def path_complete(self, args):
         if not args:
             return self._complete_path('.')
         # treat the last arg as a path and complete it
         return self._complete_path(args[-1])
 
+    def complete_open(self, args):
+        "Completions for the open commands."
+        return self.path_complete(args)
+
     def complete_save(self, args):
         "Completions for the save commands."
-        if not args:
-            return self._complete_path('.')
-        # treat the last arg as a path and complete it
-        return self._complete_path(args[-1])
+        return self.path_complete(args)
+
+    def complete_list(self, args):
+        if not args[0]:
+            return list_commands
+        return [x for x in list_commands if x.startswith(args[0])]
 
     def complete(self, text, state):
         "Generic readline completion entry point."
