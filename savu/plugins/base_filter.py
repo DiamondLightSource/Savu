@@ -57,7 +57,7 @@ class BaseFilter(Plugin):
         """
         return 8
 
-    def process_frames(self, data, slice_list):
+    def process_frames(self, data, _):
         """
         Calls the main filter processing function
         """

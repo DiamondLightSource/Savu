@@ -41,7 +41,6 @@ class NxtomoLoader(BaseLoader):
     def __init__(self, name='NxtomoLoader'):
         super(NxtomoLoader, self).__init__(name)
 
-    @logmethod
     def setup(self):
         exp = self.exp
         data_obj = exp.create_data_object('in_data', 'tomo')

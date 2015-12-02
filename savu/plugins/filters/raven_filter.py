@@ -50,7 +50,6 @@ class RavenFilter(BaseFilter, CpuPlugin):
         # right/left so padding everywhere for now
         in_data[0].padding = {'pad_frame_edges': self.pad}
         out_data[0].padding = {'pad_frame_edges': self.pad}
-        print "padding", self.pad
 
     def pre_process(self):
         in_pData = self.get_plugin_in_datasets()[0]
@@ -80,7 +79,6 @@ class RavenFilter(BaseFilter, CpuPlugin):
 
     def filter_frames(self, data):
         data2d = data[0]
-        print data2d.shape
         sino2 = np.fft.fftshift(self.fft_object(data2d))
         sino2[self.row1:self.row2] = \
             sino2[self.row1:self.row2] * self.filtercomplex

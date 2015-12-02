@@ -1,7 +1,7 @@
 module load global/testcluster
 #module load global/cluster
 
-echo "running the mpi job" 
+echo "running the mpi job"
 
 savupath=$1
 datafile=$2
@@ -10,6 +10,8 @@ outpath=$4
 outname=$5
 nNodes=$6
 nCPUs=$7
+
+echo $outname
 
 filepath=$savupath/bin/savu_mpijob.sh
 M=$((nNodes*20))
@@ -31,7 +33,7 @@ do
 done
 
 cat $filename
-
+echo $filename
 #grep "L " $filename > Profiling/log_$filename
 
 #sleep 20

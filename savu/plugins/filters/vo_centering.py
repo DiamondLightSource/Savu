@@ -72,9 +72,7 @@ class VoCentering(BaseFilter, CpuPlugin):
         return cor_positions[vv.argmin()]
 
     def filter_frames(self, data):
-        print data[0].shape
         data = data[0][::self.parameters['step']]
-        print data.shape
         width = data.shape[1]/4
         step = width/10.
         point = 0.0
@@ -119,12 +117,8 @@ class VoCentering(BaseFilter, CpuPlugin):
         # the tolerances
         while max_disp > tolerance:
             mask = (np.abs(cor_fit-cor_clean)) < (max_disp / 2.)
-            print x_clean, '\n', mask, '\n'
-            print x_clean[mask], '\n'
             x_clean = x_clean[mask]
-            print cor_clean, '\n'
             cor_clean = cor_clean[mask]
-            print cor_clean, '\n'
             z = np.polyfit(x_clean, cor_clean, self.parameters['poly_degree'])
             p = np.poly1d(z)
             cor_fit = p(x_clean)
@@ -133,7 +127,6 @@ class VoCentering(BaseFilter, CpuPlugin):
         # build a full array for the output fit
         cor_fit = p(x)
 
-        print cor_fit
         out_datasets[1].data[:] = cor_fit[:, np.newaxis]
         # add to metadata
         self.populate_meta_data('cor_raw', cor_raw)
@@ -152,21 +145,24 @@ class VoCentering(BaseFilter, CpuPlugin):
 
         # set up the output dataset that is created by the plugin
         in_dataset, out_dataset = self.get_datasets()
+        in_pData, out_pData = self.get_plugin_datasets()
+        in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
         # copy all required information from in_dataset[0]
         fullData = in_dataset[0]
 
-        out_dataset[0].create_dataset(shape=(fullData.get_shape()[1], 1),
+        slice_dirs = np.array(in_pData[0].get_slice_directions())
+        new_shape = (np.prod(np.array(fullData.get_shape())[slice_dirs]), 1)
+
+        out_dataset[0].create_dataset(shape=new_shape,
                                       axis_labels=['x.pixels', 'y.pixels'],
                                       remove=True)
         out_dataset[0].add_pattern("METADATA", core_dir=(1,), slice_dir=(0,))
 
-        out_dataset[1].create_dataset(shape=(fullData.get_shape()[1], 1),
+        out_dataset[1].create_dataset(shape=new_shape,
                                       axis_labels=['x.pixels', 'y.pixels'],
                                       remove=True)
         out_dataset[1].add_pattern("METADATA", core_dir=(1,), slice_dir=(0,))
 
-        in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
         out_pData[0].plugin_data_setup('METADATA', self.get_max_frames())
         out_pData[1].plugin_data_setup('METADATA', self.get_max_frames())
 

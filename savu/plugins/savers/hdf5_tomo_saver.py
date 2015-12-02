@@ -44,7 +44,6 @@ class Hdf5TomoSaver(BaseSaver):
     def __init__(self, name='Hdf5TomoSaver'):
         super(Hdf5TomoSaver, self).__init__(name)
 
-    @logmethod
     def setup(self):
         exp = self.exp
         for key in exp.index["out_data"].keys():
@@ -91,7 +90,9 @@ class Hdf5TomoSaver(BaseSaver):
             dt = h5py.special_dtype(vlen=data.dtype)
             data.data = group.create_dataset('data', data.get_shape()[:-1], dt)
         else:
-            data.data = group.create_dataset('data', data.get_shape(),
-                                             data.dtype)
-
+#            data.data = group.create_dataset('data', data.get_shape(),
+#                                             data.dtype)
+            logging.debug("*******ADDING CHUNKS TO THE DATA*************")
+            data.data = group.create_dataset("data", data.get_shape(),
+                                             data.dtype, chunks=True)
         return group_name, group
