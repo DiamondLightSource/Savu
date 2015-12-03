@@ -27,7 +27,6 @@ import logging
 logging.debug("Importing packages in base_recon")
 
 from savu.plugins.plugin import Plugin
-from savu.core.utils import logmethod
 
 import numpy as np
 
