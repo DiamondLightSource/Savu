@@ -90,9 +90,9 @@ class Hdf5Transport(TransportMechanism):
         """
         Gets the right log level for the flags -v or -q
         """
-        if options['verbose']:
+        if ('verbose' in options) and options['verbose']:
             return logging.DEBUG
-        if options['quiet']:
+        if ('quiet' in options) and options['quiet']:
             return logging.WARN
         return logging.INFO
 
