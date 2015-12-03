@@ -24,7 +24,6 @@ import logging
 from savu.plugins.base_filter import BaseFilter
 import numpy as np
 import peakutils as pe
-from scipy.optimize import leastsq
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 
@@ -225,12 +224,6 @@ class BaseFitter(BaseFilter, CpuPlugin):
 
 
 def lorentzian(a, w, x, c):
-    w = np.abs(w)
-    numerator = (w**2)
-    denominator = (x - c)**2 + w**2
-    y = np.abs(a)*(numerator/denominator)
-    return y
-
     w = np.abs(w)
     numerator = (w**2)
     denominator = (x - c)**2 + w**2

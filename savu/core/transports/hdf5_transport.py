@@ -65,7 +65,9 @@ class Hdf5Transport(TransportMechanism):
         options["processes"] = list(chain.from_iterable(ALL_PROCESSES))
         options["process"] = RANK
 
-        self.set_logger_parallel(MACHINE_NUMBER_STRING, MACHINE_RANK_NAME)
+        self.set_logger_parallel(MACHINE_NUMBER_STRING,
+                                 MACHINE_RANK_NAME,
+                                 options)
 
         MPI.COMM_WORLD.barrier()
         logging.debug("Rank : %i - Size : %i - host : %s", RANK, SIZE,
@@ -80,17 +82,29 @@ class Hdf5Transport(TransportMechanism):
         logging.debug("Waiting at the barrier")
         MPI.COMM_WORLD.barrier()
 
+    def get_log_level(self, options):
+        """
+        Gets the right log level for the flags -v or -q
+        """
+        if ('verbose' in options) and options['verbose']:
+            return logging.DEBUG
+        if ('quiet' in options) and options['quiet']:
+            return logging.WARN
+        return logging.INFO
+
     def set_logger_single(self, options):
         logger = logging.getLogger()
-        logger.setLevel(logging.DEBUG)
+        logger.setLevel(self.get_log_level(options))
+
         fh = logging.FileHandler(os.path.join(options["out_path"], 'log.txt'),
                                  mode='w')
         fh.setFormatter(logging.Formatter('L %(relativeCreated)12d M CPU0 0' +
                                           ' %(levelname)-6s %(message)s'))
         logger.addHandler(fh)
 
-    def set_logger_parallel(self, number, rank):
-        logging.basicConfig(level=0, format='L %(relativeCreated)12d M' +
+    def set_logger_parallel(self, number, rank, options):
+        logging.basicConfig(level=self.get_log_level(options),
+                            format='L %(relativeCreated)12d M' +
                             number + ' ' + rank +
                             ' %(levelname)-6s %(message)s', datefmt='%H:%M:%S')
 

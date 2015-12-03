@@ -26,7 +26,6 @@ import h5py
 import logging
 
 import savu.data.data_structures as ds
-from savu.core.utils import logmethod
 from savu.plugins.base_loader import BaseLoader
 
 from savu.plugins.utils import register_plugin
