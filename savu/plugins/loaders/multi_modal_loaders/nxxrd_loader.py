@@ -22,12 +22,9 @@
 
 """
 import os.path as os
-import logging
 import h5py
 
-from savu.core.utils import logmethod
 from savu.plugins.loaders.base_multi_modal_loader import BaseMultiModalLoader
-from savu.test import test_utils as tu
 from savu.plugins.utils import register_plugin
 
 
@@ -76,6 +73,7 @@ class NxxrdLoader(BaseMultiModalLoader):
                 os.realpath('.').split('savu')[0] + calibration_path
 
         calibrationfile = h5py.File(calibration_path, 'r')
+        print calibration_path
 
         mData = data_obj.meta_data
         det_str = 'entry/instrument/detector'

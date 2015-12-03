@@ -50,18 +50,21 @@ class Hdf5TransportData(object):
         logging.debug("generating all output files")
         out_data_objects = []
         count = start
+        datasets_list = pu.datasets_list
         for plugin_dict in plugin_list[start:-1]:
+            self.get_current_and_next_patterns(datasets_list[count-1:])
             plugin_id = plugin_dict["id"]
             logging.debug("Loading plugin %s", plugin_id)
             plugin = pu.plugin_loader(exp, plugin_dict)
             self.set_filenames(plugin, plugin_id, count)
             saver_plugin.setup()
             out_data_objects.append(exp.index["out_data"].copy())
-            count += 1
             if self.variable_data_check(plugin):
                 return out_data_objects, count
             exp.merge_out_data_to_in()
+            count += 1
 
+        del self.exp.meta_data.get_dictionary()['current_and_next']
         return out_data_objects, count
 
     def variable_data_check(self, plugin):
@@ -226,6 +229,8 @@ class Hdf5TransportData(object):
 
     def get_slice_dir_matrix(self, dim):
         starts, stops, steps, chunks = self.get_starts_stops_steps()
+        if 'var' in stops:
+            return np.array([0])
         chunk = chunks[dim]
         a = np.tile(np.arange(starts[dim], stops[dim], steps[dim]), (chunk, 1))
         b = np.transpose(np.tile(np.arange(chunk)-chunk/2, (a.shape[1], 1)))

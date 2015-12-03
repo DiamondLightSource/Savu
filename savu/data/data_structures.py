@@ -553,6 +553,27 @@ class Data(object):
                 axis_label_keys.append(key)
         return axis_label_keys
 
+    def get_current_and_next_patterns(self, datasets_lists):
+        current_datasets = datasets_lists[0]
+        patterns_list = []
+        for current_data in current_datasets['out_datasets']:
+            current_name = current_data['name']
+            current_pattern = current_data['pattern']
+            next_pattern = self.find_next_pattern(datasets_lists[1:],
+                                                  current_name)
+            patterns_list.append({'current': current_pattern,
+                                  'next': next_pattern})
+        self.exp.meta_data.set_meta_data('current_and_next', patterns_list)
+
+    def find_next_pattern(self, datasets_lists, current_name):
+        next_pattern = []
+        for next_data_list in datasets_lists:
+            for next_data in next_data_list['in_datasets']:
+                if next_data['name'] == current_name:
+                    next_pattern = next_data['pattern']
+                    return next_pattern
+        return next_pattern
+
 
 class PluginData(object):
 

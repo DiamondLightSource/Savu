@@ -6,7 +6,7 @@ def convert(filename):
 
     for file in filename:
         print file
-        the_key = ""  # CPU0"
+        the_key = "" #CPU0"
         the_interval = 0  # millisecs
         frame = get_frame(file, the_key)
 

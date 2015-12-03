@@ -27,7 +27,8 @@ import numpy as np
 
 plugins = {}
 plugins_path = {}
-
+datasets_list = []
+count = 0
 
 def register_plugin(clazz):
     """decorator to add logging information around calls for use with ."""
@@ -92,6 +93,9 @@ def plugin_loader(exp, plugin_dict, **kwargs):
     logging.debug("Running plugin main setup")
     plugin.main_setup(exp, plugin_dict['data'])
 
+    if check_flag is True:
+        set_datasets_list(*plugin.get_plugin_datasets())
+
     logging.debug("finished plugin loader")
     return plugin
 
@@ -105,6 +109,22 @@ def run_plugins(exp, plugin_list, **kwargs):
         exp.barrier()
         plugin_loader(exp, plugin_list[i], check=check)
         exp.merge_out_data_to_in()
+
+
+def set_datasets_list(in_pData, out_pData):
+    in_data_list = populate_datasets_list(in_pData)
+    out_data_list = populate_datasets_list(out_pData)
+    datasets_list.append({'in_datasets': in_data_list,
+                          'out_datasets': out_data_list})
+
+
+def populate_datasets_list(data):
+    data_list = []
+    for d in data:
+        name = d.data_obj.get_name()
+        pattern = d.get_pattern()
+        data_list.append({'name': name, 'pattern': pattern})
+    return data_list
 
 
 def set_datasets(exp, plugin, plugin_dict):

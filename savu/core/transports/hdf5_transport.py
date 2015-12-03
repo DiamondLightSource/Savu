@@ -29,7 +29,6 @@ import numpy as np
 from mpi4py import MPI
 from itertools import chain
 from savu.data.transport_mechanism import TransportMechanism
-from savu.core.utils import logmethod
 import savu.plugins.utils as pu
 
 
@@ -77,7 +76,6 @@ class Hdf5Transport(TransportMechanism):
         logging.debug("LD_LIBRARY_PATH is %s",  os.getenv('LD_LIBRARY_PATH'))
         self.call_mpi_barrier()
 
-    
     def call_mpi_barrier(self):
         logging.debug("Waiting at the barrier")
         MPI.COMM_WORLD.barrier()
