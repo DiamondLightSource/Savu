@@ -45,6 +45,7 @@ class PluginRunner(object):
         self.transport_control_setup(options)
         self.exp = None
 
+    # TODO : Do we need to have options passed here as it is passed to __init__
     def run_plugin_list(self, options):
         logging.info("Starting to run the plugin list")
         self.exp = Experiment(options)
