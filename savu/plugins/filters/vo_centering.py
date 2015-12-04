@@ -39,6 +39,7 @@ class VoCentering(BaseFilter, CpuPlugin):
     :param out_datasets: The default names. Default: ['cor_raw','cor_fit'].
     :param poly_degree: The polynomial degree of the fit (1 or 0 = gradient or no gradient). Default: 1.
     :param step: The step length over the rotation axis. Default: 1.
+    :param no_clean: Do not clean up potential outliers. Default: False.
     """
 
     def __init__(self):
@@ -115,14 +116,19 @@ class VoCentering(BaseFilter, CpuPlugin):
 
         # keep fitting and removing points until the fit is within
         # the tolerances
-        while max_disp > tolerance:
-            mask = (np.abs(cor_fit-cor_clean)) < (max_disp / 2.)
-            x_clean = x_clean[mask]
-            cor_clean = cor_clean[mask]
+ 
+        if self.parameters['no_clean']:
             z = np.polyfit(x_clean, cor_clean, self.parameters['poly_degree'])
             p = np.poly1d(z)
-            cor_fit = p(x_clean)
-            max_disp = (np.abs(cor_fit-cor_clean)).max()
+        else:
+            while max_disp > tolerance:
+                mask = (np.abs(cor_fit-cor_clean)) < (max_disp / 2.)
+                x_clean = x_clean[mask]
+                cor_clean = cor_clean[mask]
+                z = np.polyfit(x_clean, cor_clean, self.parameters['poly_degree'])
+                p = np.poly1d(z)
+                cor_fit = p(x_clean)
+                max_disp = (np.abs(cor_fit-cor_clean)).max()
 
         # build a full array for the output fit
         cor_fit = p(x)
