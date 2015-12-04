@@ -54,9 +54,16 @@ class Hdf5TomoSaver(BaseSaver):
         count = 0
         for key in out_data_dict.keys():
             out_data = out_data_dict[key]
+
+            self.exp.barrier()
             out_data.backing_file = self.create_backing_h5(key)
+
+            self.exp.barrier()
+
             out_data.group_name, out_data.group = \
                 self.create_entries(out_data, key, current_and_next[count])
+            self.exp.barrier()
+
             count += 1
 
     def create_backing_h5(self, key):
@@ -64,6 +71,7 @@ class Hdf5TomoSaver(BaseSaver):
         Create a h5 backend for output data
         """
         expInfo = self.exp.meta_data
+
         filename = expInfo.get_meta_data(["filename", key])
         if expInfo.get_meta_data("mpi") is True:
             backing_file = h5py.File(filename, 'w', driver='mpio',
@@ -102,7 +110,6 @@ class Hdf5TomoSaver(BaseSaver):
                                                  data.dtype)
             else:
                 chunks = self.calculate_chunking(current_and_next, shape)
-                print chunks
                 data.data = group.create_dataset("data", shape, data.dtype,
                                                  chunks=chunks)
         return group_name, group
