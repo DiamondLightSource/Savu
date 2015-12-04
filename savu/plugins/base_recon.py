@@ -38,6 +38,7 @@ class BaseRecon(Plugin):
     :param center_of_rotation: Centre of rotation to use for the reconstruction). Default: 86.
     :param in_datasets: Create a list of the dataset(s) to process. Default: [].
     :param out_datasets: Create a list of the dataset(s) to process. Default: [].
+    :param sino_pad_width: Pad proportion of the sinogram width before reconstructing. Default: 0.25.
     """
     count = 0
 
@@ -66,7 +67,9 @@ class BaseRecon(Plugin):
         Reconstruct a single sinogram with the provided center of rotation
         """
         cor = self.cor[slice_list[0][self.main_dir]]
-        result = self.reconstruct(data[0], cor, self.angles, self.vol_shape)
+        pad_ammount = self.parameters['sino_pad_width'] * data[0].shape[1]
+        data = np.pad(data[0], ((0, 0), (pad_ammount, pad_ammount)), 'edge')
+        result = self.reconstruct(data, cor+pad_ammount, self.angles, self.vol_shape)
         return result
 
     def reconstruct(self, data, cor, angles, shape):
