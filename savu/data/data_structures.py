@@ -495,8 +495,9 @@ class Data(object):
             self.set_main_axis('SINOGRAM')
             self.set_main_axis('PROJECTION')
         elif check is 1:
-            logging.warn("Cannot set up SINOGRAM and PROJECTION "
-                         "main_directions as both patterns do not exist")
+            pass
+#            logging.warn("Cannot set up SINOGRAM and PROJECTION "
+#                         "main_directions as both patterns do not exist")
 
     def check_pattern(self, pattern_name):
         patterns = self.get_data_patterns()

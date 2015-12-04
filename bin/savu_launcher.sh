@@ -11,6 +11,8 @@ outname=$5
 nNodes=$6
 nCPUs=$7
 
+echo "nNodes" $nNodes
+
 echo $outname
 
 filepath=$savupath/bin/savu_mpijob.sh

@@ -22,13 +22,29 @@
 
 """
 import logging
+#import time
+#from mpi4py import MPI
 
 logging.debug("Importing packages in base_astra_recon")
 
 from savu.plugins.base_recon import BaseRecon
 
-import astra
+#rank = 0
+#my_rank = MPI.COMM_WORLD.rank
+#processes = MPI.COMM_WORLD.size
+#MPI.COMM_WORLD.Barrier()
+#while (rank < processes):
+#    if (my_rank == rank):
+#        logging.info("***************rank %s, size %s", my_rank, processes)
+#        logging.info("Imported astra")
+#        time.sleep(5)
+#        import astra
+#        logging.info("Astra imported")
+#    rank += 1
+#    MPI.COMM_WORLD.Barrier()
+
 logging.debug("Imported astra")
+import astra
 
 import numpy as np
 logging.debug("Imported numpy")
