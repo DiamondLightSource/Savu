@@ -9,9 +9,9 @@ processfile=$2
 outpath=$3
 outname=savu
 nNodes=1
-nCPUs=10
+nCPUs=12
 
-filepath=$savupath/bin/savu_mpijob.sh
+filepath=$savupath/mpi/dls/savu_mpijob.sh
 M=$((nNodes*12))
 
 qsub -N $outname -sync y -j y -o /dls/tmp/savu/ -e /dls/tmp/savu/ -pe openmpi $M -l infiniband -q medium.q@@com07 $filepath $savupath $datafile $processfile $outpath $nCPUs > /dls/tmp/savu/$USER.out
