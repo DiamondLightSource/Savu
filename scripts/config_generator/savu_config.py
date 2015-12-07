@@ -61,6 +61,7 @@ class Content(object):
     def size(self):
         return len(self.plugin_list.plugin_list)
 
+
 def _help(content, arg):
     """Display the help information"""
     for key in commands.keys():

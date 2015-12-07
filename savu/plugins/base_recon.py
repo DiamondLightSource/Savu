@@ -67,9 +67,10 @@ class BaseRecon(Plugin):
         Reconstruct a single sinogram with the provided center of rotation
         """
         cor = self.cor[slice_list[0][self.main_dir]]
-        pad_ammount = self.parameters['sino_pad_width'] * data[0].shape[1]
+        pad_ammount = int(self.parameters['sino_pad_width'] * data[0].shape[1])
         data = np.pad(data[0], ((0, 0), (pad_ammount, pad_ammount)), 'edge')
-        result = self.reconstruct(data, cor+pad_ammount, self.angles, self.vol_shape)
+        result = self.reconstruct(data, cor+pad_ammount, self.angles,
+                                  self.vol_shape)
         return result
 
     def reconstruct(self, data, cor, angles, shape):

@@ -128,6 +128,8 @@ class Hdf5Transport(TransportControl):
             start_in_data = copy.deepcopy(self.exp.index['in_data'])
             in_data = exp.index["in_data"][exp.index["in_data"].keys()[0]]
             out_data_objs, stop = in_data.load_data(start)
+            for i in range(start, stop - start):
+                print plugin_list[i]
             exp.clear_data_objects()
             self.exp.index['in_data'] = copy.deepcopy(start_in_data)
             self.real_plugin_run(plugin_list, out_data_objs, start, stop)
