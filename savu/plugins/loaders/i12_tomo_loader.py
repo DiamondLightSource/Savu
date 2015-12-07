@@ -70,11 +70,11 @@ class I12TomoLoader(BaseLoader):
         logging.debug("Creating file '%s' '%s'", 'tomo_entry',
                       data_obj.backing_file.filename)
 
-#        data_obj.data = \
-#            data_obj.backing_file['entry/instrument/detector/data']
-
         data_obj.data = \
-            data_obj.backing_file['entry1/p2r_flyScanDetector/data']
+            data_obj.backing_file['entry/instrument/detector/data']
+
+#        data_obj.data = \
+#            data_obj.backing_file['entry1/p2r_flyScanDetector/data']
 
         dark_file = h5py.File(self.parameters['dark'], 'r')
         dark = dark_file['entry1/pco4000_dio_hdf/data']

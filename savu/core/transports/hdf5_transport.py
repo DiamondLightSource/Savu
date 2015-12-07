@@ -28,11 +28,11 @@ import numpy as np
 
 from mpi4py import MPI
 from itertools import chain
-from savu.data.transport_mechanism import TransportMechanism
+from savu.core.transport_control import TransportControl
 import savu.plugins.utils as pu
 
 
-class Hdf5Transport(TransportMechanism):
+class Hdf5Transport(TransportControl):
 
     def transport_control_setup(self, options):
         processes = options["process_names"].split(',')
@@ -58,6 +58,8 @@ class Hdf5Transport(TransportMechanism):
             RANK_NAMES_SIZE = SIZE
         MACHINES = SIZE/RANK_NAMES_SIZE
         MACHINE_RANK = RANK/MACHINES
+        print MACHINE_RANK
+        print RANK_NAMES
         MACHINE_RANK_NAME = RANK_NAMES[MACHINE_RANK]
         MACHINE_NUMBER = RANK % MACHINES
         MACHINE_NUMBER_STRING = "%03i" % (MACHINE_NUMBER)
