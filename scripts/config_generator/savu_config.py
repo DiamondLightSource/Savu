@@ -23,7 +23,7 @@ class Content(object):
         self.filename = filename
         if os.path.exists(filename):
             print "Opening file %s" % (filename)
-            self.plugin_list.populate_plugin_list(filename)
+            self.plugin_list.populate_plugin_list(filename, activePass=True)
 
     def display(self, **kwargs):
         print '\n', self.plugin_list.get_string(**kwargs), '\n'
@@ -189,7 +189,8 @@ def _add(content, arg):
 
 
 def _ref(content, arg):
-    """Refreshes the plugin, replacing it with itself (updating any changes)"""
+    """Refreshes the plugin, replacing it with itself (updating any changes).
+    """
     pos = int(arg) - 1
     name = content.plugin_list.plugin_list[pos]['name']
     content.remove(pos)
@@ -286,7 +287,8 @@ class Completer(object):
             if args:
                 return (impl(args) + [None])[state]
             return [cmd + ' '][state]
-        results = [c + ' ' for c in commands.keys() if c.startswith(cmd)] + [None]
+        results = \
+            [c + ' ' for c in commands.keys() if c.startswith(cmd)] + [None]
         return results[state]
 
 
@@ -300,7 +302,8 @@ if __name__ == '__main__':
     readline.set_completer(comp.complete)
 
     # load all the packages in the plugins directory to register classes
-    for loader, module_name, is_pkg in pkgutil.walk_packages(savu.plugins.__path__):
+    plugins_path = savu.plugins.__path__
+    for loader, module_name, is_pkg in pkgutil.walk_packages(plugins_path):
         try:
             module = loader.find_module(module_name).load_module(module_name)
             #print module

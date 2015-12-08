@@ -72,67 +72,50 @@ class BaseAstraRecon(BaseRecon):
         raise NotImplementedError("get_parameters " +
                                   "needs to be implemented")
 
-    def reconstruct(self, sinogram, centre_of_rotations, angles, vol_shape):
-        nSinos = self.get_max_frames()
+    def reconstruct_pre_process(self):
+        self.nSinos = self.get_max_frames()
         lparams = self.get_parameters()
-        alg_name = lparams[0]
-        iterations = lparams[1]
+        self.name = lparams[0]
+        self.iters = lparams[1]
+        self.func_map = {'2D': self.reconstruct2D, '3D': self.reconstruct3D}
 
-        ctr = centre_of_rotations
-        width = sinogram.shape[1]
-        pad = 50
+    def reconstruct(self, sinogram, centre_of_rotations, angles, vol_shape):
 
         sino = np.nan_to_num(1./sinogram)
+        log_data = np.log(sino+1)
+        p_low, p_high = self.array_pad(centre_of_rotations, sinogram.shape[1])
+        sino = np.pad(log_data, ((0, 0), (p_low, p_high)), mode='reflect')
 
-        # pad the array so that the centre of rotation is in the middle
-        alen = ctr
-        blen = width - ctr
-        mid = width / 2.0
+        args = [sino, angles, vol_shape]
 
-        if (ctr > mid):
-            plow = pad
-            phigh = (alen - blen) + pad
-        else:
-            plow = (blen - alen) + pad
-            phigh = pad
+        alg_type = '3D' if '3D' in self.name else '2D'
+        rec = self.func_map[alg_type](*args)
 
-        logdata = np.log(sino+1)
-        sinogram = np.pad(logdata, ((0, 0), (int(plow), int(phigh))),
-                          mode='reflect')
-
-        if not "3D" in alg_name:
-            rec = self.reconstruct2D(sinogram, angles, vol_shape, alg_name,
-                                     iterations)
-        else:
-            sinogram = np.tile(sinogram.reshape((1,)+sinogram.shape),
-                               (8, 1, 1))
-            rec = self.reconstruct3D(sinogram, angles, vol_shape, nSinos,
-                                     alg_name, iterations)
         return rec
 
-    def reconstruct2D(self, sinogram, angles, shape, alg_name, iterations):
+    def reconstruct2D(self, sino, angles, shape):
 
         vol_geom = astra.create_vol_geom(shape[0], shape[1])
-        proj_geom = astra.create_proj_geom('parallel', 1.0, sinogram.shape[1],
+        proj_geom = astra.create_proj_geom('parallel', 1.0, sino.shape[1],
                                            np.deg2rad(angles))
-        sinogram_id = astra.data2d.create("-sino", proj_geom, sinogram)
+        sinogram_id = astra.data2d.create("-sino", proj_geom, sino)
         # Create a data object for the reconstruction
         rec_id = astra.data2d.create('-vol', vol_geom)
 
-        cfg = astra.astra_dict(alg_name)
+        cfg = astra.astra_dict(self.name)
         cfg['ReconstructionDataId'] = rec_id
         cfg['ProjectionDataId'] = sinogram_id
 
-        if not "CUDA" in alg_name:
+        if not "CUDA" in self.name:
             proj_id = astra.create_projector('strip', proj_geom, vol_geom)
             cfg['ProjectorId'] = proj_id
 
         # Create the algorithm object from the configuration structure
         alg_id = astra.algorithm.create(cfg)
         # This will have a runtime in the order of 10 seconds.
-        astra.algorithm.run(alg_id, iterations)
+        astra.algorithm.run(alg_id, self.iters)
 
-        if "CUDA" in alg_name and "FBP" not in alg_name:
+        if "CUDA" in self.name and "FBP" not in self.name:
                 self.res += astra.algorithm.get_res_norm(alg_id)**2
                 print math.sqrt(self.res)
 
@@ -145,28 +128,27 @@ class BaseAstraRecon(BaseRecon):
 
         return rec
 
-    def reconstruct3D(self, sinogram, angles, shape, depth, alg_name,
-                      iterations):
+    def reconstruct3D(self, sino, angles, shape,):
 
-        det_rows = sinogram.shape[0]
-        det_cols = sinogram.shape[2]
+        det_rows = sino.shape[0]
+        det_cols = sino.shape[2]
 
-        vol_geom = astra.create_vol_geom(shape[0], depth, shape[1])
+        vol_geom = astra.create_vol_geom(shape[0], self.nSinos, shape[1])
         proj_geom = astra.create_proj_geom('parallel3d', 1.0, 1.0, det_cols,
                                            det_rows, np.deg2rad(angles))
 
-        sinogram_id = astra.data3d.create("-sino", proj_geom, sinogram)
+        sinogram_id = astra.data3d.create("-sino", proj_geom, sino)
         # Create a data object for the reconstruction
         rec_id = astra.data3d.create('-vol', vol_geom)
 
-        cfg = astra.astra_dict(alg_name)
+        cfg = astra.astra_dict(self.name)
         cfg['ReconstructionDataId'] = rec_id
         cfg['ProjectionDataId'] = sinogram_id
 
         # Create the algorithm object from the configuration structure
         alg_id = astra.algorithm.create(cfg)
         # This will have a runtime in the order of 10 seconds.
-        astra.algorithm.run(alg_id, iterations)
+        astra.algorithm.run(alg_id, self.iters)
         #if "CUDA" in params[0] and "FBP" not in params[0]:
         #self.res += astra.algorithm.get_res_norm(alg_id)**2
         #print math.sqrt(self.res)
@@ -181,6 +163,17 @@ class BaseAstraRecon(BaseRecon):
         rec = rec[:160, :160, 1]
 
         return rec
+
+    def array_pad(self, ctr, width):
+        # pad the array so that the centre of rotation is in the middle
+        pad = 50
+        alen = ctr
+        blen = width - ctr
+        mid = width / 2.0
+
+        p_low = pad if (ctr > mid) else (blen - alen) + pad
+        p_high = (alen - blen) + pad if (ctr > mid) else pad
+        return int(p_low), int(p_high)
 
     def get_max_frames(self):
         params = self.get_parameters()

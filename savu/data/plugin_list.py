@@ -41,17 +41,21 @@ class PluginList(object):
     def __init__(self):
         self.plugin_list = []
 
-    def populate_plugin_list(self, filename):
+    def populate_plugin_list(self, filename, activePass=False):
         plugin_file = h5py.File(filename, 'r')
         plugin_group = plugin_file['entry/plugin']
         self.plugin_list = []
         for key in plugin_group.keys():
+            plugin = {}
             try:
                 active = plugin_group[key]['active'][0]
+                plugin['active'] = active
+                if activePass:
+                    active = True
             except KeyError:
                 active = True
+
             if active:
-                plugin = {}
                 plugin['name'] = plugin_group[key]['name'][0]
                 plugin['id'] = plugin_group[key]['id'][0]
                 plugin['data'] = json.loads(plugin_group[key]['data'][0])
@@ -103,14 +107,13 @@ class PluginList(object):
             stop = len(self.plugin_list)
         disp_params = kwargs.get('params', True)
 
-        # Don't append plugin to string if active is off
         count = start
         plugin_list = self.plugin_list[start:stop]
         for plugin in plugin_list:
             description = ""
             count += 1
             if 'active' in plugin:
-                if plugin['active'] is False:
+                if not plugin['active']:
                     description += "***OFF***"
             description += \
                 "%2i) %s(%s)" % (count, plugin['name'], plugin['id'])

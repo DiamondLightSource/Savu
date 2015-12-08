@@ -61,6 +61,7 @@ class BaseRecon(Plugin):
         self.main_dir = in_pData[0].get_pattern()['SINOGRAM']['main_dir']
         self.angles = in_meta_data.get_meta_data('rotation_angle')
         self.slice_dirs = out_pData[0].get_slice_directions()
+        self.reconstruct_pre_process()
 
     def process_frames(self, data, slice_list):
         """
@@ -135,5 +136,11 @@ class BaseRecon(Plugin):
 
     def nOutput_datasets(self):
         return 1
+
+    def reconstruct_pre_process(self):
+        """
+        Should be overridden to perform pre-processing in a child class
+        """
+        pass
 
 logging.debug("Completed base_recon import")
