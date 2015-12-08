@@ -48,11 +48,20 @@ class Content(object):
                 print("Sorry, element %i does not have a %s parameter" %
                       (element, subelement))
 
+    def on_and_off(self, element, index):
+        if index < 2:
+            print "switching plugin", element, "ON"
+            self.plugin_list.plugin_list[element-1]['active'] = True
+        else:
+            print "switching plugin", element, "OFF"
+            self.plugin_list.plugin_list[element-1]['active'] = False
+
     def insert(self, plugin, pos):
         process = {}
         process['name'] = plugin.name
         process['id'] = "savu.plugins." + plugin.__module__
         process['data'] = plugin.parameters
+        process['active'] = True
         self.plugin_list.plugin_list.insert(pos, process)
 
     def remove(self, pos):
@@ -137,11 +146,16 @@ def _save(content, arg):
 
 def _mod(content, arg):
     """Modifies the target value e.g. 'mod 1.value 27'"""
+    on_off_list = ['ON', 'on', 'OFF', 'off']
+
     try:
         element,  subelement = arg.split()[0].split('.')
-        value = None
-        exec("value = " + arg.split()[1])
-        content.modify(int(element), subelement, value)
+        if subelement in on_off_list:
+            content.on_and_off(int(element), on_off_list.index(subelement))
+        else:
+            value = None
+            exec("value = " + arg.split()[1])
+            content.modify(int(element), subelement, value)
         content.display()
     except:
         print("Sorry I can't process the argument '%s'" % (arg))
@@ -154,7 +168,7 @@ def _add(content, arg):
         args = arg.split()
         name = args[0]
         pos = None
-        if len(args) == 2 :
+        if len(args) == 2:
             pos = args[1]
         else:
             pos = content.size()+1
@@ -164,7 +178,7 @@ def _add(content, arg):
             content.insert(plugin, int(pos)-1)
             content.display()
         else:
-            print("Sorry the plugin %s is not in my list, pick one form list" %
+            print("Sorry the plugin %s is not in my list, pick one from list" %
                   (name))
     except:
         print("Sorry I can't process the argument '%s'" % (arg))

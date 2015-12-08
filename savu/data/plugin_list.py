@@ -46,11 +46,16 @@ class PluginList(object):
         plugin_group = plugin_file['entry/plugin']
         self.plugin_list = []
         for key in plugin_group.keys():
-            plugin = {}
-            plugin['name'] = plugin_group[key]['name'][0]
-            plugin['id'] = plugin_group[key]['id'][0]
-            plugin['data'] = json.loads(plugin_group[key]['data'][0])
-            self.plugin_list.append(plugin)
+            try:
+                active = plugin_group[key]['active'][0]
+            except KeyError:
+                active = True
+            if active:
+                plugin = {}
+                plugin['name'] = plugin_group[key]['name'][0]
+                plugin['id'] = plugin_group[key]['id'][0]
+                plugin['data'] = json.loads(plugin_group[key]['data'][0])
+                self.plugin_list.append(plugin)
         plugin_file.close()
 
     def save_plugin_list(self, out_filename):
@@ -72,6 +77,13 @@ class PluginList(object):
             data_array = np.array([json.dumps(plugin['data'])])
             plugin_group.create_dataset('data', data_array.shape,
                                         data_array.dtype, data_array)
+            try:
+                name_array = np.array([plugin['active']])
+                plugin_group.create_dataset('active', name_array.shape,
+                                            name_array.dtype, name_array)
+            except KeyError:
+                pass
+
             count += 1
         plugin_file.close()
 
@@ -91,11 +103,17 @@ class PluginList(object):
             stop = len(self.plugin_list)
         disp_params = kwargs.get('params', True)
 
+        # Don't append plugin to string if active is off
         count = start
         plugin_list = self.plugin_list[start:stop]
         for plugin in plugin_list:
+            description = ""
             count += 1
-            description = "%2i) %s(%s)" % (count, plugin['name'], plugin['id'])
+            if 'active' in plugin:
+                if plugin['active'] is False:
+                    description += "***OFF***"
+            description += \
+                "%2i) %s(%s)" % (count, plugin['name'], plugin['id'])
             if disp_params:
                 keycount = 0
                 for key in plugin['data'].keys():
