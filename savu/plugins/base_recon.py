@@ -39,6 +39,7 @@ class BaseRecon(Plugin):
     :param in_datasets: Create a list of the dataset(s) to process. Default: [].
     :param out_datasets: Create a list of the dataset(s) to process. Default: [].
     :param sino_pad_width: Pad proportion of the sinogram width before reconstructing. Default: 0.25.
+    :param log: Take the log of the data before reconstruction. Default: True.
     """
     count = 0
 
@@ -63,6 +64,11 @@ class BaseRecon(Plugin):
         self.slice_dirs = out_pData[0].get_slice_directions()
         self.reconstruct_pre_process()
 
+        if self.parameters['log']:
+            self.sino_func = lambda sino: np.log(np.nan_to_num(1./sino)+1)
+        else:
+            self.sino_func = lambda sino: np.nan_to_num(1./sino)
+
     def process_frames(self, data, slice_list):
         """
         Reconstruct a single sinogram with the provided center of rotation
@@ -70,8 +76,8 @@ class BaseRecon(Plugin):
         cor = self.cor[slice_list[0][self.main_dir]]
         pad_ammount = int(self.parameters['sino_pad_width'] * data[0].shape[1])
         data = np.pad(data[0], ((0, 0), (pad_ammount, pad_ammount)), 'edge')
-        result = self.reconstruct(data, cor+pad_ammount, self.angles,
-                                  self.vol_shape)
+        result = self.reconstruct(self.sino_func(data), cor+pad_ammount,
+                                  self.angles, self.vol_shape)
         return result
 
     def reconstruct(self, data, cor, angles, shape):
