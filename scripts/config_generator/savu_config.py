@@ -36,6 +36,12 @@ class Content(object):
         print "Saving file %s" % (filename)
         self.plugin_list.save_plugin_list(filename)
 
+    def add(self, name, pos):
+        plugin = pu.plugins[name]()
+        plugin.populate_default_parameters()
+        self.insert(plugin, pos)
+        self.display()
+
     def modify(self, element, subelement, value):
         data_elements = self.plugin_list.plugin_list[element-1]['data']
         try:
@@ -145,9 +151,9 @@ def _save(content, arg):
 
 
 def _mod(content, arg):
-    """Modifies the target value e.g. 'mod 1.value 27'"""
+    """Modifies the target value e.g. 'mod 1.value 27' and turns the plugins
+       on and off e.g 'mod 1.on' or 'mod 1.off'"""
     on_off_list = ['ON', 'on', 'OFF', 'off']
-
     try:
         element,  subelement = arg.split()[0].split('.')
         if subelement in on_off_list:
@@ -173,15 +179,21 @@ def _add(content, arg):
         else:
             pos = content.size()+1
         if name in pu.plugins.keys():
-            plugin = pu.plugins[name]()
-            plugin.populate_default_parameters()
-            content.insert(plugin, int(pos)-1)
-            content.display()
+            content.add(name, int(pos)-1)
         else:
             print("Sorry the plugin %s is not in my list, pick one from list" %
                   (name))
     except:
         print("Sorry I can't process the argument '%s'" % (arg))
+    return content
+
+
+def _ref(content, arg):
+    """Refreshes the plugin, replacing it with itself (updating any changes)"""
+    pos = int(arg) - 1
+    name = content.plugin_list.plugin_list[pos]['name']
+    content.remove(pos)
+    content.add(name, pos)
     return content
 
 
@@ -198,7 +210,8 @@ commands = {'open': _open,
             'save': _save,
             'mod': _mod,
             'add': _add,
-            'rem': _rem}
+            'rem': _rem,
+            'ref': _ref}
 
 list_commands = ['loaders',
                  'corrections',
@@ -226,7 +239,7 @@ class Completer(object):
         dirname, rest = os.path.split(path)
         tmp = dirname if dirname else '.'
         res = [os.path.join(dirname, p)
-                for p in self._listdir(tmp) if p.startswith(rest)]
+               for p in self._listdir(tmp) if p.startswith(rest)]
         # more than one match, or single match which does not exist (typo)
         if len(res) > 1 or not os.path.exists(path):
             return res
