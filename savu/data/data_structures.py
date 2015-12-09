@@ -58,6 +58,7 @@ class Data(object):
         self.data = None
         self.next_shape = None
         self.mapping = None
+        self.map_dim = []
 
     def initialise_data_info(self, name):
         self.data_info.set_meta_data('name', name)
@@ -117,7 +118,8 @@ class Data(object):
         new_obj.backing_file = self.backing_file
         new_obj.data = self.data
         new_obj.next_shape = copy.deepcopy(self.next_shape)
-        new_obj.mapping = self.mapping
+        new_obj.mapping = copy.deepcopy(self.mapping)
+        new_obj.map_dim = copy.deepcopy(self.map_dim)
         return new_obj
 
     def add_base(self, ExtraBase):
@@ -132,7 +134,6 @@ class Data(object):
 
     def external_link(self):
         return h5py.ExternalLink(self.backing_file.filename, self.group_name)
-
 
     def create_dataset(self, *args, **kwargs):
         """
@@ -358,6 +359,7 @@ class Data(object):
         diff = np.array(orig_shape) - map_shape[:len(orig_shape)]
         not_map_dim = np.where(diff == 0)[0]
         map_dim = np.where(diff != 0)[0]
+        self.map_dim = map_dim
         map_obj.data_info.set_meta_data('full_map_dim_len', map_shape[map_dim])
         map_shape[not_map_dim] = np.array(new_shape)[not_map_dim]
         # assuming only one extra dimension added for now

@@ -27,7 +27,6 @@ import logging
 import numpy as np
 
 import savu.data.data_structures as ds
-from savu.core.utils import logmethod
 from savu.plugins.base_loader import BaseLoader
 
 from savu.plugins.utils import register_plugin
@@ -39,8 +38,9 @@ class I12TomoLoader(BaseLoader):
     A class to load i12 tomography data from a hdf5 file
 
     :param angular_spacing: Angular spacing between successive projections. Default: 0.2.
+    :param data_path: Path to the data. Default: 'entry1/tomo_entry/data/data'.
     :param dark: Path to the dark field data file. Default: '/dls/science/groups/das/ExampleData/i12/savu_data/ee12581-1_test/45657.nxs'. 
-    :param flat: Path to the flat field data file. Default: '/dls/science/groups/das/ExampleData/i12/savu_data/ee12581-1_test/45658.nxs'.    
+    :param flat: Path to the flat field data file. Default: '/dls/science/groups/das/ExampleData/i12/savu_data/ee12581-1_test/45658.nxs'.
     """
 
     def __init__(self, name='I12TomoLoader'):
@@ -71,7 +71,7 @@ class I12TomoLoader(BaseLoader):
                       data_obj.backing_file.filename)
 
         data_obj.data = \
-            data_obj.backing_file['entry/instrument/detector/data']
+            data_obj.backing_file[self.parameters['data_path']]
 
 #        data_obj.data = \
 #            data_obj.backing_file['entry1/p2r_flyScanDetector/data']
