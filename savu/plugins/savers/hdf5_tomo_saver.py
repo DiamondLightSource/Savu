@@ -134,7 +134,6 @@ class Hdf5TomoSaver(BaseSaver):
             for dim in range(3):
                 chunks[dim] = min(shape[dim], 64)
         else:
-            print intersect, shape
             for dim in intersect:
                 chunks[dim] = shape[dim]
             remaining_cores = set(current_cores).difference(intersect).\
