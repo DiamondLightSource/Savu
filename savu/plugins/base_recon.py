@@ -65,9 +65,9 @@ class BaseRecon(Plugin):
         self.reconstruct_pre_process()
 
         if self.parameters['log']:
-            self.sino_func = lambda sino: np.log(np.nan_to_num(1./sino)+1)
+            self.sino_func = lambda sino: -np.log(np.nan_to_num(sino)+1)
         else:
-            self.sino_func = lambda sino: np.nan_to_num(1./sino)
+            self.sino_func = lambda sino: np.nan_to_num(sino)
 
     def process_frames(self, data, slice_list):
         """

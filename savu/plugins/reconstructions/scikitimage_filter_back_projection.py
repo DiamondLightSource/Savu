@@ -36,21 +36,18 @@ class ScikitimageFilterBackProjection(BaseRecon, CpuPlugin):
     def _shift(self, sinogram, centre_of_rotation):
         centre_of_rotation_shift = (sinogram.shape[0]/2) - centre_of_rotation
         result = ndimage.interpolation.shift(sinogram,
-                                             (centre_of_rotation_shift,
-                                              0))
+                                             (centre_of_rotation_shift, 0))
         return result
 
-    def reconstruct(self, sinogram, centre_of_rotations,
-                    vol_shape, params):
-
+    def reconstruct(self, sinogram, centre_of_rotations, vol_shape, params):
+        in_pData = self.get_plugin_in_datasets()[0]
         in_meta_data = self.get_in_meta_data()[0]
         sinogram = np.swapaxes(sinogram, 0, 1)
         sinogram = self._shift(sinogram, centre_of_rotations)
-        sino = np.nan_to_num(sinogram)
         theta = in_meta_data.get_meta_data('rotation_angle')
         result = \
-            transform.iradon(sino, theta=theta,
-                             output_size=(sinogram.shape[0]),
+            transform.iradon(sinogram, theta=theta,
+                             output_size=(in_pData.get_shape()[1]),
                              # self.parameters['output_size'],
                              filter='ramp',  # self.parameters['filter'],
                              interpolation='linear',
