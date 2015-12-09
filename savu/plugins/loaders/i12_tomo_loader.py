@@ -41,9 +41,9 @@ class I12TomoLoader(BaseLoader):
 
     :param angular_spacing: Angular spacing between successive projections. Default: 0.2.
     :param data_path: Path to the data inside the file. Default: 'entry1/tomo_entry/data/data'.
-    :param dark: Path to the dark field data file. Default: 'Savu/test_data/i12_test_data/45657.nxs'. 
-    :param flat: Path to the flat field data file. Default: 'Savu/test_data/i12_test_data/45658.nxs'.
-    :param flat_dark_path: Path to the data inside the file. Default: 'entry1/pco4000_dio_hdf/data'
+    :param dark: Path to the dark field data file. Default: 'Savu/test_data/data/i12_test_data/45657.nxs'. 
+    :param flat: Path to the flat field data file. Default: 'Savu/test_data/data/i12_test_data/45658.nxs'.
+    :param flat_dark_path: Path to the data inside the file. Default: 'entry1/data/pco4000_dio_hdf/data'
     """
 
     def __init__(self, name='I12TomoLoader'):
@@ -125,6 +125,6 @@ class I12TomoLoader(BaseLoader):
     def get_file_path(self, name):
         path = self.parameters[name]
         if path.split(os.sep)[0] == 'Savu':
-            path = tu.get_test_data_path(path.split('/test_data')[1])
+            path = tu.get_test_data_path(path.split('/test_data/data')[1])
             self.parameters['flat_dark_path'] = 'entry/final_result_tomo/data'
         return path

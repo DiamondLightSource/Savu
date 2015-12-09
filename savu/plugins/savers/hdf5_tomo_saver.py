@@ -110,6 +110,7 @@ class Hdf5TomoSaver(BaseSaver):
                                                  data.dtype)
             else:
                 chunks = self.calculate_chunking(current_and_next, shape)
+                print chunks
                 data.data = group.create_dataset("data", shape, data.dtype,
                                                  chunks=chunks)
         return group_name, group
@@ -120,6 +121,8 @@ class Hdf5TomoSaver(BaseSaver):
         current = current_and_next['current']
         current_cores = current[current.keys()[0]]['core_dir']
         nnext = current_and_next['next']
+
+        print "current", current, "next", nnext
         if nnext == []:
             next_cores = current_cores
         else:
@@ -131,10 +134,15 @@ class Hdf5TomoSaver(BaseSaver):
             for dim in range(3):
                 chunks[dim] = min(shape[dim], 64)
         else:
+            print intersect, shape
             for dim in intersect:
                 chunks[dim] = shape[dim]
             remaining_cores = set(current_cores).difference(intersect).\
                 union(set(next_cores).difference(intersect))
             for dim in remaining_cores:
                 chunks[dim] = min(shape[dim], 32)
-        return tuple(chunks)
+
+        if 0 in chunks:
+            return True
+        else:
+            return tuple(chunks)

@@ -54,6 +54,7 @@ class Hdf5TransportData(object):
         for plugin_dict in plugin_list[start:-1]:
             self.get_current_and_next_patterns(datasets_list[count-1:])
             plugin_id = plugin_dict["id"]
+            print "***", plugin_id, "***"
             logging.debug("Loading plugin %s", plugin_id)
             plugin = pu.plugin_loader(exp, plugin_dict)
             self.set_filenames(plugin, plugin_id, count)
