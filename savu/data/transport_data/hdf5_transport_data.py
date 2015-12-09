@@ -94,6 +94,24 @@ class Hdf5TransportData(object):
             expInfo.set_meta_data(["filename", key], filename)
             expInfo.set_meta_data(["group_name", key], group_name)
 
+#    def add_data_links(self, linkType):
+#
+#        nxs_filename = self.exp.meta_data.get_meta_data('nxs_filename')
+#        logging.debug("Adding link to file %s", nxs_filename)
+#        plugin_file = h5py.File(nxs_filename, 'a')
+#
+#        if linkType is 'final_result':
+#            name = 'final_result_' + self.get_name()
+#            entry = plugin_file['entry']
+#            entry.attrs[NX_CLASS] = 'NXdata'
+#            entry[name] = self.external_link()
+#        else:
+#            name = self.group_name + '_' + self.data_info.get_meta_data('name')
+#            entry = plugin_file['entry'].require_group('intermediate')
+#            entry.attrs[NX_CLASS] = 'NXcollection'
+#            entry[name] = self.external_link()
+#        return plugin_file, entry
+
     def add_data_links(self, linkType):
 
         nxs_filename = self.exp.meta_data.get_meta_data('nxs_filename')

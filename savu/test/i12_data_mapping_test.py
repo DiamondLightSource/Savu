@@ -33,75 +33,77 @@ from savu.test.plugin_runner_test \
 
 class I12DataMappingTest(unittest.TestCase):
 
-    @unittest.skip('Test data not available')
+    def get_loader_dict(self):
+        return {'data_path': '/1-TempPlugin-tomo/data', 'angular_spacing': 1}
+
     def test_i12tomo(self):
         options = tu.set_experiment('i12tomo')
         plugin = 'savu.plugins.corrections.i12_dark_flat_field_correction'
         data_dict = {'in_datasets': ['tomo'], 'out_datasets': ['test']}
-        all_dicts = [{}, data_dict, {}]
+        all_dicts = [self.get_loader_dict(), data_dict, {}]
         exp = run_protected_plugin_runner_no_process_list(options, plugin,
                                                           data=all_dicts)
         self.assertEqual(exp.index['in_data']['test'].get_shape(),
-                         (901, 2160, 2560, 24))
+                         (181, 10, 192, 4))
 
-    @unittest.skip('Test data not available')
     def test_i12tomo2(self):
         options = tu.set_experiment('i12tomo')
         plugin = 'savu.plugins.corrections.i12_dark_flat_field_correction'
         selection = ['midmap:midmap+1:endmap:5', '0:end:1:1', '0:end:1:1']
-        loader_dict = {'preview': selection}
+        loader_dict = self.get_loader_dict()
+        loader_dict['preview'] = selection
         data_dict = {'in_datasets': ['tomo'], 'out_datasets': ['test']}
         all_dicts = [loader_dict, data_dict, {}]
         exp = run_protected_plugin_runner_no_process_list(options, plugin,
                                                           data=all_dicts)
         self.assertEqual(exp.index['in_data']['test'].get_shape(),
-                         (5, 2160, 2560, 1))
+                         (5, 10, 192, 1))
 
-    @unittest.skip('Test data not available')
     def test_i12tomo3(self):
         options = tu.set_experiment('i12tomo')
         plugin = 'savu.plugins.corrections.i12_dark_flat_field_correction'
         selection = ['midmap:4*endmap:endmap:5', '0:end:10:1', '0:end:10:1']
-        loader_dict = {'preview': selection}
+        loader_dict = self.get_loader_dict()
+        loader_dict['preview'] = selection
         data_dict = {'in_datasets': ['tomo'], 'out_datasets': ['test']}
         all_dicts = [loader_dict, data_dict, {}]
         exp = run_protected_plugin_runner_no_process_list(options, plugin,
                                                           data=all_dicts)
         self.assertEqual(exp.index['in_data']['test'].get_shape(),
-                         (5, 216, 256, 4))
+                         (5, 1, 20, 4))
 
-    @unittest.skip('Test data not available')
     def test_i12tomo4(self):
         options = tu.set_experiment('i12tomo')
         plugin = 'savu.plugins.corrections.i12_dark_flat_field_correction'
         selection = ['midmap:4*endmap:endmap:1', '0:end:10:1', '0:end:10:1']
-        loader_dict = {'preview': selection}
+        loader_dict = self.get_loader_dict()
+        loader_dict['preview'] = selection
         data_dict = {'in_datasets': ['tomo'], 'out_datasets': ['test']}
         all_dicts = [loader_dict, data_dict, {}]
         exp = run_protected_plugin_runner_no_process_list(options, plugin,
                                                           data=all_dicts)
         self.assertEqual(exp.index['in_data']['test'].get_shape(),
-                         (1, 216, 256, 4))
+                         (1, 1, 20, 4))
 
-    @unittest.skip('Test data not available')
     def test_i12tomo5(self):
         options = tu.set_experiment('i12tomo')
         plugin = 'savu.plugins.corrections.i12_dark_flat_field_correction'
         selection = ['0:20:1:1', '0:-1:5:1', '0:-1:5:1']
-        loader_dict = {'preview': selection}
+        loader_dict = self.get_loader_dict()
+        loader_dict['preview'] = selection
         data_dict = {'in_datasets': ['tomo'], 'out_datasets': ['test']}
         all_dicts = [loader_dict, data_dict, {}]
         exp = run_protected_plugin_runner_no_process_list(options, plugin,
                                                           data=all_dicts)
         self.assertEqual(exp.index['in_data']['test'].get_shape(),
-                         (20, 432, 512, 1))
+                         (20, 2, 39, 1))
 
-    @unittest.skip('Test data not available')
     def test_i12tomo6(self):
         options = tu.set_experiment('i12tomo')
         plugin = 'savu.plugins.corrections.i12_dark_flat_field_correction'
         selection = ['midmap:end:endmap:5', '0:end:10:1', '0:end:10:1']
-        loader_dict = {'preview': selection}
+        loader_dict = self.get_loader_dict()
+        loader_dict['preview'] = selection
         data_dict = {'in_datasets': ['tomo'], 'out_datasets': ['test']}
         all_dicts = [loader_dict, data_dict, {}]
         exp = run_protected_plugin_runner_no_process_list(options, plugin,
@@ -114,7 +116,8 @@ class I12DataMappingTest(unittest.TestCase):
         options = tu.set_experiment('i12tomo')
         plugin = 'savu.plugins.corrections.i12_dark_flat_field_correction'
         selection = ['mid-2:mid+2:1:1', '0:end:10:1', '0:end:10:1']
-        loader_dict = {'preview': selection}
+        loader_dict = self.get_loader_dict()
+        loader_dict['preview'] = selection
         data_dict = {'in_datasets': ['tomo'], 'out_datasets': ['test']}
         all_dicts = [loader_dict, data_dict, {}]
         exp = run_protected_plugin_runner_no_process_list(options, plugin,
