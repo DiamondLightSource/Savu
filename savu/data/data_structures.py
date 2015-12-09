@@ -577,6 +577,16 @@ class Data(object):
                     return next_pattern
         return next_pattern
 
+#    def find_next_pattern(self, datasets_lists, current_name):
+#        next_pattern = []
+#        print "next_data_list", next_data_list
+#        for next_data_list in datasets_lists:
+#            for next_data in next_data_list['in_datasets']:
+#                if next_data['name'] == current_name:
+#                    next_pattern = next_data['pattern']
+#                    return next_pattern
+#        return next_pattern
+
 
 class PluginData(object):
 

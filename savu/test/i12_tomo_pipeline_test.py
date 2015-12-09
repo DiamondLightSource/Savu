@@ -47,7 +47,8 @@ class I12TomoPipelineTest(unittest.TestCase):
         options = {
             "transport": "hdf5",
             "process_names": "CPU0",
-            "data_file": tu.get_test_data_path('i12_test_data.nxs'),
+            "data_file": tu.get_test_data_path(
+                '/i12_test_data/i12_test_data.nxs'),
             "process_file": tu.get_test_process_path(
                 'i12_tomo_pipeline_preview_test.nxs'),
             "out_path": tempfile.mkdtemp()
@@ -58,7 +59,8 @@ class I12TomoPipelineTest(unittest.TestCase):
         options = {
             "transport": "hdf5",
             "process_names": "CPU0",
-            "data_file": tu.get_test_data_path('i12_test_data.nxs'),
+            "data_file": tu.get_test_data_path(
+                '/i12_test_data/i12_test_data.nxs'),
             "process_file": tu.get_test_process_path(
                 'i12_tomo_pipeline_test.nxs'),
             "out_path": tempfile.mkdtemp()

@@ -25,9 +25,11 @@
 import h5py
 import logging
 import numpy as np
+import os
 
 import savu.data.data_structures as ds
 from savu.plugins.base_loader import BaseLoader
+import savu.test.test_utils as tu
 
 from savu.plugins.utils import register_plugin
 
@@ -38,9 +40,10 @@ class I12TomoLoader(BaseLoader):
     A class to load i12 tomography data from a hdf5 file
 
     :param angular_spacing: Angular spacing between successive projections. Default: 0.2.
-    :param data_path: Path to the data. Default: 'entry1/tomo_entry/data/data'.
-    :param dark: Path to the dark field data file. Default: '/dls/science/groups/das/ExampleData/i12/savu_data/ee12581-1_test/45657.nxs'. 
-    :param flat: Path to the flat field data file. Default: '/dls/science/groups/das/ExampleData/i12/savu_data/ee12581-1_test/45658.nxs'.
+    :param data_path: Path to the data inside the file. Default: 'entry1/tomo_entry/data/data'.
+    :param dark: Path to the dark field data file. Default: 'Savu/test_data/i12_test_data/45657.nxs'. 
+    :param flat: Path to the flat field data file. Default: 'Savu/test_data/i12_test_data/45658.nxs'.
+    :param flat_dark_path: Path to the data inside the file. Default: 'entry1/pco4000_dio_hdf/data'
     """
 
     def __init__(self, name='I12TomoLoader'):
@@ -76,12 +79,12 @@ class I12TomoLoader(BaseLoader):
 #        data_obj.data = \
 #            data_obj.backing_file['entry1/p2r_flyScanDetector/data']
 
-        dark_file = h5py.File(self.parameters['dark'], 'r')
-        dark = dark_file['entry1/pco4000_dio_hdf/data']
+        dark_file = h5py.File(self.get_file_path('dark'), 'r')
+        dark = dark_file[self.parameters['flat_dark_path']]
         expInfo.set_meta_data('dark', dark[:].mean(0))
 
-        flat_file = h5py.File(self.parameters['flat'], 'r')
-        flat = flat_file['entry1/pco4000_dio_hdf/data']
+        flat_file = h5py.File(self.get_file_path('flat'), 'r')
+        flat = flat_file[self.parameters['flat_dark_path']]
         expInfo.set_meta_data('flat', flat[:].mean(0))
 
         data_obj.set_shape(data_obj.data.shape)
@@ -118,3 +121,10 @@ class I12TomoLoader(BaseLoader):
         shape = (rotation_angle.shape + loaded_shape[1:3] + (n_scans,))
 
         mapping_obj.set_shape(shape)
+
+    def get_file_path(self, name):
+        path = self.parameters[name]
+        if path.split(os.sep)[0] == 'Savu':
+            path = tu.get_test_data_path(path.split('/test_data')[1])
+            self.parameters['flat_dark_path'] = 'entry/final_result_tomo/data'
+        return path
