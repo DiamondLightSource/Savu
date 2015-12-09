@@ -71,6 +71,7 @@ class ScikitimageSart(BaseRecon, CpuPlugin):
                              interpolation='linear',
                              # self.parameters['linear'],
                              circle=False)  # self.parameters[False])
+
         for i in range(self.parameters["iterations"]):
             print "Iteration %i" % i
             result = transform.iradon_sart(sino, theta=theta, image=result,
