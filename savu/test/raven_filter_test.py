@@ -29,7 +29,6 @@ from savu.test.plugin_runner_test import run_protected_plugin_runner
 
 class RavenFilterTest(unittest.TestCase):
 
-    @unittest.skip("unfixed error")
     def test_fbp(self):
         options = {
             "transport": "hdf5",

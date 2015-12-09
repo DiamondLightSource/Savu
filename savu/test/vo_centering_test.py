@@ -30,7 +30,6 @@ from savu.test.plugin_runner_test import \
 
 class VoCenterTest(unittest.TestCase):
 
-    @unittest.skip("Passes on my system: to investigate")
     def test_vo_centering(self):
         options = tu.set_experiment('tomo')
         plugin = 'savu.plugins.filters.vo_centering'
