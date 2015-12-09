@@ -109,9 +109,8 @@ class I12DataMappingTest(unittest.TestCase):
         exp = run_protected_plugin_runner_no_process_list(options, plugin,
                                                           data=all_dicts)
         self.assertEqual(exp.index['in_data']['test'].get_shape(),
-                         (5, 216, 256, 24))
+                         (5, 1, 20, 4))
 
-    @unittest.skip('Test data not available')
     def test_i12tomo7(self):
         options = tu.set_experiment('i12tomo')
         plugin = 'savu.plugins.corrections.i12_dark_flat_field_correction'
@@ -123,33 +122,33 @@ class I12DataMappingTest(unittest.TestCase):
         exp = run_protected_plugin_runner_no_process_list(options, plugin,
                                                           data=all_dicts)
         self.assertEqual(exp.index['in_data']['test'].get_shape(),
-                         (2, 216, 256, 2))
+                         (2, 1, 20, 2))
 
-    @unittest.skip('Test data not available')
     def test_i12tomo8(self):
         options = tu.set_experiment('i12tomo')
         plugin = 'savu.plugins.corrections.i12_dark_flat_field_correction'
         selection = ['0:endmap:20:1', '0:end:1:1', '0:end:1:1']
-        loader_dict = {'preview': selection}
+        loader_dict = self.get_loader_dict()
+        loader_dict['preview'] = selection
         data_dict = {'in_datasets': ['tomo'], 'out_datasets': ['test']}
         all_dicts = [loader_dict, data_dict, {}]
         exp = run_protected_plugin_runner_no_process_list(options, plugin,
                                                           data=all_dicts)
         self.assertEqual(exp.index['in_data']['test'].get_shape(),
-                         (46, 2160, 2560, 1))
+                         (10, 10, 192, 1))
 
-    @unittest.skip('Test data not available')
     def test_i12tomo9(self):
         options = tu.set_experiment('i12tomo')
         plugin = 'savu.plugins.corrections.i12_dark_flat_field_correction'
         selection = ['0:end:1:1', '0:end:30:1', '0:end:300:1']
-        loader_dict = {'preview': selection}
+        loader_dict = self.get_loader_dict()
+        loader_dict['preview'] = selection
         data_dict = {'in_datasets': ['tomo'], 'out_datasets': ['test']}
         all_dicts = [loader_dict, data_dict, {}]
         exp = run_protected_plugin_runner_no_process_list(options, plugin,
                                                           data=all_dicts)
         self.assertEqual(exp.index['in_data']['test'].get_shape(),
-                         (901, 72, 9, 24))
+                         (181, 1, 1, 4))
 
 
 if __name__ == "__main__":

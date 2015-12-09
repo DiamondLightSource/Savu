@@ -47,21 +47,18 @@ class I12TomoPipelineTest(unittest.TestCase):
         options = {
             "transport": "hdf5",
             "process_names": "CPU0",
-            "data_file": '/dls/science/groups/das/ExampleData/i12/savu_data/' +
-                         'ee12581-1_test/pc2_KRA_530_ramp_00000.hdf',
+            "data_file": tu.get_test_data_path('i12_test_data.nxs'),
             "process_file": tu.get_test_process_path(
                 'i12_tomo_pipeline_preview_test.nxs'),
             "out_path": tempfile.mkdtemp()
             }
         run_protected_plugin_runner(options)
 
-    @unittest.skip('Test data not available')
     def test_process(self):
         options = {
             "transport": "hdf5",
             "process_names": "CPU0",
-            "data_file": '/dls/science/groups/das/ExampleData/i12/savu_data/' +
-                         'ee12581-1_test/pc2_KRA_530_ramp_00000.hdf',
+            "data_file": tu.get_test_data_path('i12_test_data.nxs'),
             "process_file": tu.get_test_process_path(
                 'i12_tomo_pipeline_test.nxs'),
             "out_path": tempfile.mkdtemp()
