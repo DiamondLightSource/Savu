@@ -50,7 +50,7 @@ class Hdf5TomoSaver(BaseSaver):
         if 'current_and_next' in self.exp.meta_data.get_dictionary():
             current_and_next = \
                 self.exp.meta_data.get_meta_data('current_and_next')
-z
+
         count = 0
         for key in out_data_dict.keys():
             out_data = out_data_dict[key]
