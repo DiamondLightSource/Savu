@@ -91,6 +91,7 @@ class BaseAstraRecon(BaseRecon):
         return self.astra_reconstruction(sino, vol_geom, proj_geom)
 
     def astra_reconstruction(self, sino, vol_geom, proj_geom):
+        print sino.shape
         self.sino_id = self.astra_function.create("-sino", proj_geom, sino)
         # Create a data object for the reconstruction
         self.rec_id = self.astra_function.create('-vol', vol_geom)
@@ -113,6 +114,7 @@ class BaseAstraRecon(BaseRecon):
 
     def geom_setup_2D(self, sino, angles, shape):
         vol_geom = astra.create_vol_geom(shape[0], shape[1])
+        print sino.shape[1], len(angles)
         proj_geom = astra.create_proj_geom('parallel', 1.0, sino.shape[1],
                                            np.deg2rad(angles))
         return vol_geom, proj_geom

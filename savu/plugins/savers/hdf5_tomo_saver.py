@@ -100,6 +100,8 @@ class Hdf5TomoSaver(BaseSaver):
         group.attrs[NX_CLASS] = 'NXdata'
         group.attrs['signal'] = 'data'
 
+        self.exp.barrier()
+
         if data.get_variable_flag() is True:
             dt = h5py.special_dtype(vlen=data.dtype)
             data.data = group.create_dataset('data', data.get_shape()[:-1], dt)
@@ -116,6 +118,8 @@ class Hdf5TomoSaver(BaseSaver):
         return group_name, group
 
     def calculate_chunking(self, current_and_next, shape):
+        print shape
+
         if len(shape) < 3:
             return True
         current = current_and_next['current']

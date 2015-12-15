@@ -1,6 +1,6 @@
 #!/bin/bash
-module load global/testcluster
-#module load global/cluster
+#module load global/testcluster
+module load global/cluster
 module load python/ana
 module load cuda/5.0
 #source activate mpi2

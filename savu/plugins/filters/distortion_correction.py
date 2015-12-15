@@ -33,10 +33,12 @@ import unwarp
 @register_plugin
 class DistortionCorrection(BaseFilter, CpuPlugin):
     """
-    A plugin to apply distortion correction
+    A plugin to apply spherical aberration correction.  It must only be applied
+    after a flat field correction.
 
-    :param polynomial_coeffs: Parameters of the radial distortion function. Default: (1, 0, 0, 0, 0).
-    :param centre: Centre of distortion. Default: (1000, 1000)
+    :param polynomial_coeffs: Parameters of the radial distortion \
+        function. Default: (1.00015, 1.92892, -2.43251, 1.00439, -3.99352).
+    :param centre: Centre of distortion. Default: (1283.25, 1164.76)
     """
 
     def __init__(self):
@@ -47,14 +49,12 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
         #pass two empty arrays of frame chunk size
         unwarp.setcoeff(*self.parameters['polynomial_coeffs'])
         unwarp.setctr(*self.parameters['centre'])
-
         plugin_data_shape = self.get_plugin_in_datasets()[0].get_shape()
-
         temp_array = np.empty(plugin_data_shape, dtype=np.uint16)
         unwarp.setup(temp_array, temp_array)
 
     def filter_frames(self, data):
-        data = data[0]
+        data = data[0].astype(np.float32)
         result = np.empty_like(data)
         unwarp.run(data, result)
         return result
@@ -63,22 +63,15 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
         unwarp.cleanup()
 
     def setup(self):
-        self.exp.log(self.name + " Start")
         # set up the output dataset that is created by the plugin
         in_dataset, out_dataset = self.get_datasets()
-        # get only frames where image key is zero
-        in_dataset[0].trim_input_data(image_key=0)
-
         # copy all required information from in_dataset[0]
         out_dataset[0].create_dataset(in_dataset[0])
-
         # set information relating to the plugin data
         in_pData, out_pData = self.get_plugin_datasets()
         # set pattern_name and nframes to process for all datasets
         in_pData[0].plugin_data_setup('PROJECTION', self.get_max_frames())
         out_pData[0].plugin_data_setup('PROJECTION', self.get_max_frames())
-
-        self.exp.log(self.name + " End")
 
     def get_max_frames(self):
         return 8

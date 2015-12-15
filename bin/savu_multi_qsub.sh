@@ -21,8 +21,8 @@ while read -r a b c d; do
 	runfile=/bin/savu_launcher.sh
 	outpath=$PWD #outputting to the current folder
 	#datafile=$outpath/../test_data/24888.nxs
-	datafile=$outpath/../test_data/ee12581-1_test/pc2_KRA_530_ramp_00000.hdf
-	processfile=$outpath/../test_data/i12_tomo_pipeline.nxs
+	datafile=/dls/i12/data/2015/ee13236-1/rawdata/55751.nxs
+	processfile=$outpath/../test_data/original_process_lists/i12_tomo_pipeline_preview_55751.nxs
 	outname="${fname}N${nNodes}_C${nCPUs}_mpi_test"
 
 	for i in $(eval echo {1..$nRuns})

@@ -97,7 +97,9 @@ class I12TomoLoader(BaseLoader):
         mapping_obj = exp.create_data_object('mapping', 'tomo')
 
         angular_spacing = self.parameters['angular_spacing']
-        rotation_angle = np.arange(0, 180+angular_spacing, angular_spacing)
+        n_scans = int((180+angular_spacing)/angular_spacing)
+        #rotation_angle = np.arange(0, 180+angular_spacing, angular_spacing)
+        rotation_angle = np.linspace(0, 180, n_scans)
         mapping_obj.set_axis_labels('rotation_angle.degrees',
                                     'detector_y.pixel',
                                     'detector_x.pixel',
@@ -117,7 +119,7 @@ class I12TomoLoader(BaseLoader):
                                 slice_dir=(detY, scan))
 
         loaded_shape = data_obj.get_shape()
-        n_scans = loaded_shape[0]/len(rotation_angle)
+        #n_scans = loaded_shape[0]/len(rotation_angle)
         shape = (rotation_angle.shape + loaded_shape[1:3] + (n_scans,))
 
         mapping_obj.set_shape(shape)
