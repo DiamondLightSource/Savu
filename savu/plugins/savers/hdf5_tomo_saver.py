@@ -112,13 +112,13 @@ class Hdf5TomoSaver(BaseSaver):
                                                  data.dtype)
             else:
                 chunks = self.calculate_chunking(current_and_next, shape)
-                print chunks
-                data.data = group.create_dataset("data", shape, data.dtype,
-                                                 chunks=chunks)
+                print "chunks = ", chunks
+                data.data = group.create_dataset("data", shape, data.dtype)
+                                                 #chunks=chunks)
         return group_name, group
 
     def calculate_chunking(self, current_and_next, shape):
-        print shape
+        print "shape = ", shape
 
         if len(shape) < 3:
             return True

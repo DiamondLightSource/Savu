@@ -50,13 +50,12 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
         unwarp.setcoeff(*self.parameters['polynomial_coeffs'])
         unwarp.setctr(*self.parameters['centre'])
         plugin_data_shape = self.get_plugin_in_datasets()[0].get_shape()
-        temp_array = np.empty(plugin_data_shape, dtype=np.uint16)
+        temp_array = np.empty(plugin_data_shape, dtype=np.float32)
         unwarp.setup(temp_array, temp_array)
 
     def filter_frames(self, data):
-        data = data[0].astype(np.float32)
-        result = np.empty_like(data)
-        unwarp.run(data, result)
+        result = np.empty_like(data[0])
+        unwarp.run(data[0], result)
         return result
 
     def post_process(self):
