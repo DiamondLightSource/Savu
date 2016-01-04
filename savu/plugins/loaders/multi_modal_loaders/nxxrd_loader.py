@@ -52,24 +52,29 @@ class NxxrdLoader(BaseMultiModalLoader):
         print xrd_entry
         self.set_motors(data_obj, xrd_entry, 'xrd')
         # hard coded for now, but we can change it to fram nx transformations in future.
-        data_obj.set_axis_labels('rotation_angle.degrees',
-                                 'x.mm',
-                                 'y.mm',
-                                 'detector_x.mm',
-                                 'detector_y.mm')
+#         data_obj.set_axis_labels('rotation_angle.degrees',
+#                                  'x.mm',
+# #                                  'y.mm',
+#                                  'detector_x.mm',
+#                                  'detector_y.mm')
 
         rotation_angle = \
             data_obj.backing_file[xrd_entry.name + '/sample/theta']
         data_obj.meta_data.set_meta_data('rotation_angle', rotation_angle[...])
         #self.add_patterns_based_on_acquisition(data_obj, 'xrd')
-
+        print data_obj.data.shape
         slicedir = tuple(range(len(data_obj.data.shape)-2))
+        print "diffraction slice direction is "+str(slicedir)
         data_obj.add_pattern("DIFFRACTION", core_dir=(-2, -1),
                              slice_dir=slicedir)
+#         data_obj.add_pattern("SINOGRAM", core_dir=(0, 2),
+#                              slice_dir=(1,3,4))
+#         data_obj.add_pattern("PROJECTION", core_dir=(1, 2),
+#                              slice_dir=(0,3,4))
         data_obj.add_pattern("SINOGRAM", core_dir=(0, 2),
-                             slice_dir=(1,3,4))
+                             slice_dir=(1, 3, 4))
         data_obj.add_pattern("PROJECTION", core_dir=(1, 2),
-                             slice_dir=(0,3,4))
+                             slice_dir=(0, 3, 4))
         # now to load the calibration file
         print self.parameters['calibration_path']
         if os.exists(self.parameters['calibration_path']):

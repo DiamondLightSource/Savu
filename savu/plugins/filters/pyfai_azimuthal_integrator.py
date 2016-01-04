@@ -40,6 +40,7 @@ class PyfaiAzimuthalIntegrator(BaseFilter, CpuPlugin):
     1D azimuthal integrator by pyFAI
 
     :param use_mask: Should we mask. Default: False.
+    :param num_bins: number of bins. Default: 1005.
 
     """
 
@@ -82,7 +83,7 @@ class PyfaiAzimuthalIntegrator(BaseFilter, CpuPlugin):
         else:
             mask = np.zeros((sh[-2], sh[-1]))
         # now integrate in radius (1D)print "hello"
-        self.npts = int(np.round(np.sqrt(sh[-1]**2+sh[-2]**2)))
+        self.npts = self.get_parameters('num_bins')
         self.params = [mask, self.npts, mData, ai]
 
     def filter_frames(self, data):
@@ -112,6 +113,7 @@ class PyfaiAzimuthalIntegrator(BaseFilter, CpuPlugin):
         # I just want diffraction data
         in_pData[0].plugin_data_setup('DIFFRACTION', self.get_max_frames())
         spectra = out_datasets[0]
+        num_bins = self.get_parameters('num_bins')
         # what does this do?
         #remove an axis from all patterns
 
@@ -127,7 +129,7 @@ class PyfaiAzimuthalIntegrator(BaseFilter, CpuPlugin):
 #                                shape={'variable': shape[:-2]})
         spectra.create_dataset(patterns={in_dataset[0]: patterns},
                                axis_labels={in_dataset[0]: axis_labels},
-                               shape=shape[:-2]+(4643,))
+                               shape=shape[:-2]+(num_bins,))
 
         spectrum = {'core_dir': (-1,), 'slice_dir': tuple(range(len(shape)-2))}
         spectra.add_pattern("SPECTRUM", **spectrum)

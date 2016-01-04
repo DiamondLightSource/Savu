@@ -63,7 +63,7 @@ class BaseFluoFitter(BaseFitter):
     def setup(self):
         # set up the output datasets that are created by the plugin
         in_dataset, out_datasets = self.get_datasets()
-
+        in_meta_data = self.get_in_meta_data()[0]
         shape = in_dataset[0].get_shape()
         axis_labels = ['-1.PeakIndex.pixel.unit']
         pattern_list = ['SINOGRAM', 'PROJECTION']
@@ -71,7 +71,8 @@ class BaseFluoFitter(BaseFitter):
         fitAreas = out_datasets[0]
         fitHeights = out_datasets[1]
         fitWidths = out_datasets[2]
-        numpeaks = 23
+        #idx = self.setPositions(in_meta_data)
+        numpeaks = 29#len(idx)
         new_shape = shape[:-1] + (numpeaks,)
         print new_shape
         fitAreas.create_dataset(patterns={in_dataset[0]: pattern_list},

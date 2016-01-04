@@ -64,18 +64,23 @@ class BaseMultiModalLoader(BaseLoader):
         axes = entry['data'].attrs['axes']
         data_obj.data_mapping.set_axes(axes)
         nAxes = len(axes)
-
+        print nAxes
         cts = 0
         motors = []
         motor_type = []
+        labels = []
         for ii in range(nAxes):
             # find the rotation axis
             data_axis = 'data/' + entry['data'].attrs["axes"][ii]
-
+            label = str(entry['data'].attrs["axes"][ii])
             logging.debug(str(data_axis))
-
             entry_axis = entry[data_axis]
-
+            try:
+                units = entry_axis.attrs['units']
+            except KeyError:
+                logging.debug('leaving the units out for axis %s', str(ii))
+                units = 'unit'
+            labels.append(label+'.'+units)
             try:
                 mType = entry_axis.attrs['transformation_type']
                 if (mType == "rotation"):
@@ -98,7 +103,8 @@ class BaseMultiModalLoader(BaseLoader):
 
         if not motors:
             logging.debug("'%s' reader: No maps found!", ltype)
-
+        print labels
+        data_obj.set_axis_labels(*tuple(labels))
         data_obj.data_mapping.set_motors(motors)
         data_obj.data_mapping.set_motor_type(motor_type)
         if (cts):
@@ -123,11 +129,13 @@ class BaseMultiModalLoader(BaseLoader):
         for item, key in enumerate(motor_type):
             if key == 'translation':
                 projection.append(item)
+                print projection
             elif key == 'rotation':
                 rotation = item
 
         proj_dir = tuple(projection)
-
+        print proj_dir
+        print dims
         logging.debug("projections are: %s", str(proj_dir))
 
         if data_obj.data_mapping.is_map:

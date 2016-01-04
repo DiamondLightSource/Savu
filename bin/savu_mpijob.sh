@@ -1,7 +1,7 @@
 #!/bin/bash
 module load global/testcluster
 #module load global/cluster
-module load python/ana
+module load python/anaconda-cctbx
 #source activate mpi2
 source activate mpi5
 module load openmpi/1.6.5

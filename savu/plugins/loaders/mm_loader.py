@@ -44,15 +44,19 @@ class MmLoader(BaseLoader):
 
     @logmethod
     def setup(self):
+        print 'loading fluo'
         fluo = NxfluoLoader()
         fluo.main_setup(self.exp, {})
         fluo.setup()
+        print 'loading nxrd'
         xrd = NxxrdLoader()
         xrd.main_setup(self.exp, self.parameters)
         xrd.setup()
+        print 'loading stxm'
         stxm = NxstxmLoader()
         stxm.main_setup(self.exp, {})
         stxm.setup()
-        monitor = NxmonitorLoader()
-        monitor.main_setup(self.exp, {})
-        monitor.setup()
+        print 'finished'
+#         monitor = NxmonitorLoader()
+#         monitor.main_setup(self.exp, {})
+#         monitor.setup()

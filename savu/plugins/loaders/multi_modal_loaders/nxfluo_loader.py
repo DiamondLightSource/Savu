@@ -69,10 +69,10 @@ class NxfluoLoader(BaseMultiModalLoader):
             data_obj.backing_file[fluo_entry.name + '/sample/theta']
         data_obj.meta_data.set_meta_data('rotation_angle', rotation_angle[...])
 
-        data_obj.set_axis_labels('rotation_angle.degrees',
-                                 'x.mm',
-                                 'y.mm',
-                                 'energy.eV')
+#         data_obj.set_axis_labels('rotation_angle.degrees',
+#                                  'x.mm',
+# #                                  'y.mm',
+#                                  'energy.eV')
 
         self.add_patterns_based_on_acquisition(data_obj, 'fluo')
 
