@@ -39,7 +39,6 @@ class PyfaiTest(unittest.TestCase):
             }
         run_protected_plugin_runner(options)
 
-#print __name__, __main__
 if __name__ == "__main__":
     print "booms"
     unittest.main()
