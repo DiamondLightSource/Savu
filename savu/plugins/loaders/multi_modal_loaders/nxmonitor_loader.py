@@ -58,6 +58,7 @@ class NxmonitorLoader(BaseMultiModalLoader):
                                  'x.mm')#,
 #                                  'y.mm')
         self.add_patterns_based_on_acquisition(data_obj, 'stxm')
+        self.set_data_reduction_params(data_obj)
 
     def multi_modal_setup(self, ltype, data_str):
         # Im overloading this, purely because I want to change the name- fix this in the future

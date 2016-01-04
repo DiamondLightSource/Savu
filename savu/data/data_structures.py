@@ -31,6 +31,7 @@ import h5py
 import numpy as np
 
 from savu.data.meta_data import MetaData
+from savu.core.utils import import_class
 
 
 class Data(object):
@@ -56,6 +57,8 @@ class Data(object):
         self.backing_file = None
         self.data = None
         self.next_shape = None
+        self.mapping = None
+        self.map_dim = []
 
     def initialise_data_info(self, name):
         self.data_info.set_meta_data('name', name)
@@ -94,17 +97,7 @@ class Data(object):
         "SETTING UP THE TRANSPORT DATA"
         transport_data = "savu.data.transport_data." + transport + \
                          "_transport_data"
-        return self.import_class(transport_data)
-
-    def import_class(self, class_name):
-        name = class_name
-        mod = __import__(name)
-        components = name.split('.')
-        for comp in components[1:]:
-            mod = getattr(mod, comp)
-        temp = name.split('.')[-1]
-        module2class = ''.join(x.capitalize() for x in temp.split('_'))
-        return getattr(mod, module2class.split('.')[-1])
+        return import_class(transport_data)
 
     def __deepcopy__(self, memo):
         name = self.data_info.get_meta_data('name')
@@ -125,6 +118,8 @@ class Data(object):
         new_obj.backing_file = self.backing_file
         new_obj.data = self.data
         new_obj.next_shape = copy.deepcopy(self.next_shape)
+        new_obj.mapping = copy.deepcopy(self.mapping)
+        new_obj.map_dim = copy.deepcopy(self.map_dim)
         return new_obj
 
     def add_base(self, ExtraBase):
@@ -155,24 +150,27 @@ class Data(object):
                 self.get_tomo_raw().data_obj = self
         else:
             try:
-                self.create_axis_labels(kwargs['axis_labels'])
                 shape = kwargs['shape']
-                if isinstance(shape, Data):
-                    self.find_and_set_shape(shape)
-                elif type(shape) is dict:
-                    self.set_variable_flag()
-                    self.set_shape((shape[shape.keys()[0]] + ('var',)))
-                else:
-                    self.set_shape(shape)
-                    if 'var' in shape:
-                        self.set_variable_flag()
+                self.create_axis_labels(kwargs['axis_labels'])
             except KeyError:
                 raise Exception("Please state axis_labels and shape when "
                                 "creating a new dataset")
-            try:
+            self.set_new_dataset_shape(shape)
+            if 'patterns' in kwargs:
                 self.copy_patterns(kwargs['patterns'])
-            except KeyError:
-                pass
+        self.set_preview([])
+
+    def set_new_dataset_shape(self, shape):
+        if isinstance(shape, Data):
+            self.find_and_set_shape(shape)
+        elif type(shape) is dict:
+            self.set_variable_flag()
+            self.set_shape((shape[shape.keys()[0]] + ('var',)))
+        else:
+            pData = self.get_plugin_data()
+            self.set_shape(shape + tuple(pData.extra_dims))
+            if 'var' in shape:
+                self.set_variable_flag()
 
     def copy_patterns(self, copy_data):
         if isinstance(copy_data, Data):
@@ -220,6 +218,17 @@ class Data(object):
         return patterns
 
     def copy_dataset(self, copy_data, **kwargs):
+        if copy_data.mapping:
+            # copy label entries from meta data
+            map_data = self.exp.index['mapping'][copy_data.get_name()]
+            map_mData = map_data.meta_data
+            map_axis_labels = map_data.data_info.get_meta_data('axis_labels')
+            for axis_label in map_axis_labels:
+                if axis_label.keys()[0] in map_mData.get_dictionary().keys():
+                    map_label = map_mData.get_meta_data(axis_label.keys()[0])
+                    copy_data.meta_data.set_meta_data(axis_label.keys()[0],
+                                                      map_label)
+            copy_data = map_data
         patterns = copy.copy(copy_data.get_data_patterns())
         self.set_data_patterns(patterns)
         self.copy_labels(copy_data)
@@ -237,9 +246,19 @@ class Data(object):
 
     def copy_labels(self, copy_data):
         nDims = copy.copy(copy_data.data_info.get_meta_data('nDims'))
-        self.data_info.set_meta_data('nDims', nDims)
         axis_labels = copy.copy(
             copy_data.data_info.get_meta_data('axis_labels'))
+
+        # add multi_params axis labels from dictionary in pData
+        multi_params_dict = self.get_plugin_data().multi_params_dict
+        axis_labels.extend([0]*len(multi_params_dict))
+        for key, value in multi_params_dict.iteritems():
+            name, unit = value['label'].split('.')
+            axis_labels[nDims + key] = {name: unit}
+            # add parameter values to the meta_data
+            self.meta_data.set_meta_data(name, value['values'])
+
+        self.data_info.set_meta_data('nDims', nDims + len(self.extra_dims))
         self.data_info.set_meta_data('axis_labels', axis_labels)
 
     def amend_axis_labels(self, *args):
@@ -271,15 +290,89 @@ class Data(object):
 
     def get_shape(self):
         shape = self.data_info.get_meta_data('shape')
-        try:
-            dirs = self.meta_data.get_meta_data("fixed_directions")
-            shape = list(self.shape)
-            for ddir in dirs:
-                shape[ddir] = 1
-            shape = tuple(shape)
-        except KeyError:
-            pass
         return shape
+
+    def set_preview(self, preview_list):
+        shape = self.get_shape()
+        if preview_list:
+            starts, stops, steps, chunks = \
+                self.get_preview_indices(preview_list)
+        else:
+            starts, stops, steps, chunks = \
+                [[0]*len(shape), shape, [1]*len(shape), [1]*len(shape)]
+        self.set_starts_stops_steps(starts, stops, steps, chunks)
+
+    def set_starts_stops_steps(self, starts, stops, steps, chunks):
+        self.data_info.set_meta_data('starts', starts)
+        self.data_info.set_meta_data('stops', stops)
+        self.data_info.set_meta_data('steps', steps)
+        self.data_info.set_meta_data('chunks', chunks)
+        self.set_reduced_shape(starts, stops, steps, chunks)
+
+    def get_preview_indices(self, preview_list):
+        starts = len(preview_list)*[None]
+        stops = len(preview_list)*[None]
+        steps = len(preview_list)*[None]
+        chunks = len(preview_list)*[None]
+        for i in range(len(preview_list)):
+            starts[i], stops[i], steps[i], chunks[i] = \
+                self.convert_indices(preview_list[i].split(':'), i)
+        return starts, stops, steps, chunks
+
+    def convert_indices(self, idx, dim):
+        shape = self.get_shape()
+        mid = shape[dim]/2
+        end = shape[dim]
+
+        if self.mapping:
+            map_shape = self.exp.index['mapping'][self.get_name()].get_shape()
+            midmap = map_shape[dim]/2
+            endmap = map_shape[dim]
+
+        idx = [eval(equ) for equ in idx]
+        idx = [idx[i] if idx[i] > -1 else shape[dim]+1+idx[i] for i in
+               range(len(idx))]
+        return idx
+
+    def get_starts_stops_steps(self):
+        starts = self.data_info.get_meta_data('starts')
+        stops = self.data_info.get_meta_data('stops')
+        steps = self.data_info.get_meta_data('steps')
+        chunks = self.data_info.get_meta_data('chunks')
+        return starts, stops, steps, chunks
+
+    def set_reduced_shape(self, starts, stops, steps, chunks):
+        orig_shape = self.get_shape()
+        self.data_info.set_meta_data('orig_shape', orig_shape)
+        new_shape = []
+        for dim in range(len(starts)):
+            new_shape.append(np.prod((self.get_slice_dir_matrix(dim).shape)))
+        self.set_shape(tuple(new_shape))
+
+        # reduce shape of mapping data if it exists
+        if self.mapping:
+            self.set_mapping_reduced_shape(orig_shape, new_shape,
+                                           self.get_name())
+
+    def set_mapping_reduced_shape(self, orig_shape, new_shape, name):
+        map_obj = self.exp.index['mapping'][name]
+        map_shape = np.array(map_obj.get_shape())
+        diff = np.array(orig_shape) - map_shape[:len(orig_shape)]
+        not_map_dim = np.where(diff == 0)[0]
+        map_dim = np.where(diff != 0)[0]
+        self.map_dim = map_dim
+        map_obj.data_info.set_meta_data('full_map_dim_len', map_shape[map_dim])
+        map_shape[not_map_dim] = np.array(new_shape)[not_map_dim]
+        # assuming only one extra dimension added for now
+        starts, stops, steps, chunks = self.get_starts_stops_steps()
+        start = starts[map_dim] % map_shape[map_dim]
+        stop = min(stops[map_dim], map_shape[map_dim])
+
+        temp = len(np.arange(start, stop, steps[map_dim]))*chunks[map_dim]
+        map_shape[len(orig_shape)] = np.ceil(new_shape[map_dim]/temp)
+        map_shape[map_dim] = new_shape[map_dim]/map_shape[len(orig_shape)]
+        map_obj.data_info.set_meta_data('map_dim_len', map_shape[map_dim])
+        self.exp.index['mapping'][name].set_shape(tuple(map_shape))
 
     def find_and_set_shape(self, data):
         try:
@@ -287,7 +380,8 @@ class Data(object):
             if data.next_shape:
                 new_shape = data.next_shape
             else:
-                new_shape = data.get_shape()
+                pData = self.get_plugin_data()
+                new_shape = data.get_shape() + tuple(pData.extra_dims)
         except ValueError:
             new_shape = data.get_shape()
         self.set_shape(new_shape)
@@ -307,13 +401,6 @@ class Data(object):
                 shape[i] = var_size[count]
                 count += 1
         self.next_shape = tuple(shape)
-
-#    def remove_variable_length(self, length):
-#        self.variable_length_flag = False
-#        shape = list(self.get_shape())
-#        index = [i for i in range(len(shape)) if isinstance(shape[i], str)]
-#        shape[index[0]] = length
-#        self.next_shape = tuple(shape)
 
     def check_dims(self):
         nDims = self.data_info.get_meta_data("nDims")
@@ -348,8 +435,6 @@ class Data(object):
                         "SPECTRUM_STACK",
                         "PROJECTION_STACK",
                         "METADATA"]
-                        # added spectrum adp 17th August,
-                        # Added diffraction 28th August adp
         return pattern_list
 
     def add_pattern(self, dtype, **kwargs):
@@ -413,8 +498,9 @@ class Data(object):
             self.set_main_axis('SINOGRAM')
             self.set_main_axis('PROJECTION')
         elif check is 1:
-            raise Exception("Cannot set up SINOGRAM and PROJECTION "
-                            "main_directions as both patterns do not exist")
+            pass
+#            logging.warn("Cannot set up SINOGRAM and PROJECTION "
+#                         "main_directions as both patterns do not exist")
 
     def check_pattern(self, pattern_name):
         patterns = self.get_data_patterns()
@@ -466,6 +552,7 @@ class Data(object):
     def trim_output_data(self, copy_obj, **kwargs):
         if self.tomo_raw_obj:
             self.get_tomo_raw().remove_image_key(copy_obj, **kwargs)
+            self.set_preview([])
 
     def get_axis_label_keys(self):
         axis_labels = self.data_info.get_meta_data('axis_labels')
@@ -474,6 +561,37 @@ class Data(object):
             for key in labels.keys():
                 axis_label_keys.append(key)
         return axis_label_keys
+
+    def get_current_and_next_patterns(self, datasets_lists):
+        current_datasets = datasets_lists[0]
+        patterns_list = []
+        for current_data in current_datasets['out_datasets']:
+            current_name = current_data['name']
+            current_pattern = current_data['pattern']
+            next_pattern = self.find_next_pattern(datasets_lists[1:],
+                                                  current_name)
+            patterns_list.append({'current': current_pattern,
+                                  'next': next_pattern})
+        self.exp.meta_data.set_meta_data('current_and_next', patterns_list)
+
+    def find_next_pattern(self, datasets_lists, current_name):
+        next_pattern = []
+        for next_data_list in datasets_lists:
+            for next_data in next_data_list['in_datasets']:
+                if next_data['name'] == current_name:
+                    next_pattern = next_data['pattern']
+                    return next_pattern
+        return next_pattern
+
+#    def find_next_pattern(self, datasets_lists, current_name):
+#        next_pattern = []
+#        print "next_data_list", next_data_list
+#        for next_data_list in datasets_lists:
+#            for next_data in next_data_list['in_datasets']:
+#                if next_data['name'] == current_name:
+#                    next_pattern = next_data['pattern']
+#                    return next_pattern
+#        return next_pattern
 
 
 class PluginData(object):
@@ -488,6 +606,8 @@ class PluginData(object):
         self.selected_data = False
         self.shape = None
         self.core_shape = None
+        self.multi_params = {}
+        self.extra_dims = []
 
     def get_total_frames(self):
         temp = 1
@@ -498,9 +618,11 @@ class PluginData(object):
             temp *= self.data_obj.get_shape()[tslice]
         return temp
 
-    def set_pattern_name(self, name):
+    def set_pattern(self, name):
+        pattern = self.data_obj.get_data_patterns()[name]
         self.meta_data.set_meta_data("name", name)
-        self.check_data_type_exists()
+        self.meta_data.set_meta_data("core_dir", pattern['core_dir'])
+        self.set_slice_directions()
 
     def get_pattern_name(self):
         name = self.meta_data.get_meta_data("name")
@@ -519,7 +641,7 @@ class PluginData(object):
         dirs = list(set(core_dir + (slice_dir[0],)))
         slice_idx = dirs.index(slice_dir[0])
         shape = []
-        for core in core_dir:
+        for core in set(core_dir):
             shape.append(self.data_obj.get_shape()[core])
         self.set_core_shape(tuple(shape))
         if self.get_frame_chunk() > 1:
@@ -543,22 +665,20 @@ class PluginData(object):
         if (len(core_dir)+len(slice_dir)) is not nDims:
             sys.exit("Incorrect number of data dimensions specified.")
 
-    def check_data_type_exists(self):
-        if self.get_pattern_name() not in \
-                self.data_obj.pattern_list:
-            raise Exception(("Error: The Data class does not contain an \
-                              instance of ", self.get_pattern_name()))
-
-    def get_slice_directions(self):
-        try:
-            [fix_dirs, value] = self.get_fixed_directions()
-        except KeyError:
-            fix_dirs = []
+    def set_slice_directions(self):
+#        try:
+#            [fix_dirs, value] = self.get_fixed_directions()
+#        except KeyError:
+#            fix_dirs = []
         slice_dirs = self.data_obj.get_data_patterns()[
             self.get_pattern_name()]['slice_dir']
-        to_slice = [sd for sd in slice_dirs if sd not in fix_dirs]
-        temp = self.data_obj.non_negative_directions(tuple(to_slice))
-        return temp
+        #to_slice = [sd for sd in slice_dirs if sd not in fix_dirs]
+        #slice_dirs = self.data_obj.non_negative_directions(tuple(to_slice))
+        slice_dirs = self.data_obj.non_negative_directions(tuple(slice_dirs))
+        self.meta_data.set_meta_data('slice_dir', slice_dirs)
+
+    def get_slice_directions(self):
+        return self.meta_data.get_meta_data('slice_dir')
 
     def set_slicing_order(self, order):
         """
@@ -581,30 +701,25 @@ class PluginData(object):
 
     def set_fixed_directions(self, dims, values):
         slice_dirs = self.get_slice_directions()
+        if set(dims).difference(set(slice_dirs)):
+            raise Exception("You are trying to fix a direction that is not"
+                            " a slicing direction")
+        self.meta_data.set_meta_data("fixed_directions", dims)
+        self.meta_data.set_meta_data("fixed_directions_values", values)
+        self.set_slice_directions()
+        shape = list(self.data_obj.get_shape())
         for dim in dims:
-            if dim in slice_dirs:
-                self.meta_data.set_meta_data("fixed_directions", dims)
-                self.meta_data.set_meta_data("fixed_directions_values", values)
-            else:
-                raise Exception("You are trying to fix a direction that is not"
-                                " a slicing direction")
+            shape[dim] = 1
+        self.data_obj.set_shape(tuple(shape))
+        self.set_shape()
 
     def get_fixed_directions(self):
-        try:
+        fixed = []
+        values = []
+        if 'fixed_directions' in self.meta_data.get_dictionary():
             fixed = self.meta_data.get_meta_data("fixed_directions")
-            values = self.meta_data.\
-                get_meta_data("fixed_directions_values")
-        except KeyError:
-            fixed = []
-            values = []
+            values = self.meta_data.get_meta_data("fixed_directions_values")
         return [fixed, values]
-
-    def delete_fixed_directions(self):
-        try:
-            del self.meta_data.dict["fixed_directions"]
-            del self.meta_data.dict["fixed_directions_values"]
-        except KeyError:
-            pass
 
     def set_frame_chunk(self, nFrames):
         # number of frames to process at a time
@@ -632,9 +747,19 @@ class PluginData(object):
         return tuple(index)
 
     def plugin_data_setup(self, pattern_name, chunk):
-        self.set_pattern_name(pattern_name)
+        self.set_pattern(pattern_name)
         self.set_frame_chunk(chunk)
         self.set_shape()
+
+    def set_temp_pad_dict(self, pad_dict):
+        self.meta_data.set_meta_data('temp_pad_dict', pad_dict)
+
+    def get_temp_pad_dict(self):
+        if 'temp_pad_dict' in self.meta_data.get_dictionary().keys():
+            return self.meta_data.get_dictionary()['temp_pad_dict']
+
+    def delete_temp_pad_dict(self):
+        del self.meta_data.get_dictionary()['temp_pad_dict']
 
 
 class TomoRaw(object):

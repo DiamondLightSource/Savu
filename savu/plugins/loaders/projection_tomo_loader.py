@@ -40,7 +40,6 @@ class ProjectionTomoLoader(BaseLoader):
     def __init__(self, name='ProjectionTomoLoader'):
         super(ProjectionTomoLoader, self).__init__(name)
 
-    @logmethod
     def setup(self):
 
         data_obj = self.exp.create_data_object("in_data", "tomo")
@@ -72,3 +71,4 @@ class ProjectionTomoLoader(BaseLoader):
         objInfo.set_meta_data("rotation_angle", rotation_angle[...])
 
         data_obj.set_shape(data_obj.data.shape)
+        self.set_data_reduction_params(data_obj)

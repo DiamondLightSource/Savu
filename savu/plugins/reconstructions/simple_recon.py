@@ -22,7 +22,7 @@
 
 """
 from savu.plugins.base_recon import BaseRecon
-from savu.data.plugin_info import CitationInformation
+from savu.data.plugin_list import CitationInformation
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 import numpy as np
@@ -56,12 +56,8 @@ class SimpleRecon(BaseRecon, CpuPlugin):
                            np.arange(-center[1], shape[1] - center[1]))
         return x*np.cos(theta) - y*np.sin(theta)
 
-#     def pre_process(self):
-#         in_data, out_data = self.get_plugin_datasets()
-#         centre = tuple((np.asarray(out_data[0].get_pattern_shape()))/2)
-#         self.kwargs = {'centre': centre}
-
-    def reconstruct(self, sinogram, centre_of_rotations, vol_shape):
+    def reconstruct(self, sinogram, centre_of_rotations, angles, vol_shape):
+        sinogram = sinogram[:, np.newaxis, :]
         try:
             centre = self.kwargs['centre']
         except:
@@ -83,6 +79,9 @@ class SimpleRecon(BaseRecon, CpuPlugin):
             results.append(result[:, np.newaxis, :])
         result = np.hstack(results)
         return result
+
+    def get_max_frames(self):
+        return 1
 
     def get_citation_information(self):
         cite_info = CitationInformation()

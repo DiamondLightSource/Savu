@@ -25,10 +25,10 @@ import logging
 import inspect
 
 from savu.plugins import utils as pu
-from savu.data.data_structures import PluginData
+from savu.plugins.plugin_datasets import PluginDatasets
 
 
-class Plugin(object):
+class Plugin(PluginDatasets):
     """
     The base class from which all plugins should inherit.
     """
@@ -36,20 +36,27 @@ class Plugin(object):
     def __init__(self, name='Plugin'):
         super(Plugin, self).__init__()
         self.name = name
-        self.exp = None
         self.parameters = {}
-        self.data_objs = {}
-        self.variable_data_flag = False
+        self.parameters_types = {}
 
     def main_setup(self, exp, params):
         self.exp = exp
         self.set_parameters(params)
-        self.set_plugin_datasets(exp)
+        self.set_plugin_datasets()
         self.setup()
 
         in_datasets, out_datasets = self.get_datasets()
         for data in in_datasets + out_datasets:
             data.finalise_patterns()
+
+    def set_parameters_this_instance(self, indices):
+        dims = set(self.multi_params_dict.keys())
+        count = 0
+        for dim in dims:
+            info = self.multi_params_dict[dim]
+            name = info['label'].split('_param')[0]
+            self.parameters[name] = info['values'][indices[count]]
+            count += 1
 
     def setup(self):
         """
@@ -79,6 +86,7 @@ class Plugin(object):
                 full_description = pu.find_args(clazz)
                 for item in full_description:
                     self.parameters[item['name']] = item['default']
+                    self.parameters_types[item['name']] = item['dtype']
 
     def set_parameters(self, parameters):
         """
@@ -90,15 +98,30 @@ class Plugin(object):
         :type parameters: dict
         """
         self.parameters = {}
+        self.parameters_types = {}
         self.populate_default_parameters()
-        if parameters is not None:
-            for key in parameters.keys():
-                if key in self.parameters.keys():
-                    self.parameters[key] = parameters[key]
-                else:
-                    raise ValueError("Parameter " + key +
-                                     "is not a valid parameter for plugin " +
-                                     self.name)
+        for key in parameters.keys():
+            if key in self.parameters.keys():
+                value = self.convert_multi_params(parameters[key], key)
+                self.parameters[key] = value
+            else:
+                raise ValueError("Parameter " + key +
+                                 "is not a valid parameter for plugin " +
+                                 self.name)
+
+    def convert_multi_params(self, value, key):
+        dtype = self.parameters_types[key]
+        if isinstance(value, unicode):
+            if ';' in value:
+                value = value.split(';')
+                if type(value[0]) != dtype:
+                    value = map(dtype, value)
+                if len(value) > 1:
+                    label = key + '_params.' + type(value[0]).__name__
+                    self.multi_params_dict[len(self.multi_params_dict)] = \
+                        {'label': label, 'values': value}
+                    self.extra_dims.append(len(value))
+        return value
 
     def get_parameters(self, name):
         return self.parameters[name]
@@ -128,7 +151,7 @@ class Plugin(object):
         :type path: int
         """
 
-        logging.error("process needs to be implemented")
+        logging.error("process frames needs to be implemented")
         raise NotImplementedError("process needs to be implemented")
 
     def post_process(self):
@@ -146,6 +169,15 @@ class Plugin(object):
         #self.organise_metadata()
         self.copy_meta_data()
         self.clean_up_plugin_data()
+        #delete mapping dataset here
+        self.delete_mappings()
+
+    def delete_mappings(self):
+        in_datasets = self.get_in_datasets()
+        for data in in_datasets:
+            if data.mapping:
+                del self.exp.index['mapping'][data.get_name()]
+                self.mapping = False
 
     def copy_meta_data(self):
         """
@@ -215,80 +247,3 @@ class Plugin(object):
 
         """
         return None
-
-    def get_data_objects(self, dtype):
-        data_list = self.parameters[dtype + 'sets']
-        data_objs = []
-        for data in data_list:
-            data_objs.append(self.exp.index[dtype][data])
-        return data_objs
-
-    def set_in_datasets(self):
-        return self.get_data_objects('in_data')
-
-    def set_out_datasets(self):
-        try:
-            out_data = self.get_data_objects('out_data')
-        except KeyError:
-            out_data = []
-            for data in self.parameters['out_datasets']:
-                self.exp.create_data_object("out_data", data)
-            out_data = self.get_data_objects('out_data')
-        return out_data
-
-    def get_plugin_data(self, data_list):
-        pattern_list = []
-        for data in data_list:
-            pattern_list.append(PluginData(data))
-        return pattern_list
-
-    def set_plugin_datasets(self, experiment):
-        """
-        Convert in/out_dataset strings to objects and create PluginData objects
-        for each.
-        """
-        self.parameters['in_datasets'] = self.set_in_datasets()
-        self.parameters['out_datasets'] = self.set_out_datasets()
-        self.parameters['plugin_in_datasets'] = \
-            self.get_plugin_data(self.parameters['in_datasets'])
-        self.parameters['plugin_out_datasets'] = \
-            self.get_plugin_data(self.parameters['out_datasets'])
-
-    def get_plugin_in_datasets(self):
-        return self.parameters['plugin_in_datasets']
-
-    def get_plugin_out_datasets(self):
-        return self.parameters['plugin_out_datasets']
-
-    def get_plugin_datasets(self):
-        return self.get_plugin_in_datasets(), self.get_plugin_out_datasets()
-
-    def get_in_datasets(self):
-        return self.parameters['in_datasets']
-
-    def get_out_datasets(self):
-        return self.parameters['out_datasets']
-
-    def get_datasets(self):
-        return self.get_in_datasets(), self.get_out_datasets()
-
-    def get_in_meta_data(self):
-        return self.set_meta_data(self.parameters['in_datasets'], 'in_data')
-
-    def get_out_meta_data(self):
-        return self.set_meta_data(self.parameters['out_datasets'], 'out_data')
-
-    def get_meta_data(self):
-        return self.get_in_meta_data(), self.get_out_meta_data()
-
-    def set_meta_data(self, data_list, dtype):
-        meta_data = []
-        for data in data_list:
-            meta_data.append(data.meta_data)
-        return meta_data
-
-    def set_unknown_shape(self, data, key):
-        try:
-            return (len(data.meta_data.get_meta_data(key)),)
-        except KeyError:
-            return (0,)

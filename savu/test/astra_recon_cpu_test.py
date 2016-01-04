@@ -31,7 +31,7 @@ from savu.test.plugin_runner_test import \
 import savu.plugins.reconstructions.astra_recons as astra_recons
 
 
-class PluginRunnerAstraReconCPUTest(unittest.TestCase):
+class AstraReconCPUTest(unittest.TestCase):
 
     def test_astra_recon_cpu(self):
         options = tu.set_experiment('tomo')

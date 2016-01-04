@@ -71,8 +71,8 @@ class BaseFluoFitter(BaseFitter):
         fitAreas = out_datasets[0]
         fitHeights = out_datasets[1]
         fitWidths = out_datasets[2]
-        #idx = self.setPositions(in_meta_data)
-        numpeaks = 29#len(idx)
+        idx = self.setPositions(in_meta_data)
+        numpeaks = len(idx)
         new_shape = shape[:-1] + (numpeaks,)
         print new_shape
         fitAreas.create_dataset(patterns={in_dataset[0]: pattern_list},
@@ -88,7 +88,7 @@ class BaseFluoFitter(BaseFitter):
                                  shape=new_shape)
 
         channel = {'core_dir': (-1,), 'slice_dir': range(len(shape)-1)}
-        
+
         fitAreas.add_pattern("CHANNEL", **channel)
         fitHeights.add_pattern("CHANNEL", **channel)
         fitWidths.add_pattern("CHANNEL", **channel)
@@ -96,7 +96,6 @@ class BaseFluoFitter(BaseFitter):
         #print residlabels.append(residlabels[-1])
         residuals = out_datasets[3]
         residuals.create_dataset(in_dataset[0])
-
 
         # setup plugin datasets
         in_pData, out_pData = self.get_plugin_datasets()

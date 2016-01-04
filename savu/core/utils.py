@@ -53,7 +53,7 @@ def logmethod(func):
     return _wrapper
 
 
-def import_class(clazz, class_name):
+def import_class(class_name):
     name = class_name
     mod = __import__(name)
     components = name.split('.')

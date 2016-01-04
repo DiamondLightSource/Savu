@@ -22,13 +22,11 @@
 
 """
 import os.path as os
-import logging
 import h5py
 
-from savu.core.utils import logmethod
 from savu.plugins.loaders.base_multi_modal_loader import BaseMultiModalLoader
-from savu.test import test_utils as tu
 from savu.plugins.utils import register_plugin
+import savu.test.test_utils as tu
 
 
 @register_plugin
@@ -36,27 +34,27 @@ class NxxrdLoader(BaseMultiModalLoader):
     """
     A class to load tomography data from an NXxrd file
 
-    :param calibration_path: path to the calibration file. Default: "../../test_data/LaB6_calibration_output.nxs"
+    :param calibration_path: path to the calibration file. Default: "Savu/test_data/data/LaB6_calibration_output.nxs"
     """
 
     def __init__(self):
         super(NxxrdLoader, self).__init__("NxxrdLoader")
 
-    @logmethod
     def setup(self):
         data_str = '/instrument/detector/data'
         data_obj, xrd_entry = self.multi_modal_setup('NXxrd', data_str)
         mono_energy = data_obj.backing_file[
             xrd_entry.name + '/instrument/monochromator/energy']
         self.exp.meta_data.set_meta_data("mono_energy", mono_energy)
-        print xrd_entry
         self.set_motors(data_obj, xrd_entry, 'xrd')
-        # hard coded for now, but we can change it to fram nx transformations in future.
-#         data_obj.set_axis_labels('rotation_angle.degrees',
-#                                  'x.mm',
-# #                                  'y.mm',
-#                                  'detector_x.mm',
-#                                  'detector_y.mm')
+
+        # hard coded for now, but we can change it to fram nx transformations
+        # in future.
+        data_obj.set_axis_labels('rotation_angle.degrees',
+                                 'x.mm',
+                                 'y.mm',
+                                 'detector_x.mm',
+                                 'detector_y.mm')
 
         rotation_angle = \
             data_obj.backing_file[xrd_entry.name + '/sample/theta']
@@ -75,19 +73,10 @@ class NxxrdLoader(BaseMultiModalLoader):
                              slice_dir=(1, 3, 4))
         data_obj.add_pattern("PROJECTION", core_dir=(1, 2),
                              slice_dir=(0, 3, 4))
-        # now to load the calibration file
-        print self.parameters['calibration_path']
-        if os.exists(self.parameters['calibration_path']):
-            logging.info("Using the calibration file in the working directory")
-            calibration_path = self.parameters['calibration_path']
-        elif os.exists(tu.get_test_data_path(
-                self.parameters['calibration_path'])):
-            logging.info("Using the calibration path in the test directory")
-            calibration_path = tu.get_test_data_path(
-                self.parameters['calibration_path'])
-        else:
-            logging.info("No calibration file found!")
-        calibrationfile = h5py.File(calibration_path, 'r')
+
+
+        calibrationfile = h5py.File(self.get_cal_path(), 'r')
+
 
         mData = data_obj.meta_data
         det_str = 'entry/instrument/detector'
@@ -104,3 +93,10 @@ class NxxrdLoader(BaseMultiModalLoader):
                             calibrationfile[det_str + '/x_pixel_size'])
         mData.set_meta_data("detector_orientation",
                             calibrationfile[det_str + '/detector_orientation'])
+        self.set_data_reduction_params(data_obj)
+
+    def get_cal_path(self):
+        path = self.parameters['calibration_path']
+        if path.split(os.sep)[0] == 'Savu':
+            path = tu.get_test_data_path(path.split('/test_data/data')[1])
+        return path

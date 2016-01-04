@@ -27,7 +27,8 @@ from savu.plugins.base_loader import BaseLoader
 from savu.plugins.loaders.multi_modal_loaders.nxfluo_loader import NxfluoLoader
 from savu.plugins.loaders.multi_modal_loaders.nxxrd_loader import NxxrdLoader
 from savu.plugins.loaders.multi_modal_loaders.nxstxm_loader import NxstxmLoader
-from savu.plugins.loaders.multi_modal_loaders.nxmonitor_loader import NxmonitorLoader
+from savu.plugins.loaders.multi_modal_loaders.nxmonitor_loader \
+    import NxmonitorLoader
 
 from savu.plugins.utils import register_plugin
 
@@ -36,27 +37,25 @@ from savu.plugins.utils import register_plugin
 class MmLoader(BaseLoader):
     """
     A class to load tomography data from an NXTomo file
-    :param calibration_path: path to the calibration file. Default: "../../test_data/data/LaB6_calibration_output.nxs".
+
+    :param calibration_path: path to the calibration file. Default: "Savu/test_data/data/LaB6_calibration_output.nxs".
     """
 
     def __init__(self, name='MmLoader'):
         super(MmLoader, self).__init__(name)
 
-    @logmethod
     def setup(self):
-        print 'loading fluo'
-        fluo = NxfluoLoader()
-        fluo.main_setup(self.exp, {})
-        fluo.setup()
-        print 'loading nxrd'
-        xrd = NxxrdLoader()
-        xrd.main_setup(self.exp, self.parameters)
-        xrd.setup()
-        print 'loading stxm'
-        stxm = NxstxmLoader()
-        stxm.main_setup(self.exp, {})
-        stxm.setup()
-        print 'finished'
-#         monitor = NxmonitorLoader()
-#         monitor.main_setup(self.exp, {})
-#         monitor.setup()
+        new_dict = self.amend_dictionary()
+        self.setup_loader(NxfluoLoader(), new_dict)
+        self.setup_loader(NxxrdLoader(), self.parameters)
+        self.setup_loader(NxstxmLoader(), new_dict)
+        self.setup_loader(NxmonitorLoader(), new_dict)
+
+    def setup_loader(self, loader, params):
+        loader.main_setup(self.exp, params)
+        loader.setup()
+
+    def amend_dictionary(self):
+        new_dict = self.parameters.copy()
+        del new_dict['calibration_path']
+        return new_dict

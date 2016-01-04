@@ -28,13 +28,11 @@ import numpy as np
 
 from mpi4py import MPI
 from itertools import chain
-from savu.core.utils import logfunction
-from savu.data.transport_mechanism import TransportMechanism
-from savu.core.utils import logmethod
+from savu.core.transport_control import TransportControl
 import savu.plugins.utils as pu
 
 
-class Hdf5Transport(TransportMechanism):
+class Hdf5Transport(TransportControl):
 
     def transport_control_setup(self, options):
         processes = options["process_names"].split(',')
@@ -60,6 +58,8 @@ class Hdf5Transport(TransportMechanism):
             RANK_NAMES_SIZE = SIZE
         MACHINES = SIZE/RANK_NAMES_SIZE
         MACHINE_RANK = RANK/MACHINES
+        print MACHINE_RANK
+        print RANK_NAMES
         MACHINE_RANK_NAME = RANK_NAMES[MACHINE_RANK]
         MACHINE_NUMBER = RANK % MACHINES
         MACHINE_NUMBER_STRING = "%03i" % (MACHINE_NUMBER)
@@ -67,10 +67,11 @@ class Hdf5Transport(TransportMechanism):
         options["processes"] = list(chain.from_iterable(ALL_PROCESSES))
         options["process"] = RANK
 
-        self.set_logger_parallel(MACHINE_NUMBER_STRING, MACHINE_RANK_NAME)
+        self.set_logger_parallel(MACHINE_NUMBER_STRING,
+                                 MACHINE_RANK_NAME,
+                                 options)
 
         MPI.COMM_WORLD.barrier()
-        logging.info("Starting the reconstruction pipeline process")
         logging.debug("Rank : %i - Size : %i - host : %s", RANK, SIZE,
                       socket.gethostname())
         IP = socket.gethostbyname(socket.gethostname())
@@ -79,26 +80,35 @@ class Hdf5Transport(TransportMechanism):
         logging.debug("LD_LIBRARY_PATH is %s",  os.getenv('LD_LIBRARY_PATH'))
         self.call_mpi_barrier()
 
-    @logfunction
     def call_mpi_barrier(self):
         logging.debug("Waiting at the barrier")
         MPI.COMM_WORLD.barrier()
 
+    def get_log_level(self, options):
+        """
+        Gets the right log level for the flags -v or -q
+        """
+        if ('verbose' in options) and options['verbose']:
+            return logging.DEBUG
+        if ('quiet' in options) and options['quiet']:
+            return logging.WARN
+        return logging.INFO
+
     def set_logger_single(self, options):
         logger = logging.getLogger()
-        logger.setLevel(logging.DEBUG)
+        logger.setLevel(self.get_log_level(options))
+
         fh = logging.FileHandler(os.path.join(options["out_path"], 'log.txt'),
                                  mode='w')
         fh.setFormatter(logging.Formatter('L %(relativeCreated)12d M CPU0 0' +
                                           ' %(levelname)-6s %(message)s'))
         logger.addHandler(fh)
-        logging.info("Starting the reconstruction pipeline process")
 
-    def set_logger_parallel(self, number, rank):
-        logging.basicConfig(level=0, format='L %(relativeCreated)12d M' +
+    def set_logger_parallel(self, number, rank, options):
+        logging.basicConfig(level=self.get_log_level(options),
+                            format='L %(relativeCreated)12d M' +
                             number + ' ' + rank +
                             ' %(levelname)-6s %(message)s', datefmt='%H:%M:%S')
-        logging.info("Starting the reconstruction pipeline process")
 
     def transport_run_plugin_list(self):
         """
@@ -106,11 +116,9 @@ class Hdf5Transport(TransportMechanism):
         """
         exp = self.exp
         exp.barrier()
-        logging.info("Starting the HDF5 plugin list runner")
         plugin_list = exp.meta_data.plugin_list.plugin_list
 
         exp.barrier()
-        logging.info("run the loader plugin")
         pu.plugin_loader(exp, plugin_list[0])
 
         start = 1
@@ -119,19 +127,17 @@ class Hdf5Transport(TransportMechanism):
         while n_plugins != stop:
             start_in_data = copy.deepcopy(self.exp.index['in_data'])
             in_data = exp.index["in_data"][exp.index["in_data"].keys()[0]]
-            out_data_objs, stop = in_data.load_data(self, start)
+            out_data_objs, stop = in_data.load_data(start)
             exp.clear_data_objects()
             self.exp.index['in_data'] = copy.deepcopy(start_in_data)
             self.real_plugin_run(plugin_list, out_data_objs, start, stop)
             start = stop
 
         exp.barrier()
-        logging.info("close all remaining files")
         for key in exp.index["in_data"].keys():
             exp.index["in_data"][key].close_file()
 
         exp.barrier()
-        logging.info("Completing the HDF5 plugin list runner")
         return
 
     def real_plugin_run(self, plugin_list, out_data_objs, start, stop):
@@ -140,34 +146,26 @@ class Hdf5Transport(TransportMechanism):
             link_type = "final_result" if i is len(plugin_list)-2 else \
                 "intermediate"
 
-            logging.info("Running Plugin %s" % plugin_list[i]["id"])
             exp.barrier()
 
-            logging.info("Initialise output data")
             for key in out_data_objs[i - start]:
                 exp.index["out_data"][key] = out_data_objs[i - start][key]
 
             exp.barrier()
-            logging.info("Load the plugin")
             plugin = pu.plugin_loader(exp, plugin_list[i])
 
             exp.barrier()
-            logging.info("run the plugin")
+            print "\n*running the", plugin_list[i]['id'], "plugin*\n"
             plugin.run_plugin(exp, self)
 
             exp.barrier()
-            logging.info("close any files that are no longer required")
             out_datasets = plugin.parameters["out_datasets"]
 
             exp.reorganise_datasets(out_datasets, link_type)
 
-    @logmethod
     def process(self, plugin):
-
         self.process_checks()
-
         in_data, out_data = plugin.get_datasets()
-
         expInfo = plugin.exp.meta_data
         in_slice_list = self.get_all_slice_lists(in_data, expInfo)
         out_slice_list = self.get_all_slice_lists(out_data, expInfo)
@@ -175,7 +173,10 @@ class Hdf5Transport(TransportMechanism):
         expand_dict = self.set_functions(out_data, 'expand')
 
         for count in range(len(in_slice_list[0])):
-            print count
+            # print every 10th loop iteration to screen
+            if (count % 10) == 0:
+                print count
+
             section, slice_list = \
                 self.get_all_padded_data(in_data, in_slice_list, count,
                                          squeeze_dict)
@@ -207,17 +208,32 @@ class Hdf5Transport(TransportMechanism):
         n_core_dirs = len(data.get_plugin_data().get_core_directions())
         new_slice = [slice(None)]*len(data.get_shape())
         possible_slices = [copy.copy(new_slice)]
-        for sl in slice_dirs:
-            new_slice[sl] = None
-            possible_slices.append(copy.copy(new_slice))
+
+        if len(slice_dirs) > 1:
+            for sl in slice_dirs[1:]:
+                new_slice[sl] = None
+        possible_slices.append(copy.copy(new_slice))
+        new_slice[slice_dirs[0]] = None
+        possible_slices.append(copy.copy(new_slice))
         possible_slices = possible_slices[::-1]
         return lambda x: x[possible_slices[len(x.shape)-n_core_dirs]]
 
     def create_squeeze_function(self, data):
+        max_frames = data.get_plugin_data().get_frame_chunk()
+        if data.mapping:
+            map_obj = self.exp.index['mapping'][data.get_name()]
+            map_dim_len = map_obj.data_info.get_meta_data('map_dim_len')
+            max_frames = min(max_frames, map_dim_len)
+            data.get_plugin_data().set_frame_chunk(max_frames)
+
+        squeeze_dims = data.get_plugin_data().get_slice_directions()
+        if max_frames > 1:
+            squeeze_dims = squeeze_dims[1:]
         if data.variable_length_flag:
             unravel = lambda x, i: unravel(x[0], i-1) if i > 0 else x
-            return lambda x: np.squeeze(unravel(x, len(data.get_shape())-1))
-        return lambda x: np.squeeze(x)
+            return lambda x: np.squeeze(unravel(x, len(data.get_shape())-1),
+                                        axis=squeeze_dims)
+        return lambda x: np.squeeze(x, axis=squeeze_dims)
 
     def get_all_slice_lists(self, data_list, expInfo):
         slice_list = []

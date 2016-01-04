@@ -20,7 +20,7 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
-
+import logging
 from savu.plugins.plugin import Plugin
 
 
@@ -35,6 +35,7 @@ class BaseSaver(Plugin):
         special case of plugin that doesn't required setup of in/out_datasets
         """
         self.exp = exp
+        logging.info("%s.%s", self.__class__.__name__, 'setup')
         self.setup()
 
     def __init__(self, name='BaseSaver'):

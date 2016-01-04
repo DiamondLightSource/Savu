@@ -24,8 +24,10 @@
 import inspect
 import tempfile
 import os
+import copy
 
 from savu.core.plugin_runner import PluginRunner
+from savu.data.experiment_collection import Experiment
 import savu.plugins.utils as pu
 from savu.data.data_structures import PluginData
 
@@ -56,6 +58,9 @@ def get_experiment_types():
                         'filename': 'projections.h5'}
     exp_dict['fluo'] = {'func': 'set_fluo_experiment',
                         'filename': 'fluo.nxs'}
+    exp_dict['i12tomo'] = {'func': 'set_i12tomo_experiment',
+                           'filename': 'i12_test_data.nxs'}
+
     return exp_dict
 
 
@@ -91,6 +96,14 @@ def set_fluo_experiment(filename, **kwargs):
     return options
 
 
+def set_i12tomo_experiment(filename, **kwargs):
+    options = \
+        set_options(get_test_data_path('/i12_test_data/' + filename), **kwargs)
+    options['loader'] = 'savu.plugins.loaders.i12_tomo_loader'
+    options['saver'] = 'savu.plugins.savers.hdf5_tomo_saver'
+    return options
+
+
 def get_output_datasets(plugin):
     n_out = plugin.nOutput_datasets()
     out_data = []
@@ -99,15 +112,18 @@ def get_output_datasets(plugin):
     return out_data
 
 
-def set_plugin_list(options, pnames):
+def set_plugin_list(options, pnames, *args):
+    args = args[0] if args else None
     plugin_names = pnames if isinstance(pnames, list) else [pnames]
     options['plugin_list'] = []
     ID = [options['loader'], options['saver']]
-    data = [{}, {}]
+    data = [{}, {}] if not args else [args[0], args[-1]]
     for i in range(len(plugin_names)):
         ID.insert(i+1, plugin_names[i])
         plugin = pu.load_plugin(plugin_names[i])
-        data.insert(i+1, set_data_dict(['tomo'], get_output_datasets(plugin)))
+        data_dict = set_data_dict(['tomo'], get_output_datasets(plugin))
+        data_dict = args[i+1] if args else data_dict
+        data.insert(i+1, data_dict)
 
     for i in range(len(ID)):
         name = pu.module2class(ID[i].split('.')[-1])
@@ -170,3 +186,57 @@ def set_process(exp, process, processes):
 def plugin_runner(options):
     plugin_runner = PluginRunner(options)
     return plugin_runner.run_plugin_list(options)
+
+
+def plugin_runner_load_plugin(options):
+    plugin_runner = PluginRunner(options)
+    plugin_runner.exp = Experiment(options)
+    plugin_list = plugin_runner.exp.meta_data.plugin_list.plugin_list
+
+    exp = plugin_runner.exp
+    pu.plugin_loader(exp, plugin_list[0])
+    exp.set_nxs_filename()
+
+    plugin_dict = plugin_list[1]
+    plugin = pu.load_plugin(plugin_dict['id'])
+    plugin.exp = exp
+
+    return plugin
+
+
+def plugin_setup(plugin):
+    plugin_list = plugin.exp.meta_data.plugin_list.plugin_list
+    plugin_dict = plugin_list[1]
+    pu.set_datasets(plugin.exp, plugin, plugin_dict)
+    plugin.set_parameters(plugin_dict['data'])
+    plugin.set_plugin_datasets()
+    plugin.setup()
+
+
+def plugin_runner_real_plugin_run(options):
+    plugin_runner = PluginRunner(options)
+    plugin_runner.exp = Experiment(options)
+    plugin_list = plugin_runner.exp.meta_data.plugin_list.plugin_list
+    plugin_runner.run_plugin_list_check(plugin_list)
+
+    exp = plugin_runner.exp
+
+    pu.plugin_loader(exp, plugin_list[0])
+
+    start_in_data = copy.deepcopy(exp.index['in_data'])
+    in_data = exp.index["in_data"][exp.index["in_data"].keys()[0]]
+    out_data_objs, stop = in_data.load_data(1)
+    exp.clear_data_objects()
+    exp.index['in_data'] = copy.deepcopy(start_in_data)
+
+    for key in out_data_objs[0]:
+        exp.index["out_data"][key] = out_data_objs[0][key]
+
+    plugin = pu.plugin_loader(exp, plugin_list[1])
+    plugin.run_plugin(exp, plugin_runner)
+
+#    out_datasets = plugin.parameters["out_datasets"]
+#    exp.reorganise_datasets(out_datasets, 'final_result')
+#
+#    for key in exp.index["in_data"].keys():
+#        exp.index["in_data"][key].close_file()

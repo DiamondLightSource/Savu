@@ -27,18 +27,19 @@ import logging
 logging.debug("Importing packages in base_recon")
 
 from savu.plugins.plugin import Plugin
-from savu.core.utils import logmethod
 
 import numpy as np
 
 
 class BaseRecon(Plugin):
     """
-    A Plugin to apply a simple reconstruction with no dependancies
+    A base class for reconstruction plugins
 
     :param center_of_rotation: Centre of rotation to use for the reconstruction). Default: 86.
     :param in_datasets: Create a list of the dataset(s) to process. Default: [].
     :param out_datasets: Create a list of the dataset(s) to process. Default: [].
+    :param sino_pad_width: Pad proportion of the sinogram width before reconstructing. Default: 0.25.
+    :param log: Take the log of the data before reconstruction. Default: True.
     """
     count = 0
 
@@ -53,7 +54,7 @@ class BaseRecon(Plugin):
         except KeyError:
             cor = np.ones(in_dataset.get_shape()[1])
             cor *= self.parameters['center_of_rotation']
-            in_meta_data.set_meta_data("centre_of_rotation", cor)
+
         self.exp.log(self.name + " End")
         self.cor = cor
         in_pData, out_pData = self.get_plugin_datasets()
@@ -61,14 +62,22 @@ class BaseRecon(Plugin):
         self.main_dir = in_pData[0].get_pattern()['SINOGRAM']['main_dir']
         self.angles = in_meta_data.get_meta_data('rotation_angle')
         self.slice_dirs = out_pData[0].get_slice_directions()
+        self.reconstruct_pre_process()
 
-    @logmethod
+        if self.parameters['log']:
+            self.sino_func = lambda sino: -np.log(np.nan_to_num(sino)+1)
+        else:
+            self.sino_func = lambda sino: np.nan_to_num(sino)
+
     def process_frames(self, data, slice_list):
         """
         Reconstruct a single sinogram with the provided center of rotation
         """
         cor = self.cor[slice_list[0][self.main_dir]]
-        result = self.reconstruct(data[0], cor, self.angles, self.vol_shape)
+        pad_ammount = int(self.parameters['sino_pad_width'] * data[0].shape[1])
+        data = np.pad(data[0], ((0, 0), (pad_ammount, pad_ammount)), 'edge')
+        result = self.reconstruct(self.sino_func(data), cor+pad_ammount,
+                                  self.angles, self.vol_shape)
         return result
 
     def reconstruct(self, data, cor, angles, shape):
@@ -92,9 +101,9 @@ class BaseRecon(Plugin):
         dim_volX, dim_volY, dim_volZ = \
             self.map_volume_dimensions(in_dataset[0])
 
-        axis_labels = {in_dataset[0]: [str(dim_volX) + '.voxel_x.units',
-                       str(dim_volY) + '.voxel_y.units',
-                       str(dim_volZ) + '.voxel_z.units']}
+        axis_labels = {in_dataset[0]: [str(dim_volX) + '.voxel_x.voxels',
+                       str(dim_volY) + '.voxel_y.voxels',
+                       str(dim_volZ) + '.voxel_z.voxels']}
 
         shape = list(in_dataset[0].get_shape())
         shape[dim_volX] = shape[dim_volZ]
@@ -133,5 +142,11 @@ class BaseRecon(Plugin):
 
     def nOutput_datasets(self):
         return 1
+
+    def reconstruct_pre_process(self):
+        """
+        Should be overridden to perform pre-processing in a child class
+        """
+        pass
 
 logging.debug("Completed base_recon import")

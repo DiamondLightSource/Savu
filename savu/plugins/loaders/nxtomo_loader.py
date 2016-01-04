@@ -26,7 +26,6 @@ import h5py
 import logging
 
 import savu.data.data_structures as ds
-from savu.core.utils import logmethod
 from savu.plugins.base_loader import BaseLoader
 
 from savu.plugins.utils import register_plugin
@@ -35,13 +34,13 @@ from savu.plugins.utils import register_plugin
 @register_plugin
 class NxtomoLoader(BaseLoader):
     """
-    A class to load tomography data from an NXTomo file
+    A class to load i12 tomography data from a hdf5 file
+    :param data_path: Path to the data. Default: 'entry1/tomo_entry/data/data'.
     """
 
     def __init__(self, name='NxtomoLoader'):
         super(NxtomoLoader, self).__init__(name)
 
-    @logmethod
     def setup(self):
         exp = self.exp
         data_obj = exp.create_data_object('in_data', 'tomo')
@@ -69,7 +68,7 @@ class NxtomoLoader(BaseLoader):
         logging.debug("Creating file '%s' '%s'", 'tomo_entry',
                       data_obj.backing_file.filename)
 
-        data_obj.data = data_obj.backing_file['entry1/tomo_entry/data/data']
+        data_obj.data = data_obj.backing_file[self.parameters['data_path']]
 
         image_key = data_obj.backing_file[
             'entry1/tomo_entry/instrument/detector/''image_key']
@@ -88,3 +87,5 @@ class NxtomoLoader(BaseLoader):
             logging.warn("No Control information available")
 
         data_obj.set_shape(data_obj.data.shape)
+
+        self.set_data_reduction_params(data_obj)

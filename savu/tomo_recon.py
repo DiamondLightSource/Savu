@@ -28,7 +28,7 @@ from savu.core.plugin_runner import PluginRunner
 
 
 def option_parser():
-    usage = "%prog [options] input_file output_directory"
+    usage = "%prog [options] input_file processing_file output_directory"
     version = "%prog 0.1"
     parser = optparse.OptionParser(usage=usage, version=version)
     parser.add_option("-n", "--names", dest="names", help="Process names",
@@ -38,11 +38,16 @@ def option_parser():
                       help="Set the transport mechanism",
                       default="hdf5",
                       type='string')
+    parser.add_option("-v", "--verbose", action="store_true", dest="verbose",
+                      help="Display all debug log messages", default=False)
+    parser.add_option("-q", "--quiet", action="store_true", dest="quiet",
+                      help="Display only Errors and Info", default=False)
+
     (options, args) = parser.parse_args()
     return [options, args]
 
 
-def check_input_params(args):  
+def check_input_params(args):
     # Check basic items for completeness
     if len(args) is not 3:
         print("filename, process file and output path needs to be specified")
@@ -69,6 +74,8 @@ def set_options(opt, args):
     options = {}
     options["transport"] = opt.transport
     options["process_names"] = opt.names
+    options["verbose"] = opt.verbose
+    options["quiet"] = opt.quiet
     options["data_file"] = args[0]
     options["process_file"] = args[1]
     options["out_path"] = args[2]

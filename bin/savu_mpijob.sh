@@ -1,7 +1,11 @@
 #!/bin/bash
 module load global/testcluster
 #module load global/cluster
+
 module load python/anaconda-cctbx
+
+module load cuda/5.0
+
 #source activate mpi2
 source activate mpi5
 module load openmpi/1.6.5
@@ -13,6 +17,7 @@ datafile=$2
 processfile=$3
 outfile=$4
 nCPUs=$5
+nGPUs=2
 
 export PYTHONPATH=$savupath:$PYTHONPATH
 filename=$savupath/savu/tomo_recon.py
@@ -35,6 +40,9 @@ if [ $nCPUs -gt 0 ]; then
 		CPUs=$CPUs,CPU$i
 	done
 fi
+
+#CPUs=$CPUs,GPU0,GPU1
+#echo CPUs
 
 
 echo "Processes running are : ${processes}"

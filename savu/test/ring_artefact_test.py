@@ -24,13 +24,17 @@
 
 import unittest
 
-from savu.test.plugin_test import PluginTest
+import savu.test.test_utils as tu
+from savu.test.plugin_runner_test import \
+    run_protected_plugin_runner_no_process_list
 
 
-class RingArtefactTest(PluginTest, unittest.TestCase):
+class RingArtefactTest(unittest.TestCase):
 
-    def setUp(self):
-        self.plugin_name = "savu.plugins.ring_artefact_filter"
+    def rest_ring_artefact_removal(self):
+        options = tu.set_experiment('tomo')
+        plugin = 'savu.plugins.filters.ring_artefact_removal'
+        run_protected_plugin_runner_no_process_list(options, plugin)
 
 if __name__ == "__main__":
     unittest.main()

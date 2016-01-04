@@ -53,10 +53,10 @@ class RavenFilter(BaseFilter, CpuPlugin):
 
     def pre_process(self):
         in_pData = self.get_plugin_in_datasets()[0]
-        sino_shape = in_pData.get_core_shape()
+        sino_shape = in_pData.get_shape()
 
-        width1 = sino_shape[0] + 2*self.pad
-        height1 = sino_shape[1] + 2*self.pad
+        width1 = sino_shape[1] + 2*self.pad
+        height1 = sino_shape[0] + 2*self.pad
 
         v0 = np.abs(self.parameters['vvalue'])
         u0 = np.abs(self.parameters['uvalue'])
@@ -78,7 +78,7 @@ class RavenFilter(BaseFilter, CpuPlugin):
                                        direction='FFTW_BACKWARD')
 
     def filter_frames(self, data):
-        data2d = data[0].squeeze()
+        data2d = data[0]
         sino2 = np.fft.fftshift(self.fft_object(data2d))
         sino2[self.row1:self.row2] = \
             sino2[self.row1:self.row2] * self.filtercomplex

@@ -41,7 +41,7 @@ class Hdf5TransportData(object):
     def __init__(self):
         self.backing_file = None
 
-    def load_data(self, plugin_runner, start):
+    def load_data(self, start):
         exp = self.exp
         plugin_list = exp.meta_data.plugin_list.plugin_list
         final_plugin = plugin_list[-1]
@@ -50,18 +50,22 @@ class Hdf5TransportData(object):
         logging.debug("generating all output files")
         out_data_objects = []
         count = start
+        datasets_list = pu.datasets_list
         for plugin_dict in plugin_list[start:-1]:
+            self.get_current_and_next_patterns(datasets_list[count-1:])
             plugin_id = plugin_dict["id"]
+            print "***", plugin_id, "***"
             logging.debug("Loading plugin %s", plugin_id)
             plugin = pu.plugin_loader(exp, plugin_dict)
             self.set_filenames(plugin, plugin_id, count)
             saver_plugin.setup()
             out_data_objects.append(exp.index["out_data"].copy())
-            count += 1
             if self.variable_data_check(plugin):
                 return out_data_objects, count
             exp.merge_out_data_to_in()
+            count += 1
 
+        del self.exp.meta_data.get_dictionary()['current_and_next']
         return out_data_objects, count
 
     def variable_data_check(self, plugin):
@@ -73,23 +77,23 @@ class Hdf5TransportData(object):
         return flag
 
     def set_filenames(self, plugin, plugin_id, count):
-            exp = self.exp
-            expInfo = exp.meta_data
-            expInfo.set_meta_data("filename", {})
-            expInfo.set_meta_data("group_name", {})
-            for key in exp.index["out_data"].keys():
-                filename = \
-                    os.path.join(expInfo.get_meta_data("out_path"), "%s%02i_%s"
-                                 % (os.path.basename(
-                                    expInfo.get_meta_data("process_file")),
-                                    count, plugin_id))
-                filename = filename + "_" + key + ".h5"
-                group_name = "%i-%s" % (count, plugin.name)
-                exp.barrier()
-                logging.debug("(set_filenames) Creating output file after "
-                              " barrier %s", filename)
-                expInfo.set_meta_data(["filename", key], filename)
-                expInfo.set_meta_data(["group_name", key], group_name)
+        exp = self.exp
+        expInfo = exp.meta_data
+        expInfo.set_meta_data("filename", {})
+        expInfo.set_meta_data("group_name", {})
+        for key in exp.index["out_data"].keys():
+            filename = \
+                os.path.join(expInfo.get_meta_data("out_path"), "%s%02i_%s"
+                             % (os.path.basename(
+                                expInfo.get_meta_data("process_file")),
+                                count, plugin_id))
+            filename = filename + "_" + key + ".h5"
+            group_name = "%i-%s-%s" % (count, plugin.name, key)
+            exp.barrier()
+            logging.debug("(set_filenames) Creating output file after "
+                          " barrier %s", filename)
+            expInfo.set_meta_data(["filename", key], filename)
+            expInfo.set_meta_data(["group_name", key], group_name)
 
     def add_data_links(self, linkType):
 
@@ -130,7 +134,6 @@ class Hdf5TransportData(object):
     def save_data(self, link_type):
         process = self.exp.meta_data.get_meta_data('process')
         if process is 0:
-            logging.info("PROCESS 0 is adding data link and metadata")
             plugin_file, entry = self.add_data_links(link_type)
             #self.output_metadata(entry)
             #plugin_file.close()
@@ -158,6 +161,9 @@ class Hdf5TransportData(object):
         :rtype: [int, int, int]
         """
         sshape = self.get_shape_of_slice_dirs(slice_dirs, shape)
+        if not slice_dirs:
+            return [1], [1], [1]
+
         chunk = []
         length = []
         repeat = []
@@ -176,14 +182,14 @@ class Hdf5TransportData(object):
                 if isinstance(value, str):
                     shape[index] = \
                         len(self.data_info.get_meta_data('axis_labels')[index])
-                    self.unravel_array(index)
+                    #self.unravel_array(index)
             shape = tuple(shape)
             sshape = [shape[sslice] for sslice in slice_dirs]
         return sshape
 
-    def unravel_array(self, index):
-        self.unravel = lambda x: self.unravel(x[0]) if isinstance(x, list) \
-            else x
+#    def unravel_array(self, index):
+#        self.unravel = lambda x: self.unravel(x[0]) if isinstance(x, list) \
+#            else x
 
     def get_slice_dirs_index(self, slice_dirs, shape):
         """
@@ -191,31 +197,68 @@ class Hdf5TransportData(object):
         gives the indices for that slice dimension.
         """
         # create the indexing array
-        [chunk, length, repeat] = self.chunk_length_repeat(slice_dirs, shape)
+        chunk, length, repeat = self.chunk_length_repeat(slice_dirs, shape)
         idx_list = []
-        for dim in range(len(slice_dirs)):
-            c = chunk[dim]
-            l = length[dim]
-            r = repeat[dim]
-            idx = np.ravel(np.kron(np.arange(l), np.ones((r, c))))
+        for i in range(len(slice_dirs)):
+            c = chunk[i]
+            r = repeat[i]
+            values = self.get_slice_dir_index(slice_dirs[i])
+            idx = np.ravel(np.kron(values, np.ones((r, c))))
             idx_list.append(idx.astype(int))
 
         return np.array(idx_list)
 
+    def get_slice_dir_index(self, dim, boolean=False):
+        starts, stops, steps, chunks = self.get_starts_stops_steps()
+        if chunks[dim] > 1:
+            dir_idx = np.ravel(np.transpose(self.get_slice_dir_matrix(dim)))
+            if boolean:
+                return self.get_bool_slice_dir_index(dim, dir_idx)
+            return dir_idx
+        else:
+            fix_dirs, value = self.get_plugin_data().get_fixed_directions()
+            if dim in fix_dirs:
+                return value[fix_dirs.index(dim)]
+            else:
+                return np.arange(starts[dim], stops[dim], steps[dim])
+
+    def get_bool_slice_dir_index(self, dim, dir_idx):
+        shape = self.data_info.get_meta_data('orig_shape')[dim]
+        bool_idx = np.ones(shape, dtype=bool)
+        bool_idx[dir_idx] = True
+        return bool_idx
+
+    def get_slice_dir_matrix(self, dim):
+        starts, stops, steps, chunks = self.get_starts_stops_steps()
+        if 'var' in stops:
+            return np.array([0])
+        chunk = chunks[dim]
+        a = np.tile(np.arange(starts[dim], stops[dim], steps[dim]), (chunk, 1))
+        b = np.transpose(np.tile(np.arange(chunk)-chunk/2, (a.shape[1], 1)))
+        dim_idx = a + b
+        if dim_idx[dim_idx < 0]:
+            raise Exception('Cannot have a negative value in the slice list.')
+        return dim_idx
+
     def single_slice_list(self):
         pData = self.get_plugin_data()
         slice_dirs = pData.get_slice_directions()
-        [fix_dirs, value] = pData.get_fixed_directions()
+        core_dirs = np.array(pData.get_core_directions())
         shape = self.get_shape()
         index = self.get_slice_dirs_index(slice_dirs, shape)
-        if 'var' not in [shape[i] for i in slice_dirs]:
-            shape = [s for s in list(shape) if isinstance(s, int)]
-        nSlices = index.shape[1]
+#        if 'var' not in [shape[i] for i in slice_dirs]:
+#            shape = [s for s in list(shape) if isinstance(s, int)]
+        fix_dirs, value = pData.get_fixed_directions()
+
+        nSlices = index.shape[1] if index.size else len(fix_dirs)
         nDims = len(shape)
+
+        core_slice = self.get_core_slices(core_dirs)
 
         slice_list = []
         for i in range(nSlices):
-            getitem = [slice(None)]*nDims
+            getitem = np.array([slice(None)]*nDims)
+            getitem[core_dirs] = core_slice[np.arange(len(core_dirs))]
             for f in range(len(fix_dirs)):
                 getitem[fix_dirs[f]] = slice(value[f], value[f] + 1, 1)
             for sdir in range(len(slice_dirs)):
@@ -223,6 +266,36 @@ class Hdf5TransportData(object):
                                                   index[sdir, i] + 1, 1)
             slice_list.append(tuple(getitem))
 
+        slice_list = self.remove_var_length_dimension(slice_list)
+        return slice_list
+
+    def get_core_slices(self, core_dirs):
+        core_slice = []
+        starts, stops, steps, chunks = self.get_starts_stops_steps()
+        for c in core_dirs:
+            if (chunks[c]) > 1:
+                if (stops[c] - starts[c] == 1):
+                    start = starts[c] - int(chunks[c]/2)
+                    if start < 0:
+                        raise Exception('Cannot have a negative value in the '
+                                        'slice list.')
+                    stop = starts[c] + (chunks[c] - int(chunks[c]/2))
+                    core_slice.append(slice(start, stop, 1))
+                else:
+                    raise Exception("The core dimension does not support "
+                                    "multiple chunks.")
+            else:
+                core_slice.append(slice(starts[c], stops[c], steps[c]))
+        return np.array(core_slice)
+
+    def remove_var_length_dimension(self, slice_list):
+        shape = self.get_shape()
+        if 'var' in shape:
+            var_dim = list(shape).index('var')
+            for i in range(len(slice_list)):
+                sl = list(slice_list[i])
+                del sl[var_dim]
+                slice_list[i] = sl
         return slice_list
 
     def banked_list(self, slice_list):
@@ -230,32 +303,55 @@ class Hdf5TransportData(object):
         slice_dirs = self.get_plugin_data().get_slice_directions()
         chunk, length, repeat = self.chunk_length_repeat(slice_dirs, shape)
 
+        if self.mapping:
+            map_obj = self.exp.index['mapping'][self.get_name()]
+            new_length = map_obj.data_info.get_meta_data('map_dim_len')
+
+        repeat = length[0]/new_length if self.mapping else repeat[0]
+        length = new_length if self.mapping else length[0]
+
         banked = []
-        for rep in range(repeat[0]):
-            start = rep*length[0]
-            end = start + length[0]
+        for rep in range(repeat):
+            start = rep*length
+            end = start + length
             banked.append(slice_list[start:end])
 
-        return banked, length[0], slice_dirs
+        return banked, length, slice_dirs
 
     def grouped_slice_list(self, slice_list, max_frames):
         banked, length, slice_dir = self.banked_list(slice_list)
-        grouped = []
-        count = 0
-        for group in banked:
-            full_frames = int(length/float(max_frames))
-            rem = 1 if (length % max_frames) else 0
-            working_slice = list(group[0])
+        starts, stops, steps, chunks = self.get_starts_stops_steps()
+        group_dim = self.get_plugin_data().get_slice_directions()[0]
+        chunk = chunks[group_dim]
+        start = starts[group_dim]
+        start = start if chunk == 1 else start-chunk/2
+        step = steps[group_dim] if chunk == 1 else 1
+        jump = max_frames*step
 
-            for i in range(0, (full_frames*max_frames), max_frames):
-                new_slice = slice(i, i+max_frames, 1)
+        if self.mapping:
+            map_obj = self.exp.index['mapping'][self.get_name()]
+            map_len = map_obj.data_info.get_meta_data('full_map_dim_len')[0]
+
+        grouped = []
+        for group in banked:
+            full_frames = int((length)/max_frames)
+            full_frames_end = start + full_frames*step*max_frames
+            end = start+(len(group)-1)*step+1
+            rem = 1 if (length % max_frames) else 0
+
+            working_slice = list(group[0])
+            i = start - jump
+            for i in range(start, full_frames_end, jump):
+                new_slice = slice(i, i+jump, step)
                 working_slice[slice_dir[0]] = new_slice
                 grouped.append(tuple(working_slice))
             if rem:
-                new_slice = slice(i+max_frames, len(group), 1)
+                new_slice = slice(i+jump, end, step)
                 working_slice[slice_dir[0]] = new_slice
                 grouped.append(tuple(working_slice))
-            count += 1
+
+            if self.mapping:
+                start = start + map_len
 
         return grouped
 
@@ -279,12 +375,14 @@ class Hdf5TransportData(object):
         processes = expInfo.get_meta_data("processes")
         process = expInfo.get_meta_data("process")
         slice_list = self.get_grouped_slice_list()
+
         frame_index = np.arange(len(slice_list))
         try:
             frames = np.array_split(frame_index, len(processes))[process]
             process_slice_list = slice_list[frames[0]:frames[-1]+1]
         except IndexError:
             process_slice_list = []
+
         return process_slice_list
 
     def calculate_slice_padding(self, in_slice, pad_ammount, data_stop):
@@ -345,18 +443,13 @@ class Hdf5TransportData(object):
             getattr(padding, key)(pData.padding[key])
         return padding.get_padding_directions()
 
-    def get_padded_slice_data(self, input_slice_list):        
+    def get_padded_slice_data(self, input_slice_list):
         slice_list = list(input_slice_list)
-        if self.get_plugin_data().padding is None:
+        pData = self.get_plugin_data()
+        if pData.padding is None:
             return self.data[tuple(slice_list)]
-#            try:
-#                return self.data[tuple(slice_list)]
-#            except TypeError:
-#                temp = self.data[tuple(slice_list[:-1])]
-#                temp2 = self.unravel(temp)[slice_list[-1]]
 
         padding_dict = self.get_padding_dict()
-
         pad_list = []
         for i in range(len(slice_list)):
             pad_list.append((0, 0))
@@ -373,6 +466,7 @@ class Hdf5TransportData(object):
         padding_dict = self.get_plugin_data().padding
         if padding_dict is None:
             return padded_dataset
+
         padding_dict = self.get_padding_dict()
 
         slice_list = list(input_slice_list)

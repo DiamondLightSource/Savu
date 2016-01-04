@@ -44,13 +44,13 @@ class Experiment(object):
     def __init__(self, options):
         self.meta_data = MetaData(options)
         self.meta_data_setup(options["process_file"])
-        self.index = {"in_data": {}, "out_data": {}}
+        self.index = {"in_data": {}, "out_data": {}, "mapping": {}}
 
     def get_meta_data(self):
         return self.meta_data
 
     def meta_data_setup(self, process_file):
-        self.meta_data.load_experiment_collection()
+        #self.meta_data.load_experiment_collection()
         self.meta_data.plugin_list = PluginList()
 
         try:
@@ -109,15 +109,12 @@ class Experiment(object):
         self.remove_unwanted_data(out_data_objs)
 
         self.barrier()
-        logging.info("Copy out data to in data")
         self.copy_out_data_to_in_data(link_type)
 
         self.barrier()
-        logging.info("Clear up all data objects")
         self.clear_out_data_objects()
 
     def remove_unwanted_data(self, out_data_objs):
-        logging.info("Remove unwanted data from the plugin chain")
         for out_objs in out_data_objs:
             if out_objs.remove is True:
                 self.remove_dataset(out_objs)

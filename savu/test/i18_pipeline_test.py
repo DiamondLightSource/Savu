@@ -73,8 +73,8 @@ class I18PipelineTest(unittest.TestCase):
         options = {
             "transport": "hdf5",
             "process_names": "CPU0",
-            "data_file": '/dls/science/groups/das/ExampleData/i18/multimodal2/mmbig2.nxs',
-            "process_file": tu.get_process_list_path('I18_pipeline_noxrd_scikit.nxs'),
+            "data_file": tu.get_test_data_path('mm.nxs'),
+            "process_file": tu.get_test_process_path('I18_pipeline.nxs'),
             "out_path": tempfile.mkdtemp()
             }
         run_protected_plugin_runner(options)

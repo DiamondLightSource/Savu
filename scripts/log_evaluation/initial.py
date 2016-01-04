@@ -24,15 +24,18 @@ def evaluate(selected_data):
 
 #def process_file(filename="../../test_data/trimmed_out.log"):
 def process_file(filename="log_mpi_test.o8616282"):
-    data = pandas.io.parsers.read_fwf(filename, widths=[2, 13, 5, 5, 6, 1000], header=None)
+    data = pandas.io.parsers.read_fwf(filename, widths=[2, 13, 5, 5, 6, 1000],
+                                      header=None)
     machinepds = {}
     for machine in data[2].unique():
         threadpds = {}
         for thread in data[3].unique():
-            sel = data[data[2] == machine][data[3] == thread][data[4] == "INFO"]
+            sel = \
+                data[data[2] == machine][data[3] == thread][data[4] == "INFO"]
             (summed, count) = evaluate(sel)
             combined_data = zip(summed.keys(), summed.values(), count.values())
-            df = pandas.DataFrame(data = combined_data, columns=['function', 'total_time','num_calls'])
+            cols = ['function', 'total_time', 'num_calls']
+            df = pandas.DataFrame(data=combined_data, columns=cols)
             df = df.set_index('function')
             threadpds[thread] = df
         machinepds[machine] = pandas.concat(threadpds)
@@ -41,6 +44,6 @@ def process_file(filename="log_mpi_test.o8616282"):
     return result.sort_index(0)
 
 df = process_file()
-pandas.set_option('display.height',1000)
-pandas.set_option('display.max_rows',1000)
+pandas.set_option('display.height', 1000)
+pandas.set_option('display.max_rows', 1000)
 print df

@@ -27,7 +27,7 @@ from savu.test import test_utils as tu
 from savu.test.plugin_runner_test import run_protected_plugin_runner
 
 
-class PluginRunnerTomoTest(unittest.TestCase):
+class CglsAstraTest(unittest.TestCase):
 
     def test_cgls_astra(self):
         process = 'basic_tomo_iterative_process.nxs'

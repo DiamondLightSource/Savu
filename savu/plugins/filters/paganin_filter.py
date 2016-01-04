@@ -36,9 +36,9 @@ class PaganinFilter(BaseFilter, CpuPlugin):
     """
     A plugin to apply Paganin filter (contrast enhancement) on projections
 
-    :param Energy: Given X-ray energy in keV. Default: 20.
+    :param Energy: Given X-ray energy in keV. Default: 53.0.
     :param Distance: Distance from sample to detection - Unit is metre. Default: 1.0.
-    :param Resolution: Pixel size - Unit is micron. Default: 21.46.
+    :param Resolution: Pixel size - Unit is micron. Default: 1.28.
     :param Ratio: ratio of delta/beta. Default: 10.0.
     :param Padtopbottom: Pad to the top and bottom of projection. Default: 10.
     :param Padleftright: Pad to the left and right of projection. Default: 10.
@@ -105,7 +105,7 @@ class PaganinFilter(BaseFilter, CpuPlugin):
         result = result[padtopbottom:-padtopbottom,
                         padleftright: -padleftright]
         logging.debug("Paganin Filter output shape %s" % str(result.shape))
-        return result.squeeze()
+        return result
 
     def get_max_frames(self):
         return 1

@@ -20,6 +20,7 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
+import logging
 
 from savu.plugins.plugin import Plugin
 
@@ -27,6 +28,8 @@ from savu.plugins.plugin import Plugin
 class BaseLoader(Plugin):
     """
     A base plugin from which all data loader plugins should inherit.
+
+    :param preview: A slice list of required frames. Default: [].
     """
 
     def main_setup(self, exp, params):
@@ -34,9 +37,15 @@ class BaseLoader(Plugin):
         Overwrites the main_setup function in plugin.py as the loader is a
         special case of plugin that doesn't required setup of in/out_datasets
         """
-        self.parameters = params # I added this since I couldn't find it otherwise.adp
+        self.set_parameters(params)
         self.exp = exp
+        logging.info("%s.%s", self.__class__.__name__, 'setup')
         self.setup()
+
+    def set_data_reduction_params(self, data_obj):
+        pDict = self.parameters
+        self.data_mapping()
+        data_obj.set_preview(pDict['preview'])
 
     def __init__(self, name='BaseLoader'):
         self.hits = []
@@ -54,3 +63,6 @@ class BaseLoader(Plugin):
                 if "definition" in obj.keys():
                     if obj["definition"].value == self.application:
                         self.hits.append(obj)
+
+    def data_mapping(self):
+        pass

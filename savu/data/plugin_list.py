@@ -41,16 +41,25 @@ class PluginList(object):
     def __init__(self):
         self.plugin_list = []
 
-    def populate_plugin_list(self, filename):
+    def populate_plugin_list(self, filename, activePass=False):
         plugin_file = h5py.File(filename, 'r')
         plugin_group = plugin_file['entry/plugin']
         self.plugin_list = []
         for key in plugin_group.keys():
             plugin = {}
-            plugin['name'] = plugin_group[key]['name'][0]
-            plugin['id'] = plugin_group[key]['id'][0]
-            plugin['data'] = json.loads(plugin_group[key]['data'][0])
-            self.plugin_list.append(plugin)
+            try:
+                active = plugin_group[key]['active'][0]
+                plugin['active'] = active
+                if activePass:
+                    active = True
+            except KeyError:
+                active = True
+
+            if active:
+                plugin['name'] = plugin_group[key]['name'][0]
+                plugin['id'] = plugin_group[key]['id'][0]
+                plugin['data'] = json.loads(plugin_group[key]['data'][0])
+                self.plugin_list.append(plugin)
         plugin_file.close()
 
     def save_plugin_list(self, out_filename):
@@ -72,6 +81,13 @@ class PluginList(object):
             data_array = np.array([json.dumps(plugin['data'])])
             plugin_group.create_dataset('data', data_array.shape,
                                         data_array.dtype, data_array)
+            try:
+                name_array = np.array([plugin['active']])
+                plugin_group.create_dataset('active', name_array.shape,
+                                            name_array.dtype, name_array)
+            except KeyError:
+                pass
+
             count += 1
         plugin_file.close()
 
@@ -82,17 +98,31 @@ class PluginList(object):
         citation.write(plugin_entry)
         plugin_file.close()
 
-    def get_string(self):
+    def get_string(self, **kwargs):
         out_string = []
-        count = 0
-        for plugin in self.plugin_list:
+
+        start = kwargs.get('start', 0)
+        stop = kwargs.get('stop', len(self.plugin_list))
+        if stop == -1:
+            stop = len(self.plugin_list)
+        disp_params = kwargs.get('params', True)
+
+        count = start
+        plugin_list = self.plugin_list[start:stop]
+        for plugin in plugin_list:
+            description = ""
             count += 1
-            description = "%2i) %s(%s)" % (count, plugin['name'], plugin['id'])
-            keycount = 0
-            for key in plugin['data'].keys():
-                keycount += 1
-                description += "\n  %2i)   %20s : %s" % (keycount, key,
-                                                         plugin['data'][key])
+            if 'active' in plugin:
+                if not plugin['active']:
+                    description += "***OFF***"
+            description += \
+                "%2i) %s(%s)" % (count, plugin['name'], plugin['id'])
+            if disp_params:
+                keycount = 0
+                for key in plugin['data'].keys():
+                    keycount += 1
+                    description += "\n  %2i)   %20s : %s" % \
+                        (keycount, key, plugin['data'][key])
             out_string.append(description)
         return '\n'.join(out_string)
 

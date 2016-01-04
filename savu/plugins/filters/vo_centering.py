@@ -37,6 +37,9 @@ class VoCentering(BaseFilter, CpuPlugin):
     A plugin to calculate the center of rotation using the Vo Method
     :param datasets_to_populate: A list of datasets which require this information. Default: [].    
     :param out_datasets: The default names. Default: ['cor_raw','cor_fit'].
+    :param poly_degree: The polynomial degree of the fit (1 or 0 = gradient or no gradient). Default: 1.
+    :param step: The step length over the rotation axis. Default: 1.
+    :param no_clean: Do not clean up potential outliers. Default: False.
     """
 
     def __init__(self):
@@ -70,7 +73,7 @@ class VoCentering(BaseFilter, CpuPlugin):
         return cor_positions[vv.argmin()]
 
     def filter_frames(self, data):
-        data = data[0].squeeze()
+        data = data[0][::self.parameters['step']]
         width = data.shape[1]/4
         step = width/10.
         point = 0.0
@@ -91,8 +94,8 @@ class VoCentering(BaseFilter, CpuPlugin):
         # do some curve fitting here
         in_datasets, out_datasets = self.get_datasets()
 
-        cor_raw = out_datasets[0].data[...]
-        cor_fit = out_datasets[1].data[...]
+        cor_raw = np.squeeze(out_datasets[0].data[...])
+        cor_fit = np.squeeze(out_datasets[1].data[...])
 
         # now fit the result
         x = np.arange(cor_raw.shape[0])
@@ -100,10 +103,11 @@ class VoCentering(BaseFilter, CpuPlugin):
         # first clean all points where the derivative is too high
         diff = np.abs(np.diff(cor_raw))
 
-        tollerence = np.median(diff)
+        tolerance = np.median(diff)
+        diff = np.append(diff, tolerance)
 
-        x_clean = x[diff < tollerence * 2.0]
-        cor_clean = cor_raw[diff < tollerence * 2.0]
+        x_clean = x[diff <= tolerance * 2.0]
+        cor_clean = cor_raw[diff <= tolerance * 2.0]
 
         # set up for the iterative clean on the fit
         cor_fit = cor_clean
@@ -111,20 +115,25 @@ class VoCentering(BaseFilter, CpuPlugin):
         p = None
 
         # keep fitting and removing points until the fit is within
-        # the tollerences
-        while max_disp > tollerence:
-            mask = (np.abs(cor_fit-cor_clean)) < (max_disp / 2.)
-            x_clean = x_clean[mask]
-            cor_clean = cor_clean[mask]
-            z = np.polyfit(x_clean, cor_clean, 1)
+        # the tolerances
+ 
+        if self.parameters['no_clean']:
+            z = np.polyfit(x_clean, cor_clean, self.parameters['poly_degree'])
             p = np.poly1d(z)
-            cor_fit = p(x_clean)
-            max_disp = (np.abs(cor_fit-cor_clean)).max()
+        else:
+            while max_disp > tolerance:
+                mask = (np.abs(cor_fit-cor_clean)) < (max_disp / 2.)
+                x_clean = x_clean[mask]
+                cor_clean = cor_clean[mask]
+                z = np.polyfit(x_clean, cor_clean, self.parameters['poly_degree'])
+                p = np.poly1d(z)
+                cor_fit = p(x_clean)
+                max_disp = (np.abs(cor_fit-cor_clean)).max()
 
         # build a full array for the output fit
         cor_fit = p(x)
 
-        out_datasets[1].data[:] = cor_fit[:]
+        out_datasets[1].data[:] = cor_fit[:, np.newaxis]
         # add to metadata
         self.populate_meta_data('cor_raw', cor_raw)
         self.populate_meta_data('centre_of_rotation', cor_fit)
@@ -142,18 +151,24 @@ class VoCentering(BaseFilter, CpuPlugin):
 
         # set up the output dataset that is created by the plugin
         in_dataset, out_dataset = self.get_datasets()
+        in_pData, out_pData = self.get_plugin_datasets()
+        in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
         # copy all required information from in_dataset[0]
         fullData = in_dataset[0]
 
-        out_dataset[0].create_dataset(shape=(fullData.get_shape()[1], 1),
+        slice_dirs = np.array(in_pData[0].get_slice_directions())
+        new_shape = (np.prod(np.array(fullData.get_shape())[slice_dirs]), 1)
+
+        out_dataset[0].create_dataset(shape=new_shape,
                                       axis_labels=['x.pixels', 'y.pixels'],
                                       remove=True)
         out_dataset[0].add_pattern("METADATA", core_dir=(1,), slice_dir=(0,))
 
-        out_dataset[1].create_dataset(out_dataset[0])
+        out_dataset[1].create_dataset(shape=new_shape,
+                                      axis_labels=['x.pixels', 'y.pixels'],
+                                      remove=True)
+        out_dataset[1].add_pattern("METADATA", core_dir=(1,), slice_dir=(0,))
 
-        in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
         out_pData[0].plugin_data_setup('METADATA', self.get_max_frames())
         out_pData[1].plugin_data_setup('METADATA', self.get_max_frames())
 

@@ -31,14 +31,16 @@ class MetaData(object):
     PluginList.
     """
 
-    def __init__(self, options={}):
+    def __init__(self, options=None):
+        if options is None:
+            options = {}
         self.dict = options.copy()
 
-    def load_experiment_collection(self):
-        transport_collection = self.dict["transport"] + "_experiment"
-        class_name = ''.join(x.capitalize() for x in
-                             transport_collection.split('_'))
-        self.add_base(globals()[class_name])
+#    def load_experiment_collection(self):
+#        transport_collection = self.dict["transport"] + "_experiment"
+#        class_name = ''.join(x.capitalize() for x in
+#                             transport_collection.split('_'))
+#        self.add_base(globals()[class_name])
 
     def add_base(self, transport):
         cls = self.__class__
@@ -78,19 +80,19 @@ class MetaData(object):
         self.dict = ddict
 
 
-class Hdf5Experiment():
-    """
-    The Hdf5Experiment class is inherited by Experiment class at
-    runtime and performs initial setup of metadata
-    """
-    def set_transport_meta_data(self):
-        pass
-
-
-class distArrayExperiment():
-    """
-    The Hdf5Experiment class is inherited by Experiment class at
-    runtime and performs initial setup of metadata
-    """
-    def set_transport_meta_data(self):
-        pass
+#class Hdf5Experiment():
+#    """
+#    The Hdf5Experiment class is inherited by Experiment class at
+#    runtime and performs initial setup of metadata
+#    """
+#    def set_transport_meta_data(self):
+#        pass
+#
+#
+#class distArrayExperiment():
+#    """
+#    The Hdf5Experiment class is inherited by Experiment class at
+#    runtime and performs initial setup of metadata
+#    """
+#    def set_transport_meta_data(self):
+#        pass
