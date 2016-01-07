@@ -102,8 +102,9 @@ class MultipleParameterTest2(unittest.TestCase):
         key2 = 'iterations'
         key3 = 'in_datasets'
         key4 = 'out_datasets'
+        key5 = 'sino_pad_width'
         params = {key1: 'nearest;linear', key2: '1;2;3', key3: 'tomo',
-                  key4: 'tomo'}
+                  key4: 'tomo', key5: 0}
 
         options = tu.set_experiment('tomo')
         plugin = 'savu.plugins.reconstructions.scikitimage_sart'
