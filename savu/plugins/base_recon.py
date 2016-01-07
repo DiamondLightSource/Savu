@@ -52,6 +52,7 @@ class BaseRecon(Plugin):
 
     def pre_process(self):
         in_dataset = self.get_in_datasets()[0]
+        self.pad_dim = in_dataset.find_axis_label_dimension('detector_x')
         in_meta_data = self.get_in_meta_data()[0]
         try:
             cor = in_meta_data.get_meta_data("centre_of_rotation")
@@ -78,9 +79,11 @@ class BaseRecon(Plugin):
         Reconstruct a single sinogram with the provided center of rotation
         """
         cor = self.cor[slice_list[0][self.main_dir]]
-        pad_ammount = int(self.parameters['sino_pad_width'] * data[0].shape[1])
-        data = np.pad(data[0], ((0, 0), (pad_ammount, pad_ammount)), 'edge')
-        result = self.reconstruct(self.sino_func(data), cor+pad_ammount,
+        pad_tuples = [(0, 0)]*(len(slice_list[0])-1)
+        pad_amount = int(self.parameters['sino_pad_width'] * data[0].shape[1])
+        pad_tuples.insert(self.pad_dim, (pad_amount, pad_amount))
+        data = np.pad(data[0], tuple(pad_tuples), 'edge')
+        result = self.reconstruct(self.sino_func(data), cor+pad_amount,
                                   self.angles, self.vol_shape)
         return result
 

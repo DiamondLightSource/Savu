@@ -110,17 +110,21 @@ class Plugin(PluginDatasets):
                                  self.name)
 
     def convert_multi_params(self, value, key):
+        print "in convert multi parameters"
+        print value
         dtype = self.parameters_types[key]
-        if isinstance(value, unicode):
-            if ';' in value:
-                value = value.split(';')
-                if type(value[0]) != dtype:
-                    value = map(dtype, value)
-                if len(value) > 1:
-                    label = key + '_params.' + type(value[0]).__name__
-                    self.multi_params_dict[len(self.multi_params_dict)] = \
-                        {'label': label, 'values': value}
-                    self.extra_dims.append(len(value))
+#        if isinstance(value, unicode):
+        if ';' in value:
+            value = value.split(';')
+            print value
+            if type(value[0]) != dtype:
+                value = map(dtype, value)
+            if len(value) > 1:
+                label = key + '_params.' + type(value[0]).__name__
+                self.multi_params_dict[len(self.multi_params_dict)] = \
+                    {'label': label, 'values': value}
+                self.extra_dims.append(len(value))
+        print value
         return value
 
     def get_parameters(self, name):

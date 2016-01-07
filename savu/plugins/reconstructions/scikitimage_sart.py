@@ -13,32 +13,40 @@ from savu.plugins.utils import register_plugin
 @register_plugin
 class ScikitimageSart(BaseRecon, CpuPlugin):
     """
-    A Plugin to reconstruct an image by filter back projection
-    using the inverse radon transform from scikit-image.
+    A Plugin to reconstruct an image by filter back projection using the
+    inverse radon transform from scikit-image.
 
     :param iterations: Number of iterations in the reconstruction. Default: 1.
-    :param output_size: Number of rows and columns in the
+
+    :param output_size: Number of rows and columns in the \
     reconstruction. Default: None.
-    :param filter: Filter used in frequency domain filtering
-    Ramp filter used by default. Filters available: ramp, shepp-logan,
-    cosine, hamming, hann. Assign None to use no filter. Default: 'ramp'.
-    :param interpolation: interpolation method used in reconstruction.
-    Methods available: 'linear', 'nearest', and 'cubic' ('cubic' is slow).
-    Default: 'linear'.
-    :param circle: Assume the reconstructed image is zero outside the inscribed
-    circle. Also changes the default output_size to match the behaviour of
-    radon called with circle=True. Default: False.
+
+    :param filter: Filter used in frequency domain filtering. Ramp filter used\
+    by default. Filters available: ramp, shepp-logan, cosine, hamming, hann.\
+    Assign None to use no filter. Default: 'ramp'.
+
+    :param interpolation: interpolation method used in reconstruction.\
+    Methods available: 'linear', 'nearest', and 'cubic' \
+    ('cubic' is slow). Default: 'linear'.
+
+    :param circle: Assume the reconstructed image is zero outside the\
+    inscribed circle. Also changes the default output_size to match the \
+    behaviour of radon called with circle=True. Default: False.
+
     :param image: 2D array, dtype=float, optional.  Image containing an initial
     reconstruction estimate. Shape of this array should be
     (radon_image.shape[0], radon_image.shape[0]). The default is a filter back
     projection using scikit.image.iradon as "result"
+
     :param projection_shifts : 1D array, dtype=float. Shift the projections
     contained in radon_image (the sinogram) by this many pixels before
     reconstructing the image. The i'th value defines the shift of the i'th
     column of radon_image.  Default: None.
+
     :param clip : length-2 sequence of floats. Force all values in the
     reconstructed tomogram to lie in the range [clip[0], clip[1]].
     Default: None.
+
     :param relaxation : float. Relaxation parameter for the update step.
     A higher value can improve the convergence rate, but one runs the risk of
     instabilities. Values close to or higher than 1 are not recommended.
