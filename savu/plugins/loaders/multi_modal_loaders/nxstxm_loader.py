@@ -53,8 +53,9 @@ class NxstxmLoader(BaseMultiModalLoader):
         rotation_angle = \
             data_obj.backing_file[stxm_entry.name + '/sample/theta']
         data_obj.meta_data.set_meta_data('rotation_angle', rotation_angle[...])
-        data_obj.set_axis_labels('rotation_angle.degrees',
-                                 'x.mm',
-                                 'y.mm')
+#         data_obj.set_axis_labels('rotation_angle.degrees',
+#                                  'x.mm',
+# #                                  'y.mm')
+#                                     )
         self.add_patterns_based_on_acquisition(data_obj, 'stxm')
         self.set_data_reduction_params(data_obj)

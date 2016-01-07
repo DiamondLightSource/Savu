@@ -30,6 +30,45 @@ from savu.test.plugin_runner_test import run_protected_plugin_runner
 
 class I18PipelineTest(unittest.TestCase):
 
+#     def test_xrdtomo(self):
+#         options = {
+#             "transport": "hdf5",
+#             "process_names": "CPU0",
+#             "data_file": tu.get_test_data_path('mm.nxs'),
+#             "process_file": tu.get_process_list_path('I18_pipeline_just_xrd.nxs'),
+#             "out_path": tempfile.mkdtemp()
+#             }
+#         run_protected_plugin_runner(options)
+# 
+#     def test_noxrdtomo(self):
+#         options = {
+#             "transport": "hdf5",
+#             "process_names": "CPU0",
+#             "data_file": tu.get_test_data_path('mm.nxs'),
+#             "process_file": tu.get_process_list_path('I18_pipeline_noxrd.nxs'),
+#             "out_path": tempfile.mkdtemp()
+#             }
+#         run_protected_plugin_runner(options)
+# 
+#     def test_noxrdtomo_scikit(self):
+#         options = {
+#             "transport": "hdf5",
+#             "process_names": "CPU0",
+#             "data_file": tu.get_test_data_path('mm.nxs'),
+#             "process_file": tu.get_process_list_path('I18_pipeline_noxrd_scikit.nxs'),
+#             "out_path": tempfile.mkdtemp()
+#             }
+#         run_protected_plugin_runner(options)
+
+#     def test_full(self):
+#         options = {
+#             "transport": "hdf5",
+#             "process_names": "CPU0",
+#             "data_file": tu.get_test_data_path('mm.nxs'),
+#             "process_file": tu.get_process_list_path('I18_pipeline_just_xrd.nxs'),
+#             "out_path": tempfile.mkdtemp()
+#             }
+#         run_protected_plugin_runner(options)
     def test_process(self):
         options = {
             "transport": "hdf5",
@@ -39,6 +78,5 @@ class I18PipelineTest(unittest.TestCase):
             "out_path": tempfile.mkdtemp()
             }
         run_protected_plugin_runner(options)
-
 if __name__ == "__main__":
     unittest.main()

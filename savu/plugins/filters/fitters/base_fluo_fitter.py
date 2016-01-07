@@ -43,7 +43,6 @@ class BaseFluoFitter(BaseFitter):
     :param include_escape: Include escape. Default: 1.
     :param fitted_energy_range_keV: The fitted energy range. Default: [2.,18.].
     :param elements: The fitted elements. Default: ['Zn','Cu', 'Ar'].
-    :param n_peaks: The number of peaks. Default: 23 
     """
 
     def __init__(self, name="BaseFluoFitter"):
@@ -64,7 +63,7 @@ class BaseFluoFitter(BaseFitter):
     def setup(self):
         # set up the output datasets that are created by the plugin
         in_dataset, out_datasets = self.get_datasets()
-
+        in_meta_data = self.get_in_meta_data()[0]
         shape = in_dataset[0].get_shape()
         axis_labels = ['-1.PeakIndex.pixel.unit']
         pattern_list = ['SINOGRAM', 'PROJECTION']
@@ -72,7 +71,10 @@ class BaseFluoFitter(BaseFitter):
         fitAreas = out_datasets[0]
         fitHeights = out_datasets[1]
         fitWidths = out_datasets[2]
-        new_shape = shape[:-1] + (self.parameters['n_peaks'],)
+        idx = self.setPositions(in_meta_data)
+        numpeaks = len(idx)
+        new_shape = shape[:-1] + (numpeaks,)
+        print new_shape
         fitAreas.create_dataset(patterns={in_dataset[0]: pattern_list},
                                 axis_labels={in_dataset[0]: axis_labels},
                                 shape=new_shape)
