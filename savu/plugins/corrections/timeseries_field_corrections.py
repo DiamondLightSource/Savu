@@ -41,16 +41,18 @@ class TimeseriesFieldCorrections(BaseCorrection, CpuPlugin):
         super(TimeseriesFieldCorrections,
               self).__init__("TimeseriesFieldCorrections")
 
-    def correct(self, data):
+    def pre_process(self):
         in_meta_data, out_meta_data = self.get_meta_data()
         image_keys = in_meta_data[0].get_meta_data('image_key')
-        trimmed_data = data[image_keys == 0]
+        self.data_idx = np.where(image_keys == 0)[0]
+        self.flat_idx = np.where(image_keys == 1)[0]
+        self.dark_idx = np.where(image_keys == 2)[0]
 
-        dark = data[image_keys == 2]
-        dark = dark.mean(0)
+    def correct(self, data):
+        trimmed_data = data[self.data_idx]
+        dark = data[self.dark_idx].mean(0)
         dark = np.tile(dark, (trimmed_data.shape[0], 1, 1))
-        flat = data[image_keys == 1]
-        flat = flat.mean(0)
+        flat = data[self.flat_idx].mean(0)
         flat = np.tile(flat, (trimmed_data.shape[0], 1, 1))
         data = (trimmed_data-dark)/(flat-dark)
 
@@ -60,3 +62,23 @@ class TimeseriesFieldCorrections(BaseCorrection, CpuPlugin):
         data[data > 2] = 2
 
         return data
+
+#    def correct(self, data):
+#        in_meta_data, out_meta_data = self.get_meta_data()
+#        image_keys = in_meta_data[0].get_meta_data('image_key')
+#        trimmed_data = data[image_keys == 0]
+#
+#        dark = data[image_keys == 2]
+#        dark = dark.mean(0)
+#        dark = np.tile(dark, (trimmed_data.shape[0], 1, 1))
+#        flat = data[image_keys == 1]
+#        flat = flat.mean(0)
+#        flat = np.tile(flat, (trimmed_data.shape[0], 1, 1))
+#        data = (trimmed_data-dark)/(flat-dark)
+#
+#        # finally clean up and trim the data
+#        data = np.nan_to_num(data)
+#        data[data < 0] = 0
+#        data[data > 2] = 2
+#
+#        return data

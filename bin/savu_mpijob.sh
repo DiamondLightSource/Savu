@@ -1,13 +1,15 @@
 #!/bin/bash
 module load global/testcluster
 #module load global/cluster
-module load python/ana
+#module load python/ana
 module load cuda/5.0
-#source activate mpi2
 source activate mpi5
 module load openmpi/1.6.5
+#export PYTHONPATH=$PYTHONPATH:/dls_sw/apps/savu/anaconda/bin
 export PYTHONPATH=$PYTHONPATH:/home/clb02321/DAWN_stable/FastXRF/src/
 #export LD_LIBRARY_PATH=/dls_sw/prod/tools/RHEL6-x86_64/openmpi/1-6-5/prefix/lib:$LD_LIBRARY_PATH
+echo "echoing h5cc library"
+h5cc -showconfig
 
 savupath=$1
 datafile=$2
@@ -39,7 +41,7 @@ if [ $nCPUs -gt 0 ]; then
 fi
 
 #CPUs=$CPUs,GPU0,GPU1
-#echo CPUs
+echo CPUs
 
 
 echo "Processes running are : ${processes}"

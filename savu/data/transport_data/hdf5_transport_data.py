@@ -51,19 +51,45 @@ class Hdf5TransportData(object):
         out_data_objects = []
         count = start
         datasets_list = pu.datasets_list
+
+        logging.info("load_data: 1")
+        exp.barrier()
+
         for plugin_dict in plugin_list[start:-1]:
+
+            logging.info("load_data: 2")
+            exp.barrier()
+
             self.get_current_and_next_patterns(datasets_list[count-1:])
             plugin_id = plugin_dict["id"]
-            print "***", plugin_id, "***"
-            logging.debug("Loading plugin %s", plugin_id)
+            logging.info("Loading plugin %s", plugin_id)
+
+            logging.info("load_data: 3")
+            exp.barrier()
+
             plugin = pu.plugin_loader(exp, plugin_dict)
+
+            logging.info("load_data: 4")
+            exp.barrier()
+
             self.set_filenames(plugin, plugin_id, count)
+
+            logging.info("load_data: 5")
+            exp.barrier()
+
             saver_plugin.setup()
+
+            logging.info("load_data: 6")
+            exp.barrier()
+
             out_data_objects.append(exp.index["out_data"].copy())
             if self.variable_data_check(plugin):
                 return out_data_objects, count
             exp.merge_out_data_to_in()
             count += 1
+
+        logging.info("load_data: 2")
+        exp.barrier()
 
         del self.exp.meta_data.get_dictionary()['current_and_next']
         return out_data_objects, count

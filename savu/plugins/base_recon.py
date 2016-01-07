@@ -35,10 +35,14 @@ class BaseRecon(Plugin):
     """
     A base class for reconstruction plugins
 
-    :param center_of_rotation: Centre of rotation to use for the reconstruction). Default: 86.
-    :param in_datasets: Create a list of the dataset(s) to process. Default: [].
-    :param out_datasets: Create a list of the dataset(s) to process. Default: [].
-    :param sino_pad_width: Pad proportion of the sinogram width before reconstructing. Default: 0.25.
+    :param center_of_rotation: Centre of rotation to use for the \
+        reconstruction. Default: 86.
+    :param in_datasets: Create a list of the dataset(s) to \
+        process. Default: [].
+    :param out_datasets: Create a list of the dataset(s) to \
+        process. Default: [].
+    :param sino_pad_width: Pad proportion of the sinogram width before \
+        reconstructing. Default: 0.25.
     :param log: Take the log of the data before reconstruction. Default: True.
     """
     count = 0

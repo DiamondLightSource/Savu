@@ -50,9 +50,11 @@ class PluginRunner(object):
         self.exp = Experiment(options)
         plugin_list = self.exp.meta_data.plugin_list.plugin_list
 
+        logging.info("run_plugin_list: 1")
         self.exp.barrier()
         self.run_plugin_list_check(plugin_list)
 
+        logging.info("run_plugin_list: 2")
         self.exp.barrier()
         expInfo = self.exp.meta_data
         if expInfo.get_meta_data("process") is 0:
@@ -60,8 +62,12 @@ class PluginRunner(object):
             expInfo.plugin_list.save_plugin_list(
                 expInfo.get_meta_data("nxs_filename"))
 
+        logging.info("run_plugin_list: 3")
         self.exp.barrier()
         self.transport_run_plugin_list()
+
+        logging.info("run_plugin_list: 4")
+        self.exp.barrier()
 
         print "***********************"
         print "* Processing Complete *"

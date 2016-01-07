@@ -35,9 +35,11 @@ from savu.data.plugin_list import CitationInformation
 class VoCentering(BaseFilter, CpuPlugin):
     """
     A plugin to calculate the center of rotation using the Vo Method
-    :param datasets_to_populate: A list of datasets which require this information. Default: [].    
+    :param datasets_to_populate: A list of datasets which require this \
+        information. Default: [].
     :param out_datasets: The default names. Default: ['cor_raw','cor_fit'].
-    :param poly_degree: The polynomial degree of the fit (1 or 0 = gradient or no gradient). Default: 1.
+    :param poly_degree: The polynomial degree of the fit \
+        (1 or 0 = gradient or no gradient). Default: 1.
     :param step: The step length over the rotation axis. Default: 1.
     :param no_clean: Do not clean up potential outliers. Default: False.
     """
@@ -95,6 +97,15 @@ class VoCentering(BaseFilter, CpuPlugin):
         in_datasets, out_datasets = self.get_datasets()
 
         cor_raw = np.squeeze(out_datasets[0].data[...])
+
+        # special case of one cor_raw value (i.e. only one sinogram)
+        if not cor_raw.shape:
+            # add to metadata
+            cor_raw = out_datasets[0].data[...]
+            self.populate_meta_data('cor_raw', cor_raw)
+            self.populate_meta_data('centre_of_rotation', cor_raw)
+            return
+
         cor_fit = np.squeeze(out_datasets[1].data[...])
 
         # now fit the result
@@ -116,7 +127,6 @@ class VoCentering(BaseFilter, CpuPlugin):
 
         # keep fitting and removing points until the fit is within
         # the tolerances
- 
         if self.parameters['no_clean']:
             z = np.polyfit(x_clean, cor_clean, self.parameters['poly_degree'])
             p = np.poly1d(z)
@@ -125,7 +135,8 @@ class VoCentering(BaseFilter, CpuPlugin):
                 mask = (np.abs(cor_fit-cor_clean)) < (max_disp / 2.)
                 x_clean = x_clean[mask]
                 cor_clean = cor_clean[mask]
-                z = np.polyfit(x_clean, cor_clean, self.parameters['poly_degree'])
+                z = np.polyfit(x_clean, cor_clean,
+                               self.parameters['poly_degree'])
                 p = np.poly1d(z)
                 cor_fit = p(x_clean)
                 max_disp = (np.abs(cor_fit-cor_clean)).max()
