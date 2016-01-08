@@ -188,7 +188,7 @@ class Hdf5TomoSaver(BaseSaver):
     def get_idx(self, chunks, shape):
         idx_order = np.argsort(chunks)
         i = 0
-        for i in range(len(shape)-1):
+        for i in range(len(shape)):
             if (chunks[idx_order[i]] < shape[idx_order[i]]):
                 break
 
