@@ -35,8 +35,10 @@ class AstraReconCpu(BaseAstraRecon, CpuPlugin):
     """
     A Plugin to run the astra reconstruction
 
-    :param number_of_iterations: Number of Iterations if an iterative method is used . Default: 1.
-    :param reconstruction_type: Reconstruction type (FBP|SIRT|SART|ART|CGLS|). Default: 'FBP'.
+    :param number_of_iterations: Number of Iterations if an iterative method \
+        is used . Default: 1.
+    :param reconstruction_type: Reconstruction type \
+        (FBP|SIRT|SART|ART|CGLS|FP|BP|). Default: 'FBP'.
     """
 
     def __init__(self):

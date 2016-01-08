@@ -482,11 +482,16 @@ class Data(object):
                 pass
         self.data_info.set_meta_data('axis_labels', axis_labels)
 
-    def find_axis_label_dimension(self, name):
+    def find_axis_label_dimension(self, name, contains=False):
         axis_labels = self.data_info.get_meta_data('axis_labels')
         for i in range(len(axis_labels)):
-            if name in axis_labels[i].keys():
-                return i
+            if contains is True:
+                for names in axis_labels[i].keys():
+                    if name in names:
+                        return i
+            else:
+                if name in axis_labels[i].keys():
+                    return i
         raise Exception("Cannot find the specifed axis label.")
 
     def finalise_patterns(self):

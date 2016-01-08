@@ -52,7 +52,7 @@ class BaseRecon(Plugin):
 
     def pre_process(self):
         in_dataset = self.get_in_datasets()[0]
-        self.pad_dim = in_dataset.find_axis_label_dimension('detector_x')
+        self.pad_dim = in_dataset.find_axis_label_dimension('x', contains=True)
         in_meta_data = self.get_in_meta_data()[0]
         try:
             cor = in_meta_data.get_meta_data("centre_of_rotation")

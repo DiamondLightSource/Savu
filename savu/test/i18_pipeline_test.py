@@ -28,6 +28,7 @@ from savu.test import test_utils as tu
 from savu.test.plugin_runner_test import run_protected_plugin_runner
 
 
+@unittest.skip('functions are currently being updated')
 class I18PipelineTest(unittest.TestCase):
 
 #     def test_xrdtomo(self):
