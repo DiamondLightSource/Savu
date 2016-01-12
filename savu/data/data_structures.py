@@ -429,6 +429,7 @@ class Data(object):
                         "VOLUME_YZ",
                         "VOLUME_XZ",
                         "VOLUME_XY",
+                        "VOLUME_3D",
                         "SPECTRUM",
                         "DIFFRACTION",
                         "CHANNEL",
