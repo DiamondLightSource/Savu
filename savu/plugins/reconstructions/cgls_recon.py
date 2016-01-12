@@ -35,7 +35,8 @@ class CglsRecon(BaseRecon, CpuPlugin):
      A Plugin to run the CCPi cgls reconstruction
 
     :param number_of_iterations: Number of iterations. Default: 5.
-    :param resolution: #output voxels (res = n_pixels/n_voxels). Default: 1.
+    :param resolution: number of output voxels \
+        (res = n_pixels/n_voxels). Default: 1.
     :param number_of_threads: Number of OMP threads. Default: 1
     """
 
@@ -43,6 +44,7 @@ class CglsRecon(BaseRecon, CpuPlugin):
         super(CglsRecon, self).__init__("CglsRecon")
 
     def reconstruct(self, sinogram, centre_of_rotations, angles, vol_shape):
+        print sinogram.shape
         nthreads = self.parameters['number_of_threads']
         num_iterations = self.parameters['number_of_iterations']
         resolution = self.parameters['resolution']
@@ -51,4 +53,13 @@ class CglsRecon(BaseRecon, CpuPlugin):
                                           angles.astype(np.float32),
                                           centre_of_rotations[0], resolution,
                                           num_iterations, nthreads)
+
+        voxels = voxels[:160, :160, ...]
+        if voxels.ndim is 3:
+            voxels = np.transpose(voxels, (0, 2, 1))
+            if voxels.shape[1] > sinogram.shape[1]:
+                diff = voxels.shape[1] - sinogram.shape[1]
+                voxels = voxels[:, :-diff, :]
+                
+
         return voxels

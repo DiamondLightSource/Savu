@@ -37,8 +37,10 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
     after a flat field correction.
 
     :param polynomial_coeffs: Parameters of the radial distortion \
-        function. Default: (1.00015, 1.92892, -2.43251, 1.00439, -3.99352).
-    :param centre: Centre of distortion. Default: (1283.25, 1164.76)
+        function. Default: (1.00015076,1.9289e-6,-2.4325e-8,1.00439e-11,-3.99352e-15).
+    :param shift. If the data is cropped the centre of distortion must be \
+        shifted accordingly. Default: (0, 0)
+    :param centre: Centre of distortion. Default: (995.24, 1283.25)
     """
 
     def __init__(self):
@@ -54,6 +56,7 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
         unwarp.setup(temp_array, temp_array)
 
     def filter_frames(self, data):
+        print data[0].shape
         result = np.empty_like(data[0])
         unwarp.run(data[0], result)
         return result

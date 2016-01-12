@@ -204,7 +204,6 @@ class Data(object):
 
         patterns = {}
         for name, pattern_dict in copy_patterns.iteritems():
-            print "***", name, pattern_dict
             empty_flag = False
             for ddir in pattern_dict:
                 s_dims = self.non_negative_directions(
@@ -484,11 +483,16 @@ class Data(object):
                 pass
         self.data_info.set_meta_data('axis_labels', axis_labels)
 
-    def find_axis_label_dimension(self, name):
+    def find_axis_label_dimension(self, name, contains=False):
         axis_labels = self.data_info.get_meta_data('axis_labels')
         for i in range(len(axis_labels)):
-            if name in axis_labels[i].keys():
-                return i
+            if contains is True:
+                for names in axis_labels[i].keys():
+                    if name in names:
+                        return i
+            else:
+                if name in axis_labels[i].keys():
+                    return i
         raise Exception("Cannot find the specifed axis label.")
 
     def finalise_patterns(self):
@@ -500,8 +504,6 @@ class Data(object):
             self.set_main_axis('PROJECTION')
         elif check is 1:
             pass
-#            logging.warn("Cannot set up SINOGRAM and PROJECTION "
-#                         "main_directions as both patterns do not exist")
 
     def check_pattern(self, pattern_name):
         patterns = self.get_data_patterns()
@@ -518,7 +520,6 @@ class Data(object):
             nDims = len(self.get_shape())
         if type(ddirs) is not tuple:
             ddirs = (ddirs,)
-        print "ddirs is "+ str(ddirs)
         index = [i for i in range(len(ddirs)) if ddirs[i] < 0]
         list_ddirs = list(ddirs)
         for i in index:
@@ -540,9 +541,7 @@ class Data(object):
         n1 = 'PROJECTION' if pname is 'SINOGRAM' else 'SINOGRAM'
         d1 = patterns[n1]['core_dir']
         d2 = patterns[pname]['slice_dir']
-        print d1, d2
         tdir = set(d1).intersection(set(d2))
-        print "tdir is "+str(tdir)+"and has shape"
         self.data_info.set_meta_data(['data_patterns', pname, 'main_dir'],
                                      list(tdir)[0])
 

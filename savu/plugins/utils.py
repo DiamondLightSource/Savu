@@ -24,6 +24,8 @@
 import re
 import logging
 import numpy as np
+from mpi4py import MPI
+import time
 
 plugins = {}
 plugins_path = {}
@@ -86,17 +88,29 @@ def plugin_loader(exp, plugin_dict, **kwargs):
         logging.error(e)
         raise e
 
+#    logging.info("plugin_loader: 1")
+#    exp.barrier()
+
     check_flag = kwargs.get('check', False)
     if check_flag:
         set_datasets(exp, plugin, plugin_dict)
 
+#    logging.info("plugin_loader: 2")
+#    exp.barrier()
+
     logging.debug("Running plugin main setup")
     plugin.main_setup(exp, plugin_dict['data'])
 
-    if check_flag is True:
-        set_datasets_list(*plugin.get_plugin_datasets())
+#    logging.info("plugin_loader: 3")
+#    exp.barrier()
 
-    logging.debug("finished plugin loader")
+    if check_flag is True:
+        set_datasets_list(exp, *plugin.get_plugin_datasets())
+
+#    logging.info("plugin_loader: 4")
+#    exp.barrier()
+
+    logging.info("finished plugin loader")
     return plugin
 
 
@@ -107,16 +121,23 @@ def run_plugins(exp, plugin_list, **kwargs):
     check = kwargs.get('check', False)
     for i in range(1, len(plugin_list)-1):
         exp.barrier()
-        #logging.info("****%s", plugin_list[i])
         plugin_loader(exp, plugin_list[i], check=check)
         exp.merge_out_data_to_in()
 
 
-def set_datasets_list(in_pData, out_pData):
+def set_datasets_list(exp, in_pData, out_pData):
+#    logging.info("set_datasets_list: 1")
+#    exp.barrier()
     in_data_list = populate_datasets_list(in_pData)
+#    logging.info("set_datasets_list: 2")
+#    exp.barrier()
     out_data_list = populate_datasets_list(out_pData)
+#    logging.info("set_datasets_list: 3")
+#    exp.barrier()
     datasets_list.append({'in_datasets': in_data_list,
                           'out_datasets': out_data_list})
+#    logging.info("set_datasets_list: 4")
+#    exp.barrier()
 
 
 def populate_datasets_list(data):

@@ -25,10 +25,11 @@
 
 import h5py
 import logging
+import copy
 from mpi4py import MPI
 
+import numpy as np
 from savu.plugins.base_saver import BaseSaver
-
 from savu.plugins.utils import register_plugin
 
 NX_CLASS = 'NX_class'
@@ -51,17 +52,24 @@ class Hdf5TomoSaver(BaseSaver):
             current_and_next = \
                 self.exp.meta_data.get_meta_data('current_and_next')
 
+        logging.info("saver setup: 1")
+        exp.barrier()
+
         count = 0
         for key in out_data_dict.keys():
             out_data = out_data_dict[key]
 
+            logging.info("saver setup: 2")
             self.exp.barrier()
             out_data.backing_file = self.create_backing_h5(key)
 
+            logging.info("saver setup: 3")
             self.exp.barrier()
 
             out_data.group_name, out_data.group = \
                 self.create_entries(out_data, key, current_and_next[count])
+
+            logging.info("saver setup: 4")
             self.exp.barrier()
 
             count += 1
@@ -100,6 +108,7 @@ class Hdf5TomoSaver(BaseSaver):
         group.attrs[NX_CLASS] = 'NXdata'
         group.attrs['signal'] = 'data'
 
+        logging.info("create_entries: 1")
         self.exp.barrier()
 
         if data.get_variable_flag() is True:
@@ -111,22 +120,31 @@ class Hdf5TomoSaver(BaseSaver):
                 data.data = group.create_dataset("data", shape,
                                                  data.dtype)
             else:
-                chunks = self.calculate_chunking(current_and_next, shape)
+
+                logging.info("create_entries: 2")
+                self.exp.barrier()
+
+                chunks = self.calculate_chunking(current_and_next, shape,
+                                                 data.dtype)
+                logging.info("create_entries: 3")
+                self.exp.barrier()
                 print "chunks = ", chunks
-                data.data = group.create_dataset("data", shape, data.dtype)
-                                                 #chunks=chunks)
+                data.data = group.create_dataset("data", shape, data.dtype,
+                                                 chunks=chunks)
+                logging.info("create_entries: 4")
+                self.exp.barrier()
+
         return group_name, group
 
-    def calculate_chunking(self, current_and_next, shape):
+    def calculate_chunking(self, current_and_next, shape, ttype):
         print "shape = ", shape
-
         if len(shape) < 3:
             return True
         current = current_and_next['current']
         current_cores = current[current.keys()[0]]['core_dir']
         nnext = current_and_next['next']
 
-        print "current", current, "next", nnext
+        #print "current", current, "next", nnext
         if nnext == []:
             next_cores = current_cores
         else:
@@ -143,9 +161,35 @@ class Hdf5TomoSaver(BaseSaver):
             remaining_cores = set(current_cores).difference(intersect).\
                 union(set(next_cores).difference(intersect))
             for dim in remaining_cores:
-                chunks[dim] = min(shape[dim], 32)
+                chunks[dim] = min(shape[dim], 8)  # change 8 to max_shape?
 
         if 0 in chunks:
             return True
         else:
-            return tuple(chunks)
+            return self.adjust_chunk_size(chunks, ttype, shape)
+
+    def adjust_chunk_size(self, chunks, ttype, shape):
+        chunks = np.array(chunks)
+        chunk_size = np.prod(chunks)*np.dtype(ttype).itemsize
+        cache_size = 1000000
+        if (chunk_size > cache_size):
+            while ((np.prod(chunks)*np.dtype(ttype).itemsize) > 1000000):
+                idx = np.argmax(chunks)
+                chunks[idx] = chunks[idx]-1
+        else:
+            next_chunks = chunks
+            while (((np.prod(next_chunks)*np.dtype(ttype).itemsize) < 1000000)
+                    and not np.array_equal(chunks, np.array(shape))):
+                chunks = copy.copy(next_chunks)
+                idx = self.get_idx(next_chunks, shape)
+                next_chunks[idx] = next_chunks[idx]+1
+        return tuple(chunks)
+
+    def get_idx(self, chunks, shape):
+        idx_order = np.argsort(chunks)
+        i = 0
+        for i in range(len(shape)):
+            if (chunks[idx_order[i]] < shape[idx_order[i]]):
+                break
+
+        return idx_order[i]

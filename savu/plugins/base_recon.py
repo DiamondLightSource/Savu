@@ -35,10 +35,14 @@ class BaseRecon(Plugin):
     """
     A base class for reconstruction plugins
 
-    :param center_of_rotation: Centre of rotation to use for the reconstruction). Default: 86.
-    :param in_datasets: Create a list of the dataset(s) to process. Default: [].
-    :param out_datasets: Create a list of the dataset(s) to process. Default: [].
-    :param sino_pad_width: Pad proportion of the sinogram width before reconstructing. Default: 0.25.
+    :param center_of_rotation: Centre of rotation to use for the \
+        reconstruction. Default: 86.
+    :param in_datasets: Create a list of the dataset(s) to \
+        process. Default: [].
+    :param out_datasets: Create a list of the dataset(s) to \
+        process. Default: [].
+    :param sino_pad_width: Pad proportion of the sinogram width before \
+        reconstructing. Default: 0.25.
     :param log: Take the log of the data before reconstruction. Default: True.
     """
     count = 0
@@ -48,6 +52,7 @@ class BaseRecon(Plugin):
 
     def pre_process(self):
         in_dataset = self.get_in_datasets()[0]
+        self.pad_dim = in_dataset.find_axis_label_dimension('x', contains=True)
         in_meta_data = self.get_in_meta_data()[0]
         try:
             cor = in_meta_data.get_meta_data("centre_of_rotation")
@@ -74,9 +79,11 @@ class BaseRecon(Plugin):
         Reconstruct a single sinogram with the provided center of rotation
         """
         cor = self.cor[slice_list[0][self.main_dir]]
-        pad_ammount = int(self.parameters['sino_pad_width'] * data[0].shape[1])
-        data = np.pad(data[0], ((0, 0), (pad_ammount, pad_ammount)), 'edge')
-        result = self.reconstruct(self.sino_func(data), cor+pad_ammount,
+        pad_tuples = [(0, 0)]*(data[0].ndim-1)
+        pad_amount = int(self.parameters['sino_pad_width'] * data[0].shape[1])
+        pad_tuples.insert(self.pad_dim, (pad_amount, pad_amount))
+        data = np.pad(data[0], tuple(pad_tuples), 'edge')
+        result = self.reconstruct(self.sino_func(data), cor+pad_amount,
                                   self.angles, self.vol_shape)
         return result
 
