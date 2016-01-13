@@ -34,7 +34,8 @@ class NxxrdLoader(BaseMultiModalLoader):
     """
     A class to load tomography data from an NXxrd file
 
-    :param calibration_path: path to the calibration file. Default: "Savu/test_data/data/LaB6_calibration_output.nxs"
+    :param calibration_path: path to the calibration \
+        file. Default: "Savu/test_data/data/LaB6_calibration_output.nxs"
     """
 
     def __init__(self):
