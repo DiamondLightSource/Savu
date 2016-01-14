@@ -20,15 +20,22 @@ while read -r a b c d; do
 	#runfile=/bin/savu_distArray_launcher.sh
 	runfile=/bin/savu_launcher.sh
 	outpath=$PWD #outputting to the current folder
-    #datafile=$outpath/../test_data/24737.nxs
+    datafile=$outpath/../test_data/24737.nxs
+	processfile=/home/qmm55171/Documents/Git/git_repos/Savu/test_data/test_process_lists/basic_tomo_process.nxs
+    
     #datafile=$outpath/../test_data/LD_2W50_8_Dataset_038.nxs
 	#processfile=$outpath/../test_data/original_process_lists/i12_tomo_pipeline_preview_55751.nxs
     
     #datafile=$outpath/../test_data/ee12581-1_test/pc2_KRA_530_ramp_00000.hdf
 	#processfile=$outpath/../test_data/i12_tomo_pipeline.nxs
 
-    datafile=$outpath/../test_data/for_nicola/54681.nxs
-	processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_processes/sally_pipeline.nxs
+    #datafile=$outpath/../test_data/for_nicola/54681.nxs
+	#processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_processes/sally_pipeline.nxs
+    #datafile=/dls/i12/data/2015/sw12280-3/rawdata/54652.nxs
+	#processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_processes/sally_pipeline_full.nxs
+
+    #datafile=/dls/i13/data/2015/cm12165-5/processing/AskAaron/mmbig_58905.nxs
+    #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/test_data/process_lists/I18_pipeline_just_xrd.nxs
 
 	outname="${fname}N${nNodes}_C${nCPUs}_mpi_test"
 
@@ -51,5 +58,5 @@ while read -r a b c d; do
       #echo "completed profiling"
 	fi	
 
-done < ../test.txt
+done < ../test2.txt
 

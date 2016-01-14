@@ -42,6 +42,8 @@ class VoCentering(BaseFilter, CpuPlugin):
         (1 or 0 = gradient or no gradient). Default: 1.
     :param step: The step length over the rotation axis. Default: 1.
     :param no_clean: Do not clean up potential outliers. Default: False.
+    :param preview: A slice list of required frames. Default: [].
+
     """
 
     def __init__(self):
@@ -162,6 +164,12 @@ class VoCentering(BaseFilter, CpuPlugin):
 
         # set up the output dataset that is created by the plugin
         in_dataset, out_dataset = self.get_datasets()
+
+        print "***SHAPE before", in_dataset[0].get_shape(), "PREVIEW:", self.parameters['preview']
+        # reduce the data as per data_subset parameter
+        in_dataset[0].set_preview(self.parameters['preview'])
+        print "***SHAPE after", in_dataset[0].get_shape()
+
         in_pData, out_pData = self.get_plugin_datasets()
         in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
         # copy all required information from in_dataset[0]

@@ -299,6 +299,7 @@ class Data(object):
         else:
             starts, stops, steps, chunks = \
                 [[0]*len(shape), shape, [1]*len(shape), [1]*len(shape)]
+        print "starts, stops, steps, chunks", starts, stops, steps, chunks
         self.set_starts_stops_steps(starts, stops, steps, chunks)
 
     def set_starts_stops_steps(self, starts, stops, steps, chunks):

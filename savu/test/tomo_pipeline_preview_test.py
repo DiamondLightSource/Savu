@@ -30,7 +30,7 @@ import savu.test.test_utils as tu
 from savu.test.plugin_runner_test import run_protected_plugin_runner
 
 
-@unittest.skip('Runs as a standalone test but not in the suite. Error to be investigated')
+#@unittest.skip('Runs as a standalone test but not in the suite. Error to be investigated')
 class TomoPipelinePreviewTest(unittest.TestCase):
 
     def test_process_preview(self):

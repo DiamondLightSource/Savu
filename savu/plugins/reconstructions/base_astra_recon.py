@@ -117,7 +117,7 @@ class BaseAstraRecon(BaseRecon):
                                            np.deg2rad(angles))
         return vol_geom, proj_geom
 
-    def geom_setup_3D(self, sino, angles, shape,):
+    def geom_setup_3D(self, sino, angles, shape):
         det_rows = sino.shape[0]
         det_cols = sino.shape[2]
         vol_geom = astra.create_vol_geom(shape[0], self.nSinos, shape[1])
