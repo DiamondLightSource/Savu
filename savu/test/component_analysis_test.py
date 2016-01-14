@@ -34,6 +34,7 @@ class ComponentAnalysisTest(unittest.TestCase):
             "transport": "hdf5",
             "process_names": "CPU0",
             "data_file": tu.get_test_data_path('mm.nxs'),
+#             "data_file": "/dls/i13/data/2015/cm12165-5/processing/AskAaron/mmbig_58905.nxs",
             "process_file": tu.get_process_list_path('ica_test.nxs'),
             "out_path": tempfile.mkdtemp()
             }
