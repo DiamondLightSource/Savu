@@ -275,7 +275,6 @@ class Hdf5TransportData(object):
 #        if 'var' not in [shape[i] for i in slice_dirs]:
 #            shape = [s for s in list(shape) if isinstance(s, int)]
         fix_dirs, value = pData.get_fixed_directions()
-        print index.shape, index
         nSlices = index.shape[1] if index.size else len(fix_dirs)
         nDims = len(shape)
 
@@ -363,11 +362,6 @@ class Hdf5TransportData(object):
         grouped = []
         for group in banked:
             full_frames = int((length)/max_frames)
-            print "start is:"+str(start)
-            print "step is" + str(step)
-            print "fullframes is" +str(full_frames)
-            print "max frames is " + str( max_frames) + str(type(max_frames))
-#             max_frames = max_frames[0]
             full_frames_end = start + full_frames*step*max_frames
             end = start+(len(group)-1)*step+1
             rem = 1 if (length % max_frames) else 0

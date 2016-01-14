@@ -45,7 +45,8 @@ def run_protected_plugin_runner_no_process_list(options, plugin, **kwargs):
 def run_protected_plugin_runner(options):
     try:
         plugin_runner = PluginRunner(options)
-        plugin_runner.run_plugin_list(options)
+        exp = plugin_runner.run_plugin_list(options)
+        print exp
     except ImportError as e:
         print("Failed to run test as libraries not available (%s)," % (e) +
               " passing test")

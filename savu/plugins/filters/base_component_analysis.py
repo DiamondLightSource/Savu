@@ -39,7 +39,7 @@ class BaseComponentAnalysis(BaseFilter, CpuPlugin):
         super(BaseComponentAnalysis, self).__init__(name)
 
     def get_max_frames(self):
-        return self.spectra_length
+        return self.spectra_length[0]
 
     def get_plugin_pattern(self):
         return self.parameters['chunk']
@@ -50,23 +50,29 @@ class BaseComponentAnalysis(BaseFilter, CpuPlugin):
         in_dataset, out_dataset = self.get_datasets()
         self.spectra_length = (in_dataset[0].get_shape()[-1],)
         other_dims = in_dataset[0].get_shape()[:-1]
-        num_comps = (self.parameters['number_of_components'],)
-        self.images_shape = other_dims + num_comps
-        components_shape = num_comps + self.spectra_length
+        num_comps = self.parameters['number_of_components']
+        self.images_shape = other_dims + (num_comps,)
+        components_shape = (num_comps,) + self.spectra_length
         # copy all required information from in_dataset[0]
-        out_dataset[0].create_dataset(in_dataset[0])
-        out_dataset[0].set_shape(self.images_shape)
+
+        out_dataset[0].create_dataset(patterns=in_dataset[0],
+                                      axis_labels=in_dataset[0],
+                                      shape=self.images_shape)
 
         axis_labels = ['idx.unit', 'spectra.unit']
         out_dataset[1].create_dataset(shape=components_shape,
                                       axis_labels=axis_labels)
         spectrum = {'core_dir': (1,), 'slice_dir': (0,)}
+
         out_dataset[1].add_pattern("SPECTRUM", **spectrum)
+
         in_pData, out_pData = self.get_plugin_datasets()
         plugin_pattern = self.get_plugin_pattern()
-        in_pData[0].plugin_data_setup(plugin_pattern, self.get_max_frames()) 
+
+        in_pData[0].plugin_data_setup(plugin_pattern, self.get_max_frames())
         out_pData[0].plugin_data_setup(plugin_pattern, num_comps)
         out_pData[1].plugin_data_setup("SPECTRUM", num_comps)
+
         self.exp.log(self.name + " End")
 
     def nInput_datasets(self):

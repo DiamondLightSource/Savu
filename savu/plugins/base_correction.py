@@ -85,4 +85,4 @@ class BaseCorrection(Plugin):
 
         :returns:  an integer of the number of frames
         """
-        return 8
+        return 4
