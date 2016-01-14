@@ -57,8 +57,11 @@ class NxxrdLoader(BaseMultiModalLoader):
                                  'detector_y.mm')
 
         rotation_angle = \
-            data_obj.backing_file[xrd_entry.name + '/sample/theta']
-        data_obj.meta_data.set_meta_data('rotation_angle', rotation_angle[...])
+            data_obj.backing_file[xrd_entry.name + '/sample/theta'].value
+        if rotation_angle.ndim > 1:
+            rotation_angle = rotation_angle[:,0]
+
+        data_obj.meta_data.set_meta_data('rotation_angle', rotation_angle)
         #self.add_patterns_based_on_acquisition(data_obj, 'xrd')
         print data_obj.data.shape
         slicedir = tuple(range(len(data_obj.data.shape)-2))
@@ -69,6 +72,8 @@ class NxxrdLoader(BaseMultiModalLoader):
 #                              slice_dir=(1,3,4))
 #         data_obj.add_pattern("PROJECTION", core_dir=(1, 2),
 #                              slice_dir=(0,3,4))
+#         data_obj.add_pattern("SINOGRAM", core_dir=(0, 2),
+#                              slice_dir=(1, 3, 4))
         data_obj.add_pattern("SINOGRAM", core_dir=(0, 2),
                              slice_dir=(1, 3, 4))
         data_obj.add_pattern("PROJECTION", core_dir=(1, 2),

@@ -37,6 +37,7 @@ class BaseFluoFitter(BaseFitter):
     :param in_datasets: Create a list of the dataset(s). Default: [].
     :param out_datasets: A. Default: ["FitWeights", "FitWidths", "FitAreas", "residuals"].
     :param width_guess: An initial guess at the width. Default: 0.02.
+    :param mono_energy: the mono energy. Default: 18.0.
     :param peak_shape: Which shape do you want. Default: "gaussian".
     :param pileup_cutoff_keV: The cut off. Default: 5.5.
     :param include_pileup: Include pileup. Default: 1.
@@ -71,6 +72,7 @@ class BaseFluoFitter(BaseFitter):
         fitAreas = out_datasets[0]
         fitHeights = out_datasets[1]
         fitWidths = out_datasets[2]
+        self.length = shape[-1]
         idx = self.setPositions(in_meta_data)
         numpeaks = len(idx)
         new_shape = shape[:-1] + (numpeaks,)
@@ -117,18 +119,19 @@ class BaseFluoFitter(BaseFitter):
         paramdict["FitParams"]["fitted_energy_range_keV"] = \
             self.parameters["fitted_energy_range_keV"]
         paramdict["Experiment"]["incident_energy_keV"] = \
-            in_meta_data.get_meta_data("mono_energy")
+            self.parameters['mono_energy']
         paramdict["Experiment"]["elements"] = \
             self.parameters["elements"]
         engy = self.findLines(paramdict)
 #                 print engy
         # make it an index since this is what find peaks will also give us
-        axis = in_meta_data.get_meta_data("energy")
+        axis = np.arange(0.0, float(self.length), 0.01)#in_meta_data.get_meta_data("energy")
+        print "the length is:"+str(self.length)
         print engy
         print "the axis is"+str(axis)
         dq = axis[1]-axis[0]
         print 'dq is '+str(dq)
-        offset = np.round(axis[0]/dq).astype(int)
+        offset = np.round(paramdict["FitParams"]["fitted_energy_range_keV"][0]/dq).astype(int)
         idx = np.round(engy/dq).astype(int) - offset
         print "The index is"
         print len(idx)
