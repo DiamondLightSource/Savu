@@ -77,7 +77,6 @@ class VoCentering(BaseFilter, CpuPlugin):
         return cor_positions[vv.argmin()]
 
     def filter_frames(self, data):
-        print "***data shape", data[0].shape
         data = data[0][::self.parameters['step']]
         width = data.shape[1]/4
         step = width/10.
@@ -148,7 +147,6 @@ class VoCentering(BaseFilter, CpuPlugin):
         x = np.arange(self.orig_shape[0])
         cor_fit = p(x)
 
-        print cor_fit
         out_datasets[1].data[:] = cor_fit[:, np.newaxis]
         # add to metadata
 
@@ -172,12 +170,8 @@ class VoCentering(BaseFilter, CpuPlugin):
         self.orig_full_shape = in_dataset[0].get_shape()
 
         # reduce the data as per data_subset parameter
-        # revert kwarg allow the in_dataset to be reverted back to the
-        # specified size after the plugin has completed
-        print "calling the preview function", in_dataset[0].get_shape()
         in_dataset[0].set_preview(self.parameters['preview'],
-                                  revert=self.orig_full_shape)        
-        print "preview shape", in_dataset[0].get_shape()
+                                  revert=self.orig_full_shape)
 
         in_pData, out_pData = self.get_plugin_datasets()
         in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())

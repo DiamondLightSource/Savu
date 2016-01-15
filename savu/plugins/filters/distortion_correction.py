@@ -40,7 +40,7 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
         function. Default: (1.00015076, 1.9289e-6, -2.4325e-8, 1.00439e-11, -3.99352e-15).
     :param shift: If the data is cropped the centre of distortion must be \
         shifted accordingly. Default: (0, 0)
-    :param centre: Centre of distortion. Default: (995.24, 1283.25)
+    :param centre: Centre of distortion. Default: (1283.25, 995.24)
     :param crop_edges: Crop the edges to remove zeros if data is already \
         cropped. Default: 0
     """
@@ -50,7 +50,10 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
 
     def pre_process(self):
         centre = np.array(self.parameters['centre'])
-        unwarp.setctr(*(tuple(centre - np.array(self.parameters['shift']))))
+        centre[0] = centre[0] + self.parameters['shift'][0]
+        centre[1] = centre[0] + self.parameters['shift'][0]
+
+        unwarp.setctr(*(centre))
         #pass two empty arrays of frame chunk size
         unwarp.setcoeff(*self.parameters['polynomial_coeffs'])
         unwarp.setctr(*self.parameters['centre'])
@@ -60,7 +63,6 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
 
         self.slice_list = [slice(None)]*3
         orig_shape = self.get_in_datasets()[0].get_shape()
-        print "&&&&&&&&&&&&", orig_shape
         for ddir in self.core_dir:
             self.slice_list[ddir] = \
                 slice(self.crop, orig_shape[ddir]-self.crop)
