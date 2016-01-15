@@ -201,6 +201,7 @@ class Hdf5Transport(TransportControl):
             result = plugin.process_frames(section, slice_list)
             self.set_out_data(out_data, out_slice_list, result, count,
                               expand_dict)
+        plugin.revert_preview(in_data)
 
     def process_checks(self):
         pass

@@ -59,6 +59,7 @@ class Data(object):
         self.next_shape = None
         self.mapping = None
         self.map_dim = []
+        self.revert_shape = None
 
     def initialise_data_info(self, name):
         self.data_info.set_meta_data('name', name)
@@ -120,6 +121,7 @@ class Data(object):
         new_obj.next_shape = copy.deepcopy(self.next_shape)
         new_obj.mapping = copy.deepcopy(self.mapping)
         new_obj.map_dim = copy.deepcopy(self.map_dim)
+        new_obj.revert_shape = copy.deepcopy(self.map_dim)
         return new_obj
 
     def add_base(self, ExtraBase):
@@ -291,23 +293,33 @@ class Data(object):
         shape = self.data_info.get_meta_data('shape')
         return shape
 
-    def set_preview(self, preview_list):
+    def set_preview(self, preview_list, **kwargs):
+        self.revert_shape = kwargs.get('revert', self.revert_shape)
         shape = self.get_shape()
         if preview_list:
             starts, stops, steps, chunks = \
                 self.get_preview_indices(preview_list)
+            shape_change = True
         else:
             starts, stops, steps, chunks = \
                 [[0]*len(shape), shape, [1]*len(shape), [1]*len(shape)]
-        print "starts, stops, steps, chunks", starts, stops, steps, chunks
-        self.set_starts_stops_steps(starts, stops, steps, chunks)
+            shape_change = False
+        self.set_starts_stops_steps(starts, stops, steps, chunks,
+                                    shapeChange=shape_change)
 
-    def set_starts_stops_steps(self, starts, stops, steps, chunks):
+    def unset_preview(self):
+        self.set_preview([])
+        self.set_shape(self.revert_shape)
+        self.revert_shape = None
+
+    def set_starts_stops_steps(self, starts, stops, steps, chunks,
+                               shapeChange=True):
         self.data_info.set_meta_data('starts', starts)
         self.data_info.set_meta_data('stops', stops)
         self.data_info.set_meta_data('steps', steps)
         self.data_info.set_meta_data('chunks', chunks)
-        self.set_reduced_shape(starts, stops, steps, chunks)
+        if shapeChange:
+            self.set_reduced_shape(starts, stops, steps, chunks)
 
     def get_preview_indices(self, preview_list):
         starts = len(preview_list)*[None]

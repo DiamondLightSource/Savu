@@ -69,6 +69,8 @@ class Hdf5TransportData(object):
 
             plugin = pu.plugin_loader(exp, plugin_dict)
 
+            plugin.revert_preview(plugin.get_in_datasets())
+
             logging.info("load_data: 4")
             exp.barrier()
 
