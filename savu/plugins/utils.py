@@ -88,28 +88,15 @@ def plugin_loader(exp, plugin_dict, **kwargs):
         logging.error(e)
         raise e
 
-#    logging.info("plugin_loader: 1")
-#    exp.barrier()
-
     check_flag = kwargs.get('check', False)
     if check_flag:
         set_datasets(exp, plugin, plugin_dict)
 
-#    logging.info("plugin_loader: 2")
-#    exp.barrier()
-
     logging.debug("Running plugin main setup")
     plugin.main_setup(exp, plugin_dict['data'])
 
-#    logging.info("plugin_loader: 3")
-#    exp.barrier()
-
     if check_flag is True:
-        set_datasets_list(exp, *plugin.get_plugin_datasets())
-
-#    logging.info("plugin_loader: 4")
-#    exp.barrier()
-
+        set_datasets_list(exp, plugin)
     logging.info("finished plugin loader")
     return plugin
 
@@ -125,27 +112,22 @@ def run_plugins(exp, plugin_list, **kwargs):
         exp.merge_out_data_to_in()
 
 
-def set_datasets_list(exp, in_pData, out_pData):
-#    logging.info("set_datasets_list: 1")
-#    exp.barrier()
-    in_data_list = populate_datasets_list(in_pData)
-#    logging.info("set_datasets_list: 2")
-#    exp.barrier()
-    out_data_list = populate_datasets_list(out_pData)
-#    logging.info("set_datasets_list: 3")
-#    exp.barrier()
+def set_datasets_list(exp, plugin):
+    in_pData, out_pData = plugin.get_plugin_datasets()
+    max_frames = plugin.get_max_frames()
+    in_data_list = populate_datasets_list(in_pData, max_frames)
+    out_data_list = populate_datasets_list(out_pData, max_frames)
     datasets_list.append({'in_datasets': in_data_list,
                           'out_datasets': out_data_list})
-#    logging.info("set_datasets_list: 4")
-#    exp.barrier()
 
 
-def populate_datasets_list(data):
+def populate_datasets_list(data, max_frames):
     data_list = []
     for d in data:
         name = d.data_obj.get_name()
         pattern = d.get_pattern()
-        data_list.append({'name': name, 'pattern': pattern})
+        data_list.append({'name': name, 'pattern': pattern,
+                          'max_frames': max_frames})
     return data_list
 
 

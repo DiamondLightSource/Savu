@@ -50,13 +50,12 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
 
     def pre_process(self):
         centre = np.array(self.parameters['centre'])
-        centre[0] = centre[0] + self.parameters['shift'][0]
-        centre[1] = centre[0] + self.parameters['shift'][0]
+        centre[0] = centre[0] - self.parameters['shift'][0]
+        centre[1] = centre[0] - self.parameters['shift'][1]
 
-        unwarp.setctr(*(centre))
         #pass two empty arrays of frame chunk size
         unwarp.setcoeff(*self.parameters['polynomial_coeffs'])
-        unwarp.setctr(*self.parameters['centre'])
+        unwarp.setctr(*centre)
         plugin_data_shape = self.get_plugin_in_datasets()[0].get_shape()
         temp_array = np.empty(plugin_data_shape, dtype=np.float32)
         unwarp.setup(temp_array, temp_array)
