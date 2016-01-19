@@ -66,8 +66,11 @@ class NxfluoLoader(BaseMultiModalLoader):
 
         self.set_motors(data_obj, fluo_entry, 'fluo')
         rotation_angle = \
-            data_obj.backing_file[fluo_entry.name + '/sample/theta']
-        data_obj.meta_data.set_meta_data('rotation_angle', rotation_angle[...])
+            data_obj.backing_file[fluo_entry.name + '/sample/theta'].value
+        if rotation_angle.ndim > 1:
+            rotation_angle = rotation_angle[:,0]
+
+        data_obj.meta_data.set_meta_data('rotation_angle', rotation_angle)
 
 #         data_obj.set_axis_labels('rotation_angle.degrees',
 #                                  'x.mm',

@@ -52,8 +52,11 @@ class NxmonitorLoader(BaseMultiModalLoader):
         self.exp.meta_data.set_meta_data("mono_energy", mono_energy)
         self.set_motors(data_obj, stxm_entry, 'stxm')
         rotation_angle = \
-            data_obj.backing_file[stxm_entry.name + '/sample/theta']
-        data_obj.meta_data.set_meta_data('rotation_angle', rotation_angle[...])
+            data_obj.backing_file[stxm_entry.name + '/sample/theta'].value
+        if rotation_angle.ndim > 1:
+            rotation_angle = rotation_angle[:, 0]
+
+        data_obj.meta_data.set_meta_data('rotation_angle', rotation_angle)
         data_obj.set_axis_labels('rotation_angle.degrees',
                                  'x.mm',
                                  'y.mm')
