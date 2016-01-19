@@ -23,6 +23,7 @@
 """
 
 import copy
+from fractions import gcd
 
 import numpy as np
 from savu.plugins.utils import register_plugin
@@ -36,38 +37,45 @@ class Chunking(object):
     A class to save tomography data to a hdf5 file
     """
 
-    def __init__(self, name='Chunking'):
-        super(Chunking, self).__init__(name)
+    def __init__(self, exp, patternDict):
+        self.current = patternDict['current'][patternDict['current'].keys()[0]]
+        if patternDict['next']:
+            self.next = patternDict['next'][patternDict['next'].keys()[0]]
+        else:
+            self.next = self.current
+        self.exp = exp
 
-    def calculate_chunking(self, current_and_next, shape, ttype):
+    def calculate_chunking(self, shape, ttype):
+        """
+        Calculate appropriate chunk sizes for this dataset
+        """
         print "shape = ", shape
         if len(shape) < 3:
             return True
 
-        intersect_cores, remaining_cores = \
-            self.separate_cores(current_and_next, shape)
+        intersect_cores, remaining_cores = self.separate_cores(shape)
         chunks = [1]*len(shape)
-        adjust = [1]*len(shape)
+        adjust = self.set_adjust_params(shape)
 
-        if 'VOLUME' in current_and_next['current'].keys()[0]:
-            chunks, adjust = self.set_volume_chunks(shape, chunks, adjust)
+        if 'VOLUME' in self.current.keys()[0]:
+            self.set_volume_chunks(shape, chunks)
         else:
-            for dim in intersect_cores:
-                chunks[dim] = shape[dim]
-            for dim in remaining_cores:
-                # require knowledge of all plugins using this dataset and their
-                # max frames to set the number to replace 8.
-                chunks[dim] = min(shape[dim], 8)
+            self.set_chunks(intersect_cores, remaining_cores, chunks, shape,
+                            adjust)
 
         if 0 in chunks:
             return True
         else:
-            return self.adjust_chunk_size(chunks, ttype, shape, adjust)
+            chunks = self.adjust_chunk_size(chunks, ttype, shape, adjust)
+            print chunks
+            return tuple(chunks)
 
     def adjust_chunk_size(self, chunks, ttype, shape, adjust):
-        # increments e.g. (1, 1, self.plugin.get_max_frames)
-        # max e.g. (shape, shape, n*self.get_max_frames)
+        """
+        Adjust the chunk size to as close to 1MB as possible
+        """
         chunks = np.array(chunks)
+        print "****initial chunks", chunks
         chunk_size = np.prod(chunks)*np.dtype(ttype).itemsize
         cache_size = 1000000
         if (chunk_size > cache_size):
@@ -76,49 +84,180 @@ class Chunking(object):
             self.increase_chunks(chunks, ttype, shape, adjust)
         return tuple(chunks)
 
-    def decrease_chunks(self, chunks, ttype):
+    def decrease_chunks(self, chunks, ttype, adjust):
+        """
+        Decrease the chunk size to below but as close to 1MB as possible
+        """
         while ((np.prod(chunks)*np.dtype(ttype).itemsize) > 1000000):
-            idx = np.argmax(chunks)
-            chunks[idx] = chunks[idx]-1
+            idx = self.get_idx_decrease(chunks, adjust)
+            dim = adjust['dim'].index(idx)
+            chunks[idx] = chunks[idx] - adjust['inc'][dim]
         return chunks
 
-    def increase_chunks(self, chunks, ttype, shape):
+    def increase_chunks(self, chunks, ttype, shape, adjust):
+        """
+        Increase the chunk size as close to 1MB as possible
+        """
         next_chunks = chunks
         while (((np.prod(next_chunks)*np.dtype(ttype).itemsize) < 1000000)
-                and not np.array_equal(chunks, np.array(shape))):
+                and not np.all(np.greater(chunks, np.array(shape)))):
             chunks = copy.copy(next_chunks)
-            idx = self.get_idx(next_chunks, shape)
-            next_chunks[idx] = next_chunks[idx]+1
-        return chunks
+            idx = self.get_idx_increase(next_chunks, adjust)
+            if idx == -1:
+                return
+            dim = adjust['dim'].index(idx)
+            next_chunks[idx] = next_chunks[idx] + adjust['inc'][dim]
 
-    def separate_cores(self, current_and_next, shape):
-        current = current_and_next['current']
-        current_cores = current[current.keys()[0]]['core_dir']
-        nnext = current_and_next['next']
+    def get_max_frames_dict(self):
+        current_sdir = self.current['slice_dir'][0]
+        next_sdir = self.next['slice_dir'][0]
+        if current_sdir == next_sdir:
+            common_denom = gcd(self.current['max_frames'],
+                               self.next['max_frames'])
+            ddict = {current_sdir: common_denom}
+        else:
+            ddict = {self.current['slice_dir'][0]: self.current['max_frames'],
+                     self.next['slice_dir'][0]: self.next['max_frames']}
+        return ddict
 
-        next_cores = nnext[nnext.keys()[0]]['core_dir'] if nnext else \
-            current_cores
+    def calc_max(self, shape, nFrames):
+        """
+        Calculate the max possible value of a chunking dimension
+        """
+        total_plugin_runs = np.ceil(float(shape)/nFrames)
+        frame_list = np.arange(total_plugin_runs)
+        nProcs = len(self.exp.meta_data.get_meta_data('processes'))
+        frame_list_per_proc = np.array_split(frame_list, nProcs)
+        flist_len = []
+        for flist in frame_list_per_proc:
+            flist_len.append(len(flist))
+        runs_per_proc = np.median(np.array(flist_len))
+        return runs_per_proc*nFrames
 
+    def get_adjustable_dims(self):
+        """
+        Get all core dimensions and fastest changing slice dimension (all
+        potentially adjustable)
+        """
+        dims = []
+        dims += [self.current['slice_dir'][0]]
+        dims += list(self.current['core_dir'])
+        dims += [self.next['slice_dir'][0]]
+        dims += list(self.next['core_dir'])
+        return list(set(dims))
+
+    def separate_cores(self, shape):
+        """
+        Based on the current and next patterns associated with the dataset
+        that is being created, determine the shared/unshared core directions.
+        """
+        current_cores = self.current['core_dir']
+        next_cores = self.next['core_dir']
         intersect = set(current_cores).intersection(set(next_cores))
         remaining = set(current_cores).difference(intersect).\
             union(set(next_cores).difference(intersect))
-        return intersect, remaining
+        return list(intersect), list(remaining)
 
     def set_volume_chunks(self, shape, chunks, adjust):
-        in_pData = self.plugin.get_plugin_in_datasets()[0]
-        slice_dim = in_pData.get_pattern()['slice_dir'][0]
-        for dim in range(3):
+        """
+        Calculate initial chunk values for volume datasets
+        """
+        adj_dims = self.get_adjustable_dims()
+        for dim in adj_dims:
             chunks[dim] = min(shape[dim], 64)
-        max_frames = self.plugin.get_max_frames()
-        chunks[slice_dim] = min(shape[slice_dim], max_frames)
-        adjust[slice_dim] = max_frames
-        return chunks, adjust
+        self.set_adjust_slice_dims(adjust, self.current['slice_dir'][0], shape)
+        return chunks
 
-    def get_idx(self, chunks, shape):
-        idx_order = np.argsort(chunks)
-        i = 0
-        for i in range(len(shape)):
-            if (chunks[idx_order[i]] < shape[idx_order[i]]):
+    def set_chunks(self, in_cores, out_cores, chunks, shape, adjust):
+        """
+        Calculate initial chunk values
+        """
+        for dim in in_cores:
+            chunks[dim] = shape[dim]
+        max_frames_dict = self.get_max_frames_dict()
+        for dim in out_cores:
+            max_frames = max_frames_dict[dim]
+            chunks[dim] = min(shape[dim], max_frames)
+            adjust['inc'][dim] = max_frames
+            adjust['max'][dim] = self.calc_max(shape[dim], max_frames)
+        slice_dirs = \
+            list(set(self.get_slice_dims()).difference(set(out_cores)))
+        self.set_adjust_slice_dims(adjust, slice_dirs, shape)
+        return chunks
+
+    def set_adjust_params(self, shape):
+        """
+        Set adjustable dimension parameters (the dimension number, increment
+        and max value)
+        """
+        adjust_dim = self.get_adjustable_dims()
+        array_len = len(adjust_dim)
+        adjust_max = [1]*array_len
+        for i in range(array_len):
+            adjust_max[i] = shape[adjust_dim[i]]
+        return {'dim': adjust_dim, 'inc': [1]*array_len, 'max': adjust_max}
+
+    def set_adjust_slice_dims(self, adjust, sdirs, shape):
+        """
+        Set adjustable parameters for the slice dimensions
+        """
+        max_frames = self.current['max_frames']
+        for sdir in sdirs:
+            adjust['inc'][sdir] = max_frames
+            adjust['max'][sdir] = self.calc_max(shape[sdir], max_frames)
+
+    def get_idx_decrease(self, chunks, adjust):
+        """
+        Determine the chunk dimension to decrease
+        """
+        check = lambda a, b: True if a < 1 else False
+        self.check_adjust_dims(adjust, chunks, check)
+
+        # process slice dimensions first
+        current_sdir = set(adjust['dim']).difference(self.get_slice_dims())
+        idx_order = np.argsort(chunks[current_sdir])[::-1]
+        dim = self.get_idx(idx_order, adjust, chunks, check)
+
+        # if there are no slice dimensions try the core dimensions
+        if dim == -1:
+            idx_order = np.argsort(chunks[adjust['dim']])
+            dim = self.get_idx(idx_order, adjust, chunks, check)
+        return dim
+
+    def get_idx_increase(self, chunks, adjust):
+        """
+        Determine the chunk dimension to increase
+        """
+        check = lambda a, b: True if a > b else False
+        self.check_adjust_dims(adjust, chunks, check)
+        idx_order = np.argsort(chunks[adjust['dim']])
+        dim = self.get_idx(idx_order, adjust, chunks, check)
+        return dim
+
+    def get_idx(self, idx_order, adjust, chunks, check):
+        dim = None
+        for i in range(len(idx_order)):
+            dim = adjust['dim'][idx_order[i]]
+            adj_idx = adjust['dim'].index(dim)
+            if not check(chunks[dim], adjust['max'][adj_idx]):
                 break
+        return dim if not dim is None else -1
 
-        return idx_order[i]
+    def check_adjust_dims(self, adjust, chunks, check):
+        nDel = 0
+        for i in range(len(adjust['dim'])):
+            i -= nDel
+            dim = adjust['dim'][i]
+            if check((chunks[dim] + adjust['inc'][i]), adjust['max'][i]):
+                del adjust['dim'][i]
+                del adjust['inc'][i]
+                del adjust['max'][i]
+                nDel += 1
+
+    def get_slice_dims(self):
+        c_slice = self.current['slice_dir'][0]
+        c_slice = c_slice if isinstance(c_slice, list) else [c_slice]
+        n_slice = self.next['slice_dir'][0]
+        n_slice = n_slice if isinstance(n_slice, list) else [n_slice]
+        slice_dims = list(set(c_slice + n_slice))
+        return slice_dims

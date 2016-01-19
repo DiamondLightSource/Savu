@@ -90,8 +90,6 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
         out_dataset[0].create_dataset(patterns=in_dataset[0],
                                       axis_labels=in_dataset[0],
                                       shape=tuple(self.shape))
-
-        print "********", in_dataset[0].get_shape(), out_dataset[0].get_shape()
         out_pData[0].plugin_data_setup('PROJECTION', self.get_max_frames())
 
     def get_max_frames(self):

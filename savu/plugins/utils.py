@@ -26,6 +26,7 @@ import logging
 import numpy as np
 from mpi4py import MPI
 import time
+import copy
 
 plugins = {}
 plugins_path = {}
@@ -125,9 +126,9 @@ def populate_datasets_list(data, max_frames):
     data_list = []
     for d in data:
         name = d.data_obj.get_name()
-        pattern = d.get_pattern()
-        data_list.append({'name': name, 'pattern': pattern,
-                          'max_frames': max_frames})
+        pattern = copy.deepcopy(d.get_pattern())
+        pattern[pattern.keys()[0]]['max_frames'] = max_frames
+        data_list.append({'name': name, 'pattern': pattern})
     return data_list
 
 

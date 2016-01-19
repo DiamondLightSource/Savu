@@ -20,7 +20,7 @@ while read -r a b c d; do
 	#runfile=/bin/savu_distArray_launcher.sh
 	runfile=/bin/savu_launcher.sh
 	outpath=$PWD #outputting to the current folder
-#    datafile=$outpath/../test_data/24737.nxs
+    #datafile=$outpath/../test_data/24737.nxs
 #	processfile=/home/qmm55171/Documents/Git/git_repos/Savu/test_data/test_process_lists/basic_tomo_process.nxs
     
     #datafile=$outpath/../test_data/LD_2W50_8_Dataset_038.nxs

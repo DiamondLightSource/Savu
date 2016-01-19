@@ -472,16 +472,19 @@ class Data(object):
                             dtype, str(self.pattern_list))
 
     def add_volume_patterns(self, x, y, z):
-        self.add_pattern("VOLUME_YZ", **self.get_dirs_for_volume(y, z))
-        self.add_pattern("VOLUME_XZ", **self.get_dirs_for_volume(x, z))
-        self.add_pattern("VOLUME_XY", **self.get_dirs_for_volume(x, y))
+        self.add_pattern("VOLUME_YZ", **self.get_dirs_for_volume(y, z, x))
+        self.add_pattern("VOLUME_XZ", **self.get_dirs_for_volume(x, z, y))
+        self.add_pattern("VOLUME_XY", **self.get_dirs_for_volume(x, y, z))
 
-    def get_dirs_for_volume(self, dim1, dim2):
+    def get_dirs_for_volume(self, dim1, dim2, sdir):
         all_dims = range(len(self.get_shape()))
         vol_dict = {}
         vol_dict['core_dir'] = (dim1, dim2)
-        slice_dir = tuple([a for a in all_dims if a not in [dim1, dim2]])
-        vol_dict['slice_dir'] = slice_dir
+        slice_dir = [sdir]
+        for ddir in all_dims:
+            if ddir not in [dim1, dim2, sdir]:
+                slice_dir.append(ddir)
+        vol_dict['slice_dir'] = tuple(slice_dir)
         return vol_dict
 
     def set_axis_labels(self, *args):

@@ -44,8 +44,7 @@ class Hdf5TomoSaver(BaseSaver):
         super(Hdf5TomoSaver, self).__init__(name)
         self.plugin = None
 
-    def setup(self, plugin):
-        self.plugin = plugin
+    def setup(self):
         exp = self.exp
         out_data_dict = exp.index["out_data"]
         current_and_next = [0]*len(out_data_dict)
@@ -126,9 +125,8 @@ class Hdf5TomoSaver(BaseSaver):
                 logging.info("create_entries: 2")
                 self.exp.barrier()
 
-                chunking = Chunking()
-                chunks = chunking.calculate_chunking(current_and_next, shape,
-                                                     data.dtype)
+                chunking = Chunking(self.exp, current_and_next)
+                chunks = chunking.calculate_chunking(shape, data.dtype)
                 logging.info("create_entries: 3")
                 self.exp.barrier()
                 print "chunks = ", chunks
