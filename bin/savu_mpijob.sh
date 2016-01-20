@@ -6,7 +6,6 @@ module load cuda/5.0
 
 #module load python/anaconda-cctbx
 #source activate mpi2
-module load python/ana
 source activate mpi5
 module load openmpi/1.6.5
 #export PYTHONPATH=$PYTHONPATH:/dls_sw/apps/savu/anaconda/bin

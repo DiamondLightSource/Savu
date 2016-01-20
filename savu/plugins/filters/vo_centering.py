@@ -89,6 +89,7 @@ class VoCentering(BaseFilter, CpuPlugin):
             step = width/10.
 
         cor_raw = (data.shape[1]/2.0) - point
+        print "cor_raw in filter frames", cor_raw
         # temporary for testing
         cor_fit = (data.shape[1]/2.0) - point
 
@@ -99,7 +100,7 @@ class VoCentering(BaseFilter, CpuPlugin):
         in_datasets, out_datasets = self.get_datasets()
 
         cor_raw = np.squeeze(out_datasets[0].data[...])
-
+        print "cor_raw in post process after squeezing", cor_raw
         # special case of one cor_raw value (i.e. only one sinogram)
         if not cor_raw.shape:
             # add to metadata

@@ -76,37 +76,43 @@ class Chunking(object):
         """
         chunks = np.array(chunks)
         print "****initial chunks", chunks
+        print "****adjust chunks", adjust
         chunk_size = np.prod(chunks)*np.dtype(ttype).itemsize
         cache_size = 1000000
         if (chunk_size > cache_size):
+            print "decreasing"
             self.decrease_chunks(chunks, ttype, adjust)
         else:
-            self.increase_chunks(chunks, ttype, shape, adjust)
+            print "increasing"
+            chunks = self.increase_chunks(chunks, ttype, shape, adjust)
         return tuple(chunks)
 
     def decrease_chunks(self, chunks, ttype, adjust):
         """
         Decrease the chunk size to below but as close to 1MB as possible
         """
+        # if core dimensions are reduced then need to re-think: reduce by a factor! (of 2?)
         while ((np.prod(chunks)*np.dtype(ttype).itemsize) > 1000000):
             idx = self.get_idx_decrease(chunks, adjust)
             dim = adjust['dim'].index(idx)
             chunks[idx] = chunks[idx] - adjust['inc'][dim]
-        return chunks
 
     def increase_chunks(self, chunks, ttype, shape, adjust):
         """
         Increase the chunk size as close to 1MB as possible
         """
-        next_chunks = chunks
+        #*** need to check next indices if increasing the current one goes over
+        # the 1MB mark
+        next_chunks = copy.copy(chunks)
         while (((np.prod(next_chunks)*np.dtype(ttype).itemsize) < 1000000)
-                and not np.all(np.greater(chunks, np.array(shape)))):
+                and not np.any(np.greater(next_chunks, np.array(shape)))):
             chunks = copy.copy(next_chunks)
             idx = self.get_idx_increase(next_chunks, adjust)
             if idx == -1:
                 return
             dim = adjust['dim'].index(idx)
             next_chunks[idx] = next_chunks[idx] + adjust['inc'][dim]
+        return chunks
 
     def get_max_frames_dict(self):
         current_sdir = self.current['slice_dir'][0]
@@ -210,45 +216,37 @@ class Chunking(object):
         """
         Determine the chunk dimension to decrease
         """
-        check = lambda a, b: True if a < 1 else False
+        check = lambda a, b, c: True if (a - b) < 1 else False
         self.check_adjust_dims(adjust, chunks, check)
 
         # process slice dimensions first
-        current_sdir = set(adjust['dim']).difference(self.get_slice_dims())
+        current_sdir = \
+            list(set(adjust['dim']).difference(self.get_slice_dims()))
         idx_order = np.argsort(chunks[current_sdir])[::-1]
-        dim = self.get_idx(idx_order, adjust, chunks, check)
 
         # if there are no slice dimensions try the core dimensions
-        if dim == -1:
+        # *** change this
+        if not idx_order.size:
             idx_order = np.argsort(chunks[adjust['dim']])
-            dim = self.get_idx(idx_order, adjust, chunks, check)
-        return dim
+            print "idx_order=", idx_order
+
+        return adjust['dim'][idx_order[0]] if idx_order.size else -1
 
     def get_idx_increase(self, chunks, adjust):
         """
         Determine the chunk dimension to increase
         """
-        check = lambda a, b: True if a > b else False
+        check = lambda a, b, c: True if (a - b) > c else False
         self.check_adjust_dims(adjust, chunks, check)
         idx_order = np.argsort(chunks[adjust['dim']])
-        dim = self.get_idx(idx_order, adjust, chunks, check)
-        return dim
-
-    def get_idx(self, idx_order, adjust, chunks, check):
-        dim = None
-        for i in range(len(idx_order)):
-            dim = adjust['dim'][idx_order[i]]
-            adj_idx = adjust['dim'].index(dim)
-            if not check(chunks[dim], adjust['max'][adj_idx]):
-                break
-        return dim if not dim is None else -1
+        return adjust['dim'][idx_order[0]] if idx_order.size else -1
 
     def check_adjust_dims(self, adjust, chunks, check):
         nDel = 0
         for i in range(len(adjust['dim'])):
             i -= nDel
             dim = adjust['dim'][i]
-            if check((chunks[dim] + adjust['inc'][i]), adjust['max'][i]):
+            if check(chunks[dim], adjust['inc'][i], adjust['max'][i]):
                 del adjust['dim'][i]
                 del adjust['inc'][i]
                 del adjust['max'][i]
