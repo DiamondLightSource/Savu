@@ -34,7 +34,7 @@ from savu.plugins.utils import register_plugin
 @register_plugin
 class NxtomoLoader(BaseLoader):
     """
-    A class to load i12 tomography data from a hdf5 file
+    A class to load tomography data from a Nexus file
     :param data_path: Path to the data. Default: 'entry1/tomo_entry/data/data'.
     """
 
