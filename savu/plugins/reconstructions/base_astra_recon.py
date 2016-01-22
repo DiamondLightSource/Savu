@@ -86,6 +86,8 @@ class BaseAstraRecon(BaseRecon):
 
     def reconstruct(self, sinogram, centre_of_rotations, angles, vol_shape):
         p_low, p_high = self.array_pad(centre_of_rotations, sinogram.shape[1])
+        
+        # this only works in sino is 2D
         sino = np.pad(sinogram, ((0, 0), (p_low, p_high)), mode='reflect')
         vol_geom, proj_geom = self.geom_setup_function(sino, angles, vol_shape)
         return self.astra_reconstruction(sino, vol_geom, proj_geom)
@@ -142,6 +144,8 @@ class BaseAstraRecon(BaseRecon):
         alen = ctr
         blen = width - ctr
         mid = width / 2.0
+        
+        print "centre = ", ctr
 
         p_low = pad if (ctr > mid) else (blen - alen) + pad
         p_high = (alen - blen) + pad if (ctr > mid) else pad
