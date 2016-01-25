@@ -1,0 +1,39 @@
+ 1) MmLoader(savu.plugins.mm_loader)
+   1)       calibration_path : ../test_data/LaB6_calibration_output.nxs
+ 2) StripBackground(savu.plugins.strip_background)
+   1)            in_datasets : [u'NXfluo']
+   2)               SG_width : 35
+   3)   SG_filter_iterations : 5
+   4)           out_datasets : [u'XRF_spectra']
+   5)           SG_polyorder : 5
+   6)                 window : 10
+   7)             iterations : 100
+ 3) SimpleFitXrf(savu.plugins.simple_fit_xrf)
+   1)            in_datasets : [u'XRF_spectra']
+   2)   fitted_energy_range_keV : [2.0, 18.0]
+   3)               elements : [u'Zn', u'Cu', u'Ar']
+   4)           out_datasets : [u'XRF_FitWeights', u'XRF_FitWidths', u'XRF_FitAreas', u'XRF_residuals']
+   5)             peak_shape : gaussian
+   6)         include_pileup : 1
+   7)      pileup_cutoff_keV : 5.5
+   8)         include_escape : 1
+   9)            width_guess : 0.02
+ 4) AstraReconCpu(savu.plugins.astra_recon_cpu)
+   1)            in_datasets : [u'XRF_FitAreas']
+   2)           out_datasets : [u'XRF_tomo']
+   3)     center_of_rotation : 46
+   4)    reconstruction_type : FBP
+   5)   number_of_iterations : 25
+ 5) AstraReconCpu(savu.plugins.astra_recon_cpu)
+   1)            in_datasets : [u'XRF_FitWeights']
+   2)           out_datasets : [u'XRF_weight_tomo']
+   3)    reconstruction_type : FBP
+   4)     center_of_rotation : 46
+   5)   number_of_iterations : 25
+ 6) AstraReconCpu(savu.plugins.astra_recon_cpu)
+   1)            in_datasets : [u'NXstxm']
+   2)           out_datasets : [u'stxm_tomo']
+   3)     center_of_rotation : 46
+   4)    reconstruction_type : FBP
+   5)   number_of_iterations : 25
+ 7) Hdf5TomoSaver(savu.plugins.hdf5_tomo_saver)

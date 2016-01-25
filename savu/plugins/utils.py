@@ -32,11 +32,13 @@ plugins_path = {}
 datasets_list = []
 count = 0
 
+
 def register_plugin(clazz):
     """decorator to add logging information around calls for use with ."""
     plugins[clazz.__name__] = clazz
     if clazz.__module__.split('.')[0] != 'savu':
         plugins_path[clazz.__name__] = clazz.__module__
+    #print clazz.name, clazz.__module__
     return clazz
 
 
@@ -57,7 +59,9 @@ def load_plugin(plugin_name):
     name = plugin_name
     logging.debug("importing the module")
     # TODO This appears to be the failing line.
+    print name
     mod = __import__(name)
+    
     components = name.split('.')
     for comp in components[1:]:
         mod = getattr(mod, comp)

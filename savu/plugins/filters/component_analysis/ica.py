@@ -31,20 +31,32 @@ import numpy as np
 class Ica(BaseComponentAnalysis):
     """
     This plugin performs independent component analysis on XRD/XRF spectra.
+    :param w_init: The initial mixing matrix. Default: None.
+    :param random_state: The state. Default: 1.
     """
 
     def __init__(self):
-        super(Ica, self).__init__("ICA")
+        super(Ica, self).__init__("Ica")
 
     def filter_frames(self, data):
         logging.debug("I am starting the old componenty vous")
+        data = data[0]
+        sh = data.shape
+        newshape = (np.prod(sh[:-1]), sh[-1])
+        print "The shape of the data is:"+str(data.shape) + str(newshape)
+        data = np.reshape(data, (newshape))
         # data will already be shaped correctly
-        if self.parameters['whiten']:
-            data = data - np.mean(data)
         logging.debug("Making the matrix")
-        ica = FastICA(n_components=self.parameters['number_of_components'])
+        ica = FastICA(n_components=self.parameters['number_of_components'],
+                      algorithm='parallel',
+                      whiten=self.parameters['whiten'],
+                      w_init=self.parameters['w_init'],
+                      random_state=self.parameters['random_state'])
         logging.debug("Performing the fit")
+        data = self.remove_nan_inf(data)  #otherwise the fit flags up an error for obvious reasons
         S_ = ica.fit_transform(data)
+        print "S_Shape is:"+str(S_.shape)
+        print "self.images_shape:"+str(self.images_shape)
         scores = np.reshape(S_, (self.images_shape))
         eigenspectra = ica.components_
         logging.debug("mange-tout")

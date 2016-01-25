@@ -469,7 +469,7 @@ class Data(object):
         vol_dict = {}
         vol_dict['core_dir'] = (dim1, dim2)
         slice_dir = tuple([a for a in all_dims if a not in [dim1, dim2]])
-        vol_dict['slice_dir'] = slice_dir
+        vol_dict['slice_dir'] = slice_dir#tuple(reversed(list(slice_dir)))# this is aarons hack- temporary only
         return vol_dict
 
     def set_axis_labels(self, *args):
