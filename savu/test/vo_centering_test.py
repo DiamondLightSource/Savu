@@ -28,10 +28,10 @@ from savu.test import test_utils as tu
 from savu.test.plugin_runner_test import run_protected_plugin_runner
 
 
-#@unittest.skip('Runs as a standalone test but not in the suite. Error to be investigated')
+@unittest.skip('Runs as a standalone test but not in the suite. Error to be investigated')
 class VoCenterTest(unittest.TestCase):
 
-    def test_distortion_correction(self):
+    def test_vo_centering(self):
         options = {
             "transport": "hdf5",
             "process_names": "CPU0",

@@ -59,6 +59,7 @@ class Data(object):
         self.next_shape = None
         self.mapping = None
         self.map_dim = []
+        self.revert_shape = None
 
     def initialise_data_info(self, name):
         self.data_info.set_meta_data('name', name)
@@ -120,6 +121,7 @@ class Data(object):
         new_obj.next_shape = copy.deepcopy(self.next_shape)
         new_obj.mapping = copy.deepcopy(self.mapping)
         new_obj.map_dim = copy.deepcopy(self.map_dim)
+        new_obj.revert_shape = copy.deepcopy(self.map_dim)
         return new_obj
 
     def add_base(self, ExtraBase):
@@ -291,23 +293,33 @@ class Data(object):
         shape = self.data_info.get_meta_data('shape')
         return shape
 
-    def set_preview(self, preview_list):
+    def set_preview(self, preview_list, **kwargs):
+        self.revert_shape = kwargs.get('revert', self.revert_shape)
         shape = self.get_shape()
         if preview_list:
             starts, stops, steps, chunks = \
                 self.get_preview_indices(preview_list)
+            shape_change = True
         else:
             starts, stops, steps, chunks = \
                 [[0]*len(shape), shape, [1]*len(shape), [1]*len(shape)]
-        print "starts, stops, steps, chunks", starts, stops, steps, chunks
-        self.set_starts_stops_steps(starts, stops, steps, chunks)
+            shape_change = False
+        self.set_starts_stops_steps(starts, stops, steps, chunks,
+                                    shapeChange=shape_change)
 
-    def set_starts_stops_steps(self, starts, stops, steps, chunks):
+    def unset_preview(self):
+        self.set_preview([])
+        self.set_shape(self.revert_shape)
+        self.revert_shape = None
+
+    def set_starts_stops_steps(self, starts, stops, steps, chunks,
+                               shapeChange=True):
         self.data_info.set_meta_data('starts', starts)
         self.data_info.set_meta_data('stops', stops)
         self.data_info.set_meta_data('steps', steps)
         self.data_info.set_meta_data('chunks', chunks)
-        self.set_reduced_shape(starts, stops, steps, chunks)
+        if shapeChange:
+            self.set_reduced_shape(starts, stops, steps, chunks)
 
     def get_preview_indices(self, preview_list):
         starts = len(preview_list)*[None]
@@ -460,16 +472,19 @@ class Data(object):
                             dtype, str(self.pattern_list))
 
     def add_volume_patterns(self, x, y, z):
-        self.add_pattern("VOLUME_YZ", **self.get_dirs_for_volume(y, z))
-        self.add_pattern("VOLUME_XZ", **self.get_dirs_for_volume(x, z))
-        self.add_pattern("VOLUME_XY", **self.get_dirs_for_volume(x, y))
+        self.add_pattern("VOLUME_YZ", **self.get_dirs_for_volume(y, z, x))
+        self.add_pattern("VOLUME_XZ", **self.get_dirs_for_volume(x, z, y))
+        self.add_pattern("VOLUME_XY", **self.get_dirs_for_volume(x, y, z))
 
-    def get_dirs_for_volume(self, dim1, dim2):
+    def get_dirs_for_volume(self, dim1, dim2, sdir):
         all_dims = range(len(self.get_shape()))
         vol_dict = {}
         vol_dict['core_dir'] = (dim1, dim2)
-        slice_dir = tuple([a for a in all_dims if a not in [dim1, dim2]])
-        vol_dict['slice_dir'] = slice_dir#tuple(reversed(list(slice_dir)))# this is aarons hack- temporary only
+        slice_dir = [sdir]
+        for ddir in all_dims:
+            if ddir not in [dim1, dim2, sdir]:
+                slice_dir.append(ddir)
+        vol_dict['slice_dir'] = tuple(slice_dir)
         return vol_dict
 
     def set_axis_labels(self, *args):

@@ -222,6 +222,11 @@ class Plugin(PluginDatasets):
         for data in data_object_list:
             data.clear_plugin_data()
 
+    def revert_preview(self, in_data):
+        for data in in_data:
+            if data.revert_shape:
+                data.unset_preview()
+
     def nInput_datasets(self):
         """
         The number of datasets required as input to the plugin

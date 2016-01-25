@@ -44,6 +44,7 @@ class BaseRecon(Plugin):
     :param sino_pad_width: Pad proportion of the sinogram width before \
         reconstructing. Default: 0.25.
     :param log: Take the log of the data before reconstruction. Default: True.
+    :param preview: A slice list of required frames. Default: [].
     """
     count = 0
 
@@ -98,6 +99,10 @@ class BaseRecon(Plugin):
     def setup(self):
         # set up the output dataset that is created by the plugin
         in_dataset, out_dataset = self.get_datasets()
+
+        # reduce the data as per data_subset parameter
+        in_dataset[0].set_preview(self.parameters['preview'])
+
         # set information relating to the plugin data
         in_pData, out_pData = self.get_plugin_datasets()
         # copy all required information from in_dataset[0]

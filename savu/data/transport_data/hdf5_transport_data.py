@@ -69,6 +69,8 @@ class Hdf5TransportData(object):
 
             plugin = pu.plugin_loader(exp, plugin_dict)
 
+            plugin.revert_preview(plugin.get_in_datasets())
+
             logging.info("load_data: 4")
             exp.barrier()
 
@@ -140,6 +142,10 @@ class Hdf5TransportData(object):
         return plugin_file, entry
 
     def output_metadata(self, entry):
+        self.output_axis_labels(entry)
+        # output remaining metadata
+
+    def output_axis_labels(self, entry):
         axis_labels = self.meta_data.get_meta_data("axis_labels")
         axes = []
         count = 0
@@ -162,7 +168,7 @@ class Hdf5TransportData(object):
         if process is 0:
             plugin_file, entry = self.add_data_links(link_type)
             #self.output_metadata(entry)
-            #plugin_file.close()
+            plugin_file.close()
 
     def close_file(self):
         """

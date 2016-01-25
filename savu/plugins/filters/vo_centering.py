@@ -41,7 +41,7 @@ class VoCentering(BaseFilter, CpuPlugin):
     :param poly_degree: The polynomial degree of the fit \
         (1 or 0 = gradient or no gradient). Default: 1.
     :param step: The step length over the rotation axis. Default: 1.
-    :param no_clean: Do not clean up potential outliers. Default: False.
+    :param no_clean: Do not clean up potential outliers. Default: True.
     :param preview: A slice list of required frames. Default: [].
 
     """
@@ -89,6 +89,7 @@ class VoCentering(BaseFilter, CpuPlugin):
             step = width/10.
 
         cor_raw = (data.shape[1]/2.0) - point
+        print "cor_raw in filter frames", cor_raw
         # temporary for testing
         cor_fit = (data.shape[1]/2.0) - point
 
@@ -99,7 +100,7 @@ class VoCentering(BaseFilter, CpuPlugin):
         in_datasets, out_datasets = self.get_datasets()
 
         cor_raw = np.squeeze(out_datasets[0].data[...])
-
+        print "cor_raw in post process after squeezing", cor_raw
         # special case of one cor_raw value (i.e. only one sinogram)
         if not cor_raw.shape:
             # add to metadata
@@ -124,7 +125,7 @@ class VoCentering(BaseFilter, CpuPlugin):
 
         # set up for the iterative clean on the fit
         cor_fit = cor_clean
-        max_disp = 10
+        max_disp = 1000
         p = None
 
         # keep fitting and removing points until the fit is within
@@ -144,10 +145,12 @@ class VoCentering(BaseFilter, CpuPlugin):
                 max_disp = (np.abs(cor_fit-cor_clean)).max()
 
         # build a full array for the output fit
+        x = np.arange(self.orig_shape[0])
         cor_fit = p(x)
 
         out_datasets[1].data[:] = cor_fit[:, np.newaxis]
         # add to metadata
+
         self.populate_meta_data('cor_raw', cor_raw)
         self.populate_meta_data('centre_of_rotation', cor_fit)
 
@@ -165,10 +168,11 @@ class VoCentering(BaseFilter, CpuPlugin):
         # set up the output dataset that is created by the plugin
         in_dataset, out_dataset = self.get_datasets()
 
-        print "***SHAPE before", in_dataset[0].get_shape(), "PREVIEW:", self.parameters['preview']
+        self.orig_full_shape = in_dataset[0].get_shape()
+
         # reduce the data as per data_subset parameter
-        in_dataset[0].set_preview(self.parameters['preview'])
-        print "***SHAPE after", in_dataset[0].get_shape()
+        in_dataset[0].set_preview(self.parameters['preview'],
+                                  revert=self.orig_full_shape)
 
         in_pData, out_pData = self.get_plugin_datasets()
         in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
@@ -177,13 +181,15 @@ class VoCentering(BaseFilter, CpuPlugin):
 
         slice_dirs = np.array(in_pData[0].get_slice_directions())
         new_shape = (np.prod(np.array(fullData.get_shape())[slice_dirs]), 1)
+        self.orig_shape = \
+            (np.prod(np.array(self.orig_full_shape)[slice_dirs]), 1)
 
         out_dataset[0].create_dataset(shape=new_shape,
                                       axis_labels=['x.pixels', 'y.pixels'],
                                       remove=True)
         out_dataset[0].add_pattern("METADATA", core_dir=(1,), slice_dir=(0,))
 
-        out_dataset[1].create_dataset(shape=new_shape,
+        out_dataset[1].create_dataset(shape=self.orig_shape,
                                       axis_labels=['x.pixels', 'y.pixels'],
                                       remove=True)
         out_dataset[1].add_pattern("METADATA", core_dir=(1,), slice_dir=(0,))

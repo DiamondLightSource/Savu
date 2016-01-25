@@ -25,12 +25,11 @@
 
 import h5py
 import logging
-import copy
 from mpi4py import MPI
 
-import numpy as np
 from savu.plugins.base_saver import BaseSaver
 from savu.plugins.utils import register_plugin
+from savu.data.chunking import Chunking
 
 NX_CLASS = 'NX_class'
 
@@ -43,6 +42,7 @@ class Hdf5TomoSaver(BaseSaver):
 
     def __init__(self, name='Hdf5TomoSaver'):
         super(Hdf5TomoSaver, self).__init__(name)
+        self.plugin = None
 
     def setup(self):
         exp = self.exp
@@ -87,6 +87,7 @@ class Hdf5TomoSaver(BaseSaver):
         else:
             backing_file = h5py.File(filename, 'w')
 
+        print "creating the backing file", filename
         if backing_file is None:
             raise IOError("Failed to open the hdf5 file")
 
@@ -124,8 +125,8 @@ class Hdf5TomoSaver(BaseSaver):
                 logging.info("create_entries: 2")
                 self.exp.barrier()
 
-                chunks = self.calculate_chunking(current_and_next, shape,
-                                                 data.dtype)
+                chunking = Chunking(self.exp, current_and_next)
+                chunks = chunking.calculate_chunking(shape, data.dtype)
                 logging.info("create_entries: 3")
                 self.exp.barrier()
                 print "chunks = ", chunks
@@ -135,61 +136,3 @@ class Hdf5TomoSaver(BaseSaver):
                 self.exp.barrier()
 
         return group_name, group
-
-    def calculate_chunking(self, current_and_next, shape, ttype):
-        print "shape = ", shape
-        if len(shape) < 3:
-            return True
-        current = current_and_next['current']
-        current_cores = current[current.keys()[0]]['core_dir']
-        nnext = current_and_next['next']
-
-        #print "current", current, "next", nnext
-        if nnext == []:
-            next_cores = current_cores
-        else:
-            next_cores = nnext[nnext.keys()[0]]['core_dir']
-        chunks = [1]*len(shape)
-        intersect = set(current_cores).intersection(set(next_cores))
-
-        if 'VOLUME' in current.keys()[0]:
-            for dim in range(3):
-                chunks[dim] = min(shape[dim], 64)
-        else:
-            for dim in intersect:
-                chunks[dim] = shape[dim]
-            remaining_cores = set(current_cores).difference(intersect).\
-                union(set(next_cores).difference(intersect))
-            for dim in remaining_cores:
-                chunks[dim] = min(shape[dim], 8)  # change 8 to max_shape?
-
-        if 0 in chunks:
-            return True
-        else:
-            return self.adjust_chunk_size(chunks, ttype, shape)
-
-    def adjust_chunk_size(self, chunks, ttype, shape):
-        chunks = np.array(chunks)
-        chunk_size = np.prod(chunks)*np.dtype(ttype).itemsize
-        cache_size = 1000000
-        if (chunk_size > cache_size):
-            while ((np.prod(chunks)*np.dtype(ttype).itemsize) > 1000000):
-                idx = np.argmax(chunks)
-                chunks[idx] = chunks[idx]-1
-        else:
-            next_chunks = chunks
-            while (((np.prod(next_chunks)*np.dtype(ttype).itemsize) < 1000000)
-                    and not np.array_equal(chunks, np.array(shape))):
-                chunks = copy.copy(next_chunks)
-                idx = self.get_idx(next_chunks, shape)
-                next_chunks[idx] = next_chunks[idx]+1
-        return tuple(chunks)
-
-    def get_idx(self, chunks, shape):
-        idx_order = np.argsort(chunks)
-        i = 0
-        for i in range(len(shape)):
-            if (chunks[idx_order[i]] < shape[idx_order[i]]):
-                break
-
-        return idx_order[i]

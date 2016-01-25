@@ -85,7 +85,6 @@ class BaseAstraRecon(BaseRecon):
         self.astra_function = astra_func_map[alg_type]
 
     def reconstruct(self, sinogram, centre_of_rotations, angles, vol_shape):
-        print sinogram.shape
         p_low, p_high = self.array_pad(centre_of_rotations, sinogram.shape[1])
         sino = np.pad(sinogram, ((0, 0), (p_low, p_high)), mode='reflect')
         vol_geom, proj_geom = self.geom_setup_function(sino, angles, vol_shape)

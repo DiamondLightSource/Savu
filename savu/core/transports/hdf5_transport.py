@@ -192,8 +192,8 @@ class Hdf5Transport(TransportControl):
 
         for count in range(len(in_slice_list[0])):
             # print every 10th loop iteration to screen
-            if (count % 10) == 0:
-                print count
+            #if (count % 10) == 0:
+            print count
 
             section, slice_list = \
                 self.get_all_padded_data(in_data, in_slice_list, count,
@@ -201,6 +201,7 @@ class Hdf5Transport(TransportControl):
             result = plugin.process_frames(section, slice_list)
             self.set_out_data(out_data, out_slice_list, result, count,
                               expand_dict)
+        plugin.revert_preview(in_data)
 
     def process_checks(self):
         pass

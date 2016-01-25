@@ -57,28 +57,9 @@ class TimeseriesFieldCorrections(BaseCorrection, CpuPlugin):
         data = (trimmed_data-dark)/(flat-dark)
 
         # finally clean up and trim the data
+        # does this line need to be done to all projections?
         data = np.nan_to_num(data)
         data[data < 0] = 0
         data[data > 2] = 2
 
         return data
-
-#    def correct(self, data):
-#        in_meta_data, out_meta_data = self.get_meta_data()
-#        image_keys = in_meta_data[0].get_meta_data('image_key')
-#        trimmed_data = data[image_keys == 0]
-#
-#        dark = data[image_keys == 2]
-#        dark = dark.mean(0)
-#        dark = np.tile(dark, (trimmed_data.shape[0], 1, 1))
-#        flat = data[image_keys == 1]
-#        flat = flat.mean(0)
-#        flat = np.tile(flat, (trimmed_data.shape[0], 1, 1))
-#        data = (trimmed_data-dark)/(flat-dark)
-#
-#        # finally clean up and trim the data
-#        data = np.nan_to_num(data)
-#        data[data < 0] = 0
-#        data[data > 2] = 2
-#
-#        return data
