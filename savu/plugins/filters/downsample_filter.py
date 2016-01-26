@@ -34,7 +34,7 @@ class DownsampleFilter(BaseFilter, CpuPlugin):
     A plugin to reduce the data in the selected direction by a proportion
 
     :param bin_size: Bin Size for the downsample. Default: 2.
-    :param mode: One of 'skip', 'mean', 'median'. Default: 'median'.
+    :param mode: One of 'skip', 'mean', 'median', 'min', 'max'. Default: 'skip'.
     """
 
     def __init__(self):
@@ -44,7 +44,9 @@ class DownsampleFilter(BaseFilter, CpuPlugin):
         self.out_shape = None
         self.mode_dict = { 'skip'  : self.skip_sampler,
                            'mean'  : self.mean_sampler,
-                           'median': self.median_sampler }
+                           'median': self.median_sampler,
+                           'min'   : self.min_sampler,
+                           'max'   : self.max_sampler }
 
     def get_output_shape(self, input_data):
         input_shape = input_data.get_shape()
@@ -123,10 +125,19 @@ class DownsampleFilter(BaseFilter, CpuPlugin):
         result = self.compress_bins(data, numpy.mean)
         return result
 
-
     def median_sampler(self, data):
         logging.debug("Downsampling data using median mode")
         result = self.compress_bins(data, numpy.median)
+        return result
+
+    def min_sampler(self, data):
+        logging.debug("Downsampling data using median mode")
+        result = self.compress_bins(data, numpy.amin)
+        return result
+
+    def max_sampler(self, data):
+        logging.debug("Downsampling data using median mode")
+        result = self.compress_bins(data, numpy.amax)
         return result
 
     def setup(self):
