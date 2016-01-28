@@ -21,8 +21,8 @@ while read -r a b c d; do
 	runfile=/bin/savu_launcher.sh
 	outpath=$PWD #outputting to the current folder
     #datafile=$outpath/../test_data/24737.nxs
-    #datafile=/dls/i12/data/2015/ee10500-1/processing/LD_2W50_8/LD_2W50_8_Dataset_093.nxs
-    #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_processes/astra_cpu_test.nxs
+    datafile=/dls/i12/data/2015/ee10500-1/processing/LD_2W50_8/LD_2W50_8_Dataset_093.nxs
+    processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_processes/astra_gpu_test.nxs
     
     #datafile=$outpath/../test_data/LD_2W50_8_Dataset_038.nxs
 	#processfile=$outpath/../test_data/original_process_lists/i12_tomo_pipeline_preview_55751.nxs
@@ -32,10 +32,10 @@ while read -r a b c d; do
 
     #datafile=$outpath/../test_data/for_nicola/54681.nxs
 	#processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_processes/sally_pipeline.nxs
-    datafile=/dls/i12/data/2015/sw12280-3/rawdata/54652.nxs
+    #datafile=/dls/i12/data/2015/sw12280-3/rawdata/54652.nxs
     #datafile=/dls/i12/data/2015/sw12280-3/rawdata/54653.nxs
     #datafile=/dls/i12/data/2015/sw12280-3/rawdata/54654.nxs
-	processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_processes/sally_pipeline_full.nxs
+	#processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_processes/sally_pipeline_full.nxs
 #	processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_processes/sally_pipeline_preview.nxs
 
     #datafile=/dls/science/sharpfiles/oqi73530/tubetDataTest081Jan2016.nxs
@@ -65,5 +65,5 @@ while read -r a b c d; do
       #echo "completed profiling"
 	fi	
 
-done < ../../test.txt
+done < ../test.txt
 

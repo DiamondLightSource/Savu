@@ -22,6 +22,7 @@
 """
 import logging
 import numpy as np
+from mpi4py import MPI
 
 import savu.plugins.utils as pu
 
@@ -34,7 +35,7 @@ class PluginDriver(object):
     def __init__(self):
         super(PluginDriver, self).__init__()
 
-    def run_plugin_instances(self, transport, communicator='COMM_WORLD'):
+    def run_plugin_instances(self, transport, communicator=MPI.COMM_WORLD):
         out_data = self.get_out_datasets()
         extra_dims = self.extra_dims
         repeat = np.prod(extra_dims) if extra_dims else 1
@@ -55,12 +56,11 @@ class PluginDriver(object):
             transport.process(self)
 
             logging.info("%s.%s", self.__class__.__name__, 'barrier')
-            self.exp.barrier()
+            print "*****", communicator
+            self.exp.barrier(communicator=communicator)
 
             logging.info("%s.%s", self.__class__.__name__, 'post_process')
             self.post_process()
-
-            logging.info("%s.%s", self.__class__.__name__, 'barrier')
 
     def process(self, data, output, processes, process):
         """

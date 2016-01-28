@@ -22,6 +22,7 @@
 """
 import logging
 import copy
+from mpi4py import MPI
 
 from savu.plugins.driver.plugin_driver import PluginDriver
 
@@ -40,14 +41,12 @@ class GpuPlugin(PluginDriver):
         processes = copy.copy(expInfo.get_meta_data("processes"))
         process = expInfo.get_meta_data("process")
 
-        count = 0
         gpu_processes = []
         for i in ["GPU" in i for i in processes]:
             if i:
-                gpu_processes.append(count)
-                count += 1
+                gpu_processes.append(1)
             else:
-                gpu_processes.append(-1)
+                gpu_processes.append(0)
 
         # set only GPU processes
         new_processes = [i for i in processes if 'GPU' in i]
@@ -56,32 +55,28 @@ class GpuPlugin(PluginDriver):
         if not new_processes:
             raise Exception("THERE ARE NO GPU PROCESSES!")
 
-        print new_processes
-        print [i for i, x in enumerate(t) if x]
+        ranks = [i for i, x in enumerate(gpu_processes) if x]
+        self.create_new_communicator(ranks, exp, process)
 
-        if gpu_processes[process] >= 0:
+        if gpu_processes[process]:
+            self.new_comm.Barrier()
             logging.debug("Running the GPU Process %i", process)
             logging.debug("Pre-processing")
-            self.create_new_communicator()
-            self.run_plugin_instances(transport)
-            self.free_communicator()
+            self.run_plugin_instances(transport, communicator=self.new_comm)
             self.clean_up()
+            self.free_communicator()
 
         self.exp.barrier()
         expInfo.set_meta_data('processes', processes)
         return
 
-#    def create_new_processor(self, processes):
-#        group = MPI.COMM_WORLD()
-#                
-#        
-#        MPI.Group.Incl([0, 1])
-#        Create(self, Group group)
-#        Create intracommunicator from group
-#        
-#        Range_incl(self, ranks)
-#        Create a new group from ranges of of ranks in an existing group
-#        
-#        # new communicator barrier here before returning
+    def create_new_communicator(self, ranks, exp, process):
+        self.group = MPI.COMM_WORLD.Get_group()
+        self.new_group = MPI.Group.Incl(self.group, ranks)
+        self.new_comm = MPI.COMM_WORLD.Create(self.new_group)
+        self.exp.barrier()
 
-        
+    def free_communicator(self):
+        self.group.Free()
+        self.new_group.Free()
+        self.new_comm.Free()
