@@ -34,7 +34,7 @@ class PluginDriver(object):
     def __init__(self):
         super(PluginDriver, self).__init__()
 
-    def run_plugin_instances(self, transport):
+    def run_plugin_instances(self, transport, communicator='COMM_WORLD'):
         out_data = self.get_out_datasets()
         extra_dims = self.extra_dims
         repeat = np.prod(extra_dims) if extra_dims else 1

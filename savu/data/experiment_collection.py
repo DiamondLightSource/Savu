@@ -136,10 +136,12 @@ class Experiment(object):
             data_names.append(key)
         return data_names
 
-    def barrier(self):
+    def barrier(self, communicator="COMM_WORLD"):
+        comm_dict = {'comm': communicator}
         if self.meta_data.get_meta_data('mpi') is True:
             logging.debug("About to hit a barrier")
-            MPI.COMM_WORLD.Barrier()
+            MPI.comm_dict['comm'].Barrier()
+            #MPI.COMM_WORLD.Barrier()
             logging.debug("Past the barrier")
 
     def log(self, log_tag, log_level=logging.DEBUG):
