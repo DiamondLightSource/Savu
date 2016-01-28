@@ -56,12 +56,32 @@ class GpuPlugin(PluginDriver):
         if not new_processes:
             raise Exception("THERE ARE NO GPU PROCESSES!")
 
+        print new_processes
+        print [i for i, x in enumerate(t) if x]
+
         if gpu_processes[process] >= 0:
             logging.debug("Running the GPU Process %i", process)
             logging.debug("Pre-processing")
+            self.create_new_communicator()
             self.run_plugin_instances(transport)
+            self.free_communicator()
             self.clean_up()
 
         self.exp.barrier()
         expInfo.set_meta_data('processes', processes)
         return
+
+#    def create_new_processor(self, processes):
+#        group = MPI.COMM_WORLD()
+#                
+#        
+#        MPI.Group.Incl([0, 1])
+#        Create(self, Group group)
+#        Create intracommunicator from group
+#        
+#        Range_incl(self, ranks)
+#        Create a new group from ranges of of ranks in an existing group
+#        
+#        # new communicator barrier here before returning
+
+        
