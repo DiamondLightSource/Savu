@@ -49,7 +49,6 @@ class PluginDriver(object):
                     out_data[j].get_plugin_data()\
                         .set_fixed_directions(param_dims[j], param_idx[i])
 
-            logging.info("%s.%s", self.__class__.__name__, 'pre_process')
             self.pre_process()
 
             logging.info("%s.%s", self.__class__.__name__, 'process')

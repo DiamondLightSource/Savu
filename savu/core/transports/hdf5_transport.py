@@ -115,47 +115,28 @@ class Hdf5Transport(TransportControl):
         Runs a chain of plugins
         """
         exp = self.exp
-#        logging.info("transport_run_plugin_list: 1")
-#        exp.barrier()
+
         plugin_list = exp.meta_data.plugin_list.plugin_list
-
-#        logging.info("transport_run_plugin_list: 2")
-#        exp.barrier()
         pu.plugin_loader(exp, plugin_list[0])
-
-#        logging.info("transport_run_plugin_list: 3")
 
         start = 1
         stop = start
         n_plugins = len(plugin_list[start:-1]) + 1
         while n_plugins != stop:
 
-#            logging.info("transport_run_plugin_list: 2")
-#            exp.barrier()
-
             start_in_data = copy.deepcopy(self.exp.index['in_data'])
             in_data = exp.index["in_data"][exp.index["in_data"].keys()[0]]
 
-#            logging.info("transport_run_plugin_list: 3")
-#            exp.barrier()
-
             out_data_objs, stop = in_data.load_data(start)
-
-#            logging.info("transport_run_plugin_list: 4")
-#            exp.barrier()
 
             exp.clear_data_objects()
             self.exp.index['in_data'] = copy.deepcopy(start_in_data)
             self.real_plugin_run(plugin_list, out_data_objs, start, stop)
             start = stop
 
-#        logging.info("transport_run_plugin_list: 5")
-#        exp.barrier()
         for key in exp.index["in_data"].keys():
             exp.index["in_data"][key].close_file()
 
-#        logging.info("transport_run_plugin_list: 6")
-#        exp.barrier()
         return
 
     def real_plugin_run(self, plugin_list, out_data_objs, start, stop):

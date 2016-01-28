@@ -1,9 +1,8 @@
 #!/bin/bash
-#module load global/testcluster
-module load global/cluster
+module load global/testcluster
+#module load global/cluster
 module load python/anaconda-savu
 source activate savu_mpi1
-#export PYTHONPATH=$PYTHONPATH:/dls_sw/apps/savu/anaconda/bin
 export PYTHONPATH=$PYTHONPATH:/home/clb02321/DAWN_stable/FastXRF/src/
 
 savupath=$1
@@ -11,7 +10,7 @@ datafile=$2
 processfile=$3
 outfile=$4
 nCPUs=$5
-nGPUs=2
+nGPUs=0
 
 export PYTHONPATH=$savupath:$PYTHONPATH
 filename=$savupath/savu/tomo_recon.py
@@ -35,7 +34,7 @@ if [ $nCPUs -gt 0 ]; then
 	done
 fi
 
-CPUs=$CPUs,GPU0,GPU1
+#CPUs=$CPUs,GPU0,GPU1
 echo CPUs
 
 

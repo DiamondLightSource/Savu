@@ -65,4 +65,3 @@ class GpuPlugin(PluginDriver):
         self.exp.barrier()
         expInfo.set_meta_data('processes', processes)
         return
-        

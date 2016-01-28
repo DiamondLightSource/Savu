@@ -22,42 +22,19 @@
 
 """
 import logging
-#import time
-#from mpi4py import MPI
-
-logging.debug("Importing packages in base_astra_recon")
+import astra
+import numpy as np
+import math
 
 from savu.plugins.base_recon import BaseRecon
-
-#rank = 0
-#my_rank = MPI.COMM_WORLD.rank
-#processes = MPI.COMM_WORLD.size
-#MPI.COMM_WORLD.Barrier()
-#while (rank < processes):
-#    if (my_rank == rank):
-#        logging.info("***************rank %s, size %s", my_rank, processes)
-#        logging.info("Imported astra")
-#        time.sleep(5)
-#        import astra
-#        logging.info("Astra imported")
-#    rank += 1
-#    MPI.COMM_WORLD.Barrier()
-
-logging.debug("Imported astra")
-import astra
-
-import numpy as np
-logging.debug("Imported numpy")
-
-import math
-logging.debug("Imported math")
 
 
 class BaseAstraRecon(BaseRecon):
     """
     A Plugin to perform Astra toolbox reconstruction
     level
-    :param center_of_rotation: Center of rotation to use for the reconstruction). Default: 86.
+    :param center_of_rotation: Center of rotation to use for the \
+        reconstruction). Default: 86.
     """
 
     def __init__(self, name='BaseAstraRecon'):
@@ -69,35 +46,42 @@ class BaseAstraRecon(BaseRecon):
         Get reconstruction_type and number_of_iterations parameters
         """
         logging.error("get_parameters needs to be implemented")
-        raise NotImplementedError("get_parameters " +
-                                  "needs to be implemented")
+        raise NotImplementedError("get_parameters needs to be implemented")
 
     def reconstruct_pre_process(self):
-        self.nSinos = self.get_max_frames()
         lparams = self.get_parameters()
         self.name = lparams[0]
         self.iters = lparams[1]
+        self.alg_type = '3D' if '3D' in self.name else '2D'
 
         geom_func_map = {'2D': self.geom_setup_2D, '3D': self.geom_setup_3D}
         astra_func_map = {'2D': astra.data2d, '3D': astra.data3d}
-        alg_type = '3D' if '3D' in self.name else '2D'
-        self.geom_setup_function = geom_func_map[alg_type]
-        self.astra_function = astra_func_map[alg_type]
+        self.geom_setup_function = geom_func_map[self.alg_type]
+        self.astra_function = astra_func_map[self.alg_type]
 
-    def reconstruct(self, sinogram, centre_of_rotations, angles, vol_shape):
-        p_low, p_high = self.array_pad(centre_of_rotations, sinogram.shape[1])
-        
-        # this only works in sino is 2D
-        sino = np.pad(sinogram, ((0, 0), (p_low, p_high)), mode='reflect')
-        vol_geom, proj_geom = self.geom_setup_function(sino, angles, vol_shape)
+        in_pData = self.get_plugin_in_datasets()[0]
+        self.dim_det_cols = \
+            in_pData.get_data_dimension_by_axis_label('x', contains=True)
+        self.dim_rot = \
+            in_pData.get_data_dimension_by_axis_label('rotation_angle')
+        if self.alg_type is '3D':
+            self.slice_dim = in_pData.get_slice_dimension()
+
+    def reconstruct(self, sino, cors, angles, vol_shape):
+        self.nCols = sino.shape[self.dim_det_cols]
+        self.nAngles = sino.shape[self.dim_rot]
+        vol_geom, proj_geom = self.geom_setup_function(sino, angles,
+                                                       vol_shape, cors)
         return self.astra_reconstruction(sino, vol_geom, proj_geom)
 
     def astra_reconstruction(self, sino, vol_geom, proj_geom):
+        # currently hard-coded - for 3D version only!
+        #sino = np.transpose(sino, (1, 0, 2))
         self.sino_id = self.astra_function.create("-sino", proj_geom, sino)
         # Create a data object for the reconstruction
         self.rec_id = self.astra_function.create('-vol', vol_geom)
         cfg = self.cfg_setup()
-        if not '3D' in self.name and not "CUDA" in self.name:
+        if self.alg_type is '2D' and not "CUDA" in self.name:
             proj_id = astra.create_projector('strip', proj_geom, vol_geom)
             cfg['ProjectorId'] = proj_id
         return self.run_astra(cfg)
@@ -107,24 +91,48 @@ class BaseAstraRecon(BaseRecon):
         self.alg_id = astra.algorithm.create(cfg)
         # This will have a runtime in the order of 10 seconds.
         astra.algorithm.run(self.alg_id, self.iters)
+#
+#        if "CUDA" in self.name and "FBP" not in self.name:
+#            self.res += astra.algorithm.get_res_norm(self.alg_id)**2
+#            print math.sqrt(self.res)
+        temp = self.astra_function.get(self.rec_id)
+        return temp
 
-        if "CUDA" in self.name and "FBP" not in self.name:
-            self.res += astra.algorithm.get_res_norm(self.alg_id)**2
-            print math.sqrt(self.res)
-        return self.astra_function.get(self.rec_id)
-
-    def geom_setup_2D(self, sino, angles, shape):
+    def geom_setup_2D(self, sino, angles, shape, cors):
+        p_low, p_high = self.array_pad(cors, self.nCols)
+        sino = np.pad(sino, ((0, 0), (p_low, p_high)), mode='reflect')
         vol_geom = astra.create_vol_geom(shape[0], shape[1])
-        proj_geom = astra.create_proj_geom('parallel', 1.0, sino.shape[1],
+        proj_geom = astra.create_proj_geom('parallel', 1.0, self.nCols,
                                            np.deg2rad(angles))
         return vol_geom, proj_geom
 
-    def geom_setup_3D(self, sino, angles, shape):
-        det_rows = sino.shape[0]
-        det_cols = sino.shape[2]
-        vol_geom = astra.create_vol_geom(shape[0], self.nSinos, shape[1])
-        proj_geom = astra.create_proj_geom('parallel3d', 1.0, 1.0, det_cols,
-                                           det_rows, np.deg2rad(angles))
+    def geom_setup_3D(self, sino, angles, shape, cors):
+        nSinos = sino.shape[self.slice_dim]
+        length = len(angles)
+        theta = np.deg2rad(angles)
+
+        vectors = np.zeros((length, 12))
+        i = range(length)
+        # ray direction
+        vectors[i, 0] = np.sin(theta[i])
+        vectors[i, 1] = -np.cos(theta[i])
+        vectors[i, 2] = 0
+        # detector centre (use this for translation)
+        # assuming all sinograms are translated by the same amount for now
+        #det_vec = [cors[0], 0, 0]
+        det_vec = [0, 0, 0]
+        vectors[i, 3:6] = det_vec
+        # (use the following vectors for rotation)
+        # vector from detector pixel (0,0) to (0,1)
+        vectors[i, 6] = np.cos(theta[i])
+        vectors[i, 7] = np.sin(theta[i])
+        vectors[i, 8] = 0
+        # vector from detector pixel (0,0) to (1,0)
+        vectors[i, 9:12] = [0, 0, 1]
+        # Parameters: #rows, #columns, vectors
+        vol_geom = astra.create_vol_geom(nSinos, shape[0], shape[2])
+        proj_geom = astra.create_proj_geom('parallel3d_vec', sino.shape[1],
+                                           sino.shape[2], vectors)
         return vol_geom, proj_geom
 
     def astra_delete(self):
@@ -144,19 +152,15 @@ class BaseAstraRecon(BaseRecon):
         alen = ctr
         blen = width - ctr
         mid = width / 2.0
-        
-        print "centre = ", ctr
 
         p_low = pad if (ctr > mid) else (blen - alen) + pad
         p_high = (alen - blen) + pad if (ctr > mid) else pad
         return int(p_low), int(p_high)
 
     def get_max_frames(self):
-        params = self.get_parameters()
-        frames = 8 if "3D" in params[0] else 1
+        frames = 8 if "3D" in self.get_parameters()[0] else 1
         return frames
 
-logging.debug("Completed base_astra_recon import")
 
 # Add this as citation information:
 # W. van Aarle, W. J. Palenstijn, J. De Beenhouwer, T. Altantzis, S. Bals,  \
