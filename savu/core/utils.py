@@ -81,8 +81,10 @@ def user_message(message):
     if USER_LOG_HANDLER is not None:
         USER_LOG_HANDLER.flush()
 
-def add_user_log_handler(logger, user_log_path):
+def add_user_log_level():
     logging.addLevelName(USER_LOG_LEVEL, "USER")
+
+def add_user_log_handler(logger, user_log_path):
     fh = logging.FileHandler(user_log_path, mode='w')
     fh.setFormatter(logging.Formatter('%(relativeCreated)12d - %(message)s'))
     fh.setLevel(USER_LOG_LEVEL)

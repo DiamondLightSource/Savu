@@ -105,6 +105,7 @@ class Hdf5Transport(TransportControl):
                                           ' %(levelname)-6s %(message)s'))
         logger.addHandler(fh)
 
+        cu.add_user_log_level()
         cu.add_user_log_handler(logger, os.path.join(options["out_path"],
                                                      'user.log'))
 
@@ -115,7 +116,9 @@ class Hdf5Transport(TransportControl):
                             ' %(levelname)-6s %(message)s', datefmt='%H:%M:%S')
 
         # Only add user logging to the 0 rank process so we don't get
-        # a lot of output, just a summary
+        # a lot of output, just a summary, but we want the user messages
+        # tagged in all rank processes
+        cu.add_user_log_level()
         if MPI.COMM_WORLD.rank == 0:
             logging.getLogger()
             cu.add_user_log_handler(logging.getLogger(),
@@ -205,7 +208,7 @@ class Hdf5Transport(TransportControl):
         number_of_slices_to_process = len(in_slice_list[0])
         for count in range(number_of_slices_to_process):
             percent_complete = count/(number_of_slices_to_process * 0.01)
-            cu.user_message("%s - %03i%% complete" %
+            cu.user_message("%s - %3i%% complete" %
                             (plugin.name, percent_complete))
 
             section, slice_list = \
