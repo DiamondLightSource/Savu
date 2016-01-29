@@ -72,3 +72,20 @@ def add_base(clazz, ExtraBase):
 @logfunction
 def test():
     print("test")
+
+USER_LOG_LEVEL = 100
+USER_LOG_HANDLER = None
+
+def user_message(message):
+    logging.log(USER_LOG_LEVEL, message)
+    if USER_LOG_HANDLER is not None:
+        USER_LOG_HANDLER.flush()
+
+def add_user_log_handler(logger, user_log_path):
+    logging.addLevelName(USER_LOG_LEVEL, "USER")
+    fh = logging.FileHandler(user_log_path, mode='w')
+    fh.setFormatter(logging.Formatter('%(relativeCreated)12d - %(message)s'))
+    fh.setLevel(USER_LOG_LEVEL)
+    logger.addHandler(fh)
+    USER_LOG_HANDLER = fh
+    user_message("User Log Started")
