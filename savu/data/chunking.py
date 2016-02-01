@@ -181,6 +181,7 @@ class Chunking(object):
         for dim in in_cores:
             chunks[dim] = shape[dim]
         max_frames_dict = self.get_max_frames_dict()
+        print "theoutcores are:"+str(out_cores)
         for dim in out_cores:
             max_frames = max_frames_dict[dim]
             chunks[dim] = min(shape[dim], max_frames)

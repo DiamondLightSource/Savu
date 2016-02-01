@@ -29,8 +29,6 @@ from savu.test.plugin_runner_test import run_protected_plugin_runner
 
 
 class SimpleFitTest(unittest.TestCase):
-
-    @unittest.skip("Error: variable length arrays no longer being supported")
     def test_process(self):
         options = {
             "transport": "hdf5",
