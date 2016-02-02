@@ -45,7 +45,7 @@ class NxxrdLoader(BaseMultiModalLoader):
         data_str = '/instrument/detector/data'
         data_obj, xrd_entry = self.multi_modal_setup('NXxrd', data_str)
         mono_energy = data_obj.backing_file[
-            xrd_entry.name + '/instrument/monochromator/energy']
+            xrd_entry.name + '/instrument/monochromator/energy'].value
         self.exp.meta_data.set_meta_data("mono_energy", mono_energy)
         self.set_motors(data_obj, xrd_entry, 'xrd')
 
@@ -87,19 +87,20 @@ class NxxrdLoader(BaseMultiModalLoader):
         mData = data_obj.meta_data
         det_str = 'entry/instrument/detector'
         mData.set_meta_data("beam_center_x",
-                            calibrationfile[det_str + '/beam_center_x'])
+                            calibrationfile[det_str + '/beam_center_x'].value)
         mData.set_meta_data("beam_center_y",
-                            calibrationfile[det_str + '/beam_center_y'])
+                            calibrationfile[det_str + '/beam_center_y'].value)
         mData.set_meta_data("distance",
-                            calibrationfile[det_str + '/distance'])
+                            calibrationfile[det_str + '/distance'].value)
         mData.set_meta_data("incident_wavelength",
                             calibrationfile['/entry/calibration_sample/beam'
-                                            '/incident_wavelength'])
+                                            '/incident_wavelength'].value)
         mData.set_meta_data("x_pixel_size",
-                            calibrationfile[det_str + '/x_pixel_size'])
+                            calibrationfile[det_str + '/x_pixel_size'].value)
         mData.set_meta_data("detector_orientation",
-                            calibrationfile[det_str + '/detector_orientation'])
+                            calibrationfile[det_str + '/detector_orientation'].value)
         self.set_data_reduction_params(data_obj)
+        calibrationfile.close()
 
     def get_cal_path(self):
         path = self.parameters['calibration_path']

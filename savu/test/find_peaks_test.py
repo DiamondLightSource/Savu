@@ -21,18 +21,24 @@
 
 """
 import unittest
+import tempfile
 from savu.test import test_utils as tu
-
-from savu.test.plugin_runner_test import \
-    run_protected_plugin_runner_no_process_list
+from savu.test.plugin_runner_test import run_protected_plugin_runner
 
 
 class FindPeaksTest(unittest.TestCase):
 
-    def test_process(self):
-        options = tu.set_experiment('fluo')
-        plugin = 'savu.plugins.filters.find_peaks'
-        run_protected_plugin_runner_no_process_list(options, plugin)
+    def test_simple_fit_XRD(self):
+ 
+        options = {
+            "transport": "hdf5",
+            "process_names": "CPU0",
+            "data_file": tu.get_test_data_path('mm.nxs'),
+            "process_file": tu.get_test_process_path(
+                'findpeakstest.nxs'),
+            "out_path": tempfile.mkdtemp()
+            }
+        run_protected_plugin_runner(options)
 
 if __name__ == "__main__":
     unittest.main()

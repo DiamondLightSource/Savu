@@ -38,5 +38,10 @@ class AstraReconCPUTest(unittest.TestCase):
         plugin = astra_recons.__name__ + '.astra_recon_cpu'
         run_protected_plugin_runner_no_process_list(options, plugin)
 
+    def test_astra_recon_cpu_stxm(self):
+        options = tu.set_experiment('tomo')
+        plugin = astra_recons.__name__ + '.astra_recon_cpu'
+        run_protected_plugin_runner_no_process_list(options, plugin)
+
 if __name__ == "__main__":
     unittest.main()

@@ -236,6 +236,7 @@ class Chunking(object):
             dim = adjust['dim'].index(idx)
             next_chunks[idx] = \
                 eval(str(next_chunks[idx]) + adjust['inc']['up'][dim])
+
         return chunks
 
     def get_idx_decrease(self, chunks, adjust):

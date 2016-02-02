@@ -28,18 +28,37 @@ from savu.test import test_utils as tu
 from savu.test.plugin_runner_test import run_protected_plugin_runner
 
 
-@unittest.skip('functions are currently being updated')
+# @unittest.skip('functions are currently being updated')
 class I18PipelineTest(unittest.TestCase):
-
-#     def test_xrdtomo(self):
+#     def test1(self):
 #         options = {
 #             "transport": "hdf5",
 #             "process_names": "CPU0",
 #             "data_file": tu.get_test_data_path('mm.nxs'),
-#             "process_file": tu.get_process_list_path('I18_pipeline_just_xrd.nxs'),
+#             "process_file": '/dls/i13/data/2015/cm12165-5/processing/AskAaron/playwithclusteranalysis/I18_pipeline_just_xrd_from_raw_filtered_58905.nxs',
 #             "out_path": tempfile.mkdtemp()
 #             }
 #         run_protected_plugin_runner(options)
+#         
+#     def test2(self):
+#         options = {
+#             "transport": "hdf5",
+#             "process_names": "CPU0",
+#             "data_file": tu.get_test_data_path('mm.nxs'),
+#             "process_file": '/dls/i13/data/2015/cm12165-5/processing/AskAaron/playwithclusteranalysis/I18_pipeline_just_xrd_from_raw_filtered_58905.nxs',
+#             "out_path": tempfile.mkdtemp()
+#             }
+#         run_protected_plugin_runner(options)
+
+    def test_xrdtomo(self):
+        options = {
+            "transport": "hdf5",
+            "process_names": "CPU0",
+            "data_file": tu.get_test_data_path('mm.nxs'),
+            "process_file": tu.get_test_process_path('pyfai_tomo_chunking_test.nxs'),
+            "out_path": tempfile.mkdtemp()
+            }
+        run_protected_plugin_runner(options)
 # 
 #     def test_noxrdtomo(self):
 #         options = {
@@ -70,14 +89,14 @@ class I18PipelineTest(unittest.TestCase):
 #             "out_path": tempfile.mkdtemp()
 #             }
 #         run_protected_plugin_runner(options)
-    def test_process(self):
-        options = {
-            "transport": "hdf5",
-            "process_names": "CPU0",
-            "data_file": tu.get_test_data_path('mm.nxs'),
-            "process_file": tu.get_test_process_path('I18_pipeline.nxs'),
-            "out_path": tempfile.mkdtemp()
-            }
-        run_protected_plugin_runner(options)
+#     def test_process(self):
+#         options = {
+#             "transport": "hdf5",
+#             "process_names": "CPU0",
+#             "data_file": tu.get_test_data_path('mm.nxs'),
+#             "process_file": tu.get_test_process_path('I18_pipeline.nxs'),
+#             "out_path": tempfile.mkdtemp()
+#             }
+#         run_protected_plugin_runner(options)
 if __name__ == "__main__":
     unittest.main()

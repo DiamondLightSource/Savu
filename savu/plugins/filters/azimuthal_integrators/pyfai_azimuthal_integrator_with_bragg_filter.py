@@ -28,15 +28,14 @@ import math
 from pyFAI import units, AzimuthalIntegrator
 
 import numpy as np
-from savu.plugins.base_filter import BaseFilter
-from savu.plugins.driver.cpu_plugin import CpuPlugin
+from savu.plugins.filters.base_azimuthal_integrator import BaseAzimuthalIntegrator
 
 from savu.plugins.utils import register_plugin
 import time
 
 
 @register_plugin
-class PyfaiAzimuthalIntegratorWithBraggFilter(BaseFilter, CpuPlugin):
+class PyfaiAzimuthalIntegratorWithBraggFilter(BaseAzimuthalIntegrator):
     """
     1D azimuthal integrator by pyFAI
 
@@ -49,17 +48,6 @@ class PyfaiAzimuthalIntegratorWithBraggFilter(BaseFilter, CpuPlugin):
         logging.debug("Starting 1D azimuthal integrationr")
         super(PyfaiAzimuthalIntegratorWithBraggFilter,
               self).__init__("PyfaiAzimuthalIntegratorWithBraggFilter")
-
-    def calcfrom1d(self, tth, I, twotheta_flat):
-        '''
-        takes the 1D data and makes it two d again
-        tth is the two theta from the integrator
-        I is the intensity from the integrator
-        ai is the integrator object
-        '''
-        interpedvals = np.interp(twotheta_flat, tth, I)
-        new_image = interpedvals.reshape(self.sh)
-        return new_image
 
     def pre_process(self):
         """
@@ -107,70 +95,25 @@ class PyfaiAzimuthalIntegratorWithBraggFilter(BaseFilter, CpuPlugin):
         logging.debug("Running azimuthal integration")
         fit = ai.xrpd(data=data, npt=self.npts)
         mData.set_meta_data('Q', fit[0])
-#         newplot = self.calcfrom1d(fit[0], fit[1], twotheta_flat)
-#         rat = data/newplot
-#         thing = data.copy()
-#         thing[rat > 1.000000000001] = 0.0
-        ave_per_ring = self.calcfrom1d(fit[0], fit[1], twotheta_flat)
-        thresh = self.parameters['thresh']
-        diff = (100 - thresh) / 2.0
-        minval, maxval = np.percentile(data, [diff, 100 - diff])
+        newplot = self.calcfrom1d(fit[0], fit[1], twotheta_flat)
+        rat = data/newplot
+        thing = data.copy()
+        thing[rat > 1.000000000001] = 0.0
+#         ave_per_ring = self.calcfrom1d(fit[0], fit[1], twotheta_flat)
+#         thresh = self.parameters['thresh']
+#         diff = (100 - thresh) / 2.0
+#         minval, maxval = np.percentile(data, [diff, 100 - diff])
 
-        mask = np.ones_like(data)
-#         mask[thing == 0] = 0
-        mask[data < minval] = 0
-        mask[data > maxval] = 0
+        mask = np.zeros_like(data)
+        mask[thing == 0] = 1
+#         mask[data < minval] = 0
+#         mask[data > maxval] = 0
         final = ai.xrpd(data, self.npts, mask=mask)
         t2 = time.time()
+        print final[1].shape
         print "PyFAI iteration with correction took:"+str((t2-t1)*1e3)+"ms"
         return final[1]
 
-    def post_process(self):
-        out_datasets = self.get_out_datasets()
-        out_datasets[0].set_variable_array_length(self.npts)
 
-    def setup(self):
-        in_dataset, out_datasets = self.get_datasets()
-        in_pData, out_pData = self.get_plugin_datasets()
-        shape = in_dataset[0].get_shape()
-        # it will always be in Q for this plugin
-        # Doesnt this get rid of the other two axes?
-        #axis_labels = {in_dataset[0]: '-1.Q.nm^-1'}
-        # I just want diffraction data
-        in_pData[0].plugin_data_setup('DIFFRACTION', self.get_max_frames())
-        spectra = out_datasets[0]
-        # what does this do?
-        #remove an axis from all patterns
-
-        # copy all patterns, removing dimension -1 from the core and slice
-        # directions, and returning only those that are not empty
-        patterns = ['SINOGRAM.-1', 'PROJECTION.-1']
-        # stating only 'dimension' will remove the axis label, stating
-        # 'dimension.name.unit' name and unit will add or replace it
-        axis_labels = ['-1', '-2.name.unit']
-
-#         spectra.create_dataset(patterns={in_dataset[0]: patterns},
-#                                axis_labels={in_dataset[0]: axis_labels},
-#                                shape={'variable': shape[:-2]})
-        self.npts = self.get_parameters('num_bins')
-
-        spectra.create_dataset(patterns={in_dataset[0]: patterns},
-                               axis_labels={in_dataset[0]: axis_labels},
-                               shape=shape[:-2]+(self.npts,))
-
-        spectrum = {'core_dir': (-1,), 'slice_dir': tuple(range(len(shape)-2))}
-        spectra.add_pattern("SPECTRUM", **spectrum)
-
-        out_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
-
-    def get_max_frames(self):
-        """
-        This filter processes 1 frame at a time
-         :returns:  1
-        """
-        return 1
-
-    def nOutput_datasets(self):
-        return 1
 
 

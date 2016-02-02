@@ -121,7 +121,7 @@ class Hdf5TomoSaver(BaseSaver):
                 data.data = group.create_dataset("data", shape,
                                                  data.dtype)
             else:
-
+                print "I am here"
                 logging.info("create_entries: 2")
                 self.exp.barrier()
 

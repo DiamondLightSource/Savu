@@ -30,23 +30,21 @@ import numpy as np
 from savu.plugins.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
-from savu.plugins.utils import register_plugin
-import time
 
-
-@register_plugin
-class PyfaiAzimuthalIntegratorNospots(BaseFilter, CpuPlugin):
+class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
     """
-    1D azimuthal integrator by pyFAI
+    a base azimuthal integrator for pyfai
+
+    :param use_mask: Should we mask. Default: False.
 
     :param num_bins: number of bins. Default: 1005.
 
     """
 
-    def __init__(self):
+    def __init__(self, name):
         logging.debug("Starting 1D azimuthal integrationr")
-        super(PyfaiAzimuthalIntegratorNospots,
-              self).__init__("PyfaiAzimuthalIntegratorNospots")
+        super(BaseAzimuthalIntegrator,
+              self).__init__(name)
 
     def pre_process(self):
         """
@@ -74,27 +72,16 @@ class PyfaiAzimuthalIntegratorNospots(BaseFilter, CpuPlugin):
         roll = math.degrees(-math.atan2(orien[0, 1], orien[1, 1]))
         ai.setFit2D(distance, bc[0], bc[1], -yaw, roll, px, px, None)
         ai.set_wavelength(wl)
+
+        sh = in_d1.get_shape()
+
+        if (self.parameters["use_mask"]):
+            mask = mData.get_meta_data("mask")
+        else:
+            mask = np.zeros((sh[-2], sh[-1]))
         # now integrate in radius (1D)print "hello"
         self.npts = self.get_parameters('num_bins')
-        self.params = [self.npts, mData, ai]
-
-    def filter_frames(self, data):
-        t1 = time.time()
-        mData = self.params[2]
-        mask = data[1]
-        mask[mask>0] = 1
-        ai = self.params[3]
-        logging.debug("Running azimuthal integration")
-        fit = ai.xrpd(data=np.squeeze(data[0]), npt=self.npts, mask=mask)
-        mData.set_meta_data('Q', fit[0])
-#        mData.set_meta_data('integrated_diffraction_noise',fit[2])
-        t2 = time.time()
-        print "PyFAI iteration took:"+str((t2-t1)*1e3)+"ms"
-        return fit[1]
-
-    def post_process(self):
-        out_datasets = self.get_out_datasets()
-        out_datasets[0].set_variable_array_length(self.npts)
+        self.params = [mask, self.npts, mData, ai]
 
     def setup(self):
         in_dataset, out_datasets = self.get_datasets()
@@ -105,11 +92,8 @@ class PyfaiAzimuthalIntegratorNospots(BaseFilter, CpuPlugin):
         #axis_labels = {in_dataset[0]: '-1.Q.nm^-1'}
         # I just want diffraction data
         in_pData[0].plugin_data_setup('DIFFRACTION', self.get_max_frames())
-        in_pData[1].plugin_data_setup('DIFFRACTION', self.get_max_frames())
         spectra = out_datasets[0]
         num_bins = self.get_parameters('num_bins')
-        print num_bins,shape
-        print shape[:-2]+(num_bins,)
         # what does this do?
         #remove an axis from all patterns
 
@@ -120,10 +104,6 @@ class PyfaiAzimuthalIntegratorNospots(BaseFilter, CpuPlugin):
         # 'dimension.name.unit' name and unit will add or replace it
         axis_labels = ['-1', '-2.name.unit']
 
-#         spectra.create_dataset(patterns={in_dataset[0]: patterns},
-#                                axis_labels={in_dataset[0]: axis_labels},
-#                                shape={'variable': shape[:-2]})
-        print in_dataset
         spectra.create_dataset(patterns={in_dataset[0]: patterns},
                                axis_labels={in_dataset[0]: axis_labels},
                                shape=shape[:-2]+(num_bins,))
@@ -140,5 +120,17 @@ class PyfaiAzimuthalIntegratorNospots(BaseFilter, CpuPlugin):
         """
         return 1
 
-    def nInput_datasets(self):
-        return 2
+    def nOutput_datasets(self):
+        return 1
+
+
+    def calcfrom1d(self, tth, I, twotheta_flat):
+        '''
+        takes the 1D data and makes it two d again
+        tth is the two theta from the integrator
+        I is the intensity from the integrator
+        ai is the integrator object
+        '''
+        interpedvals = np.interp(twotheta_flat, tth, I)
+        new_image = interpedvals.reshape(self.sh)
+        return new_image

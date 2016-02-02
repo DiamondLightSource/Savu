@@ -27,18 +27,28 @@ from savu.test import test_utils as tu
 from savu.test.plugin_runner_test import run_protected_plugin_runner
 
 
-class PyfaiAzimuthalIntegrationTest(unittest.TestCase):
+class StxmTomoTest(unittest.TestCase):
 
-    def test_process(self):
+    def test_stxm_tomo_scikit(self):
         options = {
             "transport": "hdf5",
             "process_names": "CPU0",
             "data_file": tu.get_test_data_path('mm.nxs'),
-            "process_file": tu.get_test_process_path('PyFAI_azimuth_test.nxs'),
+            "process_file": tu.get_test_process_path('simple_stxm_tomo_test_scikit.nxs'),
             "out_path": tempfile.mkdtemp()
             }
         run_protected_plugin_runner(options)
 
+    def test_stxm_tomo_astra(self):
+        options = {
+            "transport": "hdf5",
+            "process_names": "CPU0",
+            "data_file": tu.get_test_data_path('mm.nxs'),
+            "process_file": tu.get_test_process_path('simple_stxm_tomo_test_astra.nxs'),
+            "out_path": tempfile.mkdtemp()
+            }
+        run_protected_plugin_runner(options)
+
+
 if __name__ == "__main__":
-    print "booms"
     unittest.main()
