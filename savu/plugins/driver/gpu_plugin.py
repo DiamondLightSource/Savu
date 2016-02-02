@@ -58,13 +58,17 @@ class GpuPlugin(PluginDriver):
         ranks = [i for i, x in enumerate(gpu_processes) if x]
         self.create_new_communicator(ranks, exp, process)
 
+        print "PROCESSES", expInfo.get_meta_data("processes")
+
         if gpu_processes[process]:
-            self.new_comm.Barrier()
+            print "RUNNING THE GPU PROCESSES", self.new_comm.Get_rank(), MPI.COMM_WORLD.Get_rank()
+            #expInfo.set_meta_data('process', self.new_comm.Get_rank())
             logging.debug("Running the GPU Process %i", process)
             logging.debug("Pre-processing")
             self.run_plugin_instances(transport, communicator=self.new_comm)
             self.clean_up()
             self.free_communicator()
+            #expInfo.set_meta_data('process', MPI.COMM_WORLD.Get_rank())
 
         self.exp.barrier()
         expInfo.set_meta_data('processes', processes)

@@ -68,6 +68,7 @@ class BaseAstraRecon(BaseRecon):
             self.slice_dim = in_pData.get_slice_dimension()
 
     def reconstruct(self, sino, cors, angles, vol_shape):
+        print "processing sino"
         self.nCols = sino.shape[self.dim_det_cols]
         self.nAngles = sino.shape[self.dim_rot]
         vol_geom, proj_geom = self.geom_setup_function(sino, angles,
@@ -76,7 +77,7 @@ class BaseAstraRecon(BaseRecon):
 
     def astra_reconstruction(self, sino, vol_geom, proj_geom):
         # currently hard-coded - for 3D version only!
-        #sino = np.transpose(sino, (1, 0, 2))
+        sino = np.transpose(sino, (1, 0, 2))
         self.sino_id = self.astra_function.create("-sino", proj_geom, sino)
         # Create a data object for the reconstruction
         self.rec_id = self.astra_function.create('-vol', vol_geom)
@@ -109,26 +110,46 @@ class BaseAstraRecon(BaseRecon):
     def geom_setup_3D(self, sino, angles, shape, cors):
         nSinos = sino.shape[self.slice_dim]
         length = len(angles)
-        theta = np.deg2rad(angles)
+        angles = np.deg2rad(angles)
 
         vectors = np.zeros((length, 12))
-        i = range(length)
-        # ray direction
-        vectors[i, 0] = np.sin(theta[i])
-        vectors[i, 1] = -np.cos(theta[i])
-        vectors[i, 2] = 0
-        # detector centre (use this for translation)
-        # assuming all sinograms are translated by the same amount for now
-        #det_vec = [cors[0], 0, 0]
-        det_vec = [0, 0, 0]
-        vectors[i, 3:6] = det_vec
-        # (use the following vectors for rotation)
-        # vector from detector pixel (0,0) to (0,1)
-        vectors[i, 6] = np.cos(theta[i])
-        vectors[i, 7] = np.sin(theta[i])
-        vectors[i, 8] = 0
-        # vector from detector pixel (0,0) to (1,0)
-        vectors[i, 9:12] = [0, 0, 1]
+        for i in range(len(angles)):
+            # ray direction
+            vectors[i, 0] = np.sin(angles[i])
+            vectors[i, 1] = -np.cos(angles[i])
+            vectors[i, 2] = 0
+
+            # center of detector
+            vectors[i, 3:6] = 0
+
+            # vector from detector pixel (0,0) to (0,1)
+            vectors[i, 6] = np.cos(angles[i])
+            vectors[i, 7] = np.sin(angles[i])
+            vectors[i, 8] = 0
+
+            # vector from detector pixel (0,0) to (1,0)
+            vectors[i, 9] = 0
+            vectors[i, 10] = 0
+            vectors[i, 11] = 1
+
+#        i = range(length)
+#        # ray direction
+#        vectors[i, 0] = np.sin(theta[i])
+#        vectors[i, 1] = -np.cos(theta[i])
+#        vectors[i, 2] = 0
+#        # detector centre (use this for translation)
+#        # assuming all sinograms are translated by the same amount for now
+#        #det_vec = [cors[0], 0, 0]
+#        det_vec = [0, 0, 0]
+#        vectors[i, 3:6] = det_vec
+#        # (use the following vectors for rotation)
+#        # vector from detector pixel (0,0) to (0,1)
+#        vectors[i, 6] = np.cos(theta[i])
+#        vectors[i, 7] = np.sin(theta[i])
+#        vectors[i, 8] = 0
+#        # vector from detector pixel (0,0) to (1,0)
+#        vectors[i, 9:12] = [0, 0, 1]
+
         # Parameters: #rows, #columns, vectors
         vol_geom = astra.create_vol_geom(nSinos, shape[0], shape[2])
         proj_geom = astra.create_proj_geom('parallel3d_vec', sino.shape[1],
