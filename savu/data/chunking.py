@@ -256,7 +256,6 @@ class Chunking(object):
         self.check_adjust_dims(adjust, chunks, 'up')
         return self.get_idx_order(adjust, chunks, 'up')
 
-    # Fix this!
     def get_idx_order(self, adjust, chunks, direction):
         process_order = [self.slice1, self.core]
         sl = slice(None, None, -1)
