@@ -13,13 +13,14 @@
 # limitations under the License.
 
 """
-.. module:: pyfai_azimuthal_integration_test
+.. module:: tomo_recon
    :platform: Unix
    :synopsis: runner for tests using the MPI framework
 
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
+
 import unittest
 import tempfile
 from savu.test import test_utils as tu
@@ -27,24 +28,14 @@ from savu.test import test_utils as tu
 from savu.test.plugin_runner_test import run_protected_plugin_runner
 
 
-class PyfaiTest(unittest.TestCase):
+class SimpleFitBoundedTest(unittest.TestCase):
 
-    def test_pyfai(self):
+    def test_process(self):
         options = {
             "transport": "hdf5",
             "process_names": "CPU0",
             "data_file": tu.get_test_data_path('mm.nxs'),
-            "process_file": tu.get_test_process_path('PyFAI_azimuth_test.nxs'),
-            "out_path": tempfile.mkdtemp()
-            }
-        run_protected_plugin_runner(options)
-
-    def test_pyfai_bragg_filter(self):
-        options = {
-            "transport": "hdf5",
-            "process_names": "CPU0",
-            "data_file": tu.get_test_data_path('mm.nxs'),
-            "process_file": tu.get_test_process_path('PyFAI_azimuth_test_bragg.nxs'),
+            "process_file": tu.get_test_data_path('simplefittestXRF.nxs'),
             "out_path": tempfile.mkdtemp()
             }
         run_protected_plugin_runner(options)

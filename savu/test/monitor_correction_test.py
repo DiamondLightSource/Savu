@@ -13,11 +13,11 @@
 # limitations under the License.
 
 """
-.. module:: pyfai_azimuthal_integration_test
+.. module:: monitor_correction_test
    :platform: Unix
-   :synopsis: runner for tests using the MPI framework
+   :synopsis: tests the monitor correction
 
-.. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
+.. moduleauthor:: Aaron Parsons <scientificsoftware@diamond.ac.uk>
 
 """
 import unittest
@@ -27,24 +27,14 @@ from savu.test import test_utils as tu
 from savu.test.plugin_runner_test import run_protected_plugin_runner
 
 
-class PyfaiTest(unittest.TestCase):
+class MonitorCorrectionTest(unittest.TestCase):
 
-    def test_pyfai(self):
+    def test_monitor_correction(self):
         options = {
             "transport": "hdf5",
             "process_names": "CPU0",
             "data_file": tu.get_test_data_path('mm.nxs'),
-            "process_file": tu.get_test_process_path('PyFAI_azimuth_test.nxs'),
-            "out_path": tempfile.mkdtemp()
-            }
-        run_protected_plugin_runner(options)
-
-    def test_pyfai_bragg_filter(self):
-        options = {
-            "transport": "hdf5",
-            "process_names": "CPU0",
-            "data_file": tu.get_test_data_path('mm.nxs'),
-            "process_file": tu.get_test_process_path('PyFAI_azimuth_test_bragg.nxs'),
+            "process_file": tu.get_test_process_path('monitor_correction_test.nxs'),
             "out_path": tempfile.mkdtemp()
             }
         run_protected_plugin_runner(options)
