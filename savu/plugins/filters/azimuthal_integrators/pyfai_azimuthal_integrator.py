@@ -21,8 +21,6 @@
 """
 
 import logging
-
-import numpy as np
 from savu.plugins.filters.base_azimuthal_integrator import BaseAzimuthalIntegrator
 
 from savu.plugins.utils import register_plugin
@@ -44,11 +42,11 @@ class PyfaiAzimuthalIntegrator(BaseAzimuthalIntegrator):
         logging.debug("Starting 1D azimuthal integrationr")
         super(PyfaiAzimuthalIntegrator,
               self).__init__("PyfaiAzimuthalIntegrator")
-              
+
     def filter_frames(self, data):
         t1 = time.time()
         mData = self.params[2]
-        mask =self.params[0]
+        mask = self.params[0]
         ai = self.params[3]
         logging.debug("Running azimuthal integration")
         fit = ai.xrpd(data=data[0], npt=self.npts)
