@@ -291,8 +291,7 @@ class Completer(object):
             [c + ' ' for c in commands.keys() if c.startswith(cmd)] + [None]
         return results[state]
 
-
-if __name__ == '__main__':
+def main():
     print "Starting Savu Config tool (please wait for prompt)"
 
     comp = Completer()
@@ -335,3 +334,7 @@ if __name__ == '__main__':
             print "I'm sorry, thats not a command I recognise, try help"
 
     print "Thanks for using the application"
+
+    
+if __name__ == '__main__':
+    main()

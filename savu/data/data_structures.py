@@ -696,6 +696,27 @@ class PluginData(object):
     def get_slice_directions(self):
         return self.meta_data.get_meta_data('slice_dir')
 
+    def get_slice_dimension(self):
+        """
+        Return the position of the slice dimension in relation to the data
+        handed to the plugin.
+        """
+        core_dirs = self.get_core_directions()
+        slice_dir = self.get_slice_directions()[0]
+        return list(set(core_dirs + (slice_dir,))).index(slice_dir)
+
+    def get_data_dimension_by_axis_label(self, label, contains=False):
+        """
+        Return the dimension of the data in the plugin that has the specified
+        axis label.
+        """
+        label_dim = \
+            self.data_obj.find_axis_label_dimension(label, contains=contains)
+        plugin_dims = self.get_core_directions()
+        if self.get_frame_chunk() > 1:
+            plugin_dims += (self.get_slice_directions()[0],)
+        return list(set(plugin_dims)).index(label_dim)
+
     def set_slicing_order(self, order):
         """
         Reorder the slice directions.  The fastest changing slice direction

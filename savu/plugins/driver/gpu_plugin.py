@@ -21,13 +21,13 @@
 
 """
 import logging
+import copy
+from mpi4py import MPI
 
-import numpy as np
-
-import savu.plugins.utils as pu
+from savu.plugins.driver.plugin_driver import PluginDriver
 
 
-class GpuPlugin(object):
+class GpuPlugin(PluginDriver):
     """
     The base class from which all plugins should inherit.
     """
@@ -38,73 +38,49 @@ class GpuPlugin(object):
     def run_plugin(self, exp, transport):
 
         expInfo = exp.meta_data
-        processes = expInfo.get_meta_data("processes")
+        processes = copy.copy(expInfo.get_meta_data("processes"))
         process = expInfo.get_meta_data("process")
 
-        count = 0
         gpu_processes = []
         for i in ["GPU" in i for i in processes]:
             if i:
-                gpu_processes.append(count)
-                count += 1
+                gpu_processes.append(1)
             else:
-                gpu_processes.append(-1)
-        if gpu_processes[process] >= 0:
+                gpu_processes.append(0)
+
+        # set only GPU processes
+        new_processes = [i for i in processes if 'GPU' in i]
+        expInfo.set_meta_data('processes', new_processes)
+
+        if not new_processes:
+            raise Exception("THERE ARE NO GPU PROCESSES!")
+
+        ranks = [i for i, x in enumerate(gpu_processes) if x]
+        self.create_new_communicator(ranks, exp, process)
+
+        print "PROCESSES", expInfo.get_meta_data("processes")
+
+        if gpu_processes[process]:
+            print "RUNNING THE GPU PROCESSES", self.new_comm.Get_rank(), MPI.COMM_WORLD.Get_rank()
+            #expInfo.set_meta_data('process', self.new_comm.Get_rank())
             logging.debug("Running the GPU Process %i", process)
-            #new_processes = [i for i in processes if "GPU" in i]
-
             logging.debug("Pre-processing")
+            self.run_plugin_instances(transport, communicator=self.new_comm)
+            self.clean_up()
+            self.free_communicator()
+            #expInfo.set_meta_data('process', MPI.COMM_WORLD.Get_rank())
 
-        self.run_plugin_instances(transport)
-        self.clean_up()
-
-        logging.debug("Not Running the task as not GPU")
+        self.exp.barrier()
+        expInfo.set_meta_data('processes', processes)
         return
 
-    def run_plugin_instances(self, transport):
-        out_data = self.get_out_datasets()
-        extra_dims = self.extra_dims
-        repeat = np.prod(extra_dims) if extra_dims else 1
+    def create_new_communicator(self, ranks, exp, process):
+        self.group = MPI.COMM_WORLD.Get_group()
+        self.new_group = MPI.Group.Incl(self.group, ranks)
+        self.new_comm = MPI.COMM_WORLD.Create(self.new_group)
+        self.exp.barrier()
 
-        param_idx = pu.calc_param_indices(extra_dims)
-        out_data_dims = [len(d.get_shape()) for d in out_data]
-        param_dims = [range(d - len(extra_dims), d) for d in out_data_dims]
-        for i in range(repeat):
-            if repeat > 1:
-                self.set_parameters_this_instance(param_idx[i])
-                for j in range(len(out_data)):
-                    out_data[j].get_plugin_data()\
-                        .set_fixed_directions(param_dims[j], param_idx[i])
-
-            logging.info("%s.%s", self.__class__.__name__, 'pre_process')
-            self.pre_process()
-
-            logging.info("%s.%s", self.__class__.__name__, 'process')
-            transport.process(self)
-
-            logging.info("%s.%s", self.__class__.__name__, 'barrier')
-            self.exp.barrier()
-
-            logging.info("%s.%s", self.__class__.__name__, 'post_process')
-            self.post_process()
-
-            logging.info("%s.%s", self.__class__.__name__, 'barrier')
-
-    def process(self, data, output, processes, plugin):
-        """
-        This method is called after the plugin has been created by the
-        pipeline framework
-
-        :param data: The input data object.
-        :type data: savu.data.structures
-        :param data: The output data object
-        :type data: savu.data.structures
-        :param processes: The number of processes which will be doing the work
-        :type path: int
-        :param path: The specific process which we are
-        :type path: int
-        """
-        logging.error("process needs to be implemented for proc %i of %i :" +
-                      " input is %s and output is %s",
-                      plugin, processes, data.__class__, output.__class__)
-        raise NotImplementedError("process needs to be implemented")
+    def free_communicator(self):
+        self.group.Free()
+        self.new_group.Free()
+        self.new_comm.Free()

@@ -30,10 +30,11 @@ from savu.plugins.utils import register_plugin
 class AstraReconGpu(BaseAstraRecon, GpuPlugin):
     """
     A Plugin to run the astra reconstruction
-    
-    :param number_of_iterations: Number of Iterations if an iterative method is used . Default: 1.
-    :param reconstruction_type: Reconstruction type (FBP_CUDA|SIRT_CUDA|SART_CUDA|CGLS_CUDA| \
-                                                     SIRT3D_CUDA|CGLS3D_CUDA). Default: 'FBP_CUDA'.
+
+    :param number_of_iterations: Number of Iterations if an iterative method\
+        is used . Default: 1.
+    :param reconstruction_type: Reconstruction type (FBP_CUDA|SIRT_CUDA|\
+        SART_CUDA|CGLS_CUDA|SIRT3D_CUDA|CGLS3D_CUDA). Default: 'FBP_CUDA'.
     """
 
     def __init__(self):

@@ -69,9 +69,9 @@ class PluginRunner(object):
         logging.info("run_plugin_list: 4")
         self.exp.barrier()
 
-        print "***********************"
-        print "* Processing Complete *"
-        print "***********************"
+        cu.user_message("***********************")
+        cu.user_message("* Processing Complete *")
+        cu.user_message("***********************")
         return self.exp
 
     def run_plugin_list_check(self, plugin_list):
@@ -85,7 +85,7 @@ class PluginRunner(object):
         self.exp.clear_data_objects()
 
         self.exp.barrier()
-        print "Plugin list check complete!"
+        cu.user_message("Plugin list check complete!")
 
     def check_loaders_and_savers(self, plugin_list):
         first_plugin = plugin_list[0]

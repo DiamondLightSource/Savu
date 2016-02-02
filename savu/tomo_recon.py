@@ -81,9 +81,13 @@ def set_options(opt, args):
     options["out_path"] = args[2]
     return options
 
-if __name__ == '__main__':
+def main():
     [options, args] = option_parser()
     check_input_params(args)
     options = set_options(options, args)
     plugin_runner = PluginRunner(options)
     plugin_runner.run_plugin_list(options)
+
+    
+if __name__ == '__main__':
+    main()

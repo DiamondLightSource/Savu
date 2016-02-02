@@ -30,6 +30,7 @@ from mpi4py import MPI
 from itertools import chain
 from savu.core.transport_control import TransportControl
 import savu.plugins.utils as pu
+import savu.core.utils as cu
 
 
 class Hdf5Transport(TransportControl):
@@ -104,58 +105,53 @@ class Hdf5Transport(TransportControl):
                                           ' %(levelname)-6s %(message)s'))
         logger.addHandler(fh)
 
+        cu.add_user_log_level()
+        cu.add_user_log_handler(logger, os.path.join(options["out_path"],
+                                                     'user.log'))
+
     def set_logger_parallel(self, number, rank, options):
         logging.basicConfig(level=self.get_log_level(options),
                             format='L %(relativeCreated)12d M' +
                             number + ' ' + rank +
                             ' %(levelname)-6s %(message)s', datefmt='%H:%M:%S')
 
+        # Only add user logging to the 0 rank process so we don't get
+        # a lot of output, just a summary, but we want the user messages
+        # tagged in all rank processes
+        cu.add_user_log_level()
+        if MPI.COMM_WORLD.rank == 0:
+            logging.getLogger()
+            cu.add_user_log_handler(logging.getLogger(),
+                                    os.path.join(options["out_path"],
+                                                 'user.log'))
+
     def transport_run_plugin_list(self):
         """
         Runs a chain of plugins
         """
         exp = self.exp
-#        logging.info("transport_run_plugin_list: 1")
-#        exp.barrier()
+
         plugin_list = exp.meta_data.plugin_list.plugin_list
-
-#        logging.info("transport_run_plugin_list: 2")
-#        exp.barrier()
         pu.plugin_loader(exp, plugin_list[0])
-
-#        logging.info("transport_run_plugin_list: 3")
 
         start = 1
         stop = start
         n_plugins = len(plugin_list[start:-1]) + 1
         while n_plugins != stop:
 
-#            logging.info("transport_run_plugin_list: 2")
-#            exp.barrier()
-
             start_in_data = copy.deepcopy(self.exp.index['in_data'])
             in_data = exp.index["in_data"][exp.index["in_data"].keys()[0]]
 
-#            logging.info("transport_run_plugin_list: 3")
-#            exp.barrier()
-
             out_data_objs, stop = in_data.load_data(start)
-
-#            logging.info("transport_run_plugin_list: 4")
-#            exp.barrier()
 
             exp.clear_data_objects()
             self.exp.index['in_data'] = copy.deepcopy(start_in_data)
             self.real_plugin_run(plugin_list, out_data_objs, start, stop)
             start = stop
 
-#        logging.info("transport_run_plugin_list: 5")
-#        exp.barrier()
         for key in exp.index["in_data"].keys():
             exp.index["in_data"][key].close_file()
 
-#        logging.info("transport_run_plugin_list: 6")
-#        exp.barrier()
         return
 
     def real_plugin_run(self, plugin_list, out_data_objs, start, stop):
@@ -173,7 +169,7 @@ class Hdf5Transport(TransportControl):
             plugin = pu.plugin_loader(exp, plugin_list[i])
 
             exp.barrier()
-            print "\n*running the", plugin_list[i]['id'], "plugin*\n"
+            cu.user_message("*Running the %s plugin*" % (plugin_list[i]['id']))
             plugin.run_plugin(exp, self)
 
             exp.barrier()
@@ -190,10 +186,11 @@ class Hdf5Transport(TransportControl):
         squeeze_dict = self.set_functions(in_data, 'squeeze')
         expand_dict = self.set_functions(out_data, 'expand')
 
-        for count in range(len(in_slice_list[0])):
-            # print every 10th loop iteration to screen
-            #if (count % 10) == 0:
-            print count
+        number_of_slices_to_process = len(in_slice_list[0])
+        for count in range(number_of_slices_to_process):
+            percent_complete = count/(number_of_slices_to_process * 0.01)
+            cu.user_message("%s - %3i%% complete" %
+                            (plugin.name, percent_complete))
 
             section, slice_list = \
                 self.get_all_padded_data(in_data, in_slice_list, count,
@@ -201,6 +198,8 @@ class Hdf5Transport(TransportControl):
             result = plugin.process_frames(section, slice_list)
             self.set_out_data(out_data, out_slice_list, result, count,
                               expand_dict)
+
+        cu.user_message("%s - 100%% complete" % (plugin.name))
         plugin.revert_preview(in_data)
 
     def process_checks(self):
