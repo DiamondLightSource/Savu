@@ -124,11 +124,12 @@ class Chunking(object):
                            2: self.core_core, 3: self.core_other,
                            4: self.core_slice}
 
+        print self.core, self.slice1, self.other
+
         adj_idx = 0
         for dim in adjust['dim']:
-            count = (adj_idx in self.core)*4 + (adj_idx in self.slice1)*2 + \
-                (adj_idx in self.other) - 2
-            count = 2*self.slice1.count(adj_idx) + self.other.count(adj_idx)
+            count = (dim in self.core)*4 + (dim in self.slice1)*2 + \
+                (dim in self.other) - 2
             chunks[dim] = chunk_functions[count](dim, adj_idx, adjust, shape)
             if 'VOLUME' in self.next_pattern:
                 self.set_volume_bounds(adjust, dim, chunks)
@@ -161,6 +162,8 @@ class Chunking(object):
         return 1
 
     def slice_slice(self, dim, adj_idx, adjust, shape):
+        print "slice_slice"
+        print self.get_max_frames_dict(), dim
         max_frames = self.get_max_frames_dict()[dim]
         adjust['inc']['up'][adj_idx] = '+' + str(max_frames)
         adjust['inc']['down'][adj_idx] = '-' + str(max_frames)
@@ -177,7 +180,6 @@ class Chunking(object):
     def get_max_frames_dict(self):
         current_sdir = self.current['slice_dir'][0]
         next_sdir = self.next['slice_dir'][0]
-        
         if current_sdir == next_sdir:
             c_max = self.current['max_frames']
             n_max = self.next['max_frames']
