@@ -14,6 +14,7 @@ python:
 #    - libboost-all-dev
 
 before_install:
+  - sudo apt-get update
   - sudo apt-get install libblas-dev
   - sudo apt-get install liblapack-dev
   - sudo apt-get install gfortran
