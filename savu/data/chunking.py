@@ -83,7 +83,6 @@ class Chunking(object):
         and max value)
         """
         adjust_dim = self.get_adjustable_dims()
-        print "*****", adjust_dim
         array_len = len(adjust_dim)
         adjust_max = [1]*array_len
         for i in range(array_len):
@@ -97,7 +96,8 @@ class Chunking(object):
         Get all core dimensions and fastest changing slice dimension (all
         potentially adjustable)
         """
-        nDims = len(self.current['slice_dir'] + self.current['core_dir'])
+
+        nDims = len(list(self.current['slice_dir']) + list(self.current['core_dir']))
         self.core = list(self.convert_dir(self.current['core_dir'], nDims)) + \
             list(self.convert_dir(self.next['core_dir'], nDims))
         c_sl = list(self.current['slice_dir'])
@@ -120,12 +120,14 @@ class Chunking(object):
         """
         Calculate initial chunk values
         """
-        chunk_functions = {0: self.core_core, 1: self.core_other,
-                           2: self.core_slice, 3: self.slice_other,
-                           4: self.slice_slice}
+        chunk_functions = {0: self.slice_slice, 1: self.slice_other,
+                           2: self.core_core, 3: self.core_other,
+                           4: self.core_slice}
 
         adj_idx = 0
         for dim in adjust['dim']:
+            count = (adj_idx in self.core)*4 + (adj_idx in self.slice1)*2 + \
+                (adj_idx in self.other) - 2
             count = 2*self.slice1.count(adj_idx) + self.other.count(adj_idx)
             chunks[dim] = chunk_functions[count](dim, adj_idx, adjust, shape)
             if 'VOLUME' in self.next_pattern:
@@ -134,21 +136,17 @@ class Chunking(object):
         return chunks
 
     def set_volume_bounds(self, adjust, dim, chunks):
-        print "dim", dim, adjust
         adjust['bounds']['min'][dim] = \
             eval(str(62) + adjust['inc']['down'][dim])
         chunks[dim] = int(min(adjust['bounds']['max'][dim], 62))
 
     def core_core(self, dim, adj_idx, adjust, shape):
-        print "core_core"
         adjust['inc']['up'][adj_idx] = '+1'
         adjust['inc']['down'][adj_idx] = '/2'
         adjust['bounds']['max'][adj_idx] = shape[dim]
         return shape[dim]
 
     def core_slice(self, dim, adj_idx, adjust, shape):
-        print "core slice"
-        print self.get_max_frames_dict()[dim]
         max_frames = self.get_max_frames_dict()[dim]
         adjust['inc']['up'][adj_idx] = '+' + str(max_frames)
         adjust['inc']['down'][adj_idx] = '-' + str(max_frames)
@@ -157,25 +155,20 @@ class Chunking(object):
         return max_frames
 
     def core_other(self, dim, adj_idx, adjust, shape):
-        print "core other"
         adjust['inc']['up'][adj_idx] = '+1'
         adjust['inc']['down'][adj_idx] = '-1'
         adjust['bounds']['max'][adj_idx] = shape[dim]
         return 1
 
     def slice_slice(self, dim, adj_idx, adjust, shape):
-        print "slice slice"
         max_frames = self.get_max_frames_dict()[dim]
         adjust['inc']['up'][adj_idx] = '+' + str(max_frames)
         adjust['inc']['down'][adj_idx] = '-' + str(max_frames)
         adjust['bounds']['max'][adj_idx] = \
             self.max_frames_per_process(shape[dim], max_frames)
-        print "in slice slice - adjust", adjust
-        print max_frames
         return max_frames
 
     def slice_other(self, dim, adj_idx, adjust, shape):
-        print "slice_other"
         adjust['inc']['up'][adj_idx] = '+1'
         adjust['inc']['down'][adj_idx] = '-1'
         adjust['bounds']['max'][adj_idx] = shape[dim]
@@ -184,6 +177,7 @@ class Chunking(object):
     def get_max_frames_dict(self):
         current_sdir = self.current['slice_dir'][0]
         next_sdir = self.next['slice_dir'][0]
+        
         if current_sdir == next_sdir:
             c_max = self.current['max_frames']
             n_max = self.next['max_frames']
@@ -216,10 +210,8 @@ class Chunking(object):
         chunk_size = np.prod(chunks)*np.dtype(ttype).itemsize
         cache_size = 1000000
         if (chunk_size > cache_size):
-            print "decreasing"
             self.decrease_chunks(chunks, ttype, adjust)
         else:
-            print "increasing"
             chunks = self.increase_chunks(chunks, ttype, shape, adjust)
         return tuple(chunks)
 
@@ -242,7 +234,6 @@ class Chunking(object):
         while ((np.prod(next_chunks)*np.dtype(ttype).itemsize) < 1000000):
             chunks = copy.copy(next_chunks)
             idx = self.get_idx_increase(next_chunks, adjust)
-            print "increasing idx", idx
             if idx == -1:
                 break
             dim = adjust['dim'].index(idx)
