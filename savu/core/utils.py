@@ -86,7 +86,7 @@ def add_user_log_level():
 
 def add_user_log_handler(logger, user_log_path):
     fh = logging.FileHandler(user_log_path, mode='w')
-    fh.setFormatter(logging.Formatter('%(relativeCreated)12d - %(message)s'))
+    fh.setFormatter(logging.Formatter('%(asctime)s - %(message)s'))
     fh.setLevel(USER_LOG_LEVEL)
     logger.addHandler(fh)
     USER_LOG_HANDLER = fh
