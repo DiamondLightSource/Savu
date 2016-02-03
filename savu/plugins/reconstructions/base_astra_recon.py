@@ -77,7 +77,7 @@ class BaseAstraRecon(BaseRecon):
 
     def astra_reconstruction(self, sino, vol_geom, proj_geom):
         # currently hard-coded - for 3D version only!
-        sino = np.transpose(sino, (1, 0, 2))
+        #sino = np.transpose(sino, (1, 0, 2))
         self.sino_id = self.astra_function.create("-sino", proj_geom, sino)
         # Create a data object for the reconstruction
         self.rec_id = self.astra_function.create('-vol', vol_geom)

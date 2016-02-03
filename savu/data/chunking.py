@@ -83,6 +83,7 @@ class Chunking(object):
         and max value)
         """
         adjust_dim = self.get_adjustable_dims()
+        print "*****", adjust_dim
         array_len = len(adjust_dim)
         adjust_max = [1]*array_len
         for i in range(array_len):
@@ -96,13 +97,24 @@ class Chunking(object):
         Get all core dimensions and fastest changing slice dimension (all
         potentially adjustable)
         """
-        self.core = \
-            list(self.current['core_dir']) + list(self.next['core_dir'])
+        nDims = len(self.current['slice_dir'] + self.current['core_dir'])
+        self.core = list(self.convert_dir(self.current['core_dir'], nDims)) + \
+            list(self.convert_dir(self.next['core_dir'], nDims))
         c_sl = list(self.current['slice_dir'])
         n_sl = list(self.next['slice_dir'])
         self.slice1 = [c_sl[0]] + [n_sl[0]]
         self.other = c_sl[1:] + n_sl[1:]
         return list(set(self.core + self.slice1))
+
+    def convert_dir(self, ddirs, nDims):
+        """
+        Convert negative directions
+        """
+        index = [i for i in range(len(ddirs)) if ddirs[i] < 0]
+        list_ddirs = list(ddirs)
+        for i in index:
+            list_ddirs[i] = nDims + ddirs[i]
+        return tuple(list_ddirs)
 
     def set_chunks(self, chunks, shape, adjust):
         """
@@ -125,7 +137,6 @@ class Chunking(object):
         print "dim", dim, adjust
         adjust['bounds']['min'][dim] = \
             eval(str(62) + adjust['inc']['down'][dim])
-        #adjust['bounds']['max'][dim] = int(min(adjust['bounds']['max'][dim], 62))
         chunks[dim] = int(min(adjust['bounds']['max'][dim], 62))
 
     def core_core(self, dim, adj_idx, adjust, shape):
@@ -137,6 +148,7 @@ class Chunking(object):
 
     def core_slice(self, dim, adj_idx, adjust, shape):
         print "core slice"
+        print self.get_max_frames_dict()[dim]
         max_frames = self.get_max_frames_dict()[dim]
         adjust['inc']['up'][adj_idx] = '+' + str(max_frames)
         adjust['inc']['down'][adj_idx] = '-' + str(max_frames)
@@ -257,7 +269,6 @@ class Chunking(object):
         self.check_adjust_dims(adjust, chunks, 'up')
         return self.get_idx_order(adjust, chunks, 'up')
 
-    # Fix this!
     def get_idx_order(self, adjust, chunks, direction):
         process_order = [self.slice1, self.core]
         sl = slice(None, None, -1)
