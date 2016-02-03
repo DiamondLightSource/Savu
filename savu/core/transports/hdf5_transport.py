@@ -40,11 +40,13 @@ class Hdf5Transport(TransportControl):
 
         if len(processes) is 1:
             options["mpi"] = False
+            self.mpi = False
             options["process"] = 0
             options["processes"] = processes
             self.set_logger_single(options)
         else:
             options["mpi"] = True
+            self.mpi = True
             print("Options for mpi are")
             print(options)
             self.mpi_setup(options)
@@ -171,6 +173,14 @@ class Hdf5Transport(TransportControl):
             exp.barrier()
             cu.user_message("*Running the %s plugin*" % (plugin_list[i]['id']))
             plugin.run_plugin(exp, self)
+
+            exp.barrier()
+            if self.mpi:
+                cu.user_message_from_all(plugin.name,
+                                         plugin.executive_summary())
+            else:
+                cu.user_message("%s - %s" % (plugin.name,
+                                           plugin.executive_summary()))
 
             exp.barrier()
             out_datasets = plugin.parameters["out_datasets"]

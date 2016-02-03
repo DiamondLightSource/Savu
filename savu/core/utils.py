@@ -21,6 +21,7 @@
 """
 
 import logging
+from mpi4py import MPI
 
 
 def logfunction(func):
@@ -76,13 +77,25 @@ def test():
 USER_LOG_LEVEL = 100
 USER_LOG_HANDLER = None
 
+
 def user_message(message):
     logging.log(USER_LOG_LEVEL, message)
     if USER_LOG_HANDLER is not None:
         USER_LOG_HANDLER.flush()
 
+
+def user_message_from_all(header, message_text):
+    comm = MPI.COMM_WORLD
+    messages = comm.gather(message_text, root=0)
+    if comm.rank == 0:
+        for message in set(messages):
+            user_message("%s : %i processes report : %s" %
+                         (header, messages.count(message), message))
+
+
 def add_user_log_level():
     logging.addLevelName(USER_LOG_LEVEL, "USER")
+
 
 def add_user_log_handler(logger, user_log_path):
     fh = logging.FileHandler(user_log_path, mode='w')
