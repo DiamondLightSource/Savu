@@ -246,9 +246,20 @@ class Plugin(PluginDatasets):
         raise NotImplementedError("nOutput_datasets needs to be implemented")
 
     def get_citation_information(self):
-        """Gets the Citation Information for a plugin
+        """
+        Gets the Citation Information for a plugin
 
         :returns:  A populated savu.data.plugin_info.CitationInfomration
 
         """
         return None
+
+    def executive_summary(self):
+        """
+        Provide a summary to the user for the result of the plugin
+        e.g.
+        Warning, the sample may have shifted during data collection
+        Filter operated normally
+        :returns:  A string summary
+        """
+        return "Nothing to Report"
