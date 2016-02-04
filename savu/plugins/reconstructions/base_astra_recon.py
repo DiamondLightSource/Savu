@@ -24,7 +24,6 @@
 import logging
 import astra
 import numpy as np
-import math
 
 from savu.plugins.base_recon import BaseRecon
 

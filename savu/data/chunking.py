@@ -38,8 +38,6 @@ class Chunking(object):
     """
 
     def __init__(self, exp, patternDict):
-        print patternDict
-        print "\n\n********************chunking**************************"
         self.pattern_dict = patternDict
         self.current = patternDict['current'][patternDict['current'].keys()[0]]
         if patternDict['next']:
@@ -47,12 +45,11 @@ class Chunking(object):
         else:
             self.next = self.current
 
-        print "current", patternDict['current'].keys()[0], self.current
         try:
             self.next_pattern = patternDict['next'].keys()[0]
         except AttributeError:
             self.next_pattern = patternDict['current'].keys()[0]
-        print "next", self.next_pattern, self.next
+
         self.exp = exp
         self.core = None
         self.slice1 = None
@@ -69,8 +66,6 @@ class Chunking(object):
         chunks = [1]*len(shape)
         adjust = self.set_adjust_params(shape)
         self.set_chunks(chunks, shape, adjust)
-
-        print "initial =", chunks
 
         if 0 in chunks:
             return True
@@ -152,7 +147,7 @@ class Chunking(object):
         adjust['inc']['down'][adj_idx] = '-' + str(max_frames)
         adjust['bounds']['max'][adj_idx] = \
             self.max_frames_per_process(shape[dim], max_frames)
-        return max_frames
+        return min(max_frames, shape[dim])
 
     def core_other(self, dim, adj_idx, adjust, shape):
         adjust['inc']['up'][adj_idx] = '+1'
@@ -166,7 +161,7 @@ class Chunking(object):
         adjust['inc']['down'][adj_idx] = '-' + str(max_frames)
         adjust['bounds']['max'][adj_idx] = \
             self.max_frames_per_process(shape[dim], max_frames)
-        return max_frames
+        return min(max_frames, shape[dim])
 
     def slice_other(self, dim, adj_idx, adjust, shape):
         adjust['inc']['up'][adj_idx] = '+1'
@@ -209,10 +204,8 @@ class Chunking(object):
         chunk_size = np.prod(chunks)*np.dtype(ttype).itemsize
         cache_size = 1000000
         if (chunk_size > cache_size):
-            print "decreasing"
             self.decrease_chunks(chunks, ttype, adjust)
         else:
-            print "increasing"
             chunks = self.increase_chunks(chunks, ttype, shape, adjust)
         return tuple(chunks)
 

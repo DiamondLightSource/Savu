@@ -146,7 +146,8 @@ class Hdf5TransportData(object):
         # output remaining metadata
 
     def output_axis_labels(self, entry):
-        axis_labels = self.meta_data.get_meta_data("axis_labels")
+        axis_labels = self.data_info.get_meta_data("axis_labels")
+        print "axis_labels***********=", axis_labels
         axes = []
         count = 0
         for labels in axis_labels:
@@ -167,7 +168,7 @@ class Hdf5TransportData(object):
         process = self.exp.meta_data.get_meta_data('process')
         if process is 0:
             plugin_file, entry = self.add_data_links(link_type)
-            #self.output_metadata(entry)
+            self.output_metadata(entry)
             plugin_file.close()
 
     def close_file(self):

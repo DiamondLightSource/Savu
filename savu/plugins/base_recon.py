@@ -24,10 +24,7 @@
 """
 import logging
 
-logging.debug("Importing packages in base_recon")
-
 from savu.plugins.plugin import Plugin
-
 import numpy as np
 
 
@@ -113,9 +110,9 @@ class BaseRecon(Plugin):
         dim_volX, dim_volY, dim_volZ = \
             self.map_volume_dimensions(in_dataset[0])
 
-        axis_labels = {in_dataset[0]: [str(dim_volX) + '.voxel_x.voxels',
+        axis_labels = [str(dim_volX) + '.voxel_x.voxels',
                        str(dim_volY) + '.voxel_y.voxels',
-                       str(dim_volZ) + '.voxel_z.voxels']}
+                       str(dim_volZ) + '.voxel_z.voxels']
 
         shape = list(in_dataset[0].get_shape())
         shape[dim_volX] = shape[dim_volZ]
