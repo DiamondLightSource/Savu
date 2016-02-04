@@ -42,6 +42,7 @@ class PluginList(object):
         self.plugin_list = []
 
     def populate_plugin_list(self, filename, activePass=False):
+        print "***", filename
         plugin_file = h5py.File(filename, 'r')
         plugin_group = plugin_file['entry/plugin']
         self.plugin_list = []

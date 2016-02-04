@@ -22,24 +22,144 @@
 """
 
 import unittest
-import tempfile
 from savu.test import test_utils as tu
+import numpy as np
 
-from savu.test.plugin_runner_test import run_protected_plugin_runner
+from savu.data.chunking import Chunking
+from savu.data.experiment_collection import Experiment
 
 
 class ChunkingTests(unittest.TestCase):
 
-    def test_spectra_to_tomo(self):
-        print "hello"
-        options = {
-            "transport": "hdf5",
-            "process_names": "CPU0",
-            "data_file": tu.get_test_data_path('mm.nxs'),
-            "process_file": tu.get_test_process_path('pyfai_tomo_chunking_test.nxs'),
-            "out_path": tempfile.mkdtemp()
-            }
-        run_protected_plugin_runner(options)
+#    def test_spectra_to_tomo(self):
+#        options = {
+#            "transport": "hdf5",
+#            "process_names": "CPU0",
+#            "data_file": tu.get_test_data_path('mm.nxs'),
+#            "process_file": tu.get_test_process_path('pyfai_tomo_chunking_test.nxs'),
+#            "out_path": tempfile.mkdtemp()
+#            }
+#        run_protected_plugin_runner(options)
+
+    def create_chunking_instance(self, current_list, nnext_list, nProcs):
+        current = self.create_pattern('a', current_list)
+        nnext = self.create_pattern('b', nnext_list)
+        options = tu.set_experiment('tomoRaw')
+        options['processes'] = range(nProcs)
+        # set a dummy process list
+        options['process_file'] = \
+            tu.get_test_process_path('basic_tomo_process.nxs')
+        exp = Experiment(options)
+        test_dict = {'current': current, 'next': nnext}
+        chunking = Chunking(exp, test_dict)
+        return chunking
+
+    def create_pattern(self, name, pattern_list):
+        pattern = {name: {'max_frames': pattern_list[0],
+                          'slice_dir': pattern_list[1],
+                          'core_dir': pattern_list[2]}}
+        return pattern
+
+    def get_nChunks(self, shape, chunks):
+        prod = 1
+        for i in range(len(shape)):
+            prod *= np.ceil(shape[i]/float(chunks[i]))
+        return prod
+
+    def test_chunks_2D(self):
+        current = [1, (0,), (1,)]
+        nnext = [1, (0,), (1,)]
+        shape = (100, 20)
+        nProcs = 1
+        chunking = self.create_chunking_instance(current, nnext, nProcs)
+        chunks = chunking.calculate_chunking(shape, np.float32)
+        self.assertEqual(chunks, True)
+
+    def test_chunks_3D_1(self):
+        current = [1, (0,), (1, 2)]
+        nnext = [1, (0,), (1, 2)]
+        shape = (5000, 500, 500)
+        nProcs = 1
+        chunking = self.create_chunking_instance(current, nnext, nProcs)
+        chunks = chunking.calculate_chunking(shape, np.float32)
+        self.assertEqual(chunks, (1, 500, 500))
+
+        nProcs = 2
+        chunking = self.create_chunking_instance(current, nnext, nProcs)
+        chunks = chunking.calculate_chunking(shape, np.float32)
+        self.assertEqual(chunks, (1, 500, 500))
+
+        shape = (5000, 5000, 5000)
+        chunking = self.create_chunking_instance(current, nnext, nProcs)
+        chunks = chunking.calculate_chunking(shape, np.float32)
+        print "nChunks =", self.get_nChunks(shape, chunks)
+        self.assertEqual(chunks, (1, 625, 313))
+
+        shape = (5000, 5000, 5000)
+        chunking = self.create_chunking_instance(current, nnext, nProcs)
+        chunks = chunking.calculate_chunking(shape, np.float32)
+        print "nChunks =", self.get_nChunks(shape, chunks)
+        self.assertEqual(chunks, (1, 625, 313))
+
+        shape = (1, 800, 500)
+        chunking = self.create_chunking_instance(current, nnext, nProcs)
+        chunks = chunking.calculate_chunking(shape, np.float32)
+        print "nChunks =", self.get_nChunks(shape, chunks)
+        self.assertEqual(chunks, (1, 400, 500))
+
+    def test_chunks_3D_2(self):
+        current = [1, (0,), (1, 2)]
+        nnext = [1, (1,), (0, 2)]
+        shape = (50, 300, 100)
+        nProcs = 1
+        chunking = self.create_chunking_instance(current, nnext, nProcs)
+        chunks = chunking.calculate_chunking(shape, np.float32)
+        self.assertEqual(chunks, (50, 50, 100))
+
+        current = [8, (0,), (1, 2)]
+        nnext = [4, (1,), (0, 2)]
+        chunking = self.create_chunking_instance(current, nnext, nProcs)
+        chunks = chunking.calculate_chunking(shape, np.float32)
+        self.assertEqual(chunks, (48, 52, 100))
+
+        nProcs = 10
+        chunking = self.create_chunking_instance(current, nnext, nProcs)
+        chunks = chunking.calculate_chunking(shape, np.float32)
+        self.assertEqual(chunks, (8, 28, 100))
+
+    def test_chunks_4D_1(self):
+        current = [1, (0, 1), (2, 3)]
+        nnext = [1, (0, 1), (2, 3)]
+        shape = (800, 700, 600, 500)
+        nProcs = 1
+        chunking = self.create_chunking_instance(current, nnext, nProcs)
+        chunks = chunking.calculate_chunking(shape, np.float32)
+        self.assertEqual(chunks, (1, 1, 300, 500))
+
+        current = [1, (0, 1), (2, 3)]
+        nnext = [1, (2, 3), (0, 1)]
+        chunking = self.create_chunking_instance(current, nnext, nProcs)
+        chunks = chunking.calculate_chunking(shape, np.float32)
+        self.assertEqual(chunks, (23, 22, 22, 22))
+
+        current = [1, (0,), (1, 2, 3)]
+        nnext = [1, (0,), (1, 2, 3)]
+        chunking = self.create_chunking_instance(current, nnext, nProcs)
+        chunks = chunking.calculate_chunking(shape, np.float32)
+        self.assertEqual(chunks, (1, 44, 75, 63))
+
+        current = [4, (0,), (1, 2, 3)]
+        nnext = [8, (1, 2), (0, 3)]
+        chunking = self.create_chunking_instance(current, nnext, nProcs)
+        chunks = chunking.calculate_chunking(shape, np.float32)
+        self.assertEqual(chunks, (8, 8, 7, 500))
+
+        nProcs = 200
+        current = [4, (0,), (1, 2, 3)]
+        nnext = [8, (1, 2), (0, 3)]
+        chunking = self.create_chunking_instance(current, nnext, nProcs)
+        chunks = chunking.calculate_chunking(shape, np.float32)
+        self.assertEqual(chunks, (4, 8, 15, 500))
 
 if __name__ == "__main__":
     unittest.main()
