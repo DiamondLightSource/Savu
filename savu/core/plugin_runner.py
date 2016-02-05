@@ -73,6 +73,8 @@ class PluginRunner(object):
         cu.user_message("* Processing Complete *")
         cu.user_message("***********************")
 
+        self.exp.nxs_file.close()
+
         return self.exp
 
     def run_plugin_list_check(self, plugin_list):
