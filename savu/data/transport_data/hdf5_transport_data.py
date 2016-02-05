@@ -99,35 +99,67 @@ class Hdf5TransportData(object):
             expInfo.set_meta_data(["group_name", key], group_name)
 
     def add_data_links(self, linkType):
-
         nxs_filename = self.exp.meta_data.get_meta_data('nxs_filename')
         logging.debug("Adding link to file %s", nxs_filename)
-        plugin_file = h5py.File(nxs_filename, 'a')
+
+        #plugin_file = h5py.File(nxs_filename, 'a')
+        nxs_file = self.exp.nxs_file
+
+        self.exp.barrier()
+
+        entry = nxs_file['entry']
+
+        self.exp.barrier()
 
         if linkType is 'final_result':
             name = 'final_result_' + self.get_name()
-            entry = plugin_file['entry']
-            entry.attrs[NX_CLASS] = 'NXdata'
             entry[name] = self.external_link()
-        else:
+        elif linkType is 'intermediate':
             name = self.group_name + '_' + self.data_info.get_meta_data('name')
-            entry = plugin_file['entry'].require_group('intermediate')
-            entry.attrs[NX_CLASS] = 'NXcollection'
+            entry = entry.require_group('intermediate')
+            entry.attrs['NX_class'] = 'NXcollection'
             entry[name] = self.external_link()
-        return plugin_file, entry
+#            print "entry[name] in intermediate is", entry[name]
+        else:
+            raise Exception("The link type is not known")
+
+        self.exp.barrier()
+        return entry[name]
+
+#tthData, countsData = numpy.loadtxt(INPUT_FILE).T
+#
+#f = h5py.File(HDF5_FILE, "w")  # create the HDF5 NeXus file
+## since this is a simple example, no attributes are used at this point
+#
+#nxentry = f.create_group('Scan')
+#nxentry.attrs["NX_class"] = 'NXentry'
+#
+#nxdata = nxentry.create_group('data')
+#nxdata.attrs["NX_class"] = 'NXdata'
+#
+#tth = nxdata.create_dataset("two_theta", data=tthData)
+#tth.attrs['units'] = "degrees"
+#
+#counts = nxdata.create_dataset("counts", data=countsData)
+#counts.attrs['units'] = "counts"
+#counts.attrs['signal'] = 1
+#counts.attrs['axes'] = "two_theta"
+
 
     def output_metadata(self, entry):
-        self.output_axis_labels(entry)
+        logging.info("before outputting axis labels")
+        #self.output_axis_labels(entry)
+        logging.info("after outputting axis labels")
         # output remaining metadata *** implement this
 
     def output_axis_labels(self, entry):
         axis_labels = self.data_info.get_meta_data("axis_labels")
-        print "axis_labels***********=", axis_labels
         axes = []
         count = 0
         for labels in axis_labels:
             name = labels.keys()[0]
             axes.append(name)
+            logging.info(name + '_indices')
             entry.attrs[name + '_indices'] = count
 
             try:
@@ -140,11 +172,14 @@ class Hdf5TransportData(object):
         entry.attrs['axes'] = axes
 
     def save_data(self, link_type):
-        process = self.exp.meta_data.get_meta_data('process')
-        if process is 0:
-            plugin_file, entry = self.add_data_links(link_type)
-            self.output_metadata(entry)
-            plugin_file.close()
+        #process = self.exp.meta_data.get_meta_data('process')
+        #if process is 0:
+        entry = self.add_data_links(link_type)
+        self.output_metadata(entry)
+        logging.info("barrier 1")
+        self.exp.barrier()
+        logging.info("After barrier 1")
+        self.exp.nxs_file.close()
 
     def close_file(self):
         """

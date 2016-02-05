@@ -38,11 +38,11 @@ class PluginList(object):
     citation information for the plugin
     """
 
-    def __init__(self):
+    def __init__(self, exp):
         self.plugin_list = []
+        self.exp = exp
 
     def populate_plugin_list(self, filename, activePass=False):
-        print "***", filename
         plugin_file = h5py.File(filename, 'r')
         plugin_group = plugin_file['entry/plugin']
         self.plugin_list = []
@@ -64,8 +64,7 @@ class PluginList(object):
         plugin_file.close()
 
     def save_plugin_list(self, out_filename):
-        plugin_file = h5py.File(out_filename, 'w')
-        entry_group = plugin_file.create_group('entry')
+        entry_group = self.exp.nxs_file.create_group('entry')
         entry_group.attrs[NX_CLASS] = 'NXentry'
         plugins_group = entry_group.create_group('plugin')
         plugins_group.attrs[NX_CLASS] = 'NXplugin'
@@ -90,7 +89,6 @@ class PluginList(object):
                 pass
 
             count += 1
-        plugin_file.close()
 
     def add_plugin_citation(self, filename, plugin_number, citation):
         logging.debug("Adding Citation to file %s", filename)

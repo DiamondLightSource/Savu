@@ -26,6 +26,7 @@ import os
 import time
 import logging
 import copy
+import h5py
 
 from mpi4py import MPI
 
@@ -45,13 +46,14 @@ class Experiment(object):
         self.meta_data = MetaData(options)
         self.meta_data_setup(options["process_file"])
         self.index = {"in_data": {}, "out_data": {}, "mapping": {}}
+        self.nxs_file = None
 
     def get_meta_data(self):
         return self.meta_data
 
     def meta_data_setup(self, process_file):
         #self.meta_data.load_experiment_collection()
-        self.meta_data.plugin_list = PluginList()
+        self.meta_data.plugin_list = PluginList(self)
 
         try:
             rtype = self.meta_data.get_meta_data('run_type')
@@ -73,7 +75,7 @@ class Experiment(object):
             data_obj.add_base_classes(bases)
         return self.index[dtype][name]
 
-    def set_nxs_filename(self):
+    def set_nxs_file(self):
         name = self.index["in_data"].keys()[0]
         filename = os.path.basename(self.index["in_data"][name].
                                     backing_file.filename)
@@ -82,6 +84,7 @@ class Experiment(object):
                                 "%s_processed_%s.nxs" %
                                 (filename, time.strftime("%Y%m%d%H%M%S")))
         self.meta_data.set_meta_data("nxs_filename", filename)
+        self.nxs_file = h5py.File(filename, 'w')
 
     def remove_dataset(self, data_obj):
         data_obj.close_file()

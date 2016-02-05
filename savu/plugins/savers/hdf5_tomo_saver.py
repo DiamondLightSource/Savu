@@ -118,8 +118,7 @@ class Hdf5TomoSaver(BaseSaver):
         else:
             shape = data.get_shape()
             if current_and_next is 0:
-                data.data = group.create_dataset("data", shape,
-                                                 data.dtype)
+                data.data = group.create_dataset("data", shape, data.dtype)
             else:
                 logging.info("create_entries: 2")
                 self.exp.barrier()
