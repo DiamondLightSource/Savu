@@ -184,7 +184,6 @@ class Hdf5Transport(TransportControl):
 
             exp.barrier()
             out_datasets = plugin.parameters["out_datasets"]
-
             exp.reorganise_datasets(out_datasets, link_type)
 
     def process(self, plugin):

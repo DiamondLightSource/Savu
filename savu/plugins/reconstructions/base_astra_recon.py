@@ -67,7 +67,6 @@ class BaseAstraRecon(BaseRecon):
             self.slice_dim = in_pData.get_slice_dimension()
 
     def reconstruct(self, sino, cors, angles, vol_shape):
-        print "processing sino"
         self.nCols = sino.shape[self.dim_det_cols]
         self.nAngles = sino.shape[self.dim_rot]
         vol_geom, proj_geom = self.geom_setup_function(sino, angles,
