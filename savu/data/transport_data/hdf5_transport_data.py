@@ -98,53 +98,71 @@ class Hdf5TransportData(object):
             expInfo.set_meta_data(["filename", key], filename)
             expInfo.set_meta_data(["group_name", key], group_name)
 
+#
+#
+#tth = self.data
+#tth.avail['units'] = 'degrees'
+#
+#
+#
+#
+## put the detector counts in an external NeXus HDF5 data file
+#f = my_lib.makeFile(FILE_HDF5_COUNTS)
+#nxentry = my_lib.makeGroup(f, 'entry', 'NXentry')
+#nxinstrument = my_lib.makeGroup(nxentry, 'instrument', 'NXinstrument')
+#nxdetector = my_lib.makeGroup(nxinstrument, 'detector', 'NXdetector')
+#counts = my_lib.makeDataset(nxdetector, "counts", countsData, 
+#                   units='counts', signal=1, axes='two_theta')
+## make a link since "two_theta" has not been stored here
+#my_lib.makeExternalLink(f, FILE_HDF5_ANGLES, 
+#                        '/angles', nxdetector.name+'/two_theta')
+#f.close()
+#
+#
+## create a master NeXus HDF5 file
+#f = my_lib.makeFile(FILE_HDF5_MASTER)
+#nxentry = my_lib.makeGroup(f, 'entry', 'NXentry')
+#nxdata = my_lib.makeGroup(nxentry, 'data', 'NXdata')
+#my_lib.makeExternalLink(f, FILE_HDF5_ANGLES, 
+#                        '/angles', nxdata.name+'/two_theta')
+#my_lib.makeExternalLink(f, FILE_HDF5_COUNTS, 
+#                        '/entry/instrument/detector/counts', 
+#                        nxdata.name+'/counts')
+#my_lib.makeExternalLink(f, FILE_HDF5_COUNTS, 
+#                        '/entry/instrument', 
+#                        nxentry.name+'/instrument')
+#f.close()
+#
+#
+
+
+
+
+
     def add_data_links(self, linkType):
         nxs_filename = self.exp.meta_data.get_meta_data('nxs_filename')
         logging.debug("Adding link to file %s", nxs_filename)
 
-        #plugin_file = h5py.File(nxs_filename, 'a')
         nxs_file = self.exp.nxs_file
-
-        self.exp.barrier()
-
         entry = nxs_file['entry']
-
-        self.exp.barrier()
 
         if linkType is 'final_result':
             name = 'final_result_' + self.get_name()
-            entry[name] = self.external_link()
+            nx_data = entry.create_group(name)
+            nx_data.attrs['NX_class']= 'Nxdata'
+            nx_data.attrs['test'] = 10
+            nx_data[name] = self.external_link()
+            print nx_data
+
         elif linkType is 'intermediate':
             name = self.group_name + '_' + self.data_info.get_meta_data('name')
             entry = entry.require_group('intermediate')
             entry.attrs['NX_class'] = 'NXcollection'
             entry[name] = self.external_link()
-#            print "entry[name] in intermediate is", entry[name]
         else:
             raise Exception("The link type is not known")
 
-        self.exp.barrier()
-        return entry[name]
-
-#tthData, countsData = numpy.loadtxt(INPUT_FILE).T
-#
-#f = h5py.File(HDF5_FILE, "w")  # create the HDF5 NeXus file
-## since this is a simple example, no attributes are used at this point
-#
-#nxentry = f.create_group('Scan')
-#nxentry.attrs["NX_class"] = 'NXentry'
-#
-#nxdata = nxentry.create_group('data')
-#nxdata.attrs["NX_class"] = 'NXdata'
-#
-#tth = nxdata.create_dataset("two_theta", data=tthData)
-#tth.attrs['units'] = "degrees"
-#
-#counts = nxdata.create_dataset("counts", data=countsData)
-#counts.attrs['units'] = "counts"
-#counts.attrs['signal'] = 1
-#counts.attrs['axes'] = "two_theta"
-
+        return nx_data
 
     def output_metadata(self, entry):
         logging.info("before outputting axis labels")
@@ -172,10 +190,16 @@ class Hdf5TransportData(object):
         entry.attrs['axes'] = axes
 
     def save_data(self, link_type):
-        #process = self.exp.meta_data.get_meta_data('process')
+        
+        self.exp.barrier()
+        process = self.exp.meta_data.get_meta_data('process')
         #if process is 0:
+        self.exp.barrier()
         entry = self.add_data_links(link_type)
+        self.exp.barrier()
         self.output_metadata(entry)
+        self.exp.barrier()
+        
         logging.info("barrier 1")
         self.exp.barrier()
         logging.info("After barrier 1")

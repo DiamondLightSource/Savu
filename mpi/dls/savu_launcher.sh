@@ -3,7 +3,7 @@ module load global/cluster
 
 echo "SAVU_LAUNCHER:: Running Job"
 
-savupath=/dls_sw/apps/savu/master/Savu
+savupath=$SAVUHOME
 datafile=$1
 processfile=$2
 outpath=$3
