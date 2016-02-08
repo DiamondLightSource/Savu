@@ -40,6 +40,7 @@ class PluginList(object):
 
     def __init__(self):
         self.plugin_list = []
+        self.exp = None
 
     def populate_plugin_list(self, filename, activePass=False):
         plugin_file = h5py.File(filename, 'r')
@@ -62,8 +63,13 @@ class PluginList(object):
                 self.plugin_list.append(plugin)
         plugin_file.close()
 
-    def save_plugin_list(self, exp, out_filename):
-        entry_group = exp.nxs_file.create_group('entry')
+    def save_plugin_list(self, out_filename, exp=None):
+        if exp:
+            entry_group = exp.nxs_file.create_group('entry')
+        else:
+            plugin_file = h5py.File(out_filename, 'w')
+            entry_group = plugin_file.create_group('entry')
+
         entry_group.attrs[NX_CLASS] = 'NXentry'
         plugins_group = entry_group.create_group('plugin')
         plugins_group.attrs[NX_CLASS] = 'NXplugin'
