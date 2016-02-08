@@ -30,31 +30,28 @@ from savu.plugins.utils import register_plugin
 class MonitorCorrection(BaseFilter, CpuPlugin):
     """
     corrects the data to the monitor counts.
-
+    This plugin corrects data[0] from data[1] by dividing. We allow a scale and offset due to I18's uncalibrated ic
+    :param nominator_scale: Threshold for peak detection Default: 1.0.
+    :param nominator_offset: Threshold for peak detection Default: 0.0.
+    :param denominator_scale: Threshold for peak detection Default: 1.0.
+    :param denominator_offset: Threshold for peak detection Default: 0.0.
     """
 
     def __init__(self):
         logging.debug("correcting data")
         super(MonitorCorrection, self).__init__("MonitorCorrection")
 
-    def process(self, exp, transport, params):
-
-        in_data = self.get_data_objects(exp.index, "in_data")
-        out_data = self.get_data_objects(exp.index, "out_data")
-    
-        in_data = in_data[0]
-        out_data = out_data[0]
-
-        slice_list = in_data.single_slice_list()
-        print slice_list
-        count = 0
-        for sl in slice_list:
-            print count
-            temp = in_data.data[sl]
-            out_data.data[sl] = temp
-            count = count + 1
-            
-        print "plugin complete"
+    def filter_frames(self, data):
+        monitor = data[1]
+        to_be_corrected = data[0]
+        nom_scale = self.parameters['nominator_scale']
+        denom_scale = self.parameters['denominator_scale']
+        nom_off = self.parameters['nominator_offset']
+        denom_off = self.parameters['denominator_offset']
+        monitor = monitor * denom_scale + denom_off
+        to_be_corrected = to_be_corrected * nom_scale + nom_off
+        out = to_be_corrected / monitor
+        return out
 
     def setup(self):
         in_datasets, out_datasets = self.get_datasets()
