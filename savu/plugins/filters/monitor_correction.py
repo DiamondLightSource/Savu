@@ -65,9 +65,10 @@ class MonitorCorrection(BaseFilter, CpuPlugin):
         corrected = out_datasets[0]
         corrected.create_dataset(tobecorrected)
         in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup('PROJECTION', self.get_max_frames())
-        in_pData[1].plugin_data_setup('PROJECTION', self.get_max_frames())
-        out_pData[0].plugin_data_setup('PROJECTION', self.get_max_frames())
+        pattern = tobecorrected.get_data_patterns().keys()[0]# just take the first one
+        in_pData[0].plugin_data_setup(pattern, self.get_max_frames())
+        in_pData[1].plugin_data_setup(pattern, self.get_max_frames())
+        out_pData[0].plugin_data_setup(pattern, self.get_max_frames())
 
     def nOutput_datasets(self):
         return 1
