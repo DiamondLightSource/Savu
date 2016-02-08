@@ -163,6 +163,8 @@ class BaseAstraRecon(BaseRecon):
         cfg = astra.astra_dict(self.name)
         cfg['ReconstructionDataId'] = self.rec_id
         cfg['ProjectionDataId'] = self.sino_id
+        if 'CUDA' in self.name:
+            cfg['option'] = {'GPUindex': self.parameters['GPU_index']}
         return cfg
 
     def array_pad(self, ctr, width):

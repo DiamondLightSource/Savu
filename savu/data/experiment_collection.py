@@ -51,7 +51,7 @@ class Experiment(object):
         return self.meta_data
 
     def meta_data_setup(self, process_file):
-        self.meta_data.plugin_list = PluginList(self)
+        self.meta_data.plugin_list = PluginList()
 
         try:
             rtype = self.meta_data.get_meta_data('run_type')

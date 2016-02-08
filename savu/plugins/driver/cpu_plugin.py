@@ -20,7 +20,6 @@
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
-import logging
 
 from savu.plugins.driver.plugin_driver import PluginDriver
 
@@ -37,6 +36,4 @@ class CpuPlugin(PluginDriver):
 
         self.run_plugin_instances(transport)
         self.clean_up()
-
-        logging.debug("Not Running the task as not CPU")
         return
