@@ -33,7 +33,7 @@ class BaseAstraRecon(BaseRecon):
     A Plugin to perform Astra toolbox reconstruction
     level
     :param center_of_rotation: Center of rotation to use for the \
-        reconstruction). Default: 86.
+        reconstruction). Default: 0.
     """
 
     def __init__(self, name='BaseAstraRecon'):
@@ -69,8 +69,8 @@ class BaseAstraRecon(BaseRecon):
     def reconstruct(self, sino, cors, angles, vol_shape):
         self.nCols = sino.shape[self.dim_det_cols]
         self.nAngles = sino.shape[self.dim_rot]
-        vol_geom, proj_geom = self.geom_setup_function(sino, angles,
-                                                       vol_shape, cors)
+        sino, vol_geom, proj_geom = \
+            self.geom_setup_function(sino, angles, vol_shape, cors)
         return self.astra_reconstruction(sino, vol_geom, proj_geom)
 
     def astra_reconstruction(self, sino, vol_geom, proj_geom):
@@ -101,9 +101,9 @@ class BaseAstraRecon(BaseRecon):
         p_low, p_high = self.array_pad(cors, self.nCols)
         sino = np.pad(sino, ((0, 0), (p_low, p_high)), mode='reflect')
         vol_geom = astra.create_vol_geom(shape[0], shape[1])
-        proj_geom = astra.create_proj_geom('parallel', 1.0, self.nCols,
+        proj_geom = astra.create_proj_geom('parallel', 1.0, sino.shape[1],
                                            np.deg2rad(angles))
-        return vol_geom, proj_geom
+        return sino, vol_geom, proj_geom
 
     def geom_setup_3D(self, sino, angles, shape, cors):
         nSinos = sino.shape[self.slice_dim]
