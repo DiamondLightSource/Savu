@@ -100,6 +100,7 @@ class Hdf5TomoSaver(BaseSaver):
     def create_entries(self, data, key, current_and_next):
         expInfo = self.exp.meta_data
         group_name = expInfo.get_meta_data(["group_name", key])
+        data.data_info.set_meta_data('group_name', group_name)
         try:
             group_name = group_name + '_' + data.name
         except AttributeError:
@@ -118,10 +119,8 @@ class Hdf5TomoSaver(BaseSaver):
         else:
             shape = data.get_shape()
             if current_and_next is 0:
-                data.data = group.create_dataset("data", shape,
-                                                 data.dtype)
+                data.data = group.create_dataset("data", shape, data.dtype)
             else:
-                print "I am here"
                 logging.info("create_entries: 2")
                 self.exp.barrier()
 

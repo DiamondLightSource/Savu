@@ -180,11 +180,10 @@ class Hdf5Transport(TransportControl):
                                          plugin.executive_summary())
             else:
                 cu.user_message("%s - %s" % (plugin.name,
-                                           plugin.executive_summary()))
+                                plugin.executive_summary()))
 
             exp.barrier()
             out_datasets = plugin.parameters["out_datasets"]
-
             exp.reorganise_datasets(out_datasets, link_type)
 
     def process(self, plugin):

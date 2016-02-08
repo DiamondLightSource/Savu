@@ -52,46 +52,21 @@ class Hdf5TransportData(object):
         count = start
         datasets_list = pu.datasets_list
 
-        logging.info("load_data: 1")
-        exp.barrier()
-
         for plugin_dict in plugin_list[start:-1]:
-
-            logging.info("load_data: 2")
-            exp.barrier()
 
             self.get_current_and_next_patterns(datasets_list[count-1:])
             plugin_id = plugin_dict["id"]
             logging.info("Loading plugin %s", plugin_id)
-
-            logging.info("load_data: 3")
-            exp.barrier()
-
             plugin = pu.plugin_loader(exp, plugin_dict)
-
             plugin.revert_preview(plugin.get_in_datasets())
-
-            logging.info("load_data: 4")
-            exp.barrier()
-
             self.set_filenames(plugin, plugin_id, count)
-
-            logging.info("load_data: 5")
-            exp.barrier()
-
             saver_plugin.setup()
-
-            logging.info("load_data: 6")
-            exp.barrier()
 
             out_data_objects.append(exp.index["out_data"].copy())
             if self.variable_data_check(plugin):
                 return out_data_objects, count
             exp.merge_out_data_to_in()
             count += 1
-
-        logging.info("load_data: 2")
-        exp.barrier()
 
         del self.exp.meta_data.get_dictionary()['current_and_next']
         return out_data_objects, count
@@ -124,34 +99,41 @@ class Hdf5TransportData(object):
             expInfo.set_meta_data(["group_name", key], group_name)
 
     def add_data_links(self, linkType):
-
         nxs_filename = self.exp.meta_data.get_meta_data('nxs_filename')
-        logging.debug("Adding link to file %s", nxs_filename)
-        plugin_file = h5py.File(nxs_filename, 'a')
+        logging.info("Adding link to file %s", nxs_filename)
+
+        nxs_file = self.exp.nxs_file
+        entry = nxs_file['entry']
+        group_name = self.data_info.get_meta_data('group_name')
+        self.output_metadata(self.backing_file[group_name])
 
         if linkType is 'final_result':
             name = 'final_result_' + self.get_name()
-            entry = plugin_file['entry']
-            entry.attrs[NX_CLASS] = 'NXdata'
+            entry[name] = self.external_link()
+
+        elif linkType is 'intermediate':
+            name = self.group_name + '_' + self.data_info.get_meta_data('name')
+            entry = entry.require_group('intermediate')
+            entry.attrs['NX_class'] = 'NXcollection'
             entry[name] = self.external_link()
         else:
-            name = self.group_name + '_' + self.data_info.get_meta_data('name')
-            entry = plugin_file['entry'].require_group('intermediate')
-            entry.attrs[NX_CLASS] = 'NXcollection'
-            entry[name] = self.external_link()
-        return plugin_file, entry
+            raise Exception("The link type is not known")
 
     def output_metadata(self, entry):
+        logging.info("before outputting axis labels")
         self.output_axis_labels(entry)
-        # output remaining metadata
+        logging.info("after outputting axis labels")
+        # output remaining metadata *** implement this
 
     def output_axis_labels(self, entry):
-        axis_labels = self.meta_data.get_meta_data("axis_labels")
+        axis_labels = self.data_info.get_meta_data("axis_labels")
+        print "***********", axis_labels
         axes = []
         count = 0
         for labels in axis_labels:
             name = labels.keys()[0]
             axes.append(name)
+            logging.info(name + '_indices')
             entry.attrs[name + '_indices'] = count
 
             try:
@@ -164,11 +146,9 @@ class Hdf5TransportData(object):
         entry.attrs['axes'] = axes
 
     def save_data(self, link_type):
-        process = self.exp.meta_data.get_meta_data('process')
-        if process is 0:
-            plugin_file, entry = self.add_data_links(link_type)
-            #self.output_metadata(entry)
-            plugin_file.close()
+        self.add_data_links(link_type)
+        logging.info('save_data barrier')
+        self.exp.barrier()
 
     def close_file(self):
         """
