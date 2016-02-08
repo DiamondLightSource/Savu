@@ -27,7 +27,7 @@ import copy
 import numpy as np
 
 from mpi4py import MPI
-from itertools import chain
+#from itertools import chain
 from savu.core.transport_control import TransportControl
 import savu.plugins.utils as pu
 import savu.core.utils as cu
@@ -61,13 +61,12 @@ class Hdf5Transport(TransportControl):
             RANK_NAMES_SIZE = SIZE
         MACHINES = SIZE/RANK_NAMES_SIZE
         MACHINE_RANK = RANK/MACHINES
-        print MACHINE_RANK
-        print RANK_NAMES
         MACHINE_RANK_NAME = RANK_NAMES[MACHINE_RANK]
         MACHINE_NUMBER = RANK % MACHINES
         MACHINE_NUMBER_STRING = "%03i" % (MACHINE_NUMBER)
-        ALL_PROCESSES = [[i]*MACHINES for i in RANK_NAMES]
-        options["processes"] = list(chain.from_iterable(ALL_PROCESSES))
+        options['processes'] = RANK_NAMES*MACHINES
+        #ALL_PROCESSES = [[i]*MACHINES for i in RANK_NAMES]
+        #options["processes"] = list(chain.from_iterable(ALL_PROCESSES))
         options["process"] = RANK
 
         self.set_logger_parallel(MACHINE_NUMBER_STRING,

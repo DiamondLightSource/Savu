@@ -22,6 +22,7 @@
 """
 import logging
 import copy
+import numpy as np
 from mpi4py import MPI
 
 from savu.plugins.driver.plugin_driver import PluginDriver
@@ -41,34 +42,37 @@ class GpuPlugin(PluginDriver):
         processes = copy.copy(expInfo.get_meta_data("processes"))
         process = expInfo.get_meta_data("process")
 
-        gpu_processes = []
-        for i in ["GPU" in i for i in processes]:
-            if i:
-                gpu_processes.append(1)
-            else:
-                gpu_processes.append(0)
+        gpu_processes = [False]*len(processes)
+        idx = [i for i in range(len(processes)) if 'GPU' in processes[i]]
+        for i in idx:
+            print i
+            gpu_processes[i] = True
 
         # set only GPU processes
         new_processes = [i for i in processes if 'GPU' in i]
-        expInfo.set_meta_data('processes', new_processes)
-
         if not new_processes:
             raise Exception("THERE ARE NO GPU PROCESSES!")
+        expInfo.set_meta_data('processes', new_processes)
+
+        nNodes = new_processes.count(new_processes[0])
+        nGPUs = gpu_processes.count(True)/nNodes
 
         ranks = [i for i, x in enumerate(gpu_processes) if x]
         self.create_new_communicator(ranks, exp, process)
-
-        print "PROCESSES", expInfo.get_meta_data("processes")
+        print MPI.COMM_WORLD.size, len(processes)
 
         if gpu_processes[process]:
             print "RUNNING THE GPU PROCESSES", self.new_comm.Get_rank(), MPI.COMM_WORLD.Get_rank()
-            #expInfo.set_meta_data('process', self.new_comm.Get_rank())
+            expInfo.set_meta_data('process', self.new_comm.Get_rank())
             logging.debug("Running the GPU Process %i", process)
             logging.debug("Pre-processing")
+            GPU_index = self.calculate_GPU_index(nNodes, nGPUs)
+            self.parameters['GPU_index'] = GPU_index
+            print "*********************************", GPU_index
             self.run_plugin_instances(transport, communicator=self.new_comm)
             self.clean_up()
             self.free_communicator()
-            #expInfo.set_meta_data('process', MPI.COMM_WORLD.Get_rank())
+            expInfo.set_meta_data('process', MPI.COMM_WORLD.Get_rank())
 
         self.exp.barrier()
         expInfo.set_meta_data('processes', processes)
@@ -84,3 +88,8 @@ class GpuPlugin(PluginDriver):
         self.group.Free()
         self.new_group.Free()
         self.new_comm.Free()
+
+    def calculate_GPU_index(self, nNodes, nGPUs):
+        rank = self.new_comm.Get_rank()
+        print "**********", rank, nNodes, np.mod(rank, nNodes), nGPUs
+        return np.mod(np.mod(rank, nNodes), nGPUs)

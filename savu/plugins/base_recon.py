@@ -114,7 +114,6 @@ class BaseRecon(Plugin):
         axis_labels[dim_volX] = 'voxel_x.voxels'
         axis_labels[dim_volY] = 'voxel_y.voxels'
         axis_labels[dim_volZ] = 'voxel_z.voxels'
-        print axis_labels
 
         shape = list(in_dataset[0].get_shape())
         shape[dim_volX] = shape[dim_volZ]

@@ -127,7 +127,6 @@ class Hdf5TransportData(object):
 
     def output_axis_labels(self, entry):
         axis_labels = self.data_info.get_meta_data("axis_labels")
-        print "***********", axis_labels
         axes = []
         count = 0
         for labels in axis_labels:
