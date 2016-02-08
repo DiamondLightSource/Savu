@@ -120,9 +120,7 @@ class Hdf5TransportData(object):
             raise Exception("The link type is not known")
 
     def output_metadata(self, entry):
-        logging.info("before outputting axis labels")
         self.output_axis_labels(entry)
-        logging.info("after outputting axis labels")
         # output remaining metadata *** implement this
 
     def output_axis_labels(self, entry):
@@ -132,7 +130,6 @@ class Hdf5TransportData(object):
         for labels in axis_labels:
             name = labels.keys()[0]
             axes.append(name)
-            logging.info(name + '_indices')
             entry.attrs[name + '_indices'] = count
 
             try:

@@ -45,7 +45,6 @@ class GpuPlugin(PluginDriver):
         gpu_processes = [False]*len(processes)
         idx = [i for i in range(len(processes)) if 'GPU' in processes[i]]
         for i in idx:
-            print i
             gpu_processes[i] = True
 
         # set only GPU processes
@@ -55,21 +54,16 @@ class GpuPlugin(PluginDriver):
         expInfo.set_meta_data('processes', new_processes)
 
         nNodes = new_processes.count(new_processes[0])
-        nCores_per_node = MPI.COMM_WORLD.size/nNodes
-        nGPUs_per_node = gpu_processes.count(True)/nNodes
 
         ranks = [i for i, x in enumerate(gpu_processes) if x]
         self.create_new_communicator(ranks, exp, process)
 
         if gpu_processes[process]:
-            print "RUNNING THE GPU PROCESSES", self.new_comm.Get_rank(), MPI.COMM_WORLD.Get_rank()
             expInfo.set_meta_data('process', self.new_comm.Get_rank())
-            logging.debug("Running the GPU Process %i", process)
-            logging.debug("Pre-processing")
-            GPU_index = \
-                self.calculate_GPU_index(nCores_per_node, nGPUs_per_node)
+            logging.info("Running the GPU Process %i",
+                         self.new_comm.Get_rank())
+            GPU_index = self.calculate_GPU_index(nNodes)
             self.parameters['GPU_index'] = GPU_index
-            print "*********************************", GPU_index
             self.run_plugin_instances(transport, communicator=self.new_comm)
             self.clean_up()
             self.free_communicator()
@@ -90,6 +84,6 @@ class GpuPlugin(PluginDriver):
         self.new_group.Free()
         self.new_comm.Free()
 
-    def calculate_GPU_index(self, nCores, nGPUs):
+    def calculate_GPU_index(self, nNodes):
         rank = self.new_comm.Get_rank()
-        return np.mod(np.mod(rank, nCores), nGPUs)
+        return int(rank/nNodes)

@@ -37,5 +37,5 @@ mpirun -np ${processes} \
        -mca orte_forward_job_control 1 \
        -x LD_LIBRARY_PATH \
        --hostfile ${UNIQHOSTS} \
-       python $filename $datafile $processfile $outfile -n $CPUs
+       python $filename $datafile $processfile $outfile -n $CPUs -v
 
