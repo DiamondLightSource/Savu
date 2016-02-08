@@ -59,6 +59,7 @@ class PolyBackgroundEstimator(BaseFilter, CpuPlugin):
                                                                         MaxIterations,
                                                                         pvalue,
                                                                         fixed=True)
+        print "The shape of zu is:"+str(zu.shape)
         return zu
 
     def setup(self):
