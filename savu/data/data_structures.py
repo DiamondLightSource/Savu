@@ -318,7 +318,7 @@ class Data(object):
         self.data_info.set_meta_data('stops', stops)
         self.data_info.set_meta_data('steps', steps)
         self.data_info.set_meta_data('chunks', chunks)
-        if shapeChange:
+        if shapeChange or self.mapping:
             self.set_reduced_shape(starts, stops, steps, chunks)
 
     def get_preview_indices(self, preview_list):
@@ -375,6 +375,7 @@ class Data(object):
         self.map_dim = map_dim
         map_obj.data_info.set_meta_data('full_map_dim_len', map_shape[map_dim])
         map_shape[not_map_dim] = np.array(new_shape)[not_map_dim]
+        
         # assuming only one extra dimension added for now
         starts, stops, steps, chunks = self.get_starts_stops_steps()
         start = starts[map_dim] % map_shape[map_dim]
