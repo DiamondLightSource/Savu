@@ -136,6 +136,7 @@ class Hdf5TransportData(object):
                 mData = self.meta_data.get_meta_data(name)
             except KeyError:
                 mData = np.arange(self.get_shape()[count])
+
             temp = self.group.create_dataset(name, mData.shape, mData.dtype)
             temp[...] = mData[...]
             count += 1

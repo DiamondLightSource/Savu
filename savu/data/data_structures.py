@@ -264,10 +264,11 @@ class Data(object):
         axis_labels = self.data_info.get_meta_data('axis_labels')
         axis_labels.extend([0]*len(params_dict))
         for key, value in params_dict.iteritems():
-            name, unit = value['label'].split('.')
+            title = value['label'].encode('ascii', 'ignore')
+            name, unit = title.split('.')
             axis_labels[nDims + key] = {name: unit}
             # add parameter values to the meta_data
-            self.meta_data.set_meta_data(name, value['values'])
+            self.meta_data.set_meta_data(name, np.array(value['values']))
         self.data_info.set_meta_data('nDims', nDims + len(self.extra_dims))
         self.data_info.set_meta_data('axis_labels', axis_labels)
 

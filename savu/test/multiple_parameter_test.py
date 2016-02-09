@@ -120,6 +120,15 @@ class MultipleParameterTest2(unittest.TestCase):
         self.assertEqual(params, [1, 2, 3])
         self.assertEqual(plugin.extra_dims[0], 3)
 
+    def test_parameter_space_float(self):
+        plugin = self.plugin_setup()
+        key = 'sino_pad_width'
+        params = {key: '0.2;0.4;0.6'}
+        plugin.set_parameters(params)
+        params = plugin.parameters[key]
+        self.assertEqual(params, [0.2, 0.4, 0.6])
+        self.assertEqual(plugin.extra_dims[0], 3)
+
     def test_parameter_space_str(self):
         plugin = self.plugin_setup()
         key = 'interpolation'
