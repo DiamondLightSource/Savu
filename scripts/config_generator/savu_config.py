@@ -160,7 +160,7 @@ def _mod(content, arg):
             content.on_and_off(int(element), on_off_list.index(subelement))
         else:
             value = None
-            exec("value = " + arg.split()[1])
+            value = ''.join(arg.split()[1:])
             content.modify(int(element), subelement, value)
         content.display()
     except:
