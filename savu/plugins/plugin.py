@@ -111,7 +111,8 @@ class Plugin(PluginDatasets):
 
     def convert_multi_params(self, value, key):
         dtype = self.parameters_types[key]
-        if isinstance(value, str) or isinstance(value, unicode):
+        # if isinstance(value, str) or isinstance(value, unicode):
+        if isinstance(value, str):
             if ';' in value:
                 value = value.split(';')
                 if type(value[0]) != dtype:

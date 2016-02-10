@@ -39,7 +39,7 @@ class VoCentering(BaseFilter, CpuPlugin):
         information. Default: [].
     :param out_datasets: The default names. Default: ['cor_raw','cor_fit'].
     :param poly_degree: The polynomial degree of the fit \
-        (1 or 0 = gradient or no gradient). Default: 1.
+        (1 or 0 = gradient or no gradient). Default: 0.
     :param step: The step length over the rotation axis. Default: 1.
     :param no_clean: Do not clean up potential outliers. Default: True.
     :param preview: A slice list of required frames. Default: [].

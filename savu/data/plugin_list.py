@@ -59,7 +59,8 @@ class PluginList(object):
             if active:
                 plugin['name'] = plugin_group[key]['name'][0]
                 plugin['id'] = plugin_group[key]['id'][0]
-                plugin['data'] = json.loads(plugin_group[key]['data'][0])
+                plugin['data'] = \
+                    self.byteify(json.loads(plugin_group[key]['data'][0]))
                 self.plugin_list.append(plugin)
         plugin_file.close()
 
@@ -130,6 +131,16 @@ class PluginList(object):
             out_string.append(description)
         return '\n'.join(out_string)
 
+    def byteify(self, input):
+        if isinstance(input, dict):
+            return {self.byteify(key): self.byteify(value)
+                    for key, value in input.iteritems()}
+        elif isinstance(input, list):
+            return [self.byteify(element) for element in input]
+        elif isinstance(input, unicode):
+            return input.encode('utf-8')
+        else:
+            return input
 
 class CitationInformation(object):
     """

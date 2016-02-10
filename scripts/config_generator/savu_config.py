@@ -54,6 +54,12 @@ class Content(object):
                 print("Sorry, element %i does not have a %s parameter" %
                       (element, subelement))
 
+    def convert_to_ascii(self, value):
+        ascii_list = []
+        for v in value:
+            ascii_list.append(v.encode('ascii', 'ignore'))
+        return ascii_list
+
     def on_and_off(self, element, index):
         if index < 2:
             print "switching plugin", element, "ON"
@@ -160,7 +166,8 @@ def _mod(content, arg):
             content.on_and_off(int(element), on_off_list.index(subelement))
         else:
             value = None
-            value = ''.join(arg.split()[1:])
+            exec("value = " + [''.join(arg.split()[1:])][0])
+            print value
             content.modify(int(element), subelement, value)
         content.display()
     except:
