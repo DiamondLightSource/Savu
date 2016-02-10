@@ -23,7 +23,6 @@
 """
 import os
 import logging
-import h5py
 import numpy as np
 
 import savu.plugins.utils as pu
@@ -121,6 +120,7 @@ class Hdf5TransportData(object):
 
     def output_metadata(self, entry):
         self.output_axis_labels(entry)
+        self.output_data_patterns(entry)
         # output remaining metadata *** implement this
 
     def output_axis_labels(self, entry):
@@ -141,6 +141,17 @@ class Hdf5TransportData(object):
             temp[...] = mData[...]
             count += 1
         entry.attrs['axes'] = axes
+
+    def output_data_patterns(self, entry):
+        data_patterns = self.data_info.get_meta_data("data_patterns")
+        entry = entry.create_group('patterns')
+        entry.attrs['NX_class'] = 'NXcollection'
+        for pattern in data_patterns:
+            nx_data = entry.create_group(pattern)
+            nx_data.attrs[NX_CLASS] = 'NXparameters'
+            values = data_patterns[pattern]
+            nx_data.create_dataset('core_dir', data=values['core_dir'])
+            nx_data.create_dataset('slice_dir', data=values['slice_dir'])
 
     def save_data(self, link_type):
         self.add_data_links(link_type)
@@ -255,12 +266,9 @@ class Hdf5TransportData(object):
         core_dirs = np.array(pData.get_core_directions())
         shape = self.get_shape()
         index = self.get_slice_dirs_index(slice_dirs, shape)
-#        if 'var' not in [shape[i] for i in slice_dirs]:
-#            shape = [s for s in list(shape) if isinstance(s, int)]
         fix_dirs, value = pData.get_fixed_directions()
         nSlices = index.shape[1] if index.size else len(fix_dirs)
         nDims = len(shape)
-
         core_slice = self.get_core_slices(core_dirs)
 
         slice_list = []
@@ -327,8 +335,6 @@ class Hdf5TransportData(object):
         return banked, length, slice_dirs
 
     def grouped_slice_list(self, slice_list, max_frames):
-#         if isinstance(max_frames, tuple):
-#             max_frames = max_frames[0] # aarons "fix"
         banked, length, slice_dir = self.banked_list(slice_list)
         starts, stops, steps, chunks = self.get_starts_stops_steps()
         group_dim = self.get_plugin_data().get_slice_directions()[0]
