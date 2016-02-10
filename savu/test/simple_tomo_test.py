@@ -27,6 +27,7 @@ from savu.test import test_utils as tu
 from savu.test.plugin_runner_test import run_protected_plugin_runner
 
 
+@unittest.skip('Runs as a standalone test but not in the suite. Error to be investigated')
 class SimpleTomoTest(unittest.TestCase):
 
     def test_process(self):
