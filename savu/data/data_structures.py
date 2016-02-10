@@ -189,7 +189,6 @@ class Data(object):
                 patterns = {}
                 for pattern in pattern_list:
                     patterns[pattern] = all_patterns[pattern]
-
         self.set_data_patterns(patterns)
 
     def copy_patterns_removing_dimensions(self, pattern_list, all_patterns,
@@ -244,21 +243,31 @@ class Data(object):
             self.amend_axis_labels(axis_labels[data])
         else:
             self.set_axis_labels(*axis_labels)
+        # if parameter tuning
+        if self.get_plugin_data().multi_params_dict:
+            self.add_extra_dims_labels()
 
     def copy_labels(self, copy_data):
         nDims = copy.copy(copy_data.data_info.get_meta_data('nDims'))
-        axis_labels = copy.copy(
-            copy_data.data_info.get_meta_data('axis_labels'))
+        axis_labels = \
+            copy.copy(copy_data.data_info.get_meta_data('axis_labels'))
+        self.data_info.set_meta_data('nDims', nDims)
+        self.data_info.set_meta_data('axis_labels', axis_labels)
+        # if parameter tuning
+        if self.get_plugin_data().multi_params_dict:
+            self.add_extra_dims_labels()
 
+    def add_extra_dims_labels(self):
+        params_dict = self.get_plugin_data().multi_params_dict
         # add multi_params axis labels from dictionary in pData
-        multi_params_dict = self.get_plugin_data().multi_params_dict
-        axis_labels.extend([0]*len(multi_params_dict))
-        for key, value in multi_params_dict.iteritems():
+        nDims = self.data_info.get_meta_data('nDims')
+        axis_labels = self.data_info.get_meta_data('axis_labels')
+        axis_labels.extend([0]*len(params_dict))
+        for key, value in params_dict.iteritems():
             name, unit = value['label'].split('.')
             axis_labels[nDims + key] = {name: unit}
             # add parameter values to the meta_data
             self.meta_data.set_meta_data(name, value['values'])
-
         self.data_info.set_meta_data('nDims', nDims + len(self.extra_dims))
         self.data_info.set_meta_data('axis_labels', axis_labels)
 
@@ -318,7 +327,7 @@ class Data(object):
         self.data_info.set_meta_data('stops', stops)
         self.data_info.set_meta_data('steps', steps)
         self.data_info.set_meta_data('chunks', chunks)
-        if shapeChange:
+        if shapeChange or self.mapping:
             self.set_reduced_shape(starts, stops, steps, chunks)
 
     def get_preview_indices(self, preview_list):
@@ -375,6 +384,7 @@ class Data(object):
         self.map_dim = map_dim
         map_obj.data_info.set_meta_data('full_map_dim_len', map_shape[map_dim])
         map_shape[not_map_dim] = np.array(new_shape)[not_map_dim]
+
         # assuming only one extra dimension added for now
         starts, stops, steps, chunks = self.get_starts_stops_steps()
         start = starts[map_dim] % map_shape[map_dim]
@@ -387,15 +397,8 @@ class Data(object):
         self.exp.index['mapping'][name].set_shape(tuple(map_shape))
 
     def find_and_set_shape(self, data):
-        try:
-            data.get_shape().index('var')
-            if data.next_shape:
-                new_shape = data.next_shape
-            else:
-                pData = self.get_plugin_data()
-                new_shape = data.get_shape() + tuple(pData.extra_dims)
-        except ValueError:
-            new_shape = data.get_shape()
+        pData = self.get_plugin_data()
+        new_shape = data.get_shape() + tuple(pData.extra_dims)
         self.set_shape(new_shape)
 
     def set_variable_flag(self):
@@ -498,6 +501,7 @@ class Data(object):
                 # data arrives here, but that may be an error
                 pass
         self.data_info.set_meta_data('axis_labels', axis_labels)
+        
 
     def find_axis_label_dimension(self, name, contains=False):
         axis_labels = self.data_info.get_meta_data('axis_labels')
