@@ -31,11 +31,11 @@ from savu.test.plugin_runner_test import run_protected_plugin_runner
 
 class PluginRunnerScikitImageTest(unittest.TestCase):
 
-    def test_fbp(self):
-        options = tu.set_experiment('tomo')
-        plugin = 'savu.plugins.reconstructions.' + \
-            'scikitimage_filter_back_projection'
-        run_protected_plugin_runner_no_process_list(options, plugin)
+#     def test_fbp(self):
+#         options = tu.set_experiment('tomo')
+#         plugin = 'savu.plugins.reconstructions.' + \
+#             'scikitimage_filter_back_projection'
+#         run_protected_plugin_runner_no_process_list(options, plugin)
 
     def test_process(self):
         options = {
