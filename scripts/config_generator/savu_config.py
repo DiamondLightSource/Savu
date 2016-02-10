@@ -165,15 +165,17 @@ def _mod(content, arg):
         if subelement in on_off_list:
             content.on_and_off(int(element), on_off_list.index(subelement))
         else:
-            value = None
-            print arg, arg.split()[1:]
             value = ([''.join(arg.split()[1:])][0]).split()[0]
-            print value, type(value)
             if not value.count(';'):
                 try:
                     exec("value = " + value)
                 except NameError:
                     exec("value = " + "'" + value + "'")
+
+            if value.count('[') and not isinstance(value, list):
+                value = value.split('[')[1].\
+                    split(']')[0].replace(" ", "").split(',')
+                exec("value = " + str(value))
 
             content.modify(int(element), subelement, value)
         content.display()

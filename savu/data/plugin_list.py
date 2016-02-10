@@ -61,6 +61,7 @@ class PluginList(object):
                 plugin['id'] = plugin_group[key]['id'][0]
                 plugin['data'] = \
                     self.byteify(json.loads(plugin_group[key]['data'][0]))
+                print "***", plugin['data']
                 self.plugin_list.append(plugin)
         plugin_file.close()
 
@@ -136,7 +137,9 @@ class PluginList(object):
             return {self.byteify(key): self.byteify(value)
                     for key, value in input.iteritems()}
         elif isinstance(input, list):
-            return [self.byteify(element) for element in input]
+            #return [self.byteify(element) for element in input]
+            temp = [self.byteify(element) for element in input]
+            return temp
         elif isinstance(input, unicode):
             return input.encode('utf-8')
         else:
