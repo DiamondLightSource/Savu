@@ -27,16 +27,15 @@ from savu.test import test_utils as tu
 
 from savu.test.plugin_runner_test import run_protected_plugin_runner
 
-
-#@unittest.skip('functions are currently being updated')
+@unittest.skip('test data and real data are different format scans. Resolving in favour of real world. Adp')
 class I18XrdPipelineTest(unittest.TestCase):
 
     def test_process(self):
         options = {
             "transport": "hdf5",
             "process_names": "CPU0",
-            "data_file": '/dls/i18/data/2016/sp12778-1/nexus/66871_i18.nxs',
-            "process_file": tu.get_process_list_path('i18_sino_test.nxs'),
+            "data_file": tu.get_test_data_path('mm.nxs'),
+            "process_file": tu.get_process_list_path('I18_pipeline_just_xrd.nxs'),
             "out_path": tempfile.mkdtemp()
             }
         run_protected_plugin_runner(options)

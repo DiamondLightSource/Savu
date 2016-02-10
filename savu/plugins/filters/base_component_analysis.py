@@ -53,6 +53,7 @@ class BaseComponentAnalysis(BaseFilter, CpuPlugin):
         other_dims = in_dataset[0].get_shape()[:-1]
         num_comps = self.parameters['number_of_components']
         self.images_shape = other_dims + (num_comps,)
+        print self.images_shape
         components_shape = (num_comps,) + self.spectra_length
         # copy all required information from in_dataset[0]
 
