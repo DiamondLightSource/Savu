@@ -166,17 +166,24 @@ def _mod(content, arg):
             content.on_and_off(int(element), on_off_list.index(subelement))
         else:
             value = ([''.join(arg.split()[1:])][0]).split()[0]
+            print value, type(value)
             if not value.count(';'):
                 try:
+                    print "here1"
                     exec("value = " + value)
+                    print value
                 except NameError:
                     exec("value = " + "'" + value + "'")
 
-            if value.count('[') and not isinstance(value, list):
+            if isinstance(value, str) and value.count('['):
+#            if value.count('[') and not isinstance(value, list):
+                print "here3"
                 value = value.split('[')[1].\
                     split(']')[0].replace(" ", "").split(',')
                 exec("value = " + str(value))
 
+            print "here4", value
+            print value
             content.modify(int(element), subelement, value)
         content.display()
     except:
