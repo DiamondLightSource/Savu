@@ -36,7 +36,7 @@ To test the current setup is correct run:
 Create a Savu test directory
 ----------------------------
 
-In order to run Savu you will require a data file and a process list.
+Savu requires a data file and a process list as input.
 A training folder of test data and process lists is available at /dls/science/groups/das/SavuTraining
 
 Create an environment variable for the test folder
@@ -48,26 +48,27 @@ Create an output test directory in /dls/tmp/<your_fed_id> and cd to this directo
 View a process list
 -------------------
 
-1. in DAWN
+1. In DAWN
 ^^^^^^^^^^
 
 A process list is simply a list of processes (e.g. corrections, filters, reconstructions) that
 should be applied to the data in the specified order. 
 
-To view the example process list <insert process list name here> do:
+To view the example process list $DATAPATH/process_lists/simple_tomo_process.nxs do:
 
     >>> module load dawn
     >>> dawn &
 
-In the DAWN GUI click on File -> open, navigate to the test folder and click on the <process list here.nxs> file.
+In the DAWN GUI click on File -> open, navigate to the test folder and click on relevant process list.
 In the Data Browsing perspective navigate through the tree entry->plugin and browse the plugin entries.
 
-2. in the configurator
+2. In the configurator
 ^^^^^^^^^^^^^^^^^^^
 
 An alternative way to view the process list is using the configurator:
 
-    >>> savu_config <process list>
+    >>> savu_config
+    >>> open /dls/science/groups/das/SavuTraining/process_lists/simple_tomo_process.nxs
 
 
 Run examples
@@ -81,7 +82,7 @@ $DATAPATH/process_lists/simple_tomo_process.nxs and output to the current direct
 
     >>> savu <data_file> <process_list> .
 
-View the output data in Dawn (see below) and look at the log files: user.log and log.txt
+View the output data in Dawn (see below) and look at the log files (user.log and log.txt) in the output directory.
 
 
 2. multiple process
@@ -93,13 +94,16 @@ The MPI version of Savu will run on the cluster.
 
 To view the job in the queue:
 
-    >>> Module load global/cluster
+    >>> module load global/cluster
     >>> qstat
 
-To view the log file during the run 
+To view the user log file during the run 
 
-    >>> cd /dls/tmp/savu
-    >>> less savu.o<job_id>
+    >>> less user.log
+
+Or to view the full log file
+
+    >>> less /dls/tmp/savu/savu.o<job_id>
 
 (job_id is in qstat). Shift-f to dynamically watch the file.
 
@@ -170,10 +174,16 @@ Amend the process list to preview only the middle 5 sinograms.
 
 
 Turning process on/off
+^^^^^^^^^^^^^^^^^^^^^^
+
 Any process can be turned off by typing
->> mod <processNo>.off
+
+    >>> mod <processNo>.off
+
 Or
->> mod <processNo>.on
+
+    >>> mod <processNo>.on
+
 
 Sinogram centering
 ^^^^^^^^^^^^^^^^^^
@@ -210,6 +220,7 @@ Or to try FBP and CGLS reconstructions
 
 Add parameter tuning and save the process list.  Apply the new pipeline to the data and view the output in DAWN. 
 
+-----------------------------------------------------------------------------------------------------------
 
 AVIZO
 =====
