@@ -52,8 +52,8 @@ class NxxrdLoader(BaseMultiModalLoader):
         # hard coded for now, but we can change it to fram nx transformations
         # in future.
         data_obj.set_axis_labels('rotation_angle.degrees',
-                                 'x.mm',
                                  'y.mm',
+                                 'x.mm',
                                  'detector_x.mm',
                                  'detector_y.mm')
 
@@ -67,7 +67,7 @@ class NxxrdLoader(BaseMultiModalLoader):
         print data_obj.data.shape
         slicedir = tuple(range(len(data_obj.data.shape)-2))
         print "diffraction slice direction is "+str(slicedir)
-        data_obj.add_pattern("DIFFRACTION", core_dir=(-2, -1),
+        data_obj.add_pattern("DIFFRACTION", core_dir=(3, 4),
                              slice_dir=slicedir)
 #         data_obj.add_pattern("SINOGRAM", core_dir=(0, 2),
 #                              slice_dir=(1,3,4))
@@ -78,7 +78,7 @@ class NxxrdLoader(BaseMultiModalLoader):
 #         data_obj.add_pattern("SINOGRAM", core_dir=(0, 1),
 #                              slice_dir=(3, 2, 4))
         data_obj.add_pattern("SINOGRAM", core_dir=(0, 1),
-                             slice_dir=(3, 2, 4))
+                             slice_dir=(2, 3, 4))
         data_obj.add_pattern("PROJECTION", core_dir=(1, 2),
                              slice_dir=(0, 3, 4))
 

@@ -27,7 +27,7 @@ from savu.test import test_utils as tu
 
 from savu.test.plugin_runner_test import run_protected_plugin_runner
 
-@unittest.skip('test data and real data are different format scans. Resolving in favour of real world. Adp')
+# @unittest.skip('test data and real data are different format scans. Resolving in favour of real world. Adp')
 class I18XrdPipelineTest(unittest.TestCase):
 
     def test_process(self):
