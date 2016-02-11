@@ -210,13 +210,13 @@ If you wish to test a preview reconstruction with a range of values for a parame
 
 For example, add 3 centering values to the process list:
 
-    >>> mod 6.3 85;86;87
+    >>> mod 6.2 85;86;87
 
 (values for example only).
 
 Or to try FBP and CGLS reconstructions
 
-    >>> mod 6.6 FBP;CGLS
+    >>> mod 6.8 FBP;CGLS
 
 Add parameter tuning and save the process list.  Apply the new pipeline to the data and view the output in DAWN. 
 
