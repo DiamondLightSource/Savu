@@ -59,6 +59,8 @@ To view the example process list $DATAPATH/process_lists/simple_tomo_process.nxs
     >>> module load dawn
     >>> dawn &
 
+.. warning:: The DAWN module must be loaded in a separate terminal as it will reset relevant paths.
+
 In the DAWN GUI click on File -> open, navigate to the test folder and click on relevant process list.
 In the Data Browsing perspective navigate through the tree entry->plugin and browse the plugin entries.
 
@@ -111,7 +113,7 @@ Or to view the full log file
 View the output data in DAWN
 ----------------------------
 
-Once the run is complete, the current directory will contain all the output hdf5 (.h5?) files and the .nxs file
+Once the run is complete, the current directory will contain all the output hdf5 files and the .nxs file
 that links the files together.  Do not change the names of the files as this will break the link to the data.
 You can view the data in Dawn by opening the .nxs file.  
 
