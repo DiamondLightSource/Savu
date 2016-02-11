@@ -12,6 +12,7 @@ User and Developer Guide
    :maxdepth: 2
    
    user
+   training
    dev
 
 Code Documentation
