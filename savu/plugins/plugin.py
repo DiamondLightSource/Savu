@@ -23,6 +23,7 @@
 
 import logging
 import inspect
+import numpy as np
 
 from savu.plugins import utils as pu
 from savu.plugins.plugin_datasets import PluginDatasets
@@ -112,16 +113,19 @@ class Plugin(PluginDatasets):
     def convert_multi_params(self, value, key):
         dtype = self.parameters_types[key]
         # if isinstance(value, str) or isinstance(value, unicode):
-        if isinstance(value, str):
-            if ';' in value:
-                value = value.split(';')
-                if type(value[0]) != dtype:
-                    value = map(dtype, value)
-                if len(value) > 1:
-                    label = key + '_params.' + type(value[0]).__name__
-                    self.multi_params_dict[len(self.multi_params_dict)] = \
-                        {'label': label, 'values': value}
-                    self.extra_dims.append(len(value))
+        if isinstance(value, str) and ';' in value:
+            value = value.split(';')
+            if ":" in value[0]:
+                seq = value[0].split(':')
+                seq = [eval(s) for s in seq]
+                value = list(np.arange(seq[0], seq[1], seq[2]))
+            if type(value[0]) != dtype:
+                value = map(dtype, value)
+            if len(value) > 1:
+                label = key + '_params.' + type(value[0]).__name__
+                self.multi_params_dict[len(self.multi_params_dict)] = \
+                    {'label': label, 'values': value}
+                self.extra_dims.append(len(value))
         return value
 
     def get_parameters(self, name):

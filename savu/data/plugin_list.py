@@ -61,7 +61,6 @@ class PluginList(object):
                 plugin['id'] = plugin_group[key]['id'][0]
                 plugin['data'] = \
                     self.byteify(json.loads(plugin_group[key]['data'][0]))
-                print "***", plugin['data']
                 self.plugin_list.append(plugin)
         plugin_file.close()
 
