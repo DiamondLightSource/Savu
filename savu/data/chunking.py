@@ -23,6 +23,7 @@
 """
 
 import copy
+import logging
 from fractions import gcd
 
 import numpy as np
@@ -59,7 +60,7 @@ class Chunking(object):
         """
         Calculate appropriate chunk sizes for this dataset
         """
-        print "shape = ", shape
+        logging.debug("shape = ", shape)
         if len(shape) < 3:
             return True
 
@@ -71,8 +72,8 @@ class Chunking(object):
             return True
         else:
             chunks = self.adjust_chunk_size(chunks, ttype, shape, adjust)
-            print "chunks =", chunks
-            print "\n\n*****************************************************"
+            logging.debug("chunks =", chunks)
+            # print "\n\n*****************************************************"
             return tuple(chunks)
 
     def set_adjust_params(self, shape):
@@ -94,7 +95,8 @@ class Chunking(object):
         Get all core dimensions and fastest changing slice dimension (all
         potentially adjustable)
         """
-        nDims = len(list(self.current['slice_dir']) + list(self.current['core_dir']))
+        nDims = len(list(self.current['slice_dir']) +
+                    list(self.current['core_dir']))
         self.core = list(self.convert_dir(self.current['core_dir'], nDims)) + \
             list(self.convert_dir(self.next['core_dir'], nDims))
         c_sl = list(self.current['slice_dir'])

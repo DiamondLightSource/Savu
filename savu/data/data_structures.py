@@ -240,13 +240,13 @@ class Data(object):
             self.copy_labels(axis_labels)
         elif isinstance(axis_labels, dict):
             data = axis_labels.keys()[0]
-            self.copy_labels(data)
+            self.copy_labels(data)          
             self.amend_axis_labels(axis_labels[data])
         else:
             self.set_axis_labels(*axis_labels)
-        # if parameter tuning
-        if self.get_plugin_data().multi_params_dict:
-            self.add_extra_dims_labels()
+            # if parameter tuning
+            if self.get_plugin_data().multi_params_dict:
+                self.add_extra_dims_labels()
 
     def copy_labels(self, copy_data):
         nDims = copy.copy(copy_data.data_info.get_meta_data('nDims'))
@@ -288,7 +288,10 @@ class Data(object):
                     axis_labels[int(label[0]) + removed_dims] = \
                         {label[1]: label[2]}
                 else:
-                    axis_labels.insert(int(label[0]), {label[1]: label[2]})
+                    if int(label[0]) < self.data_info.get_meta_data('nDims'):
+                        axis_labels[int(label[0])] = {label[1]: label[2]}
+                    else:
+                        axis_labels.insert(int(label[0]), {label[1]: label[2]})
 
     def set_data_patterns(self, patterns):
         self.add_extra_dims_to_patterns(patterns)
@@ -301,7 +304,6 @@ class Data(object):
             for dim in all_dims:
                 if dim not in pDims:
                     patterns[p]['slice_dir'] += (dim,)
-                # add to data dims in data_info?
 
     def get_data_patterns(self):
         return self.data_info.get_meta_data('data_patterns')

@@ -111,9 +111,10 @@ class BaseRecon(Plugin):
             self.map_volume_dimensions(in_dataset[0])
 
         axis_labels = [0]*3
-        axis_labels[dim_volX] = 'voxel_x.voxels'
-        axis_labels[dim_volY] = 'voxel_y.voxels'
-        axis_labels[dim_volZ] = 'voxel_z.voxels'
+        axis_labels = {in_dataset[0]:
+                       [str(dim_volX) + '.voxel_x.voxels',
+                        str(dim_volY) + '.voxel_y.voxels',
+                        str(dim_volZ) + '.voxel_z.voxels']}
 
         shape = list(in_dataset[0].get_shape())
         shape[dim_volX] = shape[dim_volZ]
