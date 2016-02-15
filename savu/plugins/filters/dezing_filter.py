@@ -20,7 +20,6 @@
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
-import logging
 import numpy as np
 import dezing
 

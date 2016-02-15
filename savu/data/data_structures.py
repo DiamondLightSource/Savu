@@ -474,7 +474,7 @@ class Data(object):
                 nDims += len(kwargs[args])
                 self.data_info.set_meta_data(['data_patterns', dtype, args],
                                              kwargs[args])
-            self.non_negative_directions(dtype)
+            self.convert_pattern_directions(dtype)
             if self.get_shape():
                 diff = len(self.get_shape()) - nDims
                 if diff:
@@ -554,18 +554,19 @@ class Data(object):
             return 0
         return 1
 
-    def non_negative_directions(self, dtype):
+    def convert_pattern_directions(self, dtype):
         pattern = self.get_data_patterns()[dtype]
         nDims = sum([len(i) for i in pattern.values()])
-
         for p in pattern:
-            temp = pattern[p]
-            index = [i for i in range(len(temp)) if temp[i] < 0]
-            list_ddirs = list(temp)
-            for i in index:
-                list_ddirs[i] = nDims + temp[i]
-            index = tuple(list_ddirs)
-            pattern[p] = index
+            ddirs = pattern[p]
+            pattern[p] = self.non_negative_directions(ddirs, nDims)
+
+    def non_negative_directions(self, ddirs, nDims):
+        index = [i for i in range(len(ddirs)) if ddirs[i] < 0]
+        list_ddirs = list(ddirs)
+        for i in index:
+            list_ddirs[i] = nDims + ddirs[i]
+        return tuple(list_ddirs)
 
     def check_direction(self, tdir, dname):
         if not isinstance(tdir, int):

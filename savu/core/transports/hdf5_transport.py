@@ -193,6 +193,14 @@ class Hdf5Transport(TransportControl):
         squeeze_dict = self.set_functions(in_data, 'squeeze')
         expand_dict = self.set_functions(out_data, 'expand')
 
+        print '\n\n'
+        for sl in in_slice_list[0]:
+            print sl
+        print '\n\n'
+        for sl in out_slice_list[0]:
+            print sl
+        print '\n\n'
+
         number_of_slices_to_process = len(in_slice_list[0])
         for count in range(number_of_slices_to_process):
             percent_complete = count/(number_of_slices_to_process * 0.01)
