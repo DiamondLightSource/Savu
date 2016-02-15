@@ -24,8 +24,6 @@
 import re
 import logging
 import numpy as np
-from mpi4py import MPI
-import time
 import copy
 
 plugins = {}
@@ -39,7 +37,6 @@ def register_plugin(clazz):
     plugins[clazz.__name__] = clazz
     if clazz.__module__.split('.')[0] != 'savu':
         plugins_path[clazz.__name__] = clazz.__module__
-    #print clazz.name, clazz.__module__
     return clazz
 
 
@@ -60,9 +57,7 @@ def load_plugin(plugin_name):
     name = plugin_name
     logging.debug("importing the module")
     # TODO This appears to be the failing line.
-    print name
     mod = __import__(name)
-    
     components = name.split('.')
     for comp in components[1:]:
         mod = getattr(mod, comp)
