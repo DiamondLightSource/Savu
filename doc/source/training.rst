@@ -166,11 +166,11 @@ should be replaced with an integer or the key words ‘end’ or ‘mid’.
 For example, the test data is 3D, in the order (rotation_angle, detector_y, detector_x).  
 To apply the data only to the middle 5 sinograms:
 
-    >>> mod 1.1 [‘0:end:1:1’, ‘mid-2:mid+2:1:1’, ‘0:end:1:1’]
+    >>> mod 1.1 ['0:end:1:1', 'mid-2:mid+2:1:1', '0:end:1:1']
 
 Or alternatively,
 
-    >>> mod 1.1 [‘0:end:1:1’, ‘mid:mid+1:1:5’, ‘0:end:1:1’]
+    >>> mod 1.1 ['0:end:1:1', 'mid:mid+1:1:5', '0:end:1:1']
 
 Amend the process list to preview only the middle 5 sinograms.
 
