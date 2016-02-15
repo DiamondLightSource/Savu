@@ -95,25 +95,13 @@ class Chunking(object):
         Get all core dimensions and fastest changing slice dimension (all
         potentially adjustable)
         """
-        nDims = len(list(self.current['slice_dir']) +
-                    list(self.current['core_dir']))
-        self.core = list(self.convert_dir(self.current['core_dir'], nDims)) + \
-            list(self.convert_dir(self.next['core_dir'], nDims))
+        self.core = \
+            list(self.current['core_dir']) + list(self.next['core_dir'])
         c_sl = list(self.current['slice_dir'])
         n_sl = list(self.next['slice_dir'])
         self.slice1 = [c_sl[0]] + [n_sl[0]]
         self.other = c_sl[1:] + n_sl[1:]
         return list(set(self.core + self.slice1))
-
-    def convert_dir(self, ddirs, nDims):
-        """
-        Convert negative directions
-        """
-        index = [i for i in range(len(ddirs)) if ddirs[i] < 0]
-        list_ddirs = list(ddirs)
-        for i in index:
-            list_ddirs[i] = nDims + ddirs[i]
-        return tuple(list_ddirs)
 
     def set_chunks(self, chunks, shape, adjust):
         """

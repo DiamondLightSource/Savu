@@ -64,7 +64,6 @@ class PolyBackgroundEstimator(BaseFilter, CpuPlugin):
 
     def setup(self):
         in_dataset, out_datasets = self.get_datasets()
-        print in_dataset[0].get_data_patterns()
         out = out_datasets[0]
         out.create_dataset(in_dataset[0])
         in_pData, out_pData = self.get_plugin_datasets()

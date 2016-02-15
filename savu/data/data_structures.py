@@ -472,8 +472,9 @@ class Data(object):
             nDims = 0
             for args in kwargs:
                 nDims += len(kwargs[args])
+                dirs = self.non_negative_directions(kwargs[args])
                 self.data_info.set_meta_data(['data_patterns', dtype, args],
-                                             kwargs[args])
+                                             dirs)
             if self.get_shape():
                 diff = len(self.get_shape()) - nDims
                 if diff:
@@ -706,15 +707,8 @@ class PluginData(object):
             sys.exit("Incorrect number of data dimensions specified.")
 
     def set_slice_directions(self):
-#        try:
-#            [fix_dirs, value] = self.get_fixed_directions()
-#        except KeyError:
-#            fix_dirs = []
         slice_dirs = self.data_obj.get_data_patterns()[
             self.get_pattern_name()]['slice_dir']
-        #to_slice = [sd for sd in slice_dirs if sd not in fix_dirs]
-        #slice_dirs = self.data_obj.non_negative_directions(tuple(to_slice))
-        slice_dirs = self.data_obj.non_negative_directions(tuple(slice_dirs))
         self.meta_data.set_meta_data('slice_dir', slice_dirs)
 
     def get_slice_directions(self):
@@ -758,7 +752,7 @@ class PluginData(object):
     def get_core_directions(self):
         core_dir = self.data_obj.get_data_patterns()[
             self.get_pattern_name()]['core_dir']
-        return self.data_obj.non_negative_directions(core_dir)
+        return core_dir
 
     def set_fixed_directions(self, dims, values):
         slice_dirs = self.get_slice_directions()
