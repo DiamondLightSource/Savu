@@ -436,7 +436,7 @@ class Hdf5TransportData(object):
             maxpad = pad_ammount
         if maxval > data_stop:
             maxpad = (maxval-data_stop)
-            maxval = data_stop + 1
+            maxval = data_stop # + 1
 
         out_slice = slice(minval, maxval, sl.step)
 
@@ -485,7 +485,8 @@ class Hdf5TransportData(object):
                                              padding_dict[direction],
                                              self.get_shape()[direction])
 
-        return self.get_pad_data(tuple(slice_list), tuple(pad_list))
+        temp = self.get_pad_data(tuple(slice_list), tuple(pad_list))
+        return temp
 
     def get_unpadded_slice_data(self, input_slice_list, padded_dataset):
         padding_dict = self.get_plugin_data().padding
