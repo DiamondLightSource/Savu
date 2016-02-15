@@ -472,9 +472,9 @@ class Data(object):
             nDims = 0
             for args in kwargs:
                 nDims += len(kwargs[args])
-                dirs = self.non_negative_directions(kwargs[args])
                 self.data_info.set_meta_data(['data_patterns', dtype, args],
-                                             dirs)
+                                             kwargs[args])
+            self.non_negative_directions(dtype)
             if self.get_shape():
                 diff = len(self.get_shape()) - nDims
                 if diff:
@@ -554,19 +554,18 @@ class Data(object):
             return 0
         return 1
 
-    def non_negative_directions(self, ddirs, **kwargs):
-        try:
-            nDims = kwargs['nDims']
-        except KeyError:
-            nDims = len(self.get_shape())
-        if type(ddirs) is not tuple:
-            ddirs = (ddirs,)
-        index = [i for i in range(len(ddirs)) if ddirs[i] < 0]
-        list_ddirs = list(ddirs)
-        for i in index:
-            list_ddirs[i] = nDims + ddirs[i]
-        index = tuple(list_ddirs)
-        return index
+    def non_negative_directions(self, dtype):
+        pattern = self.get_data_patterns()[dtype]
+        nDims = sum([len(i) for i in pattern.values()])
+
+        for p in pattern:
+            temp = pattern[p]
+            index = [i for i in range(len(temp)) if temp[i] < 0]
+            list_ddirs = list(temp)
+            for i in index:
+                list_ddirs[i] = nDims + temp[i]
+            index = tuple(list_ddirs)
+            pattern[p] = index
 
     def check_direction(self, tdir, dname):
         if not isinstance(tdir, int):
