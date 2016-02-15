@@ -121,7 +121,7 @@ class Hdf5TransportData(object):
     def output_metadata(self, entry):
         self.output_axis_labels(entry)
         self.output_data_patterns(entry)
-        # output remaining metadata *** implement this
+        self.output_metadata_dict(entry)
 
     def output_axis_labels(self, entry):
         axis_labels = self.data_info.get_meta_data("axis_labels")
@@ -152,6 +152,15 @@ class Hdf5TransportData(object):
             values = data_patterns[pattern]
             nx_data.create_dataset('core_dir', data=values['core_dir'])
             nx_data.create_dataset('slice_dir', data=values['slice_dir'])
+
+    def output_metadata_dict(self, entry):
+        meta_data = self.meta_data.get_dictionary()
+        entry = entry.create_group('meta_data')
+        entry.attrs['NX_class'] = 'NXcollection'
+        for mData in meta_data:
+            nx_note = entry.create_group(mData)
+            nx_note.attrs[NX_CLASS] = 'NXdata'
+            nx_note.create_dataset(mData, data=meta_data[mData])
 
     def save_data(self, link_type):
         self.add_data_links(link_type)
