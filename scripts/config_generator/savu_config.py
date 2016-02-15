@@ -172,7 +172,7 @@ def _mod(content, arg):
                 except NameError:
                     exec("value = " + "'" + value + "'")
 
-            if value.count('[') and not isinstance(value, list):
+            if isinstance(value, str) and value.count('['):
                 value = value.split('[')[1].\
                     split(']')[0].replace(" ", "").split(',')
                 exec("value = " + str(value))

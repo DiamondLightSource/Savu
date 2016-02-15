@@ -41,8 +41,11 @@ class DezingFilter(BaseFilter, CpuPlugin):
     def __init__(self):
         super(DezingFilter, self).__init__("DezingFilter")
 
+    def pre_process(self):
+        dezing.setup_size(self.data_size, self.parameters['outlier_mu'],
+                          self.pad)
+
     def filter_frames(self, data):
-        print data[0].dtype
         result = np.empty_like(data[0])
         dezing.run(data[0], result)
         return result
@@ -52,11 +55,10 @@ class DezingFilter(BaseFilter, CpuPlugin):
 
     def set_filter_padding(self, in_data, out_data):
         in_data = in_data[0]
-        pad = (self.parameters['kernel_size'] - 1) / 2
-        data_size = in_data.get_shape()
-        dezing.setup_size(data_size, self.parameters['outlier_mu'], pad)
-        in_data.padding = {'pad_multi_frames': pad}
-        out_data[0].padding = {'pad_multi_frames': pad}
+        self.pad = (self.parameters['kernel_size'] - 1) / 2
+        self.data_size = in_data.get_shape()
+        in_data.padding = {'pad_multi_frames': self.pad}
+        out_data[0].padding = {'pad_multi_frames': self.pad}
 # other examples
 #        data.padding = {'pad_multi_frames':pad, 'pad_frame_edges':pad}
 #        data.padding = {'pad_direction':[ddir, pad]}}

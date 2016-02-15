@@ -73,7 +73,6 @@ class PolyBackgroundEstimator(BaseFilter, CpuPlugin):
         # get the axis
         alabel = in_dataset[0].data_info.get_meta_data('axis_labels')[-1].keys()[0]
         self.axis = in_meta.get_meta_data(alabel)
-        print self.axis
 
     def get_max_frames(self):
         """

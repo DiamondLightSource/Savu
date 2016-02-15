@@ -78,6 +78,7 @@ class BaseFilter(Plugin):
         self.exp.log(self.name + " Start")
         # set up the output dataset that is created by the plugin
         in_dataset, out_dataset = self.get_datasets()
+
         # copy all required information from in_dataset[0]
         out_dataset[0].create_dataset(in_dataset[0])
 

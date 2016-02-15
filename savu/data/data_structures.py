@@ -158,6 +158,7 @@ class Data(object):
                 raise Exception("Please state axis_labels and shape when "
                                 "creating a new dataset")
             self.set_new_dataset_shape(shape)
+
             if 'patterns' in kwargs:
                 self.copy_patterns(kwargs['patterns'])
         self.set_preview([])
@@ -229,23 +230,23 @@ class Data(object):
                     copy_data.meta_data.set_meta_data(axis_label.keys()[0],
                                                       map_label)
             copy_data = map_data
-        patterns = copy.copy(copy_data.get_data_patterns())
-        self.set_data_patterns(patterns)
+        patterns = copy.deepcopy(copy_data.get_data_patterns())
         self.copy_labels(copy_data)
         self.find_and_set_shape(copy_data)
+        self.set_data_patterns(patterns)
 
     def create_axis_labels(self, axis_labels):
         if isinstance(axis_labels, Data):
             self.copy_labels(axis_labels)
         elif isinstance(axis_labels, dict):
             data = axis_labels.keys()[0]
-            self.copy_labels(data)
+            self.copy_labels(data)          
             self.amend_axis_labels(axis_labels[data])
         else:
             self.set_axis_labels(*axis_labels)
-        # if parameter tuning
-        if self.get_plugin_data().multi_params_dict:
-            self.add_extra_dims_labels()
+            # if parameter tuning
+            if self.get_plugin_data().multi_params_dict:
+                self.add_extra_dims_labels()
 
     def copy_labels(self, copy_data):
         nDims = copy.copy(copy_data.data_info.get_meta_data('nDims'))
@@ -287,10 +288,22 @@ class Data(object):
                     axis_labels[int(label[0]) + removed_dims] = \
                         {label[1]: label[2]}
                 else:
-                    axis_labels.insert(int(label[0]), {label[1]: label[2]})
+                    if int(label[0]) < self.data_info.get_meta_data('nDims'):
+                        axis_labels[int(label[0])] = {label[1]: label[2]}
+                    else:
+                        axis_labels.insert(int(label[0]), {label[1]: label[2]})
 
     def set_data_patterns(self, patterns):
+        self.add_extra_dims_to_patterns(patterns)
         self.data_info.set_meta_data('data_patterns', patterns)
+
+    def add_extra_dims_to_patterns(self, patterns):
+        all_dims = range(len(self.get_shape()))
+        for p in patterns:
+            pDims = patterns[p]['core_dir'] + patterns[p]['slice_dir']
+            for dim in all_dims:
+                if dim not in pDims:
+                    patterns[p]['slice_dir'] += (dim,)
 
     def get_data_patterns(self):
         return self.data_info.get_meta_data('data_patterns')
@@ -399,7 +412,7 @@ class Data(object):
 
     def find_and_set_shape(self, data):
         pData = self.get_plugin_data()
-        new_shape = data.get_shape() + tuple(pData.extra_dims)
+        new_shape = copy.copy(data.get_shape()) + tuple(pData.extra_dims)
         self.set_shape(new_shape)
 
     def set_variable_flag(self):
@@ -461,6 +474,13 @@ class Data(object):
                 nDims += len(kwargs[args])
                 self.data_info.set_meta_data(['data_patterns', dtype, args],
                                              kwargs[args])
+            self.non_negative_directions(dtype)
+            if self.get_shape():
+                diff = len(self.get_shape()) - nDims
+                if diff:
+                    pattern = {dtype: self.get_data_patterns()[dtype]}
+                    self.add_extra_dims_to_patterns(pattern)
+                    nDims += diff
             try:
                 if nDims != self.data_info.get_meta_data("nDims"):
                     actualDims = self.data_info.get_meta_data('nDims')
@@ -485,6 +505,7 @@ class Data(object):
         vol_dict = {}
         vol_dict['core_dir'] = (dim1, dim2)
         slice_dir = [sdir]
+        # *** need to add this for other patterns
         for ddir in all_dims:
             if ddir not in [dim1, dim2, sdir]:
                 slice_dir.append(ddir)
@@ -502,7 +523,6 @@ class Data(object):
                 # data arrives here, but that may be an error
                 pass
         self.data_info.set_meta_data('axis_labels', axis_labels)
-        
 
     def find_axis_label_dimension(self, name, contains=False):
         axis_labels = self.data_info.get_meta_data('axis_labels')
@@ -534,19 +554,18 @@ class Data(object):
             return 0
         return 1
 
-    def non_negative_directions(self, ddirs, **kwargs):
-        try:
-            nDims = kwargs['nDims']
-        except KeyError:
-            nDims = len(self.get_shape())
-        if type(ddirs) is not tuple:
-            ddirs = (ddirs,)
-        index = [i for i in range(len(ddirs)) if ddirs[i] < 0]
-        list_ddirs = list(ddirs)
-        for i in index:
-            list_ddirs[i] = nDims + ddirs[i]
-        index = tuple(list_ddirs)
-        return index
+    def non_negative_directions(self, dtype):
+        pattern = self.get_data_patterns()[dtype]
+        nDims = sum([len(i) for i in pattern.values()])
+
+        for p in pattern:
+            temp = pattern[p]
+            index = [i for i in range(len(temp)) if temp[i] < 0]
+            list_ddirs = list(temp)
+            for i in index:
+                list_ddirs[i] = nDims + temp[i]
+            index = tuple(list_ddirs)
+            pattern[p] = index
 
     def check_direction(self, tdir, dname):
         if not isinstance(tdir, int):
@@ -687,15 +706,8 @@ class PluginData(object):
             sys.exit("Incorrect number of data dimensions specified.")
 
     def set_slice_directions(self):
-#        try:
-#            [fix_dirs, value] = self.get_fixed_directions()
-#        except KeyError:
-#            fix_dirs = []
         slice_dirs = self.data_obj.get_data_patterns()[
             self.get_pattern_name()]['slice_dir']
-        #to_slice = [sd for sd in slice_dirs if sd not in fix_dirs]
-        #slice_dirs = self.data_obj.non_negative_directions(tuple(to_slice))
-        slice_dirs = self.data_obj.non_negative_directions(tuple(slice_dirs))
         self.meta_data.set_meta_data('slice_dir', slice_dirs)
 
     def get_slice_directions(self):
@@ -739,7 +751,7 @@ class PluginData(object):
     def get_core_directions(self):
         core_dir = self.data_obj.get_data_patterns()[
             self.get_pattern_name()]['core_dir']
-        return self.data_obj.non_negative_directions(core_dir)
+        return core_dir
 
     def set_fixed_directions(self, dims, values):
         slice_dirs = self.get_slice_directions()

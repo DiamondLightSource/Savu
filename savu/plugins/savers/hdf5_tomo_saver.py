@@ -87,7 +87,7 @@ class Hdf5TomoSaver(BaseSaver):
         else:
             backing_file = h5py.File(filename, 'w')
 
-        print "creating the backing file", filename
+        logging.debug("creating the backing file", filename)
         if backing_file is None:
             raise IOError("Failed to open the hdf5 file")
 
@@ -128,7 +128,7 @@ class Hdf5TomoSaver(BaseSaver):
                 chunks = chunking.calculate_chunking(shape, data.dtype)
                 logging.info("create_entries: 3")
                 self.exp.barrier()
-                print "chunks = ", chunks
+                # print "chunks = ", chunks
                 data.data = group.create_dataset("data", shape, data.dtype,
                                                  chunks=chunks)
                 logging.info("create_entries: 4")
