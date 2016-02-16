@@ -30,28 +30,28 @@ from savu.test.plugin_runner_test import run_protected_plugin_runner
 
 class FittingTest(unittest.TestCase):
 
-#     def test_simple_fit_XRF(self):
-#         options = {
-#             "transport": "hdf5",
-#             "process_names": "CPU0",
-#             "data_file": tu.get_test_data_path('mm.nxs'),
-#             "process_file": tu.get_test_process_path(
-#                 'simple_fit_test_XRF.nxs'),
-#             "out_path": tempfile.mkdtemp()
-#             }
-#         run_protected_plugin_runner(options)
-
-    def test_simple_fit_XRD(self):
- 
+    def test_simple_fit_XRF(self):
         options = {
             "transport": "hdf5",
             "process_names": "CPU0",
             "data_file": tu.get_test_data_path('mm.nxs'),
             "process_file": tu.get_test_process_path(
-                'simple_fit_test_XRD.nxs'),
+                'simple_fit_test_XRF.nxs'),
             "out_path": tempfile.mkdtemp()
             }
         run_protected_plugin_runner(options)
+
+#     def test_simple_fit_XRD(self):
+#  
+#         options = {
+#             "transport": "hdf5",
+#             "process_names": "CPU0",
+#             "data_file": tu.get_test_data_path('mm.nxs'),
+#             "process_file": tu.get_test_process_path(
+#                 'simple_fit_test_XRD.nxs'),
+#             "out_path": tempfile.mkdtemp()
+#             }
+#         run_protected_plugin_runner(options)
 
 if __name__ == "__main__":
     unittest.main()
