@@ -3,6 +3,7 @@
 #include <tiffio.h>
 #define MAX_MESSAGE (1024)
 #define D_STRIPBYTES (2097152)
+/*$Id: tifwrite.h 465 2016-02-16 11:02:36Z kny48981 $*/
 typedef struct mytiff_str{
 
   u_int32_t wd;
