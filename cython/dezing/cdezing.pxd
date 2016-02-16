@@ -1,4 +1,6 @@
 
+# $Id: cdezing.pxd 465 2016-02-16 11:02:36Z kny48981 $
+ 
 cdef extern from "./options.h":
    ctypedef struct Options:
       unsigned char versionflag

@@ -8,24 +8,31 @@ int logprint(const char *const message){
    int retval=0;
    int myerror=0;
    retval=fprintf(logfp,"%s",message);
+   fprintf(stderr,"ENTERING LOGPRINT\n");
+   fflush(stderr);
 
-#ifdef FLUSH_LOG_FILE
+
+// #ifdef FLUSH_LOG_FILE
    if( fflush(logfp) == EOF ){
       myerror=errno;
       fprintf(stderr,"ERROR: log file flush failed!\n");
       fprintf(stderr,"%s\n",strerror(myerror));
       return(151);
    };
-#endif
+//#endif
 return(0);
 }
 
 
 void timestamp_open(const char * const logname){
+  fprintf(stderr,"ENTERING TIMESTAMP OPEN\n");
+  fflush(stderr);
    logfp=fopen(logname,"w");
 }
 
 void timestamp_close(void){
+  fprintf(stderr,"ENTERING TIMESTAMP CLOSE\n");
+  fflush(stderr);
    fclose(logfp);
 }
 
@@ -35,6 +42,8 @@ void timestamp_init(){
   double nowtime,etime,itime;
   suseconds_t etimeu;
   char message[MAX_MESSAGE];
+  fprintf(stderr,"ENTERING TIMESTAMP INIT\n");
+  fflush(stderr);
 
   gettimeofday(&now,NULL);
   etimes = now.tv_sec - mystime.tv_sec;
@@ -53,6 +62,8 @@ void timestamp(const char *const stampmsg){
   double nowtime,etime,itime;
   suseconds_t etimeu;
   char message[MAX_MESSAGE];
+  fprintf(stderr,"ENTERING TIMESTAMP\n");
+  fflush(stderr);
 
   gettimeofday(&now,NULL);
   etimes = now.tv_sec - mystime.tv_sec;

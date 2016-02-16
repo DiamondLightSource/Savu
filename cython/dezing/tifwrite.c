@@ -10,6 +10,7 @@
 #ifndef MAX_MESSAGE
 #define MAX_MESSAGE (1024)
 #endif /*MAX_MESSAGE*/
+/*$Id: tifwrite.c 465 2016-02-16 11:02:36Z kny48981 $*/
 
 /* compile time option to activate some verbose printing */
 
