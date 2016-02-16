@@ -65,7 +65,7 @@ In the DAWN GUI click on File -> open, navigate to the test folder and click on 
 In the Data Browsing perspective navigate through the tree entry->plugin and browse the plugin entries.
 
 2. In the configurator
-^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^
 
 An alternative way to view the process list is using the configurator:
 
