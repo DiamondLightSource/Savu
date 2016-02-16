@@ -1,5 +1,5 @@
-Savu Diamond User Training
-**************************
+Savu Diamond Developer Training
+*******************************
 
 Github Savu
 ===========
@@ -13,7 +13,7 @@ Set up your Savu Github repository (**DO THIS ONCE**)
 -----------------------------------------------------
 
 1. Navigate to https://github.com/DiamondLightSource/Savu and click on Fork (right hand corner).
-2. Navigate to **YOUR FORK** of the repository and copy the url e.g. |A| (ensure SSH is chosen)..
+2. Navigate to **YOUR FORK** of the repository and copy the url e.g. |A| (ensure SSH is chosen).
 
 .. |A| image:: ../../images/ssh_url.png
 
@@ -70,7 +70,7 @@ the repository.
 
 
 To track a file
----------------
+^^^^^^^^^^^^^^^
 
 >>> git status
 >>> git add <untracked file_path>
@@ -78,7 +78,7 @@ To track a file
 Then commit and push as per :ref:`my-reference-label`.
 
 To untrack a file
------------------
+^^^^^^^^^^^^^^^^^
 
 >>> git rm <option> <file_path>
 
@@ -86,6 +86,11 @@ option is ``--cached`` if you want to untrack the file but keep a local copy.
 
 option is ``-f`` if you want to completely delete the file.  
 
+
+Add your changes to the **ORIGINAL** repository
+-----------------------------------------------
+
+Navigate to your repository and click on the green *New pull request* button.
 
 See the Git Cheat Sheet for additional commands https://training.github.com/kit/downloads/github-git-cheat-sheet.pdf
 
