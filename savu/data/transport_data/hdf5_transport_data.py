@@ -139,6 +139,7 @@ class Hdf5TransportData(object):
 
             temp = self.group.create_dataset(name, mData.shape, mData.dtype)
             temp[...] = mData[...]
+            temp.attrs['units'] = labels.values()[0]
             count += 1
         entry.attrs['axes'] = axes
 
@@ -158,9 +159,9 @@ class Hdf5TransportData(object):
         entry = entry.create_group('meta_data')
         entry.attrs['NX_class'] = 'NXcollection'
         for mData in meta_data:
-            nx_note = entry.create_group(mData)
-            nx_note.attrs[NX_CLASS] = 'NXdata'
-            nx_note.create_dataset(mData, data=meta_data[mData])
+            nx_data = entry.create_group(mData)
+            nx_data.attrs[NX_CLASS] = 'NXdata'
+            nx_data.create_dataset(mData, data=meta_data[mData])
 
     def save_data(self, link_type):
         self.add_data_links(link_type)

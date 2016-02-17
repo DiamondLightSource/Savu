@@ -14,6 +14,7 @@ User and Developer Guide
    user
    training
    dev
+   dev_training
 
 Code Documentation
 ==================
