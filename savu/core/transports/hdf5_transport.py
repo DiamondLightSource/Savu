@@ -52,6 +52,24 @@ class Hdf5Transport(TransportControl):
             self.mpi_setup(options)
 
     def mpi_setup(self, options):
+
+#        print "****************testing mpi settings*********************"
+#        
+#        comm = MPI.COMM_WORLD
+#        my_mpi_file = MPI.File.Open(comm, '/mnt/GPFS01/testdir/dasc/qmm55171/temp_run_out/astra_cpu_test.nxs01_savu.plugins.corrections.timeseries_field_corrections_tomo.h5')
+#        #print "\n p1", dir(my_mpi_file)
+#        info = my_mpi_file.info
+##        print "\n\n", info.Get_nkeys()
+##        print "\n\n", info.keys()
+#        keys = info.keys()
+#        count = 0
+#        for key in keys:
+#            print "***", count, key, info.get(key)
+#            count += 1
+#        print info.get('coll_read_bufsize')
+#
+#        print "*********************************************************"        
+        
         print("Running mpi_setup")
         RANK_NAMES = options["process_names"].split(',')
         RANK = MPI.COMM_WORLD.rank

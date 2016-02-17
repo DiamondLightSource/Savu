@@ -20,10 +20,10 @@ while read -r a b c d; do
 	#runfile=/bin/savu_distArray_launcher.sh
 	runfile=/bin/savu_launcher.sh
 	outpath=$PWD #outputting to the current folder
-    datafile=$outpath/../test_data/24737.nxs
-    #datafile=/dls/i12/data/2015/ee10500-1/processing/LD_2W50_8/LD_2W50_8_Dataset_093.nxs
+    #datafile=$outpath/../test_data/24737.nxs
+    datafile=/dls/i12/data/2015/ee10500-1/processing/LD_2W50_8/LD_2W50_8_Dataset_093.nxs
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/test_data/test_process_lists/basic_tomo_process.nxs
-    processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_processes/astra_cpu_test.nxs
+    processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/mpi_settings_test.nxs
     
     #datafile=$outpath/../test_data/LD_2W50_8_Dataset_038.nxs
 	#processfile=$outpath/../test_data/original_process_lists/i12_tomo_pipeline_preview_55751.nxs

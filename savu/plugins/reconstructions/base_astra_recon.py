@@ -71,7 +71,9 @@ class BaseAstraRecon(BaseRecon):
         self.nAngles = sino.shape[self.dim_rot]
         sino, vol_geom, proj_geom = \
             self.geom_setup_function(sino, angles, vol_shape, cors)
-        return self.astra_reconstruction(sino, vol_geom, proj_geom)
+        rec = self.astra_reconstruction(sino, vol_geom, proj_geom)
+        self.astra_delete()
+        return rec
 
     def astra_reconstruction(self, sino, vol_geom, proj_geom):
         # currently hard-coded - for 3D version only!

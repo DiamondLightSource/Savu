@@ -13,21 +13,18 @@
 # limitations under the License.
 
 """
-.. module:: tomography_loader
+.. module:: savu_loader
    :platform: Unix
-   :synopsis: A class for loading tomography data using the standard loaders
-   library.
+   :synopsis: A class for savu output data.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
 
 import h5py
-import logging
 
 import savu.data.data_structures as ds
 from savu.plugins.base_loader import BaseLoader
-import savu.data.data_structures as ds
 
 from savu.plugins.utils import register_plugin
 
