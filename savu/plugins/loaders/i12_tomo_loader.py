@@ -70,19 +70,21 @@ class I12TomoLoader(BaseLoader):
         data_obj.backing_file = \
             h5py.File(expInfo.get_meta_data("data_file"), 'r')
 
-        logging.debug("Creating file '%s' '%s'", 'tomo_entry',
+        logging.debug("Opened file '%s' '%s'", 'tomo_entry',
                       data_obj.backing_file.filename)
+
+        logging.debug("Getting the path to the data")
 
         data_obj.data = \
             data_obj.backing_file[self.parameters['data_path']]
 
-#        data_obj.data = \
-#            data_obj.backing_file['entry1/p2r_flyScanDetector/data']
+        logging.debug("Getting the path to the dark data")
 
         dark_file = h5py.File(self.get_file_path('dark'), 'r')
         dark = dark_file[self.parameters['flat_dark_path']]
         expInfo.set_meta_data('dark', dark[:].mean(0))
 
+        logging.debug("Getting the path to the flat data")
         flat_file = h5py.File(self.get_file_path('flat'), 'r')
         flat = flat_file[self.parameters['flat_dark_path']]
         expInfo.set_meta_data('flat', flat[:].mean(0))

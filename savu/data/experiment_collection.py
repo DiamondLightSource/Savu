@@ -47,8 +47,8 @@ class Experiment(object):
         self.index = {"in_data": {}, "out_data": {}, "mapping": {}}
         self.nxs_file = None
 
-    def get_meta_data(self):
-        return self.meta_data
+    def get_meta_data(self, entry):
+        return self.meta_data.get_meta_data(entry)
 
     def meta_data_setup(self, process_file):
         self.meta_data.plugin_list = PluginList()
@@ -82,11 +82,9 @@ class Experiment(object):
                                 "%s_processed_%s.nxs" %
                                 (filename, time.strftime("%Y%m%d%H%M%S")))
         self.meta_data.set_meta_data("nxs_filename", filename)
-        if self.meta_data.get_meta_data("mpi") is True:
-            self.nxs_file = h5py.File(filename, 'w', driver='mpio',
-                                      comm=MPI.COMM_WORLD)
-        else:
-            self.nxs_file = h5py.File(filename, 'w')
+
+        logging.debug("Opening the nexus file %s", filename)
+        self.nxs_file = h5py.File(filename, 'w')
 
     def remove_dataset(self, data_obj):
         data_obj.close_file()

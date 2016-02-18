@@ -136,13 +136,13 @@ class PluginList(object):
             return {self.byteify(key): self.byteify(value)
                     for key, value in input.iteritems()}
         elif isinstance(input, list):
-            #return [self.byteify(element) for element in input]
             temp = [self.byteify(element) for element in input]
             return temp
         elif isinstance(input, unicode):
             return input.encode('utf-8')
         else:
             return input
+
 
 class CitationInformation(object):
     """
