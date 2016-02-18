@@ -65,7 +65,7 @@ class NxtomoLoader(BaseLoader):
         data_obj.backing_file = \
             h5py.File(expInfo.get_meta_data("data_file"), 'r')
 
-        logging.debug("Creating file '%s' '%s'", 'tomo_entry',
+        logging.debug("Opening file '%s' '%s'", 'tomo_entry',
                       data_obj.backing_file.filename)
 
         data_obj.data = data_obj.backing_file[self.parameters['data_path']]

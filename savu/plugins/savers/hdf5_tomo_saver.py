@@ -82,20 +82,18 @@ class Hdf5TomoSaver(BaseSaver):
 
         filename = expInfo.get_meta_data(["filename", key])
         if expInfo.get_meta_data("mpi") is True:
-#            info = MPI.Info()
-#            info.Set("romio_ds_write", "disable")
-            info = MPI.Info.Create()                                                   
-            info.Set("romio_ds_write", "disable")                                      
-            info.Set("romio_ds_read", "disable")                                      
+
+            info = MPI.Info.Create()
+            info.Set("romio_ds_write", "disable")
+            info.Set("romio_ds_read", "disable")
             backing_file = h5py.File(filename, 'w', driver='mpio',
                                      comm=MPI.COMM_WORLD, info=info)
-            fapl = backing_file.id.get_access_plist()
-            comm, info = fapl.get_fapl_mpio()
-            print "****", info.keys()
+            # fapl = backing_file.id.get_access_plist()
+            # comm, info = fapl.get_fapl_mpio()
         else:
             backing_file = h5py.File(filename, 'w')
 
-        logging.debug("creating the backing file", filename)
+        logging.debug("creating the backing file %s", filename)
         if backing_file is None:
             raise IOError("Failed to open the hdf5 file")
 
@@ -136,7 +134,6 @@ class Hdf5TomoSaver(BaseSaver):
                 chunks = chunking.calculate_chunking(shape, data.dtype)
                 logging.info("create_entries: 3")
                 self.exp.barrier()
-                # print "chunks = ", chunks
                 data.data = group.create_dataset("data", shape, data.dtype,
                                                  chunks=chunks)
                 logging.info("create_entries: 4")

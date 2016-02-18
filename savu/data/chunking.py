@@ -60,7 +60,7 @@ class Chunking(object):
         """
         Calculate appropriate chunk sizes for this dataset
         """
-        logging.debug("shape = ", shape)
+        logging.debug("shape = %s", shape)
         if len(shape) < 3:
             return True
 
@@ -72,8 +72,9 @@ class Chunking(object):
             return True
         else:
             chunks = self.adjust_chunk_size(chunks, ttype, shape, adjust)
-            logging.debug("chunks =", chunks)
-            # print "\n\n*****************************************************"
+            for chunk in chunks:
+                chunk += 10
+            logging.debug("chunks %s", chunks)
             return tuple(chunks)
 
     def set_adjust_params(self, shape):

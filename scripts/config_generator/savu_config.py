@@ -36,6 +36,23 @@ class Content(object):
         print "Saving file %s" % (filename)
         self.plugin_list.save_plugin_list(filename)
 
+    def value(self, arg):
+        value = ([''.join(arg.split()[1:])][0]).split()[0]
+
+        tuning = True if value.count(';') else False
+        if not tuning:
+            try:
+                exec("value = " + value)
+            except (NameError, SyntaxError):
+                exec("value = " + "'" + value + "'")
+
+        pRange = True if isinstance(value, str) and value.count('[') else False
+        if pRange:
+            value = value.split('[')[1].\
+                split(']')[0].replace(" ", "").split(',')
+            exec("value = " + str(value))
+        return value
+
     def add(self, name, pos):
         plugin = pu.plugins[name]()
         plugin.populate_default_parameters()
@@ -156,28 +173,47 @@ def _save(content, arg):
     return content
 
 
+#def _mod(content, arg):
+#    """Modifies the target value e.g. 'mod 1.value 27' and turns the plugins
+#       on and off e.g 'mod 1.on' or 'mod 1.off'"""
+#    on_off_list = ['ON', 'on', 'OFF', 'off']
+#    try:
+#        element,  subelement = arg.split()[0].split('.')
+#        if subelement in on_off_list:
+#            content.on_and_off(int(element), on_off_list.index(subelement))
+#        else:
+#            value = ([''.join(arg.split()[1:])][0]).split()[0]
+#            if not value.count(';'):
+#                try:
+#                    exec("value = " + value)
+#                except NameError:
+#                    exec("value = " + "'" + value + "'")
+#
+#            if isinstance(value, str) and value.count('['):
+#                value = value.split('[')[1].\
+#                    split(']')[0].replace(" ", "").split(',')
+#                exec("value = " + str(value))
+#
+#            content.modify(int(element), subelement, value)
+#        content.display()
+#    except:
+#        print("Sorry I can't process the argument '%s'" % (arg))
+#    return content
+
 def _mod(content, arg):
-    """Modifies the target value e.g. 'mod 1.value 27' and turns the plugins
-       on and off e.g 'mod 1.on' or 'mod 1.off'"""
+    """
+    Modifies the target value e.g. 'mod 1.value 27' and turns the plugins on
+    and off e.g 'mod 1.on' or 'mod 1.off'
+    """
     on_off_list = ['ON', 'on', 'OFF', 'off']
     try:
         element,  subelement = arg.split()[0].split('.')
         if subelement in on_off_list:
             content.on_and_off(int(element), on_off_list.index(subelement))
         else:
-            value = ([''.join(arg.split()[1:])][0]).split()[0]
-            if not value.count(';'):
-                try:
-                    exec("value = " + value)
-                except NameError:
-                    exec("value = " + "'" + value + "'")
-
-            if isinstance(value, str) and value.count('['):
-                value = value.split('[')[1].\
-                    split(']')[0].replace(" ", "").split(',')
-                exec("value = " + str(value))
-
+            value = content.value(arg)
             content.modify(int(element), subelement, value)
+
         content.display()
     except:
         print("Sorry I can't process the argument '%s'" % (arg))
