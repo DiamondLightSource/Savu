@@ -164,8 +164,7 @@ class Hdf5TransportData(object):
             nx_data.create_dataset(mData, data=meta_data[mData])
 
     def save_data(self, link_type):
-        if self.exp.get_meta_data('process') is 0:
-            self.add_data_links(link_type)
+        self.add_data_links(link_type)
         logging.info('save_data barrier')
         self.exp.barrier()
 

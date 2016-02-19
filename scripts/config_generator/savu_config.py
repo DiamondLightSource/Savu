@@ -38,7 +38,6 @@ class Content(object):
 
     def value(self, arg):
         value = ([''.join(arg.split()[1:])][0]).split()[0]
-
         tuning = True if value.count(';') else False
         if not tuning:
             try:
@@ -46,11 +45,6 @@ class Content(object):
             except (NameError, SyntaxError):
                 exec("value = " + "'" + value + "'")
 
-        pRange = True if isinstance(value, str) and value.count('[') else False
-        if pRange:
-            value = value.split('[')[1].\
-                split(']')[0].replace(" ", "").split(',')
-            exec("value = " + str(value))
         return value
 
     def add(self, name, pos):
@@ -206,17 +200,17 @@ def _mod(content, arg):
     and off e.g 'mod 1.on' or 'mod 1.off'
     """
     on_off_list = ['ON', 'on', 'OFF', 'off']
-    try:
-        element,  subelement = arg.split()[0].split('.')
-        if subelement in on_off_list:
-            content.on_and_off(int(element), on_off_list.index(subelement))
-        else:
-            value = content.value(arg)
-            content.modify(int(element), subelement, value)
+    #try:
+    element,  subelement = arg.split()[0].split('.')
+    if subelement in on_off_list:
+        content.on_and_off(int(element), on_off_list.index(subelement))
+    else:
+        value = content.value(arg)
+        content.modify(int(element), subelement, value)
 
-        content.display()
-    except:
-        print("Sorry I can't process the argument '%s'" % (arg))
+    content.display()
+    #except:
+    #    print("Sorry I can't process the argument '%s'" % (arg))
     return content
 
 

@@ -52,7 +52,6 @@ class Hdf5Transport(TransportControl):
             self.mpi_setup(options)
 
     def mpi_setup(self, options):
-
 #        print "****************testing mpi settings*********************"
 #        
 #        comm = MPI.COMM_WORLD

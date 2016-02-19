@@ -181,7 +181,7 @@ class BaseAstraRecon(BaseRecon):
         return int(p_low), int(p_high)
 
     def get_max_frames(self):
-        print self.get_parameters()[0]
+        #print self.get_parameters()[0]
         frames = 8 if "3D" in self.get_parameters()[0] else 1
         return frames
 

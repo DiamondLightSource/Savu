@@ -83,8 +83,11 @@ class Experiment(object):
                                 (filename, time.strftime("%Y%m%d%H%M%S")))
         self.meta_data.set_meta_data("nxs_filename", filename)
 
-        logging.debug("Opening the nexus file %s", filename)
-        self.nxs_file = h5py.File(filename, 'w')
+        if self.meta_data.get_meta_data("mpi") is True:
+            self.nxs_file = h5py.File(filename, 'w', driver='mpio',
+                                      comm=MPI.COMM_WORLD)
+        else:
+            self.nxs_file = h5py.File(filename, 'w')
 
     def remove_dataset(self, data_obj):
         data_obj.close_file()

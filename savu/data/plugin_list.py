@@ -61,6 +61,7 @@ class PluginList(object):
                 plugin['id'] = plugin_group[key]['id'][0]
                 plugin['data'] = \
                     self.byteify(json.loads(plugin_group[key]['data'][0]))
+                plugin['data'] = self.convert_to_list(plugin['data'])
                 self.plugin_list.append(plugin)
         plugin_file.close()
 
@@ -142,6 +143,16 @@ class PluginList(object):
             return input.encode('utf-8')
         else:
             return input
+
+    def convert_to_list(self, data):
+        for key in data:
+            value = data[key]
+            if isinstance(value, str) and value.count('['):
+                value = value.split('[')[1].\
+                    split(']')[0].replace(" ", "").split(',')
+                exec("value = " + str(value))
+            data[key] = value
+        return data
 
 
 class CitationInformation(object):

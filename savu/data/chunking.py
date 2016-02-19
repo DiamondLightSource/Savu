@@ -72,8 +72,6 @@ class Chunking(object):
             return True
         else:
             chunks = self.adjust_chunk_size(chunks, ttype, shape, adjust)
-            for chunk in chunks:
-                chunk += 10
             logging.debug("chunks %s", chunks)
             return tuple(chunks)
 

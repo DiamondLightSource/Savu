@@ -104,12 +104,8 @@ def plugin_loader(exp, plugin_dict, **kwargs):
 def run_plugins(exp, plugin_list, **kwargs):
     plugin_loader(exp, plugin_list[0])
 
-    if exp.get_meta_data('process') is 0:
-        logging.debug("process 0 is setting the nexus file")
-        exp.set_nxs_filename()
-        logging.debug("process 0 has set the nexus file")
-    
-    logging.debug('waiting for process 0 to open the nexus file')
+    exp.barrier()
+    exp.set_nxs_filename()
     exp.barrier()
 
     check = kwargs.get('check', False)

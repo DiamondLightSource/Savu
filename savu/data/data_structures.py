@@ -349,7 +349,10 @@ class Data(object):
         stops = len(preview_list)*[None]
         steps = len(preview_list)*[None]
         chunks = len(preview_list)*[None]
+
         for i in range(len(preview_list)):
+            if preview_list[i] is ':':
+                preview_list[i] = '0:end:1:1'
             starts[i], stops[i], steps[i], chunks[i] = \
                 self.convert_indices(preview_list[i].split(':'), i)
         return starts, stops, steps, chunks
