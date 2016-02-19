@@ -39,11 +39,16 @@ class I12TomoLoader(BaseLoader):
     """
     A class to load i12 tomography data from a hdf5 file
 
-    :param angular_spacing: Angular spacing between successive projections. Default: 0.2.
-    :param data_path: Path to the data inside the file. Default: 'entry1/tomo_entry/data/data'.
-    :param dark: Path to the dark field data file. Default: 'Savu/test_data/data/i12_test_data/45657.nxs'. 
-    :param flat: Path to the flat field data file. Default: 'Savu/test_data/data/i12_test_data/45658.nxs'.
-    :param flat_dark_path: Path to the data inside the file. Default: 'entry1/data/pco4000_dio_hdf/data'
+    :param angular_spacing: Angular spacing between successive \
+        projections. Default: 0.2.
+    :param data_path: Path to the data inside the \
+        file. Default: 'entry1/tomo_entry/data/data'.
+    :param dark: Path to the dark field data \
+        file. Default: 'Savu/test_data/data/i12_test_data/45657.nxs'.
+    :param flat: Path to the flat field data \
+        file. Default: 'Savu/test_data/data/i12_test_data/45658.nxs'.
+    :param flat_dark_path: Path to the data inside the \
+        file. Default: 'entry1/data/pco4000_dio_hdf/data'
     """
 
     def __init__(self, name='I12TomoLoader'):
@@ -99,9 +104,10 @@ class I12TomoLoader(BaseLoader):
         mapping_obj = exp.create_data_object('mapping', 'tomo')
 
         angular_spacing = self.parameters['angular_spacing']
-        n_scans = int((180+angular_spacing)/angular_spacing)
-        #rotation_angle = np.arange(0, 180+angular_spacing, angular_spacing)
-        rotation_angle = np.linspace(0, 180, n_scans)
+        n_angles = int(np.ceil((180+angular_spacing)/float(angular_spacing)))
+
+        rotation_angle = np.linspace(0, 180, n_angles)
+
         mapping_obj.set_axis_labels('rotation_angle.degrees',
                                     'detector_y.pixel',
                                     'detector_x.pixel',
@@ -121,10 +127,11 @@ class I12TomoLoader(BaseLoader):
                                 slice_dir=(detY, scan))
 
         loaded_shape = data_obj.get_shape()
-        #n_scans = loaded_shape[0]/len(rotation_angle)
+        n_scans = loaded_shape[0]/len(rotation_angle)
         shape = (rotation_angle.shape + loaded_shape[1:3] + (n_scans,))
 
         mapping_obj.set_shape(shape)
+        print "*****", shape
 
     def get_file_path(self, name):
         path = self.parameters[name]
