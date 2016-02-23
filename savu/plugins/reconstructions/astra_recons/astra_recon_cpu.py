@@ -13,36 +13,35 @@
 # limitations under the License.
 
 """
-.. module:: astra_recon_cpu
+.. module:: astra_recon
    :platform: Unix
    :synopsis: Wrapper around the Astra toolbox for reconstruction
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
-import logging
 
-logging.debug("Importing packages in astra_recon_cpu")
-
-
-from savu.plugins.reconstructions.base_astra_recon import BaseAstraRecon
-from savu.data.plugin_list import CitationInformation
+from savu.plugins.reconstructions.base_astra_recon_fixed_centre import \
+    BaseAstraReconFixedCentre
 from savu.plugins.driver.cpu_plugin import CpuPlugin
+from savu.data.plugin_list import CitationInformation
 from savu.plugins.utils import register_plugin
 
 
 @register_plugin
-class AstraReconCpu(BaseAstraRecon, CpuPlugin):
+class AstraReconCpuFixedCentre(BaseAstraReconFixedCentre, CpuPlugin):
     """
     A Plugin to run the astra reconstruction
 
-    :param number_of_iterations: Number of Iterations if an iterative method \
+    :param number_of_iterations: Number of Iterations if an iterative method\
         is used . Default: 1.
     :param reconstruction_type: Reconstruction type \
         (FBP|SIRT|SART|ART|CGLS|FP|BP|). Default: 'FBP'.
     """
 
     def __init__(self):
-        super(AstraReconCpu, self).__init__("AstraReconCpu")
+        super(AstraReconCpuFixedCentre,
+              self).__init__("AstraReconCpuFixedCentre")
+        self.GPU_index = None
 
     def get_parameters(self):
         return [self.parameters['reconstruction_type'],
@@ -82,6 +81,3 @@ class AstraReconCpu(BaseAstraRecon, CpuPlugin):
              "%I Elsevier")
         cite_info.doi = "http://dx.doi.org/10.1016/j.jsb.2011.07.017"
         return cite_info
-
-
-logging.debug("Completed astra_recon_cpu import")
