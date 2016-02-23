@@ -322,7 +322,6 @@ class Data(object):
         if preview_list:
             starts, stops, steps, chunks = \
                 self.get_preview_indices(preview_list)
-            logging.debug("**********preview indices %s %s %s %s", starts, stops, steps, chunks)
             shape_change = True
         else:
             starts, stops, steps, chunks = \
@@ -365,14 +364,10 @@ class Data(object):
 
         if self.mapping:
             map_shape = self.exp.index['mapping'][self.get_name()].get_shape()
-            print "mapshape", map_shape
             midmap = map_shape[dim]/2
             endmap = map_shape[dim]
 
-        print "before", idx
         idx = [eval(equ) for equ in idx]
-        print "after", idx        
-        
         idx = [idx[i] if idx[i] > -1 else shape[dim]+1+idx[i] for i in
                range(len(idx))]
         return idx
@@ -389,7 +384,6 @@ class Data(object):
         self.data_info.set_meta_data('orig_shape', orig_shape)
         new_shape = []
         for dim in range(len(starts)):
-            print dim, self.get_slice_dir_matrix(dim).shape
             new_shape.append(np.prod((self.get_slice_dir_matrix(dim).shape)))
         self.set_shape(tuple(new_shape))
 
@@ -399,7 +393,6 @@ class Data(object):
                                            self.get_name())
 
     def set_mapping_reduced_shape(self, orig_shape, new_shape, name):
-        print "orig and new shape", orig_shape, new_shape
         map_obj = self.exp.index['mapping'][name]
         map_shape = np.array(map_obj.get_shape())
         diff = np.array(orig_shape) - map_shape[:len(orig_shape)]

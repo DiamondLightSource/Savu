@@ -1,6 +1,6 @@
 #!/bin/bash
-#module load global/testcluster
-module load global/cluster
+module load global/testcluster
+#module load global/cluster
 module load python/anaconda-savu
 source activate savu_mpi1
 #export PYTHONPATH=$PYTHONPATH:/home/clb02321/DAWN_stable/FastXRF/src/

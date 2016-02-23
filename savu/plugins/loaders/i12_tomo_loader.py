@@ -104,7 +104,12 @@ class I12TomoLoader(BaseLoader):
         mapping_obj = exp.create_data_object('mapping', 'tomo')
 
         angular_spacing = self.parameters['angular_spacing']
-        n_angles = int(np.ceil((180+angular_spacing)/float(angular_spacing)))
+
+        # use this if scaning [0, 180]
+        # n_angles = int(np.ceil((180+angular_spacing)/float(angular_spacing)))
+
+        # use this if scaning [0, 180)
+        n_angles = int(np.ceil((180)/float(angular_spacing)))
 
         rotation_angle = np.linspace(0, 180, n_angles)
 
@@ -131,7 +136,6 @@ class I12TomoLoader(BaseLoader):
         shape = (rotation_angle.shape + loaded_shape[1:3] + (n_scans,))
 
         mapping_obj.set_shape(shape)
-        print "*****", shape
 
     def get_file_path(self, name):
         path = self.parameters[name]

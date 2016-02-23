@@ -65,6 +65,9 @@ class BaseRecon(Plugin):
         self.main_dir = in_pData[0].get_pattern()['SINOGRAM']['main_dir']
         self.angles = in_meta_data.get_meta_data('rotation_angle')
         self.slice_dirs = out_pData[0].get_slice_directions()
+        self.pad_amount = \
+            int(self.parameters['sino_pad_width'] * in_pData[0].get_shape()[1])
+
         self.reconstruct_pre_process()
 
         if self.parameters['log']:
@@ -72,16 +75,17 @@ class BaseRecon(Plugin):
         else:
             self.sino_func = lambda sino: np.nan_to_num(sino)
 
+        self.temp = 10
+
     def process_frames(self, data, slice_list):
         """
         Reconstruct a single sinogram with the provided center of rotation
         """
         cor = self.cor[slice_list[0][self.main_dir]]
         pad_tuples = [(0, 0)]*(data[0].ndim-1)
-        pad_amount = int(self.parameters['sino_pad_width'] * data[0].shape[1])
-        pad_tuples.insert(self.pad_dim, (pad_amount, pad_amount))
+        pad_tuples.insert(self.pad_dim, (self.pad_amount, self.pad_amount))
         data = np.pad(data[0], tuple(pad_tuples), 'edge')
-        result = self.reconstruct(self.sino_func(data), cor+pad_amount,
+        result = self.reconstruct(self.sino_func(data), cor+self.pad_amount,
                                   self.angles, self.vol_shape)
         return result
 
