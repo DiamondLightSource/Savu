@@ -20,15 +20,14 @@
 
 """
 
-from savu.plugins.reconstructions.base_astra_recon_fixed_centre import \
-    BaseAstraReconFixedCentre
+from savu.plugins.reconstructions.base_astra_recon import BaseAstraRecon
 from savu.plugins.driver.gpu_plugin import GpuPlugin
 from savu.data.plugin_list import CitationInformation
 from savu.plugins.utils import register_plugin
 
 
 @register_plugin
-class AstraReconGpuFixedCentre(BaseAstraReconFixedCentre, GpuPlugin):
+class AstraReconGpu(BaseAstraRecon, GpuPlugin):
     """
     A Plugin to run the astra reconstruction
 
@@ -39,8 +38,7 @@ class AstraReconGpuFixedCentre(BaseAstraReconFixedCentre, GpuPlugin):
     """
 
     def __init__(self):
-        super(AstraReconGpuFixedCentre,
-              self).__init__("AstraReconGpuFixedCentre")
+        super(AstraReconGpu, self).__init__("AstraReconGpu")
         self.GPU_index = None
 
     def get_parameters(self):

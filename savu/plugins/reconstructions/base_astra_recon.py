@@ -28,7 +28,7 @@ import numpy as np
 from savu.plugins.base_recon import BaseRecon
 
 
-class BaseAstraReconFixedCentre(BaseRecon):
+class BaseAstraRecon(BaseRecon):
     """
     A Plugin to perform Astra toolbox reconstruction
     level
@@ -36,8 +36,8 @@ class BaseAstraReconFixedCentre(BaseRecon):
         reconstruction). Default: 0.
     """
 
-    def __init__(self, name='BaseAstraReconFixedCentre'):
-        super(BaseAstraReconFixedCentre, self).__init__(name)
+    def __init__(self, name='BaseAstraRecon'):
+        super(BaseAstraRecon, self).__init__(name)
         self.res = 0
 
     def get_parameters(self):
