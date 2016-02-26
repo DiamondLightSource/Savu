@@ -1,15 +1,16 @@
 #!/bin/bash
+#module load global/testcluster
 module load global/cluster
-module load python/ana
-source activate mpi5
-module load openmpi/1.6.5
-export PYTHONPATH=$PYTHONPATH:/home/clb02321/DAWN_stable/FastXRF/src/
+module load python/anaconda-savu
+source activate savu_mpi1
+#export PYTHONPATH=$PYTHONPATH:/home/clb02321/DAWN_stable/FastXRF/src/
 
 savupath=$1
 datafile=$2
 processfile=$3
 outfile=$4
 nCPUs=$5
+nGPUs=4
 
 export PYTHONPATH=$savupath:$PYTHONPATH
 filename=$savupath/savu/tomo_recon.py
@@ -23,15 +24,11 @@ cat ${UNIQHOSTS}
 
 processes=`bc <<< "$((uniqslots*nCPUs))"`
 
-nCPUs=$((nCPUs-1))
-CPUs=CPU0
-
-if [ $nCPUs -gt 0 ]; then
-    for i in $(eval echo {1..$nCPUs})
-    do
-        CPUs=$CPUs,CPU$i
-    done
-fi
+for i in $(seq 0 $((nGPUs-1))); do GPUs+="GPU$i " ; done
+for i in $(seq 0 $((nCPUs-1-nGPUs))); do CPUs+="CPU$i " ; done
+#for i in $(seq 0 $((nCPUs-1))); do CPUs+="CPU$i " ; done
+CPUs=$(echo $GPUs$CPUs | tr ' ' ,)
+echo $CPUs
 
 echo "Processes running are : ${processes}"
 
@@ -40,5 +37,5 @@ mpirun -np ${processes} \
        -mca orte_forward_job_control 1 \
        -x LD_LIBRARY_PATH \
        --hostfile ${UNIQHOSTS} \
-       python $filename $datafile $processfile $outfile -n $CPUs
+       python $filename $datafile $processfile $outfile -n $CPUs -v
 

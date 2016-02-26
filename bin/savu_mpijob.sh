@@ -1,6 +1,6 @@
 #!/bin/bash
-module load global/testcluster
-#module load global/cluster
+#module load global/testcluster
+module load global/cluster
 module load python/anaconda-savu
 source activate savu_mpi1
 #export PYTHONPATH=$PYTHONPATH:/home/clb02321/DAWN_stable/FastXRF/src/
@@ -12,7 +12,7 @@ datafile=$2
 processfile=$3
 outfile=$4
 nCPUs=$5
-nGPUs=2
+nGPUs=4
 
 export PYTHONPATH=$savupath:$PYTHONPATH
 filename=$savupath/savu/tomo_recon.py

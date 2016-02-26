@@ -92,7 +92,7 @@ class BaseAstraRecon(BaseRecon):
         pass
 
     def array_pad(self, ctr, width):
-        pad = 1
+        pad = 50
         alen = ctr
         blen = width - ctr
         mid = width / 2.0
