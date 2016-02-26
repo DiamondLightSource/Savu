@@ -73,6 +73,10 @@ class Chunking(object):
         else:
             chunks = self.adjust_chunk_size(chunks, ttype, shape, adjust)
             logging.debug("chunks %s", chunks)
+#            logging.debug("chunks before %s", chunks)
+#            for chunk in chunks:
+#                chunk += 1
+#            logging.debug("chunks after %s", chunks)
             return tuple(chunks)
 
     def set_adjust_params(self, shape):
