@@ -61,6 +61,9 @@ class PluginDriver(object):
             logging.info("%s.%s", self.__class__.__name__, 'post_process')
             self.post_process()
 
+        for j in range(len(out_data)):
+            out_data[j].set_shape(out_data[j].data.shape)
+
     def process(self, data, output, processes, process):
         """
         This method is called after the process has been created by the

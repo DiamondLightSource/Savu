@@ -110,6 +110,7 @@ class BaseAstraRecon(BaseRecon):
     def reconstruct(self, sino, cors, angles, vol_shape):
         sino = \
             np.pad(sino, ((0, 0), (self.p_low, self.p_high)), mode='reflect')
+
         sino_id = self.astra_function.create("-sino", self.proj_geom, sino)
         self.cfg['ProjectionDataId'] = sino_id
         self.alg_id = astra.algorithm.create(self.cfg)
@@ -124,7 +125,7 @@ class BaseAstraRecon(BaseRecon):
 
     def get_max_frames(self):
         # print self.get_parameters()[0]
-        #frames = 8 if "3D" in self.get_parameters()[0] else 1
+        # frames = 8 if "3D" in self.get_parameters()[0] else 1
         return 1
 
 

@@ -106,10 +106,10 @@ class I12TomoLoader(BaseLoader):
         angular_spacing = self.parameters['angular_spacing']
 
         # use this if scaning [0, 180]
-        # n_angles = int(np.ceil((180+angular_spacing)/float(angular_spacing)))
+        n_angles = int(np.ceil((180+angular_spacing)/float(angular_spacing)))
 
         # use this if scaning [0, 180)
-        n_angles = int(np.ceil((180)/float(angular_spacing)))
+        #n_angles = int(np.ceil((180)/float(angular_spacing)))
 
         rotation_angle = np.linspace(0, 180, n_angles)
 
