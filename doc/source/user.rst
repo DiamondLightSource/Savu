@@ -13,7 +13,7 @@ We need MPI to run Savu, so this needs to be installed and on your path
 
     >>> export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/location/of/openmpi/1.4.3/64/lib/
 
-This allows us to add this tou our python, and you might need to set up your proxy to do this
+This allows us to add this to our python, and you might need to set up your proxy to do this
     
     >>> export https_proxy=proxy_location:port
     >>> pip install mpi4py
