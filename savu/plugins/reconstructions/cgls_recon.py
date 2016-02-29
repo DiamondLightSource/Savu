@@ -16,6 +16,7 @@
 .. module:: cgls_recon
    :platform: Unix
    :synopsis: Wrapper around the CCPi cgls reconstruction
+
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """

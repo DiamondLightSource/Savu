@@ -21,17 +21,6 @@ Code Documentation
 
 .. autosummary::
    :toctree: _autosummary
-   
-   savu
-   savu.core
-   savu.data
-   savu.data.data_structures
-   savu.plugins
-   savu.plugins.utils
-   savu.plugins.plugin
-   savu.plugins.timeseries_field_corrections
-   savu.plugins.base_filter
-   savu.plugins.base_recon
 
 
 Indices and tables

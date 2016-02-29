@@ -1,3 +1,24 @@
+# Copyright 2014 Diamond Light Source Ltd.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""
+.. module:: scikitimage_sart
+   :platform: Unix
+   :synopsis: Wrapper for scikitimage SART function
+
+"""
+
 import logging
 from savu.plugins.base_recon import BaseRecon
 from savu.data.plugin_list import CitationInformation
@@ -13,44 +34,38 @@ from savu.plugins.utils import register_plugin
 @register_plugin
 class ScikitimageSart(BaseRecon, CpuPlugin):
     """
-    A Plugin to reconstruct an image by filter back projection using the
+    A Plugin to reconstruct an image by filter back projection using the \
     inverse radon transform from scikit-image.
 
     :param iterations: Number of iterations in the reconstruction. Default: 1.
-
     :param output_size: Number of rows and columns in the \
-    reconstruction. Default: None.
+        reconstruction. Default: None.
+    :param filter: Filter used in frequency domain \
+        filtering. Ramp filter used by default. Filters available: ramp, \
+        shepp-logan, cosine, hamming, hann.  Assign None to use no \
+        filter. Default: 'ramp'.
+    :param interpolation: interpolation method used in reconstruction. \
+        Methods available: 'linear', 'nearest', and 'cubic' \
+        ('cubic' is slow). Default: 'linear'.
+    :param circle: Assume the reconstructed image is zero outside the \
+        inscribed circle. Also changes the default output_size to match the \
+        behaviour of radon called with circle=True. Default: False.
+    :param image: 2D array, dtype=float, optional.  Image containing an \
+        initial reconstruction estimate. Shape of this array should be \
+        (radon_image.shape[0], radon_image.shape[0]). The default is a filter \
+        backprojection using scikit.image.iradon as "result". Default: None.
 
-    :param filter: Filter used in frequency domain filtering. Ramp filter used\
-    by default. Filters available: ramp, shepp-logan, cosine, hamming, hann.\
-    Assign None to use no filter. Default: 'ramp'.
-
-    :param interpolation: interpolation method used in reconstruction.\
-    Methods available: 'linear', 'nearest', and 'cubic' \
-    ('cubic' is slow). Default: 'linear'.
-
-    :param circle: Assume the reconstructed image is zero outside the\
-    inscribed circle. Also changes the default output_size to match the \
-    behaviour of radon called with circle=True. Default: False.
-
-    :param image: 2D array, dtype=float, optional.  Image containing an initial
-    reconstruction estimate. Shape of this array should be
-    (radon_image.shape[0], radon_image.shape[0]). The default is a filter back
-    projection using scikit.image.iradon as "result"
-
-    :param projection_shifts : 1D array, dtype=float. Shift the projections
-    contained in radon_image (the sinogram) by this many pixels before
-    reconstructing the image. The i'th value defines the shift of the i'th
-    column of radon_image.  Default: None.
-
-    :param clip : length-2 sequence of floats. Force all values in the
-    reconstructed tomogram to lie in the range [clip[0], clip[1]].
-    Default: None.
-
-    :param relaxation : float. Relaxation parameter for the update step.
-    A higher value can improve the convergence rate, but one runs the risk of
-    instabilities. Values close to or higher than 1 are not recommended.
-    Default: None.
+    :param projection_shifts : 1D array, dtype=float. Shift the projections \
+        contained in radon_image (the sinogram) by this many pixels before \
+        reconstructing the image. The i'th value defines the shift of the \
+        i'th column of radon_image.  Default: None.
+    :param clip : length-2 sequence of floats. Force all values in the \
+        reconstructed tomogram to lie in the range \
+        [clip[0], clip[1]]. Default: None.
+    :param relaxation : float. Relaxation parameter for the update step. A \
+        higher value can improve the convergence rate, but one runs the risk \
+        of instabilities. Values close to or higher than 1 are not \
+        recommended. Default: None.
     """
 
     def __init__(self):

@@ -20,8 +20,8 @@
 .. moduleauthor:: Aaron Parsons <scientificsoftware@diamond.ac.uk>
 
 """
+
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-import logging
 from savu.plugins.utils import register_plugin
 from savu.plugins.base_filter import BaseFilter
 import numpy as np
@@ -36,11 +36,13 @@ class PolyBackgroundEstimator(BaseFilter, CpuPlugin):
     :param n: max number of polys. Default: 2.
     :param MaxIterations: max number of iterations. Default: 12.
     :param weights: weightings to apply. Default: '1/data'.
-    :param pvalue: ratio of variance between successive poly iterations. Default: 0.9.
+    :param pvalue: ratio of variance between successive poly \
+        iterations. Default: 0.9.
     """
 
     def __init__(self):
-        super(PolyBackgroundEstimator, self).__init__("PolyBackgroundEstimator")
+        super(PolyBackgroundEstimator,
+              self).__init__("PolyBackgroundEstimator")
 
     def filter_frames(self, data):
         data = data[0]
@@ -52,13 +54,10 @@ class PolyBackgroundEstimator(BaseFilter, CpuPlugin):
             weights = 1.0 / data**2
         pvalue = self.parameters['pvalue']
         MaxIterations = self.parameters['MaxIterations']
-        zu, _c, _poly, _weight, _index = self.poly_background_estimator(x,
-                                                                        data,
-                                                                        n,
-                                                                        weights,
-                                                                        MaxIterations,
-                                                                        pvalue,
-                                                                        fixed=True)
+        zu, _c, _poly, _weight, _index = \
+            self.poly_background_estimator(x, data, n, weights, MaxIterations,
+                                           pvalue, fixed=True)
+
         print "The shape of zu is:"+str(zu.shape)
         return zu
 
@@ -71,7 +70,8 @@ class PolyBackgroundEstimator(BaseFilter, CpuPlugin):
         out_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
         in_meta = self.get_in_meta_data()[0]
         # get the axis
-        alabel = in_dataset[0].data_info.get_meta_data('axis_labels')[-1].keys()[0]
+        alabel = \
+            in_dataset[0].data_info.get_meta_data('axis_labels')[-1].keys()[0]
         self.axis = in_meta.get_meta_data(alabel)
 
     def get_max_frames(self):
@@ -86,8 +86,9 @@ class PolyBackgroundEstimator(BaseFilter, CpuPlugin):
         """
         generates polynomials based on
         S. Steenstrup J. Appl. Cryst. (1981). 14, 226--229
-        "A Simple Procedure for Fitting a Background to a Certain Class of Measured Spectra"
-        The polynomial parameters are based on weights supplied as part of the fitting fit.
+        "A Simple Procedure for Fitting a Background to a Certain Class of \
+        Measured Spectra". The polynomial parameters are based on weights \
+        supplied as part of the fitting fit.
         """
         Npoints = xdata.size
         poly = np.zeros((n, Npoints), dtype=np.float64, order='F')
@@ -112,7 +113,8 @@ class PolyBackgroundEstimator(BaseFilter, CpuPlugin):
 
             if j > 0:
                 alpha[j] = (weight * xdata * p * p).sum() / g
-                beta[j] = (weight * xdata * p * poly[j - 1]).sum() / gamma[j - 1]
+                beta[j] = \
+                    (weight * xdata * p * poly[j - 1]).sum() / gamma[j - 1]
 
         return alpha, gamma, beta, a, poly
 
@@ -124,13 +126,14 @@ class PolyBackgroundEstimator(BaseFilter, CpuPlugin):
         Input:
         xdata,ydata (numpy arrays of same length)
         pvalue  :   ratio of variance in poly to poly value at which to stop.
-                        0.9 default
+        0.9 default
 
         Output:
                 background,polynomial weights, polynomials
 
         S. Steenstrup J. Appl. Cryst. (1981). 14, 226--229
-        "A Simple Procedure for Fitting a Background to a Certain Class of Measured Spectra"
+        "A Simple Procedure for Fitting a Background to a Certain Class of \
+        Measured Spectra"
 
         """
         m = 0

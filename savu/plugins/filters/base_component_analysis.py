@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: filter
+.. module:: base_component_analysis
    :platform: Unix
-   :synopsis: A base class for all standard filters
+   :synopsis: A base class for all component analysis methods
 
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: base_fitter
+.. module:: base_fluo_fitter
    :platform: Unix
    :synopsis: a base fitting plugin
 

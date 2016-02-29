@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: astra_recon
+.. module:: astra_recon_cpu
    :platform: Unix
-   :synopsis: Wrapper around the Astra toolbox for reconstruction
+   :synopsis: Wrapper around the Astra toolbox for cpu reconstruction
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """

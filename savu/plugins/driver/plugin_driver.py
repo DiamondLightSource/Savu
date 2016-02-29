@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: cpu_plugin
+.. module:: plugin_driver
    :platform: Unix
-   :synopsis: Base class for all plugins which use a CPU on the target machine
+   :synopsis: Base class or all driver plugins
 
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 

@@ -15,7 +15,7 @@
 """
 .. module:: data_structures
    :platform: Unix
-   :synopsis: Contains the Data class and all the data structures from which
+   :synopsis: Contains the Data class and all the data structures from which \
    Data can inherit.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
@@ -309,7 +309,6 @@ class Data(object):
         return self.data_info.get_meta_data('data_patterns')
 
     def set_shape(self, shape):
-        print "******setting the shape to", shape, "***********"
         self.data_info.set_meta_data('shape', shape)
         self.check_dims()
 
@@ -681,7 +680,6 @@ class PluginData(object):
         return {pattern_name: self.data_obj.get_data_patterns()[pattern_name]}
 
     def set_shape(self):
-        print "setting the plugin data shape"
         core_dir = self.get_core_directions()
         slice_dir = self.get_slice_directions()
         dirs = list(set(core_dir + (slice_dir[0],)))
@@ -760,7 +758,6 @@ class PluginData(object):
         return core_dir
 
     def set_fixed_directions(self, dims, values):
-        print "setting fixed directions", values
         slice_dirs = self.get_slice_directions()
         if set(dims).difference(set(slice_dirs)):
             raise Exception("You are trying to fix a direction that is not"

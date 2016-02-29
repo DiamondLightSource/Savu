@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: grabs a selection of statisitics
+.. module:: stats
    :platform: Unix
    :synopsis: grabs a selection of statistics.
 

@@ -18,7 +18,7 @@
    :platform: Unix
    :synopsis: A base class for dark and flat field corrections
 
-.. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
+.. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
 import logging

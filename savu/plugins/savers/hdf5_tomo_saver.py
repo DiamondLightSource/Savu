@@ -15,8 +15,7 @@
 """
 .. module:: hdf5_tomo_saver
    :platform: Unix
-   :synopsis: A class for saving tomography data using the standard savers
-   library.
+   :synopsis: A class to create hdf5 output files
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 

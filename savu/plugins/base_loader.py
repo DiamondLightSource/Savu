@@ -15,7 +15,7 @@
 """
 .. module:: base_loader
    :platform: Unix
-   :synopsis: A base class for loading data
+   :synopsis: A base class for loader plugins
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 

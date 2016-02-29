@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: FastXRF fitting
+.. module:: fastxrf_fitting
    :platform: Unix
    :synopsis: A plugin to fit XRF spectra quickly
 

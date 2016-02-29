@@ -15,7 +15,7 @@
 """
 .. module:: base_saver
    :platform: Unix
-   :synopsis: A base class for saving data
+   :synopsis: A base class for all saver plugins
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 

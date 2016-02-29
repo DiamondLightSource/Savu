@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: simple_fit
+.. module:: ica
    :platform: Unix
    :synopsis: A plugin to fit peaks
 

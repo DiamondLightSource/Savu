@@ -13,10 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: tomography_loader
+.. module:: i12_tomo_loader
    :platform: Unix
-   :synopsis: A class for loading tomography data using the standard loaders
-   library.
+   :synopsis: A class for loading i12 mutli-scan tomography data
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
@@ -109,7 +108,7 @@ class I12TomoLoader(BaseLoader):
         n_angles = int(np.ceil((180+angular_spacing)/float(angular_spacing)))
 
         # use this if scaning [0, 180)
-        #n_angles = int(np.ceil((180)/float(angular_spacing)))
+        # n_angles = int(np.ceil((180)/float(angular_spacing)))
 
         rotation_angle = np.linspace(0, 180, n_angles)
 

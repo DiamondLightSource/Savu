@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: raven_filter removes ring artefacts
+.. module:: raven_filter
    :platform: Unix
    :synopsis: A plugin remove ring artefacts
 

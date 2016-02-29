@@ -13,10 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: hdf5_tomo_saver
+.. module:: chunking
    :platform: Unix
-   :synopsis: A class for saving tomography data using the standard savers
-   library.
+   :synopsis: A class to optimise hdf5 chunking
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
@@ -25,11 +24,9 @@
 import copy
 import logging
 from fractions import gcd
-
 import numpy as np
-from savu.plugins.utils import register_plugin
 
-NX_CLASS = 'NX_class'
+from savu.plugins.utils import register_plugin
 
 
 @register_plugin
@@ -72,11 +69,10 @@ class Chunking(object):
             return True
         else:
             chunks = self.adjust_chunk_size(chunks, ttype, shape, adjust)
-            logging.debug("chunks %s", chunks)
-#            logging.debug("chunks before %s", chunks)
-#            for chunk in chunks:
-#                chunk += 1
-#            logging.debug("chunks after %s", chunks)
+            logging.debug("chunks before %s", chunks)
+            for chunk in chunks:
+                chunk += 1
+            logging.debug("chunks after %s", chunks)
             return tuple(chunks)
 
     def set_adjust_params(self, shape):

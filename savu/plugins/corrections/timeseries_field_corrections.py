@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: Timeseries_field_corrections
+.. module:: timeseries_field_corrections
    :platform: Unix
    :synopsis: A Plugin to apply a simple dark and flatfield correction to some
        raw timeseries data

@@ -13,11 +13,11 @@
 # limitations under the License.
 
 """
-.. module:: plugin
+.. module:: plugin_datasets
    :platform: Unix
-   :synopsis: Base class for all plugins used by Savu
+   :synopsis: Base class of plugin containing all dataset related functions
 
-.. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
+.. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
 

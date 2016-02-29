@@ -16,8 +16,7 @@
 """
 .. module:: base_recon
    :platform: Unix
-   :synopsis: A simple implementation a reconstruction routine for testing
-       purposes
+   :synopsis: A base class for all reconstruction methods
 
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
@@ -104,15 +103,11 @@ class BaseRecon(Plugin):
         # reduce the data as per data_subset parameter
         in_dataset[0].set_preview(self.parameters['preview'])
 
-        print "setup function base recon shape %s", in_dataset[0].get_shape()
-        
-
         # set information relating to the plugin data
         in_pData, out_pData = self.get_plugin_datasets()
         # copy all required information from in_dataset[0]
         in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
-        
-        print "fixed_directions", in_pData[0].get_fixed_directions()
+
         axis_labels = in_dataset[0].data_info.get_meta_data('axis_labels')[0]
 
         dim_volX, dim_volY, dim_volZ = \

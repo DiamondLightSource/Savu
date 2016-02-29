@@ -13,12 +13,11 @@
 # limitations under the License.
 
 """
-.. module:: tomography_loader
+.. module:: i18loader
    :platform: Unix
-   :synopsis: A class for loading tomography data using the standard loaders
-   library.
+   :synopsis: A class for loading i18 data
 
-.. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
+.. moduleauthor:: Aaron Parsons <scientificsoftware@diamond.ac.uk>
 
 """
 

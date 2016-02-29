@@ -74,17 +74,12 @@ config generator found in the scripts directory of
 Available Plugins
 *****************
 
-The following plugins are available through savu for processing of tomographic datasets
-
-.. autosummary::
-   :toctree: _autosummary
-   
-   savu.plugins.timeseries_field_corrections.TimeseriesFieldCorrections
 
 
 Test
 ****
 
-.. autoclass:: savu.plugins.timeseries_field_corrections.TimeseriesFieldCorrections
+.. autoclass:: savu.plugins.corrections.timeseries_field_corrections.TimeseriesFieldCorrections
     :members:
     :inherited-members:
+

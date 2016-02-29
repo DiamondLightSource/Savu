@@ -13,10 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: tomography_loader
+.. module:: mm_loader
    :platform: Unix
-   :synopsis: A class for loading tomography data using the standard loaders
-   library.
+   :synopsis: A class for loading multi-modal data
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 

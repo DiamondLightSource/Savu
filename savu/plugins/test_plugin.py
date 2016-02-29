@@ -15,13 +15,12 @@
 """
 .. module:: test_plugin
    :platform: Unix
-   :synopsis: Plugin to test multiple input data sets are passed to process,
+   :synopsis: Plugin to test multiple input data sets are passed to process, \
    fixed directions and data reduction
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
-import numpy as np
 
 from savu.plugins.plugin import Plugin
 from savu.plugins.utils import register_plugin
@@ -32,8 +31,10 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 class TestPlugin(Plugin, CpuPlugin):
     """
     The base class from which all plugins should inherit.
-    :param in_datasets: Create a list of the dataset(s) to process. Default: [].
-    :param out_datasets: Create a list of the dataset(s) to process. Default: [].
+    :param in_datasets: Create a list of the dataset(s) to \
+        process. Default: [].
+    :param out_datasets: Create a list of the dataset(s) to \
+        process. Default: [].
     """
 
     def __init__(self):
@@ -44,9 +45,9 @@ class TestPlugin(Plugin, CpuPlugin):
 
     def setup(self):
         """
-        Initial setup of all datasets required as input and output to the
-        plugin.  This method is called before the process method in the plugin
-        chain.
+        Initial setup of all datasets required as input and output to the \
+        plugin.  This method is called before the process method in the \
+        plugin chain.
         """
         in_datasets, out_datasets = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()

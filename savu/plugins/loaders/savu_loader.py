@@ -15,7 +15,7 @@
 """
 .. module:: savu_loader
    :platform: Unix
-   :synopsis: A class for savu output data.
+   :synopsis: A class for loading savu output data.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 

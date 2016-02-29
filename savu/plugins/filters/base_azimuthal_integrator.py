@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: radial integration using pyFAI
+.. module:: base_azimuthal_integrator
    :platform: Unix
    :synopsis: A plugin to integrate azimuthally "symmetric" signals i.e. SAXS, WAXS or XRD.Requires a calibration file
 

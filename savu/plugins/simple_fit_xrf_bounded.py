@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: simple_fit
+.. module:: simple_fit_xrf_bounded
    :platform: Unix
    :synopsis: A plugin to fit peaks
 

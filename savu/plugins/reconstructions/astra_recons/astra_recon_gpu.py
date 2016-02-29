@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: astra_recon
+.. module:: astra_recon_gpu
    :platform: Unix
-   :synopsis: Wrapper around the Astra toolbox for reconstruction
+   :synopsis: Wrapper around the Astra toolbox for gpu reconstruction
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """

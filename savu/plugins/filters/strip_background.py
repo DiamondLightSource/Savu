@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: Background subtraction plugin
+.. module:: strip_background
    :platform: Unix
    :synopsis: A plugin to automatically strip peaks and subtract background
 
