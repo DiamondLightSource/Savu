@@ -224,7 +224,22 @@ Add parameter tuning and save the process list.  Apply the new pipeline to the d
 
 -----------------------------------------------------------------------------------------------------------
 
-AVIZO
-=====
+View the output with Avizo
+==========================
 
+Start avizo
+
+    >>> module load avizo
+	>>> avizo
+
+In Avizo GUI, Click on Open Data /(File->Open Data). This should show a dialog box with list of output data entries. To view final output select entry/final_result_tomo/data and press OK button. This will load the data. 
+
+2D view
+^^^^^^^
+To view 2D slices, Select the data, right click and a pop up will be shown as below. Select Ortho Slice and Click ok button to show a 2D slice.
+    .. image:: 2dview.jpg	
+3D view
+^^^^^^^
+To view 3D volume, Select the data, right click on it and a pop up will be shown as below. Select Volume Rendering and Click OK button to show a 3D volume.
+    .. image:: 3dview.jpg
 
