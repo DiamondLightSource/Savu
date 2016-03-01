@@ -236,10 +236,13 @@ In Avizo GUI, Click on Open Data /(File->Open Data). This should show a dialog b
 
 2D view
 ^^^^^^^
+
 To view 2D slices, Select the data, right click and a pop up will be shown as below. Select Ortho Slice and Click ok button to show a 2D slice.
     .. image:: 2dview.jpg	
+    
 3D view
 ^^^^^^^
+
 To view 3D volume, Select the data, right click on it and a pop up will be shown as below. Select Volume Rendering and Click OK button to show a 3D volume.
     .. image:: 3dview.jpg
 
