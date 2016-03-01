@@ -230,7 +230,7 @@ View the output with Avizo
 Start avizo
 
     >>> module load avizo
-	>>> avizo
+    >>> avizo
 
 In Avizo GUI, Click on Open Data /(File->Open Data). This should show a dialog box with list of output data entries. To view final output select entry/final_result_tomo/data and press OK button. This will load the data. 
 
