@@ -15,9 +15,9 @@
 
 
 """
-.. module:: i12 tomography test run
+.. module:: tomo_pipeline_preview_test
    :platform: Unix
-   :synopsis: unittest test classes for plugins
+   :synopsis: i12 tomography test run
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 

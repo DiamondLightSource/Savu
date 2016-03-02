@@ -15,7 +15,7 @@
 """
 .. module:: plugin_runner
    :platform: Unix
-   :synopsis: Class to control the plugin and interact with the transport
+   :synopsis: Class to control the plugin and interact with the transport \
    layer.  It inherits dynamically from chosen transport type at run time
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>

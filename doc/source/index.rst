@@ -20,8 +20,13 @@ Code Documentation
 ==================
 
 .. autosummary::
-   :toctree: _autosummary
 
+   savu
+   savu.core
+   savu.data
+   savu.data.data_structures
+   savu.plugins
+   savu.plugins.plugin
 
 Indices and tables
 ==================
