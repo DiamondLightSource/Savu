@@ -16,7 +16,7 @@
 """
 .. module:: experiment_collection
    :platform: Unix
-   :synopsis: Contains the Experiment class and all possible experiment
+   :synopsis: Contains the Experiment class and all possible experiment \
    collections from which Experiment can inherit at run time.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>

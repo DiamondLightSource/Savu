@@ -11,21 +11,25 @@ User and Developer Guide
 .. toctree::
    :maxdepth: 2
    
-   user
-   training
-   dev
-   dev_training
+   introduction
+   user_guides/user_guide
+   dev_guides/dev_guide
+
 
 Code Documentation
 ==================
 
-.. autosummary::
+.. toctree::
+   :maxdepth: 2
 
-   savu
-   savu.core
-   savu.data
-   savu.plugins
+   api
 
+Testing autosummary
+===================
+
+.. toctree::
+   
+   autosummary
 
 Indices and tables
 ==================

@@ -15,7 +15,7 @@
 """
 .. module:: hdf5_transport_data
    :platform: Unix
-   :synopsis: A data transport class that is inherited by Data class at
+   :synopsis: A data transport class that is inherited by Data class at \
    runtime. It performs the movement of the data, including loading and saving.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>

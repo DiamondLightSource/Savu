@@ -15,7 +15,7 @@
 """
 .. module:: base_multi_modal_loader
    :platform: Unix
-   :synopsis: Contains a base class from which all multi-modal loaders are
+   :synopsis: Contains a base class from which all multi-modal loaders are \
    derived.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>

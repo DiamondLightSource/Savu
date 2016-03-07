@@ -15,9 +15,9 @@
 """
 .. module:: meta_data
    :platform: Unix
-   :synopsis: Contains the MetaData class which holds all information required
-   by the pipeline throughout processing.  An instance of MetaData is held by
-   the Experiment class.
+   :synopsis: Contains the MetaData class which holds all information \
+   required by the pipeline throughout processing.  An instance of MetaData \
+   is held by the Experiment class.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
@@ -26,8 +26,8 @@
 
 class MetaData(object):
     """
-    The MetaData class creates a dictionary of all meta data which can be
-    accessed using the get and set methods. It also holds an instance of
+    The MetaData class creates a dictionary of all meta data which can be \
+    accessed using the get and set methods. It also holds an instance of \
     PluginList.
     """
 

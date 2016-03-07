@@ -15,7 +15,7 @@
 """
 .. module:: Transport_control
    :platform: Unix
-   :synopsis: A TransportControl class which implements functions that control
+   :synopsis: A TransportControl class which implements functions that control \
    the interaction between the data and plugin layers.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>

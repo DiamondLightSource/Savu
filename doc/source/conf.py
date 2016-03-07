@@ -21,6 +21,7 @@ from os import path
 #sys.path.insert(0, '../.')
 #sys.path.insert(0, '../../.')
 sys.path.insert(0, os.path.abspath('../../'))
+sys.path.insert(0, os.path.abspath('../../savu'))
 # -- General configuration -----------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.

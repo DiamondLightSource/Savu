@@ -16,8 +16,8 @@
 """
 .. module:: plugin_list
    :platform: Unix
-   :synopsis: Contains the PluginList class, which deals with loading and
-   saving the plugin list, and the CitationInformation class. An instance is
+   :synopsis: Contains the PluginList class, which deals with loading and \
+   saving the plugin list, and the CitationInformation class. An instance is \
    held by the MetaData class.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>

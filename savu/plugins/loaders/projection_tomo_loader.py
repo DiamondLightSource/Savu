@@ -15,7 +15,7 @@
 """
 .. module:: projection_tomo_loader
    :platform: Unix
-   :synopsis: A class for loading tomography data that is already calibrated
+   :synopsis: A class for loading tomography data that is already calibrated \
    and normalised (i.e. projection data not raw data)
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
