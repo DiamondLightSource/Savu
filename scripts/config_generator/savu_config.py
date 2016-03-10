@@ -216,28 +216,39 @@ def _ref(content, arg):
             -r: Keep parameter values (if the parameter still exists).
                 Without this flag the parameters revert to default values.
     """
+
+    if not arg:
+        print "ref requires the process number or * as argument"
+        print "e.g. 'ref 1' refreshes process 1"
+        print "e.g. 'ref *' refreshes ALL processes"
+        return content
+
     kwarg = None
     if len(arg.split()) > 1:
         arg, kwarg = arg.split()
 
-    pos = int(arg) - 1
-    name = content.plugin_list.plugin_list[pos]['name']
-
-    old_entry = content.get(pos)
-    content.remove(pos)
-
-    if kwarg:
-        plugin = pu.plugins[name]()
-        plugin.populate_default_parameters()
-        content.insert(plugin, pos)
-        old_params = old_entry['data']
-        new_params = plugin.parameters
-        union_params = set(old_params).intersection(set(new_params))
-        for param in union_params:
-            content.modify(pos+1, param, old_params[param])
-        content.display()
+    if arg is '*':
+        positions = range(len(content.plugin_list.plugin_list))
     else:
-        content.add(name, pos)
+        positions = [int(arg) - 1]
+
+    for pos in positions:
+        name = content.plugin_list.plugin_list[pos]['name']
+        old_entry = content.get(pos)
+        content.remove(pos)
+
+        if kwarg:
+            plugin = pu.plugins[name]()
+            plugin.populate_default_parameters()
+            content.insert(plugin, pos)
+            old_params = old_entry['data']
+            new_params = plugin.parameters
+            union_params = set(old_params).intersection(set(new_params))
+            for param in union_params:
+                content.modify(pos+1, param, old_params[param])
+            content.display()
+        else:
+            content.add(name, pos)
 
     return content
 
@@ -359,7 +370,7 @@ def main():
 
     while True:
         input_string = raw_input(">>> ").strip()
-        print "command is '%s'" % (input_string)
+        #print "command is '%s'" % (input_string)
 
         if len(input_string) == 0:
             command = 'help'
