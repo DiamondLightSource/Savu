@@ -30,7 +30,6 @@ from savu.test.framework_tests.plugin_runner_test import \
 class BackgroundEstimatorTest(unittest.TestCase):
 
     def test_background_estimator(self):
- 
         options = {
             "transport": "hdf5",
             "process_names": "CPU0",

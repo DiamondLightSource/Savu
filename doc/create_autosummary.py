@@ -48,10 +48,6 @@ def add_package_entry(f, root, dirs, files, output):
     f.write('\n\n')
 
 
-def list_of_files(package):
-    pass
-
-
 if __name__ == "__main__":
 
     # determine Savu base path
@@ -70,6 +66,7 @@ if __name__ == "__main__":
 
     exclude_dir = ['__pycache__', 'test']
     exclude_file = ['__init__.py']
+
     for root, dirs, files in os.walk(base_path, topdown=True):
         dirs[:] = [d for d in dirs if d not in exclude_dir]
         files[:] = [fi for fi in files if fi.split('.')[-1] == 'py']

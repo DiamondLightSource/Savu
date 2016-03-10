@@ -55,6 +55,7 @@ def load_plugin(plugin_name):
     # clazz = self.import_class(plugin_name)
 
     name = plugin_name
+    print name
     logging.debug("importing the module")
     # TODO This appears to be the failing line.
     mod = __import__(name)

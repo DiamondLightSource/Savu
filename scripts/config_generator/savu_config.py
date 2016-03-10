@@ -87,6 +87,9 @@ class Content(object):
         process['active'] = True
         self.plugin_list.plugin_list.insert(pos, process)
 
+    def get(self, pos):
+        return self.plugin_list.plugin_list[pos]
+
     def remove(self, pos):
         self.plugin_list.plugin_list.pop(pos)
 
@@ -167,50 +170,23 @@ def _save(content, arg):
     return content
 
 
-#def _mod(content, arg):
-#    """Modifies the target value e.g. 'mod 1.value 27' and turns the plugins
-#       on and off e.g 'mod 1.on' or 'mod 1.off'"""
-#    on_off_list = ['ON', 'on', 'OFF', 'off']
-#    try:
-#        element,  subelement = arg.split()[0].split('.')
-#        if subelement in on_off_list:
-#            content.on_and_off(int(element), on_off_list.index(subelement))
-#        else:
-#            value = ([''.join(arg.split()[1:])][0]).split()[0]
-#            if not value.count(';'):
-#                try:
-#                    exec("value = " + value)
-#                except NameError:
-#                    exec("value = " + "'" + value + "'")
-#
-#            if isinstance(value, str) and value.count('['):
-#                value = value.split('[')[1].\
-#                    split(']')[0].replace(" ", "").split(',')
-#                exec("value = " + str(value))
-#
-#            content.modify(int(element), subelement, value)
-#        content.display()
-#    except:
-#        print("Sorry I can't process the argument '%s'" % (arg))
-#    return content
-
 def _mod(content, arg):
     """
     Modifies the target value e.g. 'mod 1.value 27' and turns the plugins on
     and off e.g 'mod 1.on' or 'mod 1.off'
     """
     on_off_list = ['ON', 'on', 'OFF', 'off']
-    #try:
-    element,  subelement = arg.split()[0].split('.')
-    if subelement in on_off_list:
-        content.on_and_off(int(element), on_off_list.index(subelement))
-    else:
-        value = content.value(arg)
-        content.modify(int(element), subelement, value)
+    try:
+        element,  subelement = arg.split()[0].split('.')
+        if subelement in on_off_list:
+            content.on_and_off(int(element), on_off_list.index(subelement))
+        else:
+            value = content.value(arg)
+            content.modify(int(element), subelement, value)
 
-    content.display()
-    #except:
-    #    print("Sorry I can't process the argument '%s'" % (arg))
+        content.display()
+    except:
+        print("Sorry I can't process the argument '%s'" % (arg))
     return content
 
 
@@ -236,11 +212,34 @@ def _add(content, arg):
 
 def _ref(content, arg):
     """Refreshes the plugin, replacing it with itself (updating any changes).
+       Optional arguments:
+            -r: Keep parameter values (if the parameter still exists).
+                Without this flag the parameters revert to default values.
     """
+    kwarg = None
+    if len(arg.split()) > 1:
+        arg, kwarg = arg.split()
+
     pos = int(arg) - 1
     name = content.plugin_list.plugin_list[pos]['name']
+
+    old_entry = content.get(pos)
     content.remove(pos)
     content.add(name, pos)
+    new_entry = content.get(pos)
+
+    # option to replace any parameters with the same name
+    if kwarg:
+        old_params = old_entry['data']
+        new_params = new_entry['data']
+        union_params = set(old_params).intersection(set(new_params))
+
+        for param in union_params:
+            value = str(pos+1) + '.' + param + ' ' + str(old_params[param])
+            _mod(content, value)
+
+    new_entry = content.get(pos)
+
     return content
 
 
