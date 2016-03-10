@@ -225,20 +225,19 @@ def _ref(content, arg):
 
     old_entry = content.get(pos)
     content.remove(pos)
-    content.add(name, pos)
-    new_entry = content.get(pos)
 
-    # option to replace any parameters with the same name
     if kwarg:
+        plugin = pu.plugins[name]()
+        plugin.populate_default_parameters()
+        content.insert(plugin, pos)
         old_params = old_entry['data']
-        new_params = new_entry['data']
+        new_params = plugin.parameters
         union_params = set(old_params).intersection(set(new_params))
-
         for param in union_params:
-            value = str(pos+1) + '.' + param + ' ' + str(old_params[param])
-            _mod(content, value)
-
-    new_entry = content.get(pos)
+            content.modify(pos+1, param, old_params[param])
+        content.display()
+    else:
+        content.add(name, pos)
 
     return content
 
