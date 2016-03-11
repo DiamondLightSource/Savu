@@ -185,7 +185,7 @@ def set_process(exp, process, processes):
 
 def plugin_runner(options):
     plugin_runner = PluginRunner(options)
-    return plugin_runner.run_plugin_list(options)
+    return plugin_runner._run_plugin_list(options)
 
 
 def plugin_runner_load_plugin(options):
