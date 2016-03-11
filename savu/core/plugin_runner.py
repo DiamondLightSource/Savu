@@ -52,7 +52,7 @@ class PluginRunner(object):
 
         logging.info("run_plugin_list: 1")
         self.exp.barrier()
-        self.__run_plugin_list_check(plugin_list)
+        self._run_plugin_list_check(plugin_list)
 
         logging.info("run_plugin_list: 2")
         self.exp.barrier()
@@ -76,7 +76,7 @@ class PluginRunner(object):
 
         return self.exp
 
-    def __run_plugin_list_check(self, plugin_list):
+    def _run_plugin_list_check(self, plugin_list):
         self.exp.barrier()
         self.__check_loaders_and_savers(plugin_list)
 

@@ -217,7 +217,7 @@ def plugin_runner_real_plugin_run(options):
     plugin_runner = PluginRunner(options)
     plugin_runner.exp = Experiment(options)
     plugin_list = plugin_runner.exp.meta_data.plugin_list.plugin_list
-    plugin_runner.run_plugin_list_check(plugin_list)
+    plugin_runner._run_plugin_list_check(plugin_list)
 
     exp = plugin_runner.exp
 
