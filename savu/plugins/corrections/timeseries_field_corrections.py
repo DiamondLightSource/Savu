@@ -20,6 +20,9 @@
 
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
+:synopsis: A Plugin to apply a simple dark and flatfield correction to some
+       raw timeseries data
+
 """
 
 from savu.plugins.driver.cpu_plugin import CpuPlugin
@@ -40,6 +43,12 @@ class TimeseriesFieldCorrections(BaseCorrection, CpuPlugin):
     def __init__(self):
         super(TimeseriesFieldCorrections,
               self).__init__("TimeseriesFieldCorrections")
+        # TODO these should probably be parameters
+        self.LOW_CROP_LEVEL = 0
+        self.HIGH_CROP_LEVEL = 2
+        self.WARN_PROPORTION = 0.1  # 10%
+        self.flag_low_warning = False
+        self.flag_high_warning = False
 
     def pre_process(self):
         in_meta_data, out_meta_data = self.get_meta_data()
@@ -57,9 +66,27 @@ class TimeseriesFieldCorrections(BaseCorrection, CpuPlugin):
         data = (trimmed_data-dark)/(flat-dark)
 
         # finally clean up and trim the data
-        # does this line need to be done to all projections?
         data = np.nan_to_num(data)
-        data[data < 0] = 0
-        data[data > 2] = 2
+
+        # make high and low crop masks
+        low_crop = data < self.LOW_CROP_LEVEL
+        high_crop = data > self.HIGH_CROP_LEVEL
+
+        # flag if those masks include a large proportion of pixels, as this
+        # may indicate a failure
+        if ((float(low_crop.sum()) / low_crop.size) > self.WARN_PROPORTION):
+            self.flag_low_warning = True
+        if ((float(high_crop.sum()) / high_crop.size) > self.WARN_PROPORTION):
+            self.flag_low_warning = True
+
+        # Set all cropped values to the crop level
+        data[low_crop] = self.LOW_CROP_LEVEL
+        data[high_crop] = self.HIGH_CROP_LEVEL
 
         return data
+
+    def executive_summary(self):
+        if self.flag_high_warning or self.flag_low_warning:
+            return ("WARNING: over 10% of pixels are being clipped, " +
+                    "check your Dark and Flat field images are correct")
+        return "Nothing to Report"
