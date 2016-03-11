@@ -1,3 +1,17 @@
+# Copyright 2015 Diamond Light Source Ltd.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 '''
 Created on 21 May 2015
 
@@ -14,6 +28,14 @@ import readline
 import re
 
 RE_SPACE = re.compile('.*\s+$', re.M)
+histfile = os.path.join(os.path.expanduser("~"), ".savuhist")
+try:
+    readline.read_history_file(histfile)
+    readline.set_history_length(1000)
+except IOError:
+    pass
+import atexit
+atexit.register(readline.write_history_file, histfile)
 
 
 class Content(object):
@@ -326,13 +348,13 @@ class Completer(object):
 
     def complete(self, text, state):
         "Generic readline completion entry point."
-        buffer = readline.get_line_buffer()
+        read_buffer = readline.get_line_buffer()
         line = readline.get_line_buffer().split()
         # show all commands
         if not line:
             return [c + ' ' for c in commands.keys()][state]
         # account for last argument ending in a space
-        if RE_SPACE.match(buffer):
+        if RE_SPACE.match(read_buffer):
             line.append('')
         # resolve command to the implementation function
         cmd = line[0].strip()
@@ -360,7 +382,6 @@ def main():
     for loader, module_name, is_pkg in pkgutil.walk_packages(plugins_path):
         try:
             module = loader.find_module(module_name).load_module(module_name)
-            #print module
         except:
             pass
 
@@ -370,7 +391,6 @@ def main():
 
     while True:
         input_string = raw_input(">>> ").strip()
-        #print "command is '%s'" % (input_string)
 
         if len(input_string) == 0:
             command = 'help'
@@ -390,6 +410,5 @@ def main():
 
     print "Thanks for using the application"
 
-    
 if __name__ == '__main__':
     main()
