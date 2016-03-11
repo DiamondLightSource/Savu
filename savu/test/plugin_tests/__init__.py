@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2014 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,30 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 """
-.. module:: plugins_test
-   :platform: Unix
-   :synopsis: unittest test classes for plugins
+Test suites for Savu are here
+
 
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
-
-import unittest
-
-import savu.test.test_utils as tu
-from savu.test.framework_tests.plugin_runner_test import \
-    run_protected_plugin_runner_no_process_list
-
-
-class MedianFilterTest(unittest.TestCase):
-
-    def test_median_filter(self):
-        options = tu.set_experiment('tomo')
-        plugin = 'savu.plugins.filters.median_filter'
-        run_protected_plugin_runner_no_process_list(options, plugin)
-
-if __name__ == "__main__":
-    unittest.main()
-

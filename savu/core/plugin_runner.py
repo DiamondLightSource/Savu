@@ -46,13 +46,13 @@ class PluginRunner(object):
         self.exp = None
 
     # TODO : Do we need to have options passed here as it is passed to sp12778
-    def run_plugin_list(self, options):
+    def _run_plugin_list(self, options):
         self.exp = Experiment(options)
         plugin_list = self.exp.meta_data.plugin_list.plugin_list
 
         logging.info("run_plugin_list: 1")
         self.exp.barrier()
-        self.run_plugin_list_check(plugin_list)
+        self._run_plugin_list_check(plugin_list)
 
         logging.info("run_plugin_list: 2")
         self.exp.barrier()
@@ -76,7 +76,7 @@ class PluginRunner(object):
 
         return self.exp
 
-    def run_plugin_list_check(self, plugin_list):
+    def __run_plugin_list_check(self, plugin_list):
         self.exp.barrier()
         self.check_loaders_and_savers(plugin_list)
 
@@ -89,7 +89,7 @@ class PluginRunner(object):
         self.exp.barrier()
         cu.user_message("Plugin list check complete!")
 
-    def check_loaders_and_savers(self, plugin_list):
+    def __check_loaders_and_savers(self, plugin_list):
         first_plugin = plugin_list[0]
         end_plugin = plugin_list[-1]
 

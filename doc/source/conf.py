@@ -22,6 +22,23 @@ from os import path
 #sys.path.insert(0, '../../.')
 sys.path.insert(0, os.path.abspath('../../'))
 sys.path.insert(0, os.path.abspath('../../savu'))
+sys.path.insert(0, os.path.abspath('../../savu/core'))
+sys.path.insert(0, os.path.abspath('../../savu/transports'))
+sys.path.insert(0, os.path.abspath('../../savu/data'))
+sys.path.insert(0, os.path.abspath('../../savu/data/transport_data'))
+sys.path.insert(0, os.path.abspath('../../savu/plugins'))
+sys.path.insert(0, os.path.abspath('../../savu/plugins/driver'))
+sys.path.insert(0, os.path.abspath('../../savu/plugins/filters'))
+sys.path.insert(0, os.path.abspath('../../savu/plugins/filters/azimuthal_integrators'))
+sys.path.insert(0, os.path.abspath('../../savu/plugins/filters/component_analysis'))
+sys.path.insert(0, os.path.abspath('../../savu/plugins/filters/fitters'))
+sys.path.insert(0, os.path.abspath('../../savu/plugins/corrections'))
+sys.path.insert(0, os.path.abspath('../../savu/plugins/reconstructions'))
+sys.path.insert(0, os.path.abspath('../../savu/plugins/reconstructions/astra_recons'))
+sys.path.insert(0, os.path.abspath('../../savu/plugins/loaders'))
+sys.path.insert(0, os.path.abspath('../../savu/plugins/loaders/multi_modal_loaders'))
+sys.path.insert(0, os.path.abspath('../../savu/plugins/savers'))
+
 # -- General configuration -----------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.

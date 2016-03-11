@@ -15,19 +15,11 @@ User and Developer Guide
    user_guides/user_guide
    dev_guides/dev_guide
 
-
 Code Documentation
 ==================
 
 .. toctree::
    :maxdepth: 2
-
-   api
-
-Testing autosummary
-===================
-
-.. toctree::
    
    autosummary
 
