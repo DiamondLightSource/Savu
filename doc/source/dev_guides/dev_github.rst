@@ -56,6 +56,8 @@ Keep **YOUR** repository up-to-date with the **ORIGINAL**
 
     >>> git pull upstream
 
+    .. note:: You may need to specify the branch you want to update from at the end of the command, such as 'master' 
+
 Then follow the steps in :ref:`my-reference-label`.
 
 
