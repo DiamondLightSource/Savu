@@ -76,21 +76,21 @@ def set_experiment(exp_type, **kwargs):
 
 def set_tomoRaw_experiment(filename, **kwargs):
     # create experiment
-    options = set_options(get_test_data_path(filename))
+    options = _set_options(get_test_data_path(filename))
     options['loader'] = 'savu.plugins.loaders.nxtomo_loader'
     options['saver'] = 'savu.plugins.savers.hdf5_tomo_saver'
     return options
 
 
 def set_tomo_experiment(filename, **kwargs):
-    options = set_options(get_test_data_path(filename), **kwargs)
+    options = _set_options(get_test_data_path(filename), **kwargs)
     options['loader'] = 'savu.plugins.loaders.projection_tomo_loader'
     options['saver'] = 'savu.plugins.savers.hdf5_tomo_saver'
     return options
 
 
 def set_fluo_experiment(filename, **kwargs):
-    options = set_options(get_test_data_path(filename), **kwargs)
+    options = _set_options(get_test_data_path(filename), **kwargs)
     options['loader'] = 'savu.plugins.loaders.nxfluo_loader'
     options['saver'] = 'savu.plugins.savers.hdf5_tomo_saver'
     return options
@@ -98,7 +98,7 @@ def set_fluo_experiment(filename, **kwargs):
 
 def set_i12tomo_experiment(filename, **kwargs):
     options = \
-        set_options(get_test_data_path('/i12_test_data/' + filename), **kwargs)
+        _set_options(get_test_data_path('/i12_test_data/' + filename), **kwargs)
     options['loader'] = 'savu.plugins.loaders.i12_tomo_loader'
     options['saver'] = 'savu.plugins.savers.hdf5_tomo_saver'
     return options
@@ -138,7 +138,7 @@ def set_plugin_entry(name, ID, data):
     return plugin
 
 
-def set_options(path, **kwargs):
+def _set_options(path, **kwargs):
     process_file = kwargs.get('process_file', '')
     process_names = kwargs.get('process_names', 'CPU0')
     options = {}
