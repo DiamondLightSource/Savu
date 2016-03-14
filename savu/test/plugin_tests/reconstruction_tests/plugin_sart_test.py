@@ -25,7 +25,7 @@
 import unittest
 
 import savu.test.test_utils as tu
-from savu.test.plugin_runner_test import \
+from savu.test.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner_no_process_list
 
 

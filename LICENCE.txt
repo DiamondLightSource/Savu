@@ -31,8 +31,9 @@ for both GPLv2 and GPLv3.
 
 
     Savu Licence
+    ============
 
-Savu makes use of some GPLv3 packages in several of the processing plugins, the 
+Savu makes use of some GPLv3 libraries in several of the processing plugins, the 
 libraries in question are:
     pyAstra
     pyFAI
@@ -45,7 +46,9 @@ And the plugins containing them are:
 If your use of the code makes use of these imports, then the software is licenced under 
 GPLV3 as required by the licence.  However if you do not use or redistribute the plugins
 containing these imports, the software may be considered licenced under the Apache V2 
-licence.
+licence, Specifically all of the core functionality of Savu.
+
+Both licences now follow.
 
 
 

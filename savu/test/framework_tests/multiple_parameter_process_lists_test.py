@@ -27,7 +27,7 @@ import unittest
 import tempfile
 
 import savu.test.test_utils as tu
-from savu.test.plugin_runner_test import run_protected_plugin_runner
+from savu.test.framework_tests.plugin_runner_test import run_protected_plugin_runner
 
 
 class MultipleParameterProcessListTests(unittest.TestCase):

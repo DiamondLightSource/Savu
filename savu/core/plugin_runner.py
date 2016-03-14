@@ -76,7 +76,7 @@ class PluginRunner(object):
 
         return self.exp
 
-    def __run_plugin_list_check(self, plugin_list):
+    def _run_plugin_list_check(self, plugin_list):
         self.exp.barrier()
         self.__check_loaders_and_savers(plugin_list)
 
