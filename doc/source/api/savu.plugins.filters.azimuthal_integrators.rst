@@ -3,6 +3,7 @@ savu.plugins.filters.azimuthal_integrators package
 
 .. automodule:: savu.plugins.filters.azimuthal_integrators
     :members:
+    :private-members:
     :undoc-members:
     :show-inheritance:
 

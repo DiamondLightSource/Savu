@@ -15,8 +15,7 @@
 """
 .. module:: plugin_runner
    :platform: Unix
-   :synopsis: Class to control the plugin and interact with the transport \
-   layer.  It inherits dynamically from chosen transport type at run time
+   :synopsis: Plugin list runner, which passes control to the transport layer.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
@@ -32,22 +31,21 @@ from savu.plugins.base_saver import BaseSaver
 
 
 class PluginRunner(object):
-    """
-    The PluginRunner class controls the plugins and performs the interaction
-    between the plugin and transport layers.  It inherits from the chosen
-    transport mechanism.
+    """ Plugin list runner, which passes control to the transport layer.
     """
 
     def __init__(self, options):
         class_name = "savu.core.transports." + options["transport"] \
                      + "_transport"
         cu.add_base(self, cu.import_class(class_name))
-        self.transport_control_setup(options)
+        self._transport_control_setup(options)
         self.exp = None
+        self.options = options
 
-    # TODO : Do we need to have options passed here as it is passed to sp12778
-    def _run_plugin_list(self, options):
-        self.exp = Experiment(options)
+    def _run_plugin_list(self):
+        """ Create an experiment and run the plugin list.
+        """
+        self.exp = Experiment(self.options)
         plugin_list = self.exp.meta_data.plugin_list.plugin_list
 
         logging.info("run_plugin_list: 1")
@@ -76,7 +74,10 @@ class PluginRunner(object):
 
         return self.exp
 
-    def _run_plugin_list_check(self, plugin_list):
+    def __run_plugin_list_check(self, plugin_list):
+        """ Run the plugin list through the framework without executing the
+        main processing.
+        """
         self.exp.barrier()
         self.__check_loaders_and_savers(plugin_list)
 
@@ -90,6 +91,8 @@ class PluginRunner(object):
         cu.user_message("Plugin list check complete!")
 
     def __check_loaders_and_savers(self, plugin_list):
+        """ Check plugin list starts with a loader and ends with a saver.
+        """
         first_plugin = plugin_list[0]
         end_plugin = plugin_list[-1]
 

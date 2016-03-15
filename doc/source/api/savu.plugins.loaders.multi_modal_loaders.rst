@@ -3,6 +3,7 @@ savu.plugins.loaders.multi_modal_loaders package
 
 .. automodule:: savu.plugins.loaders.multi_modal_loaders
     :members:
+    :private-members:
     :undoc-members:
     :show-inheritance:
 

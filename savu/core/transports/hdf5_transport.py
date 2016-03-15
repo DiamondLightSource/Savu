@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-.. module:: HDF5
+.. module:: hdf5_transport
    :platform: Unix
-   :synopsis: Transport for saving and loading files using hdf5
+   :synopsis: Transport specific plugin list runner, passes the data to and
+   from the plugin.
 
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
@@ -35,7 +36,9 @@ import savu.core.utils as cu
 
 class Hdf5Transport(TransportControl):
 
-    def transport_control_setup(self, options):
+    def _transport_control_setup(self, options):
+        """ Fill the options dictionary with MPI related values.
+        """
         processes = options["process_names"].split(',')
 
         if len(processes) is 1:
@@ -43,32 +46,17 @@ class Hdf5Transport(TransportControl):
             self.mpi = False
             options["process"] = 0
             options["processes"] = processes
-            self.set_logger_single(options)
+            self.__set_logger_single(options)
         else:
             options["mpi"] = True
             self.mpi = True
             print("Options for mpi are")
             print(options)
-            self.mpi_setup(options)
+            self.__mpi_setup(options)
 
-    def mpi_setup(self, options):
-#        print "****************testing mpi settings*********************"
-#        
-#        comm = MPI.COMM_WORLD
-#        my_mpi_file = MPI.File.Open(comm, '/mnt/GPFS01/testdir/dasc/qmm55171/temp_run_out/astra_cpu_test.nxs01_savu.plugins.corrections.timeseries_field_corrections_tomo.h5')
-#        #print "\n p1", dir(my_mpi_file)
-#        info = my_mpi_file.info
-##        print "\n\n", info.Get_nkeys()
-##        print "\n\n", info.keys()
-#        keys = info.keys()
-#        count = 0
-#        for key in keys:
-#            print "***", count, key, info.get(key)
-#            count += 1
-#        print info.get('coll_read_bufsize')
-#
-#        print "*********************************************************"        
-        
+    def __mpi_setup(self, options):
+        """ Set MPI process specific values and logging initialisation.
+        """
         print("Running mpi_setup")
         RANK_NAMES = options["process_names"].split(',')
         RANK = MPI.COMM_WORLD.rank
@@ -85,9 +73,9 @@ class Hdf5Transport(TransportControl):
         options["processes"] = list(chain.from_iterable(ALL_PROCESSES))
         options["process"] = RANK
 
-        self.set_logger_parallel(MACHINE_NUMBER_STRING,
-                                 MACHINE_RANK_NAME,
-                                 options)
+        self.__set_logger_parallel(MACHINE_NUMBER_STRING,
+                                   MACHINE_RANK_NAME,
+                                   options)
 
         MPI.COMM_WORLD.barrier()
         logging.debug("Rank : %i - Size : %i - host : %s", RANK, SIZE,
@@ -99,12 +87,13 @@ class Hdf5Transport(TransportControl):
         self.call_mpi_barrier()
 
     def call_mpi_barrier(self):
+        """ Call MPI barrier before an experiment is created.
+        """
         logging.debug("Waiting at the barrier")
         MPI.COMM_WORLD.barrier()
 
-    def get_log_level(self, options):
-        """
-        Gets the right log level for the flags -v or -q
+    def __get_log_level(self, options):
+        """ Gets the right log level for the flags -v or -q
         """
         if ('verbose' in options) and options['verbose']:
             return logging.DEBUG
@@ -112,9 +101,11 @@ class Hdf5Transport(TransportControl):
             return logging.WARN
         return logging.INFO
 
-    def set_logger_single(self, options):
+    def __set_logger_single(self, options):
+        """ Set single-threaded logging.
+        """
         logger = logging.getLogger()
-        logger.setLevel(self.get_log_level(options))
+        logger.setLevel(self.__get_log_level(options))
 
         fh = logging.FileHandler(os.path.join(options["out_path"], 'log.txt'),
                                  mode='w')
@@ -126,7 +117,9 @@ class Hdf5Transport(TransportControl):
         cu.add_user_log_handler(logger, os.path.join(options["out_path"],
                                                      'user.log'))
 
-    def set_logger_parallel(self, number, rank, options):
+    def __set_logger_parallel(self, number, rank, options):
+        """ Set parallel logger.
+        """
         logging.basicConfig(level=self.get_log_level(options),
                             format='L %(relativeCreated)12d M' +
                             number + ' ' + rank +
@@ -142,9 +135,8 @@ class Hdf5Transport(TransportControl):
                                     os.path.join(options["out_path"],
                                                  'user.log'))
 
-    def transport_run_plugin_list(self):
-        """
-        Runs a chain of plugins
+    def _transport_run_plugin_list(self):
+        """ Run the plugin list inside the transport layer.
         """
         exp = self.exp
 
@@ -163,7 +155,7 @@ class Hdf5Transport(TransportControl):
 
             exp.clear_data_objects()
             self.exp.index['in_data'] = copy.deepcopy(start_in_data)
-            self.real_plugin_run(plugin_list, out_data_objs, start, stop)
+            self.__real_plugin_run(plugin_list, out_data_objs, start, stop)
             start = stop
 
         for key in exp.index["in_data"].keys():
@@ -171,7 +163,9 @@ class Hdf5Transport(TransportControl):
 
         return
 
-    def real_plugin_run(self, plugin_list, out_data_objs, start, stop):
+    def __real_plugin_run(self, plugin_list, out_data_objs, start, stop):
+        """ Execute the plugin.
+        """
         exp = self.exp
         for i in range(start, stop):
             link_type = "final_result" if i is len(plugin_list)-2 else \
@@ -201,14 +195,18 @@ class Hdf5Transport(TransportControl):
             out_datasets = plugin.parameters["out_datasets"]
             exp.reorganise_datasets(out_datasets, link_type)
 
-    def process(self, plugin):
+    def _process(self, plugin):
+        """ Organise required data and execute the main plugin processing.
+
+        :param plugin plugin: The current plugin instance.
+        """
         self.process_checks()
         in_data, out_data = plugin.get_datasets()
         expInfo = plugin.exp.meta_data
         in_slice_list = self.get_all_slice_lists(in_data, expInfo)
         out_slice_list = self.get_all_slice_lists(out_data, expInfo)
-        squeeze_dict = self.set_functions(in_data, 'squeeze')
-        expand_dict = self.set_functions(out_data, 'expand')
+        squeeze_dict = self.__set_functions(in_data, 'squeeze')
+        expand_dict = self.__set_functions(out_data, 'expand')
 
         number_of_slices_to_process = len(in_slice_list[0])
         for count in range(number_of_slices_to_process):
@@ -235,7 +233,9 @@ class Hdf5Transport(TransportControl):
 #            be Raw data. Have you performed a timeseries_field_correction?")
 # call a new process called process_check?
 
-    def set_functions(self, data_list, name):
+    def __set_functions(self, data_list, name):
+        """ Create a function to remove or re-add extra dimensions of length 1.
+        """
         str_name = 'self.' + name + '_output'
         function = {'expand': self.create_expand_function,
                     'squeeze': self.create_squeeze_function}
@@ -243,9 +243,12 @@ class Hdf5Transport(TransportControl):
         for i in range(len(data_list)):
             ddict[i] = {i: str_name + str(i)}
             ddict[i] = function[name](data_list[i])
+        print "****", ddict
         return ddict
 
-    def create_expand_function(self, data):
+    def __create_expand_function(self, data):
+        """ 
+        """
         slice_dirs = data.get_plugin_data().get_slice_directions()
         n_core_dirs = len(data.get_plugin_data().get_core_directions())
         new_slice = [slice(None)]*len(data.get_shape())
@@ -260,7 +263,7 @@ class Hdf5Transport(TransportControl):
         possible_slices = possible_slices[::-1]
         return lambda x: x[possible_slices[len(x.shape)-n_core_dirs]]
 
-    def create_squeeze_function(self, data):
+    def __create_squeeze_function(self, data):
         max_frames = data.get_plugin_data().get_frame_chunk()
         if data.mapping:
             map_obj = self.exp.index['mapping'][data.get_name()]

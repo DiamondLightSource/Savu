@@ -3,6 +3,7 @@ savu.plugins.reconstructions package
 
 .. automodule:: savu.plugins.reconstructions
     :members:
+    :private-members:
     :undoc-members:
     :show-inheritance:
 

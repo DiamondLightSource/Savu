@@ -3,6 +3,7 @@ savu.core package
 
 .. automodule:: savu.core
     :members:
+    :private-members:
     :undoc-members:
     :show-inheritance:
 

@@ -3,6 +3,7 @@ savu.plugins.loaders package
 
 .. automodule:: savu.plugins.loaders
     :members:
+    :private-members:
     :undoc-members:
     :show-inheritance:
 

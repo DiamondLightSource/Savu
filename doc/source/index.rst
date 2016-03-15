@@ -21,12 +21,5 @@ Code Documentation
 .. toctree::
    :maxdepth: 2
    
-   autosummary
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   API Documentation<autosummary>
 

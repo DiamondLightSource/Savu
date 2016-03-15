@@ -51,7 +51,7 @@ extensions = ['sphinx.ext.autodoc', 'sphinx.ext.intersphinx', 'sphinx.ext.ifconf
 autosummary_generate = True
 
 # Add any paths that contain templates here, relative to this directory.
-#templates_path = ['_templates']
+templates_path = ['_templates', 'api_plugin_dev']
 
 # The suffix of source filenames.
 source_suffix = '.rst'
@@ -107,7 +107,7 @@ exclude_patterns = ['_templates']
 pygments_style = 'sphinx'
 
 # A list of ignored prefixes for module index sorting.
-#modindex_common_prefix = []
+#modindex_common_prefix = ['savu.']
 
 
 # -- Options for HTML output ---------------------------------------------------

@@ -15,7 +15,7 @@
 """
 .. module:: create_autosummary
    :platform: Unix
-   :synopsis: A module to automatically update a Sphinx API
+   :synopsis: A module to automatically update a Sphinx API.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
@@ -37,15 +37,24 @@ def add_package_entry(f, root, dirs, files, output):
     module_name = pkg_path.replace('/', '.')
     f.write(module_name +
             '\n------------------------------------------------------------\n')
-    f.write('\n.. currentmodule::' + module_name)
-    f.write('\n.. autosummary::')
+#    f.write('\n.. currentmodule::' + module_name)
+#    f.write('\n.. autosummary::')
 #    f.write('\n   :toctree: ' + output + '/' + pkg_path + '\n\n')
-    f.write('\n   :toctree: api\n\n')
+#    f.write('\n   :toctree: api\n\n')
+    f.write('\n.. toctree::\n')
 
     for fi in files:
         file_path = module_name + '.' + fi
-        f.write('   ' + file_path.split('.py')[0] + '\n')
+        f.write('   api/' + file_path.split('.py')[0] + '\n')
     f.write('\n\n')
+
+
+def add_indices_and_tables(f):
+    f.write('Indices and tables\n')
+    f.write('==================\n')
+    f.write('* :ref:`genindex`\n')
+    f.write('* :ref:`modindex`\n')
+    f.write('* :ref:`search`\n')
 
 
 if __name__ == "__main__":
@@ -73,3 +82,5 @@ if __name__ == "__main__":
         files[:] = [fi for fi in files if fi not in exclude_file]
         if '__' not in root:
             add_package_entry(f, root, dirs, files, out_folder)
+
+    add_indices_and_tables(f)

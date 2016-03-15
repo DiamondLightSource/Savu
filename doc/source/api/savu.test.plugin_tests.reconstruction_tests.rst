@@ -3,6 +3,7 @@ savu.test.plugin_tests.reconstruction_tests package
 
 .. automodule:: savu.test.plugin_tests.reconstruction_tests
     :members:
+    :private-members:
     :undoc-members:
     :show-inheritance:
 

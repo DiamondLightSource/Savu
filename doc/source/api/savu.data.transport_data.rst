@@ -3,6 +3,7 @@ savu.data.transport_data package
 
 .. automodule:: savu.data.transport_data
     :members:
+    :private-members:
     :undoc-members:
     :show-inheritance:
 

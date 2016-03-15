@@ -3,6 +3,7 @@ savu.core.transports package
 
 .. automodule:: savu.core.transports
     :members:
+    :private-members:
     :undoc-members:
     :show-inheritance:
 
