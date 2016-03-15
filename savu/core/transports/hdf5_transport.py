@@ -203,8 +203,8 @@ class Hdf5Transport(TransportControl):
         self.process_checks()
         in_data, out_data = plugin.get_datasets()
         expInfo = plugin.exp.meta_data
-        in_slice_list = self.get_all_slice_lists(in_data, expInfo)
-        out_slice_list = self.get_all_slice_lists(out_data, expInfo)
+        in_slice_list = self.__get_all_slice_lists(in_data, expInfo)
+        out_slice_list = self.__get_all_slice_lists(out_data, expInfo)
         squeeze_dict = self.__set_functions(in_data, 'squeeze')
         expand_dict = self.__set_functions(out_data, 'expand')
 
@@ -215,11 +215,11 @@ class Hdf5Transport(TransportControl):
                             (plugin.name, percent_complete))
 
             section, slice_list = \
-                self.get_all_padded_data(in_data, in_slice_list, count,
-                                         squeeze_dict)
+                self.__get_all_padded_data(in_data, in_slice_list, count,
+                                           squeeze_dict)
             result = plugin.process_frames(section, slice_list)
-            self.set_out_data(out_data, out_slice_list, result, count,
-                              expand_dict)
+            self.__set_out_data(out_data, out_slice_list, result, count,
+                                expand_dict)
 
         cu.user_message("%s - 100%% complete" % (plugin.name))
         plugin.revert_preview(in_data)
@@ -234,20 +234,29 @@ class Hdf5Transport(TransportControl):
 # call a new process called process_check?
 
     def __set_functions(self, data_list, name):
-        """ Create a function to remove or re-add extra dimensions of length 1.
+        """ Create a dictionary of functions to remove (squeeze) or re-add
+        (expand) dimensions, of length 1, from each dataset in a list.
+
+        :param list(Data) data_list: Datasets
+        :param str name: 'squeeze' or 'expand'
+        :returns: A dictionary of lambda functions
+        :rtype: dict
         """
         str_name = 'self.' + name + '_output'
-        function = {'expand': self.create_expand_function,
-                    'squeeze': self.create_squeeze_function}
+        function = {'expand': self.__create_expand_function,
+                    'squeeze': self.__create_squeeze_function}
         ddict = {}
         for i in range(len(data_list)):
             ddict[i] = {i: str_name + str(i)}
             ddict[i] = function[name](data_list[i])
-        print "****", ddict
         return ddict
 
     def __create_expand_function(self, data):
-        """ 
+        """ Create a function that re-adds missing dimensions of length 1.
+
+        :param Data data: Dataset
+        :returns: expansion function
+        :rtype: lambda
         """
         slice_dirs = data.get_plugin_data().get_slice_directions()
         n_core_dirs = len(data.get_plugin_data().get_core_directions())
@@ -264,6 +273,12 @@ class Hdf5Transport(TransportControl):
         return lambda x: x[possible_slices[len(x.shape)-n_core_dirs]]
 
     def __create_squeeze_function(self, data):
+        """ Create a function that removes dimensions of length 1.
+
+        :param Data data: Dataset
+        :returns: squeeze function
+        :rtype: lambda
+        """
         max_frames = data.get_plugin_data().get_frame_chunk()
         if data.mapping:
             map_obj = self.exp.index['mapping'][data.get_name()]
@@ -280,33 +295,62 @@ class Hdf5Transport(TransportControl):
                                         axis=squeeze_dims)
         return lambda x: np.squeeze(x, axis=squeeze_dims)
 
-    def get_all_slice_lists(self, data_list, expInfo):
+    def __get_all_slice_lists(self, data_list, expInfo):
+        """ Get all slice lists for the current process.
+
+        :param list(Data) data_list: Datasets
+        :param: meta_data expInfo: The experiment metadata.
+        :returns: slice lists.
+        :rtype: list(tuple(slice))
+        """
         slice_list = []
         for data in data_list:
             slice_list.append(data.get_slice_list_per_process(expInfo))
         return slice_list
 
-    def get_all_padded_data(self, data, slice_list, count, squeeze_dict):
+    def __get_all_padded_data(self, data_list, slice_list, count,
+                              squeeze_dict):
+        """ Get all padded slice lists.
+
+        :param Data data_list: datasets
+        :param list(list(slice)) slice_list: slice lists for datasets
+        :param int count: frame number.
+        :param dict squeeze_dict: squeeze functions for datasets
+        :returns: all data for this frame and associated padded slice lists
+        :rtype: list(np.ndarray), list(tuple(slice))
+        """
         section = []
         slist = []
-        for idx in range(len(data)):
+        for idx in range(len(data_list)):
             section.append(squeeze_dict[idx](
-                data[idx].get_padded_slice_data(slice_list[idx][count])))
+                data_list[idx].get_padded_slice_data(slice_list[idx][count])))
             slist.append(slice_list[idx][count])
         return section, slist
 
-    def set_out_data(self, data, slice_list, result, count, expand_dict):
-        result = [result] if type(result) is not list else result
-        for idx in range(len(data)):
-            temp = data[idx].get_unpadded_slice_data(slice_list[idx][count],
-                                                     result[idx])
-            data[idx].data[slice_list[idx][count]] = expand_dict[idx](temp)
+    def __set_out_data(self, data_list, slice_list, result, count,
+                       expand_dict):
+        """ Transfer plugin results for current frame to backing files.
 
-    def transfer_to_meta_data(self, return_dict):
-        remove_data_sets = []
-        for data_key in return_dict.keys():
-            for name in return_dict[data_key].keys():
-                convert_data = return_dict[data_key][name]
-                remove_data_sets.append(convert_data.name)
-                data_key.meta_data.set_meta_data(name, convert_data.data[...])
-        return remove_data_sets
+        :param list(Data) data_list: datasets
+        :param list(list(slice)) slice_list: slice lists for datasets
+        :param list(np.ndarray) result: plugin results
+        :param int count: frame number
+        :param dict expand_dict: expand functions for datasets
+        """
+        result = [result] if type(result) is not list else result
+        for idx in range(len(data_list)):
+            temp = data_list[idx].get_unpadded_slice_data(
+                slice_list[idx][count], result[idx])
+            data_list[idx].data[slice_list[idx][count]] = \
+                expand_dict[idx](temp)
+
+#    def _transfer_to_meta_data(self, return_dict):
+#        """
+#        """
+#        remove_data_sets = []
+#        for data_key in return_dict.keys():
+#            for name in return_dict[data_key].keys():
+#                convert_data = return_dict[data_key][name]
+#                remove_data_sets.append(convert_data.name)
+#                data_key.meta_data.set_meta_data(name, convert_data.data[...])
+#        return remove_data_sets

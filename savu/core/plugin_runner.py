@@ -61,7 +61,7 @@ class PluginRunner(object):
 
         logging.info("run_plugin_list: 3")
         self.exp.barrier()
-        self.transport_run_plugin_list()
+        self._transport_run_plugin_list()
 
         logging.info("run_plugin_list: 4")
         self.exp.barrier()
