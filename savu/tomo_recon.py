@@ -15,7 +15,7 @@
 """
 .. module:: tomo_recon
    :platform: Unix
-   :synopsis: runner for tests using the MPI framework
+   :synopsis: Runner for the Savu framework
 
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
@@ -28,6 +28,8 @@ from savu.core.plugin_runner import PluginRunner
 
 
 def __option_parser():
+    """ Option parser for command line arguments.
+    """
     usage = "%prog [options] input_file processing_file output_directory"
     version = "%prog 0.1"
     parser = optparse.OptionParser(usage=usage, version=version)
@@ -48,7 +50,8 @@ def __option_parser():
 
 
 def __check_input_params(args):
-    # Check basic items for completeness
+    """ Check for required input arguments.
+    """
     if len(args) is not 3:
         print("filename, process file and output path needs to be specified")
         print("Exiting with error code 1 - incorrect number of inputs")
@@ -71,6 +74,13 @@ def __check_input_params(args):
 
 
 def _set_options(opt, args):
+    """ Set run specific information in options dictionary.
+
+    :params dict opt: input optional arguments (or defaults)
+    :params args: input required arguments
+    :returns options: optional and required arguments
+    :rtype: dict
+    """
     options = {}
     options["transport"] = opt.transport
     options["process_names"] = opt.names
