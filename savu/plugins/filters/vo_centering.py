@@ -78,11 +78,11 @@ class VoCentering(BaseFilter, CpuPlugin):
 
     def filter_frames(self, data):
         data = data[0][::self.parameters['step']]
-        width = data.shape[1]/4
+        width = data.shape[1]/16
         step = width/10.
         point = 0.0
 
-        while step > 0.01:
+        while step > 0.2:
             x = np.arange(point-width, point+width, step)
             point = self._scan(x, data)
             width = step
