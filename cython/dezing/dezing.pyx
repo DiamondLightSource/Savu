@@ -9,7 +9,20 @@ cimport cdezing
 
 
 cdef cdezing.Options ctrl
+ctrl.nthreadsreq=0
+
 cdef unsigned int batchsize
+
+cdef public void pydebug(char * message):
+   logging.debug(message)
+cdef public void pyinfo(char * message):
+   logging.info(message)
+cdef public void pywarn(char * message):
+   logging.warning(message)
+cdef public void pyerr(char * message):
+   logging.error(message)
+cdef public void pyuser(char * message):
+   logging.log(100,message)
 
 def getversion():
    global ctrl
@@ -21,25 +34,26 @@ def getversion():
 def setup_size(array_size,outlier_mu,npad,logfile="dezing.log",versionflag=0): #,bytes summary):
    global ctrl
    global batchsize
-   logging.info("setup_size: opening log file")
-   print "setup_size: opening log file"
+   logging.debug("setup_size: opening log file")
    cdezing.timestamp_open(logfile)
    cdezing.timestamp_init()
 
-   print "setup_size: setting control flags"
+   logging.debug( "setup_size: setting control flags")
    ctrl.versionflag=versionflag
    ctrl.outlier_mu=outlier_mu
    ctrl.cropwd=array_size[2]
    ctrl.nlines=array_size[1]
    ctrl.npad=npad
-   batchsize=array_size[0]
+   ctrl.nthreadsreq=0
+
+   batchsize = array_size[0] + (2 * npad)
 
    ctrl.f_call_num=0
 
-   cdezing.timestamp( "setup_size: calling c function for setup" )
+   cdezing.timestamp( "setup_size: calling c function for setup",1 )
    #cdezing.runDezing(&ctrl,batchsize,<unsigned char *> inarray.data,<unsigned char *> outarray.data)
    cdezing.runDezing(&ctrl,batchsize, NULL, NULL)
-   pass
+   return(ctrl.returnflag,ctrl.warnflag,ctrl.errflag)
 
 def setup(np.ndarray[np.uint16_t,ndim=3,mode="c"] inarray,np.ndarray[np.uint16_t,ndim=3,mode="c"] outarray,outlier_mu,npad,logfile="dezing.log",versionflag=0): #,bytes summary):
    global ctrl
@@ -61,7 +75,7 @@ def setup(np.ndarray[np.uint16_t,ndim=3,mode="c"] inarray,np.ndarray[np.uint16_t
 
    ctrl.f_call_num=0
 
-   cdezing.timestamp( "calling c function setup" )
+   cdezing.timestamp( "calling c function setup",1 )
    #cdezing.runDezing(&ctrl,batchsize,<unsigned char *> inarray.data,<unsigned char *> outarray.data)
    cdezing.runDezing(&ctrl,batchsize, inbuf, outbuf)
    pass
@@ -77,10 +91,10 @@ def run(np.ndarray[np.uint16_t,ndim=3,mode="c"] inarray,np.ndarray[np.uint16_t,n
 
    batchsize=inarray.shape[0]
 
-   cdezing.timestamp( "calling c function with run flag" )
+   cdezing.timestamp( "calling c function with run flag",1 )
    ctrl.f_call_num=1
    cdezing.runDezing(&ctrl,batchsize, <unsigned char *>np.PyArray_DATA(inarray), <unsigned char *> np.PyArray_DATA(outarray))
-   pass
+   return(ctrl.returnflag,ctrl.warnflag,ctrl.errflag)
 
 
 
@@ -88,9 +102,10 @@ def cleanup(): #,bytes summary):
    global ctrl
    global batchsize
    ctrl.f_call_num=2
-   cdezing.timestamp( "calling c function with cleanup flag" )
+   cdezing.timestamp( "calling c function with cleanup flag",1 )
    cdezing.runDezing(&ctrl,batchsize, NULL,NULL)
    cdezing.timestamp_close()
+   return(ctrl.returnflag,ctrl.warnflag,ctrl.errflag)
 
 
 
@@ -164,7 +179,7 @@ def test_data():
    inarray[0,0,0]=143
    print "setting inarray element 0 to %i"%inarray[0,0,0]
    print "calling c function"
-   cdezing.timestamp("calling c function")
+   cdezing.timestamp("calling c function",1)
    cdezing.runDezing(&ctrl,15,<unsigned char *> inarray.data,<unsigned char *> outarray.data)
    print "finished c function"
    print "outarray element 0 is %i"%outarray[0,0,0]

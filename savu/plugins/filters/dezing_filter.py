@@ -41,18 +41,21 @@ class DezingFilter(BaseFilter, CpuPlugin):
 
     def __init__(self):
         super(DezingFilter, self).__init__("DezingFilter")
+        self.warnflag=0
+        self.errflag=0
 
     def pre_process(self):
-        dezing.setup_size(self.data_size, self.parameters['outlier_mu'],
+        (retval,self.warnflag,self.errflag)=dezing.setup_size(self.data_size, self.parameters['outlier_mu'],
                           self.pad)
 
     def filter_frames(self, data):
         result = np.empty_like(data[0])
-        dezing.run(data[0], result)
+        logging.debug("Python: calling cython funciton dezing.run")
+        (retval,self.warnflag,self.errflag)=dezing.run(data[0], result)
         return result
 
     def post_process(self):
-        dezing.cleanup()
+        (retval,self.warnflag,self.errflag)=dezing.cleanup()
 
     def get_max_frames(self):
         """
@@ -66,6 +69,14 @@ class DezingFilter(BaseFilter, CpuPlugin):
         self.data_size = in_data.get_shape()
         in_data.padding = {'pad_multi_frames': self.pad}
         out_data[0].padding = {'pad_multi_frames': self.pad}
+
+    def executive_summary(self): 
+        if self.errflag!=0:
+           return("ERRORS detected in dezing plugin, Check the detailed log messages.")
+        if self.warnflag!=0:
+           return("WARNINGS detected in dezing plugin, Check the detailed log messages.")
+        return "Nothing to Report" 
+
 # other examples
 #        data.padding = {'pad_multi_frames':pad, 'pad_frame_edges':pad}
-#        data.padding = {'pad_direction':[ddir, pad]}}
+#   .padding  {'pad_direction':[ddir, pad]}}

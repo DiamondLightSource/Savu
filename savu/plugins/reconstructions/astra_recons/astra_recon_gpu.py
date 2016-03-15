@@ -39,9 +39,11 @@ class AstraReconGpu(BaseAstraRecon, GpuPlugin):
 
     def __init__(self):
         super(AstraReconGpu, self).__init__("AstraReconGpu")
+        print "INITIALIZING astra_recon_gpu.py"
         self.GPU_index = None
 
     def get_parameters(self):
+        print "ENTERING astra_recon_gpu.py get_parameters"
         return [self.parameters['reconstruction_type'],
                 self.parameters['number_of_iterations'],
                 self.GPU_index]
