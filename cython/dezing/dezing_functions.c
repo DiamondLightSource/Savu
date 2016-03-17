@@ -28,7 +28,7 @@ static pthread_mutex_t count_mutex=PTHREAD_MUTEX_INITIALIZER;
 unsigned char vflag=0;
 
 static void svn_id_file(FILE * fp){
-   fprintf(fp,"%s: SVN ID: $Id: dezing_functions.c 380 2015-04-27 15:42:37Z kny48981 $\n",__FILE__);
+   fprintf(fp,"%s: SVN ID: $Id: dezing_functions.c 464 2016-02-16 10:54:37Z kny48981 $\n",__FILE__);
    fprintf(fp,"%s: SVN URL: $URL: file:///home/kny48981/SVN/progs/dezing_cython/dezing_functions.c $\n",__FILE__);
    fprintf(fp,"%s: SVN header ID: %s\n","options.h",OPTIONS_H);
 }
@@ -74,7 +74,7 @@ void write_raw_16(const u_int16_t * const datap, const u_int32_t filenum,const s
     timestamp ("writing ...");
     ofp = fopen (fname, "w");
     nw = fwrite (datap, sizeof (u_int16_t), tsize * batch, ofp);
-    printf ("wrote %i uint16 values to %s\n",nw,  fname);
+    printf ("wrote %zu uint16 values to %s\n",nw,  fname);
     fclose(ofp);
 }
 
@@ -86,7 +86,7 @@ void write_raw_real(const Real * const datap, const u_int32_t filenum,const size
     timestamp ("writing ...");
     ofp = fopen (fname, "w");
     nw = fwrite (datap, sizeof (float), tsize * batch, ofp);
-    printf ("wrote %i float values to %s\n",nw,  fname);
+    printf ("wrote %zu float values to %s\n",nw,  fname);
     fclose(ofp);
 }
 
@@ -209,7 +209,7 @@ void runDezing( Options *  ctrlp, u_int32_t  thisbatch,u_int8_t * inbuf, u_int8_
            alloc=1;
            //**************************
            timestamp("allocating the memory in dezing functions");
-           printf("batchsize %i allocating the memory in dezing functions\n",batchsize);
+           printf("batchsize %zu allocating the memory in dezing functions\n",batchsize);
            logmessage=(char *) calloc(MAX_MESSAGE , sizeof (char));
            fname=(char *) calloc(1024 , sizeof (char));
            printf("logmessage addr: %x\n",logmessage);
@@ -224,11 +224,13 @@ void runDezing( Options *  ctrlp, u_int32_t  thisbatch,u_int8_t * inbuf, u_int8_
            snprintf (logmessage, MAX_MESSAGE,"Threads used: %u \n", nthreads);
            timestamp(logmessage);
 
-           timestamp("finished allocating the memory in dezing functions");
+           timestamp("finished allocating the memory in the dezing functions");
            ctrlp->returnflag=0;
            return;
         }else{
-           fprintf(stderr,"ERROR: %s: attempted to double-allocate !\n",__func__);
+           snprintf(logmessage,MAX_MESSAGE,"ERROR: %s: attempted to double-allocate !\n",__func__);
+           timestamp(logmessage);
+           //exit(0);
            ctrlp->returnflag=5;
            return;
         }
@@ -276,9 +278,9 @@ void runDezing( Options *  ctrlp, u_int32_t  thisbatch,u_int8_t * inbuf, u_int8_
   result16 = outbuf16;
 
 
-  snprintf (logmessage, MAX_MESSAGE,"batchsize: %u \n", batchsize);
+  snprintf (logmessage, MAX_MESSAGE,"batchsize: %zu \n", batchsize);
   timestamp(logmessage);
-  snprintf (logmessage,MAX_MESSAGE, "sizes: %i %i batch %i \n",sizes[0],sizes[1],batch);
+  snprintf (logmessage,MAX_MESSAGE, "sizes: %i %i batch %zu \n",sizes[0],sizes[1],batch);
   timestamp(logmessage);
 
 
@@ -328,7 +330,11 @@ void runDezing( Options *  ctrlp, u_int32_t  thisbatch,u_int8_t * inbuf, u_int8_
 #ifdef WRITEINPUT
   // write out the input data in case of debugging 
   //
-  write_raw_16(g_filtdata.input16,0,imagesize,batch,"Iinp");
+     {
+        static int counter=0;
+           write_raw_16(g_filtdata.input16,counter,imagesize,batch,"Iinp");
+           counter++;
+     }
 #endif
 
   printf("running the dezinger correction ...\n");
@@ -379,6 +385,16 @@ void runDezing( Options *  ctrlp, u_int32_t  thisbatch,u_int8_t * inbuf, u_int8_
 
 
 #endif/*SINGLETHREAD*/
+#ifdef WRITEOUTPUT
+
+  // write out the output data in case of debugging 
+  //
+     {
+        static int counter=0;
+           write_raw_16(g_filtdata.result16,counter,imagesize,batch,"Ioutp");
+           counter++;
+     }
+#endif
 ctrlp->returnflag=0;
 
 }
@@ -470,24 +486,46 @@ static void * threaddezing (void * in_struct) {
 #ifdef DEBUG_ALGORITHM
            /* count the threads */
            pthread_mutex_lock(&count_mutex) ;
-              printf("dezing: thread %i batchchunk %hi tlim %i %i\n",thisthread,tlim->mynum,tlim->start,tlim->end);
-              printf("dezing: thread %i width %u height %u \n",thisthread,width,height);
+              j=1;
+              rowidx=j*(g_filtdata.origsizes[0]);
+
+              //printf("dezing: thread %i batchchunk %hi tlim %i %i first rowidx: %i\n",thisthread,tlim->mynum,tlim->start,tlim->end,rowidx);
+              //printf("dezing: thread %i width %u height %u \n",thisthread,width,height);
            pthread_mutex_unlock(&count_mutex);
            /********************/
 #endif /* DEBUG_ALGORITHM */
 
            idx=0;
-           for (j=1;j<(size_t)(g_filtdata.origsizes[1])-1;j++){
+           //for (j=1;j<(size_t)(g_filtdata.origsizes[1])-1;j++)
+           for (j=0;j<(size_t)(g_filtdata.origsizes[1]);j++)
+           {
               rowidx=j*(g_filtdata.origsizes[0]);
-              for(i=1;i<g_filtdata.origsizes[0]-1;i++){
+
+              //for(i=1;i<g_filtdata.origsizes[0]-1;i++)
+              for(i=0;i<g_filtdata.origsizes[0];i++)
+              {
                  idx=rowidx+i;
                  slicestart=tlim->start * size; 
 
                  for (k=tlim->start ;k<tlim->end;k++){
-                    for(nbj=-2;nbj<=+2;nbj++){
+                    for(nbj=-2;nbj<=+2;nbj++){ /*neighborhood loop */
                           offset=nbj*size;
                           nbidx=(nbj+2);
                           thisnb[nbidx] = g_filtdata.input16[slicestart+idx+offset];
+#ifdef DEBUG_ALGORITHM
+                          {
+                             static int first=1;
+                             int firstidx;
+                             pthread_mutex_lock(&count_mutex) ;
+                             if ( first == 1 && tlim->mynum==0 ){
+                                firstidx=slicestart+idx+offset;
+                                first=0;
+                                printf("dezing: thread %i width %u height %u slicestart %i idx %i offset %i ",thisthread,width,height,slicestart,idx,offset);
+                                printf(" batchchunk %hi tlim %i %i first nb idx: %i\n",tlim->mynum,tlim->start,tlim->end,firstidx);
+                             }
+                             pthread_mutex_unlock(&count_mutex);
+                          }
+#endif /* DEBUG_ALGORITHM */
                     }/*neighbour j nbj*/
                        g_filtdata.result16[idx + slicestart ] = (u_int16_t)(getfix(thisnb,thisnum));
                        slicestart += size; /* increment the slice */

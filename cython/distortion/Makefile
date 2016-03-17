@@ -9,7 +9,6 @@ LINK := gcc
 #FFTWPREFIX := ${FFTWDIR}
 
 OPTIMIZER = -O3
-#OPTIMIZER = -ggdb
 
 #include all warnings .. 
 #FLAGS = $(OPTIMIZER)  -DPCO_4000_FIX_BCD  #-Wall
@@ -41,29 +40,31 @@ LIBS = -lm   -ldl -lrt \
 #-Wl,--verbose 
 
 
+CPPSOURCES=\
+	 unwarp_functions.cpp 
 CSOURCES=\
-	 dezing_functions.c \
-	 handlers.c \
 	 timestamp.c
 
+CPPMAIN=\
+      unwarp_functions.cpp
 CMAIN=\
-      dezing_main.c\
       tifwrite.c
 
-CSALL=$(CSOURCES) $(CMAIN)
+CSALL=$(CSOURCES) $(CMAIN) $(CPPSOURCES) $(CPPMAIN)
 
 
-COBJECTS=$(CSALL:%.c=%.o)
+COBJECTS=$(CSOURCES:%.c=%.o) $(CPPSOURCES:%.cpp=%.o)
 
-COBJLIB=$(CSOURCES:%.c=%.o)
+COBJLIB=$(CSOURCES:%.c=%.o) $(CPPSOURCES:%.cpp=%.o)
+
 
 COBJMAIN=$(CMAIN:%.c=%.o)
 
 
-PROGNAME=dezing_batch
+PROGNAME=unwarp_batch
 
-SHARENAME=libdezing.so
-STATICNAME=libdezing.a
+SHARENAME=libunwarp.so
+STATICNAME=libunwarp.a
 
 DFFLAGS = -DDEBUGALL
 
@@ -73,26 +74,29 @@ default: $(PROGNAME)
 debug: OPTIMIZER := -ggdb
 debug: FLAGS += -lefence
 debug: clean $(COBJECTS)
-	$(CC) -o $@ $(COBJECTS) $(LIBDIRS) $(LIBS) $(FLAGS)  -ltiff
+	$(CXX) -o $@ $(COBJECTS) $(LIBDIRS) $(LIBS) $(FLAGS)  -ltiff
 
 
 debugthread: OPTIMIZER := -ggdb
 debugthread: FLAGS += -DSINGLETHREAD -DDEBUG_THREADSCALE 
 debugthread: clean  $(COBJECTS)
-	$(CC) -o $@ $(COBJECTS) $(LIBDIRS) $(LIBS) $(FLAGS) 
+	$(CXX) -o $@ $(COBJECTS) $(LIBDIRS) $(LIBS) $(FLAGS) 
 
 debugfilt: FLAGS += $(DFFLAGS) 
 debugfilt: clean  $(COBJECTS)
-	$(CC) -o $@ $(COBJECTS) $(LIBDIRS) $(LIBS) $(FLAGS) 
+	$(CXX) -o $@ $(COBJECTS) $(LIBDIRS) $(LIBS) $(FLAGS) 
 
 
 .c.o:
-	$(CC) $(INCDIRS) $(FLAGS) -c $<
+	$(CXX) $(INCDIRS) $(FLAGS) -c $<
+
+.cpp.o:
+	$(CXX) $(INCDIRS) $(FLAGS) -c $<
 
 
 
 $(PROGNAME): $(CUDAOBJECTS) $(COBJMAIN) shared
-	$(CC) -o $@ $(COBJMAIN) $(LIBDIRS) $(LIBS) $(FLAGS) $(SHARENAME) -ltiff
+	$(CXX) -o $@ $(COBJMAIN) $(LIBDIRS) $(LIBS) $(FLAGS) $(SHARENAME) -ltiff
 
 shared: FLAGS+=-fPIC  -Wall
 shared: $(SHARENAME)
@@ -102,7 +106,7 @@ static: $(STATICNAME)
 
 
 $(SHARENAME): $(CUDAOBJECTS) $(COBJLIB) 
-	$(CC) -o $@ $(COBJLIB) $(LIBDIRS) $(LIBS) $(FLAGS) -shared 
+	$(CXX) -o $@ $(COBJLIB) $(LIBDIRS) $(LIBS) $(FLAGS) -shared 
 
 $(STATICNAME): $(CUDAOBJECTS) $(COBJLIB) 
 	ar rcs $@ $(COBJLIB) 

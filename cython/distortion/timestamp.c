@@ -1,25 +1,38 @@
 #include "timestamp.h"
 #include "sys/time.h"
-FILE * logfp;
-struct timeval mystime;
+extern FILE * logfp;
+static struct timeval mystime;
 double oldtime=0;
+#ifdef SAVU
+extern char *allmessages[MAX_MESSAGE];
+#endif
+
+
+#ifdef NOTYET_SAVU
+int logprint(const char *const message){
+   int retval=0;
+   int myerror=0;
+   //retval=fprintf(logfp,"%s",message);
+return(0);
+}
+#else
 
 int logprint(const char *const message){
    int retval=0;
    int myerror=0;
    retval=fprintf(logfp,"%s",message);
 
-
-// #ifdef FLUSH_LOG_FILE
+#ifdef FLUSH_LOG_FILE
    if( fflush(logfp) == EOF ){
       myerror=errno;
       fprintf(stderr,"ERROR: log file flush failed!\n");
       fprintf(stderr,"%s\n",strerror(myerror));
       return(151);
    };
-//#endif
+#endif
 return(0);
 }
+#endif /*NOTYET_SAVU*/
 
 
 void timestamp_open(const char * const logname){
@@ -37,6 +50,7 @@ void timestamp_init(){
   suseconds_t etimeu;
   char message[MAX_MESSAGE];
 
+  gettimeofday(&mystime,NULL);
   gettimeofday(&now,NULL);
   etimes = now.tv_sec - mystime.tv_sec;
   etimeu = now.tv_usec - mystime.tv_usec;
@@ -75,8 +89,12 @@ int errprint(const char * const message){
       retval=fprintf(logfp,"\n*****: %s\n",message);
    }
 
+#ifdef SAVU
+   return(0);
+#else
    retval=fprintf(stderr,"%s\n",message);
    return(retval);
+#endif
 }
 
 int vprint(const char * const message){

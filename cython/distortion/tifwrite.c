@@ -10,22 +10,7 @@
 #ifndef MAX_MESSAGE
 #define MAX_MESSAGE (1024)
 #endif /*MAX_MESSAGE*/
-/*$Id: tifwrite.c 465 2016-02-16 11:02:36Z kny48981 $*/
 
-/* compile time option to activate some verbose printing */
-
-#ifdef TIF_VERBOSE
-#define VBPRINT(...) printf(__VA_ARGS__)
-#else
-#define VBPRINT(...) 
-#endif
-
-
-#ifdef FIX_SLITS
-#   ifndef SLITROWS
-#      define SLITROWS (100)
-#   endif
-#endif
 
 int tiffree(Mytiff * mytiff){
    #ifdef INMEM
@@ -35,22 +20,11 @@ return(0);
 }
 
 
-void myhandler( const char * module, const char * fmt, va_list ap){;
-#ifdef LOGWARNINGS
-   fprintf(warnlog, "%s ",module);
-   vfprintf(warnlog,fmt,ap);
-   fprintf(warnlog,"\n");
-#endif
-   return;
-
-}
-
 
 
 int tifread_into_buffer(Mytiff * mytiff, void ** buffer){
-   /* just a stub, maybe not useful?*/
-}
 
+}
 /* obtain some values from the tiff and check if they are what was expected */
 int tifgettags(Mytiff * mytiff){
    int row,cval;
@@ -134,6 +108,7 @@ int tifgettags(Mytiff * mytiff){
    /* obtain the raw file io descriptor number */
    mytiff->tiffno=TIFFFileno(mytiff->tiffp);
 
+
 return(0);
 }
 
@@ -145,9 +120,6 @@ int tifclose(Mytiff * mytiff){
 }
 
 /* just open the tiff and keep the pointer in a structure */
-/* this does not read the data into the buffer */
-/* need to call tiffgetstripsdata */
-
 int tifread(Mytiff * mytiff, const char * const filename){
    int cval;
 
@@ -157,6 +129,7 @@ int tifread(Mytiff * mytiff, const char * const filename){
       fprintf(stderr,"%s: TIFFOpen function failed (returned NULL) for %s!\n",__func__,filename);
       return(101);
    } 
+
 
    cval=tifgettags(mytiff);
    return(cval);
@@ -172,48 +145,8 @@ void tifgetstripsdata(Mytiff * mytiff,char * buf){
       TIFFReadRawStrip(mytiff->tiffp,i,bstart,mytiff->stripsize);
       bstart+=mytiff->stripsize;
    }
-#ifdef FIX_SLITS
-   {
-      int slitrows;
-      int thisrow;
-      int startrow;
-      slitrows=SLITROWS;
-      startrow=mytiff->ht - slitrows;
-
-      for (i=0;i<slitrows;i++){
-         thisrow=startrow+i;
-         //printf("thisrow %i startrow %i\n",thisrow,startrow);
-         memcpy(buf+(thisrow)*(mytiff->wd * mytiff->bytes), buf+startrow*(mytiff->wd * mytiff->bytes) ,mytiff->wd * mytiff->bytes);
-      }
-   }
-#endif /*FIX_SLITS */
 }
 
-int tifwritestrips(Mytiff * mytiff, const char * const filename){
-   /* write the strips by assembling the strip and calling the routine */
-   /* this is probably not useful, I think TIFF library handles it better if*/
-   /* you just call the scanline routine */
-   int i;
-   int r;
-   char * datap;
-   int row;
-   tsize_t thisstrip;
-   row=mytiff->wd*mytiff->bytes;
-
-   datap=mytiff->data;
-   thisstrip=TIFFVStripSize(mytiff->tiffp,mytiff->stripsize);
-   for (i=0;i<mytiff->stripnum-1;i++){
-      TIFFWriteEncodedStrip(mytiff->tiffp,i,datap,thisstrip);
-      datap += ( thisstrip );
-   }
-
-   TIFFWriteEncodedStrip(mytiff->tiffp,i,datap,mytiff->nbytes - (mytiff->stripnum - 1)*(thisstrip));
-
-   TIFFClose(mytiff->tiffp);
-return(0);
-}
-
-/* write the tiff by scanlines. This allows tiff library functions to handle strip transitions, encoding ,etc. */
 int tifwrite(Mytiff * mytiff, const char * const filename){
    int i;
    char * datap;
@@ -250,35 +183,20 @@ int tifinit(Mytiff * mytiff,const char * const filename){
    TIFFSetField(mytiff->tiffp,TIFFTAG_PLANARCONFIG,1);
    TIFFSetField(mytiff->tiffp,TIFFTAG_PHOTOMETRIC,1);
 
-   /* only 4-byte float or 2-byte int so far */
-
-   if (mytiff->bytes == 4){
-      TIFFSetField(mytiff->tiffp,TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP);
-   }else if (mytiff->bytes == 2){
-      TIFFSetField(mytiff->tiffp,TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
-   }
-
-   /* set the number of rows per strip , default or overridden by the environment variable */
-
    Stripbytes=getenv("I12STRIPBYTES");
+   //printf("stripbytes: %s\n",Stripbytes);
+
    if (Stripbytes == NULL ){
-      stripbytes=(D_STRIPBYTES);
+      TIFFSetField(mytiff->tiffp,TIFFTAG_ROWSPERSTRIP,mytiff->ht);
+      //printf("stripbytes set to: %i\n",mytiff->ht);
+
    }else{
       stripbytes=atoi(Stripbytes);
+      estbytes=(stripbytes / (mytiff->wd * mytiff->bytes));
+      estsize=TIFFDefaultStripSize(mytiff->tiffp,estbytes);
+      TIFFSetField(mytiff->tiffp,TIFFTAG_ROWSPERSTRIP,estsize);
+      //printf("stripbytes set to: %i\n",estsize);
    }
-
-   estbytes=(stripbytes / (mytiff->wd * mytiff->bytes));
-   estsize=TIFFDefaultStripSize(mytiff->tiffp,estbytes);
-   TIFFSetField(mytiff->tiffp,TIFFTAG_ROWSPERSTRIP,estsize);
-   mytiff->stripnum=TIFFNumberOfStrips(mytiff->tiffp);
-   mytiff->bytesperstrip=TIFFVStripSize(mytiff->tiffp,mytiff->stripnum);
-   if (! mytiff->isalloc){
-      mytiff->buf=(char *) malloc(mytiff->bytesperstrip);
-      mytiff->isalloc=1;
-   }
-
-   VBPRINT("stripbytes %s requested, stripsize set to: %i rows\n",Stripbytes,estsize);
-   VBPRINT("bytes per strip is: %i \n",mytiff->bytesperstrip);
 
    return(0);
 }
@@ -295,7 +213,6 @@ int main (int argc,char **argv){
 
    retval=0;
    mytiff = (Mytiff * ) calloc(1,sizeof (Mytiff));
-   mytiff->isalloc=0;
    filename = strdup(argv[1]);
    mytiff->wd=1024;
    mytiff->ht=768;
