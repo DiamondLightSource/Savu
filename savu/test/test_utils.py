@@ -173,7 +173,7 @@ def load_test_data(exp_type):
 
 def get_data_object(exp):
     data = exp.index['in_data'][exp.index['in_data'].keys()[0]]
-    data.set_plugin_data(PluginData(data))
+    data._set_plugin_data(PluginData(data))
     pData = data.get_plugin_data()
     return data, pData
 

@@ -22,6 +22,7 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
+import savu.core.utils as cu
 
 
 class MetaData(object):
@@ -41,10 +42,6 @@ class MetaData(object):
 #        class_name = ''.join(x.capitalize() for x in
 #                             transport_collection.split('_'))
 #        self.add_base(globals()[class_name])
-
-    def add_base(self, transport):
-        cls = self.__class__
-        self.__class__ = cls.__class__(cls.__name__, (cls, transport), {})
 
     def set_meta_data(self, name, value):
         maplist = (name if type(name) is list else [name])

@@ -47,7 +47,7 @@ class PluginDriver(object):
             if repeat > 1:
                 self.set_parameters_this_instance(param_idx[i])
                 for j in range(len(out_data)):
-                    out_data[j].get_plugin_data()\
+                    out_data[j]._get_plugin_data()\
                         .set_fixed_directions(param_dims[j], param_idx[i])
 
             self.pre_process()
@@ -69,8 +69,7 @@ class PluginDriver(object):
         This method is called after the process has been created by the
         pipeline framework
 
-        :param data: The input data object.
-        :type data: savu.data.data_structures
+        :param Data data: The input data object.
         :param data: The output data object
         :type data: savu.data.data_structures
         :param processes: The number of processes which will be doing the work

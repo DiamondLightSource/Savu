@@ -21,7 +21,7 @@
 
 """
 
-from savu.data.data_structures import PluginData
+from savu.data.data_structures.plugin_data import PluginData
 
 
 class PluginDatasets(object):

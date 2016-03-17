@@ -225,7 +225,7 @@ class Plugin(PluginDatasets):
         in_data, out_data = self.get_datasets()
         data_object_list = in_data + out_data
         for data in data_object_list:
-            data.clear_plugin_data()
+            data._clear_plugin_data()
 
     def revert_preview(self, in_data):
         for data in in_data:

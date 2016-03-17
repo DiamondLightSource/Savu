@@ -120,24 +120,20 @@ class Hdf5TomoSaver(BaseSaver):
         logging.info("create_entries: 1")
         self.exp.barrier()
 
-        if data.get_variable_flag() is True:
-            dt = h5py.special_dtype(vlen=data.dtype)
-            data.data = group.create_dataset('data', data.get_shape()[:-1], dt)
+        shape = data.get_shape()
+        if current_and_next is 0:
+            data.data = group.create_dataset("data", shape, data.dtype)
         else:
-            shape = data.get_shape()
-            if current_and_next is 0:
-                data.data = group.create_dataset("data", shape, data.dtype)
-            else:
-                logging.info("create_entries: 2")
-                self.exp.barrier()
+            logging.info("create_entries: 2")
+            self.exp.barrier()
 
-                chunking = Chunking(self.exp, current_and_next)
-                chunks = chunking.calculate_chunking(shape, data.dtype)
-                logging.info("create_entries: 3")
-                self.exp.barrier()
-                data.data = group.create_dataset("data", shape, data.dtype,
-                                                 chunks=chunks)
-                logging.info("create_entries: 4")
-                self.exp.barrier()
+            chunking = Chunking(self.exp, current_and_next)
+            chunks = chunking.calculate_chunking(shape, data.dtype)
+            logging.info("create_entries: 3")
+            self.exp.barrier()
+            data.data = group.create_dataset("data", shape, data.dtype,
+                                             chunks=chunks)
+            logging.info("create_entries: 4")
+            self.exp.barrier()
 
         return group_name, group

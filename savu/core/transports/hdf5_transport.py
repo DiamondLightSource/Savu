@@ -147,13 +147,12 @@ class Hdf5Transport(TransportControl):
         stop = start
         n_plugins = len(plugin_list[start:-1]) + 1
         while n_plugins != stop:
-
             start_in_data = copy.deepcopy(self.exp.index['in_data'])
             in_data = exp.index["in_data"][exp.index["in_data"].keys()[0]]
 
             out_data_objs, stop = in_data.load_data(start)
-
             exp.clear_data_objects()
+
             self.exp.index['in_data'] = copy.deepcopy(start_in_data)
             self.__real_plugin_run(plugin_list, out_data_objs, start, stop)
             start = stop
@@ -258,8 +257,8 @@ class Hdf5Transport(TransportControl):
         :returns: expansion function
         :rtype: lambda
         """
-        slice_dirs = data.get_plugin_data().get_slice_directions()
-        n_core_dirs = len(data.get_plugin_data().get_core_directions())
+        slice_dirs = data._get_plugin_data().get_slice_directions()
+        n_core_dirs = len(data._get_plugin_data().get_core_directions())
         new_slice = [slice(None)]*len(data.get_shape())
         possible_slices = [copy.copy(new_slice)]
 
@@ -279,20 +278,16 @@ class Hdf5Transport(TransportControl):
         :returns: squeeze function
         :rtype: lambda
         """
-        max_frames = data.get_plugin_data().get_frame_chunk()
+        max_frames = data._get_plugin_data().get_frame_chunk()
         if data.mapping:
             map_obj = self.exp.index['mapping'][data.get_name()]
             map_dim_len = map_obj.data_info.get_meta_data('map_dim_len')
             max_frames = min(max_frames, map_dim_len)
-            data.get_plugin_data().set_frame_chunk(max_frames)
+            data._get_plugin_data().set_frame_chunk(max_frames)
 
-        squeeze_dims = data.get_plugin_data().get_slice_directions()
+        squeeze_dims = data._get_plugin_data().get_slice_directions()
         if max_frames > 1:
             squeeze_dims = squeeze_dims[1:]
-        if data.variable_length_flag:
-            unravel = lambda x, i: unravel(x[0], i-1) if i > 0 else x
-            return lambda x: np.squeeze(unravel(x, len(data.get_shape())-1),
-                                        axis=squeeze_dims)
         return lambda x: np.squeeze(x, axis=squeeze_dims)
 
     def __get_all_slice_lists(self, data_list, expInfo):

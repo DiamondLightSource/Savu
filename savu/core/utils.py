@@ -15,7 +15,7 @@
 """
 .. module:: utils
    :platform: Unix
-   :synopsis: Simple core util methods
+   :synopsis: Simple core utility methods
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
@@ -54,6 +54,13 @@ def logmethod(func):
     return _wrapper
 
 
+def docstring_parameter(*sub):
+    def dec(obj):
+        obj.__doc__ = obj.__doc__.format(*sub)
+        return obj
+    return dec
+
+
 def import_class(class_name):
     name = class_name
     mod = __import__(name)
@@ -65,9 +72,17 @@ def import_class(class_name):
     return getattr(mod, module2class.split('.')[-1])
 
 
-def add_base(clazz, ExtraBase):
-    cls = clazz.__class__
-    clazz.__class__ = cls.__class__(cls.__name__, (cls, ExtraBase), {})
+def add_base(this, base):
+    cls = this.__class__
+    namespace = this.__class__.__dict__.copy()
+    this.__class__ = cls.__class__(cls.__name__, (cls, base), namespace)
+    base().__init__()
+
+
+def add_base_classes(this, bases):
+    bases = bases if isinstance(bases, list) else [bases]
+    for base in bases:
+        add_base(this, base)
 
 
 @logfunction

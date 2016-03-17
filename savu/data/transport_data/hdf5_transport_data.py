@@ -22,11 +22,12 @@
 
 """
 import os
+import h5py
 import logging
 import numpy as np
 
 import savu.plugins.utils as pu
-from savu.data.data_structures import Padding
+from savu.data.data_structures.data_additions import Padding
 
 NX_CLASS = 'NX_class'
 
@@ -62,21 +63,11 @@ class Hdf5TransportData(object):
             saver_plugin.setup()
 
             out_data_objects.append(exp.index["out_data"].copy())
-            if self.variable_data_check(plugin):
-                return out_data_objects, count
             exp.merge_out_data_to_in()
             count += 1
 
         del self.exp.meta_data.get_dictionary()['current_and_next']
         return out_data_objects, count
-
-    def variable_data_check(self, plugin):
-        out_datasets = plugin.get_out_datasets()
-        flag = False
-        for data in out_datasets:
-            if data.get_variable_flag():
-                flag = True
-        return flag
 
     def set_filenames(self, plugin, plugin_id, count):
         exp = self.exp
@@ -117,6 +108,9 @@ class Hdf5TransportData(object):
             entry[name] = self.external_link()
         else:
             raise Exception("The link type is not known")
+
+    def external_link(self):
+        return h5py.ExternalLink(self.backing_file.filename, self.group_name)
 
     def output_metadata(self, entry):
         self.output_axis_labels(entry)
@@ -212,14 +206,9 @@ class Hdf5TransportData(object):
                 if isinstance(value, str):
                     shape[index] = \
                         len(self.data_info.get_meta_data('axis_labels')[index])
-                    #self.unravel_array(index)
             shape = tuple(shape)
             sshape = [shape[sslice] for sslice in slice_dirs]
         return sshape
-
-#    def unravel_array(self, index):
-#        self.unravel = lambda x: self.unravel(x[0]) if isinstance(x, list) \
-#            else x
 
     def get_slice_dirs_index(self, slice_dirs, shape):
         """
@@ -246,11 +235,8 @@ class Hdf5TransportData(object):
                 return self.get_bool_slice_dir_index(dim, dir_idx)
             return dir_idx
         else:
-            fix_dirs, value = self.get_plugin_data().get_fixed_directions()
-            if dim in fix_dirs:
-                return value[fix_dirs.index(dim)]
-            else:
-                return np.arange(starts[dim], stops[dim], steps[dim])
+            fix_dirs, value = self._get_plugin_data().get_fixed_directions()
+            return np.arange(starts[dim], stops[dim], steps[dim])
 
     def get_bool_slice_dir_index(self, dim, dir_idx):
         shape = self.data_info.get_meta_data('orig_shape')[dim]
@@ -260,8 +246,6 @@ class Hdf5TransportData(object):
 
     def get_slice_dir_matrix(self, dim):
         starts, stops, steps, chunks = self.get_starts_stops_steps()
-        if 'var' in stops:
-            return np.array([0])
         chunk = chunks[dim]
         a = np.tile(np.arange(starts[dim], stops[dim], steps[dim]), (chunk, 1))
         b = np.transpose(np.tile(np.arange(chunk)-chunk/2, (a.shape[1], 1)))
@@ -271,7 +255,7 @@ class Hdf5TransportData(object):
         return dim_idx
 
     def single_slice_list(self):
-        pData = self.get_plugin_data()
+        pData = self._get_plugin_data()
         slice_dirs = pData.get_slice_directions()
         core_dirs = np.array(pData.get_core_directions())
         shape = self.get_shape()
@@ -326,7 +310,7 @@ class Hdf5TransportData(object):
 
     def banked_list(self, slice_list):
         shape = self.get_shape()
-        slice_dirs = self.get_plugin_data().get_slice_directions()
+        slice_dirs = self._get_plugin_data().get_slice_directions()
         chunk, length, repeat = self.chunk_length_repeat(slice_dirs, shape)
 
         if self.mapping:
@@ -347,7 +331,7 @@ class Hdf5TransportData(object):
     def grouped_slice_list(self, slice_list, max_frames):
         banked, length, slice_dir = self.banked_list(slice_list)
         starts, stops, steps, chunks = self.get_starts_stops_steps()
-        group_dim = self.get_plugin_data().get_slice_directions()[0]
+        group_dim = self._get_plugin_data().get_slice_directions()[0]
         chunk = chunks[group_dim]
         start = starts[group_dim]
         start = start if chunk == 1 else start-chunk/2
@@ -382,12 +366,12 @@ class Hdf5TransportData(object):
         return grouped
 
     def get_grouped_slice_list(self):
-        max_frames = self.get_plugin_data().get_frame_chunk()
+        max_frames = self._get_plugin_data().get_frame_chunk()
         max_frames = (1 if max_frames is None else max_frames)
 
         sl = self.single_slice_list()
 
-        if self.get_plugin_data().selected_data is True:
+        if self._get_plugin_data().selected_data is True:
             sl = self.get_tomo_raw().get_frame_raw(sl)
 
         if sl is None:
@@ -463,7 +447,7 @@ class Hdf5TransportData(object):
         return data_slice
 
     def get_padding_dict(self):
-        pData = self.get_plugin_data()
+        pData = self._get_plugin_data()
         padding = Padding(pData.get_pattern())
         for key in pData.padding.keys():
             getattr(padding, key)(pData.padding[key])
@@ -471,7 +455,7 @@ class Hdf5TransportData(object):
 
     def get_padded_slice_data(self, input_slice_list):
         slice_list = list(input_slice_list)
-        pData = self.get_plugin_data()
+        pData = self._get_plugin_data()
         if pData.padding is None:
             return self.data[tuple(slice_list)]
 
@@ -490,7 +474,7 @@ class Hdf5TransportData(object):
         return temp
 
     def get_unpadded_slice_data(self, input_slice_list, padded_dataset):
-        padding_dict = self.get_plugin_data().padding
+        padding_dict = self._get_plugin_data().padding
         if padding_dict is None:
             return padded_dataset
 

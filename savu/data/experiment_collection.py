@@ -29,8 +29,9 @@ import copy
 import h5py
 from mpi4py import MPI
 
+import savu.core.utils as cu
 from savu.data.plugin_list import PluginList
-from savu.data.data_structures import Data
+from savu.data.data_structures.data import Data
 from savu.data.meta_data import MetaData
 
 
@@ -63,14 +64,15 @@ class Experiment(object):
         except KeyError:
             self.meta_data.plugin_list.populate_plugin_list(process_file)
 
-    def create_data_object(self, dtype, name, bases=[]):
+    def create_data_object(self, dtype, name):
+        bases = []
         try:
             self.index[dtype][name]
         except KeyError:
             self.index[dtype][name] = Data(name, self)
             data_obj = self.index[dtype][name]
-            bases.append(data_obj.get_transport_data())
-            data_obj.add_base_classes(bases)
+            bases.append(data_obj._get_transport_data())
+            cu.add_base_classes(data_obj, bases)
         return self.index[dtype][name]
 
     def set_nxs_filename(self):

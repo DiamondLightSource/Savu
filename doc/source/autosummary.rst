@@ -33,7 +33,6 @@ savu.data
 ------------------------------------------------------------
 
 .. toctree::
-   api/savu.data.data_structures
    api/savu.data.experiment_collection
    api/savu.data.plugin_list
    api/savu.data.transport_data
@@ -47,6 +46,17 @@ savu.data.transport_data
 .. toctree::
    api/savu.data.transport_data.hdf5_transport_data
    api/savu.data.transport_data.distArray_transport_data
+
+
+savu.data.data_structures
+------------------------------------------------------------
+
+.. toctree::
+   api/savu.data.data_structures.utils
+   api/savu.data.data_structures.data
+   api/savu.data.data_structures.plugin_data
+   api/savu.data.data_structures.data_additions
+   api/savu.data.data_structures.data_create
 
 
 savu.plugins
