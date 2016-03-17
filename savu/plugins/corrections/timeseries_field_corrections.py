@@ -44,9 +44,9 @@ class TimeseriesFieldCorrections(BaseCorrection, CpuPlugin):
         super(TimeseriesFieldCorrections,
               self).__init__("TimeseriesFieldCorrections")
         # TODO these should probably be parameters
-        self.LOW_CROP_LEVEL = 0
-        self.HIGH_CROP_LEVEL = 2
-        self.WARN_PROPORTION = 0.1  # 10%
+        self.LOW_CROP_LEVEL = 0.0
+        self.HIGH_CROP_LEVEL = 2.0
+        self.WARN_PROPORTION = 0.05  # 5%
         self.flag_low_warning = False
         self.flag_high_warning = False
 
@@ -77,7 +77,7 @@ class TimeseriesFieldCorrections(BaseCorrection, CpuPlugin):
         if ((float(low_crop.sum()) / low_crop.size) > self.WARN_PROPORTION):
             self.flag_low_warning = True
         if ((float(high_crop.sum()) / high_crop.size) > self.WARN_PROPORTION):
-            self.flag_low_warning = True
+            self.flag_high_warning = True
 
         # Set all cropped values to the crop level
         data[low_crop] = self.LOW_CROP_LEVEL
@@ -86,7 +86,20 @@ class TimeseriesFieldCorrections(BaseCorrection, CpuPlugin):
         return data
 
     def executive_summary(self):
-        if self.flag_high_warning or self.flag_low_warning:
-            return ("WARNING: over 10% of pixels are being clipped, " +
-                    "check your Dark and Flat field images are correct")
-        return "Nothing to Report"
+        summary = []
+        if self.flag_high_warning:
+            summary.append(("WARNING: over %i%% of pixels are being clipped as " +
+                           "they have %f times the intensity of the provided flat field. "+
+                           "Check your Dark and Flat correction images")
+                           % (self.WARN_PROPORTION*100, self.HIGH_CROP_LEVEL))
+
+        if self.flag_low_warning:
+            summary.append(("WARNING: over %i%% of pixels are being clipped as " +
+                           "they below the expected lower corrected threshold of  %f. " +
+                           "Check your Dark and Flat correction images")
+                           % (self.WARN_PROPORTION*100, self.LOW_CROP_LEVEL))
+
+        if len(summary) > 0:
+            return summary
+
+        return ["Nothing to Report"]

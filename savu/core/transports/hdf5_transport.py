@@ -191,11 +191,11 @@ class Hdf5Transport(TransportControl):
 
             exp.barrier()
             if self.mpi:
-                cu.user_message_from_all(plugin.name,
-                                         plugin.executive_summary())
+                cu.user_messages_from_all(plugin.name,
+                                          plugin.executive_summary())
             else:
-                cu.user_message("%s - %s" % (plugin.name,
-                                plugin.executive_summary()))
+                for message in plugin.executive_summary():
+                    cu.user_message("%s - %s" % (plugin.name, message))
 
             exp.barrier()
             out_datasets = plugin.parameters["out_datasets"]
