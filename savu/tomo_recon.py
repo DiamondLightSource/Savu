@@ -86,7 +86,7 @@ def main():
     check_input_params(args)
     options = set_options(options, args)
     plugin_runner = PluginRunner(options)
-    plugin_runner.run_plugin_list(options)
+    plugin_runner._run_plugin_list(options)
 
     
 if __name__ == '__main__':
