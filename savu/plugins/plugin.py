@@ -263,8 +263,8 @@ class Plugin(PluginDatasets):
         """
         Provide a summary to the user for the result of the plugin
         e.g.
-        Warning, the sample may have shifted during data collection
-        Filter operated normally
-        :returns:  A string summary
+         - Warning, the sample may have shifted during data collection
+         - Filter operated normally
+        :returns:  A list of string summaries
         """
-        return "Nothing to Report"
+        return ["Nothing to Report"]

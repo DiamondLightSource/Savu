@@ -99,5 +99,6 @@ def main():
     plugin_runner = PluginRunner(options)
     plugin_runner._run_plugin_list()
 
+
 if __name__ == '__main__':
     main()

@@ -21,6 +21,7 @@
 """
 
 import logging
+import itertools
 from mpi4py import MPI
 
 
@@ -99,9 +100,13 @@ def user_message(message):
         USER_LOG_HANDLER.flush()
 
 
-def user_message_from_all(header, message_text):
+def user_messages_from_all(header, message_list):
     comm = MPI.COMM_WORLD
-    messages = comm.gather(message_text, root=0)
+    messages = comm.gather(message_list, root=0)
+    if  messages is None:
+        return
+    # flatten the list
+    messages = list(itertools.chain(*messages))
     if comm.rank == 0:
         for message in set(messages):
             user_message("%s : %i processes report : %s" %
