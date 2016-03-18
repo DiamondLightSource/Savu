@@ -2,7 +2,7 @@ from setuptools import setup
 import os
 
 def readme():
-    with open(os.path.abspath('../README.rst')) as f:
+    with open(os.path.abspath('./README.rst')) as f:
         return f.read()
 
 import sys
