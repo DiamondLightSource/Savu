@@ -15,8 +15,8 @@
 """
 .. module:: data_additions
    :platform: Unix
-   :synopsis: Contains the Data class and all the data structures from which \
-   Data can inherit.
+   :synopsis: A module containing add_on classes, which have instances
+   encapsulated within the Data class.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
@@ -28,6 +28,9 @@ import numpy as np
 
 
 class TomoRaw(object):
+    """ A class associated with a dataset that has an image key.  It performs
+    operations on the image_key.
+    """
 
     def __init__(self, data_obj):
         self.data_obj = data_obj
@@ -36,11 +39,15 @@ class TomoRaw(object):
         self.frame_list = []
 
     def select_image_key(self, **kwargs):
+        """ Set the image key
+        """
         image_key = kwargs['image_key']
         self.data_obj._get_plugin_data().selected_data = True
         self.set_image_key_slice(image_key)
 
     def remove_image_key(self, copy_obj, **kwargs):
+        """ Remove the image key
+        """
         image_key = kwargs.get('image_key', 0)
         if image_key is 0:
             if copy_obj.tomo_raw_obj:
@@ -52,6 +59,8 @@ class TomoRaw(object):
         return self.raw_flag
 
     def set_image_key(self, image_key):
+        """ Set the image_key in the data meta_data dictionary
+        """
         self.data_obj.meta_data.set_meta_data('image_key', image_key)
 
     def get_image_key(self):

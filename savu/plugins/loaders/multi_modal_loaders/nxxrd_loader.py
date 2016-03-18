@@ -76,8 +76,8 @@ class NxxrdLoader(BaseMultiModalLoader):
 #                              slice_dir=(1, 3, 4))
 #         data_obj.add_pattern("SINOGRAM", core_dir=(0, 1),
 #                              slice_dir=(3, 2, 4))
-        data_obj.add_pattern("SINOGRAM", core_dir=(0, 1),
-                             slice_dir=(2, 3, 4))
+        data_obj.add_pattern("SINOGRAM", core_dir=(0, 2),
+                             slice_dir=(1, 3, 4))
         data_obj.add_pattern("PROJECTION", core_dir=(1, 2),
                              slice_dir=(0, 3, 4))
 
