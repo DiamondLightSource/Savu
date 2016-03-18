@@ -24,7 +24,7 @@
 
 import h5py
 import logging
-import savu.data.data_structures as ds
+from savu.data.data_structures.data_add_ons import DataMapping
 
 from savu.plugins.base_loader import BaseLoader
 
@@ -59,7 +59,7 @@ class BaseMultiModalLoader(BaseLoader):
     def set_motors(self, data_obj, entry, ltype):
         # now lets extract the map, if there is one!
         # to begin with
-        data_obj.data_mapping = ds.DataMapping()
+        data_obj.data_mapping = DataMapping()
 
         axes = entry['data'].attrs['axes']
         data_obj.data_mapping.set_axes(axes)

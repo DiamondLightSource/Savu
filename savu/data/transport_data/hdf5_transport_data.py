@@ -25,7 +25,6 @@ import os
 import h5py
 import logging
 import numpy as np
-from fractions import gcd
 
 import savu.plugins.utils as pu
 from savu.data.data_structures.data_add_ons import Padding
@@ -346,9 +345,10 @@ class Hdf5TransportData(object):
 
     def get_sub_groups(self, group, size, chunk):
         sub_groups = []
-        if chunk > size:
-            size = gcd(size, chunk)
-            self._get_plugin_data().set_frame_chunk(size)
+#        if chunk > size:
+#            size = gcd(size, chunk)
+#            self._get_plugin_data().set_frame_chunk(size)
+
         sub_groups = self.split_list(group, size)
         return sub_groups
 
@@ -357,6 +357,7 @@ class Hdf5TransportData(object):
 
     def get_grouped_slice_list(self):
         max_frames = self._get_plugin_data().get_frame_chunk()
+        print "****MAX FRAMES", max_frames
         max_frames = (1 if max_frames is None else max_frames)
 
         sl = self.single_slice_list()

@@ -39,6 +39,7 @@ class Plugin(PluginDatasets):
         self.name = name
         self.parameters = {}
         self.parameters_types = {}
+        self.chunk = False
 
     def main_setup(self, exp, params):
         self.exp = exp

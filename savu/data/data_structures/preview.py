@@ -137,20 +137,25 @@ class Preview(object):
                range(len(idx))]
         return idx
 
-    def get_starts_stops_steps(self):
+    def get_starts_stops_steps(self, key=None):
         """ Returns preview parameter ``starts``, ``stops``, ``steps``,
         ``chunks`` lists.
 
-        :returns: separate preview_list components, where each list has length
-            equal to number of dataset dimensions
+        :keyword str key: the list to return.
+        :returns: if key is none return  separate preview_list components,
+         where each list has length equal to number of dataset dimensions, else
+         only the ``key`` list.
         :rtype: list(list(int))
         """
         get_mData = self.get_data_obj().data_info.get_meta_data
-        starts = get_mData('starts')
-        stops = get_mData('stops')
-        steps = get_mData('steps')
-        chunks = get_mData('chunks')
-        return starts, stops, steps, chunks
+        if key is not None:
+            return get_mData(key)
+        else:
+            starts = get_mData('starts')
+            stops = get_mData('stops')
+            steps = get_mData('steps')
+            chunks = get_mData('chunks')
+            return starts, stops, steps, chunks
 
     def __set_reduced_shape(self, starts, stops, steps, chunks):
         """ Set new shape if data is reduced by previewing.

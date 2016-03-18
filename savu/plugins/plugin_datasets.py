@@ -60,12 +60,12 @@ class PluginDatasets(object):
         return out_data
 
     def get_plugin_data(self, data_list):
-        pattern_list = []
+        pData_list = []
         for data in data_list:
-            pattern_list.append(PluginData(data))
-            pattern_list[-1].extra_dims = self.extra_dims
-            pattern_list[-1].multi_params_dict = self.multi_params_dict
-        return pattern_list
+            pData_list.append(PluginData(data, self))
+            pData_list[-1].extra_dims = self.extra_dims
+            pData_list[-1].multi_params_dict = self.multi_params_dict
+        return pData_list
 
     def set_plugin_datasets(self):
         """

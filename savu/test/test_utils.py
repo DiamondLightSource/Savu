@@ -29,7 +29,7 @@ import copy
 from savu.core.plugin_runner import PluginRunner
 from savu.data.experiment_collection import Experiment
 import savu.plugins.utils as pu
-from savu.data.data_structures import PluginData
+from savu.data.data_structures.plugin_data import PluginData
 
 
 def get_test_data_path(name):
@@ -185,7 +185,7 @@ def set_process(exp, process, processes):
 
 def plugin_runner(options):
     plugin_runner = PluginRunner(options)
-    return plugin_runner._run_plugin_list(options)
+    return plugin_runner._run_plugin_list()
 
 
 def plugin_runner_load_plugin(options):

@@ -21,13 +21,14 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
+from fractions import gcd
 
 from savu.data.meta_data import MetaData
 
 
 class PluginData(object):
 
-    def __init__(self, data_obj):
+    def __init__(self, data_obj, plugin):
         self.data_obj = data_obj
         self.data_obj._set_plugin_data(self)
         self.meta_data = MetaData()
@@ -39,6 +40,7 @@ class PluginData(object):
         self.core_shape = None
         self.multi_params = {}
         self.extra_dims = []
+        self._plugin = plugin
 
     def get_total_frames(self):
         temp = 1
@@ -171,6 +173,19 @@ class PluginData(object):
         self.meta_data.set_meta_data("nFrames", nFrames)
 
     def get_frame_chunk(self):
+        """ Get the number of frames to be processes at a time.
+
+        If the number of frames is not divisible by the previewing ``chunk``
+        value then amend the number of frames to gcd(frames, chunk)
+
+        :returns: Number of frames to process
+        :rtype: int
+        """
+        if self._plugin.chunk:
+            frame_chunk = self.meta_data.get_meta_data("nFrames")
+            chunk = self.data_obj.get_preview().get_starts_stops_steps(
+                key='chunks')[self.get_slice_directions()[0]]
+            self.set_frame_chunk(gcd(frame_chunk, chunk))
         return self.meta_data.get_meta_data("nFrames")
 
     def get_index(self, indices):
@@ -193,6 +208,10 @@ class PluginData(object):
 
     def plugin_data_setup(self, pattern_name, chunk):
         self.set_pattern(pattern_name)
+        chunks = \
+            self.data_obj.get_preview().get_starts_stops_steps(key='chunks')
+        if (chunks[self.get_slice_directions()[0]] % chunk):
+            self._plugin.chunk = True
         self.set_frame_chunk(chunk)
         self.set_shape()
 

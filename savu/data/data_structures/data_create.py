@@ -139,7 +139,7 @@ class DataCreate(object):
         else:
             self.set_axis_labels(*axis_labels)
             # if parameter tuning
-            if self.get_plugin_data().multi_params_dict:
+            if self._get_plugin_data().multi_params_dict:
                 self.__add_extra_dims_labels()
 
     def __copy_labels(self, copy_data):

@@ -34,7 +34,7 @@ def run_protected_plugin_runner_no_process_list(options, plugin, **kwargs):
         else:
             tu.set_plugin_list(options, plugin)
         plugin_runner = PluginRunner(options)
-        exp = plugin_runner.__run_plugin_list(options)
+        exp = plugin_runner._run_plugin_list()
         return exp
     except ImportError as e:
         print("Failed to run test as libraries not available (%s)," % (e) +
@@ -45,7 +45,7 @@ def run_protected_plugin_runner_no_process_list(options, plugin, **kwargs):
 def run_protected_plugin_runner(options):
     try:
         plugin_runner = PluginRunner(options)
-        exp = plugin_runner._run_plugin_list(options)
+        exp = plugin_runner._run_plugin_list()
         print exp
     except ImportError as e:
         print("Failed to run test as libraries not available (%s)," % (e) +
