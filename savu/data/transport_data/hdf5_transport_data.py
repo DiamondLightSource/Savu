@@ -25,9 +25,10 @@ import os
 import h5py
 import logging
 import numpy as np
+from fractions import gcd
 
 import savu.plugins.utils as pu
-from savu.data.data_structures.data_additions import Padding
+from savu.data.data_structures.data_add_ons import Padding
 
 NX_CLASS = 'NX_class'
 
@@ -54,7 +55,7 @@ class Hdf5TransportData(object):
 
         for plugin_dict in plugin_list[start:-1]:
 
-            self.get_current_and_next_patterns(datasets_list[count-1:])
+            self._get_current_and_next_patterns(datasets_list[count-1:])
             plugin_id = plugin_dict["id"]
             logging.info("Loading plugin %s", plugin_id)
             plugin = pu.plugin_loader(exp, plugin_dict)
@@ -224,11 +225,11 @@ class Hdf5TransportData(object):
             values = self.get_slice_dir_index(slice_dirs[i])
             idx = np.ravel(np.kron(values, np.ones((r, c))))
             idx_list.append(idx.astype(int))
-
         return np.array(idx_list)
 
     def get_slice_dir_index(self, dim, boolean=False):
-        starts, stops, steps, chunks = self.get_starts_stops_steps()
+        starts, stops, steps, chunks = \
+            self.get_preview().get_starts_stops_steps()
         if chunks[dim] > 1:
             dir_idx = np.ravel(np.transpose(self.get_slice_dir_matrix(dim)))
             if boolean:
@@ -245,12 +246,13 @@ class Hdf5TransportData(object):
         return bool_idx
 
     def get_slice_dir_matrix(self, dim):
-        starts, stops, steps, chunks = self.get_starts_stops_steps()
+        starts, stops, steps, chunks = \
+            self.get_preview().get_starts_stops_steps()
         chunk = chunks[dim]
         a = np.tile(np.arange(starts[dim], stops[dim], steps[dim]), (chunk, 1))
         b = np.transpose(np.tile(np.arange(chunk)-chunk/2, (a.shape[1], 1)))
         dim_idx = a + b
-        if dim_idx[dim_idx < 0]:
+        if dim_idx[dim_idx < 0].size:
             raise Exception('Cannot have a negative value in the slice list.')
         return dim_idx
 
@@ -281,7 +283,8 @@ class Hdf5TransportData(object):
 
     def get_core_slices(self, core_dirs):
         core_slice = []
-        starts, stops, steps, chunks = self.get_starts_stops_steps()
+        starts, stops, steps, chunks = \
+            self.get_preview().get_starts_stops_steps()
         for c in core_dirs:
             if (chunks[c]) > 1:
                 if (stops[c] - starts[c] == 1):
@@ -317,53 +320,40 @@ class Hdf5TransportData(object):
             map_obj = self.exp.index['mapping'][self.get_name()]
             new_length = map_obj.data_info.get_meta_data('map_dim_len')
 
-        repeat = length[0]/new_length if self.mapping else repeat[0]
         length = new_length if self.mapping else length[0]
-
-        banked = []
-        for rep in range(repeat):
-            start = rep*length
-            end = start + length
-            banked.append(slice_list[start:end])
-
+        banked = self.split_list(slice_list, length)
         return banked, length, slice_dirs
 
     def grouped_slice_list(self, slice_list, max_frames):
         banked, length, slice_dir = self.banked_list(slice_list)
-        starts, stops, steps, chunks = self.get_starts_stops_steps()
+        starts, stops, steps, chunks = \
+            self.get_preview().get_starts_stops_steps()
         group_dim = self._get_plugin_data().get_slice_directions()[0]
         chunk = chunks[group_dim]
-        start = starts[group_dim]
-        start = start if chunk == 1 else start-chunk/2
-        step = steps[group_dim] if chunk == 1 else 1
-        jump = max_frames*step
-
-        if self.mapping:
-            map_obj = self.exp.index['mapping'][self.get_name()]
-            map_len = map_obj.data_info.get_meta_data('full_map_dim_len')[0]
 
         grouped = []
         for group in banked:
-            full_frames = int((length)/max_frames)
-            full_frames_end = start + full_frames*step*max_frames
-            end = start+(len(group)-1)*step+1
-            rem = 1 if (length % max_frames) else 0
+            sub_groups = self.get_sub_groups(group, max_frames, chunk)
 
-            working_slice = list(group[0])
-            i = start - jump
-            for i in range(start, full_frames_end, jump):
-                new_slice = slice(i, i+jump, step)
-                working_slice[slice_dir[0]] = new_slice
+            for sub in sub_groups:
+                start = sub[0][group_dim].start
+                stop = sub[-1][group_dim].stop
+                step = sub[0][group_dim].step
+                working_slice = list(sub[0])
+                working_slice[group_dim] = slice(start, stop, step)
                 grouped.append(tuple(working_slice))
-            if rem:
-                new_slice = slice(i+jump, end, step)
-                working_slice[slice_dir[0]] = new_slice
-                grouped.append(tuple(working_slice))
-
-            if self.mapping:
-                start = start + map_len
-
         return grouped
+
+    def get_sub_groups(self, group, size, chunk):
+        sub_groups = []
+        if chunk > size:
+            size = gcd(size, chunk)
+            self._get_plugin_data().set_frame_chunk(size)
+        sub_groups = self.split_list(group, size)
+        return sub_groups
+
+    def split_list(self, the_list, size):
+            return [the_list[x:x+size] for x in xrange(0, len(the_list), size)]
 
     def get_grouped_slice_list(self):
         max_frames = self._get_plugin_data().get_frame_chunk()
@@ -378,8 +368,8 @@ class Hdf5TransportData(object):
             raise Exception("Data type", self.get_current_pattern_name(),
                             "does not support slicing in directions",
                             self.get_slice_directions())
-
-        return self.grouped_slice_list(sl, max_frames)
+        temp = self.grouped_slice_list(sl, max_frames)
+        return temp
 
     def get_slice_list_per_process(self, expInfo):
         processes = expInfo.get_meta_data("processes")

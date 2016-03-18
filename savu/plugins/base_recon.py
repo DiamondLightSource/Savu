@@ -101,7 +101,7 @@ class BaseRecon(Plugin):
         in_dataset, out_dataset = self.get_datasets()
 
         # reduce the data as per data_subset parameter
-        in_dataset[0].set_preview(self.parameters['preview'])
+        in_dataset[0].get_preview().set_preview(self.parameters['preview'])
 
         # set information relating to the plugin data
         in_pData, out_pData = self.get_plugin_datasets()
@@ -130,7 +130,7 @@ class BaseRecon(Plugin):
         out_pData[0].plugin_data_setup('VOLUME_XZ', self.get_max_frames())
 
     def map_volume_dimensions(self, data, pData):
-        data.finalise_patterns()
+        data._finalise_patterns()
         dim_rotAngle = data.get_data_patterns()['PROJECTION']['main_dir']
         dim_detY = data.get_data_patterns()['SINOGRAM']['main_dir']
 

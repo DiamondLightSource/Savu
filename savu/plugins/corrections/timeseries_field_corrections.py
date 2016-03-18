@@ -63,6 +63,11 @@ class TimeseriesFieldCorrections(BaseCorrection, CpuPlugin):
         dark = np.tile(dark, (trimmed_data.shape[0], 1, 1))
         flat = data[self.flat_idx].mean(0)
         flat = np.tile(flat, (trimmed_data.shape[0], 1, 1))
+
+        if len(data.shape) is 2:
+            flat = flat.squeeze()
+            dark = dark.squeeze()
+
         data = (trimmed_data-dark)/(flat-dark)
 
         # finally clean up and trim the data

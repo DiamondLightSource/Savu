@@ -45,7 +45,7 @@ class BaseLoader(Plugin):
     def set_data_reduction_params(self, data_obj):
         pDict = self.parameters
         self.data_mapping()
-        data_obj.set_preview(pDict['preview'])
+        data_obj.get_preview().set_preview(pDict['preview'])
 
     def __init__(self, name='BaseLoader'):
         self.hits = []

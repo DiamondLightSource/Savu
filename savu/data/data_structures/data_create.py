@@ -55,7 +55,7 @@ class DataCreate(object):
 
             if 'patterns' in kwargs:
                 self.__copy_patterns(kwargs['patterns'])
-        self.set_preview([])
+        self.get_preview().set_preview([])
 
     def __set_new_dataset_shape(self, shape):
         if isinstance(shape, DataCreate):
@@ -96,7 +96,7 @@ class DataCreate(object):
             else:
                 copy_patterns[name] = all_patterns[name]
             dims = tuple(map(int, all_dims.split(',')))
-            dims = self.non_negative_directions(dims, nDims=nDims)
+            dims = self._non_negative_directions(dims, nDims=nDims)
 
         patterns = {}
         for name, pattern_dict in copy_patterns.iteritems():
@@ -198,3 +198,8 @@ class DataCreate(object):
             for dim in all_dims:
                 if dim not in pDims:
                     patterns[p]['slice_dir'] += (dim,)
+
+    def find_and_set_shape(self, data):
+        pData = self._get_plugin_data()
+        new_shape = copy.copy(data.get_shape()) + tuple(pData.extra_dims)
+        self.set_shape(new_shape)

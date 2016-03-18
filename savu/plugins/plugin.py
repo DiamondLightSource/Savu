@@ -48,7 +48,7 @@ class Plugin(PluginDatasets):
 
         in_datasets, out_datasets = self.get_datasets()
         for data in in_datasets + out_datasets:
-            data.finalise_patterns()
+            data._finalise_patterns()
 
     def set_parameters_this_instance(self, indices):
         dims = set(self.multi_params_dict.keys())
@@ -229,8 +229,8 @@ class Plugin(PluginDatasets):
 
     def revert_preview(self, in_data):
         for data in in_data:
-            if data.revert_shape:
-                data.unset_preview()
+            if data.get_preview().revert_shape:
+                data.get_preview().unset_preview()
 
     def nInput_datasets(self):
         """

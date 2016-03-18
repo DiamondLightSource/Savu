@@ -48,6 +48,22 @@ def _deepcopy_data_object(dObj, new_obj):
     return new_obj
 
 
+def get_available_pattern_types():
+    pattern_list = ["SINOGRAM",
+                    "PROJECTION",
+                    "VOLUME_YZ",
+                    "VOLUME_XZ",
+                    "VOLUME_XY",
+                    "VOLUME_3D",
+                    "SPECTRUM",
+                    "DIFFRACTION",
+                    "CHANNEL",
+                    "SPECTRUM_STACK",
+                    "PROJECTION_STACK",
+                    "METADATA"]
+    return pattern_list
+
+
 def set_preview_note():
     """
         Each ``preview_list`` element should be of the form
@@ -64,14 +80,14 @@ def set_preview_note():
             **start:stop:step:chunk (chunk > 1)**
                 represents the set of indices specified by:
 
-                >>> a = np.tile(np.arange(starts[dim], stops[dim], \
-steps[dim]), (chunk, 1))
+                >>> a = np.tile(np.arange(start, stop, step), (chunk, 1))
                 >>> b = np.transpose(np.tile(np.arange(chunk)-chunk/2, \
 (a.shape[1], 1)))
                 >>> indices = np.ravel(np.transpose(a + b))
 
                 Chunk indicates how many values to take around each value in
-                ``range(start, stop, step)``.
+                ``range(start, stop, step)``.  It is only available for slicing
+                dimensions.
 
                 .. warning:: If any indices are out of range (or negative)
                     then the list is invalid. When chunk > 1, new start and
@@ -82,8 +98,8 @@ steps[dim]), (chunk, 1))
 (step - int(chunk/2))
 
         **accepted values**:
-            All values should be positive integers or one of the following
-            keywords:
+            Each entry is executed using :func:`eval` so simple formulas are\
+            allowed and may contain the following keywords:
 
             * ``:`` is a simplification for 0:end:1:1 (all values)
             * ``mid`` is int(shape[dim]/2)

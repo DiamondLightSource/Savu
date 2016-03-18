@@ -24,7 +24,7 @@
 import h5py
 import logging
 
-from savu.data.data_structures.data_additions import TomoRaw
+from savu.data.data_structures.data_add_ons import TomoRaw
 from savu.plugins.base_loader import BaseLoader
 
 from savu.plugins.utils import register_plugin
