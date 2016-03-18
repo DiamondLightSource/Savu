@@ -382,6 +382,12 @@ class Data(DataCreate):
         return next_pattern
 
     def get_slice_directions(self):
+        """ Get pattern slice_dir of pattern currently associated with the
+        dataset (if any).
+
+        :returns: the slicing dimensions.
+        :rtype: tuple(int)
+        """
         return self._get_plugin_data().get_slice_directions()
 
 #    def find_next_pattern(self, datasets_lists, current_name):
