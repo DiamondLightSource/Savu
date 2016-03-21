@@ -86,7 +86,7 @@ class SimpleFit(BaseFitter):
         fitWidths = out_datasets[2]
 
         new_shape = shape[:-1] + \
-            self.set_unknown_shape(in_dataset[0], 'PeakIndex')
+            self._set_unknown_shape(in_dataset[0], 'PeakIndex')
 
         fitAreas.create_dataset(patterns={in_dataset[0]: pattern_list},
                                 axis_labels={in_dataset[0]: axis_labels},
