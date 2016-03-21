@@ -96,7 +96,7 @@ class DataCreate(object):
             else:
                 copy_patterns[name] = all_patterns[name]
             dims = tuple(map(int, all_dims.split(',')))
-            dims = self._non_negative_directions(dims, nDims=nDims)
+            dims = self.non_negative_directions(dims, nDims=nDims)
 
         patterns = {}
         for name, pattern_dict in copy_patterns.iteritems():
@@ -153,7 +153,7 @@ class DataCreate(object):
             self.__add_extra_dims_labels()
 
     def __add_extra_dims_labels(self):
-        params_dict = self.get_plugin_data().multi_params_dict
+        params_dict = self._get_plugin_data().multi_params_dict
         # add multi_params axis labels from dictionary in pData
         nDims = self.data_info.get_meta_data('nDims')
         axis_labels = self.data_info.get_meta_data('axis_labels')

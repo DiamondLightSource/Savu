@@ -110,7 +110,6 @@ class Preview(object):
         stops = len(preview_list)*[None]
         steps = len(preview_list)*[None]
         chunks = len(preview_list)*[None]
-        print starts, stops, steps, chunks
 
         for i in range(len(preview_list)):
             if preview_list[i] is ':':

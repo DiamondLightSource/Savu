@@ -201,6 +201,9 @@ class Hdf5Transport(TransportControl):
         """
         self.process_checks()
         in_data, out_data = plugin.get_datasets()
+
+        for data in out_data:
+            print data.get_shape()
         expInfo = plugin.exp.meta_data
         in_slice_list = self.__get_all_slice_lists(in_data, expInfo)
         out_slice_list = self.__get_all_slice_lists(out_data, expInfo)
@@ -222,7 +225,7 @@ class Hdf5Transport(TransportControl):
                                 expand_dict)
 
         cu.user_message("%s - 100%% complete" % (plugin.name))
-        plugin.revert_preview(in_data)
+        plugin._revert_preview(in_data)
 
     def process_checks(self):
         pass

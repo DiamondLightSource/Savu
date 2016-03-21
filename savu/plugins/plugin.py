@@ -41,17 +41,32 @@ class Plugin(PluginDatasets):
         self.parameters_types = {}
         self.chunk = False
 
-    def main_setup(self, exp, params):
+    def _main_setup(self, exp, params):
+        """ Performs all the required plugin setup.
+
+        It sets the experiment, then the parameters and replaces the
+        in/out_dataset strings in ``self.parameters`` with the relevant data
+        objects. It then creates PluginData objects for each of these datasets.
+
+        :param Experiment exp: The current Experiment object.
+        :params dict params: Parameter values.
+        """
         self.exp = exp
-        self.set_parameters(params)
-        self.set_plugin_datasets()
+        self._set_parameters(params)
+        self._set_plugin_datasets()
         self.setup()
 
         in_datasets, out_datasets = self.get_datasets()
         for data in in_datasets + out_datasets:
             data._finalise_patterns()
 
-    def set_parameters_this_instance(self, indices):
+    def _set_parameters_this_instance(self, indices):
+        """ Determines the parameters for this instance of the plugin, in the
+        case of parameter tuning.
+
+        param np.ndarray indices: the index of the current value in the
+            parameter tuning list.
+        """
         dims = set(self.multi_params_dict.keys())
         count = 0
         for dim in dims:
@@ -63,16 +78,13 @@ class Plugin(PluginDatasets):
     def setup(self):
         """
         This method is first to be called after the plugin has been created.
-
-        :param in_data: Input data object(set to "None" if this is a loader)
-        :type in_data: savu.data.experiment
-        :param out_data: The output data object
-        :type out_data: savu.data.experiment
+        It determines input/output datasets and plugin specific dataset
+        information such as the pattern (e.g. sinogram/projection).
         """
         logging.error("set_up needs to be implemented")
         raise NotImplementedError("setup needs to be implemented")
 
-    def populate_default_parameters(self):
+    def _populate_default_parameters(self):
         """
         This method should populate all the required parameters with default
         values.  it is used for checking to see if new parameter values are
@@ -90,30 +102,35 @@ class Plugin(PluginDatasets):
                     self.parameters[item['name']] = item['default']
                     self.parameters_types[item['name']] = item['dtype']
 
-    def set_parameters(self, parameters):
+    def _set_parameters(self, parameters):
         """
         This method is called after the plugin has been created by the
-        pipeline framework
+        pipeline framework.  It replaces ``self.parameters`` default values
+        with those given in the input process list.
 
-        :param parameters: A dictionary of the parameters for this plugin, or
-            None if no customisation is required
-        :type parameters: dict
+        :param dict parameters: A dictionary of the parameters for this plugin,
+        or None if no customisation is required.
         """
         self.parameters = {}
         self.parameters_types = {}
-        self.populate_default_parameters()
+        self._populate_default_parameters()
         for key in parameters.keys():
             if key in self.parameters.keys():
-                value = self.convert_multi_params(parameters[key], key)
+                value = self.__convert_multi_params(parameters[key], key)
                 self.parameters[key] = value
             else:
                 raise ValueError("Parameter " + key +
                                  "is not a valid parameter for plugin " +
                                  self.name)
 
-    def convert_multi_params(self, value, key):
+    def __convert_multi_params(self, value, key):
+        """ Set up parameter tuning.
+
+        Convert parameter value to a list if it uses parameter tuning and set
+        associated parameters, so the framework knows the new size of the data
+        and which plugins to re-run.
+        """
         dtype = self.parameters_types[key]
-        # if isinstance(value, str) or isinstance(value, unicode):
         if isinstance(value, str) and ';' in value:
             value = value.split(';')
             if ":" in value[0]:
@@ -130,6 +147,12 @@ class Plugin(PluginDatasets):
         return value
 
     def get_parameters(self, name):
+        """ Return the a plugin parameter
+
+        :params str name: parameter name (dictionary key)
+        :returns: the associated value in ``self.parameters``
+        :rtype: dict value
+        """
         return self.parameters[name]
 
     def pre_process(self):
@@ -171,26 +194,28 @@ class Plugin(PluginDatasets):
         """
         pass
 
-    def clean_up(self):
-        #self.organise_metadata()
-        self.copy_meta_data()
-        self.clean_up_plugin_data()
-        #delete mapping dataset here
-        self.delete_mappings()
+    def _clean_up(self):
+        """ Perform necessary plugin clean up after the plugin has completed.
+        """
+        self.__copy_meta_data()
+        self.__clean_up_plugin_data()
+        self.__delete_mappings()
 
-    def delete_mappings(self):
+    def __delete_mappings(self):
+        """ Delete mapping datasets and set mapping flag to False.
+        """
         in_datasets = self.get_in_datasets()
         for data in in_datasets:
             if data.mapping:
                 del self.exp.index['mapping'][data.get_name()]
                 self.mapping = False
 
-    def copy_meta_data(self):
+    def __copy_meta_data(self):
         """
         Copy all metadata from input datasets to output datasets, except axis
         # data that is no longer valid.
         """
-        remove_keys = self.remove_axis_data()
+        remove_keys = self.__remove_axis_data()
         in_meta_data, out_meta_data = self.get_meta_data()
         copy_dict = {}
         for mData in in_meta_data:
@@ -204,7 +229,7 @@ class Plugin(PluginDatasets):
                     del temp[key]
             out_meta_data[i].get_dictionary().update(temp)
 
-    def remove_axis_data(self):
+    def __remove_axis_data(self):
         """
         Returns a list of meta_data entries corresponding to axis labels that
         are not copied over to the output datasets
@@ -222,13 +247,20 @@ class Plugin(PluginDatasets):
 
         return remove_keys
 
-    def clean_up_plugin_data(self):
+    def __clean_up_plugin_data(self):
+        """ Remove pluginData object encapsulated in a dataset after plugin
+        completion.
+        """
         in_data, out_data = self.get_datasets()
         data_object_list = in_data + out_data
         for data in data_object_list:
             data._clear_plugin_data()
 
-    def revert_preview(self, in_data):
+    def _revert_preview(self, in_data):
+        """ Revert dataset back to original shape if previewing was used in a
+        plugin to reduce the data shape but the original data shape should be
+        used thereafter.
+        """
         for data in in_data:
             if data.get_preview().revert_shape:
                 data.get_preview().unset_preview()

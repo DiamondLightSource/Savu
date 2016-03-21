@@ -67,7 +67,7 @@ class PluginDatasets(object):
             pData_list[-1].multi_params_dict = self.multi_params_dict
         return pData_list
 
-    def set_plugin_datasets(self):
+    def _set_plugin_datasets(self):
         """
         Convert in/out_dataset strings to objects and create PluginData objects
         for each.

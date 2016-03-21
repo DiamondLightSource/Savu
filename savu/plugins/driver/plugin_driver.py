@@ -43,9 +43,10 @@ class PluginDriver(object):
         param_idx = pu.calc_param_indices(extra_dims)
         out_data_dims = [len(d.get_shape()) for d in out_data]
         param_dims = [range(d - len(extra_dims), d) for d in out_data_dims]
+
         for i in range(repeat):
             if repeat > 1:
-                self.set_parameters_this_instance(param_idx[i])
+                self._set_parameters_this_instance(param_idx[i])
                 for j in range(len(out_data)):
                     out_data[j]._get_plugin_data()\
                         .set_fixed_directions(param_dims[j], param_idx[i])

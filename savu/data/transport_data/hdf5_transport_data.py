@@ -58,7 +58,7 @@ class Hdf5TransportData(object):
             plugin_id = plugin_dict["id"]
             logging.info("Loading plugin %s", plugin_id)
             plugin = pu.plugin_loader(exp, plugin_dict)
-            plugin.revert_preview(plugin.get_in_datasets())
+            plugin._revert_preview(plugin.get_in_datasets())
             self.set_filenames(plugin, plugin_id, count)
             saver_plugin.setup()
 
@@ -236,7 +236,10 @@ class Hdf5TransportData(object):
             return dir_idx
         else:
             fix_dirs, value = self._get_plugin_data().get_fixed_directions()
-            return np.arange(starts[dim], stops[dim], steps[dim])
+            if dim in fix_dirs:
+                return value[fix_dirs.index(dim)]
+            else:
+                return np.arange(starts[dim], stops[dim], steps[dim])
 
     def get_bool_slice_dir_index(self, dim, dir_idx):
         shape = self.data_info.get_meta_data('orig_shape')[dim]
@@ -262,6 +265,7 @@ class Hdf5TransportData(object):
         shape = self.get_shape()
         index = self.get_slice_dirs_index(slice_dirs, shape)
         fix_dirs, value = pData.get_fixed_directions()
+
         nSlices = index.shape[1] if index.size else len(fix_dirs)
         nDims = len(shape)
         core_slice = self.get_core_slices(core_dirs)
@@ -357,7 +361,6 @@ class Hdf5TransportData(object):
 
     def get_grouped_slice_list(self):
         max_frames = self._get_plugin_data().get_frame_chunk()
-        print "****MAX FRAMES", max_frames
         max_frames = (1 if max_frames is None else max_frames)
 
         sl = self.single_slice_list()

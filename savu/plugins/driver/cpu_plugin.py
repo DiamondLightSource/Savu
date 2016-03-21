@@ -35,5 +35,5 @@ class CpuPlugin(PluginDriver):
     def run_plugin(self, exp, transport):
 
         self.run_plugin_instances(transport)
-        self.clean_up()
+        self._clean_up()
         return

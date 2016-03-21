@@ -15,4 +15,9 @@ Who can use savu.
 
 FAQs
 
+We perform tomographic imaging on data collected using different experimental setups: Standard tomography (absorption data) and Multi-modal setup (absorption, fluorescene and diffraction data).
+
+The result is a 3D computerised (tomographic) image of the distribution of some physical quantity of the imaged object.  This physical quantity depends on the type of data we collect, so, for example, in the case of absorption data we reconstruct the attenuation coefficient.
+diffraction: inter-atomic spacing
+fluorescence: 
 

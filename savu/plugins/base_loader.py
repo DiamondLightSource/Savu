@@ -32,12 +32,12 @@ class BaseLoader(Plugin):
     :param preview: A slice list of required frames. Default: [].
     """
 
-    def main_setup(self, exp, params):
+    def _main_setup(self, exp, params):
         """
         Overwrites the main_setup function in plugin.py as the loader is a
         special case of plugin that doesn't required setup of in/out_datasets
         """
-        self.set_parameters(params)
+        self._set_parameters(params)
         self.exp = exp
         logging.info("%s.%s", self.__class__.__name__, 'setup')
         self.setup()

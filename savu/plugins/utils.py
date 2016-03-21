@@ -55,7 +55,6 @@ def load_plugin(plugin_name):
     # clazz = self.import_class(plugin_name)
 
     name = plugin_name
-    print name
     logging.debug("importing the module")
     # TODO This appears to be the failing line.
     mod = __import__(name)
@@ -71,7 +70,7 @@ def load_plugin(plugin_name):
 
 def get_class_instance(clazz):
     instance = clazz()
-    instance.populate_default_parameters()
+    instance._populate_default_parameters()
     return instance
 
 
@@ -94,7 +93,7 @@ def plugin_loader(exp, plugin_dict, **kwargs):
         set_datasets(exp, plugin, plugin_dict)
 
     logging.debug("Running plugin main setup")
-    plugin.main_setup(exp, plugin_dict['data'])
+    plugin._main_setup(exp, plugin_dict['data'])
 
     if check_flag is True:
         set_datasets_list(exp, plugin)
