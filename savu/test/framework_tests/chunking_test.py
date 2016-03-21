@@ -72,7 +72,7 @@ class ChunkingTests(unittest.TestCase):
         shape = (100, 20)
         nProcs = 1
         chunking = self.create_chunking_instance(current, nnext, nProcs)
-        chunks = chunking.calculate_chunking(shape, np.float32)
+        chunks = chunking._calculate_chunking(shape, np.float32)
         self.assertEqual(chunks, True)
 
     def test_chunks_3D_1(self):
@@ -81,29 +81,29 @@ class ChunkingTests(unittest.TestCase):
         shape = (5000, 500, 500)
         nProcs = 1
         chunking = self.create_chunking_instance(current, nnext, nProcs)
-        chunks = chunking.calculate_chunking(shape, np.float32)
+        chunks = chunking._calculate_chunking(shape, np.float32)
         self.assertEqual(chunks, (1, 500, 500))
 
         nProcs = 2
         chunking = self.create_chunking_instance(current, nnext, nProcs)
-        chunks = chunking.calculate_chunking(shape, np.float32)
+        chunks = chunking._calculate_chunking(shape, np.float32)
         self.assertEqual(chunks, (1, 500, 500))
 
         shape = (5000, 5000, 5000)
         chunking = self.create_chunking_instance(current, nnext, nProcs)
-        chunks = chunking.calculate_chunking(shape, np.float32)
+        chunks = chunking._calculate_chunking(shape, np.float32)
         print "nChunks =", self.get_nChunks(shape, chunks)
         self.assertEqual(chunks, (1, 625, 313))
 
         shape = (5000, 5000, 5000)
         chunking = self.create_chunking_instance(current, nnext, nProcs)
-        chunks = chunking.calculate_chunking(shape, np.float32)
+        chunks = chunking._calculate_chunking(shape, np.float32)
         print "nChunks =", self.get_nChunks(shape, chunks)
         self.assertEqual(chunks, (1, 625, 313))
 
         shape = (1, 800, 500)
         chunking = self.create_chunking_instance(current, nnext, nProcs)
-        chunks = chunking.calculate_chunking(shape, np.float32)
+        chunks = chunking._calculate_chunking(shape, np.float32)
         print "nChunks =", self.get_nChunks(shape, chunks)
         self.assertEqual(chunks, (1, 400, 500))
 
@@ -113,18 +113,18 @@ class ChunkingTests(unittest.TestCase):
         shape = (50, 300, 100)
         nProcs = 1
         chunking = self.create_chunking_instance(current, nnext, nProcs)
-        chunks = chunking.calculate_chunking(shape, np.float32)
+        chunks = chunking._calculate_chunking(shape, np.float32)
         self.assertEqual(chunks, (50, 50, 100))
 
         current = [8, (0,), (1, 2)]
         nnext = [4, (1,), (0, 2)]
         chunking = self.create_chunking_instance(current, nnext, nProcs)
-        chunks = chunking.calculate_chunking(shape, np.float32)
+        chunks = chunking._calculate_chunking(shape, np.float32)
         self.assertEqual(chunks, (48, 52, 100))
 
         nProcs = 10
         chunking = self.create_chunking_instance(current, nnext, nProcs)
-        chunks = chunking.calculate_chunking(shape, np.float32)
+        chunks = chunking._calculate_chunking(shape, np.float32)
         self.assertEqual(chunks, (8, 28, 100))
 
     def test_chunks_4D_1(self):
@@ -133,32 +133,32 @@ class ChunkingTests(unittest.TestCase):
         shape = (800, 700, 600, 500)
         nProcs = 1
         chunking = self.create_chunking_instance(current, nnext, nProcs)
-        chunks = chunking.calculate_chunking(shape, np.float32)
+        chunks = chunking._calculate_chunking(shape, np.float32)
         self.assertEqual(chunks, (1, 1, 300, 500))
 
         current = [1, (0, 1), (2, 3)]
         nnext = [1, (2, 3), (0, 1)]
         chunking = self.create_chunking_instance(current, nnext, nProcs)
-        chunks = chunking.calculate_chunking(shape, np.float32)
+        chunks = chunking._calculate_chunking(shape, np.float32)
         self.assertEqual(chunks, (23, 22, 22, 22))
 
         current = [1, (0,), (1, 2, 3)]
         nnext = [1, (0,), (1, 2, 3)]
         chunking = self.create_chunking_instance(current, nnext, nProcs)
-        chunks = chunking.calculate_chunking(shape, np.float32)
+        chunks = chunking._calculate_chunking(shape, np.float32)
         self.assertEqual(chunks, (1, 44, 75, 63))
 
         current = [4, (0,), (1, 2, 3)]
         nnext = [8, (1, 2), (0, 3)]
         chunking = self.create_chunking_instance(current, nnext, nProcs)
-        chunks = chunking.calculate_chunking(shape, np.float32)
+        chunks = chunking._calculate_chunking(shape, np.float32)
         self.assertEqual(chunks, (8, 8, 7, 500))
 
         nProcs = 200
         current = [4, (0,), (1, 2, 3)]
         nnext = [8, (1, 2), (0, 3)]
         chunking = self.create_chunking_instance(current, nnext, nProcs)
-        chunks = chunking.calculate_chunking(shape, np.float32)
+        chunks = chunking._calculate_chunking(shape, np.float32)
         self.assertEqual(chunks, (4, 8, 15, 500))
 
 if __name__ == "__main__":

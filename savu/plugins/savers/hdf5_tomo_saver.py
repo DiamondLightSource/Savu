@@ -128,7 +128,7 @@ class Hdf5TomoSaver(BaseSaver):
             self.exp.barrier()
 
             chunking = Chunking(self.exp, current_and_next)
-            chunks = chunking.calculate_chunking(shape, data.dtype)
+            chunks = chunking._calculate_chunking(shape, data.dtype)
             logging.info("create_entries: 3")
             self.exp.barrier()
             data.data = group.create_dataset("data", shape, data.dtype,
