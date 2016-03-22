@@ -24,7 +24,6 @@
 
 import logging
 import warnings
-import numpy as np
 
 
 class TomoRaw(object):
@@ -38,49 +37,40 @@ class TomoRaw(object):
         self.image_key_slice = None
         self.frame_list = []
 
-    def select_image_key(self, **kwargs):
-        """ Set the image key
-        """
-        image_key = kwargs['image_key']
-        self.data_obj._get_plugin_data().selected_data = True
-        self.set_image_key_slice(image_key)
+    def _remove_image_key(self, copy_obj, image_key=0):
+        """ Reduce the shape of a dataset to be only the size of the data and
+        remove the TomoRaw instance encapsulated inside the Data object
 
-    def remove_image_key(self, copy_obj, **kwargs):
-        """ Remove the image key
+        :params Data copy_obj: A Data object with an image key
+        :keyword int image_key: The image_key data index (assumed to be 0 for
+            now)
         """
-        image_key = kwargs.get('image_key', 0)
+        # the image key should be the index of the data, not necessarily zero.
         if image_key is 0:
             if copy_obj.tomo_raw_obj:
                 self.data_obj.set_shape(
-                    copy_obj.get_tomo_raw().remove_dark_and_flat())
+                    copy_obj.get_tomo_raw().__remove_dark_and_flat())
                 self.data_obj._clear_tomo_raw()
-
-    def get_raw_flag(self):
-        return self.raw_flag
 
     def set_image_key(self, image_key):
         """ Set the image_key in the data meta_data dictionary
+
+        :params np.ndarray image_key: The image key
         """
         self.data_obj.meta_data.set_meta_data('image_key', image_key)
 
     def get_image_key(self):
+        """ Get the image key
+
+        :returns: The image key array
+        :rtype: np.ndarray
+        """
         return self.data_obj.meta_data.get_meta_data('image_key')
 
-    def set_frame_list(self, start, end):
-        self.frame_list = [start, end]
-
-    def set_image_key_slice(self, value):
-        image_key_bool = self.get_image_key() == value
-        image_key_index = np.where(image_key_bool)[0]
-        start = image_key_index[0]
-        end = image_key_index[-1]
-        self.set_frame_list(start, end)
-        self.image_key_slice = slice(start, end + 1, 1)
-
-    def get_image_key_slice(self):
+    def __get_image_key_slice(self):
         return self.image_key_slice
 
-    def remove_dark_and_flat(self):
+    def __remove_dark_and_flat(self):
         if self.get_image_key() is not None:
             shape = self.data_obj.get_shape()
             image_key = self.get_image_key()
@@ -91,9 +81,9 @@ class TomoRaw(object):
             shape = self.get_shape()
             return (shape, shape[1], shape[2])
 
-    def get_frame_raw(self, slice_list):
+    def _get_frame_raw(self, slice_list):
         pattern = self.data_obj._get_plugin_data().get_pattern_name()
-        image_slice = self.get_image_key_slice()
+        image_slice = self.__get_image_key_slice()
         new_slice_list = []
         if pattern is "SINOGRAM":
             for sl in slice_list:
@@ -111,14 +101,18 @@ class TomoRaw(object):
 
 
 class Padding(object):
+    """ A class that organises padding of the data. An instance of Padding can
+    be associated with a Data object in a plugin that inherits from BaseFilter,
+    inside :meth:`savu.plugins.base_filter.BaseFilter.set_filter_padding`
+    """
 
     def __init__(self, pattern):
         self.padding_dirs = {}
         self.pattern_name = pattern.keys()[0]
         self.pattern = pattern[self.pattern_name]
-        self.dims = self.set_dims()
+        self.dims = self.__set_dims()
 
-    def set_dims(self):
+    def __set_dims(self):
         dims = []
         for key in self.pattern.keys():
             temp = self.pattern[key]
@@ -128,11 +122,20 @@ class Padding(object):
         return dims
 
     def pad_frame_edges(self, padding):
+        """ Pad the edges of a frame of data (i.e pad in the core dimensions)
+
+        :param int padding: The pad amount
+        """
         core_dirs = self.pattern['core_dir']
         for core in core_dirs:
             self.pad_direction([core, padding])
 
     def pad_multi_frames(self, padding):
+        """ Add extra frames before and after the current frame of data (i.e
+        pad in the fastest changing slice dimension).
+
+        :param int padding: The pad amount
+        """
         try:
             main_dir = self.pattern['main_dir']
         except KeyError:
@@ -141,6 +144,11 @@ class Padding(object):
         self.pad_direction([main_dir, padding])
 
     def pad_direction(self, pad_list):
+        """ Pad the data in a specified dimension.
+
+        :param list pad_list: A list (len = 2), where the first element is the
+        dimension to pad and the second element is the pad amount.
+        """
         pdir = pad_list[0]
         padding = pad_list[1]
         if pdir not in self.dims:
@@ -153,11 +161,18 @@ class Padding(object):
         else:
             self.padding_dirs[pdir] = padding
 
-    def get_padding_directions(self):
+    def _get_padding_directions(self):
+        """ Get padding directions.
+
+        :returns: padding dictionary
+        :rtype: dict
+        """
         return self.padding_dirs
 
 
 class DataMapping(object):
+    """ A class providing helper functions to multi-modal loaders.
+    """
 
     def __init__(self):
         self._is_tomo = None

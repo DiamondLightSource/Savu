@@ -55,8 +55,10 @@ savu.data.data_structures
    api/savu.data.data_structures.utils
    api/savu.data.data_structures.data
    api/savu.data.data_structures.plugin_data
-   api/savu.data.data_structures.data_additions
    api/savu.data.data_structures.data_create
+   api/savu.data.data_structures.preview
+   api/savu.data.data_structures.data_notes
+   api/savu.data.data_structures.data_add_ons
 
 
 savu.plugins
@@ -69,6 +71,7 @@ savu.plugins
    api/savu.plugins.base_saver
    api/savu.plugins.base_filter
    api/savu.plugins.plugin
+   api/savu.plugins.plugin_datasets_notes
    api/savu.plugins.plugin_datasets
    api/savu.plugins.test_plugin
    api/savu.plugins.base_correction

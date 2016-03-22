@@ -179,7 +179,10 @@ class Data(DataCreate):
         """ Add a pattern.
 
         :params str dtype: The *type* of pattern to add, which can be anything
-            from the pattern_list
+            from the :const:`savu.data.data_structures.utils.pattern_list`
+            :const:`pattern_list`
+            :data:`savu.data.data_structures.utils.pattern_list`
+            :data:`pattern_list`:
         :keyword tuple core_dir: Dimension indices of core dimensions
         :keyword tuple slice_dir: Dimension indices of slice dimensions
         """
@@ -194,7 +197,7 @@ class Data(DataCreate):
                 diff = len(self.get_shape()) - nDims
                 if diff:
                     pattern = {dtype: self.get_data_patterns()[dtype]}
-                    self.add_extra_dims_to_patterns(pattern)
+                    self._add_extra_dims_to_patterns(pattern)
                     nDims += diff
             try:
                 if nDims != self.data_info.get_meta_data("nDims"):
@@ -331,17 +334,16 @@ class Data(DataCreate):
         self.data_info.set_meta_data(['data_patterns', pname, 'main_dir'],
                                      list(tdir)[0])
 
-    def trim_input_data(self, **kwargs):
-        """
-        """
-        if self.tomo_raw_obj:
-            self.get_tomo_raw().select_image_key(**kwargs)
+    def trim_output_data(self, copy_obj, image_key=0):
+        """ Trim the output data in a plugin to remove image key and reduce
+        shape to data size only (i.e. no darks and flats).
 
-    def trim_output_data(self, copy_obj, **kwargs):
-        """
+        :param Data copy_obj: A data object with an image key
+        :keyword str image_key: An image key value indexing the data.
+
         """
         if self.tomo_raw_obj:
-            self.get_tomo_raw().remove_image_key(copy_obj, **kwargs)
+            self.get_tomo_raw()._remove_image_key(copy_obj, image_key)
             self.get_preview().set_preview([])
 
     def get_axis_label_keys(self):
@@ -389,13 +391,3 @@ class Data(DataCreate):
         :rtype: tuple(int)
         """
         return self._get_plugin_data().get_slice_directions()
-
-#    def find_next_pattern(self, datasets_lists, current_name):
-#        next_pattern = []
-#        print "next_data_list", next_data_list
-#        for next_data_list in datasets_lists:
-#            for next_data in next_data_list['in_datasets']:
-#                if next_data['name'] == current_name:
-#                    next_pattern = next_data['pattern']
-#                    return next_pattern
-#        return next_pattern

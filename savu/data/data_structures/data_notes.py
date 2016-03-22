@@ -21,7 +21,7 @@
 """
 
 
-def set_preview_note():
+def _set_preview_note():
     """
         Each ``preview_list`` element should be of the form
         ``start:stop:step:chunk``, where ``step`` and ``chunk`` are optional
@@ -64,4 +64,74 @@ def set_preview_note():
             * ``midmap`` is the ``mid`` of a mapped dimension (only relevant \
 in a 'dimension mapping' loader)
     """
-    pass
+
+
+def image_key():
+    """
+        This is a helper function to be used after :meth:`savu.data.\
+data_structures.data_create.DataCreate.create_dataset`,
+
+            >>> out_dataset.create_dataset(in_dataset)
+            >>> out_dataset.trim_output_data(in_dataset, image_key=0)
+
+        if in_dataset is a plugin input dataset with an image_key and 0 is the
+        data index.
+    """
+
+
+def _create():
+    """
+    .. note:: **Creating a dataset**
+            Each new dataset requires the following information:
+
+            * ``shape``
+            * ``axis_labels``
+            * ``patterns``
+
+        This function can be used to setup the required information in one
+        of two ways:
+
+            1. Passing a ``Data`` object as the only argument: All required
+            information is coped from this data object. For example,
+
+                >>> out_dataset[0].create_dataset(in_dataset[0])
+
+            2. Passing kwargs: ``shape`` and ``axis_labels`` are required
+            (see above for other optional arguments). For example,
+
+                >>> out_dataset[0].create_dataset(axis_label=axis_labels, \
+shape=new_shape)
+
+        .. warning:: If ``pattern`` keyword is not used, patterns must be added
+            after  :meth:`~savu.data.data_structures.data_create.DataCreate.\
+create_dataset` by calling :func:`~savu.data.data_structures.data.Data.\
+add_pattern`.
+    """
+
+
+def _shape():
+    """
+    .. note::
+        **``shape`` keyword argument**
+            Options to pass are:
+
+            1. Data object: Copy shape from the Data object.
+            2. tuple: Define shape explicity.
+    """
+
+
+def axis_labels():
+    """
+    .. note::
+        **``axis_labels`` keyword argument**
+            Options to pass are:
+
+            1. Data object: Copy all labels from the Data object.
+            2. {Data_obj: list}: Copy and amend labels from the Data object.
+                * A list of dimensions to be removed.
+                * A list of ??? Remove, add, replace, insert
+            3. list: Where each element is of the form 'dim.name.unit'.
+
+            .. Examples::
+
+    """

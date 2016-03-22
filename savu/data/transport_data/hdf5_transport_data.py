@@ -332,11 +332,10 @@ class Hdf5TransportData(object):
         starts, stops, steps, chunks = \
             self.get_preview().get_starts_stops_steps()
         group_dim = self._get_plugin_data().get_slice_directions()[0]
-        chunk = chunks[group_dim]
 
         grouped = []
         for group in banked:
-            sub_groups = self.get_sub_groups(group, max_frames, chunk)
+            sub_groups = self.split_list(group, max_frames)
 
             for sub in sub_groups:
                 start = sub[0][group_dim].start
@@ -349,11 +348,6 @@ class Hdf5TransportData(object):
 
     def get_sub_groups(self, group, size, chunk):
         sub_groups = []
-#        if chunk > size:
-#            size = gcd(size, chunk)
-#            self._get_plugin_data().set_frame_chunk(size)
-
-        sub_groups = self.split_list(group, size)
         return sub_groups
 
     def split_list(self, the_list, size):
@@ -366,7 +360,7 @@ class Hdf5TransportData(object):
         sl = self.single_slice_list()
 
         if self._get_plugin_data().selected_data is True:
-            sl = self.get_tomo_raw().get_frame_raw(sl)
+            sl = self.get_tomo_raw()._get_frame_raw(sl)
 
         if sl is None:
             raise Exception("Data type", self.get_current_pattern_name(),

@@ -24,50 +24,91 @@
 import copy
 import numpy as np
 
+import savu.data.data_structures.data_notes as notes
+from savu.core.utils import docstring_parameter
+
 
 class DataCreate(object):
+    """ Class that deals with creating a data object.
+    """
 
     def __init__(self, name='DataCreate'):
         self.dtype = None
         self.remove = False
 
+    @docstring_parameter(notes._create.__doc__, notes._shape.__doc__)
+#                         notes.axis_labels.__doc__,
+#                         notes.patterns.__doc__)
     def create_dataset(self, *args, **kwargs):
-        """
-        Set up required information when an output dataset has been created by
-        a plugin
+        """ Set up required information when an output dataset has been
+        created by a plugin.
+
+        :arg Data: A data object
+        :keyword tuple shape: The shape of the dataset
+        :keyword list axis_labels: The axis_labels associated with the datasets
+        :keyword patterns: The patterns associated with the dataset (optional,
+            see note below)
+        :keyword type dtype: Type of the data (optional: Defaults to
+            np.float32)
+        :keyword bool remove: Remove from framework after completion
+        (no link in .nxs file) (optional: Defaults to False.)
+
+        {0} \n {1}
+
         """
         self.dtype = kwargs.get('dtype', np.float32)
-        # remove from the plugin chain
         self.remove = kwargs.get('remove', False)
         if len(args) is 1:
-            self.__copy_dataset(args[0], removeDim=kwargs.get('removeDim', []))
-            if args[0].tomo_raw_obj:
-                self._set_tomo_raw(copy.deepcopy(args[0].get_tomo_raw()))
-                self.get_tomo_raw().data_obj = self
+            self.__create_dataset_from_object(args[0])
         else:
-            try:
-                shape = kwargs['shape']
-                self.__create_axis_labels(kwargs['axis_labels'])
-            except KeyError:
-                raise Exception("Please state axis_labels and shape when "
-                                "creating a new dataset")
-            self.__set_new_dataset_shape(shape)
-
-            if 'patterns' in kwargs:
-                self.__copy_patterns(kwargs['patterns'])
+            self.__create_dataset_from_kwargs(kwargs)
         self.get_preview().set_preview([])
 
-    def __set_new_dataset_shape(self, shape):
+    def __create_dataset_from_object(self, data_obj):
+        """ Create a dataset from an existing Data object.
+
+        This will copy the necessary information:
+
+        * ``shape``
+        * ``axis_labels``
+        * ``patterns``
+        """
+        if data_obj.mapping:
+            data_obj = self.__copy_mapping_object(data_obj)
+        patterns = copy.deepcopy(data_obj.get_data_patterns())
+        self.__copy_labels(data_obj)
+        self.__find_and_set_shape(data_obj)
+        self.__set_data_patterns(patterns)
+        if data_obj.tomo_raw_obj:
+            self._set_tomo_raw(copy.deepcopy(data_obj.get_tomo_raw()))
+            self.get_tomo_raw().data_obj = self
+
+    def __copy_mapping_object(self, data_obj):
+        map_data = self.exp.index['mapping'][data_obj.get_name()]
+        map_mData = map_data.meta_data
+        map_axis_labels = map_data.data_info.get_meta_data('axis_labels')
+        for axis_label in map_axis_labels:
+            if axis_label.keys()[0] in map_mData.get_dictionary().keys():
+                map_label = map_mData.get_meta_data(axis_label.keys()[0])
+                data_obj.meta_data.set_meta_data(axis_label.keys()[0],
+                                                 map_label)
+        return map_data
+
+    def __create_dataset_from_kwargs(self, kwargs):
+        try:
+            shape = kwargs['shape']
+            self.__create_axis_labels(kwargs['axis_labels'])
+        except KeyError:
+            raise Exception("Please state axis_labels and shape when "
+                            "creating a new dataset")
+
         if isinstance(shape, DataCreate):
-            self.find_and_set_shape(shape)
-        elif type(shape) is dict:
-            self.set_variable_flag()
-            self.set_shape((shape[shape.keys()[0]] + ('var',)))
+            self.__find_and_set_shape(shape)
         else:
             pData = self._get_plugin_data()
             self.set_shape(shape + tuple(pData.extra_dims))
-            if 'var' in shape:
-                self.set_variable_flag()
+        if 'patterns' in kwargs:
+            self.__copy_patterns(kwargs['patterns'])
 
     def __copy_patterns(self, copy_data):
         if isinstance(copy_data, DataCreate):
@@ -84,7 +125,7 @@ class DataCreate(object):
                 patterns = {}
                 for pattern in pattern_list:
                     patterns[pattern] = all_patterns[pattern]
-        self.set_data_patterns(patterns)
+        self.__set_data_patterns(patterns)
 
     def __copy_patterns_removing_dimensions(self, pattern_list, all_patterns,
                                             nDims):
@@ -111,23 +152,6 @@ class DataCreate(object):
             if empty_flag is False:
                 patterns[name] = pattern_dict
         return patterns
-
-    def __copy_dataset(self, copy_data, **kwargs):
-        if copy_data.mapping:
-            # copy label entries from meta data
-            map_data = self.exp.index['mapping'][copy_data.get_name()]
-            map_mData = map_data.meta_data
-            map_axis_labels = map_data.data_info.get_meta_data('axis_labels')
-            for axis_label in map_axis_labels:
-                if axis_label.keys()[0] in map_mData.get_dictionary().keys():
-                    map_label = map_mData.get_meta_data(axis_label.keys()[0])
-                    copy_data.meta_data.set_meta_data(axis_label.keys()[0],
-                                                      map_label)
-            copy_data = map_data
-        patterns = copy.deepcopy(copy_data.get_data_patterns())
-        self.__copy_labels(copy_data)
-        self.find_and_set_shape(copy_data)
-        self.set_data_patterns(patterns)
 
     def __create_axis_labels(self, axis_labels):
         if isinstance(axis_labels, DataCreate):
@@ -187,11 +211,11 @@ class DataCreate(object):
                     else:
                         axis_labels.insert(int(label[0]), {label[1]: label[2]})
 
-    def set_data_patterns(self, patterns):
-        self.add_extra_dims_to_patterns(patterns)
+    def __set_data_patterns(self, patterns):
+        self._add_extra_dims_to_patterns(patterns)
         self.data_info.set_meta_data('data_patterns', patterns)
 
-    def add_extra_dims_to_patterns(self, patterns):
+    def _add_extra_dims_to_patterns(self, patterns):
         all_dims = range(len(self.get_shape()))
         for p in patterns:
             pDims = patterns[p]['core_dir'] + patterns[p]['slice_dir']
@@ -199,7 +223,7 @@ class DataCreate(object):
                 if dim not in pDims:
                     patterns[p]['slice_dir'] += (dim,)
 
-    def find_and_set_shape(self, data):
+    def __find_and_set_shape(self, data):
         pData = self._get_plugin_data()
         new_shape = copy.copy(data.get_shape()) + tuple(pData.extra_dims)
         self.set_shape(new_shape)

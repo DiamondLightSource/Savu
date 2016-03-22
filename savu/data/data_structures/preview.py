@@ -22,7 +22,7 @@
 """
 import numpy as np
 
-import savu.data.data_structures.utils as dsu
+import savu.data.data_structures.data_notes as notes
 from savu.core.utils import docstring_parameter
 
 
@@ -37,7 +37,7 @@ class Preview(object):
     def get_data_obj(self):
         return self._data_obj
 
-    @docstring_parameter(dsu.set_preview_note.__doc__)
+    @docstring_parameter(notes._set_preview_note.__doc__)
     def set_preview(self, preview_list, **kwargs):
         """ Reduces the data to be processed to a subset of the original.
 

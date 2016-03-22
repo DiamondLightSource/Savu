@@ -32,6 +32,7 @@ Submodules
    savu.plugins.dimension_adder
    savu.plugins.plugin
    savu.plugins.plugin_datasets
+   savu.plugins.plugin_datasets_notes
    savu.plugins.simple_fit_xrf_bounded
    savu.plugins.test_plugin
    savu.plugins.utils

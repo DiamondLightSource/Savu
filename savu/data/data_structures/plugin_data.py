@@ -15,18 +15,24 @@
 """
 .. module:: plugin_data
    :platform: Unix
-   :synopsis: Contains the Data class and all the data structures from which \
-   Data can inherit.
+   :synopsis: Contains the PluginData class. Each Data set used in a plugin \
+       has a PluginData object encapsulated within it, for the duration of a \
+       plugin run.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
+import sys
 from fractions import gcd
 
 from savu.data.meta_data import MetaData
 
 
 class PluginData(object):
+    """ The PluginData class contains plugin specific information about a Data
+    object for the duration of a plugin.  An instance of the class is
+    encapsulated inside the Data object during the plugin run
+    """
 
     def __init__(self, data_obj, plugin):
         self.data_obj = data_obj

@@ -24,6 +24,20 @@ import copy
 import savu.core.utils as cu
 
 
+pattern_list = ["SINOGRAM",
+                "PROJECTION",
+                "VOLUME_YZ",
+                "VOLUME_XZ",
+                "VOLUME_XY",
+                "VOLUME_3D",
+                "SPECTRUM",
+                "DIFFRACTION",
+                "CHANNEL",
+                "SPECTRUM_STACK",
+                "PROJECTION_STACK",
+                "METADATA"]
+
+
 def _deepcopy_data_object(dObj, new_obj):
     """ Deepcopy data object, associating hdf5 objects that can not be copied.
     """
@@ -49,62 +63,4 @@ def _deepcopy_data_object(dObj, new_obj):
 
 
 def get_available_pattern_types():
-    pattern_list = ["SINOGRAM",
-                    "PROJECTION",
-                    "VOLUME_YZ",
-                    "VOLUME_XZ",
-                    "VOLUME_XY",
-                    "VOLUME_3D",
-                    "SPECTRUM",
-                    "DIFFRACTION",
-                    "CHANNEL",
-                    "SPECTRUM_STACK",
-                    "PROJECTION_STACK",
-                    "METADATA"]
     return pattern_list
-
-
-def set_preview_note():
-    """
-        Each ``preview_list`` element should be of the form
-        ``start:stop:step:chunk``, where ``step`` and ``chunk`` are optional
-        (default = 1) but both are required if chunk > 1.
-
-        .. note::
-            **start:stop[:step]**
-                represents the set of indices specified by:
-
-                >>> indices = range(start, stop[, step])
-            For more information see :func:`range`
-
-            **start:stop:step:chunk (chunk > 1)**
-                represents the set of indices specified by:
-
-                >>> a = np.tile(np.arange(start, stop, step), (chunk, 1))
-                >>> b = np.transpose(np.tile(np.arange(chunk)-chunk/2, \
-(a.shape[1], 1)))
-                >>> indices = np.ravel(np.transpose(a + b))
-
-                Chunk indicates how many values to take around each value in
-                ``range(start, stop, step)``.  It is only available for slicing
-                dimensions.
-
-                .. warning:: If any indices are out of range (or negative)
-                    then the list is invalid. When chunk > 1, new start and
-                    end values will be:
-
-                    >>> new_start = start - int(chunk/2)
-                    >>> new_end = range(start, stop, step)[-1] + \
-(step - int(chunk/2))
-
-        **accepted values**:
-            Each entry is executed using :func:`eval` so simple formulas are\
-            allowed and may contain the following keywords:
-
-            * ``:`` is a simplification for 0:end:1:1 (all values)
-            * ``mid`` is int(shape[dim]/2)
-            * ``end`` is shape[dim]
-            * ``midmap`` is the ``mid`` of a mapped dimension (only relevant \
-in a 'dimension mapping' loader)
-    """
-    pass
