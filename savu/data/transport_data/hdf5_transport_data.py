@@ -235,7 +235,7 @@ class Hdf5TransportData(object):
                 return self.get_bool_slice_dir_index(dim, dir_idx)
             return dir_idx
         else:
-            fix_dirs, value = self._get_plugin_data().get_fixed_directions()
+            fix_dirs, value = self._get_plugin_data()._get_fixed_directions()
             if dim in fix_dirs:
                 return value[fix_dirs.index(dim)]
             else:
@@ -264,7 +264,7 @@ class Hdf5TransportData(object):
         core_dirs = np.array(pData.get_core_directions())
         shape = self.get_shape()
         index = self.get_slice_dirs_index(slice_dirs, shape)
-        fix_dirs, value = pData.get_fixed_directions()
+        fix_dirs, value = pData._get_fixed_directions()
 
         nSlices = index.shape[1] if index.size else len(fix_dirs)
         nDims = len(shape)
@@ -354,7 +354,7 @@ class Hdf5TransportData(object):
             return [the_list[x:x+size] for x in xrange(0, len(the_list), size)]
 
     def get_grouped_slice_list(self):
-        max_frames = self._get_plugin_data().get_frame_chunk()
+        max_frames = self._get_plugin_data()._get_frame_chunk()
         max_frames = (1 if max_frames is None else max_frames)
 
         sl = self.single_slice_list()

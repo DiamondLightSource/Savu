@@ -82,7 +82,7 @@ class TomoRaw(object):
             return (shape, shape[1], shape[2])
 
     def _get_frame_raw(self, slice_list):
-        pattern = self.data_obj._get_plugin_data().get_pattern_name()
+        pattern = self.data_obj._get_plugin_data()._get_pattern_name()
         image_slice = self.__get_image_key_slice()
         new_slice_list = []
         if pattern is "SINOGRAM":

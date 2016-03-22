@@ -280,12 +280,12 @@ class Hdf5Transport(TransportControl):
         :returns: squeeze function
         :rtype: lambda
         """
-        max_frames = data._get_plugin_data().get_frame_chunk()
+        max_frames = data._get_plugin_data()._get_frame_chunk()
         if data.mapping:
             map_obj = self.exp.index['mapping'][data.get_name()]
             map_dim_len = map_obj.data_info.get_meta_data('map_dim_len')
             max_frames = min(max_frames, map_dim_len)
-            data._get_plugin_data().set_frame_chunk(max_frames)
+            data._get_plugin_data()._set_frame_chunk(max_frames)
 
         squeeze_dims = data._get_plugin_data().get_slice_directions()
         if max_frames > 1:
