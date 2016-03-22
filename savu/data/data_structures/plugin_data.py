@@ -206,7 +206,7 @@ class PluginData(object):
         shape = list(self.data_obj.get_shape())
         for dim in dims:
             shape[dim] = 1
-        self.data_obj.__set_shape(tuple(shape))
+        self.data_obj.set_shape(tuple(shape))
         self.__set_shape()
 
     def _get_fixed_directions(self):

@@ -71,7 +71,7 @@ class Content(object):
 
     def add(self, name, pos):
         plugin = pu.plugins[name]()
-        plugin.populate_default_parameters()
+        plugin._populate_default_parameters()
         self.insert(plugin, pos)
         self.display()
 
@@ -261,7 +261,7 @@ def _ref(content, arg):
 
         if kwarg:
             plugin = pu.plugins[name]()
-            plugin.populate_default_parameters()
+            plugin._populate_default_parameters()
             content.insert(plugin, pos)
             old_params = old_entry['data']
             new_params = plugin.parameters

@@ -439,7 +439,7 @@ class Hdf5TransportData(object):
         padding = Padding(pData.get_pattern())
         for key in pData.padding.keys():
             getattr(padding, key)(pData.padding[key])
-        return padding.get_padding_directions()
+        return padding._get_padding_directions()
 
     def get_padded_slice_data(self, input_slice_list):
         slice_list = list(input_slice_list)
