@@ -164,7 +164,7 @@ class Preview(object):
         dobj.data_info.set_meta_data('orig_shape', orig_shape)
         new_shape = []
         for dim in range(len(starts)):
-            new_shape.append(np.prod((dobj.get_slice_dir_matrix(dim).shape)))
+            new_shape.append(np.prod((dobj._get_slice_dir_matrix(dim).shape)))
         dobj.set_shape(tuple(new_shape))
 
         # reduce shape of mapping data if it exists

@@ -35,7 +35,7 @@ class PluginDriver(object):
     def __init__(self):
         super(PluginDriver, self).__init__()
 
-    def run_plugin_instances(self, transport, communicator=MPI.COMM_WORLD):
+    def _run_plugin_instances(self, transport, communicator=MPI.COMM_WORLD):
         out_data = self.get_out_datasets()
         extra_dims = self.extra_dims
         repeat = np.prod(extra_dims) if extra_dims else 1
@@ -51,6 +51,7 @@ class PluginDriver(object):
                     out_data[j]._get_plugin_data()\
                         .set_fixed_directions(param_dims[j], param_idx[i])
 
+            logging.info("%s.%s", self.__class__.__name__, 'pre_process')
             self.pre_process()
 
             logging.info("%s.%s", self.__class__.__name__, 'process')
@@ -64,21 +65,3 @@ class PluginDriver(object):
 
         for j in range(len(out_data)):
             out_data[j].set_shape(out_data[j].data.shape)
-
-    def process(self, data, output, processes, process):
-        """
-        This method is called after the process has been created by the
-        pipeline framework
-
-        :param Data data: The input data object.
-        :param data: The output data object
-        :type data: savu.data.data_structures
-        :param processes: The number of processes which will be doing the work
-        :type path: int
-        :param path: The specific process which we are
-        :type path: int
-        """
-        logging.error("process needs to be implemented for proc %i of %i :" +
-                      " input is %s and output is %s",
-                      process, processes, data.__class__, output.__class__)
-        raise NotImplementedError("process needs to be implemented")

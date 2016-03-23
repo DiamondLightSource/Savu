@@ -28,7 +28,7 @@ from savu.plugins.plugin import Plugin
 
 class BaseCorrection(Plugin):
     """
-    A base class for dark and flat field correction plugins
+    A base class for dark and flat field correction plugins.
 
     :param in_datasets: Create a list of the dataset(s) to \
         process. Default: [].

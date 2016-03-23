@@ -180,7 +180,7 @@ class Hdf5Transport(TransportControl):
 
             exp._barrier()
             cu.user_message("*Running the %s plugin*" % (plugin_list[i]['id']))
-            plugin.run_plugin(exp, self)
+            plugin._run_plugin(exp, self)
 
             exp._barrier()
             if self.mpi:

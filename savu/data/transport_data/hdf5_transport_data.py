@@ -228,7 +228,7 @@ class Hdf5TransportData(object):
         starts, stops, steps, chunks = \
             self.get_preview().get_starts_stops_steps()
         if chunks[dim] > 1:
-            dir_idx = np.ravel(np.transpose(self.__get_slice_dir_matrix(dim)))
+            dir_idx = np.ravel(np.transpose(self._get_slice_dir_matrix(dim)))
             if boolean:
                 return self.__get_bool_slice_dir_index(dim, dir_idx)
             return dir_idx
@@ -245,7 +245,7 @@ class Hdf5TransportData(object):
         bool_idx[dir_idx] = True
         return bool_idx
 
-    def __get_slice_dir_matrix(self, dim):
+    def _get_slice_dir_matrix(self, dim):
         starts, stops, steps, chunks = \
             self.get_preview().get_starts_stops_steps()
         chunk = chunks[dim]

@@ -51,7 +51,7 @@ class MmLoader(BaseLoader):
         self.setup_loader(NxmonitorLoader(), new_dict)
 
     def setup_loader(self, loader, params):
-        loader.main_setup(self.exp, params)
+        loader._main_setup(self.exp, params)
         loader.setup()
 
     def amend_dictionary(self):

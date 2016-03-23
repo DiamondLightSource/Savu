@@ -233,7 +233,7 @@ def plugin_runner_real_plugin_run(options):
         exp.index["out_data"][key] = out_data_objs[0][key]
 
     plugin = pu.plugin_loader(exp, plugin_list[1])
-    plugin.run_plugin(exp, plugin_runner)
+    plugin._run_plugin(exp, plugin_runner)
 
 #    out_datasets = plugin.parameters["out_datasets"]
 #    exp._reorganise_datasets(out_datasets, 'final_result')
