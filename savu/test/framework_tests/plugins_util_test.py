@@ -23,6 +23,9 @@
 
 import unittest
 
+import savu
+import os
+
 from savu.plugins import utils as pu
 from savu.plugins import plugin as test_plugin
 
@@ -39,6 +42,11 @@ class Test(unittest.TestCase):
         plugin = pu.load_plugin("savu.plugins.filters.denoise_bregman_filter")
         params = pu.find_args(plugin)
         self.assertEqual(len(params), 4)
+
+    def test_get_plugin_external_path(self):
+        savu_path = os.path.split(savu.__path__[0])[0]
+        plugin = pu.load_plugin(os.path.join(savu_path, "plugin_examples", "example_median_filter"))
+        self.assertEqual(plugin.name, "ExampleMedianFilter")
 
 if __name__ == "__main__":
     unittest.main()

@@ -21,6 +21,8 @@
 
 """
 
+import os
+import sys
 import re
 import logging
 import numpy as np
@@ -56,6 +58,11 @@ def load_plugin(plugin_name):
 
     name = plugin_name
     logging.debug("importing the module")
+    if plugin_name.startswith(os.path.sep):
+        # this is a path, so we need to add the directory to the pythonpath
+        # and sort out the name
+        ppath, name = os.path.split(plugin_name)
+        sys.path.append(ppath)
     # TODO This appears to be the failing line.
     mod = __import__(name)
     components = name.split('.')
