@@ -3,7 +3,6 @@ savu.plugins.filters.fitters.fluo_fitters package
 
 .. automodule:: savu.plugins.filters.fitters.fluo_fitters
     :members:
-    :private-members:
     :undoc-members:
     :show-inheritance:
 

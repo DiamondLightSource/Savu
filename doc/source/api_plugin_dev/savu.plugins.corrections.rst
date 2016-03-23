@@ -3,7 +3,6 @@ savu.plugins.corrections package
 
 .. automodule:: savu.plugins.corrections
     :members:
-    :private-members:
     :undoc-members:
     :show-inheritance:
 

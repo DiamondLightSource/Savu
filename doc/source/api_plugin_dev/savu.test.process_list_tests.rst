@@ -3,7 +3,6 @@ savu.test.process_list_tests package
 
 .. automodule:: savu.test.process_list_tests
     :members:
-    :private-members:
     :undoc-members:
     :show-inheritance:
 

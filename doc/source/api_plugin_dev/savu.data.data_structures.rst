@@ -3,7 +3,6 @@ savu.data.data_structures package
 
 .. automodule:: savu.data.data_structures
     :members:
-    :private-members:
     :undoc-members:
     :show-inheritance:
 

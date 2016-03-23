@@ -32,12 +32,12 @@ class Test(unittest.TestCase):
         data, pData = tu.get_data_object(tu.load_test_data("tomo"))
 
         pData.plugin_data_setup('PROJECTION', 1)
-        gsl = data.get_grouped_slice_list()
+        gsl = data._get_grouped_slice_list()
         self.assertEqual(len(gsl), 91)
         self.assertEqual(len(gsl[0]), 3)
 
         pData.plugin_data_setup('SINOGRAM', 1)
-        gsl = data.get_grouped_slice_list()
+        gsl = data._get_grouped_slice_list()
         self.assertEqual(len(gsl), 135)
         self.assertEqual(len(gsl[0]), 3)
 
@@ -45,12 +45,12 @@ class Test(unittest.TestCase):
         data, pData = tu.get_data_object(tu.load_test_data("tomo"))
 
         pData.plugin_data_setup('PROJECTION', 8)
-        gsl = data.get_grouped_slice_list()
+        gsl = data._get_grouped_slice_list()
         self.assertEqual(len(gsl), 12)
         self.assertEqual(len(gsl[0]), 3)
 
         pData.plugin_data_setup('SINOGRAM', 8)
-        gsl = data.get_grouped_slice_list()
+        gsl = data._get_grouped_slice_list()
         self.assertEqual(len(gsl), 17)
         self.assertEqual(len(gsl[0]), 3)
 
@@ -61,7 +61,7 @@ class Test(unittest.TestCase):
         processes = ['t', 't', 't', 't']
 
         pData.plugin_data_setup('PROJECTION', 1)
-        sl = data.single_slice_list()
+        sl = data._single_slice_list()
         total = []
         for i in range(len(processes)):
             tu.set_process(exp, i, processes)
@@ -69,7 +69,7 @@ class Test(unittest.TestCase):
         self.assertEqual(len(sl), sum(len(t) for t in total))
 
         pData.plugin_data_setup('SINOGRAM', 1)
-        sl = data.single_slice_list()
+        sl = data._single_slice_list()
         total = []
         for i in range(len(processes)):
             tu.set_process(exp, i, processes)
@@ -77,7 +77,7 @@ class Test(unittest.TestCase):
         self.assertEqual(len(sl), sum(len(t) for t in total))
 
         pData.plugin_data_setup('PROJECTION', 8)
-        sl = data.get_grouped_slice_list()
+        sl = data._get_grouped_slice_list()
         total = []
         for i in range(len(processes)):
             tu.set_process(exp, i, processes)
@@ -85,7 +85,7 @@ class Test(unittest.TestCase):
         self.assertEqual(len(sl), sum(len(t) for t in total))
 
         pData.plugin_data_setup('SINOGRAM', 1)
-        sl = data.get_grouped_slice_list()
+        sl = data._get_grouped_slice_list()
         total = []
         for i in range(len(processes)):
             tu.set_process(exp, i, processes)

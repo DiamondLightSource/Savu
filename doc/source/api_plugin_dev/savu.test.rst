@@ -3,7 +3,6 @@ savu.test package
 
 .. automodule:: savu.test
     :members:
-    :private-members:
     :undoc-members:
     :show-inheritance:
 

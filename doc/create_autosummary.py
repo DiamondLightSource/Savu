@@ -45,7 +45,7 @@ def add_package_entry(f, root, dirs, files, output):
 
     for fi in files:
         file_path = module_name + '.' + fi
-        f.write('   api/' + file_path.split('.py')[0] + '\n')
+        f.write('   ' + output + '/' + file_path.split('.py')[0] + '\n')
     f.write('\n\n')
 
 
@@ -58,16 +58,17 @@ def add_indices_and_tables(f):
 
 
 if __name__ == "__main__":
+    import sys
+    out_folder, rst_file = sys.argv[1:]
 
     # determine Savu base path
     savu_base_path = os.path.abspath('../')
-    out_folder = '_autosummary'
 
     # open the autosummary file
-    f = open(savu_base_path + '/doc/source/autosummary.rst', 'w')
+    f = open(savu_base_path + '/doc/source/' + rst_file, 'w')
 
     # add header
-    f.write('Autosummary \n==============\n')
+    f.write('API Documentation \n===================\n')
     f.write('Information on specific functions, classes, and methods.\n \n')
 
     base_path = savu_base_path + '/savu'

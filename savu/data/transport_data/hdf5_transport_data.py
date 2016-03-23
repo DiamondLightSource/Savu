@@ -256,7 +256,7 @@ class Hdf5TransportData(object):
             raise Exception('Cannot have a negative value in the slice list.')
         return dim_idx
 
-    def __single_slice_list(self):
+    def _single_slice_list(self):
         pData = self._get_plugin_data()
         slice_dirs = pData.get_slice_directions()
         core_dirs = np.array(pData.get_core_directions())
@@ -347,11 +347,11 @@ class Hdf5TransportData(object):
     def __split_list(self, the_list, size):
             return [the_list[x:x+size] for x in xrange(0, len(the_list), size)]
 
-    def __get_grouped_slice_list(self):
+    def _get_grouped_slice_list(self):
         max_frames = self._get_plugin_data()._get_frame_chunk()
         max_frames = (1 if max_frames is None else max_frames)
 
-        sl = self.__single_slice_list()
+        sl = self._single_slice_list()
 
         if self._get_plugin_data().selected_data is True:
             sl = self.get_tomo_raw()._get_frame_raw(sl)
@@ -366,7 +366,7 @@ class Hdf5TransportData(object):
     def _get_slice_list_per_process(self, expInfo):
         processes = expInfo.get_meta_data("processes")
         process = expInfo.get_meta_data("process")
-        slice_list = self.__get_grouped_slice_list()
+        slice_list = self._get_grouped_slice_list()
 
         frame_index = np.arange(len(slice_list))
         try:

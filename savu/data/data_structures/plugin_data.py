@@ -34,7 +34,7 @@ class PluginData(object):
     encapsulated inside the Data object during the plugin run
     """
 
-    def __init__(self, data_obj, plugin):
+    def __init__(self, data_obj, plugin=None):
         self.data_obj = data_obj
         self.data_obj._set_plugin_data(self)
         self.meta_data = MetaData()
@@ -103,7 +103,7 @@ class PluginData(object):
             shape.append(self.data_obj.get_shape()[core])
         self.__set_core_shape(tuple(shape))
         if self._get_frame_chunk() > 1:
-            shape.insert(slice_idx, self.get_frame_chunk())
+            shape.insert(slice_idx, self._get_frame_chunk())
         self.shape = tuple(shape)
 
     def get_shape(self):
@@ -235,7 +235,7 @@ class PluginData(object):
         :returns: Number of frames to process
         :rtype: int
         """
-        if self._plugin.chunk:
+        if self._plugin and self._plugin.chunk:
             frame_chunk = self.meta_data.get_meta_data("nFrames")
             chunk = self.data_obj.get_preview().get_starts_stops_steps(
                 key='chunks')[self.get_slice_directions()[0]]
@@ -251,7 +251,7 @@ class PluginData(object):
         self.__set_pattern(pattern_name)
         chunks = \
             self.data_obj.get_preview().get_starts_stops_steps(key='chunks')
-        if (chunks[self.get_slice_directions()[0]] % chunk):
+        if self._plugin and (chunks[self.get_slice_directions()[0]] % chunk):
             self._plugin.chunk = True
         self._set_frame_chunk(chunk)
         self.__set_shape()

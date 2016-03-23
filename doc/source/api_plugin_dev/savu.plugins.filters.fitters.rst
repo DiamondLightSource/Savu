@@ -3,7 +3,6 @@ savu.plugins.filters.fitters package
 
 .. automodule:: savu.plugins.filters.fitters
     :members:
-    :private-members:
     :undoc-members:
     :show-inheritance:
 
