@@ -49,22 +49,22 @@ class PluginRunner(object):
         plugin_list = self.exp.meta_data.plugin_list.plugin_list
 
         logging.info("run_plugin_list: 1")
-        self.exp.barrier()
+        self.exp._barrier()
         self.__run_plugin_list_check(plugin_list)
 
         logging.info("run_plugin_list: 2")
-        self.exp.barrier()
+        self.exp._barrier()
         expInfo = self.exp.meta_data
         logging.debug("Running process List.save_list_to_file")
         expInfo.plugin_list.save_plugin_list(
             expInfo.get_meta_data("nxs_filename"), exp=self.exp)
 
         logging.info("run_plugin_list: 3")
-        self.exp.barrier()
+        self.exp._barrier()
         self._transport_run_plugin_list()
 
         logging.info("run_plugin_list: 4")
-        self.exp.barrier()
+        self.exp._barrier()
 
         cu.user_message("***********************")
         cu.user_message("* Processing Complete *")
@@ -78,16 +78,16 @@ class PluginRunner(object):
         """ Run the plugin list through the framework without executing the
         main processing.
         """
-        self.exp.barrier()
+        self.exp._barrier()
         self.__check_loaders_and_savers(plugin_list)
 
-        self.exp.barrier()
+        self.exp._barrier()
         pu.run_plugins(self.exp, plugin_list, check=True)
 
-        self.exp.barrier()
-        self.exp.clear_data_objects()
+        self.exp._barrier()
+        self.exp._clear_data_objects()
 
-        self.exp.barrier()
+        self.exp._barrier()
         cu.user_message("Plugin list check complete!")
 
     def __check_loaders_and_savers(self, plugin_list):

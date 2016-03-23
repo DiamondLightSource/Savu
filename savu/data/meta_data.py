@@ -22,7 +22,6 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
-import savu.core.utils as cu
 
 
 class MetaData(object):
@@ -36,12 +35,6 @@ class MetaData(object):
         if options is None:
             options = {}
         self.dict = options.copy()
-
-#    def load_experiment_collection(self):
-#        transport_collection = self.dict["transport"] + "_experiment"
-#        class_name = ''.join(x.capitalize() for x in
-#                             transport_collection.split('_'))
-#        self.add_base(globals()[class_name])
 
     def set_meta_data(self, name, value):
         maplist = (name if type(name) is list else [name])
@@ -75,21 +68,3 @@ class MetaData(object):
 
     def set_dictionary(self, ddict):
         self.dict = ddict
-
-
-#class Hdf5Experiment():
-#    """
-#    The Hdf5Experiment class is inherited by Experiment class at
-#    runtime and performs initial setup of metadata
-#    """
-#    def set_transport_meta_data(self):
-#        pass
-#
-#
-#class distArrayExperiment():
-#    """
-#    The Hdf5Experiment class is inherited by Experiment class at
-#    runtime and performs initial setup of metadata
-#    """
-#    def set_transport_meta_data(self):
-#        pass

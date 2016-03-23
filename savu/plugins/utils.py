@@ -111,15 +111,15 @@ def plugin_loader(exp, plugin_dict, **kwargs):
 def run_plugins(exp, plugin_list, **kwargs):
     plugin_loader(exp, plugin_list[0])
 
-    exp.barrier()
-    exp.set_nxs_filename()
-    exp.barrier()
+    exp._barrier()
+    exp._set_nxs_filename()
+    exp._barrier()
 
     check = kwargs.get('check', False)
     for i in range(1, len(plugin_list)-1):
-        exp.barrier()
+        exp._barrier()
         plugin_loader(exp, plugin_list[i], check=check)
-        exp.merge_out_data_to_in()
+        exp._merge_out_data_to_in()
 
 
 def set_datasets_list(exp, plugin):
@@ -174,7 +174,7 @@ def get_names(names):
 def check_nDatasets(exp, names, plugin_id, nSets, dtype):
     try:
         if names[0] in "all":
-            names = exp.set_all_datasets(dtype)
+            names = exp._set_all_datasets(dtype)
     except IndexError:
         pass
 

@@ -77,20 +77,20 @@ class Hdf5Transport(TransportControl):
                                    MACHINE_RANK_NAME,
                                    options)
 
-        MPI.COMM_WORLD.barrier()
+        MPI.COMM_WORLD._barrier()
         logging.debug("Rank : %i - Size : %i - host : %s", RANK, SIZE,
                       socket.gethostname())
         IP = socket.gethostbyname(socket.gethostname())
         logging.debug("ip address is : %s", IP)
-        self.call_mpi_barrier()
+        self.call_mpi__barrier()
         logging.debug("LD_LIBRARY_PATH is %s",  os.getenv('LD_LIBRARY_PATH'))
-        self.call_mpi_barrier()
+        self.call_mpi__barrier()
 
-    def call_mpi_barrier(self):
-        """ Call MPI barrier before an experiment is created.
+    def call_mpi__barrier(self):
+        """ Call MPI _barrier before an experiment is created.
         """
-        logging.debug("Waiting at the barrier")
-        MPI.COMM_WORLD.barrier()
+        logging.debug("Waiting at the _barrier")
+        MPI.COMM_WORLD._barrier()
 
     def __get_log_level(self, options):
         """ Gets the right log level for the flags -v or -q
@@ -151,7 +151,7 @@ class Hdf5Transport(TransportControl):
             in_data = exp.index["in_data"][exp.index["in_data"].keys()[0]]
 
             out_data_objs, stop = in_data.load_data(start)
-            exp.clear_data_objects()
+            exp._clear_data_objects()
 
             self.exp.index['in_data'] = copy.deepcopy(start_in_data)
             self.__real_plugin_run(plugin_list, out_data_objs, start, stop)
@@ -170,19 +170,19 @@ class Hdf5Transport(TransportControl):
             link_type = "final_result" if i is len(plugin_list)-2 else \
                 "intermediate"
 
-            exp.barrier()
+            exp._barrier()
 
             for key in out_data_objs[i - start]:
                 exp.index["out_data"][key] = out_data_objs[i - start][key]
 
-            exp.barrier()
+            exp._barrier()
             plugin = pu.plugin_loader(exp, plugin_list[i])
 
-            exp.barrier()
+            exp._barrier()
             cu.user_message("*Running the %s plugin*" % (plugin_list[i]['id']))
             plugin.run_plugin(exp, self)
 
-            exp.barrier()
+            exp._barrier()
             if self.mpi:
                 cu.user_messages_from_all(plugin.name,
                                           plugin.executive_summary())
@@ -190,9 +190,9 @@ class Hdf5Transport(TransportControl):
                 for message in plugin.executive_summary():
                     cu.user_message("%s - %s" % (plugin.name, message))
 
-            exp.barrier()
+            exp._barrier()
             out_datasets = plugin.parameters["out_datasets"]
-            exp.reorganise_datasets(out_datasets, link_type)
+            exp._reorganise_datasets(out_datasets, link_type)
 
     def _process(self, plugin):
         """ Organise required data and execute the main plugin processing.

@@ -195,7 +195,7 @@ def plugin_runner_load_plugin(options):
 
     exp = plugin_runner.exp
     pu.plugin_loader(exp, plugin_list[0])
-    exp.set_nxs_filename()
+    exp._set_nxs_filename()
 
     plugin_dict = plugin_list[1]
     plugin = pu.load_plugin(plugin_dict['id'])
@@ -226,7 +226,7 @@ def plugin_runner_real_plugin_run(options):
     start_in_data = copy.deepcopy(exp.index['in_data'])
     in_data = exp.index["in_data"][exp.index["in_data"].keys()[0]]
     out_data_objs, stop = in_data.load_data(1)
-    exp.clear_data_objects()
+    exp._clear_data_objects()
     exp.index['in_data'] = copy.deepcopy(start_in_data)
 
     for key in out_data_objs[0]:
@@ -236,7 +236,7 @@ def plugin_runner_real_plugin_run(options):
     plugin.run_plugin(exp, plugin_runner)
 
 #    out_datasets = plugin.parameters["out_datasets"]
-#    exp.reorganise_datasets(out_datasets, 'final_result')
+#    exp._reorganise_datasets(out_datasets, 'final_result')
 #
 #    for key in exp.index["in_data"].keys():
 #        exp.index["in_data"][key].close_file()

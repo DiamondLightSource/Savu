@@ -63,7 +63,7 @@ class Hdf5TransportData(object):
             saver_plugin.setup()
 
             out_data_objects.append(exp.index["out_data"].copy())
-            exp.merge_out_data_to_in()
+            exp._merge_out_data_to_in()
             count += 1
 
         del self.exp.meta_data.get_dictionary()['current_and_next']
@@ -82,9 +82,9 @@ class Hdf5TransportData(object):
                                 count, plugin_id))
             filename = filename + "_" + key + ".h5"
             group_name = "%i-%s-%s" % (count, plugin.name, key)
-            exp.barrier()
+            exp._barrier()
             logging.debug("(set_filenames) Creating output file after "
-                          " barrier %s", filename)
+                          " _barrier %s", filename)
             expInfo.set_meta_data(["filename", key], filename)
             expInfo.set_meta_data(["group_name", key], group_name)
 
@@ -159,8 +159,8 @@ class Hdf5TransportData(object):
 
     def save_data(self, link_type):
         self.add_data_links(link_type)
-        logging.info('save_data barrier')
-        self.exp.barrier()
+        logging.info('save_data _barrier')
+        self.exp._barrier()
 
     def close_file(self):
         """

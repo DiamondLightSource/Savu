@@ -52,24 +52,24 @@ class Hdf5TomoSaver(BaseSaver):
                 self.exp.meta_data.get_meta_data('current_and_next')
 
         logging.info("saver setup: 1")
-        exp.barrier()
+        exp._barrier()
 
         count = 0
         for key in out_data_dict.keys():
             out_data = out_data_dict[key]
 
             logging.info("saver setup: 2")
-            self.exp.barrier()
+            self.exp._barrier()
             out_data.backing_file = self.create_backing_h5(key)
 
             logging.info("saver setup: 3")
-            self.exp.barrier()
+            self.exp._barrier()
 
             out_data.group_name, out_data.group = \
                 self.create_entries(out_data, key, current_and_next[count])
 
             logging.info("saver setup: 4")
-            self.exp.barrier()
+            self.exp._barrier()
 
             count += 1
 
@@ -118,22 +118,22 @@ class Hdf5TomoSaver(BaseSaver):
         group.attrs['signal'] = 'data'
 
         logging.info("create_entries: 1")
-        self.exp.barrier()
+        self.exp._barrier()
 
         shape = data.get_shape()
         if current_and_next is 0:
             data.data = group.create_dataset("data", shape, data.dtype)
         else:
             logging.info("create_entries: 2")
-            self.exp.barrier()
+            self.exp._barrier()
 
             chunking = Chunking(self.exp, current_and_next)
             chunks = chunking._calculate_chunking(shape, data.dtype)
             logging.info("create_entries: 3")
-            self.exp.barrier()
+            self.exp._barrier()
             data.data = group.create_dataset("data", shape, data.dtype,
                                              chunks=chunks)
             logging.info("create_entries: 4")
-            self.exp.barrier()
+            self.exp._barrier()
 
         return group_name, group

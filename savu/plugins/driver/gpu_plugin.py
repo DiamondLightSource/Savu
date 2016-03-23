@@ -69,7 +69,7 @@ class GpuPlugin(PluginDriver):
             self.free_communicator()
             expInfo.set_meta_data('process', MPI.COMM_WORLD.Get_rank())
 
-        self.exp.barrier()
+        self.exp._barrier()
         expInfo.set_meta_data('processes', processes)
         return
 
@@ -77,7 +77,7 @@ class GpuPlugin(PluginDriver):
         self.group = MPI.COMM_WORLD.Get_group()
         self.new_group = MPI.Group.Incl(self.group, ranks)
         self.new_comm = MPI.COMM_WORLD.Create(self.new_group)
-        self.exp.barrier()
+        self.exp._barrier()
 
     def free_communicator(self):
         self.group.Free()
