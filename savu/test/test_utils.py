@@ -208,8 +208,8 @@ def plugin_setup(plugin):
     plugin_list = plugin.exp.meta_data.plugin_list.plugin_list
     plugin_dict = plugin_list[1]
     pu.set_datasets(plugin.exp, plugin, plugin_dict)
-    plugin.set_parameters(plugin_dict['data'])
-    plugin.set_plugin_datasets()
+    plugin._set_parameters(plugin_dict['data'])
+    plugin._set_plugin_datasets()
     plugin.setup()
 
 
