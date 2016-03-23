@@ -37,8 +37,7 @@ class DataCreate(object):
         self.remove = False
 
     @docstring_parameter(notes._create.__doc__, notes._shape.__doc__,
-                         notes.axis_labels.__doc__)
-#                         notes.patterns.__doc__)
+                         notes.axis_labels.__doc__, notes.patterns.__doc__)
     def create_dataset(self, *args, **kwargs):
         """ Set up required information when an output dataset has been
         created by a plugin.
@@ -53,7 +52,7 @@ class DataCreate(object):
         :keyword bool remove: Remove from framework after completion
         (no link in .nxs file) (optional: Defaults to False.)
 
-        {0} \n {1} \n {2}
+        {0} \n {1} \n {2} \n {3}
 
         """
         self.dtype = kwargs.get('dtype', np.float32)
@@ -66,12 +65,6 @@ class DataCreate(object):
 
     def __create_dataset_from_object(self, data_obj):
         """ Create a dataset from an existing Data object.
-
-        This will copy the necessary information:
-
-        * ``shape``
-        * ``axis_labels``
-        * ``patterns``
         """
         if data_obj.mapping:
             data_obj = self.__copy_mapping_object(data_obj)
@@ -111,9 +104,9 @@ class DataCreate(object):
         else:
             pData = self._get_plugin_data()
             self.set_shape(shape + tuple(pData.extra_dims))
-            print "***", self.get_axis_labels()
         if 'patterns' in kwargs:
-            self.__copy_patterns(kwargs['patterns'])
+            patterns = self.__copy_patterns(kwargs['patterns'])
+            self.__set_data_patterns(patterns)
 
     def __copy_patterns(self, copy_data):
         """ Copy patterns """
@@ -131,10 +124,11 @@ class DataCreate(object):
                 patterns = {}
                 for pattern in pattern_list:
                     patterns[pattern] = all_patterns[pattern]
-        self.__set_data_patterns(patterns)
+        return patterns
 
     def __copy_patterns_removing_dimensions(self, pattern_list, all_patterns,
                                             nDims):
+        """ Copy patterns but remove specified dimensions from them. """
         copy_patterns = {}
         for new_pattern in pattern_list:
             name, all_dims = new_pattern.split('.')
@@ -145,14 +139,16 @@ class DataCreate(object):
             dims = tuple(map(int, all_dims.split(',')))
             dims = self.non_negative_directions(dims, nDims=nDims)
 
+        dim_map = [a for a in range(nDims) if a not in dims]
         patterns = {}
         for name, pattern_dict in copy_patterns.iteritems():
             empty_flag = False
             for ddir in pattern_dict:
                 s_dims = self.non_negative_directions(
                     pattern_dict[ddir], nDims=nDims)
-                new_dims = tuple([sd for sd in s_dims if sd not in dims])
-                pattern_dict[ddir] = new_dims
+                new_dims = [sd for sd in s_dims if sd not in dims]
+                new_dims = [dim_map.index(n) for n in new_dims]
+                pattern_dict[ddir] = tuple(new_dims)
                 if not new_dims:
                     empty_flag = True
             if empty_flag is False:
@@ -160,6 +156,7 @@ class DataCreate(object):
         return patterns
 
     def __create_axis_labels(self, axis_labels):
+        """ Create axis labels. """
         if isinstance(axis_labels, DataCreate):
             self.__copy_labels(axis_labels)
         elif isinstance(axis_labels, dict):
@@ -173,6 +170,7 @@ class DataCreate(object):
                 self.__add_extra_dims_labels()
 
     def __copy_labels(self, copy_data):
+        """ Copy axis labels. """
         nDims = copy.copy(copy_data.data_info.get_meta_data('nDims'))
         axis_labels = \
             copy.copy(copy_data.data_info.get_meta_data('axis_labels'))
@@ -183,6 +181,8 @@ class DataCreate(object):
             self.__add_extra_dims_labels()
 
     def __add_extra_dims_labels(self):
+        """ Add axis labels to extra dimensions created by parameter tuning. 
+        """
         params_dict = self._get_plugin_data().multi_params_dict
         # add multi_params axis labels from dictionary in pData
         nDims = self.data_info.get_meta_data('nDims')
@@ -206,7 +206,7 @@ class DataCreate(object):
         remove = [i for i in arange if len(args[i].split('.')) is 1]
         insert = [i for i in arange if len(args[i].split('~')) is not 1]
         replace = list(set(arange).difference(set(remove + insert)))
-        print remove, insert, replace
+
         if remove:
             self.__remove_axis_labels([args[idx] for idx in remove])
         if insert:
@@ -217,14 +217,12 @@ class DataCreate(object):
     def __remove_axis_labels(self, labels):
         """ Remove axis labels. """
         axis_labels = self.get_axis_labels()
-        print "before in remove", self.get_axis_labels()
         removed_dims = 0
         for label in labels:
             del axis_labels[int(label) - removed_dims]
             removed_dims += 1
             self.data_info.set_meta_data(
                 'nDims', self.data_info.get_meta_data('nDims') - 1)
-        print "after in remove", self.get_axis_labels()
 
     def __replace_axis_labels(self, labels):
         """ Replace or add axis labels. """
@@ -239,27 +237,25 @@ class DataCreate(object):
     def __insert_axis_labels(self, labels):
         """ Insert axis labels. """
         axis_labels = self.get_axis_labels()
-        print "before in insert", self.get_axis_labels()
         for label in labels:
             label = label.split('~')[1].split('.')
             axis_labels.insert(int(label[0]), {label[1]: label[2]})
             self.data_info.set_meta_data(
                 'nDims', self.data_info.get_meta_data('nDims') + 1)
-        print "after in insert", self.get_axis_labels()
 
     def __set_data_patterns(self, patterns):
-        self._add_extra_dims_to_patterns(patterns)
-        self.data_info.set_meta_data('data_patterns', patterns)
-
-    def _add_extra_dims_to_patterns(self, patterns):
+        """ Add missing dimensions to patterns and populate data info dict. """
         all_dims = range(len(self.get_shape()))
         for p in patterns:
             pDims = patterns[p]['core_dir'] + patterns[p]['slice_dir']
             for dim in all_dims:
                 if dim not in pDims:
                     patterns[p]['slice_dir'] += (dim,)
+        self.data_info.set_meta_data('data_patterns', patterns)
 
     def __find_and_set_shape(self, data):
+        """ Add any extra dimensions, from parameter tuning, to the shape and
+        set the shape in the framework. """
         pData = self._get_plugin_data()
         new_shape = copy.copy(data.get_shape()) + tuple(pData.extra_dims)
         self.set_shape(new_shape)

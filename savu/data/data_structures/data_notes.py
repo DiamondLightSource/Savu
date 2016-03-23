@@ -71,11 +71,11 @@ def image_key():
         This is a helper function to be used after :meth:`savu.data.\
 data_structures.data_create.DataCreate.create_dataset`,
 
-            >>> out_dataset.create_dataset(in_dataset)
-            >>> out_dataset.trim_output_data(in_dataset, image_key=0)
+            >>> out_dataset[0].create_dataset(in_dataset[0])
+            >>> out_dataset[0].trim_output_data(in_dataset[0], image_key=0)
 
-        if in_dataset is a plugin input dataset with an image_key and 0 is the
-        data index.
+        if in_dataset[0] is a plugin input dataset with an image_key and 0 is
+        the data index.
     """
 
 
@@ -112,41 +112,86 @@ add_pattern`.
 def _shape():
     """
     .. note::
-        **``shape`` keyword argument**
+        ``shape`` keyword argument
             Options to pass are:
 
             1. Data object: Copy shape from the Data object.
+
+                >>> out_dataset[0].create_dataset(axis_labels=labels, \
+shape=in_dataset[0])
+
             2. tuple: Define shape explicity.
+
+                >>> out_dataset[0].create_dataset(axis_labels=labels, \
+shape=(10, 20, 30))
+
     """
 
 
 def axis_labels():
     """
     .. note::
-        **``axis_labels`` keyword argument**
+        ``axis_labels`` keyword argument
             Options to pass are:
 
             1. Data object: Copy all labels from the Data object.
+
+                >>> out_dataset[0].create_dataset(axis_labels=in_dataset[0], \
+shape=new_shape)
+
             2. {Data_obj: list}: Copy labels from the Data object and then
-                remove or insert.
-                * To remove dimensions: list = ['dim1', 'dim2', ...]
-                    For example, to remove the first and last axis_labels from
-                    the copied list:
+            remove or insert.
 
-                    >>> out_dataset.create_dataset(axis_labels=\
-{in_dataset: ['1', '-1']), shape=new_shape})
+                * To remove dimensions: list_entry = 'dim'. For example, to
+                  remove the first and last axis_labels from the copied list:
+
+                >>> out_dataset[0].create_dataset(axis_labels=\
+{in_dataset[0]: ['1', '-1']), shape=new_shape})
 
 
-                * To add/replace dimensions: list = \
-['dim1.name.unit', 'dim2.name.unit', ...]. For example,
+                * To add/replace dimensions: list_entry = 'dim.name.unit'.
 
-                    >>> out_dataset.create_dataset(axis_labels={in_dataset: \
+                >>> out_dataset[0].create_dataset(axis_labels={in_dataset[0]: \
 ['2.det_x.pixel', '3.det_y.pixel']}, shape=new_shape)
 
-            3. list: Where each element is of the form 'dim.name.unit'. For
-            example,
+                * To insert dimensions: list_entry = '~dim.name.unit'.
 
-                >>> out_dataset.create_dataset(axis_labels=['1.rotation.deg', \
-'2.det_x.pixel', '3.det_y.pixel'], shape=new_shape)
+                >>> out_dataset[0].create_dataset(axis_labels={in_dataset[0]: \
+['~2.det_x.pixel', '~3.det_y.pixel']}, shape=new_shape)
+
+                (or a combination)
+
+            3. list: Where each element is of the form 'name.unit'.
+
+                >>> out_dataset[0].create_dataset(axis_labels=['rotation.deg', \
+'det_x.pixel', 'det_y.pixel'], shape=new_shape)
+
+    """
+
+
+def patterns():
+    """
+    .. note::
+        ``patterns`` keyword argument
+            Options to pass are:
+
+            1. Data object: Copy all patterns from the Data object.
+
+                >>> out_dataset[0].create_dataset(axis_labels=labels, \
+shape=new_shape, patterns=in_dataset[0])
+
+            2. {Data_obj: list}: Copy only the patterns given in the list
+            from the Data object.
+
+                * Copy the patterns: list_entry = 'name'
+
+                >>> out_dataset[0].crate_dataset(axis_labels=labels, \
+shape=new_shape, patterns={in_dataset[0], ['SINOGRAM', 'PROJECTION']})
+
+                * Copy patterns but remove dimensions: list_entry = \
+'name1.r1,r2...': 
+
+                >>> out_dataset[0].crate_dataset(axis_labels=labels, \
+shape=new_shape, patterns={in_dataset[0], ['SINOGRAM.1', 'PROJECTION.1']})
 
     """
