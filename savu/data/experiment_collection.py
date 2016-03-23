@@ -63,14 +63,14 @@ class Experiment(object):
             else:
                 raise Exception('the run_type is unknown in Experiment class')
         except KeyError:
-            self.meta_data.plugin_list.populate_plugin_list(process_file)
+            self.meta_data.plugin_list._populate_plugin_list(process_file)
 
     def create_data_object(self, dtype, name):
         """ Create a data object.
 
         Plugin developers should apply this method in loaders only.
 
-        :params str dtype: either "in_data" or "out_data". 
+        :params str dtype: either "in_data" or "out_data".
         """
         bases = []
         try:
@@ -99,7 +99,7 @@ class Experiment(object):
             self.nxs_file = h5py.File(filename, 'w')
 
     def __remove_dataset(self, data_obj):
-        data_obj.close_file()
+        data_obj._close_file()
         del self.index["out_data"][data_obj.data_info.get_meta_data('name')]
 
     def _clear_data_objects(self):
@@ -134,12 +134,12 @@ class Experiment(object):
     def __close_unwanted_files(self, out_data_list):
         for out_objs in out_data_list:
             if out_objs in self.index["in_data"].keys():
-                self.index["in_data"][out_objs].close_file()
+                self.index["in_data"][out_objs]._close_file()
 
     def __copy_out_data_to_in_data(self, link_type):
         for key in self.index["out_data"]:
             output = self.index["out_data"][key]
-            output.save_data(link_type)
+            output._save_data(link_type)
             self.index["in_data"][key] = copy.deepcopy(output)
 
     def _set_all_datasets(self, name):
@@ -148,7 +148,7 @@ class Experiment(object):
             data_names.append(key)
         return data_names
 
-    def __barrier(self, communicator=MPI.COMM_WORLD):
+    def _barrier(self, communicator=MPI.COMM_WORLD):
         comm_dict = {'comm': communicator}
         if self.meta_data.get_meta_data('mpi') is True:
             logging.debug("About to hit a _barrier")

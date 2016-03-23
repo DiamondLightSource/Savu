@@ -56,7 +56,7 @@ class PluginRunner(object):
         self.exp._barrier()
         expInfo = self.exp.meta_data
         logging.debug("Running process List.save_list_to_file")
-        expInfo.plugin_list.save_plugin_list(
+        expInfo.plugin_list._save_plugin_list(
             expInfo.get_meta_data("nxs_filename"), exp=self.exp)
 
         logging.info("run_plugin_list: 3")

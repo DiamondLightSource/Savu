@@ -45,10 +45,10 @@ class Content(object):
         self.filename = filename
         if os.path.exists(filename):
             print "Opening file %s" % (filename)
-            self.plugin_list.populate_plugin_list(filename, activePass=True)
+            self.plugin_list._populate_plugin_list(filename, activePass=True)
 
     def display(self, **kwargs):
-        print '\n', self.plugin_list.get_string(**kwargs), '\n'
+        print '\n', self.plugin_list._get_string(**kwargs), '\n'
 
     def save(self, filename):
         if filename == "":
@@ -56,7 +56,7 @@ class Content(object):
         else:
             self.filename = filename
         print "Saving file %s" % (filename)
-        self.plugin_list.save_plugin_list(filename)
+        self.plugin_list._save_plugin_list(filename)
 
     def value(self, arg):
         value = ([''.join(arg.split()[1:])][0]).split()[0]

@@ -203,7 +203,7 @@ class PluginCoverageTest(unittest.TestCase):
         plugin_names = []
         for pfile in process_files:
             plist = PluginList()
-            plist.populate_plugin_list(path + '/' + pfile)
+            plist._populate_plugin_list(path + '/' + pfile)
             for p in plist.plugin_list:
                 plugin_id = p['id']
                 pList = self.add_plugin(plugin_id)

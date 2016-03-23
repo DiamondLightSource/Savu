@@ -150,7 +150,7 @@ class Hdf5Transport(TransportControl):
             start_in_data = copy.deepcopy(self.exp.index['in_data'])
             in_data = exp.index["in_data"][exp.index["in_data"].keys()[0]]
 
-            out_data_objs, stop = in_data.load_data(start)
+            out_data_objs, stop = in_data._load_data(start)
             exp._clear_data_objects()
 
             self.exp.index['in_data'] = copy.deepcopy(start_in_data)
@@ -158,7 +158,7 @@ class Hdf5Transport(TransportControl):
             start = stop
 
         for key in exp.index["in_data"].keys():
-            exp.index["in_data"][key].close_file()
+            exp.index["in_data"][key]._close_file()
 
         return
 
@@ -302,7 +302,7 @@ class Hdf5Transport(TransportControl):
         """
         slice_list = []
         for data in data_list:
-            slice_list.append(data.get_slice_list_per_process(expInfo))
+            slice_list.append(data._get_slice_list_per_process(expInfo))
         return slice_list
 
     def __get_all_padded_data(self, data_list, slice_list, count,
@@ -320,7 +320,7 @@ class Hdf5Transport(TransportControl):
         slist = []
         for idx in range(len(data_list)):
             section.append(squeeze_dict[idx](
-                data_list[idx].get_padded_slice_data(slice_list[idx][count])))
+                data_list[idx]._get_padded_slice_data(slice_list[idx][count])))
             slist.append(slice_list[idx][count])
         return section, slist
 
@@ -336,7 +336,7 @@ class Hdf5Transport(TransportControl):
         """
         result = [result] if type(result) is not list else result
         for idx in range(len(data_list)):
-            temp = data_list[idx].get_unpadded_slice_data(
+            temp = data_list[idx]._get_unpadded_slice_data(
                 slice_list[idx][count], result[idx])
             data_list[idx].data[slice_list[idx][count]] = \
                 expand_dict[idx](temp)

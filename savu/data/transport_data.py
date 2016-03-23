@@ -27,35 +27,35 @@ class TransportData(object):
     Implements functions associated with the transport of the data.
     """
 
-    def load_data(self, start):
+    def _load_data(self, start):
         """
         Any data setup required before the plugin chain has started.
         """
         raise NotImplementedError("load_data needs to be implemented in %s",
                                   self.__class__)
 
-    def save_data(self, link_type):
+    def _save_data(self, link_type):
         """
         Any finalisation required of the data after completion.
         """
         raise NotImplementedError("save_data needs to be implemented in %s",
                                   self.__class__)
 
-    def get_slice_list_per_process(self, expInfo):
+    def _get_slice_list_per_process(self, expInfo):
         """
         A slice list required by the current process.
         """
         raise NotImplementedError("get_slice_list_per_process needs to be"
                                   " implemented in  %s", self.__class__)
 
-    def get_padded_slice_data(self, input_slice_list):
+    def _get_padded_slice_data(self, input_slice_list):
         """
         Fetch the data with relevant padding (as determined by the plugin).
         """
         raise NotImplementedError("get_padded_slice_data needs to be"
                                   " implemented in  %s", self.__class__)
 
-    def get_unpadded_slice_data(self, input_slice_list, padded_dataset):
+    def _get_unpadded_slice_data(self, input_slice_list, padded_dataset):
         """
         Unpad the padded slice data.
         """
