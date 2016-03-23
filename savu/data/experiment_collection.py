@@ -44,14 +44,15 @@ class Experiment(object):
 
     def __init__(self, options):
         self.meta_data = MetaData(options)
-        self.meta_data_setup(options["process_file"])
+        self.__meta_data_setup(options["process_file"])
         self.index = {"in_data": {}, "out_data": {}, "mapping": {}}
         self.nxs_file = None
 
     def get_meta_data(self, entry):
+        """ Get the meta data dictionary. """
         return self.meta_data.get_meta_data(entry)
 
-    def meta_data_setup(self, process_file):
+    def __meta_data_setup(self, process_file):
         self.meta_data.plugin_list = PluginList()
 
         try:
@@ -65,6 +66,13 @@ class Experiment(object):
             self.meta_data.plugin_list.populate_plugin_list(process_file)
 
     def create_data_object(self, dtype, name):
+        """ Create a data object.
+
+        Plugin developers should apply this method in loaders only.
+
+        :params str dtype: either "in_data" or "out_data". 
+        """
+        print dtype, name
         bases = []
         try:
             self.index[dtype][name]

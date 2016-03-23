@@ -55,7 +55,7 @@ class I12TomoLoader(BaseLoader):
 
     def setup(self):
         exp = self.exp
-        data_obj = exp.create_data_object('in_data', 'tomo')
+        data_obj = exp._create_data_object('in_data', 'tomo')
         ds.TomoRaw(data_obj)
 
         # from nexus file determine rotation angle
