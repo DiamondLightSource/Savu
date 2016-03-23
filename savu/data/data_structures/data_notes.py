@@ -163,8 +163,8 @@ shape=new_shape)
 
             3. list: Where each element is of the form 'name.unit'.
 
-                >>> out_dataset[0].create_dataset(axis_labels=['rotation.deg', \
-'det_x.pixel', 'det_y.pixel'], shape=new_shape)
+                >>> out_dataset[0].create_dataset(axis_labels=['rotation.deg',\
+ 'det_x.pixel', 'det_y.pixel'], shape=new_shape)
 
     """
 
@@ -189,9 +189,15 @@ shape=new_shape, patterns=in_dataset[0])
 shape=new_shape, patterns={in_dataset[0], ['SINOGRAM', 'PROJECTION']})
 
                 * Copy patterns but remove dimensions: list_entry = \
-'name1.r1,r2...': 
+'name1.r1,r2...':
 
                 >>> out_dataset[0].crate_dataset(axis_labels=labels, \
 shape=new_shape, patterns={in_dataset[0], ['SINOGRAM.1', 'PROJECTION.1']})
+
+                * Copy ALL patterns but remove dimensions: list_entry = \
+'*.r1,r2...':
+
+                >>> out_dataset[0].crate_dataset(axis_labels=labels, \
+shape=new_shape, patterns={in_dataset[0], '*.0'})
 
     """

@@ -37,10 +37,34 @@ class MetaData(object):
         self.dict = options.copy()
 
     def set_meta_data(self, name, value):
+        """ Create and set an entry in the meta data dictionary.
+
+        :param name: dictionary key(s). If ``name`` is a list then each
+            successive name will become an entry in the dictionary which has
+            the previous name as its key.
+        :type name: str or list(str)
+        :param value value: dictionary value
+
+        For example,
+
+            >>> MetaDataObj.set_meta_data(['name1', 'name2'], 3)
+            >>> MetaDataObj.get_dictionary()
+            {'name1': {'name2': 3}}
+        """
         maplist = (name if type(name) is list else [name])
         self.get_meta_data(maplist[:-1], True)[maplist[-1]] = value
 
     def get_meta_data(self, maplist, setFlag=False):
+        """ Get a value from the meta data dictionary, given its key(s).
+
+        :params maplist: Dictionary key(s).
+        :type maplist: str of list(str)
+        :returns: Value from the dictionary corresponding to the given key(s)
+        :rtype: value
+
+        Dictionaries within dictionaries are accessed by placing successive
+        keys in a list.
+        """
         if not maplist:
             return self.dict
         else:
@@ -64,7 +88,9 @@ class MetaData(object):
             return accum_value
 
     def get_dictionary(self):
+        """ Get the meta_data dictionary """
         return self.dict
 
-    def set_dictionary(self, ddict):
+    def _set_dictionary(self, ddict):
+        """ Set the meta data dictionary """
         self.dict = ddict
