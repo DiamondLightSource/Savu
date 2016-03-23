@@ -127,7 +127,7 @@ class Preview(object):
         end = shape[dim]
 
         if dobj.mapping:
-            map_shape = self.exp.index['mapping'][self.get_name()].get_shape()
+            map_shape = self._data_obj.exp.index['mapping'][self._data_obj.get_name()].get_shape()
             midmap = map_shape[dim]/2
             endmap = map_shape[dim]
 
@@ -170,13 +170,13 @@ class Preview(object):
         # reduce shape of mapping data if it exists
         if dobj.mapping:
             self.__set_mapping_reduced_shape(orig_shape, new_shape,
-                                             self.get_name())
+                                             self._data_obj.get_name())
 
     def __set_mapping_reduced_shape(self, orig_shape, new_shape, name):
         """ Set new shape if data is reduced by previewing in a loader and the
         dataset is to be mapped from 3D to 4D.
         """
-        map_obj = self.exp.index['mapping'][name]
+        map_obj = self._data_obj.exp.index['mapping'][name]
         map_shape = np.array(map_obj.get_shape())
         diff = np.array(orig_shape) - map_shape[:len(orig_shape)]
         not_map_dim = np.where(diff == 0)[0]
@@ -194,4 +194,4 @@ class Preview(object):
         map_shape[len(orig_shape)] = np.ceil(new_shape[map_dim]/temp)
         map_shape[map_dim] = new_shape[map_dim]/map_shape[len(orig_shape)]
         map_obj.data_info.set_meta_data('map_dim_len', map_shape[map_dim])
-        self.exp.index['mapping'][name].set_shape(tuple(map_shape))
+        self._data_obj.exp.index['mapping'][name].set_shape(tuple(map_shape))
