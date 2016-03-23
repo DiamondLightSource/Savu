@@ -72,7 +72,6 @@ class Experiment(object):
 
         :params str dtype: either "in_data" or "out_data". 
         """
-        print dtype, name
         bases = []
         try:
             self.index[dtype][name]
