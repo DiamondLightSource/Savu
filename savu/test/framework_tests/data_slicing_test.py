@@ -23,7 +23,7 @@
 
 import unittest
 import savu.test.test_utils as tu
-from savu.data.data_structures import Padding
+from savu.data.data_structures.data_add_ons import Padding
 
 
 class Test(unittest.TestCase):

@@ -36,7 +36,7 @@ class Test(unittest.TestCase):
 
         out_data_name = options['plugin_list'][1]['data']['out_datasets'][0]
         plugin_runner = PluginRunner(options)
-        exp = plugin_runner._run_plugin_list(options)
+        exp = plugin_runner._run_plugin_list()
 
         self.assertEqual(exp.index['in_data'][out_data_name].get_shape(),
                          (91, 68, 80))
