@@ -5,3 +5,4 @@ savu.test.process_list_tests.i18_dimension_adder_test module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

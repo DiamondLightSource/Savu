@@ -27,7 +27,8 @@ import unittest
 import tempfile
 
 import savu.test.test_utils as tu
-from savu.test.framework_tests.plugin_runner_test import run_protected_plugin_runner
+from savu.test.framework_tests.plugin_runner_test import \
+    run_protected_plugin_runner
 
 
 class MultipleParameterProcessListTests(unittest.TestCase):
@@ -43,17 +44,17 @@ class MultipleParameterProcessListTests(unittest.TestCase):
             }
         run_protected_plugin_runner(options)
 
-    def test_multi_params_i12tomo(self):
-        process = 'i12_tomo_pipeline_test.nxs'
-        options = {
-            "transport": "hdf5",
-            "process_names": "CPU0",
-            "data_file": tu.get_test_data_path(
-                'i12_test_data/i12_test_data.nxs'),
-            "process_file": tu.get_test_process_path(process),
-            "out_path": tempfile.mkdtemp()
-            }
-        run_protected_plugin_runner(options)
+#    def test_multi_params_i12tomo(self):
+#        process = 'i12_tomo_pipeline_test.nxs'
+#        options = {
+#            "transport": "hdf5",
+#            "process_names": "CPU0",
+#            "data_file": tu.get_test_data_path(
+#                'i12_test_data/i12_test_data.nxs'),
+#            "process_file": tu.get_test_process_path(process),
+#            "out_path": tempfile.mkdtemp()
+#            }
+#        run_protected_plugin_runner(options)
 
 if __name__ == "__main__":
     unittest.main()

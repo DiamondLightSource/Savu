@@ -5,3 +5,4 @@ savu.plugins.corrections.timeseries_field_corrections module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

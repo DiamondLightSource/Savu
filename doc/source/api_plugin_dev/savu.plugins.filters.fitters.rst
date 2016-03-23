@@ -5,6 +5,7 @@ savu.plugins.filters.fitters package
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:
 
 Subpackages
 -----------

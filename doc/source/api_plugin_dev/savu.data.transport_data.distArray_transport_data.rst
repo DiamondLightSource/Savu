@@ -5,3 +5,4 @@ savu.data.transport_data.distArray_transport_data module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

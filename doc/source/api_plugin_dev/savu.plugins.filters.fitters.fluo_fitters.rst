@@ -5,6 +5,7 @@ savu.plugins.filters.fitters.fluo_fitters package
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:
 
 Submodules
 ----------

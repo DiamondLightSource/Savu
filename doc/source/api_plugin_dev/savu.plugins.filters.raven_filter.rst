@@ -5,3 +5,4 @@ savu.plugins.filters.raven_filter module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

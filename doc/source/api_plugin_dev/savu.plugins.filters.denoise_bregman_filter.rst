@@ -5,3 +5,4 @@ savu.plugins.filters.denoise_bregman_filter module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

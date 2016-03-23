@@ -5,3 +5,4 @@ savu.test.framework_tests.cgls_library_test module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

@@ -5,3 +5,4 @@ savu.plugins.loaders.nxtomo_loader module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

@@ -65,7 +65,7 @@ class Test(unittest.TestCase):
         total = []
         for i in range(len(processes)):
             tu.set_process(exp, i, processes)
-            total.append(data.get_slice_list_per_process(exp.meta_data))
+            total.append(data._get_slice_list_per_process(exp.meta_data))
         self.assertEqual(len(sl), sum(len(t) for t in total))
 
         pData.plugin_data_setup('SINOGRAM', 1)
@@ -73,7 +73,7 @@ class Test(unittest.TestCase):
         total = []
         for i in range(len(processes)):
             tu.set_process(exp, i, processes)
-            total.append(data.get_slice_list_per_process(exp.meta_data))
+            total.append(data._get_slice_list_per_process(exp.meta_data))
         self.assertEqual(len(sl), sum(len(t) for t in total))
 
         pData.plugin_data_setup('PROJECTION', 8)
@@ -81,7 +81,7 @@ class Test(unittest.TestCase):
         total = []
         for i in range(len(processes)):
             tu.set_process(exp, i, processes)
-            total.append(data.get_slice_list_per_process(exp.meta_data))
+            total.append(data._get_slice_list_per_process(exp.meta_data))
         self.assertEqual(len(sl), sum(len(t) for t in total))
 
         pData.plugin_data_setup('SINOGRAM', 1)
@@ -89,20 +89,20 @@ class Test(unittest.TestCase):
         total = []
         for i in range(len(processes)):
             tu.set_process(exp, i, processes)
-            total.append(data.get_slice_list_per_process(exp.meta_data))
+            total.append(data._get_slice_list_per_process(exp.meta_data))
         self.assertEqual(len(sl), sum(len(t) for t in total))
 
     def test_get_padded_slice_data(self):
         data, pData = tu.get_data_object(tu.load_test_data("tomo"))
 
-        data.finalise_patterns()
+        data._finalise_patterns()
         pData.plugin_data_setup('PROJECTION', 1)
         data.padding = {'pad_multi_frames': 10}
         padding = Padding(pData.get_pattern())
-        padding.get_padding_directions()
+        padding._get_padding_directions()
         for key in data.padding.keys():
             getattr(padding, key)(data.padding[key])
-        return padding.get_padding_directions()
+        return padding._get_padding_directions()
 
 #        in_data.padding = {'pad_multi_frames':10, 'pad_edges':5}
 #                

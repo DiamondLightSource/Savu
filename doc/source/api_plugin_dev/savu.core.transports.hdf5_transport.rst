@@ -5,3 +5,4 @@ savu.core.transports.hdf5_transport module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

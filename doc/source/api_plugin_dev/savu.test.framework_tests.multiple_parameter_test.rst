@@ -5,3 +5,4 @@ savu.test.framework_tests.multiple_parameter_test module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

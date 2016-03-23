@@ -5,3 +5,4 @@ savu.plugins.filters.fitters.base_fluo_fitter module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

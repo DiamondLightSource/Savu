@@ -5,3 +5,4 @@ savu.plugins.reconstructions.cgls_recon module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

@@ -235,7 +235,7 @@ class PluginData(object):
         :returns: Number of frames to process
         :rtype: int
         """
-        if self._plugin and self._plugin.chunk:
+        if self._plugin and self._plugin.chunk > 1:
             frame_chunk = self.meta_data.get_meta_data("nFrames")
             chunk = self.data_obj.get_preview().get_starts_stops_steps(
                 key='chunks')[self.get_slice_directions()[0]]

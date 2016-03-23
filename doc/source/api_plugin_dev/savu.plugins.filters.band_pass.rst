@@ -5,3 +5,4 @@ savu.plugins.filters.band_pass module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

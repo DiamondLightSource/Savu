@@ -5,3 +5,4 @@ savu.test.process_list_tests.simple_stxm_tomo_test module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

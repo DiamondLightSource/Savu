@@ -5,3 +5,4 @@ savu.plugins.filters.fastxrf_fitting module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

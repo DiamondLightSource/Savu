@@ -5,3 +5,4 @@ savu.plugins.filters.vo_centering module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

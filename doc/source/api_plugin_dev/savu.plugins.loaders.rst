@@ -5,6 +5,7 @@ savu.plugins.loaders package
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:
 
 Subpackages
 -----------

@@ -5,3 +5,4 @@ savu.test.test_utils module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

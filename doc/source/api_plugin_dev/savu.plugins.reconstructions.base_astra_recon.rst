@@ -5,3 +5,4 @@ savu.plugins.reconstructions.base_astra_recon module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

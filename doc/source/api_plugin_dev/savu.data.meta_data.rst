@@ -5,3 +5,4 @@ savu.data.meta_data module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

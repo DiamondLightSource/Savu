@@ -5,3 +5,4 @@ savu.data.experiment_collection module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

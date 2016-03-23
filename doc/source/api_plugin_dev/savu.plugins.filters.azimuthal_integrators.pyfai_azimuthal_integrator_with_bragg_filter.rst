@@ -5,3 +5,4 @@ savu.plugins.filters.azimuthal_integrators.pyfai_azimuthal_integrator_with_bragg
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

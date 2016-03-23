@@ -5,3 +5,4 @@ savu.plugins.savers.hdf5_tomo_saver module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

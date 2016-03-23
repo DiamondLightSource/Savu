@@ -5,3 +5,4 @@ savu.plugins.filters.fitters.fluo_fitters.simple_fit_xrf module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

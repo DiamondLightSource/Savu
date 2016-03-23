@@ -5,3 +5,4 @@ savu.plugins.filters.strip_background module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

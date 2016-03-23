@@ -5,3 +5,4 @@ savu.tomo_recon module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

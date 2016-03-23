@@ -5,6 +5,7 @@ savu.test.plugin_tests.filter_tests package
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:
 
 Submodules
 ----------

@@ -5,3 +5,4 @@ savu.core.transport_control module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

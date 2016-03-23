@@ -5,3 +5,4 @@ savu.plugins.filters.dials_find_spots module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

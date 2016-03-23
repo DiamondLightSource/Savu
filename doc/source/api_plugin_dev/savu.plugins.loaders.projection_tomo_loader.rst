@@ -5,3 +5,4 @@ savu.plugins.loaders.projection_tomo_loader module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

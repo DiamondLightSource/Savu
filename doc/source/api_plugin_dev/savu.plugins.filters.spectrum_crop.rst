@@ -5,3 +5,4 @@ savu.plugins.filters.spectrum_crop module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

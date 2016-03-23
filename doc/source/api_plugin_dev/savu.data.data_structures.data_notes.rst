@@ -5,3 +5,4 @@ savu.data.data_structures.data_notes module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

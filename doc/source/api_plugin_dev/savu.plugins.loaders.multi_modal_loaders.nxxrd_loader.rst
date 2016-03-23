@@ -5,3 +5,4 @@ savu.plugins.loaders.multi_modal_loaders.nxxrd_loader module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

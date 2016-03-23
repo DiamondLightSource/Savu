@@ -5,6 +5,7 @@ savu.plugins.loaders.multi_modal_loaders package
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:
 
 Submodules
 ----------

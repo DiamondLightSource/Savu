@@ -5,3 +5,4 @@ savu.plugins.filters.poly_background_estimator module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

@@ -5,6 +5,7 @@ savu.plugins.reconstructions.astra_recons package
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:
 
 Submodules
 ----------

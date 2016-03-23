@@ -5,3 +5,4 @@ savu.plugins.reconstructions.astra_recons.astra_recon_gpu module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

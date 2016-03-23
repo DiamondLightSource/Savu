@@ -5,3 +5,4 @@ savu.plugins.reconstructions.scikitimage_sart module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

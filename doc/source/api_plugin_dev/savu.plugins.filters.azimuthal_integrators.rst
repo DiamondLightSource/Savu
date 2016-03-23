@@ -5,6 +5,7 @@ savu.plugins.filters.azimuthal_integrators package
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:
 
 Submodules
 ----------

@@ -5,3 +5,4 @@ savu.test.plugin_tests.filter_tests.dezing_filter_test module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

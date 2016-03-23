@@ -5,3 +5,4 @@ savu.plugins.loaders.base_multi_modal_loader module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

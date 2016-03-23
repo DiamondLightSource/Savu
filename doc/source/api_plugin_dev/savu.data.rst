@@ -5,6 +5,7 @@ savu.data package
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:
 
 Subpackages
 -----------

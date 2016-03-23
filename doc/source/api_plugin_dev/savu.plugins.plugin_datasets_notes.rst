@@ -5,3 +5,4 @@ savu.plugins.plugin_datasets_notes module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

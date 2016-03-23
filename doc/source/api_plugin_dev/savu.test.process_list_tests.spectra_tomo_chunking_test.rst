@@ -5,3 +5,4 @@ savu.test.process_list_tests.spectra_tomo_chunking_test module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

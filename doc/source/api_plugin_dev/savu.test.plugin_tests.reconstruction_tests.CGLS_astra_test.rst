@@ -5,3 +5,4 @@ savu.test.plugin_tests.reconstruction_tests.CGLS_astra_test module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

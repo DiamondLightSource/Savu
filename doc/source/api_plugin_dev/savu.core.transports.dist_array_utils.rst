@@ -5,3 +5,4 @@ savu.core.transports.dist_array_utils module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

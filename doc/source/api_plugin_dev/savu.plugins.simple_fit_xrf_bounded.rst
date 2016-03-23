@@ -5,3 +5,4 @@ savu.plugins.simple_fit_xrf_bounded module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

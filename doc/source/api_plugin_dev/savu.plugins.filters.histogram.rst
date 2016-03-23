@@ -5,3 +5,4 @@ savu.plugins.filters.histogram module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

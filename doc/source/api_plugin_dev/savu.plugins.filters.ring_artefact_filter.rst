@@ -5,3 +5,4 @@ savu.plugins.filters.ring_artefact_filter module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

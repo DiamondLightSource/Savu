@@ -5,3 +5,4 @@ savu.plugins.filters.stats module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

@@ -5,3 +5,4 @@ savu.plugins.filters.monitor_correction module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

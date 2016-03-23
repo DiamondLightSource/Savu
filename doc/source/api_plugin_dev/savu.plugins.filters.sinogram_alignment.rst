@@ -5,3 +5,4 @@ savu.plugins.filters.sinogram_alignment module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

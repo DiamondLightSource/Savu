@@ -5,6 +5,7 @@ savu.test.process_list_tests package
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:
 
 Submodules
 ----------

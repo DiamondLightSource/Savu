@@ -5,3 +5,4 @@ savu.test.framework_tests.plugin_runner_test module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

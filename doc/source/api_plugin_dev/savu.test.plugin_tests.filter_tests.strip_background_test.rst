@@ -5,3 +5,4 @@ savu.test.plugin_tests.filter_tests.strip_background_test module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

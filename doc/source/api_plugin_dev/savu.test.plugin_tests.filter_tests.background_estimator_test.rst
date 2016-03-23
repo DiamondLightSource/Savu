@@ -5,3 +5,4 @@ savu.test.plugin_tests.filter_tests.background_estimator_test module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

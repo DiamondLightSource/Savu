@@ -5,6 +5,7 @@ savu.core.transports package
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:
 
 Submodules
 ----------

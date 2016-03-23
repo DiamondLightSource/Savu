@@ -5,3 +5,4 @@ savu.core.dist_array_process module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

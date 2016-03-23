@@ -5,3 +5,4 @@ savu.test.framework_tests.data_reduction_test module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

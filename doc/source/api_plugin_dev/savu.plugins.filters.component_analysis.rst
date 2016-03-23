@@ -5,6 +5,7 @@ savu.plugins.filters.component_analysis package
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:
 
 Submodules
 ----------

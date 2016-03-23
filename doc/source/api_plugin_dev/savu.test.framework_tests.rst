@@ -5,6 +5,7 @@ savu.test.framework_tests package
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:
 
 Submodules
 ----------

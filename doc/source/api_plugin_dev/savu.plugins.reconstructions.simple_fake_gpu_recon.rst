@@ -5,3 +5,4 @@ savu.plugins.reconstructions.simple_fake_gpu_recon module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

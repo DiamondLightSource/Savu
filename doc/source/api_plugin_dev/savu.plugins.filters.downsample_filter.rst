@@ -5,3 +5,4 @@ savu.plugins.filters.downsample_filter module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

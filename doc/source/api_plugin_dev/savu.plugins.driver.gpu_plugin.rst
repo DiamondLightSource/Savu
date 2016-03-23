@@ -5,3 +5,4 @@ savu.plugins.driver.gpu_plugin module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

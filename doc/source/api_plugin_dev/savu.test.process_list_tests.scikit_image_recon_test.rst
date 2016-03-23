@@ -5,3 +5,4 @@ savu.test.process_list_tests.scikit_image_recon_test module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

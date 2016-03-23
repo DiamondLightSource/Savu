@@ -5,3 +5,4 @@ savu.data.chunking module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

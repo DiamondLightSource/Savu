@@ -5,3 +5,4 @@ savu.plugins.base_correction module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

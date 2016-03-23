@@ -5,6 +5,7 @@ savu.data.data_structures package
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:
 
 Submodules
 ----------

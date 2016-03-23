@@ -5,3 +5,4 @@ savu.plugins.filters.find_peaks module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

@@ -5,7 +5,8 @@ Developing a Savu plugin
 Plugin Developer API
 --------------------
 
-.. toctree:: 
-
-   dev_autosummary
+.. toctree::
+   :maxdepth: 2
+   
+   ../dev_autosummary
 

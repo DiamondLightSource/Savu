@@ -5,3 +5,4 @@ savu.plugins.filters.no_process_plugin module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

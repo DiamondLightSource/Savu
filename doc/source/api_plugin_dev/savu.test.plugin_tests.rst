@@ -5,6 +5,7 @@ savu.test.plugin_tests package
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:
 
 Subpackages
 -----------

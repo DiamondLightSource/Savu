@@ -5,3 +5,4 @@ savu.plugins.loaders.mm_loader module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

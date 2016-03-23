@@ -5,3 +5,4 @@ savu.plugins.dimension_adder module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:

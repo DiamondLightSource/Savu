@@ -5,3 +5,4 @@ savu.plugins.reconstructions.scikitimage_filter_back_projection module
     :members:
     :undoc-members:
     :show-inheritance:
+    :noindex:
