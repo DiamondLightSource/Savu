@@ -36,8 +36,8 @@ class DataCreate(object):
         self.dtype = None
         self.remove = False
 
-    @docstring_parameter(notes._create.__doc__, notes._shape.__doc__)
-#                         notes.axis_labels.__doc__,
+    @docstring_parameter(notes._create.__doc__, notes._shape.__doc__,
+                         notes.axis_labels.__doc__)
 #                         notes.patterns.__doc__)
     def create_dataset(self, *args, **kwargs):
         """ Set up required information when an output dataset has been
@@ -53,7 +53,7 @@ class DataCreate(object):
         :keyword bool remove: Remove from framework after completion
         (no link in .nxs file) (optional: Defaults to False.)
 
-        {0} \n {1}
+        {0} \n {1} \n {2}
 
         """
         self.dtype = kwargs.get('dtype', np.float32)
@@ -84,6 +84,9 @@ class DataCreate(object):
             self.get_tomo_raw().data_obj = self
 
     def __copy_mapping_object(self, data_obj):
+        """ Copy relevant mapping object information and return the mapping
+        Data object
+        """
         map_data = self.exp.index['mapping'][data_obj.get_name()]
         map_mData = map_data.meta_data
         map_axis_labels = map_data.data_info.get_meta_data('axis_labels')
@@ -95,6 +98,7 @@ class DataCreate(object):
         return map_data
 
     def __create_dataset_from_kwargs(self, kwargs):
+        """ Create dataset from kwargs. """
         try:
             shape = kwargs['shape']
             self.__create_axis_labels(kwargs['axis_labels'])
@@ -107,10 +111,12 @@ class DataCreate(object):
         else:
             pData = self._get_plugin_data()
             self.set_shape(shape + tuple(pData.extra_dims))
+            print "***", self.get_axis_labels()
         if 'patterns' in kwargs:
             self.__copy_patterns(kwargs['patterns'])
 
     def __copy_patterns(self, copy_data):
+        """ Copy patterns """
         if isinstance(copy_data, DataCreate):
             patterns = copy_data.get_data_patterns()
         else:
@@ -192,24 +198,54 @@ class DataCreate(object):
         self.data_info.set_meta_data('axis_labels', axis_labels)
 
     def __amend_axis_labels(self, *args):
-        axis_labels = self.data_info.get_meta_data('axis_labels')
+        """ Helper function to remove, replace/add or insert axis_labels into
+        existing axis_labels
+        """
+        args = args[0]
+        arange = range(len(args))
+        remove = [i for i in arange if len(args[i].split('.')) is 1]
+        insert = [i for i in arange if len(args[i].split('~')) is not 1]
+        replace = list(set(arange).difference(set(remove + insert)))
+        print remove, insert, replace
+        if remove:
+            self.__remove_axis_labels([args[idx] for idx in remove])
+        if insert:
+            self.__insert_axis_labels([args[idx] for idx in insert])
+        if replace:
+            self.__replace_axis_labels([args[idx] for idx in replace])
+
+    def __remove_axis_labels(self, labels):
+        """ Remove axis labels. """
+        axis_labels = self.get_axis_labels()
+        print "before in remove", self.get_axis_labels()
         removed_dims = 0
-        for arg in args[0]:
-            label = arg.split('.')
-            if len(label) is 1:
-                del axis_labels[int(label[0]) + removed_dims]
-                removed_dims += 1
+        for label in labels:
+            del axis_labels[int(label) - removed_dims]
+            removed_dims += 1
+            self.data_info.set_meta_data(
+                'nDims', self.data_info.get_meta_data('nDims') - 1)
+        print "after in remove", self.get_axis_labels()
+
+    def __replace_axis_labels(self, labels):
+        """ Replace or add axis labels. """
+        axis_labels = self.get_axis_labels()
+        for label in labels:
+            label = label.split('.')
+            axis_labels[int(label[0])] = {label[1]: label[2]}
+            if int(label[0]) > self.data_info.get_meta_data('nDims'):
                 self.data_info.set_meta_data(
-                    'nDims', self.data_info.get_meta_data('nDims') - 1)
-            else:
-                if int(label[0]) < 0:
-                    axis_labels[int(label[0]) + removed_dims] = \
-                        {label[1]: label[2]}
-                else:
-                    if int(label[0]) < self.data_info.get_meta_data('nDims'):
-                        axis_labels[int(label[0])] = {label[1]: label[2]}
-                    else:
-                        axis_labels.insert(int(label[0]), {label[1]: label[2]})
+                    'nDims', self.data_info.get_meta_data('nDims') + 1)
+
+    def __insert_axis_labels(self, labels):
+        """ Insert axis labels. """
+        axis_labels = self.get_axis_labels()
+        print "before in insert", self.get_axis_labels()
+        for label in labels:
+            label = label.split('~')[1].split('.')
+            axis_labels.insert(int(label[0]), {label[1]: label[2]})
+            self.data_info.set_meta_data(
+                'nDims', self.data_info.get_meta_data('nDims') + 1)
+        print "after in insert", self.get_axis_labels()
 
     def __set_data_patterns(self, patterns):
         self._add_extra_dims_to_patterns(patterns)

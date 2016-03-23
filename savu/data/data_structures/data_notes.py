@@ -99,7 +99,7 @@ def _create():
             2. Passing kwargs: ``shape`` and ``axis_labels`` are required
             (see above for other optional arguments). For example,
 
-                >>> out_dataset[0].create_dataset(axis_label=axis_labels, \
+                >>> out_dataset[0].create_dataset(axis_labels=labels, \
 shape=new_shape)
 
         .. warning:: If ``pattern`` keyword is not used, patterns must be added
@@ -127,11 +127,26 @@ def axis_labels():
             Options to pass are:
 
             1. Data object: Copy all labels from the Data object.
-            2. {Data_obj: list}: Copy and amend labels from the Data object.
-                * A list of dimensions to be removed.
-                * A list of ??? Remove, add, replace, insert
-            3. list: Where each element is of the form 'dim.name.unit'.
+            2. {Data_obj: list}: Copy labels from the Data object and then
+                remove or insert.
+                * To remove dimensions: list = ['dim1', 'dim2', ...]
+                    For example, to remove the first and last axis_labels from
+                    the copied list:
 
-            .. Examples::
+                    >>> out_dataset.create_dataset(axis_labels=\
+{in_dataset: ['1', '-1']), shape=new_shape})
+
+
+                * To add/replace dimensions: list = \
+['dim1.name.unit', 'dim2.name.unit', ...]. For example,
+
+                    >>> out_dataset.create_dataset(axis_labels={in_dataset: \
+['2.det_x.pixel', '3.det_y.pixel']}, shape=new_shape)
+
+            3. list: Where each element is of the form 'dim.name.unit'. For
+            example,
+
+                >>> out_dataset.create_dataset(axis_labels=['1.rotation.deg', \
+'2.det_x.pixel', '3.det_y.pixel'], shape=new_shape)
 
     """

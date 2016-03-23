@@ -255,6 +255,14 @@ class Data(DataCreate):
                 pass
         self.data_info.set_meta_data('axis_labels', axis_labels)
 
+    def get_axis_labels(self):
+        """ Get axis labels.
+
+        :returns: Axis labels
+        :rtype: list(dict)
+        """
+        return self.data_info.get_meta_data('axis_labels')
+
     def find_axis_label_dimension(self, name, contains=False):
         """ Get the dimension of the data associated with a particular
         axis_label.

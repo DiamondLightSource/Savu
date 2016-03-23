@@ -30,8 +30,10 @@ class BaseCorrection(Plugin):
     """
     A base class for dark and flat field correction plugins
 
-    :param in_datasets: Create a list of the dataset(s) to process. Default: [].
-    :param out_datasets: Create a list of the dataset(s) to process. Default: [].
+    :param in_datasets: Create a list of the dataset(s) to \
+        process. Default: [].
+    :param out_datasets: Create a list of the dataset(s) to \
+        process. Default: [].
     """
     count = 0
 
@@ -61,7 +63,11 @@ class BaseCorrection(Plugin):
         # set up the output dataset that is created by the plugin
         in_dataset, out_dataset = self.get_datasets()
         # copy all required information from in_dataset[0]
-        out_dataset[0].create_dataset(in_dataset[0])
+#        out_dataset[0].create_dataset(in_dataset[0])
+
+        print in_dataset[0].get_axis_labels()
+        out_dataset[0].create_dataset(axis_labels={in_dataset[0]: ['-3', '-2.name2.unit2', '~3.name3.unit3', '~-4.name4.unit4']}, shape=(1,1))
+        print out_dataset[0].get_axis_labels()
 
         # removes dark and flat fields
         out_dataset[0].trim_output_data(in_dataset[0], image_key=0)
