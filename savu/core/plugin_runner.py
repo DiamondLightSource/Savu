@@ -50,7 +50,7 @@ class PluginRunner(object):
 
         logging.info("run_plugin_list: 1")
         self.exp._barrier()
-        self.__run_plugin_list_check(plugin_list)
+        self._run_plugin_list_check(plugin_list)
 
         logging.info("run_plugin_list: 2")
         self.exp._barrier()
@@ -74,7 +74,7 @@ class PluginRunner(object):
 
         return self.exp
 
-    def __run_plugin_list_check(self, plugin_list):
+    def _run_plugin_list_check(self, plugin_list):
         """ Run the plugin list through the framework without executing the
         main processing.
         """

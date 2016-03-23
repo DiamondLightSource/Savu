@@ -225,7 +225,7 @@ def plugin_runner_real_plugin_run(options):
 
     start_in_data = copy.deepcopy(exp.index['in_data'])
     in_data = exp.index["in_data"][exp.index["in_data"].keys()[0]]
-    out_data_objs, stop = in_data.load_data(1)
+    out_data_objs, stop = in_data._load_data(1)
     exp._clear_data_objects()
     exp.index['in_data'] = copy.deepcopy(start_in_data)
 

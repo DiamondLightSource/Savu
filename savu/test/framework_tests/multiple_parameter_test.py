@@ -124,7 +124,7 @@ class MultipleParameterTest2(unittest.TestCase):
         plugin = self.plugin_setup()
         key = 'sino_pad_width'
         params = {key: '0.2;0.4;0.6'}
-        plugin.set_parameters(params)
+        plugin._set_parameters(params)
         params = plugin.parameters[key]
         self.assertEqual(params, [0.2, 0.4, 0.6])
         self.assertEqual(plugin.extra_dims[0], 3)
@@ -133,7 +133,7 @@ class MultipleParameterTest2(unittest.TestCase):
         plugin = self.plugin_setup()
         key = 'interpolation'
         params = {key: 'nearest;linear'}
-        plugin.set_parameters(params)
+        plugin._set_parameters(params)
         params = plugin.parameters[key]
         self.assertEqual(params, ['nearest', 'linear'])
         self.assertEqual(plugin.extra_dims[0], 2)
@@ -143,7 +143,7 @@ class MultipleParameterTest2(unittest.TestCase):
         key1 = 'interpolation'
         key2 = 'iterations'
         params = {key1: 'nearest;linear', key2: '1;2;3'}
-        plugin.set_parameters(params)
+        plugin._set_parameters(params)
         out_datasets = plugin.get_out_datasets()
         for data in out_datasets:
             self.assertEqual(data.extra_dims, plugin.extra_dims)
