@@ -28,9 +28,6 @@ from savu.test import test_utils as tu
 from savu.test.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
-
-# @unittest.skip('test data and real data are different format scans. Resolving in favour of real world. Adp')
-@unittest.skip('Broken as somewhere a string is being put into shape.')
 class I18XrdPipelineTest(unittest.TestCase):
 
     def test_process(self):
@@ -38,7 +35,7 @@ class I18XrdPipelineTest(unittest.TestCase):
             "transport": "hdf5",
             "process_names": "CPU0",
             "data_file": tu.get_test_data_path('mm.nxs'),
-            "process_file": tu.get_process_list_path('I18_pipeline_just_xrd.nxs'),
+            "process_file": tu.get_process_list_path('I18_pipeline_just_xrd_from_raw_filtered_adp_mod2.nxs'),
             "out_path": tempfile.mkdtemp()
             }
         run_protected_plugin_runner(options)
