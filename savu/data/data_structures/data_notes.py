@@ -159,7 +159,8 @@ shape=new_shape)
                 >>> out_dataset[0].create_dataset(axis_labels={in_dataset[0]: \
 ['~2.det_x.pixel', '~3.det_y.pixel']}, shape=new_shape)
 
-                (or a combination)
+                (or a combination, where each successive step is applied after
+                the previous changes have been made.)
 
             3. list: Where each element is of the form 'name.unit'.
 

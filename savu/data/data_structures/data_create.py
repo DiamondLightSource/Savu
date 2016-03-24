@@ -201,47 +201,40 @@ class DataCreate(object):
         """ Helper function to remove, replace/add or insert axis_labels into
         existing axis_labels
         """
-        args = args[0]
-        arange = range(len(args))
-        remove = [i for i in arange if len(args[i].split('.')) is 1]
-        insert = [i for i in arange if len(args[i].split('~')) is not 1]
-        replace = list(set(arange).difference(set(remove + insert)))
+        removed_dims = 0
+        for arg in args[0]:
+            if len(arg.split('.')) is 1:
+                self.__remove_axis_labels(arg, removed_dims)
+                removed_dims += 1
+            else:
+                if len(arg.split('~')) is 1:
+                    self.__replace_axis_labels(arg)
+                else:
+                    self.__insert_axis_labels(arg)
 
-        if remove:
-            self.__remove_axis_labels([args[idx] for idx in remove])
-        if insert:
-            self.__insert_axis_labels([args[idx] for idx in insert])
-        if replace:
-            self.__replace_axis_labels([args[idx] for idx in replace])
-
-    def __remove_axis_labels(self, labels):
+    def __remove_axis_labels(self, label, removed_dims):
         """ Remove axis labels. """
         axis_labels = self.get_axis_labels()
-        removed_dims = 0
-        for label in labels:
-            del axis_labels[int(label) - removed_dims]
-            removed_dims += 1
-            self.data_info.set_meta_data(
-                'nDims', self.data_info.get_meta_data('nDims') - 1)
+        del axis_labels[int(label) - removed_dims]
+        self.data_info.set_meta_data(
+            'nDims', self.data_info.get_meta_data('nDims') - 1)
 
-    def __replace_axis_labels(self, labels):
+    def __replace_axis_labels(self, label):
         """ Replace or add axis labels. """
         axis_labels = self.get_axis_labels()
-        for label in labels:
-            label = label.split('.')
-            axis_labels[int(label[0])] = {label[1]: label[2]}
-            if int(label[0]) > self.data_info.get_meta_data('nDims'):
-                self.data_info.set_meta_data(
-                    'nDims', self.data_info.get_meta_data('nDims') + 1)
-
-    def __insert_axis_labels(self, labels):
-        """ Insert axis labels. """
-        axis_labels = self.get_axis_labels()
-        for label in labels:
-            label = label.split('~')[1].split('.')
-            axis_labels.insert(int(label[0]), {label[1]: label[2]})
+        label = label.split('.')
+        axis_labels[int(label[0])] = {label[1]: label[2]}
+        if int(label[0]) > self.data_info.get_meta_data('nDims'):
             self.data_info.set_meta_data(
                 'nDims', self.data_info.get_meta_data('nDims') + 1)
+
+    def __insert_axis_labels(self, label):
+        """ Insert axis labels. """
+        axis_labels = self.get_axis_labels()
+        label = label.split('~')[1].split('.')
+        axis_labels.insert(int(label[0]), {label[1]: label[2]})
+        self.data_info.set_meta_data(
+            'nDims', self.data_info.get_meta_data('nDims') + 1)
 
     def __set_data_patterns(self, patterns):
         """ Add missing dimensions to patterns and populate data info dict. """

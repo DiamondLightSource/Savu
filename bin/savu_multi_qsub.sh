@@ -21,8 +21,8 @@ while read -r a b c d; do
 	runfile=/bin/savu_launcher.sh
 	outpath=$PWD #outputting to the current folder
     #datafile=$outpath/../test_data/24737.nxs
-    datafile=/dls/i12/data/2015/ee10500-1/processing/LD_2W50_8/LD_2W50_8_Dataset_093.nxs
-    processfile=/home/qmm55171/Documents/Git/git_repos/Savu/test_data/test_process_lists/basic_tomo_process.nxs
+    #datafile=/dls/i12/data/2015/ee10500-1/processing/LD_2W50_8/LD_2W50_8_Dataset_093.nxs
+    #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/test_data/test_process_lists/basic_tomo_process.nxs
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/mpi_settings_test.nxs
     
     #datafile=$outpath/../test_data/LD_2W50_8_Dataset_038.nxs
@@ -49,6 +49,10 @@ while read -r a b c d; do
     # i13 data
     #datafile=/dls/i13/data/2016/mt13302-1/raw/72588.nxs
     #processfile=$outpath/../test_data/i13_mapping_preview.nxs
+
+    datafile=/home/qmm55171/Documents/Git/git_repos/Savu/test_data/data/mm.nxs
+    #datafile=/dls/i18/data/2016/sp12778-1/processing/converted_files_for_savu/67132.nxs
+    processfile=/home/qmm55171/Documents/Git/git_repos/Savu/test_data/process_lists/I18_pipeline_just_xrd_from_raw_filtered_adp_mod2.nxs
 
 	outname="${fname}N${nNodes}_C${nCPUs}_mpi_test"
 
