@@ -338,7 +338,7 @@ class Hdf5TransportData(object):
             for sub in sub_groups:
                 start = sub[0][group_dim].start
                 stop = sub[-1][group_dim].stop
-                step = sub[0][group_dim].step
+                step = steps[group_dim]
                 working_slice = list(sub[0])
                 working_slice[group_dim] = slice(start, stop, step)
                 grouped.append(tuple(working_slice))
@@ -361,6 +361,9 @@ class Hdf5TransportData(object):
                             "does not support slicing in directions",
                             self.get_slice_directions())
         temp = self.__grouped_slice_list(sl, max_frames)
+        
+        for s in temp:
+            print s
         return temp
 
     def _get_slice_list_per_process(self, expInfo):

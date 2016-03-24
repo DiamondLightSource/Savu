@@ -41,6 +41,7 @@ class TestPlugin(Plugin, CpuPlugin):
         super(TestPlugin, self).__init__("TestPlugin")
 
     def process_frames(self, data, frame_list):
+        print data[0].shape, data[1].shape
         return data[0] + data[1]
 
     def setup(self):
@@ -60,6 +61,7 @@ class TestPlugin(Plugin, CpuPlugin):
         #in_pData[1].set_fixed_directions(slice_dirs, [0, 0])
 
         out_datasets[0].create_dataset(in_datasets[0])
+        print in_datasets[0].get_shape(), out_datasets[0].get_shape(), "***"
         out_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
 
     def nInput_datasets(self):
