@@ -1,8 +1,0 @@
-savu.test.framework_tests.plugin_runner_test module
-===================================================
-
-.. automodule:: savu.test.framework_tests.plugin_runner_test
-    :members:
-    :undoc-members:
-    :show-inheritance:
-    :noindex:

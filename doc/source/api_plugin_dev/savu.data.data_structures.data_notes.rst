@@ -4,5 +4,4 @@ savu.data.data_structures.data_notes module
 .. automodule:: savu.data.data_structures.data_notes
     :members:
     :undoc-members:
-    :show-inheritance:
     :noindex:
