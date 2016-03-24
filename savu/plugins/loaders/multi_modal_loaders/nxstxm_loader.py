@@ -59,6 +59,6 @@ class NxstxmLoader(BaseMultiModalLoader):
                                  'y.mm',
                                  'x.mm'
                                     )
-        print "NXstxm"
+#         print "NXstxm"
         self.add_patterns_based_on_acquisition(data_obj, 'stxm')
         self.set_data_reduction_params(data_obj)

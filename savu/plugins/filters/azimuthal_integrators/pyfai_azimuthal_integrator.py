@@ -31,11 +31,8 @@ import time
 class PyfaiAzimuthalIntegrator(BaseAzimuthalIntegrator):
     """
     1D azimuthal integrator by pyFAI
-
     :param use_mask: Should we mask. Default: False.
-
     :param num_bins: number of bins. Default: 1005.
-
     """
 
     def __init__(self):
@@ -44,14 +41,12 @@ class PyfaiAzimuthalIntegrator(BaseAzimuthalIntegrator):
               self).__init__("PyfaiAzimuthalIntegrator")
 
     def filter_frames(self, data):
-        t1 = time.time()
+        logging.debug("Running azimuthal integration")
         mData = self.params[2]
         mask = self.params[0]
         ai = self.params[3]
-        logging.debug("Running azimuthal integration")
-        fit = ai.xrpd(data=data[0], npt=self.npts)
-        mData.set_meta_data('Q', fit[0])
-#        mData.set_meta_data('integrated_diffraction_noise',fit[2])
-        t2 = time.time()
-        print "PyFAI iteration took:"+str((t2-t1)*1e3)+"ms"
-        return fit[1]
+        units = self.parameters['units']
+        axis, remapped = ai.integrate1d(data=data[0], npt=self.npts, unit='q_nm^-1')
+        axis = self.unit_conversion(units,axis)
+        mData.set_meta_data('Q', axis) # multiplied because their units are wrong!
+        return remapped

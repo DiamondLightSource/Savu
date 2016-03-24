@@ -36,7 +36,7 @@ class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
     a base azimuthal integrator for pyfai
 
     :param use_mask: Should we mask. Default: False.
-
+    :param units: options are q_nm^-1 and d_nm. Default: "q_nm^-1".
     :param num_bins: number of bins. Default: 1005.
 
     """
@@ -102,7 +102,7 @@ class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
         patterns = ['SINOGRAM.-1', 'PROJECTION.-1']
         # stating only 'dimension' will remove the axis label, stating
         # 'dimension.name.unit' name and unit will add or replace it
-        axis_labels = ['-1', '-1.name.unit']
+        axis_labels = ['-1', '-2.name.unit']
 
         spectra.create_dataset(patterns={in_dataset[0]: patterns},
                                axis_labels={in_dataset[0]: axis_labels},
@@ -123,14 +123,11 @@ class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
     def nOutput_datasets(self):
         return 1
 
-
-    def calcfrom1d(self, tth, I, twotheta_flat):
-        '''
-        takes the 1D data and makes it two d again
-        tth is the two theta from the integrator
-        I is the intensity from the integrator
-        ai is the integrator object
-        '''
-        interpedvals = np.interp(twotheta_flat, tth, I)
-        new_image = interpedvals.reshape(self.sh)
-        return new_image
+    def unit_conversion(self,units,axis):
+        if units=='q_nm^-1':
+            axis *= 1e3*1e10 # multiplied because their conversion is incorrect I think
+        elif units=='d_nm':
+            #  this is non-linear which is ok for DAWN, but interpolation smooths it.
+            q = axis*1e3*1e10
+            axis = 1.0/axis
+        return axis
