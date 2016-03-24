@@ -81,6 +81,7 @@ class Chunking(object):
         and max value)
         """
         adjust_dim = self.__get_adjustable_dims()
+        print adjust_dim
         array_len = len(adjust_dim)
         adjust_max = [1]*array_len
         for i in range(array_len):

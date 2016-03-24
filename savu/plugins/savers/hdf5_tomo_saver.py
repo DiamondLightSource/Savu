@@ -60,20 +60,20 @@ class Hdf5TomoSaver(BaseSaver):
 
             logging.info("saver setup: 2")
             self.exp._barrier()
-            out_data.backing_file = self.create_backing_h5(key)
+            out_data.backing_file = self.__create_backing_h5(key)
 
             logging.info("saver setup: 3")
             self.exp._barrier()
 
             out_data.group_name, out_data.group = \
-                self.create_entries(out_data, key, current_and_next[count])
+                self.__create_entries(out_data, key, current_and_next[count])
 
             logging.info("saver setup: 4")
             self.exp._barrier()
 
             count += 1
 
-    def create_backing_h5(self, key):
+    def __create_backing_h5(self, key):
         """
         Create a h5 backend for output data
         """
@@ -104,7 +104,7 @@ class Hdf5TomoSaver(BaseSaver):
 
         return backing_file
 
-    def create_entries(self, data, key, current_and_next):
+    def __create_entries(self, data, key, current_and_next):
         expInfo = self.exp.meta_data
         group_name = expInfo.get_meta_data(["group_name", key])
         data.data_info.set_meta_data('group_name', group_name)
