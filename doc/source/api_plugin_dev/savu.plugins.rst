@@ -1,12 +1,6 @@
 savu.plugins package
 ====================
 
-.. automodule:: savu.plugins
-    :members:
-    :undoc-members:
-    :show-inheritance:
-    :noindex:
-
 Subpackages
 -----------
 
@@ -37,3 +31,11 @@ Submodules
    savu.plugins.test_plugin
    savu.plugins.utils
 
+Module contents
+---------------
+
+.. automodule:: savu.plugins
+    :members:
+    :undoc-members:
+    :show-inheritance:
+    :noindex:

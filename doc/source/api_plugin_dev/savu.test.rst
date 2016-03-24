@@ -1,12 +1,6 @@
 savu.test package
 =================
 
-.. automodule:: savu.test
-    :members:
-    :undoc-members:
-    :show-inheritance:
-    :noindex:
-
 Subpackages
 -----------
 
@@ -23,3 +17,11 @@ Submodules
 
    savu.test.test_utils
 
+Module contents
+---------------
+
+.. automodule:: savu.test
+    :members:
+    :undoc-members:
+    :show-inheritance:
+    :noindex:

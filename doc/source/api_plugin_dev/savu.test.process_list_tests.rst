@@ -1,12 +1,6 @@
 savu.test.process_list_tests package
 ====================================
 
-.. automodule:: savu.test.process_list_tests
-    :members:
-    :undoc-members:
-    :show-inheritance:
-    :noindex:
-
 Submodules
 ----------
 
@@ -27,3 +21,11 @@ Submodules
    savu.test.process_list_tests.stxm_tomo_test
    savu.test.process_list_tests.tomo_pipeline_preview_test
 
+Module contents
+---------------
+
+.. automodule:: savu.test.process_list_tests
+    :members:
+    :undoc-members:
+    :show-inheritance:
+    :noindex:

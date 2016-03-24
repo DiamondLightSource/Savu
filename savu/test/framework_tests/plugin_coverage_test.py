@@ -202,7 +202,6 @@ class PluginCoverageTest(unittest.TestCase):
     def get_test_plugin_list(self, process_files, path):
         plugin_names = []
         for pfile in process_files:
-            print pfile
             plist = PluginList()
             plist._populate_plugin_list(path + '/' + pfile)
             for p in plist.plugin_list:
@@ -213,14 +212,19 @@ class PluginCoverageTest(unittest.TestCase):
         return list(set(plugin_names))
 
     def add_plugin(self, plugin_id):
-        plugin_list = []
-        plugin = self.load_plugin(plugin_id)
-        pList = plugin.__class__.mro()
-        for p in pList:
-            module_name = p.__module__.split('.')
-            if module_name[0] == 'savu':
-                plugin_list.append(module_name[-1])
-        return plugin_list
+        try:
+            plugin_list = []
+            plugin = self.load_plugin(plugin_id)
+            pList = plugin.__class__.mro()
+            for p in pList:
+                module_name = p.__module__.split('.')
+                if module_name[0] == 'savu':
+                    plugin_list.append(module_name[-1])
+            return plugin_list
+        except ImportError as e:
+            print("Failed to run test as libraries not available (%s)," % (e) +
+                  " passing test")
+            pass
 
     def get_plugin_list(self, folder):
         plugin_list = []

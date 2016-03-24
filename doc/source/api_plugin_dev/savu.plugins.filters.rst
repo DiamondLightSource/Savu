@@ -1,12 +1,6 @@
 savu.plugins.filters package
 ============================
 
-.. automodule:: savu.plugins.filters
-    :members:
-    :undoc-members:
-    :show-inheritance:
-    :noindex:
-
 Subpackages
 -----------
 
@@ -46,3 +40,11 @@ Submodules
    savu.plugins.filters.strip_background
    savu.plugins.filters.vo_centering
 
+Module contents
+---------------
+
+.. automodule:: savu.plugins.filters
+    :members:
+    :undoc-members:
+    :show-inheritance:
+    :noindex:

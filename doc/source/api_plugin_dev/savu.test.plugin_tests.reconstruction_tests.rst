@@ -1,12 +1,6 @@
 savu.test.plugin_tests.reconstruction_tests package
 ===================================================
 
-.. automodule:: savu.test.plugin_tests.reconstruction_tests
-    :members:
-    :undoc-members:
-    :show-inheritance:
-    :noindex:
-
 Submodules
 ----------
 
@@ -19,3 +13,11 @@ Submodules
    savu.test.plugin_tests.reconstruction_tests.plugin_sart_test
    savu.test.plugin_tests.reconstruction_tests.simple_tomo_test
 
+Module contents
+---------------
+
+.. automodule:: savu.test.plugin_tests.reconstruction_tests
+    :members:
+    :undoc-members:
+    :show-inheritance:
+    :noindex:

@@ -1,12 +1,6 @@
 savu.core.transports package
 ============================
 
-.. automodule:: savu.core.transports
-    :members:
-    :undoc-members:
-    :show-inheritance:
-    :noindex:
-
 Submodules
 ----------
 
@@ -16,3 +10,11 @@ Submodules
    savu.core.transports.dist_array_utils
    savu.core.transports.hdf5_transport
 
+Module contents
+---------------
+
+.. automodule:: savu.core.transports
+    :members:
+    :undoc-members:
+    :show-inheritance:
+    :noindex:

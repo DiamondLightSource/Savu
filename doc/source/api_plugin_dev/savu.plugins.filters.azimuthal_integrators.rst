@@ -1,12 +1,6 @@
 savu.plugins.filters.azimuthal_integrators package
 ==================================================
 
-.. automodule:: savu.plugins.filters.azimuthal_integrators
-    :members:
-    :undoc-members:
-    :show-inheritance:
-    :noindex:
-
 Submodules
 ----------
 
@@ -15,3 +9,11 @@ Submodules
    savu.plugins.filters.azimuthal_integrators.pyfai_azimuthal_integrator
    savu.plugins.filters.azimuthal_integrators.pyfai_azimuthal_integrator_with_bragg_filter
 
+Module contents
+---------------
+
+.. automodule:: savu.plugins.filters.azimuthal_integrators
+    :members:
+    :undoc-members:
+    :show-inheritance:
+    :noindex:

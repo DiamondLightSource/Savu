@@ -1,12 +1,6 @@
 savu.data package
 =================
 
-.. automodule:: savu.data
-    :members:
-    :undoc-members:
-    :show-inheritance:
-    :noindex:
-
 Subpackages
 -----------
 
@@ -26,3 +20,11 @@ Submodules
    savu.data.plugin_list
    savu.data.transport_data
 
+Module contents
+---------------
+
+.. automodule:: savu.data
+    :members:
+    :undoc-members:
+    :show-inheritance:
+    :noindex:

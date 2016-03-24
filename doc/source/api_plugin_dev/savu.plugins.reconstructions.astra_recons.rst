@@ -1,12 +1,6 @@
 savu.plugins.reconstructions.astra_recons package
 =================================================
 
-.. automodule:: savu.plugins.reconstructions.astra_recons
-    :members:
-    :undoc-members:
-    :show-inheritance:
-    :noindex:
-
 Submodules
 ----------
 
@@ -15,3 +9,11 @@ Submodules
    savu.plugins.reconstructions.astra_recons.astra_recon_cpu
    savu.plugins.reconstructions.astra_recons.astra_recon_gpu
 
+Module contents
+---------------
+
+.. automodule:: savu.plugins.reconstructions.astra_recons
+    :members:
+    :undoc-members:
+    :show-inheritance:
+    :noindex:

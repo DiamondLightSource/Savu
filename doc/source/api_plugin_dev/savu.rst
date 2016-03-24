@@ -1,12 +1,6 @@
 savu package
 ============
 
-.. automodule:: savu
-    :members:
-    :undoc-members:
-    :show-inheritance:
-    :noindex:
-
 Subpackages
 -----------
 
@@ -25,3 +19,11 @@ Submodules
    savu.test_runner
    savu.tomo_recon
 
+Module contents
+---------------
+
+.. automodule:: savu
+    :members:
+    :undoc-members:
+    :show-inheritance:
+    :noindex:

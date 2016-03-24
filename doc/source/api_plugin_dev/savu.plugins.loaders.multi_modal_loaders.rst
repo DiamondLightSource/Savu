@@ -1,12 +1,6 @@
 savu.plugins.loaders.multi_modal_loaders package
 ================================================
 
-.. automodule:: savu.plugins.loaders.multi_modal_loaders
-    :members:
-    :undoc-members:
-    :show-inheritance:
-    :noindex:
-
 Submodules
 ----------
 
@@ -18,3 +12,11 @@ Submodules
    savu.plugins.loaders.multi_modal_loaders.nxxrd_loader
    savu.plugins.loaders.multi_modal_loaders.nxxrd_loader_old
 
+Module contents
+---------------
+
+.. automodule:: savu.plugins.loaders.multi_modal_loaders
+    :members:
+    :undoc-members:
+    :show-inheritance:
+    :noindex:

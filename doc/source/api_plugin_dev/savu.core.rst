@@ -1,12 +1,6 @@
 savu.core package
 =================
 
-.. automodule:: savu.core
-    :members:
-    :undoc-members:
-    :show-inheritance:
-    :noindex:
-
 Subpackages
 -----------
 
@@ -24,3 +18,11 @@ Submodules
    savu.core.transport_control
    savu.core.utils
 
+Module contents
+---------------
+
+.. automodule:: savu.core
+    :members:
+    :undoc-members:
+    :show-inheritance:
+    :noindex:

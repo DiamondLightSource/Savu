@@ -1,12 +1,6 @@
 savu.data.data_structures package
 =================================
 
-.. automodule:: savu.data.data_structures
-    :members:
-    :undoc-members:
-    :show-inheritance:
-    :noindex:
-
 Submodules
 ----------
 
@@ -20,3 +14,11 @@ Submodules
    savu.data.data_structures.preview
    savu.data.data_structures.utils
 
+Module contents
+---------------
+
+.. automodule:: savu.data.data_structures
+    :members:
+    :undoc-members:
+    :show-inheritance:
+    :noindex:

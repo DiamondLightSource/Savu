@@ -1,12 +1,6 @@
 savu.test.plugin_tests.filter_tests package
 ===========================================
 
-.. automodule:: savu.test.plugin_tests.filter_tests
-    :members:
-    :undoc-members:
-    :show-inheritance:
-    :noindex:
-
 Submodules
 ----------
 
@@ -32,3 +26,11 @@ Submodules
    savu.test.plugin_tests.filter_tests.strip_background_test
    savu.test.plugin_tests.filter_tests.vo_centering_test
 
+Module contents
+---------------
+
+.. automodule:: savu.test.plugin_tests.filter_tests
+    :members:
+    :undoc-members:
+    :show-inheritance:
+    :noindex:

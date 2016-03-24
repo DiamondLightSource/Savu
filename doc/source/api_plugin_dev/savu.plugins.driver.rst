@@ -1,12 +1,6 @@
 savu.plugins.driver package
 ===========================
 
-.. automodule:: savu.plugins.driver
-    :members:
-    :undoc-members:
-    :show-inheritance:
-    :noindex:
-
 Submodules
 ----------
 
@@ -17,3 +11,11 @@ Submodules
    savu.plugins.driver.gpu_plugin
    savu.plugins.driver.plugin_driver
 
+Module contents
+---------------
+
+.. automodule:: savu.plugins.driver
+    :members:
+    :undoc-members:
+    :show-inheritance:
+    :noindex:

@@ -1,12 +1,6 @@
 savu.plugins.loaders package
 ============================
 
-.. automodule:: savu.plugins.loaders
-    :members:
-    :undoc-members:
-    :show-inheritance:
-    :noindex:
-
 Subpackages
 -----------
 
@@ -27,3 +21,11 @@ Submodules
    savu.plugins.loaders.projection_tomo_loader
    savu.plugins.loaders.savu_loader
 
+Module contents
+---------------
+
+.. automodule:: savu.plugins.loaders
+    :members:
+    :undoc-members:
+    :show-inheritance:
+    :noindex:

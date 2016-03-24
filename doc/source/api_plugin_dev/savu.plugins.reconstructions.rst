@@ -1,12 +1,6 @@
 savu.plugins.reconstructions package
 ====================================
 
-.. automodule:: savu.plugins.reconstructions
-    :members:
-    :undoc-members:
-    :show-inheritance:
-    :noindex:
-
 Subpackages
 -----------
 
@@ -27,3 +21,11 @@ Submodules
    savu.plugins.reconstructions.simple_fake_gpu_recon
    savu.plugins.reconstructions.simple_recon
 
+Module contents
+---------------
+
+.. automodule:: savu.plugins.reconstructions
+    :members:
+    :undoc-members:
+    :show-inheritance:
+    :noindex:
