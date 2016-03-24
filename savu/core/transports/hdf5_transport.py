@@ -77,7 +77,7 @@ class Hdf5Transport(TransportControl):
                                    MACHINE_RANK_NAME,
                                    options)
 
-        MPI.COMM_WORLD._barrier()
+        MPI.COMM_WORLD.barrier()
         logging.debug("Rank : %i - Size : %i - host : %s", RANK, SIZE,
                       socket.gethostname())
         IP = socket.gethostbyname(socket.gethostname())
@@ -90,7 +90,7 @@ class Hdf5Transport(TransportControl):
         """ Call MPI _barrier before an experiment is created.
         """
         logging.debug("Waiting at the _barrier")
-        MPI.COMM_WORLD._barrier()
+        MPI.COMM_WORLD.barrier()
 
     def __get_log_level(self, options):
         """ Gets the right log level for the flags -v or -q
@@ -120,7 +120,7 @@ class Hdf5Transport(TransportControl):
     def __set_logger_parallel(self, number, rank, options):
         """ Set parallel logger.
         """
-        logging.basicConfig(level=self.get_log_level(options),
+        logging.basicConfig(level=self.__get_log_level(options),
                             format='L %(relativeCreated)12d M' +
                             number + ' ' + rank +
                             ' %(levelname)-6s %(message)s', datefmt='%H:%M:%S')

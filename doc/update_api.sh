@@ -6,8 +6,9 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 echo $DIR
 export SPHINX_APIDOC_OPTIONS='members,private-members,undoc-members,show-inheritance'
 sphinx-apidoc -fMeTP $DIR/../ -o $DIR/source/api
-export SPHINX_APIDOC_OPTIONS='members,undoc-members,show-inheritance,noindex'
+export SPHINX_APIDOC_OPTIONS='members,undoc-members,noindex'
 sphinx-apidoc -fe $DIR/../ -o $DIR/source/api_plugin_dev
-sphinx-build -a -E -j 2 -b html $DIR/source/ $DIR/build/
 python create_dev_autosummary.py
+sphinx-build -a -E -j 2 -b html $DIR/source/ $DIR/build/
+
 

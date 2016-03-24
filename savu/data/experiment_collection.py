@@ -152,7 +152,7 @@ class Experiment(object):
         comm_dict = {'comm': communicator}
         if self.meta_data.get_meta_data('mpi') is True:
             logging.debug("About to hit a _barrier")
-            comm_dict['comm']._barrier()
+            comm_dict['comm'].barrier()
             logging.debug("Past the _barrier")
 
     def log(self, log_tag, log_level=logging.DEBUG):

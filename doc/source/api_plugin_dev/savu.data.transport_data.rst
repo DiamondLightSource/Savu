@@ -15,5 +15,4 @@ Module contents
 .. automodule:: savu.data.transport_data
     :members:
     :undoc-members:
-    :show-inheritance:
     :noindex:
