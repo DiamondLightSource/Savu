@@ -64,7 +64,7 @@ class GpuPlugin(PluginDriver):
                          self.new_comm.Get_rank())
             GPU_index = self.__calculate_GPU_index(nNodes)
             self.parameters['GPU_index'] = GPU_index
-            self.run_plugin_instances(transport, communicator=self.new_comm)
+            self._run_plugin_instances(transport, communicator=self.new_comm)
             self._clean_up()
             self.__free_communicator()
             expInfo.set_meta_data('process', MPI.COMM_WORLD.Get_rank())

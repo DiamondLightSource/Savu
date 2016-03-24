@@ -46,7 +46,7 @@ class PluginCoverageTest(unittest.TestCase):
         test_process_path = savu_base_path + 'test_data/test_process_lists'
         self.nxs_avail = self.get_test_process_list(test_process_path)
 
-        # list the .nxs found in tests that are located in the \
+        # list the .nxs found in tests that are located in the
         # test_process_lists folder
         self.nxs_used = \
             list(set(nxs_in_tests).intersection(set(self.nxs_avail)))
@@ -202,6 +202,7 @@ class PluginCoverageTest(unittest.TestCase):
     def get_test_plugin_list(self, process_files, path):
         plugin_names = []
         for pfile in process_files:
+            print pfile
             plist = PluginList()
             plist._populate_plugin_list(path + '/' + pfile)
             for p in plist.plugin_list:
