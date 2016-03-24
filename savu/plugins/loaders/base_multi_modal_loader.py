@@ -64,7 +64,7 @@ class BaseMultiModalLoader(BaseLoader):
         axes = entry['data'].attrs['axes']
         data_obj.data_mapping.set_axes(axes)
         nAxes = len(axes)
-        print nAxes
+        #print nAxes
         cts = 0
         motors = []
         motor_type = []
@@ -103,7 +103,7 @@ class BaseMultiModalLoader(BaseLoader):
 
         if not motors:
             logging.debug("'%s' reader: No maps found!", ltype)
-        print labels
+        #print labels
         data_obj.set_axis_labels(*tuple(labels))
         data_obj.data_mapping.set_motors(motors)
         data_obj.data_mapping.set_motor_type(motor_type)
@@ -134,8 +134,8 @@ class BaseMultiModalLoader(BaseLoader):
                 rotation = item
 
         proj_dir = tuple(projection)
-        print proj_dir
-        print dims
+        #print proj_dir
+        #print dims
         logging.debug("projections are: %s", str(proj_dir))
 
         if data_obj.data_mapping.is_map:
