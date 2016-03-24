@@ -53,7 +53,7 @@ class MultipleParameterTest(unittest.TestCase):
         plugin = self.plugin_setup()
         key = 'number_of_iterations'
         params = {key: '1;2;3'}
-        plugin.set_parameters(params)
+        plugin._set_parameters(params)
         params = plugin.parameters[key]
         self.assertEqual(params, [1, 2, 3])
         self.assertEqual(plugin.extra_dims[0], 3)
@@ -62,7 +62,7 @@ class MultipleParameterTest(unittest.TestCase):
         plugin = self.plugin_setup()
         key = 'reconstruction_type'
         params = {key: 'FBP;CGLS'}
-        plugin.set_parameters(params)
+        plugin._set_parameters(params)
         params = plugin.parameters[key]
         self.assertEqual(params, ['FBP', 'CGLS'])
         self.assertEqual(plugin.extra_dims[0], 2)
@@ -72,7 +72,7 @@ class MultipleParameterTest(unittest.TestCase):
         key1 = 'reconstruction_type'
         key2 = 'number_of_iterations'
         params = {key1: 'FBP;CGLS', key2: '1;2;3'}
-        plugin.set_parameters(params)
+        plugin._set_parameters(params)
         out_datasets = plugin.get_out_datasets()
         for data in out_datasets:
             self.assertEqual(data.extra_dims, plugin.extra_dims)
@@ -115,7 +115,7 @@ class MultipleParameterTest2(unittest.TestCase):
         plugin = self.plugin_setup()
         key = 'iterations'
         params = {key: '1;2;3'}
-        plugin.set_parameters(params)
+        plugin._set_parameters(params)
         params = plugin.parameters[key]
         self.assertEqual(params, [1, 2, 3])
         self.assertEqual(plugin.extra_dims[0], 3)
