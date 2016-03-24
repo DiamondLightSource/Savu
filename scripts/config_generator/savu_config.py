@@ -179,7 +179,7 @@ def _list(content, arg):
             print key
             if len(arg) < 2:
                 plugin = pu.plugins[key]()
-                plugin.populate_default_parameters()
+                plugin._populate_default_parameters()
                 for p_key in plugin.parameters.keys():
                     print("    %20s : %s" % (p_key, plugin.parameters[p_key]))
     print "-----------------------------------------"
@@ -255,6 +255,9 @@ def _ref(content, arg):
         positions = [int(arg) - 1]
 
     for pos in positions:
+        if pos < 0 or pos >= len(content.plugin_list.plugin_list) :
+            print("Sorry %s is out of range" % (arg))
+            return content
         name = content.plugin_list.plugin_list[pos]['name']
         old_entry = content.get(pos)
         content.remove(pos)
@@ -277,7 +280,11 @@ def _ref(content, arg):
 
 def _rem(content, arg):
     """Remove the numbered item from the list"""
-    content.remove(int(arg)-1)
+    pos = int(arg)-1
+    if pos < 0 or pos >= len(content.plugin_list.plugin_list) :
+            print("Sorry %s is out of range" % (arg))
+            return content
+    content.remove(pos)
     content.display()
     return content
 
