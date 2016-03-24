@@ -54,11 +54,12 @@ class DownsampleFilter(BaseFilter, CpuPlugin):
 
     def new_slice(self, data_shape):
         pData = self.get_plugin_in_datasets()[0]
-        slice_dirs = pData.get_slice_dimension()
+        slice_dir = pData.get_slice_dimension()
         len_cores = len(pData.get_core_directions())
-        core_dirs = range(len_cores)
-        if len(core_dirs) is not len(data_shape):
-            core_dirs -= slice_dirs
+        len_data = len(data_shape)
+
+        if len_cores is not len(data_shape):
+            core_dirs = list(set(range(len_data)).difference(set([slice_dir])))
 
         new_slice = [slice(None)]*len(data_shape)
         for dim in core_dirs:

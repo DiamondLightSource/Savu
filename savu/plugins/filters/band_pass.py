@@ -63,7 +63,6 @@ class BandPass(BaseFilter, CpuPlugin):
         the same size data as you had originally.
         """
         data = data[0]
-        print data.shape
         logging.debug("Data frame recieved for processing of shape %s",
                       str(data.shape))
         if self.parameters['type'] == 'Low':
