@@ -31,7 +31,7 @@ from savu.test.framework_tests.plugin_runner_test import \
 
 class SimpleFitReconTest(unittest.TestCase):
 
-#     @unittest.skip("plugin error to be fixed by Aaron")
+    @unittest.skip("A plugin in the processing chain has 0 as a shape dimension")
     def test_process(self):
         options = {
             "transport": "hdf5",

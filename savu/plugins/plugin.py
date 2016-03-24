@@ -263,7 +263,7 @@ class Plugin(PluginDatasets):
         """
         for data in in_data:
             if data.get_preview().revert_shape:
-                data.get_preview().unset_preview()
+                data.get_preview()._unset_preview()
 
     def nInput_datasets(self):
         """

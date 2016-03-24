@@ -360,11 +360,7 @@ class Hdf5TransportData(object):
             raise Exception("Data type", self.get_current_pattern_name(),
                             "does not support slicing in directions",
                             self.get_slice_directions())
-        temp = self.__grouped_slice_list(sl, max_frames)
-        
-        for s in temp:
-            print s
-        return temp
+        return self.__grouped_slice_list(sl, max_frames)
 
     def _get_slice_list_per_process(self, expInfo):
         processes = expInfo.get_meta_data("processes")

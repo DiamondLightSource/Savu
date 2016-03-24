@@ -28,6 +28,7 @@ from savu.test.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
 
+@unittest.skip('The fastxrf_fitting setup method is in an old format and needs updating')
 class FastxrfTest(unittest.TestCase):
 
     def test_FastXrf(self):

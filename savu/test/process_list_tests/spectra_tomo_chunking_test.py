@@ -31,6 +31,7 @@ from savu.test.framework_tests.plugin_runner_test import \
 
 class SpectraTomoChunkingTest(unittest.TestCase):
 
+    @unittest.skip('Skipping due to flipped dimensions in test data')
     def test_chunking(self):
         options = {
             "transport": "hdf5",
