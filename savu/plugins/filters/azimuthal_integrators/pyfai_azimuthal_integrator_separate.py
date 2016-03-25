@@ -55,9 +55,9 @@ class PyfaiAzimuthalIntegratorSeparate(BaseAzimuthalIntegrator):
         percentile = self.parameters['percentile']
         spots, powder = ai.separate(data[0], npt_rad=num_bins_rad, npt_azim=num_bins_azim, percentile=percentile)
         axis, spectra = ai.integrate1d(data=powder,npt=num_bins_rad, )
-        axis = self.unit_conversion(units,axis)
+        axis, spectra_new = self.unit_conversion(units,axis, spectra)
         mData.set_meta_data('Q', axis) # multiplied because their units are wrong!
-        return [spectra, spots]
+        return [spectra_new, spots]
 
     def setup(self):
         in_dataset, out_datasets = self.get_datasets()

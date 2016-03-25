@@ -29,7 +29,7 @@ import pyFAI
 import numpy as np
 from savu.plugins.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-
+from scipy.interpolate import interp1d
 
 class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
     """
@@ -123,11 +123,21 @@ class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
     def nOutput_datasets(self):
         return 1
 
-    def unit_conversion(self,units,axis):
+    def unit_conversion(self,units,axis, data):
         if units=='q_nm^-1':
             axis *= 1e3*1e10 # multiplied because their conversion is incorrect I think
+            remapped = data
         elif units=='d_nm':
             #  this is non-linear which is ok for DAWN, but interpolation smooths it.
             q = axis*1e3*1e10
-            axis = 1.0/axis
-        return axis
+#             print q
+            dold = 1.0/q
+#             print dold
+            npts = float(len(dold))
+            daxis = (dold[-1]-dold[0])/npts
+            new_axis = np.arange(dold[0],dold[-1],daxis)
+            f = interp1d(dold, data)
+            remapped = f(new_axis)
+            axis = new_axis
+#             print remapped
+        return axis, remapped

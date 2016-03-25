@@ -68,9 +68,9 @@ class PyfaiAzimuthalIntegratorWithBraggFilter(BaseAzimuthalIntegrator):
             top = np.percentile(foo,lims[1])
             bottom = np.percentile(foo,lims[0])
             out[i] = np.mean(np.clip(foo,bottom,top))
-        axis = self.unit_conversion(units,axis)
+        axis, out_spectra = self.unit_conversion(units,axis,out)
         mData.set_meta_data('Q', axis) # multiplied because their units are wrong!
-        return out
+        return out_spectra
 
 
 
