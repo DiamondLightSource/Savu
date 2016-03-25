@@ -13,14 +13,13 @@
 # limitations under the License.
 
 """
-.. module:: tomo_recon
+.. module:: pyfai_azimuthal_integration_test
    :platform: Unix
    :synopsis: runner for tests using the MPI framework
 
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
-
 import unittest
 import tempfile
 from savu.test import test_utils as tu
@@ -29,15 +28,14 @@ from savu.test.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
 
-class SpectraTomoChunkingTest(unittest.TestCase):
+class PyfaiSeparateTestD(unittest.TestCase):
 
-    def test_chunking(self):
+    def test_pyfai_bragg_filter(self):
         options = {
             "transport": "hdf5",
             "process_names": "CPU0",
             "data_file": tu.get_test_data_path('mm.nxs'),
-            "process_file": tu.get_test_process_path(
-                'pyfai_tomo_chunking_test.nxs'),
+            "process_file": tu.get_test_process_path('PyFAI_separate_test_d.nxs'),
             "out_path": tempfile.mkdtemp()
             }
         run_protected_plugin_runner(options)
