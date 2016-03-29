@@ -105,17 +105,13 @@ class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
         # stating only 'dimension' will remove the axis label, stating
         # 'dimension.name.unit' name and unit will add or replace it
 
-        axis_labels = ['-1', '-1.name.unit']
 
-        print "axis labels", in_dataset[0].get_axis_labels()
-        print in_dataset[0].get_shape()
+        detX_dim = in_dataset[0].find_axis_label_dimension('detector_x')
+        axis_labels = ['-1', str(detX_dim) + '.name.unit']
 
         spectra.create_dataset(patterns={in_dataset[0]: patterns},
                                axis_labels={in_dataset[0]: axis_labels},
                                shape=shape[:-2]+(num_bins,))
-
-        print "axis labels", spectra.get_axis_labels()
-        print spectra.get_shape()
 
         spectrum = {'core_dir': (-1,), 'slice_dir': tuple(range(len(shape)-2))}
         spectra.add_pattern("SPECTRUM", **spectrum)
