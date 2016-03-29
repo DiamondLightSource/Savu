@@ -129,6 +129,9 @@ class Hdf5TransportData(object):
             except KeyError:
                 mData = np.arange(self.get_shape()[count])
 
+            if isinstance(mData, list):
+                mData = np.array(mData)
+
             temp = self.group.create_dataset(name, mData.shape, mData.dtype)
             temp[...] = mData[...]
             temp.attrs['units'] = labels.values()[0]
