@@ -30,7 +30,6 @@ from savu.test.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
 
-@unittest.skip('Runs as a standalone test but not in the suite. Error to be investigated')
 class PluginRunnerScikitImageTest(unittest.TestCase):
 
 #     def test_fbp(self):
