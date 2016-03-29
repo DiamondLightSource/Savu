@@ -26,12 +26,9 @@ import sys
 import re
 import logging
 import numpy as np
-import copy
 
 plugins = {}
 plugins_path = {}
-# FIXME 
-datasets_list = []
 count = 0
 
 
@@ -104,7 +101,7 @@ def plugin_loader(exp, plugin_dict, **kwargs):
     plugin._main_setup(exp, plugin_dict['data'])
 
     if check_flag is True:
-        set_datasets_list(exp, plugin)
+        exp.meta_data.plugin_list.set_datasets_list(plugin)
     logging.info("finished plugin loader")
     return plugin
 
@@ -121,25 +118,6 @@ def run_plugins(exp, plugin_list, **kwargs):
         exp._barrier()
         plugin_loader(exp, plugin_list[i], check=check)
         exp._merge_out_data_to_in()
-
-
-def set_datasets_list(exp, plugin):
-    in_pData, out_pData = plugin.get_plugin_datasets()
-    max_frames = plugin.get_max_frames()
-    in_data_list = populate_datasets_list(in_pData, max_frames)
-    out_data_list = populate_datasets_list(out_pData, max_frames)
-    datasets_list.append({'in_datasets': in_data_list,
-                          'out_datasets': out_data_list})
-
-
-def populate_datasets_list(data, max_frames):
-    data_list = []
-    for d in data:
-        name = d.data_obj.get_name()
-        pattern = copy.deepcopy(d.get_pattern())
-        pattern[pattern.keys()[0]]['max_frames'] = max_frames
-        data_list.append({'name': name, 'pattern': pattern})
-    return data_list
 
 
 def set_datasets(exp, plugin, plugin_dict):

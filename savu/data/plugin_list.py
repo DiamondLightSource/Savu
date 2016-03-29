@@ -26,6 +26,7 @@
 import h5py
 import json
 import logging
+import copy
 
 import numpy as np
 
@@ -40,6 +41,8 @@ class PluginList(object):
 
     def __init__(self):
         self.plugin_list = []
+        self.n_loaders = None
+        self.datasets_list = []
         self.exp = None
 
     def _populate_plugin_list(self, filename, activePass=False):
@@ -153,6 +156,26 @@ class PluginList(object):
                 exec("value = " + str(value))
             data[key] = value
         return data
+
+    def set_datasets_list(self, plugin):
+        in_pData, out_pData = plugin.get_plugin_datasets()
+        max_frames = plugin.get_max_frames()
+        in_data_list = self.populate_datasets_list(in_pData, max_frames)
+        out_data_list = self.populate_datasets_list(out_pData, max_frames)
+        self.datasets_list.append({'in_datasets': in_data_list,
+                                   'out_datasets': out_data_list})
+
+    def populate_datasets_list(self, data, max_frames):
+        data_list = []
+        for d in data:
+            name = d.data_obj.get_name()
+            pattern = copy.deepcopy(d.get_pattern())
+            pattern[pattern.keys()[0]]['max_frames'] = max_frames
+            data_list.append({'name': name, 'pattern': pattern})
+        return data_list
+
+    def get_datasets_list(self):
+        return self.datasets_list
 
 
 class CitationInformation(object):

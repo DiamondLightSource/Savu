@@ -13,10 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: test_plugin
+.. module:: basic_operations
    :platform: Unix
-   :synopsis: Plugin to test multiple input data sets are passed to process, \
-   fixed directions and data reduction
+   :synopsis: Plugin to perform basic mathematical operations on datasets.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
@@ -28,17 +27,25 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 
 @register_plugin
-class TestPlugin(Plugin, CpuPlugin):
-    """
-    The base class from which all plugins should inherit.
+class BasicOperations(Plugin, CpuPlugin):
+    """ A class that performs basic mathematical operations on datasets.
+    How should the information be passed to the plugin?
+
     :param in_datasets: Create a list of the dataset(s) to \
         process. Default: [].
     :param out_datasets: Create a list of the dataset(s) to \
         process. Default: [].
+    :param operation: Operations to perform. Default: [].
     """
 
     def __init__(self):
-        super(TestPlugin, self).__init__("TestPlugin")
+        super(BasicOperations, self).__init__("BasicOperations")
+
+    def pre_process(self):
+        operation = self.parameters['operation']
+        in_datasets = self.get_in_datasets()
+        for data in in_datasets:
+            print data.get_name()
 
     def process_frames(self, data, frame_list):
         print data[0].shape, data[1].shape
