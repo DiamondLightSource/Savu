@@ -15,16 +15,17 @@
 """
 .. module:: pyfai_azimuthal_integrator
    :platform: Unix
-   :synopsis: A plugin to integrate azimuthally "symmetric" signals i.e. SAXS, WAXS or XRD.Requires a calibration file
+   :synopsis: A plugin to integrate azimuthally "symmetric" signals i.e. SAXS,\
+       WAXS or XRD.Requires a calibration file
 
 .. moduleauthor:: Aaron D. Parsons <scientificsoftware@diamond.ac.uk>
 """
 
 import logging
-from savu.plugins.filters.base_azimuthal_integrator import BaseAzimuthalIntegrator
+from savu.plugins.filters.base_azimuthal_integrator import \
+    BaseAzimuthalIntegrator
 
 from savu.plugins.utils import register_plugin
-import time
 
 
 @register_plugin
