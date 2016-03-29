@@ -105,9 +105,9 @@ class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
         # stating only 'dimension' will remove the axis label, stating
         # 'dimension.name.unit' name and unit will add or replace it
 
-
+        detY_dim = in_dataset[0].find_axis_label_dimension('detector_y')
         detX_dim = in_dataset[0].find_axis_label_dimension('detector_x')
-        axis_labels = ['-1', str(detX_dim) + '.name.unit']
+        axis_labels = [str(detY_dim), str(detX_dim) + '.name.unit']
 
         spectra.create_dataset(patterns={in_dataset[0]: patterns},
                                axis_labels={in_dataset[0]: axis_labels},
