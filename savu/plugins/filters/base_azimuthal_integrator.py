@@ -110,7 +110,6 @@ class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
                                axis_labels={in_dataset[0]: axis_labels},
                                shape=shape[:-2]+(num_bins,))
 
-        print spectra.get_axis_labels()
         spectrum = {'core_dir': (-1,), 'slice_dir': tuple(range(len(shape)-2))}
         spectra.add_pattern("SPECTRUM", **spectrum)
 
