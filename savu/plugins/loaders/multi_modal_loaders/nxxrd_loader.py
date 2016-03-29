@@ -63,9 +63,9 @@ class NxxrdLoader(BaseMultiModalLoader):
 
         data_obj.meta_data.set_meta_data('rotation_angle', rotation_angle)
         #self.add_patterns_based_on_acquisition(data_obj, 'xrd')
-        print data_obj.data.shape
+#         print data_obj.data.shape
         slicedir = tuple(range(len(data_obj.data.shape)-2))
-        print "diffraction slice direction is "+str(slicedir)
+#         print "diffraction slice direction is "+str(slicedir)
         data_obj.add_pattern("DIFFRACTION", core_dir=(3, 4),
                              slice_dir=slicedir)
 #         data_obj.add_pattern("SINOGRAM", core_dir=(0, 2),

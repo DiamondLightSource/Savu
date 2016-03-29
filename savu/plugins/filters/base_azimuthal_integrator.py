@@ -29,14 +29,14 @@ import pyFAI
 import numpy as np
 from savu.plugins.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-
+from scipy.interpolate import interp1d
 
 class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
     """
     a base azimuthal integrator for pyfai
 
     :param use_mask: Should we mask. Default: False.
-
+    :param units: options are q_nm^-1 and d_nm. Default: "q_nm^-1".
     :param num_bins: number of bins. Default: 1005.
 
     """
@@ -102,7 +102,7 @@ class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
         patterns = ['SINOGRAM.-1', 'PROJECTION.-1']
         # stating only 'dimension' will remove the axis label, stating
         # 'dimension.name.unit' name and unit will add or replace it
-        axis_labels = ['-1', '-1.name.unit']
+        axis_labels = ['-1', '-2.name.unit']
 
         spectra.create_dataset(patterns={in_dataset[0]: patterns},
                                axis_labels={in_dataset[0]: axis_labels},
@@ -123,14 +123,21 @@ class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
     def nOutput_datasets(self):
         return 1
 
-
-    def calcfrom1d(self, tth, I, twotheta_flat):
-        '''
-        takes the 1D data and makes it two d again
-        tth is the two theta from the integrator
-        I is the intensity from the integrator
-        ai is the integrator object
-        '''
-        interpedvals = np.interp(twotheta_flat, tth, I)
-        new_image = interpedvals.reshape(self.sh)
-        return new_image
+    def unit_conversion(self,units,axis, data):
+        if units=='q_nm^-1':
+            axis *= 1e3*1e10 # multiplied because their conversion is incorrect I think
+            remapped = data
+        elif units=='d_nm':
+            #  this is non-linear which is ok for DAWN, but interpolation smooths it.
+            q = axis*1e3*1e10
+#             print q
+            dold = 1.0/q
+#             print dold
+            npts = float(len(dold))
+            daxis = (dold[-1]-dold[0])/npts
+            new_axis = np.arange(dold[0],dold[-1],daxis)
+            f = interp1d(dold, data)
+            remapped = f(new_axis)
+            axis = new_axis
+#             print remapped
+        return axis, remapped
