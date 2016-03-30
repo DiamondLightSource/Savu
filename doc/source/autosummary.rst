@@ -35,9 +35,9 @@ savu.data
 .. toctree::
    api/savu.data.experiment_collection
    api/savu.data.plugin_list
-   api/savu.data.transport_data
    api/savu.data.chunking
    api/savu.data.meta_data
+   api/savu.data.transport_data
 
 
 savu.data.transport_data
@@ -52,13 +52,13 @@ savu.data.data_structures
 ------------------------------------------------------------
 
 .. toctree::
-   api/savu.data.data_structures.utils
    api/savu.data.data_structures.data
-   api/savu.data.data_structures.plugin_data
-   api/savu.data.data_structures.data_create
-   api/savu.data.data_structures.preview
-   api/savu.data.data_structures.data_notes
    api/savu.data.data_structures.data_add_ons
+   api/savu.data.data_structures.data_create
+   api/savu.data.data_structures.data_notes
+   api/savu.data.data_structures.plugin_data
+   api/savu.data.data_structures.preview
+   api/savu.data.data_structures.utils
 
 
 savu.plugins
@@ -71,12 +71,12 @@ savu.plugins
    api/savu.plugins.base_saver
    api/savu.plugins.base_filter
    api/savu.plugins.plugin
-   api/savu.plugins.plugin_datasets_notes
+   api/savu.plugins.base_correction
    api/savu.plugins.plugin_datasets
    api/savu.plugins.test_plugin
-   api/savu.plugins.base_correction
-   api/savu.plugins.dimension_adder
+   api/savu.plugins.plugin_datasets_notes
    api/savu.plugins.simple_fit_xrf_bounded
+   api/savu.plugins.dimension_adder
 
 
 savu.plugins.reconstructions
@@ -144,8 +144,8 @@ savu.plugins.filters
    api/savu.plugins.filters.monitor_correction
    api/savu.plugins.filters.histogram
    api/savu.plugins.filters.no_process_plugin
-   api/savu.plugins.filters.base_azimuthal_integrator
    api/savu.plugins.filters.poly_background_estimator
+   api/savu.plugins.filters.base_azimuthal_integrator
 
 
 savu.plugins.filters.component_analysis
@@ -176,6 +176,7 @@ savu.plugins.filters.azimuthal_integrators
 .. toctree::
    api/savu.plugins.filters.azimuthal_integrators
    api/savu.plugins.filters.azimuthal_integrators
+   api/savu.plugins.filters.azimuthal_integrators
 
 
 savu.plugins.loaders
@@ -187,8 +188,9 @@ savu.plugins.loaders
    api/savu.plugins.loaders.nxtomo_loader
    api/savu.plugins.loaders.projection_tomo_loader
    api/savu.plugins.loaders.i12_tomo_loader
-   api/savu.plugins.loaders.savu_loader
    api/savu.plugins.loaders.i18loader
+   api/savu.plugins.loaders.savu_loader
+   api/savu.plugins.loaders.image_loader
 
 
 savu.plugins.loaders.multi_modal_loaders

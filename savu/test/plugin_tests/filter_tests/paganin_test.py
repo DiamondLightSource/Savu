@@ -29,10 +29,10 @@ from savu.test.framework_tests.plugin_runner_test import \
 
 class PaganinTest(unittest.TestCase):
 
-    def test_paganin1(self):
-        options = tu.set_experiment('tomoRaw')
-        plugin = 'savu.plugins.paganin_filter'
-        run_protected_plugin_runner_no_process_list(options, plugin)
+#    def test_paganin1(self):
+#        options = tu.set_experiment('tomoRaw')
+#        plugin = 'savu.plugins.paganin_filter'
+#        run_protected_plugin_runner_no_process_list(options, plugin)
 
     def test_paganin2(self):
         options = tu.set_experiment('tomo')

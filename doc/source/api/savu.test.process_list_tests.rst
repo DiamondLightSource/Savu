@@ -22,6 +22,7 @@ Submodules
    savu.test.process_list_tests.simple_fit_recon_test
    savu.test.process_list_tests.simple_stxm_tomo_test
    savu.test.process_list_tests.spectra_tomo_chunking_test
+   savu.test.process_list_tests.spectra_tomo_chunking_with_scanned_parameter_test
    savu.test.process_list_tests.spectrum_crop_test
    savu.test.process_list_tests.stats_test
    savu.test.process_list_tests.stxm_tomo_test
