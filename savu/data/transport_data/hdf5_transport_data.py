@@ -50,7 +50,7 @@ class Hdf5TransportData(object):
         logging.debug("generating all output files")
         out_data_objects = []
         count = start
-        datasets_list = exp.meta_data.plugin_list.get_datasets_list()
+        datasets_list = exp.meta_data.plugin_list._get_datasets_list()
 
         for plugin_dict in plugin_list[start:-1]:
 

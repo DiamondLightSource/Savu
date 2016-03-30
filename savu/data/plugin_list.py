@@ -30,6 +30,9 @@ import copy
 
 import numpy as np
 
+import savu.plugins.utils as pu
+
+
 NX_CLASS = 'NX_class'
 
 
@@ -41,7 +44,8 @@ class PluginList(object):
 
     def __init__(self):
         self.plugin_list = []
-        self.n_loaders = None
+        self.n_plugins = None
+        self.n_loaders = 0
         self.datasets_list = []
         self.exp = None
 
@@ -157,15 +161,15 @@ class PluginList(object):
             data[key] = value
         return data
 
-    def set_datasets_list(self, plugin):
+    def _set_datasets_list(self, plugin):
         in_pData, out_pData = plugin.get_plugin_datasets()
         max_frames = plugin.get_max_frames()
-        in_data_list = self.populate_datasets_list(in_pData, max_frames)
-        out_data_list = self.populate_datasets_list(out_pData, max_frames)
+        in_data_list = self._populate_datasets_list(in_pData, max_frames)
+        out_data_list = self._populate_datasets_list(out_pData, max_frames)
         self.datasets_list.append({'in_datasets': in_data_list,
                                    'out_datasets': out_data_list})
 
-    def populate_datasets_list(self, data, max_frames):
+    def _populate_datasets_list(self, data, max_frames):
         data_list = []
         for d in data:
             name = d.data_obj.get_name()
@@ -174,8 +178,36 @@ class PluginList(object):
             data_list.append({'name': name, 'pattern': pattern})
         return data_list
 
-    def get_datasets_list(self):
+    def _get_datasets_list(self):
         return self.datasets_list
+
+    def _get_n_loaders(self):
+        return self.n_loaders
+
+    def _get_loaders_and_savers_index(self):
+        """ Get lists of loader and saver positions within the plugin list and
+        set the number of loaders.
+
+        :returns: loader index list and saver index list
+        :rtype: list(int(loader)), list(int(saver))
+        """
+        from savu.plugins.base_loader import BaseLoader
+        from savu.plugins.base_saver import BaseSaver
+        loader_idx = []
+        saver_idx = []
+        self.n_plugins = len(self.plugin_list)
+        for i in range(self.n_plugins):
+            plugin = pu.load_plugin(self.plugin_list[i]['id'])
+            bases = plugin.__class__.__bases__
+            loader_list = [b for b in bases if b == BaseLoader]
+            saver_list = [b for b in bases if b == BaseSaver]
+            if loader_list:
+                loader_idx.append(i)
+            if saver_list:
+                saver_idx.append(i)
+
+        self.n_loaders = len(loader_idx)
+        return loader_idx, saver_idx
 
 
 class CitationInformation(object):

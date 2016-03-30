@@ -101,20 +101,24 @@ def plugin_loader(exp, plugin_dict, **kwargs):
     plugin._main_setup(exp, plugin_dict['data'])
 
     if check_flag is True:
-        exp.meta_data.plugin_list.set_datasets_list(plugin)
+        exp.meta_data.plugin_list._set_datasets_list(plugin)
+
     logging.info("finished plugin loader")
     return plugin
 
 
 def run_plugins(exp, plugin_list, **kwargs):
-    plugin_loader(exp, plugin_list[0])
+    n_loaders = exp.meta_data.plugin_list._get_n_loaders()
+
+    for i in range(n_loaders):
+        plugin_loader(exp, plugin_list[i])
 
     exp._barrier()
     exp._set_nxs_filename()
     exp._barrier()
 
     check = kwargs.get('check', False)
-    for i in range(1, len(plugin_list)-1):
+    for i in range(n_loaders, len(plugin_list)-1):
         exp._barrier()
         plugin_loader(exp, plugin_list[i], check=check)
         exp._merge_out_data_to_in()
