@@ -211,8 +211,8 @@ class PluginCoverageTest(unittest.TestCase):
                     for p in pList:
                         plugin_names.append(p + '.py')
                 except ImportError as e:
-                    print("Failed to run test as libraries not available (%s)," % (e) +
-                          " passing test")
+                    print("Failed to run test as libraries not available (%s),"
+                          % (e) + " passing test")
                     pass
         return list(set(plugin_names))
 

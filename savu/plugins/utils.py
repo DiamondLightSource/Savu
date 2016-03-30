@@ -137,9 +137,9 @@ def set_datasets(exp, plugin, plugin_dict):
     in_names = ('all' if len(in_names) is 0 else in_names)
     out_names = (in_names if len(out_names) is 0 else out_names)
 
-    in_names = check_nDatasets(exp, in_names, plugin_dict["id"],
+    in_names = check_nDatasets(exp, in_names, plugin_dict,
                                plugin.nInput_datasets(), "in_data")
-    out_names = check_nDatasets(exp, out_names, plugin_dict["id"],
+    out_names = check_nDatasets(exp, out_names, plugin_dict,
                                 plugin.nOutput_datasets(), "out_data")
 
     plugin_dict["data"]["in_datasets"] = in_names
@@ -154,7 +154,8 @@ def get_names(names):
     return data_names
 
 
-def check_nDatasets(exp, names, plugin_id, nSets, dtype):
+def check_nDatasets(exp, names, plugin_dict, nSets, dtype):
+    plugin_id = plugin_dict['id']
     try:
         if names[0] in "all":
             names = exp._set_all_datasets(dtype)
@@ -166,6 +167,9 @@ def check_nDatasets(exp, names, plugin_id, nSets, dtype):
         plugin_id + " in the process file."
 
     names = ([names] if type(names) is not list else names)
+    if nSets is 'var':
+        nSets = len(plugin_dict['data'][dtype + 'sets'])
+
     if len(names) is not nSets:
         raise Exception(errorMsg)
     return names

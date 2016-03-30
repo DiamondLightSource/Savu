@@ -35,21 +35,22 @@ class BasicOperations(Plugin, CpuPlugin):
         process. Default: [].
     :param out_datasets: Create a list of the dataset(s) to \
         process. Default: [].
-    :param operation: Operations to perform. Default: [].
+    :param operations: Operations to perform. Default: [].
+    :param pattern: Pattern associated with the \
+        datasets. Default: 'PROJECTION'.
     """
 
     def __init__(self):
         super(BasicOperations, self).__init__("BasicOperations")
 
     def pre_process(self):
-        operation = self.parameters['operation']
-        in_datasets = self.get_in_datasets()
-        for data in in_datasets:
-            print data.get_name()
+        self.operations = self._amend_ops(self._set_data_mappings())
+        self.out_data = self._set_out_data_names()
 
     def process_frames(self, data, frame_list):
-        print data[0].shape, data[1].shape
-        return data[0] + data[1]
+        for i in range(len(self.operations)):
+            exec(self.out_data[i] + "=" + self.operations[i])
+        return [eval(out) for out in self.out_data]
 
     def setup(self):
         """
@@ -57,25 +58,56 @@ class BasicOperations(Plugin, CpuPlugin):
         plugin.  This method is called before the process method in the \
         plugin chain.
         """
+
         in_datasets, out_datasets = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
+        pattern = self.parameters['pattern']
 
-        in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
-        #slice_dirs = in_pData[0].get_slice_directions()
-        #in_pData[0].set_fixed_directions(slice_dirs, np.zeros(len(slice_dirs)))
+        for pData in in_pData:
+            pData.plugin_data_setup(pattern, self.get_max_frames())
 
-        in_pData[1].plugin_data_setup('SINOGRAM', self.get_max_frames())
-        #in_pData[1].set_fixed_directions(slice_dirs, [0, 0])
-
-        out_datasets[0].create_dataset(in_datasets[0])
-        print in_datasets[0].get_shape(), out_datasets[0].get_shape(), "***"
-        out_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
+        # making the assumption that the basic operations do not change the
+        # shape of the data for now.
+        copy_datasets = self._get_associated_datasets()
+        for i in range(len(out_datasets)):
+            out_datasets[i].create_dataset(in_datasets[copy_datasets[i]])
+            out_pData[i].plugin_data_setup(pattern, self.get_max_frames())
 
     def nInput_datasets(self):
-        return 2
+        return 'var'
 
     def nOutput_datasets(self):
-        return 1
+        return 'var'
 
     def get_max_frames(self):
         return 8
+
+    def _set_data_mappings(self):
+        mapping_dict = {}
+        in_datasets = self.get_in_datasets()
+        for i in range(len(in_datasets)):
+            mapping_dict[in_datasets[i].get_name()] = 'data[' + str(i) + ']'
+        return mapping_dict
+
+    def _set_out_data_names(self):
+        out_datasets = self.get_out_datasets()
+        return [out_datasets[i].get_name() for i in range(len(out_datasets))]
+
+    def _amend_ops(self, mappings_dict):
+        operations = self.parameters['operations']
+        new_ops = []
+        for op in operations:
+            for key, value in mappings_dict.iteritems():
+                op = op.replace(key, value)
+            new_ops.append(op)
+        return new_ops
+
+    def _get_associated_datasets(self):
+        operations = self.parameters['operations']
+        in_datasets = self.get_in_datasets()
+        data_names = [d.get_name() for d in in_datasets]
+        index = []
+        for op in operations:
+            names = [d for d in data_names if op.find(d) > -1]
+            index.append(data_names.index(names[0]))
+        return index

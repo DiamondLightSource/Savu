@@ -141,13 +141,16 @@ class Hdf5Transport(TransportControl):
         exp = self.exp
 
         plugin_obj = exp.meta_data.plugin_list
-        plugin_list = plugin_obj.plugin_list
-        pu.plugin_loader(exp, plugin_list[0])
+        n_loaders = plugin_obj._get_n_loaders()
+        plugin_list = exp.meta_data.plugin_list.plugin_list
 
-        start = plugin_obj._get_n_loaders()
-        stop = start
+        for i in range(n_loaders):
+            pu.plugin_loader(exp, plugin_list[i])
 
-        n_plugins = len(plugin_list[start:-1]) + 1
+        start = n_loaders
+        stop = 0
+        n_plugins = len(plugin_list) - 1  # minus 1 for saver
+
         while n_plugins != stop:
             start_in_data = copy.deepcopy(self.exp.index['in_data'])
             in_data = exp.index["in_data"][exp.index["in_data"].keys()[0]]
