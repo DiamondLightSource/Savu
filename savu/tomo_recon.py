@@ -15,7 +15,7 @@
 """
 .. module:: tomo_recon
    :platform: Unix
-   :synopsis: runner for tests using the MPI framework
+   :synopsis: Runner for the Savu framework
 
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
@@ -27,7 +27,9 @@ import os
 from savu.core.plugin_runner import PluginRunner
 
 
-def option_parser():
+def __option_parser():
+    """ Option parser for command line arguments.
+    """
     usage = "%prog [options] input_file processing_file output_directory"
     version = "%prog 0.1"
     parser = optparse.OptionParser(usage=usage, version=version)
@@ -47,8 +49,9 @@ def option_parser():
     return [options, args]
 
 
-def check_input_params(args):
-    # Check basic items for completeness
+def __check_input_params(args):
+    """ Check for required input arguments.
+    """
     if len(args) is not 3:
         print("filename, process file and output path needs to be specified")
         print("Exiting with error code 1 - incorrect number of inputs")
@@ -70,7 +73,14 @@ def check_input_params(args):
         sys.exit(4)
 
 
-def set_options(opt, args):
+def _set_options(opt, args):
+    """ Set run specific information in options dictionary.
+
+    :params dict opt: input optional arguments (or defaults)
+    :params args: input required arguments
+    :returns options: optional and required arguments
+    :rtype: dict
+    """
     options = {}
     options["transport"] = opt.transport
     options["process_names"] = opt.names
@@ -81,13 +91,14 @@ def set_options(opt, args):
     options["out_path"] = args[2]
     return options
 
-def main():
-    [options, args] = option_parser()
-    check_input_params(args)
-    options = set_options(options, args)
-    plugin_runner = PluginRunner(options)
-    plugin_runner.run_plugin_list(options)
 
-    
+def main():
+    [options, args] = __option_parser()
+    __check_input_params(args)
+    options = _set_options(options, args)
+    plugin_runner = PluginRunner(options)
+    plugin_runner._run_plugin_list()
+
+
 if __name__ == '__main__':
     main()

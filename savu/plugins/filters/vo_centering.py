@@ -169,8 +169,8 @@ class VoCentering(BaseFilter, CpuPlugin):
         self.orig_full_shape = in_dataset[0].get_shape()
 
         # reduce the data as per data_subset parameter
-        in_dataset[0].set_preview(self.parameters['preview'],
-                                  revert=self.orig_full_shape)
+        in_dataset[0].get_preview().set_preview(self.parameters['preview'],
+                                                revert=self.orig_full_shape)
 
         in_pData, out_pData = self.get_plugin_datasets()
         in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())

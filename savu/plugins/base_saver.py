@@ -29,7 +29,7 @@ class BaseSaver(Plugin):
     A base plugin from which all data saver plugins should inherit.
     """
 
-    def main_setup(self, exp, params):
+    def _main_setup(self, exp, params):
         """
         Overwrites the main_setup function in plugin.py as the saver is a
         special case of plugin that doesn't required setup of in/out_datasets

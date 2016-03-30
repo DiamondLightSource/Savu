@@ -101,7 +101,7 @@ class BaseRecon(Plugin):
         in_dataset, out_dataset = self.get_datasets()
 
         # reduce the data as per data_subset parameter
-        in_dataset[0].set_preview(self.parameters['preview'])
+        in_dataset[0].get_preview().set_preview(self.parameters['preview'])
 
         # set information relating to the plugin data
         in_pData, out_pData = self.get_plugin_datasets()
@@ -111,7 +111,7 @@ class BaseRecon(Plugin):
         axis_labels = in_dataset[0].data_info.get_meta_data('axis_labels')[0]
 
         dim_volX, dim_volY, dim_volZ = \
-            self.map_volume_dimensions(in_dataset[0])
+            self.map_volume_dimensions(in_dataset[0], in_pData[0])
 
         axis_labels = [0]*3
         axis_labels = {in_dataset[0]:
@@ -129,12 +129,12 @@ class BaseRecon(Plugin):
         # set pattern_name and nframes to process for all datasets
         out_pData[0].plugin_data_setup('VOLUME_XZ', self.get_max_frames())
 
-    def map_volume_dimensions(self, data):
-        data.finalise_patterns()
+    def map_volume_dimensions(self, data, pData):
+        data._finalise_patterns()
         dim_rotAngle = data.get_data_patterns()['PROJECTION']['main_dir']
         dim_detY = data.get_data_patterns()['SINOGRAM']['main_dir']
 
-        core_dirs = data.get_plugin_data().get_core_directions()
+        core_dirs = pData.get_core_directions()
         dim_detX = list(set(core_dirs).difference(set((dim_rotAngle,))))[0]
 
         dim_volX = dim_rotAngle

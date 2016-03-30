@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# $Id: dezing_filter.py 467 2016-02-16 11:40:42Z kny48981 $
+
 
 """
 .. module:: dezing_filter
@@ -20,6 +22,7 @@
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
+import logging
 import numpy as np
 import dezing
 
@@ -31,9 +34,8 @@ from savu.plugins.utils import register_plugin
 @register_plugin
 class DezingFilter(BaseFilter, CpuPlugin):
     """
-    A plugin
-
-    :param outlier_mu: Magnitude for detecting outlier. Default: 10.0.
+    A plugin for cleaning x-ray strikes based on statistical evaluation of the near neighbourhood
+    :param outlier_mu: Threshold for detecting outliers, greater is less sensitive. Default: 10.0. 
     :param kernel_size: Number of frames included in average. Default: 5.
     """
 
@@ -51,6 +53,12 @@ class DezingFilter(BaseFilter, CpuPlugin):
 
     def post_process(self):
         dezing.cleanup()
+
+    def get_max_frames(self):
+        """
+        :returns:  an integer of the number of frames
+        """
+        return 100
 
     def set_filter_padding(self, in_data, out_data):
         in_data = in_data[0]

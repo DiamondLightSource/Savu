@@ -16,7 +16,7 @@
 """
 .. module:: experiment_collection
    :platform: Unix
-   :synopsis: Contains the Experiment class and all possible experiment
+   :synopsis: Contains the Experiment class and all possible experiment \
    collections from which Experiment can inherit at run time.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
@@ -29,8 +29,9 @@ import copy
 import h5py
 from mpi4py import MPI
 
+import savu.core.utils as cu
 from savu.data.plugin_list import PluginList
-from savu.data.data_structures import Data
+from savu.data.data_structures.data import Data
 from savu.data.meta_data import MetaData
 
 
@@ -43,14 +44,15 @@ class Experiment(object):
 
     def __init__(self, options):
         self.meta_data = MetaData(options)
-        self.meta_data_setup(options["process_file"])
+        self.__meta_data_setup(options["process_file"])
         self.index = {"in_data": {}, "out_data": {}, "mapping": {}}
         self.nxs_file = None
 
     def get_meta_data(self, entry):
+        """ Get the meta data dictionary. """
         return self.meta_data.get_meta_data(entry)
 
-    def meta_data_setup(self, process_file):
+    def __meta_data_setup(self, process_file):
         self.meta_data.plugin_list = PluginList()
 
         try:
@@ -61,19 +63,26 @@ class Experiment(object):
             else:
                 raise Exception('the run_type is unknown in Experiment class')
         except KeyError:
-            self.meta_data.plugin_list.populate_plugin_list(process_file)
+            self.meta_data.plugin_list._populate_plugin_list(process_file)
 
-    def create_data_object(self, dtype, name, bases=[]):
+    def create_data_object(self, dtype, name):
+        """ Create a data object.
+
+        Plugin developers should apply this method in loaders only.
+
+        :params str dtype: either "in_data" or "out_data".
+        """
+        bases = []
         try:
             self.index[dtype][name]
         except KeyError:
             self.index[dtype][name] = Data(name, self)
             data_obj = self.index[dtype][name]
-            bases.append(data_obj.get_transport_data())
-            data_obj.add_base_classes(bases)
+            bases.append(data_obj._get_transport_data())
+            cu.add_base_classes(data_obj, bases)
         return self.index[dtype][name]
 
-    def set_nxs_filename(self):
+    def _set_nxs_filename(self):
         name = self.index["in_data"].keys()[0]
         filename = os.path.basename(self.index["in_data"][name].
                                     backing_file.filename)
@@ -89,65 +98,62 @@ class Experiment(object):
         else:
             self.nxs_file = h5py.File(filename, 'w')
 
-    def remove_dataset(self, data_obj):
-        data_obj.close_file()
+    def __remove_dataset(self, data_obj):
+        data_obj._close_file()
         del self.index["out_data"][data_obj.data_info.get_meta_data('name')]
 
-    def clear_data_objects(self):
+    def _clear_data_objects(self):
         self.index["out_data"] = {}
         self.index["in_data"] = {}
 
-    def clear_out_data_objects(self):
-        self.index["out_data"] = {}
-
-    def merge_out_data_to_in(self):
+    def _merge_out_data_to_in(self):
         for key, data in self.index["out_data"].iteritems():
             if data.remove is False:
                 if key in self.index['in_data'].keys():
-                    data.meta_data.set_dictionary(
+                    data.meta_data._set_dictionary(
                         self.index['in_data'][key].meta_data.get_dictionary())
                 self.index['in_data'][key] = data
         self.index["out_data"] = {}
 
-    def reorganise_datasets(self, out_data_objs, link_type):
+    def _reorganise_datasets(self, out_data_objs, link_type):
         out_data_list = self.index["out_data"]
-        self.close_unwanted_files(out_data_list)
-        self.remove_unwanted_data(out_data_objs)
+        self.__close_unwanted_files(out_data_list)
+        self.__remove_unwanted_data(out_data_objs)
 
-        self.barrier()
-        self.copy_out_data_to_in_data(link_type)
+        self._barrier()
+        self.__copy_out_data_to_in_data(link_type)
 
-        self.barrier()
-        self.clear_out_data_objects()
+        self._barrier()
+        self.index['out_data'] = {}
 
-    def remove_unwanted_data(self, out_data_objs):
+    def __remove_unwanted_data(self, out_data_objs):
         for out_objs in out_data_objs:
             if out_objs.remove is True:
-                self.remove_dataset(out_objs)
+                self.__remove_dataset(out_objs)
 
-    def close_unwanted_files(self, out_data_list):
+    def __close_unwanted_files(self, out_data_list):
         for out_objs in out_data_list:
             if out_objs in self.index["in_data"].keys():
-                self.index["in_data"][out_objs].close_file()
+                self.index["in_data"][out_objs]._close_file()
 
-    def copy_out_data_to_in_data(self, link_type):
+    def __copy_out_data_to_in_data(self, link_type):
         for key in self.index["out_data"]:
             output = self.index["out_data"][key]
-            output.save_data(link_type)
+            output._save_data(link_type)
             self.index["in_data"][key] = copy.deepcopy(output)
 
-    def set_all_datasets(self, name):
+    def _set_all_datasets(self, name):
         data_names = []
         for key in self.index["in_data"].keys():
             data_names.append(key)
         return data_names
 
-    def barrier(self, communicator=MPI.COMM_WORLD):
+    def _barrier(self, communicator=MPI.COMM_WORLD):
         comm_dict = {'comm': communicator}
         if self.meta_data.get_meta_data('mpi') is True:
-            logging.debug("About to hit a barrier")
-            comm_dict['comm'].Barrier()
-            logging.debug("Past the barrier")
+            logging.debug("About to hit a _barrier")
+            comm_dict['comm'].barrier()
+            logging.debug("Past the _barrier")
 
     def log(self, log_tag, log_level=logging.DEBUG):
         """

@@ -9,14 +9,15 @@ int logprint(const char *const message){
    int myerror=0;
    retval=fprintf(logfp,"%s",message);
 
-#ifdef FLUSH_LOG_FILE
+
+// #ifdef FLUSH_LOG_FILE
    if( fflush(logfp) == EOF ){
       myerror=errno;
       fprintf(stderr,"ERROR: log file flush failed!\n");
       fprintf(stderr,"%s\n",strerror(myerror));
       return(151);
    };
-#endif
+//#endif
 return(0);
 }
 

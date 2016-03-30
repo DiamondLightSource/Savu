@@ -24,7 +24,7 @@
 import h5py
 import logging
 
-import savu.data.data_structures as ds
+from savu.data.data_structures.data_add_ons import TomoRaw
 from savu.plugins.base_loader import BaseLoader
 
 from savu.plugins.utils import register_plugin
@@ -43,7 +43,7 @@ class NxtomoLoader(BaseLoader):
     def setup(self):
         exp = self.exp
         data_obj = exp.create_data_object('in_data', 'tomo')
-        ds.TomoRaw(data_obj)
+        TomoRaw(data_obj)
 
         # from nexus file determine rotation angle
         rot = 0

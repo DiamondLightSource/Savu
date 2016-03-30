@@ -82,6 +82,6 @@ class I12DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
 
     def get_new_slice(self, pData):
         core_dir = set(pData.get_core_directions())
-        starts, stops, steps, chunks = pData.data_obj.get_starts_stops_steps()
+        starts, stops, steps, chunks = pData.data_obj._preview.get_starts_stops_steps()
         new_slice = [slice(starts[d], stops[d], steps[d]) for d in core_dir]
         return new_slice

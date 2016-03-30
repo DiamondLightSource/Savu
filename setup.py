@@ -1,9 +1,8 @@
 from setuptools import setup
 import os
-import path
 
 def readme():
-    with open(os.path.abspath('../README.rst')) as f:
+    with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'README.rst')) as f:
         return f.read()
 
 import sys
@@ -16,7 +15,7 @@ if '--facility' in sys.argv:
     facility_path='mpi/'+facility
 if '--help' in sys.argv:
     print 'To package for a facility use "--facility <facilityname>" eg: python setup.py install --facility dls [Default facilityname is dls]'
-	
+
 setup(name='savu',
       version='0.3',
       description='Savu Python Tomography Pipeline',
@@ -33,17 +32,17 @@ setup(name='savu',
       author_email='scientificsoftware@diamond.ac.uk',
       license='Apache License, Version 2.0',
       packages=['test_data','savu','savu.plugins','savu.core',
-			'savu.core.transports',
-			'savu.plugins.loaders',
-			'savu.plugins.savers',
-			'savu.plugins.corrections',
-			'savu.plugins.reconstructions',
-			'savu.plugins.driver',
-			'savu.plugins.filters',
-			'savu.data',
-			'savu.data.transport_data',
-			'scripts',
-			'scripts.config_generator'],
+                'savu.core.transports',
+                'savu.plugins.loaders',
+                'savu.plugins.savers',
+                'savu.plugins.corrections',
+                'savu.plugins.reconstructions',
+                'savu.plugins.driver',
+                'savu.plugins.filters',
+                'savu.data',
+                'savu.data.transport_data',
+                'scripts',
+                'scripts.config_generator'],
       entry_points={'console_scripts':['savu_process_generator=scripts.config_generator.savu_config:main','tomo_recon=savu.tomo_recon:main'],},
       scripts=[facility_path+'/savu_launcher.sh',facility_path+'/savu_mpijob.sh'],
       package_dir={'test_data':'test_data'},

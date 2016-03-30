@@ -37,82 +37,40 @@ import time
 @register_plugin
 class PyfaiAzimuthalIntegratorWithBraggFilter(BaseAzimuthalIntegrator):
     """
-    1D azimuthal integrator by pyFAI
+    Uses pyfai to remap the data. We then remap, percentile file and integrate.
 
     :param use_mask: Should we mask. Default: False.
     :param num_bins: number of bins. Default: 1005.
-    :param thresh: threshold of percentile filter. Default: 50.
+    :param num_bins_azim: number of bins. Default: 20.
+    :param thresh: threshold of percentile filter. Default: [5,95].
     """
 
     def __init__(self):
-        logging.debug("Starting 1D azimuthal integrationr")
+        logging.debug("Starting 1D azimuthal integration")
         super(PyfaiAzimuthalIntegratorWithBraggFilter,
               self).__init__("PyfaiAzimuthalIntegratorWithBraggFilter")
 
-    def pre_process(self):
-        """
-        This method is called after the plugin has been created by the
-        pipeline framework as a pre-processing step
-
-        :param parameters: A dictionary of the parameters for this plugin, or
-            None if no customisation is required
-        :type parameters: dict
-        """
-        in_dataset, out_datasets = self.get_datasets()
-        mData = self.get_in_meta_data()[0]
-        in_d1 = in_dataset[0]
-        ai = AzimuthalIntegrator()  # get me an integrator object
-        ### prep the goemtry
-        bc = [mData.get_meta_data("beam_center_x")[...],
-              mData.get_meta_data("beam_center_y")[...]]
-        distance = mData.get_meta_data('distance')[...]
-        wl = mData.get_meta_data('incident_wavelength')[...]
-        px = mData.get_meta_data('x_pixel_size')[...]
-        orien = mData.get_meta_data(
-            'detector_orientation')[...].reshape((3, 3))
-        #Transform
-        yaw = math.degrees(-math.atan2(orien[2, 0], orien[2, 2]))
-        roll = math.degrees(-math.atan2(orien[0, 1], orien[1, 1]))
-        ai.setFit2D(distance, bc[0], bc[1], -yaw, roll, px, px, None)
-        ai.set_wavelength(wl)
-        
-        self.sh = in_d1.get_shape()[-2:]
-        self.npts = self.get_parameters('num_bins')
-        foo = units.to_unit(units.TTH) #  preallocate
-        pretenddata = np.zeros(self.sh)
-        pretendfit = ai.xrpd(data=pretenddata, npt=self.npts)
-        twotheta=ai.__getattribute__(foo.center)(ai.detector.max_shape) # get the detector array of Q # preallocate
-        twotheta *= 180.0/np.pi # preallocate
-        twotheta_flat = twotheta.ravel() #pre allocate
-        self.params = [self.npts, mData, ai, twotheta_flat]
-        
     def filter_frames(self, data):
-        t1 = time.time()
-        data = np.squeeze(data)
-        mData = self.params[1]
-        ai = self.params[2]
-        twotheta_flat = self.params[3]
-        logging.debug("Running azimuthal integration")
-        fit = ai.xrpd(data=data, npt=self.npts)
-        mData.set_meta_data('Q', fit[0])
-        newplot = self.calcfrom1d(fit[0], fit[1], twotheta_flat)
-        rat = data/newplot
-        thing = data.copy()
-        thing[rat > 1.000000000001] = 0.0
-#         ave_per_ring = self.calcfrom1d(fit[0], fit[1], twotheta_flat)
-#         thresh = self.parameters['thresh']
-#         diff = (100 - thresh) / 2.0
-#         minval, maxval = np.percentile(data, [diff, 100 - diff])
-
-        mask = np.zeros_like(data)
-        mask[thing == 0] = 1
-#         mask[data < minval] = 0
-#         mask[data > maxval] = 0
-        final = ai.xrpd(data, self.npts, mask=mask)
-        t2 = time.time()
-        print final[1].shape
-        print "PyFAI iteration with correction took:"+str((t2-t1)*1e3)+"ms"
-        return final[1]
+        mData = self.params[2]
+        mask = self.params[0]
+        ai = self.params[3]
+        lims = self.parameters['thresh']
+        num_bins_azim = self.parameters['num_bins_azim']
+        num_bins_rad = self.parameters['num_bins']
+        units = self.parameters['units']
+        remapped, axis, chi = ai.integrate2d(data=data[0],npt_rad=num_bins_rad, npt_azim=num_bins_azim)
+        mask = np.ones_like(remapped)
+        row_mask = np.zeros(mask.shape[0])
+        mask[remapped==0] = 0
+        out = np.zeros(mask.shape[1])
+        for i in range(mask.shape[1]):
+            foo = remapped[:,i][mask[:,i] == 1]
+            top = np.percentile(foo,lims[1])
+            bottom = np.percentile(foo,lims[0])
+            out[i] = np.mean(np.clip(foo,bottom,top))
+        axis, out_spectra = self.unit_conversion(units,axis,out)
+        mData.set_meta_data('Q', axis) # multiplied because their units are wrong!
+        return out_spectra
 
 
 

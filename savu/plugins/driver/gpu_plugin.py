@@ -36,7 +36,7 @@ class GpuPlugin(PluginDriver):
     def __init__(self):
         super(GpuPlugin, self).__init__()
 
-    def run_plugin(self, exp, transport):
+    def _run_plugin(self, exp, transport):
 
         expInfo = exp.meta_data
         processes = copy.copy(expInfo.get_meta_data("processes"))
@@ -56,34 +56,34 @@ class GpuPlugin(PluginDriver):
         nNodes = new_processes.count(new_processes[0])
 
         ranks = [i for i, x in enumerate(gpu_processes) if x]
-        self.create_new_communicator(ranks, exp, process)
+        self.__create_new_communicator(ranks, exp, process)
 
         if gpu_processes[process]:
             expInfo.set_meta_data('process', self.new_comm.Get_rank())
             logging.info("Running the GPU Process %i",
                          self.new_comm.Get_rank())
-            GPU_index = self.calculate_GPU_index(nNodes)
+            GPU_index = self.__calculate_GPU_index(nNodes)
             self.parameters['GPU_index'] = GPU_index
-            self.run_plugin_instances(transport, communicator=self.new_comm)
-            self.clean_up()
-            self.free_communicator()
+            self._run_plugin_instances(transport, communicator=self.new_comm)
+            self._clean_up()
+            self.__free_communicator()
             expInfo.set_meta_data('process', MPI.COMM_WORLD.Get_rank())
 
-        self.exp.barrier()
+        self.exp._barrier()
         expInfo.set_meta_data('processes', processes)
         return
 
-    def create_new_communicator(self, ranks, exp, process):
+    def __create_new_communicator(self, ranks, exp, process):
         self.group = MPI.COMM_WORLD.Get_group()
         self.new_group = MPI.Group.Incl(self.group, ranks)
         self.new_comm = MPI.COMM_WORLD.Create(self.new_group)
-        self.exp.barrier()
+        self.exp._barrier()
 
-    def free_communicator(self):
+    def __free_communicator(self):
         self.group.Free()
         self.new_group.Free()
         self.new_comm.Free()
 
-    def calculate_GPU_index(self, nNodes):
+    def __calculate_GPU_index(self, nNodes):
         rank = self.new_comm.Get_rank()
         return int(rank/nNodes)

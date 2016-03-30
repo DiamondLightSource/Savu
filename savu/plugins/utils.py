@@ -21,6 +21,8 @@
 
 """
 
+import os
+import sys
 import re
 import logging
 import numpy as np
@@ -28,6 +30,7 @@ import copy
 
 plugins = {}
 plugins_path = {}
+# FIXME 
 datasets_list = []
 count = 0
 
@@ -56,6 +59,11 @@ def load_plugin(plugin_name):
 
     name = plugin_name
     logging.debug("importing the module")
+    if plugin_name.startswith(os.path.sep):
+        # this is a path, so we need to add the directory to the pythonpath
+        # and sort out the name
+        ppath, name = os.path.split(plugin_name)
+        sys.path.append(ppath)
     # TODO This appears to be the failing line.
     mod = __import__(name)
     components = name.split('.')
@@ -70,7 +78,7 @@ def load_plugin(plugin_name):
 
 def get_class_instance(clazz):
     instance = clazz()
-    instance.populate_default_parameters()
+    instance._populate_default_parameters()
     return instance
 
 
@@ -93,7 +101,7 @@ def plugin_loader(exp, plugin_dict, **kwargs):
         set_datasets(exp, plugin, plugin_dict)
 
     logging.debug("Running plugin main setup")
-    plugin.main_setup(exp, plugin_dict['data'])
+    plugin._main_setup(exp, plugin_dict['data'])
 
     if check_flag is True:
         set_datasets_list(exp, plugin)
@@ -104,15 +112,15 @@ def plugin_loader(exp, plugin_dict, **kwargs):
 def run_plugins(exp, plugin_list, **kwargs):
     plugin_loader(exp, plugin_list[0])
 
-    exp.barrier()
-    exp.set_nxs_filename()
-    exp.barrier()
+    exp._barrier()
+    exp._set_nxs_filename()
+    exp._barrier()
 
     check = kwargs.get('check', False)
     for i in range(1, len(plugin_list)-1):
-        exp.barrier()
+        exp._barrier()
         plugin_loader(exp, plugin_list[i], check=check)
-        exp.merge_out_data_to_in()
+        exp._merge_out_data_to_in()
 
 
 def set_datasets_list(exp, plugin):
@@ -167,7 +175,7 @@ def get_names(names):
 def check_nDatasets(exp, names, plugin_id, nSets, dtype):
     try:
         if names[0] in "all":
-            names = exp.set_all_datasets(dtype)
+            names = exp._set_all_datasets(dtype)
     except IndexError:
         pass
 

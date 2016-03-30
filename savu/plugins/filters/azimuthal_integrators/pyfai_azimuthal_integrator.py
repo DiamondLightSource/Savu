@@ -15,27 +15,25 @@
 """
 .. module:: pyfai_azimuthal_integrator
    :platform: Unix
-   :synopsis: A plugin to integrate azimuthally "symmetric" signals i.e. SAXS, WAXS or XRD.Requires a calibration file
+   :synopsis: A plugin to integrate azimuthally "symmetric" signals i.e. SAXS,\
+       WAXS or XRD.Requires a calibration file
 
 .. moduleauthor:: Aaron D. Parsons <scientificsoftware@diamond.ac.uk>
 """
 
 import logging
-from savu.plugins.filters.base_azimuthal_integrator import BaseAzimuthalIntegrator
+from savu.plugins.filters.base_azimuthal_integrator import \
+    BaseAzimuthalIntegrator
 
 from savu.plugins.utils import register_plugin
-import time
 
 
 @register_plugin
 class PyfaiAzimuthalIntegrator(BaseAzimuthalIntegrator):
     """
     1D azimuthal integrator by pyFAI
-
     :param use_mask: Should we mask. Default: False.
-
     :param num_bins: number of bins. Default: 1005.
-
     """
 
     def __init__(self):
@@ -44,14 +42,12 @@ class PyfaiAzimuthalIntegrator(BaseAzimuthalIntegrator):
               self).__init__("PyfaiAzimuthalIntegrator")
 
     def filter_frames(self, data):
-        t1 = time.time()
+        logging.debug("Running azimuthal integration")
         mData = self.params[2]
         mask = self.params[0]
         ai = self.params[3]
-        logging.debug("Running azimuthal integration")
-        fit = ai.xrpd(data=data[0], npt=self.npts)
-        mData.set_meta_data('Q', fit[0])
-#        mData.set_meta_data('integrated_diffraction_noise',fit[2])
-        t2 = time.time()
-        print "PyFAI iteration took:"+str((t2-t1)*1e3)+"ms"
-        return fit[1]
+        units = self.parameters['units']
+        axis, remapped = ai.integrate1d(data=data[0], npt=self.npts, unit='q_nm^-1')
+        axis, remapped_new = self.unit_conversion(units,axis,remapped)
+        mData.set_meta_data('Q', axis) # multiplied because their units are wrong!
+        return remapped_new

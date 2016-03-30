@@ -35,7 +35,7 @@ class PluginDriver(object):
     def __init__(self):
         super(PluginDriver, self).__init__()
 
-    def run_plugin_instances(self, transport, communicator=MPI.COMM_WORLD):
+    def _run_plugin_instances(self, transport, communicator=MPI.COMM_WORLD):
         out_data = self.get_out_datasets()
         extra_dims = self.extra_dims
         repeat = np.prod(extra_dims) if extra_dims else 1
@@ -43,42 +43,25 @@ class PluginDriver(object):
         param_idx = pu.calc_param_indices(extra_dims)
         out_data_dims = [len(d.get_shape()) for d in out_data]
         param_dims = [range(d - len(extra_dims), d) for d in out_data_dims]
+
         for i in range(repeat):
             if repeat > 1:
-                self.set_parameters_this_instance(param_idx[i])
+                self._set_parameters_this_instance(param_idx[i])
                 for j in range(len(out_data)):
-                    out_data[j].get_plugin_data()\
+                    out_data[j]._get_plugin_data()\
                         .set_fixed_directions(param_dims[j], param_idx[i])
 
+            logging.info("%s.%s", self.__class__.__name__, 'pre_process')
             self.pre_process()
 
             logging.info("%s.%s", self.__class__.__name__, 'process')
-            transport.process(self)
+            transport._process(self)
 
-            logging.info("%s.%s", self.__class__.__name__, 'barrier')
-            self.exp.barrier(communicator=communicator)
+            logging.info("%s.%s", self.__class__.__name__, '_barrier')
+            self.exp._barrier(communicator=communicator)
 
             logging.info("%s.%s", self.__class__.__name__, 'post_process')
             self.post_process()
 
         for j in range(len(out_data)):
             out_data[j].set_shape(out_data[j].data.shape)
-
-    def process(self, data, output, processes, process):
-        """
-        This method is called after the process has been created by the
-        pipeline framework
-
-        :param data: The input data object.
-        :type data: savu.data.data_structures
-        :param data: The output data object
-        :type data: savu.data.data_structures
-        :param processes: The number of processes which will be doing the work
-        :type path: int
-        :param path: The specific process which we are
-        :type path: int
-        """
-        logging.error("process needs to be implemented for proc %i of %i :" +
-                      " input is %s and output is %s",
-                      process, processes, data.__class__, output.__class__)
-        raise NotImplementedError("process needs to be implemented")

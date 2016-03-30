@@ -20,8 +20,9 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
-
-from savu.data.data_structures import PluginData
+import savu.plugins.plugin_datasets_notes as notes
+from savu.core.utils import docstring_parameter
+from savu.data.data_structures.plugin_data import PluginData
 
 
 class PluginDatasets(object):
@@ -37,82 +38,148 @@ class PluginDatasets(object):
         self.multi_params_dict = {}
         self.extra_dims = []
 
-    def get_data_objects(self, dtype):
+    def __get_data_objects(self, dtype):
+        """ Get the data objects associated with the plugin from the experiment
+        data index.
+
+        :params str dtype: "in_data" or "out_data"
+        :returns: A list of data objects with the names given in
+            ``self.parameters``
+        :rtype: list(Data)
+        """
         data_list = self.parameters[dtype + 'sets']
         data_objs = []
         for data in data_list:
             data_objs.append(self.exp.index[dtype][data])
         return data_objs
 
-    def set_in_datasets(self):
-        return self.get_data_objects('in_data')
+    def __set_in_datasets(self):
+        """ Set the in_data objects.
 
-    def set_out_datasets(self):
+        :returns: the in_datasets associated with the plugin.
+        :rtype: list[Data]
+        """
+        return self.__get_data_objects('in_data')
+
+    def __set_out_datasets(self):
+        """ Set the out_data objects.
+
+        If the out_datasets do not exist inside the experiment then create
+        them.
+
+        :returns: the out_datasets associated with the plugin.
+        :rtype: list[Data]
+        """
         try:
-            out_data = self.get_data_objects('out_data')
+            out_data = self.__get_data_objects('out_data')
         except KeyError:
             out_data = []
             for data in self.parameters['out_datasets']:
                 self.exp.create_data_object("out_data", data)
-            out_data = self.get_data_objects('out_data')
+            out_data = self.__get_data_objects('out_data')
         for data in out_data:
             data.extra_dims = self.extra_dims
         return out_data
 
-    def get_plugin_data(self, data_list):
-        pattern_list = []
+    def __get_plugin_data(self, data_list):
+        """ Encapsulate a PluginData object in each dataset associated with
+        the plugin.
+
+        :params list(Data) data_list: A list of Data objects used in a plugin.
+        :returns: A list of PluginData objects.
+        :rtype: list(PluginData)
+        """
+        pData_list = []
         for data in data_list:
-            pattern_list.append(PluginData(data))
-            pattern_list[-1].extra_dims = self.extra_dims
-            pattern_list[-1].multi_params_dict = self.multi_params_dict
-        return pattern_list
+            pData_list.append(PluginData(data, self))
+            pData_list[-1].extra_dims = self.extra_dims
+            pData_list[-1].multi_params_dict = self.multi_params_dict
+        return pData_list
 
-    def set_plugin_datasets(self):
+    def _set_plugin_datasets(self):
+        """ Populate ``self.parameters`` in/out_datasets and
+        plugin_in/out_datasets with the relevant objects (Data or PluginData).
         """
-        Convert in/out_dataset strings to objects and create PluginData objects
-        for each.
-        """
-        self.parameters['in_datasets'] = self.set_in_datasets()
-        self.parameters['out_datasets'] = self.set_out_datasets()
+        self.parameters['in_datasets'] = self.__set_in_datasets()
+        self.parameters['out_datasets'] = self.__set_out_datasets()
         self.parameters['plugin_in_datasets'] = \
-            self.get_plugin_data(self.parameters['in_datasets'])
+            self.__get_plugin_data(self.parameters['in_datasets'])
         self.parameters['plugin_out_datasets'] = \
-            self.get_plugin_data(self.parameters['out_datasets'])
+            self.__get_plugin_data(self.parameters['out_datasets'])
 
+    @docstring_parameter('PluginData', 'in')
+    @docstring_parameter(notes.datasets_notes.__doc__)
     def get_plugin_in_datasets(self):
+        """ {0} """
         return self.parameters['plugin_in_datasets']
 
+    @docstring_parameter('PluginData', 'out')
+    @docstring_parameter(notes.datasets_notes.__doc__)
     def get_plugin_out_datasets(self):
+        """ {0} """
         return self.parameters['plugin_out_datasets']
 
+    @docstring_parameter("PluginData")
+    @docstring_parameter(notes.two_datasets_notes.__doc__)
     def get_plugin_datasets(self):
+        """ {0} """
         return self.get_plugin_in_datasets(), self.get_plugin_out_datasets()
 
+    @docstring_parameter("Data", "in")
+    @docstring_parameter(notes.datasets_notes.__doc__)
     def get_in_datasets(self):
+        """ {0} """
         return self.parameters['in_datasets']
 
+    @docstring_parameter("Data", "out")
+    @docstring_parameter(notes.datasets_notes.__doc__)
     def get_out_datasets(self):
+        """ {0} """
         return self.parameters['out_datasets']
 
+    @docstring_parameter("PluginData")
+    @docstring_parameter(notes.two_datasets_notes.__doc__)
     def get_datasets(self):
+        """ {0} """
         return self.get_in_datasets(), self.get_out_datasets()
 
+    @docstring_parameter("in")
+    @docstring_parameter(notes.mData_notes.__doc__)
     def get_in_meta_data(self):
-        return self.set_meta_data(self.parameters['in_datasets'], 'in_data')
+        """ {0} """
+        return self.__set_meta_data(self.parameters['in_datasets'], 'in_data')
 
+    @docstring_parameter("out")
+    @docstring_parameter(notes.mData_notes.__doc__)
     def get_out_meta_data(self):
-        return self.set_meta_data(self.parameters['out_datasets'], 'out_data')
+        """ {0} """
+        return self.__set_meta_data(self.parameters['out_datasets'],
+                                    'out_data')
 
     def get_meta_data(self):
+        """ Get a list of meta_data objects associated with the
+        in/out_datasets.
+
+        :returns: All MetaData objects associated with out data objects.
+        :rtype: list(MetaData(in_datasets)), list(MetaData(out_datasets))
+        """
         return self.get_in_meta_data(), self.get_out_meta_data()
 
-    def set_meta_data(self, data_list, dtype):
+    def __set_meta_data(self, data_list, dtype):
+        """ Append all MetaData objs associated with specified datasets to a
+        list.
+
+        :params list(Data) data_list:
+        :returns: All MetaData objects associated with data objects in
+            data_list
+        :rtype: list(MetaData)
+        """
         meta_data = []
         for data in data_list:
             meta_data.append(data.meta_data)
         return meta_data
 
-    def set_unknown_shape(self, data, key):
+    def _set_unknown_shape(self, data, key):
         try:
             return (len(data.meta_data.get_meta_data(key)),)
         except KeyError:

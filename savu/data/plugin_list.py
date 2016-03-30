@@ -16,8 +16,8 @@
 """
 .. module:: plugin_list
    :platform: Unix
-   :synopsis: Contains the PluginList class, which deals with loading and
-   saving the plugin list, and the CitationInformation class. An instance is
+   :synopsis: Contains the PluginList class, which deals with loading and \
+   saving the plugin list, and the CitationInformation class. An instance is \
    held by the MetaData class.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
@@ -42,7 +42,7 @@ class PluginList(object):
         self.plugin_list = []
         self.exp = None
 
-    def populate_plugin_list(self, filename, activePass=False):
+    def _populate_plugin_list(self, filename, activePass=False):
         plugin_file = h5py.File(filename, 'r')
         plugin_group = plugin_file['entry/plugin']
         self.plugin_list = []
@@ -60,12 +60,12 @@ class PluginList(object):
                 plugin['name'] = plugin_group[key]['name'][0]
                 plugin['id'] = plugin_group[key]['id'][0]
                 plugin['data'] = \
-                    self.byteify(json.loads(plugin_group[key]['data'][0]))
-                plugin['data'] = self.convert_to_list(plugin['data'])
+                    self.__byteify(json.loads(plugin_group[key]['data'][0]))
+                plugin['data'] = self.__convert_to_list(plugin['data'])
                 self.plugin_list.append(plugin)
         plugin_file.close()
 
-    def save_plugin_list(self, out_filename, exp=None):
+    def _save_plugin_list(self, out_filename, exp=None):
         if exp:
             entry_group = exp.nxs_file.create_group('entry')
         else:
@@ -104,7 +104,7 @@ class PluginList(object):
         citation.write(plugin_entry)
         plugin_file.close()
 
-    def get_string(self, **kwargs):
+    def _get_string(self, **kwargs):
         out_string = []
 
         start = kwargs.get('start', 0)
@@ -132,19 +132,19 @@ class PluginList(object):
             out_string.append(description)
         return '\n'.join(out_string)
 
-    def byteify(self, input):
+    def __byteify(self, input):
         if isinstance(input, dict):
-            return {self.byteify(key): self.byteify(value)
+            return {self.__byteify(key): self.__byteify(value)
                     for key, value in input.iteritems()}
         elif isinstance(input, list):
-            temp = [self.byteify(element) for element in input]
+            temp = [self.__byteify(element) for element in input]
             return temp
         elif isinstance(input, unicode):
             return input.encode('utf-8')
         else:
             return input
 
-    def convert_to_list(self, data):
+    def __convert_to_list(self, data):
         for key in data:
             value = data[key]
             if isinstance(value, str) and value.count('['):

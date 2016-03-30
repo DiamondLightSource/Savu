@@ -21,6 +21,25 @@ from os import path
 #sys.path.insert(0, '../.')
 #sys.path.insert(0, '../../.')
 sys.path.insert(0, os.path.abspath('../../'))
+sys.path.insert(0, os.path.abspath('../../savu'))
+sys.path.insert(0, os.path.abspath('../../savu/core'))
+sys.path.insert(0, os.path.abspath('../../savu/transports'))
+sys.path.insert(0, os.path.abspath('../../savu/data'))
+sys.path.insert(0, os.path.abspath('../../savu/data/transport_data'))
+sys.path.insert(0, os.path.abspath('../../savu/data/data_structures'))
+sys.path.insert(0, os.path.abspath('../../savu/plugins'))
+sys.path.insert(0, os.path.abspath('../../savu/plugins/driver'))
+sys.path.insert(0, os.path.abspath('../../savu/plugins/filters'))
+sys.path.insert(0, os.path.abspath('../../savu/plugins/filters/azimuthal_integrators'))
+sys.path.insert(0, os.path.abspath('../../savu/plugins/filters/component_analysis'))
+sys.path.insert(0, os.path.abspath('../../savu/plugins/filters/fitters'))
+sys.path.insert(0, os.path.abspath('../../savu/plugins/corrections'))
+sys.path.insert(0, os.path.abspath('../../savu/plugins/reconstructions'))
+sys.path.insert(0, os.path.abspath('../../savu/plugins/reconstructions/astra_recons'))
+sys.path.insert(0, os.path.abspath('../../savu/plugins/loaders'))
+sys.path.insert(0, os.path.abspath('../../savu/plugins/loaders/multi_modal_loaders'))
+sys.path.insert(0, os.path.abspath('../../savu/plugins/savers'))
+
 # -- General configuration -----------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -28,12 +47,12 @@ sys.path.insert(0, os.path.abspath('../../'))
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.intersphinx', 'sphinx.ext.ifconfig', 'sphinx.ext.autosummary']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.intersphinx', 'sphinx.ext.ifconfig', 'sphinx.ext.autosummary', 'sphinx.ext.viewcode']
 
 autosummary_generate = True
 
 # Add any paths that contain templates here, relative to this directory.
-#templates_path = ['_templates']
+templates_path = ['_templates']
 
 # The suffix of source filenames.
 source_suffix = '.rst'
@@ -89,7 +108,7 @@ exclude_patterns = ['_templates']
 pygments_style = 'sphinx'
 
 # A list of ignored prefixes for module index sorting.
-#modindex_common_prefix = []
+#modindex_common_prefix = ['savu.']
 
 
 # -- Options for HTML output ---------------------------------------------------

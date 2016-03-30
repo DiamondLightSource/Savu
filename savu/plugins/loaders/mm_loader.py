@@ -28,6 +28,7 @@ from savu.plugins.loaders.multi_modal_loaders.nxxrd_loader import NxxrdLoader
 from savu.plugins.loaders.multi_modal_loaders.nxstxm_loader import NxstxmLoader
 from savu.plugins.loaders.multi_modal_loaders.nxmonitor_loader \
     import NxmonitorLoader
+import logging
 
 from savu.plugins.utils import register_plugin
 
@@ -45,13 +46,29 @@ class MmLoader(BaseLoader):
 
     def setup(self):
         new_dict = self.amend_dictionary()
-        self.setup_loader(NxfluoLoader(), new_dict)
-        self.setup_loader(NxxrdLoader(), self.parameters)
-        self.setup_loader(NxstxmLoader(), new_dict)
-        self.setup_loader(NxmonitorLoader(), new_dict)
+        try:
+            self.setup_loader(NxfluoLoader(), new_dict)
+            logging.debug('This file contains an NXfluo')
+        except:
+            logging.debug('This file does not contain an NXfluo')
+        try:
+            self.setup_loader(NxxrdLoader(), self.parameters)
+            logging.debug('This file contains an NXxrd')
+        except:
+            logging.debug('This file does not contain an NXxrd')
+        try:
+            self.setup_loader(NxstxmLoader(), new_dict)
+            logging.debug('This file contains an NXstxm')
+        except:
+            logging.debug('This file does not contain an NXstxm')
+        try:
+            self.setup_loader(NxmonitorLoader(), new_dict)
+            logging.debug('This file contains an NXmonitor')
+        except:
+            logging.debug('This file does not contain an NXmonitor')
 
     def setup_loader(self, loader, params):
-        loader.main_setup(self.exp, params)
+        loader._main_setup(self.exp, params)
         loader.setup()
 
     def amend_dictionary(self):

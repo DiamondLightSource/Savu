@@ -37,8 +37,8 @@ class BaseFilter(Plugin):
     def __init__(self, name):
         super(BaseFilter, self).__init__(name)
 
-    def main_setup(self, exp, params):
-        super(BaseFilter, self).main_setup(exp, params)
+    def _main_setup(self, exp, params):
+        super(BaseFilter, self)._main_setup(exp, params)
         self.set_filter_padding(*(self.get_plugin_datasets()))
 
     def set_filter_padding(self, in_data, out_data):

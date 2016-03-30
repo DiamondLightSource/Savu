@@ -15,7 +15,7 @@
 """
 .. module:: Transport_control
    :platform: Unix
-   :synopsis: A TransportControl class which implements functions that control
+   :synopsis: A TransportControl class which implements functions that control\
    the interaction between the data and plugin layers.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
@@ -29,7 +29,7 @@ class TransportControl(object):
     plugin layers.
     """
 
-    def transport_control_setup(self, options):
+    def _transport_control_setup(self, options):
         """
         Any initial setup required by the transport mechanism, not relating to
         the data.
@@ -37,7 +37,7 @@ class TransportControl(object):
         raise NotImplementedError("transport_control_setup needs to be "
                                   "implemented in %s", self.__class__)
 
-    def transport_run_plugin_list(self):
+    def _transport_run_plugin_list(self):
         """
         A loop that contains a call to plugin.run_plugin and anything required
         before or after the execution of a plugin.
@@ -45,7 +45,7 @@ class TransportControl(object):
         raise NotImplementedError("transport_run_plugin_list needs to be "
                                   "implemented in %s", self.__class__)
 
-    def process(self, plugin):
+    def _process(self, plugin):
         """
         A function to process the plugin, including the passing of data frames.
         """

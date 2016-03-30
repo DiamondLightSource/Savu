@@ -15,7 +15,8 @@
 """
 .. module:: base_azimuthal_integrator
    :platform: Unix
-   :synopsis: A plugin to integrate azimuthally "symmetric" signals i.e. SAXS, WAXS or XRD.Requires a calibration file
+   :synopsis: A plugin to integrate azimuthally "symmetric" signals i.e. \
+       SAXS, WAXS or XRD.Requires a calibration file
 
 .. moduleauthor:: Aaron D. Parsons <scientificsoftware@diamond.ac.uk>
 """
@@ -29,6 +30,7 @@ import pyFAI
 import numpy as np
 from savu.plugins.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
+from scipy.interpolate import interp1d
 
 
 class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
@@ -36,7 +38,7 @@ class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
     a base azimuthal integrator for pyfai
 
     :param use_mask: Should we mask. Default: False.
-
+    :param units: options are q_nm^-1 and d_nm. Default: "q_nm^-1".
     :param num_bins: number of bins. Default: 1005.
 
     """
@@ -59,7 +61,7 @@ class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
         mData = self.get_in_meta_data()[0]
         in_d1 = in_dataset[0]
         ai = pyFAI.AzimuthalIntegrator()  # get me an integrator object
-        ### prep the goemtry
+        # prep the goemtry
         bc = [mData.get_meta_data("beam_center_x")[...],
               mData.get_meta_data("beam_center_y")[...]]
         distance = mData.get_meta_data('distance')[...]
@@ -67,7 +69,7 @@ class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
         px = mData.get_meta_data('x_pixel_size')[...]
         orien = mData.get_meta_data(
             'detector_orientation')[...].reshape((3, 3))
-        #Transform
+        # Transform
         yaw = math.degrees(-math.atan2(orien[2, 0], orien[2, 2]))
         roll = math.degrees(-math.atan2(orien[0, 1], orien[1, 1]))
         ai.setFit2D(distance, bc[0], bc[1], -yaw, roll, px, px, None)
@@ -89,20 +91,23 @@ class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
         shape = in_dataset[0].get_shape()
         # it will always be in Q for this plugin
         # Doesnt this get rid of the other two axes?
-        #axis_labels = {in_dataset[0]: '-1.Q.nm^-1'}
+        # axis_labels = {in_dataset[0]: '-1.Q.nm^-1'}
         # I just want diffraction data
         in_pData[0].plugin_data_setup('DIFFRACTION', self.get_max_frames())
         spectra = out_datasets[0]
         num_bins = self.get_parameters('num_bins')
         # what does this do?
-        #remove an axis from all patterns
+        # remove an axis from all patterns
 
         # copy all patterns, removing dimension -1 from the core and slice
         # directions, and returning only those that are not empty
         patterns = ['SINOGRAM.-1', 'PROJECTION.-1']
         # stating only 'dimension' will remove the axis label, stating
         # 'dimension.name.unit' name and unit will add or replace it
-        axis_labels = ['-1', '-2.name.unit']
+
+        detY_dim = in_dataset[0].find_axis_label_dimension('detector_y')
+        detX_dim = in_dataset[0].find_axis_label_dimension('detector_x')
+        axis_labels = [str(detY_dim), str(detX_dim) + '.name.unit']
 
         spectra.create_dataset(patterns={in_dataset[0]: patterns},
                                axis_labels={in_dataset[0]: axis_labels},
@@ -123,14 +128,21 @@ class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
     def nOutput_datasets(self):
         return 1
 
-
-    def calcfrom1d(self, tth, I, twotheta_flat):
-        '''
-        takes the 1D data and makes it two d again
-        tth is the two theta from the integrator
-        I is the intensity from the integrator
-        ai is the integrator object
-        '''
-        interpedvals = np.interp(twotheta_flat, tth, I)
-        new_image = interpedvals.reshape(self.sh)
-        return new_image
+    def unit_conversion(self,units,axis, data):
+        if units=='q_nm^-1':
+            axis *= 1e3*1e10 # multiplied because their conversion is incorrect I think
+            remapped = data
+        elif units=='d_nm':
+            #  this is non-linear which is ok for DAWN, but interpolation smooths it.
+            q = axis*1e3*1e10
+#             print q
+            dold = 1.0/q
+#             print dold
+            npts = float(len(dold))
+            daxis = (dold[-1]-dold[0])/npts
+            new_axis = np.arange(dold[0],dold[-1],daxis)
+            f = interp1d(dold, data)
+            remapped = f(new_axis)
+            axis = new_axis
+#             print remapped
+        return axis, remapped
