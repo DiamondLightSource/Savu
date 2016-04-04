@@ -30,7 +30,7 @@ from savu.test.framework_tests.plugin_runner_test import \
 
 class I18XrdPipelineTest(unittest.TestCase):
 
-    @unittest.skip("Calibration file used in process list is not available as test data")
+    #@unittest.skip("Calibration file used in process list is not available as test data")
     def test_process(self):
         options = {
             "transport": "hdf5",
