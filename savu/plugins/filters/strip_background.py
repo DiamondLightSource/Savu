@@ -79,7 +79,7 @@ class StripBackground(BaseFilter, CpuPlugin):
 
         t2 = time.time()
         logging.debug("Strip iteration took: %s ms", str((t2-t1)*1e3))
-        print (data - filtered).shape
+#         print (data - filtered).shape
         return data - filtered
 
     def setup(self):
