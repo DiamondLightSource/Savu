@@ -31,25 +31,25 @@ from savu.test.framework_tests.plugin_runner_test import \
 
 class FittingTest(unittest.TestCase):
 
-#     def test_simple_fit_XRF(self):
-#         options = {
-#             "transport": "hdf5",
-#             "process_names": "CPU0",
-#             "data_file": tu.get_test_data_path('mm.nxs'),
-#             "process_file": tu.get_test_process_path('simple_fit_test_XRF.nxs'),
-#             "out_path": tempfile.mkdtemp()
-#             }
-#         run_protected_plugin_runner(options)
-
     def test_simple_fit_XRF(self):
         options = {
             "transport": "hdf5",
             "process_names": "CPU0",
-            "data_file": '/dls/i13/data/2015/cm12165-5/processing/AskAaron/mmbig_58905.nxs',
-            "process_file": '/dls/i13/data/2015/cm12165-5/processing/AskAaron/test/simple_fit_test_XRF.nxs',
+            "data_file": tu.get_test_data_path('mm.nxs'),
+            "process_file": tu.get_test_process_path('simple_fit_test_XRF.nxs'),
             "out_path": tempfile.mkdtemp()
             }
         run_protected_plugin_runner(options)
+
+#     def test_simple_fit_XRF(self):
+#         options = {
+#             "transport": "hdf5",
+#             "process_names": "CPU0",
+#             "data_file": '/dls/i13/data/2015/cm12165-5/processing/AskAaron/mmbig_58905.nxs',
+#             "process_file": '/dls/i13/data/2015/cm12165-5/processing/AskAaron/test/simple_fit_test_XRF.nxs',
+#             "out_path": tempfile.mkdtemp()
+#             }
+#         run_protected_plugin_runner(options)
 
 if __name__ == "__main__":
     unittest.main()
