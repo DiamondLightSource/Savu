@@ -53,6 +53,7 @@ class Hdf5TransportData(object):
         count = start
         datasets_list = exp.meta_data.plugin_list._get_datasets_list()
 
+
         for plugin_dict in plugin_list[start:-1]:
 
             self._get_current_and_next_patterns(
