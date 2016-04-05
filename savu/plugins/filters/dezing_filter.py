@@ -59,7 +59,7 @@ class DezingFilter(BaseFilter, CpuPlugin):
 
     def get_max_frames(self):
         """
-        :returns:  an integer of the number of frames
+        :returns:  an integer of the number of frames. Default 100
         """
         return 100
 
@@ -79,4 +79,4 @@ class DezingFilter(BaseFilter, CpuPlugin):
 
 # other examples
 #        data.padding = {'pad_multi_frames':pad, 'pad_frame_edges':pad}
-#   .padding  {'pad_direction':[ddir, pad]}}
+#        data.padding = {'pad_direction':[ddir, pad]}}

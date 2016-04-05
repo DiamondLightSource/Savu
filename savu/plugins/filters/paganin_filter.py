@@ -90,7 +90,7 @@ class PaganinFilter(BaseFilter, CpuPlugin):
 
     def filter_frames(self, data):
         if (self.count % 100 == 0 ):
-           print("... %i"%self.count)
+           logging.debug("... %i"%self.count)
         self.count+=1
         logging.debug("Getting the filter frame of Paganin Filter")
         data = data[0]

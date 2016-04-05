@@ -80,7 +80,7 @@ class RavenFilter(BaseFilter, CpuPlugin):
 
     def filter_frames(self, data):
         if(self.count%25==0):
-           print "raven...%i"%self.count
+           logging.debug( "raven...%i"%self.count)
         data2d = data[0]
         sino2 = np.fft.fftshift(self.fft_object(data2d))
         sino2[self.row1:self.row2] = \
