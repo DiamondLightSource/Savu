@@ -62,13 +62,7 @@ def load_plugin(plugin_name):
         ppath, name = os.path.split(plugin_name)
         sys.path.append(ppath)
     # TODO This appears to be the failing line.
-    mod = __import__(name)
-    components = name.split('.')
-    for comp in components[1:]:
-        mod = getattr(mod, comp)
-    temp = name.split('.')[-1]
-    mod2class = module2class(temp)
-    clazz = getattr(mod, mod2class.split('.')[-1])
+    clazz = load_class(name)
     instance = get_class_instance(clazz)
     return instance
 
@@ -77,6 +71,17 @@ def get_class_instance(clazz):
     instance = clazz()
     instance._populate_default_parameters()
     return instance
+
+
+def load_class(name):
+    mod = __import__(name)
+    components = name.split('.')
+    for comp in components[1:]:
+        mod = getattr(mod, comp)
+    temp = name.split('.')[-1]
+    mod2class = module2class(temp)
+    clazz = getattr(mod, mod2class.split('.')[-1])
+    return clazz
 
 
 def module2class(module_name):

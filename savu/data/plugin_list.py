@@ -193,12 +193,12 @@ class PluginList(object):
         """
         from savu.plugins.base_loader import BaseLoader
         from savu.plugins.base_saver import BaseSaver
+        import inspect
         loader_idx = []
         saver_idx = []
         self.n_plugins = len(self.plugin_list)
         for i in range(self.n_plugins):
-            plugin = pu.load_plugin(self.plugin_list[i]['id'])
-            bases = plugin.__class__.__bases__
+            bases = inspect.getmro(pu.load_class(self.plugin_list[i]['id']))
             loader_list = [b for b in bases if b == BaseLoader]
             saver_list = [b for b in bases if b == BaseSaver]
             if loader_list:
