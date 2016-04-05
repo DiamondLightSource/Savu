@@ -97,8 +97,8 @@ def set_fluo_experiment(filename, **kwargs):
 
 
 def set_i12tomo_experiment(filename, **kwargs):
-    options = \
-        _set_options(get_test_data_path('/i12_test_data/' + filename), **kwargs)
+    options = _set_options(
+        get_test_data_path('/i12_test_data/' + filename), **kwargs)
     options['loader'] = 'savu.plugins.loaders.i12_tomo_loader'
     options['saver'] = 'savu.plugins.savers.hdf5_tomo_saver'
     return options

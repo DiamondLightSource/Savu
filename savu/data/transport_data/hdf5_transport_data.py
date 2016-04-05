@@ -68,7 +68,7 @@ class Hdf5TransportData(object):
             exp._merge_out_data_to_in()
             count += 1
 
-        del self.exp.meta_data.get_dictionary()['current_and_next']
+        self.exp.meta_data.delete('current_and_next')
         return out_data_objects, count
 
     def __set_filenames(self, plugin, plugin_id, count):
