@@ -156,3 +156,13 @@ class BaseMultiModalLoader(BaseLoader):
             logging.debug("the sino slices are:"+str(tuple(set(dims) - set(sino_dir))))
             data_obj.add_pattern("SINOGRAM", core_dir=sino_dir,
                                  slice_dir=tuple(set(dims) - set(sino_dir)))
+        
+        if ltype is 'xrd':
+            diff_core = (-2,-1) # it will always be this
+            diff_slice = tuple(dims[:2])
+            logging.debug("is a diffraction")
+            logging.debug("the diffraction cores are:"+str(diff_core))
+            logging.debug("the diffraction slices are:"+str(diff_slice))
+            data_obj.add_pattern("DIFFRACTION", core_dir=diff_core,
+                                 slice_dir=diff_slice)
+        
