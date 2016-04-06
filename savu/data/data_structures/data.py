@@ -291,7 +291,8 @@ class Data(DataCreate):
         check = 0
         check += self.__check_pattern('SINOGRAM')
         check += self.__check_pattern('PROJECTION')
-        if check is 2:
+
+        if check is 2 and len(self.get_shape()) > 2:
             self.__set_main_axis('SINOGRAM')
             self.__set_main_axis('PROJECTION')
         elif check is 1:
@@ -339,6 +340,12 @@ class Data(DataCreate):
         d1 = patterns[n1]['core_dir']
         d2 = patterns[pname]['slice_dir']
         tdir = set(d1).intersection(set(d2))
+
+        # this is required when a single sinogram exists in the mm case, and a
+        # dimension is added via parameter tuning.
+        if not tdir:
+            tdir = [d2[0]]
+
         self.data_info.set_meta_data(['data_patterns', pname, 'main_dir'],
                                      list(tdir)[0])
 

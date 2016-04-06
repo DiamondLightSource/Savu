@@ -45,7 +45,7 @@ class PluginDriver(object):
         param_dims = [range(d - len(extra_dims), d) for d in out_data_dims]
 
         for i in range(repeat):
-            if repeat > 1:
+            if extra_dims:
                 self._set_parameters_this_instance(param_idx[i])
                 for j in range(len(out_data)):
                     out_data[j]._get_plugin_data()\
