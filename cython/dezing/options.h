@@ -8,6 +8,9 @@ typedef struct Options_str {
    u_int8_t fftw_level;
    u_int8_t f_call_num;
    u_int8_t returnflag;
+   u_int8_t errflag;
+   u_int8_t warnflag;
+   u_int16_t nthreadsreq;
    double uval;
    size_t image_size;
    size_t uncrop_image_size;

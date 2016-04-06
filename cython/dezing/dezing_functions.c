@@ -24,13 +24,24 @@
 #ifndef PLANCK 
 #define PLANCK (1240.0e-6)
 #endif
+#ifdef DEBUG_ALGORITHM
 static pthread_mutex_t count_mutex=PTHREAD_MUTEX_INITIALIZER; 
+#endif /*DEBUG_ALGORITHM*/
 unsigned char vflag=0;
 
+char gmessagebuf[MAX_MESSAGE];
+
+extern void timestamp(const char *const stampmsg,const int loglevel);
+
 static void svn_id_file(FILE * fp){
-   fprintf(fp,"%s: SVN ID: $Id: dezing_functions.c 464 2016-02-16 10:54:37Z kny48981 $\n",__FILE__);
-   fprintf(fp,"%s: SVN URL: $URL: file:///home/kny48981/SVN/progs/dezing_cython/dezing_functions.c $\n",__FILE__);
-   fprintf(fp,"%s: SVN header ID: %s\n","options.h",OPTIONS_H);
+
+   //printf("%s: SVN ID: $Id: dezing_functions.c 464 2016-02-16 10:54:37Z kny48981 $\n",__FILE__);
+   snprintf(gmessagebuf,MAX_MESSAGE,"%s: SVN ID: $Id: dezing_functions.c 464 2016-02-16 10:54:37Z kny48981 $",__FILE__);
+   timestamp(gmessagebuf,LEVEL_USER);
+   snprintf(gmessagebuf,MAX_MESSAGE,"%s: SVN URL: $URL: file:///home/kny48981/SVN/progs/dezing_cython/dezing_functions.c $",__FILE__);
+   logprint(gmessagebuf,LEVEL_USER);
+   snprintf(gmessagebuf,MAX_MESSAGE,"%s: SVN header ID: %s","options.h",OPTIONS_H);
+   logprint(gmessagebuf,LEVEL_USER);
 }
 
 // Real data type
@@ -61,7 +72,7 @@ typedef struct threadlimit_struct{
 
 
 static void * threaddezing (void * datap) ;
-void timestamp(const char *const stampmsg);
+
 
 static Filtdata g_filtdata;
 
@@ -71,10 +82,11 @@ void write_raw_16(const u_int16_t * const datap, const u_int32_t filenum,const s
     char  fname[1024];
     size_t nw = 0;
     snprintf(fname,1024,"%s_%03d.raw",prefix,filenum);
-    timestamp ("writing ...");
+    timestamp ("writing ...",LEVEL_DEBUG);
     ofp = fopen (fname, "w");
     nw = fwrite (datap, sizeof (u_int16_t), tsize * batch, ofp);
-    printf ("wrote %zu uint16 values to %s\n",nw,  fname);
+    snprintf (gmessagebuf,MAX_MESSAGE,"wrote %zu uint16 values to %s",nw,  fname);
+    logprint(gmessagebuf,LEVEL_DEBUG);
     fclose(ofp);
 }
 
@@ -83,7 +95,7 @@ void write_raw_real(const Real * const datap, const u_int32_t filenum,const size
     char  fname[1024];
     size_t nw = 0;
     snprintf(fname,1024,"%s_%03d.raw",prefix,filenum);
-    timestamp ("writing ...");
+    timestamp ("writing ...",LEVEL_DEBUG);
     ofp = fopen (fname, "w");
     nw = fwrite (datap, sizeof (float), tsize * batch, ofp);
     printf ("wrote %zu float values to %s\n",nw,  fname);
@@ -101,19 +113,22 @@ void runDezing( Options *  ctrlp, u_int32_t  thisbatch,u_int8_t * inbuf, u_int8_
 */
   int retval=0;
   unsigned int i;
-  long int numproc;
+  long int nprocavail=0;
+  long int nslotsavail=0;
   char * envstring;
   unsigned short int nthreads=16;
   unsigned short int nthreadsmax=16;
   unsigned int chunksize,extra,istart=0;
+
 
   size_t batchsize, imagesize, sizex, sizey, batch ;
   int32_t batch_nopad;
 
   int  sizes[2];
 
-  static char * logmessage;
-  static char * fname;
+ // static char * logmessage;
+  static char  logmessage[MAX_MESSAGE];
+  //static char * fname;
   //static char * wfname;
 
   static pthread_t * thread;
@@ -129,13 +144,15 @@ void runDezing( Options *  ctrlp, u_int32_t  thisbatch,u_int8_t * inbuf, u_int8_
 
 
   static int alloc=0;
-  static u_int32_t oldbatch=0;
 
 
-  svn_id_file(stdout);
-  printf("versionflag: %hhu\n",ctrlp->versionflag);
-  printf("f_call_num: %hhu\n",ctrlp->f_call_num);
-  printf("outlier_mu: %f\n",ctrlp->outlier_mu);
+
+  snprintf(logmessage,MAX_MESSAGE,"versionflag: %hhu",ctrlp->versionflag);
+  timestamp(logmessage,LEVEL_DEBUG);
+  snprintf(logmessage,MAX_MESSAGE,"f_call_num: %hhu",ctrlp->f_call_num);
+  timestamp(logmessage,LEVEL_DEBUG);
+  snprintf(logmessage,MAX_MESSAGE,"outlier_mu: %f",ctrlp->outlier_mu);
+  timestamp(logmessage,LEVEL_DEBUG);
 
   if (ctrlp->versionflag != 0 ){
      if (ctrlp->versionflag == 2 ){
@@ -156,24 +173,52 @@ void runDezing( Options *  ctrlp, u_int32_t  thisbatch,u_int8_t * inbuf, u_int8_
      }
   }
 
-  envstring=getenv("NSLOTS");
-  if (envstring == NULL){
-     /* not running in the queue */
-     /* use all the processors */
-   numproc = sysconf( _SC_NPROCESSORS_ONLN );
-  }else{
-     /* running in the queue,*/
-     /* get number of processors from the queue environment */
-     numproc=atol(envstring);
+  /* nproc refers to actual processor cores on the local system */
+  /* nslots refers to the number of processors assigned by the resource manager (queue) system */
+  /* nthreadsreq to the number requested by the script configuration or user input */
+  /* nthreadsmax set to the most that shoudl be allowed */
+  /* nthreads may be reduced if the batch of data is small */
 
-     if (numproc < 1 ){
-        fprintf(stderr,"WARNING: no processors detected! Something is wrong with the environment variable NSLOTS\n");
-        numproc=2;
-     }
+  envstring=getenv("NSLOTS");
+  nprocavail=sysconf( _SC_NPROCESSORS_ONLN );
+
+  if (envstring != NULL){
+     nslotsavail=atol(envstring);
   }
 
+  if (ctrlp->nthreadsreq ==0){
+     if (envstring == NULL){
+        /* not running in the queue */
+        /* use all the processors */
+      nthreadsmax = nprocavail;
+     }else{
+        /* running in the queue,*/
+        /* get number of processors from the queue environment */
+        nthreadsmax=nslotsavail;
 
-  nthreadsmax=numproc;
+        if (nthreadsmax < 1 ){
+           fprintf(stderr,"WARNING: no processors detected! Something is wrong with the environment variable NSLOTS\n");
+           ctrlp->warnflag=1;
+           nthreadsmax=2;
+        }
+     }
+  }else{
+     if((ctrlp->nthreadsreq > nslotsavail) && (nslotsavail != 0 )){
+           fprintf(stderr,"WARNING: selected n-threads > nslots\n");
+           fprintf(stderr,"nthreads %i > nslots %li\n",ctrlp->nthreadsreq,nslotsavail);
+           snprintf(logmessage,MAX_MESSAGE,"WARNING: nthreads %i > nslots %li",ctrlp->nthreadsreq,nslotsavail);
+           timestamp(logmessage,LEVEL_WARN);
+           ctrlp->warnflag=1;
+     }
+     if(ctrlp->nthreadsreq > nprocavail){
+           fprintf(stderr,"WARNING: selected n-threads > nprocs\n");
+           snprintf(logmessage,MAX_MESSAGE,"WARNING: nthreads %i > nproc %li",ctrlp->nthreadsreq,nprocavail);
+           timestamp(logmessage,LEVEL_WARN);
+           ctrlp->warnflag=1;
+     }
+     nthreadsmax=ctrlp->nthreadsreq;
+  }
+
   inbuf16=(u_int16_t *)(inbuf);
   outbuf16=(u_int16_t *)(outbuf);
 
@@ -191,10 +236,13 @@ void runDezing( Options *  ctrlp, u_int32_t  thisbatch,u_int8_t * inbuf, u_int8_
   sizes[0] = sizex;
   imagesize = sizex * sizey;
   batchsize = (imagesize * batch);
-  printf("Image size to read : sizex %lu sizey %lu imagesize %lu batchsize %lu\n",sizex,sizey,imagesize,batchsize);
+  snprintf(logmessage,MAX_MESSAGE,"Image size to read : sizex %lu sizey %lu imagesize %lu batchsize %lu",sizex,sizey,imagesize,batchsize);
+  timestamp(logmessage,LEVEL_INFO);
+
 
   /* number of slices in this batch */
-  printf("thisbatch %i\n",thisbatch);
+  snprintf(logmessage,MAX_MESSAGE,"thisbatch %i",thisbatch);
+  timestamp(logmessage,LEVEL_INFO);
 
   /* how many threads will actually be used this time ? */
   if (thisbatch < nthreadsmax){
@@ -207,31 +255,37 @@ void runDezing( Options *  ctrlp, u_int32_t  thisbatch,u_int8_t * inbuf, u_int8_
      case(0):
         if (!alloc){
            alloc=1;
+           ctrlp->errflag=0;
+           ctrlp->warnflag=0;
+           svn_id_file(NULL);
+
            //**************************
-           timestamp("allocating the memory in dezing functions");
-           printf("batchsize %zu allocating the memory in dezing functions\n",batchsize);
-           logmessage=(char *) calloc(MAX_MESSAGE , sizeof (char));
-           fname=(char *) calloc(1024 , sizeof (char));
-           printf("logmessage addr: %x\n",logmessage);
+           timestamp("allocating the memory in dezing functions",LEVEL_INFO);
+           snprintf(logmessage,MAX_MESSAGE,"batchsize %zu allocating the memory in dezing functions",batchsize);
+           timestamp(logmessage,LEVEL_INFO);
+           //fname=(char *) calloc(1024 , sizeof (char));
 
         /* array of threadspecific data , one for each thread */ 
         /* hmm..   when to free this array??*/
            thread=(pthread_t *)calloc(nthreadsmax,sizeof(pthread_t));
            threadlimit=(Threadlimit *)calloc(nthreadsmax,sizeof(Threadlimit));
 
-           snprintf (logmessage, MAX_MESSAGE,"Threads available: %u \n", nthreadsmax);
-           timestamp(logmessage);
-           snprintf (logmessage, MAX_MESSAGE,"Threads used: %u \n", nthreads);
-           timestamp(logmessage);
+           snprintf (logmessage, MAX_MESSAGE,"Threads available: %u ", nthreadsmax);
+           timestamp(logmessage,LEVEL_DEBUG);
+           snprintf (logmessage, MAX_MESSAGE,"Threads requested: %u ", ctrlp->nthreadsreq );
+           timestamp(logmessage,LEVEL_DEBUG);
+           snprintf (logmessage, MAX_MESSAGE,"Threads used: %u ", nthreads);
+           timestamp(logmessage,LEVEL_INFO);
 
-           timestamp("finished allocating the memory in the dezing functions");
+           timestamp("finished allocating the memory in the dezing functions",LEVEL_INFO);
            ctrlp->returnflag=0;
            return;
         }else{
-           snprintf(logmessage,MAX_MESSAGE,"ERROR: %s: attempted to double-allocate !\n",__func__);
-           timestamp(logmessage);
+           snprintf(logmessage,MAX_MESSAGE,"ERROR: %s: attempted to double-allocate !",__func__);
+           timestamp(logmessage,LEVEL_ERR);
            //exit(0);
            ctrlp->returnflag=5;
+           ctrlp->errflag=1;
            return;
         }
      break;
@@ -239,37 +293,58 @@ void runDezing( Options *  ctrlp, u_int32_t  thisbatch,u_int8_t * inbuf, u_int8_
      case(1):
         if (!alloc){
            fprintf(stderr,"ERROR: %s: attempted to run without allocating !\n",__func__);
+           snprintf(logmessage,MAX_MESSAGE,"ERROR: %s: attempted to run without allocating !",__func__);
+           timestamp(logmessage,LEVEL_ERR);
            ctrlp->returnflag=5;
+           ctrlp->errflag=1;
            return;
         }
         if(nthreads ==0){
            fprintf(stderr,"ERROR: %s: attempted to run with zero threads!\n",__func__);
+           snprintf(logmessage,MAX_MESSAGE,"ERROR: %s: attempted to run with zero threads!",__func__);
+           timestamp(logmessage,LEVEL_ERR);
            ctrlp->returnflag=5;
+           ctrlp->errflag=1;
            return;
         }
-       printf("logmessage addr: %x\n",logmessage);
+       //printf("logmessage addr: %x\n",logmessage);
+
+       snprintf (logmessage, MAX_MESSAGE,"Threads available: %u ", nthreadsmax);
+       timestamp(logmessage,LEVEL_DEBUG);
+       snprintf (logmessage, MAX_MESSAGE,"Threads requested: %u ", ctrlp->nthreadsreq );
+       timestamp(logmessage,LEVEL_DEBUG);
+       snprintf (logmessage, MAX_MESSAGE,"Threads used: %u ", nthreads);
+       timestamp(logmessage,LEVEL_INFO);
      break;
 
      case(2):
      if(alloc){
         alloc=0;
-        timestamp("freeing the memory in dezing functions");
+        timestamp("freeing the memory in dezing functions",LEVEL_INFO);
+        timestamp("freeing thread",LEVEL_DEBUG);
         free(thread);
+        timestamp("freeing threadlimit",LEVEL_DEBUG);
         free(threadlimit);
-        free(logmessage);
-        free(fname);
-        timestamp("finished freeing the memory in dezing functions");
+        //timestamp("freeing logmessage",LEVEL_DEBUG);
+        //free(logmessage);
+        //timestamp("freeing filename",LEVEL_DEBUG);
+        //free(fname);
+        timestamp("finished freeing the memory in dezing functions",LEVEL_INFO);
            ctrlp->returnflag=0;
         return;
      }else{
            fprintf(stderr,"ERROR: %s: attempted to double-free !\n",__func__);
+           snprintf(logmessage,MAX_MESSAGE,"ERROR: %s: attempted to double-free !",__func__);
+           timestamp(logmessage,LEVEL_ERR);
            ctrlp->returnflag=5;
+           ctrlp->errflag=1;
            return;
      }
      break;
      default:
            fprintf(stderr,"ERROR: %s: unknown call flag %i\n",__func__,ctrlp->f_call_num);
            ctrlp->returnflag=5;
+           ctrlp->errflag=1;
            return;
      break;
   } 
@@ -278,10 +353,10 @@ void runDezing( Options *  ctrlp, u_int32_t  thisbatch,u_int8_t * inbuf, u_int8_
   result16 = outbuf16;
 
 
-  snprintf (logmessage, MAX_MESSAGE,"batchsize: %zu \n", batchsize);
-  timestamp(logmessage);
-  snprintf (logmessage,MAX_MESSAGE, "sizes: %i %i batch %zu \n",sizes[0],sizes[1],batch);
-  timestamp(logmessage);
+  snprintf (logmessage, MAX_MESSAGE,"batchsize: %zu", batchsize);
+  timestamp(logmessage,LEVEL_INFO);
+  snprintf (logmessage,MAX_MESSAGE, "sizes: %i %i batch %zu",sizes[0],sizes[1],batch);
+  timestamp(logmessage,LEVEL_DEBUG);
 
 
      pthread_attr_init(&attr);
@@ -295,7 +370,8 @@ void runDezing( Options *  ctrlp, u_int32_t  thisbatch,u_int8_t * inbuf, u_int8_
      extra=batch_nopad-(chunksize*nthreads); /* calculate the extra slices after integer division into chunks */
 
      istart=ctrlp->npad;
-     printf("npad: %i\n",ctrlp->npad);
+     snprintf(logmessage,MAX_MESSAGE,"npad: %i",ctrlp->npad);
+     timestamp(logmessage,LEVEL_DEBUG);
      for (i=0;i<extra;i++){ // the first few chunks have an extra slice 
         threadlimit[i].mynum=i;
         threadlimit[i].start=istart;
@@ -311,18 +387,21 @@ void runDezing( Options *  ctrlp, u_int32_t  thisbatch,u_int8_t * inbuf, u_int8_
 
    g_filtdata.input16 = (inbuf16);
 
-   timestamp ("starting filter setup");
-   fprintf(stdout,"sizes: %li %li\n",sizes[0],sizes[1]);
+   timestamp ("starting filter setup",LEVEL_INFO);
+   fprintf(stdout,"sizes: %i %i\n",sizes[0],sizes[1]);
 
 
   /* setup the global data that applies to all threads */
 
      /* the filter factor */
      g_filtdata.outlier_mu=ctrlp->outlier_mu;
-     printf("set outlier mu to %f\n",g_filtdata.outlier_mu);
+     snprintf(logmessage,MAX_MESSAGE,"set outlier mu to %f",g_filtdata.outlier_mu);
+     timestamp(logmessage,LEVEL_DEBUG);
 
      /* the data locations */
-     printf("g_filtdata.result16 %x\n",&(g_filtdata.result16));
+     snprintf(logmessage,MAX_MESSAGE,"g_filtdata.result16 %p",(void *)(&(g_filtdata.result16)));
+     timestamp(logmessage,LEVEL_DEBUG);
+
      g_filtdata.result16=result16;
      g_filtdata.origsizes=sizes;
 
@@ -337,9 +416,9 @@ void runDezing( Options *  ctrlp, u_int32_t  thisbatch,u_int8_t * inbuf, u_int8_
      }
 #endif
 
-  printf("running the dezinger correction ...\n");
+  timestamp("running the dezinger correction ...",LEVEL_INFO);
   //timestamp("running thedezinger correction ...");
-  //snprintf (logmessage, MAX_MESSAGE,"nthreads: %u \n", nthreads);
+  //snprintf (logmessage, MAX_MESSAGE,"nthreads: %u ", nthreads);
   //timestamp(logmessage);
 #ifdef SINGLETHREAD
   /* mainly for debugging, just run the function once in the main thread */
@@ -349,27 +428,30 @@ void runDezing( Options *  ctrlp, u_int32_t  thisbatch,u_int8_t * inbuf, u_int8_
      /* call the function with limits 0 and total batch size */
      threaddezing((void *)(threadlimit));
 
-     timestamp ("finished single threaddezing");
-     printf (" finished single threaddezing  \n");
+     timestamp ("finished single threaddezing",LEVEL_INFO);
 
 #else /* true multithread calculation of the filter */
-  printf("launching threads:  %i ...\n" , nthreads);
+  snprintf(logmessage,MAX_MESSAGE,"launching threads:  %i ..." , nthreads);
+  timestamp(logmessage,LEVEL_DEBUG);
   for (i=0;i<nthreads;i++){
+  snprintf(logmessage,MAX_MESSAGE,"launching thread %i ..." , i);
+  timestamp(logmessage,LEVEL_DEBUG);
 
-  printf("launching thread %i ...\n" , i);
      retval=pthread_create(thread+i,&attr,threaddezing,(void *)(threadlimit+i));
 
      if (retval != 0 ){
         fprintf(stderr,"ERROR creating thread %i: code %i\n",i,retval);
+        ctrlp->errflag=1;
      }
   }
- printf ("waiting for dezing threads\n");
- timestamp ("waiting for dezing threads");
+ timestamp ("waiting for dezing threads",LEVEL_INFO);
 
   for (i=0;i<nthreads;i++){
      retval=pthread_join(thread[i],&status);
      if (retval != 0 ){
         fprintf(stderr,"ERROR joining thread %i: code %i\n",i,retval);
+        ctrlp->errflag=1;
+
      }
 #ifdef DEBUG_THREADDEZING
      else{
@@ -380,7 +462,7 @@ void runDezing( Options *  ctrlp, u_int32_t  thisbatch,u_int8_t * inbuf, u_int8_
      //timestamp(logmessage);
   }
 
- timestamp ("finished waiting for dezing threads");
+ timestamp ("finished waiting for dezing threads",LEVEL_INFO);
  pthread_attr_destroy(&attr);
 
 
@@ -460,18 +542,18 @@ static float getfix(u_int16_t * inputs, int size){
 static void * threaddezing (void * in_struct) {
 
            const static int thisnum=5; /* the number of neighbours in the neighbourhood */
-           static int mynum=0;  /* counter for logging the thread number/slice number activity */
-           int thisthread;
            Threadlimit * tlim; /* container for the thread-specific data passed in via void* */
            int i,j,k;
            long int   idx,rowidx,slicestart;
-           int nbi,nbj,offset,nbidx;
+           int nbj,offset,nbidx;
            u_int16_t thisnb[thisnum]; /* array of neighbours */
            const  long int size = g_filtdata.origsizes[0]*g_filtdata.origsizes[1];
+#ifdef DEBUG_ALGORITHM
+           static int mynum=0;  /* counter for logging the thread number/slice number activity */
+           int thisthread;
            const  int width=g_filtdata.origsizes[0];
            const  int height=g_filtdata.origsizes[1];
 
-#ifdef DEBUG_ALGORITHM
            /* count the threads */
            pthread_mutex_lock(&count_mutex);
            thisthread=mynum;
