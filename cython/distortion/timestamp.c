@@ -1,38 +1,45 @@
 #include "timestamp.h"
 #include "sys/time.h"
-extern FILE * logfp;
-static struct timeval mystime;
+
+FILE * logfp;
+struct timeval mystime;
 double oldtime=0;
-#ifdef SAVU
-extern char *allmessages[MAX_MESSAGE];
-#endif
+static int loglevel=0;
 
 
-#ifdef NOTYET_SAVU
-int logprint(const char *const message){
+int logprint(const char *const message,const int loglevel){
    int retval=0;
    int myerror=0;
+   char outmessage[MAX_MESSAGE];
+   snprintf(outmessage,MAX_MESSAGE,"timestamp.c:%s",message);
+   switch (loglevel){
+      case(LEVEL_DEBUG):
+         pydebug(outmessage);
+      break;
+      case(LEVEL_INFO):
+         pyinfo(outmessage);
+      break;
+
+      default:
+      /* fallthru */
+      case(LEVEL_USER):
+         pyuser(outmessage);
+      break;
+   }
+
    //retval=fprintf(logfp,"%s",message);
-return(0);
-}
-#else
 
-int logprint(const char *const message){
-   int retval=0;
-   int myerror=0;
-   retval=fprintf(logfp,"%s",message);
 
-#ifdef FLUSH_LOG_FILE
+// #ifdef FLUSH_LOG_FILE
    if( fflush(logfp) == EOF ){
       myerror=errno;
       fprintf(stderr,"ERROR: log file flush failed!\n");
       fprintf(stderr,"%s\n",strerror(myerror));
       return(151);
    };
-#endif
+//#endif
 return(0);
 }
-#endif /*NOTYET_SAVU*/
 
 
 void timestamp_open(const char * const logname){
@@ -50,7 +57,6 @@ void timestamp_init(){
   suseconds_t etimeu;
   char message[MAX_MESSAGE];
 
-  gettimeofday(&mystime,NULL);
   gettimeofday(&now,NULL);
   etimes = now.tv_sec - mystime.tv_sec;
   etimeu = now.tv_usec - mystime.tv_usec;
@@ -59,10 +65,10 @@ void timestamp_init(){
   oldtime=nowtime;
   itime=nowtime-oldtime;
   snprintf(message,MAX_MESSAGE,"%f %f %f %s\n",etime,nowtime,itime,"time stamp reset");
-  logprint(message);
+  logprint(message,LEVEL_INFO);
 }
 
-void timestamp(const char *const stampmsg){
+void timestamp(const char *const stampmsg,const int loglevel){
   struct timeval now;
   time_t etimes;
   double nowtime,etime,itime;
@@ -75,13 +81,13 @@ void timestamp(const char *const stampmsg){
   etime = (double)(etimes)+((double)(etimeu))/(1e6);
   nowtime=(double)(now.tv_sec) + ((double)(now.tv_usec) / 1.0e6);
   itime=nowtime-oldtime;
-  snprintf(message,MAX_MESSAGE,"%f %f %f %s\n",etime,nowtime,itime,stampmsg);
-  logprint(message);
+  snprintf(message,MAX_MESSAGE,"%f %f %f %s",etime,nowtime,itime,stampmsg);
+  logprint(message,loglevel);
   oldtime=nowtime;
 }
 
 
-int errprint(const char * const message){
+int errprint(const char * const message,const int loglevel){
    int retval;
    /* print the message with the program name prefixed, and also echo to the log file */
 
@@ -89,12 +95,8 @@ int errprint(const char * const message){
       retval=fprintf(logfp,"\n*****: %s\n",message);
    }
 
-#ifdef SAVU
-   return(0);
-#else
    retval=fprintf(stderr,"%s\n",message);
    return(retval);
-#endif
 }
 
 int vprint(const char * const message){

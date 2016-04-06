@@ -16,9 +16,7 @@
 .. module:: chunking
    :platform: Unix
    :synopsis: A class to optimise hdf5 chunking
-
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
-
 """
 
 import copy
@@ -275,3 +273,4 @@ class Chunking(object):
                 del adjust['bounds']['max'][i]
                 del adjust['bounds']['min'][i]
                 nDel += 1
+

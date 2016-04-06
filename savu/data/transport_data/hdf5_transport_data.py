@@ -43,6 +43,7 @@ class Hdf5TransportData(object):
 
     def _load_data(self, start):
         exp = self.exp
+        n_loaders = exp.meta_data.plugin_list._get_n_loaders()
         plugin_list = exp.meta_data.plugin_list.plugin_list
         final_plugin = plugin_list[-1]
         saver_plugin = pu.plugin_loader(exp, final_plugin)
@@ -50,11 +51,12 @@ class Hdf5TransportData(object):
         logging.debug("generating all output files")
         out_data_objects = []
         count = start
-        datasets_list = pu.datasets_list
+        datasets_list = exp.meta_data.plugin_list._get_datasets_list()
 
         for plugin_dict in plugin_list[start:-1]:
 
-            self._get_current_and_next_patterns(datasets_list[count-1:])
+            self._get_current_and_next_patterns(
+                datasets_list[count-n_loaders:])
             plugin_id = plugin_dict["id"]
             logging.info("Loading plugin %s", plugin_id)
             plugin = pu.plugin_loader(exp, plugin_dict)
@@ -66,7 +68,7 @@ class Hdf5TransportData(object):
             exp._merge_out_data_to_in()
             count += 1
 
-        del self.exp.meta_data.get_dictionary()['current_and_next']
+        self.exp.meta_data.delete('current_and_next')
         return out_data_objects, count
 
     def __set_filenames(self, plugin, plugin_id, count):

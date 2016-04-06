@@ -78,7 +78,7 @@ class PluginRunner(object):
         main processing.
         """
         self.exp._barrier()
-        self.__check_loaders_and_savers(plugin_list)
+        self.__check_loaders_and_savers()
 
         self.exp._barrier()
         pu.run_plugins(self.exp, plugin_list, check=True)
@@ -89,20 +89,20 @@ class PluginRunner(object):
         self.exp._barrier()
         cu.user_message("Plugin list check complete!")
 
-    def __check_loaders_and_savers(self, plugin_list):
+    def __check_loaders_and_savers(self):
         """ Check plugin list starts with a loader and ends with a saver.
         """
-        first_plugin = plugin_list[0]
-        end_plugin = plugin_list[-1]
+        plugin_obj = self.exp.meta_data.plugin_list
+        loaders, savers = plugin_obj._get_loaders_and_savers_index()
 
-        plugin = pu.load_plugin(first_plugin['id'])
-        # check the first plugin is a loader
-        if not isinstance(plugin, BaseLoader):
-            sys.exit("The first plugin in the process must "
-                     "inherit from BaseLoader")
+        if loaders:
+            if loaders[0] is not 0 or loaders[-1]+1 is not len(loaders):
+                raise Exception("All loader plugins must be at the beginning "
+                                "of the plugin list")
+        else:
+            raise Exception("The first plugin in the plugin list must be a "
+                            "loader.")
 
-        plugin = pu.load_plugin(end_plugin['id'])
-        # check the final plugin is a saver
-        if not isinstance(plugin, BaseSaver):
-            sys.exit("The final plugin in the process must "
-                     "inherit from BaseSaver")
+        if not savers or savers[0] is not plugin_obj.n_plugins-1:
+            raise Exception("The final plugin in the plugin list must be a "
+                            "saver")

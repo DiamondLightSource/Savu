@@ -31,6 +31,7 @@ class NoProcessPlugin(BaseFilter, CpuPlugin):
     :param in_datasets: A list of the dataset(s) to process. Default: [].
     :param out_datasets: A list of the dataset(s) to process. Default: [].
     :param pattern: Explicitly state the slicing pattern. Default: None.
+    :param dummy: Dummy parameter for testing. Default: 10.
     """
 
     def __init__(self):

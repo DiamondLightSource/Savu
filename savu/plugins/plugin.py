@@ -138,12 +138,15 @@ class Plugin(PluginDatasets):
                 seq = [eval(s) for s in seq]
                 value = list(np.arange(seq[0], seq[1], seq[2]))
             if type(value[0]) != dtype:
+                try:
+                    value.remove('')
+                except:
+                    pass
                 value = map(dtype, value)
-            if len(value) > 1:
-                label = key + '_params.' + type(value[0]).__name__
-                self.multi_params_dict[len(self.multi_params_dict)] = \
-                    {'label': label, 'values': value}
-                self.extra_dims.append(len(value))
+            label = key + '_params.' + type(value[0]).__name__
+            self.multi_params_dict[len(self.multi_params_dict)] = \
+                {'label': label, 'values': value}
+            self.extra_dims.append(len(value))
         return value
 
     def get_parameters(self, name):

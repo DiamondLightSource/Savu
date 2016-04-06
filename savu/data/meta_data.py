@@ -23,6 +23,8 @@
 
 """
 
+import logging
+
 
 class MetaData(object):
     """
@@ -87,8 +89,23 @@ class MetaData(object):
                     break
             return accum_value
 
+    def delete(self, entry):
+        """ Delete an entry from the meta data dictionary.
+
+        :param str entry: The dictionary key entry to delete.
+        """
+        try:
+            del self.get_dictionary()[entry]
+        except KeyError:
+            logging.warn("Trying to delete a dictionary entry that doesn't "
+                         "exist.")
+
     def get_dictionary(self):
-        """ Get the meta_data dictionary """
+        """ Get the meta_data dictionary.
+
+        :returns: A dictionary.
+        :rtype: dict
+        """
         return self.dict
 
     def _set_dictionary(self, ddict):

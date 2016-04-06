@@ -26,12 +26,9 @@ import sys
 import re
 import logging
 import numpy as np
-import copy
 
 plugins = {}
 plugins_path = {}
-# FIXME 
-datasets_list = []
 count = 0
 
 
@@ -65,13 +62,7 @@ def load_plugin(plugin_name):
         ppath, name = os.path.split(plugin_name)
         sys.path.append(ppath)
     # TODO This appears to be the failing line.
-    mod = __import__(name)
-    components = name.split('.')
-    for comp in components[1:]:
-        mod = getattr(mod, comp)
-    temp = name.split('.')[-1]
-    mod2class = module2class(temp)
-    clazz = getattr(mod, mod2class.split('.')[-1])
+    clazz = load_class(name)
     instance = get_class_instance(clazz)
     return instance
 
@@ -80,6 +71,17 @@ def get_class_instance(clazz):
     instance = clazz()
     instance._populate_default_parameters()
     return instance
+
+
+def load_class(name):
+    mod = __import__(name)
+    components = name.split('.')
+    for comp in components[1:]:
+        mod = getattr(mod, comp)
+    temp = name.split('.')[-1]
+    mod2class = module2class(temp)
+    clazz = getattr(mod, mod2class.split('.')[-1])
+    return clazz
 
 
 def module2class(module_name):
@@ -104,42 +106,27 @@ def plugin_loader(exp, plugin_dict, **kwargs):
     plugin._main_setup(exp, plugin_dict['data'])
 
     if check_flag is True:
-        set_datasets_list(exp, plugin)
+        exp.meta_data.plugin_list._set_datasets_list(plugin)
+
     logging.info("finished plugin loader")
     return plugin
 
 
 def run_plugins(exp, plugin_list, **kwargs):
-    plugin_loader(exp, plugin_list[0])
+    n_loaders = exp.meta_data.plugin_list._get_n_loaders()
+
+    for i in range(n_loaders):
+        plugin_loader(exp, plugin_list[i])
 
     exp._barrier()
     exp._set_nxs_filename()
     exp._barrier()
 
     check = kwargs.get('check', False)
-    for i in range(1, len(plugin_list)-1):
+    for i in range(n_loaders, len(plugin_list)-1):
         exp._barrier()
         plugin_loader(exp, plugin_list[i], check=check)
         exp._merge_out_data_to_in()
-
-
-def set_datasets_list(exp, plugin):
-    in_pData, out_pData = plugin.get_plugin_datasets()
-    max_frames = plugin.get_max_frames()
-    in_data_list = populate_datasets_list(in_pData, max_frames)
-    out_data_list = populate_datasets_list(out_pData, max_frames)
-    datasets_list.append({'in_datasets': in_data_list,
-                          'out_datasets': out_data_list})
-
-
-def populate_datasets_list(data, max_frames):
-    data_list = []
-    for d in data:
-        name = d.data_obj.get_name()
-        pattern = copy.deepcopy(d.get_pattern())
-        pattern[pattern.keys()[0]]['max_frames'] = max_frames
-        data_list.append({'name': name, 'pattern': pattern})
-    return data_list
 
 
 def set_datasets(exp, plugin, plugin_dict):
@@ -155,9 +142,9 @@ def set_datasets(exp, plugin, plugin_dict):
     in_names = ('all' if len(in_names) is 0 else in_names)
     out_names = (in_names if len(out_names) is 0 else out_names)
 
-    in_names = check_nDatasets(exp, in_names, plugin_dict["id"],
+    in_names = check_nDatasets(exp, in_names, plugin_dict,
                                plugin.nInput_datasets(), "in_data")
-    out_names = check_nDatasets(exp, out_names, plugin_dict["id"],
+    out_names = check_nDatasets(exp, out_names, plugin_dict,
                                 plugin.nOutput_datasets(), "out_data")
 
     plugin_dict["data"]["in_datasets"] = in_names
@@ -172,7 +159,8 @@ def get_names(names):
     return data_names
 
 
-def check_nDatasets(exp, names, plugin_id, nSets, dtype):
+def check_nDatasets(exp, names, plugin_dict, nSets, dtype):
+    plugin_id = plugin_dict['id']
     try:
         if names[0] in "all":
             names = exp._set_all_datasets(dtype)
@@ -184,6 +172,9 @@ def check_nDatasets(exp, names, plugin_id, nSets, dtype):
         plugin_id + " in the process file."
 
     names = ([names] if type(names) is not list else names)
+    if nSets is 'var':
+        nSets = len(plugin_dict['data'][dtype + 'sets'])
+
     if len(names) is not nSets:
         raise Exception(errorMsg)
     return names

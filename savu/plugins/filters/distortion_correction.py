@@ -33,8 +33,7 @@ import unwarp
 @register_plugin
 class DistortionCorrection(BaseFilter, CpuPlugin):
     """
-    A plugin to apply spherical aberration correction.  It must only be applied
-    after a flat field correction.
+    A plugin to apply radial distortion correction. 
 
     :param polynomial_coeffs: Parameters of the radial distortion \
         function. Default: (1.00015076, 1.9289e-6, -2.4325e-8, 1.00439e-11, -3.99352e-15).
@@ -98,4 +97,4 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
         out_pData[0].plugin_data_setup('PROJECTION', self.get_max_frames())
 
     def get_max_frames(self):
-        return 8
+        return 100
