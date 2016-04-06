@@ -143,10 +143,10 @@ class Plugin(PluginDatasets):
                 except:
                     pass
                 value = map(dtype, value)
-                label = key + '_params.' + type(value[0]).__name__
-                self.multi_params_dict[len(self.multi_params_dict)] = \
-                    {'label': label, 'values': value}
-                self.extra_dims.append(len(value))
+            label = key + '_params.' + type(value[0]).__name__
+            self.multi_params_dict[len(self.multi_params_dict)] = \
+                {'label': label, 'values': value}
+            self.extra_dims.append(len(value))
         return value
 
     def get_parameters(self, name):
