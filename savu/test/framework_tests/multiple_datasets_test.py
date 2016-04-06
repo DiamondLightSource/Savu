@@ -47,7 +47,7 @@ class MultipleDatasetsTest(unittest.TestCase):
     def test_tomo1(self):
         options = tu.set_experiment('tomo')
         plugin = 'savu.plugins.test_plugin'
-        loader_dict = {}
+        loader_dict = {'data_path': '1-TimeseriesFieldCorrections-tomo/data'}
         data_dict = {'in_datasets': ['tomo', 'tomo'], 'out_datasets': ['test']}
         saver_dict = {}
         all_dicts = [loader_dict, data_dict, saver_dict]
@@ -58,7 +58,8 @@ class MultipleDatasetsTest(unittest.TestCase):
         options = tu.set_experiment('tomo')
         plugin = 'savu.plugins.test_plugin'
         preview = ['10:-1:1:1', '10:-1:1:1', '10:-1:1:1']
-        loader_dict = {'preview': preview}
+        loader_dict = {'data_path': '1-TimeseriesFieldCorrections-tomo/data',
+                       'preview': preview}
         data_dict = {'in_datasets': ['tomo', 'tomo'], 'out_datasets': ['test']}
         all_dicts = [loader_dict, data_dict, {}]
         exp = run_protected_plugin_runner_no_process_list(options, plugin,
@@ -70,7 +71,8 @@ class MultipleDatasetsTest(unittest.TestCase):
         options = tu.set_experiment('tomo')
         plugin = 'savu.plugins.test_plugin'
         preview = ['10:-1:10:1', '10:-1:10:1', '10:-1:10:1']
-        loader_dict = {'preview': preview}
+        loader_dict = {'data_path': '1-TimeseriesFieldCorrections-tomo/data',
+                       'preview': preview}
         data_dict = {'in_datasets': ['tomo', 'tomo'], 'out_datasets': ['test']}
         all_dicts = [loader_dict, data_dict, {}]
         exp = run_protected_plugin_runner_no_process_list(options, plugin,
@@ -82,7 +84,8 @@ class MultipleDatasetsTest(unittest.TestCase):
         options = tu.set_experiment('tomo')
         plugin = 'savu.plugins.test_plugin'
         preview = ['10:-10:10:1', '10:-10:10:1', '10:-10:10:1']
-        loader_dict = {'preview': preview}
+        loader_dict = {'data_path': '1-TimeseriesFieldCorrections-tomo/data',
+                       'preview': preview}
         data_dict = {'in_datasets': ['tomo', 'tomo'], 'out_datasets': ['test']}
         all_dicts = [loader_dict, data_dict, {}]
         exp = run_protected_plugin_runner_no_process_list(options, plugin,
