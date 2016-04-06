@@ -35,7 +35,7 @@ class BaseFluoFitter(BaseFitter):
     """
     This plugin fits peaks. Either XRD or XRF for now.
     :param in_datasets: Create a list of the dataset(s). Default: [].
-    :param out_datasets: A. Default: ["FitWeights", "FitWidths", "FitAreas", "residuals"].
+    :param out_datasets: A. Default: ["FitWeights", "FitAreas", "residuals"].
     :param width_guess: An initial guess at the width. Default: 0.02.
     :param mono_energy: the mono energy. Default: 18.0.
     :param peak_shape: Which shape do you want. Default: "gaussian".
@@ -60,18 +60,19 @@ class BaseFluoFitter(BaseFitter):
             idx = self.setPositions(in_meta_data)
             #print "The index is"+str(idx)
             in_meta_data.set_meta_data('PeakIndex', idx)
+            in_meta_data.set_meta_data('PeakEnergy', self.axis[idx])
 
     def setup(self):
         # set up the output datasets that are created by the plugin
         in_dataset, out_datasets = self.get_datasets()
         in_meta_data = self.get_in_meta_data()[0]
+#         print in_meta_data.get_meta_data("energy")
         shape = in_dataset[0].get_shape()
         axis_labels = ['-1.PeakIndex.pixel.unit']
         pattern_list = ['SINOGRAM', 'PROJECTION']
 
         fitAreas = out_datasets[0]
         fitHeights = out_datasets[1]
-        fitWidths = out_datasets[2]
         self.length = shape[-1]
         idx = self.setPositions(in_meta_data)
         numpeaks = len(idx)
@@ -85,28 +86,23 @@ class BaseFluoFitter(BaseFitter):
                                   axis_labels={in_dataset[0]: axis_labels},
                                   shape=new_shape)
 
-        fitWidths.create_dataset(patterns={in_dataset[0]: pattern_list},
-                                 axis_labels={in_dataset[0]: axis_labels},
-                                 shape=new_shape)
 
         channel = {'core_dir': (-1,), 'slice_dir': range(len(shape)-1)}
 
         fitAreas.add_pattern("CHANNEL", **channel)
         fitHeights.add_pattern("CHANNEL", **channel)
-        fitWidths.add_pattern("CHANNEL", **channel)
         #residlabels = in_dataset[0].meta_data.get_meta_data('axis_labels')[0:3]
         #print residlabels.append(residlabels[-1])
-        residuals = out_datasets[3]
+        residuals = out_datasets[2]
         residuals.create_dataset(in_dataset[0])
-
+        residuals.set_shape(shape[:-1]+(len(self.axis),))
         # setup plugin datasets
         in_pData, out_pData = self.get_plugin_datasets()
         in_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
 
         out_pData[0].plugin_data_setup('CHANNEL', self.get_max_frames())
         out_pData[1].plugin_data_setup('CHANNEL', self.get_max_frames())
-        out_pData[2].plugin_data_setup('CHANNEL', self.get_max_frames())
-        out_pData[3].plugin_data_setup('SPECTRUM', self.get_max_frames())
+        out_pData[2].plugin_data_setup('SPECTRUM', self.get_max_frames())
 
     def setPositions(self, in_meta_data):
         paramdict = XRFDataset().paramdict
@@ -123,18 +119,11 @@ class BaseFluoFitter(BaseFitter):
         paramdict["Experiment"]["elements"] = \
             self.parameters["elements"]
         engy = self.findLines(paramdict)
-#                 print engy
         # make it an index since this is what find peaks will also give us
-        axis = np.arange(0.0, float(self.length), 0.01)#in_meta_data.get_meta_data("energy")
-        print "the length is:"+str(self.length)
-        print engy
-        print "the axis is"+str(axis)
+        axis = self.axis = in_meta_data.get_meta_data("energy")
         dq = axis[1]-axis[0]
-        print 'dq is '+str(dq)
-        offset = np.round(paramdict["FitParams"]["fitted_energy_range_keV"][0]/dq).astype(int)
-        idx = np.round(engy/dq).astype(int) - offset
-        print "The index is"
-        print len(idx)
+#
+        idx = np.round((engy+axis[0])/dq).astype(int)
         return idx
 
     def findLines(self, paramdict=XRFDataset().paramdict):
@@ -206,5 +195,8 @@ class BaseFluoFitter(BaseFitter):
         bar = np.unique(bar)
         peakpos = list(bar)
         peakpos = np.unique(peakpos)
-        print peakpos
+#         print peakpos
         return peakpos
+
+    def nOutput_datasets(self):
+        return 3
