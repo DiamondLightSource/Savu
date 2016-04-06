@@ -116,7 +116,7 @@ class Padding(object):
         dims = []
         for key in self.pattern.keys():
             temp = self.pattern[key]
-            for dim in (temp,) if type(temp) is int else temp:
+            for dim in (temp,) if isinstance(temp, int) else temp:
                 dims.append(int(dim))
         dims = list(set(dims))
         return dims
