@@ -48,38 +48,23 @@ class NxxrdLoader(BaseMultiModalLoader):
         self.exp.meta_data.set_meta_data("mono_energy", mono_energy)
         self.set_motors(data_obj, xrd_entry, 'xrd')
 
-        # hard coded for now, but we can change it to fram nx transformations
-        # in future.
-        data_obj.set_axis_labels('rotation_angle.degrees',
-                                 'y.mm',
-                                 'x.mm',
-                                 'detector_x.mm',
-                                 'detector_y.mm')
-
         rotation_angle = \
             data_obj.backing_file[xrd_entry.name + '/sample/theta'].value
         if rotation_angle.ndim > 1:
             rotation_angle = rotation_angle[:,0]
 
         data_obj.meta_data.set_meta_data('rotation_angle', rotation_angle)
-        #self.add_patterns_based_on_acquisition(data_obj, 'xrd')
-#         print data_obj.data.shape
-        slicedir = tuple(range(len(data_obj.data.shape)-2))
-#         print "diffraction slice direction is "+str(slicedir)
-        data_obj.add_pattern("DIFFRACTION", core_dir=(3, 4),
-                             slice_dir=slicedir)
-#         data_obj.add_pattern("SINOGRAM", core_dir=(0, 2),
-#                              slice_dir=(1,3,4))
-#         data_obj.add_pattern("PROJECTION", core_dir=(1, 2),
-#                              slice_dir=(0,3,4))
+        self.add_patterns_based_on_acquisition(data_obj, 'xrd')
+# #         print data_obj.data.shape
+#         slicedir = tuple(range(len(data_obj.data.shape)-2))
+# #         print "diffraction slice direction is "+str(slicedir)
+#         data_obj.add_pattern("DIFFRACTION", core_dir=(3, 4),
+#                              slice_dir=slicedir)
+# 
 #         data_obj.add_pattern("SINOGRAM", core_dir=(0, 2),
 #                              slice_dir=(1, 3, 4))
-#         data_obj.add_pattern("SINOGRAM", core_dir=(0, 1),
-#                              slice_dir=(3, 2, 4))
-        data_obj.add_pattern("SINOGRAM", core_dir=(0, 2),
-                             slice_dir=(1, 3, 4))
-        data_obj.add_pattern("PROJECTION", core_dir=(1, 2),
-                             slice_dir=(0, 3, 4))
+#         data_obj.add_pattern("PROJECTION", core_dir=(1, 2),
+#                              slice_dir=(0, 3, 4))
 
 
         calibrationfile = h5py.File(self.get_cal_path(), 'r')

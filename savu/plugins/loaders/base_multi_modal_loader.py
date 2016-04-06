@@ -32,6 +32,7 @@ from savu.plugins.base_loader import BaseLoader
 class BaseMultiModalLoader(BaseLoader):
     """
     This class provides a base for all multi-modal loaders
+    :param fast_axis: what is the fast axis called. Default:"x" 
     """
 
     def multi_modal_setup(self, ltype, data_str):
@@ -60,19 +61,21 @@ class BaseMultiModalLoader(BaseLoader):
         # now lets extract the map, if there is one!
         # to begin with
         data_obj.data_mapping = DataMapping()
-
+        logging.debug("========="+ltype+"=========")
         axes = entry['data'].attrs['axes']
         data_obj.data_mapping.set_axes(axes)
         nAxes = len(axes)
-        #print nAxes
+        #logging.debug nAxes
         cts = 0
         motors = []
         motor_type = []
         labels = []
+        fast_axis = self.parameters["fast_axis"]
+        logging.debug("axes in the file are:"+str(str(entry['data'].attrs["axes"])))
         for ii in range(nAxes):
             # find the rotation axis
             data_axis = 'data/' + entry['data'].attrs["axes"][ii]
-            label = str(entry['data'].attrs["axes"][ii])
+            
             logging.debug(str(data_axis))
             entry_axis = entry[data_axis]
             try:
@@ -80,7 +83,7 @@ class BaseMultiModalLoader(BaseLoader):
             except KeyError:
                 logging.debug('leaving the units out for axis %s', str(ii))
                 units = 'unit'
-            labels.append(label+'.'+units)
+            
             try:
                 mType = entry_axis.attrs['transformation_type']
                 if (mType == "rotation"):
@@ -89,7 +92,8 @@ class BaseMultiModalLoader(BaseLoader):
                                                         data_axis])
                     data_obj.data_mapping.is_tomo = True
                     motor_type.append('rotation')
-                    logging.debug(ltype + " reader: '%s'", "is a tomo scan")
+                    label = 'rotation_angle'
+                    logging.debug(ltype + " reader: %s", "is a tomo scan")
                 elif (mType == "translation"):
                     cts += 1  # increase the order of the map
                     # what axes are these? Would be good to have for the
@@ -98,12 +102,20 @@ class BaseMultiModalLoader(BaseLoader):
                     motors.append(data_obj.backing_file[entry.name + '/' +
                                                         data_axis])
                     motor_type.append('translation')
+                    if (str(entry['data'].attrs["axes"][ii])==fast_axis):
+                        label='x'
+                    else:
+                        label='y'
+
+                    
             except KeyError:
                 motor_type.append('None')
+                label = str(entry['data'].attrs["axes"][ii])
+            labels.append(label+'.'+units)
 
         if not motors:
-            logging.debug("'%s' reader: No maps found!", ltype)
-        #print labels
+            logging.debug("%s reader: No maps found!", ltype)
+        #logging.debug labels
         data_obj.set_axis_labels(*tuple(labels))
         data_obj.data_mapping.set_motors(motors)
         data_obj.data_mapping.set_motor_type(motor_type)
@@ -114,40 +126,33 @@ class BaseMultiModalLoader(BaseLoader):
         else:
             logging.debug("'%s' reader: No translations found!", ltype)
             pass
+        logging.debug("axis labels:"+str(labels))
+        logging.debug("motor_type:"+str(motor_type))
 
     def add_patterns_based_on_acquisition(self, data_obj, ltype):
         motor_type = data_obj.data_mapping.get_motor_type()
         dims = range(len(motor_type))
-
-        # cheating for now since the dimensions of the data do not correspond
-        # to the number of axes in the test xrd data file
-        if ltype is 'xrd':
-            dims = range(len(motor_type) + 1)
-
-        # now we will set up the core directions that we need for processing
         projection = []
         for item, key in enumerate(motor_type):
             if key == 'translation':
                 projection.append(item)
-                print projection
+#                 logging.debug projection
             elif key == 'rotation':
                 rotation = item
 
-        proj_dir = tuple(projection)
-        #print proj_dir
-        #print dims
-        logging.debug("projections are: %s", str(proj_dir))
-
         if data_obj.data_mapping.is_map:
-            # two translation axes
+            proj_dir = tuple(projection)
+            logging.debug("is a map")
+            logging.debug("the proj cores are"+str(proj_dir))
+            logging.debug("the proj slices are"+str(tuple(set(dims) - set(proj_dir))))
             data_obj.add_pattern("PROJECTION", core_dir=proj_dir,
                                  slice_dir=tuple(set(dims) - set(proj_dir)))
 
-        sino_dir = (rotation, proj_dir[-1])
-
-        logging.debug("sinograms are: %s", str(sino_dir))
-
         if data_obj.data_mapping.is_tomo:
             #rotation and fast axis
+            sino_dir = (rotation, proj_dir[-1])
+            logging.debug("is a tomo")
+            logging.debug("the sino cores are:"+str(sino_dir))
+            logging.debug("the sino slices are:"+str(tuple(set(dims) - set(sino_dir))))
             data_obj.add_pattern("SINOGRAM", core_dir=sino_dir,
                                  slice_dir=tuple(set(dims) - set(sino_dir)))
