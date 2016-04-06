@@ -34,7 +34,7 @@ class SavuLoader(BaseLoader):
     """
     A class to load Savu output data from a hdf5 file
     :param data_path: Path to the \
-        data. Default: 'entry/final_result_tomo/data'.
+        data. Default: '1-TimeseriesFieldCorrections-tomo/data'.
     :param name: Name associated with the data set. Default: 'tomo'.
     """
 
