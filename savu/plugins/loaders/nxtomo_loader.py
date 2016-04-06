@@ -86,5 +86,4 @@ class NxtomoLoader(BaseLoader):
             logging.warn("No Control information available")
 
         data_obj.set_shape(data_obj.data.shape)
-
         self.set_data_reduction_params(data_obj)

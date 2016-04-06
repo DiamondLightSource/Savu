@@ -159,7 +159,7 @@ class BaseMultiModalLoader(BaseLoader):
         
         if ltype is 'xrd':
             diff_core = (-2,-1) # it will always be this
-            diff_slice = tuple(dims[:2])
+            diff_slice = tuple(dims[:-2])
             logging.debug("is a diffraction")
             logging.debug("the diffraction cores are:"+str(diff_core))
             logging.debug("the diffraction slices are:"+str(diff_slice))

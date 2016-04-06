@@ -93,6 +93,7 @@ class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
         # Doesnt this get rid of the other two axes?
         # axis_labels = {in_dataset[0]: '-1.Q.nm^-1'}
         # I just want diffraction data
+
         in_pData[0].plugin_data_setup('DIFFRACTION', self.get_max_frames())
         spectra = out_datasets[0]
         num_bins = self.get_parameters('num_bins')
@@ -107,7 +108,7 @@ class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
 
         detY_dim = in_dataset[0].find_axis_label_dimension('detector_y')
         detX_dim = in_dataset[0].find_axis_label_dimension('detector_x')
-        axis_labels = [str(detY_dim), str(detX_dim) + '.name.unit']
+        axis_labels = [str(detX_dim), str(detY_dim) + '.name.unit']
 
         spectra.create_dataset(patterns={in_dataset[0]: patterns},
                                axis_labels={in_dataset[0]: axis_labels},

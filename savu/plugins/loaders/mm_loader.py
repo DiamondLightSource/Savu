@@ -55,7 +55,7 @@ class MmLoader(BaseLoader):
             self.setup_loader(NxxrdLoader(), self.parameters)
             logging.debug('This file contains an NXxrd')
         except:
-            logging.debug('This file does not contain an NXxrd')
+            logging.warn('This file does not contain an NXxrd')
         try:
             self.setup_loader(NxstxmLoader(), new_dict)
             logging.debug('This file contains an NXstxm')

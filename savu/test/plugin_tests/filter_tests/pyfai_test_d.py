@@ -34,6 +34,7 @@ class PyfaiTestD(unittest.TestCase):
         options = {
             "transport": "hdf5",
             "process_names": "CPU0",
+            "verbose": "True",
             "data_file": tu.get_test_data_path('mm.nxs'),
             "process_file": tu.get_test_process_path('PyFAI_azimuth_test_d.nxs'),
             "out_path": tempfile.mkdtemp()
