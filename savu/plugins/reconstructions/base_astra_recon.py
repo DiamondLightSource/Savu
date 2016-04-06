@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 # Copyright 2014 Diamond Light Source Ltd.
 #
@@ -17,9 +18,7 @@
 .. module:: base_astra_recon
    :platform: Unix
    :synopsis: A base for all Astra toolbox reconstruction algorithms
-
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
-
 """
 import logging
 import astra
@@ -142,3 +141,4 @@ class BaseAstraRecon(BaseRecon):
 ## for iterative electron tomography reconstruction using graphics processing
 ## units (GPUs)", Journal of Structural Biology, vol. 176, issue 2, pp. 250-253,
 ## 2011, http://dx.doi.org/10.1016/j.jsb.2011.07.017
+

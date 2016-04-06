@@ -94,7 +94,7 @@ template < typename T > struct Warper{
      Interp_tab(){
         is_alloc=0;
         npix=0;
-        timestamp("Instantiated interpolation table\n");
+        timestamp("Instantiated interpolation table",LEVEL_DEBUG);
      }
 
      ~Interp_tab(){
@@ -105,7 +105,7 @@ template < typename T > struct Warper{
            is_alloc=0;
            npix=0;
         }
-        timestamp("Cleared interpolation table\n");
+        //timestamp("Cleared interpolation table",LEVEL_DEBUG);
      }
 
 
@@ -133,7 +133,7 @@ template < typename T > struct Warper{
            droff=DR*npix;
            dloff=DL*npix;
 
-           timestamp("Allocated interpolation table\n");
+           timestamp("Allocated interpolation table",LEVEL_DEBUG);
            is_alloc=1;
         }
      }
@@ -148,12 +148,12 @@ template < typename T > struct Warper{
   int thisx,thisy;
 
   Warper(){
-     timestamp("Hello, world!\n");
+     timestamp("Hello, world!",LEVEL_DEBUG);
 
 
   };
   void helloworld(){
-     timestamp("Hello, world!\n");
+     timestamp("Hello, world!",LEVEL_DEBUG);
   }
 
 
@@ -254,20 +254,20 @@ template < typename T > struct Warper{
             itab.weights[itab.droff + idx]=drweight;
 
             if (ulweight < 0){
-               snprintf(message,MAX_MESSAGE,"negative ulweight %i\n",idx);
-               errprint(message);
+               snprintf(message,MAX_MESSAGE,"negative ulweight %i",idx);
+               errprint(message,LEVEL_USER);
             }
             if (urweight < 0){
-               snprintf(message,MAX_MESSAGE,"negative urweight %i\n",idx);
-               errprint(message);
+               snprintf(message,MAX_MESSAGE,"negative urweight %i",idx);
+               errprint(message,LEVEL_USER);
             }
             if (dlweight < 0){
-               snprintf(message,MAX_MESSAGE,"negative dlweight %i\n",idx);
-               errprint(message);
+               snprintf(message,MAX_MESSAGE,"negative dlweight %i",idx);
+               errprint(message,LEVEL_USER);
             }
             if (drweight < 0){
-               snprintf(message,MAX_MESSAGE,"negative drweight %i\n",idx);
-               errprint(message);
+               snprintf(message,MAX_MESSAGE,"negative drweight %i",idx);
+               errprint(message,LEVEL_USER);
             }
          }
       }
@@ -458,22 +458,30 @@ void runUnwarp(Options * ctrlp, unsigned int thisbatch,unsigned char *inbuf, uns
    u_int32_t slice=0;
 
 
-     printf("calling %s\n",__func__);
-     printf("versionflag: %hhu\n",ctrlp->versionflag);
-     printf("pixelflag: %hhu\n",ctrlp->pixelflag);
-     printf("f_call_num: %hhu\n",ctrlp->f_call_num);
+     snprintf(message,MAX_MESSAGE,"calling %s",__func__);
+           timestamp(message,LEVEL_INFO);
+
+     snprintf(message,MAX_MESSAGE,"versionflag: %hhu",ctrlp->versionflag);
+           timestamp(message,LEVEL_INFO);
+           
+     snprintf(message,MAX_MESSAGE,"pixelflag: %hhu",ctrlp->pixelflag);
+           timestamp(message,LEVEL_INFO);
+
+     snprintf(message,MAX_MESSAGE,"f_call_num: %hhu",ctrlp->f_call_num);
+           timestamp(message,LEVEL_INFO);
 
      //warper.helloworld();
 
      switch(ctrlp->f_call_num) {
 
         case (F_SETUP): 
-           printf("calling %s for setup\n",__func__);
+           snprintf(message,MAX_MESSAGE,"calling %s for setup",__func__);
+           timestamp(message,LEVEL_USER);
 
            //fprintf(stderr,"C++: Running setup %i %i \n",ctrlp->ht,ctrlp->wd);
-           timestamp("C++: Running setup");
-           snprintf(message,MAX_MESSAGE,"C++: ht= %i wd= %i\n",ctrlp->ht,ctrlp->wd);
-           timestamp(message);
+           timestamp("C++: Running setup",LEVEL_DEBUG);
+           snprintf(message,MAX_MESSAGE,"C++: ht= %i wd= %i",ctrlp->ht,ctrlp->wd);
+           timestamp(message,LEVEL_DEBUG);
 
            warper.setheight(ctrlp->ht);
            warper.setwidth(ctrlp->wd);
@@ -481,23 +489,31 @@ void runUnwarp(Options * ctrlp, unsigned int thisbatch,unsigned char *inbuf, uns
            warper.setctr(ctrlp->xcentre,ctrlp->ycentre);
            warper.setcoeff(ctrlp->acoeff,ctrlp->bcoeff,ctrlp->ccoeff,ctrlp->dcoeff,ctrlp->ecoeff);
 
-           timestamp("C++: Running setup_itab");
+           timestamp("C++: Running setup_itab",LEVEL_DEBUG);
            warper.setup_itab();
 
            npixels=ctrlp->ht * ctrlp->wd;
-           printf("npixels = %u\n",npixels);
-           printf("testval = %li\n",(long int)(warper.itab.offsets[0]));
+
+           snprintf(message,MAX_MESSAGE,"npixels = %u",npixels);
+              timestamp(message,LEVEL_DEBUG);
+           snprintf(message,MAX_MESSAGE,"testval = %li",(long int)(warper.itab.offsets[0]));
+              timestamp(message,LEVEL_DEBUG);
+
            setupflag=1;
-           timestamp("C++: Finished setup_itab");
+           timestamp("C++: Finished setup_itab",LEVEL_DEBUG);
         break;
 
         case (F_RUN):
-           snprintf(message,MAX_MESSAGE,"C++: running unwarp chunk ht= %i wd= %i batch=%i iter=%i\n",ctrlp->ht,ctrlp->wd,thisbatch,iter); timestamp("C++: running unwarp chunk");
-           timestamp(message);
-           printf("Running unwarp for %u slices \n",thisbatch);
-           printf("npixels = %u\n",npixels);
-           printf("testval = %li\n",(long int)(warper.itab.offsets[0]));
-           printf("testout = %hhu\n",warper.itab.is_outside[0]);
+           snprintf(message,MAX_MESSAGE,"C++: running unwarp chunk ht= %i wd= %i batch=%i iter=%i",ctrlp->ht,ctrlp->wd,thisbatch,iter); timestamp("C++: running unwarp chunk",LEVEL_DEBUG);
+              timestamp(message,LEVEL_USER);
+           snprintf(message,MAX_MESSAGE,"Running unwarp for %u slices ",thisbatch);
+              timestamp(message,LEVEL_DEBUG);
+           snprintf(message,MAX_MESSAGE,"npixels = %u",npixels);
+              timestamp(message,LEVEL_DEBUG);
+           snprintf(message,MAX_MESSAGE,"testval = %li",(long int)(warper.itab.offsets[0]));
+              timestamp(message,LEVEL_DEBUG);
+           snprintf(message,MAX_MESSAGE,"testout = %hhu",warper.itab.is_outside[0]);
+              timestamp(message,LEVEL_DEBUG);
 
            if (setupflag == 0 ){
               fprintf(stderr,"ERROR: setup has not been called! \n");
@@ -528,17 +544,19 @@ void runUnwarp(Options * ctrlp, unsigned int thisbatch,unsigned char *inbuf, uns
                 warper.setdata(warper.inputbuf + slice * npixels );
                 warper.dowarp_by_table(warper.outputbuf + slice * npixels );
            }
-           timestamp("C++: finished unwarp chunk ");
+           timestamp("C++: finished unwarp chunk ",LEVEL_DEBUG);
            iter++;
 
         break;
 
         case(F_CLEANUP):
-           printf("calling %s for cleanup\n",__func__);
+           snprintf(message,MAX_MESSAGE,"calling %s for cleanup",__func__);
+           timestamp(message,LEVEL_USER);
         break;
      }
      
-     printf("returning from %s\n",__func__);
+     snprintf(message,MAX_MESSAGE,"returning from %s",__func__);
+           timestamp(message,LEVEL_USER);
 
 }
 

@@ -5,8 +5,17 @@
 #$Id: unwarp.pyx 451 2016-01-04 15:08:19Z kny48981 $
 
 import numpy as np
+import logging
 cimport numpy as np
 cimport cunwarp
+
+cdef public void pydebug(char * message):
+   logging.debug(message)
+cdef public void pyinfo(char * message):
+   logging.info(message)
+cdef public void pyuser(char * message):
+   logging.log("USER",message)
+
 
 
 cdef cunwarp.Options ctrl
@@ -70,7 +79,7 @@ def run(np.ndarray[np.float32_t,ndim=3,mode="c"] inarray,np.ndarray[np.float32_t
 
 def cleanup():
    global ctrl
-   cunwarp.timestamp("unwarp cleanup");
+   cunwarp.timestamp("unwarp cleanup",0);
    ctrl.versionflag=0
    ctrl.f_call_num=2
    cunwarp.runUnwarp(&ctrl,1,NULL,NULL)
