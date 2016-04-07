@@ -32,7 +32,7 @@ from savu.plugins.base_loader import BaseLoader
 class BaseMultiModalLoader(BaseLoader):
     """
     This class provides a base for all multi-modal loaders
-    :param fast_axis: what is the fast axis called. Default:"x" 
+    :param fast_axis: what is the fast axis called. Default:"x"
     """
 
     def multi_modal_setup(self, ltype, data_str):
