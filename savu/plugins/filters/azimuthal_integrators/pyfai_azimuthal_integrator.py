@@ -46,8 +46,6 @@ class PyfaiAzimuthalIntegrator(BaseAzimuthalIntegrator):
         mData = self.params[2]
         mask = self.params[0]
         ai = self.params[3]
-        units = self.parameters['units']
-        axis, remapped = ai.integrate1d(data=data[0], npt=self.npts, unit='q_nm^-1')
-        axis, remapped_new = self.unit_conversion(units,axis,remapped)
-        mData.set_meta_data('Q', axis) # multiplied because their units are wrong!
-        return remapped_new
+        axis, remapped = ai.integrate1d(data=data[0], npt=self.npts, unit='q_nm^-1', correctSolidAngle=False)
+        self.add_axes_to_meta_data(axis,mData)
+        return remapped

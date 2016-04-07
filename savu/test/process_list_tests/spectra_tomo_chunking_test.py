@@ -35,6 +35,7 @@ class SpectraTomoChunkingTest(unittest.TestCase):
         options = {
             "transport": "hdf5",
             "process_names": "CPU0",
+            "verbose": "True",
             "data_file": tu.get_test_data_path('mm.nxs'),
             "process_file": tu.get_test_process_path(
                 'pyfai_tomo_chunking_test.nxs'),
