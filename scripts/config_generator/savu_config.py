@@ -186,6 +186,23 @@ def _list(content, arg):
     return content
 
 
+def _params(content, arg):
+    """Displays the parameters of the specified plugin.
+    """
+    try:
+        plugin = pu.plugins[arg]()
+        plugin._populate_default_parameters()
+        print "-----------------------------------------"
+        print arg
+        for p_key in plugin.parameters.keys():
+            print("    %20s : %s" % (p_key, plugin.parameters[p_key]))
+        print "-----------------------------------------"
+        return content
+    except:
+        print("Sorry I can't process the argument '%s'" % (arg))
+    return content
+
+
 def _save(content, arg):
     """Save the current list to disk with the filename given"""
     content.save(arg)
@@ -193,8 +210,7 @@ def _save(content, arg):
 
 
 def _mod(content, arg):
-    """
-    Modifies the target value e.g. 'mod 1.value 27' and turns the plugins on
+    """Modifies the target value e.g. 'mod 1.value 27' and turns the plugins on
     and off e.g 'mod 1.on' or 'mod 1.off'
     """
     on_off_list = ['ON', 'on', 'OFF', 'off']
@@ -255,7 +271,7 @@ def _ref(content, arg):
         positions = [int(arg) - 1]
 
     for pos in positions:
-        if pos < 0 or pos >= len(content.plugin_list.plugin_list) :
+        if pos < 0 or pos >= len(content.plugin_list.plugin_list):
             print("Sorry %s is out of range" % (arg))
             return content
         name = content.plugin_list.plugin_list[pos]['name']
@@ -281,7 +297,7 @@ def _ref(content, arg):
 def _rem(content, arg):
     """Remove the numbered item from the list"""
     pos = int(arg)-1
-    if pos < 0 or pos >= len(content.plugin_list.plugin_list) :
+    if pos < 0 or pos >= len(content.plugin_list.plugin_list):
             print("Sorry %s is out of range" % (arg))
             return content
     content.remove(pos)
@@ -296,7 +312,8 @@ commands = {'open': _open,
             'mod': _mod,
             'add': _add,
             'rem': _rem,
-            'ref': _ref}
+            'ref': _ref,
+            'params': _params}
 
 list_commands = ['loaders',
                  'corrections',
@@ -352,6 +369,11 @@ class Completer(object):
         if not args[0]:
             return list_commands
         return [x for x in list_commands if x.startswith(args[0])]
+
+    def complete_params(self, args):
+        if not args[0]:
+            return pu.plugins.keys()
+        return [x for x in pu.plugins.keys() if x.startswith(args[0])]
 
     def complete(self, text, state):
         "Generic readline completion entry point."
