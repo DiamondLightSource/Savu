@@ -34,11 +34,8 @@ from savu.plugins.utils import register_plugin
 class ImageLoader(BaseLoader):
     """
     A class to load tomography data from a Nexus file
-    :param data_path: Path to the folder containing the \
-        data. Default: '../../../test_data/data/image_test/tiffs'.
     :param image_type: Type of image. Choose from 'FabIO'. Default: 'FabIO'.
-    :param angles: list[first_angle, final_angle, angular_step] or \
-        file. Default: None.
+    :param angles: A python statement to be evaluated or a file. Default: None.
     :param frame_dim: Which dimension requires stitching? Default: 0.
     """
 
@@ -65,7 +62,7 @@ class ImageLoader(BaseLoader):
         mod = __import__('savu.data.data_structures.data_type', fromlist=dtype)
         clazz = getattr(mod, dtype)
 
-        path = self.parameters['data_path']
+        path = exp.meta_data.get_meta_data("data_file")
         data_obj.data = clazz(path, data_obj, self.parameters['frame_dim'])
 
         self.set_rotation_angles(data_obj)
@@ -80,14 +77,17 @@ class ImageLoader(BaseLoader):
 
     def set_rotation_angles(self, data_obj):
         angles = self.parameters['angles']
-        if isinstance(angles, list):
-            #*** use linspace for default and allow eval on input parameter"
-            angles = np.arange(angles[0], angles[1]+angles[2], angles[2])
+
+        if angles is None:
+            angles = np.linspace(0, 180, data_obj.data.get_shape()[0])
         else:
             try:
-                angles = np.loadtxt(angles)
+                exec("angles = " + angles)
             except:
-                raise Exception('Unable to open angles file.')
+                try:
+                    angles = np.loadtxt(angles)
+                except:
+                    raise Exception('Cannot set angles in loader.')
 
         n_angles = len(angles)
         data_angles = data_obj.data.get_shape()[0]
