@@ -43,9 +43,16 @@ class Content(object):
     def __init__(self, filename):
         self.plugin_list = PluginList()
         self.filename = filename
+        self._finished = False
         if os.path.exists(filename):
             print "Opening file %s" % (filename)
             self.plugin_list._populate_plugin_list(filename, activePass=True)
+
+    def set_finished(self, value):
+        self._finished = value
+
+    def is_finished(self):
+        return self._finished
 
     def display(self, **kwargs):
         print '\n', self.plugin_list._get_string(**kwargs), '\n'
@@ -304,6 +311,12 @@ def _rem(content, arg):
     content.display()
     return content
 
+
+def _exit(content, arg):
+    """Close the program"""
+    content.set_finished(True)
+    return content
+
 commands = {'open': _open,
             'help': _help,
             'disp': _disp,
@@ -313,7 +326,8 @@ commands = {'open': _open,
             'add': _add,
             'rem': _rem,
             'ref': _ref,
-            'params': _params}
+            'params': _params,
+            'exit': _exit}
 
 list_commands = ['loaders',
                  'corrections',
@@ -428,14 +442,14 @@ def main():
             command = input_string.split()[0]
             arg = ' '.join(input_string.split()[1:])
 
-        if 'exit' in command:
-            break
-
         # try to run the command
         if command in commands.keys():
             content = commands[command](content, arg)
         else:
             print "I'm sorry, thats not a command I recognise, try help"
+
+        if content.is_finished():
+            break
 
     print "Thanks for using the application"
 
