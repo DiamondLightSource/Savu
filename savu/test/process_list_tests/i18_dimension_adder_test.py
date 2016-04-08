@@ -22,9 +22,7 @@
 """
 
 import unittest
-import tempfile
 from savu.test import test_utils as tu
-
 from savu.test.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
@@ -33,14 +31,12 @@ from savu.test.framework_tests.plugin_runner_test import \
 class I18_dimension_adder_test(unittest.TestCase):
 
     def test_xrdtomo(self):
-        options = {
-            "transport": "hdf5",
-            "process_names": "CPU0",
-            "data_file": '/dls/i13/data/2015/cm12165-5/processing/AskAaron/67034_i18.nxs',
-            "process_file": tu.get_process_list_path('I18_dimension_adder_test.nxs'),
-            "out_path": tempfile.mkdtemp()
-            }
-        run_protected_plugin_runner(options)
+        data_file = \
+            '/dls/i13/data/2015/cm12165-5/processing/AskAaron/67034_i18.nxs'
+        process_file = \
+            tu.get_test_process_path('I18_dimension_adder_test.nxs')
+        run_protected_plugin_runner(tu.set_options(data_file,
+                                                   process_file=process_file))
 
 if __name__ == "__main__":
     unittest.main()

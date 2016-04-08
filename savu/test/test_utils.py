@@ -148,6 +148,7 @@ def set_options(path, **kwargs):
     options['inter_path'] = options['out_path']
     options['log_path'] = options['out_path']
     options['run_type'] = 'test'
+    options['verbose'] = 'True'
     return options
 
 

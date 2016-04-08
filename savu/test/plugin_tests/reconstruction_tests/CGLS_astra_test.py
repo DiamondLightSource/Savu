@@ -21,24 +21,19 @@
 
 """
 import unittest
-import tempfile
 from savu.test import test_utils as tu
-
-from savu.test.framework_tests.plugin_runner_test import run_protected_plugin_runner
+from savu.test.framework_tests.plugin_runner_test \
+    import run_protected_plugin_runner
 
 
 class CglsAstraTest(unittest.TestCase):
 
     def test_cgls_astra(self):
-        process = 'basic_tomo_iterative_process.nxs'
-        options = {
-            "transport": "hdf5",
-            "process_names": "CPU0",
-            "data_file": tu.get_test_data_path('24737.nxs'),
-            "process_file": tu.get_test_process_path(process),
-            "out_path": tempfile.mkdtemp()
-            }
-        run_protected_plugin_runner(options)
+        data_file = tu.get_test_data_path('24737.nxs')
+        process_file = \
+            tu.get_test_process_path('basic_tomo_iterative_process.nxs')
+        run_protected_plugin_runner(tu.set_options(data_file,
+                                                   process_file=process_file))
 
 
 if __name__ == "__main__":
