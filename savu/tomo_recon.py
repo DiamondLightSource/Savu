@@ -41,6 +41,8 @@ def __option_parser():
                       help="Override the output folder")
     parser.add_option("-d", "--tmp", dest="temp_dir",
                       help="Store intermediate files in a temp directory.")
+    parser.add_option("-l", "--log", dest="log_dir",
+                      help="Store log files in a separate location")
     parser.add_option("-v", "--verbose", action="store_true", dest="verbose",
                       help="Display all debug log messages", default=False)
     parser.add_option("-q", "--quiet", action="store_true", dest="quiet",
@@ -91,9 +93,13 @@ def _set_options(opt, args):
     options["process_file"] = args[1]
     options["out_path"] = set_output_folder(args[0], args[2], opt.folder)
     if opt.temp_dir:
-        options["inter_out_path"] = os.path.join(args[2], opt.temp_dir)
+        options["inter_path"] = opt.temp_dir
     else:
-        options["inter_out_path"] = options["out_path"]
+        options["inter_path"] = options["out_path"]
+    if opt.log_dir:
+        options['log_path'] = opt.log_dir
+    else:
+        options['log_path'] = options["out_path"]
     return options
 
 

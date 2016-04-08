@@ -107,14 +107,14 @@ class Hdf5Transport(TransportControl):
         logger = logging.getLogger()
         logger.setLevel(self.__get_log_level(options))
 
-        fh = logging.FileHandler(os.path.join(options["out_path"], 'log.txt'),
+        fh = logging.FileHandler(os.path.join(options["log_path"], 'log.txt'),
                                  mode='w')
         fh.setFormatter(logging.Formatter('L %(relativeCreated)12d M CPU0 0' +
                                           ' %(levelname)-6s %(message)s'))
         logger.addHandler(fh)
 
         cu.add_user_log_level()
-        cu.add_user_log_handler(logger, os.path.join(options["out_path"],
+        cu.add_user_log_handler(logger, os.path.join(options["log_path"],
                                                      'user.log'))
 
     def __set_logger_parallel(self, number, rank, options):

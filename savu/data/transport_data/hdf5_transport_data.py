@@ -84,7 +84,7 @@ class Hdf5TransportData(object):
             if count is nPlugins:
                 out_path = expInfo.get_meta_data('out_path')
             else:
-                out_path = expInfo.get_meta_data('inter_out_path')
+                out_path = expInfo.get_meta_data('inter_path')
             filename = os.path.join(out_path, name)
             group_name = "%i-%s-%s" % (count, plugin.name, key)
             exp._barrier()
