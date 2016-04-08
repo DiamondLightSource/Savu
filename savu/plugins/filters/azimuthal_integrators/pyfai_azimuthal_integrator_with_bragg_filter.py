@@ -57,7 +57,6 @@ class PyfaiAzimuthalIntegratorWithBraggFilter(BaseAzimuthalIntegrator):
         lims = self.parameters['thresh']
         num_bins_azim = self.parameters['num_bins_azim']
         num_bins_rad = self.parameters['num_bins']
-        units = self.parameters['units']
         remapped, axis, chi = ai.integrate2d(data=data[0],npt_rad=num_bins_rad, npt_azim=num_bins_azim)
         mask = np.ones_like(remapped)
         row_mask = np.zeros(mask.shape[0])
@@ -68,10 +67,8 @@ class PyfaiAzimuthalIntegratorWithBraggFilter(BaseAzimuthalIntegrator):
             top = np.percentile(foo,lims[1])
             bottom = np.percentile(foo,lims[0])
             out[i] = np.mean(np.clip(foo,bottom,top))
-        axis, out_spectra = self.unit_conversion(units,axis,out)
-        mData.set_meta_data('Q', axis) # multiplied because their units are wrong!
-        return out_spectra
-
+        self.add_axes_to_meta_data(axis,mData)
+        return out
 
 
 

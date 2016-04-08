@@ -38,7 +38,6 @@ class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
     a base azimuthal integrator for pyfai
 
     :param use_mask: Should we mask. Default: False.
-    :param units: options are q_nm^-1 and d_nm. Default: "q_nm^-1".
     :param num_bins: number of bins. Default: 1005.
 
     """
@@ -65,8 +64,9 @@ class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
         bc = [mData.get_meta_data("beam_center_x")[...],
               mData.get_meta_data("beam_center_y")[...]]
         distance = mData.get_meta_data('distance')[...]
-        wl = mData.get_meta_data('incident_wavelength')[...]
-        px = mData.get_meta_data('x_pixel_size')[...]
+        wl = mData.get_meta_data('incident_wavelength')[...]*1e-9
+        self.wl = wl
+        px = mData.get_meta_data('x_pixel_size')[...]*1e3
         orien = mData.get_meta_data(
             'detector_orientation')[...].reshape((3, 3))
         # Transform
@@ -129,21 +129,10 @@ class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
     def nOutput_datasets(self):
         return 1
 
-    def unit_conversion(self,units,axis, data):
-        if units=='q_nm^-1':
-            axis *= 1e3*1e10 # multiplied because their conversion is incorrect I think
-            remapped = data
-        elif units=='d_nm':
-            #  this is non-linear which is ok for DAWN, but interpolation smooths it.
-            q = axis*1e3*1e10
-#             print q
-            dold = 1.0/q
-#             print dold
-            npts = float(len(dold))
-            daxis = (dold[-1]-dold[0])/npts
-            new_axis = np.arange(dold[0],dold[-1],daxis)
-            f = interp1d(dold, data)
-            remapped = f(new_axis)
-            axis = new_axis
-#             print remapped
-        return axis, remapped
+    def add_axes_to_meta_data(self,axis,mData):
+        qanstrom = axis # per angstrom, pyfai is wrong
+        dspacing = 2*np.pi/qanstrom
+        ttheta =  2*180*np.arcsin(self.wl/(2*dspacing*1e-9))/np.pi
+        mData.set_meta_data('Q', qanstrom)
+        mData.set_meta_data('D', dspacing)
+        mData.set_meta_data('2Theta', ttheta)

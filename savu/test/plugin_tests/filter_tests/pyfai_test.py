@@ -28,14 +28,15 @@ from savu.test.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
 
-class PyfaiFilteredTestD(unittest.TestCase):
+class PyfaiTest(unittest.TestCase):
 
-    def test_pyfai_filtered(self):
+    def test_pyfai(self):
         options = {
             "transport": "hdf5",
             "process_names": "CPU0",
+            "verbose": "True",
             "data_file": tu.get_test_data_path('mm.nxs'),
-            "process_file": tu.get_test_process_path('PyFAI_azimuth_test_bragg_d.nxs'),
+            "process_file": tu.get_test_process_path('PyFAI_azimuth_test.nxs'),
             "out_path": tempfile.mkdtemp()
             }
         run_protected_plugin_runner(options)
