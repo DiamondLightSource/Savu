@@ -74,11 +74,18 @@ class Hdf5TransportData(object):
     def __set_filenames(self, plugin, plugin_id, count):
         exp = self.exp
         expInfo = exp.meta_data
+        nPlugins = \
+            expInfo.plugin_list.n_plugins - expInfo.plugin_list.n_loaders - 1
         expInfo.set_meta_data("filename", {})
         expInfo.set_meta_data("group_name", {})
         for key in exp.index["out_data"].keys():
-            name = key + '_' + plugin_id.split('.')[-1] + '.h5'
-            filename = os.path.join(expInfo.get_meta_data("out_path"), name)
+            name = key + '_p' + str(count) + '_' + \
+                plugin_id.split('.')[-1] + '.h5'
+            if count is nPlugins:
+                out_path = expInfo.get_meta_data('out_path')
+            else:
+                out_path = expInfo.get_meta_data('inter_out_path')
+            filename = os.path.join(out_path, name)
             group_name = "%i-%s-%s" % (count, plugin.name, key)
             exp._barrier()
             logging.debug("(set_filenames) Creating output file after "

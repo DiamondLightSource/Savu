@@ -23,7 +23,6 @@
 
 """
 import os
-import time
 import logging
 import copy
 import h5py
