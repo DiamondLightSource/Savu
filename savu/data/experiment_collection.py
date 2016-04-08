@@ -83,13 +83,9 @@ class Experiment(object):
         return self.index[dtype][name]
 
     def _set_nxs_filename(self):
-        name = self.index["in_data"].keys()[0]
-        filename = os.path.basename(self.index["in_data"][name].
-                                    backing_file.filename)
-        filename = os.path.splitext(filename)[0]
-        filename = os.path.join(self.meta_data.get_meta_data("out_path"),
-                                "%s_processed_%s.nxs" %
-                                (filename, time.strftime("%Y%m%d%H%M%S")))
+        folder = self.meta_data.get_meta_data('out_path')
+        fname = os.path.basename(folder.split('_')[-1]) + '_processed.nxs'
+        filename = os.path.join(folder, fname)
         self.meta_data.set_meta_data("nxs_filename", filename)
 
         if self.meta_data.get_meta_data("mpi") is True:

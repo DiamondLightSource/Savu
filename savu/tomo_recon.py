@@ -88,8 +88,21 @@ def _set_options(opt, args):
     options["quiet"] = opt.quiet
     options["data_file"] = args[0]
     options["process_file"] = args[1]
-    options["out_path"] = args[2]
+    print "setting the options"
+    options["out_path"] = set_output_folder(args[0], args[2])
     return options
+
+
+def set_output_folder(in_file, out_path):
+    import time
+    timestamp = time.strftime("%Y%m%d%H%M%S")
+    name = os.path.basename(in_file.split('.')[-2])
+    folder = os.path.join(out_path, ('_'.join([timestamp, name])))
+
+    print "The output folder is ", folder
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    return folder
 
 
 def main():
