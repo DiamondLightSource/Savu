@@ -29,15 +29,16 @@ from savu.test.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
 
-@unittest.skip('Needs updating due to the chunking changes. WIP adp')
-class I18_dimension_adder_test(unittest.TestCase):
+class SimpleFitReconSingleSinoTest(unittest.TestCase):
 
-    def test_xrdtomo(self):
+    def test_process(self):
         options = {
             "transport": "hdf5",
             "process_names": "CPU0",
-            "data_file": '/dls/i13/data/2015/cm12165-5/processing/AskAaron/67034_i18.nxs',
-            "process_file": tu.get_process_list_path('I18_dimension_adder_test.nxs'),
+            "verbose": "True",
+            "data_file": tu.get_test_data_path('fluo_single_sino.nxs'),
+            "process_file": tu.get_test_process_path(
+                'simple_fit_test_XRF_tomo.nxs'),
             "out_path": tempfile.mkdtemp()
             }
         run_protected_plugin_runner(options)

@@ -13,30 +13,32 @@
 # limitations under the License.
 
 """
-.. module:: nx_xrd_loader_test
+.. module:: tomo_recon
    :platform: Unix
-   :synopsis: testing the nx_xrd loader
+   :synopsis: runner for tests using the MPI framework
 
-.. moduleauthor:: Aaron Parsons <scientificsoftware@diamond.ac.uk>
+.. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
+
 import unittest
 import tempfile
 from savu.test import test_utils as tu
+
 from savu.test.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
 
-class NxFluoLoaderTest(unittest.TestCase):
+class SpectraTomoChunkingSingleSinoTest(unittest.TestCase):
 
-    def test_nx_fluo(self):
+    def test_chunking(self):
         options = {
             "transport": "hdf5",
             "process_names": "CPU0",
             "verbose": "True",
-            "data_file": '/dls/i18/data/2016/sp12601-1/processing/Savu_Test_Data/70214_Cat2_RT_1.nxs',
+            "data_file": tu.get_test_data_path('xrd_single_sino.nxs'),
             "process_file": tu.get_test_process_path(
-                'basic_fluo_process.nxs'),
+                'pyfai_tomo_chunking_single_sino_test.nxs'),
             "out_path": tempfile.mkdtemp()
             }
         run_protected_plugin_runner(options)
