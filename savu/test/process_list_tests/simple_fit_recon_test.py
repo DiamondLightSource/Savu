@@ -31,14 +31,14 @@ from savu.test.framework_tests.plugin_runner_test import \
 
 class SimpleFitReconTest(unittest.TestCase):
 
-    #@unittest.skip("A plugin in the processing chain has 0 as a shape dimension")
     def test_process(self):
         options = {
             "transport": "hdf5",
             "process_names": "CPU0",
-            "data_file": tu.get_test_data_path('mm.nxs'),
+            "verbose": "True",
+            "data_file": tu.get_test_data_path('fluo_single_sino.nxs'),
             "process_file": tu.get_test_process_path(
-                'testing_mm_sart_recon.nxs'),
+                'simple_fit_test_XRF_tomo.nxs'),
             "out_path": tempfile.mkdtemp()
             }
         run_protected_plugin_runner(options)
