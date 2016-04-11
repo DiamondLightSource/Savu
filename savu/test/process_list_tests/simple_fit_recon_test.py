@@ -22,9 +22,7 @@
 """
 
 import unittest
-import tempfile
 from savu.test import test_utils as tu
-
 from savu.test.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
@@ -32,16 +30,11 @@ from savu.test.framework_tests.plugin_runner_test import \
 class SimpleFitReconTest(unittest.TestCase):
 
     def test_process(self):
-        options = {
-            "transport": "hdf5",
-            "process_names": "CPU0",
-            "verbose": "True",
-            "data_file": tu.get_test_data_path('fluo_single_sino.nxs'),
-            "process_file": tu.get_test_process_path(
-                'simple_fit_test_XRF_tomo.nxs'),
-            "out_path": tempfile.mkdtemp()
-            }
-        run_protected_plugin_runner(options)
+
+        data_file = tu.get_test_data_path('mm.nxs')
+        process_file = tu.get_test_process_path('testing_mm_sart_recon.nxs')
+        run_protected_plugin_runner(tu.set_options(data_file,
+                                                   process_file=process_file))
 
 if __name__ == "__main__":
     unittest.main()

@@ -21,7 +21,6 @@
 
 """
 import unittest
-import tempfile
 from savu.test import test_utils as tu
 import savu.plugins.utils as pu
 from savu.core.plugin_runner import PluginRunner

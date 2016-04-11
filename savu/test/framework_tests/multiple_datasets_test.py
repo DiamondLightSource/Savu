@@ -34,15 +34,10 @@ from savu.test.framework_tests.plugin_runner_test \
 class MultipleDatasetsTest(unittest.TestCase):
 
     def test_mm(self):
-        options = {
-            "transport": "hdf5",
-            "process_names": "CPU0",
-            "data_file": tu.get_test_data_path('mm.nxs'),
-            "process_file": tu.get_test_process_path(
-                'multiple_mm_inputs_test.nxs'),
-            "out_path": tempfile.mkdtemp()
-            }
-        run_protected_plugin_runner(options)
+        data_file = tu.get_test_data_path('mm.nxs')
+        process_file = tu.get_test_process_path('multiple_mm_inputs_test.nxs')
+        run_protected_plugin_runner(tu.set_options(data_file,
+                                                   process_file=process_file))
 
     def test_tomo1(self):
         options = tu.set_experiment('tomo')

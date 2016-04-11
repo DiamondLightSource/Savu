@@ -76,28 +76,28 @@ def set_experiment(exp_type, **kwargs):
 
 def set_tomoRaw_experiment(filename, **kwargs):
     # create experiment
-    options = _set_options(get_test_data_path(filename))
+    options = set_options(get_test_data_path(filename))
     options['loader'] = 'savu.plugins.loaders.nxtomo_loader'
     options['saver'] = 'savu.plugins.savers.hdf5_tomo_saver'
     return options
 
 
 def set_tomo_experiment(filename, **kwargs):
-    options = _set_options(get_test_data_path(filename), **kwargs)
+    options = set_options(get_test_data_path(filename), **kwargs)
     options['loader'] = 'savu.plugins.loaders.savu_loader'
     options['saver'] = 'savu.plugins.savers.hdf5_tomo_saver'
     return options
 
 
 def set_fluo_experiment(filename, **kwargs):
-    options = _set_options(get_test_data_path(filename), **kwargs)
+    options = set_options(get_test_data_path(filename), **kwargs)
     options['loader'] = 'savu.plugins.loaders.nxfluo_loader'
     options['saver'] = 'savu.plugins.savers.hdf5_tomo_saver'
     return options
 
 
 def set_i12tomo_experiment(filename, **kwargs):
-    options = _set_options(
+    options = set_options(
         get_test_data_path('/i12_test_data/' + filename), **kwargs)
     options['loader'] = 'savu.plugins.loaders.i12_tomo_loader'
     options['saver'] = 'savu.plugins.savers.hdf5_tomo_saver'
@@ -138,16 +138,17 @@ def set_plugin_entry(name, ID, data):
     return plugin
 
 
-def _set_options(path, **kwargs):
-    process_file = kwargs.get('process_file', '')
-    process_names = kwargs.get('process_names', 'CPU0')
+def set_options(path, **kwargs):
     options = {}
-    options['transport'] = 'hdf5'
-    options['process_names'] = process_names
+    options['transport'] = kwargs.get('transport', 'hdf5')
+    options['process_names'] = kwargs.get('process_names', 'CPU0')
     options['data_file'] = path
-    options['process_file'] = process_file
+    options['process_file'] = kwargs.get('process_file', '')
     options['out_path'] = tempfile.mkdtemp()
+    options['inter_path'] = options['out_path']
+    options['log_path'] = options['out_path']
     options['run_type'] = 'test'
+    options['verbose'] = 'True'
     return options
 
 

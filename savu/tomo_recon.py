@@ -34,12 +34,15 @@ def __option_parser():
     version = "%prog 0.1"
     parser = optparse.OptionParser(usage=usage, version=version)
     parser.add_option("-n", "--names", dest="names", help="Process names",
-                      default="CPU0",
-                      type='string')
+                      default="CPU0")
     parser.add_option("-t", "--transport", dest="transport",
-                      help="Set the transport mechanism",
-                      default="hdf5",
-                      type='string')
+                      help="Set the transport mechanism", default="hdf5")
+    parser.add_option("-f", "--folder", dest="folder",
+                      help="Override the output folder")
+    parser.add_option("-d", "--tmp", dest="temp_dir",
+                      help="Store intermediate files in a temp directory.")
+    parser.add_option("-l", "--log", dest="log_dir",
+                      help="Store log files in a separate location")
     parser.add_option("-v", "--verbose", action="store_true", dest="verbose",
                       help="Display all debug log messages", default=False)
     parser.add_option("-q", "--quiet", action="store_true", dest="quiet",
@@ -88,8 +91,30 @@ def _set_options(opt, args):
     options["quiet"] = opt.quiet
     options["data_file"] = args[0]
     options["process_file"] = args[1]
-    options["out_path"] = args[2]
+    options["out_path"] = set_output_folder(args[0], args[2], opt.folder)
+    if opt.temp_dir:
+        options["inter_path"] = opt.temp_dir
+    else:
+        options["inter_path"] = options["out_path"]
+    if opt.log_dir:
+        options['log_path'] = opt.log_dir
+    else:
+        options['log_path'] = options["out_path"]
     return options
+
+
+def set_output_folder(in_file, out_path, set_folder):
+    import time
+    if not set_folder:
+        timestamp = time.strftime("%Y%m%d%H%M%S")
+        name = os.path.basename(in_file.split('.')[-2])
+        folder = os.path.join(out_path, ('_'.join([timestamp, name])))
+    else:
+        folder = os.path.join(out_path, set_folder)
+    print "The output folder is ", folder
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    return folder
 
 
 def main():

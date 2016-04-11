@@ -22,12 +22,10 @@
 """
 
 import unittest
-import tempfile
 from savu.test import test_utils as tu
-
 from savu.test.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
-
+import tempfile
 
 class SpectraTomoChunkingSingleSinoTest(unittest.TestCase):
 

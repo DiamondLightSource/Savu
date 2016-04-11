@@ -20,14 +20,14 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
+
+import time
+import os
 import logging
-import sys
 
 import savu.core.utils as cu
 import savu.plugins.utils as pu
 from savu.data.experiment_collection import Experiment
-from savu.plugins.base_loader import BaseLoader
-from savu.plugins.base_saver import BaseSaver
 
 
 class PluginRunner(object):
@@ -38,6 +38,7 @@ class PluginRunner(object):
         class_name = "savu.core.transports." + options["transport"] \
                      + "_transport"
         cu.add_base(self, cu.import_class(class_name))
+        
         self._transport_control_setup(options)
         self.exp = None
         self.options = options
