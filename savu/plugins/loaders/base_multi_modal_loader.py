@@ -76,7 +76,7 @@ class BaseMultiModalLoader(BaseLoader):
             # find the rotation axis
             data_axis = 'data/' + entry['data'].attrs["axes"][ii]
             
-            logging.debug(str(data_axis))
+            logging.debug("the data axis is %s" % str(data_axis))
             entry_axis = entry[data_axis]
             try:
                 units = entry_axis.attrs['units']
@@ -90,7 +90,7 @@ class BaseMultiModalLoader(BaseLoader):
                     #what axis is this? Could we store it?
                     motors.append(data_obj.backing_file[entry.name + '/' +
                                                         data_axis])
-                    data_obj.data_mapping.is_tomo = True
+                    data_obj.data_mapping._is_tomo = True
                     motor_type.append('rotation')
                     label = 'rotation_angle'
                     logging.debug(ltype + " reader: %s", "is a tomo scan")
@@ -121,7 +121,7 @@ class BaseMultiModalLoader(BaseLoader):
         data_obj.data_mapping.set_motor_type(motor_type)
         if (cts):
             # set the map counts to be the number of linear scan dimensions
-            data_obj.data_mapping.is_map = cts
+            data_obj.data_mapping._is_map = cts
             # chuck to meta
         else:
             logging.debug("'%s' reader: No translations found!", ltype)
@@ -140,7 +140,7 @@ class BaseMultiModalLoader(BaseLoader):
             elif key == 'rotation':
                 rotation = item
 
-        if data_obj.data_mapping.is_map:
+        if data_obj.data_mapping._is_map:
             proj_dir = tuple(projection)
             logging.debug("is a map")
             logging.debug("the proj cores are"+str(proj_dir))
@@ -148,7 +148,7 @@ class BaseMultiModalLoader(BaseLoader):
             data_obj.add_pattern("PROJECTION", core_dir=proj_dir,
                                  slice_dir=tuple(set(dims) - set(proj_dir)))
 
-        if data_obj.data_mapping.is_tomo:
+        if data_obj.data_mapping._is_tomo:
             #rotation and fast axis
             sino_dir = (rotation, proj_dir[-1])
             logging.debug("is a tomo")
