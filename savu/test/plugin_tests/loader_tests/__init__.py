@@ -13,9 +13,16 @@
 # limitations under the License.
 
 """
+<<<<<<< HEAD
 Test suites for Savu are here
 
 
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
+=======
+Tests for the various loaders are here
+
+
+.. moduleauthor:: Aaron Parsons <scientificsoftware@diamond.ac.uk>
+>>>>>>> origin/master
 
 """

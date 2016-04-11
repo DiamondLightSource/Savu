@@ -54,58 +54,5 @@ def run_protected_plugin_runner(options):
         pass
 
 
-class PluginRunnerMultiModalTest(unittest.TestCase):
-
-    def test_process(self):
-        data_file = tu.get_test_data_path('mm.nxs')
-        process_file = tu.get_test_process_path('MMtest.nxs')
-        run_protected_plugin_runner(tu.set_options(data_file,
-                                                   process_file=process_file))
-
-
-class PluginRunnerTomoTest(unittest.TestCase):
-
-    def test_process(self):
-        data_file = tu.get_test_data_path('24737.nxs')
-        process_file = tu.get_test_process_path('basic_tomo_process.nxs')
-        run_protected_plugin_runner(tu.set_options(data_file,
-                                                   process_file=process_file))
-
-
-class PluginRunnerSTXMTest(unittest.TestCase):
-
-    def test_process(self):
-        data_file = tu.get_test_data_path('mm.nxs')
-        process_file = tu.get_test_process_path('basic_stxm_process.nxs')
-        run_protected_plugin_runner(tu.set_options(data_file,
-                                                   process_file=process_file))
-
-
-class PluginRunnerXRDTest(unittest.TestCase):
-
-    def test_process(self):
-        data_file = tu.get_test_data_path('mm.nxs')
-        process_file = tu.get_test_process_path('basic_xrd_process.nxs')
-        run_protected_plugin_runner(tu.set_options(data_file,
-                                                   process_file=process_file))
-
-
-class PluginRunnerFluoTest(unittest.TestCase):
-
-    def test_process(self):
-        data_file = tu.get_test_data_path('mm.nxs')
-        process_file = tu.get_test_process_path('basic_fluo_process.nxs')
-        run_protected_plugin_runner(tu.set_options(data_file,
-                                                   process_file=process_file))
-
-
-class PluginRunnerMonitorTest(unittest.TestCase):
-
-    def test_process(self):
-        data_file = tu.get_test_data_path('mm.nxs')
-        process_file = tu.get_test_process_path('basic_monitor_process.nxs')
-        run_protected_plugin_runner(tu.set_options(data_file,
-                                                   process_file=process_file))
-
 if __name__ == "__main__":
     unittest.main()
