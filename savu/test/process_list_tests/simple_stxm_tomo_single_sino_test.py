@@ -36,5 +36,6 @@ class SimpleStxmTomoTest(unittest.TestCase):
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
 
+
 if __name__ == "__main__":
     unittest.main()
