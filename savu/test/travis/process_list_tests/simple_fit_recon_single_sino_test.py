@@ -25,21 +25,15 @@ import unittest
 from savu.test import test_utils as tu
 from savu.test.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
-import tempfile
 
-class SpectraTomoChunkingSingleSinoTest(unittest.TestCase):
 
-    def test_chunking(self):
-        options = {
-            "transport": "hdf5",
-            "process_names": "CPU0",
-            "verbose": "True",
-            "data_file": tu.get_test_data_path('xrd_single_sino.nxs'),
-            "process_file": tu.get_test_process_path(
-                'pyfai_tomo_chunking_single_sino_test.nxs'),
-            "out_path": tempfile.mkdtemp()
-            }
-        run_protected_plugin_runner(options)
+class SimpleFitReconSingleSinoTest(unittest.TestCase):
+
+    def test_process(self):
+        data_file = tu.get_test_data_path('fluo_single_sino.nxs')
+        process_file = tu.get_test_process_path('simple_fit_test_XRF_tomo.nxs')
+        run_protected_plugin_runner(tu.set_options(data_file,
+                                                   process_file=process_file))
 
 if __name__ == "__main__":
     unittest.main()
