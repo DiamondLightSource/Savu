@@ -27,9 +27,9 @@ from savu.test.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
 
-class NxFluoLoaderTest(unittest.TestCase):
-
-    def test_nx_fluo(self):
+class NxXrdLoaderTest(unittest.TestCase):
+    unittest.skip("the test data isn't ready yet. Adp")
+    def test_nx_xrd(self):
         options = {
             "transport": "hdf5",
             "process_names": "CPU0",

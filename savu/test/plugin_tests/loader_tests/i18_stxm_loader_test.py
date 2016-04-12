@@ -28,7 +28,7 @@ from savu.test.framework_tests.plugin_runner_test import \
 
 
 class I18StxmLoaderTest(unittest.TestCase):
-
+    unittest.skip("the test data isn't ready yet. Adp")
     def test_i18_stxm(self):
         options = {
             "transport": "hdf5",
