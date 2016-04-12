@@ -22,36 +22,48 @@
 """
 import unittest
 from savu.test import test_utils as tu
-import savu.plugins.utils as pu
 from savu.core.plugin_runner import PluginRunner
 
 
-def run_protected_plugin_runner_no_process_list(options, plugin, **kwargs):
-    pu.datasets_list = []
-    try:
-        if 'data' in kwargs.keys():
-            tu.set_plugin_list(options, plugin, kwargs['data'])
-        else:
-            tu.set_plugin_list(options, plugin)
-        plugin_runner = PluginRunner(options)
-        exp = plugin_runner._run_plugin_list()
-        return exp
-    except ImportError as e:
-        print("Failed to run test as libraries not available (%s)," % (e) +
-              " passing test")
-        pass
+#def run_protected_plugin_runner_no_process_list(options, plugin, **kwargs):
+#    pu.datasets_list = []
+#    try:
+#        if 'data' in kwargs.keys():
+#            tu.set_plugin_list(options, plugin, kwargs['data'])
+#        else:
+#            tu.set_plugin_list(options, plugin)
+#        plugin_runner = PluginRunner(options)
+#        exp = plugin_runner._run_plugin_list()
+#        return exp
+#    except ImportError as e:
+#        print("Failed to run test as libraries not available (%s)," % (e) +
+#              " passing test")
+#        pass
 
+#def run_protected_plugin_runner(options):
+#    pu.datasets_list = []
+#    try:
+#        plugin_runner = PluginRunner(options)
+#        exp = plugin_runner._run_plugin_list()
+#        return exp
+#    except ImportError as e:
+#        print("Failed to run test as libraries not available (%s)," % (e) +
+#              " passing test")
+#        pass
+
+def run_protected_plugin_runner_no_process_list(options, plugin, **kwargs):
+    if 'data' in kwargs.keys():
+        tu.set_plugin_list(options, plugin, kwargs['data'])
+    else:
+        tu.set_plugin_list(options, plugin)
+    plugin_runner = PluginRunner(options)
+    exp = plugin_runner._run_plugin_list()
+    return exp
 
 def run_protected_plugin_runner(options):
-    pu.datasets_list = []
-    try:
-        plugin_runner = PluginRunner(options)
-        exp = plugin_runner._run_plugin_list()
-        return exp
-    except ImportError as e:
-        print("Failed to run test as libraries not available (%s)," % (e) +
-              " passing test")
-        pass
+    plugin_runner = PluginRunner(options)
+    exp = plugin_runner._run_plugin_list()
+    return exp
 
 
 if __name__ == "__main__":

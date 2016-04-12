@@ -89,10 +89,7 @@ class NxtomoLoader(BaseLoader):
         self.set_data_reduction_params(data_obj)
 
     def __set_dark_and_flat(self, data_obj):
-        print self.parameters
-        if self.parameters['dark']:
-            print "YES"
-        if self.parameters['dark'] and self.parameters['flat']:
+        if self.parameters['dark'][0] and self.parameters['flat'][0]:
             mData = data_obj.meta_data
             dfile, dentry = self.parameters['dark']
             ffile, fentry = self.parameters['flat']
