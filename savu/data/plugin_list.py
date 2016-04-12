@@ -27,6 +27,7 @@ import h5py
 import json
 import logging
 import copy
+import inspect
 
 import numpy as np
 
@@ -193,7 +194,6 @@ class PluginList(object):
         """
         from savu.plugins.base_loader import BaseLoader
         from savu.plugins.base_saver import BaseSaver
-        import inspect
         loader_idx = []
         saver_idx = []
         self.n_plugins = len(self.plugin_list)
@@ -208,6 +208,15 @@ class PluginList(object):
 
         self.n_loaders = len(loader_idx)
         return loader_idx, saver_idx
+
+    def _contains_gpu_processes(self):
+        """ Returns True if gpu processes exist in the process list. """
+        from savu.plugins.driver.gpu_plugin import GpuPlugin
+        for i in range(self.n_plugins):
+            bases = inspect.getmro(pu.load_class(self.plugin_list[i]['id']))
+            if GpuPlugin in bases:
+                return True
+        return False
 
 
 class CitationInformation(object):

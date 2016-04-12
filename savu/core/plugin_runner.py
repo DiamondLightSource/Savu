@@ -21,8 +21,6 @@
 
 """
 
-import time
-import os
 import logging
 
 import savu.core.utils as cu
@@ -38,7 +36,6 @@ class PluginRunner(object):
         class_name = "savu.core.transports." + options["transport"] \
                      + "_transport"
         cu.add_base(self, cu.import_class(class_name))
-        
         self._transport_control_setup(options)
         self.exp = None
         self.options = options
@@ -80,6 +77,7 @@ class PluginRunner(object):
         """
         self.exp._barrier()
         self.__check_loaders_and_savers()
+        self.__check_gpu()
 
         self.exp._barrier()
         pu.run_plugins(self.exp, plugin_list, check=True)
@@ -107,3 +105,16 @@ class PluginRunner(object):
         if not savers or savers[0] is not plugin_obj.n_plugins-1:
             raise Exception("The final plugin in the plugin list must be a "
                             "saver")
+
+    def __check_gpu(self):
+        """ Check if the process list contains GPU processes and determine if
+        GPUs exists. """
+        import pyvidia as pv
+        if self.exp.meta_data.plugin_list._contains_gpu_processes():
+            if not pv.get_nvidia_device():
+                raise Exception("The process list contains GPU plugins, but "
+                                " no GPUs have been found.")
+            processes = self.exp.meta_data.get_meta_data('processes')
+            if len(processes) is 1 and processes[0] is 'CPU0':
+                print "adding gpu processes"
+                self.exp.meta_data.set_meta_data('processes', ['GPU0'])
