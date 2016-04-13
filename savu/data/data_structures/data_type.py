@@ -63,9 +63,9 @@ class FabIO(DataTypes):
         for i in range(len(frameidx)):
 #            print "amended = ", index[i]
 #            print frameidx[i], [index[i][n] for n in tiffidx]
-            data[index[i]] = self.start_file.getframe(
-#                36737 + frameidx[i]).data[[index[i][n] for n in tiffidx]]
-                frameidx[i]).data[[index[i][n] for n in tiffidx]]
+            data[index[i]] = \
+                self.start_file.getframe(self.start_no + frameidx[i])\
+                .data[[index[i][n] for n in tiffidx]]
         return data
 
     def __get_file_name(self, folder):
@@ -73,7 +73,7 @@ class FabIO(DataTypes):
         files = os.listdir(folder)
         self.nFrames = len(files)
         fname = sorted(files)[0]
-        self.start_no = [int(s) for s in re.findall(r'\d+', fname)][0]
+        self.start_no = [int(s) for s in re.findall(r'\d+', fname)][-1]
         print "start number is", self.start_no
         return folder + "/" + fname
 
