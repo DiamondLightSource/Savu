@@ -48,12 +48,7 @@ class NxxrdLoader(BaseMultiModalLoader):
         self.exp.meta_data.set_meta_data("mono_energy", mono_energy)
         self.set_motors(data_obj, xrd_entry, 'xrd')
 
-        rotation_angle = \
-            data_obj.backing_file[xrd_entry.name + '/sample/theta'].value
-        if rotation_angle.ndim > 1:
-            rotation_angle = rotation_angle[:,0]
 
-        data_obj.meta_data.set_meta_data('rotation_angle', rotation_angle)
         self.add_patterns_based_on_acquisition(data_obj, 'xrd')
 # #         print data_obj.data.shape
 #         slicedir = tuple(range(len(data_obj.data.shape)-2))

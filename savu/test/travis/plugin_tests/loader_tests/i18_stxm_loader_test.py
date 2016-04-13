@@ -13,10 +13,11 @@
 # limitations under the License.
 
 """
-.. module:: histogram
+.. module:: nx_xrd_loader_test
    :platform: Unix
-   :synopsis: testing the histogram plugin
-.. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
+   :synopsis: testing the nx_xrd loader
+
+.. moduleauthor:: Aaron Parsons <scientificsoftware@diamond.ac.uk>
 
 """
 import unittest
@@ -25,11 +26,12 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
 
-class BasicOperations(unittest.TestCase):
+class I18StxmLoaderTest(unittest.TestCase):
 
-    def test_basic_operations(self):
-        data_file = tu.get_test_data_path('savu_projections.h5')
-        process_file = tu.get_test_process_path('basic_operations_test.nxs')
+    @unittest.skip("the test data isn't ready yet. Adp")
+    def test_i18_stxm(self):
+        data_file = '/dls/i18/data/2016/sp12601-1/processing/Savu_Test_Data/70214_Cat2_RT_1.nxs'
+        process_file = tu.get_test_process_path('basic_stxm_process_i18.nxs')
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
 

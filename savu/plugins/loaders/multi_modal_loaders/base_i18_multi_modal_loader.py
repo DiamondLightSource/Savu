@@ -90,7 +90,6 @@ class BaseI18MultiModalLoader(BaseMultiModalLoader):
         for ii in range(nAxes):
             # find the rotation axis
             print ii
-            print motors[ii]
             try:
                 data_axis = self.parameters[motors[ii]]# get that out the file
                 logging.debug("the data axis is %s" % str(data_axis))

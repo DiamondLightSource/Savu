@@ -107,6 +107,8 @@ def set_i12tomo_experiment(filename, **kwargs):
 def get_output_datasets(plugin):
     n_out = plugin.nOutput_datasets()
     out_data = []
+    if n_out is 'var':
+        return None
     for n in range(n_out):
         out_data.append('test' + str(n))
     return out_data
@@ -144,7 +146,7 @@ def set_options(path, **kwargs):
     options['process_names'] = kwargs.get('process_names', 'CPU0')
     options['data_file'] = path
     options['process_file'] = kwargs.get('process_file', '')
-    options['out_path'] = tempfile.mkdtemp()
+    options['out_path'] = kwargs.get('out_path', tempfile.mkdtemp())
     options['inter_path'] = options['out_path']
     options['log_path'] = options['out_path']
     options['run_type'] = 'test'
