@@ -32,8 +32,9 @@ class NxXrdLoaderTest(unittest.TestCase):
     def test_nx_xrd(self):
         data_file = '/dls/i18/data/2016/sp12601-1/processing/Savu_Test_Data/70214_Cat2_RT_1.nxs'
         process_file = tu.get_test_process_path('basic_xrd_process_i18.nxs')
-        run_protected_plugin_runner(tu.set_options(data_file,
-                                                   process_file=process_file))
+        run_protected_plugin_runner(tu.set_options(
+            data_file, process_file=process_file,
+            out_path='/dls/tmp/qmm55171'))
 
 if __name__ == "__main__":
     unittest.main()

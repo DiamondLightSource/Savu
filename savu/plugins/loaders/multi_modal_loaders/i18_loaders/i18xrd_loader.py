@@ -36,7 +36,6 @@ class I18xrdLoader(BaseI18MultiModalLoader):
     A class to load tomography data from an NXstxm file
     :param data_path: Path to the folder containing the \
         data. Default: '../../../test_data/data/image_test/tiffs'.
-    :param frame_dim: Which dimension requires stitching? Default: 0.
     """
 
     def __init__(self, name='I18xrdLoader'):
@@ -52,12 +51,16 @@ class I18xrdLoader(BaseI18MultiModalLoader):
 
         data_obj = self.multi_modal_setup('xrd')
 
-        print self.scan_pattern # gives required order
-        print self.axis_labels # use this to get the shape of the data
-        
+        scan_pattern = self.parameters['scan_pattern']
+        frame_dim = range(len(scan_pattern))
+        shape = []
+        for pattern in self.parameters['scan_pattern']:
+            if pattern == 'rotation':
+                pattern = 'rotation_angle'
+            shape.append(len(self.exp.meta_data.get_meta_data(pattern)))
 
         path = self.parameters['data_path']
-        data_obj.data = FabIO(path, data_obj, self.parameters['frame_dim'])
+        data_obj.data = FabIO(path, data_obj, frame_dim, shape=tuple(shape))
 
         # dummy file
         filename = path.split('/')[-1] + '.h5'
