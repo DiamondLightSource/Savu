@@ -104,3 +104,16 @@ class FabIO(DataTypes):
                 [slice(i-start, i-start+1, 1) for i in idx_list[dim]]
             frameidx[:] += idx_list[dim]*np.prod(self.shape[dim+1:])
         return index.tolist(), frameidx.astype(int)
+
+
+class Map_3d_to_4d_h5(DataTypes):
+    """ This class converts a 3D dataset to a 4D dataset. """
+
+    def __init__(self, backing_file, shape):
+        self.shape = shape
+
+    def __getitem__(self, index):
+        print index
+
+    def get_shape(self):
+        return self.shape

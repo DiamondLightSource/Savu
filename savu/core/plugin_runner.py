@@ -21,8 +21,6 @@
 
 """
 
-import time
-import os
 import logging
 
 import savu.core.utils as cu
@@ -38,7 +36,6 @@ class PluginRunner(object):
         class_name = "savu.core.transports." + options["transport"] \
                      + "_transport"
         cu.add_base(self, cu.import_class(class_name))
-        
         self._transport_control_setup(options)
         self.exp = None
         self.options = options
