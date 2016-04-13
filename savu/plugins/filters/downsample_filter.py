@@ -33,6 +33,7 @@ class DownsampleFilter(BaseFilter, CpuPlugin):
     A plugin to reduce the data in the selected direction by a proportion
 
     :param bin_size: Bin Size for the downsample. Default: 2.
+    ;param pattern: Which way to pass the data. Default: PROJECTION. 
     """
 
     def __init__(self):
@@ -73,7 +74,7 @@ class DownsampleFilter(BaseFilter, CpuPlugin):
         # get plugin specific instances of these datasets
         in_pData, out_pData = self.get_plugin_datasets()
 
-        plugin_pattern = self.get_plugin_pattern()
+        plugin_pattern = self.parameters['pattern']
         in_pData[0].plugin_data_setup(plugin_pattern, self.get_max_frames())
 
         new_shape = self.new_shape(in_dataset[0].get_shape(), in_pData[0])
@@ -91,3 +92,6 @@ class DownsampleFilter(BaseFilter, CpuPlugin):
             new_shape[dim] = full_shape[dim]/self.parameters['bin_size'] \
                 + full_shape[dim] % self.parameters['bin_size']
         return tuple(new_shape)
+
+    def get_max_frames(self):
+        return 1
