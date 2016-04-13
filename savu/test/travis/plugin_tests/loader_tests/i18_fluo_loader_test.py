@@ -21,25 +21,19 @@
 
 """
 import unittest
-import tempfile
 from savu.test import test_utils as tu
 from savu.test.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
 
 class NxFluoLoaderTest(unittest.TestCase):
+
     unittest.skip("the test data isn't ready yet. Adp")
     def test_nx_fluo(self):
-        options = {
-            "transport": "hdf5",
-            "process_names": "CPU0",
-            "verbose": "True",
-            "data_file": tu.get_test_data_path('mm.nxs'),
-            "process_file": tu.get_test_process_path(
-                'basic_fluo_process.nxs'),
-            "out_path": tempfile.mkdtemp()
-            }
-        run_protected_plugin_runner(options)
+        data_file = tu.get_test_data_path('mm.nxs')
+        process_file = tu.get_test_process_path('basic_fluo_process.nxs'),
+        run_protected_plugin_runner(tu.set_options(data_file,
+                                                   process_file=process_file))
 
 if __name__ == "__main__":
     unittest.main()
