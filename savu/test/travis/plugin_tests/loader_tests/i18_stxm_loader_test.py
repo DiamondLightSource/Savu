@@ -21,25 +21,19 @@
 
 """
 import unittest
-import tempfile
 from savu.test import test_utils as tu
 from savu.test.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
 
 class I18StxmLoaderTest(unittest.TestCase):
-    unittest.skip("the test data isn't ready yet. Adp")
+
+    @unittest.skip("the test data isn't ready yet. Adp")
     def test_i18_stxm(self):
-        options = {
-            "transport": "hdf5",
-            "process_names": "CPU0",
-            "verbose": "True",
-            "data_file": '/dls/i18/data/2016/sp12601-1/processing/Savu_Test_Data/70214_Cat2_RT_1.nxs',
-            "process_file": tu.get_test_process_path(
-                'basic_stxm_process_i18.nxs'),
-            "out_path": tempfile.mkdtemp()
-            }
-        run_protected_plugin_runner(options)
+        data_file = '/dls/i18/data/2016/sp12601-1/processing/Savu_Test_Data/70214_Cat2_RT_1.nxs'
+        process_file = tu.get_test_process_path('basic_stxm_process_i18.nxs')
+        run_protected_plugin_runner(tu.set_options(data_file,
+                                                   process_file=process_file))
 
 if __name__ == "__main__":
     unittest.main()
