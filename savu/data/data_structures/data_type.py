@@ -87,7 +87,7 @@ class FabIO(DataTypes):
         return np.ravel(np.kron(values, np.ones((r, c))))
 
     def __get_indices(self, index, size):
-        """ Get the indices for the new data array and the file number. """
+        """ Get the indices for the new data array and the file numbers. """
         sub_idx = np.array(index)[np.array(self.frame_dim)]
         sub_size = [size[i] for i in self.frame_dim]
         idx_list = []
