@@ -52,10 +52,15 @@ class BaseMultiModalLoader(BaseLoader):
         data_obj.set_shape(data_obj.data.shape)
         #Now the beam fluctuations
         # the ion chamber "normalisation"
-        control = data_obj.backing_file[entry.name+'/monitor/data']
+        try:
+            control = data_obj.backing_file[entry.name+'/monitor/data']
         # this is global since it is to do with the beam
-        exp.meta_data.set_meta_data("control", control)
+            exp.meta_data.set_meta_data("control", control)
+            logging.debug('adding the ion chamber to the meta data')
+        except:
+            logging.warn('No ion chamber information. Leaving this blank')
         return data_obj, entry
+    
 
     def set_motors(self, data_obj, entry, ltype):
         # now lets extract the map, if there is one!
@@ -65,17 +70,20 @@ class BaseMultiModalLoader(BaseLoader):
         axes = entry['data'].attrs['axes']
         data_obj.data_mapping.set_axes(axes)
         nAxes = len(axes)
+        print axes
+        print nAxes
         #logging.debug nAxes
         cts = 0
         motors = []
         motor_type = []
         labels = []
         fast_axis = self.parameters["fast_axis"]
+        axes_slice_list = [slice(0,1,1)]*nAxes
         logging.debug("axes in the file are:"+str(str(entry['data'].attrs["axes"])))
         for ii in range(nAxes):
             # find the rotation axis
             data_axis = 'data/' + entry['data'].attrs["axes"][ii]
-            
+            print data_axis
             logging.debug("the data axis is %s" % str(data_axis))
             entry_axis = entry[data_axis]
             try:
@@ -93,9 +101,18 @@ class BaseMultiModalLoader(BaseLoader):
                     data_obj.data_mapping._is_tomo = True
                     motor_type.append('rotation')
                     label = 'rotation_angle'
+                    rotation_angle = \
+                        data_obj.backing_file[entry.name + '/' +data_axis].value
+                    if rotation_angle.ndim > 1:
+                        print "rotshape is:"+str(rotation_angle.shape)
+                        idx = axes_slice_list[:]# make a copy
+                        idx[ii] = slice(0,rotation_angle.shape[ii],1)
+                        rotation_angle = rotation_angle[idx].squeeze()
+
+                    data_obj.meta_data.set_meta_data('rotation_angle', rotation_angle)
                     logging.debug(ltype + " reader: %s", "is a tomo scan")
                 elif (mType == "translation"):
-                    cts += 1  # increase the order of the map
+                    # increase the order of the map
                     # what axes are these? Would be good to have for the
                     # pattern stuff
                     # attach this to the scan map
@@ -104,9 +121,27 @@ class BaseMultiModalLoader(BaseLoader):
                     motor_type.append('translation')
                     if (str(entry['data'].attrs["axes"][ii])==fast_axis):
                         label='x'
+                        x = \
+                            data_obj.backing_file[entry.name + '/' +data_axis].value
+                        if x.ndim > 1:
+                            print "xshape is:"+str(x.shape)
+#                             idx = axes_slice_list[:]# make a copy
+#                             idx[ii] = slice(0,x.shape[ii],1)
+#                             x = x[idx].squeeze()
+                            x = x[0,:]
+                        data_obj.meta_data.set_meta_data('x', x)
                     else:
                         label='y'
-
+                        y = \
+                            data_obj.backing_file[entry.name + '/' +data_axis].value
+                        if y.ndim > 1:
+#                             idx = axes_slice_list[:]# make a copy
+#                             idx[ii] = slice(0,y.shape[ii],1)
+#                             print "yshape is:"+str(y.shape)
+#                             y = y[idx].squeeze()
+                            y = y[:,0]
+                        data_obj.meta_data.set_meta_data('y', y)
+                    cts += 1
                     
             except KeyError:
                 motor_type.append('None')
