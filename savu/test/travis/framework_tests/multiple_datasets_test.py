@@ -32,7 +32,6 @@ from savu.test.travis.framework_tests.plugin_runner_test \
 
 class MultipleDatasetsTest(unittest.TestCase):
 
-    @unittest.skip("temp")
     def test_mm(self):
         data_file = tu.get_test_data_path('mm.nxs')
         process_file = tu.get_test_process_path('multiple_mm_inputs_test.nxs')
@@ -43,48 +42,49 @@ class MultipleDatasetsTest(unittest.TestCase):
         options = tu.set_experiment('tomo')
         plugin = 'savu.plugins.basic_operations'
         loader_dict = {'data_path': '1-TimeseriesFieldCorrections-tomo/data'}
-        data_dict = {'in_datasets': ['tomo', 'tomo'], 'out_datasets': ['test']}
+        data_dict = {'in_datasets': ['tomo', 'tomo'], 'out_datasets': ['test'],
+                     'operations': ['tomo + tomo'],  'pattern': 'PROJECTION'}
         saver_dict = {}
         all_dicts = [loader_dict, data_dict, saver_dict]
         run_protected_plugin_runner_no_process_list(options, plugin,
                                                     data=all_dicts)
 
-    @unittest.skip("Running locally, breaking remotely: To be investigated")
     def test_tomo2(self):
         options = tu.set_experiment('tomo')
-        plugin = 'savu.plugins.test_plugin'
+        plugin = 'savu.plugins.basic_operations'
         preview = ['10:-1:1:1', '10:-1:1:1', '10:-1:1:1']
         loader_dict = {'data_path': '1-TimeseriesFieldCorrections-tomo/data',
                        'preview': preview}
-        data_dict = {'in_datasets': ['tomo', 'tomo'], 'out_datasets': ['test']}
+        data_dict = {'in_datasets': ['tomo', 'tomo'], 'out_datasets': ['test'],
+                     'operations': ['tomo + tomo'],  'pattern': 'PROJECTION'}
         all_dicts = [loader_dict, data_dict, {}]
         exp = run_protected_plugin_runner_no_process_list(options, plugin,
                                                           data=all_dicts)
         self.assertEqual(exp.index['in_data']['test'].get_shape(),
                          (81, 125, 150))
 
-    @unittest.skip("Running locally, breaking remotely: To be investigated")
     def test_tomo3(self):
         options = tu.set_experiment('tomo')
-        plugin = 'savu.plugins.test_plugin'
+        plugin = 'savu.plugins.basic_operations'
         preview = ['10:-1:10:1', '10:-1:10:1', '10:-1:10:1']
         loader_dict = {'data_path': '1-TimeseriesFieldCorrections-tomo/data',
                        'preview': preview}
-        data_dict = {'in_datasets': ['tomo', 'tomo'], 'out_datasets': ['test']}
+        data_dict = {'in_datasets': ['tomo', 'tomo'], 'out_datasets': ['test'],
+                     'operations': ['tomo + tomo'],  'pattern': 'PROJECTION'}
         all_dicts = [loader_dict, data_dict, {}]
         exp = run_protected_plugin_runner_no_process_list(options, plugin,
                                                           data=all_dicts)
         exp = self.assertEqual(exp.index['in_data']['test'].get_shape(),
                                (9, 13, 15))
 
-    @unittest.skip("Running locally, breaking remotely: To be investigated")
     def test_tomo4(self):
         options = tu.set_experiment('tomo')
-        plugin = 'savu.plugins.test_plugin'
+        plugin = 'savu.plugins.basic_operations'
         preview = ['10:-10:10:1', '10:-10:10:1', '10:-10:10:1']
         loader_dict = {'data_path': '1-TimeseriesFieldCorrections-tomo/data',
                        'preview': preview}
-        data_dict = {'in_datasets': ['tomo', 'tomo'], 'out_datasets': ['test']}
+        data_dict = {'in_datasets': ['tomo', 'tomo'], 'out_datasets': ['test'],
+                     'operations': ['tomo + tomo'],  'pattern': 'PROJECTION'}
         all_dicts = [loader_dict, data_dict, {}]
         exp = run_protected_plugin_runner_no_process_list(options, plugin,
                                                           data=all_dicts)
