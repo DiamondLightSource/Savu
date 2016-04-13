@@ -67,4 +67,4 @@ class NoProcessPlugin(BaseFilter, CpuPlugin):
         return 1
 
     def get_max_frames(self):
-        return 1
+        return 8

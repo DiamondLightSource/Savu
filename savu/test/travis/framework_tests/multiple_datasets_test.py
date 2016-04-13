@@ -32,6 +32,7 @@ from savu.test.travis.framework_tests.plugin_runner_test \
 
 class MultipleDatasetsTest(unittest.TestCase):
 
+    @unittest.skip("temp")
     def test_mm(self):
         data_file = tu.get_test_data_path('mm.nxs')
         process_file = tu.get_test_process_path('multiple_mm_inputs_test.nxs')
@@ -40,7 +41,7 @@ class MultipleDatasetsTest(unittest.TestCase):
 
     def test_tomo1(self):
         options = tu.set_experiment('tomo')
-        plugin = 'savu.plugins.test_plugin'
+        plugin = 'savu.plugins.basic_operations'
         loader_dict = {'data_path': '1-TimeseriesFieldCorrections-tomo/data'}
         data_dict = {'in_datasets': ['tomo', 'tomo'], 'out_datasets': ['test']}
         saver_dict = {}

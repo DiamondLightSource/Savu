@@ -21,11 +21,14 @@
 
 """
 
-from savu.plugins.loaders.multi_modal_loaders.base_i18_multi_modal_loader import BaseI18MultiModalLoader
+from savu.plugins.loaders.multi_modal_loaders.base_i18_multi_modal_loader \
+    import BaseI18MultiModalLoader
 
+from savu.data.data_structures.data_type import FabIO
 from savu.plugins.utils import register_plugin
 import h5py
 import tempfile
+
 
 @register_plugin
 class I18xrdLoader(BaseI18MultiModalLoader):
@@ -33,7 +36,6 @@ class I18xrdLoader(BaseI18MultiModalLoader):
     A class to load tomography data from an NXstxm file
     :param data_path: Path to the folder containing the \
         data. Default: '../../../test_data/data/image_test/tiffs'.
-    :param image_type: Type of image. Choose from 'FabIO'. Default: 'FabIO'.
     :param frame_dim: Which dimension requires stitching? Default: 0.
     """
 
@@ -47,14 +49,16 @@ class I18xrdLoader(BaseI18MultiModalLoader):
         :param path: The full path of the NeXus file to load.
         :type path: str
         """
-        
+
         data_obj = self.multi_modal_setup('xrd')
-        dtype = self.parameters['image_type']
-        mod = __import__('savu.data.data_structures.data_type', fromlist=dtype)
-        clazz = getattr(mod, dtype)
+
+        print self.scan_pattern # gives required order
+        print self.axis_labels # use this to get the shape of the data
+        
 
         path = self.parameters['data_path']
-        data_obj.data = clazz(path, data_obj, self.parameters['frame_dim'])
+        data_obj.data = FabIO(path, data_obj, self.parameters['frame_dim'])
+
         # dummy file
         filename = path.split('/')[-1] + '.h5'
         data_obj.backing_file = \

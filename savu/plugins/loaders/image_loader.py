@@ -63,7 +63,7 @@ class ImageLoader(BaseLoader):
         clazz = getattr(mod, dtype)
 
         path = exp.meta_data.get_meta_data("data_file")
-        data_obj.data = clazz(path, data_obj, self.parameters['frame_dim'])
+        data_obj.data = clazz(path, data_obj, [self.parameters['frame_dim']])
 
         self.set_rotation_angles(data_obj)
 

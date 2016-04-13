@@ -42,30 +42,58 @@ class FabIO(DataTypes):
     """ This class loads any of the FabIO python module supported image
     formats. """
 
-    def __init__(self, folder, Data, dim):
+    def __init__(self, folder, Data, dim, shape=None):
         self._data_obj = Data
         self.nFrames = None
         self.start_file = fabio.open(self.__get_file_name(folder))
         self.frame_dim = dim
+        self.image_shape = (self.start_file.dim2, self.start_file.dim1)
+        if shape is None:
+            self.shape = (self.nFrames,)
+        else:
+            self.shape = shape
+
+#    def __getitem__(self, index):
+#        idx = index[self.frame_dim]
+#        frame_list = np.arange(idx.start, idx.stop, idx.step)
+#
+#        size = []
+#        for i in index:
+#            size.append(len(np.arange(i.start, i.stop, i.step)))
+#
+#        data = np.empty(size)
+#        tiffidx = [i for i in range(len(index)) if i is not self.frame_dim]
+#        index = list(index)
+#
+#        dataidx = 0
+#        for i in frame_list:
+#            index[self.frame_dim] = slice(dataidx, dataidx+1, idx.step)
+#            data[index] = \
+#                self.start_file.getframe(i).data[[index[i] for i in tiffidx]]
+#            dataidx += 1
+#        return data
+#
+#    def __get_file_name(self, folder):
+#        files = os.listdir(folder)
+#        self.nFrames = len(files)
+#        fname = files[0]
+#        return folder + "/" + fname
+#
+#    def get_shape(self):
+#        return (self.nFrames, self.start_file.dim2, self.start_file.dim1)
 
     def __getitem__(self, index):
-        idx = index[self.frame_dim]
-        frame_list = np.arange(idx.start, idx.stop, idx.step)
-
-        size = []
-        for i in index:
-            size.append(len(np.arange(i.start, i.stop, i.step)))
-
+        size = [len(np.arange(i.start, i.stop, i.step)) for i in index]
         data = np.empty(size)
-        tiffidx = [i for i in range(len(index)) if i is not self.frame_dim]
-        index = list(index)
+        tiffidx = [i for i in range(len(index)) if i not in self.frame_dim]
+        print "original = ", index
+        index, frameidx = self.__get_indices(index, size)
 
-        dataidx = 0
-        for i in frame_list:
-            index[self.frame_dim] = slice(dataidx, dataidx+1, idx.step)
-            data[index] = \
-                self.start_file.getframe(i).data[[index[i] for i in tiffidx]]
-            dataidx += 1
+        for i in range(len(frameidx)):
+            print "amended = ", index[i]
+            print frameidx[i], [index[i][n] for n in tiffidx]
+            data[index[i]] = self.start_file.getframe(
+                frameidx[i]).data[[index[i][n] for n in tiffidx]]
         return data
 
     def __get_file_name(self, folder):
@@ -75,4 +103,29 @@ class FabIO(DataTypes):
         return folder + "/" + fname
 
     def get_shape(self):
-        return (self.nFrames, self.start_file.dim2, self.start_file.dim1)
+        return self.shape + self.image_shape
+
+    def __get_idx(self, dim, sl, shape):
+        c = int(np.prod(shape[0:dim]))
+        r = int(np.prod(shape[dim+1:]))
+        values = np.arange(sl.start, sl.stop, sl.step)
+        return np.ravel(np.kron(values, np.ones((r, c))))
+
+    def __get_indices(self, index, size):
+        """ Get the indices for the new data array and the file number. """
+        sub_idx = np.array(index)[np.array(self.frame_dim)]
+        shape = [size[i] for i in self.frame_dim]
+        idx_list = []
+        for dim in range(len(sub_idx)):
+            idx = self.__get_idx(dim, sub_idx[dim], shape)
+            idx_list.append(idx.astype(int))
+
+        lshape = idx_list[0].shape[0]
+        index = np.tile(index, (lshape, 1))
+        frameidx = np.zeros(lshape)
+        for dim in range(len(sub_idx)):
+            start = index[0][self.frame_dim[dim]].start
+            index[:, self.frame_dim[dim]] = \
+                [slice(i-start, i-start+1, 1) for i in idx_list[dim]]
+            frameidx[:] += idx_list[dim]*np.prod(shape[0:dim])
+        return index.tolist(), frameidx.astype(int)
