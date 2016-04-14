@@ -36,6 +36,8 @@ class I18xrdLoader(BaseI18MultiModalLoader):
     A class to load tomography data from an NXstxm file
     :param data_path: Path to the folder containing the \
         data. Default: '../../../test_data/data/image_test/tiffs'.
+    :param calibration_path: path to the calibration \
+        file. Default: "Savu/test_data/data/LaB6_calibration_output.nxs".
     """
 
     def __init__(self, name='I18xrdLoader'):
@@ -72,3 +74,25 @@ class I18xrdLoader(BaseI18MultiModalLoader):
         self.set_motors(data_obj, 'xrd')
         self.add_patterns_based_on_acquisition(data_obj, 'xrd')
         self.set_data_reduction_params(data_obj)
+        
+        calibrationfile = h5py.File(self.parameters['calibration_path'], 'r')
+
+
+        mData = data_obj.meta_data
+        det_str = 'entry/instrument/detector'
+        mData.set_meta_data("beam_center_x",
+                            calibrationfile[det_str + '/beam_center_x'].value)
+        mData.set_meta_data("beam_center_y",
+                            calibrationfile[det_str + '/beam_center_y'].value)
+        mData.set_meta_data("distance",
+                            calibrationfile[det_str + '/distance'].value)
+        mData.set_meta_data("incident_wavelength",
+                            calibrationfile['/entry/calibration_sample/beam'
+                                            '/incident_wavelength'].value)
+        mData.set_meta_data("x_pixel_size",
+                            calibrationfile[det_str + '/x_pixel_size'].value)
+        mData.set_meta_data("detector_orientation",
+                            calibrationfile[det_str + '/detector_orientation'].value)
+
+        self.set_data_reduction_params(data_obj)
+        calibrationfile.close()
