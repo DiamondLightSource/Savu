@@ -108,6 +108,8 @@ class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
 
         detY_dim = in_dataset[0].find_axis_label_dimension('detector_y')
         detX_dim = in_dataset[0].find_axis_label_dimension('detector_x')
+        if detX_dim < detY_dim:
+            detY_dim -= 1
         axis_labels = [str(detX_dim), str(detY_dim) + '.name.unit']
 
         spectra.create_dataset(patterns={in_dataset[0]: patterns},
