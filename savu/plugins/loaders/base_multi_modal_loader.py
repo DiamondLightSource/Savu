@@ -105,9 +105,10 @@ class BaseMultiModalLoader(BaseLoader):
                         data_obj.backing_file[entry.name + '/' +data_axis].value
                     if rotation_angle.ndim > 1:
                         print "rotshape is:"+str(rotation_angle.shape)
-                        idx = axes_slice_list[:]# make a copy
-                        idx[ii] = slice(0,rotation_angle.shape[ii],1)
-                        rotation_angle = rotation_angle[idx].squeeze()
+#                         idx = axes_slice_list[:]# make a copy
+#                         idx[ii] = slice(0,rotation_angle.shape[ii],1)
+                        rotation_angle = rotation_angle[:,0]
+#                         rotation_angle = rotation_angle[idx].squeeze()
 
                     data_obj.meta_data.set_meta_data('rotation_angle', rotation_angle)
                     logging.debug(ltype + " reader: %s", "is a tomo scan")
