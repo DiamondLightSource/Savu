@@ -119,6 +119,8 @@ class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
         spectrum = {'core_dir': (-1,), 'slice_dir': tuple(range(len(shape)-2))}
         spectra.add_pattern("SPECTRUM", **spectrum)
 
+        logging.debug("****SPECTRA AXIS LABELS*** %s", spectra)
+
         out_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
 
     def get_max_frames(self):
