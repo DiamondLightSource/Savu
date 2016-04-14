@@ -33,7 +33,7 @@ class DownsampleFilter(BaseFilter, CpuPlugin):
     A plugin to reduce the data in the selected direction by a proportion
 
     :param bin_size: Bin Size for the downsample. Default: 2.
-    ;param pattern: Which way to pass the data. Default: PROJECTION. 
+    :param pattern: Which way to pass the data. Default: PROJECTION.
     """
 
     def __init__(self):
