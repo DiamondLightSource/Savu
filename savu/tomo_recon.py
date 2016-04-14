@@ -104,16 +104,20 @@ def _set_options(opt, args):
 
 
 def set_output_folder(in_file, out_path, set_folder):
+    from mpi4py import MPI
     import time
     if not set_folder:
+        MPI.COMM_WORLD.barrier()
         timestamp = time.strftime("%Y%m%d%H%M%S")
+        MPI.COMM_WORLD.barrier()
         name = os.path.basename(in_file.split('.')[-2])
         folder = os.path.join(out_path, ('_'.join([timestamp, name])))
     else:
         folder = os.path.join(out_path, set_folder)
-    print "The output folder is ", folder
-    if not os.path.exists(folder):
-        os.makedirs(folder)
+    print "The output folder is", folder
+    if MPI.COMM_WORLD.rank == 0:
+        if not os.path.exists(folder):
+            os.makedirs(folder)
     return folder
 
 
