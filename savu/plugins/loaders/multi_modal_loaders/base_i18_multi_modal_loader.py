@@ -34,15 +34,18 @@ class BaseI18MultiModalLoader(BaseMultiModalLoader):
     This class provides a base for all multi-modal loaders
     :param fast_axis: what is the fast axis called. Default:"x".
     :param scan_pattern: what was the scan. Default: ["rotation","x"].
-    :param x: where is x in the file. Default:'entry1/raster_counterTimer01/traj1ContiniousX'.
+    :param x: where is x in the \
+        file. Default:'entry1/raster_counterTimer01/traj1ContiniousX'.
     :param y: where is y in the file. Default:None.
-    :param rotation: where is rotation in the file. Default:'entry1/raster_counterTimer01/sc_sample_thetafine'.
-    :param monochromator: where is the monochromator. Default: 'entry1/instrument/DCM/energy'.
+    :param rotation: where is rotation in the \
+        file. Default:'entry1/raster_counterTimer01/sc_sample_thetafine'.
+    :param monochromator: where is the \
+        monochromator. Default: 'entry1/instrument/DCM/energy'.
     """
     def __init__(self, name='BaseI18MultiModalLoader'):
         super(BaseI18MultiModalLoader, self).__init__(name)
 
-    def multi_modal_setup(self,ltype):
+    def multi_modal_setup(self, ltype):
         # set up the file handles
         exp = self.exp
         data_obj = exp.create_data_object("in_data", ltype)
@@ -51,25 +54,24 @@ class BaseI18MultiModalLoader(BaseMultiModalLoader):
         f = data_obj.backing_file
         logging.debug("Creating file '%s' '%s'_entry",
                       data_obj.backing_file.filename, ltype)
-        exp.meta_data.set_meta_data("mono_energy",f[self.parameters['monochromator']])
+        exp.meta_data.set_meta_data("mono_energy",
+                                    f[self.parameters['monochromator']])
         x = f[self.parameters['x']].value
-        
-        
+
         if self.parameters['x'] is not None:
-            exp.meta_data.set_meta_data("x", x[0,:])
+            data_obj.meta_data.set_meta_data("x", x[0, :])
         if self.parameters['y'] is not None:
             y = f[self.parameters['y']].value
-            exp.meta_data.set_meta_data("y", y)
+            data_obj.meta_data.set_meta_data("y", y)
         if self.parameters['rotation'] is not None:
             rotation_angle = f[self.parameters['rotation']].value
             if rotation_angle.ndim > 1:
                 rotation_angle = rotation_angle[:, 0]
-                exp.meta_data.set_meta_data("rotation_angle", rotation_angle)
+                data_obj.meta_data.set_meta_data(
+                    "rotation_angle", rotation_angle)
         return data_obj
 
-
-
-    def set_motors(self, data_obj,ltype):
+    def set_motors(self, data_obj, ltype):
         # now lets extract the map, if there is one!
         # to begin with
         data_obj.data_mapping = DataMapping()

@@ -59,7 +59,7 @@ class I18xrdLoader(BaseI18MultiModalLoader):
         for pattern in self.parameters['scan_pattern']:
             if pattern == 'rotation':
                 pattern = 'rotation_angle'
-            shape.append(len(self.exp.meta_data.get_meta_data(pattern)))
+            shape.append(len(data_obj.meta_data.get_meta_data(pattern)))
 
         path = self.parameters['data_path']
         data_obj.data = FabIO(path, data_obj, frame_dim, shape=tuple(shape))
@@ -74,9 +74,8 @@ class I18xrdLoader(BaseI18MultiModalLoader):
         self.set_motors(data_obj, 'xrd')
         self.add_patterns_based_on_acquisition(data_obj, 'xrd')
         self.set_data_reduction_params(data_obj)
-        
-        calibrationfile = h5py.File(self.parameters['calibration_path'], 'r')
 
+        calibrationfile = h5py.File(self.parameters['calibration_path'], 'r')
 
         mData = data_obj.meta_data
         det_str = 'entry/instrument/detector'
