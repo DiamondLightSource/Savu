@@ -21,10 +21,12 @@
 """
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
+import logging
 import scipy.ndimage as ndi
 
 import numpy as np
 import scipy.fftpack as fft
+import pyfftw
 
 from savu.plugins.utils import register_plugin
 from savu.plugins.base_filter import BaseFilter
@@ -64,27 +66,37 @@ class VoCentering(BaseFilter, CpuPlugin):
         return mask
 
     def _scan(self, cor_positions, in_sino):
+        logging.debug("creating mask")
         mask = self._create_mask(in_sino)
+        logging.debug("mask created")
         values = []
         sino = np.nan_to_num(in_sino)
+        logging.debug("cor_positions are %s", cor_positions)
         for i in cor_positions:
+            logging.debug("cor_position is %d", i)
             ssino = ndi.interpolation.shift(sino, (0, i), mode='wrap')
             fsino = np.vstack([ssino, ssino[:, ::-1]])
-            fftsino = fft.fftshift(fft.fft2(fsino))
+            logging.debug("Calculating the fourier transform")
+            #fftsino = fft.fftshift(fft.fft2(fsino))
+            fftsino = fft.fftshift(pyfftw.interfaces.scipy_fftpack.fft2(fsino))
+            logging.debug("fourier transform calculated")
             values.append(np.sum(np.abs(fftsino)*mask))
         vv = np.array(values)
         vv = abs(vv)
         return cor_positions[vv.argmin()]
 
     def filter_frames(self, data):
+        print "in filter frames of centering algorithm", data[0].shape
         data = data[0][::self.parameters['step']]
         width = data.shape[1]/16
         step = width/10.
         point = 0.0
 
         while step > 0.2:
+            logging.debug("Processing step %d", step)
             x = np.arange(point-width, point+width, step)
             point = self._scan(x, data)
+            logging.debug("***NEW POINT %d", point)
             width = step
             step = width/10.
 
