@@ -21,8 +21,11 @@ while read -r a b c d; do
 	runfile=/bin/savu_launcher.sh
 	outpath=$PWD #outputting to the current folder
     
-    #datafile=/dls/i18/data/2016/sp12601-1/processing/Savu_Test_Data/70214_Cat2_RT_1.nxs
-    #processfile=/dls/i18/data/2016/sp12601-1/processing/Savu_Test_Data/test_process_list.nxs
+    #datafile=/dls/i13/data/2016/mt14367-1/raw/75814.nxs
+    #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/i13_process_list_preview.nxs
+
+    datafile=/dls/i18/data/2016/sp12601-1/processing/Savu_Test_Data/70214_Cat2_RT_1.nxs
+    processfile=/dls/i18/data/2016/sp12601-1/processing/Savu_Test_Data/new_test_process_list.nxs
 
     #datafile=$outpath/../test_data/24737.nxs
     #datafile=/dls/i12/data/2015/ee10500-1/processing/LD_2W50_8/LD_2W50_8_Dataset_093.nxs
@@ -32,7 +35,7 @@ while read -r a b c d; do
     #datafile=$outpath/../test_data/LD_2W50_8_Dataset_038.nxs
 	#processfile=$outpath/../test_data/original_process_lists/i12_tomo_pipeline_preview_55751.nxs
     
-    datafile=$outpath/../test_data/ee12581-1_test/pc2_KRA_530_ramp_00000.hdf
+    #datafile=$outpath/../test_data/ee12581-1_test/pc2_KRA_530_ramp_00000.hdf
 	#processfile=$outpath/../test_data/i12_tomo_pipeline_gpu.nxs
 	#processfile=$outpath/../test_data/i12_full_test.nxs
 

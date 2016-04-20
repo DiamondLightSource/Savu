@@ -20,7 +20,7 @@
    collections from which Experiment can inherit at run time.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
-
+sa
 """
 import os
 import logging
@@ -146,7 +146,7 @@ class Experiment(object):
     def _barrier(self, communicator=MPI.COMM_WORLD):
         comm_dict = {'comm': communicator}
         if self.meta_data.get_meta_data('mpi') is True:
-            logging.debug("About to hit a _barrier")
+            logging.debug("About to hit a _barrier %s", comm_dict)
             comm_dict['comm'].barrier()
             logging.debug("Past the _barrier")
 
