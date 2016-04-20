@@ -57,10 +57,10 @@ class BaseFluoFitter(BaseFitter):
         except KeyError:
             logging.debug("No Peak Index in the metadata")
             logging.debug("Calculating the positions from energy")
-            idx = self.setPositions(in_meta_data)
-            #print "The index is"+str(idx)
-            in_meta_data.set_meta_data('PeakIndex', idx)
-            in_meta_data.set_meta_data('PeakEnergy', self.axis[idx])
+#             idx = self.setPositions(in_meta_data)
+            logging.debug("The index is"+str(self.idx))
+            in_meta_data.set_meta_data('PeakIndex', self.idx)
+            in_meta_data.set_meta_data('PeakEnergy', self.axis[self.idx])
 
     def setup(self):
         # set up the output datasets that are created by the plugin
@@ -75,9 +75,10 @@ class BaseFluoFitter(BaseFitter):
         fitHeights = out_datasets[1]
         self.length = shape[-1]
         idx = self.setPositions(in_meta_data)
+        logging.debug("in the setup the index is"+str(idx))
         numpeaks = len(idx)
         new_shape = shape[:-1] + (numpeaks,)
-        print new_shape
+#         print new_shape
         fitAreas.create_dataset(patterns={in_dataset[0]: pattern_list},
                                 axis_labels={in_dataset[0]: axis_labels},
                                 shape=new_shape)
@@ -122,9 +123,11 @@ class BaseFluoFitter(BaseFitter):
         # make it an index since this is what find peaks will also give us
         axis = self.axis = in_meta_data.get_meta_data("energy")
         dq = axis[1]-axis[0]
-#
-        idx = np.round((engy+axis[0])/dq).astype(int)
-        return idx
+        logging.debug("the peak energies are:"+str(engy))
+        logging.debug("the offset is"+str(axis[0]))
+        self.idx = np.round((engy-axis[0])/dq).astype(int)
+        
+        return self.idx
 
     def findLines(self, paramdict=XRFDataset().paramdict):
         """

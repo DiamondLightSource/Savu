@@ -56,15 +56,15 @@ class BaseI18MultiModalLoader(BaseMultiModalLoader):
         
         
         if self.parameters['x'] is not None:
-            exp.meta_data.set_meta_data("x", x[0,:])
+            data_obj.meta_data.set_meta_data("x", x[0,:])
         if self.parameters['y'] is not None:
             y = f[self.parameters['y']].value
-            exp.meta_data.set_meta_data("y", y)
+            data_obj.meta_data.set_meta_data("y", y)
         if self.parameters['rotation'] is not None:
             rotation_angle = f[self.parameters['rotation']].value
             if rotation_angle.ndim > 1:
                 rotation_angle = rotation_angle[:, 0]
-                exp.meta_data.set_meta_data("rotation_angle", rotation_angle)
+                data_obj.meta_data.set_meta_data("rotation_angle", rotation_angle)
         return data_obj
 
 
