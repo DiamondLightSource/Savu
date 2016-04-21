@@ -167,6 +167,16 @@ class BaseI18MultiModalLoader(BaseMultiModalLoader):
             data_obj.add_pattern("SINOGRAM", core_dir=sino_dir,
                                  slice_dir=tuple(set(dims) - set(sino_dir)))
         
+        if ltype is 'fluo':
+            spec_core = (-1,) # it will always be this
+            spec_slice = tuple(dims[:-1])
+            logging.debug("is a fluo")
+            logging.debug("the fluo cores are:"+str(spec_core))
+            logging.debug("the fluo slices are:"+str(spec_slice))
+            data_obj.add_pattern("SPECTRUM", core_dir=spec_core,
+                                 slice_dir=spec_slice)
+        
+        
         if ltype is 'xrd':
             diff_core = (-2,-1) # it will always be this
             diff_slice = tuple(dims[:-2])

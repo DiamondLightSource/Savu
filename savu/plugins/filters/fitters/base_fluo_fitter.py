@@ -121,7 +121,7 @@ class BaseFluoFitter(BaseFitter):
             self.parameters["elements"]
         engy = self.findLines(paramdict)
         # make it an index since this is what find peak will also give us
-        print 'basefluo meta is:'+str(in_meta_data.get_dictionary().keys())
+#         print 'basefluo meta is:'+str(in_meta_data.get_dictionary().keys())
         axis = self.axis = in_meta_data.get_meta_data("energy")
         dq = axis[1]-axis[0]
         logging.debug("the peak energies are:"+str(engy))
