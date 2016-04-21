@@ -22,7 +22,7 @@
 """
 
 from savu.plugins.loaders.multi_modal_loaders.base_i18_multi_modal_loader import BaseI18MultiModalLoader
-
+import numpy as np
 from savu.plugins.utils import register_plugin
 
 
@@ -31,6 +31,8 @@ class I18fluoLoader(BaseI18MultiModalLoader):
     """
     A class to load tomography data from an NXstxm file
     :param fluo_detector: path to stxm. Default:'entry1/xspress3/AllElementSum'.
+    :param fluo_offset: fluo scale offset. Default: 0.0.
+    :param fluo_gain: fluo gain. Default: 0.01.
 
     """
 
@@ -40,7 +42,6 @@ class I18fluoLoader(BaseI18MultiModalLoader):
     def setup(self):
         """
          Define the input nexus file
-
         :param path: The full path of the NeXus file to load.
         :type path: str
         """
@@ -49,6 +50,11 @@ class I18fluoLoader(BaseI18MultiModalLoader):
         data_obj = self.multi_modal_setup('fluo')
         data_obj.data = data_obj.backing_file[data_str]
         data_obj.set_shape(data_obj.data.shape)
+        npts = data_obj.get_shape()[-1]
+        mData = data_obj.meta_data
+        gain = self.parameters["fluo_gain"]
+        energy = np.arange(self.parameters["fluo_offset"], gain*npts, gain)
+        mData.set_meta_data("energy", energy)
         self.set_motors(data_obj, 'fluo')
         self.add_patterns_based_on_acquisition(data_obj, 'fluo')
         self.set_data_reduction_params(data_obj)
