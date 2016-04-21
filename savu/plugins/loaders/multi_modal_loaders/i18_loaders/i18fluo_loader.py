@@ -57,4 +57,5 @@ class I18fluoLoader(BaseI18MultiModalLoader):
         mData.set_meta_data("energy", energy)
         self.set_motors(data_obj, 'fluo')
         self.add_patterns_based_on_acquisition(data_obj, 'fluo')
+        
         self.set_data_reduction_params(data_obj)

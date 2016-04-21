@@ -64,7 +64,8 @@ class SimpleFitXrf(BaseFluoFitter):
 #         areas/=np.sum(data)
 #         areas /= 0.
         areas[weights < 1e-4] = 0.0
-        areas /= np.sum(data)
+        areas[widths > 0.5] = 0.0
+#         areas /= np.sum(data)
         residuals = self._resid(params, curvetype, data, axis, positions)
         t2 = time.time()
         logging.debug("Simple fit iteration took: %s ms", str((t2-t1)*1e3))

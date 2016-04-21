@@ -115,8 +115,12 @@ class BaseFluoFitter(BaseFitter):
             self.parameters["include_escape"]
         paramdict["FitParams"]["fitted_energy_range_keV"] = \
             self.parameters["fitted_energy_range_keV"]
-        paramdict["Experiment"]["incident_energy_keV"] = \
-            self.parameters['mono_energy']
+        if self.parameters['mono_energy'] is None:
+            paramdict["Experiment"]["incident_energy_keV"] = \
+                in_meta_data.get_meta_data("mono_energy")
+        else:
+            paramdict["Experiment"]["incident_energy_keV"] = \
+                self.parameters['mono_energy']
         paramdict["Experiment"]["elements"] = \
             self.parameters["elements"]
         engy = self.findLines(paramdict)
