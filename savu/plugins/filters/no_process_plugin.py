@@ -38,7 +38,6 @@ class NoProcessPlugin(BaseFilter, CpuPlugin):
         super(NoProcessPlugin, self).__init__("NoProcessPlugin")
 
     def process_frames(self, data, frame_list):
-
         return data[0]
 
     def setup(self):
@@ -49,7 +48,6 @@ class NoProcessPlugin(BaseFilter, CpuPlugin):
         """
         in_dataset, out_dataset = self.get_datasets()
         out_dataset[0].create_dataset(in_dataset[0])
-
         in_pData, out_pData = self.get_plugin_datasets()
 
         if self.parameters['pattern']:
