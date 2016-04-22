@@ -50,7 +50,7 @@ class I18xrdLoader(BaseI18MultiModalLoader):
         :param path: The full path of the NeXus file to load.
         :type path: str
         """
-
+        print "here"
         data_obj = self.multi_modal_setup('xrd')
 
         scan_pattern = self.parameters['scan_pattern']
@@ -63,7 +63,7 @@ class I18xrdLoader(BaseI18MultiModalLoader):
 
         path = self.parameters['data_path']
         data_obj.data = FabIO(path, data_obj, frame_dim, shape=tuple(shape))
-
+        print 'the name is:'+str(data_obj.get_name())
         # dummy file
         filename = path.split('/')[-1] + '.h5'
         data_obj.backing_file = \

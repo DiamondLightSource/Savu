@@ -13,28 +13,27 @@
 # limitations under the License.
 
 """
-.. module:: tomo_recon
+.. module:: nx_xrd_loader_test
    :platform: Unix
-   :synopsis: runner for tests using the MPI framework
+   :synopsis: testing the nx_xrd loader
 
-.. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
+.. moduleauthor:: Aaron Parsons <scientificsoftware@diamond.ac.uk>
 
 """
-
 import unittest
 from savu.test import test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
 
-class I18XrdPipelineTest(unittest.TestCase):
+class I13FluoLoaderTest(unittest.TestCase):
 
-    #@unittest.skip("Calibration file used in process list is not available as test data")
-    def test_process(self):
-        data_file = tu.get_test_data_path('i18_test_data.nxs')
-        process_file = '/dls/mx-scratch/aaron/data/I18/paper_processing/devel_process_lists/xrd_tomo_i18.nxs'
-#         process_file = tu.get_process_list_path('xrd_tomo_i18.nxs')
+#     @unittest.skip("something missing from the .nxs file?")
+    def test_i13_fluo(self):
+        data_file = '/dls/i13-1/data/2016/mt12519-1/raw/77332.nxs'
+        process_file = '/home/clb02321/DAWN_stable/Savu2/Savu/test_data/test_process_lists/basic_fluo_process_i13.nxs'
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
+
 if __name__ == "__main__":
     unittest.main()
