@@ -25,8 +25,7 @@ import logging
 import scipy.ndimage as ndi
 
 import numpy as np
-import scipy.fftpack as fft
-import pyfftw
+import pyfftw.interfaces.scipy_fftpack as fft
 
 from savu.plugins.utils import register_plugin
 from savu.plugins.base_filter import BaseFilter
@@ -77,8 +76,7 @@ class VoCentering(BaseFilter, CpuPlugin):
             ssino = ndi.interpolation.shift(sino, (0, i), mode='wrap')
             fsino = np.vstack([ssino, ssino[:, ::-1]])
             logging.debug("Calculating the fourier transform")
-            #fftsino = fft.fftshift(fft.fft2(fsino))
-            fftsino = fft.fftshift(pyfftw.interfaces.scipy_fftpack.fft2(fsino))
+            fftsino = fft.fftshift(fft.fft2(fsino))
             logging.debug("fourier transform calculated")
             values.append(np.sum(np.abs(fftsino)*mask))
         vv = np.array(values)
