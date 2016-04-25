@@ -180,13 +180,22 @@ def check_nDatasets(exp, names, plugin_dict, nSets, dtype):
     return names
 
 
-def find_args(dclass):
+def find_args(dclass, inst=None):
     """
     Finds the parameters list from the docstring
     """
+    docstring = None
     if not dclass.__doc__:
+        if inst:
+            inst._override_class_docstring()
+            docstring = dclass._override_class_docstring.__doc__
+    else:
+        docstring = dclass.__doc__
+
+    if not docstring:
         return []
-    lines = dclass.__doc__.split('\n')
+
+    lines = docstring.split('\n')
     param_regexp = re.compile('^:param (?P<param>\w+):\s?(?P<doc>\w.*[^ ])\s' +
                               '?Default:\s?(?P<default>.*[^ ])$')
     args = [param_regexp.findall(line.strip(' .')) for line in lines]

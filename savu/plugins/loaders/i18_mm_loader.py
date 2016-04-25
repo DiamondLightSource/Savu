@@ -66,22 +66,26 @@ class I18MmLoader(BaseLoader):
 #             logging.debug('This file contains an fluo')
 #         except:
 #             logging.warn('This file does not contain an fluo')
-        try:
-            self.setup_loader(I18xrdLoader(), self.parameters.copy())
-            logging.debug('This file contains an xrd')
-        except:
-            logging.warn('This file does not contain an xrd')
-        try:
-            self.setup_loader(I18stxmLoader(), self.parameters.copy())
-            logging.debug('This file contains an stxm')
-        except:
-            logging.warn('This file does not contain an stxm')
-
-        try:
-            self.setup_loader(I18monitorLoader(), self.parameters.copy())
-            logging.debug('This file contains a monitor')
-        except:
-            logging.warn('This file does not contain an monitor')
+        
+         print self.parameters.copy()
+         self.setup_loader(I18xrdLoader(), self.parameters.copy())
+        
+#        try:
+#            self.setup_loader(I18xrdLoader(), self.parameters.copy())
+#            logging.debug('This file contains an xrd')
+#        except:
+#            logging.warn('This file does not contain an xrd')
+#        try:
+#            self.setup_loader(I18stxmLoader(), self.parameters.copy())
+#            logging.debug('This file contains an stxm')
+#        except:
+#            logging.warn('This file does not contain an stxm')
+#
+#        try:
+#            self.setup_loader(I18monitorLoader(), self.parameters.copy())
+#            logging.debug('This file contains a monitor')
+#        except:
+#            logging.warn('This file does not contain an monitor')
 
     def setup_loader(self, loader, params):
         logging.debug('I am here')

@@ -84,7 +84,6 @@ class VoCentering(BaseFilter, CpuPlugin):
         return cor_positions[vv.argmin()]
 
     def filter_frames(self, data):
-        print "in filter frames of centering algorithm", data[0].shape
         data = data[0][::self.parameters['step']]
         width = data.shape[1]/16
         step = width/10.

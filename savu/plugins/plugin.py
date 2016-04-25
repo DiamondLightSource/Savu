@@ -97,7 +97,7 @@ class Plugin(PluginDatasets):
         """
         for clazz in inspect.getmro(self.__class__)[::-1]:
             if clazz != object:
-                full_description = pu.find_args(clazz)
+                full_description = pu.find_args(clazz, self)
                 for item in full_description:
                     self.parameters[item['name']] = item['default']
                     self.parameters_types[item['name']] = item['dtype']
