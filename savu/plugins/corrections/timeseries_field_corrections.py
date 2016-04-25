@@ -13,12 +13,15 @@
 # limitations under the License.
 
 """
-.. module:: Timeseries_field_corrections
+.. module:: timeseries_field_corrections
    :platform: Unix
    :synopsis: A Plugin to apply a simple dark and flatfield correction to some
        raw timeseries data
 
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
+
+:synopsis: A Plugin to apply a simple dark and flatfield correction to some
+       raw timeseries data
 
 """
 
@@ -40,6 +43,12 @@ class TimeseriesFieldCorrections(BaseCorrection, CpuPlugin):
     def __init__(self):
         super(TimeseriesFieldCorrections,
               self).__init__("TimeseriesFieldCorrections")
+        # TODO these should probably be parameters
+        self.LOW_CROP_LEVEL = 0.0
+        self.HIGH_CROP_LEVEL = 2.0
+        self.WARN_PROPORTION = 0.05  # 5%
+        self.flag_low_warning = False
+        self.flag_high_warning = False
 
     def pre_process(self):
         in_meta_data, out_meta_data = self.get_meta_data()
@@ -54,31 +63,48 @@ class TimeseriesFieldCorrections(BaseCorrection, CpuPlugin):
         dark = np.tile(dark, (trimmed_data.shape[0], 1, 1))
         flat = data[self.flat_idx].mean(0)
         flat = np.tile(flat, (trimmed_data.shape[0], 1, 1))
+
+        if len(data.shape) is 2:
+            flat = flat.squeeze()
+            dark = dark.squeeze()
+
         data = (trimmed_data-dark)/(flat-dark)
 
         # finally clean up and trim the data
         data = np.nan_to_num(data)
-        data[data < 0] = 0
-        data[data > 2] = 2
+
+        # make high and low crop masks
+        low_crop = data < self.LOW_CROP_LEVEL
+        high_crop = data > self.HIGH_CROP_LEVEL
+
+        # flag if those masks include a large proportion of pixels, as this
+        # may indicate a failure
+        if ((float(low_crop.sum()) / low_crop.size) > self.WARN_PROPORTION):
+            self.flag_low_warning = True
+        if ((float(high_crop.sum()) / high_crop.size) > self.WARN_PROPORTION):
+            self.flag_high_warning = True
+
+        # Set all cropped values to the crop level
+        data[low_crop] = self.LOW_CROP_LEVEL
+        data[high_crop] = self.HIGH_CROP_LEVEL
 
         return data
 
-#    def correct(self, data):
-#        in_meta_data, out_meta_data = self.get_meta_data()
-#        image_keys = in_meta_data[0].get_meta_data('image_key')
-#        trimmed_data = data[image_keys == 0]
-#
-#        dark = data[image_keys == 2]
-#        dark = dark.mean(0)
-#        dark = np.tile(dark, (trimmed_data.shape[0], 1, 1))
-#        flat = data[image_keys == 1]
-#        flat = flat.mean(0)
-#        flat = np.tile(flat, (trimmed_data.shape[0], 1, 1))
-#        data = (trimmed_data-dark)/(flat-dark)
-#
-#        # finally clean up and trim the data
-#        data = np.nan_to_num(data)
-#        data[data < 0] = 0
-#        data[data > 2] = 2
-#
-#        return data
+    def executive_summary(self):
+        summary = []
+        if self.flag_high_warning:
+            summary.append(("WARNING: over %i%% of pixels are being clipped as " +
+                           "they have %f times the intensity of the provided flat field. "+
+                           "Check your Dark and Flat correction images")
+                           % (self.WARN_PROPORTION*100, self.HIGH_CROP_LEVEL))
+
+        if self.flag_low_warning:
+            summary.append(("WARNING: over %i%% of pixels are being clipped as " +
+                           "they below the expected lower corrected threshold of  %f. " +
+                           "Check your Dark and Flat correction images")
+                           % (self.WARN_PROPORTION*100, self.LOW_CROP_LEVEL))
+
+        if len(summary) > 0:
+            return summary
+
+        return ["Nothing to Report"]

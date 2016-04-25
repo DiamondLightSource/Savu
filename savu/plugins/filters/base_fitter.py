@@ -15,7 +15,7 @@
 """
 .. module:: base_fitter
    :platform: Unix
-   :synopsis: a base fitting plugin
+   :synopsis: a base class for all fitting methods
 
 .. moduleauthor:: Aaron Parsons <scientificsoftware@diamond.ac.uk>
 

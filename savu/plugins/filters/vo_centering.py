@@ -21,10 +21,11 @@
 """
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
+import logging
 import scipy.ndimage as ndi
 
 import numpy as np
-import scipy.fftpack as fft
+import pyfftw.interfaces.scipy_fftpack as fft
 
 from savu.plugins.utils import register_plugin
 from savu.plugins.base_filter import BaseFilter
@@ -39,9 +40,9 @@ class VoCentering(BaseFilter, CpuPlugin):
         information. Default: [].
     :param out_datasets: The default names. Default: ['cor_raw','cor_fit'].
     :param poly_degree: The polynomial degree of the fit \
-        (1 or 0 = gradient or no gradient). Default: 1.
+        (1 or 0 = gradient or no gradient). Default: 0.
     :param step: The step length over the rotation axis. Default: 1.
-    :param no_clean: Do not clean up potential outliers. Default: False.
+    :param no_clean: Do not clean up potential outliers. Default: True.
     :param preview: A slice list of required frames. Default: [].
 
     """
@@ -64,27 +65,36 @@ class VoCentering(BaseFilter, CpuPlugin):
         return mask
 
     def _scan(self, cor_positions, in_sino):
+        logging.debug("creating mask")
         mask = self._create_mask(in_sino)
+        logging.debug("mask created")
         values = []
         sino = np.nan_to_num(in_sino)
+        logging.debug("cor_positions are %s", cor_positions)
         for i in cor_positions:
+            logging.debug("cor_position is %d", i)
             ssino = ndi.interpolation.shift(sino, (0, i), mode='wrap')
             fsino = np.vstack([ssino, ssino[:, ::-1]])
+            logging.debug("Calculating the fourier transform")
             fftsino = fft.fftshift(fft.fft2(fsino))
+            logging.debug("fourier transform calculated")
             values.append(np.sum(np.abs(fftsino)*mask))
         vv = np.array(values)
         vv = abs(vv)
         return cor_positions[vv.argmin()]
 
     def filter_frames(self, data):
+        print "in filter frames of centering algorithm", data[0].shape
         data = data[0][::self.parameters['step']]
-        width = data.shape[1]/4
+        width = data.shape[1]/16
         step = width/10.
         point = 0.0
 
-        while step > 0.01:
+        while step > 0.2:
+            logging.debug("Processing step %d", step)
             x = np.arange(point-width, point+width, step)
             point = self._scan(x, data)
+            logging.debug("***NEW POINT %d", point)
             width = step
             step = width/10.
 
@@ -99,7 +109,6 @@ class VoCentering(BaseFilter, CpuPlugin):
         in_datasets, out_datasets = self.get_datasets()
 
         cor_raw = np.squeeze(out_datasets[0].data[...])
-
         # special case of one cor_raw value (i.e. only one sinogram)
         if not cor_raw.shape:
             # add to metadata
@@ -124,7 +133,7 @@ class VoCentering(BaseFilter, CpuPlugin):
 
         # set up for the iterative clean on the fit
         cor_fit = cor_clean
-        max_disp = 10
+        max_disp = 1000
         p = None
 
         # keep fitting and removing points until the fit is within
@@ -144,10 +153,12 @@ class VoCentering(BaseFilter, CpuPlugin):
                 max_disp = (np.abs(cor_fit-cor_clean)).max()
 
         # build a full array for the output fit
+        x = np.arange(self.orig_shape[0])
         cor_fit = p(x)
 
         out_datasets[1].data[:] = cor_fit[:, np.newaxis]
         # add to metadata
+
         self.populate_meta_data('cor_raw', cor_raw)
         self.populate_meta_data('centre_of_rotation', cor_fit)
 
@@ -165,10 +176,11 @@ class VoCentering(BaseFilter, CpuPlugin):
         # set up the output dataset that is created by the plugin
         in_dataset, out_dataset = self.get_datasets()
 
-        print "***SHAPE before", in_dataset[0].get_shape(), "PREVIEW:", self.parameters['preview']
+        self.orig_full_shape = in_dataset[0].get_shape()
+
         # reduce the data as per data_subset parameter
-        in_dataset[0].set_preview(self.parameters['preview'])
-        print "***SHAPE after", in_dataset[0].get_shape()
+        in_dataset[0].get_preview().set_preview(self.parameters['preview'],
+                                                revert=self.orig_full_shape)
 
         in_pData, out_pData = self.get_plugin_datasets()
         in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
@@ -177,13 +189,15 @@ class VoCentering(BaseFilter, CpuPlugin):
 
         slice_dirs = np.array(in_pData[0].get_slice_directions())
         new_shape = (np.prod(np.array(fullData.get_shape())[slice_dirs]), 1)
+        self.orig_shape = \
+            (np.prod(np.array(self.orig_full_shape)[slice_dirs]), 1)
 
         out_dataset[0].create_dataset(shape=new_shape,
                                       axis_labels=['x.pixels', 'y.pixels'],
                                       remove=True)
         out_dataset[0].add_pattern("METADATA", core_dir=(1,), slice_dir=(0,))
 
-        out_dataset[1].create_dataset(shape=new_shape,
+        out_dataset[1].create_dataset(shape=self.orig_shape,
                                       axis_labels=['x.pixels', 'y.pixels'],
                                       remove=True)
         out_dataset[1].add_pattern("METADATA", core_dir=(1,), slice_dir=(0,))

@@ -1,3 +1,24 @@
+# Copyright 2014 Diamond Light Source Ltd.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""
+.. module:: scikitimage_filter_back_projection
+   :platform: Unix
+   :synopsis: Wrapper for scikitimage FBP function
+
+"""
+
 import logging
 from savu.plugins.base_recon import BaseRecon
 from savu.data.plugin_list import CitationInformation
@@ -16,14 +37,17 @@ class ScikitimageFilterBackProjection(BaseRecon, CpuPlugin):
     A Plugin to reconstruct an image by filter back projection
     using the inverse radon transform from scikit-image.
 
-    :param output_size: Number of rows and columns in the reconstruction. Default: None.
-    :param filter: Filter used in frequency domain filtering Ramp filter used by default. Filters available: ramp, shepp-logan, cosine, hamming, hann. Assign None to use no filter. Default: 'ramp'.
-    :param interpolation: interpolation method used in reconstruction.
-    Methods available: 'linear', 'nearest', and 'cubic' ('cubic' is slow).
-    Default: 'linear'.
-    :param circle: Assume the reconstructed image is zero outside the inscribed
-    circle. Also changes the default output_size to match the behaviour of
-    radon called with circle=True. Default: False.
+    :param output_size: Number of rows and columns in the \
+        reconstruction. Default: None.
+    :param filter: Filter used in frequency domain filtering Ramp filter used \
+        by default. Filters available: ramp, shepp-logan, cosine, hamming, \
+        hann. Assign None to use no filter. Default: 'ramp'.
+    :param interpolation: interpolation method used in reconstruction. \
+        Methods available: 'linear', 'nearest', and 'cubic' \
+        ('cubic' is slow). Default: 'linear'.
+    :param circle: Assume the reconstructed image is zero outside the \
+        inscribed circle. Also changes the default output_size to match the \
+        behaviour of radon called with circle=True. Default: False.
     """
 
     def __init__(self):

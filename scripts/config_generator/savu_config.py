@@ -1,3 +1,17 @@
+# Copyright 2015 Diamond Light Source Ltd.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 '''
 Created on 21 May 2015
 
@@ -14,6 +28,14 @@ import readline
 import re
 
 RE_SPACE = re.compile('.*\s+$', re.M)
+histfile = os.path.join(os.path.expanduser("~"), ".savuhist")
+try:
+    readline.read_history_file(histfile)
+    readline.set_history_length(1000)
+except IOError:
+    pass
+import atexit
+atexit.register(readline.write_history_file, histfile)
 
 
 class Content(object):
@@ -23,10 +45,10 @@ class Content(object):
         self.filename = filename
         if os.path.exists(filename):
             print "Opening file %s" % (filename)
-            self.plugin_list.populate_plugin_list(filename, activePass=True)
+            self.plugin_list._populate_plugin_list(filename, activePass=True)
 
     def display(self, **kwargs):
-        print '\n', self.plugin_list.get_string(**kwargs), '\n'
+        print '\n', self.plugin_list._get_string(**kwargs), '\n'
 
     def save(self, filename):
         if filename == "":
@@ -34,11 +56,22 @@ class Content(object):
         else:
             self.filename = filename
         print "Saving file %s" % (filename)
-        self.plugin_list.save_plugin_list(filename)
+        self.plugin_list._save_plugin_list(filename)
+
+    def value(self, arg):
+        value = ([''.join(arg.split()[1:])][0]).split()[0]
+        tuning = True if value.count(';') else False
+        if not tuning:
+            try:
+                exec("value = " + value)
+            except (NameError, SyntaxError):
+                exec("value = " + "'" + value + "'")
+
+        return value
 
     def add(self, name, pos):
         plugin = pu.plugins[name]()
-        plugin.populate_default_parameters()
+        plugin._populate_default_parameters()
         self.insert(plugin, pos)
         self.display()
 
@@ -53,6 +86,12 @@ class Content(object):
             else:
                 print("Sorry, element %i does not have a %s parameter" %
                       (element, subelement))
+
+    def convert_to_ascii(self, value):
+        ascii_list = []
+        for v in value:
+            ascii_list.append(v.encode('ascii', 'ignore'))
+        return ascii_list
 
     def on_and_off(self, element, index):
         if index < 2:
@@ -69,6 +108,9 @@ class Content(object):
         process['data'] = plugin.parameters
         process['active'] = True
         self.plugin_list.plugin_list.insert(pos, process)
+
+    def get(self, pos):
+        return self.plugin_list.plugin_list[pos]
 
     def remove(self, pos):
         self.plugin_list.plugin_list.pop(pos)
@@ -137,10 +179,27 @@ def _list(content, arg):
             print key
             if len(arg) < 2:
                 plugin = pu.plugins[key]()
-                plugin.populate_default_parameters()
+                plugin._populate_default_parameters()
                 for p_key in plugin.parameters.keys():
                     print("    %20s : %s" % (p_key, plugin.parameters[p_key]))
     print "-----------------------------------------"
+    return content
+
+
+def _params(content, arg):
+    """Displays the parameters of the specified plugin.
+    """
+    try:
+        plugin = pu.plugins[arg]()
+        plugin._populate_default_parameters()
+        print "-----------------------------------------"
+        print arg
+        for p_key in plugin.parameters.keys():
+            print("    %20s : %s" % (p_key, plugin.parameters[p_key]))
+        print "-----------------------------------------"
+        return content
+    except:
+        print("Sorry I can't process the argument '%s'" % (arg))
     return content
 
 
@@ -151,17 +210,18 @@ def _save(content, arg):
 
 
 def _mod(content, arg):
-    """Modifies the target value e.g. 'mod 1.value 27' and turns the plugins
-       on and off e.g 'mod 1.on' or 'mod 1.off'"""
+    """Modifies the target value e.g. 'mod 1.value 27' and turns the plugins on
+    and off e.g 'mod 1.on' or 'mod 1.off'
+    """
     on_off_list = ['ON', 'on', 'OFF', 'off']
     try:
         element,  subelement = arg.split()[0].split('.')
         if subelement in on_off_list:
             content.on_and_off(int(element), on_off_list.index(subelement))
         else:
-            value = None
-            exec("value = " + arg.split()[1])
+            value = content.value(arg)
             content.modify(int(element), subelement, value)
+
         content.display()
     except:
         print("Sorry I can't process the argument '%s'" % (arg))
@@ -190,17 +250,57 @@ def _add(content, arg):
 
 def _ref(content, arg):
     """Refreshes the plugin, replacing it with itself (updating any changes).
+       Optional arguments:
+            -r: Keep parameter values (if the parameter still exists).
+                Without this flag the parameters revert to default values.
     """
-    pos = int(arg) - 1
-    name = content.plugin_list.plugin_list[pos]['name']
-    content.remove(pos)
-    content.add(name, pos)
+
+    if not arg:
+        print "ref requires the process number or * as argument"
+        print "e.g. 'ref 1' refreshes process 1"
+        print "e.g. 'ref *' refreshes ALL processes"
+        return content
+
+    kwarg = None
+    if len(arg.split()) > 1:
+        arg, kwarg = arg.split()
+
+    if arg is '*':
+        positions = range(len(content.plugin_list.plugin_list))
+    else:
+        positions = [int(arg) - 1]
+
+    for pos in positions:
+        if pos < 0 or pos >= len(content.plugin_list.plugin_list):
+            print("Sorry %s is out of range" % (arg))
+            return content
+        name = content.plugin_list.plugin_list[pos]['name']
+        old_entry = content.get(pos)
+        content.remove(pos)
+
+        if kwarg:
+            plugin = pu.plugins[name]()
+            plugin._populate_default_parameters()
+            content.insert(plugin, pos)
+            old_params = old_entry['data']
+            new_params = plugin.parameters
+            union_params = set(old_params).intersection(set(new_params))
+            for param in union_params:
+                content.modify(pos+1, param, old_params[param])
+            content.display()
+        else:
+            content.add(name, pos)
+
     return content
 
 
 def _rem(content, arg):
     """Remove the numbered item from the list"""
-    content.remove(int(arg)-1)
+    pos = int(arg)-1
+    if pos < 0 or pos >= len(content.plugin_list.plugin_list):
+            print("Sorry %s is out of range" % (arg))
+            return content
+    content.remove(pos)
     content.display()
     return content
 
@@ -212,7 +312,8 @@ commands = {'open': _open,
             'mod': _mod,
             'add': _add,
             'rem': _rem,
-            'ref': _ref}
+            'ref': _ref,
+            'params': _params}
 
 list_commands = ['loaders',
                  'corrections',
@@ -269,15 +370,20 @@ class Completer(object):
             return list_commands
         return [x for x in list_commands if x.startswith(args[0])]
 
+    def complete_params(self, args):
+        if not args[0]:
+            return pu.plugins.keys()
+        return [x for x in pu.plugins.keys() if x.startswith(args[0])]
+
     def complete(self, text, state):
         "Generic readline completion entry point."
-        buffer = readline.get_line_buffer()
+        read_buffer = readline.get_line_buffer()
         line = readline.get_line_buffer().split()
         # show all commands
         if not line:
             return [c + ' ' for c in commands.keys()][state]
         # account for last argument ending in a space
-        if RE_SPACE.match(buffer):
+        if RE_SPACE.match(read_buffer):
             line.append('')
         # resolve command to the implementation function
         cmd = line[0].strip()
@@ -291,8 +397,7 @@ class Completer(object):
             [c + ' ' for c in commands.keys() if c.startswith(cmd)] + [None]
         return results[state]
 
-
-if __name__ == '__main__':
+def main():
     print "Starting Savu Config tool (please wait for prompt)"
 
     comp = Completer()
@@ -306,7 +411,6 @@ if __name__ == '__main__':
     for loader, module_name, is_pkg in pkgutil.walk_packages(plugins_path):
         try:
             module = loader.find_module(module_name).load_module(module_name)
-            #print module
         except:
             pass
 
@@ -316,7 +420,6 @@ if __name__ == '__main__':
 
     while True:
         input_string = raw_input(">>> ").strip()
-        print "command is '%s'" % (input_string)
 
         if len(input_string) == 0:
             command = 'help'
@@ -335,3 +438,6 @@ if __name__ == '__main__':
             print "I'm sorry, thats not a command I recognise, try help"
 
     print "Thanks for using the application"
+
+if __name__ == '__main__':
+    main()

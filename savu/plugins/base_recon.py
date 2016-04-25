@@ -16,18 +16,14 @@
 """
 .. module:: base_recon
    :platform: Unix
-   :synopsis: A simple implementation a reconstruction routine for testing
-       purposes
+   :synopsis: A base class for all reconstruction methods
 
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
 import logging
 
-logging.debug("Importing packages in base_recon")
-
 from savu.plugins.plugin import Plugin
-
 import numpy as np
 
 
@@ -44,6 +40,7 @@ class BaseRecon(Plugin):
     :param sino_pad_width: Pad proportion of the sinogram width before \
         reconstructing. Default: 0.25.
     :param log: Take the log of the data before reconstruction. Default: True.
+    :param preview: A slice list of required frames. Default: [].
     """
     count = 0
 
@@ -67,6 +64,9 @@ class BaseRecon(Plugin):
         self.main_dir = in_pData[0].get_pattern()['SINOGRAM']['main_dir']
         self.angles = in_meta_data.get_meta_data('rotation_angle')
         self.slice_dirs = out_pData[0].get_slice_directions()
+        self.pad_amount = \
+            int(self.parameters['sino_pad_width'] * in_pData[0].get_shape()[1])
+
         self.reconstruct_pre_process()
 
         if self.parameters['log']:
@@ -74,16 +74,17 @@ class BaseRecon(Plugin):
         else:
             self.sino_func = lambda sino: np.nan_to_num(sino)
 
+        self.temp = 10
+
     def process_frames(self, data, slice_list):
         """
         Reconstruct a single sinogram with the provided center of rotation
         """
         cor = self.cor[slice_list[0][self.main_dir]]
         pad_tuples = [(0, 0)]*(data[0].ndim-1)
-        pad_amount = int(self.parameters['sino_pad_width'] * data[0].shape[1])
-        pad_tuples.insert(self.pad_dim, (pad_amount, pad_amount))
+        pad_tuples.insert(self.pad_dim, (self.pad_amount, self.pad_amount))
         data = np.pad(data[0], tuple(pad_tuples), 'edge')
-        result = self.reconstruct(self.sino_func(data), cor+pad_amount,
+        result = self.reconstruct(self.sino_func(data), cor+self.pad_amount,
                                   self.angles, self.vol_shape)
         return result
 
@@ -98,6 +99,10 @@ class BaseRecon(Plugin):
     def setup(self):
         # set up the output dataset that is created by the plugin
         in_dataset, out_dataset = self.get_datasets()
+
+        # reduce the data as per data_subset parameter
+        in_dataset[0].get_preview().set_preview(self.parameters['preview'])
+
         # set information relating to the plugin data
         in_pData, out_pData = self.get_plugin_datasets()
         # copy all required information from in_dataset[0]
@@ -106,11 +111,13 @@ class BaseRecon(Plugin):
         axis_labels = in_dataset[0].data_info.get_meta_data('axis_labels')[0]
 
         dim_volX, dim_volY, dim_volZ = \
-            self.map_volume_dimensions(in_dataset[0])
+            self.map_volume_dimensions(in_dataset[0], in_pData[0])
 
-        axis_labels = {in_dataset[0]: [str(dim_volX) + '.voxel_x.voxels',
-                       str(dim_volY) + '.voxel_y.voxels',
-                       str(dim_volZ) + '.voxel_z.voxels']}
+        axis_labels = [0]*3
+        axis_labels = {in_dataset[0]:
+                       [str(dim_volX) + '.voxel_x.voxels',
+                        str(dim_volY) + '.voxel_y.voxels',
+                        str(dim_volZ) + '.voxel_z.voxels']}
 
         shape = list(in_dataset[0].get_shape())
         shape[dim_volX] = shape[dim_volZ]
@@ -121,13 +128,14 @@ class BaseRecon(Plugin):
 
         # set pattern_name and nframes to process for all datasets
         out_pData[0].plugin_data_setup('VOLUME_XZ', self.get_max_frames())
+        logging.debug("****RECON AXIS LABELS*** %s", out_dataset[0].get_axis_labels())
 
-    def map_volume_dimensions(self, data):
-        data.finalise_patterns()
+    def map_volume_dimensions(self, data, pData):
+        data._finalise_patterns()
         dim_rotAngle = data.get_data_patterns()['PROJECTION']['main_dir']
         dim_detY = data.get_data_patterns()['SINOGRAM']['main_dir']
 
-        core_dirs = data.get_plugin_data().get_core_directions()
+        core_dirs = pData.get_core_directions()
         dim_detX = list(set(core_dirs).difference(set((dim_rotAngle,))))[0]
 
         dim_volX = dim_rotAngle

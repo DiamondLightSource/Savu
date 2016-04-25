@@ -16,8 +16,8 @@
 """
 .. module:: plugin_list
    :platform: Unix
-   :synopsis: Contains the PluginList class, which deals with loading and
-   saving the plugin list, and the CitationInformation class. An instance is
+   :synopsis: Contains the PluginList class, which deals with loading and \
+   saving the plugin list, and the CitationInformation class. An instance is \
    held by the MetaData class.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
@@ -26,8 +26,12 @@
 import h5py
 import json
 import logging
+import copy
 
 import numpy as np
+
+import savu.plugins.utils as pu
+
 
 NX_CLASS = 'NX_class'
 
@@ -40,8 +44,12 @@ class PluginList(object):
 
     def __init__(self):
         self.plugin_list = []
+        self.n_plugins = None
+        self.n_loaders = 0
+        self.datasets_list = []
+        self.exp = None
 
-    def populate_plugin_list(self, filename, activePass=False):
+    def _populate_plugin_list(self, filename, activePass=False):
         plugin_file = h5py.File(filename, 'r')
         plugin_group = plugin_file['entry/plugin']
         self.plugin_list = []
@@ -58,13 +66,19 @@ class PluginList(object):
             if active:
                 plugin['name'] = plugin_group[key]['name'][0]
                 plugin['id'] = plugin_group[key]['id'][0]
-                plugin['data'] = json.loads(plugin_group[key]['data'][0])
+                plugin['data'] = \
+                    self.__byteify(json.loads(plugin_group[key]['data'][0]))
+                plugin['data'] = self.__convert_to_list(plugin['data'])
                 self.plugin_list.append(plugin)
         plugin_file.close()
 
-    def save_plugin_list(self, out_filename):
-        plugin_file = h5py.File(out_filename, 'w')
-        entry_group = plugin_file.create_group('entry')
+    def _save_plugin_list(self, out_filename, exp=None):
+        if exp:
+            entry_group = exp.nxs_file.create_group('entry')
+        else:
+            plugin_file = h5py.File(out_filename, 'w')
+            entry_group = plugin_file.create_group('entry')
+
         entry_group.attrs[NX_CLASS] = 'NXentry'
         plugins_group = entry_group.create_group('plugin')
         plugins_group.attrs[NX_CLASS] = 'NXplugin'
@@ -89,7 +103,6 @@ class PluginList(object):
                 pass
 
             count += 1
-        plugin_file.close()
 
     def add_plugin_citation(self, filename, plugin_number, citation):
         logging.debug("Adding Citation to file %s", filename)
@@ -98,7 +111,7 @@ class PluginList(object):
         citation.write(plugin_entry)
         plugin_file.close()
 
-    def get_string(self, **kwargs):
+    def _get_string(self, **kwargs):
         out_string = []
 
         start = kwargs.get('start', 0)
@@ -125,6 +138,76 @@ class PluginList(object):
                         (keycount, key, plugin['data'][key])
             out_string.append(description)
         return '\n'.join(out_string)
+
+    def __byteify(self, input):
+        if isinstance(input, dict):
+            return {self.__byteify(key): self.__byteify(value)
+                    for key, value in input.iteritems()}
+        elif isinstance(input, list):
+            temp = [self.__byteify(element) for element in input]
+            return temp
+        elif isinstance(input, unicode):
+            return input.encode('utf-8')
+        else:
+            return input
+
+    def __convert_to_list(self, data):
+        for key in data:
+            value = data[key]
+            if isinstance(value, str) and value.count('['):
+                value = value.split('[')[1].\
+                    split(']')[0].replace(" ", "").split(',')
+                exec("value = " + str(value))
+            data[key] = value
+        return data
+
+    def _set_datasets_list(self, plugin):
+        in_pData, out_pData = plugin.get_plugin_datasets()
+        max_frames = plugin.get_max_frames()
+        in_data_list = self._populate_datasets_list(in_pData, max_frames)
+        out_data_list = self._populate_datasets_list(out_pData, max_frames)
+        self.datasets_list.append({'in_datasets': in_data_list,
+                                   'out_datasets': out_data_list})
+
+    def _populate_datasets_list(self, data, max_frames):
+        data_list = []
+        for d in data:
+            name = d.data_obj.get_name()
+            pattern = copy.deepcopy(d.get_pattern())
+            pattern[pattern.keys()[0]]['max_frames'] = max_frames
+            data_list.append({'name': name, 'pattern': pattern})
+        return data_list
+
+    def _get_datasets_list(self):
+        return self.datasets_list
+
+    def _get_n_loaders(self):
+        return self.n_loaders
+
+    def _get_loaders_and_savers_index(self):
+        """ Get lists of loader and saver positions within the plugin list and
+        set the number of loaders.
+
+        :returns: loader index list and saver index list
+        :rtype: list(int(loader)), list(int(saver))
+        """
+        from savu.plugins.base_loader import BaseLoader
+        from savu.plugins.base_saver import BaseSaver
+        import inspect
+        loader_idx = []
+        saver_idx = []
+        self.n_plugins = len(self.plugin_list)
+        for i in range(self.n_plugins):
+            bases = inspect.getmro(pu.load_class(self.plugin_list[i]['id']))
+            loader_list = [b for b in bases if b == BaseLoader]
+            saver_list = [b for b in bases if b == BaseSaver]
+            if loader_list:
+                loader_idx.append(i)
+            if saver_list:
+                saver_idx.append(i)
+
+        self.n_loaders = len(loader_idx)
+        return loader_idx, saver_idx
 
 
 class CitationInformation(object):

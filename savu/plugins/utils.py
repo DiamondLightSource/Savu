@@ -21,16 +21,16 @@
 
 """
 
+import os
+import sys
 import re
 import logging
 import numpy as np
-from mpi4py import MPI
-import time
 
 plugins = {}
 plugins_path = {}
-datasets_list = []
 count = 0
+
 
 def register_plugin(clazz):
     """decorator to add logging information around calls for use with ."""
@@ -56,7 +56,24 @@ def load_plugin(plugin_name):
 
     name = plugin_name
     logging.debug("importing the module")
+    if plugin_name.startswith(os.path.sep):
+        # this is a path, so we need to add the directory to the pythonpath
+        # and sort out the name
+        ppath, name = os.path.split(plugin_name)
+        sys.path.append(ppath)
     # TODO This appears to be the failing line.
+    clazz = load_class(name)
+    instance = get_class_instance(clazz)
+    return instance
+
+
+def get_class_instance(clazz):
+    instance = clazz()
+    instance._populate_default_parameters()
+    return instance
+
+
+def load_class(name):
     mod = __import__(name)
     components = name.split('.')
     for comp in components[1:]:
@@ -64,14 +81,7 @@ def load_plugin(plugin_name):
     temp = name.split('.')[-1]
     mod2class = module2class(temp)
     clazz = getattr(mod, mod2class.split('.')[-1])
-    instance = get_class_instance(clazz)
-    return instance
-
-
-def get_class_instance(clazz):
-    instance = clazz()
-    instance.populate_default_parameters()
-    return instance
+    return clazz
 
 
 def module2class(module_name):
@@ -88,65 +98,35 @@ def plugin_loader(exp, plugin_dict, **kwargs):
         logging.error(e)
         raise e
 
-#    logging.info("plugin_loader: 1")
-#    exp.barrier()
-
     check_flag = kwargs.get('check', False)
     if check_flag:
         set_datasets(exp, plugin, plugin_dict)
 
-#    logging.info("plugin_loader: 2")
-#    exp.barrier()
-
     logging.debug("Running plugin main setup")
-    plugin.main_setup(exp, plugin_dict['data'])
-
-#    logging.info("plugin_loader: 3")
-#    exp.barrier()
+    plugin._main_setup(exp, plugin_dict['data'])
 
     if check_flag is True:
-        set_datasets_list(exp, *plugin.get_plugin_datasets())
-
-#    logging.info("plugin_loader: 4")
-#    exp.barrier()
+        exp.meta_data.plugin_list._set_datasets_list(plugin)
 
     logging.info("finished plugin loader")
     return plugin
 
 
 def run_plugins(exp, plugin_list, **kwargs):
-    plugin_loader(exp, plugin_list[0])
-    exp.set_nxs_filename()
+    n_loaders = exp.meta_data.plugin_list._get_n_loaders()
+
+    for i in range(n_loaders):
+        plugin_loader(exp, plugin_list[i])
+
+    exp._barrier()
+    exp._set_nxs_filename()
+    exp._barrier()
 
     check = kwargs.get('check', False)
-    for i in range(1, len(plugin_list)-1):
-        exp.barrier()
+    for i in range(n_loaders, len(plugin_list)-1):
+        exp._barrier()
         plugin_loader(exp, plugin_list[i], check=check)
-        exp.merge_out_data_to_in()
-
-
-def set_datasets_list(exp, in_pData, out_pData):
-#    logging.info("set_datasets_list: 1")
-#    exp.barrier()
-    in_data_list = populate_datasets_list(in_pData)
-#    logging.info("set_datasets_list: 2")
-#    exp.barrier()
-    out_data_list = populate_datasets_list(out_pData)
-#    logging.info("set_datasets_list: 3")
-#    exp.barrier()
-    datasets_list.append({'in_datasets': in_data_list,
-                          'out_datasets': out_data_list})
-#    logging.info("set_datasets_list: 4")
-#    exp.barrier()
-
-
-def populate_datasets_list(data):
-    data_list = []
-    for d in data:
-        name = d.data_obj.get_name()
-        pattern = d.get_pattern()
-        data_list.append({'name': name, 'pattern': pattern})
-    return data_list
+        exp._merge_out_data_to_in()
 
 
 def set_datasets(exp, plugin, plugin_dict):
@@ -162,9 +142,9 @@ def set_datasets(exp, plugin, plugin_dict):
     in_names = ('all' if len(in_names) is 0 else in_names)
     out_names = (in_names if len(out_names) is 0 else out_names)
 
-    in_names = check_nDatasets(exp, in_names, plugin_dict["id"],
+    in_names = check_nDatasets(exp, in_names, plugin_dict,
                                plugin.nInput_datasets(), "in_data")
-    out_names = check_nDatasets(exp, out_names, plugin_dict["id"],
+    out_names = check_nDatasets(exp, out_names, plugin_dict,
                                 plugin.nOutput_datasets(), "out_data")
 
     plugin_dict["data"]["in_datasets"] = in_names
@@ -179,10 +159,11 @@ def get_names(names):
     return data_names
 
 
-def check_nDatasets(exp, names, plugin_id, nSets, dtype):
+def check_nDatasets(exp, names, plugin_dict, nSets, dtype):
+    plugin_id = plugin_dict['id']
     try:
         if names[0] in "all":
-            names = exp.set_all_datasets(dtype)
+            names = exp._set_all_datasets(dtype)
     except IndexError:
         pass
 
@@ -191,6 +172,9 @@ def check_nDatasets(exp, names, plugin_id, nSets, dtype):
         plugin_id + " in the process file."
 
     names = ([names] if type(names) is not list else names)
+    if nSets is 'var':
+        nSets = len(plugin_dict['data'][dtype + 'sets'])
+
     if len(names) is not nSets:
         raise Exception(errorMsg)
     return names

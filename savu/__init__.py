@@ -13,6 +13,8 @@
 # limitations under the License.
 
 """
+.. currentmodule:: savu
+
 The Base level for Savu
 
 use with :
@@ -22,6 +24,7 @@ import savu
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
+
 
 import os
 import sys

@@ -29,7 +29,7 @@ import copy
 from savu.core.plugin_runner import PluginRunner
 from savu.data.experiment_collection import Experiment
 import savu.plugins.utils as pu
-from savu.data.data_structures import PluginData
+from savu.data.data_structures.plugin_data import PluginData
 
 
 def get_test_data_path(name):
@@ -55,7 +55,7 @@ def get_experiment_types():
     exp_dict['tomoRaw'] = {'func': 'set_tomoRaw_experiment',
                            'filename': '24737.nxs'}
     exp_dict['tomo'] = {'func': 'set_tomo_experiment',
-                        'filename': 'projections.h5'}
+                        'filename': 'savu_projections.h5'}
     exp_dict['fluo'] = {'func': 'set_fluo_experiment',
                         'filename': 'fluo.nxs'}
     exp_dict['i12tomo'] = {'func': 'set_i12tomo_experiment',
@@ -84,7 +84,7 @@ def set_tomoRaw_experiment(filename, **kwargs):
 
 def set_tomo_experiment(filename, **kwargs):
     options = set_options(get_test_data_path(filename), **kwargs)
-    options['loader'] = 'savu.plugins.loaders.projection_tomo_loader'
+    options['loader'] = 'savu.plugins.loaders.savu_loader'
     options['saver'] = 'savu.plugins.savers.hdf5_tomo_saver'
     return options
 
@@ -97,8 +97,8 @@ def set_fluo_experiment(filename, **kwargs):
 
 
 def set_i12tomo_experiment(filename, **kwargs):
-    options = \
-        set_options(get_test_data_path('/i12_test_data/' + filename), **kwargs)
+    options = set_options(
+        get_test_data_path('/i12_test_data/' + filename), **kwargs)
     options['loader'] = 'savu.plugins.loaders.i12_tomo_loader'
     options['saver'] = 'savu.plugins.savers.hdf5_tomo_saver'
     return options
@@ -107,6 +107,8 @@ def set_i12tomo_experiment(filename, **kwargs):
 def get_output_datasets(plugin):
     n_out = plugin.nOutput_datasets()
     out_data = []
+    if n_out is 'var':
+        return None
     for n in range(n_out):
         out_data.append('test' + str(n))
     return out_data
@@ -139,15 +141,16 @@ def set_plugin_entry(name, ID, data):
 
 
 def set_options(path, **kwargs):
-    process_file = kwargs.get('process_file', '')
-    process_names = kwargs.get('process_names', 'CPU0')
     options = {}
-    options['transport'] = 'hdf5'
-    options['process_names'] = process_names
+    options['transport'] = kwargs.get('transport', 'hdf5')
+    options['process_names'] = kwargs.get('process_names', 'CPU0')
     options['data_file'] = path
-    options['process_file'] = process_file
-    options['out_path'] = tempfile.mkdtemp()
+    options['process_file'] = kwargs.get('process_file', '')
+    options['out_path'] = kwargs.get('out_path', tempfile.mkdtemp())
+    options['inter_path'] = options['out_path']
+    options['log_path'] = options['out_path']
     options['run_type'] = 'test'
+    options['verbose'] = 'True'
     return options
 
 
@@ -173,8 +176,8 @@ def load_test_data(exp_type):
 
 def get_data_object(exp):
     data = exp.index['in_data'][exp.index['in_data'].keys()[0]]
-    data.set_plugin_data(PluginData(data))
-    pData = data.get_plugin_data()
+    data._set_plugin_data(PluginData(data))
+    pData = data._get_plugin_data()
     return data, pData
 
 
@@ -185,7 +188,7 @@ def set_process(exp, process, processes):
 
 def plugin_runner(options):
     plugin_runner = PluginRunner(options)
-    return plugin_runner.run_plugin_list(options)
+    return plugin_runner._run_plugin_list()
 
 
 def plugin_runner_load_plugin(options):
@@ -195,7 +198,7 @@ def plugin_runner_load_plugin(options):
 
     exp = plugin_runner.exp
     pu.plugin_loader(exp, plugin_list[0])
-    exp.set_nxs_filename()
+    exp._set_nxs_filename()
 
     plugin_dict = plugin_list[1]
     plugin = pu.load_plugin(plugin_dict['id'])
@@ -208,8 +211,8 @@ def plugin_setup(plugin):
     plugin_list = plugin.exp.meta_data.plugin_list.plugin_list
     plugin_dict = plugin_list[1]
     pu.set_datasets(plugin.exp, plugin, plugin_dict)
-    plugin.set_parameters(plugin_dict['data'])
-    plugin.set_plugin_datasets()
+    plugin._set_parameters(plugin_dict['data'])
+    plugin._set_plugin_datasets()
     plugin.setup()
 
 
@@ -217,7 +220,7 @@ def plugin_runner_real_plugin_run(options):
     plugin_runner = PluginRunner(options)
     plugin_runner.exp = Experiment(options)
     plugin_list = plugin_runner.exp.meta_data.plugin_list.plugin_list
-    plugin_runner.run_plugin_list_check(plugin_list)
+    plugin_runner._run_plugin_list_check(plugin_list)
 
     exp = plugin_runner.exp
 
@@ -225,18 +228,18 @@ def plugin_runner_real_plugin_run(options):
 
     start_in_data = copy.deepcopy(exp.index['in_data'])
     in_data = exp.index["in_data"][exp.index["in_data"].keys()[0]]
-    out_data_objs, stop = in_data.load_data(1)
-    exp.clear_data_objects()
+    out_data_objs, stop = in_data._load_data(1)
+    exp._clear_data_objects()
     exp.index['in_data'] = copy.deepcopy(start_in_data)
 
     for key in out_data_objs[0]:
         exp.index["out_data"][key] = out_data_objs[0][key]
 
     plugin = pu.plugin_loader(exp, plugin_list[1])
-    plugin.run_plugin(exp, plugin_runner)
+    plugin._run_plugin(exp, plugin_runner)
 
 #    out_datasets = plugin.parameters["out_datasets"]
-#    exp.reorganise_datasets(out_datasets, 'final_result')
+#    exp._reorganise_datasets(out_datasets, 'final_result')
 #
 #    for key in exp.index["in_data"].keys():
 #        exp.index["in_data"][key].close_file()

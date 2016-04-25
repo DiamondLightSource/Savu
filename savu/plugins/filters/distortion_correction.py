@@ -33,8 +33,7 @@ import unwarp
 @register_plugin
 class DistortionCorrection(BaseFilter, CpuPlugin):
     """
-    A plugin to apply spherical aberration correction.  It must only be applied
-    after a flat field correction.
+    A plugin to apply radial distortion correction. 
 
     :param polynomial_coeffs: Parameters of the radial distortion \
         function. Default: (1.00015076, 1.9289e-6, -2.4325e-8, 1.00439e-11, -3.99352e-15).
@@ -50,22 +49,28 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
 
     def pre_process(self):
         centre = np.array(self.parameters['centre'])
-        unwarp.setctr(*(tuple(centre - np.array(self.parameters['shift']))))
+        centre[0] -= self.parameters['shift'][0]
+        centre[1] -= self.parameters['shift'][1]
+
+        # flipping the values
+        centre = centre[::-1]
+
+        print centre
         #pass two empty arrays of frame chunk size
         unwarp.setcoeff(*self.parameters['polynomial_coeffs'])
-        unwarp.setctr(*self.parameters['centre'])
+        unwarp.setctr(*centre)
         plugin_data_shape = self.get_plugin_in_datasets()[0].get_shape()
         temp_array = np.empty(plugin_data_shape, dtype=np.float32)
         unwarp.setup(temp_array, temp_array)
 
         self.slice_list = [slice(None)]*3
         orig_shape = self.get_in_datasets()[0].get_shape()
-        print "&&&&&&&&&&&&", orig_shape
         for ddir in self.core_dir:
             self.slice_list[ddir] = \
                 slice(self.crop, orig_shape[ddir]-self.crop)
 
     def filter_frames(self, data):
+        print data[0].shape
         result = np.empty_like(data[0])
         unwarp.run(data[0], result)
         return result[self.slice_list]
@@ -89,9 +94,7 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
         out_dataset[0].create_dataset(patterns=in_dataset[0],
                                       axis_labels=in_dataset[0],
                                       shape=tuple(self.shape))
-
-        print "********", in_dataset[0].get_shape(), out_dataset[0].get_shape()
         out_pData[0].plugin_data_setup('PROJECTION', self.get_max_frames())
 
     def get_max_frames(self):
-        return 8
+        return 100

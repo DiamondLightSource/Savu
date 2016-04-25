@@ -9,6 +9,7 @@ LINK := gcc
 #FFTWPREFIX := ${FFTWDIR}
 
 OPTIMIZER = -O3
+#OPTIMIZER = -ggdb
 
 #include all warnings .. 
 #FLAGS = $(OPTIMIZER)  -DPCO_4000_FIX_BCD  #-Wall

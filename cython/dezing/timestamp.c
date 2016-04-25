@@ -4,20 +4,50 @@ FILE * logfp;
 struct timeval mystime;
 double oldtime=0;
 
-int logprint(const char *const message){
+
+int logprint(const char *const message,const int loglevel){
    int retval=0;
    int myerror=0;
-   retval=fprintf(logfp,"%s",message);
+   char outmessage[MAX_MESSAGE];
+   snprintf(outmessage,MAX_MESSAGE,"C: dezing: %s",message);
 
-#ifdef FLUSH_LOG_FILE
+  // debug the logging ! 
+  // printf("%s\n",outmessage);
+  // return(0);
+  //
+   switch (loglevel){
+      case(LEVEL_DEBUG):
+         pydebug(outmessage);
+      break;
+      case(LEVEL_INFO):
+         pyinfo(outmessage);
+      break;
+      case(LEVEL_WARN):
+         pywarn(outmessage);
+      break;
+      case(LEVEL_ERR):
+         pyerr(outmessage);
+      break;
+
+      default:
+      /* fallthru */
+      case(LEVEL_USER):
+         pyuser(outmessage);
+      break;
+   }
+
+   //retval=fprintf(logfp,"%s",message);
+
+
+// #ifdef FLUSH_LOG_FILE
    if( fflush(logfp) == EOF ){
       myerror=errno;
       fprintf(stderr,"ERROR: log file flush failed!\n");
       fprintf(stderr,"%s\n",strerror(myerror));
       return(151);
    };
-#endif
-return(0);
+//#endif
+return(retval);
 }
 
 
@@ -43,11 +73,11 @@ void timestamp_init(){
   nowtime=(double)(now.tv_sec) + ((double)(now.tv_usec) / 1.0e6);
   oldtime=nowtime;
   itime=nowtime-oldtime;
-  snprintf(message,MAX_MESSAGE,"%f %f %f %s\n",etime,nowtime,itime,"time stamp reset");
-  logprint(message);
+  snprintf(message,MAX_MESSAGE,"%f %f %f %s",etime,nowtime,itime,"Time stamp reset");
+  logprint(message,LEVEL_INFO);
 }
 
-void timestamp(const char *const stampmsg){
+void timestamp(const char *const stampmsg,const int loglevel){
   struct timeval now;
   time_t etimes;
   double nowtime,etime,itime;
@@ -60,13 +90,13 @@ void timestamp(const char *const stampmsg){
   etime = (double)(etimes)+((double)(etimeu))/(1e6);
   nowtime=(double)(now.tv_sec) + ((double)(now.tv_usec) / 1.0e6);
   itime=nowtime-oldtime;
-  snprintf(message,MAX_MESSAGE,"%f %f %f %s\n",etime,nowtime,itime,stampmsg);
-  logprint(message);
+  snprintf(message,MAX_MESSAGE,"%f %f %f %s",etime,nowtime,itime,stampmsg);
+  logprint(message,loglevel);
   oldtime=nowtime;
 }
 
 
-int errprint(const char * const message){
+int errprint(const char * const message,const int loglevel){
    int retval;
    /* print the message with the program name prefixed, and also echo to the log file */
 

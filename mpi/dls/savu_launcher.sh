@@ -3,7 +3,7 @@ module load global/cluster
 
 echo "SAVU_LAUNCHER:: Running Job"
 
-savupath=/dls_sw/apps/savu/master/Savu
+savupath=$SAVUHOME
 datafile=$1
 processfile=$2
 outpath=$3
@@ -14,7 +14,7 @@ nCPUs=12
 filepath=$savupath/mpi/dls/savu_mpijob.sh
 M=$((nNodes*12))
 
-qsub -N $outname -sync y -j y -o /dls/tmp/savu/ -e /dls/tmp/savu/ -pe openmpi $M -l infiniband -q medium.q@@com07 $filepath $savupath $datafile $processfile $outpath $nCPUs > /dls/tmp/savu/$USER.out
+qsub -N $outname -sync y -j y -o /dls/tmp/savu/ -e /dls/tmp/savu/ -pe openmpi $M -l exclusive -l infiniband -q medium.q@@com10 $filepath $savupath $datafile $processfile $outpath $nCPUs > /dls/tmp/savu/$USER.out
 
 echo "SAVU_LAUNCHER:: Job Complete, preparing output..."
 
@@ -32,3 +32,4 @@ echo "SAVU_LAUNCHER:: Output ready, spooling now"
 cat $filename
 
 echo "SAVU_LAUNCHER:: Process complete"
+

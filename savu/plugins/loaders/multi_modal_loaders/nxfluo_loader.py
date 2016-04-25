@@ -13,10 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: tomography_loader
+.. module:: nxfluo_loader
    :platform: Unix
-   :synopsis: A class for loading tomography data using the standard loaders
-   library.
+   :synopsis: A class for loading nxfluo data
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
@@ -25,12 +24,15 @@
 from savu.plugins.loaders.base_multi_modal_loader import BaseMultiModalLoader
 
 from savu.plugins.utils import register_plugin
-
+import numpy as np
 
 @register_plugin
 class NxfluoLoader(BaseMultiModalLoader):
     """
     A class to load tomography data from an NXFluo file
+    
+    :param fluo_offset: fluo scale offset. Default: 0.0.
+    :param fluo_gain: fluo gain. Default: 0.01.
     """
     def __init__(self, name='NxfluoLoader'):
         super(NxfluoLoader, self).__init__(name)
@@ -38,7 +40,6 @@ class NxfluoLoader(BaseMultiModalLoader):
     def setup(self):
         """
          Define the input nexus file
-
         :param path: The full path of the NeXus file to load.
         :type path: str
         """
@@ -47,10 +48,11 @@ class NxfluoLoader(BaseMultiModalLoader):
         data_obj, fluo_entry = self.multi_modal_setup('NXfluo', data_str)
         # the application meta data
         mData = data_obj.meta_data
-        average = np.mean(np.mean(np.mean(data_obj.data, axis=0), axis=0),
-                          axis=0)
+        npts = data_obj.data.shape[-1]
+        average = np.ones(npts)
         # and the energy axis
-        energy = data_obj.backing_file[fluo_entry.name+'/data/energy'][...]
+        gain = self.parameters["fluo_gain"]
+        energy = np.arange(self.parameters["fluo_offset"], gain*npts, gain)
         mono_energy = data_obj.backing_file[fluo_entry.name +
                                             '/instrument/monochromator/energy'
                                             ].value
@@ -72,14 +74,9 @@ class NxfluoLoader(BaseMultiModalLoader):
 
         data_obj.meta_data.set_meta_data('rotation_angle', rotation_angle)
 
-#         data_obj.set_axis_labels('rotation_angle.degrees',
-#                                  'x.mm',
-# #                                  'y.mm',
-#                                  'energy.eV')
-
         self.add_patterns_based_on_acquisition(data_obj, 'fluo')
 
-        data_obj.add_pattern("SPECTRUM", core_dir=(-1,),
-                             slice_dir=range(len(data_obj.data.shape)-1))
+        slice_dir = tuple(range(len(data_obj.data.shape)-1))
+        data_obj.add_pattern("SPECTRUM", core_dir=(-1,), slice_dir=slice_dir)
 
         self.set_data_reduction_params(data_obj)

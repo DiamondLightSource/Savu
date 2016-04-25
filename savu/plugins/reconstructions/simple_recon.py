@@ -15,7 +15,7 @@
 """
 .. module:: simple_recon
    :platform: Unix
-   :synopsis: A simple implementation a reconstruction routine for testing
+   :synopsis: A simple implementation of a reconstruction routine for testing
        purposes
 
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>

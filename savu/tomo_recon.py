@@ -15,7 +15,7 @@
 """
 .. module:: tomo_recon
    :platform: Unix
-   :synopsis: runner for tests using the MPI framework
+   :synopsis: Runner for the Savu framework
 
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
@@ -27,17 +27,22 @@ import os
 from savu.core.plugin_runner import PluginRunner
 
 
-def option_parser():
+def __option_parser():
+    """ Option parser for command line arguments.
+    """
     usage = "%prog [options] input_file processing_file output_directory"
     version = "%prog 0.1"
     parser = optparse.OptionParser(usage=usage, version=version)
     parser.add_option("-n", "--names", dest="names", help="Process names",
-                      default="CPU0",
-                      type='string')
+                      default="CPU0")
     parser.add_option("-t", "--transport", dest="transport",
-                      help="Set the transport mechanism",
-                      default="hdf5",
-                      type='string')
+                      help="Set the transport mechanism", default="hdf5")
+    parser.add_option("-f", "--folder", dest="folder",
+                      help="Override the output folder")
+    parser.add_option("-d", "--tmp", dest="temp_dir",
+                      help="Store intermediate files in a temp directory.")
+    parser.add_option("-l", "--log", dest="log_dir",
+                      help="Store log files in a separate location")
     parser.add_option("-v", "--verbose", action="store_true", dest="verbose",
                       help="Display all debug log messages", default=False)
     parser.add_option("-q", "--quiet", action="store_true", dest="quiet",
@@ -47,8 +52,9 @@ def option_parser():
     return [options, args]
 
 
-def check_input_params(args):
-    # Check basic items for completeness
+def __check_input_params(args):
+    """ Check for required input arguments.
+    """
     if len(args) is not 3:
         print("filename, process file and output path needs to be specified")
         print("Exiting with error code 1 - incorrect number of inputs")
@@ -70,7 +76,14 @@ def check_input_params(args):
         sys.exit(4)
 
 
-def set_options(opt, args):
+def _set_options(opt, args):
+    """ Set run specific information in options dictionary.
+
+    :params dict opt: input optional arguments (or defaults)
+    :params args: input required arguments
+    :returns options: optional and required arguments
+    :rtype: dict
+    """
     options = {}
     options["transport"] = opt.transport
     options["process_names"] = opt.names
@@ -78,12 +91,43 @@ def set_options(opt, args):
     options["quiet"] = opt.quiet
     options["data_file"] = args[0]
     options["process_file"] = args[1]
-    options["out_path"] = args[2]
+    options["out_path"] = set_output_folder(args[0], args[2], opt.folder)
+    if opt.temp_dir:
+        options["inter_path"] = opt.temp_dir
+    else:
+        options["inter_path"] = options["out_path"]
+    if opt.log_dir:
+        options['log_path'] = opt.log_dir
+    else:
+        options['log_path'] = options["out_path"]
     return options
 
-if __name__ == '__main__':
-    [options, args] = option_parser()
-    check_input_params(args)
-    options = set_options(options, args)
+
+def set_output_folder(in_file, out_path, set_folder):
+    from mpi4py import MPI
+    import time
+    if not set_folder:
+        MPI.COMM_WORLD.barrier()
+        timestamp = time.strftime("%Y%m%d%H%M%S")
+        MPI.COMM_WORLD.barrier()
+        name = os.path.basename(in_file.split('.')[-2])
+        folder = os.path.join(out_path, ('_'.join([timestamp, name])))
+    else:
+        folder = os.path.join(out_path, set_folder)
+    print "The output folder is", folder
+    if MPI.COMM_WORLD.rank == 0:
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+    return folder
+
+
+def main():
+    [options, args] = __option_parser()
+    __check_input_params(args)
+    options = _set_options(options, args)
     plugin_runner = PluginRunner(options)
-    plugin_runner.run_plugin_list(options)
+    plugin_runner._run_plugin_list()
+
+
+if __name__ == '__main__':
+    main()

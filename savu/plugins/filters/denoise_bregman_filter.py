@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: denoise using the split bregman method
+.. module:: denoise_bregman_filter
    :platform: Unix
    :synopsis: A plugin to denoise 2D slices of data by using the Split Bregman
               to solve the Total Variation ROF model

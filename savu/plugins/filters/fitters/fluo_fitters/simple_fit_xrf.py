@@ -42,7 +42,7 @@ class SimpleFitXrf(BaseFluoFitter):
         t1 = time.time()
         data = data[0].squeeze()
         in_meta_data = self.get_in_meta_data()[0]
-        axis = (in_meta_data.get_meta_data("energy")*1e-3)/2.0
+        axis = self.axis
         idx = in_meta_data.get_meta_data("PeakIndex")
         positions = axis[idx]
         weights = data[idx]
@@ -64,11 +64,12 @@ class SimpleFitXrf(BaseFluoFitter):
 #         areas/=np.sum(data)
 #         areas /= 0.
         areas[weights < 1e-4] = 0.0
-        areas /= np.sum(data)
+        areas[widths > 0.5] = 0.0
+#         areas /= np.sum(data)
         residuals = self._resid(params, curvetype, data, axis, positions)
         t2 = time.time()
         logging.debug("Simple fit iteration took: %s ms", str((t2-t1)*1e3))
         # all fitting routines will output the same format.
         # nchannels long, with 3 elements. Each can be a subarray.
-        return [weights, widths, areas, residuals]
+        return [weights, areas, residuals]
 

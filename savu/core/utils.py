@@ -15,16 +15,18 @@
 """
 .. module:: utils
    :platform: Unix
-   :synopsis: Simple core util methods
+   :synopsis: Simple core utility methods.
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
 
 import logging
+import itertools
+from mpi4py import MPI
 
 
 def logfunction(func):
-    """decorator to add logging information around calls for use with ."""
+    """ Decorator to add logging information around calls for use with . """
     def _wrapper(*args, **kwds):
         logging.info("Start::%s:%s",
                      func.__module__,
@@ -38,7 +40,7 @@ def logfunction(func):
 
 
 def logmethod(func):
-    """decorator to add logging information around calls for use with ."""
+    """ Decorator to add logging information around calls for use with . """
     def _wrapper(self, *args, **kwds):
         logging.info("Start::%s.%s:%s",
                      func.__module__,
@@ -53,7 +55,21 @@ def logmethod(func):
     return _wrapper
 
 
+def docstring_parameter(*sub):
+    """ Decorator to add strings to a doc string."""
+    def dec(obj):
+        obj.__doc__ = obj.__doc__.format(*sub)
+        return obj
+    return dec
+
+
 def import_class(class_name):
+    """ Import a class.
+
+    :params: class name
+    :returns: class instance
+    :rtype: instance of class_name
+    """
     name = class_name
     mod = __import__(name)
     components = name.split('.')
@@ -64,11 +80,58 @@ def import_class(class_name):
     return getattr(mod, module2class.split('.')[-1])
 
 
-def add_base(clazz, ExtraBase):
-    cls = clazz.__class__
-    clazz.__class__ = cls.__class__(cls.__name__, (cls, ExtraBase), {})
+def add_base(this, base):
+    """ Add a base class to a class.
+
+    :params class this: a class instance
+    :params class base: a class to add as a base class
+    """
+    cls = this.__class__
+    namespace = this.__class__.__dict__.copy()
+    this.__class__ = cls.__class__(cls.__name__, (cls, base), namespace)
+    base().__init__()
 
 
-@logfunction
-def test():
-    print("test")
+def add_base_classes(this, bases):
+    """ Add multiple base classes to a class.
+
+    :params class this: a class instance.
+    :params list(class) bases: a list of base classes
+    """
+    bases = bases if isinstance(bases, list) else [bases]
+    for base in bases:
+        add_base(this, base)
+
+USER_LOG_LEVEL = 100
+USER_LOG_HANDLER = None
+
+def user_message(message):
+    logging.log(USER_LOG_LEVEL, message)
+    if USER_LOG_HANDLER is not None:
+        USER_LOG_HANDLER.flush()
+
+
+def user_messages_from_all(header, message_list):
+    comm = MPI.COMM_WORLD
+    messages = comm.gather(message_list, root=0)
+    if  messages is None:
+        return
+    # flatten the list
+    messages = list(itertools.chain(*messages))
+    if comm.rank == 0:
+        for message in set(messages):
+            user_message("%s : %i processes report : %s" %
+                         (header, messages.count(message), message))
+
+
+def add_user_log_level():
+    logging.addLevelName(USER_LOG_LEVEL, "USER")
+
+
+def add_user_log_handler(logger, user_log_path):
+    fh = logging.FileHandler(user_log_path, mode='w')
+    fh.setFormatter(logging.Formatter('%(asctime)s - %(message)s'))
+    fh.setLevel(USER_LOG_LEVEL)
+    logger.addHandler(fh)
+    USER_LOG_HANDLER = fh
+    user_message("User Log Started")

@@ -21,13 +21,14 @@
 
 """
 import logging
-
+import copy
 import numpy as np
+from mpi4py import MPI
 
-import savu.plugins.utils as pu
+from savu.plugins.driver.plugin_driver import PluginDriver
 
 
-class GpuPlugin(object):
+class GpuPlugin(PluginDriver):
     """
     The base class from which all plugins should inherit.
     """
@@ -35,76 +36,54 @@ class GpuPlugin(object):
     def __init__(self):
         super(GpuPlugin, self).__init__()
 
-    def run_plugin(self, exp, transport):
+    def _run_plugin(self, exp, transport):
 
         expInfo = exp.meta_data
-        processes = expInfo.get_meta_data("processes")
+        processes = copy.copy(expInfo.get_meta_data("processes"))
         process = expInfo.get_meta_data("process")
 
-        count = 0
-        gpu_processes = []
-        for i in ["GPU" in i for i in processes]:
-            if i:
-                gpu_processes.append(count)
-                count += 1
-            else:
-                gpu_processes.append(-1)
-        if gpu_processes[process] >= 0:
-            logging.debug("Running the GPU Process %i", process)
-            #new_processes = [i for i in processes if "GPU" in i]
+        gpu_processes = [False]*len(processes)
+        idx = [i for i in range(len(processes)) if 'GPU' in processes[i]]
+        for i in idx:
+            gpu_processes[i] = True
 
-            logging.debug("Pre-processing")
+        # set only GPU processes
+        new_processes = [i for i in processes if 'GPU' in i]
+        if not new_processes:
+            raise Exception("THERE ARE NO GPU PROCESSES!")
+        expInfo.set_meta_data('processes', new_processes)
 
-        self.run_plugin_instances(transport)
-        self.clean_up()
+        nNodes = new_processes.count(new_processes[0])
 
-        logging.debug("Not Running the task as not GPU")
+        ranks = [i for i, x in enumerate(gpu_processes) if x]
+        self.__create_new_communicator(ranks, exp, process)
+
+        if gpu_processes[process]:
+            expInfo.set_meta_data('process', self.new_comm.Get_rank())
+            logging.info("Running the GPU Process %i",
+                         self.new_comm.Get_rank())
+            GPU_index = self.__calculate_GPU_index(nNodes)
+            self.parameters['GPU_index'] = GPU_index
+            self._run_plugin_instances(transport, communicator=self.new_comm)
+            self._clean_up()
+            self.__free_communicator()
+            expInfo.set_meta_data('process', MPI.COMM_WORLD.Get_rank())
+
+        self.exp._barrier()
+        expInfo.set_meta_data('processes', processes)
         return
 
-    def run_plugin_instances(self, transport):
-        out_data = self.get_out_datasets()
-        extra_dims = self.extra_dims
-        repeat = np.prod(extra_dims) if extra_dims else 1
+    def __create_new_communicator(self, ranks, exp, process):
+        self.group = MPI.COMM_WORLD.Get_group()
+        self.new_group = MPI.Group.Incl(self.group, ranks)
+        self.new_comm = MPI.COMM_WORLD.Create(self.new_group)
+        self.exp._barrier()
 
-        param_idx = pu.calc_param_indices(extra_dims)
-        out_data_dims = [len(d.get_shape()) for d in out_data]
-        param_dims = [range(d - len(extra_dims), d) for d in out_data_dims]
-        for i in range(repeat):
-            if repeat > 1:
-                self.set_parameters_this_instance(param_idx[i])
-                for j in range(len(out_data)):
-                    out_data[j].get_plugin_data()\
-                        .set_fixed_directions(param_dims[j], param_idx[i])
+    def __free_communicator(self):
+        self.group.Free()
+        self.new_group.Free()
+        self.new_comm.Free()
 
-            logging.info("%s.%s", self.__class__.__name__, 'pre_process')
-            self.pre_process()
-
-            logging.info("%s.%s", self.__class__.__name__, 'process')
-            transport.process(self)
-
-            logging.info("%s.%s", self.__class__.__name__, 'barrier')
-            self.exp.barrier()
-
-            logging.info("%s.%s", self.__class__.__name__, 'post_process')
-            self.post_process()
-
-            logging.info("%s.%s", self.__class__.__name__, 'barrier')
-
-    def process(self, data, output, processes, plugin):
-        """
-        This method is called after the plugin has been created by the
-        pipeline framework
-
-        :param data: The input data object.
-        :type data: savu.data.structures
-        :param data: The output data object
-        :type data: savu.data.structures
-        :param processes: The number of processes which will be doing the work
-        :type path: int
-        :param path: The specific process which we are
-        :type path: int
-        """
-        logging.error("process needs to be implemented for proc %i of %i :" +
-                      " input is %s and output is %s",
-                      plugin, processes, data.__class__, output.__class__)
-        raise NotImplementedError("process needs to be implemented")
+    def __calculate_GPU_index(self, nNodes):
+        rank = self.new_comm.Get_rank()
+        return int(rank/nNodes)

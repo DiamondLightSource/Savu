@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: lowpass
+.. module:: band_pass
    :platform: Unix
    :synopsis: A plugin to low pass each frame with a gaussian
 

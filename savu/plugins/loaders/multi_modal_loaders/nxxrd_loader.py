@@ -13,10 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: tomography_loader
+.. module:: nxxrd_loader
    :platform: Unix
-   :synopsis: A class for loading tomography data using the standard loaders
-   library.
+   :synopsis: A class for loading nxxrd data
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
@@ -45,40 +44,22 @@ class NxxrdLoader(BaseMultiModalLoader):
         data_str = '/instrument/detector/data'
         data_obj, xrd_entry = self.multi_modal_setup('NXxrd', data_str)
         mono_energy = data_obj.backing_file[
-            xrd_entry.name + '/instrument/monochromator/energy']
+            xrd_entry.name + '/instrument/monochromator/energy'].value
         self.exp.meta_data.set_meta_data("mono_energy", mono_energy)
         self.set_motors(data_obj, xrd_entry, 'xrd')
 
-        # hard coded for now, but we can change it to fram nx transformations
-        # in future.
-        data_obj.set_axis_labels('rotation_angle.degrees',
-                                 'x.mm',
-                                 'y.mm',
-                                 'detector_x.mm',
-                                 'detector_y.mm')
 
-        rotation_angle = \
-            data_obj.backing_file[xrd_entry.name + '/sample/theta'].value
-        if rotation_angle.ndim > 1:
-            rotation_angle = rotation_angle[:,0]
-
-        data_obj.meta_data.set_meta_data('rotation_angle', rotation_angle)
-        #self.add_patterns_based_on_acquisition(data_obj, 'xrd')
-        print data_obj.data.shape
-        slicedir = tuple(range(len(data_obj.data.shape)-2))
-        print "diffraction slice direction is "+str(slicedir)
-        data_obj.add_pattern("DIFFRACTION", core_dir=(-2, -1),
-                             slice_dir=slicedir)
-#         data_obj.add_pattern("SINOGRAM", core_dir=(0, 2),
-#                              slice_dir=(1,3,4))
-#         data_obj.add_pattern("PROJECTION", core_dir=(1, 2),
-#                              slice_dir=(0,3,4))
+        self.add_patterns_based_on_acquisition(data_obj, 'xrd')
+# #         print data_obj.data.shape
+#         slicedir = tuple(range(len(data_obj.data.shape)-2))
+# #         print "diffraction slice direction is "+str(slicedir)
+#         data_obj.add_pattern("DIFFRACTION", core_dir=(3, 4),
+#                              slice_dir=slicedir)
+# 
 #         data_obj.add_pattern("SINOGRAM", core_dir=(0, 2),
 #                              slice_dir=(1, 3, 4))
-        data_obj.add_pattern("SINOGRAM", core_dir=(0, 2),
-                             slice_dir=(1, 3, 4))
-        data_obj.add_pattern("PROJECTION", core_dir=(1, 2),
-                             slice_dir=(0, 3, 4))
+#         data_obj.add_pattern("PROJECTION", core_dir=(1, 2),
+#                              slice_dir=(0, 3, 4))
 
 
         calibrationfile = h5py.File(self.get_cal_path(), 'r')
@@ -87,19 +68,21 @@ class NxxrdLoader(BaseMultiModalLoader):
         mData = data_obj.meta_data
         det_str = 'entry/instrument/detector'
         mData.set_meta_data("beam_center_x",
-                            calibrationfile[det_str + '/beam_center_x'])
+                            calibrationfile[det_str + '/beam_center_x'].value)
         mData.set_meta_data("beam_center_y",
-                            calibrationfile[det_str + '/beam_center_y'])
+                            calibrationfile[det_str + '/beam_center_y'].value)
         mData.set_meta_data("distance",
-                            calibrationfile[det_str + '/distance'])
+                            calibrationfile[det_str + '/distance'].value)
         mData.set_meta_data("incident_wavelength",
                             calibrationfile['/entry/calibration_sample/beam'
-                                            '/incident_wavelength'])
+                                            '/incident_wavelength'].value)
         mData.set_meta_data("x_pixel_size",
-                            calibrationfile[det_str + '/x_pixel_size'])
+                            calibrationfile[det_str + '/x_pixel_size'].value)
         mData.set_meta_data("detector_orientation",
-                            calibrationfile[det_str + '/detector_orientation'])
+                            calibrationfile[det_str + '/detector_orientation'].value)
+
         self.set_data_reduction_params(data_obj)
+        calibrationfile.close()
 
     def get_cal_path(self):
         path = self.parameters['calibration_path']

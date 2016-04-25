@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: spectrum cropping plugin
+.. module:: spectrum_crop
    :platform: Unix
    :synopsis: A plugin to crop a spectra
 
@@ -32,6 +32,7 @@ class SpectrumCrop(BaseFilter, CpuPlugin):
     crops a spectrum to a range
 
     :param crop_range: range to crop to. Default: [2., 18.].
+    :param axis: range to crop to. Default: "energy".
 
     """
 
@@ -51,16 +52,16 @@ class SpectrumCrop(BaseFilter, CpuPlugin):
         in_meta = in_dataset[0].meta_data
         out_meta = cropped.meta_data
         crop_range = self.parameters['crop_range']
-        axis_labels = in_dataset[0].get_axis_label_keys()
-        raw_axis = in_meta.get_meta_data(axis_labels[-1])
-        print "the raw axis is"+str(raw_axis)
+#         axis_labels = in_dataset[0].get_axis_label_keys()
+        raw_axis = in_meta.get_meta_data(self.parameters['axis'])
+#         print "the raw axis is"+str(raw_axis)
         self.new_idx = (raw_axis>crop_range[0]) & (raw_axis<crop_range[1])
         new_axis = raw_axis[self.new_idx]
-        out_meta.set_meta_data(axis_labels[-1], new_axis)
+        out_meta.set_meta_data(self.parameters['axis'], new_axis)
         new_len = len(new_axis)
-        print "newlen is"+str(new_len)
+#         print "newlen is"+str(new_len)
         shape = in_dataset[0].get_shape()[0:-1]+(new_len,)
-        print shape
+#         print shape
         cropped.set_shape(shape)
         in_pData, out_pData = self.get_plugin_datasets()
         in_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())

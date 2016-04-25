@@ -15,8 +15,7 @@
 """
 .. module:: hdf5_tomo_saver
    :platform: Unix
-   :synopsis: A class for saving tomography data using the standard savers
-   library.
+   :synopsis: A class to create hdf5 output files
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
@@ -25,12 +24,11 @@
 
 import h5py
 import logging
-import copy
 from mpi4py import MPI
 
-import numpy as np
 from savu.plugins.base_saver import BaseSaver
 from savu.plugins.utils import register_plugin
+from savu.data.chunking import Chunking
 
 NX_CLASS = 'NX_class'
 
@@ -43,6 +41,7 @@ class Hdf5TomoSaver(BaseSaver):
 
     def __init__(self, name='Hdf5TomoSaver'):
         super(Hdf5TomoSaver, self).__init__(name)
+        self.plugin = None
 
     def setup(self):
         exp = self.exp
@@ -53,28 +52,28 @@ class Hdf5TomoSaver(BaseSaver):
                 self.exp.meta_data.get_meta_data('current_and_next')
 
         logging.info("saver setup: 1")
-        exp.barrier()
+        exp._barrier()
 
         count = 0
         for key in out_data_dict.keys():
             out_data = out_data_dict[key]
 
             logging.info("saver setup: 2")
-            self.exp.barrier()
-            out_data.backing_file = self.create_backing_h5(key)
+            self.exp._barrier()
+            out_data.backing_file = self.__create_backing_h5(key)
 
             logging.info("saver setup: 3")
-            self.exp.barrier()
+            self.exp._barrier()
 
             out_data.group_name, out_data.group = \
-                self.create_entries(out_data, key, current_and_next[count])
+                self.__create_entries(out_data, key, current_and_next[count])
 
             logging.info("saver setup: 4")
-            self.exp.barrier()
+            self.exp._barrier()
 
             count += 1
 
-    def create_backing_h5(self, key):
+    def __create_backing_h5(self, key):
         """
         Create a h5 backend for output data
         """
@@ -82,11 +81,20 @@ class Hdf5TomoSaver(BaseSaver):
 
         filename = expInfo.get_meta_data(["filename", key])
         if expInfo.get_meta_data("mpi") is True:
+
+            info = MPI.Info.Create()
+            info.Set("romio_ds_read", "disable")
+            info.Set("romio_ds_write", "disable")
+#            info.Set("romio_cb_read", "enable")
+#            info.Set("romio_cb_write", "disable")
             backing_file = h5py.File(filename, 'w', driver='mpio',
-                                     comm=MPI.COMM_WORLD)
+                                     comm=MPI.COMM_WORLD, info=info)
+            # fapl = backing_file.id.get_access_plist()
+            # comm, info = fapl.get_fapl_mpio()
         else:
             backing_file = h5py.File(filename, 'w')
 
+        logging.debug("creating the backing file %s", filename)
         if backing_file is None:
             raise IOError("Failed to open the hdf5 file")
 
@@ -96,9 +104,10 @@ class Hdf5TomoSaver(BaseSaver):
 
         return backing_file
 
-    def create_entries(self, data, key, current_and_next):
+    def __create_entries(self, data, key, current_and_next):
         expInfo = self.exp.meta_data
         group_name = expInfo.get_meta_data(["group_name", key])
+        data.data_info.set_meta_data('group_name', group_name)
         try:
             group_name = group_name + '_' + data.name
         except AttributeError:
@@ -109,87 +118,22 @@ class Hdf5TomoSaver(BaseSaver):
         group.attrs['signal'] = 'data'
 
         logging.info("create_entries: 1")
-        self.exp.barrier()
+        self.exp._barrier()
 
-        if data.get_variable_flag() is True:
-            dt = h5py.special_dtype(vlen=data.dtype)
-            data.data = group.create_dataset('data', data.get_shape()[:-1], dt)
+        shape = data.get_shape()
+        if current_and_next is 0:
+            data.data = group.create_dataset("data", shape, data.dtype)
         else:
-            shape = data.get_shape()
-            if current_and_next is 0:
-                data.data = group.create_dataset("data", shape,
-                                                 data.dtype)
-            else:
+            logging.info("create_entries: 2")
+            self.exp._barrier()
 
-                logging.info("create_entries: 2")
-                self.exp.barrier()
-
-                chunks = self.calculate_chunking(current_and_next, shape,
-                                                 data.dtype)
-                logging.info("create_entries: 3")
-                self.exp.barrier()
-                print "chunks = ", chunks
-                data.data = group.create_dataset("data", shape, data.dtype,
-                                                 chunks=chunks)
-                logging.info("create_entries: 4")
-                self.exp.barrier()
+            chunking = Chunking(self.exp, current_and_next)
+            chunks = chunking._calculate_chunking(shape, data.dtype)
+            logging.info("create_entries: 3")
+            self.exp._barrier()
+            data.data = group.create_dataset("data", shape, data.dtype,
+                                             chunks=chunks)
+            logging.info("create_entries: 4")
+            self.exp._barrier()
 
         return group_name, group
-
-    def calculate_chunking(self, current_and_next, shape, ttype):
-        print "shape = ", shape
-        if len(shape) < 3:
-            return True
-        current = current_and_next['current']
-        current_cores = current[current.keys()[0]]['core_dir']
-        nnext = current_and_next['next']
-
-        #print "current", current, "next", nnext
-        if nnext == []:
-            next_cores = current_cores
-        else:
-            next_cores = nnext[nnext.keys()[0]]['core_dir']
-        chunks = [1]*len(shape)
-        intersect = set(current_cores).intersection(set(next_cores))
-
-        if 'VOLUME' in current.keys()[0]:
-            for dim in range(3):
-                chunks[dim] = min(shape[dim], 64)
-        else:
-            for dim in intersect:
-                chunks[dim] = shape[dim]
-            remaining_cores = set(current_cores).difference(intersect).\
-                union(set(next_cores).difference(intersect))
-            for dim in remaining_cores:
-                chunks[dim] = min(shape[dim], 8)  # change 8 to max_shape?
-
-        if 0 in chunks:
-            return True
-        else:
-            return self.adjust_chunk_size(chunks, ttype, shape)
-
-    def adjust_chunk_size(self, chunks, ttype, shape):
-        chunks = np.array(chunks)
-        chunk_size = np.prod(chunks)*np.dtype(ttype).itemsize
-        cache_size = 1000000
-        if (chunk_size > cache_size):
-            while ((np.prod(chunks)*np.dtype(ttype).itemsize) > 1000000):
-                idx = np.argmax(chunks)
-                chunks[idx] = chunks[idx]-1
-        else:
-            next_chunks = chunks
-            while (((np.prod(next_chunks)*np.dtype(ttype).itemsize) < 1000000)
-                    and not np.array_equal(chunks, np.array(shape))):
-                chunks = copy.copy(next_chunks)
-                idx = self.get_idx(next_chunks, shape)
-                next_chunks[idx] = next_chunks[idx]+1
-        return tuple(chunks)
-
-    def get_idx(self, chunks, shape):
-        idx_order = np.argsort(chunks)
-        i = 0
-        for i in range(len(shape)):
-            if (chunks[idx_order[i]] < shape[idx_order[i]]):
-                break
-
-        return idx_order[i]

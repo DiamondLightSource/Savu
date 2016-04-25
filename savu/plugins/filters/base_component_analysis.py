@@ -13,17 +13,17 @@
 # limitations under the License.
 
 """
-.. module:: filter
+.. module:: base_component_analysis
    :platform: Unix
-   :synopsis: A base class for all standard filters
+   :synopsis: A base class for all component analysis methods
 
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
 from savu.plugins.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-
-
+import sys
+import numpy as np
 class BaseComponentAnalysis(BaseFilter, CpuPlugin):
     """
     A base plugin for doing component analysis. This sorts out the main features
@@ -39,6 +39,7 @@ class BaseComponentAnalysis(BaseFilter, CpuPlugin):
         super(BaseComponentAnalysis, self).__init__(name)
 
     def get_max_frames(self):
+        print "max frames is:"+str(self.spectra_length[0])
         return self.spectra_length[0]
 
     def get_plugin_pattern(self):
@@ -52,6 +53,7 @@ class BaseComponentAnalysis(BaseFilter, CpuPlugin):
         other_dims = in_dataset[0].get_shape()[:-1]
         num_comps = self.parameters['number_of_components']
         self.images_shape = other_dims + (num_comps,)
+        print self.images_shape
         components_shape = (num_comps,) + self.spectra_length
         # copy all required information from in_dataset[0]
 
@@ -80,3 +82,13 @@ class BaseComponentAnalysis(BaseFilter, CpuPlugin):
 
     def nOutput_datasets(self):
         return 2
+
+    def remove_nan_inf(self, data):
+        '''
+        converts the nans to nums and sets the infs to the max float size
+        not strictly true, but does allow fitting to take place
+        '''
+        data = np.nan_to_num(data)
+        data[data == np.inf] = sys.float_info.max
+        data[data == -np.inf] = -sys.float_info.max
+        return data

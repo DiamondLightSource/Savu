@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: astra_recon
+.. module:: astra_recon_gpu
    :platform: Unix
-   :synopsis: Wrapper around the Astra toolbox for reconstruction
+   :synopsis: Wrapper around the Astra toolbox for gpu reconstruction
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
@@ -30,18 +30,23 @@ from savu.plugins.utils import register_plugin
 class AstraReconGpu(BaseAstraRecon, GpuPlugin):
     """
     A Plugin to run the astra reconstruction
-    
-    :param number_of_iterations: Number of Iterations if an iterative method is used . Default: 1.
-    :param reconstruction_type: Reconstruction type (FBP_CUDA|SIRT_CUDA|SART_CUDA|CGLS_CUDA| \
-                                                     SIRT3D_CUDA|CGLS3D_CUDA). Default: 'FBP_CUDA'.
+
+    :param number_of_iterations: Number of Iterations if an iterative method\
+        is used . Default: 1.
+    :param reconstruction_type: Reconstruction type (FBP_CUDA|SIRT_CUDA|\
+        SART_CUDA|CGLS_CUDA|SIRT3D_CUDA|CGLS3D_CUDA). Default: 'FBP_CUDA'.
     """
 
     def __init__(self):
         super(AstraReconGpu, self).__init__("AstraReconGpu")
+        print "INITIALIZING astra_recon_gpu.py"
+        self.GPU_index = None
 
     def get_parameters(self):
+        print "ENTERING astra_recon_gpu.py get_parameters"
         return [self.parameters['reconstruction_type'],
-                self.parameters['number_of_iterations']]
+                self.parameters['number_of_iterations'],
+                self.GPU_index]
 
     def get_citation_information(self):
         cite_info = CitationInformation()
