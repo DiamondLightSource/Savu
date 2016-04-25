@@ -34,7 +34,8 @@ class DownsampleFilter(BaseFilter, CpuPlugin):
     A plugin to reduce the data in the selected direction by a proportion
 
     :param bin_size: Bin Size for the downsample. Default: 2.
-    :param mode: One of 'skip', 'mean', 'median', 'min', 'max'. Default: 'skip'.
+    :param mode: One of 'skip', 'mean', 'median', 'min', 'max'. Default: 'mean'.
+    :param pattern: PROJECTION or SINOGRAM. Default: PROJECTION
     """
 
     def __init__(self):
@@ -64,61 +65,20 @@ class DownsampleFilter(BaseFilter, CpuPlugin):
         result = sampler(data)
         return result
 
-    def new_slice(self, data_shape):
-        pData = self.get_plugin_in_datasets()[0]
-        core_dirs = pData.get_core_directions()
-        slice_dirs = pData.get_core_directions()
-        new_slice = [slice(None)]*len(data_shape)
-        for dim in core_dirs:
-            this_slice = slice(0, data_shape[dim], self.parameters['bin_size'])
-            new_slice[dim] = this_slice
-        return new_slice
-
-    def sub_slice(self, start, step):
-        sub_slice = [slice(None)]*len(start)
-        for index in start:
-            this_slice = slice(index, index + step)
-            sub_slice[index] = this_slice
-        return sub_slice
-
-    def bin_list(self, bins_per_core_dir):
-        index_lists = []
-        for i in bins_per_core_dir:
-            index_lists.append(range(i))
-        bin_list = itertools.product(*index_lists)
-        return bin_list
-
-    def compress_bins(self, data, compressor):
-        # Initialise result and step size
-        result = numpy.zeros(self.out_shape[1:])
-        step = self.parameters['bin_size']
-        # Convenience vars
-        pData = self.get_plugin_in_datasets()[0]
-        core_dirs = pData.get_core_directions()
-        # Number of bins per axis
-        bins_per_core_dir = [dim / step for dim in core_dirs]
-        extra_bins = [dim % step for dim in core_dirs]
-        for i in range(len(bins_per_core_dir)):
-            if extra_bins[i] > 0:
-                bins_per_core_dir[i] = bins_per_core_dir[i] + 1
-        # List of bin index combinations
-        bin_list = self.bin_list(bins_per_core_dir)
-        # Actual filtering, per bin
-        for bin in bin_list:
-            # Start index along every axis (original data)
-            start = [step*i for i in bin]
-            # Slice selector
-            sub_slice_data = self.sub_slice(start, step)
-            sub_slice_result = self.sub_slice(bin, 1)
-            # Filter function
-            result[sub_slice_result] = compressor(data[0][sub_slice_data])
-        return result
-
     def skip_sampler(self, data):
         logging.debug("Downsampling data using skip mode")
         new_slice = self.new_slice(data[0].shape)
         result = data[0][new_slice]
         return result
+
+    def new_slice(self, data_shape):
+        pData = self.get_plugin_in_datasets()[0]
+        core_dirs = pData.get_core_directions()
+        new_slice = [slice(None)]*len(data_shape)
+        for dim in core_dirs:
+            this_slice = slice(0, data_shape[dim], self.parameters['bin_size'])
+            new_slice[dim] = this_slice
+        return new_slice
 
     def mean_sampler(self, data):
         logging.debug("Downsampling data using mean mode")
@@ -140,13 +100,36 @@ class DownsampleFilter(BaseFilter, CpuPlugin):
         result = self.compress_bins(data, numpy.amax)
         return result
 
+    def compress_bins(self, data, compressor):
+        # Break up the input data
+        blocks = self.get_blocks(data, data.get_core_directions())
+        # Downsampling step
+        result = numpy.array(map(compressor, blocks))
+        # Reshape the array
+        result.shape = self.out_shape[1:]
+        return result
+
+    def get_blocks(self, data, core_dirs):
+        bin_size = self.parameters['bin_size']
+        blocks = [data]
+        for dim in core_dirs:
+            stripes = []
+            nbins = data.shape[dim] / bin_size + 1
+            bins = bin_size * numpy.arange(1, nbins)
+            for block in blocks:
+                tmp = numpy.array_split(block, bins, axis=dim)
+                for t in tmp:
+                    stripes.append(t)
+            blocks = stripes
+        return blocks
+
     def setup(self):
         # get all in and out datasets required by the plugin
         in_dataset, out_dataset = self.get_datasets()
         # get plugin specific instances of these datasets
         in_pData, out_pData = self.get_plugin_datasets()
 
-        plugin_pattern = self.get_plugin_pattern()
+        plugin_pattern = self.parameters['pattern']
         in_pData[0].plugin_data_setup(plugin_pattern, self.get_max_frames())
 
         self.out_shape = self.new_shape(in_dataset[0].get_shape(), in_pData[0])
@@ -164,3 +147,6 @@ class DownsampleFilter(BaseFilter, CpuPlugin):
             new_shape[dim] = full_shape[dim]/self.parameters['bin_size'] \
                 + full_shape[dim] % self.parameters['bin_size']
         return tuple(new_shape)
+
+    def get_max_frames(self):
+        return 1
