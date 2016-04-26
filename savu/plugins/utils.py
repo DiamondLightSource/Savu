@@ -26,6 +26,7 @@ import sys
 import re
 import logging
 import numpy as np
+import savu
 
 plugins = {}
 plugins_path = {}
@@ -213,3 +214,26 @@ def calc_param_indices(dims):
         idx = np.ravel(np.kron(range(dims[i]), np.ones((repeat, chunk))))
         indices_list.append(idx.astype(int))
     return np.transpose(np.array(indices_list))
+
+
+def get_plugins_paths():
+    """
+    This gets the plugin paths, but also adds any that are not 
+    on the pythonpath to it.
+    """
+    plugins_path = []
+    user_plugin_path = os.path.join(os.path.expanduser("~"),'savu_plugins')
+    if os.path.exists(user_plugin_path):
+        plugins_path.append(user_plugin_path)
+    env_plugins_path = os.getenv("SAVU_PLUGINS_PATH")
+    if env_plugins_path is not None:
+        for ppath in (env_plugins_path.split(':')):
+            plugins_path.append(ppath)
+    # before we add the savu plugins to the list, add all items in the list
+    # so far to the pythonpath
+    for ppath in plugins_path:
+        if ppath not in sys.path:
+            sys.path.append(ppath)
+    # now add the savu plugin path
+    plugins_path.append(savu.plugins.__path__)
+    return plugins_path
