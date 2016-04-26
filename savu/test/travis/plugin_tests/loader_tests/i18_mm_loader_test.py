@@ -27,6 +27,7 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 
 
 class I18FluoLoaderTest(unittest.TestCase):
+
     def test_i18_mm(self):
         data_file = tu.get_test_data_path('i18_test_data.nxs')
         process_file = tu.get_test_process_path('MM_i18_test.nxs')

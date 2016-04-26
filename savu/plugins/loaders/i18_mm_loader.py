@@ -15,82 +15,83 @@
 """
 .. module:: mm_loader
    :platform: Unix
-   :synopsis: A class for loading multi-modal data
+   :synopsis: A class for loading multiple data types in a multi-modal
+       experimental setup.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
 
-from savu.core.utils import logmethod
-from savu.plugins.base_loader import BaseLoader
-from savu.plugins.loaders.multi_modal_loaders.i18_loaders.i18fluo_loader import I18fluoLoader
-from savu.plugins.loaders.multi_modal_loaders.i18_loaders.i18xrd_loader import I18xrdLoader
-from savu.plugins.loaders.multi_modal_loaders.i18_loaders.i18stxm_loader import I18stxmLoader
-from savu.plugins.loaders.multi_modal_loaders.i18_loaders.i18monitor_loader import I18monitorLoader
-
 import logging
+from savu.plugins.base_loader import BaseLoader
+from savu.plugins.loaders.multi_modal_loaders.base_i18_multi_modal_loader \
+    import BaseI18MultiModalLoader
+from savu.plugins.loaders.multi_modal_loaders.i18_loaders import *
+from savu.plugins.loaders.multi_modal_loaders.i18_loaders.i18xrd_loader \
+    import I18xrdLoader as xrd
+from savu.plugins.loaders.multi_modal_loaders.i18_loaders.i18fluo_loader \
+    import I18fluoLoader as fluo
+from savu.plugins.loaders.multi_modal_loaders.i18_loaders.i18stxm_loader \
+    import I18stxmLoader as stxm
+from savu.plugins.loaders.multi_modal_loaders.i18_loaders.i18monitor_loader \
+    import I18monitorLoader as mon
 
 from savu.plugins.utils import register_plugin
+from savu.core.utils import docstring_parameter
 
 
 @register_plugin
-class I18MmLoader(BaseLoader):
-    """
-    A class to load tomography data from an NXTomo file
-    :param fast_axis: what is the fast axis called. Default:"x".
-    :param scan_pattern: what was the scan. Default: ["rotation","x"].
-    :param x: where is x in the \
-        file. Default:'entry1/raster_counterTimer01/traj1ContiniousX'.
-    :param y: where is y in the file. Default:None.
-    :param rotation: where is rotation in the \
-        file. Default:'entry1/raster_counterTimer01/sc_sample_thetafine'.
-    :param monochromator: where is the \
-        monochromator. Default: 'entry1/instrument/DCM/energy'.
-    :param stxm_detector: path to stxm. Default:'entry1/raster_counterTimer01/It'.
-    :param monitor_detector: path to stxm. Default:'entry1/raster_counterTimer01/I0'.
-    :param fluo_detector: path to stxm. Default:'entry1/xspress3/AllElementSum'.
-    :param data_path: Path to the folder containing the \
-        data. Default: 'Savu/test_data/data/image_test/tiffs'.
-    :param calibration_path: path to the calibration file. Default: "Savu/test_data/data/LaB6_calibration_output.nxs".
-    
-    """
+class I18mmLoader(BaseLoader):
+    """ Class to load multi-modal data. """
 
-    def __init__(self, name='I18MmLoader'):
-        super(I18MmLoader, self).__init__(name)
+    def __init__(self, name='I18mmLoader'):
+        super(I18mmLoader, self).__init__(name)
+        base = BaseI18MultiModalLoader()
+        base._populate_default_parameters()
+        self.doc_string = base.__doc__
+        self.dict = base.parameters
+        self.fluo_keys = self.set_params(fluo(), 'fluo')
+        self.xrd_keys = self.set_params(xrd(), 'xrd')
+        self.stxm_keys = self.set_params(stxm(), 'stxm')
+        self.mon_keys = self.set_params(mon(), 'monitor')
+        for key, value in self.dict.iteritems():
+            self.parameters[key] = value
+
+    def set_params(self, inst, name):
+        inst._populate_default_parameters()
+        copy_keys = inst.parameters.viewkeys() - self.dict.viewkeys()
+        for key in copy_keys:
+            self.parameters[key] = inst.parameters[key]
+        return list(copy_keys)
+
+    def separate_params(self, keys):
+        all_keys = self.dict.keys() + keys
+        new_dict = {}
+        for key in all_keys:
+            new_dict[key] = self.parameters[key]
+        return new_dict
+
+    @docstring_parameter(BaseI18MultiModalLoader.__doc__, xrd.__doc__,
+                         stxm.__doc__, mon.__doc__, fluo.__doc__)
+    def _override_class_docstring(self):
+        """ {0} \n {1} \n {2} \n {3} \n {4} """
+        pass
 
     def setup(self):
-#         new_dict = self.amend_dictionary()
-        
-#         try:
-#             self.setup_loader(I18fluoLoader(), self.parameters.copy())
-#             logging.debug('This file contains an fluo')
-#         except:
-#             logging.warn('This file does not contain an fluo')
-        try:
-            self.setup_loader(I18xrdLoader(), self.parameters.copy())
-            logging.debug('This file contains an xrd')
-        except:
-            logging.warn('This file does not contain an xrd')
-        try:
-            self.setup_loader(I18stxmLoader(), self.parameters.copy())
-            logging.debug('This file contains an stxm')
-        except:
-            logging.warn('This file does not contain an stxm')
+        self._data_loader(fluo(), 'fluo', self.fluo_keys)
+        self._data_loader(xrd(), 'xrd', self.xrd_keys)
+        self._data_loader(stxm(), 'stxm', self.stxm_keys)
+        self._data_loader(mon(), 'monitor', self.mon_keys)
 
+    def _data_loader(self, inst, name, key):
+        debug_str = 'This file contains an ' + name
+        warn_str = 'This file does not contain a ' + name
         try:
-            self.setup_loader(I18monitorLoader(), self.parameters.copy())
-            logging.debug('This file contains a monitor')
+            self.setup_loader(inst, self.separate_params(key))
+            logging.debug(debug_str)
         except:
-            logging.warn('This file does not contain an monitor')
+            logging.warn(warn_str)
 
     def setup_loader(self, loader, params):
-        logging.debug('I am here')
         loader._main_setup(self.exp, params)
-        logging.debug('now I am here')
-#         logging.debug('Have done the main setup on %s' % loader.__name__)
         loader.setup()
-
-    def amend_dictionary(self):
-        new_dict = self.parameters.copy()
-        del new_dict['calibration_path']
-        return new_dict

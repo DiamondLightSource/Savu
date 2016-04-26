@@ -30,6 +30,8 @@ import h5py
 import tempfile
 import logging
 import math
+import os
+import savu.test.test_utils as tu
 
 
 
@@ -77,7 +79,7 @@ class I18xrdLoader(BaseI18MultiModalLoader):
         self.set_motors(data_obj, 'xrd')
         self.add_patterns_based_on_acquisition(data_obj, 'xrd')
         self.set_data_reduction_params(data_obj)
-        calibrationfile = h5py.File(self.parameters['calibration_path'], 'r')
+        calibrationfile = h5py.File(self.get_cal_path(), 'r')
         old=0
         try:
             logging.debug('testing the version of the calibration file')
@@ -130,5 +132,12 @@ class I18xrdLoader(BaseI18MultiModalLoader):
             except KeyError:
                 logging.warn("We don't know what type of calibration file this is")
 
+
         self.set_data_reduction_params(data_obj)
         calibrationfile.close()
+
+    def get_cal_path(self):
+        path = self.parameters['calibration_path']
+        if path.split(os.sep)[0] == 'Savu':
+            path = tu.get_test_data_path(path.split('/test_data/data')[1])
+        return path
