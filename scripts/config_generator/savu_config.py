@@ -62,8 +62,10 @@ class Content(object):
             filename = self.filename
         else:
             self.filename = filename
-        print "Saving file %s" % (filename)
-        self.plugin_list._save_plugin_list(filename)
+        i = raw_input("Are you sure you want to save the current data to '%s' [y/N]" % (self.filename))
+        if i.lower() is 'y':
+            print("Saving file %s" % (filename))
+            self.plugin_list._save_plugin_list(filename)
 
     def value(self, arg):
         value = ([''.join(arg.split()[1:])][0]).split()[0]
@@ -315,6 +317,7 @@ def _rem(content, arg):
 def _exit(content, arg):
     """Close the program"""
     content.set_finished(True)
+    content.save("")
     return content
 
 commands = {'open': _open,
