@@ -67,12 +67,9 @@ class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
         wl = mData.get_meta_data('incident_wavelength')[...]*1e-9
         self.wl = wl
         px = mData.get_meta_data('x_pixel_size')[...]*1e3
-        orien = mData.get_meta_data(
-            'detector_orientation')[...].reshape((3, 3))
-        # Transform
-        yaw = math.degrees(-math.atan2(orien[2, 0], orien[2, 2]))
-        roll = math.degrees(-math.atan2(orien[0, 1], orien[1, 1]))
-        ai.setFit2D(distance, bc[0], bc[1], -yaw, roll, px, px, None)
+        yaw = -mData.get_meta_data("yaw")
+        roll = mData.get_meta_data("roll")
+        ai.setFit2D(distance, bc[0], bc[1], yaw, roll, px, px, None)
         ai.set_wavelength(wl)
 
         sh = in_d1.get_shape()

@@ -18,6 +18,7 @@
    :synopsis: A plugin to integrate azimuthally "symmetric" signals i.e. SAXS,\
        WAXS or XRD.Requires a calibration file
 
+
 .. moduleauthor:: Aaron D. Parsons <scientificsoftware@diamond.ac.uk>
 """
 
