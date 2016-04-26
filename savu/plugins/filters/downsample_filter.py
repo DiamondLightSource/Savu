@@ -33,6 +33,7 @@ class DownsampleFilter(BaseFilter, CpuPlugin):
     A plugin to reduce the data in the selected direction by a proportion
 
     :param bin_size: Bin Size for the downsample. Default: 2.
+    :param pattern: Which way to pass the data. Default: 'PROJECTION'.
     """
 
     def __init__(self):
@@ -55,14 +56,15 @@ class DownsampleFilter(BaseFilter, CpuPlugin):
     def new_slice(self, data_shape):
         pData = self.get_plugin_in_datasets()[0]
         slice_dir = pData.get_slice_dimension()
-        len_cores = len(pData.get_core_directions())
+        core_dirs = pData.get_core_directions()
+        len_cores = len(core_dirs)
         len_data = len(data_shape)
 
         if len_cores is not len(data_shape):
             core_dirs = list(set(range(len_data)).difference(set([slice_dir])))
 
         new_slice = [slice(None)]*len(data_shape)
-        for dim in core_dirs:
+        for dim in range(len_cores):
             this_slice = slice(0, data_shape[dim], self.parameters['bin_size'])
             new_slice[dim] = this_slice
         return new_slice
@@ -73,7 +75,7 @@ class DownsampleFilter(BaseFilter, CpuPlugin):
         # get plugin specific instances of these datasets
         in_pData, out_pData = self.get_plugin_datasets()
 
-        plugin_pattern = self.get_plugin_pattern()
+        plugin_pattern = self.parameters['pattern']
         in_pData[0].plugin_data_setup(plugin_pattern, self.get_max_frames())
 
         new_shape = self.new_shape(in_dataset[0].get_shape(), in_pData[0])
@@ -91,3 +93,6 @@ class DownsampleFilter(BaseFilter, CpuPlugin):
             new_shape[dim] = full_shape[dim]/self.parameters['bin_size'] \
                 + full_shape[dim] % self.parameters['bin_size']
         return tuple(new_shape)
+
+    def get_max_frames(self):
+        return 1

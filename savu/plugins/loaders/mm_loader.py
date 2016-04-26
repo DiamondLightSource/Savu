@@ -50,7 +50,7 @@ class MmLoader(BaseLoader):
             self.setup_loader(NxfluoLoader(), new_dict)
             logging.debug('This file contains an NXfluo')
         except:
-            logging.debug('This file does not contain an NXfluo')
+            logging.warn('This file does not contain an NXfluo')
         try:
             self.setup_loader(NxxrdLoader(), self.parameters)
             logging.debug('This file contains an NXxrd')
@@ -60,12 +60,12 @@ class MmLoader(BaseLoader):
             self.setup_loader(NxstxmLoader(), new_dict)
             logging.debug('This file contains an NXstxm')
         except:
-            logging.debug('This file does not contain an NXstxm')
+            logging.warn('This file does not contain an NXstxm')
         try:
             self.setup_loader(NxmonitorLoader(), new_dict)
             logging.debug('This file contains an NXmonitor')
         except:
-            logging.debug('This file does not contain an NXmonitor')
+            logging.warn('This file does not contain an NXmonitor')
 
     def setup_loader(self, loader, params):
         loader._main_setup(self.exp, params)

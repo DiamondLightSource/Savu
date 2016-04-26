@@ -20,14 +20,12 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
+
 import logging
-import sys
 
 import savu.core.utils as cu
 import savu.plugins.utils as pu
 from savu.data.experiment_collection import Experiment
-from savu.plugins.base_loader import BaseLoader
-from savu.plugins.base_saver import BaseSaver
 
 
 class PluginRunner(object):

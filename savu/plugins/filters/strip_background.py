@@ -35,7 +35,8 @@ class StripBackground(BaseFilter, CpuPlugin):
 
     :param iterations: Number of iterations. Default: 100.
     :param window: Half width of the rolling window. Default: 10.
-    :param SG_filter_iterations: How many iterations until smoothing occurs. Default: 5.
+    :param SG_filter_iterations: How many iterations until smoothing \
+        occurs. Default: 5.
     :param SG_width: Whats the savitzgy golay window. Default: 35.
     :param SG_polyorder: Whats the savitzgy-golay poly order. Default: 5.
 
@@ -55,20 +56,20 @@ class StripBackground(BaseFilter, CpuPlugin):
         SGpoly = self.parameters['SG_polyorder']
 
         npts = len(data)
-        x = np.arange(npts) # set up some x indices
+        x = np.arange(npts)  # set up some x indices
         filtered = savgol_filter(data, 35, 5) # make the start a bit a bit smoother
         # lets do it the crap, slow way first
         aved = np.zeros_like(filtered)
-        bottomedgemain=x<w
-        bottomedgerest = (x>=w) & (x<2*w)
-        
-        mainpart = (x>=w) & (x<(npts-w))
-        mainpartbottom = (x>=0) & (x<(npts-2*w))
-        mainparttop = (x>=2*w) & (x<(npts))
-        
-        topedgemain = x>=(npts-w)
-        topedgerest = (x>=(npts-2*w)) & (x>=(npts-w))
-        
+        bottomedgemain = x < w
+        bottomedgerest = (x >= w) & (x < 2*w)
+
+        mainpart = (x >= w) & (x < (npts-w))
+        mainpartbottom = (x >= 0) & (x < (npts-2*w))
+        mainparttop = (x >= 2*w) & (x < (npts))
+
+        topedgemain = x >= (npts-w)
+        topedgerest = (x >= (npts-2*w)) & (x >= (npts-w))
+
         for k in range(its):
             aved[mainpart] = (filtered[mainpartbottom] + filtered[mainpart] + filtered[mainparttop])/3. # works
             aved[bottomedgemain] = (filtered[bottomedgemain] + filtered[bottomedgerest])/2.
@@ -90,6 +91,8 @@ class StripBackground(BaseFilter, CpuPlugin):
         in_pData, out_pData = self.get_plugin_datasets()
         in_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
         out_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
+
+        logging.debug("****STRIP_BACKGROUND AXIS LABELS*** %s", stripped.get_axis_labels())
 
     def get_max_frames(self):
         """

@@ -81,8 +81,8 @@ class Preview(object):
     def _unset_preview(self):
         """ Unset preview (revert=True) if it was only required in the plugin.
         """
-        self.set_preview([])
         self._data_obj.set_shape(self.revert_shape)
+        self.set_preview([])
         self.revert_shape = None
 
     def __set_starts_stops_steps(self, starts, stops, steps, chunks,

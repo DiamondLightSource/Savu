@@ -53,6 +53,9 @@ class BaseLoader(Plugin):
         super(BaseLoader, self).__init__(name)
 
     def get_NXapp(self, ltype, nx_file, entry):
+        '''
+        finds an application definition in a nexus file
+        '''
         self.application = ltype
         nx_file[entry].visititems(self._visit_NXapp)
         return self.hits
@@ -63,6 +66,19 @@ class BaseLoader(Plugin):
                 if "definition" in obj.keys():
                     if obj["definition"].value == self.application:
                         self.hits.append(obj)
+                        
+    def get_NXdata(self,nx_file, detector_list):
+        nx_file['/'].visititems(self._visit_NXdata)
+        for detector in detector_list:
+            for nxdata in self.nxdata:
+                if detector in nxdata.keys() or detector in str(nxdata.name).split('/'):
+                    self.hits.append(nxdata)
+        return self.hits
+
+    def _visit_NXdata(self, name, obj):
+        if "NX_class" in obj.attrs.keys():
+            if obj.attrs["NX_class"] in ["NXdata"]:
+                self.hits.append(obj)
 
     def data_mapping(self):
         pass

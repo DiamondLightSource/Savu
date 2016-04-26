@@ -36,6 +36,11 @@ class PluginDriver(object):
         super(PluginDriver, self).__init__()
 
     def _run_plugin_instances(self, transport, communicator=MPI.COMM_WORLD):
+        """ Runs the pre_process, process and post_process methods.
+
+        If parameter tuning is required, loop over the methods and set the
+        correct parameters for each run. """
+
         out_data = self.get_out_datasets()
         extra_dims = self.extra_dims
         repeat = np.prod(extra_dims) if extra_dims else 1
@@ -44,8 +49,12 @@ class PluginDriver(object):
         out_data_dims = [len(d.get_shape()) for d in out_data]
         param_dims = [range(d - len(extra_dims), d) for d in out_data_dims]
 
+        if extra_dims:
+            init_vars = self.__get_local_dict()
+
         for i in range(repeat):
             if extra_dims:
+                self.__reset_local_vars(init_vars)
                 self._set_parameters_this_instance(param_idx[i])
                 for j in range(len(out_data)):
                     out_data[j]._get_plugin_data()\
@@ -65,3 +74,19 @@ class PluginDriver(object):
 
         for j in range(len(out_data)):
             out_data[j].set_shape(out_data[j].data.shape)
+
+    def __get_local_dict(self):
+        """ Gets the local variables of the class minus those from the Plugin
+        class. """
+        from savu.plugins.plugin import Plugin
+        plugin = Plugin()
+        copy_keys = vars(self).viewkeys() - vars(plugin).viewkeys()
+        copy_dict = {}
+        for key in copy_keys:
+            copy_dict[key] = getattr(self, key)
+        return copy_dict
+
+    def __reset_local_vars(self, copy_dict):
+        """ Resets the class variables in copy_dict. """
+        for key, value in copy_dict.iteritems():
+            setattr(self, key, value)

@@ -51,7 +51,7 @@ class PaganinFilter(BaseFilter, CpuPlugin):
                       " initialised")
         super(PaganinFilter, self).__init__("PaganinFilter")
         self.filtercomplex = None
-        self.count=0
+        self.count = 0
 
     def _setup_paganin(self, width, height):
         if self.filtercomplex is None:
@@ -89,9 +89,9 @@ class PaganinFilter(BaseFilter, CpuPlugin):
         return result
 
     def filter_frames(self, data):
-        if (self.count % 100 == 0 ):
-           logging.debug("... %i"%self.count)
-        self.count+=1
+        if (self.count % 100 == 0):
+            logging.debug("... %i" % self.count)
+        self.count += 1
         logging.debug("Getting the filter frame of Paganin Filter")
         data = data[0]
         logging.debug("Paganin Filter input shape %s" % str(data.shape))
