@@ -13,29 +13,28 @@
 # limitations under the License.
 
 """
-.. module:: nx_xrd_loader_test
+.. module:: tomo_recon
    :platform: Unix
-   :synopsis: testing the nx_xrd loader
+   :synopsis: runner for tests using the MPI framework
 
-.. moduleauthor:: Aaron Parsons <scientificsoftware@diamond.ac.uk>
+.. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
+
 import unittest
 from savu.test import test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
 
-class I18StxmLoaderTest(unittest.TestCase):
+class I18XrfPipelineTest(unittest.TestCase):
 
-#     @unittest.skip("the test data isn't ready yet. Adp")
-    def test_i18_stxm(self):
-#         data_file = '/dls/i18/data/2016/sp12601-1/processing/Savu_Test_Data/70214_Cat2_RT_1.nxs'
+    #@unittest.skip("Calibration file used in process list is not available as test data")
+    def test_process(self):
         data_file = tu.get_test_data_path('i18_test_data.nxs')
-        process_file = tu.get_test_process_path('basic_stxm_process_i18.nxs')
-#         process_file = tu.get_process_list_path('stxm_tomo_i18.nxs')
+#         process_file = tu.get_process_list_path('xrf_tomo_i18.nxs')
+        process_file = '/dls/mx-scratch/aaron/data/I18/paper_processing/devel_process_lists/xrf_tomo_i18.nxs'
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
-
 if __name__ == "__main__":
     unittest.main()

@@ -13,27 +13,29 @@
 # limitations under the License.
 
 """
-.. module:: nxstxm_loader
+.. module:: I18stxm_loader
    :platform: Unix
-   :synopsis: A class for loading nxstxm data
+   :synopsis: A class for loading I18's stxm data
 
-.. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
+.. moduleauthor:: Aaron Parsons <scientificsoftware@diamond.ac.uk>
 
 """
 
-from savu.plugins.loaders.base_multi_modal_loader import BaseMultiModalLoader
+from savu.plugins.loaders.multi_modal_loaders.base_i18_multi_modal_loader import BaseI18MultiModalLoader
 
 from savu.plugins.utils import register_plugin
 
 
 @register_plugin
-class NxstxmLoader(BaseMultiModalLoader):
+class I18monitorLoader(BaseI18MultiModalLoader):
     """
     A class to load tomography data from an NXstxm file
+    :param monitor_detector: path to monitor. Default:'entry1/raster_counterTimer01/I0'.
+
     """
 
-    def __init__(self, name='NxstxmLoader'):
-        super(NxstxmLoader, self).__init__(name)
+    def __init__(self, name='I18monitorLoader'):
+        super(I18monitorLoader, self).__init__(name)
 
     def setup(self):
         """
@@ -43,12 +45,10 @@ class NxstxmLoader(BaseMultiModalLoader):
         :type path: str
         """
 
-        data_str = '/instrument/detector/data'
-        data_obj, stxm_entry = self.multi_modal_setup('NXstxm', data_str)
-        mono_energy = data_obj.backing_file[
-            stxm_entry.name + '/instrument/monochromator/energy']
-        self.exp.meta_data.set_meta_data("mono_energy", mono_energy)
-        self.set_motors(data_obj, stxm_entry, 'stxm')
-
-        self.add_patterns_based_on_acquisition(data_obj, 'stxm')   
+        data_str = self.parameters['monitor_detector']
+        data_obj = self.multi_modal_setup('monitor')
+        data_obj.data = data_obj.backing_file[data_str]
+        data_obj.set_shape(data_obj.data.shape)
+        self.set_motors(data_obj, 'stxm')
+        self.add_patterns_based_on_acquisition(data_obj, 'stxm')
         self.set_data_reduction_params(data_obj)

@@ -34,15 +34,18 @@ class BaseI18MultiModalLoader(BaseMultiModalLoader):
     This class provides a base for all multi-modal loaders
     :param fast_axis: what is the fast axis called. Default:"x".
     :param scan_pattern: what was the scan. Default: ["rotation","x"].
-    :param x: where is x in the file. Default:'entry1/raster_counterTimer01/traj1ContiniousX'.
+    :param x: where is x in the \
+        file. Default:'entry1/raster_counterTimer01/traj1ContiniousX'.
     :param y: where is y in the file. Default:None.
-    :param rotation: where is rotation in the file. Default:'entry1/raster_counterTimer01/sc_sample_thetafine'.
-    :param monochromator: where is the monochromator. Default: 'entry1/instrument/DCM/energy'.
+    :param rotation: where is rotation in the \
+        file. Default:'entry1/raster_counterTimer01/sc_sample_thetafine'.
+    :param monochromator: where is the \
+        monochromator. Default: 'entry1/instrument/DCM/energy'.
     """
     def __init__(self, name='BaseI18MultiModalLoader'):
         super(BaseI18MultiModalLoader, self).__init__(name)
 
-    def multi_modal_setup(self,ltype):
+    def multi_modal_setup(self, ltype):
         # set up the file handles
         exp = self.exp
         data_obj = exp.create_data_object("in_data", ltype)
@@ -51,25 +54,25 @@ class BaseI18MultiModalLoader(BaseMultiModalLoader):
         f = data_obj.backing_file
         logging.debug("Creating file '%s' '%s'_entry",
                       data_obj.backing_file.filename, ltype)
-        exp.meta_data.set_meta_data("mono_energy",f[self.parameters['monochromator']])
+        data_obj.meta_data.set_meta_data("mono_energy",
+                                    f[self.parameters['monochromator']].value/1e3)
         x = f[self.parameters['x']].value
-        
-        
+
         if self.parameters['x'] is not None:
-            exp.meta_data.set_meta_data("x", x[0,:])
+            data_obj.meta_data.set_meta_data("x", x[0, :])
         if self.parameters['y'] is not None:
             y = f[self.parameters['y']].value
-            exp.meta_data.set_meta_data("y", y)
+            data_obj.meta_data.set_meta_data("y", y)
         if self.parameters['rotation'] is not None:
             rotation_angle = f[self.parameters['rotation']].value
             if rotation_angle.ndim > 1:
                 rotation_angle = rotation_angle[:, 0]
-                exp.meta_data.set_meta_data("rotation_angle", rotation_angle)
+
+                data_obj.meta_data.set_meta_data(
+                    "rotation_angle", rotation_angle)
         return data_obj
 
-
-
-    def set_motors(self, data_obj,ltype):
+    def set_motors(self, data_obj, ltype):
         # now lets extract the map, if there is one!
         # to begin with
         data_obj.data_mapping = DataMapping()
@@ -163,6 +166,16 @@ class BaseI18MultiModalLoader(BaseMultiModalLoader):
             logging.debug("the sino slices are:"+str(tuple(set(dims) - set(sino_dir))))
             data_obj.add_pattern("SINOGRAM", core_dir=sino_dir,
                                  slice_dir=tuple(set(dims) - set(sino_dir)))
+        
+        if ltype is 'fluo':
+            spec_core = (-1,) # it will always be this
+            spec_slice = tuple(dims[:-1])
+            logging.debug("is a fluo")
+            logging.debug("the fluo cores are:"+str(spec_core))
+            logging.debug("the fluo slices are:"+str(spec_slice))
+            data_obj.add_pattern("SPECTRUM", core_dir=spec_core,
+                                 slice_dir=spec_slice)
+        
         
         if ltype is 'xrd':
             diff_core = (-2,-1) # it will always be this
