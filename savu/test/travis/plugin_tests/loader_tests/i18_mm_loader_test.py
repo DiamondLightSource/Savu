@@ -28,11 +28,9 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 
 class I18FluoLoaderTest(unittest.TestCase):
 
-    @unittest.skip("currently working on this")
     def test_i18_mm(self):
         data_file = tu.get_test_data_path('i18_test_data.nxs')
-        #process_file = tu.get_test_process_path('MM_i18_test.nxs')
-        process_file = '/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test.nxs'
+        process_file = tu.get_test_process_path('MM_i18_test.nxs')
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
 

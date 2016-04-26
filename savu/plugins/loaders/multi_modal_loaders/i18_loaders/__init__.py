@@ -23,6 +23,4 @@ All the plugin architecture for Savu is contained here
 from os.path import dirname, basename, isfile
 import glob
 modules = glob.glob(dirname(__file__)+"/*.py")
-__all__ = [ basename(f)[:-3] for f in modules if isfile(f)]
-print __all__
-
+__all__ = [basename(f)[:-3] for f in modules if isfile(f)]
