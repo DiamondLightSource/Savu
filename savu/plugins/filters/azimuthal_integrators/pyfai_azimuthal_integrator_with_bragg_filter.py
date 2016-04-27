@@ -57,7 +57,7 @@ class PyfaiAzimuthalIntegratorWithBraggFilter(BaseAzimuthalIntegrator):
         lims = self.parameters['thresh']
         num_bins_azim = self.parameters['num_bins_azim']
         num_bins_rad = self.parameters['num_bins']
-        remapped, axis, chi = ai.integrate2d(data=data[0],npt_rad=num_bins_rad, npt_azim=num_bins_azim)
+        remapped, axis, chi = ai.integrate2d(data=data[0],npt_rad=num_bins_rad, npt_azim=num_bins_azim, unit='q_A^-1')
         mask = np.ones_like(remapped)
         row_mask = np.zeros(mask.shape[0])
         mask[remapped==0] = 0
