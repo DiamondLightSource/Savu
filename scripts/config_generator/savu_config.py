@@ -63,7 +63,7 @@ class Content(object):
         else:
             self.filename = filename
         i = raw_input("Are you sure you want to save the current data to '%s' [y/N]" % (self.filename))
-        if i.lower() is 'y':
+        if i.lower() == 'y':
             print("Saving file %s" % (filename))
             self.plugin_list._save_plugin_list(filename)
 

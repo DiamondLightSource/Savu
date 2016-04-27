@@ -21,13 +21,14 @@ while read -r a b c d; do
 	runfile=/bin/savu_launcher.sh
 	outpath=$PWD #outputting to the current folder
     
-    #datafile=/dls/i13/data/2016/mt14367-1/raw/75814.nxs
-    #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/i13_process_list_preview.nxs
+    datafile=/dls/i13/data/2016/mt14367-1/raw/75814.nxs
+    processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/i13_process_list_preview.nxs
 
-    datafile=/dls/i18/data/2016/sp12601-1/processing/Savu_Test_Data/70214_Cat2_RT_1.nxs
-    processfile=/dls/i18/data/2016/sp12601-1/processing/Savu_Test_Data/new_test_process_list.nxs
+    #datafile=/dls/i18/data/2016/sp12601-1/processing/Savu_Test_Data/70214_Cat2_RT_1.nxs
+    #processfile=/dls/i18/data/2016/sp12601-1/processing/Savu_Test_Data/new_test_process_list.nxs
 
     #datafile=$outpath/../test_data/24737.nxs
+    #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/test_data/test_process_lists/vo_centering_test.nxs
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_processes/astra_gpu_test.nxs
     #datafile=/dls/i12/data/2015/ee10500-1/processing/LD_2W50_8/LD_2W50_8_Dataset_093.nxs
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/test_data/test_process_lists/basic_tomo_process.nxs
