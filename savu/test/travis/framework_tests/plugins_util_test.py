@@ -48,5 +48,9 @@ class Test(unittest.TestCase):
         plugin = pu.load_plugin(os.path.join(savu_path, "plugin_examples", "example_median_filter"))
         self.assertEqual(plugin.name, "ExampleMedianFilter")
 
+    def test_get_plugins_paths(self):
+        paths = pu.get_plugins_paths()
+        self.assertEqual(len(paths), 1)
+
 if __name__ == "__main__":
     unittest.main()

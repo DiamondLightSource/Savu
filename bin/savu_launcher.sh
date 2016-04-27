@@ -16,11 +16,11 @@ echo "nNodes" $nNodes
 echo $outname
 
 filepath=$savupath/bin/savu_mpijob.sh
-M=$((nNodes*12))
+M=$((nNodes*20))
 
 #qsub -N $outname -sync y -j y -pe openmpi $M -l exclusive -q test-medium.q -l infiniband $filepath $savupath $datafile $processfile $outpath $nCPUs > tmp.txt
-qsub -N $outname -sync y -j y -pe openmpi $M -l exclusive -q medium.q@@com07 $filepath $savupath $datafile $processfile $outpath $nCPUs > tmp.txt
-#qsub -N $outname -sync y -j y -pe openmpi $M -l exclusive -q medium.q@@com10 $filepath $savupath $datafile $processfile $outpath $nCPUs > tmp.txt
+#qsub -N $outname -sync y -j y -pe openmpi $M -l exclusive -q medium.q@@com07 $filepath $savupath $datafile $processfile $outpath $nCPUs > tmp.txt
+qsub -N $outname -sync y -j y -pe openmpi $M -l exclusive -q medium.q@@com10 $filepath $savupath $datafile $processfile $outpath $nCPUs > tmp.txt
 
 #if [ ! -d $outpath/Profiling ]; then
 #    mkdir -p $outpath/Profiling;
