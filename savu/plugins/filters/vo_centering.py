@@ -93,6 +93,7 @@ class VoCentering(BaseFilter, CpuPlugin):
 
     def _coarse_search(self, sino):
         # search minsearch to maxsearch in 1 pixel steps
+        print self.parameters['search_area']
         smin, smax = self.parameters['search_area']
         logging.debug("SMIN and SMAX %d %d", smin, smax)
         (Nrow, Ncol) = sino.shape
