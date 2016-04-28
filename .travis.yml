@@ -33,6 +33,7 @@ install:
   - travis_wait pip install mpi4py --use-mirrors -q
   - travis_wait pip install coveralls --use-mirrors -q
   - travis_wait pip install scikit-image --use-mirrors -q
+  - travis_wait pip install pyFAI --use-mirrors -q
   
 #  - travis_wait pip install numpy --use-mirrors -q
 #  - travis_wait pip install scipy --use-mirrors -q
