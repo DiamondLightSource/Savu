@@ -31,7 +31,7 @@ class I18FluoLoaderTest(unittest.TestCase):
 #     @unittest.skip("something missing from the .nxs file?")
     def test_i18_fluo(self):
         data_file = tu.get_test_data_path('i18_test_data.nxs')
-        process_file = tu.get_test_process_path('basic_fluo_process.nxs')
+        process_file = tu.get_test_process_path('basic_fluo_process_i18.nxs')
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
 
