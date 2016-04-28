@@ -35,7 +35,7 @@ class DownsampleFilter(BaseFilter, CpuPlugin):
 
     :param bin_size: Bin Size for the downsample. Default: 2.
     :param mode: One of 'skip', 'mean', 'median', 'min', 'max'. Default: 'mean'.
-    :param pattern: PROJECTION or SINOGRAM. Default: PROJECTION
+    :param pattern: One of 'PROJECTION' or 'SINOGRAM'. Default: 'PROJECTION'.
     """
 
     def __init__(self):
@@ -108,25 +108,41 @@ class DownsampleFilter(BaseFilter, CpuPlugin):
         return result
 
     def compress_bins(self, data, compressor):
+        pData = self.get_plugin_in_datasets()[0]
         # Break up the input data
-        blocks = self.get_blocks(data, data.get_core_directions())
+        blocks = self.get_blocks(data[0], pData.get_core_directions())
         # Downsampling step
         result = numpy.array(map(compressor, blocks))
-        # Reshape the array
-        result.shape = self.out_shape[1:]
+        # Reshape the array (using Fortran-like ordering)
+        slice_dir = pData.get_slice_dimension()
+        result_shape = ()
+        for s in range(0, len(self.out_shape)):
+            if s != slice_dir:
+                result_shape = result_shape + tuple([self.out_shape[s]])
+        result = numpy.reshape(result, result_shape, order='F')
         return result
 
     def get_blocks(self, data, core_dirs):
         bin_size = self.parameters['bin_size']
+        # Initialise the list of blocks
         blocks = [data]
         for dim in core_dirs:
+            # Initialise the temporary block list
             stripes = []
-            nbins = data.shape[dim] / bin_size + 1
+            # Calculate the list of bin indices along dim
+            nbins = self.out_shape[dim]
             bins = bin_size * numpy.arange(1, nbins)
+            # Handle the fact that we're dealing with a 2d slice instead of a 3d lump
+            if dim == 0:
+                axis = dim
+            else:
+                axis = dim - 1
+            # Subdivide all current blocks
             for block in blocks:
-                tmp = numpy.array_split(block, bins, axis=dim)
+                tmp = numpy.array_split(block, bins, axis=axis)
                 for t in tmp:
                     stripes.append(t)
+            # Replace the list of blocks for the next iteration
             blocks = stripes
         return blocks
 
