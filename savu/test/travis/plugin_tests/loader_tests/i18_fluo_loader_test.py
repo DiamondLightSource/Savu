@@ -28,7 +28,7 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 
 class I18FluoLoaderTest(unittest.TestCase):
 
-    @unittest.skip("something missing from the .nxs file?")
+#     @unittest.skip("something missing from the .nxs file?")
     def test_i18_fluo(self):
         data_file = tu.get_test_data_path('i18_test_data.nxs')
         process_file = tu.get_test_process_path('basic_fluo_process.nxs')

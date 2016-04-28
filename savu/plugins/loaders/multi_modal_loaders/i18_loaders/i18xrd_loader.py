@@ -55,7 +55,6 @@ class I18xrdLoader(BaseI18MultiModalLoader):
         :param path: The full path of the NeXus file to load.
         :type path: str
         """
-        print "here"
         data_obj = self.multi_modal_setup('xrd')
         
         scan_pattern = self.parameters['scan_pattern']
@@ -67,10 +66,10 @@ class I18xrdLoader(BaseI18MultiModalLoader):
                 pattern = 'rotation_angle'
             shape.append(len(data_obj.meta_data.get_meta_data(pattern)))
 
-        path = self.parameters['data_path']
+        path = self.get_path('data_path')#self.parameters['data_path']
+        
         data_obj.data = FabIO(path, data_obj, frame_dim, shape=tuple(shape))
-        print "hello  I am here"
-        print 'the name is:'+str(data_obj.get_name())
+
         # dummy file
         filename = path.split('/')[-1] + '.h5'
         data_obj.backing_file = \
@@ -81,7 +80,7 @@ class I18xrdLoader(BaseI18MultiModalLoader):
         self.set_motors(data_obj, 'xrd')
         self.add_patterns_based_on_acquisition(data_obj, 'xrd')
         self.set_data_reduction_params(data_obj)
-        calibrationfile = h5py.File(self.get_cal_path(), 'r')
+        calibrationfile = h5py.File(self.get_path('calibration_path'), 'r')
         # lets just make this all in meters and convert for pyfai in the base integrator
         try:
             logging.debug('testing the version of the calibration file')
@@ -130,8 +129,9 @@ class I18xrdLoader(BaseI18MultiModalLoader):
         self.set_data_reduction_params(data_obj)
         calibrationfile.close()
 
-    def get_cal_path(self):
-        path = self.parameters['calibration_path']
+    def get_path(self,field):
+        path = self.parameters[field]
         if path.split(os.sep)[0] == 'Savu':
             path = tu.get_test_data_path(path.split('/test_data/data')[1])
         return path
+
