@@ -172,4 +172,5 @@ class DownsampleFilter(BaseFilter, CpuPlugin):
         return tuple(new_shape)
 
     def get_max_frames(self):
+        # This filter processes one frame at a time
         return 1
