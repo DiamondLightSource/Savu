@@ -61,19 +61,20 @@ class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
         in_d1 = in_dataset[0]
         ai = pyFAI.AzimuthalIntegrator()  # get me an integrator object
         # prep the goemtry
-        bc = [mData.get_meta_data("beam_center_x")[...],
-              mData.get_meta_data("beam_center_y")[...]]
-        distance = mData.get_meta_data('distance')[...]
-        wl = mData.get_meta_data('incident_wavelength')[...]*1e-9
+        px_m = mData.get_meta_data('x_pixel_size')
+        bc_m = [mData.get_meta_data("beam_center_x"),
+              mData.get_meta_data("beam_center_y")] # in metres
+        bc = bc_m /px_m # convert to pixels
+        px = px_m*1e6 # convert to microns
+        distance = mData.get_meta_data('distance')*1e3 # convert to mm
+        wl = mData.get_meta_data('incident_wavelength')[...]# in m
         self.wl = wl
-        px = mData.get_meta_data('x_pixel_size')[...]*1e3
-        orien = mData.get_meta_data(
-            'detector_orientation')[...].reshape((3, 3))
-        # Transform
-        yaw = math.degrees(-math.atan2(orien[2, 0], orien[2, 2]))
-        roll = math.degrees(-math.atan2(orien[0, 1], orien[1, 1]))
-        ai.setFit2D(distance, bc[0], bc[1], -yaw, roll, px, px, None)
+        
+        yaw = -mData.get_meta_data("yaw")
+        roll = mData.get_meta_data("roll")
+        ai.setFit2D(distance, bc[0], bc[1], yaw, roll, px, px, None)
         ai.set_wavelength(wl)
+        logging.debug(ai)
 
         sh = in_d1.get_shape()
 
@@ -134,7 +135,7 @@ class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
         return 1
 
     def add_axes_to_meta_data(self,axis,mData):
-        qanstrom = axis # per angstrom, pyfai is wrong
+        qanstrom = axis
         dspacing = 2*np.pi/qanstrom
         ttheta =  2*180*np.arcsin(self.wl/(2*dspacing*1e-9))/np.pi
         mData.set_meta_data('Q', qanstrom)

@@ -26,7 +26,7 @@ import logging
 from savu.plugins.base_loader import BaseLoader
 from savu.plugins.loaders.multi_modal_loaders.base_i18_multi_modal_loader \
     import BaseI18MultiModalLoader
-from savu.plugins.loaders.multi_modal_loaders.i18_loaders import *
+# from savu.plugins.loaders.multi_modal_loaders.i18_loaders import *
 from savu.plugins.loaders.multi_modal_loaders.i18_loaders.i18xrd_loader \
     import I18xrdLoader as xrd
 from savu.plugins.loaders.multi_modal_loaders.i18_loaders.i18fluo_loader \
@@ -41,11 +41,10 @@ from savu.core.utils import docstring_parameter
 
 
 @register_plugin
-class I18mmLoader(BaseLoader):
-    """ Class to load multi-modal data. """
+class I18MmLoader(BaseLoader):
 
-    def __init__(self, name='I18mmLoader'):
-        super(I18mmLoader, self).__init__(name)
+    def __init__(self, name='I18MmLoader'):
+        super(I18MmLoader, self).__init__(name)
         base = BaseI18MultiModalLoader()
         base._populate_default_parameters()
         self.doc_string = base.__doc__

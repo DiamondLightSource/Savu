@@ -22,7 +22,8 @@
 """
 import os.path as os
 import h5py
-
+import logging
+import math
 from savu.plugins.loaders.base_multi_modal_loader import BaseMultiModalLoader
 from savu.plugins.utils import register_plugin
 import savu.test.test_utils as tu
@@ -50,36 +51,52 @@ class NxxrdLoader(BaseMultiModalLoader):
 
 
         self.add_patterns_based_on_acquisition(data_obj, 'xrd')
-# #         print data_obj.data.shape
-#         slicedir = tuple(range(len(data_obj.data.shape)-2))
-# #         print "diffraction slice direction is "+str(slicedir)
-#         data_obj.add_pattern("DIFFRACTION", core_dir=(3, 4),
-#                              slice_dir=slicedir)
-# 
-#         data_obj.add_pattern("SINOGRAM", core_dir=(0, 2),
-#                              slice_dir=(1, 3, 4))
-#         data_obj.add_pattern("PROJECTION", core_dir=(1, 2),
-#                              slice_dir=(0, 3, 4))
-
 
         calibrationfile = h5py.File(self.get_cal_path(), 'r')
+        try:
+            logging.debug('testing the version of the calibration file')
+            det_str = 'entry1/instrument/detector'
+            mData = data_obj.meta_data
+            xpix = calibrationfile[det_str + '/detector_module/fast_pixel_direction'].value*1e-3 # in metres
+            mData.set_meta_data("x_pixel_size",xpix)
+            
+            mData.set_meta_data("beam_center_x",
+                    calibrationfile[det_str + '/beam_center_x'].value*1e-3) #in metres 
+            mData.set_meta_data("beam_center_y",
+                            calibrationfile[det_str + '/beam_center_y'].value*1e-3) # in metres
+            mData.set_meta_data("distance",
+                            calibrationfile[det_str + '/distance'].value*1e-3) # in metres
+            mData.set_meta_data("incident_wavelength",
+                            calibrationfile['/entry1/calibration_sample/beam'
+                                            '/incident_wavelength'].value*1e-10) # in metres
+            mData.set_meta_data("yaw", -calibrationfile[det_str + '/transformations/euler_b'].value)# in degrees
+            mData.set_meta_data("roll",calibrationfile[det_str + '/transformations/euler_c'].value-180.0)# in degrees
+            logging.debug('.... its the version in DAWN 2.0')
+        except KeyError:
+            try:
+                det_str = 'entry/instrument/detector'
+                mData = data_obj.meta_data
+                xpix = calibrationfile[det_str + '/x_pixel_size'].value * 1e-3
+                mData.set_meta_data("x_pixel_size", xpix) # in metres
+                mData.set_meta_data("beam_center_x",
+                        calibrationfile[det_str + '/beam_center_x'].value/xpix)# in metres
+                mData.set_meta_data("beam_center_y",
+                                calibrationfile[det_str + '/beam_center_y'].value/xpix) # in metres
+                mData.set_meta_data("distance",
+                                calibrationfile[det_str + '/distance'].value*1e-3) # in metres
+                mData.set_meta_data("incident_wavelength",
+                                calibrationfile['/entry/calibration_sample/beam'
+                                                '/incident_wavelength'].value*1e-10)# in metres
+                orien = calibrationfile[det_str + '/detector_orientation'][...].reshape((3, 3))
+                yaw = math.degrees(-math.atan2(orien[2, 0], orien[2, 2]))# in degrees
+                roll = math.degrees(-math.atan2(orien[0, 1], orien[1, 1]))# in degrees
+                
+                mData.set_meta_data("yaw", -yaw)
+                mData.set_meta_data("roll", roll)
+                logging.debug('.... its the legacy version pre-DAWN 2.0')
+            except KeyError:
+                logging.warn("We don't know what type of calibration file this is")
 
-
-        mData = data_obj.meta_data
-        det_str = 'entry/instrument/detector'
-        mData.set_meta_data("beam_center_x",
-                            calibrationfile[det_str + '/beam_center_x'].value)
-        mData.set_meta_data("beam_center_y",
-                            calibrationfile[det_str + '/beam_center_y'].value)
-        mData.set_meta_data("distance",
-                            calibrationfile[det_str + '/distance'].value)
-        mData.set_meta_data("incident_wavelength",
-                            calibrationfile['/entry/calibration_sample/beam'
-                                            '/incident_wavelength'].value)
-        mData.set_meta_data("x_pixel_size",
-                            calibrationfile[det_str + '/x_pixel_size'].value)
-        mData.set_meta_data("detector_orientation",
-                            calibrationfile[det_str + '/detector_orientation'].value)
 
         self.set_data_reduction_params(data_obj)
         calibrationfile.close()
