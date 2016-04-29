@@ -128,7 +128,6 @@ class BaseRecon(Plugin):
 
         # set pattern_name and nframes to process for all datasets
         out_pData[0].plugin_data_setup('VOLUME_XZ', self.get_max_frames())
-        logging.debug("****RECON AXIS LABELS*** %s", out_dataset[0].get_axis_labels())
 
     def map_volume_dimensions(self, data, pData):
         data._finalise_patterns()

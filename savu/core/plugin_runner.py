@@ -108,13 +108,24 @@ class PluginRunner(object):
 
     def __check_gpu(self):
         """ Check if the process list contains GPU processes and determine if
-        GPUs exists. """
-        import pyvidia as pv
-        if self.exp.meta_data.plugin_list._contains_gpu_processes():
-            if not pv.get_nvidia_device():
-                raise Exception("The process list contains GPU plugins, but "
-                                " no GPUs have been found.")
-            processes = self.exp.meta_data.get_meta_data('processes')
-            if len(processes) is 1 and processes[0] is 'CPU0':
-                print "adding gpu processes"
-                self.exp.meta_data.set_meta_data('processes', ['GPU0'])
+        GPUs exists. Add GPU processes to the processes list if required."""
+        import pynvml as pv
+        if not self.exp.meta_data.plugin_list._contains_gpu_processes():
+            return
+        try:
+            pv.nvmlInit()
+            count = int(pv.nvmlDeviceGetCount())
+            logging.debug("%s GPUs have been found.", count)
+        except:
+            logging.debug("No GPUs have been found.")
+            raise Exception("The process list contains GPU plugins, but "
+                            " no GPUs have been found.")
+
+        processes = self.exp.meta_data.get_meta_data('processes')
+        if not [i for i in processes if 'GPU' in i]:
+            logging.debug("GPU processes missing. GPUs found so adding them.")
+            cpus = ['CPU'+str(i) for i in range(count)]
+            gpus = ['GPU'+str(i) for i in range(count)]
+            for i in range(min(count, len(processes))):
+                processes[processes.index(cpus[i])] = gpus[i]
+            self.exp.meta_data.set_meta_data('processes', processes)
