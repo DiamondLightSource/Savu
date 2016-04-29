@@ -82,14 +82,14 @@ class VoCentering(BaseFilter, CpuPlugin):
     def _get_start_shift(self, centre):
         in_mData = self.get_in_meta_data()[0]
         if self.parameters['start_pixel'] is not None:
-            shift = self.parameters['start_pixel'] - centre
+            shift = centre - self.parameters['start_pixel']
         else:
             try:
                 # may need to change this entry: to be specified in loader
-                shift = in_mData['centre'] - centre
+                shift = centre - in_mData['centre']
             except:
                 shift = 0
-        return shift
+        return int(shift)
 
     def _coarse_search(self, sino):
         # search minsearch to maxsearch in 1 pixel steps
@@ -103,17 +103,16 @@ class VoCentering(BaseFilter, CpuPlugin):
         sino2 = np.fliplr(sino[1:])
         # This image is used for compensating the shift of sino2
         compensateimage = np.zeros((Nrow-1, Ncol), dtype=np.float32)
-        compensateimage[:] = sino[-1]
         # Start coarse search in which the shift step is 1
-        list_shift = np.arange(smin, smax + 1)
+        compensateimage[:] = sino[-1]
+        start_shift = self._get_start_shift(centre_fliplr)*2
+        list_shift = np.arange(smin, smax + 1)*2 - start_shift
+        logging.debug("%s", list_shift)
         list_metric = np.zeros(len(list_shift), dtype=np.float32)
         mask = self._create_mask(2*Nrow-1, Ncol,
                                  0.5*self.parameters['ratio']*Ncol)
 
-        # perform initial shift
-        start_shift = self._get_start_shift(centre_fliplr)
-        sino2 = np.roll(sino2, start_shift, axis=1)
-
+        count = 0
         for i in list_shift:
             logging.debug("list shift %d", i)
             sino2a = np.roll(sino2, i, axis=1)
@@ -121,10 +120,11 @@ class VoCentering(BaseFilter, CpuPlugin):
                 sino2a[:, 0:i] = compensateimage[:, 0:i]
             else:
                 sino2a[:, i:] = compensateimage[:, i:]
-            list_metric[i-smin] = np.sum(
+            list_metric[count] = np.sum(
                 np.abs(fft.fftshift(fft.fft2(np.vstack((sino, sino2a)))))*mask)
+            count += 1
         minpos = np.argmin(list_metric)
-        rot_centre = centre_fliplr + start_shift + list_shift[minpos]/2.0
+        rot_centre = centre_fliplr + list_shift[minpos]/2.0
         return rot_centre, list_metric
 
     def _fine_search(self, sino, raw_cor):
@@ -170,7 +170,6 @@ class VoCentering(BaseFilter, CpuPlugin):
         logging.debug("performing fine search")
         (cor, listmetric) = self._fine_search(sino, raw_cor)
         logging.debug("%d %d", raw_cor, cor)
-        print(raw_cor, cor)
         return [np.array([cor]), np.array([cor])]
 
     def post_process(self):
@@ -187,46 +186,9 @@ class VoCentering(BaseFilter, CpuPlugin):
             return
 
         cor_fit = np.squeeze(out_datasets[1].data[...])
-
-        # now fit the result
-        x = np.arange(cor_raw.shape[0])
-
-        # first clean all points where the derivative is too high
-        diff = np.abs(np.diff(cor_raw))
-
-        tolerance = np.median(diff)
-        diff = np.append(diff, tolerance)
-
-        x_clean = x[diff <= tolerance * 2.0]
-        cor_clean = cor_raw[diff <= tolerance * 2.0]
-
-        # set up for the iterative clean on the fit
-        cor_fit = cor_clean
-        max_disp = 1000
-        p = None
-
-        # keep fitting and removing points until the fit is within
-        # the tolerances
-        if self.parameters['no_clean']:
-            z = np.polyfit(x_clean, cor_clean, self.parameters['poly_degree'])
-            p = np.poly1d(z)
-        else:
-            while max_disp > tolerance:
-                mask = (np.abs(cor_fit-cor_clean)) < (max_disp / 2.)
-                x_clean = x_clean[mask]
-                cor_clean = cor_clean[mask]
-                z = np.polyfit(x_clean, cor_clean,
-                               self.parameters['poly_degree'])
-                p = np.poly1d(z)
-                cor_fit = p(x_clean)
-                max_disp = (np.abs(cor_fit-cor_clean)).max()
-
-        # build a full array for the output fit
-        x = np.arange(self.orig_shape[0])
-        cor_fit = p(x)
-
-        out_datasets[1].data[:] = cor_fit[:, np.newaxis]
-        # add to metadata
+        fit = np.zeros(cor_fit.shape)
+        fit[:] = np.mean(cor_fit)
+        cor_fit = fit
 
         self.populate_meta_data('cor_raw', cor_raw)
         self.populate_meta_data('centre_of_rotation', cor_fit)
@@ -246,6 +208,11 @@ class VoCentering(BaseFilter, CpuPlugin):
         in_dataset, out_dataset = self.get_datasets()
 
         self.orig_full_shape = in_dataset[0].get_shape()
+
+        # if preview parameters exist then use these
+        # else get the size of the data
+        # get n processes and take 4 different sets of 5 from the data if this is feasible based on the data size.
+        # calculate the slice list here and determine if it is feasible, else apply to max(n_processes, data_size)
 
         # reduce the data as per data_subset parameter
         in_dataset[0].get_preview().set_preview(self.parameters['preview'],
