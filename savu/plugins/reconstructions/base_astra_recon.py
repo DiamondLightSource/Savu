@@ -30,9 +30,6 @@ from savu.plugins.base_recon import BaseRecon
 class BaseAstraRecon(BaseRecon):
     """
     A Plugin to perform Astra toolbox reconstruction
-    level
-    :param center_of_rotation: Center of rotation to use for the \
-        reconstruction). Default: 0.
     """
 
     def __init__(self, name='BaseAstraRecon'):
@@ -90,13 +87,14 @@ class BaseAstraRecon(BaseRecon):
     def geom_setup_3D(self, dim_det_cols):
         pass
 
-    def array_pad(self, ctr, width):
-        pad = 1
+    def array_pad(self, ctr, nPixels):
+        width = nPixels - 1.0
         alen = ctr
         blen = width - ctr
-        mid = width / 2.0
-        p_low = pad if (ctr > mid) else (blen - alen) + pad
-        p_high = (alen - blen) + pad if (ctr > mid) else pad
+        mid = (width-1.0)/2.0
+        shift = round(abs(blen-alen))
+        p_low = 0 if (ctr > mid) else shift
+        p_high = shift + 0 if (ctr > mid) else 0
         return int(p_low), int(p_high)
 
     def cfg_setup(self):
