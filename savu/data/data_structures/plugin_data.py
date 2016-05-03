@@ -38,7 +38,7 @@ class PluginData(object):
         self.data_obj = data_obj
         self.data_obj._set_plugin_data(self)
         self.meta_data = MetaData()
-        self.padding = None
+        self.padding = {}
         # this flag determines which data is passed. If false then just the
         # data, if true then all data including dark and flat fields.
         self.selected_data = False
@@ -47,6 +47,7 @@ class PluginData(object):
         self.multi_params = {}
         self.extra_dims = []
         self._plugin = plugin
+        self.fixed_dims = False
 
     def get_total_frames(self):
         """ Get the total number of frames to process.
@@ -242,11 +243,14 @@ class PluginData(object):
             self._set_frame_chunk(gcd(frame_chunk, chunk))
         return self.meta_data.get_meta_data("nFrames")
 
-    def plugin_data_setup(self, pattern_name, chunk):
+    def plugin_data_setup(self, pattern_name, chunk, fixed=False):
         """ Setup the PluginData object.
 
         :param str pattern_name: A pattern name
         :param int chunk: Number of frames to process at a time
+        :keyword bool fixed: setting fixed=True will ensure the plugin \
+            receives the same sized data array each time (padding if necessary)
+
         """
         self.__set_pattern(pattern_name)
         chunks = \
@@ -255,3 +259,4 @@ class PluginData(object):
             self._plugin.chunk = True
         self._set_frame_chunk(chunk)
         self.__set_shape()
+        self.fixed_dims = fixed

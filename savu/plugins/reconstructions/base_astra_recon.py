@@ -45,6 +45,7 @@ class BaseAstraRecon(BaseRecon):
 
     def reconstruct_pre_process(self):
         lparams = self.get_parameters()
+        self.pad = False
         self.name = lparams[0]
         self.iters = lparams[1]
         self.alg_type = '3D' if '3D' in self.name else '2D'
@@ -55,20 +56,20 @@ class BaseAstraRecon(BaseRecon):
         self.astra_function = astra_func_map[self.alg_type]
 
         in_pData = self.get_plugin_in_datasets()[0]
-        dim_det_cols = \
+        self.dim_det_cols = \
             in_pData.get_data_dimension_by_axis_label('x', contains=True)
 
         if self.alg_type is '3D':
             self.slice_dim = in_pData.get_slice_dimension()
 
-        self.geom_setup_function(dim_det_cols)
+        self.geom_setup_function()
 
-    def geom_setup_2D(self, dim_det_cols):
+    def geom_setup_2D(self):
         in_pData = self.get_plugin_in_datasets()[0]
         cor = self.cor + self.pad_amount
 
         sino_shape = in_pData.get_shape()
-        nCols = sino_shape[dim_det_cols]
+        nCols = sino_shape[self.dim_det_cols]
         self.p_low, self.p_high = \
             self.array_pad(cor[0], nCols + 2*self.pad_amount)
         sino_width = \
@@ -84,8 +85,42 @@ class BaseAstraRecon(BaseRecon):
             proj_id = astra.create_projector('strip', self.proj_geom, vol_geom)
             self.cfg['ProjectorId'] = proj_id
 
-    def geom_setup_3D(self, dim_det_cols):
-        pass
+    def geom_setup_3D(self):
+        in_pData = self.get_plugin_in_datasets()[0]
+        sino_shape = in_pData.get_shape()
+        sino_cols = sino_shape[self.dim_det_cols] + 2*self.pad_amount
+
+        self.proj_geom = astra.create_proj_geom('parallel3d', 1.0, 1.0,
+                                                self.get_max_frames(),
+                                                sino_cols, self.angles)
+        self.proj_geom = astra.functions.geom_2vec(self.proj_geom)
+        self.proj_geom['Vectors'][:, 3] = 6.0
+        self.proj_geom['Vectors'][:, 5] = self.get_max_frames()/2.0
+        # change how this is calculated
+        vol_geom = astra.create_vol_geom(8, 160, 160)
+        self.rec_id = self.astra_function.create('-vol', vol_geom)
+        self.cfg = self.cfg_setup()
+#        self.sino_transpose = (self.slice_dim, dim_det_rows, self.dim_det_cols)
+
+#    def geom_setup_3D(self):
+#        inData = self.get_in_datasets()[0]
+#        sino_shape = inData.get_shape()
+#        sino_cols = sino_shape[self.dim_det_cols] + 2*self.pad_amount
+#
+#        proj_geom = astra.create_proj_geom('parallel3d', 1.0, 1.0,
+#                                           self.get_max_frames(),
+#                                           sino_cols, self.angles)
+#        proj_geom = astra.functions.geom_2vec(proj_geom)
+#        self.vectors = proj_geom['Vectors']
+#        self.vectors[:, 3] = 6.0
+#        self.vectors[:, 5] = self.get_max_frames()/2.0
+#        vol_geom = \
+#            astra.create_vol_geom(*[self.vol_shape[i] for i in [1, 0, 2]])
+#        self.rec_id = self.astra_function.create('-vol', vol_geom)
+#        self.cfg = self.cfg_setup()
+#        dim_det_rows = list(set([0, 1, 2]).
+#                            difference({self.slice_dim, self.dim_det_cols}))[0]
+#        self.sino_transpose = (self.slice_dim, dim_det_rows, self.dim_det_cols)
 
     def array_pad(self, ctr, nPixels):
         width = nPixels - 1.0
@@ -105,8 +140,13 @@ class BaseAstraRecon(BaseRecon):
         return cfg
 
     def reconstruct(self, sino, cors, angles, vol_shape):
-        sino = \
-            np.pad(sino, ((0, 0), (self.p_low, self.p_high)), mode='reflect')
+        print sino.shape
+        self.sino_transpose = (1, 0, 2)
+        print "processing"
+        sino = sino.transpose(self.sino_transpose)
+        if self.alg_type is '2D':
+            sino = np.pad(sino, ((0, 0), (self.p_low, self.p_high)),
+                          mode='reflect')
 
         sino_id = self.astra_function.create("-sino", self.proj_geom, sino)
         self.cfg['ProjectionDataId'] = sino_id
@@ -121,9 +161,7 @@ class BaseAstraRecon(BaseRecon):
         self.astra_function.delete(self.rec_id)
 
     def get_max_frames(self):
-        # print self.get_parameters()[0]
-        # frames = 8 if "3D" in self.get_parameters()[0] else 1
-        return 1
+        return 8 if "3D" in self.get_parameters()[0] else 1
 
 
 ## Add this as citation information:

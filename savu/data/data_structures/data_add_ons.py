@@ -128,7 +128,7 @@ class Padding(object):
         """
         core_dirs = self.pattern['core_dir']
         for core in core_dirs:
-            self.pad_direction([core, padding])
+            self.__pad_direction([core, padding])
 
     def pad_multi_frames(self, padding):
         """ Add extra frames before and after the current frame of data (i.e
@@ -141,9 +141,19 @@ class Padding(object):
         except KeyError:
             raise Exception('There is no main_dir associated with this '
                             'pattern')
-        self.pad_direction([main_dir, padding])
+        self.__pad_direction([main_dir, padding])
 
-    def pad_direction(self, pad_list):
+    def pad_directions(self, pad_list):
+        """ Pad multiple, individually specified, dimensions.
+
+        :param list(dict) pad_list: A list of single entry dictionaries, \
+            key = dimension, value = pad amount.
+        """
+        for entry in pad_list:
+            for key, value in entry.iteritems():
+                self.__pad_direction([key, value])
+
+    def __pad_direction(self, pad_list):
         """ Pad the data in a specified dimension.
 
         :param list pad_list: A list (len = 2), where the first element is the
@@ -158,6 +168,7 @@ class Padding(object):
         elif pdir in self.padding_dirs:
             warnings.warn('Padding.add_dir(): The direction ' + str(pdir) +
                           ' has already been added to the padding list.')
+            self.padding_dirs[pdir] += padding
         else:
             self.padding_dirs[pdir] = padding
 

@@ -49,7 +49,9 @@ class BaseRecon(Plugin):
 
     def pre_process(self):
         in_dataset = self.get_in_datasets()[0]
-        self.pad_dim = in_dataset.find_axis_label_dimension('x', contains=True)
+        in_pData, out_pData = self.get_plugin_datasets()
+        self.pad_dim = \
+            in_pData[0].get_data_dimension_by_axis_label('x', contains=True)
         in_meta_data = self.get_in_meta_data()[0]
         try:
             cor = in_meta_data.get_meta_data("centre_of_rotation")
@@ -59,13 +61,12 @@ class BaseRecon(Plugin):
 
         self.exp.log(self.name + " End")
         self.cor = cor
-        in_pData, out_pData = self.get_plugin_datasets()
         self.vol_shape = out_pData[0].get_shape()
         self.main_dir = in_pData[0].get_pattern()['SINOGRAM']['main_dir']
         self.angles = in_meta_data.get_meta_data('rotation_angle')
         self.slice_dirs = out_pData[0].get_slice_directions()
-        self.pad_amount = \
-            int(self.parameters['sino_pad_width'] * in_pData[0].get_shape()[1])
+        self.pad_amount = int(self.parameters['sino_pad_width'] *
+                              in_pData[0].get_shape()[self.pad_dim])
 
         self.reconstruct_pre_process()
 
@@ -106,7 +107,8 @@ class BaseRecon(Plugin):
         # set information relating to the plugin data
         in_pData, out_pData = self.get_plugin_datasets()
         # copy all required information from in_dataset[0]
-        in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
+        in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames(),
+                                      fixed=True)
 
         axis_labels = in_dataset[0].data_info.get_meta_data('axis_labels')[0]
 
@@ -127,7 +129,8 @@ class BaseRecon(Plugin):
         out_dataset[0].add_volume_patterns(dim_volX, dim_volY, dim_volZ)
 
         # set pattern_name and nframes to process for all datasets
-        out_pData[0].plugin_data_setup('VOLUME_XZ', self.get_max_frames())
+        out_pData[0].plugin_data_setup('VOLUME_XZ', self.get_max_frames(),
+                                       fixed=True)
 
     def map_volume_dimensions(self, data, pData):
         data._finalise_patterns()

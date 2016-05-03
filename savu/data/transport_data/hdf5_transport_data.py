@@ -439,13 +439,20 @@ class Hdf5TransportData(object):
         pData = self._get_plugin_data()
         padding = Padding(pData.get_pattern())
         for key in pData.padding.keys():
+            print key, pData.padding[key]
             getattr(padding, key)(pData.padding[key])
+        print "**********************************************************"
+        print padding._get_padding_directions()
         return padding._get_padding_directions()
 
     def _get_padded_slice_data(self, input_slice_list):
         slice_list = list(input_slice_list)
         pData = self._get_plugin_data()
-        if pData.padding is None:
+
+        if pData.fixed_dims is True:
+            self.__matching_dims(pData, input_slice_list)
+
+        if not pData.padding:
             return self.data[tuple(slice_list)]
 
         padding_dict = self.__get_padding_dict()
@@ -459,12 +466,26 @@ class Hdf5TransportData(object):
                                                padding_dict[direction],
                                                self.get_shape()[direction])
 
-        temp = self.__get_pad_data(tuple(slice_list), tuple(pad_list))
-        return temp
+        return self.__get_pad_data(tuple(slice_list), tuple(pad_list))
+
+    def __matching_dims(self, pData, slice_list):
+        """ Ensure each chunk of frames passed to the plugin has the same \
+        (max_frames) size.
+        """
+        slice_dir = pData.get_slice_directions()[0]
+        sl = slice_list[slice_dir]
+        max_frames = self._get_plugin_data()._get_frame_chunk()
+        diff = max_frames - len(range(sl.start, sl.stop, sl.step))
+        diff = 2
+        if diff:
+            try:
+                pData.padding['pad_directions'].append({slice_dir: diff})
+            except:
+                pData.padding['pad_directions'] = [{slice_dir: diff}]
 
     def _get_unpadded_slice_data(self, input_slice_list, padded_dataset):
         padding_dict = self._get_plugin_data().padding
-        if padding_dict is None:
+        if not padding_dict:
             return padded_dataset
 
         padding_dict = self.__get_padding_dict()
