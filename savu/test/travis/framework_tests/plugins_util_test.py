@@ -52,5 +52,15 @@ class Test(unittest.TestCase):
         paths = pu.get_plugins_paths()
         self.assertEqual(len(paths), 1)
 
+    def test_get_plugins_paths2(self):
+        os.environ["SAVU_PLUGINS_PATH"] = "/tmp/"
+        paths = pu.get_plugins_paths()
+        self.assertEqual(len(paths), 2)
+
+    def test_get_plugins_paths3(self):
+        os.environ["SAVU_PLUGINS_PATH"] = "/tmp/:/dev/:/home/"
+        paths = pu.get_plugins_paths()
+        self.assertEqual(len(paths), 4)
+
 if __name__ == "__main__":
     unittest.main()
