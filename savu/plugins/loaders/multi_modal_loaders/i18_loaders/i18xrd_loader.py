@@ -28,6 +28,11 @@ from savu.data.data_structures.data_type import FabIO
 from savu.plugins.utils import register_plugin
 import h5py
 import tempfile
+import logging
+import math
+import os
+import savu.test.test_utils as tu
+
 
 
 @register_plugin
@@ -35,7 +40,7 @@ class I18xrdLoader(BaseI18MultiModalLoader):
     """
     A class to load tomography data from an NXstxm file
     :param data_path: Path to the folder containing the \
-        data. Default: '../../../test_data/data/image_test/tiffs'.
+        data. Default: 'Savu/test_data/data/image_test/tiffs'.
     :param calibration_path: path to the calibration \
         file. Default: "Savu/test_data/data/LaB6_calibration_output.nxs".
     """
@@ -50,20 +55,21 @@ class I18xrdLoader(BaseI18MultiModalLoader):
         :param path: The full path of the NeXus file to load.
         :type path: str
         """
-        print "here"
         data_obj = self.multi_modal_setup('xrd')
-
+        
         scan_pattern = self.parameters['scan_pattern']
         frame_dim = range(len(scan_pattern))
         shape = []
+        
         for pattern in self.parameters['scan_pattern']:
             if pattern == 'rotation':
                 pattern = 'rotation_angle'
             shape.append(len(data_obj.meta_data.get_meta_data(pattern)))
 
-        path = self.parameters['data_path']
+        path = self.get_path('data_path')#self.parameters['data_path']
+        
         data_obj.data = FabIO(path, data_obj, frame_dim, shape=tuple(shape))
-        print 'the name is:'+str(data_obj.get_name())
+
         # dummy file
         filename = path.split('/')[-1] + '.h5'
         data_obj.backing_file = \
@@ -74,24 +80,58 @@ class I18xrdLoader(BaseI18MultiModalLoader):
         self.set_motors(data_obj, 'xrd')
         self.add_patterns_based_on_acquisition(data_obj, 'xrd')
         self.set_data_reduction_params(data_obj)
-
-        calibrationfile = h5py.File(self.parameters['calibration_path'], 'r')
-
-        mData = data_obj.meta_data
-        det_str = 'entry/instrument/detector'
-        mData.set_meta_data("beam_center_x",
-                            calibrationfile[det_str + '/beam_center_x'].value)
-        mData.set_meta_data("beam_center_y",
-                            calibrationfile[det_str + '/beam_center_y'].value)
-        mData.set_meta_data("distance",
-                            calibrationfile[det_str + '/distance'].value)
-        mData.set_meta_data("incident_wavelength",
-                            calibrationfile['/entry/calibration_sample/beam'
-                                            '/incident_wavelength'].value)
-        mData.set_meta_data("x_pixel_size",
-                            calibrationfile[det_str + '/x_pixel_size'].value)
-        mData.set_meta_data("detector_orientation",
-                            calibrationfile[det_str + '/detector_orientation'].value)
+        calibrationfile = h5py.File(self.get_path('calibration_path'), 'r')
+        # lets just make this all in meters and convert for pyfai in the base integrator
+        try:
+            logging.debug('testing the version of the calibration file')
+            det_str = 'entry1/instrument/detector'
+            mData = data_obj.meta_data
+            xpix = calibrationfile[det_str + '/detector_module/fast_pixel_direction'].value*1e-3 # in metres
+            mData.set_meta_data("x_pixel_size",xpix)
+            
+            mData.set_meta_data("beam_center_x",
+                    calibrationfile[det_str + '/beam_center_x'].value*1e-3) #in metres 
+            mData.set_meta_data("beam_center_y",
+                            calibrationfile[det_str + '/beam_center_y'].value*1e-3) # in metres
+            mData.set_meta_data("distance",
+                            calibrationfile[det_str + '/distance'].value*1e-3) # in metres
+            mData.set_meta_data("incident_wavelength",
+                            calibrationfile['/entry1/calibration_sample/beam'
+                                            '/incident_wavelength'].value*1e-10) # in metres
+            mData.set_meta_data("yaw", -calibrationfile[det_str + '/transformations/euler_b'].value)# in degrees
+            mData.set_meta_data("roll",calibrationfile[det_str + '/transformations/euler_c'].value-180.0)# in degrees
+            logging.debug('.... its the version in DAWN 2.0')
+        except KeyError:
+            try:
+                det_str = 'entry/instrument/detector'
+                mData = data_obj.meta_data
+                xpix = calibrationfile[det_str + '/x_pixel_size'].value * 1e-3
+                mData.set_meta_data("x_pixel_size", xpix) # in metres
+                mData.set_meta_data("beam_center_x",
+                        calibrationfile[det_str + '/beam_center_x'].value/xpix)# in metres
+                mData.set_meta_data("beam_center_y",
+                                calibrationfile[det_str + '/beam_center_y'].value/xpix) # in metres
+                mData.set_meta_data("distance",
+                                calibrationfile[det_str + '/distance'].value*1e-3) # in metres
+                mData.set_meta_data("incident_wavelength",
+                                calibrationfile['/entry/calibration_sample/beam'
+                                                '/incident_wavelength'].value*1e-10)# in metres
+                orien = calibrationfile[det_str + '/detector_orientation'][...].reshape((3, 3))
+                yaw = math.degrees(-math.atan2(orien[2, 0], orien[2, 2]))# in degrees
+                roll = math.degrees(-math.atan2(orien[0, 1], orien[1, 1]))# in degrees
+                
+                mData.set_meta_data("yaw", -yaw)
+                mData.set_meta_data("roll", roll)
+                logging.debug('.... its the legacy version pre-DAWN 2.0')
+            except KeyError:
+                logging.warn("We don't know what type of calibration file this is")
 
         self.set_data_reduction_params(data_obj)
         calibrationfile.close()
+
+    def get_path(self,field):
+        path = self.parameters[field]
+        if path.split(os.sep)[0] == 'Savu':
+            path = tu.get_test_data_path(path.split('/test_data/data')[1])
+        return path
+

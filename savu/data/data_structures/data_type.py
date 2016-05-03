@@ -57,12 +57,9 @@ class FabIO(DataTypes):
         size = [len(np.arange(i.start, i.stop, i.step)) for i in index]
         data = np.empty(size)
         tiffidx = [i for i in range(len(index)) if i not in self.frame_dim]
-#        print "original = ", index
         index, frameidx = self.__get_indices(index, size)
 
         for i in range(len(frameidx)):
-#            print "amended = ", index[i]
-#            print frameidx[i], [index[i][n] for n in tiffidx]
             data[index[i]] = \
                 self.start_file.getframe(self.start_no + frameidx[i])\
                 .data[[index[i][n] for n in tiffidx]]
@@ -74,7 +71,6 @@ class FabIO(DataTypes):
         self.nFrames = len(files)
         fname = sorted(files)[0]
         self.start_no = [int(s) for s in re.findall(r'\d+', fname)][-1]
-        print "start number is", self.start_no
         return folder + "/" + fname
 
     def get_shape(self):

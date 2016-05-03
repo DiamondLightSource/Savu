@@ -44,8 +44,8 @@ class I18monitorLoader(BaseI18MultiModalLoader):
         :param path: The full path of the NeXus file to load.
         :type path: str
         """
-        
-        data_str = self.parameters['stxm_detector']
+
+        data_str = self.parameters['monitor_detector']
         data_obj = self.multi_modal_setup('monitor')
         data_obj.data = data_obj.backing_file[data_str]
         data_obj.set_shape(data_obj.data.shape)

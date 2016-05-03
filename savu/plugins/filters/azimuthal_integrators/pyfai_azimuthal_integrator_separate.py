@@ -53,7 +53,7 @@ class PyfaiAzimuthalIntegratorSeparate(BaseAzimuthalIntegrator):
         num_bins_rad = self.parameters['num_bins']
         percentile = self.parameters['percentile']
         spots, powder = ai.separate(data[0], npt_rad=num_bins_rad, npt_azim=num_bins_azim, percentile=percentile)
-        axis, spectra = ai.integrate1d(data=powder,npt=num_bins_rad, unit='q_nm^-1')
+        axis, spectra = ai.integrate1d(data=powder,npt=num_bins_rad, unit='q_A^-1')
         self.add_axes_to_meta_data(axis,mData)
         return [spectra, spots]
 
