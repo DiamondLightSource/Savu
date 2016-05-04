@@ -58,14 +58,20 @@ class Content(object):
         print '\n', self.plugin_list._get_string(**kwargs), '\n'
 
     def save(self, filename):
-        if filename == "":
-            filename = self.filename
-        else:
+        if filename is not "" and filename is not "exit":
             self.filename = filename
-        i = raw_input("Are you sure you want to save the current data to '%s' [y/N]" % (self.filename))
+
+        if filename == "exit":
+            i = raw_input("Are you sure? [y/N]")
+            return True if i.lower() == 'y' else False
+
+        i = raw_input("Are you sure you want to save the current data to "
+                      "'%s' [y/N]" % (self.filename))
         if i.lower() == 'y':
-            print("Saving file %s" % (filename))
-            self.plugin_list._save_plugin_list(filename)
+            print("Saving file %s" % (self.filename))
+            self.plugin_list._save_plugin_list(self.filename)
+        else:
+            print("The process list has NOT been saved.")
 
     def value(self, arg):
         value = ([''.join(arg.split()[1:])][0]).split()[0]
@@ -316,8 +322,7 @@ def _rem(content, arg):
 
 def _exit(content, arg):
     """Close the program"""
-    content.set_finished(True)
-    content.save("")
+    content.set_finished(content.save("exit"))
     return content
 
 commands = {'open': _open,

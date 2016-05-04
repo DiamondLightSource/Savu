@@ -21,11 +21,12 @@
 
 """
 import logging
+import numpy
+import itertools
 
 from savu.plugins.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
-
 
 @register_plugin
 class DownsampleFilter(BaseFilter, CpuPlugin):
@@ -33,13 +34,20 @@ class DownsampleFilter(BaseFilter, CpuPlugin):
     A plugin to reduce the data in the selected direction by a proportion
 
     :param bin_size: Bin Size for the downsample. Default: 2.
-    :param pattern: Which way to pass the data. Default: 'PROJECTION'.
+    :param mode: One of 'skip', 'mean', 'median', 'min', 'max'. Default: 'mean'.
+    :param pattern: One of 'PROJECTION' or 'SINOGRAM'. Default: 'PROJECTION'.
     """
 
     def __init__(self):
         logging.debug("Starting Downsample Filter")
         super(DownsampleFilter,
               self).__init__("DownsampleFilter")
+        self.out_shape = None
+        self.mode_dict = { 'skip'  : self.skip_sampler,
+                           'mean'  : self.mean_sampler,
+                           'median': self.median_sampler,
+                           'min'   : self.min_sampler,
+                           'max'   : self.max_sampler }
 
     def get_output_shape(self, input_data):
         input_shape = input_data.get_shape()
@@ -49,6 +57,16 @@ class DownsampleFilter(BaseFilter, CpuPlugin):
 
     def filter_frames(self, data):
         logging.debug("Running Downsample data")
+        if self.parameters['mode'] in self.mode_dict:
+            sampler = self.mode_dict[self.parameters['mode']]
+        else:
+            logging.debug("Warning: unknown downsample mode. Using 'skip'.")
+            sampler = self.skip_sampler
+        result = sampler(data)
+        return result
+
+    def skip_sampler(self, data):
+        logging.debug("Downsampling data using skip mode")
         new_slice = self.new_slice(data[0].shape)
         result = data[0][new_slice]
         return result
@@ -69,6 +87,65 @@ class DownsampleFilter(BaseFilter, CpuPlugin):
             new_slice[dim] = this_slice
         return new_slice
 
+    def mean_sampler(self, data):
+        logging.debug("Downsampling data using mean mode")
+        result = self.compress_bins(data, numpy.mean)
+        return result
+
+    def median_sampler(self, data):
+        logging.debug("Downsampling data using median mode")
+        result = self.compress_bins(data, numpy.median)
+        return result
+
+    def min_sampler(self, data):
+        logging.debug("Downsampling data using median mode")
+        result = self.compress_bins(data, numpy.amin)
+        return result
+
+    def max_sampler(self, data):
+        logging.debug("Downsampling data using median mode")
+        result = self.compress_bins(data, numpy.amax)
+        return result
+
+    def compress_bins(self, data, compressor):
+        pData = self.get_plugin_in_datasets()[0]
+        # Break up the input data
+        blocks = self.get_blocks(data[0], pData.get_core_directions())
+        # Downsampling step
+        result = numpy.array(map(compressor, blocks))
+        # Reshape the array (using Fortran-like ordering)
+        slice_dir = pData.get_slice_dimension()
+        result_shape = ()
+        for s in range(0, len(self.out_shape)):
+            if s != slice_dir:
+                result_shape = result_shape + tuple([self.out_shape[s]])
+        result = numpy.reshape(result, result_shape, order='F')
+        return result
+
+    def get_blocks(self, data, core_dirs):
+        bin_size = self.parameters['bin_size']
+        # Initialise the list of blocks
+        blocks = [data]
+        for dim in core_dirs:
+            # Initialise the temporary block list
+            stripes = []
+            # Calculate the list of bin indices along dim
+            nbins = self.out_shape[dim]
+            bins = bin_size * numpy.arange(1, nbins)
+            # Handle the fact that we're dealing with a 2d slice instead of a 3d lump
+            if dim == 0:
+                axis = dim
+            else:
+                axis = dim - 1
+            # Subdivide all current blocks
+            for block in blocks:
+                tmp = numpy.array_split(block, bins, axis=axis)
+                for t in tmp:
+                    stripes.append(t)
+            # Replace the list of blocks for the next iteration
+            blocks = stripes
+        return blocks
+
     def setup(self):
         # get all in and out datasets required by the plugin
         in_dataset, out_dataset = self.get_datasets()
@@ -78,11 +155,11 @@ class DownsampleFilter(BaseFilter, CpuPlugin):
         plugin_pattern = self.parameters['pattern']
         in_pData[0].plugin_data_setup(plugin_pattern, self.get_max_frames())
 
-        new_shape = self.new_shape(in_dataset[0].get_shape(), in_pData[0])
+        self.out_shape = self.new_shape(in_dataset[0].get_shape(), in_pData[0])
 
         out_dataset[0].create_dataset(patterns=in_dataset[0],
                                       axis_labels=in_dataset[0],
-                                      shape=new_shape)
+                                      shape=self.out_shape)
 
         out_pData[0].plugin_data_setup(plugin_pattern, self.get_max_frames())
 
@@ -95,4 +172,5 @@ class DownsampleFilter(BaseFilter, CpuPlugin):
         return tuple(new_shape)
 
     def get_max_frames(self):
+        # This filter processes one frame at a time
         return 1

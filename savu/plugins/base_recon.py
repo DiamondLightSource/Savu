@@ -32,7 +32,7 @@ class BaseRecon(Plugin):
     A base class for reconstruction plugins
 
     :param center_of_rotation: Centre of rotation to use for the \
-        reconstruction. Default: 86.
+        reconstruction. Default: 0.0.
     :param in_datasets: Create a list of the dataset(s) to \
         process. Default: [].
     :param out_datasets: Create a list of the dataset(s) to \
