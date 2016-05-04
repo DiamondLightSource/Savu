@@ -41,7 +41,7 @@ class PyfaiAzimuthalIntegratorWithBraggFilter(BaseAzimuthalIntegrator):
 
     :param use_mask: Should we mask. Default: False.
     :param num_bins: number of bins. Default: 1005.
-    :param num_bins_azim: number of bins. Default: 20.
+    :param num_bins_azim: number of bins. Default: 200.
     :param thresh: threshold of percentile filter. Default: [5,95].
     """
 
@@ -61,12 +61,22 @@ class PyfaiAzimuthalIntegratorWithBraggFilter(BaseAzimuthalIntegrator):
         mask = np.ones_like(remapped)
         row_mask = np.zeros(mask.shape[0])
         mask[remapped==0] = 0
+#         print "the shape of the mask is"+str(mask.shape)
+#         print "the shape of remapped is"+str(remapped.shape)
         out = np.zeros(mask.shape[1])
+#         print "the shape of out is"+str(out.shape)
         for i in range(mask.shape[1]):
-            foo = remapped[:,i][mask[:,i] == 1]
-            top = np.percentile(foo,lims[1])
-            bottom = np.percentile(foo,lims[0])
-            out[i] = np.mean(np.clip(foo,bottom,top))
+#             print i
+            idx = mask[:,i] == 1
+            if np.sum(idx*1)==0:
+                logging.warn("Found a bin where all the pixels are masked! Bin num: %s" % str(i))
+                out[i] = 0.0
+            else:
+                foo = remapped[:,i][idx]
+#                 print "the shape here is:"+str(foo.shape)
+                top = np.percentile(foo,lims[1])
+                bottom = np.percentile(foo,lims[0])
+                out[i] = np.mean(np.clip(foo,bottom,top))
         self.add_axes_to_meta_data(axis,mData)
         return out
 
