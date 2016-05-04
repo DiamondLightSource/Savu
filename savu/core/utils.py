@@ -135,3 +135,10 @@ def add_user_log_handler(logger, user_log_path):
     logger.addHandler(fh)
     USER_LOG_HANDLER = fh
     user_message("User Log Started")
+
+
+def add_syslog_log_handler(logger, syslog_address, syslog_port):
+    syslog = logging.handlers.SysLogHandler(address = (syslog_address, syslog_port))
+    syslog.setFormatter(logging.Formatter('SAVU::%(message)s'))
+    syslog.setLevel(USER_LOG_LEVEL) # only log user log messages
+    logger.addHandler(syslog)
