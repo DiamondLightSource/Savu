@@ -60,7 +60,7 @@ class DownsampleFilter(BaseFilter, CpuPlugin):
         if self.parameters['mode'] in self.mode_dict:
             sampler = self.mode_dict[self.parameters['mode']]
         else:
-            logging.debug("Warning: unknown downsample mode. Using 'skip'.")
+            logging.warning("Unknown downsample mode. Using 'skip'.")
             sampler = self.skip_sampler
         result = sampler(data)
         return result
