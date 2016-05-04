@@ -68,8 +68,11 @@ class Chunking(object):
         else:
             chunks = self.__adjust_chunk_size(chunks, ttype, shape, adjust)
             logging.debug("chunks before %s", chunks)
-            for chunk in chunks:
-                chunk += 1
+            # Adding one to each chunking dimension as hdf5/h5py? bug fix
+            chunks = list(chunks)
+            for i in range(len(chunks)):
+                if (chunks[i] + 1) < shape[i]:
+                    chunks[i] += 1
             logging.debug("chunks after %s", chunks)
             return tuple(chunks)
 
