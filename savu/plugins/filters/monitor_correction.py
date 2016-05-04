@@ -31,10 +31,10 @@ class MonitorCorrection(BaseFilter, CpuPlugin):
     """
     corrects the data to the monitor counts.
     This plugin corrects data[0] from data[1] by dividing. We allow a scale and offset due to I18's uncalibrated ic
-    :param nominator_scale: Threshold for peak detection Default: 1.0.
-    :param nominator_offset: Threshold for peak detection Default: 0.0.
-    :param denominator_scale: Threshold for peak detection Default: 1.0.
-    :param denominator_offset: Threshold for peak detection Default: 0.0.
+    :param nominator_scale: a. Default: 1.0.
+    :param nominator_offset: b. Default: 0.0.
+    :param denominator_scale: c. Default: 1.0.
+    :param denominator_offset: d. Default: 0.0.
     """
 
     def __init__(self):
