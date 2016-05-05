@@ -116,14 +116,15 @@ class Hdf5Transport(TransportControl):
         cu.add_user_log_level()
         cu.add_user_log_handler(logger, os.path.join(options["log_path"],
                                                      'user.log'))
-        try:
-            cu.add_syslog_log_handler(logger,
-                                  options['syslog_server'],
-                                  options['syslog_port'])
-        except:
-            logger.warn("Unable to add syslog logging for server %s on port %i",
-                        options['syslog_server'],
-                        options['syslog_port'])
+        if 'syslog_server' in options.keys():
+            try:
+                cu.add_syslog_log_handler(logger,
+                                      options['syslog_server'],
+                                      options['syslog_port'])
+            except:
+                logger.warn("Unable to add syslog logging for server %s on port %i",
+                            options['syslog_server'],
+                            options['syslog_port'])
 
     def __set_logger_parallel(self, number, rank, options):
         """ Set parallel logger.
@@ -142,14 +143,15 @@ class Hdf5Transport(TransportControl):
             cu.add_user_log_handler(logger,
                                     os.path.join(options["out_path"],
                                                  'user.log'))
-            try:
-                cu.add_syslog_log_handler(logger,
-                                          options['syslog_server'],
-                                          options['syslog_port'])
-            except:
-                logger.warn("Unable to add syslog logging for server %s on port %i",
-                            options['syslog_server'],
-                            options['syslog_port'])
+            if 'syslog_server' in options.keys():
+                try:
+                    cu.add_syslog_log_handler(logger,
+                                              options['syslog_server'],
+                                              options['syslog_port'])
+                except:
+                    logger.warn("Unable to add syslog logging for server %s on port %i",
+                                options['syslog_server'],
+                                options['syslog_port'])
 
     def _transport_run_plugin_list(self):
         """ Run the plugin list inside the transport layer.
