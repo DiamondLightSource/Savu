@@ -66,7 +66,8 @@ class BaseFluoFitter(BaseFitter):
         # set up the output datasets that are created by the plugin
         in_dataset, out_datasets = self.get_datasets()
         in_meta_data = in_dataset[0].meta_data
-#         print in_meta_data.get_meta_data("energy")
+#         print in_meta_data.__dict__
+        print "In base fluo-fitter"+str(in_meta_data.get_meta_data('energy'))
         shape = in_dataset[0].get_shape()
         axis_labels = ['-1.PeakIndex.pixel.unit']
         pattern_list = ['SINOGRAM', 'PROJECTION']
