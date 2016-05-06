@@ -30,9 +30,8 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 class SimpleFitReconTest(unittest.TestCase):
 
     def test_process(self):
-
         data_file = tu.get_test_data_path('mm.nxs')
-        process_file = tu.get_test_process_path('testing_mm_sart_recon.nxs')
+        process_file = tu.get_test_process_path('simple_fit_test_XRF_tomo.nxs')
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
 
