@@ -44,23 +44,33 @@ class HoganAbsorptionCorrection(BaseAbsorptionCorrection):
         density = self.parameters['density']
         mData = self.get_in_meta_data()[0]
         mono_energy = mData.get_meta_data('mono_energy')
-        peak_energy = mData.get_meta_data('peak_energy')
+        peak_energy = mData.get_meta_data('PeakEnergy')
         pump_mu = self.get_mu(compound, float(mono_energy), density)
         peak_mu = self.get_mu(compound, list(peak_energy), density)
         self.atten_ratio = [pm/pump_mu for pm in peak_mu]
         logging.debug('The test attenuation ratios should be:[25.651, 20.909, 2.903, 2.198],'
                             'they are: %s' % self.atten_ratio)
+        theta = mData.get_meta_data('rotation_angle')
+        self.dtheta = theta[1]-theta[0]
+        logging.debug('The rotation step is %s' % str(self.dtheta))
+        if np.abs(self.dtheta)>10.0:
+            logging.warn('The theta step is greater than 10 degrees! Watch out!')
+        self.npix_displacement = self.parameters['azimuthal_offset']//self.dtheta
+        logging.debug('This gives a pixel offset of %s' % str(self.npix_displacement))
+        
 
     def filter_frames(self, data):
         xrf = data[0]
-        stxm = data[1]
-        logging.debug('the xrf shape is %s' % xrf.shape)
-        logging.debug('the stxm shape is %s' % stxm.shape)
+        stxm_orig = data[1]
+        logging.debug('the xrf shape is %s' % str(xrf.shape))
+        logging.debug('the stxm shape is %s' % str(stxm_orig.shape))
         # take the log here, we assume it is monitor corrected already
-        absorption = -np.log10(stxm)
+        stxm = -np.log10(stxm_orig)
+        # now correct for the rotation offset
+        absorption = np.roll(stxm,int(self.npix_displacement), axis=0)
         num_channels = self.get_num_channels()
         corrected_xrf = np.zeros_like(xrf)
-        for i in range(len(num_channels)):
+        for i in range(num_channels):
             fluo_sino = xrf[:,:,i]
             corrected_xrf[:,:,i] = self.correct_sino(absorption, fluo_sino, self.atten_ratio[i])
         return corrected_xrf

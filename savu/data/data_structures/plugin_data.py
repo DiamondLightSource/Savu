@@ -65,7 +65,7 @@ class PluginData(object):
     def __set_pattern(self, name):
         """ Set the pattern related information int the meta data dict.
         """
-        print self.data_obj.get_data_patterns()
+#         print self.data_obj.get_data_patterns()
         pattern = self.data_obj.get_data_patterns()[name]
         
         self.meta_data.set_meta_data("name", name)
