@@ -66,8 +66,8 @@ class BaseLoader(Plugin):
                 if "definition" in obj.keys():
                     if obj["definition"].value == self.application:
                         self.hits.append(obj)
-                        
-    def get_NXdata(self,nx_file, detector_list):
+
+    def get_NXdata(self, nx_file, detector_list):
         nx_file['/'].visititems(self._visit_NXdata)
         for detector in detector_list:
             for nxdata in self.nxdata:
