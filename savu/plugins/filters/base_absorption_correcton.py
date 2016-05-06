@@ -34,7 +34,6 @@ class BaseAbsorptionCorrection(BaseFilter, CpuPlugin):
     :param azimuthal_offset: angle between detectors. Default: 90.0.
     :param density: the density. Default: 3.5377.
     :param compound: the compount. Default: 'Co0.1Re0.01Ti0.05(SiO2)0.84'.
-    
     """
 
     def __init__(self, name):
@@ -46,8 +45,9 @@ class BaseAbsorptionCorrection(BaseFilter, CpuPlugin):
         in_dataset, out_datasets = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
         in_meta_data = in_dataset[0].meta_data
+
         idx = in_meta_data.get_meta_data("PeakIndex")
-        self.nChannels = len(idx) 
+        self.nChannels = len(idx)
         in_pData[0].plugin_data_setup('SINOGRAM', self.get_num_channels())
         in_pData[1].plugin_data_setup('SINOGRAM', 1.0)
         spectra = out_datasets[0]
