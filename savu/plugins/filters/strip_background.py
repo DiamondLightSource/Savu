@@ -85,6 +85,8 @@ class StripBackground(BaseFilter, CpuPlugin):
 
     def setup(self):
         in_dataset, out_datasets = self.get_datasets()
+        in_meta = in_dataset[0].meta_data
+        print 'In strip background'+str(in_meta.get_meta_data('energy'))
         stripped = out_datasets[0]
         stripped.create_dataset(in_dataset[0])
 
