@@ -97,6 +97,7 @@ def _set_options(opt, args):
     options["data_file"] = args[0]
     options["process_file"] = args[1]
     options["out_path"] = set_output_folder(args[0], args[2], opt.folder)
+    print options['out_path']
     if opt.temp_dir:
         options["inter_path"] = opt.temp_dir
     else:
@@ -121,7 +122,6 @@ def set_output_folder(in_file, out_path, set_folder):
         folder = os.path.join(out_path, ('_'.join([timestamp, name])))
     else:
         folder = os.path.join(out_path, set_folder)
-    print "The output folder is", folder
     if MPI.COMM_WORLD.rank == 0:
         if not os.path.exists(folder):
             os.makedirs(folder)

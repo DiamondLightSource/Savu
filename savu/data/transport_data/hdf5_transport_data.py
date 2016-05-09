@@ -437,8 +437,11 @@ class Hdf5TransportData(object):
 
     def __get_padding_dict(self):
         pData = self._get_plugin_data()
+        print pData.data_obj.get_data_patterns()
         padding = Padding(pData.get_pattern())
         for key in pData.padding.keys():
+            print "************************************"
+            print pData.padding
             getattr(padding, key)(pData.padding[key])
         return padding._get_padding_directions()
 

@@ -13,11 +13,11 @@
 # limitations under the License.
 
 """
-.. module:: nx_xrd_loader_test
+.. module:: pyfai_azimuthal_integration_test
    :platform: Unix
-   :synopsis: testing the nx_xrd loader
+   :synopsis: runner for tests using the MPI framework
 
-.. moduleauthor:: Aaron Parsons <scientificsoftware@diamond.ac.uk>
+.. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
 import unittest
@@ -26,12 +26,11 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
 
-class I18XrdLoaderTest(unittest.TestCase):
+class HoganAbsorptionCorrectTest(unittest.TestCase):
 
-#     @unittest.skip("the test data isn't ready yet. Adp")
-    def test_nx_xrd(self):
+    def test_pyfai(self):
         data_file = tu.get_test_data_path('i18_test_data.nxs')
-        process_file = tu.get_test_process_path('basic_xrd_process_i18.nxs')
+        process_file = tu.get_test_process_path('hogan_absorption_correction.nxs')
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
 

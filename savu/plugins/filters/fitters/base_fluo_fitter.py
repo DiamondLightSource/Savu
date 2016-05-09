@@ -64,9 +64,10 @@ class BaseFluoFitter(BaseFitter):
 
     def setup(self):
         # set up the output datasets that are created by the plugin
+        logging.debug('setting up the fluorescence fitting')
         in_dataset, out_datasets = self.get_datasets()
         in_meta_data = in_dataset[0].meta_data
-#         print in_meta_data.get_meta_data("energy")
+#         print in_meta_data.__dict__
         shape = in_dataset[0].get_shape()
         axis_labels = ['-1.PeakIndex.pixel.unit']
         pattern_list = ['SINOGRAM', 'PROJECTION']
@@ -100,7 +101,11 @@ class BaseFluoFitter(BaseFitter):
         # setup plugin datasets
         in_pData, out_pData = self.get_plugin_datasets()
         in_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
-
+        for i in range(len(out_datasets)):
+            out_meta_data = out_datasets[i].meta_data
+            out_meta_data.set_meta_data('PeakIndex', self.idx)
+            out_meta_data.set_meta_data('PeakEnergy', self.axis[self.idx])
+            
         out_pData[0].plugin_data_setup('CHANNEL', self.get_max_frames())
         out_pData[1].plugin_data_setup('CHANNEL', self.get_max_frames())
         out_pData[2].plugin_data_setup('SPECTRUM', self.get_max_frames())
