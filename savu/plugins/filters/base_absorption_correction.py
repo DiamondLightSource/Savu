@@ -31,9 +31,10 @@ import _xraylib as xl
 class BaseAbsorptionCorrection(BaseFilter, CpuPlugin):
     """
     a base absorption correction for stxm and xrd
-    :param azimuthal_offset: angle between detectors. Default: 90.0.
+    :param azimuthal_offset: angle between detectors. Default: -90.0.
     :param density: the density. Default: 3.5377.
     :param compound: the compount. Default: 'Co0.1Re0.01Ti0.05(SiO2)0.84'.
+    
     """
 
     def __init__(self, name):
@@ -42,14 +43,14 @@ class BaseAbsorptionCorrection(BaseFilter, CpuPlugin):
               self).__init__(name)
 
     def setup(self):
+        logging.debug('setting up the base absorption correction')
         in_dataset, out_datasets = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
         in_meta_data = in_dataset[0].meta_data
-
-        idx = in_meta_data.get_meta_data("PeakIndex")
-        self.nChannels = len(idx)
+        idx = in_meta_data.get_meta_data("PeakEnergy")
+        self.nChannels = len(idx) 
         in_pData[0].plugin_data_setup('SINOGRAM', self.get_num_channels())
-        in_pData[1].plugin_data_setup('SINOGRAM', 1.0)
+        in_pData[1].plugin_data_setup('SINOGRAM', 1)
         spectra = out_datasets[0]
         spectra.create_dataset(in_dataset[0])
 
@@ -67,6 +68,9 @@ class BaseAbsorptionCorrection(BaseFilter, CpuPlugin):
     def nOutput_datasets(self):
         return 1
 
+    def get_max_frames(self):
+        return 1
+    
     def get_mu(self, compound, energy, density):
         '''
         returns mu for a compound for a single, or list, of energies
