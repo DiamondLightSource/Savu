@@ -429,7 +429,7 @@ def main():
     readline.set_completer(comp.complete)
 
     # load all the packages in the plugins directory to register classes
-    plugins_path = savu.plugins.__path__
+    plugins_path = pu.get_plugins_paths() #savu.plugins.__path__
     for loader, module_name, is_pkg in pkgutil.walk_packages(plugins_path):
         try:
             module = loader.find_module(module_name).load_module(module_name)
