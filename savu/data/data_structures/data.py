@@ -241,7 +241,7 @@ class Data(DataCreate):
     def set_axis_labels(self, *args):
         """ Set the axis labels associated with each data dimension.
 
-        :arg str: Each arg should be of the form ``name.unit``. If ``name`` is
+        :arg str: Each arg should be of the form ``name.unit``. If ``name`` is\
         a data_obj.meta_data entry, it will be output to the final .nxs file.
         """
         self.data_info.set_meta_data('nDims', len(args))

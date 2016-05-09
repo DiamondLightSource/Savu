@@ -15,7 +15,8 @@
 import sys, os
 from os import path
 
-autodoc_mock_imports = ['numpy', 'mpi4py', 'astra', 'scipy']
+autodoc_mock_imports = ['numpy', 'mpi4py', 'astra', 'scipy',
+                        'dials.array_family', 'dials.algorithms.image.threshold']
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -46,12 +47,16 @@ sys.path.insert(0, os.path.abspath('../../savu/plugins/savers'))
 print sys.path
 # -- General configuration -----------------------------------------------------
 
+keep_warnings=True
+
+
 # If your documentation needs a minimal Sphinx version, state it here.
 #needs_sphinx = '1.0'
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.intersphinx', 'sphinx.ext.ifconfig', 'sphinx.ext.autosummary', 'sphinx.ext.viewcode']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.intersphinx', 'sphinx.ext.ifconfig',
+              'sphinx.ext.autosummary', 'sphinx.ext.viewcode']
 
 autosummary_generate = True
 
@@ -92,7 +97,7 @@ release = '0.1'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_templates']
+exclude_patterns = ['_templates', '../../savu/test', '../../savu/core/transports/dist_array_transport.py']
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 #default_role = None

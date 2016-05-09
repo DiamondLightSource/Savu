@@ -15,8 +15,8 @@
 """
 .. module:: data_additions
    :platform: Unix
-   :synopsis: A module containing add_on classes, which have instances
-   encapsulated within the Data class.
+   :synopsis: A module containing add_on classes, which have instances \
+       encapsulated within the Data class.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
@@ -39,7 +39,7 @@ class TomoRaw(object):
 
     def _remove_image_key(self, copy_obj, image_key=0):
         """ Reduce the shape of a dataset to be only the size of the data and
-        remove the TomoRaw instance encapsulated inside the Data object
+        remove the TomoRaw instance encapsulated inside the Data object.
 
         :params Data copy_obj: A Data object with an image key
         :keyword int image_key: The image_key data index (assumed to be 0 for
@@ -48,6 +48,7 @@ class TomoRaw(object):
         # the image key should be the index of the data, not necessarily zero.
         if image_key is 0:
             if copy_obj.tomo_raw_obj:
+                print "setting the new shape", copy_obj.get_tomo_raw().__remove_dark_and_flat()
                 self.data_obj.set_shape(
                     copy_obj.get_tomo_raw().__remove_dark_and_flat())
                 self.data_obj._clear_tomo_raw()
@@ -82,6 +83,7 @@ class TomoRaw(object):
             return (shape, shape[1], shape[2])
 
     def _get_frame_raw(self, slice_list):
+        print "getting the raw frame", slice_list
         pattern = self.data_obj._get_plugin_data()._get_pattern_name()
         image_slice = self.__get_image_key_slice()
         new_slice_list = []
@@ -146,7 +148,7 @@ class Padding(object):
     def pad_direction(self, pad_list):
         """ Pad the data in a specified dimension.
 
-        :param list pad_list: A list (len = 2), where the first element is the
+        :param list pad_list: A list (len = 2), where the first element is the\
         dimension to pad and the second element is the pad amount.
         """
         pdir = pad_list[0]

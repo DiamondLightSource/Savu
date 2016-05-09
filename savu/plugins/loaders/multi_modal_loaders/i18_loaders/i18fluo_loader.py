@@ -21,7 +21,8 @@
 
 """
 
-from savu.plugins.loaders.multi_modal_loaders.base_i18_multi_modal_loader import BaseI18MultiModalLoader
+from savu.plugins.loaders.multi_modal_loaders.base_i18_multi_modal_loader \
+    import BaseI18MultiModalLoader
 import numpy as np
 from savu.plugins.utils import register_plugin
 
@@ -40,8 +41,8 @@ class I18fluoLoader(BaseI18MultiModalLoader):
         super(I18fluoLoader, self).__init__(name)
 
     def setup(self):
-        """
-         Define the input nexus file
+        """ Define the input nexus file.
+
         :param path: The full path of the NeXus file to load.
         :type path: str
         """

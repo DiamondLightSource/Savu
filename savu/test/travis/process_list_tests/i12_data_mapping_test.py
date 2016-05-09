@@ -15,7 +15,7 @@
 
 
 """
-.. module:: i12 tomography test run
+.. module:: i12_data_mapping_test
    :platform: Unix
    :synopsis: unittest test classes for plugins
 

@@ -108,8 +108,8 @@ class Plugin(PluginDatasets):
         pipeline framework.  It replaces ``self.parameters`` default values
         with those given in the input process list.
 
-        :param dict parameters: A dictionary of the parameters for this plugin,
-        or None if no customisation is required.
+        :param dict parameters: A dictionary of the parameters for this \
+        plugin, or None if no customisation is required.
         """
         self.parameters = {}
         self.parameters_types = {}
@@ -296,11 +296,12 @@ class Plugin(PluginDatasets):
         return None
 
     def executive_summary(self):
-        """
-        Provide a summary to the user for the result of the plugin
+        """ Provide a summary to the user for the result of the plugin.
+
         e.g.
          - Warning, the sample may have shifted during data collection
          - Filter operated normally
+
         :returns:  A list of string summaries
         """
         return ["Nothing to Report"]

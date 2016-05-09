@@ -45,11 +45,11 @@ class DataCreate(object):
         :arg Data: A data object
         :keyword tuple shape: The shape of the dataset
         :keyword list axis_labels: The axis_labels associated with the datasets
-        :keyword patterns: The patterns associated with the dataset (optional,
+        :keyword patterns: The patterns associated with the dataset (optional,\
             see note below)
-        :keyword type dtype: Type of the data (optional: Defaults to
+        :keyword type dtype: Type of the data (optional: Defaults to \
             np.float32)
-        :keyword bool remove: Remove from framework after completion
+        :keyword bool remove: Remove from framework after completion \
         (no link in .nxs file) (optional: Defaults to False.)
 
         {0} \n {1} \n {2} \n {3}

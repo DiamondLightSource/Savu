@@ -55,6 +55,7 @@ class Chunking(object):
         """
         Calculate appropriate chunk sizes for this dataset
         """
+        print shape
         logging.debug("shape = %s", shape)
         if len(shape) < 3:
             return True
@@ -70,10 +71,12 @@ class Chunking(object):
             logging.debug("chunks before %s", chunks)
             # Subtracting one from each chunking dimension as hdf5/h5py? bug fix
             chunks = list(chunks)
+            print "chunks before", chunks
             for i in range(len(chunks)):
                 if (chunks[i] - 1) > 0:
                     chunks[i] -= 1
             logging.debug("chunks after %s", chunks)
+            print "chunks after", chunks
             return tuple(chunks)
 
     def __set_adjust_params(self, shape):
