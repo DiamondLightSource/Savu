@@ -12,5 +12,6 @@ Submodules
 
 .. toctree::
 
+   savu.plugins.filters.fitters.fluo_fitters.fastxrf_fitting
    savu.plugins.filters.fitters.fluo_fitters.simple_fit_xrf
 

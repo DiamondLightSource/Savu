@@ -14,4 +14,5 @@ Submodules
 
    savu.plugins.reconstructions.astra_recons.astra_recon_cpu
    savu.plugins.reconstructions.astra_recons.astra_recon_gpu
+   savu.plugins.reconstructions.astra_recons.test_array_pad
 
