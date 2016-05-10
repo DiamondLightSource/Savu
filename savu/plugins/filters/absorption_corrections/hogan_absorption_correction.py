@@ -23,7 +23,7 @@
 
 import numpy as np
 import logging
-from savu.plugins.filters.base_absorption_correcton import BaseAbsorptionCorrection
+from savu.plugins.filters.base_absorption_correction import BaseAbsorptionCorrection
 from savu.plugins.utils import register_plugin
 
 
@@ -72,7 +72,10 @@ class HoganAbsorptionCorrection(BaseAbsorptionCorrection):
         corrected_xrf = np.zeros_like(xrf)
         for i in range(num_channels):
             fluo_sino = xrf[:,:,i]
-            corrected_xrf[:,:,i] = self.correct_sino(absorption, fluo_sino, self.atten_ratio[i])
+            corrected_xrf[:,:,i], corr_fac = self.correct_sino(absorption, fluo_sino, self.atten_ratio[i])
+            logging.debug('For channel %s, min correction: %s, max correction: %s' % (str(i),
+                                                                                      str(np.min(corr_fac)),
+                                                                                      str(np.max(corr_fac))))
         return corrected_xrf
 
     def correct_sino(self, stxm_sino, fluo_sino, atten_ratio):
@@ -81,4 +84,4 @@ class HoganAbsorptionCorrection(BaseAbsorptionCorrection):
         transmission_average = transmission_sum / foo
         exponent_Co = np.exp(-transmission_average * atten_ratio * stxm_sino)
         corrected_fluo_sino = exponent_Co * fluo_sino
-        return corrected_fluo_sino
+        return corrected_fluo_sino, exponent_Co
