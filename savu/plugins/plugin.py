@@ -158,14 +158,14 @@ class Plugin(PluginDatasets):
         """
         return self.parameters[name]
 
-    def pre_process(self):
+    def base_pre_process(self):
+        """ This method is called after the plugin has been created by the
+        pipeline framework as a pre-processing step.
         """
-        This method is called after the plugin has been created by the
-        pipeline framework as a pre-processing step
+        pass
 
-        :param exp: An experiment object, holding input and output datasets
-        :type exp: experiment class instance
-        """
+    def pre_process(self):
+        """ This method is called immediately after base_pre_process(). """
         pass
 
     def process_frames(self, data, frame_list):
@@ -195,6 +195,10 @@ class Plugin(PluginDatasets):
         :param exp: An experiment object, holding input and output datasets
         :type exp: experiment class instance
         """
+        pass
+
+    def base_post_process(self):
+        """ This method is called immediately after post_process(). """
         pass
 
     def _clean_up(self):

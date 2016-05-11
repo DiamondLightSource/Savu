@@ -43,7 +43,7 @@ class BaseAstraRecon(BaseRecon):
         logging.error("get_parameters needs to be implemented")
         raise NotImplementedError("get_parameters needs to be implemented")
 
-    def reconstruct_pre_process(self):
+    def pre_process(self):
         lparams = self.get_parameters()
         self.name = lparams[0]
         self.iters = lparams[1]

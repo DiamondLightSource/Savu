@@ -47,7 +47,7 @@ class BaseRecon(Plugin):
     def __init__(self, name='BaseRecon'):
         super(BaseRecon, self).__init__(name)
 
-    def pre_process(self):
+    def base_pre_process(self):
         in_dataset = self.get_in_datasets()[0]
         self.pad_dim = in_dataset.find_axis_label_dimension('x', contains=True)
         in_meta_data = self.get_in_meta_data()[0]
@@ -66,8 +66,6 @@ class BaseRecon(Plugin):
         self.slice_dirs = out_pData[0].get_slice_directions()
         self.pad_amount = \
             int(self.parameters['sino_pad_width'] * in_pData[0].get_shape()[1])
-
-        self.reconstruct_pre_process()
 
         if self.parameters['log']:
             self.sino_func = lambda sino: -np.log(np.nan_to_num(sino)+1)
