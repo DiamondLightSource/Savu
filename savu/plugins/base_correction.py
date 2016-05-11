@@ -34,6 +34,8 @@ class BaseCorrection(Plugin):
         process. Default: [].
     :param out_datasets: Create a list of the dataset(s) to \
         process. Default: [].
+    :param pattern: Data processing pattern is 'SINOGRAM' or \
+        'PROJECTION'. Default: 'SINOGRAM'.
     """
     count = 0
 
@@ -65,17 +67,12 @@ class BaseCorrection(Plugin):
         # copy all required information from in_dataset[0]
         out_dataset[0].create_dataset(in_dataset[0])
 
-        print "before", out_dataset[0].get_shape()
-        # removes dark and flat fields
-        out_dataset[0].trim_output_data(in_dataset[0], image_key=0)
-
-        print "after", out_dataset[0].get_shape()
-
         # set information relating to the plugin data
         in_pData, out_pData = self.get_plugin_datasets()
         # set pattern_name and nframes to process for all datasets
-        in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
-        out_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
+        pattern = self.parameters['pattern']
+        in_pData[0].plugin_data_setup(pattern, self.get_max_frames())
+        out_pData[0].plugin_data_setup(pattern, self.get_max_frames())
 
     def nInput_datasets(self):
         return 1
