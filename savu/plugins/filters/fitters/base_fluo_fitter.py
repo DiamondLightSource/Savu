@@ -68,7 +68,8 @@ class BaseFluoFitter(BaseFitter):
         in_dataset, out_datasets = self.get_datasets()
         in_meta_data = in_dataset[0].meta_data
 #         print in_meta_data.__dict__
-        shape = in_dataset[0].get_shape()
+        shape = in_dataset[0].get_shape()   
+        print in_dataset[0].data_info.get_meta_data('axis_labels')[0].keys()
         axis_labels = ['-1.PeakIndex.pixel.unit']
         pattern_list = ['SINOGRAM', 'PROJECTION']
 
