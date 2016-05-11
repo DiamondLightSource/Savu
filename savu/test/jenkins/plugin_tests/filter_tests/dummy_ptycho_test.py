@@ -29,7 +29,7 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 class DummyPtychoTest(unittest.TestCase):
 
     def test_ptycho(self):
-        data_file = '/home/clb02321/DAWN_stable/Ptychography/data/NXptychoflipped.nxs'
+        data_file = '/dls/mx-scratch/savu_test_data/NXptychoflipped.nxs'
         process_file = tu.get_test_process_path('ptycho_test.nxs')
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))

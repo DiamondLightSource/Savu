@@ -30,7 +30,7 @@ class NxPtychoLoaderTest(unittest.TestCase):
 
 #     @unittest.skip("Skipping temporarily as not passing when releasing patch")
     def test_nx_ptycho(self):
-        data_file = '/home/clb02321/DAWN_stable/Ptychography/data/NXptychoflipped.nxs'#tu.get_test_data_path('NXptycho.nxs')
+        data_file = '/dls/mx-scratch/savu_test_data/NXptychoflipped.nxs'#tu.get_test_data_path('NXptycho.nxs')
         process_file = tu.get_test_process_path('basic_ptycho_process.nxs')
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
