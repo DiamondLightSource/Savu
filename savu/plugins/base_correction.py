@@ -34,6 +34,8 @@ class BaseCorrection(Plugin):
         process. Default: [].
     :param out_datasets: Create a list of the dataset(s) to \
         process. Default: [].
+    :param pattern: Data processing pattern is 'SINOGRAM' or \
+        'PROJECTION'. Default: 'SINOGRAM'.
     """
     count = 0
 
