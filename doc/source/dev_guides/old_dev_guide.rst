@@ -114,18 +114,18 @@ The output file is saved in a tmp directory as a .h5 file, e.g.
 Adding C/C++ extensions to a plugin
 ===================================
 
-There are numerous ways to create python bindings to external C/C++ libraries, which may be useful to recycle existing code or to improve performance.  Two different approaches have currently been tested: Cython (to link to external C code) and Boost.Python (to link to external C++ code).  Cython is essentially python with C-types and requires a C-API, a python wrapper and a makefile, whilst Boost.Python is a wrapper for the Python/C API and requires a wrapper and a makefile. By building the makefile a shared library (*.so) file is created and can be added to the \\lib directory in the Savu framework and imported as a python module.  
+There are numerous ways to create python bindings to external C/C++ libraries, which may be useful to recycle existing code or to improve performance.  Two different approaches have currently been tested: Cython (to link to external C code) and Boost.Python (to link to external C++ code).  Cython is essentially python with C-types and requires a C-API, a python wrapper and a makefile, whilst Boost.Python is a wrapper for the Python/C API and requires a wrapper and a makefile. By building the makefile a shared library (\*.so) file is created and can be added to the \\lib directory in the Savu framework and imported as a python module.  
 
 Cython Example
 --------------
 http://docs.cython.org/src/tutorial/clibraries.html
 
-1) A C interface: A *.pxd file, which is similar to a C header file, providing C function definitions required in the python code. For example, cdexing.pxd:
+1) A C interface: A \*.pxd file, which is similar to a C header file, providing C function definitions required in the python code. For example, cdexing.pxd:
 
 .. literalinclude:: ../../../extension_examples/cdezing.pyd
    :linenos:
 
-2) A python wrapper: A *.pyx file that must have a different name to the *.pyd file above. For example, dezing.pyx:
+2) A python wrapper: A \*.pyx file that must have a different name to the \*.pyd file above. For example, dezing.pyx:
 
 .. literalinclude:: ../../../extension_examples/dezing.pyx
    :linenos:
@@ -135,7 +135,7 @@ http://docs.cython.org/src/tutorial/clibraries.html
 .. literalinclude:: ../../../extension_examples/setup.py
    :linenos:
 
-Compile this file, passing appropriate C compiler flags if necessary, to obtain a *.so file.
+Compile this file, passing appropriate C compiler flags if necessary, to obtain a \*.so file.
 ::
 
 e.g.
@@ -156,7 +156,7 @@ Boost.python aims to expose C++ classes/functions to python, without changing th
 .. literalinclude:: ../../../extension_examples/example_wrapper.cpp
    :linenos:
 
-2) A makefile: A standard C++ makefile, incorporating Boost.Python path, to build a shared object library (*.so).  For example, example_makefile
+2) A makefile: A standard C++ makefile, incorporating Boost.Python path, to build a shared object library (\*.so).  For example, example_makefile
 
 .. literalinclude:: ../../../extension_examples/example_makefile
    :linenos:

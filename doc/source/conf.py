@@ -49,6 +49,38 @@ print sys.path
 
 keep_warnings=True
 
+#=================== Auto-generate APIs ==============================
+#import subprocess
+#
+#python create_autosummary.py api autosummary.rst
+##python create_autosummary.py api_plugin_dev dev_autosummary.rst
+#DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+#echo $DIR
+#export SPHINX_APIDOC_OPTIONS='members,private-members,undoc-members,show-inheritance'
+#sphinx-apidoc -fMeTP $DIR/../ -o $DIR/source/api
+#export SPHINX_APIDOC_OPTIONS='members,undoc-members,noindex'
+#sphinx-apidoc -feT $DIR/../ -o $DIR/source/api_plugin_dev
+#python create_dev_autosummary.py
+#sphinx-build -a -E -j 2 -b html $DIR/source/ $DIR/build/
+#
+#
+#def run_apidoc(_):
+#    # get all module directories here
+#    modules = ['a_list_of',
+#               'python_module_directories',
+#               'in_your_project']
+#    for module in modules:
+#        cur_dir = os.path.abspath(os.path.dirname(__file__))
+#        output_path = os.path.join(cur_dir, module, 'doc')
+#        cmd_path = 'sphinx-apidoc'
+#        if hasattr(sys, 'real_prefix'):  # Check to see if we are in a virtualenv
+#            # If we are, assemble the path manually
+#            cmd_path = os.path.abspath(os.path.join(sys.prefix, 'bin', 'sphinx-apidoc'))
+#        subprocess.check_call([cmd_path, '-e', '-o', output_path, module, '--force'])
+#
+#def setup(app):
+#    app.connect('builder-inited', run_apidoc)
+#=================== Auto-generate APIs ==============================
 
 # If your documentation needs a minimal Sphinx version, state it here.
 #needs_sphinx = '1.0'
