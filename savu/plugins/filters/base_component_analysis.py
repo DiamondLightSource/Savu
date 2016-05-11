@@ -70,7 +70,8 @@ class BaseComponentAnalysis(BaseFilter, CpuPlugin):
 
         in_pData, out_pData = self.get_plugin_datasets()
         plugin_pattern = self.get_plugin_pattern()
-
+        vxz = {'core_dir': (0,1), 'slice_dir': (2,)}
+        in_dataset[0].add_pattern("VOLUME_XZ", **vxz)
         in_pData[0].plugin_data_setup(plugin_pattern, self.get_max_frames())
         out_pData[0].plugin_data_setup(plugin_pattern, num_comps)
         out_pData[1].plugin_data_setup("SPECTRUM", num_comps)
@@ -88,7 +89,7 @@ class BaseComponentAnalysis(BaseFilter, CpuPlugin):
         converts the nans to nums and sets the infs to the max float size
         not strictly true, but does allow fitting to take place
         '''
+        data = np.clip(data,-sys.float_info.max,sys.float_info.max)
+        data[np.isnan(data)]=0
         data = np.nan_to_num(data)
-        data[data == np.inf] = sys.float_info.max
-        data[data == -np.inf] = -sys.float_info.max
         return data
