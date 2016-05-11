@@ -131,3 +131,6 @@ class Map_3d_to_4d_h5(DataTypes):
 
     def get_shape(self):
         return self.shape
+        
+class TomoRaw():
+    pass

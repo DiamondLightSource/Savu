@@ -53,7 +53,6 @@ class MetaData(object):
             >>> MetaDataObj.get_dictionary()
             {'name1': {'name2': 3}}
         """
-        print "in set meta_data:"+str(name)+str(value)
         maplist = (name if type(name) is list else [name])
         self.get_meta_data(maplist[:-1], True)[maplist[-1]] = value
 

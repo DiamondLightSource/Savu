@@ -104,9 +104,11 @@ class DataCreate(object):
         else:
             pData = self._get_plugin_data()
             self.set_shape(shape + tuple(pData.extra_dims))
+
         if 'patterns' in kwargs:
             patterns = self.__copy_patterns(kwargs['patterns'])
             self.__set_data_patterns(patterns)
+            
 
     def __copy_patterns(self, copy_data):
         """ Copy patterns """

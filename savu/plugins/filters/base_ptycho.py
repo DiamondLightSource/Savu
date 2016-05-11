@@ -38,6 +38,7 @@ class BasePtycho(BaseFilter, CpuPlugin):
     def setup(self):
         self.exp.log(self.name + " Setting up the ptycho")
         in_dataset, out_dataset = self.get_datasets()
+        
         in_meta_data = in_dataset[0].meta_data# grab the positions from the metadata
         logging.debug('getting the positions...')
         self.positions = in_meta_data.get_meta_data('xy') # get the positions and bind them
@@ -59,12 +60,15 @@ class BasePtycho(BaseFilter, CpuPlugin):
         ### OBJECT ####
         self.set_size_object(in_dataset[0],self.get_positions(), self.get_pixel_size()) 
         object_trans = out_dataset[1]
+        
         object_shape = sh + self.get_size_object()
         print "##### OBJECT #####"
         print "object shape is:"+str(object_shape)
 #         print object_labels
+        
         object_trans.create_dataset(axis_labels=object_labels,
                                     shape=object_shape) # create the dataset
+                                    
         self.object_pattern_setup(object_labels, object_trans)
         
         ### POSITIONS ###

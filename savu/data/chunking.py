@@ -71,12 +71,11 @@ class Chunking(object):
             logging.debug("chunks before %s", chunks)
             # Subtracting one from each chunking dimension as hdf5/h5py? bug fix
             chunks = list(chunks)
-            print "chunks before", chunks
+            logging.debug("chunks before %s", chunks)
             for i in range(len(chunks)):
                 if (chunks[i] - 1) > 0:
                     chunks[i] -= 1
             logging.debug("chunks after %s", chunks)
-            print "chunks after", chunks
             return tuple(chunks)
 
     def __set_adjust_params(self, shape):

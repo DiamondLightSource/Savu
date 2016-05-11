@@ -186,7 +186,6 @@ class Data(DataCreate):
         :keyword tuple core_dir: Dimension indices of core dimensions
         :keyword tuple slice_dir: Dimension indices of slice dimensions
         """
-        print "In add_pattern:"+str(dtype)+str(kwargs)
         if dtype in self.pattern_list:
             nDims = 0
             for args in kwargs:
@@ -314,7 +313,9 @@ class Data(DataCreate):
         """ Replace negative indices in pattern kwargs.
         """
         pattern = self.get_data_patterns()[dtype]
-        print "In convert_pattern_directions:"+str(pattern)+str(pattern.values())
+        if 'main_dir' in pattern.keys():
+            del pattern['main_dir']
+
         nDims = sum([len(i) for i in pattern.values()])
         for p in pattern:
             ddirs = pattern[p]

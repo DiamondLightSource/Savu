@@ -48,7 +48,6 @@ class TomoRaw(object):
         # the image key should be the index of the data, not necessarily zero.
         if image_key is 0:
             if copy_obj.tomo_raw_obj:
-                print "setting the new shape", copy_obj.get_tomo_raw().__remove_dark_and_flat()
                 self.data_obj.set_shape(
                     copy_obj.get_tomo_raw().__remove_dark_and_flat())
                 self.data_obj._clear_tomo_raw()
@@ -83,7 +82,6 @@ class TomoRaw(object):
             return (shape, shape[1], shape[2])
 
     def _get_frame_raw(self, slice_list):
-        print "getting the raw frame", slice_list
         pattern = self.data_obj._get_plugin_data()._get_pattern_name()
         image_slice = self.__get_image_key_slice()
         new_slice_list = []
