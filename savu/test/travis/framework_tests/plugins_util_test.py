@@ -56,11 +56,22 @@ class Test(unittest.TestCase):
         os.environ["SAVU_PLUGINS_PATH"] = "/tmp/"
         paths = pu.get_plugins_paths()
         self.assertEqual(len(paths), 2)
+        os.environ["SAVU_PLUGINS_PATH"] = ""
 
     def test_get_plugins_paths3(self):
         os.environ["SAVU_PLUGINS_PATH"] = "/tmp/:/dev/:/home/"
         paths = pu.get_plugins_paths()
         self.assertEqual(len(paths), 4)
+        os.environ["SAVU_PLUGINS_PATH"] = ""
+
+    def test_get_plugins_path_and_load(self):
+        savu_path = os.path.split(savu.__path__[0])[0]
+        plugin_path = os.path.join(savu_path, "plugin_examples")
+        os.environ["SAVU_PLUGINS_PATH"] = plugin_path
+        pu.get_plugins_paths()
+        plugin = pu.load_plugin("example_median_filter")
+        self.assertEqual(plugin.name, "ExampleMedianFilter")
+        os.environ["SAVU_PLUGINS_PATH"] = ""
 
 if __name__ == "__main__":
     unittest.main()

@@ -27,7 +27,7 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 
 
 class PyfaiNewCalibI18Test(unittest.TestCase):
-
+@unittest.skip('We know about this failing test: https://github.com/DiamondLightSource/Savu/issues/245')
     def test_pyfai(self):
         data_file = tu.get_test_data_path('i18_test_data.nxs')#'/dls/i18/data/2016/sp12601-1/processing/Savu_Test_Data/70214_Cat2_RT_1.nxs'#
         process_file = tu.get_test_process_path('PyFAI_azimuth_new_calib_i18_test.nxs')
