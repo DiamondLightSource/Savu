@@ -383,30 +383,29 @@ class Hdf5TransportData(object):
 
         return process_slice_list
 
-    def __calculate_slice_padding(self, in_slice, pad_ammount, data_stop):
-        sl = in_slice
+    def __calculate_slice_padding(self, in_slice, pad, data_stop, **kwargs):
+        pad.append(pad if kwargs.get('before', True) else 0)
+        pad.append(pad if kwargs.get('after', True) else 0)
 
+        sl = in_slice
         if not type(sl) == slice:
             # turn the value into a slice and pad it
             sl = slice(sl, sl+1, 1)
 
-        minval = None
-        maxval = None
+        minval = None if sl.start is None else sl.start-pad[0]
+        maxval = None if sl.stop is None else sl.stop+pad[1]
 
-        if sl.start is not None:
-            minval = sl.start-pad_ammount
-        if sl.stop is not None:
-            maxval = sl.stop+pad_ammount
+        print "min and max", minval, maxval
 
         minpad = 0
         maxpad = 0
         if minval is None:
-            minpad = pad_ammount
+            minpad = pad
         elif minval < 0:
             minpad = 0 - minval
             minval = 0
         if maxval is None:
-            maxpad = pad_ammount
+            maxpad = pad
         if maxval > data_stop:
             maxpad = (maxval-data_stop)
             maxval = data_stop
@@ -460,9 +459,10 @@ class Hdf5TransportData(object):
             pad_list.append((0, 0))
 
         for direction in padding_dict.keys():
+            pDict = padding_dict[direction]
+
             slice_list[direction], pad_list[direction] = \
-                self.__calculate_slice_padding(slice_list[direction],
-                                               padding_dict[direction],
+                self.__calculate_slice_padding(slice_list[direction], pDict,
                                                self.get_shape()[direction])
 
         return self.__get_pad_data(tuple(slice_list), tuple(pad_list))
@@ -475,12 +475,13 @@ class Hdf5TransportData(object):
         sl = slice_list[slice_dir]
         max_frames = self._get_plugin_data()._get_frame_chunk()
         diff = max_frames - len(range(sl.start, sl.stop, sl.step))
-        diff = 2
         if diff:
             try:
-                pData.padding['pad_directions'].append({slice_dir: diff})
+                pData.padding['pad_directions'].\
+                    append({slice_dir: [diff, 'after']})
             except:
-                pData.padding['pad_directions'] = [{slice_dir: diff}]
+                pData.padding['pad_directions'] = \
+                    [{slice_dir: [diff, 'after']}]
 
     def _get_unpadded_slice_data(self, input_slice_list, padded_dataset):
         padding_dict = self._get_plugin_data().padding

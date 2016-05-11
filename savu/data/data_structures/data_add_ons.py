@@ -151,7 +151,7 @@ class Padding(object):
         """
         for entry in pad_list:
             for key, value in entry.iteritems():
-                self.__pad_direction([key, value])
+                self.__pad_direction([key[0], value])
 
     def __pad_direction(self, pad_list):
         """ Pad the data in a specified dimension.
@@ -159,8 +159,14 @@ class Padding(object):
         :param list pad_list: A list (len = 2), where the first element is the\
         dimension to pad and the second element is the pad amount.
         """
+        pad_place = {'before': False, 'after': False}
         pdir = pad_list[0]
         padding = pad_list[1]
+        if isinstance(padding, list):
+            for entry in padding:
+                
+            
+            
         if pdir not in self.dims:
             warnings.warn('Dimension ' + str(pdir) + ' is not associated '
                           ' with the pattern ' + self.pattern_name, +
@@ -170,6 +176,7 @@ class Padding(object):
                           ' has already been added to the padding list.')
             self.padding_dirs[pdir] += padding
         else:
+            self.padding_dirs[pdir]
             self.padding_dirs[pdir] = padding
 
     def _get_padding_directions(self):

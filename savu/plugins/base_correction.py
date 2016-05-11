@@ -66,13 +66,14 @@ class BaseCorrection(Plugin):
         in_dataset, out_dataset = self.get_datasets()
         # copy all required information from in_dataset[0]
         out_dataset[0].create_dataset(in_dataset[0])
-
         # set information relating to the plugin data
         in_pData, out_pData = self.get_plugin_datasets()
         # set pattern_name and nframes to process for all datasets
         pattern = self.parameters['pattern']
-        in_pData[0].plugin_data_setup(pattern, self.get_max_frames())
-        out_pData[0].plugin_data_setup(pattern, self.get_max_frames())
+        in_pData[0].plugin_data_setup(pattern, self.get_max_frames(),
+                                      fixed=True)
+        out_pData[0].plugin_data_setup(pattern, self.get_max_frames(),
+                                       fixed=True)
 
     def nInput_datasets(self):
         return 1

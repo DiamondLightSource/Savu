@@ -63,6 +63,7 @@ class TimeseriesFieldCorrections(BaseCorrection, CpuPlugin):
         self.index = [slice(None), slice(None)]
 
     def correct(self, data):
+        print data.shape,self.dark.shape
         start = self.count*self.nFrames
         self.index[0] = slice(start, start + self.nFrames)
         dark = np.tile(self.dark[self.index], self.tile)
