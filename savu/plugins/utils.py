@@ -228,12 +228,13 @@ def get_plugins_paths():
     env_plugins_path = os.getenv("SAVU_PLUGINS_PATH")
     if env_plugins_path is not None:
         for ppath in (env_plugins_path.split(':')):
-            plugins_path.append(ppath)
+            if ppath != "":
+                plugins_path.append(ppath)
     # before we add the savu plugins to the list, add all items in the list
     # so far to the pythonpath
     for ppath in plugins_path:
         if ppath not in sys.path:
             sys.path.append(ppath)
     # now add the savu plugin path
-    plugins_path.append(savu.plugins.__path__)
+    plugins_path.append(savu.plugins.__path__[0])
     return plugins_path

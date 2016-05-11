@@ -46,6 +46,7 @@ class SpectrumCrop(BaseFilter, CpuPlugin):
         return data_cropped
 
     def setup(self):
+        logging.debug('setting up the spectrum cropping')
         in_dataset, out_datasets = self.get_datasets()
         cropped = out_datasets[0]
         cropped.create_dataset(in_dataset[0])
@@ -54,7 +55,7 @@ class SpectrumCrop(BaseFilter, CpuPlugin):
         crop_range = self.parameters['crop_range']
 #         axis_labels = in_dataset[0].get_axis_label_keys()
         raw_axis = in_meta.get_meta_data(self.parameters['axis'])
-#         print "the raw axis is"+str(raw_axis)
+        logging.debug("the raw axis is: %s" % str(raw_axis))
         self.new_idx = (raw_axis>crop_range[0]) & (raw_axis<crop_range[1])
         new_axis = raw_axis[self.new_idx]
         out_meta.set_meta_data(self.parameters['axis'], new_axis)

@@ -65,8 +65,11 @@ class BaseCorrection(Plugin):
         # copy all required information from in_dataset[0]
         out_dataset[0].create_dataset(in_dataset[0])
 
+        print "before", out_dataset[0].get_shape()
         # removes dark and flat fields
         out_dataset[0].trim_output_data(in_dataset[0], image_key=0)
+
+        print "after", out_dataset[0].get_shape()
 
         # set information relating to the plugin data
         in_pData, out_pData = self.get_plugin_datasets()

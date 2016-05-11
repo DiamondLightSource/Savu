@@ -47,6 +47,11 @@ def __option_parser():
                       help="Display all debug log messages", default=False)
     parser.add_option("-q", "--quiet", action="store_true", dest="quiet",
                       help="Display only Errors and Info", default=False)
+    parser.add_option("-s", "--syslog", dest="syslog",
+                      help="Location of syslog server", default='cs04r-sc-serv-14')
+    parser.add_option("-p", "--syslog_port", dest="syslog_port",
+                      help="Port to connect to syslog server on", default=514)
+
 
     (options, args) = parser.parse_args()
     return [options, args]
@@ -92,6 +97,7 @@ def _set_options(opt, args):
     options["data_file"] = args[0]
     options["process_file"] = args[1]
     options["out_path"] = set_output_folder(args[0], args[2], opt.folder)
+    print options['out_path']
     if opt.temp_dir:
         options["inter_path"] = opt.temp_dir
     else:
@@ -100,6 +106,8 @@ def _set_options(opt, args):
         options['log_path'] = opt.log_dir
     else:
         options['log_path'] = options["out_path"]
+    options['syslog_server'] = opt.syslog
+    options['syslog_port'] = opt.syslog_port
     return options
 
 
@@ -114,7 +122,6 @@ def set_output_folder(in_file, out_path, set_folder):
         folder = os.path.join(out_path, ('_'.join([timestamp, name])))
     else:
         folder = os.path.join(out_path, set_folder)
-    print "The output folder is", folder
     if MPI.COMM_WORLD.rank == 0:
         if not os.path.exists(folder):
             os.makedirs(folder)

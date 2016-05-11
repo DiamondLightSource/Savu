@@ -12,8 +12,11 @@
 /*.egg-info
 /*.egg
 
-# temporary files from gedit and vim
+# Temporary files from gedit and vim
 *~
 
-# nfs failues
+# PyCharm project files
+.idea
+
+# nfs failures
 .nfs*

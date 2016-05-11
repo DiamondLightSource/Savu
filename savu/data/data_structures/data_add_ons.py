@@ -15,8 +15,8 @@
 """
 .. module:: data_additions
    :platform: Unix
-   :synopsis: A module containing add_on classes, which have instances
-   encapsulated within the Data class.
+   :synopsis: A module containing add_on classes, which have instances \
+       encapsulated within the Data class.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
@@ -39,7 +39,7 @@ class TomoRaw(object):
 
     def _remove_image_key(self, copy_obj, image_key=0):
         """ Reduce the shape of a dataset to be only the size of the data and
-        remove the TomoRaw instance encapsulated inside the Data object
+        remove the TomoRaw instance encapsulated inside the Data object.
 
         :params Data copy_obj: A Data object with an image key
         :keyword int image_key: The image_key data index (assumed to be 0 for
@@ -156,7 +156,7 @@ class Padding(object):
     def __pad_direction(self, pad_list):
         """ Pad the data in a specified dimension.
 
-        :param list pad_list: A list (len = 2), where the first element is the
+        :param list pad_list: A list (len = 2), where the first element is the\
         dimension to pad and the second element is the pad amount.
         """
         pdir = pad_list[0]

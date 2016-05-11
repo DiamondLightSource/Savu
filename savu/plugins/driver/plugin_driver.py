@@ -61,6 +61,7 @@ class PluginDriver(object):
                         .set_fixed_directions(param_dims[j], param_idx[i])
 
             logging.info("%s.%s", self.__class__.__name__, 'pre_process')
+            self.base_pre_process()
             self.pre_process()
 
             logging.info("%s.%s", self.__class__.__name__, 'process')
@@ -71,6 +72,7 @@ class PluginDriver(object):
 
             logging.info("%s.%s", self.__class__.__name__, 'post_process')
             self.post_process()
+            self.base_post_process()
 
         for j in range(len(out_data)):
             out_data[j].set_shape(out_data[j].data.shape)

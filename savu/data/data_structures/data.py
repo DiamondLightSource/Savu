@@ -192,6 +192,7 @@ class Data(DataCreate):
                 nDims += len(kwargs[args])
                 self.data_info.set_meta_data(['data_patterns', dtype, args],
                                              kwargs[args])
+            
             self.__convert_pattern_directions(dtype)
             if self.get_shape():
                 diff = len(self.get_shape()) - nDims
@@ -241,7 +242,7 @@ class Data(DataCreate):
     def set_axis_labels(self, *args):
         """ Set the axis labels associated with each data dimension.
 
-        :arg str: Each arg should be of the form ``name.unit``. If ``name`` is
+        :arg str: Each arg should be of the form ``name.unit``. If ``name`` is\
         a data_obj.meta_data entry, it will be output to the final .nxs file.
         """
         self.data_info.set_meta_data('nDims', len(args))
@@ -312,6 +313,9 @@ class Data(DataCreate):
         """ Replace negative indices in pattern kwargs.
         """
         pattern = self.get_data_patterns()[dtype]
+        if 'main_dir' in pattern.keys():
+            del pattern['main_dir']
+
         nDims = sum([len(i) for i in pattern.values()])
         for p in pattern:
             ddirs = pattern[p]

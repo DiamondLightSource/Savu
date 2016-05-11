@@ -35,7 +35,9 @@ pattern_list = ["SINOGRAM",
                 "CHANNEL",
                 "SPECTRUM_STACK",
                 "PROJECTION_STACK",
-                "METADATA"]
+                "METADATA",
+                "4D_SCAN",
+                "TIMESERIES"]
 
 
 def _deepcopy_data_object(dObj, new_obj):

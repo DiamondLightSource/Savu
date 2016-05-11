@@ -62,19 +62,19 @@ class NxptychoLoader(BaseMultiModalLoader):
         
         ### set the x
         x = \
-            data_obj.backing_file[stxm_entry.name + '/data/lab_sxy/lab_sx'].value
+            data_obj.backing_file[stxm_entry.name + '/data/lab_sxy/lab_sx'].value*1e-6
         data_obj.meta_data.set_meta_data('x', x)
         # axis label
         
         ### set the y
         y = \
-            data_obj.backing_file[stxm_entry.name + '/data/lab_sxy/lab_sy'].value
+            data_obj.backing_file[stxm_entry.name + '/data/lab_sxy/lab_sy'].value*1e-6
         pos = np.zeros((2,len(y)))
         pos[0,:] = x
         pos[1,:] = y
         data_obj.meta_data.set_meta_data('xy', pos)
         # axis label
-        labels.append('xy.microns')
+        labels.append('xy.metres')
 #         labels.append('y.microns')
         # now set them
         labels.extend(['detectorX.pixel','detectorY.pixel'])
@@ -93,5 +93,8 @@ class NxptychoLoader(BaseMultiModalLoader):
         logging.debug("the diffraction slices are:"+str(diff_slice))
         data_obj.add_pattern("DIFFRACTION", core_dir=diff_core,
                              slice_dir=diff_slice)
+        
+        data_obj.add_pattern("4D_SCAN", core_dir=(1,2,3),
+                        slice_dir=(0,))
   
         self.set_data_reduction_params(data_obj)

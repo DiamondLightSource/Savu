@@ -15,7 +15,8 @@
 import sys, os
 from os import path
 
-autodoc_mock_imports = ['numpy', 'mpi4py', 'astra', 'scipy']
+autodoc_mock_imports = ['numpy', 'mpi4py', 'astra', 'scipy',
+                        'dials.array_family', 'dials.algorithms.image.threshold']
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -46,12 +47,48 @@ sys.path.insert(0, os.path.abspath('../../savu/plugins/savers'))
 print sys.path
 # -- General configuration -----------------------------------------------------
 
+keep_warnings=True
+
+#=================== Auto-generate APIs ==============================
+#import subprocess
+#
+#python create_autosummary.py api autosummary.rst
+##python create_autosummary.py api_plugin_dev dev_autosummary.rst
+#DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+#echo $DIR
+#export SPHINX_APIDOC_OPTIONS='members,private-members,undoc-members,show-inheritance'
+#sphinx-apidoc -fMeTP $DIR/../ -o $DIR/source/api
+#export SPHINX_APIDOC_OPTIONS='members,undoc-members,noindex'
+#sphinx-apidoc -feT $DIR/../ -o $DIR/source/api_plugin_dev
+#python create_dev_autosummary.py
+#sphinx-build -a -E -j 2 -b html $DIR/source/ $DIR/build/
+#
+#
+#def run_apidoc(_):
+#    # get all module directories here
+#    modules = ['a_list_of',
+#               'python_module_directories',
+#               'in_your_project']
+#    for module in modules:
+#        cur_dir = os.path.abspath(os.path.dirname(__file__))
+#        output_path = os.path.join(cur_dir, module, 'doc')
+#        cmd_path = 'sphinx-apidoc'
+#        if hasattr(sys, 'real_prefix'):  # Check to see if we are in a virtualenv
+#            # If we are, assemble the path manually
+#            cmd_path = os.path.abspath(os.path.join(sys.prefix, 'bin', 'sphinx-apidoc'))
+#        subprocess.check_call([cmd_path, '-e', '-o', output_path, module, '--force'])
+#
+#def setup(app):
+#    app.connect('builder-inited', run_apidoc)
+#=================== Auto-generate APIs ==============================
+
 # If your documentation needs a minimal Sphinx version, state it here.
 #needs_sphinx = '1.0'
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.intersphinx', 'sphinx.ext.ifconfig', 'sphinx.ext.autosummary', 'sphinx.ext.viewcode']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.intersphinx', 'sphinx.ext.ifconfig',
+              'sphinx.ext.autosummary', 'sphinx.ext.viewcode']
 
 autosummary_generate = True
 
@@ -92,7 +129,7 @@ release = '0.1'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_templates']
+exclude_patterns = ['_templates', '../../savu/test', '../../savu/core/transports/dist_array_transport.py']
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 #default_role = None
