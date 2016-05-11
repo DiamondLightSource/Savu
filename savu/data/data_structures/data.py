@@ -353,18 +353,6 @@ class Data(DataCreate):
         self.data_info.set_meta_data(['data_patterns', pname, 'main_dir'],
                                      list(tdir)[0])
 
-    def trim_output_data(self, copy_obj, image_key=0):
-        """ Trim the output data in a plugin to remove image key and reduce
-        shape to data size only (i.e. no darks and flats).
-
-        :param Data copy_obj: A data object with an image key
-        :keyword str image_key: An image key value indexing the data.
-
-        """
-        if self.tomo_raw_obj:
-            self.get_tomo_raw()._remove_image_key(copy_obj, image_key)
-            self.get_preview().set_preview([])
-
     def get_axis_label_keys(self):
         """ Get axis_label names
 

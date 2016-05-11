@@ -101,7 +101,7 @@ class FabIO(DataTypes):
         return index.tolist(), frameidx.astype(int)
 
 
-class Map_3d_to_4d_h5(DataTypes):
+class Map_3dto4d_h5(DataTypes):
     """ This class converts a 3D dataset to a 4D dataset. """
 
     def __init__(self, data, n_angles):
@@ -131,6 +131,58 @@ class Map_3d_to_4d_h5(DataTypes):
 
     def get_shape(self):
         return self.shape
-        
-class TomoRaw():
-    pass
+
+
+class ImageKey(DataTypes):
+    """ This class is used to get data from a dataset with an image key. """
+
+    def __init__(self, data, image_key, proj_dim):
+        self.data = data
+        self.image_key = image_key
+        self.proj_dim = proj_dim
+
+        data_idx = self.get_index(0)
+        new_shape = list(data.shape)
+        new_shape[proj_dim] = len(data_idx)
+        self.shape = tuple(new_shape)
+        self.nDims = len(self.shape)
+
+    def __getitem__(self, idx):
+        print idx
+        index = list(idx)
+        index[self.proj_dim] = self.get_index(0)
+        return self.data[tuple(index)]
+
+    def get_shape(self):
+        return self.shape
+
+    def get_image_key(self):
+        return self.image_key
+
+    def get_index(self, key):
+        """ Get the projection index of a specific image key value.
+
+        :params int key: the image key value
+        """
+        return np.where(self.image_key == key)[0]
+
+    def __get_data(self, key):
+        index = [slice(None)]*self.nDims
+        index[self.proj_dim] = self.get_index(key)
+        return self.data[tuple(index)]
+
+    def dark(self):
+        """ Get the dark data. """
+        return self.__get_data(2)
+
+    def flat(self):
+        """ Get the flat data. """
+        return self.__get_data(1)
+
+    def dark_mean(self):
+        """ Get the averaged dark projection data. """
+        return self.__get_data(2).mean(self.proj_dim)
+
+    def flat_mean(self):
+        """ Get the averaged flat projection data. """
+        return self.__get_data(1).mean(self.proj_dim)
