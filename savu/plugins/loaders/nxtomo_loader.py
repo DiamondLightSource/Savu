@@ -130,7 +130,7 @@ class NxtomoLoader(BaseLoader):
             except KeyError:
                 logging.warn("An image key was not found.")
                 try:
-                    mData = data_obj.mData
+                    mData = data_obj.meta_data
                     entry = 'entry1/tomo_entry/instrument/detector/flatfield'
                     mData.set_meta_data('flat', data_obj.backing_file[entry])
                     entry = 'entry1/tomo_entry/instrument/detector/darkfield'

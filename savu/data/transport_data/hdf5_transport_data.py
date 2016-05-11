@@ -360,8 +360,6 @@ class Hdf5TransportData(object):
         max_frames = (1 if max_frames is None else max_frames)
 
         sl = self._single_slice_list()
-        for s in sl:
-            print s
 
         if self._get_plugin_data().selected_data is True:
             sl = self.get_tomo_raw()._get_frame_raw(sl)

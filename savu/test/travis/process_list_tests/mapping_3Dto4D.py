@@ -30,14 +30,17 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner_no_process_list
 
 
-class I12DataMappingTest(unittest.TestCase):
+class Mapping3Dto4D(unittest.TestCase):
 
     def get_loader_dict(self):
-        return {'data_path': '/1-TempPlugin-tomo/data', 'angular_spacing': 1}
+        return {'data_path': '/1-TempPlugin-tomo/data',
+                'angles': 'np.linspace(0, 180, 181)',
+                '3d_to_4d': True}
 
-    def test_i12tomo(self):
-        options = tu.set_experiment('i12tomo')
-        plugin = 'savu.plugins.corrections.i12_dark_flat_field_correction'
+    def test_3dto4d(self):
+        options = tu.set_experiment('tomo_3dto4d')
+        #plugin = 'savu.plugins.corrections.i12_dark_flat_field_correction'
+        plugin = 'savu.plugins.filters.no_process_plugin'
         data_dict = {'in_datasets': ['tomo'], 'out_datasets': ['test']}
         all_dicts = [self.get_loader_dict(), data_dict, {}]
         exp = run_protected_plugin_runner_no_process_list(options, plugin,
@@ -45,18 +48,19 @@ class I12DataMappingTest(unittest.TestCase):
         self.assertEqual(exp.index['in_data']['test'].get_shape(),
                          (181, 10, 192, 4))
 
-#    def test_i12tomo2(self):
-#        options = tu.set_experiment('i12tomo')
-#        plugin = 'savu.plugins.corrections.i12_dark_flat_field_correction'
-#        selection = ['midmap:midmap+1:endmap:5', '0:end:1:1', '0:end:1:1']
-#        loader_dict = self.get_loader_dict()
-#        loader_dict['preview'] = selection
-#        data_dict = {'in_datasets': ['tomo'], 'out_datasets': ['test']}
-#        all_dicts = [loader_dict, data_dict, {}]
-#        exp = run_protected_plugin_runner_no_process_list(options, plugin,
-#                                                          data=all_dicts)
-#        self.assertEqual(exp.index['in_data']['test'].get_shape(),
-#                         (5, 10, 192, 1))
+    def test_3dto4d_previewing1(self):
+        options = tu.set_experiment('tomo_3dto4d')
+        plugin = 'savu.plugins.filters.no_process_plugin'
+        selection = \
+            ['mid:mid+1:1:5', '0:end:1:1', '0:end:1:1', 'mid:mid+1:1:1']
+        loader_dict = self.get_loader_dict()
+        loader_dict['preview'] = selection
+        data_dict = {'in_datasets': ['tomo'], 'out_datasets': ['test']}
+        all_dicts = [loader_dict, data_dict, {}]
+        exp = run_protected_plugin_runner_no_process_list(options, plugin,
+                                                          data=all_dicts)
+        self.assertEqual(exp.index['in_data']['test'].get_shape(),
+                         (5, 10, 192, 1))
 #
 #    def test_i12tomo3(self):
 #        options = tu.set_experiment('i12tomo')
