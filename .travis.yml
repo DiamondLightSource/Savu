@@ -21,7 +21,7 @@ before_install:
   - sudo apt-get install libhdf5-serial-dev
   - sudo apt-get install libcr-dev mpich2 mpich2-doc
   - sudo apt-get install libboost-all-dev
-  - sudo apt-get install python-numpy python-scipy=0.17.0
+  - sudo apt-get install python-numpy python-scipy
   - sudo apt-get install python-h5py
   - sudo apt-get install python-fabio
 
