@@ -42,7 +42,7 @@ class NxtomoLoader(BaseLoader):
     :param flat: Optional Path to the flat field data file and path to data \
         in nxs file. Default: [None, None, 1].
     :param angles: A python statement to be evaluated or a file. Default: None.
-    :param 3d_to_4d: Set to true if this reshape is required. Default: None.
+    :param 3d_to_4d: Set to true if this reshape is required. Default: False.
     """
 
     def __init__(self, name='NxtomoLoader'):
@@ -130,7 +130,7 @@ class NxtomoLoader(BaseLoader):
             except KeyError:
                 logging.warn("An image key was not found.")
                 try:
-                    mData = data_obj.mData
+                    mData = data_obj.meta_data
                     entry = 'entry1/tomo_entry/instrument/detector/flatfield'
                     mData.set_meta_data('flat', data_obj.backing_file[entry])
                     entry = 'entry1/tomo_entry/instrument/detector/darkfield'

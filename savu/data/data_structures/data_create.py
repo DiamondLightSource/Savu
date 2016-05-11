@@ -45,11 +45,11 @@ class DataCreate(object):
         :arg Data: A data object
         :keyword tuple shape: The shape of the dataset
         :keyword list axis_labels: The axis_labels associated with the datasets
-        :keyword patterns: The patterns associated with the dataset (optional,
+        :keyword patterns: The patterns associated with the dataset (optional,\
             see note below)
-        :keyword type dtype: Type of the data (optional: Defaults to
+        :keyword type dtype: Type of the data (optional: Defaults to \
             np.float32)
-        :keyword bool remove: Remove from framework after completion
+        :keyword bool remove: Remove from framework after completion \
         (no link in .nxs file) (optional: Defaults to False.)
 
         {0} \n {1} \n {2} \n {3}
@@ -104,9 +104,11 @@ class DataCreate(object):
         else:
             pData = self._get_plugin_data()
             self.set_shape(shape + tuple(pData.extra_dims))
+
         if 'patterns' in kwargs:
             patterns = self.__copy_patterns(kwargs['patterns'])
             self.__set_data_patterns(patterns)
+            
 
     def __copy_patterns(self, copy_data):
         """ Copy patterns """

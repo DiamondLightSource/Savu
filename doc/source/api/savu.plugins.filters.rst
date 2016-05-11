@@ -12,6 +12,7 @@ Subpackages
 
 .. toctree::
 
+    savu.plugins.filters.absorption_corrections
     savu.plugins.filters.azimuthal_integrators
     savu.plugins.filters.component_analysis
     savu.plugins.filters.fitters
@@ -22,6 +23,7 @@ Submodules
 .. toctree::
 
    savu.plugins.filters.band_pass
+   savu.plugins.filters.base_absorption_correction
    savu.plugins.filters.base_azimuthal_integrator
    savu.plugins.filters.base_component_analysis
    savu.plugins.filters.base_fitter
@@ -30,12 +32,12 @@ Submodules
    savu.plugins.filters.dials_find_spots
    savu.plugins.filters.distortion_correction
    savu.plugins.filters.downsample_filter
-   savu.plugins.filters.fastxrf_fitting
    savu.plugins.filters.find_peaks
    savu.plugins.filters.histogram
    savu.plugins.filters.median_filter
    savu.plugins.filters.monitor_correction
    savu.plugins.filters.no_process_plugin
+   savu.plugins.filters.old_centering
    savu.plugins.filters.paganin_filter
    savu.plugins.filters.poly_background_estimator
    savu.plugins.filters.raven_filter

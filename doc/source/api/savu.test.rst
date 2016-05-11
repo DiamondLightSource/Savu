@@ -12,9 +12,7 @@ Subpackages
 
 .. toctree::
 
-    savu.test.framework_tests
-    savu.test.plugin_tests
-    savu.test.process_list_tests
+    savu.test.travis
 
 Submodules
 ----------

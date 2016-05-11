@@ -186,7 +186,6 @@ class Data(DataCreate):
         :keyword tuple core_dir: Dimension indices of core dimensions
         :keyword tuple slice_dir: Dimension indices of slice dimensions
         """
-        print "In add_pattern:"+str(dtype)+str(kwargs)
         if dtype in self.pattern_list:
             nDims = 0
             for args in kwargs:
@@ -243,7 +242,7 @@ class Data(DataCreate):
     def set_axis_labels(self, *args):
         """ Set the axis labels associated with each data dimension.
 
-        :arg str: Each arg should be of the form ``name.unit``. If ``name`` is
+        :arg str: Each arg should be of the form ``name.unit``. If ``name`` is\
         a data_obj.meta_data entry, it will be output to the final .nxs file.
         """
         self.data_info.set_meta_data('nDims', len(args))
@@ -314,7 +313,9 @@ class Data(DataCreate):
         """ Replace negative indices in pattern kwargs.
         """
         pattern = self.get_data_patterns()[dtype]
-        print "In convert_pattern_directions:"+str(pattern)+str(pattern.values())
+        if 'main_dir' in pattern.keys():
+            del pattern['main_dir']
+
         nDims = sum([len(i) for i in pattern.values()])
         for p in pattern:
             ddirs = pattern[p]

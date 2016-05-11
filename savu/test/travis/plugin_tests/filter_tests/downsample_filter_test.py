@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: Downsample test
+.. module:: downsample_filter_test
    :platform: Unix
    :synopsis: unittest test classes for plugins
 

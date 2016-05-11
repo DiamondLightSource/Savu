@@ -29,11 +29,9 @@ Submodules
    savu.plugins.base_loader
    savu.plugins.base_recon
    savu.plugins.base_saver
-   savu.plugins.dimension_adder
+   savu.plugins.basic_operations
    savu.plugins.plugin
    savu.plugins.plugin_datasets
    savu.plugins.plugin_datasets_notes
-   savu.plugins.simple_fit_xrf_bounded
-   savu.plugins.test_plugin
    savu.plugins.utils
 
