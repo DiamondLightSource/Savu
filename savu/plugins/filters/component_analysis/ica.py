@@ -55,10 +55,10 @@ class Ica(BaseComponentAnalysis):
                       random_state=self.parameters['random_state'])
         logging.debug("Performing the fit")
         data = self.remove_nan_inf(data)  #otherwise the fit flags up an error for obvious reasons
-        print "I'm here"
+#         print "I'm here"
         S_ = ica.fit_transform(data)
-        print "S_Shape is:"+str(S_.shape)
-        print "self.images_shape:"+str(self.images_shape)
+#         print "S_Shape is:"+str(S_.shape)
+#         print "self.images_shape:"+str(self.images_shape)
         scores = np.reshape(S_, (self.images_shape))
         eigenspectra = ica.components_
         logging.debug("mange-tout")

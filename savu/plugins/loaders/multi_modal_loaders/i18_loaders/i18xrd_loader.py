@@ -108,9 +108,9 @@ class I18xrdLoader(BaseI18MultiModalLoader):
                 xpix = calibrationfile[det_str + '/x_pixel_size'].value * 1e-3
                 mData.set_meta_data("x_pixel_size", xpix) # in metres
                 mData.set_meta_data("beam_center_x",
-                        calibrationfile[det_str + '/beam_center_x'].value/xpix)# in metres
+                        calibrationfile[det_str + '/beam_center_x'].value*xpix)# in metres
                 mData.set_meta_data("beam_center_y",
-                                calibrationfile[det_str + '/beam_center_y'].value/xpix) # in metres
+                                calibrationfile[det_str + '/beam_center_y'].value*xpix) # in metres
                 mData.set_meta_data("distance",
                                 calibrationfile[det_str + '/distance'].value*1e-3) # in metres
                 mData.set_meta_data("incident_wavelength",
