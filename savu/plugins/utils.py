@@ -34,7 +34,7 @@ count = 0
 
 
 def register_plugin(clazz):
-    """decorator to add logging information around calls for use with ."""
+    """decorator to add plugins to a central register"""
     plugins[clazz.__name__] = clazz
     if clazz.__module__.split('.')[0] != 'savu':
         plugins_path[clazz.__name__] = clazz.__module__
@@ -221,20 +221,20 @@ def get_plugins_paths():
     This gets the plugin paths, but also adds any that are not 
     on the pythonpath to it.
     """
-    plugins_path = []
+    plugins_paths = []
     user_plugin_path = os.path.join(os.path.expanduser("~"),'savu_plugins')
     if os.path.exists(user_plugin_path):
-        plugins_path.append(user_plugin_path)
+        plugins_paths.append(user_plugin_path)
     env_plugins_path = os.getenv("SAVU_PLUGINS_PATH")
     if env_plugins_path is not None:
         for ppath in (env_plugins_path.split(':')):
             if ppath != "":
-                plugins_path.append(ppath)
+                plugins_paths.append(ppath)
     # before we add the savu plugins to the list, add all items in the list
     # so far to the pythonpath
-    for ppath in plugins_path:
+    for ppath in plugins_paths:
         if ppath not in sys.path:
             sys.path.append(ppath)
-    # now add the savu plugin path
-    plugins_path.append(savu.plugins.__path__[0])
-    return plugins_path
+    # now add the savu plugin path, which is now the whole path.
+    plugins_paths.append(os.path.join(savu.__path__[0], os.pardir))
+    return plugins_paths

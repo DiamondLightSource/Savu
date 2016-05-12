@@ -26,6 +26,7 @@ import pkgutil
 import savu
 import readline
 import re
+import sys
 
 RE_SPACE = re.compile('.*\s+$', re.M)
 histfile = os.path.join(os.path.expanduser("~"), ".savuhist")
@@ -119,7 +120,7 @@ class Content(object):
     def insert(self, plugin, pos):
         process = {}
         process['name'] = plugin.name
-        process['id'] = "savu.plugins." + plugin.__module__
+        process['id'] = plugin.__module__
         process['data'] = plugin.parameters
         process['active'] = True
         self.plugin_list.plugin_list.insert(pos, process)
@@ -187,7 +188,7 @@ def _list(content, arg):
                 return content
 
     print "-----------------------------------------"
-    for key, value in pu.plugins_path.iteritems():
+    for key, value in pu.plugins.iteritems():
         if not arg:
             print key
         elif value.split('.')[0] == arg[0]:
@@ -258,7 +259,7 @@ def _add(content, arg):
         else:
             print("Sorry the plugin %s is not in my list, pick one from list" %
                   (name))
-    except:
+    except Exception as e:
         print("Sorry I can't process the argument '%s'" % (arg))
     return content
 
@@ -432,8 +433,16 @@ def main():
     plugins_path = pu.get_plugins_paths() #savu.plugins.__path__
     for loader, module_name, is_pkg in pkgutil.walk_packages(plugins_path):
         try:
-            module = loader.find_module(module_name).load_module(module_name)
-        except:
+            # if the module is in savu, but not a plugin, then ignore
+            if "savu" in module_name.split('.'):
+                if not "plugins" in module_name.split('.'):
+                    continue
+            # setup.py is included in this list which should also be ignored
+            if module_name in ["setup", "savu.plugins.utils"]:
+                continue
+            if not module_name in sys.modules:
+                loader.find_module(module_name).load_module(module_name)
+        except Exception as e:
             pass
 
     # set up things
