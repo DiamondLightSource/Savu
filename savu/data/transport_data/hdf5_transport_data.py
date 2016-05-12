@@ -360,7 +360,6 @@ class Hdf5TransportData(object):
         max_frames = (1 if max_frames is None else max_frames)
 
         sl = self._single_slice_list()
-
         if self._get_plugin_data().selected_data is True:
             sl = self.get_tomo_raw()._get_frame_raw(sl)
 
@@ -437,11 +436,8 @@ class Hdf5TransportData(object):
 
     def __get_padding_dict(self):
         pData = self._get_plugin_data()
-        print pData.data_obj.get_data_patterns()
         padding = Padding(pData.get_pattern())
         for key in pData.padding.keys():
-            print "************************************"
-            print pData.padding
             getattr(padding, key)(pData.padding[key])
         return padding._get_padding_directions()
 

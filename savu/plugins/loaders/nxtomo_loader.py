@@ -27,7 +27,7 @@ import numpy as np
 
 from savu.plugins.base_loader import BaseLoader
 from savu.plugins.utils import register_plugin
-from savu.data.data_structures.data_add_ons import TomoRaw
+#from savu.data.data_structures.data_add_ons import TomoRaw
 
 
 @register_plugin
@@ -42,7 +42,7 @@ class NxtomoLoader(BaseLoader):
     :param flat: Optional Path to the flat field data file and path to data \
         in nxs file. Default: [None, None, 1].
     :param angles: A python statement to be evaluated or a file. Default: None.
-    :param 3d_to_4d: Set to true if this reshape is required. Default: None.
+    :param 3d_to_4d: Set to true if this reshape is required. Default: False.
     """
 
     def __init__(self, name='NxtomoLoader'):
@@ -76,7 +76,6 @@ class NxtomoLoader(BaseLoader):
             logging.warn("No Control information available")
 
         self.__check_angles
-        data_obj.set_shape(shape)
         self.set_data_reduction_params(data_obj)
 
     def __setup_3d(self, data_obj):
@@ -92,13 +91,13 @@ class NxtomoLoader(BaseLoader):
                              slice_dir=(rot,))
         data_obj.add_pattern('SINOGRAM', core_dir=(detX, rot),
                              slice_dir=(detY,))
-        return data_obj.data.shape
+        data_obj.set_shape(data_obj.data.shape)
 
     def __setup_3d_to_4d(self, data_obj, n_angles):
         logging.debug("setting up 4d tomography data from 3d input.")
         self.__setup_4d(data_obj)
-        from savu.data.data_structures.data_type import Map_3d_to_4d_h5
-        data_obj.data = Map_3d_to_4d_h5(data_obj.data, n_angles)
+        from savu.data.data_structures.data_type import Map_3dto4d_h5
+        data_obj.data = Map_3dto4d_h5(data_obj.data, n_angles)
         return data_obj.data.get_shape()
 
     def __setup_4d(self, data_obj):
@@ -115,7 +114,7 @@ class NxtomoLoader(BaseLoader):
                              slice_dir=(rot, scan))
         data_obj.add_pattern('SINOGRAM', core_dir=(detX, rot),
                              slice_dir=(detY, scan))
-        return data_obj.data.shape
+        data_obj.set_shape(data_obj.data.shape)
 
     def __set_dark_and_flat(self, data_obj):
         flat = self.parameters['flat'][0]
@@ -125,12 +124,13 @@ class NxtomoLoader(BaseLoader):
             try:
                 image_key = data_obj.backing_file[
                     'entry1/tomo_entry/instrument/detector/image_key']
-                TomoRaw(data_obj)
-                data_obj.get_tomo_raw().set_image_key(image_key[...])
+                from savu.data.data_structures.data_type import ImageKey
+                data_obj.data = ImageKey(data_obj.data, image_key[...], 0)
+                data_obj.set_shape(data_obj.data.get_shape())
             except KeyError:
                 logging.warn("An image key was not found.")
                 try:
-                    mData = data_obj.mData
+                    mData = data_obj.meta_data
                     entry = 'entry1/tomo_entry/instrument/detector/flatfield'
                     mData.set_meta_data('flat', data_obj.backing_file[entry])
                     entry = 'entry1/tomo_entry/instrument/detector/darkfield'
@@ -162,7 +162,7 @@ class NxtomoLoader(BaseLoader):
             try:
                 entry = 'entry1/tomo_entry/data/rotation_angle'
                 angles = data_obj.backing_file[entry][
-                    (data_obj.meta_data.get_meta_data("image_key")) == 0, ...]
+                    (data_obj.data.get_image_key()) == 0, ...]
             except KeyError:
                 logging.warn("No rotation angle entry found in input file.")
                 angles = np.linspace(0, 180, data_obj.get_shape()[0])

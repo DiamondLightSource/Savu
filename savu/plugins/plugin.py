@@ -108,8 +108,8 @@ class Plugin(PluginDatasets):
         pipeline framework.  It replaces ``self.parameters`` default values
         with those given in the input process list.
 
-        :param dict parameters: A dictionary of the parameters for this plugin,
-        or None if no customisation is required.
+        :param dict parameters: A dictionary of the parameters for this \
+        plugin, or None if no customisation is required.
         """
         self.parameters = {}
         self.parameters_types = {}
@@ -158,14 +158,14 @@ class Plugin(PluginDatasets):
         """
         return self.parameters[name]
 
-    def pre_process(self):
+    def base_pre_process(self):
+        """ This method is called after the plugin has been created by the
+        pipeline framework as a pre-processing step.
         """
-        This method is called after the plugin has been created by the
-        pipeline framework as a pre-processing step
+        pass
 
-        :param exp: An experiment object, holding input and output datasets
-        :type exp: experiment class instance
-        """
+    def pre_process(self):
+        """ This method is called immediately after base_pre_process(). """
         pass
 
     def process_frames(self, data, frame_list):
@@ -195,6 +195,10 @@ class Plugin(PluginDatasets):
         :param exp: An experiment object, holding input and output datasets
         :type exp: experiment class instance
         """
+        pass
+
+    def base_post_process(self):
+        """ This method is called immediately after post_process(). """
         pass
 
     def _clean_up(self):
@@ -296,11 +300,12 @@ class Plugin(PluginDatasets):
         return None
 
     def executive_summary(self):
-        """
-        Provide a summary to the user for the result of the plugin
+        """ Provide a summary to the user for the result of the plugin.
+
         e.g.
          - Warning, the sample may have shifted during data collection
          - Filter operated normally
+
         :returns:  A list of string summaries
         """
         return ["Nothing to Report"]

@@ -15,7 +15,7 @@ Set up your Savu Github repository (**DO THIS ONCE**)
 1. Navigate to https://github.com/DiamondLightSource/Savu and click on Fork (right hand corner).
 2. Navigate to **YOUR FORK** of the repository and copy the url e.g. |A| (ensure SSH is chosen).
 
-.. |A| image:: ../../images/ssh_url.png
+.. |A| image:: ../files_and_images/ssh_url.png
 
 3. Open a terminal (or command prompt) on your local machine, change a relevant folder to install Savu, and follow the instructions below: 
 

@@ -37,6 +37,12 @@ def get_test_data_path(name):
     return '/'.join(os.path.split(path)[0].split(os.sep)[:-2] +
                     ['test_data/data', name])
 
+def get_test_big_data_path(name):
+    '''
+    internal to diamond
+    '''
+    path = '/dls/mx-scratch/savu_test_data'
+    return path+os.sep+name
 
 def get_test_process_path(name):
     path = inspect.stack()[0][1]
@@ -58,7 +64,7 @@ def get_experiment_types():
                         'filename': 'savu_projections.h5'}
     exp_dict['fluo'] = {'func': 'set_fluo_experiment',
                         'filename': 'fluo.nxs'}
-    exp_dict['i12tomo'] = {'func': 'set_i12tomo_experiment',
+    exp_dict['tomo_3dto4d'] = {'func': 'set_3dto4d_experiment',
                            'filename': 'i12_test_data.nxs'}
 
     return exp_dict
@@ -96,10 +102,10 @@ def set_fluo_experiment(filename, **kwargs):
     return options
 
 
-def set_i12tomo_experiment(filename, **kwargs):
+def set_3dto4d_experiment(filename, **kwargs):
     options = set_options(
         get_test_data_path('/i12_test_data/' + filename), **kwargs)
-    options['loader'] = 'savu.plugins.loaders.i12_tomo_loader'
+    options['loader'] = 'savu.plugins.loaders.nxtomo_loader'
     options['saver'] = 'savu.plugins.savers.hdf5_tomo_saver'
     return options
 

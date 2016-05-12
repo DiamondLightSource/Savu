@@ -15,7 +15,7 @@
 """
 .. module:: preview
    :platform: Unix
-   :synopsis: This class deals with previewing (reduction) of the data and is
+   :synopsis: This class deals with previewing (reduction) of the data and is\
    encapsulated in the Data class.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
@@ -95,7 +95,7 @@ class Preview(object):
         set_mData('stops', stops)
         set_mData('steps', steps)
         set_mData('chunks', chunks)
-        if shapeChange or self.get_data_obj().mapping:
+        if shapeChange:# or self.get_data_obj().mapping:
             self.__set_reduced_shape(starts, stops, steps, chunks)
 
     def __get_preview_indices(self, preview_list):
@@ -123,14 +123,12 @@ class Preview(object):
         """
         dobj = self.get_data_obj()
         shape = dobj.get_shape()
-        mid = shape[dim]/2
+        mid = shape[dim]/2 - 1
         end = shape[dim]
-
-        if dobj.mapping:
-            map_shape = self._data_obj.exp.index['mapping'][self._data_obj.get_name()].get_shape()
-            midmap = map_shape[dim]/2
-            endmap = map_shape[dim]
-
+#        if dobj.mapping:
+#            map_shape = self._data_obj.exp.index['mapping'][self._data_obj.get_name()].get_shape()
+#            midmap = map_shape[dim]/2
+#            endmap = map_shape[dim]
         idx = [eval(equ) for equ in idx]
         idx = [idx[i] if idx[i] > -1 else shape[dim]+1+idx[i] for i in
                range(len(idx))]
@@ -167,31 +165,31 @@ class Preview(object):
             new_shape.append(np.prod((dobj._get_slice_dir_matrix(dim).shape)))
         dobj.set_shape(tuple(new_shape))
 
-        # reduce shape of mapping data if it exists
-        if dobj.mapping:
-            self.__set_mapping_reduced_shape(orig_shape, new_shape,
-                                             self._data_obj.get_name())
-
-    def __set_mapping_reduced_shape(self, orig_shape, new_shape, name):
-        """ Set new shape if data is reduced by previewing in a loader and the
-        dataset is to be mapped from 3D to 4D.
-        """
-        map_obj = self._data_obj.exp.index['mapping'][name]
-        map_shape = np.array(map_obj.get_shape())
-        diff = np.array(orig_shape) - map_shape[:len(orig_shape)]
-        not_map_dim = np.where(diff == 0)[0]
-        map_dim = np.where(diff != 0)[0]
-        self.map_dim = map_dim
-        map_obj.data_info.set_meta_data('full_map_dim_len', map_shape[map_dim])
-        map_shape[not_map_dim] = np.array(new_shape)[not_map_dim]
-
-        # assuming only one extra dimension added for now
-        starts, stops, steps, chunks = self.get_starts_stops_steps()
-        start = starts[map_dim] % map_shape[map_dim]
-        stop = min(stops[map_dim], map_shape[map_dim])
-
-        temp = len(np.arange(start, stop, steps[map_dim]))*chunks[map_dim]
-        map_shape[len(orig_shape)] = np.ceil(new_shape[map_dim]/temp)
-        map_shape[map_dim] = new_shape[map_dim]/map_shape[len(orig_shape)]
-        map_obj.data_info.set_meta_data('map_dim_len', map_shape[map_dim])
-        self._data_obj.exp.index['mapping'][name].set_shape(tuple(map_shape))
+#        # reduce shape of mapping data if it exists
+#        if dobj.mapping:
+#            self.__set_mapping_reduced_shape(orig_shape, new_shape,
+#                                             self._data_obj.get_name())
+#
+#    def __set_mapping_reduced_shape(self, orig_shape, new_shape, name):
+#        """ Set new shape if data is reduced by previewing in a loader and the
+#        dataset is to be mapped from 3D to 4D.
+#        """
+#        map_obj = self._data_obj.exp.index['mapping'][name]
+#        map_shape = np.array(map_obj.get_shape())
+#        diff = np.array(orig_shape) - map_shape[:len(orig_shape)]
+#        not_map_dim = np.where(diff == 0)[0]
+#        map_dim = np.where(diff != 0)[0]
+#        self.map_dim = map_dim
+#        map_obj.data_info.set_meta_data('full_map_dim_len', map_shape[map_dim])
+#        map_shape[not_map_dim] = np.array(new_shape)[not_map_dim]
+#
+#        # assuming only one extra dimension added for now
+#        starts, stops, steps, chunks = self.get_starts_stops_steps()
+#        start = starts[map_dim] % map_shape[map_dim]
+#        stop = min(stops[map_dim], map_shape[map_dim])
+#
+#        temp = len(np.arange(start, stop, steps[map_dim]))*chunks[map_dim]
+#        map_shape[len(orig_shape)] = np.ceil(new_shape[map_dim]/temp)
+#        map_shape[map_dim] = new_shape[map_dim]/map_shape[len(orig_shape)]
+#        map_obj.data_info.set_meta_data('map_dim_len', map_shape[map_dim])
+#        self._data_obj.exp.index['mapping'][name].set_shape(tuple(map_shape))

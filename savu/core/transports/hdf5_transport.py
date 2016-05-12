@@ -14,8 +14,8 @@
 """
 .. module:: hdf5_transport
    :platform: Unix
-   :synopsis: Transport specific plugin list runner, passes the data to and
-   from the plugin.
+   :synopsis: Transport specific plugin list runner, passes the data to and \
+       from the plugin.
 
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 

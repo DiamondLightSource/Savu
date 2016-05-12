@@ -51,24 +51,28 @@ class TimeseriesFieldCorrections(BaseCorrection, CpuPlugin):
         self.flag_high_warning = False
 
     def pre_process(self):
-        in_meta_data, out_meta_data = self.get_meta_data()
-        image_keys = in_meta_data[0].get_meta_data('image_key')
-        self.data_idx = np.where(image_keys == 0)[0]
-        self.flat_idx = np.where(image_keys == 1)[0]
-        self.dark_idx = np.where(image_keys == 2)[0]
+        image_key = self.get_in_datasets()[0].data
+        self.dark = image_key.dark_mean()
+        self.flat = image_key.flat_mean()
+        self.nFrames = self.get_max_frames()
+        self.slice_dim = self.get_plugin_in_datasets()[0].get_slice_dimension()
+        data_shape = self.get_plugin_in_datasets()[0].get_shape()
+        self.nDims = len(data_shape)
+        self.tile = [1]*self.nDims
+        self.tile[0] = data_shape[0]
+        self.index = [slice(None), slice(None)]
 
     def correct(self, data):
-        trimmed_data = data[self.data_idx]
-        dark = data[self.dark_idx].mean(0)
-        dark = np.tile(dark, (trimmed_data.shape[0], 1, 1))
-        flat = data[self.flat_idx].mean(0)
-        flat = np.tile(flat, (trimmed_data.shape[0], 1, 1))
+        start = self.count*self.nFrames
+        self.index[0] = slice(start, start + self.nFrames)
+        dark = np.tile(self.dark[self.index], self.tile)
+        flat = np.tile(self.flat[self.index], self.tile)
 
         if len(data.shape) is 2:
             flat = flat.squeeze()
             dark = dark.squeeze()
 
-        data = (trimmed_data-dark)/(flat-dark)
+        data = (data-dark)/(flat-dark)
 
         # finally clean up and trim the data
         data = np.nan_to_num(data)
