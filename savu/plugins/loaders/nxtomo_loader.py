@@ -125,7 +125,8 @@ class NxtomoLoader(BaseLoader):
                 image_key = data_obj.backing_file[
                     'entry1/tomo_entry/instrument/detector/image_key']
                 from savu.data.data_structures.data_type import ImageKey
-                data_obj.data = ImageKey(data_obj.data, image_key[...], 0)
+                data_obj.data = ImageKey(data_obj, data_obj.data,
+                                         image_key[...], 0)
                 data_obj.set_shape(data_obj.data.get_shape())
             except KeyError:
                 logging.warn("An image key was not found.")

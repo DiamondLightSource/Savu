@@ -46,6 +46,7 @@ class BaseCorrection(Plugin):
         """
         Perform the correction
         """
+        self.slice_list = slice_list[0]
         return self.correct(data[0])
 
     def correct(self, data):
@@ -70,10 +71,8 @@ class BaseCorrection(Plugin):
         in_pData, out_pData = self.get_plugin_datasets()
         # set pattern_name and nframes to process for all datasets
         pattern = self.parameters['pattern']
-        in_pData[0].plugin_data_setup(pattern, self.get_max_frames(),
-                                      fixed=True)
-        out_pData[0].plugin_data_setup(pattern, self.get_max_frames(),
-                                       fixed=True)
+        in_pData[0].plugin_data_setup(pattern, self.get_max_frames())
+        out_pData[0].plugin_data_setup(pattern, self.get_max_frames())
 
     def nInput_datasets(self):
         return 1

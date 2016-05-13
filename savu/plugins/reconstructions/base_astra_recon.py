@@ -140,10 +140,8 @@ class BaseAstraRecon(BaseRecon):
         return cfg
 
     def reconstruct(self, sino, cors, angles, vol_shape):
-        print sino.shape
-        self.sino_transpose = (1, 0, 2)
-        print "processing"
-        sino = sino.transpose(self.sino_transpose)
+        #self.sino_transpose = (1, 0, 2)
+        #sino = sino.transpose(self.sino_transpose)
         if self.alg_type is '2D':
             sino = np.pad(sino, ((0, 0), (self.p_low, self.p_high)),
                           mode='reflect')
