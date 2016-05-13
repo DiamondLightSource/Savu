@@ -206,16 +206,6 @@ class Plugin(PluginDatasets):
         """
         self.__copy_meta_data()
         self.__clean_up_plugin_data()
-        self.__delete_mappings()
-
-    def __delete_mappings(self):
-        """ Delete mapping datasets and set mapping flag to False.
-        """
-        in_datasets = self.get_in_datasets()
-        for data in in_datasets:
-            if data.mapping:
-                del self.exp.index['mapping'][data.get_name()]
-                self.mapping = False
 
     def __copy_meta_data(self):
         """

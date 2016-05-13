@@ -353,10 +353,9 @@ class Hdf5Transport(TransportControl):
         """
         result = [result] if type(result) is not list else result
         for idx in range(len(data_list)):
-            temp = data_list[idx]._get_unpadded_slice_data(
-                slice_list[idx][count], result[idx])
             data_list[idx].data[slice_list[idx][count]] = \
-                expand_dict[idx](temp)
+                expand_dict[idx](data_list[idx]._get_unpadded_slice_data(
+                    slice_list[idx][count], result[idx]))
 
 #    def _transfer_to_meta_data(self, return_dict):
 #        """

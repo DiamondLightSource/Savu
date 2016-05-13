@@ -377,7 +377,6 @@ class Hdf5TransportData(object):
         return process_slice_list
 
     def __calculate_slice_padding(self, in_slice, pad, data_stop, **kwargs):
-        print "\n******************************************************"
         pad = [pad['before'], pad['after']]
         sl = in_slice
         if not type(sl) == slice:
@@ -397,14 +396,6 @@ class Hdf5TransportData(object):
             maxval = data_stop
 
         out_slice = slice(minval, maxval, sl.step)
-
-        print "datastop", data_stop
-        print "inslice", in_slice
-        print "pad", pad
-        print "val", minval, maxval
-        print "padval", minpad, maxpad
-        print "padding the data", out_slice
-        print "******************************************************\n"
         return (out_slice, (minpad, maxpad))
 
     def __get_pad_data(self, slice_tup, pad_tup):
@@ -438,18 +429,13 @@ class Hdf5TransportData(object):
         slice_list = list(input_slice_list)
         pData = self._get_plugin_data()
 
-        shape = list(self.get_shape())
         if pData.fixed_dims is True:
             self.__matching_dims(pData, input_slice_list)
-            nFrames = float(pData._get_frame_chunk())
-            shape[pData.get_slice_dimension()] = \
-                math.ceil(shape[pData.get_slice_dimension()]/nFrames)*nFrames
 
         if not pData.padding:
             return self.data[tuple(slice_list)]
 
         padding_dict = pData.padding._get_padding_directions()
-        print "the padding dict", padding_dict
         pad_list = []
         for i in range(len(slice_list)):
             pad_list.append((0, 0))
@@ -457,7 +443,7 @@ class Hdf5TransportData(object):
         for ddir in padding_dict.keys():
             pDict = padding_dict[ddir]
             slice_list[ddir], pad_list[ddir] = self.__calculate_slice_padding(
-                slice_list[ddir], pDict, shape[ddir])
+                slice_list[ddir], pDict, self.get_shape()[ddir])
 
         return self.__get_pad_data(tuple(slice_list), tuple(pad_list))
 
@@ -476,29 +462,19 @@ class Hdf5TransportData(object):
             pData.padding._pad_direction(pad_str)
 
     def _get_unpadded_slice_data(self, input_slice_list, padded_data):
-        print "unpadding", input_slice_list
-        print padded_data.shape
         pData = self._get_plugin_data()
+
+        if pData.fixed_dims is True:
+            self.__matching_dims(pData, input_slice_list)
+
         if not pData.padding:
             return padded_data
 
         padding_dict = pData.padding._get_padding_directions()
-        slice_list = list(input_slice_list)
-        pad_list = []
-        expand_list = []
-
-        for i in range(len(slice_list)):
-            pad_list.append((0, 0))
-            expand_list.append(0)
-
         new_slice = [slice(None)]*len(self.get_shape())
         for ddir in padding_dict.keys():
-            slice_list[ddir], pad_list[ddir] = self.__calculate_slice_padding(
-                slice_list[ddir], padding_dict[ddir], padded_data.shape[ddir])
-            end = padded_data.shape[ddir] if pad_list[ddir][1] is 0 else\
-                -pad_list[ddir][1]
-            new_slice[ddir] = slice(pad_list[ddir][0], end, 1)
+            end = padded_data.shape[ddir] if padding_dict[ddir]['after'] is 0\
+                else -padding_dict[ddir]['after']
+            new_slice[ddir] = slice(padding_dict[ddir]['before'], end, 1)
 
-        print input_slice_list, tuple(new_slice)
-        print padded_data[tuple(new_slice)].shape
         return padded_data[tuple(new_slice)]
