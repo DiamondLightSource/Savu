@@ -13,25 +13,24 @@
 # limitations under the License.
 
 """
-.. module:: ComponentAnalysisTest
+.. module:: nx_xrd_loader_test
    :platform: Unix
-   :synopsis: Test all the component analyses
+   :synopsis: testing the nx_xrd loader
 
-.. moduleauthor:: Aaron D. Parsons <scientificsoftware@diamond.ac.uk>
+.. moduleauthor:: Aaron Parsons <scientificsoftware@diamond.ac.uk>
 
 """
-
 import unittest
 from savu.test import test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
 
-class ComponentAnalysisTest(unittest.TestCase):
+class NxPtychoLoaderTest(unittest.TestCase):
 
-    def test_process(self):
-        data_file = '/dls/mx-scratch/aaron/data/I18/paper_processing/58905_Co_800C_1.nxs'#tu.get_test_data_path('mm.nxs')
-        process_file = tu.get_test_process_path('ica_test.nxs')
+    def test_nx_ptycho(self):
+        data_file = tu.get_test_big_data_path('NXptychoflipped.nxs')
+        process_file = tu.get_test_process_path('basic_ptycho_process.nxs')
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
 

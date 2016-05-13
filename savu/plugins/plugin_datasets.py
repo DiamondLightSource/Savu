@@ -30,7 +30,7 @@ class PluginDatasets(object):
     The base class from which all plugins should inherit.
     """
 
-    def __init__(self, name='PluginDatasets'):
+    def __init__(self):
         super(PluginDatasets, self).__init__()
         self.exp = None
         self.data_objs = {}

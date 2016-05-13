@@ -37,6 +37,12 @@ def get_test_data_path(name):
     return '/'.join(os.path.split(path)[0].split(os.sep)[:-2] +
                     ['test_data/data', name])
 
+def get_test_big_data_path(name):
+    '''
+    internal to diamond
+    '''
+    path = '/dls/mx-scratch/savu_test_data'
+    return path+os.sep+name
 
 def get_test_process_path(name):
     path = inspect.stack()[0][1]
