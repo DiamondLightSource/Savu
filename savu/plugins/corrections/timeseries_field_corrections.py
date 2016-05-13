@@ -52,8 +52,8 @@ class TimeseriesFieldCorrections(BaseCorrection, CpuPlugin):
 
     def pre_process(self):
         image_key = self.get_in_datasets()[0].data
-        self.dark = image_key.dark_mean()
-        self.flat = image_key.flat_mean()
+        self.dark = self.apply_preview(image_key.dark_mean())
+        self.flat = self.apply_preview(image_key.flat_mean())
         self.flat_minus_dark = self.flat - self.dark
         self.nFrames = self.get_max_frames()
         self.slice_dim = self.get_plugin_in_datasets()[0].get_slice_dimension()
@@ -64,7 +64,6 @@ class TimeseriesFieldCorrections(BaseCorrection, CpuPlugin):
         self.index = [slice(None), slice(None)]
 
     def correct(self, data):
-        print "***", data.shape
         sl = self.slice_list[self.slice_dim]
         self.index[0] = slice(sl.start, sl.start + self.nFrames)
         dark = np.tile(self.dark[self.index], self.tile)

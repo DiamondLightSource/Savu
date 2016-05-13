@@ -55,7 +55,6 @@ class Chunking(object):
         """
         Calculate appropriate chunk sizes for this dataset
         """
-        print shape
         logging.debug("shape = %s", shape)
         if len(shape) < 3:
             return True

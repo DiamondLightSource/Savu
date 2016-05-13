@@ -148,7 +148,6 @@ class ImageKey(DataTypes):
         self.nDims = len(self.shape)
 
     def __getitem__(self, idx):
-        print idx
         index = list(idx)
         index[self.proj_dim] = self.get_index(0)[idx[self.proj_dim]]
         return self.data[tuple(index)]
