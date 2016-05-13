@@ -56,6 +56,7 @@ def _deepcopy_data_object(dObj, new_obj):
     new_obj.backing_file = dObj.backing_file
     new_obj.data = dObj.data
     new_obj.next_shape = copy.deepcopy(dObj.next_shape)
+    new_obj.orig_shape = copy.deepcopy(dObj.orig_shape)
     return new_obj
 
 

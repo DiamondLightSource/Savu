@@ -41,7 +41,7 @@ while read -r a b c d; do
 	#processfile=$outpath/../test_data/original_process_lists/i12_tomo_pipeline_preview_55751.nxs
     
     datafile=$outpath/../test_data/ee12581-1_test/pc2_KRA_530_ramp_00000.hdf
-    processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_loader_i12.nxs
+    processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_processes/test_loader_i12.nxs
 	#processfile=$outpath/../test_data/i12_tomo_pipeline_gpu.nxs
 	#processfile=$outpath/../test_data/i12_full_test.nxs
 

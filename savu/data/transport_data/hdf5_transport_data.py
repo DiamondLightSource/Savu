@@ -440,10 +440,11 @@ class Hdf5TransportData(object):
         for i in range(len(slice_list)):
             pad_list.append((0, 0))
 
+        shape = self.orig_shape if self.orig_shape else self.get_shape()
         for ddir in padding_dict.keys():
             pDict = padding_dict[ddir]
             slice_list[ddir], pad_list[ddir] = self.__calculate_slice_padding(
-                slice_list[ddir], pDict, self.get_shape()[ddir])
+                slice_list[ddir], pDict, shape[ddir])
 
         return self.__get_pad_data(tuple(slice_list), tuple(pad_list))
 

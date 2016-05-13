@@ -27,7 +27,6 @@ import numpy as np
 
 from savu.plugins.base_loader import BaseLoader
 from savu.plugins.utils import register_plugin
-#from savu.data.data_structures.data_add_ons import TomoRaw
 
 
 @register_plugin
@@ -76,6 +75,7 @@ class NxtomoLoader(BaseLoader):
             logging.warn("No Control information available")
 
         self.__check_angles
+        data_obj.set_original_shape(shape)
         self.set_data_reduction_params(data_obj)
 
     def __setup_3d(self, data_obj):
@@ -91,7 +91,7 @@ class NxtomoLoader(BaseLoader):
                              slice_dir=(rot,))
         data_obj.add_pattern('SINOGRAM', core_dir=(detX, rot),
                              slice_dir=(detY,))
-        data_obj.set_shape(data_obj.data.shape)
+        return data_obj.data.shape
 
     def __setup_3d_to_4d(self, data_obj, n_angles):
         logging.debug("setting up 4d tomography data from 3d input.")
@@ -114,35 +114,37 @@ class NxtomoLoader(BaseLoader):
                              slice_dir=(rot, scan))
         data_obj.add_pattern('SINOGRAM', core_dir=(detX, rot),
                              slice_dir=(detY, scan))
-        data_obj.set_shape(data_obj.data.shape)
+        return data_obj.data.shape
 
     def __set_dark_and_flat(self, data_obj):
         flat = self.parameters['flat'][0]
         dark = self.parameters['dark'][0]
 
         if not flat or not dark:
-            try:
-                image_key = data_obj.backing_file[
-                    'entry1/tomo_entry/instrument/detector/image_key']
-                from savu.data.data_structures.data_type import ImageKey
-                data_obj.data = ImageKey(data_obj, data_obj.data,
-                                         image_key[...], 0)
-                data_obj.set_shape(data_obj.data.get_shape())
-            except KeyError:
-                logging.warn("An image key was not found.")
-                try:
-                    mData = data_obj.meta_data
-                    entry = 'entry1/tomo_entry/instrument/detector/flatfield'
-                    mData.set_meta_data('flat', data_obj.backing_file[entry])
-                    entry = 'entry1/tomo_entry/instrument/detector/darkfield'
-                    mData.set_meta_data('dark', data_obj.backing_file[entry])
-                except KeyError:
-                    logging.warn("Dark and flat data was not found in input "
-                                 "file.")
+            self.__find_dark_and_flat(data_obj)
         if flat:
             self.__get_image('flat', 1, data_obj)
         if dark:
             self.__get_image('dark', 2, data_obj)
+
+    def __find_dark_and_flat(self, data_obj):
+        try:
+            image_key = data_obj.backing_file[
+                'entry1/tomo_entry/instrument/detector/image_key']
+            from savu.data.data_structures.data_type import ImageKey
+            data_obj.data = ImageKey(data_obj.data, image_key[...], 0)
+            data_obj.set_shape(data_obj.data.get_shape())
+        except KeyError:
+            logging.warn("An image key was not found.")
+            try:
+                mData = data_obj.meta_data
+                entry = 'entry1/tomo_entry/instrument/detector/flatfield'
+                mData.set_meta_data('flat', data_obj.backing_file[entry][...])
+                entry = 'entry1/tomo_entry/instrument/detector/darkfield'
+                mData.set_meta_data('dark', data_obj.backing_file[entry][...])
+            except KeyError:
+                logging.warn("Dark and flat data was not found in input "
+                             "file.")
 
     def __get_image(self, name, key, data_obj):
         fpath, fentry, scale = self.parameters[name]

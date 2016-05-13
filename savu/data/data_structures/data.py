@@ -46,12 +46,10 @@ class Data(DataCreate):
         self.group = None
         self._plugin_data_obj = None
         self.tomo_raw_obj = None
-        #self.data_mapping = None
         self.backing_file = None
         self.data = None
         self.next_shape = None
-        #self.mapping = None
-        #self.map_dim = []
+        self.orig_shape = None
 
     def __initialise_data_info(self, name):
         """ Initialise entries in the data_info meta data.
@@ -115,6 +113,10 @@ class Data(DataCreate):
         """
         self.data_info.set_meta_data('shape', shape)
         self.__check_dims()
+
+    def set_original_shape(self, shape):
+        self.orig_shape = shape
+        self.set_shape(shape)
 
     def get_shape(self):
         """ Get the dataset shape

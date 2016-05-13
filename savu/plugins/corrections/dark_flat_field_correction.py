@@ -44,13 +44,15 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
 
     def pre_process(self):
         inData = self.get_in_datasets()[0]
+        new_slice = self._get_new_slice(inData._get_plugin_data())
         if isinstance(inData.data, ImageKey):
             image_key = self.get_in_datasets()[0].data
-            self.dark = image_key.dark_mean()
-            self.flat = image_key.flat_mean()
+            self.dark = self.apply_preview(image_key.dark_mean())
+            self.flat = self.apply_preview(image_key.flat_mean())
         else:
-            self.dark = inData.meta_data.get_meta_data['dark']
-            self.flat = inData.meta_data.get_meta_data['flat']
+            self.dark = inData.meta_data.get_meta_data('dark')[new_slice]
+            self.flat = inData.meta_data.get_meta_data('flat')[new_slice]
+            print "***************", inData.meta_data.get_meta_data('dark').shape
 
         self.flat_minus_dark = self.flat - self.dark
         self.nFrames = self.get_max_frames()
@@ -58,11 +60,12 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
         data_shape = self.get_plugin_in_datasets()[0].get_shape()
         self.nDims = len(data_shape)
         self.tile = [1]*self.nDims
-        if self.parameters['pattern'] is 'PROJECTION':
+        if self.parameters['pattern'] is 'SINOGRAM':
             self.tile[0] = data_shape[0]
         self.index = [slice(None), slice(None)]
 
     def correct(self, data):
+        print data.shape, self.dark.shape
         if self.parameters['pattern'] == 'SINOGRAM':
             sl = self.slice_list[self.slice_dim]
             self.index[0] = slice(sl.start, sl.start + self.nFrames)
@@ -70,5 +73,14 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
         dark = np.tile(self.dark[self.index], self.tile)
         flat_minus_dark = np.tile(self.flat_minus_dark[self.index], self.tile)
         data = (data-dark)/flat_minus_dark
-        # finally clean up and trim the data
+        print dark.shape
         return np.nan_to_num(data)
+
+#    def _get_new_slice(self, pData):
+#        core_dir = set(pData.get_core_directions())
+#        starts, stops, steps, chunks = \
+#            pData.data_obj._preview.get_starts_stops_steps()
+#        new_slice = [slice(starts[d], stops[d], steps[d]) for d in core_dir]
+#        return new_slice
+
+

@@ -71,8 +71,8 @@ class BaseCorrection(Plugin):
             pattern = self.parameters['pattern']
         else:
             pattern = 'SINOGRAM'
-        in_pData[0].plugin_data_setup(pattern, self.get_max_frames())
-        out_pData[0].plugin_data_setup(pattern, self.get_max_frames())
+        in_pData[0].plugin_data_setup(pattern, self.get_max_frames(), fixed=True)
+        out_pData[0].plugin_data_setup(pattern, self.get_max_frames(), fixed=True)
 
     def nInput_datasets(self):
         return 1
@@ -88,3 +88,15 @@ class BaseCorrection(Plugin):
         :returns:  an integer of the number of frames
         """
         return 4
+
+    def apply_preview(self, data):
+        """ Apply previewing to data that is not part of the input data."""
+        return data[self._get_new_slice()]
+
+    def _get_new_slice(self, pData):
+        det_dims = [pData.get_data_dimension_by_axis_label('detector_y'),
+                    pData.get_data_dimension_by_axis_label('detector_x')]
+        starts, stops, steps, chunks = \
+            pData.data_obj._preview.get_starts_stops_steps()
+        new_slice = [slice(starts[d], stops[d], steps[d]) for d in det_dims]
+        return new_slice
