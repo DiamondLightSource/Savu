@@ -54,6 +54,7 @@ class TimeseriesFieldCorrections(BaseCorrection, CpuPlugin):
         image_key = self.get_in_datasets()[0].data
         self.dark = image_key.dark_mean()
         self.flat = image_key.flat_mean()
+        self.flat_minus_dark = self.flat - self.dark
         self.nFrames = self.get_max_frames()
         self.slice_dim = self.get_plugin_in_datasets()[0].get_slice_dimension()
         data_shape = self.get_plugin_in_datasets()[0].get_shape()
@@ -66,14 +67,9 @@ class TimeseriesFieldCorrections(BaseCorrection, CpuPlugin):
         sl = self.slice_list[self.slice_dim]
         self.index[0] = slice(sl.start, sl.start + self.nFrames)
         dark = np.tile(self.dark[self.index], self.tile)
-        flat = np.tile(self.flat[self.index], self.tile)
+        flat_minus_dark = np.tile(self.flat_minus_dark[self.index], self.tile)
 
-        if len(data.shape) is 2:
-            flat = flat.squeeze()
-            dark = dark.squeeze()
-
-        data = (data-dark)/(flat-dark)
-
+        data = (data-dark)/flat_minus_dark
         # finally clean up and trim the data
         data = np.nan_to_num(data)
 

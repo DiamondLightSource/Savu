@@ -34,10 +34,7 @@ class BaseCorrection(Plugin):
         process. Default: [].
     :param out_datasets: Create a list of the dataset(s) to \
         process. Default: [].
-    :param pattern: Data processing pattern is 'SINOGRAM' or \
-        'PROJECTION'. Default: 'SINOGRAM'.
     """
-    count = 0
 
     def __init__(self, name='BaseCorrection'):
         super(BaseCorrection, self).__init__(name)
@@ -70,7 +67,10 @@ class BaseCorrection(Plugin):
         # set information relating to the plugin data
         in_pData, out_pData = self.get_plugin_datasets()
         # set pattern_name and nframes to process for all datasets
-        pattern = self.parameters['pattern']
+        if 'pattern' in self.parameters.keys():
+            pattern = self.parameters['pattern']
+        else:
+            pattern = 'SINOGRAM'
         in_pData[0].plugin_data_setup(pattern, self.get_max_frames())
         out_pData[0].plugin_data_setup(pattern, self.get_max_frames())
 
