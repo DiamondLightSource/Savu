@@ -66,15 +66,10 @@ class DataCreate(object):
     def __create_dataset_from_object(self, data_obj):
         """ Create a dataset from an existing Data object.
         """
-        if data_obj.mapping:
-            data_obj = self.__copy_mapping_object(data_obj)
         patterns = copy.deepcopy(data_obj.get_data_patterns())
         self.__copy_labels(data_obj)
         self.__find_and_set_shape(data_obj)
         self.__set_data_patterns(patterns)
-        if data_obj.tomo_raw_obj:
-            self._set_tomo_raw(copy.deepcopy(data_obj.get_tomo_raw()))
-            self.get_tomo_raw().data_obj = self
 
     def __copy_mapping_object(self, data_obj):
         """ Copy relevant mapping object information and return the mapping
@@ -108,7 +103,6 @@ class DataCreate(object):
         if 'patterns' in kwargs:
             patterns = self.__copy_patterns(kwargs['patterns'])
             self.__set_data_patterns(patterns)
-            
 
     def __copy_patterns(self, copy_data):
         """ Copy patterns """

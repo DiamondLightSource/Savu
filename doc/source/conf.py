@@ -15,7 +15,7 @@
 import sys, os
 from os import path
 
-autodoc_mock_imports = ['numpy', 'mpi4py', 'astra', 'scipy',
+autodoc_mock_imports = ['numpy', 'mpi4py', 'astra', 'scipy', 'h5py',
                         'dials.array_family', 'dials.algorithms.image.threshold']
 
 # If extensions (or modules to document with autodoc) are in another directory,

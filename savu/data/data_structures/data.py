@@ -46,12 +46,12 @@ class Data(DataCreate):
         self.group = None
         self._plugin_data_obj = None
         self.tomo_raw_obj = None
-        self.data_mapping = None
+        #self.data_mapping = None
         self.backing_file = None
         self.data = None
         self.next_shape = None
-        self.mapping = None
-        self.map_dim = []
+        #self.mapping = None
+        #self.map_dim = []
 
     def __initialise_data_info(self, name):
         """ Initialise entries in the data_info meta data.
@@ -78,28 +78,6 @@ class Data(DataCreate):
             return self._plugin_data_obj
         else:
             raise Exception("There is no PluginData object associated with "
-                            "the Data object.")
-
-    def _set_tomo_raw(self, tomo_raw_obj):
-        """ Encapsulate a TomoRaw object.
-        """
-        self.tomo_raw_obj = tomo_raw_obj
-
-    def _clear_tomo_raw(self):
-        """ Set encapsulated TomoRaw object to None.
-        """
-        self.tomo_raw_obj = None
-
-    def get_tomo_raw(self):
-        """ Get encapsulated TomoRaw object.
-
-        :return: associated TomoRaw object if available.
-        :rtype: TomoRaw
-        """
-        if self.tomo_raw_obj is not None:
-            return self.tomo_raw_obj
-        else:
-            raise Exception("There is no TomoRaw object associated with "
                             "the Data object.")
 
     def get_preview(self):

@@ -81,7 +81,3 @@ log messages."])
             return(["WARNINGS detected in dezing plugin, Check the detailed \
 log messages."])
         return "Nothing to Report"
-
-# other examples
-#        data.padding = {'pad_multi_frames':pad, 'pad_frame_edges':pad}
-#        data.padding = {'pad_direction':[ddir, pad]}}

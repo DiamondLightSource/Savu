@@ -201,3 +201,12 @@ shape=new_shape, patterns={in_dataset[0], ['SINOGRAM.1', 'PROJECTION.1']})
 shape=new_shape, patterns={in_dataset[0], '*.0'})
 
     """
+
+
+def _padding():
+    """
+    Either 'dim.pad', 'dim.after.pad' or 'dim.before.pad', where 'dim' and\
+    'pad' are integers and give the dimension to pad and the the pad \
+    amount respectively. The keywords 'before' and 'after' specify padding\
+    'before' or 'after' the original dimension index (if neither are\
+    specified the both directions will be padded. """

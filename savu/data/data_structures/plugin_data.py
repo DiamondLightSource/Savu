@@ -38,10 +38,9 @@ class PluginData(object):
         self.data_obj = data_obj
         self.data_obj._set_plugin_data(self)
         self.meta_data = MetaData()
-        self.padding = {}
+        self.padding = None
         # this flag determines which data is passed. If false then just the
         # data, if true then all data including dark and flat fields.
-        self.selected_data = False
         self.shape = None
         self.core_shape = None
         self.multi_params = {}
