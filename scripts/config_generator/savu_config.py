@@ -261,6 +261,7 @@ def _add(content, arg):
                   (name))
     except Exception as e:
         print("Sorry I can't process the argument '%s'" % (arg))
+        print(e)
     return content
 
 

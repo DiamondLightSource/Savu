@@ -39,6 +39,8 @@ class PluginRunner(object):
         self._transport_control_setup(options)
         self.exp = None
         self.options = options
+        # add all relevent locations to the path
+        pu.get_plugins_paths()
 
     def _run_plugin_list(self):
         """ Create an experiment and run the plugin list.
