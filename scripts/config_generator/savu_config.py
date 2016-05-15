@@ -191,7 +191,7 @@ def _list(content, arg):
     for key, value in pu.plugins.iteritems():
         if not arg:
             print key
-        elif value.split('.')[0] == arg[0]:
+        elif arg[0] in value.__module__:
             print key
             if len(arg) < 2:
                 plugin = pu.plugins[key]()
