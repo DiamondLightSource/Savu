@@ -42,10 +42,10 @@ class FabIO(DataTypes):
     """ This class loads any of the FabIO python module supported image
     formats. """
 
-    def __init__(self, folder, Data, dim, shape=None):
+    def __init__(self, folder, Data, dim, shape=None, data_prefix=None):
         self._data_obj = Data
         self.nFrames = None
-        self.start_file = fabio.open(self.__get_file_name(folder))
+        self.start_file = fabio.open(self.__get_file_name(folder, data_prefix))
         self.frame_dim = dim
         self.image_shape = (self.start_file.dim2, self.start_file.dim1)
         if shape is None:
@@ -65,13 +65,20 @@ class FabIO(DataTypes):
                 .data[[index[i][n] for n in tiffidx]]
         return data
 
-    def __get_file_name(self, folder):
+    def __get_file_name(self, folder, prefix):
         import re
-        files = os.listdir(folder)
+        import glob
+#        files = os.listdir(folder)
+        fullpath = str.strip(folder)
+        if prefix != "None":
+           fullpath = os.path.join(folder, prefix)
+        fullpath += "*"
+        files = glob.glob(fullpath)
         self.nFrames = len(files)
         fname = sorted(files)[0]
         self.start_no = [int(s) for s in re.findall(r'\d+', fname)][-1]
-        return folder + "/" + fname
+        return fname
+#        return folder + "/" + fname
 
     def get_shape(self):
         return self.shape + self.image_shape
