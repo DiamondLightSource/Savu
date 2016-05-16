@@ -139,9 +139,9 @@ class NxtomoLoader(BaseLoader):
             try:
                 mData = data_obj.meta_data
                 entry = 'entry1/tomo_entry/instrument/detector/flatfield'
-                mData.set_meta_data('flat', data_obj.backing_file[entry][...])
+                mData.set_meta_data('flat', data_obj.backing_file[entry][...].mean(0)*int(scale))
                 entry = 'entry1/tomo_entry/instrument/detector/darkfield'
-                mData.set_meta_data('dark', data_obj.backing_file[entry][...])
+                mData.set_meta_data('dark', data_obj.backing_file[entry][...].mean(0)*int(scale))
             except KeyError:
                 logging.warn("Dark and flat data was not found in input "
                              "file.")
