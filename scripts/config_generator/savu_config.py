@@ -191,7 +191,7 @@ def _list(content, arg):
     for key, value in pu.plugins.iteritems():
         if not arg:
             print key
-        elif value.split('.')[0] == arg[0]:
+        elif arg[0] in value.__module__:
             print key
             if len(arg) < 2:
                 plugin = pu.plugins[key]()
@@ -261,6 +261,7 @@ def _add(content, arg):
                   (name))
     except Exception as e:
         print("Sorry I can't process the argument '%s'" % (arg))
+        print(e)
     return content
 
 
@@ -326,6 +327,14 @@ def _exit(content, arg):
     content.set_finished(content.save("exit"))
     return content
 
+
+def _history(content, arg):
+    hlen = readline.get_current_history_length()
+    for i in range(hlen):
+        print("%5i : %s" % (i, readline.get_history_item(i)))
+    return content
+
+
 commands = {'open': _open,
             'help': _help,
             'disp': _disp,
@@ -336,7 +345,8 @@ commands = {'open': _open,
             'rem': _rem,
             'ref': _ref,
             'params': _params,
-            'exit': _exit}
+            'exit': _exit,
+            'history': _history}
 
 list_commands = ['loaders',
                  'corrections',
@@ -467,6 +477,9 @@ def main():
 
         if content.is_finished():
             break
+
+        # write the history to the histoy file
+        readline.write_history_file(histfile)
 
     print "Thanks for using the application"
 
