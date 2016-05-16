@@ -66,10 +66,15 @@ class ImageLoader(BaseLoader):
         clazz = getattr(mod, dtype)
 
         path = exp.meta_data.get_meta_data("data_file")
-        data_obj.data = clazz(path, data_obj, [self.parameters['frame_dim']])
+        data_obj.data = clazz(path, data_obj, [self.parameters['frame_dim']], None, data_prefix)
 
         self.set_rotation_angles(data_obj)
-
+        #read dark and flat images
+        dark = clazz(path, data_obj, [self.parameters['frame_dim']], None, dark_prefix)
+        data_obj.meta_data.set_meta_data('dark',dark[...].mean(0))
+        flat = clazz(path, data_obj, [self.parameters['frame_dim']], None, flat_prefix)
+        data_obj.meta_data.set_meta_data('flat',flat[...].mean(0))
+        
         # dummy file
         filename = path.split('/')[-1] + '.h5'
         data_obj.backing_file = \
@@ -98,3 +103,4 @@ class ImageLoader(BaseLoader):
             raise Exception("The number of angles %s does not match the data "
                             "dimension length %s", n_angles, data_angles)
         data_obj.meta_data.set_meta_data("rotation_angle", angles)
+        
