@@ -37,6 +37,9 @@ class ImageLoader(BaseLoader):
     :param image_type: Type of image. Choose from 'FabIO'. Default: 'FabIO'.
     :param angles: A python statement to be evaluated or a file. Default: None.
     :param frame_dim: Which dimension requires stitching? Default: 0.
+    :param data_prefix: A file prefix for the data file. Default: None.
+    :param dark_prefix: A file prefix for the dark field files. Default: None.
+    :param flat_prefix: A file prefix for the flat field files. Default: None.
     """
 
     def __init__(self, name='ImageLoader'):
