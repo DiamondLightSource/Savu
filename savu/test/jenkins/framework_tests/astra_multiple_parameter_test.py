@@ -15,7 +15,7 @@
 
 
 """
-.. module:: multiple_parameter_test
+.. module:: astra_multiple_parameter_test
    :platform: Unix
    :synopsis: unittest test classes for plugins
 
@@ -29,59 +29,48 @@ import savu.plugins.utils as pu
 import savu.test.test_utils as tu
 
 
-class MultipleParameterTest(unittest.TestCase):
+class AstraMultipleParameterTest(unittest.TestCase):
 
     def plugin_setup(self):
-        ppath = 'savu.plugins.reconstructions.scikitimage_sart'
+        ppath = 'savu.plugins.reconstructions.astra_recons.astra_recon_cpu'
         plugin = pu.load_plugin(ppath)
         return plugin
 
     def framework_options_setup(self):
-        key1 = 'interpolation'
-        key2 = 'iterations'
+        key1 = 'reconstruction_type'
+        key2 = 'number_of_iterations'
         key3 = 'in_datasets'
         key4 = 'out_datasets'
-        key5 = 'sino_pad_width'
-        params = {key1: 'nearest;linear', key2: '1;2;3', key3: 'tomo',
-                  key4: 'tomo', key5: 0}
+        params = {key1: 'FBP;CGLS', key2: '1;2;3', key3: 'tomo', key4: 'tomo'}
 
         options = tu.set_experiment('tomo')
-        plugin = 'savu.plugins.reconstructions.scikitimage_sart'
+        plugin = 'savu.plugins.reconstructions.astra_recons.astra_recon_cpu'
         tu.set_plugin_list(options, plugin, [{}, params, {}])
         return options
 
     def test_parameter_space_int(self):
         plugin = self.plugin_setup()
-        key = 'iterations'
+        key = 'number_of_iterations'
         params = {key: '1;2;3'}
         plugin._set_parameters(params)
         params = plugin.parameters[key]
         self.assertEqual(params, [1, 2, 3])
         self.assertEqual(plugin.extra_dims[0], 3)
 
-    def test_parameter_space_float(self):
-        plugin = self.plugin_setup()
-        key = 'sino_pad_width'
-        params = {key: '0.2;0.4;0.6'}
-        plugin._set_parameters(params)
-        params = plugin.parameters[key]
-        self.assertEqual(params, [0.2, 0.4, 0.6])
-        self.assertEqual(plugin.extra_dims[0], 3)
-
     def test_parameter_space_str(self):
         plugin = self.plugin_setup()
-        key = 'interpolation'
-        params = {key: 'nearest;linear'}
+        key = 'reconstruction_type'
+        params = {key: 'FBP;CGLS'}
         plugin._set_parameters(params)
         params = plugin.parameters[key]
-        self.assertEqual(params, ['nearest', 'linear'])
+        self.assertEqual(params, ['FBP', 'CGLS'])
         self.assertEqual(plugin.extra_dims[0], 2)
 
     def test_parameter_space_extra_dims(self):
         plugin = self.plugin_setup()
-        key1 = 'interpolation'
-        key2 = 'iterations'
-        params = {key1: 'nearest;linear', key2: '1;2;3'}
+        key1 = 'reconstruction_type'
+        key2 = 'number_of_iterations'
+        params = {key1: 'FBP;CGLS', key2: '1;2;3'}
         plugin._set_parameters(params)
         out_datasets = plugin.get_out_datasets()
         for data in out_datasets:
