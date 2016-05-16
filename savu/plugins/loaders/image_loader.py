@@ -71,10 +71,16 @@ class ImageLoader(BaseLoader):
 
         self.set_rotation_angles(data_obj)
         #read dark and flat images
-        dark = clazz(path, data_obj, [self.parameters['frame_dim']], None, self.parameters['dark_prefix'])
-        data_obj.meta_data.set_meta_data('dark',dark[...].mean(0))
-        flat = clazz(path, data_obj, [self.parameters['frame_dim']], None, self.parameters['flat_prefix'])
-        data_obj.meta_data.set_meta_data('flat',flat[...].mean(0))
+        if self.parameters['dark_prefix'] != "None":
+           dark = clazz(path, data_obj, [self.parameters['frame_dim']], None, self.parameters['dark_prefix'])
+           data_obj.meta_data.set_meta_data('dark',dark[0:dark.get_shape()[0],0:dark.get_shape()[1], 0:dark.get_shape()[2]].mean(0))
+        else:
+           data_obj.meta_data.set_meta_data('dark', np.zeros(data_obj.data.image_shape))
+        if self.parameters['flat_prefix'] != "None":
+           flat = clazz(path, data_obj, [self.parameters['frame_dim']], None, self.parameters['flat_prefix'])
+           data_obj.meta_data.set_meta_data('flat',flat[0:flat.get_shape()[0],0:flat.get_shape()[1], 0:flat.get_shape()[2]].mean(0))
+        else:
+           data_obj.meta_data.set_meta_data('flat', np.ones(data_obj.data.image_shape))
         
         # dummy file
         filename = path.split('/')[-1] + '.h5'
