@@ -61,17 +61,23 @@ class Preview(object):
             shape_change = False
         self.__set_starts_stops_steps(starts, stops, steps, chunks,
                                       shapeChange=shape_change)
+        self.__check_preview_indices()
 
     def __add_preview_defaults(self, plist):
         """ Fill in missing values in preview list entries.
 
         :param: preview list with entries of the form
-            ``start:stop[:step:chunk]``
+            ``start[:stop:step:chunk]``
         :returns: preview list with missing values replaced by defaults
         :rtype: list
         """
         nEntries = 4
         diff_len = [(nEntries - len(elem.split(':'))) for elem in plist]
+        diff3 = [i for i in range(len(diff_len)) if diff_len[i] is 3]
+        for dim in diff3:
+            plist[dim] = plist[dim] + ':' + plist[dim] + '+1'
+            diff_len[dim] = 2
+
         all_idx = [i for i in range(len(plist)) if plist[i] == ':']
         amend = [i for i in range(len(plist)) if diff_len and i not in all_idx]
         for idx in amend:
@@ -149,6 +155,13 @@ class Preview(object):
             steps = get_mData('steps')
             chunks = get_mData('chunks')
             return starts, stops, steps, chunks
+
+    def __check_preview_indices(self):
+        starts, stops, steps, chunks = self.get_starts_stops_steps()
+        nDims = len(starts)
+        for i in range(nDims):
+            if stops[i] <= starts[i]:
+                raise Exception("Error in previewing parameters!")
 
     def __set_reduced_shape(self, starts, stops, steps, chunks):
         """ Set new shape if data is reduced by previewing.

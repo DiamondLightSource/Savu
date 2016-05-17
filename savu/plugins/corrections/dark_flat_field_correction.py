@@ -73,3 +73,6 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
         flat_minus_dark = np.tile(self.flat_minus_dark[self.index], self.tile)
         data = (data-dark)/flat_minus_dark
         return np.nan_to_num(data)
+
+    def get_max_frames(self):
+        return 1
