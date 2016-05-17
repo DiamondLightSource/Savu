@@ -72,7 +72,7 @@ class ImageLoader(BaseLoader):
 
         self.set_rotation_angles(data_obj)
         # read dark and flat images
-        if self.parameters['dark_prefix'] != "None":
+        if self.parameters['dark_prefix'] != None:
             dark = clazz(path, data_obj, [self.parameters['frame_dim']], None,
                          self.parameters['dark_prefix'])
             shape = dark.get_shape()
@@ -81,7 +81,7 @@ class ImageLoader(BaseLoader):
         else:
             data_obj.meta_data.set_meta_data(
                 'dark', np.zeros(data_obj.data.image_shape))
-        if self.parameters['flat_prefix'] != "None":
+        if self.parameters['flat_prefix'] != None:
             flat = clazz(path, data_obj, [self.parameters['frame_dim']],
                          None, self.parameters['flat_prefix'])
             shape = flat.get_shape()

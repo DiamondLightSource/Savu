@@ -111,9 +111,13 @@ class PluginRunner(object):
     def __check_gpu(self):
         """ Check if the process list contains GPU processes and determine if
         GPUs exists. Add GPU processes to the processes list if required."""
-        import pynvml as pv
         if not self.exp.meta_data.plugin_list._contains_gpu_processes():
             return
+        try:
+            import pynvml as pv         
+        except:
+            logging.debug("pyNVML module not found")
+            raise Exception("pyNVML module not found")
         try:
             pv.nvmlInit()
             count = int(pv.nvmlDeviceGetCount())
