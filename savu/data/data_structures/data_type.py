@@ -57,12 +57,19 @@ class FabIO(DataTypes):
         size = [len(np.arange(i.start, i.stop, i.step)) for i in index]
         data = np.empty(size)
         tiffidx = [i for i in range(len(index)) if i not in self.frame_dim]
+        tiff_slices = [index[i] for i in tiffidx]
+
+        # shift tiff dims to start from 0
+        index = list(index)
+        for i in tiffidx:
+            if index[i].start is not 0:
+                index[i] = slice(0, index[i].stop - index[i].start)
+
         index, frameidx = self.__get_indices(index, size)
 
         for i in range(len(frameidx)):
-            data[index[i]] = \
-                self.start_file.getframe(self.start_no + frameidx[i])\
-                .data[[index[i][n] for n in tiffidx]]
+            data[index[i]] = self.start_file.getframe(
+                self.start_no + frameidx[i]).data[tiff_slices]
         return data
 
     def __get_file_name(self, folder, prefix):
@@ -71,7 +78,7 @@ class FabIO(DataTypes):
 #        files = os.listdir(folder)
         fullpath = str.strip(folder)
         if prefix != "None":
-           fullpath = os.path.join(folder, prefix)
+            fullpath = os.path.join(folder, prefix)
         fullpath += "*"
         files = glob.glob(fullpath)
         self.nFrames = len(files)
@@ -93,13 +100,16 @@ class FabIO(DataTypes):
         """ Get the indices for the new data array and the file numbers. """
         sub_idx = np.array(index)[np.array(self.frame_dim)]
         sub_size = [size[i] for i in self.frame_dim]
+
         idx_list = []
         for dim in range(len(sub_idx)):
             idx = self.__get_idx(dim, sub_idx[dim], sub_size)
             idx_list.append(idx.astype(int))
+
         lshape = idx_list[0].shape[0]
         index = np.tile(index, (lshape, 1))
         frameidx = np.zeros(lshape)
+
         for dim in range(len(sub_idx)):
             start = index[0][self.frame_dim[dim]].start
             index[:, self.frame_dim[dim]] = \

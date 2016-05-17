@@ -61,7 +61,7 @@ class Padding(object):
         """
         core_dirs = self.pattern['core_dir']
         for core in core_dirs:
-            self.__pad_direction(str(core) + '.' + str(padding))
+            self._pad_direction(str(core) + '.' + str(padding))
 
     def pad_multi_frames(self, padding):
         """ Add extra frames before and after the current frame of data (i.e

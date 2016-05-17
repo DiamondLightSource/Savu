@@ -10,7 +10,7 @@ datafile=$2
 processfile=$3
 outfile=$4
 nCPUs=$5
-nGPUs=4
+nGPUs=1
 
 export PYTHONPATH=$savupath:$PYTHONPATH
 filename=$savupath/savu/tomo_recon.py

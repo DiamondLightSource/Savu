@@ -67,21 +67,30 @@ class ImageLoader(BaseLoader):
 
         path = exp.meta_data.get_meta_data("data_file")
         data_prefix = self.parameters['data_prefix']
-        data_obj.data = clazz(path, data_obj, [self.parameters['frame_dim']], None, data_prefix)
+        data_obj.data = clazz(path, data_obj, [self.parameters['frame_dim']],
+                              None, data_prefix)
 
         self.set_rotation_angles(data_obj)
-        #read dark and flat images
+        # read dark and flat images
         if self.parameters['dark_prefix'] != "None":
-           dark = clazz(path, data_obj, [self.parameters['frame_dim']], None, self.parameters['dark_prefix'])
-           data_obj.meta_data.set_meta_data('dark',dark[0:dark.get_shape()[0],0:dark.get_shape()[1], 0:dark.get_shape()[2]].mean(0))
+            dark = clazz(path, data_obj, [self.parameters['frame_dim']], None,
+                         self.parameters['dark_prefix'])
+            shape = dark.get_shape()
+            index = [slice(0, shape[i], 1) for i in range(len(shape))]
+            data_obj.meta_data.set_meta_data('dark', dark[index].mean(0))
         else:
-           data_obj.meta_data.set_meta_data('dark', np.zeros(data_obj.data.image_shape))
+            data_obj.meta_data.set_meta_data(
+                'dark', np.zeros(data_obj.data.image_shape))
         if self.parameters['flat_prefix'] != "None":
-           flat = clazz(path, data_obj, [self.parameters['frame_dim']], None, self.parameters['flat_prefix'])
-           data_obj.meta_data.set_meta_data('flat',flat[0:flat.get_shape()[0],0:flat.get_shape()[1], 0:flat.get_shape()[2]].mean(0))
+            flat = clazz(path, data_obj, [self.parameters['frame_dim']],
+                         None, self.parameters['flat_prefix'])
+            shape = flat.get_shape()
+            index = [slice(0, shape[i], 1) for i in range(len(shape))]
+            data_obj.meta_data.set_meta_data('flat', flat[index].mean(0))
         else:
-           data_obj.meta_data.set_meta_data('flat', np.ones(data_obj.data.image_shape))
-        
+            data_obj.meta_data.set_meta_data(
+                'flat', np.ones(data_obj.data.image_shape))
+
         # dummy file
         filename = path.split('/')[-1] + '.h5'
         data_obj.backing_file = \
@@ -110,4 +119,3 @@ class ImageLoader(BaseLoader):
             raise Exception("The number of angles %s does not match the data "
                             "dimension length %s", n_angles, data_angles)
         data_obj.meta_data.set_meta_data("rotation_angle", angles)
-        
