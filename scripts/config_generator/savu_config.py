@@ -244,7 +244,8 @@ def _mod(content, arg):
             value = content.value(arg)
             content.modify(int(element), subelement, value)
 
-        content.display()
+        # display only the changed element
+        content.display(start=int(element)-1, stop=int(element))
     except:
         print("Sorry I can't process the argument '%s'" % (arg))
     return content
