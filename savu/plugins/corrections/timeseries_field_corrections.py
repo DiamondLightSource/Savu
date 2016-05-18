@@ -52,8 +52,8 @@ class TimeseriesFieldCorrections(BaseCorrection, CpuPlugin):
 
     def pre_process(self):
         inData = self.get_in_datasets()[0]
-        self.dark = inData.data.image_key.dark_mean()
-        self.flat = inData.data.image_key.flat_mean()
+        self.dark = inData.data.dark_mean()
+        self.flat = inData.data.flat_mean()
         self.flat_minus_dark = self.flat - self.dark
 
         self.flat_minus_dark = self.flat - self.dark

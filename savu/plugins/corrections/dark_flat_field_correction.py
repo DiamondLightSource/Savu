@@ -64,11 +64,14 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
             lambda x, sl: np.tile(x[[sl[d] for d in det_dims]], tile)
 
     def correct(self, data):
-#        dark = self.convert_size(self.dark, self.slice_list)
-#        flat_minus_dark = \
-#            self.convert_size(self.flat_minus_dark, self.slice_list)
+        dark = self.convert_size(self.dark, self.slice_list)
+        flat_minus_dark = \
+            self.convert_size(self.flat_minus_dark, self.slice_list)
         data = np.nan_to_num((data-dark)/flat_minus_dark)
+        self.data_check(data)
+        return data
 
+    def __data_check(self, data):
         # make high and low crop masks
         low_crop = data < self.LOW_CROP_LEVEL
         high_crop = data > self.HIGH_CROP_LEVEL
@@ -83,8 +86,7 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
         # Set all cropped values to the crop level
         data[low_crop] = self.LOW_CROP_LEVEL
         data[high_crop] = self.HIGH_CROP_LEVEL
-        
-        return data
+
 
     def executive_summary(self):
         summary = []
