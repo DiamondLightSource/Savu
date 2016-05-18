@@ -123,6 +123,7 @@ class Content(object):
         process['id'] = plugin.__module__
         process['data'] = plugin.parameters
         process['active'] = True
+        process['desc'] = plugin.parameters_desc
         self.plugin_list.plugin_list.insert(pos, process)
 
     def get(self, pos):
@@ -154,10 +155,15 @@ def _disp(content, arg):
        Optional arguments:
             i(int): Display the ith item in the list.
             i(int) j(int): Display list items i to j.
-            names: Display process names only."""
+            names: Display process names only.
+            -v: Verbose mode displays parameter details.
+            """
     idx = {'start': 0, 'stop': -1}
     if arg:
         split_arg = arg.split(' ')
+        if '-v' in split_arg:
+            idx['verbose'] = True
+            split_arg.remove('-v')
         len_args = len(split_arg)
         if len_args > 0:
             if split_arg[0] == 'names':

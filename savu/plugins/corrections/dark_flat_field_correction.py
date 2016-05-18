@@ -41,6 +41,12 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
     def __init__(self):
         super(DarkFlatFieldCorrection,
               self).__init__("DarkFlatFieldCorrection")
+        # TODO these should probably be parameters
+        self.LOW_CROP_LEVEL = 0.0
+        self.HIGH_CROP_LEVEL = 2.0
+        self.WARN_PROPORTION = 0.05  # 5%
+        self.flag_low_warning = False
+        self.flag_high_warning = False
 
     def pre_process(self):
         inData = self.get_in_datasets()[0]
@@ -68,7 +74,7 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
         flat_minus_dark = \
             self.convert_size(self.flat_minus_dark, self.slice_list)
         data = np.nan_to_num((data-dark)/flat_minus_dark)
-        self.data_check(data)
+        self.__data_check(data)
         return data
 
     def __data_check(self, data):

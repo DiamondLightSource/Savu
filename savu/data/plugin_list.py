@@ -67,6 +67,10 @@ class PluginList(object):
             if active:
                 plugin['name'] = plugin_group[key]['name'][0]
                 plugin['id'] = plugin_group[key]['id'][0]
+                if 'desc' in plugin_group[key].keys():
+                    plugin['desc'] = self.__byteify(
+                        json.loads(plugin_group[key]['desc'][0]))
+                    plugin['desc'] = self.__convert_to_list(plugin['desc'])
                 plugin['data'] = \
                     self.__byteify(json.loads(plugin_group[key]['data'][0]))
                 plugin['data'] = self.__convert_to_list(plugin['data'])
@@ -97,9 +101,16 @@ class PluginList(object):
             plugin_group.create_dataset('data', data_array.shape,
                                         data_array.dtype, data_array)
             try:
-                name_array = np.array([plugin['active']])
-                plugin_group.create_dataset('active', name_array.shape,
-                                            name_array.dtype, name_array)
+                active_array = np.array([plugin['active']])
+                plugin_group.create_dataset('active', active_array.shape,
+                                            active_array.dtype, active_array)
+            except KeyError:
+                pass
+
+            try:
+                desc_array = np.array([json.dumps(plugin['desc'])])
+                plugin_group.create_dataset('desc', desc_array.shape,
+                                            desc_array.dtype, desc_array)
             except KeyError:
                 pass
 
@@ -114,6 +125,7 @@ class PluginList(object):
 
     def _get_string(self, **kwargs):
         out_string = []
+        verbose = kwargs.get('verbose', False)
 
         start = kwargs.get('start', 0)
         stop = kwargs.get('stop', len(self.plugin_list))
@@ -137,6 +149,11 @@ class PluginList(object):
                     keycount += 1
                     description += "\n  %2i)   %20s : %s" % \
                         (keycount, key, plugin['data'][key])
+                    if verbose:
+                        desc = plugin['desc'][key].split(' ')
+                        desc = ' '.join([desc[i] for i in range(len(desc)) if
+                                        desc[i] is not ''])
+                        description += "\t\t: %20s" % desc
             out_string.append(description)
         return '\n'.join(out_string)
 

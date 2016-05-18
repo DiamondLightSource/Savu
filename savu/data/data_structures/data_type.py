@@ -77,7 +77,7 @@ class FabIO(DataTypes):
         import glob
 #        files = os.listdir(folder)
         fullpath = str.strip(folder)
-        if prefix != "None":
+        if prefix != None:
             fullpath = os.path.join(folder, prefix)
         fullpath += "*"
         files = glob.glob(fullpath)

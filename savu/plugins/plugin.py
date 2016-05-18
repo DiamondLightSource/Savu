@@ -39,6 +39,7 @@ class Plugin(PluginDatasets):
         self.name = name
         self.parameters = {}
         self.parameters_types = {}
+        self.parameters_desc = {}
         self.chunk = False
 
     def _main_setup(self, exp, params):
@@ -101,6 +102,7 @@ class Plugin(PluginDatasets):
                 for item in full_description:
                     self.parameters[item['name']] = item['default']
                     self.parameters_types[item['name']] = item['dtype']
+                    self.parameters_desc[item['name']] = item['desc']
 
     def _set_parameters(self, parameters):
         """
