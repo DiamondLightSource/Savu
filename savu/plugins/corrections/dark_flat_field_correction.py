@@ -46,33 +46,61 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
         inData = self.get_in_datasets()[0]
         if isinstance(inData.data, ImageKey):
             image_key = self.get_in_datasets()[0].data
-            self.dark = self.apply_preview(image_key.dark_mean())
-            self.flat = self.apply_preview(image_key.flat_mean())
+            self.dark = image_key.dark_mean()
+            self.flat = image_key.flat_mean()
         else:
-            self.dark = self.apply_preview(
-                inData.meta_data.get_meta_data('dark'))
-            self.flat = self.apply_preview(
-                inData.meta_data.get_meta_data('flat'))
+            self.dark = inData.meta_data.get_meta_data('dark')
+            self.flat = inData.meta_data.get_meta_data('flat')
 
         self.flat_minus_dark = self.flat - self.dark
-        self.nFrames = self.get_max_frames()
-        self.slice_dim = self.get_plugin_in_datasets()[0].get_slice_dimension()
+        det_dims = [inData.find_axis_label_dimension('detector_y'),
+                    inData.find_axis_label_dimension('detector_x')]
+
         data_shape = self.get_plugin_in_datasets()[0].get_shape()
-        self.nDims = len(data_shape)
-        self.tile = [1]*self.nDims
-        if self.parameters['pattern'] is 'SINOGRAM':
-            self.tile[0] = data_shape[0]
-        self.index = [slice(None), slice(None)]
+        tile = [1]*len(data_shape)
+        if self.parameters['pattern'] == 'PROJECTION':
+            tile[0] = data_shape[0]
+        self.convert_size = \
+            lambda x, sl: np.tile(x[[sl[d] for d in det_dims]], tile)
 
     def correct(self, data):
-        if self.parameters['pattern'] == 'SINOGRAM':
-            sl = self.slice_list[self.slice_dim]
-            self.index[0] = slice(sl.start, sl.start + self.nFrames)
+#        dark = self.convert_size(self.dark, self.slice_list)
+#        flat_minus_dark = \
+#            self.convert_size(self.flat_minus_dark, self.slice_list)
+        data = np.nan_to_num((data-dark)/flat_minus_dark)
 
-        dark = np.tile(self.dark[self.index], self.tile)
-        flat_minus_dark = np.tile(self.flat_minus_dark[self.index], self.tile)
-        data = (data-dark)/flat_minus_dark
-        return np.nan_to_num(data)
+        # make high and low crop masks
+        low_crop = data < self.LOW_CROP_LEVEL
+        high_crop = data > self.HIGH_CROP_LEVEL
 
-    def get_max_frames(self):
-        return 1
+        # flag if those masks include a large proportion of pixels, as this
+        # may indicate a failure
+        if ((float(low_crop.sum()) / low_crop.size) > self.WARN_PROPORTION):
+            self.flag_low_warning = True
+        if ((float(high_crop.sum()) / high_crop.size) > self.WARN_PROPORTION):
+            self.flag_high_warning = True
+
+        # Set all cropped values to the crop level
+        data[low_crop] = self.LOW_CROP_LEVEL
+        data[high_crop] = self.HIGH_CROP_LEVEL
+        
+        return data
+
+    def executive_summary(self):
+        summary = []
+        if self.flag_high_warning:
+            summary.append(("WARNING: over %i%% of pixels are being clipped as " +
+                           "they have %f times the intensity of the provided flat field. "+
+                           "Check your Dark and Flat correction images")
+                           % (self.WARN_PROPORTION*100, self.HIGH_CROP_LEVEL))
+
+        if self.flag_low_warning:
+            summary.append(("WARNING: over %i%% of pixels are being clipped as " +
+                           "they below the expected lower corrected threshold of  %f. " +
+                           "Check your Dark and Flat correction images")
+                           % (self.WARN_PROPORTION*100, self.LOW_CROP_LEVEL))
+
+        if len(summary) > 0:
+            return summary
+
+        return ["Nothing to Report"]

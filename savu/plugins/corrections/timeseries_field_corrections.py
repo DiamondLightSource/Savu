@@ -51,27 +51,23 @@ class TimeseriesFieldCorrections(BaseCorrection, CpuPlugin):
         self.flag_high_warning = False
 
     def pre_process(self):
-        image_key = self.get_in_datasets()[0].data
-        self.dark = self.apply_preview(image_key.dark_mean())
-        self.flat = self.apply_preview(image_key.flat_mean())
+        inData = self.get_in_datasets()[0]
+        self.dark = inData.data.image_key.dark_mean()
+        self.flat = inData.data.image_key.flat_mean()
         self.flat_minus_dark = self.flat - self.dark
-        self.nFrames = self.get_max_frames()
-        self.slice_dim = self.get_plugin_in_datasets()[0].get_slice_dimension()
-        data_shape = self.get_plugin_in_datasets()[0].get_shape()
-        self.nDims = len(data_shape)
-        self.tile = [1]*self.nDims
-        self.tile[0] = data_shape[0]
-        self.index = [slice(None), slice(None)]
+
+        self.flat_minus_dark = self.flat - self.dark
+        det_dims = [inData.find_axis_label_dimension('detector_y'),
+                    inData.find_axis_label_dimension('detector_x')]
+
+        self.convert_size = \
+            lambda x, sl: x[[sl[d] for d in det_dims]]
 
     def correct(self, data):
-        sl = self.slice_list[self.slice_dim]
-        self.index[0] = slice(sl.start, sl.start + self.nFrames)
-        dark = np.tile(self.dark[self.index], self.tile)
-        flat_minus_dark = np.tile(self.flat_minus_dark[self.index], self.tile)
-
-        data = (data-dark)/flat_minus_dark
-        # finally clean up and trim the data
-        data = np.nan_to_num(data)
+        dark = self.convert_size(self.dark, self.slice_list)
+        flat_minus_dark = \
+            self.convert_size(self.flat_minus_dark, self.slice_list)
+        data = np.nan_to_num((data-dark)/flat_minus_dark)
 
         # make high and low crop masks
         low_crop = data < self.LOW_CROP_LEVEL

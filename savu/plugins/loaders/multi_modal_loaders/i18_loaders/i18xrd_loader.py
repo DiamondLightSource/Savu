@@ -34,7 +34,6 @@ import os
 import savu.test.test_utils as tu
 
 
-
 @register_plugin
 class I18xrdLoader(BaseI18MultiModalLoader):
     """
