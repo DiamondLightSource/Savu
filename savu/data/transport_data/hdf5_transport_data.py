@@ -463,7 +463,6 @@ class Hdf5TransportData(object):
             pData.padding._pad_direction(pad_str)
 
     def _get_unpadded_slice_data(self, input_slice_list, padded_data):
-        print input_slice_list, self.extra_dims
         pData = self._get_plugin_data()
 
         if pData.fixed_dims is True:
@@ -479,5 +478,4 @@ class Hdf5TransportData(object):
                 else -padding_dict[ddir]['after']
             new_slice[ddir] = slice(padding_dict[ddir]['before'], end, 1)
 
-        print new_slice
         return padded_data[tuple(new_slice)]

@@ -229,10 +229,6 @@ class Hdf5Transport(TransportControl):
         in_slice_list = self.__get_all_slice_lists(in_data, expInfo)
         out_slice_list = self.__get_all_slice_lists(out_data, expInfo)
 
-        for sl in out_slice_list[0]:
-            print sl
-
-
         squeeze_dict = self.__set_functions(in_data, 'squeeze')
         expand_dict = self.__set_functions(out_data, 'expand')
 
@@ -358,8 +354,8 @@ class Hdf5Transport(TransportControl):
         result = [result] if type(result) is not list else result
         for idx in range(len(data_list)):
             data_list[idx].data[slice_list[idx][count]] = \
-                expand_dict[idx](data_list[idx]._get_unpadded_slice_data(
-                    slice_list[idx][count], result[idx]))
+                data_list[idx]._get_unpadded_slice_data(
+                    slice_list[idx][count], expand_dict[idx](result[idx]))
 
 #    def _transfer_to_meta_data(self, return_dict):
 #        """
