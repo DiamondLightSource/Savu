@@ -419,7 +419,7 @@ class Hdf5TransportData(object):
 
     def __set_padding_dict(self):
         pData = self._get_plugin_data()
-        if pData.padding:
+        if pData.padding and not isinstance(pData.padding, Padding):
             pad_dict = pData.padding
             pData.padding = Padding(pData.get_pattern())
             for key in pad_dict.keys():
