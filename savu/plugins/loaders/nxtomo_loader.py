@@ -36,10 +36,10 @@ class NxtomoLoader(BaseLoader):
 
     :param data_path: Path to the data inside the \
         file. Default: 'entry1/tomo_entry/data/data'.
-    :param dark: Optional path to the dark field data file, nxs entry and \
+    :param dark: Optional path to the dark field data file, nxs path and \
         scale value. Default: [None, None, 1].
-    :param flat: Optional Path to the flat field data file and path to data \
-        in nxs file. Default: [None, None, 1].
+    :param flat: Optional Path to the flat field data file, nxs path and \
+        scale value. Default: [None, None, 1].
     :param angles: A python statement to be evaluated or a file. Default: None.
     :param 3d_to_4d: Set to true if this reshape is required. Default: False.
     """

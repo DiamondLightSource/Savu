@@ -47,6 +47,7 @@ class DezingFilter(BaseFilter, CpuPlugin):
         self.errflag = 0
 
     def pre_process(self):
+        print self.parameters['outlier_mu']
         (retval, self.warnflag, self.errflag) = \
             dezing.setup_size(self.data_size, self.parameters['outlier_mu'],
                               self.pad)
@@ -68,7 +69,9 @@ class DezingFilter(BaseFilter, CpuPlugin):
 
     def set_filter_padding(self, in_data, out_data):
         in_data = in_data[0]
+        print self.parameters['kernel_size']
         self.pad = (self.parameters['kernel_size'] - 1) / 2
+        print type(self.pad)
         self.data_size = in_data.get_shape()
         in_data.padding = {'pad_multi_frames': self.pad}
         out_data[0].padding = {'pad_multi_frames': self.pad}
