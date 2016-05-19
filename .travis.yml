@@ -24,6 +24,7 @@ before_install:
   - sudo apt-get install python-numpy python-scipy
   - sudo apt-get install python-h5py
   - sudo apt-get install python-fabio
+  - sudo apt-get install python-pyfftw
 
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install: 
