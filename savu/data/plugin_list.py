@@ -73,8 +73,11 @@ class PluginList(object):
                     plugin['desc'] = self.__convert_to_list(plugin['desc'])
                 plugin['data'] = \
                     self.__byteify(json.loads(plugin_group[key]['data'][0]))
+                print "before", plugin['data']
                 plugin['data'] = self.__convert_to_list(plugin['data'])
+                print "after", plugin['data']
                 self.plugin_list.append(plugin)
+                
         plugin_file.close()
 
     def _save_plugin_list(self, out_filename, exp=None):
@@ -173,6 +176,7 @@ class PluginList(object):
         for key in data:
             value = data[key]
             if isinstance(value, str) and value.count('['):
+                print value
                 value = value.split('[')[1].\
                     split(']')[0].replace(" ", "").split(',')
                 exec("value = " + str(value))
