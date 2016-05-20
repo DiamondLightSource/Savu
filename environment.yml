@@ -1,6 +1,7 @@
 name: test-environment
 channels:
-  - nanshe
+  - nanshe # for pyfftw
+  - astra-toolbox
 dependencies:
   - python=2/.7
   - numpy
@@ -12,6 +13,7 @@ dependencies:
   - pytest
   - mpi4py 
   - scikit-image
+  - astra-toolbox
   - pip:
     - fabio 
     - pytest-cov

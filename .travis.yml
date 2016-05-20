@@ -24,7 +24,7 @@ before_install:
   - conda info -a
 
 install:
-  - conda env create -f environment.yml
+  - conda env create --file environment.yml
   - source activate test-environment 
   - python setup.py install
 
