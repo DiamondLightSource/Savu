@@ -71,7 +71,6 @@ class PluginList(object):
                     plugin['desc'] = self.__byteify(
                         json.loads(plugin_group[key]['desc'][0]))
                     plugin['desc'] = self.__convert_to_list(plugin['desc'])
-                print "***", plugin_group[key]['data'][...]
                 plugin['data'] = \
                     self.__byteify(json.loads(plugin_group[key]['data'][0]))
                 plugin['data'] = self.__convert_to_list(plugin['data'])
@@ -160,7 +159,6 @@ class PluginList(object):
 
     def __byteify(self, input):
         if isinstance(input, dict):
-            print "instance of dict", 
             return {self.__byteify(key): self.__byteify(value)
                     for key, value in input.iteritems()}
         elif isinstance(input, list):
