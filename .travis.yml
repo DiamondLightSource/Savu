@@ -21,16 +21,13 @@ before_install:
   - hash -r
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
-  # Useful for debugging any issues with conda
   - conda info -a
 
 install:
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION pip numpy scipy h5py pep8 pytest mpi4py scikit-image cython
+  - conda env create -f environment.yml
   - source activate test-environment 
-  - pip install fabio pytest-cov coveralls pyFAI nvidia-ml-py pyfftw
   - python setup.py install
 
-# command to run tests, e.g. python setup.py test
 script:
   - py.test savu/test/travis -v --cov savu --cov-report term-missing
 

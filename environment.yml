@@ -1,0 +1,22 @@
+name: test-environment
+channels:
+  - nanshe
+dependencies:
+  - python=2/.7
+  - numpy
+  - scipy
+  - pyfftw
+  - pytest
+  - h5py
+  - pep8
+  - pytest
+  - mpi4py 
+  - scikit-image
+  - pip:
+    - fabio 
+    - pytest-cov
+    - coveralls
+    - pyFAI 
+    - nvidia-ml-py
+    - pyfftw
+
