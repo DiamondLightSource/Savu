@@ -1,9 +1,9 @@
 name: test-environment
 channels:
-  - nanshe # for pyfftw
+  - soft-matter # for pyfftw
   - astra-toolbox
 dependencies:
-  - python=2/.7
+  - python=2.7
   - numpy
   - scipy
   - pyfftw

@@ -160,6 +160,7 @@ class PluginList(object):
 
     def __byteify(self, input):
         if isinstance(input, dict):
+            print "instance of dict", 
             return {self.__byteify(key): self.__byteify(value)
                     for key, value in input.iteritems()}
         elif isinstance(input, list):
