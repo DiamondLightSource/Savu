@@ -71,6 +71,7 @@ class PluginList(object):
                     plugin['desc'] = self.__byteify(
                         json.loads(plugin_group[key]['desc'][0]))
                     plugin['desc'] = self.__convert_to_list(plugin['desc'])
+                print "***", plugin_group[key]['data'][...]
                 plugin['data'] = \
                     self.__byteify(json.loads(plugin_group[key]['data'][0]))
                 plugin['data'] = self.__convert_to_list(plugin['data'])
