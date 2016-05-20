@@ -1,5 +1,5 @@
-cache: apt
-sudo: false
+#cache: apt
+#sudo: false
 language: python
 python:
   - "2.7"
@@ -10,13 +10,11 @@ addons:
     - liblapack-dev
     - gfortran
     - libhdf5-serial-dev
-    - libcr-dev 
-#mpich2 mpich2-doc
-    - mpich2python
+    - libcr-dev mpich2 mpich2-doc
     - libboost-all-dev
 
 before_install:
-#  - sudo apt-get update
+  - sudo apt-get update
   - wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
@@ -29,7 +27,7 @@ before_install:
 install:
   - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION pip numpy scipy h5py pep8 pytest mpi4py scikit-image
   - source activate test-environment 
-  - pip install fabio pytest-cov coveralls pyFAI nvidia-ml-py
+  - pip install fabio pytest-cov coveralls pyFAI nvidia-ml-py pyfftw
   - python setup.py install
 
 # command to run tests, e.g. python setup.py test
