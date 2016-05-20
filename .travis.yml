@@ -10,7 +10,9 @@ addons:
     - liblapack-dev
     - gfortran
     - libhdf5-serial-dev
-    - libcr-dev mpich2 mpich2-doc
+    - libcr-dev 
+#mpich2 mpich2-doc
+    - mpich2python
     - libboost-all-dev
 
 before_install:
@@ -27,7 +29,7 @@ before_install:
 install:
   - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION pip numpy scipy h5py pep8 pytest mpi4py scikit-image
   - source activate test-environment 
-  - pip install fabio pytest-cov coveralls pyFAI nvidia-ml-py pyfftw
+  - pip install fabio pytest-cov coveralls pyFAI nvidia-ml-py
   - python setup.py install
 
 # command to run tests, e.g. python setup.py test
