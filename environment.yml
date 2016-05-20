@@ -21,4 +21,5 @@ dependencies:
     - pyFAI 
     - nvidia-ml-py
     - pyfftw
+    - peakutils
 
