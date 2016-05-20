@@ -147,8 +147,9 @@ class NxtomoLoader(BaseLoader):
                              "file.")
 
     def __get_image(self, name, key, data_obj):
+        import os
         fpath, fentry, scale = self.parameters[name]
-        h5file = h5py.File(fpath, 'r')
+        h5file = h5py.File(os.path.abspath(fpath), 'r')
         try:
             image_key = \
                 h5file['entry1/tomo_entry/instrument/detector/image_key']
