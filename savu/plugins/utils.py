@@ -133,6 +133,8 @@ def run_plugins(exp, plugin_list, **kwargs):
 def set_datasets(exp, plugin, plugin_dict):
     in_names = get_names(plugin_dict["data"]["in_datasets"])
     out_names = get_names(plugin_dict["data"]["out_datasets"])
+    print plugin_dict["data"]
+    print in_names, out_names
 
     default_in_names = plugin.parameters['in_datasets']
     default_out_names = plugin.parameters['out_datasets']
