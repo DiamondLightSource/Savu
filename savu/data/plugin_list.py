@@ -73,7 +73,9 @@ class PluginList(object):
                     plugin['desc'] = self.__convert_to_list(plugin['desc'])
                 plugin['data'] = \
                     self.__byteify(json.loads(plugin_group[key]['data'][0]))
+                print "before", plugin['data']
                 plugin['data'] = self.__convert_to_list(plugin['data'])
+                print "after", plugin['data']
                 self.plugin_list.append(plugin)
 
         plugin_file.close()
@@ -177,7 +179,10 @@ class PluginList(object):
                 value = \
                     [[a.split(']')[0].split('[')[1]] for a in value.split(';')]
                 new_str = str(value[0])
-                value = [new_str+';'+str(b) for b in value[1:]][0]
+                if len(value) > 1:
+                    value = [new_str+';'+str(b) for b in value[1:]][0]
+                else:
+                    value = new_str
             data[key] = value
         return data
 
