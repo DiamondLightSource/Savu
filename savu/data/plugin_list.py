@@ -182,7 +182,7 @@ class PluginList(object):
                 exec("value = " + str(value))
             data[key] = value
         return data
-
+#new = [[a.split(']')[0].split('[')[1]] for a in sstr.split(';')]
     def _set_datasets_list(self, plugin):
         in_pData, out_pData = plugin.get_plugin_datasets()
         max_frames = plugin.get_max_frames()

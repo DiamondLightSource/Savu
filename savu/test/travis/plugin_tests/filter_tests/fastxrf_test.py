@@ -21,9 +21,13 @@
 
 """
 import unittest
+import mock
 from savu.test import test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
+
+import sys
+sys.modules['xraylib'] = mock.Mock()
 
 
 # @unittest.skip('The fastxrf_fitting setup method is in an old format and needs updating')
