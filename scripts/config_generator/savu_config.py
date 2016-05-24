@@ -20,6 +20,8 @@ Created on 21 May 2015
 
 import os
 
+from __future__ import print_function
+
 from savu.data.plugin_list import PluginList
 from savu.plugins import utils as pu
 import pkgutil
@@ -46,7 +48,7 @@ class Content(object):
         self.filename = filename
         self._finished = False
         if os.path.exists(filename):
-            print "Opening file %s" % (filename)
+            print("Opening file %s" % (filename))
             self.plugin_list._populate_plugin_list(filename, activePass=True)
 
     def set_finished(self, value):
@@ -56,7 +58,7 @@ class Content(object):
         return self._finished
 
     def display(self, **kwargs):
-        print '\n', self.plugin_list._get_string(**kwargs), '\n'
+        print('\n', self.plugin_list._get_string(**kwargs), '\n')
 
     def save(self, filename):
         if filename is not "" and filename is not "exit":
@@ -111,10 +113,10 @@ class Content(object):
 
     def on_and_off(self, element, index):
         if index < 2:
-            print "switching plugin", element, "ON"
+            print("switching plugin", element, "ON")
             self.plugin_list.plugin_list[element-1]['active'] = True
         else:
-            print "switching plugin", element, "OFF"
+            print("switching plugin", element, "OFF")
             self.plugin_list.plugin_list[element-1]['active'] = False
 
     def insert(self, plugin, pos):
@@ -139,7 +141,7 @@ class Content(object):
 def _help(content, arg):
     """Display the help information"""
     for key in commands.keys():
-        print "%4s : %s" % (key, commands[key].__doc__)
+        print("%4s : %s" % (key, commands[key].__doc__))
     return content
 
 
@@ -193,18 +195,18 @@ def _list(content, arg):
                 print("The arguments %s are unknown", arg)
                 return content
 
-    print "-----------------------------------------"
+    print("-----------------------------------------")
     for key, value in pu.plugins.iteritems():
         if not arg:
-            print key
+            print(key)
         elif arg[0] in value.__module__:
-            print key
+            print(key)
             if len(arg) < 2:
                 plugin = pu.plugins[key]()
                 plugin._populate_default_parameters()
                 for p_key in plugin.parameters.keys():
                     print("    %20s : %s" % (p_key, plugin.parameters[p_key]))
-    print "-----------------------------------------"
+    print("-----------------------------------------")
     return content
 
 
@@ -214,11 +216,11 @@ def _params(content, arg):
     try:
         plugin = pu.plugins[arg]()
         plugin._populate_default_parameters()
-        print "-----------------------------------------"
-        print arg
+        print("-----------------------------------------")
+        print(arg)
         for p_key in plugin.parameters.keys():
             print("    %20s : %s" % (p_key, plugin.parameters[p_key]))
-        print "-----------------------------------------"
+        print("-----------------------------------------")
         return content
     except:
         print("Sorry I can't process the argument '%s'" % (arg))
@@ -280,9 +282,9 @@ def _ref(content, arg):
     """
 
     if not arg:
-        print "ref requires the process number or * as argument"
-        print "e.g. 'ref 1' refreshes process 1"
-        print "e.g. 'ref *' refreshes ALL processes"
+        print("ref requires the process number or * as argument")
+        print("e.g. 'ref 1' refreshes process 1")
+        print("e.g. 'ref *' refreshes ALL processes")
         return content
 
     kwarg = None
@@ -438,7 +440,7 @@ class Completer(object):
         return results[state]
 
 def main():
-    print "Starting Savu Config tool (please wait for prompt)"
+    print("Starting Savu Config tool (please wait for prompt)")
 
     comp = Completer()
     # we want to treat '/' as part of a word, so override the delimiters
@@ -480,7 +482,7 @@ def main():
         if command in commands.keys():
             content = commands[command](content, arg)
         else:
-            print "I'm sorry, thats not a command I recognise, try help"
+            print("I'm sorry, thats not a command I recognise, try help")
 
         if content.is_finished():
             break
@@ -488,7 +490,7 @@ def main():
         # write the history to the histoy file
         readline.write_history_file(histfile)
 
-    print "Thanks for using the application"
+    print("Thanks for using the application")
 
 if __name__ == '__main__':
     main()
