@@ -102,17 +102,18 @@ class Hdf5TransportData(object):
         entry = nxs_file['entry']
         group_name = self.data_info.get_meta_data('group_name')
         self.__output_metadata(self.backing_file[group_name])
+        filename = self.backing_file.filename.split('/')[-1]
 
         if linkType is 'final_result':
             name = 'final_result_' + self.get_name()
             entry[name] = \
-                h5py.ExternalLink(self.backing_file.filename, self.group_name)
+                h5py.ExternalLink(filename, self.group_name)
         elif linkType is 'intermediate':
             name = self.group_name + '_' + self.data_info.get_meta_data('name')
             entry = entry.require_group('intermediate')
             entry.attrs['NX_class'] = 'NXcollection'
             entry[name] = \
-                h5py.ExternalLink(self.backing_file.filename, self.group_name)
+                h5py.ExternalLink(filename, self.group_name)
         else:
             raise Exception("The link type is not known")
 

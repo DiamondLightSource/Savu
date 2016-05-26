@@ -51,7 +51,6 @@ class PluginList(object):
         self.exp = None
 
     def _populate_plugin_list(self, filename, activePass=False):
-        print "*************** populating the plugin list**********************"
         plugin_file = h5py.File(filename, 'r')
         plugin_group = plugin_file['entry/plugin']
         self.plugin_list = []
@@ -66,7 +65,6 @@ class PluginList(object):
                 active = True
 
             if active:
-                print "loading the active plugin"
                 plugin['name'] = plugin_group[key]['name'][0]
                 plugin['id'] = plugin_group[key]['id'][0]
                 plugin['pos'] = key
