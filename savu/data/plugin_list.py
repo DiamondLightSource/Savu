@@ -51,6 +51,7 @@ class PluginList(object):
         self.exp = None
 
     def _populate_plugin_list(self, filename, activePass=False):
+        print "*************** populating the plugin list**********************"
         plugin_file = h5py.File(filename, 'r')
         plugin_group = plugin_file['entry/plugin']
         self.plugin_list = []
@@ -65,6 +66,7 @@ class PluginList(object):
                 active = True
 
             if active:
+                print "loading the active plugin"
                 plugin['name'] = plugin_group[key]['name'][0]
                 plugin['id'] = plugin_group[key]['id'][0]
                 plugin['pos'] = key
@@ -74,9 +76,7 @@ class PluginList(object):
                     plugin['desc'] = self.__convert_to_list(plugin['desc'])
                 plugin['data'] = \
                     self.__byteify(json.loads(plugin_group[key]['data'][0]))
-                print "before", plugin['data']
                 plugin['data'] = self.__convert_to_list(plugin['data'])
-                print "after", plugin['data']
                 self.plugin_list.append(plugin)
 
         plugin_file.close()
@@ -93,8 +93,12 @@ class PluginList(object):
         plugins_group.attrs[NX_CLASS] = 'NXplugin'
         count = 0
         for plugin in self.plugin_list:
-            #plugin_group = plugins_group.create_group("%*i" % (4, count))
-            plugin_group = plugins_group.create_group("%s" % (plugin['pos']))
+            if 'pos' in plugin.keys():
+                plugin_group = \
+                    plugins_group.create_group("%s" % (plugin['pos']))
+            else:
+                plugin_group = plugins_group.create_group("%*i" % (4, count))
+
             plugin_group.attrs[NX_CLASS] = 'NXnote'
             id_array = np.array([plugin['id']])
             plugin_group.create_dataset('id', id_array.shape, id_array.dtype,
