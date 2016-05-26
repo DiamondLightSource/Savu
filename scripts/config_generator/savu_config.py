@@ -18,9 +18,9 @@ Created on 21 May 2015
 @author: ssg37927
 '''
 
-import os
-
 from __future__ import print_function
+
+import os
 
 from savu.data.plugin_list import PluginList
 from savu.plugins import utils as pu
