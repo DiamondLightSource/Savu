@@ -67,6 +67,7 @@ class PluginList(object):
             if active:
                 plugin['name'] = plugin_group[key]['name'][0]
                 plugin['id'] = plugin_group[key]['id'][0]
+                plugin['pos'] = key
                 if 'desc' in plugin_group[key].keys():
                     plugin['desc'] = self.__byteify(
                         json.loads(plugin_group[key]['desc'][0]))
@@ -92,7 +93,8 @@ class PluginList(object):
         plugins_group.attrs[NX_CLASS] = 'NXplugin'
         count = 0
         for plugin in self.plugin_list:
-            plugin_group = plugins_group.create_group("%*i" % (4, count))
+            #plugin_group = plugins_group.create_group("%*i" % (4, count))
+            plugin_group = plugins_group.create_group("%s" % (plugin['pos']))
             plugin_group.attrs[NX_CLASS] = 'NXnote'
             id_array = np.array([plugin['id']])
             plugin_group.create_dataset('id', id_array.shape, id_array.dtype,
@@ -144,8 +146,8 @@ class PluginList(object):
             if 'active' in plugin:
                 if not plugin['active']:
                     description += "***OFF***"
-            description += \
-                "%2i) %s(%s)" % (count, plugin['name'], plugin['id'])
+            pos = [plugin['pos'] if 'pos' in plugin.keys() else count]
+            description += "%2s) %s(%s)" % (pos, plugin['name'], plugin['id'])
             if disp_params:
                 keycount = 0
                 for key in plugin['data'].keys():
@@ -183,6 +185,7 @@ class PluginList(object):
                     value = [new_str+';'+str(b) for b in value[1:]][0]
                 else:
                     value = new_str
+                exec("value =" + value)
             data[key] = value
         return data
 
