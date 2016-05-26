@@ -85,10 +85,10 @@ class Content(object):
 
         return value
 
-    def add(self, name, pos):
+    def add(self, name, pos, branch=False):
         plugin = pu.plugins[name]()
         plugin._populate_default_parameters()
-        self.insert(plugin, pos)
+        self.insert(plugin, pos, branch=branch)
         self.display()
 
     def modify(self, element, subelement, value):
@@ -117,10 +117,69 @@ class Content(object):
             print "switching plugin", element, "OFF"
             self.plugin_list.plugin_list[element-1]['active'] = False
 
-    def insert(self, plugin, pos):
+    def convert_pos(self, pos, branch):
+        pos_list = [list(i) for i in self.get_positions()]
+        entry = [str(pos)] if branch is False else [str(pos), branch]
+
+        # full value already exists in the list
+        if entry in pos_list:
+            index = pos_list.index(entry)
+            return self.inc_positions(index, pos_list, entry)
+
+        # only the number exists in the list
+        num_list = [pos_list[i][0] for i in range(len(pos_list))]
+        if entry[0] in num_list:
+            start = num_list.index(entry[0])
+            if len(entry) is 2:
+                if len(pos_list[start]) is 2:
+                    idx = int([i for i in range(len(num_list)) if
+                               (num_list[i] == entry[0])][-1])+1
+                    entry = [entry[0], str(unichr(ord(pos_list[idx-1][1])+1))]
+                    return idx, ''.join(entry)
+                if entry[1] == 'a':
+                    self.plugin_list.plugin_list[start]['pos'] = entry[0] + 'b'
+                    return start, ''.join(entry)
+                else:
+                    self.plugin_list.plugin_list[start]['pos'] = entry[0] + 'b'
+                    return start+1, entry[0] + 'a'
+            return self.inc_positions(start, pos_list, entry)
+
+        # number not in list
+        entry[0] = str(int(num_list[-1])+1 if num_list else 1)
+        if len(entry) is 2:
+            entry[1] = 'a'
+        return len(self.plugin_list.plugin_list), ''.join(entry)
+
+    def get_positions(self):
+        elems = self.plugin_list.plugin_list
+        pos_list = []
+        for e in elems:
+            pos_list.append(e['pos'])
+        return pos_list
+
+    def find_position(self, pos):
+        pos_list = self.get_positions()
+        return pos_list.index(pos)
+
+    def inc_positions(self, start, pos_list, entry):
+        if len(entry) is 1:
+            for i in range(start, len(pos_list)):
+                pos_list[i][0] = str(int(pos_list[i][0]) + 1)
+                self.plugin_list.plugin_list[i]['pos'] = ''.join(pos_list[i])
+        else:
+            idx = [i for i in range(start, len(pos_list)) if
+                   pos_list[i][0] == entry[0]]
+            for i in idx:
+                pos_list[i][1] = str(unichr(ord(pos_list[i][1])+1))
+                self.plugin_list.plugin_list[i]['pos'] = ''.join(pos_list[i])
+        return start, ''.join(entry)
+
+    def insert(self, plugin, pos, branch=False):
         process = {}
         process['name'] = plugin.name
         process['id'] = plugin.__module__
+        pos, str_pos = self.convert_pos(pos, branch)
+        process['pos'] = str_pos
         process['data'] = plugin.parameters
         process['active'] = True
         process['desc'] = plugin.parameters_desc
@@ -170,9 +229,9 @@ def _disp(content, arg):
                 idx['params'] = False
             else:
                 try:
-                    idx['start'] = int(split_arg[0]) - 1
-                    idx['stop'] = \
-                        idx['start']+1 if len_args == 1 else int(split_arg[1])
+                    idx['start'] = content.find_position(split_arg[0])
+                    idx['stop'] = idx['start']+1 if len_args == 1 else\
+                        content.find_position(split_arg[1])+1
                 except ValueError:
                     print("The arguments %s are unknown", arg)
     content.display(**idx)
@@ -242,10 +301,12 @@ def _mod(content, arg):
             content.on_and_off(int(element), on_off_list.index(subelement))
         else:
             value = content.value(arg)
-            content.modify(int(element), subelement, value)
+            element = content.find_position(element)
+            # change element here
+            content.modify(element+1, subelement, value)
 
         # display only the changed element
-        content.display(start=int(element)-1, stop=int(element))
+        content.display(start=int(element), stop=int(element)+1)
     except:
         print("Sorry I can't process the argument '%s'" % (arg))
     return content
@@ -257,12 +318,16 @@ def _add(content, arg):
         args = arg.split()
         name = args[0]
         pos = None
+        branch = False
         if len(args) == 2:
-            pos = args[1]
+            pos_list = list(args[1])
+            pos = pos_list[0]
+            if len(pos_list) is not 1:
+                branch = pos_list[1]
         else:
             pos = content.size()+1
         if name in pu.plugins.keys():
-            content.add(name, int(pos)-1)
+            content.add(name, int(pos), branch=branch)
         else:
             print("Sorry the plugin %s is not in my list, pick one from list" %
                   (name))
@@ -292,7 +357,7 @@ def _ref(content, arg):
     if arg is '*':
         positions = range(len(content.plugin_list.plugin_list))
     else:
-        positions = [int(arg) - 1]
+        positions = [content.find_positions(arg)]
 
     for pos in positions:
         if pos < 0 or pos >= len(content.plugin_list.plugin_list):
