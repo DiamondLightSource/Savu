@@ -106,11 +106,8 @@ class Content(object):
     def move(self, old, new):
         old_pos = self.find_position(old)
         entry = self.plugin_list.plugin_list[old_pos]
-        print ("before", self.get_positions())
         self.remove(old_pos)
-        print ("after removal", self.get_positions())
         new_pos, new = self.convert_pos(new)
-        print (new_pos, new)
         name = entry['name']
         if name in pu.plugins.keys():
             self.insert(pu.plugins[name](), new_pos, new)
