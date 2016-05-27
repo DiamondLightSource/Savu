@@ -51,7 +51,6 @@ class PluginList(object):
         self.exp = None
 
     def _populate_plugin_list(self, filename, activePass=False):
-        print "populating plugins"
         plugin_file = h5py.File(filename, 'r')
         plugin_group = plugin_file['entry/plugin']
         self.plugin_list = []
@@ -68,7 +67,7 @@ class PluginList(object):
             if active:
                 plugin['name'] = plugin_group[key]['name'][0]
                 plugin['id'] = plugin_group[key]['id'][0]
-                plugin['pos'] = key.encode("utf8")
+                plugin['pos'] = key.encode('ascii').strip()
                 if 'desc' in plugin_group[key].keys():
                     plugin['desc'] = self.__byteify(
                         json.loads(plugin_group[key]['desc'][0]))
@@ -81,7 +80,6 @@ class PluginList(object):
         plugin_file.close()
 
     def _save_plugin_list(self, out_filename, exp=None):
-        print "saving plugin list"
         if exp:
             entry_group = exp.nxs_file.create_group('entry')
         else:
@@ -91,12 +89,9 @@ class PluginList(object):
         entry_group.attrs[NX_CLASS] = 'NXentry'
         plugins_group = entry_group.create_group('plugin')
         plugins_group.attrs[NX_CLASS] = 'NXplugin'
-        count = 0
+        count = 1
         for plugin in self.plugin_list:
             if 'pos' in plugin.keys():
-                print type(plugin['pos'])
-                print plugin['pos']
-                print plugin['pos'].strip()
                 plugin_group = \
                     plugins_group.create_group("%s" % (plugin['pos']))
             else:
@@ -136,39 +131,43 @@ class PluginList(object):
         plugin_file.close()
 
     def _get_string(self, **kwargs):
-        print "getting plugin string"
         out_string = []
-        verbose = kwargs.get('verbose', False)
+        verbosity = kwargs.get('verbose', False)
 
         start = kwargs.get('start', 0)
         stop = kwargs.get('stop', len(self.plugin_list))
         if stop == -1:
             stop = len(self.plugin_list)
-        disp_params = kwargs.get('params', True)
 
         count = start
         plugin_list = self.plugin_list[start:stop]
         for plugin in plugin_list:
-            description = ""
             count += 1
-            if 'active' in plugin:
-                if not plugin['active']:
-                    description += "***OFF***"
-            pos = [plugin['pos'] if 'pos' in plugin.keys() else count]
-            description += "%2s) %s(%s)" % (pos, plugin['name'], plugin['id'])
-            if disp_params:
-                keycount = 0
-                for key in plugin['data'].keys():
-                    keycount += 1
-                    description += "\n  %2i)   %20s : %s" % \
-                        (keycount, key, plugin['data'][key])
-                    if verbose:
-                        desc = plugin['desc'][key].split(' ')
-                        desc = ' '.join([desc[i] for i in range(len(desc)) if
-                                        desc[i] is not ''])
-                        description += "\t\t: %20s" % desc
+            description = \
+                self.__get_description(plugin, count, verbosity)
             out_string.append(description)
         return '\n'.join(out_string)
+
+    def __get_description(self, plugin, count, verbose):
+        description = ""
+        if 'active' in plugin:
+            if not plugin['active']:
+                description += "***OFF***"
+        pos = plugin['pos'].strip() if 'pos' in plugin.keys() else count
+        description += "%2s) %s(%s)" % (pos, plugin['name'], plugin['id'])
+
+        if verbose != '-q':
+            keycount = 0
+            for key in plugin['data'].keys():
+                keycount += 1
+                description += "\n  %2i)   %20s : %s" % \
+                    (keycount, key, plugin['data'][key])
+                if verbose == '-v':
+                    desc = plugin['desc'][key].split(' ')
+                    desc = ' '.join([desc[i] for i in range(len(desc)) if
+                                    desc[i] is not ''])
+                    description += "\t\t: %20s" % desc
+        return description
 
     def __byteify(self, input):
         if isinstance(input, dict):

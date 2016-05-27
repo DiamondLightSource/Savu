@@ -57,7 +57,7 @@ class Content(object):
         return self._finished
 
     def display(self, **kwargs):
-        print('\n', self.plugin_list._get_string(**kwargs), '\n')
+        print ('\n' + self.plugin_list._get_string(**kwargs), '\n')
 
     def save(self, filename):
         if filename is not "" and filename is not "exit":
@@ -86,11 +86,22 @@ class Content(object):
 
         return value
 
-    def add(self, name, pos, branch=False):
+    def add(self, name, str_pos):
         plugin = pu.plugins[name]()
         plugin._populate_default_parameters()
-        self.insert(plugin, pos, branch=branch)
+        pos, str_pos = self.convert_pos(str_pos)
+        self.insert(plugin, pos, str_pos)
         self.display()
+
+    def replace(self, name, str_pos, keep):
+        plugin = pu.plugins[name]()
+        plugin._populate_default_parameters()
+        pos = self.find_position(str_pos)
+        self.insert(plugin, pos, str_pos, replace=True)
+        if keep:
+            union_params = set(keep).intersection(set(plugin.parameters))
+            for param in union_params:
+                self.modify(pos+1, param, keep[param])
 
     def modify(self, element, subelement, value):
         data_elements = self.plugin_list.plugin_list[element-1]['data']
@@ -113,19 +124,19 @@ class Content(object):
     def on_and_off(self, element, index):
         if index < 2:
             print("switching plugin", element, "ON")
-            self.plugin_list.plugin_list[element-1]['active'] = True
+            self.plugin_list.plugin_list[element]['active'] = True
         else:
             print("switching plugin", element, "OFF")
-            self.plugin_list.plugin_list[element-1]['active'] = False
+            self.plugin_list.plugin_list[element]['active'] = False
 
-    def convert_pos(self, pos, branch):
+    def convert_pos(self, str_pos):
         pos_list = [list(i) for i in self.get_positions()]
-        entry = [str(pos)] if branch is False else [str(pos), branch]
+        entry = list(str_pos)
 
         # full value already exists in the list
         if entry in pos_list:
             index = pos_list.index(entry)
-            return self.inc_positions(index, pos_list, entry)
+            return self.inc_positions(index, pos_list, entry, 1)
 
         # only the number exists in the list
         num_list = [pos_list[i][0] for i in range(len(pos_list))]
@@ -141,9 +152,9 @@ class Content(object):
                     self.plugin_list.plugin_list[start]['pos'] = entry[0] + 'b'
                     return start, ''.join(entry)
                 else:
-                    self.plugin_list.plugin_list[start]['pos'] = entry[0] + 'b'
-                    return start+1, entry[0] + 'a'
-            return self.inc_positions(start, pos_list, entry)
+                    self.plugin_list.plugin_list[start]['pos'] = entry[0] + 'a'
+                    return start+1, entry[0] + 'b'
+            return self.inc_positions(start, pos_list, entry, 1)
 
         # number not in list
         entry[0] = str(int(num_list[-1])+1 if num_list else 1)
@@ -162,35 +173,40 @@ class Content(object):
         pos_list = self.get_positions()
         return pos_list.index(pos)
 
-    def inc_positions(self, start, pos_list, entry):
+    def inc_positions(self, start, pos_list, entry, inc):
         if len(entry) is 1:
             for i in range(start, len(pos_list)):
-                pos_list[i][0] = str(int(pos_list[i][0]) + 1)
+                pos_list[i][0] = str(int(pos_list[i][0])+inc)
                 self.plugin_list.plugin_list[i]['pos'] = ''.join(pos_list[i])
         else:
             idx = [i for i in range(start, len(pos_list)) if
                    pos_list[i][0] == entry[0]]
             for i in idx:
-                pos_list[i][1] = str(unichr(ord(pos_list[i][1])+1))
+                pos_list[i][1] = str(unichr(ord(pos_list[i][1])+inc))
                 self.plugin_list.plugin_list[i]['pos'] = ''.join(pos_list[i])
         return start, ''.join(entry)
 
-    def insert(self, plugin, pos, branch=False):
+    def insert(self, plugin, pos, str_pos, replace=False):
         process = {}
         process['name'] = plugin.name
         process['id'] = plugin.__module__
-        pos, str_pos = self.convert_pos(pos, branch)
         process['pos'] = str_pos
         process['data'] = plugin.parameters
         process['active'] = True
         process['desc'] = plugin.parameters_desc
-        self.plugin_list.plugin_list.insert(pos, process)
+        if replace:
+            self.plugin_list.plugin_list[pos] = process
+        else:
+            self.plugin_list.plugin_list.insert(pos, process)
 
     def get(self, pos):
         return self.plugin_list.plugin_list[pos]
 
     def remove(self, pos):
+        entry = self.plugin_list.plugin_list[pos]['pos']
         self.plugin_list.plugin_list.pop(pos)
+        pos_list = [list(i) for i in self.get_positions()]
+        self.inc_positions(pos, pos_list, entry, -1)
 
     def size(self):
         return len(self.plugin_list.plugin_list)
@@ -215,26 +231,25 @@ def _disp(content, arg):
        Optional arguments:
             i(int): Display the ith item in the list.
             i(int) j(int): Display list items i to j.
-            names: Display process names only.
-            -v: Verbose mode displays parameter details.
+            -q: Quiet mode. Only process names are listed.
+            -v: Verbose mode. Displays parameter details.
             """
+    verbosity = ['-v', '-q']
     idx = {'start': 0, 'stop': -1}
     if arg:
         split_arg = arg.split(' ')
-        if '-v' in split_arg:
-            idx['verbose'] = True
-            split_arg.remove('-v')
+        for v in verbosity:
+            if v in split_arg:
+                idx['verbose'] = v
+                split_arg.remove(v)
         len_args = len(split_arg)
         if len_args > 0:
-            if split_arg[0] == 'names':
-                idx['params'] = False
-            else:
-                try:
-                    idx['start'] = content.find_position(split_arg[0])
-                    idx['stop'] = idx['start']+1 if len_args == 1 else\
-                        content.find_position(split_arg[1])+1
-                except ValueError:
-                    print("The arguments %s are unknown", arg)
+            try:
+                idx['start'] = content.find_position(split_arg[0])
+                idx['stop'] = idx['start']+1 if len_args == 1 else\
+                    content.find_position(split_arg[1])+1
+            except ValueError:
+                print("The arguments %s are unknown", arg)
     content.display(**idx)
     return content
 
@@ -298,16 +313,15 @@ def _mod(content, arg):
     on_off_list = ['ON', 'on', 'OFF', 'off']
     try:
         element,  subelement = arg.split()[0].split('.')
+        element = content.find_position(element)
         if subelement in on_off_list:
-            content.on_and_off(int(element), on_off_list.index(subelement))
+            content.on_and_off(element, on_off_list.index(subelement))
         else:
             value = content.value(arg)
-            element = content.find_position(element)
             # change element here
             content.modify(element+1, subelement, value)
-
         # display only the changed element
-        content.display(start=int(element), stop=int(element)+1)
+        content.display(start=element, stop=element+1)
     except:
         print("Sorry I can't process the argument '%s'" % (arg))
     return content
@@ -318,17 +332,11 @@ def _add(content, arg):
     try:
         args = arg.split()
         name = args[0]
-        pos = None
-        branch = False
-        if len(args) == 2:
-            pos_list = list(args[1])
-            pos = pos_list[0]
-            if len(pos_list) is not 1:
-                branch = pos_list[1]
-        else:
-            pos = content.size()+1
+        elems = content.get_positions()
+        final = int(list(elems[-1])[0])+1 if elems else 1
+        pos = args[1] if len(args) == 2 else str(final)
         if name in pu.plugins.keys():
-            content.add(name, int(pos), branch=branch)
+            content.add(name, pos)
         else:
             print("Sorry the plugin %s is not in my list, pick one from list" %
                   (name))
@@ -355,43 +363,37 @@ def _ref(content, arg):
     if len(arg.split()) > 1:
         arg, kwarg = arg.split()
 
-    if arg is '*':
-        positions = range(len(content.plugin_list.plugin_list))
-    else:
-        positions = [content.find_positions(arg)]
-
-    for pos in positions:
+    positions = content.get_positions() if arg is '*' else [arg]
+    for pos_str in positions:
+        pos = content.find_position(pos_str)
         if pos < 0 or pos >= len(content.plugin_list.plugin_list):
             print("Sorry %s is out of range" % (arg))
             return content
         name = content.plugin_list.plugin_list[pos]['name']
-        old_entry = content.get(pos)
-        content.remove(pos)
-
-        if kwarg:
-            plugin = pu.plugins[name]()
-            plugin._populate_default_parameters()
-            content.insert(plugin, pos)
-            old_params = old_entry['data']
-            new_params = plugin.parameters
-            union_params = set(old_params).intersection(set(new_params))
-            for param in union_params:
-                content.modify(pos+1, param, old_params[param])
-            content.display()
-        else:
-            content.add(name, pos)
+        keep = content.get(pos)['data'] if kwarg else None
+        content.replace(name, pos_str, keep)
+        content.display(start=pos, stop=pos+1)
 
     return content
 
 
 def _rem(content, arg):
     """Remove the numbered item from the list"""
-    pos = int(arg)-1
+    pos = content.find_position(arg)
     if pos < 0 or pos >= len(content.plugin_list.plugin_list):
             print("Sorry %s is out of range" % (arg))
             return content
     content.remove(pos)
     content.display()
+    return content
+
+
+def _move(content, arg):
+    try:
+        old_pos, new_pos = arg.split()
+    except ValueError:
+        print("The move command takes two arguments: 'old position' then "
+              "'new position' \ne.g move 1 2")
     return content
 
 
@@ -416,6 +418,7 @@ commands = {'open': _open,
             'mod': _mod,
             'add': _add,
             'rem': _rem,
+            'move': _move,
             'ref': _ref,
             'params': _params,
             'exit': _exit,
