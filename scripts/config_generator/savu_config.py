@@ -506,6 +506,7 @@ class Completer(object):
             [c + ' ' for c in commands.keys() if c.startswith(cmd)] + [None]
         return results[state]
 
+
 def main():
     print("Starting Savu Config tool (please wait for prompt)")
 
@@ -516,17 +517,17 @@ def main():
     readline.set_completer(comp.complete)
 
     # load all the packages in the plugins directory to register classes
-    plugins_path = pu.get_plugins_paths() #savu.plugins.__path__
+    plugins_path = pu.get_plugins_paths()
     for loader, module_name, is_pkg in pkgutil.walk_packages(plugins_path):
         try:
             # if the module is in savu, but not a plugin, then ignore
             if "savu" in module_name.split('.'):
-                if not "plugins" in module_name.split('.'):
+                if "plugins" not in module_name.split('.'):
                     continue
             # setup.py is included in this list which should also be ignored
             if module_name in ["setup", "savu.plugins.utils"]:
                 continue
-            if not module_name in sys.modules:
+            if module_name not in sys.modules:
                 loader.find_module(module_name).load_module(module_name)
         except Exception as e:
             pass
