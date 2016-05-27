@@ -103,6 +103,25 @@ class Content(object):
             for param in union_params:
                 self.modify(pos+1, param, keep[param])
 
+    def move(self, old, new):
+        old_pos = self.find_position(old)
+        entry = self.plugin_list.plugin_list[old_pos]
+        print ("before", self.get_positions())
+        self.remove(old_pos)
+        print ("after removal", self.get_positions())
+        new_pos, new = self.convert_pos(new)
+        print (new_pos, new)
+        name = entry['name']
+        if name in pu.plugins.keys():
+            self.insert(pu.plugins[name](), new_pos, new)
+        else:
+            print("Sorry the plugin %s is not in my list, pick one from list" %
+                  (name))
+            return
+        self.plugin_list.plugin_list[new_pos] = entry
+        self.plugin_list.plugin_list[new_pos]['pos'] = new
+        self.display()
+
     def modify(self, element, subelement, value):
         data_elements = self.plugin_list.plugin_list[element-1]['data']
         try:
@@ -175,16 +194,22 @@ class Content(object):
 
     def inc_positions(self, start, pos_list, entry, inc):
         if len(entry) is 1:
-            for i in range(start, len(pos_list)):
-                pos_list[i][0] = str(int(pos_list[i][0])+inc)
-                self.plugin_list.plugin_list[i]['pos'] = ''.join(pos_list[i])
+            self.inc_numbers(start, pos_list, inc)
         else:
             idx = [i for i in range(start, len(pos_list)) if
                    pos_list[i][0] == entry[0]]
-            for i in idx:
-                pos_list[i][1] = str(unichr(ord(pos_list[i][1])+inc))
-                self.plugin_list.plugin_list[i]['pos'] = ''.join(pos_list[i])
+            self.inc_letters(idx, pos_list, inc)
         return start, ''.join(entry)
+
+    def inc_numbers(self, start, pos_list, inc):
+        for i in range(start, len(pos_list)):
+            pos_list[i][0] = str(int(pos_list[i][0])+inc)
+            self.plugin_list.plugin_list[i]['pos'] = ''.join(pos_list[i])
+
+    def inc_letters(self, idx, pos_list, inc):
+        for i in idx:
+            pos_list[i][1] = str(unichr(ord(pos_list[i][1])+inc))
+            self.plugin_list.plugin_list[i]['pos'] = ''.join(pos_list[i])
 
     def insert(self, plugin, pos, str_pos, replace=False):
         process = {}
@@ -335,6 +360,7 @@ def _add(content, arg):
         elems = content.get_positions()
         final = int(list(elems[-1])[0])+1 if elems else 1
         pos = args[1] if len(args) == 2 else str(final)
+        print (elems, final, pos)
         if name in pu.plugins.keys():
             content.add(name, pos)
         else:
@@ -389,11 +415,16 @@ def _rem(content, arg):
 
 
 def _move(content, arg):
+    if len(arg.split()) is not 2:
+        print ("The move command takes two arguments: e.g 'move 1 2' moves "
+               "from position 1 to position 2")
+        return content
     try:
-        old_pos, new_pos = arg.split()
-    except ValueError:
-        print("The move command takes two arguments: 'old position' then "
-              "'new position' \ne.g move 1 2")
+        old_pos_str, new_pos_str = arg.split()
+        content.move(old_pos_str, new_pos_str)
+    except:
+        print ("Sorry, the information you have given is incorrect")
+        return content
     return content
 
 
