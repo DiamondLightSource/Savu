@@ -3,28 +3,52 @@ Created on 24 May 2016
 
 @author: ssg37927
 '''
+from __future__ import print_function
+
+import sys
 import unittest
 from mock import patch
-import __builtin__
+from StringIO import StringIO
+
 import savu_config
-
-from contextlib import contextmanager
-
-@contextmanager
-def mockRawInput(mock):
-    original_raw_input = __builtin__.raw_input
-    __builtin__.raw_input = lambda _: mock
-    yield
-    __builtin__.raw_input = original_raw_input
-
 
 class Test(unittest.TestCase):
 
+    def savu_config_runner(self, input_list, output_checks):
+        with patch('__builtin__.raw_input', side_effect=input_list):
 
-    def testName(self):
-        with patch('__builtin__.raw_input', side_effect=['exit', 'y']):
-            savu_config.main()
+            saved_stdout = sys.stdout
+            try:
+                out = StringIO()
+                sys.stdout = out
+                savu_config.main()
+                output = out.getvalue().strip()
+                for check in output_checks:
+                    assert check in output
+            finally:
+                sys.stdout = saved_stdout
 
+    def testExit(self):
+        input_list = ['exit',
+                      'y']
+        output_checks = ['Thanks for using the application']
+        self.savu_config_runner(input_list, output_checks)
+
+    def testHelpBlank(self):
+        input_list = ['',
+                      'exit',
+                      'y']
+        output_checks = ['help : Display the help information',
+                         'exit : Close the program']
+        self.savu_config_runner(input_list, output_checks)
+
+    def testHelpCommand(self):
+        input_list = ['help',
+                      'exit',
+                      'y']
+        output_checks = ['help : Display the help information',
+                         'exit : Close the program']
+        self.savu_config_runner(input_list, output_checks)
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
