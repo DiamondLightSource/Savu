@@ -51,6 +51,7 @@ class PluginList(object):
         self.exp = None
 
     def _populate_plugin_list(self, filename, activePass=False):
+        print "populating plugins"
         plugin_file = h5py.File(filename, 'r')
         plugin_group = plugin_file['entry/plugin']
         self.plugin_list = []
@@ -67,7 +68,7 @@ class PluginList(object):
             if active:
                 plugin['name'] = plugin_group[key]['name'][0]
                 plugin['id'] = plugin_group[key]['id'][0]
-                plugin['pos'] = key
+                plugin['pos'] = key.encode("utf8")
                 if 'desc' in plugin_group[key].keys():
                     plugin['desc'] = self.__byteify(
                         json.loads(plugin_group[key]['desc'][0]))
@@ -80,6 +81,7 @@ class PluginList(object):
         plugin_file.close()
 
     def _save_plugin_list(self, out_filename, exp=None):
+        print "saving plugin list"
         if exp:
             entry_group = exp.nxs_file.create_group('entry')
         else:
@@ -92,6 +94,9 @@ class PluginList(object):
         count = 0
         for plugin in self.plugin_list:
             if 'pos' in plugin.keys():
+                print type(plugin['pos'])
+                print plugin['pos']
+                print plugin['pos'].strip()
                 plugin_group = \
                     plugins_group.create_group("%s" % (plugin['pos']))
             else:
@@ -131,6 +136,7 @@ class PluginList(object):
         plugin_file.close()
 
     def _get_string(self, **kwargs):
+        print "getting plugin string"
         out_string = []
         verbose = kwargs.get('verbose', False)
 
