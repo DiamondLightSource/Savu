@@ -46,7 +46,6 @@ class AstraReconCpu(NewBaseAstraRecon, CpuPlugin):
                 self.parameters['number_of_iterations']]
 
     def astra_setup(self):
-        print self.parameters['reconstruction_type']
         options_list = ["FBP", "SIRT", "SART", "ART", "CGLS", "FP", "BP"]
         if not options_list.count(self.parameters['reconstruction_type']):
             raise Exception("Unknown Astra CPU algorithm.")

@@ -47,7 +47,9 @@ class AstraReconGpu(NewBaseAstraRecon, GpuPlugin):
                 self.parameters['number_of_iterations']]
 
     def set_options(self, cfg):
-        cfg['option'] = {'GPUindex': self.parameters['GPU_index']}
+        if 'option' not in cfg.keys():
+            cfg['option'] = {}
+        cfg['option']['GPUindex'] = self.parameters['GPU_index']
         return cfg
 
     def astra_setup(self):
@@ -55,9 +57,9 @@ class AstraReconGpu(NewBaseAstraRecon, GpuPlugin):
                         "FP_CUDA", "BP_CUDA", "SIRT3D_CUDA", "CGLS3D_CUDA"]
         if not options_list.count(self.parameters['reconstruction_type']):
             raise Exception("Unknown Astra GPU algorithm.")
-        if 'FBP' not in self.parameters['reconstruction_type']:
-            exec("""def nOutput_datasets:
-            ...     return 2""")
+#        if 'FBP' not in self.parameters['reconstruction_type']:
+#            exec("""def nOutput_datasets:
+#            ...     return 2""")
 
     def get_citation_information(self):
         cite_info = CitationInformation()

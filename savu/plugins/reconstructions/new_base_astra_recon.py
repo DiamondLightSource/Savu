@@ -65,15 +65,24 @@ class NewBaseAstraRecon(BaseRecon):
 
     def setup_2D(self):
         pData = self.get_plugin_in_datasets()[0]
-        detX = pData.get_data_dimension_by_axis_label('x', contains=True)
+        dim_detX = pData.get_data_dimension_by_axis_label('x', contains=True)
         self.sino_shape = pData.get_shape()
         self.nDims = len(self.sino_shape)
-        self.dim_detX = detX if self.nDims is 2 else detX-1
-        self.nCols = self.sino_shape[detX]
+        self.sino_dim_detX = dim_detX if self.nDims is 2 else dim_detX-1
+        self.nCols = self.sino_shape[dim_detX]
         self.slice_dir = pData.get_slice_dimension()
         self.nSinos = self.sino_shape[self.slice_dir] if self.nDims is 3 else 1
         self.slice_func = self.slice_sino(self.nDims)
         self.out_shape = self.get_plugin_out_datasets()[0].shape
+        l = self.sino_shape[dim_detX]
+        c = np.linspace(-l/2.0, l/2.0, l)
+        x, y = np.meshgrid(c, c)
+        self.mask = np.array((x**2 + y**2 < (l/2.0)**2), dtype=np.float)
+        self.mask_id = True if not self.parameters['sino_pad'] and 'FBP' not \
+            in self.alg else False
+        self.manual_mask = True if 'FBP' in self.alg and not \
+            self.parameters['sino_pad'] else False
+        print self.mask_id, self.manual_mask
 
     def slice_sino(self, nDims):
         if nDims is 2:
@@ -88,6 +97,7 @@ class NewBaseAstraRecon(BaseRecon):
         if self.nDims is 2:
             recon = np.expand_dims(recon, axis=self.slice_dir)
 
+        proj_id = False
         # create volume geom
         vol_geom = astra.create_vol_geom(*vol_shape[0:1])
 
@@ -101,9 +111,9 @@ class NewBaseAstraRecon(BaseRecon):
             pad_sino = self.pad_sino(self.slice_func(sino, sslice), cor)
 
             # create projection geom
-            proj_geom = astra.create_proj_geom('parallel', 1.0,
-                                               pad_sino.shape[self.dim_detX],
-                                               np.deg2rad(self.angles))
+            proj_geom = astra.create_proj_geom(
+                'parallel', 1.0, pad_sino.shape[self.sino_dim_detX],
+                np.deg2rad(self.angles))
             # create sinogram id
             sino_id = astra.data2d.create("-sino", proj_geom, pad_sino)
 
@@ -113,37 +123,60 @@ class NewBaseAstraRecon(BaseRecon):
             else:
                 rec_id = astra.data2d.create('-vol', vol_geom)
 
+            if self.mask_id:
+                self.mask_id = astra.data2d.create('-vol', vol_geom, self.mask)
+
             # setup configuration options
-            cfg = astra.astra_dict(self.alg)
-            cfg['ReconstructionDataId'] = rec_id
-            cfg['ProjectionDataId'] = sino_id
-            cfg['FilterType'] = self.parameters['FBP_filter']
-            if 'projector' in self.parameters.keys():
-                cfg['ProjectorId'] = astra.create_projector(
-                    self.parameters['projector'], proj_geom, vol_geom)
-            cfg = self.set_options(cfg)
+            cfg = self.set_config(rec_id, sino_id, proj_geom, vol_geom)
 
             # create algorithm id
             alg_id = astra.algorithm.create(cfg)
 
             # run algorithm
-            astra.algorithm.run(alg_id,
-                                self.parameters['number_of_iterations'])
+            astra.algorithm.run(alg_id, self.iters)
             # get reconstruction matrix
-            recon[sslice] = astra.data2d.get(rec_id)
+
+            if self.manual_mask:
+                recon[sslice] = self.mask*astra.data2d.get(rec_id)
+            else:
+                recon[sslice] = astra.data2d.get(rec_id)
 
             # delete geometry
-            astra.algorithm.delete(alg_id)
-            astra.data2d.delete(sino_id)
-            astra.data2d.delete(rec_id)
+            self.delete(alg_id, sino_id, rec_id, proj_id)
+
         return recon
+
+    def set_config(self, rec_id, sino_id, proj_geom, vol_geom):
+        cfg = astra.astra_dict(self.alg)
+        cfg['ReconstructionDataId'] = rec_id
+        cfg['ProjectionDataId'] = sino_id
+        if 'FBP' in self.alg:
+            cfg['FilterType'] = self.parameters['FBP_filter']
+        if 'projector' in self.parameters.keys():
+            proj_id = astra.create_projector(
+                self.parameters['projector'], proj_geom, vol_geom)
+            cfg['ProjectorId'] = proj_id
+        if self.mask_id:
+            cfg['option'] = {}
+            cfg['option']['ReconstructionMaskId'] = self.mask_id
+        cfg = self.set_options(cfg)
+        return cfg
+
+    def delete(self, alg_id, sino_id, rec_id, proj_id):
+        astra.algorithm.delete(alg_id)
+        if self.mask_id:
+            astra.data2d.delete(self.mask_id)
+        astra.data2d.delete(sino_id)
+        astra.data2d.delete(rec_id)
+        if proj_id:
+            astra.projector.delete(proj_id)
 
     def astra_3D_recon(self, sino, cors, angles, vol_shape):
         pass
 
     def pad_sino(self, sino, cor):
         centre_pad = self.array_pad(cor, self.nCols)
-        sino_width = sino.shape[self.dim_detX]
+        sino_width = sino.shape[self.sino_dim_detX]
         new_width = sino_width + max(centre_pad)
         sino_pad = \
             int(math.ceil(float(sino_width)/new_width * self.sino_pad)/2)
