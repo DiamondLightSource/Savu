@@ -146,8 +146,10 @@ class Content(object):
             self.plugin_list.plugin_list[element]['active'] = False
 
     def convert_pos(self, str_pos):
-        pos_list = [list(i) for i in self.get_positions()]
-        entry = list(str_pos)
+        pos_list = self.get_split_positions()
+        num = re.findall("\d+", str_pos)[0]
+        letter = re.findall("[a-z]", str_pos)
+        entry = [num, letter[0]] if letter else [num]
 
         # full value already exists in the list
         if entry in pos_list:
@@ -184,6 +186,15 @@ class Content(object):
         for e in elems:
             pos_list.append(e['pos'])
         return pos_list
+
+    def get_split_positions(self):
+        positions = self.get_positions()
+        split_pos = []
+        for i in range(len(positions)):
+            num = re.findall('\d+', positions[i])[0]
+            letter = re.findall('[a-z]', positions[i])
+            split_pos.append([num, letter[0]] if letter else [num])
+        return split_pos
 
     def find_position(self, pos):
         pos_list = self.get_positions()
@@ -227,7 +238,7 @@ class Content(object):
     def remove(self, pos):
         entry = self.plugin_list.plugin_list[pos]['pos']
         self.plugin_list.plugin_list.pop(pos)
-        pos_list = [list(i) for i in self.get_positions()]
+        pos_list = self.get_split_positions()
         self.inc_positions(pos, pos_list, entry, -1)
 
     def size(self):
@@ -357,7 +368,6 @@ def _add(content, arg):
         elems = content.get_positions()
         final = int(list(elems[-1])[0])+1 if elems else 1
         pos = args[1] if len(args) == 2 else str(final)
-        print (elems, final, pos)
         if name in pu.plugins.keys():
             content.add(name, pos)
         else:
@@ -412,6 +422,7 @@ def _rem(content, arg):
 
 
 def _move(content, arg):
+    """ Moves the plugin from position a to b: 'move a b'. e.g 'move 1 2'."""
     if len(arg.split()) is not 2:
         print ("The move command takes two arguments: e.g 'move 1 2' moves "
                "from position 1 to position 2")

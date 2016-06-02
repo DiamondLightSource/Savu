@@ -80,6 +80,7 @@ class PluginList(object):
         plugin_file.close()
 
     def _save_plugin_list(self, out_filename, exp=None):
+        import re
         if exp:
             entry_group = exp.nxs_file.create_group('entry')
         else:
@@ -90,10 +91,14 @@ class PluginList(object):
         plugins_group = entry_group.create_group('plugin')
         plugins_group.attrs[NX_CLASS] = 'NXplugin'
         count = 1
+
         for plugin in self.plugin_list:
             if 'pos' in plugin.keys():
+                num = int(re.findall('\d+', plugin['pos'])[0])
+                letter = re.findall('[a-z]', plugin['pos'])
+                letter = letter[0] if letter else ""
                 plugin_group = \
-                    plugins_group.create_group("%s" % (plugin['pos']))
+                    plugins_group.create_group("%*i%*s" % (4, num, 1, letter))
             else:
                 plugin_group = plugins_group.create_group("%*i" % (4, count))
 

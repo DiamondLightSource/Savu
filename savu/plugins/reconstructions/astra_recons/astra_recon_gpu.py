@@ -20,21 +20,22 @@
 
 """
 
-from savu.plugins.reconstructions.base_astra_recon import BaseAstraRecon
+from savu.plugins.reconstructions.new_base_astra_recon import NewBaseAstraRecon
 from savu.plugins.driver.gpu_plugin import GpuPlugin
 from savu.data.plugin_list import CitationInformation
 from savu.plugins.utils import register_plugin
 
 
 @register_plugin
-class AstraReconGpu(BaseAstraRecon, GpuPlugin):
+class AstraReconGpu(NewBaseAstraRecon, GpuPlugin):
     """
     A Plugin to run the astra reconstruction
 
     :param number_of_iterations: Number of Iterations if an iterative method\
         is used . Default: 1.
     :param reconstruction_type: Reconstruction type (FBP_CUDA|SIRT_CUDA|\
-        SART_CUDA|CGLS_CUDA|SIRT3D_CUDA|CGLS3D_CUDA). Default: 'FBP_CUDA'.
+        SART_CUDA|CGLS_CUDA|FP_CUDA|BP_CUDA|SIRT3D_CUDA|\
+        CGLS3D_CUDA). Default: 'FBP_CUDA'.
     """
 
     def __init__(self):
@@ -43,8 +44,20 @@ class AstraReconGpu(BaseAstraRecon, GpuPlugin):
 
     def get_parameters(self):
         return [self.parameters['reconstruction_type'],
-                self.parameters['number_of_iterations'],
-                self.GPU_index]
+                self.parameters['number_of_iterations']]
+
+    def set_options(self, cfg):
+        cfg['option'] = {'GPUindex': self.parameters['GPU_index']}
+        return cfg
+
+    def astra_setup(self):
+        options_list = ["FBP_CUDA", "SIRT_CUDA", "SART_CUDA", "CGLS_CUDA",
+                        "FP_CUDA", "BP_CUDA", "SIRT3D_CUDA", "CGLS3D_CUDA"]
+        if not options_list.count(self.parameters['reconstruction_type']):
+            raise Exception("Unknown Astra GPU algorithm.")
+        if 'FBP' not in self.parameters['reconstruction_type']:
+            exec("""def nOutput_datasets:
+            ...     return 2""")
 
     def get_citation_information(self):
         cite_info = CitationInformation()

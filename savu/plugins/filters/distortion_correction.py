@@ -55,7 +55,6 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
         # flipping the values
         centre = centre[::-1]
 
-        print centre
         #pass two empty arrays of frame chunk size
         unwarp.setcoeff(*self.parameters['polynomial_coeffs'])
         unwarp.setctr(*centre)
@@ -70,7 +69,6 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
                 slice(self.crop, orig_shape[ddir]-self.crop)
 
     def filter_frames(self, data):
-        print data[0].shape
         result = np.empty_like(data[0])
         unwarp.run(data[0], result)
         return result[self.slice_list]

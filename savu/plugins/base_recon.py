@@ -22,6 +22,7 @@
 
 """
 import logging
+import math
 
 from savu.plugins.plugin import Plugin
 import numpy as np
@@ -37,8 +38,9 @@ class BaseRecon(Plugin):
         process. Default: [].
     :param out_datasets: Create a list of the dataset(s) to \
         process. Default: [].
-    :param sino_pad_width: Pad proportion of the sinogram width before \
-        reconstructing. Default: 0.25.
+    :param sino_pad: Pad the sinogram to remove edge artefacts in the \
+        reconstructed ROI (NB. This will increase the size of the data and \
+        the time taken to perform the reconstruction). Default: False.
     :param log: Take the log of the data before reconstruction. Default: True.
     :param preview: A slice list of required frames. Default: [].
     """
@@ -53,39 +55,65 @@ class BaseRecon(Plugin):
         self.pad_dim = \
             in_pData[0].get_data_dimension_by_axis_label('x', contains=True)
         in_meta_data = self.get_in_meta_data()[0]
-        try:
-            cor = in_meta_data.get_meta_data("centre_of_rotation")
-        except KeyError:
-            cor = np.ones(in_dataset.get_shape()[
-                in_pData[0].get_slice_dimension()])
-            cor *= self.parameters['center_of_rotation']
 
+        self.set_centre_of_rotation(in_dataset, in_meta_data, in_pData[0])
         self.exp.log(self.name + " End")
-        self.cor = cor
         self.vol_shape = out_pData[0].get_shape()
         self.main_dir = in_pData[0].get_pattern()['SINOGRAM']['main_dir']
         self.angles = in_meta_data.get_meta_data('rotation_angle')
         self.slice_dirs = out_pData[0].get_slice_directions()
-        self.pad_amount = int(self.parameters['sino_pad_width'] *
-                              in_pData[0].get_shape()[self.pad_dim])
 
-        if self.parameters['log']:
-            self.sino_func = lambda sino: -np.log(np.nan_to_num(sino)+1)
+        shape = in_pData[0].get_shape()
+        pad_len = shape[self.pad_dim] if self.parameters['sino_pad'] else 0
+        self.sino_pad = int(math.ceil((math.sqrt(2)-1)*pad_len))
+
+        bases = [b.__name__ for b in self.__class__.__bases__]
+        # pad the data now if the recon is not astra
+        self.sino_func, self.cor_func = self.set_function(False) if \
+            'NewBaseAstraRecon' in bases else self.set_function(shape)
+
+    def set_centre_of_rotation(self, inData, mData, pData):
+        try:
+            cor = mData.get_meta_data("centre_of_rotation")
+        except KeyError:
+            cor = np.ones(inData.get_shape()[pData.get_slice_dimension()])
+            cor *= self.parameters['center_of_rotation']
+        self.cor = cor
+
+    def set_function(self, pad_shape):
+        if not pad_shape:
+            cor_func = lambda cor: cor
+            if self.parameters['log']:
+                sino_func = lambda sino: -np.log(np.nan_to_num(sino)+1)
+            else:
+                sino_func = lambda sino: np.nan_to_num(sino)
         else:
-            self.sino_func = lambda sino: np.nan_to_num(sino)
-
-        self.temp = 10
+            cor_func = lambda cor: cor+self.sino_pad
+            pad_tuples = [(0, 0)]*(len(pad_shape)-1)
+            pad_tuples.insert(self.pad_dim, (self.sino_pad, self.sino_pad))
+            pad_tuples = tuple(pad_tuples)
+            if self.parameters['log']:
+                sino_func = lambda sino: -np.log(np.nan_to_num(
+                    np.pad(sino, pad_tuples, 'edge'))+1)
+            else:
+                sino_func = lambda sino: np.nan_to_num(np.pad(
+                    sino, pad_tuples, 'edge'))
+        return sino_func, cor_func
 
     def process_frames(self, data, slice_list):
         """
         Reconstruct a single sinogram with the provided center of rotation
         """
         cor = self.cor[slice_list[0][self.main_dir]]
-        pad_tuples = [(0, 0)]*(data[0].ndim-1)
-        pad_tuples.insert(self.pad_dim, (self.pad_amount, self.pad_amount))
-        data = np.pad(data[0], tuple(pad_tuples), 'edge')
-        result = self.reconstruct(self.sino_func(data), cor+self.pad_amount,
-                                  self.angles, self.vol_shape)
+        if len(data) is 2:
+            result = self.reconstruct(self.sino_func(data[0]),
+                                      self.cor_func(cor),
+                                      self.angles, self.vol_shape,
+                                      init=data[1])
+        else:
+            result = self.reconstruct(self.sino_func(data[0]),
+                                      self.cor_func(cor),
+                                      self.angles, self.vol_shape)
         return result
 
     def reconstruct(self, data, cor, angles, shape):
