@@ -166,8 +166,8 @@ class NewBaseAstraRecon(BaseRecon):
     def setup(self):
         self.astra_setup()
         if self.parameters['init_vol']:
-            self.parameters['in_datasets'].append(
-                self.exp.index['in_data'][self.parameters['init_vol']])
+            self.parameters['in_datasets'].append(self.parameters['init_vol'])
+            self._set_plugin_datasets()
         super(NewBaseAstraRecon, self).setup()
 
     def get_max_frames(self):
