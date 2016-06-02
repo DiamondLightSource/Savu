@@ -32,7 +32,6 @@ class NewBaseAstraRecon(BaseRecon):
     """
     A Plugin to perform Astra toolbox reconstruction
 
-    :param init_vol: Dataset to use as volume initialiser. Default: None.
     :param FBP_filter: The FBP reconstruction filter type (none|ram-lak|\
         shepp-logan|cosine|hamming|hann|tukey|lanczos|triangular|gaussian|\
         barlett-hann|blackman|nuttall|blackman-harris|blackman-nuttall|\
@@ -78,7 +77,8 @@ class NewBaseAstraRecon(BaseRecon):
 
     def slice_sino(self, nDims):
         if nDims is 2:
-            return lambda x, sslice: np.expand_dims(x, axis=self.slice_dir)[sslice]
+            return lambda x, sslice: np.expand_dims(
+                x, axis=self.slice_dir)[sslice]
         else:
             return lambda x, sslice: x[sslice]
 
@@ -109,8 +109,7 @@ class NewBaseAstraRecon(BaseRecon):
 
             # create reconstruction id
             if init is not None:
-                print "initialising the volume to init"
-                rec_id = astra.data2d.create('-vol', vol_geom, init)
+                rec_id = astra.data2d.create('-vol', vol_geom, init[sslice])
             else:
                 rec_id = astra.data2d.create('-vol', vol_geom)
 
@@ -165,9 +164,6 @@ class NewBaseAstraRecon(BaseRecon):
 
     def setup(self):
         self.astra_setup()
-        if self.parameters['init_vol']:
-            self.parameters['in_datasets'].append(self.parameters['init_vol'])
-            self._set_plugin_datasets()
         super(NewBaseAstraRecon, self).setup()
 
     def get_max_frames(self):

@@ -38,6 +38,7 @@ class BaseRecon(Plugin):
         process. Default: [].
     :param out_datasets: Create a list of the dataset(s) to \
         process. Default: [].
+    :param init_vol: Dataset to use as volume initialiser. Default: None.
     :param sino_pad: Pad the sinogram to remove edge artefacts in the \
         reconstructed ROI (NB. This will increase the size of the data and \
         the time taken to perform the reconstruction). Default: False.
@@ -125,7 +126,11 @@ class BaseRecon(Plugin):
         raise NotImplementedError("process needs to be implemented")
 
     def setup(self):
-        # set up the output dataset that is created by the plugin
+        print self
+        # add another input dataset if there is a volume initialiser
+        if self.parameters['init_vol']:
+            self.add_initialiser()
+
         in_dataset, out_dataset = self.get_datasets()
 
         # reduce the data as per data_subset parameter
@@ -133,9 +138,12 @@ class BaseRecon(Plugin):
 
         # set information relating to the plugin data
         in_pData, out_pData = self.get_plugin_datasets()
-        # copy all required information from in_dataset[0]
+
         in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames(),
                                       fixed=True)
+        if len(in_pData) is 2:
+            in_pData[1].plugin_data_setup('VOLUME_XZ', self.get_max_frames(),
+                                          fixed=True)
 
         axis_labels = in_dataset[0].data_info.get_meta_data('axis_labels')[0]
 
@@ -158,6 +166,12 @@ class BaseRecon(Plugin):
         # set pattern_name and nframes to process for all datasets
         out_pData[0].plugin_data_setup('VOLUME_XZ', self.get_max_frames(),
                                        fixed=True)
+
+    def add_initialiser(self):
+        vol = self.parameters['init_vol']
+        self.parameters['in_datasets'].append(self.exp.index['in_data'][vol])
+        pData = self._get_plugin_data([self.parameters['in_datasets'][1]])[0]
+        self.parameters['plugin_in_datasets'].append(pData)
 
     def map_volume_dimensions(self, data, pData):
         data._finalise_patterns()
