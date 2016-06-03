@@ -126,7 +126,7 @@ def run_plugins(exp, plugin_list, **kwargs):
 
     check = kwargs.get('check', False)
     for i in range(n_loaders, len(plugin_list)-1):
-        exp._barrier()        
+        exp._barrier()
         plugin_loader(exp, plugin_list[i], check=check)
         exp._merge_out_data_to_in()
 
@@ -181,6 +181,8 @@ def check_nDatasets(exp, names, plugin_dict, nSets, dtype):
     names = ([names] if type(names) is not list else names)
     if nSets is 'var':
         nSets = len(plugin_dict['data'][dtype + 'sets'])
+
+    print names, dtype
 
     if len(names) is not nSets:
         raise Exception(errorMsg)

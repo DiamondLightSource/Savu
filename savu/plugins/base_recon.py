@@ -50,11 +50,16 @@ class BaseRecon(Plugin):
     def __init__(self, name='BaseRecon'):
         super(BaseRecon, self).__init__(name)
         self.nOut = 1
+        self.nIn = 1
 
     def base_dynamic_data_info(self):
+        print "testing for initialiser"
+        print self.parameters['init_vol']
         if self.parameters['init_vol']:
+            print "initialiser found"
             self.nIn += 1
             self.parameters['in_datasets'].append(self.parameters['init_vol'])
+            print self.nIn
 
     def base_pre_process(self):
         in_dataset = self.get_in_datasets()[0]
@@ -185,9 +190,11 @@ class BaseRecon(Plugin):
         return 8
 
     def nInput_datasets(self):
-        return 1
+        print self.nIn, "in"
+        return self.nIn
 
     def nOutput_datasets(self):
+        print self.nOut, "out"
         return self.nOut
 
     def reconstruct_pre_process(self):
