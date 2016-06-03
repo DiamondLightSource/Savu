@@ -33,6 +33,8 @@ class AstraReconGpu(NewBaseAstraRecon, GpuPlugin):
 
     :param number_of_iterations: Number of Iterations if an iterative method\
         is used . Default: 1.
+    :param res_norm: Output the residual norm at each iteration\
+        (Error in the solution). Default: False.
     :param reconstruction_type: Reconstruction type (FBP_CUDA|SIRT_CUDA|\
         SART_CUDA|CGLS_CUDA|FP_CUDA|BP_CUDA|SIRT3D_CUDA|\
         CGLS3D_CUDA). Default: 'FBP_CUDA'.
@@ -53,24 +55,18 @@ class AstraReconGpu(NewBaseAstraRecon, GpuPlugin):
         cfg['option']['GPUindex'] = self.parameters['GPU_index']
         return cfg
 
+    def dynamic_data_info(self):
+        alg = self.parameters['reconstruction_type']
+        if self.parameters['res_norm'] is True and 'FBP' not in alg:
+            self.res = True
+            self.nOut += 1
+            self.parameters['out_datasets'].append('res_norm')
+
     def astra_setup(self):
         options_list = ["FBP_CUDA", "SIRT_CUDA", "SART_CUDA", "CGLS_CUDA",
                         "FP_CUDA", "BP_CUDA", "SIRT3D_CUDA", "CGLS3D_CUDA"]
         if not options_list.count(self.parameters['reconstruction_type']):
             raise Exception("Unknown Astra GPU algorithm.")
-        if len(self.get_out_datasets()) is 2:
-            if 'FBP' in self.parameters['reconstruction_type']:
-                raise Exception("Only one output dataset required for FBP")
-
-    def add_out_dataset(self):
-        self.res = True
-        in_data = self.get_in_datasets()[0]
-        dim_detX = in_data.find_axis_label_dimension('y', contains=True)
-        shape = (in_data.get_shape()[dim_detX],
-                 self.parameters['number_of_iterations'])
-        labels = ['vol_y.voxel', 'iteration.number']
-        pattern = {'name': 'SINOGRAM', 'slice_dir': (0,), 'core_dir': (1,)}
-        return 'res_norm', shape, labels, pattern
 
     def get_citation_information(self):
         cite_info = CitationInformation()

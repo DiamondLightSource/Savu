@@ -27,6 +27,7 @@ import re
 import logging
 import numpy as np
 import savu
+import copy
 
 plugins = {}
 plugins_path = {}
@@ -97,7 +98,7 @@ def plugin_loader(exp, plugin_dict, **kwargs):
     except Exception as e:
         logging.error("failed to load the plugin")
         logging.error(e)
-        raise e
+        raise e        
 
     check_flag = kwargs.get('check', False)
     if check_flag:
@@ -125,7 +126,7 @@ def run_plugins(exp, plugin_list, **kwargs):
 
     check = kwargs.get('check', False)
     for i in range(n_loaders, len(plugin_list)-1):
-        exp._barrier()
+        exp._barrier()        
         plugin_loader(exp, plugin_list[i], check=check)
         exp._merge_out_data_to_in()
 
@@ -141,14 +142,19 @@ def set_datasets(exp, plugin, plugin_dict):
     out_names = out_names if out_names else default_out_names
 
     in_names = ('all' if len(in_names) is 0 else in_names)
-    out_names = (in_names if len(out_names) is 0 else out_names)
+    out_names = (copy.copy(in_names) if len(out_names) is 0 else out_names)
 
     in_names = check_nDatasets(exp, in_names, plugin_dict,
                                plugin.nInput_datasets(), "in_data")
     out_names = check_nDatasets(exp, out_names, plugin_dict,
                                 plugin.nOutput_datasets(), "out_data")
+
     plugin_dict["data"]["in_datasets"] = in_names
     plugin_dict["data"]["out_datasets"] = out_names
+
+    plugin._set_parameters(plugin_dict['data'])
+    plugin.base_dynamic_data_info()
+    plugin.dynamic_data_info()
 
 
 def get_names(names):
@@ -161,6 +167,7 @@ def get_names(names):
 
 def check_nDatasets(exp, names, plugin_dict, nSets, dtype):
     plugin_id = plugin_dict['id']
+
     try:
         if names[0] in "all":
             names = exp._set_all_datasets(dtype)
@@ -177,6 +184,7 @@ def check_nDatasets(exp, names, plugin_dict, nSets, dtype):
 
     if len(names) is not nSets:
         raise Exception(errorMsg)
+
     return names
 
 

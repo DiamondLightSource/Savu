@@ -76,6 +76,16 @@ class Plugin(PluginDatasets):
             self.parameters[name] = info['values'][indices[count]]
             count += 1
 
+    def base_dynamic_data_info(self):
+        """ Provides an opportunity to override the number and name of input
+        and output datasets before they are created in the base classes. """
+        pass
+
+    def dynamic_data_info(self):
+        """ Provides an opportunity to override the number and name of input
+        and output datasets before they are created. """
+        pass
+
     def setup(self):
         """
         This method is first to be called after the plugin has been created.

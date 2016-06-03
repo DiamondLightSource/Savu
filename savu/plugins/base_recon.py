@@ -49,6 +49,12 @@ class BaseRecon(Plugin):
 
     def __init__(self, name='BaseRecon'):
         super(BaseRecon, self).__init__(name)
+        self.nOut = 1
+
+    def base_dynamic_data_info(self):
+        if self.parameters['init_vol']:
+            self.nIn += 1
+            self.parameters['in_datasets'].append(self.parameters['init_vol'])
 
     def base_pre_process(self):
         in_dataset = self.get_in_datasets()[0]
@@ -106,15 +112,9 @@ class BaseRecon(Plugin):
         Reconstruct a single sinogram with the provided center of rotation
         """
         cor = self.cor[slice_list[0][self.main_dir]]
-        if len(data) is 2:
-            result = self.reconstruct(self.sino_func(data[0]),
-                                      self.cor_func(cor),
-                                      self.angles, self.vol_shape,
-                                      init=data[1])
-        else:
-            result = self.reconstruct(self.sino_func(data[0]),
-                                      self.cor_func(cor),
-                                      self.angles, self.vol_shape)
+        init = data[1] if len(data) is 2 else None
+        result = self.reconstruct(self.sino_func(data[0]), self.cor_func(cor),
+                                  self.angles, self.vol_shape, init)
         return result
 
     def reconstruct(self, data, cor, angles, shape):
@@ -126,10 +126,6 @@ class BaseRecon(Plugin):
         raise NotImplementedError("process needs to be implemented")
 
     def setup(self):
-        # add another input dataset if there is a volume initialiser
-        if self.parameters['init_vol']:
-            self.setup_initialiser()
-
         in_dataset, out_dataset = self.get_datasets()
 
         # reduce the data as per data_subset parameter
@@ -166,21 +162,6 @@ class BaseRecon(Plugin):
         out_pData[0].plugin_data_setup('VOLUME_XZ', self.get_max_frames(),
                                        fixed=True)
 
-        if len(out_dataset) is 2:
-            name, shape, label, pattern = self.add_out_dataset()
-            out_dataset[1].create_dataset(axis_labels=label, shape=shape)
-            out_dataset[1].add_pattern(pattern['name'],
-                                       slice_dir=pattern['slice_dir'],
-                                       core_dir=pattern['core_dir'])
-            out_pData[1].plugin_data_setup(pattern['name'],
-                                           self.get_max_frames(), fixed=True)
-
-    def setup_initialiser(self):
-        vol = self.parameters['init_vol']
-        self.parameters['in_datasets'].append(self.exp.index['in_data'][vol])
-        pData = self._get_plugin_data([self.parameters['in_datasets'][1]])[0]
-        self.parameters['plugin_in_datasets'].append(pData)
-
     def map_volume_dimensions(self, data, pData):
         data._finalise_patterns()
         dim_rotAngle = data.get_data_patterns()['PROJECTION']['main_dir']
@@ -207,7 +188,7 @@ class BaseRecon(Plugin):
         return 1
 
     def nOutput_datasets(self):
-        return 'var'
+        return self.nOut
 
     def reconstruct_pre_process(self):
         """

@@ -40,7 +40,7 @@ class NewBaseAstraRecon(BaseRecon):
 
     def __init__(self, name='NewBaseAstraRecon'):
         super(NewBaseAstraRecon, self).__init__(name)
-        self.res = 0
+        self.res = False
 
     def get_parameters(self):
         """
@@ -48,6 +48,26 @@ class NewBaseAstraRecon(BaseRecon):
         """
         logging.error("get_parameters needs to be implemented")
         raise NotImplementedError("get_parameters needs to be implemented")
+
+    def setup(self):
+        super(NewBaseAstraRecon, self).setup()
+        out_dataset = self.get_out_datasets()
+        # is res_norm is required then setup another output dataset
+        if len(out_dataset) is 2:
+            self.res = True
+            out_pData = self.get_plugin_out_datasets()
+            in_data = self.get_in_datasets()[0]
+            dim_detX = in_data.find_axis_label_dimension('y', contains=True)
+            shape = (in_data.get_shape()[dim_detX],
+                     self.parameters['number_of_iterations'])
+            label = ['vol_y.voxel', 'iteration.number']
+            pattern = {'name': 'SINOGRAM', 'slice_dir': (0,), 'core_dir': (1,)}
+            out_dataset[1].create_dataset(axis_labels=label, shape=shape)
+            out_dataset[1].add_pattern(pattern['name'],
+                                       slice_dir=pattern['slice_dir'],
+                                       core_dir=pattern['core_dir'])
+            out_pData[1].plugin_data_setup(pattern['name'],
+                                           self.get_max_frames(), fixed=True)
 
     def pre_process(self):
         # *****check here if there are deviations in the cor and determine the algorithm***
@@ -206,10 +226,6 @@ class NewBaseAstraRecon(BaseRecon):
         p_low = 0 if (ctr > mid) else shift
         p_high = shift + 0 if (ctr > mid) else 0
         return np.array([int(p_low), int(p_high)])
-
-    def setup(self):
-        self.astra_setup()
-        super(NewBaseAstraRecon, self).setup()
 
     def get_max_frames(self):
         #return 8 if "3D" in self.get_parameters()[0] else 1
