@@ -147,7 +147,6 @@ def set_datasets(exp, plugin, plugin_dict):
                                plugin.nInput_datasets(), "in_data")
     out_names = check_nDatasets(exp, out_names, plugin_dict,
                                 plugin.nOutput_datasets(), "out_data")
-
     plugin_dict["data"]["in_datasets"] = in_names
     plugin_dict["data"]["out_datasets"] = out_names
 

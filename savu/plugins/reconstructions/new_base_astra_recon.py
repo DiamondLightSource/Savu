@@ -73,16 +73,15 @@ class NewBaseAstraRecon(BaseRecon):
         self.slice_dir = pData.get_slice_dimension()
         self.nSinos = self.sino_shape[self.slice_dir] if self.nDims is 3 else 1
         self.slice_func = self.slice_sino(self.nDims)
-        self.out_shape = self.get_plugin_out_datasets()[0].shape
         l = self.sino_shape[dim_detX]
         c = np.linspace(-l/2.0, l/2.0, l)
         x, y = np.meshgrid(c, c)
         self.mask = np.array((x**2 + y**2 < (l/2.0)**2), dtype=np.float)
         self.mask_id = True if not self.parameters['sino_pad'] and 'FBP' not \
             in self.alg else False
-        self.manual_mask = True if 'FBP' in self.alg and not \
-            self.parameters['sino_pad'] else False
-        print self.mask_id, self.manual_mask
+#        self.manual_mask = True if 'FBP' in self.alg and not \
+#            self.parameters['sino_pad'] else False
+        self.manual_mask = True if not self.parameters['sino_pad'] else False
 
     def slice_sino(self, nDims):
         if nDims is 2:
@@ -93,9 +92,13 @@ class NewBaseAstraRecon(BaseRecon):
 
     def astra_2D_recon(self, sino, cors, angles, vol_shape, init=None):
         sslice = [slice(None)]*self.nDims
-        recon = np.zeros(self.out_shape)
+        recon = np.zeros(self.vol_shape)
         if self.nDims is 2:
             recon = np.expand_dims(recon, axis=self.slice_dir)
+        if self.res:
+            res = np.zeros((self.vol_shape[self.slice_dir], self.iters))
+        if self.nDims is 2:
+            res = np.expand_dims(recon, axis=self.slice_dir)
 
         proj_id = False
         # create volume geom
@@ -133,9 +136,15 @@ class NewBaseAstraRecon(BaseRecon):
             alg_id = astra.algorithm.create(cfg)
 
             # run algorithm
-            astra.algorithm.run(alg_id, self.iters)
-            # get reconstruction matrix
+            if self.res:
+                for j in range(self.iters):
+                    # Run a single iteration
+                    astra.algorithm.run(alg_id, 1)
+                    res[i, j] = astra.algorithm.get_res_norm(alg_id)
+            else:
+                astra.algorithm.run(alg_id, self.iters)
 
+            # get reconstruction matrix
             if self.manual_mask:
                 recon[sslice] = self.mask*astra.data2d.get(rec_id)
             else:
@@ -144,7 +153,10 @@ class NewBaseAstraRecon(BaseRecon):
             # delete geometry
             self.delete(alg_id, sino_id, rec_id, proj_id)
 
-        return recon
+        if self.res:
+            return [recon, res]
+        else:
+            return recon
 
     def set_config(self, rec_id, sino_id, proj_geom, vol_geom):
         cfg = astra.astra_dict(self.alg)

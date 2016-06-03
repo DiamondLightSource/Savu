@@ -126,10 +126,9 @@ class BaseRecon(Plugin):
         raise NotImplementedError("process needs to be implemented")
 
     def setup(self):
-        print self
         # add another input dataset if there is a volume initialiser
         if self.parameters['init_vol']:
-            self.add_initialiser()
+            self.setup_initialiser()
 
         in_dataset, out_dataset = self.get_datasets()
 
@@ -167,7 +166,16 @@ class BaseRecon(Plugin):
         out_pData[0].plugin_data_setup('VOLUME_XZ', self.get_max_frames(),
                                        fixed=True)
 
-    def add_initialiser(self):
+        if len(out_dataset) is 2:
+            name, shape, label, pattern = self.add_out_dataset()
+            out_dataset[1].create_dataset(axis_labels=label, shape=shape)
+            out_dataset[1].add_pattern(pattern['name'],
+                                       slice_dir=pattern['slice_dir'],
+                                       core_dir=pattern['core_dir'])
+            out_pData[1].plugin_data_setup(pattern['name'],
+                                           self.get_max_frames(), fixed=True)
+
+    def setup_initialiser(self):
         vol = self.parameters['init_vol']
         self.parameters['in_datasets'].append(self.exp.index['in_data'][vol])
         pData = self._get_plugin_data([self.parameters['in_datasets'][1]])[0]
@@ -199,7 +207,7 @@ class BaseRecon(Plugin):
         return 1
 
     def nOutput_datasets(self):
-        return 1
+        return 'var'
 
     def reconstruct_pre_process(self):
         """

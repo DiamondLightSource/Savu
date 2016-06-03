@@ -41,6 +41,7 @@ class AstraReconGpu(NewBaseAstraRecon, GpuPlugin):
     def __init__(self):
         super(AstraReconGpu, self).__init__("AstraReconGpu")
         self.GPU_index = None
+        self.res = False
 
     def get_parameters(self):
         return [self.parameters['reconstruction_type'],
@@ -57,9 +58,19 @@ class AstraReconGpu(NewBaseAstraRecon, GpuPlugin):
                         "FP_CUDA", "BP_CUDA", "SIRT3D_CUDA", "CGLS3D_CUDA"]
         if not options_list.count(self.parameters['reconstruction_type']):
             raise Exception("Unknown Astra GPU algorithm.")
-#        if 'FBP' not in self.parameters['reconstruction_type']:
-#            exec("""def nOutput_datasets:
-#            ...     return 2""")
+        if len(self.get_out_datasets()) is 2:
+            if 'FBP' in self.parameters['reconstruction_type']:
+                raise Exception("Only one output dataset required for FBP")
+
+    def add_out_dataset(self):
+        self.res = True
+        in_data = self.get_in_datasets()[0]
+        dim_detX = in_data.find_axis_label_dimension('y', contains=True)
+        shape = (in_data.get_shape()[dim_detX],
+                 self.parameters['number_of_iterations'])
+        labels = ['vol_y.voxel', 'iteration.number']
+        pattern = {'name': 'SINOGRAM', 'slice_dir': (0,), 'core_dir': (1,)}
+        return 'res_norm', shape, labels, pattern
 
     def get_citation_information(self):
         cite_info = CitationInformation()
