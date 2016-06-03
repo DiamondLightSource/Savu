@@ -182,8 +182,6 @@ def check_nDatasets(exp, names, plugin_dict, nSets, dtype):
     if nSets is 'var':
         nSets = len(plugin_dict['data'][dtype + 'sets'])
 
-    print names, dtype
-
     if len(names) is not nSets:
         raise Exception(errorMsg)
 
@@ -227,11 +225,11 @@ def calc_param_indices(dims):
 
 def get_plugins_paths():
     """
-    This gets the plugin paths, but also adds any that are not 
-    on the pythonpath to it.
+    This gets the plugin paths, but also adds any that are not on the
+    pythonpath to it.
     """
     plugins_paths = []
-    user_plugin_path = os.path.join(os.path.expanduser("~"),'savu_plugins')
+    user_plugin_path = os.path.join(os.path.expanduser("~"), 'savu_plugins')
     if os.path.exists(user_plugin_path):
         plugins_paths.append(user_plugin_path)
     env_plugins_path = os.getenv("SAVU_PLUGINS_PATH")

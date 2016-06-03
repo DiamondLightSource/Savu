@@ -114,6 +114,13 @@ class Plugin(PluginDatasets):
                     self.parameters_types[item['name']] = item['dtype']
                     self.parameters_desc[item['name']] = item['desc']
 
+    def initialise_parameters(self):
+        self.parameters = {}
+        self.parameters_types = {}
+        self._populate_default_parameters()
+        self.multi_params_dict = {}
+        self.extra_dims = []
+
     def _set_parameters(self, parameters):
         """
         This method is called after the plugin has been created by the
@@ -123,9 +130,7 @@ class Plugin(PluginDatasets):
         :param dict parameters: A dictionary of the parameters for this \
         plugin, or None if no customisation is required.
         """
-        self.parameters = {}
-        self.parameters_types = {}
-        self._populate_default_parameters()
+        self.initialise_parameters()
         for key in parameters.keys():
             if key in self.parameters.keys():
                 value = self.__convert_multi_params(parameters[key], key)

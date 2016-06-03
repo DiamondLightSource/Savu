@@ -53,13 +53,9 @@ class BaseRecon(Plugin):
         self.nIn = 1
 
     def base_dynamic_data_info(self):
-        print "testing for initialiser"
-        print self.parameters['init_vol']
         if self.parameters['init_vol']:
-            print "initialiser found"
             self.nIn += 1
             self.parameters['in_datasets'].append(self.parameters['init_vol'])
-            print self.nIn
 
     def base_pre_process(self):
         in_dataset = self.get_in_datasets()[0]
@@ -161,11 +157,13 @@ class BaseRecon(Plugin):
 
         out_dataset[0].create_dataset(axis_labels=axis_labels,
                                       shape=tuple(shape))
+
         out_dataset[0].add_volume_patterns(dim_volX, dim_volY, dim_volZ)
 
         # set pattern_name and nframes to process for all datasets
         out_pData[0].plugin_data_setup('VOLUME_XZ', self.get_max_frames(),
                                        fixed=True)
+                                       
 
     def map_volume_dimensions(self, data, pData):
         data._finalise_patterns()
@@ -190,11 +188,9 @@ class BaseRecon(Plugin):
         return 8
 
     def nInput_datasets(self):
-        print self.nIn, "in"
         return self.nIn
 
     def nOutput_datasets(self):
-        print self.nOut, "out"
         return self.nOut
 
     def reconstruct_pre_process(self):
