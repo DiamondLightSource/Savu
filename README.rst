@@ -21,14 +21,6 @@ Be aware though, the following is also true "Savu Pythons are typically calm in 
 .. [2] http://www.reptilesmagazine.com/Breeding-Snakes/Breeding-Savu-Python/
 .. [3] http://blogs.thatpetplace.com/thatreptileblog/2014/06/19/savu-python-care-keeping-one-worlds-smallest-pythons/
 
-Logo credit ::
-
-    Title         "Python de Savu"
-    Author        "Thomas Bersy" - https://www.flickr.com/photos/tautaudu02/
-    Source        "Python de Savu" - https://www.flickr.com/photos/tautaudu02/8481434915/in/photolist-dVtyBz-dVtz7t-cirEZ7/
-    License       "CC BY 2.0" - http://creativecommons.org/licenses/by/2.0/
-    Modification  "Cropped from original"
-
 
 .. image:: https://badges.gitter.im/Join%20Chat.svg
    :alt: Join the chat at https://gitter.im/DiamondLightSource/Savu
