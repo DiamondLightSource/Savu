@@ -19,3 +19,5 @@ Test suites for Savu are here
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
+
+from . import travis
