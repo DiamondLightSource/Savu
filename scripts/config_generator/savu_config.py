@@ -17,6 +17,7 @@ Created on 21 May 2015
 
 @author: ssg37927
 '''
+from __future__ import print_function
 
 import os
 
@@ -26,6 +27,7 @@ import pkgutil
 import savu
 import readline
 import re
+import sys
 
 RE_SPACE = re.compile('.*\s+$', re.M)
 histfile = os.path.join(os.path.expanduser("~"), ".savuhist")
@@ -45,7 +47,7 @@ class Content(object):
         self.filename = filename
         self._finished = False
         if os.path.exists(filename):
-            print "Opening file %s" % (filename)
+            print("Opening file %s" % (filename))
             self.plugin_list._populate_plugin_list(filename, activePass=True)
 
     def set_finished(self, value):
@@ -55,7 +57,7 @@ class Content(object):
         return self._finished
 
     def display(self, **kwargs):
-        print '\n', self.plugin_list._get_string(**kwargs), '\n'
+        print ('\n' + self.plugin_list._get_string(**kwargs), '\n')
 
     def save(self, filename):
         if filename is not "" and filename is not "exit":
@@ -84,10 +86,37 @@ class Content(object):
 
         return value
 
-    def add(self, name, pos):
+    def add(self, name, str_pos):
         plugin = pu.plugins[name]()
         plugin._populate_default_parameters()
-        self.insert(plugin, pos)
+        pos, str_pos = self.convert_pos(str_pos)
+        self.insert(plugin, pos, str_pos)
+        self.display()
+
+    def replace(self, name, str_pos, keep):
+        plugin = pu.plugins[name]()
+        plugin._populate_default_parameters()
+        pos = self.find_position(str_pos)
+        self.insert(plugin, pos, str_pos, replace=True)
+        if keep:
+            union_params = set(keep).intersection(set(plugin.parameters))
+            for param in union_params:
+                self.modify(pos+1, param, keep[param])
+
+    def move(self, old, new):
+        old_pos = self.find_position(old)
+        entry = self.plugin_list.plugin_list[old_pos]
+        self.remove(old_pos)
+        new_pos, new = self.convert_pos(new)
+        name = entry['name']
+        if name in pu.plugins.keys():
+            self.insert(pu.plugins[name](), new_pos, new)
+        else:
+            print("Sorry the plugin %s is not in my list, pick one from list" %
+                  (name))
+            return
+        self.plugin_list.plugin_list[new_pos] = entry
+        self.plugin_list.plugin_list[new_pos]['pos'] = new
         self.display()
 
     def modify(self, element, subelement, value):
@@ -110,25 +139,107 @@ class Content(object):
 
     def on_and_off(self, element, index):
         if index < 2:
-            print "switching plugin", element, "ON"
-            self.plugin_list.plugin_list[element-1]['active'] = True
+            print("switching plugin", element, "ON")
+            self.plugin_list.plugin_list[element]['active'] = True
         else:
-            print "switching plugin", element, "OFF"
-            self.plugin_list.plugin_list[element-1]['active'] = False
+            print("switching plugin", element, "OFF")
+            self.plugin_list.plugin_list[element]['active'] = False
 
-    def insert(self, plugin, pos):
+    def convert_pos(self, str_pos):
+        pos_list = self.get_split_positions()
+        num = re.findall("\d+", str_pos)[0]
+        letter = re.findall("[a-z]", str_pos)
+        entry = [num, letter[0]] if letter else [num]
+
+        # full value already exists in the list
+        if entry in pos_list:
+            index = pos_list.index(entry)
+            return self.inc_positions(index, pos_list, entry, 1)
+
+        # only the number exists in the list
+        num_list = [pos_list[i][0] for i in range(len(pos_list))]
+        if entry[0] in num_list:
+            start = num_list.index(entry[0])
+            if len(entry) is 2:
+                if len(pos_list[start]) is 2:
+                    idx = int([i for i in range(len(num_list)) if
+                               (num_list[i] == entry[0])][-1])+1
+                    entry = [entry[0], str(unichr(ord(pos_list[idx-1][1])+1))]
+                    return idx, ''.join(entry)
+                if entry[1] == 'a':
+                    self.plugin_list.plugin_list[start]['pos'] = entry[0] + 'b'
+                    return start, ''.join(entry)
+                else:
+                    self.plugin_list.plugin_list[start]['pos'] = entry[0] + 'a'
+                    return start+1, entry[0] + 'b'
+            return self.inc_positions(start, pos_list, entry, 1)
+
+        # number not in list
+        entry[0] = str(int(num_list[-1])+1 if num_list else 1)
+        if len(entry) is 2:
+            entry[1] = 'a'
+        return len(self.plugin_list.plugin_list), ''.join(entry)
+
+    def get_positions(self):
+        elems = self.plugin_list.plugin_list
+        pos_list = []
+        for e in elems:
+            pos_list.append(e['pos'])
+        return pos_list
+
+    def get_split_positions(self):
+        positions = self.get_positions()
+        split_pos = []
+        for i in range(len(positions)):
+            num = re.findall('\d+', positions[i])[0]
+            letter = re.findall('[a-z]', positions[i])
+            split_pos.append([num, letter[0]] if letter else [num])
+        return split_pos
+
+    def find_position(self, pos):
+        pos_list = self.get_positions()
+        return pos_list.index(pos)
+
+    def inc_positions(self, start, pos_list, entry, inc):
+        if len(entry) is 1:
+            self.inc_numbers(start, pos_list, inc)
+        else:
+            idx = [i for i in range(start, len(pos_list)) if
+                   pos_list[i][0] == entry[0]]
+            self.inc_letters(idx, pos_list, inc)
+        return start, ''.join(entry)
+
+    def inc_numbers(self, start, pos_list, inc):
+        for i in range(start, len(pos_list)):
+            pos_list[i][0] = str(int(pos_list[i][0])+inc)
+            self.plugin_list.plugin_list[i]['pos'] = ''.join(pos_list[i])
+
+    def inc_letters(self, idx, pos_list, inc):
+        for i in idx:
+            pos_list[i][1] = str(unichr(ord(pos_list[i][1])+inc))
+            self.plugin_list.plugin_list[i]['pos'] = ''.join(pos_list[i])
+
+    def insert(self, plugin, pos, str_pos, replace=False):
         process = {}
         process['name'] = plugin.name
-        process['id'] = "savu.plugins." + plugin.__module__
+        process['id'] = plugin.__module__
+        process['pos'] = str_pos
         process['data'] = plugin.parameters
         process['active'] = True
-        self.plugin_list.plugin_list.insert(pos, process)
+        process['desc'] = plugin.parameters_desc
+        if replace:
+            self.plugin_list.plugin_list[pos] = process
+        else:
+            self.plugin_list.plugin_list.insert(pos, process)
 
     def get(self, pos):
         return self.plugin_list.plugin_list[pos]
 
     def remove(self, pos):
+        entry = self.plugin_list.plugin_list[pos]['pos']
         self.plugin_list.plugin_list.pop(pos)
+        pos_list = self.get_split_positions()
+        self.inc_positions(pos, pos_list, entry, -1)
 
     def size(self):
         return len(self.plugin_list.plugin_list)
@@ -137,7 +248,7 @@ class Content(object):
 def _help(content, arg):
     """Display the help information"""
     for key in commands.keys():
-        print "%4s : %s" % (key, commands[key].__doc__)
+        print("%4s : %s" % (key, commands[key].__doc__))
     return content
 
 
@@ -153,21 +264,25 @@ def _disp(content, arg):
        Optional arguments:
             i(int): Display the ith item in the list.
             i(int) j(int): Display list items i to j.
-            names: Display process names only."""
+            -q: Quiet mode. Only process names are listed.
+            -v: Verbose mode. Displays parameter details.
+            """
+    verbosity = ['-v', '-q']
     idx = {'start': 0, 'stop': -1}
     if arg:
         split_arg = arg.split(' ')
+        for v in verbosity:
+            if v in split_arg:
+                idx['verbose'] = v
+                split_arg.remove(v)
         len_args = len(split_arg)
         if len_args > 0:
-            if split_arg[0] == 'names':
-                idx['params'] = False
-            else:
-                try:
-                    idx['start'] = int(split_arg[0]) - 1
-                    idx['stop'] = \
-                        idx['start']+1 if len_args == 1 else int(split_arg[1])
-                except ValueError:
-                    print("The arguments %s are unknown", arg)
+            try:
+                idx['start'] = content.find_position(split_arg[0])
+                idx['stop'] = idx['start']+1 if len_args == 1 else\
+                    content.find_position(split_arg[1])+1
+            except ValueError:
+                print("The arguments %s are unknown", arg)
     content.display(**idx)
     return content
 
@@ -186,18 +301,18 @@ def _list(content, arg):
                 print("The arguments %s are unknown", arg)
                 return content
 
-    print "-----------------------------------------"
-    for key, value in pu.plugins_path.iteritems():
+    print("-----------------------------------------")
+    for key, value in pu.plugins.iteritems():
         if not arg:
-            print key
-        elif value.split('.')[0] == arg[0]:
-            print key
+            print(key)
+        elif arg[0] in value.__module__:
+            print(key)
             if len(arg) < 2:
                 plugin = pu.plugins[key]()
                 plugin._populate_default_parameters()
                 for p_key in plugin.parameters.keys():
                     print("    %20s : %s" % (p_key, plugin.parameters[p_key]))
-    print "-----------------------------------------"
+    print("-----------------------------------------")
     return content
 
 
@@ -207,11 +322,11 @@ def _params(content, arg):
     try:
         plugin = pu.plugins[arg]()
         plugin._populate_default_parameters()
-        print "-----------------------------------------"
-        print arg
+        print("-----------------------------------------")
+        print(arg)
         for p_key in plugin.parameters.keys():
             print("    %20s : %s" % (p_key, plugin.parameters[p_key]))
-        print "-----------------------------------------"
+        print("-----------------------------------------")
         return content
     except:
         print("Sorry I can't process the argument '%s'" % (arg))
@@ -231,13 +346,15 @@ def _mod(content, arg):
     on_off_list = ['ON', 'on', 'OFF', 'off']
     try:
         element,  subelement = arg.split()[0].split('.')
+        element = content.find_position(element)
         if subelement in on_off_list:
-            content.on_and_off(int(element), on_off_list.index(subelement))
+            content.on_and_off(element, on_off_list.index(subelement))
         else:
             value = content.value(arg)
-            content.modify(int(element), subelement, value)
-
-        content.display()
+            # change element here
+            content.modify(element+1, subelement, value)
+        # display only the changed element
+        content.display(start=element, stop=element+1)
     except:
         print("Sorry I can't process the argument '%s'" % (arg))
     return content
@@ -248,18 +365,17 @@ def _add(content, arg):
     try:
         args = arg.split()
         name = args[0]
-        pos = None
-        if len(args) == 2:
-            pos = args[1]
-        else:
-            pos = content.size()+1
+        elems = content.get_positions()
+        final = int(list(elems[-1])[0])+1 if elems else 1
+        pos = args[1] if len(args) == 2 else str(final)
         if name in pu.plugins.keys():
-            content.add(name, int(pos)-1)
+            content.add(name, pos)
         else:
             print("Sorry the plugin %s is not in my list, pick one from list" %
                   (name))
-    except:
+    except Exception as e:
         print("Sorry I can't process the argument '%s'" % (arg))
+        print(e)
     return content
 
 
@@ -271,47 +387,32 @@ def _ref(content, arg):
     """
 
     if not arg:
-        print "ref requires the process number or * as argument"
-        print "e.g. 'ref 1' refreshes process 1"
-        print "e.g. 'ref *' refreshes ALL processes"
+        print("ref requires the process number or * as argument")
+        print("e.g. 'ref 1' refreshes process 1")
+        print("e.g. 'ref *' refreshes ALL processes")
         return content
 
     kwarg = None
     if len(arg.split()) > 1:
         arg, kwarg = arg.split()
 
-    if arg is '*':
-        positions = range(len(content.plugin_list.plugin_list))
-    else:
-        positions = [int(arg) - 1]
-
-    for pos in positions:
+    positions = content.get_positions() if arg is '*' else [arg]
+    for pos_str in positions:
+        pos = content.find_position(pos_str)
         if pos < 0 or pos >= len(content.plugin_list.plugin_list):
             print("Sorry %s is out of range" % (arg))
             return content
         name = content.plugin_list.plugin_list[pos]['name']
-        old_entry = content.get(pos)
-        content.remove(pos)
-
-        if kwarg:
-            plugin = pu.plugins[name]()
-            plugin._populate_default_parameters()
-            content.insert(plugin, pos)
-            old_params = old_entry['data']
-            new_params = plugin.parameters
-            union_params = set(old_params).intersection(set(new_params))
-            for param in union_params:
-                content.modify(pos+1, param, old_params[param])
-            content.display()
-        else:
-            content.add(name, pos)
+        keep = content.get(pos)['data'] if kwarg else None
+        content.replace(name, pos_str, keep)
+        content.display(start=pos, stop=pos+1)
 
     return content
 
 
 def _rem(content, arg):
     """Remove the numbered item from the list"""
-    pos = int(arg)-1
+    pos = content.find_position(arg)
     if pos < 0 or pos >= len(content.plugin_list.plugin_list):
             print("Sorry %s is out of range" % (arg))
             return content
@@ -320,10 +421,33 @@ def _rem(content, arg):
     return content
 
 
+def _move(content, arg):
+    """ Moves the plugin from position a to b: 'move a b'. e.g 'move 1 2'."""
+    if len(arg.split()) is not 2:
+        print ("The move command takes two arguments: e.g 'move 1 2' moves "
+               "from position 1 to position 2")
+        return content
+    try:
+        old_pos_str, new_pos_str = arg.split()
+        content.move(old_pos_str, new_pos_str)
+    except:
+        print ("Sorry, the information you have given is incorrect")
+        return content
+    return content
+
+
 def _exit(content, arg):
     """Close the program"""
     content.set_finished(content.save("exit"))
     return content
+
+
+def _history(content, arg):
+    hlen = readline.get_current_history_length()
+    for i in range(hlen):
+        print("%5i : %s" % (i, readline.get_history_item(i)))
+    return content
+
 
 commands = {'open': _open,
             'help': _help,
@@ -333,9 +457,11 @@ commands = {'open': _open,
             'mod': _mod,
             'add': _add,
             'rem': _rem,
+            'move': _move,
             'ref': _ref,
             'params': _params,
-            'exit': _exit}
+            'exit': _exit,
+            'history': _history}
 
 list_commands = ['loaders',
                  'corrections',
@@ -419,8 +545,9 @@ class Completer(object):
             [c + ' ' for c in commands.keys() if c.startswith(cmd)] + [None]
         return results[state]
 
+
 def main():
-    print "Starting Savu Config tool (please wait for prompt)"
+    print("Starting Savu Config tool (please wait for prompt)")
 
     comp = Completer()
     # we want to treat '/' as part of a word, so override the delimiters
@@ -429,11 +556,19 @@ def main():
     readline.set_completer(comp.complete)
 
     # load all the packages in the plugins directory to register classes
-    plugins_path = pu.get_plugins_paths() #savu.plugins.__path__
+    plugins_path = pu.get_plugins_paths()
     for loader, module_name, is_pkg in pkgutil.walk_packages(plugins_path):
         try:
-            module = loader.find_module(module_name).load_module(module_name)
-        except:
+            # if the module is in savu, but not a plugin, then ignore
+            if "savu" in module_name.split('.'):
+                if "plugins" not in module_name.split('.'):
+                    continue
+            # setup.py is included in this list which should also be ignored
+            if module_name in ["setup", "savu.plugins.utils"]:
+                continue
+            if module_name not in sys.modules:
+                loader.find_module(module_name).load_module(module_name)
+        except Exception as e:
             pass
 
     # set up things
@@ -454,12 +589,15 @@ def main():
         if command in commands.keys():
             content = commands[command](content, arg)
         else:
-            print "I'm sorry, thats not a command I recognise, try help"
+            print("I'm sorry, thats not a command I recognise, try help")
 
         if content.is_finished():
             break
 
-    print "Thanks for using the application"
+        # write the history to the histoy file
+        readline.write_history_file(histfile)
+
+    print("Thanks for using the application")
 
 if __name__ == '__main__':
     main()

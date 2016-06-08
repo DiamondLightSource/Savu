@@ -13,36 +13,34 @@
 # limitations under the License.
 
 """
-.. module:: timeseries_field_corrections
+.. module:: dark_flat_field_correction
    :platform: Unix
-   :synopsis: A Plugin to apply a simple dark and flatfield correction to some
-       raw timeseries data
+   :synopsis: A Plugin to apply a simple dark and flatfield correction to raw\
+       timeseries data
 
-.. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
-
-:synopsis: A Plugin to apply a simple dark and flatfield correction to some
-       raw timeseries data
+.. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
 
-from savu.plugins.driver.cpu_plugin import CpuPlugin
-from savu.plugins.base_correction import BaseCorrection
-
 import numpy as np
 
+from savu.data.data_structures.data_type import ImageKey
+from savu.plugins.driver.cpu_plugin import CpuPlugin
+from savu.plugins.base_correction import BaseCorrection
 from savu.plugins.utils import register_plugin
 
 
 @register_plugin
-class TimeseriesFieldCorrections(BaseCorrection, CpuPlugin):
+class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
     """
-    A Plugin to apply a simple dark and flatfield correction to some
-    raw timeseries data
+    A Plugin to apply a simple dark and flat field correction to data.
+    :param pattern: Data processing pattern is 'SINOGRAM' or \
+        'PROJECTION'. Default: 'SINOGRAM'.
     """
 
     def __init__(self):
-        super(TimeseriesFieldCorrections,
-              self).__init__("TimeseriesFieldCorrections")
+        super(DarkFlatFieldCorrection,
+              self).__init__("DarkFlatFieldCorrection")
         # TODO these should probably be parameters
         self.LOW_CROP_LEVEL = 0.0
         self.HIGH_CROP_LEVEL = 2.0
@@ -52,23 +50,34 @@ class TimeseriesFieldCorrections(BaseCorrection, CpuPlugin):
 
     def pre_process(self):
         inData = self.get_in_datasets()[0]
-        self.dark = inData.data.dark_mean()
-        self.flat = inData.data.flat_mean()
-        self.flat_minus_dark = self.flat - self.dark
+        if isinstance(inData.data, ImageKey):
+            image_key = self.get_in_datasets()[0].data
+            self.dark = image_key.dark_mean()
+            self.flat = image_key.flat_mean()
+        else:
+            self.dark = inData.meta_data.get_meta_data('dark')
+            self.flat = inData.meta_data.get_meta_data('flat')
 
         self.flat_minus_dark = self.flat - self.dark
         det_dims = [inData.find_axis_label_dimension('detector_y'),
                     inData.find_axis_label_dimension('detector_x')]
 
+        data_shape = self.get_plugin_in_datasets()[0].get_shape()
+        tile = [1]*len(data_shape)
+        if self.parameters['pattern'] == 'PROJECTION':
+            tile[0] = data_shape[0]
         self.convert_size = \
-            lambda x, sl: x[[sl[d] for d in det_dims]]
+            lambda x, sl: np.tile(x[[sl[d] for d in det_dims]], tile)
 
     def correct(self, data):
         dark = self.convert_size(self.dark, self.slice_list)
         flat_minus_dark = \
             self.convert_size(self.flat_minus_dark, self.slice_list)
         data = np.nan_to_num((data-dark)/flat_minus_dark)
+        self.__data_check(data)
+        return data
 
+    def __data_check(self, data):
         # make high and low crop masks
         low_crop = data < self.LOW_CROP_LEVEL
         high_crop = data > self.HIGH_CROP_LEVEL
@@ -84,7 +93,6 @@ class TimeseriesFieldCorrections(BaseCorrection, CpuPlugin):
         data[low_crop] = self.LOW_CROP_LEVEL
         data[high_crop] = self.HIGH_CROP_LEVEL
 
-        return data
 
     def executive_summary(self):
         summary = []

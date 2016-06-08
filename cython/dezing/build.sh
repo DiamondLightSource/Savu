@@ -1,5 +1,5 @@
 module add fftw
-module add python/ana
+module add python/anaconda-savu
 #make shared
 make static
 export CFLAGS="-I . $CFLAGS"

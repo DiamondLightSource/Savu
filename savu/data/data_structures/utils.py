@@ -49,8 +49,6 @@ def _deepcopy_data_object(dObj, new_obj):
     new_obj.data_info = copy.deepcopy(dObj.data_info)
     new_obj.exp = dObj.exp
     new_obj._plugin_data_obj = dObj._plugin_data_obj
-    new_obj.tomo_raw_obj = dObj.tomo_raw_obj
-    new_obj.data_mapping = dObj.data_mapping
     new_obj.dtype = copy.deepcopy(dObj.dtype)
     new_obj.remove = copy.deepcopy(dObj.remove)
     new_obj.group_name = dObj.group_name
@@ -58,9 +56,7 @@ def _deepcopy_data_object(dObj, new_obj):
     new_obj.backing_file = dObj.backing_file
     new_obj.data = dObj.data
     new_obj.next_shape = copy.deepcopy(dObj.next_shape)
-    new_obj.mapping = copy.deepcopy(dObj.mapping)
-    new_obj.map_dim = copy.deepcopy(dObj.map_dim)
-    new_obj.revert_shape = copy.deepcopy(dObj.map_dim)
+    new_obj.orig_shape = copy.deepcopy(dObj.orig_shape)
     return new_obj
 
 

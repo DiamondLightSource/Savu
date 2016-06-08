@@ -25,79 +25,8 @@
 import logging
 import warnings
 
-
-#class TomoRaw(object):
-#    """ A class associated with a dataset that has an image key.  It performs
-#    operations on the image_key.
-#    """
-#
-#    def __init__(self, data_obj):
-#        self.data_obj = data_obj
-#        self.data_obj._set_tomo_raw(self)
-#        self.image_key_slice = None
-#        self.frame_list = []
-#
-#    def _remove_image_key(self, copy_obj, image_key=0):
-#        """ Reduce the shape of a dataset to be only the size of the data and
-#        remove the TomoRaw instance encapsulated inside the Data object.
-#
-#        :params Data copy_obj: A Data object with an image key
-#        :keyword int image_key: The image_key data index (assumed to be 0 for
-#            now)
-#        """
-#        # the image key should be the index of the data, not necessarily zero.
-#        if image_key is 0:
-#            if copy_obj.tomo_raw_obj:
-#                self.data_obj.set_shape(
-#                    copy_obj.get_tomo_raw().__remove_dark_and_flat())
-#                self.data_obj._clear_tomo_raw()
-#
-#    def set_image_key(self, image_key):
-#        """ Set the image_key in the data meta_data dictionary
-#
-#        :params np.ndarray image_key: The image key
-#        """
-#        self.data_obj.meta_data.set_meta_data('image_key', image_key)
-#
-#    def get_image_key(self):
-#        """ Get the image key
-#
-#        :returns: The image key array
-#        :rtype: np.ndarray
-#        """
-#        return self.data_obj.meta_data.get_meta_data('image_key')
-#
-#    def __get_image_key_slice(self):
-#        return self.image_key_slice
-#
-#    def __remove_dark_and_flat(self):
-#        if self.get_image_key() is not None:
-#            shape = self.data_obj.get_shape()
-#            image_key = self.get_image_key()
-#            new_shape = shape[0] - len(image_key[image_key != 0])
-#            return (new_shape, shape[1], shape[2])
-#        else:
-#            logging.warn("Error in remove_dark_and_flat(): No image_key found")
-#            shape = self.get_shape()
-#            return (shape, shape[1], shape[2])
-#
-#    def _get_frame_raw(self, slice_list):
-#        pattern = self.data_obj._get_plugin_data()._get_pattern_name()
-#        image_slice = self.__get_image_key_slice()
-#        new_slice_list = []
-#        if pattern is "SINOGRAM":
-#            for sl in slice_list:
-#                sl = list(sl)
-#                sl[0] = image_slice
-#                sl = tuple(sl)
-#                new_slice_list.append(sl)
-#        elif pattern is "PROJECTION":
-#            new_slice_list = slice_list[self.frame_list[0]:self.frame_list[1]]
-#        else:
-#            raise Exception("The pattern", pattern, " is not recognized \
-#                             by", self.__name__)
-#
-#        return new_slice_list
+import savu.data.data_structures.data_notes as notes
+from savu.core.utils import docstring_parameter
 
 
 class Padding(object):
@@ -108,6 +37,7 @@ class Padding(object):
 
     def __init__(self, pattern):
         self.padding_dirs = {}
+        self.pad_dict = None
         self.pattern_name = pattern.keys()[0]
         self.pattern = pattern[self.pattern_name]
         self.dims = self.__set_dims()
@@ -119,16 +49,19 @@ class Padding(object):
             for dim in (temp,) if isinstance(temp, int) else temp:
                 dims.append(int(dim))
         dims = list(set(dims))
+        for dim in dims:
+            self.padding_dirs[dim] = {'before': 0, 'after': 0}
         return dims
 
     def pad_frame_edges(self, padding):
-        """ Pad the edges of a frame of data (i.e pad in the core dimensions)
+        """ Pad all the edges of a frame of data with the same pad amount
+        (i.e pad in the core dimensions).
 
         :param int padding: The pad amount
         """
         core_dirs = self.pattern['core_dir']
         for core in core_dirs:
-            self.pad_direction([core, padding])
+            self._pad_direction(str(core) + '.' + str(padding))
 
     def pad_multi_frames(self, padding):
         """ Add extra frames before and after the current frame of data (i.e
@@ -141,25 +74,40 @@ class Padding(object):
         except KeyError:
             raise Exception('There is no main_dir associated with this '
                             'pattern')
-        self.pad_direction([main_dir, padding])
+        self._pad_direction(str(main_dir) + '.' + str(padding))
 
-    def pad_direction(self, pad_list):
+    @docstring_parameter(notes._padding.__doc__)
+    def pad_directions(self, pad_list):
+        """ Pad multiple, individually specified, dimensions.
+
+        :param list(dict) pad_list: A list of strings of the form: {0}.
+        """
+        for entry in pad_list:
+            self.__pad_direction(entry)
+
+    @docstring_parameter(notes._padding.__doc__)
+    def _pad_direction(self, pad_str):
         """ Pad the data in a specified dimension.
 
-        :param list pad_list: A list (len = 2), where the first element is the\
-        dimension to pad and the second element is the pad amount.
+        :param str pad_str: {0}.
         """
-        pdir = pad_list[0]
-        padding = pad_list[1]
-        if pdir not in self.dims:
-            warnings.warn('Dimension ' + str(pdir) + ' is not associated '
-                          ' with the pattern ' + self.pattern_name, +
-                          '. IGNORING!')
-        elif pdir in self.padding_dirs:
-            warnings.warn('Padding.add_dir(): The direction ' + str(pdir) +
-                          ' has already been added to the padding list.')
+        pad_vals = pad_str.split('.')
+        pplace = None
+        pad_place = ['before', 'after']
+        if len(pad_vals) is 3:
+            pdir, pplace, pval = pad_vals
+            remove = list(set(pad_place).difference(set([pplace])))[0]
+            pad_place.remove(remove)
         else:
-            self.padding_dirs[pdir] = padding
+            pdir, pval = pad_vals
+
+        pdir = int(pdir)
+        if pdir not in self.dims:
+            warnings.warn('Dimension '+str(pdir)+' is not associated with the '
+                          'pattern ' + self.pattern_name + '. IGNORING!')
+        else:
+            for p in pad_place:
+                self.padding_dirs[pdir][p] += int(pval)
 
     def _get_padding_directions(self):
         """ Get padding directions.
@@ -167,6 +115,9 @@ class Padding(object):
         :returns: padding dictionary
         :rtype: dict
         """
+        for key in self.padding_dirs.keys():
+            if sum(self.padding_dirs[key].values()) is 0:
+                del self.padding_dirs[key]
         return self.padding_dirs
 
 

@@ -29,6 +29,7 @@ import savu
 import os
 import sys
 import logging
+
 savuPath = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(savuPath + "/../lib"))
 
@@ -38,32 +39,21 @@ try:
     sys.path.append("/dls/science/groups/das/Aaron/FastXRF/src")
 except Exception:
     logging.warn("Fluo tools not on path")
-    
+
 from . import core
 from . import data
 from . import plugins
+from . import test
+
 
 def run_tests():
     import unittest
-    from . import test
-
-    path = os.path.split(test.__file__)[0]
-    testmodules = ['savu.test.%s' % (os.path.splitext(p)[0]) for p in
-                   os.listdir(path)]
-    suite = unittest.TestSuite()
-
-    for t in testmodules:
-        try:
-            mod = __import__(t, globals(), locals(), ['suite'])
-            suitefn = getattr(mod, 'suite')
-            suite.addTest(suitefn())
-        except (ImportError, AttributeError):
-            # else, just load all the test cases from the module.
-            suite.addTest(unittest.defaultTestLoader.loadTestsFromName(t))
 
     print "Tests will run shortly, and may take some time to complete"
     print "The tests may raise errors, please don't worry about these as " + \
         "they may be raised deliberatly"
     print "The key information is in the final test results"
 
+    path = os.path.split(test.travis.__file__)[0]
+    suite = unittest.defaultTestLoader.discover(path, pattern='*test.py')
     unittest.TextTestRunner().run(suite)

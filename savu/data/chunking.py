@@ -27,7 +27,6 @@ import numpy as np
 from savu.plugins.utils import register_plugin
 
 
-@register_plugin
 class Chunking(object):
     """
     A class to save tomography data to a hdf5 file
@@ -55,7 +54,6 @@ class Chunking(object):
         """
         Calculate appropriate chunk sizes for this dataset
         """
-        print shape
         logging.debug("shape = %s", shape)
         if len(shape) < 3:
             return True

@@ -39,6 +39,7 @@ class Plugin(PluginDatasets):
         self.name = name
         self.parameters = {}
         self.parameters_types = {}
+        self.parameters_desc = {}
         self.chunk = False
 
     def _main_setup(self, exp, params):
@@ -75,6 +76,16 @@ class Plugin(PluginDatasets):
             self.parameters[name] = info['values'][indices[count]]
             count += 1
 
+    def base_dynamic_data_info(self):
+        """ Provides an opportunity to override the number and name of input
+        and output datasets before they are created in the base classes. """
+        pass
+
+    def dynamic_data_info(self):
+        """ Provides an opportunity to override the number and name of input
+        and output datasets before they are created. """
+        pass
+
     def setup(self):
         """
         This method is first to be called after the plugin has been created.
@@ -101,6 +112,14 @@ class Plugin(PluginDatasets):
                 for item in full_description:
                     self.parameters[item['name']] = item['default']
                     self.parameters_types[item['name']] = item['dtype']
+                    self.parameters_desc[item['name']] = item['desc']
+
+    def initialise_parameters(self):
+        self.parameters = {}
+        self.parameters_types = {}
+        self._populate_default_parameters()
+        self.multi_params_dict = {}
+        self.extra_dims = []
 
     def _set_parameters(self, parameters):
         """
@@ -111,9 +130,7 @@ class Plugin(PluginDatasets):
         :param dict parameters: A dictionary of the parameters for this \
         plugin, or None if no customisation is required.
         """
-        self.parameters = {}
-        self.parameters_types = {}
-        self._populate_default_parameters()
+        self.initialise_parameters()
         for key in parameters.keys():
             if key in self.parameters.keys():
                 value = self.__convert_multi_params(parameters[key], key)
@@ -206,16 +223,6 @@ class Plugin(PluginDatasets):
         """
         self.__copy_meta_data()
         self.__clean_up_plugin_data()
-        self.__delete_mappings()
-
-    def __delete_mappings(self):
-        """ Delete mapping datasets and set mapping flag to False.
-        """
-        in_datasets = self.get_in_datasets()
-        for data in in_datasets:
-            if data.mapping:
-                del self.exp.index['mapping'][data.get_name()]
-                self.mapping = False
 
     def __copy_meta_data(self):
         """

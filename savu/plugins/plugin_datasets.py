@@ -30,7 +30,7 @@ class PluginDatasets(object):
     The base class from which all plugins should inherit.
     """
 
-    def __init__(self, name='PluginDatasets'):
+    def __init__(self):
         super(PluginDatasets, self).__init__()
         self.exp = None
         self.data_objs = {}
@@ -81,7 +81,7 @@ class PluginDatasets(object):
             data.extra_dims = self.extra_dims
         return out_data
 
-    def __get_plugin_data(self, data_list):
+    def _get_plugin_data(self, data_list):
         """ Encapsulate a PluginData object in each dataset associated with
         the plugin.
 
@@ -103,9 +103,9 @@ class PluginDatasets(object):
         self.parameters['in_datasets'] = self.__set_in_datasets()
         self.parameters['out_datasets'] = self.__set_out_datasets()
         self.parameters['plugin_in_datasets'] = \
-            self.__get_plugin_data(self.parameters['in_datasets'])
+            self._get_plugin_data(self.parameters['in_datasets'])
         self.parameters['plugin_out_datasets'] = \
-            self.__get_plugin_data(self.parameters['out_datasets'])
+            self._get_plugin_data(self.parameters['out_datasets'])
 
     @docstring_parameter('PluginData', 'in')
     @docstring_parameter(notes.datasets_notes.__doc__)

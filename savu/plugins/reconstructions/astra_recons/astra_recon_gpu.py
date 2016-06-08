@@ -20,33 +20,53 @@
 
 """
 
-from savu.plugins.reconstructions.base_astra_recon import BaseAstraRecon
+from savu.plugins.reconstructions.new_base_astra_recon import NewBaseAstraRecon
 from savu.plugins.driver.gpu_plugin import GpuPlugin
 from savu.data.plugin_list import CitationInformation
 from savu.plugins.utils import register_plugin
 
 
 @register_plugin
-class AstraReconGpu(BaseAstraRecon, GpuPlugin):
+class AstraReconGpu(NewBaseAstraRecon, GpuPlugin):
     """
     A Plugin to run the astra reconstruction
 
     :param number_of_iterations: Number of Iterations if an iterative method\
         is used . Default: 1.
+    :param res_norm: Output the residual norm at each iteration\
+        (Error in the solution). Default: False.
     :param reconstruction_type: Reconstruction type (FBP_CUDA|SIRT_CUDA|\
-        SART_CUDA|CGLS_CUDA|SIRT3D_CUDA|CGLS3D_CUDA). Default: 'FBP_CUDA'.
+        SART_CUDA|CGLS_CUDA|FP_CUDA|BP_CUDA|SIRT3D_CUDA|\
+        CGLS3D_CUDA). Default: 'FBP_CUDA'.
     """
 
     def __init__(self):
         super(AstraReconGpu, self).__init__("AstraReconGpu")
-        print "INITIALIZING astra_recon_gpu.py"
         self.GPU_index = None
+        self.res = False
 
     def get_parameters(self):
-        print "ENTERING astra_recon_gpu.py get_parameters"
         return [self.parameters['reconstruction_type'],
-                self.parameters['number_of_iterations'],
-                self.GPU_index]
+                self.parameters['number_of_iterations']]
+
+    def set_options(self, cfg):
+        if 'option' not in cfg.keys():
+            cfg['option'] = {}
+        cfg['option']['GPUindex'] = self.parameters['GPU_index']
+        return cfg
+
+    def dynamic_data_info(self):
+        alg = self.parameters['reconstruction_type']
+        if self.parameters['res_norm'] is True and 'FBP' not in alg:
+            self.res = True
+            self.nOut += 1
+            self.parameters['out_datasets'].append('res_norm')
+
+    def astra_setup(self):
+        options_list = ["FBP_CUDA", "SIRT_CUDA", "SART_CUDA", "CGLS_CUDA",
+                        "FP_CUDA", "BP_CUDA", "SIRT3D_CUDA", "CGLS3D_CUDA"]
+        if not options_list.count(self.parameters['reconstruction_type']):
+            raise Exception("Unknown Astra GPU algorithm.")
 
     def get_citation_information(self):
         cite_info = CitationInformation()

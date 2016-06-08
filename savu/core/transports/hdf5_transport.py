@@ -304,12 +304,6 @@ class Hdf5Transport(TransportControl):
         :rtype: lambda
         """
         max_frames = data._get_plugin_data()._get_frame_chunk()
-        if data.mapping:
-            map_obj = self.exp.index['mapping'][data.get_name()]
-            map_dim_len = map_obj.data_info.get_meta_data('map_dim_len')
-            max_frames = min(max_frames, map_dim_len)
-            data._get_plugin_data()._set_frame_chunk(max_frames)
-
         squeeze_dims = data._get_plugin_data().get_slice_directions()
         if max_frames > 1:
             squeeze_dims = squeeze_dims[1:]
@@ -359,10 +353,9 @@ class Hdf5Transport(TransportControl):
         """
         result = [result] if type(result) is not list else result
         for idx in range(len(data_list)):
-            temp = data_list[idx]._get_unpadded_slice_data(
-                slice_list[idx][count], result[idx])
             data_list[idx].data[slice_list[idx][count]] = \
-                expand_dict[idx](temp)
+                data_list[idx]._get_unpadded_slice_data(
+                    slice_list[idx][count], expand_dict[idx](result[idx]))
 
 #    def _transfer_to_meta_data(self, return_dict):
 #        """

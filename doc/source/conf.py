@@ -15,7 +15,7 @@
 import sys, os
 from os import path
 
-autodoc_mock_imports = ['numpy', 'mpi4py', 'astra', 'scipy',
+autodoc_mock_imports = ['numpy', 'mpi4py', 'astra', 'scipy', 'h5py', 'pyfftw',
                         'dials.array_family', 'dials.algorithms.image.threshold']
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -175,7 +175,7 @@ html_theme = 'classic'
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = '../../logo_small.png'
+html_logo = '../../Savu_logo_2_L_Res_trans.png'
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32

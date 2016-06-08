@@ -37,6 +37,9 @@ class ImageLoader(BaseLoader):
     :param image_type: Type of image. Choose from 'FabIO'. Default: 'FabIO'.
     :param angles: A python statement to be evaluated or a file. Default: None.
     :param frame_dim: Which dimension requires stitching? Default: 0.
+    :param data_prefix: A file prefix for the data file. Default: None.
+    :param dark_prefix: A file prefix for the dark field files. Default: None.
+    :param flat_prefix: A file prefix for the flat field files. Default: None.
     """
 
     def __init__(self, name='ImageLoader'):
@@ -63,9 +66,30 @@ class ImageLoader(BaseLoader):
         clazz = getattr(mod, dtype)
 
         path = exp.meta_data.get_meta_data("data_file")
-        data_obj.data = clazz(path, data_obj, [self.parameters['frame_dim']])
+        data_prefix = self.parameters['data_prefix']
+        data_obj.data = clazz(path, data_obj, [self.parameters['frame_dim']],
+                              None, data_prefix)
 
         self.set_rotation_angles(data_obj)
+        # read dark and flat images
+        if self.parameters['dark_prefix'] != None:
+            dark = clazz(path, data_obj, [self.parameters['frame_dim']], None,
+                         self.parameters['dark_prefix'])
+            shape = dark.get_shape()
+            index = [slice(0, shape[i], 1) for i in range(len(shape))]
+            data_obj.meta_data.set_meta_data('dark', dark[index].mean(0))
+        else:
+            data_obj.meta_data.set_meta_data(
+                'dark', np.zeros(data_obj.data.image_shape))
+        if self.parameters['flat_prefix'] != None:
+            flat = clazz(path, data_obj, [self.parameters['frame_dim']],
+                         None, self.parameters['flat_prefix'])
+            shape = flat.get_shape()
+            index = [slice(0, shape[i], 1) for i in range(len(shape))]
+            data_obj.meta_data.set_meta_data('flat', flat[index].mean(0))
+        else:
+            data_obj.meta_data.set_meta_data(
+                'flat', np.ones(data_obj.data.image_shape))
 
         # dummy file
         filename = path.split('/')[-1] + '.h5'

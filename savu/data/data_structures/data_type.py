@@ -42,10 +42,10 @@ class FabIO(DataTypes):
     """ This class loads any of the FabIO python module supported image
     formats. """
 
-    def __init__(self, folder, Data, dim, shape=None):
+    def __init__(self, folder, Data, dim, shape=None, data_prefix=None):
         self._data_obj = Data
         self.nFrames = None
-        self.start_file = fabio.open(self.__get_file_name(folder))
+        self.start_file = fabio.open(self.__get_file_name(folder, data_prefix))
         self.frame_dim = dim
         self.image_shape = (self.start_file.dim2, self.start_file.dim1)
         if shape is None:
@@ -57,21 +57,35 @@ class FabIO(DataTypes):
         size = [len(np.arange(i.start, i.stop, i.step)) for i in index]
         data = np.empty(size)
         tiffidx = [i for i in range(len(index)) if i not in self.frame_dim]
+        tiff_slices = [index[i] for i in tiffidx]
+
+        # shift tiff dims to start from 0
+        index = list(index)
+        for i in tiffidx:
+            if index[i].start is not 0:
+                index[i] = slice(0, index[i].stop - index[i].start)
+
         index, frameidx = self.__get_indices(index, size)
 
         for i in range(len(frameidx)):
-            data[index[i]] = \
-                self.start_file.getframe(self.start_no + frameidx[i])\
-                .data[[index[i][n] for n in tiffidx]]
+            data[index[i]] = self.start_file.getframe(
+                self.start_no + frameidx[i]).data[tiff_slices]
         return data
 
-    def __get_file_name(self, folder):
+    def __get_file_name(self, folder, prefix):
         import re
-        files = os.listdir(folder)
+        import glob
+#        files = os.listdir(folder)
+        fullpath = str.strip(folder)
+        if prefix != None:
+            fullpath = os.path.join(folder, prefix)
+        fullpath += "*"
+        files = glob.glob(fullpath)
         self.nFrames = len(files)
         fname = sorted(files)[0]
         self.start_no = [int(s) for s in re.findall(r'\d+', fname)][-1]
-        return folder + "/" + fname
+        return fname
+#        return folder + "/" + fname
 
     def get_shape(self):
         return self.shape + self.image_shape
@@ -86,13 +100,16 @@ class FabIO(DataTypes):
         """ Get the indices for the new data array and the file numbers. """
         sub_idx = np.array(index)[np.array(self.frame_dim)]
         sub_size = [size[i] for i in self.frame_dim]
+
         idx_list = []
         for dim in range(len(sub_idx)):
             idx = self.__get_idx(dim, sub_idx[dim], sub_size)
             idx_list.append(idx.astype(int))
+
         lshape = idx_list[0].shape[0]
         index = np.tile(index, (lshape, 1))
         frameidx = np.zeros(lshape)
+
         for dim in range(len(sub_idx)):
             start = index[0][self.frame_dim[dim]].start
             index[:, self.frame_dim[dim]] = \
@@ -148,9 +165,8 @@ class ImageKey(DataTypes):
         self.nDims = len(self.shape)
 
     def __getitem__(self, idx):
-        print idx
         index = list(idx)
-        index[self.proj_dim] = self.get_index(0)
+        index[self.proj_dim] = self.get_index(0)[idx[self.proj_dim]].tolist()
         return self.data[tuple(index)]
 
     def get_shape(self):

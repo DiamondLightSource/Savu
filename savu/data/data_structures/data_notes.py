@@ -24,8 +24,9 @@
 def _set_preview_note():
     """
         Each ``preview_list`` element should be of the form
-        ``start:stop:step:chunk``, where ``step`` and ``chunk`` are optional
-        (default = 1) but both are required if chunk > 1.
+        ``start:stop:step:chunk``, where ``stop``, ``step`` and ``chunk`` are
+        optional (defaults: ``stop``=``start``+ 1, ``step``= 1, ``chunk`` = 1)
+        but must be given in that order.
 
         .. note::
             **start:stop[:step]**
@@ -201,3 +202,12 @@ shape=new_shape, patterns={in_dataset[0], ['SINOGRAM.1', 'PROJECTION.1']})
 shape=new_shape, patterns={in_dataset[0], '*.0'})
 
     """
+
+
+def _padding():
+    """
+    Either 'dim.pad', 'dim.after.pad' or 'dim.before.pad', where 'dim' and\
+    'pad' are integers and give the dimension to pad and the the pad \
+    amount respectively. The keywords 'before' and 'after' specify padding\
+    'before' or 'after' the original dimension index (if neither are\
+    specified the both directions will be padded. """

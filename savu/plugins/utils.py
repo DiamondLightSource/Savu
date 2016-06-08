@@ -27,6 +27,7 @@ import re
 import logging
 import numpy as np
 import savu
+import copy
 
 plugins = {}
 plugins_path = {}
@@ -34,7 +35,7 @@ count = 0
 
 
 def register_plugin(clazz):
-    """decorator to add logging information around calls for use with ."""
+    """decorator to add plugins to a central register"""
     plugins[clazz.__name__] = clazz
     if clazz.__module__.split('.')[0] != 'savu':
         plugins_path[clazz.__name__] = clazz.__module__
@@ -97,7 +98,7 @@ def plugin_loader(exp, plugin_dict, **kwargs):
     except Exception as e:
         logging.error("failed to load the plugin")
         logging.error(e)
-        raise e
+        raise e        
 
     check_flag = kwargs.get('check', False)
     if check_flag:
@@ -141,7 +142,7 @@ def set_datasets(exp, plugin, plugin_dict):
     out_names = out_names if out_names else default_out_names
 
     in_names = ('all' if len(in_names) is 0 else in_names)
-    out_names = (in_names if len(out_names) is 0 else out_names)
+    out_names = (copy.copy(in_names) if len(out_names) is 0 else out_names)
 
     in_names = check_nDatasets(exp, in_names, plugin_dict,
                                plugin.nInput_datasets(), "in_data")
@@ -150,6 +151,10 @@ def set_datasets(exp, plugin, plugin_dict):
 
     plugin_dict["data"]["in_datasets"] = in_names
     plugin_dict["data"]["out_datasets"] = out_names
+
+    plugin._set_parameters(plugin_dict['data'])
+    plugin.base_dynamic_data_info()
+    plugin.dynamic_data_info()
 
 
 def get_names(names):
@@ -162,6 +167,7 @@ def get_names(names):
 
 def check_nDatasets(exp, names, plugin_dict, nSets, dtype):
     plugin_id = plugin_dict['id']
+
     try:
         if names[0] in "all":
             names = exp._set_all_datasets(dtype)
@@ -178,6 +184,7 @@ def check_nDatasets(exp, names, plugin_dict, nSets, dtype):
 
     if len(names) is not nSets:
         raise Exception(errorMsg)
+
     return names
 
 
@@ -218,23 +225,23 @@ def calc_param_indices(dims):
 
 def get_plugins_paths():
     """
-    This gets the plugin paths, but also adds any that are not 
-    on the pythonpath to it.
+    This gets the plugin paths, but also adds any that are not on the
+    pythonpath to it.
     """
-    plugins_path = []
-    user_plugin_path = os.path.join(os.path.expanduser("~"),'savu_plugins')
+    plugins_paths = []
+    user_plugin_path = os.path.join(os.path.expanduser("~"), 'savu_plugins')
     if os.path.exists(user_plugin_path):
-        plugins_path.append(user_plugin_path)
+        plugins_paths.append(user_plugin_path)
     env_plugins_path = os.getenv("SAVU_PLUGINS_PATH")
     if env_plugins_path is not None:
         for ppath in (env_plugins_path.split(':')):
             if ppath != "":
-                plugins_path.append(ppath)
+                plugins_paths.append(ppath)
     # before we add the savu plugins to the list, add all items in the list
     # so far to the pythonpath
-    for ppath in plugins_path:
+    for ppath in plugins_paths:
         if ppath not in sys.path:
             sys.path.append(ppath)
-    # now add the savu plugin path
-    plugins_path.append(savu.plugins.__path__[0])
-    return plugins_path
+    # now add the savu plugin path, which is now the whole path.
+    plugins_paths.append(os.path.join(savu.__path__[0], os.pardir))
+    return plugins_paths
