@@ -72,9 +72,7 @@ class BaseFitter(BaseFilter, CpuPlugin):
         #residlabels = in_dataset[0].meta_data.get_meta_data('axis_labels')[0:3]
         #print residlabels.append(residlabels[-1])
         residuals = out_datasets[3]
-        residuals.create_dataset(patterns=in_dataset[0],
-                                 axis_labels=in_dataset[0],
-                                 shape={'variable': shape[:-1]})
+        residuals.create_dataset(in_dataset[0])
 
 
         # setup plugin datasets
@@ -127,11 +125,11 @@ class BaseFitter(BaseFilter, CpuPlugin):
                 dsig_mult = np.zeros((npts, len(x)))
                 for i in range(npts):
                     #dmu_mult[i] = x+mu[i]
-                    dsig_mult[i] = ((x-mu[i])/sig[i])-1.
+                    dsig_mult[i] = ((x-mu[i])**2) / sig[i]**3 #((x-mu[i])/sig[i])-1.
                 #dmu = spectrum_sum_dfun(fun, dmu_mult, x, mu, *p)
                 dsig = self.spectrum_sum_dfun(fun, dsig_mult, x, mu, *p)
         #        print "shape of da"+str(da.shape)
-                op = np.concatenate([da, dsig])
+                op = np.concatenate([-da, -dsig])
                 #print "op.shape is "+str(op.shape)
             elif fun.__name__ == 'lorentzian':
                 #print "hey"

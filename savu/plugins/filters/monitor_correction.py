@@ -31,6 +31,7 @@ class MonitorCorrection(BaseFilter, CpuPlugin):
     """
     corrects the data to the monitor counts.
     This plugin corrects data[0] from data[1] by dividing. We allow a scale and offset due to I18's uncalibrated ic
+    :param in_datasets: A list of the dataset(s) to process. Default: ['to_be_corrected','monitor'].
     :param nominator_scale: a. Default: 1.0.
     :param nominator_offset: b. Default: 0.0.
     :param denominator_scale: c. Default: 1.0.

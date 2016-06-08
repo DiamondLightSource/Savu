@@ -25,7 +25,7 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 import logging
 import numpy as np
 
-class BasePtycho(BaseFilter, CpuPlugin):
+class BasePtycho(BaseFilter, CpuPlugin): # also make one for gpu
     """
     A base plugin for doing ptychography. Other ptychography plugins should inherit from this
     :param in_datasets: A list of the dataset(s) to process. Default: [].
