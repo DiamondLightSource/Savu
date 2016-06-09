@@ -32,28 +32,29 @@ import savu.test.test_utils as tu
 class MultipleParameterTest(unittest.TestCase):
 
     def plugin_setup(self):
-        ppath = 'savu.plugins.reconstructions.scikitimage_sart'
+        ppath = 'savu.plugins.reconstructions.astra_recons.astra_recon_cpu'
         plugin = pu.load_plugin(ppath)
         return plugin
 
     def framework_options_setup(self):
-        key1 = 'interpolation'
-        key2 = 'iterations'
-        key3 = 'in_datasets'
-        key4 = 'out_datasets'
-        key5 = 'sino_pad_width'
-        params = {key1: 'nearest;linear', key2: '1;2;3', key3: 'tomo',
-                  key4: 'tomo', key5: 0}
+        key1 = 'preview'
+        key2 = 'FBP_filter'
+        key3 = 'center_of_rotation'
+        key4 = 'in_datasets'
+        key5 = 'out_datasets'
+        params = {key1: [':', '0', ':'], key2: 'ram-lak;hamming',
+                  key3: '85.0;85.5;86.0', key4: 'tomo', key5: 'tomo'}
 
         options = tu.set_experiment('tomo')
-        plugin = 'savu.plugins.reconstructions.scikitimage_sart'
+        plugin = 'savu.plugins.reconstructions.astra_recons.astra_recon_cpu'
         tu.set_plugin_list(options, plugin, [{}, params, {}])
         return options
 
     def test_parameter_space_int(self):
         plugin = self.plugin_setup()
-        key = 'iterations'
-        params = {key: '1;2;3'}
+        key = 'number_of_iterations'
+        params = {'reconstruction_type': 'CGLS', 'preview': '[:,0,:]',
+                  key: '1;2;3'}
         plugin._set_parameters(params)
         params = plugin.parameters[key]
         self.assertEqual(params, [1, 2, 3])
@@ -61,8 +62,8 @@ class MultipleParameterTest(unittest.TestCase):
 
     def test_parameter_space_float(self):
         plugin = self.plugin_setup()
-        key = 'sino_pad_width'
-        params = {key: '0.2;0.4;0.6'}
+        key = 'center_of_rotation'
+        params = {'preview': '[:,0,:]', key: '0.2;0.4;0.6'}
         plugin._set_parameters(params)
         params = plugin.parameters[key]
         self.assertEqual(params, [0.2, 0.4, 0.6])
@@ -70,18 +71,18 @@ class MultipleParameterTest(unittest.TestCase):
 
     def test_parameter_space_str(self):
         plugin = self.plugin_setup()
-        key = 'interpolation'
-        params = {key: 'nearest;linear'}
+        key = 'FBP_filter'
+        params = {'preview': '[:,0,:]', key: 'ram-lak;hamming'}
         plugin._set_parameters(params)
         params = plugin.parameters[key]
-        self.assertEqual(params, ['nearest', 'linear'])
+        self.assertEqual(params, ['ram-lak', 'hamming'])
         self.assertEqual(plugin.extra_dims[0], 2)
 
     def test_parameter_space_extra_dims(self):
         plugin = self.plugin_setup()
-        key1 = 'interpolation'
-        key2 = 'iterations'
-        params = {key1: 'nearest;linear', key2: '1;2;3'}
+        key1 = 'FBP_filter'
+        key2 = 'center_of_rotation'
+        params = {key1: 'ram-lak;hamming', key2: '85.0;85.5;86.0'}
         plugin._set_parameters(params)
         out_datasets = plugin.get_out_datasets()
         for data in out_datasets:
@@ -93,11 +94,11 @@ class MultipleParameterTest(unittest.TestCase):
         tu.plugin_setup(plugin)
 
         out_dataset = plugin.get_out_datasets()[0]
-        self.assertEqual((160, 135, 160, 3, 2), out_dataset.get_shape())
+        self.assertEqual((160, 1, 160, 3, 2), out_dataset.get_shape())
 
-    def test_parameter_space_full_run(self):
-        options = self.framework_options_setup()
-        tu.plugin_runner_real_plugin_run(options)
+#    def test_parameter_space_full_run(self):
+#        options = self.framework_options_setup()
+#        tu.plugin_runner_real_plugin_run(options)
 
 if __name__ == "__main__":
     unittest.main()

@@ -44,13 +44,13 @@ class CglsRecon(BaseRecon, CpuPlugin):
     def __init__(self):
         super(CglsRecon, self).__init__("CglsRecon")
 
-    def reconstruct(self, sinogram, centre_of_rotations, angles, vol_shape):
-        print sinogram.shape
+    def reconstruct(self, sino, centre_of_rotations, angles, vol_shape, init):
+        print sino.shape
         nthreads = self.parameters['number_of_threads']
         num_iterations = self.parameters['number_of_iterations']
         resolution = self.parameters['resolution']
 
-        voxels = ccpi_reconstruction.cgls(sinogram.astype(np.float32),
+        voxels = ccpi_reconstruction.cgls(sino.astype(np.float32),
                                           angles.astype(np.float32),
                                           centre_of_rotations[0], resolution,
                                           num_iterations, nthreads)
@@ -58,8 +58,8 @@ class CglsRecon(BaseRecon, CpuPlugin):
         voxels = voxels[:160, :160, ...]
         if voxels.ndim is 3:
             voxels = np.transpose(voxels, (0, 2, 1))
-            if voxels.shape[1] > sinogram.shape[1]:
-                diff = voxels.shape[1] - sinogram.shape[1]
+            if voxels.shape[1] > sino.shape[1]:
+                diff = voxels.shape[1] - sino.shape[1]
                 voxels = voxels[:, :-diff, :]
                 
 

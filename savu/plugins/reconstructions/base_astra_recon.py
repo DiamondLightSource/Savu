@@ -80,9 +80,6 @@ class BaseAstraRecon(BaseRecon):
             self.setup_2D()
             self.reconstruct = self.astra_2D_recon
 
-    def reconstruct(self, sino, cors, angles, vol_shape):
-        self.reconstruct(sino, cors, angles, vol_shape)
-
     def setup_2D(self):
         pData = self.get_plugin_in_datasets()[0]
         dim_detX = pData.get_data_dimension_by_axis_label('x', contains=True)
@@ -108,7 +105,7 @@ class BaseAstraRecon(BaseRecon):
         else:
             return lambda x, sslice: x[sslice]
 
-    def astra_2D_recon(self, sino, cors, angles, vol_shape, init=None):
+    def astra_2D_recon(self, sino, cors, angles, vol_shape, init):
         sslice = [slice(None)]*self.nDims
         recon = np.zeros(self.vol_shape)
         if self.nDims is 2:
