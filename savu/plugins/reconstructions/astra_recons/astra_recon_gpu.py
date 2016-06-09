@@ -22,14 +22,14 @@
 import astra
 import numpy as np
 
-from savu.plugins.reconstructions.new_base_astra_recon import NewBaseAstraRecon
+from savu.plugins.reconstructions.base_astra_recon import BaseAstraRecon
 from savu.plugins.driver.gpu_plugin import GpuPlugin
 from savu.data.plugin_list import CitationInformation
 from savu.plugins.utils import register_plugin
 
 
 @register_plugin
-class AstraReconGpu(NewBaseAstraRecon, GpuPlugin):
+class AstraReconGpu(BaseAstraRecon, GpuPlugin):
     """
     A Plugin to run the astra reconstruction
 
@@ -161,7 +161,7 @@ class AstraReconGpu(NewBaseAstraRecon, GpuPlugin):
             return recon
 
     def create_3d_vector_geom(self, angles, cors, detX):
-        # make this generic, add tilt for detector
+        # add tilt for detector
         # make sure output volume is the correct way
         # add res_norm
         # add a mask

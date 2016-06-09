@@ -20,14 +20,14 @@
 
 """
 
-from savu.plugins.reconstructions.new_base_astra_recon import NewBaseAstraRecon
+from savu.plugins.reconstructions.base_astra_recon import BaseAstraRecon
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.data.plugin_list import CitationInformation
 from savu.plugins.utils import register_plugin
 
 
 @register_plugin
-class AstraReconCpu(NewBaseAstraRecon, CpuPlugin):
+class AstraReconCpu(BaseAstraRecon, CpuPlugin):
     """
     A Plugin to run the astra reconstruction
 
