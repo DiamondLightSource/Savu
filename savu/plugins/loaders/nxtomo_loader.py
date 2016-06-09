@@ -183,6 +183,7 @@ class NxtomoLoader(BaseLoader):
                     angles = np.loadtxt(angles)
                 except:
                     raise Exception('Cannot set angles in loader.')
+
         data_obj.meta_data.set_meta_data("rotation_angle", angles)
         return len(angles)
 
