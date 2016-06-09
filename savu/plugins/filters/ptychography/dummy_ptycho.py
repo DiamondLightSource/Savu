@@ -40,4 +40,4 @@ class DummyPtycho(BasePtycho):
         probe = data[0]
         object_transmission = np.random.rand(self.obj_shape)
         positions = self.get_positions()
-        return [probe, object_transmission, positions]
+        return [probe, object_transmission, positions]#] add fourier error, realspace error

@@ -63,6 +63,7 @@ class SimpleFitXrf(BaseFluoFitter):
                                                axis, positions, params)
 #         areas/=np.sum(data)
 #         areas /= 0.
+        weights[weights<-1e-8]=0
         areas[weights < 1e-4] = 0.0
         areas[widths > 0.5] = 0.0
 #         areas /= np.sum(data)
@@ -71,5 +72,5 @@ class SimpleFitXrf(BaseFluoFitter):
         logging.debug("Simple fit iteration took: %s ms", str((t2-t1)*1e3))
         # all fitting routines will output the same format.
         # nchannels long, with 3 elements. Each can be a subarray.
-        return [weights, areas, residuals]
+        return [weights, widths, areas, residuals]
 

@@ -26,6 +26,7 @@ from savu.plugins.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 import time
 from savu.plugins.utils import register_plugin
+from copy import deepcopy
 
 
 @register_plugin
@@ -39,7 +40,7 @@ class StripBackground(BaseFilter, CpuPlugin):
         occurs. Default: 5.
     :param SG_width: Whats the savitzgy golay window. Default: 35.
     :param SG_polyorder: Whats the savitzgy-golay poly order. Default: 5.
-
+    :param out_datasets: A list of the dataset(s) to process. Default: ['stripped','background'].
     """
 
     def __init__(self):
@@ -81,18 +82,28 @@ class StripBackground(BaseFilter, CpuPlugin):
         t2 = time.time()
         logging.debug("Strip iteration took: %s ms", str((t2-t1)*1e3))
 #         print (data - filtered).shape
-        return data - filtered
+        return [data - filtered, filtered]
 
     def setup(self):
         logging.debug('setting up the background subtraction')
         in_dataset, out_datasets = self.get_datasets()
         in_meta = in_dataset[0].meta_data
+        in_dictionary = in_meta.get_dictionary()
+        print in_dictionary
         stripped = out_datasets[0]
         stripped.create_dataset(in_dataset[0])
-
+        stripped.meta_data.dict = deepcopy(in_dictionary)
+        print stripped.meta_data.dict
+        background = out_datasets[1]
+        background.create_dataset(in_dataset[0])
+        background.meta_data.dict = deepcopy(in_dictionary)
+        
+        
         in_pData, out_pData = self.get_plugin_datasets()
         in_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
         out_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
+        out_pData[1].plugin_data_setup('SPECTRUM', self.get_max_frames())
+
 
         logging.debug("****STRIP_BACKGROUND AXIS LABELS*** %s", stripped.get_axis_labels())
 
@@ -105,4 +116,4 @@ class StripBackground(BaseFilter, CpuPlugin):
         return 1
 
     def nOutput_datasets(self):
-        return 1
+        return 2

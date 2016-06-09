@@ -31,7 +31,7 @@ from savu.plugins.utils import register_plugin
 class McNearAbsorptionCorrection(BaseAbsorptionCorrection):
     """
     McNears absorption correction, takes in a normalised absorption sinogram and xrf sinogram stack
-
+    :param in_datasets: A list of the dataset(s) to process. Default: ['xrf','stxm'].
     """
 
     def __init__(self):
@@ -65,23 +65,36 @@ class McNearAbsorptionCorrection(BaseAbsorptionCorrection):
         logging.debug('the xrf shape is %s' % str(xrf.shape))
         logging.debug('the stxm shape is %s' % str(stxm_orig.shape))
         # take the log here, we assume it is monitor corrected already
-        stxm = -np.log10(stxm_orig)
+        stxm = stxm_orig
         # now correct for the rotation offset
         absorption = np.roll(stxm,int(self.npix_displacement), axis=0)
         num_channels = self.get_num_channels()
         corrected_xrf = np.zeros_like(xrf)
         for i in range(num_channels):
             fluo_sino = xrf[:,:,i]
-            corrected_xrf[:,:,i], corr_fac = self.correct_sino(absorption, fluo_sino, self.atten_ratio[i])
+            corrected_xrf[:,:,i], corr_fac = self.correct_sino(self.atten_ratio[i], fluo_sino, absorption)
             logging.debug('For channel %s, min correction: %s, max correction: %s' % (str(i),
                                                                                       str(np.min(corr_fac)),
                                                                                       str(np.max(corr_fac))))
         return corrected_xrf
 
-    def correct_sino(self, stxm_sino, fluo_sino, atten_ratio):
-        foo = np.arange(stxm_sino.shape[1]) + 1.0 * np.ones_like(abs)
-        transmission_sum = np.cumsum(stxm_sino, axis=1)
-        transmission_average = transmission_sum / foo
-        exponent_Co = np.exp(-transmission_average * atten_ratio * stxm_sino)
-        corrected_fluo_sino = exponent_Co * fluo_sino
-        return corrected_fluo_sino, exponent_Co
+    def correct_sino(self,Ti_ratio, FFI0_Ti, absorption):
+        trans_ave_array = np.ndarray(shape=FFI0_Ti.shape, dtype=np.float64)
+        for n in range(len(absorption)): #columns, axis=0
+            row = absorption[n]
+            trans_ave_array[n] = row
+            for m in range(1, len(row), 1): #row, axis=1
+                trans_ave_array[n][m] = np.average(row[0:m]) #average of all absorption between pixel 0 and pixel - removes t so should be mu only
+           
+        trans_ave_array = np.nan_to_num(trans_ave_array)
+        exponent_Ti = self.get_exponent_Ti_mu(Ti_ratio, absorption, trans_ave_array)
+        FFI0_corrected_Ti = np.multiply(FFI0_Ti, exponent_Ti)
+        return FFI0_corrected_Ti, exponent_Ti
+
+    def get_exponent_Ti_mu(self, Ti_ratio, absorption, trans_ave_array):
+        FF_Ti_xray_mu = np.multiply(trans_ave_array, Ti_ratio)
+        exponent_Ti = np.add(FF_Ti_xray_mu, absorption)
+        exponent_Ti = np.multiply(exponent_Ti, -1)
+
+        exponent_Ti = np.exp(exponent_Ti)
+        return exponent_Ti

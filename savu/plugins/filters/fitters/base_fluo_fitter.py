@@ -29,13 +29,14 @@ from flupy.algorithms.xrf_calculations.transitions_and_shells import \
     shells, transitions
 from flupy.algorithms.xrf_calculations.escape import *
 from flupy.xrf_data_handling import XRFDataset
+from copy import deepcopy
 
 
 class BaseFluoFitter(BaseFitter):
     """
     This plugin fits peaks. Either XRD or XRF for now.
     :param in_datasets: Create a list of the dataset(s). Default: [].
-    :param out_datasets: A. Default: ["FitWeights", "FitAreas", "residuals"].
+    :param out_datasets: A. Default: ["FitWeights", "FitWidths", "FitAreas", "residuals"].
     :param width_guess: An initial guess at the width. Default: 0.02.
     :param mono_energy: the mono energy. Default: 18.0.
     :param peak_shape: Which shape do you want. Default: "gaussian".
@@ -66,50 +67,56 @@ class BaseFluoFitter(BaseFitter):
         # set up the output datasets that are created by the plugin
         logging.debug('setting up the fluorescence fitting')
         in_dataset, out_datasets = self.get_datasets()
+        in_pData, out_pData = self.get_plugin_datasets()
         in_meta_data = in_dataset[0].meta_data
 #         print in_meta_data.__dict__
         shape = in_dataset[0].get_shape()   
-        print in_dataset[0].data_info.get_meta_data('axis_labels')[0].keys()
+        in_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
+#         print in_dataset[0].meta_data.get_dictionary()
         axis_labels = ['-1.PeakIndex.pixel.unit']
         pattern_list = ['SINOGRAM', 'PROJECTION']
 
         fitAreas = out_datasets[0]
-        fitHeights = out_datasets[1]
+        fitWidths = out_datasets[1]
+        fitHeights = out_datasets[2]
         self.length = shape[-1]
         idx = self.setPositions(in_meta_data)
         logging.debug("in the setup the index is"+str(idx))
         numpeaks = len(idx)
         new_shape = shape[:-1] + (numpeaks,)
+        
 #         print new_shape
+        channel = {'core_dir': (-1,), 'slice_dir': range(len(shape)-1)}
         fitAreas.create_dataset(patterns={in_dataset[0]: pattern_list},
                                 axis_labels={in_dataset[0]: axis_labels},
                                 shape=new_shape)
-
+        fitAreas.add_pattern("CHANNEL", **channel)
+        out_pData[0].plugin_data_setup('CHANNEL', self.get_max_frames())
+        
+        fitWidths.create_dataset(patterns={in_dataset[0]: pattern_list},
+                                axis_labels={in_dataset[0]: axis_labels},
+                                shape=new_shape)
+        fitWidths.add_pattern("CHANNEL", **channel)
+        out_pData[1].plugin_data_setup('CHANNEL', self.get_max_frames())
+        
         fitHeights.create_dataset(patterns={in_dataset[0]: pattern_list},
                                   axis_labels={in_dataset[0]: axis_labels},
                                   shape=new_shape)
-
-
-        channel = {'core_dir': (-1,), 'slice_dir': range(len(shape)-1)}
-
-        fitAreas.add_pattern("CHANNEL", **channel)
         fitHeights.add_pattern("CHANNEL", **channel)
-        #residlabels = in_dataset[0].meta_data.get_meta_data('axis_labels')[0:3]
-        #print residlabels.append(residlabels[-1])
-        residuals = out_datasets[2]
+        out_pData[2].plugin_data_setup('CHANNEL', self.get_max_frames())
+        
+        residuals = out_datasets[3]
         residuals.create_dataset(in_dataset[0])
         residuals.set_shape(shape[:-1]+(len(self.axis),))
-        # setup plugin datasets
-        in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
+        out_pData[3].plugin_data_setup('SPECTRUM', self.get_max_frames())
+        
+        
         for i in range(len(out_datasets)):
             out_meta_data = out_datasets[i].meta_data
-            out_meta_data.set_meta_data('PeakIndex', self.idx)
-            out_meta_data.set_meta_data('PeakEnergy', self.axis[self.idx])
-            
-        out_pData[0].plugin_data_setup('CHANNEL', self.get_max_frames())
-        out_pData[1].plugin_data_setup('CHANNEL', self.get_max_frames())
-        out_pData[2].plugin_data_setup('SPECTRUM', self.get_max_frames())
+            out_meta_data.dict = deepcopy(in_meta_data.get_dictionary())
+            out_meta_data.set_meta_data("PeakEnergy",self.axis[self.idx])
+            out_meta_data.set_meta_data('PeakIndex',self.idx)
+
 
     def setPositions(self, in_meta_data):
         paramdict = XRFDataset().paramdict
@@ -212,5 +219,3 @@ class BaseFluoFitter(BaseFitter):
 #         print peakpos
         return peakpos
 
-    def nOutput_datasets(self):
-        return 3
