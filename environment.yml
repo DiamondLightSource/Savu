@@ -2,6 +2,7 @@ name: test-environment
 channels:
   - soft-matter # for pyfftw
   - astra-toolbox
+  - tacaswell
 dependencies:
   - python=2.7
   - numpy
@@ -14,6 +15,7 @@ dependencies:
   - mpi4py 
   - scikit-image
   - astra-toolbox
+  - xraylib
   - pip:
     - fabio 
     - pytest-cov
