@@ -94,6 +94,7 @@ class BaseAstraRecon(BaseRecon):
         c = np.linspace(-l/2.0, l/2.0, l)
         x, y = np.meshgrid(c, c)
         self.mask = np.array((x**2 + y**2 < (l/2.0)**2), dtype=np.float)
+        self.mask[self.mask == 0] = np.nan
         self.mask_id = True if not self.parameters['sino_pad'] and 'FBP' not \
             in self.alg else False
         self.manual_mask = True if not self.parameters['sino_pad'] else False
