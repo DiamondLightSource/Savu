@@ -92,7 +92,6 @@ class AstraReconGpu(BaseAstraRecon, GpuPlugin):
         self.manual_mask = True if not self.parameters['sino_pad'] else False
 
     def astra_3D_recon(self, sino, cors, angles, vol_shape, init):
-        sino = sino[:,:,10:]
 #        while len(cors) is not self.sino_shape[self.slice_dir]:
 #            cors.append(0)
         proj_id = False
