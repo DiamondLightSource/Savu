@@ -24,6 +24,7 @@ import logging
 import astra
 import numpy as np
 import math
+import copy
 
 from savu.plugins.base_recon import BaseRecon
 
@@ -94,10 +95,13 @@ class BaseAstraRecon(BaseRecon):
         c = np.linspace(-l/2.0, l/2.0, l)
         x, y = np.meshgrid(c, c)
         self.mask = np.array((x**2 + y**2 < (l/2.0)**2), dtype=np.float)
-        self.mask[self.mask == 0] = np.nan
         self.mask_id = True if not self.parameters['sino_pad'] and 'FBP' not \
             in self.alg else False
-        self.manual_mask = True if not self.parameters['sino_pad'] else False
+        if not self.parameters['sino_pad']:
+            self.manual_mask = copy.copy(self.mask)
+            self.manual_mask[self.manual_mask == 0] = np.nan
+        else:
+            self.manual_mask = False
 
     def slice_sino(self, nDims):
         if nDims is 2:
@@ -133,6 +137,7 @@ class BaseAstraRecon(BaseRecon):
             proj_geom = astra.create_proj_geom(
                 'parallel', 1.0, pad_sino.shape[self.sino_dim_detX],
                 np.deg2rad(angles))
+
             # create sinogram id
             sino_id = astra.data2d.create("-sino", proj_geom, pad_sino)
 
@@ -161,8 +166,8 @@ class BaseAstraRecon(BaseRecon):
                 astra.algorithm.run(alg_id, self.iters)
 
             # get reconstruction matrix
-            if self.manual_mask:
-                recon[sslice] = self.mask*astra.data2d.get(rec_id)
+            if self.manual_mask is not False:
+                recon[sslice] = self.manual_mask*astra.data2d.get(rec_id)
             else:
                 recon[sslice] = astra.data2d.get(rec_id)
 
@@ -184,9 +189,9 @@ class BaseAstraRecon(BaseRecon):
             proj_id = astra.create_projector(
                 self.parameters['projector'], proj_geom, vol_geom)
             cfg['ProjectorId'] = proj_id
-        if self.mask_id:
-            cfg['option'] = {}
-            cfg['option']['ReconstructionMaskId'] = self.mask_id
+#        if self.mask_id:
+#            cfg['option'] = {}
+#            cfg['option']['ReconstructionMaskId'] = self.mask_id
         cfg = self.set_options(cfg)
         return cfg
 
@@ -201,7 +206,7 @@ class BaseAstraRecon(BaseRecon):
 
     def pad_sino(self, sino, cor):
         centre_pad = (0, 0) if '3D' in self.alg else \
-            self.array_pad(cor, self.nCols)
+            self.array_pad(cor, sino.shape[self.sino_dim_detX])
         sino_width = sino.shape[self.sino_dim_detX]
         new_width = sino_width + max(centre_pad)
         sino_pad = \
@@ -223,7 +228,7 @@ class BaseAstraRecon(BaseRecon):
 
     def get_max_frames(self):
         #return 8 if "3D" in self.get_parameters()[0] else 1
-        return 5
+        return 8
 
 ## Add this as citation information:
 ## W. van Aarle, W. J. Palenstijn, J. De Beenhouwer, T. Altantzis, S. Bals,  \

@@ -106,7 +106,6 @@ class AstraReconGpu(BaseAstraRecon, GpuPlugin):
             astra.create_vol_geom(vol_shape[0], vol_shape[2], vol_shape[1])
         # pad the sinogram
         pad_sino = self.pad_sino(self.slice_func(sino, sslice), cors)
-        print pad_sino.shape
         nDets = pad_sino.shape[self.slice_dir]
         trans = (self.slice_dir, self.det_rot, self.sino_dim_detX)
         pad_sino = np.transpose(pad_sino, trans)
@@ -115,7 +114,7 @@ class AstraReconGpu(BaseAstraRecon, GpuPlugin):
         vectors = self.create_3d_vector_geom(angles, cors,
                                              sino.shape[self.sino_dim_detX])
         proj_geom = astra.create_proj_geom('parallel3d_vec', nDets,
-                                           pad_sino.shape(self.sino_dim_detX),
+                                           pad_sino.shape[self.sino_dim_detX],
                                            vectors)
         # create sinogram id
         sino_id = astra.data3d.create("-sino", proj_geom, pad_sino)
