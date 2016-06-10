@@ -38,8 +38,8 @@ class AstraReconGpu(BaseAstraRecon, GpuPlugin):
     :param res_norm: Output the residual norm at each iteration\
         (Error in the solution). Default: False.
     :param reconstruction_type: Reconstruction type (FBP_CUDA|SIRT_CUDA|\
-        SART_CUDA|CGLS_CUDA|FP_CUDA|BP_CUDA|SIRT3D_CUDA|\
-        CGLS3D_CUDA). Default: 'FBP_CUDA'.
+        SART_CUDA (not currently working)|CGLS_CUDA|FP_CUDA|BP_CUDA|\
+        SIRT3D_CUDA|CGLS3D_CUDA). Default: 'FBP_CUDA'.
     """
 
     def __init__(self):
@@ -92,6 +92,7 @@ class AstraReconGpu(BaseAstraRecon, GpuPlugin):
         self.manual_mask = True if not self.parameters['sino_pad'] else False
 
     def astra_3D_recon(self, sino, cors, angles, vol_shape, init):
+        sino = sino[:,:,10:]
 #        while len(cors) is not self.sino_shape[self.slice_dir]:
 #            cors.append(0)
         proj_id = False

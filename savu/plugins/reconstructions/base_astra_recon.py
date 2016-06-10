@@ -53,7 +53,7 @@ class BaseAstraRecon(BaseRecon):
     def setup(self):
         super(BaseAstraRecon, self).setup()
         out_dataset = self.get_out_datasets()
-        # is res_norm is required then setup another output dataset
+        # if res_norm is required then setup another output dataset
         if len(out_dataset) is 2:
             self.res = True
             out_pData = self.get_plugin_out_datasets()
@@ -71,8 +71,6 @@ class BaseAstraRecon(BaseRecon):
                                            self.get_max_frames(), fixed=True)
 
     def pre_process(self):
-        # *****check here if there are deviations in the cor and determine the algorithm***
-        # perhaps do the above in base pre-process
         self.alg, self.iters = self.get_parameters()
         if '3D' in self.alg:
             self.setup_3D()
@@ -189,9 +187,11 @@ class BaseAstraRecon(BaseRecon):
             proj_id = astra.create_projector(
                 self.parameters['projector'], proj_geom, vol_geom)
             cfg['ProjectorId'] = proj_id
-#        if self.mask_id:
-#            cfg['option'] = {}
-#            cfg['option']['ReconstructionMaskId'] = self.mask_id
+        # mask not currently working correctly for SIRT or SART algorithms
+        sirt_or_sart = [a for a in ['SIRT', 'SART'] if a in self.alg]
+        if self.mask_id and not sirt_or_sart:
+            cfg['option'] = {}
+            cfg['option']['ReconstructionMaskId'] = self.mask_id
         cfg = self.set_options(cfg)
         return cfg
 
@@ -227,7 +227,6 @@ class BaseAstraRecon(BaseRecon):
         return np.array([int(p_low), int(p_high)])
 
     def get_max_frames(self):
-        #return 8 if "3D" in self.get_parameters()[0] else 1
         return 8
 
 ## Add this as citation information:
