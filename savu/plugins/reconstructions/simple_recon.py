@@ -56,8 +56,8 @@ class SimpleRecon(BaseRecon, CpuPlugin):
                            np.arange(-center[1], shape[1] - center[1]))
         return x*np.cos(theta) - y*np.sin(theta)
 
-    def reconstruct(self, sinogram, centre_of_rotations, angles, vol_shape):
-        sinogram = sinogram[:, np.newaxis, :]
+    def reconstruct(self, sino, centre_of_rotations, angles, vol_shape, init):
+        sinogram = sino[:, np.newaxis, :]
         try:
             centre = self.kwargs['centre']
         except:

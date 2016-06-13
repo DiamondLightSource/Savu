@@ -63,10 +63,10 @@ class ScikitimageFilterBackProjection(BaseRecon, CpuPlugin):
                                              (centre_of_rotation_shift, 0))
         return result
 
-    def reconstruct(self, sinogram, centre_of_rotations, vol_shape, params):
+    def reconstruct(self, sino, centre_of_rotations, angles, vol_shape, init):
         in_pData = self.get_plugin_in_datasets()[0]
         in_meta_data = self.get_in_meta_data()[0]
-        sinogram = np.swapaxes(sinogram, 0, 1)
+        sinogram = np.swapaxes(sino, 0, 1)
         sinogram = self._shift(sinogram, centre_of_rotations)
         theta = in_meta_data.get_meta_data('rotation_angle')
         result = \

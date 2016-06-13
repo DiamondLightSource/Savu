@@ -57,16 +57,19 @@ class NxtomoLoader(BaseLoader):
         data_obj.data = data_obj.backing_file[self.parameters['data_path']]
 
         self.__set_dark_and_flat(data_obj)
-        n_angles = self.__set_rotation_angles(data_obj)
 
         if self.parameters['3d_to_4d']:
             if not self.parameters['angles']:
                 raise Exception('Angles are required in the loader.')
+            self.__setup_4d(data_obj)
+            n_angles = self.__set_rotation_angles(data_obj)
             shape = self.__setup_3d_to_4d(data_obj, n_angles)
-        elif len(data_obj.data.shape) is 3:
-            shape = self.__setup_3d(data_obj)
         else:
-            shape = self.__setup_4d(data_obj)
+            if len(data_obj.data.shape) is 3:
+                shape = self.__setup_3d(data_obj)
+            else:
+                shape = self.__setup_4d(data_obj)
+            self.__set_rotation_angles(data_obj)
 
         try:
             control = data_obj.backing_file['entry1/tomo_entry/control/data']
@@ -95,7 +98,6 @@ class NxtomoLoader(BaseLoader):
 
     def __setup_3d_to_4d(self, data_obj, n_angles):
         logging.debug("setting up 4d tomography data from 3d input.")
-        self.__setup_4d(data_obj)
         from savu.data.data_structures.data_type import Map_3dto4d_h5
         data_obj.data = Map_3dto4d_h5(data_obj.data, n_angles)
         return data_obj.data.get_shape()
@@ -183,6 +185,7 @@ class NxtomoLoader(BaseLoader):
                     angles = np.loadtxt(angles)
                 except:
                     raise Exception('Cannot set angles in loader.')
+
         data_obj.meta_data.set_meta_data("rotation_angle", angles)
         return len(angles)
 

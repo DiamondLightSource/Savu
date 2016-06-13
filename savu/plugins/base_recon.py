@@ -154,7 +154,7 @@ class BaseRecon(Plugin):
 
         shape = list(in_dataset[0].get_shape())
         shape[dim_volX] = shape[dim_volZ]
-
+        
         out_dataset[0].create_dataset(axis_labels=axis_labels,
                                       shape=tuple(shape))
 

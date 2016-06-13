@@ -72,17 +72,16 @@ class ScikitimageSart(BaseRecon, CpuPlugin):
         logging.debug("initialising Scikitimage SART")
         logging.debug("Calling super to make sure that all superclasses are " +
                       " initialised")
-        super(ScikitimageSart,
-              self).__init__("Scikitimage SART")
+        super(ScikitimageSart, self).__init__("ScikitimageSart")
 
     def _shift(self, sinogram, centre_of_rotation):
         centre_of_rotation_shift = (sinogram.shape[0]/2) - \
             float(centre_of_rotation)
         return ndimage.interpolation.shift(sinogram, centre_of_rotation_shift)
 
-    def reconstruct(self, sinogram, centre_of_rotations, angles, vol_shape):
+    def reconstruct(self, sino, centre_of_rotations, angles, vol_shape, init):
         in_pData = self.get_plugin_in_datasets()[0]
-        sinogram = np.swapaxes(sinogram, 0, 1)
+        sinogram = np.swapaxes(sino, 0, 1)
         sinogram = self._shift(sinogram, centre_of_rotations)
         sino = sinogram.astype(np.float64)
         theta = np.linspace(0, 180, sinogram.shape[1])

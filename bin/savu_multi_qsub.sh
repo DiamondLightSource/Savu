@@ -24,13 +24,14 @@ while read -r a b c d; do
     #datafile=/dls/i12/data/2016/cm14465-1/processing/brick-data/dls/i12/data/2014/cm4963-3/rawdata/40384.nxs
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_loader.nxs
 
-    datafile=/dls/i13/data/2016/mt14367-1/raw/75814.nxs
-    processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_processes/i13_process_list_preview.nxs
+    #datafile=/dls/i13/data/2016/mt14367-1/raw/75814.nxs
+    #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_processes/i13_process_list_preview.nxs
 
     #datafile=/dls/i18/data/2016/sp12601-1/processing/Savu_Test_Data/70214_Cat2_RT_1.nxs
     #processfile=/dls/i18/data/2016/sp12601-1/processing/Savu_Test_Data/new_test_process_list.nxs
 
-    #datafile=$outpath/../test_data/24737.nxs
+    datafile=$outpath/../test_data/24737.nxs
+    processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_processes/test.nxs
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/test_data/test_process_lists/NLReg_cgls.nxs
 
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/test_data/test_process_lists/vo_centering_test.nxs

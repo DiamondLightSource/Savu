@@ -23,6 +23,8 @@
 import logging
 import astra
 import numpy as np
+import math
+import copy
 
 from savu.plugins.base_recon import BaseRecon
 
@@ -30,11 +32,16 @@ from savu.plugins.base_recon import BaseRecon
 class BaseAstraRecon(BaseRecon):
     """
     A Plugin to perform Astra toolbox reconstruction
+
+    :param FBP_filter: The FBP reconstruction filter type (none|ram-lak|\
+        shepp-logan|cosine|hamming|hann|tukey|lanczos|triangular|gaussian|\
+        barlett-hann|blackman|nuttall|blackman-harris|blackman-nuttall|\
+        flat-top|kaiser|parzen). Default: 'ram-lak'.
     """
 
     def __init__(self, name='BaseAstraRecon'):
         super(BaseAstraRecon, self).__init__(name)
-        self.res = 0
+        self.res = False
 
     def get_parameters(self):
         """
@@ -43,124 +50,171 @@ class BaseAstraRecon(BaseRecon):
         logging.error("get_parameters needs to be implemented")
         raise NotImplementedError("get_parameters needs to be implemented")
 
+    def setup(self):
+        super(BaseAstraRecon, self).setup()
+        out_dataset = self.get_out_datasets()
+        # if res_norm is required then setup another output dataset
+        if len(out_dataset) is 2:
+            self.res = True
+            out_pData = self.get_plugin_out_datasets()
+            in_data = self.get_in_datasets()[0]
+            dim_detX = in_data.find_axis_label_dimension('y', contains=True)
+            shape = (in_data.get_shape()[dim_detX],
+                     self.parameters['number_of_iterations'])
+            label = ['vol_y.voxel', 'iteration.number']
+            pattern = {'name': 'SINOGRAM', 'slice_dir': (0,), 'core_dir': (1,)}
+            out_dataset[1].create_dataset(axis_labels=label, shape=shape)
+            out_dataset[1].add_pattern(pattern['name'],
+                                       slice_dir=pattern['slice_dir'],
+                                       core_dir=pattern['core_dir'])
+            out_pData[1].plugin_data_setup(pattern['name'],
+                                           self.get_max_frames(), fixed=True)
+
     def pre_process(self):
-        lparams = self.get_parameters()
-        self.pad = False
-        self.name = lparams[0]
-        self.iters = lparams[1]
-        self.alg_type = '3D' if '3D' in self.name else '2D'
+        self.alg, self.iters = self.get_parameters()
+        if '3D' in self.alg:
+            self.setup_3D()
+            self.reconstruct = self.astra_3D_recon
+        else:
+            self.setup_2D()
+            self.reconstruct = self.astra_2D_recon
 
-        geom_func_map = {'2D': self.geom_setup_2D, '3D': self.geom_setup_3D}
-        astra_data_map = {'2D': astra.data2d, '3D': astra.data3d}
-        self.geom_setup_function = geom_func_map[self.alg_type]
-        self.astra_data = astra_data_map[self.alg_type]
+    def setup_2D(self):
+        pData = self.get_plugin_in_datasets()[0]
+        dim_detX = pData.get_data_dimension_by_axis_label('x', contains=True)
+        self.sino_shape = pData.get_shape()
+        self.nDims = len(self.sino_shape)
+        self.sino_dim_detX = dim_detX if self.nDims is 2 else dim_detX-1
+        self.nCols = self.sino_shape[dim_detX]
+        self.slice_dir = pData.get_slice_dimension()
+        self.nSinos = self.sino_shape[self.slice_dir] if self.nDims is 3 else 1
+        self.slice_func = self.slice_sino(self.nDims)
+        l = self.sino_shape[dim_detX]
+        c = np.linspace(-l/2.0, l/2.0, l)
+        x, y = np.meshgrid(c, c)
+        self.mask = np.array((x**2 + y**2 < (l/2.0)**2), dtype=np.float)
+        self.mask_id = True if not self.parameters['sino_pad'] and 'FBP' not \
+            in self.alg else False
+        if not self.parameters['sino_pad']:
+            self.manual_mask = copy.copy(self.mask)
+            self.manual_mask[self.manual_mask == 0] = np.nan
+        else:
+            self.manual_mask = False
 
-        in_pData = self.get_plugin_in_datasets()[0]
-        self.dim_det_cols = \
-            in_pData.get_data_dimension_by_axis_label('x', contains=True)
+    def slice_sino(self, nDims):
+        if nDims is 2:
+            return lambda x, sslice: np.expand_dims(
+                x, axis=self.slice_dir)[sslice]
+        else:
+            return lambda x, sslice: x[sslice]
 
-        if self.alg_type is '3D':
-            self.slice_dim = in_pData.get_slice_dimension()
+    def astra_2D_recon(self, sino, cors, angles, vol_shape, init):
+        sslice = [slice(None)]*self.nDims
+        recon = np.zeros(self.vol_shape)
+        if self.nDims is 2:
+            recon = np.expand_dims(recon, axis=self.slice_dir)
+        if self.res:
+            res = np.zeros((self.vol_shape[self.slice_dir], self.iters))
+        if self.nDims is 2:
+            res = np.expand_dims(recon, axis=self.slice_dir)
 
-        self.geom_setup_function()
+        proj_id = False
+        # create volume geom
+        vol_geom = astra.create_vol_geom(*vol_shape[0:1])
 
-#    def geom_setup_2D(self):
-#        in_pData = self.get_plugin_in_datasets()[0]
-#        cor = self.cor + self.pad_amount
-#
-#        sino_shape = in_pData.get_shape()
-#        nCols = sino_shape[self.dim_det_cols]
-#        self.p_low, self.p_high = \
-#            self.array_pad(cor[0], nCols + 2*self.pad_amount)
-#        sino_width = \
-#            sino_shape[1] + self.p_low + self.p_high + 2*self.pad_amount
-#
-#        vol_geom = astra.create_vol_geom(self.vol_shape[0], self.vol_shape[1])
-#        self.proj_geom = astra.create_proj_geom('parallel', 1.0, sino_width,
-#                                                np.deg2rad(self.angles))
-#
-#        self.rec_id = self.astra_function.create('-vol', vol_geom)
-#        self.cfg = self.cfg_setup()
-#        if self.alg_type is '2D' and "CUDA" not in self.name:
-#            proj_id = astra.create_projector('strip', self.proj_geom, vol_geom)
-#            self.cfg['ProjectorId'] = proj_id
+        for i in range(self.nSinos):
+            sslice[self.slice_dir] = i
+            try:
+                cor = cors[i]
+            except:
+                cor = cors[0]
 
-    def geom_setup_2D(self):
-        in_pData = self.get_plugin_in_datasets()[0]
-        cor = self.cor + self.pad_amount
+            pad_sino = self.pad_sino(self.slice_func(sino, sslice), cor)
 
-        sino_shape = in_pData.get_shape()
-        nCols = sino_shape[self.dim_det_cols]
-        self.p_low, self.p_high = \
-            self.array_pad(cor[0], nCols + 2*self.pad_amount)
-        sino_width = \
-            sino_shape[1] + self.p_low + self.p_high + 2*self.pad_amount
+            # create projection geom
+            proj_geom = astra.create_proj_geom(
+                'parallel', 1.0, pad_sino.shape[self.sino_dim_detX],
+                np.deg2rad(angles))
 
-        vol_geom = astra.create_vol_geom(self.vol_shape[0], self.vol_shape[1])
-        self.proj_geom = astra.create_proj_geom('parallel', 1.0, sino_width,
-                                                np.deg2rad(self.angles))
+            # create sinogram id
+            sino_id = astra.data2d.create("-sino", proj_geom, pad_sino)
 
-        self.rec_id = self.astra_data.create('-vol', vol_geom)
-        self.cfg = self.cfg_setup()
+            # create reconstruction id
+            if init is not None:
+                rec_id = astra.data2d.create('-vol', vol_geom, init[sslice])
+            else:
+                rec_id = astra.data2d.create('-vol', vol_geom)
 
-    def geom_setup_3D(self):
-        in_pData = self.get_plugin_in_datasets()[0]
-        sino_shape = in_pData.get_shape()
-        sino_cols = sino_shape[self.dim_det_cols] + 2*self.pad_amount
+            if self.mask_id:
+                self.mask_id = astra.data2d.create('-vol', vol_geom, self.mask)
 
-        self.proj_geom = astra.create_proj_geom('parallel3d', 1.0, 1.0,
-                                                sino_shape[self.slice_dim],
-                                                sino_cols, self.angles)
-        self.proj_geom = astra.functions.geom_2vec(self.proj_geom)
-        
-        self.proj_geom['Vectors'][:, 3] = 86.0 # centre of test data ***change this
+            # setup configuration options
+            cfg = self.set_config(rec_id, sino_id, proj_geom, vol_geom)
 
-        print self.proj_geom
+            # create algorithm id
+            alg_id = astra.algorithm.create(cfg)
 
-        # change how this is calculated
-        vol_geom = astra.create_vol_geom(8, 160, 160)
-        
-        print vol_geom
-        # what are these and are they needed
-        self.rec_id = self.astra_data.create('-vol', vol_geom)
-        self.cfg = self.cfg_setup()
+            # run algorithm
+            if self.res:
+                for j in range(self.iters):
+                    # Run a single iteration
+                    astra.algorithm.run(alg_id, 1)
+                    res[i, j] = astra.algorithm.get_res_norm(alg_id)
+            else:
+                astra.algorithm.run(alg_id, self.iters)
 
-#    def geom_setup_3D(self):
-#        in_pData = self.get_plugin_in_datasets()[0]
-#        sino_shape = in_pData.get_shape()
-#        sino_cols = sino_shape[self.dim_det_cols] + 2*self.pad_amount
-#
-#        self.proj_geom = astra.create_proj_geom('parallel3d', 1.0, 1.0,
-#                                                self.get_max_frames(),
-#                                                sino_cols, self.angles)
-#        self.proj_geom = astra.functions.geom_2vec(self.proj_geom)
-#        self.proj_geom['Vectors'][:, 3] = 6.0
-#        self.proj_geom['Vectors'][:, 5] = self.get_max_frames()/2.0
-#        # change how this is calculated
-#        vol_geom = astra.create_vol_geom(8, 160, 160)
-#        self.rec_id = self.astra_function.create('-vol', vol_geom)
-#        self.cfg = self.cfg_setup()
-#        self.sino_transpose = (self.slice_dim, dim_det_rows, self.dim_det_cols)
+            # get reconstruction matrix
+            if self.manual_mask is not False:
+                recon[sslice] = self.manual_mask*astra.data2d.get(rec_id)
+            else:
+                recon[sslice] = astra.data2d.get(rec_id)
 
-#    def geom_setup_3D(self):
-#        inData = self.get_in_datasets()[0]
-#        sino_shape = inData.get_shape()
-#        sino_cols = sino_shape[self.dim_det_cols] + 2*self.pad_amount
-#
-#        proj_geom = astra.create_proj_geom('parallel3d', 1.0, 1.0,
-#                                           self.get_max_frames(),
-#                                           sino_cols, self.angles)
-#        proj_geom = astra.functions.geom_2vec(proj_geom)
-#        self.vectors = proj_geom['Vectors']
-#        self.vectors[:, 3] = 6.0
-#        self.vectors[:, 5] = self.get_max_frames()/2.0
-#        vol_geom = \
-#            astra.create_vol_geom(*[self.vol_shape[i] for i in [1, 0, 2]])
-#        self.rec_id = self.astra_function.create('-vol', vol_geom)
-#        self.cfg = self.cfg_setup()
-#        dim_det_rows = list(set([0, 1, 2]).
-#                            difference({self.slice_dim, self.dim_det_cols}))[0]
-#        self.sino_transpose = (self.slice_dim, dim_det_rows, self.dim_det_cols)
+            # delete geometry
+            self.delete(alg_id, sino_id, rec_id, proj_id)
+
+        if self.res:
+            return [recon, res]
+        else:
+            return recon
+
+    def set_config(self, rec_id, sino_id, proj_geom, vol_geom):
+        cfg = astra.astra_dict(self.alg)
+        cfg['ReconstructionDataId'] = rec_id
+        cfg['ProjectionDataId'] = sino_id
+        if 'FBP' in self.alg:
+            cfg['FilterType'] = self.parameters['FBP_filter']
+        if 'projector' in self.parameters.keys():
+            proj_id = astra.create_projector(
+                self.parameters['projector'], proj_geom, vol_geom)
+            cfg['ProjectorId'] = proj_id
+        # mask not currently working correctly for SIRT or SART algorithms
+        sirt_or_sart = [a for a in ['SIRT', 'SART'] if a in self.alg]
+        if self.mask_id and not sirt_or_sart:
+            cfg['option'] = {}
+            cfg['option']['ReconstructionMaskId'] = self.mask_id
+        cfg = self.set_options(cfg)
+        return cfg
+
+    def delete(self, alg_id, sino_id, rec_id, proj_id):
+        astra.algorithm.delete(alg_id)
+        if self.mask_id:
+            astra.data2d.delete(self.mask_id)
+        astra.data2d.delete(sino_id)
+        astra.data2d.delete(rec_id)
+        if proj_id:
+            astra.projector.delete(proj_id)
+
+    def pad_sino(self, sino, cor):
+        centre_pad = (0, 0) if '3D' in self.alg else \
+            self.array_pad(cor, sino.shape[self.sino_dim_detX])
+        sino_width = sino.shape[self.sino_dim_detX]
+        new_width = sino_width + max(centre_pad)
+        sino_pad = \
+            int(math.ceil(float(sino_width)/new_width * self.sino_pad)/2)
+        pad = np.array([sino_pad]*2) + centre_pad
+        pad_tuples = [(0, 0)]*(len(sino.shape)-1)
+        pad_tuples.insert(self.pad_dim, tuple(pad))
+        return np.pad(sino, tuple(pad_tuples), mode='edge')
 
     def array_pad(self, ctr, nPixels):
         width = nPixels - 1.0
@@ -170,40 +224,10 @@ class BaseAstraRecon(BaseRecon):
         shift = round(abs(blen-alen))
         p_low = 0 if (ctr > mid) else shift
         p_high = shift + 0 if (ctr > mid) else 0
-        return int(p_low), int(p_high)
-
-    def cfg_setup(self):
-        cfg = astra.astra_dict(self.name)
-        cfg['ReconstructionDataId'] = self.rec_id
-        if 'CUDA' in self.name:
-            cfg['option'] = {'GPUindex': self.parameters['GPU_index']}
-        return cfg
-
-    def reconstruct(self, sino, cors, angles, vol_shape):
-        if self.alg_type is '2D':
-            sino = np.pad(sino, ((0, 0), (self.p_low, self.p_high)),
-                          mode='reflect')
-        else:
-            self.sino_transpose = (1, 0, 2)
-            sino = sino.transpose(self.sino_transpose)
-
-        sino_id = self.astra_data.create("-sino", self.proj_geom, sino)
-        self.cfg['ProjectionDataId'] = sino_id
-        self.alg_id = astra.algorithm.create(self.cfg)
-
-        astra.algorithm.run(self.alg_id, self.iters)
-        rec = self.astra_data.get(self.rec_id)
-        astra.algorithm.delete(self.alg_id)
-        self.astra_data.delete(sino_id)
-        self.astra_data.delete()
-        return rec
-
-    def post_process(self):
-        self.astra_data.delete(self.rec_id)
+        return np.array([int(p_low), int(p_high)])
 
     def get_max_frames(self):
-        return 8 if "3D" in self.get_parameters()[0] else 1
-
+        return 8
 
 ## Add this as citation information:
 ## W. van Aarle, W. J. Palenstijn, J. De Beenhouwer, T. Altantzis, S. Bals,  \
