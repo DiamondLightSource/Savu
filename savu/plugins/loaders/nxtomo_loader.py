@@ -152,6 +152,7 @@ class NxtomoLoader(BaseLoader):
         import os
         fpath, fentry, scale = self.parameters[name]
 
+        #*** doesn't work
         if 'savu' not in fpath:
             fpath = \
                 os.path.abspath(__file__).split('savu')[0] + 'savu/' + fpath
