@@ -17,7 +17,7 @@ if '--help' in sys.argv:
     print 'To package for a facility use "--facility <facilityname>" eg: python setup.py install --facility dls [Default facilityname is dls]'
 
 setup(name='savu',
-      version='1.0',
+      version='2.0',
       description='Savu Python Tomography Pipeline',
       long_description=readme(),
       classifiers=[

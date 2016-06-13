@@ -114,7 +114,7 @@ class PluginRunner(object):
         if not self.exp.meta_data.plugin_list._contains_gpu_processes():
             return
         try:
-            import pynvml as pv         
+            import pynvml as pv
         except:
             logging.debug("pyNVML module not found")
             raise Exception("pyNVML module not found")
