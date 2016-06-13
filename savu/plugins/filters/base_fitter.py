@@ -72,9 +72,7 @@ class BaseFitter(BaseFilter, CpuPlugin):
         #residlabels = in_dataset[0].meta_data.get_meta_data('axis_labels')[0:3]
         #print residlabels.append(residlabels[-1])
         residuals = out_datasets[3]
-        residuals.create_dataset(patterns=in_dataset[0],
-                                 axis_labels=in_dataset[0],
-                                 shape={'variable': shape[:-1]})
+        residuals.create_dataset(in_dataset[0])
 
 
         # setup plugin datasets
@@ -126,32 +124,18 @@ class BaseFitter(BaseFilter, CpuPlugin):
                 #dmu_mult = np.zeros((len(mu), len(x)))
                 dsig_mult = np.zeros((npts, len(x)))
                 for i in range(npts):
-                    #dmu_mult[i] = x+mu[i]
-                    dsig_mult[i] = ((x-mu[i])/sig[i])-1.
-                #dmu = spectrum_sum_dfun(fun, dmu_mult, x, mu, *p)
+                    dsig_mult[i] = ((x-mu[i])**2) / sig[i]**3
                 dsig = self.spectrum_sum_dfun(fun, dsig_mult, x, mu, *p)
-        #        print "shape of da"+str(da.shape)
-                op = np.concatenate([da, dsig])
-                #print "op.shape is "+str(op.shape)
+                op = np.concatenate([-da, -dsig])
             elif fun.__name__ == 'lorentzian':
                 #print "hey"
                 da = self.spectrum_sum_dfun(fun, 1./a, x, mu, *p)
-                #dmu_mult = np.zeros((len(mu), len(x)))
-                dsig_mult = np.zeros((npts, len(x)))
+                dsig = np.zeros((npts, len(x)))
                 for i in range(npts):
-                    #dmu_mult[i] = 2.0*(x-mu[i])/((x-mu[i])**2+sig[i]**2)
-                    nom =  (2.0*(x-mu[i])**2)
-                    denom = (sig[i]*((x-mu[i])**2+sig[i]**2))
-                    dsig_mult[i] =  nom /denom # a minus here makes it work somewhat better...
-                    #dsig_mult[i] = ((x-mu[i])/sig[i])-1.
-                
-                #print dsig_mult
-                #dmu = spectrum_sum_dfun(fun, dmu_mult, x, mu, *p)
-                dsig = self.spectrum_sum_dfun(fun, dsig_mult, x, mu, *p)
-                #print sig
-        #        print "shape of da"+str(da.shape)
+                    nom = 8 * a[i]* sig[i] * (x - mu[i]) ** 2 
+                    denom = (sig[i]**2 + 4.0 * (x - mu[i])**2)**2
+                    dsig[i] = nom / denom
                 op = np.concatenate([-da, -dsig])
-                #print "op.shape is "+str(op.shape)
         else:
             op = None
         return op
@@ -162,7 +146,7 @@ class BaseFitter(BaseFilter, CpuPlugin):
         weights = rest[:npts]
         #print weights
         widths = rest[npts:2*npts]
-        #print widths
+        print widths
         spec = np.zeros((len(x),))
         for ii in range(len(weights)):
             spec += fun(weights[ii], widths[ii], x, positions[ii])
@@ -224,10 +208,11 @@ class BaseFitter(BaseFilter, CpuPlugin):
 
 
 def lorentzian(a, w, x, c):
-    w = np.abs(w)
-    numerator = (w**2)
-    denominator = (x - c)**2 + w**2
-    y = np.abs(a)*(numerator/denominator)
+#     w = np.abs(w)
+#     numerator = (w**2)
+#     denominator = (x - c)**2 + w**2
+#     y = np.abs(a)*(numerator/denominator)
+    y = a / (1.0 + (2.0 * (c - x) / w) ** 2)
     return y
 
 

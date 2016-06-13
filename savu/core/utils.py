@@ -21,6 +21,7 @@
 """
 
 import logging
+import logging.handlers as handlers
 import itertools
 from mpi4py import MPI
 
@@ -135,3 +136,10 @@ def add_user_log_handler(logger, user_log_path):
     logger.addHandler(fh)
     USER_LOG_HANDLER = fh
     user_message("User Log Started")
+
+
+def add_syslog_log_handler(logger, syslog_address, syslog_port):
+    syslog = handlers.SysLogHandler(address = (syslog_address, syslog_port))
+    syslog.setFormatter(logging.Formatter('SAVU:%(message)s'))
+    syslog.setLevel(logging.WARN) # only log user log messages
+    logger.addHandler(syslog)

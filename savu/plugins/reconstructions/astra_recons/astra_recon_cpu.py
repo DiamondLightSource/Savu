@@ -35,15 +35,23 @@ class AstraReconCpu(BaseAstraRecon, CpuPlugin):
         is used . Default: 1.
     :param reconstruction_type: Reconstruction type \
         (FBP|SIRT|SART|ART|CGLS|FP|BP|). Default: 'FBP'.
+    :param projector: Set astra projector (line|strip|linear). Default: 'line'.
     """
 
     def __init__(self):
         super(AstraReconCpu, self).__init__("AstraReconCpu")
-        self.GPU_index = None
 
     def get_parameters(self):
         return [self.parameters['reconstruction_type'],
                 self.parameters['number_of_iterations']]
+
+    def astra_setup(self):
+        options_list = ["FBP", "SIRT", "SART", "ART", "CGLS", "FP", "BP"]
+        if not options_list.count(self.parameters['reconstruction_type']):
+            raise Exception("Unknown Astra CPU algorithm.")
+
+    def set_options(self, cfg):
+        return cfg
 
     def get_citation_information(self):
         cite_info = CitationInformation()

@@ -15,13 +15,10 @@
 """
 .. module:: dials_find_spots
    :platform: Unix
-   :synopsis: A plugin to integrate azimuthally "symmetric" signals i.e. SAXS, WAXS or XRD.Requires a calibration file
+   :synopsis: A plugin to integrate azimuthally "symmetric" signals i.e. SAXS,\
+       WAXS or XRD.Requires a calibration file
 
-.. moduleauthor:: Aa
-import math
-
-import pyFAI
-ron D. Parsons <scientificsoftware@diamond.ac.uk>
+.. moduleauthor:: Aaron D. Parsons <scientificsoftware@diamond.ac.uk>
 """
 
 import logging

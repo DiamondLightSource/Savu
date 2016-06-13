@@ -51,27 +51,23 @@ class TimeseriesFieldCorrections(BaseCorrection, CpuPlugin):
         self.flag_high_warning = False
 
     def pre_process(self):
-        in_meta_data, out_meta_data = self.get_meta_data()
-        image_keys = in_meta_data[0].get_meta_data('image_key')
-        self.data_idx = np.where(image_keys == 0)[0]
-        self.flat_idx = np.where(image_keys == 1)[0]
-        self.dark_idx = np.where(image_keys == 2)[0]
+        inData = self.get_in_datasets()[0]
+        self.dark = inData.data.dark_mean()
+        self.flat = inData.data.flat_mean()
+        self.flat_minus_dark = self.flat - self.dark
+
+        self.flat_minus_dark = self.flat - self.dark
+        det_dims = [inData.find_axis_label_dimension('detector_y'),
+                    inData.find_axis_label_dimension('detector_x')]
+
+        self.convert_size = \
+            lambda x, sl: x[[sl[d] for d in det_dims]]
 
     def correct(self, data):
-        trimmed_data = data[self.data_idx]
-        dark = data[self.dark_idx].mean(0)
-        dark = np.tile(dark, (trimmed_data.shape[0], 1, 1))
-        flat = data[self.flat_idx].mean(0)
-        flat = np.tile(flat, (trimmed_data.shape[0], 1, 1))
-
-        if len(data.shape) is 2:
-            flat = flat.squeeze()
-            dark = dark.squeeze()
-
-        data = (trimmed_data-dark)/(flat-dark)
-
-        # finally clean up and trim the data
-        data = np.nan_to_num(data)
+        dark = self.convert_size(self.dark, self.slice_list)
+        flat_minus_dark = \
+            self.convert_size(self.flat_minus_dark, self.slice_list)
+        data = np.nan_to_num((data-dark)/flat_minus_dark)
 
         # make high and low crop masks
         low_crop = data < self.LOW_CROP_LEVEL

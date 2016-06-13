@@ -20,7 +20,6 @@
    collections from which Experiment can inherit at run time.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
-sa
 """
 import os
 import logging

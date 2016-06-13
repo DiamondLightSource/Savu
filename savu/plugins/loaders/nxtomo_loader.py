@@ -23,22 +23,25 @@
 
 import h5py
 import logging
+import numpy as np
 
-from savu.data.data_structures.data_add_ons import TomoRaw
 from savu.plugins.base_loader import BaseLoader
-
 from savu.plugins.utils import register_plugin
 
 
 @register_plugin
 class NxtomoLoader(BaseLoader):
     """
-    A class to load tomography data from a Nexus file
-    :param data_path: Path to the data. Default: 'entry1/tomo_entry/data/data'.
-    :param dark: Optional path to the dark field data file and nxs \
-        entry. Default: [None, None].
-    :param flat: Optional Path to the flat field data file and path to data \
-        in nxs file. Default: [None, None].
+    A class to load i12 tomography data from a hdf5 file
+
+    :param data_path: Path to the data inside the \
+        file. Default: 'entry1/tomo_entry/data/data'.
+    :param dark: Optional path to the dark field data file, nxs path and \
+        scale value. Default: [None, None, 1].
+    :param flat: Optional Path to the flat field data file, nxs path and \
+        scale value. Default: [None, None, 1].
+    :param angles: A python statement to be evaluated or a file. Default: None.
+    :param 3d_to_4d: Set to true if this reshape is required. Default: False.
     """
 
     def __init__(self, name='NxtomoLoader'):
@@ -48,7 +51,38 @@ class NxtomoLoader(BaseLoader):
         exp = self.exp
         data_obj = exp.create_data_object('in_data', 'tomo')
 
-        # from nexus file determine rotation angle
+        data_obj.backing_file = \
+            h5py.File(self.exp.meta_data.get_meta_data("data_file"), 'r')
+
+        data_obj.data = data_obj.backing_file[self.parameters['data_path']]
+
+        self.__set_dark_and_flat(data_obj)
+
+        if self.parameters['3d_to_4d']:
+            if not self.parameters['angles']:
+                raise Exception('Angles are required in the loader.')
+            self.__setup_4d(data_obj)
+            n_angles = self.__set_rotation_angles(data_obj)
+            shape = self.__setup_3d_to_4d(data_obj, n_angles)
+        else:
+            if len(data_obj.data.shape) is 3:
+                shape = self.__setup_3d(data_obj)
+            else:
+                shape = self.__setup_4d(data_obj)
+            self.__set_rotation_angles(data_obj)
+
+        try:
+            control = data_obj.backing_file['entry1/tomo_entry/control/data']
+            data_obj.meta_data.set_meta_data("control", control[...])
+        except:
+            logging.warn("No Control information available")
+
+        self.__check_angles
+        data_obj.set_original_shape(shape)
+        self.set_data_reduction_params(data_obj)
+
+    def __setup_3d(self, data_obj):
+        logging.debug("Setting up 3d tomography data.")
         rot = 0
         detY = 1
         detX = 2
@@ -60,46 +94,104 @@ class NxtomoLoader(BaseLoader):
                              slice_dir=(rot,))
         data_obj.add_pattern('SINOGRAM', core_dir=(detX, rot),
                              slice_dir=(detY,))
+        return data_obj.data.shape
 
-        objInfo = data_obj.meta_data
-        expInfo = exp.meta_data
+    def __setup_3d_to_4d(self, data_obj, n_angles):
+        logging.debug("setting up 4d tomography data from 3d input.")
+        from savu.data.data_structures.data_type import Map_3dto4d_h5
+        data_obj.data = Map_3dto4d_h5(data_obj.data, n_angles)
+        return data_obj.data.get_shape()
 
-        data_obj.backing_file = \
-            h5py.File(expInfo.get_meta_data("data_file"), 'r')
+    def __setup_4d(self, data_obj):
+        logging.debug("setting up 4d tomography data.")
+        rot = 0
+        detY = 1
+        detX = 2
+        scan = 3
 
-        logging.debug("Opening file '%s' '%s'", 'tomo_entry',
-                      data_obj.backing_file.filename)
+        data_obj.set_axis_labels('rotation_angle.degrees', 'detector_y.pixel',
+                                 'detector_x.pixel', 'scan.number')
 
-        data_obj.data = data_obj.backing_file[self.parameters['data_path']]
-
-        self.__set_dark_and_flat(data_obj)
-
-        rotation_angle = \
-            data_obj.backing_file['entry1/tomo_entry/data/rotation_angle']
-        objInfo.set_meta_data("rotation_angle", rotation_angle
-                              [(objInfo.get_meta_data("image_key")) == 0, ...])
-
-        try:
-            control = data_obj.backing_file['entry1/tomo_entry/control/data']
-            objInfo.set_meta_data("control", control[...])
-        except:
-            logging.warn("No Control information available")
-
-        data_obj.set_shape(data_obj.data.shape)
-        self.set_data_reduction_params(data_obj)
+        data_obj.add_pattern('PROJECTION', core_dir=(detX, detY),
+                             slice_dir=(rot, scan))
+        data_obj.add_pattern('SINOGRAM', core_dir=(detX, rot),
+                             slice_dir=(detY, scan))
+        return data_obj.data.shape
 
     def __set_dark_and_flat(self, data_obj):
-        if self.parameters['dark'][0] and self.parameters['flat'][0]:
-            mData = data_obj.meta_data
-            dfile, dentry = self.parameters['dark']
-            ffile, fentry = self.parameters['flat']
-            mData.set_meta_data('dark', h5py.File(dfile, 'r')[dentry][...])
-            mData.set_meta_data('flat', h5py.File(dfile, 'r')[dentry][...])
+        flat = self.parameters['flat'][0]
+        dark = self.parameters['dark'][0]
+
+        if not flat or not dark:
+            self.__find_dark_and_flat(data_obj)
+        if flat:
+            self.__get_image('flat', 1, data_obj)
+        if dark:
+            self.__get_image('dark', 2, data_obj)
+
+    def __find_dark_and_flat(self, data_obj):
+        try:
+            image_key = data_obj.backing_file[
+                'entry1/tomo_entry/instrument/detector/image_key']
+            from savu.data.data_structures.data_type import ImageKey
+            data_obj.data = ImageKey(data_obj.data, image_key[...], 0)
+            data_obj.set_shape(data_obj.data.get_shape())
+        except KeyError:
+            logging.warn("An image key was not found.")
+            try:
+                mData = data_obj.meta_data
+                entry = 'entry1/tomo_entry/instrument/detector/flatfield'
+                mData.set_meta_data('flat', data_obj.backing_file[entry][...])
+                entry = 'entry1/tomo_entry/instrument/detector/darkfield'
+                mData.set_meta_data('dark', data_obj.backing_file[entry][...])
+            except KeyError:
+                logging.warn("Dark and flat data was not found in input "
+                             "file.")
+
+    def __get_image(self, name, key, data_obj):
+        import os
+        fpath, fentry, scale = self.parameters[name]
+
+        #*** doesn't work
+        if 'savu' not in fpath:
+            fpath = \
+                os.path.abspath(__file__).split('savu')[0] + 'savu/' + fpath
+
+        h5file = h5py.File(fpath, 'r')
+        try:
+            image_key = \
+                h5file['entry1/tomo_entry/instrument/detector/image_key']
+            data = h5file[self.parameters['data_path']][
+                image_key == key, ...].mean(0)*int(scale)
+        except KeyError:
+            data = h5file[fentry][...].mean(0)*int(scale)
+        data_obj.meta_data.set_meta_data(name, data)
+
+    def __set_rotation_angles(self, data_obj):
+        angles = self.parameters['angles']
+
+        if angles is None:
+            try:
+                entry = 'entry1/tomo_entry/data/rotation_angle'
+                angles = data_obj.backing_file[entry][
+                    (data_obj.data.get_image_key()) == 0, ...]
+            except KeyError:
+                logging.warn("No rotation angle entry found in input file.")
+                angles = np.linspace(0, 180, data_obj.get_shape()[0])
         else:
             try:
-                image_key = data_obj.backing_file[
-                    'entry1/tomo_entry/instrument/detector/''image_key']
-                TomoRaw(data_obj)
-                data_obj.get_tomo_raw().set_image_key(image_key[...])
+                exec("angles = " + angles)
             except:
-                pass
+                try:
+                    angles = np.loadtxt(angles)
+                except:
+                    raise Exception('Cannot set angles in loader.')
+
+        data_obj.meta_data.set_meta_data("rotation_angle", angles)
+        return len(angles)
+
+    def __check_angles(self, data_obj, n_angles):
+        data_angles = data_obj.data.get_shape()[0]
+        if data_angles is not n_angles:
+            raise Exception("The number of angles %s does not match the data "
+                            "dimension length %s", n_angles, data_angles)

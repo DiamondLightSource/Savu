@@ -24,22 +24,22 @@
 from savu.plugins.loaders.base_multi_modal_loader import BaseMultiModalLoader
 
 from savu.plugins.utils import register_plugin
-import numpy as np
+
 
 @register_plugin
 class NxfluoLoader(BaseMultiModalLoader):
-    """
-    A class to load tomography data from an NXFluo file
-    
+    """ A class to load tomography data from an NXFluo file.
+
     :param fluo_offset: fluo scale offset. Default: 0.0.
     :param fluo_gain: fluo gain. Default: 0.01.
     """
+
     def __init__(self, name='NxfluoLoader'):
         super(NxfluoLoader, self).__init__(name)
 
     def setup(self):
-        """
-         Define the input nexus file
+        """ Define the input nexus file.
+
         :param path: The full path of the NeXus file to load.
         :type path: str
         """

@@ -39,6 +39,8 @@ class PluginRunner(object):
         self._transport_control_setup(options)
         self.exp = None
         self.options = options
+        # add all relevent locations to the path
+        pu.get_plugins_paths()
 
     def _run_plugin_list(self):
         """ Create an experiment and run the plugin list.
@@ -77,6 +79,7 @@ class PluginRunner(object):
         """
         self.exp._barrier()
         self.__check_loaders_and_savers()
+        self.__check_gpu()
 
         self.exp._barrier()
         pu.run_plugins(self.exp, plugin_list, check=True)
@@ -104,3 +107,31 @@ class PluginRunner(object):
         if not savers or savers[0] is not plugin_obj.n_plugins-1:
             raise Exception("The final plugin in the plugin list must be a "
                             "saver")
+
+    def __check_gpu(self):
+        """ Check if the process list contains GPU processes and determine if
+        GPUs exists. Add GPU processes to the processes list if required."""
+        if not self.exp.meta_data.plugin_list._contains_gpu_processes():
+            return
+        try:
+            import pynvml as pv
+        except:
+            logging.debug("pyNVML module not found")
+            raise Exception("pyNVML module not found")
+        try:
+            pv.nvmlInit()
+            count = int(pv.nvmlDeviceGetCount())
+            logging.debug("%s GPUs have been found.", count)
+        except:
+            logging.debug("No GPUs have been found.")
+            raise Exception("The process list contains GPU plugins, but "
+                            " no GPUs have been found.")
+
+        processes = self.exp.meta_data.get_meta_data('processes')
+        if not [i for i in processes if 'GPU' in i]:
+            logging.debug("GPU processes missing. GPUs found so adding them.")
+            cpus = ['CPU'+str(i) for i in range(count)]
+            gpus = ['GPU'+str(i) for i in range(count)]
+            for i in range(min(count, len(processes))):
+                processes[processes.index(cpus[i])] = gpus[i]
+            self.exp.meta_data.set_meta_data('processes', processes)

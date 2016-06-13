@@ -46,12 +46,10 @@ class Data(DataCreate):
         self.group = None
         self._plugin_data_obj = None
         self.tomo_raw_obj = None
-        self.data_mapping = None
         self.backing_file = None
         self.data = None
         self.next_shape = None
-        self.mapping = None
-        self.map_dim = []
+        self.orig_shape = None
 
     def __initialise_data_info(self, name):
         """ Initialise entries in the data_info meta data.
@@ -78,28 +76,6 @@ class Data(DataCreate):
             return self._plugin_data_obj
         else:
             raise Exception("There is no PluginData object associated with "
-                            "the Data object.")
-
-    def _set_tomo_raw(self, tomo_raw_obj):
-        """ Encapsulate a TomoRaw object.
-        """
-        self.tomo_raw_obj = tomo_raw_obj
-
-    def _clear_tomo_raw(self):
-        """ Set encapsulated TomoRaw object to None.
-        """
-        self.tomo_raw_obj = None
-
-    def get_tomo_raw(self):
-        """ Get encapsulated TomoRaw object.
-
-        :return: associated TomoRaw object if available.
-        :rtype: TomoRaw
-        """
-        if self.tomo_raw_obj is not None:
-            return self.tomo_raw_obj
-        else:
-            raise Exception("There is no TomoRaw object associated with "
                             "the Data object.")
 
     def get_preview(self):
@@ -137,6 +113,10 @@ class Data(DataCreate):
         """
         self.data_info.set_meta_data('shape', shape)
         self.__check_dims()
+
+    def set_original_shape(self, shape):
+        self.orig_shape = shape
+        self.set_shape(shape)
 
     def get_shape(self):
         """ Get the dataset shape
@@ -192,6 +172,7 @@ class Data(DataCreate):
                 nDims += len(kwargs[args])
                 self.data_info.set_meta_data(['data_patterns', dtype, args],
                                              kwargs[args])
+            
             self.__convert_pattern_directions(dtype)
             if self.get_shape():
                 diff = len(self.get_shape()) - nDims
@@ -241,7 +222,7 @@ class Data(DataCreate):
     def set_axis_labels(self, *args):
         """ Set the axis labels associated with each data dimension.
 
-        :arg str: Each arg should be of the form ``name.unit``. If ``name`` is
+        :arg str: Each arg should be of the form ``name.unit``. If ``name`` is\
         a data_obj.meta_data entry, it will be output to the final .nxs file.
         """
         self.data_info.set_meta_data('nDims', len(args))
@@ -312,6 +293,9 @@ class Data(DataCreate):
         """ Replace negative indices in pattern kwargs.
         """
         pattern = self.get_data_patterns()[dtype]
+        if 'main_dir' in pattern.keys():
+            del pattern['main_dir']
+
         nDims = sum([len(i) for i in pattern.values()])
         for p in pattern:
             ddirs = pattern[p]
@@ -348,18 +332,6 @@ class Data(DataCreate):
 
         self.data_info.set_meta_data(['data_patterns', pname, 'main_dir'],
                                      list(tdir)[0])
-
-    def trim_output_data(self, copy_obj, image_key=0):
-        """ Trim the output data in a plugin to remove image key and reduce
-        shape to data size only (i.e. no darks and flats).
-
-        :param Data copy_obj: A data object with an image key
-        :keyword str image_key: An image key value indexing the data.
-
-        """
-        if self.tomo_raw_obj:
-            self.get_tomo_raw()._remove_image_key(copy_obj, image_key)
-            self.get_preview().set_preview([])
 
     def get_axis_label_keys(self):
         """ Get axis_label names

@@ -41,29 +41,34 @@ class SimpleFit(BaseFitter):
 
     def pre_process(self):
         in_meta_data = self.get_in_meta_data()[0]
-        in_meta_data.set_meta_data("PeakIndex", self.parameters["PeakIndex"])
+        out_meta_data = self.get_out_meta_data()[0]
+        in_meta_data.set_meta_data("PeakIndex", self.parameters["PeakIndex"])        
+        self.axis = in_meta_data.get_meta_data("Q")
+        self.peakindex = in_meta_data.get_meta_data("PeakIndex")
+        self.positions = self.axis[self.peakindex]
+        in_meta_data.set_meta_data('PeakQ', self.positions)
 
     def filter_frames(self, data):
         t1 = time.time()
         data = data[0]
-        in_meta_data = self.get_in_meta_data()[0]
-        positions = in_meta_data.get_meta_data("PeakIndex")
-        axis = in_meta_data.get_meta_data("Q")
-        weights = data[positions]
+        axis = self.axis
+        positions = self.positions
+        print positions
+        weights = data[self.peakindex]
         widths = np.ones_like(positions)*self.parameters["width_guess"]
         p = []
         p.extend(weights)
         p.extend(widths)
         curvetype = self.getFitFunction(str(self.parameters['peak_shape']))
-        lsq1 = leastsq(self._resid, p,
+        [x2, cov_x2, infodict2, msg2, ier2] = leastsq(self._resid, p,
                        args=(curvetype, data, axis, positions),
-                       Dfun=self.dfunc, col_deriv=1)
+                       Dfun=self.dfunc, col_deriv=1, full_output=1)
         logging.debug("done one")
-        params = lsq1[0]
+        params = x2
         if np.isnan(params).any():
             logging.debug('Nans were detected here')
             params = np.zeros(len(params))
-
+        print msg2
         weights, widths, areas = self.getAreas(curvetype,
                                                axis, positions, params)
         residuals = self._resid(params, curvetype, data, axis, positions)

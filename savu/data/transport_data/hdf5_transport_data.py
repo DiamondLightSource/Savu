@@ -24,6 +24,7 @@
 import os
 import h5py
 import logging
+import math
 import numpy as np
 
 import savu.plugins.utils as pu
@@ -101,17 +102,18 @@ class Hdf5TransportData(object):
         entry = nxs_file['entry']
         group_name = self.data_info.get_meta_data('group_name')
         self.__output_metadata(self.backing_file[group_name])
+        filename = self.backing_file.filename.split('/')[-1]
 
         if linkType is 'final_result':
             name = 'final_result_' + self.get_name()
             entry[name] = \
-                h5py.ExternalLink(self.backing_file.filename, self.group_name)
+                h5py.ExternalLink(filename, self.group_name)
         elif linkType is 'intermediate':
             name = self.group_name + '_' + self.data_info.get_meta_data('name')
             entry = entry.require_group('intermediate')
             entry.attrs['NX_class'] = 'NXcollection'
             entry[name] = \
-                h5py.ExternalLink(self.backing_file.filename, self.group_name)
+                h5py.ExternalLink(filename, self.group_name)
         else:
             raise Exception("The link type is not known")
 
@@ -324,13 +326,7 @@ class Hdf5TransportData(object):
         shape = self.get_shape()
         slice_dirs = self._get_plugin_data().get_slice_directions()
         chunk, length, repeat = self.__chunk_length_repeat(slice_dirs, shape)
-
-        if self.mapping:
-            map_obj = self.exp.index['mapping'][self.get_name()]
-            new_length = map_obj.data_info.get_meta_data('map_dim_len')
-
-        length = new_length if self.mapping else length[0]
-        banked = self.__split_list(slice_list, length)
+        banked = self.__split_list(slice_list, length[0])
         return banked, length, slice_dirs
 
     def __grouped_slice_list(self, slice_list, max_frames):
@@ -360,10 +356,6 @@ class Hdf5TransportData(object):
         max_frames = (1 if max_frames is None else max_frames)
 
         sl = self._single_slice_list()
-
-        if self._get_plugin_data().selected_data is True:
-            sl = self.get_tomo_raw()._get_frame_raw(sl)
-
         if sl is None:
             raise Exception("Data type", self.get_current_pattern_name(),
                             "does not support slicing in directions",
@@ -373,6 +365,7 @@ class Hdf5TransportData(object):
     def _get_slice_list_per_process(self, expInfo):
         processes = expInfo.get_meta_data("processes")
         process = expInfo.get_meta_data("process")
+        self.__set_padding_dict()
         slice_list = self._get_grouped_slice_list()
 
         frame_index = np.arange(len(slice_list))
@@ -384,36 +377,26 @@ class Hdf5TransportData(object):
 
         return process_slice_list
 
-    def __calculate_slice_padding(self, in_slice, pad_ammount, data_stop):
+    def __calculate_slice_padding(self, in_slice, pad, data_stop, **kwargs):
+        pad = [pad['before'], pad['after']]
         sl = in_slice
-
         if not type(sl) == slice:
             # turn the value into a slice and pad it
             sl = slice(sl, sl+1, 1)
 
-        minval = None
-        maxval = None
+        minval = sl.start-pad[0] if sl.start is not None else None
+        maxval = sl.stop+pad[1] if sl.stop is not None else None
 
-        if sl.start is not None:
-            minval = sl.start-pad_ammount
-        if sl.stop is not None:
-            maxval = sl.stop+pad_ammount
-
-        minpad = 0
-        maxpad = 0
-        if minval is None:
-            minpad = pad_ammount
-        elif minval < 0:
+        minpad = pad[0] if minval is None else 0
+        maxpad = pad[1] if maxval is None else 0
+        if minval < 0:
             minpad = 0 - minval
             minval = 0
-        if maxval is None:
-            maxpad = pad_ammount
         if maxval > data_stop:
-            maxpad = (maxval-data_stop)
+            maxpad = maxval - data_stop
             maxval = data_stop
 
         out_slice = slice(minval, maxval, sl.step)
-
         return (out_slice, (minpad, maxpad))
 
     def __get_pad_data(self, slice_tup, pad_tup):
@@ -435,63 +418,65 @@ class Hdf5TransportData(object):
 
         return data_slice
 
-    def __get_padding_dict(self):
+    def __set_padding_dict(self):
         pData = self._get_plugin_data()
-        padding = Padding(pData.get_pattern())
-        for key in pData.padding.keys():
-            getattr(padding, key)(pData.padding[key])
-        return padding._get_padding_directions()
+        if pData.padding and not isinstance(pData.padding, Padding):
+            pad_dict = pData.padding
+            pData.padding = Padding(pData.get_pattern())
+            for key in pad_dict.keys():
+                getattr(pData.padding, key)(pad_dict[key])
 
     def _get_padded_slice_data(self, input_slice_list):
         slice_list = list(input_slice_list)
         pData = self._get_plugin_data()
-        if pData.padding is None:
+
+        if pData.fixed_dims is True:
+            self.__matching_dims(pData, input_slice_list)
+
+        if not pData.padding:
             return self.data[tuple(slice_list)]
 
-        padding_dict = self.__get_padding_dict()
+        padding_dict = pData.padding._get_padding_directions()
         pad_list = []
         for i in range(len(slice_list)):
             pad_list.append((0, 0))
 
-        for direction in padding_dict.keys():
-            slice_list[direction], pad_list[direction] = \
-                self.__calculate_slice_padding(slice_list[direction],
-                                               padding_dict[direction],
-                                               self.get_shape()[direction])
+        shape = self.orig_shape if self.orig_shape else self.get_shape()
+        for ddir in padding_dict.keys():
+            pDict = padding_dict[ddir]
+            slice_list[ddir], pad_list[ddir] = self.__calculate_slice_padding(
+                slice_list[ddir], pDict, shape[ddir])
 
-        temp = self.__get_pad_data(tuple(slice_list), tuple(pad_list))
-        return temp
+        return self.__get_pad_data(tuple(slice_list), tuple(pad_list))
 
-    def _get_unpadded_slice_data(self, input_slice_list, padded_dataset):
-        padding_dict = self._get_plugin_data().padding
-        if padding_dict is None:
-            return padded_dataset
+    def __matching_dims(self, pData, slice_list):
+        """ Ensure each chunk of frames passed to the plugin has the same \
+        (max_frames) size.
+        """
+        slice_dir = pData.get_slice_directions()[0]
+        sl = slice_list[slice_dir]
+        max_frames = self._get_plugin_data()._get_frame_chunk()
+        diff = max_frames - len(range(sl.start, sl.stop, sl.step))
+        if diff:
+            if not pData.padding:
+                pData.padding = Padding(pData.get_pattern())
+            pad_str = str(slice_dir)+'.after.'+str(diff)
+            pData.padding._pad_direction(pad_str)
 
-        padding_dict = self.__get_padding_dict()
+    def _get_unpadded_slice_data(self, input_slice_list, padded_data):
+        pData = self._get_plugin_data()
 
-        slice_list = list(input_slice_list)
-        pad_list = []
-        expand_list = []
+        if pData.fixed_dims is True:
+            self.__matching_dims(pData, input_slice_list)
 
-        for i in range(len(slice_list)):
-            pad_list.append((0, 0))
-            expand_list.append(0)
+        if not pData.padding:
+            return padded_data
 
-        for direction in padding_dict.keys():
-            slice_list[direction], pad_list[direction] = \
-                self.__calculate_slice_padding(slice_list[direction],
-                                               padding_dict[direction],
-                                               padded_dataset.shape[direction])
-            expand_list[direction] = padding_dict[direction]
+        padding_dict = pData.padding._get_padding_directions()
+        new_slice = [slice(None)]*len(self.get_shape())
+        for ddir in padding_dict.keys():
+            end = padded_data.shape[ddir] if padding_dict[ddir]['after'] is 0\
+                else -padding_dict[ddir]['after']
+            new_slice[ddir] = slice(padding_dict[ddir]['before'], end, 1)
 
-        slice_list_2 = []
-        for i in range(len(padded_dataset.shape)):
-            start = None
-            stop = None
-            if expand_list[i] > 0:
-                start = expand_list[i]
-                stop = -expand_list[i]
-            sl = slice(start, stop, None)
-            slice_list_2.append(sl)
-
-        return padded_dataset[tuple(slice_list_2)]
+        return padded_data[tuple(new_slice)]

@@ -27,7 +27,6 @@ import numpy as np
 from savu.plugins.utils import register_plugin
 
 
-@register_plugin
 class Chunking(object):
     """
     A class to save tomography data to a hdf5 file
@@ -68,8 +67,12 @@ class Chunking(object):
         else:
             chunks = self.__adjust_chunk_size(chunks, ttype, shape, adjust)
             logging.debug("chunks before %s", chunks)
-            for chunk in chunks:
-                chunk += 1
+            # Subtracting one from each chunking dimension as hdf5/h5py? bug fix
+            chunks = list(chunks)
+            logging.debug("chunks before %s", chunks)
+            for i in range(len(chunks)):
+                if (chunks[i] - 1) > 0:
+                    chunks[i] -= 1
             logging.debug("chunks after %s", chunks)
             return tuple(chunks)
 

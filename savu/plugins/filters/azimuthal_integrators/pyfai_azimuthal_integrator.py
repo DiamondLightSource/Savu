@@ -47,6 +47,9 @@ class PyfaiAzimuthalIntegrator(BaseAzimuthalIntegrator):
         mData = self.params[2]
         mask = self.params[0]
         ai = self.params[3]
+        logging.info('datashape=%s' % str(data[0].shape))
+        logging.info("about to process a frame")
         axis, remapped = ai.integrate1d(data=data[0], npt=self.npts, unit='q_A^-1', correctSolidAngle=False)
+        logging.info('processed a frame')
         self.add_axes_to_meta_data(axis,mData)
         return remapped

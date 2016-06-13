@@ -14,8 +14,8 @@
 """
 .. module:: hdf5_transport
    :platform: Unix
-   :synopsis: Transport specific plugin list runner, passes the data to and
-   from the plugin.
+   :synopsis: Transport specific plugin list runner, passes the data to and \
+       from the plugin.
 
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
@@ -35,6 +35,7 @@ import savu.core.utils as cu
 
 
 class Hdf5Transport(TransportControl):
+
 
     def _transport_control_setup(self, options):
         """ Fill the options dictionary with MPI related values.
@@ -116,6 +117,15 @@ class Hdf5Transport(TransportControl):
         cu.add_user_log_level()
         cu.add_user_log_handler(logger, os.path.join(options["log_path"],
                                                      'user.log'))
+        if 'syslog_server' in options.keys():
+            try:
+                cu.add_syslog_log_handler(logger,
+                                      options['syslog_server'],
+                                      options['syslog_port'])
+            except:
+                logger.warn("Unable to add syslog logging for server %s on port %i",
+                            options['syslog_server'],
+                            options['syslog_port'])
 
     def __set_logger_parallel(self, number, rank, options):
         """ Set parallel logger.
@@ -130,10 +140,19 @@ class Hdf5Transport(TransportControl):
         # tagged in all rank processes
         cu.add_user_log_level()
         if MPI.COMM_WORLD.rank == 0:
-            logging.getLogger()
-            cu.add_user_log_handler(logging.getLogger(),
+            logger = logging.getLogger()
+            cu.add_user_log_handler(logger,
                                     os.path.join(options["out_path"],
                                                  'user.log'))
+            if 'syslog_server' in options.keys():
+                try:
+                    cu.add_syslog_log_handler(logger,
+                                              options['syslog_server'],
+                                              options['syslog_port'])
+                except:
+                    logger.warn("Unable to add syslog logging for server %s on port %i",
+                                options['syslog_server'],
+                                options['syslog_port'])
 
     def _transport_run_plugin_list(self):
         """ Run the plugin list inside the transport layer.
@@ -286,12 +305,6 @@ class Hdf5Transport(TransportControl):
         :rtype: lambda
         """
         max_frames = data._get_plugin_data()._get_frame_chunk()
-        if data.mapping:
-            map_obj = self.exp.index['mapping'][data.get_name()]
-            map_dim_len = map_obj.data_info.get_meta_data('map_dim_len')
-            max_frames = min(max_frames, map_dim_len)
-            data._get_plugin_data()._set_frame_chunk(max_frames)
-
         squeeze_dims = data._get_plugin_data().get_slice_directions()
         if max_frames > 1:
             squeeze_dims = squeeze_dims[1:]
@@ -341,10 +354,9 @@ class Hdf5Transport(TransportControl):
         """
         result = [result] if type(result) is not list else result
         for idx in range(len(data_list)):
-            temp = data_list[idx]._get_unpadded_slice_data(
-                slice_list[idx][count], result[idx])
             data_list[idx].data[slice_list[idx][count]] = \
-                expand_dict[idx](temp)
+                data_list[idx]._get_unpadded_slice_data(
+                    slice_list[idx][count], expand_dict[idx](result[idx]))
 
 #    def _transfer_to_meta_data(self, return_dict):
 #        """

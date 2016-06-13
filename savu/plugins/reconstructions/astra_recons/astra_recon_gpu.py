@@ -19,6 +19,8 @@
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
+import astra
+import numpy as np
 
 from savu.plugins.reconstructions.base_astra_recon import BaseAstraRecon
 from savu.plugins.driver.gpu_plugin import GpuPlugin
@@ -33,20 +35,159 @@ class AstraReconGpu(BaseAstraRecon, GpuPlugin):
 
     :param number_of_iterations: Number of Iterations if an iterative method\
         is used . Default: 1.
+    :param res_norm: Output the residual norm at each iteration\
+        (Error in the solution). Default: False.
     :param reconstruction_type: Reconstruction type (FBP_CUDA|SIRT_CUDA|\
-        SART_CUDA|CGLS_CUDA|SIRT3D_CUDA|CGLS3D_CUDA). Default: 'FBP_CUDA'.
+        SART_CUDA (not currently working)|CGLS_CUDA|FP_CUDA|BP_CUDA|\
+        SIRT3D_CUDA|CGLS3D_CUDA). Default: 'FBP_CUDA'.
     """
 
     def __init__(self):
         super(AstraReconGpu, self).__init__("AstraReconGpu")
-        print "INITIALIZING astra_recon_gpu.py"
         self.GPU_index = None
+        self.res = False
+        self.start = 0
 
     def get_parameters(self):
-        print "ENTERING astra_recon_gpu.py get_parameters"
         return [self.parameters['reconstruction_type'],
-                self.parameters['number_of_iterations'],
-                self.GPU_index]
+                self.parameters['number_of_iterations']]
+
+    def set_options(self, cfg):
+        if 'option' not in cfg.keys():
+            cfg['option'] = {}
+        cfg['option']['GPUindex'] = self.parameters['GPU_index']
+        return cfg
+
+    def dynamic_data_info(self):
+        alg = self.parameters['reconstruction_type']
+        if self.parameters['res_norm'] is True and 'FBP' not in alg:
+            self.res = True
+            self.nOut += 1
+            self.parameters['out_datasets'].append('res_norm')
+
+    def astra_setup(self):
+        options_list = ["FBP_CUDA", "SIRT_CUDA", "SART_CUDA", "CGLS_CUDA",
+                        "FP_CUDA", "BP_CUDA", "SIRT3D_CUDA", "CGLS3D_CUDA"]
+        if not options_list.count(self.parameters['reconstruction_type']):
+            raise Exception("Unknown Astra GPU algorithm.")
+
+    def setup_3D(self):
+        pData = self.get_plugin_in_datasets()[0]
+        self.sino_dim_detX = \
+            pData.get_data_dimension_by_axis_label('x', contains=True)
+        self.det_rot = \
+            pData.get_data_dimension_by_axis_label('angle', contains=True)
+        self.sino_shape = pData.get_shape()
+        self.nDims = len(self.sino_shape)
+#        self.nCols = self.sino_shape[self.sino_dim_detX]
+        self.slice_dir = pData.get_slice_dimension()
+        self.slice_func = self.slice_sino(self.nDims)
+        l = self.sino_shape[self.sino_dim_detX]
+        c = np.linspace(-l/2.0, l/2.0, l)
+        x, y = np.meshgrid(c, c)
+        self.mask_id = False
+        mask = np.array((x**2 + y**2 < (l/2.0)**2), dtype=np.float)
+        self.mask = np.transpose(
+            np.tile(mask, (self.get_max_frames(), 1, 1)), (1, 0, 2))
+        self.manual_mask = True if not self.parameters['sino_pad'] else False
+
+    def astra_3D_recon(self, sino, cors, angles, vol_shape, init):
+#        while len(cors) is not self.sino_shape[self.slice_dir]:
+#            cors.append(0)
+        proj_id = False
+        sslice = [slice(None)]*self.nDims
+        recon = np.zeros(self.vol_shape)
+        recon = np.expand_dims(recon, axis=self.slice_dir)
+        if self.res:
+            res = np.zeros((self.vol_shape[self.slice_dir], self.iters))
+
+        # create volume geometry
+        vol_geom = \
+            astra.create_vol_geom(vol_shape[0], vol_shape[2], vol_shape[1])
+        # pad the sinogram
+        pad_sino = self.pad_sino(self.slice_func(sino, sslice), cors)
+        nDets = pad_sino.shape[self.slice_dir]
+        trans = (self.slice_dir, self.det_rot, self.sino_dim_detX)
+        pad_sino = np.transpose(pad_sino, trans)
+
+        # create projection geom
+        vectors = self.create_3d_vector_geom(angles, cors,
+                                             sino.shape[self.sino_dim_detX])
+        proj_geom = astra.create_proj_geom('parallel3d_vec', nDets,
+                                           pad_sino.shape[self.sino_dim_detX],
+                                           vectors)
+        # create sinogram id
+        sino_id = astra.data3d.create("-sino", proj_geom, pad_sino)
+
+        # create reconstruction id
+        if init is not None:
+            #init = np.transpose(init, (0, 2, 1))  # make this general
+            rec_id = astra.data3d.create('-vol', vol_geom, init)
+        else:
+            rec_id = astra.data3d.create('-vol', vol_geom)
+
+        # setup configuration options
+        cfg = self.set_config(rec_id, sino_id, proj_geom, vol_geom)
+
+        # create algorithm id
+        alg_id = astra.algorithm.create(cfg)
+
+#        # run algorithm
+#        if self.res:
+#            for j in range(self.iters):
+#                print j
+#                # Run a single iteration
+#                astra.algorithm.run(alg_id, 1)
+#                temp = astra.algorithm.get_res_norm(alg_id)
+#        else:
+        astra.algorithm.run(alg_id, self.iters)
+
+        # get reconstruction matrix
+#        if self.manual_mask:
+#            recon = self.mask*astra.data3d.get(rec_id)
+#        else:
+#            recon = astra.data3d.get(rec_id)
+
+        #recon = astra.data3d.get(rec_id)
+        recon = np.transpose(astra.data3d.get(rec_id), (2, 0, 1))
+        # delete geometry
+        self.delete(alg_id, sino_id, rec_id, proj_id)
+
+        self.start += 1
+        if self.res:
+            return [recon, res]
+        else:
+            return recon
+
+    def create_3d_vector_geom(self, angles, cors, detX):
+        # add tilt for detector
+        # make sure output volume is the correct way
+        # add res_norm
+        # add a mask
+        angles = np.deg2rad(angles)
+        vectors = np.zeros((len(angles), 12))
+        shift = detX/2.0 - cors[0] # temporary
+        for i in range(len(angles)):
+            # ray direction
+            vectors[i, 0] = np.cos(angles[i])
+            vectors[i, 1] = -np.sin(angles[i])
+            vectors[i, 2] = 0
+
+            # center of detector
+            vectors[i, 3] = -shift*np.sin(angles[i])
+            vectors[i, 4] = -shift*np.cos(angles[i])
+            vectors[i, 5] = 0
+
+            # vector from detector pixel (0,0) to (0,1)
+            vectors[i, 6] = -np.sin(angles[i])
+            vectors[i, 7] = -np.cos(angles[i])
+            vectors[i, 8] = 0
+
+            # vector from detector pixel (0,0) to (1,0)
+            vectors[i, 9] = 0
+            vectors[i, 10] = 0
+            vectors[i, 11] = 1
+        return vectors
 
     def get_citation_information(self):
         cite_info = CitationInformation()

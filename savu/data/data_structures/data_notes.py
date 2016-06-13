@@ -24,14 +24,16 @@
 def _set_preview_note():
     """
         Each ``preview_list`` element should be of the form
-        ``start:stop:step:chunk``, where ``step`` and ``chunk`` are optional
-        (default = 1) but both are required if chunk > 1.
+        ``start:stop:step:chunk``, where ``stop``, ``step`` and ``chunk`` are
+        optional (defaults: ``stop``=``start``+ 1, ``step``= 1, ``chunk`` = 1)
+        but must be given in that order.
 
         .. note::
             **start:stop[:step]**
                 represents the set of indices specified by:
 
                 >>> indices = range(start, stop[, step])
+
             For more information see :func:`range`
 
             **start:stop:step:chunk (chunk > 1)**
@@ -59,10 +61,8 @@ def _set_preview_note():
             allowed and may contain the following keywords:
 
             * ``:`` is a simplification for 0:end:1:1 (all values)
-            * ``mid`` is int(shape[dim]/2)
+            * ``mid`` is int(shape[dim]/2)-1
             * ``end`` is shape[dim]
-            * ``midmap`` is the ``mid`` of a mapped dimension (only relevant \
-in a 'dimension mapping' loader)
     """
 
 
@@ -196,9 +196,18 @@ shape=new_shape, patterns={in_dataset[0], ['SINOGRAM', 'PROJECTION']})
 shape=new_shape, patterns={in_dataset[0], ['SINOGRAM.1', 'PROJECTION.1']})
 
                 * Copy ALL patterns but remove dimensions: list_entry = \
-'*.r1,r2...':
+'\*.r1,r2...':
 
                 >>> out_dataset[0].crate_dataset(axis_labels=labels, \
 shape=new_shape, patterns={in_dataset[0], '*.0'})
 
     """
+
+
+def _padding():
+    """
+    Either 'dim.pad', 'dim.after.pad' or 'dim.before.pad', where 'dim' and\
+    'pad' are integers and give the dimension to pad and the the pad \
+    amount respectively. The keywords 'before' and 'after' specify padding\
+    'before' or 'after' the original dimension index (if neither are\
+    specified the both directions will be padded. """

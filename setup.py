@@ -17,16 +17,17 @@ if '--help' in sys.argv:
     print 'To package for a facility use "--facility <facilityname>" eg: python setup.py install --facility dls [Default facilityname is dls]'
 
 setup(name='savu',
-      version='0.3',
+      version='2.0',
       description='Savu Python Tomography Pipeline',
       long_description=readme(),
       classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: Apache Software License',
         'Natural Language :: English',
         'Programming Language :: Python :: 2.7',
         'Topic :: Scientific/Engineering'
+        'Operating System :: POSIX :: Linux'
       ],
       author='Mark Basham',
       author_email='scientificsoftware@diamond.ac.uk',

@@ -27,6 +27,7 @@ import h5py
 import json
 import logging
 import copy
+import inspect
 
 import numpy as np
 
@@ -66,13 +67,20 @@ class PluginList(object):
             if active:
                 plugin['name'] = plugin_group[key]['name'][0]
                 plugin['id'] = plugin_group[key]['id'][0]
+                plugin['pos'] = key.encode('ascii').strip()
+                if 'desc' in plugin_group[key].keys():
+                    plugin['desc'] = self.__byteify(
+                        json.loads(plugin_group[key]['desc'][0]))
+                    plugin['desc'] = self.__convert_to_list(plugin['desc'])
                 plugin['data'] = \
                     self.__byteify(json.loads(plugin_group[key]['data'][0]))
-                plugin['data'] = self.__convert_to_list(plugin['data'])
+                plugin['data'] = self.__convert_to_list(plugin['data'])                
                 self.plugin_list.append(plugin)
+
         plugin_file.close()
 
     def _save_plugin_list(self, out_filename, exp=None):
+        import re
         if exp:
             entry_group = exp.nxs_file.create_group('entry')
         else:
@@ -82,9 +90,18 @@ class PluginList(object):
         entry_group.attrs[NX_CLASS] = 'NXentry'
         plugins_group = entry_group.create_group('plugin')
         plugins_group.attrs[NX_CLASS] = 'NXplugin'
-        count = 0
+        count = 1
+
         for plugin in self.plugin_list:
-            plugin_group = plugins_group.create_group("%*i" % (4, count))
+            if 'pos' in plugin.keys():
+                num = int(re.findall('\d+', plugin['pos'])[0])
+                letter = re.findall('[a-z]', plugin['pos'])
+                letter = letter[0] if letter else ""
+                plugin_group = \
+                    plugins_group.create_group("%*i%*s" % (4, num, 1, letter))
+            else:
+                plugin_group = plugins_group.create_group("%*i" % (4, count))
+
             plugin_group.attrs[NX_CLASS] = 'NXnote'
             id_array = np.array([plugin['id']])
             plugin_group.create_dataset('id', id_array.shape, id_array.dtype,
@@ -96,9 +113,16 @@ class PluginList(object):
             plugin_group.create_dataset('data', data_array.shape,
                                         data_array.dtype, data_array)
             try:
-                name_array = np.array([plugin['active']])
-                plugin_group.create_dataset('active', name_array.shape,
-                                            name_array.dtype, name_array)
+                active_array = np.array([plugin['active']])
+                plugin_group.create_dataset('active', active_array.shape,
+                                            active_array.dtype, active_array)
+            except KeyError:
+                pass
+
+            try:
+                desc_array = np.array([json.dumps(plugin['desc'])])
+                plugin_group.create_dataset('desc', desc_array.shape,
+                                            desc_array.dtype, desc_array)
             except KeyError:
                 pass
 
@@ -113,31 +137,42 @@ class PluginList(object):
 
     def _get_string(self, **kwargs):
         out_string = []
+        verbosity = kwargs.get('verbose', False)
 
         start = kwargs.get('start', 0)
         stop = kwargs.get('stop', len(self.plugin_list))
         if stop == -1:
             stop = len(self.plugin_list)
-        disp_params = kwargs.get('params', True)
 
         count = start
         plugin_list = self.plugin_list[start:stop]
         for plugin in plugin_list:
-            description = ""
             count += 1
-            if 'active' in plugin:
-                if not plugin['active']:
-                    description += "***OFF***"
-            description += \
-                "%2i) %s(%s)" % (count, plugin['name'], plugin['id'])
-            if disp_params:
-                keycount = 0
-                for key in plugin['data'].keys():
-                    keycount += 1
-                    description += "\n  %2i)   %20s : %s" % \
-                        (keycount, key, plugin['data'][key])
+            description = \
+                self.__get_description(plugin, count, verbosity)
             out_string.append(description)
         return '\n'.join(out_string)
+
+    def __get_description(self, plugin, count, verbose):
+        description = ""
+        if 'active' in plugin:
+            if not plugin['active']:
+                description += "***OFF***"
+        pos = plugin['pos'].strip() if 'pos' in plugin.keys() else count
+        description += "%2s) %s(%s)" % (pos, plugin['name'], plugin['id'])
+
+        if verbose != '-q':
+            keycount = 0
+            for key in plugin['data'].keys():
+                keycount += 1
+                description += "\n  %2i)   %20s : %s" % \
+                    (keycount, key, plugin['data'][key])
+                if verbose == '-v':
+                    desc = plugin['desc'][key].split(' ')
+                    desc = ' '.join([desc[i] for i in range(len(desc)) if
+                                    desc[i] is not ''])
+                    description += "\t\t: %20s" % desc
+        return description
 
     def __byteify(self, input):
         if isinstance(input, dict):
@@ -155,9 +190,15 @@ class PluginList(object):
         for key in data:
             value = data[key]
             if isinstance(value, str) and value.count('['):
-                value = value.split('[')[1].\
-                    split(']')[0].replace(" ", "").split(',')
-                exec("value = " + str(value))
+                value = \
+                    [[a.split(']')[0].split('[')[1]] for a in value.split(';')]
+                value = [v[0].split(',') for v in value]
+                new_str = str(value[0])
+                if len(value) > 1:
+                    value = [new_str+';'+str(b) for b in value[1:]][0]
+                else:
+                    value = new_str
+                exec("value =" + value)
             data[key] = value
         return data
 
@@ -193,7 +234,6 @@ class PluginList(object):
         """
         from savu.plugins.base_loader import BaseLoader
         from savu.plugins.base_saver import BaseSaver
-        import inspect
         loader_idx = []
         saver_idx = []
         self.n_plugins = len(self.plugin_list)
@@ -208,6 +248,15 @@ class PluginList(object):
 
         self.n_loaders = len(loader_idx)
         return loader_idx, saver_idx
+
+    def _contains_gpu_processes(self):
+        """ Returns True if gpu processes exist in the process list. """
+        from savu.plugins.driver.gpu_plugin import GpuPlugin
+        for i in range(self.n_plugins):
+            bases = inspect.getmro(pu.load_class(self.plugin_list[i]['id']))
+            if GpuPlugin in bases:
+                return True
+        return False
 
 
 class CitationInformation(object):
