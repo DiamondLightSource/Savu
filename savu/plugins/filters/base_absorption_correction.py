@@ -47,7 +47,7 @@ class BaseAbsorptionCorrection(BaseFilter, CpuPlugin):
         in_dataset, out_datasets = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
         in_meta_data = in_dataset[0].meta_data
-        idx = in_meta_data.get_meta_data("PeakEnergy")
+        idx = in_meta_data.get("PeakEnergy")
         self.nChannels = len(idx) 
         in_pData[0].plugin_data_setup('SINOGRAM', self.get_num_channels())
         in_pData[1].plugin_data_setup('SINOGRAM', 1)

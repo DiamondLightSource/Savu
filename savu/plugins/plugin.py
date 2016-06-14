@@ -230,7 +230,7 @@ class Plugin(PluginDatasets):
         # data that is no longer valid.
         """
         remove_keys = self.__remove_axis_data()
-        in_meta_data, out_meta_data = self.get_meta_data()
+        in_meta_data, out_meta_data = self.get()
         copy_dict = {}
         for mData in in_meta_data:
             temp = mData.get_dictionary().copy()

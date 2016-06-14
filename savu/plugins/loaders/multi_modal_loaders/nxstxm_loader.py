@@ -47,7 +47,7 @@ class NxstxmLoader(BaseMultiModalLoader):
         data_obj, stxm_entry = self.multi_modal_setup('NXstxm', data_str)
         mono_energy = data_obj.backing_file[
             stxm_entry.name + '/instrument/monochromator/energy']
-        self.exp.meta_data.set_meta_data("mono_energy", mono_energy)
+        self.exp.meta_data.set("mono_energy", mono_energy)
         self.set_motors(data_obj, stxm_entry, 'stxm')
 
         self.add_patterns_based_on_acquisition(data_obj, 'stxm')   

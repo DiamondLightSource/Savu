@@ -77,11 +77,11 @@ class DataCreate(object):
         """
         map_data = self.exp.index['mapping'][data_obj.get_name()]
         map_mData = map_data.meta_data
-        map_axis_labels = map_data.data_info.get_meta_data('axis_labels')
+        map_axis_labels = map_data.data_info.get('axis_labels')
         for axis_label in map_axis_labels:
             if axis_label.keys()[0] in map_mData.get_dictionary().keys():
-                map_label = map_mData.get_meta_data(axis_label.keys()[0])
-                data_obj.meta_data.set_meta_data(axis_label.keys()[0],
+                map_label = map_mData.get(axis_label.keys()[0])
+                data_obj.meta_data.set(axis_label.keys()[0],
                                                  map_label)
         return map_data
 
@@ -167,11 +167,11 @@ class DataCreate(object):
 
     def __copy_labels(self, copy_data):
         """ Copy axis labels. """
-        nDims = copy.copy(copy_data.data_info.get_meta_data('nDims'))
+        nDims = copy.copy(copy_data.data_info.get('nDims'))
         axis_labels = \
-            copy.copy(copy_data.data_info.get_meta_data('axis_labels'))
-        self.data_info.set_meta_data('nDims', nDims)
-        self.data_info.set_meta_data('axis_labels', axis_labels)
+            copy.copy(copy_data.data_info.get('axis_labels'))
+        self.data_info.set('nDims', nDims)
+        self.data_info.set('axis_labels', axis_labels)
         # if parameter tuning
         if self._get_plugin_data().multi_params_dict:
             self.__add_extra_dims_labels()
@@ -181,17 +181,17 @@ class DataCreate(object):
         """
         params_dict = self._get_plugin_data().multi_params_dict
         # add multi_params axis labels from dictionary in pData
-        nDims = self.data_info.get_meta_data('nDims')
-        axis_labels = self.data_info.get_meta_data('axis_labels')
+        nDims = self.data_info.get('nDims')
+        axis_labels = self.data_info.get('axis_labels')
         axis_labels.extend([0]*len(params_dict))
         for key, value in params_dict.iteritems():
             title = value['label'].encode('ascii', 'ignore')
             name, unit = title.split('.')
             axis_labels[nDims + key] = {name: unit}
             # add parameter values to the meta_data
-            self.meta_data.set_meta_data(name, np.array(value['values']))
-        self.data_info.set_meta_data('nDims', nDims + len(self.extra_dims))
-        self.data_info.set_meta_data('axis_labels', axis_labels)
+            self.meta_data.set(name, np.array(value['values']))
+        self.data_info.set('nDims', nDims + len(self.extra_dims))
+        self.data_info.set('axis_labels', axis_labels)
 
     def __amend_axis_labels(self, *args):
         """ Helper function to remove, replace/add or insert axis_labels into
@@ -212,25 +212,25 @@ class DataCreate(object):
         """ Remove axis labels. """
         axis_labels = self.get_axis_labels()
         del axis_labels[int(label) - removed_dims]
-        self.data_info.set_meta_data(
-            'nDims', self.data_info.get_meta_data('nDims') - 1)
+        self.data_info.set(
+            'nDims', self.data_info.get('nDims') - 1)
 
     def __replace_axis_labels(self, label):
         """ Replace or add axis labels. """
         axis_labels = self.get_axis_labels()
         label = label.split('.')
         axis_labels[int(label[0])] = {label[1]: label[2]}
-        if int(label[0]) > self.data_info.get_meta_data('nDims'):
-            self.data_info.set_meta_data(
-                'nDims', self.data_info.get_meta_data('nDims') + 1)
+        if int(label[0]) > self.data_info.get('nDims'):
+            self.data_info.set(
+                'nDims', self.data_info.get('nDims') + 1)
 
     def __insert_axis_labels(self, label):
         """ Insert axis labels. """
         axis_labels = self.get_axis_labels()
         label = label.split('~')[1].split('.')
         axis_labels.insert(int(label[0]), {label[1]: label[2]})
-        self.data_info.set_meta_data(
-            'nDims', self.data_info.get_meta_data('nDims') + 1)
+        self.data_info.set(
+            'nDims', self.data_info.get('nDims') + 1)
 
     def __set_data_patterns(self, patterns):
         """ Add missing dimensions to patterns and populate data info dict. """
@@ -240,7 +240,7 @@ class DataCreate(object):
             for dim in all_dims:
                 if dim not in pDims:
                     patterns[p]['slice_dir'] += (dim,)
-        self.data_info.set_meta_data('data_patterns', patterns)
+        self.data_info.set('data_patterns', patterns)
 
     def __find_and_set_shape(self, data):
         """ Add any extra dimensions, from parameter tuning, to the shape and

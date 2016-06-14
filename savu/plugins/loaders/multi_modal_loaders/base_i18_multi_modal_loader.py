@@ -50,25 +50,25 @@ class BaseI18MultiModalLoader(BaseMultiModalLoader):
         exp = self.exp
         data_obj = exp.create_data_object("in_data", ltype)
         data_obj.backing_file = \
-            h5py.File(exp.meta_data.get_meta_data("data_file"), 'r')
+            h5py.File(exp.meta_data.get("data_file"), 'r')
         f = data_obj.backing_file
         logging.debug("Creating file '%s' '%s'_entry",
                       data_obj.backing_file.filename, ltype)
-        data_obj.meta_data.set_meta_data("mono_energy",
+        data_obj.meta_data.set("mono_energy",
                                     f[self.parameters['monochromator']].value/1e3)
         x = f[self.parameters['x']].value
 
         if self.parameters['x'] is not None:
-            data_obj.meta_data.set_meta_data("x", x[0, :])
+            data_obj.meta_data.set("x", x[0, :])
         if self.parameters['y'] is not None:
             y = f[self.parameters['y']].value
-            data_obj.meta_data.set_meta_data("y", y)
+            data_obj.meta_data.set("y", y)
         if self.parameters['rotation'] is not None:
             rotation_angle = f[self.parameters['rotation']].value
             if rotation_angle.ndim > 1:
                 rotation_angle = rotation_angle[:, 0]
 
-                data_obj.meta_data.set_meta_data(
+                data_obj.meta_data.set(
                     "rotation_angle", rotation_angle)
         return data_obj
 

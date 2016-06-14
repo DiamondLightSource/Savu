@@ -188,8 +188,8 @@ def get_data_object(exp):
 
 
 def set_process(exp, process, processes):
-    exp.meta_data.set_meta_data('process', process)
-    exp.meta_data.set_meta_data('processes', processes)
+    exp.meta_data.set('process', process)
+    exp.meta_data.set('processes', processes)
 
 
 def plugin_runner(options):

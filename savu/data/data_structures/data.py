@@ -54,10 +54,10 @@ class Data(DataCreate):
     def __initialise_data_info(self, name):
         """ Initialise entries in the data_info meta data.
         """
-        self.data_info.set_meta_data('name', name)
-        self.data_info.set_meta_data('data_patterns', {})
-        self.data_info.set_meta_data('shape', None)
-        self.data_info.set_meta_data('nDims', None)
+        self.data_info.set('name', name)
+        self.data_info.set('data_patterns', {})
+        self.data_info.set('shape', None)
+        self.data_info.set('nDims', None)
 
     def _set_plugin_data(self, plugin_data_obj):
         """ Encapsulate a PluginData object.
@@ -89,7 +89,7 @@ class Data(DataCreate):
         :returns: instance of data transport
         :rtype: transport_data
         """
-        transport = self.exp.meta_data.get_meta_data("transport")
+        transport = self.exp.meta_data.get("transport")
         transport_data = "savu.data.transport_data." + transport + \
                          "_transport_data"
         return cu.import_class(transport_data)
@@ -97,7 +97,7 @@ class Data(DataCreate):
     def __deepcopy__(self, memo):
         """ Copy the data object.
         """
-        name = self.data_info.get_meta_data('name')
+        name = self.data_info.get('name')
         return dsu._deepcopy_data_object(self, Data(name, self.exp))
 
     def get_data_patterns(self):
@@ -106,12 +106,12 @@ class Data(DataCreate):
         :returns: A dictionary of associated patterns.
         :rtype: dict
         """
-        return self.data_info.get_meta_data('data_patterns')
+        return self.data_info.get('data_patterns')
 
     def set_shape(self, shape):
         """ Set the dataset shape.
         """
-        self.data_info.set_meta_data('shape', shape)
+        self.data_info.set('shape', shape)
         self.__check_dims()
 
     def set_original_shape(self, shape):
@@ -124,15 +124,15 @@ class Data(DataCreate):
         :returns: data shape
         :rtype: tuple
         """
-        shape = self.data_info.get_meta_data('shape')
+        shape = self.data_info.get('shape')
         return shape
 
     def __check_dims(self):
         """ Check the ``shape`` and ``nDims`` entries in the data_info
         meta_data dictionary are equal.
         """
-        nDims = self.data_info.get_meta_data("nDims")
-        shape = self.data_info.get_meta_data('shape')
+        nDims = self.data_info.get("nDims")
+        shape = self.data_info.get('shape')
         if nDims:
             if len(shape) != nDims:
                 error_msg = ("The number of axis labels, %d, does not "
@@ -146,7 +146,7 @@ class Data(DataCreate):
         :returns: the name associated with the dataset
         :rtype: str
         """
-        return self.data_info.get_meta_data('name')
+        return self.data_info.get('name')
 
     def __get_available_pattern_list(self):
         """ Get a list of ALL pattern names that are currently allowed in the
@@ -170,7 +170,7 @@ class Data(DataCreate):
             nDims = 0
             for args in kwargs:
                 nDims += len(kwargs[args])
-                self.data_info.set_meta_data(['data_patterns', dtype, args],
+                self.data_info.set(['data_patterns', dtype, args],
                                              kwargs[args])
             
             self.__convert_pattern_directions(dtype)
@@ -181,14 +181,14 @@ class Data(DataCreate):
                     self._add_extra_dims_to_patterns(pattern)
                     nDims += diff
             try:
-                if nDims != self.data_info.get_meta_data("nDims"):
-                    actualDims = self.data_info.get_meta_data('nDims')
+                if nDims != self.data_info.get("nDims"):
+                    actualDims = self.data_info.get('nDims')
                     err_msg = ("The pattern %s has an incorrect number of "
                                "dimensions: %d required but %d specified."
                                % (dtype, actualDims, nDims))
                     raise Exception(err_msg)
             except KeyError:
-                self.data_info.set_meta_data('nDims', nDims)
+                self.data_info.set('nDims', nDims)
         else:
             raise Exception("The data pattern '%s'does not exist. Please "
                             "choose from the following list: \n'%s'",
@@ -225,7 +225,7 @@ class Data(DataCreate):
         :arg str: Each arg should be of the form ``name.unit``. If ``name`` is\
         a data_obj.meta_data entry, it will be output to the final .nxs file.
         """
-        self.data_info.set_meta_data('nDims', len(args))
+        self.data_info.set('nDims', len(args))
         axis_labels = []
         for arg in args:
             try:
@@ -234,7 +234,7 @@ class Data(DataCreate):
             except:
                 # data arrives here, but that may be an error
                 pass
-        self.data_info.set_meta_data('axis_labels', axis_labels)
+        self.data_info.set('axis_labels', axis_labels)
 
     def get_axis_labels(self):
         """ Get axis labels.
@@ -242,7 +242,7 @@ class Data(DataCreate):
         :returns: Axis labels
         :rtype: list(dict)
         """
-        return self.data_info.get_meta_data('axis_labels')
+        return self.data_info.get('axis_labels')
 
     def find_axis_label_dimension(self, name, contains=False):
         """ Get the dimension of the data associated with a particular
@@ -254,7 +254,7 @@ class Data(DataCreate):
         :returns: The associated axis number
         :rtype: int
         """
-        axis_labels = self.data_info.get_meta_data('axis_labels')
+        axis_labels = self.data_info.get('axis_labels')
         for i in range(len(axis_labels)):
             if contains is True:
                 for names in axis_labels[i].keys():
@@ -330,8 +330,7 @@ class Data(DataCreate):
         if not tdir:
             tdir = [d2[0]]
 
-        self.data_info.set_meta_data(['data_patterns', pname, 'main_dir'],
-                                     list(tdir)[0])
+        self.data_info.set(['data_patterns', pname, 'main_dir'], list(tdir)[0])
 
     def get_axis_label_keys(self):
         """ Get axis_label names
@@ -339,36 +338,12 @@ class Data(DataCreate):
         :returns: A list containing associated axis names for each dimension
         :rtype: list(str)
         """
-        axis_labels = self.data_info.get_meta_data('axis_labels')
+        axis_labels = self.data_info.get('axis_labels')
         axis_label_keys = []
         for labels in axis_labels:
             for key in labels.keys():
                 axis_label_keys.append(key)
         return axis_label_keys
-
-    def _get_current_and_next_patterns(self, datasets_lists):
-        """ Get the current and next patterns associated with a dataset
-        throughout the processing chain.
-        """
-        current_datasets = datasets_lists[0]
-        patterns_list = []
-        for current_data in current_datasets['out_datasets']:
-            current_name = current_data['name']
-            current_pattern = current_data['pattern']
-            next_pattern = self.__find_next_pattern(datasets_lists[1:],
-                                                    current_name)
-            patterns_list.append({'current': current_pattern,
-                                  'next': next_pattern})
-        self.exp.meta_data.set_meta_data('current_and_next', patterns_list)
-
-    def __find_next_pattern(self, datasets_lists, current_name):
-        next_pattern = []
-        for next_data_list in datasets_lists:
-            for next_data in next_data_list['in_datasets']:
-                if next_data['name'] == current_name:
-                    next_pattern = next_data['pattern']
-                    return next_pattern
-        return next_pattern
 
     def get_slice_directions(self):
         """ Get pattern slice_dir of pattern currently associated with the

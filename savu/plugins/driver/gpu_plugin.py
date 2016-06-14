@@ -38,8 +38,8 @@ class GpuPlugin(PluginDriver):
     def _run_plugin(self, exp, transport):
 
         expInfo = exp.meta_data
-        processes = copy.copy(expInfo.get_meta_data("processes"))
-        process = expInfo.get_meta_data("process")
+        processes = copy.copy(expInfo.get("processes"))
+        process = expInfo.get("process")
 
         gpu_processes = [False]*len(processes)
         idx = [i for i in range(len(processes)) if 'GPU' in processes[i]]
@@ -50,7 +50,7 @@ class GpuPlugin(PluginDriver):
         new_processes = [i for i in processes if 'GPU' in i]
         if not new_processes:
             raise Exception("THERE ARE NO GPU PROCESSES!")
-        expInfo.set_meta_data('processes', new_processes)
+        expInfo.set('processes', new_processes)
 
         nNodes = new_processes.count(new_processes[0])
 
@@ -58,7 +58,7 @@ class GpuPlugin(PluginDriver):
         self.__create_new_communicator(ranks, exp, process)
 
         if gpu_processes[process]:
-            expInfo.set_meta_data('process', self.new_comm.Get_rank())
+            expInfo.set('process', self.new_comm.Get_rank())
             logging.info("Running the GPU Process %i",
                          self.new_comm.Get_rank())
             GPU_index = self.__calculate_GPU_index(nNodes)
@@ -66,10 +66,10 @@ class GpuPlugin(PluginDriver):
             self._run_plugin_instances(transport, communicator=self.new_comm)
             self._clean_up()
             self.__free_communicator()
-            expInfo.set_meta_data('process', MPI.COMM_WORLD.Get_rank())
+            expInfo.set('process', MPI.COMM_WORLD.Get_rank())
 
         self.exp._barrier()
-        expInfo.set_meta_data('processes', processes)
+        expInfo.set('processes', processes)
         return
 
     def __create_new_communicator(self, ranks, exp, process):

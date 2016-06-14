@@ -196,9 +196,9 @@ class VoCentering(BaseFilter, CpuPlugin):
     def populate_meta_data(self, key, value):
         datasets = self.parameters['datasets_to_populate']
         in_meta_data = self.get_in_meta_data()[0]
-        in_meta_data.set_meta_data(key, value)
+        in_meta_data.set(key, value)
         for name in datasets:
-            self.exp.index['in_data'][name].meta_data.set_meta_data(key, value)
+            self.exp.index['in_data'][name].meta_data.set(key, value)
 
     def setup(self):
 

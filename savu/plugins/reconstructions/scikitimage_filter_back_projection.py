@@ -68,7 +68,7 @@ class ScikitimageFilterBackProjection(BaseRecon, CpuPlugin):
         in_meta_data = self.get_in_meta_data()[0]
         sinogram = np.swapaxes(sino, 0, 1)
         sinogram = self._shift(sinogram, centre_of_rotations)
-        theta = in_meta_data.get_meta_data('rotation_angle')
+        theta = in_meta_data.get('rotation_angle')
         result = \
             transform.iradon(sinogram, theta=theta,
                              output_size=(in_pData.get_shape()[1]),

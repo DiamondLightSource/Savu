@@ -43,14 +43,14 @@ class McNearAbsorptionCorrection(BaseAbsorptionCorrection):
         compound = self.parameters['compound']
         density = self.parameters['density']
         mData = self.get_in_meta_data()[0]
-        mono_energy = mData.get_meta_data('mono_energy')
-        peak_energy = mData.get_meta_data('PeakEnergy')
+        mono_energy = mData.get('mono_energy')
+        peak_energy = mData.get('PeakEnergy')
         pump_mu = self.get_mu(compound, float(mono_energy), density)
         peak_mu = self.get_mu(compound, list(peak_energy), density)
         self.atten_ratio = [pm/pump_mu for pm in peak_mu]
         logging.debug('The test attenuation ratios should be:[25.651, 20.909, 2.903, 2.198],'
                             'they are: %s' % self.atten_ratio)
-        theta = mData.get_meta_data('rotation_angle')
+        theta = mData.get('rotation_angle')
         self.dtheta = theta[1]-theta[0]
         logging.debug('The rotation step is %s' % str(self.dtheta))
         if np.abs(self.dtheta)>10.0:

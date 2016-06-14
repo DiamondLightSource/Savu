@@ -48,14 +48,14 @@ class NxmonitorLoader(BaseMultiModalLoader):
         data_obj, stxm_entry = self.multi_modal_setup('NXstxm', data_str)
         mono_energy = data_obj.backing_file[
             stxm_entry.name + '/instrument/monochromator/energy']
-        self.exp.meta_data.set_meta_data("mono_energy", mono_energy)
+        self.exp.meta_data.set("mono_energy", mono_energy)
         self.set_motors(data_obj, stxm_entry, 'stxm')
         rotation_angle = \
             data_obj.backing_file[stxm_entry.name + '/sample/theta'].value
         if rotation_angle.ndim > 1:
             rotation_angle = rotation_angle[:, 0]
 
-        data_obj.meta_data.set_meta_data('rotation_angle', rotation_angle)
+        data_obj.meta_data.set('rotation_angle', rotation_angle)
         data_obj.set_axis_labels('rotation_angle.degrees',
                                  'x.mm',
                                  'y.mm')
@@ -67,7 +67,7 @@ class NxmonitorLoader(BaseMultiModalLoader):
         exp = self.exp
         data_obj = exp.create_data_object("in_data", "NXmonitor")
         data_obj.backing_file = \
-            h5py.File(exp.meta_data.get_meta_data("data_file"), 'r')
+            h5py.File(exp.meta_data.get("data_file"), 'r')
         logging.debug("Creating file '%s' '%s'_entry",
                       data_obj.backing_file.filename, ltype)
         # now lets extract the entry so we can figure out our geometries!

@@ -43,7 +43,7 @@ class SimpleFitXrf(BaseFluoFitter):
         data = data[0].squeeze()
         in_meta_data = self.get_in_meta_data()[0]
         axis = self.axis
-        idx = in_meta_data.get_meta_data("PeakIndex")
+        idx = in_meta_data.get("PeakIndex")
         positions = axis[idx]
         weights = data[idx]
         widths = np.ones_like(positions)*self.parameters["width_guess"]

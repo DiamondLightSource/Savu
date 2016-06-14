@@ -42,11 +42,11 @@ class SimpleFit(BaseFitter):
     def pre_process(self):
         in_meta_data = self.get_in_meta_data()[0]
         out_meta_data = self.get_out_meta_data()[0]
-        in_meta_data.set_meta_data("PeakIndex", self.parameters["PeakIndex"])        
-        self.axis = in_meta_data.get_meta_data("Q")
-        self.peakindex = in_meta_data.get_meta_data("PeakIndex")
+        in_meta_data.set("PeakIndex", self.parameters["PeakIndex"])        
+        self.axis = in_meta_data.get("Q")
+        self.peakindex = in_meta_data.get("PeakIndex")
         self.positions = self.axis[self.peakindex]
-        in_meta_data.set_meta_data('PeakQ', self.positions)
+        in_meta_data.set('PeakQ', self.positions)
 
     def filter_frames(self, data):
         t1 = time.time()

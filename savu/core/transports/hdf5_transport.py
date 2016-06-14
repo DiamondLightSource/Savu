@@ -21,202 +21,70 @@
 
 """
 
-import logging
-import socket
-import os
 import copy
 import numpy as np
 
-from mpi4py import MPI
-from itertools import chain
 from savu.core.transport_control import TransportControl
+from savu.core.transport_setup import MPI_setup
 import savu.plugins.utils as pu
 import savu.core.utils as cu
 
 
 class Hdf5Transport(TransportControl):
 
-
     def _transport_control_setup(self, options):
-        """ Fill the options dictionary with MPI related values.
-        """
-        processes = options["process_names"].split(',')
+        MPI_setup(options)
 
-        if len(processes) is 1:
-            options["mpi"] = False
-            self.mpi = False
-            options["process"] = 0
-            options["processes"] = processes
-            self.__set_logger_single(options)
-        else:
-            options["mpi"] = True
-            self.mpi = True
-            print("Options for mpi are")
-            print(options)
-            self.__mpi_setup(options)
-
-    def __mpi_setup(self, options):
-        """ Set MPI process specific values and logging initialisation.
-        """
-        print("Running mpi_setup")
-        RANK_NAMES = options["process_names"].split(',')
-        RANK = MPI.COMM_WORLD.rank
-        SIZE = MPI.COMM_WORLD.size
-        RANK_NAMES_SIZE = len(RANK_NAMES)
-        if RANK_NAMES_SIZE > SIZE:
-            RANK_NAMES_SIZE = SIZE
-        MACHINES = SIZE/RANK_NAMES_SIZE
-        MACHINE_RANK = RANK/MACHINES
-        MACHINE_RANK_NAME = RANK_NAMES[MACHINE_RANK]
-        MACHINE_NUMBER = RANK % MACHINES
-        MACHINE_NUMBER_STRING = "%03i" % (MACHINE_NUMBER)
-        ALL_PROCESSES = [[i]*MACHINES for i in RANK_NAMES]
-        options["processes"] = list(chain.from_iterable(ALL_PROCESSES))
-        options["process"] = RANK
-
-        self.__set_logger_parallel(MACHINE_NUMBER_STRING,
-                                   MACHINE_RANK_NAME,
-                                   options)
-
-        MPI.COMM_WORLD.barrier()
-        logging.debug("Rank : %i - Size : %i - host : %s", RANK, SIZE,
-                      socket.gethostname())
-        IP = socket.gethostbyname(socket.gethostname())
-        logging.debug("ip address is : %s", IP)
-        self.call_mpi__barrier()
-        logging.debug("LD_LIBRARY_PATH is %s",  os.getenv('LD_LIBRARY_PATH'))
-        self.call_mpi__barrier()
-
-    def call_mpi__barrier(self):
-        """ Call MPI _barrier before an experiment is created.
-        """
-        logging.debug("Waiting at the _barrier")
-        MPI.COMM_WORLD.barrier()
-
-    def __get_log_level(self, options):
-        """ Gets the right log level for the flags -v or -q
-        """
-        if ('verbose' in options) and options['verbose']:
-            return logging.DEBUG
-        if ('quiet' in options) and options['quiet']:
-            return logging.WARN
-        return logging.INFO
-
-    def __set_logger_single(self, options):
-        """ Set single-threaded logging.
-        """
-        logger = logging.getLogger()
-        logger.setLevel(self.__get_log_level(options))
-
-        fh = logging.FileHandler(os.path.join(options["log_path"], 'log.txt'),
-                                 mode='w')
-        fh.setFormatter(logging.Formatter('L %(relativeCreated)12d M CPU0 0' +
-                                          ' %(levelname)-6s %(message)s'))
-        logger.addHandler(fh)
-
-        cu.add_user_log_level()
-        cu.add_user_log_handler(logger, os.path.join(options["log_path"],
-                                                     'user.log'))
-        if 'syslog_server' in options.keys():
-            try:
-                cu.add_syslog_log_handler(logger,
-                                      options['syslog_server'],
-                                      options['syslog_port'])
-            except:
-                logger.warn("Unable to add syslog logging for server %s on port %i",
-                            options['syslog_server'],
-                            options['syslog_port'])
-
-    def __set_logger_parallel(self, number, rank, options):
-        """ Set parallel logger.
-        """
-        logging.basicConfig(level=self.__get_log_level(options),
-                            format='L %(relativeCreated)12d M' +
-                            number + ' ' + rank +
-                            ' %(levelname)-6s %(message)s', datefmt='%H:%M:%S')
-
-        # Only add user logging to the 0 rank process so we don't get
-        # a lot of output, just a summary, but we want the user messages
-        # tagged in all rank processes
-        cu.add_user_log_level()
-        if MPI.COMM_WORLD.rank == 0:
-            logger = logging.getLogger()
-            cu.add_user_log_handler(logger,
-                                    os.path.join(options["out_path"],
-                                                 'user.log'))
-            if 'syslog_server' in options.keys():
-                try:
-                    cu.add_syslog_log_handler(logger,
-                                              options['syslog_server'],
-                                              options['syslog_port'])
-                except:
-                    logger.warn("Unable to add syslog logging for server %s on port %i",
-                                options['syslog_server'],
-                                options['syslog_port'])
-
-    def _transport_run_plugin_list(self):
+    def _transport_pre_process(self, in_data_list, out_data_list, plugin_inst):
         """ Run the plugin list inside the transport layer.
         """
         exp = self.exp
-
         plugin_obj = exp.meta_data.plugin_list
         n_loaders = plugin_obj._get_n_loaders()
         plugin_list = exp.meta_data.plugin_list.plugin_list
+        saver_plugin = pu.plugin_loader(exp, plugin_list[-1])
 
         for i in range(n_loaders):
             pu.plugin_loader(exp, plugin_list[i])
 
-        start = n_loaders
-        stop = 0
-        n_plugins = len(plugin_list) - 1  # minus 1 for saver
+        for i in range(len(plugin_inst)):
+            exp.index['in_data'] = in_data_list[i]
+            exp.index['out_data'] = out_data_list[i]
+            saver_plugin.setup()
 
-        while n_plugins != stop:
-            start_in_data = copy.deepcopy(self.exp.index['in_data'])
-            in_data = exp.index["in_data"][exp.index["in_data"].keys()[0]]
+#    def _transport_run_plugin_list(self):
+#        """ Run the plugin list inside the transport layer.
+#        """
+#        exp = self.exp
+#
+#        plugin_obj = exp.meta_data.plugin_list
+#        n_loaders = plugin_obj._get_n_loaders()
+#        plugin_list = exp.meta_data.plugin_list.plugin_list
+#
+#        for i in range(n_loaders):
+#            pu.plugin_loader(exp, plugin_list[i])
+#
+#        start = n_loaders
+#        stop = 0
+#        n_plugins = len(plugin_list) - 1  # minus 1 for saver
+#
+#        while n_plugins != stop:
+#            start_in_data = copy.deepcopy(self.exp.index['in_data'])
+#            in_data = exp.index["in_data"][exp.index["in_data"].keys()[0]]
+#
+#            out_data_objs, stop = in_data._load_data(start)
+#            exp._clear_data_objects()
+#
+#            self.exp.index['in_data'] = copy.deepcopy(start_in_data)
+#            self.__real_plugin_run(plugin_list, out_data_objs, start, stop)
+#            start = stop
+#
+#        for key in exp.index["in_data"].keys():
+#            exp.index["in_data"][key]._close_file()
+#
+#        return
 
-            out_data_objs, stop = in_data._load_data(start)
-            exp._clear_data_objects()
 
-            self.exp.index['in_data'] = copy.deepcopy(start_in_data)
-            self.__real_plugin_run(plugin_list, out_data_objs, start, stop)
-            start = stop
-
-        for key in exp.index["in_data"].keys():
-            exp.index["in_data"][key]._close_file()
-
-        return
-
-    def __real_plugin_run(self, plugin_list, out_data_objs, start, stop):
-        """ Execute the plugin.
-        """
-        exp = self.exp
-        for i in range(start, stop):
-            link_type = "final_result" if i is len(plugin_list)-2 else \
-                "intermediate"
-
-            exp._barrier()
-
-            for key in out_data_objs[i - start]:
-                exp.index["out_data"][key] = out_data_objs[i - start][key]
-
-            exp._barrier()
-            plugin = pu.plugin_loader(exp, plugin_list[i])
-
-            exp._barrier()
-            cu.user_message("*Running the %s plugin*" % (plugin_list[i]['id']))
-            plugin._run_plugin(exp, self)
-
-            exp._barrier()
-            if self.mpi:
-                cu.user_messages_from_all(plugin.name,
-                                          plugin.executive_summary())
-            else:
-                for message in plugin.executive_summary():
-                    cu.user_message("%s - %s" % (plugin.name, message))
-
-            exp._barrier()
-            out_datasets = plugin.parameters["out_datasets"]
-            exp._reorganise_datasets(out_datasets, link_type)
 
     def _process(self, plugin):
         """ Organise required data and execute the main plugin processing.
@@ -366,5 +234,5 @@ class Hdf5Transport(TransportControl):
 #            for name in return_dict[data_key].keys():
 #                convert_data = return_dict[data_key][name]
 #                remove_data_sets.append(convert_data.name)
-#                data_key.meta_data.set_meta_data(name, convert_data.data[...])
+#                data_key.meta_data.set(name, convert_data.data[...])
 #        return remove_data_sets

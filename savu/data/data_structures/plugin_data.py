@@ -67,8 +67,8 @@ class PluginData(object):
         """
 
         pattern = self.data_obj.get_data_patterns()[name]
-        self.meta_data.set_meta_data("name", name)
-        self.meta_data.set_meta_data("core_dir", pattern['core_dir'])
+        self.meta_data.set("name", name)
+        self.meta_data.set("core_dir", pattern['core_dir'])
         self.__set_slice_directions()
 
     def get_pattern_name(self):
@@ -77,7 +77,7 @@ class PluginData(object):
         :returns: the pattern name
         :rtype: str
         """
-        name = self.meta_data.get_meta_data("name")
+        name = self.meta_data.get("name")
         if name is not None:
             return name
         else:
@@ -138,12 +138,12 @@ class PluginData(object):
         """
         slice_dirs = self.data_obj.get_data_patterns()[
             self.get_pattern_name()]['slice_dir']
-        self.meta_data.set_meta_data('slice_dir', slice_dirs)
+        self.meta_data.set('slice_dir', slice_dirs)
 
     def get_slice_directions(self):
         """ Get the slice directions (slice_dir) of the dataset.
         """
-        return self.meta_data.get_meta_data('slice_dir')
+        return self.meta_data.get('slice_dir')
 
     def get_slice_dimension(self):
         """
@@ -201,8 +201,8 @@ class PluginData(object):
         if set(dims).difference(set(slice_dirs)):
             raise Exception("You are trying to fix a direction that is not"
                             " a slicing direction")
-        self.meta_data.set_meta_data("fixed_directions", dims)
-        self.meta_data.set_meta_data("fixed_directions_values", values)
+        self.meta_data.set("fixed_directions", dims)
+        self.meta_data.set("fixed_directions_values", values)
         self.__set_slice_directions()
         shape = list(self.data_obj.get_shape())
         for dim in dims:
@@ -219,13 +219,13 @@ class PluginData(object):
         fixed = []
         values = []
         if 'fixed_directions' in self.meta_data.get_dictionary():
-            fixed = self.meta_data.get_meta_data("fixed_directions")
-            values = self.meta_data.get_meta_data("fixed_directions_values")
+            fixed = self.meta_data.get("fixed_directions")
+            values = self.meta_data.get("fixed_directions_values")
         return [fixed, values]
 
     def _set_frame_chunk(self, nFrames):
         """ Set the number of frames to process at a time """
-        self.meta_data.set_meta_data("nFrames", nFrames)
+        self.meta_data.set("nFrames", nFrames)
 
     def _get_frame_chunk(self):
         """ Get the number of frames to be processes at a time.
@@ -237,11 +237,11 @@ class PluginData(object):
         :rtype: int
         """
         if self._plugin and self._plugin.chunk > 1:
-            frame_chunk = self.meta_data.get_meta_data("nFrames")
+            frame_chunk = self.meta_data.get("nFrames")
             chunk = self.data_obj.get_preview().get_starts_stops_steps(
                 key='chunks')[self.get_slice_directions()[0]]
             self._set_frame_chunk(gcd(frame_chunk, chunk))
-        return self.meta_data.get_meta_data("nFrames")
+        return self.meta_data.get("nFrames")
 
     def plugin_data_setup(self, pattern_name, chunk, fixed=False):
         """ Setup the PluginData object.

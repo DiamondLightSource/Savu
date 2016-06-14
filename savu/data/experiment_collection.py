@@ -14,10 +14,9 @@
 # limitations under the License.
 
 """
-.. module:: experiment_collection
+.. module:: experiment
    :platform: Unix
-   :synopsis: Contains the Experiment class and all possible experiment \
-   collections from which Experiment can inherit at run time.
+   :synopsis: Contains information specific to the entire experiment.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 """
@@ -28,6 +27,7 @@ import h5py
 from mpi4py import MPI
 
 import savu.core.utils as cu
+import savu.plugins.utils as pu
 from savu.data.plugin_list import PluginList
 from savu.data.data_structures.data import Data
 from savu.data.meta_data import MetaData
@@ -43,25 +43,113 @@ class Experiment(object):
     def __init__(self, options):
         self.meta_data = MetaData(options)
         self.__meta_data_setup(options["process_file"])
-        self.index = {"in_data": {}, "out_data": {}, "mapping": {}}
+        self.experiment_collection = {}
+        self.index = {"in_data": {}, "out_data": {}}
         self.nxs_file = None
 
-    def get_meta_data(self, entry):
+    def get(self, entry):
         """ Get the meta data dictionary. """
-        return self.meta_data.get_meta_data(entry)
+        return self.meta_data.get(entry)
 
     def __meta_data_setup(self, process_file):
         self.meta_data.plugin_list = PluginList()
 
         try:
-            rtype = self.meta_data.get_meta_data('run_type')
+            rtype = self.meta_data.get('run_type')
             if rtype is 'test':
                 self.meta_data.plugin_list.plugin_list = \
-                    self.meta_data.get_meta_data('plugin_list')
+                    self.meta_data.get('plugin_list')
             else:
                 raise Exception('the run_type is unknown in Experiment class')
         except KeyError:
             self.meta_data.plugin_list._populate_plugin_list(process_file)
+
+    def _experiment_setup(self):
+        n_loaders = self.meta_data.plugin_list._get_n_loaders()
+        plugin_list = self.meta_data.plugin_list.plugin_list
+
+        logging.debug("generating all output files")
+        in_objs = []
+        out_objs = []
+        datasets_list = self.meta_data.plugin_list._get_datasets_list()
+        plugins_inst = []
+
+        count = n_loaders
+
+        for i in range(n_loaders):
+            pu.plugin_loader(self, plugin_list[i])
+
+        for plugin_dict in plugin_list[n_loaders:-1]:
+            self._get_current_and_next_patterns(
+                datasets_list[count-n_loaders:])
+            plugin_id = plugin_dict["id"]
+            logging.info("Loading plugin %s", plugin_id)
+            plugin = pu.plugin_loader(self, plugin_dict)
+            plugins_inst.append(plugin)
+            plugin._revert_preview(plugin.get_in_datasets())
+            self.__set_filenames(plugin, plugin_id, count)
+
+            in_objs.append(self.index['in_data'].copy())
+            out_objs.append(self.index["out_data"].copy())
+            self._merge_out_data_to_in()
+            count += 1
+
+        self.meta_data.delete('current_and_next')
+        self.__set_experiment_collection(in_objs, out_objs, plugins_inst)
+
+    def __set_experiment_collection(self, in_list, out_list, plugin_list):
+        print("setting the experiment collection", in_list, out_list, plugin_list)
+        self.experiment_collection['in_datasets'] = in_list
+        self.experiment_collection['out_datasets'] = out_list
+        self.experiment_collection['plugin_list'] = plugin_list
+
+    def _get_experiment_collection(self):
+        temp = self.experiment_collection
+        return temp['in_datasets'], temp['out_datasets'], temp['plugin_list']
+
+    def __set_filenames(self, plugin, plugin_id, count):
+        n_loaders = self.meta_data.plugin_list.n_loaders
+        nPlugins = self.meta_data.plugin_list.n_plugins - n_loaders - 1
+        self.meta_data.set("filename", {})
+        self.meta_data.set("group_name", {})
+        for key in self.index["out_data"].keys():
+            name = key + '_p' + str(count) + '_' + \
+                plugin_id.split('.')[-1] + '.h5'
+            if count is nPlugins:
+                out_path = self.meta_data.get('out_path')
+            else:
+                out_path = self.meta_data.get('inter_path')
+            filename = os.path.join(out_path, name)
+            group_name = "%i-%s-%s" % (count, plugin.name, key)
+            self._barrier()
+            logging.debug("(set_filenames) Creating output file after "
+                          " _barrier %s", filename)
+            self.meta_data.set(["filename", key], filename)
+            self.meta_data.set(["group_name", key], group_name)
+
+    def _get_current_and_next_patterns(self, datasets_lists):
+        """ Get the current and next patterns associated with a dataset
+        throughout the processing chain.
+        """
+        current_datasets = datasets_lists[0]
+        patterns_list = []
+        for current_data in current_datasets['out_datasets']:
+            current_name = current_data['name']
+            current_pattern = current_data['pattern']
+            next_pattern = self.__find_next_pattern(datasets_lists[1:],
+                                                    current_name)
+            patterns_list.append({'current': current_pattern,
+                                  'next': next_pattern})
+        self.meta_data.set('current_and_next', patterns_list)
+
+    def __find_next_pattern(self, datasets_lists, current_name):
+        next_pattern = []
+        for next_data_list in datasets_lists:
+            for next_data in next_data_list['in_datasets']:
+                if next_data['name'] == current_name:
+                    next_pattern = next_data['pattern']
+                    return next_pattern
+        return next_pattern
 
     def create_data_object(self, dtype, name):
         """ Create a data object.
@@ -81,12 +169,12 @@ class Experiment(object):
         return self.index[dtype][name]
 
     def _set_nxs_filename(self):
-        folder = self.meta_data.get_meta_data('out_path')
+        folder = self.meta_data.get('out_path')
         fname = os.path.basename(folder.split('_')[-1]) + '_processed.nxs'
         filename = os.path.join(folder, fname)
-        self.meta_data.set_meta_data("nxs_filename", filename)
+        self.meta_data.set("nxs_filename", filename)
 
-        if self.meta_data.get_meta_data("mpi") is True:
+        if self.meta_data.get("mpi") is True:
             self.nxs_file = h5py.File(filename, 'w', driver='mpio',
                                       comm=MPI.COMM_WORLD)
         else:
@@ -94,13 +182,14 @@ class Experiment(object):
 
     def __remove_dataset(self, data_obj):
         data_obj._close_file()
-        del self.index["out_data"][data_obj.data_info.get_meta_data('name')]
+        del self.index["out_data"][data_obj.data_info.get('name')]
 
     def _clear_data_objects(self):
         self.index["out_data"] = {}
         self.index["in_data"] = {}
 
     def _merge_out_data_to_in(self):
+        print("in merge out data to in", self.index["out_data"])
         for key, data in self.index["out_data"].iteritems():
             if data.remove is False:
                 if key in self.index['in_data'].keys():
@@ -144,7 +233,7 @@ class Experiment(object):
 
     def _barrier(self, communicator=MPI.COMM_WORLD):
         comm_dict = {'comm': communicator}
-        if self.meta_data.get_meta_data('mpi') is True:
+        if self.meta_data.get('mpi') is True:
             logging.debug("About to hit a _barrier %s", comm_dict)
             comm_dict['comm'].barrier()
             logging.debug("Past the _barrier")

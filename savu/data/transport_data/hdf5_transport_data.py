@@ -42,65 +42,47 @@ class Hdf5TransportData(object):
     def __init__(self):
         self.backing_file = None
 
-    def _load_data(self, start):
-        exp = self.exp
-        n_loaders = exp.meta_data.plugin_list._get_n_loaders()
-        plugin_list = exp.meta_data.plugin_list.plugin_list
-        final_plugin = plugin_list[-1]
-        saver_plugin = pu.plugin_loader(exp, final_plugin)
 
-        logging.debug("generating all output files")
-        out_data_objects = []
-        count = start
-        datasets_list = exp.meta_data.plugin_list._get_datasets_list()
 
-        for plugin_dict in plugin_list[start:-1]:
+#    def _load_data(self, start):
+#        exp = self.exp
+#        n_loaders = exp.meta_data.plugin_list._get_n_loaders()
+#        plugin_list = exp.meta_data.plugin_list.plugin_list
+#        final_plugin = plugin_list[-1]
+#        saver_plugin = pu.plugin_loader(exp, final_plugin)
+#
+#        logging.debug("generating all output files")
+#        out_data_objects = []
+#        count = start
+#        datasets_list = exp.meta_data.plugin_list._get_datasets_list()
+#
+#        for plugin_dict in plugin_list[start:-1]:
+#
+#            self._get_current_and_next_patterns(
+#                datasets_list[count-n_loaders:])
+#            plugin_id = plugin_dict["id"]
+#            logging.info("Loading plugin %s", plugin_id)
+#            plugin = pu.plugin_loader(exp, plugin_dict)
+#            plugin._revert_preview(plugin.get_in_datasets())
+#            self.__set_filenames(plugin, plugin_id, count)
+#            saver_plugin.setup()
+#
+#            out_data_objects.append(exp.index["out_data"].copy())
+#            exp._merge_out_data_to_in()
+#            count += 1
+#
+#        self.exp.meta_data.delete('current_and_next')
+#        return out_data_objects, count
 
-            self._get_current_and_next_patterns(
-                datasets_list[count-n_loaders:])
-            plugin_id = plugin_dict["id"]
-            logging.info("Loading plugin %s", plugin_id)
-            plugin = pu.plugin_loader(exp, plugin_dict)
-            plugin._revert_preview(plugin.get_in_datasets())
-            self.__set_filenames(plugin, plugin_id, count)
-            saver_plugin.setup()
 
-            out_data_objects.append(exp.index["out_data"].copy())
-            exp._merge_out_data_to_in()
-            count += 1
-
-        self.exp.meta_data.delete('current_and_next')
-        return out_data_objects, count
-
-    def __set_filenames(self, plugin, plugin_id, count):
-        exp = self.exp
-        expInfo = exp.meta_data
-        nPlugins = \
-            expInfo.plugin_list.n_plugins - expInfo.plugin_list.n_loaders - 1
-        expInfo.set_meta_data("filename", {})
-        expInfo.set_meta_data("group_name", {})
-        for key in exp.index["out_data"].keys():
-            name = key + '_p' + str(count) + '_' + \
-                plugin_id.split('.')[-1] + '.h5'
-            if count is nPlugins:
-                out_path = expInfo.get_meta_data('out_path')
-            else:
-                out_path = expInfo.get_meta_data('inter_path')
-            filename = os.path.join(out_path, name)
-            group_name = "%i-%s-%s" % (count, plugin.name, key)
-            exp._barrier()
-            logging.debug("(set_filenames) Creating output file after "
-                          " _barrier %s", filename)
-            expInfo.set_meta_data(["filename", key], filename)
-            expInfo.set_meta_data(["group_name", key], group_name)
 
     def __add_data_links(self, linkType):
-        nxs_filename = self.exp.meta_data.get_meta_data('nxs_filename')
+        nxs_filename = self.exp.meta_data.get('nxs_filename')
         logging.info("Adding link to file %s", nxs_filename)
 
         nxs_file = self.exp.nxs_file
         entry = nxs_file['entry']
-        group_name = self.data_info.get_meta_data('group_name')
+        group_name = self.data_info.get('group_name')
         self.__output_metadata(self.backing_file[group_name])
         filename = self.backing_file.filename.split('/')[-1]
 
@@ -109,7 +91,7 @@ class Hdf5TransportData(object):
             entry[name] = \
                 h5py.ExternalLink(filename, self.group_name)
         elif linkType is 'intermediate':
-            name = self.group_name + '_' + self.data_info.get_meta_data('name')
+            name = self.group_name + '_' + self.data_info.get('name')
             entry = entry.require_group('intermediate')
             entry.attrs['NX_class'] = 'NXcollection'
             entry[name] = \
@@ -123,7 +105,7 @@ class Hdf5TransportData(object):
         self.__output_metadata_dict(entry)
 
     def __output_axis_labels(self, entry):
-        axis_labels = self.data_info.get_meta_data("axis_labels")
+        axis_labels = self.data_info.get("axis_labels")
         axes = []
         count = 0
         for labels in axis_labels:
@@ -132,7 +114,7 @@ class Hdf5TransportData(object):
             entry.attrs[name + '_indices'] = count
 
             try:
-                mData = self.meta_data.get_meta_data(name)
+                mData = self.meta_data.get(name)
             except KeyError:
                 mData = np.arange(self.get_shape()[count])
 
@@ -146,7 +128,7 @@ class Hdf5TransportData(object):
         entry.attrs['axes'] = axes
 
     def __output_data_patterns(self, entry):
-        data_patterns = self.data_info.get_meta_data("data_patterns")
+        data_patterns = self.data_info.get("data_patterns")
         entry = entry.create_group('patterns')
         entry.attrs['NX_class'] = 'NXcollection'
         for pattern in data_patterns:
@@ -213,7 +195,7 @@ class Hdf5TransportData(object):
             for index, value in enumerate(shape):
                 if isinstance(value, str):
                     shape[index] = \
-                        len(self.data_info.get_meta_data('axis_labels')[index])
+                        len(self.data_info.get('axis_labels')[index])
             shape = tuple(shape)
             sshape = [shape[sslice] for sslice in slice_dirs]
         return sshape
@@ -250,7 +232,7 @@ class Hdf5TransportData(object):
                 return np.arange(starts[dim], stops[dim], steps[dim])
 
     def __get_bool_slice_dir_index(self, dim, dir_idx):
-        shape = self.data_info.get_meta_data('orig_shape')[dim]
+        shape = self.data_info.get('orig_shape')[dim]
         bool_idx = np.ones(shape, dtype=bool)
         bool_idx[dir_idx] = True
         return bool_idx
@@ -363,8 +345,8 @@ class Hdf5TransportData(object):
         return self.__grouped_slice_list(sl, max_frames)
 
     def _get_slice_list_per_process(self, expInfo):
-        processes = expInfo.get_meta_data("processes")
-        process = expInfo.get_meta_data("process")
+        processes = expInfo.get("processes")
+        process = expInfo.get("process")
         self.__set_padding_dict()
         slice_list = self._get_grouped_slice_list()
 

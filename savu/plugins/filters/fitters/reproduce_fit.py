@@ -67,8 +67,8 @@ class ReproduceFit(BaseFitter):
         summed = out_datasets[0]
         individual_curves = out_datasets[1]
 
-        self.PeakEnergy = in_dataset[0].meta_data.get_meta_data('PeakEnergy')
-        self.energy = in_dataset[-1].meta_data.get_meta_data('energy')
+        self.PeakEnergy = in_dataset[0].meta_data.get('PeakEnergy')
+        self.energy = in_dataset[-1].meta_data.get('energy')
 
         new_shape = shape[:-1] + (len(self.PeakEnergy),) + (shape[-1],)
 #         print "the new shape is"+str(new_shape)

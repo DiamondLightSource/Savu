@@ -156,7 +156,7 @@ class PluginDatasets(object):
         return self.__set_meta_data(self.parameters['out_datasets'],
                                     'out_data')
 
-    def get_meta_data(self):
+    def get(self):
         """ Get a list of meta_data objects associated with the
         in/out_datasets.
 
@@ -181,6 +181,6 @@ class PluginDatasets(object):
 
     def _set_unknown_shape(self, data, key):
         try:
-            return (len(data.meta_data.get_meta_data(key)),)
+            return (len(data.meta_data.get(key)),)
         except KeyError:
             return (0,)

@@ -53,15 +53,15 @@ class BaseFluoFitter(BaseFitter):
     def pre_process(self):
         in_meta_data = self.get_in_meta_data()[0]
         try:
-            _foo = in_meta_data.get_meta_data("PeakIndex")[0]
+            _foo = in_meta_data.get("PeakIndex")[0]
             logging.debug('Using the positions in the peak index')
         except KeyError:
             logging.debug("No Peak Index in the metadata")
             logging.debug("Calculating the positions from energy")
 #             idx = self.setPositions(in_meta_data)
             logging.debug("The index is"+str(self.idx))
-            in_meta_data.set_meta_data('PeakIndex', self.idx)
-            in_meta_data.set_meta_data('PeakEnergy', self.axis[self.idx])
+            in_meta_data.set('PeakIndex', self.idx)
+            in_meta_data.set('PeakEnergy', self.axis[self.idx])
 
     def setup(self):
         # set up the output datasets that are created by the plugin
@@ -114,8 +114,8 @@ class BaseFluoFitter(BaseFitter):
         for i in range(len(out_datasets)):
             out_meta_data = out_datasets[i].meta_data
             out_meta_data.dict = deepcopy(in_meta_data.get_dictionary())
-            out_meta_data.set_meta_data("PeakEnergy",self.axis[self.idx])
-            out_meta_data.set_meta_data('PeakIndex',self.idx)
+            out_meta_data.set("PeakEnergy",self.axis[self.idx])
+            out_meta_data.set('PeakIndex',self.idx)
 
 
     def setPositions(self, in_meta_data):
@@ -130,7 +130,7 @@ class BaseFluoFitter(BaseFitter):
             self.parameters["fitted_energy_range_keV"]
         if self.parameters['mono_energy'] is None:
             paramdict["Experiment"]["incident_energy_keV"] = \
-                in_meta_data.get_meta_data("mono_energy")
+                in_meta_data.get("mono_energy")
         else:
             paramdict["Experiment"]["incident_energy_keV"] = \
                 self.parameters['mono_energy']
@@ -139,7 +139,7 @@ class BaseFluoFitter(BaseFitter):
         engy = self.findLines(paramdict)
         # make it an index since this is what find peak will also give us
 #         print 'basefluo meta is:'+str(in_meta_data.get_dictionary().keys())
-        axis = self.axis = in_meta_data.get_meta_data("energy")
+        axis = self.axis = in_meta_data.get("energy")
         dq = axis[1]-axis[0]
         logging.debug("the peak energies are:"+str(engy))
         logging.debug("the offset is"+str(axis[0]))

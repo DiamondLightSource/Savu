@@ -95,7 +95,7 @@ class Preview(object):
         """ Add previewing params to data_info dictionary and set reduced
         shape.
         """
-        set_mData = self.get_data_obj().data_info.set_meta_data
+        set_mData = self.get_data_obj().data_info.set
         set_mData('starts', starts)
         set_mData('stops', stops)
         set_mData('steps', steps)
@@ -149,7 +149,7 @@ class Preview(object):
          only the ``key`` list.
         :rtype: list(list(int))
         """
-        get_mData = self.get_data_obj().data_info.get_meta_data
+        get_mData = self.get_data_obj().data_info.get
         if key is not None:
             return get_mData(key)
         else:
@@ -171,7 +171,7 @@ class Preview(object):
         """
         dobj = self.get_data_obj()
         orig_shape = dobj.get_shape()
-        dobj.data_info.set_meta_data('orig_shape', orig_shape)
+        dobj.data_info.set('orig_shape', orig_shape)
         new_shape = []
         for dim in range(len(starts)):
             new_shape.append(np.prod((dobj._get_slice_dir_matrix(dim).shape)))

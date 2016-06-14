@@ -38,7 +38,7 @@ class MetaData(object):
             options = {}
         self.dict = options.copy()
 
-    def set_meta_data(self, name, value):
+    def set(self, name, value):
         """ Create and set an entry in the meta data dictionary.
 
         :param name: dictionary key(s). If ``name`` is a list then each
@@ -49,14 +49,14 @@ class MetaData(object):
 
         For example,
 
-            >>> MetaDataObj.set_meta_data(['name1', 'name2'], 3)
+            >>> MetaDataObj.set(['name1', 'name2'], 3)
             >>> MetaDataObj.get_dictionary()
             {'name1': {'name2': 3}}
         """
         maplist = (name if type(name) is list else [name])
-        self.get_meta_data(maplist[:-1], True)[maplist[-1]] = value
+        self.get(maplist[:-1], True)[maplist[-1]] = value
 
-    def get_meta_data(self, maplist, setFlag=False):
+    def get(self, maplist, setFlag=False):
         """ Get a value from the meta data dictionary, given its key(s).
 
         :params maplist: Dictionary key(s).

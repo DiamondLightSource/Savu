@@ -85,7 +85,7 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
 
         # copy all required information from in_dataset[0]
         self.shape = list(in_dataset[0].get_shape())
-        self.core_dir = in_pData[0].meta_data.get_meta_data('core_dir')
+        self.core_dir = in_pData[0].meta_data.get('core_dir')
         self.crop = self.parameters['crop_edges']
         for ddir in self.core_dir:
             self.shape[ddir] = self.shape[ddir] - 2*self.crop

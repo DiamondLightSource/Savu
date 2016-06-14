@@ -65,7 +65,7 @@ class ImageLoader(BaseLoader):
         mod = __import__('savu.data.data_structures.data_type', fromlist=dtype)
         clazz = getattr(mod, dtype)
 
-        path = exp.meta_data.get_meta_data("data_file")
+        path = exp.meta_data.get("data_file")
         data_prefix = self.parameters['data_prefix']
         data_obj.data = clazz(path, data_obj, [self.parameters['frame_dim']],
                               None, data_prefix)
@@ -77,18 +77,18 @@ class ImageLoader(BaseLoader):
                          self.parameters['dark_prefix'])
             shape = dark.get_shape()
             index = [slice(0, shape[i], 1) for i in range(len(shape))]
-            data_obj.meta_data.set_meta_data('dark', dark[index].mean(0))
+            data_obj.meta_data.set('dark', dark[index].mean(0))
         else:
-            data_obj.meta_data.set_meta_data(
+            data_obj.meta_data.set(
                 'dark', np.zeros(data_obj.data.image_shape))
         if self.parameters['flat_prefix'] != None:
             flat = clazz(path, data_obj, [self.parameters['frame_dim']],
                          None, self.parameters['flat_prefix'])
             shape = flat.get_shape()
             index = [slice(0, shape[i], 1) for i in range(len(shape))]
-            data_obj.meta_data.set_meta_data('flat', flat[index].mean(0))
+            data_obj.meta_data.set('flat', flat[index].mean(0))
         else:
-            data_obj.meta_data.set_meta_data(
+            data_obj.meta_data.set(
                 'flat', np.ones(data_obj.data.image_shape))
 
         # dummy file
@@ -118,4 +118,4 @@ class ImageLoader(BaseLoader):
         if data_angles is not n_angles:
             raise Exception("The number of angles %s does not match the data "
                             "dimension length %s", n_angles, data_angles)
-        data_obj.meta_data.set_meta_data("rotation_angle", angles)
+        data_obj.meta_data.set("rotation_angle", angles)

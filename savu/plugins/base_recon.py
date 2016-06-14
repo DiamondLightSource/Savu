@@ -68,7 +68,7 @@ class BaseRecon(Plugin):
         self.exp.log(self.name + " End")
         self.vol_shape = out_pData[0].get_shape()
         self.main_dir = in_pData[0].get_pattern()['SINOGRAM']['main_dir']
-        self.angles = in_meta_data.get_meta_data('rotation_angle')
+        self.angles = in_meta_data.get('rotation_angle')
         self.slice_dirs = out_pData[0].get_slice_directions()
 
         shape = in_pData[0].get_shape()
@@ -82,7 +82,7 @@ class BaseRecon(Plugin):
 
     def set_centre_of_rotation(self, inData, mData, pData):
         try:
-            cor = mData.get_meta_data("centre_of_rotation")
+            cor = mData.get("centre_of_rotation")
         except KeyError:
             cor = np.ones(inData.get_shape()[pData.get_slice_dimension()])
             cor *= self.parameters['center_of_rotation']
@@ -141,7 +141,7 @@ class BaseRecon(Plugin):
             in_pData[1].plugin_data_setup('VOLUME_XZ', self.get_max_frames(),
                                           fixed=True)
 
-        axis_labels = in_dataset[0].data_info.get_meta_data('axis_labels')[0]
+        axis_labels = in_dataset[0].data_info.get('axis_labels')[0]
 
         dim_volX, dim_volY, dim_volZ = \
             self.map_volume_dimensions(in_dataset[0], in_pData[0])

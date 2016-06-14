@@ -69,7 +69,7 @@ class BaseFitter(BaseFilter, CpuPlugin):
         fitAreas.add_pattern("CHANNEL", **channel)
         fitHeights.add_pattern("CHANNEL", **channel)
         fitWidths.add_pattern("CHANNEL", **channel)
-        #residlabels = in_dataset[0].meta_data.get_meta_data('axis_labels')[0:3]
+        #residlabels = in_dataset[0].meta_data.get('axis_labels')[0:3]
         #print residlabels.append(residlabels[-1])
         residuals = out_datasets[3]
         residuals.create_dataset(in_dataset[0])
@@ -97,7 +97,7 @@ class BaseFitter(BaseFilter, CpuPlugin):
     
     def setPositions(self, in_meta_data):
         try:
-            positions = in_meta_data.get_meta_data('PeakIndex')
+            positions = in_meta_data.get('PeakIndex')
             logging.debug('Using the pre-defined PeakIndex metadata')
         except KeyError:
             logging.error('No peaks defined!')

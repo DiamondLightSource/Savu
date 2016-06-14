@@ -49,7 +49,7 @@ class Hdf5TomoSaver(BaseSaver):
         current_and_next = [0]*len(out_data_dict)
         if 'current_and_next' in self.exp.meta_data.get_dictionary():
             current_and_next = \
-                self.exp.meta_data.get_meta_data('current_and_next')
+                self.exp.meta_data.get('current_and_next')
 
         logging.info("saver setup: 1")
         exp._barrier()
@@ -79,8 +79,8 @@ class Hdf5TomoSaver(BaseSaver):
         """
         expInfo = self.exp.meta_data
 
-        filename = expInfo.get_meta_data(["filename", key])
-        if expInfo.get_meta_data("mpi") is True:
+        filename = expInfo.get(["filename", key])
+        if expInfo.get("mpi") is True:
 
             info = MPI.Info.Create()
             info.Set("romio_ds_read", "disable")
@@ -99,15 +99,15 @@ class Hdf5TomoSaver(BaseSaver):
             raise IOError("Failed to open the hdf5 file")
 
         logging.debug("Creating file '%s' '%s'",
-                      expInfo.get_meta_data("group_name"),
+                      expInfo.get("group_name"),
                       backing_file.filename)
 
         return backing_file
 
     def __create_entries(self, data, key, current_and_next):
         expInfo = self.exp.meta_data
-        group_name = expInfo.get_meta_data(["group_name", key])
-        data.data_info.set_meta_data('group_name', group_name)
+        group_name = expInfo.get(["group_name", key])
+        data.data_info.set('group_name', group_name)
         try:
             group_name = group_name + '_' + data.name
         except AttributeError:

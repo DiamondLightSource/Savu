@@ -55,7 +55,7 @@ class Stats(BaseFilter, CpuPlugin):
         data = out_datasets[0].data
         if self.parameters['required_stats'] == 'max':
             maximum = np.max(data)
-            in_meta_data.set_meta_data('max', maximum)
+            in_meta_data.set('max', maximum)
 
     def get_max_frames(self):
         return 1

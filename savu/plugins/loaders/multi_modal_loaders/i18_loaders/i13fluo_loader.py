@@ -27,6 +27,7 @@ from savu.plugins.utils import register_plugin
 import logging
 import h5py
 
+
 @register_plugin
 class I13fluoLoader(BaseLoader):
     """
@@ -50,18 +51,18 @@ class I13fluoLoader(BaseLoader):
         exp = self.exp
         data_obj = exp.create_data_object("in_data", 'fluo')
         data_obj.backing_file = \
-            h5py.File(exp.meta_data.get_meta_data("data_file"), 'r')
+            h5py.File(exp.meta_data.get("data_file"), 'r')
         data_obj.data = data_obj.backing_file[data_str]
         data_obj.set_shape(data_obj.data.shape)
         npts = data_obj.data.shape[-1]
         gain = self.parameters["fluo_gain"]
         energy = np.arange(self.parameters["fluo_offset"], gain*npts, gain)
-        data_obj.meta_data.set_meta_data("energy", energy)
+        data_obj.meta_data.set("energy", energy)
         labels = []
         ### set the x
         x = \
             data_obj.backing_file['entry1/xmapMca/t1_sx'].value
-        data_obj.meta_data.set_meta_data('x', x)
+        data_obj.meta_data.set('x', x)
         # axis label
         
         ### set the y
@@ -70,7 +71,7 @@ class I13fluoLoader(BaseLoader):
         pos = np.zeros((2,len(y)))
         pos[0,:] = x
         pos[1,:] = y
-        data_obj.meta_data.set_meta_data('xy', pos)
+        data_obj.meta_data.set('xy', pos)
         # axis label
         labels.append('xy.microns')
         labels.append('idx.idx')

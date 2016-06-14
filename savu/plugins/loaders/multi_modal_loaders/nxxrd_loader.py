@@ -46,7 +46,7 @@ class NxxrdLoader(BaseMultiModalLoader):
         data_obj, xrd_entry = self.multi_modal_setup('NXxrd', data_str)
         mono_energy = data_obj.backing_file[
             xrd_entry.name + '/instrument/monochromator/energy'].value
-        self.exp.meta_data.set_meta_data("mono_energy", mono_energy)
+        self.exp.meta_data.set("mono_energy", mono_energy)
         self.set_motors(data_obj, xrd_entry, 'xrd')
 
 
@@ -58,41 +58,41 @@ class NxxrdLoader(BaseMultiModalLoader):
             det_str = 'entry1/instrument/detector'
             mData = data_obj.meta_data
             xpix = calibrationfile[det_str + '/detector_module/fast_pixel_direction'].value*1e-3 # in metres
-            mData.set_meta_data("x_pixel_size",xpix)
+            mData.set("x_pixel_size",xpix)
             
-            mData.set_meta_data("beam_center_x",
+            mData.set("beam_center_x",
                     calibrationfile[det_str + '/beam_center_x'].value*1e-3) #in metres 
-            mData.set_meta_data("beam_center_y",
+            mData.set("beam_center_y",
                             calibrationfile[det_str + '/beam_center_y'].value*1e-3) # in metres
-            mData.set_meta_data("distance",
+            mData.set("distance",
                             calibrationfile[det_str + '/distance'].value*1e-3) # in metres
-            mData.set_meta_data("incident_wavelength",
+            mData.set("incident_wavelength",
                             calibrationfile['/entry1/calibration_sample/beam'
                                             '/incident_wavelength'].value*1e-10) # in metres
-            mData.set_meta_data("yaw", -calibrationfile[det_str + '/transformations/euler_b'].value)# in degrees
-            mData.set_meta_data("roll",calibrationfile[det_str + '/transformations/euler_c'].value-180.0)# in degrees
+            mData.set("yaw", -calibrationfile[det_str + '/transformations/euler_b'].value)# in degrees
+            mData.set("roll",calibrationfile[det_str + '/transformations/euler_c'].value-180.0)# in degrees
             logging.debug('.... its the version in DAWN 2.0')
         except KeyError:
             try:
                 det_str = 'entry/instrument/detector'
                 mData = data_obj.meta_data
                 xpix = calibrationfile[det_str + '/x_pixel_size'].value * 1e-3
-                mData.set_meta_data("x_pixel_size", xpix) # in metres
-                mData.set_meta_data("beam_center_x",
+                mData.set("x_pixel_size", xpix) # in metres
+                mData.set("beam_center_x",
                         calibrationfile[det_str + '/beam_center_x'].value*xpix)# in metres
-                mData.set_meta_data("beam_center_y",
+                mData.set("beam_center_y",
                                 calibrationfile[det_str + '/beam_center_y'].value*xpix) # in metres
-                mData.set_meta_data("distance",
+                mData.set("distance",
                                 calibrationfile[det_str + '/distance'].value*1e-3) # in metres
-                mData.set_meta_data("incident_wavelength",
+                mData.set("incident_wavelength",
                                 calibrationfile['/entry/calibration_sample/beam'
                                                 '/incident_wavelength'].value*1e-10)# in metres
                 orien = calibrationfile[det_str + '/detector_orientation'][...].reshape((3, 3))
                 yaw = math.degrees(-math.atan2(orien[2, 0], orien[2, 2]))# in degrees
                 roll = math.degrees(-math.atan2(orien[0, 1], orien[1, 1]))# in degrees
                 
-                mData.set_meta_data("yaw", -yaw)
-                mData.set_meta_data("roll", roll)
+                mData.set("yaw", -yaw)
+                mData.set("roll", roll)
                 logging.debug('.... its the legacy version pre-DAWN 2.0')
             except KeyError:
                 logging.warn("We don't know what type of calibration file this is")

@@ -152,7 +152,7 @@ class DataMapping(object):
 
     def check_is_map(self, proj_dir):
         pattern = []
-        if self.get_meta_data("is_map"):
+        if self._is_map:
             ovs = []
             for i in self.get_shape():
                 if i != proj_dir[0]:
@@ -163,7 +163,7 @@ class DataMapping(object):
 
     def check_is_tomo(self, proj_dir, rotation):
         pattern = []
-        if self.get_meta_data("is_tomo"):
+        if self._is_tomo:
             ovs = []
             for i in self.get_shape():
                 if i != rotation:

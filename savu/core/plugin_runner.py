@@ -46,32 +46,69 @@ class PluginRunner(object):
         """ Create an experiment and run the plugin list.
         """
         self.exp = Experiment(self.options)
+        exp = self.exp
         plugin_list = self.exp.meta_data.plugin_list.plugin_list
-
-        logging.info("run_plugin_list: 1")
-        self.exp._barrier()
         self._run_plugin_list_check(plugin_list)
 
-        logging.info("run_plugin_list: 2")
-        self.exp._barrier()
         expInfo = self.exp.meta_data
         logging.debug("Running process List.save_list_to_file")
-        expInfo.plugin_list._save_plugin_list(
-            expInfo.get_meta_data("nxs_filename"), exp=self.exp)
+        expInfo.plugin_list._save_plugin_list(expInfo.get("nxs_filename"),
+                                              exp=exp)
 
-        logging.info("run_plugin_list: 3")
+        exp._experiment_setup()
+        in_data_objs, out_data_objs, plugins_inst = \
+            exp._get_experiment_collection()
+
+        self._transport_pre_process(in_data_objs, out_data_objs, plugins_inst)
+        # set conditions for start/stop here?
+
+        start = 0
+        stop = 0
+        count = 0
+        n_plugins = len(plugins_inst)
+        while n_plugins != stop:
+            stop = n_plugins # *** temporary, add conditions/call function here
+            self.exp.index['in_data'] = in_data_objs[count]
+            self.exp.index['out_data'] = out_data_objs[count]
+            self.__real_plugin_run(plugins_inst, start, stop)
+            start = stop
+            count += 1
+
+        for key in exp.index["in_data"].keys():
+            exp.index["in_data"][key]._close_file()
+
         self.exp._barrier()
-        self._transport_run_plugin_list()
-
-        logging.info("run_plugin_list: 4")
-        self.exp._barrier()
-
         cu.user_message("***********************")
         cu.user_message("* Processing Complete *")
         cu.user_message("***********************")
 
         self.exp.nxs_file.close()
         return self.exp
+
+    def __real_plugin_run(self, plugins_inst, start, stop):
+        """ Execute the plugin.
+        """
+        exp = self.exp
+        for i in range(start, stop):
+            link_type = "final_result" if i is len(plugins_inst) else \
+                "intermediate"
+
+            exp._barrier()
+            plugin = plugins_inst[i]
+            cu.user_message("*Running the %s plugin*" % plugin.name)
+            plugin._run_plugin(exp, self)
+
+            exp._barrier()
+            if self.exp.meta_data.get('mpi'):
+                cu.user_messages_from_all(plugin.name,
+                                          plugin.executive_summary())
+            else:
+                for message in plugin.executive_summary():
+                    cu.user_message("%s - %s" % (plugin.name, message))
+
+            exp._barrier()
+            out_datasets = plugin.parameters["out_datasets"]
+            exp._reorganise_datasets(out_datasets, link_type)
 
     def _run_plugin_list_check(self, plugin_list):
         """ Run the plugin list through the framework without executing the
@@ -127,11 +164,11 @@ class PluginRunner(object):
             raise Exception("The process list contains GPU plugins, but "
                             " no GPUs have been found.")
 
-        processes = self.exp.meta_data.get_meta_data('processes')
+        processes = self.exp.meta_data.get('processes')
         if not [i for i in processes if 'GPU' in i]:
             logging.debug("GPU processes missing. GPUs found so adding them.")
             cpus = ['CPU'+str(i) for i in range(count)]
             gpus = ['GPU'+str(i) for i in range(count)]
             for i in range(min(count, len(processes))):
                 processes[processes.index(cpus[i])] = gpus[i]
-            self.exp.meta_data.set_meta_data('processes', processes)
+            self.exp.meta_data.set('processes', processes)

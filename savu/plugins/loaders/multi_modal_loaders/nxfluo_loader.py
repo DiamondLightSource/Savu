@@ -59,11 +59,11 @@ class NxfluoLoader(BaseMultiModalLoader):
         monitor = data_obj.backing_file[fluo_entry.name +
                                         '/monitor/data'
                                         ].value
-        mData.set_meta_data("energy", energy)
+        mData.set("energy", energy)
         # global since it is to do with the beam
-        mData.set_meta_data("mono_energy", mono_energy)
-        mData.set_meta_data("monitor", monitor)
-        mData.set_meta_data("average", average)
+        mData.set("mono_energy", mono_energy)
+        mData.set("monitor", monitor)
+        mData.set("average", average)
         #and get the mono energy
 
         self.set_motors(data_obj, fluo_entry, 'fluo')
@@ -72,7 +72,7 @@ class NxfluoLoader(BaseMultiModalLoader):
         if rotation_angle.ndim > 1:
             rotation_angle = rotation_angle[:,0]
 
-        data_obj.meta_data.set_meta_data('rotation_angle', rotation_angle)
+        data_obj.meta_data.set('rotation_angle', rotation_angle)
 
         self.add_patterns_based_on_acquisition(data_obj, 'fluo')
 

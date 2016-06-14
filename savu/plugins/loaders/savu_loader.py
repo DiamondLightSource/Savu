@@ -48,7 +48,7 @@ class SavuLoader(BaseLoader):
         expInfo = exp.meta_data
 
         data_obj.backing_file = \
-            h5py.File(expInfo.get_meta_data("data_file"), 'r')
+            h5py.File(expInfo.get("data_file"), 'r')
 
         data_path = self.parameters['data_path']
         entry_path = '/'.join(data_path.split('/')[:-1])
@@ -88,7 +88,7 @@ class SavuLoader(BaseLoader):
             if mData_name is 'image_key':
                 self.set_image_key(data, mData)
             else:
-                data.meta_data.set_meta_data(mData_name, mData[...])
+                data.meta_data.set(mData_name, mData[...])
 
     def set_image_key(self, data, mData):
         ds.TomoRaw(data)

@@ -41,7 +41,7 @@ class BasePtycho(BaseFilter, CpuPlugin): # also make one for gpu
         
         in_meta_data = in_dataset[0].meta_data# grab the positions from the metadata
         logging.debug('getting the positions...')
-        self.positions = in_meta_data.get_meta_data('xy') # get the positions and bind them
+        self.positions = in_meta_data.get('xy') # get the positions and bind them
 
         # lets set up the axis labels for output datasets
         position_labels, probe_labels, object_labels, sh = self.setup_axis_labels(in_dataset)
@@ -193,7 +193,7 @@ class BasePtycho(BaseFilter, CpuPlugin): # also make one for gpu
         positions: 'xy'
         '''
         PATTERN_LABELS = ['xy', 'detectorX', 'detectorY']
-        in_labels = in_dataset[0].data_info.get_meta_data('axis_labels') # this is a list of dictionarys
+        in_labels = in_dataset[0].data_info.get('axis_labels') # this is a list of dictionarys
         existing_labels = [d.keys()[0] for d in in_labels] # this just gets the axes names
         logging.debug('The existing labels are:%s, we will remove:%s' % (existing_labels, PATTERN_LABELS))
         logging.debug('removing these labels from the list')
@@ -213,7 +213,7 @@ class BasePtycho(BaseFilter, CpuPlugin): # also make one for gpu
         logging.debug('the labels for the positions are:%s' % str(position_labels))
         # now we also need this part of the shape of the data so...
         md = in_dataset[0].meta_data
-        sh = tuple([len(md.get_meta_data(l)) for l in core_labels_raw])
+        sh = tuple([len(md.get(l)) for l in core_labels_raw])
         return position_labels, probe_labels, object_labels, sh
 
     def set_probe_rotation_patterns(self, probe, rest_probe):

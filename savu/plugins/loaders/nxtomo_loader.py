@@ -52,7 +52,7 @@ class NxtomoLoader(BaseLoader):
         data_obj = exp.create_data_object('in_data', 'tomo')
 
         data_obj.backing_file = \
-            h5py.File(self.exp.meta_data.get_meta_data("data_file"), 'r')
+            h5py.File(self.exp.meta_data.get("data_file"), 'r')
 
         data_obj.data = data_obj.backing_file[self.parameters['data_path']]
 
@@ -73,7 +73,7 @@ class NxtomoLoader(BaseLoader):
 
         try:
             control = data_obj.backing_file['entry1/tomo_entry/control/data']
-            data_obj.meta_data.set_meta_data("control", control[...])
+            data_obj.meta_data.set("control", control[...])
         except:
             logging.warn("No Control information available")
 
@@ -141,9 +141,9 @@ class NxtomoLoader(BaseLoader):
             try:
                 mData = data_obj.meta_data
                 entry = 'entry1/tomo_entry/instrument/detector/flatfield'
-                mData.set_meta_data('flat', data_obj.backing_file[entry][...])
+                mData.set('flat', data_obj.backing_file[entry][...])
                 entry = 'entry1/tomo_entry/instrument/detector/darkfield'
-                mData.set_meta_data('dark', data_obj.backing_file[entry][...])
+                mData.set('dark', data_obj.backing_file[entry][...])
             except KeyError:
                 logging.warn("Dark and flat data was not found in input "
                              "file.")
@@ -165,7 +165,7 @@ class NxtomoLoader(BaseLoader):
                 image_key == key, ...].mean(0)*int(scale)
         except KeyError:
             data = h5file[fentry][...].mean(0)*int(scale)
-        data_obj.meta_data.set_meta_data(name, data)
+        data_obj.meta_data.set(name, data)
 
     def __set_rotation_angles(self, data_obj):
         angles = self.parameters['angles']
@@ -187,7 +187,7 @@ class NxtomoLoader(BaseLoader):
                 except:
                     raise Exception('Cannot set angles in loader.')
 
-        data_obj.meta_data.set_meta_data("rotation_angle", angles)
+        data_obj.meta_data.set("rotation_angle", angles)
         return len(angles)
 
     def __check_angles(self, data_obj, n_angles):

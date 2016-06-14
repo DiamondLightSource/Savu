@@ -78,7 +78,7 @@ class FastxrfFitting(BaseFluoFitter):
     
     
     def prep_xrfd(self, in_meta_data):
-        self.axis = in_meta_data.get_meta_data("energy")
+        self.axis = in_meta_data.get("energy")
         xrfd = XRFDataset()
         # now to overide the experiment
         xrfd.paramdict["Experiment"] = {}
