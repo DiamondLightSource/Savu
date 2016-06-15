@@ -46,36 +46,31 @@ class PluginRunner(object):
         """ Create an experiment and run the plugin list.
         """
         self.exp = Experiment(self.options)
-        exp = self.exp
-        plugin_list = self.exp.meta_data.plugin_list.plugin_list
-        self._run_plugin_list_check(plugin_list)
+        plugin_list = self.exp.meta_data.plugin_list
+        self._run_plugin_list_check(plugin_list.plugin_list)
 
-        expInfo = self.exp.meta_data
         logging.debug("Running process List.save_list_to_file")
-        expInfo.plugin_list._save_plugin_list(expInfo.get("nxs_filename"),
-                                              exp=exp)
+        self.exp.meta_data.plugin_list._save_plugin_list(
+            self.exp.meta_data.get("nxs_filename"), exp=self.exp)
 
-        exp._experiment_setup()
-        in_data_objs, out_data_objs, plugins_inst = \
-            exp._get_experiment_collection()
+        self.exp._experiment_setup()
+        exp_coll = self.exp._get_experiment_collection()
 
-        self._transport_pre_process(in_data_objs, out_data_objs, plugins_inst)
-        # set conditions for start/stop here?
+        n_plugins = plugin_list._get_n_processing_plugins()
+        for i in range(n_plugins):
+            plugin = exp_coll["plugin_list"][i]
+            self.exp._set_experiment_details_for_current_plugin(i)
+            self.exp._set_experiment_details_for_current_plugin(i)
+            self._transport_pre_plugin()
+            self.exp._barrier()
+            cu.user_message("*Running the %s plugin*" % plugin.name)
+            plugin._run_plugin(self.exp, self)
+            self.exp._barrier()
+            self.exp._cleanup_experiment_for_current_plugin(plugin)
+            self._transport_post_plugin()
 
-        start = 0
-        stop = 0
-        count = 0
-        n_plugins = len(plugins_inst)
-        while n_plugins != stop:
-            stop = n_plugins # *** temporary, add conditions/call function here
-            self.exp.index['in_data'] = in_data_objs[count]
-            self.exp.index['out_data'] = out_data_objs[count]
-            self.__real_plugin_run(plugins_inst, start, stop)
-            start = stop
-            count += 1
-
-        for key in exp.index["in_data"].keys():
-            exp.index["in_data"][key]._close_file()
+        for key in self.exp.index["in_data"].keys():
+            self.exp.index["in_data"][key]._close_file()
 
         self.exp._barrier()
         cu.user_message("***********************")
@@ -84,31 +79,6 @@ class PluginRunner(object):
 
         self.exp.nxs_file.close()
         return self.exp
-
-    def __real_plugin_run(self, plugins_inst, start, stop):
-        """ Execute the plugin.
-        """
-        exp = self.exp
-        for i in range(start, stop):
-            link_type = "final_result" if i is len(plugins_inst) else \
-                "intermediate"
-
-            exp._barrier()
-            plugin = plugins_inst[i]
-            cu.user_message("*Running the %s plugin*" % plugin.name)
-            plugin._run_plugin(exp, self)
-
-            exp._barrier()
-            if self.exp.meta_data.get('mpi'):
-                cu.user_messages_from_all(plugin.name,
-                                          plugin.executive_summary())
-            else:
-                for message in plugin.executive_summary():
-                    cu.user_message("%s - %s" % (plugin.name, message))
-
-            exp._barrier()
-            out_datasets = plugin.parameters["out_datasets"]
-            exp._reorganise_datasets(out_datasets, link_type)
 
     def _run_plugin_list_check(self, plugin_list):
         """ Run the plugin list through the framework without executing the

@@ -35,63 +35,19 @@ class Hdf5Transport(TransportControl):
     def _transport_control_setup(self, options):
         MPI_setup(options)
 
-    def _transport_pre_process(self, in_data_list, out_data_list, plugin_inst):
-        """ Run the plugin list inside the transport layer.
-        """
-        exp = self.exp
-        plugin_obj = exp.meta_data.plugin_list
-        n_loaders = plugin_obj._get_n_loaders()
-        plugin_list = exp.meta_data.plugin_list.plugin_list
-        saver_plugin = pu.plugin_loader(exp, plugin_list[-1])
+    def _transport_pre_plugin(self):
+        plugin_list = self.exp.meta_data.plugin_list
+        pu.plugin_loader(self.exp, plugin_list.plugin_list[-1])
 
-        for i in range(n_loaders):
-            pu.plugin_loader(exp, plugin_list[i])
-
-        for i in range(len(plugin_inst)):
-            exp.index['in_data'] = in_data_list[i]
-            exp.index['out_data'] = out_data_list[i]
-            saver_plugin.setup()
-
-#    def _transport_run_plugin_list(self):
-#        """ Run the plugin list inside the transport layer.
-#        """
-#        exp = self.exp
-#
-#        plugin_obj = exp.meta_data.plugin_list
-#        n_loaders = plugin_obj._get_n_loaders()
-#        plugin_list = exp.meta_data.plugin_list.plugin_list
-#
-#        for i in range(n_loaders):
-#            pu.plugin_loader(exp, plugin_list[i])
-#
-#        start = n_loaders
-#        stop = 0
-#        n_plugins = len(plugin_list) - 1  # minus 1 for saver
-#
-#        while n_plugins != stop:
-#            start_in_data = copy.deepcopy(self.exp.index['in_data'])
-#            in_data = exp.index["in_data"][exp.index["in_data"].keys()[0]]
-#
-#            out_data_objs, stop = in_data._load_data(start)
-#            exp._clear_data_objects()
-#
-#            self.exp.index['in_data'] = copy.deepcopy(start_in_data)
-#            self.__real_plugin_run(plugin_list, out_data_objs, start, stop)
-#            start = stop
-#
-#        for key in exp.index["in_data"].keys():
-#            exp.index["in_data"][key]._close_file()
-#
-#        return
-
-
+    def _transport_post_plugin(self):
+        for data in self.exp.index["out_data"].values():
+            data._save_data(self.exp.meta_data.get("link_type"))
 
     def _process(self, plugin):
         """ Organise required data and execute the main plugin processing.
 
         :param plugin plugin: The current plugin instance.
         """
-        self.process_checks()
         in_data, out_data = plugin.get_datasets()
 
         expInfo = plugin.exp.meta_data
@@ -116,15 +72,6 @@ class Hdf5Transport(TransportControl):
 
         cu.user_message("%s - 100%% complete" % (plugin.name))
         plugin._revert_preview(in_data)
-
-    def process_checks(self):
-        pass
-        # if plugin inherits from base_recon and the data inherits from tomoraw
-        # then throw an exception
-#        if isinstance(in_data, TomoRaw):
-#            raise Exception("The input data to a reconstruction plugin cannot
-#            be Raw data. Have you performed a timeseries_field_correction?")
-# call a new process called process_check?
 
     def __set_functions(self, data_list, name):
         """ Create a dictionary of functions to remove (squeeze) or re-add

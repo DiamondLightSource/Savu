@@ -125,6 +125,14 @@ def user_messages_from_all(header, message_list):
                          (header, messages.count(message), message))
 
 
+def _output_summary(mpi_flag, plugin):
+    if mpi_flag:
+        user_messages_from_all(plugin.name, plugin.executive_summary())
+    else:
+        for message in plugin.executive_summary():
+            user_message("%s - %s" % (plugin.name, message))
+
+
 def add_user_log_level():
     logging.addLevelName(USER_LOG_LEVEL, "USER")
 

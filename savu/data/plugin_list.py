@@ -225,6 +225,9 @@ class PluginList(object):
     def _get_n_loaders(self):
         return self.n_loaders
 
+    def _get_n_processing_plugins(self):
+        return len(self.plugin_list) - self._get_n_loaders() - 1
+
     def _get_loaders_and_savers_index(self):
         """ Get lists of loader and saver positions within the plugin list and
         set the number of loaders.

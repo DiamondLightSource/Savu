@@ -42,40 +42,6 @@ class Hdf5TransportData(object):
     def __init__(self):
         self.backing_file = None
 
-
-
-#    def _load_data(self, start):
-#        exp = self.exp
-#        n_loaders = exp.meta_data.plugin_list._get_n_loaders()
-#        plugin_list = exp.meta_data.plugin_list.plugin_list
-#        final_plugin = plugin_list[-1]
-#        saver_plugin = pu.plugin_loader(exp, final_plugin)
-#
-#        logging.debug("generating all output files")
-#        out_data_objects = []
-#        count = start
-#        datasets_list = exp.meta_data.plugin_list._get_datasets_list()
-#
-#        for plugin_dict in plugin_list[start:-1]:
-#
-#            self._get_current_and_next_patterns(
-#                datasets_list[count-n_loaders:])
-#            plugin_id = plugin_dict["id"]
-#            logging.info("Loading plugin %s", plugin_id)
-#            plugin = pu.plugin_loader(exp, plugin_dict)
-#            plugin._revert_preview(plugin.get_in_datasets())
-#            self.__set_filenames(plugin, plugin_id, count)
-#            saver_plugin.setup()
-#
-#            out_data_objects.append(exp.index["out_data"].copy())
-#            exp._merge_out_data_to_in()
-#            count += 1
-#
-#        self.exp.meta_data.delete('current_and_next')
-#        return out_data_objects, count
-
-
-
     def __add_data_links(self, linkType):
         nxs_filename = self.exp.meta_data.get('nxs_filename')
         logging.info("Adding link to file %s", nxs_filename)
@@ -147,9 +113,12 @@ class Hdf5TransportData(object):
             nx_data.attrs[NX_CLASS] = 'NXdata'
             nx_data.create_dataset(mData, data=meta_data[mData])
 
-    def _save_data(self, link_type):
-        self.__add_data_links(link_type)
-        logging.info('save_data _barrier')
+    def _save_data(self, link_type=None):
+        if link_type is None:
+            self._close_file()
+        else:
+            self.__add_data_links(link_type)
+            logging.info('save_data _barrier')
         self.exp._barrier()
 
     def _close_file(self):

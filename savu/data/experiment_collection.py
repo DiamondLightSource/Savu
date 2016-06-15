@@ -64,54 +64,93 @@ class Experiment(object):
         except KeyError:
             self.meta_data.plugin_list._populate_plugin_list(process_file)
 
+    def create_data_object(self, dtype, name):
+        """ Create a data object.
+
+        Plugin developers should apply this method in loaders only.
+
+        :params str dtype: either "in_data" or "out_data".
+        """
+        bases = []
+        try:
+            self.index[dtype][name]
+        except KeyError:
+            self.index[dtype][name] = Data(name, self)
+            data_obj = self.index[dtype][name]
+            bases.append(data_obj._get_transport_data())
+            cu.add_base_classes(data_obj, bases)
+        return self.index[dtype][name]
+
     def _experiment_setup(self):
+        """ Setup the experiment by creating lists of in/out datasets, \
+        associated plugin datasets, and a potential output filename for each \
+        plugin.  Group this information together in an experiment collection.
+        """
         n_loaders = self.meta_data.plugin_list._get_n_loaders()
         plugin_list = self.meta_data.plugin_list.plugin_list
 
         logging.debug("generating all output files")
         in_objs = []
         out_objs = []
-        datasets_list = self.meta_data.plugin_list._get_datasets_list()
-        plugins_inst = []
-
-        count = n_loaders
+        plugin_inst = []
+        file_list = []
 
         for i in range(n_loaders):
             pu.plugin_loader(self, plugin_list[i])
 
+        count = 0
         for plugin_dict in plugin_list[n_loaders:-1]:
-            self._get_current_and_next_patterns(
-                datasets_list[count-n_loaders:])
-            plugin_id = plugin_dict["id"]
-            logging.info("Loading plugin %s", plugin_id)
-            plugin = pu.plugin_loader(self, plugin_dict)
-            plugins_inst.append(plugin)
-            plugin._revert_preview(plugin.get_in_datasets())
-            self.__set_filenames(plugin, plugin_id, count)
-
-            in_objs.append(self.index['in_data'].copy())
-            out_objs.append(self.index["out_data"].copy())
-            self._merge_out_data_to_in()
+            in_data, out_data, plugin, out_file = \
+                self.__plugin_setup(plugin_dict, count)
+            self._merge_out_data_to_in() # copy data objects here
+            in_objs.append(in_data)
+            out_objs.append(out_data)
+            plugin_inst.append(plugin)
+            file_list.append(out_file)
             count += 1
 
         self.meta_data.delete('current_and_next')
-        self.__set_experiment_collection(in_objs, out_objs, plugins_inst)
+        self.__set_experiment_collection(in_objs, out_objs, plugin_inst,
+                                         file_list)
 
-    def __set_experiment_collection(self, in_list, out_list, plugin_list):
-        print("setting the experiment collection", in_list, out_list, plugin_list)
+    def __plugin_setup(self, plugin_dict, count):
+        """ Determine plugin specific information: in_datasets, out_datasets,
+        plugin instance and output file.
+        """
+        plugin_id = plugin_dict["id"]
+        logging.info("Loading plugin %s", plugin_id)
+        plugin = pu.plugin_loader(self, plugin_dict)
+        plugin._revert_preview(plugin.get_in_datasets())
+        files = self.__set_filenames(plugin, plugin_id, count)
+        temp_in = self.index['in_data'].copy()
+        in_pData = self.__detach_plugin_datasets(temp_in)
+        temp_out = self.index['out_data'].copy()
+        out_pData = self.__detach_plugin_datasets(temp_out)
+        in_data = {"data": temp_in, "pData": in_pData}
+        out_data = {"data": temp_out, "pData": out_pData}
+        return in_data, out_data, plugin, files
+
+    def __detach_plugin_datasets(self, data_dict):
+        pData_dict = {}
+        for key in data_dict:
+            pData_dict[key] = data_dict[key]._get_plugin_data()
+            data_dict[key]._clear_plugin_data()
+        return pData_dict
+
+    def __set_experiment_collection(self, in_list, out_list, plugin_list,
+                                    file_list):
         self.experiment_collection['in_datasets'] = in_list
         self.experiment_collection['out_datasets'] = out_list
         self.experiment_collection['plugin_list'] = plugin_list
+        self.experiment_collection['file_list'] = file_list
 
     def _get_experiment_collection(self):
-        temp = self.experiment_collection
-        return temp['in_datasets'], temp['out_datasets'], temp['plugin_list']
+        return self.experiment_collection
 
     def __set_filenames(self, plugin, plugin_id, count):
         n_loaders = self.meta_data.plugin_list.n_loaders
         nPlugins = self.meta_data.plugin_list.n_plugins - n_loaders - 1
-        self.meta_data.set("filename", {})
-        self.meta_data.set("group_name", {})
+        files = {"filename": {}, "group_name": {}}
         for key in self.index["out_data"].keys():
             name = key + '_p' + str(count) + '_' + \
                 plugin_id.split('.')[-1] + '.h5'
@@ -124,8 +163,32 @@ class Experiment(object):
             self._barrier()
             logging.debug("(set_filenames) Creating output file after "
                           " _barrier %s", filename)
-            self.meta_data.set(["filename", key], filename)
-            self.meta_data.set(["group_name", key], group_name)
+            files["filename"][key] = filename
+            files["group_name"][key] = group_name
+        link = "final_result" if count is nPlugins else "intermediate"
+        files["link"] = link
+        return files
+
+    def _set_experiment_details_for_current_plugin(self, count):
+        n_loaders = self.meta_data.plugin_list._get_n_loaders()
+        datasets_list = \
+            self.meta_data.plugin_list._get_datasets_list()[count-n_loaders:]
+        self._get_current_and_next_patterns(datasets_list)
+        exp_coll = self._get_experiment_collection()
+        self._clear_data_objects()
+        data_dict = {"in_data": exp_coll["in_datasets"][count],
+                     "out_data": exp_coll["out_datasets"][count]}
+        self.__set_data_objects(data_dict)
+        self.__set_output_file(exp_coll["file_list"][count])
+
+    def __set_output_file(self, out_file):
+        self.meta_data.set("filename", {})
+        self.meta_data.set("group_name", {})
+        for key in self.index['out_data'].keys():
+            self.meta_data.set("link_type", out_file["link"])
+            self.meta_data.set(["filename", key], out_file["filename"][key])
+            self.meta_data.set(["group_name", key],
+                               out_file["group_name"][key])
 
     def _get_current_and_next_patterns(self, datasets_lists):
         """ Get the current and next patterns associated with a dataset
@@ -151,23 +214,6 @@ class Experiment(object):
                     return next_pattern
         return next_pattern
 
-    def create_data_object(self, dtype, name):
-        """ Create a data object.
-
-        Plugin developers should apply this method in loaders only.
-
-        :params str dtype: either "in_data" or "out_data".
-        """
-        bases = []
-        try:
-            self.index[dtype][name]
-        except KeyError:
-            self.index[dtype][name] = Data(name, self)
-            data_obj = self.index[dtype][name]
-            bases.append(data_obj._get_transport_data())
-            cu.add_base_classes(data_obj, bases)
-        return self.index[dtype][name]
-
     def _set_nxs_filename(self):
         folder = self.meta_data.get('out_path')
         fname = os.path.basename(folder.split('_')[-1]) + '_processed.nxs'
@@ -180,16 +226,18 @@ class Experiment(object):
         else:
             self.nxs_file = h5py.File(filename, 'w')
 
-    def __remove_dataset(self, data_obj):
-        data_obj._close_file()
-        del self.index["out_data"][data_obj.data_info.get('name')]
+    def __set_data_objects(self, data_dict):
+        for key in data_dict.keys():
+            for name in data_dict[key]['data']:
+                entry = data_dict[key]
+                entry['data'][name]._set_plugin_data(entry['pData'][name])
+                self.index[key][name] = entry['data'][name]
 
     def _clear_data_objects(self):
         self.index["out_data"] = {}
         self.index["in_data"] = {}
 
     def _merge_out_data_to_in(self):
-        print("in merge out data to in", self.index["out_data"])
         for key, data in self.index["out_data"].iteritems():
             if data.remove is False:
                 if key in self.index['in_data'].keys():
@@ -198,32 +246,25 @@ class Experiment(object):
                 self.index['in_data'][key] = data
         self.index["out_data"] = {}
 
-    def _reorganise_datasets(self, out_data_objs, link_type):
-        out_data_list = self.index["out_data"]
-        self.__close_unwanted_files(out_data_list)
-        self.__remove_unwanted_data(out_data_objs)
-
+    def _cleanup_experiment_for_current_plugin(self, plugin):
         self._barrier()
-        self.__copy_out_data_to_in_data(link_type)
-
+        cu._output_summary(self.meta_data.get("mpi"), plugin)
         self._barrier()
-        self.index['out_data'] = {}
+        out_data = self.index['out_data']
+        self.__close_unwanted_files(out_data)
+        self.__remove_unwanted_data(out_data)
+        self._barrier()
 
-    def __remove_unwanted_data(self, out_data_objs):
-        for out_objs in out_data_objs:
-            if out_objs.remove is True:
-                self.__remove_dataset(out_objs)
+    def __remove_unwanted_data(self, out_data):
+        for data in out_data.values():
+            if data.remove is True:
+                data._save_file()
+                del self.index["out_data"][data.data_info.get('name')]
 
-    def __close_unwanted_files(self, out_data_list):
-        for out_objs in out_data_list:
-            if out_objs in self.index["in_data"].keys():
-                self.index["in_data"][out_objs]._close_file()
-
-    def __copy_out_data_to_in_data(self, link_type):
-        for key in self.index["out_data"]:
-            output = self.index["out_data"][key]
-            output._save_data(link_type)
-            self.index["in_data"][key] = copy.deepcopy(output)
+    def __close_unwanted_files(self, out_data):
+        for name in out_data:
+            if name in self.index["in_data"].keys():
+                self.index["in_data"][name]._close_file()
 
     def _set_all_datasets(self, name):
         data_names = []
