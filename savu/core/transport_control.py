@@ -37,13 +37,13 @@ class TransportControl(object):
         raise NotImplementedError("transport_control_setup needs to be "
                                   "implemented in %s", self.__class__)
 
-    def _transport_run_plugin_list(self):
-        """
-        A loop that contains a call to plugin.run_plugin and anything required
-        before or after the execution of a plugin.
-        """
-        raise NotImplementedError("transport_run_plugin_list needs to be "
-                                  "implemented in %s", self.__class__)
+#    def _transport_run_plugin_list(self):
+#        """
+#        A loop that contains a call to plugin.run_plugin and anything required
+#        before or after the execution of a plugin.
+#        """
+#        raise NotImplementedError("transport_run_plugin_list needs to be "
+#                                  "implemented in %s", self.__class__)
 
     def _process(self, plugin):
         """

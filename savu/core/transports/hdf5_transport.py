@@ -26,7 +26,6 @@ import numpy as np
 
 from savu.core.transport_control import TransportControl
 from savu.core.transport_setup import MPI_setup
-import savu.plugins.utils as pu
 import savu.core.utils as cu
 
 
@@ -36,12 +35,18 @@ class Hdf5Transport(TransportControl):
         MPI_setup(options)
 
     def _transport_pre_plugin(self):
-        plugin_list = self.exp.meta_data.plugin_list
-        pu.plugin_loader(self.exp, plugin_list.plugin_list[-1])
+        self.exp._get_experiment_collection()['saver_plugin'].setup()
 
     def _transport_post_plugin(self):
+        saver = self.exp._get_experiment_collection()['saver_plugin']
         for data in self.exp.index["out_data"].values():
-            data._save_data(self.exp.meta_data.get("link_type"))
+            entry, fname = \
+                saver._save_data(data, self.exp.meta_data.get("link_type"))
+            saver._open_read_only(data, fname, entry)
+
+    def _transport_control_finalise(self):
+        # save the output file and link to nexus file when using distarray?
+        pass
 
     def _process(self, plugin):
         """ Organise required data and execute the main plugin processing.

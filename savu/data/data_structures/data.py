@@ -63,6 +63,7 @@ class Data(DataCreate):
         """ Encapsulate a PluginData object.
         """
         self._plugin_data_obj = plugin_data_obj
+        self._plugin_data_obj._preview = self._preview
 
     def _clear_plugin_data(self):
         """ Set encapsulated PluginData object to None.
@@ -171,8 +172,8 @@ class Data(DataCreate):
             for args in kwargs:
                 nDims += len(kwargs[args])
                 self.data_info.set(['data_patterns', dtype, args],
-                                             kwargs[args])
-            
+                                   kwargs[args])
+
             self.__convert_pattern_directions(dtype)
             if self.get_shape():
                 diff = len(self.get_shape()) - nDims

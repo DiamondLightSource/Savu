@@ -47,37 +47,42 @@ class PluginRunner(object):
         """
         self.exp = Experiment(self.options)
         plugin_list = self.exp.meta_data.plugin_list
+        print "**** running plugin list check ***"
         self._run_plugin_list_check(plugin_list.plugin_list)
 
-        logging.debug("Running process List.save_list_to_file")
-        self.exp.meta_data.plugin_list._save_plugin_list(
-            self.exp.meta_data.get("nxs_filename"), exp=self.exp)
-
+        print "*** real plugin run ***"
         self.exp._experiment_setup()
         exp_coll = self.exp._get_experiment_collection()
+        saver = exp_coll['saver_plugin']
 
         n_plugins = plugin_list._get_n_processing_plugins()
         for i in range(n_plugins):
             plugin = exp_coll["plugin_list"][i]
+            print "\n*** running the plugin", plugin, '\n'
             self.exp._set_experiment_details_for_current_plugin(i)
             self.exp._set_experiment_details_for_current_plugin(i)
+
+            for key, val in self.exp.index['out_data'].iteritems():
+                print "*", key, val._get_plugin_data()
+
             self._transport_pre_plugin()
             self.exp._barrier()
             cu.user_message("*Running the %s plugin*" % plugin.name)
             plugin._run_plugin(self.exp, self)
+
             self.exp._barrier()
-            self.exp._cleanup_experiment_for_current_plugin(plugin)
+            cu._output_summary(self.exp.meta_data.get("mpi"), plugin)
             self._transport_post_plugin()
 
-        for key in self.exp.index["in_data"].keys():
-            self.exp.index["in_data"][key]._close_file()
+        for data in self.exp.index['in_data'].values():
+            saver._close_file(data)
 
         self.exp._barrier()
         cu.user_message("***********************")
         cu.user_message("* Processing Complete *")
         cu.user_message("***********************")
 
-        self.exp.nxs_file.close()
+        saver.nxs_file.close()
         return self.exp
 
     def _run_plugin_list_check(self, plugin_list):

@@ -36,6 +36,7 @@ class PluginData(object):
 
     def __init__(self, data_obj, plugin=None):
         self.data_obj = data_obj
+        self._preview = None
         self.data_obj._set_plugin_data(self)
         self.meta_data = MetaData()
         self.padding = None
@@ -47,6 +48,9 @@ class PluginData(object):
         self.extra_dims = []
         self._plugin = plugin
         self.fixed_dims = False
+
+    def _get_preview(self):
+        return self._preview
 
     def get_total_frames(self):
         """ Get the total number of frames to process.
@@ -65,7 +69,6 @@ class PluginData(object):
     def __set_pattern(self, name):
         """ Set the pattern related information int the meta data dict.
         """
-
         pattern = self.data_obj.get_data_patterns()[name]
         self.meta_data.set("name", name)
         self.meta_data.set("core_dir", pattern['core_dir'])

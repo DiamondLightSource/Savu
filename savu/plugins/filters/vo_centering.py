@@ -209,16 +209,12 @@ class VoCentering(BaseFilter, CpuPlugin):
 
         self.orig_full_shape = in_dataset[0].get_shape()
 
-        # if preview parameters exist then use these
-        # else get the size of the data
-        # get n processes and take 4 different sets of 5 from the data if this is feasible based on the data size.
-        # calculate the slice list here and determine if it is feasible, else apply to max(n_processes, data_size)
-
         # reduce the data as per data_subset parameter
         in_dataset[0].get_preview().set_preview(self.parameters['preview'],
                                                 revert=self.orig_full_shape)
 
         in_pData, out_pData = self.get_plugin_datasets()
+
         in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
         # copy all required information from in_dataset[0]
         fullData = in_dataset[0]

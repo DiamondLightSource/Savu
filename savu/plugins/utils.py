@@ -98,7 +98,7 @@ def plugin_loader(exp, plugin_dict, **kwargs):
     except Exception as e:
         logging.error("failed to load the plugin")
         logging.error(e)
-        raise e        
+        raise e
 
     check_flag = kwargs.get('check', False)
     if check_flag:
@@ -119,10 +119,10 @@ def run_plugins(exp, plugin_list, **kwargs):
 
     for i in range(n_loaders):
         plugin_loader(exp, plugin_list[i])
-
-    exp._barrier()
-    exp._set_nxs_filename()
-    exp._barrier()
+#
+#    exp._barrier()
+#    exp._set_nxs_filename()
+#    exp._barrier()
 
     check = kwargs.get('check', False)
     for i in range(n_loaders, len(plugin_list)-1):

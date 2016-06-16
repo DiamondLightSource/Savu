@@ -23,7 +23,6 @@
 import os
 import logging
 import copy
-import h5py
 from mpi4py import MPI
 
 import savu.core.utils as cu
@@ -95,23 +94,28 @@ class Experiment(object):
         plugin_inst = []
         file_list = []
 
+        # load the loader plugins
         for i in range(n_loaders):
             pu.plugin_loader(self, plugin_list[i])
+
+        # load the saver plugin and save the plugin list
+        saver = pu.plugin_loader(self, plugin_list[-1])
+        logging.debug("Saving plugin list to file.")
+        self.meta_data.plugin_list._save_plugin_list(saver)
 
         count = 0
         for plugin_dict in plugin_list[n_loaders:-1]:
             in_data, out_data, plugin, out_file = \
                 self.__plugin_setup(plugin_dict, count)
-            self._merge_out_data_to_in() # copy data objects here
+            self._merge_out_data_to_in()
             in_objs.append(in_data)
             out_objs.append(out_data)
             plugin_inst.append(plugin)
             file_list.append(out_file)
             count += 1
 
-        self.meta_data.delete('current_and_next')
         self.__set_experiment_collection(in_objs, out_objs, plugin_inst,
-                                         file_list)
+                                         file_list, saver)
 
     def __plugin_setup(self, plugin_dict, count):
         """ Determine plugin specific information: in_datasets, out_datasets,
@@ -120,9 +124,10 @@ class Experiment(object):
         plugin_id = plugin_dict["id"]
         logging.info("Loading plugin %s", plugin_id)
         plugin = pu.plugin_loader(self, plugin_dict)
-        plugin._revert_preview(plugin.get_in_datasets())
+
         files = self.__set_filenames(plugin, plugin_id, count)
-        temp_in = self.index['in_data'].copy()
+        temp_in = copy.deepcopy(self.index['in_data'])
+        plugin._revert_preview(plugin.get_in_datasets())
         in_pData = self.__detach_plugin_datasets(temp_in)
         temp_out = self.index['out_data'].copy()
         out_pData = self.__detach_plugin_datasets(temp_out)
@@ -133,16 +138,17 @@ class Experiment(object):
     def __detach_plugin_datasets(self, data_dict):
         pData_dict = {}
         for key in data_dict:
-            pData_dict[key] = data_dict[key]._get_plugin_data()
+            pData_dict[key] = copy.deepcopy(data_dict[key]._get_plugin_data())
             data_dict[key]._clear_plugin_data()
         return pData_dict
 
     def __set_experiment_collection(self, in_list, out_list, plugin_list,
-                                    file_list):
+                                    file_list, saver):
         self.experiment_collection['in_datasets'] = in_list
         self.experiment_collection['out_datasets'] = out_list
         self.experiment_collection['plugin_list'] = plugin_list
         self.experiment_collection['file_list'] = file_list
+        self.experiment_collection['saver_plugin'] = saver
 
     def _get_experiment_collection(self):
         return self.experiment_collection
@@ -170,16 +176,15 @@ class Experiment(object):
         return files
 
     def _set_experiment_details_for_current_plugin(self, count):
-        n_loaders = self.meta_data.plugin_list._get_n_loaders()
         datasets_list = \
-            self.meta_data.plugin_list._get_datasets_list()[count-n_loaders:]
-        self._get_current_and_next_patterns(datasets_list)
+            self.meta_data.plugin_list._get_datasets_list()[count:]
         exp_coll = self._get_experiment_collection()
         self._clear_data_objects()
         data_dict = {"in_data": exp_coll["in_datasets"][count],
                      "out_data": exp_coll["out_datasets"][count]}
         self.__set_data_objects(data_dict)
         self.__set_output_file(exp_coll["file_list"][count])
+        self._get_current_and_next_patterns(datasets_list)
 
     def __set_output_file(self, out_file):
         self.meta_data.set("filename", {})
@@ -214,23 +219,15 @@ class Experiment(object):
                     return next_pattern
         return next_pattern
 
-    def _set_nxs_filename(self):
-        folder = self.meta_data.get('out_path')
-        fname = os.path.basename(folder.split('_')[-1]) + '_processed.nxs'
-        filename = os.path.join(folder, fname)
-        self.meta_data.set("nxs_filename", filename)
-
-        if self.meta_data.get("mpi") is True:
-            self.nxs_file = h5py.File(filename, 'w', driver='mpio',
-                                      comm=MPI.COMM_WORLD)
-        else:
-            self.nxs_file = h5py.File(filename, 'w')
-
     def __set_data_objects(self, data_dict):
         for key in data_dict.keys():
             for name in data_dict[key]['data']:
                 entry = data_dict[key]
-                entry['data'][name]._set_plugin_data(entry['pData'][name])
+                pData = entry['pData'][name]
+                print "setting the plugin data"
+                entry['data'][name]._set_plugin_data(pData)
+                print entry['data'][name]
+                print entry['data'][name]._get_plugin_data().padding
                 self.index[key][name] = entry['data'][name]
 
     def _clear_data_objects(self):
@@ -245,26 +242,6 @@ class Experiment(object):
                         self.index['in_data'][key].meta_data.get_dictionary())
                 self.index['in_data'][key] = data
         self.index["out_data"] = {}
-
-    def _cleanup_experiment_for_current_plugin(self, plugin):
-        self._barrier()
-        cu._output_summary(self.meta_data.get("mpi"), plugin)
-        self._barrier()
-        out_data = self.index['out_data']
-        self.__close_unwanted_files(out_data)
-        self.__remove_unwanted_data(out_data)
-        self._barrier()
-
-    def __remove_unwanted_data(self, out_data):
-        for data in out_data.values():
-            if data.remove is True:
-                data._save_file()
-                del self.index["out_data"][data.data_info.get('name')]
-
-    def __close_unwanted_files(self, out_data):
-        for name in out_data:
-            if name in self.index["in_data"].keys():
-                self.index["in_data"][name]._close_file()
 
     def _set_all_datasets(self, name):
         data_names = []
