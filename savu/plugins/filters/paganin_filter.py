@@ -53,6 +53,12 @@ class PaganinFilter(BaseFilter, CpuPlugin):
         self.filtercomplex = None
         self.count = 0
 
+    def pre_process(self):
+        pData = self.get_plugin_in_datasets()[0]
+        self.slice_dir = pData.get_slice_dimension()
+        nDims = len(pData.get_shape())
+        self.sslice = [slice(None)]*nDims
+
     def _setup_paganin(self, width, height):
         if self.filtercomplex is None:
             micron = 10**(-6)
@@ -89,29 +95,33 @@ class PaganinFilter(BaseFilter, CpuPlugin):
         return result
 
     def filter_frames(self, data):
-        if (self.count % 100 == 0):
-            logging.debug("... %i" % self.count)
-        self.count += 1
-        logging.debug("Getting the filter frame of Paganin Filter")
-        data = data[0]
-        logging.debug("Paganin Filter input shape %s" % str(data.shape))
-        height, width = data.shape
-        self._setup_paganin(width, height)
-        data = np.nan_to_num(data)  # Noted performance
-        data[data == 0] = 1.0
-        padtopbottom = self.parameters['Padtopbottom']
-        padleftright = self.parameters['Padleftright']
-        padmethod = str(self.parameters['Padmethod'])
-        data = np.lib.pad(data, ((padtopbottom, padtopbottom),
-                                 (padleftright, padleftright)), padmethod)
-        result = np.apply_over_axes(self._paganin, data, 0)
-        result = np.abs(result)
-        result = result[padtopbottom:-padtopbottom,
-                        padleftright: -padleftright]
-        logging.debug("Paganin Filter output shape %s" % str(result.shape))
-        return result
+        output = np.empty_like(data[0])
+        nSlices = data[0].shape[self.slice_dir]
+        for i in range(nSlices):
+            self.sslice[self.slice_dir] = i
+            proj = np.squeeze(data[0][tuple(self.sslice)])
+            if (self.count % 100 == 0):
+                logging.debug("... %i" % self.count)
+            self.count += 1
+            logging.debug("Getting the filter frame of Paganin Filter")
+            logging.debug("Paganin Filter input shape %s" % str(proj.shape))
+            height, width = proj.shape
+            self._setup_paganin(width, height)
+            proj = np.nan_to_num(proj)  # Noted performance
+            proj[proj == 0] = 1.0
+            padtopbottom = self.parameters['Padtopbottom']
+            padleftright = self.parameters['Padleftright']
+            padmethod = str(self.parameters['Padmethod'])
+            proj = np.lib.pad(proj, ((padtopbottom, padtopbottom),
+                                     (padleftright, padleftright)), padmethod)
+            result = np.apply_over_axes(self._paganin, proj, 0)
+            result = np.abs(result)
+            output[self.sslice] = result[padtopbottom:-padtopbottom,
+                                         padleftright:-padleftright]
+            logging.debug("Paganin Filter output shape %s" % str(result.shape))
+        return output
 
     def get_max_frames(self):
-        return 1
+        return 8
 
 # TODO Add the citation information here
