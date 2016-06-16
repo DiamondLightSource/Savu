@@ -105,8 +105,6 @@ class PaganinFilter(BaseFilter, CpuPlugin):
             if (self.count % 100 == 0):
                 logging.debug("... %i" % self.count)
             self.count += 1
-            logging.debug("Getting the filter frame of Paganin Filter")
-            logging.debug("Paganin Filter input shape %s" % str(proj.shape))
             height, width = proj.shape
             proj = np.nan_to_num(proj)  # Noted performance
             proj[proj == 0] = 1.0
@@ -118,7 +116,6 @@ class PaganinFilter(BaseFilter, CpuPlugin):
             result = np.abs(np.apply_over_axes(self._paganin, proj, 0))
             output[self.sslice] = result[padtopbottom:-padtopbottom,
                                          padleftright:-padleftright]
-            logging.debug("Paganin Filter output shape %s" % str(result.shape))
         return output
 
     def get_max_frames(self):
