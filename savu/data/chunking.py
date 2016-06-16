@@ -24,8 +24,6 @@ import logging
 from fractions import gcd
 import numpy as np
 
-from savu.plugins.utils import register_plugin
-
 
 class Chunking(object):
     """
@@ -137,6 +135,7 @@ class Chunking(object):
         adjust['inc']['down'][adj_idx] = '-' + str(max_frames)
         adjust['bounds']['max'][adj_idx] = \
             self.__max_frames_per_process(shape[dim], max_frames)
+        print adjust
         return min(max_frames, shape[dim])
 
     def __core_other(self, dim, adj_idx, adjust, shape):

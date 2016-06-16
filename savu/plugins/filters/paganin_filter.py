@@ -20,14 +20,13 @@
 .. moduleauthor:: Nghia Vo <scientificsoftware@diamond.ac.uk>
 
 """
+import math
 import logging
+import numpy as np
+import pyfftw.interfaces.scipy_fftpack as fft
 
 from savu.plugins.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-
-import numpy as np
-import math
-
 from savu.plugins.utils import register_plugin
 
 
@@ -90,9 +89,9 @@ class PaganinFilter(BaseFilter, CpuPlugin):
         self.filtercomplex = filter1+filter1*1j
 
     def _paganin(self, data, axes):
-        pci1 = np.fft.fft2(np.float32(data))
-        pci2 = np.fft.fftshift(pci1)/self.filtercomplex
-        fpci = np.abs(np.fft.ifft2(pci2))
+        pci1 = fft.fft2(np.float32(data))
+        pci2 = fft.fftshift(pci1)/self.filtercomplex
+        fpci = np.abs(fft.ifft2(pci2))
         result = -0.5*self.parameters['Ratio']*np.log(fpci+1.0)
         return result
 
@@ -102,9 +101,6 @@ class PaganinFilter(BaseFilter, CpuPlugin):
         for i in range(nSlices):
             self.sslice[self.slice_dir] = i
             proj = data[0][tuple(self.sslice)]
-            if (self.count % 100 == 0):
-                logging.debug("... %i" % self.count)
-            self.count += 1
             height, width = proj.shape
             proj = np.nan_to_num(proj)  # Noted performance
             proj[proj == 0] = 1.0
