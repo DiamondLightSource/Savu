@@ -58,11 +58,11 @@ class PaganinFilter(BaseFilter, CpuPlugin):
         self.slice_dir = pData.get_slice_dimension()
         nDims = len(pData.get_shape())
         self.sslice = [slice(None)]*nDims
-        core_shape = pData.get_core_directions()
+        core_shape = list(pData.get_shape())
+        del core_shape[self.slice_dir]
         self._setup_paganin(*core_shape)
 
-    def _setup_paganin(self, width, height):
-        print width, height
+    def _setup_paganin(self, height, width):
         micron = 10**(-6)
         keV = 1000.0
         distance = self.parameters['Distance']
@@ -90,7 +90,6 @@ class PaganinFilter(BaseFilter, CpuPlugin):
         self.filtercomplex = filter1+filter1*1j
 
     def _paganin(self, data, axes):
-        print self.filtercomplex.shape
         pci1 = np.fft.fft2(np.float32(data))
         pci2 = np.fft.fftshift(pci1)/self.filtercomplex
         fpci = np.abs(np.fft.ifft2(pci2))
