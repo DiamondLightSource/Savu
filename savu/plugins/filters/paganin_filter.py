@@ -99,7 +99,7 @@ class PaganinFilter(BaseFilter, CpuPlugin):
         nSlices = data[0].shape[self.slice_dir]
         for i in range(nSlices):
             self.sslice[self.slice_dir] = i
-            proj = np.squeeze(data[0][tuple(self.sslice)])
+            proj = data[0][tuple(self.sslice)]
             if (self.count % 100 == 0):
                 logging.debug("... %i" % self.count)
             self.count += 1
