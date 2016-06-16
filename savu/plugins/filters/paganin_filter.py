@@ -58,36 +58,39 @@ class PaganinFilter(BaseFilter, CpuPlugin):
         self.slice_dir = pData.get_slice_dimension()
         nDims = len(pData.get_shape())
         self.sslice = [slice(None)]*nDims
+        core_shape = pData.get_core_directions()
+        self._setup_paganin(*core_shape)
 
     def _setup_paganin(self, width, height):
-        if self.filtercomplex is None:
-            micron = 10**(-6)
-            keV = 1000.0
-            distance = self.parameters['Distance']
-            energy = self.parameters['Energy']*keV
-            resolution = self.parameters['Resolution']*micron
-            wavelength = (1240.0/energy)*10.0**(-9)
-            ratio = self.parameters['Ratio']
-            padtopbottom = self.parameters['Padtopbottom']
-            padleftright = self.parameters['Padleftright']
-            height1 = height + 2*padtopbottom
-            width1 = width + 2*padleftright
-            centery = np.ceil(height1/2.0)-1.0
-            centerx = np.ceil(width1/2.0)-1.0
-            # Define the paganin filter
-            dpx = 1.0/(width1*resolution)
-            dpy = 1.0/(height1*resolution)
-            pxlist = (np.arange(width1)-centerx)*dpx
-            pylist = (np.arange(height1)-centery)*dpy
-            pxx = np.zeros((height1, width1), dtype=np.float32)
-            pxx[:, 0:width1] = pxlist
-            pyy = np.zeros((height1, width1), dtype=np.float32)
-            pyy[0:height1, :] = np.reshape(pylist, (height1, 1))
-            pd = (pxx*pxx+pyy*pyy)*wavelength*distance*math.pi
-            filter1 = 1.0+ratio*pd
-            self.filtercomplex = filter1+filter1*1j
+        print width, height
+        micron = 10**(-6)
+        keV = 1000.0
+        distance = self.parameters['Distance']
+        energy = self.parameters['Energy']*keV
+        resolution = self.parameters['Resolution']*micron
+        wavelength = (1240.0/energy)*10.0**(-9)
+        ratio = self.parameters['Ratio']
+        padtopbottom = self.parameters['Padtopbottom']
+        padleftright = self.parameters['Padleftright']
+        height1 = height + 2*padtopbottom
+        width1 = width + 2*padleftright
+        centery = np.ceil(height1/2.0)-1.0
+        centerx = np.ceil(width1/2.0)-1.0
+        # Define the paganin filter
+        dpx = 1.0/(width1*resolution)
+        dpy = 1.0/(height1*resolution)
+        pxlist = (np.arange(width1)-centerx)*dpx
+        pylist = (np.arange(height1)-centery)*dpy
+        pxx = np.zeros((height1, width1), dtype=np.float32)
+        pxx[:, 0:width1] = pxlist
+        pyy = np.zeros((height1, width1), dtype=np.float32)
+        pyy[0:height1, :] = np.reshape(pylist, (height1, 1))
+        pd = (pxx*pxx+pyy*pyy)*wavelength*distance*math.pi
+        filter1 = 1.0+ratio*pd
+        self.filtercomplex = filter1+filter1*1j
 
     def _paganin(self, data, axes):
+        print self.filtercomplex.shape
         pci1 = np.fft.fft2(np.float32(data))
         pci2 = np.fft.fftshift(pci1)/self.filtercomplex
         fpci = np.abs(np.fft.ifft2(pci2))
@@ -106,22 +109,20 @@ class PaganinFilter(BaseFilter, CpuPlugin):
             logging.debug("Getting the filter frame of Paganin Filter")
             logging.debug("Paganin Filter input shape %s" % str(proj.shape))
             height, width = proj.shape
-            self._setup_paganin(width, height)
             proj = np.nan_to_num(proj)  # Noted performance
             proj[proj == 0] = 1.0
             padtopbottom = self.parameters['Padtopbottom']
             padleftright = self.parameters['Padleftright']
             padmethod = str(self.parameters['Padmethod'])
-            proj = np.lib.pad(proj, ((padtopbottom, padtopbottom),
-                                     (padleftright, padleftright)), padmethod)
-            result = np.apply_over_axes(self._paganin, proj, 0)
-            result = np.abs(result)
+            proj = np.lib.pad(proj, (tuple([padtopbottom]*2),
+                                     tuple([padleftright]*2)), padmethod)
+            result = np.abs(np.apply_over_axes(self._paganin, proj, 0))
             output[self.sslice] = result[padtopbottom:-padtopbottom,
                                          padleftright:-padleftright]
             logging.debug("Paganin Filter output shape %s" % str(result.shape))
         return output
 
     def get_max_frames(self):
-        return 8
+        return 16
 
 # TODO Add the citation information here
