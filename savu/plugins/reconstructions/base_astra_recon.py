@@ -227,7 +227,7 @@ class BaseAstraRecon(BaseRecon):
         return np.array([int(p_low), int(p_high)])
 
     def get_max_frames(self):
-        return 8
+        return 16
 
 ## Add this as citation information:
 ## W. van Aarle, W. J. Palenstijn, J. De Beenhouwer, T. Altantzis, S. Bals,  \
