@@ -40,6 +40,7 @@ class PluginData(object):
         self.data_obj._set_plugin_data(self)
         self.meta_data = MetaData()
         self.padding = None
+        self.pad_dict = None
         # this flag determines which data is passed. If false then just the
         # data, if true then all data including dark and flat fields.
         self.shape = None
@@ -48,6 +49,7 @@ class PluginData(object):
         self.extra_dims = []
         self._plugin = plugin
         self.fixed_dims = False
+        self.end_pad = False
 
     def _get_preview(self):
         return self._preview

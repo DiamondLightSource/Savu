@@ -69,11 +69,12 @@ class ChunkingTests(unittest.TestCase):
     def amend_chunks(self, chunks):
         """ If any temporary amendments are applied to the final chunking
         values in the framework, then remove these here. """
-        new_chunks = list(chunks)
-        for i in range(len(new_chunks)):
-            if chunks[i]-1 > 0:
-                new_chunks[i] = chunks[i] + 1
-        return tuple(new_chunks)
+        return chunks
+#        new_chunks = list(chunks)
+#        for i in range(len(new_chunks)):
+#            if chunks[i]-1 > 0:
+#                new_chunks[i] = chunks[i] + 1
+#        return tuple(new_chunks)
 
 #    def test_chunks_2D(self):
 #        current = [1, (0,), (1,)]
@@ -101,19 +102,16 @@ class ChunkingTests(unittest.TestCase):
         shape = (5000, 5000, 5000)
         chunking = self.create_chunking_instance(current, nnext, nProcs)
         chunks = chunking._calculate_chunking(shape, np.float32)
-        print "nChunks =", self.get_nChunks(shape, chunks)
         self.assertEqual(self.amend_chunks(chunks), (1, 625, 313))
 
         shape = (5000, 5000, 5000)
         chunking = self.create_chunking_instance(current, nnext, nProcs)
         chunks = chunking._calculate_chunking(shape, np.float32)
-        print "nChunks =", self.get_nChunks(shape, chunks)
         self.assertEqual(self.amend_chunks(chunks), (1, 625, 313))
 
         shape = (1, 800, 500)
         chunking = self.create_chunking_instance(current, nnext, nProcs)
         chunks = chunking._calculate_chunking(shape, np.float32)
-        print "nChunks =", self.get_nChunks(shape, chunks)
         self.assertEqual(self.amend_chunks(chunks), (1, 400, 500))
 
     def test_chunks_3D_2(self):

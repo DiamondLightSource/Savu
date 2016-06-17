@@ -24,8 +24,6 @@ import logging
 from fractions import gcd
 import numpy as np
 
-from savu.plugins.utils import register_plugin
-
 
 class Chunking(object):
     """
@@ -70,9 +68,9 @@ class Chunking(object):
             # Subtracting one from each chunking dimension as hdf5/h5py? bug fix
             chunks = list(chunks)
             logging.debug("chunks before %s", chunks)
-            for i in range(len(chunks)):
-                if (chunks[i] - 1) > 0:
-                    chunks[i] -= 1
+#            for i in range(len(chunks)):
+#                if (chunks[i] - 1) > 0:
+#                    chunks[i] -= 1
             logging.debug("chunks after %s", chunks)
             return tuple(chunks)
 
@@ -265,9 +263,9 @@ class Chunking(object):
         for i in range(len(adjust['dim'])):
             i -= nDel
             dim = adjust['dim'][i]
-            if self.check(chunks[dim], adjust['inc'][up_down],
-                          adjust['bounds'], i):
-                adjust['inc']['down'][i] = '-1'
+#            if self.check(chunks[dim], adjust['inc'][up_down],
+#                          adjust['bounds'], i):
+#                adjust['inc']['down'][i] = '-1'
             if self.check(chunks[dim], adjust['inc'][up_down],
                           adjust['bounds'], i):
                 del adjust['dim'][i]
@@ -276,4 +274,3 @@ class Chunking(object):
                 del adjust['bounds']['max'][i]
                 del adjust['bounds']['min'][i]
                 nDel += 1
-

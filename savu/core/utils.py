@@ -106,6 +106,7 @@ def add_base_classes(this, bases):
 USER_LOG_LEVEL = 100
 USER_LOG_HANDLER = None
 
+
 def user_message(message):
     logging.log(USER_LOG_LEVEL, message)
     if USER_LOG_HANDLER is not None:
@@ -115,7 +116,7 @@ def user_message(message):
 def user_messages_from_all(header, message_list):
     comm = MPI.COMM_WORLD
     messages = comm.gather(message_list, root=0)
-    if  messages is None:
+    if messages is None:
         return
     # flatten the list
     messages = list(itertools.chain(*messages))
@@ -144,10 +145,11 @@ def add_user_log_handler(logger, user_log_path):
     logger.addHandler(fh)
     USER_LOG_HANDLER = fh
     user_message("User Log Started")
+    user_message("User Log location is '%s'" % (user_log_path))
 
 
 def add_syslog_log_handler(logger, syslog_address, syslog_port):
-    syslog = handlers.SysLogHandler(address = (syslog_address, syslog_port))
+    syslog = handlers.SysLogHandler(address=(syslog_address, syslog_port))
     syslog.setFormatter(logging.Formatter('SAVU:%(message)s'))
-    syslog.setLevel(logging.WARN) # only log user log messages
+    syslog.setLevel(logging.WARN)  # only log user log messages
     logger.addHandler(syslog)

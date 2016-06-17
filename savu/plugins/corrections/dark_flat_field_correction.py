@@ -93,7 +93,6 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
         data[low_crop] = self.LOW_CROP_LEVEL
         data[high_crop] = self.HIGH_CROP_LEVEL
 
-
     def executive_summary(self):
         summary = []
         if self.flag_high_warning:

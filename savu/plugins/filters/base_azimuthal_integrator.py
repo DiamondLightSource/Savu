@@ -137,7 +137,9 @@ class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
     def add_axes_to_meta_data(self,axis,mData):
         qanstrom = axis
         dspacing = 2*np.pi/qanstrom
+
         ttheta =  2*180*np.arcsin(self.wl/(2*dspacing*1e-9))/np.pi
         mData.set('Q', qanstrom)
         mData.set('D', dspacing)
         mData.set('2Theta', ttheta)
+
