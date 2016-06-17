@@ -60,10 +60,14 @@ class Chunking(object):
         adjust = self.__set_adjust_params(shape)
         self.__set_chunks(chunks, shape, adjust)
 
+        print "before adjusting", adjust
+
         if 0 in chunks:
             return True
         else:
             chunks = self.__adjust_chunk_size(chunks, ttype, shape, adjust)
+            print "chunks = ", chunks
+            print ttype
             logging.debug("chunks before %s", chunks)
             # Subtracting one from each chunking dimension as hdf5/h5py? bug fix
             chunks = list(chunks)
@@ -116,6 +120,8 @@ class Chunking(object):
             if 'VOLUME' in self.next_pattern:
                 self.__set_volume_bounds(adjust, dim, chunks)
             adj_idx += 1
+            
+        print "adjust", adjust
         return chunks
 
     def __set_volume_bounds(self, adjust, dim, chunks):
@@ -124,9 +130,11 @@ class Chunking(object):
         chunks[dim] = int(min(adjust['bounds']['max'][dim], 62))
 
     def __core_core(self, dim, adj_idx, adjust, shape):
+        print "before", adjust
         adjust['inc']['up'][adj_idx] = '+1'
         adjust['inc']['down'][adj_idx] = '/2'
         adjust['bounds']['max'][adj_idx] = shape[dim]
+        print "after", adjust
         return shape[dim]
 
     def __core_slice(self, dim, adj_idx, adjust, shape):
@@ -177,7 +185,7 @@ class Chunking(object):
         """
         total_plugin_runs = np.ceil(float(shape)/nFrames)
         frame_list = np.arange(total_plugin_runs)
-        nProcs = len(self.exp.meta_data.get_meta_data('processes'))
+        nProcs = 120 # len(self.exp.meta_data.get_meta_data('processes'))
         frame_list_per_proc = np.array_split(frame_list, nProcs)
         flist_len = []
         for flist in frame_list_per_proc:
@@ -189,6 +197,7 @@ class Chunking(object):
         """
         Adjust the chunk size to as close to 1MB as possible
         """
+        print "about to adjust", adjust
         chunks = np.array(chunks)
         chunk_size = np.prod(chunks)*np.dtype(ttype).itemsize
         cache_size = 1000000
@@ -202,8 +211,10 @@ class Chunking(object):
         """
         Decrease the chunk size to below but as close to 1MB as possible
         """
+        print "decreasing the chunks", adjust
         while ((np.prod(chunks)*np.dtype(ttype).itemsize) > 1000000):
             idx = self.__get_idx_decrease(chunks, adjust)
+            print "idx decrease", adjust
             dim = adjust['dim'].index(idx)
 #            if idx == -1:
 #                break
@@ -231,6 +242,7 @@ class Chunking(object):
         """
         self.check = lambda a, b, c, i: \
             True if (eval(str(a) + b[i])) < c['min'][i] else False
+        print "getting the decrease index*", adjust
         self.__check_adjust_dims(adjust, chunks, 'down')
         return self.__get_idx_order(adjust, chunks, 'down')
 
@@ -244,6 +256,7 @@ class Chunking(object):
         return self.__get_idx_order(adjust, chunks, 'up')
 
     def __get_idx_order(self, adjust, chunks, direction):
+        print adjust, chunks, direction
         process_order = [self.slice1, self.core]
         sl = slice(None, None, -1)
         if direction is 'up':
@@ -260,13 +273,14 @@ class Chunking(object):
         return adjust['dim'][idx_order[0]] if idx_order.size else -1
 
     def __check_adjust_dims(self, adjust, chunks, up_down):
+        print chunks
         nDel = 0
         for i in range(len(adjust['dim'])):
             i -= nDel
             dim = adjust['dim'][i]
-            if self.check(chunks[dim], adjust['inc'][up_down],
-                          adjust['bounds'], i):
-                adjust['inc']['down'][i] = '-1'
+#            if self.check(chunks[dim], adjust['inc'][up_down],
+#                          adjust['bounds'], i):
+#                adjust['inc']['down'][i] = '-1'
             if self.check(chunks[dim], adjust['inc'][up_down],
                           adjust['bounds'], i):
                 del adjust['dim'][i]
@@ -275,4 +289,3 @@ class Chunking(object):
                 del adjust['bounds']['max'][i]
                 del adjust['bounds']['min'][i]
                 nDel += 1
-
