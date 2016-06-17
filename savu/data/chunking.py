@@ -176,7 +176,7 @@ class Chunking(object):
         """
         total_plugin_runs = np.ceil(float(shape)/nFrames)
         frame_list = np.arange(total_plugin_runs)
-        nProcs = 120 # len(self.exp.meta_data.get_meta_data('processes'))
+        nProcs = len(self.exp.meta_data.get_meta_data('processes'))
         frame_list_per_proc = np.array_split(frame_list, nProcs)
         flist_len = []
         for flist in frame_list_per_proc:
