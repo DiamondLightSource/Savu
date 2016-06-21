@@ -29,6 +29,7 @@ import dezing
 from savu.plugins.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
+from savu.data.data_structures.data_type import ImageKey
 
 
 @register_plugin
@@ -47,10 +48,20 @@ class DezingFilter(BaseFilter, CpuPlugin):
         self.errflag = 0
 
     def pre_process(self):
-        print self.parameters['outlier_mu']
         (retval, self.warnflag, self.errflag) = \
             dezing.setup_size(self.data_size, self.parameters['outlier_mu'],
                               self.pad)
+        # amend dark and flat here
+        inData = self.get_in_datasets()[0]
+        if isinstance(inData.data, ImageKey):
+            image_key = self.get_in_datasets()[0].data
+            self.dark = image_key.dark_mean()
+            self.flat = image_key.flat_mean()
+        else:
+            self.dark = inData.meta_data.get_meta_data('dark')
+            self.flat = inData.meta_data.get_meta_data('flat')
+            
+        
 
     def filter_frames(self, data):
         result = np.empty_like(data[0])
@@ -69,9 +80,7 @@ class DezingFilter(BaseFilter, CpuPlugin):
 
     def set_filter_padding(self, in_data, out_data):
         in_data = in_data[0]
-        print self.parameters['kernel_size']
         self.pad = (self.parameters['kernel_size'] - 1) / 2
-        print type(self.pad)
         self.data_size = in_data.get_shape()
         in_data.padding = {'pad_multi_frames': self.pad}
         out_data[0].padding = {'pad_multi_frames': self.pad}

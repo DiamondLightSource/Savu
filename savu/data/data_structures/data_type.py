@@ -153,16 +153,18 @@ class Map_3dto4d_h5(DataTypes):
 class ImageKey(DataTypes):
     """ This class is used to get data from a dataset with an image key. """
 
-    def __init__(self, data, image_key, proj_dim):
-        self.data = data
+    def __init__(self, data_obj, image_key, proj_dim):
+        self.data = data_obj.data
         self.image_key = image_key
         self.proj_dim = proj_dim
 
         data_idx = self.get_index(0)
-        new_shape = list(data.shape)
+        new_shape = list(self.data.shape)
         new_shape[proj_dim] = len(data_idx)
         self.shape = tuple(new_shape)
         self.nDims = len(self.shape)
+        data_obj.meta_data.set_meta_data('dark', self.dark_mean())
+        data_obj.meta_data.set_meta_data('flat', self.flat_mean())
 
     def __getitem__(self, idx):
         index = list(idx)
