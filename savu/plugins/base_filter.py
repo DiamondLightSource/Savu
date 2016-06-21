@@ -74,6 +74,12 @@ class BaseFilter(Plugin):
     def get_plugin_pattern(self):
         return 'PROJECTION'
 
+    def fix_data(self):
+        """ Set flag to determine whether the shape of data passed to the main
+        processing method should have a fixed size.
+        """
+        return False
+
     def setup(self):
         self.exp.log(self.name + " Start")
         # set up the output dataset that is created by the plugin
@@ -86,8 +92,10 @@ class BaseFilter(Plugin):
         in_pData, out_pData = self.get_plugin_datasets()
         # set pattern_name and nframes to process for all datasets
         plugin_pattern = self.get_plugin_pattern()
-        in_pData[0].plugin_data_setup(plugin_pattern, self.get_max_frames())
-        out_pData[0].plugin_data_setup(plugin_pattern, self.get_max_frames())
+        in_pData[0].plugin_data_setup(plugin_pattern, self.get_max_frames(),
+                                      fixed=self.fix_data())
+        out_pData[0].plugin_data_setup(plugin_pattern, self.get_max_frames(),
+                                       fixed=self.fix_data())
 
         self.exp.log(self.name + " End")
 

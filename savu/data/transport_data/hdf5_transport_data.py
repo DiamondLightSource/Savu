@@ -349,8 +349,8 @@ class Hdf5TransportData(object):
 
     def correct_pad(self, pData):
         if pData.pad_dict:
-            pData.padding = self.pad_dict
-            self.__calculate_slice_padding()
+            pData.padding = pData.pad_dict
+            self.__set_padding_dict()
         else:
             pData.padding = None
         pData.end_pad = False
