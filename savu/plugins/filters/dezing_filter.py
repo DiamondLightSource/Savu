@@ -51,10 +51,15 @@ class DezingFilter(BaseFilter, CpuPlugin):
         inData = self.get_in_datasets()[0]
         dark = inData.data.dark()
         flat = inData.data.flat()
-        (retval, self.warnflag, self.errflag) = \
-            dezing.setup_size(dark.shape, self.parameters['outlier_mu'], 0)
-        inData.meta_data.set_meta_data('dark', self._dezing(dark).mean(0))
-        inData.meta_data.set_meta_data('flat', self._dezing(flat).mean(0))
+        (retval, self.warnflag, self.errflag) = dezing.setup_size(
+            dark.shape, self.parameters['outlier_mu'], self.pad)
+        pad_list = ((self.pad, self.pad), (0, 0), (0, 0))
+        dark = self._dezing(np.pad(dark, pad_list, mode='edge'))
+        flat = self._dezing(np.pad(flat, pad_list, mode='edge'))
+        inData.meta_data.set_meta_data(
+            'dark', dark[self.pad:-self.pad].mean(0))
+        inData.meta_data.set_meta_data(
+            'flat', flat[self.pad:-self.pad].mean(0))
         (retval, self.warnflag, self.errflag) = dezing.cleanup()
 
         # setup dezing for data
@@ -79,26 +84,12 @@ class DezingFilter(BaseFilter, CpuPlugin):
         """
         return 16
 
-#    def set_filter_padding(self, in_data, out_data):
-#        in_data = in_data[0]
-#        self.pad = (self.parameters['kernel_size'] - 1) / 2
-#        self.data_size = in_data.get_shape()
-#        in_data.padding = {'pad_multi_frames': self.pad}
-#        out_data[0].padding = {'pad_multi_frames': self.pad}
-
     def set_filter_padding(self, in_data, out_data):
         in_data = in_data[0]
-        self.pad = 0
-#        self.pad = (self.parameters['kernel_size'] - 1) / 2
+        self.pad = (self.parameters['kernel_size'] - 1) / 2
         self.data_size = in_data.get_shape()
-#        in_data.padding = {'pad_frame_edges': self.pad}
-#        out_data[0].padding = {'pad_frame_edges': self.pad}
-
-#    def get_plugin_pattern(self):
-#        return 'SINOGRAM'
-#
-#    def fix_data(self):
-#        return True
+        in_data.padding = {'pad_multi_frames': self.pad}
+        out_data[0].padding = {'pad_multi_frames': self.pad}
 
     def executive_summary(self):
         if self.errflag != 0:
