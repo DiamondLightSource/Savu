@@ -199,8 +199,8 @@ class ImageKey(DataTypes):
 
     def dark_mean(self):
         """ Get the averaged dark projection data. """
-        return self.__get_data(2).mean(self.proj_dim)
+        return self.__get_data(2).mean(self.proj_dim).astype(np.float32)
 
     def flat_mean(self):
         """ Get the averaged flat projection data. """
-        return self.__get_data(1).mean(self.proj_dim)
+        return self.__get_data(1).mean(self.proj_dim).astype(np.float32)

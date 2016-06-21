@@ -22,7 +22,7 @@
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
-import logging
+
 import numpy as np
 import dezing
 
@@ -47,17 +47,24 @@ class DezingFilter(BaseFilter, CpuPlugin):
         self.errflag = 0
 
     def pre_process(self):
+        # Apply dezing to dark and flat images (data with image key only)
+        inData = self.get_in_datasets()[0]
+        dark = inData.data.dark()
+        flat = inData.data.flat()
+        (retval, self.warnflag, self.errflag) = \
+            dezing.setup_size(dark.shape, self.parameters['outlier_mu'], 0)
+        inData.meta_data.set_meta_data('dark', self._dezing(dark).mean(0))
+        inData.meta_data.set_meta_data('flat', self._dezing(flat).mean(0))
+        (retval, self.warnflag, self.errflag) = dezing.cleanup()
+
+        # setup dezing for data
         (retval, self.warnflag, self.errflag) = \
             dezing.setup_size(self.data_size, self.parameters['outlier_mu'],
                               self.pad)
-        # amend dark and flat here
-        mData = self.get_in_meta_data()[0]
-        mData.set_meta_data('dark', self._dezing(mData.get_meta_data('dark')))
-        mData.set_meta_data('flat', self._dezing(mData.get_meta_data('flat')))
 
     def _dezing(self, data):
         result = np.empty_like(data)
-        (retval, self.warnflag, self.errflag) = dezing.run(data[0], result)
+        (retval, self.warnflag, self.errflag) = dezing.run(data, result)
         return result
 
     def filter_frames(self, data):
@@ -70,14 +77,28 @@ class DezingFilter(BaseFilter, CpuPlugin):
         """
         :returns:  an integer of the number of frames. Default 100
         """
-        return 100
+        return 16
+
+#    def set_filter_padding(self, in_data, out_data):
+#        in_data = in_data[0]
+#        self.pad = (self.parameters['kernel_size'] - 1) / 2
+#        self.data_size = in_data.get_shape()
+#        in_data.padding = {'pad_multi_frames': self.pad}
+#        out_data[0].padding = {'pad_multi_frames': self.pad}
 
     def set_filter_padding(self, in_data, out_data):
         in_data = in_data[0]
-        self.pad = (self.parameters['kernel_size'] - 1) / 2
+        self.pad = 0
+#        self.pad = (self.parameters['kernel_size'] - 1) / 2
         self.data_size = in_data.get_shape()
-        in_data.padding = {'pad_multi_frames': self.pad}
-        out_data[0].padding = {'pad_multi_frames': self.pad}
+#        in_data.padding = {'pad_frame_edges': self.pad}
+#        out_data[0].padding = {'pad_frame_edges': self.pad}
+
+#    def get_plugin_pattern(self):
+#        return 'SINOGRAM'
+#
+#    def fix_data(self):
+#        return True
 
     def executive_summary(self):
         if self.errflag != 0:
