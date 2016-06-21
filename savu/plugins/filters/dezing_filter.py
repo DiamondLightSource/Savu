@@ -29,7 +29,6 @@ import dezing
 from savu.plugins.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
-from savu.data.data_structures.data_type import ImageKey
 
 
 @register_plugin
@@ -52,22 +51,17 @@ class DezingFilter(BaseFilter, CpuPlugin):
             dezing.setup_size(self.data_size, self.parameters['outlier_mu'],
                               self.pad)
         # amend dark and flat here
-        inData = self.get_in_datasets()[0]
-        if isinstance(inData.data, ImageKey):
-            image_key = self.get_in_datasets()[0].data
-            self.dark = image_key.dark_mean()
-            self.flat = image_key.flat_mean()
-        else:
-            self.dark = inData.meta_data.get_meta_data('dark')
-            self.flat = inData.meta_data.get_meta_data('flat')
-            
-        
+        mData = self.get_in_meta_data()[0]
+        mData.set_meta_data('dark', self._dezing(mData.get_meta_data('dark')))
+        mData.set_meta_data('flat', self._dezing(mData.get_meta_data('flat')))
 
-    def filter_frames(self, data):
-        result = np.empty_like(data[0])
-        logging.debug("Python: calling cython funciton dezing.run")
+    def _dezing(self, data):
+        result = np.empty_like(data)
         (retval, self.warnflag, self.errflag) = dezing.run(data[0], result)
         return result
+
+    def filter_frames(self, data):
+        return self._dezing(data[0])
 
     def post_process(self):
         (retval, self.warnflag, self.errflag) = dezing.cleanup()
