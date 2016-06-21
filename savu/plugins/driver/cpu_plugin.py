@@ -33,7 +33,6 @@ class CpuPlugin(PluginDriver):
         super(CpuPlugin, self).__init__()
 
     def _run_plugin(self, exp, transport):
-
         self._run_plugin_instances(transport)
         self._clean_up()
         return

@@ -45,6 +45,7 @@ class Experiment(object):
         self.experiment_collection = {}
         self.index = {"in_data": {}, "out_data": {}}
         self.nxs_file = None
+        self.initial_datasets = None
 
     def get(self, entry):
         """ Get the meta data dictionary. """
@@ -87,35 +88,37 @@ class Experiment(object):
         """
         n_loaders = self.meta_data.plugin_list._get_n_loaders()
         plugin_list = self.meta_data.plugin_list.plugin_list
+        self.__set_experiment_collection(*[{}]*6)
 
         logging.debug("generating all output files")
-        in_objs = []
-        out_objs = []
+        data_objs = []
         plugin_inst = []
         file_list = []
 
         # load the loader plugins
-        for i in range(n_loaders):
-            pu.plugin_loader(self, plugin_list[i])
-
+        self._set_loaders()
         # load the saver plugin and save the plugin list
         saver = pu.plugin_loader(self, plugin_list[-1])
         logging.debug("Saving plugin list to file.")
         self.meta_data.plugin_list._save_plugin_list(saver)
 
         count = 0
+        # first run through of the plugin setup methods
         for plugin_dict in plugin_list[n_loaders:-1]:
-            in_data, out_data, plugin, out_file = \
-                self.__plugin_setup(plugin_dict, count)
+            self.__set_experiment_collection(
+                *self.__plugin_setup(plugin_dict, count), saver)
             self._merge_out_data_to_in()
-            in_objs.append(in_data)
-            out_objs.append(out_data)
-            plugin_inst.append(plugin)
-            file_list.append(out_file)
             count += 1
 
-        self.__set_experiment_collection(in_objs, out_objs, plugin_inst,
-                                         file_list, saver)
+    def _set_loaders(self):
+        n_loaders = self.meta_data.plugin_list._get_n_loaders()
+        plugin_list = self.meta_data.plugin_list.plugin_list
+        for i in range(n_loaders):
+            pu.plugin_loader(self, plugin_list[i])
+        self.initial_datasets = copy.deepcopy(self.index['in_data'])
+
+    def _reset_datasets(self):
+        self.index['in_data'] = self.initial_datasets
 
     def __plugin_setup(self, plugin_dict, count):
         """ Determine plugin specific information: in_datasets, out_datasets,
@@ -124,30 +127,20 @@ class Experiment(object):
         plugin_id = plugin_dict["id"]
         logging.info("Loading plugin %s", plugin_id)
         plugin = pu.plugin_loader(self, plugin_dict)
-
+        in_pData = plugin._detach_plugin_datasets(self.index['in_data'])
         files = self.__set_filenames(plugin, plugin_id, count)
-        temp_in = copy.deepcopy(self.index['in_data'])
         plugin._revert_preview(plugin.get_in_datasets())
-        in_pData = self.__detach_plugin_datasets(temp_in)
-        temp_out = self.index['out_data'].copy()
-        out_pData = self.__detach_plugin_datasets(temp_out)
-        in_data = {"data": temp_in, "pData": in_pData}
-        out_data = {"data": temp_out, "pData": out_pData}
-        return in_data, out_data, plugin, files
+        data = self.index['out_data'].copy()
+        out_pData = plugin._detach_plugin_datasets(self.index['out_data'])
+        return data, in_pData, out_pData, plugin, files
 
-    def __detach_plugin_datasets(self, data_dict):
-        pData_dict = {}
-        for key in data_dict:
-            pData_dict[key] = copy.deepcopy(data_dict[key]._get_plugin_data())
-            data_dict[key]._clear_plugin_data()
-        return pData_dict
-
-    def __set_experiment_collection(self, in_list, out_list, plugin_list,
-                                    file_list, saver):
-        self.experiment_collection['in_datasets'] = in_list
-        self.experiment_collection['out_datasets'] = out_list
-        self.experiment_collection['plugin_list'] = plugin_list
-        self.experiment_collection['file_list'] = file_list
+    def __set_experiment_collection(self, data, in_pData, out_pData, plugins,
+                                    files, saver):
+        self.experiment_collection['datasets'] = data
+        self.experiment_collection['in_pData'] = in_pData
+        self.experiment_collection['out_pData'] = out_pData
+        self.experiment_collection['plugin_list'] = plugins
+        self.experiment_collection['file_list'] = files
         self.experiment_collection['saver_plugin'] = saver
 
     def _get_experiment_collection(self):
@@ -175,14 +168,15 @@ class Experiment(object):
         files["link"] = link
         return files
 
-    def _set_experiment_details_for_current_plugin(self, count):
+    def _set_experiment_for_current_plugin(self, count):
         datasets_list = \
             self.meta_data.plugin_list._get_datasets_list()[count:]
         exp_coll = self._get_experiment_collection()
-        self._clear_data_objects()
-        data_dict = {"in_data": exp_coll["in_datasets"][count],
-                     "out_data": exp_coll["out_datasets"][count]}
-        self.__set_data_objects(data_dict)
+
+        exp_coll['plugin_list'][count]._reset_all_datasets(
+            self.index['in_data'], exp_coll['datasets'][count],
+            exp_coll['in_pData'][count], exp_coll['out_pData'][count])
+
         self.__set_output_file(exp_coll["file_list"][count])
         self._get_current_and_next_patterns(datasets_list)
 
@@ -218,17 +212,6 @@ class Experiment(object):
                     next_pattern = next_data['pattern']
                     return next_pattern
         return next_pattern
-
-    def __set_data_objects(self, data_dict):
-        for key in data_dict.keys():
-            for name in data_dict[key]['data']:
-                entry = data_dict[key]
-                pData = entry['pData'][name]
-                print "setting the plugin data"
-                entry['data'][name]._set_plugin_data(pData)
-                print entry['data'][name]
-                print entry['data'][name]._get_plugin_data().padding
-                self.index[key][name] = entry['data'][name]
 
     def _clear_data_objects(self):
         self.index["out_data"] = {}

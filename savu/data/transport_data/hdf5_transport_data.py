@@ -225,6 +225,7 @@ class Hdf5TransportData(object):
     def _get_slice_list_per_process(self, expInfo):
         processes = expInfo.get("processes")
         process = expInfo.get("process")
+
         self.__set_padding_dict()
         slice_list = self._get_grouped_slice_list()
 

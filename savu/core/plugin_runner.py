@@ -36,7 +36,7 @@ class PluginRunner(object):
         class_name = "savu.core.transports." + options["transport"] \
                      + "_transport"
         cu.add_base(self, cu.import_class(class_name))
-        self._transport_control_setup(options)
+        self._transport_initialise(options)
         self.exp = None
         self.options = options
         # add all relevent locations to the path
@@ -47,32 +47,42 @@ class PluginRunner(object):
         """
         self.exp = Experiment(self.options)
         plugin_list = self.exp.meta_data.plugin_list
-        print "**** running plugin list check ***"
         self._run_plugin_list_check(plugin_list.plugin_list)
 
-        print "*** real plugin run ***"
         self.exp._experiment_setup()
         exp_coll = self.exp._get_experiment_collection()
         saver = exp_coll['saver_plugin']
 
+        self._transport_pre_plugin_list_run()
+        self.exp._reset_datasets()
+
         n_plugins = plugin_list._get_n_processing_plugins()
         for i in range(n_plugins):
+
             plugin = exp_coll["plugin_list"][i]
-            print "\n*** running the plugin", plugin, '\n'
-            self.exp._set_experiment_details_for_current_plugin(i)
-            self.exp._set_experiment_details_for_current_plugin(i)
+            self.exp._set_experiment_for_current_plugin(i)
 
-            for key, val in self.exp.index['out_data'].iteritems():
-                print "*", key, val._get_plugin_data()
-
+            print "setting in data", self.exp.index['in_data']
+            for key, value in self.exp.index['in_data'].iteritems()            :
+                print "in data", key, value._get_plugin_data()
+                
+            print "setting out data", self.exp.index['out_data']
+            for key, value in self.exp.index['out_data'].iteritems()            :
+                print "out data", key, value._get_plugin_data()
+            
             self._transport_pre_plugin()
             self.exp._barrier()
             cu.user_message("*Running the %s plugin*" % plugin.name)
+
             plugin._run_plugin(self.exp, self)
 
             self.exp._barrier()
+            self.exp._finalise_experiment_for_current_plugin
             cu._output_summary(self.exp.meta_data.get("mpi"), plugin)
             self._transport_post_plugin()
+            self._merge_out_data_to_in()  # check this here
+
+        self._transport_post_plugin_list_run()
 
         for data in self.exp.index['in_data'].values():
             saver._close_file(data)

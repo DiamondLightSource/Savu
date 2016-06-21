@@ -31,11 +31,15 @@ import savu.core.utils as cu
 
 class Hdf5Transport(TransportControl):
 
-    def _transport_control_setup(self, options):
+    def _transport_initialise(self, options):
         MPI_setup(options)
 
-    def _transport_pre_plugin(self):
-        self.exp._get_experiment_collection()['saver_plugin'].setup()
+    def _transport_pre_plugin_list_run(self):
+        # run through the experiment (no processing) and create output files
+        exp_coll = self.exp._get_experiment_collection()
+        for i in range(len(exp_coll['plugin_list'])):
+            self.exp._set_experiment_for_current_plugin(i)
+            exp_coll['saver_plugin'].setup()
 
     def _transport_post_plugin(self):
         saver = self.exp._get_experiment_collection()['saver_plugin']
@@ -43,10 +47,6 @@ class Hdf5Transport(TransportControl):
             entry, fname = \
                 saver._save_data(data, self.exp.meta_data.get("link_type"))
             saver._open_read_only(data, fname, entry)
-
-    def _transport_control_finalise(self):
-        # save the output file and link to nexus file when using distarray?
-        pass
 
     def _process(self, plugin):
         """ Organise required data and execute the main plugin processing.
@@ -56,6 +56,7 @@ class Hdf5Transport(TransportControl):
         in_data, out_data = plugin.get_datasets()
 
         expInfo = plugin.exp.meta_data
+
         in_slice_list = self.__get_all_slice_lists(in_data, expInfo)
         out_slice_list = self.__get_all_slice_lists(out_data, expInfo)
 

@@ -29,21 +29,37 @@ class TransportControl(object):
     plugin layers.
     """
 
-    def _transport_control_setup(self, options):
+    def _transport_initialise(self, options):
         """
-        Any initial setup required by the transport mechanism, not relating to
-        the data.
+        Any initial setup required by the transport mechanism on start up.
         """
         raise NotImplementedError("transport_control_setup needs to be "
                                   "implemented in %s", self.__class__)
 
-#    def _transport_run_plugin_list(self):
-#        """
-#        A loop that contains a call to plugin.run_plugin and anything required
-#        before or after the execution of a plugin.
-#        """
-#        raise NotImplementedError("transport_run_plugin_list needs to be "
-#                                  "implemented in %s", self.__class__)
+    def _transport_pre_plugin_list_run(self):
+        """
+        This method is called after all datasets have been created but BEFORE
+        the plugin list is processes.
+        """
+        pass
+
+    def _transport_pre_plugin(self):
+        """
+        This method is called directly BEFORE each plugin is executed.
+        """
+        pass
+
+    def _transport_post_plugin(self):
+        """
+        This method is called directly AFTER each plugin is executed.
+        """
+        pass
+
+    def _transport_post_plugin_list_run(self):
+        """
+        This method is called AFTER the full plugin list has been processed.
+        """
+        pass
 
     def _process(self, plugin):
         """
