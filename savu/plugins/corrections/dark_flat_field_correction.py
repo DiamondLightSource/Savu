@@ -50,14 +50,8 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
 
     def pre_process(self):
         inData = self.get_in_datasets()[0]
-        if isinstance(inData.data, ImageKey):
-            image_key = self.get_in_datasets()[0].data
-            self.dark = image_key.dark_mean()
-            self.flat = image_key.flat_mean()
-        else:
-            self.dark = inData.meta_data.get_meta_data('dark')
-            self.flat = inData.meta_data.get_meta_data('flat')
-
+        self.dark = inData.meta_data.get_meta_data('dark')
+        self.flat = inData.meta_data.get_meta_data('flat')
         self.flat_minus_dark = self.flat - self.dark
         det_dims = [inData.find_axis_label_dimension('detector_y'),
                     inData.find_axis_label_dimension('detector_x')]
@@ -92,7 +86,6 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
         # Set all cropped values to the crop level
         data[low_crop] = self.LOW_CROP_LEVEL
         data[high_crop] = self.HIGH_CROP_LEVEL
-
 
     def executive_summary(self):
         summary = []

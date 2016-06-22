@@ -21,17 +21,9 @@
 """
 
 import logging
-
-import math
-
-
-from pyFAI import units, AzimuthalIntegrator
-
 import numpy as np
 from savu.plugins.filters.base_azimuthal_integrator import BaseAzimuthalIntegrator
-
 from savu.plugins.utils import register_plugin
-import time
 
 
 @register_plugin
@@ -52,24 +44,19 @@ class PyfaiAzimuthalIntegratorWithBraggFilter(BaseAzimuthalIntegrator):
 
     def filter_frames(self, data):
         mData = self.params[2]
-        mask = self.params[0]
         ai = self.params[3]
         lims = self.parameters['thresh']
         num_bins_azim = self.parameters['num_bins_azim']
         num_bins_rad = self.parameters['num_bins']
-        remapped, axis, chi = ai.integrate2d(data=data[0],npt_rad=num_bins_rad, npt_azim=num_bins_azim, unit='q_A^-1')
+        remapped, axis, _chi = ai.integrate2d(data=data[0],npt_rad=num_bins_rad, npt_azim=num_bins_azim, unit='q_A^-1')
         mask = np.ones_like(remapped)
-        row_mask = np.zeros(mask.shape[0])
         mask[remapped==0] = 0
-#         print "the shape of the mask is"+str(mask.shape)
-#         print "the shape of remapped is"+str(remapped.shape)
         out = np.zeros(mask.shape[1])
-#         print "the shape of out is"+str(out.shape)
         for i in range(mask.shape[1]):
 #             print i
             idx = mask[:,i] == 1
             if np.sum(idx*1)==0:
-                logging.warn("Found a bin where all the pixels are masked! Bin num: %s" % str(i))
+                logging.warn("Found a bin where all the pixels are masked! Bin num: %s" , str(i))
                 out[i] = 0.0
             else:
                 foo = remapped[:,i][idx]

@@ -94,7 +94,7 @@ class BaseCorrection(Plugin):
 
         :returns:  an integer of the number of frames
         """
-        return 4
+        return 16
 
 #    def apply_preview(self, data):
 #        """ Apply previewing to data that is not part of the input data."""

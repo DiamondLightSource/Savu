@@ -20,14 +20,13 @@
 .. moduleauthor:: Nghia Vo <scientificsoftware@diamond.ac.uk>
 
 """
+import math
 import logging
+import numpy as np
+import pyfftw.interfaces.scipy_fftpack as fft
 
 from savu.plugins.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-
-import numpy as np
-import math
-
 from savu.plugins.utils import register_plugin
 
 
@@ -53,65 +52,69 @@ class PaganinFilter(BaseFilter, CpuPlugin):
         self.filtercomplex = None
         self.count = 0
 
-    def _setup_paganin(self, width, height):
-        if self.filtercomplex is None:
-            micron = 10**(-6)
-            keV = 1000.0
-            distance = self.parameters['Distance']
-            energy = self.parameters['Energy']*keV
-            resolution = self.parameters['Resolution']*micron
-            wavelength = (1240.0/energy)*10.0**(-9)
-            ratio = self.parameters['Ratio']
-            padtopbottom = self.parameters['Padtopbottom']
-            padleftright = self.parameters['Padleftright']
-            height1 = height + 2*padtopbottom
-            width1 = width + 2*padleftright
-            centery = np.ceil(height1/2.0)-1.0
-            centerx = np.ceil(width1/2.0)-1.0
-            # Define the paganin filter
-            dpx = 1.0/(width1*resolution)
-            dpy = 1.0/(height1*resolution)
-            pxlist = (np.arange(width1)-centerx)*dpx
-            pylist = (np.arange(height1)-centery)*dpy
-            pxx = np.zeros((height1, width1), dtype=np.float32)
-            pxx[:, 0:width1] = pxlist
-            pyy = np.zeros((height1, width1), dtype=np.float32)
-            pyy[0:height1, :] = np.reshape(pylist, (height1, 1))
-            pd = (pxx*pxx+pyy*pyy)*wavelength*distance*math.pi
-            filter1 = 1.0+ratio*pd
-            self.filtercomplex = filter1+filter1*1j
+    def pre_process(self):
+        pData = self.get_plugin_in_datasets()[0]
+        self.slice_dir = pData.get_slice_dimension()
+        nDims = len(pData.get_shape())
+        self.sslice = [slice(None)]*nDims
+        core_shape = list(pData.get_shape())
+        del core_shape[self.slice_dir]
+        self._setup_paganin(*core_shape)
+
+    def _setup_paganin(self, height, width):
+        micron = 10**(-6)
+        keV = 1000.0
+        distance = self.parameters['Distance']
+        energy = self.parameters['Energy']*keV
+        resolution = self.parameters['Resolution']*micron
+        wavelength = (1240.0/energy)*10.0**(-9)
+        ratio = self.parameters['Ratio']
+        padtopbottom = self.parameters['Padtopbottom']
+        padleftright = self.parameters['Padleftright']
+        height1 = height + 2*padtopbottom
+        width1 = width + 2*padleftright
+        centery = np.ceil(height1/2.0)-1.0
+        centerx = np.ceil(width1/2.0)-1.0
+        # Define the paganin filter
+        dpx = 1.0/(width1*resolution)
+        dpy = 1.0/(height1*resolution)
+        pxlist = (np.arange(width1)-centerx)*dpx
+        pylist = (np.arange(height1)-centery)*dpy
+        pxx = np.zeros((height1, width1), dtype=np.float32)
+        pxx[:, 0:width1] = pxlist
+        pyy = np.zeros((height1, width1), dtype=np.float32)
+        pyy[0:height1, :] = np.reshape(pylist, (height1, 1))
+        pd = (pxx*pxx+pyy*pyy)*wavelength*distance*math.pi
+        filter1 = 1.0+ratio*pd
+        self.filtercomplex = filter1+filter1*1j
 
     def _paganin(self, data, axes):
-        pci1 = np.fft.fft2(np.float32(data))
-        pci2 = np.fft.fftshift(pci1)/self.filtercomplex
-        fpci = np.abs(np.fft.ifft2(pci2))
+        pci1 = fft.fft2(np.float32(data))
+        pci2 = fft.fftshift(pci1)/self.filtercomplex
+        fpci = np.abs(fft.ifft2(pci2))
         result = -0.5*self.parameters['Ratio']*np.log(fpci+1.0)
         return result
 
     def filter_frames(self, data):
-        if (self.count % 100 == 0):
-            logging.debug("... %i" % self.count)
-        self.count += 1
-        logging.debug("Getting the filter frame of Paganin Filter")
-        data = data[0]
-        logging.debug("Paganin Filter input shape %s" % str(data.shape))
-        height, width = data.shape
-        self._setup_paganin(width, height)
-        data = np.nan_to_num(data)  # Noted performance
-        data[data == 0] = 1.0
-        padtopbottom = self.parameters['Padtopbottom']
-        padleftright = self.parameters['Padleftright']
-        padmethod = str(self.parameters['Padmethod'])
-        data = np.lib.pad(data, ((padtopbottom, padtopbottom),
-                                 (padleftright, padleftright)), padmethod)
-        result = np.apply_over_axes(self._paganin, data, 0)
-        result = np.abs(result)
-        result = result[padtopbottom:-padtopbottom,
-                        padleftright: -padleftright]
-        logging.debug("Paganin Filter output shape %s" % str(result.shape))
-        return result
+        output = np.empty_like(data[0])
+        nSlices = data[0].shape[self.slice_dir]
+        for i in range(nSlices):
+            self.sslice[self.slice_dir] = i
+            proj = data[0][tuple(self.sslice)]
+            height, width = proj.shape
+            proj = np.nan_to_num(proj)  # Noted performance
+            proj[proj == 0] = 1.0
+            padtopbottom = self.parameters['Padtopbottom']
+            padleftright = self.parameters['Padleftright']
+            padmethod = str(self.parameters['Padmethod'])
+            proj = np.lib.pad(proj, (tuple([padtopbottom]*2),
+                                     tuple([padleftright]*2)), padmethod)
+            result = np.abs(np.apply_over_axes(self._paganin, proj, 0))
+            output[self.sslice] = result[padtopbottom:-padtopbottom,
+                                         padleftright:-padleftright]
+        return output
 
     def get_max_frames(self):
-        return 1
+        return 16
 
 # TODO Add the citation information here
