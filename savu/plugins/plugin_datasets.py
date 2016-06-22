@@ -109,28 +109,6 @@ class PluginDatasets(object):
         self.parameters['plugin_out_datasets'] = \
             self._get_plugin_data(self.parameters['out_datasets'])
 
-    def _detach_plugin_datasets(self, data_dict):
-        pData_dict = {}
-        for key in data_dict:
-            pData_dict[key] = copy.deepcopy(data_dict[key]._get_plugin_data())
-            data_dict[key]._clear_plugin_data()
-        return pData_dict
-
-    def __attach_plugin_datasets(self, data, pData):
-        for i in range(len(data)):
-            data[i]._set_plugin_data(pData[i])
-
-    def _reset_all_datasets(self, inData, outData, in_pData, out_pData):
-        print inData
-        for key, data in inData.iteritems():
-            data._set_plugin_data(in_pData[key])
-            self.parameters['in_datasets'] = inData
-
-        print outData
-        for key, data in outData.iteritems():
-            self._set_plugin_data(out_pData[key])
-            self.parameters['out_datasets'] = outData
-
     @docstring_parameter('PluginData', 'in')
     @docstring_parameter(notes.datasets_notes.__doc__)
     def get_plugin_in_datasets(self):

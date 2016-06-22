@@ -63,7 +63,6 @@ class Data(DataCreate):
         """ Encapsulate a PluginData object.
         """
         self._plugin_data_obj = plugin_data_obj
-        self._plugin_data_obj._preview = self._preview
 
     def _clear_plugin_data(self):
         """ Set encapsulated PluginData object to None.

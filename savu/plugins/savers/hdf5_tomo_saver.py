@@ -141,6 +141,7 @@ class Hdf5TomoSaver(BaseSaver):
 
             try:
                 mData = data.meta_data.get(name)
+                print "outputting the axis label", name
             except KeyError:
                 mData = np.arange(data.get_shape()[count])
 

@@ -61,9 +61,9 @@ class TransportControl(object):
         """
         pass
 
-    def _process(self, plugin):
-        """
-        A function to process the plugin, including the passing of data frames.
-        """
-        raise NotImplementedError("process needs to be implemented in  %s",
-                                  self.__class__)
+#    def _process(self, plugin):
+#        """
+#        A function to process the plugin, including the passing of data frames.
+#        """
+#        raise NotImplementedError("process needs to be implemented in  %s",
+#                                  self.__class__)

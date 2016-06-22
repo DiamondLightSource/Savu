@@ -163,8 +163,8 @@ class ImageKey(DataTypes):
         new_shape[proj_dim] = len(data_idx)
         self.shape = tuple(new_shape)
         self.nDims = len(self.shape)
-        data_obj.meta_data.set_meta_data('dark', self.dark_mean())
-        data_obj.meta_data.set_meta_data('flat', self.flat_mean())
+        data_obj.meta_data.set('dark', self.dark_mean())
+        data_obj.meta_data.set('flat', self.flat_mean())
 
     def __getitem__(self, idx):
         index = list(idx)

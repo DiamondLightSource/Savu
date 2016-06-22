@@ -37,7 +37,7 @@ class Hdf5Transport(TransportControl):
     def _transport_pre_plugin_list_run(self):
         # run through the experiment (no processing) and create output files
         exp_coll = self.exp._get_experiment_collection()
-        for i in range(len(exp_coll['plugin_list'])):
+        for i in range(len(exp_coll['datasets'])):
             self.exp._set_experiment_for_current_plugin(i)
             exp_coll['saver_plugin'].setup()
 
