@@ -60,7 +60,7 @@ class MetaData(object):
         """ Get a value from the meta data dictionary, given its key(s).
 
         :params maplist: Dictionary key(s).
-        :type maplist: str of list(str)
+        :type maplist: str or list(str)
         :returns: Value from the dictionary corresponding to the given key(s)
         :rtype: value
 
