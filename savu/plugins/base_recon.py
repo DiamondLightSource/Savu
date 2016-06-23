@@ -154,7 +154,7 @@ class BaseRecon(Plugin):
 
         shape = list(in_dataset[0].get_shape())
         shape[dim_volX] = shape[dim_volZ]
-        
+
         out_dataset[0].create_dataset(axis_labels=axis_labels,
                                       shape=tuple(shape))
 
@@ -163,7 +163,6 @@ class BaseRecon(Plugin):
         # set pattern_name and nframes to process for all datasets
         out_pData[0].plugin_data_setup('VOLUME_XZ', self.get_max_frames(),
                                        fixed=True)
-                                       
 
     def map_volume_dimensions(self, data, pData):
         data._finalise_patterns()
@@ -198,5 +197,3 @@ class BaseRecon(Plugin):
         Should be overridden to perform pre-processing in a child class
         """
         pass
-
-logging.debug("Completed base_recon import")

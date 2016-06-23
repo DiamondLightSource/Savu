@@ -157,6 +157,7 @@ class Hdf5TransportData(object):
             nx_data.create_dataset('slice_dir', data=values['slice_dir'])
 
     def __output_metadata_dict(self, entry):
+        print "outputting the meta data dictionary"
         meta_data = self.meta_data.get_dictionary()
         entry = entry.create_group('meta_data')
         entry.attrs['NX_class'] = 'NXcollection'

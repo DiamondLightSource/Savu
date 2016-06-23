@@ -172,7 +172,7 @@ class Data(DataCreate):
                 nDims += len(kwargs[args])
                 self.data_info.set_meta_data(['data_patterns', dtype, args],
                                              kwargs[args])
-            
+
             self.__convert_pattern_directions(dtype)
             if self.get_shape():
                 diff = len(self.get_shape()) - nDims
