@@ -24,8 +24,12 @@ while read -r a b c d; do
     #datafile=/dls/i13/data/2016/mt14080-1/raw/77391.nxs
     #processfile=$outpath/test.nxs
 
-    datafile=/dls/i18/data/2016/sp12778-1/processing/Savu_testing_steve/XRF/67086_homer_absorption_tomo17kev_1.nxs
-    processfile=$outpath/i18_test2.nxs
+    datafile=$outpath/../../test_data/sn65/SampleA
+    processfile=$outpath/sri_test.nxs
+
+    #datafile=/dls/i18/data/2016/sp12778-1/processing/Savu_testing_steve/XRF/RAW_DATA/67086_homer_absorption_tomo17kev_1.nxs
+    #processfile=$outpath/i18_test2.nxs
+    #processfile=$outpath/i18_fluo_preview.nxs
 
     #datafile=/dls/i12/data/2016/cm14465-1/processing/brick-data/dls/i12/data/2014/cm4963-3/rawdata/40384.nxs
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_loader.nxs
@@ -102,5 +106,5 @@ while read -r a b c d; do
       #echo "completed profiling"
 	fi	
 
-done < ../test.txt
+done < ../../test.txt
 

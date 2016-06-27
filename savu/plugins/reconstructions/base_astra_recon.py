@@ -82,13 +82,16 @@ class BaseAstraRecon(BaseRecon):
     def setup_2D(self):
         pData = self.get_plugin_in_datasets()[0]
         dim_detX = pData.get_data_dimension_by_axis_label('x', contains=True)
+        dim_rot = pData.get_data_dimension_by_axis_label('rot', contains=True)
 
         self.sino_shape = pData.get_shape()
         self.nDims = len(self.sino_shape)
         self.slice_dir = pData.get_slice_dimension()
 
-        self.sino_dim_detX = dim_detX-1 if self.nDims is 3 and self.slice_dir\
-            is not 2 else dim_detX
+        self.sino_dim_detX = dim_detX-1 if self.nDims is 3 and\
+            self.slice_dir < dim_detX else dim_detX
+        self.sino_dim_rot = dim_rot-1 if self.nDims is 3 and\
+            self.slice_dir < dim_rot else dim_rot
 
         self.nCols = self.sino_shape[dim_detX]
         self.nSinos = self.sino_shape[self.slice_dir] if self.nDims is 3 else 1
@@ -125,7 +128,10 @@ class BaseAstraRecon(BaseRecon):
 
         proj_id = False
         # create volume geom
-        vol_geom = astra.create_vol_geom(*vol_shape[0:1])
+
+        astra_vol_shape = list(vol_shape)
+        del astra_vol_shape[self.slice_dir]
+        vol_geom = astra.create_vol_geom(astra_vol_shape)
 
         for i in range(self.nSinos):
             sslice[self.slice_dir] = i
@@ -141,6 +147,8 @@ class BaseAstraRecon(BaseRecon):
                 'parallel', 1.0, pad_sino.shape[self.sino_dim_detX],
                 np.deg2rad(angles))
 
+            pad_sino = \
+                np.transpose(pad_sino, (self.sino_dim_rot, self.sino_dim_detX))
             # create sinogram id
             sino_id = astra.data2d.create("-sino", proj_geom, pad_sino)
 
@@ -218,7 +226,7 @@ class BaseAstraRecon(BaseRecon):
             int(math.ceil(float(sino_width)/new_width * self.sino_pad)/2)
         pad = np.array([sino_pad]*2) + centre_pad
         pad_tuples = [(0, 0)]*(len(sino.shape)-1)
-        pad_tuples.insert(self.pad_dim, tuple(pad))
+        pad_tuples.insert(self.sino_dim_detX, tuple(pad))
         return np.pad(sino, tuple(pad_tuples), mode='edge')
 
     def array_pad(self, ctr, nPixels):

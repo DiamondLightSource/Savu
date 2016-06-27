@@ -157,7 +157,6 @@ class Hdf5TransportData(object):
             nx_data.create_dataset('slice_dir', data=values['slice_dir'])
 
     def __output_metadata_dict(self, entry):
-        print "outputting the meta data dictionary"
         meta_data = self.meta_data.get_dictionary()
         entry = entry.create_group('meta_data')
         entry.attrs['NX_class'] = 'NXcollection'
@@ -171,17 +170,32 @@ class Hdf5TransportData(object):
         logging.info('save_data _barrier')
         self.exp._barrier()
 
+#    def _close_file(self):
+#        """
+#        Closes the backing file and completes work
+#        """
+#        if self.backing_file is not None:
+#            temp_filename = copy.copy(self.backing_file.filename)
+#            self.exp._barrier()
+#            try:
+#                logging.debug("Completing file %s", self.backing_file.filename)
+#                print self.backing_file
+#                print "closing"
+#                self.backing_file.close()
+#                print "closed"
+#                self.backing_file = None
+#            except:
+#                pass
+#            print "====== the file", temp_filename, "has succeeded in being closed"
+
     def _close_file(self):
         """
         Closes the backing file and completes work
         """
-        if self.backing_file is not None:
-            try:
-                logging.debug("Completing file %s", self.backing_file.filename)
-                self.backing_file.close()
-                self.backing_file = None
-            except:
-                pass
+        self.exp._barrier()
+        logging.debug("Completing file %s", self.backing_file.filename)
+        self.backing_file.close()
+        self.backing_file = None
 
     def __chunk_length_repeat(self, slice_dirs, shape):
         """

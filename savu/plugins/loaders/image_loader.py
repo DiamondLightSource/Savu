@@ -115,7 +115,7 @@ class ImageLoader(BaseLoader):
 
         n_angles = len(angles)
         data_angles = data_obj.data.get_shape()[0]
-        if data_angles is not n_angles:
+        if data_angles != n_angles:
             raise Exception("The number of angles %s does not match the data "
                             "dimension length %s", n_angles, data_angles)
         data_obj.meta_data.set_meta_data("rotation_angle", angles)

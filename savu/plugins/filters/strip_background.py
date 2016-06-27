@@ -87,15 +87,15 @@ class StripBackground(BaseFilter, CpuPlugin):
     def setup(self):
         logging.debug('setting up the background subtraction')
         in_dataset, out_datasets = self.get_datasets()
-        print in_dataset, out_datasets        
+        #print in_dataset, out_datasets        
         
         in_meta = in_dataset[0].meta_data
         in_dictionary = in_meta.get_dictionary()
-        print in_dictionary
+        #print in_dictionary
         stripped = out_datasets[0]
         stripped.create_dataset(in_dataset[0])
         stripped.meta_data.dict = deepcopy(in_dictionary)
-        print stripped.meta_data.dict
+        #print stripped.meta_data.dict
         background = out_datasets[1]
         background.create_dataset(in_dataset[0])
         background.meta_data.dict = deepcopy(in_dictionary)

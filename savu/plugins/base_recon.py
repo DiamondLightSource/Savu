@@ -67,6 +67,7 @@ class BaseRecon(Plugin):
         self.set_centre_of_rotation(in_dataset, in_meta_data, in_pData[0])
         self.exp.log(self.name + " End")
         self.vol_shape = out_pData[0].get_shape()
+
         self.main_dir = in_pData[0].get_pattern()['SINOGRAM']['main_dir']
         self.angles = in_meta_data.get_meta_data('rotation_angle')
         self.slice_dirs = out_pData[0].get_slice_directions()
@@ -115,7 +116,6 @@ class BaseRecon(Plugin):
         """
         cor = self.cor[slice_list[0][self.main_dir]]
         init = data[1] if len(data) is 2 else None
-        print "initial data shape", data[0].shape
         result = self.reconstruct(self.sino_func(data[0]), self.cor_func(cor),
                                   self.angles, self.vol_shape, init)
         return result
