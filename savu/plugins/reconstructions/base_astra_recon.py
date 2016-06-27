@@ -82,11 +82,15 @@ class BaseAstraRecon(BaseRecon):
     def setup_2D(self):
         pData = self.get_plugin_in_datasets()[0]
         dim_detX = pData.get_data_dimension_by_axis_label('x', contains=True)
+
         self.sino_shape = pData.get_shape()
         self.nDims = len(self.sino_shape)
-        self.sino_dim_detX = dim_detX if self.nDims is 2 else dim_detX-1
-        self.nCols = self.sino_shape[dim_detX]
         self.slice_dir = pData.get_slice_dimension()
+
+        self.sino_dim_detX = dim_detX-1 if self.nDims is 3 and self.slice_dir\
+            is not 2 else dim_detX
+
+        self.nCols = self.sino_shape[dim_detX]
         self.nSinos = self.sino_shape[self.slice_dir] if self.nDims is 3 else 1
         self.slice_func = self.slice_sino(self.nDims)
         l = self.sino_shape[dim_detX]
@@ -109,6 +113,7 @@ class BaseAstraRecon(BaseRecon):
             return lambda x, sslice: x[sslice]
 
     def astra_2D_recon(self, sino, cors, angles, vol_shape, init):
+        logging.debug("running astra_2D_recon")
         sslice = [slice(None)]*self.nDims
         recon = np.zeros(self.vol_shape)
         if self.nDims is 2:
@@ -227,7 +232,7 @@ class BaseAstraRecon(BaseRecon):
         return np.array([int(p_low), int(p_high)])
 
     def get_max_frames(self):
-        return 8
+        return 16
 
 ## Add this as citation information:
 ## W. van Aarle, W. J. Palenstijn, J. De Beenhouwer, T. Altantzis, S. Bals,  \

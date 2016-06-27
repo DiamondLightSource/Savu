@@ -34,16 +34,17 @@ class RavenFilter(BaseFilter, CpuPlugin):
     """
     Ring artefact removal method
 
-    :param uvalue: To define the shape of filter. Default: 30.
-    :param vvalue: How many rows to be applied the filter. Default: 1.
-    :param nvalue: To define the shape of filter. Default: 8.
+    :param uvalue: To define the shape of filter, e.g. bad=10, moderate=20,\
+        minor=50. Default: 20.
+    :param vvalue: How many rows to be applied the filter. Default: 2.
+    :param nvalue: To define the shape of filter. Default: 4.
     :param padFT: Padding for Fourier transform. Default: 20.
     """
 
     def __init__(self):
         logging.debug("Starting Raven Filter")
         super(RavenFilter, self).__init__("RavenFilter")
-        self.count=0
+        self.count = 0
 
     def set_filter_padding(self, in_data, out_data):
         self.pad = self.parameters['padFT']
@@ -79,8 +80,8 @@ class RavenFilter(BaseFilter, CpuPlugin):
                                        direction='FFTW_BACKWARD')
 
     def filter_frames(self, data):
-        if(self.count%25==0):
-           logging.debug( "raven...%i"%self.count)
+        if(self.count % 25 == 0):
+            logging.debug("raven...%i" % self.count)
         data2d = data[0]
         sino2 = np.fft.fftshift(self.fft_object(data2d))
         sino2[self.row1:self.row2] = \
@@ -88,7 +89,7 @@ class RavenFilter(BaseFilter, CpuPlugin):
         sino3 = np.fft.ifftshift(sino2)
         sino4 = self.ifft_object(sino3).real
         sino4 = sino4[:, np.newaxis, :]
-        self.count+=1
+        self.count += 1
         return sino4
 
     def get_plugin_pattern(self):

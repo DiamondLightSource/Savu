@@ -21,6 +21,12 @@ while read -r a b c d; do
 	runfile=/bin/savu_launcher.sh
 	outpath=$PWD #outputting to the current folder
     
+    #datafile=/dls/i13/data/2016/mt14080-1/raw/77391.nxs
+    #processfile=$outpath/test.nxs
+
+    datafile=/dls/i18/data/2016/sp12778-1/processing/Savu_testing_steve/XRF/67086_homer_absorption_tomo17kev_1.nxs
+    processfile=$outpath/i18_test2.nxs
+
     #datafile=/dls/i12/data/2016/cm14465-1/processing/brick-data/dls/i12/data/2014/cm4963-3/rawdata/40384.nxs
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_loader.nxs
 
@@ -42,17 +48,17 @@ while read -r a b c d; do
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/test_data/test_process_lists/basic_tomo_process.nxs
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/mpi_settings_test.nxs
     
-    datafile=$outpath/../test_data/LD_2W50_8_Dataset_038.nxs
-	processfile=$outpath/../test_data/original_process_lists/i12_tomo_pipeline_preview_55751.nxs
+    #datafile=$outpath/../test_data/LD_2W50_8_Dataset_038.nxs
+	#processfile=$outpath/../test_data/original_process_lists/i12_tomo_pipeline_preview_55751.nxs
     
-    datafile=$outpath/../test_data/ee12581-1_test/pc2_KRA_530_ramp_00000.hdf
-    process_file=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_processes/test.nxs
+    #datafile=$outpath/../test_data/ee12581-1_test/pc2_KRA_530_ramp_00000.hdf
+    #process_file=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_processes/test.nxs
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_processes/test_loader_i12.nxs
     #processfile=$outpath/../test_data/i12_tomo_pipeline_gpu.nxs
 	#processfile=$outpath/../test_data/i12_full_test.nxs
 
-    datafile=$outpath/../test_data/for_nicola/54681.nxs
-	processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_processes/sally_pipeline.nxs
+    #datafile=$outpath/../test_data/for_nicola/54681.nxs
+	#processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_processes/sally_pipeline.nxs
     #datafile=/dls/i12/data/2015/sw12280-3/rawdata/54652.nxs
     #datafile=/dls/i12/data/2015/sw12280-3/rawdata/54653.nxs
     #datafile=/dls/i12/data/2015/sw12280-3/rawdata/54654.nxs

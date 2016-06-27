@@ -21,6 +21,7 @@
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 """
+
 import os
 import logging
 import copy

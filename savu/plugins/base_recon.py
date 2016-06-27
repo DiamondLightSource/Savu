@@ -75,10 +75,11 @@ class BaseRecon(Plugin):
         pad_len = shape[self.pad_dim] if self.parameters['sino_pad'] else 0
         self.sino_pad = int(math.ceil((math.sqrt(2)-1)*pad_len))
 
-        bases = [b.__name__ for b in self.__class__.__bases__]
+#        bases = [b.__name__ for b in self.__class__.__bases__]
         # pad the data now if the recon is not astra
-        self.sino_func, self.cor_func = self.set_function(False) if \
-            'NewBaseAstraRecon' in bases else self.set_function(shape)
+#        self.sino_func, self.cor_func = self.set_function(False) if \
+#            'NewBaseAstraRecon' in bases else self.set_function(shape)
+        self.sino_func, self.cor_func = self.set_function(False)
 
     def set_centre_of_rotation(self, inData, mData, pData):
         try:
@@ -114,6 +115,7 @@ class BaseRecon(Plugin):
         """
         cor = self.cor[slice_list[0][self.main_dir]]
         init = data[1] if len(data) is 2 else None
+        print "initial data shape", data[0].shape
         result = self.reconstruct(self.sino_func(data[0]), self.cor_func(cor),
                                   self.angles, self.vol_shape, init)
         return result
@@ -154,7 +156,7 @@ class BaseRecon(Plugin):
 
         shape = list(in_dataset[0].get_shape())
         shape[dim_volX] = shape[dim_volZ]
-        
+
         out_dataset[0].create_dataset(axis_labels=axis_labels,
                                       shape=tuple(shape))
 
@@ -163,7 +165,6 @@ class BaseRecon(Plugin):
         # set pattern_name and nframes to process for all datasets
         out_pData[0].plugin_data_setup('VOLUME_XZ', self.get_max_frames(),
                                        fixed=True)
-                                       
 
     def map_volume_dimensions(self, data, pData):
         data._finalise_patterns()
@@ -198,5 +199,3 @@ class BaseRecon(Plugin):
         Should be overridden to perform pre-processing in a child class
         """
         pass
-
-logging.debug("Completed base_recon import")

@@ -24,7 +24,7 @@
 import os
 import h5py
 import logging
-import math
+import copy
 import numpy as np
 
 import savu.plugins.utils as pu
@@ -39,8 +39,8 @@ class Hdf5TransportData(object):
     specific to a hdf5 transport mechanism.
     """
 
-    def __init__(self):
-        self.backing_file = None
+#    def __init__(self):
+#        self.end_pad = True
 
     def _load_data(self, start):
         exp = self.exp
@@ -157,6 +157,7 @@ class Hdf5TransportData(object):
             nx_data.create_dataset('slice_dir', data=values['slice_dir'])
 
     def __output_metadata_dict(self, entry):
+        print "outputting the meta data dictionary"
         meta_data = self.meta_data.get_dictionary()
         entry = entry.create_group('meta_data')
         entry.attrs['NX_class'] = 'NXcollection'
@@ -421,10 +422,10 @@ class Hdf5TransportData(object):
     def __set_padding_dict(self):
         pData = self._get_plugin_data()
         if pData.padding and not isinstance(pData.padding, Padding):
-            pad_dict = pData.padding
+            pData.pad_dict = copy.deepcopy(pData.padding)
             pData.padding = Padding(pData.get_pattern())
-            for key in pad_dict.keys():
-                getattr(pData.padding, key)(pad_dict[key])
+            for key in pData.pad_dict.keys():
+                getattr(pData.padding, key)(pData.pad_dict[key])
 
     def _get_padded_slice_data(self, input_slice_list):
         slice_list = list(input_slice_list)
@@ -447,12 +448,15 @@ class Hdf5TransportData(object):
             slice_list[ddir], pad_list[ddir] = self.__calculate_slice_padding(
                 slice_list[ddir], pDict, shape[ddir])
 
+        if pData.end_pad is True:
+            self.correct_pad(pData)
         return self.__get_pad_data(tuple(slice_list), tuple(pad_list))
 
     def __matching_dims(self, pData, slice_list):
         """ Ensure each chunk of frames passed to the plugin has the same \
         (max_frames) size.
         """
+        pData.end_pad = True
         slice_dir = pData.get_slice_directions()[0]
         sl = slice_list[slice_dir]
         max_frames = self._get_plugin_data()._get_frame_chunk()
@@ -479,4 +483,14 @@ class Hdf5TransportData(object):
                 else -padding_dict[ddir]['after']
             new_slice[ddir] = slice(padding_dict[ddir]['before'], end, 1)
 
+        if pData.end_pad is True:
+            self.correct_pad(pData)
         return padded_data[tuple(new_slice)]
+
+    def correct_pad(self, pData):
+        if pData.pad_dict:
+            pData.padding = pData.pad_dict
+            self.__set_padding_dict()
+        else:
+            pData.padding = None
+        pData.end_pad = False
