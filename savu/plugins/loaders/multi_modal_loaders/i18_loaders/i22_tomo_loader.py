@@ -59,7 +59,7 @@ class I22TomoLoader(BaseLoader):
                                 slice_dir=(0, 1, 2))
 
         mData = data_obj.meta_data
-        mData.set_meta_data("Q", data_obj.backing_file['entry/result/q'])
+        mData.set_meta_data("Q", data_obj.backing_file['entry/result/q'].value)
         mData.set_meta_data("x", np.arange(data_obj.data.shape[1]))
         mData.set_meta_data("y", np.arange(data_obj.data.shape[0]))
         mData.set_meta_data("rotation_angle",
