@@ -193,6 +193,9 @@ class Hdf5TransportData(object):
         Closes the backing file and completes work
         """
         self.exp._barrier()
+        print "1", self.get_name(), self
+        print "2", self.backing_file
+        print "3", self.backing_file.filename
         logging.debug("Completing file %s", self.backing_file.filename)
         self.backing_file.close()
         self.backing_file = None

@@ -32,7 +32,7 @@ from savu.plugins.utils import register_plugin
 @register_plugin
 class NxtomoLoader(BaseLoader):
     """
-    A class to load i12 tomography data from a hdf5 file
+    A class to load tomography data from a hdf5 file
 
     :param data_path: Path to the data inside the \
         file. Default: 'entry1/tomo_entry/data/data'.
@@ -49,6 +49,7 @@ class NxtomoLoader(BaseLoader):
 
     def setup(self):
         exp = self.exp
+
         data_obj = exp.create_data_object('in_data', 'tomo')
 
         data_obj.backing_file = \
@@ -66,7 +67,7 @@ class NxtomoLoader(BaseLoader):
             shape = self.__setup_3d_to_4d(data_obj, n_angles)
         else:
             if len(data_obj.data.shape) is 3:
-                shape = self.__setup_3d(data_obj)
+                shape = self._setup_3d(data_obj)
             else:
                 shape = self.__setup_4d(data_obj)
             self.__set_rotation_angles(data_obj)
@@ -81,7 +82,7 @@ class NxtomoLoader(BaseLoader):
         data_obj.set_original_shape(shape)
         self.set_data_reduction_params(data_obj)
 
-    def __setup_3d(self, data_obj):
+    def _setup_3d(self, data_obj):
         logging.debug("Setting up 3d tomography data.")
         rot = 0
         detY = 1

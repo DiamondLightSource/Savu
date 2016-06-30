@@ -149,6 +149,7 @@ class BaseAstraRecon(BaseRecon):
 
             pad_sino = \
                 np.transpose(pad_sino, (self.sino_dim_rot, self.sino_dim_detX))
+
             # create sinogram id
             sino_id = astra.data2d.create("-sino", proj_geom, pad_sino)
 

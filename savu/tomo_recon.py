@@ -119,7 +119,7 @@ def set_output_folder(in_file, out_path, set_folder):
         timestamp = time.strftime("%Y%m%d%H%M%S")
         MPI.COMM_WORLD.barrier()
         split = in_file.split('.')
-        if len(split) is 1:
+        if split[-1] != 'nxs':
             split = in_file.split('/')
             name = split[-2] if split[-1] == '' else split[-1]
         else:

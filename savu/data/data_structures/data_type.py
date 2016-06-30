@@ -25,6 +25,7 @@
 import os
 import numpy as np
 import fabio
+import copy
 
 
 class DataTypes(object):
@@ -167,6 +168,7 @@ class ImageKey(DataTypes):
         data_obj.meta_data.set_meta_data('flat', self.flat_mean())
 
     def __getitem__(self, idx):
+        print "image key index", idx
         index = list(idx)
         index[self.proj_dim] = self.get_index(0)[idx[self.proj_dim]].tolist()
         return self.data[tuple(index)]
@@ -204,3 +206,83 @@ class ImageKey(DataTypes):
     def flat_mean(self):
         """ Get the averaged flat projection data. """
         return self.__get_data(1).mean(self.proj_dim).astype(np.float32)
+
+
+class MultipleImageKey(DataTypes):
+    """ This class is used to combine multiple Data objects containing\
+        ImageKey objects. """
+
+    def __init__(self, data_obj_list, stack_or_cat, dim):
+        self.obj_list = data_obj_list
+        self.stack_or_cat = stack_or_cat
+        self.dim = dim
+        self.shape = None
+        self._set_shape()
+        if self.stack_or_cat == 'stack':
+            self.inc = 1
+        else:
+            self.inc = self.obj_list[0].get_shape()[self.dim]
+
+    def __getitem__(self, idx):
+        print "original index", idx
+        obj_list, in_slice_list, out_slice_list = self._get_lists(idx)
+        size = [len(np.arange(s.start, s.stop, s.step)) for s in idx]
+        data = np.empty(size)
+
+        for i in range(len(obj_list)):
+            print "out slice list", out_slice_list[i]
+            data[tuple(out_slice_list[i])] = \
+                obj_list[i].data[tuple(in_slice_list[i])]
+
+        return data
+
+    def _get_lists(self, idx):
+        inc = self.inc
+        entry = idx[self.dim]
+        init_vals = np.arange(entry.start, entry.stop, entry.step)
+        array = init_vals % inc
+        index = np.where(np.diff(array) < 0)[0] + 1
+        val_list = np.array_split(array, index)
+
+        # get the relevant Data objects
+        obj_vals = init_vals[np.append(0, index)]/inc
+        active_obj_list = []
+        for i in obj_vals:
+            active_obj_list.append(self.obj_list[i])
+
+        # set the input and output slice lists
+        in_slice_list = np.tile(idx, (len(val_list), 1))
+        new_slices = [slice(e[0], e[-1]+1, entry.step) for e in val_list]
+        in_slice_list[:, self.dim] = new_slices
+
+        out_slice_list = self._set_out_slice_list(idx, val_list)
+
+        return active_obj_list, in_slice_list, out_slice_list
+
+    def _set_out_slice_list(self, idx, val_list):
+        out_slice_list = \
+            [slice(0, len(np.arange(s.start, s.stop, s.step))) for s in idx]
+        out_slice_list = np.tile(out_slice_list, (len(val_list), 1))
+        length = np.append(0, np.cumsum([len(v) for v in val_list]))
+
+        if self.stack_or_cat == 'cat':
+            new_slices = \
+                [slice(length[i-1], length[i]) for i in range(1, len(length))]
+        else:
+            new_slices = [slice(i, i+1) for i in range(len(val_list))]
+        out_slice_list[:, self.dim] = new_slices
+
+        return out_slice_list
+
+    def get_shape(self):
+        return self.shape
+
+    def _set_shape(self):
+        nObjs = len(self.obj_list)
+        shape = list(self.obj_list[0].data.shape)
+        if self.stack_or_cat == 'cat':
+            shape[self.dim] *= nObjs
+        else:
+            shape.insert(self.dim, nObjs)
+        self.shape = tuple(shape)
+        print "setting the shape", self.shape, "***"
