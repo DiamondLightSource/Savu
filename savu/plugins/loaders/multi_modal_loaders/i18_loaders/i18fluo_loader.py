@@ -49,7 +49,7 @@ class I18fluoLoader(BaseI18MultiModalLoader):
         
         data_str = self.parameters['fluo_detector']
         data_obj = self.multi_modal_setup('fluo')
-        data_obj.data = data_obj.backing_file['entry/result/data']
+        data_obj.data = data_obj.backing_file[data_str]
         data_obj.set_shape(data_obj.data.shape)
         npts = data_obj.get_shape()[-1]
         mData = data_obj.meta_data
