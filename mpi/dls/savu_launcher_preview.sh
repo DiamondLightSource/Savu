@@ -11,7 +11,7 @@ shift 3
 options=$@
 
 outname=savu
-nNodes=4
+nNodes=1
 nCPUs=20
 
 filepath=$savupath/mpi/dls/savu_mpijob.sh
