@@ -17,7 +17,7 @@ nCPUs=20
 filepath=$savupath/mpi/dls/savu_mpijob.sh
 M=$((nNodes*20))
 
-filepath=/dls/tmp/savu
+log_path=/dls/tmp/savu
 while [[ $# -gt 1 ]]
 do
 echo processing $1
