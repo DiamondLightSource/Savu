@@ -8,14 +8,27 @@ datafile=$1
 processfile=$2
 outpath=$3
 shift 3
+options=$@
+
 outname=savu
-nNodes=2
+nNodes=4
 nCPUs=20
 
 filepath=$savupath/mpi/dls/savu_mpijob.sh
 M=$((nNodes*20))
 
-qsub -N $outname -sync y -j y -o /dls/tmp/savu/ -e /dls/tmp/savu/ -pe openmpi $M -l exclusive -l infiniband -l gpu=1 -q medium.q@@com10 $filepath $savupath $datafile $processfile $outpath $nCPUs $@> /dls/tmp/savu/$USER.out
+filepath=/dls/tmp/savu
+while [[ $# -gt 1 ]]
+do
+echo processing $1
+if [ $1 == "-l" ]
+  then
+  log_path=$2
+fi
+shift
+done
+
+qsub -N $outname -sync y -j y -o $log_path -e $log_path -pe openmpi $M -l exclusive -l infiniband -l gpu=1 -q medium.q@@com10 $filepath $savupath $datafile $processfile $outpath $nCPUs $options > /dls/tmp/savu/$USER.out
 
 echo "SAVU_LAUNCHER:: Job Complete, preparing output..."
 
