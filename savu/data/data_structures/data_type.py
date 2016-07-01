@@ -168,7 +168,6 @@ class ImageKey(DataTypes):
         data_obj.meta_data.set_meta_data('flat', self.flat_mean())
 
     def __getitem__(self, idx):
-        print "image key index", idx
         index = list(idx)
         index[self.proj_dim] = self.get_index(0)[idx[self.proj_dim]].tolist()
         return self.data[tuple(index)]
@@ -224,13 +223,11 @@ class MultipleImageKey(DataTypes):
             self.inc = self.obj_list[0].get_shape()[self.dim]
 
     def __getitem__(self, idx):
-        print "original index", idx
         obj_list, in_slice_list, out_slice_list = self._get_lists(idx)
         size = [len(np.arange(s.start, s.stop, s.step)) for s in idx]
         data = np.empty(size)
 
         for i in range(len(obj_list)):
-            print "out slice list", out_slice_list[i]
             data[tuple(out_slice_list[i])] = \
                 obj_list[i].data[tuple(in_slice_list[i])]
 
@@ -285,4 +282,3 @@ class MultipleImageKey(DataTypes):
         else:
             shape.insert(self.dim, nObjs)
         self.shape = tuple(shape)
-        print "setting the shape", self.shape, "***"
