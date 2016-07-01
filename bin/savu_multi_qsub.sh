@@ -27,7 +27,8 @@ while read -r a b c d; do
     #datafile=$outpath/../../test_data/sn65/SampleA
     #processfile=$outpath/sri_test.nxs
 
-    datafile=$outpath/../../test_data/mark_data/
+    #datafile=$outpath/../../test_data/mark_data/
+    datafile=/dls/science/users/ssg37927/mt9396-1/raw/
     processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_processes/multi_nxs_test.nxs
 
     #datafile=/dls/i18/data/2016/sp12778-1/processing/Savu_testing_steve/XRF/RAW_DATA/67086_homer_absorption_tomo17kev_1.nxs
