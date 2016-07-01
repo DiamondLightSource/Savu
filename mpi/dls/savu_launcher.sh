@@ -8,7 +8,7 @@ datafile=$1
 processfile=$2
 outpath=$3
 outname=savu
-nNodes=4
+nNodes=2
 nCPUs=20
 
 filepath=$savupath/mpi/dls/savu_mpijob.sh

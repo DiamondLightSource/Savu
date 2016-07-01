@@ -95,29 +95,3 @@ class BaseCorrection(Plugin):
         :returns:  an integer of the number of frames
         """
         return 16
-
-#    def apply_preview(self, data):
-#        """ Apply previewing to data that is not part of the input data."""
-#        return data[self._get_new_slice(len(data.shape))]
-
-#    def _get_new_slice(self, nDims):
-#        inData = self.get_in_datasets()[0]
-#        pData = self.get_plugin_in_datasets()[0]
-#        pattern = pData.get_pattern_name()
-#
-#        new_slice = [slice(None)]*nDims
-#        if pattern == 'SINOGRAM':
-#            det_dims = [inData.find_axis_label_dimension('detector_x')]
-#        else:
-#            det_dims = [inData.find_axis_label_dimension('detector_y'),
-#                        inData.find_axis_label_dimension('detector_x')]
-#
-#        starts, stops, steps, chunks = \
-#            pData.data_obj._preview.get_starts_stops_steps()
-#        for i in range(len(det_dims)):
-#            d = det_dims[i]
-#            new_slice[i] = slice(starts[d], stops[d], steps[d])
-#
-#        if pattern == 'SINOGRAM':
-#            return [slice(None), new_slice[0]]
-#        return new_slice

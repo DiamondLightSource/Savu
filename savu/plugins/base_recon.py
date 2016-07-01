@@ -67,6 +67,7 @@ class BaseRecon(Plugin):
         self.set_centre_of_rotation(in_dataset, in_meta_data, in_pData[0])
         self.exp.log(self.name + " End")
         self.vol_shape = out_pData[0].get_shape()
+
         self.main_dir = in_pData[0].get_pattern()['SINOGRAM']['main_dir']
         self.angles = in_meta_data.get_meta_data('rotation_angle')
         self.slice_dirs = out_pData[0].get_slice_directions()
@@ -75,10 +76,11 @@ class BaseRecon(Plugin):
         pad_len = shape[self.pad_dim] if self.parameters['sino_pad'] else 0
         self.sino_pad = int(math.ceil((math.sqrt(2)-1)*pad_len))
 
-        bases = [b.__name__ for b in self.__class__.__bases__]
+#        bases = [b.__name__ for b in self.__class__.__bases__]
         # pad the data now if the recon is not astra
-        self.sino_func, self.cor_func = self.set_function(False) if \
-            'NewBaseAstraRecon' in bases else self.set_function(shape)
+#        self.sino_func, self.cor_func = self.set_function(False) if \
+#            'NewBaseAstraRecon' in bases else self.set_function(shape)
+        self.sino_func, self.cor_func = self.set_function(False)
 
     def set_centre_of_rotation(self, inData, mData, pData):
         try:
@@ -154,7 +156,7 @@ class BaseRecon(Plugin):
 
         shape = list(in_dataset[0].get_shape())
         shape[dim_volX] = shape[dim_volZ]
-        
+
         out_dataset[0].create_dataset(axis_labels=axis_labels,
                                       shape=tuple(shape))
 
@@ -163,7 +165,6 @@ class BaseRecon(Plugin):
         # set pattern_name and nframes to process for all datasets
         out_pData[0].plugin_data_setup('VOLUME_XZ', self.get_max_frames(),
                                        fixed=True)
-                                       
 
     def map_volume_dimensions(self, data, pData):
         data._finalise_patterns()
@@ -198,5 +199,3 @@ class BaseRecon(Plugin):
         Should be overridden to perform pre-processing in a child class
         """
         pass
-
-logging.debug("Completed base_recon import")

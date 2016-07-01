@@ -21,6 +21,7 @@
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 """
+
 import os
 import logging
 import copy
@@ -113,10 +114,8 @@ class Experiment(object):
         out_data_list = self.index["out_data"]
         self.__close_unwanted_files(out_data_list)
         self.__remove_unwanted_data(out_data_objs)
-
         self._barrier()
         self.__copy_out_data_to_in_data(link_type)
-
         self._barrier()
         self.index['out_data'] = {}
 
@@ -129,6 +128,10 @@ class Experiment(object):
         for out_objs in out_data_list:
             if out_objs in self.index["in_data"].keys():
                 self.index["in_data"][out_objs]._close_file()
+
+    def _clean_up_files(self):
+        for key in self.index["in_data"].keys():
+            self.index["in_data"][key]._close_file()
 
     def __copy_out_data_to_in_data(self, link_type):
         for key in self.index["out_data"]:

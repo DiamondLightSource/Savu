@@ -181,8 +181,7 @@ class Hdf5Transport(TransportControl):
             self.__real_plugin_run(plugin_list, out_data_objs, start, stop)
             start = stop
 
-        for key in exp.index["in_data"].keys():
-            exp.index["in_data"][key]._close_file()
+        self.exp._clean_up_files()
 
         return
 
@@ -195,7 +194,6 @@ class Hdf5Transport(TransportControl):
                 "intermediate"
 
             exp._barrier()
-
             for key in out_data_objs[i - start]:
                 exp.index["out_data"][key] = out_data_objs[i - start][key]
 

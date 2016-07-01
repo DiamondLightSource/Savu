@@ -51,6 +51,7 @@ class Preview(object):
         self.revert_shape = kwargs.get('revert', self.revert_shape)
         shape = self.get_data_obj().get_shape()
         if preview_list:
+            preview_list = self.__add_preview_defaults(preview_list)
             starts, stops, steps, chunks = \
                 self.__get_preview_indices(preview_list)
             shape_change = True
@@ -120,9 +121,6 @@ class Preview(object):
             if preview_list[i] is ':':
                 preview_list[i] = '0:end:1:1'
             vals = preview_list[i].split(':')
-            if len(vals) is 1:
-                idx = preview_list[i]
-                vals = [idx, idx + '+1', '1', '1']
             starts[i], stops[i], steps[i], chunks[i] = \
                 self.__convert_indices(vals, i)
         return starts, stops, steps, chunks

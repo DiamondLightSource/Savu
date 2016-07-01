@@ -48,10 +48,10 @@ def __option_parser():
     parser.add_option("-q", "--quiet", action="store_true", dest="quiet",
                       help="Display only Errors and Info", default=False)
     parser.add_option("-s", "--syslog", dest="syslog",
-                      help="Location of syslog server", default='cs04r-sc-serv-14')
+                      help="Location of syslog server",
+                      default='cs04r-sc-serv-14')
     parser.add_option("-p", "--syslog_port", dest="syslog_port",
                       help="Port to connect to syslog server on", default=514)
-
 
     (options, args) = parser.parse_args()
     return [options, args]
@@ -118,7 +118,12 @@ def set_output_folder(in_file, out_path, set_folder):
         MPI.COMM_WORLD.barrier()
         timestamp = time.strftime("%Y%m%d%H%M%S")
         MPI.COMM_WORLD.barrier()
-        name = os.path.basename(in_file.split('.')[-2])
+        split = in_file.split('.')
+        if split[-1] != 'nxs':
+            split = in_file.split('/')
+            name = split[-2] if split[-1] == '' else split[-1]
+        else:
+            name = os.path.basename(split[-2])
         folder = os.path.join(out_path, ('_'.join([timestamp, name])))
     else:
         folder = os.path.join(out_path, set_folder)

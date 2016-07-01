@@ -98,7 +98,7 @@ def plugin_loader(exp, plugin_dict, **kwargs):
     except Exception as e:
         logging.error("failed to load the plugin")
         logging.error(e)
-        raise e        
+        raise e
 
     check_flag = kwargs.get('check', False)
     if check_flag:
@@ -148,6 +148,11 @@ def set_datasets(exp, plugin, plugin_dict):
                                plugin.nInput_datasets(), "in_data")
     out_names = check_nDatasets(exp, out_names, plugin_dict,
                                 plugin.nOutput_datasets(), "out_data")
+
+    for i in range(len(out_names)):
+        new = out_names[i].split('in_datasets')
+        if len(new) is 2:
+            out_names[i] = in_names[int(list(new[1])[1])]
 
     plugin_dict["data"]["in_datasets"] = in_names
     plugin_dict["data"]["out_datasets"] = out_names

@@ -174,13 +174,10 @@ class Hdf5TransportData(object):
         """
         Closes the backing file and completes work
         """
-        if self.backing_file is not None:
-            try:
-                logging.debug("Completing file %s", self.backing_file.filename)
-                self.backing_file.close()
-                self.backing_file = None
-            except:
-                pass
+        self.exp._barrier()
+        logging.debug("Completing file %s", self.backing_file.filename)
+        self.backing_file.close()
+        self.backing_file = None
 
     def __chunk_length_repeat(self, slice_dirs, shape):
         """
