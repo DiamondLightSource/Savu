@@ -75,22 +75,19 @@ class ThresholdFilter(BaseFilter, CpuPlugin):
 
     def pre_process(self):
         in_dataset = self.get_in_datasets()[0]
+        try:
+            # Extract the intensity range from the image meta data
+            self.lowest = numpy.amin(in_dataset.meta_data.get_meta_data('min'))
+            self.highest = numpy.amax(in_dataset.meta_data.get_meta_data('max'))
+        except KeyError as k:
+            logging.error("Caught KeyError in BinaryQuantisation.setup(): %s", str(k))
+
+            # Use defaults suitable for tomo test data
+            logging.warning("Using test data min and max intensities.")
+            self.lowest = 0
+            self.highest = 31137
 
         if self.parameters['explicit_threshold']:
             self.threshold = self.parameters['intensity_threshold']
-
         else:
-            try:
-                # Extract the intensity range from the image meta data
-                self.lowest = numpy.amin(in_dataset.meta_data.get_meta_data('min'))
-                self.highest = numpy.amax(in_dataset.meta_data.get_meta_data('max'))
-
-            except KeyError as k:
-                logging.error("Caught KeyError in BinaryQuantisation.setup(): %s", str(k))
-
-                # Use defaults suitable for tomo test data
-                logging.warning("Using test data min and max intensities.")
-                self.lowest = 0
-                self.highest = 31137
-
             self.threshold = (self.highest + self.lowest) / 2.0
