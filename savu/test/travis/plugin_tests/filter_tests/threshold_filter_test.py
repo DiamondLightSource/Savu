@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2014 Diamond Light Source Ltd.
+# Copyright 2016 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
 
 
 """
-.. module:: plugins_test
+.. module:: Threshold filter test
    :platform: Unix
-   :synopsis: unittest test classes for plugins
+   :synopsis: unittest test classes for quantisation plugin
 
-.. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
+.. moduleauthor:: Nicoletta De Maio <scientificsoftware@diamond.ac.uk>
 
 """
 
@@ -30,11 +30,11 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
 
-class MedianFilterTest(unittest.TestCase):
+class ThresholdFilterTest(unittest.TestCase):
 
-    def test_median_filter(self):
+    def test_binary_quantisation_filter(self):
         data_file = tu.get_test_data_path('24737.nxs')
-        process_file = tu.get_test_process_path('median_filter_test.nxs')
+        process_file = tu.get_test_process_path('threshold_filter_test.nxs')
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
 
