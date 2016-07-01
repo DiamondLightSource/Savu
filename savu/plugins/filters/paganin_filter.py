@@ -88,7 +88,7 @@ class PaganinFilter(BaseFilter, CpuPlugin):
         filter1 = 1.0+ratio*pd
         self.filtercomplex = filter1+filter1*1j
 
-    def _paganin(self, data, axes):
+    def _paganin(self, data):
         pci1 = fft.fft2(np.float32(data))
         pci2 = fft.fftshift(pci1)/self.filtercomplex
         fpci = np.abs(fft.ifft2(pci2))
@@ -109,7 +109,8 @@ class PaganinFilter(BaseFilter, CpuPlugin):
             padmethod = str(self.parameters['Padmethod'])
             proj = np.lib.pad(proj, (tuple([padtopbottom]*2),
                                      tuple([padleftright]*2)), padmethod)
-            result = np.abs(np.apply_over_axes(self._paganin, proj, 0))
+            result = self._paganin(proj)
+            #result = np.abs(np.apply_over_axes(self._paganin(proj), proj, 0))
             output[self.sslice] = result[padtopbottom:-padtopbottom,
                                          padleftright:-padleftright]
         return output

@@ -12,5 +12,5 @@ Submodules
 
 .. toctree::
 
-   savu.plugins.filters.absorption_corrections.hogan_absorption_correction
+   savu.plugins.filters.absorption_corrections.mc_near_absorption_correction
 

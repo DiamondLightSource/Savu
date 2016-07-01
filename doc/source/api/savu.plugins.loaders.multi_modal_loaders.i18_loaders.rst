@@ -17,4 +17,5 @@ Submodules
    savu.plugins.loaders.multi_modal_loaders.i18_loaders.i18monitor_loader
    savu.plugins.loaders.multi_modal_loaders.i18_loaders.i18stxm_loader
    savu.plugins.loaders.multi_modal_loaders.i18_loaders.i18xrd_loader
+   savu.plugins.loaders.multi_modal_loaders.i18_loaders.i22_tomo_loader
 

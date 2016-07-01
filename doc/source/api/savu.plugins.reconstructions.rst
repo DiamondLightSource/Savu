@@ -21,7 +21,9 @@ Submodules
 
    savu.plugins.reconstructions.base_astra_recon
    savu.plugins.reconstructions.cgls_recon
+   savu.plugins.reconstructions.non_local_regularised_cgls
    savu.plugins.reconstructions.old_base_astra_recon
+   savu.plugins.reconstructions.really_old_base_astra_recon
    savu.plugins.reconstructions.scikitimage_filter_back_projection
    savu.plugins.reconstructions.scikitimage_sart
    savu.plugins.reconstructions.simple_fake_gpu_recon

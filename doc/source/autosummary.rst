@@ -16,8 +16,9 @@ savu.core
 .. toctree::
    api/savu.core.utils
    api/savu.core.plugin_runner
-   api/savu.core.dist_array_process
    api/savu.core.transport_control
+   api/savu.core.dist_array_process
+   api/savu.core.transport_setup
 
 
 savu.core.transports
@@ -84,11 +85,13 @@ savu.plugins.reconstructions
 .. toctree::
    api/savu.plugins.reconstructions.base_astra_recon
    api/savu.plugins.reconstructions.cgls_recon
+   api/savu.plugins.reconstructions.old_base_astra_recon
    api/savu.plugins.reconstructions.scikitimage_sart
    api/savu.plugins.reconstructions.simple_fake_gpu_recon
    api/savu.plugins.reconstructions.simple_recon
    api/savu.plugins.reconstructions.scikitimage_filter_back_projection
-   api/savu.plugins.reconstructions.old_base_astra_recon
+   api/savu.plugins.reconstructions.non_local_regularised_cgls
+   api/savu.plugins.reconstructions.really_old_base_astra_recon
 
 
 savu.plugins.reconstructions.astra_recons
@@ -103,8 +106,8 @@ savu.plugins.corrections
 ------------------------------------------------------------
 
 .. toctree::
-   api/savu.plugins.corrections.i12_dark_flat_field_correction
    api/savu.plugins.corrections.timeseries_field_corrections
+   api/savu.plugins.corrections.dark_flat_field_correction
 
 
 savu.plugins.driver
@@ -143,9 +146,10 @@ savu.plugins.filters
    api/savu.plugins.filters.monitor_correction
    api/savu.plugins.filters.histogram
    api/savu.plugins.filters.base_azimuthal_integrator
-   api/savu.plugins.filters.poly_background_estimator
    api/savu.plugins.filters.old_centering
    api/savu.plugins.filters.base_absorption_correction
+   api/savu.plugins.filters.base_ptycho
+   api/savu.plugins.filters.poly_background_estimator
 
 
 savu.plugins.filters.component_analysis
@@ -161,6 +165,8 @@ savu.plugins.filters.fitters
 .. toctree::
    api/savu.plugins.filters.fitters.base_fluo_fitter
    api/savu.plugins.filters.fitters.simple_fit
+   api/savu.plugins.filters.fitters.ral_fit
+   api/savu.plugins.filters.fitters.reproduce_fit
 
 
 savu.plugins.filters.fitters.fluo_fitters
@@ -184,7 +190,14 @@ savu.plugins.filters.absorption_corrections
 ------------------------------------------------------------
 
 .. toctree::
-   api/savu.plugins.filters.absorption_corrections.hogan_absorption_correction
+   api/savu.plugins.filters.absorption_corrections.mc_near_absorption_correction
+
+
+savu.plugins.filters.ptychography
+------------------------------------------------------------
+
+.. toctree::
+   api/savu.plugins.filters.ptychography.dummy_ptycho
 
 
 savu.plugins.loaders
@@ -196,6 +209,7 @@ savu.plugins.loaders
    api/savu.plugins.loaders.nxtomo_loader
    api/savu.plugins.loaders.savu_loader
    api/savu.plugins.loaders.image_loader
+   api/savu.plugins.loaders.multi_nxtomo_loader
    api/savu.plugins.loaders.i18_mm_loader
 
 
@@ -220,6 +234,7 @@ savu.plugins.loaders.multi_modal_loaders.i18_loaders
    api/savu.plugins.loaders.multi_modal_loaders.i18_loaders.i18xrd_loader
    api/savu.plugins.loaders.multi_modal_loaders.i18_loaders.i13fluo_loader
    api/savu.plugins.loaders.multi_modal_loaders.i18_loaders.i18monitor_loader
+   api/savu.plugins.loaders.multi_modal_loaders.i18_loaders.i22_tomo_loader
 
 
 savu.plugins.savers
