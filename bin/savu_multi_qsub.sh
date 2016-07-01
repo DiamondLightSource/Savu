@@ -93,7 +93,7 @@ while read -r a b c d; do
 
 	for i in $(eval echo {1..$nRuns})
   		do
-   		  $savupath$runfile $savupath $datafile $processfile $outpath $outname $nNodes $nCPUs
+   		  $savupath$runfile $savupath $datafile $processfile $outpath $outname $nNodes $nCPUs $@
 	done
 
 

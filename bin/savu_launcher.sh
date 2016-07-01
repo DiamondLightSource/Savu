@@ -10,6 +10,7 @@ outpath=$4
 outname=$5
 nNodes=$6
 nCPUs=$7
+shift 7
 
 echo "nNodes" $nNodes
 
@@ -20,7 +21,7 @@ M=$((nNodes*20))
 
 #qsub -N $outname -sync y -j y -pe openmpi $M -l exclusive -q test-medium.q -l infiniband $filepath $savupath $datafile $processfile $outpath $nCPUs > tmp.txt
 #qsub -N $outname -sync y -j y -pe openmpi $M -l exclusive -q medium.q@@com07 $filepath $savupath $datafile $processfile $outpath $nCPUs > tmp.txt
-qsub -N $outname -sync y -j y -pe openmpi $M -l exclusive -l infiniband -l gpu=1 -q medium.q@@com10 $filepath $savupath $datafile $processfile $outpath $nCPUs > tmp.txt
+qsub -N $outname -sync y -j y -pe openmpi $M -l exclusive -l infiniband -l gpu=1 -q medium.q@@com10 $filepath $savupath $datafile $processfile $outpath $nCPUs $@> tmp.txt
 
 #if [ ! -d $outpath/Profiling ]; then
 #    mkdir -p $outpath/Profiling;

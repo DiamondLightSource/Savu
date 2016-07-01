@@ -10,7 +10,8 @@ datafile=$2
 processfile=$3
 outfile=$4
 nCPUs=$5
-nGPUs=2
+shift 5
+nGPUs=4
 
 export PYTHONPATH=$savupath:$PYTHONPATH
 filename=$savupath/savu/tomo_recon.py
@@ -37,5 +38,5 @@ mpirun -np ${processes} \
        -mca orte_forward_job_control 1 \
        -x LD_LIBRARY_PATH \
        --hostfile ${UNIQHOSTS} \
-       python $filename $datafile $processfile $outfile -n $CPUs -v
+       python $filename $datafile $processfile $outfile -n $CPUs -v $@
 
