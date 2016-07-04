@@ -7,7 +7,8 @@ savu
 
 .. toctree::
    api/savu.tomo_recon
-   api/savu.test_runner
+   api/savu.long_test_runner
+   api/savu.short_test_runner
 
 
 savu.core

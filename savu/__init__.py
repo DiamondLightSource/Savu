@@ -46,7 +46,7 @@ from . import plugins
 from . import test
 
 
-def run_tests():
+def run_full_tests():
     import unittest
 
     print "Tests will run shortly, and may take some time to complete"
@@ -57,3 +57,15 @@ def run_tests():
     path = os.path.split(test.travis.__file__)[0]
     suite = unittest.defaultTestLoader.discover(path, pattern='*test.py')
     unittest.TextTestRunner().run(suite)
+
+
+def run_tests():
+    import unittest
+    from savu.test.travis.process_list_tests.tomo_pipeline_preview_test \
+        import TomoPipelinePreviewTest
+    print("Running a quick test...")
+
+    suite = \
+        unittest.TestLoader().loadTestsFromTestCase(TomoPipelinePreviewTest)
+    unittest.TextTestRunner(verbosity=2).run(suite)
+    print("Test complete...")
