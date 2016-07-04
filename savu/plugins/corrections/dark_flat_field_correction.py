@@ -50,8 +50,8 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
 
     def pre_process(self):
         inData = self.get_in_datasets()[0]
-        self.dark = inData.meta_data.get_meta_data('dark')
-        self.flat = inData.meta_data.get_meta_data('flat')
+        self.dark = inData.meta_data.get('dark')
+        self.flat = inData.meta_data.get('flat')
         self.flat_minus_dark = self.flat - self.dark
         det_dims = [inData.find_axis_label_dimension('detector_y'),
                     inData.find_axis_label_dimension('detector_x')]
