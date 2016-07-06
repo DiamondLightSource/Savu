@@ -94,6 +94,7 @@ class Experiment(object):
             self.nxs_file = h5py.File(filename, 'w')
 
     def __remove_dataset(self, data_obj):
+        self._barrier()
         data_obj._close_file()
         del self.index["out_data"][data_obj.data_info.get_meta_data('name')]
 

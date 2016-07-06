@@ -109,14 +109,18 @@ class BaseFluoFitter(BaseFitter):
         residuals.create_dataset(in_dataset[0])
         residuals.set_shape(shape[:-1]+(len(self.axis),))
         out_pData[3].plugin_data_setup('SPECTRUM', self.get_max_frames())
-        
-        
+
+#        for i in range(len(out_datasets)):
+#            out_meta_data = out_datasets[i].meta_data
+#            out_meta_data.dict = deepcopy(in_meta_data.get_dictionary())
+#            out_meta_data.set_meta_data("PeakEnergy",self.axis[self.idx])
+#            out_meta_data.set_meta_data('PeakIndex',self.idx)
+
         for i in range(len(out_datasets)):
             out_meta_data = out_datasets[i].meta_data
-            out_meta_data.dict = deepcopy(in_meta_data.get_dictionary())
+            out_meta_data = deepcopy(in_meta_data)
             out_meta_data.set_meta_data("PeakEnergy",self.axis[self.idx])
             out_meta_data.set_meta_data('PeakIndex',self.idx)
-
 
     def setPositions(self, in_meta_data):
         paramdict = XRFDataset().paramdict
