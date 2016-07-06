@@ -29,8 +29,8 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 class I13FluoLoaderTest(unittest.TestCase):
 
     def test_i13_fluo(self):
-        data_file = '/dls/i13-1/data/2016/mt12519-1/raw/77332.nxs'
-        process_file = '/home/clb02321/DAWN_stable/Savu2/Savu/test_data/test_process_lists/basic_fluo_process_i13.nxs'
+        data_file = tu.get_test_data_path('i13_fluo_data.nxs')
+        process_file = tu.get_test_process_path('basic_fluo_process_i13.nxs')
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
 
