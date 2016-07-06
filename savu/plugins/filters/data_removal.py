@@ -48,11 +48,14 @@ class DataRemoval(BaseFilter, CpuPlugin):
         self.slice_list[self.parameters['dim']] = self.indices
         self.slice_list = tuple(self.slice_list)
 
+        in_data = self.get_in_datasets()[0]
+        in_data.amend_axis_label_values(
+            in_pData._get_data_slice_list(self.slice_list))
+
     def process_frames(self, data, frame_list):
         return data[0][self.slice_list]
 
     def setup(self):
-        # check pattern here and if it doesn't exist then stop the processing.
         reduced_dim_shape = self.calc_shape()
         in_dataset, out_dataset = self.get_datasets()
 
