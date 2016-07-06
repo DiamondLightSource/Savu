@@ -180,6 +180,7 @@ class Hdf5Transport(TransportControl):
             self.__real_plugin_run(plugin_list, out_data_objs, start, stop)
             start = stop
 
+        self.exp._barrier()
         self.exp._clean_up_files()
 
         return
@@ -211,7 +212,6 @@ class Hdf5Transport(TransportControl):
                 for message in plugin.executive_summary():
                     cu.user_message("%s - %s" % (plugin.name, message))
 
-            exp._barrier()
             out_datasets = plugin.parameters["out_datasets"]
             exp._reorganise_datasets(out_datasets, link_type)
 

@@ -33,9 +33,7 @@ class MetaData(object):
     PluginList.
     """
 
-    def __init__(self, options=None):
-        if options is None:
-            options = {}
+    def __init__(self, options={}):
         self.dict = options.copy()
 
     def set_meta_data(self, name, value):

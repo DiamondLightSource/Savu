@@ -178,7 +178,7 @@ class Preview(object):
         dobj.set_shape(tuple(new_shape))
 
     def __apply_previewing_to_axis_labels(self, starts, stops, steps, chunks):
-        """ Amend the axis label values based on the previewing paramters.
+        """ Amend the axis label values based on the previewing parameters.
         """
         dobj = self.get_data_obj()
         slice_list = []
