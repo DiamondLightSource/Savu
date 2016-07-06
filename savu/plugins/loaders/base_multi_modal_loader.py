@@ -44,7 +44,10 @@ class BaseMultiModalLoader(BaseLoader):
         logging.debug("Creating file '%s' '%s'_entry",
                       data_obj.backing_file.filename, ltype)
         # now lets extract the entry so we can figure out our geometries!
-        entry = self.get_NXapp(ltype, data_obj.backing_file, 'entry1/')[0]
+        if ltype == 'NXmonitor':
+            entry = self.get_NXapp('NXstxm', data_obj.backing_file, 'entry1/')[0]
+        else:
+            entry = self.get_NXapp(ltype, data_obj.backing_file, 'entry1/')[0]
         logging.debug(str(entry))
 
         #lets get the data out
@@ -177,6 +180,7 @@ class BaseMultiModalLoader(BaseLoader):
                 rotation = item
 
         if data_obj.data_mapping._is_map:
+            print ltype, "is map",data_obj.data_mapping._is_map
             proj_dir = tuple(projection)
             logging.debug("is a map")
             logging.debug("the proj cores are"+str(proj_dir))
@@ -185,6 +189,7 @@ class BaseMultiModalLoader(BaseLoader):
                                  slice_dir=tuple(set(dims) - set(proj_dir)))
 
         if data_obj.data_mapping._is_tomo:
+            print ltype, "is tomo"
             #rotation and fast axis
             sino_dir = (rotation, proj_dir[-1])
             logging.debug("is a tomo")
@@ -192,6 +197,10 @@ class BaseMultiModalLoader(BaseLoader):
             logging.debug("the sino slices are:"+str(tuple(set(dims) - set(sino_dir))))
             data_obj.add_pattern("SINOGRAM", core_dir=sino_dir,
                                  slice_dir=tuple(set(dims) - set(sino_dir)))
+            
+        if data_obj.data_mapping._is_tomo and (data_obj.data_mapping._is_map==1):
+            data_obj.add_pattern("PROJECTION", core_dir=(0,),
+                        slice_dir=(1,))
         
         if ltype is 'xrd':
             diff_core = (-2,-1) # it will always be this

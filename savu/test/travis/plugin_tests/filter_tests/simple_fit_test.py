@@ -13,11 +13,10 @@
 # limitations under the License.
 
 """
-.. module:: pyfai_azimuthal_integration_test
+.. module:: simple_fit_test
    :platform: Unix
-   :synopsis: runner for tests using the MPI framework
-
-.. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
+   :synopsis: testing the simple fit plugin
+.. moduleauthor:: Aaron D. Parsons <scientificsoftware@diamond.ac.uk>
 
 """
 import unittest
@@ -26,23 +25,17 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
 
-class StxmTomoTest(unittest.TestCase):
+class SimpleFitTest(unittest.TestCase):
 
-    def test_stxm_tomo_scikit(self):
-        print "Hi"
+    def test_simple_fit_runs(self):
         data_file = tu.get_test_data_path('mm.nxs')
-        process_file = \
-            tu.get_test_process_path('simple_stxm_tomo_test_scikit.nxs')
-        run_protected_plugin_runner(tu.set_options(data_file,
-                                                   process_file=process_file))
-
-    def test_stxm_tomo_astra(self):
-        print "Hi2"
-        data_file = tu.get_test_data_path('mm.nxs')
-        process_file = \
-            tu.get_test_process_path('simple_stxm_tomo_test_astra.nxs')
-        run_protected_plugin_runner(tu.set_options(data_file,
-                                                   process_file=process_file))
+        process_file = tu.get_test_process_path('simple_fit_test_XRF.nxs')
+        options = tu.set_options(data_file, process_file=process_file)
+        self.datapath = options['out_path']
+        run_protected_plugin_runner(options)
+        
+#     def test_output_data(self):
+#         
 
 if __name__ == "__main__":
     unittest.main()

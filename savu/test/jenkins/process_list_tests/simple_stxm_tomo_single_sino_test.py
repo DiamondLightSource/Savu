@@ -27,7 +27,7 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
 
-class SimpleStxmTomoTest(unittest.TestCase):
+class SimpleStxmTomoSingleSinoTest(unittest.TestCase):
 
     def test_process(self):
         data_file = tu.get_test_data_path('stxm_single_sino.nxs')

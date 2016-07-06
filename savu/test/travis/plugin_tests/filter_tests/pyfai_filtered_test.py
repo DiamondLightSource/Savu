@@ -26,21 +26,11 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
 
-class StxmTomoTest(unittest.TestCase):
+class PyfaiFilteredTest(unittest.TestCase):
 
-    def test_stxm_tomo_scikit(self):
-        print "Hi"
+    def test_pyfai_filtered(self):
         data_file = tu.get_test_data_path('mm.nxs')
-        process_file = \
-            tu.get_test_process_path('simple_stxm_tomo_test_scikit.nxs')
-        run_protected_plugin_runner(tu.set_options(data_file,
-                                                   process_file=process_file))
-
-    def test_stxm_tomo_astra(self):
-        print "Hi2"
-        data_file = tu.get_test_data_path('mm.nxs')
-        process_file = \
-            tu.get_test_process_path('simple_stxm_tomo_test_astra.nxs')
+        process_file = tu.get_test_process_path('PyFAI_azimuth_test_bragg.nxs')
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
 
