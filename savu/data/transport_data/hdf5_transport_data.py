@@ -353,8 +353,6 @@ class Hdf5TransportData(object):
         max_frames = (1 if max_frames is None else max_frames)
 
         sl = self._single_slice_list()
-        for s in sl:
-            print s
         if sl is None:
             raise Exception("Data type", self.get_current_pattern_name(),
                             "does not support slicing in directions",
