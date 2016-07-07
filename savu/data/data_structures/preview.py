@@ -51,6 +51,7 @@ class Preview(object):
         self.revert_shape = kwargs.get('revert', self.revert_shape)
         shape = self.get_data_obj().get_shape()
         if preview_list:
+            preview_list = self.__add_preview_defaults(preview_list)
             starts, stops, steps, chunks = \
                 self.__get_preview_indices(preview_list)
             shape_change = True
@@ -102,6 +103,8 @@ class Preview(object):
         set_mData('chunks', chunks)
         if shapeChange:
             self.__set_reduced_shape(starts, stops, steps, chunks)
+            self.__apply_previewing_to_axis_labels(
+            starts, stops, steps, chunks)
 
     def __get_preview_indices(self, preview_list):
         """ Get preview_list ``starts``, ``stops``, ``steps``, ``chunks``
@@ -120,9 +123,6 @@ class Preview(object):
             if preview_list[i] is ':':
                 preview_list[i] = '0:end:1:1'
             vals = preview_list[i].split(':')
-            if len(vals) is 1:
-                idx = preview_list[i]
-                vals = [idx, idx + '+1', '1', '1']
             starts[i], stops[i], steps[i], chunks[i] = \
                 self.__convert_indices(vals, i)
         return starts, stops, steps, chunks
@@ -176,3 +176,17 @@ class Preview(object):
         for dim in range(len(starts)):
             new_shape.append(np.prod((dobj._get_slice_dir_matrix(dim).shape)))
         dobj.set_shape(tuple(new_shape))
+
+    def __apply_previewing_to_axis_labels(self, starts, stops, steps, chunks):
+        """ Amend the axis label values based on the previewing parameters.
+        """
+        dobj = self.get_data_obj()
+        slice_list = []
+        for dim in range(len(dobj.get_shape())):
+            if chunks[dim] > 1:
+                slice_list.append(
+                    np.ravel(np.transpose(dobj._get_slice_dir_matrix(dim))))
+            else:
+                slice_list.append(
+                    np.arange(starts[dim], stops[dim], steps[dim]))
+        dobj.amend_axis_label_values(slice_list)

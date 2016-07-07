@@ -48,11 +48,10 @@ class BasePtycho(BaseFilter, CpuPlugin): # also make one for gpu
         
         # Now create the datasets and work out the patterns
         ### PROBE ###
-        print "sh has type:"+str(type(sh))
         probe = out_dataset[0]
         probe_shape = sh + self.get_size_probe(in_dataset[0])
-        print "##### PROBE #####"
-        print "probe shape is:"+str(probe_shape)
+        logging.debug("##### PROBE #####")
+        logging.debug("probe shape is:%s",str(probe_shape))
         probe.create_dataset(axis_labels=probe_labels,
                             shape=probe_shape) # create the dataset
         self.probe_pattern_setup(probe_labels, probe)
@@ -62,8 +61,8 @@ class BasePtycho(BaseFilter, CpuPlugin): # also make one for gpu
         object_trans = out_dataset[1]
         
         object_shape = sh + self.get_size_object()
-        print "##### OBJECT #####"
-        print "object shape is:"+str(object_shape)
+        logging.debug("##### OBJECT #####")
+        logging.debug("object shape is:%s",str(object_shape))
 #         print object_labels
         
         object_trans.create_dataset(axis_labels=object_labels,
@@ -72,18 +71,17 @@ class BasePtycho(BaseFilter, CpuPlugin): # also make one for gpu
         self.object_pattern_setup(object_labels, object_trans)
         
         ### POSITIONS ###
+        logging.debug('##### POSITIONS #####')
         positions = out_dataset[2]
-        print "sh is"+str(sh)
-        print position_labels
+        positions_shape = sh + self.get_positions().shape
+        logging.debug('positions shape is:%s',str(positions_shape))
         positions.create_dataset(axis_labels=position_labels,
-                                 shape=sh+(2, len(self.get_positions())))
+                                 shape=positions_shape)
         
         rest_pos = range(len(position_labels))
-        print "rest pos"+str(rest_pos)
         
-        pos_md = {'core_dir':(0,), 'slice_dir':tuple(set(rest_pos) - set([0]))}
+        pos_md = {'core_dir':tuple(set(rest_pos) - set([0])), 'slice_dir':(0,)}
         positions.add_pattern("CHANNEL", **pos_md)
-        
         '''
         now we need to tell the setup what we want as input shapes, output shapes, and the number of each of them in one go.
         '''

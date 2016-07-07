@@ -146,7 +146,7 @@ class BaseFitter(BaseFilter, CpuPlugin):
         weights = rest[:npts]
         #print weights
         widths = rest[npts:2*npts]
-        print widths
+        #print widths
         spec = np.zeros((len(x),))
         for ii in range(len(weights)):
             spec += fun(weights[ii], widths[ii], x, positions[ii])

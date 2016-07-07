@@ -228,6 +228,18 @@ class PluginData(object):
             values = self.meta_data.get("fixed_directions_values")
         return [fixed, values]
 
+    def _get_data_slice_list(self, plist):
+        """ Convert a plugin data slice list to a slice list for the whole
+        dataset, i.e. add in any missing dimensions.
+        """
+        nDims = len(self.get_shape())
+        all_dims = self.get_core_directions() + self.get_slice_directions()
+        extra_dims = all_dims[nDims:]
+        dlist = list(plist)
+        for i in extra_dims:
+            dlist.insert(slice(None), i)
+        return tuple(dlist)
+
     def _set_frame_chunk(self, nFrames):
         """ Set the number of frames to process at a time """
         self.meta_data.set("nFrames", nFrames)

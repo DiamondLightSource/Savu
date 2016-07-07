@@ -31,7 +31,9 @@ from savu.plugins.utils import register_plugin
 @register_plugin
 class Stats(BaseFilter, CpuPlugin):
     """
-    :param required_stats: create a list of required stats calcs. Default: ['max'].
+    :param out_datasets: the output dataset. Default: ['stats'].
+    :param required_stats: create a list of required stats\
+        calcs. Default: ['max'].
     :param direction: which direction to perform this. Default: 'PROJECTION'.
     """
 
@@ -42,11 +44,8 @@ class Stats(BaseFilter, CpuPlugin):
     def filter_frames(self, data):
         data = data[0]
         if 'max' in self.parameters['required_stats']:
-            print 'm here'
             maximum = np.max(data)
-            print maximum
             op = np.array([maximum])
-        print "op shjape is"+str(op.shape)
         return op
 
     def post_process(self):
@@ -64,9 +63,9 @@ class Stats(BaseFilter, CpuPlugin):
         self.exp.log(self.name + " Start")
         _in_dataset, out_dataset = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup(self.parameters["direction"], self.get_max_frames())
+        in_pData[0].plugin_data_setup(self.parameters["direction"],
+                                      self.get_max_frames())
         nFrames = in_pData[0].get_total_frames()
-        print "nframes is"+str(nFrames)
         axis_labels = ['frame.unit', 'max.unit']
         out_dataset[0].create_dataset(axis_labels=axis_labels,
                                       shape=(nFrames, 1),
@@ -74,4 +73,3 @@ class Stats(BaseFilter, CpuPlugin):
 
         out_dataset[0].add_pattern("METADATA", core_dir=(1,), slice_dir=(0,))
         out_pData[0].plugin_data_setup("METADATA", self.get_max_frames())
-

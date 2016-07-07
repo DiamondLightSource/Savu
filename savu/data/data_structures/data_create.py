@@ -71,20 +71,6 @@ class DataCreate(object):
         self.__find_and_set_shape(data_obj)
         self.__set_data_patterns(patterns)
 
-    def __copy_mapping_object(self, data_obj):
-        """ Copy relevant mapping object information and return the mapping
-        Data object
-        """
-        map_data = self.exp.index['mapping'][data_obj.get_name()]
-        map_mData = map_data.meta_data
-        map_axis_labels = map_data.data_info.get('axis_labels')
-        for axis_label in map_axis_labels:
-            if axis_label.keys()[0] in map_mData.get_dictionary().keys():
-                map_label = map_mData.get(axis_label.keys()[0])
-                data_obj.meta_data.set(axis_label.keys()[0],
-                                                 map_label)
-        return map_data
-
     def __create_dataset_from_kwargs(self, kwargs):
         """ Create dataset from kwargs. """
         try:
@@ -102,7 +88,7 @@ class DataCreate(object):
 
         if 'patterns' in kwargs:
             patterns = self.__copy_patterns(kwargs['patterns'])
-            self.__set_data_patterns(patterns)
+            self._set_data_patterns(patterns)
 
     def __copy_patterns(self, copy_data):
         """ Copy patterns """
@@ -177,7 +163,7 @@ class DataCreate(object):
             self.__add_extra_dims_labels()
 
     def __add_extra_dims_labels(self):
-        """ Add axis labels to extra dimensions created by parameter tuning. 
+        """ Add axis labels to extra dimensions created by parameter tuning.
         """
         params_dict = self._get_plugin_data().multi_params_dict
         # add multi_params axis labels from dictionary in pData
@@ -232,7 +218,7 @@ class DataCreate(object):
         self.data_info.set(
             'nDims', self.data_info.get('nDims') + 1)
 
-    def __set_data_patterns(self, patterns):
+    def _set_data_patterns(self, patterns):
         """ Add missing dimensions to patterns and populate data info dict. """
         all_dims = range(len(self.get_shape()))
         for p in patterns:

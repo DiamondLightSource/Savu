@@ -92,11 +92,11 @@ class PluginRunner(object):
         main processing.
         """
         self.exp._barrier()
-        self.__check_loaders_and_savers()
+        plugin_list._check_loaders_and_savers()
         self.__check_gpu()
 
         self.exp._barrier()
-        pu.run_plugins(self.exp, plugin_list, check=True)
+        self.__fake_plugin_list_run(plugin_list.plugin_list, check=True)
 
         self.exp._barrier()
         self.exp._clear_data_objects()
@@ -104,23 +104,23 @@ class PluginRunner(object):
         self.exp._barrier()
         cu.user_message("Plugin list check complete!")
 
-    def __check_loaders_and_savers(self):
-        """ Check plugin list starts with a loader and ends with a saver.
+    def __fake_plugin_list_run(self, plugin_list, **kwargs):
+        """ Run through the plugin list without any processing (setup only)\
+        and fill in missing dataset names.
         """
-        plugin_obj = self.exp.meta_data.plugin_list
-        loaders, savers = plugin_obj._get_loaders_and_savers_index()
+        n_loaders = self.exp.meta_data.plugin_list._get_n_loaders()
 
-        if loaders:
-            if loaders[0] is not 0 or loaders[-1]+1 is not len(loaders):
-                raise Exception("All loader plugins must be at the beginning "
-                                "of the plugin list")
-        else:
-            raise Exception("The first plugin in the plugin list must be a "
-                            "loader.")
+        for i in range(n_loaders):
+            pu.plugin_loader(self.exp, plugin_list[i])
 
-        if not savers or savers[0] is not plugin_obj.n_plugins-1:
-            raise Exception("The final plugin in the plugin list must be a "
-                            "saver")
+        self.exp._set_nxs_filename()
+
+        check = kwargs.get('check', False)
+        for i in range(n_loaders, len(plugin_list)-1):
+            self.exp._barrier()
+            plugin = pu.plugin_loader(self.exp, plugin_list[i], check=check)
+            plugin._clean_up()
+            self.exp._merge_out_data_to_in()
 
     def __check_gpu(self):
         """ Check if the process list contains GPU processes and determine if
@@ -136,12 +136,19 @@ class PluginRunner(object):
             pv.nvmlInit()
             count = int(pv.nvmlDeviceGetCount())
             logging.debug("%s GPUs have been found.", count)
+            for i in range(count):
+                handle = pv.nvmlDeviceGetHandleByIndex(i)
+                if pv.nvmlDeviceGetComputeRunningProcesses(handle):
+                    raise Exception("Unfortunately, GPU %i is busy. Try \
+                        resubmitting the job to the queue." % i)
         except:
             logging.debug("No GPUs have been found.")
             raise Exception("The process list contains GPU plugins, but "
                             " no GPUs have been found.")
+        self.__set_gpu_processes(count)
 
-        processes = self.exp.meta_data.get('processes')
+    def __set_gpu_processes(self, count):
+        processes = self.exp.meta_data.get_meta_data('processes')
         if not [i for i in processes if 'GPU' in i]:
             logging.debug("GPU processes missing. GPUs found so adding them.")
             cpus = ['CPU'+str(i) for i in range(count)]
@@ -149,3 +156,4 @@ class PluginRunner(object):
             for i in range(min(count, len(processes))):
                 processes[processes.index(cpus[i])] = gpus[i]
             self.exp.meta_data.set('processes', processes)
+

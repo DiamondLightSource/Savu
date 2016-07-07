@@ -28,7 +28,7 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 
 
 class NewFitTest(unittest.TestCase):
-
+    @unittest.skip("This test will only work intermittently since it is under active development. Ignore for now.")
     def test_process(self):
         data_file = '/scratch/S_clb02321/Science/I14/Aaron/MultimodalPapers/figures/xrd/xrd_spectra_p1_pyfai_azimuthal_integrator.h5'
         process_file = tu.get_test_process_path('new_fittest.nxs')

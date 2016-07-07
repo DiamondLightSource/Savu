@@ -23,6 +23,7 @@ Submodules
    savu.plugins.loaders.i18_mm_loader
    savu.plugins.loaders.image_loader
    savu.plugins.loaders.mm_loader
+   savu.plugins.loaders.multi_nxtomo_loader
    savu.plugins.loaders.nxtomo_loader
    savu.plugins.loaders.savu_loader
 

@@ -178,7 +178,7 @@ class Data(DataCreate):
                 diff = len(self.get_shape()) - nDims
                 if diff:
                     pattern = {dtype: self.get_data_patterns()[dtype]}
-                    self._add_extra_dims_to_patterns(pattern)
+                    self._set_data_patterns(pattern)
                     nDims += diff
             try:
                 if nDims != self.data_info.get("nDims"):
@@ -353,3 +353,14 @@ class Data(DataCreate):
         :rtype: tuple(int)
         """
         return self._get_plugin_data().get_slice_directions()
+
+    def amend_axis_label_values(self, slice_list):
+        """ Amend all axis label values based on the slice_list parameter.\
+        This is required if the data is reduced.
+        """
+        axis_labels = self.get_axis_labels()
+        for i in range(len(slice_list)):
+            label = axis_labels[i].keys()[0]
+            if label in self.meta_data.get_dictionary().keys():
+                self.meta_data.set_meta_data(
+                    label, self.meta_data.get_meta_data(label)[slice_list[i]])

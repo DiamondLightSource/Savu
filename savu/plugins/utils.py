@@ -113,20 +113,6 @@ def plugin_loader(exp, plugin_dict, **kwargs):
     logging.info("finished plugin loader")
     return plugin
 
-
-def run_plugins(exp, plugin_list, **kwargs):
-    n_loaders = exp.meta_data.plugin_list._get_n_loaders()
-
-    for i in range(n_loaders):
-        plugin_loader(exp, plugin_list[i])
-
-    check = kwargs.get('check', False)
-    for i in range(n_loaders, len(plugin_list)-1):
-        exp._barrier()
-        plugin_loader(exp, plugin_list[i], check=check)
-        exp._merge_out_data_to_in()
-
-
 def set_datasets(exp, plugin, plugin_dict):
     in_names = get_names(plugin_dict["data"]["in_datasets"])
     out_names = get_names(plugin_dict["data"]["out_datasets"])
@@ -144,6 +130,11 @@ def set_datasets(exp, plugin, plugin_dict):
                                plugin.nInput_datasets(), "in_data")
     out_names = check_nDatasets(exp, out_names, plugin_dict,
                                 plugin.nOutput_datasets(), "out_data")
+
+    for i in range(len(out_names)):
+        new = out_names[i].split('in_datasets')
+        if len(new) is 2:
+            out_names[i] = in_names[int(list(new[1])[1])]
 
     plugin_dict["data"]["in_datasets"] = in_names
     plugin_dict["data"]["out_datasets"] = out_names

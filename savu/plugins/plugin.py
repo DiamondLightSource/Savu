@@ -227,13 +227,14 @@ class Plugin(PluginDatasets):
     def __copy_meta_data(self):
         """
         Copy all metadata from input datasets to output datasets, except axis
-        # data that is no longer valid.
+        data that is no longer valid.
         """
         remove_keys = self.__remove_axis_data()
         in_meta_data, out_meta_data = self.get()
         copy_dict = {}
+        import copy
         for mData in in_meta_data:
-            temp = mData.get_dictionary().copy()
+            temp = copy.deepcopy(mData.get_dictionary())
             copy_dict.update(temp)
 
         for i in range(len(out_meta_data)):
@@ -241,7 +242,8 @@ class Plugin(PluginDatasets):
             for key in remove_keys[i]:
                 if temp.get(key, None) is not None:
                     del temp[key]
-            out_meta_data[i].get_dictionary().update(temp)
+            temp.update(out_meta_data[i].get_dictionary())
+            out_meta_data[i]._set_dictionary(temp)
 
     def __remove_axis_data(self):
         """

@@ -32,8 +32,8 @@ class I18XrdPipelineTest(unittest.TestCase):
     #@unittest.skip("Calibration file used in process list is not available as test data")
     def test_process(self):
         data_file = tu.get_test_data_path('i18_test_data.nxs')
-        process_file = '/dls/mx-scratch/aaron/data/I18/paper_processing/devel_process_lists/xrd_tomo_i18.nxs'
-#         process_file = tu.get_process_list_path('xrd_tomo_i18.nxs')
+#         process_file = '/dls/mx-scratch/aaron/data/I18/paper_processing/devel_process_lists/xrd_tomo_i18.nxs'
+        process_file = tu.get_process_list_path('xrd_tomo_i18.nxs')
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
 if __name__ == "__main__":

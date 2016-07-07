@@ -138,7 +138,6 @@ class BaseI18MultiModalLoader(BaseMultiModalLoader):
         logging.debug("axis labels:"+str(labels))
         logging.debug("motor_type:"+str(motor_type))
 
-
     def add_patterns_based_on_acquisition(self, data_obj, ltype):
         motor_type = data_obj.data_mapping.get_motor_type()
         dims = range(len(motor_type))

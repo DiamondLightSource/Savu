@@ -20,6 +20,7 @@
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 """
+
 import os
 import logging
 import copy
@@ -201,6 +202,23 @@ class Experiment(object):
                     return next_pattern
         return next_pattern
 
+    def _set_nxs_filename(self):
+        folder = self.meta_data.get_meta_data('out_path')
+        fname = os.path.basename(folder.split('_')[-1]) + '_processed.nxs'
+        filename = os.path.join(folder, fname)
+        self.meta_data.set_meta_data("nxs_filename", filename)
+
+        if self.meta_data.get_meta_data("mpi") is True:
+            self.nxs_file = h5py.File(filename, 'w', driver='mpio',
+                                      comm=MPI.COMM_WORLD)
+        else:
+            self.nxs_file = h5py.File(filename, 'w')
+
+    def __remove_dataset(self, data_obj):
+        self._barrier()
+        data_obj._close_file()
+        del self.index["out_data"][data_obj.data_info.get_meta_data('name')]
+
     def _clear_data_objects(self):
         self.index["out_data"] = {}
         self.index["in_data"] = {}
@@ -208,11 +226,37 @@ class Experiment(object):
     def _merge_out_data_to_in(self):
         for key, data in self.index["out_data"].iteritems():
             if data.remove is False:
-                if key in self.index['in_data'].keys():
-                    data.meta_data._set_dictionary(
-                        self.index['in_data'][key].meta_data.get_dictionary())
                 self.index['in_data'][key] = data
         self.index["out_data"] = {}
+
+    def _reorganise_datasets(self, out_data_objs, link_type):
+        out_data_list = self.index["out_data"]
+        self.__close_unwanted_files(out_data_list)
+        self.__remove_unwanted_data(out_data_objs)
+        self._barrier()
+        self.__copy_out_data_to_in_data(link_type)
+        self._barrier()
+        self.index['out_data'] = {}
+
+    def __remove_unwanted_data(self, out_data_objs):
+        for out_objs in out_data_objs:
+            if out_objs.remove is True:
+                self.__remove_dataset(out_objs)
+
+    def __close_unwanted_files(self, out_data_list):
+        for out_objs in out_data_list:
+            if out_objs in self.index["in_data"].keys():
+                self.index["in_data"][out_objs]._close_file()
+
+    def _clean_up_files(self):
+        for key in self.index["in_data"].keys():
+            self.index["in_data"][key]._close_file()
+
+    def __copy_out_data_to_in_data(self, link_type):
+        for key in self.index["out_data"]:
+            output = self.index["out_data"][key]
+            output._save_data(link_type)
+            self.index["in_data"][key] = copy.deepcopy(output)
 
     def _set_all_datasets(self, name):
         data_names = []

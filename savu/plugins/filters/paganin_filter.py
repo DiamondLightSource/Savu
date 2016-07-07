@@ -38,7 +38,7 @@ class PaganinFilter(BaseFilter, CpuPlugin):
     :param Energy: Given X-ray energy in keV. Default: 53.0.
     :param Distance: Distance from sample to detection - Unit is metre. Default: 1.0.
     :param Resolution: Pixel size - Unit is micron. Default: 1.28.
-    :param Ratio: ratio of delta/beta. Default: 10.0.
+    :param Ratio: ratio of delta/beta. Default: 250.0.
     :param Padtopbottom: Pad to the top and bottom of projection. Default: 10.
     :param Padleftright: Pad to the left and right of projection. Default: 10.
     :param Padmethod: Method of padding. Default: 'edge'.
@@ -88,7 +88,7 @@ class PaganinFilter(BaseFilter, CpuPlugin):
         filter1 = 1.0+ratio*pd
         self.filtercomplex = filter1+filter1*1j
 
-    def _paganin(self, data, axes):
+    def _paganin(self, data):
         pci1 = fft.fft2(np.float32(data))
         pci2 = fft.fftshift(pci1)/self.filtercomplex
         fpci = np.abs(fft.ifft2(pci2))
@@ -109,7 +109,8 @@ class PaganinFilter(BaseFilter, CpuPlugin):
             padmethod = str(self.parameters['Padmethod'])
             proj = np.lib.pad(proj, (tuple([padtopbottom]*2),
                                      tuple([padleftright]*2)), padmethod)
-            result = np.abs(np.apply_over_axes(self._paganin, proj, 0))
+            result = self._paganin(proj)
+            #result = np.abs(np.apply_over_axes(self._paganin(proj), proj, 0))
             output[self.sslice] = result[padtopbottom:-padtopbottom,
                                          padleftright:-padleftright]
         return output

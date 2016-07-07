@@ -1,0 +1,8 @@
+savu.test.jenkins.process_list_tests.simple_fit_recon_test module
+=================================================================
+
+.. automodule:: savu.test.jenkins.process_list_tests.simple_fit_recon_test
+    :members:
+    :private-members:
+    :undoc-members:
+    :show-inheritance:

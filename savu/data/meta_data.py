@@ -24,6 +24,7 @@
 """
 
 import logging
+import copy
 
 
 class MetaData(object):
@@ -33,9 +34,7 @@ class MetaData(object):
     PluginList.
     """
 
-    def __init__(self, options=None):
-        if options is None:
-            options = {}
+    def __init__(self, options={}):
         self.dict = options.copy()
 
     def set(self, name, value):
@@ -110,4 +109,4 @@ class MetaData(object):
 
     def _set_dictionary(self, ddict):
         """ Set the meta data dictionary """
-        self.dict = ddict
+        self.dict = copy.deepcopy(ddict)

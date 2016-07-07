@@ -12,6 +12,7 @@ Subpackages
 
 .. toctree::
 
+    savu.test.jenkins
     savu.test.travis
 
 Submodules
