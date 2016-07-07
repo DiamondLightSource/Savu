@@ -180,7 +180,7 @@ class BaseMultiModalLoader(BaseLoader):
                 rotation = item
 
         if data_obj.data_mapping._is_map:
-            print ltype, "is map",data_obj.data_mapping._is_map
+            logging.debug("%s is map %s" % (ltype,data_obj.data_mapping._is_map))
             proj_dir = tuple(projection)
             logging.debug("is a map")
             logging.debug("the proj cores are"+str(proj_dir))
@@ -189,18 +189,22 @@ class BaseMultiModalLoader(BaseLoader):
                                  slice_dir=tuple(set(dims) - set(proj_dir)))
 
         if data_obj.data_mapping._is_tomo:
-            print ltype, "is tomo"
+            logging.debug("%s is tomo", ltype)
+            logging.debug("I am adding a sinogram")
             #rotation and fast axis
             sino_dir = (rotation, proj_dir[-1])
             logging.debug("is a tomo")
             logging.debug("the sino cores are:"+str(sino_dir))
             logging.debug("the sino slices are:"+str(tuple(set(dims) - set(sino_dir))))
+            sino_slice_dir = tuple(set(dims) - set(sino_dir))
             data_obj.add_pattern("SINOGRAM", core_dir=sino_dir,
-                                 slice_dir=tuple(set(dims) - set(sino_dir)))
+                                 slice_dir=sino_slice_dir)
             
-        if data_obj.data_mapping._is_tomo and (data_obj.data_mapping._is_map==1):
-            data_obj.add_pattern("PROJECTION", core_dir=(0,),
-                        slice_dir=(1,))
+        # I don't think this is needed anymore
+#         if data_obj.data_mapping._is_tomo and (data_obj.data_mapping._is_map==1) and len(sino_slice_dir)<2:
+#             print "I'm here"
+#             data_obj.add_pattern("PROJECTION", core_dir=(0,),
+#                         slice_dir=(1,))
         
         if ltype is 'xrd':
             diff_core = (-2,-1) # it will always be this
