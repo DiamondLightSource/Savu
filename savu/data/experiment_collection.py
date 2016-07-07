@@ -105,9 +105,6 @@ class Experiment(object):
     def _merge_out_data_to_in(self):
         for key, data in self.index["out_data"].iteritems():
             if data.remove is False:
-                if key in self.index['in_data'].keys():
-                    data.meta_data._set_dictionary(
-                        self.index['in_data'][key].meta_data.get_dictionary())
                 self.index['in_data'][key] = data
         self.index["out_data"] = {}
 

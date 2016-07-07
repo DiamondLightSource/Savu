@@ -37,3 +37,4 @@ class CpuPlugin(PluginDriver):
         self._run_plugin_instances(transport)
         self._clean_up()
         return
+

@@ -225,7 +225,7 @@ class PluginList(object):
     def _get_n_loaders(self):
         return self.n_loaders
 
-    def _get_loaders_and_savers_index(self):
+    def __get_loaders_and_savers_index(self):
         """ Get lists of loader and saver positions within the plugin list and
         set the number of loaders.
 
@@ -248,6 +248,23 @@ class PluginList(object):
 
         self.n_loaders = len(loader_idx)
         return loader_idx, saver_idx
+
+    def _check_loaders_and_savers(self):
+        """ Check plugin list starts with a loader and ends with a saver.
+        """
+        loaders, savers = self.__get_loaders_and_savers_index()
+
+        if loaders:
+            if loaders[0] is not 0 or loaders[-1]+1 is not len(loaders):
+                raise Exception("All loader plugins must be at the beginning "
+                                "of the plugin list")
+        else:
+            raise Exception("The first plugin in the plugin list must be a "
+                            "loader.")
+
+        if not savers or savers[0] is not self.n_plugins-1:
+            raise Exception("The final plugin in the plugin list must be a "
+                            "saver")
 
     def _contains_gpu_processes(self):
         """ Returns True if gpu processes exist in the process list. """

@@ -114,23 +114,6 @@ def plugin_loader(exp, plugin_dict, **kwargs):
     return plugin
 
 
-def run_plugins(exp, plugin_list, **kwargs):
-    n_loaders = exp.meta_data.plugin_list._get_n_loaders()
-
-    for i in range(n_loaders):
-        plugin_loader(exp, plugin_list[i])
-
-    exp._barrier()
-    exp._set_nxs_filename()
-    exp._barrier()
-
-    check = kwargs.get('check', False)
-    for i in range(n_loaders, len(plugin_list)-1):
-        exp._barrier()
-        plugin_loader(exp, plugin_list[i], check=check)
-        exp._merge_out_data_to_in()
-
-
 def set_datasets(exp, plugin, plugin_dict):
     in_names = get_names(plugin_dict["data"]["in_datasets"])
     out_names = get_names(plugin_dict["data"]["out_datasets"])

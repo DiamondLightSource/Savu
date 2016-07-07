@@ -24,6 +24,7 @@
 """
 
 import logging
+import copy
 
 
 class MetaData(object):
@@ -108,4 +109,4 @@ class MetaData(object):
 
     def _set_dictionary(self, ddict):
         """ Set the meta data dictionary """
-        self.dict = ddict
+        self.dict = copy.deepcopy(ddict)
