@@ -178,7 +178,7 @@ class Data(DataCreate):
                 diff = len(self.get_shape()) - nDims
                 if diff:
                     pattern = {dtype: self.get_data_patterns()[dtype]}
-                    self._add_extra_dims_to_patterns(pattern)
+                    self._set_data_patterns(pattern)
                     nDims += diff
             try:
                 if nDims != self.data_info.get_meta_data("nDims"):
