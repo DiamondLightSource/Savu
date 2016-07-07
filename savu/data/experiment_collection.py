@@ -82,9 +82,7 @@ class Experiment(object):
         return self.index[dtype][name]
 
     def _experiment_setup(self):
-        """ Setup the experiment by creating lists of in/out datasets, \
-        associated plugin datasets, and a potential output filename for each \
-        plugin.  Group this information together in an experiment collection.
+        """ Setup an experiment collection.
         """
         n_loaders = self.meta_data.plugin_list._get_n_loaders()
         plugin_list = self.meta_data.plugin_list.plugin_list
@@ -123,20 +121,19 @@ class Experiment(object):
         self.index['in_data'] = self.initial_datasets
 
     def __plugin_setup(self, plugin_dict, count):
-        """ Determine plugin specific information: in_datasets, out_datasets,
-        plugin instance and output file.
+        """ Determine plugin specific information.
         """
         plugin_id = plugin_dict["id"]
         logging.info("Loading plugin %s", plugin_id)
-        plugin = pu.plugin_loader(self, plugin_dict)
+        plugin = pu.plugin_loader(self, plugin_dict) # runs main_setup method
         files = self.__set_filenames(plugin, plugin_id, count)
         plugin._revert_preview(plugin.get_in_datasets())
         data = self.index['out_data'].copy()
         return data, files
 
-    def __set_experiment_collection(self, data, in_pData, out_pData, plugins,
-                                    files, saver):
-        self.experiment_collection.setdefault('datasets', {}).append(data)
+#    def __set_experiment_collection(self, data, in_pData, out_pData, plugins,
+#                                    files, saver):
+#        self.experiment_collection.setdefault('datasets', {}).append(data)
 
     def _get_experiment_collection(self):
         return self.experiment_collection

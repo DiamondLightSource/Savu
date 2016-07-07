@@ -119,10 +119,6 @@ def run_plugins(exp, plugin_list, **kwargs):
 
     for i in range(n_loaders):
         plugin_loader(exp, plugin_list[i])
-#
-#    exp._barrier()
-#    exp._set_nxs_filename()
-#    exp._barrier()
 
     check = kwargs.get('check', False)
     for i in range(n_loaders, len(plugin_list)-1):

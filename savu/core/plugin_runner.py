@@ -57,20 +57,8 @@ class PluginRunner(object):
 
         n_plugins = plugin_list._get_n_processing_plugins()
         for i in range(n_plugins):
-
-            plugin = pu.plugin_loader(self.exp, exp_coll['pid'][i])
             self.exp._set_experiment_for_current_plugin(i)
-            self._transport_pre_plugin()
-            self.exp._barrier()
-            cu.user_message("*Running the %s plugin*" % plugin.name)
-
-            plugin._run_plugin(self.exp, self)
-
-            self.exp._barrier()
-#            self.exp._finalise_experiment_for_current_plugin()
-            cu._output_summary(self.exp.meta_data.get("mpi"), plugin)
-            self._transport_post_plugin()
-            self._merge_out_data_to_in()  # check this here
+            self.__run_plugin(exp_coll[i])
 
         self._transport_post_plugin_list_run()
 
@@ -84,6 +72,20 @@ class PluginRunner(object):
 
         saver.nxs_file.close()
         return self.exp
+
+    def __run_plugin(self, plugin_info):
+        plugin = pu.plugin_loader(self.exp, plugin_info['pid'])
+
+        self._transport_pre_plugin()
+
+        self.exp._barrier()
+        cu.user_message("*Running the %s plugin*" % plugin.name)
+        plugin._run_plugin(self.exp, self)
+        self.exp._barrier()
+
+        cu._output_summary(self.exp.meta_data.get("mpi"), plugin)
+        self._transport_post_plugin()
+        self.exp._merge_out_data_to_in()
 
     def _run_plugin_list_check(self, plugin_list):
         """ Run the plugin list through the framework without executing the

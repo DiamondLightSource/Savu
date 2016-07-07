@@ -24,7 +24,6 @@
 
 import numpy as np
 
-from savu.data.data_structures.data_type import ImageKey
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.base_correction import BaseCorrection
 from savu.plugins.utils import register_plugin
