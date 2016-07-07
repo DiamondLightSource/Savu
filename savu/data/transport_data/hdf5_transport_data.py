@@ -66,6 +66,7 @@ class Hdf5TransportData(object):
             saver_plugin.setup()
 
             out_data_objects.append(exp.index["out_data"].copy())
+            plugin._clean_up()
             exp._merge_out_data_to_in()
             count += 1
 

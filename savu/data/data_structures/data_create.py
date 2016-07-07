@@ -69,7 +69,7 @@ class DataCreate(object):
         patterns = copy.deepcopy(data_obj.get_data_patterns())
         self.__copy_labels(data_obj)
         self.__find_and_set_shape(data_obj)
-        self.__set_data_patterns(patterns)
+        self._set_data_patterns(patterns)
 
     def __copy_mapping_object(self, data_obj):
         """ Copy relevant mapping object information and return the mapping
@@ -102,7 +102,7 @@ class DataCreate(object):
 
         if 'patterns' in kwargs:
             patterns = self.__copy_patterns(kwargs['patterns'])
-            self.__set_data_patterns(patterns)
+            self._set_data_patterns(patterns)
 
     def __copy_patterns(self, copy_data):
         """ Copy patterns """
@@ -232,7 +232,7 @@ class DataCreate(object):
         self.data_info.set_meta_data(
             'nDims', self.data_info.get_meta_data('nDims') + 1)
 
-    def __set_data_patterns(self, patterns):
+    def _set_data_patterns(self, patterns):
         """ Add missing dimensions to patterns and populate data info dict. """
         all_dims = range(len(self.get_shape()))
         for p in patterns:

@@ -16,6 +16,7 @@ Subpackages
     savu.plugins.filters.azimuthal_integrators
     savu.plugins.filters.component_analysis
     savu.plugins.filters.fitters
+    savu.plugins.filters.ptychography
 
 Submodules
 ----------
@@ -27,6 +28,7 @@ Submodules
    savu.plugins.filters.base_azimuthal_integrator
    savu.plugins.filters.base_component_analysis
    savu.plugins.filters.base_fitter
+   savu.plugins.filters.base_ptycho
    savu.plugins.filters.denoise_bregman_filter
    savu.plugins.filters.dezing_filter
    savu.plugins.filters.dials_find_spots

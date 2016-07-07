@@ -94,6 +94,7 @@ class Experiment(object):
             self.nxs_file = h5py.File(filename, 'w')
 
     def __remove_dataset(self, data_obj):
+        self._barrier()
         data_obj._close_file()
         del self.index["out_data"][data_obj.data_info.get_meta_data('name')]
 
@@ -104,9 +105,6 @@ class Experiment(object):
     def _merge_out_data_to_in(self):
         for key, data in self.index["out_data"].iteritems():
             if data.remove is False:
-                if key in self.index['in_data'].keys():
-                    data.meta_data._set_dictionary(
-                        self.index['in_data'][key].meta_data.get_dictionary())
                 self.index['in_data'][key] = data
         self.index["out_data"] = {}
 
