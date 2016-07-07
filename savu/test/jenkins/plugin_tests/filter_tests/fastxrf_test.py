@@ -26,9 +26,9 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
 
-# @unittest.skip('The fastxrf_fitting setup method is in an old format and needs updating')
-class FastxrfTest(unittest.TestCase):
 
+class FastxrfTest(unittest.TestCase):
+    @unittest.skip('Please can I just trash this and start again?! adp')
     def test_FastXrf(self):
         data_file = tu.get_test_data_path('fluo.nxs')
         process_file = \
