@@ -85,6 +85,9 @@ class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
         # now integrate in radius (1D)print "hello"
         self.npts = self.get_parameters('num_bins')
         self.params = [mask, self.npts, mData, ai]
+        # now set the axis values, we shouldn't do this in every slice
+        axis, __remapped = ai.integrate1d(data=mask, npt=self.npts, unit='q_A^-1', correctSolidAngle=False)
+        self.add_axes_to_meta_data(axis,mData)
 
     def setup(self):
         in_dataset, out_datasets = self.get_datasets()
@@ -94,7 +97,6 @@ class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
         # Doesnt this get rid of the other two axes?
         # axis_labels = {in_dataset[0]: '-1.Q.nm^-1'}
         # I just want diffraction data
-        print "input patterns are:", in_dataset[0].get_data_patterns()
         in_pData[0].plugin_data_setup('DIFFRACTION', self.get_max_frames())
         spectra = out_datasets[0]
         num_bins = self.get_parameters('num_bins')
@@ -112,15 +114,20 @@ class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
         if detX_dim < detY_dim:
             detY_dim -= 1
         axis_labels = [str(detX_dim), str(detY_dim) + '.name.unit']
+#         spectra.create_dataset(patterns={in_dataset[0]: patterns},
+#                                axis_labels={in_dataset[0]: axis_labels},
+#                                shape=shape[:-2]+(num_bins,))
 
         spectra.create_dataset(patterns={in_dataset[0]: patterns},
                                axis_labels={in_dataset[0]: axis_labels},
                                shape=shape[:-2]+(num_bins,))
+        axis_labels = [{'rotation_angle': 'degrees'}, {'y': 'mm'}, {'x': 'mm'}, {'2Theta': 'degrees', 'Q': 'Angstrom^-1','D':'Angstrom'}]
 
+        spectra.data_info.set_meta_data('axis_labels',axis_labels)
         spectrum = {'core_dir': (-1,), 'slice_dir': tuple(range(len(shape)-2))}
         spectra.add_pattern("SPECTRUM", **spectrum)
 
-        logging.debug("****SPECTRA AXIS LABELS*** %s", spectra.get_axis_labels())
+        print("****SPECTRA AXIS LABELS*** %s", spectra.get_axis_labels()[-1], type(spectra.get_axis_labels()[-1]))
 
         out_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
 
