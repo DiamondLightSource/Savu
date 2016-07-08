@@ -27,8 +27,8 @@ while read -r a b c d; do
     #datafile=$outpath/../../test_data/sn65/SampleA
     #processfile=$outpath/sri_test.nxs
 
-    datafile=$outpath/../../test_data/i18_small_test_data/i18_test_data.nxs
-    processfile=$outpath/i18_test2.nxs
+    #datafile=$outpath/../../test_data/i18_small_test_data/i18_test_data.nxs
+    #processfile=$outpath/i18_test2.nxs
 
     #datafile=$outpath/../../test_data/mark_data/
     #datafile=/dls/science/users/ssg37927/mt9396-1/raw/
@@ -52,8 +52,8 @@ while read -r a b c d; do
 
     #processfile=/dls/i18/data/2016/sp12601-1/processing/Savu_Test_Data/new_test_process_list.nxs
 
-    #datafile=$outpath/../test_data/24737.nxs
-    #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_processes/test.nxs
+    datafile=$outpath/../../test_data/24737.nxs
+    processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_processes/test.nxs
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/test_data/test_process_lists/NLReg_cgls.nxs
 
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/test_data/test_process_lists/vo_centering_test.nxs

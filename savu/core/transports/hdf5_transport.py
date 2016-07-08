@@ -213,6 +213,7 @@ class Hdf5Transport(TransportControl):
                     cu.user_message("%s - %s" % (plugin.name, message))
 
             out_datasets = plugin.parameters["out_datasets"]
+            plugin._clean_up()
             exp._reorganise_datasets(out_datasets, link_type)
 
     def _process(self, plugin):
