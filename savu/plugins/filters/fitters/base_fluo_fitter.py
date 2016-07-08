@@ -50,7 +50,7 @@ class BaseFluoFitter(BaseFitter):
     def __init__(self, name="BaseFluoFitter"):
         super(BaseFluoFitter, self).__init__(name)
 
-    def pre_process(self):
+    def base_pre_process(self):
         in_meta_data = self.get_in_meta_data()[0]
         try:
             _foo = in_meta_data.get_meta_data("PeakIndex")[0]
