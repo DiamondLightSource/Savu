@@ -88,7 +88,7 @@ class DataCreate(object):
 
         if 'patterns' in kwargs:
             patterns = self.__copy_patterns(kwargs['patterns'])
-            self._set_data_patterns(patterns)
+            self.__set_data_patterns(patterns)
 
     def __copy_patterns(self, copy_data):
         """ Copy patterns """
@@ -218,7 +218,7 @@ class DataCreate(object):
         self.data_info.set(
             'nDims', self.data_info.get('nDims') + 1)
 
-    def _set_data_patterns(self, patterns):
+    def __set_data_patterns(self, patterns):
         """ Add missing dimensions to patterns and populate data info dict. """
         all_dims = range(len(self.get_shape()))
         for p in patterns:

@@ -220,14 +220,10 @@ class PluginList(object):
     def _get_n_loaders(self):
         return self.n_loaders
 
-<<<<<<< .merge_file_qKFpN1
     def _get_n_processing_plugins(self):
         return len(self.plugin_list) - self._get_n_loaders() - 1
 
-    def _get_loaders_and_savers_index(self):
-=======
     def __get_loaders_and_savers_index(self):
->>>>>>> .merge_file_MYWWAV
         """ Get lists of loader and saver positions within the plugin list and
         set the number of loaders.
 

@@ -112,8 +112,8 @@ class BaseFluoFitter(BaseFitter):
         for i in range(len(out_datasets)):
             out_datasets[i].meta_data = deepcopy(in_meta_data)
             mData = out_datasets[i].meta_data
-            mData.set_meta_data("PeakEnergy", self.axis[self.idx])
-            mData.set_meta_data('PeakIndex', self.idx)
+            mData.set("PeakEnergy", self.axis[self.idx])
+            mData.set('PeakIndex', self.idx)
 
     def setPositions(self, in_meta_data):
         paramdict = XRFDataset().paramdict

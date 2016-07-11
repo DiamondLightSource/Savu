@@ -94,7 +94,7 @@ class Experiment(object):
         self._set_loaders()
         # load the saver plugin and save the plugin list
         saver = pu.plugin_loader(self, plugin_list[-1])
-        self.experiment_collection = {'saver_plugin': saver, 'pid': [],
+        self.experiment_collection = {'saver_plugin': saver, 'plugin_dict': [],
                                       'datasets': [], 'file_list': []}
         logging.debug("Saving plugin list to file.")
         self.meta_data.plugin_list._save_plugin_list(saver)
@@ -104,7 +104,7 @@ class Experiment(object):
         for plugin_dict in plugin_list[n_loaders:-1]:
             data, files = self.__plugin_setup(plugin_dict, count)
             self.experiment_collection['datasets'].append(data)
-            self.experiment_collection['pid'].append(plugin_dict)
+            self.experiment_collection['plugin_dict'].append(plugin_dict)
             self.experiment_collection.setdefault(
                 'file_list', {}).append(files)
             self._merge_out_data_to_in()
@@ -126,15 +126,14 @@ class Experiment(object):
         """
         plugin_id = plugin_dict["id"]
         logging.info("Loading plugin %s", plugin_id)
-        plugin = pu.plugin_loader(self, plugin_dict) # runs main_setup method
+        # Run main_setup method
+        plugin = pu.plugin_loader(self, plugin_dict)
         files = self.__set_filenames(plugin, plugin_id, count)
         plugin._revert_preview(plugin.get_in_datasets())
+        # Populate the metadata
+        plugin._clean_up()
         data = self.index['out_data'].copy()
         return data, files
-
-#    def __set_experiment_collection(self, data, in_pData, out_pData, plugins,
-#                                    files, saver):
-#        self.experiment_collection.setdefault('datasets', {}).append(data)
 
     def _get_experiment_collection(self):
         return self.experiment_collection
@@ -157,7 +156,7 @@ class Experiment(object):
                           " _barrier %s", filename)
             files["filename"][key] = filename
             files["group_name"][key] = group_name
-        link = "final_result" if count is nPlugins else "intermediate"
+        link = "final_result" if count+1 is nPlugins else "intermediate"
         files["link"] = link
         return files
 
@@ -202,22 +201,10 @@ class Experiment(object):
                     return next_pattern
         return next_pattern
 
-    def _set_nxs_filename(self):
-        folder = self.meta_data.get_meta_data('out_path')
-        fname = os.path.basename(folder.split('_')[-1]) + '_processed.nxs'
-        filename = os.path.join(folder, fname)
-        self.meta_data.set_meta_data("nxs_filename", filename)
-
-        if self.meta_data.get_meta_data("mpi") is True:
-            self.nxs_file = h5py.File(filename, 'w', driver='mpio',
-                                      comm=MPI.COMM_WORLD)
-        else:
-            self.nxs_file = h5py.File(filename, 'w')
-
     def __remove_dataset(self, data_obj):
         self._barrier()
         data_obj._close_file()
-        del self.index["out_data"][data_obj.data_info.get_meta_data('name')]
+        del self.index["out_data"][data_obj.data_info.get('name')]
 
     def _clear_data_objects(self):
         self.index["out_data"] = {}

@@ -108,6 +108,7 @@ def _set_options(opt, args):
         options['log_path'] = options["out_path"]
     options['syslog_server'] = opt.syslog
     options['syslog_port'] = opt.syslog_port
+
     return options
 
 

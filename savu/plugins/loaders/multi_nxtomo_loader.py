@@ -94,12 +94,12 @@ class MultiNxtomoLoader(BaseLoader):
         for i in file_list:
             this_file = file_path + file_name + str(i) + '.nxs'
             print this_file
-            self.exp.meta_data.set_meta_data('data_file', this_file)
+            self.exp.meta_data.set('data_file', this_file)
             nxtomo.setup()
             data_obj_list.append(self.exp.index['in_data']['tomo'])
             self.exp.index['in_data'] = {}
 
-        self.exp.meta_data.set_meta_data('data_file', file_path)
+        self.exp.meta_data.set('data_file', file_path)
         return data_obj_list
 
     def _setup_4d(self, data_obj):
@@ -126,11 +126,11 @@ class MultiNxtomoLoader(BaseLoader):
         axis_name = data_obj.get_axis_labels()[dim].keys()[0].split('.')[0]
 
         new_values = np.zeros(data_obj.data.get_shape()[dim])
-        inc = len(data_obj_list[0].meta_data.get_meta_data(axis_name))
+        inc = len(data_obj_list[0].meta_data.get(axis_name))
 
         for i in range(len(data_obj_list)):
             new_values[i*inc:i*inc+inc] = \
-                data_obj_list[i].meta_data.get_meta_data(axis_name)
+                data_obj_list[i].meta_data.get(axis_name)
 
         data_obj.meta_data.set_meta_data(axis_name, new_values)
 
@@ -146,8 +146,9 @@ class MultiNxtomoLoader(BaseLoader):
         data_obj.meta_data.set_meta_data('flat', flat)
 
     def _combine_data(self, obj_list, entry, function):
-        array = obj_list[0].meta_data.get_meta_data(entry)
+        array = obj_list[0].meta_data.get(entry)
         for obj in obj_list[1:]:
             array = \
-                function((array, obj.meta_data.get_meta_data(entry)), axis=0)
+                function((array, obj.meta_data.get(entry)), axis=0)
         return array
+

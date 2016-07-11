@@ -32,11 +32,15 @@ class PluginRunner(object):
     """ Plugin list runner, which passes control to the transport layer.
     """
 
-    def __init__(self, options):
+    def __init__(self, options, name='PluginRunner'):
         class_name = "savu.core.transports." + options["transport"] \
                      + "_transport"
         cu.add_base(self, cu.import_class(class_name))
+        super(PluginRunner, self).__init__()
+
+        #  ********* transport function ***********
         self._transport_initialise(options)
+
         self.exp = None
         self.options = options
         # add all relevent locations to the path
@@ -47,19 +51,22 @@ class PluginRunner(object):
         """
         self.exp = Experiment(self.options)
         plugin_list = self.exp.meta_data.plugin_list
-        self._run_plugin_list_check(plugin_list.plugin_list)
+        self._run_plugin_list_check(plugin_list)
 
         self.exp._experiment_setup()
         exp_coll = self.exp._get_experiment_collection()
         saver = exp_coll['saver_plugin']
 
+        #  ********* transport function ***********
         self._transport_pre_plugin_list_run()
 
         n_plugins = plugin_list._get_n_processing_plugins()
         for i in range(n_plugins):
+            print exp_coll['file_list']
             self.exp._set_experiment_for_current_plugin(i)
-            self.__run_plugin(exp_coll[i])
+            self.__run_plugin(exp_coll['plugin_dict'][i])
 
+        #  ********* transport function ***********
         self._transport_post_plugin_list_run()
 
         for data in self.exp.index['in_data'].values():
@@ -73,18 +80,25 @@ class PluginRunner(object):
         saver.nxs_file.close()
         return self.exp
 
-    def __run_plugin(self, plugin_info):
-        plugin = pu.plugin_loader(self.exp, plugin_info['pid'])
+    def __run_plugin(self, plugin_dict):
 
+        plugin = pu.plugin_loader(self.exp, plugin_dict)
+
+        #  ********* transport function ***********
         self._transport_pre_plugin()
 
         self.exp._barrier()
         cu.user_message("*Running the %s plugin*" % plugin.name)
+
+        #  ******** transport 'process' function is called inside here ********
         plugin._run_plugin(self.exp, self)
         self.exp._barrier()
 
         cu._output_summary(self.exp.meta_data.get("mpi"), plugin)
+
+        #  ********* transport function ***********
         self._transport_post_plugin()
+
         self.exp._merge_out_data_to_in()
 
     def _run_plugin_list_check(self, plugin_list):
@@ -112,8 +126,6 @@ class PluginRunner(object):
 
         for i in range(n_loaders):
             pu.plugin_loader(self.exp, plugin_list[i])
-
-        self.exp._set_nxs_filename()
 
         check = kwargs.get('check', False)
         for i in range(n_loaders, len(plugin_list)-1):
@@ -156,4 +168,3 @@ class PluginRunner(object):
             for i in range(min(count, len(processes))):
                 processes[processes.index(cpus[i])] = gpus[i]
             self.exp.meta_data.set('processes', processes)
-

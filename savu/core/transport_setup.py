@@ -28,11 +28,17 @@ from mpi4py import MPI
 from itertools import chain
 import savu.core.utils as cu
 
+#
+#class logging_setup(object):
+#
+#    def __init__(self, options, name='logging_setup'):
+#        self.options = options
+#
+
 
 class MPI_setup(object):
 
     def __init__(self, options, name='MPI_setup'):
-        super(MPI_setup, self).__init__()
         self.__set_dictionary(options)
 
     def __set_dictionary(self, options):
@@ -102,8 +108,8 @@ class MPI_setup(object):
         logger = logging.getLogger()
         logger.setLevel(self.__get_log_level(options))
 
-        fh = logging.FileHandler(os.path.join(options["log_path"], 'log.txt'),
-                                 mode='w')
+        fh = logging.FileHandler(os.path.join(options["log_path"],
+                                              'log.txt'), mode='w')
         fh.setFormatter(logging.Formatter('L %(relativeCreated)12d M CPU0 0' +
                                           ' %(levelname)-6s %(message)s'))
         logger.addHandler(fh)
@@ -116,8 +122,8 @@ class MPI_setup(object):
                 cu.add_syslog_log_handler(logger, options['syslog_server'],
                                           options['syslog_port'])
             except:
-                logger.warn("Unable to add syslog logging for server %s on port %i",
-                            options['syslog_server'],
+                msg = "Unable to add syslog logging for server %s on port %i"
+                logger.warn(msg, options['syslog_server'],
                             options['syslog_port'])
 
     def __set_logger_parallel(self, number, rank, options):
@@ -146,4 +152,3 @@ class MPI_setup(object):
                     logger.warn("Unable to add syslog logging for server %s on port %i",
                                 options['syslog_server'],
                                 options['syslog_port'])
-

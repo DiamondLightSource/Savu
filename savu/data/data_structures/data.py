@@ -362,5 +362,5 @@ class Data(DataCreate):
         for i in range(len(slice_list)):
             label = axis_labels[i].keys()[0]
             if label in self.meta_data.get_dictionary().keys():
-                self.meta_data.set_meta_data(
-                    label, self.meta_data.get_meta_data(label)[slice_list[i]])
+                self.meta_data.set(
+                    label, self.meta_data.get(label)[slice_list[i]])
