@@ -57,18 +57,26 @@ class PluginRunner(object):
         exp_coll = self.exp._get_experiment_collection()
         saver = exp_coll['saver_plugin']
 
+        # create output files for final datasets
+        n_plugins = plugin_list._get_n_processing_plugins()
+        self.exp._set_experiment_for_current_plugin(n_plugins-1)
+        exp_coll['saver_plugin'].setup()  # creates the hdf5 files
+
         #  ********* transport function ***********
         self._transport_pre_plugin_list_run()
 
-        n_plugins = plugin_list._get_n_processing_plugins()
         for i in range(n_plugins):
-            print exp_coll['file_list']
             self.exp._set_experiment_for_current_plugin(i)
             self.__run_plugin(exp_coll['plugin_dict'][i])
 
         #  ********* transport function ***********
         self._transport_post_plugin_list_run()
 
+#        # close the output files
+#        for data in self.exp.index['in_data'].values():
+#            saver._save_data(data)
+
+        # close the output files
         for data in self.exp.index['in_data'].values():
             saver._close_file(data)
 
@@ -160,7 +168,7 @@ class PluginRunner(object):
         self.__set_gpu_processes(count)
 
     def __set_gpu_processes(self, count):
-        processes = self.exp.meta_data.get_meta_data('processes')
+        processes = self.exp.meta_data.get('processes')
         if not [i for i in processes if 'GPU' in i]:
             logging.debug("GPU processes missing. GPUs found so adding them.")
             cpus = ['CPU'+str(i) for i in range(count)]

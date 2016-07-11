@@ -32,14 +32,18 @@ class Hdf5Transport(TransportControl):
 
     def _transport_pre_plugin_list_run(self):
         # run through the experiment (no processing) and create output files
+        # (final plugin files are automatically created.)
         exp_coll = self.exp._get_experiment_collection()
-        for i in range(len(exp_coll['datasets'])):
+        for i in range(len(exp_coll['datasets'])-1):
             self.exp._set_experiment_for_current_plugin(i)
-            exp_coll['saver_plugin'].setup()
+            exp_coll['saver_plugin'].setup()  # creates the hdf5 files
 
     def _transport_post_plugin(self):
         saver = self.exp._get_experiment_collection()['saver_plugin']
         for data in self.exp.index["out_data"].values():
-            entry, fname = \
+            if data.remove is False:
+                entry, fname = \
+                    saver._save_data(data, self.exp.meta_data.get("link_type"))
+                saver._open_read_only(data, fname, entry)
+            else:
                 saver._save_data(data, self.exp.meta_data.get("link_type"))
-            saver._open_read_only(data, fname, entry)

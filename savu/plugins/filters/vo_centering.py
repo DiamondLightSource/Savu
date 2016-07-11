@@ -180,13 +180,17 @@ class VoCentering(BaseFilter, CpuPlugin):
         # special case of one cor_raw value (i.e. only one sinogram)
         if not cor_raw.shape:
             # add to metadata
-            cor_raw = out_datasets[0].data[...]
+            cor_raw = out_datasets[0].data[...][0]
+            cor_raw = cor_raw*np.ones(self.orig_shape[0])
+            out_datasets[1].data[:] = cor_raw[:, np.newaxis]
             self.populate_meta_data('cor_raw', cor_raw)
             self.populate_meta_data('centre_of_rotation', cor_raw)
             return
 
         cor_fit = np.squeeze(out_datasets[1].data[...])
-        fit = np.zeros(cor_fit.shape)
+
+        in_datasets[0].find_axis_label_dimensions()
+        fit = np.zeros(self.orig_shape[0])
         fit[:] = np.mean(cor_fit)
         cor_fit = fit
 

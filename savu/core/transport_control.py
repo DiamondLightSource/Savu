@@ -70,8 +70,6 @@ class TransportControl(object):
 
         :param plugin plugin: The current plugin instance.
         """
-        
-        print "running the main processing function"
         in_data, out_data = plugin.get_datasets()
 
         expInfo = plugin.exp.meta_data

@@ -56,6 +56,11 @@ class DistArrayTransport(TransportControl):
         self.__update_history(self.exp.index)
         self.__distribute_arrays(self.exp.index)
 
+    def _transport_post_plugin(self):
+        # if you wish to output datasets that have been removed from the index
+        # then do that here (data.remove is True)
+        pass
+
     def _transport_post_plugin_list_run(self):
         closing(self.context).__exit__()
 

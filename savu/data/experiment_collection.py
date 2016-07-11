@@ -216,25 +216,6 @@ class Experiment(object):
                 self.index['in_data'][key] = data
         self.index["out_data"] = {}
 
-    def _reorganise_datasets(self, out_data_objs, link_type):
-        out_data_list = self.index["out_data"]
-        self.__close_unwanted_files(out_data_list)
-        self.__remove_unwanted_data(out_data_objs)
-        self._barrier()
-        self.__copy_out_data_to_in_data(link_type)
-        self._barrier()
-        self.index['out_data'] = {}
-
-    def __remove_unwanted_data(self, out_data_objs):
-        for out_objs in out_data_objs:
-            if out_objs.remove is True:
-                self.__remove_dataset(out_objs)
-
-    def __close_unwanted_files(self, out_data_list):
-        for out_objs in out_data_list:
-            if out_objs in self.index["in_data"].keys():
-                self.index["in_data"][out_objs]._close_file()
-
     def _clean_up_files(self):
         for key in self.index["in_data"].keys():
             self.index["in_data"][key]._close_file()

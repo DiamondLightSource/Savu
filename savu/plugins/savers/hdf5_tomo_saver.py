@@ -56,6 +56,7 @@ class Hdf5TomoSaver(BaseSaver):
 
         count = 0
         for key in out_data_dict.keys():
+            print key
             out_data = out_data_dict[key]
             self.exp._barrier()
             filename = self.exp.meta_data.get(["filename", key])
@@ -140,6 +141,7 @@ class Hdf5TomoSaver(BaseSaver):
 
             try:
                 mData = data.meta_data.get(name)
+                print "outputting the axis label", name
             except KeyError:
                 mData = np.arange(data.get_shape()[count])
 
@@ -185,7 +187,12 @@ class Hdf5TomoSaver(BaseSaver):
                 pass
 
     def _save_data(self, data, link_type=None):
+#        if data.remove is True or data.backing_file.mode == 'r':
+#            link_type = None
+
         if link_type is None or data.remove is True:
+            print "closing the file without linking", link_type, data.remove
+            print data.get_name(), "\n"
             self._close_file(data)
             self.exp._barrier()
             return
