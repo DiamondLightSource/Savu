@@ -72,13 +72,9 @@ class PluginRunner(object):
         #  ********* transport function ***********
         self._transport_post_plugin_list_run()
 
-#        # close the output files
-#        for data in self.exp.index['in_data'].values():
-#            saver._save_data(data)
-
         # close the output files
         for data in self.exp.index['in_data'].values():
-            saver._close_file(data)
+            saver._save_data(data, self.exp.meta_data.get("link_type"))
 
         self.exp._barrier()
         cu.user_message("***********************")

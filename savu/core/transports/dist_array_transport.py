@@ -62,6 +62,13 @@ class DistArrayTransport(TransportControl):
         pass
 
     def _transport_post_plugin_list_run(self):
+        # convert distarrays to hdf5
+        for data in self.exp.index['in_data'].values():
+            name = data.get_name()
+            data.data.context.save_hdf5(
+                self.exp.meta_data.get('filename')[name], data.data,
+                self.exp.meta_data.get('group_name')[name], mode='w')
+            self.exp._get_experiment_collection()['saver_plugin']._open_read_only(data, self.exp.meta_data.get('filename')[name], self.exp.meta_data.get('group_name')[name])
         closing(self.context).__exit__()
 
     def __update_history(self, data_index):

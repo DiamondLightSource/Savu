@@ -187,12 +187,10 @@ class Hdf5TomoSaver(BaseSaver):
                 pass
 
     def _save_data(self, data, link_type=None):
-#        if data.remove is True or data.backing_file.mode == 'r':
-#            link_type = None
+        if data.remove is True or data.backing_file.mode == 'r':
+            link_type = None
 
-        if link_type is None or data.remove is True:
-            print "closing the file without linking", link_type, data.remove
-            print data.get_name(), "\n"
+        if link_type is None:
             self._close_file(data)
             self.exp._barrier()
             return
