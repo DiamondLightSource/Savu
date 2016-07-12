@@ -20,6 +20,7 @@
 
 """
 import numpy as np
+import pickler
 
 from savu.core.transport_control import TransportControl
 from contextlib import closing
@@ -134,3 +135,45 @@ class DistArrayTransport(TransportControl):
         for sl in slice_dirs:
             dist[sl] = 'b'
         return ''.join(dist)
+
+    def _transport_process(self, plugin):
+        #self.distributed_process(self.process, plugin)
+        print self.testing
+        pickler.dump(self)
+        self.distributed_process()
+
+    def distributed_process(self, kernel):
+        self.context.register(kernel)
+        iters_key = \
+            self.context.apply(self.local_process, (), {'kernel': kernel})
+        return iters_key
+
+    def local_process(frames, output, params, kernel):
+        from distarray.localapi import LocalArray
+        recon = kernel(frames, output, params)
+        res = LocalArray(output.distribution, buf=recon)
+        return proxyize(res)  # noqa
+
+    def testing(self):
+        print "running the testing function"
+
+#    def process(self, plugin, in_data, out_data, processes, process, params,
+#                kernel):
+#
+#        if kernel is "timeseries_correction_set_up":
+#            kernel = du.timeseries_correction_set_up
+#        elif kernel is "reconstruction_set_up":
+#            kernel = du.reconstruction_set_up
+#        elif kernel is "filter_set_up":
+#            kernel = du.filter_set_up
+#        else:
+#            print("The kernel", kernel, "has not been registered in "
+#                  " dist_array_transport")
+#            sys.exit(1)
+#
+#        iters_key = du.distributed_process(plugin, in_data, out_data,
+#                                           processes, process, params, kernel)
+#
+#        out_data.data = da.from_localarrays(iters_key[0],
+#                                            context=in_data.data.context,
+#                                            dtype=np.int32)

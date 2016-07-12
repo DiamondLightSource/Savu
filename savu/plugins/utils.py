@@ -28,6 +28,9 @@ import logging
 import numpy as np
 import savu
 import copy
+import copy_reg
+import types
+
 
 plugins = {}
 plugins_path = {}
@@ -233,3 +236,26 @@ def get_plugins_paths():
     # now add the savu plugin path, which is now the whole path.
     plugins_paths.append(os.path.join(savu.__path__[0], os.pardir))
     return plugins_paths
+
+
+def set_pickles():
+        copy_reg.pickle(types.MethodType, _pickle_method, _unpickle_method)
+
+
+def _pickle_method(method):
+    func_name = method.im_func.__name__
+    obj = method.im_self
+    cls = method.im_class
+    return _unpickle_method, (func_name, obj, cls)
+
+
+def _unpickle_method(func_name, obj, cls):
+    for cls in cls.mro():
+        try:
+            func = cls.__dict__[func_name]
+        except KeyError:
+            pass
+        else:
+            break
+    return func.__get__(obj, cls)
+        

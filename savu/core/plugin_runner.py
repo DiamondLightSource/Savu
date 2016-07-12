@@ -44,6 +44,7 @@ class PluginRunner(object):
         self.exp = None
         self.options = options
         # add all relevent locations to the path
+        pu.set_pickles()
         pu.get_plugins_paths()
 
     def _run_plugin_list(self):
@@ -87,6 +88,7 @@ class PluginRunner(object):
     def __run_plugin(self, plugin_dict):
 
         plugin = pu.plugin_loader(self.exp, plugin_dict)
+        self.exp.plugin = plugin
 
         #  ********* transport function ***********
         self._transport_pre_plugin()

@@ -65,7 +65,7 @@ class PluginDriver(object):
             self.pre_process()
 
             logging.info("%s.%s", self.__class__.__name__, 'process')
-            transport._process(self)
+            transport._transport_process(self)
 
             logging.info("%s.%s", self.__class__.__name__, '_barrier')
             self.exp._barrier(communicator=communicator)

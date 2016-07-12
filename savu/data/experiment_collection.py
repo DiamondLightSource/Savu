@@ -47,6 +47,7 @@ class Experiment(object):
         self.index = {"in_data": {}, "out_data": {}}
         self.nxs_file = None
         self.initial_datasets = None
+        self.plugin = None
 
     def get(self, entry):
         """ Get the meta data dictionary. """
