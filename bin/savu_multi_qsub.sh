@@ -21,6 +21,12 @@ while read -r a b c d; do
 	runfile=/bin/savu_launcher.sh
 	outpath=$PWD #outputting to the current folder
     
+    datafile=/dls/tmp/kny48981/savu_bug/dots_m1_2016_07_13.nxs
+    processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test.nxs
+
+    #datafile=/dls/i18/data/2016/sp13562-1/Experiment_1/nexus/71993_Sample1_before_calcination_1.nxs
+    #processfile=/dls/i18/data/2016/sp13562-1/processing/savu/SavuProcessLists/xrfabsorption_test.nxs
+
     #datafile=/dls/i13/data/2016/mt14080-1/raw/77391.nxs
     #processfile=$outpath/test.nxs
 
@@ -52,8 +58,8 @@ while read -r a b c d; do
 
     #processfile=/dls/i18/data/2016/sp12601-1/processing/Savu_Test_Data/new_test_process_list.nxs
 
-    datafile=$outpath/../../test_data/24737.nxs
-    processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_processes/test.nxs
+    #datafile=$outpath/../../test_data/24737.nxs
+    #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_processes/test.nxs
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/test_data/test_process_lists/NLReg_cgls.nxs
 
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/test_data/test_process_lists/vo_centering_test.nxs
