@@ -153,19 +153,17 @@ class NxtomoLoader(BaseLoader):
         import os
         fpath, fentry, scale = self.parameters[name]
 
-        #*** doesn't work
-        if 'savu' not in fpath:
-            fpath = \
-                os.path.abspath(__file__).split('savu')[0] + 'savu/' + fpath
+        if fpath.split('/')[0] == 'test_data':
+            fpath = os.path.abspath(__file__).split('savu')[0] + fpath
 
         h5file = h5py.File(fpath, 'r')
         try:
             image_key = \
                 h5file['entry1/tomo_entry/instrument/detector/image_key']
             data = h5file[self.parameters['data_path']][
-                image_key == key, ...].mean(0)*int(scale)
+                image_key == key, ...].mean(0)*float(scale)
         except KeyError:
-            data = h5file[fentry][...].mean(0)*int(scale)
+            data = h5file[fentry][...].mean(0)*float(scale)
         data_obj.meta_data.set_meta_data(name, data)
 
     def __set_rotation_angles(self, data_obj):
