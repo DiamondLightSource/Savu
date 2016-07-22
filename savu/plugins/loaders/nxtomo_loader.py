@@ -27,6 +27,7 @@ import numpy as np
 
 from savu.plugins.base_loader import BaseLoader
 from savu.plugins.utils import register_plugin
+import savu.core.utils as cu
 
 
 @register_plugin
@@ -138,7 +139,7 @@ class NxtomoLoader(BaseLoader):
             data_obj.data = ImageKey(data_obj, image_key[...], 0)
             data_obj.set_shape(data_obj.data.get_shape())
         except KeyError:
-            logging.warn("An image key was not found.")
+            cu.user_message("An image key was not found.")
             try:
                 mData = data_obj.meta_data
                 entry = 'entry1/tomo_entry/instrument/detector/flatfield'
@@ -146,8 +147,7 @@ class NxtomoLoader(BaseLoader):
                 entry = 'entry1/tomo_entry/instrument/detector/darkfield'
                 mData.set_meta_data('dark', data_obj.backing_file[entry][...])
             except KeyError:
-                logging.warn("Dark and flat data was not found in input "
-                             "file.")
+                cu.user_message("Dark and flat data was not found in input file.")
 
     def __get_image(self, name, key, data_obj):
         import os

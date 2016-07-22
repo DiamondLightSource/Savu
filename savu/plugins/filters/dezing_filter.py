@@ -65,7 +65,7 @@ class DezingFilter(BaseFilter, CpuPlugin):
         # setup dezing for data
         (retval, self.warnflag, self.errflag) = \
             dezing.setup_size(self.data_size, self.parameters['outlier_mu'],
-                              self.pad)
+                              self.pad, versionflag=0)
 
     def _dezing(self, data):
         result = np.empty_like(data)
