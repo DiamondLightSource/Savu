@@ -33,8 +33,8 @@ from savu.plugins.utils import register_plugin
 class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
     """
     A Plugin to apply a simple dark and flat field correction to data.
-    :param pattern: Data processing pattern is 'SINOGRAM' or \
-        'PROJECTION'. Default: 'SINOGRAM'.
+    :param pattern: Data processing pattern is 'PROJECTION' or \
+        'SINOGRAM'. Default: 'PROJECTION'.
     """
 
     def __init__(self):
