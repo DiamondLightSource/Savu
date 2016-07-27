@@ -79,7 +79,8 @@ class NxtomoLoader(BaseLoader):
         except:
             logging.warn("No Control information available")
 
-        self.__check_angles
+        nAngles = len(data_obj.meta_data.get_meta_data('rotation_angle'))
+        self.__check_angles(data_obj, nAngles)
         data_obj.set_original_shape(shape)
         self.set_data_reduction_params(data_obj)
         data_obj.data._set_dark_and_flat()
@@ -154,13 +155,18 @@ class NxtomoLoader(BaseLoader):
             image_key = data_obj.backing_file[
                 'entry1/tomo_entry/instrument/detector/image_key'][...]
         except:
-            image_key = False
+            image_key = None
         data_obj.data = NoImageKey(data_obj, image_key, 0)
         self.__set_data(data_obj, 'flat', data_obj.data._set_flat_path)
         self.__set_data(data_obj, 'dark', data_obj.data._set_dark_path)
 
     def __set_data(self, data_obj, name, func):
         path, entry, scale = self.parameters[name]
+
+        if path.split('/')[0] == 'test_data':
+            import os
+            path = os.path.abspath(__file__).split('savu')[0] + path
+
         ffile = h5py.File(path, 'r')
         try:
             image_key = \

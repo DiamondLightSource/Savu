@@ -103,6 +103,7 @@ def add_base_classes(this, bases):
     for base in bases:
         add_base(this, base)
 
+
 USER_LOG_LEVEL = 100
 USER_LOG_HANDLER = None
 

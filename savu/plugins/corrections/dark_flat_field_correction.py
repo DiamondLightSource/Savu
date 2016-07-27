@@ -65,9 +65,15 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
             self.convert_size = lambda x: np.tile(x, tile)
             self.correct = self.correct_proj
         elif self.parameters['pattern'] == 'SINOGRAM':
-            tile[rot_dim] = inData.get_shape()[rot_dim]
+            full_shape = inData.get_shape()
+            tile[rot_dim] = full_shape[rot_dim]
             self.correct = self.correct_sino
-            self.convert_size = lambda a, b, x: np.tile(x[a:b], tile)
+            if len(full_shape) is 3:
+                self.convert_size = lambda a, b, x: np.tile(x[a:b], tile)
+            else:
+                nSino = \
+                    full_shape[inData.find_axis_label_dimension('detector_y')]
+                self.convert_size = lambda a, b, x: np.tile(x[a%nSino:b], tile)
 
     def correct_proj(self, data):
         dark = self.convert_size(self.dark)

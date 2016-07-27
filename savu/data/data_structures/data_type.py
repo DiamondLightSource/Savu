@@ -38,6 +38,17 @@ class DataTypes(object):
         """ Get full stiched shape of a stack of files"""
         raise NotImplementedError("get_shape must be implemented.")
 
+    def add_base_class_with_instance(self, base, inst):
+        """ Add a base class instance to a class (merging of two data types).
+
+        :params class base: a class to add as a base class
+        :params instance inst: a instance of the base class
+        """
+        cls = self.__class__
+        namespace = self.__class__.__dict__.copy()
+        self.__dict__.update(inst.__dict__)
+        self.__class__ = cls.__class__(cls.__name__, (cls, base), namespace)
+
 
 class FabIO(DataTypes):
     """ This class loads any of the FabIO python module supported image
@@ -124,6 +135,11 @@ class Map_3dto4d_h5(DataTypes):
 
     def __init__(self, data, n_angles):
         shape = data.shape
+
+        import inspect
+        if inspect.isclass(type(data)):
+            self.add_base_class_with_instance(type(data), data)
+
         self.data = data
         new_shape = (n_angles, shape[1], shape[2], shape[0]/n_angles)
         self.shape = new_shape
@@ -190,7 +206,14 @@ class Tomo(DataTypes):
         self.data[key] = val
 
     def _set_dark_and_flat(self):
-        self.dark_flat_slice_list = tuple(self.get_dark_flat_slice_list())
+        self.dark_flat_slice_list = self.get_dark_flat_slice_list()
+
+        # remove extra dimension if 3d to 4d mapping
+        from data_type import Map_3dto4d_h5
+        if Map_3dto4d_h5 in self.__class__.__bases__:
+            del self.dark_flat_slice_list[-1]
+
+        self.dark_flat_slice_list = tuple(self.dark_flat_slice_list)
         self.data_obj.meta_data.set_meta_data('dark', self.dark_mean())
         self.data_obj.meta_data.set_meta_data('flat', self.flat_mean())
 
@@ -333,7 +356,8 @@ class NoImageKey(Tomo):
             dark = self.dark_image_key_data()
             self.image_key = self.orig_image_key
             return dark
-        return self.dark_path[self.dark_flat_slice_list]*self.dscale
+        temp = self.dark_path[self.dark_flat_slice_list]*self.dscale
+        return temp
 
     def flat(self):
         """ Get the flat data. """
