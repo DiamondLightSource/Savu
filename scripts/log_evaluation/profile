@@ -20,11 +20,12 @@ extension="${filename##*.}"
 filename="${filename%.*}"
 echo "*** $filename $extension"
 logfile=$filename"_"$extension.log
-echo $logfile
+
+logfile=$PWD/$logfile
 
 grep "L " $full_filename | grep "INFO" | grep -v "C: dezing:" >> $logfile
 
-temp=$path/$logfile
+temp=$logfile
 
 python -c "import GraphicalThreadProfiler as gtp; gtp.convert(['$temp'])"
 

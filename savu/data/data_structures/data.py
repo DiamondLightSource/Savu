@@ -45,7 +45,8 @@ class Data(DataCreate):
         self.group_name = None
         self.group = None
         self._plugin_data_obj = None
-        self.tomo_raw_obj = None
+        #self.tomo_raw_obj = None
+        self.raw = None
         self.backing_file = None
         self.data = None
         self.next_shape = None

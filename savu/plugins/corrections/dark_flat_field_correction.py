@@ -24,7 +24,6 @@
 
 import numpy as np
 
-from savu.data.data_structures.data_type import ImageKey
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.base_correction import BaseCorrection
 from savu.plugins.utils import register_plugin
@@ -50,23 +49,39 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
 
     def pre_process(self):
         inData = self.get_in_datasets()[0]
+        in_pData = self.get_plugin_in_datasets()[0]
         self.dark = inData.meta_data.get_meta_data('dark')
         self.flat = inData.meta_data.get_meta_data('flat')
         self.flat_minus_dark = self.flat - self.dark
-        det_dims = [inData.find_axis_label_dimension('detector_y'),
-                    inData.find_axis_label_dimension('detector_x')]
 
-        data_shape = self.get_plugin_in_datasets()[0].get_shape()
-        tile = [1]*len(data_shape)
+        pData_shape = in_pData.get_shape()
+        tile = [1]*len(pData_shape)
+        rot_dim = inData.find_axis_label_dimension('rotation_angle')
+        self.slice_dir = in_pData.get_slice_dimension()
+        self.count = 0
+
         if self.parameters['pattern'] == 'PROJECTION':
-            tile[0] = data_shape[0]
-        self.convert_size = \
-            lambda x, sl: np.tile(x[[sl[d] for d in det_dims]], tile)
+            tile[rot_dim] = pData_shape[rot_dim]
+            self.convert_size = lambda x: np.tile(x, tile)
+            self.correct = self.correct_proj
+        elif self.parameters['pattern'] == 'SINOGRAM':
+            tile[rot_dim] = inData.get_shape()[rot_dim]
+            self.correct = self.correct_sino
+            self.convert_size = lambda a, b, x: np.tile(x[a:b], tile)
 
-    def correct(self, data):
-        dark = self.convert_size(self.dark, self.slice_list)
+    def correct_proj(self, data):
+        dark = self.convert_size(self.dark)
+        flat_minus_dark = self.convert_size(self.flat_minus_dark)
+        data = np.nan_to_num((data-dark)/flat_minus_dark)
+        self.__data_check(data)
+        return data
+
+    def correct_sino(self, data):
+        end = self.count + data.shape[self.slice_dir]
+        dark = self.convert_size(self.count, end, self.dark)
         flat_minus_dark = \
-            self.convert_size(self.flat_minus_dark, self.slice_list)
+            self.convert_size(self.count, end, self.flat_minus_dark)
+        self.count += data.shape[self.slice_dir]
         data = np.nan_to_num((data-dark)/flat_minus_dark)
         self.__data_check(data)
         return data

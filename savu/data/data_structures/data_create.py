@@ -51,12 +51,15 @@ class DataCreate(object):
             np.float32)
         :keyword bool remove: Remove from framework after completion \
         (no link in .nxs file) (optional: Defaults to False.)
+        :keyword bool raw: Keep dark and flats (ImageKey or NoImageKey)
 
         {0} \n {1} \n {2} \n {3}
 
         """
         self.dtype = kwargs.get('dtype', np.float32)
         self.remove = kwargs.get('remove', False)
+        self.raw = kwargs.get('raw', False)
+
         if len(args) is 1:
             self.__create_dataset_from_object(args[0])
         else:
@@ -70,20 +73,8 @@ class DataCreate(object):
         self.__copy_labels(data_obj)
         self.__find_and_set_shape(data_obj)
         self._set_data_patterns(patterns)
-
-#    def __copy_mapping_object(self, data_obj):
-#        """ Copy relevant mapping object information and return the mapping
-#        Data object
-#        """
-#        map_data = self.exp.index['mapping'][data_obj.get_name()]
-#        map_mData = map_data.meta_data
-#        map_axis_labels = map_data.data_info.get_meta_data('axis_labels')
-#        for axis_label in map_axis_labels:
-#            if axis_label.keys()[0] in map_mData.get_dictionary().keys():
-#                map_label = map_mData.get_meta_data(axis_label.keys()[0])
-#                data_obj.meta_data.set_meta_data(axis_label.keys()[0],
-#                                                 map_label)
-#        return map_data
+        if self.raw:
+            self.raw = data_obj.data
 
     def __create_dataset_from_kwargs(self, kwargs):
         """ Create dataset from kwargs. """
@@ -248,3 +239,16 @@ class DataCreate(object):
         pData = self._get_plugin_data()
         new_shape = copy.copy(data.get_shape()) + tuple(pData.extra_dims)
         self.set_shape(new_shape)
+
+    def _add_raw_data_obj(self, data_obj):
+        from savu.data.data_structures.data_type import ImageKey, NoImageKey
+        proj_dim = self.find_axis_label_dimension('rotation_angle')
+        if isinstance(data_obj.raw, ImageKey):
+            data_obj.data = \
+                ImageKey(data_obj, data_obj.raw.image_key, proj_dim)
+            data_obj.raw._copy(data_obj)
+        elif isinstance(data_obj.raw, NoImageKey):
+            data_obj.data = NoImageKey(data_obj, proj_dim)
+            data_obj.raw._copy(data_obj)
+        else:
+            raise Exception('Raw data type not recognised.')

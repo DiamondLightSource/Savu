@@ -21,11 +21,11 @@ while read -r a b c d; do
 	runfile=/bin/savu_launcher.sh
 	outpath=$PWD #outputting to the current folder
     
-    datafile=/dls/i12/data/2016/ee13941-1/rawdata/58197.nxs
-    processfile=$outpath/test_median_filter.nxs
+    #datafile=/dls/i12/data/2016/ee13941-1/rawdata/58197.nxs
+    #processfile=$outpath/test_median_filter.nxs
 
-    #datafile=$outpath/../../test_data/separate_darks_and_flats/57451.nxs
-    #processfile=$outpath/separate_darks_flats.nxs
+    datafile=$outpath/../../test_data/separate_darks_and_flats/57451.nxs
+    processfile=$outpath/separate_darks_flats.nxs
 
     #datafile=/dls/tmp/kny48981/savu_bug/dots_m1_2016_07_13.nxs
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test.nxs
