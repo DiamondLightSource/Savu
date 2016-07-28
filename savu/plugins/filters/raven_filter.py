@@ -22,6 +22,7 @@
 import logging
 import numpy as np
 import pyfftw
+import pyfftw.interfaces.numpy_fft as fft
 
 from savu.plugins.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
@@ -55,7 +56,12 @@ class RavenFilter(BaseFilter, CpuPlugin):
 
     def pre_process(self):
         in_pData = self.get_plugin_in_datasets()[0]
-        sino_shape = in_pData.get_shape()
+        self.slice_dir = in_pData.get_slice_dimension()
+        nDims = len(in_pData.get_shape())
+        self.sslice = [slice(None)]*nDims
+        sino_shape = list(in_pData.get_shape())
+        if len(sino_shape) is 3:
+            del sino_shape[self.slice_dir]
 
         width1 = sino_shape[1] + 2*self.pad
         height1 = sino_shape[0] + 2*self.pad
@@ -80,20 +86,20 @@ class RavenFilter(BaseFilter, CpuPlugin):
                                        direction='FFTW_BACKWARD')
 
     def filter_frames(self, data):
-        if(self.count % 25 == 0):
-            logging.debug("raven...%i" % self.count)
-        data2d = data[0]
-        sino2 = np.fft.fftshift(self.fft_object(data2d))
-        sino2[self.row1:self.row2] = \
-            sino2[self.row1:self.row2] * self.filtercomplex
-        sino3 = np.fft.ifftshift(sino2)
-        sino4 = self.ifft_object(sino3).real
-        sino4 = sino4[:, np.newaxis, :]
-        self.count += 1
-        return sino4
+        output = np.empty_like(data[0])
+        nSlices = data[0].shape[self.slice_dir]
+        for i in range(nSlices):
+            self.sslice[self.slice_dir] = i
+            sino = fft.fftshift(self.fft_object(data[0][tuple(self.sslice)]))
+            sino[self.row1:self.row2] = \
+                sino[self.row1:self.row2] * self.filtercomplex
+            sino = fft.ifftshift(sino)
+            sino = self.ifft_object(sino).real
+            output = sino
+        return output
 
     def get_plugin_pattern(self):
         return 'SINOGRAM'
 
     def get_max_frames(self):
-        return 1
+        return 16

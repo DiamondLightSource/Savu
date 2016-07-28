@@ -38,6 +38,17 @@ class DataTypes(object):
         """ Get full stiched shape of a stack of files"""
         raise NotImplementedError("get_shape must be implemented.")
 
+    def add_base_class_with_instance(self, base, inst):
+        """ Add a base class instance to a class (merging of two data types).
+
+        :params class base: a class to add as a base class
+        :params instance inst: a instance of the base class
+        """
+        cls = self.__class__
+        namespace = self.__class__.__dict__.copy()
+        self.__dict__.update(inst.__dict__)
+        self.__class__ = cls.__class__(cls.__name__, (cls, base), namespace)
+
 
 class FabIO(DataTypes):
     """ This class loads any of the FabIO python module supported image
@@ -124,6 +135,11 @@ class Map_3dto4d_h5(DataTypes):
 
     def __init__(self, data, n_angles):
         shape = data.shape
+
+        import inspect
+        if inspect.isclass(type(data)):
+            self.add_base_class_with_instance(type(data), data)
+
         self.data = data
         new_shape = (n_angles, shape[1], shape[2], shape[0]/n_angles)
         self.shape = new_shape
@@ -151,32 +167,86 @@ class Map_3dto4d_h5(DataTypes):
         return self.shape
 
 
-class ImageKey(DataTypes):
-    """ This class is used to get data from a dataset with an image key. """
+class Tomo(DataTypes):
 
-    def __init__(self, data_obj, image_key, proj_dim):
-        self.data = data_obj.data
+    def __init__(self, data_obj, proj_dim, image_key):
+        self.data_obj = data_obj
+        self.fscale = 1
+        self.dscale = 1
+        self.flat_updated = False
+        self.dark_updated = False
         self.image_key = image_key
+        self.data = data_obj.data
         self.proj_dim = proj_dim
+        self.dark_flat_slice_list = None
 
+    def _copy_base(self, new_obj):
+        new_obj.flat_updated = self.flat_updated
+        new_obj.dark_updated = self.dark_updated
+        self._set_dark_and_flat()
+
+    def get_image_key(self):
+        return self.image_key
+
+    def _get_image_key_data_shape(self):
         data_idx = self.get_index(0)
         new_shape = list(self.data.shape)
-        new_shape[proj_dim] = len(data_idx)
-        self.shape = tuple(new_shape)
-        self.nDims = len(self.shape)
-        data_obj.meta_data.set_meta_data('dark', self.dark_mean())
-        data_obj.meta_data.set_meta_data('flat', self.flat_mean())
+        new_shape[self.proj_dim] = len(data_idx)
+        return tuple(new_shape)
 
-    def __getitem__(self, idx):
+    def _getitem_imagekey(self, idx):
         index = list(idx)
         index[self.proj_dim] = self.get_index(0)[idx[self.proj_dim]].tolist()
         return self.data[tuple(index)]
 
+    def _getitem_noimagekey(self, idx):
+        return self.data[idx]
+
+    def __setitem__(self, key, val):
+        self.data[key] = val
+
+    def _set_dark_and_flat(self):
+        self.dark_flat_slice_list = self.get_dark_flat_slice_list()
+
+        # remove extra dimension if 3d to 4d mapping
+        from data_type import Map_3dto4d_h5
+        if Map_3dto4d_h5 in self.__class__.__bases__:
+            del self.dark_flat_slice_list[-1]
+
+        self.dark_flat_slice_list = tuple(self.dark_flat_slice_list)
+        self.data_obj.meta_data.set_meta_data('dark', self.dark_mean())
+        self.data_obj.meta_data.set_meta_data('flat', self.flat_mean())
+
+    def get_dark_flat_slice_list(self):
+        slice_list = self.data_obj._preview._get_preview_slice_list()
+        remove_dim = self.data_obj.find_axis_label_dimension('rotation_angle')
+        slice_list[remove_dim] = slice(None)
+        return slice_list
+
+    def _set_scale(self, name, scale):
+        self.set_flat_scale(scale) if name is 'flat' else\
+            self.set_dark_scale(scale)
+
+    def set_flat_scale(self, fscale):
+        self.fscale = float(fscale)
+
+    def set_dark_scale(self, dscale):
+        self.dscale = float(dscale)
+
     def get_shape(self):
         return self.shape
 
-    def get_image_key(self):
-        return self.image_key
+    def dark_mean(self):
+        """ Get the averaged dark projection data. """
+        return self._calc_mean(self.dark())
+
+    def flat_mean(self):
+        """ Get the averaged flat projection data. """
+        return self._calc_mean(self.flat())
+
+    def _calc_mean(self, data):
+        return data if len(data.shape) is 2 else\
+            data.mean(self.proj_dim).astype(np.float32)
 
     def get_index(self, key):
         """ Get the projection index of a specific image key value.
@@ -188,23 +258,117 @@ class ImageKey(DataTypes):
     def __get_data(self, key):
         index = [slice(None)]*self.nDims
         index[self.proj_dim] = self.get_index(key)
-        return self.data[tuple(index)]
+        data = self.data[tuple(index)]
+        return data[self.dark_flat_slice_list]
+
+    def dark_image_key_data(self):
+        """ Get the dark data. """
+        return self.__get_data(2)*self.dscale
+
+    def flat_image_key_data(self):
+        """ Get the flat data. """
+        return self.__get_data(1)*self.fscale
+
+    def update_dark(self, data):
+        self.dark_updated = data
+        self.dscale = 1
+        self.data_obj.meta_data.set_meta_data('dark', self._calc_mean(data))
+
+    def update_flat(self, data):
+        self.flat_updated = data
+        self.fscale = 1
+        self.data_obj.meta_data.set_meta_data('flat', self._calc_mean(data))
+
+
+class ImageKey(Tomo):
+    """ This class is used to get data from a dataset with an image key. """
+
+    def __init__(self, data_obj, image_key, proj_dim):
+        super(ImageKey, self).__init__(data_obj, proj_dim, image_key)
+        self.shape = self._get_image_key_data_shape()
+        self.nDims = len(self.shape)
+        self._getitem = self._getitem_imagekey
+
+    def __getitem__(self, idx):
+        return self._getitem(idx)
+
+    def _copy(self, new_obj):
+        self._copy_base(new_obj)
 
     def dark(self):
         """ Get the dark data. """
-        return self.__get_data(2)
+        return self.dark_updated if self.dark_updated else\
+            self.dark_image_key_data()
 
     def flat(self):
         """ Get the flat data. """
-        return self.__get_data(1)
+        return self.flat_updated if self.flat_updated else\
+            self.flat_image_key_data()
 
-    def dark_mean(self):
-        """ Get the averaged dark projection data. """
-        return self.__get_data(2).mean(self.proj_dim).astype(np.float32)
 
-    def flat_mean(self):
-        """ Get the averaged flat projection data. """
-        return self.__get_data(1).mean(self.proj_dim).astype(np.float32)
+class NoImageKey(Tomo):
+    """ This class is used to get data from a dataset with separate darks and
+        flats. """
+
+    def __init__(self, data_obj, image_key, proj_dim):
+        super(NoImageKey, self).__init__(data_obj, proj_dim, image_key)
+        self.dark_path = None
+        self.flat_path = None
+        self.orig_image_key = copy.copy(image_key)
+        self.flat_image_key = False
+        self.dark_image_key = False
+        if self.image_key is not None:
+            self.shape = self._get_image_key_data_shape()
+            self._getitem = self._getitem_imagekey
+        else:
+            self.shape = data_obj.data.shape
+            self._getitem = self._getitem_noimagekey
+        self.data_obj = data_obj
+        self.nDims = len(self.shape)
+
+    def __getitem__(self, idx):
+        return self._getitem(idx)
+
+    def _copy(self, new_obj):
+        new_obj.dark_path = self.dark_path
+        new_obj.flat_path = self.flat_path
+        new_obj.flat_image_key = self.flat_image_key
+        new_obj.dark_image_key = self.dark_image_key
+        self._copy_base(new_obj)
+
+    def _set_flat_path(self, path, imagekey=False):
+        self.flat_image_key = imagekey
+        self.flat_path = path
+
+    def _set_dark_path(self, path, imagekey=False):
+        self.dark_image_key = imagekey
+        self.dark_path = path
+
+    def get_shape(self):
+        return self.shape
+
+    def dark(self):
+        """ Get the dark data. """
+        if self.dark_updated:
+            return self.dark_updated
+        if self.dark_image_key is not False:
+            self.image_key = self.dark_image_key
+            dark = self.dark_image_key_data()
+            self.image_key = self.orig_image_key
+            return dark
+        temp = self.dark_path[self.dark_flat_slice_list]*self.dscale
+        return temp
+
+    def flat(self):
+        """ Get the flat data. """
+        if self.flat_updated:
+            return self.flat_updated()
+        if self.flat_image_key is not False:
+            self.image_key = self.flat_image_key
+            flat = self.flat_image_key_data()
+            self.image_key = self.orig_image_key
+            return flat
+        return self.flat_path[self.dark_flat_slice_list]*self.fscale
 
 
 class MultipleImageKey(DataTypes):

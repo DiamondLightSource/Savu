@@ -47,25 +47,23 @@ class DezingFilter(BaseFilter, CpuPlugin):
         self.errflag = 0
 
     def pre_process(self):
-        # Apply dezing to dark and flat images (data with image key only)
         inData = self.get_in_datasets()[0]
         dark = inData.data.dark()
         flat = inData.data.flat()
         (retval, self.warnflag, self.errflag) = dezing.setup_size(
             dark.shape, self.parameters['outlier_mu'], self.pad)
         pad_list = ((self.pad, self.pad), (0, 0), (0, 0))
+
         dark = self._dezing(np.pad(dark, pad_list, mode='edge'))
         flat = self._dezing(np.pad(flat, pad_list, mode='edge'))
-        inData.meta_data.set_meta_data(
-            'dark', dark[self.pad:-self.pad].mean(0))
-        inData.meta_data.set_meta_data(
-            'flat', flat[self.pad:-self.pad].mean(0))
+        inData.data.update_dark(dark[self.pad:-self.pad])
+        inData.data.update_flat(flat[self.pad:-self.pad])
         (retval, self.warnflag, self.errflag) = dezing.cleanup()
 
         # setup dezing for data
         (retval, self.warnflag, self.errflag) = \
             dezing.setup_size(self.data_size, self.parameters['outlier_mu'],
-                              self.pad)
+                              self.pad, versionflag=0)
 
     def _dezing(self, data):
         result = np.empty_like(data)
@@ -83,6 +81,9 @@ class DezingFilter(BaseFilter, CpuPlugin):
         :returns:  an integer of the number of frames. Default 100
         """
         return 16
+
+    def raw_data(self):
+        return True
 
     def set_filter_padding(self, in_data, out_data):
         in_data = in_data[0]

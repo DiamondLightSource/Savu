@@ -355,14 +355,3 @@ class Hdf5Transport(TransportControl):
             data_list[idx].data[slice_list[idx][count]] = \
                 data_list[idx]._get_unpadded_slice_data(
                     slice_list[idx][count], expand_dict[idx](result[idx]))
-
-#    def _transfer_to_meta_data(self, return_dict):
-#        """
-#        """
-#        remove_data_sets = []
-#        for data_key in return_dict.keys():
-#            for name in return_dict[data_key].keys():
-#                convert_data = return_dict[data_key][name]
-#                remove_data_sets.append(convert_data.name)
-#                data_key.meta_data.set_meta_data(name, convert_data.data[...])
-#        return remove_data_sets
