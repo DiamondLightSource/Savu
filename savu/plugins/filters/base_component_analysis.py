@@ -42,6 +42,7 @@ class BaseComponentAnalysis(BaseFilter, CpuPlugin):
         print "max frames is:"+str(self.spectra_length[0])
         return self.spectra_length[0]
 
+
     def get_plugin_pattern(self):
         return self.parameters['chunk']
 
@@ -49,6 +50,7 @@ class BaseComponentAnalysis(BaseFilter, CpuPlugin):
         self.exp.log(self.name + " Setting up the component analysis")
         # set up the output dataset that is created by the plugin
         in_dataset, out_dataset = self.get_datasets()
+        print "shape"+str(in_dataset[0].get_shape())
         self.spectra_length = (in_dataset[0].get_shape()[-1],)
         other_dims = in_dataset[0].get_shape()[:-1]
         num_comps = self.parameters['number_of_components']
@@ -70,8 +72,9 @@ class BaseComponentAnalysis(BaseFilter, CpuPlugin):
 
         in_pData, out_pData = self.get_plugin_datasets()
         plugin_pattern = self.get_plugin_pattern()
-        vxz = {'core_dir': (0,1), 'slice_dir': (2,)}
-        in_dataset[0].add_pattern("VOLUME_XZ", **vxz)
+#         dirs = range(len(out_dataset[0].get_shape()))
+#         vxz = {'core_dir': (0,1), 'slice_dir': (2,)}
+#         in_dataset[0].add_pattern("VOLUME_XZ", **vxz)
         in_pData[0].plugin_data_setup(plugin_pattern, self.get_max_frames())
         out_pData[0].plugin_data_setup(plugin_pattern, num_comps)
         out_pData[1].plugin_data_setup("SPECTRUM", num_comps)
