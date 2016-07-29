@@ -113,7 +113,7 @@ class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
         detY_dim = in_dataset[0].find_axis_label_dimension('detector_y')
         if detX_dim < detY_dim:
             detY_dim -= 1
-        axis_labels = [str(detX_dim), str(detY_dim) + '.name.unit']
+        axis_labels = [str(detX_dim), str(detY_dim) + '.Q.Angstrom^-1']
 #         spectra.create_dataset(patterns={in_dataset[0]: patterns},
 #                                axis_labels={in_dataset[0]: axis_labels},
 #                                shape=shape[:-2]+(num_bins,))
@@ -121,9 +121,9 @@ class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
         spectra.create_dataset(patterns={in_dataset[0]: patterns},
                                axis_labels={in_dataset[0]: axis_labels},
                                shape=shape[:-2]+(num_bins,))
-        axis_labels = [{'rotation_angle': 'degrees'}, {'y': 'mm'}, {'x': 'mm'}, {'2Theta': 'degrees', 'Q': 'Angstrom^-1','D':'Angstrom'}]
+#         axis_labels = [{'rotation_angle': 'degrees'}, {'y': 'mm'}, {'x': 'mm'}, {'2Theta': 'degrees', 'Q': 'Angstrom^-1','D':'Angstrom'}]
 
-        spectra.data_info.set_meta_data('axis_labels',axis_labels)
+#         spectra.data_info.set_meta_data('axis_labels',axis_labels)
         spectrum = {'core_dir': (-1,), 'slice_dir': tuple(range(len(shape)-2))}
         spectra.add_pattern("SPECTRUM", **spectrum)
 
