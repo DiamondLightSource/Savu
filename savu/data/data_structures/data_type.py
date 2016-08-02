@@ -356,8 +356,7 @@ class NoImageKey(Tomo):
             dark = self.dark_image_key_data()
             self.image_key = self.orig_image_key
             return dark
-        temp = self.dark_path[self.dark_flat_slice_list]*self.dscale
-        return temp
+        return self.dark_path[self.dark_flat_slice_list]*self.dscale
 
     def flat(self):
         """ Get the flat data. """

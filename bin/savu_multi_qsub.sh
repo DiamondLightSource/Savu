@@ -24,8 +24,11 @@ while read -r a b c d; do
     #datafile=/dls/i12/data/2016/ee13941-1/rawdata/58197.nxs
     #processfile=$outpath/test_median_filter.nxs
 
-    datafile=$outpath/../../test_data/separate_darks_and_flats/57451.nxs
-    processfile=$outpath/separate_darks_flats.nxs
+    #datafile=/dls/staging/dls/i13/data/2015/mt13044-1/raw/69999.nxs
+    #processfile=$outpath/tomo_69999_updated.nxs
+
+    #datafile=$outpath/../../test_data/separate_darks_and_flats/57451.nxs
+    #processfile=$outpath/separate_darks_flats.nxs
 
     #datafile=/dls/tmp/kny48981/savu_bug/dots_m1_2016_07_13.nxs
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test.nxs
@@ -43,8 +46,10 @@ while read -r a b c d; do
     #processfile=$outpath/i18_test2.nxs
 
     #datafile=$outpath/../../test_data/mark_data/
-    #datafile=/dls/science/users/ssg37927/mt9396-1/raw/
+    datafile=/dls/science/users/ssg37927/mt9396-1/raw/
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_processes/multi_nxs_test.nxs
+    #datafile=/mnt/GPFS01/testdir/dasc/qmm55171/temp_run_out/mark_test_data/proj_5files.h5
+    processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/marks_data_test.nxs
 
     #datafile=/dls/i18/data/2016/sp13562-1/Experiment_1/nexus/71993_Sample1_before_calcination_1.nxs
     #processfile=/dls/i18/data/2016/sp13562-1/processing/savu/SavuProcessLists/index_test.nxs

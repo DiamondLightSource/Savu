@@ -74,8 +74,10 @@ class BaseRecon(Plugin):
 
         shape = in_pData[0].get_shape()
         pad_len = shape[self.pad_dim] if self.parameters['sino_pad'] else 0
-        self.sino_pad = int(math.ceil((math.sqrt(2)-1)*pad_len))
 
+        # this is the correct value but doesn't give a good result
+        self.sino_pad = int(math.ceil((math.sqrt(2)-1)*pad_len))
+        #self.sino_pad = int(0.5*pad_len)
 #        bases = [b.__name__ for b in self.__class__.__bases__]
         # pad the data now if the recon is not astra
 #        self.sino_func, self.cor_func = self.set_function(False) if \

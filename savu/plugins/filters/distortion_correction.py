@@ -95,4 +95,4 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
         out_pData[0].plugin_data_setup('PROJECTION', self.get_max_frames())
 
     def get_max_frames(self):
-        return 100
+        return 16

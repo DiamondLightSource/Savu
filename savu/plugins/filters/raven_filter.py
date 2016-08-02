@@ -95,7 +95,7 @@ class RavenFilter(BaseFilter, CpuPlugin):
                 sino[self.row1:self.row2] * self.filtercomplex
             sino = fft.ifftshift(sino)
             sino = self.ifft_object(sino).real
-            output = sino
+            output[self.sslice] = sino
         return output
 
     def get_plugin_pattern(self):
