@@ -382,56 +382,82 @@ class MultipleImageKey(DataTypes):
         self._set_shape()
         if self.stack_or_cat == 'stack':
             self.inc = 1
+            self._getitem = self._getitem_stack
+            self._get_lists = self._get_lists_stack
         else:
             self.inc = self.obj_list[0].get_shape()[self.dim]
+            self._getitem = self._getitem_cat
+            self._get_lists = self._get_lists_cat
 
     def __getitem__(self, idx):
-        obj_list, in_slice_list, out_slice_list = self._get_lists(idx)
         size = [len(np.arange(s.start, s.stop, s.step)) for s in idx]
+        obj_list, in_slice_list, out_slice_list = self._get_lists(idx)
         data = np.empty(size)
 
         for i in range(len(obj_list)):
             data[tuple(out_slice_list[i])] = \
-                obj_list[i].data[tuple(in_slice_list[i])]
-
+                self._getitem(obj_list[i], in_slice_list[i])
         return data
 
-    def _get_lists(self, idx):
+    def _getitem_stack(self, obj, sl):
+        return np.expand_dims(obj.data[tuple(sl)], self.dim)
+
+    def _getitem_cat(self, obj, sl):
+        return obj.data[tuple(sl)]
+
+    def _get_lists_stack(self, idx):
+        entry = idx[self.dim]
+        init_vals = np.arange(entry.start, entry.stop, entry.step)
+        obj_list = []
+        for i in init_vals:
+            obj_list.append(self.obj_list[i])
+
+        in_idx = list(idx)
+        del in_idx[self.dim]
+        in_slice_list = np.tile(in_idx, (len(init_vals), 1))
+
+        out_slice_list = \
+            [slice(0, len(np.arange(s.start, s.stop, s.step))) for s in idx]
+        out_slice_list = np.tile(out_slice_list, (len(init_vals), 1))
+
+        new_slices = [slice(i, i+1) for i in range(len(init_vals))]
+        out_slice_list[:, self.dim] = new_slices
+        return obj_list, in_slice_list, out_slice_list
+
+    def _get_lists_cat(self, idx):
         inc = self.inc
         entry = idx[self.dim]
         init_vals = np.arange(entry.start, entry.stop, entry.step)
         array = init_vals % inc
         index = np.where(np.diff(array) < 0)[0] + 1
-        val_list = np.array_split(array, index)
 
-        # get the relevant Data objects
+        val_list = np.array_split(array, index)
         obj_vals = init_vals[np.append(0, index)]/inc
         active_obj_list = []
         for i in obj_vals:
             active_obj_list.append(self.obj_list[i])
 
-        # set the input and output slice lists
+        in_slice_list = self._set_in_slice_list(idx, val_list, entry)
+        out_slice_list = self._set_out_slice_list(idx, val_list)
+        return active_obj_list, in_slice_list, out_slice_list
+
+    def _set_in_slice_list(self, idx, val_list, entry):
         in_slice_list = np.tile(idx, (len(val_list), 1))
         new_slices = [slice(e[0], e[-1]+1, entry.step) for e in val_list]
         in_slice_list[:, self.dim] = new_slices
-
-        out_slice_list = self._set_out_slice_list(idx, val_list)
-
-        return active_obj_list, in_slice_list, out_slice_list
+        return in_slice_list
 
     def _set_out_slice_list(self, idx, val_list):
         out_slice_list = \
             [slice(0, len(np.arange(s.start, s.stop, s.step))) for s in idx]
         out_slice_list = np.tile(out_slice_list, (len(val_list), 1))
         length = np.append(0, np.cumsum([len(v) for v in val_list]))
-
         if self.stack_or_cat == 'cat':
             new_slices = \
                 [slice(length[i-1], length[i]) for i in range(1, len(length))]
         else:
             new_slices = [slice(i, i+1) for i in range(len(val_list))]
         out_slice_list[:, self.dim] = new_slices
-
         return out_slice_list
 
     def get_shape(self):
@@ -445,3 +471,21 @@ class MultipleImageKey(DataTypes):
         else:
             shape.insert(self.dim, nObjs)
         self.shape = tuple(shape)
+
+
+class Replicate(DataTypes):
+    """ Class to replicate the slice list of a dataset (not the data itself!)
+    """
+
+    def __init__(self, data_obj, shape, rep_dim):
+        self.shape = shape
+        self.data = data_obj.data
+        self.rep_dim = rep_dim
+
+    def __getitem__(self, idx):
+        idx = list(idx)
+        del idx[self.rep_dim]
+        return self.data[tuple(idx)]
+
+    def get_shape(self):
+        return self.shape

@@ -71,6 +71,8 @@ class MultiNxtomoLoader(BaseLoader):
             self._extend_axis_label_values(data_obj_list, data_obj)
         else:
             self._setup_4d(data_obj)
+            # may want to add this as a parameter...
+            self._set_nD_rotation_angle(data_obj_list, data_obj)
 
         print "setting the final data shape", data_obj.data.get_shape()
         data_obj.set_original_shape(data_obj.data.get_shape())
@@ -107,7 +109,7 @@ class MultiNxtomoLoader(BaseLoader):
             ['rotation_angle.degrees', 'detector_y.pixel', 'detector_x.pixel']
 
         extra_label = self.parameters['axis_label']
-        axis_labels.insert(extra_label)
+        axis_labels.append(extra_label)
 
         rot = axis_labels.index('rotation_angle.degrees')
         detY = axis_labels.index('detector_y.pixel')
@@ -134,35 +136,22 @@ class MultiNxtomoLoader(BaseLoader):
 
         data_obj.meta_data.set_meta_data(axis_name, new_values)
 
+    def _set_nD_rotation_angle(self, data_obj_list, data_obj):
+        rot_dim_len = data_obj.data.get_shape()[
+            data_obj.find_axis_label_dimension('rotation_angle')]
+        new_values = np.zeros([rot_dim_len, len(data_obj_list)])
+        for i in range(len(data_obj_list)):
+            new_values[:, i] = \
+                data_obj_list[i].meta_data.get_meta_data('rotation_angle')
+        data_obj.meta_data.set_meta_data('rotation_angle', new_values)
+
     def _set_dark_and_flat(self, obj_list, data_obj):
         # change this to use NoImageKey?
         dark = self._combine_data(obj_list, 'dark', np.stack)
         flat = self._combine_data(obj_list, 'flat', np.stack)
         slice_list = self.get_dark_flat_slice_list(data_obj)
-        data_obj.meta_data.set_meta_data('dark', dark[slice_list[1:]])
-        data_obj.meta_data.set_meta_data('flat', flat[slice_list[1:]])
-
-#    def _set_dark_and_flat(self, obj_list, data_obj):
-#        func = {'cat': np.concatenate, 'stack': np.stack}
-#        if self.parameters['stack_or_cat'] == 'cat':
-#            dark = self._combine_data(obj_list, 'dark', func['cat'])
-#            flat = self._combine_data(obj_list, 'flat', func['cat'])
-#        else:
-#            dark = self._combine_data(obj_list, 'dark', func['stack']).mean(0)
-#            flat = self._combine_data(obj_list, 'flat', func['stack']).mean(0)
-#        data_obj.meta_data.set_meta_data('dark', dark)
-#        data_obj.meta_data.set_meta_data('flat', flat)
-
-#    def _combine_data(self, obj_list, entry, function):
-#        array = obj_list[0].meta_data.get_meta_data(entry)
-#        count = 0
-#        print len(obj_list[1:])
-#        for obj in obj_list[1:]:
-#            print "*****", count, obj.meta_data.get_meta_data(entry).shape, array.shape
-#            array = \
-#                function((array, obj.meta_data.get_meta_data(entry)), axis=0)
-#            count += 1
-#        return array
+        data_obj.meta_data.set_meta_data('dark', dark[slice_list])
+        data_obj.meta_data.set_meta_data('flat', flat[slice_list])
 
     def _combine_data(self, obj_list, entry, function):
         # directly calculating the mean for now
@@ -173,6 +162,10 @@ class MultiNxtomoLoader(BaseLoader):
 
     def get_dark_flat_slice_list(self, data_obj):
         slice_list = data_obj._preview._get_preview_slice_list()
-        remove_dim = data_obj.find_axis_label_dimension('rotation_angle')
-        slice_list[remove_dim] = slice(None)
-        return slice_list
+        detX_dim = data_obj.find_axis_label_dimension('detector_x')
+        detY_dim = data_obj.find_axis_label_dimension('detector_y')
+        dims = list(set([detX_dim, detY_dim]))
+        new_slice_list = []
+        for d in dims:
+            new_slice_list.append(slice_list[d])
+        return new_slice_list

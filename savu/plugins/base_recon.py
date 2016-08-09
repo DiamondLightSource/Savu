@@ -38,7 +38,8 @@ class BaseRecon(Plugin):
         process. Default: [].
     :param out_datasets: Create a list of the dataset(s) to \
         process. Default: [].
-    :param init_vol: Dataset to use as volume initialiser. Default: None.
+    :param init_vol: Dataset to use as volume initialiser \
+        (doesn't currently work with preview). Default: None.
     :param sino_pad: Pad the sinogram to remove edge artefacts in the \
         reconstructed ROI (NB. This will increase the size of the data and \
         the time taken to perform the reconstruction). Default: False.
@@ -51,9 +52,14 @@ class BaseRecon(Plugin):
         super(BaseRecon, self).__init__(name)
         self.nOut = 1
         self.nIn = 1
+        self.scan_dim = None
+        self.rep_dim = None
 
     def base_dynamic_data_info(self):
         if self.parameters['init_vol']:
+            if len(self.parameters['init_vol'].split('.')) is 3:
+                name, temp, self.rep_dim = self.parameters['init_vol']
+                self.parameters['init_vol'] = name
             self.nIn += 1
             self.parameters['in_datasets'].append(self.parameters['init_vol'])
 
@@ -70,6 +76,8 @@ class BaseRecon(Plugin):
 
         self.main_dir = in_pData[0].get_pattern()['SINOGRAM']['main_dir']
         self.angles = in_meta_data.get_meta_data('rotation_angle')
+        if len(self.angles.shape) is not 1:
+            self.scan_dim = in_dataset.find_axis_label_dimension('scan')
         self.slice_dirs = out_pData[0].get_slice_directions()
 
         shape = in_pData[0].get_shape()
@@ -118,8 +126,10 @@ class BaseRecon(Plugin):
         """
         cor = self.cor[slice_list[0][self.main_dir]]
         init = data[1] if len(data) is 2 else None
+        angles = self.angles[:, slice_list[0][self.scan_dim]] if self.scan_dim\
+            else self.angles
         result = self.reconstruct(self.sino_func(data[0]), self.cor_func(cor),
-                                  self.angles, self.vol_shape, init)
+                                  angles, self.vol_shape, init)
         return result
 
     def reconstruct(self, data, cor, angles, shape):
@@ -129,6 +139,44 @@ class BaseRecon(Plugin):
         """
         logging.error("process needs to be implemented")
         raise NotImplementedError("process needs to be implemented")
+
+#    def setup(self):
+#        in_dataset, out_dataset = self.get_datasets()
+#
+#        # reduce the data as per data_subset parameter
+#        in_dataset[0].get_preview().set_preview(self.parameters['preview'])
+#
+#        # set information relating to the plugin data
+#        in_pData, out_pData = self.get_plugin_datasets()
+#
+#        in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames(),
+#                                      fixed=True)
+#        if len(in_pData) is 2:
+#            in_pData[1].plugin_data_setup('VOLUME_XZ', self.get_max_frames(),
+#                                          fixed=True)
+#
+#        axis_labels = in_dataset[0].data_info.get_meta_data('axis_labels')[0]
+#
+#        dim_volX, dim_volY, dim_volZ = \
+#            self.map_volume_dimensions(in_dataset[0], in_pData[0])
+#
+#        axis_labels = [0]*3
+#        axis_labels = {in_dataset[0]:
+#                       [str(dim_volX) + '.voxel_x.voxels',
+#                        str(dim_volY) + '.voxel_y.voxels',
+#                        str(dim_volZ) + '.voxel_z.voxels']}
+#
+#        shape = list(in_dataset[0].get_shape())
+#        shape[dim_volX] = shape[dim_volZ]
+#
+#        out_dataset[0].create_dataset(axis_labels=axis_labels,
+#                                      shape=tuple(shape))
+#
+#        out_dataset[0].add_volume_patterns(dim_volX, dim_volY, dim_volZ)
+#
+#        # set pattern_name and nframes to process for all datasets
+#        out_pData[0].plugin_data_setup('VOLUME_XZ', self.get_max_frames(),
+#                                       fixed=True)
 
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
