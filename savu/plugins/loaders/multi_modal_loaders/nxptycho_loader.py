@@ -70,8 +70,8 @@ class NxptychoLoader(BaseMultiModalLoader):
         y = \
             data_obj.backing_file[stxm_entry.name + '/data/lab_sxy/lab_sy'].value*1e-6
         pos = np.zeros((2,len(y)))
-        pos[0,:] = x
-        pos[1,:] = y
+        pos[0,:] = y
+        pos[1,:] = x
         data_obj.meta_data.set_meta_data('xy', pos)
         # axis label
         labels.append('xy.metres')
