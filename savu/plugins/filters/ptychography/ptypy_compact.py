@@ -136,8 +136,7 @@ class PtypyCompact(BasePtycho):
         p.engine.common.clip_object = self.parameters['common_clip_object'] #     turn off all of the output things
         p.io = u.Param()
         p.io.home = "./" ## (05) Base directory for all I/O
-        p.io.rfile = "./" ## (06) Reconstruction file name (or format string)
-        p.io.no_save = True ## (07) Auto-save options
+        p.io.rfile = False ## (06) Reconstruction file name (or format string)
         p.io.autosave = u.Param()
         p.io.autosave.active = False ## (08) Activation switch
         p.io.autosave.interval = -1 ## (09) Auto-save interval
