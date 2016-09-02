@@ -78,7 +78,7 @@ class BaseAbsorptionCorrection(BaseFilter, CpuPlugin):
         if isinstance(energy, (list)):
             op = []
             for e in energy:
-                op.append((xl.CS_Total_CP(compound, e)*density)*1e2)
+                op.append((xl.CS_Total_CP(compound, e)*density)*1e-2)
             return op
         else:
-            return (xl.CS_Total_CP(compound, energy)*density)*1e2
+            return (xl.CS_Total_CP(compound, energy)*density)*1e-2

@@ -38,6 +38,7 @@ class DummyPtycho(BasePtycho):
     def filter_frames(self, data):
         data = data[0]
         probe = data[0]
+        print "probe is "+str(probe.shape)
         object_transmission = np.random.random(self.obj_shape).squeeze()
         positions = self.get_positions()
         return [probe, object_transmission, positions]#] add fourier error, realspace error

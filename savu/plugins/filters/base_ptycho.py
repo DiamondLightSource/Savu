@@ -141,7 +141,7 @@ class BasePtycho(BaseFilter, CpuPlugin): # also make one for gpu
         return self.obj_shape
     
     def set_size_probe(self,val):
-        self.probe_size = val + (self.get_num_probe_modes(),)
+        self.probe_size = (1,)+val + (self.get_num_probe_modes(),)
     
     def get_size_probe(self):
         '''
