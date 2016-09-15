@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: multi_nxs_savu_loader
+.. module:: multi_savu_loader
    :platform: Unix
    :synopsis: A class for loading multiple savu output nexus files.
 

@@ -46,6 +46,7 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
         self.WARN_PROPORTION = 0.05  # 5%
         self.flag_low_warning = False
         self.flag_high_warning = False
+        self.flag = True
 
     def pre_process(self):
         inData = self.get_in_datasets()[0]
@@ -91,6 +92,12 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
         data = np.nan_to_num((data-dark)/flat_minus_dark)
         self.__data_check(data)
         return data
+
+    def fixed_flag(self):
+        if self.parameters['pattern'] == 'PROJECTION':
+            return True
+        else:
+            return False
 
     def __data_check(self, data):
         # make high and low crop masks

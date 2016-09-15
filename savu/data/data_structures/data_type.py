@@ -196,7 +196,7 @@ class Tomo(DataTypes):
 
     def _getitem_imagekey(self, idx):
         index = list(idx)
-        index[self.proj_dim] = self.get_index(0)[idx[self.proj_dim]].tolist()
+        index[self.proj_dim] = self.get_index(0, full=True)[idx[self.proj_dim]].tolist()
         return self.data[tuple(index)]
 
     def _getitem_noimagekey(self, idx):
@@ -248,12 +248,41 @@ class Tomo(DataTypes):
         return data if len(data.shape) is 2 else\
             data.mean(self.proj_dim).astype(np.float32)
 
-    def get_index(self, key):
+    def get_index(self, key, full=False):
         """ Get the projection index of a specific image key value.
 
         :params int key: the image key value
         """
-        return np.where(self.image_key == key)[0]
+        if full is True:
+            return np.where(self.image_key == key)[0]
+        else:
+            return self.__get_preview_index(key)
+
+    def __get_preview_index(self, key):
+        try:
+            # amend if there is previewing
+            slice_list = self.data_obj.get_preview().\
+                _get_preview_slice_list()[self.proj_dim]
+            return self.__get_reduced_index(key, slice_list)
+        except:
+            return np.where(self.image_key == key)[0]
+
+    def __get_reduced_index(self, key, slice_list):
+        """ Get the projection index of a specific image key value when\
+            previewing has been applied """
+        data_entries = np.where(self.image_key == 0)[0][slice_list]
+        if key == 0:
+            return data_entries
+        index = np.where(self.image_key == key)[0]
+        index_start_key = [0] + list(np.where(np.diff(index) > 1)[0]+1)
+        index_start = index[index_start_key]
+        index_end_key = np.array(index_start_key[1:] + [len(index)])-1
+        index_end = index[index_end_key]
+        val = index[np.where(np.less(index, data_entries[0]))[0][-1]]
+        start = index_start_key[np.where(index_end == val)[0]]
+        val2 = index[np.where(np.greater(index, data_entries[-1]))[0][0]]
+        end = index_end_key[np.where(index_start == val2)[0]]
+        return index[start:end]
 
     def __get_data(self, key):
         index = [slice(None)]*self.nDims
@@ -477,15 +506,26 @@ class Replicate(DataTypes):
     """ Class to replicate the slice list of a dataset (not the data itself!)
     """
 
-    def __init__(self, data_obj, shape, rep_dim):
-        self.shape = shape
+    def __init__(self, data_obj, reps):
+        self.data_obj = data_obj
+        self.rep_dim = len(data_obj.get_shape()) + 1
+        self.shape = data_obj.get_shape() + (reps,)
         self.data = data_obj.data
-        self.rep_dim = rep_dim
+        self.original_patterns = data_obj.get_data_patterns()
+        self.__set_patterns(copy.deepcopy(self.original_patterns))
 
     def __getitem__(self, idx):
-        idx = list(idx)
-        del idx[self.rep_dim]
-        return self.data[tuple(idx)]
+        return np.expand_dims(self.data[idx[:-1]], self.rep_dim)
 
     def get_shape(self):
         return self.shape
+
+    def __set_patterns(self, data_obj, patterns):
+        for p in patterns:
+            patterns[p]['slice_dir'] += (3,)
+        data_obj.data_info.set_meta_data('data_patterns', patterns)
+
+    def _reset(self):
+        self.data_obj.data_info.set_meta_data('data_patterns',
+                                              self.original_patterns)
+        return self.data

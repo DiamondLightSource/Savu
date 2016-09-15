@@ -70,16 +70,17 @@ class BaseCorrection(Plugin):
         if 'pattern' in self.parameters.keys():
             pattern = self.parameters['pattern']
         else:
-            pattern = 'SINOGRAM'
+            pattern = 'PROJECTION'
 
-        flag = False
-        if pattern == 'PROJECTION':
-            flag = True
+        flag = self.fixed_flag()
 
         in_pData[0].plugin_data_setup(pattern, self.get_max_frames(),
                                       fixed=flag)
         out_pData[0].plugin_data_setup(pattern, self.get_max_frames(),
                                        fixed=flag)
+
+    def fixed_flag(self):
+        return False
 
     def nInput_datasets(self):
         return 1

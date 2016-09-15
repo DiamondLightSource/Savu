@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2014 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -140,44 +139,6 @@ class BaseRecon(Plugin):
         logging.error("process needs to be implemented")
         raise NotImplementedError("process needs to be implemented")
 
-#    def setup(self):
-#        in_dataset, out_dataset = self.get_datasets()
-#
-#        # reduce the data as per data_subset parameter
-#        in_dataset[0].get_preview().set_preview(self.parameters['preview'])
-#
-#        # set information relating to the plugin data
-#        in_pData, out_pData = self.get_plugin_datasets()
-#
-#        in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames(),
-#                                      fixed=True)
-#        if len(in_pData) is 2:
-#            in_pData[1].plugin_data_setup('VOLUME_XZ', self.get_max_frames(),
-#                                          fixed=True)
-#
-#        axis_labels = in_dataset[0].data_info.get_meta_data('axis_labels')[0]
-#
-#        dim_volX, dim_volY, dim_volZ = \
-#            self.map_volume_dimensions(in_dataset[0], in_pData[0])
-#
-#        axis_labels = [0]*3
-#        axis_labels = {in_dataset[0]:
-#                       [str(dim_volX) + '.voxel_x.voxels',
-#                        str(dim_volY) + '.voxel_y.voxels',
-#                        str(dim_volZ) + '.voxel_z.voxels']}
-#
-#        shape = list(in_dataset[0].get_shape())
-#        shape[dim_volX] = shape[dim_volZ]
-#
-#        out_dataset[0].create_dataset(axis_labels=axis_labels,
-#                                      shape=tuple(shape))
-#
-#        out_dataset[0].add_volume_patterns(dim_volX, dim_volY, dim_volZ)
-#
-#        # set pattern_name and nframes to process for all datasets
-#        out_pData[0].plugin_data_setup('VOLUME_XZ', self.get_max_frames(),
-#                                       fixed=True)
-
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
 
@@ -190,6 +151,10 @@ class BaseRecon(Plugin):
         in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames(),
                                       fixed=True)
         if len(in_pData) is 2:
+            from savu.data.data_structures.data_types import Replicate
+            if self.rep_dim:
+                in_dataset[1].data = Replicate(
+                    in_dataset[1], in_dataset[0].get_shape(self.rep_dim))
             in_pData[1].plugin_data_setup('VOLUME_XZ', self.get_max_frames(),
                                           fixed=True)
 

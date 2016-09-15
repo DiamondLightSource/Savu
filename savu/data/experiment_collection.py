@@ -110,12 +110,20 @@ class Experiment(object):
 
     def _reorganise_datasets(self, out_data_objs, link_type):
         out_data_list = self.index["out_data"]
+        self.__unreplicate_data()
         self.__close_unwanted_files(out_data_list)
         self.__remove_unwanted_data(out_data_objs)
         self._barrier()
         self.__copy_out_data_to_in_data(link_type)
         self._barrier()
         self.index['out_data'] = {}
+
+    def __unreplicate_data(self):
+        in_data_list = self.index['in_data']
+        from savu.data.data_structures.data_type import Replicate
+        for in_data in in_data_list.values():
+            if isinstance(in_data.data, Replicate):
+                in_data.data = in_data.data.reset()
 
     def __remove_unwanted_data(self, out_data_objs):
         for out_objs in out_data_objs:

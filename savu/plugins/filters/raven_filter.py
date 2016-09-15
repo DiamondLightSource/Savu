@@ -81,8 +81,11 @@ class RavenFilter(BaseFilter, CpuPlugin):
         self.filtercomplex = filtershapepad2d + filtershapepad2d*1j
 
         a = pyfftw.n_byte_align_empty((height1, width1), 16, 'complex128')
-        self.fft_object = pyfftw.FFTW(a, a, axes=(0, 1))
-        self.ifft_object = pyfftw.FFTW(a, a, axes=(0, 1),
+        b = pyfftw.n_byte_align_empty((height1, width1), 16, 'complex128')
+        c = pyfftw.n_byte_align_empty((height1, width1), 16, 'complex128')
+        d = pyfftw.n_byte_align_empty((height1, width1), 16, 'complex128')
+        self.fft_object = pyfftw.FFTW(a, b, axes=(0, 1))
+        self.ifft_object = pyfftw.FFTW(c, d, axes=(0, 1),
                                        direction='FFTW_BACKWARD')
 
     def filter_frames(self, data):
