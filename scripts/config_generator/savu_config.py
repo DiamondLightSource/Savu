@@ -287,6 +287,35 @@ def _disp(content, arg):
     return content
 
 
+#def _list(content, arg):
+#    """List the plugins which have been registered for use.
+#       Optional arguments:
+#            type(str): Display 'type' plugins. Where type can be 'loaders',
+#            'corrections', 'filters', 'reconstructions' or 'savers'.
+#            type(str) names: Display type selection with process names only.
+#    """
+#    if arg:
+#        arg = arg.split(' ')
+#        if len(arg) == 2:
+#            if arg[1] != 'names':
+#                print("The arguments %s are unknown", arg)
+#                return content
+#
+#    print("-----------------------------------------")
+#    for key, value in pu.plugins.iteritems():
+#        if not arg:
+#            print(key)
+#        elif arg[0] in value.__module__:
+#            print(key)
+#            if len(arg) < 2:
+#                plugin = pu.plugins[key]()
+#                plugin._populate_default_parameters()
+#                for p_key in plugin.parameters.keys():
+#                    print("    %20s : %s" % (p_key, plugin.parameters[p_key]))
+#
+#    print("-----------------------------------------")
+#    return content
+
 def _list(content, arg):
     """List the plugins which have been registered for use.
        Optional arguments:
@@ -302,7 +331,7 @@ def _list(content, arg):
                 return content
 
     print("-----------------------------------------")
-    for key, value in pu.plugins.iteritems():
+    for key, value in _order_plugins():
         if not arg:
             print(key)
         elif arg[0] in value.__module__:
@@ -312,8 +341,22 @@ def _list(content, arg):
                 plugin._populate_default_parameters()
                 for p_key in plugin.parameters.keys():
                     print("    %20s : %s" % (p_key, plugin.parameters[p_key]))
+
     print("-----------------------------------------")
     return content
+
+
+def _order_plugins():
+    key_list = []
+    value_list = []
+    for key, value in pu.plugins.iteritems():
+        key_list.append(key)
+        value_list.append(value)
+
+    sort_idx = sorted(range(len(key_list)), key=lambda k: key_list[k])
+    key_list.sort()
+    value_list = [value_list[i] for i in sort_idx]
+    return zip(key_list, value_list)
 
 
 def _params(content, arg):

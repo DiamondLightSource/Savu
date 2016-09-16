@@ -51,8 +51,8 @@ class SinogramAlignment(BaseFilter, CpuPlugin):
         return (a*np.sin(np.deg2rad(data-b)))+c
 
     def _shift(self, sinogram, com_x, com_y):
-        fitpars, covmat = curve_fit(self._sinfunc, com_x, com_y,
-                                    p0=(1.0, 0.2, 20))
+        fitpars, covmat = curve_fit(self._sinfunc, com_x, com_y)
+                                    #p0=(1.0, 0.2, 20))
         variances = covmat.diagonal()
         std_devs = np.sqrt(variances)
         residual = com_y - self._sinfunc(com_x, *fitpars)
