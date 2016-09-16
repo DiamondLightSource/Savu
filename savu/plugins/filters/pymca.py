@@ -48,7 +48,7 @@ class Pymca(BaseFilter, CpuPlugin):
         y=np.array(data)
 #         y = np.expand_dims(data,0)
         print "filter IN shape is:"+str(y.shape)
-        b = setup_fit(y)
+        b = self.setup_fit(y)
         b._McaAdvancedFitBatch__processStack()
         stack = np.array(b._McaAdvancedFitBatch__images.values())
         print "stack shape is:",stack.shape
@@ -62,7 +62,7 @@ class Pymca(BaseFilter, CpuPlugin):
         inshape = in_dataset[0].get_shape()
         spectra_shape = inshape[-1] #  nearly always true.
         rest_shape = inshape[:-1]
-        c = setup_fit(np.random.random((1,1,spectra_shape)))# seed it with junk, zeros made the matrix singular unsurprisingly and this bungles it.
+        c = self.setup_fit(np.random.random((1,1,spectra_shape)))# seed it with junk, zeros made the matrix singular unsurprisingly and this bungles it.
         c._McaAdvancedFitBatch__processStack()# perform an initial fit to get the shapes
         fit_labels = c._McaAdvancedFitBatch__images.keys() # and then take out the axis labels for the channels
         outputshape = rest_shape+(len(fit_labels),) # and this is the shape the thing will be
@@ -95,39 +95,55 @@ class Pymca(BaseFilter, CpuPlugin):
     def nOutput_datasets(self):
         return 1
 
-def setup_fit(y):
-    '''
-    takes a data shape and returns a fit-primed object
-    '''
+    def setup_fit(self,y):
+        '''
+        takes a data shape and returns a fit-primed object
+        '''
+        
+        cfg=[self.get_conf_path()] # needs to be a list, apparently
+        inputfile= self.get_dummyhdf_path() # this is needed because we do a hard check on the file type, which we then override... just trust me...Line204 of getFileHandle
+        outputdir=None # nope
+        roifit=0# nope
+        roiwidth=y.shape[1] #need this to pretend its an image
+        b = McaAdvancedFitBatch.McaAdvancedFitBatch(cfg,
+                                                    inputfile,
+                                                    outputdir,
+                                                    roifit,
+                                                    roiwidth,
+                                                    fitfiles=0) # prime the beauty
+        b.pleaseBreak = 1 # we want to run it up to just before loading the data
+        b.processList() # but only up to loading before it breaks
+        # populate this manually so that we can bypass the loading
+        b.file.info['McaCalib'] = [0.0, 1.0, 0.0] #  are these actually used? Or is the calib from the file taken....must check!
+        b.file.info["McaIndex"] = 2 # the signal is in axis=2
+        b.file.info['Channel0'] = 0#not sure what this does. Presumably good for fitting multielement detectors?
+        b.file.info['Size'] = 1# no idea what this does. Should check it
+        b.file.info['Dim_1'] = y.shape[0]# auto populate these sizes with something
+        b.file.info['Dim_2'] = y.shape[1]
+        b.file.info['Dim_3'] = y.shape[2]
+        b.file.info['SourceName'] = 'Benjamin'# just a random name
+        b.file.info['SourceType'] = 'array'# just a random type
+        b.file.info['NumberOfFiles'] = 1# we are only giving it one fake file
+        b.file.info['FileIndex'] = 0# ... and it is index 0
+        b.file.data = y #  now we cram in the data
+        b.file.incrProgressBar = 0 #this does nothing in what we are using
+        b.file._HDF5Stack1D__dtype = np.dtype('float64') # there you are!
+        b._McaAdvancedFitBatch__stack = True # we skip this in the bypass, but we should be true!
+        b.pleaseBreak =0# now deactivate this switch so it doesn't interfere in future
+        return b
     
-    cfg=['/home/clb02321/DAWN_stable/Pymca/test_data/test_config.cfg'] # needs to be a list, apparently
-    inputfile= '/home/clb02321/DAWN_stable/Savu2/Savu/test_data/data/i18_test_data.nxs' # this is needed because we do a hard check on the file type, which we then override... just trust me...Line204 of getFileHandle
-    outputdir=None # nope
-    roifit=0# nope
-    roiwidth=y.shape[1] #need this to pretend its an image
-    b = McaAdvancedFitBatch.McaAdvancedFitBatch(cfg,
-                                                inputfile,
-                                                outputdir,
-                                                roifit,
-                                                roiwidth,
-                                                fitfiles=0) # prime the beauty
-    b.pleaseBreak = 1 # we want to run it up to just before loading the data
-    b.processList() # but only up to loading before it breaks
-    # populate this manually so that we can bypass the loading
-    b.file.info['McaCalib'] = [0.0, 1.0, 0.0] #  are these actually used? Or is the calib from the file taken....must check!
-    b.file.info["McaIndex"] = 2 # the signal is in axis=2
-    b.file.info['Channel0'] = 0#not sure what this does. Presumably good for fitting multielement detectors?
-    b.file.info['Size'] = 1# no idea what this does. Should check it
-    b.file.info['Dim_1'] = y.shape[0]# auto populate these sizes with something
-    b.file.info['Dim_2'] = y.shape[1]
-    b.file.info['Dim_3'] = y.shape[2]
-    b.file.info['SourceName'] = 'Benjamin'# just a random name
-    b.file.info['SourceType'] = 'array'# just a random type
-    b.file.info['NumberOfFiles'] = 1# we are only giving it one fake file
-    b.file.info['FileIndex'] = 0# ... and it is index 0
-    b.file.data = y #  now we cram in the data
-    b.file.incrProgressBar = 0 #this does nothing in what we are using
-    b.file._HDF5Stack1D__dtype = np.dtype('float64') # there you are!
-    b._McaAdvancedFitBatch__stack = True # we skip this in the bypass, but we should be true!
-    b.pleaseBreak =0# now deactivate this switch so it doesn't interfere in future
-    return b
+    def get_conf_path(self):
+        import os
+        import savu.test.test_utils as tu
+        path = self.parameters['config']
+        if path.split(os.sep)[0] == 'Savu':
+            path = tu.get_test_data_path(path.split('/test_data/data')[1])
+        return path
+    
+    def get_dummyhdf_path(self):
+        import os
+        import savu.test.test_utils as tu
+        path = 'Savu/test_data/data/i18_test_data.nxs'
+        if path.split(os.sep)[0] == 'Savu':
+            path = tu.get_test_data_path(path.split('/test_data/data')[1])
+        return path
