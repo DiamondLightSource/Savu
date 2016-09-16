@@ -24,4 +24,5 @@ dependencies:
     - nvidia-ml-py
     - pyfftw
     - peakutils
+    - pymca
 
