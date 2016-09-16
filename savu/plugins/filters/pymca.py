@@ -24,6 +24,8 @@ from savu.plugins.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 import numpy as np
+import os
+import savu.test.test_utils as tu
 from PyMca5.PyMcaPhysics.xrf import McaAdvancedFitBatch
 
 @register_plugin
@@ -133,17 +135,11 @@ class Pymca(BaseFilter, CpuPlugin):
         return b
     
     def get_conf_path(self):
-        import os
-        import savu.test.test_utils as tu
         path = self.parameters['config']
         if path.split(os.sep)[0] == 'Savu':
             path = tu.get_test_data_path(path.split('/test_data/data')[1])
         return path
     
     def get_dummyhdf_path(self):
-        import os
-        import savu.test.test_utils as tu
-        path = 'Savu/test_data/data/i18_test_data.nxs'
-        if path.split(os.sep)[0] == 'Savu':
-            path = tu.get_test_data_path(path.split('/test_data/data')[1])
-        return path
+        return tu.get_test_data_path('i18_test_data.nxs')
+            
