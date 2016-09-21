@@ -214,8 +214,10 @@ class Tomo(DataTypes):
             del self.dark_flat_slice_list[-1]
 
         self.dark_flat_slice_list = tuple(self.dark_flat_slice_list)
-        self.data_obj.meta_data.set_meta_data('dark', self.dark_mean())
-        self.data_obj.meta_data.set_meta_data('flat', self.flat_mean())
+        if self.get_index(2):
+            self.data_obj.meta_data.set_meta_data('dark', self.dark_mean())
+        if self.get_index(1):
+            self.data_obj.meta_data.set_meta_data('flat', self.flat_mean())
 
     def get_dark_flat_slice_list(self):
         slice_list = self.data_obj._preview._get_preview_slice_list()

@@ -185,7 +185,10 @@ class PluginList(object):
 
     def __get_verbose(self, plugin, count, width, breakdown=False):
         title = self.__get_plugin_title(plugin, count, width)
-        synopsis = self.__get_synopsis(plugin, width)
+        colour_on = Back.LIGHTBLACK_EX + Fore.LIGHTWHITE_EX
+        colour_off = Back.RESET + Fore.RESET
+        synopsis = \
+            self._get_synopsis(plugin['name'], width, colour_on, colour_off)
         params = self.__get_param_details(plugin, count, width, desc=True)
         if breakdown:
             return title, synopsis, params
@@ -206,14 +209,13 @@ class PluginList(object):
         warn = "\n"+warn if warn else ''
         return title + synopsis + info + warn + param_details
 
-    def __get_synopsis(self, plugin, width):
-        colour_on = Back.LIGHTBLACK_EX + Fore.LIGHTWHITE_EX
-        colour_off = Back.RESET + Fore.RESET
+    def _get_synopsis(self, plugin_name, width, colour_on, colour_off):
         synopsis = self.__get_equal_lines(self.__get_docstring_info(
-            plugin['name'])['synopsis'], width-1, colour_on, colour_off, " "*2)
+            plugin_name)['synopsis'], width-1, colour_on, colour_off, " "*2)
         if not synopsis:
             return ''
-        return "\n" + colour_on + " "*2 + "%s" % synopsis + colour_off
+        #return "\n" + colour_on + " "*2 + "%s" % synopsis + colour_off
+        return "\n" + colour_on + synopsis + colour_off
 
     def __get_param_details(self, plugin, count, width, desc=False):
         margin = 4
@@ -222,15 +224,13 @@ class PluginList(object):
         params = ''
         for key in plugin['data'].keys():
             keycount += 1
-#            temp = "\n   " + Fore.LIGHTYELLOW_EX + "%2i)   %20s : %s" +\
-#                Fore.RESET
             temp = "\n   %2i)   %20s : %s"
             params += temp % (keycount, key, plugin['data'][key])
             if desc:
                 pdesc = " ".join(plugin['desc'][key].split())
                 pdesc = joiner.join(textwrap.wrap(pdesc, width=width))
-                temp = '\n' + Fore.YELLOW + ' '*margin + "%s" + Fore.RESET
-                params +=  temp % pdesc
+                temp = '\n' + Fore.CYAN + ' '*margin + "%s" + Fore.RESET
+                params += temp % pdesc
         return params
 
     def __get_equal_lines(self, string, width, colour_on, colour_off, offset):

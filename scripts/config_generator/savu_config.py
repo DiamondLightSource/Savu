@@ -20,6 +20,8 @@ Created on 21 May 2015
 from __future__ import print_function
 
 import os
+from colorama import Fore, Back
+
 
 from savu.data.plugin_list import PluginList
 from savu.plugins import utils as pu
@@ -288,24 +290,64 @@ def _disp(content, arg):
     return content
 
 
+#def _list(content, arg):
+#    """List the plugins which have been registered for use.
+#       Optional arguments:
+#            type(str): Display 'type' plugins. Where type can be 'loaders',
+#            'corrections', 'filters', 'reconstructions' or 'savers'.
+#            -q: Quiet mode. Only process names are listed.
+#            -v: Verbose mode. Process names and synopsis.
+#            -vv: Extra verbose. Process names, synopsis and parameters.
+#    """
+#
+#    #type(str) names: Display type selection with process names only.
+#    verbosity = ['-q', '-v', '-vv']
+#    if arg:
+#        arg = arg.split(' ')
+#        if len(arg) == 2:
+#            if arg[1] not in verbosity:
+#                print("The arguments %s are unknown", arg)
+#                return content
+#
+#    print("-----------------------------------------")
+#    for key, value in _order_plugins():
+#        if not arg:
+#            print(key, content.plugin_list._get_synopsis(key, 60, Fore.CYAN, Fore.RESET))
+#        elif arg[0] in value.__module__:
+#            print(key)
+#            if len(arg) < 2:
+#                plugin = pu.plugins[key]()
+#                plugin._populate_default_parameters()
+#                for p_key in plugin.parameters.keys():
+#                    print("    %20s : %s" % (p_key, plugin.parameters[p_key]))
+#
+#    print("-----------------------------------------")
+#    return content
+
+
 def _list(content, arg):
     """List the plugins which have been registered for use.
        Optional arguments:
             type(str): Display 'type' plugins. Where type can be 'loaders',
             'corrections', 'filters', 'reconstructions' or 'savers'.
-            type(str) names: Display type selection with process names only.
+            -q: Quiet mode. Only process names are listed.
+            -v: Verbose mode. Process names and synopsis.
+            -vv: Extra verbose. Process names, synopsis and parameters.
     """
+
+    #type(str) names: Display type selection with process names only.
+    verbosity = ['-q', '-v', '-vv']
     if arg:
         arg = arg.split(' ')
         if len(arg) == 2:
-            if arg[1] != 'names':
+            if arg[1] not in verbosity:
                 print("The arguments %s are unknown", arg)
                 return content
 
     print("-----------------------------------------")
     for key, value in _order_plugins():
         if not arg:
-            print(key)
+            print(key, content.plugin_list._get_synopsis(key, 60, Fore.CYAN, Fore.RESET))
         elif arg[0] in value.__module__:
             print(key)
             if len(arg) < 2:
