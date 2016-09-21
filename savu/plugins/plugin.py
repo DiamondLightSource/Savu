@@ -41,6 +41,7 @@ class Plugin(PluginDatasets):
         self.parameters_types = {}
         self.parameters_desc = {}
         self.chunk = False
+        self.docstring_info = {}
 
     def _main_setup(self, exp, params):
         """ Performs all the required plugin setup.
@@ -108,7 +109,11 @@ class Plugin(PluginDatasets):
         """
         for clazz in inspect.getmro(self.__class__)[::-1]:
             if clazz != object:
-                full_description = pu.find_args(clazz, self)
+                desc = pu.find_args(clazz, self)
+                self.docstring_info['warn'] = desc['warn']
+                self.docstring_info['info'] = desc['info']
+                self.docstring_info['synopsis'] = desc['synopsis']
+                full_description = desc['param']
                 for item in full_description:
                     self.parameters[item['name']] = item['default']
                     self.parameters_types[item['name']] = item['dtype']

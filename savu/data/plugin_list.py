@@ -28,9 +28,10 @@ import json
 import logging
 import copy
 import inspect
+import textwrap
 
 import numpy as np
-
+from colorama import Fore, Back, Style
 import savu.plugins.utils as pu
 
 
@@ -74,7 +75,7 @@ class PluginList(object):
                     plugin['desc'] = self.__convert_to_list(plugin['desc'])
                 plugin['data'] = \
                     self.__byteify(json.loads(plugin_group[key]['data'][0]))
-                plugin['data'] = self.__convert_to_list(plugin['data'])                
+                plugin['data'] = self.__convert_to_list(plugin['data'])
                 self.plugin_list.append(plugin)
 
         plugin_file.close()
@@ -154,25 +155,99 @@ class PluginList(object):
         return '\n'.join(out_string)
 
     def __get_description(self, plugin, count, verbose):
-        description = ""
-        if 'active' in plugin:
-            if not plugin['active']:
-                description += "***OFF***"
-        pos = plugin['pos'].strip() if 'pos' in plugin.keys() else count
-        description += "%2s) %s(%s)" % (pos, plugin['name'], plugin['id'])
+        width = 85
+        if verbose == '-q':
+            return self.__get_plugin_title(plugin, count, width, quiet=True)
+        if not verbose:
+            return self.__get_basic(plugin, count, width)
+        if verbose == '-v':
+            return self.__get_verbose(plugin, count, width)
+        if verbose == '-vv':
+            return self.__get_verbose_verbose(plugin, count, width)
 
-        if verbose != '-q':
-            keycount = 0
-            for key in plugin['data'].keys():
-                keycount += 1
-                description += "\n  %2i)   %20s : %s" % \
-                    (keycount, key, plugin['data'][key])
-                if verbose == '-v':
-                    desc = plugin['desc'][key].split(' ')
-                    desc = ' '.join([desc[i] for i in range(len(desc)) if
-                                    desc[i] is not ''])
-                    description += "\t\t: %20s" % desc
-        return description
+    def __get_plugin_title(self, plugin, count, width, quiet=False):
+        active = \
+            '***OFF***' if 'active' in plugin and not plugin['active'] else ''
+        pos = plugin['pos'].strip() if 'pos' in plugin.keys() else count
+        fore_colour = Fore.RED + Style.DIM if active else Fore.LIGHTWHITE_EX
+        title = "%s %2s) %s" % (active, pos, plugin['name'])
+        width = width - len(active) - 4 - len(plugin['name'])
+        if not quiet:
+            title += "(%s)" % plugin['id']
+            width = width - len(plugin['id']) - 2
+        return Back.LIGHTBLACK_EX + fore_colour + title + " "*width + \
+            Style.RESET_ALL
+
+    def __get_basic(self, plugin, count, width):
+        title = self.__get_plugin_title(plugin, count, width, quiet=True)
+        params = self.__get_param_details(plugin, count, width)
+        return title + params
+
+    def __get_verbose(self, plugin, count, width, breakdown=False):
+        title = self.__get_plugin_title(plugin, count, width)
+        synopsis = self.__get_synopsis(plugin, width)
+        params = self.__get_param_details(plugin, count, width, desc=True)
+        if breakdown:
+            return title, synopsis, params
+        return title + synopsis + params
+
+    def __get_verbose_verbose(self, plugin, count, width):
+        title, synopsis, param_details = \
+            self.__get_verbose(plugin, count, width, breakdown=True)
+        extra_info = self.__get_docstring_info(plugin['name'])
+        info_colour = Back.LIGHTBLACK_EX + Fore.LIGHTWHITE_EX
+        warn_colour = Back.RED + Fore.WHITE
+        colour_off = Back.RESET + Fore.RESET
+        info = self.__get_equal_lines(extra_info['info'], width+1,
+                                      info_colour, colour_off, " "*4)
+        warn = self.__get_equal_lines(extra_info['warn'], width+1,
+                                      warn_colour, colour_off, " "*4)
+        info = "\n"+info if info else ''
+        warn = "\n"+warn if warn else ''
+        return title + synopsis + info + warn + param_details
+
+    def __get_synopsis(self, plugin, width):
+        colour_on = Back.LIGHTBLACK_EX + Fore.LIGHTWHITE_EX
+        colour_off = Back.RESET + Fore.RESET
+        synopsis = self.__get_equal_lines(self.__get_docstring_info(
+            plugin['name'])['synopsis'], width-1, colour_on, colour_off, " "*2)
+        if not synopsis:
+            return ''
+        return "\n" + colour_on + " "*2 + "%s" % synopsis + colour_off
+
+    def __get_param_details(self, plugin, count, width, desc=False):
+        margin = 4
+        keycount = 0
+        joiner = "\n" + " "*margin
+        params = ''
+        for key in plugin['data'].keys():
+            keycount += 1
+#            temp = "\n   " + Fore.LIGHTYELLOW_EX + "%2i)   %20s : %s" +\
+#                Fore.RESET
+            temp = "\n   %2i)   %20s : %s"
+            params += temp % (keycount, key, plugin['data'][key])
+            if desc:
+                pdesc = " ".join(plugin['desc'][key].split())
+                pdesc = joiner.join(textwrap.wrap(pdesc, width=width))
+                temp = '\n' + Fore.YELLOW + ' '*margin + "%s" + Fore.RESET
+                params +=  temp % pdesc
+        return params
+
+    def __get_equal_lines(self, string, width, colour_on, colour_off, offset):
+        if not string:
+            return ''
+        str_list = textwrap.wrap(string, width=width-len(offset))
+        new_str_list = []
+        for line in str_list:
+            lwidth = width - len(line) - len(offset)
+            new_str_list.append(
+                colour_on + offset + line + " "*lwidth + colour_off)
+        return "\n".join(new_str_list)
+
+    def __get_docstring_info(self, plugin):
+        plugin_inst = pu.plugins[plugin]()
+        plugin_inst._populate_default_parameters()
+        return plugin_inst.docstring_info
 
     def __byteify(self, input):
         if isinstance(input, dict):

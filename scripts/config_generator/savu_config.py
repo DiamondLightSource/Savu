@@ -266,8 +266,9 @@ def _disp(content, arg):
             i(int) j(int): Display list items i to j.
             -q: Quiet mode. Only process names are listed.
             -v: Verbose mode. Displays parameter details.
+            -vv: Extra verbose. Displays additional information and warnings.
             """
-    verbosity = ['-v', '-q']
+    verbosity = ['-vv', '-v', '-q']
     idx = {'start': 0, 'stop': -1}
     if arg:
         split_arg = arg.split(' ')
@@ -286,35 +287,6 @@ def _disp(content, arg):
     content.display(**idx)
     return content
 
-
-#def _list(content, arg):
-#    """List the plugins which have been registered for use.
-#       Optional arguments:
-#            type(str): Display 'type' plugins. Where type can be 'loaders',
-#            'corrections', 'filters', 'reconstructions' or 'savers'.
-#            type(str) names: Display type selection with process names only.
-#    """
-#    if arg:
-#        arg = arg.split(' ')
-#        if len(arg) == 2:
-#            if arg[1] != 'names':
-#                print("The arguments %s are unknown", arg)
-#                return content
-#
-#    print("-----------------------------------------")
-#    for key, value in pu.plugins.iteritems():
-#        if not arg:
-#            print(key)
-#        elif arg[0] in value.__module__:
-#            print(key)
-#            if len(arg) < 2:
-#                plugin = pu.plugins[key]()
-#                plugin._populate_default_parameters()
-#                for p_key in plugin.parameters.keys():
-#                    print("    %20s : %s" % (p_key, plugin.parameters[p_key]))
-#
-#    print("-----------------------------------------")
-#    return content
 
 def _list(content, arg):
     """List the plugins which have been registered for use.

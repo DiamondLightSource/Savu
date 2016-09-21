@@ -32,7 +32,7 @@ from savu.plugins.utils import register_plugin
 @register_plugin
 class TimeBasedCorrection(BaseCorrection, CpuPlugin):
     """
-    A Plugin to apply a time-based dark and flat field correction to data.
+    Apply a time-based dark and flat field correction to data.
     """
 
     def __init__(self, name="TimeBasedCorrection"):

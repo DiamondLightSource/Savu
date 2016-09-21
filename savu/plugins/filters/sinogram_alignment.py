@@ -2,6 +2,7 @@ import logging
 from savu.plugins.base_filter import BaseFilter
 from savu.data.plugin_list import CitationInformation
 from savu.plugins.driver.cpu_plugin import CpuPlugin
+import scipy.ndimage.filters as filter
 
 from scipy import ndimage
 from scipy import optimize
@@ -37,10 +38,11 @@ class SinogramAlignment(BaseFilter, CpuPlugin):
         :type data: ndarray
         :returns:  The filtered image
         """
-        sinogram = data[0]
+        #sino = data[0]
         # as dealing with one slice we can squeeze
-        sino = sinogram.squeeze()
-        sino = np.nan_to_num(sino)
+        #sino = sinogram.squeeze()
+        #sino = np.nan_to_num(data[0])
+        sino = filter.gaussian_filter(np.nan_to_num(data[0]), sigma=(3, 1))        
         com_x = self._com_x(sino)
         com_y = self._com_y(sino)
         result = self._shift(sino, com_x, com_y)
@@ -51,8 +53,7 @@ class SinogramAlignment(BaseFilter, CpuPlugin):
         return (a*np.sin(np.deg2rad(data-b)))+c
 
     def _shift(self, sinogram, com_x, com_y):
-        fitpars, covmat = curve_fit(self._sinfunc, com_x, com_y)
-                                    #p0=(1.0, 0.2, 20))
+        fitpars, covmat = curve_fit(self._sinfunc, com_x, com_y, p0=(1.0, 0.2, 20))
         variances = covmat.diagonal()
         std_devs = np.sqrt(variances)
         residual = com_y - self._sinfunc(com_x, *fitpars)

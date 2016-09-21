@@ -36,7 +36,7 @@ class BaseRecon(Plugin):
     :param in_datasets: Create a list of the dataset(s) to \
         process. Default: [].
     :param out_datasets: Create a list of the dataset(s) to \
-        process. Default: [].
+        create. Default: [].
     :param init_vol: Dataset to use as volume initialiser \
         (doesn't currently work with preview). Default: None.
     :param sino_pad: Pad the sinogram to remove edge artefacts in the \

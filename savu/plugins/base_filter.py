@@ -31,7 +31,7 @@ class BaseFilter(Plugin):
     raw timeseries data
 
     :param in_datasets: A list of the dataset(s) to process. Default: [].
-    :param out_datasets: A list of the dataset(s) to process. Default: [].
+    :param out_datasets: A list of the dataset(s) to create. Default: [].
     """
 
     def __init__(self, name):

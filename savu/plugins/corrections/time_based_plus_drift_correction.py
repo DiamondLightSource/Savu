@@ -34,7 +34,7 @@ from savu.plugins.utils import register_plugin
 @register_plugin
 class TimeBasedPlusDriftCorrection(TimeBasedCorrection, CpuPlugin):
     """
-    A Plugin to a time-based dark and flat field correction on data with an\
+    Apply a time-based dark and flat field correction on data with an\
     image drift
     """
 
