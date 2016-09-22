@@ -205,20 +205,6 @@ class Tomo(DataTypes):
     def __setitem__(self, key, val):
         self.data[key] = val
 
-    def _set_dark_and_flat(self):
-        self.dark_flat_slice_list = self.get_dark_flat_slice_list()
-
-        # remove extra dimension if 3d to 4d mapping
-        from data_type import Map_3dto4d_h5
-        if Map_3dto4d_h5 in self.__class__.__bases__:
-            del self.dark_flat_slice_list[-1]
-
-        self.dark_flat_slice_list = tuple(self.dark_flat_slice_list)
-        if len(self.get_index(2)):
-            self.data_obj.meta_data.set_meta_data('dark', self.dark_mean())
-        if len(self.get_index(1)):
-            self.data_obj.meta_data.set_meta_data('flat', self.flat_mean())
-
     def get_dark_flat_slice_list(self):
         slice_list = self.data_obj._preview._get_preview_slice_list()
         remove_dim = self.data_obj.find_axis_label_dimension('rotation_angle')
@@ -336,6 +322,13 @@ class ImageKey(Tomo):
         return self.flat_updated if self.flat_updated else\
             self.flat_image_key_data()
 
+    def _set_dark_and_flat(self):
+        self.dark_flat_slice_list = tuple(self.get_dark_flat_slice_list())
+        if len(self.get_index(2)):
+            self.data_obj.meta_data.set_meta_data('dark', self.dark_mean())
+        if len(self.get_index(1)):
+            self.data_obj.meta_data.set_meta_data('flat', self.flat_mean())
+
 
 class NoImageKey(Tomo):
     """ This class is used to get data from a dataset with separate darks and
@@ -399,6 +392,17 @@ class NoImageKey(Tomo):
             self.image_key = self.orig_image_key
             return flat
         return self.flat_path[self.dark_flat_slice_list]*self.fscale
+
+    def _set_dark_and_flat(self):
+        self.dark_flat_slice_list = self.get_dark_flat_slice_list()
+        # remove extra dimension if 3d to 4d mapping
+        from data_type import Map_3dto4d_h5
+        if Map_3dto4d_h5 in self.__class__.__bases__:
+            del self.dark_flat_slice_list[-1]
+
+        self.dark_flat_slice_list = tuple(self.dark_flat_slice_list)
+        self.data_obj.meta_data.set_meta_data('dark', self.dark_mean())
+        self.data_obj.meta_data.set_meta_data('flat', self.flat_mean())
 
 
 class MultipleImageKey(DataTypes):
