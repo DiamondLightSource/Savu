@@ -180,7 +180,7 @@ class PluginList(object):
 
     def __get_basic(self, plugin, count, width):
         title = self.__get_plugin_title(plugin, count, width, quiet=True)
-        params = self.__get_param_details(plugin, count, width)
+        params = self._get_param_details(plugin['data'], width)
         return title + params
 
     def __get_verbose(self, plugin, count, width, breakdown=False):
@@ -189,7 +189,8 @@ class PluginList(object):
         colour_off = Back.RESET + Fore.RESET
         synopsis = \
             self._get_synopsis(plugin['name'], width, colour_on, colour_off)
-        params = self.__get_param_details(plugin, count, width, desc=True)
+        params = self._get_param_details(
+            plugin['data'], width, desc=plugin['desc'])
         if breakdown:
             return title, synopsis, params
         return title + synopsis + params
@@ -214,20 +215,19 @@ class PluginList(object):
             plugin_name)['synopsis'], width-1, colour_on, colour_off, " "*2)
         if not synopsis:
             return ''
-        #return "\n" + colour_on + " "*2 + "%s" % synopsis + colour_off
         return "\n" + colour_on + synopsis + colour_off
 
-    def __get_param_details(self, plugin, count, width, desc=False):
+    def _get_param_details(self, pdata, width, desc=False):
         margin = 4
         keycount = 0
         joiner = "\n" + " "*margin
         params = ''
-        for key in plugin['data'].keys():
+        for key in pdata.keys():
             keycount += 1
             temp = "\n   %2i)   %20s : %s"
-            params += temp % (keycount, key, plugin['data'][key])
+            params += temp % (keycount, key, pdata[key])
             if desc:
-                pdesc = " ".join(plugin['desc'][key].split())
+                pdesc = " ".join(desc[key].split())
                 pdesc = joiner.join(textwrap.wrap(pdesc, width=width))
                 temp = '\n' + Fore.CYAN + ' '*margin + "%s" + Fore.RESET
                 params += temp % pdesc

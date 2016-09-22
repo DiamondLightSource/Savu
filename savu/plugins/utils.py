@@ -180,7 +180,6 @@ def find_args(dclass, inst=None):
     """
     Finds the parameters list from the docstring
     """
-    
     docstring = None
     if not dclass.__doc__:
         if inst:

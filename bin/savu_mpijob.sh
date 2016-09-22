@@ -3,7 +3,7 @@
 module load global/cluster
 
 module load python/anaconda-savu
-source activate savu_mpi1
+source activate savu_mpi2
 
 #module load savu/1.0_new_env
 #activate_env

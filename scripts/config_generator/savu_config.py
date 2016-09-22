@@ -290,82 +290,59 @@ def _disp(content, arg):
     return content
 
 
-#def _list(content, arg):
-#    """List the plugins which have been registered for use.
-#       Optional arguments:
-#            type(str): Display 'type' plugins. Where type can be 'loaders',
-#            'corrections', 'filters', 'reconstructions' or 'savers'.
-#            -q: Quiet mode. Only process names are listed.
-#            -v: Verbose mode. Process names and synopsis.
-#            -vv: Extra verbose. Process names, synopsis and parameters.
-#    """
-#
-#    #type(str) names: Display type selection with process names only.
-#    verbosity = ['-q', '-v', '-vv']
-#    if arg:
-#        arg = arg.split(' ')
-#        if len(arg) == 2:
-#            if arg[1] not in verbosity:
-#                print("The arguments %s are unknown", arg)
-#                return content
-#
-#    print("-----------------------------------------")
-#    for key, value in _order_plugins():
-#        if not arg:
-#            print(key, content.plugin_list._get_synopsis(key, 60, Fore.CYAN, Fore.RESET))
-#        elif arg[0] in value.__module__:
-#            print(key)
-#            if len(arg) < 2:
-#                plugin = pu.plugins[key]()
-#                plugin._populate_default_parameters()
-#                for p_key in plugin.parameters.keys():
-#                    print("    %20s : %s" % (p_key, plugin.parameters[p_key]))
-#
-#    print("-----------------------------------------")
-#    return content
-
-
 def _list(content, arg):
     """List the plugins which have been registered for use.
        Optional arguments:
             type(str): Display 'type' plugins. Where type can be 'loaders',
-            'corrections', 'filters', 'reconstructions' or 'savers'.
+            'corrections', 'filters', 'reconstructions', 'savers' or the start\
+            of a plugin name followed by an asterisk, e.g. a*.
             -q: Quiet mode. Only process names are listed.
-            -v: Verbose mode. Process names and synopsis.
-            -vv: Extra verbose. Process names, synopsis and parameters.
+            -v: Verbose mode. Process names, synopsis and parameters.
     """
 
-    #type(str) names: Display type selection with process names only.
     verbosity = ['-q', '-v', '-vv']
     if arg:
         arg = arg.split(' ')
-        if len(arg) == 2:
-            if arg[1] not in verbosity:
-                print("The arguments %s are unknown", arg)
-                return content
+
+    if len(arg) is 2:
+        plugins = _order_plugins(pfilter=arg[0])
+        arg = [arg[1]]
+    elif len(arg) is 1 and arg[0] not in verbosity:
+        plugins = _order_plugins(pfilter=arg[0])
+        arg = None
+    else:
+        plugins = _order_plugins()
 
     print("-----------------------------------------")
-    for key, value in _order_plugins():
+    for key, value in plugins:
         if not arg:
-            print(key, content.plugin_list._get_synopsis(key, 60, Fore.CYAN, Fore.RESET))
-        elif arg[0] in value.__module__:
+            print(key, content.plugin_list._get_synopsis(
+                key, 60, Fore.CYAN, Fore.RESET))
+        elif arg[0] == '-q':
             print(key)
-            if len(arg) < 2:
-                plugin = pu.plugins[key]()
-                plugin._populate_default_parameters()
-                for p_key in plugin.parameters.keys():
-                    print("    %20s : %s" % (p_key, plugin.parameters[p_key]))
-
+        elif arg[0] == '-v':
+            plugin = pu.plugins[key]()
+            plugin._populate_default_parameters()
+            print(key, content.plugin_list._get_synopsis(
+                key, 60, Fore.CYAN, Fore.RESET),
+                content.plugin_list._get_param_details(plugin.parameters, 100))
+        else:
+            print("The arguments %s are unknown", arg)
     print("-----------------------------------------")
     return content
 
 
-def _order_plugins():
+def _order_plugins(pfilter='savu'):
     key_list = []
     value_list = []
+    star_search = pfilter.split('*')[0] if '*' in pfilter else False
     for key, value in pu.plugins.iteritems():
-        key_list.append(key)
-        value_list.append(value)
+        if star_search and re.match('(?i)^' + star_search, value.__name__):
+            key_list.append(key)
+            value_list.append(value)
+        elif pfilter in value.__module__:
+            key_list.append(key)
+            value_list.append(value)
 
     sort_idx = sorted(range(len(key_list)), key=lambda k: key_list[k])
     key_list.sort()
