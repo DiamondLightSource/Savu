@@ -210,7 +210,7 @@ def find_args(dclass, inst=None):
     param_entry = [{'dtype': type(value), 'name': a[0], 'desc': a[1],
                     'default': value} for a in param for value in [eval(a[2])]]
 
-    return {'warn': warn[0], 'info': info, 'synopsis': synopsis[0],
+    return {'warn': "\n".join(warn), 'info': info, 'synopsis': synopsis[0],
             'param': param_entry}
 
 

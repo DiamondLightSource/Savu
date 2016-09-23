@@ -171,10 +171,9 @@ class PluginList(object):
         pos = plugin['pos'].strip() if 'pos' in plugin.keys() else count
         fore_colour = Fore.RED + Style.DIM if active else Fore.LIGHTWHITE_EX
         title = "%s %2s) %s" % (active, pos, plugin['name'])
-        width = width - len(active) - 4 - len(plugin['name'])
         if not quiet:
             title += "(%s)" % plugin['id']
-            width = width - len(plugin['id']) - 2
+        width -= len(title)
         return Back.LIGHTBLACK_EX + fore_colour + title + " "*width + \
             Style.RESET_ALL
 
@@ -198,21 +197,21 @@ class PluginList(object):
     def __get_verbose_verbose(self, plugin, count, width):
         title, synopsis, param_details = \
             self.__get_verbose(plugin, count, width, breakdown=True)
-        extra_info = self.__get_docstring_info(plugin['name'])
+        extra_info = self._get_docstring_info(plugin['name'])
         info_colour = Back.LIGHTBLACK_EX + Fore.LIGHTWHITE_EX
         warn_colour = Back.RED + Fore.WHITE
         colour_off = Back.RESET + Fore.RESET
-        info = self.__get_equal_lines(extra_info['info'], width+1,
-                                      info_colour, colour_off, " "*4)
-        warn = self.__get_equal_lines(extra_info['warn'], width+1,
-                                      warn_colour, colour_off, " "*4)
+        info = self._get_equal_lines(extra_info['info'], width,
+                                     info_colour, colour_off, " "*4)
+        warn = self._get_equal_lines(extra_info['warn'], width,
+                                     warn_colour, colour_off, " "*4)
         info = "\n"+info if info else ''
         warn = "\n"+warn if warn else ''
         return title + synopsis + info + warn + param_details
 
     def _get_synopsis(self, plugin_name, width, colour_on, colour_off):
-        synopsis = self.__get_equal_lines(self.__get_docstring_info(
-            plugin_name)['synopsis'], width-1, colour_on, colour_off, " "*2)
+        synopsis = self._get_equal_lines(self._get_docstring_info(
+            plugin_name)['synopsis'], width, colour_on, colour_off, " "*2)
         if not synopsis:
             return ''
         return "\n" + colour_on + synopsis + colour_off
@@ -233,7 +232,7 @@ class PluginList(object):
                 params += temp % pdesc
         return params
 
-    def __get_equal_lines(self, string, width, colour_on, colour_off, offset):
+    def _get_equal_lines(self, string, width, colour_on, colour_off, offset):
         if not string:
             return ''
         str_list = textwrap.wrap(string, width=width-len(offset))
@@ -244,7 +243,7 @@ class PluginList(object):
                 colour_on + offset + line + " "*lwidth + colour_off)
         return "\n".join(new_str_list)
 
-    def __get_docstring_info(self, plugin):
+    def _get_docstring_info(self, plugin):
         plugin_inst = pu.plugins[plugin]()
         plugin_inst._populate_default_parameters()
         return plugin_inst.docstring_info

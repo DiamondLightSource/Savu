@@ -15,7 +15,7 @@
 """
 .. module:: raven_filter
    :platform: Unix
-   :synopsis: A plugin remove ring artefacts
+   :synopsis: A plugin to remove ring artefacts
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 """

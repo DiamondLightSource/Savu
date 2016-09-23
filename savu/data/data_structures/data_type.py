@@ -196,7 +196,8 @@ class Tomo(DataTypes):
 
     def _getitem_imagekey(self, idx):
         index = list(idx)
-        index[self.proj_dim] = self.get_index(0, full=True)[idx[self.proj_dim]].tolist()
+        index[self.proj_dim] = \
+            self.get_index(0, full=True)[idx[self.proj_dim]].tolist()
         return self.data[tuple(index)]
 
     def _getitem_noimagekey(self, idx):

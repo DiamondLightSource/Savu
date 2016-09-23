@@ -20,7 +20,7 @@ Created on 21 May 2015
 from __future__ import print_function
 
 import os
-from colorama import Fore
+from colorama import Fore, Back
 
 from savu.data.plugin_list import PluginList
 from savu.plugins import utils as pu
@@ -68,6 +68,13 @@ class Content(object):
             i = raw_input("Are you sure? [y/N]")
             return True if i.lower() == 'y' else False
 
+        width = 86
+        warnings = self.get_warnings(width)
+        if warnings:
+            notice = Back.RED + Fore.WHITE + "IMPORTANT PLUGIN NOTICES" +\
+                Back.RESET + Fore.RESET + "\n"
+            border = "*"*width + '\n'
+            print (border + notice + warnings + '\n'+border)
         i = raw_input("Are you sure you want to save the current data to "
                       "'%s' [y/N]" % (self.filename))
         if i.lower() == 'y':
@@ -75,6 +82,19 @@ class Content(object):
             self.plugin_list._save_plugin_list(self.filename)
         else:
             print("The process list has NOT been saved.")
+
+    def get_warnings(self, width):
+        colour = Back.RESET + Fore.RESET
+        warnings = []
+        for plugin in self.plugin_list.plugin_list:
+            warn = self.plugin_list._get_docstring_info(plugin['name'])['warn']
+            if warn:
+                for w in warn.split('\n'):
+                    string = plugin['name'] + ": " + w
+                    warnings.append(self.plugin_list._get_equal_lines(
+                        string, width-1, colour, colour, " "*2))
+        return "\n".join(
+            ["*" + "\n ".join(w.split('\n')) for w in warnings if w])
 
     def value(self, arg):
         value = ([''.join(arg.split()[1:])][0]).split()[0]
