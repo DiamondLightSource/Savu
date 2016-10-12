@@ -127,14 +127,18 @@ class PluginList(object):
             except KeyError:
                 pass
 
+            if 'cite' in plugin.keys():
+                if plugin['cite'] is not None:
+                    plugin['cite'].write(plugin_group)
+
             count += 1
 
-    def add_plugin_citation(self, filename, plugin_number, citation):
-        logging.debug("Adding Citation to file %s", filename)
-        plugin_file = h5py.File(filename, 'a')
-        plugin_entry = plugin_file['entry/process/%i' % plugin_number]
-        citation.write(plugin_entry)
-        plugin_file.close()
+#    def add_plugin_citation(self, filename, plugin_number, citation):
+#        logging.debug("Adding Citation to file %s", filename)
+#        plugin_file = h5py.File(filename, 'a')
+#        plugin_entry = plugin_file['entry/process/%i' % plugin_number]
+#        citation.write(plugin_entry)
+#        plugin_file.close()
 
     def _get_string(self, **kwargs):
         out_string = []

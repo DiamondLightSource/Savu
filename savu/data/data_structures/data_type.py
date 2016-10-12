@@ -258,20 +258,28 @@ class Tomo(DataTypes):
 
     def __get_reduced_index(self, key, slice_list):
         """ Get the projection index of a specific image key value when\
-            previewing has been applied """
+            previewing has been applied. """
         data_entries = np.where(self.image_key == 0)[0][slice_list]
         if key == 0:
             return data_entries
+
         index = np.where(self.image_key == key)[0]
-        index_start_key = [0] + list(np.where(np.diff(index) > 1)[0]+1)
-        index_start = index[index_start_key]
-        index_end_key = np.array(index_start_key[1:] + [len(index)])-1
-        index_end = index[index_end_key]
+        start_idx, end_idx, start_entry, end_entry = \
+            self.__get_start_end_idx(index)
+
         val = index[np.where(np.less(index, data_entries[0]))[0][-1]]
-        start = index_start_key[np.where(index_end == val)[0]]
+        start = start_idx[np.where(end_entry == val)[0]]
         val2 = index[np.where(np.greater(index, data_entries[-1]))[0][0]]
-        end = index_end_key[np.where(index_start == val2)[0]]
+        end = end_idx[np.where(end_entry == val2)[0]]+1
+
         return index[start:end]
+
+    def _get_start_end_idx(self, index):
+        start = [0] + list(np.where(np.diff(index) > 1)[0]+1)
+        end = np.array(start[1:] + [len(index)])-1
+        start_entry = index[start]
+        end_entry = index[end]
+        return start, end, start_entry, end_entry
 
     def __get_data(self, key):
         index = [slice(None)]*self.nDims
@@ -301,17 +309,26 @@ class Tomo(DataTypes):
 class ImageKey(Tomo):
     """ This class is used to get data from a dataset with an image key. """
 
-    def __init__(self, data_obj, image_key, proj_dim):
+    def __init__(self, data_obj, image_key, proj_dim, ignore=None):
         super(ImageKey, self).__init__(data_obj, proj_dim, image_key)
         self.shape = self._get_image_key_data_shape()
         self.nDims = len(self.shape)
         self._getitem = self._getitem_imagekey
+        if ignore:
+            self.__ignore_image_key_entries(ignore)
 
     def __getitem__(self, idx):
         return self._getitem(idx)
 
     def _copy(self, new_obj):
         self._copy_base(new_obj)
+
+    def __ignore_image_key_entries(self, ignore):
+        a, a, start, end = self._get_start_end_idx(self.get_index(1))
+        if not isinstance(ignore, list):
+            ignore = [ignore]
+        for batch in ignore:
+            self.image_key[start[batch-1]:end[batch-1]+1] = 3
 
     def dark(self):
         """ Get the dark data. """

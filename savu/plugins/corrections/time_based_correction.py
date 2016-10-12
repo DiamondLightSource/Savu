@@ -33,6 +33,9 @@ from savu.plugins.utils import register_plugin
 class TimeBasedCorrection(BaseCorrection, CpuPlugin):
     """
     Apply a time-based dark and flat field correction to data.
+
+    :param in_range: Set to True if you require values in the \
+        range [0, 1]. Default: False.
     """
 
     def __init__(self, name="TimeBasedCorrection"):
@@ -54,7 +57,6 @@ class TimeBasedCorrection(BaseCorrection, CpuPlugin):
         self.flat, self.flat_idx = \
             self.calc_average(inData.data.flat(), inData.data.get_index(1))
 
-        print self.dark[0].shape, self.flat[0].shape
         inData.meta_data.set_meta_data('multiple_dark', self.dark)
         inData.meta_data.set_meta_data('multiple_flat', self.flat)
 
@@ -71,7 +73,6 @@ class TimeBasedCorrection(BaseCorrection, CpuPlugin):
         return [np.mean(data[sl[i]], axis=0) for i in range(len(sl))], abs_idx
 
     def correct(self, data):
-        print data.shape
         frames = self._get_frames()
         output = np.empty(data.shape, dtype=np.float32)
         nSlices = data.shape[self.slice_dir]
@@ -83,9 +84,16 @@ class TimeBasedCorrection(BaseCorrection, CpuPlugin):
                     self.flat_idx, frames[i]))
             dark = self.calculate_dark_field(
                 *self.find_nearest_frames(self.dark_idx, frames[i]))
+
+            if self.parameters['in_range']:
+                proj = self.in_range(proj, flat)
             # perform correction
             output[self.sslice] = np.nan_to_num((proj-dark)/(flat-dark))
         return output
+
+    def in_range(self, data, flat):
+        data[data > flat] = flat[data > flat]
+        return data
 
     def _get_frames(self):
         frames = self.slice_list[self.slice_dir]

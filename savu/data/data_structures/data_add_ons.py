@@ -83,7 +83,7 @@ class Padding(object):
         :param list(dict) pad_list: A list of strings of the form: {0}.
         """
         for entry in pad_list:
-            self.__pad_direction(entry)
+            self._pad_direction(entry)
 
     @docstring_parameter(notes._padding.__doc__)
     def _pad_direction(self, pad_str):

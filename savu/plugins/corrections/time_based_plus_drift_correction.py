@@ -16,7 +16,7 @@
 .. module:: time_based_plus_drift_correction
    :platform: Unix
    :synopsis: A time-based dark and flat field correction that accounts for\
-       image drift.
+       image drift (Note: A work in progress but please try).
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
@@ -35,26 +35,22 @@ from savu.plugins.utils import register_plugin
 class TimeBasedPlusDriftCorrection(TimeBasedCorrection, CpuPlugin):
     """
     Apply a time-based dark and flat field correction on data with an\
-    image drift
+    image drift using linear interpolation and template matching.
+
     """
 
     def __init__(self):
-        super(TimeBasedPlusDriftCorrection, self).__init__("TimeBasedPlusDriftCorrection")
+        super(TimeBasedPlusDriftCorrection, self).__init__(
+            "TimeBasedPlusDriftCorrection")
 
     def pre_process(self):
         super(TimeBasedPlusDriftCorrection, self).pre_process()
 
         self.shift_array = np.zeros((len(self.data_idx), 2))
         # find shift between flat field frames
-        #self.template = self.flat[0][10:20, 10:100]
         self.template = self.flat[0][100:300, 800:]
-        #self.template3 = self.flat[0][600:1200, 950:]
+        #self.template = self.flat[0][10:20, 10:20]
         self.drift = self.calculate_flat_field_drift(self.template)
-        #self.drift2 = self.calculate_flat_field_drift(self.template2)
-        #self.drift3 = self.calculate_flat_field_drift(self.template3)
-        print "***drift is", self.drift
-        #print "***drift2 is", self.drift2
-        #print "***drift3 is", self.drift3
 
     def calculate_flat_field_drift(self, template):
         drift = []
@@ -69,18 +65,11 @@ class TimeBasedPlusDriftCorrection(TimeBasedCorrection, CpuPlugin):
             match = match_template(im, template)
             index.append(np.unravel_index(np.argmax(match), match.shape))
         index = np.array(index)
-        print "shift indices", index[0], index[1]
         shift = index[1] - index[0]
         return shift
 
     def calculate_flat_field(self, frame, data, frames, distance):
         shift = self.calculate_shift(self.flat[frames[0]], data, self.template)
-
-        #shift2 = self.calculate_shift(self.flat[frames[0]], data, self.template2)
-        #shift3 = self.calculate_shift(self.flat[frames[0]], data, self.template3)
-        #print "shift image 1:", shift, "shift image 2:", shift-self.drift[frames[0]], "frames", frames
-        #print "shift2 image 1:", shift2, "shift2 image 2:", shift2-self.drift2[frames[0]], "frames", frames
-        #print "shift3 image 1:", shift3, "shift3 image 2:", shift3-self.drift3[frames[0]], "frames", frames
         flat1 = sci_shift(self.flat[frames[0]], tuple(shift), cval=np.nan)
         flat2 = sci_shift(self.flat[frames[1]], shift-self.drift[frames[0]],
                           cval=np.nan)
@@ -88,8 +77,7 @@ class TimeBasedPlusDriftCorrection(TimeBasedCorrection, CpuPlugin):
 
         if frames[0] > 0:
             shift = shift + self.drift[frames[0]-1]
-        self.shift_array[np.where(self.data_idx == frame)[0]] = shift        
-        
+        self.shift_array[np.where(self.data_idx == frame)[0]] = shift
         return flat1*distance[0] + flat2*distance[1]
 
     def fill_nans(self, im1, im2):

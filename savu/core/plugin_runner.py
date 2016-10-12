@@ -48,22 +48,18 @@ class PluginRunner(object):
         self.exp = Experiment(self.options)
         plugin_list = self.exp.meta_data.plugin_list
 
-        logging.info("run_plugin_list: 1")
         self.exp._barrier()
         self._run_plugin_list_check(plugin_list)
 
-        logging.info("run_plugin_list: 2")
         self.exp._barrier()
         expInfo = self.exp.meta_data
         logging.debug("Running process List.save_list_to_file")
         expInfo.plugin_list._save_plugin_list(
             expInfo.get_meta_data("nxs_filename"), exp=self.exp)
 
-        logging.info("run_plugin_list: 3")
         self.exp._barrier()
         self._transport_run_plugin_list()
 
-        logging.info("run_plugin_list: 4")
         self.exp._barrier()
 
         cu.user_message("***********************")
@@ -105,6 +101,7 @@ class PluginRunner(object):
         for i in range(n_loaders, len(plugin_list)-1):
             self.exp._barrier()
             plugin = pu.plugin_loader(self.exp, plugin_list[i], check=check)
+            plugin_list[i]['cite'] = plugin.get_citation_information()
             plugin._clean_up()
             self.exp._merge_out_data_to_in()
 

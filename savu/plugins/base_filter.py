@@ -57,10 +57,11 @@ class BaseFilter(Plugin):
         """
         return 8
 
-    def process_frames(self, data, _):
+    def process_frames(self, data, slice_list):
         """
         Calls the main filter processing function
         """
+        self.slice_list = slice_list[0]  
         return self.filter_frames(data)
 
     def filter_frames(self, data):

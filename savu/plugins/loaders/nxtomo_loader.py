@@ -43,6 +43,8 @@ class NxtomoLoader(BaseLoader):
         scale value. Default: [None, None, 1].
     :param angles: A python statement to be evaluated or a file. Default: None.
     :param 3d_to_4d: Set to true if this reshape is required. Default: False.
+    :param ignore_flats: List of batch numbers of flats (start at 1) to \
+        ignore. Default: None.
     """
 
     def __init__(self, name='NxtomoLoader'):
@@ -132,17 +134,26 @@ class NxtomoLoader(BaseLoader):
             self.__set_separate_dark_and_flat(data_obj)
 
     def __find_dark_and_flat(self, data_obj):
+        ignore = self.parameters['ignore_flats'] if \
+            self.parameters['ignore_flats'] else None
         try:
             image_key = data_obj.backing_file[
-                'entry1/tomo_entry/instrument/detector/image_key']
+                'entry1/tomo_entry/instrument/detector/image_key'][...]
+
+            # *** temporary for i23 data ***
+            image_key[390:400] = 3
+            # ******************************
+
             from savu.data.data_structures.data_type import ImageKey
-            data_obj.data = ImageKey(data_obj, image_key[...], 0)
+            data_obj.data = \
+                ImageKey(data_obj, image_key, 0, ignore=ignore)
             data_obj.set_shape(data_obj.data.get_shape())
         except KeyError:
             cu.user_message("An image key was not found.")
             try:
                 from savu.data.data_structures.data_type import NoImageKey
-                data_obj.data = NoImageKey(data_obj, 0)
+                data_obj.data = \
+                    NoImageKey(data_obj, 0, ignore=ignore)
                 entry = 'entry1/tomo_entry/instrument/detector/'
                 data_obj.data._set_flat_path(entry + 'flatfield')
                 data_obj.data._set_dark_path(entry + 'darkfield')
@@ -174,6 +185,7 @@ class NxtomoLoader(BaseLoader):
             func(ffile[entry], imagekey=image_key)
         except:
             func(ffile[entry])
+
         data_obj.data._set_scale(name, scale)
 
     def __set_rotation_angles(self, data_obj):
