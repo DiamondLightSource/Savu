@@ -96,7 +96,5 @@ class McNearAbsorptionCorrection(BaseAbsorptionCorrection):
     def get_exponent_Ti_mu(self, Ti_ratio, absorption, trans_ave_array):
         FF_Ti_xray_mu = np.multiply(trans_ave_array, Ti_ratio)
         exponent_Ti = np.add(FF_Ti_xray_mu, absorption)
-        exponent_Ti = np.multiply(exponent_Ti, -1)
-
         exponent_Ti = np.exp(exponent_Ti)
         return exponent_Ti

@@ -93,37 +93,18 @@ class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
         in_dataset, out_datasets = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
         shape = in_dataset[0].get_shape()
-        # it will always be in Q for this plugin
-        # Doesnt this get rid of the other two axes?
-        # axis_labels = {in_dataset[0]: '-1.Q.nm^-1'}
-        # I just want diffraction data
         in_pData[0].plugin_data_setup('DIFFRACTION', self.get_max_frames())
         spectra = out_datasets[0]
         num_bins = self.get_parameters('num_bins')
-        # what does this do?
-        # remove an axis from all patterns
-
-        # copy all patterns, removing dimension -1 from the core and slice
-        # directions, and returning only those that are not empty
         patterns = ['SINOGRAM.-1', 'PROJECTION.-1']
-        # stating only 'dimension' will remove the axis label, stating
-        # 'dimension.name.unit' name and unit will add or replace it
-
         detX_dim = in_dataset[0].find_axis_label_dimension('detector_x')
         detY_dim = in_dataset[0].find_axis_label_dimension('detector_y')
         if detX_dim < detY_dim:
             detY_dim -= 1
         axis_labels = [str(detX_dim), str(detY_dim) + '.Q.Angstrom^-1']
-#         spectra.create_dataset(patterns={in_dataset[0]: patterns},
-#                                axis_labels={in_dataset[0]: axis_labels},
-#                                shape=shape[:-2]+(num_bins,))
-
         spectra.create_dataset(patterns={in_dataset[0]: patterns},
                                axis_labels={in_dataset[0]: axis_labels},
                                shape=shape[:-2]+(num_bins,))
-#         axis_labels = [{'rotation_angle': 'degrees'}, {'y': 'mm'}, {'x': 'mm'}, {'2Theta': 'degrees', 'Q': 'Angstrom^-1','D':'Angstrom'}]
-
-#         spectra.data_info.set_meta_data('axis_labels',axis_labels)
         spectrum = {'core_dir': (-1,), 'slice_dir': tuple(range(len(shape)-2))}
         spectra.add_pattern("SPECTRUM", **spectrum)
 

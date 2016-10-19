@@ -68,14 +68,16 @@ class Pymca(BaseFilter, CpuPlugin):
         c._McaAdvancedFitBatch__processStack()# perform an initial fit to get the shapes
         fit_labels = c._McaAdvancedFitBatch__images.keys() # and then take out the axis labels for the channels
         outputshape = rest_shape+(len(fit_labels),) # and this is the shape the thing will be
+        print "input shape is", in_dataset[0].get_shape()
         print "the output shape in setup is"+str(outputshape)
         
         axis_labels = ['-1.FitAreas.unit']
         pattern_list = ['SINOGRAM', 'PROJECTION']
         fitResult = out_datasets[0]
+
         fitResult.create_dataset(patterns={in_dataset[0]: pattern_list},
-                        axis_labels={in_dataset[0]: axis_labels},
-                        shape=outputshape)
+                                axis_labels={in_dataset[0]: axis_labels},
+                                shape=outputshape)
         fitResult.meta_data.set_meta_data('FitAreas',fit_labels)
         slice_directions = tuple(range(len(rest_shape)))
         print "slice directions are:"+str(slice_directions)

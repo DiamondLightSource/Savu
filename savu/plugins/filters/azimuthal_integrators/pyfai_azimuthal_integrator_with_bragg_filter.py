@@ -64,6 +64,7 @@ class PyfaiAzimuthalIntegratorWithBraggFilter(BaseAzimuthalIntegrator):
                 top = np.percentile(foo,lims[1])
                 bottom = np.percentile(foo,lims[0])
                 out[i] = np.mean(np.clip(foo,bottom,top))
+        print "done one"
         return out
 
 

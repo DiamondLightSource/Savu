@@ -26,8 +26,8 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 
 
 class SimpleFitTest(unittest.TestCase):
-    @unittest.skip('Need to update the calculation of peak positions,' 
-            'Ticket: https://github.com/DiamondLightSource/Savu/issues/318 ')
+#     @unittest.skip('Need to update the calculation of peak positions,' 
+#             'Ticket: https://github.com/DiamondLightSource/Savu/issues/318 ')
     def test_simple_fit_runs(self):
         data_file = tu.get_test_data_path('mm.nxs')
         process_file = tu.get_test_process_path('simple_fit_test_XRF.nxs')
