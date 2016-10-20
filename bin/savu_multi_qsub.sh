@@ -36,7 +36,8 @@ while read -r a b c d; do
 
     datafile=/dls/i23/data/2016/cm14483-3/processing/9782_rotated.nxs
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_processes/i23_pipeline.nxs
-    processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/testing_sino_align.nxs
+    #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/testing_sino_align.nxs
+    processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/orig_i23.nxs
 
     #datafile=/dls/i12/data/2016/ee14033-1/processing/savu/N100y10H10V8ROI1dataPGVHilb/HIGHEI12ROCK01.nxs
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/updated_B16_pipeline.nxs

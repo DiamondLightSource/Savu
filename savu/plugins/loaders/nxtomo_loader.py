@@ -140,9 +140,9 @@ class NxtomoLoader(BaseLoader):
             image_key = data_obj.backing_file[
                 'entry1/tomo_entry/instrument/detector/image_key'][...]
 
-            # *** temporary for i23 data ***
-            image_key[390:400] = 3
-            # ******************************
+#            # *** temporary for i23 data ***
+#            image_key[390:400] = 3
+#            # ******************************
 
             from savu.data.data_structures.data_type import ImageKey
             data_obj.data = \

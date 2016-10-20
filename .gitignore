@@ -7,6 +7,8 @@
 # Built documenation
 /doc/build
 /doc/source/_autosummary
+scripts/config_generator/test_processes
+scripts/config_generator/test_processes_2
 
 # Python egg metadata, regenerated from source files by setuptools.
 /*.egg-info
