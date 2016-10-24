@@ -31,7 +31,7 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 class DataRemoval(BaseFilter, CpuPlugin):
     """
     A class to remove any unwanted data from the specified pattern frame.
-    :param indices: A list or range of values, e.g. [0, 1, 2], \
+    :param indices: A list or range of values to remove, e.g. [0, 1, 2], \
         0:2 (start:stop) or 0:2:1 (start:stop:step). Default: None.
     :param pattern: Explicitly state the slicing pattern. Default: 'SINOGRAM'.
     :param dim: Data dimension to reduce. Default: 0.
@@ -40,26 +40,29 @@ class DataRemoval(BaseFilter, CpuPlugin):
     def __init__(self):
         super(DataRemoval, self).__init__("DataRemoval")
         self.indices = None
-        self.slice_list = None
+        self.sl = None
 
     def pre_process(self):
         in_pData = self.get_plugin_in_datasets()[0]
-        self.slice_list = [slice(None)]*len(in_pData.get_shape())
-        self.slice_list[self.parameters['dim']] = self.indices
-        self.slice_list = tuple(self.slice_list)
-
         in_data = self.get_in_datasets()[0]
+        self.dim = self.parameters['dim']
+        self.indices = self.calc_indices(in_data.get_shape()[self.dim])
+        self.sl = [slice(None)]*len(in_pData.get_shape())
+        self.sl[self.dim] = self.indices
+        self.sl = tuple(self.sl)
+
         in_data.amend_axis_label_values(
-            in_pData._get_data_slice_list(self.slice_list))
+            in_pData._get_data_slice_list(self.sl))
 
     def process_frames(self, data, frame_list):
-        return data[0][self.slice_list]
+        return data[0][self.sl]
 
     def setup(self):
-        reduced_dim_shape = self.calc_shape()
         in_dataset, out_dataset = self.get_datasets()
 
         shape = list(in_dataset[0].get_shape())
+        reduced_dim_shape = \
+            len(self.calc_indices(shape[self.parameters['dim']]))
         shape[self.parameters['dim']] = reduced_dim_shape
 
         out_dataset[0].create_dataset(shape=tuple(shape),
@@ -76,7 +79,7 @@ class DataRemoval(BaseFilter, CpuPlugin):
         in_pData[0].plugin_data_setup(pattern, self.get_max_frames())
         out_pData[0].plugin_data_setup(pattern, self.get_max_frames())
 
-    def calc_shape(self):
+    def calc_indices(self, orig_shape):
         indices = self.parameters['indices']
         if isinstance(indices, list):
             self.indices = np.array(indices)
@@ -86,7 +89,7 @@ class DataRemoval(BaseFilter, CpuPlugin):
             if len(indices_list) is 2:
                 indices_list.append(1)
             self.indices = np.arange(*indices_list)
-        return len(self.indices)
+        return np.setxor1d(np.arange(orig_shape), self.indices)
 
     def nInput_datasets(self):
         return 1

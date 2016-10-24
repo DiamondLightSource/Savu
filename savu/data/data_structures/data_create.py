@@ -130,7 +130,7 @@ class DataCreate(object):
         patterns = {}
         for name, pattern_dict in copy_patterns.iteritems():
             empty_flag = False
-            for ddir in pattern_dict:
+            for ddir in ['slice_dir', 'core_dir']:
                 s_dims = self.non_negative_directions(
                     pattern_dict[ddir], nDims=nDims)
                 new_dims = [sd for sd in s_dims if sd not in dims]
