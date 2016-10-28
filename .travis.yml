@@ -23,7 +23,7 @@ before_install:
 #  - conda update -q conda
   - conda info -a
   - conda list
-#  - conda update yaml
+  - conda install yaml=0.1.5
 
 install:
   - conda env create --file environment.yml
