@@ -20,10 +20,11 @@ before_install:
   - export PATH="$HOME/miniconda/bin:$PATH"
   - hash -r
   - conda config --set always_yes yes --set changeps1 no
-#  - conda update -q conda
+  - conda update -q conda
   - conda info -a
   - conda list
-  - conda install yaml=0.1.5
+  - conda install pyyaml
+  - conda list
 
 install:
   - conda env create --file environment.yml
