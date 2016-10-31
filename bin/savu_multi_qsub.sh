@@ -21,6 +21,8 @@ while read -r a b c d; do
 	runfile=/bin/savu_launcher.sh
 	outpath=$PWD #outputting to the current folder
     
+    #datafile=/dls/staging/dls/i12/data/2015/ee13236-1/processing/scripts/../NEW_WORK_2016_08/55734/55734_007.nxs
+    #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/robert_test.nxs
     datafile=/dls/i18/data/2016/sp13939-1/Experiment_1/nexus/75996_alphanitrateRT_1.nxs
     processfile=/dls/i18/data/2016/sp13939-1/processing/XRD/AbsorptionCorrectedXRD/cropped.nxs
 

@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 import os
 
 def readme():
@@ -32,20 +32,8 @@ setup(name='savu',
       author='Mark Basham',
       author_email='scientificsoftware@diamond.ac.uk',
       license='Apache License, Version 2.0',
-      packages=['test_data','savu','savu.plugins','savu.core',
-                'savu.core.transports',
-                'savu.plugins.loaders',
-                'savu.plugins.savers',
-                'savu.plugins.corrections',
-                'savu.plugins.reconstructions',
-                'savu.plugins.driver',
-                'savu.plugins.filters',
-                'savu.data',
-                'savu.data.transport_data',
-                'savu.data.data_structures',
-                'scripts',
-                'scripts.config_generator'],
-      entry_points={'console_scripts':['savu_process_generator=scripts.config_generator.savu_config:main','tomo_recon=savu.tomo_recon:main'],},
+      packages=find_packages()
+      entry_points={'console_scripts':['savu_config=scripts.config_generator.savu_config:main','savu=savu.tomo_recon:main'],},
       scripts=[facility_path+'/savu_launcher.sh',facility_path+'/savu_mpijob.sh'],
       package_dir={'test_data':'test_data'},
       package_data={'test_data':['data/*.nxs','process_lists/*.nxs','test_process_lists/*.nxs']},
