@@ -32,7 +32,7 @@ setup(name='savu',
       author='Mark Basham',
       author_email='scientificsoftware@diamond.ac.uk',
       license='Apache License, Version 2.0',
-      packages=find_packages()
+      packages=find_packages(),
       entry_points={'console_scripts':['savu_config=scripts.config_generator.savu_config:main','savu=savu.tomo_recon:main'],},
       scripts=[facility_path+'/savu_launcher.sh',facility_path+'/savu_mpijob.sh'],
       package_dir={'test_data':'test_data'},
