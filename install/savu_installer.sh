@@ -96,15 +96,8 @@ h5pybuild=`conda build $recipes/h5py --output`
 echo "Installing h5py..."
 conda install --use-local $h5pybuild
 
-
-CUDA_ROOT=/path/to/cuda pip install astra-toolbox
-
-echo "Building astra toolbox..."
-conda build $recipes/astra
-astrabuild=`conda build $recipes/astra --output`
-
 echo "Installing astra toolbox..."
-conda install --use-local $astrabuild
+CUDA_ROOT=$cuda pip install astra-toolbox
 
 echo "Installing xraylib..."
 conda install -c tacaswell xraylib
