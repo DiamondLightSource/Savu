@@ -1,0 +1,8 @@
+pyfftw
+lmfit
+fabio
+pyfai
+peakutils
+nvidia-ml-py
+pymca
+

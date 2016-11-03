@@ -13,9 +13,9 @@ while read -r a b c d; do
 
 
 	DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-	x=$DIR
-	echo $x
-	savupath=${x%/bin}
+	savupath=${DIR%/bin}
+
+    echo $savupath
 
 	#runfile=/bin/savu_distArray_launcher.sh
 	runfile=/bin/savu_launcher.sh
@@ -23,8 +23,8 @@ while read -r a b c d; do
     
     #datafile=/dls/staging/dls/i12/data/2015/ee13236-1/processing/scripts/../NEW_WORK_2016_08/55734/55734_007.nxs
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/robert_test.nxs
-    datafile=/dls/i18/data/2016/sp13939-1/Experiment_1/nexus/75996_alphanitrateRT_1.nxs
-    processfile=/dls/i18/data/2016/sp13939-1/processing/XRD/AbsorptionCorrectedXRD/cropped.nxs
+    #datafile=/dls/i18/data/2016/sp13939-1/Experiment_1/nexus/75996_alphanitrateRT_1.nxs
+    #processfile=/dls/i18/data/2016/sp13939-1/processing/XRD/AbsorptionCorrectedXRD/cropped.nxs
 
     #datafile=/dls/i12/data/2016/cm14465-4/processing/bubble_scan/
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/multi_nxs_stack_test.nxs
@@ -102,8 +102,8 @@ while read -r a b c d; do
 
     #processfile=/dls/i18/data/2016/sp12601-1/processing/Savu_Test_Data/new_test_process_list.nxs
 
-    #datafile=$outpath/../../test_data/24737.nxs
-    #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test.nxs
+    datafile=$outpath/../../test_data/24737.nxs
+    processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test.nxs
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/test_data/test_process_lists/NLReg_cgls.nxs
 
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/test_data/test_process_lists/vo_centering_test.nxs
