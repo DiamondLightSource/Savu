@@ -140,10 +140,6 @@ class NxtomoLoader(BaseLoader):
             image_key = data_obj.backing_file[
                 'entry1/tomo_entry/instrument/detector/image_key'][...]
 
-#            # *** temporary for i23 data ***
-#            image_key[390:400] = 3
-#            # ******************************
-
             from savu.data.data_structures.data_type import ImageKey
             data_obj.data = \
                 ImageKey(data_obj, image_key, 0, ignore=ignore)
@@ -176,7 +172,8 @@ class NxtomoLoader(BaseLoader):
 
         if path.split('/')[0] == 'test_data':
             import os
-            path = os.path.abspath(__file__).split('savu')[0] + path
+            path = \
+                os.path.dirname(os.path.abspath(__file__))+'/../../../' + path
 
         ffile = h5py.File(path, 'r')
         try:

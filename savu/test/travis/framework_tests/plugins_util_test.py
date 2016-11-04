@@ -36,7 +36,8 @@ class Test(unittest.TestCase):
         plugin = pu.load_plugin("savu.plugins.plugin")
         self.assertEqual(plugin.__class__, test_plugin.Plugin,
                          "Failed to load the correct class")
-        self.assertRaises(NotImplementedError, plugin.process_frames, None, None)
+        self.assertRaises(NotImplementedError,
+                          plugin.process_frames, None, None)
 
     def testfind_args(self):
         plugin = pu.load_plugin("savu.plugins.filters.denoise_bregman_filter")
@@ -45,23 +46,22 @@ class Test(unittest.TestCase):
 
     def test_get_plugin_external_path(self):
         savu_path = os.path.split(savu.__path__[0])[0]
-        plugin = pu.load_plugin(os.path.join(savu_path, "plugin_examples", "example_median_filter"))
+        plugin = pu.load_plugin(os.path.join(savu_path, "plugin_examples",
+                                             "example_median_filter"))
         self.assertEqual(plugin.name, "ExampleMedianFilter")
 
     def test_get_plugins_paths(self):
-        paths = pu.get_plugins_paths()
-        self.assertEqual(len(paths), 1)
-
-    def test_get_plugins_paths2(self):
+        n_paths = len(pu.get_plugins_paths())
         os.environ["SAVU_PLUGINS_PATH"] = "/tmp/"
         paths = pu.get_plugins_paths()
-        self.assertEqual(len(paths), 2)
+        self.assertEqual(len(paths), n_paths+1)
         os.environ["SAVU_PLUGINS_PATH"] = ""
 
-    def test_get_plugins_paths3(self):
+    def test_get_plugins_paths2(self):
+        n_paths = len(pu.get_plugins_paths())
         os.environ["SAVU_PLUGINS_PATH"] = "/tmp/:/dev/:/home/"
         paths = pu.get_plugins_paths()
-        self.assertEqual(len(paths), 4)
+        self.assertEqual(len(paths), n_paths+3)
         os.environ["SAVU_PLUGINS_PATH"] = ""
 
     def test_get_plugins_path_and_load(self):

@@ -1,10 +1,11 @@
  # "Loads up UGE for DLS cluster" ***change this
 module load global/cluster
 
-# Loads the Savu Anaconda distribution
-# Loads openmpi 1.6.5
-# Loads cuda 7.0
-# Loads fftw 3.3.3
+# Adds to relevant paths:
+# Savu Anaconda distribution
+# openmpi 1.6.5
+# cuda 7.0
+# fftw 3.3.3
 # *** change this
 module load python/anaconda-savu
 
@@ -18,7 +19,7 @@ shift 5
 nGPUs=4
 
 # get path to Savu module containing main
-filename=$savupath/savu/tomo_recon.py
+filename=`command -v savu_serial`
 
 # output each host name to the log file
 UNIQHOSTS=${TMPDIR}/machines-u
@@ -36,7 +37,6 @@ for i in $(seq 0 $((nGPUs-1))); do GPUs+="GPU$i " ; done
 for i in $(seq 0 $((nCPUs-1-nGPUs))); do CPUs+="CPU$i " ; done
 CPUs=$(echo $GPUs$CPUs | tr ' ' ,)
 echo $CPUs
-
 echo "Processes running are : ${processes}"
 
 # run the mpijob

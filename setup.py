@@ -33,7 +33,7 @@ if '--help' in sys.argv:
     print 'To package for a facility use "--facility <facilityname>" eg: python setup.py install --facility dls [Default facilityname is dls]'
 
 def _get_packages():
-    others = ['scripts', 'scripts.config_generator', 'scripts.log_evaluation', 'install', 'install.conda-recipes']
+    others = ['scripts', 'scripts.config_generator', 'scripts.log_evaluation', 'install', 'install.conda-recipes', 'test_data', 'lib']
     return find_packages() + others
 
 setup(name='savu',
@@ -54,12 +54,14 @@ setup(name='savu',
       license='Apache License, Version 2.0',
       packages=_get_packages(),
       scripts=[facility_path+'/savu_launcher.sh',facility_path+'/savu_mpijob.sh',
-               'install/savu_installer.sh', 'install/savu_setup.sh'],
+               'install/savu_installer.sh', 'install/savu_setup.sh', 'install/mpi_cpu_test.sh', 'install/mpi_gpu_test.sh'],
       entry_points={'console_scripts':['savu_config=scripts.config_generator.savu_config:main',
-                    'savu=savu.tomo_recon:main', 'savu_quick_tests=savu:run_tests',
+                    'savu_serial=savu.tomo_recon:main', 'savu_quick_tests=savu:run_tests',
                     'savu_full_tests=savu:run_full_tests',
                     'savu_profile=scripts.log_evaluation.GraphicalThreadProfiler:main',],},
-      package_data={'test_data':['data/*', 'process_lists/*','test_process_lists/*']},
+      package_data={'test_data':['data/*', 'process_lists/*','test_process_lists/*', 'data/i12_test_data/*',
+                    'data/I18_test_data/*', 'data/image_test/*', 'data/image_test/tiffs/*'],'lib':['*.so'],
+                    'install.conda-recipes':['hdf5/*', 'h5py/*', 'savu/*', 'xraylib/*']},
       include_package_data=True,
       zip_safe=False)
 

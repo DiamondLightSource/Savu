@@ -78,6 +78,8 @@ fi
 
 echo "Uninstalling packages..."
 conda remove mpi4py h5py hdf5
+pip uninstall mpi4py astra-toolbox xraylib
+pip uninstall -r $package_list
 
 echo "Installing mpi4py..."
 env MPICC=$mpicc pip install mpi4py==$mpi4py_version
@@ -99,8 +101,12 @@ conda install --use-local $h5pybuild
 echo "Installing astra toolbox..."
 CUDA_ROOT=$cuda pip install astra-toolbox
 
+echo "Building xraylib..."
+conda build $recipes/xraylib
+xraylibbuild=`conda build $recipes/xraylib --output`
+
 echo "Installing xraylib..."
-conda install -c tacaswell xraylib
+conda install --use-local $xraylibbuild
 
 package_list='install/pip_install_package_list.txt'
 echo "Installing extra packages through pip..."
@@ -110,5 +116,4 @@ echo
 echo "*********************************"
 echo "* package installation complete *"
 echo "*********************************"
-
 

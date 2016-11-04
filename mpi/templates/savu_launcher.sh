@@ -19,7 +19,7 @@ nCoresPerNode=20    # the number of cores per node ***change this
 
 # set relevant filepaths
 DIR="$(cd "$(dirname "$0")" && pwd)"
-filepath=$DIR'/savu_mpijob.sh'
+filepath=`command -v savu_mpijob.sh`
 savupath=${DIR%/mpi}
 
 # total number of processes
@@ -39,7 +39,8 @@ done
 # node exclusivity is required
 # log files are useful for profiling
 # ***change this
-qsub -N $outname -sync y -j y -pe openmpi $M -l exclusive -l infiniband -l gpu=1 -q medium.q@@com10 $filepath $savupath $datafile $processfile $outpath $nCPUs $@> tmp.txt
+qsub -N $outname -sync y -j y -o $log_path -e $log_path -pe openmpi $M -l exclusive\
+     -l infiniband -l gpu=1 -q medium.q@@com10 $filepath $savupath $datafile $processfile $outpath $nCoresPerNode $@> tmp.txt
 
 # =================== a more detailed description ===================================
 #qsub -N $outname         `# name of the qsub job` \
@@ -69,5 +70,4 @@ done
 echo "SAVU_LAUNCHER:: Output ready, spooling now"
 cat $filename
 echo "SAVU_LAUNCHER:: Process complete"
-
 
