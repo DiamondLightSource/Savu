@@ -62,7 +62,7 @@ setup(name='savu',
                     'savu_profile=scripts.log_evaluation.GraphicalThreadProfiler:main',],},
       package_data={'test_data':['data/*', 'process_lists/*','test_process_lists/*', 'data/i12_test_data/*',
                     'data/I18_test_data/*', 'data/image_test/*', 'data/image_test/tiffs/*'],'lib':['*.so'],
-                    'install.conda-recipes':['hdf5/*', 'h5py/*', 'savu/*', 'xraylib/*']},
+                    'install':['*.txt'], 'install.conda-recipes':['hdf5/*', 'h5py/*', 'savu/*', 'xraylib/*']},
       include_package_data=True,
       zip_safe=False)
 

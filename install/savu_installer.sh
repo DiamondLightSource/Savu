@@ -108,7 +108,7 @@ xraylibbuild=`conda build $recipes/xraylib --output`
 echo "Installing xraylib..."
 conda install --use-local $xraylibbuild
 
-package_list='install/pip_install_package_list.txt'
+package_list=$recipes'/../pip_install_package_list.txt'
 echo "Installing extra packages through pip..."
 pip install -r $package_list
 
