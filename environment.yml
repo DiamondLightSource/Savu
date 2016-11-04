@@ -25,8 +25,5 @@ dependencies:
     - pyfftw
     - peakutils
     - pymca
-<<<<<<< HEAD
-=======
     - colorama
->>>>>>> version1
 

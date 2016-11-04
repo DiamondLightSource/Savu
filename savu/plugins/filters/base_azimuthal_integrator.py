@@ -105,16 +105,7 @@ class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
         spectra.create_dataset(patterns={in_dataset[0]: patterns},
                                axis_labels={in_dataset[0]: axis_labels},
                                shape=shape[:-2]+(num_bins,))
-<<<<<<< HEAD
-=======
 
-#        The following lines are needed to make the axis labels correct. There are 3 labels for the last dimension.
-#         spectra.create_dataset(patterns={in_dataset[0]: patterns},
-#                                axis_labels={in_dataset[0]: axis_labels},
-#                                shape=shape[:-2]+(num_bins,))
-#         axis_labels = [{'rotation_angle': 'degrees'}, {'y': 'mm'}, {'x': 'mm'}, {'2Theta': 'degrees', 'Q': 'Angstrom^-1','D':'Angstrom'}]
-#         spectra.data_info.set_meta_data('axis_labels',axis_labels)
->>>>>>> version1
         spectrum = {'core_dir': (-1,), 'slice_dir': tuple(range(len(shape)-2))}
         spectra.add_pattern("SPECTRUM", **spectrum)
 
