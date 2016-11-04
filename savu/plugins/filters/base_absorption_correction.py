@@ -25,7 +25,7 @@ import numpy as np
 from savu.plugins.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from scipy.interpolate import interp1d
-import _xraylib as xl
+import xraylib as xl
 
 
 class BaseAbsorptionCorrection(BaseFilter, CpuPlugin):
