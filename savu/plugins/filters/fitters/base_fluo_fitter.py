@@ -26,7 +26,7 @@ from savu.plugins.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 import peakutils as pe
 import numpy as np
-import _xraylib as xl
+import xraylib as xl
 from flupy.algorithms.xrf_calculations.transitions_and_shells import \
     shells, transitions
 from flupy.algorithms.xrf_calculations.escape import *
