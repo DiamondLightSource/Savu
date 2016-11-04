@@ -86,8 +86,7 @@ def set_file_name(filename):
 
     return outfilename
 
-
-if __name__ == "__main__":
+def main():
     import optparse
 
     usage = "%prog [options] input_file"
@@ -97,3 +96,7 @@ if __name__ == "__main__":
 
     filename = [os.getcwd() + '/' + args[0]]
     convert(filename)
+
+if __name__ == "__main__":
+    main()
+
