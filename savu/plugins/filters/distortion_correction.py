@@ -62,16 +62,16 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
         temp_array = np.empty(plugin_data_shape, dtype=np.float32)
         unwarp.setup(temp_array, temp_array)
 
-        self.slice_list = [slice(None)]*3
+        self.new_slice = [slice(None)]*3
         orig_shape = self.get_in_datasets()[0].get_shape()
         for ddir in self.core_dir:
-            self.slice_list[ddir] = \
+            self.new_slice[ddir] = \
                 slice(self.crop, orig_shape[ddir]-self.crop)
 
     def filter_frames(self, data):
         result = np.empty_like(data[0])
         unwarp.run(data[0], result)
-        return result[self.slice_list]
+        return result[self.new_slice]
 
     def post_process(self):
         unwarp.cleanup()
@@ -95,4 +95,4 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
         out_pData[0].plugin_data_setup('PROJECTION', self.get_max_frames())
 
     def get_max_frames(self):
-        return 100
+        return 16

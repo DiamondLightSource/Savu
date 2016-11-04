@@ -59,7 +59,7 @@ class NxxrdLoader(BaseMultiModalLoader):
             mData = data_obj.meta_data
             xpix = calibrationfile[det_str + '/detector_module/fast_pixel_direction'].value*1e-3 # in metres
             mData.set_meta_data("x_pixel_size",xpix)
-            
+
             mData.set_meta_data("beam_center_x",
                     calibrationfile[det_str + '/beam_center_x'].value*1e-3) #in metres 
             mData.set_meta_data("beam_center_y",

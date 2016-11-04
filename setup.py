@@ -1,5 +1,6 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 import os
+import shutil
 
 def readme():
     with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'README.rst')) as f:
@@ -8,13 +9,32 @@ def readme():
 import sys
 facility='dls'
 facility_path='mpi/dls'
+
+def _create_new_facility(facility_path):
+    # if the folder doesn't exist then create it and add two template scripts...
+    path=os.path.join(os.path.dirname(os.path.realpath(__file__)))
+    facility_path = path+'/'+facility_path
+    print "the facility path is", facility_path
+    if not os.path.exists(facility_path):
+        template_path = path+'/mpi/templates'
+        print "Creating the directory...", facility_path
+        os.makedirs(facility_path)
+        print "Adding templates to the new directory..."
+        shutil.copy(template_path+'/savu_launcher.sh', facility_path)
+        shutil.copy(template_path+'/savu_mpijob.sh', facility_path)
+
 if '--facility' in sys.argv:
     index = sys.argv.index('--facility')
     sys.argv.pop(index)
     facility=sys.argv.pop(index)
     facility_path='mpi/'+facility
+    _create_new_facility(facility_path)
 if '--help' in sys.argv:
     print 'To package for a facility use "--facility <facilityname>" eg: python setup.py install --facility dls [Default facilityname is dls]'
+
+def _get_packages():
+    others = ['scripts', 'scripts.config_generator', 'scripts.log_evaluation', 'install', 'install.conda-recipes', 'test_data', 'lib']
+    return find_packages() + others
 
 setup(name='savu',
       version='2.0',
@@ -32,22 +52,16 @@ setup(name='savu',
       author='Mark Basham',
       author_email='scientificsoftware@diamond.ac.uk',
       license='Apache License, Version 2.0',
-      packages=['test_data','savu','savu.plugins','savu.core',
-                'savu.core.transports',
-                'savu.plugins.loaders',
-                'savu.plugins.savers',
-                'savu.plugins.corrections',
-                'savu.plugins.reconstructions',
-                'savu.plugins.driver',
-                'savu.plugins.filters',
-                'savu.data',
-                'savu.data.transport_data',
-                'savu.data.data_structures',
-                'scripts',
-                'scripts.config_generator'],
-      entry_points={'console_scripts':['savu_process_generator=scripts.config_generator.savu_config:main','tomo_recon=savu.tomo_recon:main'],},
-      scripts=[facility_path+'/savu_launcher.sh',facility_path+'/savu_mpijob.sh'],
-      package_dir={'test_data':'test_data'},
-      package_data={'test_data':['data/*.nxs','process_lists/*.nxs','test_process_lists/*.nxs']},
+      packages=_get_packages(),
+      scripts=[facility_path+'/savu_launcher.sh',facility_path+'/savu_mpijob.sh',
+               'install/savu_installer.sh', 'install/savu_setup.sh', 'install/mpi_cpu_test.sh', 'install/mpi_gpu_test.sh'],
+      entry_points={'console_scripts':['savu_config=scripts.config_generator.savu_config:main',
+                    'savu_serial=savu.tomo_recon:main', 'savu_quick_tests=savu:run_tests',
+                    'savu_full_tests=savu:run_full_tests',
+                    'savu_profile=scripts.log_evaluation.GraphicalThreadProfiler:main',],},
+      package_data={'test_data':['data/*', 'process_lists/*','test_process_lists/*', 'data/i12_test_data/*',
+                    'data/I18_test_data/*', 'data/image_test/*', 'data/image_test/tiffs/*'],'lib':['*.so'],
+                    'install.conda-recipes':['hdf5/*', 'h5py/*', 'savu/*', 'xraylib/*']},
       include_package_data=True,
       zip_safe=False)
+

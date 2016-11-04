@@ -1,0 +1,22 @@
+package:
+  name: astra-toolbox
+  version: 1.6
+
+source:
+  fn: astra-1.6.tar.bz2
+  url: http://sourceforge.net/projects/astra-toolbox/files/astra-1.6/astra-1.6.tar.bz2
+
+requirements:
+  build:
+    - python
+    - numpy
+    - cython
+
+build:
+  number: 100
+
+about:
+  home: http://www.astra-toolbox.com
+  license: GPLv3
+  summary: 'The ASTRA Toolbox is a Python toolbox of high-performance GPU primitives for 2D and 3D tomography.'
+

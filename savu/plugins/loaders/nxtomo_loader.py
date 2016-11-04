@@ -27,6 +27,7 @@ import numpy as np
 
 from savu.plugins.base_loader import BaseLoader
 from savu.plugins.utils import register_plugin
+import savu.core.utils as cu
 
 
 @register_plugin
@@ -42,6 +43,8 @@ class NxtomoLoader(BaseLoader):
         scale value. Default: [None, None, 1].
     :param angles: A python statement to be evaluated or a file. Default: None.
     :param 3d_to_4d: Set to true if this reshape is required. Default: False.
+    :param ignore_flats: List of batch numbers of flats (start at 1) to \
+        ignore. Default: None.
     """
 
     def __init__(self, name='NxtomoLoader'):
@@ -78,9 +81,11 @@ class NxtomoLoader(BaseLoader):
         except:
             logging.warn("No Control information available")
 
-        self.__check_angles
+        nAngles = len(data_obj.meta_data.get_meta_data('rotation_angle'))
+        self.__check_angles(data_obj, nAngles)
         data_obj.set_original_shape(shape)
         self.set_data_reduction_params(data_obj)
+        data_obj.data._set_dark_and_flat()
 
     def _setup_3d(self, data_obj):
         logging.debug("Setting up 3d tomography data.")
@@ -123,54 +128,65 @@ class NxtomoLoader(BaseLoader):
         flat = self.parameters['flat'][0]
         dark = self.parameters['dark'][0]
 
-        if not flat or not dark:
+        if not flat and not dark:
             self.__find_dark_and_flat(data_obj)
-        if flat:
-            self.__get_image('flat', 1, data_obj)
-        if dark:
-            self.__get_image('dark', 2, data_obj)
+        else:
+            self.__set_separate_dark_and_flat(data_obj)
 
     def __find_dark_and_flat(self, data_obj):
+        ignore = self.parameters['ignore_flats'] if \
+            self.parameters['ignore_flats'] else None
         try:
             image_key = data_obj.backing_file[
-                'entry1/tomo_entry/instrument/detector/image_key']
+                'entry1/tomo_entry/instrument/detector/image_key'][...]
+
             from savu.data.data_structures.data_type import ImageKey
-            data_obj.data = ImageKey(data_obj, image_key[...], 0)
+            data_obj.data = \
+                ImageKey(data_obj, image_key, 0, ignore=ignore)
             data_obj.set_shape(data_obj.data.get_shape())
         except KeyError:
-            logging.warn("An image key was not found.")
+            cu.user_message("An image key was not found.")
             try:
-                mData = data_obj.meta_data
-                entry = 'entry1/tomo_entry/instrument/detector/flatfield'
-                mData.set_meta_data('flat', data_obj.backing_file[entry][...])
-                entry = 'entry1/tomo_entry/instrument/detector/darkfield'
-                mData.set_meta_data('dark', data_obj.backing_file[entry][...])
+                from savu.data.data_structures.data_type import NoImageKey
+                data_obj.data = \
+                    NoImageKey(data_obj, 0, ignore=ignore)
+                entry = 'entry1/tomo_entry/instrument/detector/'
+                data_obj.data._set_flat_path(entry + 'flatfield')
+                data_obj.data._set_dark_path(entry + 'darkfield')
             except KeyError:
-                logging.warn("Dark and flat data was not found in input "
-                             "file.")
+                cu.user_message("Dark/flat data was not found in input file.")
 
-    def __get_image(self, name, key, data_obj):
-        import os
-        fpath, fentry, scale = self.parameters[name]
+    def __set_separate_dark_and_flat(self, data_obj):
+        from savu.data.data_structures.data_type import NoImageKey
+        try:
+            image_key = data_obj.backing_file[
+                'entry1/tomo_entry/instrument/detector/image_key'][...]
+        except:
+            image_key = None
+        data_obj.data = NoImageKey(data_obj, image_key, 0)
+        self.__set_data(data_obj, 'flat', data_obj.data._set_flat_path)
+        self.__set_data(data_obj, 'dark', data_obj.data._set_dark_path)
 
-        #*** doesn't work
-        if 'savu' not in fpath:
-            fpath = \
-                os.path.abspath(__file__).split('savu')[0] + 'savu/' + fpath
+    def __set_data(self, data_obj, name, func):
+        path, entry, scale = self.parameters[name]
 
-        h5file = h5py.File(fpath, 'r')
+        if path.split('/')[0] == 'test_data':
+            import os
+            path = \
+                os.path.dirname(os.path.abspath(__file__))+'/../../../' + path
+
+        ffile = h5py.File(path, 'r')
         try:
             image_key = \
-                h5file['entry1/tomo_entry/instrument/detector/image_key']
-            data = h5file[self.parameters['data_path']][
-                image_key == key, ...].mean(0)*int(scale)
-        except KeyError:
-            data = h5file[fentry][...].mean(0)*int(scale)
-        data_obj.meta_data.set_meta_data(name, data)
+                ffile['entry1/tomo_entry/instrument/detector/image_key'][...]
+            func(ffile[entry], imagekey=image_key)
+        except:
+            func(ffile[entry])
+
+        data_obj.data._set_scale(name, scale)
 
     def __set_rotation_angles(self, data_obj):
         angles = self.parameters['angles']
-
         if angles is None:
             try:
                 entry = 'entry1/tomo_entry/data/rotation_angle'
@@ -193,6 +209,6 @@ class NxtomoLoader(BaseLoader):
 
     def __check_angles(self, data_obj, n_angles):
         data_angles = data_obj.data.get_shape()[0]
-        if data_angles is not n_angles:
+        if data_angles != n_angles:
             raise Exception("The number of angles %s does not match the data "
                             "dimension length %s", n_angles, data_angles)

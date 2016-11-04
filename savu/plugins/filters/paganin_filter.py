@@ -42,6 +42,9 @@ class PaganinFilter(BaseFilter, CpuPlugin):
     :param Padtopbottom: Pad to the top and bottom of projection. Default: 10.
     :param Padleftright: Pad to the left and right of projection. Default: 10.
     :param Padmethod: Method of padding. Default: 'edge'.
+
+    :config_warn: The 'log' parameter in the reconstruction should be set to\
+        FALSE when the Paganin Filter is on.
     """
 
     def __init__(self):

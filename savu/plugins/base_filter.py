@@ -31,7 +31,7 @@ class BaseFilter(Plugin):
     raw timeseries data
 
     :param in_datasets: A list of the dataset(s) to process. Default: [].
-    :param out_datasets: A list of the dataset(s) to process. Default: [].
+    :param out_datasets: A list of the dataset(s) to create. Default: [].
     """
 
     def __init__(self, name):
@@ -57,10 +57,11 @@ class BaseFilter(Plugin):
         """
         return 8
 
-    def process_frames(self, data, _):
+    def process_frames(self, data, slice_list):
         """
         Calls the main filter processing function
         """
+        self.slice_list = slice_list[0]  
         return self.filter_frames(data)
 
     def filter_frames(self, data):
@@ -80,13 +81,21 @@ class BaseFilter(Plugin):
         """
         return False
 
+    def raw_data(self):
+        """ Return True if the output dataset should retain ImageKey/NoImageKey
+        instances if they exist, i.e. keep the darks and flats
+        NB. This is only available if out_dataset is created from an in_dataset
+        """
+        return False
+
     def setup(self):
         self.exp.log(self.name + " Start")
         # set up the output dataset that is created by the plugin
         in_dataset, out_dataset = self.get_datasets()
 
         # copy all required information from in_dataset[0]
-        out_dataset[0].create_dataset(in_dataset[0])
+        # raw=True/False => output is still raw data (retain darks and flats)
+        out_dataset[0].create_dataset(in_dataset[0], raw=self.raw_data())
 
         # set information relating to the plugin data
         in_pData, out_pData = self.get_plugin_datasets()
@@ -94,6 +103,7 @@ class BaseFilter(Plugin):
         plugin_pattern = self.get_plugin_pattern()
         in_pData[0].plugin_data_setup(plugin_pattern, self.get_max_frames(),
                                       fixed=self.fix_data())
+        # fixed=True/False => same number of frames each time (uses padding)
         out_pData[0].plugin_data_setup(plugin_pattern, self.get_max_frames(),
                                        fixed=self.fix_data())
 

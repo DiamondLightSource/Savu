@@ -33,13 +33,6 @@ import logging
 savuPath = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(savuPath + "/../lib"))
 
-# add xraylib
-sys.path.append("/dls_sw/apps/xraylib/3.0.0/64/lib/python2.7/site-packages")
-try:
-    sys.path.append("/dls/science/groups/das/Aaron/FastXRF/src")
-except Exception:
-    logging.warn("Fluo tools not on path")
-
 from . import core
 from . import data
 from . import plugins
@@ -51,7 +44,7 @@ def run_full_tests():
 
     print "Tests will run shortly, and may take some time to complete"
     print "The tests may raise errors, please don't worry about these as " + \
-        "they may be raised deliberatly"
+        "they may be raised deliberately."
     print "The key information is in the final test results"
 
     path = os.path.split(test.travis.__file__)[0]

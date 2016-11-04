@@ -45,7 +45,8 @@ class Data(DataCreate):
         self.group_name = None
         self.group = None
         self._plugin_data_obj = None
-        self.tomo_raw_obj = None
+        #self.tomo_raw_obj = None
+        self.raw = None
         self.backing_file = None
         self.data = None
         self.next_shape = None
@@ -387,5 +388,7 @@ class Data(DataCreate):
         for i in range(len(slice_list)):
             label = axis_labels[i].keys()[0]
             if label in self.meta_data.get_dictionary().keys():
-                self.meta_data.set_meta_data(
-                    label, self.meta_data.get_meta_data(label)[slice_list[i]])
+                values = self.meta_data.get_meta_data(label)
+                preview_sl = [slice(None)]*len(values.shape)
+                preview_sl[0] = slice_list[i]
+                self.meta_data.set_meta_data(label, values[preview_sl])

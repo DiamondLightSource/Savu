@@ -191,14 +191,46 @@ def find_args(dclass, inst=None):
     if not docstring:
         return []
 
-    lines = docstring.split('\n')
+    mod_doc_lines = __get_doc_lines(sys.modules[dclass.__module__].__doc__)
+    lines = __get_doc_lines(docstring)
     param_regexp = re.compile('^:param (?P<param>\w+):\s?(?P<doc>\w.*[^ ])\s' +
                               '?Default:\s?(?P<default>.*[^ ])$')
-    args = [param_regexp.findall(line.strip(' .')) for line in lines]
+    param, idx1 = __find_regexp(param_regexp, lines)
+    warn_regexp = re.compile(r'^:config_warn: \s?(?P<config_warn>.*[^ ])$')
+    warn, idx2 = __find_regexp(warn_regexp, lines)
+    if not warn:
+        warn = ['']
+    syn_regexp = re.compile(r'^:synopsis: \s?(?P<synopsis>.*[^ ])$')
+    synopsis, idx3 = __find_regexp(syn_regexp, mod_doc_lines)
+    if not synopsis:
+        synopsis = ['']
+
+    info = __find_docstring_info(idx1+idx2+idx3, lines)
+
+    param_entry = [{'dtype': type(value), 'name': a[0], 'desc': a[1],
+                    'default': value} for a in param for value in [eval(a[2])]]
+
+    return {'warn': "\n".join(warn), 'info': info, 'synopsis': synopsis[0],
+            'param': param_entry}
+
+
+def __get_doc_lines(doc):
+    if not doc:
+        return ['']
+    return [" ".join(l.strip(' .').split()) for l in doc.split('\n')]
+
+
+def __find_regexp(regexp, str_list):
+    args = [regexp.findall(s) for s in str_list]
+    index = [i for i in range(len(args)) if args[i]]
     args = [arg[0] for arg in args if len(arg)]
-    return [{'dtype': type(value),
-             'name': a[0], 'desc': a[1],
-             'default': value} for a in args for value in [eval(a[2])]]
+    return args, index
+
+
+def __find_docstring_info(index, str_list):
+    info = [str_list[i] for i in range(len(str_list)) if i not in index]
+    info = [i for i in info if i]
+    return "\n".join(info)
 
 
 def calc_param_indices(dims):

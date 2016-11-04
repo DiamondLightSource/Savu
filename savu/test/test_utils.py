@@ -37,12 +37,14 @@ def get_test_data_path(name):
     return '/'.join(os.path.split(path)[0].split(os.sep)[:-2] +
                     ['test_data/data', name])
 
+
 def get_test_big_data_path(name):
     '''
     internal to diamond
     '''
     path = '/dls/mx-scratch/savu_test_data'
     return path+os.sep+name
+
 
 def get_test_process_path(name):
     path = inspect.stack()[0][1]
@@ -65,7 +67,7 @@ def get_experiment_types():
     exp_dict['fluo'] = {'func': 'set_fluo_experiment',
                         'filename': 'fluo.nxs'}
     exp_dict['tomo_3dto4d'] = {'func': 'set_3dto4d_experiment',
-                           'filename': 'i12_test_data.nxs'}
+                               'filename': 'i12_test_data.nxs'}
 
     return exp_dict
 

@@ -50,7 +50,10 @@ class Pca(BaseComponentAnalysis):
         data = self.remove_nan_inf(data)  #otherwise the fit flags up an error for obvious reasons
 #         print "I'm here"
         S_ = pca.fit_transform(data)
+<<<<<<< HEAD
         print "I am here"
+=======
+>>>>>>> version1
 #         print "S_Shape is:"+str(S_.shape)
 #         print "self.images_shape:"+str(self.images_shape)
         loading = np.reshape(S_, (self.images_shape))

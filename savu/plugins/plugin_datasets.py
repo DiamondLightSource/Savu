@@ -50,8 +50,19 @@ class PluginDatasets(object):
         data_list = self.parameters[dtype + 'sets']
         data_objs = []
         for data in data_list:
-            data_objs.append(self.exp.index[dtype][data])
+            data_obj = self.exp.index[dtype][data]
+            if data_obj.raw and data_obj.data:
+                self.__add_raw_data(data_obj)
+            data_objs.append(data_obj)
         return data_objs
+
+    def __add_raw_data(self, data_obj):
+        from savu.data.data_structures.data_type import ImageKey, NoImageKey
+        if isinstance(data_obj.raw, ImageKey) or\
+           isinstance(data_obj.raw, NoImageKey):
+            return
+        proj_dim = data_obj.find_axis_label_dimension('rotation_angle')
+        data_obj.add_raw_data_obj(data_obj)
 
     def __set_in_datasets(self):
         """ Set the in_data objects.

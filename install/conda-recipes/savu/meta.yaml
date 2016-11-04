@@ -1,0 +1,16 @@
+package:
+  name: savu
+  version: "1.0"
+
+source:
+  url: https://github.com/DiamondLightSource/Savu/archive/version1.tar.gz
+
+requirements:
+  build:
+    - python
+
+about:
+  home: https://github.com/diamondlightsource/Savu
+  license: Apache V2 and GPL V3
+  license_file: LICENCE.txt
+
