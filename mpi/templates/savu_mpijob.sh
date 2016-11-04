@@ -19,7 +19,7 @@ shift 5
 nGPUs=4
 
 # get path to Savu module containing main
-filename=`command -v savu_serial`
+filename=`command -v savu`
 
 # output each host name to the log file
 UNIQHOSTS=${TMPDIR}/machines-u
