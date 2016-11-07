@@ -33,6 +33,7 @@ import textwrap
 import numpy as np
 from colorama import Fore, Back, Style
 import savu.plugins.utils as pu
+import savu.data.framework_citations as fc
 
 
 NX_CLASS = 'NX_class'
@@ -89,10 +90,14 @@ class PluginList(object):
             entry_group = plugin_file.create_group('entry')
 
         entry_group.attrs[NX_CLASS] = 'NXentry'
-        plugins_group = entry_group.create_group('plugin')
-        plugins_group.attrs[NX_CLASS] = 'NXplugin'
-        count = 1
+        citations_group = entry_group.create_group('framework_citations')
+        citations_group.attrs[NX_CLASS] = 'NXcollection'
+        self._save_framework_citations(citations_group)
 
+        plugins_group = entry_group.create_group('plugin')
+        plugins_group.attrs[NX_CLASS] = 'NXprocess'
+
+        count = 1
         for plugin in self.plugin_list:
             if 'pos' in plugin.keys():
                 num = int(re.findall('\d+', plugin['pos'])[0])
@@ -129,16 +134,32 @@ class PluginList(object):
 
             if 'cite' in plugin.keys():
                 if plugin['cite'] is not None:
-                    plugin['cite'].write(plugin_group)
+                    self._output_plugin_citations(plugin['cite'], plugin_group)
+
+#                if plugin['cite'] is not None:
+#                citation_group = plugin_group.create_group('citation')
+#                    plugin['cite'].write(citation_group)
 
             count += 1
 
-#    def add_plugin_citation(self, filename, plugin_number, citation):
-#        logging.debug("Adding Citation to file %s", filename)
-#        plugin_file = h5py.File(filename, 'a')
-#        plugin_entry = plugin_file['entry/process/%i' % plugin_number]
-#        citation.write(plugin_entry)
-#        plugin_file.close()
+    def _output_plugin_citations(self, citations, group):
+        if not isinstance(citations, list):
+            citations = [citations]
+        for cite in citations:
+            citation_group = group.create_group(cite.name)
+            cite.write(citation_group)
+
+    def _save_framework_citations(self, group):
+        framework_cites = fc.get_framework_citations()
+        count = 0
+        for cite in framework_cites:
+            citation_group = group.create_group(cite['name'])
+            citation = CitationInformation()
+            del cite['name']
+            for key, value in cite.iteritems():
+                exec('citation.' + key + '= value')
+            citation.write(citation_group)
+            count += 1
 
     def _get_string(self, **kwargs):
         out_string = []
@@ -365,9 +386,9 @@ class CitationInformation(object):
         self.doi = "Default DOI"
         self.endnote = "Default Endnote"
         self.bibtex = "Default Bibtex"
+        self.name = 'citation'
 
-    def write(self, hdf_group):
-        citation_group = hdf_group.create_group('citation')
+    def write(self, citation_group):
         citation_group.attrs[NX_CLASS] = 'NXcite'
         description_array = np.array([self.description])
         citation_group.create_dataset('description',

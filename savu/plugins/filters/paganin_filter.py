@@ -28,6 +28,7 @@ import pyfftw.interfaces.scipy_fftpack as fft
 from savu.plugins.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
+from savu.data.plugin_list import CitationInformation
 
 
 @register_plugin
@@ -36,7 +37,8 @@ class PaganinFilter(BaseFilter, CpuPlugin):
     A plugin to apply Paganin filter (contrast enhancement) on projections
 
     :param Energy: Given X-ray energy in keV. Default: 53.0.
-    :param Distance: Distance from sample to detection - Unit is metre. Default: 1.0.
+    :param Distance: Distance from sample to detection - Unit is \
+        metre. Default: 1.0.
     :param Resolution: Pixel size - Unit is micron. Default: 1.28.
     :param Ratio: ratio of delta/beta. Default: 250.0.
     :param Padtopbottom: Pad to the top and bottom of projection. Default: 10.
@@ -121,4 +123,40 @@ class PaganinFilter(BaseFilter, CpuPlugin):
     def get_max_frames(self):
         return 16
 
-# TODO Add the citation information here
+    def get_citation_information(self):
+        cite_info = CitationInformation()
+        cite_info.description = \
+            ("The contrast enhancement used in this processing chain is taken\
+             from this work.")
+        cite_info.bibtex = \
+            ("@article{paganin2002simultaneous,\n" +
+             "title={Simultaneous phase and amplitude extraction from a single\
+             defocused image of a homogeneous object},\n" +
+             "author={Paganin, David and Mayo, SC and Gureyev, Tim E and \
+             Miller, Peter R and Wilkins, Steve W},\n" +
+             "journal={Journal of microscopy},\n" +
+             "volume={206},\n" +
+             "number={1},\n" +
+             "pages={33--40},\n" +
+             "year={2002},\n" +
+             "publisher={Wiley Online Library}" +
+             "}")
+        cite_info.endnote = \
+            ("%0 Journal Article\n" +
+             "%T Simultaneous phase and amplitude extraction from a single \
+             defocused image of a homogeneous object\n" +
+             "%A Paganin, David\n" +
+             "%A Mayo, SC\n" +
+             "%A Gureyev, Tim E\n" +
+             "%A Miller, Peter R\n" +
+             "%A Wilkins, Steve W\n" +
+             "%J Journal of microscopy\n" +
+             "%V 206\n" +
+             "%N 1\n" +
+             "%P 33-40\n" +
+             "%@ 1365-2818\n" +
+             "%D 2002\n" +
+             "%I Wiley Online Library\n")
+        cite_info.doi = "doi: DOI: 10.1046/j.1365-2818.2002.01010.x"
+        return cite_info
+

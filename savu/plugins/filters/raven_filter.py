@@ -26,7 +26,7 @@ import pyfftw.interfaces.numpy_fft as fft
 
 from savu.plugins.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-
+from savu.data.plugin_list import CitationInformation
 from savu.plugins.utils import register_plugin
 
 
@@ -106,3 +106,34 @@ class RavenFilter(BaseFilter, CpuPlugin):
 
     def get_max_frames(self):
         return 16
+
+    def get_citation_information(self):
+        cite_info = CitationInformation()
+        cite_info.description = \
+            ("The ring artefact removal algorithm used in this processing \
+             chain is taken from this work.")
+        cite_info.bibtex = \
+            ("@article{raven1998numerical,\n" +
+             "title={Numerical removal of ring artifacts in \
+             microtomography},\n" +
+             "author={Raven, Carsten},\n" +
+             "journal={Review of scientific instruments},\n" +
+             "volume={69},\n" +
+             "number={8},\n" +
+             "pages={2978--2980},\n" +
+             "year={1998},\n" +
+             "publisher={AIP Publishing}\n" +
+             "}")
+        cite_info.endnote = \
+            ("%0 Journal Article\n" +
+             "%T Numerical removal of ring artifacts in microtomography\n" +
+             "%A Raven, Carsten\n" +
+             "%J Review of scientific instruments\n" +
+             "%V 69\n" +
+             "%N 8\n" +
+             "%P 2978-2980\n" +
+             "%@ 0034-6748\n" +
+             "%D 1998\n" +
+             "%I AIP Publishing")
+        cite_info.doi = "doi: 10.1063/1.1149043"
+        return cite_info

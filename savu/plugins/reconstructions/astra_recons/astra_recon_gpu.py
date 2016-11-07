@@ -191,14 +191,15 @@ class AstraReconGpu(BaseAstraRecon, GpuPlugin):
 
     def get_citation_information(self):
         cite_info = CitationInformation()
+        cite_info.name = 'citation3'
         cite_info.description = \
-            ("The reconstruction used to create this output is described in " +
-             "this publication")
+            ("The tomography reconstruction algorithm used in this processing \
+             pipeline is part of the ASTRA Toolbox")
         cite_info.bibtex = \
             ("@article{palenstijn2011performance,\n" +
-             "title={Performance improvements for iterative electron " +
-             "tomography reconstruction using graphics processing units " +
-             "(GPUs)},\n" +
+             "title={Performance improvements for iterative electron \
+             tomography reconstruction using graphics processing units \
+             (GPUs)},\n" +
              "author={Palenstijn, WJ and Batenburg, KJ and Sijbers, J},\n" +
              "journal={Journal of structural biology},\n" +
              "volume={176},\n" +
@@ -209,8 +210,8 @@ class AstraReconGpu(BaseAstraRecon, GpuPlugin):
              "}")
         cite_info.endnote = \
             ("%0 Journal Article\n" +
-             "%T Performance improvements for iterative electron tomography " +
-             "reconstruction using graphics processing units (GPUs)\n" +
+             "%T Performance improvements for iterative electron tomography \
+             reconstruction using graphics processing units (GPUs)\n" +
              "%A Palenstijn, WJ\n" +
              "%A Batenburg, KJ\n" +
              "%A Sijbers, J\n" +
@@ -220,6 +221,8 @@ class AstraReconGpu(BaseAstraRecon, GpuPlugin):
              "%P 250-253\n" +
              "%@ 1047-8477\n" +
              "%D 2011\n" +
-             "%I Elsevier")
-        cite_info.doi = "http://dx.doi.org/10.1016/j.jsb.2011.07.017"
-        return cite_info
+             "%I Elsevier\n")
+        cite_info.doi = "doi: 10.1016/j.jsb.2011.07.017"
+
+        return super(AstraReconGpu, self).get_citation_information() + \
+            [cite_info]
