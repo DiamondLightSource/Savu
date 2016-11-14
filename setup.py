@@ -38,7 +38,7 @@ def _get_packages():
     return find_packages() + others
 
 setup(name='savu',
-      version='2.0',
+      version='1.1',
       description='Savu Python Tomography Pipeline',
       long_description=readme(),
       classifiers=[

@@ -9,6 +9,9 @@ requirements:
   build:
     - python
 
+build:
+  preserve_egg_dir: True
+
 about:
   home: https://github.com/diamondlightsource/Savu
   license: Apache V2 and GPL V3
