@@ -33,8 +33,8 @@ if '--help' in sys.argv:
     print 'To package for a facility use "--facility <facilityname>" eg: python setup.py install --facility dls [Default facilityname is dls]'
 
 def _get_packages():
-    others = ['scripts', 'scripts.config_generator', 'scripts.log_evaluation',
-              'scripts.citation_extractor', 'install', 'install.conda-recipes', 'test_data', 'lib']
+    others = ['scripts', 'scripts.config_generator', 'scripts.log_evaluation', 'scripts.citation_extractor',
+              'install', 'install.conda-recipes', 'test_data', 'lib', 'mpi']
     return find_packages() + others
 
 setup(name='savu',
@@ -61,7 +61,7 @@ setup(name='savu',
                     'savu_full_tests=savu:run_full_tests', 'savu_citations=scripts.citation_extractor.citation_extractor:main',
                     'savu_profile=scripts.log_evaluation.GraphicalThreadProfiler:main',],},
       package_data={'test_data':['data/*', 'process_lists/*','test_process_lists/*', 'data/i12_test_data/*',
-                    'data/I18_test_data/*', 'data/image_test/*', 'data/image_test/tiffs/*'],'lib':['*.so'],
+                    'data/I18_test_data/*', 'data/image_test/*', 'data/image_test/tiffs/*'],'lib':['*.so'], 'mpi':['dls/*.sh'],
                     'install':['*.txt'], 'install.conda-recipes':['hdf5/*', 'h5py/*', 'savu/*', 'xraylib/*']},
       include_package_data=True,
       zip_safe=False)

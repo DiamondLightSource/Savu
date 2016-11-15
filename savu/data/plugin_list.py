@@ -136,10 +136,6 @@ class PluginList(object):
                 if plugin['cite'] is not None:
                     self._output_plugin_citations(plugin['cite'], plugin_group)
 
-#                if plugin['cite'] is not None:
-#                citation_group = plugin_group.create_group('citation')
-#                    plugin['cite'].write(citation_group)
-
             count += 1
 
     def _output_plugin_citations(self, citations, group):

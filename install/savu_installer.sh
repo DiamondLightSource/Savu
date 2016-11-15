@@ -1,3 +1,5 @@
+facility=$1
+
 build_no=100
 hdf5_version=1.15.1
 h5py_version=2.5.0
@@ -6,6 +8,14 @@ mpi4py_version=1.3.1
 path=$(python -c "import savu; import os; print os.path.abspath(savu.__file__)")
 DIR=${path%/savu/__init__.pyc}
 recipes=$DIR'/install/conda-recipes'
+
+launcher_path=`command -v savu_launcher.sh`
+launcher_path=${launcher_path%/savu_launcher.sh}
+if [ "$facility" ]; then
+    echo "copying the dls launcher scripts to the bin folder"
+    cp $DIR/mpi/$facility/savu_launcher.sh $launcher_path
+    cp $DIR/mpi/$facility/savu_mpijob.sh $launcher_path
+fi
 
 #=========================library checking==============================
 
@@ -93,7 +103,7 @@ conda install --use-local $hdf5build
 
 echo "Building h5py..."
 conda build $recipes/h5py --no-test
-h5pybuild=`conda build $recipes/h5py --output` 
+h5pybuild=`conda build $recipes/h5py --output`
 
 echo "Installing h5py..."
 conda install --use-local $h5pybuild

@@ -8,6 +8,7 @@ module load global/cluster
 # fftw 3.3.3
 # *** change this
 module load python/anaconda-savu
+# source activate your_anaconda_env 
 
 # sets run parameters
 savupath=$1

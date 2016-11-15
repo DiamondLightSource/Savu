@@ -15,7 +15,8 @@ nCoresPerNode=20
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
 filepath=$DIR'/savu_mpijob.sh'
-savupath=${DIR%/mpi}
+savupath=$(python -c "import savu, os; print savu.__path__[0]")
+savupath=${savupath%/savu}
 
 M=$((nNodes*nCoresPerNode))
 
