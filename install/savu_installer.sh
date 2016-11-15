@@ -1,4 +1,5 @@
 facility=$1
+savu_env=$2
 
 build_no=100
 hdf5_version=1.15.1
@@ -12,9 +13,15 @@ recipes=$DIR'/install/conda-recipes'
 launcher_path=`command -v savu_launcher.sh`
 launcher_path=${launcher_path%/savu_launcher.sh}
 if [ "$facility" ]; then
-    echo "copying the dls launcher scripts to the bin folder"
     cp $DIR/mpi/$facility/savu_launcher.sh $launcher_path
     cp $DIR/mpi/$facility/savu_mpijob.sh $launcher_path
+    if ! [ "$savu_env" ]; then
+        echo "WARNING: No conda environment has been set."
+    else
+        file=$launcher_path/savu_mpijob.sh
+        line=$(awk '/source activate/{ print NR; exit }' $file)
+        sed -i $line's/.*/source activate '$savu_env'/' $file
+    fi
 fi
 
 #=========================library checking==============================
