@@ -36,7 +36,6 @@ import savu.core.utils as cu
 
 class Hdf5Transport(TransportControl):
 
-
     def _transport_control_setup(self, options):
         """ Fill the options dictionary with MPI related values.
         """
@@ -58,6 +57,18 @@ class Hdf5Transport(TransportControl):
     def __mpi_setup(self, options):
         """ Set MPI process specific values and logging initialisation.
         """
+        sockets = MPI.COMM_WORLD.allgather(socket.gethostname())
+        uniq_sockets = set(sockets)
+        rank_map = [i for s in uniq_sockets for i in range(len(sockets))
+                    if s == sockets[i]]
+
+        nProcesses = len(sockets)
+        nSockets = len(uniq_sockets)
+        for i in range(nProcesses):
+            options['processes']
+            options['process'] = rank_map[RANK]
+        
+
         print("Running mpi_setup")
         RANK_NAMES = options["process_names"].split(',')
         RANK = MPI.COMM_WORLD.rank

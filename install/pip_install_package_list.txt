@@ -2,7 +2,6 @@ pyopencl
 pyfftw
 lmfit
 fabio
-pyfai --no-openmp
 peakutils
 nvidia-ml-py
 pymca

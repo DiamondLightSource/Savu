@@ -42,7 +42,7 @@ class MultiThreadedPlugin(PluginDriver):
         masters = [p for p in range(len(processes)) if p % nCores is 0]
         self.__create_new_communicator(masters, exp)
 
-        print "*****available cores", nCores
+        print "*****available cores", nCores, masters
         if process in masters:
             logging.info("Running a multi-threaded process")
             self.parameters['available_CPUs'] = nCores

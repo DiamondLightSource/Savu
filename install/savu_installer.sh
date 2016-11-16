@@ -115,8 +115,16 @@ h5pybuild=`conda build $recipes/h5py --output`
 echo "Installing h5py..."
 conda install --use-local $h5pybuild
 
+echo "Building astra toolbox..."
+conda build $recipes/astra
+astrabuild=`conda build $recipes/astra --output`
+
 echo "Installing astra toolbox..."
-CUDA_ROOT=$cuda pip install astra-toolbox
+conda install --use-local $astrabuild
+
+astra_init_path=$(python -c "import site; print site.getsitepackages()[0]")/astra/python/astra/__init__.py
+cat $astra_init_path >> $recipes/astra/__init__.py
+cp $recipes/astra/__init__.py ${astra_init_path%__init__.py}
 
 echo "Building xraylib..."
 conda build $recipes/xraylib
@@ -124,6 +132,9 @@ xraylibbuild=`conda build $recipes/xraylib --output`
 
 echo "Installing xraylib..."
 conda install --use-local $xraylibbuild
+
+echo "Installing pyfai..."
+pip install pyfai --no-openmp
 
 package_list=$recipes'/../pip_install_package_list.txt'
 echo "Installing extra packages through pip..."

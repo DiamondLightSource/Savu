@@ -29,11 +29,12 @@ import pyFAI
 
 import numpy as np
 from savu.plugins.base_filter import BaseFilter
-from savu.plugins.driver.cpu_plugin import CpuPlugin
+#from savu.plugins.driver.cpu_plugin import CpuPlugin
+from savu.plugins.driver.multi_threaded_plugin import MultiThreadedPlugin
 from scipy.interpolate import interp1d
 
 
-class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
+class BaseAzimuthalIntegrator(BaseFilter, MultiThreadedPlugin):
     """
     a base azimuthal integrator for pyfai
 
@@ -130,3 +131,4 @@ class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
         mData.set_meta_data('Q', qanstrom)
         mData.set_meta_data('D', dspacing)
         mData.set_meta_data('2Theta', ttheta)
+

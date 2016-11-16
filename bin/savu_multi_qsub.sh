@@ -47,8 +47,8 @@ while read -r a b c d; do
     #datafile=/dls/i12/data/2016/ee14033-1/processing/savu/N100y10H10V8ROI1dataPGVHilb/HIGHEI12ROCK01.nxs
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/updated_B16_pipeline.nxs
 
-    #datafile=/dls/i18/data/2016/sp13939-1/Experiment_1/nexus/75996_alphanitrateRT_1.nxs
-    #processfile=/dls/i18/data/2016/sp13939-1/processing/XRD/xrd_test.nxs
+    datafile=/dls/i18/data/2016/sp13939-1/Experiment_1/nexus/75996_alphanitrateRT_1.nxs
+    processfile=/dls/i18/data/2016/sp13939-1/processing/XRD/xrd_test.nxs
 
     #datafile=/dls/i12/data/2016/ee13941-1/rawdata/58197.nxs
     #processfile=$outpath/test_median_filter.nxs
@@ -102,8 +102,8 @@ while read -r a b c d; do
 
     #processfile=/dls/i18/data/2016/sp12601-1/processing/Savu_Test_Data/new_test_process_list.nxs
 
-    datafile=$outpath/../../test_data/24737.nxs
-    processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test.nxs
+    #datafile=$outpath/../../test_data/24737.nxs
+    #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test.nxs
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/test_data/test_process_lists/NLReg_cgls.nxs
 
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/test_data/test_process_lists/vo_centering_test.nxs
