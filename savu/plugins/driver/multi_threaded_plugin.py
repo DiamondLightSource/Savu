@@ -39,10 +39,11 @@ class MultiThreadedPlugin(PluginDriver):
         processes = exp.meta_data.get_meta_data("processes")
         nNodes = processes.count(processes[0])
         nCores = len(processes)/nNodes
-        masters = [p for p in range(len(processes)) if p % nCores is 0]
+
+        masters = [p for p in range(len(processes)) if p == 'CPU0']
+        print masters
         self.__create_new_communicator(masters, exp)
 
-        print "*****available cores", nCores, masters
         if process in masters:
             logging.info("Running a multi-threaded process")
             self.parameters['available_CPUs'] = nCores

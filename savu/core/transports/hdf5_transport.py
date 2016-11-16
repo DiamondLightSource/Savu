@@ -58,6 +58,7 @@ class Hdf5Transport(TransportControl):
         """ Set MPI process specific values and logging initialisation.
         """
         hosts = MPI.COMM_WORLD.allgather(socket.gethostname())
+        print hosts
         uniq_hosts = set(hosts)
         names = options['process_names'].split(',')
 
@@ -67,14 +68,13 @@ class Hdf5Transport(TransportControl):
 
         rank_map = [i for s in uniq_hosts for i in range(n_cores)
                     if s == hosts[i]]
-
-        all_processes = [[i]*n_nodes for i in names]
-        options['processes'] = list(chain.from_iterable(all_processes))
-        rank = rank_map.index(MPI.COMM_WORLD.rank)
+        index = sorted(range(len(rank_map)), key=lambda k: rank_map[k])
+        all_processes = [(names*n_nodes)[index[i]] for i in range(n_cores)]
+        options['processes'] = all_processes
+        rank = MPI.COMM_WORLD.rank
         options['process'] = rank
-        node_number = rank/n_cores_per_node
-        local_rank = rank % n_cores_per_node
-        local_name = names[local_rank]
+        node_number = rank_map.index(rank)/n_cores_per_node
+        local_name = all_processes[rank]
 
         self.__set_logger_parallel("%03i" % node_number, local_name, options)
 
@@ -89,7 +89,7 @@ class Hdf5Transport(TransportControl):
         self.call_mpi__barrier()
 
     def call_mpi__barrier(self):
-        """ Call MPI _barrier before an experiment is created.
+        """ Call MPI_barrier before an experiment is created.
         """
         logging.debug("Waiting at the _barrier")
         MPI.COMM_WORLD.barrier()
