@@ -57,41 +57,31 @@ class Hdf5Transport(TransportControl):
     def __mpi_setup(self, options):
         """ Set MPI process specific values and logging initialisation.
         """
-        sockets = MPI.COMM_WORLD.allgather(socket.gethostname())
-        uniq_sockets = set(sockets)
-        rank_map = [i for s in uniq_sockets for i in range(len(sockets))
-                    if s == sockets[i]]
+        hosts = MPI.COMM_WORLD.allgather(socket.gethostname())
+        uniq_hosts = set(hosts)
+        names = options['process_names'].split(',')
 
-        nProcesses = len(sockets)
-        nSockets = len(uniq_sockets)
-        for i in range(nProcesses):
-            options['processes']
-            options['process'] = rank_map[RANK]
-        
+        n_cores = len(hosts)
+        n_nodes = len(uniq_hosts)
+        n_cores_per_node = len(names)
 
-        print("Running mpi_setup")
-        RANK_NAMES = options["process_names"].split(',')
-        RANK = MPI.COMM_WORLD.rank
-        SIZE = MPI.COMM_WORLD.size
-        RANK_NAMES_SIZE = len(RANK_NAMES)
-        if RANK_NAMES_SIZE > SIZE:
-            RANK_NAMES_SIZE = SIZE
-        MACHINES = SIZE/RANK_NAMES_SIZE
-        MACHINE_RANK = RANK/MACHINES
-        MACHINE_RANK_NAME = RANK_NAMES[MACHINE_RANK]
-        MACHINE_NUMBER = RANK % MACHINES
-        MACHINE_NUMBER_STRING = "%03i" % (MACHINE_NUMBER)
-        ALL_PROCESSES = [[i]*MACHINES for i in RANK_NAMES]
-        options["processes"] = list(chain.from_iterable(ALL_PROCESSES))
-        options["process"] = RANK
+        rank_map = [i for s in uniq_hosts for i in range(n_cores)
+                    if s == hosts[i]]
 
-        self.__set_logger_parallel(MACHINE_NUMBER_STRING,
-                                   MACHINE_RANK_NAME,
-                                   options)
+        all_processes = [[i]*n_nodes for i in names]
+        options['processes'] = list(chain.from_iterable(all_processes))
+        rank = rank_map.index(MPI.COMM_WORLD.rank)
+        options['process'] = rank
+        node_number = rank/n_cores_per_node
+        local_rank = rank % n_cores_per_node
+        local_name = names[local_rank]
+
+        self.__set_logger_parallel("%03i" % node_number, local_name, options)
 
         MPI.COMM_WORLD.barrier()
-        logging.debug("Rank : %i - Size : %i - host : %s", RANK, SIZE,
-                      socket.gethostname())
+        logging.debug("Rank : %i - Size : %i - host : %s", rank, n_cores,
+                      hosts[MPI.COMM_WORLD.rank])
+
         IP = socket.gethostbyname(socket.gethostname())
         logging.debug("ip address is : %s", IP)
         self.call_mpi__barrier()

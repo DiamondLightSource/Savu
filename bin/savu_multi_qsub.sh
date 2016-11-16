@@ -32,8 +32,8 @@ while read -r a b c d; do
     #datafile=/dls/i12/data/2016/cm14465-4/rawdata/EH2TEST/pc2_ball_01.hdf
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/i12_process_list.nxs
 
-    #datafile=/dls/i18/data/2016/sp13562-1/Experiment_1/nexus/71974_Sample1_before_calcination_1.nxs 
-    #processfile=/dls/i18/data/2016/sp13562-1/processing/savu/XRD_filtered/xrd_filter.nxs
+    datafile=/dls/i18/data/2016/sp13562-1/Experiment_1/nexus/71974_Sample1_before_calcination_1.nxs 
+    processfile=/dls/i18/data/2016/sp13562-1/processing/savu/XRD_filtered/xrd_filter.nxs
     #processfile=/dls/i18/data/2016/sp13562-1/processing/savu/XRD_filtered/xrd_test.nxs
  
     #datafile=/dls/staging/dls/i12/data/2015/ee13236-1/processing/NEW_WORK_2016_08/55712/55712_000.nxs
@@ -47,8 +47,8 @@ while read -r a b c d; do
     #datafile=/dls/i12/data/2016/ee14033-1/processing/savu/N100y10H10V8ROI1dataPGVHilb/HIGHEI12ROCK01.nxs
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/updated_B16_pipeline.nxs
 
-    datafile=/dls/i18/data/2016/sp13939-1/Experiment_1/nexus/75996_alphanitrateRT_1.nxs
-    processfile=/dls/i18/data/2016/sp13939-1/processing/XRD/xrd_test.nxs
+    #datafile=/dls/i18/data/2016/sp13939-1/Experiment_1/nexus/75996_alphanitrateRT_1.nxs
+    #processfile=/dls/i18/data/2016/sp13939-1/processing/XRD/xrd_test.nxs
 
     #datafile=/dls/i12/data/2016/ee13941-1/rawdata/58197.nxs
     #processfile=$outpath/test_median_filter.nxs
