@@ -122,9 +122,8 @@ astrabuild=`conda build $recipes/astra --output`
 echo "Installing astra toolbox..."
 conda install --use-local $astrabuild
 
-astra_init_path=$(python -c "import site; print site.getsitepackages()[0]")/astra/python/astra/__init__.py
-cat $astra_init_path >> $recipes/astra/__init__.py
-cp $recipes/astra/__init__.py ${astra_init_path%__init__.py}
+astra_init_path=$(python -c "import site; print site.getsitepackages()[0]")/astra/__init__.py
+mv $recipes/astra/start_up_script.py $astra_init_path
 
 echo "Building xraylib..."
 conda build $recipes/xraylib
@@ -132,6 +131,13 @@ xraylibbuild=`conda build $recipes/xraylib --output`
 
 echo "Installing xraylib..."
 conda install --use-local $xraylibbuild
+
+echo "Building pyfai..."
+conda build $recipes/pyFAI
+pyfaibuild=`conda build $recipes/pyFAI --output`
+
+echo "Installing xraylib..."
+conda install --use-local $pyfaibuild
 
 package_list=$recipes'/../pip_install_package_list.txt'
 echo "Installing extra packages through pip..."

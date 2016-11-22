@@ -20,6 +20,8 @@
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
+
+import tempfile  # this import is required for pyFAI - DO NOT REMOVE!
 import optparse
 import sys
 import os
@@ -97,7 +99,7 @@ def _set_options(opt, args):
     options["data_file"] = args[0]
     options["process_file"] = args[1]
     options["out_path"] = set_output_folder(args[0], args[2], opt.folder)
-    print options['out_path']
+
     if opt.temp_dir:
         options["inter_path"] = opt.temp_dir
     else:
@@ -133,13 +135,17 @@ def set_output_folder(in_file, out_path, set_folder):
     return folder
 
 
-def main():
+def main(input_args=None):
     [options, args] = __option_parser()
+
+    if input_args:
+        args = input_args
+
     __check_input_params(args)
+
     options = _set_options(options, args)
     plugin_runner = PluginRunner(options)
     plugin_runner._run_plugin_list()
-
 
 if __name__ == '__main__':
     main()

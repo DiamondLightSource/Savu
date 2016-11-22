@@ -22,6 +22,7 @@
 """
 import logging
 from mpi4py import MPI
+import socket
 
 from savu.plugins.driver.plugin_driver import PluginDriver
 
@@ -40,11 +41,14 @@ class MultiThreadedPlugin(PluginDriver):
         nNodes = processes.count(processes[0])
         nCores = len(processes)/nNodes
 
-        masters = [p for p in range(len(processes)) if p == 'CPU0']
-        print masters
+        masters = [p for p in range(len(processes)) if processes[p] == 'CPU0']
         self.__create_new_communicator(masters, exp)
 
+        self.exp._barrier()
+
         if process in masters:
+            IP = socket.gethostbyname(socket.gethostname())
+            logging.info("**************************%s", IP)
             logging.info("Running a multi-threaded process")
             self.parameters['available_CPUs'] = nCores
             self.parameters['available_GPUs'] = \

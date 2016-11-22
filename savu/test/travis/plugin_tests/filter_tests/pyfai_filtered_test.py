@@ -33,6 +33,10 @@ class PyfaiFilteredTest(unittest.TestCase):
         process_file = tu.get_test_process_path('PyFAI_azimuth_test_bragg.nxs')
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
+#    def test_pyfai_realdata(self):
+#        from savu.test.travis.framework_tests.plugin_runner_test import \
+#            run_protected_plugin_runner2
+#        run_protected_plugin_runner2()
 
 if __name__ == "__main__":
     unittest.main()

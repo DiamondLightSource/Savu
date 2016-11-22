@@ -4,6 +4,7 @@ module load global/cluster
 
 module load python/anaconda-savu
 source activate savu_mpi1
+#source activate savu_test_env2
 
 #module load savu/1.0_new_env
 #activate_env
@@ -14,7 +15,7 @@ processfile=$3
 outfile=$4
 nCPUs=$5
 shift 5
-nGPUs=4
+nGPUs=2
 
 if [ $nGPUs -gt $nCPUs ]; then
     nGPUs=$nCPUs
@@ -41,6 +42,9 @@ echo $CPUs
 echo $nCPUs $nGPUs
 
 echo "Processes running are : ${processes}"
+
+export OMP_NUM_THREADS=1
+export PYFAI_OPENCL=0
 
 mpirun -np ${processes} \
        -mca btl self,openib,sm \

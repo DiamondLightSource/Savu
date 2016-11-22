@@ -37,15 +37,14 @@ class PluginRunner(object):
                      + "_transport"
         cu.add_base(self, cu.import_class(class_name))
         self._transport_control_setup(options)
-        self.exp = None
         self.options = options
         # add all relevent locations to the path
         pu.get_plugins_paths()
+        self.exp = Experiment(options)
 
     def _run_plugin_list(self):
         """ Create an experiment and run the plugin list.
         """
-        self.exp = Experiment(self.options)
         plugin_list = self.exp.meta_data.plugin_list
 
         self.exp._barrier()

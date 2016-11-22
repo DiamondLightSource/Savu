@@ -25,7 +25,7 @@ import logging
 import numpy as np
 from savu.plugins.filters.base_azimuthal_integrator import BaseAzimuthalIntegrator
 from savu.plugins.utils import register_plugin
-
+import unittest
 
 @register_plugin
 class PyfaiAzimuthalIntegratorWithBraggFilter(BaseAzimuthalIntegrator):
@@ -39,19 +39,22 @@ class PyfaiAzimuthalIntegratorWithBraggFilter(BaseAzimuthalIntegrator):
     """
 
     def __init__(self):
-        logging.debug("Starting 1D azimuthal integration")
+        logging.debug("Starting 1D azimuthal integration***")
         super(PyfaiAzimuthalIntegratorWithBraggFilter,
               self).__init__("PyfaiAzimuthalIntegratorWithBraggFilter")
 
     def filter_frames(self, data):
         mData = self.params[2]
         ai = self.params[3]
+
         lims = self.parameters['thresh']
         num_bins_azim = self.parameters['num_bins_azim']
         num_bins_rad = self.parameters['num_bins']
+
         remapped, axis, _chi = \
             ai.integrate2d(data=data[0], npt_rad=num_bins_rad,
                            npt_azim=num_bins_azim, unit='q_A^-1')
+
         mask = np.ones_like(remapped)
         mask[remapped==0] = 0
         out = np.zeros(mask.shape[1])
@@ -68,4 +71,3 @@ class PyfaiAzimuthalIntegratorWithBraggFilter(BaseAzimuthalIntegrator):
                 bottom = np.percentile(foo,lims[0])
                 out[i] = np.mean(np.clip(foo,bottom,top))
         return out
-

@@ -29,11 +29,11 @@ import pyFAI
 
 import numpy as np
 from savu.plugins.base_filter import BaseFilter
-from savu.plugins.driver.multi_threaded_plugin import MultiThreadedPlugin
+from savu.plugins.driver.cpu_plugin import CpuPlugin
 from scipy.interpolate import interp1d
 
 
-class BaseAzimuthalIntegrator(BaseFilter, MultiThreadedPlugin):
+class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
     """
     a base azimuthal integrator for pyfai
 
@@ -56,23 +56,28 @@ class BaseAzimuthalIntegrator(BaseFilter, MultiThreadedPlugin):
             None if no customisation is required
         :type parameters: dict
         """
+
         in_dataset, out_datasets = self.get_datasets()
         mData = self.get_in_meta_data()[0]
         in_d1 = in_dataset[0]
+
         ai = pyFAI.AzimuthalIntegrator()  # get me an integrator object
+
         # prep the goemtry
         px_m = mData.get_meta_data('x_pixel_size')
         bc_m = [mData.get_meta_data("beam_center_x"),
-              mData.get_meta_data("beam_center_y")] # in metres
-        bc = bc_m /px_m # convert to pixels
-        px = px_m*1e6 # convert to microns
-        distance = mData.get_meta_data('distance')*1e3 # convert to mm
-        wl = mData.get_meta_data('incident_wavelength')[...]# in m
+                mData.get_meta_data("beam_center_y")]  # in metres
+        bc = bc_m / px_m  # convert to pixels
+        px = px_m*1e6  # convert to microns
+        distance = mData.get_meta_data('distance')*1e3  # convert to mm
+        wl = mData.get_meta_data('incident_wavelength')[...]  # in m
         self.wl = wl
-        
+
         yaw = -mData.get_meta_data("yaw")
         roll = mData.get_meta_data("roll")
+
         ai.setFit2D(distance, bc[0], bc[1], yaw, roll, px, px, None)
+
         ai.set_wavelength(wl)
         logging.debug(ai)
 
@@ -86,8 +91,12 @@ class BaseAzimuthalIntegrator(BaseFilter, MultiThreadedPlugin):
         self.npts = self.get_parameters('num_bins')
         self.params = [mask, self.npts, mData, ai]
         # now set the axis values, we shouldn't do this in every slice
-        axis, __remapped = ai.integrate1d(data=mask, npt=self.npts, unit='q_A^-1', correctSolidAngle=False)
-        self.add_axes_to_meta_data(axis,mData)
+
+        axis, __remapped = \
+            ai.integrate1d(data=mask, npt=self.npts, unit='q_A^-1',
+                           correctSolidAngle=False)
+
+        self.add_axes_to_meta_data(axis, mData)
 
     def setup(self):
         in_dataset, out_datasets = self.get_datasets()

@@ -58,7 +58,6 @@ class Hdf5Transport(TransportControl):
         """ Set MPI process specific values and logging initialisation.
         """
         hosts = MPI.COMM_WORLD.allgather(socket.gethostname())
-        print hosts
         uniq_hosts = set(hosts)
         names = options['process_names'].split(',')
 
@@ -223,6 +222,8 @@ class Hdf5Transport(TransportControl):
 
         :param plugin plugin: The current plugin instance.
         """
+        
+        logging.debug("******running the plugin %s", plugin)
         self.process_checks()
         in_data, out_data = plugin.get_datasets()
 
