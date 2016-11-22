@@ -1,5 +1,5 @@
-Savu : Tomography Reconstructon Pipeline
-========================================
+Savu : Tomography Reconstruction Pipeline
+=========================================
 
 :Date: 2014-11-14
 :Version: 0.1
