@@ -49,9 +49,10 @@ def __option_parser():
                       help="Display all debug log messages", default=False)
     parser.add_option("-q", "--quiet", action="store_true", dest="quiet",
                       help="Display only Errors and Info", default=False)
+                      # add -s 'cs04r-sc-serv-14' to module file
     parser.add_option("-s", "--syslog", dest="syslog",
                       help="Location of syslog server",
-                      default='cs04r-sc-serv-14')
+                      default=None)
     parser.add_option("-p", "--syslog_port", dest="syslog_port",
                       help="Port to connect to syslog server on", default=514)
 
