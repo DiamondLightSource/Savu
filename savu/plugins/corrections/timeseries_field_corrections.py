@@ -63,9 +63,9 @@ class TimeseriesFieldCorrections(BaseCorrection, CpuPlugin):
             lambda x, sl: x[[sl[d] for d in det_dims]]
 
     def correct(self, data):
-        dark = self.convert_size(self.dark, self.slice_list)
-        flat_minus_dark = \
-            self.convert_size(self.flat_minus_dark, self.slice_list)
+        dark = self.convert_size(self.dark, self.get_current_slice_list()[0])
+        flat_minus_dark = self.convert_size(
+            self.flat_minus_dark, self.get_current_slice_list()[0])
         data = np.nan_to_num((data-dark)/flat_minus_dark)
 
         # make high and low crop masks

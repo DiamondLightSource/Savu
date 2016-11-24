@@ -119,13 +119,12 @@ class Hdf5Transport(TransportControl):
                                                      'user.log'))
         if 'syslog_server' in options.keys():
             try:
-                cu.add_syslog_log_handler(logger,
-                                      options['syslog_server'],
-                                      options['syslog_port'])
+                cu.add_syslog_log_handler(logger, options['syslog_server'],
+                                          options['syslog_port'])
             except:
-                logger.warn("Unable to add syslog logging for server %s on port %i",
-                            options['syslog_server'],
-                            options['syslog_port'])
+                logger.warn(
+                    "Unable to add syslog logging for server %s on port %i",
+                    options['syslog_server'], options['syslog_port'])
 
     def __set_logger_parallel(self, number, rank, options):
         """ Set parallel logger.
@@ -150,8 +149,8 @@ class Hdf5Transport(TransportControl):
                                               options['syslog_server'],
                                               options['syslog_port'])
                 except:
-                    logger.warn("Unable to add syslog logging for server %s on port %i",
-                                options['syslog_server'],
+                    logger.warn("Unable to add syslog logging for server %s on"
+                                " port %i", options['syslog_server'],
                                 options['syslog_port'])
 
     def _transport_run_plugin_list(self):
@@ -222,9 +221,6 @@ class Hdf5Transport(TransportControl):
 
         :param plugin plugin: The current plugin instance.
         """
-        
-        logging.debug("******running the plugin %s", plugin)
-        self.process_checks()
         in_data, out_data = plugin.get_datasets()
 
         expInfo = plugin.exp.meta_data
@@ -243,21 +239,13 @@ class Hdf5Transport(TransportControl):
             section, slice_list = \
                 self.__get_all_padded_data(in_data, in_slice_list, count,
                                            squeeze_dict)
-            result = plugin.process_frames(section, slice_list)
+            plugin.set_current_slice_list(slice_list)
+            result = plugin.process_frames(section)
             self.__set_out_data(out_data, out_slice_list, result, count,
                                 expand_dict)
 
         cu.user_message("%s - 100%% complete" % (plugin.name))
         plugin._revert_preview(in_data)
-
-    def process_checks(self):
-        pass
-        # if plugin inherits from base_recon and the data inherits from tomoraw
-        # then throw an exception
-#        if isinstance(in_data, TomoRaw):
-#            raise Exception("The input data to a reconstruction plugin cannot
-#            be Raw data. Have you performed a timeseries_field_correction?")
-# call a new process called process_check?
 
     def __set_functions(self, data_list, name):
         """ Create a dictionary of functions to remove (squeeze) or re-add

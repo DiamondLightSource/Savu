@@ -42,6 +42,7 @@ class Plugin(PluginDatasets):
         self.parameters_desc = {}
         self.chunk = False
         self.docstring_info = {}
+        self.slice_list = None
 
     def _main_setup(self, exp, params):
         """ Performs all the required plugin setup.
@@ -190,19 +191,13 @@ class Plugin(PluginDatasets):
         """ This method is called immediately after base_pre_process(). """
         pass
 
-    def process_frames(self, data, frame_list):
+    def process_frames(self, data):
         """
         This method is called after the plugin has been created by the
         pipeline framework and forms the main processing step
 
-        :param data: The input data object.
-        :type data: savu.data.data_structures
-        :param data: The output data object
-        :type data: savu.data.data_structures
-        :param processes: The number of processes which will be doing the work
-        :type path: int
-        :param path: The specific process which we are
-        :type path: int
+        :param data: A list of numpy arrays for each input dataset.
+        :type data: list(np.array)
         """
 
         logging.error("process frames needs to be implemented")
@@ -285,6 +280,12 @@ class Plugin(PluginDatasets):
         for data in in_data:
             if data.get_preview().revert_shape:
                 data.get_preview()._unset_preview()
+
+    def set_current_slice_list(self, sl):
+        self.slice_list = sl
+
+    def get_current_slice_list(self):
+        return self.slice_list
 
     def nInput_datasets(self):
         """

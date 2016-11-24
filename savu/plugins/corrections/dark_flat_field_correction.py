@@ -84,10 +84,10 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
         return data
 
     def correct_sino(self, data):
-        end = self.count + data.shape[self.slice_dir]
-        dark = self.convert_size(self.count, end, self.dark)
+        sl = self.get_current_slice_list()[0][self.slice_dir]
+        dark = self.convert_size(sl.start, sl.stop, self.dark)
         flat_minus_dark = \
-            self.convert_size(self.count, end, self.flat_minus_dark)
+            self.convert_size(sl.start, sl.stop, self.flat_minus_dark)
         self.count += data.shape[self.slice_dir]
         data = np.nan_to_num((data-dark)/flat_minus_dark)
         self.__data_check(data)

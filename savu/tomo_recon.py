@@ -49,10 +49,10 @@ def __option_parser():
                       help="Display all debug log messages", default=False)
     parser.add_option("-q", "--quiet", action="store_true", dest="quiet",
                       help="Display only Errors and Info", default=False)
-                      # add -s 'cs04r-sc-serv-14' to module file
+    #  add -s 'cs04r-sc-serv-14' to module file
     parser.add_option("-s", "--syslog", dest="syslog",
                       help="Location of syslog server",
-                      default=None)
+                      default='localhost')
     parser.add_option("-p", "--syslog_port", dest="syslog_port",
                       help="Port to connect to syslog server on", default=514)
 
@@ -116,6 +116,14 @@ def _set_options(opt, args):
 
 def set_output_folder(in_file, out_path, set_folder):
     from mpi4py import MPI
+
+#    # temporarily outputting environment variables
+#    rank = MPI.COMM_WORLD.rank
+#    filename = out_path + "/envs_" + str(rank)
+#    fid = open(filename, 'w')
+#    fid.write(str(os.environ))
+#    fid.close()
+
     import time
     if not set_folder:
         MPI.COMM_WORLD.barrier()

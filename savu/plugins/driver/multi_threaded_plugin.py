@@ -41,7 +41,10 @@ class MultiThreadedPlugin(PluginDriver):
         nNodes = processes.count(processes[0])
         nCores = len(processes)/nNodes
 
-        masters = [p for p in range(len(processes)) if processes[p] == 'CPU0']
+        masters = [p for p in range(len(processes)) if processes[p] == 'GPU0']
+        if not masters:
+            masters = \
+                [p for p in range(len(processes)) if processes[p] == 'CPU0']
         self.__create_new_communicator(masters, exp)
 
         self.exp._barrier()

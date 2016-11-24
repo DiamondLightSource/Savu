@@ -119,14 +119,15 @@ class BaseRecon(Plugin):
                     sino, pad_tuples, 'edge'))
         return sino_func, cor_func
 
-    def process_frames(self, data, slice_list):
+    def process_frames(self, data):
         """
         Reconstruct a single sinogram with the provided center of rotation
         """
-        cor = self.cor[slice_list[0][self.main_dir]]
+        sl = self.get_current_slice_list()[0]
+        cor = self.cor[sl[self.main_dir]]
         init = data[1] if len(data) is 2 else None
-        angles = self.angles[:, slice_list[0][self.scan_dim]] if self.scan_dim\
-            else self.angles
+        angles = \
+            self.angles[:, sl[self.scan_dim]] if self.scan_dim else self.angles
         result = self.reconstruct(self.sino_func(data[0]), self.cor_func(cor),
                                   angles, self.vol_shape, init)
         return result

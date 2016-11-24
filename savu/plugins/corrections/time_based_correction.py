@@ -96,7 +96,7 @@ class TimeBasedCorrection(BaseCorrection, CpuPlugin):
         return data
 
     def _get_frames(self):
-        frames = self.slice_list[self.slice_dir]
+        frames = self.get_current_slice_list()[0][self.slice_dir]
         frames = range(frames.start, frames.stop, frames.step)
         inData = self.get_in_datasets()[0]
         return inData.data.get_index(0, full=True)[np.array(frames)]
