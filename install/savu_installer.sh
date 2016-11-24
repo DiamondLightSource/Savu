@@ -132,13 +132,6 @@ xraylibbuild=`conda build $recipes/xraylib --output`
 echo "Installing xraylib..."
 conda install --use-local $xraylibbuild
 
-echo "Building pyfai..."
-conda build $recipes/pyFAI
-pyfaibuild=`conda build $recipes/pyFAI --output`
-
-echo "Installing xraylib..."
-conda install --use-local $pyfaibuild
-
 package_list=$recipes'/../pip_install_package_list.txt'
 echo "Installing extra packages through pip..."
 pip install -r $package_list
