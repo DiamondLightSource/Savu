@@ -15,7 +15,7 @@ processfile=$3
 outfile=$4
 nCPUs=$5
 shift 5
-nGPUs=4
+nGPUs=2
 
 if [ $nGPUs -gt $nCPUs ]; then
     nGPUs=$nCPUs

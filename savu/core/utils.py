@@ -109,7 +109,6 @@ USER_LOG_HANDLER = None
 
 
 def user_message(message):
-    print message, type(message)
     logging.log(USER_LOG_LEVEL, message)
     if USER_LOG_HANDLER is not None:
         USER_LOG_HANDLER.flush()

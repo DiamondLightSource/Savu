@@ -77,12 +77,16 @@ while read -r a b c d; do
     #datafile=$outpath/../../test_data/mark_data/
     #datafile=/dls/science/users/ssg37927/mt9396-1/raw/
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_processes/multi_nxs_test.nxs
-    #datafile=/mnt/GPFS01/testdir/dasc/qmm55171/temp_run_out/mark_test_data/temp_folder/
-#savu_stitched_tomos.h5
+    #datafile=/mnt/GPFS01/testdir/dasc/qmm55171/temp_run_out/mark_test_data/temp_folder/savu_stitched_tomos.h5
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_processes/test_init_replicate.nxs
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_processes/multi_savu_loader_test.nxs
     #datafile=/mnt/GPFS01/testdir/dasc/qmm55171/temp_run_out/mark_test_data/proj_4d.h5
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/marks_data_test.nxs
+
+
+    #datafile=$outpath/34997.nxs
+    #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/david_test.nxs
+
 
     #datafile=/dls/i18/data/2016/sp13562-1/Experiment_1/nexus/71993_Sample1_before_calcination_1.nxs
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_processes_2/steve_test.nxs

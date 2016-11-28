@@ -37,7 +37,7 @@ class Test(unittest.TestCase):
         self.assertEqual(plugin.__class__, test_plugin.Plugin,
                          "Failed to load the correct class")
         self.assertRaises(NotImplementedError,
-                          plugin.process_frames, None, None)
+                          plugin.process_frames, None)
 
     def testfind_args(self):
         plugin = pu.load_plugin("savu.plugins.filters.denoise_bregman_filter")

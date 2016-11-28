@@ -1,4 +1,5 @@
 pyfftw
+pyfai
 lmfit
 fabio
 peakutils

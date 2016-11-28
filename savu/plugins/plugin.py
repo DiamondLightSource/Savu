@@ -43,6 +43,7 @@ class Plugin(PluginDatasets):
         self.chunk = False
         self.docstring_info = {}
         self.slice_list = None
+        self.global_index = None
 
     def _main_setup(self, exp, params):
         """ Performs all the required plugin setup.
@@ -281,10 +282,19 @@ class Plugin(PluginDatasets):
             if data.get_preview().revert_shape:
                 data.get_preview()._unset_preview()
 
+    def set_global_frame_index(self, frame_idx):
+        self.global_index = frame_idx
+
+    def get_global_frame_index(self):
+        """ Get the position of the local processes frames from the global \
+        index of frames. """
+        return self.global_index
+
     def set_current_slice_list(self, sl):
         self.slice_list = sl
 
     def get_current_slice_list(self):
+        """ Get the slice list of the current frame being processed. """
         return self.slice_list
 
     def nInput_datasets(self):

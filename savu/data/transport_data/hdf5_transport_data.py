@@ -374,7 +374,7 @@ class Hdf5TransportData(object):
         except IndexError:
             process_slice_list = []
 
-        return process_slice_list
+        return process_slice_list, frames
 
     def __calculate_slice_padding(self, in_slice, pad, data_stop, **kwargs):
         pad = [pad['before'], pad['after']]
