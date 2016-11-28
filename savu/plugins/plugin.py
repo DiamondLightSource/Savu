@@ -297,6 +297,17 @@ class Plugin(PluginDatasets):
         """ Get the slice list of the current frame being processed. """
         return self.slice_list
 
+    def get_slice_dir_reps(self, nData):
+        """ Return the periodicity of the main slice direction.
+
+        :params int nData: The number of the dataset in the list.
+        """
+        slice_dir = \
+            self.get_plugin_in_datasets()[nData].get_slice_directions()[0]
+        sl = [sl[slice_dir] for sl in self.slice_list]
+        reps = [i for i in range(len(sl)) if sl[i] == sl[0]]
+        return np.diff(reps)[0] if len(reps) > 1 else 1
+
     def nInput_datasets(self):
         """
         The number of datasets required as input to the plugin
