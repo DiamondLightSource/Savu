@@ -28,7 +28,7 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 import tomopy
 import numpy as np
 
-from savu.data.plugin_list.citation_information import CitationInformation
+from savu.data.plugin_list import CitationInformation
 from savu.plugins.utils import register_plugin
 from savu.plugins.base_recon import BaseRecon
 
@@ -97,9 +97,9 @@ class TomopyRecon(BaseRecon, CpuPlugin):
              "}")
         cite_info.endnote = \
             ("%0 Journal Article\n" +
-             "%T TomoPy: a framework for the analysis of synchrotron \
-             tomographic data\n" +
-             "%A Gürsoy, Doga\n" +
+             "%T TomoPy: a framework for the analysis of synchrotron\n" +
+             "tomographic data\n" +
+             "%A Gursoy, Doga\n" +
              "%A De Carlo, Francesco" +
              "%A Xiao, Xianghui" +
              "%A Jacobsen, Chris" +
