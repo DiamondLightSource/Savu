@@ -79,6 +79,7 @@ class BaseAstraRecon(BaseRecon):
         else:
             self.setup_2D()
             self.reconstruct = self.astra_2D_recon
+        self.vol_shape = self.get_vol_shape()
 
     def setup_2D(self):
         pData = self.get_plugin_in_datasets()[0]
