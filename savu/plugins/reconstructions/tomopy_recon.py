@@ -47,8 +47,9 @@ class TomopyRecon(BaseRecon, CpuPlugin):
     :param num_iter: Number of iterations. Default: 10.
     :param init_vol: Dataset to use as volume initialiser \
      (doesn't currently work with preview). Default: None.
-
-    :~param sino_pad:
+    :param sino_pad: Pad the sinogram to remove edge artefacts in the \
+        reconstructed ROI (NB. This will increase the size of the data and \
+        the time taken to perform the reconstruction). Default: False.
     """
 
     def __init__(self):
