@@ -63,7 +63,7 @@ class TomopyRecon(BaseRecon, CpuPlugin):
                    'num_iter': self.parameters['num_iter'],
                    'num_gridx': vol_shape[0], 'num_gridy': vol_shape[2]}
 
-        self.alg_keys = tomopy.get_allowed_kwargs()
+        self.alg_keys = self.get_allowed_kwargs()
         self.alg = self.parameters['algorithm']
         self.kwargs = {key: options[key] for key in self.alg_keys[self.alg] if
                        key in options.keys()}
@@ -77,6 +77,25 @@ class TomopyRecon(BaseRecon, CpuPlugin):
 
     def get_max_frames(self):
         return 8
+
+    def get_allowed_kwargs(self):
+        return {
+            'art': ['num_gridx', 'num_gridy', 'num_iter'],
+            'bart': ['num_gridx', 'num_gridy', 'num_iter', 'num_block',
+                     'ind_block'],
+            'fbp': ['num_gridx', 'num_gridy', 'filter_name', 'filter_par'],
+            'gridrec': ['num_gridx', 'num_gridy', 'filter_name', 'filter_par'],
+            'mlem': ['num_gridx', 'num_gridy', 'num_iter'],
+            'osem': ['num_gridx', 'num_gridy', 'num_iter', 'num_block',
+                     'ind_block'],
+            'ospml_hybrid': ['num_gridx', 'num_gridy', 'num_iter', 'reg_par',
+                             'num_block', 'ind_block'],
+            'ospml_quad': ['num_gridx', 'num_gridy', 'num_iter', 'reg_par',
+                           'num_block', 'ind_block'],
+            'pml_hybrid': ['num_gridx', 'num_gridy', 'num_iter', 'reg_par'],
+            'pml_quad': ['num_gridx', 'num_gridy', 'num_iter', 'reg_par'],
+            'sirt': ['num_gridx', 'num_gridy', 'num_iter'],
+        }
 
     def get_citation_information(self):
         cite_info = CitationInformation()
