@@ -30,6 +30,9 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 from savu.data.plugin_list import CitationInformation
 
+#    :param correction1: (USERS IGNORE) Disputed value changed from \
+#        mathpi. Default: '(1/(4*mathpi))'.
+
 
 @register_plugin
 class PaganinFilter(BaseFilter, CpuPlugin):
@@ -44,6 +47,10 @@ class PaganinFilter(BaseFilter, CpuPlugin):
     :param Padtopbottom: Pad to the top and bottom of projection. Default: 10.
     :param Padleftright: Pad to the left and right of projection. Default: 10.
     :param Padmethod: Method of padding. Default: 'edge'.
+    :param increment: Increment all values by this amount before taking the \
+        log. Default: 1.0.
+    :param correction1: USERS IGNORE Disputed value changed from \
+        math.pi. Default: '(1/(4*math.pi))'.
 
     :config_warn: The 'log' parameter in the reconstruction should be set to\
         FALSE when the Paganin Filter is on.
@@ -89,7 +96,9 @@ class PaganinFilter(BaseFilter, CpuPlugin):
         pxx[:, 0:width1] = pxlist
         pyy = np.zeros((height1, width1), dtype=np.float32)
         pyy[0:height1, :] = np.reshape(pylist, (height1, 1))
-        pd = (pxx*pxx+pyy*pyy)*wavelength*distance*math.pi
+        #pd = (pxx*pxx+pyy*pyy)*wavelength*distance*math.pi
+        pd = (pxx*pxx+pyy*pyy)*wavelength*distance*eval(self.parameters['correction1'])
+        
         filter1 = 1.0+ratio*pd
         self.filtercomplex = filter1+filter1*1j
 
@@ -97,7 +106,8 @@ class PaganinFilter(BaseFilter, CpuPlugin):
         pci1 = fft.fft2(np.float32(data))
         pci2 = fft.fftshift(pci1)/self.filtercomplex
         fpci = np.abs(fft.ifft2(pci2))
-        result = -0.5*self.parameters['Ratio']*np.log(fpci+1.0)
+        result = -0.5*self.parameters['Ratio']*np.log(
+            fpci+self.parameters['increment'])
         return result
 
     def filter_frames(self, data):

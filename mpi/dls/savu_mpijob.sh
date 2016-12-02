@@ -1,6 +1,5 @@
 module load global/cluster
-module load python/anaconda-savu
-source activate savu_mpi1
+module load savu
 
 savupath=$1
 datafile=$2

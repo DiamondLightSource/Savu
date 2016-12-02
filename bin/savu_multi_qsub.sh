@@ -84,8 +84,8 @@ while read -r a b c d; do
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/marks_data_test.nxs
 
 
-    #datafile=$outpath/34997.nxs
-    #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/david_test.nxs
+    datafile=$outpath/34997.nxs
+    processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/david_test.nxs
 
 
     #datafile=/dls/i18/data/2016/sp13562-1/Experiment_1/nexus/71993_Sample1_before_calcination_1.nxs
@@ -106,8 +106,8 @@ while read -r a b c d; do
 
     #processfile=/dls/i18/data/2016/sp12601-1/processing/Savu_Test_Data/new_test_process_list.nxs
 
-    datafile=$outpath/../../test_data/24737.nxs
-    processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test.nxs
+    #datafile=$outpath/../../test_data/24737.nxs
+    #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test.nxs
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/test_data/test_process_lists/NLReg_cgls.nxs
 
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/test_data/test_process_lists/vo_centering_test.nxs
@@ -170,5 +170,5 @@ while read -r a b c d; do
       #echo "completed profiling"
 	fi	
 
-done < ../../test.txt
+done < ../../../test.txt
 

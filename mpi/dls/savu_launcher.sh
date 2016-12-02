@@ -1,5 +1,6 @@
 #!/bin/bash
 module load global/cluster
+module load savu/dev
 
 echo "SAVU_LAUNCHER:: Running Job"
 
@@ -17,6 +18,8 @@ DIR="$(cd "$(dirname "$0")" && pwd)"
 filepath=$DIR'/savu_mpijob.sh'
 savupath=$(python -c "import savu, os; print savu.__path__[0]")
 savupath=${savupath%/savu}
+
+echo "****************savupath", $savupath
 
 M=$((nNodes*nCoresPerNode))
 
