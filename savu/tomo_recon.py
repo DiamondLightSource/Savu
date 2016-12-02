@@ -146,6 +146,7 @@ def set_output_folder(in_file, out_path, set_folder):
 
 def main(input_args=None):
     [options, args] = __option_parser()
+    print options, args
 
     if input_args:
         args = input_args
