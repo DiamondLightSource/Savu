@@ -1,6 +1,6 @@
 #!/bin/bash
 module load global/cluster
-module load savu/dev
+module load savu
 
 echo "SAVU_LAUNCHER:: Running Job"
 

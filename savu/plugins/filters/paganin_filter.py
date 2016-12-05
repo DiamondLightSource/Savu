@@ -61,7 +61,6 @@ class PaganinFilter(BaseFilter, CpuPlugin):
         super(PaganinFilter, self).__init__("PaganinFilter")
         self.filtercomplex = None
         self.count = 0
-        self.coeff = (1/(4*math.pi))
 
     def pre_process(self):
         pData = self.get_plugin_in_datasets()[0]
@@ -95,7 +94,7 @@ class PaganinFilter(BaseFilter, CpuPlugin):
         pxx[:, 0:width1] = pxlist
         pyy = np.zeros((height1, width1), dtype=np.float32)
         pyy[0:height1, :] = np.reshape(pylist, (height1, 1))
-        pd = (pxx*pxx+pyy*pyy)*wavelength*distance*self.coeff
+        pd = (pxx*pxx+pyy*pyy)*wavelength*distance*math.pi
 
         filter1 = 1.0+ratio*pd
         self.filtercomplex = filter1+filter1*1j

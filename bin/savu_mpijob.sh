@@ -21,7 +21,6 @@ if [ $nGPUs -gt $nCPUs ]; then
     nGPUs=$nCPUs
 fi
 
-
 export PYTHONPATH=$savupath:$PYTHONPATH
 filename=$savupath/savu/tomo_recon.py
 

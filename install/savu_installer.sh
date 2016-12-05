@@ -125,6 +125,11 @@ xraylibbuild=`conda build $recipes/xraylib --output`
 echo "Installing xraylib..."
 conda install --use-local $xraylibbuild
 
+echo "Installing tomopy..."
+conda install -c dgursoy tomopy
+# revert back to MPI version of HDF5
+conda install --use-local $hdf5build
+
 package_list=$recipes'/../pip_install_package_list.txt'
 echo "Installing extra packages through pip..."
 pip install -r $package_list
