@@ -1,11 +1,11 @@
-{% set version = "v1.2" %}
+{% set version = "1.2" %}
 
 package:
   name: savu
-  version: "1.2"
+  version: {{ version }}
 
 source:
-  url: https://github.com/DiamondLightSource/Savu/archive/{{ version }}.tar.gz
+  url: https://github.com/DiamondLightSource/Savu/archive/v{{ version }}.tar.gz
 
 requirements:
   build:

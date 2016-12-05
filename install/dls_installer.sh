@@ -2,7 +2,9 @@ new_env=$1
 new_version=1.2
 
 # create module file for new Savu version with old Savu env
-# change Savu version in setup.py
+# update Savu version in setup.py
+# update Savu version in conda recipe
+# update other conda recipe versions
 
 module load savu/$new_version
 source deactivate
@@ -14,7 +16,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 recipes=$DIR/conda-recipes
 
 conda build $recipes/savu_test
-$savu_build =`conda build $recipes/savu_test --output`
+savu_build=`conda build $recipes/savu_test --output`
 
 anaconda login
 anaconda upload $savu_build --label test
@@ -22,6 +24,16 @@ anaconda upload $savu_build --label test
 conda install -c savu/label/test savu
 savu_installer.sh dls
 
+savu_quick_tests
+savu_full_tests
+source savu_setup.sh
+mpi_cpu_test.sh /dls/tmp/qmm55171
+mpi_gpu_test.sh /dls/tmp/qmm55171
+
+# Push changes to Git
+# Create new release on Github
+# Remove savu test install and install new version of Savu into new conda env
+# Re-run tests
 # update module file to source new environment
 # update Savu default module load
 

@@ -1,10 +1,10 @@
 facility=$1
 savu_env=$2
 
-build_no=100
-hdf5_version=1.15.1
-h5py_version=2.5.0
-mpi4py_version=1.3.1
+#build_no=100
+#hdf5_version=1.8.18
+#h5py_version=2.5.0
+mpi4py_version=2.0.0
 
 path=$(python -c "import savu; import os; print os.path.abspath(savu.__file__)")
 DIR=${path%/savu/__init__.pyc}
@@ -87,7 +87,9 @@ fi
 #=====================installing other packages==========================
 
 echo "Uninstalling packages..."
-conda remove mpi4py h5py hdf5
+conda remove mpi4py
+conda remove h5py 
+conda remove hdf5
 pip uninstall mpi4py astra-toolbox xraylib
 pip uninstall -r $package_list
 
