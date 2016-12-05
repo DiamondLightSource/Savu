@@ -1,9 +1,8 @@
 facility=$1
 savu_env=$2
 
-#build_no=100
 #hdf5_version=1.8.18
-#h5py_version=2.5.0
+#h5py_version=2.6.0
 mpi4py_version=2.0.0
 
 path=$(python -c "import savu; import os; print os.path.abspath(savu.__file__)")
