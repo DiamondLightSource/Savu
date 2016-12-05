@@ -1,6 +1,9 @@
 new_env=$1
 new_version=1.2
 
+# create module file for new Savu version with old Savu env
+# change Savu version in setup.py
+
 module load savu/$new_version
 source deactivate
 conda create -n $new_env
@@ -18,4 +21,7 @@ anaconda upload $savu_build --label test
 
 conda install -c savu/label/test savu
 savu_installer.sh dls
+
+# update module file to source new environment
+# update Savu default module load
 
