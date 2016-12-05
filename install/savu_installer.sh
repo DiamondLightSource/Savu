@@ -82,13 +82,12 @@ else
     echo -e "\nYour input was unknown.\n"
     read  -n 1 -p "Are you happy to proceed with the installation? (y/n): " input
 fi
-
-
+c   
 #=====================installing other packages==========================
 
 echo "Uninstalling packages..."
 conda remove mpi4py
-conda remove h5py 
+conda remove h5py
 conda remove hdf5
 pip uninstall mpi4py astra-toolbox xraylib
 pip uninstall -r $package_list
