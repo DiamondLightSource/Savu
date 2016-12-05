@@ -1,5 +1,5 @@
 {% set version = "1.8.18" %}
-{% set filename = hdf5-1.8.18 %}
+{% set filename = "hdf5-1.8.18" %}
 
 package:
   name: hdf5

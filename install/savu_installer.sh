@@ -81,8 +81,7 @@ elif [ "$input" = "n" ]; then
 else
     echo -e "\nYour input was unknown.\n"
     read  -n 1 -p "Are you happy to proceed with the installation? (y/n): " input
-fi
-c   
+fi   
 #=====================installing other packages==========================
 
 echo "Uninstalling packages..."

@@ -32,11 +32,11 @@ mpi_gpu_test.sh /dls/tmp/qmm55171
 
 # Push changes to Git
 # Create new release on Github
+# Create conda build of Savu and upload to anaconda cloud
 # Remove savu test install and install new version of Savu into new conda env
 # Re-run tests
-# Download zip and 
+# Download zip
 # update module file to source new environment
 # update Savu default module load
 # create a branch for the new release
-# 
 
