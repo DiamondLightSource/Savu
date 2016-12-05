@@ -1,9 +1,9 @@
 facility=$1
 savu_env=$2
 
-#hdf5_version=1.8.18
-#h5py_version=2.6.0
-mpi4py_version=2.0.0
+#hdf5_version=1.8.15.1
+#h5py_version=2.5.0
+mpi4py_version=1.3.1
 
 path=$(python -c "import savu; import os; print os.path.abspath(savu.__file__)")
 DIR=${path%/savu/__init__.pyc}
