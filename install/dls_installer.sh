@@ -37,6 +37,7 @@ mpi_gpu_test.sh /dls/tmp/qmm55171
 # Re-run tests
 # Download zip
 # update module file to source new environment
+# copy savu_launcher_preview.sh to conda_env/bin?
 # update Savu default module load
 # create a branch for the new release
 

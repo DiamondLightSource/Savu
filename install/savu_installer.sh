@@ -1,8 +1,6 @@
 facility=$1
 savu_env=$2
 
-#hdf5_version=1.8.15.1
-#h5py_version=2.5.0
 mpi4py_version=1.3.1
 
 path=$(python -c "import savu; import os; print os.path.abspath(savu.__file__)")
@@ -126,8 +124,9 @@ conda install --use-local $xraylibbuild
 
 echo "Installing tomopy..."
 conda install -c dgursoy tomopy
-# revert back to MPI version of HDF5
+# revert back to MPI versions of HDF5 and h5py
 conda install --use-local $hdf5build
+conda install --use-local $h5pybuild
 
 package_list=$recipes'/../pip_install_package_list.txt'
 echo "Installing extra packages through pip..."
