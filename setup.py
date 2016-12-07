@@ -34,7 +34,7 @@ if '--help' in sys.argv:
 
 def _get_packages():
     others = ['scripts', 'scripts.config_generator', 'scripts.log_evaluation', 'scripts.citation_extractor',
-              'install', 'install.conda-recipes', 'test_data', 'lib', 'mpi']
+              'install', 'install.conda-recipes', 'test_data', 'lib', 'mpi', 'plugin_examples']
     return find_packages() + others
 
 setup(name='savu',
