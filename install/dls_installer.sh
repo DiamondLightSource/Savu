@@ -2,6 +2,7 @@ new_env=$1
 new_version=1.2
 
 # create module file for new Savu version with old Savu env
+# amend launcher scripts to module load the new version
 # update Savu version in setup.py
 # update Savu version in conda recipe
 # update other conda recipe versions
@@ -24,7 +25,7 @@ anaconda upload $savu_build --label test
 conda install -c savu/label/test savu
 savu_installer.sh dls
 
-# Update tomopy source code to not use multiprocessing
+# update tomopy source code to not use multiprocessing
 
 savu_quick_tests
 savu_full_tests
@@ -32,12 +33,12 @@ source savu_setup.sh
 mpi_cpu_test.sh /dls/tmp/qmm55171
 mpi_gpu_test.sh /dls/tmp/qmm55171
 
-# Push changes to Git
-# Create new release on Github
-# Create conda build of Savu and upload to anaconda cloud
-# Remove savu test install and install new version of Savu into new conda env
-# Re-run tests
-# Download zip
+# push changes to Git
+# create new release on Github
+# create conda build of Savu and upload to anaconda cloud
+# remove savu test install and install new version of Savu into new conda env
+# re-run tests
+# download zip
 # update module file to source new environment
 # copy savu_launcher_preview.sh to conda_env/bin?
 # update Savu default module load
