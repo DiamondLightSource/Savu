@@ -5,8 +5,6 @@ cuda=${nvcc%/bin/nvcc}
 
 ana_path=`command -v anaconda`
 prefix=${ana_path%/bin/anaconda}/lib/python2.7/site-packages/astra
-#export PYTHONPATH=$prefix/python:$PYTHONPATH
-#export LD_LIBRARY_PATH=$prefix/lib:$LD_LIBRARY_PATH
 
 cd build/linux
 

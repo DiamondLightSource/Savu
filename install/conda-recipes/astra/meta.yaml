@@ -16,7 +16,7 @@ requirements:
     - cython
 
 build:
-  number: 100
+  number: 2
 
 about:
   home: http://www.astra-toolbox.com

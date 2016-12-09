@@ -112,8 +112,9 @@ astrabuild=`conda build $recipes/astra --output`
 echo "Installing astra toolbox..."
 conda install --use-local $astrabuild
 
-astra_init_path=$(python -c "import site; print site.getsitepackages()[0]")/astra/__init__.py
-mv $recipes/astra/start_up_script.py $astra_init_path
+site_path=$(python -c "import site; print site.getsitepackages()[0]")
+cp $recipes/astra/astra.pth $site_path
+astra_lib_path=$site_path/astra/lib
 
 echo "Building xraylib..."
 conda build $recipes/xraylib
@@ -136,4 +137,5 @@ echo
 echo "*********************************"
 echo "* package installation complete *"
 echo "*********************************"
+echo -e "\nNow please add $astra_lib_path to LD_LIBRARY_PATH\n"
 
