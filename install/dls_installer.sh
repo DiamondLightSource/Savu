@@ -24,7 +24,6 @@ anaconda upload $savu_build --label test
 conda install -c savu/label/test savu
 savu_installer.sh dls
 
-# Add astra/lib to LD_LIBRARY_PATH
 # Update tomopy source code to not use multiprocessing
 
 savu_quick_tests

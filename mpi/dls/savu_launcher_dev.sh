@@ -1,4 +1,5 @@
 #!/bin/bash
+module load savu/1.2
 
 count=0
 while read -r entry; do
@@ -30,7 +31,6 @@ file_path=$DIR'/savu_mpijob.sh'
 savu_path=$(python -c "import savu, os; print os.path.dirname(os.path.abspath(savu.__file__))")
 savu_path=${savu_path%/savu}
 
-
 # set the log path
 log_path=/dls/tmp/savu
 a=( $options )
@@ -41,8 +41,8 @@ for (( i=0; i<${#a[@]} ; i+=2 )) ; do
 done
 
 qsub -N $outname -sync y -j y -o $log_path -e $log_path -pe openmpi $processes \
-     -l exclusive -l infiniband -l gpu=1 -q medium.q@@com10 $file_path $savu_path \
-     $input_file $process_file $output_folder $cpus_per_node $gpus_per_node $options > /dls/tmp/savu/$USER.out
+     -l exclusive -l infiniband -l gpu=1 -q $cluster $file_path $savu_path \
+     $input_file $process_file $output_folder $cpus_per_node $gpus_per_node $options -s cs04r-sc-serv-14 > /dls/tmp/savu/$USER.out
 
 echo "SAVU_LAUNCHER:: Job Complete, preparing output..."
 

@@ -1,5 +1,4 @@
-module load global/cluster
-module load savu
+module load savu/1.2
 
 savupath=$1
 datafile=$2
