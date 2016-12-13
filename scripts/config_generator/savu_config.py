@@ -608,24 +608,7 @@ def main():
     readline.parse_and_bind("tab: complete")
     readline.set_completer(comp.complete)
 
-    # load all the packages in the plugins directory to register classes
-    plugins_path = pu.get_plugins_paths()
-    for loader, module_name, is_pkg in pkgutil.walk_packages(plugins_path):
-        try:
-            # if the module is in savu, but not a plugin, then ignore
-            if "savu" in module_name.split('.') and "example_median_filter"\
-                not in module_name:
-                if "plugins" not in module_name.split('.'):
-                    continue
-            else:
-                continue
-            # setup.py is included in this list which should also be ignored
-            if module_name in ["savu.plugins.utils"]:
-                continue
-            if module_name not in sys.modules:
-                loader.find_module(module_name).load_module(module_name)
-        except Exception as e:
-            pass
+    _load_plugins()
 
     # set up things
     input_string = "startup"
@@ -650,10 +633,43 @@ def main():
         if content.is_finished():
             break
 
-        # write the history to the histoy file
+        # write the history to the history file
         readline.write_history_file(histfile)
 
     print("Thanks for using the application")
+
+
+def _load_plugins():
+    # load all the packages in the plugins directory to register classes
+    plugins_path = pu.get_plugins_paths()
+    idx = [i for i in range(len(plugins_path)) if 'savu_plugins' in
+           plugins_path[i]]
+
+    # load local plugins
+    if idx:
+        for loader, module_name, is_pkg in pkgutil.walk_packages(
+             [plugins_path[idx[0]]]):
+            if module_name not in sys.modules:
+                loader.find_module(module_name).load_module(module_name)
+        del plugins_path[idx[0]]
+
+    # load example plugins
+    for loader, module_name, is_pkg in pkgutil.walk_packages(plugins_path):
+        try:
+            # if the module is in savu, but not a plugin, then ignore
+            if "savu" in module_name.split('.') and "example_median_filter"\
+                 not in module_name:
+                if "plugins" not in module_name.split('.'):
+                    continue
+            else:
+                continue
+            # setup.py is included in this list which should also be ignored
+            if module_name in ["savu.plugins.utils"]:
+                continue
+            if module_name not in sys.modules:
+                loader.find_module(module_name).load_module(module_name)
+        except Exception as e:
+            pass
 
 if __name__ == '__main__':
     main()
