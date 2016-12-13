@@ -52,6 +52,8 @@ def load_plugin(plugin_name):
     :returns:  An instance of the class described by the named plugin
 
     """
+
+    print plugin_name
     logging.debug("getting class")
     logging.debug("plugin name is %s" % plugin_name)
     # clazz = self.import_class(plugin_name)
@@ -64,6 +66,8 @@ def load_plugin(plugin_name):
         ppath, name = os.path.split(plugin_name)
         sys.path.append(ppath)
     # TODO This appears to be the failing line.
+
+    print name
     clazz = load_class(name)
     instance = get_class_instance(clazz)
     return instance
@@ -268,5 +272,5 @@ def get_plugins_paths():
             sys.path.append(ppath)
 
     # now add the savu plugin path, which is now the whole path.
-    plugins_paths.append(os.path.join(savu.__path__[0], os.pardir))
+    plugins_paths.append(os.path.join(savu.__path__[0]) + '/plugins')
     return plugins_paths

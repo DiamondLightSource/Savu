@@ -34,7 +34,7 @@ class BaseFilter(Plugin):
     :param out_datasets: A list of the dataset(s) to create. Default: [].
     """
 
-    def __init__(self, name):
+    def __init__(self, name="BaseFilter"):
         super(BaseFilter, self).__init__(name)
 
     def _main_setup(self, exp, params):

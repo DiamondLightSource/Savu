@@ -351,15 +351,20 @@ def _list(content, arg):
     return content
 
 
-def _order_plugins(pfilter='savu'):
+def _order_plugins(pfilter=""):
     key_list = []
     value_list = []
-    star_search = pfilter.split('*')[0] if '*' in pfilter else False
+    star_search = \
+        pfilter.split('*')[0] if pfilter and '*' in pfilter else False
+
     for key, value in pu.plugins.iteritems():
-        if star_search and re.match('(?i)^' + star_search, value.__name__):
-            key_list.append(key)
-            value_list.append(value)
-        elif pfilter in value.__module__:
+        if star_search:
+            search = '(?i)^' + star_search
+            if re.match(search, value.__name__) or \
+                    re.match(search, value.__module__):
+                key_list.append(key)
+                value_list.append(value)
+        elif pfilter in value.__module__ or pfilter in value.__name__:
             key_list.append(key)
             value_list.append(value)
 
@@ -642,34 +647,15 @@ def main():
 def _load_plugins():
     # load all the packages in the plugins directory to register classes
     plugins_path = pu.get_plugins_paths()
-    idx = [i for i in range(len(plugins_path)) if 'savu_plugins' in
-           plugins_path[i]]
+    plugins_path.append(plugins_path[-1].split('savu')[0] + 'plugin_examples')
 
     # load local plugins
-    if idx:
-        for loader, module_name, is_pkg in pkgutil.walk_packages(
-             [plugins_path[idx[0]]]):
-            if module_name not in sys.modules:
-                loader.find_module(module_name).load_module(module_name)
-        del plugins_path[idx[0]]
-
-    # load example plugins
     for loader, module_name, is_pkg in pkgutil.walk_packages(plugins_path):
-        try:
-            # if the module is in savu, but not a plugin, then ignore
-            if "savu" in module_name.split('.') and "example_median_filter"\
-                 not in module_name:
-                if "plugins" not in module_name.split('.'):
-                    continue
-            else:
-                continue
-            # setup.py is included in this list which should also be ignored
-            if module_name in ["savu.plugins.utils"]:
-                continue
-            if module_name not in sys.modules:
+        if module_name not in sys.modules:
+            try:
                 loader.find_module(module_name).load_module(module_name)
-        except Exception as e:
-            pass
+            except:
+                pass
 
 if __name__ == '__main__':
     main()

@@ -138,3 +138,4 @@ class PluginRunner(object):
             for i in range(min(count, len(processes))):
                 processes[processes.index(cpus[i])] = gpus[i]
             self.exp.meta_data.set_meta_data('processes', processes)
+
