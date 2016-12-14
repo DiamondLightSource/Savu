@@ -1,14 +1,12 @@
-module load global/cluster
-module load python/anaconda-savu
-source activate savu_mpi1
+module load savu/1.2
 
 savupath=$1
 datafile=$2
 processfile=$3
 outfile=$4
 nCPUs=$5
-shift 5
-nGPUs=4
+nGPUs=$6
+shift 6
 
 export PYTHONPATH=$savupath:$PYTHONPATH
 filename=$savupath/savu/tomo_recon.py

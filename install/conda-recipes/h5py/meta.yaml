@@ -1,10 +1,12 @@
+{% set version = "2.5.0" %}
+
 package:
   name: h5py
-  version: 2.5.0
+  version: {{ version }}
 
 source:
-  fn: h5py-2.5.0.tar.gz
-  url: https://github.com/h5py/h5py/archive/2.5.0.tar.gz
+  fn: h5py-{{ version }}.tar.gz
+  url: https://github.com/h5py/h5py/archive/{{ version }}.tar.gz
 
 requirements:
   build:

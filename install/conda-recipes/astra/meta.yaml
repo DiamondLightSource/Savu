@@ -1,10 +1,13 @@
+{% set version = "1.6" %}
+
 package:
   name: astra-toolbox
   version: 1.6
 
 source:
-  fn: astra-1.6.tar.bz2
-  url: http://sourceforge.net/projects/astra-toolbox/files/astra-1.6/astra-1.6.tar.bz2
+  fn: astra-{{ version }}.tar.bz2
+  url: http://www.astra-toolbox.com/files/astra-{{ version }}/astra-{{ version }}.tar.bz2
+  sha256: e4dfb782cf2e547264947dd89f8c280b3aa63b7f40010abe6270949577b573d3
 
 requirements:
   build:
@@ -13,7 +16,7 @@ requirements:
     - cython
 
 build:
-  number: 100
+  number: 2
 
 about:
   home: http://www.astra-toolbox.com

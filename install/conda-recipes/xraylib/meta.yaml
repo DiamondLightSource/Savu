@@ -6,8 +6,8 @@ package:
 
 source:
   fn: xraylib-{{ version }}.tar.gz
-  url: https://github.com/tschoonj/xraylib/archive/xraylib-{{ version }}.tar.gz
-  sha256: 4f4ab07f47619fa5458efbcd5ea51cd2c76c11a474ef869432235719c5bcdb41
+  url: https://xraylib.tomschoonjans.eu/xraylib-{{ version }}.tar.gz
+  sha256: a734a0ea7b8224918f4e2105a4cf6c63664f257c1940a4c633beedf470d1576b
 
 build:
   number: 0

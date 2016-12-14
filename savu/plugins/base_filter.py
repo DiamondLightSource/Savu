@@ -34,7 +34,7 @@ class BaseFilter(Plugin):
     :param out_datasets: A list of the dataset(s) to create. Default: [].
     """
 
-    def __init__(self, name):
+    def __init__(self, name="BaseFilter"):
         super(BaseFilter, self).__init__(name)
 
     def _main_setup(self, exp, params):
@@ -57,11 +57,10 @@ class BaseFilter(Plugin):
         """
         return 8
 
-    def process_frames(self, data, slice_list):
+    def process_frames(self, data):
         """
         Calls the main filter processing function
         """
-        self.slice_list = slice_list[0]  
         return self.filter_frames(data)
 
     def filter_frames(self, data):

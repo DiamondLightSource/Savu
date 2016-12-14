@@ -36,7 +36,6 @@ import savu.core.utils as cu
 
 class Hdf5Transport(TransportControl):
 
-
     def _transport_control_setup(self, options):
         """ Fill the options dictionary with MPI related values.
         """
@@ -58,29 +57,30 @@ class Hdf5Transport(TransportControl):
     def __mpi_setup(self, options):
         """ Set MPI process specific values and logging initialisation.
         """
-        print("Running mpi_setup")
-        RANK_NAMES = options["process_names"].split(',')
-        RANK = MPI.COMM_WORLD.rank
-        SIZE = MPI.COMM_WORLD.size
-        RANK_NAMES_SIZE = len(RANK_NAMES)
-        if RANK_NAMES_SIZE > SIZE:
-            RANK_NAMES_SIZE = SIZE
-        MACHINES = SIZE/RANK_NAMES_SIZE
-        MACHINE_RANK = RANK/MACHINES
-        MACHINE_RANK_NAME = RANK_NAMES[MACHINE_RANK]
-        MACHINE_NUMBER = RANK % MACHINES
-        MACHINE_NUMBER_STRING = "%03i" % (MACHINE_NUMBER)
-        ALL_PROCESSES = [[i]*MACHINES for i in RANK_NAMES]
-        options["processes"] = list(chain.from_iterable(ALL_PROCESSES))
-        options["process"] = RANK
+        hosts = MPI.COMM_WORLD.allgather(socket.gethostname())
+        uniq_hosts = set(hosts)
+        names = options['process_names'].split(',')
 
-        self.__set_logger_parallel(MACHINE_NUMBER_STRING,
-                                   MACHINE_RANK_NAME,
-                                   options)
+        n_cores = len(hosts)
+        n_nodes = len(uniq_hosts)
+        n_cores_per_node = len(names)
+
+        rank_map = [i for s in uniq_hosts for i in range(n_cores)
+                    if s == hosts[i]]
+        index = sorted(range(len(rank_map)), key=lambda k: rank_map[k])
+        all_processes = [(names*n_nodes)[index[i]] for i in range(n_cores)]
+        options['processes'] = all_processes
+        rank = MPI.COMM_WORLD.rank
+        options['process'] = rank
+        node_number = rank_map.index(rank)/n_cores_per_node
+        local_name = all_processes[rank]
+
+        self.__set_logger_parallel("%03i" % node_number, local_name, options)
 
         MPI.COMM_WORLD.barrier()
-        logging.debug("Rank : %i - Size : %i - host : %s", RANK, SIZE,
-                      socket.gethostname())
+        logging.debug("Rank : %i - Size : %i - host : %s", rank, n_cores,
+                      hosts[MPI.COMM_WORLD.rank])
+
         IP = socket.gethostbyname(socket.gethostname())
         logging.debug("ip address is : %s", IP)
         self.call_mpi__barrier()
@@ -88,7 +88,7 @@ class Hdf5Transport(TransportControl):
         self.call_mpi__barrier()
 
     def call_mpi__barrier(self):
-        """ Call MPI _barrier before an experiment is created.
+        """ Call MPI_barrier before an experiment is created.
         """
         logging.debug("Waiting at the _barrier")
         MPI.COMM_WORLD.barrier()
@@ -119,13 +119,12 @@ class Hdf5Transport(TransportControl):
                                                      'user.log'))
         if 'syslog_server' in options.keys():
             try:
-                cu.add_syslog_log_handler(logger,
-                                      options['syslog_server'],
-                                      options['syslog_port'])
+                cu.add_syslog_log_handler(logger, options['syslog_server'],
+                                          options['syslog_port'])
             except:
-                logger.warn("Unable to add syslog logging for server %s on port %i",
-                            options['syslog_server'],
-                            options['syslog_port'])
+                logger.warn(
+                    "Unable to add syslog logging for server %s on port %i",
+                    options['syslog_server'], options['syslog_port'])
 
     def __set_logger_parallel(self, number, rank, options):
         """ Set parallel logger.
@@ -150,8 +149,8 @@ class Hdf5Transport(TransportControl):
                                               options['syslog_server'],
                                               options['syslog_port'])
                 except:
-                    logger.warn("Unable to add syslog logging for server %s on port %i",
-                                options['syslog_server'],
+                    logger.warn("Unable to add syslog logging for server %s on"
+                                " port %i", options['syslog_server'],
                                 options['syslog_port'])
 
     def _transport_run_plugin_list(self):
@@ -222,12 +221,13 @@ class Hdf5Transport(TransportControl):
 
         :param plugin plugin: The current plugin instance.
         """
-        self.process_checks()
         in_data, out_data = plugin.get_datasets()
 
         expInfo = plugin.exp.meta_data
-        in_slice_list = self.__get_all_slice_lists(in_data, expInfo)
-        out_slice_list = self.__get_all_slice_lists(out_data, expInfo)
+        in_slice_list, in_global_frame_idx = \
+            self.__get_all_slice_lists(in_data, expInfo)
+        out_slice_list, _ = self.__get_all_slice_lists(out_data, expInfo)
+        plugin.set_global_frame_index(in_global_frame_idx)
 
         squeeze_dict = self.__set_functions(in_data, 'squeeze')
         expand_dict = self.__set_functions(out_data, 'expand')
@@ -241,21 +241,13 @@ class Hdf5Transport(TransportControl):
             section, slice_list = \
                 self.__get_all_padded_data(in_data, in_slice_list, count,
                                            squeeze_dict)
-            result = plugin.process_frames(section, slice_list)
+            plugin.set_current_slice_list(slice_list)
+            result = plugin.process_frames(section)
             self.__set_out_data(out_data, out_slice_list, result, count,
                                 expand_dict)
 
         cu.user_message("%s - 100%% complete" % (plugin.name))
         plugin._revert_preview(in_data)
-
-    def process_checks(self):
-        pass
-        # if plugin inherits from base_recon and the data inherits from tomoraw
-        # then throw an exception
-#        if isinstance(in_data, TomoRaw):
-#            raise Exception("The input data to a reconstruction plugin cannot
-#            be Raw data. Have you performed a timeseries_field_correction?")
-# call a new process called process_check?
 
     def __set_functions(self, data_list, name):
         """ Create a dictionary of functions to remove (squeeze) or re-add
@@ -318,9 +310,12 @@ class Hdf5Transport(TransportControl):
         :rtype: list(tuple(slice))
         """
         slice_list = []
+        global_frame_index = []
         for data in data_list:
-            slice_list.append(data._get_slice_list_per_process(expInfo))
-        return slice_list
+            sl, f = data._get_slice_list_per_process(expInfo)
+            slice_list.append(sl)
+            global_frame_index.append(f)
+        return slice_list, global_frame_index
 
     def __get_all_padded_data(self, data_list, slice_list, count,
                               squeeze_dict):

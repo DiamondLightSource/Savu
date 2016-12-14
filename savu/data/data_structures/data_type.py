@@ -398,6 +398,7 @@ class NoImageKey(Tomo):
             dark = self.dark_image_key_data()
             self.image_key = self.orig_image_key
             return dark
+
         return self.dark_path[self.dark_flat_slice_list]*self.dscale
 
     def flat(self):
@@ -417,6 +418,9 @@ class NoImageKey(Tomo):
         from data_type import Map_3dto4d_h5
         if Map_3dto4d_h5 in self.__class__.__bases__:
             del self.dark_flat_slice_list[-1]
+
+#        if len(self.dark_flat_slice_list) < len(self.dark_path.shape):
+            # change dimensions here
 
         self.dark_flat_slice_list = tuple(self.dark_flat_slice_list)
         self.data_obj.meta_data.set_meta_data('dark', self.dark_mean())

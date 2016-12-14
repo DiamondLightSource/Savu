@@ -37,7 +37,7 @@ class NoProcessPlugin(BaseFilter, CpuPlugin):
     def __init__(self):
         super(NoProcessPlugin, self).__init__("NoProcessPlugin")
 
-    def process_frames(self, data, frame_list):
+    def process_frames(self, data):
         return data[0]
 
     def setup(self):

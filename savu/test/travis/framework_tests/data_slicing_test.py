@@ -65,7 +65,8 @@ class Test(unittest.TestCase):
         total = []
         for i in range(len(processes)):
             tu.set_process(exp, i, processes)
-            total.append(data._get_slice_list_per_process(exp.meta_data))
+            data._get_slice_list_per_process(exp.meta_data)
+            total.append(data._get_slice_list_per_process(exp.meta_data)[0])
         self.assertEqual(len(sl), sum(len(t) for t in total))
 
         pData.plugin_data_setup('SINOGRAM', 1)
@@ -73,7 +74,7 @@ class Test(unittest.TestCase):
         total = []
         for i in range(len(processes)):
             tu.set_process(exp, i, processes)
-            total.append(data._get_slice_list_per_process(exp.meta_data))
+            total.append(data._get_slice_list_per_process(exp.meta_data)[0])
         self.assertEqual(len(sl), sum(len(t) for t in total))
 
         pData.plugin_data_setup('PROJECTION', 8)
@@ -81,7 +82,7 @@ class Test(unittest.TestCase):
         total = []
         for i in range(len(processes)):
             tu.set_process(exp, i, processes)
-            total.append(data._get_slice_list_per_process(exp.meta_data))
+            total.append(data._get_slice_list_per_process(exp.meta_data)[0])
         self.assertEqual(len(sl), sum(len(t) for t in total))
 
         pData.plugin_data_setup('SINOGRAM', 1)
@@ -89,7 +90,7 @@ class Test(unittest.TestCase):
         total = []
         for i in range(len(processes)):
             tu.set_process(exp, i, processes)
-            total.append(data._get_slice_list_per_process(exp.meta_data))
+            total.append(data._get_slice_list_per_process(exp.meta_data)[0])
         self.assertEqual(len(sl), sum(len(t) for t in total))
 
     def test_get_padded_slice_data(self):

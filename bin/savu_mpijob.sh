@@ -3,6 +3,7 @@
 module load global/cluster
 
 module load python/anaconda-savu
+# test unloading astra module!
 source activate savu_mpi1
 
 #module load savu/1.0_new_env
@@ -19,7 +20,6 @@ nGPUs=4
 if [ $nGPUs -gt $nCPUs ]; then
     nGPUs=$nCPUs
 fi
-
 
 export PYTHONPATH=$savupath:$PYTHONPATH
 filename=$savupath/savu/tomo_recon.py
@@ -42,6 +42,9 @@ echo $nCPUs $nGPUs
 
 echo "Processes running are : ${processes}"
 
+#export OMP_NUM_THREADS=1
+#export PYFAI_OPENCL=0
+
 mpirun -np ${processes} \
        -mca btl self,openib,sm \
        -mca orte_forward_job_control 1 \
@@ -50,5 +53,4 @@ mpirun -np ${processes} \
        python $filename $datafile $processfile $outfile -n $CPUs -v $@
 
         #h5perf -i 3 -B 512K -d 1 -e 63M -x 512K -X 512K
-
 

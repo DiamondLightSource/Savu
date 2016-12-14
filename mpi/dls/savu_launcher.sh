@@ -1,5 +1,5 @@
 #!/bin/bash
-module load global/cluster
+module load savu/1.2
 
 echo "SAVU_LAUNCHER:: Running Job"
 
@@ -12,10 +12,14 @@ options=$@
 outname=savu
 nNodes=2
 nCoresPerNode=20
+nGPUs=4
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
 filepath=$DIR'/savu_mpijob.sh'
-savupath=${DIR%/mpi}
+savupath=$(python -c "import savu, os; print savu.__path__[0]")
+savupath=${savupath%/savu}
+
+echo "*** savupath:" $savupath
 
 M=$((nNodes*nCoresPerNode))
 
@@ -29,7 +33,9 @@ fi
 shift
 done
 
-qsub -N $outname -sync y -j y -o $log_path -e $log_path -pe openmpi $M -l exclusive -l infiniband -l gpu=1 -q medium.q@@com10 $filepath $savupath $datafile $processfile $outpath $nCoresPerNode $options > /dls/tmp/savu/$USER.out
+qsub -N $outname -sync y -j y -o $log_path -e $log_path -pe openmpi $M \
+     -l exclusive -l infiniband -l gpu=1 -q medium.q@@com10 $filepath $savupath \
+     $datafile $processfile $outpath $nCoresPerNode $nGPUs $options  -s cs04r-sc-serv-14 > /dls/tmp/savu/$USER.out
 
 echo "SAVU_LAUNCHER:: Job Complete, preparing output..."
 

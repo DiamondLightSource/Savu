@@ -13,14 +13,13 @@
 # limitations under the License.
 
 """
-.. module:: gpu_plugin
+.. module:: multi_threaded_plugin
    :platform: Unix
-   :synopsis: Base class for all plugins which use a GPU on the target machine
+   :synopsis: Driver to run one instance of a plugin on EACH node.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
-import logging
 from mpi4py import MPI
 
 from savu.plugins.driver.plugin_driver import PluginDriver
@@ -28,23 +27,26 @@ from savu.plugins.driver.plugin_driver import PluginDriver
 
 class MultiThreadedPlugin(PluginDriver):
     """
-    The base class from which all plugins should inherit.
+    Initiates a multi-theaded plugin on one core of each node.
+
     """
 
     def __init__(self):
         super(MultiThreadedPlugin, self).__init__()
 
     def _run_plugin(self, exp, transport):
+
         process = exp.meta_data.get_meta_data("process")
         processes = exp.meta_data.get_meta_data("processes")
         nNodes = processes.count(processes[0])
         nCores = len(processes)/nNodes
-        masters = [p for p in range(len(processes)) if p % nCores is 0]
-        self.__create_new_communicator(masters, exp)
 
-        print "*****available cores", nCores
+        masters = self._get_masters(processes)
+
+        self.__create_new_communicator(masters, exp)
+        self.exp._barrier()
+
         if process in masters:
-            logging.info("Running a multi-threaded process")
             self.parameters['available_CPUs'] = nCores
             self.parameters['available_GPUs'] = \
                 len([p for p in processes if 'GPU' in p])/nNodes
@@ -53,6 +55,13 @@ class MultiThreadedPlugin(PluginDriver):
 
         self.exp._barrier()
         return
+
+    def _get_masters(self, processes):
+        masters = [p for p in range(len(processes)) if processes[p] == 'GPU0']
+        if not masters:
+            masters = \
+                [p for p in range(len(processes)) if processes[p] == 'CPU0']
+        return masters
 
     def __create_new_communicator(self, ranks, exp):
         self.group = MPI.COMM_WORLD.Get_group()

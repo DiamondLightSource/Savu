@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright 2014 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,31 +13,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 """
-.. module:: pyfai_azimuthal_integration_test
+.. module:: tomopy_recon_test
    :platform: Unix
-   :synopsis: runner for tests using the MPI framework
+   :synopsis: unittest for the tomopy 'gridrec' reconstruction
 
-.. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
+.. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
+
 import unittest
-from savu.test import test_utils as tu
+
+import savu.test.test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
 
-class PyfaiFilteredTest(unittest.TestCase):
+class TomopyReconTest(unittest.TestCase):
 
-    def test_pyfai_filtered(self):
-        data_file = tu.get_test_data_path('mm.nxs')
-        process_file = tu.get_test_process_path('PyFAI_azimuth_test_bragg.nxs')
+    def test_tomopy_gridrec(self):
+        data_file = tu.get_test_data_path('24737.nxs')
+        process_file = tu.get_test_process_path('tomopy_test.nxs')
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
-#    def test_pyfai_realdata(self):
-#        from savu.test.travis.framework_tests.plugin_runner_test import \
-#            run_protected_plugin_runner2
-#        run_protected_plugin_runner2()
 
 if __name__ == "__main__":
     unittest.main()

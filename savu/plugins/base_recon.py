@@ -53,6 +53,7 @@ class BaseRecon(Plugin):
         self.nIn = 1
         self.scan_dim = None
         self.rep_dim = None
+        self.br_vol_shape = None
 
     def base_dynamic_data_info(self):
         if self.parameters['init_vol']:
@@ -71,7 +72,7 @@ class BaseRecon(Plugin):
 
         self.set_centre_of_rotation(in_dataset, in_meta_data, in_pData[0])
         self.exp.log(self.name + " End")
-        self.vol_shape = out_pData[0].get_shape()
+        self.br_vol_shape = out_pData[0].get_shape()
 
         self.main_dir = in_pData[0].get_pattern()['SINOGRAM']['main_dir']
         self.angles = in_meta_data.get_meta_data('rotation_angle')
@@ -90,6 +91,9 @@ class BaseRecon(Plugin):
 #        self.sino_func, self.cor_func = self.set_function(False) if \
 #            'NewBaseAstraRecon' in bases else self.set_function(shape)
         self.sino_func, self.cor_func = self.set_function(False)
+
+    def get_vol_shape(self):
+        return self.br_vol_shape
 
     def set_centre_of_rotation(self, inData, mData, pData):
         try:
@@ -119,16 +123,17 @@ class BaseRecon(Plugin):
                     sino, pad_tuples, 'edge'))
         return sino_func, cor_func
 
-    def process_frames(self, data, slice_list):
+    def process_frames(self, data):
         """
         Reconstruct a single sinogram with the provided center of rotation
         """
-        cor = self.cor[slice_list[0][self.main_dir]]
+        sl = self.get_current_slice_list()[0]
+        cor = self.cor[sl[self.main_dir]]
         init = data[1] if len(data) is 2 else None
-        angles = self.angles[:, slice_list[0][self.scan_dim]] if self.scan_dim\
-            else self.angles
+        angles = \
+            self.angles[:, sl[self.scan_dim]] if self.scan_dim else self.angles
         result = self.reconstruct(self.sino_func(data[0]), self.cor_func(cor),
-                                  angles, self.vol_shape, init)
+                                  angles, self.get_vol_shape(), init)
         return result
 
     def reconstruct(self, data, cor, angles, shape):

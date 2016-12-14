@@ -42,6 +42,8 @@ class Plugin(PluginDatasets):
         self.parameters_desc = {}
         self.chunk = False
         self.docstring_info = {}
+        self.slice_list = None
+        self.global_index = None
 
     def _main_setup(self, exp, params):
         """ Performs all the required plugin setup.
@@ -107,17 +109,30 @@ class Plugin(PluginDatasets):
 
         :param error_threshold: Convergence threshold. Default: 0.001.
         """
+        not_item = []
         for clazz in inspect.getmro(self.__class__)[::-1]:
             if clazz != object:
                 desc = pu.find_args(clazz, self)
                 self.docstring_info['warn'] = desc['warn']
                 self.docstring_info['info'] = desc['info']
                 self.docstring_info['synopsis'] = desc['synopsis']
-                full_description = desc['param']
-                for item in full_description:
-                    self.parameters[item['name']] = item['default']
-                    self.parameters_types[item['name']] = item['dtype']
-                    self.parameters_desc[item['name']] = item['desc']
+                if desc['not_param']:
+                    not_item.append(*desc['not_param'])
+                self._add_item(desc['param'])
+        if not_item:
+            self._delete_item(not_item)
+
+    def _add_item(self, full_description):
+        for item in full_description:
+            self.parameters[item['name']] = item['default']
+            self.parameters_types[item['name']] = item['dtype']
+            self.parameters_desc[item['name']] = item['desc']
+
+    def _delete_item(self, items):
+        for item in items:
+            del self.parameters[item]
+            del self.parameters_types[item]
+            del self.parameters_desc[item]
 
     def initialise_parameters(self):
         self.parameters = {}
@@ -190,19 +205,13 @@ class Plugin(PluginDatasets):
         """ This method is called immediately after base_pre_process(). """
         pass
 
-    def process_frames(self, data, frame_list):
+    def process_frames(self, data):
         """
         This method is called after the plugin has been created by the
         pipeline framework and forms the main processing step
 
-        :param data: The input data object.
-        :type data: savu.data.data_structures
-        :param data: The output data object
-        :type data: savu.data.data_structures
-        :param processes: The number of processes which will be doing the work
-        :type path: int
-        :param path: The specific process which we are
-        :type path: int
+        :param data: A list of numpy arrays for each input dataset.
+        :type data: list(np.array)
         """
 
         logging.error("process frames needs to be implemented")
@@ -285,6 +294,32 @@ class Plugin(PluginDatasets):
         for data in in_data:
             if data.get_preview().revert_shape:
                 data.get_preview()._unset_preview()
+
+    def set_global_frame_index(self, frame_idx):
+        self.global_index = frame_idx
+
+    def get_global_frame_index(self):
+        """ Get the position of the local processes frames from the global \
+        index of frames. """
+        return self.global_index
+
+    def set_current_slice_list(self, sl):
+        self.slice_list = sl
+
+    def get_current_slice_list(self):
+        """ Get the slice list of the current frame being processed. """
+        return self.slice_list
+
+    def get_slice_dir_reps(self, nData):
+        """ Return the periodicity of the main slice direction.
+
+        :params int nData: The number of the dataset in the list.
+        """
+        slice_dir = \
+            self.get_plugin_in_datasets()[nData].get_slice_directions()[0]
+        sl = [sl[slice_dir] for sl in self.slice_list]
+        reps = [i for i in range(len(sl)) if sl[i] == sl[0]]
+        return np.diff(reps)[0] if len(reps) > 1 else 1
 
     def nInput_datasets(self):
         """

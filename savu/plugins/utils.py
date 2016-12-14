@@ -70,6 +70,8 @@ def load_plugin(plugin_name):
     :returns:  An instance of the class described by the named plugin
 
     """
+
+    print plugin_name
     logging.debug("getting class")
     logging.debug("plugin name is %s" % plugin_name)
     # clazz = self.import_class(plugin_name)
@@ -82,6 +84,8 @@ def load_plugin(plugin_name):
         ppath, name = os.path.split(plugin_name)
         sys.path.append(ppath)
     # TODO This appears to be the failing line.
+
+    print name
     clazz = load_class(name)
     instance = get_class_instance(clazz)
     return instance
@@ -214,22 +218,26 @@ def find_args(dclass, inst=None):
     param_regexp = re.compile('^:param (?P<param>\w+):\s?(?P<doc>\w.*[^ ])\s' +
                               '?Default:\s?(?P<default>.*[^ ])$')
     param, idx1 = __find_regexp(param_regexp, lines)
+
+    not_param_regexp = re.compile('^:~param (?P<param>\w+):')
+    not_param, idx2 = __find_regexp(not_param_regexp, lines)
+
     warn_regexp = re.compile(r'^:config_warn: \s?(?P<config_warn>.*[^ ])$')
-    warn, idx2 = __find_regexp(warn_regexp, lines)
+    warn, idx3 = __find_regexp(warn_regexp, lines)
     if not warn:
         warn = ['']
     syn_regexp = re.compile(r'^:synopsis: \s?(?P<synopsis>.*[^ ])$')
-    synopsis, idx3 = __find_regexp(syn_regexp, mod_doc_lines)
+    synopsis, idx4 = __find_regexp(syn_regexp, mod_doc_lines)
     if not synopsis:
         synopsis = ['']
 
-    info = __find_docstring_info(idx1+idx2+idx3, lines)
+    info = __find_docstring_info(idx1+idx2+idx3+idx4, lines)
 
     param_entry = [{'dtype': type(value), 'name': a[0], 'desc': a[1],
                     'default': value} for a in param for value in [eval(a[2])]]
 
     return {'warn': "\n".join(warn), 'info': info, 'synopsis': synopsis[0],
-            'param': param_entry}
+            'param': param_entry, 'not_param': not_param}
 
 
 def __get_doc_lines(doc):
@@ -280,29 +288,23 @@ def get_plugins_paths():
     for ppath in plugins_paths:
         if ppath not in sys.path:
             sys.path.append(ppath)
+
     # now add the savu plugin path, which is now the whole path.
-    plugins_paths.append(os.path.join(savu.__path__[0], os.pardir))
+    plugins_paths.append(os.path.join(savu.__path__[0]) + '/plugins')
     return plugins_paths
 
 
 def populate_plugins():
     plugins_path = get_plugins_paths()
+    plugins_path.append(plugins_path[-1].split('savu')[0] + 'plugin_examples')
+
+    # load local plugins
     for loader, module_name, is_pkg in pkgutil.walk_packages(plugins_path):
-        try:
-            # if the module is in savu, but not a plugin, then ignore
-            if "savu" in module_name.split('.') and "example_median_filter"\
-                not in module_name:
-                if "plugins" not in module_name.split('.'):
-                    continue
-            else:
-                continue
-            # setup.py is included in this list which should also be ignored
-            if module_name in ["savu.plugins.utils"]:
-                continue
-            if module_name not in sys.modules:
+        if module_name not in sys.modules:
+            try:
                 loader.find_module(module_name).load_module(module_name)
-        except Exception as e:
-            pass
+            except:
+                pass
     for plugin in dawn_plugins.keys():
         p = load_plugin(dawn_plugins[plugin]['path2plugin'].strip('.py'))
         dawn_plugins[plugin]['input rank'] = u.get_pattern_rank(p.get_plugin_pattern())

@@ -73,8 +73,6 @@ class BaseMultiModalLoader(BaseLoader):
         axes = entry['data'].attrs['axes']
         data_obj.data_mapping.set_axes(axes)
         nAxes = len(axes)
-        print axes
-        print nAxes
         #logging.debug nAxes
         cts = 0
         motors = []
@@ -86,7 +84,6 @@ class BaseMultiModalLoader(BaseLoader):
         for ii in range(nAxes):
             # find the rotation axis
             data_axis = 'data/' + entry['data'].attrs["axes"][ii]
-            print data_axis
             logging.debug("the data axis is %s" % str(data_axis))
             entry_axis = entry[data_axis]
             try:
@@ -107,7 +104,6 @@ class BaseMultiModalLoader(BaseLoader):
                     rotation_angle = \
                         data_obj.backing_file[entry.name + '/' +data_axis].value
                     if rotation_angle.ndim > 1:
-                        print "rotshape is:"+str(rotation_angle.shape)
 #                         idx = axes_slice_list[:]# make a copy
 #                         idx[ii] = slice(0,rotation_angle.shape[ii],1)
                         rotation_angle = rotation_angle[:,0]

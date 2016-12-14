@@ -53,28 +53,36 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
         in_pData = self.get_plugin_in_datasets()[0]
         self.dark = inData.meta_data.get_meta_data('dark')
         self.flat = inData.meta_data.get_meta_data('flat')
-        self.flat_minus_dark = self.flat - self.dark
 
         pData_shape = in_pData.get_shape()
         tile = [1]*len(pData_shape)
         rot_dim = inData.find_axis_label_dimension('rotation_angle')
         self.slice_dir = in_pData.get_slice_dimension()
-        self.count = 0
 
         if self.parameters['pattern'] == 'PROJECTION':
-            tile[rot_dim] = pData_shape[rot_dim]
-            self.convert_size = lambda x: np.tile(x, tile)
-            self.correct = self.correct_proj
+            self._proj_pre_process(inData, pData_shape, tile, rot_dim)
         elif self.parameters['pattern'] == 'SINOGRAM':
-            full_shape = inData.get_shape()
-            tile[rot_dim] = full_shape[rot_dim]
-            self.correct = self.correct_sino
-            if len(full_shape) is 3:
-                self.convert_size = lambda a, b, x: np.tile(x[a:b], tile)
-            else:
-                nSino = \
-                    full_shape[inData.find_axis_label_dimension('detector_y')]
-                self.convert_size = lambda a, b, x: np.tile(x[a%nSino:b], tile)
+            self._sino_pre_process(inData, tile, rot_dim)
+
+        self.flat_minus_dark = self.flat - self.dark
+
+    def _proj_pre_process(self, data, shape, tile, dim):
+        tile[dim] = shape[dim]
+        self.convert_size = lambda x: np.tile(x, tile)
+        self.correct = self.correct_proj
+
+    def _sino_pre_process(self, data, tile, dim):
+        full_shape = data.get_shape()
+        tile[dim] = full_shape[dim]
+        self.correct = self.correct_sino
+        if len(full_shape) is 3:
+            self.convert_size = lambda a, b, x: np.tile(x[a:b], tile)
+        else:
+            nSino = \
+                full_shape[data.find_axis_label_dimension('detector_y')]
+            self.convert_size = \
+                lambda a, b, x: np.tile(x[a % nSino:b], tile)
+        self.count = 0
 
     def correct_proj(self, data):
         dark = self.convert_size(self.dark)
@@ -84,13 +92,17 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
         return data
 
     def correct_sino(self, data):
-        end = self.count + data.shape[self.slice_dir]
-        dark = self.convert_size(self.count, end, self.dark)
+        reps = self.get_slice_dir_reps(0)
+
+        sl = self.get_current_slice_list()[0][self.slice_dir]
+        start = self.get_global_frame_index()[0][self.count]%reps
+        end = start + len(np.arange(sl.start, sl.stop, sl.step))
+        dark = self.convert_size(start, end, self.dark)
         flat_minus_dark = \
-            self.convert_size(self.count, end, self.flat_minus_dark)
-        self.count += data.shape[self.slice_dir]
+            self.convert_size(start, end, self.flat_minus_dark)
         data = np.nan_to_num((data-dark)/flat_minus_dark)
         self.__data_check(data)
+        self.count += 1
         return data
 
     def fixed_flag(self):

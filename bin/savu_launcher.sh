@@ -21,7 +21,7 @@ savupath=${DIR%/bin}
 
 M=$((nNodes*nCoresPerNode))
 
-qsub -N $outname -sync y -j y -pe openmpi $M -l exclusive -l infiniband -l gpu=1 -q medium.q@@com10 $filepath $savupath $datafile $processfile $outpath $nCoresPerNode $@ > tmp.txt
+qsub -N $outname -sync y -j y -pe openmpi $M -l exclusive -l infiniband -l gpu=1 -q medium.q@@com10 $filepath $savupath $datafile $processfile $outpath $nCPUs $@ > tmp.txt
 
 filename=`echo $outname.o`
 jobnumber=`awk '{print $3}' tmp.txt | head -n 1`

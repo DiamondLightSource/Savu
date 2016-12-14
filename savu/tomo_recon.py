@@ -20,6 +20,8 @@
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
+
+import tempfile  # this import is required for pyFAI - DO NOT REMOVE!
 import optparse
 import sys
 import os
@@ -47,9 +49,10 @@ def __option_parser():
                       help="Display all debug log messages", default=False)
     parser.add_option("-q", "--quiet", action="store_true", dest="quiet",
                       help="Display only Errors and Info", default=False)
+    #  add -s 'cs04r-sc-serv-14' to module file
     parser.add_option("-s", "--syslog", dest="syslog",
                       help="Location of syslog server",
-                      default='cs04r-sc-serv-14')
+                      default='localhost')
     parser.add_option("-p", "--syslog_port", dest="syslog_port",
                       help="Port to connect to syslog server on", default=514)
 
@@ -97,7 +100,7 @@ def _set_options(opt, args):
     options["data_file"] = args[0]
     options["process_file"] = args[1]
     options["out_path"] = set_output_folder(args[0], args[2], opt.folder)
-    print options['out_path']
+
     if opt.temp_dir:
         options["inter_path"] = opt.temp_dir
     else:
@@ -113,6 +116,14 @@ def _set_options(opt, args):
 
 def set_output_folder(in_file, out_path, set_folder):
     from mpi4py import MPI
+
+#    # temporarily outputting environment variables
+#    rank = MPI.COMM_WORLD.rank
+#    filename = out_path + "/envs_" + str(rank)
+#    fid = open(filename, 'w')
+#    fid.write(str(os.environ))
+#    fid.close()
+
     import time
     if not set_folder:
         MPI.COMM_WORLD.barrier()
@@ -133,13 +144,18 @@ def set_output_folder(in_file, out_path, set_folder):
     return folder
 
 
-def main():
+def main(input_args=None):
     [options, args] = __option_parser()
+    print options, args
+
+    if input_args:
+        args = input_args
+
     __check_input_params(args)
+
     options = _set_options(options, args)
     plugin_runner = PluginRunner(options)
     plugin_runner._run_plugin_list()
-
 
 if __name__ == '__main__':
     main()

@@ -77,15 +77,19 @@ while read -r a b c d; do
     #datafile=$outpath/../../test_data/mark_data/
     #datafile=/dls/science/users/ssg37927/mt9396-1/raw/
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_processes/multi_nxs_test.nxs
-    #datafile=/mnt/GPFS01/testdir/dasc/qmm55171/temp_run_out/mark_test_data/temp_folder/
-#savu_stitched_tomos.h5
+    #datafile=/mnt/GPFS01/testdir/dasc/qmm55171/temp_run_out/mark_test_data/temp_folder/savu_stitched_tomos.h5
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_processes/test_init_replicate.nxs
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_processes/multi_savu_loader_test.nxs
     #datafile=/mnt/GPFS01/testdir/dasc/qmm55171/temp_run_out/mark_test_data/proj_4d.h5
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/marks_data_test.nxs
 
+
+    datafile=$outpath/34997.nxs
+    processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/david_test.nxs
+
+
     #datafile=/dls/i18/data/2016/sp13562-1/Experiment_1/nexus/71993_Sample1_before_calcination_1.nxs
-    #processfile=/dls/i18/data/2016/sp13562-1/processing/savu/SavuProcessLists/index_test.nxs
+    #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_processes_2/steve_test.nxs
 
     #datafile=/dls/i18/data/2016/sp12778-1/processing/Savu_testing_steve/XRF/RAW_DATA/67086_homer_absorption_tomo17kev_1.nxs
     #processfile=$outpath/i18_test2.nxs
@@ -102,8 +106,8 @@ while read -r a b c d; do
 
     #processfile=/dls/i18/data/2016/sp12601-1/processing/Savu_Test_Data/new_test_process_list.nxs
 
-    datafile=$outpath/../../test_data/24737.nxs
-    processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test.nxs
+    #datafile=$outpath/../../test_data/24737.nxs
+    #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test.nxs
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/test_data/test_process_lists/NLReg_cgls.nxs
 
     #processfile=/home/qmm55171/Documents/Git/git_repos/Savu/test_data/test_process_lists/vo_centering_test.nxs
@@ -166,5 +170,5 @@ while read -r a b c d; do
       #echo "completed profiling"
 	fi	
 
-done < ../../test.txt
+done < ../../../test.txt
 

@@ -39,11 +39,10 @@ class BaseCorrection(Plugin):
     def __init__(self, name='BaseCorrection'):
         super(BaseCorrection, self).__init__(name)
 
-    def process_frames(self, data, slice_list):
+    def process_frames(self, data):
         """
         Perform the correction
         """
-        self.slice_list = slice_list[0]
         return self.correct(data[0])
 
     def correct(self, data):

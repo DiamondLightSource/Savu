@@ -1,11 +1,18 @@
-build_no=100
-hdf5_version=1.15.1
-h5py_version=2.5.0
+facility=$1
+savu_env=$2
+
 mpi4py_version=1.3.1
 
 path=$(python -c "import savu; import os; print os.path.abspath(savu.__file__)")
 DIR=${path%/savu/__init__.pyc}
 recipes=$DIR'/install/conda-recipes'
+
+launcher_path=`command -v savu_launcher.sh`
+launcher_path=${launcher_path%/savu_launcher.sh}
+if [ "$facility" ]; then
+    cp $DIR/mpi/$facility/savu_launcher.sh $launcher_path
+    cp $DIR/mpi/$facility/savu_mpijob.sh $launcher_path
+fi
 
 #=========================library checking==============================
 
@@ -71,13 +78,13 @@ elif [ "$input" = "n" ]; then
 else
     echo -e "\nYour input was unknown.\n"
     read  -n 1 -p "Are you happy to proceed with the installation? (y/n): " input
-fi
-
-
+fi   
 #=====================installing other packages==========================
 
 echo "Uninstalling packages..."
-conda remove mpi4py h5py hdf5
+conda remove mpi4py
+conda remove h5py
+conda remove hdf5
 pip uninstall mpi4py astra-toolbox xraylib
 pip uninstall -r $package_list
 
@@ -93,13 +100,21 @@ conda install --use-local $hdf5build
 
 echo "Building h5py..."
 conda build $recipes/h5py --no-test
-h5pybuild=`conda build $recipes/h5py --output` 
+h5pybuild=`conda build $recipes/h5py --output`
 
 echo "Installing h5py..."
 conda install --use-local $h5pybuild
 
+echo "Building astra toolbox..."
+conda build $recipes/astra
+astrabuild=`conda build $recipes/astra --output`
+
 echo "Installing astra toolbox..."
-CUDA_ROOT=$cuda pip install astra-toolbox
+conda install --use-local $astrabuild
+
+site_path=$(python -c "import site; print site.getsitepackages()[0]")
+cp $recipes/astra/astra.pth $site_path
+astra_lib_path=$site_path/astra/lib
 
 echo "Building xraylib..."
 conda build $recipes/xraylib
@@ -107,6 +122,12 @@ xraylibbuild=`conda build $recipes/xraylib --output`
 
 echo "Installing xraylib..."
 conda install --use-local $xraylibbuild
+
+echo "Installing tomopy..."
+conda install -c dgursoy tomopy
+# revert back to MPI versions of HDF5 and h5py
+conda install --use-local $hdf5build
+conda install --use-local $h5pybuild
 
 package_list=$recipes'/../pip_install_package_list.txt'
 echo "Installing extra packages through pip..."
@@ -116,4 +137,5 @@ echo
 echo "*********************************"
 echo "* package installation complete *"
 echo "*********************************"
+echo -e "\nNow please add $astra_lib_path to LD_LIBRARY_PATH\n"
 

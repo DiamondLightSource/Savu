@@ -351,15 +351,20 @@ def _list(content, arg):
     return content
 
 
-def _order_plugins(pfilter='savu'):
+def _order_plugins(pfilter=""):
     key_list = []
     value_list = []
-    star_search = pfilter.split('*')[0] if '*' in pfilter else False
+    star_search = \
+        pfilter.split('*')[0] if pfilter and '*' in pfilter else False
+
     for key, value in pu.plugins.iteritems():
-        if star_search and re.match('(?i)^' + star_search, value.__name__):
-            key_list.append(key)
-            value_list.append(value)
-        elif pfilter in value.__module__:
+        if star_search:
+            search = '(?i)^' + star_search
+            if re.match(search, value.__name__) or \
+                    re.match(search, value.__module__):
+                key_list.append(key)
+                value_list.append(value)
+        elif pfilter in value.__module__ or pfilter in value.__name__:
             key_list.append(key)
             value_list.append(value)
 
@@ -608,8 +613,12 @@ def main():
     readline.parse_and_bind("tab: complete")
     readline.set_completer(comp.complete)
 
+
     # load all the packages in the plugins directory to register classes
+    # I've changed this to be in plugin utils package since this is now also called from dawn when 
+    #it populates savu plugins. adp 14/12/16
     pu.populate_plugins()
+
 
     # set up things
     input_string = "startup"
@@ -634,10 +643,11 @@ def main():
         if content.is_finished():
             break
 
-        # write the history to the histoy file
+        # write the history to the history file
         readline.write_history_file(histfile)
 
     print("Thanks for using the application")
+
 
 if __name__ == '__main__':
     main()
