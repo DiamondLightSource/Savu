@@ -24,7 +24,8 @@
 """
 
 import numpy as np
-import dezing
+
+import scipy.signal.signaltools as sig
 
 from savu.plugins.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
@@ -37,50 +38,50 @@ class DezingFilter(BaseFilter, CpuPlugin):
     A plugin for cleaning x-ray strikes based on statistical evaluation of \
     the near neighbourhood
     :param outlier_mu: Threshold for detecting outliers, greater is less \
-    sensitive. Default: 10.0.
+    sensitive. Default: 1000.0.
     :param kernel_size: Number of frames included in average. Default: 5.
     """
 
     def __init__(self):
         super(DezingFilter, self).__init__("DezingFilter")
-        self.warnflag = 0
-        self.errflag = 0
+        self.zinger_proportion = 0.0
 
     def pre_process(self):
-        # Apply dezing to dark and flat images (data with image key only)
         inData = self.get_in_datasets()[0]
         dark = inData.data.dark()
         flat = inData.data.flat()
-        (retval, self.warnflag, self.errflag) = dezing.setup_size(
-            dark.shape, self.parameters['outlier_mu'], self.pad)
+
         pad_list = ((self.pad, self.pad), (0, 0), (0, 0))
+
+        self._kernel = (self.parameters['kernel_size'], 1, 1)
+
         dark = self._dezing(np.pad(dark, pad_list, mode='edge'))
         flat = self._dezing(np.pad(flat, pad_list, mode='edge'))
-        inData.meta_data.set('dark', dark[self.pad:-self.pad].mean(0))
-        inData.meta_data.set('flat', flat[self.pad:-self.pad].mean(0))
-        (retval, self.warnflag, self.errflag) = dezing.cleanup()
-
-        # setup dezing for data
-        (retval, self.warnflag, self.errflag) = \
-            dezing.setup_size(self.data_size, self.parameters['outlier_mu'],
-                              self.pad)
+        inData.data.update_dark(dark[self.pad:-self.pad])
+        inData.data.update_flat(flat[self.pad:-self.pad])
 
     def _dezing(self, data):
-        result = np.empty_like(data)
-        (retval, self.warnflag, self.errflag) = dezing.run(data, result)
+        result = data[...]
+        median_result = sig.medfilt(data, self._kernel)
+        differrence = np.abs(data-median_result)
+        replace_mask = differrence > self.parameters['outlier_mu']
+        self.zinger_proportion = \
+            max(self.zinger_proportion, np.sum(replace_mask)/(
+                np.size(replace_mask)*1.0))
+        result[replace_mask] = median_result[replace_mask]
         return result
 
     def filter_frames(self, data):
         return self._dezing(data[0])
-
-    def post_process(self):
-        (retval, self.warnflag, self.errflag) = dezing.cleanup()
 
     def get_max_frames(self):
         """
         :returns:  an integer of the number of frames. Default 100
         """
         return 16
+
+    def raw_data(self):
+        return True
 
     def set_filter_padding(self, in_data, out_data):
         in_data = in_data[0]
@@ -90,10 +91,8 @@ class DezingFilter(BaseFilter, CpuPlugin):
         out_data[0].padding = {'pad_multi_frames': self.pad}
 
     def executive_summary(self):
-        if self.errflag != 0:
-            return(["ERRORS detected in dezing plugin, Check the detailed \
-log messages."])
-        if self.warnflag != 0:
-            return(["WARNINGS detected in dezing plugin, Check the detailed \
-log messages."])
-        return "Nothing to Report"
+        if self.zinger_proportion > 0.5:
+            return ["Over 50% of the pixels were treated as zingers!!"]
+        if self.zinger_proportion > 0.05:
+            return ["Over 5% of the pixels were treated as zingers"]
+        return ["Nothing to Report"]

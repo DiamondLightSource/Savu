@@ -33,7 +33,6 @@ import numpy as np
 from savu.plugins.utils import register_plugin
 
 
-@register_plugin
 class TimeseriesFieldCorrections(BaseCorrection, CpuPlugin):
     """
     A Plugin to apply a simple dark and flatfield correction to some
@@ -64,9 +63,9 @@ class TimeseriesFieldCorrections(BaseCorrection, CpuPlugin):
             lambda x, sl: x[[sl[d] for d in det_dims]]
 
     def correct(self, data):
-        dark = self.convert_size(self.dark, self.slice_list)
-        flat_minus_dark = \
-            self.convert_size(self.flat_minus_dark, self.slice_list)
+        dark = self.convert_size(self.dark, self.get_current_slice_list()[0])
+        flat_minus_dark = self.convert_size(
+            self.flat_minus_dark, self.get_current_slice_list()[0])
         data = np.nan_to_num((data-dark)/flat_minus_dark)
 
         # make high and low crop masks

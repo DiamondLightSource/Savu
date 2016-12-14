@@ -47,7 +47,7 @@ class BasicOperations(Plugin, CpuPlugin):
         self.operations = self._amend_ops(self._set_data_mappings())
         self.out_data = self._set_out_data_names()
 
-    def process_frames(self, data, frame_list):
+    def process_frames(self, data):
         for i in range(len(self.operations)):
             exec(self.out_data[i] + "=" + self.operations[i])
         return [eval(out) for out in self.out_data]

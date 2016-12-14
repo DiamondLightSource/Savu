@@ -15,17 +15,18 @@
 """
 .. module:: raven_filter
    :platform: Unix
-   :synopsis: A plugin remove ring artefacts
+   :synopsis: A plugin to remove ring artefacts
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 """
 import logging
 import numpy as np
 import pyfftw
+import pyfftw.interfaces.numpy_fft as fft
 
 from savu.plugins.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-
+from savu.data.plugin_list import CitationInformation
 from savu.plugins.utils import register_plugin
 
 
@@ -55,7 +56,12 @@ class RavenFilter(BaseFilter, CpuPlugin):
 
     def pre_process(self):
         in_pData = self.get_plugin_in_datasets()[0]
-        sino_shape = in_pData.get_shape()
+        self.slice_dir = in_pData.get_slice_dimension()
+        nDims = len(in_pData.get_shape())
+        self.sslice = [slice(None)]*nDims
+        sino_shape = list(in_pData.get_shape())
+        if len(sino_shape) is 3:
+            del sino_shape[self.slice_dir]
 
         width1 = sino_shape[1] + 2*self.pad
         height1 = sino_shape[0] + 2*self.pad
@@ -75,25 +81,59 @@ class RavenFilter(BaseFilter, CpuPlugin):
         self.filtercomplex = filtershapepad2d + filtershapepad2d*1j
 
         a = pyfftw.n_byte_align_empty((height1, width1), 16, 'complex128')
-        self.fft_object = pyfftw.FFTW(a, a, axes=(0, 1))
-        self.ifft_object = pyfftw.FFTW(a, a, axes=(0, 1),
+        b = pyfftw.n_byte_align_empty((height1, width1), 16, 'complex128')
+        c = pyfftw.n_byte_align_empty((height1, width1), 16, 'complex128')
+        d = pyfftw.n_byte_align_empty((height1, width1), 16, 'complex128')
+        self.fft_object = pyfftw.FFTW(a, b, axes=(0, 1))
+        self.ifft_object = pyfftw.FFTW(c, d, axes=(0, 1),
                                        direction='FFTW_BACKWARD')
 
     def filter_frames(self, data):
-        if(self.count % 25 == 0):
-            logging.debug("raven...%i" % self.count)
-        data2d = data[0]
-        sino2 = np.fft.fftshift(self.fft_object(data2d))
-        sino2[self.row1:self.row2] = \
-            sino2[self.row1:self.row2] * self.filtercomplex
-        sino3 = np.fft.ifftshift(sino2)
-        sino4 = self.ifft_object(sino3).real
-        sino4 = sino4[:, np.newaxis, :]
-        self.count += 1
-        return sino4
+        output = np.empty_like(data[0])
+        nSlices = data[0].shape[self.slice_dir]
+        for i in range(nSlices):
+            self.sslice[self.slice_dir] = i
+            sino = fft.fftshift(self.fft_object(data[0][tuple(self.sslice)]))
+            sino[self.row1:self.row2] = \
+                sino[self.row1:self.row2] * self.filtercomplex
+            sino = fft.ifftshift(sino)
+            sino = self.ifft_object(sino).real
+            output[self.sslice] = sino
+        return output
 
     def get_plugin_pattern(self):
         return 'SINOGRAM'
 
     def get_max_frames(self):
-        return 1
+        return 16
+
+    def get_citation_information(self):
+        cite_info = CitationInformation()
+        cite_info.description = \
+            ("The ring artefact removal algorithm used in this processing \
+             chain is taken from this work.")
+        cite_info.bibtex = \
+            ("@article{raven1998numerical,\n" +
+             "title={Numerical removal of ring artifacts in \
+             microtomography},\n" +
+             "author={Raven, Carsten},\n" +
+             "journal={Review of scientific instruments},\n" +
+             "volume={69},\n" +
+             "number={8},\n" +
+             "pages={2978--2980},\n" +
+             "year={1998},\n" +
+             "publisher={AIP Publishing}\n" +
+             "}")
+        cite_info.endnote = \
+            ("%0 Journal Article\n" +
+             "%T Numerical removal of ring artifacts in microtomography\n" +
+             "%A Raven, Carsten\n" +
+             "%J Review of scientific instruments\n" +
+             "%V 69\n" +
+             "%N 8\n" +
+             "%P 2978-2980\n" +
+             "%@ 0034-6748\n" +
+             "%D 1998\n" +
+             "%I AIP Publishing")
+        cite_info.doi = "doi: 10.1063/1.1149043"
+        return cite_info

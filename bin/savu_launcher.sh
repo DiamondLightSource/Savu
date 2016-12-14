@@ -1,4 +1,3 @@
-#module load global/testcluster
 module load global/cluster
 
 echo "running the mpi job"
@@ -14,17 +13,17 @@ shift 7
 
 echo "nNodes" $nNodes
 echo $outname
+nCoresPerNode=20
 
-filepath=$savupath/bin/savu_mpijob.sh
-M=$((nNodes*20))
+DIR="$(cd "$(dirname "$0")" && pwd)"
+filepath=$DIR'/savu_mpijob.sh'
+savupath=${DIR%/bin}
 
-#qsub -N $outname -sync y -j y -pe openmpi $M -l exclusive -q test-medium.q -l infiniband $filepath $savupath $datafile $processfile $outpath $nCPUs > tmp.txt
-#qsub -N $outname -sync y -j y -pe openmpi $M -l exclusive -q medium.q@@com07 $filepath $savupath $datafile $processfile $outpath $nCPUs > tmp.txt
 qsub -N $outname -sync y -j y -pe openmpi $M -l exclusive -l infiniband -l gpu=1 -q medium.q@@com10 $filepath $savupath $datafile $processfile $outpath $nCPUs $@ > tmp.txt
 
-#if [ ! -d $outpath/Profiling ]; then
-#    mkdir -p $outpath/Profiling;
-#fi
+M=$((nNodes*nCoresPerNode))
+
+qsub -N $outname -sync y -j y -pe openmpi $M -l exclusive -l infiniband -l gpu=1 -q medium.q@@com10 $filepath $savupath $datafile $processfile $outpath $nCPUs $@ > tmp.txt
 
 filename=`echo $outname.o`
 jobnumber=`awk '{print $3}' tmp.txt | head -n 1`
@@ -37,9 +36,4 @@ done
 
 cat $filename
 echo $filename
-#grep "L " $filename > Profiling/log_$filename
-
-#sleep 20
-#echo qacct -j ${jobnumber}
-#qacct -j ${jobnumber}
 

@@ -237,7 +237,7 @@ class PluginData(object):
         extra_dims = all_dims[nDims:]
         dlist = list(plist)
         for i in extra_dims:
-            dlist.insert(slice(None), i)
+            dlist.insert(i, slice(None))
         return tuple(dlist)
 
     def _set_frame_chunk(self, nFrames):

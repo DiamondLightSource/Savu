@@ -27,7 +27,7 @@ import numpy as np
 
 class BasePtycho(BaseFilter, CpuPlugin): # also make one for gpu
     """
-    A base plugin for doing ptychography. Other ptychography plugins should inherit from this
+    A base plugin for doing ptychography. Other ptychography plugins should inherit from this.
     :param in_datasets: A list of the dataset(s) to process. Default: [].
     :param out_datasets: A list of the dataset(s) to process. Default: ['probe', 'object_transmission', 'positions'].
     """
@@ -44,25 +44,26 @@ class BasePtycho(BaseFilter, CpuPlugin): # also make one for gpu
         self.positions = in_meta_data.get('xy') # get the positions and bind them
 
         # lets set up the axis labels for output datasets
-        position_labels, probe_labels, object_labels, sh = self.setup_axis_labels(in_dataset)
-        
+        position_labels, probe_labels, object_labels, self.sh = self.setup_axis_labels(in_dataset)
+        print "probe labels are:"+str(probe_labels)
         # Now create the datasets and work out the patterns
         ### PROBE ###
         probe = out_dataset[0]
-        probe_shape = sh + self.get_size_probe(in_dataset[0])
+#         probe_shape = in_dataset[0].get_shape()[-2:] + (self.get_num_probe_modes(),)
+        
+        self.set_size_probe(in_dataset[0].get_shape()[-2:])
         logging.debug("##### PROBE #####")
-        logging.debug("probe shape is:%s",str(probe_shape))
+        print("probe shape is:%s",str(self.get_size_probe()))
         probe.create_dataset(axis_labels=probe_labels,
-                            shape=probe_shape) # create the dataset
+                            shape=self.get_size_probe()) # create the dataset
         self.probe_pattern_setup(probe_labels, probe)
 
         ### OBJECT ####
         self.set_size_object(in_dataset[0],self.get_positions(), self.get_pixel_size()) 
         object_trans = out_dataset[1]
-        
-        object_shape = sh + self.get_size_object()
+        object_shape = self.sh + self.get_size_object()
         logging.debug("##### OBJECT #####")
-        logging.debug("object shape is:%s",str(object_shape))
+        print("object shape is:%s",str(object_shape))
 #         print object_labels
         
         object_trans.create_dataset(axis_labels=object_labels,
@@ -73,7 +74,7 @@ class BasePtycho(BaseFilter, CpuPlugin): # also make one for gpu
         ### POSITIONS ###
         logging.debug('##### POSITIONS #####')
         positions = out_dataset[2]
-        positions_shape = sh + self.get_positions().shape
+        positions_shape = self.sh + self.get_positions().shape
         logging.debug('positions shape is:%s',str(positions_shape))
         positions.create_dataset(axis_labels=position_labels,
                                  shape=positions_shape)
@@ -127,7 +128,7 @@ class BasePtycho(BaseFilter, CpuPlugin): # also make one for gpu
         '''
 #         print "positions is "+str(self.get_positions().shape)
         x,y = self.get_positions()[0],self.get_positions()[1]
-        probe_size = self.get_size_probe(dataset)
+        probe_size = self.get_size_probe()
         x_fov = np.max(x)-np.min(x)
         y_fov = np.max(y)-np.min(y)
         xsize = int(x_fov//pobj) + probe_size[0]
@@ -137,11 +138,14 @@ class BasePtycho(BaseFilter, CpuPlugin): # also make one for gpu
     def get_size_object(self):
         return self.obj_shape
     
-    def get_size_probe(self, dataset):
+    def set_size_probe(self,val):
+        self.probe_size = (1,)+val + (self.get_num_probe_modes(),)
+    
+    def get_size_probe(self):
         '''
         returns tuple
         '''
-        return dataset.get_shape()[-2:]+(self.get_num_object_modes(),)
+        return self.probe_size
     
     def get_max_frames(self):
         return 1
@@ -221,10 +225,10 @@ class BasePtycho(BaseFilter, CpuPlugin): # also make one for gpu
             logging.warn(str(e) + 'we were looking for "rotation_angle"')
             logging.debug('This is not a tomography, so no time series for the probe')
         else:
-            logging.debug('the rotation axis is:%s' % str(rot_axis))
+            print('the rotation axis is:%s' % str(rot_axis))
             probe_ts = {'core_dir':(rot_axis,), 'slice_dir':tuple(set(rest_probe) - set([rot_axis]))}
             probe.add_pattern("TIMESERIES", **probe_ts) # so we can FT the wiggles etc...
-            logging.debug('This is a tomography so I have added a TIMESERIES pattern to the probe') # the probe oscillates in time for each projection, set this as a time series pattern
+            print('This is a tomography so I have added a TIMESERIES pattern to the probe') # the probe oscillates in time for each projection, set this as a time series pattern
 
     def set_probe_energy_patterns(self, probe, rest_probe):
         try:

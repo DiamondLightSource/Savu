@@ -81,18 +81,16 @@ class BaseI18MultiModalLoader(BaseMultiModalLoader):
         data_obj.data_mapping.set_axes(self.parameters['scan_pattern'])
         f = data_obj.backing_file
         nAxes = len(data_obj.get_shape())
-        print "number of axes"+str(nAxes)
+
         #logging.debug nAxes
         cts = 0
         chk = 0
         motor_type = []
         labels = []
         fast_axis = self.parameters["fast_axis"]
-        print 'my motors are:'+str(motors)
         logging.debug("axes input are:"+str(motors))
         for ii in range(nAxes):
             # find the rotation axis
-            print ii
             try:
                 data_axis = self.parameters[motors[ii]]# get that out the file
                 logging.debug("the data axis is %s" % str(data_axis))

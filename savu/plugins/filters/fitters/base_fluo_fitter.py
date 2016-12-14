@@ -22,9 +22,11 @@
 """
 
 import logging
-from savu.plugins.filters.base_fitter import BaseFitter
+from savu.plugins.base_filter import BaseFilter
+from savu.plugins.driver.cpu_plugin import CpuPlugin
+import peakutils as pe
 import numpy as np
-import _xraylib as xl
+import xraylib as xl
 from flupy.algorithms.xrf_calculations.transitions_and_shells import \
     shells, transitions
 from flupy.algorithms.xrf_calculations.escape import *
@@ -32,7 +34,7 @@ from flupy.xrf_data_handling import XRFDataset
 from copy import deepcopy
 
 
-class BaseFluoFitter(BaseFitter):
+class BaseFluoFitter(BaseFilter, CpuPlugin):
     """
     This plugin fits peaks. Either XRD or XRF for now.
     :param in_datasets: Create a list of the dataset(s). Default: [].
@@ -50,7 +52,7 @@ class BaseFluoFitter(BaseFitter):
     def __init__(self, name="BaseFluoFitter"):
         super(BaseFluoFitter, self).__init__(name)
 
-    def pre_process(self):
+    def base_pre_process(self):
         in_meta_data = self.get_in_meta_data()[0]
         try:
             _foo = in_meta_data.get("PeakIndex")[0]
@@ -112,8 +114,8 @@ class BaseFluoFitter(BaseFitter):
         for i in range(len(out_datasets)):
             out_datasets[i].meta_data = deepcopy(in_meta_data)
             mData = out_datasets[i].meta_data
-            mData.set("PeakEnergy", self.axis[self.idx])
-            mData.set('PeakIndex', self.idx)
+            mData.set_meta_data("PeakEnergy", self.axis[self.idx])
+            mData.set_meta_data('PeakIndex', self.idx)
 
     def setPositions(self, in_meta_data):
         paramdict = XRFDataset().paramdict
@@ -141,7 +143,7 @@ class BaseFluoFitter(BaseFitter):
         logging.debug("the peak energies are:"+str(engy))
         logging.debug("the offset is"+str(axis[0]))
         self.idx = np.round((engy-axis[0])/dq).astype(int)
-        
+
         return self.idx
 
     def findLines(self, paramdict=XRFDataset().paramdict):
@@ -215,4 +217,132 @@ class BaseFluoFitter(BaseFitter):
         peakpos = np.unique(peakpos)
 #         print peakpos
         return peakpos
+
+    def getAreas(self, fun, x, positions, fitmatrix):
+        rest = fitmatrix
+        numargsinp = self.getFitFunctionNumArgs(str(fun.__name__))  # 2 in
+        npts = len(fitmatrix) / numargsinp
+        #print npts
+        weights = rest[:npts]
+        #print 'the weights are'+str(weights)
+        widths = rest[npts:2*npts]
+        #print 'the widths are'+str(widths)
+        #print(len(widths))
+        areas = []
+        for ii in range(len(weights)):
+            areas.append(np.sum(fun(weights[ii],
+                                    widths[ii],
+                                    x,
+                                    positions[ii],
+                                    )))
+        return weights, widths, np.array(areas)
+
+    def getFitFunctionNumArgs(self,key):
+        self.lookup = {
+                       "lorentzian": 2,
+                       "gaussian": 2
+                       }
+        return self.lookup[key]
+
+    def get_max_frames(self):
+        """
+        This filter processes 1 frame at a time
+
+         :returns:  1
+        """
+        return 1
+
+    def nOutput_datasets(self):
+        return 4
+
+    def getFitFunction(self,key):
+        self.lookup = {
+                       "lorentzian": lorentzian,
+                       "gaussian": gaussian
+                       }
+        return self.lookup[key]
+
+    def _resid(self, p, fun, y, x, pos):
+        #print fun.__name__
+        r = y-self._spectrum_sum(fun, x, pos, *p)
+        
+        return r
+
+    def dfunc(self, p, fun, y, x, pos):
+        if fun.__name__ == 'gaussian' or fun.__name__ == 'lorentzian': # took the lorentzian out. Weird
+            #print fun.__name__
+            rest = p
+            #print "parameter shape is "+ str(p.shape)
+            npts = len(p) / 2
+            a = rest[:npts]
+            sig = rest[npts:2*npts]
+            mu = pos
+        #    print "len mu"+str(len(mu))
+        #    print "len x"+str(len(x))
+            if fun.__name__ == 'gaussian':
+                da = self.spectrum_sum_dfun(fun, 1./a, x, mu, *p)
+                #dmu_mult = np.zeros((len(mu), len(x)))
+                dsig_mult = np.zeros((npts, len(x)))
+                for i in range(npts):
+                    dsig_mult[i] = ((x-mu[i])**2) / sig[i]**3
+                dsig = self.spectrum_sum_dfun(fun, dsig_mult, x, mu, *p)
+                op = np.concatenate([-da, -dsig])
+            elif fun.__name__ == 'lorentzian':
+                #print "hey"
+                da = self.spectrum_sum_dfun(fun, 1./a, x, mu, *p)
+                dsig = np.zeros((npts, len(x)))
+                for i in range(npts):
+                    nom = 8 * a[i]* sig[i] * (x - mu[i]) ** 2 
+                    denom = (sig[i]**2 + 4.0 * (x - mu[i])**2)**2
+                    dsig[i] = nom / denom
+                op = np.concatenate([-da, -dsig])
+        else:
+            op = None
+        return op
+
+    def _spectrum_sum(self, fun, x, positions, *p):
+        rest = np.abs(p)
+        npts = len(p) / 2
+        weights = rest[:npts]
+        #print weights
+        widths = rest[npts:2*npts]
+        #print widths
+        spec = np.zeros((len(x),))
+        for ii in range(len(weights)):
+            spec += fun(weights[ii], widths[ii], x, positions[ii])
+        return spec
+
+    def spectrum_sum_dfun(self, fun, multiplier, x, pos, *p):
+        rest = p
+        npts = len(p) / 2
+    #    print npts
+        weights = rest[:npts]
+        #print weights
+        widths = rest[npts:2*npts]
+        #print widths
+        positions = pos
+    #    print(len(positions))
+        spec = np.zeros((npts, len(x)))
+        #print "len x is "+str(len(spec))
+    #    print len(spec), type(spec)
+    #    print len(positions), type(positions)
+    #    print len(weights), type(weights)
+        for ii in range(len(weights)):
+            spec[ii] = multiplier[ii]*fun(weights[ii],
+                                          widths[ii],
+                                          x, positions[ii])
+        return spec
+
+def lorentzian(a, w, x, c):
+#     w = np.abs(w)
+#     numerator = (w**2)
+#     denominator = (x - c)**2 + w**2
+#     y = np.abs(a)*(numerator/denominator)
+    y = a / (1.0 + (2.0 * (c - x) / w) ** 2)
+    return y
+
+
+def gaussian(a, w, x, c):
+    return pe.gaussian(x, a, c, w)
+
 

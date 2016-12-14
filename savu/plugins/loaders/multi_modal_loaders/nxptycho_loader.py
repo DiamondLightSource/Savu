@@ -70,9 +70,15 @@ class NxptychoLoader(BaseMultiModalLoader):
         y = \
             data_obj.backing_file[stxm_entry.name + '/data/lab_sxy/lab_sy'].value*1e-6
         pos = np.zeros((2,len(y)))
+<<<<<<< HEAD
         pos[0,:] = x
         pos[1,:] = y
         data_obj.meta_data.set('xy', pos)
+=======
+        pos[0,:] = y
+        pos[1,:] = x
+        data_obj.meta_data.set_meta_data('xy', pos)
+>>>>>>> origin/master
         # axis label
         labels.append('xy.metres')
 #         labels.append('y.microns')

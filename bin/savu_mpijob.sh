@@ -1,9 +1,13 @@
 #!/bin/bash
 #module load global/testcluster
 module load global/cluster
+
 module load python/anaconda-savu
+# test unloading astra module!
 source activate savu_mpi1
-#export PYTHONPATH=$PYTHONPATH:/home/clb02321/DAWN_stable/FastXRF/src/
+
+#module load savu/1.0_new_env
+#activate_env
 
 savupath=$1
 datafile=$2
@@ -12,6 +16,10 @@ outfile=$4
 nCPUs=$5
 shift 5
 nGPUs=4
+
+if [ $nGPUs -gt $nCPUs ]; then
+    nGPUs=$nCPUs
+fi
 
 export PYTHONPATH=$savupath:$PYTHONPATH
 filename=$savupath/savu/tomo_recon.py
@@ -30,8 +38,12 @@ for i in $(seq 0 $((nCPUs-1-nGPUs))); do CPUs+="CPU$i " ; done
 #for i in $(seq 0 $((nCPUs-1))); do CPUs+="CPU$i " ; done
 CPUs=$(echo $GPUs$CPUs | tr ' ' ,)
 echo $CPUs
+echo $nCPUs $nGPUs
 
 echo "Processes running are : ${processes}"
+
+#export OMP_NUM_THREADS=1
+#export PYFAI_OPENCL=0
 
 mpirun -np ${processes} \
        -mca btl self,openib,sm \
@@ -39,4 +51,9 @@ mpirun -np ${processes} \
        -x LD_LIBRARY_PATH \
        --hostfile ${UNIQHOSTS} \
        python $filename $datafile $processfile $outfile -n $CPUs -v $@
+<<<<<<< HEAD
+=======
+
+        #h5perf -i 3 -B 512K -d 1 -e 63M -x 512K -X 512K
+>>>>>>> origin/master
 

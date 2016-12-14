@@ -44,7 +44,11 @@ class I22TomoLoader(BaseLoader):
         exp = self.exp
         data_obj = exp.create_data_object('in_data', 'tomo')
         data_obj.backing_file = \
+<<<<<<< HEAD
             h5py.File(exp.meta_data.get("data_file"), 'r')
+=======
+            h5py.File(exp.meta_data.get_meta_data("data_file"), 'r')
+>>>>>>> origin/master
         data_obj.data = data_obj.backing_file['entry/result/data']
         data_obj.set_shape(data_obj.data.shape)
         logging.warn('the data as shape %s' % str(data_obj.data.shape))
@@ -59,6 +63,7 @@ class I22TomoLoader(BaseLoader):
                                 slice_dir=(0, 1, 2))
 
         mData = data_obj.meta_data
+<<<<<<< HEAD
         mData.set("Q", data_obj.backing_file['entry/result/q'].value)
         mData.set("x", np.arange(data_obj.data.shape[1]))
         mData.set("y", np.arange(data_obj.data.shape[0]))
@@ -67,3 +72,12 @@ class I22TomoLoader(BaseLoader):
         
         self.set_data_reduction_params(data_obj)
 
+=======
+        mData.set_meta_data("Q", data_obj.backing_file['entry/result/q'].value)
+        mData.set_meta_data("x", np.arange(data_obj.data.shape[1]))
+        mData.set_meta_data("y", np.arange(data_obj.data.shape[0]))
+        mData.set_meta_data("rotation_angle",
+                                data_obj.backing_file['entry/result/theta'].value)
+        
+        self.set_data_reduction_params(data_obj)
+>>>>>>> origin/master

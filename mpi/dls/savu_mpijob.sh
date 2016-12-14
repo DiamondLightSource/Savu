@@ -1,17 +1,12 @@
-#!/bin/bash
-#module load global/testcluster
-module load global/cluster
-module load python/anaconda-savu
-source activate savu_mpi1
-#export PYTHONPATH=$PYTHONPATH:/home/clb02321/DAWN_stable/FastXRF/src/
+module load savu/1.2
 
 savupath=$1
 datafile=$2
 processfile=$3
 outfile=$4
 nCPUs=$5
-shift 5
-nGPUs=4
+nGPUs=$6
+shift 6
 
 export PYTHONPATH=$savupath:$PYTHONPATH
 filename=$savupath/savu/tomo_recon.py
@@ -27,7 +22,6 @@ processes=`bc <<< "$((uniqslots*nCPUs))"`
 
 for i in $(seq 0 $((nGPUs-1))); do GPUs+="GPU$i " ; done
 for i in $(seq 0 $((nCPUs-1-nGPUs))); do CPUs+="CPU$i " ; done
-#for i in $(seq 0 $((nCPUs-1))); do CPUs+="CPU$i " ; done
 CPUs=$(echo $GPUs$CPUs | tr ' ' ,)
 echo $CPUs
 

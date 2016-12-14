@@ -3,6 +3,7 @@ channels:
   - soft-matter # for pyfftw
   - astra-toolbox
   - tacaswell
+  - dgursoy
 dependencies:
   - python=2.7
   - numpy
@@ -16,6 +17,7 @@ dependencies:
   - scikit-image
   - astra-toolbox
   - xraylib
+  - tomopy
   - pip:
     - fabio 
     - pytest-cov
@@ -24,4 +26,6 @@ dependencies:
     - nvidia-ml-py
     - pyfftw
     - peakutils
+    - pymca
+    - colorama
 

@@ -45,6 +45,9 @@ class FastxrfFitting(BaseFluoFitter):
         logging.debug("Starting fast fitter")
         super(FastxrfFitting, self).__init__("FastxrfFitting")
 
+    def base_pre_process(self):
+        pass
+
     def pre_process(self):
         """
         This method is called after the plugin has been created by the

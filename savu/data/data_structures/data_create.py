@@ -51,12 +51,15 @@ class DataCreate(object):
             np.float32)
         :keyword bool remove: Remove from framework after completion \
         (no link in .nxs file) (optional: Defaults to False.)
+        :keyword bool raw: Keep dark and flats (ImageKey or NoImageKey)
 
         {0} \n {1} \n {2} \n {3}
 
         """
         self.dtype = kwargs.get('dtype', np.float32)
         self.remove = kwargs.get('remove', False)
+        self.raw = kwargs.get('raw', False)
+
         if len(args) is 1:
             self.__create_dataset_from_object(args[0])
         else:
@@ -69,7 +72,9 @@ class DataCreate(object):
         patterns = copy.deepcopy(data_obj.get_data_patterns())
         self.__copy_labels(data_obj)
         self.__find_and_set_shape(data_obj)
-        self.__set_data_patterns(patterns)
+        self._set_data_patterns(patterns)
+        if self.raw:
+            self.raw = data_obj.data
 
     def __create_dataset_from_kwargs(self, kwargs):
         """ Create dataset from kwargs. """
@@ -88,7 +93,7 @@ class DataCreate(object):
 
         if 'patterns' in kwargs:
             patterns = self.__copy_patterns(kwargs['patterns'])
-            self.__set_data_patterns(patterns)
+            self._set_data_patterns(patterns)
 
     def __copy_patterns(self, copy_data):
         """ Copy patterns """
@@ -125,7 +130,7 @@ class DataCreate(object):
         patterns = {}
         for name, pattern_dict in copy_patterns.iteritems():
             empty_flag = False
-            for ddir in pattern_dict:
+            for ddir in ['slice_dir', 'core_dir']:
                 s_dims = self.non_negative_directions(
                     pattern_dict[ddir], nDims=nDims)
                 new_dims = [sd for sd in s_dims if sd not in dims]
@@ -218,7 +223,7 @@ class DataCreate(object):
         self.data_info.set(
             'nDims', self.data_info.get('nDims') + 1)
 
-    def __set_data_patterns(self, patterns):
+    def _set_data_patterns(self, patterns):
         """ Add missing dimensions to patterns and populate data info dict. """
         all_dims = range(len(self.get_shape()))
         for p in patterns:
@@ -234,3 +239,16 @@ class DataCreate(object):
         pData = self._get_plugin_data()
         new_shape = copy.copy(data.get_shape()) + tuple(pData.extra_dims)
         self.set_shape(new_shape)
+
+    def _add_raw_data_obj(self, data_obj):
+        from savu.data.data_structures.data_type import ImageKey, NoImageKey
+        proj_dim = self.find_axis_label_dimension('rotation_angle')
+        if isinstance(data_obj.raw, ImageKey):
+            data_obj.data = \
+                ImageKey(data_obj, data_obj.raw.image_key, proj_dim)
+            data_obj.raw._copy(data_obj)
+        elif isinstance(data_obj.raw, NoImageKey):
+            data_obj.data = NoImageKey(data_obj, proj_dim)
+            data_obj.raw._copy(data_obj)
+        else:
+            raise Exception('Raw data type not recognised.')

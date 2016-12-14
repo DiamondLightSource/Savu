@@ -20,6 +20,7 @@ Created on 21 May 2015
 from __future__ import print_function
 
 import os
+from colorama import Fore, Back
 
 from savu.data.plugin_list import PluginList
 from savu.plugins import utils as pu
@@ -67,6 +68,13 @@ class Content(object):
             i = raw_input("Are you sure? [y/N]")
             return True if i.lower() == 'y' else False
 
+        width = 86
+        warnings = self.get_warnings(width)
+        if warnings:
+            notice = Back.RED + Fore.WHITE + "IMPORTANT PLUGIN NOTICES" +\
+                Back.RESET + Fore.RESET + "\n"
+            border = "*"*width + '\n'
+            print (border + notice + warnings + '\n'+border)
         i = raw_input("Are you sure you want to save the current data to "
                       "'%s' [y/N]" % (self.filename))
         if i.lower() == 'y':
@@ -74,6 +82,19 @@ class Content(object):
             self.plugin_list._save_plugin_list(self.filename)
         else:
             print("The process list has NOT been saved.")
+
+    def get_warnings(self, width):
+        colour = Back.RESET + Fore.RESET
+        warnings = []
+        for plugin in self.plugin_list.plugin_list:
+            warn = self.plugin_list._get_docstring_info(plugin['name'])['warn']
+            if warn:
+                for w in warn.split('\n'):
+                    string = plugin['name'] + ": " + w
+                    warnings.append(self.plugin_list._get_equal_lines(
+                        string, width-1, colour, colour, " "*2))
+        return "\n".join(
+            ["*" + "\n ".join(w.split('\n')) for w in warnings if w])
 
     def value(self, arg):
         value = ([''.join(arg.split()[1:])][0]).split()[0]
@@ -266,8 +287,9 @@ def _disp(content, arg):
             i(int) j(int): Display list items i to j.
             -q: Quiet mode. Only process names are listed.
             -v: Verbose mode. Displays parameter details.
+            -vv: Extra verbose. Displays additional information and warnings.
             """
-    verbosity = ['-v', '-q']
+    verbosity = ['-vv', '-v', '-q']
     idx = {'start': 0, 'stop': -1}
     if arg:
         split_arg = arg.split(' ')
@@ -291,29 +313,65 @@ def _list(content, arg):
     """List the plugins which have been registered for use.
        Optional arguments:
             type(str): Display 'type' plugins. Where type can be 'loaders',
-            'corrections', 'filters', 'reconstructions' or 'savers'.
-            type(str) names: Display type selection with process names only.
+            'corrections', 'filters', 'reconstructions', 'savers' or the start\
+            of a plugin name followed by an asterisk, e.g. a*.
+            -q: Quiet mode. Only process names are listed.
+            -v: Verbose mode. Process names, synopsis and parameters.
     """
+
+    verbosity = ['-q', '-v', '-vv']
     if arg:
         arg = arg.split(' ')
-        if len(arg) == 2:
-            if arg[1] != 'names':
-                print("The arguments %s are unknown", arg)
-                return content
+
+    if len(arg) is 2:
+        plugins = _order_plugins(pfilter=arg[0])
+        arg = [arg[1]]
+    elif len(arg) is 1 and arg[0] not in verbosity:
+        plugins = _order_plugins(pfilter=arg[0])
+        arg = None
+    else:
+        plugins = _order_plugins()
 
     print("-----------------------------------------")
-    for key, value in pu.plugins.iteritems():
+    for key, value in plugins:
         if not arg:
+            print(key, content.plugin_list._get_synopsis(
+                key, 60, Fore.CYAN, Fore.RESET))
+        elif arg[0] == '-q':
             print(key)
-        elif arg[0] in value.__module__:
-            print(key)
-            if len(arg) < 2:
-                plugin = pu.plugins[key]()
-                plugin._populate_default_parameters()
-                for p_key in plugin.parameters.keys():
-                    print("    %20s : %s" % (p_key, plugin.parameters[p_key]))
+        elif arg[0] == '-v':
+            plugin = pu.plugins[key]()
+            plugin._populate_default_parameters()
+            print(key, content.plugin_list._get_synopsis(
+                key, 60, Fore.CYAN, Fore.RESET),
+                content.plugin_list._get_param_details(plugin.parameters, 100))
+        else:
+            print("The arguments %s are unknown", arg)
     print("-----------------------------------------")
     return content
+
+
+def _order_plugins(pfilter=""):
+    key_list = []
+    value_list = []
+    star_search = \
+        pfilter.split('*')[0] if pfilter and '*' in pfilter else False
+
+    for key, value in pu.plugins.iteritems():
+        if star_search:
+            search = '(?i)^' + star_search
+            if re.match(search, value.__name__) or \
+                    re.match(search, value.__module__):
+                key_list.append(key)
+                value_list.append(value)
+        elif pfilter in value.__module__ or pfilter in value.__name__:
+            key_list.append(key)
+            value_list.append(value)
+
+    sort_idx = sorted(range(len(key_list)), key=lambda k: key_list[k])
+    key_list.sort()
+    value_list = [value_list[i] for i in sort_idx]
+    return zip(key_list, value_list)
 
 
 def _params(content, arg):
@@ -555,21 +613,7 @@ def main():
     readline.parse_and_bind("tab: complete")
     readline.set_completer(comp.complete)
 
-    # load all the packages in the plugins directory to register classes
-    plugins_path = pu.get_plugins_paths()
-    for loader, module_name, is_pkg in pkgutil.walk_packages(plugins_path):
-        try:
-            # if the module is in savu, but not a plugin, then ignore
-            if "savu" in module_name.split('.'):
-                if "plugins" not in module_name.split('.'):
-                    continue
-            # setup.py is included in this list which should also be ignored
-            if module_name in ["setup", "savu.plugins.utils"]:
-                continue
-            if module_name not in sys.modules:
-                loader.find_module(module_name).load_module(module_name)
-        except Exception as e:
-            pass
+    _load_plugins()
 
     # set up things
     input_string = "startup"
@@ -594,10 +638,24 @@ def main():
         if content.is_finished():
             break
 
-        # write the history to the histoy file
+        # write the history to the history file
         readline.write_history_file(histfile)
 
     print("Thanks for using the application")
+
+
+def _load_plugins():
+    # load all the packages in the plugins directory to register classes
+    plugins_path = pu.get_plugins_paths()
+    plugins_path.append(plugins_path[-1].split('savu')[0] + 'plugin_examples')
+
+    # load local plugins
+    for loader, module_name, is_pkg in pkgutil.walk_packages(plugins_path):
+        if module_name not in sys.modules:
+            try:
+                loader.find_module(module_name).load_module(module_name)
+            except:
+                pass
 
 if __name__ == '__main__':
     main()

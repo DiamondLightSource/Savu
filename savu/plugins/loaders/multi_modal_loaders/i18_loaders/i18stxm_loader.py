@@ -21,7 +21,8 @@
 
 """
 
-from savu.plugins.loaders.multi_modal_loaders.base_i18_multi_modal_loader import BaseI18MultiModalLoader
+from savu.plugins.loaders.multi_modal_loaders.base_i18_multi_modal_loader \
+    import BaseI18MultiModalLoader
 import logging
 from savu.plugins.utils import register_plugin
 
@@ -30,7 +31,8 @@ from savu.plugins.utils import register_plugin
 class I18stxmLoader(BaseI18MultiModalLoader):
     """
     A class to load tomography data from an NXstxm file
-    :param stxm_detector: path to stxm. Default:'entry1/raster_counterTimer01/It'.
+    :param stxm_detector: path to \
+        stxm. Default:'entry1/raster_counterTimer01/It'.
 
     """
 
@@ -44,7 +46,7 @@ class I18stxmLoader(BaseI18MultiModalLoader):
         :param path: The full path of the NeXus file to load.
         :type path: str
         """
-        
+
         data_str = self.parameters['stxm_detector']
         logging.debug('The detector is in: %s' % data_str)
         data_obj = self.multi_modal_setup('stxm')

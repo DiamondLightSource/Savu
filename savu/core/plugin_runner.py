@@ -41,16 +41,15 @@ class PluginRunner(object):
         #  ********* transport function ***********
         self._transport_initialise(options)
 
-        self.exp = None
         self.options = options
         # add all relevent locations to the path
         pu.set_pickles()
         pu.get_plugins_paths()
+        self.exp = Experiment(options)
 
     def _run_plugin_list(self):
         """ Create an experiment and run the plugin list.
         """
-        self.exp = Experiment(self.options)
         plugin_list = self.exp.meta_data.plugin_list
         self._run_plugin_list_check(plugin_list)
 
@@ -133,10 +132,13 @@ class PluginRunner(object):
         for i in range(n_loaders):
             pu.plugin_loader(self.exp, plugin_list[i])
 
+        self.exp._set_nxs_filename()
+
         check = kwargs.get('check', False)
         for i in range(n_loaders, len(plugin_list)-1):
             self.exp._barrier()
             plugin = pu.plugin_loader(self.exp, plugin_list[i], check=check)
+            plugin_list[i]['cite'] = plugin.get_citation_information()
             plugin._clean_up()
             self.exp._merge_out_data_to_in()
 

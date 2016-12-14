@@ -52,38 +52,3 @@ class AstraReconCpu(BaseAstraRecon, CpuPlugin):
 
     def set_options(self, cfg):
         return cfg
-
-    def get_citation_information(self):
-        cite_info = CitationInformation()
-        cite_info.description = \
-            ("The reconstruction used to create this output is described in " +
-             "this publication")
-        cite_info.bibtex = \
-            ("@article{palenstijn2011performance,\n" +
-             "title={Performance improvements for iterative electron " +
-             "tomography reconstruction using graphics processing units " +
-             "(GPUs)},\n" +
-             "author={Palenstijn, WJ and Batenburg, KJ and Sijbers, J},\n" +
-             "journal={Journal of structural biology},\n" +
-             "volume={176},\n" +
-             "number={2},\n" +
-             "pages={250--253},\n" +
-             "year={2011},\n" +
-             "publisher={Elsevier}\n" +
-             "}")
-        cite_info.endnote = \
-            ("%0 Journal Article\n" +
-             "%T Performance improvements for iterative electron tomography " +
-             "reconstruction using graphics processing units (GPUs)\n" +
-             "%A Palenstijn, WJ\n" +
-             "%A Batenburg, KJ\n" +
-             "%A Sijbers, J\n" +
-             "%J Journal of structural biology\n" +
-             "%V 176\n" +
-             "%N 2\n" +
-             "%P 250-253\n" +
-             "%@ 1047-8477\n" +
-             "%D 2011\n" +
-             "%I Elsevier")
-        cite_info.doi = "http://dx.doi.org/10.1016/j.jsb.2011.07.017"
-        return cite_info

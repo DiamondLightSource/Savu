@@ -32,7 +32,8 @@ import savu.plugins.reconstructions.astra_recons as astra_recons
 
 
 class AstraReconGPUTest(unittest.TestCase):
-
+   
+    @unittest.skip('Skipping as test instrastructure does not have a good enoguh GPU. At the moment')
     def test_astra_recon_gpu(self):
         options = tu.set_experiment('tomo', process_names='GPU0')
         plugin = astra_recons.__name__ + '.astra_recon_gpu'

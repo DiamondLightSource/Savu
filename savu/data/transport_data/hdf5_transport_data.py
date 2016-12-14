@@ -21,13 +21,9 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
-import os
-import h5py
-import logging
 import copy
 import numpy as np
 
-import savu.plugins.utils as pu
 from savu.data.data_structures.data_add_ons import Padding
 
 NX_CLASS = 'NX_class'
@@ -216,6 +212,7 @@ class Hdf5TransportData(object):
         max_frames = (1 if max_frames is None else max_frames)
 
         sl = self._single_slice_list()
+
         if sl is None:
             raise Exception("Data type", self.get_current_pattern_name(),
                             "does not support slicing in directions",
@@ -236,7 +233,7 @@ class Hdf5TransportData(object):
         except IndexError:
             process_slice_list = []
 
-        return process_slice_list
+        return process_slice_list, frames
 
     def __calculate_slice_padding(self, in_slice, pad, data_stop, **kwargs):
         pad = [pad['before'], pad['after']]

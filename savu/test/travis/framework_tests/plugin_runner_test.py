@@ -24,6 +24,7 @@ import unittest
 from savu.test import test_utils as tu
 from savu.core.plugin_runner import PluginRunner
 
+
 def run_protected_plugin_runner_no_process_list(options, plugin, **kwargs):
     if 'data' in kwargs.keys():
         tu.set_plugin_list(options, plugin, kwargs['data'])
@@ -33,10 +34,19 @@ def run_protected_plugin_runner_no_process_list(options, plugin, **kwargs):
     exp = plugin_runner._run_plugin_list()
     return exp
 
+
 def run_protected_plugin_runner(options):
     plugin_runner = PluginRunner(options)
     exp = plugin_runner._run_plugin_list()
     return exp
+
+#def run_protected_plugin_runner2():
+#    import savu.tomo_recon as tr
+#
+#    args = ('/dls/i18/data/2016/sp13562-1/Experiment_1/nexus/71993_Sample1_before_calcination_1.nxs',
+#            '/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_processes_2/steve_test.nxs',
+#            '/dls/tmp/qmm55171')
+#    tr.main(input_args=args)
 
 
 

@@ -35,6 +35,7 @@ class BaseFitter(BaseFilter, CpuPlugin):
     :param out_datasets: A. Default: ["FitWeights", "FitWidths", "FitAreas", "residuals"].
     :param width_guess: An initial guess at the width. Default: 0.02.
     :param peak_shape: Which shape do you want. Default: "gaussian".
+    :param PeakIndex: the peak index. Default: [].
     """
 
     def __init__(self, name='BaseFitter'):
@@ -45,6 +46,7 @@ class BaseFitter(BaseFilter, CpuPlugin):
         in_dataset, out_datasets = self.get_datasets()
 
         shape = in_dataset[0].get_shape()
+        outshape = tuple(shape[:-1])+(self.parameters('PeakIndex'),)
         axis_labels = ['-1.PeakIndex.pixel.unit']
         pattern_list = ['SINOGRAM', 'PROJECTION']
 
@@ -54,15 +56,15 @@ class BaseFitter(BaseFilter, CpuPlugin):
 
         fitAreas.create_dataset(patterns={in_dataset[0]: pattern_list},
                                 axis_labels={in_dataset[0]: axis_labels},
-                                shape={'variable': shape[:-1]})
+                                shape=outshape)
 
         fitHeights.create_dataset(patterns={in_dataset[0]: pattern_list},
                                   axis_labels={in_dataset[0]: axis_labels},
-                                  shape={'variable': shape[:-1]})
+                                  shape=outshape)
 
         fitWidths.create_dataset(patterns={in_dataset[0]: pattern_list},
                                  axis_labels={in_dataset[0]: axis_labels},
-                                 shape={'variable': shape[:-1]})
+                                 shape=outshape)
 
         channel = {'core_dir': (-1,), 'slice_dir': range(len(shape)-1)}
         

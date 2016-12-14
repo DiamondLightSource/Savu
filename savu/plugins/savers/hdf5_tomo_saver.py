@@ -74,12 +74,11 @@ class Hdf5TomoSaver(BaseSaver):
         if self.exp.meta_data.get("mpi") is True:
 
             info = MPI.Info.Create()
-            info.Set("romio_ds_read", "disable")
-            info.Set("romio_ds_write", "disable")
-#            info.Set("romio_cb_read", "enable")
-#            info.Set("romio_cb_write", "disable")
-
-            backing_file = h5py.File(filename, mode, driver='mpio',
+            info.Set("romio_ds_write", "disable")  # this setting is required
+            #info.Set("romio_ds_read", "disable")
+            #info.Set("romio_cb_read", "disable")
+            #info.Set("romio_cb_write", "disable")
+            backing_file = h5py.File(filename, 'w', driver='mpio',
                                      comm=MPI.COMM_WORLD, info=info)
             # fapl = backing_file.id.get_access_plist()
             # comm, info = fapl.get_fapl_mpio()

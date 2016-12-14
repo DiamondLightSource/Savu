@@ -55,6 +55,8 @@ def load_plugin(plugin_name):
     :returns:  An instance of the class described by the named plugin
 
     """
+
+    print plugin_name
     logging.debug("getting class")
     logging.debug("plugin name is %s" % plugin_name)
     # clazz = self.import_class(plugin_name)
@@ -67,6 +69,8 @@ def load_plugin(plugin_name):
         ppath, name = os.path.split(plugin_name)
         sys.path.append(ppath)
     # TODO This appears to be the failing line.
+
+    print name
     clazz = load_class(name)
     instance = get_class_instance(clazz)
     return instance
@@ -194,14 +198,50 @@ def find_args(dclass, inst=None):
     if not docstring:
         return []
 
-    lines = docstring.split('\n')
+    mod_doc_lines = __get_doc_lines(sys.modules[dclass.__module__].__doc__)
+    lines = __get_doc_lines(docstring)
     param_regexp = re.compile('^:param (?P<param>\w+):\s?(?P<doc>\w.*[^ ])\s' +
                               '?Default:\s?(?P<default>.*[^ ])$')
-    args = [param_regexp.findall(line.strip(' .')) for line in lines]
+    param, idx1 = __find_regexp(param_regexp, lines)
+
+    not_param_regexp = re.compile('^:~param (?P<param>\w+):')
+    not_param, idx2 = __find_regexp(not_param_regexp, lines)
+
+    warn_regexp = re.compile(r'^:config_warn: \s?(?P<config_warn>.*[^ ])$')
+    warn, idx3 = __find_regexp(warn_regexp, lines)
+    if not warn:
+        warn = ['']
+    syn_regexp = re.compile(r'^:synopsis: \s?(?P<synopsis>.*[^ ])$')
+    synopsis, idx4 = __find_regexp(syn_regexp, mod_doc_lines)
+    if not synopsis:
+        synopsis = ['']
+
+    info = __find_docstring_info(idx1+idx2+idx3+idx4, lines)
+
+    param_entry = [{'dtype': type(value), 'name': a[0], 'desc': a[1],
+                    'default': value} for a in param for value in [eval(a[2])]]
+
+    return {'warn': "\n".join(warn), 'info': info, 'synopsis': synopsis[0],
+            'param': param_entry, 'not_param': not_param}
+
+
+def __get_doc_lines(doc):
+    if not doc:
+        return ['']
+    return [" ".join(l.strip(' .').split()) for l in doc.split('\n')]
+
+
+def __find_regexp(regexp, str_list):
+    args = [regexp.findall(s) for s in str_list]
+    index = [i for i in range(len(args)) if args[i]]
     args = [arg[0] for arg in args if len(arg)]
-    return [{'dtype': type(value),
-             'name': a[0], 'desc': a[1],
-             'default': value} for a in args for value in [eval(a[2])]]
+    return args, index
+
+
+def __find_docstring_info(index, str_list):
+    info = [str_list[i] for i in range(len(str_list)) if i not in index]
+    info = [i for i in info if i]
+    return "\n".join(info)
 
 
 def calc_param_indices(dims):
@@ -233,8 +273,9 @@ def get_plugins_paths():
     for ppath in plugins_paths:
         if ppath not in sys.path:
             sys.path.append(ppath)
+
     # now add the savu plugin path, which is now the whole path.
-    plugins_paths.append(os.path.join(savu.__path__[0], os.pardir))
+    plugins_paths.append(os.path.join(savu.__path__[0]) + '/plugins')
     return plugins_paths
 
 

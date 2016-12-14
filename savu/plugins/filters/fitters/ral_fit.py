@@ -34,7 +34,6 @@ class RalFit(BaseFitter):
     """
     This plugin fits peaks.
     :param width_guess: An initial guess at the width. Default: 0.02.
-    :param PeakIndex: the peak index. Default: [].
     """
 
     def __init__(self):

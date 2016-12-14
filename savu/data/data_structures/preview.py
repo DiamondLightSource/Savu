@@ -103,8 +103,8 @@ class Preview(object):
         set_mData('chunks', chunks)
         if shapeChange:
             self.__set_reduced_shape(starts, stops, steps, chunks)
-            self.__apply_previewing_to_axis_labels(
-            starts, stops, steps, chunks)
+            slice_list = self._get_preview_slice_list()
+            self.get_data_obj().amend_axis_label_values(slice_list)
 
     def __get_preview_indices(self, preview_list):
         """ Get preview_list ``starts``, ``stops``, ``steps``, ``chunks``
@@ -177,16 +177,16 @@ class Preview(object):
             new_shape.append(np.prod((dobj._get_slice_dir_matrix(dim).shape)))
         dobj.set_shape(tuple(new_shape))
 
-    def __apply_previewing_to_axis_labels(self, starts, stops, steps, chunks):
+    def _get_preview_slice_list(self):
         """ Amend the axis label values based on the previewing parameters.
         """
         dobj = self.get_data_obj()
+        starts, stops, steps, chunks = self.get_starts_stops_steps()
         slice_list = []
         for dim in range(len(dobj.get_shape())):
             if chunks[dim] > 1:
                 slice_list.append(
                     np.ravel(np.transpose(dobj._get_slice_dir_matrix(dim))))
             else:
-                slice_list.append(
-                    np.arange(starts[dim], stops[dim], steps[dim]))
-        dobj.amend_axis_label_values(slice_list)
+                slice_list.append(slice(starts[dim], stops[dim], steps[dim]))
+        return slice_list

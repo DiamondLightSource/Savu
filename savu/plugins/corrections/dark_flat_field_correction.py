@@ -33,8 +33,8 @@ from savu.plugins.utils import register_plugin
 class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
     """
     A Plugin to apply a simple dark and flat field correction to data.
-    :param pattern: Data processing pattern is 'SINOGRAM' or \
-        'PROJECTION'. Default: 'SINOGRAM'.
+    :param pattern: Data processing pattern is 'PROJECTION' or \
+        'SINOGRAM'. Default: 'PROJECTION'.
     """
 
     def __init__(self):
@@ -46,29 +46,70 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
         self.WARN_PROPORTION = 0.05  # 5%
         self.flag_low_warning = False
         self.flag_high_warning = False
+        self.flag = True
 
     def pre_process(self):
         inData = self.get_in_datasets()[0]
-        self.dark = inData.meta_data.get('dark')
-        self.flat = inData.meta_data.get('flat')
-        self.flat_minus_dark = self.flat - self.dark
-        det_dims = [inData.find_axis_label_dimension('detector_y'),
-                    inData.find_axis_label_dimension('detector_x')]
+        in_pData = self.get_plugin_in_datasets()[0]
+        self.dark = inData.meta_data.get_meta_data('dark')
+        self.flat = inData.meta_data.get_meta_data('flat')
 
-        data_shape = self.get_plugin_in_datasets()[0].get_shape()
-        tile = [1]*len(data_shape)
+        pData_shape = in_pData.get_shape()
+        tile = [1]*len(pData_shape)
+        rot_dim = inData.find_axis_label_dimension('rotation_angle')
+        self.slice_dir = in_pData.get_slice_dimension()
+
         if self.parameters['pattern'] == 'PROJECTION':
-            tile[0] = data_shape[0]
-        self.convert_size = \
-            lambda x, sl: np.tile(x[[sl[d] for d in det_dims]], tile)
+            self._proj_pre_process(inData, pData_shape, tile, rot_dim)
+        elif self.parameters['pattern'] == 'SINOGRAM':
+            self._sino_pre_process(inData, tile, rot_dim)
 
-    def correct(self, data):
-        dark = self.convert_size(self.dark, self.slice_list)
-        flat_minus_dark = \
-            self.convert_size(self.flat_minus_dark, self.slice_list)
+        self.flat_minus_dark = self.flat - self.dark
+
+    def _proj_pre_process(self, data, shape, tile, dim):
+        tile[dim] = shape[dim]
+        self.convert_size = lambda x: np.tile(x, tile)
+        self.correct = self.correct_proj
+
+    def _sino_pre_process(self, data, tile, dim):
+        full_shape = data.get_shape()
+        tile[dim] = full_shape[dim]
+        self.correct = self.correct_sino
+        if len(full_shape) is 3:
+            self.convert_size = lambda a, b, x: np.tile(x[a:b], tile)
+        else:
+            nSino = \
+                full_shape[data.find_axis_label_dimension('detector_y')]
+            self.convert_size = \
+                lambda a, b, x: np.tile(x[a % nSino:b], tile)
+        self.count = 0
+
+    def correct_proj(self, data):
+        dark = self.convert_size(self.dark)
+        flat_minus_dark = self.convert_size(self.flat_minus_dark)
         data = np.nan_to_num((data-dark)/flat_minus_dark)
         self.__data_check(data)
         return data
+
+    def correct_sino(self, data):
+        reps = self.get_slice_dir_reps(0)
+
+        sl = self.get_current_slice_list()[0][self.slice_dir]
+        start = self.get_global_frame_index()[0][self.count]%reps
+        end = start + len(np.arange(sl.start, sl.stop, sl.step))
+        dark = self.convert_size(start, end, self.dark)
+        flat_minus_dark = \
+            self.convert_size(start, end, self.flat_minus_dark)
+        data = np.nan_to_num((data-dark)/flat_minus_dark)
+        self.__data_check(data)
+        self.count += 1
+        return data
+
+    def fixed_flag(self):
+        if self.parameters['pattern'] == 'PROJECTION':
+            return True
+        else:
+            return False
 
     def __data_check(self, data):
         # make high and low crop masks
