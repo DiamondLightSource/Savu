@@ -268,5 +268,5 @@ def get_plugins_paths():
             sys.path.append(ppath)
 
     # now add the savu plugin path, which is now the whole path.
-    plugins_paths.append(os.path.join(savu.__path__[0]) + '/plugins')
+    plugins_paths.append(os.path.join(savu.__path__[0]) + '/../')
     return plugins_paths
