@@ -609,23 +609,7 @@ def main():
     readline.set_completer(comp.complete)
 
     # load all the packages in the plugins directory to register classes
-    plugins_path = pu.get_plugins_paths()
-    for loader, module_name, is_pkg in pkgutil.walk_packages(plugins_path):
-        try:
-            # if the module is in savu, but not a plugin, then ignore
-            if "savu" in module_name.split('.') and "example_median_filter"\
-                not in module_name:
-                if "plugins" not in module_name.split('.'):
-                    continue
-            else:
-                continue
-            # setup.py is included in this list which should also be ignored
-            if module_name in ["savu.plugins.utils"]:
-                continue
-            if module_name not in sys.modules:
-                loader.find_module(module_name).load_module(module_name)
-        except Exception as e:
-            pass
+    pu.populate_plugins()
 
     # set up things
     input_string = "startup"

@@ -28,17 +28,35 @@ import logging
 import numpy as np
 import savu
 import copy
+import pkgutil
+import inspect
+from savu.data.data_structures import utils as u
 
 plugins = {}
 plugins_path = {}
+dawn_plugins = {}
+dawn_plugin_params = {}
 count = 0
 
-
+import imp
 def register_plugin(clazz):
     """decorator to add plugins to a central register"""
     plugins[clazz.__name__] = clazz
     if clazz.__module__.split('.')[0] != 'savu':
         plugins_path[clazz.__name__] = clazz.__module__
+    return clazz
+
+
+def dawn_compatible(clazz):
+    """
+    decorator to add dawn compatible plugins and details to a central register
+    """
+    dawn_plugins[clazz.__name__] = {}
+    try:
+        plugin_path = sys.modules[clazz.__module__].__file__
+        dawn_plugins[clazz.__name__]['path2plugin'] = plugin_path.split('.pyc')[0]+'.py'
+    except Exception as e:
+        print e
     return clazz
 
 
@@ -265,3 +283,41 @@ def get_plugins_paths():
     # now add the savu plugin path, which is now the whole path.
     plugins_paths.append(os.path.join(savu.__path__[0], os.pardir))
     return plugins_paths
+
+
+def populate_plugins():
+    plugins_path = get_plugins_paths()
+    for loader, module_name, is_pkg in pkgutil.walk_packages(plugins_path):
+        try:
+            # if the module is in savu, but not a plugin, then ignore
+            if "savu" in module_name.split('.') and "example_median_filter"\
+                not in module_name:
+                if "plugins" not in module_name.split('.'):
+                    continue
+            else:
+                continue
+            # setup.py is included in this list which should also be ignored
+            if module_name in ["savu.plugins.utils"]:
+                continue
+            if module_name not in sys.modules:
+                loader.find_module(module_name).load_module(module_name)
+        except Exception as e:
+            pass
+    for plugin in dawn_plugins.keys():
+        p = load_plugin(dawn_plugins[plugin]['path2plugin'].strip('.py'))
+        dawn_plugins[plugin]['input rank'] = u.get_pattern_rank(p.get_plugin_pattern())
+        dawn_plugins[plugin]['description'] = p.__doc__.split(':param')[0]
+        params = get_parameters(p)
+        dawn_plugin_params[plugin] = params
+
+
+def get_parameters(plugin):
+    params = {}
+    for clazz in inspect.getmro(plugin.__class__):
+        if clazz != object:
+            args = find_args(clazz)
+            for item in args['param']:
+                if item['name'] not in ['in_datasets', 'out_datasets']:
+                    params[item['name']] = {'value':item['default'],  'hint':item['desc']}
+    return params
+
