@@ -37,6 +37,8 @@ class NxtomoLoader(BaseLoader):
 
     :param data_path: Path to the data inside the \
         file. Default: 'entry1/tomo_entry/data/data'.
+    :param image_key_path: Path to the image key entry inside the nxs \
+        file. Default: 'entry1/tomo_entry/instrument/detector/image_key'.
     :param dark: Optional path to the dark field data file, nxs path and \
         scale value. Default: [None, None, 1].
     :param flat: Optional Path to the flat field data file, nxs path and \
@@ -143,13 +145,12 @@ class NxtomoLoader(BaseLoader):
             from savu.data.data_structures.data_type import ImageKey
             data_obj.data = \
                 ImageKey(data_obj, image_key, 0, ignore=ignore)
-            data_obj.set_shape(data_obj.data.get_shape())
+            #data_obj.set_shape(data_obj.data.get_shape())
         except KeyError:
             cu.user_message("An image key was not found.")
             try:
                 from savu.data.data_structures.data_type import NoImageKey
-                data_obj.data = \
-                    NoImageKey(data_obj, 0, ignore=ignore)
+                data_obj.data = NoImageKey(data_obj, None, 0)
                 entry = 'entry1/tomo_entry/instrument/detector/'
                 data_obj.data._set_flat_path(entry + 'flatfield')
                 data_obj.data._set_dark_path(entry + 'darkfield')
