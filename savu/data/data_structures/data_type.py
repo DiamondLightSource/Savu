@@ -210,6 +210,15 @@ class Tomo(DataTypes):
         slice_list = self.data_obj._preview._get_preview_slice_list()
         remove_dim = self.data_obj.find_axis_label_dimension('rotation_angle')
         slice_list[remove_dim] = slice(None)
+
+        if len(slice_list) > 3:
+            idx = np.arange(0, len(slice_list))
+            detX = self.data_obj.find_axis_label_dimension('detector_x')
+            detY = self.data_obj.find_axis_label_dimension('detector_y')
+            remove = set(idx).difference(set([remove_dim, detX, detY]))
+            for dim in sorted(list(remove), reverse=True):
+                del slice_list[dim]
+
         return slice_list
 
     def _set_scale(self, name, scale):
@@ -285,7 +294,13 @@ class Tomo(DataTypes):
         index = [slice(None)]*self.nDims
         index[self.proj_dim] = self.get_index(key)
         data = self.data[tuple(index)]
-        return data[self.dark_flat_slice_list]
+
+        sl = list(copy.deepcopy(self.dark_flat_slice_list))
+        if len(data.shape) is 2:
+            rot_dim = self.data_obj.find_axis_label_dimension('rotation_angle')
+            del sl[rot_dim]
+
+        return data[sl]
 
     def dark_image_key_data(self):
         """ Get the dark data. """

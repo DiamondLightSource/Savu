@@ -70,8 +70,6 @@ def load_plugin(plugin_name):
     :returns:  An instance of the class described by the named plugin
 
     """
-
-    print plugin_name
     logging.debug("getting class")
     logging.debug("plugin name is %s" % plugin_name)
     # clazz = self.import_class(plugin_name)
@@ -84,8 +82,6 @@ def load_plugin(plugin_name):
         ppath, name = os.path.split(plugin_name)
         sys.path.append(ppath)
     # TODO This appears to be the failing line.
-
-    print name
     clazz = load_class(name)
     instance = get_class_instance(clazz)
     return instance
@@ -290,21 +286,25 @@ def get_plugins_paths():
             sys.path.append(ppath)
 
     # now add the savu plugin path, which is now the whole path.
-    plugins_paths.append(os.path.join(savu.__path__[0]) + '/plugins')
+    plugins_paths.append(os.path.join(savu.__path__[0]) + '/../')
     return plugins_paths
 
 
 def populate_plugins():
     plugins_path = get_plugins_paths()
-    plugins_path.append(plugins_path[-1].split('savu')[0] + 'plugin_examples')
+    savu_path = plugins_path[-1].split('savu')[0]
+    savu_plugins = plugins_path[-1:]
+    local_plugins = plugins_path[0:-1] + [savu_path + 'plugins_examples']
 
     # load local plugins
-    for loader, module_name, is_pkg in pkgutil.walk_packages(plugins_path):
-        if module_name not in sys.modules:
-            try:
-                loader.find_module(module_name).load_module(module_name)
-            except:
-                pass
+    for loader, module_name, is_pkg in pkgutil.walk_packages(local_plugins):
+        _add_module(loader, module_name)
+
+    # load savu plugins
+    for loader, module_name, is_pkg in pkgutil.walk_packages(savu_plugins):
+        if module_name.split('savu.plugins')[0] == '':
+            _add_module(loader, module_name)
+
     for plugin in dawn_plugins.keys():
         p = load_plugin(dawn_plugins[plugin]['path2plugin'].strip('.py'))
         dawn_plugins[plugin]['input rank'] = u.get_pattern_rank(p.get_plugin_pattern())
@@ -312,6 +312,12 @@ def populate_plugins():
         params = get_parameters(p)
         dawn_plugin_params[plugin] = params
 
+def _add_module(loader, module_name):
+    if module_name not in sys.modules:
+        try:
+            loader.find_module(module_name).load_module(module_name)
+        except:
+            pass
 
 def get_parameters(plugin):
     params = {}
