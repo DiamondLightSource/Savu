@@ -27,21 +27,11 @@ from savu.plugins.utils import register_plugin,dawn_compatible
 import numpy as np
 import os
 import savu.test.test_utils as tu
-# from PyMca5.PyMcaPhysics.xrf import McaAdvancedFitBatch
-import sys
-try:
-    from PyMca5.PyMcaPhysics.xrf import McaAdvancedFitBatch
-except ImportError:
-    print "HELLO"
-    print"attaching this to the python path"
-    sys.path.append('/home/clb02321/.local/lib/python2.7/site-packages/')
-    from PyMca5.PyMcaPhysics.xrf import McaAdvancedFitBatch
-
-
+from PyMca5.PyMcaPhysics.xrf import McaAdvancedFitBatch
 
 @dawn_compatible
 @register_plugin
-class PymcaRework(BaseFilter, CpuPlugin):
+class Pymca(BaseFilter, CpuPlugin):
     """
     crops a spectrum to a range
 
@@ -51,7 +41,7 @@ class PymcaRework(BaseFilter, CpuPlugin):
 
     def __init__(self):
         logging.debug("cropping spectrum")
-        super(PymcaRework, self).__init__("PymcaRework")
+        super(Pymca, self).__init__("Pymca")
         
     def pre_process(self):
 #         slice_dir = self.get_plugin_in_datasets()[0].get_slice_dimension()
