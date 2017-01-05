@@ -56,7 +56,6 @@ class Hdf5TomoSaver(BaseSaver):
 
         count = 0
         for key in out_data_dict.keys():
-            print key
             out_data = out_data_dict[key]
             self.exp._barrier()
             filename = self.exp.meta_data.get(["filename", key])

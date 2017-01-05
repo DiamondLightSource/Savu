@@ -68,7 +68,7 @@ class TransportControl(object):
     def _transport_process(self, plugin):
         self._process(plugin)
 
-    def process(self, plugin):  # could be moved to plugin? along with all functions below
+    def _process(self, plugin):
         """ Organise required data and execute the main plugin processing.
 
         :param plugin plugin: The current plugin instance.

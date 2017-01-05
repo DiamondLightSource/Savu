@@ -39,6 +39,7 @@ class Hdf5Transport(TransportControl):
             exp_coll['saver_plugin'].setup()  # creates the hdf5 files
 
     def _transport_post_plugin(self):
+        # This should only happen if there is a .nxs file. 
         saver = self.exp._get_experiment_collection()['saver_plugin']
         for data in self.exp.index["out_data"].values():
             if data.remove is False:

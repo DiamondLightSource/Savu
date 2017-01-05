@@ -25,18 +25,16 @@ import copy
 import numpy as np
 
 from savu.data.data_structures.data_add_ons import Padding
+from savu.data.transport_data import TransportData
 
 NX_CLASS = 'NX_class'
 
 
-class Hdf5TransportData(object):
+class Hdf5TransportData(TransportData):
     """
     The Hdf5TransportData class performs the loading and saving of data
     specific to a hdf5 transport mechanism.
     """
-
-#    def __init__(self):
-#        self.end_pad = True
 
     def __chunk_length_repeat(self, slice_dirs, shape):
         """

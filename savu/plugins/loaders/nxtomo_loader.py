@@ -83,7 +83,7 @@ class NxtomoLoader(BaseLoader):
         except:
             logging.warn("No Control information available")
 
-        nAngles = len(data_obj.meta_data.get_meta_data('rotation_angle'))
+        nAngles = len(data_obj.meta_data.get('rotation_angle'))
         self.__check_angles(data_obj, nAngles)
         data_obj.set_original_shape(shape)
         self.set_data_reduction_params(data_obj)
