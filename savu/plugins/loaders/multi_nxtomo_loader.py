@@ -29,7 +29,7 @@ import numpy as np
 from savu.plugins.base_loader import BaseLoader
 from savu.plugins.loaders.nxtomo_loader import NxtomoLoader
 from savu.plugins.utils import register_plugin
-from savu.data.data_structures.data_type import MultipleImageKey
+from savu.data.data_structures.data_type.stitch_data import StitchData
 
 
 @register_plugin
@@ -64,7 +64,7 @@ class MultiNxtomoLoader(BaseLoader):
 
         stack_or_cat = self.parameters['stack_or_cat']
         dim = self.parameters['stack_or_cat_dim']
-        data_obj.data = MultipleImageKey(data_obj_list, stack_or_cat, dim)
+        data_obj.data = StitchData(data_obj_list, stack_or_cat, dim)
 
         if stack_or_cat == 'cat':
             nxtomo._setup_3d(data_obj)
