@@ -23,21 +23,21 @@
 import copy
 import savu.core.utils as cu
 
-
-pattern_list = ["SINOGRAM",
-                "PROJECTION",
-                "VOLUME_YZ",
-                "VOLUME_XZ",
-                "VOLUME_XY",
-                "VOLUME_3D",
-                "SPECTRUM",
-                "DIFFRACTION",
-                "CHANNEL",
-                "SPECTRUM_STACK",
-                "PROJECTION_STACK",
-                "METADATA",
-                "4D_SCAN",
-                "TIMESERIES"]
+# going to convert this to a dictionary so that they contain the ranks... needed for dawn
+pattern_list = {"SINOGRAM": 2,
+                "PROJECTION":2,
+                "VOLUME_YZ":2,
+                "VOLUME_XZ":2,
+                "VOLUME_XY":2,
+                "VOLUME_3D":3,
+                "SPECTRUM":1,
+                "DIFFRACTION":2,
+                "CHANNEL":1,
+                "SPECTRUM_STACK":2,
+                "PROJECTION_STACK":3,
+                "METADATA":0,
+                "4D_SCAN":3,
+                "TIMESERIES":1}
 
 
 def _deepcopy_data_object(dObj, new_obj):
@@ -61,4 +61,7 @@ def _deepcopy_data_object(dObj, new_obj):
 
 
 def get_available_pattern_types():
-    return pattern_list
+    return pattern_list.keys()
+
+def get_pattern_rank(pattern):
+    return pattern_list[pattern]
