@@ -28,12 +28,14 @@ import numpy as np
 
 from savu.plugins.base_loader import BaseLoader
 from savu.plugins.utils import register_plugin
+from savu.data.data_structures.data_types.fabio import FabIO
 
 
 @register_plugin
 class ImageLoader(BaseLoader):
     """
-    A class to load tomography data from a Nexus file
+    Load any FabIO compatible formats (e.g. tiffs)
+
     :param image_type: Type of image. Choose from 'FabIO'. Default: 'FabIO'.
     :param angles: A python statement to be evaluated or a file. Default: None.
     :param frame_dim: Which dimension requires stitching? Default: 0.
@@ -67,7 +69,7 @@ class ImageLoader(BaseLoader):
 
         path = exp.meta_data.get_meta_data("data_file")
         data_prefix = self.parameters['data_prefix']
-        data_obj.data = clazz(path, data_obj, [self.parameters['frame_dim']],
+        data_obj.data = FabIO(path, data_obj, [self.parameters['frame_dim']],
                               None, data_prefix)
 
         self.set_rotation_angles(data_obj)
