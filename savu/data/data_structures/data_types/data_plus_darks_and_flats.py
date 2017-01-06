@@ -291,7 +291,7 @@ class NoImageKey(DataWithDarksAndFlats):
     def _set_dark_and_flat(self):
         self.dark_flat_slice_list = self.get_dark_flat_slice_list()
         # remove extra dimension if 3d to 4d mapping
-        from data_type import Map_3dto4d_h5
+        from data_types.map_3dto4d_h5 import Map_3dto4d_h5
         if Map_3dto4d_h5 in self.__class__.__bases__:
             del self.dark_flat_slice_list[-1]
 

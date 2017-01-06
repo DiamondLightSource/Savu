@@ -36,7 +36,6 @@ class ImageLoader(BaseLoader):
     """
     Load any FabIO compatible formats (e.g. tiffs)
 
-    :param image_type: Type of image. Choose from 'FabIO'. Default: 'FabIO'.
     :param angles: A python statement to be evaluated or a file. Default: None.
     :param frame_dim: Which dimension requires stitching? Default: 0.
     :param data_prefix: A file prefix for the data file. Default: None.
@@ -63,10 +62,6 @@ class ImageLoader(BaseLoader):
         data_obj.add_pattern('SINOGRAM', core_dir=(detX, rot),
                              slice_dir=(detY,))
 
-        dtype = self.parameters['image_type']
-        mod = __import__('savu.data.data_structures.data_type', fromlist=dtype)
-        clazz = getattr(mod, dtype)
-
         path = exp.meta_data.get_meta_data("data_file")
         data_prefix = self.parameters['data_prefix']
         data_obj.data = FabIO(path, data_obj, [self.parameters['frame_dim']],
@@ -74,8 +69,8 @@ class ImageLoader(BaseLoader):
 
         self.set_rotation_angles(data_obj)
         # read dark and flat images
-        if self.parameters['dark_prefix'] != None:
-            dark = clazz(path, data_obj, [self.parameters['frame_dim']], None,
+        if self.parameters['dark_prefix'] is not None:
+            dark = FabIO(path, data_obj, [self.parameters['frame_dim']], None,
                          self.parameters['dark_prefix'])
             shape = dark.get_shape()
             index = [slice(0, shape[i], 1) for i in range(len(shape))]
@@ -83,8 +78,8 @@ class ImageLoader(BaseLoader):
         else:
             data_obj.meta_data.set_meta_data(
                 'dark', np.zeros(data_obj.data.image_shape))
-        if self.parameters['flat_prefix'] != None:
-            flat = clazz(path, data_obj, [self.parameters['frame_dim']],
+        if self.parameters['flat_prefix'] is not None:
+            flat = FabIO(path, data_obj, [self.parameters['frame_dim']],
                          None, self.parameters['flat_prefix'])
             shape = flat.get_shape()
             index = [slice(0, shape[i], 1) for i in range(len(shape))]
