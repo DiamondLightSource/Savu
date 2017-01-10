@@ -27,7 +27,7 @@ import numpy as np
 from savu.data.data_structures.data_types.base_type import BaseType
 
 
-class Map_3dto4d_h5(BaseType):
+class Map3dto4dh5(BaseType):
     """ This class converts a 3D dataset to a 4D dataset. """
 
     def __init__(self, data, n_angles):

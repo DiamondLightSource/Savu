@@ -109,8 +109,8 @@ class NxtomoLoader(BaseLoader):
     def __setup_3d_to_4d(self, data_obj, n_angles):
         logging.debug("setting up 4d tomography data from 3d input.")
         from savu.data.data_structures.data_types.map_3dto4d_h5 \
-            import Map_3dto4d_h5
-        data_obj.data = Map_3dto4d_h5(data_obj.data, n_angles)
+            import Map3dto4dh5
+        data_obj.data = Map3dto4dh5(data_obj.data, n_angles)
         return data_obj.data.get_shape()
 
     def __setup_4d(self, data_obj):
