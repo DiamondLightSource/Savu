@@ -42,8 +42,8 @@ class MRC(object):
         if self.format['mode'] == 16:
             self.shape = self.shape + (3,)
 
-        self.data = np.memmap(filename, dtype=self.format['dtype'], mode='r',
-                              offset=first, shape=self.shape)
+        self.data = np.memmap(filename, dtype=self.format['dtype'], order='F',
+                              mode='r', offset=first, shape=self.shape)
 
     def __getitem__(self, idx):
         return self.data[idx]
@@ -79,7 +79,7 @@ class MRC(object):
     def __set_shape(self, header):
         nx, ny, nz = header['nx'], header['ny'], header['nz']
         if not isinstance(nx, int):
-            nx = nz[0]
+            nx = nx[0]
             ny = ny[0]
             nz = nz[0]
         return (nx, ny, nz)
