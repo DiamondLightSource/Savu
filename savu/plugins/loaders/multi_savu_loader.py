@@ -29,7 +29,7 @@ import copy
 from savu.plugins.base_loader import BaseLoader
 from savu.plugins.utils import register_plugin
 from savu.plugins.loaders.savu_loader import SavuLoader
-from savu.data.data_structures.data_type import MultipleImageKey
+from savu.data.data_structures.data_type.stitch_data import StitchData
 
 
 @register_plugin
@@ -64,12 +64,11 @@ class MultiSavuLoader(BaseLoader):
 
         stack_or_cat = self.parameters['stack_or_cat']
         dim = self.parameters['stack_or_cat_dim']
-        data_obj.data = MultipleImageKey(data_obj_list, stack_or_cat, dim)
+        data_obj.data = StitchData(data_obj_list, stack_or_cat, dim)
 
         self._set_axis_labels(data_obj, data_obj_list[0])
         self._set_patterns(data_obj, data_obj_list[0])
 
-        print "setting the final data shape", data_obj.data.get_shape()
         data_obj.set_original_shape(data_obj.data.get_shape())
         self.set_data_reduction_params(data_obj)
 
@@ -86,7 +85,6 @@ class MultiSavuLoader(BaseLoader):
         if self.parameters['stack_or_cat'] == 'stack':
             for p in patterns:
                 patterns[p]['slice_dir'] += (3,)
-        print patterns, "*****************"
         data_obj.data_info.set_meta_data('data_patterns', patterns)
 
     def _get_data_objects(self, savu):
@@ -99,7 +97,6 @@ class MultiSavuLoader(BaseLoader):
         data_obj_list = []
         for i in file_list:
             this_file = file_path + file_name + str(i) + '.h5'
-            print this_file
             self.exp.meta_data.set_meta_data('data_file', this_file)
             savu.setup()
             data_obj_list.append(self.exp.index['in_data']['tomo'])

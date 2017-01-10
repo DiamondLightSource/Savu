@@ -120,7 +120,7 @@ class Experiment(object):
 
     def __unreplicate_data(self):
         in_data_list = self.index['in_data']
-        from savu.data.data_structures.data_type import Replicate
+        from savu.data.data_structures.data_types.replicate import Replicate
         for in_data in in_data_list.values():
             if isinstance(in_data.data, Replicate):
                 in_data.data = in_data.data.reset()
