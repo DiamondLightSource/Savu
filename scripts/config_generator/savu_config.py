@@ -613,7 +613,12 @@ def main():
     readline.parse_and_bind("tab: complete")
     readline.set_completer(comp.complete)
 
-    _load_plugins()
+
+    # load all the packages in the plugins directory to register classes
+    # I've changed this to be in plugin utils package since this is now also called from dawn when 
+    #it populates savu plugins. adp 14/12/16
+    pu.populate_plugins()
+
 
     # set up things
     input_string = "startup"
@@ -642,31 +647,6 @@ def main():
         readline.write_history_file(histfile)
 
     print("Thanks for using the application")
-
-
-def _load_plugins():
-    # load all the packages in the plugins directory to register classes
-    plugins_path = pu.get_plugins_paths()
-    savu_path = plugins_path[-1].split('savu')[0]
-    savu_plugins = plugins_path[-1:]
-    local_plugins = plugins_path[0:-1] + [savu_path + 'plugins_examples']
-
-    # load local plugins
-    for loader, module_name, is_pkg in pkgutil.walk_packages(local_plugins):
-        _add_module(loader, module_name)
-
-    # load savu plugins
-    for loader, module_name, is_pkg in pkgutil.walk_packages(savu_plugins):
-        if module_name.split('savu.plugins')[0] == '':
-            _add_module(loader, module_name)
-
-
-def _add_module(loader, module_name):
-    if module_name not in sys.modules:
-        try:
-            loader.find_module(module_name).load_module(module_name)
-        except:
-            pass
 
 
 if __name__ == '__main__':

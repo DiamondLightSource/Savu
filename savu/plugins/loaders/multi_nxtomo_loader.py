@@ -29,7 +29,7 @@ import numpy as np
 from savu.plugins.base_loader import BaseLoader
 from savu.plugins.loaders.nxtomo_loader import NxtomoLoader
 from savu.plugins.utils import register_plugin
-from savu.data.data_structures.data_type import MultipleImageKey
+from savu.data.data_structures.data_type.stitch_data import StitchData
 
 
 @register_plugin
@@ -64,30 +64,20 @@ class MultiNxtomoLoader(BaseLoader):
 
         stack_or_cat = self.parameters['stack_or_cat']
         dim = self.parameters['stack_or_cat_dim']
-        data_obj.data = MultipleImageKey(data_obj_list, stack_or_cat, dim)
-<<<<<<< HEAD
-        self._set_dark_and_flat(data_obj_list, data_obj)
-=======
->>>>>>> origin/master
+        data_obj.data = StitchData(data_obj_list, stack_or_cat, dim)
 
         if stack_or_cat == 'cat':
             nxtomo._setup_3d(data_obj)
             self._extend_axis_label_values(data_obj_list, data_obj)
         else:
             self._setup_4d(data_obj)
-<<<<<<< HEAD
-=======
             # may want to add this as a parameter...
             self._set_nD_rotation_angle(data_obj_list, data_obj)
->>>>>>> origin/master
 
         print "setting the final data shape", data_obj.data.get_shape()
         data_obj.set_original_shape(data_obj.data.get_shape())
         self.set_data_reduction_params(data_obj)
-<<<<<<< HEAD
-=======
         self._set_dark_and_flat(data_obj_list, data_obj)
->>>>>>> origin/master
 
     def _get_nxtomo(self):
         nxtomo = NxtomoLoader()
@@ -98,28 +88,19 @@ class MultiNxtomoLoader(BaseLoader):
     def _get_data_objects(self, nxtomo):
         rrange = self.parameters['range']
         file_list = range(rrange[0], rrange[1]+1)
-        file_path = copy.copy(self.exp.meta_data.get_meta_data('data_file'))
+        file_path = copy.copy(self.exp.meta_data.get('data_file'))
         file_name = '' if self.parameters['file_name'] is None else\
             self.parameters['file_name']
 
         data_obj_list = []
         for i in file_list:
             this_file = file_path + file_name + str(i) + '.nxs'
-            print this_file
-<<<<<<< HEAD
             self.exp.meta_data.set('data_file', this_file)
-=======
-            self.exp.meta_data.set_meta_data('data_file', this_file)
->>>>>>> origin/master
             nxtomo.setup()
             data_obj_list.append(self.exp.index['in_data']['tomo'])
             self.exp.index['in_data'] = {}
 
-<<<<<<< HEAD
         self.exp.meta_data.set('data_file', file_path)
-=======
-        self.exp.meta_data.set_meta_data('data_file', file_path)
->>>>>>> origin/master
         return data_obj_list
 
     def _setup_4d(self, data_obj):
@@ -127,11 +108,7 @@ class MultiNxtomoLoader(BaseLoader):
             ['rotation_angle.degrees', 'detector_y.pixel', 'detector_x.pixel']
 
         extra_label = self.parameters['axis_label']
-<<<<<<< HEAD
-        axis_labels.insert(extra_label)
-=======
         axis_labels.append(extra_label)
->>>>>>> origin/master
 
         rot = axis_labels.index('rotation_angle.degrees')
         detY = axis_labels.index('detector_y.pixel')
@@ -150,41 +127,13 @@ class MultiNxtomoLoader(BaseLoader):
         axis_name = data_obj.get_axis_labels()[dim].keys()[0].split('.')[0]
 
         new_values = np.zeros(data_obj.data.get_shape()[dim])
-<<<<<<< HEAD
         inc = len(data_obj_list[0].meta_data.get(axis_name))
 
         for i in range(len(data_obj_list)):
             new_values[i*inc:i*inc+inc] = \
                 data_obj_list[i].meta_data.get(axis_name)
 
-        data_obj.meta_data.set_meta_data(axis_name, new_values)
-
-    def _set_dark_and_flat(self, obj_list, data_obj):
-        func = {'cat': np.concatenate, 'stack': np.stack}
-        if self.parameters['stack_or_cat'] == 'cat':
-            dark = self._combine_data(obj_list, 'dark', func['cat'])
-            flat = self._combine_data(obj_list, 'flat', func['cat'])
-        else:
-            dark = self._combine_data(obj_list, 'dark', func['stack']).mean(0)
-            flat = self._combine_data(obj_list, 'flat', func['stack']).mean(0)
-        data_obj.meta_data.set_meta_data('dark', dark)
-        data_obj.meta_data.set_meta_data('flat', flat)
-
-    def _combine_data(self, obj_list, entry, function):
-        array = obj_list[0].meta_data.get(entry)
-        for obj in obj_list[1:]:
-            array = \
-                function((array, obj.meta_data.get(entry)), axis=0)
-        return array
-
-=======
-        inc = len(data_obj_list[0].meta_data.get_meta_data(axis_name))
-
-        for i in range(len(data_obj_list)):
-            new_values[i*inc:i*inc+inc] = \
-                data_obj_list[i].meta_data.get_meta_data(axis_name)
-
-        data_obj.meta_data.set_meta_data(axis_name, new_values)
+        data_obj.meta_data.set(axis_name, new_values)
 
     def _set_nD_rotation_angle(self, data_obj_list, data_obj):
         rot_dim_len = data_obj.data.get_shape()[
@@ -192,22 +141,22 @@ class MultiNxtomoLoader(BaseLoader):
         new_values = np.zeros([rot_dim_len, len(data_obj_list)])
         for i in range(len(data_obj_list)):
             new_values[:, i] = \
-                data_obj_list[i].meta_data.get_meta_data('rotation_angle')
-        data_obj.meta_data.set_meta_data('rotation_angle', new_values)
+                data_obj_list[i].meta_data.get('rotation_angle')
+        data_obj.meta_data.set('rotation_angle', new_values)
 
     def _set_dark_and_flat(self, obj_list, data_obj):
         # change this to use NoImageKey?
         dark = self._combine_data(obj_list, 'dark', np.stack)
         flat = self._combine_data(obj_list, 'flat', np.stack)
         slice_list = self.get_dark_flat_slice_list(data_obj)
-        data_obj.meta_data.set_meta_data('dark', dark[slice_list])
-        data_obj.meta_data.set_meta_data('flat', flat[slice_list])
+        data_obj.meta_data.set('dark', dark[slice_list])
+        data_obj.meta_data.set('flat', flat[slice_list])
 
     def _combine_data(self, obj_list, entry, function):
         # directly calculating the mean for now
-        mean_val = obj_list[0].meta_data.get_meta_data(entry)
+        mean_val = obj_list[0].meta_data.get(entry)
         for obj in obj_list[1:]:
-            mean_val = (mean_val + obj.meta_data.get_meta_data(entry))/2.0
+            mean_val = (mean_val + obj.meta_data.get(entry))/2.0
         return mean_val
 
     def get_dark_flat_slice_list(self, data_obj):
@@ -219,4 +168,3 @@ class MultiNxtomoLoader(BaseLoader):
         for d in dims:
             new_slice_list.append(slice_list[d])
         return new_slice_list
->>>>>>> origin/master

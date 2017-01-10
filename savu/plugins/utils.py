@@ -30,10 +30,16 @@ import savu
 import copy
 import copy_reg
 import types
+import pkgutil
+import inspect
+import imp
 
+from savu.data.data_structures import utils as u
 
 plugins = {}
 plugins_path = {}
+dawn_plugins = {}
+dawn_plugin_params = {}
 count = 0
 
 
@@ -42,6 +48,20 @@ def register_plugin(clazz):
     plugins[clazz.__name__] = clazz
     if clazz.__module__.split('.')[0] != 'savu':
         plugins_path[clazz.__name__] = clazz.__module__
+    return clazz
+
+
+def dawn_compatible(clazz):
+    """
+    decorator to add dawn compatible plugins and details to a central register
+    """
+    dawn_plugins[clazz.__name__] = {}
+    try:
+        plugin_path = sys.modules[clazz.__module__].__file__
+        dawn_plugins[clazz.__name__]['path2plugin'] = \
+            plugin_path.split('.pyc')[0]+'.py'
+    except Exception as e:
+        print e
     return clazz
 
 
@@ -295,4 +315,47 @@ def _unpickle_method(func_name, obj, cls):
         else:
             break
     return func.__get__(obj, cls)
-        
+
+
+def populate_plugins():
+    plugins_path = get_plugins_paths()
+    savu_path = plugins_path[-1].split('savu')[0]
+    savu_plugins = plugins_path[-1:]
+    local_plugins = plugins_path[0:-1] + [savu_path + 'plugins_examples']
+
+    # load local plugins
+    for loader, module_name, is_pkg in pkgutil.walk_packages(local_plugins):
+        _add_module(loader, module_name)
+
+    # load savu plugins
+    for loader, module_name, is_pkg in pkgutil.walk_packages(savu_plugins):
+        if module_name.split('savu.plugins')[0] == '':
+            _add_module(loader, module_name)
+
+    for plugin in dawn_plugins.keys():
+        p = load_plugin(dawn_plugins[plugin]['path2plugin'].strip('.py'))
+        dawn_plugins[plugin]['input rank'] = \
+            u.get_pattern_rank(p.get_plugin_pattern())
+        dawn_plugins[plugin]['description'] = p.__doc__.split(':param')[0]
+        params = get_parameters(p)
+        dawn_plugin_params[plugin] = params
+
+
+def _add_module(loader, module_name):
+    if module_name not in sys.modules:
+        try:
+            loader.find_module(module_name).load_module(module_name)
+        except:
+            pass
+
+
+def get_parameters(plugin):
+    params = {}
+    for clazz in inspect.getmro(plugin.__class__):
+        if clazz != object:
+            args = find_args(clazz)
+            for item in args['param']:
+                if item['name'] not in ['in_datasets', 'out_datasets']:
+                    params[item['name']] = {'value': item['default'],
+                                            'hint': item['desc']}
+    return params

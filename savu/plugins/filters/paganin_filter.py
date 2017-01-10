@@ -27,13 +27,11 @@ import pyfftw.interfaces.scipy_fftpack as fft
 
 from savu.plugins.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-from savu.plugins.utils import register_plugin
+from savu.plugins.utils import register_plugin, dawn_compatible
 from savu.data.plugin_list import CitationInformation
 
-#    :param correction1: (USERS IGNORE) Disputed value changed from \
-#        mathpi. Default: '(1/(4*mathpi))'.
 
-
+@dawn_compatible
 @register_plugin
 class PaganinFilter(BaseFilter, CpuPlugin):
     """

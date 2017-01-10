@@ -42,6 +42,9 @@ class BaseLoader(Plugin):
         logging.info("%s.%s", self.__class__.__name__, 'setup')
         self.setup()
 
+    def get_experiment(self):
+        return self.exp
+
     def set_data_reduction_params(self, data_obj):
         pDict = self.parameters
         self.data_mapping()
