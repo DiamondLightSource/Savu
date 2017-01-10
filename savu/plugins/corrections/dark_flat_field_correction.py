@@ -51,8 +51,8 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
     def pre_process(self):
         inData = self.get_in_datasets()[0]
         in_pData = self.get_plugin_in_datasets()[0]
-        self.dark = inData.meta_data.get_meta_data('dark')
-        self.flat = inData.meta_data.get_meta_data('flat')
+        self.dark = inData.meta_data.get('dark')
+        self.flat = inData.meta_data.get('flat')
 
         pData_shape = in_pData.get_shape()
         tile = [1]*len(pData_shape)

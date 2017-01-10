@@ -25,7 +25,7 @@ import copy
 import numpy as np
 
 from savu.data.data_structures.data_add_ons import Padding
-from savu.data.transport_data import TransportData
+from savu.data.transport_data.transport_data import TransportData
 
 NX_CLASS = 'NX_class'
 

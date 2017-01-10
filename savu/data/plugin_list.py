@@ -81,14 +81,14 @@ class PluginList(object):
 
         plugin_file.close()
 
-    def _save_plugin_list(self, saver):
+    def _save_plugin_list(self, out_filename, exp=None):
         import re
-        if isinstance(saver, str):
-            plugin_file = h5py.File(saver, 'w')
-            entry_group = plugin_file.create_group('entry')
+
+        if exp:
+            entry_group = exp.nxs_file.create_group('entry')
         else:
-            entry_group = saver.nxs_file.create_group('entry')
-            entry_group.attrs[NX_CLASS] = 'NXentry'
+            plugin_file = h5py.File(out_filename, 'w')
+            entry_group = plugin_file.create_group('entry')
 
         entry_group.attrs[NX_CLASS] = 'NXentry'
         citations_group = entry_group.create_group('framework_citations')

@@ -24,6 +24,7 @@
 import os
 import logging
 import copy
+import h5py
 from mpi4py import MPI
 
 import savu.core.utils as cu
@@ -98,7 +99,8 @@ class Experiment(object):
         self.experiment_collection = {'saver_plugin': saver, 'plugin_dict': [],
                                       'datasets': [], 'file_list': []}
         logging.debug("Saving plugin list to file.")
-        self.meta_data.plugin_list._save_plugin_list(saver)
+        self.meta_data.plugin_list._save_plugin_list(
+            self.meta_data.get('nxs_filename'), exp=self)
 
         count = 0
         # first run through of the plugin setup methods
@@ -201,6 +203,18 @@ class Experiment(object):
                     next_pattern = next_data['pattern']
                     return next_pattern
         return next_pattern
+
+    def _set_nxs_filename(self):
+        folder = self.meta_data.get('out_path')
+        fname = os.path.basename(folder.split('_')[-1]) + '_processed.nxs'
+        filename = os.path.join(folder, fname)
+        self.meta_data.set('nxs_filename', filename)
+
+        if self.meta_data.get('mpi') is True:
+            self.nxs_file = \
+                h5py.File(filename, 'w', driver='mpio', comm=MPI.COMM_WORLD)
+        else:
+            self.nxs_file = h5py.File(filename, 'w')
 
     def __remove_dataset(self, data_obj):
         self._barrier()

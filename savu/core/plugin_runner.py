@@ -50,6 +50,7 @@ class PluginRunner(object):
     def _run_plugin_list(self):
         """ Create an experiment and run the plugin list.
         """
+
         plugin_list = self.exp.meta_data.plugin_list
         self._run_plugin_list_check(plugin_list)
 
