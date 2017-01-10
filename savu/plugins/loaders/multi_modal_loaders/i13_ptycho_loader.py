@@ -68,7 +68,7 @@ class I13PtychoLoader(BaseMultiModalLoader):
         ### set the rotation
         rotation_angle = None
         try:
-            rotation_angle = data_obj.backing_file['entry1/instrument/t1_theta/t1_theta'].value+
+            rotation_angle = data_obj.backing_file['entry1/instrument/t1_theta/t1_theta'].value
             if rotation_angle.ndim > 1:
                 rotation_angle = rotation_angle[:, 0]
             # axis label
