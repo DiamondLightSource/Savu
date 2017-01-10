@@ -66,30 +66,21 @@ class TransportControl(object):
         pass
 
     def _transport_process(self, plugin):
-        self._process(plugin)
-
-    def _process(self, plugin):
         """ Organise required data and execute the main plugin processing.
 
         :param plugin plugin: The current plugin instance.
         """
-        
         in_data, out_data = plugin.get_datasets()
 
         expInfo = plugin.exp.meta_data
-
-        in_slice_list = self.__get_all_slice_lists(in_data, expInfo)
-        out_slice_list = self.__get_all_slice_lists(out_data, expInfo)
+        in_slice_list, in_global_frame_idx = \
+            self.__get_all_slice_lists(in_data, expInfo)
+        out_slice_list, _ = self.__get_all_slice_lists(out_data, expInfo)
+        plugin.set_global_frame_index(in_global_frame_idx)
 
         squeeze_dict = self.__set_functions(in_data, 'squeeze')
         expand_dict = self.__set_functions(out_data, 'expand')
 
-
-        print "**********inside the processing method"
-        for sl in in_slice_list[0]:
-            print sl
-        
-        
         number_of_slices_to_process = len(in_slice_list[0])
         for count in range(number_of_slices_to_process):
             percent_complete = count/(number_of_slices_to_process * 0.01)
@@ -99,7 +90,8 @@ class TransportControl(object):
             section, slice_list = \
                 self.__get_all_padded_data(in_data, in_slice_list, count,
                                            squeeze_dict)
-            result = plugin.process_frames(section, slice_list)
+            plugin.set_current_slice_list(slice_list)
+            result = plugin.process_frames(section)
             self.__set_out_data(out_data, out_slice_list, result, count,
                                 expand_dict)
 
@@ -167,9 +159,12 @@ class TransportControl(object):
         :rtype: list(tuple(slice))
         """
         slice_list = []
+        global_frame_index = []
         for data in data_list:
-            slice_list.append(data._get_slice_list_per_process(expInfo))
-        return slice_list
+            sl, f = data._get_slice_list_per_process(expInfo)
+            slice_list.append(sl)
+            global_frame_index.append(f)
+        return slice_list, global_frame_index
 
     def __get_all_padded_data(self, data_list, slice_list, count,
                               squeeze_dict):

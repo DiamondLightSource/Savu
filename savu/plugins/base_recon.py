@@ -75,7 +75,7 @@ class BaseRecon(Plugin):
         self.br_vol_shape = out_pData[0].get_shape()
 
         self.main_dir = in_pData[0].get_pattern()['SINOGRAM']['main_dir']
-        self.angles = in_meta_data.get_meta_data('rotation_angle')
+        self.angles = in_meta_data.get('rotation_angle')
         if len(self.angles.shape) is not 1:
             self.scan_dim = in_dataset.find_axis_label_dimension('scan')
         self.slice_dirs = out_pData[0].get_slice_directions()

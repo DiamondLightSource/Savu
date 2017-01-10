@@ -82,7 +82,7 @@ class PluginRunner(object):
         cu.user_message("* Processing Complete *")
         cu.user_message("***********************")
 
-        saver.nxs_file.close()
+        self.exp.nxs_file.close()
         return self.exp
 
     def __run_plugin(self, plugin_dict):

@@ -201,8 +201,8 @@ class Hdf5TomoSaver(BaseSaver):
         return entry, filename
 
     def __add_data_links(self, data, linkType):
-        logging.info("Adding link to file %s", self.nxs_filename)
-        entry = self.nxs_file['entry']
+        logging.info("Adding link to file %s", self.exp.get('nxs_filename'))
+        entry = self.exp.nxs_file['entry']
         group_name = data.data_info.get('group_name')
         self.__output_metadata(data, data.backing_file[group_name])
         filename = data.backing_file.filename.split('/')[-1]
