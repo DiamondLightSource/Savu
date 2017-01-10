@@ -55,12 +55,12 @@ class NxtomoLoader(BaseLoader):
         super(NxtomoLoader, self).__init__(name)
 
     def setup(self):
-        exp = self.exp
+        exp = self.get_experiment()
 
         data_obj = exp.create_data_object('in_data', 'tomo')
 
         data_obj.backing_file = \
-            h5py.File(self.exp.meta_data.get_meta_data("data_file"), 'r')
+            h5py.File(exp.meta_data.get_meta_data("data_file"), 'r')
 
         data_obj.data = data_obj.backing_file[self.parameters['data_path']]
 
