@@ -73,6 +73,7 @@ class TransportControl(object):
 
         :param plugin plugin: The current plugin instance.
         """
+        
         in_data, out_data = plugin.get_datasets()
 
         expInfo = plugin.exp.meta_data
@@ -83,6 +84,12 @@ class TransportControl(object):
         squeeze_dict = self.__set_functions(in_data, 'squeeze')
         expand_dict = self.__set_functions(out_data, 'expand')
 
+
+        print "**********inside the processing method"
+        for sl in in_slice_list[0]:
+            print sl
+        
+        
         number_of_slices_to_process = len(in_slice_list[0])
         for count in range(number_of_slices_to_process):
             percent_complete = count/(number_of_slices_to_process * 0.01)

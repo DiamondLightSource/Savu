@@ -174,12 +174,12 @@ class DataWithDarksAndFlats(BaseType):
     def update_dark(self, data):
         self.dark_updated = data
         self.dscale = 1
-        self.data_obj.meta_data.set_meta_data('dark', self._calc_mean(data))
+        self.data_obj.meta_data.set('dark', self._calc_mean(data))
 
     def update_flat(self, data):
         self.flat_updated = data
         self.fscale = 1
-        self.data_obj.meta_data.set_meta_data('flat', self._calc_mean(data))
+        self.data_obj.meta_data.set('flat', self._calc_mean(data))
 
 
 class ImageKey(DataWithDarksAndFlats):
@@ -219,9 +219,9 @@ class ImageKey(DataWithDarksAndFlats):
     def _set_dark_and_flat(self):
         self.dark_flat_slice_list = tuple(self.get_dark_flat_slice_list())
         if len(self.get_index(2)):
-            self.data_obj.meta_data.set_meta_data('dark', self.dark_mean())
+            self.data_obj.meta_data.set('dark', self.dark_mean())
         if len(self.get_index(1)):
-            self.data_obj.meta_data.set_meta_data('flat', self.flat_mean())
+            self.data_obj.meta_data.set('flat', self.flat_mean())
 
 
 class NoImageKey(DataWithDarksAndFlats):
@@ -300,5 +300,5 @@ class NoImageKey(DataWithDarksAndFlats):
             # change dimensions here
 
         self.dark_flat_slice_list = tuple(self.dark_flat_slice_list)
-        self.data_obj.meta_data.set_meta_data('dark', self.dark_mean())
-        self.data_obj.meta_data.set_meta_data('flat', self.flat_mean())
+        self.data_obj.meta_data.set('dark', self.dark_mean())
+        self.data_obj.meta_data.set('flat', self.flat_mean())
