@@ -75,6 +75,7 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
         full_shape = data.get_shape()
         tile[dim] = full_shape[dim]
         self.correct = self.correct_sino
+        self.length = full_shape[self.slice_dir]
         if len(full_shape) is 3:
             self.convert_size = lambda a, b, x: np.tile(x[a:b], tile)
         else:
@@ -92,10 +93,9 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
         return data
 
     def correct_sino(self, data):
-        reps = self.get_slice_dir_reps(0)
-
         sl = self.get_current_slice_list()[0][self.slice_dir]
-        start = self.get_global_frame_index()[0][self.count]%reps
+        start = self.get_global_frame_index()[0][self.count] % self.length
+        start *= self.get_max_frames()
         end = start + len(np.arange(sl.start, sl.stop, sl.step))
         dark = self.convert_size(start, end, self.dark)
         flat_minus_dark = \
