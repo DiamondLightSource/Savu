@@ -16,7 +16,7 @@
 .. module:: hdf5_transport_data
    :platform: Unix
    :synopsis: A data transport class that is inherited by Data class at \
-   runtime. It performs the movement of the data, including loading and saving.
+   runtime. It organises the slice list and moves the data.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
@@ -32,8 +32,7 @@ NX_CLASS = 'NX_class'
 
 class Hdf5TransportData(BaseTransportData):
     """
-    The Hdf5TransportData class performs the loading and saving of data
-    specific to a hdf5 transport mechanism.
+    The Hdf5TransportData class performs the organising and movement of data.
     """
 
     def __chunk_length_repeat(self, slice_dirs, shape):
