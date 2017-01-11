@@ -94,13 +94,12 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
 
     def correct_sino(self, data):
         sl = self.get_current_slice_list()[0][self.slice_dir]
-        start = self.get_global_frame_index()[0][self.count] % self.length
-        start *= self.get_max_frames()
-
-        print "count", self.count
-        print "start", start
+        nFrames = min(self.get_max_frames(), self.length)
+        reps_at = int(np.ceil(self.length/float(nFrames)))
+        current_idx = self.get_global_frame_index()[0][self.count]
+        start = (current_idx % reps_at)*nFrames
         end = start + len(np.arange(sl.start, sl.stop, sl.step))
-        print "end", end
+
         dark = self.convert_size(start, end, self.dark)
         flat_minus_dark = \
             self.convert_size(start, end, self.flat_minus_dark)
