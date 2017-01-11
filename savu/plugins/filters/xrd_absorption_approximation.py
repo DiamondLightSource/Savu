@@ -49,8 +49,8 @@ class XrdAbsorptionApproximation(BaseFilter, CpuPlugin):
         compound = self.parameters['compound']
         density = self.parameters['density']
         mData = self.get_in_meta_data()[0]
-        mono_energy = mData.get_meta_data('mono_energy')
-        peak_energy = mData.get_meta_data('mono_energy')
+        mono_energy = mData.get('mono_energy')
+        peak_energy = mData.get('mono_energy')
         pump_mu = self.get_mu(compound, float(mono_energy), density)
         peak_mu = self.get_mu(compound, list(mono_energy), density) # sets outgoing x-ray energy to incoming x-ray energy
         logging.debug("THE PUMP MU IS is:"+str(pump_mu)+str(mono_energy))
@@ -58,7 +58,7 @@ class XrdAbsorptionApproximation(BaseFilter, CpuPlugin):
         self.atten_ratio = [pm/pump_mu for pm in peak_mu]
         logging.debug('The test attenuation ratios should be:[25.651, 20.909, 2.903, 2.198],'
                             'they are: %s' % self.atten_ratio)
-        theta = mData.get_meta_data('rotation_angle')
+        theta = mData.get('rotation_angle')
         self.dtheta = theta[1]-theta[0]
         logging.debug('The rotation step is %s' % str(self.dtheta))
         if np.abs(self.dtheta)>10.0:
@@ -106,7 +106,7 @@ class XrdAbsorptionApproximation(BaseFilter, CpuPlugin):
         in_dataset, out_datasets = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
         in_meta_data = in_dataset[0].meta_data
-        idx = [in_meta_data.get_meta_data("mono_energy")]
+        idx = [in_meta_data.get("mono_energy")]
         self.nChannels = len(idx)
         in_pData[0].plugin_data_setup('SINOGRAM', self.get_num_channels())
         spectra = out_datasets[0]

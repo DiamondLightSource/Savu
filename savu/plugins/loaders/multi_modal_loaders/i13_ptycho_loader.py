@@ -47,7 +47,7 @@ class I13PtychoLoader(BaseMultiModalLoader):
         data_obj, stxm_entry = self.multi_modal_setup('NXptycho', data_str)
         mono_energy = data_obj.backing_file[
             stxm_entry.name + '/instrument/monochromator/energy']
-        self.exp.meta_data.set_meta_data("mono_energy", mono_energy)
+        self.exp.meta_data.set("mono_energy", mono_energy)
         
         labels = []
         ### set the rotation
@@ -58,12 +58,12 @@ class I13PtychoLoader(BaseMultiModalLoader):
         # axis label
         labels.append('rotation_angle.degrees')
         
-        data_obj.meta_data.set_meta_data('rotation_angle', rotation_angle)
+        data_obj.meta_data.set('rotation_angle', rotation_angle)
         
         ### set the x
         x = \
             data_obj.backing_file[stxm_entry.name + '/data/lab_sxy/lab_sx'].value*1e-6
-        data_obj.meta_data.set_meta_data('x', x)
+        data_obj.meta_data.set('x', x)
         # axis label
         
         ### set the y
@@ -72,7 +72,7 @@ class I13PtychoLoader(BaseMultiModalLoader):
         pos = np.zeros((2,len(y)))
         pos[0,:] = y
         pos[1,:] = x
-        data_obj.meta_data.set_meta_data('xy', pos)
+        data_obj.meta_data.set('xy', pos)
         # axis label
         labels.append('xy.metres')
 #         labels.append('y.microns')

@@ -48,7 +48,7 @@ class I13StxmXrfLoader(BaseLoader):
         data_obj = exp.create_data_object('in_data', 'tomo')
 
         data_obj.backing_file = \
-            h5py.File(self.exp.meta_data.get_meta_data("data_file"), 'r')
+            h5py.File(self.exp.meta_data.get("data_file"), 'r')
 
         data_obj.data = data_obj.backing_file['/entry1/xmapMca/fullSpectrum']
         sh = data_obj.data.shape

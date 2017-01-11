@@ -77,8 +77,8 @@ class ThresholdFilter(BaseFilter, CpuPlugin):
         in_dataset = self.get_in_datasets()[0]
         try:
             # Extract the intensity range from the image meta data
-            self.lowest = numpy.amin(in_dataset.meta_data.get_meta_data('min'))
-            self.highest = numpy.amax(in_dataset.meta_data.get_meta_data('max'))
+            self.lowest = numpy.amin(in_dataset.meta_data.get('min'))
+            self.highest = numpy.amax(in_dataset.meta_data.get('max'))
         except KeyError as k:
             logging.error("Caught KeyError in BinaryQuantisation.setup(): %s", str(k))
 

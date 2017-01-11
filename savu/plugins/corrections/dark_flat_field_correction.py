@@ -96,11 +96,6 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
 
         sl = self.get_current_slice_list()[0][self.slice_dir]
         start = self.get_global_frame_index()[0][self.count]%reps
-        start += self.count * self.get_max_frames()
-        print self.get_global_frame_index()
-        print self.get_global_frame_index()[0]
-        print self.get_global_frame_index()[0][self.count]
-        print "****", sl, start, reps
         end = start + len(np.arange(sl.start, sl.stop, sl.step))
         dark = self.convert_size(start, end, self.dark)
         flat_minus_dark = \

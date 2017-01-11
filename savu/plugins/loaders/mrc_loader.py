@@ -43,11 +43,11 @@ class MrcLoader(BaseLoader):
         exp = self.exp
         data_obj = exp.create_data_object('in_data', 'tomo')
 
-        filename = exp.meta_data.get_meta_data("data_file")
+        filename = exp.meta_data.get("data_file")
         data_obj.data = MrcType(data_obj, filename)
 
         # dummy file
-        path = exp.meta_data.get_meta_data("data_file")
+        path = exp.meta_data.get("data_file")
         filename = path.split('/')[-1] + '.h5'
         data_obj.backing_file = \
             h5py.File(tempfile.mkdtemp() + '/' + filename, 'a')

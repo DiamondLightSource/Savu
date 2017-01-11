@@ -62,7 +62,7 @@ class ImageLoader(BaseLoader):
         data_obj.add_pattern('SINOGRAM', core_dir=(detX, rot),
                              slice_dir=(detY,))
 
-        path = exp.meta_data.get_meta_data("data_file")
+        path = exp.meta_data.get("data_file")
         data_prefix = self.parameters['data_prefix']
         data_obj.data = FabIO(path, data_obj, [self.parameters['frame_dim']],
                               None, data_prefix)

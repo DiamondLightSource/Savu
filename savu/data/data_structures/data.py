@@ -363,7 +363,7 @@ class Data(DataCreate):
         for i in range(len(slice_list)):
             label = axis_labels[i].keys()[0]
             if label in self.meta_data.get_dictionary().keys():
-                values = self.meta_data.get_meta_data(label)
+                values = self.meta_data.get(label)
                 preview_sl = [slice(None)]*len(values.shape)
                 preview_sl[0] = slice_list[i]
                 self.meta_data.set(label, values[preview_sl])

@@ -36,8 +36,8 @@ class MultiThreadedPlugin(PluginDriver):
 
     def _run_plugin(self, exp, transport):
 
-        process = exp.meta_data.get_meta_data("process")
-        processes = exp.meta_data.get_meta_data("processes")
+        process = exp.meta_data.get("process")
+        processes = exp.meta_data.get("processes")
         nNodes = processes.count(processes[0])
         nCores = len(processes)/nNodes
 

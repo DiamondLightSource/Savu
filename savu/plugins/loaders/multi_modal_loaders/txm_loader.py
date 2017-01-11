@@ -48,7 +48,7 @@ class TxmLoader(BaseLoader):
         data_obj = exp.create_data_object('in_data', 'tomo')
 
         data_obj.backing_file = \
-            h5py.File(self.exp.meta_data.get_meta_data("data_file"), 'r')
+            h5py.File(self.exp.meta_data.get("data_file"), 'r')
 
         data_obj.data = data_obj.backing_file['/entry1/data']
         sh = data_obj.data.shape
@@ -57,7 +57,7 @@ class TxmLoader(BaseLoader):
         rotation_angle = \
             data_obj.backing_file['entry1/theta'].value.astype(float)
         print rotation_angle.shape
-        data_obj.meta_data.set_meta_data('rotation_angle', rotation_angle)
+        data_obj.meta_data.set('rotation_angle', rotation_angle)
         data_obj.set_axis_labels('rotation_angle.degrees',
                                  'detector_y.pixel',
                                  'detector_x.pixel')

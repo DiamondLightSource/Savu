@@ -77,32 +77,32 @@ class MultiSavuLoader(BaseLoader):
         if self.parameters['stack_or_cat'] == 'stack':
             name, unit = self.parameters['axis_label'].split('.')
             axis_labels.append({name: unit})
-        data_obj.data_info.set_meta_data('axis_labels', axis_labels)
+        data_obj.data_info.set('axis_labels', axis_labels)
 
     def _set_patterns(self, data_obj, savu_obj):
-        patterns = savu_obj.data_info.get_meta_data('data_patterns')
+        patterns = savu_obj.data_info.get('data_patterns')
 
         if self.parameters['stack_or_cat'] == 'stack':
             for p in patterns:
                 patterns[p]['slice_dir'] += (3,)
-        data_obj.data_info.set_meta_data('data_patterns', patterns)
+        data_obj.data_info.set('data_patterns', patterns)
 
     def _get_data_objects(self, savu):
         rrange = self.parameters['range']
         file_list = range(rrange[0], rrange[1]+1)
-        file_path = copy.copy(self.exp.meta_data.get_meta_data('data_file'))
+        file_path = copy.copy(self.exp.meta_data.get('data_file'))
         file_name = '' if self.parameters['file_name'] is None else\
             self.parameters['file_name']
 
         data_obj_list = []
         for i in file_list:
             this_file = file_path + file_name + str(i) + '.h5'
-            self.exp.meta_data.set_meta_data('data_file', this_file)
+            self.exp.meta_data.set('data_file', this_file)
             savu.setup()
             data_obj_list.append(self.exp.index['in_data']['tomo'])
             self.exp.index['in_data'] = {}
 
-        self.exp.meta_data.set_meta_data('data_file', file_path)
+        self.exp.meta_data.set('data_file', file_path)
         return data_obj_list
 
     def _get_savu_loader(self):
