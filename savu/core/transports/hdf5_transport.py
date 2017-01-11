@@ -21,11 +21,11 @@
 
 """
 
-from savu.core.transport_control import TransportControl
+from savu.core.transports.base_transport import BaseTransport
 from savu.core.transport_setup import MPI_setup
 
 
-class Hdf5Transport(TransportControl):
+class Hdf5Transport(BaseTransport):
 
     def _transport_initialise(self, options):
         MPI_setup(options)
