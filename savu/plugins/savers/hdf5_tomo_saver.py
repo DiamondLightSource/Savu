@@ -46,6 +46,7 @@ class Hdf5TomoSaver(BaseSaver):
 
     def setup(self):
         exp = self.exp
+        print "****exp", exp
         out_data_dict = exp.index["out_data"]
         current_and_next = [0]*len(out_data_dict)
         if 'current_and_next' in self.exp.meta_data.get_dictionary():

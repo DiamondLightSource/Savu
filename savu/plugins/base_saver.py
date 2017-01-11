@@ -21,9 +21,6 @@
 
 """
 import logging
-import os
-import h5py
-from mpi4py import MPI
 
 from savu.plugins.plugin import Plugin
 

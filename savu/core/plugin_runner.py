@@ -61,7 +61,9 @@ class PluginRunner(object):
         # create output files for final datasets
         n_plugins = plugin_list._get_n_processing_plugins()
         self.exp._set_experiment_for_current_plugin(n_plugins-1)
-        exp_coll['saver_plugin'].setup()  # creates the hdf5 files
+        saver = pu.load_plugin('savu.plugins.savers.hdf5_tomo_saver')
+        saver.setup()
+        #exp_coll['saver_plugin'].setup()  # creates the hdf5 files
 
         #  ********* transport function ***********
         self._transport_pre_plugin_list_run()
