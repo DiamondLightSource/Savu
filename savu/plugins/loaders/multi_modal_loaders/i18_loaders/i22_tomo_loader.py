@@ -21,18 +21,18 @@
 
 """
 
-
-
 from savu.plugins.utils import register_plugin
 from savu.plugins.base_loader import BaseLoader
 import h5py
 import logging
 import numpy as np
 
+
 @register_plugin
 class I22TomoLoader(BaseLoader):
     """
-    A class to load tomography data for I22 that has been previously processed using dawn
+    A class to load tomography data for I22 that has been previously processed\
+    using dawn
     """
 
     def __init__(self, name='I22TomoLoader'):
@@ -44,25 +44,22 @@ class I22TomoLoader(BaseLoader):
         exp = self.exp
         data_obj = exp.create_data_object('in_data', 'tomo')
         data_obj.backing_file = \
-            h5py.File(exp.meta_data.get_meta_data("data_file"), 'r')
+            h5py.File(exp.meta_data.get("data_file"), 'r')
         data_obj.data = data_obj.backing_file['entry/result/data']
         data_obj.set_shape(data_obj.data.shape)
         logging.warn('the data as shape %s' % str(data_obj.data.shape))
-        data_obj.set_axis_labels('y.units', 'x.units', 'rotation_angle.degrees', 'Q.angstrom^-1')
-        data_obj.add_pattern('PROJECTION', core_dir=(1, 0),
-                                slice_dir=(2, 3))
+        data_obj.set_axis_labels('y.units', 'x.units',
+                                 'rotation_angle.degrees', 'Q.angstrom^-1')
 
-        data_obj.add_pattern('SINOGRAM', core_dir=(2, 1),
-                                slice_dir=(0, 3))
-
-        data_obj.add_pattern('SPECTRUM', core_dir=(3,),
-                                slice_dir=(0, 1, 2))
+        data_obj.add_pattern('PROJECTION', core_dir=(1, 0), slice_dir=(2, 3))
+        data_obj.add_pattern('SINOGRAM', core_dir=(2, 1), slice_dir=(0, 3))
+        data_obj.add_pattern('SPECTRUM', core_dir=(3,), slice_dir=(0, 1, 2))
 
         mData = data_obj.meta_data
         mData.set("Q", data_obj.backing_file['entry/result/q'].value)
         mData.set("x", np.arange(data_obj.data.shape[1]))
         mData.set("y", np.arange(data_obj.data.shape[0]))
-        mData.set("rotation_angle",
-                                data_obj.backing_file['entry/result/theta'].value)
-        
+        mData.set("rotation_angle", data_obj.backing_file[
+            'entry/result/theta'].value)
+
         self.set_data_reduction_params(data_obj)

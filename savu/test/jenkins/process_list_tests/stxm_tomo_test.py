@@ -29,7 +29,6 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 class StxmTomoTest(unittest.TestCase):
 
     def test_stxm_tomo_scikit(self):
-        print "Hi"
         data_file = tu.get_test_data_path('mm.nxs')
         process_file = \
             tu.get_test_process_path('simple_stxm_tomo_test_scikit.nxs')
@@ -37,7 +36,6 @@ class StxmTomoTest(unittest.TestCase):
                                                    process_file=process_file))
 
     def test_stxm_tomo_astra(self):
-        print "Hi2"
         data_file = tu.get_test_data_path('mm.nxs')
         process_file = \
             tu.get_test_process_path('simple_stxm_tomo_test_astra.nxs')

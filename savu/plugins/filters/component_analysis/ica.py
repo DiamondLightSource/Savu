@@ -41,10 +41,10 @@ class Ica(BaseComponentAnalysis):
     def filter_frames(self, data):
         logging.debug("I am starting the old componenty vous")
         data = data[0]
-        print 'The length of the data is'+str(data.shape)
+        #print 'The length of the data is'+str(data.shape)
         sh = data.shape
         newshape = (np.prod(sh[:-1]), sh[-1])
-        print "The shape of the data is:"+str(data.shape) + str(newshape)
+        #print "The shape of the data is:"+str(data.shape) + str(newshape)
         data = np.reshape(data, (newshape))
         # data will already be shaped correctly
         logging.debug("Making the matrix")

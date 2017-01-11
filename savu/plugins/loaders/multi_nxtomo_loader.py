@@ -74,7 +74,7 @@ class MultiNxtomoLoader(BaseLoader):
             # may want to add this as a parameter...
             self._set_nD_rotation_angle(data_obj_list, data_obj)
 
-        print "setting the final data shape", data_obj.data.get_shape()
+        #print "setting the final data shape", data_obj.data.get_shape()
         data_obj.set_original_shape(data_obj.data.get_shape())
         self.set_data_reduction_params(data_obj)
         self._set_dark_and_flat(data_obj_list, data_obj)

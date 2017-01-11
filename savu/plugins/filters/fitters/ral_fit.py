@@ -52,14 +52,14 @@ class RalFit(BaseFitter):
         data = data[0]
         axis = self.axis
         positions = self.positions
-        print positions
+        #print positions
         weights = data[self.peakindex]
         widths = np.ones_like(positions)*self.parameters["width_guess"]
         p = []
         p.extend(weights)
         p.extend(widths)
         curvetype = self.getFitFunction(str(self.parameters['peak_shape']))
-        print "HI"
+        #print "HI"
         [x1, infodict1] = ral_nlls.solve(
                     p, self._resid, self.dfunc,
                     params=(curvetype, data, axis, positions),

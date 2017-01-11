@@ -45,7 +45,7 @@ class BasePtycho(BaseFilter, CpuPlugin): # also make one for gpu
 
         # lets set up the axis labels for output datasets
         position_labels, probe_labels, object_labels, self.sh = self.setup_axis_labels(in_dataset)
-        print "probe labels are:"+str(probe_labels)
+        #print "probe labels are:"+str(probe_labels)
         # Now create the datasets and work out the patterns
         ### PROBE ###
         probe = out_dataset[0]
@@ -53,7 +53,7 @@ class BasePtycho(BaseFilter, CpuPlugin): # also make one for gpu
         
         self.set_size_probe(in_dataset[0].get_shape()[-2:])
         logging.debug("##### PROBE #####")
-        print("probe shape is:%s",str(self.get_size_probe()))
+        #print("probe shape is:%s",str(self.get_size_probe()))
         probe.create_dataset(axis_labels=probe_labels,
                             shape=self.get_size_probe()) # create the dataset
         self.probe_pattern_setup(probe_labels, probe)
@@ -63,7 +63,7 @@ class BasePtycho(BaseFilter, CpuPlugin): # also make one for gpu
         object_trans = out_dataset[1]
         object_shape = self.sh + self.get_size_object()
         logging.debug("##### OBJECT #####")
-        print("object shape is:%s",str(object_shape))
+        #print("object shape is:%s",str(object_shape))
 #         print object_labels
         
         object_trans.create_dataset(axis_labels=object_labels,
@@ -225,10 +225,10 @@ class BasePtycho(BaseFilter, CpuPlugin): # also make one for gpu
             logging.warn(str(e) + 'we were looking for "rotation_angle"')
             logging.debug('This is not a tomography, so no time series for the probe')
         else:
-            print('the rotation axis is:%s' % str(rot_axis))
+            # print('the rotation axis is:%s' % str(rot_axis))
             probe_ts = {'core_dir':(rot_axis,), 'slice_dir':tuple(set(rest_probe) - set([rot_axis]))}
             probe.add_pattern("TIMESERIES", **probe_ts) # so we can FT the wiggles etc...
-            print('This is a tomography so I have added a TIMESERIES pattern to the probe') # the probe oscillates in time for each projection, set this as a time series pattern
+            # print('This is a tomography so I have added a TIMESERIES pattern to the probe') # the probe oscillates in time for each projection, set this as a time series pattern
 
     def set_probe_energy_patterns(self, probe, rest_probe):
         try:

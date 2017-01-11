@@ -52,7 +52,7 @@ class I13StxmXrfLoader(BaseLoader):
 
         data_obj.data = data_obj.backing_file['/entry1/xmapMca/fullSpectrum']
         sh = data_obj.data.shape
-        print sh
+        #print sh
         
         if self.parameters['is_map']:
             lab_sxy = data_obj.backing_file['entry1/instrument/lab_sxy/']
@@ -66,7 +66,7 @@ class I13StxmXrfLoader(BaseLoader):
                 data_obj.backing_file['entry1/merlin_sw_hdf/t1_theta'].value.astype(float)
             if rotation_angle.ndim>1:
                 rotation_angle = rotation_angle[:,0]
-            print rotation_angle.shape
+            #print rotation_angle.shape
             data_obj.meta_data.set_meta_data('rotation_angle', rotation_angle)
             data_obj.set_axis_labels('rotation_angle.degrees',
                                      'x.pixel','ch.unit', 'spectrum.eV')

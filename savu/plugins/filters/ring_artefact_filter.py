@@ -70,5 +70,5 @@ class RingArtefactFilter(BaseFilter, CpuPlugin):
             raise ValueError('param_r is too small')
             
         if p3 < 1 or p3 > 100:
-            print p3
             raise ValueError('num_series is out of bounds')
+

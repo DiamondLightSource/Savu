@@ -52,11 +52,11 @@ class I13StxmLoader(BaseLoader):
 
         data_obj.data = data_obj.backing_file['/entry1/merlin_sw_hdf/merlin_tot']
         sh = data_obj.data.shape
-        print sh
+        #print sh
         ### set the rotation
         rotation_angle = \
             data_obj.backing_file['entry1/merlin_sw_hdf/t1_theta'].value.astype(float)[:,0]
-        print rotation_angle.shape
+        #print rotation_angle.shape
         data_obj.meta_data.set('rotation_angle', rotation_angle)
         data_obj.set_axis_labels('rotation_angle.degrees',
                                  'x.pixel')

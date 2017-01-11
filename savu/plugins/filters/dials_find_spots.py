@@ -52,24 +52,17 @@ class DialsFindSpots(BaseFilter, CpuPlugin):
         hp = data - lp # poormans background subtraction
         hp -= np.min(hp)
         sh = hp.shape
-        print "here"
         hp = hp.astype('uint32')
         hp = flex.int(hp)
-        print "here now"
         
         mask = flex.bool(np.ones_like(hp).astype('bool'))
-        print "here now"
         result1 = flex.bool(np.zeros_like(hp).astype('bool'))
         spots = np.zeros_like(hp).astype('bool')
-        print "here now"
         
         for i in range(3, self.parameters['spotsize'], 5):
-            print "here now"
             algorithm = DispersionThreshold(sh, (i, i), 1, 1, 0, -1)
-            print "here now"
-            print type(hp), type(mask), type(result1)
+            #print type(hp), type(mask), type(result1)
             thing = algorithm(hp, mask, result1)
-            print "here now"
             spots = spots + result1.as_numpy_array()
         return [data, spots*data]
 

@@ -19,7 +19,7 @@
 
 .. moduleauthor:: Aaron D. Parsons <scientificsoftware@diamond.ac.uk>
 """
-print "HI"
+
 import logging
 from savu.plugins.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
@@ -84,7 +84,7 @@ class Pymca(BaseFilter, CpuPlugin):
         fitResult.create_dataset(patterns={in_dataset[0]: pattern_list},
                                 axis_labels={in_dataset[0]: axis_labels},
                                 shape=outputshape)
-        fitResult.meta_data.set_meta_data('FitAreas',fit_labels)
+        fitResult.meta_data.set('FitAreas',fit_labels)
         slice_directions = tuple(range(len(rest_shape)))
 #         print "slice directions are:"+str(slice_directions)
         fitResult.add_pattern("CHANNEL", core_dir=(-1,),

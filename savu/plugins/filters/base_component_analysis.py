@@ -39,7 +39,6 @@ class BaseComponentAnalysis(BaseFilter, CpuPlugin):
         super(BaseComponentAnalysis, self).__init__(name)
 
     def get_max_frames(self):
-        print "max frames is:"+str(self.spectra_length[0])
         return self.spectra_length[0]
 
 
@@ -50,12 +49,10 @@ class BaseComponentAnalysis(BaseFilter, CpuPlugin):
         self.exp.log(self.name + " Setting up the component analysis")
         # set up the output dataset that is created by the plugin
         in_dataset, out_dataset = self.get_datasets()
-        print "shape"+str(in_dataset[0].get_shape())
         self.spectra_length = (in_dataset[0].get_shape()[-1],)
         other_dims = in_dataset[0].get_shape()[:-1]
         num_comps = self.parameters['number_of_components']
         self.images_shape = other_dims + (num_comps,)
-        print self.images_shape
         components_shape = (num_comps,) + self.spectra_length
         # copy all required information from in_dataset[0]
 

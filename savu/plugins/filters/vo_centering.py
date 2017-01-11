@@ -15,9 +15,7 @@
 .. module:: vo_centering
    :platform: Unix
    :synopsis: A plugin to find the center of rotation per frame
-
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
-
 """
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
@@ -37,7 +35,6 @@ from savu.data.plugin_list import CitationInformation
 class VoCentering(BaseFilter, CpuPlugin):
     """
     A plugin to calculate the centre of rotation using the Vo Method
-
     :param ratio: The ratio between the size of object and FOV of \
         the camera. Default: 2.0.
     :param row_drop: Drop lines around vertical center of the \
@@ -180,17 +177,13 @@ class VoCentering(BaseFilter, CpuPlugin):
         # special case of one cor_raw value (i.e. only one sinogram)
         if not cor_raw.shape:
             # add to metadata
-            cor_raw = out_datasets[0].data[...][0]
-            cor_raw = cor_raw*np.ones(self.orig_shape[0])
-            out_datasets[1].data[:] = cor_raw[:, np.newaxis]
+            cor_raw = out_datasets[0].data[...]
             self.populate_meta_data('cor_raw', cor_raw)
             self.populate_meta_data('centre_of_rotation', cor_raw)
             return
 
         cor_fit = np.squeeze(out_datasets[1].data[...])
-
-        in_datasets[0].find_axis_label_dimensions()
-        fit = np.zeros(self.orig_shape[0])
+        fit = np.zeros(cor_fit.shape)
         fit[:] = np.mean(cor_fit)
         cor_fit = fit
 
@@ -213,12 +206,16 @@ class VoCentering(BaseFilter, CpuPlugin):
 
         self.orig_full_shape = in_dataset[0].get_shape()
 
+        # if preview parameters exist then use these
+        # else get the size of the data
+        # get n processes and take 4 different sets of 5 from the data if this is feasible based on the data size.
+        # calculate the slice list here and determine if it is feasible, else apply to max(n_processes, data_size)
+
         # reduce the data as per data_subset parameter
         in_dataset[0].get_preview().set_preview(self.parameters['preview'],
                                                 revert=self.orig_full_shape)
 
         in_pData, out_pData = self.get_plugin_datasets()
-
         in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
         # copy all required information from in_dataset[0]
         fullData = in_dataset[0]
@@ -249,7 +246,6 @@ class VoCentering(BaseFilter, CpuPlugin):
     def get_max_frames(self):
         """
         This filter processes 1 frame at a time
-
          :returns:  1
         """
         return 1

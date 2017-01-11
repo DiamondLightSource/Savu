@@ -224,10 +224,11 @@ class PtypyCompact(BasePtycho):
         P = Ptycho(p,level=2)
         object_shape = P.obj.storages['S00G00'].data[0].shape
         self.obj_shape = object_shape + (self.get_num_object_modes(),)
-        print "object shape is" + str(self.obj_shape)
+        #print "object shape is" + str(self.obj_shape)
     
     def set_size_probe(self, probe_shape):
         self.p, self.r = self.parse_params()
         sh = self.p.scans.savu.data.shape
         self.probe_size = (1,)+tuple(u.expect2(sh)) + (self.get_num_probe_modes(),)
-        print "probe size is" + str(self.probe_size)
+        #print "probe size is" + str(self.probe_size)
+

@@ -56,10 +56,10 @@ class SinogramAlignment(BaseFilter, CpuPlugin):
 
     def pre_process(self):
         if self.parameters['type'] == 'shift':
-            self.com_y = self.get_in_datasets()[0].meta_data.get_meta_data(
+            self.com_y = self.get_in_datasets()[0].meta_data.get(
                 'proj_align_shift')[:, 1]
         self.com_x = \
-            self.get_in_datasets()[0].meta_data.get_meta_data('rotation_angle')
+            self.get_in_datasets()[0].meta_data.get('rotation_angle')
         data = self.get_in_datasets()[0]
         self.sl = [slice(None)]*len(data.get_shape())
         self.slice_dir = self.get_plugin_in_datasets()[0].get_slice_dimension()

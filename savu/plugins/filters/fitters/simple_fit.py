@@ -53,7 +53,7 @@ class SimpleFit(BaseFitter):
         data = data[0]
         axis = self.axis
         positions = self.positions
-        print positions
+        #print positions
         weights = data[self.peakindex]
         widths = np.ones_like(positions)*self.parameters["width_guess"]
         p = []
@@ -68,7 +68,7 @@ class SimpleFit(BaseFitter):
         if np.isnan(params).any():
             logging.debug('Nans were detected here')
             params = np.zeros(len(params))
-        print msg2
+        #print msg2
         weights, widths, areas = self.getAreas(curvetype,
                                                axis, positions, params)
         residuals = self._resid(params, curvetype, data, axis, positions)

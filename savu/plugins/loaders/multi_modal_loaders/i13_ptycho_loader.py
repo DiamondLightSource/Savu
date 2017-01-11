@@ -78,16 +78,16 @@ class I13PtychoLoader(BaseMultiModalLoader):
 #         labels.append('y.microns')
         # now set them
         labels.extend(['detectorX.pixel','detectorY.pixel'])
-        print labels
+        #print labels
         data_obj.set_axis_labels(*tuple(labels))
 
         
         dims = range(len(data_obj.get_shape()))
         diff_core = (-2,-1) # it will always be this
-        print diff_core
+        #print diff_core
         
         diff_slice = tuple(dims[:-2])
-        print diff_slice
+        #print diff_slice
         logging.debug("is a diffraction")
         logging.debug("the diffraction cores are:"+str(diff_core))
         logging.debug("the diffraction slices are:"+str(diff_slice))

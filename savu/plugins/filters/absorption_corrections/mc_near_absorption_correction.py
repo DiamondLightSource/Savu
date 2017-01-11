@@ -47,8 +47,8 @@ class McNearAbsorptionCorrection(BaseAbsorptionCorrection):
         peak_energy = mData.get('PeakEnergy')
         pump_mu = self.get_mu(compound, float(mono_energy), density)
         peak_mu = self.get_mu(compound, list(peak_energy), density)
-        print "THE PUMP MU IS is:"+str(pump_mu)+str(mono_energy)
-        print "THE PEAK MU IS is:"+str(peak_mu)+str(peak_energy)
+        #print "THE PUMP MU IS is:"+str(pump_mu)+str(mono_energy)
+        #print "THE PEAK MU IS is:"+str(peak_mu)+str(peak_energy)
         self.atten_ratio = [pm/pump_mu for pm in peak_mu]
         logging.debug('The test attenuation ratios should be:[25.651, 20.909, 2.903, 2.198],'
                             'they are: %s' % self.atten_ratio)

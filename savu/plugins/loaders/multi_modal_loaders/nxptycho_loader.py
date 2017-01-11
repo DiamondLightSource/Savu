@@ -70,30 +70,24 @@ class NxptychoLoader(BaseMultiModalLoader):
         y = \
             data_obj.backing_file[stxm_entry.name + '/data/lab_sxy/lab_sy'].value*1e-6
         pos = np.zeros((2,len(y)))
-<<<<<<< HEAD
-        pos[0,:] = x
-        pos[1,:] = y
-        data_obj.meta_data.set('xy', pos)
-=======
         pos[0,:] = y
         pos[1,:] = x
-        data_obj.meta_data.set_meta_data('xy', pos)
->>>>>>> origin/master
+        data_obj.meta_data.set('xy', pos)
         # axis label
         labels.append('xy.metres')
 #         labels.append('y.microns')
         # now set them
         labels.extend(['detectorX.pixel','detectorY.pixel'])
-        print labels
+        #print labels
         data_obj.set_axis_labels(*tuple(labels))
 
         
         dims = range(len(data_obj.get_shape()))
         diff_core = (-2,-1) # it will always be this
-        print diff_core
+        #print diff_core
         
         diff_slice = tuple(dims[:-2])
-        print diff_slice
+        #print diff_slice
         logging.debug("is a diffraction")
         logging.debug("the diffraction cores are:"+str(diff_core))
         logging.debug("the diffraction slices are:"+str(diff_slice))

@@ -58,7 +58,6 @@ class MPI_setup(object):
     def __mpi_setup(self, options):
         """ Set MPI process specific values and logging initialisation.
         """
-        print("Running mpi_setup")
         RANK_NAMES = options["process_names"].split(',')
         RANK = MPI.COMM_WORLD.rank
         SIZE = MPI.COMM_WORLD.size

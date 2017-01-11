@@ -45,7 +45,6 @@ class CglsRecon(BaseRecon, CpuPlugin):
         super(CglsRecon, self).__init__("CglsRecon")
 
     def reconstruct(self, sino, centre_of_rotations, angles, vol_shape, init):
-        print sino.shape
         nthreads = self.parameters['number_of_threads']
         num_iterations = self.parameters['number_of_iterations']
         resolution = self.parameters['resolution']

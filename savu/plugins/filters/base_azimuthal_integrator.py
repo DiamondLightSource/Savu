@@ -64,17 +64,17 @@ class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
         ai = pyFAI.AzimuthalIntegrator()  # get me an integrator object
 
         # prep the goemtry
-        px_m = mData.get_meta_data('x_pixel_size')
-        bc_m = [mData.get_meta_data("beam_center_x"),
-                mData.get_meta_data("beam_center_y")]  # in metres
+        px_m = mData.get('x_pixel_size')
+        bc_m = [mData.get("beam_center_x"),
+                mData.get("beam_center_y")]  # in metres
         bc = bc_m / px_m  # convert to pixels
         px = px_m*1e6  # convert to microns
-        distance = mData.get_meta_data('distance')*1e3  # convert to mm
-        wl = mData.get_meta_data('incident_wavelength')[...]  # in m
+        distance = mData.get('distance')*1e3  # convert to mm
+        wl = mData.get('incident_wavelength')[...]  # in m
         self.wl = wl
 
-        yaw = -mData.get_meta_data("yaw")
-        roll = mData.get_meta_data("roll")
+        yaw = -mData.get("yaw")
+        roll = mData.get("roll")
 
         ai.setFit2D(distance, bc[0], bc[1], yaw, roll, px, px, None)
 
@@ -136,6 +136,6 @@ class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
         qanstrom = axis
         dspacing = 2*np.pi/qanstrom
         ttheta = 2*180*np.arcsin(self.wl/(2*dspacing*1e-10))/np.pi
-        mData.set_meta_data('Q', qanstrom)
-        mData.set_meta_data('D', dspacing)
-        mData.set_meta_data('2Theta', ttheta)
+        mData.set('Q', qanstrom)
+        mData.set('D', dspacing)
+        mData.set('2Theta', ttheta)
