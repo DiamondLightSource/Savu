@@ -56,14 +56,7 @@ class PluginRunner(object):
 
         self.exp._experiment_setup()
         exp_coll = self.exp._get_experiment_collection()
-        saver = exp_coll['saver_plugin']
-
-        # create output files for final datasets
         n_plugins = plugin_list._get_n_processing_plugins()
-        self.exp._set_experiment_for_current_plugin(n_plugins-1)
-        saver = pu.load_plugin('savu.plugins.savers.hdf5_tomo_saver')
-        saver.setup()
-        #exp_coll['saver_plugin'].setup()  # creates the hdf5 files
 
         #  ********* transport function ***********
         self._transport_pre_plugin_list_run()
@@ -75,9 +68,10 @@ class PluginRunner(object):
         #  ********* transport function ***********
         self._transport_post_plugin_list_run()
 
-        # close the output files
-        for data in self.exp.index['in_data'].values():
-            saver._save_data(data, self.exp.meta_data.get("link_type"))
+        # convert output files here if necessary
+#        saver = exp_coll['saver_plugin']
+#        for data in self.exp.index['in_data'].values():
+#            saver._save_data(data, self.exp.meta_data.get("link_type"))
 
         self.exp._barrier()
         cu.user_message("***********************")

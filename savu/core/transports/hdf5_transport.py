@@ -21,6 +21,7 @@
 
 """
 
+import savu.plugins.utils as pu
 from savu.core.transports.base_transport import BaseTransport
 from savu.core.transport_setup import MPI_setup
 
@@ -29,22 +30,24 @@ class Hdf5Transport(BaseTransport):
 
     def _transport_initialise(self, options):
         MPI_setup(options)
+        self.saver = None
 
     def _transport_pre_plugin_list_run(self):
         # run through the experiment (no processing) and create output files
-        # (final plugin files are automatically created.)
+        plugin_id = 'savu.plugins.savers.hdf5_tomo_saver'
+        self.saver = pu.plugin_loader(self.exp, {'id': plugin_id, 'data': {}})
         exp_coll = self.exp._get_experiment_collection()
-        for i in range(len(exp_coll['datasets'])-1):
+        for i in range(len(exp_coll['datasets'])):
             self.exp._set_experiment_for_current_plugin(i)
-            exp_coll['saver_plugin'].setup()  # creates the hdf5 files
+            self.saver.setup()  # creates the hdf5 files
 
     def _transport_post_plugin(self):
         # This should only happen if there is a .nxs file.
-        saver = self.exp._get_experiment_collection()['saver_plugin']
         for data in self.exp.index["out_data"].values():
             if data.remove is False:
-                entry, fname = \
-                    saver._save_data(data, self.exp.meta_data.get("link_type"))
-                saver._open_read_only(data, fname, entry)
+                entry, fname = self.saver._save_data(
+                    data, self.exp.meta_data.get("link_type"))
+                self.saver._open_read_only(data, fname, entry)
             else:
-                saver._save_data(data, self.exp.meta_data.get("link_type"))
+                self.saver._save_data(
+                    data, self.exp.meta_data.get("link_type"))
