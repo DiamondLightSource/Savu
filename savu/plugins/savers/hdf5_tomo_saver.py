@@ -73,7 +73,7 @@ class Hdf5TomoSaver(BaseSaver):
         self.exp._barrier()
 
         if self.exp.meta_data.get("mpi") is True:
-            backing_file = h5py.File(filename, 'w', driver='mpio',
+            backing_file = h5py.File(filename, mode, driver='mpio',
                                      comm=MPI.COMM_WORLD, info=self.info)
         else:
             backing_file = h5py.File(filename, mode)
@@ -182,17 +182,24 @@ class Hdf5TomoSaver(BaseSaver):
         Closes the backing file and completes work
         """
         self.exp._barrier()
-        logging.debug("Trying to close the file the file")
+        logging.debug("Trying to close the file ")
+
+#        if data.backing_file is not None:
+#            try:
+#                data.backing_file.close()
+#                logging.debug("File close successful: %s",
+#                              data.backing_file.filename)
+#                data.backing_file = None
+#            except:
+#                logging.debug("File close unsuccessful")
+#                pass
 
         if data.backing_file is not None:
-            try:
-                data.backing_file.close()
-                logging.debug("File close successful: %s",
-                              data.backing_file.filename)
-                data.backing_file = None
-            except:
-                logging.debug("File close unsuccessful")
-                pass
+            print "*****", data.backing_file
+            data.backing_file.close()
+            logging.debug("File close successful: %s",
+                          data.backing_file.filename)
+            data.backing_file = None
 
         self.exp._barrier()
 

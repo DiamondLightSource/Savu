@@ -79,6 +79,7 @@ class PluginRunner(object):
         cu.user_message("***********************")
 
         self.exp.nxs_file.close()
+        self.exp._barrier()
         return self.exp
 
     def __run_plugin(self, plugin_dict):
