@@ -1,0 +1,41 @@
+# Notes for installing Savu at Diamond
+======================================
+
+(1) Install Python Anaconda for Python 2.7 version (https://www.continuum.io/downloads). Then:
+    >> export PATH=/path/to/anaconda/bin:$PATH
+
+# These library versions have been tested but any versions can be tried.
+(2) >> module load openmpi/1.6.5
+    >> module load cuda/7.0
+    >> module load fftw
+
+(3)(a) To install a stable version of Savu:
+        # replace 1.2 with newest version
+        >> conda install -c savu savu=1.2
+   (b) To install from the master repository:
+        >> conda install -c savu/label/test savu
+
+===============================================================================================
+# *** For library updates ***
+# If changes are required to conda recipes and you have installed (3)(a) or the changes have 
+# not been pushed to the master repository and you have installed (3)(b) then you can pass a 
+# different recipe folder path by setting the RECIPES environment variable.
+#   >> export RECIPES=/path/to/folder/containing/recipes
+# ***NB.  It is only currently possible to do this through the (3)(b) - See Nic for workaround!
+===============================================================================================
+
+(4) >> savu_installer.sh dls
+
+# Savu should now be installed!
+# Test the installation.
+(5) >> export LD_LIBRARY_PATH=/path/to/anaconda/lib/python2.7/site-packages/astra/lib
+    >> savu_quick_tests
+    >> savu_full_tests
+    >> source savu_setup.sh
+    >> mpi_cpu_test.sh /path/to/output/folder
+    >> mpi_gpu_test.sh /path/to/output/folder
+
+(6) Use the Savu module template at /dls/science/groups/das/savu/savu_module_template
+    to create a new module file and copy to your local module folder for testing
+    (/home/username/privatemodules).
+

@@ -1,3 +1,5 @@
+#!/bin/bash
+
 facility=$1
 savu_env=$2
 
@@ -5,7 +7,12 @@ mpi4py_version=1.3.1
 
 path=$(python -c "import savu; import os; print os.path.abspath(savu.__file__)")
 DIR=${path%/savu/__init__.pyc}
-recipes=$DIR'/install/conda-recipes'
+
+if [[ ! -z "${RECIPES}" ]]; then
+    recipes=`echo $RECIPES`
+else
+    recipes=$DIR'/install/conda-recipes'
+fi
 
 launcher_path=`command -v savu_launcher.sh`
 launcher_path=${launcher_path%/savu_launcher.sh}
