@@ -90,8 +90,6 @@ class Experiment(object):
         n_loaders = self.meta_data.plugin_list._get_n_loaders()
         plugin_list = self.meta_data.plugin_list.plugin_list
 
-        logging.debug("generating all output files")
-
         # load the loader plugins
         self._set_loaders()
         # load the saver plugin and save the plugin list
@@ -155,8 +153,6 @@ class Experiment(object):
             filename = os.path.join(out_path, name)
             group_name = "%i-%s-%s" % (count, plugin.name, key)
             self._barrier()
-            logging.debug("(set_filenames) Creating output file after "
-                          " _barrier %s", filename)
             files["filename"][key] = filename
             files["group_name"][key] = group_name
         link = "final_result" if count+1 is nPlugins else "intermediate"

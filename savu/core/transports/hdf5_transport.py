@@ -33,6 +33,7 @@ class Hdf5Transport(BaseTransport):
         self.saver = None
 
     def _transport_pre_plugin_list_run(self):
+        self.exp._barrier()
         # run through the experiment (no processing) and create output files
         plugin_id = 'savu.plugins.savers.hdf5_tomo_saver'
         self.saver = pu.plugin_loader(self.exp, {'id': plugin_id, 'data': {}})
@@ -40,9 +41,11 @@ class Hdf5Transport(BaseTransport):
         for i in range(len(exp_coll['datasets'])):
             self.exp._set_experiment_for_current_plugin(i)
             self.saver.setup()  # creates the hdf5 files
+            self.exp._barrier()
 
     def _transport_post_plugin(self):
         # This should only happen if there is a .nxs file.
+        self.exp._barrier()
         for data in self.exp.index["out_data"].values():
             if data.remove is False:
                 entry, fname = self.saver._save_data(
@@ -51,3 +54,4 @@ class Hdf5Transport(BaseTransport):
             else:
                 self.saver._save_data(
                     data, self.exp.meta_data.get("link_type"))
+            self.exp._barrier()
