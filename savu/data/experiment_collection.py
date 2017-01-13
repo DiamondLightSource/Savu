@@ -159,22 +159,36 @@ class Experiment(object):
         files["link"] = link
         return files
 
+#    def __set_filenames(self, plugin, plugin_id, count):
+#        n_loaders = self.meta_data.plugin_list.n_loaders
+#        nPlugins = self.meta_data.plugin_list.n_plugins - n_loaders - 1
+#        files = {"filename": {}, "group_name": {}}
+#        for key in self.index["out_data"].keys():
+#            name = key + '_p' + str(count) + '_' + \
+#                plugin_id.split('.')[-1] + '.h5'
+#            if count is nPlugins:
+#                out_path = self.meta_data.get('out_path')
+#            else:
+#                out_path = self.meta_data.get('inter_path')
+#            filename = os.path.join(out_path, name)
+#            group_name = "%i-%s-%s" % (count, plugin.name, key)
+#            self._barrier()
+#            files["filename"][key] = filename
+#            files["group_name"][key] = group_name
+#        link = "final_result" if count+1 is nPlugins else "intermediate"
+#        files["link"] = link
+#        return files
+
     def _set_experiment_for_current_plugin(self, count):
         datasets_list = \
             self.meta_data.plugin_list._get_datasets_list()[count:]
         exp_coll = self._get_experiment_collection()
         self.index['out_data'] = exp_coll['datasets'][count]
-        self.__set_output_file(exp_coll["file_list"][count])
-        self._get_current_and_next_patterns(datasets_list)
-
-    def __set_output_file(self, out_file):
-        self.meta_data.set("filename", {})
-        self.meta_data.set("group_name", {})
+        out_file = exp_coll["file_list"][count]
         for key in self.index['out_data'].keys():
-            self.meta_data.set("link_type", out_file["link"])
             self.meta_data.set(["filename", key], out_file["filename"][key])
-            self.meta_data.set(["group_name", key],
-                               out_file["group_name"][key])
+        
+        self._get_current_and_next_patterns(datasets_list)
 
     def _get_current_and_next_patterns(self, datasets_lists):
         """ Get the current and next patterns associated with a dataset

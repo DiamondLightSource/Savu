@@ -102,7 +102,7 @@ class PluginRunner(object):
         #  ********* transport function ***********
         self._transport_post_plugin()
 
-        self.exp._merge_out_data_to_in()
+        self.exp._reorganise_datasets()
 
     def _run_plugin_list_check(self, plugin_list):
         """ Run the plugin list through the framework without executing the
