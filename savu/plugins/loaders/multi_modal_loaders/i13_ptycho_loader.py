@@ -25,14 +25,16 @@ from savu.plugins.loaders.base_multi_modal_loader import BaseMultiModalLoader
 import numpy as np
 from savu.plugins.utils import register_plugin
 import logging
+import h5py
 
 @register_plugin
 class I13PtychoLoader(BaseMultiModalLoader):
     """
     A class to load tomography data from an NXstxm file
+    :param mono_energy: The mono energy. Default: 9.1. 
     """
 
-    def __init__(self, name='NxptychoLoader'):
+    def __init__(self, name='I13PtychoLoader'):
         super(I13PtychoLoader, self).__init__(name)
 
     def setup(self):
@@ -43,51 +45,65 @@ class I13PtychoLoader(BaseMultiModalLoader):
         :type path: str
         """
 
-        data_str = '/instrument/detector/data'
-        data_obj, stxm_entry = self.multi_modal_setup('NXptycho', data_str)
-        mono_energy = data_obj.backing_file[
-            stxm_entry.name + '/instrument/monochromator/energy']
-        self.exp.meta_data.set_meta_data("mono_energy", mono_energy)
+        exp = self.exp
+        data_obj = exp.create_data_object("in_data", 'ptycho')
+        data_obj.backing_file = \
+            h5py.File(exp.meta_data.get_meta_data("data_file"), 'r')
+        logging.debug("Creating file '%s' '%s'_entry",
+                      data_obj.backing_file.filename, 'ptycho')
+        
+        data_obj.data = data_obj.backing_file['entry1/instrument/merlin_sw_hdf/data']
+        data_obj.set_shape(data_obj.data.shape)
+        try:
+            control = data_obj.backing_file['/entry1/instrument/ionc_i/ionc_i'].value
+        # this is global since it is to do with the beam
+            exp.meta_data.set_meta_data("control", control)
+            logging.debug('adding the ion chamber to the meta data')
+        except:
+            logging.warn('No ion chamber information. Leaving this blank')
+        
+        self.exp.meta_data.set_meta_data("mono_energy", self.parameters['mono_energy'])
         
         labels = []
         ### set the rotation
-        rotation_angle = \
-            data_obj.backing_file[stxm_entry.name + '/data/theta'].value
-        if rotation_angle.ndim > 1:
-            rotation_angle = rotation_angle[:, 0]
-        # axis label
-        labels.append('rotation_angle.degrees')
-        
-        data_obj.meta_data.set_meta_data('rotation_angle', rotation_angle)
-        
-        ### set the x
-        x = \
-            data_obj.backing_file[stxm_entry.name + '/data/lab_sxy/lab_sx'].value*1e-6
-        data_obj.meta_data.set_meta_data('x', x)
-        # axis label
-        
-        ### set the y
-        y = \
-            data_obj.backing_file[stxm_entry.name + '/data/lab_sxy/lab_sy'].value*1e-6
-        pos = np.zeros((2,len(y)))
-        pos[0,:] = y
-        pos[1,:] = x
-        data_obj.meta_data.set_meta_data('xy', pos)
-        # axis label
-        labels.append('xy.metres')
-#         labels.append('y.microns')
-        # now set them
-        labels.extend(['detectorX.pixel','detectorY.pixel'])
-        print labels
-        data_obj.set_axis_labels(*tuple(labels))
+        rotation_angle = None
+        try:
+            rotation_angle = data_obj.backing_file['entry1/instrument/t1_theta/t1_theta'].value
+            if rotation_angle.ndim > 1:
+                rotation_angle = rotation_angle[:, 0]
+            # axis label
+            labels.append('rotation_angle.degrees')
+            
+            data_obj.meta_data.set_meta_data('rotation_angle', rotation_angle)
+        except KeyError:
+            logging.debug("Not a tomography!")
 
+        ### GET THE AXES ###
+        x = data_obj.backing_file['entry1/instrument/lab_sxy/lab_sx'].value*1e-6
+        data_obj.meta_data.set_meta_data('x', x)
+        y = data_obj.backing_file['entry1/instrument/lab_sxy/lab_sxy/lab_sy'].value*1e-6
+        data_obj.meta_data.set_meta_data('y', y)
+        if rotation_angle is not None:
+            pos = np.zeros((x.shape[0],2,x.shape[1]))
+            pos[:,0,:] = y
+            pos[:,1,:] = x
+        else:
+            pos = np.zeros((2,len(y)))
+            pos[0,:] = y
+            pos[1,:] = x
+        data_obj.meta_data.set_meta_data('xy', pos)
+        ######
+
+        ### NOW DO THE LABELS
+        labels.append('xy.metres')
         
+        labels.extend(['detectorX.pixel','detectorY.pixel'])
+        logging.debug('The labels are: %s',labels)
+
+        data_obj.set_axis_labels(*tuple(labels))        
         dims = range(len(data_obj.get_shape()))
         diff_core = (-2,-1) # it will always be this
-        print diff_core
-        
         diff_slice = tuple(dims[:-2])
-        print diff_slice
         logging.debug("is a diffraction")
         logging.debug("the diffraction cores are:"+str(diff_core))
         logging.debug("the diffraction slices are:"+str(diff_slice))
