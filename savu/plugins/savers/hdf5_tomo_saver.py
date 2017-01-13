@@ -182,24 +182,16 @@ class Hdf5TomoSaver(BaseSaver):
         Closes the backing file and completes work
         """
         self.exp._barrier()
-        logging.debug("Trying to close the file ")
-
-#        if data.backing_file is not None:
-#            try:
-#                data.backing_file.close()
-#                logging.debug("File close successful: %s",
-#                              data.backing_file.filename)
-#                data.backing_file = None
-#            except:
-#                logging.debug("File close unsuccessful")
-#                pass
+        logging.debug("Attempting to close the file ")
 
         if data.backing_file is not None:
-            print "*****", data.backing_file
-            data.backing_file.close()
-            logging.debug("File close successful: %s",
-                          data.backing_file.filename)
-            data.backing_file = None
+            try:
+                filename = data.backing_file.filename
+                data.backing_file.close()
+                logging.debug("File close successful: %s", filename)
+                data.backing_file = None
+            except:
+                logging.debug("File close unsuccessful", filename)
 
         self.exp._barrier()
 

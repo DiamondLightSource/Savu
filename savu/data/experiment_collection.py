@@ -255,10 +255,6 @@ class Experiment(object):
 #                self.index["in_data"][out_objs]._close_file()
 # >>>>>>> origin/master
 
-    def _clean_up_files(self):
-        for key in self.index["in_data"].keys():
-            self.index["in_data"][key]._close_file()
-
     def __copy_out_data_to_in_data(self, link_type):
         for key in self.index["out_data"]:
             output = self.index["out_data"][key]
