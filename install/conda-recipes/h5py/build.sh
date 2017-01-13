@@ -7,8 +7,7 @@ mpi=`dirname $mpicc`
 # set anaconda distribution
 ana_path=$(command -v anaconda)
 ana_path=${ana_path%/bin/anaconda}
-hdf5_version=1.10.0 
-hdf5_version_short=1.10
+hdf5_version=1.10.0
 hdf5_build_no=100
 
 export LD_LIBRARY_PATH=$mpi/lib:$mpi/include:$ana_path/lib:$LD_LIBRARY_PATH
@@ -18,7 +17,7 @@ export PATH=$PATH:$ana_path/bin/
 export CC=$mpicc
 
 $PYTHON setup.py configure --hdf5=$ana_path
-$PYTHON setup.py configure --hdf5-version=$hdf5_version_short
+$PYTHON setup.py configure --hdf5-version=$hdf5_version
 $PYTHON setup.py configure --mpi
 $PYTHON setup.py build
 $PYTHON setup.py install

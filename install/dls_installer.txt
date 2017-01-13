@@ -12,8 +12,10 @@
 (3)(a) To install a stable version of Savu:
         # replace 1.2 with newest version
         >> conda install -c savu savu=1.2
-   (b) To install from the master repository:
-        >> conda install -c savu/label/test savu
+   (b) To install from the savu_test recipe (which installs from the master repository):
+        >> conda build savu_test
+        >> savubuild=`conda build savu_test --output`
+        >> conda install --use-local $savubuild
 
 ===============================================================================================
 # *** For library updates ***
