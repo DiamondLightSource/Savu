@@ -28,14 +28,18 @@
 
 # Savu should now be installed!
 # Test the installation.
-(5) >> export LD_LIBRARY_PATH=/path/to/anaconda/lib/python2.7/site-packages/astra/lib
+(6) Use the Savu module template at /dls/science/groups/das/savu/savu_module_template
+    to create a new module file and copy to your local module folder for testing
+    (/home/username/privatemodules).
+
+(7) Update launcher scripts, savu_launcher.sh and savu_mpijob.sh to module load the correct
+    version (just type 'which savu_launcher.sh' to find the location).
+
+(5) From a fresh terminal:
+    >> module load savu/your_version
     >> savu_quick_tests
     >> savu_full_tests
     >> source savu_setup.sh
     >> mpi_cpu_test.sh /path/to/output/folder
     >> mpi_gpu_test.sh /path/to/output/folder
-
-(6) Use the Savu module template at /dls/science/groups/das/savu/savu_module_template
-    to create a new module file and copy to your local module folder for testing
-    (/home/username/privatemodules).
 
