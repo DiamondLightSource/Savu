@@ -109,6 +109,7 @@ def _set_options(opt, args):
         options['log_path'] = opt.log_dir
     else:
         options['log_path'] = options["out_path"]
+
     options['syslog_server'] = opt.syslog
     options['syslog_port'] = opt.syslog_port
     return options
@@ -116,14 +117,6 @@ def _set_options(opt, args):
 
 def set_output_folder(in_file, out_path, set_folder):
     from mpi4py import MPI
-
-#    # temporarily outputting environment variables
-#    rank = MPI.COMM_WORLD.rank
-#    filename = out_path + "/envs_" + str(rank)
-#    fid = open(filename, 'w')
-#    fid.write(str(os.environ))
-#    fid.close()
-
     import time
     if not set_folder:
         MPI.COMM_WORLD.barrier()
