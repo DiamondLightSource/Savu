@@ -49,7 +49,8 @@ def __option_parser():
                       help="Display all debug log messages", default=False)
     parser.add_option("-q", "--quiet", action="store_true", dest="quiet",
                       help="Display only Errors and Info", default=False)
-    #  add -s 'cs04r-sc-serv-14' to module file
+    parser.add_option("-c", "--cluster", action="store_true", dest="cluster",
+                      help="Set logging to cluster mode", default=False)
     parser.add_option("-s", "--syslog", dest="syslog",
                       help="Location of syslog server",
                       default='localhost')
@@ -97,6 +98,7 @@ def _set_options(opt, args):
     options["process_names"] = opt.names
     options["verbose"] = opt.verbose
     options["quiet"] = opt.quiet
+    options['cluster'] = opt.cluster
     options["data_file"] = args[0]
     options["process_file"] = args[1]
     options["out_path"] = set_output_folder(args[0], args[2], opt.folder)

@@ -1,12 +1,10 @@
 #!/bin/bash
 module load savu/1.2
 
-echo "SAVU_LAUNCHER:: Running Job"
+echo "SAVU_MPI_LOCAL:: Running Job"
 
-outname=savu
-log_path=/dls/tmp/savu
 nNodes=1
-nCoresPerNode=2
+nCoresPerNode=1
 nGPUs=1
 
 datafile=$1
@@ -21,15 +19,6 @@ savupath=${savupath%/savu}
 echo "savupath is:" $savupath
 
 nCPUs=$((nNodes*nCoresPerNode))
-
-while [[ $# -gt 1 ]]
-do
-if [ $1 == "-l" ]
-  then
-  log_path=$2
-fi
-shift
-done
 
 # launch mpi job
 export PYTHONPATH=$savupath:$PYTHONPATH
@@ -47,5 +36,6 @@ CPUs=$(echo $GPUs$CPUs | tr ' ' ,)
 mpirun -np $nCPUs -x LD_LIBRARY_PATH \
     python $filename $datafile $processfile $outpath -n $CPUs -v $options
 
-echo "SAVU_LAUNCHER:: Process complete"
+echo "SAVU_MPI_LOCAL:: Process complete"
+exit
 

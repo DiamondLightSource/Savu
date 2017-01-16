@@ -1,5 +1,6 @@
 #!/bin/bash
 module load savu/1.2
+module load global/cluster
 
 count=0
 while read -r entry; do
@@ -48,7 +49,7 @@ echo "SAVU_LAUNCHER:: Job Complete, preparing output..."
 
 filename=`echo $outname.o`
 jobnumber=`awk '{print $3}' /dls/tmp/savu/$USER.out | head -n 1`
-filename=/dls/tmp/savu/$filename$jobnumber
+filename=$log_path/$filename$jobnumber
 
 while [ ! -f $filename ]
 do
@@ -60,4 +61,5 @@ echo "SAVU_LAUNCHER:: Output ready, spooling now"
 cat $filename
 
 echo "SAVU_LAUNCHER:: Process complete"
+exit
 

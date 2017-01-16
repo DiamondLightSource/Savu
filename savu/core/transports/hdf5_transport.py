@@ -105,53 +105,62 @@ class Hdf5Transport(TransportControl):
     def __set_logger_single(self, options):
         """ Set single-threaded logging.
         """
-        logger = logging.getLogger()
-        logger.setLevel(self.__get_log_level(options))
-
-        fh = logging.FileHandler(os.path.join(options["log_path"], 'log.txt'),
-                                 mode='w')
-        fh.setFormatter(logging.Formatter('L %(relativeCreated)12d M CPU0 0' +
-                                          ' %(levelname)-6s %(message)s'))
-        logger.addHandler(fh)
-
+        log_format = 'L %(relativeCreated)12d M CPU0 0' + \
+                     ' %(levelname)-6s %(message)s'
+        self.__set_logger(log_format, options, tofile=True)
         cu.add_user_log_level()
-        cu.add_user_log_handler(logger, os.path.join(options["log_path"],
-                                                     'user.log'))
+        self.__add_user_logging(options)
+        self.__add_console_logging()
+
+    def __set_logger_parallel(self, number, rank, options):
+        """ Set parallel logger.
+        """
+        log_format = 'L %(relativeCreated)12d M' + number + ' ' + rank +\
+                     ' %(levelname)-6s %(message)s'
+        if options['cluster']:
+            self.__set_logger(log_format, options)
+        else:
+            self.__set_logger(log_format, options, tofile=True)
+
+        # Only add user logging to the 0 rank process only
+        cu.add_user_log_level()
+        if MPI.COMM_WORLD.rank == 0:
+            self.__add_user_logging(options)
+            if not options['cluster']:
+                self.__add_console_logging()
+
+    def __set_logger(self, fmat, options, tofile=False):
+        level = self.__get_log_level('options')
+        datefmt = '%H:%M:%S'
+        if tofile:
+            filename = os.path.join(options['log_path'], 'log.txt')
+            logging.basicConfig(level=level, format=fmat, datefmt=datefmt,
+                                filename=filename, filemode='w')
+        else:
+            logging.basicConfig(level=level, format=fmat, datefmt=datefmt)
+
+    def __add_console_logging(self):
+        console = logging.StreamHandler()
+        console.setLevel(cu.USER_LOG_LEVEL)
+#        formatter = \
+#            logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
+        formatter = \
+            logging.Formatter('%(message)s')
+        console.setFormatter(formatter)
+        logging.getLogger('').addHandler(console)
+
+    def __add_user_logging(self, options):
+        logger = logging.getLogger()
+        filename = os.path.join(options['out_path'], 'user_log')
+        cu.add_user_log_handler(logger, filename)
         if 'syslog_server' in options.keys():
             try:
                 cu.add_syslog_log_handler(logger, options['syslog_server'],
                                           options['syslog_port'])
             except:
-                logger.warn(
-                    "Unable to add syslog logging for server %s on port %i",
-                    options['syslog_server'], options['syslog_port'])
-
-    def __set_logger_parallel(self, number, rank, options):
-        """ Set parallel logger.
-        """
-        logging.basicConfig(level=self.__get_log_level(options),
-                            format='L %(relativeCreated)12d M' +
-                            number + ' ' + rank +
-                            ' %(levelname)-6s %(message)s', datefmt='%H:%M:%S')
-
-        # Only add user logging to the 0 rank process so we don't get
-        # a lot of output, just a summary, but we want the user messages
-        # tagged in all rank processes
-        cu.add_user_log_level()
-        if MPI.COMM_WORLD.rank == 0:
-            logger = logging.getLogger()
-            cu.add_user_log_handler(logger,
-                                    os.path.join(options["out_path"],
-                                                 'user.log'))
-            if 'syslog_server' in options.keys():
-                try:
-                    cu.add_syslog_log_handler(logger,
-                                              options['syslog_server'],
-                                              options['syslog_port'])
-                except:
-                    logger.warn("Unable to add syslog logging for server %s on"
-                                " port %i", options['syslog_server'],
-                                options['syslog_port'])
+                logger.warn("Unable to add syslog logging for server %s on"
+                            " port %i", options['syslog_server'],
+                            options['syslog_port'])
 
     def _transport_run_plugin_list(self):
         """ Run the plugin list inside the transport layer.

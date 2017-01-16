@@ -36,13 +36,13 @@ done
 
 qsub -N $outname -sync y -j y -o $log_path -e $log_path -pe openmpi $M \
      -l exclusive -l infiniband -l gpu=1 -q medium.q@@com10 $filepath $savupath \
-     $datafile $processfile $outpath $nCoresPerNode $nGPUs $options  -s cs04r-sc-serv-14 > /dls/tmp/savu/$USER.out
+     $datafile $processfile $outpath $nCoresPerNode $nGPUs $options -c -s cs04r-sc-serv-14 > /dls/tmp/savu/$USER.out
 
 echo "SAVU_LAUNCHER:: Job Complete, preparing output..."
 
 filename=`echo $outname.o`
 jobnumber=`awk '{print $3}' /dls/tmp/savu/$USER.out | head -n 1`
-filename=/dls/tmp/savu/$filename$jobnumber
+filename=$log_path/$filename$jobnumber
 
 while [ ! -f $filename ]
 do
@@ -54,4 +54,5 @@ echo "SAVU_LAUNCHER:: Output ready, spooling now"
 cat $filename
 
 echo "SAVU_LAUNCHER:: Process complete"
+exit
 

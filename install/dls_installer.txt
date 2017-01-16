@@ -31,8 +31,10 @@ been pushed to the master repository then, before running step (4), do
     to create a new module file and copy to your local module folder for testing
     (/home/username/privatemodules).
 
-(7) Update launcher scripts, savu_launcher.sh and savu_mpijob.sh to module load the correct
-    version (just type 'which savu_launcher.sh' to find the location).
+(7) Update launcher scripts, to module load the correct version
+    (just type 'which savu_launcher.sh' to find the location).
+    (a) savu_launcher.sh and savu_mpijob.sh if you will run across the cluster
+    (b) savu_mpijob_local.sh if you will run locally in mpi mode.
 
 (5) From a fresh terminal:
     >> module load savu/your_version
@@ -43,10 +45,11 @@ been pushed to the master repository then, before running step (4), do
     >> savu_full_tests
     
     # local mpi tests
-    >>
-    >> 
+    >> mpi_cpu_local_test.sh
+    >> mpi_gpu_local_test.sh
 
+    # cluster mpi tests
+    >> mpi_cpu_cluster_test.sh /path/to/output/folder
+    >> mpi_gpu_cluster_test.sh /path/to/output/folder
 
-    >> mpi_cpu_test.sh /path/to/output/folder  # cluster mpi test
-    >> mpi_gpu_test.sh /path/to/output/folder  # cluster mpi test
 
