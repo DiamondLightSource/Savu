@@ -34,6 +34,8 @@ fi
 shift
 done
 
+# add -d followed by output filepath
+
 qsub -N $outname -sync y -j y -o $log_path -e $log_path -pe openmpi $M -l exclusive \
      -l infiniband -l gpu=1 -q medium.q@@com10 $filepath $savupath $datafile \
      $processfile $outpath $nCoresPerNode $nGPUs $options -c -u /dls/tmp/savu/log.txt\
@@ -56,4 +58,3 @@ cat $filename
 
 echo "SAVU_LAUNCHER:: Process complete"
 exit
-

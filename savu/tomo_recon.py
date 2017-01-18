@@ -54,8 +54,7 @@ def __option_parser():
     parser.add_option("-c", "--cluster", action="store_true", dest="cluster",
                       help="Set logging to cluster mode", default=False)
     parser.add_option("-s", "--syslog", dest="syslog",
-                      help="Location of syslog server",
-                      default='localhost')
+                      help="Location of syslog server", default='localhost')
     parser.add_option("-p", "--syslog_port", dest="syslog_port",
                       help="Port to connect to syslog server on", default=514)
 

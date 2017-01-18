@@ -33,4 +33,3 @@ mpirun -np ${processes} \
        -x LD_LIBRARY_PATH \
        --hostfile ${UNIQHOSTS} \
        python $filename $datafile $processfile $outfile -n $CPUs -v $@
-
