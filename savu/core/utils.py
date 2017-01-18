@@ -104,6 +104,17 @@ def add_base_classes(this, bases):
         add_base(this, base)
 
 
+def get_available_gpus():
+    try:
+        import pynvml as pv
+    except:
+        logging.debug("pyNVML module not found")
+        raise Exception("pyNVML module not found")
+    pv.nvmlInit()
+    count = int(pv.nvmlDeviceGetCount())
+    return pv, count
+
+
 USER_LOG_LEVEL = 100
 USER_LOG_HANDLER = None
 
@@ -146,3 +157,13 @@ def add_syslog_log_handler(logger, syslog_address, syslog_port):
     syslog.setFormatter(logging.Formatter('SAVU:%(message)s'))
     syslog.setLevel(logging.WARN)  # only log user log messages
     logger.addHandler(syslog)
+
+
+def _get_log_level(options):
+    """ Gets the right log level for the flags -v or -q
+    """
+    if ('verbose' in options) and options['verbose']:
+        return logging.DEBUG
+    if ('quiet' in options) and options['quiet']:
+        return logging.WARN
+    return logging.INFO

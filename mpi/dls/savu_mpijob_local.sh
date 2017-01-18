@@ -4,8 +4,13 @@ module load savu/1.2
 echo "SAVU_MPI_LOCAL:: Running Job"
 
 nNodes=1
-nCoresPerNode=1
-nGPUs=1
+nCoresPerNode=`nproc`
+nGPUs=$(python -c "import savu.core.utils as cu; p, count = cu.get_available_gpus(); print count")
+
+
+echo "***********************************************"
+echo -e "\tRunning on $nCoresPerNode CPUs and $nGPUs GPUs"
+echo "***********************************************"
 
 datafile=$1
 processfile=$2
@@ -33,9 +38,7 @@ for i in $(seq 0 $((nGPUs-1))); do GPUs+="GPU$i " ; done
 for i in $(seq 0 $((nCPUs-1-nGPUs))); do CPUs+="CPU$i " ; done
 CPUs=$(echo $GPUs$CPUs | tr ' ' ,)
 
-mpirun -np $nCPUs -x LD_LIBRARY_PATH \
-    python $filename $datafile $processfile $outpath -n $CPUs -v $options
+mpirun -np $nCPUs python $filename $datafile $processfile $outpath -n $CPUs -v $options
 
 echo "SAVU_MPI_LOCAL:: Process complete"
 exit
-

@@ -28,7 +28,6 @@ import copy
 import numpy as np
 
 from mpi4py import MPI
-from itertools import chain
 from savu.core.transport_control import TransportControl
 import savu.plugins.utils as pu
 import savu.core.utils as cu
@@ -93,21 +92,14 @@ class Hdf5Transport(TransportControl):
         logging.debug("Waiting at the _barrier")
         MPI.COMM_WORLD.barrier()
 
-    def __get_log_level(self, options):
-        """ Gets the right log level for the flags -v or -q
-        """
-        if ('verbose' in options) and options['verbose']:
-            return logging.DEBUG
-        if ('quiet' in options) and options['quiet']:
-            return logging.WARN
-        return logging.INFO
-
     def __set_logger_single(self, options):
         """ Set single-threaded logging.
         """
         log_format = 'L %(relativeCreated)12d M CPU0 0' + \
                      ' %(levelname)-6s %(message)s'
-        self.__set_logger(log_format, options, tofile=True)
+        filename = os.path.join(options['log_path'], 'log.txt')
+        level = cu._get_log_level(options)
+        self.__set_logger(level, log_format, fname=filename)
         cu.add_user_log_level()
         self.__add_user_logging(options)
         self.__add_console_logging()
@@ -117,25 +109,24 @@ class Hdf5Transport(TransportControl):
         """
         log_format = 'L %(relativeCreated)12d M' + number + ' ' + rank +\
                      ' %(levelname)-6s %(message)s'
-        if options['cluster']:
-            self.__set_logger(log_format, options)
-        else:
-            self.__set_logger(log_format, options, tofile=True)
+        level = cu._get_log_level(options)
+        self.__set_logger(level, log_format)
 
-        # Only add user logging to the 0 rank process only
+        # Only add user logging to the 0 rank process
         cu.add_user_log_level()
         if MPI.COMM_WORLD.rank == 0:
             self.__add_user_logging(options)
             if not options['cluster']:
-                self.__add_console_logging()
+                #self.__add_console_logging()
+                if options['tmp_user_log']:
+                    self.__set_logger(cu.USER_LOG_LEVEL, '%(message)s',
+                                      fname=options['tmp_user_log'])
 
-    def __set_logger(self, fmat, options, tofile=False):
-        level = self.__get_log_level('options')
+    def __set_logger(self, level, fmat, fname=None):
         datefmt = '%H:%M:%S'
-        if tofile:
-            filename = os.path.join(options['log_path'], 'log.txt')
+        if fname:
             logging.basicConfig(level=level, format=fmat, datefmt=datefmt,
-                                filename=filename, filemode='w')
+                                filename=fname, filemode='w')
         else:
             logging.basicConfig(level=level, format=fmat, datefmt=datefmt)
 
@@ -151,7 +142,7 @@ class Hdf5Transport(TransportControl):
 
     def __add_user_logging(self, options):
         logger = logging.getLogger()
-        filename = os.path.join(options['out_path'], 'user_log')
+        filename = os.path.join(options['out_path'], 'user_log.txt')
         cu.add_user_log_handler(logger, filename)
         if 'syslog_server' in options.keys():
             try:

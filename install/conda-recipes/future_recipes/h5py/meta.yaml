@@ -1,4 +1,4 @@
-{% set version = "2.5.0" %}
+{% set version = "2.6.0" %} # change this
 
 package:
   name: h5py
@@ -7,7 +7,6 @@ package:
 source:
   fn: h5py-{{ version }}.tar.gz
   url: https://github.com/h5py/h5py/archive/{{ version }}.tar.gz
-
 requirements:
   build:
     - python
@@ -23,3 +22,4 @@ build:
 about:
   home: http://www.h5py.org/
   license: New BSD (http://opensource.org/licenses/bsd-license.php)
+

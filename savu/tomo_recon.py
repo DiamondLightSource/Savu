@@ -45,6 +45,8 @@ def __option_parser():
                       help="Store intermediate files in a temp directory.")
     parser.add_option("-l", "--log", dest="log_dir",
                       help="Store log files in a separate location")
+    parser.add_option("-u", "--userlog", dest="tmp_user_log", default='None',
+                      help="Create a copy of the user log in cluster mode.")
     parser.add_option("-v", "--verbose", action="store_true", dest="verbose",
                       help="Display all debug log messages", default=False)
     parser.add_option("-q", "--quiet", action="store_true", dest="quiet",
@@ -99,6 +101,7 @@ def _set_options(opt, args):
     options["verbose"] = opt.verbose
     options["quiet"] = opt.quiet
     options['cluster'] = opt.cluster
+    options['tmp_user_log'] = opt.tmp_user_log
     options["data_file"] = args[0]
     options["process_file"] = args[1]
     options["out_path"] = set_output_folder(args[0], args[2], opt.folder)
@@ -125,9 +128,11 @@ def set_output_folder(in_file, out_path, set_folder):
         timestamp = time.strftime("%Y%m%d%H%M%S")
         MPI.COMM_WORLD.barrier()
         split = in_file.split('.')
-        if split[-1] != 'nxs':
+        # if the input is a folder
+        if len(split[-1].split('/')) > 1:
             split = in_file.split('/')
             name = split[-2] if split[-1] == '' else split[-1]
+        # if the input is a file
         else:
             name = os.path.basename(split[-2])
         folder = os.path.join(out_path, ('_'.join([timestamp, name])))
