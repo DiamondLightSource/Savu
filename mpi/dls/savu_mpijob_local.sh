@@ -7,7 +7,6 @@ nNodes=1
 nCoresPerNode=`nproc`
 nGPUs=$(python -c "import savu.core.utils as cu; p, count = cu.get_available_gpus(); print count")
 
-
 echo "***********************************************"
 echo -e "\tRunning on $nCoresPerNode CPUs and $nGPUs GPUs"
 echo "***********************************************"

@@ -66,6 +66,7 @@ def __option_parser():
 def __check_input_params(args):
     """ Check for required input arguments.
     """
+    print args
     if len(args) is not 3:
         print("filename, process file and output path needs to be specified")
         print("Exiting with error code 1 - incorrect number of inputs")
