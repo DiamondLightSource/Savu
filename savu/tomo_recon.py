@@ -64,7 +64,6 @@ def __option_parser():
 def __check_input_params(args):
     """ Check for required input arguments.
     """
-    print args
     if len(args) is not 3:
         print("filename, process file and output path needs to be specified")
         print("Exiting with error code 1 - incorrect number of inputs")
@@ -114,7 +113,7 @@ def _set_options(opt, args):
         if opt.temp_dir else out_folder_path
     options['inter_path'] = inter_folder_path
 
-    options['log_path'] = opt.log_dir if opt.log_dir else options['out_path']
+    options['log_path'] = opt.log_dir if opt.log_dir else options['inter_path']
 
     return options
 
