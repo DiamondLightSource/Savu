@@ -25,6 +25,7 @@ import tempfile  # this import is required for pyFAI - DO NOT REMOVE!
 import optparse
 import sys
 import os
+from mpi4py import MPI
 
 from savu.core.plugin_runner import PluginRunner
 
@@ -40,13 +41,11 @@ def __option_parser():
     parser.add_option("-t", "--transport", dest="transport",
                       help="Set the transport mechanism", default="hdf5")
     parser.add_option("-f", "--folder", dest="folder",
-                      help="Override the output folder")
+                      help="Override the output folder name")
     parser.add_option("-d", "--tmp", dest="temp_dir",
                       help="Store intermediate files in a temp directory.")
     parser.add_option("-l", "--log", dest="log_dir",
-                      help="Store log files in a separate location")
-    parser.add_option("-u", "--userlog", dest="tmp_user_log", default='None',
-                      help="Create a copy of the user log in cluster mode.")
+                      help="Store full log file in a separate location")
     parser.add_option("-v", "--verbose", action="store_true", dest="verbose",
                       help="Display all debug log messages", default=False)
     parser.add_option("-q", "--quiet", action="store_true", dest="quiet",
@@ -96,48 +95,47 @@ def _set_options(opt, args):
     :rtype: dict
     """
     options = {}
-    options["transport"] = opt.transport
-    options["process_names"] = opt.names
-    options["verbose"] = opt.verbose
-    options["quiet"] = opt.quiet
+    options['data_file'] = args[0]
+    options['process_file'] = args[1]
+    options['transport'] = opt.transport
+    options['process_names'] = opt.names
+    options['verbose'] = opt.verbose
+    options['quiet'] = opt.quiet
     options['cluster'] = opt.cluster
-    options['tmp_user_log'] = opt.tmp_user_log
-    options["data_file"] = args[0]
-    options["process_file"] = args[1]
-    options["out_path"] = set_output_folder(args[0], args[2], opt.folder)
-
-    if opt.temp_dir:
-        options["inter_path"] = opt.temp_dir
-    else:
-        options["inter_path"] = options["out_path"]
-    if opt.log_dir:
-        options['log_path'] = opt.log_dir
-    else:
-        options['log_path'] = options["out_path"]
-
     options['syslog_server'] = opt.syslog
     options['syslog_port'] = opt.syslog_port
+
+    out_folder_name = \
+        opt.folder if opt.folder else __get_folder_name(options['data_file'])
+    out_folder_path = __create_output_folder(args[2], out_folder_name)
+    options['out_path'] = out_folder_path
+
+    inter_folder_path = __create_output_folder(opt.temp_dir, out_folder_name)\
+        if opt.temp_dir else out_folder_path
+    options['inter_path'] = inter_folder_path
+
+    options['log_path'] = opt.log_dir if opt.log_dir else options['out_path']
+
     return options
 
 
-def set_output_folder(in_file, out_path, set_folder):
-    from mpi4py import MPI
+def __get_folder_name(in_file):
     import time
-    if not set_folder:
-        MPI.COMM_WORLD.barrier()
-        timestamp = time.strftime("%Y%m%d%H%M%S")
-        MPI.COMM_WORLD.barrier()
-        split = in_file.split('.')
-        # if the input is a folder
-        if len(split[-1].split('/')) > 1:
-            split = in_file.split('/')
-            name = split[-2] if split[-1] == '' else split[-1]
-        # if the input is a file
-        else:
-            name = os.path.basename(split[-2])
-        folder = os.path.join(out_path, ('_'.join([timestamp, name])))
+    MPI.COMM_WORLD.barrier()
+    timestamp = time.strftime("%Y%m%d%H%M%S")
+    MPI.COMM_WORLD.barrier()
+    split = in_file.split('.')
+    if len(split[-1].split('/')) > 1:
+        split = in_file.split('/')
+        name = split[-2] if split[-1] == '' else split[-1]
+    # if the input is a file
     else:
-        folder = os.path.join(out_path, set_folder)
+        name = os.path.basename(split[-2])
+    return '_'.join([timestamp, name])
+
+
+def __create_output_folder(path, folder_name):
+    folder = os.path.join(path, folder_name)
     if MPI.COMM_WORLD.rank == 0:
         if not os.path.exists(folder):
             os.makedirs(folder)
