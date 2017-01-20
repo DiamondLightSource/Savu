@@ -94,7 +94,13 @@ def get_class_instance(clazz):
 
 
 def load_class(name):
-    mod = __import__(name)
+    try:
+        mod = __import__(name)
+    except ImportError:
+        (path, name)=os.path.split(name)
+        (name,ext) = os.path.splitext(name)
+        (file, filename, data) = imp.find_module(name, [path])
+        mod = imp.load_module(name, file, filename, data)
     components = name.split('.')
     for comp in components[1:]:
         mod = getattr(mod, comp)
@@ -306,7 +312,7 @@ def populate_plugins():
             _add_module(loader, module_name)
 
     for plugin in dawn_plugins.keys():
-        p = load_plugin(dawn_plugins[plugin]['path2plugin'].strip('.py'))
+        p = load_plugin(dawn_plugins[plugin]['path2plugin'])#.strip('.py'))
         dawn_plugins[plugin]['input rank'] = u.get_pattern_rank(p.get_plugin_pattern())
         dawn_plugins[plugin]['description'] = p.__doc__.split(':param')[0]
         params = get_parameters(p)
