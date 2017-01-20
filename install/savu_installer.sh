@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# error log to screen and file
+error_log=/tmp/savu_error_log.txt
+exec 2> >(tee -ia $error_log)
+
 facility=$1
 savu_env=$2
 
@@ -144,5 +148,7 @@ echo
 echo "*********************************"
 echo "* package installation complete *"
 echo "*********************************"
+echo 
+echo "Check the log file $error_log for any installation errors\n".
 echo -e "\nNow please add $astra_lib_path to LD_LIBRARY_PATH\n"
 
