@@ -2,8 +2,22 @@
 module load savu/1.2
 module load global/cluster
 
-echo "SAVU_LAUNCHER:: Running Job"
+# function for parsing optional arguments
+function arg_parse ()
+{
+  flag=$1
+  return=$2
+  while [[ $# -gt 3 ]] ; do
+    if [ $3 == $flag ] ; then
+      eval "$return"=$4
+    fi
+    shift
+  done
+}
 
+echo -e "\t SAVU_LAUNCHER:: Running Job"
+
+# set parameters
 datafile=$1
 processfile=$2
 outpath=$3
@@ -15,46 +29,63 @@ nNodes=2
 nCoresPerNode=20
 nGPUs=4
 
+# get the Savu path
 DIR="$(cd "$(dirname "$0")" && pwd)"
 filepath=$DIR'/savu_mpijob.sh'
 savupath=$(python -c "import savu, os; print savu.__path__[0]")
 savupath=${savupath%/savu}
 
-echo "*** savupath:" $savupath
+echo -e "\t The Savu path is:" $savupath
 
 M=$((nNodes*nCoresPerNode))
 
-log_path=/dls/tmp/savu
-while [[ $# -gt 1 ]]
-do
-if [ $1 == "-l" ]
-  then
-  log_path=$2
+# set the output folder
+arg_parse "-f" foldername "$@"
+if [ ! $foldername ] ; then
+  IFS=. read path ext <<<"${datafile##*-}"
+  foldername=$(date +%Y%m%d%H%M%S)"_$(basename $path)"
 fi
-shift
-done
+outfolder=$outpath/$foldername
 
-# add -d followed by output filepath
+# create the output folder
+if [ ! -d $outfolder ]; then
+  echo -e "\t Creating the output folder "$outfolder
+  mkdir -p $outfolder;
+fi
+# create the user log
+touch $outfolder/user_log.txt
 
-qsub -N $outname -sync y -j y -o $log_path -e $log_path -pe openmpi $M -l exclusive \
+# set the intermediate folder
+arg_parse "-d" interfolder "$@"
+if [ ! $interfolder ] ; then
+  interfolder=$outfolder
+fi
+
+qsub -N $outname -j y -o $interfolder -e $interfolder -pe openmpi $M -l exclusive \
      -l infiniband -l gpu=1 -q medium.q@@com10 $filepath $savupath $datafile \
-     $processfile $outpath $nCoresPerNode $nGPUs $options -c -u /dls/tmp/savu/log.txt\
-     -s cs04r-sc-serv-14 > /dls/tmp/savu/$USER.out
+     $processfile $outpath $nCoresPerNode $nGPUs $options -c \
+     -f $outfolder -s cs04r-sc-serv-14 -l $outfolder > /dls/tmp/savu/$USER.out
 
-echo "SAVU_LAUNCHER:: Job Complete, preparing output..."
-
+# get the job number here
 filename=`echo $outname.o`
 jobnumber=`awk '{print $3}' /dls/tmp/savu/$USER.out | head -n 1`
-filename=$log_path/$filename$jobnumber
 
-while [ ! -f $filename ]
-do
-  sleep 2
-done
+echo -e "\n\t************************************************************************"
+tput setaf 6
+echo -e "\n\t Your job has been submitted to the cluster with job number "$jobnumber"."
+tput setaf 3
+echo -e "\n\t\t* Monitor the status of your job on the cluster:"
+tput sgr0
+echo -e "\t\t   >> module load global/cluster"
+echo -e "\t\t   >> qstat"
+tput setaf 3
+echo -e "\n\t\t* Monitor the progression of your Savu job:"
+tput sgr0
+echo -e "\t\t   >> tail -f $outfolder/user_log.txt"
+echo -e "\t\t   >> Ctrl+C (to quit)"
+tput setaf 6
+echo -e "\n\t For a more detailed log file see: "
+echo -e "\t   $interfolder/savu.o$jobnumber"
+tput sgr0
+echo -e "\n\t************************************************************************\n"
 
-echo "SAVU_LAUNCHER:: Output ready, spooling now"
-
-cat $filename
-
-echo "SAVU_LAUNCHER:: Process complete"
-exit

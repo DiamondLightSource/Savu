@@ -117,10 +117,7 @@ class Hdf5Transport(TransportControl):
         if MPI.COMM_WORLD.rank == 0:
             self.__add_user_logging(options)
             if not options['cluster']:
-                #self.__add_console_logging()
-                if options['tmp_user_log']:
-                    self.__set_logger(cu.USER_LOG_LEVEL, '%(message)s',
-                                      fname=options['tmp_user_log'])
+                self.__add_console_logging()
 
     def __set_logger(self, level, fmat, fname=None):
         datefmt = '%H:%M:%S'
