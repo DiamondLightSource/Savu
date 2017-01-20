@@ -29,7 +29,8 @@ been pushed to the master repository then, before running step (4), do
 # Test the installation.
 (6) Copy the Savu module template at /dls/science/groups/das/savu/savu_module_template
     to your local module folder (/home/username/privatemodules), changing the name if
-    you prefer, and update the relevant paths inside the file. 
+    you prefer, and update the relevant paths inside the file. Then
+    >> module load your_savu_module
 
 (7) Update launcher scripts, to module load your_savu_module.
     (just type 'which savu_launcher.sh' to find the location).
@@ -37,7 +38,6 @@ been pushed to the master repository then, before running step (4), do
     (b) savu_mpijob_local.sh if you will run locally in mpi mode.
 
 (5) From a fresh terminal:
-    >> module load your_savu_module
     >> source savu_setup.sh
 
     # single-threaded tests
