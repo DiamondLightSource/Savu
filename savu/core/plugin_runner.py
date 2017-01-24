@@ -16,9 +16,7 @@
 .. module:: plugin_runner
    :platform: Unix
    :synopsis: Plugin list runner, which passes control to the transport layer.
-
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
-
 """
 
 import logging
@@ -184,4 +182,3 @@ class PluginRunner(object):
             for i in range(min(count, len(processes))):
                 processes[processes.index(cpus[i])] = gpus[i]
             self.exp.meta_data.set('processes', processes)
-        

@@ -55,9 +55,9 @@ class MrcLoader(BaseLoader):
         nDims = len(data_obj.data.get_shape())
         if nDims is 3:
             # change this
-            rot = 0
+            rot = 2
             detY = 1
-            detX = 2
+            detX = 0
             data_obj.set_axis_labels('rotation_angle.degrees',
                                      'detector_y.pixel',
                                      'detector_x.pixel')

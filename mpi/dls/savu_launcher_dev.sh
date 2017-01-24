@@ -1,5 +1,5 @@
 #!/bin/bash
-module load savu/1.2
+module load global/cluster
 
 count=0
 while read -r entry; do
@@ -8,15 +8,19 @@ while read -r entry; do
         count=$(( $count + 1 ))
     fi
 done < $1
-   
-cluster=medium.q@@${var[0]}
-nodes=${var[1]}
-cpus_per_node=${var[2]}
-gpus_per_node=${var[3]}
-input_file=${var[4]}
-process_file=${var[5]}
-output_folder=${var[6]}
-options=${var[7]}
+
+version=${var[0]}
+echo "module loading "$version
+module load $version
+
+cluster=medium.q@@${var[1]}
+nodes=${var[2]}
+cpus_per_node=${var[3]}
+gpus_per_node=${var[4]}
+input_file=${var[5]}
+process_file=${var[6]}
+output_folder=${var[7]}
+options=${var[8]}
 outname=savu
 processes=$((nodes*cpus_per_node))
 
@@ -27,7 +31,7 @@ echo "Process list: $process_file"
 echo -e "*******************************************************************************\n"
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
-file_path=$DIR'/savu_mpijob.sh'
+file_path=$DIR'/savu_mpijob_dev.sh'
 savu_path=$(python -c "import savu, os; print os.path.dirname(os.path.abspath(savu.__file__))")
 savu_path=${savu_path%/savu}
 
@@ -41,14 +45,15 @@ for (( i=0; i<${#a[@]} ; i+=2 )) ; do
 done
 
 qsub -N $outname -sync y -j y -o $log_path -e $log_path -pe openmpi $processes \
-     -l exclusive -l infiniband -l gpu=1 -q $cluster $file_path $savu_path \
-     $input_file $process_file $output_folder $cpus_per_node $gpus_per_node $options -s cs04r-sc-serv-14 > /dls/tmp/savu/$USER.out
+     -l exclusive -l infiniband -l gpu=1 -q $cluster $file_path $version $savu_path \
+     $input_file $process_file $output_folder $cpus_per_node \
+     $gpus_per_node $options -s cs04r-sc-serv-14 > /dls/tmp/savu/$USER.out
 
 echo "SAVU_LAUNCHER:: Job Complete, preparing output..."
 
 filename=`echo $outname.o`
 jobnumber=`awk '{print $3}' /dls/tmp/savu/$USER.out | head -n 1`
-filename=/dls/tmp/savu/$filename$jobnumber
+filename=$log_path/$filename$jobnumber
 
 while [ ! -f $filename ]
 do
@@ -60,4 +65,5 @@ echo "SAVU_LAUNCHER:: Output ready, spooling now"
 cat $filename
 
 echo "SAVU_LAUNCHER:: Process complete"
+exit
 

@@ -1,3 +1,4 @@
+version=savu/master
 cluster=com10
 nodes=2
 cpus_per_node=20
@@ -5,5 +6,5 @@ gpus_per_node=4
 input_file=/home/qmm55171/Documents/Git/git_repos/Savu/test_data/data/24737.nxs
 process_file=/home/qmm55171/Documents/Git/git_repos/Savu/test_data/test_process_lists/basic_tomo_process.nxs
 output_folder=.
-options=-l . -s localhost
+options=-l .
 
