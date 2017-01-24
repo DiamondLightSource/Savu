@@ -61,16 +61,16 @@ class VoCentering(BaseFilter, CpuPlugin):
     def _create_mask(self, Nrow, Ncol, obj_radius):
         du = 1.0/Ncol
         dv = (Nrow-1.0)/(Nrow*2.0*math.pi)
-        cen_row = np.ceil(Nrow/2)-1
-        cen_col = np.ceil(Ncol/2)-1
+        cen_row = int(np.ceil(Nrow/2)-1)
+        cen_col = int(np.ceil(Ncol/2)-1)
         drop = self.parameters['row_drop']
         mask = np.zeros((Nrow, Ncol), dtype=np.float32)
         for i in range(Nrow):
-            num1 = \
-                np.round(((i-cen_row)*dv/obj_radius)/du)
-            (p1, p2) = \
-                np.clip(np.sort((-num1+cen_col, num1+cen_col)), 0, Ncol-1)
+            num1 = np.round(((i-cen_row)*dv/obj_radius)/du)
+            p1, p2 = (np.clip(np.sort((-num1+cen_col, num1+cen_col)),
+                              0, Ncol-1)).astype(int)
             mask[i, p1:p2+1] = np.ones(p2-p1+1, dtype=np.float32)
+
         if drop < cen_row:
             mask[cen_row-drop:cen_row+drop+1, :] = \
                 np.zeros((2*drop + 1, Ncol), dtype=np.float32)
@@ -139,7 +139,7 @@ class VoCentering(BaseFilter, CpuPlugin):
         else:
             lefttake = np.ceil(raw_cor-(Ncol-1-raw_cor)+search_rad+1)
             righttake = np.floor(Ncol-1-search_rad-1)
-        Ncol1 = righttake-lefttake + 1
+        Ncol1 = int(righttake-lefttake + 1)
         mask = self._create_mask(2*Nrow-1, Ncol1,
                                  0.5*self.parameters['ratio']*Ncol)
         numshift = np.int16((2*search_rad+1.0)/self.parameters['step'])
@@ -151,7 +151,7 @@ class VoCentering(BaseFilter, CpuPlugin):
             sino2a = ndi.interpolation.shift(sino2, (0, i), prefilter=False)
             sinojoin = np.vstack((sino, sino2a))
             listmetric[num1] = np.sum(np.abs(fft.fftshift(
-                fft.fft2(sinojoin[:, lefttake:righttake + 1])))*mask)
+                fft.fft2(sinojoin[:, int(lefttake):int(righttake) + 1])))*mask)
             num1 = num1 + 1
         minpos = np.argmin(listmetric)
         rotcenter = raw_cor + listshift[minpos]/2.0
@@ -178,9 +178,9 @@ class VoCentering(BaseFilter, CpuPlugin):
         if not cor_raw.shape:
             # add to metadata
             cor_raw = out_datasets[0].data[...]
-            self.populate_meta_data('cor_raw', cor_raw)
-            self.populate_meta_data('centre_of_rotation', cor_raw)
-            return
+#            self.populate_meta_data('cor_raw', cor_raw)
+#            self.populate_meta_data('centre_of_rotation', cor_raw)
+#            return
 
         cor_fit = np.squeeze(out_datasets[1].data[...])
         fit = np.zeros(cor_fit.shape)

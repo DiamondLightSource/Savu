@@ -65,6 +65,14 @@ class BaseTransport(object):
         """
         pass
 
+    def _transport_terminate_dataset(self, data):
+        """ A dataset that will subequently be removed by the framework.
+
+        :param Data data: A data object to finalise.
+        """
+        raise NotImplementedError("_transport_terminate_dataset needs to be\
+                                  implemented in %s", self.__class__)
+
     def _transport_process(self, plugin):
         """ Organise required data and execute the main plugin processing.
 

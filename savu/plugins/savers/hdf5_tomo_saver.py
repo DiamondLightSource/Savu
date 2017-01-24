@@ -24,7 +24,6 @@
 
 import h5py
 import logging
-import numpy as np
 from mpi4py import MPI
 
 from savu.plugins.base_saver import BaseSaver
@@ -84,6 +83,26 @@ class Hdf5TomoSaver(BaseSaver):
             raise IOError("Failed to open the hdf5 file")
         return backing_file
 
+    def _link_datafile_to_nexus_file(self, data):
+        # nexus file
+        nxs_file = self.exp.nxs_file
+        # entry path in nexus file
+        name = data.get_name()
+        group_name = self.exp.meta_data.get(['group_name', name])
+        link_type = self.exp.meta_data.get('link_type')
+        nxs_entry = '/entry/' + link_type
+        if link_type == 'final_result':
+            nxs_entry += '_' + data.get_name()
+        else:
+            nxs_entry += "/" + group_name
+        nxs_entry = nxs_file[nxs_entry]
+        nxs_entry.attrs['signal'] = 'data'
+        data_entry = nxs_entry.name + '/data'
+        # output file path
+        h5file = data.backing_file.filename.split('/')[-1]
+        # entry path in output file path
+        nxs_file[data_entry] = h5py.ExternalLink(h5file, group_name + '/data')
+
     def __create_entries(self, data, key, current_and_next):
         self.exp._barrier()
 
@@ -115,71 +134,9 @@ class Hdf5TomoSaver(BaseSaver):
 
         return group_name, group
 
-    def __output_metadata(self, data, entry):
-        self.__output_axis_labels(data, entry)
-        self.__output_data_patterns(data, entry)
-        self.__output_metadata_dict(data, entry)
-
-    def __output_axis_labels(self, data, entry):
-        self.exp._barrier()
-
-        axis_labels = data.data_info.get("axis_labels")
-        axes = []
-        count = 0
-        for labels in axis_labels:
-            name = labels.keys()[0]
-            axes.append(name)
-            entry.attrs[name + '_indices'] = count
-
-            try:
-                mData = data.meta_data.get(name)
-            except KeyError:
-                mData = np.arange(data.get_shape()[count])
-
-            if isinstance(mData, list):
-                mData = np.array(mData)
-
-            temp = data.group.create_dataset(name, mData.shape, mData.dtype)
-            temp[...] = mData[...]
-            temp.attrs['units'] = labels.values()[0]
-            count += 1
-        entry.attrs['axes'] = axes
-
-        self.exp._barrier()
-
-    def __output_data_patterns(self, data, entry):
-        self.exp._barrier()
-        logging.debug("Outputting data patterns to file")
-
-        data_patterns = data.data_info.get("data_patterns")
-        entry = entry.create_group('patterns')
-        entry.attrs['NX_class'] = 'NXcollection'
-        for pattern in data_patterns:
-            nx_data = entry.create_group(pattern)
-            nx_data.attrs[NX_CLASS] = 'NXparameters'
-            values = data_patterns[pattern]
-            nx_data.create_dataset('core_dir', data=values['core_dir'])
-            nx_data.create_dataset('slice_dir', data=values['slice_dir'])
-
-        self.exp._barrier()
-
-    def __output_metadata_dict(self, data, entry):
-        self.exp._barrier()
-        logging.debug("Outputting meta data dictionary to file")
-
-        meta_data = data.meta_data.get_dictionary()
-        entry = entry.create_group('meta_data')
-        entry.attrs['NX_class'] = 'NXcollection'
-        for mData in meta_data:
-            nx_data = entry.create_group(mData)
-            nx_data.attrs[NX_CLASS] = 'NXdata'
-            nx_data.create_dataset(mData, data=meta_data[mData])
-
-        self.exp._barrier()
-
     def _close_file(self, data):
         """
-        Closes the backing file and completes work
+        Closes the backing file
         """
         self.exp._barrier()
         logging.debug("Attempting to close the file ")
@@ -192,55 +149,12 @@ class Hdf5TomoSaver(BaseSaver):
                 data.backing_file = None
             except:
                 logging.debug("File close unsuccessful", filename)
-
         self.exp._barrier()
 
-    def _save_data(self, data, link_type=None):
-        self.exp._barrier()
-        logging.debug('Saving the data to the hdf5 file')
-
-        if data.remove is True or data.backing_file.mode == 'r':
-            link_type = None
-
-        if link_type is None:
-            self._close_file(data)
-            return
-
-        self.__add_data_links(data, link_type)
+    def _open_read_only(self, data):
         filename = data.backing_file.filename
         entry = data.data.name
         self._close_file(data)
-
-        self.exp._barrier()
-        return entry, filename
-
-    def __add_data_links(self, data, linkType):
-        self.exp._barrier()
-
-        logging.info("Adding link to file %s", self.exp.get('nxs_filename'))
-        entry = self.exp.nxs_file['entry']
-        group_name = data.data_info.get('group_name')
-        self.__output_metadata(data, data.backing_file[group_name])
-        filename = data.backing_file.filename.split('/')[-1]
-
-        if linkType is 'final_result':
-            name = 'final_result_' + data.get_name()
-            entry[name] = \
-                h5py.ExternalLink(filename, data.group_name)
-        elif linkType is 'intermediate':
-            name = data.group_name + '_' + data.data_info.get('name')
-            entry = entry.require_group('intermediate')
-            entry.attrs['NX_class'] = 'NXcollection'
-            entry[name] = \
-                h5py.ExternalLink(filename, data.group_name)
-        else:
-            raise Exception("The link type is not known")
-
-        self.exp._barrier()
-
-    def _open_read_only(self, data, filename, entry):
         logging.debug("Re-opening the backing file %s in read only", filename)
         data.backing_file = self.__open_backing_h5(filename, 'r')
         data.data = data.backing_file[entry]
-
-        self.exp._barrier()

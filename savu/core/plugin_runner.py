@@ -61,6 +61,8 @@ class PluginRunner(object):
         #  ********* transport function ***********
         self._transport_pre_plugin_list_run()
 
+        # decide here whether the saver plugin is a processing plugin or not
+
         for i in range(n_plugins):
             self.exp._set_experiment_for_current_plugin(i)
             self.__run_plugin(exp_coll['plugin_dict'][i])
@@ -99,10 +101,18 @@ class PluginRunner(object):
 
         cu._output_summary(self.exp.meta_data.get("mpi"), plugin)
 
+        plugin._clean_up()
+
+        finalise = self.exp._finalise_experiment_for_current_plugin()
+
         #  ********* transport function ***********
         self._transport_post_plugin()
 
-        self.exp._reorganise_datasets()
+        for data in finalise['remove'] + finalise['replace']:
+            #  ********* transport function ***********
+            self._transport_terminate_dataset(data)
+
+        self.exp._reorganise_datasets(finalise)
 
     def _run_plugin_list_check(self, plugin_list):
         """ Run the plugin list through the framework without executing the
@@ -174,3 +184,4 @@ class PluginRunner(object):
             for i in range(min(count, len(processes))):
                 processes[processes.index(cpus[i])] = gpus[i]
             self.exp.meta_data.set('processes', processes)
+        

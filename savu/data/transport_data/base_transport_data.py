@@ -26,20 +26,6 @@ class BaseTransportData(object):
     """
     Implements functions associated with the transport of the data.
     """
-#
-#    def _load_data(self, start):
-#        """
-#        Any data setup required before the plugin chain has started.
-#        """
-#        raise NotImplementedError("load_data needs to be implemented in %s",
-#                                  self.__class__)
-#
-#    def _save_data(self, link_type):
-#        """
-#        Any finalisation required of the data after completion.
-#        """
-#        raise NotImplementedError("save_data needs to be implemented in %s",
-#                                  self.__class__)
 
     def _get_slice_list_per_process(self, expInfo):
         """
@@ -61,4 +47,3 @@ class BaseTransportData(object):
         """
         raise NotImplementedError("get_padded_slice_data needs to be"
                                   " implemented in  %s", self.__class__)
-
