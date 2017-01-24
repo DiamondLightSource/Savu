@@ -70,8 +70,7 @@ class BaseTransport(object):
 
         :param Data data: A data object to finalise.
         """
-        raise NotImplementedError("_transport_terminate_dataset needs to be\
-                                  implemented in %s", self.__class__)
+        pass
 
     def _transport_process(self, plugin):
         """ Organise required data and execute the main plugin processing.
@@ -102,6 +101,35 @@ class BaseTransport(object):
             result = plugin.process_frames(section)
             self.__set_out_data(out_data, out_slice_list, result, count,
                                 expand_dict)
+
+        cu.user_message("%s - 100%% complete" % (plugin.name))
+        plugin._revert_preview(in_data)
+
+    def _transport_process_no_output(self, plugin):
+        """ Organise required data and execute the main plugin processing.
+
+        :param plugin plugin: The current plugin instance.
+        """
+        in_data = plugin.get_in_datasets()
+
+        expInfo = plugin.exp.meta_data
+        in_slice_list, in_global_frame_idx = \
+            self.__get_all_slice_lists(in_data, expInfo)
+        plugin.set_global_frame_index(in_global_frame_idx)
+
+        squeeze_dict = self.__set_functions(in_data, 'squeeze')
+
+        number_of_slices_to_process = len(in_slice_list[0])
+        for count in range(number_of_slices_to_process):
+            percent_complete = count/(number_of_slices_to_process * 0.01)
+            cu.user_message("%s - %3i%% complete" %
+                            (plugin.name, percent_complete))
+
+            section, slice_list = \
+                self.__get_all_padded_data(in_data, in_slice_list, count,
+                                           squeeze_dict)
+            plugin.set_current_slice_list(slice_list)
+            plugin.process_frames(section)
 
         cu.user_message("%s - 100%% complete" % (plugin.name))
         plugin._revert_preview(in_data)

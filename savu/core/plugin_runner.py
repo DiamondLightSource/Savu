@@ -59,8 +59,6 @@ class PluginRunner(object):
         #  ********* transport function ***********
         self._transport_pre_plugin_list_run()
 
-        # decide here whether the saver plugin is a processing plugin or not
-
         for i in range(n_plugins):
             self.exp._set_experiment_for_current_plugin(i)
             self.__run_plugin(exp_coll['plugin_dict'][i])
@@ -68,10 +66,11 @@ class PluginRunner(object):
         #  ********* transport function ***********
         self._transport_post_plugin_list_run()
 
-        # convert output files here if necessary
-#        saver = exp_coll['saver_plugin']
-#        for data in self.exp.index['in_data'].values():
-#            saver._save_data(data, self.exp.meta_data.get("link_type"))
+        self.__run_saver_plugin()
+
+        # terminate any remaining datasets
+        for data in self.exp.index['in_data'].values():
+            self._transport_terminate_dataset(data)
 
         self.exp._barrier()
         cu.user_message("***********************")
@@ -94,7 +93,7 @@ class PluginRunner(object):
         cu.user_message("*Running the %s plugin*" % plugin.name)
 
         #  ******** transport 'process' function is called inside here ********
-        plugin._run_plugin(self.exp, self)
+        plugin._run_plugin(self.exp, self)  # plugin driver
         self.exp._barrier()
 
         cu._output_summary(self.exp.meta_data.get("mpi"), plugin)
@@ -147,6 +146,13 @@ class PluginRunner(object):
             plugin_list[i]['cite'] = plugin.get_citation_information()
             plugin._clean_up()
             self.exp._merge_out_data_to_in()
+
+    def __run_saver_plugin(self):
+        plugin_list = self.exp.meta_data.plugin_list
+        if plugin_list._get_saver_plugin_status() is False:
+            return
+        self._transport_process = self._transport_process_no_output
+        
 
     def __check_gpu(self):
         """ Check if the process list contains GPU processes and determine if

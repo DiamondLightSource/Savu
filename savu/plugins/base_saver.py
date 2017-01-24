@@ -37,5 +37,17 @@ class BaseSaver(Plugin):
         Overwrites the main_setup function in plugin.py as the saver is a
         special case of plugin that doesn't required setup of in/out_datasets
         """
+        print "****running the base saver setup method"
         self.exp = exp
         logging.info("%s.%s", self.__class__.__name__, 'setup')
+
+#    def _main_setup(self, exp, params):
+#        """
+#        Overwrites the main_setup function in plugin.py as the saver is a
+#        special case of plugin that doesn't required setup of in/out_datasets
+#        """
+#        self._set_parameters(params)
+#        self.exp = exp
+#        logging.info("%s.%s", self.__class__.__name__, 'setup')
+#        self._set_plugin_datasets()
+#        self.setup()

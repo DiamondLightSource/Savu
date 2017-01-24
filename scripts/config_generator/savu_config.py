@@ -20,17 +20,19 @@ Created on 21 May 2015
 from __future__ import print_function
 
 import os
+from savu.data.plugin_list import PluginList
+from savu.plugins import utils as pu
+import re
+
+if os.name == 'nt':
+    import win_readline as readline
+else:
+    import readline
+
 from colorama import Fore, Back, init
 #Need to call init method for colorama to work in windows
 init()
 
-from savu.data.plugin_list import PluginList
-from savu.plugins import utils as pu
-import pkgutil
-import savu
-import readline
-import re
-import sys
 
 RE_SPACE = re.compile('.*\s+$', re.M)
 histfile = os.path.join(os.path.expanduser("~"), ".savuhist")

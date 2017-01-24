@@ -96,8 +96,7 @@ class Experiment(object):
         # load the loader plugins
         self._set_loaders()
         # load the saver plugin and save the plugin list
-        saver = pu.plugin_loader(self, plugin_list[-1])
-        self.experiment_collection = {'saver_plugin': saver, 'plugin_dict': [],
+        self.experiment_collection = {'plugin_dict': [],
                                       'datasets': []}
         logging.debug("Saving plugin list to file.")
         self.meta_data.plugin_list._save_plugin_list(

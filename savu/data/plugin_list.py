@@ -25,7 +25,6 @@
 """
 import h5py
 import json
-import logging
 import copy
 import inspect
 import textwrap
@@ -51,6 +50,7 @@ class PluginList(object):
         self.n_loaders = 0
         self.datasets_list = []
         self.exp = None
+        self.saver_plugin_status = True
 
     def _populate_plugin_list(self, filename, activePass=False):
         plugin_file = h5py.File(filename, 'r')
@@ -346,6 +346,15 @@ class PluginList(object):
 
         self.n_loaders = len(loader_idx)
         return loader_idx, saver_idx
+
+    def _set_saver_plugin_status(self, status):
+        """ If saver plugin is not required then set status to False.
+        :param bool status: Determines whether the saver plugin will run.
+        """
+        self.saver_plugin_status = status
+
+    def _get_saver_plugin_status(self):
+        return self.saver_plugin_status
 
     def _check_loaders_and_savers(self):
         """ Check plugin list starts with a loader and ends with a saver.

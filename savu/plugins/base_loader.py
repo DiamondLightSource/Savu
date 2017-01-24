@@ -74,7 +74,8 @@ class BaseLoader(Plugin):
         nx_file['/'].visititems(self._visit_NXdata)
         for detector in detector_list:
             for nxdata in self.nxdata:
-                if detector in nxdata.keys() or detector in str(nxdata.name).split('/'):
+                if detector in nxdata.keys() or detector in \
+                        str(nxdata.name).split('/'):
                     self.hits.append(nxdata)
         return self.hits
 

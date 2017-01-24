@@ -48,24 +48,28 @@ class Hdf5TomoSaver(BaseSaver):
         # info.Set("romio_cb_read", "disable")
         # info.Set("romio_cb_write", "disable")
 
+#    def setup(self):
+#        exp = self.exp
+#        out_data_dict = exp.index["out_data"]
+#        current_and_next = [0]*len(out_data_dict)
+#        if 'current_and_next' in self.exp.meta_data.get_dictionary():
+#            current_and_next = self.exp.meta_data.get('current_and_next')
+#
+#        count = 0
+#        for key in out_data_dict.keys():
+#            out_data = out_data_dict[key]
+#            filename = self.exp.meta_data.get(["filename", key])
+#            logging.debug("creating the backing file %s", filename)
+#            out_data.backing_file = self.__open_backing_h5(filename, 'w')
+#            out_data.group_name, out_data.group = \
+#                self.__create_entries(out_data, key, current_and_next[count])
+#            count += 1
+
     def setup(self):
-        exp = self.exp
-        out_data_dict = exp.index["out_data"]
-        current_and_next = [0]*len(out_data_dict)
-        if 'current_and_next' in self.exp.meta_data.get_dictionary():
-            current_and_next = self.exp.meta_data.get('current_and_next')
+        # setup in_dataset only (only one dataset allowed)
+        pass
 
-        count = 0
-        for key in out_data_dict.keys():
-            out_data = out_data_dict[key]
-            filename = self.exp.meta_data.get(["filename", key])
-            logging.debug("creating the backing file %s", filename)
-            out_data.backing_file = self.__open_backing_h5(filename, 'w')
-            out_data.group_name, out_data.group = \
-                self.__create_entries(out_data, key, current_and_next[count])
-            count += 1
-
-    def __open_backing_h5(self, filename, mode):
+    def _open_backing_h5(self, filename, mode):
         """
         Create a h5 backend for output data
         """
@@ -103,7 +107,7 @@ class Hdf5TomoSaver(BaseSaver):
         # entry path in output file path
         nxs_file[data_entry] = h5py.ExternalLink(h5file, group_name + '/data')
 
-    def __create_entries(self, data, key, current_and_next):
+    def _create_entries(self, data, key, current_and_next):
         self.exp._barrier()
 
         expInfo = self.exp.meta_data
@@ -156,5 +160,5 @@ class Hdf5TomoSaver(BaseSaver):
         entry = data.data.name
         self._close_file(data)
         logging.debug("Re-opening the backing file %s in read only", filename)
-        data.backing_file = self.__open_backing_h5(filename, 'r')
+        data.backing_file = self._open_backing_h5(filename, 'r')
         data.data = data.backing_file[entry]
