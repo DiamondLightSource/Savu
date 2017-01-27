@@ -17,6 +17,7 @@ Created on 21 May 2015
 
 @author: ssg37927
 '''
+
 from __future__ import print_function
 
 import os
@@ -32,7 +33,6 @@ else:
 from colorama import Fore, Back, init
 #Need to call init method for colorama to work in windows
 init()
-
 
 RE_SPACE = re.compile('.*\s+$', re.M)
 histfile = os.path.join(os.path.expanduser("~"), ".savuhist")
