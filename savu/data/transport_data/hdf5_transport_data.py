@@ -216,12 +216,62 @@ class Hdf5TransportData(BaseTransportData):
                             self.get_slice_directions())
         return self.__grouped_slice_list(sl, max_frames)
 
+    # This method only works if the split dimensions in the slice list contain
+    # slice objects
+    def __split_frames(self, slice_list, split_list):
+        split = [map(int, a.split('.')) for a in split_list]
+        dims = [s[0] for s in split]
+        length = [s[1] for s in split]
+        replace = self.__get_split_frame_entries(slice_list, dims, length)
+        # now replace each slice list entry with multiple entries
+        array_list = []
+        for sl in slice_list:
+            new_list = np.array([sl for i in range(len(replace[0]))])
+            for d, i in zip(dims, range(len(dims))):
+                new_list[:, d] = replace[i]
+            array_list += [tuple(a) for a in new_list]
+
+        return tuple(array_list)
+
+    def __get_split_frame_entries(self, slice_list, dims, length):
+        shape = self.get_shape
+        replace = []
+        seq_len = []
+
+        # get the new entries
+        for d, l in zip(dims, length):
+            sl = slice_list[0][d]
+            start = 0 if sl.start is None else sl.start
+            stop = shape[d] if sl.stop is None else sl.stop
+            inc = l*sl.step if sl.step else l
+            temp_list = [slice(a, a+inc) for a in np.arange(start, stop, inc)]
+            if temp_list[-1].stop > stop:
+                temp = temp_list[-1]
+                temp_list[-1] = slice(temp.start, stop, temp.step)
+            replace.append(temp_list)
+            seq_len.append(len(temp_list))
+
+        # calculate the permutations
+        length = np.array(seq_len)
+        chunk = [int(np.prod(length[0:dim])) for dim in range(len(dims))]
+        repeat = [int(np.prod(length[dim+1:])) for dim in range(len(dims))]
+        full_replace = []
+        for d in range(len(dims)):
+            temp = [[replace[d][i]]*chunk[d] for x in range(repeat[d]) for i
+                    in range(len(replace[d]))]
+            full_replace.append([t for sub in temp for t in sub])
+        return full_replace
+
     def _get_slice_list_per_process(self, expInfo):
         processes = expInfo.get("processes")
         process = expInfo.get("process")
 
         self.__set_padding_dict()
         slice_list = self._get_grouped_slice_list()
+
+        split_list = self._get_plugin_data().split
+        if split_list:
+            slice_list = self.__split_frames(slice_list, split_list)
 
         frame_index = np.arange(len(slice_list))
         try:

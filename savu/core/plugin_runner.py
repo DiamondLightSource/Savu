@@ -151,8 +151,9 @@ class PluginRunner(object):
         plugin_list = self.exp.meta_data.plugin_list
         if plugin_list._get_saver_plugin_status() is False:
             return
+
+        # for data in self.exp.index['out_data']:
         self._transport_process = self._transport_process_no_output
-        
 
     def __check_gpu(self):
         """ Check if the process list contains GPU processes and determine if

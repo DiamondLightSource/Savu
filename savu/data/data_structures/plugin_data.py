@@ -50,6 +50,7 @@ class PluginData(object):
         self._plugin = plugin
         self.fixed_dims = False
         self.end_pad = False
+        self.split = None
 
     def _get_preview(self):
         return self._preview
@@ -260,7 +261,7 @@ class PluginData(object):
             self._set_frame_chunk(gcd(frame_chunk, chunk))
         return self.meta_data.get("nFrames")
 
-    def plugin_data_setup(self, pattern_name, chunk, fixed=False):
+    def plugin_data_setup(self, pattern_name, chunk, fixed=False, split=None):
         """ Setup the PluginData object.
 
         :param str pattern_name: A pattern name
@@ -277,3 +278,4 @@ class PluginData(object):
         self._set_frame_chunk(chunk)
         self.__set_shape()
         self.fixed_dims = fixed
+        self.split = split
