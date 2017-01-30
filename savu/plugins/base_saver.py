@@ -30,20 +30,25 @@ class BaseSaver(Plugin):
 
     :param in_datasets: A list of the dataset(s) to process. Default: [].
     :param out_datasets: A list of the dataset(s) to create. Default: [].
+    :param pattern: How to slice the data. Default: 'VOLUME_XZ'.
     """
 
     def __init__(self, name="BaseSaver"):
         super(BaseSaver, self).__init__(name)
+        self.frame = None
 
     def setup(self):
         # set information relating to the plugin data
         in_pData = self.get_plugin_in_datasets()
         # set pattern_name and nframes to process for all datasets
-        plugin_pattern = self.get_plugin_pattern()
-        in_pData[0].plugin_data_setup(plugin_pattern, self.get_max_frames())
+        pattern = self.parameters['pattern']
+        in_pData[0].plugin_data_setup(pattern, self.get_max_frames())
 
-    def get_plugin_pattern(self):
-        return 'VOLUME_XZ'
+#    def base_process(self):
+#        self.frame = self.
+
+    def get_frame(self):
+        return self.frame
 
     def nInput_datasets(self):
         return 1

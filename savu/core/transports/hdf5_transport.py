@@ -24,7 +24,7 @@
 import logging
 import os
 
-import savu.plugins.utils as pu
+from savu.plugins.savers.utils.hdf5_utils import Hdf5Utils
 from savu.core.transports.base_transport import BaseTransport
 from savu.core.transport_setup import MPI_setup
 
@@ -33,15 +33,12 @@ class Hdf5Transport(BaseTransport):
 
     def _transport_initialise(self, options):
         MPI_setup(options)
-        self.hdf5 = None
         self.exp_coll = None
         self.files = []
 
     def _transport_pre_plugin_list_run(self):
         # run through the experiment (no processing) and create output files
-        plugin_id = 'savu.plugins.savers.hdf5_tomo_saver'
-        self.hdf5 = pu.load_plugin(plugin_id)
-        self.hdf5.exp = self.exp
+        self.hdf5 = Hdf5Utils(self.exp)
         self.exp_coll = self.exp._get_experiment_collection()
         # check the saver plugin and turn off if it is hdf5
         self.__check_saver()
@@ -120,6 +117,6 @@ class Hdf5Transport(BaseTransport):
             self.exp._barrier()
             files["filename"][key] = filename
             files["group_name"][key] = group_name
-        link = "final_result" if count is nPlugins+saver else "intermediate"
+        link = "final_result" if count is nPlugins-saver else "intermediate"
         files["link"] = link
         return files

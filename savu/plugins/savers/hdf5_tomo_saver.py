@@ -15,150 +15,91 @@
 """
 .. module:: hdf5_tomo_saver
    :platform: Unix
-   :synopsis: A class to create hdf5 output files
+   :synopsis: A class to save data to a hdf5 output file.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
 
 
-import h5py
 import logging
-from mpi4py import MPI
+import os
+import copy
+import h5py
 
+from savu.plugins.savers.utils.hdf5_utils import Hdf5Utils
 from savu.plugins.base_saver import BaseSaver
+from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 from savu.data.chunking import Chunking
 
-NX_CLASS = 'NX_class'
-
 
 @register_plugin
-class Hdf5TomoSaver(BaseSaver):
+class Hdf5TomoSaver(BaseSaver, CpuPlugin):
     """
     A class to save tomography data to a hdf5 file
     """
 
     def __init__(self, name='Hdf5TomoSaver'):
         super(Hdf5TomoSaver, self).__init__(name)
-        self.plugin = None
-        self.info = MPI.Info.Create()
-        self.info.Set("romio_ds_write", "disable")  # this setting is required
-        # info.Set("romio_ds_read", "disable")
-        # info.Set("romio_cb_read", "disable")
-        # info.Set("romio_cb_write", "disable")
+        self.in_data = None
+        self.out_data = None
+        self.fdict = {}
 
-#    def setup(self):
-#        exp = self.exp
-#        out_data_dict = exp.index["out_data"]
-#        current_and_next = [0]*len(out_data_dict)
-#        if 'current_and_next' in self.exp.meta_data.get_dictionary():
-#            current_and_next = self.exp.meta_data.get('current_and_next')
-#
-#        count = 0
-#        for key in out_data_dict.keys():
-#            out_data = out_data_dict[key]
-#            filename = self.exp.meta_data.get(["filename", key])
-#            logging.debug("creating the backing file %s", filename)
-#            out_data.backing_file = self.__open_backing_h5(filename, 'w')
-#            out_data.group_name, out_data.group = \
-#                self.__create_entries(out_data, key, current_and_next[count])
-#            count += 1
+    def pre_process(self):
+        # Create the hdf5 output file
+        self.hdf5 = Hdf5Utils(self.exp)
+        self.in_data = self.get_in_datasets()[0]
+        name = self.in_data.get_name()
+        current_pattern = self.__set_pattern(name)
+        pattern_idx = {'current': current_pattern, 'next': []}
 
-    def setup(self):
-        # setup in_dataset only (only one dataset allowed)
-        pass
+        self.__set_file_info(name)
+        logging.debug("creating the backing file %s", self.fdict['fname'])
+        backing_file = self.hdf5._open_backing_h5(self.fdict['fname'], 'w')
+        self.fdict['bfile'] = backing_file
 
-    def _open_backing_h5(self, filename, mode):
-        """
-        Create a h5 backend for output data
-        """
+        group = backing_file.create_group(self.fdict['gname'])
+        group.attrs['NX_class'] = 'NXdata'
+        group.attrs['signal'] = 'data'
         self.exp._barrier()
-
-        if self.exp.meta_data.get("mpi") is True:
-            backing_file = h5py.File(filename, mode, driver='mpio',
-                                     comm=MPI.COMM_WORLD, info=self.info)
-        else:
-            backing_file = h5py.File(filename, mode)
-
+        shape = self.in_data.get_shape()
+        chunking = Chunking(self.exp, pattern_idx)
+        dtype = self.in_data.data.dtype
+        chunks = chunking._calculate_chunking(shape, dtype)
         self.exp._barrier()
+        self.out_data = \
+            group.create_dataset("data", shape, dtype, chunks=chunks)
 
-        if backing_file is None:
-            raise IOError("Failed to open the hdf5 file")
-        return backing_file
+    def process_frames(self, data):
+        self.out_data[self.get_current_slice_list()[0]] = data[0]
 
-    def _link_datafile_to_nexus_file(self, data):
-        # nexus file
+    def post_process(self):
+        self.__link_datafile_to_nexus_file()
+        self.fdict['bfile'].close()
+
+    def __set_pattern(self, name):
+        pattern = copy.deepcopy(self.in_data._get_plugin_data().get_pattern())
+        pattern[pattern.keys()[0]]['max_frames'] = self.get_max_frames()
+        return pattern
+
+    def __set_file_info(self, name):
+        nPlugin = self.exp.meta_data.get('nPlugin')
+        plugin_dict = \
+            self.exp._get_experiment_collection()['plugin_dict'][nPlugin]
+        fname = name + '_p' + str(nPlugin) + '_' + \
+            plugin_dict['id'].split('.')[-1] + '.h5'
+        out_path = self.exp.meta_data.get('out_path')
+        fname = os.path.join(out_path, fname)
+        gname = "%i-%s-%s_%s" % (nPlugin, plugin_dict['name'], fname, name)
+        self.fdict = {'fname': fname, 'gname': gname, 'name': name}
+
+    def __link_datafile_to_nexus_file(self):
         nxs_file = self.exp.nxs_file
-        # entry path in nexus file
-        name = data.get_name()
-        group_name = self.exp.meta_data.get(['group_name', name])
-        link_type = self.exp.meta_data.get('link_type')
-        nxs_entry = '/entry/' + link_type
-        if link_type == 'final_result':
-            nxs_entry += '_' + data.get_name()
-        else:
-            nxs_entry += "/" + group_name
+        nxs_entry = '/entry/final_result_' + self.fdict['name']
         nxs_entry = nxs_file[nxs_entry]
         nxs_entry.attrs['signal'] = 'data'
         data_entry = nxs_entry.name + '/data'
-        # output file path
-        h5file = data.backing_file.filename.split('/')[-1]
-        # entry path in output file path
-        nxs_file[data_entry] = h5py.ExternalLink(h5file, group_name + '/data')
-
-    def _create_entries(self, data, key, current_and_next):
-        self.exp._barrier()
-
-        expInfo = self.exp.meta_data
-        group_name = expInfo.get(["group_name", key])
-        data.data_info.set('group_name', group_name)
-        try:
-            group_name = group_name + '_' + data.name
-        except AttributeError:
-            pass
-
-        group = data.backing_file.create_group(group_name)
-        group.attrs[NX_CLASS] = 'NXdata'
-        group.attrs['signal'] = 'data'
-
-        self.exp._barrier()
-
-        shape = data.get_shape()
-        if current_and_next is 0:
-            data.data = group.create_dataset("data", shape, data.dtype)
-        else:
-            self.exp._barrier()
-            chunking = Chunking(self.exp, current_and_next)
-            chunks = chunking._calculate_chunking(shape, data.dtype)
-            self.exp._barrier()
-            data.data = group.create_dataset("data", shape, data.dtype,
-                                             chunks=chunks)
-        self.exp._barrier()
-
-        return group_name, group
-
-    def _close_file(self, data):
-        """
-        Closes the backing file
-        """
-        self.exp._barrier()
-        logging.debug("Attempting to close the file ")
-
-        if data.backing_file is not None:
-            try:
-                filename = data.backing_file.filename
-                data.backing_file.close()
-                logging.debug("File close successful: %s", filename)
-                data.backing_file = None
-            except:
-                logging.debug("File close unsuccessful", filename)
-        self.exp._barrier()
-
-    def _open_read_only(self, data):
-        filename = data.backing_file.filename
-        entry = data.data.name
-        self._close_file(data)
-        logging.debug("Re-opening the backing file %s in read only", filename)
-        data.backing_file = self._open_backing_h5(filename, 'r')
-        data.data = data.backing_file[entry]
+        h5file = self.fdict['fname'].split('/')[-1]
+        nxs_file[data_entry] = \
+            h5py.ExternalLink(h5file, self.fdict['gname'] + '/data')

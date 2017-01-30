@@ -101,6 +101,7 @@ class BaseTransport(object):
             section, slice_list = \
                 self.__get_all_padded_data(in_data, in_slice_list, count,
                                            squeeze_dict)
+
             plugin.set_current_slice_list(slice_list)
             result = plugin.process_frames(section)
             self.__set_out_data(out_data, out_slice_list, result, count,

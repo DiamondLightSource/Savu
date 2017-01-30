@@ -205,6 +205,10 @@ class Plugin(PluginDatasets):
         """ This method is called immediately after base_pre_process(). """
         pass
 
+    def base_pre_process_frames():
+        """ This method is called before each call to process frames """
+        pass
+
     def process_frames(self, data):
         """
         This method is called after the plugin has been created by the
@@ -216,6 +220,10 @@ class Plugin(PluginDatasets):
 
         logging.error("process frames needs to be implemented")
         raise NotImplementedError("process needs to be implemented")
+
+    def base_post_process_frames():
+        """ This method is called after each call to process frames """
+        pass
 
     def post_process(self):
         """

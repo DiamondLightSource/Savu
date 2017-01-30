@@ -54,9 +54,6 @@ class PluginRunner(object):
 
         self.exp._experiment_setup(self._transport_get_n_processing_plugins())
         exp_coll = self.exp._get_experiment_collection()
-
-        for e in exp_coll:
-            print e
         n_plugins = self._transport_get_n_processing_plugins()
 
         #  ********* transport function ***********
@@ -68,8 +65,6 @@ class PluginRunner(object):
 
         #  ********* transport function ***********
         self._transport_post_plugin_list_run()
-
-        #self.__run_saver_plugin()
 
         # terminate any remaining datasets
         for data in self.exp.index['in_data'].values():
@@ -150,14 +145,6 @@ class PluginRunner(object):
             plugin_list[i]['cite'] = plugin.get_citation_information()
             plugin._clean_up()
             self.exp._merge_out_data_to_in()
-
-    def __run_saver_plugin(self):
-        plugin_list = self.exp.meta_data.plugin_list
-        if plugin_list._get_saver_plugin_status() is False:
-            return
-
-        # for data in self.exp.index['out_data']:
-        self._transport_process = self._transport_process_no_output
 
     def __check_gpu(self):
         """ Check if the process list contains GPU processes and determine if

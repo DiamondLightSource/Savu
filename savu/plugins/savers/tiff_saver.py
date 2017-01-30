@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: hdf5_tomo_saver
+.. module:: tiff_saver
    :platform: Unix
-   :synopsis: A class to create hdf5 output files
+   :synopsis: A class to save output in tiff format
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
@@ -35,14 +35,12 @@ class TiffSaver(BaseSaver, CpuPlugin):
     """
     A class to save tomography data to tiff files
 
-    :param pattern: How to slice the data. Default: 'VOLUME_XZ'.
     """
 
     def __init__(self, name='TiffSaver'):
         super(TiffSaver, self).__init__(name)
 
     def pre_process(self):
-        # **** move this to base pre-process
         self.count = 0
         self.folder = self.exp.meta_data.get("out_path") + '/tiffs'
         self.filename = self.folder + "/" + self.exp.meta_data.get("data_name")
@@ -58,6 +56,3 @@ class TiffSaver(BaseSaver, CpuPlugin):
 
     def get_max_frames(self):
         return 1
-
-    def get_plugin_pattern(self):
-        return self.parameters['pattern']
