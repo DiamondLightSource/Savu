@@ -144,11 +144,14 @@ def plugin_loader(exp, plugin_dict, **kwargs):
 
 
 def set_datasets(exp, plugin, plugin_dict):
-    in_names = get_names(plugin_dict["data"]["in_datasets"])
-    out_names = get_names(plugin_dict["data"]["out_datasets"])
+    in_names = get_names(plugin_dict["data"], "in_datasets")
+    out_names = get_names(plugin_dict["data"], "out_datasets")
 
     default_in_names = plugin.parameters['in_datasets']
-    default_out_names = plugin.parameters['out_datasets']
+    if 'out_datasets' in plugin.parameters.keys():
+        default_out_names = plugin.parameters['out_datasets']
+    else:
+        default_out_names = []
 
     in_names = in_names if in_names else default_in_names
     out_names = out_names if out_names else default_out_names
@@ -174,9 +177,9 @@ def set_datasets(exp, plugin, plugin_dict):
     plugin.dynamic_data_info()
 
 
-def get_names(names):
+def get_names(pdict, key):
     try:
-        data_names = names
+        data_names = pdict[key]
     except KeyError:
         data_names = []
     return data_names
@@ -191,16 +194,18 @@ def check_nDatasets(exp, names, plugin_dict, nSets, dtype):
     except IndexError:
         pass
 
-    errorMsg = "***ERROR: Broken plugin chain. \n Please name the " + \
-        str(nSets) + " " + dtype + " sets associated with the plugin " + \
-        plugin_id + " in the process file."
-
     names = ([names] if type(names) is not list else names)
     if nSets is 'var':
         nSets = len(plugin_dict['data'][dtype + 'sets'])
 
     if len(names) is not nSets:
-        raise Exception(errorMsg)
+        if nSets is 0:
+            names = []
+        else:
+            raise Exception("ERROR: Broken plugin chain. \n Please name the " +
+                            str(nSets) + " " + dtype + " sets associated with "
+                            " the plugin " + plugin_id + " in the process "
+                            "file.")
 
     return names
 

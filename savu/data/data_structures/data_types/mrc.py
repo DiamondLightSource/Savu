@@ -24,9 +24,9 @@
 import numpy as np
 
 import savu.plugins.loaders.utils.mrc_header as header_format
+from savu.data.data_structures.data_types.base_type import BaseType
 
-
-class MRC(object):
+class MRC(BaseType):
 
     def __init__(self, Data, filename, stats=None):
         self._data_obj = Data
@@ -86,3 +86,4 @@ class MRC(object):
 
     def get_shape(self):
         return self.shape
+

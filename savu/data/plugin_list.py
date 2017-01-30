@@ -49,7 +49,6 @@ class PluginList(object):
         self.n_plugins = None
         self.n_loaders = 0
         self.datasets_list = []
-        self.exp = None
         self.saver_plugin_status = True
 
     def _populate_plugin_list(self, filename, activePass=False):
@@ -321,7 +320,7 @@ class PluginList(object):
         return self.n_loaders
 
     def _get_n_processing_plugins(self):
-        return len(self.plugin_list) - self._get_n_loaders() - 1
+        return len(self.plugin_list) - self._get_n_loaders()
 
     def __get_loaders_and_savers_index(self):
         """ Get lists of loader and saver positions within the plugin list and
@@ -418,3 +417,4 @@ class CitationInformation(object):
                                       bibtex_array.shape,
                                       bibtex_array.dtype,
                                       bibtex_array)
+

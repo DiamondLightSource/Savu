@@ -52,9 +52,12 @@ class PluginRunner(object):
         plugin_list = self.exp.meta_data.plugin_list
         self._run_plugin_list_check(plugin_list)
 
-        self.exp._experiment_setup()
+        self.exp._experiment_setup(self._transport_get_n_processing_plugins())
         exp_coll = self.exp._get_experiment_collection()
-        n_plugins = plugin_list._get_n_processing_plugins()
+
+        for e in exp_coll:
+            print e
+        n_plugins = self._transport_get_n_processing_plugins()
 
         #  ********* transport function ***********
         self._transport_pre_plugin_list_run()
@@ -66,7 +69,7 @@ class PluginRunner(object):
         #  ********* transport function ***********
         self._transport_post_plugin_list_run()
 
-        self.__run_saver_plugin()
+        #self.__run_saver_plugin()
 
         # terminate any remaining datasets
         for data in self.exp.index['in_data'].values():
@@ -139,8 +142,9 @@ class PluginRunner(object):
 
         self.exp._set_nxs_filename()
 
+        n_plugins = self._transport_get_n_processing_plugins()
         check = kwargs.get('check', False)
-        for i in range(n_loaders, len(plugin_list)-1):
+        for i in range(n_loaders, n_loaders+n_plugins):
             self.exp._barrier()
             plugin = pu.plugin_loader(self.exp, plugin_list[i], check=check)
             plugin_list[i]['cite'] = plugin.get_citation_information()

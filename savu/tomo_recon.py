@@ -108,6 +108,7 @@ def _set_options(opt, args):
         opt.folder if opt.folder else __get_folder_name(options['data_file'])
     out_folder_path = __create_output_folder(args[2], out_folder_name)
     options['out_path'] = out_folder_path
+    options['data_name'] = out_folder_path.split('_')[-1]
 
     inter_folder_path = __create_output_folder(opt.temp_dir, out_folder_name)\
         if opt.temp_dir else out_folder_path

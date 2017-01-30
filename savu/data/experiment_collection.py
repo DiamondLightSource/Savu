@@ -87,7 +87,7 @@ class Experiment(object):
             cu.add_base_classes(data_obj, bases)
         return self.index[dtype][name]
 
-    def _experiment_setup(self):
+    def _experiment_setup(self, n_plugins):
         """ Setup an experiment collection.
         """
         n_loaders = self.meta_data.plugin_list._get_n_loaders()
@@ -104,7 +104,7 @@ class Experiment(object):
 
         count = 0
         # first run through of the plugin setup methods
-        for plugin_dict in plugin_list[n_loaders:-1]:
+        for plugin_dict in plugin_list[n_loaders:n_loaders+n_plugins]:
             data = self.__plugin_setup(plugin_dict, count)
             self.experiment_collection['datasets'].append(data)
             self.experiment_collection['plugin_dict'].append(plugin_dict)
@@ -227,7 +227,7 @@ class Experiment(object):
 
     def __unreplicate_data(self):
         in_data_list = self.index['in_data']
-        from savu.data.data_structures.data_type import Replicate
+        from savu.data.data_structures.data_types.replicate import Replicate
         for in_data in in_data_list.values():
             if isinstance(in_data.data, Replicate):
                 in_data.data = in_data.data.reset()

@@ -20,7 +20,6 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
-import logging
 
 from savu.plugins.plugin import Plugin
 
@@ -28,26 +27,29 @@ from savu.plugins.plugin import Plugin
 class BaseSaver(Plugin):
     """
     A base plugin from which all data saver plugins should inherit.
+
+    :param in_datasets: A list of the dataset(s) to process. Default: [].
+    :param out_datasets: A list of the dataset(s) to create. Default: [].
     """
+
     def __init__(self, name="BaseSaver"):
         super(BaseSaver, self).__init__(name)
 
-    def _main_setup(self, exp, params):
-        """
-        Overwrites the main_setup function in plugin.py as the saver is a
-        special case of plugin that doesn't required setup of in/out_datasets
-        """
-        print "****running the base saver setup method"
-        self.exp = exp
-        logging.info("%s.%s", self.__class__.__name__, 'setup')
+    def setup(self):
+        # set information relating to the plugin data
+        in_pData = self.get_plugin_in_datasets()
+        # set pattern_name and nframes to process for all datasets
+        plugin_pattern = self.get_plugin_pattern()
+        in_pData[0].plugin_data_setup(plugin_pattern, self.get_max_frames())
 
-#    def _main_setup(self, exp, params):
-#        """
-#        Overwrites the main_setup function in plugin.py as the saver is a
-#        special case of plugin that doesn't required setup of in/out_datasets
-#        """
-#        self._set_parameters(params)
-#        self.exp = exp
-#        logging.info("%s.%s", self.__class__.__name__, 'setup')
-#        self._set_plugin_datasets()
-#        self.setup()
+    def get_plugin_pattern(self):
+        return 'VOLUME_XZ'
+
+    def nInput_datasets(self):
+        return 1
+
+    def nOutput_datasets(self):
+        return 0
+
+    def get_max_frames(self):
+        return 1

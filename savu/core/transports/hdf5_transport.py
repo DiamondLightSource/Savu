@@ -96,9 +96,16 @@ class Hdf5Transport(BaseTransport):
             self.exp.meta_data.set(['group_name', key],
                                    files['group_name'][key])
 
+    def _transport_get_n_processing_plugins(self):
+        p_list = self.exp.meta_data.plugin_list
+        n_plugins = p_list._get_n_processing_plugins()
+        if p_list.plugin_list[-1]['name'] == 'Hdf5TomoSaver':
+            return n_plugins - 1
+        return n_plugins
+
     def __get_filenames(self, plugin_dict, count):
         plugin_list = self.exp.meta_data.plugin_list
-        nPlugins = plugin_list._get_n_processing_plugins()
+        nPlugins = self._transport_get_n_processing_plugins()
         saver = plugin_list._get_saver_plugin_status()
         files = {"filename": {}, "group_name": {}}
         for key in self.exp.index["out_data"].keys():
