@@ -44,7 +44,7 @@ class Hdf5TomoSaver(BaseSaver, CpuPlugin):
         super(Hdf5TomoSaver, self).__init__(name)
         self.in_data = None
         self.out_data = None
-        self.name = None
+        self.data_name = None
         self.filename = None
         self.group_name = None
 
@@ -52,12 +52,12 @@ class Hdf5TomoSaver(BaseSaver, CpuPlugin):
         # Create the hdf5 output file
         self.hdf5 = Hdf5Utils(self.exp)
         self.in_data = self.get_in_datasets()[0]
-        self.name = self.in_data.get_name()
-        current_pattern = self.__set_pattern(self.name)
+        self.data_name = self.in_data.get_name()
+        current_pattern = self.__set_pattern(self.data_name)
         pattern_idx = {'current': current_pattern, 'next': []}
 
         self.filename = self.__get_file_name()
-        self.group_name = self._get_group_name(self.name)
+        self.group_name = self._get_group_name(self.data_name)
         logging.debug("creating the backing file %s", self.filename)
         self.backing_file = self.hdf5._open_backing_h5(self.filename, 'w')
         group = self.backing_file.create_group(self.group_name)
@@ -76,7 +76,7 @@ class Hdf5TomoSaver(BaseSaver, CpuPlugin):
         self.out_data[self.get_current_slice_list()[0]] = data[0]
 
     def post_process(self):
-        self._link_datafile_to_nexus_file(self.name, self.filename,
+        self._link_datafile_to_nexus_file(self.data_name, self.filename,
                                           self.group_namegroup_name + '/data')
         self.backing_file.close()
 
@@ -89,7 +89,7 @@ class Hdf5TomoSaver(BaseSaver, CpuPlugin):
         nPlugin = self.exp.meta_data.get('nPlugin')
         plugin_dict = \
             self.exp._get_experiment_collection()['plugin_dict'][nPlugin]
-        fname = self.name + '_p' + str(nPlugin) + '_' + \
+        fname = self.data_name + '_p' + str(nPlugin) + '_' + \
             plugin_dict['id'].split('.')[-1] + '.h5'
         out_path = self.exp.meta_data.get('out_path')
         return os.path.join(out_path, fname)

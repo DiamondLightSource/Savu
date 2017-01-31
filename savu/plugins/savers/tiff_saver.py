@@ -41,26 +41,29 @@ class TiffSaver(BaseSaver, CpuPlugin):
         super(TiffSaver, self).__init__(name)
         self.count = None
         self.folder = None
-        self.name = None
+        self.data_name = None
         self.file_name = None
+        self.group_name = None
 
     def pre_process(self):
-        self.name = self.get_in_datasets()[0].get_name()
+        self.data_name = self.get_in_datasets()[0].get_name()
         self.count = 0
-        self.folder = self.exp.meta_data.get("out_path") + '/tiffs'
         self.input = self.exp.meta_data.get("data_name")
-        self.filename = self.folder + "/" + self.input
+        self.group_name = self._get_group_name(self.data_name)
+        self.folder = "%s/%s-%s" % (self.exp.meta_data.get("out_path"),
+                                    self.name, self.data_name)
+        self.filename = "%s/%s_" % (self.folder, self.data_name)
         if MPI.COMM_WORLD.rank == 0:
             if not os.path.exists(self.folder):
                 os.makedirs(self.folder)
 
     def process_frames(self, data):
         frame = self.get_global_frame_index()[0][self.count]
-        filename = self.filename + '_' + str(frame) + '.tiff'
+        filename = self.filename + str(frame) + '.tiff'
         tf.imsave(filename, data[0])
         self.count += 1
 
     def post_process(self):
-        group_name = self._get_group_name(self.name)
         # this is incorrect and only provides a broken link
-        self._link_datafile_to_nexus_file(self.name, self.filename, group_name)
+        self._link_datafile_to_nexus_file(self.data_name, self.filename,
+                                          self.group_name)
