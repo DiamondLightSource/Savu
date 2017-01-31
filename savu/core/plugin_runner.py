@@ -71,12 +71,12 @@ class PluginRunner(object):
             self._transport_terminate_dataset(data)
 
         self.exp._barrier()
+        self.exp.nxs_file.close()
+        self.exp._barrier()
+
         cu.user_message("***********************")
         cu.user_message("* Processing Complete *")
         cu.user_message("***********************")
-
-        self.exp.nxs_file.close()
-        self.exp._barrier()
         return self.exp
 
     def __run_plugin(self, plugin_dict):
