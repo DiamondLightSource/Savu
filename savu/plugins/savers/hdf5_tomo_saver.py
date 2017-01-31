@@ -44,22 +44,23 @@ class Hdf5TomoSaver(BaseSaver, CpuPlugin):
         super(Hdf5TomoSaver, self).__init__(name)
         self.in_data = None
         self.out_data = None
-        self.fdict = {}
+        self.name = None
+        self.filename = None
+        self.group_name = None
 
     def pre_process(self):
         # Create the hdf5 output file
         self.hdf5 = Hdf5Utils(self.exp)
         self.in_data = self.get_in_datasets()[0]
-        name = self.in_data.get_name()
-        current_pattern = self.__set_pattern(name)
+        self.name = self.in_data.get_name()
+        current_pattern = self.__set_pattern(self.name)
         pattern_idx = {'current': current_pattern, 'next': []}
 
-        self.__set_file_info(name)
-        logging.debug("creating the backing file %s", self.fdict['fname'])
-        backing_file = self.hdf5._open_backing_h5(self.fdict['fname'], 'w')
-        self.fdict['bfile'] = backing_file
-
-        group = backing_file.create_group(self.fdict['gname'])
+        self.filename = self.__get_file_name()
+        self.group_name = self._get_group_name(self.name)
+        logging.debug("creating the backing file %s", self.filename)
+        self.backing_file = self.hdf5._open_backing_h5(self.filename, 'w')
+        group = self.backing_file.create_group(self.group_name)
         group.attrs['NX_class'] = 'NXdata'
         group.attrs['signal'] = 'data'
         self.exp._barrier()
@@ -75,31 +76,20 @@ class Hdf5TomoSaver(BaseSaver, CpuPlugin):
         self.out_data[self.get_current_slice_list()[0]] = data[0]
 
     def post_process(self):
-        self.__link_datafile_to_nexus_file()
-        self.fdict['bfile'].close()
+        self._link_datafile_to_nexus_file(self.name, self.filename,
+                                          self.group_namegroup_name + '/data')
+        self.backing_file.close()
 
     def __set_pattern(self, name):
         pattern = copy.deepcopy(self.in_data._get_plugin_data().get_pattern())
         pattern[pattern.keys()[0]]['max_frames'] = self.get_max_frames()
         return pattern
 
-    def __set_file_info(self, name):
+    def __get_file_name(self):
         nPlugin = self.exp.meta_data.get('nPlugin')
         plugin_dict = \
             self.exp._get_experiment_collection()['plugin_dict'][nPlugin]
-        fname = name + '_p' + str(nPlugin) + '_' + \
+        fname = self.name + '_p' + str(nPlugin) + '_' + \
             plugin_dict['id'].split('.')[-1] + '.h5'
         out_path = self.exp.meta_data.get('out_path')
-        fname = os.path.join(out_path, fname)
-        gname = "%i-%s-%s_%s" % (nPlugin, plugin_dict['name'], fname, name)
-        self.fdict = {'fname': fname, 'gname': gname, 'name': name}
-
-    def __link_datafile_to_nexus_file(self):
-        nxs_file = self.exp.nxs_file
-        nxs_entry = '/entry/final_result_' + self.fdict['name']
-        nxs_entry = nxs_file[nxs_entry]
-        nxs_entry.attrs['signal'] = 'data'
-        data_entry = nxs_entry.name + '/data'
-        h5file = self.fdict['fname'].split('/')[-1]
-        nxs_file[data_entry] = \
-            h5py.ExternalLink(h5file, self.fdict['gname'] + '/data')
+        return os.path.join(out_path, fname)
