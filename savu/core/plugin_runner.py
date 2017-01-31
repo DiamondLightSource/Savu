@@ -50,11 +50,12 @@ class PluginRunner(object):
         """
 
         plugin_list = self.exp.meta_data.plugin_list
+
         self._run_plugin_list_check(plugin_list)
 
-        self.exp._experiment_setup(self._transport_get_n_processing_plugins())
+        self.exp._experiment_setup()
         exp_coll = self.exp._get_experiment_collection()
-        n_plugins = self._transport_get_n_processing_plugins()
+        n_plugins = plugin_list._get_n_processing_plugins()
 
         #  ********* transport function ***********
         self._transport_pre_plugin_list_run()
@@ -80,7 +81,6 @@ class PluginRunner(object):
         return self.exp
 
     def __run_plugin(self, plugin_dict):
-
         plugin = pu.plugin_loader(self.exp, plugin_dict)
         self.exp.plugin = plugin
 
@@ -115,10 +115,14 @@ class PluginRunner(object):
         """
         self.exp._barrier()
         plugin_list._check_loaders_and_savers()
+
+        #  ********* transport function ***********
+        self._transport_update_plugin_list()
+
         self.__check_gpu()
 
         self.exp._barrier()
-        self.__fake_plugin_list_run(plugin_list.plugin_list, check=True)
+        self.__fake_plugin_list_run(plugin_list, check=True)
 
         self.exp._barrier()
         self.exp._clear_data_objects()
@@ -131,18 +135,19 @@ class PluginRunner(object):
         and fill in missing dataset names.
         """
         n_loaders = self.exp.meta_data.plugin_list._get_n_loaders()
+        n_plugins = plugin_list._get_n_processing_plugins()
+        plist = plugin_list.plugin_list
 
         for i in range(n_loaders):
-            pu.plugin_loader(self.exp, plugin_list[i])
+            pu.plugin_loader(self.exp, plist[i])
 
         self.exp._set_nxs_filename()
 
-        n_plugins = self._transport_get_n_processing_plugins()
         check = kwargs.get('check', False)
         for i in range(n_loaders, n_loaders+n_plugins):
             self.exp._barrier()
-            plugin = pu.plugin_loader(self.exp, plugin_list[i], check=check)
-            plugin_list[i]['cite'] = plugin.get_citation_information()
+            plugin = pu.plugin_loader(self.exp, plist[i], check=check)
+            plist[i]['cite'] = plugin.get_citation_information()
             plugin._clean_up()
             self.exp._merge_out_data_to_in()
 

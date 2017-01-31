@@ -77,7 +77,7 @@ class Hdf5TomoSaver(BaseSaver, CpuPlugin):
 
     def post_process(self):
         self._link_datafile_to_nexus_file(self.data_name, self.filename,
-                                          self.group_namegroup_name + '/data')
+                                          self.group_name + '/data')
         self.backing_file.close()
 
     def __set_pattern(self, name):

@@ -34,19 +34,31 @@ class Hdf5Transport(BaseTransport):
     def _transport_initialise(self, options):
         MPI_setup(options)
         self.exp_coll = None
+        self.data_flow = []
         self.files = []
+
+    def _transport_update_plugin_list(self):
+        plugin_list = self.exp.meta_data.plugin_list
+        saver_idx = plugin_list._get_savers_index()
+        remove = []
+        for idx in saver_idx:
+            if plugin_list.plugin_list[idx]['name'] == 'Hdf5TomoSaver':
+                remove.append(idx)
+        for idx in sorted(remove, reverse=True):
+            plugin_list._remove(idx)
 
     def _transport_pre_plugin_list_run(self):
         # run through the experiment (no processing) and create output files
         self.hdf5 = Hdf5Utils(self.exp)
         self.exp_coll = self.exp._get_experiment_collection()
+        self.data_flow = self.exp.meta_data.plugin_list._get_dataset_flow()
+
         # check the saver plugin and turn off if it is hdf5
-        self.__check_saver()
         n_plugins = range(len(self.exp_coll['datasets']))
         for i in n_plugins:
             self.exp._set_experiment_for_current_plugin(i)
             self.files.append(
-                self.__get_filenames(self.exp_coll['plugin_dict'][i], i+1))
+                self.__get_filenames(self.exp_coll['plugin_dict'][i]))
             self.__set_file_details(self.files[i])
             self.__setup_h5_files()  # creates the hdf5 files
 
@@ -78,33 +90,23 @@ class Hdf5Transport(BaseTransport):
                 out_data, key, current_and_next[count])
             count += 1
 
-    def __check_saver(self):
-        plugin_list = self.exp.meta_data.plugin_list
-        saver_plugin = plugin_list.plugin_list[-1]['name']
-        if saver_plugin == 'Hdf5TomoSaver':
-            plugin_list._set_saver_plugin_status(False)
-
     def __set_file_details(self, files):
-        self.exp.meta_data.set('link_type', files['link'])
+        self.exp.meta_data.set('link_type', files['link_type'])
+        self.exp.meta_data.set('link_type', {})
         self.exp.meta_data.set('filename', {})
         self.exp.meta_data.set('group_name', {})
         for key in self.exp.index['out_data'].keys():
+            self.exp.meta_data.set(['link_type', key], files['link_type'][key])
             self.exp.meta_data.set(['filename', key], files['filename'][key])
             self.exp.meta_data.set(['group_name', key],
                                    files['group_name'][key])
 
-    def _transport_get_n_processing_plugins(self):
-        p_list = self.exp.meta_data.plugin_list
-        n_plugins = p_list._get_n_processing_plugins()
-        if p_list.plugin_list[-1]['name'] == 'Hdf5TomoSaver':
-            return n_plugins - 1
-        return n_plugins
-
-    def __get_filenames(self, plugin_dict, count):
+    def __get_filenames(self, plugin_dict):
+        count = self.exp.meta_data.get('nPlugin') + 1
         plugin_list = self.exp.meta_data.plugin_list
-        nPlugins = self._transport_get_n_processing_plugins()
-        saver = plugin_list._get_saver_plugin_status()
-        files = {"filename": {}, "group_name": {}}
+        # determine if this is the last link of this dataset => final_result
+        nPlugins = plugin_list._get_n_processing_plugins()
+        files = {"filename": {}, "group_name": {}, "link_type": {}}
         for key in self.exp.index["out_data"].keys():
             name = key + '_p' + str(count) + '_' + \
                 plugin_dict['id'].split('.')[-1] + '.h5'
@@ -117,6 +119,12 @@ class Hdf5Transport(BaseTransport):
             self.exp._barrier()
             files["filename"][key] = filename
             files["group_name"][key] = group_name
-        link = "final_result" if count is nPlugins-saver else "intermediate"
-        files["link"] = link
+            files['link_type'][key] = self.__get_link_type(key)
         return files
+
+    def __get_link_type(self, name):
+        idx = self.exp.meta_data.get('nPlugin')
+        temp = [e for entry in self.data_flow[idx+1:] for e in entry]
+        if name in temp:
+            return 'intermediate'
+        return 'final_result'

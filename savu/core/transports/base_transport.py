@@ -40,6 +40,13 @@ class BaseTransport(object):
         raise NotImplementedError("transport_control_setup needs to be "
                                   "implemented in %s", self.__class__)
 
+    def _transport_update_plugin_list(self):
+        """
+        This method provides an opportunity to add or remove items from the
+        plugin list before plugin list check.
+        """
+        pass
+
     def _transport_pre_plugin_list_run(self):
         """
         This method is called after all datasets have been created but BEFORE
@@ -71,10 +78,6 @@ class BaseTransport(object):
         :param Data data: A data object to finalise.
         """
         pass
-
-    def _transport_get_n_processing_plugins(self):
-        """ Override the number of processing plugins with this method. """
-        return self.exp.plugin_list._get_n_processing_plugins()
 
     def _transport_process(self, plugin):
         """ Organise required data and execute the main plugin processing.

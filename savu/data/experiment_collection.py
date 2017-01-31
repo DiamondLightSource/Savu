@@ -87,11 +87,12 @@ class Experiment(object):
             cu.add_base_classes(data_obj, bases)
         return self.index[dtype][name]
 
-    def _experiment_setup(self, n_plugins):
+    def _experiment_setup(self):
         """ Setup an experiment collection.
         """
         n_loaders = self.meta_data.plugin_list._get_n_loaders()
-        plugin_list = self.meta_data.plugin_list.plugin_list
+        plugin_list = self.meta_data.plugin_list
+        plist = plugin_list.plugin_list
 
         # load the loader plugins
         self._set_loaders()
@@ -99,12 +100,13 @@ class Experiment(object):
         self.experiment_collection = {'plugin_dict': [],
                                       'datasets': []}
         logging.debug("Saving plugin list to file.")
-        self.meta_data.plugin_list._save_plugin_list(
-            self.meta_data.get('nxs_filename'), exp=self)
+        plugin_list._save_plugin_list(self.meta_data.get('nxs_filename'),
+                                      exp=self)
 
+        n_plugins = plugin_list._get_n_processing_plugins()
         count = 0
         # first run through of the plugin setup methods
-        for plugin_dict in plugin_list[n_loaders:n_loaders+n_plugins]:
+        for plugin_dict in plist[n_loaders:n_loaders+n_plugins]:
             data = self.__plugin_setup(plugin_dict, count)
             self.experiment_collection['datasets'].append(data)
             self.experiment_collection['plugin_dict'].append(plugin_dict)
@@ -194,7 +196,7 @@ class Experiment(object):
 
     def _finalise_experiment_for_current_plugin(self):
         finalise = {}
-        # populate nexus file with out_dataset information and find out \
+        # populate nexus file with out_dataset information and determine which
         # datasets to remove from the framework.
         finalise['remove'] = []
         for key, data in self.index['out_data'].iteritems():
@@ -217,12 +219,9 @@ class Experiment(object):
         for data in finalise['remove']:
             del self.index["out_data"][data.data_info.get('name')]
 
-        # replace datasets in input with output of the same name
-        for data in finalise['replace']:
-            name = data.data_info.get('name')
-            output = self.index["out_data"][name]
-            # write links to the nexus file?
-            self.index["in_data"][name] = copy.deepcopy(output)
+        # Add remaining output datasets to input datasets
+        for name, data in self.index['out_data'].iteritems():
+            self.index["in_data"][name] = copy.deepcopy(data)
         self.index['out_data'] = {}
 
     def __unreplicate_data(self):
@@ -261,12 +260,11 @@ class Experiment(object):
         self._barrier()
         logging.info("Adding link to file %s",
                      self.meta_data.get('nxs_filename'))
-
         nxs_file = self.nxs_file
         nxs_entry = nxs_file['entry']
         name = data.data_info.get('name')
         group_name = self.meta_data.get(['group_name', name])
-        link_type = self.meta_data.get('link_type')
+        link_type = self.meta_data.get(['link_type', name])
 
         if link_type is 'final_result':
             plugin_entry = \

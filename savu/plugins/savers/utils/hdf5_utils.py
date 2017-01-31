@@ -68,7 +68,7 @@ class Hdf5Utils(object):
         # entry path in nexus file
         name = data.get_name()
         group_name = self.exp.meta_data.get(['group_name', name])
-        link_type = self.exp.meta_data.get('link_type')
+        link_type = self.exp.meta_data.get(['link_type', name])
         nxs_entry = '/entry/' + link_type
         if link_type == 'final_result':
             nxs_entry += '_' + data.get_name()

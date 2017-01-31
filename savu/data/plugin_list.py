@@ -48,6 +48,9 @@ class PluginList(object):
         self.plugin_list = []
         self.n_plugins = None
         self.n_loaders = 0
+        self.n_savers = 0
+        self.loader_idx = None
+        self.saver_idx = None
         self.datasets_list = []
         self.saver_plugin_status = True
 
@@ -136,6 +139,14 @@ class PluginList(object):
                     self._output_plugin_citations(plugin['cite'], plugin_group)
 
             count += 1
+
+    def _add(self, entry, idx):
+        self.plugin_list.insert(entry, idx)
+        self.__set_loaders_and_savers()
+
+    def _remove(self, idx):
+        del self.plugin_list[idx]
+        self.__set_loaders_and_savers()
 
     def _output_plugin_citations(self, citations, group):
         if not isinstance(citations, list):
@@ -319,10 +330,19 @@ class PluginList(object):
     def _get_n_loaders(self):
         return self.n_loaders
 
+    def _get_n_savers(self):
+        return self.n_savers
+
+    def _get_loaders_index(self):
+        return self.loader_idx
+
+    def _get_savers_index(self):
+        return self.saver_idx
+
     def _get_n_processing_plugins(self):
         return len(self.plugin_list) - self._get_n_loaders()
 
-    def __get_loaders_and_savers_index(self):
+    def __set_loaders_and_savers(self):
         """ Get lists of loader and saver positions within the plugin list and
         set the number of loaders.
 
@@ -342,23 +362,17 @@ class PluginList(object):
                 loader_idx.append(i)
             if saver_list:
                 saver_idx.append(i)
-
+        self.loader_idx = loader_idx
+        self.saver_idx = saver_idx
         self.n_loaders = len(loader_idx)
-        return loader_idx, saver_idx
-
-    def _set_saver_plugin_status(self, status):
-        """ If saver plugin is not required then set status to False.
-        :param bool status: Determines whether the saver plugin will run.
-        """
-        self.saver_plugin_status = status
-
-    def _get_saver_plugin_status(self):
-        return self.saver_plugin_status
+        self.n_savers = len(saver_idx)
 
     def _check_loaders_and_savers(self):
         """ Check plugin list starts with a loader and ends with a saver.
         """
-        loaders, savers = self.__get_loaders_and_savers_index()
+        self.__set_loaders_and_savers()
+        loaders = self._get_loaders_index()
+        savers = self._get_savers_index()
 
         if loaders:
             if loaders[0] is not 0 or loaders[-1]+1 is not len(loaders):
@@ -366,11 +380,18 @@ class PluginList(object):
                                 "of the plugin list")
         else:
             raise Exception("The first plugin in the plugin list must be a "
-                            "loader.")
-
-        if not savers or savers[0] is not self.n_plugins-1:
+                            "loader plugin.")
+        if not savers:
             raise Exception("The final plugin in the plugin list must be a "
-                            "saver")
+                            "saver plugin.")
+
+    def _get_dataset_flow(self):
+        datasets_idx = []
+        n_loaders = self._get_n_loaders()
+        n_plugins = self._get_n_processing_plugins()
+        for i in range(self.n_loaders, n_loaders+n_plugins):
+            datasets_idx.append(self.plugin_list[i]['data']['out_datasets'])
+        return datasets_idx
 
     def _contains_gpu_processes(self):
         """ Returns True if gpu processes exist in the process list. """
