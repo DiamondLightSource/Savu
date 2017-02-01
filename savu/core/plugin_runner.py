@@ -124,6 +124,9 @@ class PluginRunner(object):
         self.exp._barrier()
         self.__fake_plugin_list_run(plugin_list, check=True)
 
+        # update loaders and savers here now the data flow has been determined
+        # need to check that each dataset has a saver?
+
         self.exp._barrier()
         self.exp._clear_data_objects()
 

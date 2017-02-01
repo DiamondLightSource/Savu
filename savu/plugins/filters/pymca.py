@@ -29,7 +29,8 @@ import os
 import savu.test.test_utils as tu
 from PyMca5.PyMcaPhysics.xrf import McaAdvancedFitBatch
 
-#@dawn_compatible
+
+# @dawn_compatible
 @register_plugin
 class Pymca(BaseFilter, CpuPlugin):
     """

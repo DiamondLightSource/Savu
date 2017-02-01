@@ -54,12 +54,16 @@ class BaseI18MultiModalLoader(BaseMultiModalLoader):
         f = data_obj.backing_file
         logging.debug("Creating file '%s' '%s'_entry",
                       data_obj.backing_file.filename, ltype)
-        data_obj.meta_data.set("mono_energy",
-                                    f[self.parameters['monochromator']].value/1e3)
+        data_obj.meta_data.set(
+            "mono_energy", f[self.parameters['monochromator']].value/1e3)
         x = f[self.parameters['x']].value
 
         if self.parameters['x'] is not None:
-            data_obj.meta_data.set("x", x[0, :])
+            if x.ndim > 1:
+                data_obj.meta_data.set_meta_data("x", x[0, :])
+            else:
+                data_obj.meta_data.set_meta_data("x", x)
+
         if self.parameters['y'] is not None:
             y = f[self.parameters['y']].value
             data_obj.meta_data.set("y", y)
