@@ -48,12 +48,10 @@ class PluginRunner(object):
     def _run_plugin_list(self):
         """ Create an experiment and run the plugin list.
         """
-
         plugin_list = self.exp.meta_data.plugin_list
-
         self._run_plugin_list_check(plugin_list)
 
-        self.exp._experiment_setup()
+        self.exp._experiment_setup()  # save the plugin list before the savers are added - not inside here!
         exp_coll = self.exp._get_experiment_collection()
         n_plugins = plugin_list._get_n_processing_plugins()
 
@@ -114,18 +112,15 @@ class PluginRunner(object):
         main processing.
         """
         self.exp._barrier()
-        plugin_list._check_loaders_and_savers()
-
-        #  ********* transport function ***********
-        self._transport_update_plugin_list()
+        plugin_list._check_loaders()
 
         self.__check_gpu()
 
         self.exp._barrier()
         self.__fake_plugin_list_run(plugin_list, check=True)
 
-        # update loaders and savers here now the data flow has been determined
-        # need to check that each dataset has a saver?
+        #  ********* transport function ***********
+        self._transport_update_plugin_list()
 
         self.exp._barrier()
         self.exp._clear_data_objects()
@@ -133,6 +128,12 @@ class PluginRunner(object):
         self.exp._barrier()
         cu.user_message("Plugin list check complete!")
 
+        
+    def __get_data_flow(self):
+        n_loaders = self.exp.meta_data.plugin_list._get_n_loaders()
+        n_plugins = plugin_list._get_n_processing_plugins()
+        plist = plugin_list.plugin_list        
+        
     def __fake_plugin_list_run(self, plugin_list, **kwargs):
         """ Run through the plugin list without any processing (setup only)\
         and fill in missing dataset names.
@@ -153,6 +154,10 @@ class PluginRunner(object):
             plist[i]['cite'] = plugin.get_citation_information()
             plugin._clean_up()
             self.exp._merge_out_data_to_in()
+
+        import copy
+        data_list = copy.copy(self.exp.index['in_data'].keys())
+        plugin_list._setup_savers(data_list)
 
     def __check_gpu(self):
         """ Check if the process list contains GPU processes and determine if

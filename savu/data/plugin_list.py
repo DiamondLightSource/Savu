@@ -27,6 +27,7 @@ import h5py
 import json
 import copy
 import inspect
+import re
 import textwrap
 
 import numpy as np
@@ -140,8 +141,11 @@ class PluginList(object):
 
             count += 1
 
-    def _add(self, entry, idx):
-        self.plugin_list.insert(entry, idx)
+    def _add(self, idx, entry):
+        print "Adding to the plugin list", idx, entry
+        self.plugin_list.insert(idx, entry)
+        for p in self.plugin_list:
+            print p
         self.__set_loaders_and_savers()
 
     def _remove(self, idx):
@@ -367,12 +371,11 @@ class PluginList(object):
         self.n_loaders = len(loader_idx)
         self.n_savers = len(saver_idx)
 
-    def _check_loaders_and_savers(self):
+    def _check_loaders(self):
         """ Check plugin list starts with a loader and ends with a saver.
         """
         self.__set_loaders_and_savers()
         loaders = self._get_loaders_index()
-        savers = self._get_savers_index()
 
         if loaders:
             if loaders[0] is not 0 or loaders[-1]+1 is not len(loaders):
@@ -381,9 +384,27 @@ class PluginList(object):
         else:
             raise Exception("The first plugin in the plugin list must be a "
                             "loader plugin.")
-        if not savers:
-            raise Exception("The final plugin in the plugin list must be a "
-                            "saver plugin.")
+
+    def _setup_savers(self, data_names):
+        """ Add savers for missing datasets. """
+        saved_data = []
+        for i in self._get_savers_index():
+            saved_data.append(self.plugin_list[i]['data']['in_datasets'])
+        saved_data = set([s for sub_list in saved_data for s in sub_list])
+
+        for name in [data for data in data_names if data not in s]:
+            process = {}
+            pos = int(re.search(r'\d+', self.plugin_list[-1]['pos']).group())+1
+            plugin = pu.load_plugin('savu.plugins.savers.hdf5_saver')
+            plugin._populate_default_parameters()
+            plugin.parameters['in_datasets'] = [name]
+            process['name'] = plugin.name
+            process['id'] = plugin.__module__
+            process['pos'] = str(pos)
+            process['data'] = plugin.parameters
+            process['active'] = True
+            process['desc'] = plugin.parameters_desc
+            self._add(pos, process)
 
     def _get_dataset_flow(self):
         datasets_idx = []

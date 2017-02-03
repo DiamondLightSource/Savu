@@ -29,7 +29,7 @@ import numpy as np
 from savu.plugins.base_loader import BaseLoader
 from savu.plugins.loaders.nxtomo_loader import NxtomoLoader
 from savu.plugins.utils import register_plugin
-from savu.data.data_structures.data_type.stitch_data import StitchData
+from savu.data.data_structures.data_types.stitch_data import StitchData
 
 
 @register_plugin

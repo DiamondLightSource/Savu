@@ -23,6 +23,7 @@
 
 import logging
 import inspect
+import copy
 import numpy as np
 
 from savu.plugins import utils as pu
@@ -244,6 +245,7 @@ class Plugin(PluginDatasets):
         """ Perform necessary plugin clean up after the plugin has completed.
         """
         self.__copy_meta_data()
+        self.__set_previous_patterns()
         self.__clean_up_plugin_data()
 
     def __copy_meta_data(self):
@@ -254,7 +256,6 @@ class Plugin(PluginDatasets):
         remove_keys = self.__remove_axis_data()
         in_meta_data, out_meta_data = self.get()
         copy_dict = {}
-        import copy
         for mData in in_meta_data:
             temp = copy.deepcopy(mData.get_dictionary())
             copy_dict.update(temp)
@@ -266,6 +267,11 @@ class Plugin(PluginDatasets):
                     del temp[key]
             temp.update(out_meta_data[i].get_dictionary())
             out_meta_data[i]._set_dictionary(temp)
+
+    def __set_previous_patterns(self):
+        for data in self.get_out_datasets():
+            data._set_previous_pattern(
+                copy.deepcopy(data._get_plugin_data().get_pattern()))
 
     def __remove_axis_data(self):
         """

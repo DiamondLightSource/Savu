@@ -34,7 +34,7 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 class TiffSaver(BaseSaver, CpuPlugin):
     """
     A class to save tomography data to tiff files
-
+    :param pattern: How to slice the data. Default: 'VOLUME_XZ'.
     """
 
     def __init__(self, name='TiffSaver'):
@@ -63,7 +63,7 @@ class TiffSaver(BaseSaver, CpuPlugin):
         tf.imsave(filename, data[0])
         self.count += 1
 
-    def post_process(self):
-        # this is incorrect and only provides a broken link
-        self._link_datafile_to_nexus_file(self.data_name, self.filename,
-                                          self.group_name)
+#    def post_process(self):
+#        # this is incorrect and only provides a broken link
+#        self._link_datafile_to_nexus_file(self.data_name, self.filename,
+#                                          self.group_name)

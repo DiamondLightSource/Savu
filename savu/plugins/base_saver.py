@@ -32,7 +32,6 @@ class BaseSaver(Plugin):
 
     :param in_datasets: A list of the dataset(s) to process. Default: [].
     :param out_datasets: A list of the dataset(s) to create. Default: [].
-    :param pattern: How to slice the data. Default: 'VOLUME_XZ'.
     """
 
     def __init__(self, name="BaseSaver"):
@@ -41,7 +40,7 @@ class BaseSaver(Plugin):
 
     def setup(self):
         in_pData = self.get_plugin_in_datasets()
-        pattern = self.parameters['pattern']
+        pattern = self.get_pattern()
         in_pData[0].plugin_data_setup(pattern, self.get_max_frames())
 
     def _link_datafile_to_nexus_file(self, name, filename, path):
@@ -63,6 +62,9 @@ class BaseSaver(Plugin):
         plugin_dict = \
             self.exp._get_experiment_collection()['plugin_dict'][nPlugin]
         return "%i-%s-%s" % (nPlugin, plugin_dict['name'], name)
+
+    def get_pattern(self):
+        return self.parameters['pattern']
 
     def get_frame(self):
         return self.frame

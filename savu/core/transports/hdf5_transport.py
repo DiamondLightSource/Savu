@@ -42,7 +42,7 @@ class Hdf5Transport(BaseTransport):
         saver_idx = plugin_list._get_savers_index()
         remove = []
         for idx in saver_idx:
-            if plugin_list.plugin_list[idx]['name'] == 'Hdf5TomoSaver':
+            if plugin_list.plugin_list[idx]['name'] == 'Hdf5Saver':
                 remove.append(idx)
         for idx in sorted(remove, reverse=True):
             plugin_list._remove(idx)

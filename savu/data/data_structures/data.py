@@ -45,12 +45,12 @@ class Data(DataCreate):
         self.group_name = None
         self.group = None
         self._plugin_data_obj = None
-        #self.tomo_raw_obj = None
         self.raw = None
         self.backing_file = None
         self.data = None
         self.next_shape = None
         self.orig_shape = None
+        self.previous_pattern = None
 
     def __initialise_data_info(self, name):
         """ Initialise entries in the data_info meta data.
@@ -108,6 +108,12 @@ class Data(DataCreate):
         :rtype: dict
         """
         return self.data_info.get('data_patterns')
+
+    def _set_previous_pattern(self, pattern):
+        self.previous_pattern = pattern
+
+    def get_previous_pattern(self):
+        return self.previous_pattern
 
     def set_shape(self, shape):
         """ Set the dataset shape.
