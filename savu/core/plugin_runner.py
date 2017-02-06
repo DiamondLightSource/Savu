@@ -111,53 +111,41 @@ class PluginRunner(object):
         """ Run the plugin list through the framework without executing the
         main processing.
         """
-        self.exp._barrier()
         plugin_list._check_loaders()
 
         self.__check_gpu()
 
-        self.exp._barrier()
-        self.__fake_plugin_list_run(plugin_list, check=True)
+        n_loaders = self.exp.meta_data.plugin_list._get_n_loaders()
+        for i in range(n_loaders):
+            pu.plugin_loader(self.exp, plugin_list.plugin_list[i])
+
+        self.exp._set_nxs_filename()
+
+        self.__fake_plugin_list_run(plugin_list, n_loaders)
+
+        plugin_list._add_missing_savers(self.exp.index['in_data'].keys())
 
         #  ********* transport function ***********
         self._transport_update_plugin_list()
 
-        self.exp._barrier()
         self.exp._clear_data_objects()
 
-        self.exp._barrier()
+        self.__fake_plugin_list_run(plugin_list, n_loaders)
+        self.exp._clear_data_objects()
         cu.user_message("Plugin list check complete!")
 
-        
-    def __get_data_flow(self):
-        n_loaders = self.exp.meta_data.plugin_list._get_n_loaders()
-        n_plugins = plugin_list._get_n_processing_plugins()
-        plist = plugin_list.plugin_list        
-        
-    def __fake_plugin_list_run(self, plugin_list, **kwargs):
+    def __fake_plugin_list_run(self, plugin_list, start):
         """ Run through the plugin list without any processing (setup only)\
         and fill in missing dataset names.
         """
-        n_loaders = self.exp.meta_data.plugin_list._get_n_loaders()
         n_plugins = plugin_list._get_n_processing_plugins()
         plist = plugin_list.plugin_list
-
-        for i in range(n_loaders):
-            pu.plugin_loader(self.exp, plist[i])
-
-        self.exp._set_nxs_filename()
-
-        check = kwargs.get('check', False)
-        for i in range(n_loaders, n_loaders+n_plugins):
+        for i in range(start, start+n_plugins):
             self.exp._barrier()
-            plugin = pu.plugin_loader(self.exp, plist[i], check=check)
+            plugin = pu.plugin_loader(self.exp, plist[i], check=True)
             plist[i]['cite'] = plugin.get_citation_information()
             plugin._clean_up()
             self.exp._merge_out_data_to_in()
-
-        import copy
-        data_list = copy.copy(self.exp.index['in_data'].keys())
-        plugin_list._setup_savers(data_list)
 
     def __check_gpu(self):
         """ Check if the process list contains GPU processes and determine if

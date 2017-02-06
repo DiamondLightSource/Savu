@@ -86,21 +86,19 @@ def set_tomoRaw_experiment(filename, **kwargs):
     # create experiment
     options = set_options(get_test_data_path(filename))
     options['loader'] = 'savu.plugins.loaders.nxtomo_loader'
-    options['saver'] = 'savu.plugins.savers.hdf5_tomo_saver'
     return options
 
 
 def set_tomo_experiment(filename, **kwargs):
     options = set_options(get_test_data_path(filename), **kwargs)
     options['loader'] = 'savu.plugins.loaders.savu_loader'
-    options['saver'] = 'savu.plugins.savers.hdf5_tomo_saver'
+    #options['saver'] = 'savu.plugins.savers.hdf5_saver'
     return options
 
 
 def set_fluo_experiment(filename, **kwargs):
     options = set_options(get_test_data_path(filename), **kwargs)
     options['loader'] = 'savu.plugins.loaders.nxfluo_loader'
-    options['saver'] = 'savu.plugins.savers.hdf5_tomo_saver'
     return options
 
 
@@ -108,7 +106,6 @@ def set_3dto4d_experiment(filename, **kwargs):
     options = set_options(
         get_test_data_path('/i12_test_data/' + filename), **kwargs)
     options['loader'] = 'savu.plugins.loaders.nxtomo_loader'
-    options['saver'] = 'savu.plugins.savers.hdf5_tomo_saver'
     return options
 
 
@@ -126,7 +123,7 @@ def set_plugin_list(options, pnames, *args):
     args = args[0] if args else None
     plugin_names = pnames if isinstance(pnames, list) else [pnames]
     options['plugin_list'] = []
-    ID = [options['loader'], options['saver']]
+    ID = [options['loader']]
     data = [{}, {}] if not args else [args[0], args[-1]]
     for i in range(len(plugin_names)):
         ID.insert(i+1, plugin_names[i])
@@ -137,14 +134,16 @@ def set_plugin_list(options, pnames, *args):
 
     for i in range(len(ID)):
         name = pu.module2class(ID[i].split('.')[-1])
-        options['plugin_list'].append(set_plugin_entry(name, ID[i], data[i]))
+        options['plugin_list'].append(set_plugin_entry(
+            name, ID[i], data[i], i))
 
 
-def set_plugin_entry(name, ID, data):
+def set_plugin_entry(name, ID, data, pos):
     plugin = {}
     plugin['name'] = name
     plugin['id'] = ID
     plugin['data'] = data
+    plugin['pos'] = str(pos)
     return plugin
 
 
@@ -173,10 +172,7 @@ def load_test_data(exp_type):
     plugin_list = []
     ID = options['loader']
     name = pu.module2class(ID.split('.')[-1])
-    plugin_list.append(set_plugin_entry(name, ID, {}))
-    ID = options['saver']
-    name = pu.module2class(ID.split('.')[-1])
-    plugin_list.append(set_plugin_entry(name, ID, {}))
+    plugin_list.append(set_plugin_entry(name, ID, {}, 0))
 
     # currently assuming an empty parameters dictionary
     options['plugin_list'] = plugin_list

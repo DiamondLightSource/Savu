@@ -382,7 +382,7 @@ class PluginList(object):
             raise Exception("The first plugin in the plugin list must be a "
                             "loader plugin.")
 
-    def _setup_savers(self, data_names):
+    def _add_missing_savers(self, data_names):
         """ Add savers for missing datasets. """
         saved_data = []
         for i in self._get_savers_index():
