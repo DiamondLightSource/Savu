@@ -116,6 +116,8 @@ def _set_options(opt, args):
 
     options['log_path'] = opt.log_dir if opt.log_dir else options['inter_path']
 
+    options['nProcesses'] = len(options["process_names"].split(','))
+
     return options
 
 
@@ -151,8 +153,20 @@ def main(input_args=None):
     __check_input_params(args)
 
     options = _set_options(options, args)
-    plugin_runner = PluginRunner(options)
-    plugin_runner._run_plugin_list()
+
+    if options['nProcesses'] == 1:
+        plugin_runner = PluginRunner(options)
+        plugin_runner._run_plugin_list()
+    else:
+        try:
+            plugin_runner = PluginRunner(options)
+            plugin_runner._run_plugin_list()
+        except Exception as error:
+            import traceback
+            print error.message
+            traceback.print_exc(file=sys.stdout)
+            MPI.COMM_WORLD.Abort()
+
 
 if __name__ == '__main__':
     main()
