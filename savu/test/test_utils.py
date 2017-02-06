@@ -92,7 +92,6 @@ def set_tomoRaw_experiment(filename, **kwargs):
 def set_tomo_experiment(filename, **kwargs):
     options = set_options(get_test_data_path(filename), **kwargs)
     options['loader'] = 'savu.plugins.loaders.savu_loader'
-    #options['saver'] = 'savu.plugins.savers.hdf5_saver'
     return options
 
 
