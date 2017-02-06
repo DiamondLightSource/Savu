@@ -142,10 +142,7 @@ class PluginList(object):
             count += 1
 
     def _add(self, idx, entry):
-        print "Adding to the plugin list", idx, entry
         self.plugin_list.insert(idx, entry)
-        for p in self.plugin_list:
-            print p
         self.__set_loaders_and_savers()
 
     def _remove(self, idx):
@@ -392,7 +389,7 @@ class PluginList(object):
             saved_data.append(self.plugin_list[i]['data']['in_datasets'])
         saved_data = set([s for sub_list in saved_data for s in sub_list])
 
-        for name in [data for data in data_names if data not in s]:
+        for name in [data for data in data_names if data not in saved_data]:
             process = {}
             pos = int(re.search(r'\d+', self.plugin_list[-1]['pos']).group())+1
             plugin = pu.load_plugin('savu.plugins.savers.hdf5_saver')
