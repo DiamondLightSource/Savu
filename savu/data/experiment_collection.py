@@ -141,8 +141,9 @@ class Experiment(object):
         return self.experiment_collection
 
     def _set_experiment_for_current_plugin(self, count):
+        n_loaders = self.meta_data.plugin_list._get_n_loaders()
         datasets_list = \
-            self.meta_data.plugin_list._get_datasets_list()[count:]
+            self.meta_data.plugin_list._get_datasets_list()[n_loaders+count:]
         exp_coll = self._get_experiment_collection()
         self.index['out_data'] = exp_coll['datasets'][count]
         self._get_current_and_next_patterns(datasets_list)

@@ -75,6 +75,7 @@ class Chunking(object):
         adjust_dim = self.__get_adjustable_dims()
         array_len = len(adjust_dim)
         adjust_max = [1]*array_len
+
         for i in range(array_len):
             adjust_max[i] = shape[adjust_dim[i]]
         inc_dict = {'up': [1]*array_len, 'down': [1]*array_len}
