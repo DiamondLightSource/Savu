@@ -60,9 +60,9 @@ class BaseI18MultiModalLoader(BaseMultiModalLoader):
 
         if self.parameters['x'] is not None:
             if x.ndim > 1:
-                data_obj.meta_data.set_meta_data("x", x[0, :])
+                data_obj.meta_data.set("x", x[0, :])
             else:
-                data_obj.meta_data.set_meta_data("x", x)
+                data_obj.meta_data.set("x", x)
 
         if self.parameters['y'] is not None:
             y = f[self.parameters['y']].value

@@ -125,6 +125,7 @@ class PluginRunner(object):
         self.exp._clear_data_objects()
 
         self.__fake_plugin_list_run(plugin_list)
+
         self.exp._clear_data_objects()
         cu.user_message("Plugin list check complete!")
 
@@ -132,8 +133,10 @@ class PluginRunner(object):
         """ Run through the plugin list without any processing (setup only)\
         and fill in missing dataset names.
         """
+        plugin_list._reset_datsets_list()
         n_loaders = self.exp.meta_data.plugin_list._get_n_loaders()
         n_plugins = plugin_list._get_n_processing_plugins()
+
         plist = plugin_list.plugin_list
         for i in range(n_loaders):
             pu.plugin_loader(self.exp, plugin_list.plugin_list[i])

@@ -328,6 +328,9 @@ class PluginList(object):
     def _get_datasets_list(self):
         return self.datasets_list
 
+    def _reset_datsets_list(self):
+        self.datasets_list = []
+
     def _get_n_loaders(self):
         return self.n_loaders
 
