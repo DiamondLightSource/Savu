@@ -16,9 +16,9 @@ Submodules
 
    savu.data.chunking
    savu.data.experiment_collection
+   savu.data.framework_citations
    savu.data.meta_data
    savu.data.plugin_list
-   savu.data.transport_data
 
 Module contents
 ---------------

@@ -7,8 +7,6 @@ savu
 
 .. toctree::
    api/savu.tomo_recon
-   api/savu.long_test_runner
-   api/savu.short_test_runner
 
 
 savu.core
@@ -17,7 +15,6 @@ savu.core
 .. toctree::
    api/savu.core.utils
    api/savu.core.plugin_runner
-   api/savu.core.transport_control
    api/savu.core.dist_array_process
    api/savu.core.transport_setup
 
@@ -27,8 +24,9 @@ savu.core.transports
 
 .. toctree::
    api/savu.core.transports.hdf5_transport
-   api/savu.core.transports.dist_array_transport
    api/savu.core.transports.dist_array_utils
+   api/savu.core.transports.base_transport
+   api/savu.core.transports.dist_array_transport
 
 
 savu.data
@@ -39,7 +37,7 @@ savu.data
    api/savu.data.plugin_list
    api/savu.data.chunking
    api/savu.data.meta_data
-   api/savu.data.transport_data
+   api/savu.data.framework_citations
 
 
 savu.data.transport_data
@@ -47,7 +45,8 @@ savu.data.transport_data
 
 .. toctree::
    api/savu.data.transport_data.hdf5_transport_data
-   api/savu.data.transport_data.distArray_transport_data
+   api/savu.data.transport_data.dist_array_transport_data
+   api/savu.data.transport_data.base_transport_data
 
 
 savu.data.data_structures
@@ -61,7 +60,19 @@ savu.data.data_structures
    api/savu.data.data_structures.plugin_data
    api/savu.data.data_structures.preview
    api/savu.data.data_structures.utils
-   api/savu.data.data_structures.data_type
+
+
+savu.data.data_structures.data_types
+------------------------------------------------------------
+
+.. toctree::
+   api/savu.data.data_structures.data_types.base_type
+   api/savu.data.data_structures.data_types.data_plus_darks_and_flats
+   api/savu.data.data_structures.data_types.fabIO
+   api/savu.data.data_structures.data_types.map_3dto4d_h5
+   api/savu.data.data_structures.data_types.mrc
+   api/savu.data.data_structures.data_types.replicate
+   api/savu.data.data_structures.data_types.stitch_data
 
 
 savu.plugins
@@ -78,6 +89,7 @@ savu.plugins
    api/savu.plugins.plugin_datasets
    api/savu.plugins.basic_operations
    api/savu.plugins.plugin_datasets_notes
+   api/savu.plugins.testing_sino_align
 
 
 savu.plugins.reconstructions
@@ -93,6 +105,7 @@ savu.plugins.reconstructions
    api/savu.plugins.reconstructions.scikitimage_filter_back_projection
    api/savu.plugins.reconstructions.non_local_regularised_cgls
    api/savu.plugins.reconstructions.really_old_base_astra_recon
+   api/savu.plugins.reconstructions.tomopy_recon
 
 
 savu.plugins.reconstructions.astra_recons
@@ -109,6 +122,8 @@ savu.plugins.corrections
 .. toctree::
    api/savu.plugins.corrections.timeseries_field_corrections
    api/savu.plugins.corrections.dark_flat_field_correction
+   api/savu.plugins.corrections.time_based_correction
+   api/savu.plugins.corrections.time_based_plus_drift_correction
 
 
 savu.plugins.driver
@@ -119,6 +134,8 @@ savu.plugins.driver
    api/savu.plugins.driver.cpu_plugin
    api/savu.plugins.driver.gpu_plugin
    api/savu.plugins.driver.plugin_driver
+   api/savu.plugins.driver.multi_threaded_plugin
+   api/savu.plugins.driver.single_node_multi_threaded_plugin
 
 
 savu.plugins.filters
@@ -151,6 +168,15 @@ savu.plugins.filters
    api/savu.plugins.filters.base_absorption_correction
    api/savu.plugins.filters.base_ptycho
    api/savu.plugins.filters.poly_background_estimator
+   api/savu.plugins.filters.data_removal
+   api/savu.plugins.filters.xrd_absorption_approximation
+   api/savu.plugins.filters.sinogram_clean
+   api/savu.plugins.filters.quantisation_filter
+   api/savu.plugins.filters.projection_vertical_alignment
+   api/savu.plugins.filters.projection_shift
+   api/savu.plugins.filters.ring_removal_waveletfft
+   api/savu.plugins.filters
+   api/savu.plugins.filters.threshold_filter
 
 
 savu.plugins.filters.component_analysis
@@ -158,6 +184,7 @@ savu.plugins.filters.component_analysis
 
 .. toctree::
    api/savu.plugins.filters.component_analysis.ica
+   api/savu.plugins.filters.component_analysis.pca
 
 
 savu.plugins.filters.fitters
@@ -185,6 +212,7 @@ savu.plugins.filters.azimuthal_integrators
    api/savu.plugins.filters.azimuthal_integrators
    api/savu.plugins.filters.azimuthal_integrators
    api/savu.plugins.filters.azimuthal_integrators
+   api/savu.plugins.filters.azimuthal_integrators
 
 
 savu.plugins.filters.absorption_corrections
@@ -199,6 +227,8 @@ savu.plugins.filters.ptychography
 
 .. toctree::
    api/savu.plugins.filters.ptychography.dummy_ptycho
+   api/savu.plugins.filters.ptychography.ptypy_compact
+   api/savu.plugins.filters.ptychography.ptypy_batch
 
 
 savu.plugins.loaders
@@ -212,6 +242,9 @@ savu.plugins.loaders
    api/savu.plugins.loaders.image_loader
    api/savu.plugins.loaders.multi_nxtomo_loader
    api/savu.plugins.loaders.i18_mm_loader
+   api/savu.plugins.loaders.multi_savu_loader
+   api/savu.plugins.loaders.p2r_fly_scan_detector_loader
+   api/savu.plugins.loaders.mrc_loader
 
 
 savu.plugins.loaders.multi_modal_loaders
@@ -224,6 +257,11 @@ savu.plugins.loaders.multi_modal_loaders
    api/savu.plugins.loaders.multi_modal_loaders.nxxrd_loader
    api/savu.plugins.loaders.multi_modal_loaders.base_i18_multi_modal_loader
    api/savu.plugins.loaders.multi_modal_loaders.nxptycho_loader
+   api/savu.plugins.loaders.multi_modal_loaders.i13_ptycho_loader
+   api/savu.plugins.loaders.multi_modal_loaders.i13_stxm_loader
+   api/savu.plugins.loaders.multi_modal_loaders.i13_stxm_monitor_loader
+   api/savu.plugins.loaders.multi_modal_loaders.i13_stxm_xrf_loader
+   api/savu.plugins.loaders.multi_modal_loaders.txm_loader
 
 
 savu.plugins.loaders.multi_modal_loaders.i18_loaders
@@ -238,11 +276,32 @@ savu.plugins.loaders.multi_modal_loaders.i18_loaders
    api/savu.plugins.loaders.multi_modal_loaders.i18_loaders.i22_tomo_loader
 
 
+savu.plugins.loaders.utils
+------------------------------------------------------------
+
+.. toctree::
+   api/savu.plugins.loaders.utils.mrc_header
+
+
 savu.plugins.savers
 ------------------------------------------------------------
 
 .. toctree::
-   api/savu.plugins.savers.hdf5_tomo_saver
+   api/savu.plugins.savers.tiff_saver
+   api/savu.plugins.savers.hdf5_saver
+
+
+savu.plugins.savers.utils
+------------------------------------------------------------
+
+.. toctree::
+   api/savu.plugins.savers.utils.hdf5_utils
+
+
+savu.IMAGES
+------------------------------------------------------------
+
+.. toctree::
 
 
 Indices and tables

@@ -23,9 +23,16 @@ Submodules
    savu.test.travis.plugin_tests.filter_tests.median_filter_test
    savu.test.travis.plugin_tests.filter_tests.monitor_correction_test
    savu.test.travis.plugin_tests.filter_tests.paganin_test
+   savu.test.travis.plugin_tests.filter_tests.pyfai_filtered_test
+   savu.test.travis.plugin_tests.filter_tests.pyfai_separate_test
+   savu.test.travis.plugin_tests.filter_tests.pyfai_test
+   savu.test.travis.plugin_tests.filter_tests.pymca_test
+   savu.test.travis.plugin_tests.filter_tests.quantisation_filter_test
    savu.test.travis.plugin_tests.filter_tests.raven_filter_test
    savu.test.travis.plugin_tests.filter_tests.ring_artefact_test
+   savu.test.travis.plugin_tests.filter_tests.simple_fit_test
    savu.test.travis.plugin_tests.filter_tests.sinogram_alignment_test
    savu.test.travis.plugin_tests.filter_tests.strip_background_test
+   savu.test.travis.plugin_tests.filter_tests.threshold_filter_test
    savu.test.travis.plugin_tests.filter_tests.vo_centering_test
 

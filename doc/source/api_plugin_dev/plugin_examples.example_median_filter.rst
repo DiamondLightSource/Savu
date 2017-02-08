@@ -1,0 +1,7 @@
+plugin_examples.example_median_filter module
+============================================
+
+.. automodule:: plugin_examples.example_median_filter
+    :members:
+    :undoc-members:
+    :noindex:

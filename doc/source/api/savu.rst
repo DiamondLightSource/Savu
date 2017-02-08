@@ -22,7 +22,5 @@ Submodules
 
 .. toctree::
 
-   savu.long_test_runner
-   savu.short_test_runner
    savu.tomo_recon
 

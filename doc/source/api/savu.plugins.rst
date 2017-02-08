@@ -33,5 +33,6 @@ Submodules
    savu.plugins.plugin
    savu.plugins.plugin_datasets
    savu.plugins.plugin_datasets_notes
+   savu.plugins.testing_sino_align
    savu.plugins.utils
 

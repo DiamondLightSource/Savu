@@ -1,6 +1,13 @@
 savu.data.data_structures package
 =================================
 
+Subpackages
+-----------
+
+.. toctree::
+
+    savu.data.data_structures.data_types
+
 Submodules
 ----------
 
@@ -10,7 +17,6 @@ Submodules
    savu.data.data_structures.data_add_ons
    savu.data.data_structures.data_create
    savu.data.data_structures.data_notes
-   savu.data.data_structures.data_type
    savu.data.data_structures.plugin_data
    savu.data.data_structures.preview
    savu.data.data_structures.utils

@@ -103,14 +103,13 @@ class Hdf5Transport(BaseTransport):
 
     def __get_filenames(self, plugin_dict):
         count = self.exp.meta_data.get('nPlugin') + 1
-        plugin_list = self.exp.meta_data.plugin_list
-        # determine if this is the last link of this dataset => final_result
-        nPlugins = plugin_list._get_n_processing_plugins()
         files = {"filename": {}, "group_name": {}, "link_type": {}}
         for key in self.exp.index["out_data"].keys():
             name = key + '_p' + str(count) + '_' + \
                 plugin_dict['id'].split('.')[-1] + '.h5'
-            if count is nPlugins:
+            link_type = self.__get_link_type(key)
+            files['link_type'][key] = link_type
+            if link_type == 'final_result' and self.__final_output(key):
                 out_path = self.exp.meta_data.get('out_path')
             else:
                 out_path = self.exp.meta_data.get('inter_path')
@@ -119,7 +118,6 @@ class Hdf5Transport(BaseTransport):
             self.exp._barrier()
             files["filename"][key] = filename
             files["group_name"][key] = group_name
-            files['link_type'][key] = self.__get_link_type(key)
         return files
 
     def __get_link_type(self, name):
@@ -128,3 +126,14 @@ class Hdf5Transport(BaseTransport):
         if name in temp:
             return 'intermediate'
         return 'final_result'
+
+    def __final_output(self, name):
+        plugin_list = self.exp.meta_data.plugin_list
+        saver_idx = plugin_list._get_savers_index()
+        print saver_idx
+        names = [plugin_list.plugin_list[i]['data']['out_datasets'] for i in saver_idx]
+        print names
+        print name, names
+        if name in names:
+            return True
+        return False

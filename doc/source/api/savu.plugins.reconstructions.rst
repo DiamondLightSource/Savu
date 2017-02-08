@@ -28,4 +28,5 @@ Submodules
    savu.plugins.reconstructions.scikitimage_sart
    savu.plugins.reconstructions.simple_fake_gpu_recon
    savu.plugins.reconstructions.simple_recon
+   savu.plugins.reconstructions.tomopy_recon
 

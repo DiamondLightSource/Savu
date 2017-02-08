@@ -7,10 +7,18 @@ savu.plugins.savers package
     :undoc-members:
     :show-inheritance:
 
+Subpackages
+-----------
+
+.. toctree::
+
+    savu.plugins.savers.utils
+
 Submodules
 ----------
 
 .. toctree::
 
-   savu.plugins.savers.hdf5_tomo_saver
+   savu.plugins.savers.hdf5_saver
+   savu.plugins.savers.tiff_saver
 

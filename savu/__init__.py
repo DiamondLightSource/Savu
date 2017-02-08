@@ -28,7 +28,6 @@ import savu
 
 import os
 import sys
-import logging
 
 savuPath = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(savuPath + "/../lib"))
@@ -37,6 +36,7 @@ from . import core
 from . import data
 from . import plugins
 from . import test
+from .version import __version__
 
 
 def run_full_tests():

@@ -29,6 +29,7 @@ Submodules
    savu.plugins.filters.base_component_analysis
    savu.plugins.filters.base_fitter
    savu.plugins.filters.base_ptycho
+   savu.plugins.filters.data_removal
    savu.plugins.filters.denoise_bregman_filter
    savu.plugins.filters.dezing_filter
    savu.plugins.filters.dials_find_spots
@@ -42,11 +43,19 @@ Submodules
    savu.plugins.filters.old_centering
    savu.plugins.filters.paganin_filter
    savu.plugins.filters.poly_background_estimator
+   savu.plugins.filters.projection_shift
+   savu.plugins.filters.projection_vertical_alignment
+   savu.plugins.filters.pymca
+   savu.plugins.filters.quantisation_filter
    savu.plugins.filters.raven_filter
    savu.plugins.filters.ring_artefact_filter
+   savu.plugins.filters.ring_removal_waveletfft
    savu.plugins.filters.sinogram_alignment
+   savu.plugins.filters.sinogram_clean
    savu.plugins.filters.spectrum_crop
    savu.plugins.filters.stats
    savu.plugins.filters.strip_background
+   savu.plugins.filters.threshold_filter
    savu.plugins.filters.vo_centering
+   savu.plugins.filters.xrd_absorption_approximation
 

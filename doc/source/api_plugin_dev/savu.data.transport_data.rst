@@ -6,7 +6,8 @@ Submodules
 
 .. toctree::
 
-   savu.data.transport_data.distArray_transport_data
+   savu.data.transport_data.base_transport_data
+   savu.data.transport_data.dist_array_transport_data
    savu.data.transport_data.hdf5_transport_data
 
 Module contents

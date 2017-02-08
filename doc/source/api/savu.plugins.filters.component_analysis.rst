@@ -13,4 +13,5 @@ Submodules
 .. toctree::
 
    savu.plugins.filters.component_analysis.ica
+   savu.plugins.filters.component_analysis.pca
 
