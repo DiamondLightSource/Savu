@@ -24,7 +24,8 @@ import os.path as os
 import h5py
 import logging
 import math
-from savu.plugins.loaders.base_multi_modal_loader import BaseMultiModalLoader
+from savu.plugins.loaders.mapping_loaders.base_multi_modal_loader \
+    import BaseMultiModalLoader
 from savu.plugins.utils import register_plugin
 import savu.test.test_utils as tu
 

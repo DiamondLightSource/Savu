@@ -21,12 +21,11 @@
 
 """
 
-from savu.core.utils import logmethod
-from savu.plugins.base_loader import BaseLoader
-from savu.plugins.loaders.multi_modal_loaders.nxfluo_loader import NxfluoLoader
-from savu.plugins.loaders.multi_modal_loaders.nxxrd_loader import NxxrdLoader
-from savu.plugins.loaders.multi_modal_loaders.nxstxm_loader import NxstxmLoader
-from savu.plugins.loaders.multi_modal_loaders.nxmonitor_loader \
+from savu.plugins.loaders.base_loader import BaseLoader
+from savu.plugins.loaders.mapping_loaders.nxfluo_loader import NxfluoLoader
+from savu.plugins.loaders.mapping_loaders.nxxrd_loader import NxxrdLoader
+from savu.plugins.loaders.mapping_loaders.nxstxm_loader import NxstxmLoader
+from savu.plugins.loaders.mapping_loaders.nxmonitor_loader \
     import NxmonitorLoader
 import logging
 
@@ -38,7 +37,8 @@ class MmLoader(BaseLoader):
     """
     A class to load tomography data from an NXTomo file
 
-    :param calibration_path: path to the calibration file. Default: "Savu/test_data/data/LaB6_calibration_output.nxs".
+    :param calibration_path: path to the calibration \
+        file. Default: "Savu/test_data/data/LaB6_calibration_output.nxs".
     """
 
     def __init__(self, name='MmLoader'):
@@ -53,7 +53,6 @@ class MmLoader(BaseLoader):
             logging.warn('This file does not contain an NXfluo')
         except:
             raise
-        
         try:
             self.setup_loader(NxxrdLoader(), self.parameters)
             logging.debug('This file contains an NXxrd')
@@ -61,7 +60,6 @@ class MmLoader(BaseLoader):
             logging.warn('This file does not contain an NXxrd')
         except:
             raise
-        
         try:
             self.setup_loader(NxstxmLoader(), new_dict)
             logging.debug('This file contains an NXstxm')

@@ -25,7 +25,7 @@ import h5py
 import logging
 import numpy as np
 
-from savu.plugins.base_loader import BaseLoader
+from savu.plugins.loaders.base_loader import BaseLoader
 from savu.plugins.utils import register_plugin
 import savu.core.utils as cu
 

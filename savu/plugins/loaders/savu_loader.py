@@ -24,7 +24,7 @@
 import h5py
 
 import savu.data.data_structures as ds
-from savu.plugins.base_loader import BaseLoader
+from savu.plugins.loaders.base_loader import BaseLoader
 
 from savu.plugins.utils import register_plugin
 

@@ -24,7 +24,7 @@
 import h5py
 import tempfile
 
-from savu.plugins.base_loader import BaseLoader
+from savu.plugins.loaders.base_loader import BaseLoader
 from savu.plugins.utils import register_plugin
 from savu.data.data_structures.data_types.mrc import MRC as MrcType
 

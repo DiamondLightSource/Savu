@@ -20,9 +20,9 @@
 
 """
 
-from savu.plugins.reconstructions.base_astra_recon import BaseAstraRecon
+from savu.plugins.reconstructions.astra_recons.base_astra_recon \
+    import BaseAstraRecon
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-from savu.data.plugin_list import CitationInformation
 from savu.plugins.utils import register_plugin
 
 

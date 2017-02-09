@@ -85,7 +85,7 @@ def set_experiment(exp_type, **kwargs):
 def set_tomoRaw_experiment(filename, **kwargs):
     # create experiment
     options = set_options(get_test_data_path(filename))
-    options['loader'] = 'savu.plugins.loaders.nxtomo_loader'
+    options['loader'] = 'savu.plugins.loaders.full_field_loaders.nxtomo_loader'
     return options
 
 
@@ -97,14 +97,14 @@ def set_tomo_experiment(filename, **kwargs):
 
 def set_fluo_experiment(filename, **kwargs):
     options = set_options(get_test_data_path(filename), **kwargs)
-    options['loader'] = 'savu.plugins.loaders.nxfluo_loader'
+    options['loader'] = 'savu.plugins.loaders.mapping_loaders.nxfluo_loader'
     return options
 
 
 def set_3dto4d_experiment(filename, **kwargs):
     options = set_options(
         get_test_data_path('/i12_test_data/' + filename), **kwargs)
-    options['loader'] = 'savu.plugins.loaders.nxtomo_loader'
+    options['loader'] = 'savu.plugins.loaders.full_field_loaders.nxtomo_loader'
     return options
 
 

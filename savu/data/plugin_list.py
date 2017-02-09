@@ -353,8 +353,8 @@ class PluginList(object):
         :returns: loader index list and saver index list
         :rtype: list(int(loader)), list(int(saver))
         """
-        from savu.plugins.base_loader import BaseLoader
-        from savu.plugins.base_saver import BaseSaver
+        from savu.plugins.loaders.base_loader import BaseLoader
+        from savu.plugins.savers.base_saver import BaseSaver
         loader_idx = []
         saver_idx = []
         self.n_plugins = len(self.plugin_list)

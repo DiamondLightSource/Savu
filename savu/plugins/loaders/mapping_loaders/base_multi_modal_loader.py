@@ -24,7 +24,7 @@ import h5py
 import logging
 from savu.data.data_structures.data_add_ons import DataMapping
 
-from savu.plugins.base_loader import BaseLoader
+from savu.plugins.loaders.base_loader import BaseLoader
 
 
 class BaseMultiModalLoader(BaseLoader):

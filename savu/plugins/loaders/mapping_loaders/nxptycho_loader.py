@@ -21,10 +21,12 @@
 
 """
 
-from savu.plugins.loaders.base_multi_modal_loader import BaseMultiModalLoader
+from savu.plugins.loaders.mapping_loaders.base_multi_modal_loader \
+    import BaseMultiModalLoader
 import numpy as np
 from savu.plugins.utils import register_plugin
 import logging
+
 
 @register_plugin
 class NxptychoLoader(BaseMultiModalLoader):

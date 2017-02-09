@@ -23,17 +23,17 @@
 """
 
 import logging
-from savu.plugins.base_loader import BaseLoader
-from savu.plugins.loaders.multi_modal_loaders.base_i18_multi_modal_loader \
+from savu.plugins.loaders.base_loader import BaseLoader
+from savu.plugins.loaders.mapping_loaders.base_i18_multi_modal_loader \
     import BaseI18MultiModalLoader
 # from savu.plugins.loaders.multi_modal_loaders.i18_loaders import *
-from savu.plugins.loaders.multi_modal_loaders.i18_loaders.i18xrd_loader \
+from savu.plugins.loaders.mapping_loaders.i18_loaders.i18xrd_loader \
     import I18xrdLoader as xrd
-from savu.plugins.loaders.multi_modal_loaders.i18_loaders.i18fluo_loader \
+from savu.plugins.loaders.mapping_loaders.i18_loaders.i18fluo_loader \
     import I18fluoLoader as fluo
-from savu.plugins.loaders.multi_modal_loaders.i18_loaders.i18stxm_loader \
+from savu.plugins.loaders.mapping_loaders.i18_loaders.i18stxm_loader \
     import I18stxmLoader as stxm
-from savu.plugins.loaders.multi_modal_loaders.i18_loaders.i18monitor_loader \
+from savu.plugins.loaders.mapping_loaders.i18_loaders.i18monitor_loader \
     import I18monitorLoader as mon
 
 from savu.plugins.utils import register_plugin

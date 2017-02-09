@@ -21,11 +21,11 @@
 
 """
 
-from savu.plugins.loaders.base_multi_modal_loader import BaseMultiModalLoader
+from savu.plugins.loaders.mapping_loaders.base_multi_modal_loader \
+    import BaseMultiModalLoader
 
 from savu.plugins.utils import register_plugin
-import logging
-import h5py
+
 
 @register_plugin
 class NxmonitorLoader(BaseMultiModalLoader):

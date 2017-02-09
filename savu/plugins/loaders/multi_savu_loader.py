@@ -26,7 +26,7 @@ import os
 import tempfile
 import copy
 
-from savu.plugins.base_loader import BaseLoader
+from savu.plugins.loaders.base_loader import BaseLoader
 from savu.plugins.utils import register_plugin
 from savu.plugins.loaders.savu_loader import SavuLoader
 from savu.data.data_structures.data_type.stitch_data import StitchData

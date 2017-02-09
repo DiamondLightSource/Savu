@@ -26,7 +26,7 @@ import h5py
 import tempfile
 import numpy as np
 
-from savu.plugins.base_loader import BaseLoader
+from savu.plugins.loaders.base_loader import BaseLoader
 from savu.plugins.utils import register_plugin
 from savu.data.data_structures.data_types.fabIO import FabIO
 

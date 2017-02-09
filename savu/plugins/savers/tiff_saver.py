@@ -25,7 +25,7 @@ from mpi4py import MPI
 import tifffile as tf
 import os
 
-from savu.plugins.base_saver import BaseSaver
+from savu.plugins.savers.base_saver import BaseSaver
 from savu.plugins.utils import register_plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 

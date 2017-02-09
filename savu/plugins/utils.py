@@ -102,8 +102,8 @@ def load_class(name):
     try:
         mod = __import__(name)
     except ImportError:
-        (path, name)=os.path.split(name)
-        (name,ext) = os.path.splitext(name)
+        (path, name) = os.path.split(name)
+        (name, ext) = os.path.splitext(name)
         (file, filename, data) = imp.find_module(name, [path])
         mod = imp.load_module(name, file, filename, data)
     components = name.split('.')

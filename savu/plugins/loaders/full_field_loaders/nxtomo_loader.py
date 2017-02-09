@@ -26,7 +26,7 @@ import logging
 import numpy as np
 
 import savu.core.utils as cu
-from savu.plugins.base_loader import BaseLoader
+from savu.plugins.loaders.base_loader import BaseLoader
 from savu.plugins.utils import register_plugin
 from savu.data.data_structures.data_types.data_plus_darks_and_flats \
     import ImageKey, NoImageKey

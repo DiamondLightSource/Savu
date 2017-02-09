@@ -21,7 +21,7 @@
 
 """
 
-from savu.plugins.base_loader import BaseLoader
+from savu.plugins.loaders.base_loader import BaseLoader
 import numpy as np
 from savu.plugins.utils import register_plugin
 import logging
