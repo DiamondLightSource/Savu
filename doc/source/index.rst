@@ -4,22 +4,17 @@
    contain the root `toctree` directive.
 
 .. include:: ../../README.rst
+    :start-after: start_of_main_text
 
-User and Developer Guide
-========================
+Table of Contents
+=================
 
 .. toctree::
    :maxdepth: 2
    
-   introduction
+   about
+   installation
    user_guides/user_guide
    dev_guides/dev_guide
-
-Code Documentation
-==================
-
-.. toctree::
-   :maxdepth: 2
-   
    autosummary
 

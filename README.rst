@@ -1,27 +1,3 @@
-Savu : Tomography Reconstruction Pipeline
-=========================================
-
-:Date: 2014-11-14
-:Version: 0.1
-:Authors: Mark Basham - *Diamond Light Source*
-:Authors: Nicola Wadeson - *Diamond Light Source*
-
-
-This documentation in full is available at https://savu.readthedocs.org/en/latest/
-
-Savu is a Python package to assist with reconstructing tomography data.  The project was started at Diamond Light Source when a new pipeline was required for dealing with the more complex tomography reconstruction processes that were appearing at the facility. [1]_
-
-The project is named 'Savu', after a python subspecies  known for their small size, good temperament, easy feeding habits and tolerance for a wide range of temperatures. [2]_
-
-The Savu Tomography reconstruction pipeline project aims to mimic these behaviours being a small package, which is easy to use and reliable, chomps its way through vast amounts of data, and finally is portable to a wide range of systems. 
-
-Be aware though, the following is also true "Savu Pythons are typically calm in disposition, and generally tolerate gentle handling. Like all snakes, however, care must be exercised when working around them." [3]_
-
-.. [1] https://dx.doi.org/10.1098/rsta.2014.0398
-.. [2] http://www.reptilesmagazine.com/Breeding-Snakes/Breeding-Savu-Python/
-.. [3] http://blogs.thatpetplace.com/thatreptileblog/2014/06/19/savu-python-care-keeping-one-worlds-smallest-pythons/
-
-
 .. image:: https://badges.gitter.im/Join%20Chat.svg
    :alt: Join the chat at https://gitter.im/DiamondLightSource/Savu
    :target: https://gitter.im/DiamondLightSource/Savu?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
@@ -52,4 +28,29 @@ Be aware though, the following is also true "Savu Pythons are typically calm in 
 .. image:: https://landscape.io/github/DiamondLightSource/Savu/master/landscape.svg?style=flat
     :target: https://landscape.io/github/DiamondLightSource/Savu/master
     :alt: Code Health
+
+:Date: 2014-11-14
+:Version: 0.1
+:Authors: Mark Basham - *Diamond Light Source*
+:Authors: Nicola Wadeson - *Diamond Light Source*
+
+This documentation in full is available at https://savu.readthedocs.org/en/latest/
+
+.. start_of_main_text
+
+.. image:: files_and_images/Savu_logo_2_L_Res_trans.png
+   :scale: 40 %
+   :align: left
+
+
+Tomography Reconstruction and Processing Pipeline
+=================================================
+
+Savu is a Python package to assist with the processing and reconstruction of tomography data.  The project was started at Diamond Light Source when a new pipeline was required for dealing with the more complex tomography reconstruction processes that were appearing at the facility. `[1]`_
+
+.. _[1]: https://dx.doi.org/10.1098/rsta.2014.0398
+
+Features
+--------
+
 

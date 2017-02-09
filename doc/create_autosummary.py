@@ -85,3 +85,4 @@ if __name__ == "__main__":
             add_package_entry(f, root, dirs, files, out_folder)
 
     add_indices_and_tables(f)
+
