@@ -24,7 +24,7 @@ import numpy as np
 import math
 import copy
 
-from savu.plugins.base_recon import BaseRecon
+from savu.plugins.reconstructions.base_recon import BaseRecon
 from savu.data.plugin_list import CitationInformation
 
 
@@ -73,10 +73,10 @@ class BaseAstraRecon(BaseRecon):
         self.alg, self.iters = self.get_parameters()
         if '3D' in self.alg:
             self.setup_3D()
-            self.reconstruct = self.astra_3D_recon
+            self.process_frames = self.astra_3D_recon
         else:
             self.setup_2D()
-            self.reconstruct = self.astra_2D_recon
+            self.process_frames = self.astra_2D_recon
         self.vol_shape = self.get_vol_shape()
 
     def setup_2D(self):
@@ -115,8 +115,17 @@ class BaseAstraRecon(BaseRecon):
         else:
             return lambda x, sslice: x[sslice]
 
-    def astra_2D_recon(self, sino, cors, angles, vol_shape, init):
+    def __set_frame_params(self):
+        cors = self.get_cors()
+        angles = self.get_angles()
+        vol_shape = self.get_shape()
+        init = self.get_initial_data()
+        return cors, angles, vol_shape, init
+
+    def astra_2D_recon(self, data):
         logging.debug("running astra_2D_recon")
+        sino = data[0]
+        cors, angles, vol_shape, init = self.set_params()
         sslice = [slice(None)]*self.nDims
         recon = np.zeros(self.vol_shape)
         if self.nDims is 2:
