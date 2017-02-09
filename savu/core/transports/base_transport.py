@@ -106,7 +106,7 @@ class BaseTransport(object):
                                            squeeze_dict)
 
             plugin.set_current_slice_list(slice_list)
-            result = plugin.process_frames(section)
+            result = plugin.plugin_process_frames(section)
             self.__set_out_data(out_data, out_slice_list, result, count,
                                 expand_dict)
 
