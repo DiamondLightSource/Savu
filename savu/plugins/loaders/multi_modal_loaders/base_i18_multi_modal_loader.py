@@ -71,7 +71,7 @@ class BaseI18MultiModalLoader(BaseMultiModalLoader):
             if rotation_angle.ndim > 1:
                 rotation_angle = rotation_angle[:, 0]
 
-                data_obj.meta_data.set_meta_data(
+            data_obj.meta_data.set_meta_data(
                     "rotation_angle", rotation_angle)
         return data_obj
 
