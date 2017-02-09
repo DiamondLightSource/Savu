@@ -134,9 +134,9 @@ class BaseRecon(Plugin):
         init = data[1] if len(data) is 2 else None
         angles = \
             self.angles[:, sl[self.scan_dim]] if self.scan_dim else self.angles
-        self.frame_angles(angles)
-        self.frame_cors(self.cor_func(self.cor[sl[self.main_dir]]))
-        self.frame_init_data(init)
+        self.frame_angles = angles
+        self.frame_cors = self.cor_func(self.cor[sl[self.main_dir]])
+        self.frame_init_data = init
 
     def get_angles(self):
         return self.frame_angles
@@ -146,27 +146,6 @@ class BaseRecon(Plugin):
 
     def get_initial_data(self):
         return self.frame_init_data
-
-#    def process_frames(self, data):
-#        """
-#        Reconstruct a single sinogram with the provided center of rotation
-#        """
-#        sl = self.get_current_slice_list()[0]
-#        cor = self.cor[sl[self.main_dir]]
-#        init = data[1] if len(data) is 2 else None
-#        angles = \
-#            self.angles[:, sl[self.scan_dim]] if self.scan_dim else self.angles
-#        result = self.reconstruct(self.sino_func(data[0]), self.cor_func(cor),
-#                                  angles, self.get_vol_shape(), init)
-#        return result
-
-#    def reconstruct(self, data, cor, angles, shape):
-#        """
-#        This is the main processing method for all plugins that inherit from
-#        base recon.  The plugin must implement this method.
-#        """
-#        logging.error("process needs to be implemented")
-#        raise NotImplementedError("process needs to be implemented")
 
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()

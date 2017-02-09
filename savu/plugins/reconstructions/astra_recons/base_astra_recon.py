@@ -118,14 +118,14 @@ class BaseAstraRecon(BaseRecon):
     def __set_frame_params(self):
         cors = self.get_cors()
         angles = self.get_angles()
-        vol_shape = self.get_shape()
+        vol_shape = self.get_vol_shape()
         init = self.get_initial_data()
         return cors, angles, vol_shape, init
 
     def astra_2D_recon(self, data):
         logging.debug("running astra_2D_recon")
         sino = data[0]
-        cors, angles, vol_shape, init = self.set_params()
+        cors, angles, vol_shape, init = self.__set_frame_params()
         sslice = [slice(None)]*self.nDims
         recon = np.zeros(self.vol_shape)
         if self.nDims is 2:
