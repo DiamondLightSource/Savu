@@ -60,6 +60,7 @@ class Plugin(PluginDatasets):
         self._set_parameters(params)
         self._set_plugin_datasets()
         self.setup()
+        self.set_filter_padding(*(self.get_plugin_datasets()))
 
         in_datasets, out_datasets = self.get_datasets()
         for data in in_datasets + out_datasets:
@@ -89,6 +90,13 @@ class Plugin(PluginDatasets):
         """ Provides an opportunity to override the number and name of input
         and output datasets before they are created. """
         pass
+
+    def set_filter_padding(self, in_data, out_data):
+        """
+        Should be overridden to define how wide the frame should be for each
+        input data set
+        """
+        return {}
 
     def setup(self):
         """
@@ -206,9 +214,13 @@ class Plugin(PluginDatasets):
         """ This method is called immediately after base_pre_process(). """
         pass
 
-    def base_pre_process_frames():
+    def base_process_frames():
         """ This method is called before each call to process frames """
         pass
+
+    def plugin_process_frames(self, data):
+        self.base_process_frames()
+        return self.process_frames(data)
 
     def process_frames(self, data):
         """
@@ -221,10 +233,6 @@ class Plugin(PluginDatasets):
 
         logging.error("process frames needs to be implemented")
         raise NotImplementedError("process needs to be implemented")
-
-    def base_post_process_frames():
-        """ This method is called after each call to process frames """
-        pass
 
     def post_process(self):
         """
