@@ -82,9 +82,8 @@ class BaseI18MultiModalLoader(BaseMultiModalLoader):
         logging.debug("========="+ltype+"=========")
         motors = self.parameters['scan_pattern']
         data_obj.data_mapping.set_axes(self.parameters['scan_pattern'])
-        f = data_obj.backing_file
         nAxes = len(data_obj.get_shape())
-
+        print "THERE WILL BE:"+str(nAxes)
         #logging.debug nAxes
         cts = 0
         chk = 0
@@ -92,18 +91,21 @@ class BaseI18MultiModalLoader(BaseMultiModalLoader):
         labels = []
         fast_axis = self.parameters["fast_axis"]
         logging.debug("axes input are:"+str(motors))
+        unknown_count = 0
         for ii in range(nAxes):
             # find the rotation axis
             try:
                 data_axis = self.parameters[motors[ii]]# get that out the file
                 logging.debug("the data axis is %s" % str(data_axis))
                 if motors[ii]=="rotation":
+                    print "found a rotation"
                     data_obj.data_mapping._is_tomo = True
                     motor_type.append('rotation')
                     label = 'rotation_angle'
                     units = 'degrees'
                     logging.debug(ltype + " reader: %s", "is a tomo scan")
                 elif motors[ii] in ["x","y"]:
+                    print "found a translation"
                     cts += 1  # increase the order of the map
                     motor_type.append('translation')
                     if (motors[ii]==fast_axis):
@@ -111,7 +113,9 @@ class BaseI18MultiModalLoader(BaseMultiModalLoader):
                     else:
                         label='y'
                     units = 'mm'
-            except:
+            except KeyError as e:
+                print "exception was "+str(e)
+                print "found nothing"
                 motor_type.append('None')
                 #now the detector axes
                 if ltype =='fluo':
@@ -124,10 +128,23 @@ class BaseI18MultiModalLoader(BaseMultiModalLoader):
                         label = 'detector_y'
                     units = 'index'
                     chk=chk+1
+            
+            except IndexError:
+                '''
+                some additional singleton dimensions have been added in the latest mapping project stuff on I18
+                This fixes that.
+                '''
+                label = 'unknown_%s' % unknown_count
+                units = 'unknown'
+                unknown_count += 1
+            except:
+                raise
+
             labels.append(label+'.'+units)
         if not motors:
             logging.debug("%s reader: No maps found!", ltype)
         #logging.debug labels
+        print "THE LABELS WILL BE:"+str(labels)
         data_obj.set_axis_labels(*tuple(labels))
         data_obj.data_mapping.set_motors(motors)
         data_obj.data_mapping.set_motor_type(motor_type)
@@ -141,7 +158,6 @@ class BaseI18MultiModalLoader(BaseMultiModalLoader):
 
     def add_patterns_based_on_acquisition(self, data_obj, ltype):
         motor_type = data_obj.data_mapping.get_motor_type()
-        dims = range(len(motor_type))
         projection = []
         for item, key in enumerate(motor_type):
             if key == 'translation':
@@ -149,7 +165,7 @@ class BaseI18MultiModalLoader(BaseMultiModalLoader):
 #                 logging.debug projection
             elif key == 'rotation':
                 rotation = item
-
+        dims = range(len(data_obj.get_shape()))
         if data_obj.data_mapping._is_map:
             proj_dir = tuple(projection)
             logging.debug("is a map")
@@ -186,6 +202,9 @@ class BaseI18MultiModalLoader(BaseMultiModalLoader):
             data_obj.add_pattern("DIFFRACTION", core_dir=diff_core,
                                  slice_dir=diff_slice)
         
-
-            
-            
+        if ltype is 'monitor':
+            # this is needed for I0 corrections of single sinogram ND data
+            channel_core = (dims[-1],)
+            channel_slice = tuple(dims[:-1])
+            data_obj.add_pattern("CHANNEL", core_dir=channel_core,
+                        slice_dir=channel_slice)
