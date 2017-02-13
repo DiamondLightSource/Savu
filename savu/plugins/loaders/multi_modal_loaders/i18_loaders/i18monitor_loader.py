@@ -32,6 +32,7 @@ class I18monitorLoader(BaseI18MultiModalLoader):
     A class to load tomography data from an NXstxm file
     :param monitor_detector: path to monitor. Default:'entry1/raster_counterTimer01/I0'.
 
+
     """
 
     def __init__(self, name='I18monitorLoader'):
@@ -49,6 +50,5 @@ class I18monitorLoader(BaseI18MultiModalLoader):
         data_obj = self.multi_modal_setup('monitor')
         data_obj.data = data_obj.backing_file[data_str]
         data_obj.set_shape(data_obj.data.shape)
-        self.set_motors(data_obj, 'stxm')
-        self.add_patterns_based_on_acquisition(data_obj, 'stxm')
+
         self.set_data_reduction_params(data_obj)

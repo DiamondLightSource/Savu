@@ -44,7 +44,18 @@ class McNearAbsorptionCorrection(BaseAbsorptionCorrection):
         density = self.parameters['density']
         mData = self.get_in_meta_data()[0]
         mono_energy = mData.get_meta_data('mono_energy')
-        peak_energy = mData.get_meta_data('PeakEnergy')
+        try:
+            peak_energy = mData.get_meta_data('PeakEnergy')
+        except KeyError:
+            logging.debug('No PeakEnergy: trying with the fullSpectrum')
+            try:
+                in_dataset, out_datasets = self.get_datasets()
+                in_dataset[0].get_data_patterns()['SPECTRUM']
+                peak_energy = list(mData.get_meta_data('energy'))
+            except KeyError:
+                logging.debug("No PeakEnergy or energy axis. This won't work")
+                raise 
+        
         pump_mu = self.get_mu(compound, float(mono_energy), density)
         peak_mu = self.get_mu(compound, list(peak_energy), density)
         print "THE PUMP MU IS is:"+str(pump_mu)+str(mono_energy)

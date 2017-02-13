@@ -186,3 +186,6 @@ class BaseI18MultiModalLoader(BaseMultiModalLoader):
             data_obj.add_pattern("DIFFRACTION", core_dir=diff_core,
                                  slice_dir=diff_slice)
         
+
+            
+            
