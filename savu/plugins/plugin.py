@@ -33,6 +33,10 @@ from savu.plugins.plugin_datasets import PluginDatasets
 class Plugin(PluginDatasets):
     """
     The base class from which all plugins should inherit.
+    :param in_datasets: Create a list of the dataset(s) to \
+        process. Default: [].
+    :param out_datasets: Create a list of the dataset(s) to \
+        create. Default: [].
     """
 
     def __init__(self, name='Plugin'):
@@ -214,7 +218,7 @@ class Plugin(PluginDatasets):
         """ This method is called immediately after base_pre_process(). """
         pass
 
-    def base_process_frames():
+    def base_process_frames(self, data):
         """ This method is called before each call to process frames """
         pass
 

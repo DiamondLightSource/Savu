@@ -22,7 +22,6 @@
 
 """
 
-import logging
 import warnings
 
 import savu.data.data_structures.data_notes as notes

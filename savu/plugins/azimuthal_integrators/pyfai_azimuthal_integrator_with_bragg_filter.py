@@ -23,7 +23,7 @@
 
 import logging
 import numpy as np
-from savu.plugins.filters.azimuthal_integrators.base_azimuthal_integrator \
+from savu.plugins.azimuthal_integrators.base_azimuthal_integrator \
     import BaseAzimuthalIntegrator
 from savu.plugins.utils import register_plugin
 
