@@ -23,12 +23,13 @@
 import logging
 import numpy
 
-from savu.plugins.base_filter import BaseFilter
+from savu.plugins.plugin import Plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 
+
 @register_plugin
-class DownsampleFilter(BaseFilter, CpuPlugin):
+class DownsampleFilter(Plugin, CpuPlugin):
     """
     A plugin to reduce the data in the selected direction by a proportion
 

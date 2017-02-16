@@ -30,7 +30,7 @@ import numpy as np
 
 from savu.data.plugin_list import CitationInformation
 from savu.plugins.utils import register_plugin
-from savu.plugins.base_recon import BaseRecon
+from savu.plugins.reconstructions.base_recon import BaseRecon
 
 
 @register_plugin
@@ -68,7 +68,9 @@ class TomopyRecon(BaseRecon, CpuPlugin):
         self.kwargs = {key: options[key] for key in self.alg_keys[self.alg] if
                        key in options.keys()}
 
-    def reconstruct(self, sino, cors, angles, vol_shape, init):
+    def process_frames(self, data):
+        sino = data[0]
+        cors, angles, vol_shape, init = self.get_frame_params()
         recon = tomopy.recon(sino, np.deg2rad(angles), center=cors[0],
                              ncore=1, algorithm=self.alg, init_recon=init,
                              **self.kwargs)

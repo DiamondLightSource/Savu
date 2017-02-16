@@ -23,11 +23,10 @@
 
 import logging
 import numpy as np
-from savu.plugins.base_filter import BaseFilter
+from savu.plugins.filters.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 from scipy.ndimage import gaussian_filter
-import os
 
 from dials.array_family import flex
 from dials.algorithms.image.threshold import DispersionThreshold

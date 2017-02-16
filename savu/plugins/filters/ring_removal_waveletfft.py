@@ -21,13 +21,13 @@
    Adapted from  tomopy source code: 
    http://tomopy.github.io/tomopy/_modules/tomopy/algorithms/preprocess/stripe_removal.html
 """
+
 import logging
 import numpy as np
-import pyfftw
 import pyfftw.interfaces.numpy_fft as fft
 import pywt
 
-from savu.plugins.base_filter import BaseFilter
+from savu.plugins.filters.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 from savu.plugins.utils import register_plugin

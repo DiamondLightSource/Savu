@@ -21,18 +21,18 @@
 
 """
 import logging
-from savu.plugins.base_filter import BaseFilter
+from savu.plugins.plugin import Plugin
 import numpy as np
 import peakutils as pe
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 
-class BaseFitter(BaseFilter, CpuPlugin):
-
+class BaseFitter(Plugin, CpuPlugin):
     """
     This plugin fits peaks.
     :param in_datasets: Create a list of the dataset(s). Default: [].
-    :param out_datasets: A. Default: ["FitWeights", "FitWidths", "FitAreas", "residuals"].
+    :param out_datasets: \
+        A. Default: ["FitWeights", "FitWidths", "FitAreas", "residuals"].
     :param width_guess: An initial guess at the width. Default: 0.02.
     :param peak_shape: Which shape do you want. Default: "gaussian".
     :param PeakIndex: the peak index. Default: [].

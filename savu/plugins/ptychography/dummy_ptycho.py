@@ -20,9 +20,9 @@
 .. moduleauthor:: Aaron Parsons <scientificsoftware@diamond.ac.uk>
 
 """
-import logging
+
 from savu.plugins.utils import register_plugin
-from savu.plugins.filters.base_ptycho import BasePtycho
+from savu.plugins.ptychography.base_ptycho import BasePtycho
 import numpy as np
 
 

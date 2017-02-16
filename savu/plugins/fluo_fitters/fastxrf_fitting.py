@@ -21,7 +21,7 @@
 """
 
 import logging
-from savu.plugins.filters.fitters.base_fluo_fitter import BaseFluoFitter
+from savu.plugins.fluo_fitters.base_fluo_fitter import BaseFluoFitter
 from flupy.xrf_data_handling import XRFDataset
 import numpy as np
 from savu.plugins.utils import register_plugin

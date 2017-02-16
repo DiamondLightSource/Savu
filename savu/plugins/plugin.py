@@ -220,7 +220,7 @@ class Plugin(PluginDatasets):
 
     def plugin_process_frames(self, data):
         self.base_process_frames(data)
-        return self.process_frames(data)
+        return self.process_frames([data[0]])
 
     def process_frames(self, data):
         """

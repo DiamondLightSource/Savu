@@ -22,7 +22,8 @@
 """
 import logging
 from savu.plugins.utils import register_plugin
-from savu.plugins.filters.base_component_analysis import BaseComponentAnalysis
+from savu.plugins.component_analysis.base_component_analysis \
+    import BaseComponentAnalysis
 from sklearn.decomposition import PCA
 import numpy as np
 

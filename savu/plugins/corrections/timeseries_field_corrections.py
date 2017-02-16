@@ -26,7 +26,7 @@
 """
 
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-from savu.plugins.base_correction import BaseCorrection
+from savu.plugins.corrections.base_correction import BaseCorrection
 
 import numpy as np
 

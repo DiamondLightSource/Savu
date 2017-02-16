@@ -20,7 +20,7 @@
 """
 
 import logging
-from savu.plugins.base_recon import BaseRecon
+from savu.plugins.reconstructions.base_recon import BaseRecon
 from savu.data.plugin_list import CitationInformation
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
@@ -63,7 +63,9 @@ class ScikitimageFilterBackProjection(BaseRecon, CpuPlugin):
                                              (centre_of_rotation_shift, 0))
         return result
 
-    def reconstruct(self, sino, centre_of_rotations, angles, vol_shape, init):
+    def process_frames(self, data):
+        sino = data[0]
+        centre_of_rotations, angles, vol_shape, init = self.get_frame_params()
         in_pData = self.get_plugin_in_datasets()[0]
         in_meta_data = self.get_in_meta_data()[0]
         sinogram = np.swapaxes(sino, 0, 1)

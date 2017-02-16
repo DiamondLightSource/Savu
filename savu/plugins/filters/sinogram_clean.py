@@ -26,7 +26,7 @@ import numpy as np
 import pyfftw.interfaces.scipy_fftpack as fft
 
 from savu.plugins.utils import register_plugin
-from savu.plugins.base_filter import BaseFilter
+from savu.plugins.filters.base_filter import BaseFilter
 
 
 @register_plugin

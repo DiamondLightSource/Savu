@@ -22,7 +22,7 @@
 """
 import logging
 
-from savu.plugins.base_filter import BaseFilter
+from savu.plugins.filters.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 from scipy.ndimage.filters import gaussian_filter

@@ -19,13 +19,13 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
-from savu.plugins.base_filter import BaseFilter
+from savu.plugins.plugin import Plugin
 from savu.plugins.utils import register_plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 
 @register_plugin
-class NoProcessPlugin(BaseFilter, CpuPlugin):
+class NoProcessPlugin(Plugin, CpuPlugin):
     """
     The base class from which all plugins should inherit.
     :param in_datasets: A list of the dataset(s) to process. Default: [].

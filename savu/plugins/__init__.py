@@ -20,8 +20,20 @@ All the plugin architecture for Savu is contained here
 
 """
 
+from . import absorption_corrections
+from . import analysis
+from . import azimuthal_integrators
+from . import component_analysis
+from . import corrections
+from . import developing
 from . import driver
 from . import filters
+from . import fitters
+from . import fluo_fitters
 from . import loaders
+from . import others
+from . import ptychography
 from . import reconstructions
+from . import reshape
 from . import savers
+

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: XrdAbsorptionApproximation    
+.. module:: XrdAbsorptionApproximation
    :platform: Unix
    :synopsis: A plugin apply xrd absorption approximation using stxm data
 .. moduleauthor:: Stephen W.T. PRice <stephen.price@diamond.ac.uk>
@@ -22,16 +22,16 @@
 import numpy as np
 import logging
 from savu.plugins.utils import register_plugin
-from savu.plugins.base_filter import BaseFilter
+from savu.plugins.filters.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-from scipy.interpolate import interp1d
 import _xraylib as xl
 
 
 @register_plugin
 class XrdAbsorptionApproximation(BaseFilter, CpuPlugin):
     """
-    McNears absorption correction, takes in a normalised absorption sinogram and xrd sinogram stack
+    McNears absorption correction, takes in a normalised absorption sinogram \
+    and xrd sinogram stack
 
     a base absorption correction for stxm and xrd
     :param azimuthal_offset: angle between detectors. Default: 0.
@@ -44,7 +44,7 @@ class XrdAbsorptionApproximation(BaseFilter, CpuPlugin):
         logging.debug("Starting Xrd Absorption Approximation")
         super(XrdAbsorptionApproximation,
               self).__init__("XrdAbsorptionApproximation")
-              
+
     def pre_process(self):
         compound = self.parameters['compound']
         density = self.parameters['density']

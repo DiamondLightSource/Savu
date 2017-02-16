@@ -27,7 +27,7 @@ import numpy as np
 import ccpi_reconstruction
 from savu.plugins.utils import register_plugin
 
-from savu.plugins.base_recon import BaseRecon
+from savu.plugins.reconstructions.base_recon import BaseRecon
 
 
 @register_plugin
@@ -44,7 +44,9 @@ class CglsRecon(BaseRecon, CpuPlugin):
     def __init__(self):
         super(CglsRecon, self).__init__("CglsRecon")
 
-    def reconstruct(self, sino, centre_of_rotations, angles, vol_shape, init):
+    def process_frames(self, data):
+        sino = data[0]
+        centre_of_rotations, angles, vol_shape, init = self.get_frame_params()
         nthreads = self.parameters['number_of_threads']
         num_iterations = self.parameters['number_of_iterations']
         resolution = self.parameters['resolution']

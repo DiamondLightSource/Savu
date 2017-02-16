@@ -21,13 +21,13 @@
 
 """
 
-import logging
 from savu.plugins.utils import register_plugin
-from savu.plugins.filters.base_ptycho import BasePtycho
+from savu.plugins.ptychography.base_ptycho import BasePtycho
 import numpy as np
 from ptypy.core import Ptycho
 from ptypy import utils as u
 from copy import deepcopy as copy
+
 
 @register_plugin
 class PtypyBatch(BasePtycho):

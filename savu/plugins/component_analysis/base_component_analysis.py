@@ -20,16 +20,21 @@
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
-from savu.plugins.base_filter import BaseFilter
+
+from savu.plugins.plugin import Plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 import sys
 import numpy as np
-class BaseComponentAnalysis(BaseFilter, CpuPlugin):
+
+
+class BaseComponentAnalysis(Plugin, CpuPlugin):
     """
-    A base plugin for doing component analysis. This sorts out the main features
-    of a component analysis
+    A base plugin for doing component analysis. This sorts out the main \
+    features of a component analysis
+
     :param in_datasets: A list of the dataset(s) to process. Default: [].
-    :param out_datasets: A list of the dataset(s) to process. Default: ['scores', 'eigenvectors'].
+    :param out_datasets: A list of the dataset(s) to \
+        process. Default: ['scores', 'eigenvectors'].
     :param number_of_components: The number expected components. Default: 3.
     :param chunk: The chunk to work on. Default: 'SINOGRAM'.
     :param whiten: To subtract the mean or not. Default: 1.
@@ -40,7 +45,6 @@ class BaseComponentAnalysis(BaseFilter, CpuPlugin):
 
     def get_max_frames(self):
         return self.spectra_length[0]
-
 
     def get_plugin_pattern(self):
         return self.parameters['chunk']

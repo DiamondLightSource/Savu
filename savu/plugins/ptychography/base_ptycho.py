@@ -20,16 +20,19 @@
 .. moduleauthor:: Aaron Parsons <scientificsoftware@diamond.ac.uk>
 
 """
-from savu.plugins.base_filter import BaseFilter
+from savu.plugins.plugin import Plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 import logging
 import numpy as np
 
-class BasePtycho(BaseFilter, CpuPlugin): # also make one for gpu
+
+class BasePtycho(Plugin, CpuPlugin):  # also make one for gpu
     """
-    A base plugin for doing ptychography. Other ptychography plugins should inherit from this.
+    A base plugin for doing ptychography. Other ptychography plugins should \
+    inherit from this.
     :param in_datasets: A list of the dataset(s) to process. Default: [].
-    :param out_datasets: A list of the dataset(s) to process. Default: ['probe', 'object_transmission', 'positions'].
+    :param out_datasets: A list of the dataset(s) to \
+        process. Default: ['probe', 'object_transmission', 'positions'].
     """
 
     def __init__(self, name):
@@ -44,7 +47,8 @@ class BasePtycho(BaseFilter, CpuPlugin): # also make one for gpu
         self.positions = in_meta_data.get('xy') # get the positions and bind them
 
         # lets set up the axis labels for output datasets
-        position_labels, probe_labels, object_labels, self.sh = self.setup_axis_labels(in_dataset)
+        position_labels, probe_labels, object_labels, self.sh = \
+            self.setup_axis_labels(in_dataset)
         #print "probe labels are:"+str(probe_labels)
         # Now create the datasets and work out the patterns
         ### PROBE ###
@@ -59,7 +63,8 @@ class BasePtycho(BaseFilter, CpuPlugin): # also make one for gpu
         self.probe_pattern_setup(probe_labels, probe)
 
         ### OBJECT ####
-        self.set_size_object(in_dataset[0],self.get_positions(), self.get_pixel_size()) 
+        self.set_size_object(in_dataset[0], self.get_positions(),
+                             self.get_pixel_size())
         object_trans = out_dataset[1]
         object_shape = self.sh + self.get_size_object()
         logging.debug("##### OBJECT #####")

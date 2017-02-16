@@ -21,7 +21,7 @@
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
-from savu.plugins.base_recon import BaseRecon
+from savu.plugins.reconstructions.base_recon import BaseRecon
 from savu.data.plugin_list import CitationInformation
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
@@ -56,7 +56,9 @@ class SimpleRecon(BaseRecon, CpuPlugin):
                            np.arange(-center[1], shape[1] - center[1]))
         return x*np.cos(theta) - y*np.sin(theta)
 
-    def reconstruct(self, sino, centre_of_rotations, angles, vol_shape, init):
+    def process_frames(self, data):
+        sino = data[0]
+        centre_of_rotations, angles, vol_shape, init = self.get_frame_params()
         sinogram = sino[:, np.newaxis, :]
         try:
             centre = self.kwargs['centre']

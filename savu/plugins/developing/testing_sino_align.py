@@ -29,13 +29,13 @@ import scipy.ndimage.filters as filter
 import numpy as np
 
 from savu.plugins.utils import register_plugin
-from savu.plugins.base_filter import BaseFilter
+from savu.plugins.plugin import Plugin
 from savu.data.plugin_list import CitationInformation
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 
 @register_plugin
-class TestingSinoAlign(BaseFilter, CpuPlugin):
+class TestingSinoAlign(Plugin, CpuPlugin):
     """
     The centre of mass of each row is determined and then a sine function fit
     through these to determine the centre of rotation.  The residual between\

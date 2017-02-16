@@ -20,7 +20,7 @@
 """
 
 import logging
-from savu.plugins.base_recon import BaseRecon
+from savu.plugins.reconstructions.base_recon import BaseRecon
 from savu.data.plugin_list import CitationInformation
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
@@ -79,7 +79,9 @@ class ScikitimageSart(BaseRecon, CpuPlugin):
             float(centre_of_rotation)
         return ndimage.interpolation.shift(sinogram, centre_of_rotation_shift)
 
-    def reconstruct(self, sino, centre_of_rotations, angles, vol_shape, init):
+    def process_frames(self, data):
+        sino = data[0]
+        centre_of_rotations, angles, vol_shape, init = self.get_frame_params()
         in_pData = self.get_plugin_in_datasets()[0]
         sinogram = np.swapaxes(sino, 0, 1)
         sinogram = self._shift(sinogram, centre_of_rotations)

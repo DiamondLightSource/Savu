@@ -22,7 +22,7 @@
 """
 
 import logging
-from savu.plugins.base_filter import BaseFilter
+from savu.plugins.plugin import Plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 import peakutils as pe
 import numpy as np
@@ -34,7 +34,7 @@ from flupy.xrf_data_handling import XRFDataset
 from copy import deepcopy
 
 
-class BaseFluoFitter(BaseFilter, CpuPlugin):
+class BaseFluoFitter(Plugin, CpuPlugin):
     """
     This plugin fits peaks. Either XRD or XRF for now.
     :param in_datasets: Create a list of the dataset(s). Default: [].

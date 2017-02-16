@@ -139,13 +139,37 @@ class BaseRecon(Plugin):
         self.frame_init_data = init
 
     def get_angles(self):
+        """ Get the angles associated with the current sinogram(s).
+
+        :returns: Angles of the current frames.
+        :rtype: np.ndarray
+        """
         return self.frame_angles
 
     def get_cors(self):
+        """
+        Get the centre of rotations associated with the current sinogram(s).
+
+        :returns: Centre of rotation values for the current frames.
+        :rtype: np.ndarray
+        """
         return self.frame_cors
 
     def get_initial_data(self):
+        """
+        Get the initial data (if it is exists) associated with the current \
+        sinogram(s).
+
+        :returns: The section of the initialisation data associated with the \
+            current frames.
+        :rtype: np.ndarray or None
+        """
         return self.frame_init_data
+
+    def get_frame_params(self):
+        params = [self.get_cors(), self.get_angles(), self.get_vol_shape(),
+                  self.get_initial_data()]
+        return params
 
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()

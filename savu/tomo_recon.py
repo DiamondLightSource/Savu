@@ -25,6 +25,7 @@ import tempfile  # this import is required for pyFAI - DO NOT REMOVE!
 import optparse
 import sys
 import os
+import logging
 from mpi4py import MPI
 
 from savu.core.plugin_runner import PluginRunner
@@ -164,8 +165,9 @@ def main(input_args=None):
         except Exception as error:
             import traceback
             print error.message
+            logging.debug('killing all the processes')
             traceback.print_exc(file=sys.stdout)
-            MPI.COMM_WORLD.Abort()
+            MPI.COMM_WORLD.Abort(1)
 
 
 if __name__ == '__main__':

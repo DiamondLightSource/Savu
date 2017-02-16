@@ -22,18 +22,14 @@
 """
 
 import logging
-
-import math
-
 import pyFAI
 
 import numpy as np
-from savu.plugins.base_filter import BaseFilter
+from savu.plugins.plugin import Plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-from scipy.interpolate import interp1d
 
 
-class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
+class BaseAzimuthalIntegrator(Plugin, CpuPlugin):
     """
     a base azimuthal integrator for pyfai
 
@@ -42,10 +38,9 @@ class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
 
     """
 
-    def __init__(self, name):
+    def __init__(self, name='BaseAzimuthalIntegrator'):
         logging.debug("Starting 1D azimuthal integrationr")
-        super(BaseAzimuthalIntegrator,
-              self).__init__(name)
+        super(BaseAzimuthalIntegrator, self).__init__(name)
 
     def pre_process(self):
         """
@@ -118,7 +113,7 @@ class BaseAzimuthalIntegrator(BaseFilter, CpuPlugin):
         spectrum = {'core_dir': (-1,), 'slice_dir': tuple(range(len(shape)-2))}
         spectra.add_pattern("SPECTRUM", **spectrum)
 
-        logging.debug("****SPECTRA AXIS LABELS*** %s", spectra.get_axis_labels())
+        logging.debug("**SPECTRA AXIS LABELS** %s", spectra.get_axis_labels())
 
         out_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
 

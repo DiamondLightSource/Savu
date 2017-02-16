@@ -23,9 +23,10 @@
 
 import logging
 import numpy as np
-from savu.plugins.filters.base_azimuthal_integrator import BaseAzimuthalIntegrator
+from savu.plugins.filters.azimuthal_integrators.base_azimuthal_integrator \
+    import BaseAzimuthalIntegrator
 from savu.plugins.utils import register_plugin
-import unittest
+
 
 @register_plugin
 class PyfaiAzimuthalIntegratorWithBraggFilter(BaseAzimuthalIntegrator):

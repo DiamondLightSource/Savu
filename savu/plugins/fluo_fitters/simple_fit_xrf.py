@@ -22,7 +22,7 @@
 """
 import logging
 from savu.plugins.utils import register_plugin
-from savu.plugins.filters.fitters.base_fluo_fitter import BaseFluoFitter
+from savu.plugins.fluo_fitters.base_fluo_fitter import BaseFluoFitter
 import numpy as np
 from scipy.optimize import leastsq
 import time

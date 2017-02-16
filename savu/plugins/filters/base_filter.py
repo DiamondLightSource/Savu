@@ -22,8 +22,6 @@
 """
 from savu.plugins.plugin import Plugin
 
-import logging
-
 
 class BaseFilter(Plugin):
     """

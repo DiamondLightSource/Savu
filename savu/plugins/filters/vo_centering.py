@@ -27,7 +27,7 @@ import pyfftw.interfaces.scipy_fftpack as fft
 import scipy.ndimage.filters as filter
 
 from savu.plugins.utils import register_plugin
-from savu.plugins.base_filter import BaseFilter
+from savu.plugins.filters.base_filter import BaseFilter
 from savu.data.plugin_list import CitationInformation
 
 

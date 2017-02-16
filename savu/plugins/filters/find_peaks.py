@@ -21,13 +21,11 @@
 
 """
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-import logging
 from savu.plugins.utils import register_plugin
-from savu.plugins.base_filter import BaseFilter
+from savu.plugins.filters.base_filter import BaseFilter
 import peakutils as pe
 import numpy as np
 from scipy.signal import savgol_filter
-from itertools import chain
 
 
 @register_plugin

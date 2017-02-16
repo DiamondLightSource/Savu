@@ -24,7 +24,7 @@ import numpy as np
 import pyfftw
 import pyfftw.interfaces.numpy_fft as fft
 
-from savu.plugins.base_filter import BaseFilter
+from savu.plugins.filters.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.data.plugin_list import CitationInformation
 from savu.plugins.utils import register_plugin
