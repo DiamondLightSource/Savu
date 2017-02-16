@@ -22,14 +22,14 @@
 import logging
 import numpy as np
 
-from savu.plugins.base_filter import BaseFilter
+from savu.plugins.plugin import Plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 from savu.plugins.utils import register_plugin
 
 
 @register_plugin
-class Stats(BaseFilter, CpuPlugin):
+class Stats(Plugin, CpuPlugin):
     """
     :param out_datasets: the output dataset. Default: ['stats'].
     :param required_stats: create a list of required stats\

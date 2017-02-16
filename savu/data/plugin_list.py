@@ -62,10 +62,13 @@ class PluginList(object):
         for key in plugin_group.keys():
             plugin = {}
 
-            active = True
-            if 'active' in plugin_group[key].keys() and activePass is False:
+            if 'active' in plugin_group[key].keys():
                 active = plugin_group[key]['active'][0]
                 plugin['active'] = active
+                if activePass:
+                    active = True
+            else:
+                active = True
 
             if active:
                 plugin['name'] = plugin_group[key]['name'][0]

@@ -244,7 +244,6 @@ class Content(object):
             self.plugin_list.plugin_list[i]['pos'] = ''.join(pos_list[i])
 
     def insert(self, plugin, pos, str_pos, replace=False):
-        print ("inserting the entry")
         process = {}
         process['name'] = plugin.name
         process['id'] = plugin.__module__
