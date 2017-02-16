@@ -32,7 +32,6 @@ from scipy.signal import savgol_filter
 class FindPeaks(BaseFilter, CpuPlugin):
     """
     This plugin uses peakutils to find peaks in spectra. This is then metadata.
-    :param in_datasets: Create a list of the dataset(s). Default: [].
     :param out_datasets: Create a list of the dataset(s). Default: ['Peaks'].
     :param thresh: Threshold for peak detection Default: 0.03.
     :param min_distance: Minimum distance for peak detection. Default: 15.

@@ -28,8 +28,6 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 class NoProcessPlugin(Plugin, CpuPlugin):
     """
     The base class from which all plugins should inherit.
-    :param in_datasets: A list of the dataset(s) to process. Default: [].
-    :param out_datasets: A list of the dataset(s) to process. Default: [].
     :param pattern: Explicitly state the slicing pattern. Default: None.
     :param dummy: Dummy parameter for testing. Default: 10.
     """

@@ -26,9 +26,6 @@ from savu.plugins.plugin import Plugin
 class BaseAnalysis(Plugin):
     """
     This setup method in this class needs to be updated
-
-    :param in_datasets: A list of the dataset(s) to process. Default: [].
-    :param out_datasets: A list of the dataset(s) to create. Default: [].
     """
 
     def __init__(self, name="BaseAnalysis"):

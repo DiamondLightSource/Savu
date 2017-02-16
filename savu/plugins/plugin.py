@@ -123,6 +123,7 @@ class Plugin(PluginDatasets):
         :param error_threshold: Convergence threshold. Default: 0.001.
         """
         not_item = []
+        hidden_item = []
         for clazz in inspect.getmro(self.__class__)[::-1]:
             if clazz != object:
                 desc = pu.find_args(clazz, self)
@@ -131,9 +132,12 @@ class Plugin(PluginDatasets):
                 self.docstring_info['synopsis'] = desc['synopsis']
                 if desc['not_param']:
                     not_item.extend(desc['not_param'])
+                    hidden_item.extend(desc['hidden_param'])
                 self._add_item(desc['param'])
         if not_item:
             self._delete_item(not_item)
+        if hidden_item:
+            self._hide_item(hidden_item)
 
     def _add_item(self, full_description):
         for item in full_description:
@@ -146,6 +150,10 @@ class Plugin(PluginDatasets):
             del self.parameters[item]
             del self.parameters_types[item]
             del self.parameters_desc[item]
+
+    def _hide_item(self, items):
+        for item in items:
+            self.parameters[item]['hide'] = True
 
     def initialise_parameters(self):
         self.parameters = {}

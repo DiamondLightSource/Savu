@@ -30,8 +30,8 @@ class BaseSaver(Plugin):
     """
     A base plugin from which all data saver plugins should inherit.
 
-    :param in_datasets: A list of the dataset(s) to process. Default: [].
-    :param out_datasets: A list of the dataset(s) to create. Default: [].
+    :*param out_datasets: Hidden, dummy out_datasets entry. Default: []
+    :param in_datasets: The name of the dataset to save. Default: [].
     """
 
     def __init__(self, name="BaseSaver"):

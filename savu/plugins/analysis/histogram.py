@@ -30,8 +30,6 @@ import numpy as np
 class Histogram(BaseAnalysis, CpuPlugin):
     """
     This plugin uses peakutils to find peaks in spectra. This is then metadata.
-    :param in_datasets: Create a list of the dataset(s). Default: [].
-    :param out_datasets: Create a list of the dataset(s). Default: [].
     """
 
     def __init__(self):

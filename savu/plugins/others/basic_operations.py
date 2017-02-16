@@ -31,10 +31,6 @@ class BasicOperations(Plugin, CpuPlugin):
     """ A class that performs basic mathematical operations on datasets.
     How should the information be passed to the plugin?
 
-    :param in_datasets: Create a list of the dataset(s) to \
-        process. Default: [].
-    :param out_datasets: Create a list of the dataset(s) to \
-        process. Default: [].
     :param operations: Operations to perform. Default: [].
     :param pattern: Pattern associated with the \
         datasets. Default: 'PROJECTION'.
