@@ -51,6 +51,5 @@ Savu is a Python package to assist with the processing and reconstruction of tom
 .. _[1]: https://dx.doi.org/10.1098/rsta.2014.0398
 
 Features
---------
-
+========
 

@@ -37,15 +37,11 @@ def add_package_entry(f, root, dirs, files, output):
     module_name = pkg_path.replace('/', '.')
     f.write(module_name +
             '\n------------------------------------------------------------\n')
-#    f.write('\n.. currentmodule::' + module_name)
-#    f.write('\n.. autosummary::')
-#    f.write('\n   :toctree: ' + output + '/' + pkg_path + '\n\n')
-#    f.write('\n   :toctree: api\n\n')
     f.write('\n.. toctree::\n')
 
     for fi in files:
-        file_path = module_name + '.' + fi
-        f.write('   ' + output + '/' + file_path.split('.py')[0] + '\n')
+        file_path = module_name + '.' + fi.split('.py')[0]
+        f.write('   ' + output + '/' + file_path + '\n')
     f.write('\n\n')
 
 
@@ -59,7 +55,7 @@ def add_indices_and_tables(f):
 
 if __name__ == "__main__":
     import sys
-    out_folder, rst_file = sys.argv[1:]
+    out_folder, rst_file, api_type = sys.argv[1:]
 
     # determine Savu base path
     savu_base_path = os.path.abspath('../')
@@ -67,14 +63,21 @@ if __name__ == "__main__":
     # open the autosummary file
     f = open(savu_base_path + '/doc/source/' + rst_file, 'w')
 
+    if api_type == 'framework':
+        f.write('Framework API \n===================\n')
+        exclude_dir = ['__pycache__', 'test', 'plugins']
+    elif api_type == 'plugin':
+        f.write('Plugin API \n===================\n')
+        exclude_dir = ['__pycache__', 'test']
+    else:
+        raise Exception('Unknown API type', api_type)
+
     # add header
-    f.write('API Documentation \n===================\n')
     f.write('Information on specific functions, classes, and methods.\n \n')
 
     base_path = savu_base_path + '/savu'
     # create entries in the autosummary for each package
 
-    exclude_dir = ['__pycache__', 'test']
     exclude_file = ['__init__.py']
 
     for root, dirs, files in os.walk(base_path, topdown=True):
@@ -84,5 +87,4 @@ if __name__ == "__main__":
         if '__' not in root:
             add_package_entry(f, root, dirs, files, out_folder)
 
-    add_indices_and_tables(f)
-
+#    add_indices_and_tables(f)

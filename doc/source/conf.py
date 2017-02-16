@@ -22,28 +22,8 @@ autodoc_mock_imports = ['numpy', 'mpi4py', 'astra', 'scipy', 'h5py', 'pyfftw',
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#sys.path.insert(0, os.path.abspath('.'))
-#sys.path.insert(0, '../.')
-#sys.path.insert(0, '../../.')
 sys.path.insert(0, os.path.abspath('../../'))
-#sys.path.insert(0, os.path.abspath('../../savu'))
-#sys.path.insert(0, os.path.abspath('../../savu/core'))
-#sys.path.insert(0, os.path.abspath('../../savu/transports'))
-#sys.path.insert(0, os.path.abspath('../../savu/data'))
-#sys.path.insert(0, os.path.abspath('../../savu/data/transport_data'))
-#sys.path.insert(0, os.path.abspath('../../savu/data/data_structures'))
-#sys.path.insert(0, os.path.abspath('../../savu/plugins'))
-#sys.path.insert(0, os.path.abspath('../../savu/plugins/driver'))
-#sys.path.insert(0, os.path.abspath('../../savu/plugins/filters'))
-#sys.path.insert(0, os.path.abspath('../../savu/plugins/filters/azimuthal_integrators'))
-#sys.path.insert(0, os.path.abspath('../../savu/plugins/filters/component_analysis'))
-#sys.path.insert(0, os.path.abspath('../../savu/plugins/filters/fitters'))
-#sys.path.insert(0, os.path.abspath('../../savu/plugins/corrections'))
-#sys.path.insert(0, os.path.abspath('../../savu/plugins/reconstructions'))
-#sys.path.insert(0, os.path.abspath('../../savu/plugins/reconstructions/astra_recons'))
-#sys.path.insert(0, os.path.abspath('../../savu/plugins/loaders'))
-#sys.path.insert(0, os.path.abspath('../../savu/plugins/loaders/multi_modal_loaders'))
-#sys.path.insert(0, os.path.abspath('../../savu/plugins/savers'))
+sys.path.insert(0, os.path.abspath('../../savu'))
 
 print sys.path
 # -- General configuration -----------------------------------------------------
@@ -88,8 +68,10 @@ keep_warnings=True
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.intersphinx', 'sphinx.ext.ifconfig',
-              'sphinx.ext.autosummary', 'sphinx.ext.viewcode']
+#extensions = ['sphinx.ext.autodoc', 'sphinx.ext.intersphinx', 'sphinx.ext.ifconfig',
+#              'sphinx.ext.autosummary', 'sphinx.ext.viewcode']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.autosummary',
+              'sphinx.ext.napoleon', 'sphinx.ext.viewcode']
 
 # have a look at this extension 'sphinx.ext.doctest',
 
@@ -134,9 +116,11 @@ release = __version__
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_templates', '', '../../savu/test',
-                    '../../savu/core/transports/dist_array_transport.py',
-                    'setup.py', 'install']
+#exclude_patterns = ['_templates', '', '../../savu/test',
+#                    '../../savu/core/transports/dist_array_transport.py',
+#                    'setup.py', 'install']
+exclude_patterns = ['api/savu.test*', 'api/setup*', 
+                    'api_plugin/savu.test*', 'api_plugin/setup*']
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 #default_role = None
@@ -146,7 +130,7 @@ exclude_patterns = ['_templates', '', '../../savu/test',
 
 # If true, the current module name will be prepended to all description
 # unit titles (such as .. function::).
-#add_module_names = True
+add_module_names = False
 
 # If true, sectionauthor and moduleauthor directives will be shown in the
 # output. They are ignored by default.
