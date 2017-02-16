@@ -61,13 +61,11 @@ class PluginList(object):
         self.plugin_list = []
         for key in plugin_group.keys():
             plugin = {}
-            try:
+
+            active = True
+            if 'active' in plugin_group[key].keys() and activePass is False:
                 active = plugin_group[key]['active'][0]
                 plugin['active'] = active
-                if activePass:
-                    active = True
-            except KeyError:
-                active = True
 
             if active:
                 plugin['name'] = plugin_group[key]['name'][0]
@@ -85,8 +83,6 @@ class PluginList(object):
         plugin_file.close()
 
     def _save_plugin_list(self, out_filename, exp=None):
-        import re
-
         if exp:
             entry_group = exp.nxs_file.create_group('entry')
         else:
@@ -102,44 +98,44 @@ class PluginList(object):
 
         count = 1
         for plugin in self.plugin_list:
-            if 'pos' in plugin.keys():
-                num = int(re.findall('\d+', plugin['pos'])[0])
-                letter = re.findall('[a-z]', plugin['pos'])
-                letter = letter[0] if letter else ""
-                plugin_group = \
-                    plugins_group.create_group("%*i%*s" % (4, num, 1, letter))
-            else:
-                plugin_group = plugins_group.create_group("%*i" % (4, count))
-
-            plugin_group.attrs[NX_CLASS] = 'NXnote'
-            id_array = np.array([plugin['id']])
-            plugin_group.create_dataset('id', id_array.shape, id_array.dtype,
-                                        id_array)
-            name_array = np.array([plugin['name']])
-            plugin_group.create_dataset('name', name_array.shape,
-                                        name_array.dtype, name_array)
-            data_array = np.array([json.dumps(plugin['data'])])
-            plugin_group.create_dataset('data', data_array.shape,
-                                        data_array.dtype, data_array)
-            try:
-                active_array = np.array([plugin['active']])
-                plugin_group.create_dataset('active', active_array.shape,
-                                            active_array.dtype, active_array)
-            except KeyError:
-                pass
-
-            try:
-                desc_array = np.array([json.dumps(plugin['desc'])])
-                plugin_group.create_dataset('desc', desc_array.shape,
-                                            desc_array.dtype, desc_array)
-            except KeyError:
-                pass
-
-            if 'cite' in plugin.keys():
-                if plugin['cite'] is not None:
-                    self._output_plugin_citations(plugin['cite'], plugin_group)
-
+            self.__populate_plugins_group(plugins_group, plugin, count)
             count += 1
+
+    def __populate_plugins_group(self, plugins_group, plugin, count):
+        import re
+        if 'pos' in plugin.keys():
+            num = int(re.findall('\d+', plugin['pos'])[0])
+            letter = re.findall('[a-z]', plugin['pos'])
+            letter = letter[0] if letter else ""
+            plugin_group = \
+                plugins_group.create_group("%*i%*s" % (4, num, 1, letter))
+        else:
+            plugin_group = plugins_group.create_group("%*i" % (4, count))
+
+        plugin_group.attrs[NX_CLASS] = 'NXnote'
+        id_array = np.array([plugin['id']])
+        plugin_group.create_dataset('id', id_array.shape, id_array.dtype,
+                                    id_array)
+        name_array = np.array([plugin['name']])
+        plugin_group.create_dataset('name', name_array.shape,
+                                    name_array.dtype, name_array)
+        data_array = np.array([json.dumps(plugin['data'])])
+        plugin_group.create_dataset('data', data_array.shape,
+                                    data_array.dtype, data_array)
+
+        if 'active' in plugin.keys():
+            active_array = np.array([plugin['active']])
+            plugin_group.create_dataset('active', active_array.shape,
+                                        active_array.dtype, active_array)
+
+        if 'desc' in plugin.keys():
+            desc_array = np.array([json.dumps(plugin['desc'])])
+            plugin_group.create_dataset('desc', desc_array.shape,
+                                        desc_array.dtype, desc_array)
+
+        if 'cite' in plugin.keys():
+            if plugin['cite'] is not None:
+                self._output_plugin_citations(plugin['cite'], plugin_group)
 
     def _add(self, idx, entry):
         self.plugin_list.insert(idx, entry)
@@ -211,7 +207,7 @@ class PluginList(object):
 
     def __get_basic(self, plugin, count, width):
         title = self.__get_plugin_title(plugin, count, width, quiet=True)
-        params = self._get_param_details(plugin['data'], width)
+        params = self._get_param_details(plugin, width)
         return title + params
 
     def __get_verbose(self, plugin, count, width, breakdown=False):
@@ -220,8 +216,7 @@ class PluginList(object):
         colour_off = Back.RESET + Fore.RESET
         synopsis = \
             self._get_synopsis(plugin['name'], width, colour_on, colour_off)
-        params = self._get_param_details(
-            plugin['data'], width, desc=plugin['desc'])
+        params = self._get_param_details(plugin, width, desc=plugin['desc'])
         if breakdown:
             return title, synopsis, params
         return title + synopsis + params
@@ -248,12 +243,19 @@ class PluginList(object):
             return ''
         return "\n" + colour_on + synopsis + colour_off
 
-    def _get_param_details(self, pdata, width, desc=False):
+    def _get_param_details(self, plugin, width, desc=False):
+        pdata = plugin['data']
         margin = 4
         keycount = 0
         joiner = "\n" + " "*margin
         params = ''
-        for key in pdata.keys():
+
+        if 'hide' in plugin.keys():
+            keys = [p for p in pdata.keys() if p not in plugin['hide']]
+        else:
+            keys = pdata.keys()
+
+        for key in keys:
             keycount += 1
             temp = "\n   %2i)   %20s : %s"
             params += temp % (keycount, key, pdata[key])

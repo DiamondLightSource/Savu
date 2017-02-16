@@ -108,7 +108,6 @@ class Content(object):
                 exec("value = " + value)
             except (NameError, SyntaxError):
                 exec("value = " + "'" + value + "'")
-
         return value
 
     def add(self, name, str_pos):
@@ -245,6 +244,7 @@ class Content(object):
             self.plugin_list.plugin_list[i]['pos'] = ''.join(pos_list[i])
 
     def insert(self, plugin, pos, str_pos, replace=False):
+        print ("inserting the entry")
         process = {}
         process['name'] = plugin.name
         process['id'] = plugin.__module__
@@ -252,6 +252,7 @@ class Content(object):
         process['data'] = plugin.parameters
         process['active'] = True
         process['desc'] = plugin.parameters_desc
+        process['hide'] = plugin.parameters_hide
         if replace:
             self.plugin_list.plugin_list[pos] = process
         else:

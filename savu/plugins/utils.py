@@ -234,22 +234,28 @@ def find_args(dclass, inst=None):
     not_param_regexp = re.compile('^:~param (?P<param>\w+):')
     not_param, idx2 = __find_regexp(not_param_regexp, lines)
 
+    hidden_param_regexp = \
+        re.compile('^:\*param (?P<param>\w+):\s?(?P<doc>\w.*[^ ])\s' +
+                   '?Default:\s?(?P<default>.*[^ ])$')
+    hidden_param, idx3 = __find_regexp(hidden_param_regexp, lines)
+
     warn_regexp = re.compile(r'^:config_warn: \s?(?P<config_warn>.*[^ ])$')
-    warn, idx3 = __find_regexp(warn_regexp, lines)
+    warn, idx4 = __find_regexp(warn_regexp, lines)
     if not warn:
         warn = ['']
     syn_regexp = re.compile(r'^:synopsis: \s?(?P<synopsis>.*[^ ])$')
-    synopsis, idx4 = __find_regexp(syn_regexp, mod_doc_lines)
+    synopsis, idx5 = __find_regexp(syn_regexp, mod_doc_lines)
     if not synopsis:
         synopsis = ['']
 
-    info = __find_docstring_info(idx1+idx2+idx3+idx4, lines)
+    info = __find_docstring_info(idx1+idx2+idx3+idx4+idx5, lines)
 
     param_entry = [{'dtype': type(value), 'name': a[0], 'desc': a[1],
                     'default': value} for a in param for value in [eval(a[2])]]
 
     return {'warn': "\n".join(warn), 'info': info, 'synopsis': synopsis[0],
-            'param': param_entry, 'not_param': not_param}
+            'param': param_entry, 'not_param': not_param,
+            'hidden_param': hidden_param}
 
 
 def __get_doc_lines(doc):
