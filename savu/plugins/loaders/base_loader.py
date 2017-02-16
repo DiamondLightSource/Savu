@@ -30,12 +30,14 @@ class BaseLoader(Plugin):
     A base plugin from which all data loader plugins should inherit.
 
     :param preview: A slice list of required frames. Default: [].
-    """
+    :~param in_datasets: Inherited but not required. Default: [].
+    :~param out_datasets: Inherited but not required. Default: [].
 
+    """
     def _main_setup(self, exp, params):
         """
         Overwrites the main_setup function in plugin.py as the loader is a
-        special case of plugin that doesn't required setup of in/out_datasets
+        special case of plugin that doesn't require setup of in/out_datasets
         """
         self._set_parameters(params)
         self.exp = exp

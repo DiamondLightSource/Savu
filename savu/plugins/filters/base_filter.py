@@ -27,9 +27,6 @@ class BaseFilter(Plugin):
     """
     A Plugin to apply a simple dark and flatfield correction to some
     raw timeseries data
-
-    :param in_datasets: A list of the dataset(s) to process. Default: [].
-    :param out_datasets: A list of the dataset(s) to create. Default: [].
     """
 
     def __init__(self, name="BaseFilter"):
@@ -47,6 +44,12 @@ class BaseFilter(Plugin):
     def get_plugin_pattern(self):
         return 'PROJECTION'
 
+    def fix_data(self):
+        """ Set flag to determine whether the shape of data passed to the main
+        processing method should have a fixed size.
+        """
+        return False
+        
     def raw_data(self):
         """ Return True if the output dataset should retain ImageKey/NoImageKey
         instances if they exist, i.e. keep the darks and flats

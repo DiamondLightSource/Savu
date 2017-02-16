@@ -69,12 +69,12 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
     def _proj_pre_process(self, data, shape, tile, dim):
         tile[dim] = shape[dim]
         self.convert_size = lambda x: np.tile(x, tile)
-        self.correct = self.correct_proj
+        self.process_frames = self.correct_proj
 
     def _sino_pre_process(self, data, tile, dim):
         full_shape = data.get_shape()
         tile[dim] = full_shape[dim]
-        self.correct = self.correct_sino
+        self.process_frames = self.correct_sino
         self.length = full_shape[self.slice_dir]
         if len(full_shape) is 3:
             self.convert_size = lambda a, b, x: np.tile(x[a:b], tile)

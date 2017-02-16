@@ -105,7 +105,7 @@ class PaganinFilter(BaseFilter, CpuPlugin):
             fpci+self.parameters['increment'])
         return result
 
-    def filter_frames(self, data):
+    def process_frames(self, data):
         output = np.empty_like(data[0])
         nSlices = data[0].shape[self.slice_dir]
         for i in range(nSlices):
