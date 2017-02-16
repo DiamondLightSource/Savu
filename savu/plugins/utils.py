@@ -234,8 +234,6 @@ def find_args(dclass, inst=None):
     not_param_regexp = re.compile('^:~param (?P<param>\w+):')
     not_param, idx2 = __find_regexp(not_param_regexp, lines)
 
-    print not_param
-
     warn_regexp = re.compile(r'^:config_warn: \s?(?P<config_warn>.*[^ ])$')
     warn, idx3 = __find_regexp(warn_regexp, lines)
     if not warn:

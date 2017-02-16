@@ -130,7 +130,7 @@ class Plugin(PluginDatasets):
                 self.docstring_info['info'] = desc['info']
                 self.docstring_info['synopsis'] = desc['synopsis']
                 if desc['not_param']:
-                    not_item.append(*desc['not_param'])
+                    not_item.extend(desc['not_param'])
                 self._add_item(desc['param'])
         if not_item:
             self._delete_item(not_item)
