@@ -230,10 +230,14 @@ class Hdf5Transport(TransportControl):
         expand_dict = self.__set_functions(out_data, 'expand')
 
         number_of_slices_to_process = len(in_slice_list[0])
+        output_counter=-1
         for count in range(number_of_slices_to_process):
             percent_complete = count/(number_of_slices_to_process * 0.01)
-            cu.user_message("%s - %3i%% complete" %
-                            (plugin.name, percent_complete))
+            rounded_amount_through = percent_complete // 5 
+            if (rounded_amount_through) != output_counter:
+                cu.user_message("%s - %3i%% complete" %
+                                (plugin.name, percent_complete))
+                output_counter = rounded_amount_through
 
             section, slice_list = \
                 self.__get_all_padded_data(in_data, in_slice_list, count,
