@@ -136,6 +136,11 @@ class PluginList(object):
             plugin_group.create_dataset('desc', desc_array.shape,
                                         desc_array.dtype, desc_array)
 
+        if 'hide' in plugin.keys():
+            hide_array = np.array([json.dumps(plugin['hide'])])
+            plugin_group.create_dataset('hide', hide_array.shape,
+                                        hide_array.dtype, hide_array)
+
         if 'cite' in plugin.keys():
             if plugin['cite'] is not None:
                 self._output_plugin_citations(plugin['cite'], plugin_group)
