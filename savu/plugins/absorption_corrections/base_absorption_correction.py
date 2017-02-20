@@ -45,8 +45,19 @@ class BaseAbsorptionCorrection(Plugin, CpuPlugin):
         in_dataset, out_datasets = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
         in_meta_data = in_dataset[0].meta_data
-        idx = in_meta_data.get("PeakEnergy")
-        self.nChannels = len(idx)
+        
+        try:
+            idx =in_meta_data.get_meta_data('PeakEnergy')
+        except KeyError:
+            logging.debug('No PeakEnergy: trying with the fullSpectrum')
+            try:
+                in_dataset, out_datasets = self.get_datasets()
+                in_dataset[0].get_data_patterns()['SPECTRUM']
+                idx = list(in_meta_data.get_meta_data('energy'))
+            except KeyError:
+                logging.debug("No PeakEnergy or energy axis. This won't work")
+                raise 
+        self.nChannels = len(idx) 
         in_pData[0].plugin_data_setup('SINOGRAM', self.get_num_channels())
         in_pData[1].plugin_data_setup('SINOGRAM', 1)
         spectra = out_datasets[0]

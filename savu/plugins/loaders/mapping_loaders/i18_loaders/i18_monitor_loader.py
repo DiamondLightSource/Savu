@@ -30,7 +30,7 @@ from savu.plugins.utils import register_plugin
 @register_plugin
 class I18monitorLoader(BaseI18MultiModalLoader):
     """
-    A class to load tomography data from an NXstxm file
+    A class to load tomography data from an monitor file
     :param monitor_detector: path to \
         monitor. Default:'entry1/raster_counterTimer01/I0'.
     """
@@ -50,6 +50,6 @@ class I18monitorLoader(BaseI18MultiModalLoader):
         data_obj = self.multi_modal_setup('monitor')
         data_obj.data = data_obj.backing_file[data_str]
         data_obj.set_shape(data_obj.data.shape)
-        self.set_motors(data_obj, 'stxm')
-        self.add_patterns_based_on_acquisition(data_obj, 'stxm')
+        self.set_motors(data_obj, 'monitor')
+        self.add_patterns_based_on_acquisition(data_obj, 'monitor')
         self.set_data_reduction_params(data_obj)

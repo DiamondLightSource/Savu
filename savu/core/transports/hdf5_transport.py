@@ -130,10 +130,7 @@ class Hdf5Transport(BaseTransport):
     def __final_output(self, name):
         plugin_list = self.exp.meta_data.plugin_list
         saver_idx = plugin_list._get_savers_index()
-        print saver_idx
         names = [plugin_list.plugin_list[i]['data']['out_datasets'] for i in saver_idx]
-        print names
-        print name, names
         if name in names:
             return True
         return False
