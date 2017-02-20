@@ -59,6 +59,7 @@ class PluginList(object):
         plugin_file = h5py.File(filename, 'r')
         plugin_group = plugin_file['entry/plugin']
         self.plugin_list = []
+        start0 = False
         for key in plugin_group.keys():
             plugin = {}
 
@@ -74,6 +75,13 @@ class PluginList(object):
                 plugin['name'] = plugin_group[key]['name'][0]
                 plugin['id'] = plugin_group[key]['id'][0]
                 plugin['pos'] = key.encode('ascii').strip()
+
+                # fixes old plugin lists that start with 0
+                if plugin['pos'] == '0':
+                    start0 = True
+                if start0:
+                    plugin['pos'] = str(int(plugin['pos']) + 1)
+
                 if 'desc' in plugin_group[key].keys():
                     plugin['desc'] = self.__byteify(
                         json.loads(plugin_group[key]['desc'][0]))

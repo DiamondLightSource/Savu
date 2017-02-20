@@ -163,10 +163,10 @@ class Content(object):
 
     def on_and_off(self, element, index):
         if index < 2:
-            print("switching plugin", element, "ON")
+            print("switching plugin", element+1, "ON")
             self.plugin_list.plugin_list[element]['active'] = True
         else:
-            print("switching plugin", element, "OFF")
+            print("switching plugin", element+1, "OFF")
             self.plugin_list.plugin_list[element]['active'] = False
 
     def convert_pos(self, str_pos):
