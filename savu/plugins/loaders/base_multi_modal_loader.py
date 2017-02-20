@@ -211,10 +211,5 @@ class BaseMultiModalLoader(BaseLoader):
             data_obj.add_pattern("DIFFRACTION", core_dir=diff_core,
                                  slice_dir=diff_slice)
         
-        if ltype is 'monitor':
-            # this is needed for I0 corrections of single sinogram ND data
-            channel_core = (dims[-1],)
-            channel_slice = tuple(dims[:-1])
-            data_obj.add_pattern("CHANNEL", core_dir=channel_core,
-                        slice_dir=channel_slice)
+
             
