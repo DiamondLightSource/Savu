@@ -49,7 +49,7 @@ class BaseFilter(Plugin):
         processing method should have a fixed size.
         """
         return False
-        
+
     def raw_data(self):
         """ Return True if the output dataset should retain ImageKey/NoImageKey
         instances if they exist, i.e. keep the darks and flats

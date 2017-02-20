@@ -62,7 +62,7 @@ class SinogramClean(BaseFilter, CpuPlugin):
                 np.zeros((2*drop + 1, Ncol), dtype=np.float32)
         return mask
 
-    def filter_frames(self, data):
+    def process_frames(self, data):
         sino = data[0]
         sino2 = np.fliplr(sino[1:])
         (Nrow, Ncol) = sino.shape

@@ -43,7 +43,7 @@ class PolyBackgroundEstimator(BaseFilter, CpuPlugin):
         super(PolyBackgroundEstimator,
               self).__init__("PolyBackgroundEstimator")
 
-    def filter_frames(self, data):
+    def process_frames(self, data):
         data = data[0]
         x = self.axis
         n = self.parameters['n']

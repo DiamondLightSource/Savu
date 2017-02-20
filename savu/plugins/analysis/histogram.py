@@ -35,7 +35,7 @@ class Histogram(BaseAnalysis, CpuPlugin):
     def __init__(self):
         super(Histogram, self).__init__("Histogram")
 
-    def filter_frames(self, data):
+    def process_frames(self, data):
         return np.array([data[0].sum()])
     #TODO: probably should add the option for some filtering on the output/ rebinning etc
 

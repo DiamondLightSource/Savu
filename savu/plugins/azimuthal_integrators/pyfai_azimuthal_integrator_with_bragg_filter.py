@@ -44,7 +44,7 @@ class PyfaiAzimuthalIntegratorWithBraggFilter(BaseAzimuthalIntegrator):
         super(PyfaiAzimuthalIntegratorWithBraggFilter,
               self).__init__("PyfaiAzimuthalIntegratorWithBraggFilter")
 
-    def filter_frames(self, data):
+    def process_frames(self, data):
         mData = self.params[2]
         ai = self.params[3]
 

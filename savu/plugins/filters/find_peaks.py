@@ -40,7 +40,7 @@ class FindPeaks(BaseFilter, CpuPlugin):
     def __init__(self):
         super(FindPeaks, self).__init__("FindPeaks")
 
-    def filter_frames(self, data):
+    def process_frames(self, data):
         data = data[0]
         # filter to smooth noise
         data = savgol_filter(data, 51, 3)

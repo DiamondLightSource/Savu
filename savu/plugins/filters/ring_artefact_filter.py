@@ -47,7 +47,7 @@ class RingArtefactFilter(BaseFilter, CpuPlugin):
               self).__init__("RingArtefactFilter")
 
 
-    def filter_frame(self, data):
+    def process_frames(self, data):
         logging.debug("Running Filter data")
         
         param_n = self.parameters['param_n']

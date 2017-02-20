@@ -53,7 +53,7 @@ class BandPass(BaseFilter, CpuPlugin):
         super(BandPass,
               self).__init__("BandPass")
 
-    def filter_frames(self, data):
+    def process_frames(self, data):
         """
         The second method we need to implement from the Filter class and the
         part of the code that actually does all the work. the input here 'data'

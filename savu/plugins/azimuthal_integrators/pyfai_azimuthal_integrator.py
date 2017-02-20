@@ -42,7 +42,7 @@ class PyfaiAzimuthalIntegrator(BaseAzimuthalIntegrator):
         super(PyfaiAzimuthalIntegrator,
               self).__init__("PyfaiAzimuthalIntegrator")
 
-    def filter_frames(self, data):
+    def process_frames(self, data):
         logging.debug("Running azimuthal integration")
         ai = self.params[3]
         logging.info('datashape=%s' % str(data[0].shape))

@@ -45,7 +45,7 @@ class DialsFindSpots(BaseFilter, CpuPlugin):
         super(DialsFindSpots,
               self).__init__("DialsFindSpots")
 
-    def filter_frames(self, data):
+    def process_frames(self, data):
         data = data[0]
         lp = gaussian_filter(data, 100)
         hp = data - lp # poormans background subtraction

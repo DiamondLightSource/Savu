@@ -52,7 +52,7 @@ class ProjectionVerticalAlignment(BaseFilter, CpuPlugin):
         self.det_y = self.get_plugin_in_datasets()[0].\
             get_data_dimension_by_axis_label('detector_y')
 
-    def filter_frames(self, data):
+    def process_frames(self, data):
         data = data[0]
         output = np.empty_like(data)
         nFrames = data.shape[self.slice_dir]

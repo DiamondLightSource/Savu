@@ -69,7 +69,7 @@ class XrdAbsorptionApproximation(BaseFilter, CpuPlugin):
             self.stxm = np.log10(np.squeeze(self.exp.index['in_data']['stxm'].data[...]))
         self.stxm = np.squeeze(self.exp.index['in_data']['stxm'].data[...])
 
-    def filter_frames(self, data):
+    def process_frames(self, data):
         xrd = data[0]
         stxm_orig = self.stxm
         logging.debug('the xrd shape is %s' % str(xrd.shape))

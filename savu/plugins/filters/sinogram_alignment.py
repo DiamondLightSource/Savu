@@ -86,7 +86,7 @@ class SinogramAlignment(BaseFilter, CpuPlugin):
 #                shifted.reshape(shifted.shape[0], shifted.shape[1])
 #        return data
 
-    def filter_frames(self, data):
+    def process_frames(self, data):
         """
         Should be overloaded by filter classes extending this one
 

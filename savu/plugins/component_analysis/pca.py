@@ -37,7 +37,7 @@ class Pca(BaseComponentAnalysis):
     def __init__(self):
         super(Pca, self).__init__("Pca")
 
-    def filter_frames(self, data):
+    def process_frames(self, data):
         logging.debug("Starting the PCA")
         data = data[0]
         sh = data.shape

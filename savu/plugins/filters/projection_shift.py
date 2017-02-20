@@ -95,7 +95,7 @@ class ProjectionShift(BaseFilter, CpuPlugin):
                 A[i, f] = 1
         return A
 
-    def filter_frames(self, data):
+    def process_frames(self, data):
         data, nFrames, output, shift_array = self._initial_setup(data)
         return self._sub_pixel_shift_adjustment(data)
 

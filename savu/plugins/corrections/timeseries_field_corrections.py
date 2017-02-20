@@ -62,7 +62,8 @@ class TimeseriesFieldCorrections(BaseCorrection, CpuPlugin):
         self.convert_size = \
             lambda x, sl: x[[sl[d] for d in det_dims]]
 
-    def correct(self, data):
+    def process_frames(self, data):
+        data = data[0]
         dark = self.convert_size(self.dark, self.get_current_slice_list()[0])
         flat_minus_dark = self.convert_size(
             self.flat_minus_dark, self.get_current_slice_list()[0])

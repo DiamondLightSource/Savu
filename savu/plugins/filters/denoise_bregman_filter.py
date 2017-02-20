@@ -49,7 +49,7 @@ class DenoiseBregmanFilter(BaseFilter, CpuPlugin):
     def get_filter_padding(self):
         return {}
 
-    def filter_frames(self, data):
+    def process_frames(self, data):
         data = data[0]
         logging.debug("Running Denoise")
         weight = self.parameters['weight']

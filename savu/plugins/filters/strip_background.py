@@ -47,7 +47,7 @@ class StripBackground(BaseFilter, CpuPlugin):
         logging.debug("Stripping background")
         super(StripBackground, self).__init__("StripBackground")
 
-    def filter_frames(self, data):
+    def process_frames(self, data):
         data = data[0]
         t1 = time.time()
         its = self.parameters['iterations']

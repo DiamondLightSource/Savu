@@ -35,20 +35,6 @@ class BaseCorrection(Plugin):
     def __init__(self, name='BaseCorrection'):
         super(BaseCorrection, self).__init__(name)
 
-    def process_frames(self, data):
-        """
-        Perform the correction
-        """
-        return self.correct(data[0])
-
-    def correct(self, data):
-        """
-        This is the main processing method for all plugins that inherit from
-        base correction.  The plugin must implement this method.
-        """
-        logging.error("process needs to be implemented")
-        raise NotImplementedError("process needs to be implemented")
-
     def setup(self):
         """
         Initial setup of all datasets required as input and output to the

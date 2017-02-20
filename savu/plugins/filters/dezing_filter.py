@@ -71,7 +71,7 @@ class DezingFilter(BaseFilter, CpuPlugin):
         result[replace_mask] = median_result[replace_mask]
         return result
 
-    def filter_frames(self, data):
+    def process_frames(self, data):
         return self._dezing(data[0])
 
     def get_max_frames(self):

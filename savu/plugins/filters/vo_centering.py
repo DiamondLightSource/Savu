@@ -157,7 +157,7 @@ class VoCentering(BaseFilter, CpuPlugin):
         rotcenter = raw_cor + listshift[minpos]/2.0
         return rotcenter, listmetric
 
-    def filter_frames(self, data):
+    def process_frames(self, data):
         # if data is greater than a certain size
         # data = data[0][::self.parameters['step']]
         # Reducing noise by smooth filtering, it's important

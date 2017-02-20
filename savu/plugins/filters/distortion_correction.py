@@ -68,7 +68,7 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
             self.new_slice[ddir] = \
                 slice(self.crop, orig_shape[ddir]-self.crop)
 
-    def filter_frames(self, data):
+    def process_frames(self, data):
         result = np.empty_like(data[0])
         unwarp.run(data[0], result)
         return result[self.new_slice]

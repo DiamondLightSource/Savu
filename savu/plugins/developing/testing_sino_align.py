@@ -51,7 +51,7 @@ class TestingSinoAlign(Plugin, CpuPlugin):
         logging.debug("initialising Sinogram Alignment")
         super(TestingSinoAlign, self).__init__("TestingSinoAlign")
 
-    def filter_frames(self, data):
+    def process_frames(self, data):
         """
         Should be overloaded by filter classes extending this one
 

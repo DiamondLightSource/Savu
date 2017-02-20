@@ -39,7 +39,7 @@ class Ica(BaseComponentAnalysis):
     def __init__(self):
         super(Ica, self).__init__("Ica")
 
-    def filter_frames(self, data):
+    def process_frames(self, data):
         logging.debug("I am starting the old componenty vous")
         data = data[0]
         #print 'The length of the data is'+str(data.shape)

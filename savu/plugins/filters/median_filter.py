@@ -42,7 +42,7 @@ class MedianFilter(BaseFilter, CpuPlugin):
         logging.debug("Starting Median Filter")
         super(MedianFilter, self).__init__("MedianFilter")
 
-    def filter_frames(self, data):
+    def process_frames(self, data):
         result = sig.medfilt(data[0], self.parameters['kernel_size'])
         return result
 

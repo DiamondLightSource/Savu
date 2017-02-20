@@ -73,7 +73,7 @@ class RingRemovalWaveletfft(BaseFilter, CpuPlugin):
         self.level = np.abs(self.parameters['level'])
         self.waveletname = 'db'+str(n)
 
-    def filter_frames(self, data):
+    def process_frames(self, data):
         output = np.empty_like(data[0])
         nSlices = data[0].shape[self.slice_dir]
         for i in range(nSlices):

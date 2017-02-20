@@ -46,7 +46,7 @@ class MonitorCorrection(Plugin, CpuPlugin):
         logging.debug("correcting data")
         super(MonitorCorrection, self).__init__("MonitorCorrection")
 
-    def filter_frames(self, data):
+    def process_frames(self, data):
         monitor = data[1]
         to_be_corrected = data[0]
         nom_scale = self.parameters['nominator_scale']

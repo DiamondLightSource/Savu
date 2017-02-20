@@ -44,7 +44,7 @@ class PyfaiAzimuthalIntegratorSeparate(BaseAzimuthalIntegrator):
         super(PyfaiAzimuthalIntegratorSeparate,
               self).__init__("PyfaiAzimuthalIntegratorSeparate")
 
-    def filter_frames(self, data):
+    def process_frames(self, data):
         logging.debug("Running azimuthal integration")
         mData = self.params[2]
         mask = self.params[0]

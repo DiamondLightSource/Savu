@@ -52,7 +52,7 @@ class Pymca(BaseFilter, CpuPlugin):
         sh = in_d1.get_shape()
         self.b = self.setup_fit(np.random.random((1,1,sh[-1])))
 
-    def filter_frames(self, data):
+    def process_frames(self, data):
 #         print np.array(data).shape
         y=np.array(data)
         y = np.expand_dims(data,0)

@@ -72,7 +72,8 @@ class TimeBasedCorrection(BaseCorrection, CpuPlugin):
         sl = [list(s) for s in sl]
         return [np.mean(data[sl[i]], axis=0) for i in range(len(sl))], abs_idx
 
-    def correct(self, data):
+    def process_frames(self, data):
+        data = data[0]
         frames = self._get_frames()
         output = np.empty(data.shape, dtype=np.float32)
         nSlices = data.shape[self.slice_dir]

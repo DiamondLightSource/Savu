@@ -40,7 +40,7 @@ class SpectrumCrop(BaseFilter, CpuPlugin):
         logging.debug("cropping spectrum")
         super(SpectrumCrop, self).__init__("SpectrumCrop")
 
-    def filter_frames(self, data):
+    def process_frames(self, data):
         data = data[0]
         data_cropped = data[self.new_idx]
         return data_cropped

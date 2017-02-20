@@ -41,7 +41,7 @@ class Stats(Plugin, CpuPlugin):
         logging.debug("Starting the statistics")
         super(Stats, self).__init__("Stats")
 
-    def filter_frames(self, data):
+    def process_frames(self, data):
         data = data[0]
         if 'max' in self.parameters['required_stats']:
             maximum = np.max(data)
