@@ -173,7 +173,7 @@ class Experiment(object):
 
     def _set_nxs_filename(self):
         folder = self.meta_data.get('out_path')
-        fname = os.path.basename(folder.split('_')[-1]) + '_processed.nxs'
+        fname = self.meta_data.get('datafile_name') + '_processed.nxs'
         filename = os.path.join(folder, fname)
         self.meta_data.set('nxs_filename', filename)
 
