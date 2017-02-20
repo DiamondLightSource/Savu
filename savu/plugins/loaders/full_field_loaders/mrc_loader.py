@@ -34,6 +34,8 @@ class MrcLoader(BaseLoader):
     """
     Load Medical Research Council (MRC) formatted image data.
 
+    :param name: The name assigned to the dataset. Default: 'tomo'.
+
     """
 
     def __init__(self, name='MrcLoader'):
@@ -41,7 +43,7 @@ class MrcLoader(BaseLoader):
 
     def setup(self):
         exp = self.exp
-        data_obj = exp.create_data_object('in_data', 'tomo')
+        data_obj = exp.create_data_object('in_data', self.parameters['name'])
 
         filename = exp.meta_data.get("data_file")
         data_obj.data = MrcType(data_obj, filename)

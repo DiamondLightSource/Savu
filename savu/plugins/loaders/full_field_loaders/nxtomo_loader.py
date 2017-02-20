@@ -37,6 +37,7 @@ class NxtomoLoader(BaseLoader):
     """
     A class to load tomography data from a hdf5 file
 
+    :param name: The name assigned to the dataset. Default: 'tomo'.
     :param data_path: Path to the data inside the \
         file. Default: 'entry1/tomo_entry/data/data'.
     :param image_key_path: Path to the image key entry inside the nxs \
@@ -57,7 +58,7 @@ class NxtomoLoader(BaseLoader):
     def setup(self):
         exp = self.get_experiment()
 
-        data_obj = exp.create_data_object('in_data', 'tomo')
+        data_obj = exp.create_data_object('in_data', self.parameters['name'])
 
         data_obj.backing_file = \
             h5py.File(self.exp.meta_data.get("data_file"), 'r')

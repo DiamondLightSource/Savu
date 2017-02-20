@@ -36,6 +36,7 @@ class ImageLoader(BaseLoader):
     """
     Load any FabIO compatible formats (e.g. tiffs)
 
+    :param dataset_name: The name assigned to the dataset. Default: 'tomo'.
     :param angles: A python statement to be evaluated or a file. Default: None.
     :param frame_dim: Which dimension requires stitching? Default: 0.
     :param data_prefix: A file prefix for the data file. Default: None.
@@ -48,7 +49,8 @@ class ImageLoader(BaseLoader):
 
     def setup(self):
         exp = self.exp
-        data_obj = exp.create_data_object('in_data', 'tomo')
+        data_obj = exp.create_data_object('in_data',
+                                          self.parameters['dataset_name'])
 
         rot = 0
         detY = 1

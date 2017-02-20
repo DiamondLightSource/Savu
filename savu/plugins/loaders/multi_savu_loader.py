@@ -47,6 +47,7 @@ class MultiSavuLoader(BaseLoader):
     :param axis_label: New axis label, if required, in the form\
         'name.units'. Default: 'scan.number'.
     :param range: The start and end of file numbers. Default: [0, 10].
+    :param name: Name associated with the data set. Default: 'tomo'.
     """
 
     def __init__(self, name='MultiSavuLoader'):
@@ -110,4 +111,5 @@ class MultiSavuLoader(BaseLoader):
         savu.exp = self.exp
         savu._populate_default_parameters()
         savu.parameters['data_path'] = self.parameters['data_path']
+        savu.parameters['name'] = self.parameters['name']
         return savu
