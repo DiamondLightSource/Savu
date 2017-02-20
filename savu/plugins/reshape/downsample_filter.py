@@ -55,7 +55,7 @@ class DownsampleFilter(Plugin, CpuPlugin):
                 (input_shape[1]+1)/self.parameters['bin_size'],
                 (input_shape[2]+1)/self.parameters['bin_size'])
 
-    def filter_frames(self, data):
+    def process_frames(self, data):
         logging.debug("Running Downsample data")
         if self.parameters['mode'] in self.mode_dict:
             sampler = self.mode_dict[self.parameters['mode']]

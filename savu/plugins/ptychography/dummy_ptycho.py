@@ -35,7 +35,7 @@ class DummyPtycho(BasePtycho):
     def __init__(self):
         super(DummyPtycho, self).__init__("DummyPtycho")
 
-    def filter_frames(self, data):
+    def process_frames(self, data):
         data = data[0]
         probe = data[0]
         #print "probe is "+str(probe.shape)

@@ -56,7 +56,7 @@ class FastxrfFitting(BaseFluoFitter):
         in_meta_data = self.get_in_meta_data()[0]
         self.xrfd = self.prep_xrfd(in_meta_data)
 
-    def filter_frames(self, data):
+    def process_frames(self, data):
         logging.debug("Running azimuthal integration")
         xrfd = self.xrfd
 #         print np.squeeze(data).shape

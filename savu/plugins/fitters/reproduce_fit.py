@@ -44,7 +44,7 @@ class ReproduceFit(BaseFitter):
         print "finished preprocess"
 
 
-    def filter_frames(self, data):
+    def process_frames(self, data):
         print "I am in filter frames"
         FitWeights,FitWidths, _FitAreas,Backgrounds = data
         npts = len(FitWeights)

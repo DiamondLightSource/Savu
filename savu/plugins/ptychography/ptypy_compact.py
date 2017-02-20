@@ -90,7 +90,7 @@ class PtypyCompact(BasePtycho):
         self.p = p
         self.r = r
 
-    def filter_frames(self, data):
+    def process_frames(self, data):
         self.r.data = data[0]
         self.p.scans.savu.data.recipe = self.r
         # reconstruct

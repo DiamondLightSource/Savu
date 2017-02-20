@@ -50,7 +50,7 @@ class PtypyBatch(BasePtycho):
         p.scan.illumination = b.probe.storages['S00G00'].data
         self.p = p
 
-    def filter_frames(self, data):
+    def process_frames(self, data):
         idx = self.get_global_frame_index()# the current frame
         print idx 
         p = self.p

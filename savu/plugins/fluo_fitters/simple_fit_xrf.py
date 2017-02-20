@@ -38,7 +38,7 @@ class SimpleFitXrf(BaseFluoFitter):
     def __init__(self):
         super(SimpleFitXrf, self).__init__("SimpleFitXrf")
 
-    def filter_frames(self, data):
+    def process_frames(self, data):
         t1 = time.time()
         data = data[0].squeeze()
         in_meta_data = self.get_in_meta_data()[0]

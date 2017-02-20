@@ -48,7 +48,7 @@ class SimpleFit(BaseFitter):
         self.positions = self.axis[self.peakindex]
         in_meta_data.set('PeakQ', self.positions)
 
-    def filter_frames(self, data):
+    def process_frames(self, data):
         t1 = time.time()
         data = data[0]
         axis = self.axis
