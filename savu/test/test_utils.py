@@ -153,6 +153,7 @@ def set_options(path, **kwargs):
     options['data_file'] = path
     options['process_file'] = kwargs.get('process_file', '')
     options['out_path'] = kwargs.get('out_path', tempfile.mkdtemp())
+    options['datafile_name'] = 'test'
     options['inter_path'] = options['out_path']
     options['log_path'] = options['out_path']
     options['run_type'] = 'test'

@@ -28,7 +28,7 @@ from savu.plugins.utils import register_plugin
 
 
 @register_plugin
-class I18stxmLoader(BaseI18MultiModalLoader):
+class I18StxmLoader(BaseI18MultiModalLoader):
     """
     A class to load tomography data from an NXstxm file
     :param stxm_detector: path to \
@@ -36,8 +36,8 @@ class I18stxmLoader(BaseI18MultiModalLoader):
 
     """
 
-    def __init__(self, name='I18stxmLoader'):
-        super(I18stxmLoader, self).__init__(name)
+    def __init__(self, name='I18StxmLoader'):
+        super(I18StxmLoader, self).__init__(name)
 
     def setup(self):
         """

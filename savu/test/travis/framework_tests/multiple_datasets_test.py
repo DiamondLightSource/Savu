@@ -40,7 +40,7 @@ class MultipleDatasetsTest(unittest.TestCase):
 
     def test_tomo1(self):
         options = tu.set_experiment('tomo')
-        plugin = 'savu.plugins.basic_operations'
+        plugin = 'savu.plugins.basic_operations.basic_operations'
         loader_dict = {'data_path': '1-TimeseriesFieldCorrections-tomo/data'}
         data_dict = {'in_datasets': ['tomo', 'tomo'], 'out_datasets': ['test'],
                      'operations': ['tomo + tomo'],  'pattern': 'PROJECTION'}
@@ -51,7 +51,7 @@ class MultipleDatasetsTest(unittest.TestCase):
 
     def test_tomo2(self):
         options = tu.set_experiment('tomo')
-        plugin = 'savu.plugins.basic_operations'
+        plugin = 'savu.plugins.basic_operations.basic_operations'
         preview = ['10:-1:1:1', '10:-1:1:1', '10:-1:1:1']
         loader_dict = {'data_path': '1-TimeseriesFieldCorrections-tomo/data',
                        'preview': preview}
@@ -65,7 +65,7 @@ class MultipleDatasetsTest(unittest.TestCase):
 
     def test_tomo3(self):
         options = tu.set_experiment('tomo')
-        plugin = 'savu.plugins.basic_operations'
+        plugin = 'savu.plugins.basic_operations.basic_operations'
         preview = ['10:-1:10:1', '10:-1:10:1', '10:-1:10:1']
         loader_dict = {'data_path': '1-TimeseriesFieldCorrections-tomo/data',
                        'preview': preview}
@@ -79,7 +79,7 @@ class MultipleDatasetsTest(unittest.TestCase):
 
     def test_tomo4(self):
         options = tu.set_experiment('tomo')
-        plugin = 'savu.plugins.basic_operations'
+        plugin = 'savu.plugins.basic_operations.basic_operations'
         preview = ['10:-10:10:1', '10:-10:10:1', '10:-10:10:1']
         loader_dict = {'data_path': '1-TimeseriesFieldCorrections-tomo/data',
                        'preview': preview}

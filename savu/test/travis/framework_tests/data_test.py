@@ -31,7 +31,7 @@ class Test(unittest.TestCase):
 
     def test_create_smaller_data_block(self):
         options = tu.set_experiment('tomo')
-        plugin = 'savu.plugins.filters.downsample_filter'
+        plugin = 'savu.plugins.reshape.downsample_filter'
         tu.set_plugin_list(options, plugin)
 
         out_data_name = options['plugin_list'][1]['data']['out_datasets'][0]

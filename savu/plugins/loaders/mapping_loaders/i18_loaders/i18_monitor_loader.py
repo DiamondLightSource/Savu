@@ -28,15 +28,15 @@ from savu.plugins.utils import register_plugin
 
 
 @register_plugin
-class I18monitorLoader(BaseI18MultiModalLoader):
+class I18MonitorLoader(BaseI18MultiModalLoader):
     """
     A class to load tomography data from an monitor file
     :param monitor_detector: path to \
         monitor. Default:'entry1/raster_counterTimer01/I0'.
     """
 
-    def __init__(self, name='I18monitorLoader'):
-        super(I18monitorLoader, self).__init__(name)
+    def __init__(self, name='I18MonitorLoader'):
+        super(I18MonitorLoader, self).__init__(name)
 
     def setup(self):
         """

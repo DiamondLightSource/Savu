@@ -28,7 +28,7 @@ from savu.plugins.utils import register_plugin
 
 
 @register_plugin
-class I18fluoLoader(BaseI18MultiModalLoader):
+class I18FluoLoader(BaseI18MultiModalLoader):
     """
     A class to load tomography data from an NXstxm file
     :param fluo_detector: path to \
@@ -38,8 +38,8 @@ class I18fluoLoader(BaseI18MultiModalLoader):
 
     """
 
-    def __init__(self, name='I18fluoLoader'):
-        super(I18fluoLoader, self).__init__(name)
+    def __init__(self, name='I18FluoLoader'):
+        super(I18FluoLoader, self).__init__(name)
 
     def setup(self):
         """ Define the input nexus file.

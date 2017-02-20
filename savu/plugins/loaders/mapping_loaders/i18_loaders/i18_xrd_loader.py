@@ -35,7 +35,7 @@ import savu.test.test_utils as tu
 
 
 @register_plugin
-class I18xrdLoader(BaseI18MultiModalLoader):
+class I18XrdLoader(BaseI18MultiModalLoader):
     """
     A class to load tomography data from an NXstxm file
     :param data_path: Path to the folder containing the \
@@ -44,8 +44,8 @@ class I18xrdLoader(BaseI18MultiModalLoader):
         file. Default: "Savu/test_data/data/LaB6_calibration_output.nxs".
     """
 
-    def __init__(self, name='I18xrdLoader'):
-        super(I18xrdLoader, self).__init__(name)
+    def __init__(self, name='I18XrdLoader'):
+        super(I18XrdLoader, self).__init__(name)
 
     def setup(self):
         """
