@@ -617,12 +617,10 @@ def main():
     readline.parse_and_bind("tab: complete")
     readline.set_completer(comp.complete)
 
-
     # load all the packages in the plugins directory to register classes
     # I've changed this to be in plugin utils package since this is now also called from dawn when 
     #it populates savu plugins. adp 14/12/16
     pu.populate_plugins()
-
 
     # set up things
     input_string = "startup"

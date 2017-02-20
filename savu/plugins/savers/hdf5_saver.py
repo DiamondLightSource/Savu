@@ -16,13 +16,9 @@
 .. module:: hdf5_tomo_saver
    :platform: Unix
    :synopsis: A class to save data to a hdf5 output file.
-<<<<<<< HEAD
-.. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
-=======
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
->>>>>>> origin/master
 """
 
 import logging
