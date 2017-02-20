@@ -360,7 +360,7 @@ class Plugin(PluginDatasets):
         :returns:  Number of input datasets
 
         """
-        raise NotImplementedError("nInput_datasets needs to be implemented")
+        return 1
 
     def nOutput_datasets(self):
         """
@@ -369,7 +369,10 @@ class Plugin(PluginDatasets):
         :returns:  Number of output datasets
 
         """
-        raise NotImplementedError("nOutput_datasets needs to be implemented")
+        return 1
+
+    def get_max_frames(self):
+        return 8
 
     def get_citation_information(self):
         """

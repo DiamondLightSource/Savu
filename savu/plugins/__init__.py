@@ -31,7 +31,7 @@ from . import filters
 from . import fitters
 from . import fluo_fitters
 from . import loaders
-from . import others
+from . import basic_operations
 from . import ptychography
 from . import reconstructions
 from . import reshape

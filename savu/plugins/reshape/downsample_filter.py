@@ -171,6 +171,12 @@ class DownsampleFilter(Plugin, CpuPlugin):
                 + full_shape[dim] % self.parameters['bin_size']
         return tuple(new_shape)
 
+    def nInput_datasets(self):
+        return 1
+
+    def nOutput_datasets(self):
+        return 1
+
     def get_max_frames(self):
         # This filter processes one frame at a time
         return 1

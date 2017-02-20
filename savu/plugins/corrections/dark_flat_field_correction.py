@@ -86,6 +86,7 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
         self.count = 0
 
     def correct_proj(self, data):
+        data = data[0]
         dark = self.convert_size(self.dark)
         flat_minus_dark = self.convert_size(self.flat_minus_dark)
         data = np.nan_to_num((data-dark)/flat_minus_dark)
@@ -93,6 +94,7 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
         return data
 
     def correct_sino(self, data):
+        data = data[0]
         sl = self.get_current_slice_list()[0][self.slice_dir]
         nFrames = min(self.get_max_frames(), self.length)
         reps_at = int(np.ceil(self.length/float(nFrames)))

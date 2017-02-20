@@ -38,7 +38,7 @@ class BaseMultiModalLoader(BaseLoader):
         exp = self.exp
         data_obj = exp.create_data_object("in_data", ltype)
         data_obj.backing_file = \
-            h5py.File(exp.meta_data.get_meta_data("data_file"), 'r')
+            h5py.File(exp.meta_data.get("data_file"), 'r')
         logging.debug("Creating file '%s' '%s'_entry",
                       data_obj.backing_file.filename, ltype)
         # now lets extract the entry so we can figure out our geometries!
@@ -56,7 +56,7 @@ class BaseMultiModalLoader(BaseLoader):
         try:
             control = data_obj.backing_file[entry.name+'/monitor/data']
         # this is global since it is to do with the beam
-            exp.meta_data.set_meta_data("control", control)
+            exp.meta_data.set("control", control)
             logging.debug('adding the ion chamber to the meta data')
         except:
             logging.warn('No ion chamber information. Leaving this blank')
@@ -107,7 +107,7 @@ class BaseMultiModalLoader(BaseLoader):
                         rotation_angle = rotation_angle[:,0]
 #                         rotation_angle = rotation_angle[idx].squeeze()
 
-                    data_obj.meta_data.set_meta_data('rotation_angle', rotation_angle)
+                    data_obj.meta_data.set('rotation_angle', rotation_angle)
                     logging.debug(ltype + " reader: %s", "is a tomo scan")
                 elif (mType == "translation"):
                     # increase the order of the map
@@ -127,7 +127,7 @@ class BaseMultiModalLoader(BaseLoader):
 #                             idx[ii] = slice(0,x.shape[ii],1)
 #                             x = x[idx].squeeze()
                             x = x[0,:]
-                        data_obj.meta_data.set_meta_data('x', x)
+                        data_obj.meta_data.set('x', x)
                     else:
                         label='y'
                         y = \
@@ -138,7 +138,7 @@ class BaseMultiModalLoader(BaseLoader):
 #                             print "yshape is:"+str(y.shape)
 #                             y = y[idx].squeeze()
                             y = y[:,0]
-                        data_obj.meta_data.set_meta_data('y', y)
+                        data_obj.meta_data.set('y', y)
                     cts += 1
                     
             except KeyError:
