@@ -58,28 +58,30 @@ class MPI_setup(object):
     def __mpi_setup(self, options):
         """ Set MPI process specific values and logging initialisation.
         """
-        RANK_NAMES = options["process_names"].split(',')
-        RANK = MPI.COMM_WORLD.rank
-        SIZE = MPI.COMM_WORLD.size
-        RANK_NAMES_SIZE = len(RANK_NAMES)
-        if RANK_NAMES_SIZE > SIZE:
-            RANK_NAMES_SIZE = SIZE
-        MACHINES = SIZE/RANK_NAMES_SIZE
-        MACHINE_RANK = RANK/MACHINES
-        MACHINE_RANK_NAME = RANK_NAMES[MACHINE_RANK]
-        MACHINE_NUMBER = RANK % MACHINES
-        MACHINE_NUMBER_STRING = "%03i" % (MACHINE_NUMBER)
-        ALL_PROCESSES = [[i]*MACHINES for i in RANK_NAMES]
-        options["processes"] = list(chain.from_iterable(ALL_PROCESSES))
-        options["process"] = RANK
+        hosts = MPI.COMM_WORLD.allgather(socket.gethostname())
+        uniq_hosts = set(hosts)
+        names = options['process_names'].split(',')
 
-        self.__set_logger_parallel(MACHINE_NUMBER_STRING,
-                                   MACHINE_RANK_NAME,
-                                   options)
+        n_cores = len(hosts)
+        n_nodes = len(uniq_hosts)
+        n_cores_per_node = len(names)
+
+        rank_map = [i for s in uniq_hosts for i in range(n_cores)
+                    if s == hosts[i]]
+        index = sorted(range(len(rank_map)), key=lambda k: rank_map[k])
+        all_processes = [(names*n_nodes)[index[i]] for i in range(n_cores)]
+        options['processes'] = all_processes
+        rank = MPI.COMM_WORLD.rank
+        options['process'] = rank
+        node_number = rank_map.index(rank)/n_cores_per_node
+        local_name = all_processes[rank]
+
+        self.__set_logger_parallel("%03i" % node_number, local_name, options)
 
         MPI.COMM_WORLD.barrier()
-        logging.debug("Rank : %i - Size : %i - host : %s", RANK, SIZE,
-                      socket.gethostname())
+        logging.debug("Rank : %i - Size : %i - host : %s", rank, n_cores,
+                      hosts[MPI.COMM_WORLD.rank])
+
         IP = socket.gethostbyname(socket.gethostname())
         logging.debug("ip address is : %s", IP)
         self.call_mpi__barrier()
@@ -87,67 +89,65 @@ class MPI_setup(object):
         self.call_mpi__barrier()
 
     def call_mpi__barrier(self):
-        """ Call MPI _barrier before an experiment is created.
+        """ Call MPI_barrier before an experiment is created.
         """
         logging.debug("Waiting at the _barrier")
         MPI.COMM_WORLD.barrier()
 
-    def __get_log_level(self, options):
-        """ Gets the right log level for the flags -v or -q
-        """
-        if ('verbose' in options) and options['verbose']:
-            return logging.DEBUG
-        if ('quiet' in options) and options['quiet']:
-            return logging.WARN
-        return logging.INFO
-
     def __set_logger_single(self, options):
         """ Set single-threaded logging.
         """
-        logger = logging.getLogger()
-        logger.setLevel(self.__get_log_level(options))
-
-        fh = logging.FileHandler(os.path.join(options["log_path"],
-                                              'log.txt'), mode='w')
-        fh.setFormatter(logging.Formatter('L %(relativeCreated)12d M CPU0 0' +
-                                          ' %(levelname)-6s %(message)s'))
-        logger.addHandler(fh)
-
+        log_format = 'L %(relativeCreated)12d M CPU0 0' + \
+                     ' %(levelname)-6s %(message)s'
+        filename = os.path.join(options['log_path'], 'log.txt')
+        level = cu._get_log_level(options)
+        self.__set_logger(level, log_format, fname=filename)
         cu.add_user_log_level()
-        cu.add_user_log_handler(logger, os.path.join(options["log_path"],
-                                                     'user.log'))
+        self.__add_user_logging(options)
+        self.__add_console_logging()
+
+    def __set_logger_parallel(self, number, rank, options):
+        """ Set parallel logger.
+        """
+        log_format = 'L %(relativeCreated)12d M' + number + ' ' + rank +\
+                     ' %(levelname)-6s %(message)s'
+        level = cu._get_log_level(options)
+        self.__set_logger(level, log_format)
+
+        # Only add user logging to the 0 rank process
+        cu.add_user_log_level()
+        if MPI.COMM_WORLD.rank == 0:
+            self.__add_user_logging(options)
+            if not options['cluster']:
+                self.__add_console_logging()
+
+    def __set_logger(self, level, fmat, fname=None):
+        datefmt = '%H:%M:%S'
+        if fname:
+            logging.basicConfig(level=level, format=fmat, datefmt=datefmt,
+                                filename=fname, filemode='w')
+        else:
+            logging.basicConfig(level=level, format=fmat, datefmt=datefmt)
+
+    def __add_console_logging(self):
+        console = logging.StreamHandler()
+        console.setLevel(cu.USER_LOG_LEVEL)
+#        formatter = \
+#            logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
+        formatter = \
+            logging.Formatter('%(message)s')
+        console.setFormatter(formatter)
+        logging.getLogger('').addHandler(console)
+
+    def __add_user_logging(self, options):
+        logger = logging.getLogger()
+        filename = os.path.join(options['out_path'], 'user_log.txt')
+        cu.add_user_log_handler(logger, filename)
         if 'syslog_server' in options.keys():
             try:
                 cu.add_syslog_log_handler(logger, options['syslog_server'],
                                           options['syslog_port'])
             except:
-                msg = "Unable to add syslog logging for server %s on port %i"
-                logger.warn(msg, options['syslog_server'],
+                logger.warn("Unable to add syslog logging for server %s on"
+                            " port %i", options['syslog_server'],
                             options['syslog_port'])
-
-    def __set_logger_parallel(self, number, rank, options):
-        """ Set parallel logger.
-        """
-        logging.basicConfig(level=self.__get_log_level(options),
-                            format='L %(relativeCreated)12d M' +
-                            number + ' ' + rank +
-                            ' %(levelname)-6s %(message)s', datefmt='%H:%M:%S')
-
-        # Only add user logging to the 0 rank process so we don't get
-        # a lot of output, just a summary, but we want the user messages
-        # tagged in all rank processes
-        cu.add_user_log_level()
-        if MPI.COMM_WORLD.rank == 0:
-            logger = logging.getLogger()
-            cu.add_user_log_handler(logger,
-                                    os.path.join(options["out_path"],
-                                                 'user.log'))
-            if 'syslog_server' in options.keys():
-                try:
-                    cu.add_syslog_log_handler(logger,
-                                              options['syslog_server'],
-                                              options['syslog_port'])
-                except:
-                    logger.warn("Unable to add syslog logging for server %s on port %i",
-                                options['syslog_server'],
-                                options['syslog_port'])
