@@ -22,7 +22,9 @@
 """
 import logging
 import copy
+import numpy as np
 from mpi4py import MPI
+from itertools import chain, izip
 
 from savu.plugins.driver.plugin_driver import PluginDriver
 
@@ -54,6 +56,12 @@ class GpuPlugin(PluginDriver):
         nNodes = new_processes.count(new_processes[0])
 
         ranks = [i for i, x in enumerate(gpu_processes) if x]
+        idx = [i for i in range(len(ranks)) if new_processes[i] == 'GPU0']
+        split = int(np.diff(np.array(idx)))
+        split = split if split != 1 else len(ranks)
+        split_ranks = [ranks[n:n+split] for n in range(0, len(ranks), split)]
+        ranks = list(chain.from_iterable(izip(*split_ranks)))
+
         self.__create_new_communicator(ranks, exp, process)
 
         if gpu_processes[process]:
