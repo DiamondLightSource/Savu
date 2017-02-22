@@ -1,6 +1,6 @@
 #!/bin/bash
 module load savu/1.2
-module load global/cluster
+module load global/cluster-quiet
 
 # function for parsing optional arguments
 function arg_parse ()
