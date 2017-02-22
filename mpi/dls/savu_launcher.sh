@@ -53,7 +53,7 @@ if [ ! -d $outfolder ]; then
   mkdir -p $outfolder;
 fi
 # create the user log
-touch $outfolder/user_log.txt
+touch $outfolder/user.log
 
 # set the intermediate folder
 arg_parse "-d" interfolder "$@"
@@ -83,7 +83,7 @@ echo -e "\t\t   >> qstat"
 tput setaf 3
 echo -e "\n\t\t* Monitor the progression of your Savu job:"
 tput sgr0
-echo -e "\t\t   >> tail -f $outfolder/user_log.txt"
+echo -e "\t\t   >> tail -f $outfolder/user.log"
 echo -e "\t\t   >> Ctrl+C (to quit)"
 tput setaf 6
 echo -e "\n\t For a more detailed log file see: "
