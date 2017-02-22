@@ -63,7 +63,7 @@ fi
 
 qsub -jsv /dls_sw/apps/sge/common/JSVs/tomo_recon_test.pl \
      -N $outname -j y -o $interfolder -e $interfolder -pe openmpi $M -l exclusive \
-     -l infiniband -l gpu=4 gpu_arch=Kepler $filepath $savupath $datafile \
+     -l infiniband -l gpu=4 -l gpu_arch=Kepler $filepath $savupath $datafile \
      $processfile $outpath $nCoresPerNode $nGPUs $options -c \
      -f $outfolder -s cs04r-sc-serv-14 -l $outfolder > /dls/tmp/savu/$USER.out
 
