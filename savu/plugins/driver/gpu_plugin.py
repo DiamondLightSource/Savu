@@ -58,9 +58,9 @@ class GpuPlugin(PluginDriver):
 
         if gpu_processes[process]:
             expInfo.set('process', self.new_comm.Get_rank())
-            logging.info("Running the GPU Process %i",
-                         self.new_comm.Get_rank())
             GPU_index = self.__calculate_GPU_index(nNodes)
+            logging.info("Running the GPU process %i with GPU index %i",
+                         self.new_comm.Get_rank(), GPU_index)
             self.parameters['GPU_index'] = GPU_index
             self._run_plugin_instances(transport, communicator=self.new_comm)
             self.__free_communicator()
