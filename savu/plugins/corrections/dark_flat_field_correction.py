@@ -35,15 +35,18 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
     A Plugin to apply a simple dark and flat field correction to data.
     :param pattern: Data processing pattern is 'PROJECTION' or \
         'SINOGRAM'. Default: 'PROJECTION'.
+    :param lower_bound: Set all values below the lower_bound to this \
+        value. Default: None.
+    :param upper_bound: Set all values above the upper bound to this \
+        value. Default: None.
+    :param warn_proportion: Output a warning if this proportion of values, \
+        or greater, are below and/or above the lower/upper bounds, \
+        e.g enter 0.05 for 5%. Default: 0.05.
     """
 
     def __init__(self):
         super(DarkFlatFieldCorrection,
               self).__init__("DarkFlatFieldCorrection")
-        # TODO these should probably be parameters
-        self.LOW_CROP_LEVEL = 0.0
-        self.HIGH_CROP_LEVEL = 2.0
-        self.WARN_PROPORTION = 0.05  # 5%
         self.flag_low_warning = False
         self.flag_high_warning = False
         self.flag = True
@@ -65,6 +68,9 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
             self._sino_pre_process(inData, tile, rot_dim)
 
         self.flat_minus_dark = self.flat - self.dark
+        self.warn = self.parameters['warn_proportion']
+        self.low = self.parameters['lower_bound']
+        self.high = self.parameters['upper_bound']
 
     def _proj_pre_process(self, data, shape, tile, dim):
         tile[dim] = shape[dim]
@@ -117,35 +123,37 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
             return False
 
     def __data_check(self, data):
-        # make high and low crop masks
-        low_crop = data < self.LOW_CROP_LEVEL
-        high_crop = data > self.HIGH_CROP_LEVEL
+        # make high and low crop masks and flag if those masks include a large
+        # proportion of pixels, as this may indicate a failure
+        if not self.low and not self.high:
+            return
 
-        # flag if those masks include a large proportion of pixels, as this
-        # may indicate a failure
-        if ((float(low_crop.sum()) / low_crop.size) > self.WARN_PROPORTION):
-            self.flag_low_warning = True
-        if ((float(high_crop.sum()) / high_crop.size) > self.WARN_PROPORTION):
-            self.flag_high_warning = True
-
-        # Set all cropped values to the crop level
-        data[low_crop] = self.LOW_CROP_LEVEL
-        data[high_crop] = self.HIGH_CROP_LEVEL
+        if self.low:
+            low_crop = data < self.parameters['lower_bound']
+            if ((float(low_crop.sum()) / low_crop.size) > self.warn):
+                self.flag_low_warning = True
+            # Set all cropped values to the crop level
+            data[low_crop] = self.parameters['lower_bound']
+        if self.high:
+            high_crop = data > self.parameters['upper_bound']
+            if ((float(high_crop.sum()) / high_crop.size) > self.warn):
+                self.flag_high_warning = True
+            # Set all cropped values to the crop level
+            data[low_crop] = self.parameters['lower_bound']
 
     def executive_summary(self):
         summary = []
         if self.flag_high_warning:
-            summary.append(("WARNING: over %i%% of pixels are being clipped as " +
-                           "they have %f times the intensity of the provided flat field. "+
-                           "Check your Dark and Flat correction images")
-                           % (self.WARN_PROPORTION*100, self.HIGH_CROP_LEVEL))
+            summary.append(("WARNING: over %i%% of pixels are being clipped " +
+                            "as they have %f times the intensity of the " +
+                            "provided flat field. Check your Dark and Flat " +
+                            "correction images") % (self.warn*100, self.high))
 
         if self.flag_low_warning:
-            summary.append(("WARNING: over %i%% of pixels are being clipped as " +
-                           "they below the expected lower corrected threshold of  %f. " +
-                           "Check your Dark and Flat correction images")
-                           % (self.WARN_PROPORTION*100, self.LOW_CROP_LEVEL))
-
+            summary.append(("WARNING: over %i%% of pixels are being clipped " +
+                            "as they below the expected lower corrected " +
+                            "threshold of  %f. Check your Dark and Flat " +
+                            "correction images") % (self.warn*100, self.low))
         if len(summary) > 0:
             return summary
 
