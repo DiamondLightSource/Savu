@@ -18,6 +18,11 @@ echo "number of uniq hosts: ${uniqslots}"
 echo "running on these hosts:"
 cat ${UNIQHOSTS}
 
+typeset TMP_FILE=$( mktemp )
+touch "${TMP_FILE}"
+cp -p ${UNIQHOSTS} "${TMP_FILE}"
+sed -e 's/$/ slots=${nCPUs}/' -i ${TMP_FILE}
+
 processes=`bc <<< "$((uniqslots*nCPUs))"`
 
 for i in $(seq 0 $((nGPUs-1))); do GPUs+="GPU$i " ; done
@@ -29,7 +34,6 @@ echo "Processes running are : ${processes}"
 
 mpirun -np ${processes} \
        -mca btl self,openib,sm \
-       -mca orte_forward_job_control 1 \
        -x LD_LIBRARY_PATH \
        --hostfile ${UNIQHOSTS} \
        python $filename $datafile $processfile $outfile -n $CPUs -v $@
