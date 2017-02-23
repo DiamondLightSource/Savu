@@ -178,9 +178,9 @@ class VoCentering(BaseFilter, CpuPlugin):
         if not cor_raw.shape:
             # add to metadata
             cor_raw = out_datasets[0].data[...]
-#            self.populate_meta_data('cor_raw', cor_raw)
-#            self.populate_meta_data('centre_of_rotation', cor_raw)
-#            return
+            self.populate_meta_data('cor_raw', cor_raw)
+            self.populate_meta_data('centre_of_rotation', cor_raw)
+            return
 
         cor_fit = np.squeeze(out_datasets[1].data[...])
         fit = np.zeros(cor_fit.shape)
