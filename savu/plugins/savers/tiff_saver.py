@@ -48,7 +48,6 @@ class TiffSaver(BaseSaver, CpuPlugin):
     def pre_process(self):
         self.data_name = self.get_in_datasets()[0].get_name()
         self.count = 0
-        self.input = self.exp.meta_data.get("data_name")
         self.group_name = self._get_group_name(self.data_name)
         self.folder = "%s/%s-%s" % (self.exp.meta_data.get("out_path"),
                                     self.name, self.data_name)
@@ -62,8 +61,3 @@ class TiffSaver(BaseSaver, CpuPlugin):
         filename = self.filename + str(frame) + '.tiff'
         tf.imsave(filename, data[0])
         self.count += 1
-
-#    def post_process(self):
-#        # this is incorrect and only provides a broken link
-#        self._link_datafile_to_nexus_file(self.data_name, self.filename,
-#                                          self.group_name)
