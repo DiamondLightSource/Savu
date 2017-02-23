@@ -46,6 +46,7 @@ class Plugin(PluginDatasets):
         self.parameters_types = {}
         self.parameters_desc = {}
         self.parameters_hide = []
+        self.parameters_user = []
         self.chunk = False
         self.docstring_info = {}
         self.slice_list = None
@@ -123,36 +124,28 @@ class Plugin(PluginDatasets):
 
         :param error_threshold: Convergence threshold. Default: 0.001.
         """
-        not_item = []
-        hidden_item = []
+        hidden_items = []
+        user_items = []
         for clazz in inspect.getmro(self.__class__)[::-1]:
             if clazz != object:
                 desc = pu.find_args(clazz, self)
                 self.docstring_info['warn'] = desc['warn']
                 self.docstring_info['info'] = desc['info']
                 self.docstring_info['synopsis'] = desc['synopsis']
-                if desc['not_param']:
-                    not_item.extend(desc['not_param'])
-                if desc['hidden_param']:
-                    hidden_item.extend(desc['hidden_param'])
                 self._add_item(desc['param'])
+                if desc['hide_param']:
+                    hidden_items.extend(desc['hide_param'])
+                if desc['user_param']:
+                    user_items.extend(desc['user_param'])
+                self._add_item(desc['param'])
+        self.parameters_hide = hidden_items
+        self.parameters_user = user_items
 
-        if not_item:
-            self._delete_item(not_item)
-        if hidden_item:
-            self.parameters_hide = hidden_item
-
-    def _add_item(self, full_description):
-        for item in full_description:
+    def _add_item(self, item_list):
+        for item in item_list:
             self.parameters[item['name']] = item['default']
             self.parameters_types[item['name']] = item['dtype']
             self.parameters_desc[item['name']] = item['desc']
-
-    def _delete_item(self, items):
-        for item in items:
-            del self.parameters[item]
-            del self.parameters_types[item]
-            del self.parameters_desc[item]
 
     def initialise_parameters(self):
         self.parameters = {}

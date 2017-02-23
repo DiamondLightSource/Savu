@@ -138,17 +138,18 @@ class PluginList(object):
             active_array = np.array([plugin['active']])
             plugin_group.create_dataset('active', active_array.shape,
                                         active_array.dtype, active_array)
-
         if 'desc' in plugin.keys():
             desc_array = np.array([json.dumps(plugin['desc'])])
             plugin_group.create_dataset('desc', desc_array.shape,
                                         desc_array.dtype, desc_array)
-
         if 'hide' in plugin.keys():
             hide_array = np.array([json.dumps(plugin['hide'])])
             plugin_group.create_dataset('hide', hide_array.shape,
                                         hide_array.dtype, hide_array)
-
+        if 'user' in plugin.keys():
+            hide_array = np.array([json.dumps(plugin['user'])])
+            plugin_group.create_dataset('user', hide_array.shape,
+                                        hide_array.dtype, hide_array)
         if 'cite' in plugin.keys():
             if plugin['cite'] is not None:
                 self._output_plugin_citations(plugin['cite'], plugin_group)
@@ -183,6 +184,7 @@ class PluginList(object):
     def _get_string(self, **kwargs):
         out_string = []
         verbosity = kwargs.get('verbose', False)
+        level = kwargs.get('level', 'user')
 
         start = kwargs.get('start', 0)
         stop = kwargs.get('stop', len(self.plugin_list))
@@ -194,53 +196,54 @@ class PluginList(object):
         for plugin in plugin_list:
             count += 1
             description = \
-                self.__get_description(plugin, count, verbosity)
+                self.__get_description(level, plugin, count, verbosity)
             out_string.append(description)
         return '\n'.join(out_string)
 
-    def __get_description(self, plugin, count, verbose):
+    def __get_description(self, level, p_dict, count, verbose):
         width = 85
         if verbose == '-q':
-            return self.__get_plugin_title(plugin, count, width, quiet=True)
+            return self.__get_plugin_title(p_dict, count, width, quiet=True)
         if not verbose:
-            return self.__get_basic(plugin, count, width)
+            return self.__get_basic(level, p_dict, count, width)
         if verbose == '-v':
-            return self.__get_verbose(plugin, count, width)
+            return self.__get_verbose(level, p_dict, count, width)
         if verbose == '-vv':
-            return self.__get_verbose_verbose(plugin, count, width)
+            return self.__get_verbose_verbose(level, p_dict, count, width)
 
-    def __get_plugin_title(self, plugin, count, width, quiet=False):
+    def __get_plugin_title(self, p_dict, count, width, quiet=False):
         active = \
-            '***OFF***' if 'active' in plugin and not plugin['active'] else ''
-        pos = plugin['pos'].strip() if 'pos' in plugin.keys() else count
+            '***OFF***' if 'active' in p_dict and not p_dict['active'] else ''
+        pos = p_dict['pos'].strip() if 'pos' in p_dict.keys() else count
         fore_colour = Fore.RED + Style.DIM if active else Fore.LIGHTWHITE_EX
-        title = "%s %2s) %s" % (active, pos, plugin['name'])
+        title = "%s %2s) %s" % (active, pos, p_dict['name'])
         if not quiet:
-            title += "(%s)" % plugin['id']
+            title += "(%s)" % p_dict['id']
         width -= len(title)
         return Back.LIGHTBLACK_EX + fore_colour + title + " "*width + \
             Style.RESET_ALL
 
-    def __get_basic(self, plugin, count, width):
-        title = self.__get_plugin_title(plugin, count, width, quiet=True)
-        params = self._get_param_details(plugin, width)
+    def __get_basic(self, level, p_dict, count, width):
+        title = self.__get_plugin_title(p_dict, count, width, quiet=True)
+        params = self._get_param_details(level, p_dict, width)
         return title + params
 
-    def __get_verbose(self, plugin, count, width, breakdown=False):
-        title = self.__get_plugin_title(plugin, count, width)
+    def __get_verbose(self, level, p_dict, count, width, breakdown=False):
+        title = self.__get_plugin_title(p_dict, count, width)
         colour_on = Back.LIGHTBLACK_EX + Fore.LIGHTWHITE_EX
         colour_off = Back.RESET + Fore.RESET
         synopsis = \
-            self._get_synopsis(plugin['name'], width, colour_on, colour_off)
-        params = self._get_param_details(plugin, width, desc=plugin['desc'])
+            self._get_synopsis(p_dict['name'], width, colour_on, colour_off)
+        params = \
+            self._get_param_details(level, p_dict, width, desc=p_dict['desc'])
         if breakdown:
             return title, synopsis, params
         return title + synopsis + params
 
-    def __get_verbose_verbose(self, plugin, count, width):
+    def __get_verbose_verbose(self, level, p_dict, count, width):
         title, synopsis, param_details = \
-            self.__get_verbose(plugin, count, width, breakdown=True)
-        extra_info = self._get_docstring_info(plugin['name'])
+            self.__get_verbose(level, p_dict, count, width, breakdown=True)
+        extra_info = self._get_docstring_info(p_dict['name'])
         info_colour = Back.LIGHTBLACK_EX + Fore.LIGHTWHITE_EX
         warn_colour = Back.RED + Fore.WHITE
         colour_off = Back.RESET + Fore.RESET
@@ -259,22 +262,22 @@ class PluginList(object):
             return ''
         return "\n" + colour_on + synopsis + colour_off
 
-    def _get_param_details(self, plugin, width, desc=False):
-        pdata = plugin['data']
+    def _get_param_details(self, level, p_dict, width, desc=False):
         margin = 4
         keycount = 0
         joiner = "\n" + " "*margin
         params = ''
 
-        if 'hide' in plugin.keys():
-            keys = [p for p in pdata.keys() if p not in plugin['hide']]
-        else:
-            keys = pdata.keys()
+        keys = p_dict['data'].keys()
+        if level == 'user':
+            keys = [p for p in keys if p in p_dict['user']]
+        if 'hide' in p_dict.keys():
+            keys = [p for p in keys if p not in p_dict['hide']]
 
         for key in keys:
             keycount += 1
             temp = "\n   %2i)   %20s : %s"
-            params += temp % (keycount, key, pdata[key])
+            params += temp % (keycount, key, p_dict['data'][key])
             if desc:
                 pdesc = " ".join(desc[key].split())
                 pdesc = joiner.join(textwrap.wrap(pdesc, width=width))

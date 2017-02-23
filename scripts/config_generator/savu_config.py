@@ -244,18 +244,23 @@ class Content(object):
             self.plugin_list.plugin_list[i]['pos'] = ''.join(pos_list[i])
 
     def insert(self, plugin, pos, str_pos, replace=False):
-        process = {}
-        process['name'] = plugin.name
-        process['id'] = plugin.__module__
-        process['pos'] = str_pos
-        process['data'] = plugin.parameters
-        process['active'] = True
-        process['desc'] = plugin.parameters_desc
-        process['hide'] = plugin.parameters_hide
+        plugin_dict = self.create_plugin_dict(plugin)
+        plugin_dict['pos'] = str_pos
         if replace:
-            self.plugin_list.plugin_list[pos] = process
+            self.plugin_list.plugin_list[pos] = plugin_dict
         else:
-            self.plugin_list.plugin_list.insert(pos, process)
+            self.plugin_list.plugin_list.insert(pos, plugin_dict)
+
+    def create_plugin_dict(self, plugin):
+        plugin_dict = {}
+        plugin_dict['name'] = plugin.name
+        plugin_dict['id'] = plugin.__module__
+        plugin_dict['data'] = plugin.parameters
+        plugin_dict['active'] = True
+        plugin_dict['desc'] = plugin.parameters_desc
+        plugin_dict['hide'] = plugin.parameters_hide
+        plugin_dict['user'] = plugin.parameters_user
+        return plugin_dict
 
     def get(self, pos):
         return self.plugin_list.plugin_list[pos]
@@ -289,14 +294,23 @@ def _disp(content, arg):
        Optional arguments:
             i(int): Display the ith item in the list.
             i(int) j(int): Display list items i to j.
+            -a: Display ALL parameters (user parameters only by default).
             -q: Quiet mode. Only process names are listed.
             -v: Verbose mode. Displays parameter details.
             -vv: Extra verbose. Displays additional information and warnings.
             """
+
     verbosity = ['-vv', '-v', '-q']
+    level = 'user'
     idx = {'start': 0, 'stop': -1}
     if arg:
         split_arg = arg.split(' ')
+        print (split_arg)
+        if '-a' in split_arg:
+            print ("setting the level to all")
+            level = 'all'
+            del_idx = split_arg.index('-a')
+            del split_arg[del_idx]
         for v in verbosity:
             if v in split_arg:
                 idx['verbose'] = v
@@ -309,7 +323,7 @@ def _disp(content, arg):
                     content.find_position(split_arg[1])+1
             except ValueError:
                 print("The arguments %s are unknown", arg)
-    content.display(**idx)
+    content.display(level=level, **idx)
     return content
 
 
@@ -346,9 +360,11 @@ def _list(content, arg):
         elif arg[0] == '-v':
             plugin = pu.plugins[key]()
             plugin._populate_default_parameters()
-            print(key, content.plugin_list._get_synopsis(
-                key, 60, Fore.CYAN, Fore.RESET),
-                content.plugin_list._get_param_details(plugin.parameters, 100))
+            synopsis = content.plugin_list._get_synopsis(
+                       key, 60, Fore.CYAN, Fore.RESET)
+            params = content.plugin_list._get_param_details(
+                     'all', content.create_plugin_dict(plugin), 100)
+            print(key, synopsis, params)
         else:
             print("The arguments %s are unknown", arg)
     print("-----------------------------------------")

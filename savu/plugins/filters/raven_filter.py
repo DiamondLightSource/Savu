@@ -35,7 +35,7 @@ class RavenFilter(BaseFilter, CpuPlugin):
     """
     Ring artefact removal method
 
-    :param uvalue: To define the shape of filter, e.g. bad=10, moderate=20,\
+    :u*param uvalue: To define the shape of filter, e.g. bad=10, moderate=20,\
         minor=50. Default: 20.
     :param vvalue: How many rows to be applied the filter. Default: 2.
     :param nvalue: To define the shape of filter. Default: 4.
