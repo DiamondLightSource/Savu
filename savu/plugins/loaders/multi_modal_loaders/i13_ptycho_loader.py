@@ -32,6 +32,11 @@ class I13PtychoLoader(BaseMultiModalLoader):
     """
     A class to load tomography data from an NXstxm file
     :param mono_energy: The mono energy. Default: 9.1. 
+    :param is_tomo: The mono energy. Default: True.
+    :param theta_step: The theta step. Default:1.0.
+    :param theta_start: The theta start. Default: -90.0.
+    :param theta_end: The theta end. Default: 90.0.
+     
     """
 
     def __init__(self, name='I13PtychoLoader'):
@@ -67,21 +72,26 @@ class I13PtychoLoader(BaseMultiModalLoader):
         labels = []
         ### set the rotation
         rotation_angle = None
-        try:
-            rotation_angle = data_obj.backing_file['entry1/instrument/t1_theta/t1_theta'].value
-            if rotation_angle.ndim > 1:
-                rotation_angle = rotation_angle[:, 0]
-            # axis label
+        if self.parameters['is_tomo']:
+            rotation_angle = np.arange(self.parameters['theta_start'],self.parameters['theta_end'], self.parameters['theta_step'])
             labels.append('rotation_angle.degrees')
-            
             data_obj.meta_data.set_meta_data('rotation_angle', rotation_angle)
-        except KeyError:
-            logging.debug("Not a tomography!")
+
+#             try:
+#                 rotation_angle = data_obj.backing_file['entry1/instrument/t1_theta/t1_theta'].value
+#                 if rotation_angle.ndim > 1:
+#                     rotation_angle = rotation_angle[:, 0]
+#                 # axis label
+#                 labels.append('rotation_angle.degrees')
+#                 
+#                 data_obj.meta_data.set_meta_data('rotation_angle', rotation_angle)
+#             except KeyError:
+#                 logging.debug("Not a tomography!")
 
         ### GET THE AXES ###
         x = data_obj.backing_file['entry1/instrument/lab_sxy/lab_sx'].value*1e-6
         data_obj.meta_data.set_meta_data('x', x)
-        y = data_obj.backing_file['entry1/instrument/lab_sxy/lab_sxy/lab_sy'].value*1e-6
+        y = data_obj.backing_file['entry1/instrument/lab_sxy/lab_sy'].value*1e-6
         data_obj.meta_data.set_meta_data('y', y)
         if rotation_angle is not None:
             pos = np.zeros((x.shape[0],2,x.shape[1]))
@@ -107,10 +117,17 @@ class I13PtychoLoader(BaseMultiModalLoader):
         logging.debug("is a diffraction")
         logging.debug("the diffraction cores are:"+str(diff_core))
         logging.debug("the diffraction slices are:"+str(diff_slice))
+        positions_label = (data_obj.find_axis_label_dimension('xy', contains=True),)
+        rotation_label = (data_obj.find_axis_label_dimension('rotation_angle', contains=True),)
+
+        data_obj.add_pattern("PROJECTION", core_dir=positions_label, slice_dir=tuple(set(dims)-set(positions_label)))
+        sino_cores = rotation_label + positions_label
+        data_obj.add_pattern("SINOGRAM", core_dir=sino_cores, slice_dir = tuple(set(dims)-set(sino_cores)))
+
         data_obj.add_pattern("DIFFRACTION", core_dir=diff_core,
                              slice_dir=diff_slice)
         
-        data_obj.add_pattern("4D_SCAN", core_dir=(1,2,3),
-                        slice_dir=(0,))
+        data_obj.add_pattern("4D_SCAN", core_dir=tuple(set(dims)-set(rotation_label)),
+                        slice_dir=rotation_label)
   
         self.set_data_reduction_params(data_obj)
