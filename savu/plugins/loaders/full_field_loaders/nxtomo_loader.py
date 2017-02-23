@@ -174,7 +174,7 @@ class NxtomoLoader(BaseLoader):
         if path.split('/')[0] == 'test_data':
             import os
             path = \
-                os.path.dirname(os.path.abspath(__file__))+'/../../../' + path
+                os.path.dirname(os.path.abspath(__file__))+'/../../../../'+path
 
         ffile = h5py.File(path, 'r')
         try:
