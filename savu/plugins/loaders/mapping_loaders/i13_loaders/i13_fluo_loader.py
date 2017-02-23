@@ -29,15 +29,15 @@ import h5py
 
 
 @register_plugin
-class I13fluoLoader(BaseLoader):
+class I13FluoLoader(BaseLoader):
     """
     A class to load tomography data from an NXstxm file
     :param fluo_offset: fluo scale offset. Default: 0.0.
     :param fluo_gain: fluo gain. Default: 0.01.
     """
 
-    def __init__(self, name='I13fluoLoader'):
-        super(I13fluoLoader, self).__init__(name)
+    def __init__(self, name='I13FluoLoader'):
+        super(I13FluoLoader, self).__init__(name)
 
     def setup(self):
         """
