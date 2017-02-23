@@ -136,6 +136,7 @@ class Plugin(PluginDatasets):
                 if desc['hidden_param']:
                     hidden_item.extend(desc['hidden_param'])
                 self._add_item(desc['param'])
+
         if not_item:
             self._delete_item(not_item)
         if hidden_item:

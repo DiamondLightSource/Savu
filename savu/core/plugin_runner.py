@@ -41,7 +41,6 @@ class PluginRunner(object):
 
         self.options = options
         # add all relevent locations to the path
-        pu.set_pickles()
         pu.get_plugins_paths()
         self.exp = Experiment(options)
 
