@@ -42,7 +42,7 @@ class Test(unittest.TestCase):
     def testfind_args(self):
         plugin = pu.load_plugin("savu.plugins.filters.denoise_bregman_filter")
         params = pu.find_args(plugin)
-        self.assertEqual(len(params), 5)
+        self.assertEqual(len(params), 6)
 
     def test_get_plugin_external_path(self):
         savu_path = os.path.split(savu.__path__[0])[0]
