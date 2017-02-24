@@ -34,8 +34,6 @@ class AstraReconGpu(BaseAstraRecon, GpuPlugin):
     """
     A Plugin to run the astra reconstruction
 
-    :param number_of_iterations: Number of Iterations if an iterative method\
-        is used . Default: 1.
     :param res_norm: Output the residual norm at each iteration\
         (Error in the solution). Default: False.
     :param reconstruction_type: Reconstruction type (FBP_CUDA|SIRT_CUDA|\
@@ -48,10 +46,6 @@ class AstraReconGpu(BaseAstraRecon, GpuPlugin):
         self.GPU_index = None
         self.res = False
         self.start = 0
-
-    def get_parameters(self):
-        return [self.parameters['reconstruction_type'],
-                self.parameters['number_of_iterations']]
 
     def set_options(self, cfg):
         if 'option' not in cfg.keys():

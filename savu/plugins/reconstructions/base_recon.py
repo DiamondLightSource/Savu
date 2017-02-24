@@ -31,15 +31,15 @@ class BaseRecon(Plugin):
     """
     A base class for reconstruction plugins
 
-    :param center_of_rotation: Centre of rotation to use for the \
+    :u*param center_of_rotation: Centre of rotation to use for the \
         reconstruction. Default: 0.0.
-    :param init_vol: Dataset to use as volume initialiser \
+    :u*param init_vol: Dataset to use as volume initialiser \
         (doesn't currently work with preview). Default: None.
     :param sino_pad: Pad the sinogram to remove edge artefacts in the \
         reconstructed ROI (NB. This will increase the size of the data and \
         the time taken to perform the reconstruction). Default: True.
-    :param log: Take the log of the data before reconstruction. Default: True.
-    :param preview: A slice list of required frames. Default: [].
+    :u*param log: Take the log of the data before reconstruction. Default: True.
+    :u*param preview: A slice list of required frames. Default: [].
     """
     count = 0
 

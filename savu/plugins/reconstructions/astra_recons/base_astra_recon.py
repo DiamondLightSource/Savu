@@ -32,22 +32,17 @@ class BaseAstraRecon(BaseRecon):
     """
     A Plugin to perform Astra toolbox reconstruction
 
-    :param FBP_filter: The FBP reconstruction filter type (none|ram-lak|\
+    :u*param FBP_filter: The FBP reconstruction filter type (none|ram-lak|\
         shepp-logan|cosine|hamming|hann|tukey|lanczos|triangular|gaussian|\
         barlett-hann|blackman|nuttall|blackman-harris|blackman-nuttall|\
         flat-top|kaiser|parzen). Default: 'ram-lak'.
+    :u*param n_iterations: Number of Iterations if an iterative method\
+        is used . Default: 1.
     """
 
     def __init__(self, name='BaseAstraRecon'):
         super(BaseAstraRecon, self).__init__(name)
         self.res = False
-
-    def get_parameters(self):
-        """
-        Get reconstruction_type and number_of_iterations parameters
-        """
-        logging.error("get_parameters needs to be implemented")
-        raise NotImplementedError("get_parameters needs to be implemented")
 
     def setup(self):
         super(BaseAstraRecon, self).setup()
@@ -71,6 +66,8 @@ class BaseAstraRecon(BaseRecon):
 
     def pre_process(self):
         self.alg, self.iters = self.get_parameters()
+        self.alg = self.parameters['reconstruction_type']
+        self.iters = self.parameters['n_iterations']
         if '3D' in self.alg:
             self.setup_3D()
             self.process_frames = self.astra_3D_recon

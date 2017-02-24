@@ -41,7 +41,7 @@ class PaganinFilter(BaseFilter, CpuPlugin):
     :param Distance: Distance from sample to detection - Unit is \
         metre. Default: 1.0.
     :param Resolution: Pixel size - Unit is micron. Default: 1.28.
-    :param Ratio: ratio of delta/beta. Default: 250.0.
+    :u*param Ratio: ratio of delta/beta. Default: 250.0.
     :param Padtopbottom: Pad to the top and bottom of projection. Default: 10.
     :param Padleftright: Pad to the left and right of projection. Default: 10.
     :param Padmethod: Method of padding. Default: 'edge'.
