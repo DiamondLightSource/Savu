@@ -21,258 +21,27 @@ Created on 21 May 2015
 from __future__ import print_function
 
 import os
-from savu.data.plugin_list import PluginList
-from savu.plugins import utils as pu
 import re
+import atexit
+from content import Content
+from completer import Completer
+from savu.plugins import utils as pu
+from colorama import Fore, init
+#  Need to call init method for colorama to work in windows
+init()
 
 if os.name == 'nt':
     import win_readline as readline
 else:
     import readline
 
-from colorama import Fore, Back, init
-#Need to call init method for colorama to work in windows
-init()
-
-RE_SPACE = re.compile('.*\s+$', re.M)
 histfile = os.path.join(os.path.expanduser("~"), ".savuhist")
 try:
     readline.read_history_file(histfile)
     readline.set_history_length(1000)
 except IOError:
     pass
-import atexit
 atexit.register(readline.write_history_file, histfile)
-
-
-class Content(object):
-
-    def __init__(self, filename):
-        self.plugin_list = PluginList()
-        self.filename = filename
-        self._finished = False
-        if os.path.exists(filename):
-            print("Opening file %s" % (filename))
-            self.plugin_list._populate_plugin_list(filename, activePass=True)
-
-    def set_finished(self, value):
-        self._finished = value
-
-    def is_finished(self):
-        return self._finished
-
-    def display(self, **kwargs):
-        print ('\n' + self.plugin_list._get_string(**kwargs), '\n')
-
-    def save(self, filename):
-        if filename is not "" and filename is not "exit":
-            self.filename = filename
-
-        if filename == "exit":
-            i = raw_input("Are you sure? [y/N]")
-            return True if i.lower() == 'y' else False
-
-        width = 86
-        warnings = self.get_warnings(width)
-        if warnings:
-            notice = Back.RED + Fore.WHITE + "IMPORTANT PLUGIN NOTICES" +\
-                Back.RESET + Fore.RESET + "\n"
-            border = "*"*width + '\n'
-            print (border + notice + warnings + '\n'+border)
-        i = raw_input("Are you sure you want to save the current data to "
-                      "'%s' [y/N]" % (self.filename))
-        if i.lower() == 'y':
-            print("Saving file %s" % (self.filename))
-            self.plugin_list._save_plugin_list(self.filename)
-        else:
-            print("The process list has NOT been saved.")
-
-    def get_warnings(self, width):
-        colour = Back.RESET + Fore.RESET
-        warnings = []
-        for plugin in self.plugin_list.plugin_list:
-            warn = self.plugin_list._get_docstring_info(plugin['name'])['warn']
-            if warn:
-                for w in warn.split('\n'):
-                    string = plugin['name'] + ": " + w
-                    warnings.append(self.plugin_list._get_equal_lines(
-                        string, width-1, colour, colour, " "*2))
-        return "\n".join(
-            ["*" + "\n ".join(w.split('\n')) for w in warnings if w])
-
-    def value(self, arg):
-        value = ([''.join(arg.split()[1:])][0]).split()[0]
-        tuning = True if value.count(';') else False
-        if not tuning:
-            try:
-                exec("value = " + value)
-            except (NameError, SyntaxError):
-                exec("value = " + "'" + value + "'")
-        return value
-
-    def add(self, name, str_pos):
-        plugin = pu.plugins[name]()
-        plugin._populate_default_parameters()
-        pos, str_pos = self.convert_pos(str_pos)
-        self.insert(plugin, pos, str_pos)
-        self.display()
-
-    def replace(self, name, str_pos, keep):
-        plugin = pu.plugins[name]()
-        plugin._populate_default_parameters()
-        pos = self.find_position(str_pos)
-        self.insert(plugin, pos, str_pos, replace=True)
-        if keep:
-            union_params = set(keep).intersection(set(plugin.parameters))
-            for param in union_params:
-                self.modify(pos+1, param, keep[param])
-
-    def move(self, old, new):
-        old_pos = self.find_position(old)
-        entry = self.plugin_list.plugin_list[old_pos]
-        self.remove(old_pos)
-        new_pos, new = self.convert_pos(new)
-        name = entry['name']
-        if name in pu.plugins.keys():
-            self.insert(pu.plugins[name](), new_pos, new)
-        else:
-            print("Sorry the plugin %s is not in my list, pick one from list" %
-                  (name))
-            return
-        self.plugin_list.plugin_list[new_pos] = entry
-        self.plugin_list.plugin_list[new_pos]['pos'] = new
-        self.display()
-
-    def modify(self, element, subelement, value):
-        data_elements = self.plugin_list.plugin_list[element-1]['data']
-        try:
-            position = int(subelement) - 1
-            data_elements[data_elements.keys()[position]] = value
-        except:
-            if subelement in data_elements.keys():
-                data_elements[subelement] = value
-            else:
-                print("Sorry, element %i does not have a %s parameter" %
-                      (element, subelement))
-
-    def convert_to_ascii(self, value):
-        ascii_list = []
-        for v in value:
-            ascii_list.append(v.encode('ascii', 'ignore'))
-        return ascii_list
-
-    def on_and_off(self, element, index):
-        if index < 2:
-            print("switching plugin", element+1, "ON")
-            self.plugin_list.plugin_list[element]['active'] = True
-        else:
-            print("switching plugin", element+1, "OFF")
-            self.plugin_list.plugin_list[element]['active'] = False
-
-    def convert_pos(self, str_pos):
-        pos_list = self.get_split_positions()
-        num = re.findall("\d+", str_pos)[0]
-        letter = re.findall("[a-z]", str_pos)
-        entry = [num, letter[0]] if letter else [num]
-
-        # full value already exists in the list
-        if entry in pos_list:
-            index = pos_list.index(entry)
-            return self.inc_positions(index, pos_list, entry, 1)
-
-        # only the number exists in the list
-        num_list = [pos_list[i][0] for i in range(len(pos_list))]
-        if entry[0] in num_list:
-            start = num_list.index(entry[0])
-            if len(entry) is 2:
-                if len(pos_list[start]) is 2:
-                    idx = int([i for i in range(len(num_list)) if
-                               (num_list[i] == entry[0])][-1])+1
-                    entry = [entry[0], str(unichr(ord(pos_list[idx-1][1])+1))]
-                    return idx, ''.join(entry)
-                if entry[1] == 'a':
-                    self.plugin_list.plugin_list[start]['pos'] = entry[0] + 'b'
-                    return start, ''.join(entry)
-                else:
-                    self.plugin_list.plugin_list[start]['pos'] = entry[0] + 'a'
-                    return start+1, entry[0] + 'b'
-            return self.inc_positions(start, pos_list, entry, 1)
-
-        # number not in list
-        entry[0] = str(int(num_list[-1])+1 if num_list else 1)
-        if len(entry) is 2:
-            entry[1] = 'a'
-        return len(self.plugin_list.plugin_list), ''.join(entry)
-
-    def get_positions(self):
-        elems = self.plugin_list.plugin_list
-        pos_list = []
-        for e in elems:
-            pos_list.append(e['pos'])
-        return pos_list
-
-    def get_split_positions(self):
-        positions = self.get_positions()
-        split_pos = []
-        for i in range(len(positions)):
-            num = re.findall('\d+', positions[i])[0]
-            letter = re.findall('[a-z]', positions[i])
-            split_pos.append([num, letter[0]] if letter else [num])
-        return split_pos
-
-    def find_position(self, pos):
-        pos_list = self.get_positions()
-        return pos_list.index(pos)
-
-    def inc_positions(self, start, pos_list, entry, inc):
-        if len(entry) is 1:
-            self.inc_numbers(start, pos_list, inc)
-        else:
-            idx = [i for i in range(start, len(pos_list)) if
-                   pos_list[i][0] == entry[0]]
-            self.inc_letters(idx, pos_list, inc)
-        return start, ''.join(entry)
-
-    def inc_numbers(self, start, pos_list, inc):
-        for i in range(start, len(pos_list)):
-            pos_list[i][0] = str(int(pos_list[i][0])+inc)
-            self.plugin_list.plugin_list[i]['pos'] = ''.join(pos_list[i])
-
-    def inc_letters(self, idx, pos_list, inc):
-        for i in idx:
-            pos_list[i][1] = str(unichr(ord(pos_list[i][1])+inc))
-            self.plugin_list.plugin_list[i]['pos'] = ''.join(pos_list[i])
-
-    def insert(self, plugin, pos, str_pos, replace=False):
-        plugin_dict = self.create_plugin_dict(plugin)
-        plugin_dict['pos'] = str_pos
-        if replace:
-            self.plugin_list.plugin_list[pos] = plugin_dict
-        else:
-            self.plugin_list.plugin_list.insert(pos, plugin_dict)
-
-    def create_plugin_dict(self, plugin):
-        plugin_dict = {}
-        plugin_dict['name'] = plugin.name
-        plugin_dict['id'] = plugin.__module__
-        plugin_dict['data'] = plugin.parameters
-        plugin_dict['active'] = True
-        plugin_dict['desc'] = plugin.parameters_desc
-        plugin_dict['hide'] = plugin.parameters_hide
-        plugin_dict['user'] = plugin.parameters_user
-        return plugin_dict
-
-    def get(self, pos):
-        return self.plugin_list.plugin_list[pos]
-
-    def remove(self, pos):
-        entry = self.plugin_list.plugin_list[pos]['pos']
-        self.plugin_list.plugin_list.pop(pos)
-        pos_list = self.get_split_positions()
-        self.inc_positions(pos, pos_list, entry, -1)
-
-    def size(self):
-        return len(self.plugin_list.plugin_list)
 
 
 def _help(content, arg):
@@ -284,7 +53,7 @@ def _help(content, arg):
 
 def _open(content, arg):
     """Opens or creates a new configuration file with the given filename"""
-    ct = Content(arg)
+    ct = Content(arg, __option_parser())
     ct.display()
     return ct
 
@@ -301,13 +70,11 @@ def _disp(content, arg):
             """
 
     verbosity = ['-vv', '-v', '-q']
-    level = 'user'
+    level = content.disp_level
     idx = {'start': 0, 'stop': -1}
     if arg:
         split_arg = arg.split(' ')
-        print (split_arg)
         if '-a' in split_arg:
-            print ("setting the level to all")
             level = 'all'
             del_idx = split_arg.index('-a')
             del split_arg[del_idx]
@@ -480,6 +247,7 @@ def _ref(content, arg):
         if pos < 0 or pos >= len(content.plugin_list.plugin_list):
             print("Sorry %s is out of range" % (arg))
             return content
+        content.refresh(pos)
         name = content.plugin_list.plugin_list[pos]['name']
         keep = content.get(pos)['data'] if kwarg else None
         content.replace(name, pos_str, keep)
@@ -541,106 +309,25 @@ commands = {'open': _open,
             'exit': _exit,
             'history': _history}
 
-list_commands = ['loaders',
-                 'corrections',
-                 'filters',
-                 'reconstructions',
-                 'savers']
-
-
-class Completer(object):
-
-    def _listdir(self, root):
-        "List directory 'root' appending the path separator to subdirs."
-        res = []
-        for name in os.listdir(root):
-            path = os.path.join(root, name)
-            if os.path.isdir(path):
-                name += os.sep
-            res.append(name)
-        return res
-
-    def _complete_path(self, path=None):
-        "Perform completion of filesystem path."
-        if not path:
-            return self._listdir('.')
-        dirname, rest = os.path.split(path)
-        tmp = dirname if dirname else '.'
-        res = [os.path.join(dirname, p)
-               for p in self._listdir(tmp) if p.startswith(rest)]
-        # more than one match, or single match which does not exist (typo)
-        if len(res) > 1 or not os.path.exists(path):
-            return res
-        # resolved to a single directory, so return list of files below it
-        if os.path.isdir(path):
-            return [os.path.join(path, p) for p in self._listdir(path)]
-        # exact file match terminates this completion
-        return [path + ' ']
-
-    def path_complete(self, args):
-        if not args:
-            return self._complete_path('.')
-        # treat the last arg as a path and complete it
-        return self._complete_path(args[-1])
-
-    def complete_open(self, args):
-        "Completions for the open commands."
-        return self.path_complete(args)
-
-    def complete_save(self, args):
-        "Completions for the save commands."
-        return self.path_complete(args)
-
-    def complete_list(self, args):
-        if not args[0]:
-            return list_commands
-        return [x for x in list_commands if x.startswith(args[0])]
-
-    def complete_params(self, args):
-        if not args[0]:
-            return pu.plugins.keys()
-        return [x for x in pu.plugins.keys() if x.startswith(args[0])]
-
-    def complete(self, text, state):
-        "Generic readline completion entry point."
-        read_buffer = readline.get_line_buffer()
-        line = readline.get_line_buffer().split()
-        # show all commands
-        if not line:
-            return [c + ' ' for c in commands.keys()][state]
-        # account for last argument ending in a space
-        if RE_SPACE.match(read_buffer):
-            line.append('')
-        # resolve command to the implementation function
-        cmd = line[0].strip()
-        if cmd in commands.keys():
-            impl = getattr(self, 'complete_%s' % cmd)
-            args = line[1:]
-            if args:
-                return (impl(args) + [None])[state]
-            return [cmd + ' '][state]
-        results = \
-            [c + ' ' for c in commands.keys() if c.startswith(cmd)] + [None]
-        return results[state]
-
 
 def main():
     print("Starting Savu Config tool (please wait for prompt)")
 
-    comp = Completer()
+    comp = Completer(commands)
     # we want to treat '/' as part of a word, so override the delimiters
     readline.set_completer_delims(' \t\n;')
     readline.parse_and_bind("tab: complete")
     readline.set_completer(comp.complete)
 
     # load all the packages in the plugins directory to register classes
-    # I've changed this to be in plugin utils package since this is now also called from dawn when 
-    #it populates savu plugins. adp 14/12/16
+    # I've changed this to be in plugin utils package since this is now also
+    # called from dawn when it populates savu plugins. adp 14/12/16
     pu.populate_plugins()
 
     # set up things
     input_string = "startup"
-    content = Content("")
+
+    content = Content('', __option_parser())
 
     while True:
         input_string = raw_input(">>> ").strip()
@@ -666,6 +353,23 @@ def main():
 
     print("Thanks for using the application")
 
+
+def __option_parser():
+    """ Option parser for command line arguments.
+    """
+    import optparse
+    desc = "Create process lists of plugins for Savu."
+    parser = optparse.OptionParser(description=desc)
+    disp_str = "Set the display level to show ALL parameters by default."
+    parser.add_option("-a", "--all", action="store_true", dest="disp_all",
+                      help=disp_str, default=False)
+    input_str = "Open a Savu process list."
+    parser.add_option("-i", "--input", dest="input_file", help=input_str)
+    (options, args) = parser.parse_args()
+    return options
+
+    parser.add_option("-d", "--tmp", dest="temp_dir",
+                      help="Store intermediate files in a temp directory.")
 
 if __name__ == '__main__':
     main()
