@@ -32,14 +32,22 @@ else:
 
 RE_SPACE = re.compile('.*\s+$', re.M)
 
-list_commands = ['loaders', 'corrections', 'filters', 'reconstructions',
-                 'savers']
-
 
 class Completer(object):
 
     def __init__(self, commands):
         self.commands = commands
+        self.list_commands = self.__get_list_commands()
+
+    def __get_list_commands(self):
+        list_commands = []
+        import savu.plugins as plugins
+        import pkgutil
+        for imp, mod, ispkg in pkgutil.iter_modules(plugins.__path__):
+            if ispkg:
+                list_commands.append(mod)
+        del list_commands[list_commands.index('driver')]
+        return list_commands
 
     def _listdir(self, root):
         "List directory 'root' appending the path separator to subdirs."
@@ -84,8 +92,8 @@ class Completer(object):
 
     def complete_list(self, args):
         if not args[0]:
-            return list_commands
-        return [x for x in list_commands if x.startswith(args[0])]
+            return self.list_commands
+        return [x for x in self.list_commands if x.startswith(args[0])]
 
     def complete_params(self, args):
         if not args[0]:
@@ -104,7 +112,7 @@ class Completer(object):
             line.append('')
         # resolve command to the implementation function
         cmd = line[0].strip()
-        if cmd in commands.keys():
+        if cmd in self.commands.keys():
             impl = getattr(self, 'complete_%s' % cmd)
             args = line[1:]
             if args:
