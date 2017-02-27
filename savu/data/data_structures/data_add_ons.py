@@ -72,8 +72,9 @@ class Padding(object):
         try:
             main_dir = self.pattern['main_dir']
         except KeyError:
-            raise Exception('There is no main_dir associated with this '
-                            'pattern')
+            logging.warn('There is no main_dir associated with this '
+                            'pattern, using the first slice direction instead.')
+            main_dir = self.pattern['slice_dir'][0]
         self._pad_direction(str(main_dir) + '.' + str(padding))
 
     @docstring_parameter(notes._padding.__doc__)
