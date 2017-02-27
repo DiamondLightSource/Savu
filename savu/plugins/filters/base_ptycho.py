@@ -46,6 +46,8 @@ class BasePtycho(BaseFilter, CpuPlugin): # also make one for gpu
         # lets set up the axis labels for output datasets
         position_labels, probe_labels, object_labels, self.sh = self.setup_axis_labels(in_dataset)
         print "probe labels are:"+str(probe_labels)
+        print "object labels are:"+str(object_labels)
+        print "position labels are:"+str(position_labels)
         # Now create the datasets and work out the patterns
         ### PROBE ###
         probe = out_dataset[0]
@@ -76,8 +78,10 @@ class BasePtycho(BaseFilter, CpuPlugin): # also make one for gpu
         ### POSITIONS ###
         logging.debug('##### POSITIONS #####')
         positions = out_dataset[2]
-        positions_shape = self.sh + self.get_positions().shape
+        print self.sh, self.get_positions().shape
+        positions_shape = self.sh + self.get_positions().shape[-2:]
         logging.debug('positions shape is:%s',str(positions_shape))
+        print "positions shape",positions_shape
         positions.create_dataset(axis_labels=position_labels,
                                  shape=positions_shape)
         
@@ -207,10 +211,10 @@ class BasePtycho(BaseFilter, CpuPlugin): # also make one for gpu
         trans_units = self.get_output_axis_units()
         
         probe_labels = list(core_labels) # take a copy
-        probe_labels.extend(['x.' + trans_units, 'y.' + trans_units, 'mode_idx.number'])
+        probe_labels.extend(['mode_idx.number','x.' + trans_units, 'y.' + trans_units, ])
         logging.debug('the labels for the probe are:%s' % str(probe_labels))
         object_labels = list(core_labels)
-        object_labels.extend(['x.' + trans_units, 'y.' + trans_units, 'mode_idx.number'])
+        object_labels.extend(['mode_idx.number','x.' + trans_units, 'y.' + trans_units])
         logging.debug('the labels for the object are:%s' % str(object_labels))
         position_labels = list(core_labels)
         position_labels.extend(['xy.m','idx'])
