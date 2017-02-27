@@ -36,6 +36,7 @@ class MedianFilter(BaseFilter, CpuPlugin):
     A plugin to filter each frame with a 3x3 median filter
 
     :param kernel_size: Kernel size for the filter. Default: (1, 3, 3).
+    :param pattern: pattern to apply this to. Default: "PROJECTION".
     """
 
     def __init__(self):
@@ -59,3 +60,7 @@ class MedianFilter(BaseFilter, CpuPlugin):
 
     def get_max_frames(self):
         return 8
+
+    def get_plugin_pattern(self):
+        return self.parameters['pattern']
+
