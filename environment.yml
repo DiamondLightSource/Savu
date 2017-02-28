@@ -26,6 +26,6 @@ dependencies:
     - nvidia-ml-py
     - pyfftw
     - peakutils
-    - '--editable=git+https://github.com/aaron-parsons/pymca'
+    - "--editable=git+https://github.com/aaron-parsons/pymca.git#egg=pymca"
     - colorama
 
