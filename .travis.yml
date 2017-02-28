@@ -29,6 +29,7 @@ before_install:
 install:
   - conda env create --file environment.yml
   - source activate test-environment 
+  - pip install git+git://github.com/aaron-parsons/pymca@master --upgrade --no-deps
   - python setup.py install
 
 script:
