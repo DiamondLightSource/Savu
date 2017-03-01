@@ -28,10 +28,8 @@ import json
 import copy
 import inspect
 import re
-import textwrap
 
 import numpy as np
-from colorama import Fore, Back, Style
 import savu.plugins.utils as pu
 import savu.data.framework_citations as fc
 
@@ -55,7 +53,47 @@ class PluginList(object):
         self.datasets_list = []
         self.saver_plugin_status = True
 
+#    def _populate_plugin_list(self, filename, activePass=False):
+#        """ Populate the plugin list from a nexus file. """
+#        plugin_file = h5py.File(filename, 'r')
+#        plugin_group = plugin_file['entry/plugin']
+#        self.plugin_list = []
+#        start0 = False
+#        for key in plugin_group.keys():
+#            plugin = {}
+#
+#            if 'active' in plugin_group[key].keys():
+#                active = plugin_group[key]['active'][0]
+#                plugin['active'] = active
+#                if activePass:
+#                    active = True
+#            else:
+#                active = True
+#
+#            if active:
+#                plugin['name'] = plugin_group[key]['name'][0]
+#                plugin['id'] = plugin_group[key]['id'][0]
+#                plugin['pos'] = key.encode('ascii').strip()
+#
+#                # fixes old plugin lists that start with 0
+#                if plugin['pos'] == '0':
+#                    start0 = True
+#                if start0:
+#                    plugin['pos'] = str(int(plugin['pos']) + 1)
+#
+#                if 'desc' in plugin_group[key].keys():
+#                    plugin['desc'] = self.__byteify(
+#                        json.loads(plugin_group[key]['desc'][0]))
+#                    plugin['desc'] = self.__convert_to_list(plugin['desc'])
+#                plugin['data'] = \
+#                    self.__byteify(json.loads(plugin_group[key]['data'][0]))
+#                plugin['data'] = self.__convert_to_list(plugin['data'])
+#                self.plugin_list.append(plugin)
+#
+#        plugin_file.close()
+
     def _populate_plugin_list(self, filename, activePass=False):
+        """ Populate the plugin list from a nexus file. """
         plugin_file = h5py.File(filename, 'r')
         plugin_group = plugin_file['entry/plugin']
         self.plugin_list = []
@@ -180,121 +218,6 @@ class PluginList(object):
                 exec('citation.' + key + '= value')
             citation.write(citation_group)
             count += 1
-
-    def _get_string(self, **kwargs):
-        out_string = []
-        verbosity = kwargs.get('verbose', False)
-        level = kwargs.get('level', 'user')
-
-        start = kwargs.get('start', 0)
-        stop = kwargs.get('stop', len(self.plugin_list))
-        if stop == -1:
-            stop = len(self.plugin_list)
-
-        count = start
-        plugin_list = self.plugin_list[start:stop]
-        for plugin in plugin_list:
-            count += 1
-            description = \
-                self.__get_description(level, plugin, count, verbosity)
-            out_string.append(description)
-        return '\n'.join(out_string)
-
-    def __get_description(self, level, p_dict, count, verbose):
-        width = 85
-        if verbose == '-q':
-            return self.__get_plugin_title(p_dict, count, width, quiet=True)
-        if not verbose:
-            return self.__get_basic(level, p_dict, count, width)
-        if verbose == '-v':
-            return self.__get_verbose(level, p_dict, count, width)
-        if verbose == '-vv':
-            return self.__get_verbose_verbose(level, p_dict, count, width)
-
-    def __get_plugin_title(self, p_dict, count, width, quiet=False):
-        active = \
-            '***OFF***' if 'active' in p_dict and not p_dict['active'] else ''
-        pos = p_dict['pos'].strip() if 'pos' in p_dict.keys() else count
-        fore_colour = Fore.RED + Style.DIM if active else Fore.LIGHTWHITE_EX
-        title = "%s %2s) %s" % (active, pos, p_dict['name'])
-        if not quiet:
-            title += "(%s)" % p_dict['id']
-        width -= len(title)
-        return Back.LIGHTBLACK_EX + fore_colour + title + " "*width + \
-            Style.RESET_ALL
-
-    def __get_basic(self, level, p_dict, count, width):
-        title = self.__get_plugin_title(p_dict, count, width, quiet=True)
-        params = self._get_param_details(level, p_dict, width)
-        return title + params
-
-    def __get_verbose(self, level, p_dict, count, width, breakdown=False):
-        title = self.__get_plugin_title(p_dict, count, width)
-        colour_on = Back.LIGHTBLACK_EX + Fore.LIGHTWHITE_EX
-        colour_off = Back.RESET + Fore.RESET
-        synopsis = \
-            self._get_synopsis(p_dict['name'], width, colour_on, colour_off)
-        params = \
-            self._get_param_details(level, p_dict, width, desc=p_dict['desc'])
-        if breakdown:
-            return title, synopsis, params
-        return title + synopsis + params
-
-    def __get_verbose_verbose(self, level, p_dict, count, width):
-        title, synopsis, param_details = \
-            self.__get_verbose(level, p_dict, count, width, breakdown=True)
-        extra_info = self._get_docstring_info(p_dict['name'])
-        info_colour = Back.LIGHTBLACK_EX + Fore.LIGHTWHITE_EX
-        warn_colour = Back.RED + Fore.WHITE
-        colour_off = Back.RESET + Fore.RESET
-        info = self._get_equal_lines(extra_info['info'], width,
-                                     info_colour, colour_off, " "*4)
-        warn = self._get_equal_lines(extra_info['warn'], width,
-                                     warn_colour, colour_off, " "*4)
-        info = "\n"+info if info else ''
-        warn = "\n"+warn if warn else ''
-        return title + synopsis + info + warn + param_details
-
-    def _get_synopsis(self, plugin_name, width, colour_on, colour_off):
-        synopsis = self._get_equal_lines(self._get_docstring_info(
-            plugin_name)['synopsis'], width, colour_on, colour_off, " "*2)
-        if not synopsis:
-            return ''
-        return "\n" + colour_on + synopsis + colour_off
-
-    def _get_param_details(self, level, p_dict, width, desc=False):
-        margin = 4
-        keycount = 0
-        joiner = "\n" + " "*margin
-        params = ''
-
-        keys = p_dict['data'].keys()
-        if level == 'user':
-            keys = [p for p in keys if p in p_dict['user']]
-        if 'hide' in p_dict.keys():
-            keys = [p for p in keys if p not in p_dict['hide']]
-
-        for key in keys:
-            keycount += 1
-            temp = "\n   %2i)   %20s : %s"
-            params += temp % (keycount, key, p_dict['data'][key])
-            if desc:
-                pdesc = " ".join(desc[key].split())
-                pdesc = joiner.join(textwrap.wrap(pdesc, width=width))
-                temp = '\n' + Fore.CYAN + ' '*margin + "%s" + Fore.RESET
-                params += temp % pdesc
-        return params
-
-    def _get_equal_lines(self, string, width, colour_on, colour_off, offset):
-        if not string:
-            return ''
-        str_list = textwrap.wrap(string, width=width-len(offset))
-        new_str_list = []
-        for line in str_list:
-            lwidth = width - len(line) - len(offset)
-            new_str_list.append(
-                colour_on + offset + line + " "*lwidth + colour_off)
-        return "\n".join(new_str_list)
 
     def _get_docstring_info(self, plugin):
         plugin_inst = pu.plugins[plugin]()

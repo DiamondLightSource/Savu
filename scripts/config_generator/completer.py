@@ -37,9 +37,9 @@ class Completer(object):
 
     def __init__(self, commands):
         self.commands = commands
-        self.list_commands = self.__get_list_commands()
+        self.list_commands = self._get_list_commands()
 
-    def __get_list_commands(self):
+    def _get_list_commands(self):
         list_commands = []
         import savu.plugins as plugins
         import pkgutil

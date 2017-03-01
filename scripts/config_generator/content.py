@@ -21,7 +21,6 @@
 
 """
 
-import os
 import re
 
 from savu.plugins import utils as pu
@@ -33,15 +32,11 @@ init()
 
 class Content(object):
 
-    def __init__(self, filename, options):
-        self.disp_level = 'all' if options.disp_all else 'user'
-        filename = options.input_file if options.input_file else filename
+    def __init__(self, filename=None, level='user'):
+        self.disp_level = level
         self.plugin_list = PluginList()
         self.filename = filename
         self._finished = False
-        if os.path.exists(filename):
-            print("Opening file %s" % (filename))
-            self.plugin_list._populate_plugin_list(filename, activePass=True)
 
     def set_finished(self, value):
         self._finished = value
@@ -49,10 +44,8 @@ class Content(object):
     def is_finished(self):
         return self._finished
 
-    def display(self, **kwargs):
-        if 'level' not in kwargs.keys():
-            kwargs['level'] = self.disp_level
-        print ('\n' + self.plugin_list._get_string(**kwargs), '\n')
+    def display(self, formatter, **kwargs):
+        print '\n' + formatter._get_string(**kwargs), '\n'
 
     def save(self, filename):
         if filename is not "" and filename is not "exit":
@@ -105,7 +98,6 @@ class Content(object):
         plugin._populate_default_parameters()
         pos, str_pos = self.convert_pos(str_pos)
         self.insert(plugin, pos, str_pos)
-        self.display()
 
     def replace(self, name, str_pos, keep):
         plugin = pu.plugins[name]()
@@ -152,12 +144,9 @@ class Content(object):
         return ascii_list
 
     def on_and_off(self, element, index):
-        if index < 2:
-            print("switching plugin", element+1, "ON")
-            self.plugin_list.plugin_list[element]['active'] = True
-        else:
-            print("switching plugin", element+1, "OFF")
-            self.plugin_list.plugin_list[element]['active'] = False
+        print("switching plugin %d %s" % element+1, index)
+        status = True if index == 'ON' else False
+        self.plugin_list.plugin_list[element]['active'] = status
 
     def convert_pos(self, str_pos):
         pos_list = self.get_split_positions()
