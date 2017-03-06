@@ -190,9 +190,8 @@ def _move(content, args):
 
 @parse_args
 def _coll(content, arg):
-    """ List all plugin collections. To list all plugins in a collection type
-    'list <collection_name>"""
-    colls = Completer([])._get_list_commands()
+    """ List all plugin collections. """
+    colls = Completer([])._get_collections()
     print("-----------------------------------------")
     for c in colls:
         print(c)
@@ -237,14 +236,14 @@ def main():
 
     print("Starting Savu Config tool (please wait for prompt)")
 
-    comp = Completer(commands)
+    logging.basicConfig(level='CRITICAL')
+    pu.populate_plugins()
+
+    comp = Completer(commands=commands, plugin_list=pu.plugins)
     # we want to treat '/' as part of a word, so override the delimiters
     readline.set_completer_delims(' \t\n;')
     readline.parse_and_bind("tab: complete")
     readline.set_completer(comp.complete)
-
-    logging.basicConfig(level='CRITICAL')
-    pu.populate_plugins()
 
     content = Content(level="all" if args.disp_all else None)
 

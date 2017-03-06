@@ -35,19 +35,10 @@ RE_SPACE = re.compile('.*\s+$', re.M)
 
 class Completer(object):
 
-    def __init__(self, commands):
+    def __init__(self, commands, plugin_list=[]):
         self.commands = commands
-        self.list_commands = self._get_list_commands()
-
-    def _get_list_commands(self):
-        list_commands = []
-        import savu.plugins as plugins
-        import pkgutil
-        for imp, mod, ispkg in pkgutil.iter_modules(plugins.__path__):
-            if ispkg:
-                list_commands.append(mod)
-        del list_commands[list_commands.index('driver')]
-        return list_commands
+        self.plugin_list = plugin_list
+        self.matches = None
 
     def _listdir(self, root):
         "List directory 'root' appending the path separator to subdirs."
@@ -91,9 +82,23 @@ class Completer(object):
         return self.path_complete(args)
 
     def complete_list(self, args):
+        "Completions for the list commands."
+        list_args = self._get_collections()
+        list_args += self.plugin_list
         if not args[0]:
-            return self.list_commands
-        return [x for x in self.list_commands if x.startswith(args[0])]
+            return list_args
+        return [x for x in list_args if x.lower().startswith(args[0].lower())]
+
+    def _get_collections(self):
+        """ Get plugin collection names. """
+        colls = []
+        import savu.plugins as plugins
+        import pkgutil
+        for imp, mod, ispkg in pkgutil.iter_modules(plugins.__path__):
+            if ispkg:
+                colls.append(mod)
+        del colls[colls.index('driver')]
+        return colls
 
     def complete_params(self, args):
         if not args[0]:
@@ -102,22 +107,27 @@ class Completer(object):
 
     def complete(self, text, state):
         "Generic readline completion entry point."
-        read_buffer = readline.get_line_buffer()
-        line = readline.get_line_buffer().split()
+        if state == 0:
+            self.matches = self.__get_matches(readline.get_line_buffer())
+        return self.matches[state]
+
+    def __get_matches(self, read_buffer):
         # show all commands
+        line = readline.get_line_buffer().split()
         if not line:
-            return [c + ' ' for c in self.commands.keys()][state]
-        # account for last argument ending in a space
-        if RE_SPACE.match(read_buffer):
-            line.append('')
-        # resolve command to the implementation function
-        cmd = line[0].strip()
-        if cmd in self.commands.keys():
-            impl = getattr(self, 'complete_%s' % cmd)
-            args = line[1:]
-            if args:
-                return (impl(args) + [None])[state]
-            return [cmd + ' '][state]
-        results = [c + ' ' for c in self.commands.keys() if
-                   c.startswith(cmd)] + [None]
-        return results[state]
+            return [c + ' ' for c in self.commands.keys()]
+        else:
+            # account for last argument ending in a space
+            if RE_SPACE.match(read_buffer):
+                line.append('')
+
+            # resolve command to the implementation function
+            cmd = line[0].strip()
+            if cmd in self.commands.keys():
+                impl = getattr(self, 'complete_%s' % cmd)
+                args = line[1:]
+                if args:
+                    return (impl(args) + [None])
+                return [cmd + ' ']
+            return [c + ' ' for c in self.commands.keys() if
+                    c.startswith(cmd)] + [None]
