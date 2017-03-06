@@ -1,0 +1,7 @@
+savu.plugins.loaders.full_field_loaders.nxtomo_loader module
+============================================================
+
+.. automodule:: savu.plugins.loaders.full_field_loaders.nxtomo_loader
+    :members:
+    :undoc-members:
+    :noindex:

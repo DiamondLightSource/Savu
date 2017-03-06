@@ -1,0 +1,8 @@
+savu.data.data_structures.data_types.map_3dto4d_h5 module
+=========================================================
+
+.. automodule:: savu.data.data_structures.data_types.map_3dto4d_h5
+    :members:
+    :private-members:
+    :undoc-members:
+    :show-inheritance:
