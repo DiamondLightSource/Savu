@@ -13,11 +13,11 @@
 # limitations under the License.
 
 """
-.. module:: nxstxm_loader
+.. module:: i13fluo_loader
    :platform: Unix
-   :synopsis: A class for loading nxstxm data
+   :synopsis: A class for loading xrf data
 
-.. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
+.. moduleauthor:: Aaron Parsons <scientificsoftware@diamond.ac.uk>
 
 """
 
@@ -34,6 +34,11 @@ class I13FluoLoader(BaseLoader):
     A class to load tomography data from an NXstxm file
     :param fluo_offset: fluo scale offset. Default: 0.0.
     :param fluo_gain: fluo gain. Default: 0.01.
+    :param is_tomo: The mono energy. Default: True.
+    :param theta_step: The theta step. Default:1.0.
+    :param theta_start: The theta start. Default: -90.0.
+    :param theta_end: The theta end. Default: 90.0.
+    :param mono_energy: The mono energy. Default: 11.8. 
     """
 
     def __init__(self, name='I13FluoLoader'):
@@ -47,7 +52,7 @@ class I13FluoLoader(BaseLoader):
         :type path: str
         """
 
-        data_str = 'entry1/xmapMca/fullSpectrum'
+        data_str = 'entry1/instrument/xmapMca/fullSpectrum'
         exp = self.exp
         data_obj = exp.create_data_object("in_data", 'fluo')
         data_obj.backing_file = \
@@ -60,18 +65,23 @@ class I13FluoLoader(BaseLoader):
         data_obj.meta_data.set("energy", energy)
         labels = []
         ### set the x
+        rotation_angle = None
+        if self.parameters['is_tomo']:
+            rotation_angle = np.arange(self.parameters['theta_start'],self.parameters['theta_end'], self.parameters['theta_step'])
+            labels.append('rotation_angle.degrees')
+            data_obj.meta_data.set_meta_data('rotation_angle', rotation_angle)
         x = \
-            data_obj.backing_file['entry1/xmapMca/t1_sx'].value
-        data_obj.meta_data.set('x', x)
+            data_obj.backing_file['entry1/instrument/lab_sxy/lab_sx'].value
+        data_obj.meta_data.set_meta_data('x', x)
         # axis label
         
         ### set the y
         y = \
-            data_obj.backing_file['entry1/xmapMca/t1_sy'].value
-        pos = np.zeros((2,len(y)))
-        pos[0,:] = x
-        pos[1,:] = y
-        data_obj.meta_data.set('xy', pos)
+            data_obj.backing_file['entry1/instrument/lab_sxy/lab_sy'].value
+        pos = np.zeros((2,len(y[0])))
+        pos[0,:] = x[0]
+        pos[1,:] = y[0]
+        data_obj.meta_data.set_meta_data('xy', pos)
         # axis label
         labels.append('xy.microns')
         labels.append('idx.idx')
@@ -93,8 +103,25 @@ class I13FluoLoader(BaseLoader):
         logging.debug("the spectrum slices are:"+str(spec_slice))
         data_obj.add_pattern("SPECTRUM", core_dir=spec_core,
                              slice_dir=spec_slice)
-        data_obj.add_pattern("SINOGRAM", core_dir=(0,1),
-                     slice_dir=(2,))
-        data_obj.add_pattern("PROJECTION", core_dir=(0,),
-                     slice_dir=(1,2))
+        logging.debug("the spectrum slices are:"+str(spec_slice))
+        data_obj.add_pattern("SPECTRUM_STACK", core_dir=spec_core[:-1],
+                             slice_dir=(-2,)+spec_slice)
+        
+        
+        
+        positions_label = (data_obj.find_axis_label_dimension('xy', contains=True),)
+        rotation_label = (data_obj.find_axis_label_dimension('rotation_angle', contains=True),)
+
+        data_obj.add_pattern("PROJECTION", core_dir=positions_label, slice_dir=tuple(set(dims)-set(positions_label)))
+        sino_cores = rotation_label + positions_label
+        data_obj.add_pattern("SINOGRAM", core_dir=sino_cores, slice_dir = tuple(set(dims)-set(sino_cores)))
+
+        
+        data_obj.add_pattern("4D_SCAN", core_dir=tuple(set(dims)-set(rotation_label)),
+                        slice_dir=rotation_label)
+  
+#         data_obj.add_pattern("SINOGRAM", core_dir=(0,1),
+#                      slice_dir=(2,3))
+#         data_obj.add_pattern("PROJECTION", core_dir=(0,3),
+#                      slice_dir=(1,2))
         self.set_data_reduction_params(data_obj)

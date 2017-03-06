@@ -13,25 +13,26 @@
 # limitations under the License.
 
 """
-.. module:: nx_xrd_loader_test
+.. module:: ListToProjectionsTest
    :platform: Unix
-   :synopsis: testing the nx_xrd loader
+   :synopsis: Test all the component analyses
 
-.. moduleauthor:: Aaron Parsons <scientificsoftware@diamond.ac.uk>
+.. moduleauthor:: Aaron D. Parsons <scientificsoftware@diamond.ac.uk>
 
 """
+
 import unittest
 from savu.test import test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
 
-class I13PtychoLoaderTest(unittest.TestCase):
-#     @unittest.skip("Data isn't on a public path")
-    def test_i13_ptycho(self):
-#         data_file = '/dls/i13-1/data/2016/mt14190-1/processing/tomo_processed/ptycho/ptycho_vds_testeroo.h5'
-        data_file = '/dls/science/users/clb02321/DAWN_stable/I13Test_Catalysts/processing/catalyst_data/stacked_data/ptycho_tomo_copied_92713.h5'
-        process_file = '/dls/science/users/clb02321/DAWN_stable/Savu2/Savu/test_data/test_process_lists/basic_ptycho_process_i13.nxs'
+class ListToProjectionsTest(unittest.TestCase):
+#     @unittest.skip('Something is up with this')
+    def test_process(self):
+        path = '/dls/science/users/clb02321/DAWN_stable/I13Test_Catalysts/processing/catalyst_data/analysis92713/'
+        data_file = path+'20170222134626_ptycho_tomo_copied_92713/fluo_p1_pymca.h5'
+        process_file = path+'interpolation_test.nxs'
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
 
