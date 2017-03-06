@@ -23,6 +23,7 @@
 import re
 import sys
 
+from functools import wraps
 import savu.plugins.utils as pu
 import arg_parsers as parsers
 
@@ -38,6 +39,7 @@ def _redirect_stdout():
 
 
 def parse_args(function):
+    @wraps(function)
     def _parse_args_wrap_function(content, args):
         doc = function.__doc__
         parser = '%s_arg_parser' % function.__name__

@@ -188,8 +188,10 @@ def _move(content, args):
     return content
 
 
+@parse_args
 def _coll(content, arg):
-    """ List all plugin collections. """
+    """ List all plugin collections. To list all plugins in a collection type
+    'list <collection_name>"""
     colls = Completer([])._get_list_commands()
     print("-----------------------------------------")
     for c in colls:

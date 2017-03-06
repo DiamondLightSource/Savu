@@ -109,15 +109,9 @@ def _list_arg_parser(args, desc):
     parser = ArgumentParser(prog='list', description=desc)
     q_str = "List plugin names only."
     v_str = "List plugin names and full synopsis."
-    vv_str = "List plugin names, full synopsis, warnings and all parameters"
+    vv_str = "List all information."
     __verbosity_arguments(parser, q_str, v_str, vv_str)
-
-    coll_str = "List plugin collections (packages of similar plugins)."
-    parser.add_argument("-c", "--collections", action="store_true",
-                        dest="collections", help=coll_str, default=False)
-
-    type_str = ("A string containing all or part of a plugin name or plugin "
-                "collection, for filtering.")
+    type_str = "List plugins or collections containing this string."
     parser.add_argument("string", nargs='?', help=type_str, default="")
 
     return __arg_parser(parser, args)
@@ -172,6 +166,12 @@ def _move_arg_parser(args, desc):
     parser = ArgumentParser(prog='move', description=desc)
     parser.add_argument("orig_pos", help="Original position.")
     parser.add_argument('new_pos', help="New position.")
+
+
+def _coll_arg_parser(args, desc):
+    """ Argument parser for coll command. """
+    parser = ArgumentParser(prog='coll', description=desc)
+    return __arg_parser(parser, args)
 
 
 def _get_verbosity(args):
