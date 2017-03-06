@@ -1,43 +1,111 @@
 Savu Diamond User Guide
 ***********************
 
+Introduction
+------------
+Tomography data collected at Diamond has, in recent years, been processed using the Tomo Recon GPU 
+cluster-based code available through DAWN.  A steady increase in the popularity of tomographic imaging, 
+due to improvements in data acquisition and computer technology, has led to a broadening of the range of 
+tomographic experiments, and their complexity, across multiple fields.   
 
+In full-field tomography, where the whole region-of-interest is irradiated by the beam simultaneously, 
+time-resolved imaging is becoming increasingly popular.  In mapping tomography, where a thin beam of 
+x-rays is translated and rotated across the region of interest, multi-modal data collection is common and
+incorporates a variety of measurements, such as x-ray absorption, diffraction and fluorescence. 
+
+This wide range of experimental requirements leads to a wider range of software processing requirements.  
+Savu, developed in the Data Analysis Group at Diamond Light Source Ltd., is the new tomography data 
+processing tool that has been developed to allow greater flexibility in tomography data processing. Custom
+process lists are passed to Savu at runtime to enable processing to be tailored to a specific experimental
+setup.  The framework is capable of processing multiple, n-dimensional, very large datasets, and is written
+in Python to allow easy integration of new functionality, allowing researchers and beam line staff greater
+flexibility in integrating new, cutting-edge processing techniques.
+
+A quick comparison of the old and new tomography software is given in the table below.
+
++-------------------+---------------------------------------+----------------------------------------------+
+|                   |            Tomo Recon                 |                      Savu                    |
++===================+=======================================+==============================================+
+|    Data type      |     Full-field tomography data        |   Full-field and mapping tomography data     | 
++-------------------+---------------------------------------+----------------------------------------------+
+|  Data dimensions  |                 3-D                   |                     N-D                      |
++-------------------+---------------------------------------+----------------------------------------------+
+|   Data format     |          Nxtomo NEXUS format          |      Multiple formats (any possible)         |
++-------------------+---------------------------------------+----------------------------------------------+
+|  Output format    |                 tiff                  | Multiple formats (hdf5 - tiff coming soon)   |
++-------------------+---------------------------------------+----------------------------------------------+
+|     Data size     |             Limited by RAM            |        No RAM limit (uses parallel hdf5)     |
++-------------------+---------------------------------------+----------------------------------------------+
+| Datasets per run  |             One dataset               |           Multiple datasets                  |
++-------------------+---------------------------------------+----------------------------------------------+
+|   Data slicing    |            Sinogram only              |       Flexible (e.g sinogram/projection)     |
++-------------------+---------------------------------------+----------------------------------------------+
+|    Processing     | Fixed: correction, ring removal, FBP  |        Custom: Tailored process lists        |
++-------------------+---------------------------------------+----------------------------------------------+
+| New functionality |            No integration             |                Easy integration              |
++-------------------+---------------------------------------+----------------------------------------------+
+
+
+Process lists
+-------------
+Savu is a framework that does nothing if you run it on its own.  It requires a process list, passed to it 
+at runtime along with the data, to detail the processing steps it should follow.  A Savu process list is 
+created using the Savu configurator tool, which stacks together plugins chosen from a repository. Each plugin
+performs a specific independent task, such as correction, filtering, reconstruction.  For a list of available
+plugins see `plugin API <file:///home/qmm55171/Documents/Git/git_repos/Savu/doc/build/plugin_autosummary.html>`_.
+
+Plugins are grouped into categories of similar functionality.  Loaders and savers are two of these categories and each
+process list must begin with a loader plugin and end with a saver plugin (soon to be deprecated), with at
+least one processing plugin in-between.  The loader informs the framework of the data location and format along
+with important metadata such as shape, axis information, and associated patterns (e.g. sinogram, projection).
+Therefore, the choice of loader is dependent upon the format of the data.
+
+.. note:: Savu plugins can run on the CPU or the GPU.  If you are running the single-threaded version of Savu
+          and you don't have a GPU you will be limited to CPU plugins.
+
+Example: View a process list in the Savu configurator.
+    
+    >>> module load savu
+    >>> savu_config
+    >>> help                # show the available commands
+    >>> list                # list the available plugins
+    >>> open /dls/science/groups/das/SavuTraining/process_lists/simple_tomo_pipeline.nxs  # open a process list
+    >>> exit                # exit the configurator
+
+.. note:: The process lists created by the configurator are in NEXUS (.nxs) format.
+
+For examples of how to create and amend process lists see :ref:`create_process_list` and :ref:`amend_process_list`.
 
 
 Running Savu
-============
+------------
 
-    >>> module load savu
-    >>> savu_config
-    >>> help
-
-
-
-
-
-Load the Savu module
---------------------
-
-Start by loading the Savu module
+To run Savu you require a data file and a process list (link to process list).
 
     >>> module load savu
 
-This will load the correct version of python-anaconda, set relevant paths and provide 5 aliases:
+To run Savu across the cluster (in parallel):
+
+    >>> savu_mpi  <data_path>  <process_list_path>  <output_folder>  <optional_args>
+
+To run Savu on your local machine (single threaded):
+
+    >>> savu  <data_path>  <process_list_path>  <output_folder>  <optional_args>
+
+
+The full list of aliases provided with `module load savu` is given below:
 
 +-------------------+---------------------------------------+----------------------------------------------+
 |    Alias          |            Description                |             Required input parameters        |
 +===================+=======================================+==============================================+
 |   savu            | Run single threaded Savu              | <data_path> <process_list_path> <output_path>|
 +-------------------+---------------------------------------+----------------------------------------------+
-|  savu_mpi         | Run mpi Savu across 4 nodes (80 cores)| <data_path> <process_list_path> <output_path>|
+|  savu_mpi         | Run mpi Savu across the cluster       | <data_path> <process_list_path> <output_path>|
 +-------------------+---------------------------------------+----------------------------------------------+
 | savu_mpi_preview  | Run mpi Savu across 1 node (20 cores) | <data_path> <process_list_path> <output_path>|
 +-------------------+---------------------------------------+----------------------------------------------+
 | savu_config       | Create or amend process lists         |                                              |
 +-------------------+---------------------------------------+----------------------------------------------+
-|  savu_test        | Run tests to check setup              |                                              |
-+-------------------+---------------------------------------+----------------------------------------------+
-
 
 Optional arguments:
 
@@ -53,223 +121,327 @@ Optional arguments:
 | -v, -q | **--verbose**, **--quiet** |                       | Verbosity of output log messages                 |
 +--------+----------------------------+-----------------------+--------------------------------------------------+
 
-Check the setup
----------------
 
-To test the current setup is correct run:
+.. note:: Savu produces a hdf5 file for each plugin in the process list.  It is recommended, if you are running
+          Savu on a full dataset, to pass the optional argument `-d <tmp_dir>` where `tmp_dir` is the temporary 
+          directory for a visit.
 
-    >> savu_test
 
-Create a Savu test directory
-----------------------------
 
-Savu requires a data file and a process list as input.
-A training folder of test data and process lists is available at /dls/science/groups/das/SavuTraining
+Training Examples
+-----------------
 
-Create an environment variable for the test folder
+Test data and process lists can be found in the directory `/dls/science/groups/das/SavuTraining` inside the data and
+process_lists directories respectively.  Create a SavuTraining directory in your home directory and copy the 
+data and process lists into this folder.  First, open a terminal and follow the commands below: 
 
-    >>> export DATAPATH=/dls/science/groups/das/SavuTraining
+    >>> mkdir SavuTraining
+    >>> cd SavuTraining
+    >>> cp -r /dls/science/groups/das/SavuTraining/process_lists .
+    >>> cp -r /dls/science/groups/das/SavuTraining/data .
+    >>> module load savu
 
-Create an output test directory in /dls/tmp/<your_fed_id> and cd to this directory.
 
-View a process list
--------------------
+1. Run a single-threaded Savu job on your local machine
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-1. In DAWN
-^^^^^^^^^^
-
-A process list is simply a list of processes (e.g. corrections, filters, reconstructions) that
-should be applied to the data in the specified order. 
-
-To view the example process list $DATAPATH/process_lists/simple_tomo_process.nxs do:
-
-    >>> module load dawn
-    >>> dawn &
-
-.. warning:: The DAWN module must be loaded in a separate terminal as it will reset relevant paths.
-
-In the DAWN GUI click on File -> open, navigate to the test folder and click on relevant process list.
-In the Data Browsing perspective navigate through the tree entry->plugin and browse the plugin entries.
-
-2. In the configurator
-^^^^^^^^^^^^^^^^^^^^^^
-
-An alternative way to view the process list is using the configurator:
+View the simple_tomo_pipeline_cpu.nxs process list inside the configurator
 
     >>> savu_config
-    >>> open /dls/science/groups/das/SavuTraining/process_lists/simple_tomo_process.nxs
+    >>> open process_lists/simple_tomo_pipeline_cpu.nxs
+    >>> disp -v
+    >>> exit
 
-
-Run examples
-------------
-
-1. single process
-^^^^^^^^^^^^^^^^^
-
-Run the single-threaded verion of Savu with the data file $DATAPATH/data/LD_2W50_8_Dataset_038.nxs and the process list
-$DATAPATH/process_lists/simple_tomo_process.nxs and output to the current directory.
+Run the single-threaded version of Savu with the data file `data/24737.nxs`.
+and the process list `process_lists/simple_tomo_pipeline_cpu.nxs` and output to the current directory.
 
     >>> savu <data_file> <process_list> .
 
-View the output data in Dawn (see below) and look at the log files (user.log and log.txt) in the output directory.
 
+2. Run a parallel Savu job on the cluster
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-2. multiple process
-^^^^^^^^^^^^^^^^^^^
+View the simple_tomo_pipeline.nxs file in the configurator.  Use the same data file as above, but this time use 
+the `simple_tomo_pipeline.nxs` process list, which contains GPU processes.
 
 The MPI version of Savu will run on the cluster.
 
     >>> savu_mpi <data_file> <process_list> .
 
-To view the job in the queue:
+Re-run the mpi job but send the intermediate files to a temporary directory:
 
-    >>> module load global/cluster
-    >>> qstat
+    >>> savu_mpi <data_file> <process_list> .  -d  /dls/tmp
 
-To view the user log file during the run 
-
-    >>> less user.log
-
-Or to view the full log file
-
-    >>> less /dls/tmp/savu/savu.o<job_id>
-
-(job_id is in qstat). Shift-f to dynamically watch the file.
+.. note:: `/dls/tmp` is for training purposes only and should not be used during a visit.
 
 
-View the output data in DAWN
-----------------------------
+3. View the output data in DAWN
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Once the run is complete, the current directory will contain all the output hdf5 files and the .nxs file
 that links the files together.  Do not change the names of the files as this will break the link to the data.
-You can view the data in Dawn by opening the .nxs file.  
+You can view the data in Dawn by opening the .nxs file (see :ref:`dawn`).
 
 
------------------------------------------------------------------------------------------------------------
+.. _amend_process_list:
+
+4. Amend a process list
+^^^^^^^^^^^^^^^^^^^^^^^
+
+The process list tomo_pipeline.nxs is a typical full-field tomography reconstruction pipeline.  However, 
+the experimental setup will determine which plugins should remain 'on' and what values the plugin 
+parameters should take.  Follow the list of commands below for some examples of what you can do.
 
 
-Creating and amending process lists
-===================================
-
-Process lists
--------------
-
-Each process list requires a loader as the first entry, a saver as the final entry and any combination of corrections/filters/reconstructions in-between.
-
-
-The Configurator
-----------------
-
-Open the configurator:
-
+Example 1
+=========
+1. Open the process list.
     >>> savu_config
+    >>> open process_lists/tomo_pipeline.nxs
+2. View all available commands.
+    >>> help
+3. Switch Raven filter and Paganin filter.
+    >>> move 4 3
+4. Turn the Paganin filter off (and turn the reconstruction log parameter back on).
+    >>> mod 3.off
+5. Display only the astra recon plugin with parameter descriptions.
+    >>> disp 6 -v
+6. Turn the astra recon log parameter to True.
+    >>> mod 6.6 True
+7. Apply previewing to reconstruct the middle 10 sinograms only (:ref:`previewing`).
+    >>> mod 1.6 [:, mid-5:mid+6, :]
+8. Manually entering centre of rotation (:ref:`centering`).
+    >>> mod 5.off
+    >>> mod 6.5 86
+9. Save the process list and exit.
+    >>> save process_lists/test.nxs
+    >>> exit
 
-whilst inside the configurator type --help for a list of available commands.
+Now run `savu_mpi_preview` with `data/24737.nxs' and the new process list 'process_lists/test.nxs` and 
+view the output in DAWN.
 
-e.g to view available loaders:
+.. _eg2:
 
-    >>> list loaders names
+Example 2
+=========
+1. Open the process list.
+    >>> savu_config
+    >>> open process_lists/test.nxs
+2. Apply parameter tuning to centre value (:ref:`parameter`).
+    >>> mod 6.5 84:87:0.5;
+3. Modify the reconstruction algorithm to CGLS_CUDA and increase iterations.
+    >>> disp 6 -v
+    >>> mod 6.6 CGLS_CUDA
+    >>> mod 6.8 10
+4. Apply parameter tuning to Paganin Ratio parameter.
+    >>> mod 3.on
+    >>> mod 6.6 False
+    >>> mod 3.3 50;100;200
+5. Save the process list and exit.
+    >>> save process_lists/test2.nxs
+    >>> exit
+
+Now run `savu_mpi_preview` with `data/24737.nxs` and the new process list `process_lists/test2.nxs` and 
+view the output in DAWN.
+
+
+.. _create_process_list:
+
+5. Create a process list
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+Here is the list of commands used to create the process list `tomo_pipeline.nxs` used in the 
+previous example.
+
+
+.. _autocentering:
+
+Full pipeline with auto-centering
+=================================
+
+    >>> savu_config                 # open the configurator
+    >>> list nxtomo                 # filter plugin list with nxtomo
+    >>> add NxtomoLoader            # add the loader plugin
+    >>> list dark                   # filter plugin list with dark
+    >>> add DarkFlatFieldCorrection # add the correction plugin
+    >>> list raven                  # filter plugin list with raven
+    >>> add RavenFilter             # add the ring artefact removal plugin 
+    >>> list pag                    # filter plugin list with pag
+    >>> add PaganinFilter           # add contrast enhancement plugin
+    >>> list vo                     # filter plugin list with vo
+    >>> add VoCentering             # add auto-centering plugin
+    >>> list astra                  # filter plugin list with astra
+    >>> add AstraReconGpu           # add reconstruction plugin
+    >>> mod 6.6 False               # don't take the log of the data in recon (required by paganin)
+    >>> list saver                  # filter plugin list with saver
+    >>> add Hdf5TomoSaver           # add the saver plugin
+    >>> mod 5.13 [:, mid-5:mid+6, :] # apply centering to mid 10 sinograms only
+    >>> save tomo_pipeline.nxs      # save the process list
+    >>> exit                        # exit the configurator
+
+.. _previewing_eg1:
+
+Apply previewing
+================
+
+    >>> savu_config                 # open the configurator
+    >>> open tomo_pipeline.nxs      # open the full data process list
+    >>> mod 1.6 [:, mid-2:mid+3, :] # process the middle 5 sinograms only
+    >>> ref 5                       # refresh auto-centering to remove previewing
+    >>> save tomo_pipeline_preview.nxs # save the process list
+    >>> exit                        # exit the configurator
+
+
+.. _manualcentering:
+
+Apply manual centering
+======================
+
+    >>> savu_config                 # open the configurator
+    >>> open tomo_pipeline_preview.nxs  # open the preview process list
+    >>> mod 5.off                   # turn the auto-centering plugin off
+    >>> mod 6.5 86                  # manually enter the centre value to the recon
+    >>> save tomo_pipeline_preview2.nxs # save the process list
+    >>> exit                        # exit the configurator
+
+.. _cor_parameter_tuning:
+
+Apply parameter tuning to the centre of rotation
+================================================
+    
+    >>> savu_config                 # open the configurator
+    >>> open tomo_pipeline_preview2.nxs # open the preview process list
+    >>> mod 6.5 85;85.5;86;86.5     # apply 4 different values to the centre of rotation param in the reconstruction
+    >>> save tomo_pipeline_preview3.nxs # save the process list
+    >>> exit
+
 
 
 Special features
 ----------------
 
+.. _previewing:
+
 Previewing
 ^^^^^^^^^^
 
-Previewing enables the process list to be applied to a subset of the data.
-
-Copy the tomo_process.nxs file to /dls/tmp/<fed_id>
-
-Open the configurator and open the process list:
-
-    >>> open tomo_process.nxs
-
-Each loader has a preview parameter that is empty by default (apply processing to all the data).  
-The preview requires a list as input with entries for each data dimension.  Each entry in the 
-preview list requires a string of 4 values, ‘start:stop:step:chunk’, where each of the strings 
-should be replaced with an integer or the key words ‘end’ or ‘mid’.
-
-For example, the test data is 3D, in the order (rotation_angle, detector_y, detector_x).  
-To apply the data only to the middle 5 sinograms:
-
-    >>> mod 1.1 ['0:end:1:1', 'mid-2:mid+2:1:1', '0:end:1:1']
-
-Or alternatively,
-
-    >>> mod 1.1 ['0:end:1:1', 'mid:mid+1:1:5', '0:end:1:1']
-
-Amend the process list to preview only the middle 5 sinograms.
+Previewing enables the process list to be applied to a subset of the data.  Each loader plugin
+has a preview parameter that is empty by default (apply processing to all the data).  
+The preview requires a list as input with entries for each data dimension.  Each entry in the preview 
+list should be of the form start:stop:step:chunk, where stop, step and chunk are optional 
+(defaults: stop = start + 1, step = 1, chunk = 1) but must be given in that order.  For more information
+see :meth:`~savu.data.data_structures.preview.Preview.set_preview`
 
 
-Turning process on/off
-^^^^^^^^^^^^^^^^^^^^^^
+Previewing Examples
+===================
 
-Any process can be turned off by typing
+The 3-D NxtomoLoader plugin maps the data dimensions (0, 1, 2) to the axis labels 
+(rotation_angle, detector_y, detector_x) respectively.  
 
-    >>> mod <processNo>.off
 
-Or
+    >>> savu_config
+    >>> add NxtomoLoader
+    >>> mod 1.6 [:, mid-5:mid+6, :]     # process the middle 10 sinograms only
+    >>> mod 1.6 [0:end:2, mid-5:mid+6, :]      # process every other projection
+    >>> mod 1.6 [0:end:2, mid-5:mid+6, 300:end-300] # crop 300 pixels from the sides of the detector
 
-    >>> mod <processNo>.on
 
+.. _centering:
 
 Sinogram centering
 ^^^^^^^^^^^^^^^^^^
 
-There is an optional auto-centering filter (vo_centering).  However, it is computationally expensive 
-and should only be applied to a preview.  There are two ways to do this. 
+Automatic calculation OR manual input of the centre of rotation are possible in Savu. 
 
-1. Amend the preview parameter in the loader
-2. Create a process list that incorporates vo_centering (choose relevant degree of polynomial) and reconstructs the data.
-3. There are two additional .h5 files that end in *cor_raw.h5 and *cor_fit.h5: View these in DAWN
-   and get the fit value (if satisfied with the reconstruction).
-4. Manually amend the centering parameter to the required value for the full data reconstruction.
 
-OR
+Auto-centering
+==============
 
-1. Ensure the preview parameter is empty.
-2. Amend the preview parameter in the vo_centering plugin entry. 
+The auto-centering plugin (VoCentering) can be added to a process list before the reconstruction
+plugin.  The value calculated in the centering routine is automatically passed to the reconstruction
+and will override the centre_of_rotation parameter in the reconstruction plugin. The auto-centering 
+plugin is computationally expensive and should only be applied to previewed data.  There are two ways
+to achieve this:
 
+1. Apply previewing in the loader plugin to reduce the size of the processed data.
+
+and/or
+
+2. Apply previewing in VoCentering plugin (this will not reduce the size of the data). 
+
+.. note:: If you have applied previewing in the loader and again in the centering plugin you will be 
+          applying previewing to the previewed (reduced size) data.
+
+See :ref:`autocentering`
+
+
+Manual-centering
+================
+
+Ensure the VoCentering algorithm is not in the process list (remove it or turn it off if it is already 
+inside your list).  Modify the centre_of_rotation value in the reconstruction plugin, see 
+:ref:`manualcentering`.  If the manual centering value is approximate you can apply parameter
+tuning, see :ref:`cor_parameter_tuning`
+
+
+.. _parameter_tuning:
 
 Parameter_tuning
 ^^^^^^^^^^^^^^^^
 
-If you wish to test a preview reconstruction with a range of values for a parameter, for instance, if the centering is not quite optimal, then you can add different values separated by semi-colons.  Each ‘tuned’ parameter will add an extra dimension to the data. 
+If you wish to test a preview reconstruction with a range of values for a parameter, for instance, 
+if the centering is not quite optimal, then you can add different values separated by semi-colons.  
+Each ‘tuned’ parameter will add an extra dimension to the data. 
 
-For example, add 3 centering values to the process list:
 
-    >>> mod 6.2 85;86;87
+Parameter tuning examples
+=========================
 
-(values for example only).
+    >>> mod 6.2 85;86;87        # three distinct values
+    >>> mod 6.2 84:86:0.5;      # a range of values (start:stop:step) with semi-colon at the end
+    >>> mod 6.8 FBP;CGLS        # values can be strings
 
-Or to try FBP and CGLS reconstructions
+See :ref:`eg2` and :ref:`cor_parameter_tuning`.
 
-    >>> mod 6.8 FBP;CGLS
+View the Savu output
+--------------------
 
-Add parameter tuning and save the process list.  Apply the new pipeline to the data and view the output in DAWN. 
 
------------------------------------------------------------------------------------------------------------
+.. _dawn:
 
-View the output with Avizo
-==========================
+In DAWN
+^^^^^^^
+Open a new terminal window and type:
+
+    >>> module load dawn
+    >>> dawn &
+
+Choose the Data Browsing perspective and click on File -> open, navigate to an output folder and click on 
+the .nxs file.
+
+.. warning:: The DAWN module must be loaded in a separate terminal as it will reset relevant paths.
+
+
+In Avizo
+^^^^^^^^
 
 Start avizo
 
     >>> module load avizo
     >>> avizo
 
-In Avizo GUI, Click on Open Data /(File->Open Data). This should show a dialog box with list of output data entries. To view final output select entry/final_result_tomo/data and press OK button. This will load the data. 
+In Avizo GUI, Click on Open Data /(File->Open Data). This should show a dialog box with list of output data 
+entries. To view final output select entry/final_result_tomo/data and press OK button. This will load the data. 
 
-2D view
-^^^^^^^
+1. 2D view
 
 To view 2D slices, Select the data, right click and a pop up will be shown as below. Select Ortho Slice and Click ok button to show a 2D slice.
     .. image:: ../files_and_images/2dview.jpg	
     
-3D view
-^^^^^^^
+2. 3D view
 
 To view 3D volume, Select the data, right click on it and a pop up will be shown as below. Select Volume Rendering and Click OK button to show a 3D volume.
     .. image:: ../files_and_images/3dview.jpg
+
 

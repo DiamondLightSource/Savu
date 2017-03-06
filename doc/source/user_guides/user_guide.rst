@@ -5,6 +5,5 @@ Description of who can use Savu (internal and external users) and how it can be 
 
 .. toctree::
    
-   user_install
    user_training
 

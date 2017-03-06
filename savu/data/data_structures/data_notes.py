@@ -25,7 +25,7 @@ def _set_preview_note():
     """
         Each ``preview_list`` element should be of the form
         ``start:stop:step:chunk``, where ``stop``, ``step`` and ``chunk`` are
-        optional (defaults: ``stop``=``start``+ 1, ``step``= 1, ``chunk`` = 1)
+        optional (defaults: ``stop`` = ``start`` +  1, ``step`` = 1, ``chunk`` = 1)
         but must be given in that order.
 
         .. note::
