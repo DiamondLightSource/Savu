@@ -2,6 +2,14 @@
 module load savu/1.2
 module load global/cluster-quiet
 
+PREVIEW=false
+echo "LAUNCHING THE SCRIPT"
+if [ $1 == 'PREVIEW' ] ; then
+    echo "The first arg is PREVIEW"
+    PREVIEW=true
+    shift 1
+fi
+
 # function for parsing optional arguments
 function arg_parse ()
 {
@@ -46,7 +54,7 @@ nargs=${#args[@]}
 
 if [ $nargs != 3 ] ; then
     tput setaf 1    
-    echo -e "\n\t************************* SAVU INPUT ERROR *****************************"
+    echo -e "\n\t************************* SAVU INPUT ERROR ******************************"
     tput setaf 6
     echo -e "\n\t You have entered an incorrect number of input arguments.  Please follow"
     echo -e "\t the template below:"
@@ -59,7 +67,7 @@ if [ $nargs != 3 ] ; then
 #    tput setaf 6
     echo -e "\n\t\t\t *** THANK YOU FOR USING SAVU! ***"
     tput setaf 1
-    echo -e "\n\t************************************************************************\n"
+    echo -e "\n\t*************************************************************************\n"
     tput sgr0
     exit
 fi
@@ -75,6 +83,10 @@ outname=savu
 nNodes=2
 nCoresPerNode=20
 nGPUs=4
+
+if [ $PREVIEW = true ] ; then
+    nNodes=1
+fi
 
 # get the Savu path
 DIR="$(cd "$(dirname "$0")" && pwd)"
