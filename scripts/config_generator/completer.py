@@ -89,6 +89,13 @@ class Completer(object):
             return list_args
         return [x for x in list_args if x.lower().startswith(args[0].lower())]
 
+    def complete_add(self, args):
+        "Completions for the add commands."
+        list_args = self.plugin_list
+        if not args[0]:
+            return list_args
+        return [x for x in list_args if x.lower().startswith(args[0].lower())]
+
     def _get_collections(self):
         """ Get plugin collection names. """
         colls = []

@@ -143,6 +143,7 @@ def _add_arg_parser(args, desc):
     parser.add_argument("name", help="The plugin name.")
     pos_str = "Plugin list position (defaults to end)."
     parser.add_argument('pos', nargs='?', help=pos_str)
+    return __arg_parser(parser, args)
 
 
 def _ref_arg_parser(args, desc):
