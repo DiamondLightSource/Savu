@@ -34,6 +34,7 @@ install:
 
 script:
   - py.test savu/test/travis -v --cov savu --cov-report term-missing
+  - py.test savu/scripts/configurator_tests/ -v --cov savu --cov-report term-missing
 
 after_script:
   - coveralls
