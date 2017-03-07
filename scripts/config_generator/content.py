@@ -48,6 +48,7 @@ class Content(object):
         print '\n' + formatter._get_string(**kwargs), '\n'
 
     def save(self, filename):
+        # move any display styling outside of this class
         if filename is not "" and filename is not "exit":
             self.filename = filename
 
@@ -71,6 +72,7 @@ class Content(object):
             print("The process list has NOT been saved.")
 
     def get_warnings(self, width):
+        # remove display styling outside of this class
         colour = Back.RESET + Fore.RESET
         warnings = []
         for plugin in self.plugin_list.plugin_list:
@@ -149,6 +151,15 @@ class Content(object):
         self.plugin_list.plugin_list[element]['active'] = status
 
     def convert_pos(self, str_pos):
+        """ Converts the display position (input) to the equivalent numerical
+        position and updates the display position if required.
+                :param data: A list of numpy arrays for each input dataset.
+
+        :param str_pos: the plugin display position (input) string.
+        :returns: the equivalent numerical position of str_pos and and updated\
+            str_pos.
+        :rtype: (pos, str_pos)
+        """
         pos_list = self.get_split_positions()
         num = re.findall("\d+", str_pos)[0]
         letter = re.findall("[a-z]", str_pos)
@@ -184,6 +195,7 @@ class Content(object):
         return len(self.plugin_list.plugin_list), ''.join(entry)
 
     def get_positions(self):
+        """ Get a list of all current plugin entry positions. """
         elems = self.plugin_list.plugin_list
         pos_list = []
         for e in elems:
@@ -191,6 +203,7 @@ class Content(object):
         return pos_list
 
     def get_split_positions(self):
+        """ Separate numbers and letters in positions. """
         positions = self.get_positions()
         split_pos = []
         for i in range(len(positions)):
@@ -200,6 +213,7 @@ class Content(object):
         return split_pos
 
     def find_position(self, pos):
+        """ Find the numerical index of a position (a string). """
         pos_list = self.get_positions()
         return pos_list.index(pos)
 

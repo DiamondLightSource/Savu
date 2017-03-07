@@ -75,11 +75,18 @@ def _open(content, args):
 @parse_args
 def _disp(content, args):
     """ Display the plugins in the current list."""
-    i, j = args.range if isinstance(args.range, list) else [args.range, -1]
+
+    try:
+        range_dict = utils.__get_start_stop(content, args.start, args.stop)
+    except:
+        print("Sorry, I cannot display the requested items, please check your "
+              "input and try again.")
+        return content
+
     formatter = DispDisplay(content.plugin_list)
     verbosity = parsers._get_verbosity(args)
     level = 'all' if args.all else 'user'
-    content.display(formatter, level=level, verbose=verbosity, start=i, stop=j)
+    content.display(formatter, level=level, verbose=verbosity, **range_dict)
     return content
 
 
@@ -135,11 +142,9 @@ def _add(content, args):
     """ Add a plugin to the list. """
     formatter = DispDisplay(content.plugin_list)
     elems = content.get_positions()
-    final = int(list(elems[-1])[0])+1 if elems else 1
+    final = str(int(list(elems[-1])[0])+1) if elems else 1
     if args.name in pu.plugins.keys():
-        print("Adding the plugin %s to the list" % args.name)
         content.add(args.name, args.pos if args.pos else str(final))
-        print("plugin should have been added")
         content.display(formatter)
     else:
         print("Sorry the plugin %s is not in my list." % (args.name))

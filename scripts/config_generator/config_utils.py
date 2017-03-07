@@ -77,3 +77,13 @@ def __get_filtered_plugins(pfilter):
 
     key_list.sort()
     return key_list
+
+
+def __get_start_stop(content, start, stop):
+    range_dict = {}
+    if start:
+        start = content.find_position(start)
+        stop = content.find_position(stop)+1 if stop is 2 else start+1
+        range_dict['start'] = start
+        range_dict['stop'] = stop
+    return range_dict

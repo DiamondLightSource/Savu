@@ -84,6 +84,24 @@ def _open_arg_parser(args, desc):
     return __arg_parser(parser, args)
 
 
+#def _disp_arg_parser(args, desc):
+#    """ Argument parser for disp command. """
+#    parser = ArgumentParser(prog='disp', description=desc)
+#    q_str = "Display plugin names only."
+#    v_str = "Display plugin names, synopsis and parameter details."
+#    vv_str = \
+#        "Display plugin names, full synopsis, parameter details and warnings."
+#    __verbosity_arguments(parser, q_str, v_str, vv_str)
+#
+#    all_str = "Display ALL parameters (user parameters only by default)."
+#    parser.add_argument("-a", "--all", action='store_true', help=all_str,
+#                        default=False)
+#
+#    ith_str = "Display the ith item in the list 'disp i' OR display items i \
+#               to j, 'disp i j'."
+#    parser.add_argument("range", nargs='*', help=ith_str, default=[0, -1])
+#
+#    return __arg_parser(parser, args)
 def _disp_arg_parser(args, desc):
     """ Argument parser for disp command. """
     parser = ArgumentParser(prog='disp', description=desc)
@@ -97,10 +115,9 @@ def _disp_arg_parser(args, desc):
     parser.add_argument("-a", "--all", action='store_true', help=all_str,
                         default=False)
 
-    ith_str = "Display the ith item in the list 'disp i' OR display items i \
-               to j, 'disp i j'."
-    parser.add_argument("range", nargs='?', help=ith_str, default=[0, -1])
-
+    parser.add_argument("start", nargs='?', help="Display this list entry.")
+    stop_str = "Display entries from start to stop."
+    parser.add_argument("stop", nargs='?', help=stop_str)
     return __arg_parser(parser, args)
 
 
