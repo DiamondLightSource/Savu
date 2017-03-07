@@ -4,14 +4,14 @@ This tests the functions required by dawn. If these test break, the dawn integra
 
 import unittest
 from savu.plugins import utils as pu
-from savu.plugins.utils import dawn_plugins
 
 
 class DawnCompatibleTest(unittest.TestCase):
     
     def test_populate_plugins(self):
         pu.populate_plugins()
- 
+        pu.dawn_plugins = {}# reset this after the test
+        pu.dawn_plugin_params = {} # reset this after the test
 #     def test_dawn_plugins_found(self):
 #         pu.populate_plugins()
 #         self.assertGreater(len(pu.dawn_plugins), 0)
