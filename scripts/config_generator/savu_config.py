@@ -21,8 +21,6 @@ Created on 21 May 2015
 from __future__ import print_function
 
 import os
-import atexit
-import logging
 
 from content import Content
 from completer import Completer
@@ -31,20 +29,7 @@ import arg_parsers as parsers
 from savu.plugins import utils as pu
 import config_utils as utils
 from config_utils import parse_args
-
-
-if os.name == 'nt':
-    import win_readline as readline
-else:
-    import readline
-
-histfile = os.path.join(os.path.expanduser("~"), ".savuhist")
-try:
-    readline.read_history_file(histfile)
-    readline.set_history_length(1000)
-except IOError:
-    pass
-atexit.register(readline.write_history_file, histfile)
+from config_utils import error_catcher
 
 
 def _help(content, args):
@@ -63,10 +48,14 @@ def _help(content, args):
 def _open(content, args):
     """ Open or create a new process list."""
     if os.path.exists(args.file):
-        print("Opening file %s" % (args.file))
         content.plugin_list._populate_plugin_list(args.file, activePass=True)
         # Auto refresh plugin list? # update numbering for old plugin_list
-        content.update()
+        try:
+            content.update()
+        except:
+            print("Sorry, this process list is incompatible with this version "
+                  "of Savu and cannot be auto-updated.  Please re-create the "
+                  "list.")
         formatter = DispDisplay(content.plugin_list)
         content.display(formatter)
     return content
@@ -79,10 +68,7 @@ def _disp(content, args):
     try:
         range_dict = utils.__get_start_stop(content, args.start, args.stop)
     except:
-        print("Sorry, I cannot display the requested items, please check your "
-              "input and try again.")
         return content
-
     formatter = DispDisplay(content.plugin_list)
     verbosity = parsers._get_verbosity(args)
     level = 'all' if args.all else 'user'
@@ -96,7 +82,7 @@ def _list(content, args):
     list_content = Content()
     utils._populate_plugin_list(list_content, pfilter=args.string)
     if not len(list_content.plugin_list.plugin_list):
-        print("No plugins were found containing the string %s" % (args.string))
+        print("No result found.")
         return content
     formatter = ListDisplay(list_content.plugin_list)
     verbosity = parsers._get_verbosity(args)
@@ -114,15 +100,13 @@ def _save(content, args):
 
 
 @parse_args
+@error_catcher
 def _mod(content, args):
     """ Modify plugin parameters. """
-    if args.param.split('.'):
-        element, subelement = args.param.split('.')
-        value = content.value(args.value)
-        content.modify(element+1, subelement, value)
-        content.display(start=element, stop=element+1)
-    else:
-        print("The parameter %s was not recognised." % args.param)
+    pos_str, subelem = args.param.split('.')
+    pos = content.modify(pos_str, subelem, args.value)
+    formatter = DispDisplay(content.plugin_list)
+    content.display(formatter, start=pos, stop=pos+1)
     return content
 
 
@@ -147,7 +131,7 @@ def _add(content, args):
         content.add(args.name, args.pos if args.pos else str(final))
         content.display(formatter)
     else:
-        print("Sorry the plugin %s is not in my list." % (args.name))
+        print("Sorry the plugin %s does not exist." % (args.name))
     return content
 
 
@@ -157,14 +141,11 @@ def _ref(content, args):
     formatter = DispDisplay(content.plugin_list)
     positions = content.get_positions() if args.pos is ['*'] else args.pos
     for pos_str in positions:
-        pos = content.find_position(pos_str)
-        if pos < 0 or pos >= len(content.plugin_list.plugin_list):
-            print("Sorry %s is out of range" % (args))
+        try:
+            pos = content.find_position(pos_str)
+            content.refresh(pos_str, defaults=args.defaults)
+        except:
             return content
-        content.refresh(pos)
-        name = content.plugin_list.plugin_list[pos]['name']
-        default_vals = content.get(pos)['data'] if args.defaults else None
-        content.replace(name, pos_str, default_vals)
         content.display(formatter, start=pos, stop=pos+1)
     return content
 
@@ -189,7 +170,7 @@ def _move(content, args):
     try:
         content.move(args.orig_pos, args.new_pos)
     except:
-        print ("Sorry, the information you have given is incorrect")
+        print ("ERROR: Please type 'move -h' for help.")
     return content
 
 
@@ -211,9 +192,9 @@ def _exit(content, arg):
 
 
 def _history(content, arg):
-    hlen = readline.get_current_history_length()
+    hlen = utils.readline.get_current_history_length()
     for i in range(hlen):
-        print("%5i : %s" % (i, readline.get_history_item(i)))
+        print("%5i : %s" % (i, utils.readline.get_history_item(i)))
     return content
 
 
@@ -241,15 +222,9 @@ def main():
 
     print("Starting Savu Config tool (please wait for prompt)")
 
-    logging.basicConfig(level='CRITICAL')
     pu.populate_plugins()
-
     comp = Completer(commands=commands, plugin_list=pu.plugins)
-    # we want to treat '/' as part of a word, so override the delimiters
-    readline.set_completer_delims(' \t\n;')
-    readline.parse_and_bind("tab: complete")
-    readline.set_completer(comp.complete)
-
+    utils._set_readline(comp.complete)
     content = Content(level="all" if args.disp_all else None)
 
     while True:
@@ -266,7 +241,7 @@ def main():
             break
 
         # write the history to the history file
-        readline.write_history_file(histfile)
+        utils.readline.write_history_file(utils.histfile)
 
     print("Thanks for using the application")
 

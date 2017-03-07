@@ -85,31 +85,31 @@ class Content(object):
         return "\n".join(
             ["*" + "\n ".join(w.split('\n')) for w in warnings if w])
 
-    def value(self, arg):
-        value = ([''.join(arg.split()[1:])][0]).split()[0]
-        tuning = True if value.count(';') else False
-        if not tuning:
-            try:
-                exec("value = " + value)
-            except (NameError, SyntaxError):
-                exec("value = " + "'" + value + "'")
-        return value
-
     def add(self, name, str_pos):
         plugin = pu.plugins[name]()
         plugin._populate_default_parameters()
         pos, str_pos = self.convert_pos(str_pos)
         self.insert(plugin, pos, str_pos)
 
-    def replace(self, name, str_pos, keep):
+    def refresh(self, str_pos, defaults=False):
+        # if the name is not found then find if it has changed slightly (remove underscores and capitals)
+        pos = self.find_position(str_pos)
+        name = self.plugin_list.plugin_list[pos]['name']
         plugin = pu.plugins[name]()
         plugin._populate_default_parameters()
-        pos = self.find_position(str_pos)
+
+        keep = self.get(str_pos)['data'] if defaults else None
         self.insert(plugin, pos, str_pos, replace=True)
         if keep:
             union_params = set(keep).intersection(set(plugin.parameters))
             for param in union_params:
                 self.modify(pos+1, param, keep[param])
+
+    def update(self):
+        # ensure 'active' is now in list and remove this condition in pluginlist.
+        # ensure all numbers start from 1 and remove this condition in pluginlist
+        pass
+
 
     def move(self, old, new):
         old_pos = self.find_position(old)
@@ -127,17 +127,23 @@ class Content(object):
         self.plugin_list.plugin_list[new_pos]['pos'] = new
         self.display()
 
-    def modify(self, element, subelement, value):
-        data_elements = self.plugin_list.plugin_list[element-1]['data']
-        try:
-            position = int(subelement) - 1
-            data_elements[data_elements.keys()[position]] = value
-        except:
-            if subelement in data_elements.keys():
-                data_elements[subelement] = value
-            else:
-                print("Sorry, element %i does not have a %s parameter" %
-                      (element, subelement))
+    def modify(self, pos_str, subelem, value):
+        value = self.value(value)
+        pos = self.find_position(pos_str)
+        data_elements = self.plugin_list.plugin_list[pos]['data']
+        if subelem.isdigit():
+            data_elements[data_elements.keys()[int(subelem)-1]] = value
+        else:
+            data_elements[subelem] = value
+        return pos
+
+    def value(self, value):
+        if not value.count(';'):
+            try:
+                exec("value = " + value)
+            except (NameError, SyntaxError):
+                exec("value = " + "'" + value + "'")
+        return value
 
     def convert_to_ascii(self, value):
         ascii_list = []
@@ -215,7 +221,12 @@ class Content(object):
     def find_position(self, pos):
         """ Find the numerical index of a position (a string). """
         pos_list = self.get_positions()
-        return pos_list.index(pos)
+        try:
+            index = pos_list.index(pos)
+        except:
+            print("The plugin position is incorrect.")
+            return
+        return index
 
     def inc_positions(self, start, pos_list, entry, inc):
         if len(entry) is 1:

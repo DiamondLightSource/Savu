@@ -22,10 +22,28 @@
 """
 import re
 import sys
+import os
+import atexit
+import logging
 
 from functools import wraps
 import savu.plugins.utils as pu
 import arg_parsers as parsers
+
+if os.name == 'nt':
+    import win_readline as readline
+else:
+    import readline
+
+histfile = os.path.join(os.path.expanduser("~"), ".savuhist")
+try:
+    readline.read_history_file(histfile)
+    readline.set_history_length(1000)
+except IOError:
+    pass
+atexit.register(readline.write_history_file, histfile)
+
+logging.basicConfig(level='CRITICAL')
 
 
 class DummyFile(object):
@@ -38,6 +56,13 @@ def _redirect_stdout():
     return save_stdout
 
 
+def _set_readline(completer):
+    # we want to treat '/' as part of a word, so override the delimiters
+    readline.set_completer_delims(' \t\n;')
+    readline.parse_and_bind("tab: complete")
+    readline.set_completer(completer)
+
+
 def parse_args(function):
     @wraps(function)
     def _parse_args_wrap_function(content, args):
@@ -48,6 +73,23 @@ def parse_args(function):
             return content
         return function(content, args)
     return _parse_args_wrap_function
+
+
+error_level = 0
+
+
+def error_catcher(function):
+    @wraps(function)
+    def error_catcher_wrap_function(content, args):
+        command = function.__names.split('_')[1]
+        try:
+            return function(content, args)
+        except Exception as e:
+            if error_level is 1:
+                print e.message
+            print("ERROR: Please type '%s -h' for help." % command)
+            return content
+    return error_catcher_wrap_function
 
 
 def _populate_plugin_list(content, pfilter=""):

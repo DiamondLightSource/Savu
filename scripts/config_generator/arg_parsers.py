@@ -62,6 +62,8 @@ def _config_arg_parser():
                         help=disp_str, default=False)
     input_str = "Open a Savu process list."
     parser.add_argument("-i", "--input", dest="input_file", help=input_str)
+    parser.add_argument("-e", "--error", dest="error", help=argparse.SUPPRESS,
+                        action='store_true', default=False)
     return __arg_parser(parser, sys.argv[1:])
 
 
@@ -84,24 +86,6 @@ def _open_arg_parser(args, desc):
     return __arg_parser(parser, args)
 
 
-#def _disp_arg_parser(args, desc):
-#    """ Argument parser for disp command. """
-#    parser = ArgumentParser(prog='disp', description=desc)
-#    q_str = "Display plugin names only."
-#    v_str = "Display plugin names, synopsis and parameter details."
-#    vv_str = \
-#        "Display plugin names, full synopsis, parameter details and warnings."
-#    __verbosity_arguments(parser, q_str, v_str, vv_str)
-#
-#    all_str = "Display ALL parameters (user parameters only by default)."
-#    parser.add_argument("-a", "--all", action='store_true', help=all_str,
-#                        default=False)
-#
-#    ith_str = "Display the ith item in the list 'disp i' OR display items i \
-#               to j, 'disp i j'."
-#    parser.add_argument("range", nargs='*', help=ith_str, default=[0, -1])
-#
-#    return __arg_parser(parser, args)
 def _disp_arg_parser(args, desc):
     """ Argument parser for disp command. """
     parser = ArgumentParser(prog='disp', description=desc)
@@ -141,7 +125,7 @@ def _mod_arg_parser(args, desc):
                  "'plugin_pos.param_name' or ' plugin_pos.param_no'")
     parser.add_argument("param", help=param_str)
     val_str = ("The plugin parameter value.")
-    parser.add_argument("param", help=val_str)
+    parser.add_argument("value", help=val_str)
     return __arg_parser(parser, args)
 
 
@@ -171,6 +155,7 @@ def _ref_arg_parser(args, desc):
     defaults_str = "Populate parameters with default values."
     parser.add_argument("-d", "--defaults", action="store_true",
                         dest="defaults", help=defaults_str, default=False)
+    return __arg_parser(parser, args)
 
 
 def _rem_arg_parser(args, desc):
