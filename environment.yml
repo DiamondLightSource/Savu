@@ -19,6 +19,7 @@ dependencies:
   - xraylib
   - tomopy
   - pip:
+    - mock
     - fabio 
     - pytest-cov
     - coveralls

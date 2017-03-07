@@ -10,7 +10,7 @@ import unittest
 from mock import patch
 from StringIO import StringIO
 
-import savu_config
+from ..config_generator import savu_config
 
 class Test(unittest.TestCase):
 
