@@ -23,6 +23,7 @@
 
 import tempfile  # this import is required for pyFAI - DO NOT REMOVE!
 import optparse
+import traceback
 import sys
 import os
 from mpi4py import MPI
@@ -128,6 +129,7 @@ def __get_folder_name(in_file):
     timestamp = time.strftime("%Y%m%d%H%M%S")
     MPI.COMM_WORLD.barrier()
     split = in_file.split('.')
+
     if len(split[-1].split('/')) > 1:
         split = in_file.split('/')
         name = split[-2] if split[-1] == '' else split[-1]
@@ -163,7 +165,6 @@ def main(input_args=None):
             plugin_runner = PluginRunner(options)
             plugin_runner._run_plugin_list()
         except Exception as error:
-            import traceback
             print error.message
             traceback.print_exc(file=sys.stdout)
             MPI.COMM_WORLD.Abort(1)
