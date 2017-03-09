@@ -53,72 +53,18 @@ class PluginList(object):
         self.datasets_list = []
         self.saver_plugin_status = True
 
-#    def _populate_plugin_list(self, filename, activePass=False):
-#        """ Populate the plugin list from a nexus file. """
-#        plugin_file = h5py.File(filename, 'r')
-#        plugin_group = plugin_file['entry/plugin']
-#        self.plugin_list = []
-#        start0 = False
-#        for key in plugin_group.keys():
-#            plugin = {}
-#
-#            if 'active' in plugin_group[key].keys():
-#                active = plugin_group[key]['active'][0]
-#                plugin['active'] = active
-#                if activePass:
-#                    active = True
-#            else:
-#                active = True
-#
-#            if active:
-#                plugin['name'] = plugin_group[key]['name'][0]
-#                plugin['id'] = plugin_group[key]['id'][0]
-#                plugin['pos'] = key.encode('ascii').strip()
-#
-#                # fixes old plugin lists that start with 0
-#                if plugin['pos'] == '0':
-#                    start0 = True
-#                if start0:
-#                    plugin['pos'] = str(int(plugin['pos']) + 1)
-#
-#                if 'desc' in plugin_group[key].keys():
-#                    plugin['desc'] = self.__byteify(
-#                        json.loads(plugin_group[key]['desc'][0]))
-#                    plugin['desc'] = self.__convert_to_list(plugin['desc'])
-#                plugin['data'] = \
-#                    self.__byteify(json.loads(plugin_group[key]['data'][0]))
-#                plugin['data'] = self.__convert_to_list(plugin['data'])
-#                self.plugin_list.append(plugin)
-#
-#        plugin_file.close()
-
     def _populate_plugin_list(self, filename, activePass=False):
         """ Populate the plugin list from a nexus file. """
         plugin_file = h5py.File(filename, 'r')
         plugin_group = plugin_file['entry/plugin']
         self.plugin_list = []
-        start0 = False
         for key in plugin_group.keys():
             plugin = {}
 
-            if 'active' in plugin_group[key].keys():
-                active = plugin_group[key]['active'][0]
-                plugin['active'] = active
-                if activePass:
-                    active = True
-            else:
-                active = True
-
-            if active:
+            if plugin_group[key]['active'] or activePass:
                 plugin['name'] = plugin_group[key]['name'][0]
                 plugin['id'] = plugin_group[key]['id'][0]
                 plugin['pos'] = key.encode('ascii').strip()
-
-                # fixes old plugin lists that start with 0
-                if plugin['pos'] == '0':
-                    start0 = True
-                if start0:
-                    plugin['pos'] = str(int(plugin['pos']) + 1)
 
                 if 'desc' in plugin_group[key].keys():
                     plugin['desc'] = self.__byteify(

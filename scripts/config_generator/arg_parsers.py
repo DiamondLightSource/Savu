@@ -118,6 +118,15 @@ def _list_arg_parser(args, desc):
     return __arg_parser(parser, args)
 
 
+def _save_arg_parser(args, desc):
+    """ Argument parser for save command. """
+    parser = ArgumentParser(prog='save', description=desc)
+    parser.add_argument("filepath", nargs='?', help="The output file path.")
+    parser.add_argument("-i", "--input", action="store_true", default=False,
+                        help="Save to the input file.")
+    return __arg_parser(parser, args)
+
+
 def _mod_arg_parser(args, desc):
     """ Argument parser for mod command. """
     parser = ArgumentParser(prog='mod', description=desc)

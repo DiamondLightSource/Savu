@@ -22,10 +22,12 @@
 """
 
 import re
+import os
 
 from savu.plugins import utils as pu
 from savu.data.plugin_list import PluginList
 from colorama import Fore, Back, init
+import deprecated_dict
 #  Need to call init method for colorama to work in windows
 init()
 
@@ -38,52 +40,48 @@ class Content(object):
         self.filename = filename
         self._finished = False
 
-    def set_finished(self, value):
-        self._finished = value
+    def set_finished(self):
+        i = raw_input("Are you sure? [y/N]")
+        self._finished = True if i.lower() == 'y' else False
 
     def is_finished(self):
         return self._finished
+
+    def fopen(self, infile):
+        if os.path.exists(infile):
+            self.plugin_list._populate_plugin_list(infile, activePass=True)
+        else:
+            raise Exception('INPUT ERROR: The file does not exist.')
+        self.filename = infile
+        # updating old process lists
+        the_list = self.plugin_list.plugin_list
+        if 'pos' in the_list[0].keys() and the_list[0]['pos'] == '0':
+            self.increment_positions()
+        # replace deprecated plugins
+        self._apply_plugin_updates()
+            
+
+        # ensure 'active' is now in list and remove this condition in pluginlist.
+        # ensure all numbers start from 1 and remove this condition in pluginlist        
+
+#        print("Sorry, this process list is incompatible with this version of "
+#              "Savu and cannot be auto-updated.  Please re-create the list.")
+
 
     def display(self, formatter, **kwargs):
         print '\n' + formatter._get_string(**kwargs), '\n'
 
     def save(self, filename):
-        # move any display styling outside of this class
-        if filename is not "" and filename is not "exit":
-            self.filename = filename
-
-        if filename == "exit":
-            i = raw_input("Are you sure? [y/N]")
-            return True if i.lower() == 'y' else False
-
-        width = 86
-        warnings = self.get_warnings(width)
-        if warnings:
-            notice = Back.RED + Fore.WHITE + "IMPORTANT PLUGIN NOTICES" +\
-                Back.RESET + Fore.RESET + "\n"
-            border = "*"*width + '\n'
-            print (border + notice + warnings + '\n'+border)
         i = raw_input("Are you sure you want to save the current data to "
-                      "'%s' [y/N]" % (self.filename))
+                      "'%s' [y/N]" % (filename))
         if i.lower() == 'y':
-            print("Saving file %s" % (self.filename))
-            self.plugin_list._save_plugin_list(self.filename)
+            if not os.path.exists(os.path.dirname(filename)):
+                file_error = "INPUT_ERROR: There is an error in the filepath."
+                raise Exception(file_error)
+            print("Saving file %s" % (filename))
+            self.plugin_list._save_plugin_list(filename)
         else:
             print("The process list has NOT been saved.")
-
-    def get_warnings(self, width):
-        # remove display styling outside of this class
-        colour = Back.RESET + Fore.RESET
-        warnings = []
-        for plugin in self.plugin_list.plugin_list:
-            warn = self.plugin_list._get_docstring_info(plugin['name'])['warn']
-            if warn:
-                for w in warn.split('\n'):
-                    string = plugin['name'] + ": " + w
-                    warnings.append(self.plugin_list._get_equal_lines(
-                        string, width-1, colour, colour, " "*2))
-        return "\n".join(
-            ["*" + "\n ".join(w.split('\n')) for w in warnings if w])
 
     def add(self, name, str_pos):
         plugin = pu.plugins[name]()
@@ -92,24 +90,47 @@ class Content(object):
         self.insert(plugin, pos, str_pos)
 
     def refresh(self, str_pos, defaults=False):
-        # if the name is not found then find if it has changed slightly (remove underscores and capitals)
         pos = self.find_position(str_pos)
         name = self.plugin_list.plugin_list[pos]['name']
         plugin = pu.plugins[name]()
         plugin._populate_default_parameters()
 
-        keep = self.get(str_pos)['data'] if defaults else None
+        keep = self.get(pos)['data'] if not defaults else None
         self.insert(plugin, pos, str_pos, replace=True)
         if keep:
             union_params = set(keep).intersection(set(plugin.parameters))
             for param in union_params:
-                self.modify(pos+1, param, keep[param])
+                self.modify(str_pos, param, keep[param], ref=True)
 
-    def update(self):
-        # ensure 'active' is now in list and remove this condition in pluginlist.
-        # ensure all numbers start from 1 and remove this condition in pluginlist
-        pass
+    def _apply_plugin_updates(self):
+        missing = False
+        for plugin in self.plugin_list.plugin_list:
+            if 'active' not in plugin.keys():
+                plugin['active'] = True
+            if plugin['name'] not in pu.plugins.keys():
+                if not self._investigate_plugins(plugin['name']):
+                    missing = True
+        if missing:
+            raise Exception('PLUGIN ERROR: To skip missing plugins type '
+                            '"open <process_list> -r."')
 
+    def _investigate_plugins(self, name):
+        """ Renames a plugin that has been replaced or had a name change. """
+        for key in pu.plugins.keys():
+            if name.lower() == key.lower():
+                return key
+
+        if name in deprecated_dict.entries.keys():
+            new_name = deprecated_dict.entries[name]
+            print new_name
+            if new_name in pu.plugins.keys():
+                print ("new name has been found")
+                print('AUTO-REPLACEMENT: The plugin %s is no longer available '
+                      'and has been replaced by %s.  Please check the '
+                      'parameters' % (name, new_name))
+                return new_name
+        print('The plugin %s is no longer available.' % name)
+        return None
 
     def move(self, old, new):
         old_pos = self.find_position(old)
@@ -127,8 +148,9 @@ class Content(object):
         self.plugin_list.plugin_list[new_pos]['pos'] = new
         self.display()
 
-    def modify(self, pos_str, subelem, value):
-        value = self.value(value)
+    def modify(self, pos_str, subelem, value, ref=False):
+        if not ref:
+            value = self.value(value)
         pos = self.find_position(pos_str)
         data_elements = self.plugin_list.plugin_list[pos]['data']
         if subelem.isdigit():
@@ -159,7 +181,6 @@ class Content(object):
     def convert_pos(self, str_pos):
         """ Converts the display position (input) to the equivalent numerical
         position and updates the display position if required.
-                :param data: A list of numpy arrays for each input dataset.
 
         :param str_pos: the plugin display position (input) string.
         :returns: the equivalent numerical position of str_pos and and updated\
@@ -200,6 +221,15 @@ class Content(object):
             entry[1] = 'a'
         return len(self.plugin_list.plugin_list), ''.join(entry)
 
+    def increment_positions(self):
+        """ Update old process lists that start plugin numbering from 0 to
+        start from 1. """
+        for plugin in self.plugin_list.plugin_list:
+            str_pos = plugin['pos']
+            num = str(int(re.findall("\d+", str_pos)[0]) + 1)
+            letter = re.findall("[a-z]", str_pos)
+            plugin['pos'] = ''.join([num, letter[0]] if letter else [num])
+
     def get_positions(self):
         """ Get a list of all current plugin entry positions. """
         elems = self.plugin_list.plugin_list
@@ -221,12 +251,9 @@ class Content(object):
     def find_position(self, pos):
         """ Find the numerical index of a position (a string). """
         pos_list = self.get_positions()
-        try:
-            index = pos_list.index(pos)
-        except:
-            print("The plugin position is incorrect.")
-            return
-        return index
+        if pos not in pos_list:
+            raise Exception("INPUT ERROR: Incorrect plugin position.")
+        return pos_list.index(pos)
 
     def inc_positions(self, start, pos_list, entry, inc):
         if len(entry) is 1:

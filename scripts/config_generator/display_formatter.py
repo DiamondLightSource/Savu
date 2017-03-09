@@ -172,6 +172,30 @@ class DispDisplay(DisplayFormatter):
         info, warn = self._get_extra_info(p_dict, width, c_off, info_c, warn_c)
         return title + synopsis + info + warn + param_details
 
+    def _notices(self):
+        width = 86
+        warnings = self.get_warnings(width)
+        if warnings:
+            notice = Back.RED + Fore.WHITE + "IMPORTANT PLUGIN NOTICES" +\
+                Back.RESET + Fore.RESET + "\n"
+            border = "*"*width + '\n'
+            print (border + notice + warnings + '\n'+border)
+
+    def get_warnings(self, width):
+        # remove display styling outside of this class
+        colour = Back.RESET + Fore.RESET
+        warnings = []
+        for plugin in self.plugin_list:
+            warn = self.plugin_list_inst._get_docstring_info(
+                    plugin['name'])['warn']
+            if warn:
+                for w in warn.split('\n'):
+                    string = plugin['name'] + ": " + w
+                    warnings.append(self._get_equal_lines(
+                        string, width-1, colour, colour, " "*2))
+        return "\n".join(
+            ["*" + "\n ".join(w.split('\n')) for w in warnings if w])
+
 
 class ListDisplay(DisplayFormatter):
 

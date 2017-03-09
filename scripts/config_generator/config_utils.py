@@ -25,6 +25,7 @@ import sys
 import os
 import atexit
 import logging
+import traceback
 
 from functools import wraps
 import savu.plugins.utils as pu
@@ -81,13 +82,19 @@ error_level = 0
 def error_catcher(function):
     @wraps(function)
     def error_catcher_wrap_function(content, args):
-        command = function.__names.split('_')[1]
+        command = function.__name__.split('_')[1]
         try:
             return function(content, args)
         except Exception as e:
-            if error_level is 1:
+            savu_error = True if e.message.split()[1] == 'ERROR:' else False
+            if error_level is 0 and savu_error:
                 print e.message
-            print("ERROR: Please type '%s -h' for help." % command)
+            if error_level is 0:
+                print("Please type '%s -h' for help." % command)
+
+            if error_level is 1:
+                traceback.print_exc(file=sys.stdout)
+
             return content
     return error_catcher_wrap_function
 

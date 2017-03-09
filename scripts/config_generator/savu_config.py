@@ -20,8 +20,6 @@ Created on 21 May 2015
 
 from __future__ import print_function
 
-import os
-
 from content import Content
 from completer import Completer
 from display_formatter import ListDisplay, DispDisplay
@@ -45,30 +43,19 @@ def _help(content, args):
 
 
 @parse_args
+@error_catcher
 def _open(content, args):
     """ Open or create a new process list."""
-    if os.path.exists(args.file):
-        content.plugin_list._populate_plugin_list(args.file, activePass=True)
-        # Auto refresh plugin list? # update numbering for old plugin_list
-        try:
-            content.update()
-        except:
-            print("Sorry, this process list is incompatible with this version "
-                  "of Savu and cannot be auto-updated.  Please re-create the "
-                  "list.")
-        formatter = DispDisplay(content.plugin_list)
-        content.display(formatter)
+    content.fopen(args.file)
+    _ref(content, '*')
     return content
 
 
 @parse_args
+@error_catcher
 def _disp(content, args):
     """ Display the plugins in the current list."""
-
-    try:
-        range_dict = utils.__get_start_stop(content, args.start, args.stop)
-    except:
-        return content
+    range_dict = utils.__get_start_stop(content, args.start, args.stop)
     formatter = DispDisplay(content.plugin_list)
     verbosity = parsers._get_verbosity(args)
     level = 'all' if args.all else 'user'
@@ -77,6 +64,7 @@ def _disp(content, args):
 
 
 @parse_args
+@error_catcher
 def _list(content, args):
     """ List the available plugins. """
     list_content = Content()
@@ -93,9 +81,12 @@ def _list(content, args):
 
 
 @parse_args
+@error_catcher
 def _save(content, args):
-    """ Save the current process list."""
-    content.save(args.file)
+    """ Save the current process list to file."""
+    out_file = content.filename if args.input else args.filepath
+    DispDisplay(content.plugin_list)._notices()
+    content.save(out_file)
     return content
 
 
@@ -111,6 +102,7 @@ def _mod(content, args):
 
 
 @parse_args
+@error_catcher
 def _set(content, arg):
     """ Set the status of the plugin to be on or off. """
     args = parsers._set_arg_parser(arg.split(), _list.__doc__)
@@ -122,6 +114,7 @@ def _set(content, arg):
 
 
 @parse_args
+@error_catcher
 def _add(content, args):
     """ Add a plugin to the list. """
     formatter = DispDisplay(content.plugin_list)
@@ -136,21 +129,20 @@ def _add(content, args):
 
 
 @parse_args
+@error_catcher
 def _ref(content, args):
     """ Refresh a plugin (update it). """
     formatter = DispDisplay(content.plugin_list)
-    positions = content.get_positions() if args.pos is ['*'] else args.pos
+    positions = content.get_positions() if args.pos == ['*'] else args.pos
     for pos_str in positions:
-        try:
-            pos = content.find_position(pos_str)
-            content.refresh(pos_str, defaults=args.defaults)
-        except:
-            return content
+        pos = content.find_position(pos_str)
+        content.refresh(pos_str, defaults=args.defaults)
         content.display(formatter, start=pos, stop=pos+1)
     return content
 
 
 @parse_args
+@error_catcher
 def _rem(content, args):
     """ Remove plugin(s) from the list. """
     for pos_str in args.pos:
@@ -165,6 +157,7 @@ def _rem(content, args):
 
 
 @parse_args
+@error_catcher
 def _move(content, args):
     """ Move a plugin to a different position in the list."""
     try:
@@ -175,6 +168,7 @@ def _move(content, args):
 
 
 @parse_args
+@error_catcher
 def _coll(content, arg):
     """ List all plugin collections. """
     colls = Completer([])._get_collections()
@@ -187,7 +181,7 @@ def _coll(content, arg):
 
 def _exit(content, arg):
     """ Close the program."""
-    content.set_finished(content.save("exit"))
+    content.set_finished()
     return content
 
 
@@ -217,8 +211,8 @@ commands = {'open': _open,
 def main():
 
     args = parsers._config_arg_parser()
-    if not args:
-        return
+    if args.error:
+        utils.error_level = 1
 
     print("Starting Savu Config tool (please wait for prompt)")
 
@@ -226,6 +220,8 @@ def main():
     comp = Completer(commands=commands, plugin_list=pu.plugins)
     utils._set_readline(comp.complete)
     content = Content(level="all" if args.disp_all else None)
+
+    # if file flag is passed then open it here
 
     while True:
         in_list = raw_input(">>> ").strip().split(' ', 1)
