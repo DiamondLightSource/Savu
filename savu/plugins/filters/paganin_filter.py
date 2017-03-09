@@ -68,6 +68,7 @@ class PaganinFilter(BaseFilter, CpuPlugin):
         core_shape = list(pData.get_shape())
         del core_shape[self.slice_dir]
         self._setup_paganin(*core_shape)
+        print "did the preprocess"
 
     def _setup_paganin(self, height, width):
         micron = 10**(-6)
@@ -96,6 +97,7 @@ class PaganinFilter(BaseFilter, CpuPlugin):
 
         filter1 = 1.0+ratio*pd
         self.filtercomplex = filter1+filter1*1j
+        print "I set up the filter"
 
     def _paganin(self, data):
         pci1 = fft.fft2(np.float32(data))
@@ -106,6 +108,7 @@ class PaganinFilter(BaseFilter, CpuPlugin):
         return result
 
     def filter_frames(self, data):
+        print "In filter frames"
         output = np.empty_like(data[0])
         nSlices = data[0].shape[self.slice_dir]
         for i in range(nSlices):
