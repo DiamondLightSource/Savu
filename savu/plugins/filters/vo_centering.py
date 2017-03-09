@@ -46,7 +46,6 @@ class VoCentering(BaseFilter, CpuPlugin):
     :param step: Step of fine searching. Default: 0.2.
     :param downsample: The step length over the rotation axis. Default: 1.
     :param preview: A slice list of required frames. Default: [].
-    :param no_clean: Do not clean up potential outliers. Default: True.
     :param datasets_to_populate: A list of datasets which require this \
         information. Default: [].
     :param out_datasets: The default names. Default: ['cor_raw','cor_fit'].
