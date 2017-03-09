@@ -344,9 +344,8 @@ def populate_plugins():
             _add_module(loader, module_name)
 
     for plugin in dawn_plugins.keys():
-        p = load_plugin(dawn_plugins[plugin]['path2plugin']).strip('.py')
-        dawn_plugins[plugin]['input rank'] = \
-            u.get_pattern_rank(p.get_plugin_pattern())
+        p = load_plugin(dawn_plugins[plugin]['path2plugin'].split('.py')[0])#.strip('.py'))
+        dawn_plugins[plugin]['input rank'] = u.get_pattern_rank(p.get_plugin_pattern())
         dawn_plugins[plugin]['description'] = p.__doc__.split(':param')[0]
         params = get_parameters(p)
         dawn_plugin_params[plugin] = params
