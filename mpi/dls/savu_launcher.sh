@@ -1,11 +1,14 @@
 #!/bin/bash
-module load savu/1.2
+
+version=$1
+echo "module loading "$version
+module load savu/$version
 module load global/cluster-quiet
+shift 1
 
 PREVIEW=false
 echo "LAUNCHING THE SCRIPT"
 if [ $1 == 'PREVIEW' ] ; then
-    echo "The first arg is PREVIEW"
     PREVIEW=true
     shift 1
 fi
@@ -105,7 +108,6 @@ if [ ! $foldername ] ; then
   foldername=$(date +%Y%m%d%H%M%S)"_$(basename $path)"
 fi
 outfolder=$outpath/$foldername
-# check the output folder exists - error if not
 
 # create the output folder
 if [ ! -d $outfolder ]; then
@@ -123,7 +125,7 @@ fi
 
 qsub -jsv /dls_sw/apps/sge/common/JSVs/tomo_recon_test.pl \
      -N $outname -j y -o $interfolder -e $interfolder -pe openmpi $M -l exclusive \
-     -l infiniband -l gpu=4 -l gpu_arch=Kepler $filepath $savupath $datafile \
+     -l infiniband -l gpu=4 -l gpu_arch=Kepler $filepath $version $savupath $datafile \
      $processfile $outpath $nCoresPerNode $nGPUs $options -c \
      -f $outfolder -s cs04r-sc-serv-14 -l $outfolder > /dls/tmp/savu/$USER.out
 
@@ -131,6 +133,9 @@ qsub -jsv /dls_sw/apps/sge/common/JSVs/tomo_recon_test.pl \
 # get the job number here
 filename=`echo $outname.o`
 jobnumber=`awk '{print $3}' /dls/tmp/savu/$USER.out | head -n 1`
+
+interpath=`readlink -f $interfolder`
+ln -s $interpath/savu.o$jobnumber /dls/tmp/savu/savu.o$jobnumber
 
 echo -e "\n\t************************************************************************"
 echo -e "\n\t\t\t *** THANK YOU FOR USING SAVU! ***"
@@ -151,4 +156,5 @@ echo -e "\n\t For a more detailed log file see: "
 echo -e "\t   $interfolder/savu.o$jobnumber"
 tput sgr0
 echo -e "\n\t************************************************************************\n"
+
 

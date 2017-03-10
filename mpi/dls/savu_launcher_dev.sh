@@ -81,7 +81,6 @@ if [ ! $foldername ] ; then
   foldername=$(date +%Y%m%d%H%M%S)"_$(basename $path)"
 fi
 outfolder=$output_folder/$foldername
-# check the output folder exists - error if not
 
 # create the output folder
 if [ ! -d $outfolder ]; then
@@ -99,7 +98,7 @@ fi
 
 
 qsub -N $outname -j y -o $interfolder -e $interfolder -pe openmpi $processes -l exclusive \
-     -l infiniband -l gpu=2 $filepath $savupath $input_file \
+     -l infiniband -l gpu=2 -q $cluster $filepath $savupath $input_file \
      $process_file $output_folder $cpus_per_node $gpus_per_node $options -c \
      -f $outfolder -s cs04r-sc-serv-14 -l $outfolder > /dls/tmp/savu/$USER.out
 

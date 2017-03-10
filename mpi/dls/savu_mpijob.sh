@@ -1,4 +1,6 @@
-module load savu/1.2
+version=$1
+shift 1
+module load savu/$version
 
 savupath=$1
 datafile=$2
