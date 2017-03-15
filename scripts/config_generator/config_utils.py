@@ -45,6 +45,7 @@ except IOError:
 atexit.register(readline.write_history_file, histfile)
 
 logging.basicConfig(level='CRITICAL')
+error_level = 0
 
 
 class DummyFile(object):
@@ -76,9 +77,6 @@ def parse_args(function):
     return _parse_args_wrap_function
 
 
-error_level = 0
-
-
 def error_catcher(function):
     @wraps(function)
     def error_catcher_wrap_function(content, args):
@@ -86,7 +84,8 @@ def error_catcher(function):
         try:
             return function(content, args)
         except Exception as e:
-            savu_error = True if e.message.split()[1] == 'ERROR:' else False
+            savu_error = True if len(e.message.split()) > 1 and \
+                e.message.split()[1] == 'ERROR:' else False
             if error_level is 0 and savu_error:
                 print e.message
             if error_level is 0:
@@ -132,7 +131,7 @@ def __get_start_stop(content, start, stop):
     range_dict = {}
     if start:
         start = content.find_position(start)
-        stop = content.find_position(stop)+1 if stop is 2 else start+1
+        stop = content.find_position(stop) + 1 if stop else start + 1
         range_dict['start'] = start
         range_dict['stop'] = stop
     return range_dict

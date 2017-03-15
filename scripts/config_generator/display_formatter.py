@@ -44,15 +44,19 @@ class DisplayFormatter(object):
 
         count = start
         plugin_list = self.plugin_list[start:stop]
+
+        width = 85
+        line_break = ('%s' % ('-'*width))
+        out_string.append(line_break)
         for p_dict in plugin_list:
             count += 1
             description = \
-                self._get_description(level, p_dict, count, verbosity)
+                self._get_description(width, level, p_dict, count, verbosity)
             out_string.append(description)
+            out_string.append(line_break)
         return '\n'.join(out_string)
 
-    def _get_description(self, level, p_dict, count, verbose):
-        width = 85
+    def _get_description(self, width, level, p_dict, count, verbose):
         if verbose == '-q':
             return self._get_quiet(p_dict, count, width)
         if not verbose:
@@ -113,9 +117,9 @@ class DisplayFormatter(object):
                         warn_colour):
         extra_info = self.plugin_list_inst._get_docstring_info(p_dict['name'])
         info = self._get_equal_lines(extra_info['info'], width, info_colour,
-                                     colour_off, " "*4)
+                                     colour_off, " "*2)
         warn = self._get_equal_lines(extra_info['warn'], width, warn_colour,
-                                     colour_off, " "*4)
+                                     colour_off, " "*2)
         info = "\n"+info if info else ''
         warn = "\n"+warn if warn else ''
         return info, warn
@@ -165,8 +169,8 @@ class DispDisplay(DisplayFormatter):
 
     def _get_verbose_verbose(self, level, p_dict, count, width):
         title, synopsis, param_details = \
-            self.__get_verbose(level, p_dict, count, width, breakdown=True)
-        info_c = Back.LIGHTBLACK_EX + Fore.LIGHTWHITE_EX
+            self._get_verbose(level, p_dict, count, width, breakdown=True)
+        info_c = Back.CYAN + Fore.LIGHTWHITE_EX
         warn_c = Back.RED + Fore.WHITE
         c_off = Back.RESET + Fore.RESET
         info, warn = self._get_extra_info(p_dict, width, c_off, info_c, warn_c)
@@ -209,12 +213,12 @@ class ListDisplay(DisplayFormatter):
     def _get_default(self, level, p_dict, count, width):
         title = self._get_quiet(p_dict, count, width)
         synopsis = \
-            self._get_synopsis(p_dict['name'], 60, Fore.CYAN, Fore.RESET)
+            self._get_synopsis(p_dict['name'], width, Fore.CYAN, Fore.RESET)
         return title + synopsis
 
     def _get_verbose(self, level, p_dict, count, width, breakdown=False):
         default_str = self._get_default(level, p_dict, count, width)
-        info_c = Back.LIGHTBLACK_EX + Fore.LIGHTWHITE_EX
+        info_c = Fore.CYAN
         c_off = Back.RESET + Fore.RESET
         info, warn = self._get_extra_info(p_dict, width, c_off, info_c, info_c)
         return default_str + info
@@ -222,7 +226,7 @@ class ListDisplay(DisplayFormatter):
     def _get_verbose_verbose(self, level, p_dict, count, width):
         all_params = self._get_param_details('all', p_dict, 100)
         default_str = self._get_default(level, p_dict, count, width)
-        info_c = Back.LIGHTBLACK_EX + Fore.LIGHTWHITE_EX
+        info_c = Fore.CYAN
         warn_c = Back.RED + Fore.WHITE
         c_off = Back.RESET + Fore.RESET
         info, warn = self._get_extra_info(p_dict, width, c_off, info_c, warn_c)

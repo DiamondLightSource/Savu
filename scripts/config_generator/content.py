@@ -26,10 +26,7 @@ import os
 
 from savu.plugins import utils as pu
 from savu.data.plugin_list import PluginList
-from colorama import Fore, Back, init
-import deprecated_dict
-#  Need to call init method for colorama to work in windows
-init()
+import mutations
 
 
 class Content(object):
@@ -47,36 +44,26 @@ class Content(object):
     def is_finished(self):
         return self._finished
 
-    def fopen(self, infile):
+    def fopen(self, infile, update=False, skip=False):
         if os.path.exists(infile):
             self.plugin_list._populate_plugin_list(infile, activePass=True)
         else:
             raise Exception('INPUT ERROR: The file does not exist.')
         self.filename = infile
-        # updating old process lists
-        the_list = self.plugin_list.plugin_list
-        if 'pos' in the_list[0].keys() and the_list[0]['pos'] == '0':
-            self.increment_positions()
-        # replace deprecated plugins
-        self._apply_plugin_updates()
-            
-
-        # ensure 'active' is now in list and remove this condition in pluginlist.
-        # ensure all numbers start from 1 and remove this condition in pluginlist        
-
-#        print("Sorry, this process list is incompatible with this version of "
-#              "Savu and cannot be auto-updated.  Please re-create the list.")
-
+        if update:
+            self._apply_plugin_updates(skip)
 
     def display(self, formatter, **kwargs):
-        print '\n' + formatter._get_string(**kwargs), '\n'
+        if 'level' not in kwargs.keys():
+            kwargs['level'] = self.disp_level
+        print '\n' + formatter._get_string(**kwargs) + '\n'
 
     def save(self, filename):
         i = raw_input("Are you sure you want to save the current data to "
                       "'%s' [y/N]" % (filename))
         if i.lower() == 'y':
             if not os.path.exists(os.path.dirname(filename)):
-                file_error = "INPUT_ERROR: There is an error in the filepath."
+                file_error = "INPUT_ERROR: Incorrect filepath."
                 raise Exception(file_error)
             print("Saving file %s" % (filename))
             self.plugin_list._save_plugin_list(filename)
@@ -89,9 +76,9 @@ class Content(object):
         pos, str_pos = self.convert_pos(str_pos)
         self.insert(plugin, pos, str_pos)
 
-    def refresh(self, str_pos, defaults=False):
+    def refresh(self, str_pos, defaults=False, change=False):
         pos = self.find_position(str_pos)
-        name = self.plugin_list.plugin_list[pos]['name']
+        name = change if change else self.plugin_list.plugin_list[pos]['name']
         plugin = pu.plugins[name]()
         plugin._populate_default_parameters()
 
@@ -102,35 +89,54 @@ class Content(object):
             for param in union_params:
                 self.modify(str_pos, param, keep[param], ref=True)
 
-    def _apply_plugin_updates(self):
-        missing = False
-        for plugin in self.plugin_list.plugin_list:
+    def _apply_plugin_updates(self, skip=False):
+        # Update old process lists that start from 0
+        the_list = self.plugin_list.plugin_list
+        if 'pos' in the_list[0].keys() and the_list[0]['pos'] == '0':
+            self.increment_positions()
+
+        missing = []
+        pos = len(the_list)-1
+        for plugin in the_list[::-1]:
+            # update old process lists to include 'active' flag
             if 'active' not in plugin.keys():
                 plugin['active'] = True
+            # if a plugin is missing then look for mutations
             if plugin['name'] not in pu.plugins.keys():
-                if not self._investigate_plugins(plugin['name']):
-                    missing = True
-        if missing:
-            raise Exception('PLUGIN ERROR: To skip missing plugins type '
-                            '"open <process_list> -r."')
+                if not self._mutate_plugins(plugin['name'], pos):
+                    str_pos = self.plugin_list.plugin_list[pos]['pos']
+                    missing.append([plugin['name'], str_pos])
+                    self.remove(pos)
+            pos -= 1
+        exception = False
+        for name, pos in missing[::-1]:
+            if skip:
+                print('Skipping plugin %s: %s' % (pos, name))
+            else:
+                print("PLUGIN ERROR: The plugin %s is unavailable in this "
+                      "version of Savu." % name)
+                exception = True
+        if exception:
+            raise Exception('Incompatible process list.')
 
-    def _investigate_plugins(self, name):
-        """ Renames a plugin that has been replaced or had a name change. """
+    def _mutate_plugins(self, name, pos):
+        """ Perform plugin mutations. """
+        # check for case changes in plugin name
         for key in pu.plugins.keys():
             if name.lower() == key.lower():
                 return key
 
-        if name in deprecated_dict.entries.keys():
-            new_name = deprecated_dict.entries[name]
-            print new_name
-            if new_name in pu.plugins.keys():
-                print ("new name has been found")
-                print('AUTO-REPLACEMENT: The plugin %s is no longer available '
-                      'and has been replaced by %s.  Please check the '
-                      'parameters' % (name, new_name))
-                return new_name
-        print('The plugin %s is no longer available.' % name)
-        return None
+        # check mutations dict
+        if name in mutations.details.keys():
+            mutate = mutations.details[name]
+            if mutate['replace'] in pu.plugins.keys():
+                str_pos = self.plugin_list.plugin_list[pos]['pos']
+                self.refresh(str_pos, change=mutate['replace'])
+                print mutate['desc']
+                return True
+            raise Exception('Replacement plugin %s unavailable for %s'
+                            % (mutate['replace'], name))
+        return False
 
     def move(self, old, new):
         old_pos = self.find_position(old)

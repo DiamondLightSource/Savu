@@ -22,7 +22,6 @@
 
 """
 import argparse
-import sys
 
 
 class MyException(Exception):
@@ -56,15 +55,15 @@ def __arg_parser(parser, args):
 def _config_arg_parser():
     """ Argument parser for command line arguments. """
     desc = "Create process lists of plugins for Savu."
-    parser = ArgumentParser(prog='savu_config.py', description=desc)
+    parser = argparse.ArgumentParser(prog='savu_config.py', description=desc)
     disp_str = "Set the display level to show ALL parameters by default."
     parser.add_argument("-a", "--all", action="store_true", dest="disp_all",
                         help=disp_str, default=False)
     input_str = "Open a Savu process list."
-    parser.add_argument("-i", "--input", dest="input_file", help=input_str)
+    parser.add_argument("-i", "--input", dest="file", help=input_str)
     parser.add_argument("-e", "--error", dest="error", help=argparse.SUPPRESS,
                         action='store_true', default=False)
-    return __arg_parser(parser, sys.argv[1:])
+    return parser.parse_args()
 
 
 def __verbosity_arguments(parser, q_str, v_str, vv_str):
@@ -83,6 +82,8 @@ def _open_arg_parser(args, desc):
     parser = ArgumentParser(prog='add', description=desc)
     file_str = "The path to the process list to open."
     parser.add_argument('file', help=file_str)
+    parser.add_argument('-s', '--skip', help='Skip broken plugins.',
+                        action='store_true', default=False)
     return __arg_parser(parser, args)
 
 
@@ -164,6 +165,8 @@ def _ref_arg_parser(args, desc):
     defaults_str = "Populate parameters with default values."
     parser.add_argument("-d", "--defaults", action="store_true",
                         dest="defaults", help=defaults_str, default=False)
+    parser.add_argument("-n", "--nodisp", action="store_true", dest="nodisp",
+                        help=argparse.SUPPRESS, default=False)
     return __arg_parser(parser, args)
 
 

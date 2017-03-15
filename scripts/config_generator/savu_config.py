@@ -46,8 +46,9 @@ def _help(content, args):
 @error_catcher
 def _open(content, args):
     """ Open or create a new process list."""
-    content.fopen(args.file)
-    _ref(content, '*')
+    content.fopen(args.file, update=True, skip=args.skip)
+    _ref(content, '* -n')
+    _disp(content, '-q')
     return content
 
 
@@ -58,7 +59,7 @@ def _disp(content, args):
     range_dict = utils.__get_start_stop(content, args.start, args.stop)
     formatter = DispDisplay(content.plugin_list)
     verbosity = parsers._get_verbosity(args)
-    level = 'all' if args.all else 'user'
+    level = 'all' if args.all else content.disp_level
     content.display(formatter, level=level, verbose=verbosity, **range_dict)
     return content
 
@@ -69,14 +70,14 @@ def _list(content, args):
     """ List the available plugins. """
     list_content = Content()
     utils._populate_plugin_list(list_content, pfilter=args.string)
+
+    # ******* move this to content class as exception
     if not len(list_content.plugin_list.plugin_list):
         print("No result found.")
         return content
     formatter = ListDisplay(list_content.plugin_list)
     verbosity = parsers._get_verbosity(args)
-    print("-----------------------------------------")
     list_content.display(formatter, verbose=verbosity)
-    print("-----------------------------------------")
     return content
 
 
@@ -137,7 +138,8 @@ def _ref(content, args):
     for pos_str in positions:
         pos = content.find_position(pos_str)
         content.refresh(pos_str, defaults=args.defaults)
-        content.display(formatter, start=pos, stop=pos+1)
+        if not args.nodisp:
+            content.display(formatter, start=pos, stop=pos+1)
     return content
 
 
@@ -219,9 +221,12 @@ def main():
     pu.populate_plugins()
     comp = Completer(commands=commands, plugin_list=pu.plugins)
     utils._set_readline(comp.complete)
+
     content = Content(level="all" if args.disp_all else None)
 
     # if file flag is passed then open it here
+    if args.file:
+        commands['open'](content, args.file)
 
     while True:
         in_list = raw_input(">>> ").strip().split(' ', 1)
