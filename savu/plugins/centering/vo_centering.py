@@ -43,7 +43,6 @@ class VoCentering(BaseFilter, CpuPlugin):
     :param step: Step of fine searching. Default: 0.2.
     :param downsample: The step length over the rotation axis. Default: 1.
     :param preview: A slice list of required frames. Default: [].
-    :param no_clean: Do not clean up potential outliers. Default: True.
     :param datasets_to_populate: A list of datasets which require this \
         information. Default: [].
     :param out_datasets: The default names. Default: ['cor_raw','cor_fit'].
@@ -74,6 +73,7 @@ class VoCentering(BaseFilter, CpuPlugin):
         if drop < cen_row:
             mask[cen_row-drop:cen_row+drop+1, :] = \
                 np.zeros((2*drop + 1, Ncol), dtype=np.float32)
+        mask[:,cen_col-1:cen_col+2] = np.zeros((Nrow, 3), dtype=np.float32)
         return mask
 
     def _get_start_shift(self, centre):
@@ -142,13 +142,16 @@ class VoCentering(BaseFilter, CpuPlugin):
         Ncol1 = int(righttake-lefttake + 1)
         mask = self._create_mask(2*Nrow-1, Ncol1,
                                  0.5*self.parameters['ratio']*Ncol)
-        numshift = np.int16((2*search_rad+1.0)/self.parameters['step'])
+        numshift = np.int16((2*search_rad)/self.parameters['step'])+1
         listshift = np.linspace(-search_rad, search_rad, num=numshift)
         listmetric = np.zeros(len(listshift), dtype=np.float32)
         num1 = 0
+        factor1 = np.mean(sino[-1,lefttake:righttake])
         for i in listshift:
             logging.debug("list shift %d", i)
             sino2a = ndi.interpolation.shift(sino2, (0, i), prefilter=False)
+            factor2 = np.mean(sino2a[0,lefttake:righttake])
+            sino2a = sino2a*factor1/factor2
             sinojoin = np.vstack((sino, sino2a))
             listmetric[num1] = np.sum(np.abs(fft.fftshift(
                 fft.fft2(sinojoin[:, int(lefttake):int(righttake) + 1])))*mask)
@@ -161,7 +164,7 @@ class VoCentering(BaseFilter, CpuPlugin):
         # if data is greater than a certain size
         # data = data[0][::self.parameters['step']]
         # Reducing noise by smooth filtering, it's important
-        sino = filter.gaussian_filter(data[0], sigma=(3, 1))
+        sino = filter.median_filter(data[0], (2, 2))
         logging.debug("performing coarse search")
         (raw_cor, raw_metric) = self._coarse_search(sino)
         logging.debug("performing fine search")
