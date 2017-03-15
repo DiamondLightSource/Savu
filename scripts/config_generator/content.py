@@ -71,6 +71,8 @@ class Content(object):
             print("The process list has NOT been saved.")
 
     def add(self, name, str_pos):
+        if name not in pu.plugins.keys():
+            raise Exception("INPUT ERROR: Unknown plugin %s" % name)
         plugin = pu.plugins[name]()
         plugin._populate_default_parameters()
         pos, str_pos = self.convert_pos(str_pos)
@@ -144,15 +146,9 @@ class Content(object):
         self.remove(old_pos)
         new_pos, new = self.convert_pos(new)
         name = entry['name']
-        if name in pu.plugins.keys():
-            self.insert(pu.plugins[name](), new_pos, new)
-        else:
-            print("Sorry the plugin %s is not in my list, pick one from list" %
-                  (name))
-            return
+        self.insert(pu.plugins[name](), new_pos, new)
         self.plugin_list.plugin_list[new_pos] = entry
         self.plugin_list.plugin_list[new_pos]['pos'] = new
-        self.display()
 
     def modify(self, pos_str, subelem, value, ref=False):
         if not ref:
@@ -163,7 +159,6 @@ class Content(object):
             data_elements[data_elements.keys()[int(subelem)-1]] = value
         else:
             data_elements[subelem] = value
-        return pos
 
     def value(self, value):
         if not value.count(';'):
@@ -303,10 +298,13 @@ class Content(object):
         return self.plugin_list.plugin_list[pos]
 
     def remove(self, pos):
-        entry = self.plugin_list.plugin_list[pos]['pos']
+        if pos >= self.size:
+            raise Exception("Cannot remove plugin %s as it does not exist."
+                            % self.plugin_list.plugin_list[pos]['name'])
+        pos_str = self.plugin_list.plugin_list[pos]['pos']
         self.plugin_list.plugin_list.pop(pos)
         pos_list = self.get_split_positions()
-        self.inc_positions(pos, pos_list, entry, -1)
+        self.inc_positions(pos, pos_list, pos_str, -1)
 
     def size(self):
         return len(self.plugin_list.plugin_list)

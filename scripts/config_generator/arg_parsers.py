@@ -79,7 +79,7 @@ def __verbosity_arguments(parser, q_str, v_str, vv_str):
 
 def _open_arg_parser(args, desc):
     """ Argument parser for open command. """
-    parser = ArgumentParser(prog='add', description=desc)
+    parser = ArgumentParser(prog='open', description=desc)
     file_str = "The path to the process list to open."
     parser.add_argument('file', help=file_str)
     parser.add_argument('-s', '--skip', help='Skip broken plugins.',
@@ -135,13 +135,13 @@ def _mod_arg_parser(args, desc):
                  "'plugin_pos.param_name' or ' plugin_pos.param_no'")
     parser.add_argument("param", help=param_str)
     val_str = ("The plugin parameter value.")
-    parser.add_argument("value", help=val_str)
+    parser.add_argument("value", nargs='+', help=val_str)
     return __arg_parser(parser, args)
 
 
 def _set_arg_parser(args, desc):
     """ Argument parser for set command. """
-    parser = ArgumentParser(prog='mod', description=desc)
+    parser = ArgumentParser(prog='set', description=desc)
     parser.add_argument('plugin_pos', type=int, help="Plugin position.")
     parser.add_argument("status", type=str, choices=['on', 'ON', 'off', 'OFF'],
                         help="Plugin status (ON of OFF).")
@@ -173,7 +173,8 @@ def _ref_arg_parser(args, desc):
 def _rem_arg_parser(args, desc):
     """ Argument parser for rem command. """
     parser = ArgumentParser(prog='rem', description=desc)
-    parser.add_argument('pos', nargs='+', help="Plugin position(s).")
+    parser.add_argument('pos', help="Plugin position(s).")
+    return __arg_parser(parser, args)
 
 
 def _move_arg_parser(args, desc):
@@ -181,6 +182,7 @@ def _move_arg_parser(args, desc):
     parser = ArgumentParser(prog='move', description=desc)
     parser.add_argument("orig_pos", help="Original position.")
     parser.add_argument('new_pos', help="New position.")
+    return __arg_parser(parser, args)
 
 
 def _coll_arg_parser(args, desc):

@@ -32,7 +32,7 @@ from config_utils import error_catcher
 
 def _help(content, args):
     """ Display the help information"""
-    print('%s Savu configurator commands %s\n' % tuple(['*'*25]*2))
+    print('%s Savu configurator commands %s\n' % tuple(['*'*21]*2))
     for key in commands.keys():
         doc = commands[key].__doc__
         if doc:
@@ -45,7 +45,7 @@ def _help(content, args):
 @parse_args
 @error_catcher
 def _open(content, args):
-    """ Open or create a new process list."""
+    """ Open an existing process list."""
     content.fopen(args.file, update=True, skip=args.skip)
     _ref(content, '* -n')
     _disp(content, '-q')
@@ -70,8 +70,6 @@ def _list(content, args):
     """ List the available plugins. """
     list_content = Content()
     utils._populate_plugin_list(list_content, pfilter=args.string)
-
-    # ******* move this to content class as exception
     if not len(list_content.plugin_list.plugin_list):
         print("No result found.")
         return content
@@ -96,9 +94,8 @@ def _save(content, args):
 def _mod(content, args):
     """ Modify plugin parameters. """
     pos_str, subelem = args.param.split('.')
-    pos = content.modify(pos_str, subelem, args.value)
-    formatter = DispDisplay(content.plugin_list)
-    content.display(formatter, start=pos, stop=pos+1)
+    content.modify(pos_str, subelem, ' '.join(args.value))
+    _disp(content, pos_str)
     return content
 
 
@@ -118,14 +115,10 @@ def _set(content, arg):
 @error_catcher
 def _add(content, args):
     """ Add a plugin to the list. """
-    formatter = DispDisplay(content.plugin_list)
     elems = content.get_positions()
     final = str(int(list(elems[-1])[0])+1) if elems else 1
-    if args.name in pu.plugins.keys():
-        content.add(args.name, args.pos if args.pos else str(final))
-        content.display(formatter)
-    else:
-        print("Sorry the plugin %s does not exist." % (args.name))
+    content.add(args.name, args.pos if args.pos else str(final))
+    _disp(content, '-q')
     return content
 
 
@@ -133,13 +126,11 @@ def _add(content, args):
 @error_catcher
 def _ref(content, args):
     """ Refresh a plugin (update it). """
-    formatter = DispDisplay(content.plugin_list)
     positions = content.get_positions() if args.pos == ['*'] else args.pos
     for pos_str in positions:
-        pos = content.find_position(pos_str)
         content.refresh(pos_str, defaults=args.defaults)
         if not args.nodisp:
-            content.display(formatter, start=pos, stop=pos+1)
+            _disp(content, pos_str)
     return content
 
 
@@ -147,14 +138,8 @@ def _ref(content, args):
 @error_catcher
 def _rem(content, args):
     """ Remove plugin(s) from the list. """
-    for pos_str in args.pos:
-        pos = content.find_position(pos_str)
-        if pos < 0 or pos >= len(content.plugin_list.plugin_list):
-            print("Sorry %s is out of range" % (pos))
-            return content
-            content.remove(pos)
-    formatter = DispDisplay(content.plugin_list)
-    content.display(formatter)
+    content.remove(content.find_position(args.pos))
+    _disp(content, '-q')
     return content
 
 
@@ -162,10 +147,8 @@ def _rem(content, args):
 @error_catcher
 def _move(content, args):
     """ Move a plugin to a different position in the list."""
-    try:
-        content.move(args.orig_pos, args.new_pos)
-    except:
-        print ("ERROR: Please type 'move -h' for help.")
+    content.move(args.orig_pos, args.new_pos)
+    _disp(content, '-q')
     return content
 
 
@@ -178,6 +161,15 @@ def _coll(content, arg):
     for c in colls:
         print(c)
     print("-----------------------------------------")
+    return content
+
+
+def _clear(content, arg):
+    """ Clear the current plugin list."""
+    i = raw_input("Are you sure you want to clear the current plugin list? "
+                  "[y/N]")
+    if i.lower() == 'y':
+        content.plugin_list.plugin_list = []
     return content
 
 
@@ -206,6 +198,7 @@ commands = {'open': _open,
             'move': _move,
             'ref': _ref,
             'coll': _coll,
+            'clear': _clear,
             'exit': _exit,
             'history': _history}
 
@@ -222,19 +215,21 @@ def main():
     comp = Completer(commands=commands, plugin_list=pu.plugins)
     utils._set_readline(comp.complete)
 
-    content = Content(level="all" if args.disp_all else None)
+    content = Content(level="all" if args.disp_all else 'user')
 
     # if file flag is passed then open it here
     if args.file:
         commands['open'](content, args.file)
+
+    print("\n*** Press Enter for a list of available commands. ***\n")
 
     while True:
         in_list = raw_input(">>> ").strip().split(' ', 1)
         command, arg = in_list if len(in_list) is 2 else in_list+['']
         command = command if command else 'help'
         if command not in commands:
-            print("I'm sorry, that's not a command I recognise. Type 'help' "
-                  "for a list of available Savu commands.")
+            print("I'm sorry, that's not a command I recognise. Press Enter "
+                  "for a list of available commands.")
         else:
             content = commands[command](content, arg)
 
