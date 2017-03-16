@@ -65,7 +65,6 @@ class BaseAstraRecon(BaseRecon):
                                            self.get_max_frames(), fixed=True)
 
     def pre_process(self):
-        self.alg, self.iters = self.get_parameters()
         self.alg = self.parameters['reconstruction_type']
         self.iters = self.parameters['n_iterations']
         if '3D' in self.alg:
