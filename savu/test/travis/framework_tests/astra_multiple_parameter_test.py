@@ -38,7 +38,7 @@ class AstraMultipleParameterTest(unittest.TestCase):
 
     def framework_options_setup(self):
         key1 = 'reconstruction_type'
-        key2 = 'number_of_iterations'
+        key2 = 'n_iterations'
         key3 = 'in_datasets'
         key4 = 'out_datasets'
         params = {key1: 'FBP;CGLS', key2: '1;2;3', key3: 'tomo', key4: 'tomo'}
@@ -48,33 +48,33 @@ class AstraMultipleParameterTest(unittest.TestCase):
         tu.set_plugin_list(options, plugin, [{}, params, {}])
         return options
 
-#    def test_parameter_space_int(self):
-#        plugin = self.plugin_setup()
-#        key = 'number_of_iterations'
-#        params = {key: '1;2;3'}
-#        plugin._set_parameters(params)
-#        params = plugin.parameters[key]
-#        self.assertEqual(params, [1, 2, 3])
-#        self.assertEqual(plugin.extra_dims[0], 3)
-#
-#    def test_parameter_space_str(self):
-#        plugin = self.plugin_setup()
-#        key = 'reconstruction_type'
-#        params = {key: 'FBP;CGLS'}
-#        plugin._set_parameters(params)
-#        params = plugin.parameters[key]
-#        self.assertEqual(params, ['FBP', 'CGLS'])
-#        self.assertEqual(plugin.extra_dims[0], 2)
-#
-#    def test_parameter_space_extra_dims(self):
-#        plugin = self.plugin_setup()
-#        key1 = 'reconstruction_type'
-#        key2 = 'number_of_iterations'
-#        params = {key1: 'FBP;CGLS', key2: '1;2;3'}
-#        plugin._set_parameters(params)
-#        out_datasets = plugin.get_out_datasets()
-#        for data in out_datasets:
-#            self.assertEqual(data.extra_dims, plugin.extra_dims)
+    def test_parameter_space_int(self):
+        plugin = self.plugin_setup()
+        key = 'n_iterations'
+        params = {key: '1;2;3'}
+        plugin._set_parameters(params)
+        params = plugin.parameters[key]
+        self.assertEqual(params, [1, 2, 3])
+        self.assertEqual(plugin.extra_dims[0], 3)
+
+    def test_parameter_space_str(self):
+        plugin = self.plugin_setup()
+        key = 'reconstruction_type'
+        params = {key: 'FBP;CGLS'}
+        plugin._set_parameters(params)
+        params = plugin.parameters[key]
+        self.assertEqual(params, ['FBP', 'CGLS'])
+        self.assertEqual(plugin.extra_dims[0], 2)
+
+    def test_parameter_space_extra_dims(self):
+        plugin = self.plugin_setup()
+        key1 = 'reconstruction_type'
+        key2 = 'n_iterations'
+        params = {key1: 'FBP;CGLS', key2: '1;2;3'}
+        plugin._set_parameters(params)
+        out_datasets = plugin.get_out_datasets()
+        for data in out_datasets:
+            self.assertEqual(data.extra_dims, plugin.extra_dims)
 
     def test_parameter_space_data_shape(self):
         options = self.framework_options_setup()
