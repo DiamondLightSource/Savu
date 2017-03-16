@@ -273,7 +273,7 @@ def __get_params(lines):
 
     lines_read = idx1+idx2+idx3+idx4
 
-    param = param + user_param + hidden_param
+    param = user_param + param + hidden_param
     param_entry = [{'dtype': type(value), 'name': a[0], 'desc': a[1],
                     'default': value} for a in param for value in [eval(a[2])]]
     return param_entry, user_keys, hide_keys, lines_read

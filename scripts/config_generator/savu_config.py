@@ -101,13 +101,10 @@ def _mod(content, args):
 
 @parse_args
 @error_catcher
-def _set(content, arg):
+def _set(content, args):
     """ Set the status of the plugin to be on or off. """
-    args = parsers._set_arg_parser(arg.split(), _list.__doc__)
-    if not args:
-        return content
-    content.on_and_off(args.plugin_no, args.status.upper())
-    content.display(start=args.plugin_no, stop=args.plugin+1)
+    content.on_and_off(args.plugin_pos, args.status.upper())
+    _disp(content, '-q')
     return content
 
 
@@ -157,10 +154,10 @@ def _move(content, args):
 def _coll(content, arg):
     """ List all plugin collections. """
     colls = Completer([])._get_collections()
-    print("-----------------------------------------")
+    print('\n')
     for c in colls:
-        print(c)
-    print("-----------------------------------------")
+        print('%s\n %s' % ('-'*40, c))
+    print('-'*40, '\n')
     return content
 
 

@@ -83,7 +83,7 @@ class Completer(object):
 
     def complete_list(self, args):
         "Completions for the list commands."
-        list_args = self._get_collections()
+        list_args = [c.strip() for c in self._get_collections()]
         list_args += self.plugin_list
         if not args[0]:
             return list_args
@@ -98,13 +98,25 @@ class Completer(object):
 
     def _get_collections(self):
         """ Get plugin collection names. """
-        colls = []
         import savu.plugins as plugins
-        import pkgutil
-        for imp, mod, ispkg in pkgutil.iter_modules(plugins.__path__):
-            if ispkg:
-                colls.append(mod)
-        del colls[colls.index('driver')]
+        import copy
+
+        path = plugins.__path__[0]
+        exclude_dir = ['driver', 'utils']
+        arrow = ' ==> '
+        for root, dirs, files in os.walk(path):
+            depth = root.count(os.path.sep) - path.count(os.path.sep)
+            dirs[:] = [d for d in dirs if d not in exclude_dir]
+            if depth == 0:
+                colls = copy.copy(dirs)
+            else:
+                sep = '' if depth == 1 else ' ' + arrow if depth == 2 else \
+                    (depth-2)*6*' ' + arrow
+                pos = colls.index(sep + os.path.basename(root)) + 1
+                sep = ' ' + arrow if depth == 1 else (depth-1)*6*' ' + arrow
+                for i in range(len(dirs)):
+                    colls.insert(pos, sep + dirs[i])
+                    pos += 1
         return colls
 
     def complete_params(self, args):

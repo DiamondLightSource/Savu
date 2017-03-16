@@ -80,12 +80,15 @@ class Content(object):
 
     def refresh(self, str_pos, defaults=False, change=False):
         pos = self.find_position(str_pos)
-        name = change if change else self.plugin_list.plugin_list[pos]['name']
+        plugin_entry = self.plugin_list.plugin_list[pos]
+        name = change if change else plugin_entry['name']
+        active = plugin_entry['active']
         plugin = pu.plugins[name]()
         plugin._populate_default_parameters()
 
         keep = self.get(pos)['data'] if not defaults else None
         self.insert(plugin, pos, str_pos, replace=True)
+        self.plugin_list.plugin_list[pos]['active'] = active
         if keep:
             union_params = set(keep).intersection(set(plugin.parameters))
             for param in union_params:
@@ -156,9 +159,8 @@ class Content(object):
         pos = self.find_position(pos_str)
         data_elements = self.plugin_list.plugin_list[pos]['data']
         if subelem.isdigit():
-            data_elements[data_elements.keys()[int(subelem)-1]] = value
-        else:
-            data_elements[subelem] = value
+            subelem = self.plugin_list.plugin_list[pos]['map'][int(subelem)-1]
+        data_elements[subelem] = value
 
     def value(self, value):
         if not value.count(';'):
@@ -174,10 +176,11 @@ class Content(object):
             ascii_list.append(v.encode('ascii', 'ignore'))
         return ascii_list
 
-    def on_and_off(self, element, index):
-        print("switching plugin %d %s" % element+1, index)
+    def on_and_off(self, str_pos, index):
+        print("switching plugin %s %s" % (str_pos, index))
         status = True if index == 'ON' else False
-        self.plugin_list.plugin_list[element]['active'] = status
+        pos = self.find_position(str_pos)
+        self.plugin_list.plugin_list[pos]['active'] = status
 
     def convert_pos(self, str_pos):
         """ Converts the display position (input) to the equivalent numerical
@@ -292,6 +295,11 @@ class Content(object):
         plugin_dict['desc'] = plugin.parameters_desc
         plugin_dict['hide'] = plugin.parameters_hide
         plugin_dict['user'] = plugin.parameters_user
+
+        dev_keys = [k for k in plugin_dict['data'].keys() if k not in
+                    plugin_dict['user'] + plugin_dict['hide']]
+        plugin_dict['map'] = \
+            plugin_dict['user'] + dev_keys + plugin_dict['hide']
         return plugin_dict
 
     def get(self, pos):

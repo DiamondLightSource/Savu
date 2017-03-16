@@ -89,17 +89,9 @@ class DisplayFormatter(object):
         joiner = "\n" + " "*margin
         params = ''
 
-        all_keys = p_dict['data'].keys()
-        if 'hide' in p_dict.keys():
-            all_keys = [p for p in all_keys if p not in p_dict['hide']]
-
-        user_keys = [p for p in all_keys if p in p_dict['user']]
-        dev_keys = [p for p in all_keys if p not in p_dict['user']]
-
-        if level == 'user':
-            keys = user_keys
-        else:
-            keys = user_keys + dev_keys
+        dev_keys = [k for k in p_dict['data'].keys() if k not in
+                    p_dict['user'] + p_dict['hide']]
+        keys = p_dict['user'] if level == 'user' else p_dict['user'] + dev_keys
 
         for key in keys:
             keycount += 1

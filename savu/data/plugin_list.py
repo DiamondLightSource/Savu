@@ -62,6 +62,7 @@ class PluginList(object):
             plugin = {}
 
             if plugin_group[key]['active'] or activePass:
+                plugin['active'] = plugin_group[key]['active'][0]
                 plugin['name'] = plugin_group[key]['name'][0]
                 plugin['id'] = plugin_group[key]['id'][0]
                 plugin['pos'] = key.encode('ascii').strip()
