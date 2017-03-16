@@ -62,7 +62,9 @@ class Content(object):
         i = raw_input("Are you sure you want to save the current data to "
                       "'%s' [y/N]" % (filename))
         if i.lower() == 'y':
-            if not os.path.exists(os.path.dirname(filename)):
+            path = os.path.dirname(filename)
+            path = path if path else '.'
+            if not os.path.exists(path):
                 file_error = "INPUT_ERROR: Incorrect filepath."
                 raise Exception(file_error)
             print("Saving file %s" % (filename))
