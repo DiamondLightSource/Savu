@@ -142,6 +142,10 @@ def set_plugin_entry(name, ID, data, pos):
     plugin['name'] = name
     plugin['id'] = ID
     plugin['data'] = data
+    plugin['desc'] = data
+    plugin['hide'] = []
+    plugin['user'] = []
+    plugin['active'] = []
     plugin['pos'] = str(pos)
     return plugin
 

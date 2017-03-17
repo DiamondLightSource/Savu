@@ -77,6 +77,8 @@ class Content(object):
     def add(self, name, str_pos):
         if name not in pu.plugins.keys():
             raise Exception("INPUT ERROR: Unknown plugin %s" % name)
+            
+        print "********", pu.plugins
         plugin = pu.plugins[name]()
         plugin._populate_default_parameters()
         pos, str_pos = self.convert_pos(str_pos)

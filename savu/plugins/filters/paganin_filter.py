@@ -68,7 +68,6 @@ class PaganinFilter(BaseFilter, CpuPlugin):
         core_shape = list(pData.get_shape())
         del core_shape[self.slice_dir]
         self._setup_paganin(*core_shape)
-        print "did the preprocess"
 
     def _setup_paganin(self, height, width):
         micron = 10**(-6)
