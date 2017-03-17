@@ -59,6 +59,8 @@ class Content(object):
         print '\n' + formatter._get_string(**kwargs) + '\n'
 
     def save(self, filename):
+        if not filename:
+            raise Exception('INPUT ERROR: Please specify the output filepath.')
         i = raw_input("Are you sure you want to save the current data to "
                       "'%s' [y/N]" % (filename))
         if i.lower() == 'y':

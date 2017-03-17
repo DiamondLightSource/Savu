@@ -53,29 +53,43 @@ class PluginList(object):
         self.datasets_list = []
         self.saver_plugin_status = True
 
+    def _get_plugin_entry_template(self):
+        template = {'active': True,
+                    'name': None,
+                    'id': None,
+                    'desc': None,
+                    'data': None,
+                    'user': [],
+                    'hide': []}
+        return template
+
+    def __get_json_keys(self):
+        return ['data', 'desc', 'user', 'hide']
+
     def _populate_plugin_list(self, filename, activePass=False):
         """ Populate the plugin list from a nexus file. """
+
         plugin_file = h5py.File(filename, 'r')
         plugin_group = plugin_file['entry/plugin']
         self.plugin_list = []
+        single_val = ['name', 'id', 'pos', 'active']
         for key in plugin_group.keys():
-            plugin = {}
+            plugin = self._get_plugin_entry_template()
+            entry_keys = plugin_group[key].keys()
+            json_keys = [k for k in entry_keys if k not in single_val]
 
-            if plugin_group[key]['active'] or activePass:
+            if 'active' in entry_keys:
                 plugin['active'] = plugin_group[key]['active'][0]
+
+            if plugin['active'] or activePass:
                 plugin['name'] = plugin_group[key]['name'][0]
                 plugin['id'] = plugin_group[key]['id'][0]
                 plugin['pos'] = key.encode('ascii').strip()
 
-                if 'desc' in plugin_group[key].keys():
-                    plugin['desc'] = self.__byteify(
-                        json.loads(plugin_group[key]['desc'][0]))
-                    plugin['desc'] = self.__convert_to_list(plugin['desc'])
-                plugin['data'] = \
-                    self.__byteify(json.loads(plugin_group[key]['data'][0]))
-                plugin['data'] = self.__convert_to_list(plugin['data'])
+                for jkey in json_keys:
+                    plugin[jkey] = self.__convert_to_list(self.__byteify(
+                        json.loads(plugin_group[key][jkey][0])))
                 self.plugin_list.append(plugin)
-
         plugin_file.close()
 
     def _save_plugin_list(self, out_filename, exp=None):
@@ -109,35 +123,18 @@ class PluginList(object):
             plugin_group = plugins_group.create_group("%*i" % (4, count))
 
         plugin_group.attrs[NX_CLASS] = 'NXnote'
-        id_array = np.array([plugin['id']])
-        plugin_group.create_dataset('id', id_array.shape, id_array.dtype,
-                                    id_array)
-        name_array = np.array([plugin['name']])
-        plugin_group.create_dataset('name', name_array.shape,
-                                    name_array.dtype, name_array)
-        data_array = np.array([json.dumps(plugin['data'])])
-        plugin_group.create_dataset('data', data_array.shape,
-                                    data_array.dtype, data_array)
 
-        if 'active' in plugin.keys():
-            active_array = np.array([plugin['active']])
-            plugin_group.create_dataset('active', active_array.shape,
-                                        active_array.dtype, active_array)
-        if 'desc' in plugin.keys():
-            desc_array = np.array([json.dumps(plugin['desc'])])
-            plugin_group.create_dataset('desc', desc_array.shape,
-                                        desc_array.dtype, desc_array)
-        if 'hide' in plugin.keys():
-            hide_array = np.array([json.dumps(plugin['hide'])])
-            plugin_group.create_dataset('hide', hide_array.shape,
-                                        hide_array.dtype, hide_array)
-        if 'user' in plugin.keys():
-            hide_array = np.array([json.dumps(plugin['user'])])
-            plugin_group.create_dataset('user', hide_array.shape,
-                                        hide_array.dtype, hide_array)
+        required_keys = self._get_plugin_entry_template().keys()
+        json_keys = self.__get_json_keys()
+
         if 'cite' in plugin.keys():
             if plugin['cite'] is not None:
                 self._output_plugin_citations(plugin['cite'], plugin_group)
+
+        for key in required_keys:
+            array = np.array([json.dumps(plugin[key])]) if key in json_keys \
+                else np.array([plugin[key]])
+            plugin_group.create_dataset(key, array.shape, array.dtype, array)
 
     def _add(self, idx, entry):
         self.plugin_list.insert(idx, entry)
@@ -184,6 +181,8 @@ class PluginList(object):
             return input
 
     def __convert_to_list(self, data):
+        if isinstance(data, list):
+            return data
         for key in data:
             value = data[key]
             if isinstance(value, str) and value.count('['):
