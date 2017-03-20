@@ -26,6 +26,7 @@ import tempfile
 import os
 import copy
 
+from config_generator.content import Content
 from savu.core.plugin_runner import PluginRunner
 from savu.data.experiment_collection import Experiment
 import savu.plugins.utils as pu
@@ -48,8 +49,22 @@ def get_test_big_data_path(name):
 
 def get_test_process_path(name):
     path = inspect.stack()[0][1]
-    return '/'.join(os.path.split(path)[0].split(os.sep)[:-2] +
-                    ['test_data/test_process_lists', name])
+    full_path = '/'.join(os.path.split(path)[0].split(os.sep)[:-2] +
+                         ['test_data/test_process_lists', name])
+    _refresh_process_file(full_path)
+    return full_path
+
+
+def _refresh_process_file(path):
+    content = Content()
+    # open
+    content.fopen(path, update=True)
+    # refresh
+    positions = content.get_positions()
+    for pos_str in positions:
+        content.refresh(pos_str)
+    # save
+    content.save(content.filename)
 
 
 def get_process_list_path(name):
