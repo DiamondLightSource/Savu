@@ -36,6 +36,11 @@ from savu.data.chunking import Chunking
 class Hdf5Saver(BaseSaver, CpuPlugin):
     """
     A class to save tomography data to a hdf5 file
+
+    :param pattern: Optimise data storage to this access pattern: 'optimum' \
+        will automate this process by choosing the output pattern from the \
+        previous plugin, if it exists, else the first \
+        pattern. Default: 'optimum'.
     """
 
     def __init__(self, name='Hdf5Saver'):
@@ -84,7 +89,13 @@ class Hdf5Saver(BaseSaver, CpuPlugin):
         return pattern
 
     def get_pattern(self):
-        return self.get_in_datasets()[0].get_previous_pattern().keys()[0]
+        if self.parameters['pattern'] != 'optimum':
+            return self.parameters['pattern']
+        previous_pattern = \
+            self.get_in_datasets()[0].get_previous_pattern().keys()[0]
+        if previous_pattern:
+            return previous_pattern
+        return self.get_in_datasets()[0].get_data_patterns().keys()[0]
 
     def __get_file_name(self):
         nPlugin = self.exp.meta_data.get('nPlugin')

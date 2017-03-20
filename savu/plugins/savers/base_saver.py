@@ -54,9 +54,6 @@ class BaseSaver(Plugin):
             h5file = filename.split('/')[-1]
             nxs_file[data_entry] = h5py.ExternalLink(h5file, path)
 
-#    def base_process(self):
-#        self.frame = self.
-
     def _get_group_name(self, name):
         nPlugin = self.exp.meta_data.get('nPlugin')
         plugin_dict = \
