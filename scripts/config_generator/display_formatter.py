@@ -100,7 +100,7 @@ class DisplayFormatter(object):
             params += temp % (keycount, key, p_dict['data'][key])
             if desc:
                 pdesc = " ".join(desc[key].split())
-                pdesc = joiner.join(textwrap.wrap(pdesc, width=width))
+                pdesc = joiner.join(textwrap.wrap(pdesc, width=width-margin))
                 temp = '\n' + Fore.CYAN + ' '*margin + "%s" + Fore.RESET
                 params += temp % pdesc
         return params

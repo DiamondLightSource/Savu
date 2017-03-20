@@ -84,8 +84,10 @@ def _list(content, args):
 def _save(content, args):
     """ Save the current process list to file."""
     out_file = content.filename if args.input else args.filepath
+    content.check_file(out_file)
+    content.save(out_file, check=raw_input("Are you sure you want to save the "
+                 "current data to %s' [y/N]" % (out_file)))
     DispDisplay(content.plugin_list)._notices()
-    content.save(out_file)
     return content
 
 
@@ -163,16 +165,14 @@ def _coll(content, arg):
 
 def _clear(content, arg):
     """ Clear the current plugin list."""
-    i = raw_input("Are you sure you want to clear the current plugin list? "
-                  "[y/N]")
-    if i.lower() == 'y':
-        content.plugin_list.plugin_list = []
+    content.clear(check=raw_input("Are you sure you want to clear the current "
+                  "plugin list? [y/N]"))
     return content
 
 
 def _exit(content, arg):
     """ Close the program."""
-    content.set_finished()
+    content.set_finished(check=raw_input("Are you sure? [y/N]"))
     return content
 
 
@@ -240,3 +240,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+

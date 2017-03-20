@@ -37,9 +37,8 @@ class Content(object):
         self.filename = filename
         self._finished = False
 
-    def set_finished(self):
-        i = raw_input("Are you sure? [y/N]")
-        self._finished = True if i.lower() == 'y' else False
+    def set_finished(self, check='y'):
+        self._finished = True if check.lower() == 'y' else False
 
     def is_finished(self):
         return self._finished
@@ -58,27 +57,29 @@ class Content(object):
             kwargs['level'] = self.disp_level
         print '\n' + formatter._get_string(**kwargs) + '\n'
 
-    def save(self, filename):
+    def check_file(self, filename):
         if not filename:
             raise Exception('INPUT ERROR: Please specify the output filepath.')
-        i = raw_input("Are you sure you want to save the current data to "
-                      "'%s' [y/N]" % (filename))
-        if i.lower() == 'y':
-            path = os.path.dirname(filename)
-            path = path if path else '.'
-            if not os.path.exists(path):
-                file_error = "INPUT_ERROR: Incorrect filepath."
-                raise Exception(file_error)
+        path = os.path.dirname(filename)
+        path = path if path else '.'
+        if not os.path.exists(path):
+            file_error = "INPUT_ERROR: Incorrect filepath."
+            raise Exception(file_error)
+
+    def save(self, filename, check='y'):
+        if check.lower() == 'y':
             print("Saving file %s" % (filename))
             self.plugin_list._save_plugin_list(filename)
         else:
             print("The process list has NOT been saved.")
 
+    def clear(self, check='y'):
+        if check.lower() == 'y':
+            self.plugin_list.plugin_list = []
+
     def add(self, name, str_pos):
         if name not in pu.plugins.keys():
             raise Exception("INPUT ERROR: Unknown plugin %s" % name)
-            
-        print "********", pu.plugins
         plugin = pu.plugins[name]()
         plugin._populate_default_parameters()
         pos, str_pos = self.convert_pos(str_pos)
