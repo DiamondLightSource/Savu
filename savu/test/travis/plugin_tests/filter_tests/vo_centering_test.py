@@ -35,32 +35,6 @@ class VoCenterTest(unittest.TestCase):
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
 
-#    def test_vo_centering(self):
-#        options = tu.set_experiment('tomo')
-#        plugin = 'savu.plugins.filters.vo_centering'
-#        run_protected_plugin_runner_no_process_list(options, plugin)
-
-#    def test_vo_centering_process(self):
-#        options = {
-#            "transport": "hdf5",
-#            "process_names": "CPU0",
-#            "data_file": tu.get_test_data_path('tomo'),
-#            "process_file": tu.get_test_process_path(
-#                'vo_centering_process.nxs'),
-#            "out_path": tempfile.mkdtemp()
-#            }
-#        run_protected_plugin_runner(options)
-#
-#    def test_multimodal_process(self):
-#        options = {
-#            "transport": "hdf5",
-#            "process_names": "CPU0",
-#            "data_file": tu.get_test_data_path('mm.nxs'),
-#            "process_file": tu.get_test_process_path(
-#                'vo_centering_multimodal_process.nxs'),
-#            "out_path": tempfile.mkdtemp()
-#            }
-#        run_protected_plugin_runner(options)
 
 if __name__ == "__main__":
     unittest.main()

@@ -25,6 +25,7 @@ import unittest
 import os
 
 from savu.data.plugin_list import PluginList
+import savu.test.test_utils as tu
 
 
 class PluginCoverageTest(unittest.TestCase):
@@ -44,7 +45,7 @@ class PluginCoverageTest(unittest.TestCase):
 
         # list all test process lists available in test_process_lists folder
         test_process_path = savu_base_path + 'test_data/test_process_lists'
-        self.nxs_avail = self.get_test_process_list(test_process_path)
+        self.nxs_avail = tu.get_test_process_list(test_process_path)
 
         # list the .nxs found in tests that are located in the
         # test_process_lists folder
@@ -190,14 +191,6 @@ class PluginCoverageTest(unittest.TestCase):
             for f in files:
                 data_list.append(f)
         return data_list
-
-    def get_test_process_list(self, folder):
-        test_process_list = []
-        for root, dirs, files in os.walk(folder, topdown=True):
-            files[:] = [fi for fi in files if fi.split('.')[-1] == 'nxs']
-            for f in files:
-                test_process_list.append(f)
-        return test_process_list
 
     def get_test_plugin_list(self, process_files, path):
         plugin_names = []

@@ -25,7 +25,6 @@ import inspect
 import tempfile
 import os
 import copy
-import sys
 
 from scripts.config_generator.content import Content
 from savu.core.plugin_runner import PluginRunner
@@ -53,23 +52,7 @@ def get_test_process_path(name):
     path = inspect.stack()[0][1]
     full_path = '/'.join(os.path.split(path)[0].split(os.sep)[:-2] +
                          ['test_data/test_process_lists', name])
-    mods = copy.copy(sys.modules)
-    _refresh_process_file(full_path)
-    sys.modules = mods
     return full_path
-
-
-def _refresh_process_file(path):
-    cu.populate_plugins()
-    content = Content()
-    # open
-    content.fopen(path, update=True)
-    # refresh
-    positions = content.get_positions()
-    for pos_str in positions:
-        content.refresh(pos_str)
-    # save
-    content.save(content.filename)
 
 
 def get_process_list_path(name):
@@ -274,3 +257,12 @@ def plugin_runner_real_plugin_run(options):
 #
 #    for key in exp.index["in_data"].keys():
 #        exp.index["in_data"][key].close_file()
+
+
+def get_test_process_list(folder):
+    test_process_list = []
+    for root, dirs, files in os.walk(folder, topdown=True):
+        files[:] = [fi for fi in files if fi.split('.')[-1] == 'nxs']
+        for f in files:
+            test_process_list.append(f)
+    return test_process_list
