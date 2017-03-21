@@ -136,7 +136,9 @@ class Content(object):
         # check for case changes in plugin name
         for key in pu.plugins.keys():
             if name.lower() == key.lower():
-                return key
+                str_pos = self.plugin_list.plugin_list[pos]['pos']
+                self.refresh(str_pos, change=key)
+                return True
 
         # check mutations dict
         if name in mutations.details.keys():
