@@ -45,7 +45,7 @@ class PluginDriver(object):
         extra_dims = self.extra_dims
         repeat = np.prod(extra_dims) if extra_dims else 1
 
-        param_idx = pu.calc_param_indices(extra_dims)
+        param_idx = self.__calc_param_indices(extra_dims)
         out_data_dims = [len(d.get_shape()) for d in out_data]
         param_dims = [range(d - len(extra_dims), d) for d in out_data_dims]
 
@@ -94,3 +94,12 @@ class PluginDriver(object):
         """ Resets the class variables in copy_dict. """
         for key, value in copy_dict.iteritems():
             setattr(self, key, value)
+
+    def __calc_param_indices(self, dims):
+        indices_list = []
+        for i in range(len(dims)):
+            chunk = int(np.prod(dims[0:i]))
+            repeat = int(np.prod(dims[i+1:]))
+            idx = np.ravel(np.kron(range(dims[i]), np.ones((repeat, chunk))))
+            indices_list.append(idx.astype(int))
+        return np.transpose(np.array(indices_list))
