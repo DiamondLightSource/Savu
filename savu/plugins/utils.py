@@ -26,7 +26,7 @@ import sys
 import logging
 import savu
 import copy
-import imp
+import importlib
 
 
 plugins = {}
@@ -73,20 +73,11 @@ def get_plugin(plugin_name):
 
 
 def load_class(name):
-    try:
-        mod = __import__(name)
-    except ImportError:
-        (path, name) = os.path.split(name)
-        (name, ext) = os.path.splitext(name)
-        (file, filename, data) = imp.find_module(name, [path])
-        mod = imp.load_module(name, file, filename, data)
-    components = name.split('.')
-    for comp in components[1:]:
-        mod = getattr(mod, comp)
-    temp = name.split('.')[-1]
-    mod2class = ''.join(x.capitalize() for x in temp.split('_'))
-    clazz = getattr(mod, mod2class.split('.')[-1])
-    return clazz
+    logging.debug('loading the module %s' % name)
+    mod = importlib.import_module(name)
+    mod_name = (name.split('.')[-1])
+    mod2class = ''.join(x.capitalize() for x in mod_name.split('_'))
+    return getattr(mod, mod2class)
 
 
 def plugin_loader(exp, plugin_dict, **kwargs):
@@ -176,7 +167,6 @@ def check_nDatasets(exp, names, plugin_dict, nSets, dtype):
                             str(nSets) + " " + dtype + " sets associated with "
                             " the plugin " + plugin_id + " in the process "
                             "file.")
-
     return names
 
 
