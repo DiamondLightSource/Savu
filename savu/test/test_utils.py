@@ -25,14 +25,14 @@ import inspect
 import tempfile
 import os
 import copy
+import sys
 
-from content import Content
+from scripts.config_generator.content import Content
 from savu.core.plugin_runner import PluginRunner
 from savu.data.experiment_collection import Experiment
-import savu.plugins.utils as pu
 from savu.data.data_structures.plugin_data import PluginData
-
-#pu.populate_plugins()
+import savu.plugins.utils as pu
+import scripts.config_generator.config_utils as cu
 
 
 def get_test_data_path(name):
@@ -53,11 +53,14 @@ def get_test_process_path(name):
     path = inspect.stack()[0][1]
     full_path = '/'.join(os.path.split(path)[0].split(os.sep)[:-2] +
                          ['test_data/test_process_lists', name])
-    #_refresh_process_file(full_path)
+    mods = copy.copy(sys.modules)
+    _refresh_process_file(full_path)
+    sys.modules = mods
     return full_path
 
 
 def _refresh_process_file(path):
+    cu.populate_plugins()
     content = Content()
     # open
     content.fopen(path, update=True)
@@ -149,7 +152,8 @@ def set_plugin_list(options, pnames, *args):
         data.insert(i+1, data_dict)
 
     for i in range(len(ID)):
-        name = pu.module2class(ID[i].split('.')[-1])
+        name = \
+            ''.join(x.capitalize() for x in (ID[i].split('.')[-1]).split('_'))
         options['plugin_list'].append(set_plugin_entry(
             name, ID[i], data[i], i))
 
@@ -192,7 +196,7 @@ def load_test_data(exp_type):
 
     plugin_list = []
     ID = options['loader']
-    name = pu.module2class(ID.split('.')[-1])
+    name = ''.join(x.capitalize() for x in (ID.split('.')[-1]).split('_'))
     plugin_list.append(set_plugin_entry(name, ID, {}, 0))
 
     # currently assuming an empty parameters dictionary
