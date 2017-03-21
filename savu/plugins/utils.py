@@ -27,6 +27,7 @@ import logging
 import savu
 import copy
 import importlib
+import imp
 
 
 plugins = {}
@@ -74,7 +75,12 @@ def get_plugin(plugin_name):
 
 def load_class(name):
     logging.debug('loading the module %s' % name)
-    mod = importlib.import_module(name)
+    if os.path.isdir(os.path.dirname(name)):
+        path = name
+        name = os.path.basename(os.path.splitext(name)[0])
+        mod = imp.load_source(name, path)
+    else:
+        mod = importlib.import_module(name)
     mod_name = (name.split('.')[-1])
     mod2class = ''.join(x.capitalize() for x in mod_name.split('_'))
     return getattr(mod, mod2class)
