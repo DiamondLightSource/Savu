@@ -24,23 +24,21 @@
 """
 
 import unittest
-
 import savu.test.test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner_no_process_list
-import savu.plugins.reconstructions.astra_recons as astra_recons
 
 
 class AstraReconCPUTest(unittest.TestCase):
 
     def test_astra_recon_cpu(self):
         options = tu.set_experiment('tomo')
-        plugin = astra_recons.__name__ + '.astra_recon_cpu'
+        plugin = 'savu.plugins.reconstructions.astra_recons.astra_recon_cpu'
         run_protected_plugin_runner_no_process_list(options, plugin)
 
     def test_astra_recon_cpu_stxm(self):
         options = tu.set_experiment('tomo')
-        plugin = astra_recons.__name__ + '.astra_recon_cpu'
+        plugin = 'savu.plugins.reconstructions.astra_recons.astra_recon_cpu'
         run_protected_plugin_runner_no_process_list(options, plugin)
 
 if __name__ == "__main__":

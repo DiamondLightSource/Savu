@@ -105,7 +105,7 @@ def _add_module(loader, module_name):
     if module_name not in sys.modules:
         try:
             loader.find_module(module_name).load_module(module_name)
-        except Exception as error:
+        except Exception:
             pass
 
 
