@@ -163,7 +163,7 @@ class DispDisplay(DisplayFormatter):
         title, synopsis, param_details = \
             self._get_verbose(level, p_dict, count, width, breakdown=True)
         info_c = Back.CYAN + Fore.LIGHTWHITE_EX
-        warn_c = Back.RED + Fore.WHITE
+        warn_c = Back.WHITE + Fore.RED
         c_off = Back.RESET + Fore.RESET
         info, warn = self._get_extra_info(p_dict, width, c_off, info_c, warn_c)
         return title + synopsis + info + warn + param_details
@@ -219,7 +219,7 @@ class ListDisplay(DisplayFormatter):
         all_params = self._get_param_details('all', p_dict, 100)
         default_str = self._get_default(level, p_dict, count, width)
         info_c = Fore.CYAN
-        warn_c = Back.RED + Fore.WHITE
+        warn_c = Fore.RED
         c_off = Back.RESET + Fore.RESET
         info, warn = self._get_extra_info(p_dict, width, c_off, info_c, warn_c)
         return default_str + info + warn + all_params
