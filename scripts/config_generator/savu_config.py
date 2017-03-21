@@ -85,9 +85,10 @@ def _save(content, args):
     """ Save the current process list to file."""
     out_file = content.filename if args.input else args.filepath
     content.check_file(out_file)
+    print()
+    DispDisplay(content.plugin_list)._notices()
     content.save(out_file, check=raw_input("Are you sure you want to save the "
                  "current data to %s' [y/N]" % (out_file)))
-    DispDisplay(content.plugin_list)._notices()
     return content
 
 
