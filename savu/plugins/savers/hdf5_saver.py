@@ -91,10 +91,9 @@ class Hdf5Saver(BaseSaver, CpuPlugin):
     def get_pattern(self):
         if self.parameters['pattern'] != 'optimum':
             return self.parameters['pattern']
-        previous_pattern = \
-            self.get_in_datasets()[0].get_previous_pattern().keys()[0]
+        previous_pattern = self.get_in_datasets()[0].get_previous_pattern()
         if previous_pattern:
-            return previous_pattern
+            return previous_pattern.keys()[0]
         return self.get_in_datasets()[0].get_data_patterns().keys()[0]
 
     def __get_file_name(self):
