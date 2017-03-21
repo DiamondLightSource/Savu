@@ -23,18 +23,11 @@
 
 import os
 import sys
-import re
 import logging
-import numpy as np
 import savu
 import copy
-import copy_reg
-import types
-import pkgutil
-import inspect
 import imp
 
-from savu.data.data_structures import utils as u
 
 plugins = {}
 plugins_path = {}
@@ -58,41 +51,23 @@ def dawn_compatible(clazz):
     dawn_plugins[clazz.__name__] = {}
     try:
         plugin_path = sys.modules[clazz.__module__].__file__
-        dawn_plugins[clazz.__name__]['path2plugin'] = plugin_path.split('.py')[0]+'.py' # looks out for .pyc files
+        # looks out for .pyc files
+        dawn_plugins[clazz.__name__]['path2plugin'] = \
+            plugin_path.split('.py')[0]+'.py'
     except Exception as e:
         print e
     return clazz
 
 
-def load_plugin(plugin_name):
-    """Load a plugin.
+def get_plugin(plugin_name):
+    """ Get an instance of the plugin class and populate default parameters.
 
     :param plugin_name: Name of the plugin to import
-                    path/loc/then.plugin.name if there is no path, then the
-                    assumption is an internal plugin
     :type plugin_name: str.
-    :returns:  An instance of the class described by the named plugin
-
+    :returns:  An instance of the class described by the named plugin.
     """
-    logging.debug("getting class")
-    logging.debug("plugin name is %s" % plugin_name)
-    # clazz = self.import_class(plugin_name)
-
-    name = plugin_name
-    logging.debug("importing the module")
-    if plugin_name.startswith(os.path.sep):
-        # this is a path, so we need to add the directory to the pythonpath
-        # and sort out the name
-        ppath, name = os.path.split(plugin_name)
-        sys.path.append(ppath)
-    # TODO This appears to be the failing line.
-    clazz = load_class(name)
-    instance = get_class_instance(clazz)
-    return instance
-
-
-def get_class_instance(clazz):
-    instance = clazz()
+    logging.debug("Importing the module %s", plugin_name)
+    instance = load_class(plugin_name)()
     instance._populate_default_parameters()
     return instance
 
@@ -109,20 +84,16 @@ def load_class(name):
     for comp in components[1:]:
         mod = getattr(mod, comp)
     temp = name.split('.')[-1]
-    mod2class = module2class(temp)
+    mod2class = ''.join(x.capitalize() for x in temp.split('_'))
     clazz = getattr(mod, mod2class.split('.')[-1])
     return clazz
-
-
-def module2class(module_name):
-    return ''.join(x.capitalize() for x in module_name.split('_'))
 
 
 def plugin_loader(exp, plugin_dict, **kwargs):
     logging.debug("Running plugin loader")
 
     try:
-        plugin = load_plugin(plugin_dict['id'])
+        plugin = get_plugin(plugin_dict['id'])
     except Exception as e:
         logging.error("failed to load the plugin")
         logging.error(e)
@@ -209,99 +180,6 @@ def check_nDatasets(exp, names, plugin_dict, nSets, dtype):
     return names
 
 
-def find_args(dclass, inst=None):
-    """
-    Finds the parameters list from the docstring
-    """
-    docstring = None
-    if not dclass.__doc__:
-        if inst:
-            inst._override_class_docstring()
-            docstring = dclass._override_class_docstring.__doc__
-    else:
-        docstring = dclass.__doc__
-
-    if not docstring:
-        return []
-
-    mod_doc_lines = __get_doc_lines(sys.modules[dclass.__module__].__doc__)
-    lines = __get_doc_lines(docstring)
-
-    param_list, user, hide, param_lines = __get_params(lines)
-
-    warn_regexp = re.compile(r'^:config_warn: \s?(?P<config_warn>.*[^ ])$')
-    warn, idx1 = __find_regexp(warn_regexp, lines)
-    if not warn:
-        warn = ['']
-    syn_regexp = re.compile(r'^:synopsis: \s?(?P<synopsis>.*[^ ])$')
-    synopsis, idx2 = __find_regexp(syn_regexp, mod_doc_lines)
-    if not synopsis:
-        synopsis = ['']
-
-    info = __find_docstring_info(param_lines+idx1+idx2, lines)
-
-    return {'warn': "\n".join(warn), 'info': info, 'synopsis': synopsis[0],
-            'param': param_list, 'hide_param': hide, 'user_param': user}
-
-
-def __get_doc_lines(doc):
-    if not doc:
-        return ['']
-    return [" ".join(l.strip(' .').split()) for l in doc.split('\n')]
-
-
-def __get_params(lines):
-    fixed_str = '(?P<param>\w+):\s?(?P<doc>\w.*[^ ])\s'\
-                + '?Default:\s?(?P<default>.*[^ ])$'
-    param_regexp = re.compile('^:param ' + fixed_str)
-    param, idx1 = __find_regexp(param_regexp, lines)
-
-    not_param_regexp = re.compile('^:~param (?P<param>\w+):')
-    not_param, idx2 = __find_regexp(not_param_regexp, lines)
-
-    del_idx = [i for i in range(len(param)) if param[i][0] in not_param]
-    for idx in sorted(del_idx)[::-1]:
-        del param[idx]
-
-    hidden_param_regexp = re.compile('^:\*param ' + fixed_str)
-    hidden_param, idx3 = __find_regexp(hidden_param_regexp, lines)
-    hide_keys = [p[0] for p in hidden_param]
-
-    user_param_regexp = re.compile('^:u\*param ' + fixed_str)
-    user_param, idx4 = __find_regexp(user_param_regexp, lines)
-    user_keys = [p[0] for p in user_param]
-
-    lines_read = idx1+idx2+idx3+idx4
-
-    param = user_param + param + hidden_param
-    param_entry = [{'dtype': type(value), 'name': a[0], 'desc': a[1],
-                    'default': value} for a in param for value in [eval(a[2])]]
-    return param_entry, user_keys, hide_keys, lines_read
-
-
-def __find_regexp(regexp, str_list):
-    args = [regexp.findall(s) for s in str_list]
-    index = [i for i in range(len(args)) if args[i]]
-    args = [arg[0] for arg in args if len(arg)]
-    return args, index
-
-
-def __find_docstring_info(index, str_list):
-    info = [str_list[i] for i in range(len(str_list)) if i not in index]
-    info = [i for i in info if i]
-    return "\n".join(info)
-
-
-def calc_param_indices(dims):
-    indices_list = []
-    for i in range(len(dims)):
-        chunk = int(np.prod(dims[0:i]))
-        repeat = int(np.prod(dims[i+1:]))
-        idx = np.ravel(np.kron(range(dims[i]), np.ones((repeat, chunk))))
-        indices_list.append(idx.astype(int))
-    return np.transpose(np.array(indices_list))
-
-
 def get_plugins_paths():
     """
     This gets the plugin paths, but also adds any that are not on the
@@ -325,47 +203,3 @@ def get_plugins_paths():
     # now add the savu plugin path, which is now the whole path.
     plugins_paths.append(os.path.join(savu.__path__[0]) + '/../')
     return plugins_paths
-
-
-def populate_plugins():
-    plugins_path = get_plugins_paths()
-    savu_path = plugins_path[-1].split('savu')[0]
-    savu_plugins = plugins_path[-1:]
-    local_plugins = plugins_path[0:-1] + [savu_path + 'plugins_examples']
-
-    # load local plugins
-    for loader, module_name, is_pkg in pkgutil.walk_packages(local_plugins):
-        _add_module(loader, module_name)
-
-    # load savu plugins
-    for loader, module_name, is_pkg in pkgutil.walk_packages(savu_plugins):
-        if module_name.split('savu.plugins')[0] == '':
-            _add_module(loader, module_name)
-
-    for plugin in dawn_plugins.keys():
-        p = plugins[plugin]()
-        dawn_plugins[plugin]['input rank'] = \
-            u.get_pattern_rank(p.get_plugin_pattern())
-        dawn_plugins[plugin]['description'] = p.__doc__.split(':param')[0]
-        params = get_parameters(p)
-        dawn_plugin_params[plugin] = params
-
-
-def _add_module(loader, module_name):
-    if module_name not in sys.modules:
-        try:
-            loader.find_module(module_name).load_module(module_name)
-        except Exception as error:
-            pass
-
-
-def get_parameters(plugin):
-    params = {}
-    for clazz in inspect.getmro(plugin.__class__):
-        if clazz != object:
-            args = find_args(clazz)
-            for item in args['param']:
-                if item['name'] not in ['in_datasets', 'out_datasets']:
-                    params[item['name']] = {'value': item['default'],
-                                            'hint': item['desc']}
-    return params

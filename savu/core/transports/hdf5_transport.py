@@ -41,6 +41,8 @@ class Hdf5Transport(BaseTransport):
         plugin_list = self.exp.meta_data.plugin_list
         saver_idx = plugin_list._get_savers_index()
         remove = []
+
+        # check the saver plugin and turn off if it is hdf5
         for idx in saver_idx:
             if plugin_list.plugin_list[idx]['name'] == 'Hdf5Saver':
                 remove.append(idx)
@@ -53,7 +55,6 @@ class Hdf5Transport(BaseTransport):
         self.exp_coll = self.exp._get_experiment_collection()
         self.data_flow = self.exp.meta_data.plugin_list._get_dataset_flow()
 
-        # check the saver plugin and turn off if it is hdf5
         n_plugins = range(len(self.exp_coll['datasets']))
         for i in n_plugins:
             self.exp._set_experiment_for_current_plugin(i)

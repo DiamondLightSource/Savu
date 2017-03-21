@@ -208,7 +208,7 @@ def main():
 
     print("Starting Savu Config tool (please wait for prompt)")
 
-    pu.populate_plugins()
+    utils.populate_plugins()
     comp = Completer(commands=commands, plugin_list=pu.plugins)
     utils._set_readline(comp.complete)
 

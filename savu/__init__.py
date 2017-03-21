@@ -31,6 +31,7 @@ import sys
 
 savuPath = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(savuPath + "/../lib"))
+sys.path.append(os.path.join(savuPath + '/../scripts/config_generator/'))
 
 from . import core
 from . import data

@@ -248,6 +248,7 @@ class PluginList(object):
         loader_idx = []
         saver_idx = []
         self.n_plugins = len(self.plugin_list)
+
         for i in range(self.n_plugins):
             bases = inspect.getmro(pu.load_class(self.plugin_list[i]['id']))
             loader_list = [b for b in bases if b == BaseLoader]
@@ -285,8 +286,7 @@ class PluginList(object):
         for name in [data for data in data_names if data not in saved_data]:
             process = {}
             pos = int(re.search(r'\d+', self.plugin_list[-1]['pos']).group())+1
-            plugin = pu.load_plugin('savu.plugins.savers.hdf5_saver')
-            plugin._populate_default_parameters()
+            plugin = pu.get_plugin('savu.plugins.savers.hdf5_saver')
             plugin.parameters['in_datasets'] = [name]
             process['name'] = plugin.name
             process['id'] = plugin.__module__

@@ -23,7 +23,7 @@
 import copy
 import savu.core.utils as cu
 
-# going to convert this to a dictionary so that they contain the ranks... needed for dawn
+# A dictionary of available patterns (and ranks, needed for dawn)
 pattern_list = {"SINOGRAM": 2,
                 "PROJECTION": 2,
                 "VOLUME_YZ": 2,

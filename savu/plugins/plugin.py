@@ -26,7 +26,7 @@ import inspect
 import copy
 import numpy as np
 
-from savu.plugins import utils as pu
+import savu.plugins.docstring_parser as doc
 from savu.plugins.plugin_datasets import PluginDatasets
 
 
@@ -128,7 +128,7 @@ class Plugin(PluginDatasets):
         user_items = []
         for clazz in inspect.getmro(self.__class__)[::-1]:
             if clazz != object:
-                desc = pu.find_args(clazz, self)
+                desc = doc.find_args(clazz, self)
                 self.docstring_info['warn'] = desc['warn']
                 self.docstring_info['info'] = desc['info']
                 self.docstring_info['synopsis'] = desc['synopsis']

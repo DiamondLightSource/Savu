@@ -26,10 +26,13 @@ import os
 import atexit
 import logging
 import traceback
+import pkgutil
 
 from functools import wraps
-import savu.plugins.utils as pu
 import arg_parsers as parsers
+import savu.plugins.utils as pu
+import savu.data.data_structures.utils as du
+
 
 if os.name == 'nt':
     import win_readline as readline
@@ -96,6 +99,49 @@ def error_catcher(function):
 
             return content
     return error_catcher_wrap_function
+
+
+def _add_module(loader, module_name):
+    if module_name not in sys.modules:
+        try:
+            loader.find_module(module_name).load_module(module_name)
+        except Exception as error:
+            pass
+
+
+def populate_plugins():
+    # load all the plugins
+    plugins_path = pu.get_plugins_paths()
+    savu_path = plugins_path[-1].split('savu')[0]
+    savu_plugins = plugins_path[-1:]
+    local_plugins = plugins_path[0:-1] + [savu_path + 'plugins_examples']
+
+    # load local plugins
+    for loader, module_name, is_pkg in pkgutil.walk_packages(local_plugins):
+        _add_module(loader, module_name)
+
+    # load savu plugins
+    for loader, module_name, is_pkg in pkgutil.walk_packages(savu_plugins):
+        if module_name.split('savu.plugins')[0] == '':
+            _add_module(loader, module_name)
+
+    for plugin in pu.dawn_plugins.keys():
+        p = pu.plugins[plugin]()
+        pu.dawn_plugins[plugin]['input rank'] = \
+            du.get_pattern_rank(p.get_plugin_pattern())
+        pu.dawn_plugins[plugin]['description'] = p.__doc__.split(':param')[0]
+        params = _get_dawn_parameters(p)
+        pu.dawn_plugin_params[plugin] = params
+
+
+def _get_dawn_parameters(plugin):
+    plugin._populate_default_parameters()
+    desc = plugin.parameters_desc
+    params = {}
+    for key, value in plugin.parameters.iteritems():
+        if key not in ['in_datasets', 'out_datasets']:
+            params[key] = {'value': value, 'hint': desc[key]}
+    return params
 
 
 def _populate_plugin_list(content, pfilter=""):

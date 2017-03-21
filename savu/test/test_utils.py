@@ -26,11 +26,13 @@ import tempfile
 import os
 import copy
 
-from config_generator.content import Content
+from content import Content
 from savu.core.plugin_runner import PluginRunner
 from savu.data.experiment_collection import Experiment
 import savu.plugins.utils as pu
 from savu.data.data_structures.plugin_data import PluginData
+
+#pu.populate_plugins()
 
 
 def get_test_data_path(name):
@@ -51,7 +53,7 @@ def get_test_process_path(name):
     path = inspect.stack()[0][1]
     full_path = '/'.join(os.path.split(path)[0].split(os.sep)[:-2] +
                          ['test_data/test_process_lists', name])
-    _refresh_process_file(full_path)
+    #_refresh_process_file(full_path)
     return full_path
 
 
@@ -141,7 +143,7 @@ def set_plugin_list(options, pnames, *args):
     data = [{}, {}] if not args else [args[0], args[-1]]
     for i in range(len(plugin_names)):
         ID.insert(i+1, plugin_names[i])
-        plugin = pu.load_plugin(plugin_names[i])
+        plugin = pu.get_plugin(plugin_names[i])
         data_dict = set_data_dict(['tomo'], get_output_datasets(plugin))
         data_dict = args[i+1] if args else data_dict
         data.insert(i+1, data_dict)
@@ -225,7 +227,7 @@ def plugin_runner_load_plugin(options):
     exp._set_nxs_filename()
 
     plugin_dict = plugin_list[1]
-    plugin = pu.load_plugin(plugin_dict['id'])
+    plugin = pu.get_plugin(plugin_dict['id'])
     plugin.exp = exp
 
     return plugin
