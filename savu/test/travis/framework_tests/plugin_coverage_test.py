@@ -37,7 +37,7 @@ class PluginCoverageTest(unittest.TestCase):
         # lists all .nxs process lists used in the tests, and all plugins
         # directly called in the tests
         [nxs_in_tests, plugins_in_tests] = \
-            self.get_process_list(savu_base_path + '/savu/test')
+            tu.get_process_list(savu_base_path + '/savu/test')
 
         # remove data files from the list
         data_list = self.get_data_list(savu_base_path + '/test_data/data')
@@ -86,98 +86,6 @@ class PluginCoverageTest(unittest.TestCase):
     def test_process_lists(self):
         # check for unused process lists
         pass
-
-    def get_process_list(self, folder, search=False):
-        process_list = []
-        plugin_list = []
-        exclude_dir = ['__pycache__']
-        exclude_file = ['__init__.py']
-        for root, dirs, files in os.walk(folder, topdown=True):
-            dirs[:] = [d for d in dirs if d not in exclude_dir]
-            files[:] = [fi for fi in files if fi.split('.')[-1] == 'py']
-            files[:] = [fi for fi in files if fi not in exclude_file]
-            processes = self.get_process_list_in_file(root, files)
-            plugins = self.get_no_process_list_tests(root, files)
-            for p in processes:
-                process_list.append(p)
-            for p in plugins:
-                plugin_list.append(p)
-        return process_list, plugin_list
-
-    def get_process_list_in_file(self, root, files):
-        processes = []
-        for fname in files:
-            fname = root + '/' + fname
-            in_file = open(fname, 'r')
-            for line in in_file:
-                if '.nxs' in line:
-                    processes.append(self.get_nxs_file_name(line))
-        return processes
-
-    def get_nxs_file_name(self, line):
-        split_list = line.split("'")
-        for entry in split_list:
-            if 'nxs' in entry:
-                if (len(entry.split(' ')) == 1):
-                    return entry
-
-    def get_no_process_list_tests(self, root, files):
-        processes = []
-        for fname in files:
-            fname = root + '/' + fname
-            in_file = open(fname, 'r')
-            func = 'run_protected_plugin_runner_no_process_list'
-            exclude = ['def', 'search_str']
-            pos = 1
-            param = self.get_param_name(func, pos, in_file, exclude=exclude)
-            if param:
-                in_file.seek(0)
-                plugin_id_list = self.get_param_value_from_file(param, in_file)
-                for pid in plugin_id_list:
-                    plugin_name = pid.split('.')[-1].split("'")[0]
-                    processes.append(plugin_name + '.py')
-        return processes
-
-    def get_param_name(self, func, pos, in_file, exclude=[]):
-        """ Find the name of an argument passed to a function.
-
-        :param str func: function name
-        :param int pos: function argument position
-        :param file in_file: open file to search
-        :keyword list[str] exclude: ignore lines containing these strings.
-                                    Defaults to [].
-        :returns: name associated with function argument
-        :rtype: str
-        """
-        search_str = 'run_protected_plugin_runner_no_process_list('
-        ignore = ['def', 'search_str']
-        val_str = None
-        for line in in_file:
-            if search_str in line:
-                if not [i in line for i in ignore].count(True):
-                    if ')' not in line:
-                        line += next(in_file)
-                    params = line.split('(')[1].split(')')[0]
-                    val_str = params.split(',')[1].strip()
-        return val_str
-
-    def get_param_value_from_file(self, param, in_file):
-        """ Find all values associated with a parameter name in a file.
-
-        :param str param: parameter name to search for
-        :param file in_file: open file to search
-        :returns: value associated with param
-        :rtype: list[str]
-        """
-        param_list = []
-        for line in in_file:
-            if param in line and line.split('=')[0].strip() == param:
-                if "\\" in line:
-                    line += next(in_file)
-                    line = ''.join(line.split('\\'))
-                value = line.split('=')[1].strip()
-                param_list.append(value)
-        return param_list
 
     def get_data_list(self, folder):
         data_list = []

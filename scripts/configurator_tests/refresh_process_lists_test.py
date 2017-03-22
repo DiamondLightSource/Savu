@@ -34,13 +34,22 @@ class RefreshProcessListsTest(unittest.TestCase):
     def test_refresh(self):
         cu.populate_plugins()
         path = os.path.dirname(os.path.realpath(__file__)).split('scripts')[0]
+
+        [nxs_in_tests, plugins_in_tests] = \
+            tu.get_process_list(path + '/savu/test/travis')
+
+        lists = tu.get_test_process_list(path + 'test_data/process_lists') \
+            + tu.get_test_process_list(path+'test_data/test_process_lists')
+        nxs_used = list(set(nxs_in_tests).intersection(set(lists)))
+
         test_path = path + '/test_data/test_process_lists'
-        nxs_files = tu.get_test_process_list(test_path)
-        exclude = ['new_fittest.nxs', 'ptycho_ptypy_compact_test.nxs']
-        for f in nxs_files:
-            if f not in exclude:
-                print f
+        test_path2 = path + '/test_data/process_lists'
+        for f in nxs_used:
+            print f
+            if os.path.exists(os.path.join(test_path, f)):
                 self._refresh_process_file(os.path.join(test_path, f))
+            else:
+                self._refresh_process_file(os.path.join(test_path2, f))
 
     def _refresh_process_file(self, path):
         content = Content()
