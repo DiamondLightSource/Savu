@@ -26,12 +26,10 @@ import tempfile
 import os
 import copy
 
-from scripts.config_generator.content import Content
 from savu.core.plugin_runner import PluginRunner
 from savu.data.experiment_collection import Experiment
 from savu.data.data_structures.plugin_data import PluginData
 import savu.plugins.utils as pu
-import scripts.config_generator.config_utils as cu
 
 
 def get_test_data_path(name):
