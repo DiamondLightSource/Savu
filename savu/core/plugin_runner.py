@@ -50,7 +50,7 @@ class PluginRunner(object):
         plugin_list = self.exp.meta_data.plugin_list
         self._run_plugin_list_check(plugin_list)
 
-        self.exp._experiment_setup()  # save the plugin list before the savers are added - not inside here!
+        self.exp._experiment_setup()
         exp_coll = self.exp._get_experiment_collection()
         n_plugins = plugin_list._get_n_processing_plugins()
 
