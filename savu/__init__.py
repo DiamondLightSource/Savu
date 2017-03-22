@@ -29,7 +29,6 @@ import savu
 import os
 import sys
 from . import test
-from .version import __version__
 
 savuPath = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(savuPath + "/../lib"))
