@@ -96,14 +96,14 @@ def _set_options(args):
     out_folder_path = __create_output_folder(args.out_folder, out_folder_name)
 
     options['out_path'] = out_folder_path
-    options['datafile_name'] = '_'.join(out_folder_path.split('_')[1:])
+    options['datafile_name'] = os.path.splitext(
+            os.path.basename(args.in_file))[0]
 
     inter_folder_path = __create_output_folder(args.tmp, out_folder_name)\
         if args.tmp else out_folder_path
     options['inter_path'] = inter_folder_path
 
     options['log_path'] = args.log if args.log else options['inter_path']
-
     options['nProcesses'] = len(options["process_names"].split(','))
 
     return options
