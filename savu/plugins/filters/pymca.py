@@ -60,6 +60,7 @@ class Pymca(BaseFilter, CpuPlugin):
             op_stack = -np.ones((1,1,self.outputshape[-1]))
             logging.warn("Error in fit:%s",e) 
         op = op_stack[0,0]
+        print "shape", op.shape
         return op
 
     def setup(self):

@@ -298,6 +298,7 @@ def get_plugins_paths():
 
 
 def populate_plugins():
+    print "I AM HERE"
     plugins_path = get_plugins_paths()
     savu_path = plugins_path[-1].split('savu')[0]
     savu_plugins = plugins_path[-1:]
