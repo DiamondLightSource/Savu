@@ -84,10 +84,10 @@ class BaseI18MultiModalLoader(BaseMultiModalLoader):
         motors = self.parameters['scan_pattern']
         data_obj.data_mapping.set_axes(self.parameters['scan_pattern'])
         nAxes = len(data_obj.get_shape())
-        print "THERE WILL BE:"+str(nAxes)
         #logging.debug nAxes
         cts = 0
         chk = 0
+        chk1 = 0
         motor_type = []
         labels = []
         fast_axis = self.parameters["fast_axis"]
@@ -99,14 +99,12 @@ class BaseI18MultiModalLoader(BaseMultiModalLoader):
                 data_axis = self.parameters[motors[ii]]# get that out the file
                 logging.debug("the data axis is %s" % str(data_axis))
                 if motors[ii]=="rotation":
-                    print "found a rotation"
                     data_obj.data_mapping._is_tomo = True
                     motor_type.append('rotation')
                     label = 'rotation_angle'
                     units = 'degrees'
                     logging.debug(ltype + " reader: %s", "is a tomo scan")
                 elif motors[ii] in ["x","y"]:
-                    print "found a translation"
                     cts += 1  # increase the order of the map
                     motor_type.append('translation')
                     if (motors[ii]==fast_axis):
@@ -115,8 +113,8 @@ class BaseI18MultiModalLoader(BaseMultiModalLoader):
                         label='y'
                     units = 'mm'
             except KeyError as e:
-                print "exception was "+str(e)
-                print "found nothing"
+                print("exception was ",str(e))
+                print("found no motor")
                 motor_type.append('None')
                 #now the detector axes
                 if ltype =='fluo':
@@ -135,9 +133,17 @@ class BaseI18MultiModalLoader(BaseMultiModalLoader):
                 some additional singleton dimensions have been added in the latest mapping project stuff on I18
                 This fixes that.
                 '''
-                label = 'unknown_%s' % unknown_count
-                units = 'unknown'
-                unknown_count += 1
+                if ltype =='xrd':
+                    if chk1 == 0:
+                        label = 'detector_x'
+                    elif chk1 == 1:
+                        label = 'detector_y'
+                    units = 'pixels'
+                    chk1=chk1+1
+                else:
+                    label = 'unknown_%s' % unknown_count
+                    units = 'unknown'
+                    unknown_count += 1
             except:
                 raise
 
@@ -145,7 +151,6 @@ class BaseI18MultiModalLoader(BaseMultiModalLoader):
         if not motors:
             logging.debug("%s reader: No maps found!", ltype)
         #logging.debug labels
-        print "THE LABELS WILL BE:"+str(labels)
         data_obj.set_axis_labels(*tuple(labels))
         data_obj.data_mapping.set_motors(motors)
         data_obj.data_mapping.set_motor_type(motor_type)
