@@ -22,11 +22,12 @@
 """
 
 import tempfile  # this import is required for pyFAI - DO NOT REMOVE!
-import optparse
+import argparse
 import traceback
 import sys
 import os
 from mpi4py import MPI
+from savu.version import __version__
 
 from savu.core.plugin_runner import PluginRunner
 
@@ -34,59 +35,44 @@ from savu.core.plugin_runner import PluginRunner
 def __option_parser():
     """ Option parser for command line arguments.
     """
-    usage = "%prog [options] input_file processing_file output_directory"
-    version = "%prog 0.1"
-    parser = optparse.OptionParser(usage=usage, version=version)
-    parser.add_option("-n", "--names", dest="names", help="Process names",
-                      default="CPU0")
-    parser.add_option("-t", "--transport", dest="transport",
-                      help="Set the transport mechanism", default="hdf5")
-    parser.add_option("-f", "--folder", dest="folder",
-                      help="Override the output folder name")
-    parser.add_option("-d", "--tmp", dest="temp_dir",
-                      help="Store intermediate files in a temp directory.")
-    parser.add_option("-l", "--log", dest="log_dir",
-                      help="Store full log file in a separate location")
-    parser.add_option("-v", "--verbose", action="store_true", dest="verbose",
-                      help="Display all debug log messages", default=False)
-    parser.add_option("-q", "--quiet", action="store_true", dest="quiet",
-                      help="Display only Errors and Info", default=False)
-    parser.add_option("-c", "--cluster", action="store_true", dest="cluster",
-                      help="Set logging to cluster mode", default=False)
-    parser.add_option("-s", "--syslog", dest="syslog",
-                      help="Location of syslog server", default='localhost')
-    parser.add_option("-p", "--syslog_port", dest="syslog_port",
-                      help="Port to connect to syslog server on", default=514)
+    version = "%(prog)s " + __version__
+    parser = argparse.ArgumentParser(prog='savu')
+    hide = argparse.SUPPRESS
 
-    (options, args) = parser.parse_args()
-    return [options, args]
+    parser.add_argument('in_file', help='Input data file.')
+    process_str = 'Process list, created with the savu configurator.'
+    parser.add_argument('process_list', help=process_str)
+    parser.add_argument('out_folder', help='Output folder.')
+    parser.add_argument('--version', action='version', version=version)
+    parser.add_argument("-f", "--folder", help="Override output folder name")
+    tmp_help = "Store intermediate files in a temp directory."
+    parser.add_argument("-d", "--tmp", help=tmp_help)
+    log_help = "Store full log file in a separate location"
+    parser.add_argument("-l", "--log", help=log_help)
+    v_help = "Display all debug log messages"
+    parser.add_argument("-v", "--verbose", help=v_help, action="store_true",
+                        default=False)
+    parser.add_argument("-q", "--quiet", action="store_true", dest="quiet",
+                        help="Display only Errors and Info.", default=False)
 
-
-def __check_input_params(args):
-    """ Check for required input arguments.
-    """
-    if len(args) is not 3:
-        print("filename, process file and output path needs to be specified")
-        print("Exiting with error code 1 - incorrect number of inputs")
-        sys.exit(1)
-
-    if not os.path.exists(args[0]):
-        print("Input file '%s' does not exist" % args[0])
-        print("Exiting with error code 2 - Input file missing")
-        sys.exit(2)
-
-    if not os.path.exists(args[1]):
-        print("Processing file '%s' does not exist" % args[1])
-        print("Exiting with error code 3 - Processing file missing")
-        sys.exit(3)
-
-    if not os.path.exists(args[2]):
-        print("Output Directory '%s' does not exist" % args[2])
-        print("Exiting with error code 4 - Output Directory missing")
-        sys.exit(4)
+    # Hidden arguments
+    # process names
+    parser.add_argument("-n", "--names", help=hide, default="CPU0")
+    # transport mechanism
+    parser.add_argument("-t", "--transport", help=hide, default="hdf5")
+    # Set logging to cluster mode
+    parser.add_argument("-c", "--cluster", action="store_true", help=hide,
+                        default=False)
+    # Location of syslog server
+    parser.add_argument("-s", "--syslog", dest="syslog", help=hide,
+                        default='localhost')
+    # Port to connect to syslog server on
+    parser.add_argument("-p", "--syslog_port", dest="syslog_port",
+                        help=hide, default=514)
+    return parser.parse_args()
 
 
-def _set_options(opt, args):
+def _set_options(args):
     """ Set run specific information in options dictionary.
 
     :params dict opt: input optional arguments (or defaults)
@@ -95,28 +81,28 @@ def _set_options(opt, args):
     :rtype: dict
     """
     options = {}
-    options['data_file'] = args[0]
-    options['process_file'] = args[1]
-    options['transport'] = opt.transport
-    options['process_names'] = opt.names
-    options['verbose'] = opt.verbose
-    options['quiet'] = opt.quiet
-    options['cluster'] = opt.cluster
-    options['syslog_server'] = opt.syslog
-    options['syslog_port'] = opt.syslog_port
+    options['data_file'] = args.in_file
+    options['process_file'] = args.process_list
+    options['transport'] = args.transport
+    options['process_names'] = args.names
+    options['verbose'] = args.verbose
+    options['quiet'] = args.quiet
+    options['cluster'] = args.cluster
+    options['syslog_server'] = args.syslog
+    options['syslog_port'] = args.syslog_port
 
     out_folder_name = \
-        opt.folder if opt.folder else __get_folder_name(options['data_file'])
-    out_folder_path = __create_output_folder(args[2], out_folder_name)
+        args.folder if args.folder else __get_folder_name(options['data_file'])
+    out_folder_path = __create_output_folder(args.out_folder, out_folder_name)
 
     options['out_path'] = out_folder_path
     options['datafile_name'] = '_'.join(out_folder_path.split('_')[1:])
 
-    inter_folder_path = __create_output_folder(opt.temp_dir, out_folder_name)\
-        if opt.temp_dir else out_folder_path
+    inter_folder_path = __create_output_folder(args.tmp, out_folder_name)\
+        if args.tmp else out_folder_path
     options['inter_path'] = inter_folder_path
 
-    options['log_path'] = opt.log_dir if opt.log_dir else options['inter_path']
+    options['log_path'] = args.log if args.log else options['inter_path']
 
     options['nProcesses'] = len(options["process_names"].split(','))
 
@@ -148,14 +134,12 @@ def __create_output_folder(path, folder_name):
 
 
 def main(input_args=None):
-    [options, args] = __option_parser()
+    args = __option_parser()
 
     if input_args:
         args = input_args
 
-    __check_input_params(args)
-
-    options = _set_options(options, args)
+    options = _set_options(args)
 
     if options['nProcesses'] == 1:
         plugin_runner = PluginRunner(options)
