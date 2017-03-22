@@ -12,6 +12,7 @@ from StringIO import StringIO
 
 from ..config_generator import savu_config
 
+
 class Test(unittest.TestCase):
 
     def savu_config_runner(self, input_list, output_checks):
