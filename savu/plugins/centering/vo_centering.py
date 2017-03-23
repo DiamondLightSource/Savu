@@ -73,7 +73,7 @@ class VoCentering(BaseFilter, CpuPlugin):
         if drop < cen_row:
             mask[cen_row-drop:cen_row+drop+1, :] = \
                 np.zeros((2*drop + 1, Ncol), dtype=np.float32)
-        mask[:,cen_col-1:cen_col+2] = np.zeros((Nrow, 3), dtype=np.float32)
+        mask[:, cen_col-1:cen_col+2] = np.zeros((Nrow, 3), dtype=np.float32)
         return mask
 
     def _get_start_shift(self, centre):
@@ -189,6 +189,7 @@ class VoCentering(BaseFilter, CpuPlugin):
         fit = np.zeros(cor_fit.shape)
         fit[:] = np.mean(cor_raw)
         cor_fit = fit
+        out_datasets[1].data[:] =  cor_fit[:, np.newaxis]
 
         self.populate_meta_data('cor_raw', cor_raw)
         self.populate_meta_data('centre_of_rotation', cor_fit)
