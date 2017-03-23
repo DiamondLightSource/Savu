@@ -133,6 +133,8 @@ class BaseRecon(Plugin):
         self.frame_angles = angles
         self.frame_cors = self.cor_func(self.cor[sl[self.main_dir]])
         self.frame_init_data = init
+        data[0] = self.sino_func(data[0])
+        return data
 
     def get_angles(self):
         """ Get the angles associated with the current sinogram(s).

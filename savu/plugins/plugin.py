@@ -220,11 +220,10 @@ class Plugin(PluginDatasets):
 
     def base_process_frames(self, data):
         """ This method is called before each call to process frames """
-        pass
+        return data
 
     def plugin_process_frames(self, data):
-        self.base_process_frames(data)
-        return self.process_frames(data)
+        return self.process_frames(self.base_process_frames(data))
 
     def process_frames(self, data):
         """

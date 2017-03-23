@@ -24,8 +24,6 @@ import logging
 import numpy as np
 from mpi4py import MPI
 
-import savu.plugins.utils as pu
-
 
 class PluginDriver(object):
     """
