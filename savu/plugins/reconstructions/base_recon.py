@@ -36,7 +36,7 @@ class BaseRecon(Plugin):
         (doesn't currently work with preview). Default: None.
     :param sino_pad: Pad the sinogram to remove edge artefacts in the \
         reconstructed ROI (NB. This will increase the size of the data and \
-        the time taken to perform the reconstruction). Default: True.
+        the time taken to perform the reconstruction). Default: False.
     :u*param log: Take the log of the data before \
         reconstruction. Default: True.
     :u*param preview: A slice list of required frames. Default: [].
