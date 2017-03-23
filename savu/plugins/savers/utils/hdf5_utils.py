@@ -86,7 +86,6 @@ class Hdf5Utils(object):
                 m_data('inter_path') != m_data('out_path')):
             h5file = h5file.split(m_data('out_folder') + '/')[-1]
 
-        print h5file
         nxs_file[data_entry] = h5py.ExternalLink(h5file, group_name + '/data')
 
     def _create_entries(self, data, key, current_and_next):

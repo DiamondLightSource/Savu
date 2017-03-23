@@ -199,9 +199,10 @@ class Experiment(object):
         # datasets to remove from the framework.
         finalise['remove'] = []
         for key, data in self.index['out_data'].iteritems():
-            self._populate_nexus_file(data)
             if data.remove is True:
                 finalise['remove'].append(data)
+            else:
+                self._populate_nexus_file(data)
 
         # find in datasets to replace
         finalise['replace'] = []

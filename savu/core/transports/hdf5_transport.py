@@ -69,8 +69,9 @@ class Hdf5Transport(BaseTransport):
 
     def _transport_post_plugin(self):
         for data in self.exp.index['out_data'].values():
-            self.hdf5._link_datafile_to_nexus_file(data)
-            self.hdf5._open_read_only(data)
+            if not data.remove:
+                self.hdf5._link_datafile_to_nexus_file(data)
+                self.hdf5._open_read_only(data)
 
     def _transport_terminate_dataset(self, data):
         self.hdf5._close_file(data)
@@ -127,7 +128,7 @@ class Hdf5Transport(BaseTransport):
     def __get_link_type(self, name):
         idx = self.exp.meta_data.get('nPlugin')
         temp = [e for entry in self.data_flow[idx+1:] for e in entry]
-        if name in temp:
+        if name in temp or self.exp.index['out_data'][name].remove:
             return 'intermediate'
         return 'final_result'
 
