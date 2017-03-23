@@ -73,10 +73,12 @@ class PluginList(object):
         plugin_group = plugin_file['entry/plugin']
         self.plugin_list = []
         single_val = ['name', 'id', 'pos', 'active']
+        exclude = ['citation']
         for key in plugin_group.keys():
             plugin = self._get_plugin_entry_template()
             entry_keys = plugin_group[key].keys()
-            json_keys = [k for k in entry_keys if k not in single_val]
+            json_keys = [k for k in entry_keys for e in exclude if k not in
+                         single_val and e not in k]
 
             if 'active' in entry_keys:
                 plugin['active'] = plugin_group[key]['active'][0]
