@@ -187,7 +187,7 @@ class VoCentering(BaseFilter, CpuPlugin):
 
         cor_fit = np.squeeze(out_datasets[1].data[...])
         fit = np.zeros(cor_fit.shape)
-        fit[:] = np.mean(cor_fit)
+        fit[:] = np.mean(cor_raw)
         cor_fit = fit
 
         self.populate_meta_data('cor_raw', cor_raw)

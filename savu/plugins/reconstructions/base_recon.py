@@ -20,7 +20,6 @@
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
-import logging
 import math
 
 from savu.plugins.plugin import Plugin
@@ -38,7 +37,8 @@ class BaseRecon(Plugin):
     :param sino_pad: Pad the sinogram to remove edge artefacts in the \
         reconstructed ROI (NB. This will increase the size of the data and \
         the time taken to perform the reconstruction). Default: True.
-    :u*param log: Take the log of the data before reconstruction. Default: True.
+    :u*param log: Take the log of the data before \
+        reconstruction. Default: True.
     :u*param preview: A slice list of required frames. Default: [].
     """
     count = 0
