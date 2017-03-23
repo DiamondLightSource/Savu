@@ -34,9 +34,9 @@ class AstraReconGpu(BaseAstraRecon, GpuPlugin):
     """
     A Plugin to run the astra reconstruction
 
-    :param res_norm: Output the residual norm at each iteration\
-        (Error in the solution). Default: False.
-    :param reconstruction_type: Reconstruction type (FBP_CUDA|SIRT_CUDA|\
+    :u*param res_norm: Output the residual norm at each iteration\
+        (Error in the solution - iterative solvers only). Default: False.
+    :u*param reconstruction_type: Reconstruction type (FBP_CUDA|SIRT_CUDA|\
         SART_CUDA (not currently working)|CGLS_CUDA|FP_CUDA|BP_CUDA|\
         SIRT3D_CUDA|CGLS3D_CUDA). Default: 'FBP_CUDA'.
     """

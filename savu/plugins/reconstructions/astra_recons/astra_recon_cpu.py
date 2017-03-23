@@ -31,7 +31,7 @@ class AstraReconCpu(BaseAstraRecon, CpuPlugin):
     """
     A Plugin to run the astra reconstruction
 
-    :param reconstruction_type: Reconstruction type \
+    :u*param reconstruction_type: Reconstruction type \
         (FBP|SIRT|SART|ART|CGLS|FP|BP|). Default: 'FBP'.
     :param projector: Set astra projector (line|strip|linear). Default: 'line'.
     """
