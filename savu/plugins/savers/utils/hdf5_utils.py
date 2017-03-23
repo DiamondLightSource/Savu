@@ -78,8 +78,15 @@ class Hdf5Utils(object):
         nxs_entry.attrs['signal'] = 'data'
         data_entry = nxs_entry.name + '/data'
         # output file path
-        h5file = data.backing_file.filename.split('/')[-1]
+        h5file = data.backing_file.filename
         # entry path in output file path
+
+        m_data = self.exp.meta_data.get
+        if not (link_type == 'intermediate' and
+                m_data('inter_path') != m_data('out_path')):
+            h5file = h5file.split(m_data('out_folder') + '/')[-1]
+
+        print h5file
         nxs_file[data_entry] = h5py.ExternalLink(h5file, group_name + '/data')
 
     def _create_entries(self, data, key, current_and_next):
