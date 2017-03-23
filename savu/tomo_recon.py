@@ -93,8 +93,10 @@ def _set_options(args):
 
     out_folder_name = \
         args.folder if args.folder else __get_folder_name(options['data_file'])
+
     out_folder_path = __create_output_folder(args.out_folder, out_folder_name)
 
+    options['out_folder'] = out_folder_name
     options['out_path'] = out_folder_path
     options['datafile_name'] = os.path.splitext(
             os.path.basename(args.in_file))[0]
