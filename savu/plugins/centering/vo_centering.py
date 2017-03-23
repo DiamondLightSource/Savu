@@ -35,23 +35,21 @@ from savu.data.plugin_list import CitationInformation
 class VoCentering(BaseFilter, CpuPlugin):
     """
     A plugin to calculate the centre of rotation using the Vo Method
-    :param ratio: The ratio between the size of object and FOV of \
+    :u*param ratio: The ratio between the size of object and FOV of \
         the camera. Default: 2.0.
     :param row_drop: Drop lines around vertical center of the \
         mask. Default: 20.
     :param search_radius: Use for fine searching. Default: 3.
     :param step: Step of fine searching. Default: 0.2.
     :param downsample: The step length over the rotation axis. Default: 1.
-    :param preview: A slice list of required frames. Default: [].
+    :u*param preview: A slice list of required frames. Default: [].
     :param datasets_to_populate: A list of datasets which require this \
         information. Default: [].
     :param out_datasets: The default names. Default: ['cor_raw','cor_fit'].
-    :param poly_degree: The polynomial degree of the fit \
-        (1 or 0 = gradient or no gradient). Default: 0.
-    :param start_pixel: The approximate centre. If value is None, take the \
+    :u*param start_pixel: The approximate centre. If value is None, take the \
         value from .nxs file else set to image centre. Default: None.
-    :param search_area: Search area from horizontal approximate centre of the \
-        image. Default: (-50, 50).
+    :u*param search_area: Search area from horizontal approximate centre of \
+        the image. Default: (-50, 50).
     """
 
     def __init__(self):
