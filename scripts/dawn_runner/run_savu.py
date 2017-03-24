@@ -88,19 +88,21 @@ def runSavu(path2plugin, params, metaOnly, inputs, persistence):
     else:
         data = inputs['data']
         
-    if not metaOnly:    
+    if not metaOnly: 
         result['data'] = plugin_object.filter_frames([data])[0]
         
     elif metaOnly:
         print "metadata only operation"
         result['data'] = inputs['data']
 #         print type(result['data'])
-        out_array = plugin_object.filter_frames([data])[0]
+        out_array = plugin_object.filter_frames([data])
+        print out_array
         k=0
 #         print aux.keys()
         for key in aux.keys():
             print "assigning the dict in aux"
-            aux[key]=np.array(out_array[k])# wow really
+#             print out_array
+            aux[key]=np.array([out_array[k]])# wow really
             k+=1
         result['auxiliary'] = aux
     print "ran the python part fine"
@@ -126,7 +128,7 @@ def process_init(path2plugin, inputs, parameters):
     plugin._clean_up() # this copies the metadata!
     for label in axis_labels:
         axis_values[label] = plugin.get_out_datasets()[0].meta_data.get_meta_data(label)
-        print label, axis_values[label].shape
+#         print label, axis_values[label].shape
     plugin.base_pre_process()
     plugin.pre_process()
     print "I went here"
