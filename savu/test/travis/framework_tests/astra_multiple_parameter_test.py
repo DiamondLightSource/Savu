@@ -33,7 +33,7 @@ class AstraMultipleParameterTest(unittest.TestCase):
 
     def plugin_setup(self):
         ppath = 'savu.plugins.reconstructions.astra_recons.astra_recon_cpu'
-        plugin = pu.load_plugin(ppath)
+        plugin = pu.get_plugin(ppath)
         return plugin
 
     def framework_options_setup(self):

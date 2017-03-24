@@ -39,7 +39,7 @@ class MultipleParameterTest(unittest.TestCase):
     def framework_options_setup(self):
         key1 = 'preview'
         key2 = 'FBP_filter'
-        key3 = 'center_of_rotation'
+        key3 = 'centre_of_rotation'
         key4 = 'in_datasets'
         key5 = 'out_datasets'
         params = {key1: [':', '0', ':'], key2: 'ram-lak;hamming',
@@ -52,7 +52,7 @@ class MultipleParameterTest(unittest.TestCase):
 
     def test_parameter_space_int(self):
         plugin = self.plugin_setup()
-        key = 'number_of_iterations'
+        key = 'n_iterations'
         params = {'reconstruction_type': 'CGLS', 'preview': '[:,0,:]',
                   key: '1;2;3'}
         plugin._set_parameters(params)
@@ -62,7 +62,7 @@ class MultipleParameterTest(unittest.TestCase):
 
     def test_parameter_space_float(self):
         plugin = self.plugin_setup()
-        key = 'center_of_rotation'
+        key = 'centre_of_rotation'
         params = {'preview': '[:,0,:]', key: '0.2;0.4;0.6'}
         plugin._set_parameters(params)
         params = plugin.parameters[key]
@@ -81,7 +81,7 @@ class MultipleParameterTest(unittest.TestCase):
     def test_parameter_space_extra_dims(self):
         plugin = self.plugin_setup()
         key1 = 'FBP_filter'
-        key2 = 'center_of_rotation'
+        key2 = 'centre_of_rotation'
         params = {key1: 'ram-lak;hamming', key2: '85.0;85.5;86.0'}
         plugin._set_parameters(params)
         out_datasets = plugin.get_out_datasets()
