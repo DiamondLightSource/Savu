@@ -31,7 +31,7 @@ from savu.plugins.utils import register_plugin, dawn_compatible
 from savu.data.plugin_list import CitationInformation
 
 
-#@dawn_compatible
+@dawn_compatible
 @register_plugin
 class PaganinFilter(BaseFilter, CpuPlugin):
     """
