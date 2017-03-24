@@ -23,6 +23,8 @@
 
 import re
 import os
+import copy
+import inspect
 
 from savu.plugins import utils as pu
 from savu.data.plugin_list import PluginList
@@ -100,6 +102,13 @@ class Content(object):
             union_params = set(keep).intersection(set(plugin.parameters))
             for param in union_params:
                 self.modify(str_pos, param, keep[param], ref=True)
+            # add any parameter mutations here
+            classes = [c.__name__ for c in inspect.getmro(plugin.__class__)]
+            m_dict = mutations.param_mutations
+            keys = [k for k in m_dict.keys() if k in classes]
+            for k in keys:
+                self.modify(str_pos, m_dict[k]['new'],
+                            keep[m_dict[k]['old']], ref=True)
 
     def _apply_plugin_updates(self, skip=False):
         # Update old process lists that start from 0
@@ -141,8 +150,9 @@ class Content(object):
                 return True
 
         # check mutations dict
-        if name in mutations.details.keys():
-            mutate = mutations.details[name]
+        m_dict = mutations.plugin_mutations
+        if name in m_dict.keys():
+            mutate = m_dict[name]
             if mutate['replace'] in pu.plugins.keys():
                 str_pos = self.plugin_list.plugin_list[pos]['pos']
                 self.refresh(str_pos, change=mutate['replace'])

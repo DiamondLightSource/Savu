@@ -38,7 +38,7 @@ def rename_str(old_name, new_name):
     return (auto_str() + '\n%s has been renamed as %s. \nNo '
             'further action required.' % (old_name, new_name))
 
-details = \
+plugin_mutations = \
     {'TimeseriesFieldCorrections':
         {'replace' : 'DarkFlatFieldCorrection',
          'desc'    : replace_str('TimeseriesFieldCorrections',
@@ -47,3 +47,7 @@ details = \
         {'replace'  : 'Hdf5Saver',
          'desc'     : rename_str('Hdf5TomoSaver', 'Hdf5Saver')},
      }
+
+
+param_mutations = \
+    {'BaseRecon': {'old': 'center_of_rotation', 'new': 'centre_of_rotation'}}
