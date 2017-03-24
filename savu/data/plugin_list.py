@@ -252,6 +252,7 @@ class PluginList(object):
         self.n_plugins = len(self.plugin_list)
 
         for i in range(self.n_plugins):
+            print "********", self.plugin_list[i]['id']
             bases = inspect.getmro(pu.load_class(self.plugin_list[i]['id']))
             loader_list = [b for b in bases if b == BaseLoader]
             saver_list = [b for b in bases if b == BaseSaver]

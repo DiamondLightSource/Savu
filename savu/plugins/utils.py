@@ -74,6 +74,7 @@ def get_plugin(plugin_name):
 
 
 def load_class(name):
+    print "***********in load class the module is %s" %name
     logging.debug('loading the module %s' % name)
     if os.path.isdir(os.path.dirname(name)):
         path = name
