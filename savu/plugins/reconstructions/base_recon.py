@@ -30,7 +30,7 @@ class BaseRecon(Plugin):
     """
     A base class for reconstruction plugins
 
-    :u*param center_of_rotation: Centre of rotation to use for the \
+    :u*param centre_of_rotation: Centre of rotation to use for the \
         reconstruction. Default: 0.0.
     :u*param init_vol: Dataset to use as volume initialiser \
         (doesn't currently work with preview). Default: None.
@@ -99,7 +99,7 @@ class BaseRecon(Plugin):
             cor = mData.get("centre_of_rotation")
         except KeyError:
             cor = np.ones(inData.get_shape()[pData.get_slice_dimension()])
-            cor *= self.parameters['center_of_rotation']
+            cor *= self.parameters['centre_of_rotation']
         self.cor = cor
 
     def set_function(self, pad_shape):
