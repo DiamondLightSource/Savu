@@ -30,27 +30,23 @@ class Test(unittest.TestCase):
                 sys.stdout = saved_stdout
 
     def testExit(self):
-        input_list = ['exit',
-                      'y']
+        input_list = ['exit', 'y']
         output_checks = ['Thanks for using the application']
         self.savu_config_runner(input_list, output_checks)
 
     def testHelpBlank(self):
-        input_list = ['',
-                      'exit',
-                      'y']
-        output_checks = ['help : Display the help information',
-                         'exit : Close the program']
+        input_list = ['', 'exit', 'y']
+        output_checks = ['help :  Display the help information',
+                         'exit :  Close the program']
         self.savu_config_runner(input_list, output_checks)
 
     def testHelpCommand(self):
         input_list = ['help',
                       'exit',
                       'y']
-        output_checks = ['help : Display the help information',
-                         'exit : Close the program']
+        output_checks = ['help :  Display the help information',
+                         'exit :  Close the program']
         self.savu_config_runner(input_list, output_checks)
 
 if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
