@@ -41,9 +41,7 @@ class Test(unittest.TestCase):
         self.savu_config_runner(input_list, output_checks)
 
     def testHelpCommand(self):
-        input_list = ['help',
-                      'exit',
-                      'y']
+        input_list = ['help', 'exit', 'y']
         output_checks = ['help :  Display the help information',
                          'exit :  Close the program']
         self.savu_config_runner(input_list, output_checks)

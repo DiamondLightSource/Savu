@@ -20,6 +20,8 @@ Created on 21 May 2015
 
 from __future__ import print_function
 
+import sys
+
 from content import Content
 from completer import Completer
 from display_formatter import ListDisplay, DispDisplay
@@ -202,6 +204,10 @@ commands = {'open': _open,
 
 
 def main():
+
+    # required for travis tests
+    if sys.argv[-2] == 'scripts/configurator_tests/':
+        sys.argv = [sys.argv[:-2]]
 
     args = parsers._config_arg_parser()
     if args.error:
