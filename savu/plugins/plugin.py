@@ -169,9 +169,11 @@ class Plugin(PluginDatasets):
                 value = self.__convert_multi_params(parameters[key], key)
                 self.parameters[key] = value
             else:
-                raise ValueError("Parameter " + key +
-                                 "is not a valid parameter for plugin " +
-                                 self.name)
+                error = ("Parameter '%s' is not valid for plugin %s. \nTry "
+                         "opening and re-saving the process list in the "
+                         "configurator to auto remove \nobsolete parameters."
+                         % (key, self.name))
+                raise ValueError(error)
 
     def __convert_multi_params(self, value, key):
         """ Set up parameter tuning.
