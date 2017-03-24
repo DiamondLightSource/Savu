@@ -39,17 +39,17 @@ class TomopyRecon(BaseRecon, CpuPlugin):
      A wrapper to the tomopy reconstruction library. Extra keywords not \
      required for the chosen algorithm will be ignored.
 
-    :param algorithm: The reconstruction algorithm (art|bart|fbp|gridrec|mlem|\
-    osem|ospml_hybrid|ospml_quad|pml_hybrid|pml_quad|sirt). Default: 'gridrec'.
-    :param filter_name: Analytic reconstruction filter (none|shepp|cosine|\
+    :u*param algorithm: The reconstruction algorithm (art|bart|fbp|gridrec|\
+        mlem|osem|ospml_hybrid|ospml_quad|pml_hybrid|pml_quad\
+        |sirt). Default: 'gridrec'.
+    :u*param filter_name: Valid for fbp|gridrec, options: none|shepp|cosine|\
      hann|hamming|ramlak|parzen|butterworth). Default: None
-    :param reg_par: Regularization parameter for smoothing. Default: 0.0.
-    :param num_iter: Number of iterations. Default: 10.
-    :param init_vol: Dataset to use as volume initialiser \
-     (doesn't currently work with preview). Default: None.
-    :param sino_pad: Pad the sinogram to remove edge artefacts in the \
-        reconstructed ROI (NB. This will increase the size of the data and \
-        the time taken to perform the reconstruction). Default: False.
+    :u*param reg_par: Regularization parameter for smoothing, valid for \
+        ospml_hybrid|ospml_quad|pml_hybrid|pml_quad. Default: 0.0.
+    :param n_iterations: Number of iterations, NOT valid for \
+        fbp|gridrec. Default: 10.
+    :~param init_vol: Hidden parameter - not required. Default: None.
+    :~param sino_pad: Hidden parameter - not required. Default: False.
     """
 
     def __init__(self):
@@ -60,7 +60,7 @@ class TomopyRecon(BaseRecon, CpuPlugin):
         vol_shape = self.get_vol_shape()
         options = {'filter_name': self.parameters['filter_name'],
                    'reg_par': self.parameters['reg_par']-1,
-                   'num_iter': self.parameters['num_iter'],
+                   'n_iterations': self.parameters['n_iterations'],
                    'num_gridx': vol_shape[0], 'num_gridy': vol_shape[2]}
 
         self.alg_keys = self.get_allowed_kwargs()
