@@ -1,7 +1,10 @@
-import optparse
+import argparse
 import h5py
 import sys
 import os
+
+from savu.version import __version__
+
 
 class NXcitation(object):
     def __init__(self, description, doi, endnote, bibtex):
@@ -27,9 +30,10 @@ class NXcitation(object):
 
     def get_description_with_author(self):
         return "%s \\ref{%s}(%s, %s)" % (self.description,
-                                       self.get_bibtex_ref(),
-                                       self.get_first_author(),
-                                       self.get_date())
+                                         self.get_bibtex_ref(),
+                                         self.get_first_author(),
+                                         self.get_date())
+
 
 class NXcitation_manager(object):
     def __init__(self):
@@ -45,12 +49,14 @@ class NXcitation_manager(object):
         return "\n".join([cite.bibtex for cite in self.NXcite_list])
 
     def get_description_with_citations(self):
-        return ".  ".join([cite.get_description_with_author() for cite in self.NXcite_list])
+        return ".  ".join([cite.get_description_with_author() for cite in
+                           self.NXcite_list])
 
     def __str__(self):
-        return "\nDESCRIPTION\n%s\n\nBIBTEX\n%s\n\nENDNOTE\n%s" % (self.get_description_with_citations(),
-                                   self.get_full_bibtex(),
-                                   self.get_full_endnote())
+        return "\nDESCRIPTION\n%s\n\nBIBTEX\n%s\n\nENDNOTE\n%s" % \
+            (self.get_description_with_citations(), self.get_full_bibtex(),
+             self.get_full_endnote())
+
 
 class NXciteVisitor(object):
 
@@ -63,12 +69,13 @@ class NXciteVisitor(object):
                 citation = NXcitation(obj['description'][0],
                                       obj['doi'][0],
                                       obj['endnote'][0],
-                                      obj['bibtex'][0]) 
+                                      obj['bibtex'][0])
                 self.citation_manager.add_citation(citation)
 
     def get_citation_manager(self, nx_file, entry):
         nx_file[entry].visititems(self._visit_NXcite)
         return self.citation_manager
+
 
 def __check_input_params(args):
     """ Check for required input arguments.
@@ -83,25 +90,27 @@ def __check_input_params(args):
         print("Exiting with error code 2 - Input file missing")
         sys.exit(2)
 
+
 def __option_parser():
     """ Option parser for command line arguments.
     """
-    usage = "%prog [options] savu_output_file result_file"
-    version = "%prog 0.1"
-    parser = optparse.OptionParser(usage=usage, version=version)
-    (options, args) = parser.parse_args()
-    return [options, args]
+    version = "%(prog)s " + __version__
+    parser = argparse.ArgumentParser()
+    parser.add_argument('in_file', help='Input data file.')
+    parser.add_argument('out_file', help='Output file to extract citation \
+                        information to.')
+    parser.add_argument('--version', action='version', version=version)
+    return parser.parse_args()
 
 
 def main():
-    [options, args] = __option_parser()
-    infile = h5py.File(args[0], 'r')
+    args = __option_parser()
+    infile = h5py.File(args.in_file, 'r')
     citation_manager = NXciteVisitor().get_citation_manager(infile, '/')
     if citation_manager is not None:
-        with open(args[1], 'a') as outfile:
+        with open(args.out_file, 'a') as outfile:
             outfile.write(citation_manager.__str__())
     print("Extraction complete")
 
 if __name__ == '__main__':
     main()
-

@@ -24,7 +24,7 @@
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 import numpy as np
-import ccpi_reconstruction
+import ccpi
 from savu.plugins.utils import register_plugin
 
 from savu.plugins.reconstructions.base_recon import BaseRecon
@@ -46,15 +46,14 @@ class CglsRecon(BaseRecon, CpuPlugin):
 
     def process_frames(self, data):
         sino = data[0]
-        centre_of_rotations, angles, vol_shape, init = self.get_frame_params()
+        cors, angles, vol_shape, init = self.get_frame_params()
+
         nthreads = self.parameters['number_of_threads']
         num_iterations = self.parameters['number_of_iterations']
         resolution = self.parameters['resolution']
 
-        voxels = ccpi_reconstruction.cgls(sino.astype(np.float32),
-                                          angles.astype(np.float32),
-                                          centre_of_rotations[0], resolution,
-                                          num_iterations, nthreads)
+        voxels = ccpi.cgls(sino.astype(np.float32), angles.astype(np.float32),
+                           cors[0], resolution, num_iterations, nthreads)
 
         voxels = voxels[:160, :160, ...]
         if voxels.ndim is 3:
@@ -62,6 +61,5 @@ class CglsRecon(BaseRecon, CpuPlugin):
             if voxels.shape[1] > sino.shape[1]:
                 diff = voxels.shape[1] - sino.shape[1]
                 voxels = voxels[:, :-diff, :]
-                
 
         return voxels
