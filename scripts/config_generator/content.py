@@ -107,8 +107,9 @@ class Content(object):
             m_dict = mutations.param_mutations
             keys = [k for k in m_dict.keys() if k in classes]
             for k in keys:
-                self.modify(str_pos, m_dict[k]['new'],
-                            keep[m_dict[k]['old']], ref=True)
+                if m_dict[k]['old'] in keep.keys():
+                    self.modify(str_pos, m_dict[k]['new'],
+                                keep[m_dict[k]['old']], ref=True)
 
     def _apply_plugin_updates(self, skip=False):
         # Update old process lists that start from 0
