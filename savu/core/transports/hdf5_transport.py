@@ -103,7 +103,6 @@ class Hdf5Transport(BaseTransport):
             self.exp.meta_data.set(['group_name', key],
                                    files['group_name'][key])
 
-    # ***** check this for final output filepath
     def __get_filenames(self, plugin_dict):
         count = self.exp.meta_data.get('nPlugin') + 1
         files = {"filename": {}, "group_name": {}, "link_type": {}}
@@ -131,11 +130,3 @@ class Hdf5Transport(BaseTransport):
         if name in temp or self.exp.index['out_data'][name].remove:
             return 'intermediate'
         return 'final_result'
-
-#    def __final_output(self, name):
-#        plugin_list = self.exp.meta_data.plugin_list
-#        saver_idx = plugin_list._get_savers_index()
-#        names = [plugin_list.plugin_list[i]['data']['out_datasets'] for i in saver_idx]
-#        if name in names:
-#            return True
-#        return False
