@@ -74,16 +74,19 @@ def get_plugin(plugin_name):
 
 
 def load_class(name):
-    logging.debug('loading the module %s' % name)
-    if os.path.isdir(os.path.dirname(name)):
-        path = name
-        name = os.path.basename(os.path.splitext(name)[0])
-        mod = imp.load_source(name, path)
-    else:
-        mod = importlib.import_module(name)
-    mod_name = (name.split('.')[-1])
-    mod2class = ''.join(x.capitalize() for x in mod_name.split('_'))
-    return getattr(mod, mod2class)
+    """ Returns an instance of the class associated with the module name.
+
+    :param name: Module name or path to a module file
+    :returns: An instance of the class associated with module.
+    """
+    path = name if os.path.dirname(name) else None
+    name = os.path.basename(os.path.splitext(name)[0]) if path else name
+    cls_name = ''.join(x.capitalize() for x in name.split('.')[-1].split('_'))
+    if cls_name in plugins.keys():
+        return plugins[cls_name]
+    mod = \
+        imp.load_source(name, path) if path else importlib.import_module(name)
+    return getattr(mod, cls_name)
 
 
 def plugin_loader(exp, plugin_dict, **kwargs):
