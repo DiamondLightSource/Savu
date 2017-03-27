@@ -6,7 +6,7 @@ It is currently very early in development and will be subject to massive refacto
 '''
 from savu.data.experiment_collection import Experiment
 from savu.data.meta_data import MetaData
-from savu.plugins.utils import load_plugin
+from savu.plugins.utils import get_plugin
 import os, sys
 import numpy as np
 from copy import deepcopy as copy
@@ -115,7 +115,7 @@ def runSavu(path2plugin, params, metaOnly, inputs, persistence):
 def process_init(path2plugin, inputs, parameters):
     parameters['in_datasets'] = [inputs['dataset_name']]
     parameters['out_datasets'] = [inputs['dataset_name']]
-    plugin = load_plugin(path2plugin.strip('.py'))
+    plugin = get_plugin(path2plugin.strip('.py'))
     plugin.exp = setup_exp_and_data(inputs, inputs['data'], plugin)
     plugin._set_parameters(parameters)
     plugin._set_plugin_datasets()
