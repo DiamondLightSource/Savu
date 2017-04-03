@@ -210,11 +210,6 @@ class Plugin(PluginDatasets):
         """
         return self.parameters[name]
 
-#    def plugin_setup_frames(self):
-#        pData = self.get_plugin_in_datasets()
-#        self.loops = [p._get_max_frames_process() for p in pData]
-#        self.slice_dirs = [p.get_slice_dimension() for p in pData]
-
     def base_pre_process(self):
         """ This method is called after the plugin has been created by the
         pipeline framework as a pre-processing step.
@@ -231,28 +226,6 @@ class Plugin(PluginDatasets):
 
     def plugin_process_frames(self, data):
         return self.process_frames(self.base_process_frames(data))
-
-#    def plugin_process_frames(self, data):
-#        result = []
-#        for sdata in self.__split_data(data):
-#            temp = self.process_frames(self.base_process_frames(sdata))
-#            result.append(temp if isinstance(temp, list) else [temp])
-#        return self.__stitch_data(result, self.slice_dirs)
-#
-#    def __split_data(self, data):
-#        split_data = []
-#        for i in range(len(data)):
-#            sd = self.slice_dirs[i]
-#            split = int(np.ceil(data[i].shape[sd]/self.loops[i]))
-#            split_data.append(np.array_split(data[i], split, axis=sd))
-#        return [[split_data[i][j] for i in range(len(data))] for j in
-#                range(len(split_data[0]))]
-#
-#    def __stitch_data(self, data, slice_dims):
-#        datasets = range(len(data[0]))
-#        splits = range(1, len(data))
-#        return [np.concatenate((data[j-1][i], data[j][i]), axis=slice_dims[i])
-#                for j in splits for i in datasets]
 
     def process_frames(self, data):
         """
