@@ -62,7 +62,7 @@ class BaseAstraRecon(BaseRecon):
                                        slice_dir=pattern['slice_dir'],
                                        core_dir=pattern['core_dir'])
             out_pData[1].plugin_data_setup(pattern['name'],
-                                           self.get_max_frames(), fixed=True)
+                                           self._get_frame_type())
 
     def pre_process(self):
         self.alg = self.parameters['reconstruction_type']
@@ -237,9 +237,6 @@ class BaseAstraRecon(BaseRecon):
         p_low = 0 if (ctr > mid) else shift
         p_high = shift + 0 if (ctr > mid) else 0
         return np.array([int(p_low), int(p_high)])
-
-    def get_max_frames(self):
-        return 16
 
     def get_citation_information(self):
         cite_info1 = CitationInformation()

@@ -154,14 +154,15 @@ class Chunking(object):
     def __get_max_frames_dict(self):
         current_sdir = self.current['slice_dir'][0]
         next_sdir = self.next['slice_dir'][0]
+        mft = 'max_frames_transfer'
         if current_sdir == next_sdir:
-            c_max = self.current['max_frames']
-            n_max = self.next['max_frames']
+            c_max = self.current[mft]
+            n_max = self.next[mft]
             least_common_multiple = (c_max*n_max)/gcd(c_max, n_max)
             ddict = {current_sdir: least_common_multiple}
         else:
-            ddict = {self.current['slice_dir'][0]: self.current['max_frames'],
-                     self.next['slice_dir'][0]: self.next['max_frames']}
+            ddict = {self.current['slice_dir'][0]: self.current[mft],
+                     self.next['slice_dir'][0]: self.next[mft]}
         return ddict
 
     def __max_frames_per_process(self, shape, nFrames):

@@ -22,8 +22,6 @@
 
 """
 
-import warnings
-
 import savu.data.data_structures.data_notes as notes
 from savu.core.utils import docstring_parameter
 
@@ -37,18 +35,18 @@ class Padding(object):
     def __init__(self, pattern):
         self.padding_dirs = {}
         self.pad_dict = None
+        self.dims = None
         self.pattern_name = pattern.keys()[0]
         self.pattern = pattern[self.pattern_name]
         self.dims = self.__set_dims()
+        self.mode = 'edge'
 
     def __set_dims(self):
         dims = []
-        for key in self.pattern.keys():
-            temp = self.pattern[key]
-            for dim in (temp,) if isinstance(temp, int) else temp:
-                dims.append(int(dim))
-        dims = list(set(dims))
-        for dim in dims:
+        core_dir = self.pattern['core_dir']
+        slice_dir = self.pattern['slice_dir']
+        self.pad_dims = list(set(core_dir + (slice_dir[0],)))
+        for dim in range(len(core_dir + slice_dir)):
             self.padding_dirs[dim] = {'before': 0, 'after': 0}
         return dims
 
@@ -68,13 +66,8 @@ class Padding(object):
 
         :param int padding: The pad amount
         """
-        try:
-            main_dir = self.pattern['main_dir']
-        except KeyError:
-            logging.warn('There is no main_dir associated with this '
-                            'pattern, using the first slice direction instead.')
-            main_dir = self.pattern['slice_dir'][0]
-        self._pad_direction(str(main_dir) + '.' + str(padding))
+        sdir = self.pattern['slice_dir'][0]
+        self._pad_direction(str(sdir) + '.' + str(padding))
 
     @docstring_parameter(notes._padding.__doc__)
     def pad_directions(self, pad_list):
@@ -102,9 +95,12 @@ class Padding(object):
             pdir, pval = pad_vals
 
         pdir = int(pdir)
-        if pdir not in self.dims:
-            warnings.warn('Dimension '+str(pdir)+' is not associated with the '
-                          'pattern ' + self.pattern_name + '. IGNORING!')
+        allowed_dims = \
+            self.pattern['core_dir'] + (self.pattern['slice_dir'][0],)
+        if pdir not in allowed_dims:
+            raise Exception('Only core and first slice dimensions, %s, can be '
+                            'padded. I cannot pad data dim %s in this plugin.'
+                            % (allowed_dims, str(pdir)))
         else:
             for p in pad_place:
                 self.padding_dirs[pdir][p] += int(pval)

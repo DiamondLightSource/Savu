@@ -21,7 +21,6 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
-import logging
 
 from savu.plugins.plugin import Plugin
 
@@ -53,27 +52,11 @@ class BaseCorrection(Plugin):
         else:
             pattern = 'PROJECTION'
 
-        flag = self.fixed_flag()
-
-        in_pData[0].plugin_data_setup(pattern, self.get_max_frames(),
-                                      fixed=flag)
-        out_pData[0].plugin_data_setup(pattern, self.get_max_frames(),
-                                       fixed=flag)
-
-    def fixed_flag(self):
-        return False
+        in_pData[0].plugin_data_setup(pattern, 'multiple')
+        out_pData[0].plugin_data_setup(pattern, 'multiple')
 
     def nInput_datasets(self):
         return 1
 
     def nOutput_datasets(self):
         return 1
-
-    def get_max_frames(self):
-        """
-        Should be overridden to define the max number of frames to process at
-        a time.
-
-        :returns:  an integer of the number of frames
-        """
-        return 16

@@ -190,7 +190,7 @@ class PluginList(object):
             if isinstance(value, str) and value.count('['):
                 value = \
                     [[a.split(']')[0].split('[')[1]] for a in value.split(';')]
-                value = [v[0].split(',') for v in value]
+                value = [v[0].replace(' ', '').split(',') for v in value]
                 new_str = str(value[0])
                 if len(value) > 1:
                     value = [new_str+';'+str(b) for b in value[1:]][0]
@@ -202,18 +202,18 @@ class PluginList(object):
 
     def _set_datasets_list(self, plugin):
         in_pData, out_pData = plugin.get_plugin_datasets()
-        max_frames = plugin.get_max_frames()
-        in_data_list = self._populate_datasets_list(in_pData, max_frames)
-        out_data_list = self._populate_datasets_list(out_pData, max_frames)
+        in_data_list = self._populate_datasets_list(in_pData)
+        out_data_list = self._populate_datasets_list(out_pData)
         self.datasets_list.append({'in_datasets': in_data_list,
                                    'out_datasets': out_data_list})
 
-    def _populate_datasets_list(self, data, max_frames):
+    def _populate_datasets_list(self, data):
         data_list = []
         for d in data:
             name = d.data_obj.get_name()
             pattern = copy.deepcopy(d.get_pattern())
-            pattern[pattern.keys()[0]]['max_frames'] = max_frames
+            pattern[pattern.keys()[0]]['max_frames_transfer'] = \
+                d._get_max_frames_process()
             data_list.append({'name': name, 'pattern': pattern})
         return data_list
 

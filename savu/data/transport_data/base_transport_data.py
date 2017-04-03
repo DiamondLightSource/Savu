@@ -34,16 +34,9 @@ class BaseTransportData(object):
         raise NotImplementedError("get_slice_list_per_process needs to be"
                                   " implemented in  %s", self.__class__)
 
-    def _get_padded_slice_data(self, input_slice_list):
+    def _get_padded_data(self, input_slice_list):
         """
         Fetch the data with relevant padding (as determined by the plugin).
         """
-        raise NotImplementedError("get_padded_slice_data needs to be"
-                                  " implemented in  %s", self.__class__)
-
-    def _get_unpadded_slice_data(self, input_slice_list, padded_dataset):
-        """
-        Unpad the padded slice data.
-        """
-        raise NotImplementedError("get_padded_slice_data needs to be"
+        raise NotImplementedError("get_padded_data needs to be"
                                   " implemented in  %s", self.__class__)

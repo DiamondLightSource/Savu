@@ -186,19 +186,19 @@ shape=new_shape, patterns=in_dataset[0])
 
                 * Copy the patterns: list_entry = 'name'
 
-                >>> out_dataset[0].crate_dataset(axis_labels=labels, \
+                >>> out_dataset[0].create_dataset(axis_labels=labels, \
 shape=new_shape, patterns={in_dataset[0], ['SINOGRAM', 'PROJECTION']})
 
                 * Copy patterns but remove dimensions: list_entry = \
 'name1.r1,r2...':
 
-                >>> out_dataset[0].crate_dataset(axis_labels=labels, \
+                >>> out_dataset[0].create_dataset(axis_labels=labels, \
 shape=new_shape, patterns={in_dataset[0], ['SINOGRAM.1', 'PROJECTION.1']})
 
                 * Copy ALL patterns but remove dimensions: list_entry = \
 '\*.r1,r2...':
 
-                >>> out_dataset[0].crate_dataset(axis_labels=labels, \
+                >>> out_dataset[0].create_dataset(axis_labels=labels, \
 shape=new_shape, patterns={in_dataset[0], '*.0'})
 
     """

@@ -32,23 +32,8 @@ class BaseFilter(Plugin):
     def __init__(self, name="BaseFilter"):
         super(BaseFilter, self).__init__(name)
 
-    def get_max_frames(self):
-        """
-        Should be overridden to define the max number of frames to process at
-        a time
-
-        :returns:  an integer of the number of frames
-        """
-        return 8
-
     def get_plugin_pattern(self):
         return 'PROJECTION'
-
-    def fix_data(self):
-        """ Set flag to determine whether the shape of data passed to the main
-        processing method should have a fixed size.
-        """
-        return False
 
     def raw_data(self):
         """ Return True if the output dataset should retain ImageKey/NoImageKey
@@ -70,11 +55,8 @@ class BaseFilter(Plugin):
         in_pData, out_pData = self.get_plugin_datasets()
         # set pattern_name and nframes to process for all datasets
         plugin_pattern = self.get_plugin_pattern()
-        in_pData[0].plugin_data_setup(plugin_pattern, self.get_max_frames(),
-                                      fixed=self.fix_data())
-        # fixed=True/False => same number of frames each time (uses padding)
-        out_pData[0].plugin_data_setup(plugin_pattern, self.get_max_frames(),
-                                       fixed=self.fix_data())
+        in_pData[0].plugin_data_setup(plugin_pattern, 'multiple')
+        out_pData[0].plugin_data_setup(plugin_pattern, 'multiple')
 
         self.exp.log(self.name + " End")
 

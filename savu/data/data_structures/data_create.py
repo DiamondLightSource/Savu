@@ -210,6 +210,7 @@ class DataCreate(object):
         """ Replace or add axis labels. """
         axis_labels = self.get_axis_labels()
         label = label.split('.')
+        print label
         axis_labels[int(label[0])] = {label[1]: label[2]}
         if int(label[0]) > self.data_info.get('nDims'):
             self.data_info.set(

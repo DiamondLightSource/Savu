@@ -37,8 +37,8 @@ class BaseRecon(Plugin):
     :param sino_pad: Pad the sinogram to remove edge artefacts in the \
         reconstructed ROI (NB. This will increase the size of the data and \
         the time taken to perform the reconstruction). Default: False.
-    :u*param log: Take the log of the data before \
-        reconstruction. Default: True.
+    :u*param log: Take the log of the data before reconstruction \
+        (True or False). Default: True.
     :u*param preview: A slice list of required frames. Default: [].
     """
     count = 0
@@ -178,15 +178,13 @@ class BaseRecon(Plugin):
         # set information relating to the plugin data
         in_pData, out_pData = self.get_plugin_datasets()
 
-        in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames(),
-                                      fixed=True)
+        in_pData[0].plugin_data_setup('SINOGRAM', self._get_frame_type())
         if len(in_pData) is 2:
             from savu.data.data_structures.data_types import Replicate
             if self.rep_dim:
                 in_dataset[1].data = Replicate(
                     in_dataset[1], in_dataset[0].get_shape(self.rep_dim))
-            in_pData[1].plugin_data_setup('VOLUME_XZ', self.get_max_frames(),
-                                          fixed=True)
+            in_pData[1].plugin_data_setup('VOLUME_XZ', self._get_frame_type())
 
         axis_labels = in_dataset[0].data_info.get('axis_labels')[0]
 
@@ -208,8 +206,10 @@ class BaseRecon(Plugin):
         out_dataset[0].add_volume_patterns(dim_volX, dim_volY, dim_volZ)
 
         # set pattern_name and nframes to process for all datasets
-        out_pData[0].plugin_data_setup('VOLUME_XZ', self.get_max_frames(),
-                                       fixed=True)
+        out_pData[0].plugin_data_setup('VOLUME_XZ', self._get_frame_type())
+
+    def _get_frame_type(self):
+        return 'multiple'
 
     def map_volume_dimensions(self, data, pData):
         data._finalise_patterns()

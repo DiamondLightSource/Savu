@@ -23,6 +23,8 @@
 
 """
 import sys
+import copy
+import numpy as np
 from fractions import gcd
 
 from savu.data.meta_data import MetaData
@@ -44,12 +46,12 @@ class PluginData(object):
         # this flag determines which data is passed. If false then just the
         # data, if true then all data including dark and flat fields.
         self.shape = None
+        self.shape_transfer = None
         self.core_shape = None
         self.multi_params = {}
         self.extra_dims = []
         self._plugin = plugin
-        self.fixed_dims = False
-        self.end_pad = False
+        self.fixed_dims = True
         self.split = None
 
     def _get_preview(self):
@@ -70,7 +72,7 @@ class PluginData(object):
         return temp
 
     def __set_pattern(self, name):
-        """ Set the pattern related information int the meta data dict.
+        """ Set the pattern related information in the meta data dict.
         """
         pattern = self.data_obj.get_data_patterns()[name]
         self.meta_data.set("name", name)
@@ -109,14 +111,23 @@ class PluginData(object):
         for core in set(core_dir):
             shape.append(self.data_obj.get_shape()[core])
         self.__set_core_shape(tuple(shape))
-        if self._get_frame_chunk() > 1:
-            shape.insert(slice_idx, self._get_frame_chunk())
+        shape_transfer = copy.copy(shape)
+        if self._get_max_frames_process() > 1:
+            shape.insert(slice_idx, self._get_max_frames_process())
+        if self._get_max_frames_transfer() > 1:
+            shape_transfer.insert(slice_idx, self._get_max_frames_transfer())
         self.shape = tuple(shape)
+        self.shape_transfer = tuple(shape_transfer)
 
     def get_shape(self):
         """ Get the shape of the plugin data to be processed each time.
         """
         return self.shape
+
+    def get_shape_transfer(self):
+        """ Get the shape of the plugin data to be transferred each time.
+        """
+        return self.shape_transfer
 
     def __set_core_shape(self, shape):
         """ Set the core shape to hold only the shape of the core dimensions
@@ -241,12 +252,28 @@ class PluginData(object):
             dlist.insert(i, slice(None))
         return tuple(dlist)
 
-    def _set_frame_chunk(self, nFrames):
-        """ Set the number of frames to process at a time """
-        self.meta_data.set("nFrames", nFrames)
+#    def _set_frame_chunk(self, nFrames):
+#        """ Set the number of frames to retrieve from file at a time """
+#        self.meta_data.set("nFrames", nFrames)
+#
+#    def _get_frame_chunk(self):
+#        """ Get the number of frames to retrieve from file at a time.
+#
+#        If the number of frames is not divisible by the previewing ``chunk``
+#        value then amend the number of frames to gcd(frames, chunk)
+#
+#        :returns: Number of frames to process
+#        :rtype: int
+#        """
+#        if self._plugin and self._plugin.chunk > 1:
+#            frame_chunk = self.meta_data.get("nFrames")
+#            chunk = self.data_obj.get_preview().get_starts_stops_steps(
+#                key='chunks')[self.get_slice_directions()[0]]
+#            self._set_frame_chunk(gcd(frame_chunk, chunk))
+#        return self.meta_data.get("nFrames")
 
-    def _get_frame_chunk(self):
-        """ Get the number of frames to be processes at a time.
+    def _get_max_frames_process(self):
+        """ Get the number of frames to process for each run of process_frames.
 
         If the number of frames is not divisible by the previewing ``chunk``
         value then amend the number of frames to gcd(frames, chunk)
@@ -255,27 +282,93 @@ class PluginData(object):
         :rtype: int
         """
         if self._plugin and self._plugin.chunk > 1:
-            frame_chunk = self.meta_data.get("nFrames")
+            frame_chunk = self.meta_data.get("max_frames_process")
             chunk = self.data_obj.get_preview().get_starts_stops_steps(
                 key='chunks')[self.get_slice_directions()[0]]
-            self._set_frame_chunk(gcd(frame_chunk, chunk))
-        return self.meta_data.get("nFrames")
+            self.meta_data.set('max_frames_process', gcd(frame_chunk, chunk))
+        return self.meta_data.get("max_frames_process")
 
-    def plugin_data_setup(self, pattern_name, chunk, fixed=False, split=None):
+    def _get_max_frames_transfer(self):
+        """ Get the number of frames to transfer for each run of
+        process_frames. """
+        return self.meta_data.get('max_frames_transfer')
+
+    def _calc_max_frames_transfer(self, nFrames):
+        """ The number of frames each process should get from file at a time.
+        """
+        fixed, _ = self._get_fixed_directions()
+        slice_dirs = [s for s in self.get_slice_directions() if s not in fixed]
+        shape = self.data_obj.get_shape() ### what shape is this?
+        print "shape in plugin data is", shape
+        total_frames = np.prod([shape[d] for d in slice_dirs])
+        print "total frames to process", total_frames
+        mpi_procs = len(self.data_obj.exp.meta_data.get('processes'))
+        print "n mpi processes", mpi_procs
+        
+        # process frames must divide transfer frames
+        # calculate number of frames to get from file, this has to be exact (with required padding)
+        # it must be divisible by max_frames_process and by the number of processes
+        # take into account dimension barriers! Change in hdf5_transport_data
+        # raise an exception if number is too high! For checking
+        mf = 2  # ***** temporary fix
+        if isinstance(nFrames, int):
+            self.meta_data.set('max_frames_process', nFrames)
+        elif nFrames == 'single':
+            self.meta_data.set('max_frames_process', 1)
+        elif nFrames == 'multiple':
+            # min of nFrames in first slice dimension and mf
+            self.meta_data.set('max_frames_process', mf)
+        else:
+            e_str = "The value of nFrames is not recognised.  Please choose "
+            "from 'single' and 'multiple' (or an integer in exceptional "
+            "circumstances)."
+            raise Exception(e_str)
+        # process frames should be a maximum of the size of the first slice dimension. 
+        # if this is one and multiple are required then add to padding multi-frames?
+
+        # data_object = self.data_obj
+
+#        # calculate this value based on number of processes and number of frames
+#        set_max = 20 # maximum frames that can be picked up from file at a time
+#        this max value of the required value from the plugin
+#        total_frames = 
+#       Consider max frames per dimension?
+#        How many live processes are there (CPU/GPU)
+        return mf
+
+    def plugin_data_setup(self, pattern, nFrames, split=None):
         """ Setup the PluginData object.
 
-        :param str pattern_name: A pattern name
-        :param int chunk: Number of frames to process at a time
-        :keyword bool fixed: setting fixed=True will ensure the plugin \
-            receives the same sized data array each time (padding if necessary)
-
+        # add more information into here via a decorator!
+        :param str pattern: A pattern name
+        :param int nFrames: How many frames to process at a time.  Choose from\
+            'single', 'multiple', 'fixed_multiple' or an integer (an integer \
+            should only ever be passed in exceptional circumstances)
         """
-        self.__set_pattern(pattern_name)
+        self.__set_pattern(pattern)
         chunks = \
             self.data_obj.get_preview().get_starts_stops_steps(key='chunks')
-        if self._plugin and (chunks[self.get_slice_directions()[0]] % chunk):
+
+        nFrames = self._calc_max_frames_transfer(nFrames)
+        self.meta_data.set('max_frames_transfer', nFrames)
+        if self._plugin and (chunks[self.get_slice_directions()[0]] % nFrames):
             self._plugin.chunk = True
-        self._set_frame_chunk(chunk)
         self.__set_shape()
-        self.fixed_dims = fixed
         self.split = split
+
+#    def plugin_data_setup(self, pattern_name, chunk, fixed=False, split=None):
+#        """ Setup the PluginData object.
+#        :param str pattern_name: A pattern name
+#        :param int chunk: Number of frames to process at a time
+#        :keyword bool fixed: setting fixed=True will ensure the plugin \
+#            receives the same sized data array each time (padding if necessary)
+#        """
+#        self.__set_pattern(pattern_name)
+#        chunks = \
+#            self.data_obj.get_preview().get_starts_stops_steps(key='chunks')
+#        if self._plugin and (chunks[self.get_slice_directions()[0]] % chunk):
+#            self._plugin.chunk = True
+#        self._set_frame_chunk(chunk)
+#        self.__set_shape()
+#        self.fixed_dims = fixed
+#        self.split = split
