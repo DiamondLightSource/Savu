@@ -47,7 +47,7 @@ class ListToProjections(BaseFilter, CpuPlugin):
     def pre_process(self):
         # assume all the projections are on the same axes
         in_datasets, _out_datasets = self.get_datasets()
-        positions = in_datasets[0].meta_data.get_meta_data("xy")[0]
+        positions = in_datasets[0].meta_data.get("xy")[0]
         self.setup_grids(positions)
         
         
@@ -77,7 +77,7 @@ class ListToProjections(BaseFilter, CpuPlugin):
 
         in_datasets, _out_datasets = self.get_datasets()
 
-        positions = in_datasets[0].meta_data.get_meta_data("xy")[0]# assume they are the same for all postiions
+        positions = in_datasets[0].meta_data.get("xy")[0]# assume they are the same for all postiions
 
         self.setup_grids(positions)
         out_projection_shape = self.meshgrids[0][1:,1:].shape

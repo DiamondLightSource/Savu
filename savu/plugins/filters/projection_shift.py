@@ -187,9 +187,9 @@ class ProjectionShift(BaseFilter, CpuPlugin):
 
     def post_process(self):
         out_data = self.get_out_datasets()[0]
-        self.get_in_datasets()[0].meta_data.set_meta_data(
+        self.get_in_datasets()[0].meta_data.set(
             'proj_align_shift_local', out_data.data[:, :])
-        self.get_in_datasets()[0].meta_data.set_meta_data(
+        self.get_in_datasets()[0].meta_data.set(
             'proj_align_shift', np.cumsum(out_data.data[:, :], axis=0))
 
     def get_max_frames(self):

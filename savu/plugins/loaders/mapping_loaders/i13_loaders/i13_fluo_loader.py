@@ -69,10 +69,10 @@ class I13FluoLoader(BaseLoader):
         if self.parameters['is_tomo']:
             rotation_angle = np.arange(self.parameters['theta_start'],self.parameters['theta_end'], self.parameters['theta_step'])
             labels.append('rotation_angle.degrees')
-            data_obj.meta_data.set_meta_data('rotation_angle', rotation_angle)
+            data_obj.meta_data.set('rotation_angle', rotation_angle)
         x = \
             data_obj.backing_file['entry1/instrument/lab_sxy/lab_sx'].value
-        data_obj.meta_data.set_meta_data('x', x)
+        data_obj.meta_data.set('x', x)
         # axis label
         
         ### set the y
@@ -81,7 +81,7 @@ class I13FluoLoader(BaseLoader):
         pos = np.zeros((2,len(y[0])))
         pos[0,:] = x[0]
         pos[1,:] = y[0]
-        data_obj.meta_data.set_meta_data('xy', pos)
+        data_obj.meta_data.set('xy', pos)
         # axis label
         labels.append('xy.microns')
         labels.append('idx.idx')

@@ -55,7 +55,7 @@ class I13StxmXrfLoader(BaseLoader):
         
         if self.parameters['is_map']:
             lab_sxy = data_obj.backing_file['entry1/instrument/lab_sxy/']
-            data_obj.meta_data.set_meta_data('xy', (lab_sxy['lab_sx'].value,lab_sxy['lab_sy'].value))
+            data_obj.meta_data.set('xy', (lab_sxy['lab_sx'].value,lab_sxy['lab_sy'].value))
             data_obj.set_axis_labels('xy.microns','ch.unit', 'spectrum.eV')
             data_obj.add_pattern('PROJECTION', core_dir=(0,),slice_dir=(1,2))
             data_obj.add_pattern('SPECTRUM', core_dir=(2,), slice_dir=(0,1))
@@ -66,7 +66,7 @@ class I13StxmXrfLoader(BaseLoader):
             if rotation_angle.ndim>1:
                 rotation_angle = rotation_angle[:,0]
             #print rotation_angle.shape
-            data_obj.meta_data.set_meta_data('rotation_angle', rotation_angle)
+            data_obj.meta_data.set('rotation_angle', rotation_angle)
             data_obj.set_axis_labels('rotation_angle.degrees',
                                      'x.pixel','ch.unit', 'spectrum.eV')
     

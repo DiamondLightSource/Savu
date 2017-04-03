@@ -49,9 +49,8 @@ class Replicate(BaseType):
     def __set_patterns(self, data_obj, patterns):
         for p in patterns:
             patterns[p]['slice_dir'] += (3,)
-        data_obj.data_info.set_meta_data('data_patterns', patterns)
+        data_obj.data_info.set('data_patterns', patterns)
 
     def _reset(self):
-        self.data_obj.data_info.set_meta_data('data_patterns',
-                                              self.original_patterns)
+        self.data_obj.data_info.set('data_patterns', self.original_patterns)
         return self.data

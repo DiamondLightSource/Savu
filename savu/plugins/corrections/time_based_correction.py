@@ -57,8 +57,8 @@ class TimeBasedCorrection(BaseCorrection, CpuPlugin):
         self.flat, self.flat_idx = \
             self.calc_average(inData.data.flat(), inData.data.get_index(1))
 
-        inData.meta_data.set_meta_data('multiple_dark', self.dark)
-        inData.meta_data.set_meta_data('multiple_flat', self.flat)
+        inData.meta_data.set('multiple_dark', self.dark)
+        inData.meta_data.set('multiple_flat', self.flat)
 
     def calc_average(self, data, key):
         idx = np.where(np.diff(key) > 1)[0]

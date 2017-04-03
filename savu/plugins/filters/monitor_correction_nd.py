@@ -59,7 +59,7 @@ class MonitorCorrectionNd(BaseFilter, CpuPlugin):
     def setup(self):
         in_datasets, out_datasets = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
-#         print in_pData[0].meta_data.get_meta_data('SINOGRAM')# 
+#         print in_pData[0].meta_data.get('SINOGRAM')# 
         tobecorrected = in_datasets[0]
         monitor = in_datasets[1]
         corrected = out_datasets[0]

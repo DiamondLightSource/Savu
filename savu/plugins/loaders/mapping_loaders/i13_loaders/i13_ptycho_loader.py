@@ -73,7 +73,7 @@ class I13PtychoLoader(BaseMultiModalLoader):
         if self.parameters['is_tomo']:
             rotation_angle = np.arange(self.parameters['theta_start'],self.parameters['theta_end'], self.parameters['theta_step'])
             labels.append('rotation_angle.degrees')
-            data_obj.meta_data.set_meta_data('rotation_angle', rotation_angle)
+            data_obj.meta_data.set('rotation_angle', rotation_angle)
 
 #             try:
 #                 rotation_angle = data_obj.backing_file['entry1/instrument/t1_theta/t1_theta'].value
@@ -82,15 +82,15 @@ class I13PtychoLoader(BaseMultiModalLoader):
 #                 # axis label
 #                 labels.append('rotation_angle.degrees')
 #                 
-#                 data_obj.meta_data.set_meta_data('rotation_angle', rotation_angle)
+#                 data_obj.meta_data.set('rotation_angle', rotation_angle)
 #             except KeyError:
 #                 logging.debug("Not a tomography!")
 
         ### GET THE AXES ###
         x = data_obj.backing_file['entry1/instrument/lab_sxy/lab_sx'].value*1e-6
-        data_obj.meta_data.set_meta_data('x', x)
+        data_obj.meta_data.set('x', x)
         y = data_obj.backing_file['entry1/instrument/lab_sxy/lab_sy'].value*1e-6
-        data_obj.meta_data.set_meta_data('y', y)
+        data_obj.meta_data.set('y', y)
         if rotation_angle is not None:
             pos = np.zeros((x.shape[0],2,x.shape[1]))
             pos[:,0,:] = y

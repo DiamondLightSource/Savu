@@ -69,7 +69,7 @@ class StxmAnalysis(BaseFilter, CpuPlugin):
         dpc_x = out_datasets[2]
         dpc_y = out_datasets[3]
         combined_dpc = out_datasets[4]
-        in_dataset[0].data_info.get_meta_data('axis_labels')
+        in_dataset[0].data_info.get_data('axis_labels')
         
         bf.create_dataset(patterns={in_dataset[0]: patterns},
                           axis_labels={in_dataset[0]: axis_labels},

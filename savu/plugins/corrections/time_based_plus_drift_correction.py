@@ -87,4 +87,4 @@ class TimeBasedPlusDriftCorrection(TimeBasedCorrection, CpuPlugin):
 
     def post_process(self):
         inData = self.get_in_datasets()[0]
-        inData.meta_data.set_meta_data('shift', self.shift_array)
+        inData.meta_data.set('shift', self.shift_array)
