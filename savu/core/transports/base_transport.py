@@ -114,9 +114,6 @@ class BaseTransport(object):
             transfer_data, slice_list = self.__transfer_all_data(
                     in_data, in_trans_sl, squeeze_dict)
 
-            for t in transfer_data:
-                print t.shape
-            
             # loop over the process data
             for i in range(nProcs):
                 plugin.set_current_slice_list(
@@ -126,15 +123,6 @@ class BaseTransport(object):
                 temp = plugin.plugin_process_frames(process_data)
                 temp = temp if isinstance(temp, list) else [temp]
                 for j in range(len(temp)):
-                    print "in transfer", transfer_data[j].shape
-                    print "in process", transfer_data[j][in_sl['process'][i][j]].shape
-                    print "out_transfer", temp[j].shape
-                    print "unpad", temp[j][out_sl['unpad'][i][j]].shape
-                    print "in_sl transfer", in_sl['transfer'][i][j]
-                    print "out_sl transfer", out_sl['transfer'][i][j]
-                    print "in_sl process", in_sl['process'][i][j]
-                    print "out_sl process", out_sl['process'][i][j]
-                    print "unpad sl", out_sl['unpad'][i][j]
                     result[j][out_sl['process'][i][j]] = \
                           temp[j][out_sl['unpad'][i][j]]
 

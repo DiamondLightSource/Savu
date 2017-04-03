@@ -270,6 +270,7 @@ class Hdf5TransportData(BaseTransportData):
         mft = self._get_plugin_data()._get_max_frames_transfer()
         mfp = self._get_plugin_data()._get_max_frames_process()
         sl['transfer'][-1] = self.__fix_list_length(sl['transfer'][-1], mft)
+
         if self.pad:
             sl['transfer'] = self.__pad_slice_list(
                     sl['transfer'], "-value['before']", "value['after']")
@@ -317,11 +318,9 @@ class Hdf5TransportData(BaseTransportData):
         process_gsl = self.__grouped_slice_list(process_ssl, mf_process)
 
         if dtype == 'in':
-            if self.pad:
-                pad_sl = self.__pad_slice_list(
-                        process_gsl, '0', 'sum(value.values())')
-                return pad_sl
-            return process_gsl # temporary
+            pad_sl = self.__pad_slice_list(
+                    process_gsl, '0', 'sum(value.values())')
+            return pad_sl
 
         unpad_sl = self.__get_unpad_slice_list(len(process_gsl))
         return process_gsl, unpad_sl
@@ -373,7 +372,6 @@ class Hdf5TransportData(BaseTransportData):
     def _get_padded_data(self, slice_list, end=False):
 #        if not self.pad and not end:
 #            return self.data[tuple(slice_list)]
-
         slice_list = list(slice_list)
         pData = self._get_plugin_data()
         pad_dims = list(set(pData.get_core_directions() +
@@ -381,6 +379,7 @@ class Hdf5TransportData(BaseTransportData):
         pad_list = []
         for i in range(len(pad_dims)):
             pad_list.append([0, 0])
+        shape = self.data.shape
 
         for i in range(len(pad_dims)):
             dim = pad_dims[i]
@@ -388,12 +387,12 @@ class Hdf5TransportData(BaseTransportData):
             if sl.start < 0:
                 pad_list[i][0] = -sl.start
                 slice_list[dim] = slice(0, sl.stop, sl.step)
-            diff = len(np.arange(sl.start, sl.stop, sl.step)) - self.get_shape()[dim]
+            diff = sl.stop - shape[dim]
             if diff > 0:
                 pad_list[i][1] = diff
                 slice_list[dim] = \
                     slice(slice_list[dim].start, sl.stop + diff, sl.step)
-                    
+
         data = self.data[tuple(slice_list)]
         if np.sum(pad_list):
             mode = pData.padding.mode if pData.padding else 'edge'
