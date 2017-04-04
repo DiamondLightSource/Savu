@@ -38,6 +38,59 @@ class Hdf5TransportData(BaseTransportData):
     def __init__(self):
         self.pad = False
 
+    def _single_slice_list(self, shape, process=False):
+        pData = self._get_plugin_data()
+        slice_dirs = pData.get_slice_directions()
+        core_dirs = np.array(pData.get_core_directions())
+
+        if process:
+            # remove any dimensions of length 1
+            dshape = self.get_shape()
+            remove_dims = [d for d in range(len(dshape)) if dshape[d] is 1]
+            slice_dirs = list(set(slice_dirs).difference(set(remove_dims)))
+            fix_dirs, value = [[]]*2
+            core_slice = np.array([slice(None)]*len(core_dirs))
+        else:
+            fix_dirs, value = pData._get_fixed_directions()
+            core_slice = self.__get_core_slices(core_dirs)
+
+        index = self.__get_slice_dirs_index(slice_dirs, shape, process=process)
+        nSlices = index.shape[1] if index.size else len(fix_dirs)
+        nDims = len(shape)
+
+        slice_list = []
+        for i in range(nSlices):
+            getitem = np.array([slice(None)]*nDims)
+            getitem[core_dirs] = core_slice[np.arange(len(core_dirs))]
+            for f in range(len(fix_dirs)):
+                getitem[fix_dirs[f]] = slice(value[f], value[f] + 1, 1)
+            for sdir in range(len(slice_dirs)):
+                getitem[slice_dirs[sdir]] = slice(index[sdir, i],
+                                                  index[sdir, i] + 1, 1)
+            slice_list.append(tuple(getitem))
+
+        slice_list = self.__remove_var_length_dimension(slice_list)
+        return slice_list
+
+    def __get_slice_dirs_index(self, slice_dirs, shape, process=False):
+        """
+        returns a list of arrays for each slice dimension, where each array
+        gives the indices for that slice dimension.
+        """
+        # create the indexing array
+        chunk, length, repeat = self.__chunk_length_repeat(slice_dirs, shape)
+        idx_list = []
+        for i in range(len(slice_dirs)):
+            c = chunk[i]
+            r = repeat[i]
+            if process:
+                values = np.arange(shape[i])
+            else:
+                values = self.__get_slice_dir_index(slice_dirs[i])
+            idx = np.ravel(np.kron(values, np.ones((r, c))))
+            idx_list.append(idx.astype(int))
+        return np.array(idx_list)
+
     def __chunk_length_repeat(self, slice_dirs, shape):
         """
         For each slice dimension, determine 3 values relevant to the slicing.
@@ -74,25 +127,6 @@ class Hdf5TransportData(BaseTransportData):
             sshape = [shape[sslice] for sslice in slice_dirs]
         return sshape
 
-    def __get_slice_dirs_index(self, slice_dirs, shape, process=True):
-        """
-        returns a list of arrays for each slice dimension, where each array
-        gives the indices for that slice dimension.
-        """
-        # create the indexing array
-        chunk, length, repeat = self.__chunk_length_repeat(slice_dirs, shape)
-        idx_list = []
-        for i in range(len(slice_dirs)):
-            c = chunk[i]
-            r = repeat[i]
-            if process:
-                values = np.arange(shape[i])
-            else:
-                values = self.__get_slice_dir_index(slice_dirs[i])
-            idx = np.ravel(np.kron(values, np.ones((r, c))))
-            idx_list.append(idx.astype(int))
-        return np.array(idx_list)
-
     def __get_slice_dir_index(self, dim, boolean=False):
         starts, stops, steps, chunks = \
             self.get_preview().get_starts_stops_steps()
@@ -125,36 +159,11 @@ class Hdf5TransportData(BaseTransportData):
             raise Exception('Cannot have a negative value in the slice list.')
         return dim_idx
 
-    def _single_slice_list(self, shape, process=False):
-        pData = self._get_plugin_data()
-        slice_dirs = pData.get_slice_directions()
-        core_dirs = np.array(pData.get_core_directions())
-        index = self.__get_slice_dirs_index(slice_dirs, shape, process=process)
-        fix_dirs, value = pData._get_fixed_directions()
-
-        nSlices = index.shape[1] if index.size else len(fix_dirs)
-        nDims = len(shape)
-        core_slice = np.array([slice(None)]*len(core_dirs)) if process else \
-            self.__get_core_slices(core_dirs)
-
-        slice_list = []
-        for i in range(nSlices):
-            getitem = np.array([slice(None)]*nDims)
-            getitem[core_dirs] = core_slice[np.arange(len(core_dirs))]
-            for f in range(len(fix_dirs)):
-                getitem[fix_dirs[f]] = slice(value[f], value[f] + 1, 1)
-            for sdir in range(len(slice_dirs)):
-                getitem[slice_dirs[sdir]] = slice(index[sdir, i],
-                                                  index[sdir, i] + 1, 1)
-            slice_list.append(tuple(getitem))
-
-        slice_list = self.__remove_var_length_dimension(slice_list)
-        return slice_list
-
     def __get_core_slices(self, core_dirs):
         core_slice = []
         starts, stops, steps, chunks = \
             self.get_preview().get_starts_stops_steps()
+            
         for c in core_dirs:
             if (chunks[c]) > 1:
                 if (stops[c] - starts[c] == 1):
@@ -266,9 +275,9 @@ class Hdf5TransportData(BaseTransportData):
         if dtype == 'out':
             sl['process'], sl['unpad'] = self.__get_process_slice_list(dtype)
             return sl
-
         mft = self._get_plugin_data()._get_max_frames_transfer()
         mfp = self._get_plugin_data()._get_max_frames_process()
+
         sl['transfer'][-1] = self.__fix_list_length(sl['transfer'][-1], mft)
 
         if self.pad:
@@ -277,6 +286,7 @@ class Hdf5TransportData(BaseTransportData):
         sl['process'] = self.__get_process_slice_list(dtype)
         sl['process'][-1] = self.__fix_list_length(sl['process'][-1], mfp)
         sl['frames'] = frames
+
         return sl
 
     def __get_frames_per_process(self, slice_list):
@@ -295,13 +305,13 @@ class Hdf5TransportData(BaseTransportData):
         max_frames = (1 if max_frames is None else max_frames)
         # amend shape here to be a multiple of max_frames
         transfer_ssl = self._single_slice_list(shape)
-
         if transfer_ssl is None:
             raise Exception("Data type %s does not support slicing in "
                             "directions %s" % (self.get_current_pattern_name(),
                                                self.get_slice_directions()))
 
         transfer_gsl = self.__grouped_slice_list(transfer_ssl, max_frames)
+
         split_list = self._get_plugin_data().split
         transfer_gsl = self.__split_frames(transfer_gsl, split_list) if \
             split_list else transfer_gsl
@@ -314,6 +324,7 @@ class Hdf5TransportData(BaseTransportData):
         pData = self._get_plugin_data()
         mf_process = pData.meta_data.get('max_frames_process')
         shape = pData.get_shape_transfer()
+
         process_ssl = self._single_slice_list(shape, process=True)
         process_gsl = self.__grouped_slice_list(process_ssl, mf_process)
 
@@ -372,6 +383,7 @@ class Hdf5TransportData(BaseTransportData):
     def _get_padded_data(self, slice_list, end=False):
 #        if not self.pad and not end:
 #            return self.data[tuple(slice_list)]
+
         slice_list = list(slice_list)
         pData = self._get_plugin_data()
         pad_dims = list(set(pData.get_core_directions() +

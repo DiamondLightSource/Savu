@@ -46,7 +46,6 @@ class SpectrumCrop(BaseFilter, CpuPlugin):
         return data_cropped
 
     def setup(self):
-        logging.debug('setting up the spectrum cropping')
         in_dataset, out_datasets = self.get_datasets()
         cropped = out_datasets[0]
         cropped.create_dataset(in_dataset[0])
@@ -65,16 +64,8 @@ class SpectrumCrop(BaseFilter, CpuPlugin):
 #         print shape
         cropped.set_shape(shape)
         in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
-        out_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
-
-    def get_max_frames(self):
-        """
-        This filter processes 1 frame at a time
-
-         :returns:  1
-        """
-        return 1
+        in_pData[0].plugin_data_setup('SPECTRUM', 'single')
+        out_pData[0].plugin_data_setup('SPECTRUM', 'single')
 
     def nOutput_datasets(self):
         return 1

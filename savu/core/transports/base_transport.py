@@ -111,26 +111,27 @@ class BaseTransport(object):
             in_trans_sl = [in_sl['transfer'][i][count] for i in range(nIn)]
             out_trans_sl = [out_sl['transfer'][i][count] for i in range(nOut)]
             current_sl = self.__get_slice_lists(in_trans_sl, nProcs, sdirs)
-            transfer_data, slice_list = self.__transfer_all_data(
-                    in_data, in_trans_sl, squeeze_dict)
+            transfer_data, slice_list = \
+                self.__transfer_all_data(in_data, in_trans_sl)
 
             # loop over the process data
             for i in range(nProcs):
                 plugin.set_current_slice_list(
                     [current_sl[j][i] for j in range(nIn)])
-                process_data = [transfer_data[j][in_sl['process'][i][j]] for
+                process_data = [squeeze_dict[j](transfer_data[j][in_sl['process'][i][j]]) for
                                 j in range(nIn)]
+
                 temp = plugin.plugin_process_frames(process_data)
                 temp = temp if isinstance(temp, list) else [temp]
                 for j in range(len(temp)):
                     result[j][out_sl['process'][i][j]] = \
-                          temp[j][out_sl['unpad'][i][j]]
+                          expand_dict[j](temp[j])[out_sl['unpad'][i][j]]
 
-            self.__return_all_data(
-                    out_data, out_trans_sl, result, expand_dict, end)
+            self.__return_all_data(out_data, out_trans_sl, result, end)
 
         cu.user_message("%s - 100%% complete" % (plugin.name))
         plugin._revert_preview(in_data)
+        print "******************plugin complete*******************\n"
 
     def __get_slice_lists(self, slice_lists, n_split, sdirs):
         """ Get data global slice lists that are used in each call to \
@@ -193,7 +194,7 @@ class BaseTransport(object):
         :returns: squeeze function
         :rtype: lambda
         """
-        max_frames = data._get_plugin_data()._get_max_frames_transfer()
+        max_frames = data._get_plugin_data()._get_max_frames_process()
         squeeze_dims = data._get_plugin_data().get_slice_directions()
         if max_frames > 1:
             squeeze_dims = squeeze_dims[1:]
@@ -214,7 +215,7 @@ class BaseTransport(object):
                 if key not in sl_dict:
                     sl_dict[key] = [value]
                 else:
-                    sl_dict[key] = sl_dict[key].append(value)
+                    sl_dict[key].append(value)
 
         for key in [k for k in ['process', 'unpad'] if k in sl_dict.keys()]:
             nData = range(len(sl_dict[key]))
@@ -222,30 +223,29 @@ class BaseTransport(object):
             sl_dict[key] = [[sl_dict[key][i][j] for i in nData] for j in rep]
         return sl_dict
 
-    def __transfer_all_data(self, data_list, slice_list, squeeze):
+    def __transfer_all_data(self, data_list, slice_list):
         """ Get all padded slice lists.
 
         :param Data data_list: datasets
         :param list(list(slice)) slice_list: slice lists for datasets
-        :param dict squeeze: squeeze functions for datasets
+#        :param dict squeeze: squeeze functions for datasets
         :returns: all data for this frame and associated padded slice lists
         :rtype: list(np.ndarray), list(tuple(slice))
         """
         section = []
         slist = []
         for idx in range(len(data_list)):
-            section.append(squeeze[idx](
-                    data_list[idx]._get_padded_data(slice_list[idx])))
+            section.append(data_list[idx]._get_padded_data(slice_list[idx]))
             slist.append(slice_list[idx])
         return section, slist
 
-    def __return_all_data(self, data_list, slice_list, result, expand, end):
+    def __return_all_data(self, data_list, slice_list, result, end):
         """ Transfer plugin results for current frame to backing files.
 
         :param list(Data) data_list: datasets
         :param list(list(slice)) slice_list: slice lists for datasets
         :param list(np.ndarray) result: plugin results
-        :param dict expand: expand functions for datasets
+#        :param dict expand: expand functions for datasets
         :param bool end: True if this is the last entry in the slice list.
         """
         result = [result] if type(result) is not list else result
@@ -253,7 +253,7 @@ class BaseTransport(object):
             if end:
                 result[idx] = self.__remove_excess_data(
                         data_list[idx], result[idx], slice_list[idx])
-            data_list[idx].data[slice_list[idx]] = expand[idx](result[idx])
+            data_list[idx].data[slice_list[idx]] = result[idx]
 
     def __remove_excess_data(self, data, result, slice_list):
         """ Remove any excess results due to padding for fixed length process \

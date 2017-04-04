@@ -108,15 +108,35 @@ class PluginData(object):
         slice_dir = self.get_slice_directions()
         dirs = list(set(core_dir + (slice_dir[0],)))
         slice_idx = dirs.index(slice_dir[0])
+        dshape = self.data_obj.get_shape()
         shape = []
         for core in set(core_dir):
-            shape.append(self.data_obj.get_shape()[core])
+            shape.append(dshape[core])
         self.__set_core_shape(tuple(shape))
+        
         shape_transfer = copy.copy(shape)
-        if self._get_max_frames_process() > 1:
-            shape.insert(slice_idx, self._get_max_frames_process())
-        if self._get_max_frames_transfer() > 1:
-            shape_transfer.insert(slice_idx, self._get_max_frames_transfer())
+        for sl in slice_dir:
+            shape_transfer.insert(sl, 1)
+
+        mfp = self._get_max_frames_process()
+        mft = self._get_max_frames_transfer()
+        if mfp > 1:
+            shape.insert(slice_idx, mfp)
+        if mft > 1:
+            shape_transfer[slice_idx] = mft
+
+#        # use this if transfer frames gsl does not stop at the boundaries            
+#        prod = False
+#        mft = self._get_max_frames_transfer()
+#        if mft > 1:
+#            for i in range(len(slice_dir)):
+#                shape_transfer.insert(slice_dir[i], dshape[i])
+#                prod = np.prod([dshape[slice_dir[s]] for s in range(i+1)])
+#                if prod == mft:
+#                    break
+#        if prod and prod != mft:
+#            raise Exception('Error when setting plugin data shape.')
+
         self.shape = tuple(shape)
         self.shape_transfer = tuple(shape_transfer)
 
@@ -291,27 +311,29 @@ class PluginData(object):
         total_frames = np.prod([shape[d] for d in sdir])
         mpi_procs = len(self.data_obj.exp.meta_data.get('processes'))
 
-        mft = np.ceil(float(total_frames)/mpi_procs)
+        mft = min(np.ceil(float(total_frames)/mpi_procs), shape[sdir[0]])
+
         if mft > max_mft:
+            fchoices = range(1, min(max_mft+1, shape[sdir[0]]))
             mft = self.__find_best_frame_distribution(
-                    range(1, max_mft+1), total_frames, mpi_procs)
+                fchoices, total_frames, mpi_procs)
 
         if nFrames == 'single':
             logging.info("Setting max frames transfer to %d", mft)
             logging.info("Setting max frames process to %d", 1)
             self.meta_data.set('max_frames_process', 1)
-            return mft
+            return int(mft)
 
         mfp = nFrames if isinstance(nFrames, int) else min(mft, shape[sdir[0]])
         multi = self.__find_multiples_of_a_that_divide_b(mft, mfp)
         mft = mfp if not multi else self.__find_best_frame_distribution(
             multi, total_frames, mpi_procs)
-        self.meta_data.set('max_frames_process', mfp)
+        self.meta_data.set('max_frames_process', int(mfp))
 
         logging.info("Setting max frames transfer to %d", mft)
         logging.info("Setting max frames process to %d", mfp)
 
-        return mft
+        return int(mft)
 
     def __find_multiples_of_a_that_divide_b(self, a, b):
         """ Find all positive multiples of b that divide a. """

@@ -59,6 +59,9 @@ class PluginRunner(object):
 
         for i in range(n_plugins):
             self.exp._set_experiment_for_current_plugin(i)
+            print "Running plugin %s" % exp_coll['plugin_dict'][i]
+            print "in datasets", self.exp.index['in_datasets']
+            print "out_datasets", self.exp.index['out_datasets']
             self.__run_plugin(exp_coll['plugin_dict'][i])
 
         #  ********* transport function ***********

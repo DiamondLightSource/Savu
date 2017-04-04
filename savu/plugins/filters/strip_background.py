@@ -88,7 +88,7 @@ class StripBackground(BaseFilter, CpuPlugin):
         logging.debug('setting up the background subtraction')
         in_dataset, out_datasets = self.get_datasets()
         #print in_dataset, out_datasets        
-        
+
         in_meta = in_dataset[0].meta_data
         in_dictionary = in_meta.get_dictionary()
         #print in_dictionary
@@ -99,23 +99,14 @@ class StripBackground(BaseFilter, CpuPlugin):
         background = out_datasets[1]
         background.create_dataset(in_dataset[0])
         background.meta_data.dict = deepcopy(in_dictionary)
-        
-        
+
         in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
-        out_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
-        out_pData[1].plugin_data_setup('SPECTRUM', self.get_max_frames())
+        in_pData[0].plugin_data_setup('SPECTRUM', 'single')
+        out_pData[0].plugin_data_setup('SPECTRUM', 'single')
+        out_pData[1].plugin_data_setup('SPECTRUM', 'single')
 
-
-        logging.debug("****STRIP_BACKGROUND AXIS LABELS*** %s", stripped.get_axis_labels())
-
-    def get_max_frames(self):
-        """
-        This filter processes 1 frame at a time
-
-         :returns:  1
-        """
-        return 1
+        logging.debug("****STRIP_BACKGROUND AXIS LABELS*** %s",
+                      stripped.get_axis_labels())
 
     def nOutput_datasets(self):
         return 2

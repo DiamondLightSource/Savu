@@ -56,11 +56,10 @@ class BaseAbsorptionCorrection(Plugin, CpuPlugin):
                 idx = list(in_meta_data.get('energy'))
             except KeyError:
                 logging.debug("No PeakEnergy or energy axis. This won't work")
-                raise 
-        self.nChannels = len(idx) 
-        print self.nChannels
+                raise
+        self.nChannels = len(idx)
         in_pData[0].plugin_data_setup('SINOGRAM', self.get_num_channels())
-        in_pData[1].plugin_data_setup('SINOGRAM', 1)
+        in_pData[1].plugin_data_setup('SINOGRAM', 'single')
         spectra = out_datasets[0]
         spectra.create_dataset(in_dataset[0])
 
