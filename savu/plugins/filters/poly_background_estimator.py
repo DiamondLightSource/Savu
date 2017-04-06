@@ -74,12 +74,7 @@ class PolyBackgroundEstimator(BaseFilter, CpuPlugin):
         self.axis = in_meta.get(alabel)
 
     def get_max_frames(self):
-        """
-        This filter processes 1 frame at a time
-
-         :returns:  1
-        """
-        return 1
+        return 'single'
 
     def __generate_parameters(self, n, weight, xdata, ydata):
         """

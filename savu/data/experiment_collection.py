@@ -221,6 +221,7 @@ class Experiment(object):
 
         # Add remaining output datasets to input datasets
         for name, data in self.index['out_data'].iteritems():
+            data.get_preview().set_preview([])
             self.index["in_data"][name] = copy.deepcopy(data)
         self.index['out_data'] = {}
 

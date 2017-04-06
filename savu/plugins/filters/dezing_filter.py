@@ -75,10 +75,7 @@ class DezingFilter(BaseFilter, CpuPlugin):
         return self._dezing(data[0])
 
     def get_max_frames(self):
-        """
-        :returns:  an integer of the number of frames. Default 100
-        """
-        return 16
+        return 'multiple'
 
     def raw_data(self):
         return True

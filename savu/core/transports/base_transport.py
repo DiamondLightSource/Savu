@@ -93,7 +93,7 @@ class BaseTransport(object):
         nProcs = len(in_sl['process'])
         nTrans = len(in_sl['transfer'][0])
 
-        plugin.set_global_frame_index(sl['frames'] for sl in in_sl)
+        plugin.set_global_frame_index([f for f in in_sl['frames']])
 
         squeeze_dict = self.__set_functions(in_data, 'squeeze')
         expand_dict = self.__set_functions(out_data, 'expand')
@@ -109,6 +109,7 @@ class BaseTransport(object):
                             (plugin.name, percent_complete))
 
             in_trans_sl = [in_sl['transfer'][i][count] for i in range(nIn)]
+
             out_trans_sl = [out_sl['transfer'][i][count] for i in range(nOut)]
             current_sl = self.__get_slice_lists(in_trans_sl, nProcs, sdirs)
             transfer_data, slice_list = \
@@ -118,9 +119,9 @@ class BaseTransport(object):
             for i in range(nProcs):
                 plugin.set_current_slice_list(
                     [current_sl[j][i] for j in range(nIn)])
-                process_data = [squeeze_dict[j](transfer_data[j][in_sl['process'][i][j]]) for
-                                j in range(nIn)]
-
+                process_data = \
+                    [squeeze_dict[j](transfer_data[j][in_sl['process'][i][j]])
+                     for j in range(nIn)]
                 temp = plugin.plugin_process_frames(process_data)
                 temp = temp if isinstance(temp, list) else [temp]
                 for j in range(len(temp)):
@@ -131,11 +132,11 @@ class BaseTransport(object):
 
         cu.user_message("%s - 100%% complete" % (plugin.name))
         plugin._revert_preview(in_data)
-        print "******************plugin complete*******************\n"
 
     def __get_slice_lists(self, slice_lists, n_split, sdirs):
         """ Get data global slice lists that are used in each call to \
         process_frames. """
+
         new_slice_list = []
         for i in range(len(slice_lists)):
             dim = sdirs[i]
@@ -228,7 +229,6 @@ class BaseTransport(object):
 
         :param Data data_list: datasets
         :param list(list(slice)) slice_list: slice lists for datasets
-#        :param dict squeeze: squeeze functions for datasets
         :returns: all data for this frame and associated padded slice lists
         :rtype: list(np.ndarray), list(tuple(slice))
         """
@@ -245,7 +245,6 @@ class BaseTransport(object):
         :param list(Data) data_list: datasets
         :param list(list(slice)) slice_list: slice lists for datasets
         :param list(np.ndarray) result: plugin results
-#        :param dict expand: expand functions for datasets
         :param bool end: True if this is the last entry in the slice list.
         """
         result = [result] if type(result) is not list else result

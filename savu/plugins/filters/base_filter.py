@@ -55,8 +55,8 @@ class BaseFilter(Plugin):
         in_pData, out_pData = self.get_plugin_datasets()
         # set pattern_name and nframes to process for all datasets
         plugin_pattern = self.get_plugin_pattern()
-        in_pData[0].plugin_data_setup(plugin_pattern, 'multiple')
-        out_pData[0].plugin_data_setup(plugin_pattern, 'multiple')
+        in_pData[0].plugin_data_setup(plugin_pattern, self.get_max_frames())
+        out_pData[0].plugin_data_setup(plugin_pattern, self.get_max_frames())
 
         self.exp.log(self.name + " End")
 
@@ -65,3 +65,6 @@ class BaseFilter(Plugin):
 
     def nOutput_datasets(self):
         return 1
+
+    def get_max_frames(self):
+        return 'multiple'

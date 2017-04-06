@@ -118,11 +118,7 @@ class BaseAzimuthalIntegrator(Plugin, CpuPlugin):
         out_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
 
     def get_max_frames(self):
-        """
-        This filter processes 1 frame at a time
-         :returns:  1
-        """
-        return 1
+        return 'single'
 
     def nOutput_datasets(self):
         return 1

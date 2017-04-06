@@ -179,4 +179,4 @@ class DownsampleFilter(Plugin, CpuPlugin):
 
     def get_max_frames(self):
         # This filter processes one frame at a time
-        return 1
+        return 'single'

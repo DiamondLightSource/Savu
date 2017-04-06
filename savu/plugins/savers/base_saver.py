@@ -73,4 +73,4 @@ class BaseSaver(Plugin):
         return 0
 
     def get_max_frames(self):
-        return 1
+        return 'single'

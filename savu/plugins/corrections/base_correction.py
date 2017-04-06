@@ -52,8 +52,11 @@ class BaseCorrection(Plugin):
         else:
             pattern = 'PROJECTION'
 
-        in_pData[0].plugin_data_setup(pattern, 'multiple')
-        out_pData[0].plugin_data_setup(pattern, 'multiple')
+        in_pData[0].plugin_data_setup(pattern, self.get_max_frames())
+        out_pData[0].plugin_data_setup(pattern, self.get_max_frames())
+
+    def get_max_frames(self):
+        return 'multiple'
 
     def nInput_datasets(self):
         return 1

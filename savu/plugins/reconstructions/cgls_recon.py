@@ -54,8 +54,6 @@ class CglsRecon(BaseRecon, CpuPlugin):
 
         voxels = ccpi_recon.cgls(sino.astype(np.float32), angles.astype(np.float32),
                            cors[0], resolution, num_iterations, nthreads)
-        print np.max(voxels)
-
         voxels = voxels[:160, :160, ...]
         if voxels.ndim is 3:
             voxels = np.transpose(voxels, (0, 2, 1))

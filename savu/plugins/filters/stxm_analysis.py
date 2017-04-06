@@ -111,6 +111,6 @@ class StxmAnalysis(BaseFilter, CpuPlugin):
 
     def nOutput_datasets(self):
         return 5
-    
+
     def get_max_frames(self):
-        return 1
+        return 'single'

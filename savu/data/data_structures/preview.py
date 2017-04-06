@@ -96,7 +96,6 @@ class Preview(object):
         """ Add previewing params to data_info dictionary and set reduced
         shape.
         """
-        print z
         set_mData = self.get_data_obj().data_info.set
         set_mData('starts', starts)
         set_mData('stops', stops)

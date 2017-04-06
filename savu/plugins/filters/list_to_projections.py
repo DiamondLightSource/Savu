@@ -111,7 +111,6 @@ class ListToProjections(BaseFilter, CpuPlugin):
                 slice_dir = list(set(allDimsOut)-set(core_dir))
                 dim_info = {'core_dir': core_dir, 'slice_dir': slice_dir}
                 reshaped_projections.add_pattern(pattern, **dim_info)
-        print outshape
         out_pData[0].plugin_data_setup('PROJECTION', self.get_max_frames())
 #     
     def setup_grids(self,positions):
@@ -145,10 +144,7 @@ class ListToProjections(BaseFilter, CpuPlugin):
 
 
     def get_max_frames(self):
-        """
-        This filter processes 1 frame at a time
-        """
-        return 1
+        return 'single'
 
     def get_plugin_pattern(self):
         return 'PROJECTION'

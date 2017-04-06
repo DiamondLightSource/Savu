@@ -83,7 +83,7 @@ class SimpleRecon(BaseRecon, CpuPlugin):
         return result
 
     def get_max_frames(self):
-        return 1
+        return 'single'
 
     def get_citation_information(self):
         cite_info = CitationInformation()

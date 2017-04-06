@@ -82,13 +82,7 @@ class ScikitimageFilterBackProjection(BaseRecon, CpuPlugin):
         return result
 
     def get_max_frames(self):
-        """
-        Should be overridden to define the max number of frames to process at
-        a time
-
-        :returns:  an integer of the number of frames
-        """
-        return 1
+        return 'single'
 
     def get_citation_information(self):
         cite_info = CitationInformation()

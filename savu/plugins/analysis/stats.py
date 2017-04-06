@@ -57,7 +57,7 @@ class Stats(Plugin, CpuPlugin):
             in_meta_data.set('max', maximum)
 
     def get_max_frames(self):
-        return 1
+        return 'single'
 
     def setup(self):
         self.exp.log(self.name + " Start")

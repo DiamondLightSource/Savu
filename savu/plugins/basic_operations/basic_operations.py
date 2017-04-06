@@ -76,7 +76,7 @@ class BasicOperations(Plugin, CpuPlugin):
         return 'var'
 
     def get_max_frames(self):
-        return 8
+        return 'multiple'
 
     def _set_data_mappings(self):
         mapping_dict = {}

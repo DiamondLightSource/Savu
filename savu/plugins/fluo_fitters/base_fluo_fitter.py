@@ -245,12 +245,7 @@ class BaseFluoFitter(Plugin, CpuPlugin):
         return self.lookup[key]
 
     def get_max_frames(self):
-        """
-        This filter processes 1 frame at a time
-
-         :returns:  1
-        """
-        return 1
+        return 'single'
 
     def nOutput_datasets(self):
         return 4

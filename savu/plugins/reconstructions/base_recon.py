@@ -178,13 +178,13 @@ class BaseRecon(Plugin):
         # set information relating to the plugin data
         in_pData, out_pData = self.get_plugin_datasets()
 
-        in_pData[0].plugin_data_setup('SINOGRAM', self._get_frame_type())
+        in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
         if len(in_pData) is 2:
             from savu.data.data_structures.data_types import Replicate
             if self.rep_dim:
                 in_dataset[1].data = Replicate(
                     in_dataset[1], in_dataset[0].get_shape(self.rep_dim))
-            in_pData[1].plugin_data_setup('VOLUME_XZ', self._get_frame_type())
+            in_pData[1].plugin_data_setup('VOLUME_XZ', self.get_max_frames())
 
         axis_labels = in_dataset[0].data_info.get('axis_labels')[0]
 
@@ -206,9 +206,9 @@ class BaseRecon(Plugin):
         out_dataset[0].add_volume_patterns(dim_volX, dim_volY, dim_volZ)
 
         # set pattern_name and nframes to process for all datasets
-        out_pData[0].plugin_data_setup('VOLUME_XZ', self._get_frame_type())
+        out_pData[0].plugin_data_setup('VOLUME_XZ', self.get_max_frames())
 
-    def _get_frame_type(self):
+    def get_max_frames(self):
         return 'multiple'
 
     def map_volume_dimensions(self, data, pData):
@@ -223,15 +223,6 @@ class BaseRecon(Plugin):
         dim_volY = dim_detY
         dim_volZ = dim_detX
         return dim_volX, dim_volY, dim_volZ
-
-    def get_max_frames(self):
-        """
-        Should be overridden to define the max number of frames to process at
-        a time
-
-        :returns:  an integer of the number of frames
-        """
-        return 8
 
     def nInput_datasets(self):
         return self.nIn

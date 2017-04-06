@@ -39,13 +39,9 @@ class ReproduceFit(BaseFitter):
         super(ReproduceFit, self).__init__("ReproduceFit")
 
     def pre_process(self):
-        print "in the preprocess"
         self.function = self.getFitFunction(self.parameters['peak_shape'])
-        print "finished preprocess"
-
 
     def process_frames(self, data):
-        print "I am in filter frames"
         FitWeights,FitWidths, _FitAreas,Backgrounds = data
         npts = len(FitWeights)
         params = []
@@ -55,7 +51,6 @@ class ReproduceFit(BaseFitter):
         Individual_curves = np.zeros((len(self.PeakEnergy), len(self.energy)))
         for i in range(npts):
             Individual_curves[i,:] = self.function(FitWeights[i], FitWidths[i], self.energy, self.PeakEnergy[i]) + Backgrounds
-        print "the sum shape is "+str(Sum.shape) 
         return [Sum, Individual_curves]
 
     def setup(self):
@@ -78,7 +73,6 @@ class ReproduceFit(BaseFitter):
                                   axis_labels={in_dataset[-1]: ['~-2.idx.unit']},
                                   shape=new_shape)
 
-        
         ss_slice = range(len(new_shape) - 2)
 #         print "spectrum stack slice dims are" + str(ss_slice)
         spectrum_stack = {'core_dir': (-2, -1), 'slice_dir': tuple(ss_slice)}
@@ -93,7 +87,6 @@ class ReproduceFit(BaseFitter):
         in_pData[3].plugin_data_setup('SPECTRUM', self.get_max_frames())
         out_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
         out_pData[1].plugin_data_setup("SPECTRUM_STACK", self.get_max_frames())
-        print "at the end of the setup"
 
 
     def nInput_datasets(self):

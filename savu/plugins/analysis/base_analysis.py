@@ -32,13 +32,7 @@ class BaseAnalysis(Plugin):
         super(BaseAnalysis, self).__init__(name)
 
     def get_max_frames(self):
-        """
-        Should be overridden to define the max number of frames to process at
-        a time
-
-        :returns:  an integer of the number of frames
-        """
-        return 8
+        return 'multiple'
 
     def get_plugin_pattern(self):
         return 'PROJECTION'

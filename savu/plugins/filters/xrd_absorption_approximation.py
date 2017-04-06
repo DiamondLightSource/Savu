@@ -124,7 +124,7 @@ class XrdAbsorptionApproximation(BaseFilter, CpuPlugin):
         return 1
 
     def get_max_frames(self):
-        return 1
+        return 'single'
     
     def get_mu(self, compound, energy, density):
         '''

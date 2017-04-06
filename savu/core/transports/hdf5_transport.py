@@ -31,6 +31,9 @@ from savu.core.transport_setup import MPI_setup
 
 class Hdf5Transport(BaseTransport):
 
+    def __init__(self):
+        super(Hdf5Transport, self).__init__()
+
     def _transport_initialise(self, options):
         MPI_setup(options)
         self.exp_coll = None

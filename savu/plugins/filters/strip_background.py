@@ -101,12 +101,15 @@ class StripBackground(BaseFilter, CpuPlugin):
         background.meta_data.dict = deepcopy(in_dictionary)
 
         in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup('SPECTRUM', 'single')
-        out_pData[0].plugin_data_setup('SPECTRUM', 'single')
-        out_pData[1].plugin_data_setup('SPECTRUM', 'single')
+        in_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
+        out_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
+        out_pData[1].plugin_data_setup('SPECTRUM', self.get_max_frames())
 
         logging.debug("****STRIP_BACKGROUND AXIS LABELS*** %s",
                       stripped.get_axis_labels())
 
+    def get_max_frames(self):
+        return 'single'
+        
     def nOutput_datasets(self):
         return 2

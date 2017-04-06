@@ -67,10 +67,14 @@ class MonitorCorrection(Plugin, CpuPlugin):
         corrected.create_dataset(tobecorrected)
         in_pData, out_pData = self.get_plugin_datasets()
 #         pattern = tobecorrected.get_data_patterns().keys()[-1]# just take the first one
-        in_pData[0].plugin_data_setup(self.parameters['pattern'], 'multiple')
-        in_pData[1].plugin_data_setup(self.parameters['pattern'], 'multiple')
-        out_pData[0].plugin_data_setup(self.parameters['pattern'], 'multiple')
+        frames = self.get_max_frames()
+        in_pData[0].plugin_data_setup(self.parameters['pattern'], frames)
+        in_pData[1].plugin_data_setup(self.parameters['pattern'], frames)
+        out_pData[0].plugin_data_setup(self.parameters['pattern'], frames)
 
+    def nframes(self):
+        return 'multiple'
+        
     def nOutput_datasets(self):
         return 1
 

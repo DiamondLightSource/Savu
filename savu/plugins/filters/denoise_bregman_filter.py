@@ -62,4 +62,4 @@ class DenoiseBregmanFilter(BaseFilter, CpuPlugin):
         return result
 
     def get_max_frames(self):
-        return 8
+        return 'multiple'

@@ -78,7 +78,7 @@ class TomopyRecon(BaseRecon, CpuPlugin):
         return np.transpose(recon, (1, 0, 2))
 
     def get_max_frames(self):
-        return 8
+        return 'multiple'
 
     def get_allowed_kwargs(self):
         return {

@@ -64,8 +64,11 @@ class SpectrumCrop(BaseFilter, CpuPlugin):
 #         print shape
         cropped.set_shape(shape)
         in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup('SPECTRUM', 'single')
-        out_pData[0].plugin_data_setup('SPECTRUM', 'single')
+        in_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
+        out_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
+
+    def get_max_frames(self):
+        return 'single'
 
     def nOutput_datasets(self):
         return 1

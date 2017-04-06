@@ -200,7 +200,7 @@ class PluginData(object):
         label_dim = \
             self.data_obj.find_axis_label_dimension(label, contains=contains)
         plugin_dims = self.get_core_directions()
-        if self._get_frame_chunk() > 1:
+        if self._get_max_frames_process > 1:
             plugin_dims += (self.get_slice_directions()[0],)
         return list(set(plugin_dims)).index(label_dim)
 
@@ -328,12 +328,12 @@ class PluginData(object):
         multi = self.__find_multiples_of_a_that_divide_b(mft, mfp)
         mft = mfp if not multi else self.__find_best_frame_distribution(
             multi, total_frames, mpi_procs)
-        self.meta_data.set('max_frames_process', int(mfp))
+        self.meta_data.set('max_frames_process', int(mfp if mfp != 1 else 2))
 
         logging.info("Setting max frames transfer to %d", mft)
         logging.info("Setting max frames process to %d", mfp)
 
-        return int(mft)
+        return int(mft if mft != 1 else 2)
 
     def __find_multiples_of_a_that_divide_b(self, a, b):
         """ Find all positive multiples of b that divide a. """

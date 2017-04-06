@@ -246,11 +246,7 @@ class VoCentering(BaseFilter, CpuPlugin):
         return 2
 
     def get_max_frames(self):
-        """
-        This filter processes 1 frame at a time
-         :returns:  1
-        """
-        return 1
+        return 'single'
 
     def get_citation_information(self):
         cite_info = CitationInformation()

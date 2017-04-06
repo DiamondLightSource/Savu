@@ -101,11 +101,7 @@ class Pymca(BaseFilter, CpuPlugin):
         
         
     def get_max_frames(self):
-        """
-        This filter processes 1 frame at a time
-
-        """
-        return 1
+        return 'single'
 
     def get_plugin_pattern(self):
         return 'SPECTRUM'

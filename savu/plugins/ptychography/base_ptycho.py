@@ -156,7 +156,7 @@ class BasePtycho(Plugin, CpuPlugin):  # also make one for gpu
         return self.probe_size
     
     def get_max_frames(self):
-        return 1
+        return 'single'
     
     def get_output_axis_units(self):
         return 'nm'

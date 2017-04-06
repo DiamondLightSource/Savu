@@ -89,23 +89,17 @@ class RavenFilter(BaseFilter, CpuPlugin):
                                        direction='FFTW_BACKWARD')
 
     def process_frames(self, data):
-        output = np.empty_like(data[0])
-        nSlices = data[0].shape[self.slice_dir]
-        for i in range(nSlices):
-            self.sslice[self.slice_dir] = i
-            sino = fft.fftshift(self.fft_object(data[0][tuple(self.sslice)]))
-            sino[self.row1:self.row2] = \
-                sino[self.row1:self.row2] * self.filtercomplex
-            sino = fft.ifftshift(sino)
-            sino = self.ifft_object(sino).real
-            output[self.sslice] = sino
-        return output
+        sino = fft.fftshift(self.fft_object(data[0]))
+        sino[self.row1:self.row2] = \
+            sino[self.row1:self.row2] * self.filtercomplex
+        sino = fft.ifftshift(sino)
+        return self.ifft_object(sino).real
 
     def get_plugin_pattern(self):
         return 'SINOGRAM'
 
     def get_max_frames(self):
-        return 16
+        return 'single'
 
     def get_citation_information(self):
         cite_info = CitationInformation()

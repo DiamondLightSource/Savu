@@ -61,16 +61,11 @@ class FindPeaks(BaseFilter, CpuPlugin):
         in_pData[0].plugin_data_setup("SPECTRUM", self.get_max_frames())
         nFrames = in_pData[0].get_total_frames()
         labels = ['frames.index', 'position.idx']
-        out_dataset[0].create_dataset(axis_labels=labels,
-                                      shape=(nFrames, in_dataset[0].get_shape()[-1]))
+        shape = (nFrames, in_dataset[0].get_shape()[-1])
+        out_dataset[0].create_dataset(axis_labels=labels, shape=shape)
         out_dataset[0].add_pattern("CHANNEL", slice_dir=(1,), core_dir=(0,))
-        out_dataset[0].add_pattern("SPECTRUM", slice_dir=(0,), core_dir= (1,))
+        out_dataset[0].add_pattern("SPECTRUM", slice_dir=(0,), core_dir=(1,))
         out_pData[0].plugin_data_setup("SPECTRUM", self.get_max_frames())
 
     def get_max_frames(self):
-        """
-        This filter processes 1 frame at a time
-
-         :returns:  1
-        """
-        return 1
+        return 'single'

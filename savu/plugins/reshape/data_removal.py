@@ -98,4 +98,4 @@ class DataRemoval(BaseFilter, CpuPlugin):
         return 1
 
     def get_max_frames(self):
-        return 8
+        return 'multiple'
