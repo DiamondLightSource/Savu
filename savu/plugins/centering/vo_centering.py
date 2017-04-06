@@ -161,12 +161,13 @@ class VoCentering(BaseFilter, CpuPlugin):
     def process_frames(self, data):
         # if data is greater than a certain size
         # data = data[0][::self.parameters['step']]
-        # Reducing noise by smooth filtering, it's important
-        sino = filter.median_filter(data[0], (2, 2))
+        # Use different smooth filters for coarse and fine search.  
+        sino_cs = filter.gaussian_filter(data[0], (3,1))        
         logging.debug("performing coarse search")
-        (raw_cor, raw_metric) = self._coarse_search(sino)
+        (raw_cor, raw_metric) = self._coarse_search(sino_cs)
         logging.debug("performing fine search")
-        (cor, listmetric) = self._fine_search(sino, raw_cor)
+        sino_fs = filter.median_filter(data[0], (2, 2))
+        (cor, listmetric) = self._fine_search(sino_fs, raw_cor)
         logging.debug("%d %d", raw_cor, cor)
         return [np.array([cor]), np.array([cor])]
 
