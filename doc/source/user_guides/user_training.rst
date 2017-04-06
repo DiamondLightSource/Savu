@@ -10,8 +10,8 @@ tomographic experiments, and their complexity, across multiple fields.
 
 In full-field tomography, where the whole region-of-interest is irradiated by the beam simultaneously, 
 time-resolved imaging is becoming increasingly popular.  In mapping tomography, where a thin beam of 
-x-rays is translated and rotated across the region of interest, multi-modal data collection is common and
-incorporates a variety of measurements, such as x-ray absorption, diffraction and fluorescence. 
+X-rays is translated and rotated across the region of interest, multi-modal data collection is common and
+incorporates a variety of measurements, such as X-ray absorption, diffraction and fluorescence. 
 
 This wide range of experimental requirements leads to a wider range of software processing requirements.  
 Savu, developed in the Data Analysis Group at Diamond Light Source Ltd., is the new tomography data 
