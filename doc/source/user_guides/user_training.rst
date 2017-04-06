@@ -72,7 +72,7 @@ Example: View a process list in the Savu configurator.
     >>> open /dls/science/groups/das/SavuTraining/process_lists/simple_tomo_pipeline.nxs  # open a process list
     >>> exit                # exit the configurator
 
-.. note:: The process lists created by the configurator are in NEXUS (.nxs) format.
+.. note:: The process lists created by the configurator are in NeXus (.nxs) format (http://www.nexusformat.org/).
 
 For examples of how to create and amend process lists see :ref:`create_process_list` and :ref:`amend_process_list`.
 
