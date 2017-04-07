@@ -53,6 +53,7 @@ class BaseRecon(Plugin):
         self.frame_angles = None
         self.frame_cors = None
         self.frame_init_data = None
+        self.centre = None
 
     def base_dynamic_data_info(self):
         if self.parameters['init_vol']:
@@ -95,12 +96,13 @@ class BaseRecon(Plugin):
         return self.br_vol_shape
 
     def set_centre_of_rotation(self, inData, mData, pData):
-        try:
-            cor = mData.get("centre_of_rotation")
-        except KeyError:
+        if 'centre_of_rotation' in mData.get_dictionary().keys():
+            cor = mData.get('centre_of_rotation')
+        else:
             cor = np.ones(inData.get_shape()[pData.get_slice_dimension()])
             cor *= self.parameters['centre_of_rotation']
         self.cor = cor
+        self.centre = self.cor[0]
 
     def set_function(self, pad_shape):
         if not pad_shape:
@@ -131,7 +133,16 @@ class BaseRecon(Plugin):
         angles = \
             self.angles[:, sl[self.scan_dim]] if self.scan_dim else self.angles
         self.frame_angles = angles
-        self.frame_cors = self.cor_func(self.cor[sl[self.main_dir]])
+
+        dim_sl = sl[self.main_dir]
+        self.frame_cors = self.cor_func(self.cor[dim_sl])
+        if not self.frame_cors:
+            self.frame_cors = np.array([self.centre])
+        len_data = len(np.arange(dim_sl.start, dim_sl.stop, dim_sl.step))
+
+        missing = [self.centre]*(len(self.frame_cors) - len_data)
+        self.frame_cors = np.append(self.frame_cors, missing)
+
         self.frame_init_data = init
         data[0] = self.sino_func(data[0])
         return data

@@ -273,7 +273,6 @@ class Hdf5TransportData(BaseTransportData):
 
         pad_dict = self._get_plugin_data().padding._get_padding_directions()
         shape = self.get_shape()
-        print "padding with pad dict", pad_dict
         for ddir, value in pad_dict.iteritems():
             exec('inc_start = ' + inc_start_str)
             exec('inc_stop = ' + inc_stop_str)
@@ -327,7 +326,7 @@ class TransferData(object):
     def _get_dict_in(self):
         sl_dict = {}
         mft = self.pData._get_max_frames_transfer()
-        sl = self.__get_slice_list(self.shape)
+        sl = self._get_slice_list(self.shape)
         sl[-1] = self.data._fix_list_length(sl[-1], mft)  # switched this and the line below? (only makes a difference for MPI)
         sl, sl_dict['frames'] = self.data._get_frames_per_process(sl)
         if self.data.pad:
@@ -338,11 +337,11 @@ class TransferData(object):
 
     def _get_dict_out(self):
         sl_dict = {}
-        sl = self.__get_slice_list(self.shape)
+        sl = self._get_slice_list(self.shape)
         sl_dict['transfer'], _ = self.data._get_frames_per_process(sl)
         return sl_dict
 
-    def __get_slice_list(self, shape):
+    def _get_slice_list(self, shape):
         max_frames = self.pData._get_max_frames_transfer()
         max_frames = (1 if max_frames is None else max_frames)
         # amend shape here to be a multiple of max_frames
@@ -354,6 +353,7 @@ class TransferData(object):
         slice_dir = self.pData.get_slice_directions()[0]
         transfer_gsl = \
             self.data._grouped_slice_list(transfer_ssl, max_frames, slice_dir)
+
         split_list = self.pData.split
         transfer_gsl = self.__split_frames(transfer_gsl, split_list) if \
             split_list else transfer_gsl
@@ -375,7 +375,7 @@ class TransferData(object):
 
     def _get_padded_data(self, slice_list, end=False):
 #        if not self.pad and not end:
-#            return self.data[tuple(slice_list)]        
+#            return self.data[tuple(slice_list)]
         slice_list = list(slice_list)
         pData = self.pData
         pad_dims = list(set(pData.get_core_directions() +
@@ -425,7 +425,7 @@ class ProcessData(object):
     def _get_dict_in(self):
         sl_dict = {}
         mfp = self.pData._get_max_frames_process()
-        sl = self.__get_slice_list()
+        sl = self._get_slice_list()
         if self.sdir:
             sl[-1] = self.data._fix_list_length(sl[-1], mfp)
         sl = self.data._pad_slice_list(sl, '0', 'sum(value.values())')
@@ -434,11 +434,11 @@ class ProcessData(object):
 
     def _get_dict_out(self):
         sl_dict = {}
-        sl_dict['process'] = self.__get_slice_list()
+        sl_dict['process'] = self._get_slice_list()
         sl_dict['unpad'] = self.__get_unpad_slice_list(len(sl_dict['process']))
         return sl_dict
 
-    def __get_slice_list(self,):
+    def _get_slice_list(self,):
         """ Splits a file transfer slice list into a list of (padded) slices
         required for each loop of process_frames.
         """

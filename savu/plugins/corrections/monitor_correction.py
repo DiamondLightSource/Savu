@@ -72,7 +72,7 @@ class MonitorCorrection(Plugin, CpuPlugin):
         in_pData[1].plugin_data_setup(self.parameters['pattern'], frames)
         out_pData[0].plugin_data_setup(self.parameters['pattern'], frames)
 
-    def nframes(self):
+    def get_max_frames(self):
         return 'multiple'
         
     def nOutput_datasets(self):

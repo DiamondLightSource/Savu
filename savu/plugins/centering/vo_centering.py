@@ -89,7 +89,6 @@ class VoCentering(BaseFilter, CpuPlugin):
     def _coarse_search(self, sino):
         # search minsearch to maxsearch in 1 pixel steps
         smin, smax = self.parameters['search_area']
-        logging.debug("SMIN and SMAX %d %d", smin, smax)
         (Nrow, Ncol) = sino.shape
         centre_fliplr = (Ncol - 1.0)/2.0
         # check angles here to determine if a sinogram should be chopped off.
@@ -102,14 +101,12 @@ class VoCentering(BaseFilter, CpuPlugin):
         compensateimage[:] = sino[-1]
         start_shift = self._get_start_shift(centre_fliplr)*2
         list_shift = np.arange(smin, smax + 1)*2 - start_shift
-        logging.debug("%s", list_shift)
         list_metric = np.zeros(len(list_shift), dtype=np.float32)
         mask = self._create_mask(2*Nrow-1, Ncol,
                                  0.5*self.parameters['ratio']*Ncol)
 
         count = 0
         for i in list_shift:
-            logging.debug("list shift %d", i)
             sino2a = np.roll(sino2, i, axis=1)
             if i >= 0:
                 sino2a[:, 0:i] = compensateimage[:, 0:i]
@@ -146,7 +143,6 @@ class VoCentering(BaseFilter, CpuPlugin):
         num1 = 0
         factor1 = np.mean(sino[-1,lefttake:righttake])
         for i in listshift:
-            logging.debug("list shift %d", i)
             sino2a = ndi.interpolation.shift(sino2, (0, i), prefilter=False)
             factor2 = np.mean(sino2a[0,lefttake:righttake])
             sino2a = sino2a*factor1/factor2
@@ -161,8 +157,8 @@ class VoCentering(BaseFilter, CpuPlugin):
     def process_frames(self, data):
         # if data is greater than a certain size
         # data = data[0][::self.parameters['step']]
-        # Use different smooth filters for coarse and fine search.  
-        sino_cs = filter.gaussian_filter(data[0], (3,1))        
+        # Use different smooth filters for coarse and fine search.
+        sino_cs = filter.gaussian_filter(data[0], (3, 1))
         logging.debug("performing coarse search")
         (raw_cor, raw_metric) = self._coarse_search(sino_cs)
         logging.debug("performing fine search")
@@ -176,19 +172,11 @@ class VoCentering(BaseFilter, CpuPlugin):
         in_datasets, out_datasets = self.get_datasets()
 
         cor_raw = np.squeeze(out_datasets[0].data[...])
-        # special case of one cor_raw value (i.e. only one sinogram)
-        if not cor_raw.shape:
-            # add to metadata
-            cor_raw = out_datasets[0].data[...]
-            self.populate_meta_data('cor_raw', cor_raw)
-            self.populate_meta_data('centre_of_rotation', cor_raw)
-            return
-
         cor_fit = np.squeeze(out_datasets[1].data[...])
         fit = np.zeros(cor_fit.shape)
         fit[:] = np.mean(cor_raw)
         cor_fit = fit
-        out_datasets[1].data[:] =  cor_fit[:, np.newaxis]
+        out_datasets[1].data[:] = cor_fit[:, np.newaxis]
 
         self.populate_meta_data('cor_raw', cor_raw)
         self.populate_meta_data('centre_of_rotation', cor_fit)

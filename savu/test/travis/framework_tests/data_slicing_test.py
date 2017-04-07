@@ -24,35 +24,64 @@
 import unittest
 import savu.test.test_utils as tu
 from savu.data.data_structures.data_add_ons import Padding
+from savu.data.transport_data.hdf5_transport_data import \
+    TransferData, ProcessData
 
 
 class Test(unittest.TestCase):
 
+    def _get_grouped_transfer_slice_list(self, data):
+        tdata = TransferData('in', data)
+        return tdata._get_slice_list(data.get_shape())
+
+    def _get_grouped_process_slice_list(self, data):
+        tdata = ProcessData('in', data)
+        return tdata._get_slice_list()
+
+    def _get_transfer_slice_list_per_process(self, data):
+        
+        
+    def _get_process_slice_list_per_process(self, data):
+        
+
     def test_slice(self):
+        # transfer or process slice list
         data, pData = tu.get_data_object(tu.load_test_data("tomo"))
 
-        pData.plugin_data_setup('PROJECTION', 1)
-        gsl = data._get_grouped_slice_list()
-        self.assertEqual(len(gsl), 91)
-        self.assertEqual(len(gsl[0]), 3)
+        pData.plugin_data_setup('PROJECTION', 'single')
+        trans_gsl = self._get_grouped_transfer_slice_list(data)
+        proc_gsl = self._get_grouped_process_slice_list(data)
 
-        pData.plugin_data_setup('SINOGRAM', 1)
-        gsl = data._get_grouped_slice_list()
-        self.assertEqual(len(gsl), 135)
-        self.assertEqual(len(gsl[0]), 3)
+        self.assertEqual(len(trans_gsl), 3)
+        self.assertEqual(len(proc_gsl), 32)
+        self.assertEqual(len(proc_gsl[0]), 3)
+
+        pData.plugin_data_setup('SINOGRAM', 'single')
+        trans_gsl = self._get_grouped_transfer_slice_list(data)
+        proc_gsl = self._get_grouped_process_slice_list(data)
+
+        self.assertEqual(len(trans_gsl), 5)
+        self.assertEqual(len(proc_gsl), 32)
+        self.assertEqual(len(proc_gsl[0]), 3)
 
     def test_slice_group(self):
         data, pData = tu.get_data_object(tu.load_test_data("tomo"))
 
-        pData.plugin_data_setup('PROJECTION', 8)
-        gsl = data._get_grouped_slice_list()
-        self.assertEqual(len(gsl), 12)
-        self.assertEqual(len(gsl[0]), 3)
+        pData.plugin_data_setup('PROJECTION', 'multiple')
+        trans_gsl = self._get_grouped_transfer_slice_list(data)
+        proc_gsl = self._get_grouped_process_slice_list(data)
 
-        pData.plugin_data_setup('SINOGRAM', 8)
-        gsl = data._get_grouped_slice_list()
-        self.assertEqual(len(gsl), 17)
-        self.assertEqual(len(gsl[0]), 3)
+        self.assertEqual(len(trans_gsl), 3)
+        self.assertEqual(len(proc_gsl), 1)
+        self.assertEqual(len(proc_gsl[0]), 3)
+
+        pData.plugin_data_setup('SINOGRAM', 'multiple')
+        trans_gsl = self._get_grouped_transfer_slice_list(data)
+        proc_gsl = self._get_grouped_process_slice_list(data)
+
+        self.assertEqual(len(trans_gsl), 5)
+        self.assertEqual(len(proc_gsl), 1)
+        self.assertEqual(len(proc_gsl[0]), 3)
 
     def test_get_slice_list_per_process(self):
         exp = tu.load_test_data("tomo")
@@ -60,7 +89,7 @@ class Test(unittest.TestCase):
 
         processes = ['t', 't', 't', 't']
 
-        pData.plugin_data_setup('PROJECTION', 1)
+        pData.plugin_data_setup('PROJECTION', 'single')
         sl = data._single_slice_list()
         total = []
         for i in range(len(processes)):
