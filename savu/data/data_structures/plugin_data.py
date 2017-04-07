@@ -311,7 +311,8 @@ class PluginData(object):
         total_frames = np.prod([shape[d] for d in sdir])
         mpi_procs = len(self.data_obj.exp.meta_data.get('processes'))
 
-        mft = min(np.ceil(float(total_frames)/mpi_procs), shape[sdir[0]])
+        #mft = min(np.ceil(float(total_frames)/mpi_procs), shape[sdir[0]])
+        mft = np.ceil(float(total_frames)/mpi_procs)
 
         if mft > max_mft:
             fchoices = range(1, min(max_mft+1, shape[sdir[0]]))

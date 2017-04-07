@@ -164,18 +164,26 @@ class Hdf5TransportData(BaseTransportData):
                 core_slice.append(slice(starts[c], stops[c], steps[c]))
         return np.array(core_slice)
 
-    def __banked_list(self, slice_list):
+    def __banked_list(self, slice_list, transfer_flag):
         shape = self.get_shape()
         slice_dirs = self._get_plugin_data().get_slice_directions()
-        chunk, length, repeat = self.__chunk_length_repeat(slice_dirs, shape)
-        banked = self.__split_list(slice_list, length[0])
+
+        # don't stop at boundaries if transferring
+        if transfer_flag:
+            banked = [slice_list]
+            length = len(slice_list)
+        else:
+            chunk, length, repeat = \
+                self.__chunk_length_repeat(slice_dirs, shape)
+            banked = self.__split_list(slice_list, length[0])
         return banked, length, slice_dirs
 
-    def _grouped_slice_list(self, slice_list, max_frames, group_dim):
+    def _grouped_slice_list(self, slice_list, max_frames, group_dim,
+                            transfer=False):
         if group_dim is None:
             return slice_list
 
-        banked, length, slice_dir = self.__banked_list(slice_list)
+        banked, length, slice_dir = self.__banked_list(slice_list, transfer)
         starts, stops, steps, chunks = \
             self.get_preview().get_starts_stops_steps()
 
@@ -351,9 +359,8 @@ class TransferData(object):
                             "directions %s" % (self.get_current_pattern_name(),
                                                self.get_slice_directions()))
         slice_dir = self.pData.get_slice_directions()[0]
-        transfer_gsl = \
-            self.data._grouped_slice_list(transfer_ssl, max_frames, slice_dir)
-
+        transfer_gsl = self.data._grouped_slice_list(transfer_ssl, max_frames,
+                                                     slice_dir, transfer=True)
         split_list = self.pData.split
         transfer_gsl = self.__split_frames(transfer_gsl, split_list) if \
             split_list else transfer_gsl
