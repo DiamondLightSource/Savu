@@ -97,7 +97,7 @@ class MPI_setup(object):
     def __set_logger_single(self, options):
         """ Set single-threaded logging.
         """
-        log_format = 'L %(relativeCreated)12d M CPU0 0' + \
+        log_format = 'L %(relativeCreated)12d M000 CPU00' + \
                      ' %(levelname)-6s %(message)s'
         filename = os.path.join(options['log_path'], 'log.txt')
         level = cu._get_log_level(options)
