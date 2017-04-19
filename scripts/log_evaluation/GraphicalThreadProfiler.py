@@ -21,7 +21,7 @@ def get_frame(file, the_key):
     import itertools
 
     names = ['L', 'Time', 'Machine', 'CPU', 'Type', 'Message']
-    data = pd.io.parsers.read_fwf(file, widths=[2, 13, 5, 5, 6, 1000],
+    data = pd.io.parsers.read_fwf(file, widths=[2, 13, 5, 6, 7, 1000],
                                   names=names)
     data['Key'] = data['Machine'] + data['CPU']
     frame = ((data[data.Type == "INFO"])[data.columns[[6, 5, 1]]])
@@ -94,8 +94,13 @@ def main():
 
     (options, args) = parser.parse_args()
 
-    filename = [os.getcwd() + '/' + args[0]]
-    convert(filename)
+    if len(args) > 0:
+        filename = [args[0]]
+        if not args[0].startswith(os.path.sep):
+            filename = [os.getcwd() + os.path.sep + args[0]]
+        convert(filename)
+    else:
+        print("You need to specify a filename to process")
 
 if __name__ == "__main__":
     main()
