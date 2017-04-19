@@ -85,7 +85,6 @@ class BaseTransport(object):
         :param plugin plugin: The current plugin instance.
         """
         in_data, out_data = plugin.get_datasets()
-        sdirs = [d.get_slice_directions()[0] for d in in_data]
         in_sl = self.__get_all_slice_lists(in_data, 'in')
         out_sl = self.__get_all_slice_lists(out_data, 'out')
         nIn = len(in_data)
@@ -101,6 +100,22 @@ class BaseTransport(object):
         result = [np.empty(d._get_plugin_data().get_shape_transfer())
                   for d in out_data]
 
+        # ****** could this be different for different datasets?
+        print "\nin process list", in_sl['process']
+        print "\nout process list", out_sl['process'], "\n"
+        print "IN nProcess", len(in_sl['process'])
+        print "IN nTransfer", len(in_sl['transfer'][0])
+        print "OUT nProcess", len(out_sl['process'])
+        print "OUT nTransfer", len(out_sl['transfer'][0])
+        print "nIn", nIn
+        print "nOut", nOut
+
+        for d in in_data:
+            print "in", d.get_shape()
+
+        for d in out_data:
+            print "out", d.get_shape()
+
         # loop over the transfer data
         for count in range(nTrans):
             end = True if count == nTrans-1 else False
@@ -109,9 +124,9 @@ class BaseTransport(object):
                             (plugin.name, percent_complete))
 
             in_trans_sl = [in_sl['transfer'][i][count] for i in range(nIn)]
-
             out_trans_sl = [out_sl['transfer'][i][count] for i in range(nOut)]
-            current_sl = self.__get_slice_lists(in_trans_sl, nProcs, sdirs)
+            #current_sl = self.__get_slice_lists(in_trans_sl, nProcs, sdirs)
+            current_sl = [in_sl['current'][i][count] for i in range(nIn)]
             transfer_data, slice_list = \
                 self.__transfer_all_data(in_data, in_trans_sl)
 
@@ -133,21 +148,21 @@ class BaseTransport(object):
         cu.user_message("%s - 100%% complete" % (plugin.name))
         plugin._revert_preview(in_data)
 
-    def __get_slice_lists(self, slice_lists, n_split, sdirs):
-        """ Get data global slice lists that are used in each call to \
-        process_frames. """
-
-        new_slice_list = []
-        for i in range(len(slice_lists)):
-            dim = sdirs[i]
-            sl = slice_lists[i][dim]
-            split = \
-                np.array_split(np.arange(sl.start, sl.stop, sl.step), n_split)
-            temp = [slice(s[0], s[-1]+1, sl.step) for s in split]
-            unravel = np.array([slice_lists[i]]*len(temp))
-            unravel[:, dim] = temp
-            new_slice_list.append(unravel)
-        return new_slice_list
+#    def __get_slice_lists(self, slice_lists, n_split, sdirs):
+#        """ Get data global slice lists that are used in each call to \
+#        process_frames. """
+#
+#        new_slice_list = []
+#        for i in range(len(slice_lists)):
+#            dim = sdirs[i]
+#            sl = slice_lists[i][dim]
+#            split = \
+#                np.array_split(np.arange(sl.start, sl.stop, sl.step), n_split)
+#            temp = [slice(s[0], s[-1]+1, sl.step) for s in split]
+#            unravel = np.array([slice_lists[i]]*len(temp))
+#            unravel[:, dim] = temp
+#            new_slice_list.append(unravel)
+#        return new_slice_list
 
     def __set_functions(self, data_list, name):
         """ Create a dictionary of functions to remove (squeeze) or re-add

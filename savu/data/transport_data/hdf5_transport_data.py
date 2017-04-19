@@ -164,43 +164,21 @@ class Hdf5TransportData(BaseTransportData):
                 core_slice.append(slice(starts[c], stops[c], steps[c]))
         return np.array(core_slice)
 
-    def __banked_list(self, slice_list, transfer_flag):
+    def _banked_list(self, slice_list):
         shape = self.get_shape()
         slice_dirs = self._get_plugin_data().get_slice_directions()
-
-        # don't stop at boundaries if transferring
-        if transfer_flag:
-            banked = [slice_list]
-            length = len(slice_list)
-        else:
-            chunk, length, repeat = \
-                self.__chunk_length_repeat(slice_dirs, shape)
-            banked = self.__split_list(slice_list, length[0])
+        chunk, length, repeat = self.__chunk_length_repeat(slice_dirs, shape)
+        banked = self._split_list(slice_list, length[0])
         return banked, length, slice_dirs
 
-    def _grouped_slice_list(self, slice_list, max_frames, group_dim,
-                            transfer=False):
-        if group_dim is None:
-            return slice_list
+    def _group_dimension(self, sl, dim, step):
+        start = sl[0][dim].start
+        stop = sl[-1][dim].stop
+        working_slice = list(sl[0])
+        working_slice[dim] = slice(start, stop, step)
+        return tuple(working_slice)
 
-        banked, length, slice_dir = self.__banked_list(slice_list, transfer)
-        starts, stops, steps, chunks = \
-            self.get_preview().get_starts_stops_steps()
-
-        grouped = []
-        for group in banked:
-            sub_groups = self.__split_list(group, max_frames)
-
-            for sub in sub_groups:
-                start = sub[0][group_dim].start
-                stop = sub[-1][group_dim].stop
-                step = steps[group_dim]
-                working_slice = list(sub[0])
-                working_slice[group_dim] = slice(start, stop, step)
-                grouped.append(tuple(working_slice))
-        return grouped
-
-    def __split_list(self, the_list, size):
+    def _split_list(self, the_list, size):
             return [the_list[x:x+size] for x in xrange(0, len(the_list), size)]
 
     # This method only works if the split dimensions in the slice list contain
@@ -333,9 +311,9 @@ class TransferData(object):
 
     def _get_dict_in(self):
         sl_dict = {}
-        mft = self.pData._get_max_frames_transfer()
+        mfp = self.pData._get_max_frames_process()
         sl = self._get_slice_list(self.shape)
-        sl[-1] = self.data._fix_list_length(sl[-1], mft)  # switched this and the line below? (only makes a difference for MPI)
+        sl[-1] = self.data._fix_list_length(sl[-1], mfp)
         sl, sl_dict['frames'] = self.data._get_frames_per_process(sl)
         if self.data.pad:
             sl = self.data._pad_slice_list(
@@ -354,13 +332,15 @@ class TransferData(object):
         max_frames = (1 if max_frames is None else max_frames)
         # amend shape here to be a multiple of max_frames
         transfer_ssl = self._local_single_slice_list(shape)
+
         if transfer_ssl is None:
             raise Exception("Data type %s does not support slicing in "
                             "directions %s" % (self.get_current_pattern_name(),
                                                self.get_slice_directions()))
-        slice_dir = self.pData.get_slice_directions()[0]
-        transfer_gsl = self.data._grouped_slice_list(transfer_ssl, max_frames,
-                                                     slice_dir, transfer=True)
+        slice_dir = self.pData.get_slice_directions()
+        transfer_gsl = \
+            self.__grouped_slice_list(transfer_ssl, max_frames, slice_dir)
+
         split_list = self.pData.split
         transfer_gsl = self.__split_frames(transfer_gsl, split_list) if \
             split_list else transfer_gsl
@@ -380,6 +360,52 @@ class TransferData(object):
             nSlices, nDims, core_slice, core_dirs, slice_dirs, fix, index)
         return ssl
 
+    def __grouped_slice_list(self, slice_list, max_frames, group_dim):
+        if group_dim is None:
+            return slice_list
+        steps = self.data.get_preview().get_starts_stops_steps('steps')
+        sub_groups = self.data._split_list(slice_list, max_frames)
+        grouped = []
+
+        for sub in sub_groups:
+            temp = list(sub[0])
+            for dim in group_dim:
+                temp[dim] = \
+                    self.data._group_dimension(sub, dim, steps[dim])[dim]
+            grouped.append(tuple(temp))
+        return grouped
+
+#    def _get_padded_data(self, slice_list, end=False):
+##        if not self.pad and not end:
+##            return self.data[tuple(slice_list)]
+#        slice_list = list(slice_list)
+#        pData = self.pData
+#        pad_dims = list(set(pData.get_core_directions() +
+#                            (pData.get_slice_directions()[0],)))
+#        pad_list = []
+#        for i in range(len(pad_dims)):
+#            pad_list.append([0, 0])
+#        shape = self.data.data.shape
+#
+#        for i in range(len(pad_dims)):
+#            dim = pad_dims[i]
+#            sl = slice_list[dim]
+#            if sl.start < 0:
+#                pad_list[i][0] = -sl.start
+#                slice_list[dim] = slice(0, sl.stop, sl.step)
+#            diff = sl.stop - shape[dim]
+#            if diff > 0:
+#                pad_list[i][1] = diff
+#                slice_list[dim] = \
+#                    slice(slice_list[dim].start, sl.stop + diff, sl.step)
+#
+#        data = self.data.data[tuple(slice_list)]
+#        if np.sum(pad_list):
+#            mode = pData.padding.mode if pData.padding else 'edge'
+#            return np.pad(data, tuple(pad_list), mode=mode)
+#        return data
+
+
     def _get_padded_data(self, slice_list, end=False):
 #        if not self.pad and not end:
 #            return self.data[tuple(slice_list)]
@@ -388,19 +414,18 @@ class TransferData(object):
         pad_dims = list(set(pData.get_core_directions() +
                             (pData.get_slice_directions()[0],)))
         pad_list = []
-        for i in range(len(pad_dims)):
+        for i in range(len(slice_list)):
             pad_list.append([0, 0])
         shape = self.data.data.shape
 
-        for i in range(len(pad_dims)):
-            dim = pad_dims[i]
+        for dim in range(len(pad_dims)):
             sl = slice_list[dim]
             if sl.start < 0:
-                pad_list[i][0] = -sl.start
+                pad_list[dim][0] = -sl.start
                 slice_list[dim] = slice(0, sl.stop, sl.step)
             diff = sl.stop - shape[dim]
             if diff > 0:
-                pad_list[i][1] = diff
+                pad_list[dim][1] = diff
                 slice_list[dim] = \
                     slice(slice_list[dim].start, sl.stop + diff, sl.step)
 
@@ -432,7 +457,7 @@ class ProcessData(object):
     def _get_dict_in(self):
         sl_dict = {}
         mfp = self.pData._get_max_frames_process()
-        sl = self._get_slice_list()
+        sl, sl_dict['current'] = self._get_slice_list()
         if self.sdir:
             sl[-1] = self.data._fix_list_length(sl[-1], mfp)
         sl = self.data._pad_slice_list(sl, '0', 'sum(value.values())')
@@ -441,7 +466,7 @@ class ProcessData(object):
 
     def _get_dict_out(self):
         sl_dict = {}
-        sl_dict['process'] = self._get_slice_list()
+        sl_dict['process'], _ = self._get_slice_list()
         sl_dict['unpad'] = self.__get_unpad_slice_list(len(sl_dict['process']))
         return sl_dict
 
@@ -453,9 +478,10 @@ class ProcessData(object):
         mf_process = pData.meta_data.get('max_frames_process')
         shape = pData.get_shape_transfer()
         process_ssl = self._local_single_slice_list(shape)
-        process_gsl = \
-            self.data._grouped_slice_list(process_ssl, mf_process, self.sdir)
-        return process_gsl
+
+        process_gsl, current_sl = \
+            self.__grouped_slice_list(process_ssl, mf_process, self.sdir)
+        return process_gsl, current_sl
 
     def _local_single_slice_list(self, shape):
         pData = self.pData
@@ -481,6 +507,20 @@ class ProcessData(object):
             nSlices, nDims, core_slice, core_dirs, slice_dirs, fix, index)
         self.sdir = slice_dirs[0] if len(slice_dirs) > 0 else None
         return ssl
+
+    def __grouped_slice_list(self, slice_list, max_frames, group_dim):
+        if group_dim is None:
+            return slice_list
+
+        banked, length, slice_dir = self.data._banked_list(slice_list)
+        steps = self.data.get_preview().get_starts_stops_steps('steps')
+        grouped = []
+        for group in banked:
+            sub_groups = self.data._split_list(group, max_frames)
+            for sub in sub_groups:
+                grouped.append(self.data._group_dimension(
+                                    sub, group_dim, steps[group_dim]))
+        return grouped, banked[0]
 
     def __get_unpad_slice_list(self, reps):
         sl = [slice(None)]*len(self.pData.get_shape_transfer())

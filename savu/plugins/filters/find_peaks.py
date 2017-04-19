@@ -58,7 +58,9 @@ class FindPeaks(BaseFilter, CpuPlugin):
         in_pData, out_pData = self.get_plugin_datasets()
 
         # set pattern_name and nframes to process for all datasets
+        print "in data shape", in_dataset[0].get_shape()
         in_pData[0].plugin_data_setup("SPECTRUM", self.get_max_frames())
+        print in_pData[0].get_pattern()
         nFrames = in_pData[0].get_total_frames()
         labels = ['frames.index', 'position.idx']
         shape = (nFrames, in_dataset[0].get_shape()[-1])
@@ -66,6 +68,8 @@ class FindPeaks(BaseFilter, CpuPlugin):
         out_dataset[0].add_pattern("CHANNEL", slice_dir=(1,), core_dir=(0,))
         out_dataset[0].add_pattern("SPECTRUM", slice_dir=(0,), core_dir=(1,))
         out_pData[0].plugin_data_setup("SPECTRUM", self.get_max_frames())
+        print "out data shape", out_dataset[0].get_shape()
+        print out_pData[0].get_pattern()
 
     def get_max_frames(self):
         return 'single'

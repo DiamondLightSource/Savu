@@ -305,19 +305,19 @@ class PluginData(object):
             raise Exception(e_str)
 
         max_mft = 32  # max frames that can be transferred from file at a time
+        if isinstance(nFrames, int) and nFrames > max_mft:
+            raise Exception("The requested %s frames excedes the maximum "
+                            "allowed of %s." % (nFrames, max_mft))
+
         fixed, _ = self._get_fixed_directions()
         sdir = [s for s in self.get_slice_directions() if s not in fixed]
         shape = self.data_obj.get_shape()
         total_frames = np.prod([shape[d] for d in sdir])
         mpi_procs = len(self.data_obj.exp.meta_data.get('processes'))
 
-        #mft = min(np.ceil(float(total_frames)/mpi_procs), shape[sdir[0]])
-        mft = np.ceil(float(total_frames)/mpi_procs)
-
-        if mft > max_mft:
-            fchoices = range(1, min(max_mft+1, shape[sdir[0]]))
-            mft = self.__find_best_frame_distribution(
-                fchoices, total_frames, mpi_procs)
+        fchoices = self.__get_frame_choices(sdir, max_mft)[::-1]
+        mft = self.__find_best_frame_distribution(
+            fchoices, total_frames, mpi_procs)
 
         if nFrames == 'single':
             logging.info("Setting max frames transfer to %d", mft)
@@ -336,6 +336,21 @@ class PluginData(object):
 
         return int(mft if mft != 1 else 2)
 
+    def __get_frame_choices(self, sdir, max_mft):
+        """ Find all possible combinations of increasing slice dimension sizes
+        with their product less than max_mft and return a list of these
+        products. """
+        idx = 0
+        temp = [1]*len(sdir)
+        shape = self.data_obj.get_shape()
+        choices = []
+        while(np.prod(temp) <= max_mft and idx < len(sdir)):
+            choices.append(np.prod(temp))
+            temp[idx] += 1
+            if temp[idx] == shape[sdir[idx]]:
+                idx += 1
+        return choices
+
     def __find_multiples_of_a_that_divide_b(self, a, b):
         """ Find all positive multiples of b that divide a. """
         val = 1
@@ -353,8 +368,8 @@ class PluginData(object):
         multi_list = [(np.ceil(nframes/float(v)))/nprocs for v in flist]
         frac = [m % 1 for m in multi_list]
         min_val = min(frac, key=lambda x: abs(x-1))
-        closest_lower_idx = frac[::-1].index(min_val)
-        return flist[::-1][closest_lower_idx]
+        closest_lower_idx = frac.index(min_val)
+        return flist[closest_lower_idx]
 
     def plugin_data_setup(self, pattern, nFrames, split=None):
         """ Setup the PluginData object.
