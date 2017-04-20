@@ -85,6 +85,7 @@ class BaseTransport(object):
         :param plugin plugin: The current plugin instance.
         """
         in_data, out_data = plugin.get_datasets()
+        sdirs = [d.get_slice_directions()[0] for d in in_data]
         in_sl = self.__get_all_slice_lists(in_data, 'in')
         out_sl = self.__get_all_slice_lists(out_data, 'out')
         nIn = len(in_data)
@@ -116,6 +117,10 @@ class BaseTransport(object):
         for d in out_data:
             print "out", d.get_shape()
 
+        print "\nIN slice list for process"
+        for sl in in_sl['process']:
+            print sl
+
         # loop over the transfer data
         for count in range(nTrans):
             end = True if count == nTrans-1 else False
@@ -125,15 +130,14 @@ class BaseTransport(object):
 
             in_trans_sl = [in_sl['transfer'][i][count] for i in range(nIn)]
             out_trans_sl = [out_sl['transfer'][i][count] for i in range(nOut)]
-            #current_sl = self.__get_slice_lists(in_trans_sl, nProcs, sdirs)
-            current_sl = [in_sl['current'][i][count] for i in range(nIn)]
+
             transfer_data, slice_list = \
                 self.__transfer_all_data(in_data, in_trans_sl)
 
             # loop over the process data
             for i in range(nProcs):
                 plugin.set_current_slice_list(
-                    [current_sl[j][i] for j in range(nIn)])
+                        [in_sl['current'][j][i] for j in range(nIn)])
                 process_data = \
                     [squeeze_dict[j](transfer_data[j][in_sl['process'][i][j]])
                      for j in range(nIn)]
@@ -148,22 +152,27 @@ class BaseTransport(object):
         cu.user_message("%s - 100%% complete" % (plugin.name))
         plugin._revert_preview(in_data)
 
-#    def __get_slice_lists(self, slice_lists, n_split, sdirs):
-#        """ Get data global slice lists that are used in each call to \
-#        process_frames. """
+#    def _transport_process(self, plugin):
+#        """ Organise required data and execute the main plugin processing.
 #
-#        new_slice_list = []
-#        for i in range(len(slice_lists)):
-#            dim = sdirs[i]
-#            sl = slice_lists[i][dim]
-#            split = \
-#                np.array_split(np.arange(sl.start, sl.stop, sl.step), n_split)
-#            temp = [slice(s[0], s[-1]+1, sl.step) for s in split]
-#            unravel = np.array([slice_lists[i]]*len(temp))
-#            unravel[:, dim] = temp
-#            new_slice_list.append(unravel)
-#        return new_slice_list
-
+#        :param plugin plugin: The current plugin instance.
+#        """
+#        sl_dict = self.__get_slice_lists_info(plugin)
+#
+#    def __get_slice_lists_info(self, plugin):
+#        in_data, out_data = plugin.get_datasets()
+#        nIn = len(in_data)
+#        nOut = len(out_data)         
+#        in_sl = self.__get_all_slice_lists(in_data, 'in')
+#        out_sl = self.__get_all_slice_lists(out_data, 'out')
+#        nProcessIn = [len(in_sl['process'][:][j]) for j in range(nIn)]
+#        nTransferIn = [len(in_sl['transfer'][i][:]) for i in range(nIn)]
+#        nProcessOut = [len(out_sl['process'][:][j]) for j in range(nOut)]
+#        nTransferOut = [len(out_sl['transfer'][i][:]) for i in range(nOut)]
+#        sl_dict = {'len': {'in': {'nproc': nProcessIn, 'ntrans': nTransferIn},
+#                    'out': {'nproc': nProcessOut, 'ntrans': nTransferOut}}}
+#        return sl_dict    
+                        
     def __set_functions(self, data_list, name):
         """ Create a dictionary of functions to remove (squeeze) or re-add
         (expand) dimensions, of length 1, from each dataset in a list.

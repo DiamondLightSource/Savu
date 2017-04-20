@@ -234,6 +234,9 @@ class Hdf5TransportData(BaseTransportData):
 
     def _get_slice_lists_per_process(self, dtype):
         self.__set_padding_dict()
+        print "mft", self._get_plugin_data()._get_max_frames_transfer()
+        print "mfp", self._get_plugin_data()._get_max_frames_process()
+
         self.pad = True if self._get_plugin_data().padding else False
         self.transfer_data = TransferData(dtype, self)
         trans_dict = self.transfer_data._get_dict()
@@ -312,8 +315,15 @@ class TransferData(object):
     def _get_dict_in(self):
         sl_dict = {}
         mfp = self.pData._get_max_frames_process()
-        sl = self._get_slice_list(self.shape)
-        sl[-1] = self.data._fix_list_length(sl[-1], mfp)
+        sl, sl_dict['current'] = \
+            self._get_slice_list(self.shape, current_sl=True)
+
+        if self.pData._get_boundary_padding():
+            for i in range(len(sl)):
+                sl[i] = self.data._fix_list_length(sl[i], mfp)
+        else:
+            sl[-1] = self.data._fix_list_length(sl[-1], mfp)
+
         sl, sl_dict['frames'] = self.data._get_frames_per_process(sl)
         if self.data.pad:
             sl = self.data._pad_slice_list(
@@ -327,10 +337,9 @@ class TransferData(object):
         sl_dict['transfer'], _ = self.data._get_frames_per_process(sl)
         return sl_dict
 
-    def _get_slice_list(self, shape):
-        max_frames = self.pData._get_max_frames_transfer()
-        max_frames = (1 if max_frames is None else max_frames)
-        # amend shape here to be a multiple of max_frames
+    def _get_slice_list(self, shape, current_sl=False):
+        mft = self.pData._get_max_frames_transfer()
+        mfp = self.pData._get_max_frames_process()
         transfer_ssl = self._local_single_slice_list(shape)
 
         if transfer_ssl is None:
@@ -339,11 +348,16 @@ class TransferData(object):
                                                self.get_slice_directions()))
         slice_dir = self.pData.get_slice_directions()
         transfer_gsl = \
-            self.__grouped_slice_list(transfer_ssl, max_frames, slice_dir)
+            self.__grouped_slice_list(transfer_ssl, mft, slice_dir)
 
         split_list = self.pData.split
         transfer_gsl = self.__split_frames(transfer_gsl, split_list) if \
             split_list else transfer_gsl
+
+        if current_sl:
+            temp = ProcessData('in', self.data)
+            current_sl = temp._grouped_slice_list(transfer_ssl, mfp, slice_dir[0])
+            return transfer_gsl, current_sl
         return transfer_gsl
 
     def _local_single_slice_list(self, shape):
@@ -375,37 +389,6 @@ class TransferData(object):
             grouped.append(tuple(temp))
         return grouped
 
-#    def _get_padded_data(self, slice_list, end=False):
-##        if not self.pad and not end:
-##            return self.data[tuple(slice_list)]
-#        slice_list = list(slice_list)
-#        pData = self.pData
-#        pad_dims = list(set(pData.get_core_directions() +
-#                            (pData.get_slice_directions()[0],)))
-#        pad_list = []
-#        for i in range(len(pad_dims)):
-#            pad_list.append([0, 0])
-#        shape = self.data.data.shape
-#
-#        for i in range(len(pad_dims)):
-#            dim = pad_dims[i]
-#            sl = slice_list[dim]
-#            if sl.start < 0:
-#                pad_list[i][0] = -sl.start
-#                slice_list[dim] = slice(0, sl.stop, sl.step)
-#            diff = sl.stop - shape[dim]
-#            if diff > 0:
-#                pad_list[i][1] = diff
-#                slice_list[dim] = \
-#                    slice(slice_list[dim].start, sl.stop + diff, sl.step)
-#
-#        data = self.data.data[tuple(slice_list)]
-#        if np.sum(pad_list):
-#            mode = pData.padding.mode if pData.padding else 'edge'
-#            return np.pad(data, tuple(pad_list), mode=mode)
-#        return data
-
-
     def _get_padded_data(self, slice_list, end=False):
 #        if not self.pad and not end:
 #            return self.data[tuple(slice_list)]
@@ -416,7 +399,9 @@ class TransferData(object):
         pad_list = []
         for i in range(len(slice_list)):
             pad_list.append([0, 0])
-        shape = self.data.data.shape
+
+        temp = self.data.data.shape
+        shape = temp if len(temp) == len(slice_list) else self.data.get_shape()
 
         for dim in range(len(pad_dims)):
             sl = slice_list[dim]
@@ -443,7 +428,7 @@ class ProcessData(object):
     """
 
     def __init__(self, dtype, data):
-        self.dtype = dtype  # in or out TransferData object
+        self.dtype = dtype  # in or out ProcessData object
         self.data = data
         self.pData = data._get_plugin_data()
         self.shape = data.get_shape()
@@ -457,16 +442,19 @@ class ProcessData(object):
     def _get_dict_in(self):
         sl_dict = {}
         mfp = self.pData._get_max_frames_process()
-        sl, sl_dict['current'] = self._get_slice_list()
+        sl = self._get_slice_list()
+
+        # does this do anything?
         if self.sdir:
             sl[-1] = self.data._fix_list_length(sl[-1], mfp)
+
         sl = self.data._pad_slice_list(sl, '0', 'sum(value.values())')
         sl_dict['process'] = sl
         return sl_dict
 
     def _get_dict_out(self):
         sl_dict = {}
-        sl_dict['process'], _ = self._get_slice_list()
+        sl_dict['process'] = self._get_slice_list()
         sl_dict['unpad'] = self.__get_unpad_slice_list(len(sl_dict['process']))
         return sl_dict
 
@@ -478,10 +466,9 @@ class ProcessData(object):
         mf_process = pData.meta_data.get('max_frames_process')
         shape = pData.get_shape_transfer()
         process_ssl = self._local_single_slice_list(shape)
-
-        process_gsl, current_sl = \
-            self.__grouped_slice_list(process_ssl, mf_process, self.sdir)
-        return process_gsl, current_sl
+        process_gsl = \
+            self._grouped_slice_list(process_ssl, mf_process, self.sdir)
+        return process_gsl
 
     def _local_single_slice_list(self, shape):
         pData = self.pData
@@ -508,7 +495,7 @@ class ProcessData(object):
         self.sdir = slice_dirs[0] if len(slice_dirs) > 0 else None
         return ssl
 
-    def __grouped_slice_list(self, slice_list, max_frames, group_dim):
+    def _grouped_slice_list(self, slice_list, max_frames, group_dim):
         if group_dim is None:
             return slice_list
 
@@ -520,7 +507,7 @@ class ProcessData(object):
             for sub in sub_groups:
                 grouped.append(self.data._group_dimension(
                                     sub, group_dim, steps[group_dim]))
-        return grouped, banked[0]
+        return grouped
 
     def __get_unpad_slice_list(self, reps):
         sl = [slice(None)]*len(self.pData.get_shape_transfer())
