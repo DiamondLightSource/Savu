@@ -234,9 +234,6 @@ class Hdf5TransportData(BaseTransportData):
 
     def _get_slice_lists_per_process(self, dtype):
         self.__set_padding_dict()
-        print "mft", self._get_plugin_data()._get_max_frames_transfer()
-        print "mfp", self._get_plugin_data()._get_max_frames_process()
-
         self.pad = True if self._get_plugin_data().padding else False
         self.transfer_data = TransferData(dtype, self)
         trans_dict = self.transfer_data._get_dict()
@@ -475,9 +472,8 @@ class ProcessData(object):
         slice_dirs = pData.get_slice_directions()
         core_dirs = np.array(pData.get_core_directions())
         # remove any dimensions of length 1
-        dshape = self.shape
-        self.remove_dims = [d for d in range(len(dshape)) if dshape[d] is
-                            1 and d in slice_dirs]
+        self.remove_dims = self.__get_dims_to_remove(slice_dirs)
+
         slice_dirs = list(set(slice_dirs).difference(set(self.remove_dims)))
         fix = [[]]*2
         core_slice = np.array([slice(None)]*len(core_dirs))
@@ -494,6 +490,15 @@ class ProcessData(object):
             nSlices, nDims, core_slice, core_dirs, slice_dirs, fix, index)
         self.sdir = slice_dirs[0] if len(slice_dirs) > 0 else None
         return ssl
+
+    def __get_dims_to_remove(self, sdirs):
+        dshape = self.shape
+        no_squeeze = self.pData._get_no_squeeze()
+        remove = [sdirs[0]] if dshape[sdirs[0]] == 1 and not no_squeeze else []
+        for s in sdirs[1:]:
+            if dshape[s] == 1:
+                remove.append(s)
+        return remove
 
     def _grouped_slice_list(self, slice_list, max_frames, group_dim):
         if group_dim is None:

@@ -136,7 +136,7 @@ class BaseRecon(Plugin):
 
         dim_sl = sl[self.main_dir]
         self.frame_cors = self.cor_func(self.cor[dim_sl])
-        if not self.frame_cors:
+        if not self.frame_cors.shape:
             self.frame_cors = np.array([self.centre])
         len_data = len(np.arange(dim_sl.start, dim_sl.stop, dim_sl.step))
 

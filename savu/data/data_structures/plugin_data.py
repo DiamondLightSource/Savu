@@ -53,6 +53,7 @@ class PluginData(object):
         self.fixed_dims = True
         self.split = None
         self.boundary_padding = None
+        self.no_squeeze = False
 
     def _get_preview(self):
         return self._preview
@@ -114,7 +115,7 @@ class PluginData(object):
         self.__set_core_shape(tuple(shape))
 
         mfp = self._get_max_frames_process()
-        if mfp > 1:
+        if mfp > 1 or self._get_no_squeeze():
             shape.insert(slice_idx, mfp)
         self.shape = tuple(shape)
 
@@ -191,7 +192,7 @@ class PluginData(object):
         label_dim = \
             self.data_obj.find_axis_label_dimension(label, contains=contains)
         plugin_dims = self.get_core_directions()
-        if self._get_max_frames_process > 1:
+        if self._get_max_frames_process() > 1:
             plugin_dims += (self.get_slice_directions()[0],)
         return list(set(plugin_dims)).index(label_dim)
 
@@ -291,11 +292,17 @@ class PluginData(object):
     def _get_boundary_padding(self):
         return self.boundary_padding
 
+    def __set_no_squeeze(self):
+        self.no_squeeze = True
+
+    def _get_no_squeeze(self):
+        return self.no_squeeze
+
     def _calc_max_frames_transfer(self, nFrames):
         """ The number of frames each process should retrieve from file at a
         time.
         """
-        print "\nnframes in calc max frames transfer", nFrames
+        print "nFrames in calc max frames transfer is", nFrames
         options = ['single', 'multiple']
         if not isinstance(nFrames, int) and nFrames not in options:
             e_str = "The value of nFrames is not recognised.  Please choose "
@@ -317,9 +324,7 @@ class PluginData(object):
         # find all possible choices of nFrames, being careful with boundaries
         fchoices, size_list = self.__get_frame_choices(
                 sdir, min(max_mft, np.prod([shape[d] for d in sdir])))
-        print "slice dirs", sdir
-        print "fchoices before", fchoices, size_list
-        print "shape", shape
+
         mft, idx = self.__find_best_frame_distribution(
             fchoices, total_frames, mpi_procs, idx=True)
         self.__set_shape_transfer(size_list[fchoices.index(mft)])
@@ -327,26 +332,25 @@ class PluginData(object):
         if nFrames == 'single':
             logging.info("Setting max frames transfer to %d", mft)
             logging.info("Setting max frames process to %d", 1)
+            print("Setting max frames transfer to %d" % mft)
+            print("Setting max frames process to %d" % 1)
             self.meta_data.set('max_frames_process', 1)
             return int(mft)
 
         mfp = nFrames if isinstance(nFrames, int) else min(mft, shape[sdir[0]])
-        # Temporary to ensure the slice dimension is not removed in the plugin
-        # if it has length 1
-        mfp = 2 if mfp == 1 else mfp
+#        # Temporary to ensure the slice dimension is not removed in the plugin
+#        # if it has length 1
+#        mfp = 2 if mfp == 1 else mfp
         multi = self.__find_multiples_of_b_that_divide_a(mft, mfp)
         possible = sorted(list(set(set(multi).intersection(set(fchoices)))))
 
         # closest of fchoices to mfp plus difference as boundary padding
         if not possible:
-            print "not possible finding the closest"
             mft, _ = self.__find_closest_lower(fchoices[::-1], mfp)
             self.__set_boundary_padding(mfp - mft)
         else:
-            print "calculating which frame is best from", possible[::-1]
             mft = self.__find_best_frame_distribution(
                 possible[::-1], total_frames, mpi_procs)
-            print "mft = ", mft
 
         self.__set_shape_transfer(size_list[fchoices.index(mft)])
         self.meta_data.set('max_frames_process', int(mfp))
@@ -354,13 +358,17 @@ class PluginData(object):
         logging.info("Setting max frames transfer to %d", mft)
         logging.info("Setting max frames process to %d", mfp)
 
+        if mfp == 1:
+            self.__set_no_squeeze()
+        print("Setting max frames transfer to %d" % mft)
+        print("Setting max frames process to %d" % mfp)
         return int(mft)
 
     def __find_closest_lower(self, vlist, value):
-        frac = [f if f != 0 else value for f in [m % value for m in vlist]]
-        min_val = min(frac, key=lambda x: abs(x-value))
-        idx = frac.index(min_val)
-        return min_val, idx
+        rem = [f if f != 0 else value for f in [m % value for m in vlist]]
+        min_val = min(rem, key=lambda x: abs(x-value))
+        idx = rem.index(min_val)
+        return vlist[idx], idx
 
     def __get_frame_choices(self, sdir, max_mft):
         """ Find all possible combinations of increasing slice dimension sizes
@@ -374,9 +382,13 @@ class PluginData(object):
         size_list = []
 
         while(np.prod(temp) <= max_mft):
-            choices.append(np.prod(temp))
-            size_list.append(copy.copy(temp))
-            if temp[idx] == shape[sdir[idx]]:
+            dshape = shape[sdir[idx]]
+            # could remove this if statement and ensure padding at the end of
+            # each slice dimension instead.
+            if dshape % temp[idx] == 0:
+                choices.append(np.prod(temp))
+                size_list.append(copy.copy(temp))
+            if temp[idx] == dshape:
                 idx += 1
                 if idx == nDims:
                     break

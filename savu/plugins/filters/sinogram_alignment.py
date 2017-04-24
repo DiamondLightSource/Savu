@@ -142,7 +142,7 @@ class SinogramAlignment(BaseFilter, CpuPlugin):
         return 'SINOGRAM'
 
     def get_max_frames(self):
-        return 8
+        return 'multiple'
 
     def get_citation_information(self):
         cite_info = CitationInformation()
