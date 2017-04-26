@@ -15,7 +15,7 @@
 """
 .. module:: nxtomo_loader
    :platform: Unix
-   :synopsis: A class for loading standard tomography data
+   :synopsis: A class for loading standard tomography data in Nexus format.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 

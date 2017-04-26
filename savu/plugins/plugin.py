@@ -138,6 +138,7 @@ class Plugin(PluginDatasets):
                 if desc['user_param']:
                     user_items.extend(desc['user_param'])
                 self._add_item(desc['param'])
+        user_items = list(set(user_items).difference(set(hidden_items)))
         self.parameters_hide = hidden_items
         self.parameters_user = user_items
 

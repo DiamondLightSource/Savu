@@ -59,7 +59,7 @@ class SavuLoader(BaseLoader):
         self.add_meta_data(data_obj, entry_path)
 
         data_obj.set_shape(data_obj.data.shape)
-        self.set_data_reduction_params(data_obj)
+        return data_obj
 
     def set_axis_labels(self, data, entry):
         # set axis labels

@@ -96,7 +96,7 @@ class ImageLoader(BaseLoader):
             h5py.File(tempfile.mkdtemp() + '/' + filename, 'a')
 
         data_obj.set_shape(data_obj.data.get_shape())
-        self.set_data_reduction_params(data_obj)
+        return data_obj
 
     def set_rotation_angles(self, data_obj):
         angles = self.parameters['angles']

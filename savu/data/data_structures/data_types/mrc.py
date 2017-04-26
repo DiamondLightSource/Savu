@@ -26,6 +26,7 @@ import numpy as np
 import savu.plugins.loaders.utils.mrc_header as header_format
 from savu.data.data_structures.data_types.base_type import BaseType
 
+
 class MRC(BaseType):
 
     def __init__(self, Data, filename, stats=None):

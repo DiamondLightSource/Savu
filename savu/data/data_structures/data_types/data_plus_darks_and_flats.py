@@ -208,12 +208,12 @@ class ImageKey(DataWithDarksAndFlats):
 
     def dark(self):
         """ Get the dark data. """
-        return self.dark_updated if self.dark_updated else\
+        return self.dark_updated if self.dark_updated is not False else\
             self.dark_image_key_data()
 
     def flat(self):
         """ Get the flat data. """
-        return self.flat_updated if self.flat_updated else\
+        return self.flat_updated if self.flat_updated is not False else\
             self.flat_image_key_data()
 
     def _set_dark_and_flat(self):

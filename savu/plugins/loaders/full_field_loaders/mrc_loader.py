@@ -76,4 +76,4 @@ class MrcLoader(BaseLoader):
                             'mrc loader')
 
         data_obj.set_shape(data_obj.data.get_shape())
-        self.set_data_reduction_params(data_obj)
+        return data_obj

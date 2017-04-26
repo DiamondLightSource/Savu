@@ -302,7 +302,6 @@ class PluginData(object):
         """ The number of frames each process should retrieve from file at a
         time.
         """
-        print "nFrames in calc max frames transfer is", nFrames
         options = ['single', 'multiple']
         if not isinstance(nFrames, int) and nFrames not in options:
             e_str = "The value of nFrames is not recognised.  Please choose "
@@ -327,20 +326,16 @@ class PluginData(object):
 
         mft, idx = self.__find_best_frame_distribution(
             fchoices, total_frames, mpi_procs, idx=True)
+
         self.__set_shape_transfer(size_list[fchoices.index(mft)])
 
         if nFrames == 'single':
             logging.info("Setting max frames transfer to %d", mft)
             logging.info("Setting max frames process to %d", 1)
-            print("Setting max frames transfer to %d" % mft)
-            print("Setting max frames process to %d" % 1)
             self.meta_data.set('max_frames_process', 1)
             return int(mft)
 
         mfp = nFrames if isinstance(nFrames, int) else min(mft, shape[sdir[0]])
-#        # Temporary to ensure the slice dimension is not removed in the plugin
-#        # if it has length 1
-#        mfp = 2 if mfp == 1 else mfp
         multi = self.__find_multiples_of_b_that_divide_a(mft, mfp)
         possible = sorted(list(set(set(multi).intersection(set(fchoices)))))
 
@@ -358,10 +353,9 @@ class PluginData(object):
         logging.info("Setting max frames transfer to %d", mft)
         logging.info("Setting max frames process to %d", mfp)
 
+        # Retain the shape if the first slice dimension has length 1
         if mfp == 1:
             self.__set_no_squeeze()
-        print("Setting max frames transfer to %d" % mft)
-        print("Setting max frames process to %d" % mfp)
         return int(mft)
 
     def __find_closest_lower(self, vlist, value):
@@ -385,7 +379,7 @@ class PluginData(object):
             dshape = shape[sdir[idx]]
             # could remove this if statement and ensure padding at the end of
             # each slice dimension instead.
-            if dshape % temp[idx] == 0:
+            if dshape % temp[idx] == 0 or nDims == 1:
                 choices.append(np.prod(temp))
                 size_list.append(copy.copy(temp))
             if temp[idx] == dshape:

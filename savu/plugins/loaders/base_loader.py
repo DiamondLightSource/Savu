@@ -34,6 +34,13 @@ class BaseLoader(Plugin):
     :~param out_datasets:
 
     """
+
+    def __init__(self, name='BaseLoader'):
+        super(BaseLoader, self).__init__(name)
+        self.hits = []
+        self.application = None
+        self.reduction_flag = False
+
     def _main_setup(self, exp, params):
         """
         Overwrites the main_setup function in plugin.py as the loader is a
@@ -42,7 +49,9 @@ class BaseLoader(Plugin):
         self._set_parameters(params)
         self.exp = exp
         logging.info("%s.%s", self.__class__.__name__, 'setup')
-        self.setup()
+        data_obj = self.setup()
+        if data_obj and not self.reduction_flag:
+            self.set_data_reduction_params(data_obj)
 
     def get_experiment(self):
         return self.exp
@@ -51,11 +60,7 @@ class BaseLoader(Plugin):
         pDict = self.parameters
         self.data_mapping()
         data_obj.get_preview().set_preview(pDict['preview'])
-
-    def __init__(self, name='BaseLoader'):
-        self.hits = []
-        self.application = None
-        super(BaseLoader, self).__init__(name)
+        self.reduction_flag = True
 
     def get_NXapp(self, ltype, nx_file, entry):
         '''

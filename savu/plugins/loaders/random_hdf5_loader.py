@@ -23,7 +23,6 @@
 """
 
 import os
-import copy
 import h5py
 import numpy as np
 
@@ -58,9 +57,6 @@ class RandomHdf5Loader(BaseLoader):
     default is the first pattern in the pattern dictionary. Default: None.
     """
 
-    def __init__(self, name='RandomHdf5Loader'):
-        super(RandomHdf5Loader, self).__init__(name)
-
     def setup(self):
         exp = self.exp
         data_obj = exp.create_data_object('in_data',
@@ -68,13 +64,15 @@ class RandomHdf5Loader(BaseLoader):
 
         data_obj.set_axis_labels(*self.parameters['axis_labels'])
         self.__convert_patterns(data_obj)
+        self.__parameter_checks(data_obj)
 
         data_obj.backing_file = self.__get_backing_file(data_obj)
         data_obj.data = data_obj.backing_file['/']['test']
 
         data_obj.set_shape(data_obj.data.shape)
-        self.__set_rotation_angles(data_obj)
-        self.set_data_reduction_params(data_obj)
+        self.n_entries = data_obj.get_shape()[0]
+        self._set_rotation_angles(data_obj, self._get_n_entries())
+        return data_obj
 
     def __get_backing_file(self, data_obj):
         fname = '%s/%s.h5' % \
@@ -89,8 +87,8 @@ class RandomHdf5Loader(BaseLoader):
         size = tuple(self.parameters['size'])
 
         patterns = data_obj.get_data_patterns()
-        p_name = self.parameters['pattern'] if self.parameters['pattern'] is \
-            not None else patterns.keys()[0]
+        p_name = patterns[self.parameters['pattern']] if \
+            self.parameters['pattern'] is not None else patterns.keys()[0]
         p_name = patterns.keys()[0]
         p_dict = patterns[p_name]
         p_dict['max_frames_transfer'] = 1
@@ -109,9 +107,11 @@ class RandomHdf5Loader(BaseLoader):
         sub_size = \
             [1 if i in slice_dirs else dset.shape[i] for i in range(nDims)]
 
+        # need an mpi barrier after creating the file before populating it
         idx = 0
-        sl = [slice(0, 1) if i in slice_dirs else slice(None)
-              for i in range(nDims)]
+        sl, total_frames = \
+            self.__get_start_slice_list(slice_dirs, dset.shape, total_frames)
+        # calculate the first slice
         for i in range(total_frames):
             dset[tuple(sl)] = np.random.randint(
                 1, high=10, size=sub_size, dtype=self.parameters['dtype'])
@@ -124,7 +124,22 @@ class RandomHdf5Loader(BaseLoader):
 
         h5file.close()
         return self.hdf5._open_backing_h5(fname, 'r')
-        # create an image key as well? # add this as an extension for 3D full-field tomography data        
+
+    def __get_start_slice_list(self, slice_dirs, shape, n_frames):
+        n_processes = len(self.exp.get('processes'))
+        rank = self.exp.get('process')
+        frames = np.array_split(np.arange(n_frames), n_processes)[rank]
+        f_range = range(0, frames[0]) if len(frames) else []
+        sl = [slice(0, 1) if i in slice_dirs else slice(None)
+              for i in range(len(shape))]
+        idx = 0
+        for i in f_range:
+            if sl[slice_dirs[idx]] == shape[slice_dirs[idx]]-1:
+                idx += 1
+            tmp = sl[slice_dirs[idx]]
+            sl[slice_dirs[idx]] = slice(tmp.start+1, tmp.stop+1)
+
+        return sl, len(frames)
 
     def __convert_patterns(self, data_obj):
         pattern_list = self.parameters['patterns']
@@ -138,23 +153,34 @@ class RandomHdf5Loader(BaseLoader):
                                if len(i) == 2])
             data_obj.add_pattern(name, core_dir=core_dir, slice_dir=slice_dir)
 
-    def __set_rotation_angles(self, data_obj):
+    def _set_rotation_angles(self, data_obj, n_entries):
         angles = self.parameters['angles']
 
         if angles is None:
-            angles = np.linspace(0, 180, data_obj.get_shape()[0])
+            angles = np.linspace(0, 180, n_entries)
         else:
             try:
                 exec("angles = " + angles)
             except:
-                try:
-                    angles = np.loadtxt(angles)
-                except:
-                    raise Exception('Cannot set angles in loader.')
+                raise Exception('Cannot set angles in loader.')
 
         n_angles = len(angles)
-        data_angles = data_obj.get_shape()[0]
+        data_angles = n_entries
         if data_angles != n_angles:
             raise Exception("The number of angles %s does not match the data "
                             "dimension length %s", n_angles, data_angles)
         data_obj.meta_data.set("rotation_angle", angles)
+
+    def __parameter_checks(self, data_obj):
+        if not self.parameters['size']:
+            raise Exception(
+                    'Please specifiy the size of the dataset to create.')
+        dark, flat = self.parameters['image_key']
+        proj_dim = data_obj.get_data_patterns()['PROJECTION']['slice_dir'][0]
+        if len(dark + flat) >= self.parameters['size'][proj_dim]:
+            raise Exception('Please increase the data size in the rotation '
+                            'angle dimension to be greater than the sum of '
+                            'dark and flat entries.')
+
+    def _get_n_entries(self):
+        return self.n_entries

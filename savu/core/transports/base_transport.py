@@ -157,7 +157,8 @@ class BaseTransport(object):
         """
         process_frames = []
         for f in frame_list:
-            process_frames.append(range(f[0]*nProc, (f[-1]+1)*nProc))
+            if len(f):
+                process_frames.append(range(f[0]*nProc, (f[-1]+1)*nProc))
         plugin.set_global_frame_index(process_frames)
 
     def __set_functions(self, data_list, name):

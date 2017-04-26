@@ -71,7 +71,7 @@ class MultiSavuLoader(BaseLoader):
         self._set_patterns(data_obj, data_obj_list[0])
 
         data_obj.set_original_shape(data_obj.data.get_shape())
-        self.set_data_reduction_params(data_obj)
+        return data_obj
 
     def _set_axis_labels(self, data_obj, savu_obj):
         axis_labels = savu_obj.get_axis_labels()
