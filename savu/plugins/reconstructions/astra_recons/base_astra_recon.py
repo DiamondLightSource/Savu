@@ -18,7 +18,6 @@
    :synopsis: A base for all Astra toolbox reconstruction algorithms
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 """
-import logging
 import astra
 import numpy as np
 import math
@@ -45,6 +44,10 @@ class BaseAstraRecon(BaseRecon):
         self.res = False
 
     def setup(self):
+        self.alg = self.parameters['reconstruction_type']
+        self.get_max_frames = \
+            self._get_multiple if '3D' in self.alg else self._get_single
+
         super(BaseAstraRecon, self).setup()
         out_dataset = self.get_out_datasets()
         # if res_norm is required then setup another output dataset
@@ -61,8 +64,8 @@ class BaseAstraRecon(BaseRecon):
             out_dataset[1].add_pattern(pattern['name'],
                                        slice_dir=pattern['slice_dir'],
                                        core_dir=pattern['core_dir'])
-            out_pData[1].plugin_data_setup(pattern['name'],
-                                           self._get_frame_type())
+            out_pData[1].plugin_data_setup(
+                    pattern['name'], self._get_max_frames())
 
     def pre_process(self):
         self.alg = self.parameters['reconstruction_type']
@@ -73,26 +76,19 @@ class BaseAstraRecon(BaseRecon):
         else:
             self.setup_2D()
             self.process_frames = self.astra_2D_recon
-        self.vol_shape = self.get_vol_shape()
 
     def setup_2D(self):
         pData = self.get_plugin_in_datasets()[0]
-        dim_detX = pData.get_data_dimension_by_axis_label('x', contains=True)
-        dim_rot = pData.get_data_dimension_by_axis_label('rot', contains=True)
+        self.dim_detX = \
+            pData.get_data_dimension_by_axis_label('x', contains=True)
+        self.dim_rot = \
+            pData.get_data_dimension_by_axis_label('rot', contains=True)
 
         self.sino_shape = pData.get_shape()
         self.nDims = len(self.sino_shape)
-        self.slice_dir = pData.get_slice_dimension()
+        self.nCols = self.sino_shape[self.dim_detX]
 
-        self.sino_dim_detX = dim_detX-1 if self.nDims is 3 and\
-            self.slice_dir < dim_detX else dim_detX
-        self.sino_dim_rot = dim_rot-1 if self.nDims is 3 and\
-            self.slice_dir < dim_rot else dim_rot
-
-        self.nCols = self.sino_shape[dim_detX]
-        self.nSinos = self.sino_shape[self.slice_dir] if self.nDims is 3 else 1
-        self.slice_func = self.slice_sino(self.nDims)
-        l = self.sino_shape[dim_detX]
+        l = self.sino_shape[self.dim_detX]
         c = np.linspace(-l/2.0, l/2.0, l)
         x, y = np.meshgrid(c, c)
         self.mask = np.array((x**2 + y**2 < (l/2.0)**2), dtype=np.float)
@@ -104,90 +100,49 @@ class BaseAstraRecon(BaseRecon):
         else:
             self.manual_mask = False
 
-    def slice_sino(self, nDims):
-        if nDims is 2:
-            return lambda x, sslice: np.expand_dims(
-                x, axis=self.slice_dir)[sslice]
-        else:
-            return lambda x, sslice: x[sslice]
-
     def astra_2D_recon(self, data):
-        logging.debug("running astra_2D_recon")
         sino = data[0]
-        cors, angles, vol_shape, init = self.get_frame_params()
-        sslice = [slice(None)]*self.nDims
-        recon = np.zeros(self.vol_shape)
-        if self.nDims is 2:
-            recon = np.expand_dims(recon, axis=self.slice_dir)
+        cor, angles, vol_shape, init = self.get_frame_params()
+        angles = np.deg2rad(angles)
         if self.res:
-            res = np.zeros((self.vol_shape[self.slice_dir], self.iters))
-        if self.nDims is 2:
-            res = np.expand_dims(recon, axis=self.slice_dir)
-
-        proj_id = False
+            res = np.zeros(self.iters)
         # create volume geom
-
-        astra_vol_shape = list(vol_shape)
-        del astra_vol_shape[self.slice_dir]
-        vol_geom = astra.create_vol_geom(astra_vol_shape)
-
-        for i in range(self.nSinos):
-            sslice[self.slice_dir] = i
-            try:
-                cor = cors[i]
-            except:
-                cor = cors[0]
-
-            pad_sino = self.pad_sino(self.slice_func(sino, sslice), cor)
-
-            # create projection geom
-            proj_geom = astra.create_proj_geom(
-                'parallel', 1.0, pad_sino.shape[self.sino_dim_detX],
-                np.deg2rad(angles))
-
-            pad_sino = \
-                np.transpose(pad_sino, (self.sino_dim_rot, self.sino_dim_detX))
-
-            # create sinogram id
-            sino_id = astra.data2d.create("-sino", proj_geom, pad_sino)
-
-            # create reconstruction id
-            if init is not None:
-                rec_id = astra.data2d.create('-vol', vol_geom, init[sslice])
-            else:
-                rec_id = astra.data2d.create('-vol', vol_geom)
-
-            if self.mask_id:
-                self.mask_id = astra.data2d.create('-vol', vol_geom, self.mask)
-
-            # setup configuration options
-            cfg = self.set_config(rec_id, sino_id, proj_geom, vol_geom)
-
-            # create algorithm id
-            alg_id = astra.algorithm.create(cfg)
-
-            # run algorithm
-            if self.res:
-                for j in range(self.iters):
-                    # Run a single iteration
-                    astra.algorithm.run(alg_id, 1)
-                    res[i, j] = astra.algorithm.get_res_norm(alg_id)
-            else:
-                astra.algorithm.run(alg_id, self.iters)
-
-            # get reconstruction matrix
-            if self.manual_mask is not False:
-                recon[sslice] = self.manual_mask*astra.data2d.get(rec_id)
-            else:
-                recon[sslice] = astra.data2d.get(rec_id)
-
-            # delete geometry
-            self.delete(alg_id, sino_id, rec_id, proj_id)
-
-        if self.res:
-            return [recon, res]
+        vol_geom = astra.create_vol_geom(vol_shape)
+        # create projection geom
+        pad_sino = self.pad_sino(sino, cor[0])
+        det_width = pad_sino.shape[self.dim_detX]
+        proj_geom = astra.create_proj_geom('parallel', 1.0, det_width, angles)
+        pad_sino = np.transpose(pad_sino, (self.dim_rot, self.dim_detX))
+        # create sinogram id
+        sino_id = astra.data2d.create("-sino", proj_geom, pad_sino)
+        # create reconstruction id
+        if init:
+            rec_id = astra.data2d.create('-vol', vol_geom, init)
         else:
-            return recon
+            rec_id = astra.data2d.create('-vol', vol_geom)
+
+        if self.mask_id:
+            self.mask_id = astra.data2d.create('-vol', vol_geom, self.mask)
+        # setup configuration options
+        cfg = self.set_config(rec_id, sino_id, proj_geom, vol_geom)
+        # create algorithm id
+        alg_id = astra.algorithm.create(cfg)
+        # run algorithm
+        if self.res:
+            for j in range(self.iters):
+                # Run a single iteration
+                astra.algorithm.run(alg_id, 1)
+                res[j] = astra.algorithm.get_res_norm(alg_id)
+        else:
+            astra.algorithm.run(alg_id, self.iters)
+        # get reconstruction matrix
+        if self.manual_mask is not False:
+            recon = self.manual_mask*astra.data2d.get(rec_id)
+        else:
+            recon = astra.data2d.get(rec_id)
+        # delete geometry
+        self.delete(alg_id, sino_id, rec_id, False)
+        return [recon, res] if self.res else recon
 
     def set_config(self, rec_id, sino_id, proj_geom, vol_geom):
         cfg = astra.astra_dict(self.alg)
@@ -218,14 +173,14 @@ class BaseAstraRecon(BaseRecon):
 
     def pad_sino(self, sino, cor):
         centre_pad = (0, 0) if '3D' in self.alg else \
-            self.array_pad(cor, sino.shape[self.sino_dim_detX])
-        sino_width = sino.shape[self.sino_dim_detX]
+            self.array_pad(cor, sino.shape[self.dim_detX])
+        sino_width = sino.shape[self.dim_detX]
         new_width = sino_width + max(centre_pad)
         sino_pad = \
             int(math.ceil(float(sino_width)/new_width * self.sino_pad)/2)
         pad = np.array([sino_pad]*2) + centre_pad
         pad_tuples = [(0, 0)]*(len(sino.shape)-1)
-        pad_tuples.insert(self.sino_dim_detX, tuple(pad))
+        pad_tuples.insert(self.dim_detX, tuple(pad))
         return np.pad(sino, tuple(pad_tuples), mode='edge')
 
     def array_pad(self, ctr, nPixels):
@@ -237,6 +192,12 @@ class BaseAstraRecon(BaseRecon):
         p_low = 0 if (ctr > mid) else shift
         p_high = shift + 0 if (ctr > mid) else 0
         return np.array([int(p_low), int(p_high)])
+
+    def _get_single(self):
+        return 'single'
+
+    def _get_multiple(self):
+        return 'multiple'
 
     def get_citation_information(self):
         cite_info1 = CitationInformation()
