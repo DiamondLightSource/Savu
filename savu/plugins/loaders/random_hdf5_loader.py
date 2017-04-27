@@ -57,6 +57,9 @@ class RandomHdf5Loader(BaseLoader):
     default is the first pattern in the pattern dictionary. Default: None.
     """
 
+    def __init__(self, name='RandomHdf5Loader'):
+        super(RandomHdf5Loader, self).__init__(name)
+
     def setup(self):
         exp = self.exp
         data_obj = exp.create_data_object('in_data',
