@@ -34,5 +34,20 @@ class NxTomoLoaderTest(unittest.TestCase):
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
 
+#    def test_separate_flats(self):
+#        data_file = tu.get_test_data_path('24737.nxs')
+#        process_file = tu.get_test_process_path(
+#                'basic_tomo_process_separate_flats.nxs')
+#        run_protected_plugin_runner(tu.set_options(data_file,
+#                                                   process_file=process_file))
+
+#    def test_separate_darks(self):
+#        data_file = tu.get_test_data_path('24737.nxs')
+#        process_file = tu.get_test_process_path(
+#                'basic_tomo_process_separate_darks.nxs')
+#        run_protected_plugin_runner(tu.set_options(data_file,
+#                                                   process_file=process_file))
+
+
 if __name__ == "__main__":
     unittest.main()

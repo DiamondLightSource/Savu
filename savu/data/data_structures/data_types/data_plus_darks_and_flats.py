@@ -156,6 +156,9 @@ class DataWithDarksAndFlats(BaseType):
         index[self.proj_dim] = self.get_index(key)
         data = self.data[tuple(index)]
 
+        if not self.dark_flat_slice_list:
+            return data
+
         sl = list(copy.deepcopy(self.dark_flat_slice_list))
         if len(data.shape) is 2:
             rot_dim = self.data_obj.find_axis_label_dimension('rotation_angle')
@@ -217,7 +220,9 @@ class ImageKey(DataWithDarksAndFlats):
             self.flat_image_key_data()
 
     def _set_dark_and_flat(self):
-        self.dark_flat_slice_list = tuple(self.get_dark_flat_slice_list())
+        slice_list = self.data_obj._preview._get_preview_slice_list()
+        if slice_list:
+            self.dark_flat_slice_list = tuple(self.get_dark_flat_slice_list())
         if len(self.get_index(2)):
             self.data_obj.meta_data.set('dark', self.dark_mean())
         if len(self.get_index(1)):

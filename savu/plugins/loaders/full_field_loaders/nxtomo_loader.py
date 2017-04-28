@@ -89,6 +89,7 @@ class NxtomoLoader(BaseLoader):
         nAngles = len(data_obj.meta_data.get('rotation_angle'))
         self.__check_angles(data_obj, nAngles)
         data_obj.set_original_shape(shape)
+
         self.set_data_reduction_params(data_obj)
         data_obj.data._set_dark_and_flat()
 
@@ -134,12 +135,12 @@ class NxtomoLoader(BaseLoader):
         flat = self.parameters['flat'][0]
         dark = self.parameters['dark'][0]
 
-        if not flat and not dark:
-            self.__find_dark_and_flat(data_obj)
+        if not flat or not dark:
+            self.__find_dark_and_flat(data_obj, flat=flat, dark=dark)
         else:
             self.__set_separate_dark_and_flat(data_obj)
 
-    def __find_dark_and_flat(self, data_obj):
+    def __find_dark_and_flat(self, data_obj, flat=None, dark=None):
         ignore = self.parameters['ignore_flats'] if \
             self.parameters['ignore_flats'] else None
         try:
@@ -147,7 +148,6 @@ class NxtomoLoader(BaseLoader):
                 'entry1/tomo_entry/instrument/detector/image_key'][...]
             data_obj.data = \
                 ImageKey(data_obj, image_key, 0, ignore=ignore)
-            #data_obj.set_shape(data_obj.data.get_shape())
         except KeyError:
             cu.user_message("An image key was not found.")
             try:
@@ -157,6 +157,11 @@ class NxtomoLoader(BaseLoader):
                 data_obj.data._set_dark_path(entry + 'darkfield')
             except KeyError:
                 cu.user_message("Dark/flat data was not found in input file.")
+        data_obj.data._set_dark_and_flat()
+        if dark:
+            data_obj.data.update_dark(dark)
+        if flat:
+            data_obj.data.update_flat(flat)
 
     def __set_separate_dark_and_flat(self, data_obj):
         try:
