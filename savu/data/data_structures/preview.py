@@ -149,15 +149,16 @@ class Preview(object):
          only the ``key`` list.
         :rtype: list(list(int))
         """
-        get_mData = self.get_data_obj().data_info.get
+        mData = self.get_data_obj().data_info
+
+        if 'starts' not in mData.get_dictionary().keys():
+            return None if key else [None]*4
+
         if key is not None:
-            return get_mData(key)
-        else:
-            starts = get_mData('starts')
-            stops = get_mData('stops')
-            steps = get_mData('steps')
-            chunks = get_mData('chunks')
-            return starts, stops, steps, chunks
+            return mData.get(key)
+
+        return [mData.get('starts'), mData.get('stops'), mData.get('steps'),
+                mData.get('chunks')]
 
     def __check_preview_indices(self):
         starts, stops, steps, chunks = self.get_starts_stops_steps()
@@ -182,6 +183,9 @@ class Preview(object):
         """
         dobj = self.get_data_obj()
         starts, stops, steps, chunks = self.get_starts_stops_steps()
+        if not starts:
+            return None
+        
         slice_list = []
         for dim in range(len(dobj.get_shape())):
             if chunks[dim] > 1:
