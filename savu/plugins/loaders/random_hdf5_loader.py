@@ -55,6 +55,7 @@ class RandomHdf5Loader(BaseLoader):
     is None, values will be in the interval [0, 180]. Default: None.
     :param pattern: Pattern used to create and store the hdf5 dataset - \
     default is the first pattern in the pattern dictionary. Default: None.
+    :param range: Set the distribution interval. Default: [1, 10].
     """
 
     def __init__(self, name='RandomHdf5Loader'):
@@ -116,8 +117,9 @@ class RandomHdf5Loader(BaseLoader):
             self.__get_start_slice_list(slice_dirs, dset.shape, total_frames)
         # calculate the first slice
         for i in range(total_frames):
+            low, high = self.parameters['range']
             dset[tuple(sl)] = np.random.randint(
-                1, high=10, size=sub_size, dtype=self.parameters['dtype'])
+                low, high=high, size=sub_size, dtype=self.parameters['dtype'])
             if sl[slice_dirs[idx]].stop == dset.shape[slice_dirs[idx]]:
                 idx += 1
                 if idx == len(slice_dirs):
@@ -178,12 +180,6 @@ class RandomHdf5Loader(BaseLoader):
         if not self.parameters['size']:
             raise Exception(
                     'Please specifiy the size of the dataset to create.')
-        dark, flat = self.parameters['image_key']
-        proj_dim = data_obj.get_data_patterns()['PROJECTION']['slice_dir'][0]
-        if len(dark + flat) >= self.parameters['size'][proj_dim]:
-            raise Exception('Please increase the data size in the rotation '
-                            'angle dimension to be greater than the sum of '
-                            'dark and flat entries.')
 
     def _get_n_entries(self):
         return self.n_entries
