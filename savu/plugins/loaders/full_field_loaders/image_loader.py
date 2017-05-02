@@ -37,7 +37,8 @@ class ImageLoader(BaseLoader):
     Load any FabIO compatible formats (e.g. tiffs)
 
     :param dataset_name: The name assigned to the dataset. Default: 'tomo'.
-    :param angles: A python statement to be evaluated or a file. Default: None.
+    :param angles: A python statement to be evaluated \
+    (e.g np.linspace(0, 180, nAngles)) or a file. Default: None.
     :param frame_dim: Which dimension requires stitching? Default: 0.
     :param data_prefix: A file prefix for the data file. Default: None.
     :param dark_prefix: A file prefix for the dark field files. Default: None.
