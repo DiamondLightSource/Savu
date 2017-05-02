@@ -56,12 +56,7 @@ class RavenFilter(BaseFilter, CpuPlugin):
 
     def pre_process(self):
         in_pData = self.get_plugin_in_datasets()[0]
-        self.slice_dir = in_pData.get_slice_dimension()
-        nDims = len(in_pData.get_shape())
-        self.sslice = [slice(None)]*nDims
         sino_shape = list(in_pData.get_shape())
-        if len(sino_shape) is 3:
-            del sino_shape[self.slice_dir]
 
         width1 = sino_shape[1] + 2*self.pad
         height1 = sino_shape[0] + 2*self.pad
