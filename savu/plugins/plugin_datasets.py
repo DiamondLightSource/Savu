@@ -64,7 +64,6 @@ class PluginDatasets(object):
         if isinstance(data_obj.raw, ImageKey) or\
            isinstance(data_obj.raw, NoImageKey):
             return
-        proj_dim = data_obj.find_axis_label_dimension('rotation_angle')
         data_obj.add_raw_data_obj(data_obj)
 
     def __set_in_datasets(self):

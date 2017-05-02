@@ -181,14 +181,17 @@ class DispDisplay(DisplayFormatter):
         # remove display styling outside of this class
         colour = Back.RESET + Fore.RESET
         warnings = []
+        names = []
         for plugin in self.plugin_list:
-            warn = self.plugin_list_inst._get_docstring_info(
-                    plugin['name'])['warn']
-            if warn:
-                for w in warn.split('\n'):
-                    string = plugin['name'] + ": " + w
-                    warnings.append(self._get_equal_lines(
-                        string, width-1, colour, colour, " "*2))
+            if plugin['name'] not in names:
+                names.append(plugin['name'])
+                warn = self.plugin_list_inst._get_docstring_info(
+                        plugin['name'])['warn']
+                if warn:
+                    for w in warn.split('\n'):
+                        string = plugin['name'] + ": " + w + '.'
+                        warnings.append(self._get_equal_lines(
+                            string, width-1, colour, colour, " "*2))
         return "\n".join(
             ["*" + "\n ".join(w.split('\n')) for w in warnings if w])
 
