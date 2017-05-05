@@ -132,7 +132,7 @@ class Preview(object):
         """
         dobj = self.get_data_obj()
         shape = dobj.get_shape()
-        mid = shape[dim]/2 - 1
+        mid = 0 if shape[dim]/2 - 1 < 0 else shape[dim]/2 - 1
         end = shape[dim]
         idx = [eval(equ) for equ in idx]
         idx = [idx[i] if idx[i] > -1 else shape[dim]+1+idx[i] for i in

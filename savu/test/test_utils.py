@@ -173,16 +173,24 @@ def set_data_dict(in_data, out_data):
     return {'in_datasets': in_data, 'out_datasets': out_data}
 
 
-def load_test_data(exp_type):
-    options = set_experiment(exp_type)
-
+def _add_loader_to_plugin_list(options, params={}):
     plugin_list = []
     ID = options['loader']
     name = ''.join(x.capitalize() for x in (ID.split('.')[-1]).split('_'))
-    plugin_list.append(set_plugin_entry(name, ID, {}, 0))
-
-    # currently assuming an empty parameters dictionary
+    plugin_list.append(set_plugin_entry(name, ID, params, 0))
     options['plugin_list'] = plugin_list
+
+
+def load_random_data(loader, params):
+    options = set_options(get_test_data_path('24737.nxs'))
+    options['loader'] = 'savu.plugins.loaders.' + str(loader)
+    _add_loader_to_plugin_list(options, params=params)
+    return plugin_runner(options)
+
+
+def load_test_data(exp_type):
+    options = set_experiment(exp_type)
+    _add_loader_to_plugin_list(options)
     return plugin_runner(options)
 
 

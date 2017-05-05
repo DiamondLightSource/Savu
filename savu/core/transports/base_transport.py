@@ -136,7 +136,7 @@ class BaseTransport(object):
         data = []
         current_sl = []
         for d in self.pDict['nIn']:
-            in_sl = self.pDict['in_sl']['process'][count][d]
+            in_sl = self.pDict['in_sl']['process'][count][d]            
             data.append(self.pDict['squeeze'][d](trans_data[d][in_sl]))
             current_sl.append(self.pDict['in_sl']['current'][d][count])
         plugin.set_current_slice_list(current_sl)
@@ -186,8 +186,8 @@ class BaseTransport(object):
         :returns: expansion function
         :rtype: lambda
         """
-        slice_dirs = data._get_plugin_data().get_slice_directions()
-        n_core_dirs = len(data._get_plugin_data().get_core_directions())
+        slice_dirs = data.get_slice_dimensions()
+        n_core_dirs = len(data.get_core_dimensions())
         new_slice = [slice(None)]*len(data.get_shape())
         possible_slices = [copy.copy(new_slice)]
 
@@ -209,8 +209,12 @@ class BaseTransport(object):
         """
         pData = data._get_plugin_data()
         max_frames = pData._get_max_frames_process()
-        squeeze_dims = pData.get_slice_directions()
-        if max_frames > 1 or pData._get_no_squeeze():
+
+        pad = True if pData.padding and data.get_slice_dimensions()[0] in \
+            pData.padding._get_padding_directions().keys() else False
+
+        squeeze_dims = data.get_slice_dimensions()
+        if max_frames > 1 or pData._get_no_squeeze() or pad:
             squeeze_dims = squeeze_dims[1:]
         return lambda x: np.squeeze(x, axis=squeeze_dims)
 

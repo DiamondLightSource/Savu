@@ -68,8 +68,8 @@ class Plugin(PluginDatasets):
         self.setup()
         self.set_filter_padding(*(self.get_plugin_datasets()))
 
-        in_datasets, out_datasets = self.get_datasets()
-        for data in in_datasets + out_datasets:
+        in_data, out_data = self.get_datasets()
+        for data in in_data + out_data:
             data._finalise_patterns()
 
     def _set_parameters_this_instance(self, indices):
