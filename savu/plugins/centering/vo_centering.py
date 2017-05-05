@@ -172,11 +172,11 @@ class VoCentering(BaseFilter, CpuPlugin):
         in_datasets, out_datasets = self.get_datasets()
 
         cor_raw = np.squeeze(out_datasets[0].data[...])
-        cor_fit = np.squeeze(out_datasets[1].data[...])
+        cor_fit = out_datasets[1].data[...]
         fit = np.zeros(cor_fit.shape)
         fit[:] = np.mean(cor_raw)
         cor_fit = fit
-        out_datasets[1].data[:] = cor_fit[:, np.newaxis]
+        out_datasets[1].data[:] = cor_fit[:]
 
         self.populate_meta_data('cor_raw', cor_raw)
         self.populate_meta_data('centre_of_rotation', cor_fit)
@@ -211,7 +211,7 @@ class VoCentering(BaseFilter, CpuPlugin):
         # copy all required information from in_dataset[0]
         fullData = in_dataset[0]
 
-        slice_dirs = np.array(in_pData[0].get_slice_directions())
+        slice_dirs = np.array(in_dataset[0].get_slice_dimensions())
         new_shape = (np.prod(np.array(fullData.get_shape())[slice_dirs]), 1)
         self.orig_shape = \
             (np.prod(np.array(self.orig_full_shape)[slice_dirs]), 1)
@@ -219,12 +219,12 @@ class VoCentering(BaseFilter, CpuPlugin):
         out_dataset[0].create_dataset(shape=new_shape,
                                       axis_labels=['x.pixels', 'y.pixels'],
                                       remove=True)
-        out_dataset[0].add_pattern("METADATA", core_dir=(1,), slice_dir=(0,))
+        out_dataset[0].add_pattern("METADATA", core_dims=(1,), slice_dims=(0,))
 
         out_dataset[1].create_dataset(shape=self.orig_shape,
                                       axis_labels=['x.pixels', 'y.pixels'],
                                       remove=True)
-        out_dataset[1].add_pattern("METADATA", core_dir=(1,), slice_dir=(0,))
+        out_dataset[1].add_pattern("METADATA", core_dims=(1,), slice_dims=(0,))
 
         out_pData[0].plugin_data_setup('METADATA', self.get_max_frames())
         out_pData[1].plugin_data_setup('METADATA', self.get_max_frames())
