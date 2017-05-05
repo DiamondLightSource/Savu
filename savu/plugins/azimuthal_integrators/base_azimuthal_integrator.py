@@ -101,8 +101,8 @@ class BaseAzimuthalIntegrator(Plugin, CpuPlugin):
         spectra = out_datasets[0]
         num_bins = self.get_parameters('num_bins')
         patterns = ['SINOGRAM.-1', 'PROJECTION.-1']
-        detX_dim = in_dataset[0].find_axis_label_dimension('detector_x')
-        detY_dim = in_dataset[0].find_axis_label_dimension('detector_y')
+        detX_dim = in_dataset[0].get_data_dimension_by_axis_label('detector_x')
+        detY_dim = in_dataset[0].get_data_dimension_by_axis_label('detector_y')
         if detX_dim < detY_dim:
             detY_dim -= 1
         axis_labels = [str(detX_dim), str(detY_dim) + '.Q.Angstrom^-1']
@@ -110,7 +110,8 @@ class BaseAzimuthalIntegrator(Plugin, CpuPlugin):
                                axis_labels={in_dataset[0]: axis_labels},
                                shape=shape[:-2]+(num_bins,))
 
-        spectrum = {'core_dir': (-1,), 'slice_dir': tuple(range(len(shape)-2))}
+        spectrum = \
+            {'core_dims': (-1,), 'slice_dims': tuple(range(len(shape)-2))}
         spectra.add_pattern("SPECTRUM", **spectrum)
 
         logging.debug("**SPECTRA AXIS LABELS** %s", spectra.get_axis_labels())

@@ -31,7 +31,7 @@ from savu.plugins.utils import register_plugin
 @register_plugin
 class DownsampleFilter(Plugin, CpuPlugin):
     """
-    A plugin to reduce the data in the selected direction by a proportion
+    A plugin to reduce the data in the selected dimension by a proportion
 
     :param bin_size: Bin Size for the downsample. Default: 2.
     :param mode: One of 'skip', 'mean', 'median', 'min', 'max'. Default: 'mean'.
@@ -110,7 +110,7 @@ class DownsampleFilter(Plugin, CpuPlugin):
     def compress_bins(self, data, compressor):
         pData = self.get_plugin_in_datasets()[0]
         # Break up the input data
-        blocks = self.get_blocks(data[0], pData.get_core_directions())
+        blocks = self.get_blocks(data[0], pData.get_core_dimensions())
         # Downsampling step
         result = numpy.array(map(compressor, blocks))
         # Reshape the array (using Fortran-like ordering)
@@ -155,7 +155,8 @@ class DownsampleFilter(Plugin, CpuPlugin):
         plugin_pattern = self.parameters['pattern']
         in_pData[0].plugin_data_setup(plugin_pattern, self.get_max_frames())
 
-        self.out_shape = self.new_shape(in_dataset[0].get_shape(), in_pData[0])
+        self.out_shape = \
+            self.new_shape(in_dataset[0].get_shape(), in_dataset[0])
 
         out_dataset[0].create_dataset(patterns=in_dataset[0],
                                       axis_labels=in_dataset[0],
@@ -163,8 +164,8 @@ class DownsampleFilter(Plugin, CpuPlugin):
 
         out_pData[0].plugin_data_setup(plugin_pattern, self.get_max_frames())
 
-    def new_shape(self, full_shape, pData):
-        core_dirs = pData.get_core_directions()
+    def new_shape(self, full_shape, data):
+        core_dirs = data.get_core_dimensions()
         new_shape = list(full_shape)
         for dim in core_dirs:
             new_shape[dim] = full_shape[dim]/self.parameters['bin_size'] \

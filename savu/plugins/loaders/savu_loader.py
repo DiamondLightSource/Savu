@@ -75,9 +75,15 @@ class SavuLoader(BaseLoader):
         for pattern in pattern_list:
             pattern = pattern.encode('ascii')
             pEntry = entry + '/patterns/' + pattern
-            core_dir = tuple(data.backing_file[pEntry + '/core_dir'][...])
-            slice_dir = tuple(data.backing_file[pEntry + '/slice_dir'][...])
-            data.add_pattern(pattern, core_dir=core_dir, slice_dir=slice_dir)
+            try:
+                core_dims = data.backing_file[pEntry + '/core_dims'][...]
+                slice_dims = data.backing_file[pEntry + '/slice_dims'][...]
+            except:
+                core_dims = data.backing_file[pEntry + '/core_dir'][...]
+                slice_dims = data.backing_file[pEntry + '/slice_dir'][...]
+
+            data.add_pattern(pattern, core_dims=tuple(core_dims),
+                             slice_dims=tuple(slice_dims))
 
     def add_meta_data(self, data, entry):
         meta_data_list = data.backing_file[entry + '/meta_data'].keys()

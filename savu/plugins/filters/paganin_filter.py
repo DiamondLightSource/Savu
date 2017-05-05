@@ -44,12 +44,16 @@ class PaganinFilter(BaseFilter, CpuPlugin):
     :u*param Ratio: ratio of delta/beta. Default: 250.0.
     :param Padtopbottom: Pad to the top and bottom of projection. Default: 10.
     :param Padleftright: Pad to the left and right of projection. Default: 10.
-    :param Padmethod: Method of padding. Default: 'edge'.
+    :param Padmethod: Numpy pad method. Default: 'edge'.
     :param increment: Increment all values by this amount before taking the \
         log. Default: 1.0.
 
-    :config_warn: The 'log' parameter in the reconstruction should be set to\
-        FALSE when the Paganin Filter is on.
+    :config_warn: The 'log' parameter in the reconstruction should be set to \
+    FALSE..
+    :config_warn: Previewing a subset of sinograms will alter the result, due \
+    to the global nature of this filter. If this is necessary, ensure they \
+    are consecutive.
+
     """
 
     def __init__(self):
@@ -60,14 +64,19 @@ class PaganinFilter(BaseFilter, CpuPlugin):
         self.filtercomplex = None
         self.count = 0
 
+    def set_filter_padding(self, in_pData, out_pData):
+        in_data = self.get_in_datasets()[0]
+        det_x = in_data.get_data_dimension_by_axis_label('detector_x')
+        det_y = in_data.get_data_dimension_by_axis_label('detector_y')
+        pad_det_y = '%s.%s' % (det_y, self.parameters['Padtopbottom'])
+        pad_det_x = '%s.%s' % (det_x, self.parameters['Padleftright'])
+        mode = self.parameters['Padmethod']
+        pad_dict = {'pad_directions': [pad_det_x, pad_det_y], 'pad_mode': mode}
+        in_pData[0].padding = pad_dict
+        out_pData[0].padding = pad_dict
+
     def pre_process(self):
-        pData = self.get_plugin_in_datasets()[0]
-        self.slice_dir = pData.get_slice_dimension()
-        nDims = len(pData.get_shape())
-        self.sslice = [slice(None)]*nDims
-        core_shape = list(pData.get_shape())
-        del core_shape[self.slice_dir]
-        self._setup_paganin(*core_shape)
+        self._setup_paganin(*self.get_plugin_in_datasets()[0].get_shape())
 
     def _setup_paganin(self, height, width):
         micron = 10**(-6)
@@ -77,12 +86,12 @@ class PaganinFilter(BaseFilter, CpuPlugin):
         resolution = self.parameters['Resolution']*micron
         wavelength = (1240.0/energy)*10.0**(-9)
         ratio = self.parameters['Ratio']
-        padtopbottom = self.parameters['Padtopbottom']
-        padleftright = self.parameters['Padleftright']
-        height1 = height + 2*padtopbottom
-        width1 = width + 2*padleftright
+
+        height1 = height + 2*self.parameters['Padtopbottom']
+        width1 = width + 2*self.parameters['Padleftright']
         centery = np.ceil(height1/2.0)-1.0
         centerx = np.ceil(width1/2.0)-1.0
+
         # Define the paganin filter
         dpx = 1.0/(width1*resolution)
         dpy = 1.0/(height1*resolution)
@@ -96,7 +105,6 @@ class PaganinFilter(BaseFilter, CpuPlugin):
 
         filter1 = 1.0+ratio*pd
         self.filtercomplex = filter1+filter1*1j
-        print "I set up the filter"
 
     def _paganin(self, data):
         pci1 = fft.fft2(np.float32(data))
@@ -107,27 +115,12 @@ class PaganinFilter(BaseFilter, CpuPlugin):
         return result
 
     def process_frames(self, data):
-        output = np.empty_like(data[0])
-        nSlices = data[0].shape[self.slice_dir]
-        for i in range(nSlices):
-            self.sslice[self.slice_dir] = i
-            proj = data[0][tuple(self.sslice)]
-            height, width = proj.shape
-            proj = np.nan_to_num(proj)  # Noted performance
-            proj[proj == 0] = 1.0
-            padtopbottom = self.parameters['Padtopbottom']
-            padleftright = self.parameters['Padleftright']
-            padmethod = str(self.parameters['Padmethod'])
-            proj = np.lib.pad(proj, (tuple([padtopbottom]*2),
-                                     tuple([padleftright]*2)), padmethod)
-            result = self._paganin(proj)
-            #result = np.abs(np.apply_over_axes(self._paganin(proj), proj, 0))
-            output[self.sslice] = result[padtopbottom:-padtopbottom,
-                                         padleftright:-padleftright]
-        return output
+        proj = np.nan_to_num(data[0])  # Noted performance
+        proj[proj == 0] = 1.0
+        return self._paganin(proj)
 
     def get_max_frames(self):
-        return 16
+        return 'single'
 
     def get_citation_information(self):
         cite_info = CitationInformation()

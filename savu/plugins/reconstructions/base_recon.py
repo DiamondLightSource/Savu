@@ -64,21 +64,21 @@ class BaseRecon(Plugin):
             self.parameters['in_datasets'].append(self.parameters['init_vol'])
 
     def base_pre_process(self):
-        in_dataset = self.get_in_datasets()[0]
+        in_data, out_data = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
         self.pad_dim = \
             in_pData[0].get_data_dimension_by_axis_label('x', contains=True)
         in_meta_data = self.get_in_meta_data()[0]
 
-        self.set_centre_of_rotation(in_dataset, in_meta_data, in_pData[0])
+        self.set_centre_of_rotation(in_data[0], in_meta_data, in_pData[0])
         self.exp.log(self.name + " End")
         self.br_vol_shape = out_pData[0].get_shape()
 
         self.main_dir = in_pData[0].get_pattern()['SINOGRAM']['main_dir']
         self.angles = in_meta_data.get('rotation_angle')
         if len(self.angles.shape) is not 1:
-            self.scan_dim = in_dataset.find_axis_label_dimension('scan')
-        self.slice_dirs = out_pData[0].get_slice_directions()
+            self.scan_dim = in_data[0].find_axis_label_dimension('scan')
+        self.slice_dirs = out_data[0].get_slice_dimensions()
 
         shape = in_pData[0].get_shape()
         pad_len = shape[self.pad_dim] if self.parameters['sino_pad'] else 0
@@ -227,7 +227,7 @@ class BaseRecon(Plugin):
         dim_rotAngle = data.get_data_patterns()['PROJECTION']['main_dir']
         dim_detY = data.get_data_patterns()['SINOGRAM']['main_dir']
 
-        core_dirs = pData.get_core_directions()
+        core_dirs = data.get_core_dimensions()
         dim_detX = list(set(core_dirs).difference(set((dim_rotAngle,))))[0]
 
         dim_volX = dim_rotAngle

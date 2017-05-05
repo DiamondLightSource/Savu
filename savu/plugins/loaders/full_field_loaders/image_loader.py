@@ -60,10 +60,10 @@ class ImageLoader(BaseLoader):
                                  'detector_y.pixel',
                                  'detector_x.pixel')
 
-        data_obj.add_pattern('PROJECTION', core_dir=(detX, detY),
-                             slice_dir=(rot,))
-        data_obj.add_pattern('SINOGRAM', core_dir=(detX, rot),
-                             slice_dir=(detY,))
+        data_obj.add_pattern('PROJECTION', core_dims=(detX, detY),
+                             slice_dims=(rot,))
+        data_obj.add_pattern('SINOGRAM', core_dims=(detX, rot),
+                             slice_dims=(detY,))
 
         path = exp.meta_data.get("data_file")
         data_prefix = self.parameters['data_prefix']

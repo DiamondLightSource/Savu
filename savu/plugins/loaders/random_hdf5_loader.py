@@ -105,7 +105,7 @@ class RandomHdf5Loader(BaseLoader):
         h5file = self.hdf5._open_backing_h5(fname, 'w')
         dset = h5file.create_dataset('test', size, chunks=chunks)
 
-        slice_dirs = nnext.values()[0]['slice_dir']
+        slice_dirs = nnext.values()[0]['slice_dims']
         nDims = len(dset.shape)
         total_frames = np.prod([dset.shape[i] for i in slice_dirs])
         sub_size = \
@@ -152,11 +152,12 @@ class RandomHdf5Loader(BaseLoader):
             p_split = p.split('.')
             name = p_split[0]
             dims = p_split[1:]
-            core_dir = tuple([int(i[0]) for i in [d.split('c') for d in dims]
+            core_dims = tuple([int(i[0]) for i in [d.split('c') for d in dims]
                               if len(i) == 2])
-            slice_dir = tuple([int(i[0]) for i in [d.split('s') for d in dims]
+            slice_dims = tuple([int(i[0]) for i in [d.split('s') for d in dims]
                                if len(i) == 2])
-            data_obj.add_pattern(name, core_dir=core_dir, slice_dir=slice_dir)
+            data_obj.add_pattern(
+                    name, core_dims=core_dims, slice_dims=slice_dims)
 
     def _set_rotation_angles(self, data_obj, n_entries):
         angles = self.parameters['angles']

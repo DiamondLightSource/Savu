@@ -118,14 +118,14 @@ class I13PtychoLoader(BaseMultiModalLoader):
         positions_label = (data_obj.find_axis_label_dimension('xy', contains=True),)
         rotation_label = (data_obj.find_axis_label_dimension('rotation_angle', contains=True),)
 
-        data_obj.add_pattern("PROJECTION", core_dir=positions_label, slice_dir=tuple(set(dims)-set(positions_label)))
+        data_obj.add_pattern("PROJECTION", core_dims=positions_label, slice_dims=tuple(set(dims)-set(positions_label)))
         sino_cores = rotation_label + positions_label
-        data_obj.add_pattern("SINOGRAM", core_dir=sino_cores, slice_dir = tuple(set(dims)-set(sino_cores)))
+        data_obj.add_pattern("SINOGRAM", core_dims=sino_cores, slice_dims=tuple(set(dims)-set(sino_cores)))
 
-        data_obj.add_pattern("DIFFRACTION", core_dir=diff_core,
-                             slice_dir=diff_slice)
+        data_obj.add_pattern("DIFFRACTION", core_dims=diff_core,
+                             slice_dims=diff_slice)
         
-        data_obj.add_pattern("4D_SCAN", core_dir=tuple(set(dims)-set(rotation_label)),
-                        slice_dir=rotation_label)
+        data_obj.add_pattern("4D_SCAN", core_dims=tuple(set(dims)-set(rotation_label)),
+                        slice_dims=rotation_label)
   
         self.set_data_reduction_params(data_obj)

@@ -85,7 +85,7 @@ class MultiSavuLoader(BaseLoader):
 
         if self.parameters['stack_or_cat'] == 'stack':
             for p in patterns:
-                patterns[p]['slice_dir'] += (3,)
+                patterns[p]['slice_dims'] += (3,)
         data_obj.data_info.set('data_patterns', patterns)
 
     def _get_data_objects(self, savu):

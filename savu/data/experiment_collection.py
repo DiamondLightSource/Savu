@@ -324,8 +324,8 @@ class Experiment(object):
             nx_data = entry.create_group(pattern)
             nx_data.attrs[NX_CLASS] = 'NXparameters'
             values = data_patterns[pattern]
-            nx_data.create_dataset('core_dir', data=values['core_dir'])
-            nx_data.create_dataset('slice_dir', data=values['slice_dir'])
+            nx_data.create_dataset('core_dims', data=values['core_dims'])
+            nx_data.create_dataset('slice_dims', data=values['slice_dims'])
 
         self._barrier()
 

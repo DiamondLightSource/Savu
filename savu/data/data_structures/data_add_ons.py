@@ -32,23 +32,27 @@ class Padding(object):
     inside :meth:`savu.plugins.base_filter.BaseFilter.set_filter_padding`
     """
 
-    def __init__(self, pattern):
+    def __init__(self, pData):
+        self._pData = pData
+        self.mtp = pData._get_max_frames_process()
         self.padding_dirs = {}
         self.pad_dict = None
         self.dims = None
-        self.pattern_name = pattern.keys()[0]
-        self.pattern = pattern[self.pattern_name]
+        self.pattern_name = pData.get_pattern().keys()[0]
+        self.pattern = pData.get_pattern()[self.pattern_name]
         self.dims = self.__set_dims()
         self.mode = 'edge'
 
     def __set_dims(self):
         dims = []
-        core_dir = self.pattern['core_dir']
-        slice_dir = self.pattern['slice_dir']
-        self.pad_dims = list(set(core_dir + (slice_dir[0],)))
+        core_dir = self.pattern['core_dims']
+        slice_dir = self.pattern['slice_dims']
         for dim in range(len(core_dir + slice_dir)):
             self.padding_dirs[dim] = {'before': 0, 'after': 0}
         return dims
+
+    def pad_mode(self, mode):
+        self.mode = mode
 
     def pad_frame_edges(self, padding):
         """ Pad all the edges of a frame of data with the same pad amount
@@ -56,7 +60,7 @@ class Padding(object):
 
         :param int padding: The pad amount
         """
-        core_dirs = self.pattern['core_dir']
+        core_dirs = self.pattern['core_dims']
         for core in core_dirs:
             self._pad_direction(str(core) + '.' + str(padding))
 
@@ -66,8 +70,8 @@ class Padding(object):
 
         :param int padding: The pad amount
         """
-        sdir = self.pattern['slice_dir'][0]
-        self._pad_direction(str(sdir) + '.' + str(padding))
+        sdir = self.pattern['slice_dims'][0]
+        self._pad_dimension(str(sdir) + '.' + str(padding))
 
     @docstring_parameter(notes._padding.__doc__)
     def pad_directions(self, pad_list):
@@ -96,7 +100,7 @@ class Padding(object):
 
         pdir = int(pdir)
         allowed_dims = \
-            self.pattern['core_dir'] + (self.pattern['slice_dir'][0],)
+            self.pattern['core_dims'] + (self.pattern['slice_dims'][0],)
         if pdir not in allowed_dims:
             raise Exception('Only core and first slice dimensions, %s, can be '
                             'padded. I cannot pad data dim %s in this plugin.'
@@ -106,6 +110,17 @@ class Padding(object):
                 self.padding_dirs[pdir][p] += int(pval)
 
     def _get_padding_directions(self):
+        """ Get padding directions.
+
+        :returns: padding dictionary
+        :rtype: dict
+        """
+        for key in self.padding_dirs.keys():
+            if sum(self.padding_dirs[key].values()) is 0:
+                del self.padding_dirs[key]
+        return self.padding_dirs
+
+    def _get_plugin_padding_directions(self):
         """ Get padding directions.
 
         :returns: padding dictionary
@@ -154,7 +169,8 @@ class DataMapping(object):
                 if i != proj_dir[0]:
                     if i != proj_dir[1]:
                         ovs.append(i)
-            pattern = {"PROJECTION", {'core_dir': proj_dir, 'slice_dir': ovs}}
+            pattern = \
+                {"PROJECTION", {'core_dims': proj_dir, 'slice_dims': ovs}}
         return pattern
 
     def check_is_tomo(self, proj_dir, rotation):
@@ -165,6 +181,6 @@ class DataMapping(object):
                 if i != rotation:
                     if i != proj_dir[1]:
                         ovs.append(i)
-            pattern = {"SINOGRAM", {'core_dir': (rotation, proj_dir[-1]),
-                                    'slice_dir': ovs}}
+            pattern = {"SINOGRAM", {'core_dims': (rotation, proj_dir[-1]),
+                                    'slice_dims': ovs}}
         return pattern

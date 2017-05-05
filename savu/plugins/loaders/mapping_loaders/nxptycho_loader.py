@@ -93,10 +93,10 @@ class NxptychoLoader(BaseMultiModalLoader):
         logging.debug("is a diffraction")
         logging.debug("the diffraction cores are:"+str(diff_core))
         logging.debug("the diffraction slices are:"+str(diff_slice))
-        data_obj.add_pattern("DIFFRACTION", core_dir=diff_core,
-                             slice_dir=diff_slice)
+        data_obj.add_pattern("DIFFRACTION", core_dims=diff_core,
+                             slice_dims=diff_slice)
         
-        data_obj.add_pattern("4D_SCAN", core_dir=(1,2,3),
-                        slice_dir=(0,))
+        data_obj.add_pattern("4D_SCAN", core_dims=(1,2,3),
+                        slice_dims=(0,))
   
         self.set_data_reduction_params(data_obj)

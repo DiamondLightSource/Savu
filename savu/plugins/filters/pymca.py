@@ -92,8 +92,8 @@ class Pymca(BaseFilter, CpuPlugin):
         fitResult.meta_data.set('FitAreas',np.array(fit_labels))
         slice_directions = tuple(range(len(rest_shape)))
 #         print "slice directions are:"+str(slice_directions)
-        fitResult.add_pattern("CHANNEL", core_dir=(-1,),
-                        slice_dir=slice_directions)
+        fitResult.add_pattern("CHANNEL", core_dims=(-1,),
+                        slice_dims=slice_directions)
         
         in_pData, out_pData = self.get_plugin_datasets()
         in_pData[0].plugin_data_setup(self.get_plugin_pattern(), self.get_max_frames())

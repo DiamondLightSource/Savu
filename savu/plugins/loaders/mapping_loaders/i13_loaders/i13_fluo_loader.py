@@ -101,24 +101,24 @@ class I13FluoLoader(BaseLoader):
         logging.debug("is a spectrum")
         logging.debug("the spectrum cores are:"+str(spec_core))
         logging.debug("the spectrum slices are:"+str(spec_slice))
-        data_obj.add_pattern("SPECTRUM", core_dir=spec_core,
-                             slice_dir=spec_slice)
+        data_obj.add_pattern("SPECTRUM", core_dims=spec_core,
+                             slice_dims=spec_slice)
         logging.debug("the spectrum slices are:"+str(spec_slice))
-        data_obj.add_pattern("SPECTRUM_STACK", core_dir=spec_core[:-1],
-                             slice_dir=(-2,)+spec_slice)
+        data_obj.add_pattern("SPECTRUM_STACK", core_dims=spec_core[:-1],
+                             slice_dims=(-2,)+spec_slice)
         
         
         
         positions_label = (data_obj.find_axis_label_dimension('xy', contains=True),)
         rotation_label = (data_obj.find_axis_label_dimension('rotation_angle', contains=True),)
 
-        data_obj.add_pattern("PROJECTION", core_dir=positions_label, slice_dir=tuple(set(dims)-set(positions_label)))
+        data_obj.add_pattern("PROJECTION", core_dims=positions_label, slice_dims=tuple(set(dims)-set(positions_label)))
         sino_cores = rotation_label + positions_label
-        data_obj.add_pattern("SINOGRAM", core_dir=sino_cores, slice_dir = tuple(set(dims)-set(sino_cores)))
+        data_obj.add_pattern("SINOGRAM", core_dims=sino_cores, slice_dims = tuple(set(dims)-set(sino_cores)))
 
         
-        data_obj.add_pattern("4D_SCAN", core_dir=tuple(set(dims)-set(rotation_label)),
-                        slice_dir=rotation_label)
+        data_obj.add_pattern("4D_SCAN", core_dims=tuple(set(dims)-set(rotation_label)),
+                        slice_dims=rotation_label)
   
 #         data_obj.add_pattern("SINOGRAM", core_dir=(0,1),
 #                      slice_dir=(2,3))

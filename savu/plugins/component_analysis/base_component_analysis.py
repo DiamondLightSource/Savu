@@ -67,14 +67,14 @@ class BaseComponentAnalysis(Plugin, CpuPlugin):
         axis_labels = ['idx.unit', 'spectra.unit']
         out_dataset[1].create_dataset(shape=components_shape,
                                       axis_labels=axis_labels)
-        spectrum = {'core_dir': (1,), 'slice_dir': (0,)}
+        spectrum = {'core_dims': (1,), 'slice_dims': (0,)}
 
         out_dataset[1].add_pattern("SPECTRUM", **spectrum)
 
         in_pData, out_pData = self.get_plugin_datasets()
         plugin_pattern = self.get_plugin_pattern()
 #         dirs = range(len(out_dataset[0].get_shape()))
-#         vxz = {'core_dir': (0,1), 'slice_dir': (2,)}
+#         vxz = {'core_dims': (0,1), 'slice_dims': (2,)}
 #         in_dataset[0].add_pattern("VOLUME_XZ", **vxz)
         in_pData[0].plugin_data_setup(plugin_pattern, self.get_max_frames())
         out_pData[0].plugin_data_setup(plugin_pattern, num_comps)

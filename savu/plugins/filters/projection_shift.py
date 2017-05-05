@@ -213,7 +213,7 @@ class ProjectionShift(BaseFilter, CpuPlugin):
         out_dataset[0].create_dataset(shape=new_shape,
                                       axis_labels=['x.pixels', 'y.pixels'],
                                       remove=True)
-        out_dataset[0].add_pattern("METADATA", core_dir=(1,), slice_dir=(0,))
+        out_dataset[0].add_pattern("METADATA", core_dims=(1,), slice_dims=(0,))
         out_pData[0].plugin_data_setup('METADATA', self.get_max_frames(),
                                        fixed=True)
 

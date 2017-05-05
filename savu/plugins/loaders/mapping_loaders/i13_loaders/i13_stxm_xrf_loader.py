@@ -57,8 +57,8 @@ class I13StxmXrfLoader(BaseLoader):
             lab_sxy = data_obj.backing_file['entry1/instrument/lab_sxy/']
             data_obj.meta_data.set('xy', (lab_sxy['lab_sx'].value,lab_sxy['lab_sy'].value))
             data_obj.set_axis_labels('xy.microns','ch.unit', 'spectrum.eV')
-            data_obj.add_pattern('PROJECTION', core_dir=(0,),slice_dir=(1,2))
-            data_obj.add_pattern('SPECTRUM', core_dir=(2,), slice_dir=(0,1))
+            data_obj.add_pattern('PROJECTION', core_dims=(0,),slice_dims=(1,2))
+            data_obj.add_pattern('SPECTRUM', core_dims=(2,), slice_dims=(0,1))
         else:
             ### set the rotation
             rotation_angle = \
@@ -70,10 +70,10 @@ class I13StxmXrfLoader(BaseLoader):
             data_obj.set_axis_labels('rotation_angle.degrees',
                                      'x.pixel','ch.unit', 'spectrum.eV')
     
-            data_obj.add_pattern('PROJECTION', core_dir=(1,),slice_dir=(0,2,3))
-            data_obj.add_pattern('SINOGRAM', core_dir=(0,1),slice_dir=(2,3))
-    #         data_obj.add_pattern('PROJECTION', core_dir=(0,), slice_dir=(1,2,3))
-            data_obj.add_pattern('SPECTRUM', core_dir=(3,), slice_dir=(0,1,2))
+            data_obj.add_pattern('PROJECTION', core_dims=(1,),slice_dims=(0,2,3))
+            data_obj.add_pattern('SINOGRAM', core_dims=(0,1),slice_dims=(2,3))
+    #         data_obj.add_pattern('PROJECTION', core_dims=(0,), slice_dims=(1,2,3))
+            data_obj.add_pattern('SPECTRUM', core_dims=(3,), slice_dims=(0,1,2))
         
         data_obj.set_shape(sh)
         self.set_data_reduction_params(data_obj)

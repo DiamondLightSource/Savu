@@ -63,7 +63,8 @@ class Random3dTomoLoader(RandomHdf5Loader):
         data_obj.data.update_flat(np.ones(data_obj.data.flat().shape))
 
     def __set_image_key(self, data_obj):
-        proj_slice = data_obj.get_data_patterns()['PROJECTION']['slice_dir'][0]
+        proj_slice = \
+            data_obj.get_data_patterns()['PROJECTION']['slice_dims'][0]
         image_key = np.zeros(data_obj.data.shape[proj_slice], dtype=int)
         dark, flat = self.parameters['image_key']
         image_key[np.array(dark)] = 2

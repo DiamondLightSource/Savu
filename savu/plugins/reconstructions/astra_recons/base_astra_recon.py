@@ -59,11 +59,11 @@ class BaseAstraRecon(BaseRecon):
             shape = (in_data.get_shape()[dim_detX],
                      self.parameters['number_of_iterations'])
             label = ['vol_y.voxel', 'iteration.number']
-            pattern = {'name': 'SINOGRAM', 'slice_dir': (0,), 'core_dir': (1,)}
+            pattern = {'name': 'SINOGRAM', 'slice_dims': (0,), 'core_dims': (1,)}
             out_dataset[1].create_dataset(axis_labels=label, shape=shape)
             out_dataset[1].add_pattern(pattern['name'],
-                                       slice_dir=pattern['slice_dir'],
-                                       core_dir=pattern['core_dir'])
+                                       slice_dir=pattern['slice_dims'],
+                                       core_dir=pattern['core_dims'])
             out_pData[1].plugin_data_setup(
                     pattern['name'], self._get_max_frames())
 

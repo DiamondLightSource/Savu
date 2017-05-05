@@ -56,8 +56,8 @@ class ChunkingTests(unittest.TestCase):
 
     def create_pattern(self, name, pattern_list):
         pattern = {name: {'max_frames_transfer': pattern_list[0],
-                          'slice_dir': pattern_list[1],
-                          'core_dir': pattern_list[2]}}
+                          'slice_dims': pattern_list[1],
+                          'core_dims': pattern_list[2]}}
         return pattern
 
     def get_nChunks(self, shape, chunks):

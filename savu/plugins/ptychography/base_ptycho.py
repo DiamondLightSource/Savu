@@ -48,9 +48,9 @@ class BasePtycho(Plugin, CpuPlugin):  # also make one for gpu
 
         # lets set up the axis labels for output datasets
         position_labels, probe_labels, object_labels, self.sh = self.setup_axis_labels(in_dataset)
-        print "probe labels are:"+str(probe_labels)
-        print "object labels are:"+str(object_labels)
-        print "position labels are:"+str(position_labels)
+#        print "probe labels are:"+str(probe_labels)
+#        print "object labels are:"+str(object_labels)
+#        print "position labels are:"+str(position_labels)
         # Now create the datasets and work out the patterns
         ### PROBE ###
         probe = out_dataset[0]
@@ -80,16 +80,17 @@ class BasePtycho(Plugin, CpuPlugin):  # also make one for gpu
         ### POSITIONS ###
         logging.debug('##### POSITIONS #####')
         positions = out_dataset[2]
-        print self.sh, self.get_positions().shape
+        #print self.sh, self.get_positions().shape
         positions_shape = self.sh + self.get_positions().shape[-2:]
         logging.debug('positions shape is:%s',str(positions_shape))
-        print "positions shape",positions_shape
+        #print "positions shape",positions_shape
         positions.create_dataset(axis_labels=position_labels,
                                  shape=positions_shape)
         
         rest_pos = range(len(position_labels))
         
-        pos_md = {'core_dir':tuple(set(rest_pos) - set([0])), 'slice_dir':(0,)}
+        pos_md = \
+            {'core_dims':tuple(set(rest_pos) - set([0])), 'slice_dims':(0,)}
         positions.add_pattern("CHANNEL", **pos_md)
         '''
         now we need to tell the setup what we want as input shapes, output shapes, and the number of each of them in one go.
@@ -234,7 +235,8 @@ class BasePtycho(Plugin, CpuPlugin):  # also make one for gpu
             logging.debug('This is not a tomography, so no time series for the probe')
         else:
             # print('the rotation axis is:%s' % str(rot_axis))
-            probe_ts = {'core_dir':(rot_axis,), 'slice_dir':tuple(set(rest_probe) - set([rot_axis]))}
+            probe_ts = {'core_dims':(rot_axis,),
+                        'slice_dims':tuple(set(rest_probe) - set([rot_axis]))}
             probe.add_pattern("TIMESERIES", **probe_ts) # so we can FT the wiggles etc...
             # print('This is a tomography so I have added a TIMESERIES pattern to the probe') # the probe oscillates in time for each projection, set this as a time series pattern
 
@@ -245,7 +247,7 @@ class BasePtycho(Plugin, CpuPlugin):  # also make one for gpu
             logging.warn(str(e) + 'we were looking for "energy"')
             logging.debug('This is not spectro-microscopy, so no spectrum/timeseries for the probe')
         else:
-            probe_spec = {'core_dir':tuple(energy_axis), 'slice_dir':tuple(set(rest_probe) - set([energy_axis]))}
+            probe_spec = {'core_dims':tuple(energy_axis), 'slice_dims':tuple(set(rest_probe) - set([energy_axis]))}
             probe.add_pattern("SPECTRUM", **probe_spec)
             probe.add_pattern("TIMESERIES", **probe_spec)
             logging.debug('This is probably spectro-microscopy so I have added a SPECTRUM pattern to the probe')
@@ -255,7 +257,7 @@ class BasePtycho(Plugin, CpuPlugin):  # also make one for gpu
     def set_projection_pattern(self, probe, rest_probe):
         probe_proj_core = tuple([rest_probe[idx] for idx in (-3, -2)]) # hard coded since we set them just above
         probe_slice = tuple(set(rest_probe) - set(probe_proj_core))
-        probe_proj = {'core_dir':probe_proj_core, 'slice_dir':probe_slice}
+        probe_proj = {'core_dims':probe_proj_core, 'slice_dims':probe_slice}
         probe.add_pattern("PROJECTION", **probe_proj)
         logging.debug('have added a PROJECTION pattern')
 
@@ -266,7 +268,7 @@ class BasePtycho(Plugin, CpuPlugin):  # also make one for gpu
             logging.warn(str(e) + 'we were looking for "energy"')
             logging.debug('This is not spectro-microscopy, so no spectrum for the object')
         else:
-            obj_spec = {'core_dir':tuple(energy_axis), 'slice_dir':tuple(set(rest_obj) - set([energy_axis]))}
+            obj_spec = {'core_dims':tuple(energy_axis), 'slice_dims':tuple(set(rest_obj) - set([energy_axis]))}
             object_trans.add_pattern("SPECTRUM", **obj_spec)
             logging.debug('This is probably spectro-microscopy so I have added a SPECTRUM pattern to the object') # the probe oscillates in time for each projection, set this as a time series pattern
 
@@ -279,16 +281,6 @@ class BasePtycho(Plugin, CpuPlugin):  # also make one for gpu
             logging.debug('This is not a tomography, so no sinograms for the object transmission')
         else:
             x_axis = object_trans.find_axis_label_dimension('x', contains=True) # get the x axis
-            obj_sino = {'core_dir':(rot_axis, x_axis), 'slice_dir':tuple(set(rest_obj) - set((rot_axis, x_axis)))}
+            obj_sino = {'core_dims':(rot_axis, x_axis), 'slice_dims':tuple(set(rest_obj) - set((rot_axis, x_axis)))}
             object_trans.add_pattern("SINOGRAM", **obj_sino) # for the tomography
             logging.debug('This is a tomography so I have added a SINOGRAM pattern to the object transmission') # the probe oscillates in time for each projection, set this as a time series pattern
-
-
-
-
-
-
-
-
-
-

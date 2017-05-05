@@ -56,7 +56,7 @@ class PluginDriver(object):
                 self._set_parameters_this_instance(param_idx[i])
                 for j in range(len(out_data)):
                     out_data[j]._get_plugin_data()\
-                        .set_fixed_directions(param_dims[j], param_idx[i])
+                        .set_fixed_dimensions(param_dims[j], param_idx[i])
 
             logging.info("%s.%s", self.__class__.__name__, 'pre_process')
             self.base_pre_process()

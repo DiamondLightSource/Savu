@@ -65,9 +65,9 @@ class MrcLoader(BaseLoader):
                                      'detector_x.pixel')
 
             data_obj.add_pattern('PROJECTION', core_dir=(detX, detY),
-                                 slice_dir=(rot,))
+                                 slice_dims=(rot,))
             data_obj.add_pattern('SINOGRAM', core_dir=(detX, rot),
-                                 slice_dir=(detY,))
+                                 slice_dims=(detY,))
         elif nDims is 4:
             # 4D patterns need to be set here
             pass

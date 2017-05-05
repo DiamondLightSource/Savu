@@ -102,10 +102,10 @@ class NxtomoLoader(BaseLoader):
                                  'detector_y.pixel',
                                  'detector_x.pixel')
 
-        data_obj.add_pattern('PROJECTION', core_dir=(detX, detY),
-                             slice_dir=(rot,))
-        data_obj.add_pattern('SINOGRAM', core_dir=(detX, rot),
-                             slice_dir=(detY,))
+        data_obj.add_pattern('PROJECTION', core_dims=(detX, detY),
+                             slice_dims=(rot,))
+        data_obj.add_pattern('SINOGRAM', core_dims=(detX, rot),
+                             slice_dims=(detY,))
         return data_obj.data.shape
 
     def __setup_3d_to_4d(self, data_obj, n_angles):
@@ -125,10 +125,10 @@ class NxtomoLoader(BaseLoader):
         data_obj.set_axis_labels('rotation_angle.degrees', 'detector_y.pixel',
                                  'detector_x.pixel', 'scan.number')
 
-        data_obj.add_pattern('PROJECTION', core_dir=(detX, detY),
-                             slice_dir=(rot, scan))
-        data_obj.add_pattern('SINOGRAM', core_dir=(detX, rot),
-                             slice_dir=(detY, scan))
+        data_obj.add_pattern('PROJECTION', core_dims=(detX, detY),
+                             slice_dims=(rot, scan))
+        data_obj.add_pattern('SINOGRAM', core_dims=(detX, rot),
+                             slice_dims=(detY, scan))
         return data_obj.data.shape
 
     def __set_dark_and_flat(self, data_obj):

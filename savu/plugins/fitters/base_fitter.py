@@ -66,7 +66,7 @@ class BaseFitter(Plugin, CpuPlugin):
                                  axis_labels={in_dataset[0]: axis_labels},
                                  shape=outshape)
 
-        channel = {'core_dir': (-1,), 'slice_dir': range(len(shape)-1)}
+        channel = {'core_dims': (-1,), 'slice_dims': range(len(shape)-1)}
         
         fitAreas.add_pattern("CHANNEL", **channel)
         fitHeights.add_pattern("CHANNEL", **channel)

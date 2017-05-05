@@ -120,9 +120,9 @@ class MultiNxtomoLoader(BaseLoader):
         data_obj.set_axis_labels(*axis_labels)
 
         data_obj.add_pattern('PROJECTION', core_dir=(detX, detY),
-                             slice_dir=(rot, extra))
+                             slice_dims=(rot, extra))
         data_obj.add_pattern('SINOGRAM', core_dir=(detX, rot),
-                             slice_dir=(detY, extra))
+                             slice_dims=(detY, extra))
 
     def _extend_axis_label_values(self, data_obj_list, data_obj):
         dim = self.parameters['stack_or_cat_dim']

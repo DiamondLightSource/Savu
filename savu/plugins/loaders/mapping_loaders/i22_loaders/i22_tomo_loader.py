@@ -51,9 +51,9 @@ class I22TomoLoader(BaseLoader):
         data_obj.set_axis_labels('y.units', 'x.units',
                                  'rotation_angle.degrees', 'Q.angstrom^-1')
 
-        data_obj.add_pattern('PROJECTION', core_dir=(1, 0), slice_dir=(2, 3))
-        data_obj.add_pattern('SINOGRAM', core_dir=(2, 1), slice_dir=(0, 3))
-        data_obj.add_pattern('SPECTRUM', core_dir=(3,), slice_dir=(0, 1, 2))
+        data_obj.add_pattern('PROJECTION', core_dims=(1, 0), slice_dims=(2, 3))
+        data_obj.add_pattern('SINOGRAM', core_dims=(2, 1), slice_dims=(0, 3))
+        data_obj.add_pattern('SPECTRUM', core_dims=(3,), slice_dims=(0, 1, 2))
 
         mData = data_obj.meta_data
         mData.set("Q", data_obj.backing_file['entry/result/q'].value)

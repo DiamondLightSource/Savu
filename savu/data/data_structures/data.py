@@ -122,6 +122,8 @@ class Data(DataCreate):
         self.__check_dims()
 
     def set_original_shape(self, shape):
+        """ Set the original data shape before previewing
+        """
         self.orig_shape = shape
         self.set_shape(shape)
 
@@ -217,13 +219,13 @@ class Data(DataCreate):
         """
         all_dims = range(len(self.get_shape()))
         vol_dict = {}
-        vol_dict['core_dir'] = (dim1, dim2)
+        vol_dict['core_dims'] = (dim1, dim2)
         slice_dir = [sdir]
         # *** need to add this for other patterns
         for ddir in all_dims:
             if ddir not in [dim1, dim2, sdir]:
                 slice_dir.append(ddir)
-        vol_dict['slice_dir'] = tuple(slice_dir)
+        vol_dict['slice_dims'] = tuple(slice_dir)
         return vol_dict
 
     def set_axis_labels(self, *args):
@@ -251,7 +253,7 @@ class Data(DataCreate):
         """
         return self.data_info.get('axis_labels')
 
-    def find_axis_label_dimension(self, name, contains=False):
+    def get_data_dimension_by_axis_label(self, name, contains=False):
         """ Get the dimension of the data associated with a particular
         axis_label.
 
@@ -306,9 +308,9 @@ class Data(DataCreate):
         nDims = sum([len(i) for i in pattern.values()])
         for p in pattern:
             ddirs = pattern[p]
-            pattern[p] = self.non_negative_directions(ddirs, nDims)
+            pattern[p] = self.__non_negative_directions(ddirs, nDims)
 
-    def non_negative_directions(self, ddirs, nDims):
+    def __non_negative_directions(self, ddirs, nDims):
         """ Replace negative indexing values with positive counterparts.
 
         :params tuple(int) ddirs: data dimension indices
@@ -328,8 +330,8 @@ class Data(DataCreate):
         """
         patterns = self.get_data_patterns()
         n1 = 'PROJECTION' if pname is 'SINOGRAM' else 'SINOGRAM'
-        d1 = patterns[n1]['core_dir']
-        d2 = patterns[pname]['slice_dir']
+        d1 = patterns[n1]['core_dims']
+        d2 = patterns[pname]['slice_dims']
         tdir = set(d1).intersection(set(d2))
 
         # this is required when a single sinogram exists in the mm case, and a
@@ -352,15 +354,6 @@ class Data(DataCreate):
                 axis_label_keys.append(key)
         return axis_label_keys
 
-    def get_slice_directions(self):
-        """ Get pattern slice_dir of pattern currently associated with the
-        dataset (if any).
-
-        :returns: the slicing dimensions.
-        :rtype: tuple(int)
-        """
-        return self._get_plugin_data().get_slice_directions()
-
     def amend_axis_label_values(self, slice_list):
         """ Amend all axis label values based on the slice_list parameter.\
         This is required if the data is reduced.
@@ -373,3 +366,21 @@ class Data(DataCreate):
                 preview_sl = [slice(None)]*len(values.shape)
                 preview_sl[0] = slice_list[i]
                 self.meta_data.set(label, values[preview_sl])
+
+    def get_core_dimensions(self):
+        """ Get the core data dimensions associated with the current pattern.
+
+        :returns: value associated with pattern key ``core_dims``
+        :rtype: tuple
+        """
+        return self._get_plugin_data().get_pattern().values()[0]['core_dims']
+
+    def get_slice_dimensions(self):
+        """ Get the slice data dimensions associated with the current pattern.
+
+        :returns: value associated with pattern key ``slice_dims``
+        :rtype: tuple
+        """
+        temp = self._get_plugin_data()
+        temp2 = temp.get_pattern()
+        return self._get_plugin_data().get_pattern().values()[0]['slice_dims']

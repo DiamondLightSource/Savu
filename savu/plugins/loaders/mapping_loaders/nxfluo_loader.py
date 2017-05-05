@@ -78,6 +78,6 @@ class NxfluoLoader(BaseMultiModalLoader):
         self.add_patterns_based_on_acquisition(data_obj, 'fluo')
 
         slice_dir = tuple(range(len(data_obj.data.shape)-1))
-        data_obj.add_pattern("SPECTRUM", core_dir=(-1,), slice_dir=slice_dir)
+        data_obj.add_pattern("SPECTRUM", core_dims=(-1,), slice_dims=slice_dir)
 
         self.set_data_reduction_params(data_obj)

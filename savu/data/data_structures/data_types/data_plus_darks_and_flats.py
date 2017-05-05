@@ -69,13 +69,14 @@ class DataWithDarksAndFlats(BaseType):
 
     def get_dark_flat_slice_list(self):
         slice_list = self.data_obj._preview._get_preview_slice_list()
-        remove_dim = self.data_obj.find_axis_label_dimension('rotation_angle')
+        remove_dim = \
+            self.data_obj.get_data_dimension_by_axis_label('rotation_angle')
         slice_list[remove_dim] = slice(None)
 
         if len(slice_list) > 3:
             idx = np.arange(0, len(slice_list))
-            detX = self.data_obj.find_axis_label_dimension('detector_x')
-            detY = self.data_obj.find_axis_label_dimension('detector_y')
+            detX = self.data_obj.get_data_dimension_by_axis_label('detector_x')
+            detY = self.data_obj.get_data_dimension_by_axis_label('detector_y')
             remove = set(idx).difference(set([remove_dim, detX, detY]))
             for dim in sorted(list(remove), reverse=True):
                 del slice_list[dim]

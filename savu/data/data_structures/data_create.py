@@ -130,7 +130,7 @@ class DataCreate(object):
         patterns = {}
         for name, pattern_dict in copy_patterns.iteritems():
             empty_flag = False
-            for ddir in ['slice_dir', 'core_dir']:
+            for ddir in ['slice_dims', 'core_dims']:
                 s_dims = self.non_negative_directions(
                     pattern_dict[ddir], nDims=nDims)
                 new_dims = [sd for sd in s_dims if sd not in dims]
@@ -227,10 +227,10 @@ class DataCreate(object):
         """ Add missing dimensions to patterns and populate data info dict. """
         all_dims = range(len(self.get_shape()))
         for p in patterns:
-            pDims = patterns[p]['core_dir'] + patterns[p]['slice_dir']
+            pDims = patterns[p]['core_dims'] + patterns[p]['slice_dims']
             for dim in all_dims:
                 if dim not in pDims:
-                    patterns[p]['slice_dir'] += (dim,)
+                    patterns[p]['slice_dims'] += (dim,)
         self.data_info.set('data_patterns', patterns)
 
     def __find_and_set_shape(self, data):

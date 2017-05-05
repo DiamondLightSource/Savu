@@ -103,13 +103,13 @@ class ListToProjections(BaseFilter, CpuPlugin):
         
         reshaped_projections = out_datasets[0]
         reshaped_projections.create_dataset(shape=tuple(outshape), axis_labels=axis_labels)
-        reshaped_projections.add_pattern("PROJECTION", core_dir=proj_out_core_dirs, slice_dir=proj_out_slice_dirs)
+        reshaped_projections.add_pattern("PROJECTION", core_dims=proj_out_core_dirs, slice_dims=proj_out_slice_dirs)
         in_patterns = in_datasets[0].get_data_patterns()
         for pattern in in_patterns.keys():
             if pattern != "PROJECTION":
-                core_dir = in_patterns[pattern]['core_dir']
+                core_dir = in_patterns[pattern]['core_dims']
                 slice_dir = list(set(allDimsOut)-set(core_dir))
-                dim_info = {'core_dir': core_dir, 'slice_dir': slice_dir}
+                dim_info = {'core_dims': core_dir, 'slice_dims': slice_dir}
                 reshaped_projections.add_pattern(pattern, **dim_info)
         out_pData[0].plugin_data_setup('PROJECTION', self.get_max_frames())
 #     

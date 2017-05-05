@@ -179,8 +179,8 @@ class BaseMultiModalLoader(BaseLoader):
             logging.debug("is a map")
             logging.debug("the proj cores are"+str(proj_dir))
             logging.debug("the proj slices are"+str(tuple(set(dims) - set(proj_dir))))
-            data_obj.add_pattern("PROJECTION", core_dir=proj_dir,
-                                 slice_dir=tuple(set(dims) - set(proj_dir)))
+            data_obj.add_pattern("PROJECTION", core_dims=proj_dir,
+                                 slice_dims=tuple(set(dims) - set(proj_dir)))
 
         if data_obj.data_mapping._is_tomo:
             logging.debug("%s is tomo", ltype)
@@ -191,14 +191,14 @@ class BaseMultiModalLoader(BaseLoader):
             logging.debug("the sino cores are:"+str(sino_dir))
             logging.debug("the sino slices are:"+str(tuple(set(dims) - set(sino_dir))))
             sino_slice_dir = tuple(set(dims) - set(sino_dir))
-            data_obj.add_pattern("SINOGRAM", core_dir=sino_dir,
-                                 slice_dir=sino_slice_dir)
+            data_obj.add_pattern("SINOGRAM", core_dims=sino_dir,
+                                 slice_dims=sino_slice_dir)
             
         # I don't think this is needed anymore
 #         if data_obj.data_mapping._is_tomo and (data_obj.data_mapping._is_map==1) and len(sino_slice_dir)<2:
 #             print "I'm here"
-#             data_obj.add_pattern("PROJECTION", core_dir=(0,),
-#                         slice_dir=(1,))
+#             data_obj.add_pattern("PROJECTION", core_dims=(0,),
+#                         slice_dims=(1,))
         
         if ltype is 'xrd':
             diff_core = (-2,-1) # it will always be this
@@ -206,5 +206,6 @@ class BaseMultiModalLoader(BaseLoader):
             logging.debug("is a diffraction")
             logging.debug("the diffraction cores are:"+str(diff_core))
             logging.debug("the diffraction slices are:"+str(diff_slice))
-            data_obj.add_pattern("DIFFRACTION", core_dir=diff_core,
-                                 slice_dir=diff_slice)
+            data_obj.add_pattern("DIFFRACTION", core_dims=diff_core,
+                                 slice_dims=diff_slice)
+

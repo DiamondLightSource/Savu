@@ -132,7 +132,7 @@ class PluginRunner(object):
         """ Run through the plugin list without any processing (setup only)\
         and fill in missing dataset names.
         """
-        plugin_list._reset_datsets_list()
+        plugin_list._reset_datasets_list()
         n_loaders = self.exp.meta_data.plugin_list._get_n_loaders()
         n_plugins = plugin_list._get_n_processing_plugins()
 

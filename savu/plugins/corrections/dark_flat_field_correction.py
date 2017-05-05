@@ -59,7 +59,7 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
 
         pData_shape = in_pData.get_shape()
         tile = [1]*len(pData_shape)
-        rot_dim = inData.find_axis_label_dimension('rotation_angle')
+        rot_dim = inData.get_data_dimension_by_axis_label('rotation_angle')
         self.slice_dir = in_pData.get_slice_dimension()
 
         if self.parameters['pattern'] == 'PROJECTION':
@@ -86,7 +86,7 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
             self.convert_size = lambda a, b, x: np.tile(x[a:b], tile)
         else:
             nSino = \
-                full_shape[data.find_axis_label_dimension('detector_y')]
+                full_shape[data.get_data_dimension_by_axis_label('detector_y')]
             self.convert_size = \
                 lambda a, b, x: np.tile(x[a % nSino:b], tile)
         self.count = 0

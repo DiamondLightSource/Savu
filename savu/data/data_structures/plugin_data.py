@@ -59,7 +59,7 @@ class PluginData(object):
         return self._preview
 
     def get_total_frames(self):
-        """ Get the total number of frames to process.
+        """ Get the total number of frames to process (all MPI processes).
 
         :returns: Number of frames
         :rtype: int
@@ -67,7 +67,7 @@ class PluginData(object):
         temp = 1
         slice_dir = \
             self.data_obj.get_data_patterns()[
-                self.get_pattern_name()]["slice_dir"]
+                self.get_pattern_name()]["slice_dims"]
         for tslice in slice_dir:
             temp *= self.data_obj.get_shape()[tslice]
         return temp
@@ -77,8 +77,8 @@ class PluginData(object):
         """
         pattern = self.data_obj.get_data_patterns()[name]
         self.meta_data.set("name", name)
-        self.meta_data.set("core_dir", pattern['core_dir'])
-        self.__set_slice_directions()
+        self.meta_data.set("core_dims", pattern['core_dims'])
+        self.__set_slice_dimensions()
 
     def get_pattern_name(self):
         """ Get the pattern name.
@@ -86,10 +86,10 @@ class PluginData(object):
         :returns: the pattern name
         :rtype: str
         """
-        name = self.meta_data.get("name")
-        if name is not None:
+        try:
+            name = self.meta_data.get("name")
             return name
-        else:
+        except KeyError:
             raise Exception("The pattern name has not been set.")
 
     def get_pattern(self):
@@ -104,8 +104,8 @@ class PluginData(object):
     def __set_shape(self):
         """ Set the shape of the plugin data processing chunk.
         """
-        core_dir = self.get_core_directions()
-        slice_dir = self.get_slice_directions()
+        core_dir = self.data_obj.get_core_dimensions()
+        slice_dir = self.data_obj.get_slice_dimensions()
         dirs = list(set(core_dir + (slice_dir[0],)))
         slice_idx = dirs.index(slice_dir[0])
         dshape = self.data_obj.get_shape()
@@ -120,8 +120,8 @@ class PluginData(object):
         self.shape = tuple(shape)
 
     def __set_shape_transfer(self, slice_size):
-        core_dir = self.get_core_directions()
-        slice_dir = self.get_slice_directions()
+        core_dir = self.data_obj.get_core_dimensions()
+        slice_dir = self.data_obj.get_slice_dimensions()
         dshape = self.data_obj.get_shape()
         shape = [None]*len(dshape)
         for dim in core_dir:
@@ -133,7 +133,17 @@ class PluginData(object):
         self.shape_transfer = tuple(shape)
 
     def get_shape(self):
-        """ Get the shape of the plugin data to be processed each time.
+        """ Get the shape of the data (without padding) that is passed to the
+        plugin process_frames method.
+        """
+        return self.shape
+
+    def _set_padded_shape(self):
+        pass
+
+    def get_padded_shape(self):
+        """ Get the shape of the data (with padding) that is passed to the
+        plugin process_frames method.
         """
         return self.shape
 
@@ -163,25 +173,20 @@ class PluginData(object):
         if (len(core_dir)+len(slice_dir)) is not nDims:
             sys.exit("Incorrect number of data dimensions specified.")
 
-    def __set_slice_directions(self):
-        """ Set the slice directions in the pluginData meta data dictionary.
+    def __set_slice_dimensions(self):
+        """ Set the slice dimensions in the pluginData meta data dictionary.
         """
         slice_dirs = self.data_obj.get_data_patterns()[
-            self.get_pattern_name()]['slice_dir']
-        self.meta_data.set('slice_dir', slice_dirs)
-
-    def get_slice_directions(self):
-        """ Get the slice directions (slice_dir) of the dataset.
-        """
-        return self.meta_data.get('slice_dir')
+            self.get_pattern_name()]['slice_dims']
+        self.meta_data.set('slice_dims', slice_dirs)
 
     def get_slice_dimension(self):
         """
         Return the position of the slice dimension in relation to the data
         handed to the plugin.
         """
-        core_dirs = self.get_core_directions()
-        slice_dir = self.get_slice_directions()[0]
+        core_dirs = self.data_obj.get_core_dimensions()
+        slice_dir = self.data_obj.get_slice_dimensions()[0]
         return list(set(core_dirs + (slice_dir,))).index(slice_dir)
 
     def get_data_dimension_by_axis_label(self, label, contains=False):
@@ -189,19 +194,19 @@ class PluginData(object):
         Return the dimension of the data in the plugin that has the specified
         axis label.
         """
-        label_dim = \
-            self.data_obj.find_axis_label_dimension(label, contains=contains)
-        plugin_dims = self.get_core_directions()
+        label_dim = self.data_obj.get_data_dimension_by_axis_label(
+                label, contains=contains)
+        plugin_dims = self.data_obj.get_core_dimensions()
         if self._get_max_frames_process() > 1:
-            plugin_dims += (self.get_slice_directions()[0],)
+            plugin_dims += (self.get_slice_dimensions()[0],)
         return list(set(plugin_dims)).index(label_dim)
 
     def set_slicing_order(self, order):
         """
-        Reorder the slice directions.  The fastest changing slice direction
+        Reorder the slice dimensions.  The fastest changing slice dimension
         will always be the first one stated in the pattern key ``slice_dir``.
         The input param is a tuple stating the desired order of slicing
-        directions relative to the current order.
+        dimensions relative to the current order.
         """
         slice_dirs = self.get_slice_directions()
         if len(slice_dirs) < len(order):
@@ -211,36 +216,36 @@ class PluginData(object):
         new_slice_dirs = tuple(ordered + remaining)
         self.get_current_pattern()['slice_dir'] = new_slice_dirs
 
-    def get_core_directions(self):
-        """ Get the core data directions
-
-        :returns: value associated with pattern key ``core_dir``
-        :rtype: tuple
+    def get_core_dimensions(self):
         """
-        core_dir = self.data_obj.get_data_patterns()[
-            self.get_pattern_name()]['core_dir']
-        return core_dir
+        Return the position of the core dimensions in relation to the data
+        handed to the plugin.
+        """
+        core_dims = self.data_obj.get_core_dimensions()
+        first_slice_dim = (self.data_obj.get_slice_dimensions()[0],)
+        plugin_dims = np.sort(core_dims + first_slice_dim)
+        return np.searchsorted(plugin_dims, np.sort(core_dims))
 
-    def set_fixed_directions(self, dims, values):
+    def set_fixed_dimensions(self, dims, values):
         """ Fix a data direction to the index in values list.
 
         :param list(int) dims: Directions to fix
         :param list(int) value: Index of fixed directions
         """
-        slice_dirs = self.get_slice_directions()
+        slice_dirs = self.data_obj.get_slice_dimensions()
         if set(dims).difference(set(slice_dirs)):
             raise Exception("You are trying to fix a direction that is not"
                             " a slicing direction")
-        self.meta_data.set("fixed_directions", dims)
-        self.meta_data.set("fixed_directions_values", values)
-        self.__set_slice_directions()
+        self.meta_data.set("fixed_dimensions", dims)
+        self.meta_data.set("fixed_dimensions_values", values)
+        self.__set_slice_dimensions()
         shape = list(self.data_obj.get_shape())
         for dim in dims:
             shape[dim] = 1
         self.data_obj.set_shape(tuple(shape))
         self.__set_shape()
 
-    def _get_fixed_directions(self):
+    def _get_fixed_dimensions(self):
         """ Get the fixed data directions and their indices
 
         :returns: Fixed directions and their associated values
@@ -248,9 +253,9 @@ class PluginData(object):
         """
         fixed = []
         values = []
-        if 'fixed_directions' in self.meta_data.get_dictionary():
-            fixed = self.meta_data.get("fixed_directions")
-            values = self.meta_data.get("fixed_directions_values")
+        if 'fixed_dimensions' in self.meta_data.get_dictionary():
+            fixed = self.meta_data.get("fixed_dimensions")
+            values = self.meta_data.get("fixed_dimensions_values")
         return [fixed, values]
 
     def _get_data_slice_list(self, plist):
@@ -310,22 +315,31 @@ class PluginData(object):
             raise Exception(e_str)
 
         max_mft = 32  # max frames that can be transferred from file at a time
+        frame_threshold = 32  # no idea if this is a good number
+        # min frames required if frames_per_process > frame_threshold
+        min_mft = 16
         if isinstance(nFrames, int) and nFrames > max_mft:
             raise Exception("The requested %s frames excedes the maximum "
                             "allowed of %s." % (nFrames, max_mft))
 
-        fixed, _ = self._get_fixed_directions()
-        sdir = [s for s in self.get_slice_directions() if s not in fixed]
+        fixed, _ = self._get_fixed_dimensions()
+        sdir = \
+            [s for s in self.data_obj.get_slice_dimensions() if s not in fixed]
         shape = self.data_obj.get_shape()
         total_frames = np.prod([shape[d] for d in sdir])
         mpi_procs = len(self.data_obj.exp.meta_data.get('processes'))
+        frames_per_process = np.ceil(total_frames/mpi_procs)
 
         # find all possible choices of nFrames, being careful with boundaries
         fchoices, size_list = self.__get_frame_choices(
                 sdir, min(max_mft, np.prod([shape[d] for d in sdir])))
 
+        if frames_per_process > frame_threshold:
+            min_mft = min(max(fchoices), min_mft)
+            fchoices = [f for f in fchoices if f >= min_mft]
+
         mft, idx = self.__find_best_frame_distribution(
-            fchoices, total_frames, mpi_procs, idx=True)
+            fchoices[::-1], total_frames, mpi_procs, idx=True)
 
         self.__set_shape_transfer(size_list[fchoices.index(mft)])
 
@@ -333,6 +347,8 @@ class PluginData(object):
             logging.info("Setting max frames transfer to %d", mft)
             logging.info("Setting max frames process to %d", 1)
             self.meta_data.set('max_frames_process', 1)
+            self.__check_distribution(mft, total_frames, mpi_procs)
+            (((total_frames/mft)/mpi_procs) % 1)
             return int(mft)
 
         mfp = nFrames if isinstance(nFrames, int) else min(mft, shape[sdir[0]])
@@ -352,11 +368,19 @@ class PluginData(object):
 
         logging.info("Setting max frames transfer to %d", mft)
         logging.info("Setting max frames process to %d", mfp)
+        self.__check_distribution(mft, total_frames, mpi_procs)
 
         # Retain the shape if the first slice dimension has length 1
         if mfp == 1:
             self.__set_no_squeeze()
         return int(mft)
+
+    def __check_distribution(self, mft, nframes, nprocs):
+        warn_threshold = 0.85
+        temp = (((nframes/mft)/nprocs) % 1)
+        if temp != 0.0 and temp < warn_threshold:
+            logging.warn(
+                    'UNEVEN FRAME DISTRIBUTION: shape %s, sdir %s, nprocs %s')
 
     def __find_closest_lower(self, vlist, value):
         rem = [f if f != 0 else value for f in [m % value for m in vlist]]
@@ -426,7 +450,8 @@ class PluginData(object):
 
         nFrames = self._calc_max_frames_transfer(nFrames)
         self.meta_data.set('max_frames_transfer', nFrames)
-        if self._plugin and (chunks[self.get_slice_directions()[0]] % nFrames):
+        if self._plugin and \
+                (chunks[self.data_obj.get_slice_dimensions()[0]] % nFrames):
             self._plugin.chunk = True
         self.__set_shape()
         self.split = split

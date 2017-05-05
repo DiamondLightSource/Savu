@@ -51,7 +51,7 @@ class Histogram(BaseAnalysis, CpuPlugin):
         axis_labels = ['idx.unit', 'peaks.pixels']
         out_dataset[0].create_dataset(axis_labels=axis_labels,
                                       shape=(sh[-1], 1))
-        out_dataset[0].add_pattern("METADATA", slice_dir=(0,), core_dir=(1,))
+        out_dataset[0].add_pattern("METADATA", slice_dims=(0,), core_dims=(1,))
         out_pData[0].plugin_data_setup("METADATA", self.get_max_frames())
 
     def get_max_frames(self):

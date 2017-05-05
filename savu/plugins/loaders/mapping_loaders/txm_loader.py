@@ -62,10 +62,10 @@ class TxmLoader(BaseLoader):
                                  'detector_y.pixel',
                                  'detector_x.pixel')
 
-        data_obj.add_pattern('PROJECTION', core_dir=(1, 2),
-                             slice_dir=(0,))
-        data_obj.add_pattern('SINOGRAM', core_dir=(0, 2),
-                             slice_dir=(1,))
+        data_obj.add_pattern('PROJECTION', core_dims=(1, 2),
+                             slice_dims=(0,))
+        data_obj.add_pattern('SINOGRAM', core_dims=(0, 2),
+                             slice_dims=(1,))
         
         data_obj.set_shape(sh)
         self.set_data_reduction_params(data_obj)

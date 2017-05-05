@@ -75,7 +75,7 @@ class ReproduceFit(BaseFitter):
 
         ss_slice = range(len(new_shape) - 2)
 #         print "spectrum stack slice dims are" + str(ss_slice)
-        spectrum_stack = {'core_dir': (-2, -1), 'slice_dir': tuple(ss_slice)}
+        spectrum_stack = {'core_dims': (-2, -1), 'slice_dims': tuple(ss_slice)}
 
         individual_curves.add_pattern("SPECTRUM_STACK", **spectrum_stack)
 

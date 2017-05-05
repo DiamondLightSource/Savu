@@ -60,8 +60,8 @@ class I13StxmLoader(BaseLoader):
         data_obj.set_axis_labels('rotation_angle.degrees',
                                  'x.pixel')
 
-        data_obj.add_pattern('PROJECTION', core_dir=(1,),slice_dir=(0,))
-        data_obj.add_pattern('SINOGRAM', core_dir=(0,1),slice_dir=())
+        data_obj.add_pattern('PROJECTION', core_dims=(1,),slice_dims=(0,))
+        data_obj.add_pattern('SINOGRAM', core_dims=(0,1),slice_dims=())
 #         data_obj.add_pattern('PROJECTION', core_dir=(0,), slice_dir=(1,2,3))
 #         data_obj.add_pattern('SPECTRUM', core_dir=(3,), slice_dir=(0,1,2))
         

@@ -88,9 +88,9 @@ class Chunking(object):
         potentially adjustable)
         """
         self.core = \
-            list(self.current['core_dir']) + list(self.next['core_dir'])
-        c_sl = list(self.current['slice_dir'])
-        n_sl = list(self.next['slice_dir'])
+            list(self.current['core_dims']) + list(self.next['core_dims'])
+        c_sl = list(self.current['slice_dims'])
+        n_sl = list(self.next['slice_dims'])
         self.slice1 = [c_sl[0]] + [n_sl[0]]
         self.other = c_sl[1:] + n_sl[1:]
         return list(set(self.core + self.slice1))
@@ -152,8 +152,8 @@ class Chunking(object):
         return 1
 
     def __get_max_frames_dict(self):
-        current_sdir = self.current['slice_dir'][0]
-        next_sdir = self.next['slice_dir'][0]
+        current_sdir = self.current['slice_dims'][0]
+        next_sdir = self.next['slice_dims'][0]
         mft = 'max_frames_transfer'
         if current_sdir == next_sdir:
             c_max = self.current[mft]
@@ -161,8 +161,8 @@ class Chunking(object):
             least_common_multiple = (c_max*n_max)/gcd(c_max, n_max)
             ddict = {current_sdir: least_common_multiple}
         else:
-            ddict = {self.current['slice_dir'][0]: self.current[mft],
-                     self.next['slice_dir'][0]: self.next[mft]}
+            ddict = {self.current['slice_dims'][0]: self.current[mft],
+                     self.next['slice_dims'][0]: self.next[mft]}
         return ddict
 
     def __max_frames_per_process(self, shape, nFrames):

@@ -64,7 +64,7 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
 
         self.new_slice = [slice(None)]*3
         orig_shape = self.get_in_datasets()[0].get_shape()
-        for ddir in self.core_dir:
+        for ddir in self.core_dims:
             self.new_slice[ddir] = \
                 slice(self.crop, orig_shape[ddir]-self.crop)
 
@@ -85,9 +85,9 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
 
         # copy all required information from in_dataset[0]
         self.shape = list(in_dataset[0].get_shape())
-        self.core_dir = in_pData[0].meta_data.get('core_dir')
+        self.core_dims = in_pData[0].meta_data.get('core_dims')
         self.crop = self.parameters['crop_edges']
-        for ddir in self.core_dir:
+        for ddir in self.core_dims:
             self.shape[ddir] = self.shape[ddir] - 2*self.crop
         out_dataset[0].create_dataset(patterns=in_dataset[0],
                                       axis_labels=in_dataset[0],
