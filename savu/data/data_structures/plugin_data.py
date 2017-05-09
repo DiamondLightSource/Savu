@@ -54,6 +54,7 @@ class PluginData(object):
         self.split = None
         self.boundary_padding = None
         self.no_squeeze = False
+        self.pre_tuning_shape = None
 
     def _get_preview(self):
         return self._preview
@@ -120,9 +121,13 @@ class PluginData(object):
         self.shape = tuple(shape)
 
     def __set_shape_transfer(self, slice_size):
+        dshape = self.data_obj.get_shape()
+        shape_before_tuning = self._get_shape_before_tuning()
+        add = [1]*(len(dshape) - len(shape_before_tuning))
+        slice_size = slice_size + add
+
         core_dir = self.data_obj.get_core_dimensions()
         slice_dir = self.data_obj.get_slice_dimensions()
-        dshape = self.data_obj.get_shape()
         shape = [None]*len(dshape)
         for dim in core_dir:
             shape[dim] = dshape[dim]
@@ -164,6 +169,17 @@ class PluginData(object):
         :rtype: tuple
         """
         return self.core_shape
+
+    def _set_shape_before_tuning(self, shape):
+        """ Set the shape of the full dataset used during each run of the \
+        plugin (i.e. ignore extra dimensions due to parameter tuning). """
+        self.pre_tuning_shape = shape
+
+    def _get_shape_before_tuning(self):
+        """ Return the shape of the full dataset used during each run of the \
+        plugin (i.e. ignore extra dimensions due to parameter tuning). """
+        return self.pre_tuning_shape if self.pre_tuning_shape else\
+            self.data_obj.get_shape()
 
     def __check_dimensions(self, indices, core_dir, slice_dir, nDims):
         if len(indices) is not len(slice_dir):
@@ -303,10 +319,7 @@ class PluginData(object):
     def _get_no_squeeze(self):
         return self.no_squeeze
 
-    def _calc_max_frames_transfer(self, nFrames):
-        """ The number of frames each process should retrieve from file at a
-        time.
-        """
+    def __checks_and_boundaries(self, nFrames):
         options = ['single', 'multiple']
         if not isinstance(nFrames, int) and nFrames not in options:
             e_str = "The value of nFrames is not recognised.  Please choose "
@@ -321,20 +334,45 @@ class PluginData(object):
         if isinstance(nFrames, int) and nFrames > max_mft:
             raise Exception("The requested %s frames excedes the maximum "
                             "allowed of %s." % (nFrames, max_mft))
+        return max_mft, min_mft, frame_threshold
 
+    def __get_max_frames_parameters(self):
         fixed, _ = self._get_fixed_dimensions()
         sdir = \
             [s for s in self.data_obj.get_slice_dimensions() if s not in fixed]
         shape = self.data_obj.get_shape()
-        total_frames = np.prod([shape[d] for d in sdir])
-        mpi_procs = len(self.data_obj.exp.meta_data.get('processes'))
-        frames_per_process = np.ceil(total_frames/mpi_procs)
+        shape_before_tuning = self._get_shape_before_tuning()
+
+        diff = len(shape) - len(shape_before_tuning)
+        if diff:
+            shape = shape_before_tuning
+            sdir = sdir[:-diff]
+
+        frames = np.prod([shape[d] for d in sdir])
+        n_procs = len(self.data_obj.exp.meta_data.get('processes'))
+        f_per_p = np.ceil(frames/n_procs)
+        return sdir, shape, frames, n_procs, f_per_p
+
+    def __log_max_frames(self, mft, mfp, frames, procs):
+        logging.info("Setting max frames transfer to %d", mft)
+        logging.info("Setting max frames process to %d", mfp)
+        self.meta_data.set('max_frames_process', mfp)
+        self.__check_distribution(mft, frames, procs)
+        # (((total_frames/mft)/mpi_procs) % 1)
+
+    def _calc_max_frames_transfer(self, nFrames):
+        """ The number of frames each process should retrieve from file at a
+        time.
+        """
+        max_mft, min_mft, threshold = self.__checks_and_boundaries(nFrames)
+        sdir, shape, total_frames, mpi_procs, frames_per_process = \
+            self.__get_max_frames_parameters()
 
         # find all possible choices of nFrames, being careful with boundaries
         fchoices, size_list = self.__get_frame_choices(
                 sdir, min(max_mft, np.prod([shape[d] for d in sdir])))
 
-        if frames_per_process > frame_threshold:
+        if frames_per_process > threshold:
             min_mft = min(max(fchoices), min_mft)
             fchoices = [f for f in fchoices if f >= min_mft]
 
@@ -344,11 +382,7 @@ class PluginData(object):
         self.__set_shape_transfer(size_list[fchoices.index(mft)])
 
         if nFrames == 'single':
-            logging.info("Setting max frames transfer to %d", mft)
-            logging.info("Setting max frames process to %d", 1)
-            self.meta_data.set('max_frames_process', 1)
-            self.__check_distribution(mft, total_frames, mpi_procs)
-            (((total_frames/mft)/mpi_procs) % 1)
+            self.__log_max_frames(mft, 1, total_frames, mpi_procs)
             return int(mft)
 
         mfp = nFrames if isinstance(nFrames, int) else min(mft, shape[sdir[0]])
@@ -364,11 +398,7 @@ class PluginData(object):
                 possible[::-1], total_frames, mpi_procs)
 
         self.__set_shape_transfer(size_list[fchoices.index(mft)])
-        self.meta_data.set('max_frames_process', int(mfp))
-
-        logging.info("Setting max frames transfer to %d", mft)
-        logging.info("Setting max frames process to %d", mfp)
-        self.__check_distribution(mft, total_frames, mpi_procs)
+        self.__log_max_frames(mft, mfp, total_frames, mpi_procs)
 
         # Retain the shape if the first slice dimension has length 1
         if mfp == 1:
@@ -393,7 +423,7 @@ class PluginData(object):
         with their product less than max_mft and return a list of these
         products. """
         nDims = len(sdir)
-        temp = [1]*nDims
+        temp = [1]*len(sdir)
         shape = self.data_obj.get_shape()
         idx = 0
         choices = []

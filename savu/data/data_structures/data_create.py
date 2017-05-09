@@ -89,6 +89,7 @@ class DataCreate(object):
             self.__find_and_set_shape(shape)
         else:
             pData = self._get_plugin_data()
+            pData._set_shape_before_tuning(copy.copy(pData.data_obj.get_shape()))
             self.set_shape(shape + tuple(pData.extra_dims))
 
         if 'patterns' in kwargs:
@@ -124,14 +125,14 @@ class DataCreate(object):
             else:
                 copy_patterns[name] = all_patterns[name]
             dims = tuple(map(int, all_dims.split(',')))
-            dims = self.non_negative_directions(dims, nDims=nDims)
+            dims = self._non_negative_directions(dims, nDims=nDims)
 
         dim_map = [a for a in range(nDims) if a not in dims]
         patterns = {}
         for name, pattern_dict in copy_patterns.iteritems():
             empty_flag = False
             for ddir in ['slice_dims', 'core_dims']:
-                s_dims = self.non_negative_directions(
+                s_dims = self._non_negative_directions(
                     pattern_dict[ddir], nDims=nDims)
                 new_dims = [sd for sd in s_dims if sd not in dims]
                 new_dims = [dim_map.index(n) for n in new_dims]
@@ -237,12 +238,13 @@ class DataCreate(object):
         """ Add any extra dimensions, from parameter tuning, to the shape and
         set the shape in the framework. """
         pData = self._get_plugin_data()
+        pData._set_shape_before_tuning(copy.copy(data.get_shape()))
         new_shape = copy.copy(data.get_shape()) + tuple(pData.extra_dims)
         self.set_shape(new_shape)
 
     def _add_raw_data_obj(self, data_obj):
         from savu.data.data_structures.data_type import ImageKey, NoImageKey
-        proj_dim = self.find_axis_label_dimension('rotation_angle')
+        proj_dim = self.get_data_dimension_by_axis_label('rotation_angle')
         if isinstance(data_obj.raw, ImageKey):
             data_obj.data = \
                 ImageKey(data_obj, data_obj.raw.image_key, proj_dim)
