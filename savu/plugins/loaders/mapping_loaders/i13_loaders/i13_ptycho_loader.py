@@ -115,8 +115,8 @@ class I13PtychoLoader(BaseMultiModalLoader):
         logging.debug("is a diffraction")
         logging.debug("the diffraction cores are:"+str(diff_core))
         logging.debug("the diffraction slices are:"+str(diff_slice))
-        positions_label = (data_obj.find_axis_label_dimension('xy', contains=True),)
-        rotation_label = (data_obj.find_axis_label_dimension('rotation_angle', contains=True),)
+        positions_label = (data_obj.get_data_dimension_by_axis_label('xy', contains=True),)
+        rotation_label = (data_obj.get_data_dimension_by_axis_label('rotation_angle', contains=True),)
 
         data_obj.add_pattern("PROJECTION", core_dims=positions_label, slice_dims=tuple(set(dims)-set(positions_label)))
         sino_cores = rotation_label + positions_label

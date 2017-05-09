@@ -56,8 +56,8 @@ class TimeseriesFieldCorrections(BaseCorrection, CpuPlugin):
         self.flat_minus_dark = self.flat - self.dark
 
         self.flat_minus_dark = self.flat - self.dark
-        det_dims = [inData.find_axis_label_dimension('detector_y'),
-                    inData.find_axis_label_dimension('detector_x')]
+        det_dims = [inData.get_data_dimension_by_axis_label('detector_y'),
+                    inData.get_data_dimension_by_axis_label('detector_x')]
 
         self.convert_size = \
             lambda x, sl: x[[sl[d] for d in det_dims]]

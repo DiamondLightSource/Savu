@@ -44,7 +44,8 @@ class TimeBasedCorrection(BaseCorrection, CpuPlugin):
     def pre_process(self):
         inData = self.get_in_datasets()[0]
         pData = self.get_plugin_in_datasets()[0]
-        self.proj_dim = inData.find_axis_label_dimension('rotation_angle')
+        self.proj_dim = \
+            inData.get_data_dimension_by_axis_label('rotation_angle')
         self.slice_dir = pData.get_slice_dimension()
         nDims = len(pData.get_shape())
         self.sslice = [slice(None)]*nDims

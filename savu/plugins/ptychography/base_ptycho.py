@@ -229,7 +229,7 @@ class BasePtycho(Plugin, CpuPlugin):  # also make one for gpu
 
     def set_probe_rotation_patterns(self, probe, rest_probe):
         try:
-            rot_axis = probe.find_axis_label_dimension('rotation_angle', contains=True) # get the rotation axis
+            rot_axis = probe.get_data_dimension_by_axis_label('rotation_angle', contains=True) # get the rotation axis
         except Exception as e:
             logging.warn(str(e) + 'we were looking for "rotation_angle"')
             logging.debug('This is not a tomography, so no time series for the probe')
@@ -242,7 +242,7 @@ class BasePtycho(Plugin, CpuPlugin):  # also make one for gpu
 
     def set_probe_energy_patterns(self, probe, rest_probe):
         try:
-            energy_axis = probe.find_axis_label_dimension('energy', contains=True) # get an energy axis
+            energy_axis = probe.get_data_dimension_by_axis_label('energy', contains=True) # get an energy axis
         except Exception as e:
             logging.warn(str(e) + 'we were looking for "energy"')
             logging.debug('This is not spectro-microscopy, so no spectrum/timeseries for the probe')
@@ -263,7 +263,7 @@ class BasePtycho(Plugin, CpuPlugin):  # also make one for gpu
 
     def set_object_energy_patterns(self, object_trans, rest_obj):
         try:
-            energy_axis = object_trans.find_axis_label_dimension('energy', contains=True) # get an energy axis
+            energy_axis = object_trans.get_data_dimension_by_axis_label('energy', contains=True) # get an energy axis
         except Exception as e:
             logging.warn(str(e) + 'we were looking for "energy"')
             logging.debug('This is not spectro-microscopy, so no spectrum for the object')
@@ -275,12 +275,12 @@ class BasePtycho(Plugin, CpuPlugin):  # also make one for gpu
 
     def set_object_rotation_patterns(self, object_trans, rest_obj):
         try:
-            rot_axis = object_trans.find_axis_label_dimension('rotation_angle', contains=True) # get the rotation axis
+            rot_axis = object_trans.get_data_dimension_by_axis_label('rotation_angle', contains=True) # get the rotation axis
         except Exception as e:
             logging.warn(str(e) + 'we were looking for "rotation_angle"')
             logging.debug('This is not a tomography, so no sinograms for the object transmission')
         else:
-            x_axis = object_trans.find_axis_label_dimension('x', contains=True) # get the x axis
+            x_axis = object_trans.get_data_dimension_by_axis_label('x', contains=True) # get the x axis
             obj_sino = {'core_dims':(rot_axis, x_axis), 'slice_dims':tuple(set(rest_obj) - set((rot_axis, x_axis)))}
             object_trans.add_pattern("SINOGRAM", **obj_sino) # for the tomography
             logging.debug('This is a tomography so I have added a SINOGRAM pattern to the object transmission') # the probe oscillates in time for each projection, set this as a time series pattern

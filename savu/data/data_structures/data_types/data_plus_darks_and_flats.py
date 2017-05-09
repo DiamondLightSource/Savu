@@ -162,7 +162,8 @@ class DataWithDarksAndFlats(BaseType):
 
         sl = list(copy.deepcopy(self.dark_flat_slice_list))
         if len(data.shape) is 2:
-            rot_dim = self.data_obj.find_axis_label_dimension('rotation_angle')
+            rot_dim = self.data_obj.get_data_dimension_by_axis_label(
+                    'rotation_angle')
             del sl[rot_dim]
 
         return data[sl]

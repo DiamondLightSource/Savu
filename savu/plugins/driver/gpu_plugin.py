@@ -58,7 +58,7 @@ class GpuPlugin(PluginDriver):
         ranks = [i for i, x in enumerate(gpu_processes) if x]
         idx = [i for i in range(len(ranks)) if new_processes[i] == 'GPU0']
         diff = np.diff(np.array(idx)) if len(idx) > 1 else 1
-        split = np.max(diff) if diff != 1 else len(ranks)
+        split = np.max(diff) if not isinstance(diff, int) else len(ranks)
         split_ranks = [ranks[n:n+split] for n in range(0, len(ranks), split)]
         ranks = list(chain.from_iterable(izip(*split_ranks)))
 

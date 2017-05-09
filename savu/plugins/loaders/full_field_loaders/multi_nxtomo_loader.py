@@ -139,7 +139,7 @@ class MultiNxtomoLoader(BaseLoader):
 
     def _set_nD_rotation_angle(self, data_obj_list, data_obj):
         rot_dim_len = data_obj.data.get_shape()[
-            data_obj.find_axis_label_dimension('rotation_angle')]
+            data_obj.get_data_dimension_by_axis_label('rotation_angle')]
         new_values = np.zeros([rot_dim_len, len(data_obj_list)])
         for i in range(len(data_obj_list)):
             new_values[:, i] = \
@@ -163,8 +163,8 @@ class MultiNxtomoLoader(BaseLoader):
 
     def get_dark_flat_slice_list(self, data_obj):
         slice_list = data_obj._preview._get_preview_slice_list()
-        detX_dim = data_obj.find_axis_label_dimension('detector_x')
-        detY_dim = data_obj.find_axis_label_dimension('detector_y')
+        detX_dim = data_obj.get_data_dimension_by_axis_label('detector_x')
+        detY_dim = data_obj.get_data_dimension_by_axis_label('detector_y')
         dims = list(set([detX_dim, detY_dim]))
         new_slice_list = []
         for d in dims:

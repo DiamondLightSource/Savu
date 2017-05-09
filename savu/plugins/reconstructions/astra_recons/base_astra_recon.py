@@ -55,7 +55,8 @@ class BaseAstraRecon(BaseRecon):
             self.res = True
             out_pData = self.get_plugin_out_datasets()
             in_data = self.get_in_datasets()[0]
-            dim_detX = in_data.find_axis_label_dimension('y', contains=True)
+            dim_detX = \
+                in_data.get_data_dimension_by_axis_label('y', contains=True)
             shape = (in_data.get_shape()[dim_detX],
                      self.parameters['number_of_iterations'])
             label = ['vol_y.voxel', 'iteration.number']

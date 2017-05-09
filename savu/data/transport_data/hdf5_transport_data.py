@@ -313,6 +313,7 @@ class TransferData(object):
     def _get_dict_in(self):
         sl_dict = {}
         mfp = self.pData._get_max_frames_process()
+        mft = self.pData._get_max_frames_transfer()
         sl, sl_dict['current'] = \
             self._get_slice_list(self.shape, current_sl=True)
 
@@ -320,7 +321,7 @@ class TransferData(object):
             for i in range(len(sl)):
                 sl[i] = self.data._fix_list_length(sl[i], mfp)
         else:
-            sl[-1] = self.data._fix_list_length(sl[-1], mfp)
+            sl[-1] = self.data._fix_list_length(sl[-1], mft)
 
         sl, sl_dict['frames'] = self.data._get_frames_per_process(sl)
         if self.data.pad:
@@ -411,12 +412,14 @@ class TransferData(object):
             if diff > 0:
                 pad_list[dim][1] = diff
                 slice_list[dim] = \
-                    slice(slice_list[dim].start, sl.stop + diff, sl.step)
+                    slice(slice_list[dim].start, sl.stop - diff, sl.step)
 
         data = self.data.data[tuple(slice_list)]
+
         if np.sum(pad_list):
             mode = pData.padding.mode if pData.padding else 'edge'
-            return np.pad(data, tuple(pad_list), mode=mode)
+            temp = np.pad(data, tuple(pad_list), mode=mode)
+            return temp
         return data
 
 
@@ -488,27 +491,16 @@ class ProcessData(object):
         self.sdir = slice_dirs[0] if len(slice_dirs) > 0 else None
         return ssl
 
-#    def __get_dims_to_remove(self, sdirs):
-#        dshape = self.shape
-#        no_squeeze = self.pData._get_no_squeeze()
-#        remove = [sdirs[0]] if dshape[sdirs[0]] == 1 and not no_squeeze else []
-#        for s in sdirs[1:]:
-#            if dshape[s] == 1:
-#                remove.append(s)
-#        return remove
-
     def _grouped_slice_list(self, slice_list, max_frames, group_dim):
         if group_dim is None:
             return slice_list
 
         banked, length, slice_dir = self.data._banked_list(slice_list)
-        steps = self.data.get_preview().get_starts_stops_steps('steps')
         grouped = []
         for group in banked:
             sub_groups = self.data._split_list(group, max_frames)
             for sub in sub_groups:
-                grouped.append(self.data._group_dimension(
-                                    sub, group_dim, steps[group_dim]))
+                grouped.append(self.data._group_dimension(sub, group_dim, 1))
         return grouped
 
     def __get_unpad_slice_list(self, reps):
