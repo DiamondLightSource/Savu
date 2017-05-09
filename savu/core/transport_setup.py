@@ -55,6 +55,8 @@ class MPI_setup(object):
             options["mpi"] = True
             self.__mpi_setup(options)
 
+        logging.info(options)
+
     def __mpi_setup(self, options):
         """ Set MPI process specific values and logging initialisation.
         """
