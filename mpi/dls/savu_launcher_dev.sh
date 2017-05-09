@@ -13,19 +13,21 @@ echo "module loading "$version
 module load $version
 module load global/cluster
 
-cluster=medium.q@@${var[1]}
+cluster=high.q@@${var[1]}
 nodes=${var[2]}
 cpus_per_node=${var[3]}
 gpus_per_node=${var[4]}
-input_file=${var[5]}
-process_file=${var[6]}
-output_folder=${var[7]}
-options=${var[8]}
+cpus_to_use_per_node=${var[5]}
+gpus_to_use_per_node=${var[6]}
+input_file=${var[7]}
+process_file=${var[8]}
+output_folder=${var[9]}
+options=${var[10]}
 outname=savu
 processes=$((nodes*cpus_per_node))
 
 echo -e "\n*******************************************************************************"
-echo "Running job on $cluster with $nodes nodes, $cpus_per_node cpus per node, $gpus_per_node gpus per node".
+echo "Running job on $cluster with $nodes nodes, $cpus_to_use_per_node cpus per node, $gpus_to_use_per_node gpus per node".
 echo "Input file: $input_file"
 echo "Process list: $process_file"
 echo -e "*******************************************************************************\n"
@@ -96,10 +98,9 @@ if [ ! $interfolder ] ; then
   interfolder=$outfolder
 fi
 
-
 qsub -N $outname -j y -o $interfolder -e $interfolder -pe openmpi $processes -l exclusive \
-     -l infiniband -l gpu=2 -q $cluster $filepath $savupath $input_file \
-     $process_file $output_folder $cpus_per_node $gpus_per_node $options -c \
+     -l infiniband -l gpu=$gpus_per_node -q $cluster -P tomography $filepath $savupath $input_file \
+     $process_file $output_folder $cpus_to_use_per_node $gpus_to_use_per_node $options -c \
      -f $outfolder -s cs04r-sc-serv-14 -l $outfolder > /dls/tmp/savu/$USER.out
 
 # get the job number here
