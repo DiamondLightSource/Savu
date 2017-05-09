@@ -107,8 +107,8 @@ class Chunking(object):
             count = (dim in self.core)*4 + (dim in self.slice1)*2 + \
                 (dim in self.other) - 2
             chunks[dim] = chunk_functions[count](dim, adj_idx, adjust, shape)
-            if 'VOLUME' in self.next_pattern:
-                self.__set_volume_bounds(adjust, dim, chunks)
+#            if 'VOLUME' in self.next_pattern:
+#                self.__set_volume_bounds(adjust, dim, chunks)
             adj_idx += 1
         return chunks
 
