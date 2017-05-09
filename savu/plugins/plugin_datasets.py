@@ -102,7 +102,10 @@ class PluginDatasets(object):
         :rtype: list(PluginData)
         """
         pData_list = []
-        for data in list(set(data_list)):
+        used = set()
+        unique_data_list = \
+            [x for x in data_list if x not in used and (used.add(x) or True)]
+        for data in unique_data_list:
             pData_list.append(PluginData(data, self))
             pData_list[-1].extra_dims = self.extra_dims
             pData_list[-1].multi_params_dict = self.multi_params_dict
