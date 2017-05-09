@@ -71,7 +71,7 @@ class Padding(object):
         :param int padding: The pad amount
         """
         sdir = self.pattern['slice_dims'][0]
-        self._pad_dimension(str(sdir) + '.' + str(padding))
+        self._pad_direction(str(sdir) + '.' + str(padding))
 
     @docstring_parameter(notes._padding.__doc__)
     def pad_directions(self, pad_list):

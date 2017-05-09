@@ -308,9 +308,9 @@ class Data(DataCreate):
         nDims = sum([len(i) for i in pattern.values()])
         for p in pattern:
             ddirs = pattern[p]
-            pattern[p] = self.__non_negative_directions(ddirs, nDims)
+            pattern[p] = self._non_negative_directions(ddirs, nDims)
 
-    def __non_negative_directions(self, ddirs, nDims):
+    def _non_negative_directions(self, ddirs, nDims):
         """ Replace negative indexing values with positive counterparts.
 
         :params tuple(int) ddirs: data dimension indices
