@@ -22,7 +22,7 @@
 """
 import logging
 from savu.plugins.utils import register_plugin
-from savu.plugins.base_filter import BaseFilter
+from savu.plugins.filters.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 import numpy as np
 from scipy.ndimage import center_of_mass

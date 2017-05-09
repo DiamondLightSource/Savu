@@ -140,6 +140,7 @@ data and process lists into this folder.  First, open a terminal and follow the 
     >>> cp -r /dls/science/groups/das/SavuTraining/process_lists .
     >>> cp -r /dls/science/groups/das/SavuTraining/data .
     >>> module load savu
+    >>> python process_lists/refresh.py  # ensure the process lists are up-to-date with the current version of Savu.
 
 
 1. Run a single-threaded Savu job on your local machine

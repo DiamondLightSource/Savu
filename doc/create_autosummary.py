@@ -78,7 +78,7 @@ if __name__ == "__main__":
     base_path = savu_base_path + '/savu'
     # create entries in the autosummary for each package
 
-    exclude_file = ['__init__.py']
+    exclude_file = ['__init__.py', 'win_readline.py']
 
     for root, dirs, files in os.walk(base_path, topdown=True):
         dirs[:] = [d for d in dirs if d not in exclude_dir]

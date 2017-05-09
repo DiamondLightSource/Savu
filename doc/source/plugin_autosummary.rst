@@ -83,14 +83,18 @@ savu.plugins
    api_plugin/savu.plugins.utils
    api_plugin/savu.plugins.plugin
    api_plugin/savu.plugins.plugin_datasets
+   api_plugin/savu.plugins.docstring_parser
    api_plugin/savu.plugins.plugin_datasets_notes
 
 
-savu.plugins.developing
+savu.plugins.azimuthal_integrators
 ------------------------------------------------------------
 
 .. toctree::
-   api_plugin/savu.plugins.developing.testing_sino_align
+   api_plugin/savu.plugins.azimuthal_integrators.base_azimuthal_integrator
+   api_plugin/savu.plugins.azimuthal_integrators.pyfai_azimuthal_integrator
+   api_plugin/savu.plugins.azimuthal_integrators.pyfai_azimuthal_integrator_separate
+   api_plugin/savu.plugins.azimuthal_integrators.pyfai_azimuthal_integrator_with_bragg_filter
 
 
 savu.plugins.absorption_corrections
@@ -111,24 +115,19 @@ savu.plugins.ptychography
    api_plugin/savu.plugins.ptychography.ptypy_compact
 
 
-savu.plugins.azimuthal_integrators
+savu.plugins.basic_operations
 ------------------------------------------------------------
 
 .. toctree::
-   api_plugin/savu.plugins.azimuthal_integrators.base_azimuthal_integrator
-   api_plugin/savu.plugins.azimuthal_integrators.pyfai_azimuthal_integrator
-   api_plugin/savu.plugins.azimuthal_integrators.pyfai_azimuthal_integrator_separate
-   api_plugin/savu.plugins.azimuthal_integrators.pyfai_azimuthal_integrator_with_bragg_filter
+   api_plugin/savu.plugins.basic_operations.basic_operations
+   api_plugin/savu.plugins.basic_operations.no_process_plugin
 
 
-savu.plugins.fitters
+savu.plugins.centering
 ------------------------------------------------------------
 
 .. toctree::
-   api_plugin/savu.plugins.fitters.base_fitter
-   api_plugin/savu.plugins.fitters.ral_fit
-   api_plugin/savu.plugins.fitters.reproduce_fit
-   api_plugin/savu.plugins.fitters.simple_fit
+   api_plugin/savu.plugins.centering.vo_centering
 
 
 savu.plugins.component_analysis
@@ -164,9 +163,9 @@ savu.plugins.reconstructions
 .. toctree::
    api_plugin/savu.plugins.reconstructions.base_recon
    api_plugin/savu.plugins.reconstructions.cgls_recon
-   api_plugin/savu.plugins.reconstructions.scikitimage_filter_back_projection
    api_plugin/savu.plugins.reconstructions.scikitimage_sart
    api_plugin/savu.plugins.reconstructions.simple_recon
+   api_plugin/savu.plugins.reconstructions.scikitimage_filter_back_projection
    api_plugin/savu.plugins.reconstructions.tomopy_recon
    api_plugin/savu.plugins.reconstructions.simple_fake_gpu_recon
    api_plugin/savu.plugins.reconstructions.non_local_regularised_cgls
@@ -176,9 +175,38 @@ savu.plugins.reconstructions.astra_recons
 ------------------------------------------------------------
 
 .. toctree::
-   api_plugin/savu.plugins.reconstructions.astra_recons.astra_recon_gpu
    api_plugin/savu.plugins.reconstructions.astra_recons.astra_recon_cpu
+   api_plugin/savu.plugins.reconstructions.astra_recons.astra_recon_gpu
    api_plugin/savu.plugins.reconstructions.astra_recons.base_astra_recon
+
+
+savu.plugins.developing
+------------------------------------------------------------
+
+.. toctree::
+   api_plugin/savu.plugins.developing.testing_sino_align
+
+
+savu.plugins.corrections
+------------------------------------------------------------
+
+.. toctree::
+   api_plugin/savu.plugins.corrections.dark_flat_field_correction
+   api_plugin/savu.plugins.corrections.timeseries_field_corrections
+   api_plugin/savu.plugins.corrections.time_based_correction
+   api_plugin/savu.plugins.corrections.time_based_plus_drift_correction
+   api_plugin/savu.plugins.corrections.base_correction
+   api_plugin/savu.plugins.corrections.monitor_correction
+
+
+savu.plugins.fitters
+------------------------------------------------------------
+
+.. toctree::
+   api_plugin/savu.plugins.fitters.base_fitter
+   api_plugin/savu.plugins.fitters.ral_fit
+   api_plugin/savu.plugins.fitters.reproduce_fit
+   api_plugin/savu.plugins.fitters.simple_fit
 
 
 savu.plugins.reshape
@@ -189,33 +217,6 @@ savu.plugins.reshape
    api_plugin/savu.plugins.reshape.downsample_filter
 
 
-savu.plugins.centering
-------------------------------------------------------------
-
-.. toctree::
-   api_plugin/savu.plugins.centering.vo_centering
-
-
-savu.plugins.basic_operations
-------------------------------------------------------------
-
-.. toctree::
-   api_plugin/savu.plugins.basic_operations.basic_operations
-   api_plugin/savu.plugins.basic_operations.no_process_plugin
-
-
-savu.plugins.corrections
-------------------------------------------------------------
-
-.. toctree::
-   api_plugin/savu.plugins.corrections.timeseries_field_corrections
-   api_plugin/savu.plugins.corrections.dark_flat_field_correction
-   api_plugin/savu.plugins.corrections.time_based_correction
-   api_plugin/savu.plugins.corrections.time_based_plus_drift_correction
-   api_plugin/savu.plugins.corrections.base_correction
-   api_plugin/savu.plugins.corrections.monitor_correction
-
-
 savu.plugins.driver
 ------------------------------------------------------------
 
@@ -224,8 +225,8 @@ savu.plugins.driver
    api_plugin/savu.plugins.driver.gpu_plugin
    api_plugin/savu.plugins.driver.multi_threaded_plugin
    api_plugin/savu.plugins.driver.plugin_driver
-   api_plugin/savu.plugins.driver.single_node_multi_threaded_plugin
    api_plugin/savu.plugins.driver.all_cpus_plugin
+   api_plugin/savu.plugins.driver.single_node_multi_threaded_plugin
 
 
 savu.plugins.filters
@@ -249,49 +250,15 @@ savu.plugins.filters
    api_plugin/savu.plugins.filters.ring_artefact_filter
    api_plugin/savu.plugins.filters.ring_removal_waveletfft
    api_plugin/savu.plugins.filters.sinogram_alignment
-   api_plugin/savu.plugins.filters.projection_shift
+   api_plugin/savu.plugins.filters.list_to_projections
    api_plugin/savu.plugins.filters.spectrum_crop
    api_plugin/savu.plugins.filters.strip_background
    api_plugin/savu.plugins.filters.threshold_filter
    api_plugin/savu.plugins.filters.xrd_absorption_approximation
+   api_plugin/savu.plugins.filters.projection_shift
    api_plugin/savu.plugins.filters.projection_vertical_alignment
    api_plugin/savu.plugins.filters.sinogram_clean
-
-
-savu.plugins.filters.absorption_corrections
-------------------------------------------------------------
-
-.. toctree::
-
-
-savu.plugins.filters.azimuthal_integrators
-------------------------------------------------------------
-
-.. toctree::
-
-
-savu.plugins.filters.component_analysis
-------------------------------------------------------------
-
-.. toctree::
-
-
-savu.plugins.filters.fitters
-------------------------------------------------------------
-
-.. toctree::
-
-
-savu.plugins.filters.fitters.fluo_fitters
-------------------------------------------------------------
-
-.. toctree::
-
-
-savu.plugins.filters.ptychography
-------------------------------------------------------------
-
-.. toctree::
+   api_plugin/savu.plugins.filters.stxm_analysis
 
 
 savu.plugins.loaders
@@ -301,6 +268,7 @@ savu.plugins.loaders
    api_plugin/savu.plugins.loaders.base_loader
    api_plugin/savu.plugins.loaders.multi_savu_loader
    api_plugin/savu.plugins.loaders.savu_loader
+   api_plugin/savu.plugins.loaders.random_hdf5_loader
 
 
 savu.plugins.loaders.full_field_loaders
@@ -311,18 +279,7 @@ savu.plugins.loaders.full_field_loaders
    api_plugin/savu.plugins.loaders.full_field_loaders.mrc_loader
    api_plugin/savu.plugins.loaders.full_field_loaders.multi_nxtomo_loader
    api_plugin/savu.plugins.loaders.full_field_loaders.nxtomo_loader
-
-
-savu.plugins.loaders.multi_modal_loaders
-------------------------------------------------------------
-
-.. toctree::
-
-
-savu.plugins.loaders.multi_modal_loaders.i18_loaders
-------------------------------------------------------------
-
-.. toctree::
+   api_plugin/savu.plugins.loaders.full_field_loaders.random_3d_tomo_loader
 
 
 savu.plugins.loaders.utils

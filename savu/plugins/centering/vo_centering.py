@@ -42,7 +42,9 @@ class VoCentering(BaseFilter, CpuPlugin):
     :param search_radius: Use for fine searching. Default: 3.
     :param step: Step of fine searching. Default: 0.2.
     :param downsample: The step length over the rotation axis. Default: 1.
-    :u*param preview: A slice list of required frames. Default: [].
+    :u*param preview: A slice list of required frames (sinograms) to use in \
+    the calulation of the centre of rotation (this will not reduce the data \
+    size for subsequent plugins). Default: [].
     :param datasets_to_populate: A list of datasets which require this \
         information. Default: [].
     :param out_datasets: The default names. Default: ['cor_raw','cor_fit'].

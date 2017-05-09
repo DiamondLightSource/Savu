@@ -35,6 +35,7 @@ Submodules
 
 .. toctree::
 
+   savu.plugins.docstring_parser
    savu.plugins.plugin
    savu.plugins.plugin_datasets
    savu.plugins.plugin_datasets_notes

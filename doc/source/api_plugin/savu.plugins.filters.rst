@@ -13,6 +13,7 @@ Submodules
    savu.plugins.filters.dials_find_spots
    savu.plugins.filters.distortion_correction
    savu.plugins.filters.find_peaks
+   savu.plugins.filters.list_to_projections
    savu.plugins.filters.median_filter
    savu.plugins.filters.monitor_correction_nd
    savu.plugins.filters.paganin_filter
@@ -28,6 +29,7 @@ Submodules
    savu.plugins.filters.sinogram_clean
    savu.plugins.filters.spectrum_crop
    savu.plugins.filters.strip_background
+   savu.plugins.filters.stxm_analysis
    savu.plugins.filters.threshold_filter
    savu.plugins.filters.xrd_absorption_approximation
 

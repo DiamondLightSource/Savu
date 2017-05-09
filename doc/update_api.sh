@@ -9,4 +9,5 @@ sphinx-apidoc -fMeTP $DIR/../ -o $DIR/source/api
 export SPHINX_APIDOC_OPTIONS='members,undoc-members,noindex'
 sphinx-apidoc -feT $DIR/../ -o $DIR/source/api_plugin
 #python create_dev_autosummary.py
+# add -Q to suppress warnings
 sphinx-build -a -E -j 2 -b html $DIR/source/ $DIR/build/

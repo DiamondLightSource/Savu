@@ -23,5 +23,6 @@ Submodules
 
    savu.plugins.loaders.base_loader
    savu.plugins.loaders.multi_savu_loader
+   savu.plugins.loaders.random_hdf5_loader
    savu.plugins.loaders.savu_loader
 

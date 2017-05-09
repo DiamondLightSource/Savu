@@ -1,4 +1,4 @@
-savu.plugins.others package
+scripts.dawn_runner package
 ===========================
 
 Submodules
@@ -6,13 +6,12 @@ Submodules
 
 .. toctree::
 
-   savu.plugins.others.basic_operations
-   savu.plugins.others.no_process_plugin
+   scripts.dawn_runner.run_savu
 
 Module contents
 ---------------
 
-.. automodule:: savu.plugins.others
+.. automodule:: scripts.dawn_runner
     :members:
     :undoc-members:
     :noindex:
