@@ -70,6 +70,8 @@ Example: View a process list in the Savu configurator.
     >>> help                # show the available commands
     >>> list                # list the available plugins
     >>> open /dls/science/groups/das/SavuTraining/process_lists/simple_tomo_pipeline.nxs  # open a process list
+    >>> disp -v             # view parameter descriptions
+    >>> disp -v -a          # view hidden parameters
     >>> exit                # exit the configurator
 
 .. note:: The process lists created by the configurator are in NeXus (.nxs) format (http://www.nexusformat.org/).
@@ -204,16 +206,16 @@ Example 1
 3. Switch Raven filter and Paganin filter.
     >>> move 4 3
 4. Turn the Paganin filter off (and turn the reconstruction log parameter back on).
-    >>> mod 3.off
+    >>> set 3 off
 5. Display only the astra recon plugin with parameter descriptions.
     >>> disp 6 -v
 6. Turn the astra recon log parameter to True.
-    >>> mod 6.6 True
+    >>> mod 6.3 True
 7. Apply previewing to reconstruct the middle 10 sinograms only (:ref:`previewing`).
-    >>> mod 1.6 [:, mid-5:mid+6, :]
+    >>> mod 1.1 [:, mid-5:mid+6, :]
 8. Manually entering centre of rotation (:ref:`centering`).
-    >>> mod 5.off
-    >>> mod 6.5 86
+    >>> set 5 off
+    >>> mod 6.7 86
 9. Save the process list and exit.
     >>> save process_lists/test.nxs
     >>> exit
@@ -229,15 +231,15 @@ Example 2
     >>> savu_config
     >>> open process_lists/test.nxs
 2. Apply parameter tuning to centre value (:ref:`parameter`).
-    >>> mod 6.5 84:87:0.5;
+    >>> mod 6.7 84:87:0.5;
 3. Modify the reconstruction algorithm to CGLS_CUDA and increase iterations.
     >>> disp 6 -v
     >>> mod 6.6 CGLS_CUDA
-    >>> mod 6.8 10
+    >>> mod 6.4 10
 4. Apply parameter tuning to Paganin Ratio parameter.
-    >>> mod 3.on
-    >>> mod 6.6 False
-    >>> mod 3.3 50;100;200
+    >>> set 3 on
+    >>> mod 6.3 False
+    >>> mod 3.1 50;100;200
 5. Save the process list and exit.
     >>> save process_lists/test2.nxs
     >>> exit
@@ -261,22 +263,14 @@ Full pipeline with auto-centering
 =================================
 
     >>> savu_config                 # open the configurator
-    >>> list nxtomo                 # filter plugin list with nxtomo
-    >>> add NxtomoLoader            # add the loader plugin
-    >>> list dark                   # filter plugin list with dark
+    >>> add NxtomoLoader            # add the loader plugin (use tab completion)
     >>> add DarkFlatFieldCorrection # add the correction plugin
-    >>> list raven                  # filter plugin list with raven
     >>> add RavenFilter             # add the ring artefact removal plugin 
-    >>> list pag                    # filter plugin list with pag
     >>> add PaganinFilter           # add contrast enhancement plugin
-    >>> list vo                     # filter plugin list with vo
     >>> add VoCentering             # add auto-centering plugin
-    >>> list astra                  # filter plugin list with astra
     >>> add AstraReconGpu           # add reconstruction plugin
-    >>> mod 6.6 False               # don't take the log of the data in recon (required by paganin)
-    >>> list saver                  # filter plugin list with saver
-    >>> add Hdf5TomoSaver           # add the saver plugin
-    >>> mod 5.13 [:, mid-5:mid+6, :] # apply centering to mid 10 sinograms only
+    >>> mod 6.3 False               # don't take the log of the data in recon (required by paganin)
+    >>> mod 5.1 [:, mid-5:mid+6, :] # apply centering to mid 10 sinograms only
     >>> save tomo_pipeline.nxs      # save the process list
     >>> exit                        # exit the configurator
 
@@ -287,8 +281,8 @@ Apply previewing
 
     >>> savu_config                 # open the configurator
     >>> open tomo_pipeline.nxs      # open the full data process list
-    >>> mod 1.6 [:, mid-2:mid+3, :] # process the middle 5 sinograms only
-    >>> ref 5                       # refresh auto-centering to remove previewing
+    >>> mod 1.1 [:, mid-2:mid+3, :] # process the middle 5 sinograms only
+    >>> ref 5 -d                    # refresh auto-centering to default parameters (remove previewing)
     >>> save tomo_pipeline_preview.nxs # save the process list
     >>> exit                        # exit the configurator
 
@@ -300,8 +294,8 @@ Apply manual centering
 
     >>> savu_config                 # open the configurator
     >>> open tomo_pipeline_preview.nxs  # open the preview process list
-    >>> mod 5.off                   # turn the auto-centering plugin off
-    >>> mod 6.5 86                  # manually enter the centre value to the recon
+    >>> set 5 off                   # turn the auto-centering plugin off
+    >>> mod 6.7 86                  # manually enter the centre value to the recon
     >>> save tomo_pipeline_preview2.nxs # save the process list
     >>> exit                        # exit the configurator
 
@@ -312,7 +306,7 @@ Apply parameter tuning to the centre of rotation
     
     >>> savu_config                 # open the configurator
     >>> open tomo_pipeline_preview2.nxs # open the preview process list
-    >>> mod 6.5 85;85.5;86;86.5     # apply 4 different values to the centre of rotation param in the reconstruction
+    >>> mod 6.7 85;85.5;86;86.5     # apply 4 different values to the centre of rotation param in the reconstruction
     >>> save tomo_pipeline_preview3.nxs # save the process list
     >>> exit
 
@@ -343,9 +337,9 @@ The 3-D NxtomoLoader plugin maps the data dimensions (0, 1, 2) to the axis label
 
     >>> savu_config
     >>> add NxtomoLoader
-    >>> mod 1.6 [:, mid-5:mid+6, :]     # process the middle 10 sinograms only
-    >>> mod 1.6 [0:end:2, mid-5:mid+6, :]      # process every other projection
-    >>> mod 1.6 [0:end:2, mid-5:mid+6, 300:end-300] # crop 300 pixels from the sides of the detector
+    >>> mod 1.1 [:, mid-5:mid+6, :]     # process the middle 10 sinograms only
+    >>> mod 1.1 [0:end:2, mid-5:mid+6, :]      # process every other projection
+    >>> mod 1.1 [0:end:2, mid-5:mid+6, 300:end-300] # crop 300 pixels from the sides of the detector
 
 
 .. _centering:
@@ -399,9 +393,9 @@ Each ‘tuned’ parameter will add an extra dimension to the data.
 Parameter tuning examples
 =========================
 
-    >>> mod 6.2 85;86;87        # three distinct values
-    >>> mod 6.2 84:86:0.5;      # a range of values (start:stop:step) with semi-colon at the end
-    >>> mod 6.8 FBP;CGLS        # values can be strings
+    >>> mod 6.7 85;86;87        # three distinct values
+    >>> mod 6.7 84:86:0.5;      # a range of values (start:stop:step) with semi-colon at the end
+    >>> mod 6.6 FBP;CGLS        # values can be strings
 
 See :ref:`eg2` and :ref:`cor_parameter_tuning`.
 
