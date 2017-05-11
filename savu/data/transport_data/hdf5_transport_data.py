@@ -277,9 +277,11 @@ class Hdf5TransportData(BaseTransportData):
         sdir = self.get_slice_dimensions()[0]
         sl = list(sl)
         e = sl[sdir]
-        if (e.stop - e.start) < length:
-            diff = length - (e.stop - e.start)
-            sl[sdir] = slice(e.start, e.stop + diff, e.step)
+
+        sl_length = len(np.arange(e.start, e.stop, e.step))
+        if sl_length < length:
+            diff = length - sl_length
+            sl[sdir] = slice(e.start, e.stop + diff*e.step, e.step)
         return tuple(sl)
 
     def __set_padding_dict(self):
