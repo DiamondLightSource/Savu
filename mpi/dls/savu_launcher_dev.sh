@@ -14,15 +14,16 @@ module load $version
 module load global/cluster
 
 cluster=high.q@@${var[1]}
-nodes=${var[2]}
-cpus_per_node=${var[3]}
-gpus_per_node=${var[4]}
-cpus_to_use_per_node=${var[5]}
-gpus_to_use_per_node=${var[6]}
-input_file=${var[7]}
-process_file=${var[8]}
-output_folder=${var[9]}
-options=${var[10]}
+gpu_arch=${var[2]}
+nodes=${var[3]}
+cpus_per_node=${var[4]}
+gpus_per_node=${var[5]}
+cpus_to_use_per_node=${var[6]}
+gpus_to_use_per_node=${var[7]}
+input_file=${var[8]}
+process_file=${var[9]}
+output_folder=${var[10]}
+options=${var[11]}
 outname=savu
 processes=$((nodes*cpus_per_node))
 
@@ -97,9 +98,9 @@ arg_parse "-d" interfolder "$@"
 if [ ! $interfolder ] ; then
   interfolder=$outfolder
 fi
-
+# gpu_arch = Kepler or Pascal (com14)
 qsub -N $outname -j y -o $interfolder -e $interfolder -pe openmpi $processes -l exclusive \
-     -l infiniband -l gpu=$gpus_per_node -q $cluster -P tomography $filepath $savupath $input_file \
+     -l infiniband -l gpu=$gpus_per_node -l gpu_arch=$gpu_arch -q $cluster -P tomography $filepath $savupath $input_file \
      $process_file $output_folder $cpus_to_use_per_node $gpus_to_use_per_node $options -c \
      -f $outfolder -s cs04r-sc-serv-14 -l $outfolder > /dls/tmp/savu/$USER.out
 
