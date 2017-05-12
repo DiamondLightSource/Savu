@@ -40,16 +40,40 @@ This documentation in full is available at https://savu.readthedocs.org/en/lates
 
 .. image:: files_and_images/Savu_logo_2_L_Res_trans.png
    :scale: 40 %
-   :align: left
+   :align: right
 
 
 Tomography Reconstruction and Processing Pipeline
 =================================================
 
-Savu is a Python package to assist with the processing and reconstruction of tomography data.  The project was started at Diamond Light Source when a new pipeline was required for dealing with the more complex tomography reconstruction processes that were appearing at the facility. `[1]`_
+Savu is a Python package to assist with the processing and reconstruction of parallel-beam tomography data.  The project originated in the Data Analysis Group at the Diamond Light Source (UK synchrotron) to address the growing, and increasingly complex, needs of the tomography community.
+
+Designed to allow greater flexibility in tomography data processing, Savu is capable of processing N-dimensional full-field tomography and mapping tomography data, along with concurrent processing of multiple datasets such as those collected as part of a multi-modal setup.  Savu process lists, tailored to a specific experiment and passed to the framework at runtime along with the data, detail the processing steps that are required.
+
+A Savu process list is created using the Savu configurator tool, which stacks together plugins chosen from a repository. Each plugin performs a specific independent task, such as correction, filtering, reconstruction. For a list of available plugins see plugin API.
+
+Savu is currently in use across the tomography beamlines at Diamond to reconstruct both full-field tomography data and multi-modal, mapping tomography data.
+
 
 .. _[1]: https://dx.doi.org/10.1098/rsta.2014.0398
 
 Features
 ========
+
+- Full-field and mapping tomography data processing
+- multi-modal data processing
+- Absorption, fluorescence, diffraction and ptychography data processing
+- Handles N-dimensional data and multiple datasets
+- Supports multiple data formats
+- Runs in serial or parallel on your local machine
+- Runs in parallel across a cluster
+- Supports very large data processing with parallel HDF5 (not limited by RAM)
+- Allows flexible data slicing (e.g. alternate between projection and sinogram processing)
+- Plugin architecture with CPU and GPU plugins
+- Processing tailored to a specific experimental setup
+- Easy integration of new functionality
+
+
+
+
 

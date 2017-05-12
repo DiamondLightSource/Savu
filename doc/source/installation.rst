@@ -1,5 +1,11 @@
 Installation Guide
 ******************
 
-Description of how to install Savu (internal/external)
+Table of Contents
+=================
+
+.. toctree::
+   :maxdepth: 2
+   
+    dls_installer
 
