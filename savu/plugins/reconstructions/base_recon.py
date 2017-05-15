@@ -101,6 +101,7 @@ class BaseRecon(Plugin):
         else:
             cor = np.ones(inData.get_shape()[pData.get_slice_dimension()])
             cor *= self.parameters['centre_of_rotation']
+            mData.set('centre_of_rotation', cor)
         self.cor = cor
         self.centre = self.cor[0]
 
