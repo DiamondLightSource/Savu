@@ -55,7 +55,7 @@ performs a specific independent task, such as correction, filtering, reconstruct
 plugins see `plugin API <file:///home/qmm55171/Documents/Git/git_repos/Savu/doc/build/plugin_autosummary.html>`_.
 
 Plugins are grouped into categories of similar functionality.  Loaders and savers are two of these categories and each
-process list must begin with a loader plugin and end with a saver plugin (soon to be deprecated), with at
+process list must begin with a loader plugin and optionally end with a saver plugin (hdf5 is the default), with at
 least one processing plugin in-between.  The loader informs the framework of the data location and format along
 with important metadata such as shape, axis information, and associated patterns (e.g. sinogram, projection).
 Therefore, the choice of loader is dependent upon the format of the data.
