@@ -280,6 +280,7 @@ savu.plugins.loaders.full_field_loaders
    api_plugin/savu.plugins.loaders.full_field_loaders.multi_nxtomo_loader
    api_plugin/savu.plugins.loaders.full_field_loaders.nxtomo_loader
    api_plugin/savu.plugins.loaders.full_field_loaders.random_3d_tomo_loader
+   api_plugin/savu.plugins.loaders.full_field_loaders.dxchange_loader
 
 
 savu.plugins.loaders.utils

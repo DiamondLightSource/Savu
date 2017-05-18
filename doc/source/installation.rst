@@ -6,6 +6,5 @@ Table of Contents
 
 .. toctree::
    :maxdepth: 2
-   
-    dls_installer
 
+   dls_installer
