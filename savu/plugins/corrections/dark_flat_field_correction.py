@@ -54,8 +54,8 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
     def pre_process(self):
         inData = self.get_in_datasets()[0]
         in_pData = self.get_plugin_in_datasets()[0]
-        self.dark = inData.meta_data.get('dark')
-        self.flat = inData.meta_data.get('flat')
+        self.dark = inData.data.dark_mean()
+        self.flat = inData.data.flat_mean()
 
         pData_shape = in_pData.get_shape()
         tile = [1]*len(pData_shape)
@@ -78,17 +78,25 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
         self.process_frames = self.correct_proj
 
     def _sino_pre_process(self, data, tile, dim):
+        pData = data._get_plugin_data()
         full_shape = data.get_shape()
         tile[dim] = full_shape[dim]
         self.process_frames = self.correct_sino
-        self.length = full_shape[self.slice_dir]
+        self.n_plugin_frames = pData.get_shape()[self.slice_dir]
+
+        length = full_shape[self.slice_dir]
+        self.mfp = pData._get_max_frames_process()
+        self.reps_at = int(np.ceil(length/float(self.mfp)))
+
         if len(full_shape) is 3:
-            self.convert_size = lambda a, b, x: np.tile(x[a:b], tile)
+            self.convert_size = lambda a, b, x, pad: np.pad(
+                    np.tile(x[a:b], tile), pad, 'edge')
         else:
             nSino = \
                 full_shape[data.get_data_dimension_by_axis_label('detector_y')]
             self.convert_size = \
-                lambda a, b, x: np.tile(x[a % nSino:b], tile)
+                lambda a, b, x, pad: np.pad(
+                        np.tile(x[a % nSino:b], tile), pad, 'edge')
         self.count = 0
 
     def correct_proj(self, data):
@@ -102,15 +110,16 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
     def correct_sino(self, data):
         data = data[0]
         sl = self.get_current_slice_list()[0][self.slice_dir]
-        nFrames = min(self.get_max_frames(), self.length)
-        reps_at = int(np.ceil(self.length/float(nFrames)))
         current_idx = self.get_global_frame_index()[0][self.count]
-        start = (current_idx % reps_at)*nFrames
+        start = (current_idx % self.reps_at)*self.mfp
         end = start + len(np.arange(sl.start, sl.stop, sl.step))
 
-        dark = self.convert_size(start, end, self.dark)
+        pad = [[0, 0] for i in range(3)]
+        pad[self.slice_dir][1] = self.n_plugin_frames - (end - start)
+
+        dark = self.convert_size(start, end, self.dark, pad)
         flat_minus_dark = \
-            self.convert_size(start, end, self.flat_minus_dark)
+            self.convert_size(start, end, self.flat_minus_dark, pad)
         data = np.nan_to_num((data-dark)/flat_minus_dark)
         self.__data_check(data)
         self.count += 1
