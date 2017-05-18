@@ -55,6 +55,8 @@ class MultiNxtomoLoader(BaseLoader):
 
     def setup(self):
         nxtomo = self._get_nxtomo()
+        preview = self.parameters['preview']
+        nxtomo.parameters['preview'] = [x for i,x in enumerate(preview) if i!=self.parameters['stack_or_cat_dim']]
         data_obj_list = self._get_data_objects(nxtomo)
         data_obj = \
             self.exp.create_data_object('in_data', self.parameters['name'])

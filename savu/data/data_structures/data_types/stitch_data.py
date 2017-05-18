@@ -129,8 +129,8 @@ class StitchData(BaseType):
     
     def dark_mean(self):
         """ Get the averaged dark projection data. """
-        return self.obj_list[0].dark_mean()
+        return self.obj_list[0].data.dark_mean()
 
     def flat_mean(self):
         """ Get the averaged flat projection data. """
-        return self.obj_list[0].flat_mean()
+        return self.obj_list[0].data.flat_mean()
