@@ -79,7 +79,6 @@ class MultiNxtomoLoader(BaseLoader):
         #print "setting the final data shape", data_obj.data.get_shape()
         data_obj.set_original_shape(data_obj.data.get_shape())
         self.set_data_reduction_params(data_obj)
-        self._set_dark_and_flat(data_obj_list, data_obj)
 
     def _get_nxtomo(self):
         nxtomo = NxtomoLoader()
@@ -146,20 +145,6 @@ class MultiNxtomoLoader(BaseLoader):
                 data_obj_list[i].meta_data.get('rotation_angle')
         data_obj.meta_data.set('rotation_angle', new_values)
 
-    def _set_dark_and_flat(self, obj_list, data_obj):
-        # change this to use NoImageKey?
-        dark = self._combine_data(obj_list, 'dark', np.stack)
-        flat = self._combine_data(obj_list, 'flat', np.stack)
-        slice_list = self.get_dark_flat_slice_list(data_obj)
-        data_obj.meta_data.set('dark', dark[slice_list])
-        data_obj.meta_data.set('flat', flat[slice_list])
-
-    def _combine_data(self, obj_list, entry, function):
-        # directly calculating the mean for now
-        mean_val = obj_list[0].meta_data.get(entry)
-        for obj in obj_list[1:]:
-            mean_val = (mean_val + obj.meta_data.get(entry))/2.0
-        return mean_val
 
     def get_dark_flat_slice_list(self, data_obj):
         slice_list = data_obj._preview._get_preview_slice_list()
