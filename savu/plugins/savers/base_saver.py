@@ -21,8 +21,6 @@
 
 """
 
-import h5py
-
 from savu.plugins.plugin import Plugin
 
 
@@ -42,17 +40,6 @@ class BaseSaver(Plugin):
         in_pData = self.get_plugin_in_datasets()
         pattern = self.get_pattern()
         in_pData[0].plugin_data_setup(pattern, self.get_max_frames())
-
-    def _link_datafile_to_nexus_file(self, name, filename, path):
-        nxs_file = self.exp.nxs_file
-        nxs_entry = '/entry/final_result_' + name
-        nxs_entry = nxs_file[nxs_entry]
-        nxs_entry.attrs['signal'] = 'data'
-        data_entry = nxs_entry.name + '/data'
-
-        if data_entry not in nxs_file:
-            h5file = filename.split('/')[-1]
-            nxs_file[data_entry] = h5py.ExternalLink(h5file, path)
 
     def _get_group_name(self, name):
         nPlugin = self.exp.meta_data.get('nPlugin')

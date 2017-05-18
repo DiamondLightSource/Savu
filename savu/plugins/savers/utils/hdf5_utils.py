@@ -40,7 +40,7 @@ class Hdf5Utils(object):
         self.info = MPI.Info.Create()
         self.exp = exp
         self.info.Set("romio_ds_write", "disable")  # this setting is required
-        # info.Set("romio_ds_read", "disable")
+        # self.info.Set("romio_ds_read", "disable")
         # info.Set("romio_cb_read", "disable")
         # info.Set("romio_cb_write", "disable")
 
@@ -63,30 +63,32 @@ class Hdf5Utils(object):
         return backing_file
 
     def _link_datafile_to_nexus_file(self, data):
-        # nexus file
-        nxs_file = self.exp.nxs_file
-        # entry path in nexus file
-        name = data.get_name()
-        group_name = self.exp.meta_data.get(['group_name', name])
-        link_type = self.exp.meta_data.get(['link_type', name])
-        nxs_entry = '/entry/' + link_type
-        if link_type == 'final_result':
-            nxs_entry += '_' + data.get_name()
-        else:
-            nxs_entry += "/" + group_name
-        nxs_entry = nxs_file[nxs_entry]
-        nxs_entry.attrs['signal'] = 'data'
-        data_entry = nxs_entry.name + '/data'
-        # output file path
-        h5file = data.backing_file.filename
-        # entry path in output file path
+        filename = self.exp.meta_data.get('nxs_filename')
 
-        m_data = self.exp.meta_data.get
-        if not (link_type == 'intermediate' and
-                m_data('inter_path') != m_data('out_path')):
-            h5file = h5file.split(m_data('out_folder') + '/')[-1]
+        with h5py.File(filename, 'a') as nxs_file:
+            # entry path in nexus file
+            name = data.get_name()
+            group_name = self.exp.meta_data.get(['group_name', name])
+            link_type = self.exp.meta_data.get(['link_type', name])
+            nxs_entry = '/entry/' + link_type
+            if link_type == 'final_result':
+                nxs_entry += '_' + data.get_name()
+            else:
+                nxs_entry += "/" + group_name
+            nxs_entry = nxs_file[nxs_entry]
+            nxs_entry.attrs['signal'] = 'data'
+            data_entry = nxs_entry.name + '/data'
+            # output file path
+            h5file = data.backing_file.filename
 
-        nxs_file[data_entry] = h5py.ExternalLink(h5file, group_name + '/data')
+            # entry path in output file path
+            m_data = self.exp.meta_data.get
+            if not (link_type == 'intermediate' and
+                    m_data('inter_path') != m_data('out_path')):
+                h5file = h5file.split(m_data('out_folder') + '/')[-1]
+
+            nxs_file[data_entry] = \
+                h5py.ExternalLink(h5file, group_name + '/data')
 
     def _create_entries(self, data, key, current_and_next):
         self.exp._barrier()
@@ -100,16 +102,11 @@ class Hdf5Utils(object):
             pass
 
         group = data.backing_file.create_group(group_name)
-        group.attrs[NX_CLASS] = 'NXdata'
-        group.attrs['signal'] = 'data'
-
         self.exp._barrier()
-
         shape = data.get_shape()
         if current_and_next is 0:
             data.data = group.create_dataset("data", shape, data.dtype)
         else:
-            self.exp._barrier()
             chunking = Chunking(self.exp, current_and_next)
             chunks = chunking._calculate_chunking(shape, data.dtype)
             self.exp._barrier()
@@ -136,10 +133,11 @@ class Hdf5Utils(object):
                 logging.debug("File close unsuccessful", filename)
         self.exp._barrier()
 
-    def _open_read_only(self, data):
+    def _reopen_file(self, data, mode):
         filename = data.backing_file.filename
         entry = data.data.name
         self._close_file(data)
-        logging.debug("Re-opening the backing file %s in read only", filename)
-        data.backing_file = self._open_backing_h5(filename, 'r')
+        logging.debug(
+                "Re-opening the backing file %s in mode %s" % (filename, mode))
+        data.backing_file = self._open_backing_h5(filename, mode)
         data.data = data.backing_file[entry]

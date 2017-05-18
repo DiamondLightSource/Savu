@@ -49,7 +49,6 @@ class Experiment(object):
         self.__meta_data_setup(options["process_file"])
         self.experiment_collection = {}
         self.index = {"in_data": {}, "out_data": {}}
-        self.nxs_file = None
         self.initial_datasets = None
         self.plugin = None
 
@@ -96,12 +95,15 @@ class Experiment(object):
 
         # load the loader plugins
         self._set_loaders()
+
         # load the saver plugin and save the plugin list
         self.experiment_collection = {'plugin_dict': [],
                                       'datasets': []}
-        logging.debug("Saving plugin list to file.")
-        plugin_list._save_plugin_list(self.meta_data.get('nxs_filename'),
-                                      exp=self)
+
+        self._barrier()
+        if self.meta_data.get('process') == 0:
+            plugin_list._save_plugin_list(self.meta_data.get('nxs_filename'))
+        self._barrier()
 
         n_plugins = plugin_list._get_n_processing_plugins()
         count = 0
@@ -176,12 +178,9 @@ class Experiment(object):
         fname = self.meta_data.get('datafile_name') + '_processed.nxs'
         filename = os.path.join(folder, fname)
         self.meta_data.set('nxs_filename', filename)
-
-        if self.meta_data.get('mpi') is True:
-            self.nxs_file = \
-                h5py.File(filename, 'w', driver='mpio', comm=MPI.COMM_WORLD)
-        else:
-            self.nxs_file = h5py.File(filename, 'w')
+#
+#        if self.meta_data.get('process') == 0:
+#            self.nxs_file = h5py.File(filename, 'w')
 
     def _clear_data_objects(self):
         self.index["out_data"] = {}
@@ -202,13 +201,16 @@ class Experiment(object):
             if data.remove is True:
                 finalise['remove'].append(data)
             else:
-                self._populate_nexus_file(data)
+                if self.meta_data.get('process') == 0:
+                    self._populate_nexus_file(data)
+                self._barrier()
 
         # find in datasets to replace
         finalise['replace'] = []
         for out_name in self.index['out_data'].keys():
             if out_name in self.index['in_data'].keys():
                 finalise['replace'].append(self.index['in_data'][out_name])
+
         return finalise
 
     def _reorganise_datasets(self, finalise):
@@ -258,29 +260,28 @@ class Experiment(object):
                         value.get_shape())
 
     def _populate_nexus_file(self, data):
-        self._barrier()
-        logging.info("Adding link to file %s",
-                     self.meta_data.get('nxs_filename'))
-        nxs_file = self.nxs_file
-        nxs_entry = nxs_file['entry']
-        name = data.data_info.get('name')
-        group_name = self.meta_data.get(['group_name', name])
-        link_type = self.meta_data.get(['link_type', name])
+        filename = self.meta_data.get('nxs_filename')
+        logging.info("Adding link to file %s", filename)
 
-        if link_type is 'final_result':
-            plugin_entry = \
-                nxs_entry.create_group('final_result_' + data.get_name())
-            plugin_entry.attrs[NX_CLASS] = 'NXdata'
-        elif link_type is 'intermediate':
-            link = nxs_entry.require_group(link_type)
-            link.attrs[NX_CLASS] = 'NXcollection'
-            plugin_entry = link.create_group(group_name)
-            plugin_entry.attrs[NX_CLASS] = 'NXdata'
-        else:
-            raise Exception("The link type is not known")
+        with h5py.File(filename, 'a') as nxs_file:
+            nxs_entry = nxs_file['entry']
+            name = data.data_info.get('name')
+            group_name = self.meta_data.get(['group_name', name])
+            link_type = self.meta_data.get(['link_type', name])
 
-        self.__output_metadata(data, plugin_entry)
-        self._barrier()
+            if link_type is 'final_result':
+                plugin_entry = \
+                    nxs_entry.create_group('final_result_' + data.get_name())
+                plugin_entry.attrs[NX_CLASS] = 'NXdata'
+            elif link_type is 'intermediate':
+                link = nxs_entry.require_group(link_type)
+                link.attrs[NX_CLASS] = 'NXcollection'
+                plugin_entry = link.create_group(group_name)
+                plugin_entry.attrs[NX_CLASS] = 'NXdata'
+            else:
+                raise Exception("The link type is not known")
+
+            self.__output_metadata(data, plugin_entry)
 
     def __output_metadata(self, data, entry):
         self.__output_axis_labels(data, entry)
@@ -288,8 +289,6 @@ class Experiment(object):
         self.__output_metadata_dict(data, entry)
 
     def __output_axis_labels(self, data, entry):
-        self._barrier()
-
         axis_labels = data.data_info.get("axis_labels")
         axes = []
         count = 0
@@ -311,10 +310,8 @@ class Experiment(object):
             axis_entry.attrs['units'] = labels.values()[0]
             count += 1
         entry.attrs['axes'] = axes
-        self._barrier()
 
     def __output_data_patterns(self, data, entry):
-        self._barrier()
         logging.debug("Outputting data patterns to file")
 
         data_patterns = data.data_info.get("data_patterns")
@@ -327,10 +324,7 @@ class Experiment(object):
             nx_data.create_dataset('core_dims', data=values['core_dims'])
             nx_data.create_dataset('slice_dims', data=values['slice_dims'])
 
-        self._barrier()
-
     def __output_metadata_dict(self, data, entry):
-        self._barrier()
         logging.debug("Outputting meta data dictionary to file")
 
         meta_data = data.meta_data.get_dictionary()
@@ -340,5 +334,3 @@ class Experiment(object):
             nx_data = entry.create_group(mData)
             nx_data.attrs[NX_CLASS] = 'NXdata'
             nx_data.create_dataset(mData, data=meta_data[mData])
-
-        self._barrier()
