@@ -59,6 +59,7 @@ class Hdf5Transport(BaseTransport):
         self.data_flow = self.exp.meta_data.plugin_list._get_dataset_flow()
 
         n_plugins = range(len(self.exp_coll['datasets']))
+
         for i in n_plugins:
             self.exp._set_experiment_for_current_plugin(i)
             self.files.append(
@@ -73,8 +74,11 @@ class Hdf5Transport(BaseTransport):
     def _transport_post_plugin(self):
         for data in self.exp.index['out_data'].values():
             if not data.remove:
-                self.hdf5._link_datafile_to_nexus_file(data)
-                self.hdf5._open_read_only(data)
+                self.exp._barrier()
+                if self.exp.meta_data.get('process') == 0:
+                    self.hdf5._link_datafile_to_nexus_file(data)
+                self.exp._barrier()
+                self.hdf5._reopen_file(data, 'r')  # reopen file as read-only
 
     def _transport_terminate_dataset(self, data):
         self.hdf5._close_file(data)
@@ -91,6 +95,7 @@ class Hdf5Transport(BaseTransport):
             filename = self.exp.meta_data.get(["filename", key])
             logging.debug("creating the backing file %s", filename)
             out_data.backing_file = self.hdf5._open_backing_h5(filename, 'w')
+
             out_data.group_name, out_data.group = self.hdf5._create_entries(
                 out_data, key, current_and_next[count])
             count += 1

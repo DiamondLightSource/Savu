@@ -27,8 +27,6 @@ import numpy as np
 from savu.data.data_structures.data_add_ons import Padding
 from savu.data.transport_data.base_transport_data import BaseTransportData
 
-NX_CLASS = 'NX_class'
-
 
 class Hdf5TransportData(BaseTransportData):
     """
@@ -59,7 +57,7 @@ class Hdf5TransportData(BaseTransportData):
             slice_list.append(tuple(getitem))
         return slice_list
 
-    def _get_slice_dirs_index(self, slice_dirs, shape, value):
+    def _get_slice_dirs_index(self, slice_dirs, shape, value, calc=None):
         """
         returns a list of arrays for each slice dimension, where each array
         gives the indices for that slice dimension.
@@ -316,8 +314,8 @@ class TransferData(object):
         sl_dict = {}
         mfp = self.pData._get_max_frames_process()
         mft = self.pData._get_max_frames_transfer()
-        sl, sl_dict['current'] = \
-            self._get_slice_list(self.shape, current_sl=True)
+        sl, current = self._get_slice_list(self.shape, current_sl=True)
+        sl_dict['current'], _ = self.data._get_frames_per_process(current)
 
         if self.pData._get_boundary_padding():
             for i in range(len(sl)):
@@ -326,6 +324,7 @@ class TransferData(object):
             sl[-1] = self.data._fix_list_length(sl[-1], mft)
 
         sl, sl_dict['frames'] = self.data._get_frames_per_process(sl)
+
         if self.data.pad:
             sl = self.data._pad_slice_list(
                 sl, "-value['before']", "value['after']")
@@ -334,33 +333,30 @@ class TransferData(object):
 
     def _get_dict_out(self):
         sl_dict = {}
-        sl = self._get_slice_list(self.shape)
+        sl, _ = self._get_slice_list(self.shape)
         sl_dict['transfer'], _ = self.data._get_frames_per_process(sl)
         return sl_dict
 
-    def _get_slice_list(self, shape, current_sl=False):
+    def _get_slice_list(self, shape, current_sl=None):
         mft = self.pData._get_max_frames_transfer()
-        mfp = self.pData._get_max_frames_process()
         transfer_ssl = self._local_single_slice_list(shape)
 
         if transfer_ssl is None:
             raise Exception("Data type %s does not support slicing in "
                             "directions %s" % (self.get_current_pattern_name(),
                                                self.get_slice_directions()))
-        slice_dir = self.data.get_slice_dimensions()
+        slice_dims = self.data.get_slice_dimensions()
         transfer_gsl = \
-            self.__grouped_slice_list(transfer_ssl, mft, slice_dir)
+            self.__grouped_slice_list(transfer_ssl, mft, slice_dims)
+
+        if current_sl:
+            mfp = self.pData._get_max_frames_process()
+            current_sl = self.__grouped_slice_list(transfer_ssl, mfp, slice_dims)
 
         split_list = self.pData.split
         transfer_gsl = self.__split_frames(transfer_gsl, split_list) if \
             split_list else transfer_gsl
-
-        if current_sl:
-            temp = ProcessData('in', self.data)
-            current_sl = \
-                temp._grouped_slice_list(transfer_ssl, mfp, slice_dir[0])
-            return transfer_gsl, current_sl
-        return transfer_gsl
+        return transfer_gsl, current_sl
 
     def _local_single_slice_list(self, shape):
         pData = self.pData
@@ -379,6 +375,7 @@ class TransferData(object):
     def __grouped_slice_list(self, slice_list, max_frames, group_dim):
         if group_dim is None:
             return slice_list
+
         steps = self.data.get_preview().get_starts_stops_steps('steps')
         sub_groups = self.data._split_list(slice_list, max_frames)
         grouped = []

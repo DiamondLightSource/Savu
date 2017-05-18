@@ -98,7 +98,7 @@ arg_parse "-d" interfolder "$@"
 if [ ! $interfolder ] ; then
   interfolder=$outfolder
 fi
-# gpu_arch = Kepler or Pascal (com14)
+# gpu_arch = Fermi (com07), Kepler (com10), Pascal (com14)
 qsub -N $outname -j y -o $interfolder -e $interfolder -pe openmpi $processes -l exclusive \
      -l infiniband -l gpu=$gpus_per_node -l gpu_arch=$gpu_arch -q $cluster -P tomography $filepath $savupath $input_file \
      $process_file $output_folder $cpus_to_use_per_node $gpus_to_use_per_node $options -c \

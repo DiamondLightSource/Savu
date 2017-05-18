@@ -357,7 +357,7 @@ class PluginData(object):
         logging.info("Setting max frames transfer to %d", mft)
         logging.info("Setting max frames process to %d", mfp)
         self.meta_data.set('max_frames_process', mfp)
-        self.__check_distribution(mft, frames, procs)
+        self.__check_distribution(mft)
         # (((total_frames/mft)/mpi_procs) % 1)
 
     def _calc_max_frames_transfer(self, nFrames):
@@ -379,6 +379,7 @@ class PluginData(object):
         mft, idx = self.__find_best_frame_distribution(
             fchoices[::-1], total_frames, mpi_procs, idx=True)
 
+        logging.debug('plugin %s mft1 %s' % (self, mft))
         self.__set_shape_transfer(size_list[fchoices.index(mft)])
 
         if nFrames == 'single':
@@ -386,16 +387,21 @@ class PluginData(object):
             return int(mft)
 
         mfp = nFrames if isinstance(nFrames, int) else min(mft, shape[sdir[0]])
+        logging.debug('plugin %s mft2 %s' % (self, mft))
+
         multi = self.__find_multiples_of_b_that_divide_a(mft, mfp)
         possible = sorted(list(set(set(multi).intersection(set(fchoices)))))
 
         # closest of fchoices to mfp plus difference as boundary padding
         if not possible:
             mft, _ = self.__find_closest_lower(fchoices[::-1], mfp)
+            logging.debug('plugin %s mft3 %s' % (self, mft))
             self.__set_boundary_padding(mfp - mft)
         else:
             mft = self.__find_best_frame_distribution(
                 possible[::-1], total_frames, mpi_procs)
+
+        logging.debug('plugin %s mft4 %s' % (self, mft))
 
         self.__set_shape_transfer(size_list[fchoices.index(mft)])
         self.__log_max_frames(mft, mfp, total_frames, mpi_procs)
@@ -405,12 +411,13 @@ class PluginData(object):
             self.__set_no_squeeze()
         return int(mft)
 
-    def __check_distribution(self, mft, nframes, nprocs):
+    def __check_distribution(self, mft):
+        sdir, shape, nframes, nprocs, _ = \
+            self.__get_max_frames_parameters()
         warn_threshold = 0.85
-        temp = (((nframes/mft)/nprocs) % 1)
+        temp = (((nframes/mft)/float(nprocs)) % 1)
         if temp != 0.0 and temp < warn_threshold:
-            logging.warn(
-                    'UNEVEN FRAME DISTRIBUTION: shape %s, sdir %s, nprocs %s')
+            logging.warn('UNEVEN FRAME DISTRIBUTION: shape %s, nframes %s, sdir %s, nprocs %s' % (shape, nframes, sdir, nprocs))
 
     def __find_closest_lower(self, vlist, value):
         rem = [f if f != 0 else value for f in [m % value for m in vlist]]

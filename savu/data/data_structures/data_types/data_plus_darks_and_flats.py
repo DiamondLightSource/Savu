@@ -225,10 +225,10 @@ class ImageKey(DataWithDarksAndFlats):
         slice_list = self.data_obj._preview._get_preview_slice_list()
         if slice_list:
             self.dark_flat_slice_list = tuple(self.get_dark_flat_slice_list())
-        if len(self.get_index(2)):
-            self.data_obj.meta_data.set('dark', self.dark_mean())
-        if len(self.get_index(1)):
-            self.data_obj.meta_data.set('flat', self.flat_mean())
+#        if len(self.get_index(2)):
+#            self.data_obj.meta_data.set('dark', self.dark_mean())
+#        if len(self.get_index(1)):
+#            self.data_obj.meta_data.set('flat', self.flat_mean())
 
 
 class NoImageKey(DataWithDarksAndFlats):
@@ -307,5 +307,5 @@ class NoImageKey(DataWithDarksAndFlats):
             # change dimensions here
 
         self.dark_flat_slice_list = tuple(self.dark_flat_slice_list)
-        self.data_obj.meta_data.set('dark', self.dark_mean())
-        self.data_obj.meta_data.set('flat', self.flat_mean())
+#        self.data_obj.meta_data.set('dark', self.dark_mean())
+#        self.data_obj.meta_data.set('flat', self.flat_mean())

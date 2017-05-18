@@ -23,11 +23,12 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
+import re
 import h5py
 import json
 import copy
 import inspect
-import re
+import logging
 
 import numpy as np
 import savu.plugins.utils as pu
@@ -94,27 +95,23 @@ class PluginList(object):
                 self.plugin_list.append(plugin)
         plugin_file.close()
 
-    def _save_plugin_list(self, out_filename, exp=None):
-        if exp:
-            entry_group = exp.nxs_file.create_group('entry')
-        else:
-            plugin_file = h5py.File(out_filename, 'w')
-            entry_group = plugin_file.create_group('entry')
+    def _save_plugin_list(self, out_filename):
+        with h5py.File(out_filename, 'w') as nxs_file:
+            print "opening the nexus file %s in plugin list", out_filename
+            entry_group = nxs_file.create_group('entry')
+            entry_group.attrs[NX_CLASS] = 'NXentry'
+            citations_group = entry_group.create_group('framework_citations')
+            citations_group.attrs[NX_CLASS] = 'NXcollection'
+            self._save_framework_citations(citations_group)
+            plugins_group = entry_group.create_group('plugin')
+            plugins_group.attrs[NX_CLASS] = 'NXprocess'
 
-        entry_group.attrs[NX_CLASS] = 'NXentry'
-        citations_group = entry_group.create_group('framework_citations')
-        citations_group.attrs[NX_CLASS] = 'NXcollection'
-        self._save_framework_citations(citations_group)
-        plugins_group = entry_group.create_group('plugin')
-        plugins_group.attrs[NX_CLASS] = 'NXprocess'
-
-        count = 1
-        for plugin in self.plugin_list:
-            self.__populate_plugins_group(plugins_group, plugin, count)
-            count += 1
+            count = 1
+            for plugin in self.plugin_list:
+                self.__populate_plugins_group(plugins_group, plugin, count)
+                count += 1
 
     def __populate_plugins_group(self, plugins_group, plugin, count):
-        import re
         if 'pos' in plugin.keys():
             num = int(re.findall('\d+', plugin['pos'])[0])
             letter = re.findall('[a-z]', plugin['pos'])
@@ -125,7 +122,6 @@ class PluginList(object):
             plugin_group = plugins_group.create_group("%*i" % (4, count))
 
         plugin_group.attrs[NX_CLASS] = 'NXnote'
-
         required_keys = self._get_plugin_entry_template().keys()
         json_keys = self.__get_json_keys()
 
@@ -136,6 +132,7 @@ class PluginList(object):
         for key in required_keys:
             array = np.array([json.dumps(plugin[key])]) if key in json_keys \
                 else np.array([plugin[key]])
+
             plugin_group.create_dataset(key, array.shape, array.dtype, array)
 
     def _add(self, idx, entry):

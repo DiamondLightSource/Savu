@@ -120,7 +120,7 @@ class BaseTransport(object):
 
             # loop over the process data
             for i in range(pDict['nProc']):
-                data = self._get_input_data(plugin, transfer_data, i)
+                data = self._get_input_data(plugin, transfer_data, i, count)
                 res = self._get_output_data(
                         plugin.plugin_process_frames(data), i)
                 for j in pDict['nOut']:
@@ -132,13 +132,17 @@ class BaseTransport(object):
         cu.user_message("%s - 100%% complete" % (plugin.name))
         plugin._revert_preview(pDict['in_data'])
 
-    def _get_input_data(self, plugin, trans_data, count):
+    def _get_input_data(self, plugin, trans_data, nproc, ntrans):
         data = []
         current_sl = []
         for d in self.pDict['nIn']:
-            in_sl = self.pDict['in_sl']['process'][count][d]            
+            in_sl = self.pDict['in_sl']['process'][nproc][d]
             data.append(self.pDict['squeeze'][d](trans_data[d][in_sl]))
-            current_sl.append(self.pDict['in_sl']['current'][d][count])
+            entry = ntrans*self.pDict['nProc'] + nproc
+            if entry < len(self.pDict['in_sl']['current'][d]):
+                current_sl.append(self.pDict['in_sl']['current'][d][entry])
+            else:
+                current_sl.append(self.pDict['in_sl']['current'][d][-1])
         plugin.set_current_slice_list(current_sl)
         return data
 

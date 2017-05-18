@@ -50,6 +50,7 @@ class Preview(object):
         """
         self.revert_shape = kwargs.get('revert', self.revert_shape)
         shape = self.get_data_obj().get_shape()
+
         if preview_list:
             preview_list = self.__add_preview_defaults(preview_list)
             starts, stops, steps, chunks = \
@@ -59,6 +60,7 @@ class Preview(object):
             starts, stops, steps, chunks = \
                 [[0]*len(shape), shape, [1]*len(shape), [1]*len(shape)]
             shape_change = False
+
         self.__set_starts_stops_steps(starts, stops, steps, chunks,
                                       shapeChange=shape_change)
         self.__check_preview_indices()

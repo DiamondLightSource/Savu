@@ -25,15 +25,7 @@ import socket
 import os
 
 from mpi4py import MPI
-from itertools import chain
 import savu.core.utils as cu
-
-#
-#class logging_setup(object):
-#
-#    def __init__(self, options, name='logging_setup'):
-#        self.options = options
-#
 
 
 class MPI_setup(object):

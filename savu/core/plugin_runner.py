@@ -20,6 +20,7 @@
 """
 
 import logging
+from mpi4py import MPI
 
 import savu.core.utils as cu
 import savu.plugins.utils as pu
@@ -38,7 +39,6 @@ class PluginRunner(object):
 
         #  ********* transport function ***********
         self._transport_initialise(options)
-
         self.options = options
         # add all relevent locations to the path
         pu.get_plugins_paths()
@@ -51,6 +51,7 @@ class PluginRunner(object):
         self._run_plugin_list_check(plugin_list)
 
         self.exp._experiment_setup()
+
         exp_coll = self.exp._get_experiment_collection()
         n_plugins = plugin_list._get_n_processing_plugins()
 
@@ -68,10 +69,6 @@ class PluginRunner(object):
         for data in self.exp.index['in_data'].values():
             self._transport_terminate_dataset(data)
 
-        self.exp._barrier()
-        self.exp.nxs_file.close()
-        self.exp._barrier()
-
         cu.user_message("***********************")
         cu.user_message("* Processing Complete *")
         cu.user_message("***********************")
@@ -79,12 +76,10 @@ class PluginRunner(object):
 
     def __run_plugin(self, plugin_dict):
         plugin = pu.plugin_loader(self.exp, plugin_dict)
-        self.exp.plugin = plugin
 
         #  ********* transport function ***********
         self._transport_pre_plugin()
 
-        self.exp._barrier()
         cu.user_message("*Running the %s plugin*" % plugin.name)
 
         #  ******** transport 'process' function is called inside here ********
