@@ -1,9 +1,0 @@
-cluster=com10
-nodes=2
-cpus_per_node=20
-gpus_per_node=4
-input_file=/dls/i13/data/2016/mt15287-1/raw/81914.nxs
-process_file=/dls/i13/data/2016/mt15287-1/processing/savu_recons/process_lists/tomo_81914.nxs
-output_folder=.
-options=-l .
-
