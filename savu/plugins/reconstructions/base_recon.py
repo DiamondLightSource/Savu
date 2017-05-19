@@ -96,12 +96,9 @@ class BaseRecon(Plugin):
         return self.br_vol_shape
 
     def set_centre_of_rotation(self, inData, mData, pData):
-        if 'centre_of_rotation' in mData.get_dictionary().keys():
-            cor = mData.get('centre_of_rotation')
-        else:
-            cor = np.ones(inData.get_shape()[pData.get_slice_dimension()])
-            cor *= self.parameters['centre_of_rotation']
-            mData.set('centre_of_rotation', cor)
+        cor = np.ones(inData.get_shape()[pData.get_slice_dimension()])
+        cor *= self.parameters['centre_of_rotation']
+        mData.set('centre_of_rotation', cor)
         self.cor = cor
         self.centre = self.cor[0]
 
