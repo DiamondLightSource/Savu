@@ -36,9 +36,10 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
     A plugin to apply radial distortion correction.
 
     :param polynomial_coeffs: Parameters of the radial distortion \
-        function. Default: (1.00015076, 1.9289e-6, -2.4325e-8, 1.00439e-11, -3.99352e-15).
+    function. Default: (1.00015076, 1.9289e-6, -2.4325e-8, 1.00439e-11, -3.99352e-15).
     :u*param shift: If the data is cropped the centre of distortion must be \
-        shifted accordingly. Default: (0, 0)
+    shifted accordingly, e.g is preview is [:, a:b, c:d] then shift \
+    is (a, c). Default: (0, 0)
     :param centre: Centre of distortion. Default: (995.24, 1283.25)
     :u*param crop_edges: Crop the edges to remove zeros if data is already \
         cropped. Default: 0
