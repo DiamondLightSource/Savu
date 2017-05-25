@@ -22,10 +22,9 @@
 """
 
 import h5py
+import numpy as np
 
-import savu.data.data_structures as ds
 from savu.plugins.loaders.base_loader import BaseLoader
-
 from savu.plugins.utils import register_plugin
 
 
@@ -36,6 +35,9 @@ class SavuLoader(BaseLoader):
     :param data_path: Path to the \
         data. Default: '1-TimeseriesFieldCorrections-tomo/data'.
     :param name: Name associated with the data set. Default: 'tomo'.
+    :param image_key: Specify position of darks and flats (in that order) \
+    in the data e.g. [[0, 1], [2, 3]]. Default: None.
+    :param angles: Override angles. Default: None.
     """
 
     def __init__(self, name='SavuLoader'):
@@ -54,14 +56,24 @@ class SavuLoader(BaseLoader):
         entry_path = '/'.join(data_path.split('/')[:-1])
         data_obj.data = data_obj.backing_file[data_path]
 
-        self.set_axis_labels(data_obj, entry_path)
-        self.add_patterns(data_obj, entry_path)
-        self.add_meta_data(data_obj, entry_path)
+        self.__set_axis_labels(data_obj, entry_path)
+        self.__add_patterns(data_obj, entry_path)
+        self.__add_meta_data(data_obj, entry_path)
+
+        if self.parameters['image_key']:
+            self.__set_image_key(data_obj)
+
+        if self.parameters['angles']:
+            exec("angles = " + self.parameters['angles'])
+            print "****setting angles in the meta_data", angles
+            data_obj.meta_data.set("rotation_angle", angles)
+
 
         data_obj.set_shape(data_obj.data.shape)
-        return data_obj
+        self.set_data_reduction_params(data_obj)
+        data_obj.data._set_dark_and_flat()        
 
-    def set_axis_labels(self, data, entry):
+    def __set_axis_labels(self, data, entry):
         # set axis labels
         axes = data.backing_file[entry].attrs['axes']
         axis_labels = []
@@ -70,7 +82,7 @@ class SavuLoader(BaseLoader):
             axis_labels.append(axis + '.' + units)
         data.set_axis_labels(*axis_labels)
 
-    def add_patterns(self, data, entry):
+    def __add_patterns(self, data, entry):
         pattern_list = data.backing_file[entry + '/patterns'].keys()
         for pattern in pattern_list:
             pattern = pattern.encode('ascii')
@@ -85,17 +97,23 @@ class SavuLoader(BaseLoader):
             data.add_pattern(pattern, core_dims=tuple(core_dims),
                              slice_dims=tuple(slice_dims))
 
-    def add_meta_data(self, data, entry):
+    def __add_meta_data(self, data, entry):
         meta_data_list = data.backing_file[entry + '/meta_data'].keys()
         for mData_name in meta_data_list:
             mData_name = mData_name.encode('ascii')
             mEntry = entry + '/meta_data/' + mData_name
             mData = data.backing_file[mEntry + '/' + mData_name]
-            if mData_name is 'image_key':
-                self.set_image_key(data, mData)
-            else:
-                data.meta_data.set(mData_name, mData[...])
+            data.meta_data.set(mData_name, mData[...])
 
-    def set_image_key(self, data, mData):
-        ds.TomoRaw(data)
-        data.get_tomo_raw().set_image_key(mData[...])
+    def __set_image_key(self, data_obj):
+        from savu.data.data_structures.data_types.data_plus_darks_and_flats \
+            import ImageKey
+
+        proj_slice = \
+            data_obj.get_data_patterns()['PROJECTION']['slice_dims'][0]
+        image_key = np.zeros(data_obj.data.shape[proj_slice], dtype=int)
+        dark, flat = self.parameters['image_key']
+        image_key[np.array(dark)] = 2
+        image_key[np.array(flat)] = 1
+
+        data_obj.data = ImageKey(data_obj, image_key, 0)
