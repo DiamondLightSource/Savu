@@ -349,13 +349,22 @@ class PluginData(object):
             sdir = sdir[:-diff]
 
         frames = np.prod([shape[d] for d in sdir])
-        n_procs = len(self.data_obj.exp.meta_data.get('processes'))
+        base_names = [p.__name__ for p in self._plugin.__class__.__bases__]
+        processes = self.data_obj.exp.meta_data.get('processes')
+
+        if 'GpuPlugin' in base_names:
+            n_procs = len([n for n in processes if 'GPU' in n])
+        else:
+            n_procs = len(processes)
+
         f_per_p = np.ceil(frames/n_procs)
         return sdir, shape, frames, n_procs, f_per_p
 
     def __log_max_frames(self, mft, mfp, frames, procs):
-        logging.info("Setting max frames transfer to %d", mft)
-        logging.info("Setting max frames process to %d", mfp)
+        logging.info("Setting max frames transfer for plugin %s to %d" %
+                     (self._plugin, mft))
+        logging.info("Setting max frames process for plugin %s to %d" %
+                     (self._plugin, mft))
         self.meta_data.set('max_frames_process', mfp)
         self.__check_distribution(mft)
         # (((total_frames/mft)/mpi_procs) % 1)
@@ -377,9 +386,8 @@ class PluginData(object):
             fchoices = [f for f in fchoices if f >= min_mft]
 
         mft, idx = self.__find_best_frame_distribution(
-            fchoices[::-1], total_frames, mpi_procs, idx=True)
+            fchoices, total_frames, mpi_procs, idx=True)
 
-        logging.debug('plugin %s mft1 %s' % (self, mft))
         self.__set_shape_transfer(size_list[fchoices.index(mft)])
 
         if nFrames == 'single':
@@ -387,7 +395,6 @@ class PluginData(object):
             return int(mft)
 
         mfp = nFrames if isinstance(nFrames, int) else min(mft, shape[sdir[0]])
-        logging.debug('plugin %s mft2 %s' % (self, mft))
 
         multi = self.__find_multiples_of_b_that_divide_a(mft, mfp)
         possible = sorted(list(set(set(multi).intersection(set(fchoices)))))
@@ -395,13 +402,10 @@ class PluginData(object):
         # closest of fchoices to mfp plus difference as boundary padding
         if not possible:
             mft, _ = self.__find_closest_lower(fchoices[::-1], mfp)
-            logging.debug('plugin %s mft3 %s' % (self, mft))
             self.__set_boundary_padding(mfp - mft)
         else:
             mft = self.__find_best_frame_distribution(
                 possible[::-1], total_frames, mpi_procs)
-
-        logging.debug('plugin %s mft4 %s' % (self, mft))
 
         self.__set_shape_transfer(size_list[fchoices.index(mft)])
         self.__log_max_frames(mft, mfp, total_frames, mpi_procs)
