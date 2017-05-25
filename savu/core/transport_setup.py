@@ -47,7 +47,7 @@ class MPI_setup(object):
             options["mpi"] = True
             self.__mpi_setup(options)
 
-        logging.info(options)
+        logging.debug(options)
 
     def __mpi_setup(self, options):
         """ Set MPI process specific values and logging initialisation.
@@ -103,7 +103,8 @@ class MPI_setup(object):
     def __set_logger_parallel(self, number, rank, options):
         """ Set parallel logger.
         """
-        log_format = 'L %(relativeCreated)12d M' + number + ' ' + rank +\
+        machine = 'M%-5s%-6s' % (number, rank)        
+        log_format = 'L %(relativeCreated)12d ' + machine +\
                      ' %(levelname)-6s %(message)s'
         level = cu._get_log_level(options)
         self.__set_logger(level, log_format)
