@@ -6,10 +6,9 @@ def convert(filename):
 
     for file in filename:
         print file
-        the_key = "" #CPU0"
+        the_key = ""
         the_interval = 0  # millisecs
         frame = get_frame(file, the_key)
-
         machine_names = get_machine_names(frame)
         render_template(frame, machine_names, the_interval,
                         set_file_name(file))
@@ -21,8 +20,12 @@ def get_frame(file, the_key):
     import itertools
 
     names = ['L', 'Time', 'Machine', 'CPU', 'Type', 'Message']
-    data = pd.io.parsers.read_fwf(file, widths=[2, 13, 5, 6, 7, 1000],
+    data = pd.io.parsers.read_fwf(file, widths=[2, 13, 6, 6, 7, 1000],
                                   names=names)
+
+#    data = pd.io.parsers.read_fwf(file, widths=[2, 13, 5, 6, 7, 1000],
+#                                  names=names)
+
     data['Key'] = data['Machine'] + data['CPU']
     frame = ((data[data.Type == "INFO"])[data.columns[[6, 5, 1]]])
     frame.insert(0, 'Index', range(len(frame)))
@@ -86,6 +89,7 @@ def set_file_name(filename):
 
     return outfilename
 
+
 def main():
     import optparse
 
@@ -104,4 +108,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
