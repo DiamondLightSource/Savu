@@ -20,7 +20,6 @@
 """
 
 import logging
-from mpi4py import MPI
 
 import savu.core.utils as cu
 import savu.plugins.utils as pu

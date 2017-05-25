@@ -65,7 +65,7 @@ class NxtomoLoader(BaseLoader):
 
         data_obj.data = data_obj.backing_file[self.parameters['data_path']]
 
-        self.__set_dark_and_flat(data_obj)
+        self._set_dark_and_flat(data_obj)
 
         if self.parameters['3d_to_4d']:
             if not self.parameters['angles']:
@@ -131,7 +131,7 @@ class NxtomoLoader(BaseLoader):
                              slice_dims=(detY, scan))
         return data_obj.data.shape
 
-    def __set_dark_and_flat(self, data_obj):
+    def _set_dark_and_flat(self, data_obj):
         flat = self.parameters['flat'][0]
         dark = self.parameters['dark'][0]
 

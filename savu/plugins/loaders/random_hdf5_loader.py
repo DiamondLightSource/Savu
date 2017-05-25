@@ -24,6 +24,7 @@
 
 import os
 import h5py
+import logging
 import numpy as np
 
 from savu.data.chunking import Chunking
@@ -105,6 +106,8 @@ class RandomHdf5Loader(BaseLoader):
         h5file = self.hdf5._open_backing_h5(fname, 'w')
         dset = h5file.create_dataset('test', size, chunks=chunks)
 
+        self.exp._barrier()
+
         slice_dirs = nnext.values()[0]['slice_dims']
         nDims = len(dset.shape)
         total_frames = np.prod([dset.shape[i] for i in slice_dirs])
@@ -127,7 +130,13 @@ class RandomHdf5Loader(BaseLoader):
             tmp = sl[slice_dirs[idx]]
             sl[slice_dirs[idx]] = slice(tmp.start+1, tmp.stop+1)
 
-        h5file.close()
+        self.exp._barrier()
+
+        try:
+            h5file.close()
+        except:
+            logging.debug('There was a problem trying to close the file in random_hdf5_loader')
+
         return self.hdf5._open_backing_h5(fname, 'r')
 
     def __get_start_slice_list(self, slice_dirs, shape, n_frames):
