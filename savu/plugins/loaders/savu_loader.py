@@ -26,6 +26,8 @@ import numpy as np
 
 from savu.plugins.loaders.base_loader import BaseLoader
 from savu.plugins.utils import register_plugin
+from savu.data.data_structures.data_types.data_plus_darks_and_flats \
+    import ImageKey
 
 
 @register_plugin
@@ -65,13 +67,12 @@ class SavuLoader(BaseLoader):
 
         if self.parameters['angles']:
             exec("angles = " + self.parameters['angles'])
-            print "****setting angles in the meta_data", angles
             data_obj.meta_data.set("rotation_angle", angles)
-
 
         data_obj.set_shape(data_obj.data.shape)
         self.set_data_reduction_params(data_obj)
-        data_obj.data._set_dark_and_flat()        
+        if isinstance(data_obj.data, ImageKey):
+            data_obj.data._set_dark_and_flat()
 
     def __set_axis_labels(self, data, entry):
         # set axis labels
@@ -106,9 +107,6 @@ class SavuLoader(BaseLoader):
             data.meta_data.set(mData_name, mData[...])
 
     def __set_image_key(self, data_obj):
-        from savu.data.data_structures.data_types.data_plus_darks_and_flats \
-            import ImageKey
-
         proj_slice = \
             data_obj.get_data_patterns()['PROJECTION']['slice_dims'][0]
         image_key = np.zeros(data_obj.data.shape[proj_slice], dtype=int)
