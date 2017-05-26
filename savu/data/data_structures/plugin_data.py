@@ -332,8 +332,9 @@ class PluginData(object):
         # min frames required if frames_per_process > frame_threshold
         min_mft = 16
         if isinstance(nFrames, int) and nFrames > max_mft:
-            raise Exception("The requested %s frames excedes the maximum "
-                            "allowed of %s." % (nFrames, max_mft))
+            logging.warn("The requested %s frames excedes the maximum "
+                         "preferred of %s." % (nFrames, max_mft))
+            max_mft = nFrames
         return max_mft, min_mft, frame_threshold
 
     def __get_max_frames_parameters(self):
@@ -421,7 +422,8 @@ class PluginData(object):
         warn_threshold = 0.85
         temp = (((nframes/mft)/float(nprocs)) % 1)
         if temp != 0.0 and temp < warn_threshold:
-            logging.warn('UNEVEN FRAME DISTRIBUTION: shape %s, nframes %s, sdir %s, nprocs %s' % (shape, nframes, sdir, nprocs))
+            logging.warn('UNEVEN FRAME DISTRIBUTION: shape %s, nframes %s ' +
+                         'sdir %s, nprocs %s' % (shape, nframes, sdir, nprocs))
 
     def __find_closest_lower(self, vlist, value):
         rem = [f if f != 0 else value for f in [m % value for m in vlist]]
