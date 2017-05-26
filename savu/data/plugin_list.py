@@ -28,7 +28,6 @@ import h5py
 import json
 import copy
 import inspect
-import logging
 
 import numpy as np
 import savu.plugins.utils as pu
@@ -97,7 +96,6 @@ class PluginList(object):
 
     def _save_plugin_list(self, out_filename):
         with h5py.File(out_filename, 'w') as nxs_file:
-            print "opening the nexus file %s in plugin list", out_filename
             entry_group = nxs_file.create_group('entry')
             entry_group.attrs[NX_CLASS] = 'NXentry'
             citations_group = entry_group.create_group('framework_citations')
