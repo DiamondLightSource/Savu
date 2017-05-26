@@ -68,12 +68,16 @@ class FabIO(BaseType):
         import glob
 #        files = os.listdir(folder)
         fullpath = str.strip(folder)
+        
+        print "fullpath", fullpath
         if prefix != None:
             fullpath = os.path.join(folder, prefix)
         fullpath += "*"
         files = glob.glob(fullpath)
         self.nFrames = len(files)
+
         fname = sorted(files)[0]
+
         self.start_no = [int(s) for s in re.findall(r'\d+', fname)][-1]
         return fname
 #        return folder + "/" + fname
