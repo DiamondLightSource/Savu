@@ -35,7 +35,7 @@ class BaseRecon(Plugin):
     reconstruction. Default: 0.0.
     :u*param init_vol: Dataset to use as volume initialiser \
     (doesn't currently work with preview). Default: None.
-    :param centre_pad: Pad the sinogram to centre it. Default: False.
+    :param centre_pad: Pad the sinogram to centre it. Default: True.
     :param outer_pad: Pad the sinogram to remove edge artefacts in the \
     reconstructed ROI for FBP algorithms only (NB. This will increase the \
     size of the data and the time taken to perform the reconstruction and it \

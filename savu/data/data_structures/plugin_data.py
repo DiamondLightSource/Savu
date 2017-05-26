@@ -214,7 +214,7 @@ class PluginData(object):
                 label, contains=contains)
         plugin_dims = self.data_obj.get_core_dimensions()
         if self._get_max_frames_process() > 1:
-            plugin_dims += (self.get_slice_dimensions()[0],)
+            plugin_dims += (self.get_slice_dimension(),)
         return list(set(plugin_dims)).index(label_dim)
 
     def set_slicing_order(self, order):

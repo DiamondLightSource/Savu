@@ -120,6 +120,7 @@ class BaseAstraRecon(BaseRecon):
         det_width = fix_sino.shape[self.dim_detX]
         proj_geom = astra.create_proj_geom('parallel', 1.0, det_width, angles)
         fix_sino = np.transpose(fix_sino, (self.dim_rot, self.dim_detX))
+
         # create sinogram id
         sino_id = astra.data2d.create("-sino", proj_geom, fix_sino)
         # create reconstruction id
