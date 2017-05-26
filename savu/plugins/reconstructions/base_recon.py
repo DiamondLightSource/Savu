@@ -22,6 +22,7 @@
 """
 import math
 
+
 from savu.plugins.plugin import Plugin
 import numpy as np
 
@@ -31,14 +32,16 @@ class BaseRecon(Plugin):
     A base class for reconstruction plugins
 
     :u*param centre_of_rotation: Centre of rotation to use for the \
-        reconstruction. Default: 0.0.
+    reconstruction. Default: 0.0.
     :u*param init_vol: Dataset to use as volume initialiser \
-        (doesn't currently work with preview). Default: None.
-    :param sino_pad: Pad the sinogram to remove edge artefacts in the \
-        reconstructed ROI (NB. This will increase the size of the data and \
-        the time taken to perform the reconstruction). Default: False.
+    (doesn't currently work with preview). Default: None.
+    :param centre_pad: Pad the sinogram to centre it. Default: False.
+    :param outer_pad: Pad the sinogram to remove edge artefacts in the \
+    reconstructed ROI for FBP algorithms only (NB. This will increase the \
+    size of the data and the time taken to perform the reconstruction and it \
+    cannot be used if centre_pad is False). Default: False.
     :u*param log: Take the log of the data before reconstruction \
-        (True or False). Default: True.
+    (True or False). Default: True.
     :u*param preview: A slice list of required frames. Default: [].
     """
     count = 0
@@ -81,16 +84,13 @@ class BaseRecon(Plugin):
         self.slice_dirs = out_data[0].get_slice_dimensions()
 
         shape = in_pData[0].get_shape()
-        pad_len = shape[self.pad_dim] if self.parameters['sino_pad'] else 0
+        pad_len = shape[self.pad_dim] if self.parameters['outer_pad'] else 0
 
         # this is the correct value but doesn't give a good result
         self.sino_pad = int(math.ceil((math.sqrt(2)-1)*pad_len))
-        #self.sino_pad = int(0.5*pad_len)
-#        bases = [b.__name__ for b in self.__class__.__bases__]
-        # pad the data now if the recon is not astra
-#        self.sino_func, self.cor_func = self.set_function(False) if \
-#            'NewBaseAstraRecon' in bases else self.set_function(shape)
-        self.sino_func, self.cor_func = self.set_function(False)
+
+        self.sino_func, self.cor_func = self.set_function(shape) if \
+            self.parameters['outer_pad'] else self.set_function(False)
 
     def get_vol_shape(self):
         return self.br_vol_shape
@@ -101,7 +101,7 @@ class BaseRecon(Plugin):
         else:
             cor = np.ones(inData.get_shape()[pData.get_slice_dimension()])
             cor *= self.parameters['centre_of_rotation']
-            mData.set('centre_of_rotation', cor)
+            #mData.set('centre_of_rotation', cor) see Github ticket
         self.cor = cor
         self.centre = self.cor[0]
 
@@ -113,16 +113,17 @@ class BaseRecon(Plugin):
             else:
                 sino_func = lambda sino: np.nan_to_num(sino)
         else:
+            mode = 'edge'
             cor_func = lambda cor: cor+self.sino_pad
             pad_tuples = [(0, 0)]*(len(pad_shape)-1)
             pad_tuples.insert(self.pad_dim, (self.sino_pad, self.sino_pad))
             pad_tuples = tuple(pad_tuples)
             if self.parameters['log']:
                 sino_func = lambda sino: -np.log(np.nan_to_num(
-                    np.pad(sino, pad_tuples, 'edge'))+1)
+                    np.pad(sino, pad_tuples, mode))+1)
             else:
                 sino_func = lambda sino: np.nan_to_num(np.pad(
-                    sino, pad_tuples, 'edge'))
+                    sino, pad_tuples, mode))
         return sino_func, cor_func
 
     def base_process_frames(self, data):

@@ -127,21 +127,20 @@ class AstraReconGpu(BaseAstraRecon, GpuPlugin):
         # create algorithm id
         alg_id = astra.algorithm.create(cfg)
 
-#        # run algorithm
-#        if self.res:
-#            for j in range(self.iters):
-#                print j
-#                # Run a single iteration
-#                astra.algorithm.run(alg_id, 1)
-#                temp = astra.algorithm.get_res_norm(alg_id)
-#        else:
-        astra.algorithm.run(alg_id, self.iters)
+        # run algorithm
+        if self.res:
+            for j in range(self.iters):
+                # Run a single iteration
+                astra.algorithm.run(alg_id, 1)
+                res[j] = astra.algorithm.get_res_norm(alg_id)
+        else:
+            astra.algorithm.run(alg_id, self.iters)
 
         # get reconstruction matrix
-#        if self.manual_mask:
-#            recon = self.mask*astra.data3d.get(rec_id)
-#        else:
-#            recon = astra.data3d.get(rec_id)
+        if self.manual_mask:
+            recon = self.mask*astra.data3d.get(rec_id)
+        else:
+            recon = astra.data3d.get(rec_id)
 
         #recon = astra.data3d.get(rec_id)
         recon = np.transpose(astra.data3d.get(rec_id), (2, 0, 1))
