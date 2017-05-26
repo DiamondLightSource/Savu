@@ -22,6 +22,7 @@
 """
 import logging
 import numpy
+import skimage.measure as skim
 
 from savu.plugins.plugin import Plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
@@ -33,9 +34,9 @@ class DownsampleFilter(Plugin, CpuPlugin):
     """
     A plugin to reduce the data in the selected dimension by a proportion
 
-    :param bin_size: Bin Size for the downsample. Default: 2.
-    :param mode: One of 'skip', 'mean', 'median', 'min', 'max'. Default: 'mean'.
-    :param pattern: One of 'PROJECTION' or 'SINOGRAM'. Default: 'PROJECTION'.
+    :u*param bin_size: Bin Size for the downsample. Default: 2.
+    :u*param mode: One of 'mean', 'median', 'min', 'max'. Default: 'mean'.
+    :u*param pattern: One of 'PROJECTION' or 'SINOGRAM'. Default: 'PROJECTION'.
     """
 
     def __init__(self):
@@ -43,108 +44,33 @@ class DownsampleFilter(Plugin, CpuPlugin):
         super(DownsampleFilter,
               self).__init__("DownsampleFilter")
         self.out_shape = None
-        self.mode_dict = { 'skip'  : self.skip_sampler,
-                           'mean'  : self.mean_sampler,
-                           'median': self.median_sampler,
-                           'min'   : self.min_sampler,
-                           'max'   : self.max_sampler }
+        self.mode_dict = { 'mean'  : numpy.mean,
+                           'median': numpy.median,
+                           'min'   : numpy.min,
+                           'max'   : numpy.max }
 
     def get_output_shape(self, input_data):
         input_shape = input_data.get_shape()
-        return (input_shape[0],
-                (input_shape[1]+1)/self.parameters['bin_size'],
-                (input_shape[2]+1)/self.parameters['bin_size'])
+        core_dirs = input_data.get_core_directions()
+        output_shape = []
+        for i in range(len(input_shape)):
+            if i in core_dirs:
+                output_shape.append(input_shape[i]/self.parameters['bin_size'])
+            else:
+                output_shape.append(input_shape[i])
+        
+        return output_shape
 
     def process_frames(self, data):
         logging.debug("Running Downsample data")
         if self.parameters['mode'] in self.mode_dict:
             sampler = self.mode_dict[self.parameters['mode']]
         else:
-            logging.warning("Unknown downsample mode. Using 'skip'.")
-            sampler = self.skip_sampler
-        result = sampler(data)
+            logging.warning("Unknown downsample mode. Using 'mean'.")
+            sampler = numpy.mean
+        block_size = (self.parameters['bin_size'], self.parameters['bin_size'])
+        result = skim.block_reduce(data[0], block_size, sampler)
         return result
-
-    def skip_sampler(self, data):
-        logging.debug("Downsampling data using skip mode")
-        new_slice = self.new_slice(data[0].shape)
-        result = data[0][new_slice]
-        return result
-
-    def new_slice(self, data_shape):
-        pData = self.get_plugin_in_datasets()[0]
-        slice_dir = pData.get_slice_dimension()
-        core_dirs = pData.get_core_directions()
-        len_cores = len(core_dirs)
-        len_data = len(data_shape)
-
-        if len_cores is not len(data_shape):
-            core_dirs = list(set(range(len_data)).difference(set([slice_dir])))
-
-        new_slice = [slice(None)]*len(data_shape)
-        for dim in range(len_cores):
-            this_slice = slice(0, data_shape[dim], self.parameters['bin_size'])
-            new_slice[dim] = this_slice
-        return new_slice
-
-    def mean_sampler(self, data):
-        logging.debug("Downsampling data using mean mode")
-        result = self.compress_bins(data, numpy.mean)
-        return result
-
-    def median_sampler(self, data):
-        logging.debug("Downsampling data using median mode")
-        result = self.compress_bins(data, numpy.median)
-        return result
-
-    def min_sampler(self, data):
-        logging.debug("Downsampling data using median mode")
-        result = self.compress_bins(data, numpy.amin)
-        return result
-
-    def max_sampler(self, data):
-        logging.debug("Downsampling data using median mode")
-        result = self.compress_bins(data, numpy.amax)
-        return result
-
-    def compress_bins(self, data, compressor):
-        pData = self.get_plugin_in_datasets()[0]
-        # Break up the input data
-        blocks = self.get_blocks(data[0], pData.get_core_dimensions())
-        # Downsampling step
-        result = numpy.array(map(compressor, blocks))
-        # Reshape the array (using Fortran-like ordering)
-        slice_dir = pData.get_slice_dimension()
-        result_shape = ()
-        for s in range(0, len(self.out_shape)):
-            if s != slice_dir:
-                result_shape = result_shape + tuple([self.out_shape[s]])
-        result = numpy.reshape(result, result_shape, order='F')
-        return result
-
-    def get_blocks(self, data, core_dirs):
-        bin_size = self.parameters['bin_size']
-        # Initialise the list of blocks
-        blocks = [data]
-        for dim in core_dirs:
-            # Initialise the temporary block list
-            stripes = []
-            # Calculate the list of bin indices along dim
-            nbins = self.out_shape[dim]
-            bins = bin_size * numpy.arange(1, nbins)
-            # Handle the fact that we're dealing with a 2d slice instead of a 3d lump
-            if dim == 0:
-                axis = dim
-            else:
-                axis = dim - 1
-            # Subdivide all current blocks
-            for block in blocks:
-                tmp = numpy.array_split(block, bins, axis=axis)
-                for t in tmp:
-                    stripes.append(t)
-            # Replace the list of blocks for the next iteration
-            blocks = stripes
-        return blocks
 
     def setup(self):
         # get all in and out datasets required by the plugin
@@ -168,8 +94,9 @@ class DownsampleFilter(Plugin, CpuPlugin):
         core_dirs = data.get_core_dimensions()
         new_shape = list(full_shape)
         for dim in core_dirs:
-            new_shape[dim] = full_shape[dim]/self.parameters['bin_size'] \
-                + full_shape[dim] % self.parameters['bin_size']
+            new_shape[dim] = full_shape[dim]/self.parameters['bin_size']
+            if (full_shape[dim] % self.parameters['bin_size']) > 0:
+                new_shape[dim] += 1
         return tuple(new_shape)
 
     def nInput_datasets(self):
