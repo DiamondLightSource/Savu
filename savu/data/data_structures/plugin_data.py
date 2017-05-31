@@ -423,7 +423,7 @@ class PluginData(object):
         temp = (((nframes/mft)/float(nprocs)) % 1)
         if temp != 0.0 and temp < warn_threshold:
             logging.warn('UNEVEN FRAME DISTRIBUTION: shape %s, nframes %s ' +
-                         'sdir %s, nprocs %s' % (shape, nframes, sdir, nprocs))
+                         'sdir %s, nprocs %s', shape, nframes, sdir, nprocs)
 
     def __find_closest_lower(self, vlist, value):
         rem = [f if f != 0 else value for f in [m % value for m in vlist]]

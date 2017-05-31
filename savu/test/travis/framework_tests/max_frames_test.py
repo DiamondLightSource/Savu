@@ -235,11 +235,11 @@ class MaxFramesTest(unittest.TestCase):
 
         sl_dict = self.__get_slice_list_dict(
                 data, pData, 'PROJECTION', 'single', 'in', processes)
-        self.__assert(pData, sl_dict, 18, 1, 350, 18, 450*36*14)
+        self.__assert(pData, sl_dict, 30, 1, 210, 30, 210*36*14)
 
         sl_dict = self.__get_slice_list_dict(
                 data, pData, 'PROJECTION', 'multiple', 'in', processes)
-        self.__assert(pData, sl_dict, 18, 18, 350, 1, 450*36*14)
+        self.__assert(pData, sl_dict, 30, 30, 210, 1, 210*36*14)
 
 if __name__ == "__main__":
     unittest.main()
