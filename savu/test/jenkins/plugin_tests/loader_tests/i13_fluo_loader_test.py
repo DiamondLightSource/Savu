@@ -27,12 +27,8 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 
 
 class I13FluoLoaderTest(unittest.TestCase):
-
-    @unittest.skip('Skipping due to permissions error on data folder')
     def test_i13_fluo(self):
-        #data_file = #tu.get_test_data_path('i13_fluo_data.nxs')
-        data_file = '/dls/science/users/clb02321/DAWN_stable/I13Test_Catalysts/processing/catalyst_data/stacked_data/ptycho_tomo_copied_92713.h5'
-
+        data_file = tu.get_test_big_data_path('i13_xrf_tomo_92713.nxs')
         process_file = tu.get_test_process_path('basic_fluo_process_i13.nxs')
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
