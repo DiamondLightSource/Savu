@@ -28,11 +28,9 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 
 class I13PtychoLoaderTest(unittest.TestCase):
 
-    @unittest.skip('Skipping due to permissions error on data folder')
     def test_i13_ptycho(self):
-#         data_file = '/dls/i13-1/data/2016/mt14190-1/processing/tomo_processed/ptycho/ptycho_vds_testeroo.h5'
-        data_file = '/dls/science/users/clb02321/DAWN_stable/I13Test_Catalysts/processing/catalyst_data/stacked_data/ptycho_tomo_copied_92713.h5'
-        process_file = '/dls/science/users/clb02321/DAWN_stable/Savu2/Savu/test_data/test_process_lists/basic_ptycho_process_i13.nxs'
+        data_file = tu.get_test_big_data_path('68862.nxs')
+        process_file = tu.get_test_process_path('basic_ptycho_process_i13.nxs')
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
 
