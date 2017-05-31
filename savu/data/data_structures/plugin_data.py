@@ -412,7 +412,7 @@ class PluginData(object):
         self.__log_max_frames(mft, mfp, total_frames, mpi_procs)
 
         # Retain the shape if the first slice dimension has length 1
-        if mfp == 1:
+        if mfp == 1 and nFrames != 1:
             self.__set_no_squeeze()
         return int(mft)
 

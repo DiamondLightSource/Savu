@@ -84,12 +84,11 @@ class DataCreate(object):
         except KeyError:
             raise Exception("Please state axis_labels and shape when "
                             "creating a new dataset")
-
         if isinstance(shape, DataCreate):
             self.__find_and_set_shape(shape)
         else:
             pData = self._get_plugin_data()
-            pData._set_shape_before_tuning(copy.copy(pData.data_obj.get_shape()))
+            pData._set_shape_before_tuning(copy.copy(shape))
             self.set_shape(shape + tuple(pData.extra_dims))
 
         if 'patterns' in kwargs:
