@@ -28,7 +28,8 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 
 
 class ListToProjectionsTest(unittest.TestCase):
-#     @unittest.skip('Something is up with this')
+
+    @unittest.skip('Skipping due to permissions error on data folder')
     def test_process(self):
         path = '/dls/science/users/clb02321/DAWN_stable/I13Test_Catalysts/processing/catalyst_data/analysis92713/'
         data_file = path+'20170222134626_ptycho_tomo_copied_92713/fluo_p1_pymca.h5'
