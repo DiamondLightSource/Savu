@@ -47,14 +47,16 @@ class PluginRunner(object):
         """ Create an experiment and run the plugin list.
         """
         plugin_list = self.exp.meta_data.plugin_list
+        logging.info('Running the plugin list check')
         self._run_plugin_list_check(plugin_list)
 
+        logging.info('Setting up the experiment')
         self.exp._experiment_setup()
-
         exp_coll = self.exp._get_experiment_collection()
         n_plugins = plugin_list._get_n_processing_plugins()
 
         #  ********* transport function ***********
+        logging.info('Running transport_pre_plugin_list_run()')
         self._transport_pre_plugin_list_run()
 
         for i in range(n_plugins):
@@ -62,6 +64,7 @@ class PluginRunner(object):
             self.__run_plugin(exp_coll['plugin_dict'][i])
 
         #  ********* transport function ***********
+        logging.info('Running transport_post_plugin_list_run')
         self._transport_post_plugin_list_run()
 
         # terminate any remaining datasets
@@ -71,6 +74,8 @@ class PluginRunner(object):
         cu.user_message("***********************")
         cu.user_message("* Processing Complete *")
         cu.user_message("***********************")
+
+        logging.info('Processing complete')
         return self.exp
 
     def __run_plugin(self, plugin_dict):

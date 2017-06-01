@@ -130,7 +130,7 @@ class Experiment(object):
         """ Determine plugin specific information.
         """
         plugin_id = plugin_dict["id"]
-        logging.info("Loading plugin %s", plugin_id)
+        logging.debug("Loading plugin %s", plugin_id)
         # Run main_setup method
         plugin = pu.plugin_loader(self, plugin_dict)
         plugin._revert_preview(plugin.get_in_datasets())
@@ -261,7 +261,7 @@ class Experiment(object):
 
     def _populate_nexus_file(self, data):
         filename = self.meta_data.get('nxs_filename')
-        logging.info("Adding link to file %s", filename)
+        logging.debug("Adding link to file %s", filename)
 
         with h5py.File(filename, 'a') as nxs_file:
             nxs_entry = nxs_file['entry']

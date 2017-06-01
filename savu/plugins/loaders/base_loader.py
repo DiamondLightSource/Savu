@@ -48,7 +48,6 @@ class BaseLoader(Plugin):
         """
         self._set_parameters(params)
         self.exp = exp
-        logging.info("%s.%s", self.__class__.__name__, 'setup')
         data_obj = self.setup()
         if data_obj and not self.reduction_flag:
             self.set_data_reduction_params(data_obj)
