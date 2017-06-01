@@ -47,13 +47,15 @@ class ListToProjections(BaseFilter, CpuPlugin):
     def pre_process(self):
         # assume all the projections are on the same axes
         in_datasets, _out_datasets = self.get_datasets()
-        positions = in_datasets[0].meta_data.get("xy")[0]
+        in_positions = in_datasets[0].meta_data.get("xy")
+
+        if in_positions.ndim==3:
+            positions = in_positions[0]# assume they are the same for all postiions
+        elif in_positions.ndim==2:
+            positions = in_positions# assume they are the same for all postiions
         self.setup_grids(positions)
         
-        
-
-        
-    def filter_frames(self, data):
+    def process_frames(self, data):
         meshgridx, meshgridy = self.meshgrids
         data = data[0]
         if self.parameters['fill_value']=='mean':
@@ -76,13 +78,16 @@ class ListToProjections(BaseFilter, CpuPlugin):
         inshape = in_dataset[0].get_shape()
 
         in_datasets, _out_datasets = self.get_datasets()
+        in_positions = in_datasets[0].meta_data.get("xy")
 
-        positions = in_datasets[0].meta_data.get("xy")[0]# assume they are the same for all postiions
-
+        if in_positions.ndim==3:
+            positions = in_positions[0]# assume they are the same for all postiions
+        elif in_positions.ndim==2:
+            positions = in_positions# assume they are the same for all postiions
         self.setup_grids(positions)
         out_projection_shape = self.meshgrids[0][1:,1:].shape
         in_pData[0].plugin_data_setup('PROJECTION', self.get_max_frames())
-        proj_in_core_dirs= np.array(in_pData[0].get_core_directions())
+        proj_in_core_dirs= np.array(in_pData[0].get_core_dimensions())
 
         if len(proj_in_core_dirs)>1:
             raise IndexError("This plugin won't work since there are more than 1 core direction for the projection")
@@ -114,19 +119,20 @@ class ListToProjections(BaseFilter, CpuPlugin):
         out_pData[0].plugin_data_setup('PROJECTION', self.get_max_frames())
 #     
     def setup_grids(self,positions):
+        print positions.shape
         x = positions[0,:]
         y = positions[1,:]
         self.x = x
         self.y = y
         if self.parameters['step_size_x'] is not None:
-            self.step_size_x = self.parameters['step_size_x']*1e-6
+            self.step_size_x = self.parameters['step_size_x']
         else:
             abs_diff_x = abs(np.diff(x))
             abs_diff_x_masked = abs_diff_x[abs_diff_x>0.1]
             self.step_size_x = min(abs_diff_x_masked)
             
         if self.parameters['step_size_y'] is not None:
-            self.step_size_y = self.parameters['step_size_y']*1e-6
+            self.step_size_y = self.parameters['step_size_y']
         else:
             abs_diff_y = abs(np.diff(y))
             abs_diff_y_masked = abs_diff_y[abs_diff_y>0.1]

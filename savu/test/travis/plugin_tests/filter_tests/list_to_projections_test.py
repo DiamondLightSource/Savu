@@ -28,12 +28,9 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 
 
 class ListToProjectionsTest(unittest.TestCase):
-
-    @unittest.skip('Skipping due to permissions error on data folder')
     def test_process(self):
-        path = '/dls/science/users/clb02321/DAWN_stable/I13Test_Catalysts/processing/catalyst_data/analysis92713/'
-        data_file = path+'20170222134626_ptycho_tomo_copied_92713/fluo_p1_pymca.h5'
-        process_file = path+'interpolation_test.nxs'
+        data_file = tu.get_test_data_path('fluo_p1_pymca.h5')
+        process_file = tu.get_test_process_path('interpolation_test.nxs')
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
 

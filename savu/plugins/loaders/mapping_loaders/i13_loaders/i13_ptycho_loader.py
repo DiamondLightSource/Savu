@@ -56,6 +56,7 @@ class I13PtychoLoader(BaseMultiModalLoader):
                       data_obj.backing_file.filename, 'ptycho')
 
         data_obj.data = data_obj.backing_file['entry1/instrument/merlin_sw_hdf/data']
+        print data_obj.data.shape
         data_obj.set_shape(data_obj.data.shape)
         try:
             control = data_obj.backing_file['/entry1/instrument/ionc_i/ionc_i'].value
@@ -91,7 +92,7 @@ class I13PtychoLoader(BaseMultiModalLoader):
         data_obj.meta_data.set('x', x)
         y = data_obj.backing_file['entry1/instrument/lab_sxy/lab_sy'].value*1e-6
         data_obj.meta_data.set('y', y)
-        if rotation_angle is not None:
+        if rotation_angle is not None and len(x.shape)>1:
             pos = np.zeros((x.shape[0],2,x.shape[1]))
             pos[:,0,:] = y
             pos[:,1,:] = x
@@ -116,11 +117,15 @@ class I13PtychoLoader(BaseMultiModalLoader):
         logging.debug("the diffraction cores are:"+str(diff_core))
         logging.debug("the diffraction slices are:"+str(diff_slice))
         positions_label = (data_obj.get_data_dimension_by_axis_label('xy', contains=True),)
-        rotation_label = (data_obj.get_data_dimension_by_axis_label('rotation_angle', contains=True),)
-
+        rotation_label=[]
+        if self.parameters['is_tomo']:
+            rotation_label = (data_obj.get_data_dimension_by_axis_label('rotation_angle', contains=True),)
+            sino_cores = rotation_label + positions_label
+            data_obj.add_pattern("SINOGRAM", core_dims=sino_cores, slice_dims=tuple(set(dims)-set(sino_cores)))
+        
         data_obj.add_pattern("PROJECTION", core_dims=positions_label, slice_dims=tuple(set(dims)-set(positions_label)))
-        sino_cores = rotation_label + positions_label
-        data_obj.add_pattern("SINOGRAM", core_dims=sino_cores, slice_dims=tuple(set(dims)-set(sino_cores)))
+        
+        
 
         data_obj.add_pattern("DIFFRACTION", core_dims=diff_core,
                              slice_dims=diff_slice)
