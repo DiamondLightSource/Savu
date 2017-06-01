@@ -362,10 +362,10 @@ class PluginData(object):
         return sdir, shape, frames, n_procs, f_per_p
 
     def __log_max_frames(self, mft, mfp, frames, procs):
-        logging.info("Setting max frames transfer for plugin %s to %d" %
-                     (self._plugin, mft))
-        logging.info("Setting max frames process for plugin %s to %d" %
-                     (self._plugin, mft))
+        logging.debug("Setting max frames transfer for plugin %s to %d" %
+                      (self._plugin, mft))
+        logging.debug("Setting max frames process for plugin %s to %d" %
+                      (self._plugin, mft))
         self.meta_data.set('max_frames_process', mfp)
         self.__check_distribution(mft)
         # (((total_frames/mft)/mpi_procs) % 1)
