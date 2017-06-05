@@ -166,7 +166,7 @@ class PluginRunner(object):
             count = int(pv.nvmlDeviceGetCount())
             logging.debug("%s GPUs have been found.", count)
 
-            if self.exp.meta_data.get('test_state'):
+            if not self.exp.meta_data.get('test_state'):
                 for i in range(count):
                     handle = pv.nvmlDeviceGetHandleByIndex(i)
                     if pv.nvmlDeviceGetComputeRunningProcesses(handle):
