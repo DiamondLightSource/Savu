@@ -81,8 +81,7 @@ setup(name='savu',
                'install/mpi_cpu_test.sh',
                'install/mpi_gpu_test.sh',
                'install/local_mpi_cpu_test.sh',
-               'install/local_mpi_gpu_test.sh',
-               'scripts/log_evaluation/profile.sh],
+               'install/local_mpi_gpu_test.sh'],
 
       entry_points={'console_scripts': [
                         'savu_config=scripts.config_generator.savu_config:main',
