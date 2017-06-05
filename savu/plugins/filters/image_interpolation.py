@@ -24,7 +24,7 @@ import logging
 import numpy as np
 from scipy.misc import imresize
 
-from savu.plugins.base_filter import BaseFilter
+from savu.plugins.filters.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 
@@ -42,7 +42,7 @@ class ImageInterpolation(BaseFilter, CpuPlugin):
         super(ImageInterpolation,
               self).__init__("ImageInterpolation")
 
-    def filter_frames(self, data):
+    def process_frames(self, data):
         data = data[0]
         return imresize(data, self.parameters['size'], self.parameters['interp'], mode=None)
 

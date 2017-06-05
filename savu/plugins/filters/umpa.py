@@ -24,7 +24,7 @@ import logging
 import numpy as np
 
 from speckle_matching import match_speckles
-from savu.plugins.base_filter import BaseFilter
+from savu.plugins.filters.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 
@@ -44,7 +44,7 @@ class Umpa(BaseFilter, CpuPlugin):
         super(Umpa,
               self).__init__("Umpa")
 
-    def filter_frames(self, data):
+    def process_frames(self, data):
         signals = data[0]
         references = data[1]
         out_dict = match_speckles(signals, references, self.parameters['Nw'], self.parameters['step'], self.parameters['max_shift'], df=True, printout=False)
@@ -73,7 +73,7 @@ class Umpa(BaseFilter, CpuPlugin):
         pattern_list = in_datasets[0].get_data_patterns().keys()
         pattern_dict = in_datasets[0].get_data_patterns()
         pattern_list.remove(self.get_plugin_pattern())
-        proj_in_core_dirs= np.array(in_pData[0].get_core_directions())
+        proj_in_core_dirs= np.array(in_pData[0].get_core_dimensions())
         first_core_dir = proj_in_core_dirs[0] # should be the scan index
         outlabels = in_datasets[0].get_axis_labels()
         _unused = outlabels.pop(first_core_dir)
@@ -84,11 +84,11 @@ class Umpa(BaseFilter, CpuPlugin):
         out_datasets[4].create_dataset(axis_labels=outlabels, shape=outshape)
         
         for pattern in pattern_list:
-            core_dir = pattern_dict[pattern]['core_dir']
+            core_dir = pattern_dict[pattern]['core_dims']
             core_dir = [ix-1 if ix > first_core_dir else ix for ix in core_dir]
             slice_dir = list(set(allDims)-set(core_dir))
             slice_dir = [ix-1 if ix > first_core_dir else ix for ix in slice_dir]
-            dim_info = {'core_dir': core_dir, 'slice_dir': slice_dir}
+            dim_info = {'core_dims': core_dir, 'slice_dims': slice_dir}
             
             for dataset in out_datasets:
                 dataset.add_pattern(pattern, **dim_info)
