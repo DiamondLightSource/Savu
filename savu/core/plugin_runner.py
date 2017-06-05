@@ -168,10 +168,10 @@ class PluginRunner(object):
                 if pv.nvmlDeviceGetComputeRunningProcesses(handle):
                     raise Exception("Unfortunately, GPU %i is busy. Try \
                         resubmitting the job to the queue." % i)
-        except:
+        except Exception as e:
             logging.debug("No GPUs have been found.")
             raise Exception("The process list contains GPU plugins, but "
-                            " no GPUs have been found.")
+                            " no GPUs have been found: %s", e.message)
         self.__set_gpu_processes(count)
 
     def __set_gpu_processes(self, count):
