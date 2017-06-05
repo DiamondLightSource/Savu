@@ -23,7 +23,6 @@
 
 import re
 import os
-import copy
 import inspect
 
 from savu.plugins import utils as pu
@@ -119,17 +118,27 @@ class Content(object):
 
         missing = []
         pos = len(the_list)-1
+        notices = mutations.plugin_notices
+
         for plugin in the_list[::-1]:
             # update old process lists to include 'active' flag
             if 'active' not in plugin.keys():
                 plugin['active'] = True
-            # if a plugin is missing then look for mutations
-            if plugin['name'] not in pu.plugins.keys():
-                if not self._mutate_plugins(plugin['name'], pos):
-                    str_pos = self.plugin_list.plugin_list[pos]['pos']
-                    missing.append([plugin['name'], str_pos])
-                    self.remove(pos)
+
+            while(True):
+                name = the_list[pos]['name']
+                if name in notices.keys():
+                    print notices[name]['desc']
+                # if a plugin is missing then look for mutations
+                if name not in pu.plugins.keys():
+                    if not self._mutate_plugins(name, pos):
+                        str_pos = self.plugin_list.plugin_list[pos]['pos']
+                        missing.append([name, str_pos])
+                        self.remove(pos)
+                if (name == the_list[pos]['name']):
+                    break
             pos -= 1
+
         exception = False
         for name, pos in missing[::-1]:
             if skip:
@@ -140,6 +149,7 @@ class Content(object):
                 exception = True
         if exception:
             raise Exception('Incompatible process list.')
+
 
     def _mutate_plugins(self, name, pos):
         """ Perform plugin mutations. """
@@ -154,13 +164,19 @@ class Content(object):
         m_dict = mutations.plugin_mutations
         if name in m_dict.keys():
             mutate = m_dict[name]
-            if mutate['replace'] in pu.plugins.keys():
-                str_pos = self.plugin_list.plugin_list[pos]['pos']
-                self.refresh(str_pos, change=mutate['replace'])
+            if 'replace' in mutate.keys():
+                if mutate['replace'] in pu.plugins.keys():
+                    str_pos = self.plugin_list.plugin_list[pos]['pos']
+                    self.refresh(str_pos, change=mutate['replace'])
+                    print mutate['desc']
+                    return True
+                raise Exception('Replacement plugin %s unavailable for %s'
+                                % (mutate['replace'], name))
+            elif 'remove' in mutate.keys():
+                self.remove(pos)
                 print mutate['desc']
-                return True
-            raise Exception('Replacement plugin %s unavailable for %s'
-                            % (mutate['replace'], name))
+            else:
+                raise Exception('Unknown mutation type.')
         return False
 
     def move(self, old, new):

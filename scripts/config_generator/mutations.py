@@ -22,32 +22,72 @@
 
 """
 
+import textwrap
 from colorama import Back
+import display_formatter as df
 
 
-def auto_str():
-    return ('\n' + Back.CYAN + '***AUTO-REPLACEMENT NOTICE***:' + Back.RESET)
+def wrap(string):
+    string = string.split('\n')
+    final_str = []
+    for s in string:
+        final_str += textwrap.wrap(s, width=df.WIDTH)
+    return '\n' + '\n'.join(final_str)
+
+
+def header(string):
+    return (Back.CYAN + string + Back.RESET + '\n')
+
+
+def auto_replace_str():
+    return header('***AUTO-REPLACEMENT NOTICE***:')
+
+
+def auto_remove_str():
+    return header('***AUTO-REMOVAL NOTICE***:')
+
+
+def plugin_notice_str():
+    return header('***PLUGIN NOTICE***:')
 
 
 def replace_str(old_name, new_name):
-    return (auto_str() + '\n%s has been replaced by %s. '
-            '\nPlease check the parameters.\n' % (old_name, new_name))
+    return wrap(auto_replace_str() + '\n%s has been replaced by %s. '
+                '\nPlease check the parameters.\n' % (old_name, new_name))
 
 
 def rename_str(old_name, new_name):
-    return (auto_str() + '\n%s has been renamed as %s. \nNo '
-            'further action required.' % (old_name, new_name))
+    return wrap(auto_replace_str() + '%s has been renamed as %s. \nNo '
+                'further action required.' % (old_name, new_name))
+
+
+def remove_str(name, reason):
+    return wrap(auto_remove_str() + '%s %s' % (name, reason))
+
+
+def notice_str(name, notice):
+    return wrap(plugin_notice_str() + '%s %s' % (name, notice))
+
+
+hdf5_notice = 'is now used by default.\nPlease remove from the process list, '\
+    'unless you wish to override the default parameters (which must be done '\
+    'individually for each dataset).'
+
 
 plugin_mutations = \
     {'TimeseriesFieldCorrections':
-        {'replace' : 'DarkFlatFieldCorrection',
-         'desc'    : replace_str('TimeseriesFieldCorrections',
-                                 'DarkFlatFieldCorrection')},
+        {'replace': 'DarkFlatFieldCorrection',
+         'desc': replace_str('TimeseriesFieldCorrections',
+                             'DarkFlatFieldCorrection')},
      'Hdf5TomoSaver':
-        {'replace'  : 'Hdf5Saver',
-         'desc'     : rename_str('Hdf5TomoSaver', 'Hdf5Saver')},
+        {'replace': 'Hdf5Saver',
+         'desc': replace_str('Hdf5TomoSaver', 'Hdf5Saver')},
      }
 
 
 param_mutations = \
     {'BaseRecon': {'old': 'center_of_rotation', 'new': 'centre_of_rotation'}}
+
+
+plugin_notices = \
+    {'Hdf5Saver': {'desc': notice_str('Hdf5Saver', hdf5_notice)}, }

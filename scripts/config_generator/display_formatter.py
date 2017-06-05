@@ -25,6 +25,8 @@ import textwrap
 
 from colorama import Fore, Back, Style
 
+WIDTH = 85
+
 
 class DisplayFormatter(object):
 
@@ -45,13 +47,12 @@ class DisplayFormatter(object):
         count = start
         plugin_list = self.plugin_list[start:stop]
 
-        width = 85
-        line_break = ('%s' % ('-'*width))
+        line_break = ('%s' % ('-'*WIDTH))
         out_string.append(line_break)
         for p_dict in plugin_list:
             count += 1
             description = \
-                self._get_description(width, level, p_dict, count, verbosity)
+                self._get_description(WIDTH, level, p_dict, count, verbosity)
             out_string.append(description)
             out_string.append(line_break)
         return '\n'.join(out_string)
