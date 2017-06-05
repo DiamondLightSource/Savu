@@ -166,6 +166,7 @@ def set_options(path, **kwargs):
     options['run_type'] = 'test'
     options['verbose'] = 'True'
     options['link_type'] = 'final_result'
+    options['test_state'] = True
     return options
 
 

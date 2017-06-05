@@ -47,14 +47,16 @@ class PluginRunner(object):
         """ Create an experiment and run the plugin list.
         """
         plugin_list = self.exp.meta_data.plugin_list
+        logging.info('Running the plugin list check')
         self._run_plugin_list_check(plugin_list)
 
+        logging.info('Setting up the experiment')
         self.exp._experiment_setup()
-
         exp_coll = self.exp._get_experiment_collection()
         n_plugins = plugin_list._get_n_processing_plugins()
 
         #  ********* transport function ***********
+        logging.info('Running transport_pre_plugin_list_run()')
         self._transport_pre_plugin_list_run()
 
         for i in range(n_plugins):
@@ -62,6 +64,7 @@ class PluginRunner(object):
             self.__run_plugin(exp_coll['plugin_dict'][i])
 
         #  ********* transport function ***********
+        logging.info('Running transport_post_plugin_list_run')
         self._transport_post_plugin_list_run()
 
         # terminate any remaining datasets
@@ -71,6 +74,8 @@ class PluginRunner(object):
         cu.user_message("***********************")
         cu.user_message("* Processing Complete *")
         cu.user_message("***********************")
+
+        logging.info('Processing complete')
         return self.exp
 
     def __run_plugin(self, plugin_dict):
@@ -149,24 +154,26 @@ class PluginRunner(object):
         GPUs exists. Add GPU processes to the processes list if required."""
         if not self.exp.meta_data.plugin_list._contains_gpu_processes():
             return
+
         try:
             import pynvml as pv
         except:
             logging.debug("pyNVML module not found")
             raise Exception("pyNVML module not found")
+
         try:
             pv.nvmlInit()
             count = int(pv.nvmlDeviceGetCount())
             logging.debug("%s GPUs have been found.", count)
-            for i in range(count):
-                handle = pv.nvmlDeviceGetHandleByIndex(i)
-                if pv.nvmlDeviceGetComputeRunningProcesses(handle):
-                    raise Exception("Unfortunately, GPU %i is busy. Try \
-                        resubmitting the job to the queue." % i)
-        except:
-            logging.debug("No GPUs have been found.")
-            raise Exception("The process list contains GPU plugins, but "
-                            " no GPUs have been found.")
+
+            if not self.exp.meta_data.get('test_state'):
+                for i in range(count):
+                    handle = pv.nvmlDeviceGetHandleByIndex(i)
+                    if pv.nvmlDeviceGetComputeRunningProcesses(handle):
+                        raise Exception("Unfortunately, GPU %i is busy. Try \
+                            resubmitting the job to the queue." % i)
+        except Exception as e:
+            raise Exception("Unable to run GPU plugins: %s", e.message)
         self.__set_gpu_processes(count)
 
     def __set_gpu_processes(self, count):

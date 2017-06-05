@@ -1,7 +1,6 @@
 #!/bin/bash
 
 version=$1
-echo "module loading "$version
 module load savu/$version
 module load global/cluster-quiet
 shift 1
@@ -129,7 +128,6 @@ qsub -jsv /dls_sw/apps/sge/common/JSVs/tomo_recon_test.pl \
      $processfile $outpath $nCoresPerNode $nGPUs $options -c \
      -f $outfolder -s cs04r-sc-serv-14 -l $outfolder > /dls/tmp/savu/$USER.out
 
-
 # get the job number here
 filename=`echo $outname.o`
 jobnumber=`awk '{print $3}' /dls/tmp/savu/$USER.out | head -n 1`
@@ -156,5 +154,4 @@ echo -e "\n\t For a more detailed log file see: "
 echo -e "\t   $interfolder/savu.o$jobnumber"
 tput sgr0
 echo -e "\n\t************************************************************************\n"
-
 

@@ -1,18 +1,22 @@
-from setuptools import setup, find_packages
 import os
+import sys
 import shutil
 
+from setuptools import setup, find_packages
+
+
 def readme():
-    with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'README.rst')) as f:
+    with open(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                           'README.rst')) as f:
         return f.read()
 
-import sys
-facility='dls'
-facility_path='mpi/dls'
+facility = 'dls'
+facility_path = 'mpi/dls'
+
 
 def _create_new_facility(facility_path):
-    # if the folder doesn't exist then create it and add two template scripts...
-    path=os.path.join(os.path.dirname(os.path.realpath(__file__)))
+    #  if the folder doesn't exist then create it and add two template scripts
+    path = os.path.join(os.path.dirname(os.path.realpath(__file__)))
     facility_path = path+'/'+facility_path
     print "the facility path is", facility_path
     if not os.path.exists(facility_path):
@@ -26,15 +30,26 @@ def _create_new_facility(facility_path):
 if '--facility' in sys.argv:
     index = sys.argv.index('--facility')
     sys.argv.pop(index)
-    facility=sys.argv.pop(index)
-    facility_path='mpi/'+facility
+    facility = sys.argv.pop(index)
+    facility_path = 'mpi/'+facility
     _create_new_facility(facility_path)
+
 if '--help' in sys.argv:
-    print 'To package for a facility use "--facility <facilityname>" eg: python setup.py install --facility dls [Default facilityname is dls]'
+    print('To package for a facility use "--facility <facilityname> eg: python'
+          'setup.py install --facility dls [Default facilityname is dls]')
+
 
 def _get_packages():
-    others = ['scripts', 'scripts.config_generator', 'scripts.log_evaluation', 'scripts.citation_extractor',
-              'install', 'install.conda-recipes', 'test_data', 'lib', 'mpi', 'plugin_examples']
+    others = ['scripts',
+              'scripts.config_generator',
+              'scripts.log_evaluation',
+              'scripts.citation_extractor',
+              'install',
+              'install.conda-recipes',
+              'test_data',
+              'lib',
+              'mpi',
+              'plugin_examples']
     return find_packages() + others
 
 setup(name='savu',
@@ -54,18 +69,45 @@ setup(name='savu',
       author_email='scientificsoftware@diamond.ac.uk',
       license='Apache License, Version 2.0',
       packages=_get_packages(),
-      # the line below breaks the build of the docs and it is not sufficient to install Savu anyway...  Nic
+      # the line below breaks the build of the docs and it is not sufficient
+      # to install Savu anyway...  Nic
       #install_requires=['pyreadline','colorama','h5py','mpi4py'],
-      scripts=[facility_path+'/savu_launcher.sh',facility_path+'/savu_mpijob.sh', facility_path+'/savu_mpijob_local.sh',
-               'install/savu_installer.sh', 'install/savu_setup.sh', 'install/mpi_cpu_test.sh', 'install/mpi_gpu_test.sh',
-               'install/local_mpi_cpu_test.sh', 'install/local_mpi_gpu_test.sh'],
-      entry_points={'console_scripts':['savu_config=scripts.config_generator.savu_config:main',
-                    'savu=savu.tomo_recon:main', 'savu_quick_tests=savu:run_tests',
-                    'savu_full_tests=savu:run_full_tests', 'savu_citations=scripts.citation_extractor.citation_extractor:main',
-                    'savu_profile=scripts.log_evaluation.GraphicalThreadProfiler:main',],},
-      package_data={'test_data':['data/*', 'process_lists/*','test_process_lists/*', 'data/i12_test_data/*',
-                    'data/I18_test_data/*', 'data/image_test/*', 'data/image_test/tiffs/*'],'lib':['*.so'], 'mpi':['dls/*.sh'],
-                    'install':['*.txt'], 'install.conda-recipes':['hdf5/*', 'h5py/*', 'savu/*', 'xraylib/*', 'astra/*']},
+
+      scripts=[facility_path+'/savu_launcher.sh',
+               facility_path+'/savu_mpijob.sh',
+               facility_path+'/savu_mpijob_local.sh',
+               'install/savu_installer.sh',
+               'install/savu_setup.sh',
+               'install/mpi_cpu_test.sh',
+               'install/mpi_gpu_test.sh',
+               'install/local_mpi_cpu_test.sh',
+               'install/local_mpi_gpu_test.sh'],
+
+      entry_points={'console_scripts': [
+                        'savu_config=scripts.config_generator.savu_config:main',
+                        'savu=savu.tomo_recon:main',
+                        'savu_quick_tests=savu:run_tests',
+                        'savu_full_tests=savu:run_full_tests',
+                        'savu_citations=scripts.citation_extractor.citation_extractor:main',
+                        'savu_profile=scripts.log_evaluation.GraphicalThreadProfiler:main',],},
+
+      package_data={'test_data': [
+                        'data/*',
+                        'process_lists/*',
+                        'test_process_lists/*',
+                        'data/i12_test_data/*',
+                        'data/I18_test_data/*',
+                        'data/image_test/*',
+                        'data/image_test/tiffs/*'],
+                    'lib': ['*.so'],
+                    'mpi': ['dls/*.sh'],
+                    'install': ['*.txt'],
+                    'install.conda-recipes': [
+                        'hdf5/*',
+                        'h5py/*',
+                        'savu/*',
+                        'xraylib/*',
+                        'astra/*']},
+
       include_package_data=True,
       zip_safe=False)
-

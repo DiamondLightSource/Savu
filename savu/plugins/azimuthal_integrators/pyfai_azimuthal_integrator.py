@@ -45,7 +45,7 @@ class PyfaiAzimuthalIntegrator(BaseAzimuthalIntegrator):
     def process_frames(self, data):
         logging.debug("Running azimuthal integration")
         ai = self.params[3]
-        logging.info('datashape=%s' % str(data[0].shape))
+        logging.debug('datashape=%s' % str(data[0].shape))
         axis, remapped = \
             ai.integrate1d(data=data[0], npt=self.npts, unit='q_A^-1',
                            correctSolidAngle=False)

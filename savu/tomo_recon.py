@@ -69,6 +69,9 @@ def __option_parser():
     # Port to connect to syslog server on
     parser.add_argument("-p", "--syslog_port", dest="syslog_port",
                         help=hide, default=514)
+    parser.add_argument("--test_state", dest="test_state", default='False',
+                        action='store_true', help=hide)
+
     return parser.parse_args()
 
 
@@ -90,6 +93,7 @@ def _set_options(args):
     options['cluster'] = args.cluster
     options['syslog_server'] = args.syslog
     options['syslog_port'] = args.syslog_port
+    options['test_state'] = args.test_state
 
     out_folder_name = \
         args.folder if args.folder else __get_folder_name(options['data_file'])

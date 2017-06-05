@@ -67,12 +67,14 @@ class GpuPlugin(PluginDriver):
         if gpu_processes[process]:
             expInfo.set('process', self.new_comm.Get_rank())
             GPU_index = self.__calculate_GPU_index(nNodes)
-            logging.info("Running the GPU process %i with GPU index %i",
+            logging.debug("Running the GPU process %i with GPU index %i",
                          self.new_comm.Get_rank(), GPU_index)
             self.parameters['GPU_index'] = GPU_index
             self._run_plugin_instances(transport, communicator=self.new_comm)
             self.__free_communicator()
             expInfo.set('process', MPI.COMM_WORLD.Get_rank())
+        else:
+            logging.info('Not a GPU process: Waiting...')
 
         self.exp._barrier()
         expInfo.set('processes', processes)

@@ -109,7 +109,7 @@ def plugin_loader(exp, plugin_dict, **kwargs):
     if check_flag is True:
         exp.meta_data.plugin_list._set_datasets_list(plugin)
 
-    logging.info("finished plugin loader")
+    logging.debug("finished plugin loader")
     return plugin
 
 
