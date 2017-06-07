@@ -21,12 +21,13 @@
 
 """
 
-from savu.plugins.driver.cpu_plugin import CpuPlugin
-
+import logging
 import numpy as np
-import ccpi.reconstruction as ccpi_recon
-from savu.plugins.utils import register_plugin
 
+from ccpi.reconstruction.parallelbeam import alg as ccpi_alg
+
+from savu.plugins.utils import register_plugin
+from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.reconstructions.base_recon import BaseRecon
 
 
@@ -35,30 +36,60 @@ class CglsRecon(BaseRecon, CpuPlugin):
     """
      A Plugin to run the CCPi cgls reconstruction
 
-    :param number_of_iterations: Number of iterations. Default: 5.
-    :param resolution: number of output voxels \
-        (res = n_pixels/n_voxels). Default: 1.
-    :param number_of_threads: Number of OMP threads. Default: 1
+    :u*param number_of_iterations: Number of iterations. Default: 5.
+    :u*param resolution: number of output voxels (res = n_pixels/n_voxels), \
+    set res > 1 for reduced resolution. Default: 1.
+    :param n_frames: This algorithm requires a multiple of 8 frames for \
+    processing and this number may affect performance depending on your data \
+    size (choose from 8, 16, 24, 32). Default: 16.
+
+    :*param centre_pad: Not an option. Default: False.
+    :*param outer_pad: Not an option. Default: False.
+    :*param init_vol: Not an option. Default: None.
+    :*param enforce_positive: Not an option. Default: False.
     """
 
     def __init__(self):
         super(CglsRecon, self).__init__("CglsRecon")
 
+    def pre_process(self):
+        self.n_iters = self.parameters['number_of_iterations']
+        self.res = self.parameters['resolution']
+        in_data = self.get_in_datasets()[0]
+        in_pData = self.get_plugin_in_datasets()[0]
+        det_x = in_pData.get_data_dimension_by_axis_label('detector_x')
+        self.width = in_data.get_shape()[det_x]
+
     def process_frames(self, data):
         sino = data[0]
         cors, angles, vol_shape, init = self.get_frame_params()
 
-        nthreads = self.parameters['number_of_threads']
-        num_iterations = self.parameters['number_of_iterations']
-        resolution = self.parameters['resolution']
+        voxels = ccpi_alg.cgls(sino.astype(np.float32),
+                               angles.astype(np.float32), cors[0],
+                               self.res, self.n_iters, 1,
+                               self.parameters['log'])
 
-        voxels = ccpi_recon.cgls(sino.astype(np.float32), angles.astype(np.float32),
-                           cors[0], resolution, num_iterations, nthreads)
-        voxels = voxels[:160, :160, ...]
-        if voxels.ndim is 3:
-            voxels = np.transpose(voxels, (0, 2, 1))
-            if voxels.shape[1] > sino.shape[1]:
-                diff = voxels.shape[1] - sino.shape[1]
-                voxels = voxels[:, :-diff, :]
+        # need to get left and right shift and crop
+        pad_start, pad_end = self.array_pad(cors[0], self.width)
+        return np.transpose(voxels[pad_start:pad_end, pad_start:pad_end, :], (0, 2, 1))
 
-        return voxels
+    def array_pad(self, ctr, nPixels):
+        width = nPixels - 1.0
+        alen = ctr
+        blen = width - ctr
+        mid = (width-1.0)/2.0
+        shift = round(abs(blen-alen))
+        p_low = 0 if (ctr > mid) else shift
+        p_high = shift + 0 if (ctr > mid) else 0
+        pad = max(p_low, p_high)
+        return pad/2-1, -np.ceil(pad/2.0)
+
+    def get_max_frames(self):
+        # this algorithm requires a multiple of 8 frames
+        default = 16
+        n_frames = self.parameters['n_frames']
+        if n_frames % 8 != 0:
+            n_frames = default
+            logging.warn('incorrect number of frames requested for cgls_recon,'
+                         ' using %s', default)
+        return n_frames
