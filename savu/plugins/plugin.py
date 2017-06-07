@@ -126,24 +126,30 @@ class Plugin(PluginDatasets):
         """
         hidden_items = []
         user_items = []
+        params = []
+        not_params = []
         for clazz in inspect.getmro(self.__class__)[::-1]:
             if clazz != object:
                 desc = doc.find_args(clazz, self)
                 self.docstring_info['warn'] = desc['warn']
                 self.docstring_info['info'] = desc['info']
                 self.docstring_info['synopsis'] = desc['synopsis']
-                self._add_item(desc['param'])
+                params.extend(desc['param'])
                 if desc['hide_param']:
                     hidden_items.extend(desc['hide_param'])
                 if desc['user_param']:
                     user_items.extend(desc['user_param'])
-                self._add_item(desc['param'])
+                if desc['not_param']:
+                    not_params.extend(desc['not_param'])
+        self._add_item(params, not_params)
         user_items = list(set(user_items).difference(set(hidden_items)))
         self.parameters_hide = hidden_items
         self.parameters_user = user_items
 
-    def _add_item(self, item_list):
-        for item in item_list:
+    def _add_item(self, item_list, not_list):
+        true_list = [item_list[i] for i in range(len(item_list)) if
+                     item_list[i]['name'] not in not_list]
+        for item in true_list:
             self.parameters[item['name']] = item['default']
             self.parameters_types[item['name']] = item['dtype']
             self.parameters_desc[item['name']] = item['desc']

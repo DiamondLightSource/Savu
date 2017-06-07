@@ -42,7 +42,7 @@ def find_args(dclass, inst=None):
     mod_doc_lines = __get_doc_lines(sys.modules[dclass.__module__].__doc__)
     lines = __get_doc_lines(docstring)
 
-    param_list, user, hide, param_lines = __get_params(lines)
+    param_list, user, hide, not_param, param_lines = __get_params(lines)
 
     warn_regexp = re.compile(r'^:config_warn: \s?(?P<config_warn>.*[^ ])$')
     warn, idx1 = __find_regexp(warn_regexp, lines)
@@ -56,7 +56,8 @@ def find_args(dclass, inst=None):
     info = __find_docstring_info(param_lines+idx1+idx2, lines)
 
     return {'warn': "\n".join(warn), 'info': info, 'synopsis': synopsis[0],
-            'param': param_list, 'hide_param': hide, 'user_param': user}
+            'param': param_list, 'hide_param': hide, 'user_param': user,
+            'not_param': not_param}
 
 
 def __get_doc_lines(doc):
@@ -74,10 +75,6 @@ def __get_params(lines):
     not_param_regexp = re.compile('^:~param (?P<param>\w+):')
     not_param, idx2 = __find_regexp(not_param_regexp, lines)
 
-    del_idx = [i for i in range(len(param)) if param[i][0] in not_param]
-    for idx in sorted(del_idx)[::-1]:
-        del param[idx]
-
     hidden_param_regexp = re.compile('^:\*param ' + fixed_str)
     hidden_param, idx3 = __find_regexp(hidden_param_regexp, lines)
     hide_keys = [p[0] for p in hidden_param]
@@ -93,7 +90,7 @@ def __get_params(lines):
     param_entry = [{'dtype': type(value), 'name': a[0], 'desc': a[1],
                     'default': value} for a in param for value in [eval(a[2])]]
 
-    return param_entry, user_keys, hide_keys, lines_read
+    return param_entry, user_keys, hide_keys, not_param, lines_read
 
 
 def __find_regexp(regexp, str_list):
