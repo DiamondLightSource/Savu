@@ -142,13 +142,14 @@ class Plugin(PluginDatasets):
                 if desc['not_param']:
                     not_params.extend(desc['not_param'])
         self._add_item(params, not_params)
+        user_items = [u for u in user_items if u not in not_params]
+        hidden_items = [h for h in hidden_items if h not in not_params]
         user_items = list(set(user_items).difference(set(hidden_items)))
         self.parameters_hide = hidden_items
         self.parameters_user = user_items
 
     def _add_item(self, item_list, not_list):
-        true_list = [item_list[i] for i in range(len(item_list)) if
-                     item_list[i]['name'] not in not_list]
+        true_list = [i for i in item_list if i['name'] not in not_list]
         for item in true_list:
             self.parameters[item['name']] = item['default']
             self.parameters_types[item['name']] = item['dtype']
@@ -227,12 +228,18 @@ class Plugin(PluginDatasets):
         """ This method is called immediately after base_pre_process(). """
         pass
 
-    def base_process_frames(self, data):
+    def base_process_frames_before(self, data):
         """ This method is called before each call to process frames """
         return data
 
+    def base_process_frames_after(self, data):
+        """ This method is called directly after each call to process frames \
+        and before returning the data to file."""
+        return data
+
     def plugin_process_frames(self, data):
-        return self.process_frames(self.base_process_frames(data))
+        return self.base_process_frames_after(self.process_frames(
+                self.base_process_frames_before(data)))
 
     def process_frames(self, data):
         """
