@@ -44,6 +44,7 @@ class TimeBasedCorrection(BaseCorrection, CpuPlugin):
     def pre_process(self):
         inData = self.get_in_datasets()[0]
         pData = self.get_plugin_in_datasets()[0]
+        self.mfp = inData._get_plugin_data()._get_max_frames_process()
         self.proj_dim = \
             inData.get_data_dimension_by_axis_label('rotation_angle')
         self.slice_dir = pData.get_slice_dimension()
@@ -53,10 +54,14 @@ class TimeBasedCorrection(BaseCorrection, CpuPlugin):
         self.data_idx = inData.data.get_index(0)
 
         # calculate dark and flat averages
+        dark_idx = inData.data.get_index(2)
+        flat_idx = inData.data.get_index(1)
+        self.dark_flat_idx = np.concatenate((dark_idx, flat_idx))
+
         self.dark, self.dark_idx = \
-            self.calc_average(inData.data.dark(), inData.data.get_index(2))
+            self.calc_average(inData.data.dark(), dark_idx)
         self.flat, self.flat_idx = \
-            self.calc_average(inData.data.flat(), inData.data.get_index(1))
+            self.calc_average(inData.data.flat(), flat_idx)
 
         inData.meta_data.set('multiple_dark', self.dark)
         inData.meta_data.set('multiple_flat', self.flat)
@@ -101,7 +106,16 @@ class TimeBasedCorrection(BaseCorrection, CpuPlugin):
         frames = self.get_current_slice_list()[0][self.slice_dir]
         frames = range(frames.start, frames.stop, frames.step)
         inData = self.get_in_datasets()[0]
-        return inData.data.get_index(0, full=True)[np.array(frames)]
+        frames = inData.data.get_index(0, full=True)[np.array(frames)]
+
+        # if this frames list contains the last possible frame and the length
+        # is not equal to max frames process then pad by the end frame.
+        n_df_before = len([i for i in self.dark_flat_idx if i < frames[-1]])
+        if (frames[-1] - n_df_before+1) == inData.get_shape()[self.slice_dir]:
+            diff = self.mfp - len(frames)
+            frames = \
+                np.concatenate((frames, [frames[-1]])*diff) if diff else diff
+        return frames
 
     def find_nearest_frames(self, idx_list, value):
         """ Find the index of the two entries that 'value' lies between in \
