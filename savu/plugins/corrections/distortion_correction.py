@@ -37,29 +37,39 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
 
     :param polynomial_coeffs: Parameters of the radial distortion \
     function. Default: (1.00015076, 1.9289e-6, -2.4325e-8, 1.00439e-11, -3.99352e-15).
-    :u*param shift: If the data is cropped the centre of distortion must be \
-    shifted accordingly, e.g is preview is [:, a:b, c:d] then shift \
-    is (a, c). Default: (0, 0)
-    :param centre: Centre of distortion. Default: (995.24, 1283.25)
-    :u*param crop_edges: Crop the edges to remove zeros if data is already \
-        cropped. Default: 0
+    :param centre_y: The det_y coordinate of the centre of \
+    distortion=(det_y, det_x) with origin (0, 0) in the top left \
+    corner. Default: 995.24.
+    :param centre_x: The det_x coordinate of the centre of \
+    distortion=(det_y, det_x) with origin (0, 0) in the top left \
+    corner. Default: 1283.25.
+    :u*param crop_edges: When applied to previewed/cropped data, the result \
+    may contain zeros around the edges, which can be removed by \
+    cropping the edges by a specified number of pixels. Default: 0
     """
 
     def __init__(self):
         super(DistortionCorrection, self).__init__("DistortionCorrection")
 
     def pre_process(self):
-        centre = np.array(self.parameters['centre'])
-        centre[0] -= self.parameters['shift'][0]
-        centre[1] -= self.parameters['shift'][1]
+        in_pData = self.get_plugin_in_datasets()[0]
+        shift = self.get_in_datasets()[0].data_info.get('starts')
+        det_y = in_pData.get_data_dimension_by_axis_label('detector_y')
+        det_x = in_pData.get_data_dimension_by_axis_label('detector_x')
 
+        # If the data is cropped then the centre of distortion must be shifted
+        # accordingly, e.g if preview is [:, a:b, c:d] then shift is (a, c)
+        centre = np.array([self.parameters['centre_y'],
+                           self.parameters['centre_x']])
+        centre[0] -= shift[det_y]
+        centre[1] -= shift[det_x]
         # flipping the values
         centre = centre[::-1]
 
-        #pass two empty arrays of frame chunk size
+        # pass two empty arrays of frame chunk size
         unwarp.setcoeff(*self.parameters['polynomial_coeffs'])
         unwarp.setctr(*centre)
-        plugin_data_shape = self.get_plugin_in_datasets()[0].get_shape()
+        plugin_data_shape = in_pData.get_shape()
         temp_array = np.empty(plugin_data_shape, dtype=np.float32)
         unwarp.setup(temp_array, temp_array)
 
