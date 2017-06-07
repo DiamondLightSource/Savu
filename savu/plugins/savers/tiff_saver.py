@@ -35,6 +35,9 @@ class TiffSaver(BaseSaver, CpuPlugin):
     """
     A class to save tomography data to tiff files
     :param pattern: How to slice the data. Default: 'VOLUME_XZ'.
+
+    :config_warn: Do not use this plugin if the raw data is greater than \
+    100 GB.
     """
 
     def __init__(self, name='TiffSaver'):
