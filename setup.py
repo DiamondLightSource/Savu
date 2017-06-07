@@ -4,6 +4,10 @@ import shutil
 
 from setuptools import setup, find_packages
 
+savu_path = os.path.abspath(os.path.dirname(__file__))
+with open(savu_path + '/savu/version.py') as f:
+    exec(f.read())
+
 
 def readme():
     with open(os.path.join(os.path.dirname(os.path.realpath(__file__)),
@@ -53,7 +57,7 @@ def _get_packages():
     return find_packages() + others
 
 setup(name='savu',
-      version='1.2',
+      version=__version__,
       description='Savu Python Tomography Pipeline',
       long_description=readme(),
       classifiers=[

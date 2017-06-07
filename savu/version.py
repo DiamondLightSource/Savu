@@ -13,8 +13,11 @@
 # limitations under the License.
 
 """
-Stand-alone module for version number which can be imported or executed with
-no dependencies.
+Get the Savu version
 """
 
-__version__ = '1.2'
+#from pkg_resources import get_distribution
+#
+#__version__ = get_distribution('savu').version
+
+__version__ = '2.0'
