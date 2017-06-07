@@ -43,6 +43,9 @@ class BaseRecon(Plugin):
     :u*param log: Take the log of the data before reconstruction \
     (True or False). Default: True.
     :u*param preview: A slice list of required frames. Default: [].
+    :param force_zero: Set any values in the reconstructed image outside of \
+    this range to zero. Default: [None, None].
+    to zero. Default: False.
     """
     count = 0
 
@@ -92,6 +95,8 @@ class BaseRecon(Plugin):
         self.sino_func, self.cor_func = self.set_function(shape) if \
             self.parameters['outer_pad'] else self.set_function(False)
 
+        self.range = self.parameters['force_zero']
+
     def get_vol_shape(self):
         return self.br_vol_shape
 
@@ -126,7 +131,7 @@ class BaseRecon(Plugin):
                     sino, pad_tuples, mode))
         return sino_func, cor_func
 
-    def base_process_frames(self, data):
+    def base_process_frames_before(self, data):
         """
         Reconstruct a single sinogram with the provided centre of rotation
         """
@@ -146,7 +151,16 @@ class BaseRecon(Plugin):
         self.frame_cors = np.append(self.frame_cors, missing)
 
         self.frame_init_data = init
+
         data[0] = self.sino_func(data[0])
+        return data
+
+    def base_process_frames_after(self, data):
+        lower_range, upper_range = self.range
+        if lower_range is not None:
+            data[data < lower_range] = 0
+        if upper_range is not None:
+            data[data > upper_range] = 0
         return data
 
     def get_angles(self):
@@ -212,6 +226,10 @@ class BaseRecon(Plugin):
 
         shape = list(in_dataset[0].get_shape())
         shape[dim_volX] = shape[dim_volZ]
+
+        if 'resolution' in self.parameters.keys():
+            shape[dim_volX] /= self.parameters['resolution']
+            shape[dim_volZ] /= self.parameters['resolution']
 
         out_dataset[0].create_dataset(axis_labels=axis_labels,
                                       shape=tuple(shape))
