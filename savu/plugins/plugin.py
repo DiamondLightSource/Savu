@@ -21,9 +21,10 @@
 
 """
 
+import ast
+import copy
 import logging
 import inspect
-import copy
 import numpy as np
 
 import savu.plugins.docstring_parser as doc
@@ -202,6 +203,7 @@ class Plugin(PluginDatasets):
                     value.remove('')
                 except:
                     pass
+                value = [ast.literal_eval(i) for i in value]
                 value = map(dtype, value)
             label = key + '_params.' + type(value[0]).__name__
             self.multi_params_dict[len(self.multi_params_dict)] = \

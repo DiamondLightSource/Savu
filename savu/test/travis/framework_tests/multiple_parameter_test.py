@@ -42,8 +42,10 @@ class MultipleParameterTest(unittest.TestCase):
         key3 = 'centre_of_rotation'
         key4 = 'in_datasets'
         key5 = 'out_datasets'
+        key6 = 'force_zero'
         params = {key1: [':', '0', ':'], key2: 'ram-lak;hamming',
-                  key3: '85.0;85.5;86.0', key4: 'tomo', key5: 'tomo'}
+                  key3: '85.0;85.5;86.0', key4: 'tomo', key5: 'tomo',
+                  key6: '[None, None]'}
 
         options = tu.set_experiment('tomo')
         plugin = 'savu.plugins.reconstructions.astra_recons.astra_recon_cpu'
@@ -76,6 +78,15 @@ class MultipleParameterTest(unittest.TestCase):
         plugin._set_parameters(params)
         params = plugin.parameters[key]
         self.assertEqual(params, ['ram-lak', 'hamming'])
+        self.assertEqual(plugin.extra_dims[0], 2)
+
+    def test_parameter_space_list(self):
+        plugin = self.plugin_setup()
+        key = 'force_zero'
+        params = {'preview': '[:,0,:]', key: '[0, 1];[1, 2]'}
+        plugin._set_parameters(params)
+        params = plugin.parameters[key]
+        self.assertEqual(params, [[0, 1], [1, 2]])
         self.assertEqual(plugin.extra_dims[0], 2)
 
     def test_parameter_space_extra_dims(self):
