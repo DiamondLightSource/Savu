@@ -32,7 +32,7 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 
 class CcpiCglsReconTest(unittest.TestCase):
 
-    def test_tomopy_gridrec(self):
+    def test_cgls_recon(self):
         data_file = tu.get_test_data_path('24737.nxs')
         process_file = tu.get_test_process_path('ccpi_cgls_recon_test.nxs')
         run_protected_plugin_runner(tu.set_options(data_file,
