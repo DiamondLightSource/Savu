@@ -29,34 +29,32 @@ from savu.plugins.filters.base_filter import BaseFilter
 
 
 @register_plugin
-class RingArtefactFilter(BaseFilter, CpuPlugin):
+class CcpiRingArtefactFilter(BaseFilter, CpuPlugin):
     """
-    A plugin to perform ring artefact removal
+    This plugin applies the same ring removal method as the DLS tomo_recon\
+    reconstruction software.
 
-    :u*param param_n: To be defined (param_n >= 1e-10). Default: 0.001.
-    :u*param param_r: To be defined (param_r >= 1e-8). Default: 0.001.
-    :u*param num_series: To be defined (1 <= num_series <= 100). Default: 20
+    :u*param param_r: The correction strength - decrease (typically in order \
+    of magnitude steps) to increase ring supression, or increase to reduce \
+    ring supression. Default: 0.005.
+
+    :param param_n: Unknown description (for plate-like objects \
+    only). Default: 0.
+    :u*param num_series: High aspect ration compensation (for plate-like \
+    objects only) . Default: 1.
     """
 
     def __init__(self):
-        super(RingArtefactFilter, self).__init__("RingArtefactFilter")
+        super(CcpiRingArtefactFilter, self).__init__(
+                "CcpiRingArtefactFilter")
 
     def process_frames(self, data):
         param_n = self.parameters['param_n']
         param_r = self.parameters['param_r']
         num_series = self.parameters['num_series']
-        self.param_check(param_n, param_r, num_series)
 
         return ccpi_filters.aml_ring_artefacts(
                 data[0], param_n, param_r, num_series)
-
-    def param_check(self, p1, p2, p3):
-        if p1 < 1e-10:
-            raise ValueError('param_n is too small')
-        if p2 < 1e-8:
-            raise ValueError('param_r is too small')
-        if p3 < 1 or p3 > 100:
-            raise ValueError('num_series is out of bounds')
 
     def get_plugin_pattern(self):
         return 'SINOGRAM'
