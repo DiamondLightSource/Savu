@@ -71,14 +71,14 @@ class NxtomoLoader(BaseLoader):
             if not self.parameters['angles']:
                 raise Exception('Angles are required in the loader.')
             self.__setup_4d(data_obj)
-            n_angles = self.__set_rotation_angles(data_obj)
+            n_angles = self._set_rotation_angles(data_obj)
             shape = self.__setup_3d_to_4d(data_obj, n_angles)
         else:
             if len(data_obj.data.shape) is 3:
                 shape = self._setup_3d(data_obj)
             else:
                 shape = self.__setup_4d(data_obj)
-            self.__set_rotation_angles(data_obj)
+            self._set_rotation_angles(data_obj)
 
         try:
             control = data_obj.backing_file['entry1/tomo_entry/control/data']
@@ -191,7 +191,7 @@ class NxtomoLoader(BaseLoader):
 
         data_obj.data._set_scale(name, scale)
 
-    def __set_rotation_angles(self, data_obj):
+    def _set_rotation_angles(self, data_obj):
         angles = self.parameters['angles']
         if angles is None:
             try:
