@@ -73,7 +73,7 @@ class TimeBasedCorrection(BaseCorrection, CpuPlugin):
         rel_idx = zip(start, start[1:] + [len(key)])
         abs_idx = zip(key[np.append(0, idx+1)], np.append(key[idx], key[-1])+1)
         mean_range = [np.arange(*i) for i in rel_idx]
-        sl = np.array([[slice(None)]*3]*len(mean_range))
+        sl = np.array([[slice(None)]*len(data.shape)]*len(mean_range))
         sl[:, self.proj_dim] = mean_range
         sl = [list(s) for s in sl]
         return [np.mean(data[sl[i]], axis=0) for i in range(len(sl))], abs_idx
@@ -114,18 +114,22 @@ class TimeBasedCorrection(BaseCorrection, CpuPlugin):
         if (frames[-1] - n_df_before+1) == inData.get_shape()[self.slice_dir]:
             diff = self.mfp - len(frames)
             frames = \
-                np.concatenate((frames, [frames[-1]])*diff) if diff else diff
+                np.concatenate((frames, [frames[-1]])*diff) if diff else frames
         return frames
 
     def find_nearest_frames(self, idx_list, value):
         """ Find the index of the two entries that 'value' lies between in \
             'idx_list' and calculate the distance between each of them.
         """
+        n_entries = len(idx_list)
         start_array = np.array([idx_list[i][0] for i in range(len(idx_list))])
         end_array = np.array([idx_list[i][1] for i in range(len(idx_list))])
         idx = (np.abs(start_array - value)).argmin()
-        idx2 = idx+1 if start_array[idx] < value else idx-1
-        nearest = list(set([idx, idx2]))
+        if n_entries is 1:
+            idx2 = idx
+        else:
+            idx2 = idx+1 if start_array[idx] < value else idx-1
+        nearest = list(np.sort([idx, idx2]))
         rrange = [end_array[nearest[0]]-1, start_array[nearest[1]]]
         length = float(rrange[1] - rrange[0])
         distance = [(value - rrange[0])/length, (rrange[1] - value)/length]
