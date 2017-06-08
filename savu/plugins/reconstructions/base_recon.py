@@ -62,7 +62,8 @@ class BaseRecon(Plugin):
         self.centre = None
 
     def base_dynamic_data_info(self):
-        if self.parameters['init_vol']:
+        if 'init_vol' in self.parameters.keys() and \
+                                             self.parameters['init_vol']:
             if len(self.parameters['init_vol'].split('.')) is 3:
                 name, temp, self.rep_dim = self.parameters['init_vol']
                 self.parameters['init_vol'] = name
