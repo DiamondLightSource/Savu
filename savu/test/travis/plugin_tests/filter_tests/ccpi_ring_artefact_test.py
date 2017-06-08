@@ -26,15 +26,16 @@ import unittest
 
 import savu.test.test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
-    run_protected_plugin_runner_no_process_list
+    run_protected_plugin_runner
 
 
-class RingArtefactTest(unittest.TestCase):
+class CcpiRingArtefactTest(unittest.TestCase):
 
-    def rest_ring_artefact_removal(self):
-        options = tu.set_experiment('tomo')
-        plugin = 'savu.plugins.filters.ring_artefact_removal'
-        run_protected_plugin_runner_no_process_list(options, plugin)
+    def test_ring_removal(self):
+        data_file = tu.get_test_data_path('24737.nxs')
+        process_file = tu.get_test_process_path('ccpi_ring_artefact_test.nxs')
+        run_protected_plugin_runner(tu.set_options(data_file,
+                                                   process_file=process_file))
 
 if __name__ == "__main__":
     unittest.main()
