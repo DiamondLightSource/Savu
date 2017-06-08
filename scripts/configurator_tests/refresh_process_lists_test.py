@@ -35,7 +35,7 @@ class RefreshProcessListsTest(unittest.TestCase):
         cu.populate_plugins()
         path = os.path.dirname(os.path.realpath(__file__)).split('scripts')[0]
 
-        [nxs_in_tests, plugins_in_tests] = \
+        nxs_in_tests, plugins_in_tests = \
             tu.get_process_list(path + '/savu/test/travis')
 
         lists = tu.get_test_process_list(path + 'test_data/process_lists') \

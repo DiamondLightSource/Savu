@@ -21,3 +21,6 @@ Get the Savu version
 #__version__ = get_distribution('savu').version
 
 __version__ = '2.0'
+
+__install__ = 'install/' + '_'.join(__version__.split('.')) + '_install'
+

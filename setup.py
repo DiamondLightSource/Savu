@@ -4,9 +4,14 @@ import shutil
 
 from setuptools import setup, find_packages
 
+__version__ = None
+__install__ = None
+# loading the above parameters into the namespace from version.py
 savu_path = os.path.abspath(os.path.dirname(__file__))
 with open(savu_path + '/savu/version.py') as f:
     exec(f.read())
+
+install_pkg = '.'.join(__install__.split('/'))
 
 
 def readme():
@@ -49,7 +54,8 @@ def _get_packages():
               'scripts.log_evaluation',
               'scripts.citation_extractor',
               'install',
-              'install.conda-recipes',
+              install_pkg,
+              install_pkg + '.conda-recipes',
               'test_data',
               'lib',
               'mpi',
@@ -80,12 +86,12 @@ setup(name='savu',
       scripts=[facility_path+'/savu_launcher.sh',
                facility_path+'/savu_mpijob.sh',
                facility_path+'/savu_mpijob_local.sh',
-               'install/savu_installer.sh',
-               'install/savu_setup.sh',
-               'install/mpi_cpu_test.sh',
-               'install/mpi_gpu_test.sh',
-               'install/local_mpi_cpu_test.sh',
-               'install/local_mpi_gpu_test.sh'],
+               __install__ + '/savu_installer.sh',
+               __install__ + '/savu_setup.sh',
+               __install__ + '/mpi_cpu_test.sh',
+               __install__ + '/mpi_gpu_test.sh',
+               __install__ + '/local_mpi_cpu_test.sh',
+               __install__ + '/local_mpi_gpu_test.sh'],
 
       entry_points={'console_scripts': [
                         'savu_config=scripts.config_generator.savu_config:main',
@@ -105,8 +111,8 @@ setup(name='savu',
                         'data/image_test/tiffs/*'],
                     'lib': ['*.so'],
                     'mpi': ['dls/*.sh'],
-                    'install': ['*.txt'],
-                    'install.conda-recipes': [
+                    __install__: ['*.txt'],
+                    __install__ + '.conda-recipes': [
                         'hdf5/*',
                         'h5py/*',
                         'savu/*',
