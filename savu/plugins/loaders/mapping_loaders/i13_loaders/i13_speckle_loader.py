@@ -32,7 +32,7 @@ class I13SpeckleLoader(BaseLoader):
     :param signal_key: Path to the signals.Default:'/entry/sample'.
     :param reference_key: Path to the reference.Default:'/entry/reference'.
     :param angle_key: Path to the reference.Default:'/entry/theta'.
-    :param out_datasets: the output sets.Default: ['signal','reference'].
+    :param dataset_names: the output sets.Default: ['signal','reference'].
     """
 
     def __init__(self, name='I13SpeckleLoader'):
@@ -42,32 +42,29 @@ class I13SpeckleLoader(BaseLoader):
         """
 
         """
+        name_signal, name_reference = self.parameters['dataset_names']
 
         exp = self.exp
-        signal = exp.create_data_object("in_data", self.parameters['out_datasets'][0])
-        signal.backing_file = \
-            h5py.File(exp.meta_data.get("data_file"), 'r')
-        
-        reference = exp.create_data_object("in_data", self.parameters['out_datasets'][1])
-        reference.backing_file = \
-            h5py.File(exp.meta_data.get("data_file"), 'r')
+        signal = exp.create_data_object("in_data", name_signal)
+        signal.backing_file = h5py.File(exp.meta_data.get("data_file"), 'r')
 
+        reference = exp.create_data_object("in_data", name_reference)
+        reference.backing_file = h5py.File(exp.meta_data.get("data_file"), 'r')
 
         signal.data = signal.backing_file[self.parameters['signal_key']]
         signal.set_shape(signal.data.shape)
         reference.data = signal.backing_file[self.parameters['reference_key']]
         reference.set_shape(signal.data.shape)
 
-
         signal.set_axis_labels('rotation_angle.degrees',
-                                 'idx.units',
-                                 'detector_y.pixel',
-                                 'detector_x.pixel')
+                               'idx.units',
+                               'detector_y.pixel',
+                               'detector_x.pixel')
 
         reference.set_axis_labels('rotation_angle.degrees',
-                                 'idx.units',
-                                 'detector_y.pixel',
-                                 'detector_x.pixel')
+                                  'idx.units',
+                                  'detector_y.pixel',
+                                  'detector_x.pixel')
 
         theta = signal.backing_file[self.parameters['angle_key']][0]
         signal.meta_data.set('rotation_angle', theta)
