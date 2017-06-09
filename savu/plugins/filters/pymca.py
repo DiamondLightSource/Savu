@@ -76,6 +76,7 @@ class Pymca(BaseFilter, CpuPlugin):
         fit_labels = c._McaAdvancedFitBatch__images.keys() # and then take out the axis labels for the channels
         out_meta_data = out_datasets[0].meta_data
         out_meta_data.set("PeakElements",fit_labels)
+        
         self.outputshape = rest_shape+(len(fit_labels),) # and this is the shape the thing will be
 #         print "input shape is", in_dataset[0].get_shape()
 #         print "the output shape in setup is"+str(outputshape)
