@@ -46,14 +46,15 @@ def runSavu(path2plugin, params, metaOnly, inputs, persistence):
             parameters = {}
                 # slight repack here
             for key in params.keys():
-                print "here"
+#                 print "here"
                 val = params[key]["value"]
                 if type(val)==type(''):
                     val = val.replace('\n','').strip()
-                print val
+#                 print val
                 parameters[key] = val
-            print "initialising the object"
+#             print "initialising the object"
             plugin_object, axis_labels, axis_values = process_init(path2plugin, inputs, parameters)
+#             print "I did the initialisation"
 #             print "axis labels",axis_labels
 #             print "axis_values", axis_values
 #             print plugin_object
@@ -71,7 +72,7 @@ def runSavu(path2plugin, params, metaOnly, inputs, persistence):
                     result['xaxis']=axis_values[axis_labels[0]]
                     result['xaxis_title']=axis_labels[0]
                 if len(axis_labels) == 2:
-                    print "set the output axes"
+#                     print "set the output axes"
                     x = axis_labels[0]
                     result['xaxis_title']=x
                     y = axis_labels[1]
@@ -87,25 +88,24 @@ def runSavu(path2plugin, params, metaOnly, inputs, persistence):
         data = np.expand_dims(inputs['data'], 0)
     else:
         data = inputs['data']
-        
+
     if not metaOnly: 
-        result['data'] = plugin_object.filter_frames([data])[0]
-        
+
+        out = plugin_object.process_frames([data])
+#         print "ran the plugin"
+
+        result['data'] = out
     elif metaOnly:
-        print "metadata only operation"
         result['data'] = inputs['data']
 #         print type(result['data'])
-        out_array = plugin_object.filter_frames([data])
-        print out_array
+        out_array = plugin_object.process_frames([data])
+
         k=0
 #         print aux.keys()
         for key in aux.keys():
-            print "assigning the dict in aux"
-#             print out_array
             aux[key]=np.array([out_array[k]])# wow really
             k+=1
         result['auxiliary'] = aux
-    print "ran the python part fine"
     t2 = time.time()
     print "time to runSavu = "+str((t2-t1))
     return result
@@ -115,23 +115,26 @@ def runSavu(path2plugin, params, metaOnly, inputs, persistence):
 def process_init(path2plugin, inputs, parameters):
     parameters['in_datasets'] = [inputs['dataset_name']]
     parameters['out_datasets'] = [inputs['dataset_name']]
-    plugin = get_plugin(path2plugin.strip('.py'))
+    
+    plugin = get_plugin(path2plugin.split('.py')[0]+'.py')
+#     print "I got this far"
     plugin.exp = setup_exp_and_data(inputs, inputs['data'], plugin)
     plugin._set_parameters(parameters)
     plugin._set_plugin_datasets()
     plugin.setup()
+#     print "I am her now"
     axis_labels = plugin.get_out_datasets()[0].get_axis_label_keys()
     foo = [type(ix) for ix in axis_labels]
-    print "axis label types", foo
+#     print "axis label types", foo
     axis_labels.remove('idx') # get the labels
     axis_values = {}
     plugin._clean_up() # this copies the metadata!
     for label in axis_labels:
-        axis_values[label] = plugin.get_out_datasets()[0].meta_data.get_meta_data(label)
+        axis_values[label] = plugin.get_out_datasets()[0].meta_data.get(label)
 #         print label, axis_values[label].shape
     plugin.base_pre_process()
     plugin.pre_process()
-    print "I went here"
+#     print "I went here"
     return plugin, axis_labels, axis_values
 
 def setup_exp_and_data(inputs, data, plugin):
@@ -144,11 +147,11 @@ def setup_exp_and_data(inputs, data, plugin):
             inputs['xaxis_title']='x'
             inputs['xaxis'] = np.arange(inputs['data'].shape[0])
         data_obj.set_axis_labels('idx.units', inputs['xaxis_title'] + '.units')
-        data_obj.meta_data.set_meta_data('idx', np.array([1]))
-        data_obj.meta_data.set_meta_data(str(inputs['xaxis_title']), inputs['xaxis'])
-        data_obj.add_pattern(plugin.get_plugin_pattern(), core_dir=(1,), slice_dir=(0, ))
-        data_obj.add_pattern('SINOGRAM', core_dir=(1,), slice_dir=(0, )) # good to add these two on too
-        data_obj.add_pattern('PROJECTION', core_dir=(1,), slice_dir=(0, ))
+        data_obj.meta_data.set('idx', np.array([1]))
+        data_obj.meta_data.set(str(inputs['xaxis_title']), inputs['xaxis'])
+        data_obj.add_pattern(plugin.get_plugin_pattern(), core_dims=(1,), slice_dims=(0, ))
+        data_obj.add_pattern('SINOGRAM', core_dims=(1,), slice_dims=(0, )) # good to add these two on too
+        data_obj.add_pattern('PROJECTION', core_dims=(1,), slice_dims=(0, ))
     if len(inputs['data_dimensions'])==2:
         if inputs['xaxis_title'] is None  or inputs['xaxis_title'].isspace():
             print "set x"
@@ -159,13 +162,15 @@ def setup_exp_and_data(inputs, data, plugin):
             inputs['yaxis_title']='y'
             size_y_axis = inputs['data'].shape[1]
             inputs['yaxis'] = np.arange(size_y_axis)
+        
         data_obj.set_axis_labels('idx.units', inputs['xaxis_title'] + '.units', inputs['yaxis_title'] + '.units')
-        data_obj.meta_data.set_meta_data('idx', np.array([1]))
-        data_obj.meta_data.set_meta_data(str(inputs['xaxis_title']), inputs['xaxis'])
-        data_obj.meta_data.set_meta_data(str(inputs['yaxis_title']), inputs['yaxis'])
-        data_obj.add_pattern(plugin.get_plugin_pattern(), core_dir=(1,2,), slice_dir=(0, ))
-        data_obj.add_pattern('SINOGRAM', core_dir=(1,2,), slice_dir=(0, )) # good to add these two on too
-        data_obj.add_pattern('PROJECTION', core_dir=(1,2,), slice_dir=(0, ))
+        data_obj.meta_data.set('idx', np.array([1]))
+        data_obj.meta_data.set(str(inputs['xaxis_title']), inputs['xaxis'])
+        data_obj.meta_data.set(str(inputs['yaxis_title']), inputs['yaxis'])
+        data_obj.add_pattern(plugin.get_plugin_pattern(), core_dims=(1,2,), slice_dims=(0, ))
+        data_obj.add_pattern('SINOGRAM', core_dims=(1,2,), slice_dims=(0, )) # good to add these two on too
+        data_obj.add_pattern('PROJECTION', core_dims=(1,2,), slice_dims=(0, ))
+   
     data_obj.set_shape((1, ) + data.shape) # need to add for now for slicing...
     data_obj.get_preview().set_preview([])
     return exp
@@ -180,6 +185,7 @@ def get_options():
     options = {}
     options['transport'] = 'hdf5'
     options['process_names'] = 'CPU0'
+    options['processes'] = 'CPU0'
     options['data_file'] = ''
     options['process_file'] = ''
     options['out_path'] = ''

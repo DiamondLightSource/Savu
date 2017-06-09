@@ -27,11 +27,11 @@ import pyfftw.interfaces.scipy_fftpack as fft
 
 from savu.plugins.filters.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-from savu.plugins.utils import register_plugin, dawn_compatible
+from savu.plugins.utils import register_plugin
 from savu.data.plugin_list import CitationInformation
 
 
-@dawn_compatible
+
 @register_plugin
 class PaganinFilter(BaseFilter, CpuPlugin):
     """
@@ -115,6 +115,7 @@ class PaganinFilter(BaseFilter, CpuPlugin):
         return result
 
     def process_frames(self, data):
+        print "datashape in is:",data[0].shape
         proj = np.nan_to_num(data[0])  # Noted performance
         proj[proj == 0] = 1.0
         return self._paganin(proj)
