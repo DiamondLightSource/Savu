@@ -22,10 +22,15 @@ Get the Savu version
 
 import os
 
-filepath = os.path.dirname(__file__)
-with open(filepath + '/../install/latest_version.txt', 'r') as f:
+path = os.path.abspath(os.path.dirname(__file__))
+if 'Savu/savu' in path:
+    path = path + '/../install/'
+else:
+    path = path + '/install/'
+
+with open(path + 'latest_version.txt', 'r') as f:
     version_file = f.readline().strip()
-    with open(filepath + '/../install/' + version_file, 'r') as f2:
+    with open(path + version_file, 'r') as f2:
         __version__ = f2.readline().strip()
 
 __install__ = 'install/' + '_'.join(__version__.split('.')) + '_install'

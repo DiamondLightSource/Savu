@@ -139,6 +139,7 @@ echo
 
 #conda env update -n root -f $DIR/environment.yml
 
+
 # check anaconda distribution
 ana_path=$(command -v anaconda)
 if ! [ "$ana_path" ]; then
@@ -168,18 +169,19 @@ if [ "$facility" ]; then
     cp $DIR/mpi/$facility/savu_mpijob.sh $launcher_path
 fi
 
-mpi4py_version=`cat $recipes/mpi4py/version.txt`
+#mpi4py_version=`cat $recipes/mpi4py/version.txt`
+mpi4py_version=1.3.1
 
 echo $mpi4py_version
 
-exit 1
-
 echo "Installing mpi4py..."
-env MPICC=$mpicc pip install mpi4py==$mpi4py_version
+#env MPICC=$mpicc pip install mpi4py==$mpi4py_version
 
 echo "Building hdf5..."
 conda build $recipes/hdf5
 hdf5build=`conda build $recipes/hdf5 --output`
+
+exit 1
 
 echo "Installing hdf5..."
 conda install --use-local $hdf5build
