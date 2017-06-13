@@ -26,9 +26,11 @@ from scipy.misc import imresize
 
 from savu.plugins.filters.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-from savu.plugins.utils import register_plugin
+
+from savu.plugins.utils import register_plugin, dawn_compatible
 
 @register_plugin
+@dawn_compatible
 class ImageInterpolation(BaseFilter, CpuPlugin):
     """
     A plugin to interpolate an image by a factor

@@ -69,6 +69,7 @@ def get_plugin(plugin_name):
     """
     logging.debug("Importing the module %s", plugin_name)
     instance = load_class(plugin_name)()
+
     instance._populate_default_parameters()
     return instance
 
