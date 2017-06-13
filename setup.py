@@ -86,12 +86,11 @@ setup(name='savu',
       scripts=[facility_path+'/savu_launcher.sh',
                facility_path+'/savu_mpijob.sh',
                facility_path+'/savu_mpijob_local.sh',
-               __install__ + '/savu_installer.sh',
-               __install__ + '/savu_setup.sh',
-               __install__ + '/mpi_cpu_test.sh',
-               __install__ + '/mpi_gpu_test.sh',
-               __install__ + '/local_mpi_cpu_test.sh',
-               __install__ + '/local_mpi_gpu_test.sh'],
+               __install__ + '/tests/test_setup.sh',
+               __install__ + '/tests/mpi_cpu_test.sh',
+               __install__ + '/tests/mpi_gpu_test.sh',
+               __install__ + '/tests/local_mpi_cpu_test.sh',
+               __install__ + '/tests/local_mpi_gpu_test.sh'],
 
       entry_points={'console_scripts': [
                         'savu_config=scripts.config_generator.savu_config:main',
@@ -121,3 +120,4 @@ setup(name='savu',
 
       include_package_data=True,
       zip_safe=False)
+

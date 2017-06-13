@@ -6,9 +6,13 @@ module load global/cluster-quiet
 shift 1
 
 PREVIEW=false
+BIG=false
 echo "LAUNCHING THE SCRIPT"
 if [ $1 == 'PREVIEW' ] ; then
     PREVIEW=true
+    shift 1
+elif [ $1 == 'BIG' ] ; then
+    BIG=true
     shift 1
 fi
 
@@ -81,13 +85,24 @@ outpath=$3
 shift 3
 options=$@
 
-outname=savu
-nNodes=2
-nCoresPerNode=20
-nGPUs=4
-
-if [ $PREVIEW = true ] ; then
-    nNodes=1
+if [ $BIG = true ] ; then
+    echo "RUNNING BIG DATA RECONSTRUCTION"
+    cluster=high.q@@com14
+    gpu_arch=Pascal
+    outname=savu
+    nNodes=10
+    nCoresPerNode=20
+    nGPUs=2
+else
+    cluster=high.q@@com10
+    gpu_arch=Kepler
+    outname=savu
+    nNodes=4
+    nCoresPerNode=20
+    nGPUs=4
+    if [ $PREVIEW = true ] ; then
+        nNodes=1
+    fi
 fi
 
 # get the Savu path
@@ -122,9 +137,14 @@ if [ ! $interfolder ] ; then
   interfolder=$outfolder
 fi
 
-qsub -jsv /dls_sw/apps/sge/common/JSVs/tomo_recon_test.pl \
-     -N $outname -j y -o $interfolder -e $interfolder -pe openmpi $M -l exclusive \
-     -l infiniband -l gpu=4 -l gpu_arch=Kepler $filepath $version $savupath $datafile \
+#qsub -jsv /dls_sw/apps/sge/common/JSVs/tomo_recon_test.pl \
+#     -N $outname -j y -o $interfolder -e $interfolder -pe openmpi $M -l exclusive \
+#     -l infiniband -l gpu=$nGPUs -l gpu_arch=$gpu_arch -q $cluster $filepath $version $savupath $datafile \
+#     $processfile $outpath $nCoresPerNode $nGPUs $options -c \
+#     -f $outfolder -s cs04r-sc-serv-14 -l $outfolder > /dls/tmp/savu/$USER.out
+
+qsub -N $outname -j y -o $interfolder -e $interfolder -pe openmpi $M -l exclusive \
+     -l infiniband -l gpu=$nGPUs -l gpu_arch=$gpu_arch -q $cluster -P tomography $filepath $version $savupath $datafile \
      $processfile $outpath $nCoresPerNode $nGPUs $options -c \
      -f $outfolder -s cs04r-sc-serv-14 -l $outfolder > /dls/tmp/savu/$USER.out
 

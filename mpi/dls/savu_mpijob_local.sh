@@ -1,5 +1,4 @@
 #!/bin/bash
-module load savu/1.2
 
 echo "SAVU_MPI_LOCAL:: Running Job"
 

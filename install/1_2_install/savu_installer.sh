@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -ex
 
 # error log to screen and file
 error_log=/tmp/savu_error_log.txt

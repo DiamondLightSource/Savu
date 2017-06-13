@@ -16,11 +16,16 @@
 Get the Savu version
 """
 
-#from pkg_resources import get_distribution
+# from pkg_resources import get_distribution
 #
-#__version__ = get_distribution('savu').version
+# __version__ = get_distribution('savu').version
 
-__version__ = '1.2'
+import os
+
+filepath = os.path.dirname(__file__)
+with open(filepath + '/../install/latest_version.txt', 'r') as f:
+    version_file = f.readline().strip()
+    with open(filepath + '/../install/' + version_file, 'r') as f2:
+        __version__ = f2.readline().strip()
 
 __install__ = 'install/' + '_'.join(__version__.split('.')) + '_install'
-
