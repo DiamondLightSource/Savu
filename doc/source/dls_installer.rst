@@ -12,6 +12,7 @@ Requirements:
 
     >>> bash savu_v2.0/savu_installer.sh
 
-3. See :download:`README.txt <../../install/2_0_install/Savu_v2.0/>`
+3. Check the log file /tmp/savu_error_log.txt for installation errors.
 
+4. See :download:`README.txt <../../install/2_0_install/Savu_v2.0/README.txt>` for more information.
 

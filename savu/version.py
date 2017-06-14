@@ -26,9 +26,9 @@ path = os.path.abspath(os.path.dirname(__file__))
 thepath = path + '/../install/'
 thepath = thepath if os.path.exists(thepath) else path + '/install/'
 
-with open(path + 'latest_version.txt', 'r') as f:
+with open(thepath + 'latest_version.txt', 'r') as f:
     version_file = f.readline().strip()
-    with open(path + version_file, 'r') as f2:
+    with open(thepath + version_file, 'r') as f2:
         __version__ = f2.readline().strip()
 
 __install__ = 'install/' + '_'.join(__version__.split('.')) + '_install'
