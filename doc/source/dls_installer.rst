@@ -1,6 +1,15 @@
 Installing Savu at Diamond
 ==========================
 
+(Savu requires openmpi...)
+
+1. :download:`Download savu version 2.0 <../../install/2_0_install/savu_v2.0.tar.gz>` and unzip.
+
+2. >>> bash /path/to/savu_v2/savu_installer.sh
+   and follow the instructions for installation.
+
+3. To run savu... (updating installer scripts etc.)
+
 1. Install Python Anaconda for Python 2.7 version (https://www.continuum.io/downloads) and add to the PATH.
 
     >>> export PATH=/path/to/anaconda/bin:$PATH

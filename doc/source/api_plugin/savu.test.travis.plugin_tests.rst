@@ -6,6 +6,7 @@ Subpackages
 
 .. toctree::
 
+    savu.test.travis.plugin_tests.correction_tests
     savu.test.travis.plugin_tests.filter_tests
     savu.test.travis.plugin_tests.loader_tests
     savu.test.travis.plugin_tests.reconstruction_tests

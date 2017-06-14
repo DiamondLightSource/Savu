@@ -14,6 +14,7 @@ Submodules
    savu.test.travis.plugin_tests.filter_tests.downsample_filter_test
    savu.test.travis.plugin_tests.filter_tests.find_peaks_test
    savu.test.travis.plugin_tests.filter_tests.histogram_test
+   savu.test.travis.plugin_tests.filter_tests.list_to_projections_test
    savu.test.travis.plugin_tests.filter_tests.median_filter_test
    savu.test.travis.plugin_tests.filter_tests.monitor_correction_test
    savu.test.travis.plugin_tests.filter_tests.paganin_test
@@ -23,7 +24,6 @@ Submodules
    savu.test.travis.plugin_tests.filter_tests.pymca_test
    savu.test.travis.plugin_tests.filter_tests.quantisation_filter_test
    savu.test.travis.plugin_tests.filter_tests.raven_filter_test
-   savu.test.travis.plugin_tests.filter_tests.ring_artefact_test
    savu.test.travis.plugin_tests.filter_tests.simple_fit_test
    savu.test.travis.plugin_tests.filter_tests.sinogram_alignment_test
    savu.test.travis.plugin_tests.filter_tests.strip_background_test

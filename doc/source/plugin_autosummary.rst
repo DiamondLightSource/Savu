@@ -155,6 +155,7 @@ savu.plugins.analysis
    api_plugin/savu.plugins.analysis.base_analysis
    api_plugin/savu.plugins.analysis.histogram
    api_plugin/savu.plugins.analysis.stats
+   api_plugin/savu.plugins.analysis.stxm_analysis
 
 
 savu.plugins.reconstructions
@@ -162,13 +163,13 @@ savu.plugins.reconstructions
 
 .. toctree::
    api_plugin/savu.plugins.reconstructions.base_recon
-   api_plugin/savu.plugins.reconstructions.cgls_recon
    api_plugin/savu.plugins.reconstructions.scikitimage_sart
    api_plugin/savu.plugins.reconstructions.simple_recon
    api_plugin/savu.plugins.reconstructions.scikitimage_filter_back_projection
    api_plugin/savu.plugins.reconstructions.tomopy_recon
    api_plugin/savu.plugins.reconstructions.simple_fake_gpu_recon
    api_plugin/savu.plugins.reconstructions.non_local_regularised_cgls
+   api_plugin/savu.plugins.reconstructions.ccpi_cgls_recon
 
 
 savu.plugins.reconstructions.astra_recons
@@ -197,6 +198,9 @@ savu.plugins.corrections
    api_plugin/savu.plugins.corrections.time_based_plus_drift_correction
    api_plugin/savu.plugins.corrections.base_correction
    api_plugin/savu.plugins.corrections.monitor_correction
+   api_plugin/savu.plugins.corrections.distortion_correction
+   api_plugin/savu.plugins.corrections.monitor_correction_nd
+   api_plugin/savu.plugins.corrections.xrd_absorption_approximation
 
 
 savu.plugins.fitters
@@ -229,6 +233,25 @@ savu.plugins.driver
    api_plugin/savu.plugins.driver.single_node_multi_threaded_plugin
 
 
+savu.plugins.ring_removal
+------------------------------------------------------------
+
+.. toctree::
+   api_plugin/savu.plugins.ring_removal.raven_filter
+   api_plugin/savu.plugins.ring_removal.ring_removal_waveletfft
+   api_plugin/savu.plugins.ring_removal.ccpi_ring_artefact_filter
+
+
+savu.plugins.alignment
+------------------------------------------------------------
+
+.. toctree::
+   api_plugin/savu.plugins.alignment.projection_shift
+   api_plugin/savu.plugins.alignment.projection_vertical_alignment
+   api_plugin/savu.plugins.alignment.sinogram_alignment
+   api_plugin/savu.plugins.alignment.sinogram_clean
+
+
 savu.plugins.filters
 ------------------------------------------------------------
 
@@ -237,28 +260,19 @@ savu.plugins.filters
    api_plugin/savu.plugins.filters.denoise_bregman_filter
    api_plugin/savu.plugins.filters.dezing_filter
    api_plugin/savu.plugins.filters.dials_find_spots
-   api_plugin/savu.plugins.filters.distortion_correction
+   api_plugin/savu.plugins.filters.image_interpolation
    api_plugin/savu.plugins.filters.find_peaks
    api_plugin/savu.plugins.filters.median_filter
-   api_plugin/savu.plugins.filters.monitor_correction_nd
+   api_plugin/savu.plugins.filters.pymca
    api_plugin/savu.plugins.filters.paganin_filter
    api_plugin/savu.plugins.filters.poly_background_estimator
-   api_plugin/savu.plugins.filters.base_filter
-   api_plugin/savu.plugins.filters.pymca
-   api_plugin/savu.plugins.filters.quantisation_filter
-   api_plugin/savu.plugins.filters.raven_filter
-   api_plugin/savu.plugins.filters.ring_artefact_filter
-   api_plugin/savu.plugins.filters.ring_removal_waveletfft
-   api_plugin/savu.plugins.filters.sinogram_alignment
    api_plugin/savu.plugins.filters.list_to_projections
+   api_plugin/savu.plugins.filters.base_filter
+   api_plugin/savu.plugins.filters.quantisation_filter
    api_plugin/savu.plugins.filters.spectrum_crop
    api_plugin/savu.plugins.filters.strip_background
    api_plugin/savu.plugins.filters.threshold_filter
-   api_plugin/savu.plugins.filters.xrd_absorption_approximation
-   api_plugin/savu.plugins.filters.projection_shift
-   api_plugin/savu.plugins.filters.projection_vertical_alignment
-   api_plugin/savu.plugins.filters.sinogram_clean
-   api_plugin/savu.plugins.filters.stxm_analysis
+   api_plugin/savu.plugins.filters.umpa
 
 
 savu.plugins.loaders
@@ -281,6 +295,7 @@ savu.plugins.loaders.full_field_loaders
    api_plugin/savu.plugins.loaders.full_field_loaders.nxtomo_loader
    api_plugin/savu.plugins.loaders.full_field_loaders.random_3d_tomo_loader
    api_plugin/savu.plugins.loaders.full_field_loaders.dxchange_loader
+   api_plugin/savu.plugins.loaders.full_field_loaders.fake_nxtomo_loader
 
 
 savu.plugins.loaders.utils
@@ -314,6 +329,7 @@ savu.plugins.loaders.mapping_loaders.i13_loaders
    api_plugin/savu.plugins.loaders.mapping_loaders.i13_loaders.i13_stxm_loader
    api_plugin/savu.plugins.loaders.mapping_loaders.i13_loaders.i13_stxm_monitor_loader
    api_plugin/savu.plugins.loaders.mapping_loaders.i13_loaders.i13_stxm_xrf_loader
+   api_plugin/savu.plugins.loaders.mapping_loaders.i13_loaders.i13_speckle_loader
 
 
 savu.plugins.loaders.mapping_loaders.i22_loaders

@@ -13,6 +13,7 @@ Subpackages
 .. toctree::
 
     savu.plugins.absorption_corrections
+    savu.plugins.alignment
     savu.plugins.analysis
     savu.plugins.azimuthal_integrators
     savu.plugins.basic_operations
@@ -28,6 +29,7 @@ Subpackages
     savu.plugins.ptychography
     savu.plugins.reconstructions
     savu.plugins.reshape
+    savu.plugins.ring_removal
     savu.plugins.savers
 
 Submodules

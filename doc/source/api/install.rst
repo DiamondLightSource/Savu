@@ -12,5 +12,6 @@ Subpackages
 
 .. toctree::
 
-    install.conda-recipes
+    install.1_2_install
+    install.2_0_install
 

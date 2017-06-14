@@ -14,13 +14,41 @@ done
 
 PREFIX=$HOME
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-savu_version=1.2 #`cat $DIR/version.txt`
+savu_version=`cat $DIR/version.txt`
 
-# might want to change this
-if [ $# -gt 0 ]; then
-  facility=$1
+# function for parsing optional arguments
+function arg_parse ()
+{
+  flag=$1
+  return=$2
+  while [[ $# -gt 3 ]] ; do
+    if [ $3 == $flag ] ; then
+      eval "$return"=$4
+    fi
+    shift
+  done
+}
+
+# set the intermediate folder
+arg_parse "-f" facility "$@"
+if [ ! $facility ] ; then
+  facility=dls # change this default?
+fi
+
+# set the intermediate folder
+arg_parse "-c" conda_folder "$@"
+if [ ! $conda_folder ] ; then
+  conda_folder=Savu_$savu_version
+fi
+
+# set the intermediate folder
+arg_parse "-s" savu_install "$@"
+if [ ! $savu_install ] ; then
+  savu_install=savu
+elif [ $savu_install = 'master' ] ; then
+  savu_install=savu_master
 else
-  facility=dls  
+  echo "Unknown Savu installation version."
 fi
 
 #=========================library checking==============================
@@ -35,12 +63,12 @@ echo -e "fftw and cuda are desirable for a full range of plugins."
 echo -e "\n============================================================="
 
 # set compiler wrapper
-mpicc=$(command -v mpicc)
-if ! [ "$mpicc" ]; then
+MPICC=$(command -v mpicc)
+if ! [ "$MPICC" ]; then
     echo "ERROR: I require mpicc but I can't find it.  Check /path/to/mpi_implementation/bin is in your PATH"
     exit 1
 else
-    echo "Using mpicc:   " $mpicc
+    echo "Using mpicc:   " $MPICC
 fi
 
 # check for fftw
@@ -69,7 +97,6 @@ nvcc=`command -v nvcc`
 CUDAHOME=${nvcc%/bin/nvcc}
 if [ "$CUDAHOME" ]; then
     echo "Using cuda:    " $CUDAHOME
-    CUDAHOME="$(dirname $CUDAHOME)"
 else
     echo "cuda has not been found."
 fi
@@ -98,7 +125,7 @@ fi
 
 while true; do
   if [ -d "$PREFIX" ]; then
-    PREFIX=$PREFIX/Savu_$savu_version/
+    PREFIX=$PREFIX/$conda_folder/
     break
   fi
   echo "The path" $PREFIX "is not recognised"
@@ -106,7 +133,6 @@ while true; do
   PREFIX=$input
 done
 
-# what if this folder already exists.
 if [ -d "$PREFIX" ]; then
   echo
   read -n 1 -p "The folder $PREFIX already exists. Continue? [y/n]" input
@@ -128,8 +154,8 @@ echo -e "\nThank you!  Installing Savu into" $PREFIX"\n"
 
 echo $PREFIX
 
-#wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O $PREFIX/miniconda.sh;
-#bash $PREFIX/miniconda.sh -b -p $PREFIX/miniconda
+wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O $PREFIX/miniconda.sh;
+bash $PREFIX/miniconda.sh -b -p $PREFIX/miniconda
 PYTHONHOME=$PREFIX/miniconda/bin
 export PATH="$PYTHONHOME:$PATH"
 
@@ -137,8 +163,7 @@ echo
 conda info | grep 'root environment'
 echo
 
-#conda env update -n root -f $DIR/environment.yml
-
+conda env update -n root -f $DIR/environment.yml
 
 # check anaconda distribution
 ana_path=$(command -v anaconda)
@@ -150,38 +175,39 @@ else
     echo "Using anaconda:" $ana_path
 fi
 
-# conda install savu
-#conda install -c savu savu=$savu_version
+echo "Building Savu..."
+conda build $recipes/$savu_recipe
+savubuild=`conda build $recipes/$savu_recipe --output`
+echo "Installing Savu..."
+conda install --use-local $savubuild
 
 path=$(python -c "import savu; import os; print os.path.abspath(savu.__file__)")
-DIR=${path%/savu/__init__.pyc}
+savu_path=${path%/savu/__init__.pyc}
 
 if [[ ! -z "${RECIPES}" ]]; then
     recipes=`echo $RECIPES`
 else
-    recipes=$DIR'/install/conda-recipes'
+    recipes=$savu_path'/install/conda-recipes'
 fi
 
 launcher_path=`command -v savu_launcher.sh`
 launcher_path=${launcher_path%/savu_launcher.sh}
 if [ "$facility" ]; then
-    cp $DIR/mpi/$facility/savu_launcher.sh $launcher_path
-    cp $DIR/mpi/$facility/savu_mpijob.sh $launcher_path
+    cp $savu_path/mpi/$facility/savu_launcher.sh $launcher_path
+    cp $savu_path/mpi/$facility/savu_mpijob.sh $launcher_path
 fi
 
-#mpi4py_version=`cat $recipes/mpi4py/version.txt`
+mpi4py_version=`cat $recipes/mpi4py/version.txt`
 mpi4py_version=1.3.1
 
 echo $mpi4py_version
 
 echo "Installing mpi4py..."
-#env MPICC=$mpicc pip install mpi4py==$mpi4py_version
+env MPICC=$MPICC pip install mpi4py==$mpi4py_version
 
 echo "Building hdf5..."
 conda build $recipes/hdf5
 hdf5build=`conda build $recipes/hdf5 --output`
-
-exit 1
 
 echo "Installing hdf5..."
 conda install --use-local $hdf5build
@@ -211,83 +237,82 @@ xraylibbuild=`conda build $recipes/xraylib --output`
 echo "Installing xraylib..."
 conda install --use-local $xraylibbuild
 
-echo "Installing ccpi-reconstruction"
-conda install –c ccpi ccpi-reconstruction –c conda-forge
+#conda install -c ccpi ccpi-reconstruction -c conda-forge
 
-if [ "$CUDAHOME" ]; then
-  pip install pycuda
-fi
+# pycuda not working add this later?
+#if [ "$CUDAHOME" ] ; then
+#  pip install pycuda
+#fi
 
-echo
-echo "*********************************"
-echo "* package installation complete *"
-echo "*********************************"
-echo 
-echo "Check the log file $error_log for any installation errors\n".
+# update to pyqt5?
 
-
-echo -e "Adding "$astra_lib_path" to LD_LIBRARY_PATH"
-export LD_LIBRARY_PATH=$astra_lib_path:$LD_LIBRARY_PATH
+echo -e "\n\t***************************************************"
+echo -e "\t*          Package installation complete          *"
+echo -e "\t*    Check $error_log for errors     *"
+echo -e "\t***************************************************\n"
 
 # automatically run the tests
-source test_setup.sh
+source test_setup.sh > /dev/null # not available yet
 
-setup_script=$DIR/savu_setup.sh
+setup_script=$PREFIX'savu_setup.sh'
 echo -e "\nCreating a Savu setup script" $setup_script
 ( [ -e "$setup_script" ] || touch "$setup_script" ) && [ ! -w "$setup_script" ] && echo cannot write to $setup_script && exit 1
 MPIHOME="$(dirname "$(dirname $MPICC)")"
-echo ""export PATH=$MPIHOME/bin:'$PATH'"" > $setup_script
+echo "#!bin/bash" > $setup_script
+echo ""export PATH=$MPIHOME/bin:'$PATH'"" >> $setup_script
 echo ""export LD_LIBRARY_PATH=$MPIHOME/lib:'$LD_LIBRARY_PATH'"" >> $setup_script
 echo ""export PYTHONUSERSITE True"" >> $setup_script
-echo ""export PATH=$PYTHONHOME/bin:'$PATH'"" >> $setup_script
+echo ""export PATH=$PYTHONHOME:'$PATH'"" >> $setup_script
 echo ""export LD_LIBRARY_PATH=$PYTHONHOME/lib:'$LD_LIBRARY_PATH'"" >> $setup_script
 echo ""export LD_LIBRARY_PATH=$astra_lib_path:'$LD_LIBRARY_PATH'"" >> $setup_script
 if [ "$CUDAHOME" ]; then
   echo ""export PATH=$CUDAHOME/bin:'$PATH'"" >> $setup_script
   echo ""export LD_LIBRARY_PATH=$CUDAHOME/lib:'$LD_LIBRARY_PATH'"" >> $setup_script
 fi
-if [ "$FFTWHOME" ]; then
+if [ "$FFTWHOME" ]; then    
   echo ""export FFTWDIR=$FFTWHOME"" >> $setup_script
   echo ""export LD_LIBRARY_PATH=$FFTWHOME/lib:'$LD_LIBRARY_PATH'"" >> $setup_script
 fi
 
+echo $(python -c "import savu; savu.__file__")
 nGPUs=$(python -c "import savu.core.utils as cu; p, count = cu.get_available_gpus(); print count")
 
 source $setup_script
 
-echo -e "\nTesting Savu setup....."
+echo -e "\n***** Testing Savu setup *****\n"
 savu_quick_tests
 
-echo -e "\nRunning Savu single-threaded local tests (this may take a while)....."
+echo -e "\n*****Running Savu single-threaded local tests *****\n"
 savu_full_tests
 
-echo "************** Single-threaded local tests complete ******************"
+echo -e "\n************** Single-threaded local tests complete ******************\n"
 
-# can the savu_mpi_local tests be auto-mated?
-echo -e "\nRunning Savu MPI local cpu tests....."
+echo -e "\n***** Running Savu MPI local CPU tests *****\n"
 local_mpi_cpu_test.sh
 
 if [ $nGPUs -gt 0 ]; then
-  echo -e "\nRunning Savu MPI local gpu tests....."
-  # if gpus are found then run the gpu tests else print a message saying they are skipped
+  echo -e "\n***** Running Savu MPI local GPU tests *****\n"
   local_mpi_gpu_test.sh
+else
+  echo -e "\n***** Skipping Savu MPI local GPU tests (no GPUs found) *****\n"
 fi
 
-echo "************** MPI local tests complete ******************"
+echo -e "\n************** MPI local tests complete ******************\n"
 
 
-read  -n 1 -p "Are you installing Savu for cluster use? (y/n): " input
-if [ "$input" = "y" ]; then
+while true
+do
+  read  -n 1 -p "Are you installing Savu for cluster use? (y/n): " input
+  if [ "$input" = "y" ]; then
     echo -e "To run Savu across a cluster you will need to update the savu laucher scripts:"
     echo -e "savu_launcher.sh"
     echo -e "savu_mpijob.sh"
-    
-elif [ "$input" = "n" ]; then
-    continue
-else
+    break    
+  elif [ "$input" = "n" ]; then
     echo -e "\nYour input was unknown.\n"
-    read  -n 1 -p "Are you happy to proceed with the installation? (y/n): " input
-fi   
+    continue
+  fi
+done   
 
 
 echo -e "\nTo run Savu type 'source $savu_setup' to set relevant paths every time you open a new terminal."
