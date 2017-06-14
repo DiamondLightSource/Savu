@@ -186,11 +186,9 @@ conda install --use-local $savubuild
 path=$(python -c "import savu; import os; print os.path.abspath(savu.__file__)")
 savu_path=${path%/savu/__init__.pyc}
 
-if [[ ! -z "${RECIPES}" ]]; then
-    recipes=`echo $RECIPES`
-else
-    recipes=$savu_path'/install/conda-recipes'
-fi
+# get the savu version
+install_path=$(python -c "import savu; import savu.version as sv; print sv.__install__")
+recipes=$savu_path/$install_path/conda-recipes
 
 launcher_path=`command -v savu_launcher.sh`
 launcher_path=${launcher_path%/savu_launcher.sh}
