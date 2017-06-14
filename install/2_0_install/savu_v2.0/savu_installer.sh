@@ -35,6 +35,8 @@ if [ ! $facility ] ; then
   facility=dls # change this default?
 fi
 
+export FACILITY=$facility
+
 # set the intermediate folder
 arg_parse "-c" conda_folder "$@"
 if [ ! $conda_folder ] ; then
@@ -42,11 +44,11 @@ if [ ! $conda_folder ] ; then
 fi
 
 # set the intermediate folder
-arg_parse "-s" savu_install "$@"
-if [ ! $savu_install ] ; then
-  savu_install=savu
-elif [ $savu_install = 'master' ] ; then
-  savu_install=savu_master
+arg_parse "-s" savu_recipe "$@"
+if [ ! $savu_recipe ] ; then
+  savu_recipe=savu
+elif [ $savu_recipe = 'master' ] ; then
+  savu_recipe=savu_master
 else
   echo "Unknown Savu installation version."
 fi
@@ -176,8 +178,8 @@ else
 fi
 
 echo "Building Savu..."
-conda build $recipes/$savu_recipe
-savubuild=`conda build $recipes/$savu_recipe --output`
+conda build $DIR/$savu_recipe
+savubuild=`conda build $DIR/$savu_recipe --output`
 echo "Installing Savu..."
 conda install --use-local $savubuild
 
@@ -314,10 +316,8 @@ do
   fi
 done   
 
-
 echo -e "\nTo run Savu type 'source $savu_setup' to set relevant paths every time you open a new terminal."
 echo -e "Alternatively, if you are using the Modules system, see $DIR/module_template for an example module file." 
-
 
 echo -e "*************** SAVU INSTALLATION COMPLETE! ******************\n"
 echo -e "    ......Thank you for running the Savu installer......\n"
@@ -326,5 +326,4 @@ echo -e "=============================================================\n"
 # have a look at .... for the list of instructions above. (inside the downloaded folder).
 # Create a README.txt inside Savu/install/savu_install/README.txt
 
-#path_remove ()  { export PATH=`echo -n $PATH | awk -v RS=: -v ORS=: '$0 != "'$1'"' | sed 's/:$//'`; }
 

@@ -1,11 +1,17 @@
-Installing Savu at Diamond
-==========================
+Installing Savu
+===============
 
-(Savu requires openmpi...)
+Requirements: 
+    - An MPI implementation (tested with openmpi 2.0.1) 
+    - fftw (tested with 3.3.3)
+    - cuda (tested with 7.0)
 
-1. :download:`Download savu version 2.0 <../../install/2_0_install/savu_v2.0.tar.gz>` and unzip.
 
-2. >>> bash /path/to/savu_v2/savu_installer.sh
+1. Download the latest version of :download:`savu <../../install/2_0_install/savu_v2.0.tar.gz>` and unzip
+the folder `savu_v2.0`.
+
+2. >>> bash savu_v2.0/savu_installer.sh
+
    and follow the instructions for installation.
 
 3. To run savu... (updating installer scripts etc.)

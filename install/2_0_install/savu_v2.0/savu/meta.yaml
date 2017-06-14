@@ -13,6 +13,8 @@ requirements:
 
 build:
   preserve_egg_dir: True
+  script_env:
+    - FACILITY
 
 about:
   home: https://github.com/diamondlightsource/Savu
