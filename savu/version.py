@@ -23,10 +23,8 @@ Get the Savu version
 import os
 
 path = os.path.abspath(os.path.dirname(__file__))
-if 'Savu/savu' in path:
-    path = path + '/../install/'
-else:
-    path = path + '/install/'
+thepath = path + '/../install/'
+thepath = thepath if os.path.exists(thepath) else path + '/install/'
 
 with open(path + 'latest_version.txt', 'r') as f:
     version_file = f.readline().strip()
