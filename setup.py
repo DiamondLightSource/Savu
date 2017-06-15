@@ -110,14 +110,14 @@ setup(name='savu',
                         'data/image_test/tiffs/*'],
                     'lib': ['*.so'],
                     'mpi': ['dls/*.sh'],
+                    'install': 'latest_version.txt.',
                     __install__: ['*.txt'],
                     __install__ + '.conda-recipes': [
                         'hdf5/*',
                         'h5py/*',
                         'savu/*',
                         'xraylib/*',
-                        'astra/*'],
-                    __install__: 'latest_version.txt'},
+                        'astra/*']},
 
       include_package_data=True,
       zip_safe=False)
