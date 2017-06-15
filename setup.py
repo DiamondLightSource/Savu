@@ -116,7 +116,8 @@ setup(name='savu',
                         'h5py/*',
                         'savu/*',
                         'xraylib/*',
-                        'astra/*']},
+                        'astra/*'],
+                    __install__: 'latest_version.txt'},
 
       include_package_data=True,
       zip_safe=False)
