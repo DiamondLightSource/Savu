@@ -167,16 +167,6 @@ echo
 
 conda env update -n root -f $DIR/environment.yml
 
-# check anaconda distribution
-ana_path=$(command -v anaconda)
-if ! [ "$ana_path" ]; then
-    echo "ERROR: I require anaconda but I can't find it.  Check /path/to/anaconda/bin is in your PATH."
-    exit 1
-else
-    ana_path=$(python -c "import sys; print sys.prefix")
-    echo "Using anaconda:" $ana_path
-fi
-
 echo "Building Savu..."
 conda build $DIR/$savu_recipe
 savubuild=`conda build $DIR/$savu_recipe --output`

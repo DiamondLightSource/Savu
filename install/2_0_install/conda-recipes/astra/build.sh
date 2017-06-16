@@ -4,7 +4,7 @@ nvcc=`command -v nvcc`
 cuda=${nvcc%/bin/nvcc}
 
 ana_path=`command -v savu`
-prefix=${ana_path%/bin/anaconda}/lib/python2.7/site-packages/astra
+prefix=${ana_path%/bin/savu}/lib/python2.7/site-packages/astra
 
 cd build/linux
 
