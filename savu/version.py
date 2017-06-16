@@ -28,7 +28,6 @@ thepath = thepath if os.path.exists(thepath) else path + '/install/'
 
 with open(thepath + 'latest_version.txt', 'r') as f:
     version_file = f.readline().strip()
-    with open(thepath + version_file, 'r') as f2:
-        __version__ = f2.readline().strip()
+    __version__ = version_file.split('savu_v')[1].split('/')[0]
 
 __install__ = 'install/' + '_'.join(__version__.split('.')) + '_install'
