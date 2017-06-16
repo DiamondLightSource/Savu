@@ -137,16 +137,16 @@ if [ ! $interfolder ] ; then
   interfolder=$outfolder
 fi
 
-#qsub -jsv /dls_sw/apps/sge/common/JSVs/tomo_recon_test.pl \
-#     -N $outname -j y -o $interfolder -e $interfolder -pe openmpi $M -l exclusive \
-#     -l infiniband -l gpu=$nGPUs -l gpu_arch=$gpu_arch -q $cluster $filepath $version $savupath $datafile \
-#     $processfile $outpath $nCoresPerNode $nGPUs $options -c \
-#     -f $outfolder -s cs04r-sc-serv-14 -l $outfolder > /dls/tmp/savu/$USER.out
-
-qsub -N $outname -j y -o $interfolder -e $interfolder -pe openmpi $M -l exclusive \
-     -l infiniband -l gpu=$nGPUs -l gpu_arch=$gpu_arch -q $cluster -P tomography $filepath $version $savupath $datafile \
+qsub -jsv /dls_sw/apps/sge/common/JSVs/tomo_recon_test.pl \
+     -N $outname -j y -o $interfolder -e $interfolder -pe openmpi $M -l exclusive \
+     -l infiniband -l gpu=$nGPUs -l gpu_arch=$gpu_arch -q $cluster $filepath $version $savupath $datafile \
      $processfile $outpath $nCoresPerNode $nGPUs $options -c \
      -f $outfolder -s cs04r-sc-serv-14 -l $outfolder > /dls/tmp/savu/$USER.out
+
+#qsub -N $outname -j y -o $interfolder -e $interfolder -pe openmpi $M -l exclusive \
+#     -l infiniband -l gpu=$nGPUs -l gpu_arch=$gpu_arch -q $cluster -P tomography $filepath $version $savupath $datafile \
+#     $processfile $outpath $nCoresPerNode $nGPUs $options -c \
+#     -f $outfolder -s cs04r-sc-serv-14 -l $outfolder > /dls/tmp/savu/$USER.out
 
 # get the job number here
 filename=`echo $outname.o`

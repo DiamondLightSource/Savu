@@ -237,7 +237,15 @@ xraylibbuild=`conda build $recipes/xraylib --output`
 echo "Installing xraylib..."
 conda install --use-local $xraylibbuild
 
-#conda install -c ccpi ccpi-reconstruction -c conda-forge
+
+echo "Installing tomopy..."
+conda install -c dgursoy tomopy
+# revert back to MPI versions of HDF5 and h5py
+conda install --use-local $hdf5build
+conda install --use-local $h5pybuild
+
+echo "Installing ccpi-reconstruction..."
+conda install -c ccpi ccpi-reconstruction -c conda-forge
 
 # pycuda not working add this later?
 #if [ "$CUDAHOME" ] ; then
@@ -314,6 +322,8 @@ do
   fi
 done   
 
+
+# what about an example module file?  OR source savu_setup instead (adding the paths from savu_setup).
 echo -e "\nTo run Savu type 'source $savu_setup' to set relevant paths every time you open a new terminal."
 echo -e "Alternatively, if you are using the Modules system, see $DIR/module_template for an example module file." 
 
@@ -323,5 +333,4 @@ echo -e "=============================================================\n"
 
 # have a look at .... for the list of instructions above. (inside the downloaded folder).
 # Create a README.txt inside Savu/install/savu_install/README.txt
-
 
