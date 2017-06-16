@@ -5,8 +5,8 @@ mpicc=$(command -v mpicc)
 mpi=`dirname $mpicc`
 
 # set anaconda distribution
-ana_path=$(command -v anaconda)
-ana_path=${ana_path%/bin/anaconda}
+ana_path=$(command -v savu)
+ana_path=${ana_path%/bin/savu}
 hdf5_version=1.10.0
 hdf5_build_no=100
 

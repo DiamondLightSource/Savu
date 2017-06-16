@@ -227,7 +227,6 @@ xraylibbuild=`conda build $recipes/xraylib --output`
 echo "Installing xraylib..."
 conda install --use-local $xraylibbuild
 
-
 echo "Installing tomopy..."
 conda install -c dgursoy tomopy
 # revert back to MPI versions of HDF5 and h5py
@@ -298,19 +297,19 @@ fi
 echo -e "\n************** MPI local tests complete ******************\n"
 
 
-while true
-do
-  read  -n 1 -p "Are you installing Savu for cluster use? (y/n): " input
-  if [ "$input" = "y" ]; then
-    echo -e "To run Savu across a cluster you will need to update the savu laucher scripts:"
-    echo -e "savu_launcher.sh"
-    echo -e "savu_mpijob.sh"
-    break    
-  elif [ "$input" = "n" ]; then
-    echo -e "\nYour input was unknown.\n"
-    continue
-  fi
-done   
+#while true
+#do
+#  read  -n 1 -p "Are you installing Savu for cluster use? (y/n): " input
+#  if [ "$input" = "y" ]; then
+#    echo -e "To run Savu across a cluster you will need to update the savu laucher scripts:"
+#    echo -e "savu_launcher.sh"
+#    echo -e "savu_mpijob.sh"
+#    break    
+#  elif [ "$input" = "n" ]; then
+#    echo -e "\nYour input was unknown.\n"
+#    continue
+#  fi
+#done   
 
 
 # what about an example module file?  OR source savu_setup instead (adding the paths from savu_setup).
