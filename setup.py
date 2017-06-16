@@ -112,12 +112,13 @@ setup(name='savu',
                     'mpi': ['dls/*.sh'],
                     'install': ['*.txt'],
                     __install__: ['*.txt'],
-                    __install__ + '.conda-recipes': [
+                    install_pkg + '.conda-recipes': [
                         'hdf5/*',
                         'h5py/*',
                         'savu/*',
                         'xraylib/*',
-                        'astra/*']},
+                        'astra/*',
+                        'mpi4py/*']},
 
       include_package_data=True,
       zip_safe=False)
