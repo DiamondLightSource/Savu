@@ -110,7 +110,7 @@ setup(name='savu',
                         'data/image_test/tiffs/*'],
                     'lib': ['*.so'],
                     'mpi': ['dls/*.sh'],
-                    'install': ['latest_version.txt.'],
+                    'install': ['*.txt'],
                     __install__: ['*.txt'],
                     __install__ + '.conda-recipes': [
                         'hdf5/*',
