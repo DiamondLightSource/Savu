@@ -140,7 +140,7 @@ def setup_exp_and_data(inputs, data, plugin):
     exp = DawnExperiment(get_options())
     data_obj = exp.create_data_object('in_data', inputs['dataset_name'])
     data_obj.data = None
-    if len(inputs['data_dimensions'])==1:
+    if len(inputs['data'].shape)==1:
 #         print data.shape
         if inputs['xaxis_title'] is None or inputs['xaxis_title'].isspace():
             inputs['xaxis_title']='x'
@@ -151,7 +151,7 @@ def setup_exp_and_data(inputs, data, plugin):
         data_obj.add_pattern(plugin.get_plugin_pattern(), core_dims=(1,), slice_dims=(0, ))
         data_obj.add_pattern('SINOGRAM', core_dims=(1,), slice_dims=(0, )) # good to add these two on too
         data_obj.add_pattern('PROJECTION', core_dims=(1,), slice_dims=(0, ))
-    if len(inputs['data_dimensions'])==2:
+    if len(inputs['data'].shape)==2:
         if inputs['xaxis_title'] is None  or inputs['xaxis_title'].isspace():
             print "set x"
             inputs['xaxis_title']='x'
