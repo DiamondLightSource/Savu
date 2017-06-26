@@ -203,7 +203,8 @@ class Plugin(PluginDatasets):
                     value.remove('')
                 except:
                     pass
-                value = [ast.literal_eval(i) for i in value]
+                if isinstance(value[0], str):
+                    value = [ast.literal_eval(i) for i in value]
                 value = map(dtype, value)
             label = key + '_params.' + type(value[0]).__name__
             self.multi_params_dict[len(self.multi_params_dict)] = \

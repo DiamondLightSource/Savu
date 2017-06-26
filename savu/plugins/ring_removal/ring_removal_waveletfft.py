@@ -115,4 +115,4 @@ class RingRemovalWaveletfft(BaseFilter, CpuPlugin):
         return 'SINOGRAM'
 
     def get_max_frames(self):
-        return 16
+        return 'multiple'
