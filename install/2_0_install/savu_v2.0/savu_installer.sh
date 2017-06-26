@@ -220,6 +220,7 @@ site_path=$(python -c "import site; print site.getsitepackages()[0]")
 cp $recipes/astra/astra.pth $site_path
 astra_lib_path=$site_path/astra/lib
 
+
 echo "Building xraylib..."
 conda build $recipes/xraylib
 xraylibbuild=`conda build $recipes/xraylib --output`
@@ -229,12 +230,19 @@ conda install --use-local $xraylibbuild
 
 echo "Installing tomopy..."
 conda install -c dgursoy tomopy
-# revert back to MPI versions of HDF5 and h5py
-conda install --use-local $hdf5build
-conda install --use-local $h5pybuild
+
+echo "Installing pyfai..."
+pip install pyfai
+
+# revert back to newer version of numpy
+conda install numpy=1.13.0
 
 echo "Installing ccpi-reconstruction..."
 conda install -c ccpi ccpi-reconstruction -c conda-forge
+
+# revert back to MPI versions of HDF5 and h5py
+conda install --use-local $hdf5build
+conda install --use-local $h5pybuild
 
 # pycuda not working add this later?
 #if [ "$CUDAHOME" ] ; then
@@ -264,7 +272,7 @@ echo ""export LD_LIBRARY_PATH=$PYTHONHOME/lib:'$LD_LIBRARY_PATH'"" >> $setup_scr
 echo ""export LD_LIBRARY_PATH=$astra_lib_path:'$LD_LIBRARY_PATH'"" >> $setup_script
 if [ "$CUDAHOME" ]; then
   echo ""export PATH=$CUDAHOME/bin:'$PATH'"" >> $setup_script
-  echo ""export LD_LIBRARY_PATH=$CUDAHOME/lib:'$LD_LIBRARY_PATH'"" >> $setup_script
+  echo ""export LD_LIBRARY_PATH=$CUDAHOME/lib64:'$LD_LIBRARY_PATH'"" >> $setup_script
 fi
 if [ "$FFTWHOME" ]; then    
   echo ""export FFTWDIR=$FFTWHOME"" >> $setup_script
@@ -296,6 +304,7 @@ fi
 
 echo -e "\n************** MPI local tests complete ******************\n"
 
+exit 1
 
 #while true
 #do
