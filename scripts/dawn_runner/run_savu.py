@@ -98,8 +98,9 @@ def runSavu(path2plugin, params, metaOnly, inputs, persistence):
     elif metaOnly:
         result['data'] = inputs['data']
 #         print type(result['data'])
-        out_array = plugin_object.process_frames([data])
-
+        print inputs['data'], type(inputs['data']), inputs['data'].shape
+        out_array = plugin_object.process_frames([inputs['data']])
+        print "I AM HERE"
         k=0
 #         print aux.keys()
         for key in aux.keys():
