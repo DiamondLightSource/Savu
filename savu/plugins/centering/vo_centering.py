@@ -131,12 +131,12 @@ class VoCentering(BaseFilter, CpuPlugin):
         righttake = Ncol-1
         search_rad = self.parameters['search_radius']
         if raw_cor <= centerfliplr:
-            lefttake = np.ceil(search_rad+1)
-            righttake = np.floor(2*raw_cor-search_rad-1)
+            lefttake = int(np.ceil(search_rad+1))
+            righttake = int(np.floor(2*raw_cor-search_rad-1))
         else:
-            lefttake = np.ceil(raw_cor-(Ncol-1-raw_cor)+search_rad+1)
-            righttake = np.floor(Ncol-1-search_rad-1)
-        Ncol1 = int(righttake-lefttake + 1)
+            lefttake = int(np.ceil(raw_cor-(Ncol-1-raw_cor)+search_rad+1))
+            righttake = int(np.floor(Ncol-1-search_rad-1))
+        Ncol1 = righttake-lefttake + 1
         mask = self._create_mask(2*Nrow-1, Ncol1,
                                  0.5*self.parameters['ratio']*Ncol)
         numshift = np.int16((2*search_rad)/self.parameters['step'])+1
@@ -150,7 +150,7 @@ class VoCentering(BaseFilter, CpuPlugin):
             sino2a = sino2a*factor1/factor2
             sinojoin = np.vstack((sino, sino2a))
             listmetric[num1] = np.sum(np.abs(fft.fftshift(
-                fft.fft2(sinojoin[:, int(lefttake):int(righttake) + 1])))*mask)
+                fft.fft2(sinojoin[:, lefttake:righttake + 1])))*mask)
             num1 = num1 + 1
         minpos = np.argmin(listmetric)
         rotcenter = raw_cor + listshift[minpos]/2.0
