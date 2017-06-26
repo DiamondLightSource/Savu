@@ -1,8 +1,8 @@
-{% set version = "1.6" %}
+{% set version = "1.8" %}
 
 package:
   name: astra-toolbox
-  version: 1.6
+  version: 1.8
 
 source:
   fn: astra-{{ version }}.tar.bz2

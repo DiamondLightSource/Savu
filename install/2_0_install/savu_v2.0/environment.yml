@@ -23,6 +23,7 @@ dependencies:
 - sympy
 - wheel
 - pywavelets
+- pytest
 - pip:
   - pyreadline
   - appdirs
