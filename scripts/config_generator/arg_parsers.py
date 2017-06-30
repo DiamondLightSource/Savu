@@ -130,13 +130,22 @@ def _save_arg_parser(args, desc):
 
 def _mod_arg_parser(args, desc):
     """ Argument parser for mod command. """
+
+    # required to allow negative values in a list
+    new_args = []
+    for a in args:
+        if len(a.split('[')) > 1:
+            new_args.extend(['--', a])
+        else:
+            new_args.append(a)
+
     parser = ArgumentParser(prog='mod', description=desc)
     param_str = ("The plugin parameter to modify. Either "
                  "'plugin_pos.param_name' or ' plugin_pos.param_no'")
     parser.add_argument("param", help=param_str)
     val_str = ("The plugin parameter value.")
     parser.add_argument("value", nargs='+', help=val_str)
-    return __arg_parser(parser, args)
+    return __arg_parser(parser, new_args)
 
 
 def _set_arg_parser(args, desc):

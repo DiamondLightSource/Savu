@@ -213,7 +213,7 @@ class Plugin(PluginDatasets):
         return value
 
     def get_parameters(self, name):
-        """ Return the a plugin parameter
+        """ Return a plugin parameter
 
         :params str name: parameter name (dictionary key)
         :returns: the associated value in ``self.parameters``
