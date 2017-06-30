@@ -9,8 +9,8 @@ while read -r entry; do
 done < $1
 
 version=${var[0]}
-echo "module loading "$version
-module load $version
+echo "module loading savu/"$version
+module load savu/$version
 module load global/cluster
 
 cluster=high.q@@${var[1]}
@@ -98,10 +98,14 @@ arg_parse "-d" interfolder "$@"
 if [ ! $interfolder ] ; then
   interfolder=$outfolder
 fi
+
+echo $savupath
+
 # gpu_arch = Fermi (com07), Kepler (com10), Pascal (com14)
 qsub -N $outname -j y -o $interfolder -e $interfolder -pe openmpi $processes -l exclusive \
-     -l infiniband -l gpu=$gpus_per_node -l gpu_arch=$gpu_arch -q $cluster -P tomography $filepath $savupath $input_file \
-     $process_file $output_folder $cpus_to_use_per_node $gpus_to_use_per_node $options -c \
+     -l infiniband -l gpu=$gpus_per_node -l gpu_arch=$gpu_arch -q $cluster -P tomography \
+     $filepath $version $savupath $input_file $process_file $output_folder \
+     $cpus_to_use_per_node $gpus_to_use_per_node $options -c \
      -f $outfolder -s cs04r-sc-serv-14 -l $outfolder > /dls/tmp/savu/$USER.out
 
 # get the job number here

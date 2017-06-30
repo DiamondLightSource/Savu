@@ -85,7 +85,7 @@ class CcpiCglsRecon(BaseRecon, CpuPlugin):
         pad = max(p_low, p_high)
         if pad == 0:
             return 0, -1
-        return pad/2-1, -np.ceil(pad/2.0)
+        return int(pad/2-1), int(-np.ceil(pad/2.0))
 
     def get_max_frames(self):
         # this algorithm requires a multiple of 8 frames

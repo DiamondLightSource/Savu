@@ -115,10 +115,11 @@ echo -e "\t The Savu path is:" $savupath
 
 M=$((nNodes*nCoresPerNode))
 
+basename=`basename $datafile`
 # set the output folder
 arg_parse "-f" foldername "$@"
 if [ ! $foldername ] ; then
-  IFS=. read path ext <<<"${datafile##*-}"
+  IFS=. read path ext <<<"${basename##*-}"
   foldername=$(date +%Y%m%d%H%M%S)"_$(basename $path)"
 fi
 outfolder=$outpath/$foldername
