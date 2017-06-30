@@ -98,7 +98,7 @@ class DataCreate(object):
     def __copy_patterns(self, copy_data):
         """ Copy patterns """
         if isinstance(copy_data, DataCreate):
-            patterns = copy_data.get_data_patterns()
+            patterns = copy.deepcopy(copy_data.get_data_patterns())
         else:
             data = copy_data.keys()[0]
             pattern_list = copy_data[data]
