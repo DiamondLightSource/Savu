@@ -145,7 +145,7 @@ def _mod_arg_parser(args, desc):
     parser.add_argument("param", help=param_str)
     val_str = ("The plugin parameter value.")
     parser.add_argument("value", nargs='+', help=val_str)
-    return __arg_parser(parser, args)
+    return __arg_parser(parser, new_args)
 
 
 def _set_arg_parser(args, desc):
