@@ -170,7 +170,7 @@ class VoCentering(BaseFilter, CpuPlugin):
         (Nrow, Ncol) = data[0].shape
         downlevel = 4
         if Ncol>1024:
-            sino_downsp = data[0][0:Ncol:downlevel]
+            sino_downsp = data[0][:,0:Ncol:downlevel]
             sino_cs = filter.gaussian_filter(sino_downsp, (3,1))
             logging.debug("performing coarse search")
             (raw_cor, raw_metric) = self._coarse_search(sino_cs)
