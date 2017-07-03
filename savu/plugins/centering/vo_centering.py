@@ -35,12 +35,13 @@ from savu.data.plugin_list import CitationInformation
 class VoCentering(BaseFilter, CpuPlugin):
     """
     A plugin to calculate the centre of rotation using the Vo Method
-    :u*param ratio: The ratio between the size of object and FOV of \
-        the camera. Default: 2.0.
+
+    :param ratio: The ratio between the size of object and FOV of \
+        the camera. Default: 0.5.
     :param row_drop: Drop lines around vertical center of the \
         mask. Default: 20.
-    :param search_radius: Use for fine searching. Default: 3.
-    :param step: Step of fine searching. Default: 0.2.
+    :param search_radius: Use for fine searching. Default: 6.
+    :param step: Step of fine searching. Default: 0.5.
     :param downsample: The step length over the rotation axis. Default: 1.
     :u*param preview: A slice list of required frames (sinograms) to use in \
     the calulation of the centre of rotation (this will not reduce the data \
@@ -130,12 +131,14 @@ class VoCentering(BaseFilter, CpuPlugin):
         lefttake = 0
         righttake = Ncol-1
         search_rad = self.parameters['search_radius']
+
         if raw_cor <= centerfliplr:
-            lefttake = int(np.ceil(search_rad+1))
-            righttake = int(np.floor(2*raw_cor-search_rad-1))
+            lefttake = np.int16(np.ceil(search_rad+1))
+            righttake = np.int16(np.floor(2*raw_cor-search_rad-1))
         else:
-            lefttake = int(np.ceil(raw_cor-(Ncol-1-raw_cor)+search_rad+1))
-            righttake = int(np.floor(Ncol-1-search_rad-1))
+            lefttake = np.int16(np.ceil(raw_cor-(Ncol-1-raw_cor)+search_rad+1))
+            righttake = np.int16(np.floor(Ncol-1-search_rad-1))
+
         Ncol1 = righttake-lefttake + 1
         mask = self._create_mask(2*Nrow-1, Ncol1,
                                  0.5*self.parameters['ratio']*Ncol)
@@ -160,9 +163,20 @@ class VoCentering(BaseFilter, CpuPlugin):
         # if data is greater than a certain size
         # data = data[0][::self.parameters['step']]
         # Use different smooth filters for coarse and fine search.
-        sino_cs = filter.gaussian_filter(data[0], (3, 1))
-        logging.debug("performing coarse search")
-        (raw_cor, raw_metric) = self._coarse_search(sino_cs)
+
+        (Nrow, Ncol) = data[0].shape
+        downlevel = 4
+        if Ncol>1024:
+            sino_downsp = data[0][:,0:Ncol:downlevel]
+            sino_cs = filter.gaussian_filter(sino_downsp, (3,1))
+            logging.debug("performing coarse search")
+            (raw_cor, raw_metric) = self._coarse_search(sino_cs)
+            raw_cor = raw_cor*downlevel
+        else:
+            sino_cs = filter.gaussian_filter(data[0], (3,1))        
+            logging.debug("performing coarse search")
+            (raw_cor, raw_metric) = self._coarse_search(sino_cs)
+
         logging.debug("performing fine search")
         sino_fs = filter.median_filter(data[0], (2, 2))
         (cor, listmetric) = self._fine_search(sino_fs, raw_cor)
