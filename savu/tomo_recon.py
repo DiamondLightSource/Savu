@@ -29,6 +29,7 @@ import os
 from mpi4py import MPI
 from savu.version import __version__
 
+from savu.core.basic_plugin_runner import BasicPluginRunner
 from savu.core.plugin_runner import PluginRunner
 
 
@@ -61,6 +62,9 @@ def __option_parser():
     # transport mechanism
     parser.add_argument("-t", "--transport", help=hide, default="hdf5")
     # Set logging to cluster mode
+    parser.add_argument("-m", "--mode", help=hide, default="full",
+                        choices=['basic', 'full'])
+    # Set logging to cluster mode
     parser.add_argument("-c", "--cluster", action="store_true", help=hide,
                         default=False)
     # Location of syslog server
@@ -86,7 +90,8 @@ def _set_options(args):
     options = {}
     options['data_file'] = args.in_file
     options['process_file'] = args.process_list
-    options['transport'] = args.transport
+    options['mode'] = args.mode
+    options['transport'] = 'basic' if args.mode == 'basic' else args.transport
     options['process_names'] = args.names
     options['verbose'] = args.verbose
     options['quiet'] = args.quiet
@@ -146,12 +151,14 @@ def main(input_args=None):
 
     options = _set_options(args)
 
+    pRunner = PluginRunner if options['mode'] == 'full' else BasicPluginRunner
+
     if options['nProcesses'] == 1:
-        plugin_runner = PluginRunner(options)
+        plugin_runner = pRunner(options)
         plugin_runner._run_plugin_list()
     else:
         try:
-            plugin_runner = PluginRunner(options)
+            plugin_runner = pRunner(options)
             plugin_runner._run_plugin_list()
         except Exception as error:
             print error.message
