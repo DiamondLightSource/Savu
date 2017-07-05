@@ -31,7 +31,7 @@ import h5py as h5
 class I14FluoLoader(BaseLoader):
     """
     A class to load i14s xrf data
-    :param mono_path: The mono energy. Default: '/entry/instrument/DCM/dcm_energy'. 
+    :param mono_path: The mono energy. Default: '/entry/instrument/beamline/DCM/dcm_energy'. 
     """
 
     def __init__(self, name='I14FluoLoader'):
@@ -76,7 +76,7 @@ class I14FluoLoader(BaseLoader):
             scan_axis[-1] = 'energy'
             scan_axis = [ix +'.units' for ix in scan_axis]
 
-        mono_energy = h5.File(exp.meta_data.get("data_file"))['entry/instrument/beamline/DCM/dcm_energy'][...]
+        mono_energy = h5.File(exp.meta_data.get("data_file"))[self.parameters['mono_path']][...]
 
         data_obj.meta_data.set('mono_energy',mono_energy)
         # axis label
