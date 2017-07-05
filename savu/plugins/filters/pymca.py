@@ -36,7 +36,7 @@ class Pymca(BaseFilter, CpuPlugin):
     """
     crops a spectrum to a range
 
-    :param config: path to the config file. Default: 'Savu/test_data/data/test_config.cfg'.
+    :u*param config: path to the config file. Default: 'Savu/test_data/data/test_config.cfg'.
 
     """
 
@@ -52,6 +52,7 @@ class Pymca(BaseFilter, CpuPlugin):
 
     def process_frames(self, data):
         y = np.expand_dims(data,0)
+        print "yshape", y.shape
         self.b = self.setup_fit(y)
         self.b._McaAdvancedFitBatch__processStack()
         try:
@@ -82,7 +83,9 @@ class Pymca(BaseFilter, CpuPlugin):
 #         print "the output shape in setup is"+str(outputshape)
         
         axis_labels = ['-1.PeakElements.label']
-        pattern_list = ['SINOGRAM', 'PROJECTION']
+        in_patterns = in_dataset[0].get_data_patterns()
+#         pattern_list = ['SINOGRAM', 'PROJECTION']
+        pattern_list = in_patterns.keys()
         fitResult = out_datasets[0]
 
         fitResult.create_dataset(patterns={in_dataset[0]: pattern_list},
