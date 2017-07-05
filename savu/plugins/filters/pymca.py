@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: spectrum_crop
+.. module:: pymca
    :platform: Unix
-   :synopsis: A plugin to crop a spectra
+   :synopsis: A plugin to fit spectral data
 
 .. moduleauthor:: Aaron D. Parsons <scientificsoftware@diamond.ac.uk>
 """
@@ -34,7 +34,7 @@ from PyMca5.PyMcaPhysics.xrf import McaAdvancedFitBatch
 @register_plugin
 class Pymca(BaseFilter, CpuPlugin):
     """
-    crops a spectrum to a range
+    uses pymca to fit spectral data
 
     :u*param config: path to the config file. Default: 'Savu/test_data/data/test_config.cfg'.
 
