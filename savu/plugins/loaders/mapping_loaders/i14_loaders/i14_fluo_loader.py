@@ -80,7 +80,7 @@ class I14FluoLoader(BaseLoader):
 
             data_obj.meta_data.set('mono_energy',mono_energy)
         except KeyError:
-            logging.warn("Monochromator value not found at %s, are you sure this is correct? Continuing anyway..." % self.parameter['mono_path'])
+            logging.warn("Monochromator value not found at %s, are you sure this is correct? Continuing anyway..." % self.parameters['mono_path'])
         # axis label
 #         print "the labels are:"+str(labels)
         data_obj.set_axis_labels(*tuple(scan_axis))
