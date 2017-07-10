@@ -104,7 +104,7 @@ class VoCentering(BaseFilter, CpuPlugin):
         # This image is used for compensating the shift of sino2
         compensateimage = np.zeros((Nrow-1, Ncol), dtype=np.float32)
         # Start coarse search in which the shift step is 1
-        compensateimage[:] = sino[-1]
+        compensateimage[:] = np.flipud(sino)[1:]
         start_shift = self._get_start_shift(centre_fliplr)*2
         list_shift = np.arange(smin, smax + 1)*2 - start_shift
         logging.debug("%s", list_shift)
@@ -169,7 +169,7 @@ class VoCentering(BaseFilter, CpuPlugin):
         # Use different smooth filters for coarse and fine search.
         (Nrow, Ncol) = data[0].shape
         downlevel = 4
-        if Ncol>1024:
+        if Ncol>1800:
             sino_downsp = data[0][:,0:Ncol:downlevel]
             sino_cs = filter.gaussian_filter(sino_downsp, (3,1))
             logging.debug("performing coarse search")
