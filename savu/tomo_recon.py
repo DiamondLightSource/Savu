@@ -55,6 +55,10 @@ def __option_parser():
                         default=False)
     parser.add_argument("-q", "--quiet", action="store_true", dest="quiet",
                         help="Display only Errors and Info.", default=False)
+    # temporary flag to fix lustre issue
+    parser.add_argument("--lustre_workaround", action="store_true",
+                        dest="lustre", help="Avoid lustre segmentation fault",
+                        default=False)
 
     # Hidden arguments
     # process names
@@ -99,6 +103,7 @@ def _set_options(args):
     options['syslog_server'] = args.syslog
     options['syslog_port'] = args.syslog_port
     options['test_state'] = args.test_state
+    options['lustre'] = args.lustre
 
     out_folder_name = \
         args.folder if args.folder else __get_folder_name(options['data_file'])
