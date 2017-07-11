@@ -53,14 +53,18 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
 
     def pre_process(self):
         in_pData = self.get_plugin_in_datasets()[0]
-        shift = self.get_in_datasets()[0].data_info.get('starts')
-        det_y = in_pData.get_data_dimension_by_axis_label('detector_y')
-        det_x = in_pData.get_data_dimension_by_axis_label('detector_x')
+        data = self.get_in_datasets()[0]
+
+        dict_entry = data.get_name() + '_preview_starts'
+        shift = self.exp.meta_data.get(dict_entry)
+
+        det_y = data.get_data_dimension_by_axis_label('detector_y')
+        det_x = data.get_data_dimension_by_axis_label('detector_x')
 
         # If the data is cropped then the centre of distortion must be shifted
         # accordingly, e.g if preview is [:, a:b, c:d] then shift is (a, c)
-        centre = np.array([self.parameters['centre_y'],
-                           self.parameters['centre_x']])
+        centre = np.array([self.parameters['centre_x'],
+                           self.parameters['centre_y']])
         centre[0] -= shift[det_y]
         centre[1] -= shift[det_x]
         # flipping the values
