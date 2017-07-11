@@ -48,6 +48,22 @@ class Chunking(object):
         self.slice1 = None
         self.other = None
 
+    def __lustre_workaround(self, chunks, shape):
+        nChunks_to_create_file = \
+            np.ceil(np.prod(np.array(shape)/np.array(chunks, dtype=np.float)))
+        nProcesses = self.exp.meta_data.get('processes')
+        dims = range(len(shape))
+        chunks = list(chunks)
+        if nChunks_to_create_file < nProcesses:
+            idx = [i for i in dims if shape[i] - chunks[i] > 0 and
+                   chunks[i] > 1]
+            idx = idx if idx else [i for i in dims if chunks[i] > 1]
+            if idx:
+                chunks[idx[0]] = int(np.ceil(chunks[idx[0]]/2.0))
+                return tuple(chunks)
+            else:
+                raise Exception('There is an error in the lustre workaround')
+
     def _calculate_chunking(self, shape, ttype):
         """
         Calculate appropriate chunk sizes for this dataset
@@ -64,6 +80,10 @@ class Chunking(object):
             return True
         else:
             chunks = self.__adjust_chunk_size(chunks, ttype, shape, adjust)
+            # temporary work around for lustre
+            if self.exp.meta_data.get('lustre') is True:
+                chunks = self.__lustre_workaround(chunks, shape)
+
             logging.debug("chunk size %s", chunks)
             return tuple(chunks)
 
