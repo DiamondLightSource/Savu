@@ -102,8 +102,11 @@ def runSavu(path2plugin, params, metaOnly, inputs, persistence):
         out_array = plugin_object.process_frames([inputs['data']])
 
 #         print aux.keys()
-        for k, key in enumerate(aux.keys()):
+
+        for k,key in enumerate(aux.keys()):
             aux[key]=np.array([out_array[k]])# wow really
+
+
         result['auxiliary'] = aux
     t2 = time.time()
     print "time to runSavu = "+str((t2-t1))
