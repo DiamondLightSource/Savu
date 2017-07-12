@@ -11,6 +11,7 @@ import os, sys
 import numpy as np
 from copy import deepcopy as copy
 import time
+from collections import OrderedDict
 
 def runSavu(path2plugin, params, metaOnly, inputs, persistence):
     '''
@@ -63,7 +64,7 @@ def runSavu(path2plugin, params, metaOnly, inputs, persistence):
                 metaOnly = True
 #                 print "AXIS LABELS"+str(axis_values)
                 string_key = axis_labels[chkstring.index(True)]
-                aux = dict.fromkeys(axis_values[string_key])
+                aux = OrderedDict.fromkeys(axis_values[string_key])
                 print aux.keys()
             else:
                 string_key = axis_labels[0]# will it always be the first one?
@@ -99,11 +100,10 @@ def runSavu(path2plugin, params, metaOnly, inputs, persistence):
         result['data'] = inputs['data']
 #         print type(result['data'])
         out_array = plugin_object.process_frames([inputs['data']])
-        k=0
+
 #         print aux.keys()
-        for key in aux.keys():
+        for k, key in enumerate(aux.keys()):
             aux[key]=np.array([out_array[k]])# wow really
-            k+=1
         result['auxiliary'] = aux
     t2 = time.time()
     print "time to runSavu = "+str((t2-t1))
