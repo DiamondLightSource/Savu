@@ -75,10 +75,12 @@ class I14FluoLoader(BaseLoader):
                     data_obj.meta_data.set(axis,axis_data)
             scan_axis[-1] = 'energy'
             scan_axis = [ix +'.units' for ix in scan_axis]
+        try:
+            mono_energy = h5.File(exp.meta_data.get("data_file"))[self.parameters['mono_path']][...]
 
-        mono_energy = h5.File(exp.meta_data.get("data_file"))[self.parameters['mono_path']][...]
-
-        data_obj.meta_data.set('mono_energy',mono_energy)
+            data_obj.meta_data.set('mono_energy',mono_energy)
+        except KeyError:
+            logging.warn("Monochromator value not found at %s, are you sure this is correct? Continuing anyway..." % self.parameters['mono_path'])
         # axis label
 #         print "the labels are:"+str(labels)
         data_obj.set_axis_labels(*tuple(scan_axis))
