@@ -105,42 +105,10 @@ class SliceLists(object):
             sshape = [shape[sslice] for sslice in slice_dirs]
         return sshape
 
-    def _get_slice_dir_index(self, dim, boolean=False):
-        starts, stops, steps, chunks = \
-            self.get_preview().get_starts_stops_steps()
-        if chunks[dim] > 1:
-            dir_idx = np.ravel(np.transpose(self._get_slice_dir_matrix(dim)))
-            if boolean:
-                return self.__get_bool_slice_dir_index(dim, dir_idx)
-            return dir_idx
-        else:
-            fix_dirs, value = self._get_plugin_data()._get_fixed_dimensions()
-            if dim in fix_dirs:
-                return value[fix_dirs.index(dim)]
-            else:
-                return np.arange(starts[dim], stops[dim], steps[dim])
-
-    def __get_bool_slice_dir_index(self, dim, dir_idx):
-        shape = self.data_info.get('orig_shape')[dim]
-        bool_idx = np.ones(shape, dtype=bool)
-        bool_idx[dir_idx] = True
-        return bool_idx
-
-    def _get_slice_dir_matrix(self, dim):
-        starts, stops, steps, chunks = \
-            self.get_preview().get_starts_stops_steps()
-        chunk = chunks[dim]
-        a = np.tile(np.arange(starts[dim], stops[dim], steps[dim]), (chunk, 1))
-        b = np.transpose(np.tile(np.arange(chunk)-chunk/2, (a.shape[1], 1)))
-        dim_idx = a + b
-        if dim_idx[dim_idx < 0].size:
-            raise Exception('Cannot have a negative value in the slice list.')
-        return dim_idx
-
     def _get_core_slices(self, core_dirs):
         core_slice = []
         starts, stops, steps, chunks = \
-            self.get_preview().get_starts_stops_steps()
+            self.data.get_preview().get_starts_stops_steps()
 
         for c in core_dirs:
             if (chunks[c]) > 1:
@@ -159,8 +127,8 @@ class SliceLists(object):
         return np.array(core_slice)
 
     def _banked_list(self, slice_list):
-        shape = self.get_shape()
-        slice_dirs = self.get_slice_dimensions()
+        shape = self.data.get_shape()
+        slice_dirs = self.data.get_slice_dimensions()
         chunk, length, repeat = self.__chunk_length_repeat(slice_dirs, shape)
         banked = self._split_list(slice_list, length[0])
         return banked, length, slice_dirs
@@ -173,7 +141,7 @@ class SliceLists(object):
         return tuple(working_slice)
 
     def _split_list(self, the_list, size):
-            return [the_list[x:x+size] for x in xrange(0, len(the_list), size)]
+        return [the_list[x:x+size] for x in xrange(0, len(the_list), size)]
 
     # This method only works if the split dimensions in the slice list contain
     # slice objects
@@ -222,8 +190,8 @@ class SliceLists(object):
         return full_replace
 
     def _get_frames_per_process(self, slice_list):
-        processes = self.exp.meta_data.get("processes")
-        process = self.exp.meta_data.get("process")
+        processes = self.data.exp.meta_data.get("processes")
+        process = self.data.exp.meta_data.get("process")
         frame_idx = np.arange(len(slice_list))
         try:
             frames = np.array_split(frame_idx, len(processes))[process]
@@ -235,7 +203,7 @@ class SliceLists(object):
     def _pad_slice_list(self, slice_list, inc_start_str, inc_stop_str):
         """ Amend the slice lists to include padding.  Includes variations for
         transfer and process slice lists. """
-        if not self._get_plugin_data().padding:
+        if not self.data._get_plugin_data().padding:
             return slice_list
 
         pad_dict = self._get_plugin_data().padding._get_padding_directions()
@@ -255,7 +223,7 @@ class SliceLists(object):
         return slice_list
 
     def _fix_list_length(self, sl, length):
-        sdir = self.get_slice_dimensions()[0]
+        sdir = self.data.get_slice_dimensions()[0]
         sl = list(sl)
         e = sl[sdir]
 
@@ -266,8 +234,8 @@ class SliceLists(object):
         return tuple(sl)
 
     def _get_local_single_slice_list(self, shape):
-        slice_dirs = self.get_slice_dimensions()
-        core_dirs = np.array(self.get_core_dimensions())
+        slice_dirs = self.data.get_slice_dimensions()
+        core_dirs = np.array(self.data.get_core_dimensions())
         fix = [[]]*2
         core_slice = np.array([slice(None)]*len(core_dirs))
         shape = tuple([shape[i] for i in range(len(shape))])
@@ -299,9 +267,9 @@ class SliceLists(object):
         return grouped
 
     def _get_global_single_slice_list(self, shape):
-        slice_dirs = self.get_slice_dimensions()
-        core_dirs = np.array(self.get_core_dimensions())
-        fix = self._get_plugin_data()._get_fixed_dimensions()
+        slice_dirs = self.data.get_slice_dimensions()
+        core_dirs = np.array(self.data.get_core_dimensions())
+        fix = self.data._get_plugin_data()._get_fixed_dimensions()
         core_slice = self._get_core_slices(core_dirs)
         values = 'self._get_slice_dir_index(slice_dirs[i])'
         index = self._get_slice_dirs_index(slice_dirs, shape, values)
@@ -319,7 +287,7 @@ class SliceLists(object):
         if group_dim is None:
             return slice_list
 
-        steps = self.get_preview().get_starts_stops_steps('steps')
+        steps = self.data.get_preview().get_starts_stops_steps('steps')
         sub_groups = self._split_list(slice_list, max_frames)
         grouped = []
 
@@ -329,3 +297,162 @@ class SliceLists(object):
                 temp[dim] = self._group_dimension(sub, dim, steps[dim])[dim]
             grouped.append(tuple(temp))
         return grouped
+
+
+class LocalData(object):
+    """ The ProcessData class organises the slicing of transferred data to \
+    give the shape requested by a plugin for each run of 'process_frames'.
+    """
+
+    def __init__(self, dtype, transport_data):
+        self.dtype = dtype  # in or out ProcessData object
+        self.td = transport_data
+        self.data = transport_data.data
+        self.pData = self.data._get_plugin_data()
+        self.shape = self.data.get_shape()
+        self.sdir = None
+
+    def _get_dict(self):
+        return self._get_dict_in() if self.dtype == 'in' else \
+            self._get_dict_out()
+
+    def _get_dict_in(self):
+        sl_dict = {}
+        mfp = self.pData._get_max_frames_process()
+        sl = self._get_slice_list()
+
+        # does this do anything?
+        if self.sdir:
+            sl[-1] = self.td._fix_list_length(sl[-1], mfp)
+
+        sl = self.td._pad_slice_list(sl, '0', 'sum(value.values())')
+        sl_dict['process'] = sl
+        return sl_dict
+
+    def _get_dict_out(self):
+        sl_dict = {}
+        sl_dict['process'] = self._get_slice_list()
+        sl_dict['unpad'] = self.__get_unpad_slice_list(len(sl_dict['process']))
+        return sl_dict
+
+    def _get_slice_list(self):
+        """ Splits a file transfer slice list into a list of (padded) slices
+        required for each loop of process_frames.
+        """
+        slice_dirs = self.data.get_slice_dimensions()
+        self.sdir = slice_dirs[0] if len(slice_dirs) > 0 else None
+
+        pData = self.pData
+        mf_process = pData.meta_data.get('max_frames_process')
+        shape = pData.get_shape_transfer()
+        process_ssl = self.td._get_local_single_slice_list(shape)
+        process_gsl = self.td._group_slice_list_in_one_dimension(
+                process_ssl, mf_process, self.sdir)
+        return process_gsl
+
+    def __get_unpad_slice_list(self, reps):
+        sl = [slice(None)]*len(self.pData.get_shape_transfer())
+        if not self.pData.padding:
+            return tuple([tuple(sl)]*reps)
+        pad_dict = self.pData.padding._get_padding_directions()
+        for ddir, value in pad_dict.iteritems():
+            sl[ddir] = slice(value['before'], -value['after'])
+        return tuple([tuple(sl)]*reps)
+
+
+class GlobalData(object):
+    """
+    The TransferData class organises the movement and slicing of the data from
+    file.
+    """
+
+    def __init__(self, dtype, transport):
+        self.dtype = dtype  # in or out TransferData object
+        self.trans = transport
+        self.data = transport.data
+        self.pData = self.data._get_plugin_data()
+        self.shape = self.data.get_shape()
+
+    def _get_dict(self):
+        return self._get_dict_in() if self.dtype == 'in' else \
+            self._get_dict_out()
+
+    def _get_dict_in(self):
+        sl_dict = {}
+        mfp = self.pData._get_max_frames_process()
+        mft = self.pData._get_max_frames_transfer()
+        sl, current = self._get_slice_list(self.shape, current_sl=True)
+        sl_dict['current'], _ = self.trans._get_frames_per_process(current)
+
+        if self.pData._get_boundary_padding():
+            for i in range(len(sl)):
+                sl[i] = self.trans._fix_list_length(sl[i], mfp)
+        else:
+            sl[-1] = self.trans._fix_list_length(sl[-1], mft)
+
+        sl, sl_dict['frames'] = self.trans._get_frames_per_process(sl)
+
+        if self.trans.pad:
+            sl = self.data._pad_slice_list(
+                sl, "-value['before']", "value['after']")
+        sl_dict['transfer'] = sl
+        return sl_dict
+
+    def _get_dict_out(self):
+        sl_dict = {}
+        sl, _ = self._get_slice_list(self.shape)
+        sl_dict['transfer'], _ = self.trans._get_frames_per_process(sl)
+        return sl_dict
+
+    def _get_slice_list(self, shape, current_sl=None):
+        mft = self.pData._get_max_frames_transfer()
+        transfer_ssl = self.trans._get_global_single_slice_list(shape)
+
+        if transfer_ssl is None:
+            raise Exception("Data type %s does not support slicing in "
+                            "directions %s" % (self.get_current_pattern_name(),
+                                               self.get_slice_directions()))
+        slice_dims = self.data.get_slice_dimensions()
+        transfer_gsl = self.trans._group_slice_list_in_multiple_dimensions(
+                transfer_ssl, mft, slice_dims)
+
+        if current_sl:
+            mfp = self.pData._get_max_frames_process()
+            current_sl = self.trans._group_slice_list_in_multiple_dimensions(
+                    transfer_ssl, mfp, slice_dims)
+
+        split_list = self.pData.split
+        transfer_gsl = self.__split_frames(transfer_gsl, split_list) if \
+            split_list else transfer_gsl
+        return transfer_gsl, current_sl
+
+    def _get_padded_data(self, slice_list, end=False):
+        slice_list = list(slice_list)
+        pData = self.pData
+        pad_dims = list(set(self.data.get_core_dimensions() +
+                            (self.data.get_slice_dimensions()[0],)))
+        pad_list = []
+        for i in range(len(slice_list)):
+            pad_list.append([0, 0])
+
+        temp = self.data.data.shape
+        shape = temp if len(temp) == len(slice_list) else self.data.get_shape()
+
+        for dim in range(len(pad_dims)):
+            sl = slice_list[dim]
+            if sl.start < 0:
+                pad_list[dim][0] = -sl.start
+                slice_list[dim] = slice(0, sl.stop, sl.step)
+            diff = sl.stop - shape[dim]
+            if diff > 0:
+                pad_list[dim][1] = diff
+                slice_list[dim] = \
+                    slice(slice_list[dim].start, sl.stop - diff, sl.step)
+
+        data = self.data.data[tuple(slice_list)]
+
+        if np.sum(pad_list):
+            mode = pData.padding.mode if pData.padding else 'edge'
+            temp = np.pad(data, tuple(pad_list), mode=mode)
+            return temp
+        return data

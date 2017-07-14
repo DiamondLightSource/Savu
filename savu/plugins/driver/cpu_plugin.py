@@ -22,9 +22,13 @@
 """
 
 from savu.plugins.driver.plugin_driver import PluginDriver
+from savu.plugins.driver.basic_driver import BasicDriver
+
+import os
+_base = BasicDriver if os.environ['savu_mode'] == 'basic' else PluginDriver
 
 
-class CpuPlugin(PluginDriver):
+class CpuPlugin(_base):
     """
     The base class from which all plugins should inherit.
     """

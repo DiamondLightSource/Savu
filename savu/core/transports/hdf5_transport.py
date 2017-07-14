@@ -21,7 +21,6 @@
 
 """
 
-import logging
 import os
 
 from savu.plugins.savers.utils.hdf5_utils import Hdf5Utils
@@ -33,6 +32,7 @@ class Hdf5Transport(BaseTransport):
 
     def __init__(self):
         super(Hdf5Transport, self).__init__()
+        os.environ['savu_mode'] = 'hdf5'
 
     def _transport_initialise(self, options):
         MPI_setup(options)
@@ -63,78 +63,23 @@ class Hdf5Transport(BaseTransport):
         for i in n_plugins:
             self.exp._set_experiment_for_current_plugin(i)
             self.files.append(
-                self.__get_filenames(self.exp_coll['plugin_dict'][i]))
-            self.__set_file_details(self.files[i])
-            self.__setup_h5_files()  # creates the hdf5 files
+                self._get_filenames(self.exp_coll['plugin_dict'][i]))
+            self._set_file_details(self.files[i])
+            self._setup_h5_files()  # creates the hdf5 files
 
     def _transport_pre_plugin(self):
         count = self.exp.meta_data.get('nPlugin')
-        self.__set_file_details(self.files[count])
+        self._set_file_details(self.files[count])
 
     def _transport_post_plugin(self):
         for data in self.exp.index['out_data'].values():
             if not data.remove:
                 self.exp._barrier()
                 if self.exp.meta_data.get('process') == 0:
+                    self._populate_nexus_file(data)
                     self.hdf5._link_datafile_to_nexus_file(data)
                 self.exp._barrier()
                 self.hdf5._reopen_file(data, 'r')  # reopen file as read-only
 
     def _transport_terminate_dataset(self, data):
         self.hdf5._close_file(data)
-
-    def __setup_h5_files(self):
-        out_data_dict = self.exp.index["out_data"]
-        current_and_next = [0]*len(out_data_dict)
-        if 'current_and_next' in self.exp.meta_data.get_dictionary():
-            current_and_next = self.exp.meta_data.get('current_and_next')
-
-        count = 0
-        for key in out_data_dict.keys():
-            out_data = out_data_dict[key]
-            filename = self.exp.meta_data.get(["filename", key])
-            logging.debug("creating the backing file %s", filename)
-            out_data.backing_file = self.hdf5._open_backing_h5(filename, 'w')
-
-            out_data.group_name, out_data.group = self.hdf5._create_entries(
-                out_data, key, current_and_next[count])
-            count += 1
-
-    def __set_file_details(self, files):
-        self.exp.meta_data.set('link_type', files['link_type'])
-        self.exp.meta_data.set('link_type', {})
-        self.exp.meta_data.set('filename', {})
-        self.exp.meta_data.set('group_name', {})
-        for key in self.exp.index['out_data'].keys():
-            self.exp.meta_data.set(['link_type', key], files['link_type'][key])
-            self.exp.meta_data.set(['filename', key], files['filename'][key])
-            self.exp.meta_data.set(['group_name', key],
-                                   files['group_name'][key])
-
-    def __get_filenames(self, plugin_dict):
-        count = self.exp.meta_data.get('nPlugin') + 1
-        files = {"filename": {}, "group_name": {}, "link_type": {}}
-        for key in self.exp.index["out_data"].keys():
-            name = key + '_p' + str(count) + '_' + \
-                plugin_dict['id'].split('.')[-1] + '.h5'
-            link_type = self.__get_link_type(key)
-            files['link_type'][key] = link_type
-            if link_type == 'final_result':
-                out_path = self.exp.meta_data.get('out_path')
-            else:
-                out_path = self.exp.meta_data.get('inter_path')
-
-            filename = os.path.join(out_path, name)
-            group_name = "%i-%s-%s" % (count, plugin_dict['name'], key)
-            self.exp._barrier()
-            files["filename"][key] = filename
-            files["group_name"][key] = group_name
-
-        return files
-
-    def __get_link_type(self, name):
-        idx = self.exp.meta_data.get('nPlugin')
-        temp = [e for entry in self.data_flow[idx+1:] for e in entry]
-        if name in temp or self.exp.index['out_data'][name].remove:
-            return 'intermediate'
-        return 'final_result'

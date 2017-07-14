@@ -24,17 +24,12 @@
 import os
 import logging
 import copy
-import h5py
-import numpy as np
 from mpi4py import MPI
 
-import savu.core.utils as cu
 import savu.plugins.utils as pu
 from savu.data.plugin_list import PluginList
 from savu.data.data_structures.data import Data
 from savu.data.meta_data import MetaData
-
-NX_CLASS = 'NX_class'
 
 
 class Experiment(object):
@@ -82,8 +77,9 @@ class Experiment(object):
         except KeyError:
             self.index[dtype][name] = Data(name, self)
             data_obj = self.index[dtype][name]
-            bases.append(data_obj._get_transport_data())
-            cu.add_base_classes(data_obj, bases)
+            data_obj._set_transport_data(self.meta_data.get('transport'))
+            #bases.append(data_obj._get_transport_data())
+            #cu.add_base_classes(data_obj, bases)
         return self.index[dtype][name]
 
     def _experiment_setup(self):
@@ -146,7 +142,8 @@ class Experiment(object):
         datasets_list = self.meta_data.plugin_list._get_datasets_list()[count:]
         exp_coll = self._get_experiment_collection()
         self.index['out_data'] = exp_coll['datasets'][count]
-        self._get_current_and_next_patterns(datasets_list)
+        if datasets_list:
+            self._get_current_and_next_patterns(datasets_list)
         self.meta_data.set('nPlugin', count)
 
     def _get_current_and_next_patterns(self, datasets_lists):
@@ -197,13 +194,12 @@ class Experiment(object):
         # populate nexus file with out_dataset information and determine which
         # datasets to remove from the framework.
         finalise['remove'] = []
+        finalise['keep'] = []
         for key, data in self.index['out_data'].iteritems():
             if data.remove is True:
                 finalise['remove'].append(data)
             else:
-                if self.meta_data.get('process') == 0:
-                    self._populate_nexus_file(data)
-                self._barrier()
+                finalise['keep']
 
         # find in datasets to replace
         finalise['replace'] = []
@@ -259,78 +255,3 @@ class Experiment(object):
             logging.log(log_level, "out data (%s) shape = %s", key,
                         value.get_shape())
 
-    def _populate_nexus_file(self, data):
-        filename = self.meta_data.get('nxs_filename')
-        logging.debug("Adding link to file %s", filename)
-
-        with h5py.File(filename, 'a') as nxs_file:
-            nxs_entry = nxs_file['entry']
-            name = data.data_info.get('name')
-            group_name = self.meta_data.get(['group_name', name])
-            link_type = self.meta_data.get(['link_type', name])
-
-            if link_type is 'final_result':
-                plugin_entry = \
-                    nxs_entry.create_group('final_result_' + data.get_name())
-                plugin_entry.attrs[NX_CLASS] = 'NXdata'
-            elif link_type is 'intermediate':
-                link = nxs_entry.require_group(link_type)
-                link.attrs[NX_CLASS] = 'NXcollection'
-                plugin_entry = link.create_group(group_name)
-                plugin_entry.attrs[NX_CLASS] = 'NXdata'
-            else:
-                raise Exception("The link type is not known")
-
-            self.__output_metadata(data, plugin_entry)
-
-    def __output_metadata(self, data, entry):
-        self.__output_axis_labels(data, entry)
-        self.__output_data_patterns(data, entry)
-        self.__output_metadata_dict(data, entry)
-
-    def __output_axis_labels(self, data, entry):
-        axis_labels = data.data_info.get("axis_labels")
-        axes = []
-        count = 0
-        for labels in axis_labels:
-            name = labels.keys()[0]
-            axes.append(name)
-            entry.attrs[name + '_indices'] = count
-
-            try:
-                mData = data.meta_data.get(name)
-            except KeyError:
-                mData = np.arange(data.get_shape()[count])
-
-            if isinstance(mData, list):
-                mData = np.array(mData)
-
-            axis_entry = entry.create_dataset(name, mData.shape, mData.dtype)
-            axis_entry[...] = mData[...]
-            axis_entry.attrs['units'] = labels.values()[0]
-            count += 1
-        entry.attrs['axes'] = axes
-
-    def __output_data_patterns(self, data, entry):
-        logging.debug("Outputting data patterns to file")
-
-        data_patterns = data.data_info.get("data_patterns")
-        entry = entry.create_group('patterns')
-        entry.attrs[NX_CLASS] = 'NXcollection'
-        for pattern in data_patterns:
-            nx_data = entry.create_group(pattern)
-            nx_data.attrs[NX_CLASS] = 'NXparameters'
-            values = data_patterns[pattern]
-            nx_data.create_dataset('core_dims', data=values['core_dims'])
-            nx_data.create_dataset('slice_dims', data=values['slice_dims'])
-
-    def __output_metadata_dict(self, data, entry):
-        logging.debug("Outputting meta data dictionary to file")
-
-        meta_data = data.meta_data.get_dictionary()
-        entry = entry.create_group('meta_data')
-        entry.attrs[NX_CLASS] = 'NXcollection'
-        for mData in meta_data:
-            nx_data = entry.create_group(mData)
-            nx_data.attrs[NX_CLASS] = 'NXdata'
-            nx_data.create_dataset(mData, data=meta_data[mData])

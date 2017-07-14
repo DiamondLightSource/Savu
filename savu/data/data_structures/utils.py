@@ -43,7 +43,6 @@ pattern_list = {"SINOGRAM": 2,
 def _deepcopy_data_object(dObj, new_obj):
     """ Deepcopy data object, associating hdf5 objects that can not be copied.
     """
-    cu.add_base_classes(new_obj, dObj._get_transport_data())
     new_obj.meta_data = dObj.meta_data
     new_obj.pattern_list = copy.deepcopy(dObj.pattern_list)
     new_obj.data_info = copy.deepcopy(dObj.data_info)
@@ -58,6 +57,7 @@ def _deepcopy_data_object(dObj, new_obj):
     new_obj.next_shape = copy.deepcopy(dObj.next_shape)
     new_obj.orig_shape = copy.deepcopy(dObj.orig_shape)
     new_obj.previous_pattern = copy.deepcopy(dObj.previous_pattern)
+    new_obj._set_transport_data(dObj.exp.meta_data.get('transport'))
     return new_obj
 
 

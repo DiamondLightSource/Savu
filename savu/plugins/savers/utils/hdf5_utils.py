@@ -101,6 +101,7 @@ class Hdf5Utils(object):
         except AttributeError:
             pass
 
+        self.exp._barrier()
         group = data.backing_file.create_group(group_name)
         self.exp._barrier()
         shape = data.get_shape()
