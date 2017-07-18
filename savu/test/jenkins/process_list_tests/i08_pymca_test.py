@@ -24,7 +24,8 @@ import unittest
 from savu.test import test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
-
+import h5py as h5
+import os
 
 class I08PymcaTest(unittest.TestCase):
      
@@ -34,12 +35,19 @@ class I08PymcaTest(unittest.TestCase):
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
 
-#     def test_i08_REGRESSION(self):
-#         data_file = tu.get_test_big_data_path('pymca_live_processing_test/i08-10471.nxs')
-#         process_file = tu.get_test_process_path('i08_pymca_process.nxs')
-#         options = tu.set_options(data_file,process_file=process_file)
-#         run_protected_plugin_runner(options)
-        
+    def test_i08_REGRESSION(self):
+        data_file = tu.get_test_big_data_path('pymca_live_processing_test/i08-10471.nxs')
+        process_file = tu.get_test_process_path('i08_pymca_process.nxs')
+        options = tu.set_options(data_file,process_file=process_file)
+        run_protected_plugin_runner(options)
+        f_test = h5.File(options['out_path']+os.sep+options['out_folder']+'_processed.nxs','r') #  the result of this test
+        f_known = h5.File(tu.get_test_big_data_path('pymca_live_processing_test/savu_test_result/.nxs')+os.sep+options['out_folder']+'_processed.nxs','r')#  a known good result from the same data
+        # first we just do a direct comparison of the data. This should be equal exactly.
+        data = '/entry/final_result_fluo/data'
+        elements = 'entry/final_result_fluo/PeakElements'
+        self.assertAlmostEqual(f_test[data][...], f_known[data][...], 6)
+        self.assertSequenceEqual(f_test[elements].values(), f_known[elements].values())
+
 
 if __name__ == "__main__":
     unittest.main()

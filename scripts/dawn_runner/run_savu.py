@@ -65,7 +65,7 @@ def runSavu(path2plugin, params, metaOnly, inputs, persistence):
 #                 print "AXIS LABELS"+str(axis_values)
                 string_key = axis_labels[chkstring.index(True)]
                 aux = OrderedDict.fromkeys(axis_values[string_key])
-                print aux.keys()
+#                 print aux.keys()
             else:
                 string_key = axis_labels[0]# will it always be the first one?
             if not metaOnly:
