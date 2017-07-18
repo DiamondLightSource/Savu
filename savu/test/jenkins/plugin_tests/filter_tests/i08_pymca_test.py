@@ -26,11 +26,17 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
 
-class I08FluoLoaderTest(unittest.TestCase):
-
+class I08PymcaTest(unittest.TestCase):
+     
     def test_i08(self):
-        data_file = tu.get_test_big_data_path('pymca_live_processing_test/i08-10471.nxs')
-        process_file = tu.get_test_process_path("i08_basic_process.nxs")
+        data_file = tu.get_test_big_data_path('i14-5195.nxs')
+        process_file = tu.get_test_process_path('i14_pymca_process.nxs')
+        run_protected_plugin_runner(tu.set_options(data_file,
+                                                   process_file=process_file))
+
+    def test_i08_regression(self):
+        data_file = tu.get_test_big_data_path('i14-5195.nxs')
+        process_file = tu.get_test_process_path('i14_pymca_process.nxs')
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
 
