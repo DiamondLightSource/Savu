@@ -52,7 +52,6 @@ class Pymca(BaseFilter, CpuPlugin):
 
     def process_frames(self, data):
         y = np.expand_dims(data,0)
-        print "yshape", y.shape
         self.b = self.setup_fit(y)
         self.b._McaAdvancedFitBatch__processStack()
         try:
@@ -86,6 +85,7 @@ class Pymca(BaseFilter, CpuPlugin):
         in_patterns = in_dataset[0].get_data_patterns()
 #         pattern_list = ['SINOGRAM', 'PROJECTION']
         pattern_list = in_patterns.keys()
+
         fitResult = out_datasets[0]
 
         fitResult.create_dataset(patterns={in_dataset[0]: pattern_list},
