@@ -41,7 +41,7 @@ class I08PymcaTest(unittest.TestCase):
         options = tu.set_options(data_file,process_file=process_file)
         run_protected_plugin_runner(options)
         f_test = h5.File(options['out_path']+os.sep+options['out_folder']+'_processed.nxs','r') #  the result of this test
-        f_known = h5.File(tu.get_test_big_data_path('pymca_live_processing_test/savu_test_result/.nxs')+os.sep+options['out_folder']+'_processed.nxs','r')#  a known good result from the same data
+        f_known = h5.File(tu.get_test_big_data_path('pymca_live_processing_test/savu_test_result/test_processed.nxs'),'r')#  a known good result from the same data
         # first we just do a direct comparison of the data. This should be equal exactly.
         data = '/entry/final_result_fluo/data'
         elements = 'entry/final_result_fluo/PeakElements'
