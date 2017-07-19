@@ -33,8 +33,6 @@ class I18FluoLoader(BaseI18MultiModalLoader):
     A class to load tomography data from an NXstxm file
     :param fluo_detector: path to \
         stxm. Default:'entry1/xspress3/AllElementSum'.
-    :param fluo_offset: fluo scale offset. Default: 0.0.
-    :param fluo_gain: fluo gain. Default: 0.01.
 
     """
 
