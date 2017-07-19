@@ -26,6 +26,7 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 import h5py as h5
 import os
+import numpy as np
 
 class I08PymcaTest(unittest.TestCase):
      
@@ -45,7 +46,7 @@ class I08PymcaTest(unittest.TestCase):
         # first we just do a direct comparison of the data. This should be equal exactly.
         data = '/entry/final_result_fluo/data'
         elements = 'entry/final_result_fluo/PeakElements'
-        self.assertSequenceEqual(f_test[data][...], f_known[data][...], delta=0.5)
+        np.testing.assert_array_almost_equal(f_test[data][...], f_known[data][...], 0)
         self.assertSequenceEqual(f_test[elements].values(), f_known[elements].values())
 
 
