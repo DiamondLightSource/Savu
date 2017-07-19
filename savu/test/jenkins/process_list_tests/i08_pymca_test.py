@@ -45,7 +45,7 @@ class I08PymcaTest(unittest.TestCase):
         # first we just do a direct comparison of the data. This should be equal exactly.
         data = '/entry/final_result_fluo/data'
         elements = 'entry/final_result_fluo/PeakElements'
-        self.assertAlmostEqual(f_test[data][...], f_known[data][...], 6)
+        self.assertSequenceEqual(f_test[data][...], f_known[data][...], delta=0.5)
         self.assertSequenceEqual(f_test[elements].values(), f_known[elements].values())
 
 
