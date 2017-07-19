@@ -51,9 +51,9 @@ class I18FluoLoader(BaseI18MultiModalLoader):
         data_obj.set_shape(data_obj.data.shape)
         npts = data_obj.get_shape()[-1]
         mData = data_obj.meta_data
-        gain = self.parameters["fluo_gain"]
-        energy = np.arange(self.parameters["fluo_offset"], gain*npts, gain)
-        mData.set("energy", energy)
+#         gain = self.parameters["fluo_gain"]
+#         energy = np.arange(self.parameters["fluo_offset"], gain*npts, gain)
+        mData.set("energy", np.arange(npts))
         self.set_motors(data_obj, 'fluo')
         self.add_patterns_based_on_acquisition(data_obj, 'fluo')
         
