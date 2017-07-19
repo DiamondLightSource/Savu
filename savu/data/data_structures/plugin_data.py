@@ -29,6 +29,7 @@ import numpy as np
 from fractions import gcd
 
 from savu.data.meta_data import MetaData
+from savu.data.data_structures.data_add_ons import Padding
 
 
 class PluginData(object):
@@ -313,7 +314,7 @@ class PluginData(object):
     def _get_boundary_padding(self):
         return self.boundary_padding
 
-    def __set_no_squeeze(self):
+    def _set_no_squeeze(self):
         self.no_squeeze = True
 
     def _get_no_squeeze(self):
@@ -341,9 +342,11 @@ class PluginData(object):
             n_procs = len(processes)
 
         f_per_p = np.ceil(frames/n_procs)
-        return sdir, shape, frames, n_procs, f_per_p
+        params_dict = {'shape': shape, 'sdir': sdir, 'total_frames': frames,
+                       'mpi_procs': n_procs, 'frames_per_process': f_per_p}
+        return params_dict
 
-    def _log_max_frames(self, mft, mfp, frames, procs, check=True):
+    def __log_max_frames(self, mft, mfp, check=True):
         logging.debug("Setting max frames transfer for plugin %s to %d" %
                       (self._plugin, mft))
         logging.debug("Setting max frames process for plugin %s to %d" %
@@ -354,12 +357,22 @@ class PluginData(object):
         # (((total_frames/mft)/mpi_procs) % 1)
 
     def __check_distribution(self, mft):
-        sdir, shape, nframes, nprocs, _ = self._get_max_frames_parameters()
+        self.params = self._get_max_frames_parameters()
         warn_threshold = 0.85
+        nprocs = self.params['mpi_procs']
+        nframes = self.params['total_frames']
         temp = (((nframes/mft)/float(nprocs)) % 1)
         if temp != 0.0 and temp < warn_threshold:
             logging.warn('UNEVEN FRAME DISTRIBUTION: shape %s, nframes %s ' +
-                         'sdir %s, nprocs %s', shape, nframes, sdir, nprocs)
+                         'sdir %s, nprocs %s', self.params['shape'],
+                         nframes, self.params['sdir'], nprocs)
+
+    def _set_padding_dict(self):
+        if self.padding and not isinstance(self.padding, Padding):
+            self.pad_dict = copy.deepcopy(self.padding)
+            self.padding = Padding(self)
+            for key in self.pad_dict.keys():
+                getattr(self.padding, key)(self.pad_dict[key])
 
     def plugin_data_setup(self, pattern, nFrames, split=None):
         """ Setup the PluginData object.
@@ -374,10 +387,34 @@ class PluginData(object):
         chunks = \
             self.data_obj.get_preview().get_starts_stops_steps(key='chunks')
 
-        nFrames = self.data_obj._calc_max_frames_transfer(nFrames)
-        self.meta_data.set('max_frames_transfer', nFrames)
-        if self._plugin and \
-                (chunks[self.data_obj.get_slice_dimensions()[0]] % nFrames):
+        self.__set_max_frames(nFrames)
+
+        mft = self.meta_data.get('max_frames_transfer')
+        if self._plugin and mft \
+                and (chunks[self.data_obj.get_slice_dimensions()[0]] % mft):
             self._plugin.chunk = True
         self.__set_shape()
         self.split = split
+
+    def __set_max_frames(self, nFrames):
+        self.__perform_checks(nFrames)
+        td = self.data_obj._get_transport_data()
+        mft, mft_shape = td._calc_max_frames_transfer(nFrames)
+        self.meta_data.set('max_frames_transfer', mft)
+        if mft:
+            self._set_shape_transfer(mft_shape)
+        mfp = td._calc_max_frames_process(nFrames)
+        self.meta_data.set('max_frames_process', mfp)
+        self.__log_max_frames(mft, mfp)
+
+        # Retain the shape if the first slice dimension has length 1
+        if mfp == 1 and nFrames == 'multiple':
+            self._set_no_squeeze()
+
+    def __perform_checks(self, nFrames):
+        options = ['single', 'multiple']
+        if not isinstance(nFrames, int) and nFrames not in options:
+            e_str = "The value of nFrames is not recognised.  Please choose "
+            "from 'single' and 'multiple' (or an integer in exceptional "
+            "circumstances)."
+            raise Exception(e_str)

@@ -37,6 +37,7 @@ class BasicTransport(BaseTransport):
         self.h5trans = Hdf5Transport()
         self.data_flow = None
         self.count = 0
+        self.hdf5_flag = True
 
     def _transport_initialise(self, options):
         MPI_setup(options)
@@ -48,7 +49,7 @@ class BasicTransport(BaseTransport):
     def _transport_pre_plugin_list_run(self):
         # loaders have completed now revert back to BasicTransport, so any
         # output datasets created by a plugin will use this.
-        self.hdf5 = Hdf5Utils(self.exp)        
+        self.hdf5 = Hdf5Utils(self.exp)
         self.data_flow = self.exp.meta_data.plugin_list._get_dataset_flow()
         self.exp.meta_data.set('transport', 'basic')
         plist = self.exp.meta_data.plugin_list
@@ -58,19 +59,42 @@ class BasicTransport(BaseTransport):
     def _transport_pre_plugin(self):
         # if this is the final plugin then revert back to Hdf5Transport to
         # output the data to file
-        if self.count == self.n_plugins - 1:
-            self.exp.meta_data.set('transport', 'hdf5')
-            self.__setup_files()
+        trans = self.exp.plugin.fix_transport()
+        if trans == 'hdf5':
+            self.__set_hdf5_transport()
+        elif trans:
+            raise Exception("I'm sorry, basic transport does not support %s as"
+                            " requested by %s" % (trans, self.exp.plugin))
+        elif self.count == self.n_plugins - 1:
+            self.__set_hdf5_transport()
 
     def _transport_post_plugin(self):
+        # revert back to basic if a temporary transport mechanism was used
+        if self.hdf5_flag:
+            self.__unset_hdf5_transport()
+
+        if self.count == self.n_plugins - 2:
+            self.exp.meta_data.set('transport', 'hdf5')
+
         if self.count == self.n_plugins - 1:  # final plugin
             self.h5trans.exp = self.exp
+            self.h5trans.hdf5 = Hdf5Utils(self.exp)
             self.h5trans._transport_post_plugin()
 
         self.count += 1
 
-    def __setup_files(self):
+    def __set_hdf5_transport(self):
+        self.hdf5_flag = True
         self.exp.meta_data.set('transport', 'hdf5')
         files = self._get_filenames(self.final_dict)
         self._set_file_details(files)
         self._setup_h5_files()
+
+    def __unset_hdf5_transport(self):
+        self.exp.meta_data.set('transport', 'basic')
+        self.hdf5_flag = False
+
+    def _transport_terminate_dataset(self, data):
+        if data.backing_file:
+            print "******* the backing file is", data.backing_file
+            self.hdf5._close_file(data)

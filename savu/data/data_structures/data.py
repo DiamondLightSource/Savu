@@ -51,6 +51,7 @@ class Data(DataCreate):
         self.next_shape = None
         self.orig_shape = None
         self.previous_pattern = None
+        self.transport_data = None
 
     def __initialise_data_info(self, name):
         """ Initialise entries in the data_info meta data.
@@ -84,16 +85,19 @@ class Data(DataCreate):
         """
         return self._preview
 
-    def _get_transport_data(self):
+    def _set_transport_data(self, transport):
         """ Import the data transport mechanism
 
         :returns: instance of data transport
         :rtype: transport_data
         """
-        transport = self.exp.meta_data.get("transport")
         transport_data = "savu.data.transport_data." + transport + \
                          "_transport_data"
-        return cu.import_class(transport_data)
+        transport_data = cu.import_class(transport_data)
+        self.transport_data = transport_data(self)
+
+    def _get_transport_data(self):
+        return self.transport_data
 
     def __deepcopy__(self, memo):
         """ Copy the data object.
@@ -381,6 +385,4 @@ class Data(DataCreate):
         :returns: value associated with pattern key ``slice_dims``
         :rtype: tuple
         """
-        temp = self._get_plugin_data()
-        temp2 = temp.get_pattern()
         return self._get_plugin_data().get_pattern().values()[0]['slice_dims']

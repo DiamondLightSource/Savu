@@ -78,6 +78,7 @@ class BasicPluginRunner(object):
 
     def __run_plugin(self, plugin_dict):
         plugin = pu.get_plugin(plugin_dict['id'])
+        self.exp.plugin = plugin
         plugin._main_setup(self.exp, plugin_dict['data'])
 
         self._transport_pre_plugin()

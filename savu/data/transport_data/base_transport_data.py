@@ -22,6 +22,7 @@
 """
 
 import copy
+import logging
 import numpy as np
 
 
@@ -136,16 +137,11 @@ class BaseTransportData(object):
 
     def __get_boundaries(self, nFrames):
         min_mft, max_mft, frame_threshold = self._set_boundaries()
-        if isinstance(nFrames, int) and nFrames > self.max_mft:
+        if isinstance(nFrames, int) and nFrames > max_mft:
             logging.warn("The requested %s frames excedes the maximum "
-                         "preferred of %s." % (nFrames, self.max_mft))
+                         "preferred of %s." % (nFrames, max_mft))
             max_mft = nFrames
         return min_mft, max_mft, frame_threshold
-
-
-
-
-
 
     def _get_slice_dir_index(self, dim, boolean=False):
         starts, stops, steps, chunks = \

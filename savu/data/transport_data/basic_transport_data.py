@@ -48,11 +48,8 @@ class BasicTransportData(BaseTransportData, SliceLists):
 
     def _calc_max_frames_transfer(self, nFrames):
         t1, t2 = self._calc_max_frames_transfer_single(nFrames)
-        print "***************calculating max frames transfer single", t1
         return t1, t2
 
     def _get_padded_data(self, input_slice_list):
         data = self.data.data[input_slice_list]
-        print input_slice_list
-        print data.shape, self.mft, self.data._get_plugin_data().meta_data.get('max_frames_process')
         return data

@@ -183,7 +183,6 @@ class BaseTransport(object):
 
         section = []
         for idx in range(len(data_list)):
-            print "in base transport", data_list[idx]._get_transport_data()
             section.append(data_list[idx]._get_transport_data().
                            _get_padded_data(slice_list[idx]))
         return section
@@ -193,7 +192,6 @@ class BaseTransport(object):
         current_sl = []
         for d in self.pDict['nIn']:
             in_sl = self.pDict['in_sl']['process'][nproc][d]
-            print trans_data[d][in_sl].shape
             data.append(self.pDict['squeeze'][d](trans_data[d][in_sl]))
             entry = ntrans*self.pDict['nProc'] + nproc
             if entry < len(self.pDict['in_sl']['current'][d]):
@@ -234,7 +232,6 @@ class BaseTransport(object):
                 if end:
                     result[idx] = self._remove_excess_data(
                             data_list[idx], result[idx], slice_list[idx])
-                print data_list[idx].data
                 data_list[idx].data[slice_list[idx]] = result[idx]
             else:
                 data_list[idx].data = result[idx]
@@ -313,7 +310,6 @@ class BaseTransport(object):
 
         # Not currently working for basic_transport
         if isinstance(slice_list, slice):
-            print "not removing the excess data"
             return
 
         sl = slice_list[sdir]

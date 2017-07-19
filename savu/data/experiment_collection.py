@@ -71,15 +71,12 @@ class Experiment(object):
 
         :params str dtype: either "in_data" or "out_data".
         """
-        bases = []
         try:
             self.index[dtype][name]
         except KeyError:
             self.index[dtype][name] = Data(name, self)
             data_obj = self.index[dtype][name]
             data_obj._set_transport_data(self.meta_data.get('transport'))
-            #bases.append(data_obj._get_transport_data())
-            #cu.add_base_classes(data_obj, bases)
         return self.index[dtype][name]
 
     def _experiment_setup(self):

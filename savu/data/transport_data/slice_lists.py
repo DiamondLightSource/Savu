@@ -435,8 +435,12 @@ class GlobalData(object):
         for i in range(len(slice_list)):
             pad_list.append([0, 0])
 
-        temp = self.data.data.shape
-        shape = temp if len(temp) == len(slice_list) else self.data.get_shape()
+#        temp = self.data.data.shape
+#        shape = temp if len(temp) == len(slice_list) else self.data.get_shape()
+
+        data_dict = self.data.data_info.get_dictionary()
+        shape = data_dict['orig_shape'] if 'orig_shape' in data_dict.keys() \
+            else self.data.get_shape()
 
         for dim in range(len(pad_dims)):
             sl = slice_list[dim]

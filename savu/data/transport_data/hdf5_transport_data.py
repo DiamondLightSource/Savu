@@ -39,9 +39,9 @@ class Hdf5TransportData(BaseTransportData, SliceLists):
         self.mfp = None
         self.params = None
         if os.environ['savu_mode'] == 'basic':
-            self.max_frames_function = self._calc_max_frames_transfer_multi
-        else:
             self.max_frames_function = self._calc_max_frames_transfer_single
+        else:
+            self.max_frames_function = self._calc_max_frames_transfer_multi
 
     def _get_slice_lists_per_process(self, dtype):
         pData = self.data._get_plugin_data()
@@ -61,5 +61,4 @@ class Hdf5TransportData(BaseTransportData, SliceLists):
         return self.transfer_data._get_padded_data(slice_list, end=False)
 
     def _calc_max_frames_transfer(self, nFrames):
-        print "setting max frames transfer in hdf5 data"
         return self.max_frames_function(nFrames)

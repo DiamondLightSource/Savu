@@ -21,7 +21,6 @@
 """
 
 import copy
-import savu.core.utils as cu
 
 # A dictionary of available patterns (and ranks, needed for dawn)
 pattern_list = {"SINOGRAM": 2,

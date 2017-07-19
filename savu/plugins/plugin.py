@@ -377,6 +377,10 @@ class Plugin(PluginDatasets):
         reps = [i for i in range(len(sl)) if sl[i] == sl[0]]
         return np.diff(reps)[0] if len(reps) > 1 else 1
 
+    def fix_transport(self):
+        """ Return a transport mechanism if a plugin requires a fixed one. """
+        return None
+
     def nInput_datasets(self):
         """
         The number of datasets required as input to the plugin
