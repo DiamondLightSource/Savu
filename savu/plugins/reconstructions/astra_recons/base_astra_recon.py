@@ -18,10 +18,11 @@
    :synopsis: A base for all Astra toolbox reconstruction algorithms
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 """
-import astra
-import numpy as np
+
 import math
 import copy
+import astra
+import numpy as np
 
 from savu.plugins.reconstructions.base_recon import BaseRecon
 from savu.data.plugin_list import CitationInformation

@@ -33,6 +33,7 @@ class Preview(object):
     def __init__(self, data_obj):
         self._data_obj = data_obj
         self.revert_shape = None
+        self.plugin_preview = None
 
     def get_data_obj(self):
         return self._data_obj
@@ -52,20 +53,20 @@ class Preview(object):
         shape = self.get_data_obj().get_shape()
 
         if preview_list:
-            preview_list = self.__add_preview_defaults(preview_list)
+            preview_list = self._add_preview_defaults(preview_list)
             starts, stops, steps, chunks = \
-                self.__get_preview_indices(preview_list)
+                self._get_preview_indices(preview_list)
             shape_change = True
         else:
             starts, stops, steps, chunks = \
                 [[0]*len(shape), shape, [1]*len(shape), [1]*len(shape)]
             shape_change = False
 
-        self.__set_starts_stops_steps(starts, stops, steps, chunks,
-                                      shapeChange=shape_change)
+        self._set_starts_stops_steps(starts, tuple(stops), steps, chunks,
+                                     shapeChange=shape_change)
         self.__check_preview_indices()
 
-    def __add_preview_defaults(self, plist):
+    def _add_preview_defaults(self, plist):
         """ Fill in missing values in preview list entries.
 
         :param: preview list with entries of the form
@@ -93,8 +94,12 @@ class Preview(object):
         self.set_preview([])
         self.revert_shape = None
 
-    def __set_starts_stops_steps(self, starts, stops, steps, chunks,
-                                 shapeChange=True):
+    def _reset_preview(self):
+        self.set_preview([])
+        self.plugin_preview = None
+
+    def _set_starts_stops_steps(self, starts, stops, steps, chunks,
+                                shapeChange=True):
         """ Add previewing params to data_info dictionary and set reduced
         shape.
         """
@@ -108,7 +113,7 @@ class Preview(object):
             slice_list = self._get_preview_slice_list()
             self.get_data_obj().amend_axis_label_values(slice_list)
 
-    def __get_preview_indices(self, preview_list):
+    def _get_preview_indices(self, preview_list):
         """ Get preview_list ``starts``, ``stops``, ``steps``, ``chunks``
         separate components with integer values.
 
@@ -173,11 +178,12 @@ class Preview(object):
         """ Set new shape if data is reduced by previewing.
         """
         dobj = self.get_data_obj()
+        td = dobj._get_transport_data()
         orig_shape = dobj.get_shape()
         dobj.data_info.set('orig_shape', orig_shape)
         new_shape = []
         for dim in range(len(starts)):
-            new_shape.append(np.prod((dobj._get_slice_dir_matrix(dim).shape)))
+            new_shape.append(np.prod((td._get_slice_dir_matrix(dim).shape)))
         dobj.set_shape(tuple(new_shape))
 
     def _get_preview_slice_list(self):

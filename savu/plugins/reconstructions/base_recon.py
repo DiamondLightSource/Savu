@@ -143,7 +143,7 @@ class BaseRecon(Plugin):
         self.frame_angles = angles
 
         dim_sl = sl[self.main_dir]
-        self.frame_cors = self.cor_func(self.cor[dim_sl])
+        self.frame_cors = self.cor_func(self.cor[self.get_global_frame_index()[0]])
         if not self.frame_cors.shape:
             self.frame_cors = np.array([self.centre])
         len_data = len(np.arange(dim_sl.start, dim_sl.stop, dim_sl.step))
@@ -201,7 +201,8 @@ class BaseRecon(Plugin):
         in_dataset, out_dataset = self.get_datasets()
 
         # reduce the data as per data_subset parameter
-        in_dataset[0].get_preview().set_preview(self.parameters['preview'])
+        self.preview_flag = \
+            self.set_preview(in_dataset[0], self.parameters['preview'])
 
         # set information relating to the plugin data
         in_pData, out_pData = self.get_plugin_datasets()
@@ -267,3 +268,12 @@ class BaseRecon(Plugin):
         Should be overridden to perform pre-processing in a child class
         """
         pass
+
+    def executive_summary(self):
+        summary = []
+        if not self.preview_flag:
+            summary.append(("WARNING: Ignoring preview parameters as a preview"
+                            " has already been applied to the data."))
+        if len(summary) > 0:
+            return summary
+        return ["Nothing to Report"]
