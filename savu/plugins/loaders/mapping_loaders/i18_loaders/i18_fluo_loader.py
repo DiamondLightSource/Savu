@@ -31,7 +31,7 @@ from savu.plugins.utils import register_plugin
 class I18FluoLoader(BaseI18MultiModalLoader):
     """
     A class to load tomography data from an NXstxm file
-    :param fluo_detector: path to \
+    :u*param fluo_detector: path to \
         stxm. Default:'entry1/xspress3/AllElementSum'.
 
     """
