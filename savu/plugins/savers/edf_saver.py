@@ -13,11 +13,11 @@
 # limitations under the License.
 
 """
-.. module:: tiff_saver
+.. module:: edf_saver
    :platform: Unix
-   :synopsis: A class to save output in tiff format
+   :synopsis: A class to save xrf output in edf format
 
-.. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
+.. moduleauthor:: Aaron Parsons <scientificsoftware@diamond.ac.uk>
 
 """
 
@@ -92,3 +92,4 @@ class EdfSaver(BaseSaver, CpuPlugin):
 
     def get_pattern(self):
         return "PROJECTION"
+
