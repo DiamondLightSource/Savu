@@ -47,7 +47,7 @@ class I08PymcaTest(unittest.TestCase):
         data = '/entry/final_result_fluo/data'
         elements = 'entry/final_result_fluo/PeakElements'
         np.testing.assert_array_almost_equal(f_test[data][...], f_known[data][...], 0)
-        self.assertSequenceEqual(f_test[elements].values(), f_known[elements].values())
+        self.assertSequenceEqual(f_test[elements][...], f_known[elements][...])
 
 
 if __name__ == "__main__":
