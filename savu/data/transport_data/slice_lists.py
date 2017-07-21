@@ -223,14 +223,16 @@ class SliceLists(object):
         return slice_list
 
     def _fix_list_length(self, sl, length):
-        sdir = self.data.get_slice_dimensions()[0]
+        length = [length] if not isinstance(length, list) else length
+        sdir = self.data.get_slice_dimensions()[0:len(length)]
         sl = list(sl)
-        e = sl[sdir]
 
-        sl_length = len(np.arange(e.start, e.stop, e.step))
-        if sl_length < length:
-            diff = length - sl_length
-            sl[sdir] = slice(e.start, e.stop + diff*e.step, e.step)
+        for i in range(len(sdir)):
+            s = sl[sdir[i]]
+            sl_length = len(np.arange(s.start, s.stop, s.step))
+            if sl_length < length[i]:
+                diff = length[i] - sl_length
+                sl[sdir[i]] = slice(s.start, s.stop + diff*s.step, s.step)
         return tuple(sl)
 
     def _get_local_single_slice_list(self, shape):
@@ -300,7 +302,7 @@ class SliceLists(object):
 
 
 class LocalData(object):
-    """ The ProcessData class organises the slicing of transferred data to \
+    """ The LocalData class organises the slicing of transferred data to \
     give the shape requested by a plugin for each run of 'process_frames'.
     """
 
@@ -362,7 +364,7 @@ class LocalData(object):
 
 class GlobalData(object):
     """
-    The TransferData class organises the movement and slicing of the data from
+    The GlobalData class organises the movement and slicing of the data from
     file.
     """
 
@@ -379,16 +381,12 @@ class GlobalData(object):
 
     def _get_dict_in(self):
         sl_dict = {}
-        mfp = self.pData._get_max_frames_process()
-        mft = self.pData._get_max_frames_transfer()
         sl, current = self._get_slice_list(self.shape, current_sl=True)
         sl_dict['current'], _ = self.trans._get_frames_per_process(current)
 
-        if self.pData._get_boundary_padding():
-            for i in range(len(sl)):
-                sl[i] = self.trans._fix_list_length(sl[i], mfp)
-        else:
-            sl[-1] = self.trans._fix_list_length(sl[-1], mft)
+        sdims = self.data.get_slice_dimensions()
+        dims = [self.pData.get_shape_transfer()[s] for s in sdims]
+        sl[-1] = self.trans._fix_list_length(sl[-1], dims)
 
         sl, sl_dict['frames'] = self.trans._get_frames_per_process(sl)
 
@@ -424,6 +422,7 @@ class GlobalData(object):
         split_list = self.pData.split
         transfer_gsl = self.__split_frames(transfer_gsl, split_list) if \
             split_list else transfer_gsl
+
         return transfer_gsl, current_sl
 
     def _get_padded_data(self, slice_list, end=False):
