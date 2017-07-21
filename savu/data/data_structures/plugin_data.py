@@ -308,12 +308,6 @@ class PluginData(object):
         process_frames. """
         return self.meta_data.get('max_frames_transfer')
 
-    def __set_boundary_padding(self, pad):
-        self.boundary_padding = pad
-
-    def _get_boundary_padding(self):
-        return self.boundary_padding
-
     def _set_no_squeeze(self):
         self.no_squeeze = True
 

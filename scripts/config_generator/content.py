@@ -146,7 +146,8 @@ class Content(object):
                         str_pos = self.plugin_list.plugin_list[pos]['pos']
                         missing.append([name, str_pos])
                         self.remove(pos)
-                if (name == the_list[pos]['name']):
+                        pos -= 1
+                elif (name == the_list[pos]['name']):
                     break
             pos -= 1
 

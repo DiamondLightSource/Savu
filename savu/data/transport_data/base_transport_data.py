@@ -65,7 +65,8 @@ class BaseTransportData(object):
     def _calc_max_frames_transfer_single(self, nFrames):
         """ Only one transfer per process """
         self.params = self.data._get_plugin_data()._get_max_frames_parameters()
-        mft = np.ceil(self.params['total_frames']/float(self.params['mpi_procs']))
+        mft = np.ceil(
+                self.params['total_frames']/float(self.params['mpi_procs']))
         # what size are the slice dims?
         fchoices, size_list = self._get_frame_choices(self.params['sdir'], mft)
         self.mft = mft
