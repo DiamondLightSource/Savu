@@ -50,7 +50,7 @@ class I08PymcaTest(unittest.TestCase):
         outdir = '/tmp/pymca_i08_test/'
         if os.path.exists(outdir):
             shutil.rmtree(outdir)
-        os.makedirs(outdir)
+        os.makedirs(outdir,0777)
         options = tu.set_options(data_file,process_file=process_file,out_path=outdir)
         run_protected_plugin_runner(options)
         change_permissions_recursive(options['out_path'], 777)
