@@ -30,11 +30,11 @@ import numpy as np
 
 class I08PymcaTest(unittest.TestCase):
      
-    def test_i08(self):
-        data_file = tu.get_test_big_data_path('pymca_live_processing_test/i08-10471.nxs')
-        process_file = tu.get_test_process_path('i08_pymca_process.nxs')
-        run_protected_plugin_runner(tu.set_options(data_file,
-                                                   process_file=process_file))
+#     def test_i08(self):
+#         data_file = tu.get_test_big_data_path('pymca_live_processing_test/i08-10471.nxs')
+#         process_file = tu.get_test_process_path('i08_pymca_process.nxs')
+#         run_protected_plugin_runner(tu.set_options(data_file,
+#                                                    process_file=process_file))
 
     def test_i08_REGRESSION(self):
         data_file = tu.get_test_big_data_path('pymca_live_processing_test/i08-10471.nxs')
@@ -46,8 +46,11 @@ class I08PymcaTest(unittest.TestCase):
         # first we just do a direct comparison of the data. This should be equal exactly.
         data = '/entry/final_result_fluo/data'
         elements = 'entry/final_result_fluo/PeakElements'
-        np.testing.assert_array_almost_equal(f_test[data][...], f_known[data][...], 0)
-        self.assertSequenceEqual(f_test[elements][...], f_known[elements][...])
+#         test=np.around(f_test[data][...], decimals=-1)
+#         known=np.around(f_known[data][...], decimals=-1)
+#         self.assertEqual(test, known)
+        np.testing.assert_array_almost_equal(f_test[data][...], f_known[data][...], 0) # this needs to be -1
+        self.assertListEqual(list(f_test[elements][...]), list(f_known[elements][...]))
 
 
 if __name__ == "__main__":
