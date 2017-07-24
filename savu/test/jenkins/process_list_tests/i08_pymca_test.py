@@ -27,6 +27,7 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 import h5py as h5
 import os
 import numpy as np
+import shutil
 
 def change_permissions_recursive(path, mode):
     for root, dirs, files in os.walk(path, topdown=False):
@@ -46,7 +47,11 @@ class I08PymcaTest(unittest.TestCase):
     def test_i08_REGRESSION(self):
         data_file = tu.get_test_big_data_path('pymca_live_processing_test/i08-10471.nxs')
         process_file = tu.get_test_process_path('i08_pymca_process.nxs')
-        options = tu.set_options(data_file,process_file=process_file,out_path='/tmp/pymca_i08_test/')
+        outdir = '/tmp/pymca_i08_test/'
+        if os.path.exists(outdir):
+            shutil.rmtree(outdir)
+        os.makedirs(outdir)
+        options = tu.set_options(data_file,process_file=process_file,out_path=outdir)
         run_protected_plugin_runner(options)
         change_permissions_recursive(options['out_path'], 777)
         
