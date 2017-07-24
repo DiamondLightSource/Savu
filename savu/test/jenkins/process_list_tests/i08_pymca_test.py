@@ -33,8 +33,8 @@ def change_permissions_recursive(path, mode):
     for root, dirs, files in os.walk(path, topdown=False):
         for di in [os.path.join(root,d) for d in dirs]:
             os.chmod(di, mode)
-    for fil in [os.path.join(root, f) for f in files]:
-            os.chmod(fil, mode)
+        for fil in [os.path.join(root, f) for f in files]:
+                os.chmod(fil, mode)
             
 class I08PymcaTest(unittest.TestCase):
      
