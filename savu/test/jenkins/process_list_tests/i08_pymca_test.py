@@ -50,10 +50,10 @@ class I08PymcaTest(unittest.TestCase):
         outdir = '/tmp/pymca_i08_test/'
         if os.path.exists(outdir):
             shutil.rmtree(outdir)
-        os.makedirs(outdir,0777)
+        os.makedirs(outdir,1777)
         options = tu.set_options(data_file,process_file=process_file,out_path=outdir)
         run_protected_plugin_runner(options)
-        change_permissions_recursive(options['out_path'], 777)
+        change_permissions_recursive(options['out_path'], 1777)
         
         f_test = h5.File(options['out_path']+os.sep+options['out_folder']+'_processed.nxs','r') #  the result of this test
         f_known = h5.File(tu.get_test_big_data_path('pymca_live_processing_test/savu_test_result/test_processed.nxs'),'r')#  a known good result from the same data
