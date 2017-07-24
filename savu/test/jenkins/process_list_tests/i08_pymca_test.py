@@ -28,6 +28,13 @@ import h5py as h5
 import os
 import numpy as np
 
+def change_permissions_recursive(path, mode):
+    for root, dirs, files in os.walk(path, topdown=False):
+        for di in [os.path.join(root,d) for d in dirs]:
+            os.chmod(di, mode)
+    for fil in [os.path.join(root, f) for f in files]:
+            os.chmod(fil, mode)
+            
 class I08PymcaTest(unittest.TestCase):
      
 #     def test_i08(self):
@@ -39,8 +46,10 @@ class I08PymcaTest(unittest.TestCase):
     def test_i08_REGRESSION(self):
         data_file = tu.get_test_big_data_path('pymca_live_processing_test/i08-10471.nxs')
         process_file = tu.get_test_process_path('i08_pymca_process.nxs')
-        options = tu.set_options(data_file,process_file=process_file)
+        options = tu.set_options(data_file,process_file=process_file,out_path='/tmp/pymca_i08_test/')
         run_protected_plugin_runner(options)
+        change_permissions_recursive(options['out_path'], 777)
+        
         f_test = h5.File(options['out_path']+os.sep+options['out_folder']+'_processed.nxs','r') #  the result of this test
         f_known = h5.File(tu.get_test_big_data_path('pymca_live_processing_test/savu_test_result/test_processed.nxs'),'r')#  a known good result from the same data
         # first we just do a direct comparison of the data. This should be equal exactly.
@@ -51,6 +60,7 @@ class I08PymcaTest(unittest.TestCase):
 #         self.assertEqual(test, known)
         np.testing.assert_array_almost_equal(f_test[data][...], f_known[data][...], 0) # this needs to be -1
         self.assertListEqual(list(f_test[elements][...]), list(f_known[elements][...]))
+        
 
 
 if __name__ == "__main__":
