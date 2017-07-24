@@ -18,7 +18,7 @@ if [[ ${var[1]} == *"test"* ]]; then
   module load global/testcluster
   test_cluster=true
 else
-  cluster=high.q@@${var[1]}
+  cluster=${var[1]}
   module load global/cluster-quiet
   test_cluster=false
 fi
@@ -108,7 +108,7 @@ if [ ! $interfolder ] ; then
   interfolder=$outfolder
 fi
 
-if [ "$test_cluster" = false ] ; then 
+if [ "$test_cluster" = false ] && [ "$gpus_per_node" -gt 0 ] ; then 
   # gpu_arch = Fermi (com07), Kepler (com10), Pascal (com14)
   qsub -N $outname -j y -o $interfolder -e $interfolder -pe openmpi $processes -l exclusive \
        -l infiniband -l gpu=$gpus_per_node -l gpu_arch=$gpu_arch -q $cluster -P tomography \
@@ -117,7 +117,7 @@ if [ "$test_cluster" = false ] ; then
        $outfolder > /dls/tmp/savu/$USER.out
 else
   qsub -N $outname -j y -o $interfolder -e $interfolder -pe openmpi $processes -l exclusive \
-       -l infiniband -q $cluster -P tomography $filepath $version $savupath $input_file \
+       -l infiniband -q $cluster -P dls $filepath $version $savupath $input_file \
        $process_file $output_folder $cpus_to_use_per_node $gpus_to_use_per_node $options -c \
        -f $outfolder -s cs04r-sc-serv-14 -l $outfolder > /dls/tmp/savu/$USER.out
 fi
