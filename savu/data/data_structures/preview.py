@@ -51,7 +51,6 @@ class Preview(object):
         """
         self.revert_shape = kwargs.get('revert', self.revert_shape)
         shape = self.get_data_obj().get_shape()
-
         preview_list = self.__convert_nprocs(preview_list)
 
         if preview_list:

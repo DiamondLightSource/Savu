@@ -203,12 +203,13 @@ class SliceLists(object):
     def _pad_slice_list(self, slice_list, inc_start_str, inc_stop_str):
         """ Amend the slice lists to include padding.  Includes variations for
         transfer and process slice lists. """
-        if not self.data._get_plugin_data().padding:
+        pData = self.data._get_plugin_data()
+        if not pData.padding:
             return slice_list
 
-        pad_dict = self._get_plugin_data().padding._get_padding_directions()
+        pad_dict = pData.padding._get_padding_directions()
 
-        shape = self.get_shape()
+        shape = self.data.get_shape()
         for ddir, value in pad_dict.iteritems():
             exec('inc_start = ' + inc_start_str)
             exec('inc_stop = ' + inc_stop_str)
@@ -391,7 +392,7 @@ class GlobalData(object):
         sl, sl_dict['frames'] = self.trans._get_frames_per_process(sl)
 
         if self.trans.pad:
-            sl = self.data._pad_slice_list(
+            sl = self.trans._pad_slice_list(
                 sl, "-value['before']", "value['after']")
         sl_dict['transfer'] = sl
         return sl_dict
