@@ -192,11 +192,12 @@ class Experiment(object):
         # datasets to remove from the framework.
         finalise['remove'] = []
         finalise['keep'] = []
+
         for key, data in self.index['out_data'].iteritems():
             if data.remove is True:
                 finalise['remove'].append(data)
             else:
-                finalise['keep']
+                finalise['keep'].append(data)
 
         # find in datasets to replace
         finalise['replace'] = []
