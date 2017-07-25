@@ -67,6 +67,9 @@ def __option_parser():
     # Set logging to cluster mode
     parser.add_argument("-c", "--cluster", action="store_true", help=hide,
                         default=False)
+    # Set beamline log file (for online processing)
+    parser.add_argument("--bllog", dest="bllog", help=hide,
+                        default=None)
     # Location of syslog server
     parser.add_argument("-s", "--syslog", dest="syslog", help=hide,
                         default='localhost')
@@ -99,6 +102,7 @@ def _set_options(args):
     options['syslog_port'] = args.syslog_port
     options['test_state'] = args.test_state
     options['lustre'] = args.lustre
+    options['bllog'] = args.bllog
 
     out_folder_name = \
         args.folder if args.folder else __get_folder_name(options['data_file'])
