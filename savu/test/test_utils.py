@@ -169,6 +169,7 @@ def set_options(path, **kwargs):
     options['link_type'] = 'final_result'
     options['test_state'] = True
     options['lustre'] = False
+    options['bllog'] = None
     return options
 
 
