@@ -52,6 +52,8 @@ class Preview(object):
         self.revert_shape = kwargs.get('revert', self.revert_shape)
         shape = self.get_data_obj().get_shape()
 
+        preview_list = self.__convert_nprocs(preview_list)
+
         if preview_list:
             preview_list = self._add_preview_defaults(preview_list)
             starts, stops, steps, chunks = \
@@ -65,6 +67,15 @@ class Preview(object):
         self._set_starts_stops_steps(starts, tuple(stops), steps, chunks,
                                      shapeChange=shape_change)
         self.__check_preview_indices()
+
+    def __convert_nprocs(self, preview_list):
+        for i in range(len(preview_list)):
+            if preview_list[i] == 'nprocs':
+                nprocs = self.get_data_obj().exp.meta_data.get('nProcesses')
+                start = int(np.floor(nprocs/2.0))
+                end = int(np.ceil(nprocs/2.0))
+                preview_list[i] = 'mid-' + str(start) + ':mid+' + str(end)
+        return preview_list
 
     def _add_preview_defaults(self, plist):
         """ Fill in missing values in preview list entries.
@@ -132,6 +143,9 @@ class Preview(object):
             vals = preview_list[i].split(':')
             starts[i], stops[i], steps[i], chunks[i] = \
                 self.__convert_indices(vals, i)
+
+        nprocs = self.get_data_obj().exp.meta_data.get('nProcesses')
+
         return starts, stops, steps, chunks
 
     def __convert_indices(self, idx, dim):
@@ -193,7 +207,7 @@ class Preview(object):
         starts, stops, steps, chunks = self.get_starts_stops_steps()
         if not starts:
             return None
-        
+
         slice_list = []
         for dim in range(len(dobj.get_shape())):
             if chunks[dim] > 1:
