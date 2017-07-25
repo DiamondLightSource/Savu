@@ -50,6 +50,7 @@ class Preview(object):
         {0}
         """
         self.revert_shape = kwargs.get('revert', self.revert_shape)
+        load = kwargs.get('load', False)
         shape = self.get_data_obj().get_shape()
         preview_list = self.__convert_nprocs(preview_list)
 
@@ -63,8 +64,8 @@ class Preview(object):
                 [[0]*len(shape), shape, [1]*len(shape), [1]*len(shape)]
             shape_change = False
 
-        self._set_starts_stops_steps(starts, tuple(stops), steps, chunks,
-                                     shapeChange=shape_change)
+        self.__set_starts_stops_steps(starts, stops, steps, chunks,
+                                      shapeChange=shape_change, load=load)
         self.__check_preview_indices()
 
     def __convert_nprocs(self, preview_list):
@@ -108,8 +109,8 @@ class Preview(object):
         self.set_preview([])
         self.plugin_preview = None
 
-    def _set_starts_stops_steps(self, starts, stops, steps, chunks,
-                                shapeChange=True):
+    def __set_starts_stops_steps(self, starts, stops, steps, chunks,
+                                 shapeChange=True, load=False):
         """ Add previewing params to data_info dictionary and set reduced
         shape.
         """
@@ -122,6 +123,9 @@ class Preview(object):
             self.__set_reduced_shape(starts, stops, steps, chunks)
             slice_list = self._get_preview_slice_list()
             self.get_data_obj().amend_axis_label_values(slice_list)
+        if load:
+            entry = self.get_data_obj().get_name() + '_preview_starts'
+            self.get_data_obj().exp.meta_data.set(entry, starts)
 
     def _get_preview_indices(self, preview_list):
         """ Get preview_list ``starts``, ``stops``, ``steps``, ``chunks``

@@ -147,7 +147,7 @@ class Content(object):
                         missing.append([name, str_pos])
                         self.remove(pos)
                         pos -= 1
-                elif (name == the_list[pos]['name']):
+                if (name == the_list[pos]['name']):
                     break
             pos -= 1
 

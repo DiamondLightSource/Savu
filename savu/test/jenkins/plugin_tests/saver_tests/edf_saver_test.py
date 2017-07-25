@@ -1,5 +1,3 @@
-# Copyright 2014 Diamond Light Source Ltd.
-#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -26,20 +24,15 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
 
-class I08FluoLoaderTest(unittest.TestCase):
+class EdfSaverrTest(unittest.TestCase):
 
-<<<<<<< HEAD
-    @unittest.skip("Permission denied on data folder.")
-    def test_i08(self):
-        data_file = "/dls/i08/data/2017/cm16789-3/nexus/i08-10481.nxs"#tu.get_test_big_data_path('i14-5195.nxs')
-        process_file = "/home/clb02321/DAWN_stable/Savu/Savu/test_data/test_process_lists/i08_basic_process.nxs"
-=======
-    def test_i08(self):
-        data_file = tu.get_test_big_data_path('pymca_live_processing_test/i08-10471.nxs')
-        process_file = tu.get_test_process_path("i08_basic_process.nxs")
->>>>>>> version2.0
+    def test_edf(self):
+        data_file = tu.get_test_big_data_path('pymca_live_processing_test/savu_test_result/test_processed.nxs')
+        process_file = tu.get_test_process_path("i08_edf_saver_process.nxs")
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
 
+
 if __name__ == "__main__":
     unittest.main()
+

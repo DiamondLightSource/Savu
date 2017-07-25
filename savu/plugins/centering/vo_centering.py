@@ -173,7 +173,7 @@ class VoCentering(BaseFilter, CpuPlugin):
             (raw_cor, raw_metric) = self._coarse_search(sino_cs)
             raw_cor = raw_cor*downlevel
         else:
-            sino_cs = filter.gaussian_filter(data[0], (3,1))
+            sino_cs = filter.gaussian_filter(data[0], (3,1))        
             logging.debug("performing coarse search")
             (raw_cor, raw_metric) = self._coarse_search(sino_cs)
 

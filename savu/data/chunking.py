@@ -80,7 +80,6 @@ class Chunking(object):
             return True
         else:
             chunks = self.__adjust_chunk_size(chunks, ttype, shape, adjust)
-
             # temporary work around for lustre
             if self.exp.meta_data.get('lustre') is True:
                 chunks = self.__lustre_workaround(chunks, shape)

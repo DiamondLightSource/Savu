@@ -40,7 +40,7 @@ class Hdf5Utils(object):
         self.info = MPI.Info.Create()
         self.exp = exp
         self.info.Set("romio_ds_write", "disable")  # this setting is required
-        # self.info.Set("romio_ds_read", "disable")
+        self.info.Set("romio_ds_read", "disable")
         # info.Set("romio_cb_read", "disable")
         # info.Set("romio_cb_write", "disable")
 

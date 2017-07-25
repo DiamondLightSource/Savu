@@ -31,10 +31,8 @@ from savu.plugins.utils import register_plugin
 class I18FluoLoader(BaseI18MultiModalLoader):
     """
     A class to load tomography data from an NXstxm file
-    :param fluo_detector: path to \
+    :u*param fluo_detector: path to \
         stxm. Default:'entry1/xspress3/AllElementSum'.
-    :param fluo_offset: fluo scale offset. Default: 0.0.
-    :param fluo_gain: fluo gain. Default: 0.01.
 
     """
 
@@ -53,9 +51,9 @@ class I18FluoLoader(BaseI18MultiModalLoader):
         data_obj.set_shape(data_obj.data.shape)
         npts = data_obj.get_shape()[-1]
         mData = data_obj.meta_data
-        gain = self.parameters["fluo_gain"]
-        energy = np.arange(self.parameters["fluo_offset"], gain*npts, gain)
-        mData.set("energy", energy)
+#         gain = self.parameters["fluo_gain"]
+#         energy = np.arange(self.parameters["fluo_offset"], gain*npts, gain)
+        mData.set("energy", np.arange(npts)*0.01)
         self.set_motors(data_obj, 'fluo')
         self.add_patterns_based_on_acquisition(data_obj, 'fluo')
         

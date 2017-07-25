@@ -62,3 +62,4 @@ class Hdf5TransportData(BaseTransportData, SliceLists):
 
     def _calc_max_frames_transfer(self, nFrames):
         return self.max_frames_function(nFrames)
+
