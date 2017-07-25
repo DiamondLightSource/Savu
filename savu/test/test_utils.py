@@ -156,6 +156,7 @@ def set_options(path, **kwargs):
     options = {}
     options['transport'] = kwargs.get('transport', 'hdf5')
     options['process_names'] = kwargs.get('process_names', 'CPU0')
+    options['nProcesses'] = len(options["process_names"].split(','))
     options['data_file'] = path
     options['process_file'] = kwargs.get('process_file', '')
     options['out_path'] = kwargs.get('out_path', tempfile.mkdtemp())
