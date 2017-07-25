@@ -33,6 +33,7 @@ class BaseTransportData(object):
 
     def __init__(self, data_obj, name='BaseTransportData'):
         self.data = data_obj
+        self.mfp = None
 
     def _get_data_obj(self):
         return self.data
@@ -59,7 +60,7 @@ class BaseTransportData(object):
 
     def _calc_max_frames_process(self, nFrames):
         mfp = 1 if nFrames == 'single' else nFrames if \
-            isinstance(nFrames, int) else self.mfp
+            isinstance(nFrames, int) else self.mfp if self.mfp else self.mft
         return int(mfp)
 
     def _calc_max_frames_transfer_single(self, nFrames):
