@@ -56,7 +56,7 @@ class I08PymcaTest(unittest.TestCase):
         os.makedirs(outdir, stat.S_IRWXO | stat.S_IRWXU)
         options = tu.set_options(data_file,process_file=process_file,out_path=outdir)
         run_protected_plugin_runner(options)
-        change_permissions_recursive(options['out_path'], stat.S_IRWXO | stat.S_IRWXU)
+        change_permissions_recursive(options['out_path'], stat.S_IRWXO | stat.S_IRWXU | stat.S_IRWXG)
         
         f_test = h5.File(options['out_path']+os.sep+options['out_folder']+'_processed.nxs','r') #  the result of this test
         f_known = h5.File(tu.get_test_big_data_path('pymca_live_processing_test/savu_test_result/test_processed.nxs'),'r')#  a known good result from the same data
