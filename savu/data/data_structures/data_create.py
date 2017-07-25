@@ -59,6 +59,10 @@ class DataCreate(object):
         self.dtype = kwargs.get('dtype', np.float32)
         self.remove = kwargs.get('remove', False)
         self.raw = kwargs.get('raw', False)
+        self.transport = kwargs.get('transport', None)
+        if self.transport:
+            self.exp.meta_data.set('transport', self.transport)
+            self._set_transport_data(self.transport)
 
         if len(args) is 1:
             self.__create_dataset_from_object(args[0])

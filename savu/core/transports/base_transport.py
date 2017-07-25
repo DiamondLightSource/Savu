@@ -29,6 +29,7 @@ import logging
 import numpy as np
 
 import savu.core.utils as cu
+import savu.plugins.utils as pu
 
 NX_CLASS = 'NX_class'
 
@@ -64,9 +65,14 @@ class BaseTransport(object):
         """
         pass
 
+    def _transport_load_plugin(self, exp, plugin_dict):
+        """ This method is called before each plugin is loaded """
+        return pu.plugin_loader(exp, plugin_dict)
+
     def _transport_pre_plugin(self):
         """
-        This method is called directly BEFORE each plugin is executed.
+        This method is called directly BEFORE each plugin is executed, but \
+        after the plugin is loaded.
         """
         pass
 
@@ -115,8 +121,8 @@ class BaseTransport(object):
         """
         self.process_setup(plugin)
         pDict = self.pDict
-        result = [np.empty(d._get_plugin_data().get_shape_transfer()) for d in
-                  pDict['out_data']]
+        result = [np.empty(d._get_plugin_data().get_shape_transfer(),
+                           dtype=np.float32) for d in pDict['out_data']]
 
         # loop over the transfer data
         nTrans = pDict['nTrans']

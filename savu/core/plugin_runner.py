@@ -79,7 +79,7 @@ class PluginRunner(object):
         return self.exp
 
     def __run_plugin(self, plugin_dict):
-        plugin = pu.plugin_loader(self.exp, plugin_dict)
+        plugin = self._transport_load_plugin(self.exp, plugin_dict)
 
         #  ********* transport function ***********
         self._transport_pre_plugin()
@@ -100,7 +100,7 @@ class PluginRunner(object):
         self._transport_post_plugin()
 
         for data in finalise['remove'] + finalise['replace']:
-            #  ********* transport function ***********
+            #  ********* transport function ***********z
             self._transport_terminate_dataset(data)
 
         self.exp._reorganise_datasets(finalise)

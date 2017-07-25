@@ -57,15 +57,8 @@ class BasicTransport(BaseTransport):
         self.final_dict = plist.plugin_list[-1]
 
     def _transport_pre_plugin(self):
-        # if this is the final plugin then revert back to Hdf5Transport to
-        # output the data to file
-        trans = self.exp.plugin.fix_transport()
-        if trans == 'hdf5':
-            self.__set_hdf5_transport()
-        elif trans:
-            raise Exception("I'm sorry, basic transport does not support %s as"
-                            " requested by %s" % (trans, self.exp.plugin))
-        elif self.count == self.n_plugins - 1:
+        trans = self.exp.meta_data.get('transport')
+        if self.count == self.n_plugins - 1 or trans == 'hdf5':
             self.__set_hdf5_transport()
 
     def _transport_post_plugin(self):
@@ -96,5 +89,4 @@ class BasicTransport(BaseTransport):
 
     def _transport_terminate_dataset(self, data):
         if data.backing_file:
-            print "******* the backing file is", data.backing_file
             self.hdf5._close_file(data)

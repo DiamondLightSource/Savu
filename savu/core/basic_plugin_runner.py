@@ -69,6 +69,10 @@ class BasicPluginRunner(object):
             self.__run_plugin(plugin_dict)
             count += 1
 
+        # terminate any remaining datasets
+        for data in self.exp.index['in_data'].values():
+            self._transport_terminate_dataset(data)
+
         cu.user_message("***********************")
         cu.user_message("* Processing Complete *")
         cu.user_message("***********************")
@@ -77,7 +81,7 @@ class BasicPluginRunner(object):
         return self.exp
 
     def __run_plugin(self, plugin_dict):
-        plugin = pu.get_plugin(plugin_dict['id'])
+        plugin = self._transport_load_plugin(self.exp, plugin_dict)
         self.exp.plugin = plugin
         plugin._main_setup(self.exp, plugin_dict['data'])
 
