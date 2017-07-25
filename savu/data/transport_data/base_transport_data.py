@@ -59,7 +59,7 @@ class BaseTransportData(object):
 
     def _calc_max_frames_process(self, nFrames):
         mfp = 1 if nFrames == 'single' else nFrames if \
-            isinstance(nFrames, int) else self.mft
+            isinstance(nFrames, int) else self.mfp
         return int(mfp)
 
     def _calc_max_frames_transfer_single(self, nFrames):
@@ -127,7 +127,6 @@ class BaseTransportData(object):
         # closest of fchoices to mfp plus difference as boundary padding
         if not possible:
             mft, _ = self._find_closest_lower(fchoices[::-1], mfp)
-            self.__set_boundary_padding(mfp - mft)
         else:
             mft = self._find_best_frame_distribution(
                 possible[::-1], self.params['total_frames'],
@@ -177,7 +176,7 @@ class BaseTransportData(object):
             raise Exception('Cannot have a negative value in the slice list.')
         return dim_idx
 
-    def __find_closest_lower(self, vlist, value):
+    def _find_closest_lower(self, vlist, value):
         rem = [f if f != 0 else value for f in [m % value for m in vlist]]
         min_val = min(rem, key=lambda x: abs(x-value))
         idx = rem.index(min_val)
@@ -225,7 +224,7 @@ class BaseTransportData(object):
         """ Determine which of the numbers in the list of possible frame
         chunks gives the best distribution of frames per process. """
         multi_list = [(nframes/float(v))/nprocs for v in flist]
-        min_val, closest_lower_idx = self.__find_closest_lower(multi_list, 1)
+        min_val, closest_lower_idx = self._find_closest_lower(multi_list, 1)
         if idx:
             return flist[closest_lower_idx], closest_lower_idx
         return flist[closest_lower_idx]

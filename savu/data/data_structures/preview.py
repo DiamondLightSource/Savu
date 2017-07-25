@@ -204,6 +204,7 @@ class Preview(object):
         """ Amend the axis label values based on the previewing parameters.
         """
         dobj = self.get_data_obj()
+        td = dobj._get_transport_data()
         starts, stops, steps, chunks = self.get_starts_stops_steps()
         if not starts:
             return None
@@ -212,7 +213,7 @@ class Preview(object):
         for dim in range(len(dobj.get_shape())):
             if chunks[dim] > 1:
                 slice_list.append(
-                    np.ravel(np.transpose(dobj._get_slice_dir_matrix(dim))))
+                    np.ravel(np.transpose(td._get_slice_dir_matrix(dim))))
             else:
                 slice_list.append(slice(starts[dim], stops[dim], steps[dim]))
         return slice_list

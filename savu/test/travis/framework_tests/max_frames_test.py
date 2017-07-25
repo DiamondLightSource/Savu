@@ -31,7 +31,8 @@ class MaxFramesTest(unittest.TestCase):
                               processes):
         data.exp.meta_data.set('processes', processes)
         pData.plugin_data_setup(pattern, nFrames)
-        sl_dict = data._get_slice_lists_per_process(dtype)
+        sl_dict = \
+            data._get_transport_data()._get_slice_lists_per_process(dtype)
         return sl_dict
 
     def __assert(self, pData, sl_dict, mft, mfp, nTrans, nProc, nframes=None):
