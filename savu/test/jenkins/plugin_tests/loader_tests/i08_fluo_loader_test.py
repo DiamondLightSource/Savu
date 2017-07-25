@@ -28,6 +28,7 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 
 class I08FluoLoaderTest(unittest.TestCase):
 
+    @unittest.skip("Permission denied on data folder.")
     def test_i08(self):
         data_file = "/dls/i08/data/2017/cm16789-3/nexus/i08-10481.nxs"#tu.get_test_big_data_path('i14-5195.nxs')
         process_file = "/home/clb02321/DAWN_stable/Savu/Savu/test_data/test_process_lists/i08_basic_process.nxs"
