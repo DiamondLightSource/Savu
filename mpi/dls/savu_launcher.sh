@@ -93,6 +93,13 @@ if [ $BIG = true ] ; then
     nNodes=8
     nCoresPerNode=20
     nGPUs=2
+elif [ $PREVIEW = true ] ; then
+    cluster=high.q@@com07
+    gpu_arch=Fermi
+    outname=savu
+    nNodes=1
+    nCoresPerNode=12
+    nGPUs=2
 else
     cluster=high.q@@com10
     gpu_arch=Kepler
@@ -100,9 +107,6 @@ else
     nNodes=4
     nCoresPerNode=20
     nGPUs=4
-    if [ $PREVIEW = true ] ; then
-        nNodes=1
-    fi
 fi
 
 # get the Savu path
