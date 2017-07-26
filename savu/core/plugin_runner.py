@@ -76,6 +76,8 @@ class PluginRunner(object):
         cu.user_message("***********************")
 
         logging.info('Processing complete')
+        if self.exp.meta_data.get('email'):
+            cu.send_email(self.exp.meta_data.get('email'))
         return self.exp
 
     def __run_plugin(self, plugin_dict):
