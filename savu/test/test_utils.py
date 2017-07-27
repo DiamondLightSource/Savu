@@ -170,6 +170,7 @@ def set_options(path, **kwargs):
     options['test_state'] = True
     options['lustre'] = False
     options['bllog'] = None
+    options['email'] = None
     return options
 
 
