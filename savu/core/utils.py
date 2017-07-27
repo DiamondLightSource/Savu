@@ -192,7 +192,7 @@ def _send_email(address):
 
     # me == the sender's email address
     # you == the recipient's email address
-    msg['Subject'] = 'Your Savu job has completed"
+    msg['Subject'] = 'Your Savu job has completed'
     msg['From'] = me
     msg['To'] = you
     
