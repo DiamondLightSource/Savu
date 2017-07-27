@@ -271,6 +271,18 @@ class Plugin(PluginDatasets):
         """ This method is called immediately after post_process(). """
         pass
 
+    def set_preview(self, data, params):
+        if not params:
+            return True
+        preview = data.get_preview()
+        orig_indices = preview.get_starts_stops_steps()
+        no_preview = [[0, 0, 0], data.get_shape(), [1, 1, 1], [1, 1, 1]]
+        if no_preview == orig_indices:
+            data.get_preview().revert_shape = data.get_shape()
+            data.get_preview().set_preview(params)
+            return True
+        return False
+
     def _clean_up(self):
         """ Perform necessary plugin clean up after the plugin has completed.
         """
