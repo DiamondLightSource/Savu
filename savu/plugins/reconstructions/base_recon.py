@@ -105,7 +105,8 @@ class BaseRecon(Plugin):
         if 'centre_of_rotation' in mData.get_dictionary().keys():
             cor = mData.get('centre_of_rotation')
         else:
-            cor = np.ones(inData.get_shape()[pData.get_slice_dimension()])
+            sdirs = inData.get_slice_dimensions()
+            cor = np.ones(np.prod([inData.get_shape()[i] for i in sdirs]))
             cor *= self.parameters['centre_of_rotation']
             #mData.set('centre_of_rotation', cor) see Github ticket
         self.cor = cor
@@ -143,7 +144,10 @@ class BaseRecon(Plugin):
         self.frame_angles = angles
 
         dim_sl = sl[self.main_dir]
-        self.frame_cors = self.cor_func(self.cor[dim_sl])
+
+        global_frames = self.get_global_frame_index()[0][self.count]
+        self.frame_cors = self.cor_func(self.cor[global_frames])
+
         if not self.frame_cors.shape:
             self.frame_cors = np.array([self.centre])
         len_data = len(np.arange(dim_sl.start, dim_sl.stop, dim_sl.step))
