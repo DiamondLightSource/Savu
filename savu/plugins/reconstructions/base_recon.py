@@ -199,10 +199,12 @@ class BaseRecon(Plugin):
 
     def crop_sino(self, sino, cor):
         """  Crop the sinogram so the centre of rotation is at the centre. """
-        start, stop = (0, 0) if '3D' in self.alg else \
-            self.array_pad(cor, sino.shape[self.dim_detX])[::-1]
+        print "cropping the data"
+        pData = self.get_plugin_in_datasets()[0]
+        detX = pData.get_data_dimension_by_axis_label('x', contains=True)
+        start, stop = self.array_pad(cor, sino.shape[detX])[::-1]
         sl = [slice(None)]*len(sino.shape)
-        sl[self.dim_detX] = slice(start, sino.shape[self.dim_detX] - stop)
+        sl[detX] = slice(start, sino.shape[detX] - stop)
         sino = sino[tuple(sl)]
         self.set_mask(sino.shape)
         return sino
@@ -225,8 +227,8 @@ class BaseRecon(Plugin):
         centre_pad = self.keep_sino
         if 'centre_pad' in self.parameters.keys():
             key = self.parameters['centre_pad']
-            centre_pad = self.pad_sino if key is 'pad' else self.crop_sino if \
-                key is 'crop' else self.keep_sino
+            centre_pad = self.pad_sino if key == 'pad' else self.crop_sino if \
+                key == 'crop' else self.keep_sino
         return centre_pad
 
     def __set_pad_amount(self, pad_amount):
@@ -234,6 +236,15 @@ class BaseRecon(Plugin):
 
     def get_pad_amount(self):
         return self.base_pad_amount
+
+    def get_fov_fraction(self, sino, cor):
+        """ Get the fraction of the original FOV that can be reconstructed due\
+        to offset centre """
+        pData = self.get_plugin_in_datasets()[0]
+        detX = pData.get_data_dimension_by_axis_label('x', contains=True)
+        original_length = sino.shape[detX]
+        shift = self.get_centre_shift(sino, cor)
+        return (original_length-shift)/float(original_length)
 
     def get_angles(self):
         """ Get the angles associated with the current sinogram(s).

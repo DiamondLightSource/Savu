@@ -48,8 +48,10 @@ class TomopyRecon(BaseRecon, CpuPlugin):
         ospml_hybrid|ospml_quad|pml_hybrid|pml_quad. Default: 0.0.
     :param n_iterations: Number of iterations, NOT valid for \
         fbp|gridrec. Default: 10.
-    :~param init_vol: Hidden parameter - not required. Default: None.
-    :~param sino_pad: Hidden parameter - not required. Default: False.
+    :param ratio: Ratio of the masks diameter in pixels to the smallest edge\
+        size along given axis. Default: 0.95.
+    :~param init_vol: Hidden unrequired parameter. Default: None.
+    :*param centre_pad: Hidden fixed parameter. Default: 'pad'.
     """
 
     def __init__(self):
@@ -74,6 +76,7 @@ class TomopyRecon(BaseRecon, CpuPlugin):
         recon = tomopy.recon(sino, np.deg2rad(angles), center=cors[0],
                              ncore=1, algorithm=self.alg, init_recon=init,
                              **self.kwargs)
+
         recon = tomopy.circ_mask(recon, axis=0, ratio=0.95)
         return np.transpose(recon, (1, 0, 2))
 
