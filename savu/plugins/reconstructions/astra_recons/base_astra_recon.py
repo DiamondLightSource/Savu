@@ -61,7 +61,8 @@ class BaseAstraRecon(BaseRecon):
             shape = (in_data.get_shape()[dim_detX],
                      self.parameters['n_iterations'])
             label = ['vol_y.voxel', 'iteration.number']
-            pattern = {'name': 'SINOGRAM', 'slice_dims': (0,), 'core_dims': (1,)}
+            pattern = {'name': 'SINOGRAM', 'slice_dims': (0,),
+                       'core_dims': (1,)}
             out_dataset[1].create_dataset(axis_labels=label, shape=shape)
             out_dataset[1].add_pattern(pattern['name'],
                                        slice_dims=pattern['slice_dims'],
@@ -72,8 +73,6 @@ class BaseAstraRecon(BaseRecon):
     def pre_process(self):
         self.alg = self.parameters['reconstruction_type']
         self.iters = self.parameters['n_iterations']
-        self.fix_sino = \
-            self.pad_sino if self.parameters['centre_pad'] else self.crop_sino
 
         if '3D' in self.alg:
             self.setup_3D()
@@ -92,9 +91,9 @@ class BaseAstraRecon(BaseRecon):
         self.sino_shape = pData.get_shape()
         self.nDims = len(self.sino_shape)
         self.nCols = self.sino_shape[self.dim_detX]
-        self.__set_mask(self.sino_shape)
+        self.set_mask(self.sino_shape)
 
-    def __set_mask(self, shape):
+    def set_mask(self, shape):
         l = self.sino_shape[self.dim_detX]
         c = np.linspace(-l/2.0, l/2.0, l)
         x, y = np.meshgrid(c, c)
@@ -117,13 +116,12 @@ class BaseAstraRecon(BaseRecon):
         # create volume geom
         vol_geom = astra.create_vol_geom(vol_shape)
         # create projection geom
-        fix_sino = self.fix_sino(sino, cor[0])
-        det_width = fix_sino.shape[self.dim_detX]
+        det_width = sino.shape[self.dim_detX]
         proj_geom = astra.create_proj_geom('parallel', 1.0, det_width, angles)
-        fix_sino = np.transpose(fix_sino, (self.dim_rot, self.dim_detX))
+        sino = np.transpose(sino, (self.dim_rot, self.dim_detX))
 
         # create sinogram id
-        sino_id = astra.data2d.create("-sino", proj_geom, fix_sino)
+        sino_id = astra.data2d.create("-sino", proj_geom, sino)
         # create reconstruction id
         if init:
             rec_id = astra.data2d.create('-vol', vol_geom, init)
@@ -180,42 +178,16 @@ class BaseAstraRecon(BaseRecon):
         if proj_id:
             astra.projector.delete(proj_id)
 
-    def pad_sino(self, sino, cor):
-        centre_pad = (0, 0) if '3D' in self.alg else \
-            self.array_pad(cor, sino.shape[self.dim_detX])
-        sino_width = sino.shape[self.dim_detX]
-        new_width = sino_width + max(centre_pad)
-        sino_pad = \
-            int(math.ceil(float(sino_width)/new_width * self.sino_pad)/2)
-        pad = np.array([sino_pad]*2) + centre_pad
-        pad_tuples = [(0, 0)]*(len(sino.shape)-1)
-        pad_tuples.insert(self.dim_detX, tuple(pad))
-        return np.pad(sino, tuple(pad_tuples), mode='edge')
-
-    def crop_sino(self, sino, cor):
-        start, stop = (0, 0) if '3D' in self.alg else \
-            self.array_pad(cor, sino.shape[self.dim_detX])[::-1]
-        sl = [slice(None)]*len(sino.shape)
-        sl[self.dim_detX] = slice(start, sino.shape[self.dim_detX] - stop)
-        sino = sino[tuple(sl)]
-        self.__set_mask(sino.shape)
-        return sino
-
-    def array_pad(self, ctr, nPixels):
-        width = nPixels - 1.0
-        alen = ctr
-        blen = width - ctr
-        mid = (width-1.0)/2.0
-        shift = round(abs(blen-alen))
-        p_low = 0 if (ctr > mid) else shift
-        p_high = shift + 0 if (ctr > mid) else 0
-        return np.array([int(p_low), int(p_high)])
-
     def _get_single(self):
         return 'single'
 
     def _get_multiple(self):
         return 'multiple'
+
+    def get_sino_centre_method(self):
+        method = \
+            self.pad_sino if self.parameters['centre_pad'] else self.crop_sino
+        return method
 
     def get_citation_information(self):
         cite_info1 = CitationInformation()

@@ -60,6 +60,7 @@ class BaseRecon(Plugin):
         self.frame_cors = None
         self.frame_init_data = None
         self.centre = None
+        self.base_pad_amount = None
 
     def base_dynamic_data_info(self):
         if 'init_vol' in self.parameters.keys() and \
@@ -97,6 +98,7 @@ class BaseRecon(Plugin):
             self.parameters['outer_pad'] else self.set_function(False)
 
         self.range = self.parameters['force_zero']
+        self.fix_sino = self.get_sino_centre_method()
 
     def get_vol_shape(self):
         return self.br_vol_shape
@@ -146,10 +148,13 @@ class BaseRecon(Plugin):
         dim_sl = sl[self.main_dir]
 
         global_frames = self.get_global_frame_index()[0][self.count]
-        self.frame_cors = self.cor_func(self.cor[global_frames])
 
+        self.frame_cors = self.cor_func(self.cor[[global_frames]])
+
+        # for extra padded frames that make up the numbers
         if not self.frame_cors.shape:
             self.frame_cors = np.array([self.centre])
+
         len_data = len(np.arange(dim_sl.start, dim_sl.stop, dim_sl.step))
 
         missing = [self.centre]*(len(self.frame_cors) - len_data)
@@ -157,7 +162,7 @@ class BaseRecon(Plugin):
 
         self.frame_init_data = init
 
-        data[0] = self.sino_func(data[0])
+        data[0] = self.fix_sino(self.sino_func(data[0]), self.frame_cors[0])
         return data
 
     def base_process_frames_after(self, data):
@@ -167,6 +172,68 @@ class BaseRecon(Plugin):
         if upper_range is not None:
             data[data > upper_range] = 0
         return data
+
+    def pad_sino(self, sino, cor):
+        """  Pad the sinogram so the centre of rotation is at the centre. """
+        pData = self.get_plugin_in_datasets()[0]
+        detX = pData.get_data_dimension_by_axis_label('x', contains=True)
+        pad = self.get_centre_offset(sino, cor, detX)
+        pad_tuples = [(0, 0)]*(len(sino.shape)-1)
+        pad_tuples.insert(detX, tuple(pad))
+        self.__set_pad_amount(max(pad))
+        return np.pad(sino, tuple(pad_tuples), mode='edge')
+
+    def get_centre_offset(self, sino, cor, detX):
+        centre_pad = self.array_pad(cor, sino.shape[detX])
+        sino_width = sino.shape[detX]
+        new_width = sino_width + max(centre_pad)
+        sino_pad = \
+            int(math.ceil(float(sino_width)/new_width * self.sino_pad)/2)
+        pad = np.array([sino_pad]*2) + centre_pad
+        return pad
+
+    def get_centre_shift(self, sino, cor):
+        pData = self.get_plugin_in_datasets()[0]
+        detX = pData.get_data_dimension_by_axis_label('x', contains=True)
+        return max(self.get_centre_offset(sino, cor, detX))
+
+    def crop_sino(self, sino, cor):
+        """  Crop the sinogram so the centre of rotation is at the centre. """
+        start, stop = (0, 0) if '3D' in self.alg else \
+            self.array_pad(cor, sino.shape[self.dim_detX])[::-1]
+        sl = [slice(None)]*len(sino.shape)
+        sl[self.dim_detX] = slice(start, sino.shape[self.dim_detX] - stop)
+        sino = sino[tuple(sl)]
+        self.set_mask(sino.shape)
+        return sino
+
+    def array_pad(self, ctr, nPixels):
+        width = nPixels - 1.0
+        alen = ctr
+        blen = width - ctr
+        mid = (width-1.0)/2.0
+        shift = round(abs(blen-alen))
+        p_low = 0 if (ctr > mid) else shift
+        p_high = shift + 0 if (ctr > mid) else 0
+        return np.array([int(p_low), int(p_high)])
+
+    def keep_sino(self, sino, cor):
+        """ No change to the sinogram """
+        return sino
+
+    def get_sino_centre_method(self):
+        centre_pad = self.keep_sino
+        if 'centre_pad' in self.parameters.keys():
+            key = self.parameters['centre_pad']
+            centre_pad = self.pad_sino if key is 'pad' else self.crop_sino if \
+                key is 'crop' else self.keep_sino
+        return centre_pad
+
+    def __set_pad_amount(self, pad_amount):
+        self.base_pad_amount = pad_amount
+
+    def get_pad_amount(self):
+        return self.base_pad_amount
 
     def get_angles(self):
         """ Get the angles associated with the current sinogram(s).
@@ -184,6 +251,9 @@ class BaseRecon(Plugin):
         :rtype: np.ndarray
         """
         return self.frame_cors
+
+    def set_mask(self, shape):
+        pass
 
     def get_initial_data(self):
         """
