@@ -100,6 +100,11 @@ class AstraReconGpu(BaseAstraRecon, GpuPlugin):
         vol_geom = \
             astra.create_vol_geom(vol_shape[0], vol_shape[2], vol_shape[1])
         # pad the sinogram
+        # Don't pad the sinogram if 3d
+        # Originally in pad_sino:
+        # centre_pad = (0, 0) if '3D' in self.alg else \
+        # self.array_pad(cor, sino.shape[self.dim_detX])
+
         pad_sino = self.pad_sino(self.slice_func(sino, sslice), cors)
         nDets = pad_sino.shape[self.slice_dir]
         trans = (self.slice_dir, self.det_rot, self.sino_dim_detX)
