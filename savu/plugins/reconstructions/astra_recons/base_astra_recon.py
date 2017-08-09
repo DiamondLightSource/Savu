@@ -96,7 +96,8 @@ class BaseAstraRecon(BaseRecon):
         l = self.sino_shape[self.dim_detX]
         c = np.linspace(-l/2.0, l/2.0, l)
         x, y = np.meshgrid(c, c)
-        r = (shape[self.dim_detX]-1)*self.parameters['ratio']
+        ratio = 0.95
+        r = (shape[self.dim_detX]-1)*ratio
         if not self.parameters['outer_pad']:
             self.manual_mask = \
                 np.array((x**2 + y**2 < (r/2.0)**2), dtype=np.float)
@@ -125,6 +126,8 @@ class BaseAstraRecon(BaseRecon):
         else:
             rec_id = astra.data2d.create('-vol', vol_geom)
 
+#        if self.mask_id:
+#            self.mask_id = astra.data2d.create('-vol', vol_geom, self.mask)
         # setup configuration options
         cfg = self.set_config(rec_id, sino_id, proj_geom, vol_geom)
         # create algorithm id
@@ -158,6 +161,7 @@ class BaseAstraRecon(BaseRecon):
             proj_id = astra.create_projector(
                 self.parameters['projector'], proj_geom, vol_geom)
             cfg['ProjectorId'] = proj_id
+        cfg = self.set_options(cfg)
         return cfg
 
     def delete(self, alg_id, sino_id, rec_id, proj_id):
