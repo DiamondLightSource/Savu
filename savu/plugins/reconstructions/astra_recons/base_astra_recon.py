@@ -19,7 +19,6 @@
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 """
 
-import math
 import copy
 import astra
 import numpy as np
@@ -36,8 +35,8 @@ class BaseAstraRecon(BaseRecon):
         shepp-logan|cosine|hamming|hann|tukey|lanczos|triangular|gaussian|\
         barlett-hann|blackman|nuttall|blackman-harris|blackman-nuttall|\
         flat-top|kaiser|parzen). Default: 'ram-lak'.
-    :u*param n_iterations: Number of Iterations if an iterative method\
-        is used . Default: 1.
+    :u*param n_iterations: Number of Iterations - only valid for iterative \
+        algorithms. Default: 1.
     """
 
     def __init__(self, name='BaseAstraRecon'):
@@ -45,7 +44,7 @@ class BaseAstraRecon(BaseRecon):
         self.res = False
 
     def setup(self):
-        self.alg = self.parameters['reconstruction_type']
+        self.alg = self.parameters['algorithm']
         self.get_max_frames = \
             self._get_multiple if '3D' in self.alg else self._get_single
 
@@ -71,7 +70,7 @@ class BaseAstraRecon(BaseRecon):
                     pattern['name'], self.get_max_frames())
 
     def pre_process(self):
-        self.alg = self.parameters['reconstruction_type']
+        self.alg = self.parameters['algorithm']
         self.iters = self.parameters['n_iterations']
 
         if '3D' in self.alg:
@@ -97,12 +96,10 @@ class BaseAstraRecon(BaseRecon):
         l = self.sino_shape[self.dim_detX]
         c = np.linspace(-l/2.0, l/2.0, l)
         x, y = np.meshgrid(c, c)
-        r = shape[self.dim_detX]-1
-        self.mask = np.array((x**2 + y**2 < (r/2.0)**2), dtype=np.float)
-        self.mask_id = True if not self.parameters['outer_pad'] and 'FBP' not \
-            in self.alg else False
+        r = (shape[self.dim_detX]-1)*self.parameters['ratio']
         if not self.parameters['outer_pad']:
-            self.manual_mask = copy.copy(self.mask)
+            self.manual_mask = \
+                np.array((x**2 + y**2 < (r/2.0)**2), dtype=np.float)
             self.manual_mask[self.manual_mask == 0] = np.nan
         else:
             self.manual_mask = False
@@ -128,8 +125,6 @@ class BaseAstraRecon(BaseRecon):
         else:
             rec_id = astra.data2d.create('-vol', vol_geom)
 
-        if self.mask_id:
-            self.mask_id = astra.data2d.create('-vol', vol_geom, self.mask)
         # setup configuration options
         cfg = self.set_config(rec_id, sino_id, proj_geom, vol_geom)
         # create algorithm id
@@ -143,10 +138,12 @@ class BaseAstraRecon(BaseRecon):
         else:
             astra.algorithm.run(alg_id, self.iters)
         # get reconstruction matrix
+
         if self.manual_mask is not False:
             recon = self.manual_mask*astra.data2d.get(rec_id)
         else:
             recon = astra.data2d.get(rec_id)
+
         # delete geometry
         self.delete(alg_id, sino_id, rec_id, False)
         return [recon, res] if self.res else recon
@@ -161,33 +158,24 @@ class BaseAstraRecon(BaseRecon):
             proj_id = astra.create_projector(
                 self.parameters['projector'], proj_geom, vol_geom)
             cfg['ProjectorId'] = proj_id
-        # mask not currently working correctly for SIRT or SART algorithms
-        sirt_or_sart = [a for a in ['SIRT', 'SART'] if a in self.alg]
-        if self.mask_id and not sirt_or_sart:
-            cfg['option'] = {}
-            cfg['option']['ReconstructionMaskId'] = self.mask_id
-        cfg = self.set_options(cfg)
         return cfg
 
     def delete(self, alg_id, sino_id, rec_id, proj_id):
         astra.algorithm.delete(alg_id)
-        if self.mask_id:
-            astra.data2d.delete(self.mask_id)
         astra.data2d.delete(sino_id)
         astra.data2d.delete(rec_id)
         if proj_id:
             astra.projector.delete(proj_id)
+
+    def get_padding_algorithms(self):
+        """ A list of algorithms that allow the data to be padded. """
+        return ['FBP', 'FBP_CUDA']
 
     def _get_single(self):
         return 'single'
 
     def _get_multiple(self):
         return 'multiple'
-
-    def get_sino_centre_method(self):
-        method = \
-            self.pad_sino if self.parameters['centre_pad'] else self.crop_sino
-        return method
 
     def get_citation_information(self):
         cite_info1 = CitationInformation()
