@@ -55,7 +55,7 @@ class MultipleParameterTest(unittest.TestCase):
     def test_parameter_space_int(self):
         plugin = self.plugin_setup()
         key = 'n_iterations'
-        params = {'reconstruction_type': 'CGLS', 'preview': '[:,0,:]',
+        params = {'algorithm': 'CGLS', 'preview': '[:,0,:]',
                   key: '1;2;3'}
         plugin._set_parameters(params)
         params = plugin.parameters[key]

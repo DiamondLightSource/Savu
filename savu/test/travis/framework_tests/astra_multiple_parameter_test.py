@@ -37,7 +37,7 @@ class AstraMultipleParameterTest(unittest.TestCase):
         return plugin
 
     def framework_options_setup(self):
-        key1 = 'reconstruction_type'
+        key1 = 'algorithm'
         key2 = 'n_iterations'
         key3 = 'in_datasets'
         key4 = 'out_datasets'
@@ -59,7 +59,7 @@ class AstraMultipleParameterTest(unittest.TestCase):
 
     def test_parameter_space_str(self):
         plugin = self.plugin_setup()
-        key = 'reconstruction_type'
+        key = 'algorithm'
         params = {key: 'FBP;CGLS'}
         plugin._set_parameters(params)
         params = plugin.parameters[key]
@@ -68,7 +68,7 @@ class AstraMultipleParameterTest(unittest.TestCase):
 
     def test_parameter_space_extra_dims(self):
         plugin = self.plugin_setup()
-        key1 = 'reconstruction_type'
+        key1 = 'algorithm'
         key2 = 'n_iterations'
         params = {key1: 'FBP;CGLS', key2: '1;2;3'}
         plugin._set_parameters(params)
