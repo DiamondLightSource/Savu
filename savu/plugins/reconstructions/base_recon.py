@@ -90,9 +90,9 @@ class BaseRecon(Plugin):
         in_meta_data = self.get_in_meta_data()[0]
         self.__set_padding_alg()
 
-        self.set_centre_of_rotation(in_data[0], in_meta_data, in_pData[0])
         self.exp.log(self.name + " End")
         self.br_vol_shape = out_pData[0].get_shape()
+        self.set_centre_of_rotation(in_data[0], in_meta_data, in_pData[0])
 
         self.main_dir = in_pData[0].get_pattern()['SINOGRAM']['main_dir']
         self.angles = in_meta_data.get('rotation_angle')
@@ -128,7 +128,11 @@ class BaseRecon(Plugin):
         else:
             sdirs = inData.get_slice_dimensions()
             cor = np.ones(np.prod([inData.get_shape()[i] for i in sdirs]))
-            cor *= self.parameters['centre_of_rotation']
+            val = self.parameters['centre_of_rotation']
+            # if centre of rotation has not been set then fix it in the centre
+            val = val if val != 0 else \
+                (self.get_vol_shape()[self._get_detX_dim()])/2
+            cor *= val
             #mData.set('centre_of_rotation', cor) see Github ticket
         self.cor = cor
         self.centre = self.cor[0]
@@ -180,7 +184,6 @@ class BaseRecon(Plugin):
         self.frame_cors = np.append(self.frame_cors, missing)
 
         self.frame_init_data = init
-
         data[0] = self.fix_sino(self.sino_func(data[0]), self.frame_cors[0])
         return data
 
