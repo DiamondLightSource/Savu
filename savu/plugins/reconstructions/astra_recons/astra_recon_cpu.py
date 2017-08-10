@@ -31,7 +31,7 @@ class AstraReconCpu(BaseAstraRecon, CpuPlugin):
     """
     A Plugin to run the astra reconstruction
 
-    :u*param reconstruction_type: Reconstruction type \
+    :u*param algorithm: Reconstruction type \
         (FBP|SIRT|SART|ART|CGLS|FP|BP|). Default: 'FBP'.
     :param projector: Set astra projector (line|strip|linear). Default: 'line'.
     """
@@ -41,7 +41,7 @@ class AstraReconCpu(BaseAstraRecon, CpuPlugin):
 
     def astra_setup(self):
         options_list = ["FBP", "SIRT", "SART", "ART", "CGLS", "FP", "BP"]
-        if not options_list.count(self.parameters['reconstruction_type']):
+        if not options_list.count(self.parameters['algorithm']):
             raise Exception("Unknown Astra CPU algorithm.")
 
     def set_options(self, cfg):

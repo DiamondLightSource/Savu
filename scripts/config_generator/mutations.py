@@ -76,12 +76,15 @@ def notice_str(name, notice):
 def param_change_str(old, new, plugin, keys):
     removed = list(set(old).difference(set(new)))
     added = list(set(new).difference(set(old)))
-    replaced = [entry['old'] for k in keys for entry in param_mutations[k]]
-    replacing = [entry['new'] for k in keys for entry in param_mutations[k]]
+    replaced = [entry['old'] for k in keys for entry in param_mutations[k]
+                if entry['old'] in old.keys()]
+    replacing = [entry['new'] for k in keys for entry in param_mutations[k]
+                 if entry['old'] in old.keys()]
+
     removed = [x for x in removed if x not in replaced]
     added = [x for x in added if x not in replacing]
 
-    if len(removed + added) > 0:
+    if len(removed + added + replaced) > 0:
         removed_str = ["Removing parameter %s" % r for r in removed]
         added_str = ["Adding parameter %s" % a for a in added]
         replaced_str = ["Replacing parameter %s with %s" % (
@@ -108,9 +111,10 @@ param_mutations = \
     {'BaseRecon': [{'old': 'center_of_rotation', 'new': 'centre_of_rotation'},
                    {'old': 'number_of_iterations', 'new': 'n_iterations'},
                    {'old': 'sino_pad', 'new': 'outer_pad'}],
+     'AstraReconGpu': [{'old': 'reconstruction_type', 'new': 'algorithm'}],
+     'AstraReconCpu': [{'old': 'reconstruction_type', 'new': 'algorithm'}],
      'DistortionCorrection': [{'old': 'centre', 'new': 'centre_x', 'eval': 'val[0]'},
                               {'old': 'centre', 'new': 'centre_y', 'eval': 'val[1]'}]}
-
 
 plugin_notices = \
     {'Hdf5Saver': {'desc': notice_str('Hdf5Saver', hdf5_notice)}, }

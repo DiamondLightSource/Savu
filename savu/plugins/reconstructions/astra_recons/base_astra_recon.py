@@ -19,7 +19,6 @@
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 """
 
-import copy
 import astra
 import numpy as np
 
@@ -50,6 +49,7 @@ class BaseAstraRecon(BaseRecon):
 
         super(BaseAstraRecon, self).setup()
         out_dataset = self.get_out_datasets()
+
         # if res_norm is required then setup another output dataset
         if len(out_dataset) is 2:
             self.res = True
@@ -96,9 +96,11 @@ class BaseAstraRecon(BaseRecon):
         l = self.sino_shape[self.dim_detX]
         c = np.linspace(-l/2.0, l/2.0, l)
         x, y = np.meshgrid(c, c)
-        ratio = 0.95
-        r = (shape[self.dim_detX]-1)*ratio
-        if not self.parameters['outer_pad']:
+        r = (shape[self.dim_detX]-1)*self.parameters['ratio']
+
+        outer_pad = True if self.parameters['outer_pad'] and self.padding_alg\
+            else False
+        if not outer_pad:
             self.manual_mask = \
                 np.array((x**2 + y**2 < (r/2.0)**2), dtype=np.float)
             self.manual_mask[self.manual_mask == 0] = np.nan

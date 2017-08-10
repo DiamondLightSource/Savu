@@ -20,6 +20,7 @@
 """
 
 import logging
+import numpy as np
 
 import savu.core.utils as cu
 import savu.plugins.utils as pu
@@ -112,11 +113,14 @@ class PluginRunner(object):
         main processing.
         """
         plugin_list._check_loaders()
+        n_loaders = plugin_list._get_n_loaders()
 
         self.__check_gpu()
 
-        self.__fake_plugin_list_run(plugin_list, setnxs=True)
+        check_list = np.arange(len(plugin_list.plugin_list)) - n_loaders
+        self.__fake_plugin_list_run(plugin_list, check_list, setnxs=True)
 
+        savers_idx_before = plugin_list._get_savers_index()
         plugin_list._add_missing_savers(self.exp.index['in_data'].keys())
 
         #  ********* transport function ***********
@@ -124,12 +128,14 @@ class PluginRunner(object):
 
         self.exp._clear_data_objects()
 
-        self.__fake_plugin_list_run(plugin_list)
+        check_list = np.array(list(set(plugin_list._get_savers_index()).
+                              difference(set(savers_idx_before)))) - n_loaders
+        self.__fake_plugin_list_run(plugin_list, check_list)
 
         self.exp._clear_data_objects()
         cu.user_message("Plugin list check complete!")
 
-    def __fake_plugin_list_run(self, plugin_list, setnxs=False):
+    def __fake_plugin_list_run(self, plugin_list, check_list, setnxs=False):
         """ Run through the plugin list without any processing (setup only)\
         and fill in missing dataset names.
         """
@@ -144,12 +150,16 @@ class PluginRunner(object):
         if setnxs:
             self.exp._set_nxs_filename()
 
+        check = [True if x in check_list else False for x in range(n_plugins)]
+
+        count = 0
         for i in range(n_loaders, n_loaders+n_plugins):
             self.exp._barrier()
-            plugin = pu.plugin_loader(self.exp, plist[i], check=True)
+            plugin = pu.plugin_loader(self.exp, plist[i], check=check[count])
             plist[i]['cite'] = plugin.get_citation_information()
             plugin._clean_up()
             self.exp._merge_out_data_to_in()
+            count += 1
 
     def __check_gpu(self):
         """ Check if the process list contains GPU processes and determine if

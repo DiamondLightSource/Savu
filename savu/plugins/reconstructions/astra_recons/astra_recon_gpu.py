@@ -36,7 +36,7 @@ class AstraReconGpu(BaseAstraRecon, GpuPlugin):
 
     :u*param res_norm: Output the residual norm at each iteration\
         (Error in the solution - iterative solvers only). Default: False.
-    :u*param reconstruction_type: Reconstruction type (FBP_CUDA|SIRT_CUDA|\
+    :u*param algorithm: Reconstruction type (FBP_CUDA|SIRT_CUDA|\
         SART_CUDA (not currently working)|CGLS_CUDA|FP_CUDA|BP_CUDA|\
         SIRT3D_CUDA|CGLS3D_CUDA). Default: 'FBP_CUDA'.
     """
@@ -54,16 +54,19 @@ class AstraReconGpu(BaseAstraRecon, GpuPlugin):
         return cfg
 
     def dynamic_data_info(self):
-        alg = self.parameters['reconstruction_type']
+        alg = self.parameters['algorithm']
         if self.parameters['res_norm'] is True and 'FBP' not in alg:
             self.res = True
             self.nOut += 1
-            self.parameters['out_datasets'].append('res_norm')
+            if not self.parameters['out_datasets']:
+                self.parameters['out_datasets'] = ['in_dataset[0]', 'res_norm']
+            else:
+                self.parameters['out_datasets'].append('res_norm')
 
     def astra_setup(self):
         options_list = ["FBP_CUDA", "SIRT_CUDA", "SART_CUDA", "CGLS_CUDA",
                         "FP_CUDA", "BP_CUDA", "SIRT3D_CUDA", "CGLS3D_CUDA"]
-        if not options_list.count(self.parameters['reconstruction_type']):
+        if not options_list.count(self.parameters['algorithm']):
             raise Exception("Unknown Astra GPU algorithm.")
 
     def setup_3D(self):
