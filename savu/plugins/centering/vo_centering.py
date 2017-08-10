@@ -195,7 +195,7 @@ class VoCentering(BaseFilter, CpuPlugin):
 
         self.populate_meta_data('cor_raw', cor_raw)
         self.populate_meta_data('centre_of_rotation',
-                                out_datasets[1].data[:].squeeze())
+                                out_datasets[1].data[:].squeeze(axis=1))
 
     def populate_meta_data(self, key, value):
         datasets = self.parameters['datasets_to_populate']
