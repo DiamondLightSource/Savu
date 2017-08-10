@@ -214,7 +214,7 @@ class PluginData(object):
         label_dim = self.data_obj.get_data_dimension_by_axis_label(
                 label, contains=contains)
         plugin_dims = self.data_obj.get_core_dimensions()
-        if self._get_max_frames_process() > 1:
+        if self._get_max_frames_process() > 1 or self.max_frames == 'multiple':
             plugin_dims += (self.get_slice_dimension(),)
         return list(set(plugin_dims)).index(label_dim)
 
@@ -391,6 +391,7 @@ class PluginData(object):
         self.split = split
 
     def __set_max_frames(self, nFrames):
+        self.max_frames = nFrames
         self.__perform_checks(nFrames)
         td = self.data_obj._get_transport_data()
         mft, mft_shape = td._calc_max_frames_transfer(nFrames)
