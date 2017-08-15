@@ -77,7 +77,10 @@ class Padding(object):
     def pad_directions(self, pad_list):
         """ Pad multiple, individually specified, dimensions.
 
-        :param list(dict) pad_list: A list of strings of the form: {0}.
+        :param list(dict) pad_list: A list of strings of the form 'dim.pad',\
+        'dim.after.pad' or 'dim.before.pad'
+        {0}
+
         """
         for entry in pad_list:
             self._pad_direction(entry)
@@ -86,7 +89,10 @@ class Padding(object):
     def _pad_direction(self, pad_str):
         """ Pad the data in a specified dimension.
 
-        :param str pad_str: {0}.
+        :param str pad_str: A string of the form 'dim.pad', 'dim.after.pad'\
+        or 'dim.before.pad'
+        {0}
+
         """
         pad_vals = pad_str.split('.')
         pplace = None
