@@ -1,5 +1,5 @@
-savu.test package
-=================
+savu\.test package
+==================
 
 Subpackages
 -----------

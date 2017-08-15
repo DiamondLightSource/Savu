@@ -1,5 +1,5 @@
-scripts.config_generator.config_utils module
-============================================
+scripts\.config\_generator\.config\_utils module
+================================================
 
 .. automodule:: scripts.config_generator.config_utils
     :members:

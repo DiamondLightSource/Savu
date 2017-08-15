@@ -1,5 +1,5 @@
-savu.plugins.analysis.stxm_analysis module
-==========================================
+savu\.plugins\.analysis\.stxm\_analysis module
+==============================================
 
 .. automodule:: savu.plugins.analysis.stxm_analysis
     :members:

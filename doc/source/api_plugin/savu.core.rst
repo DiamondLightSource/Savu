@@ -1,5 +1,5 @@
-savu.core package
-=================
+savu\.core package
+==================
 
 Subpackages
 -----------
@@ -13,6 +13,7 @@ Submodules
 
 .. toctree::
 
+   savu.core.basic_plugin_runner
    savu.core.dist_array_process
    savu.core.plugin_runner
    savu.core.transport_setup

@@ -1,5 +1,5 @@
-savu.plugins.corrections.distortion_correction module
-=====================================================
+savu\.plugins\.corrections\.distortion\_correction module
+=========================================================
 
 .. automodule:: savu.plugins.corrections.distortion_correction
     :members:

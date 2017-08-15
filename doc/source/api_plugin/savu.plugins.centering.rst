@@ -1,5 +1,5 @@
-savu.plugins.centering package
-==============================
+savu\.plugins\.centering package
+================================
 
 Submodules
 ----------
@@ -7,6 +7,7 @@ Submodules
 .. toctree::
 
    savu.plugins.centering.vo_centering
+   savu.plugins.centering.vo_centering_updated
 
 Module contents
 ---------------

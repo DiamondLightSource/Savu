@@ -1,5 +1,5 @@
-scripts.dawn_runner package
-===========================
+scripts\.dawn\_runner package
+=============================
 
 .. automodule:: scripts.dawn_runner
     :members:

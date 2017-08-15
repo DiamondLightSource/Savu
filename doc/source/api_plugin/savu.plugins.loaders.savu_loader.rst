@@ -1,5 +1,5 @@
-savu.plugins.loaders.savu_loader module
-=======================================
+savu\.plugins\.loaders\.savu\_loader module
+===========================================
 
 .. automodule:: savu.plugins.loaders.savu_loader
     :members:

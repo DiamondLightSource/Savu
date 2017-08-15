@@ -1,5 +1,5 @@
-savu.plugins.ptychography package
-=================================
+savu\.plugins\.ptychography package
+===================================
 
 .. automodule:: savu.plugins.ptychography
     :members:

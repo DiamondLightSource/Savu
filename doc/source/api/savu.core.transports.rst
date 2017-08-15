@@ -1,5 +1,5 @@
-savu.core.transports package
-============================
+savu\.core\.transports package
+==============================
 
 .. automodule:: savu.core.transports
     :members:
@@ -13,6 +13,7 @@ Submodules
 .. toctree::
 
    savu.core.transports.base_transport
+   savu.core.transports.basic_transport
    savu.core.transports.dist_array_transport
    savu.core.transports.dist_array_utils
    savu.core.transports.hdf5_transport

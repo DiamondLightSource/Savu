@@ -1,5 +1,5 @@
-savu.plugins.fitters.base_fitter module
-=======================================
+savu\.plugins\.fitters\.base\_fitter module
+===========================================
 
 .. automodule:: savu.plugins.fitters.base_fitter
     :members:
