@@ -113,13 +113,14 @@ if [ "$test_cluster" = false ] && [ "$gpus_per_node" -gt 0 ] ; then
   qsub -N $outname -j y -o $interfolder -e $interfolder -pe openmpi $processes -l exclusive \
        -l infiniband -l gpu=$gpus_per_node -l gpu_arch=$gpu_arch -q $cluster -P tomography \
        $filepath $version $savupath $input_file $process_file $output_folder $cpus_to_use_per_node \
-       $gpus_to_use_per_node $options -c -f $outfolder -s cs04r-sc-serv-14 -l \
-       $outfolder > /dls/tmp/savu/$USER.out
+       $gpus_to_use_per_node $options -c -f $outfolder -s cs04r-sc-serv-14 --facility_email \
+       scientificsoftware@diamond.ac.uk -l $outfolder > /dls/tmp/savu/$USER.out
 else
   qsub -N $outname -j y -o $interfolder -e $interfolder -pe openmpi $processes -l exclusive \
        -l infiniband -q $cluster -P dls $filepath $version $savupath $input_file \
        $process_file $output_folder $cpus_to_use_per_node $gpus_to_use_per_node $options -c \
-       -f $outfolder -s cs04r-sc-serv-14 -l $outfolder > /dls/tmp/savu/$USER.out
+       -f $outfolder -s cs04r-sc-serv-14 --facility_email scientificsoftware@diamond.ac.uk \
+       -l $outfolder > /dls/tmp/savu/$USER.out
 fi
 
 # get the job number here

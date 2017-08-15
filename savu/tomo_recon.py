@@ -73,6 +73,8 @@ def __option_parser():
                         default=False)
     # Send an email on completion
     parser.add_argument("-e", "--email", dest="email", help=hide, default=None)
+    # Facility email for errors
+    parser.add_argument("--facility_email", dest="femail", help=hide, default=None)
     # Set beamline log file (for online processing)
     parser.add_argument("--bllog", dest="bllog", help=hide, default=None)
     # Location of syslog server
@@ -110,6 +112,7 @@ def _set_options(args):
     options['lustre'] = args.lustre
     options['bllog'] = args.bllog
     options['email'] = args.email
+    options['femail'] = args.femail
 
     out_folder_name = \
         args.folder if args.folder else __get_folder_name(options['data_file'])
