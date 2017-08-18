@@ -42,6 +42,7 @@ class TimeBasedCorrection(BaseCorrection, CpuPlugin):
         super(TimeBasedCorrection, self).__init__(name)
 
     def pre_process(self):
+        self.count = 0
         inData = self.get_in_datasets()[0]
         pData = self.get_plugin_in_datasets()[0]
         self.mfp = inData._get_plugin_data()._get_max_frames_process()
@@ -50,95 +51,78 @@ class TimeBasedCorrection(BaseCorrection, CpuPlugin):
         self.slice_dir = pData.get_slice_dimension()
         nDims = len(pData.get_shape())
         self.sslice = [slice(None)]*nDims
-        # get data image key
-        self.data_idx = inData.data.get_index(0)
 
-        # calculate dark and flat averages
-        dark_idx = inData.data.get_index(2)
-        flat_idx = inData.data.get_index(1)
-        self.dark_flat_idx = np.concatenate((dark_idx, flat_idx))
+        self.image_key = inData.data.get_image_key()
+        changes = np.where(np.diff(self.image_key) != 0)[0] + 1
+        self.split_key = np.split(self.image_key, changes)
+        self.split_idx = np.split(np.arange(len(self.image_key)), changes)
+        self.data_key = inData.data.get_index(0)
 
-        self.dark, self.dark_idx = \
-            self.calc_average(inData.data.dark(), dark_idx)
-        self.flat, self.flat_idx = \
-            self.calc_average(inData.data.flat(), flat_idx)
+        self.dark, self.dark_idx = self.calc_average(inData.data.dark(), 2)
+        self.flat, self.flat_idx = self.calc_average(inData.data.flat(), 1)
 
         inData.meta_data.set('multiple_dark', self.dark)
         inData.meta_data.set('multiple_flat', self.flat)
 
     def calc_average(self, data, key):
-        idx = np.where(np.diff(key) > 1)[0]
-        start = [0] + list(idx+1)
-        # get relative and absolute indexes of requested data
-        rel_idx = zip(start, start[1:] + [len(key)])
-        abs_idx = zip(key[np.append(0, idx+1)], np.append(key[idx], key[-1])+1)
-        mean_range = [np.arange(*i) for i in rel_idx]
-        sl = np.array([[slice(None)]*len(data.shape)]*len(mean_range))
-        sl[:, self.proj_dim] = mean_range
-        sl = [list(s) for s in sl]
-        return [np.mean(data[sl[i]], axis=0) for i in range(len(sl))], abs_idx
+        im_key = np.where(self.image_key == key)[0]
+        splits = np.where(np.diff(im_key) > 1)[0]+1
+        local_idx = np.split(np.arange(len(im_key)), splits)
+        mean_data = [np.mean(data[np.array(local_idx[i])], axis=0)
+                     for i in range(len(local_idx))]
+        list_idx = list(np.where([key in i for i in self.split_key])[0])
+        return mean_data, list_idx
 
     def process_frames(self, data):
-        data = data[0]
-        frames = self._get_frames()
-        output = np.empty(data.shape, dtype=np.float32)
-        nSlices = data.shape[self.slice_dir]
-        for i in range(nSlices):
-            self.sslice[self.slice_dir] = i
-            proj = data[tuple(self.sslice)]
-            flat = self.calculate_flat_field(
-                frames[i], proj, *self.find_nearest_frames(
-                    self.flat_idx, frames[i]))
-            dark = self.calculate_dark_field(
-                *self.find_nearest_frames(self.dark_idx, frames[i]))
+        proj = data[0]
+        frame = self.get_global_frame_index()[0][self.count]
+        flat = self.calculate_flat_field(
+                *self.find_nearest_frames(self.flat_idx, frame))
+        dark = self.calculate_dark_field(
+                *self.find_nearest_frames(self.dark_idx, frame))
 
-            if self.parameters['in_range']:
-                proj = self.in_range(proj, flat)
-            # perform correction
-            output[self.sslice] = np.nan_to_num((proj-dark)/(flat-dark))
-        return output
+        if self.parameters['in_range']:
+            proj = self.in_range(proj, flat)
+
+        self.count += 1
+        return np.nan_to_num((proj-dark)/(flat-dark))
 
     def in_range(self, data, flat):
         data[data > flat] = flat[data > flat]
         return data
 
-    def _get_frames(self):
-        frames = self.get_current_slice_list()[0][self.slice_dir]
-        frames = range(frames.start, frames.stop, frames.step)
-        inData = self.get_in_datasets()[0]
-        frames = inData.data.get_index(0, full=True)[np.array(frames)]
-
-        # if this frames list contains the last possible frame and the length
-        # is not equal to max frames process then pad by the end frame.
-        n_df_before = len([i for i in self.dark_flat_idx if i < frames[-1]])
-        if (frames[-1] - n_df_before+1) == inData.get_shape()[self.slice_dir]:
-            diff = self.mfp - len(frames)
-            frames = \
-                np.concatenate((frames, [frames[-1]])*diff) if diff else frames
-        return frames
-
     def find_nearest_frames(self, idx_list, value):
         """ Find the index of the two entries that 'value' lies between in \
             'idx_list' and calculate the distance between each of them.
         """
-        n_entries = len(idx_list)
-        start_array = np.array([idx_list[i][0] for i in range(len(idx_list))])
-        end_array = np.array([idx_list[i][1] for i in range(len(idx_list))])
-        idx = (np.abs(start_array - value)).argmin()
-        if n_entries is 1:
-            idx2 = idx
-        else:
-            idx2 = idx+1 if start_array[idx] < value else idx-1
-        nearest = list(np.sort([idx, idx2]))
-        rrange = [end_array[nearest[0]]-1, start_array[nearest[1]]]
-        length = float(rrange[1] - rrange[0])
-        distance = [(value - rrange[0])/length, (rrange[1] - value)/length]
-        return nearest, distance
+        global_val = self.data_key[value]
+        # find which list (index) global_val belongs to
+        list_idx = [global_val in i for i in self.split_idx].index(True)
+        val_list = self.split_idx[list_idx]
+        # find length of list
+        length_list = len(val_list)
+        # find position of global_val in list and distance from each end
+        pos = np.where(val_list == global_val)[0][0]
+        dist = [(length_list-pos)/float(length_list), pos/float(length_list)]
 
-    def calculate_flat_field(self, frame, data, frames, distance):
+        # find closest before and after idx_list entries
+        new_list = list(np.sort(np.append(idx_list, list_idx)))
+        new_idx = new_list.index(list_idx)
+
+        entry1 = new_idx-1 if new_idx != 0 else new_idx+1
+        entry2 = new_idx+1 if new_idx != length_list else new_idx-1
+        before = idx_list.index(new_list[entry1])
+        after = idx_list.index(new_list[entry2])
+
+        return [before, after], dist
+
+    def calculate_flat_field(self, frames, distance):
         return self.flat[frames[0]]*distance[0] + \
             self.flat[frames[1]]*distance[1]
 
     def calculate_dark_field(self, frames, distance):
         return self.dark[frames[0]]*distance[0] + \
             self.dark[frames[1]]*distance[1]
+
+    def get_max_frames(self):
+        return 'single'
