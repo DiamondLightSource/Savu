@@ -110,7 +110,7 @@ class TimeBasedCorrection(BaseCorrection, CpuPlugin):
         new_idx = new_list.index(list_idx)
 
         entry1 = new_idx-1 if new_idx != 0 else new_idx+1
-        entry2 = new_idx+1 if new_idx != length_list else new_idx-1
+        entry2 = new_idx+1 if new_idx != len(new_list)-1 else new_idx-1
         before = idx_list.index(new_list[entry1])
         after = idx_list.index(new_list[entry2])
 
