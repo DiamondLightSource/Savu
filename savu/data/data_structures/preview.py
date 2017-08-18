@@ -114,6 +114,7 @@ class Preview(object):
         """ Add previewing params to data_info dictionary and set reduced
         shape.
         """
+
         set_mData = self.get_data_obj().data_info.set
         set_mData('starts', starts)
         set_mData('stops', stops)
@@ -146,8 +147,6 @@ class Preview(object):
             vals = preview_list[i].split(':')
             starts[i], stops[i], steps[i], chunks[i] = \
                 self.__convert_indices(vals, i)
-
-        nprocs = self.get_data_obj().exp.meta_data.get('nProcesses')
 
         return starts, stops, steps, chunks
 
@@ -209,7 +208,8 @@ class Preview(object):
         dobj = self.get_data_obj()
         td = dobj._get_transport_data()
         starts, stops, steps, chunks = self.get_starts_stops_steps()
-        if not starts:
+
+        if starts is None:
             return None
 
         slice_list = []
