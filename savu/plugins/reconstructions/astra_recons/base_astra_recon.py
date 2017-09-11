@@ -18,10 +18,9 @@
    :synopsis: A base for all Astra toolbox reconstruction algorithms
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 """
+
 import astra
 import numpy as np
-import math
-import copy
 
 from savu.plugins.reconstructions.base_recon import BaseRecon
 from savu.data.plugin_list import CitationInformation
@@ -35,8 +34,8 @@ class BaseAstraRecon(BaseRecon):
         shepp-logan|cosine|hamming|hann|tukey|lanczos|triangular|gaussian|\
         barlett-hann|blackman|nuttall|blackman-harris|blackman-nuttall|\
         flat-top|kaiser|parzen). Default: 'ram-lak'.
-    :u*param n_iterations: Number of Iterations if an iterative method\
-        is used . Default: 1.
+    :u*param n_iterations: Number of Iterations - only valid for iterative \
+        algorithms. Default: 1.
     """
 
     def __init__(self, name='BaseAstraRecon'):
@@ -44,12 +43,13 @@ class BaseAstraRecon(BaseRecon):
         self.res = False
 
     def setup(self):
-        self.alg = self.parameters['reconstruction_type']
+        self.alg = self.parameters['algorithm']
         self.get_max_frames = \
             self._get_multiple if '3D' in self.alg else self._get_single
 
         super(BaseAstraRecon, self).setup()
         out_dataset = self.get_out_datasets()
+
         # if res_norm is required then setup another output dataset
         if len(out_dataset) is 2:
             self.res = True
@@ -60,7 +60,8 @@ class BaseAstraRecon(BaseRecon):
             shape = (in_data.get_shape()[dim_detX],
                      self.parameters['n_iterations'])
             label = ['vol_y.voxel', 'iteration.number']
-            pattern = {'name': 'SINOGRAM', 'slice_dims': (0,), 'core_dims': (1,)}
+            pattern = {'name': 'SINOGRAM', 'slice_dims': (0,),
+                       'core_dims': (1,)}
             out_dataset[1].create_dataset(axis_labels=label, shape=shape)
             out_dataset[1].add_pattern(pattern['name'],
                                        slice_dims=pattern['slice_dims'],
@@ -69,10 +70,8 @@ class BaseAstraRecon(BaseRecon):
                     pattern['name'], self.get_max_frames())
 
     def pre_process(self):
-        self.alg = self.parameters['reconstruction_type']
+        self.alg = self.parameters['algorithm']
         self.iters = self.parameters['n_iterations']
-        self.fix_sino = \
-            self.pad_sino if self.parameters['centre_pad'] else self.crop_sino
 
         if '3D' in self.alg:
             self.setup_3D()
@@ -91,18 +90,19 @@ class BaseAstraRecon(BaseRecon):
         self.sino_shape = pData.get_shape()
         self.nDims = len(self.sino_shape)
         self.nCols = self.sino_shape[self.dim_detX]
-        self.__set_mask(self.sino_shape)
+        self.set_mask(self.sino_shape)
 
-    def __set_mask(self, shape):
+    def set_mask(self, shape):
         l = self.sino_shape[self.dim_detX]
         c = np.linspace(-l/2.0, l/2.0, l)
         x, y = np.meshgrid(c, c)
-        r = shape[self.dim_detX]-1
-        self.mask = np.array((x**2 + y**2 < (r/2.0)**2), dtype=np.float)
-        self.mask_id = True if not self.parameters['outer_pad'] and 'FBP' not \
-            in self.alg else False
-        if not self.parameters['outer_pad']:
-            self.manual_mask = copy.copy(self.mask)
+        r = (shape[self.dim_detX]-1)*self.parameters['ratio']
+
+        outer_pad = True if self.parameters['outer_pad'] and self.padding_alg\
+            else False
+        if not outer_pad:
+            self.manual_mask = \
+                np.array((x**2 + y**2 < (r/2.0)**2), dtype=np.float)
             self.manual_mask[self.manual_mask == 0] = np.nan
         else:
             self.manual_mask = False
@@ -116,21 +116,20 @@ class BaseAstraRecon(BaseRecon):
         # create volume geom
         vol_geom = astra.create_vol_geom(vol_shape)
         # create projection geom
-        fix_sino = self.fix_sino(sino, cor[0])
-        det_width = fix_sino.shape[self.dim_detX]
+        det_width = sino.shape[self.dim_detX]
         proj_geom = astra.create_proj_geom('parallel', 1.0, det_width, angles)
-        fix_sino = np.transpose(fix_sino, (self.dim_rot, self.dim_detX))
+        sino = np.transpose(sino, (self.dim_rot, self.dim_detX))
 
         # create sinogram id
-        sino_id = astra.data2d.create("-sino", proj_geom, fix_sino)
+        sino_id = astra.data2d.create("-sino", proj_geom, sino)
         # create reconstruction id
         if init:
             rec_id = astra.data2d.create('-vol', vol_geom, init)
         else:
             rec_id = astra.data2d.create('-vol', vol_geom)
 
-        if self.mask_id:
-            self.mask_id = astra.data2d.create('-vol', vol_geom, self.mask)
+#        if self.mask_id:
+#            self.mask_id = astra.data2d.create('-vol', vol_geom, self.mask)
         # setup configuration options
         cfg = self.set_config(rec_id, sino_id, proj_geom, vol_geom)
         # create algorithm id
@@ -144,10 +143,12 @@ class BaseAstraRecon(BaseRecon):
         else:
             astra.algorithm.run(alg_id, self.iters)
         # get reconstruction matrix
+
         if self.manual_mask is not False:
             recon = self.manual_mask*astra.data2d.get(rec_id)
         else:
             recon = astra.data2d.get(rec_id)
+
         # delete geometry
         self.delete(alg_id, sino_id, rec_id, False)
         return [recon, res] if self.res else recon
@@ -162,53 +163,19 @@ class BaseAstraRecon(BaseRecon):
             proj_id = astra.create_projector(
                 self.parameters['projector'], proj_geom, vol_geom)
             cfg['ProjectorId'] = proj_id
-        # mask not currently working correctly for SIRT or SART algorithms
-        sirt_or_sart = [a for a in ['SIRT', 'SART'] if a in self.alg]
-        if self.mask_id and not sirt_or_sart:
-            cfg['option'] = {}
-            cfg['option']['ReconstructionMaskId'] = self.mask_id
         cfg = self.set_options(cfg)
         return cfg
 
     def delete(self, alg_id, sino_id, rec_id, proj_id):
         astra.algorithm.delete(alg_id)
-        if self.mask_id:
-            astra.data2d.delete(self.mask_id)
         astra.data2d.delete(sino_id)
         astra.data2d.delete(rec_id)
         if proj_id:
             astra.projector.delete(proj_id)
 
-    def pad_sino(self, sino, cor):
-        centre_pad = (0, 0) if '3D' in self.alg else \
-            self.array_pad(cor, sino.shape[self.dim_detX])
-        sino_width = sino.shape[self.dim_detX]
-        new_width = sino_width + max(centre_pad)
-        sino_pad = \
-            int(math.ceil(float(sino_width)/new_width * self.sino_pad)/2)
-        pad = np.array([sino_pad]*2) + centre_pad
-        pad_tuples = [(0, 0)]*(len(sino.shape)-1)
-        pad_tuples.insert(self.dim_detX, tuple(pad))
-        return np.pad(sino, tuple(pad_tuples), mode='edge')
-
-    def crop_sino(self, sino, cor):
-        start, stop = (0, 0) if '3D' in self.alg else \
-            self.array_pad(cor, sino.shape[self.dim_detX])[::-1]
-        sl = [slice(None)]*len(sino.shape)
-        sl[self.dim_detX] = slice(start, sino.shape[self.dim_detX] - stop)
-        sino = sino[tuple(sl)]
-        self.__set_mask(sino.shape)
-        return sino
-
-    def array_pad(self, ctr, nPixels):
-        width = nPixels - 1.0
-        alen = ctr
-        blen = width - ctr
-        mid = (width-1.0)/2.0
-        shift = round(abs(blen-alen))
-        p_low = 0 if (ctr > mid) else shift
-        p_high = shift + 0 if (ctr > mid) else 0
-        return np.array([int(p_low), int(p_high)])
+    def get_padding_algorithms(self):
+        """ A list of algorithms that allow the data to be padded. """
+        return ['FBP', 'FBP_CUDA']
 
     def _get_single(self):
         return 'single'

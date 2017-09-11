@@ -1,5 +1,5 @@
-savu.plugins.analysis.stats module
-==================================
+savu\.plugins\.analysis\.stats module
+=====================================
 
 .. automodule:: savu.plugins.analysis.stats
     :members:

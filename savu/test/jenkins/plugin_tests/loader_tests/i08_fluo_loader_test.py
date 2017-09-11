@@ -29,8 +29,8 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 class I08FluoLoaderTest(unittest.TestCase):
 
     def test_i08(self):
-        data_file = "/dls/i08/data/2017/cm16789-3/nexus/i08-10481.nxs"#tu.get_test_big_data_path('i14-5195.nxs')
-        process_file = "/home/clb02321/DAWN_stable/Savu/Savu/test_data/test_process_lists/i08_basic_process.nxs"
+        data_file = tu.get_test_big_data_path('pymca_live_processing_test/i08-10471.nxs')
+        process_file = tu.get_test_process_path("i08_basic_process.nxs")
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
 

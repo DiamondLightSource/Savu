@@ -1,5 +1,5 @@
-savu.test.travis.plugin_tests.filter_tests package
-==================================================
+savu\.test\.travis\.plugin\_tests\.filter\_tests package
+========================================================
 
 Submodules
 ----------

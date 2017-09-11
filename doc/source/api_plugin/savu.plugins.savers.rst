@@ -1,5 +1,5 @@
-savu.plugins.savers package
-===========================
+savu\.plugins\.savers package
+=============================
 
 Subpackages
 -----------
@@ -14,8 +14,10 @@ Submodules
 .. toctree::
 
    savu.plugins.savers.base_saver
+   savu.plugins.savers.edf_saver
    savu.plugins.savers.hdf5_saver
    savu.plugins.savers.tiff_saver
+   savu.plugins.savers.xrf_saver
 
 Module contents
 ---------------

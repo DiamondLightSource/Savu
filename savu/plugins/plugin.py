@@ -271,6 +271,18 @@ class Plugin(PluginDatasets):
         """ This method is called immediately after post_process(). """
         pass
 
+    def set_preview(self, data, params):
+        if not params:
+            return True
+        preview = data.get_preview()
+        orig_indices = preview.get_starts_stops_steps()
+        no_preview = [[0, 0, 0], data.get_shape(), [1, 1, 1], [1, 1, 1]]
+        if no_preview == orig_indices:
+            data.get_preview().revert_shape = data.get_shape()
+            data.get_preview().set_preview(params)
+            return True
+        return False
+
     def _clean_up(self):
         """ Perform necessary plugin clean up after the plugin has completed.
         """
@@ -333,7 +345,7 @@ class Plugin(PluginDatasets):
     def _revert_preview(self, in_data):
         """ Revert dataset back to original shape if previewing was used in a
         plugin to reduce the data shape but the original data shape should be
-        used thereafter.
+        used thereafter. Remove previewing if it was added in the plugin.
         """
         for data in in_data:
             if data.get_preview().revert_shape:
@@ -386,7 +398,7 @@ class Plugin(PluginDatasets):
     def nFrames(self):
         """ The number of frames to process during each call to process_frames.
         """
-        return 1
+        return 'single'
 
     def get_citation_information(self):
         """

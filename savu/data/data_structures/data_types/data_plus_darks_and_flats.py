@@ -47,7 +47,10 @@ class DataWithDarksAndFlats(BaseType):
         self._set_dark_and_flat()
 
     def get_image_key(self):
-        return self.image_key
+        preview_sl = self.data_obj.get_preview()._get_preview_slice_list()
+        if preview_sl is None:
+            return self.image_key
+        return self.__get_preview_image_key(preview_sl[self.proj_dim])
 
     def _get_image_key_data_shape(self):
         data_idx = self.get_index(0)
@@ -119,38 +122,25 @@ class DataWithDarksAndFlats(BaseType):
             return self.__get_preview_index(key)
 
     def __get_preview_index(self, key):
-        try:
-            # amend if there is previewing
-            slice_list = self.data_obj.get_preview().\
-                _get_preview_slice_list()[self.proj_dim]
-            return self.__get_reduced_index(key, slice_list)
-        except:
+        # Remove this try/except statement
+        preview_sl = self.data_obj.get_preview()._get_preview_slice_list()
+        if preview_sl is None:
             return np.where(self.image_key == key)[0]
+        else:
+            return self.__get_reduced_index(key, preview_sl[self.proj_dim])
+
+    def __get_preview_image_key(self, slice_list):
+        # all data entries
+        data_idx = np.where(self.image_key == 0)[0]
+        preview_idx = np.arange(len(data_idx))[slice_list]
+        remove_idx = np.delete(data_idx, preview_idx[::-1])
+        return np.delete(self.image_key, remove_idx)
 
     def __get_reduced_index(self, key, slice_list):
         """ Get the projection index of a specific image key value when\
             previewing has been applied. """
-        data_entries = np.where(self.image_key == 0)[0][slice_list]
-        if key == 0:
-            return data_entries
-
-        index = np.where(self.image_key == key)[0]
-        start_idx, end_idx, start_entry, end_entry = \
-            self.__get_start_end_idx(index)
-
-        val = index[np.where(np.less(index, data_entries[0]))[0][-1]]
-        start = start_idx[np.where(end_entry == val)[0]]
-        val2 = index[np.where(np.greater(index, data_entries[-1]))[0][0]]
-        end = end_idx[np.where(end_entry == val2)[0]]+1
-
-        return index[start:end]
-
-    def _get_start_end_idx(self, index):
-        start = [0] + list(np.where(np.diff(index) > 1)[0]+1)
-        end = np.array(start[1:] + [len(index)])-1
-        start_entry = index[start]
-        end_entry = index[end]
-        return start, end, start_entry, end_entry
+        preview_image_key = self.__get_preview_image_key(slice_list)
+        return np.where(preview_image_key == key)[0]
 
     def __get_data(self, key):
         index = [slice(None)]*self.nDims

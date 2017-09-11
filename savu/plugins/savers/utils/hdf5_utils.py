@@ -23,8 +23,10 @@
 
 import h5py
 import logging
+import numpy as np
 from mpi4py import MPI
 
+import savu.core.utils as cu
 from savu.data.chunking import Chunking
 
 NX_CLASS = 'NX_class'
@@ -40,7 +42,7 @@ class Hdf5Utils(object):
         self.info = MPI.Info.Create()
         self.exp = exp
         self.info.Set("romio_ds_write", "disable")  # this setting is required
-        # self.info.Set("romio_ds_read", "disable")
+        self.info.Set("romio_ds_read", "disable")
         # info.Set("romio_cb_read", "disable")
         # info.Set("romio_cb_write", "disable")
 
@@ -101,20 +103,51 @@ class Hdf5Utils(object):
         except AttributeError:
             pass
 
+        self.exp._barrier()
         group = data.backing_file.create_group(group_name)
         self.exp._barrier()
         shape = data.get_shape()
         if current_and_next is 0:
+            logging.warn('Creating the dataset without chunks')
             data.data = group.create_dataset("data", shape, data.dtype)
         else:
             chunking = Chunking(self.exp, current_and_next)
             chunks = chunking._calculate_chunking(shape, data.dtype)
             self.exp._barrier()
-            data.data = group.create_dataset("data", shape, data.dtype,
-                                             chunks=chunks)
+            nBytes = np.prod(shape)*np.dtype(data.dtype).itemsize
+            nProcs = self.exp.meta_data.get('nProcesses')
+            # parallel hdf5 cannot handle data_size/nProcesses > 2GB
+            self.__hdf5_file_write_failed_check(nBytes, nProcs)
+            data.data = group.create_dataset(
+                    "data", shape, data.dtype, chunks=chunks)
+
         self.exp._barrier()
 
         return group_name, group
+
+    def __hdf5_file_write_failed_check(self, nBytes, nProcs):
+        _2GB = 2e9
+
+        if nBytes/np.float(nProcs) < _2GB:
+            return
+
+        msg = "The data is too big for the number of processes, please "
+        if self.exp.meta_data.get('femail') == \
+                'scientificsoftware@diamond.ac.uk':
+            n_procs_big = 160  # number of processes for BIG data
+            savu_mpi_big = True if nProcs is n_procs_big else False
+            if savu_mpi_big or (nBytes/np.float(n_procs_big) >= _2GB):
+                if self.exp.meta_data.get('femail'):
+                    msg += ("contact %s" % self.exp.meta_data.get('femail'))
+                else:
+                    msg += "increase the number of cores."
+            else:
+                msg += "use savu_mpi_big."
+        else:
+            msg += "increase the number of cores."
+
+        cu.user_message(msg)
+        raise Exception(msg)
 
     def _close_file(self, data):
         """

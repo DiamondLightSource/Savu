@@ -29,6 +29,7 @@ import numpy as np
 from fractions import gcd
 
 from savu.data.meta_data import MetaData
+from savu.data.data_structures.data_add_ons import Padding
 
 
 class PluginData(object):
@@ -120,7 +121,7 @@ class PluginData(object):
             shape.insert(slice_idx, mfp)
         self.shape = tuple(shape)
 
-    def __set_shape_transfer(self, slice_size):
+    def _set_shape_transfer(self, slice_size):
         dshape = self.data_obj.get_shape()
         shape_before_tuning = self._get_shape_before_tuning()
         add = [1]*(len(dshape) - len(shape_before_tuning))
@@ -213,7 +214,7 @@ class PluginData(object):
         label_dim = self.data_obj.get_data_dimension_by_axis_label(
                 label, contains=contains)
         plugin_dims = self.data_obj.get_core_dimensions()
-        if self._get_max_frames_process() > 1:
+        if self._get_max_frames_process() > 1 or self.max_frames == 'multiple':
             plugin_dims += (self.get_slice_dimension(),)
         return list(set(plugin_dims)).index(label_dim)
 
@@ -307,37 +308,13 @@ class PluginData(object):
         process_frames. """
         return self.meta_data.get('max_frames_transfer')
 
-    def __set_boundary_padding(self, pad):
-        self.boundary_padding = pad
-
-    def _get_boundary_padding(self):
-        return self.boundary_padding
-
-    def __set_no_squeeze(self):
+    def _set_no_squeeze(self):
         self.no_squeeze = True
 
     def _get_no_squeeze(self):
         return self.no_squeeze
 
-    def __checks_and_boundaries(self, nFrames):
-        options = ['single', 'multiple']
-        if not isinstance(nFrames, int) and nFrames not in options:
-            e_str = "The value of nFrames is not recognised.  Please choose "
-            "from 'single' and 'multiple' (or an integer in exceptional "
-            "circumstances)."
-            raise Exception(e_str)
-
-        max_mft = 32  # max frames that can be transferred from file at a time
-        frame_threshold = 32  # no idea if this is a good number
-        # min frames required if frames_per_process > frame_threshold
-        min_mft = 16
-        if isinstance(nFrames, int) and nFrames > max_mft:
-            logging.warn("The requested %s frames excedes the maximum "
-                         "preferred of %s." % (nFrames, max_mft))
-            max_mft = nFrames
-        return max_mft, min_mft, frame_threshold
-
-    def __get_max_frames_parameters(self):
+    def _get_max_frames_parameters(self):
         fixed, _ = self._get_fixed_dimensions()
         sdir = \
             [s for s in self.data_obj.get_slice_dimensions() if s not in fixed]
@@ -359,124 +336,37 @@ class PluginData(object):
             n_procs = len(processes)
 
         f_per_p = np.ceil(frames/n_procs)
-        return sdir, shape, frames, n_procs, f_per_p
+        params_dict = {'shape': shape, 'sdir': sdir, 'total_frames': frames,
+                       'mpi_procs': n_procs, 'frames_per_process': f_per_p}
+        return params_dict
 
-    def __log_max_frames(self, mft, mfp, frames, procs):
+    def __log_max_frames(self, mft, mfp, check=True):
         logging.debug("Setting max frames transfer for plugin %s to %d" %
                       (self._plugin, mft))
         logging.debug("Setting max frames process for plugin %s to %d" %
                       (self._plugin, mft))
         self.meta_data.set('max_frames_process', mfp)
-        self.__check_distribution(mft)
+        if check:
+            self.__check_distribution(mft)
         # (((total_frames/mft)/mpi_procs) % 1)
 
-    def _calc_max_frames_transfer(self, nFrames):
-        """ The number of frames each process should retrieve from file at a
-        time.
-        """
-        max_mft, min_mft, threshold = self.__checks_and_boundaries(nFrames)
-        sdir, shape, total_frames, mpi_procs, frames_per_process = \
-            self.__get_max_frames_parameters()
-
-        # find all possible choices of nFrames, being careful with boundaries
-        fchoices, size_list = self.__get_frame_choices(
-                sdir, min(max_mft, np.prod([shape[d] for d in sdir])))
-
-        if frames_per_process > threshold:
-            min_mft = min(max(fchoices), min_mft)
-            fchoices = [f for f in fchoices if f >= min_mft]
-
-        mft, idx = self.__find_best_frame_distribution(
-            fchoices, total_frames, mpi_procs, idx=True)
-
-        self.__set_shape_transfer(size_list[fchoices.index(mft)])
-
-        if nFrames == 'single':
-            self.__log_max_frames(mft, 1, total_frames, mpi_procs)
-            return int(mft)
-
-        mfp = nFrames if isinstance(nFrames, int) else min(mft, shape[sdir[0]])
-
-        multi = self.__find_multiples_of_b_that_divide_a(mft, mfp)
-        possible = sorted(list(set(set(multi).intersection(set(fchoices)))))
-
-        # closest of fchoices to mfp plus difference as boundary padding
-        if not possible:
-            mft, _ = self.__find_closest_lower(fchoices[::-1], mfp)
-            self.__set_boundary_padding(mfp - mft)
-        else:
-            mft = self.__find_best_frame_distribution(
-                possible[::-1], total_frames, mpi_procs)
-
-        self.__set_shape_transfer(size_list[fchoices.index(mft)])
-        self.__log_max_frames(mft, mfp, total_frames, mpi_procs)
-
-        # Retain the shape if the first slice dimension has length 1
-        if mfp == 1 and nFrames != 1:
-            self.__set_no_squeeze()
-        return int(mft)
-
     def __check_distribution(self, mft):
-        sdir, shape, nframes, nprocs, _ = \
-            self.__get_max_frames_parameters()
+        self.params = self._get_max_frames_parameters()
         warn_threshold = 0.85
+        nprocs = self.params['mpi_procs']
+        nframes = self.params['total_frames']
         temp = (((nframes/mft)/float(nprocs)) % 1)
         if temp != 0.0 and temp < warn_threshold:
             logging.warn('UNEVEN FRAME DISTRIBUTION: shape %s, nframes %s ' +
-                         'sdir %s, nprocs %s', shape, nframes, sdir, nprocs)
+                         'sdir %s, nprocs %s', self.params['shape'],
+                         nframes, self.params['sdir'], nprocs)
 
-    def __find_closest_lower(self, vlist, value):
-        rem = [f if f != 0 else value for f in [m % value for m in vlist]]
-        min_val = min(rem, key=lambda x: abs(x-value))
-        idx = rem.index(min_val)
-        return vlist[idx], idx
-
-    def __get_frame_choices(self, sdir, max_mft):
-        """ Find all possible combinations of increasing slice dimension sizes
-        with their product less than max_mft and return a list of these
-        products. """
-        nDims = len(sdir)
-        temp = [1]*len(sdir)
-        shape = self.data_obj.get_shape()
-        idx = 0
-        choices = []
-        size_list = []
-
-        while(np.prod(temp) <= max_mft):
-            dshape = shape[sdir[idx]]
-            # could remove this if statement and ensure padding at the end of
-            # each slice dimension instead.
-            if dshape % temp[idx] == 0 or nDims == 1:
-                choices.append(np.prod(temp))
-                size_list.append(copy.copy(temp))
-            if temp[idx] == dshape:
-                idx += 1
-                if idx == nDims:
-                    break
-            temp[idx] += 1
-
-        return choices[::-1], size_list[::-1]
-
-    def __find_multiples_of_b_that_divide_a(self, a, b):
-        """ Find all positive multiples of b that divide a. """
-        val = 1
-        val_list = []
-        i = 0
-        while(val > 0):
-            val = (int(a/b)+i)*b
-            val_list.append(val)
-            i -= 1
-        return val_list[:-1]
-
-    def __find_best_frame_distribution(self, flist, nframes, nprocs,
-                                       idx=False):
-        """ Determine which of the numbers in the list of possible frame
-        chunks gives the best distribution of frames per process. """
-        multi_list = [(nframes/float(v))/nprocs for v in flist]
-        min_val, closest_lower_idx = self.__find_closest_lower(multi_list, 1)
-        if idx:
-            return flist[closest_lower_idx], closest_lower_idx
-        return flist[closest_lower_idx]
+    def _set_padding_dict(self):
+        if self.padding and not isinstance(self.padding, Padding):
+            self.pad_dict = copy.deepcopy(self.padding)
+            self.padding = Padding(self)
+            for key in self.pad_dict.keys():
+                getattr(self.padding, key)(self.pad_dict[key])
 
     def plugin_data_setup(self, pattern, nFrames, split=None):
         """ Setup the PluginData object.
@@ -491,10 +381,35 @@ class PluginData(object):
         chunks = \
             self.data_obj.get_preview().get_starts_stops_steps(key='chunks')
 
-        nFrames = self._calc_max_frames_transfer(nFrames)
-        self.meta_data.set('max_frames_transfer', nFrames)
-        if self._plugin and \
-                (chunks[self.data_obj.get_slice_dimensions()[0]] % nFrames):
+        self.__set_max_frames(nFrames)
+
+        mft = self.meta_data.get('max_frames_transfer')
+        if self._plugin and mft \
+                and (chunks[self.data_obj.get_slice_dimensions()[0]] % mft):
             self._plugin.chunk = True
         self.__set_shape()
         self.split = split
+
+    def __set_max_frames(self, nFrames):
+        self.max_frames = nFrames
+        self.__perform_checks(nFrames)
+        td = self.data_obj._get_transport_data()
+        mft, mft_shape = td._calc_max_frames_transfer(nFrames)
+        self.meta_data.set('max_frames_transfer', mft)
+        if mft:
+            self._set_shape_transfer(mft_shape)
+        mfp = td._calc_max_frames_process(nFrames)
+        self.meta_data.set('max_frames_process', mfp)
+        self.__log_max_frames(mft, mfp)
+
+        # Retain the shape if the first slice dimension has length 1
+        if mfp == 1 and nFrames == 'multiple':
+            self._set_no_squeeze()
+
+    def __perform_checks(self, nFrames):
+        options = ['single', 'multiple']
+        if not isinstance(nFrames, int) and nFrames not in options:
+            e_str = "The value of nFrames is not recognised.  Please choose "
+            "from 'single' and 'multiple' (or an integer in exceptional "
+            "circumstances)."
+            raise Exception(e_str)

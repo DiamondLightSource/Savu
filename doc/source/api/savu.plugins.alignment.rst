@@ -1,5 +1,5 @@
-savu.plugins.alignment package
-==============================
+savu\.plugins\.alignment package
+================================
 
 .. automodule:: savu.plugins.alignment
     :members:

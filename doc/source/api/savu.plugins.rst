@@ -1,5 +1,5 @@
-savu.plugins package
-====================
+savu\.plugins package
+=====================
 
 .. automodule:: savu.plugins
     :members:

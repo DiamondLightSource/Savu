@@ -70,6 +70,7 @@ class Pymca(BaseFilter, CpuPlugin):
         inshape = in_dataset[0].get_shape()
         spectra_shape = inshape[-1] #  nearly always true.
         rest_shape = inshape[:-1]
+        np.random.seed=1
         dummy_spectrum = np.random.random((1, 1, spectra_shape))
         c = self.setup_fit(dummy_spectrum)# seed it with junk, zeros made the matrix singular unsurprisingly and this bungles it.
         
@@ -86,6 +87,7 @@ class Pymca(BaseFilter, CpuPlugin):
         in_patterns = in_dataset[0].get_data_patterns()
 #         pattern_list = ['SINOGRAM', 'PROJECTION']
         pattern_list = in_patterns.keys()
+
         fitResult = out_datasets[0]
 
         fitResult.create_dataset(patterns={in_dataset[0]: pattern_list},

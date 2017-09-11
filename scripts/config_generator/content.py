@@ -98,17 +98,28 @@ class Content(object):
         self.insert(plugin, pos, str_pos, replace=True)
         self.plugin_list.plugin_list[pos]['active'] = active
         if keep:
-            union_params = set(keep).intersection(set(plugin.parameters))
-            for param in union_params:
-                self.modify(str_pos, param, keep[param], ref=True)
-            # add any parameter mutations here
-            classes = [c.__name__ for c in inspect.getmro(plugin.__class__)]
-            m_dict = mutations.param_mutations
-            keys = [k for k in m_dict.keys() if k in classes]
-            for k in keys:
-                if m_dict[k]['old'] in keep.keys():
-                    self.modify(str_pos, m_dict[k]['new'],
-                                keep[m_dict[k]['old']], ref=True)
+            self._update_parameters(plugin, name, keep, str_pos)
+
+    def _update_parameters(self, plugin, name, keep, str_pos):
+        union_params = set(keep).intersection(set(plugin.parameters))
+        for param in union_params:
+            self.modify(str_pos, param, keep[param], ref=True)
+        # add any parameter mutations here
+        classes = [c.__name__ for c in inspect.getmro(plugin.__class__)]
+        m_dict = mutations.param_mutations
+        keys = [k for k in m_dict.keys() if k in classes]
+
+        changes = False
+        for k in keys:
+            for entry in m_dict[k]:
+                if entry['old'] in keep.keys():
+                    changes = True
+                    val = keep[entry['old']]
+                    if 'eval' in entry.keys():
+                        val = eval(entry['eval'])
+                    self.modify(str_pos, entry['new'], val, ref=True)
+        if changes:
+            mutations.param_change_str(keep, plugin.parameters, name, keys)
 
     def _apply_plugin_updates(self, skip=False):
         # Update old process lists that start from 0
@@ -135,6 +146,7 @@ class Content(object):
                         str_pos = self.plugin_list.plugin_list[pos]['pos']
                         missing.append([name, str_pos])
                         self.remove(pos)
+                        pos -= 1
                 if (name == the_list[pos]['name']):
                     break
             pos -= 1
@@ -149,7 +161,6 @@ class Content(object):
                 exception = True
         if exception:
             raise Exception('Incompatible process list.')
-
 
     def _mutate_plugins(self, name, pos):
         """ Perform plugin mutations. """

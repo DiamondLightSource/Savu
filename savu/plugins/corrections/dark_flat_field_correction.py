@@ -22,6 +22,7 @@
 
 """
 
+import logging
 import numpy as np
 
 from savu.plugins.driver.cpu_plugin import CpuPlugin
@@ -54,7 +55,9 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
     def pre_process(self):
         inData = self.get_in_datasets()[0]
         in_pData = self.get_plugin_in_datasets()[0]
+        logging.debug('getting the dark data')
         self.dark = inData.data.dark_mean()
+        logging.debug('getting the flat data')
         self.flat = inData.data.flat_mean()
 
         pData_shape = in_pData.get_shape()

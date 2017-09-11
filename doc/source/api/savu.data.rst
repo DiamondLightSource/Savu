@@ -1,5 +1,5 @@
-savu.data package
-=================
+savu\.data package
+==================
 
 .. automodule:: savu.data
     :members:

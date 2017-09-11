@@ -283,6 +283,7 @@ class PluginList(object):
         for name in [data for data in data_names if data not in saved_data]:
             process = {}
             pos = int(re.search(r'\d+', self.plugin_list[-1]['pos']).group())+1
+            self.saver_idx.append(pos)
             plugin = pu.get_plugin('savu.plugins.savers.hdf5_saver')
             plugin.parameters['in_datasets'] = [name]
             process['name'] = plugin.name

@@ -1,5 +1,5 @@
-savu.test.jenkins.process_list_tests package
-============================================
+savu\.test\.jenkins\.process\_list\_tests package
+=================================================
 
 .. automodule:: savu.test.jenkins.process_list_tests
     :members:
@@ -13,6 +13,7 @@ Submodules
 .. toctree::
 
    savu.test.jenkins.process_list_tests.full_recon_test
+   savu.test.jenkins.process_list_tests.i08_pymca_test
    savu.test.jenkins.process_list_tests.i18_full_pipeline_test
    savu.test.jenkins.process_list_tests.i18_stxm_pipeline_test
    savu.test.jenkins.process_list_tests.i18_xrd_pipeline_test

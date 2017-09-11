@@ -1,5 +1,5 @@
-scripts.configurator_tests package
-==================================
+scripts\.configurator\_tests package
+====================================
 
 Submodules
 ----------

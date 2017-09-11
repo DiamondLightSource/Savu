@@ -1,5 +1,5 @@
-savu.plugins.corrections.monitor_correction module
-==================================================
+savu\.plugins\.corrections\.monitor\_correction module
+======================================================
 
 .. automodule:: savu.plugins.corrections.monitor_correction
     :members:

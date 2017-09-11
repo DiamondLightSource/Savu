@@ -35,17 +35,26 @@ class BaseRecon(Plugin):
     reconstruction. Default: 0.0.
     :u*param init_vol: Dataset to use as volume initialiser \
     (doesn't currently work with preview). Default: None.
-    :param centre_pad: Pad the sinogram to centre it. Default: True.
-    :param outer_pad: Pad the sinogram to remove edge artefacts in the \
-    reconstructed ROI for FBP algorithms only (NB. This will increase the \
-    size of the data and the time taken to perform the reconstruction and it \
-    cannot be used if centre_pad is False). Default: False.
+
+    :param centre_pad: Pad the sinogram to centre it in order to fill the \
+    reconstructed volume ROI for asthetic purposes - only available for \
+    selected algorithms and will be ignored if unavailable (warning: This will\
+    increase the size of the data and the time to compute the \
+    reconstruction. Default: False.
+
+    :param outer_pad: Pad the sinogram to fill the reconstructed volume for \
+    asthetic purposes - only available for selected algorithms and if \
+    centre_pad is True (warning: This will significantly increase the size of \
+    the data and the time to compute the reconstruction). Default: False.
+
     :u*param log: Take the log of the data before reconstruction \
     (True or False). Default: True.
     :u*param preview: A slice list of required frames. Default: [].
     :param force_zero: Set any values in the reconstructed image outside of \
     this range to zero. Default: [None, None].
     to zero. Default: False.
+    :param ratio: Ratio of the masks diameter in pixels to the smallest edge\
+        size along given axis. Default: 0.95.
     """
     count = 0
 
@@ -60,6 +69,9 @@ class BaseRecon(Plugin):
         self.frame_cors = None
         self.frame_init_data = None
         self.centre = None
+        self.base_pad_amount = None
+        self.padding_alg = False
+        self.cor_shift = 0
 
     def base_dynamic_data_info(self):
         if 'init_vol' in self.parameters.keys() and \
@@ -76,10 +88,11 @@ class BaseRecon(Plugin):
         self.pad_dim = \
             in_pData[0].get_data_dimension_by_axis_label('x', contains=True)
         in_meta_data = self.get_in_meta_data()[0]
+        self.__set_padding_alg()
 
-        self.set_centre_of_rotation(in_data[0], in_meta_data, in_pData[0])
         self.exp.log(self.name + " End")
         self.br_vol_shape = out_pData[0].get_shape()
+        self.set_centre_of_rotation(in_data[0], in_meta_data, in_pData[0])
 
         self.main_dir = in_pData[0].get_pattern()['SINOGRAM']['main_dir']
         self.angles = in_meta_data.get('rotation_angle')
@@ -94,9 +107,17 @@ class BaseRecon(Plugin):
         self.sino_pad = int(math.ceil((math.sqrt(2)-1)*pad_len))
 
         self.sino_func, self.cor_func = self.set_function(shape) if \
-            self.parameters['outer_pad'] else self.set_function(False)
+            self.padding_alg else self.set_function(False)
 
         self.range = self.parameters['force_zero']
+        self.fix_sino = self.get_sino_centre_method()
+
+    def __set_padding_alg(self):
+        """ Determine if this is an algorithm that allows sinogram padding. """
+        pad_algs = self.get_padding_algorithms()
+        alg = self.parameters['algorithm'] if 'algorithm' in \
+            self.parameters.keys() else None
+        self.padding_alg = True if alg in pad_algs else False
 
     def get_vol_shape(self):
         return self.br_vol_shape
@@ -105,8 +126,13 @@ class BaseRecon(Plugin):
         if 'centre_of_rotation' in mData.get_dictionary().keys():
             cor = mData.get('centre_of_rotation')
         else:
-            cor = np.ones(inData.get_shape()[pData.get_slice_dimension()])
-            cor *= self.parameters['centre_of_rotation']
+            sdirs = inData.get_slice_dimensions()
+            cor = np.ones(np.prod([inData.get_shape()[i] for i in sdirs]))
+            val = self.parameters['centre_of_rotation']
+            # if centre of rotation has not been set then fix it in the centre
+            val = val if val != 0 else \
+                (self.get_vol_shape()[self._get_detX_dim()])/2
+            cor *= val
             #mData.set('centre_of_rotation', cor) see Github ticket
         self.cor = cor
         self.centre = self.cor[0]
@@ -143,17 +169,22 @@ class BaseRecon(Plugin):
         self.frame_angles = angles
 
         dim_sl = sl[self.main_dir]
-        self.frame_cors = self.cor_func(self.cor[dim_sl])
+
+        global_frames = self.get_global_frame_index()[0][self.count]
+
+        self.frame_cors = self.cor_func(self.cor[[global_frames]])
+
+        # for extra padded frames that make up the numbers
         if not self.frame_cors.shape:
             self.frame_cors = np.array([self.centre])
+
         len_data = len(np.arange(dim_sl.start, dim_sl.stop, dim_sl.step))
 
         missing = [self.centre]*(len(self.frame_cors) - len_data)
         self.frame_cors = np.append(self.frame_cors, missing)
 
         self.frame_init_data = init
-
-        data[0] = self.sino_func(data[0])
+        data[0] = self.fix_sino(self.sino_func(data[0]), self.frame_cors[0])
         return data
 
     def base_process_frames_after(self, data):
@@ -163,6 +194,87 @@ class BaseRecon(Plugin):
         if upper_range is not None:
             data[data > upper_range] = 0
         return data
+
+    def get_padding_algorithms(self):
+        """ A list of algorithms that allow the data to be padded. """
+        return []
+
+    def pad_sino(self, sino, cor):
+        """  Pad the sinogram so the centre of rotation is at the centre. """
+        detX = self._get_detX_dim()
+        pad = self.get_centre_offset(sino, cor, detX)
+        self.cor_shift = pad[0]
+        pad_tuples = [(0, 0)]*(len(sino.shape)-1)
+        pad_tuples.insert(detX, tuple(pad))
+        self.__set_pad_amount(max(pad))
+        return np.pad(sino, tuple(pad_tuples), mode='edge')
+
+    def _get_detX_dim(self):
+        pData = self.get_plugin_in_datasets()[0]
+        return pData.get_data_dimension_by_axis_label('x', contains=True)
+
+    def get_centre_offset(self, sino, cor, detX):
+        centre_pad = self.array_pad(cor, sino.shape[detX])
+        sino_width = sino.shape[detX]
+        new_width = sino_width + max(centre_pad)
+        sino_pad = \
+            int(math.ceil(float(sino_width)/new_width * self.sino_pad)/2)
+        pad = np.array([sino_pad]*2) + centre_pad
+        return pad
+
+    def get_centre_shift(self, sino, cor):
+        detX = self._get_detX_dim()
+        return max(self.get_centre_offset(sino, self.centre, detX))
+
+    def crop_sino(self, sino, cor):
+        """  Crop the sinogram so the centre of rotation is at the centre. """
+        detX = self._get_detX_dim()
+        start, stop = self.array_pad(cor, sino.shape[detX])[::-1]
+        self.cor_shift = -start
+        sl = [slice(None)]*len(sino.shape)
+        sl[detX] = slice(start, sino.shape[detX] - stop)
+        sino = sino[tuple(sl)]
+        self.set_mask(sino.shape)
+        return sino
+
+    def array_pad(self, ctr, nPixels):
+        width = nPixels - 1.0
+        alen = ctr
+        blen = width - ctr
+        mid = (width-1.0)/2.0
+        shift = round(abs(blen-alen))
+        p_low = 0 if (ctr > mid) else shift
+        p_high = shift + 0 if (ctr > mid) else 0
+        return np.array([int(p_low), int(p_high)])
+
+    def keep_sino(self, sino, cor):
+        """ No change to the sinogram """
+        return sino
+
+    def get_sino_centre_method(self):
+        centre_pad = self.keep_sino
+        if 'centre_pad' in self.parameters.keys():
+            centre_pad = self.pad_sino if self.parameters['centre_pad'] and \
+                self.padding_alg is True else self.crop_sino
+        return centre_pad
+
+    def __set_pad_amount(self, pad_amount):
+        self.base_pad_amount = pad_amount
+
+    def get_pad_amount(self):
+        return self.base_pad_amount
+
+    def get_fov_fraction(self, sino, cor):
+        """ Get the fraction of the original FOV that can be reconstructed due\
+        to offset centre """
+        pData = self.get_plugin_in_datasets()[0]
+        detX = pData.get_data_dimension_by_axis_label('x', contains=True)
+        original_length = sino.shape[detX]
+        shift = self.get_centre_shift(sino, cor)
+        return (original_length-shift)/float(original_length)
+
+    def get_reconstruction_alg(self):
+        return None
 
     def get_angles(self):
         """ Get the angles associated with the current sinogram(s).
@@ -179,7 +291,10 @@ class BaseRecon(Plugin):
         :returns: Centre of rotation values for the current frames.
         :rtype: np.ndarray
         """
-        return self.frame_cors
+        return self.frame_cors + self.cor_shift
+
+    def set_mask(self, shape):
+        pass
 
     def get_initial_data(self):
         """
@@ -199,9 +314,9 @@ class BaseRecon(Plugin):
 
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
-
         # reduce the data as per data_subset parameter
-        in_dataset[0].get_preview().set_preview(self.parameters['preview'])
+        self.preview_flag = \
+            self.set_preview(in_dataset[0], self.parameters['preview'])
 
         # set information relating to the plugin data
         in_pData, out_pData = self.get_plugin_datasets()
@@ -267,3 +382,12 @@ class BaseRecon(Plugin):
         Should be overridden to perform pre-processing in a child class
         """
         pass
+
+    def executive_summary(self):
+        summary = []
+        if not self.preview_flag:
+            summary.append(("WARNING: Ignoring preview parameters as a preview"
+                            " has already been applied to the data."))
+        if len(summary) > 0:
+            return summary
+        return ["Nothing to Report"]

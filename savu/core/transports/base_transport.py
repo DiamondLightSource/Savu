@@ -21,9 +21,17 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
+
+import os
 import copy
+import h5py
+import logging
 import numpy as np
+
 import savu.core.utils as cu
+import savu.plugins.utils as pu
+
+NX_CLASS = 'NX_class'
 
 
 class BaseTransport(object):
@@ -57,9 +65,14 @@ class BaseTransport(object):
         """
         pass
 
+    def _transport_load_plugin(self, exp, plugin_dict):
+        """ This method is called before each plugin is loaded """
+        return pu.plugin_loader(exp, plugin_dict)
+
     def _transport_pre_plugin(self):
         """
-        This method is called directly BEFORE each plugin is executed.
+        This method is called directly BEFORE each plugin is executed, but \
+        after the plugin is loaded.
         """
         pass
 
@@ -85,17 +98,20 @@ class BaseTransport(object):
     def process_setup(self, plugin):
         pDict = {}
         pDict['in_data'], pDict['out_data'] = plugin.get_datasets()
-        pDict['in_sl'] = self.__get_all_slice_lists(pDict['in_data'], 'in')
-        pDict['out_sl'] = self.__get_all_slice_lists(pDict['out_data'], 'out')
+        pDict['in_sl'] = self._get_all_slice_lists(pDict['in_data'], 'in')
+        pDict['out_sl'] = self._get_all_slice_lists(pDict['out_data'], 'out')
         pDict['nIn'] = range(len(pDict['in_data']))
         pDict['nOut'] = range(len(pDict['out_data']))
         pDict['nProc'] = len(pDict['in_sl']['process'])
-        pDict['nTrans'] = len(pDict['in_sl']['transfer'][0])
-        pDict['squeeze'] = self.__set_functions(pDict['in_data'], 'squeeze')
-        pDict['expand'] = self.__set_functions(pDict['out_data'], 'expand')
+        if 'transfer' in pDict['in_sl'].keys():
+            pDict['nTrans'] = len(pDict['in_sl']['transfer'][0])
+        else:
+            pDict['nTrans'] = 1
+        pDict['squeeze'] = self._set_functions(pDict['in_data'], 'squeeze')
+        pDict['expand'] = self._set_functions(pDict['out_data'], 'expand')
 
         frames = [f for f in pDict['in_sl']['frames']]
-        self.__set_global_frame_index(plugin, frames, pDict['nProc'])
+        self._set_global_frame_index(plugin, frames, pDict['nProc'])
         self.pDict = pDict
 
     def _transport_process(self, plugin):
@@ -105,8 +121,8 @@ class BaseTransport(object):
         """
         self.process_setup(plugin)
         pDict = self.pDict
-        result = [np.empty(d._get_plugin_data().get_shape_transfer()) for d in
-                  pDict['out_data']]
+        result = [np.empty(d._get_plugin_data().get_shape_transfer(),
+                           dtype=np.float32) for d in pDict['out_data']]
 
         # loop over the transfer data
         nTrans = pDict['nTrans']
@@ -116,7 +132,7 @@ class BaseTransport(object):
             cu.user_message("%s - %3i%% complete" %
                             (plugin.name, percent_complete))
             # get the transfer data
-            transfer_data = self.__transfer_all_data(count)
+            transfer_data = self._transfer_all_data(count)
 
             # loop over the process data
             for i in range(pDict['nProc']):
@@ -127,10 +143,55 @@ class BaseTransport(object):
                     out_sl = pDict['out_sl']['process'][i][j]
                     result[j][out_sl] = res[j]
 
-            self.__return_all_data(count, result, end)
+            self._return_all_data(count, result, end)
 
         cu.user_message("%s - 100%% complete" % (plugin.name))
         plugin._revert_preview(pDict['in_data'])
+
+    def _get_all_slice_lists(self, data_list, dtype):
+        """ Get all slice lists for the current process.
+
+        :param list(Data) data_list: Datasets
+        :returns: A list of dictionaries containing slice lists for each \
+            dataset
+        :rtype: list(dict)
+        """
+        sl_dict = {}
+        for data in data_list:
+            sl = data._get_transport_data()._get_slice_lists_per_process(dtype)
+            for key, value in sl.iteritems():
+                if key not in sl_dict:
+                    sl_dict[key] = [value]
+                else:
+                    sl_dict[key].append(value)
+
+        for key in [k for k in ['process', 'unpad'] if k in sl_dict.keys()]:
+            nData = range(len(sl_dict[key]))
+            rep = range(len(sl_dict[key][0]))
+            sl_dict[key] = [[sl_dict[key][i][j] for i in nData] for j in rep]
+        return sl_dict
+
+    def _transfer_all_data(self, count):
+        """ Transfer data from file and pad if required.
+
+        :param int count: The current frame index.
+        :returns: All data for this frame and associated padded slice lists
+        :rtype: list(np.ndarray), list(tuple(slice))
+        """
+        pDict = self.pDict
+        data_list = pDict['in_data']
+
+        if 'transfer' in pDict['in_sl'].keys():
+            slice_list = \
+                [pDict['in_sl']['transfer'][i][count] for i in pDict['nIn']]
+        else:
+            slice_list = [slice(None)]*len(pDict['nIn'])
+
+        section = []
+        for idx in range(len(data_list)):
+            section.append(data_list[idx]._get_transport_data().
+                           _get_padded_data(slice_list[idx]))
+        return section
 
     def _get_input_data(self, plugin, trans_data, nproc, ntrans):
         data = []
@@ -155,7 +216,33 @@ class BaseTransport(object):
             result[j] = self.pDict['expand'][j](result[j])[unpad_sl[j]]
         return result
 
-    def __set_global_frame_index(self, plugin, frame_list, nProc):
+    def _return_all_data(self, count, result, end):
+        """ Transfer plugin results for current frame to backing files.
+
+        :param int count: The current frame index.
+        :param list(np.ndarray) result: plugin results
+        :param bool end: True if this is the last entry in the slice list.
+        """
+        pDict = self.pDict
+        data_list = pDict['out_data']
+
+        slice_list = None
+        if 'transfer' in pDict['out_sl'].keys():
+            slice_list = \
+                [pDict['out_sl']['transfer'][i][count] for i in pDict['nOut']]
+
+        result = [result] if type(result) is not list else result
+
+        for idx in range(len(data_list)):
+            if slice_list:
+                if end:
+                    result[idx] = self._remove_excess_data(
+                            data_list[idx], result[idx], slice_list[idx])
+                data_list[idx].data[slice_list[idx]] = result[idx]
+            else:
+                data_list[idx].data = result[idx]
+
+    def _set_global_frame_index(self, plugin, frame_list, nProc):
         """ Convert the transfer global frame index to a process global frame
             index.
         """
@@ -163,9 +250,13 @@ class BaseTransport(object):
         for f in frame_list:
             if len(f):
                 process_frames.append(range(f[0]*nProc, (f[-1]+1)*nProc))
+
+        process_frames = np.array(process_frames)
+        nframes = plugin.get_plugin_in_datasets()[0].get_total_frames()
+        process_frames[process_frames >= nframes] = nframes - 1
         plugin.set_global_frame_index(process_frames)
 
-    def __set_functions(self, data_list, name):
+    def _set_functions(self, data_list, name):
         """ Create a dictionary of functions to remove (squeeze) or re-add
         (expand) dimensions, of length 1, from each dataset in a list.
 
@@ -222,68 +313,15 @@ class BaseTransport(object):
             squeeze_dims = squeeze_dims[1:]
         return lambda x: np.squeeze(x, axis=squeeze_dims)
 
-    def __get_all_slice_lists(self, data_list, dtype):
-        """ Get all slice lists for the current process.
-
-        :param list(Data) data_list: Datasets
-        :returns: A list of dictionaries containing slice lists for each \
-            dataset
-        :rtype: list(dict)
-        """
-        sl_dict = {}
-        for data in data_list:
-            sl = data._get_slice_lists_per_process(dtype)
-            for key, value in sl.iteritems():
-                if key not in sl_dict:
-                    sl_dict[key] = [value]
-                else:
-                    sl_dict[key].append(value)
-
-        for key in [k for k in ['process', 'unpad'] if k in sl_dict.keys()]:
-            nData = range(len(sl_dict[key]))
-            rep = range(len(sl_dict[key][0]))
-            sl_dict[key] = [[sl_dict[key][i][j] for i in nData] for j in rep]
-        return sl_dict
-
-    def __transfer_all_data(self, count):
-        """ Get all padded slice lists.
-
-        :param int count: The current frame index.
-        :returns: All data for this frame and associated padded slice lists
-        :rtype: list(np.ndarray), list(tuple(slice))
-        """
-        pDict = self.pDict
-        data_list = pDict['in_data']
-        slice_list = \
-            [pDict['in_sl']['transfer'][i][count] for i in pDict['nIn']]
-        section = []
-        for idx in range(len(data_list)):
-            section.append(data_list[idx]._get_padded_data(slice_list[idx]))
-        return section
-
-    def __return_all_data(self, count, result, end):
-        """ Transfer plugin results for current frame to backing files.
-
-        :param int count: The current frame index.
-        :param list(np.ndarray) result: plugin results
-        :param bool end: True if this is the last entry in the slice list.
-        """
-        pDict = self.pDict
-        data_list = pDict['out_data']
-        slice_list = \
-            [pDict['out_sl']['transfer'][i][count] for i in pDict['nOut']]
-
-        result = [result] if type(result) is not list else result
-        for idx in range(len(data_list)):
-            if end:
-                result[idx] = self.__remove_excess_data(
-                        data_list[idx], result[idx], slice_list[idx])
-            data_list[idx].data[slice_list[idx]] = result[idx]
-
-    def __remove_excess_data(self, data, result, slice_list):
+    def _remove_excess_data(self, data, result, slice_list):
         """ Remove any excess results due to padding for fixed length process \
         frames. """
         sdir = data._get_plugin_data().get_slice_dimension()
+
+        # Not currently working for basic_transport
+        if isinstance(slice_list, slice):
+            return
+
         sl = slice_list[sdir]
         shape = result.shape
         if shape[sdir] - (sl.stop - sl.start):
@@ -291,3 +329,135 @@ class BaseTransport(object):
             unpad_sl[sdir] = slice(0, sl.stop - sl.start)
             result = result[unpad_sl]
         return result
+
+    def _setup_h5_files(self):
+        out_data_dict = self.exp.index["out_data"]
+
+        current_and_next = [0]*len(out_data_dict)
+        if 'current_and_next' in self.exp.meta_data.get_dictionary():
+            current_and_next = self.exp.meta_data.get('current_and_next')
+
+        count = 0
+        for key in out_data_dict.keys():
+            out_data = out_data_dict[key]
+            filename = self.exp.meta_data.get(["filename", key])
+            logging.debug("creating the backing file %s", filename)
+            out_data.backing_file = self.hdf5._open_backing_h5(filename, 'w')
+            out_data.group_name, out_data.group = self.hdf5._create_entries(
+                out_data, key, current_and_next[count])
+            count += 1
+
+    def _set_file_details(self, files):
+        self.exp.meta_data.set('link_type', files['link_type'])
+        self.exp.meta_data.set('link_type', {})
+        self.exp.meta_data.set('filename', {})
+        self.exp.meta_data.set('group_name', {})
+        for key in self.exp.index['out_data'].keys():
+            self.exp.meta_data.set(['link_type', key], files['link_type'][key])
+            self.exp.meta_data.set(['filename', key], files['filename'][key])
+            self.exp.meta_data.set(['group_name', key],
+                                   files['group_name'][key])
+
+    def _get_filenames(self, plugin_dict):
+        count = self.exp.meta_data.get('nPlugin') + 1
+        files = {"filename": {}, "group_name": {}, "link_type": {}}
+        for key in self.exp.index["out_data"].keys():
+            name = key + '_p' + str(count) + '_' + \
+                plugin_dict['id'].split('.')[-1] + '.h5'
+            link_type = self._get_link_type(key)
+            files['link_type'][key] = link_type
+            if link_type == 'final_result':
+                out_path = self.exp.meta_data.get('out_path')
+            else:
+                out_path = self.exp.meta_data.get('inter_path')
+
+            filename = os.path.join(out_path, name)
+            group_name = "%i-%s-%s" % (count, plugin_dict['name'], key)
+            self.exp._barrier()
+            files["filename"][key] = filename
+            files["group_name"][key] = group_name
+
+        return files
+
+    def _get_link_type(self, name):
+        idx = self.exp.meta_data.get('nPlugin')
+        temp = [e for entry in self.data_flow[idx+1:] for e in entry]
+        if name in temp or self.exp.index['out_data'][name].remove:
+            return 'intermediate'
+        return 'final_result'
+
+    def _populate_nexus_file(self, data):
+        filename = self.exp.meta_data.get('nxs_filename')
+        logging.debug("Adding link to file %s", filename)
+
+        with h5py.File(filename, 'a') as nxs_file:
+            nxs_entry = nxs_file['entry']
+            name = data.data_info.get('name')
+            group_name = self.exp.meta_data.get(['group_name', name])
+            link_type = self.exp.meta_data.get(['link_type', name])
+
+            if link_type is 'final_result':
+                plugin_entry = \
+                    nxs_entry.create_group('final_result_' + data.get_name())
+                plugin_entry.attrs[NX_CLASS] = 'NXdata'
+            elif link_type is 'intermediate':
+                link = nxs_entry.require_group(link_type)
+                link.attrs[NX_CLASS] = 'NXcollection'
+                plugin_entry = link.create_group(group_name)
+                plugin_entry.attrs[NX_CLASS] = 'NXdata'
+            else:
+                raise Exception("The link type is not known")
+
+            self.__output_metadata(data, plugin_entry)
+
+    def __output_metadata(self, data, entry):
+        self.__output_axis_labels(data, entry)
+        self.__output_data_patterns(data, entry)
+        self.__output_metadata_dict(data, entry)
+
+    def __output_axis_labels(self, data, entry):
+        axis_labels = data.data_info.get("axis_labels")
+        axes = []
+        count = 0
+        for labels in axis_labels:
+            name = labels.keys()[0]
+            axes.append(name)
+            entry.attrs[name + '_indices'] = count
+
+            try:
+                mData = data.meta_data.get(name)
+            except KeyError:
+                mData = np.arange(data.get_shape()[count])
+
+            if isinstance(mData, list):
+                mData = np.array(mData)
+
+            axis_entry = entry.create_dataset(name, mData.shape, mData.dtype)
+            axis_entry[...] = mData[...]
+            axis_entry.attrs['units'] = labels.values()[0]
+            count += 1
+        entry.attrs['axes'] = axes
+
+    def __output_data_patterns(self, data, entry):
+        logging.debug("Outputting data patterns to file")
+
+        data_patterns = data.data_info.get("data_patterns")
+        entry = entry.create_group('patterns')
+        entry.attrs[NX_CLASS] = 'NXcollection'
+        for pattern in data_patterns:
+            nx_data = entry.create_group(pattern)
+            nx_data.attrs[NX_CLASS] = 'NXparameters'
+            values = data_patterns[pattern]
+            nx_data.create_dataset('core_dims', data=values['core_dims'])
+            nx_data.create_dataset('slice_dims', data=values['slice_dims'])
+
+    def __output_metadata_dict(self, data, entry):
+        logging.debug("Outputting meta data dictionary to file")
+
+        meta_data = data.meta_data.get_dictionary()
+        entry = entry.create_group('meta_data')
+        entry.attrs[NX_CLASS] = 'NXcollection'
+        for mData in meta_data:
+            nx_data = entry.create_group(mData)
+            nx_data.attrs[NX_CLASS] = 'NXdata'
+            nx_data.create_dataset(mData, data=meta_data[mData])

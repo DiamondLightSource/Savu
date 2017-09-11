@@ -18,6 +18,7 @@ savu.core
    api/savu.core.plugin_runner
    api/savu.core.dist_array_process
    api/savu.core.transport_setup
+   api/savu.core.basic_plugin_runner
 
 
 savu.core.transports
@@ -28,6 +29,7 @@ savu.core.transports
    api/savu.core.transports.dist_array_utils
    api/savu.core.transports.base_transport
    api/savu.core.transports.dist_array_transport
+   api/savu.core.transports.basic_transport
 
 
 savu.data
@@ -48,6 +50,8 @@ savu.data.transport_data
    api/savu.data.transport_data.hdf5_transport_data
    api/savu.data.transport_data.base_transport_data
    api/savu.data.transport_data.dist_array_transport_data
+   api/savu.data.transport_data.basic_transport_data
+   api/savu.data.transport_data.slice_lists
 
 
 savu.data.data_structures

@@ -1,5 +1,5 @@
-savu.test.jenkins.plugin_tests.filter_tests package
-===================================================
+savu\.test\.jenkins\.plugin\_tests\.filter\_tests package
+=========================================================
 
 .. automodule:: savu.test.jenkins.plugin_tests.filter_tests
     :members:
@@ -17,6 +17,8 @@ Submodules
    savu.test.jenkins.plugin_tests.filter_tests.diffraction_absorption_test
    savu.test.jenkins.plugin_tests.filter_tests.dummy_ptycho_test
    savu.test.jenkins.plugin_tests.filter_tests.fastxrf_test
+   savu.test.jenkins.plugin_tests.filter_tests.i08_pymca_test
+   savu.test.jenkins.plugin_tests.filter_tests.i14_pymca_test
    savu.test.jenkins.plugin_tests.filter_tests.image_interpolation_test
    savu.test.jenkins.plugin_tests.filter_tests.mc_near_absorption_correct_test
    savu.test.jenkins.plugin_tests.filter_tests.pca_test

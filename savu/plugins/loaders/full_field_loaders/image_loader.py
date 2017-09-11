@@ -66,9 +66,7 @@ class ImageLoader(BaseLoader):
                              slice_dims=(detY,))
 
         path = exp.meta_data.get("data_file")
-        data_prefix = self.parameters['data_prefix']
-        data_obj.data = FabIO(path, data_obj, [self.parameters['frame_dim']],
-                              None, data_prefix)
+        data_obj.data = self._get_data_type(data_obj, path)
 
         self.set_rotation_angles(data_obj)
         # read dark and flat images
@@ -98,6 +96,10 @@ class ImageLoader(BaseLoader):
 
         data_obj.set_shape(data_obj.data.get_shape())
         return data_obj
+
+    def _get_data_type(self, obj, path):
+        prefix = self.parameters['data_prefix']
+        return FabIO(path, obj, [self.parameters['frame_dim']], None, prefix)
 
     def set_rotation_angles(self, data_obj):
         angles = self.parameters['angles']

@@ -1,5 +1,5 @@
-savu.plugins.centering package
-==============================
+savu\.plugins\.centering package
+================================
 
 .. automodule:: savu.plugins.centering
     :members:
@@ -13,4 +13,5 @@ Submodules
 .. toctree::
 
    savu.plugins.centering.vo_centering
+   savu.plugins.centering.vo_centering_updated
 

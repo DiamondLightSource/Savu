@@ -1,5 +1,5 @@
-scripts.config_generator.content module
-=======================================
+scripts\.config\_generator\.content module
+==========================================
 
 .. automodule:: scripts.config_generator.content
     :members:

@@ -33,6 +33,7 @@ class Preview(object):
     def __init__(self, data_obj):
         self._data_obj = data_obj
         self.revert_shape = None
+        self.plugin_preview = None
 
     def get_data_obj(self):
         return self._data_obj
@@ -49,12 +50,14 @@ class Preview(object):
         {0}
         """
         self.revert_shape = kwargs.get('revert', self.revert_shape)
+        load = kwargs.get('load', False)
         shape = self.get_data_obj().get_shape()
+        preview_list = self.__convert_nprocs(preview_list)
 
         if preview_list:
-            preview_list = self.__add_preview_defaults(preview_list)
+            preview_list = self._add_preview_defaults(preview_list)
             starts, stops, steps, chunks = \
-                self.__get_preview_indices(preview_list)
+                self._get_preview_indices(preview_list)
             shape_change = True
         else:
             starts, stops, steps, chunks = \
@@ -62,10 +65,19 @@ class Preview(object):
             shape_change = False
 
         self.__set_starts_stops_steps(starts, stops, steps, chunks,
-                                      shapeChange=shape_change)
+                                      shapeChange=shape_change, load=load)
         self.__check_preview_indices()
 
-    def __add_preview_defaults(self, plist):
+    def __convert_nprocs(self, preview_list):
+        for i in range(len(preview_list)):
+            if preview_list[i] == 'nprocs':
+                nprocs = self.get_data_obj().exp.meta_data.get('nProcesses')
+                start = int(np.floor(nprocs/2.0))
+                end = int(np.ceil(nprocs/2.0))
+                preview_list[i] = 'mid-' + str(start) + ':mid+' + str(end)
+        return preview_list
+
+    def _add_preview_defaults(self, plist):
         """ Fill in missing values in preview list entries.
 
         :param: preview list with entries of the form
@@ -93,11 +105,16 @@ class Preview(object):
         self.set_preview([])
         self.revert_shape = None
 
+    def _reset_preview(self):
+        self.set_preview([])
+        self.plugin_preview = None
+
     def __set_starts_stops_steps(self, starts, stops, steps, chunks,
-                                 shapeChange=True):
+                                 shapeChange=True, load=False):
         """ Add previewing params to data_info dictionary and set reduced
         shape.
         """
+
         set_mData = self.get_data_obj().data_info.set
         set_mData('starts', starts)
         set_mData('stops', stops)
@@ -107,8 +124,11 @@ class Preview(object):
             self.__set_reduced_shape(starts, stops, steps, chunks)
             slice_list = self._get_preview_slice_list()
             self.get_data_obj().amend_axis_label_values(slice_list)
+        if load:
+            entry = self.get_data_obj().get_name() + '_preview_starts'
+            self.get_data_obj().exp.meta_data.set(entry, starts)
 
-    def __get_preview_indices(self, preview_list):
+    def _get_preview_indices(self, preview_list):
         """ Get preview_list ``starts``, ``stops``, ``steps``, ``chunks``
         separate components with integer values.
 
@@ -127,6 +147,7 @@ class Preview(object):
             vals = preview_list[i].split(':')
             starts[i], stops[i], steps[i], chunks[i] = \
                 self.__convert_indices(vals, i)
+
         return starts, stops, steps, chunks
 
     def __convert_indices(self, idx, dim):
@@ -173,26 +194,29 @@ class Preview(object):
         """ Set new shape if data is reduced by previewing.
         """
         dobj = self.get_data_obj()
+        td = dobj._get_transport_data()
         orig_shape = dobj.get_shape()
         dobj.data_info.set('orig_shape', orig_shape)
         new_shape = []
         for dim in range(len(starts)):
-            new_shape.append(np.prod((dobj._get_slice_dir_matrix(dim).shape)))
+            new_shape.append(np.prod((td._get_slice_dir_matrix(dim).shape)))
         dobj.set_shape(tuple(new_shape))
 
     def _get_preview_slice_list(self):
         """ Amend the axis label values based on the previewing parameters.
         """
         dobj = self.get_data_obj()
+        td = dobj._get_transport_data()
         starts, stops, steps, chunks = self.get_starts_stops_steps()
-        if not starts:
+
+        if starts is None:
             return None
-        
+
         slice_list = []
         for dim in range(len(dobj.get_shape())):
             if chunks[dim] > 1:
                 slice_list.append(
-                    np.ravel(np.transpose(dobj._get_slice_dir_matrix(dim))))
+                    np.ravel(np.transpose(td._get_slice_dir_matrix(dim))))
             else:
                 slice_list.append(slice(starts[dim], stops[dim], steps[dim]))
         return slice_list

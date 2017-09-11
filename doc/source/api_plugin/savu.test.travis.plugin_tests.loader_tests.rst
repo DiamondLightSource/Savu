@@ -1,5 +1,5 @@
-savu.test.travis.plugin_tests.loader_tests package
-==================================================
+savu\.test\.travis\.plugin\_tests\.loader\_tests package
+========================================================
 
 Submodules
 ----------

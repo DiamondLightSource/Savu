@@ -1,5 +1,5 @@
-savu.plugins.fitters package
-============================
+savu\.plugins\.fitters package
+==============================
 
 .. automodule:: savu.plugins.fitters
     :members:

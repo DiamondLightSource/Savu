@@ -58,7 +58,7 @@ class BaseLoader(Plugin):
     def set_data_reduction_params(self, data_obj):
         pDict = self.parameters
         self.data_mapping()
-        data_obj.get_preview().set_preview(pDict['preview'])
+        data_obj.get_preview().set_preview(pDict['preview'], load=True)
         self.reduction_flag = True
 
     def get_NXapp(self, ltype, nx_file, entry):

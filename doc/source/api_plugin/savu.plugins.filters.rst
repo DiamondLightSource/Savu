@@ -1,5 +1,5 @@
-savu.plugins.filters package
-============================
+savu\.plugins\.filters package
+==============================
 
 Submodules
 ----------

@@ -90,8 +90,15 @@ if [ $BIG = true ] ; then
     cluster=high.q@@com14
     gpu_arch=Pascal
     outname=savu
-    nNodes=10
+    nNodes=8
     nCoresPerNode=20
+    nGPUs=2
+elif [ $PREVIEW = true ] ; then
+    cluster=high.q@@com07
+    gpu_arch=Fermi
+    outname=savu
+    nNodes=1
+    nCoresPerNode=12
     nGPUs=2
 else
     cluster=high.q@@com10
@@ -100,9 +107,6 @@ else
     nNodes=4
     nCoresPerNode=20
     nGPUs=4
-    if [ $PREVIEW = true ] ; then
-        nNodes=1
-    fi
 fi
 
 # get the Savu path
@@ -138,11 +142,11 @@ if [ ! $interfolder ] ; then
   interfolder=$outfolder
 fi
 
-qsub -jsv /dls_sw/apps/sge/common/JSVs/tomo_recon_test.pl \
+qsub -jsv /dls_sw/apps/sge/common/JSVs/savu.pl \
      -N $outname -j y -o $interfolder -e $interfolder -pe openmpi $M -l exclusive \
      -l infiniband -l gpu=$nGPUs -l gpu_arch=$gpu_arch -q $cluster $filepath $version $savupath $datafile \
-     $processfile $outpath $nCoresPerNode $nGPUs $options -c \
-     -f $outfolder -s cs04r-sc-serv-14 -l $outfolder > /dls/tmp/savu/$USER.out
+     $processfile $outpath $nCoresPerNode $nGPUs $options -c -f $outfolder -s cs04r-sc-serv-14 \
+     --facility_email scientificsoftware@diamond.ac.uk -l $outfolder > /dls/tmp/savu/$USER.out
 
 #qsub -N $outname -j y -o $interfolder -e $interfolder -pe openmpi $M -l exclusive \
 #     -l infiniband -l gpu=$nGPUs -l gpu_arch=$gpu_arch -q $cluster -P tomography $filepath $version $savupath $datafile \

@@ -39,9 +39,13 @@ def find_args(dclass, inst=None):
     if not docstring:
         return []
 
-    mod_doc_lines = __get_doc_lines(sys.modules[dclass.__module__].__doc__)
-    lines = __get_doc_lines(docstring)
+    mod_doc_lines = _get_doc_lines(sys.modules[dclass.__module__].__doc__)
+    lines = _get_doc_lines(docstring)
 
+    return _parse_args(mod_doc_lines, lines)
+
+
+def _parse_args(mod_doc_lines, lines):
     param_list, user, hide, not_param, param_lines = __get_params(lines)
 
     warn_regexp = re.compile(r'^:config_warn: \s?(?P<config_warn>.*[^ ])$')
@@ -60,7 +64,7 @@ def find_args(dclass, inst=None):
             'not_param': not_param}
 
 
-def __get_doc_lines(doc):
+def _get_doc_lines(doc):
     if not doc:
         return ['']
     return [" ".join(l.strip(' .').split()) for l in doc.split('\n')]

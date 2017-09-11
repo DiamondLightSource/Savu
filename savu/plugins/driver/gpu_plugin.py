@@ -20,16 +20,22 @@
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
-import logging
+
+import os
 import copy
+import logging
 import numpy as np
+import pynvml as pv
 from mpi4py import MPI
 from itertools import chain, izip
 
 from savu.plugins.driver.plugin_driver import PluginDriver
+from savu.plugins.driver.basic_driver import BasicDriver
+
+_base = BasicDriver if os.environ['savu_mode'] == 'basic' else PluginDriver
 
 
-class GpuPlugin(PluginDriver):
+class GpuPlugin(_base):
     """
     The base class from which all plugins should inherit.
     """
@@ -68,7 +74,7 @@ class GpuPlugin(PluginDriver):
             expInfo.set('process', self.new_comm.Get_rank())
             GPU_index = self.__calculate_GPU_index(nNodes)
             logging.debug("Running the GPU process %i with GPU index %i",
-                         self.new_comm.Get_rank(), GPU_index)
+                          self.new_comm.Get_rank(), GPU_index)
             self.parameters['GPU_index'] = GPU_index
             self._run_plugin_instances(transport, communicator=self.new_comm)
             self.__free_communicator()
@@ -92,5 +98,7 @@ class GpuPlugin(PluginDriver):
         self.new_comm.Free()
 
     def __calculate_GPU_index(self, nNodes):
+        pv.nvmlInit()
+        nGPUs = int(pv.nvmlDeviceGetCount())
         rank = self.new_comm.Get_rank()
-        return int(rank/nNodes)
+        return int(rank/nNodes) % nGPUs

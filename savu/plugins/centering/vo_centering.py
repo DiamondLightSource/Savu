@@ -101,7 +101,7 @@ class VoCentering(BaseFilter, CpuPlugin):
         # This image is used for compensating the shift of sino2
         compensateimage = np.zeros((Nrow-1, Ncol), dtype=np.float32)
         # Start coarse search in which the shift step is 1
-        compensateimage[:] = sino[-1]
+        compensateimage[:] = np.flipud(sino)[1:]
         start_shift = self._get_start_shift(centre_fliplr)*2
         list_shift = np.arange(smin, smax + 1)*2 - start_shift
         list_metric = np.zeros(len(list_shift), dtype=np.float32)
@@ -166,7 +166,7 @@ class VoCentering(BaseFilter, CpuPlugin):
 
         (Nrow, Ncol) = data[0].shape
         downlevel = 4
-        if Ncol>1024:
+        if Ncol>1800:
             sino_downsp = data[0][:,0:Ncol:downlevel]
             sino_cs = filter.gaussian_filter(sino_downsp, (3,1))
             logging.debug("performing coarse search")
@@ -186,16 +186,16 @@ class VoCentering(BaseFilter, CpuPlugin):
     def post_process(self):
         # do some curve fitting here
         in_datasets, out_datasets = self.get_datasets()
-
         cor_raw = np.squeeze(out_datasets[0].data[...])
         cor_fit = out_datasets[1].data[...]
         fit = np.zeros(cor_fit.shape)
-        fit[:] = np.mean(cor_raw)
+        fit[:] = np.median(cor_raw)
         cor_fit = fit
         out_datasets[1].data[:] = cor_fit[:]
 
         self.populate_meta_data('cor_raw', cor_raw)
-        self.populate_meta_data('centre_of_rotation', cor_fit)
+        self.populate_meta_data('centre_of_rotation',
+                                out_datasets[1].data[:].squeeze(axis=1))
 
     def populate_meta_data(self, key, value):
         datasets = self.parameters['datasets_to_populate']
@@ -219,8 +219,7 @@ class VoCentering(BaseFilter, CpuPlugin):
         # calculate the slice list here and determine if it is feasible, else apply to max(n_processes, data_size)
 
         # reduce the data as per data_subset parameter
-        in_dataset[0].get_preview().set_preview(self.parameters['preview'],
-                                                revert=self.orig_full_shape)
+        self.set_preview(in_dataset[0], self.parameters['preview'])
 
         in_pData, out_pData = self.get_plugin_datasets()
         in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
@@ -234,12 +233,15 @@ class VoCentering(BaseFilter, CpuPlugin):
 
         out_dataset[0].create_dataset(shape=new_shape,
                                       axis_labels=['x.pixels', 'y.pixels'],
-                                      remove=True)
+                                      remove=True,
+                                      transport='hdf5')
+
         out_dataset[0].add_pattern("METADATA", core_dims=(1,), slice_dims=(0,))
 
         out_dataset[1].create_dataset(shape=self.orig_shape,
                                       axis_labels=['x.pixels', 'y.pixels'],
-                                      remove=True)
+                                      remove=True,
+                                      transport='hdf5')
         out_dataset[1].add_pattern("METADATA", core_dims=(1,), slice_dims=(0,))
 
         out_pData[0].plugin_data_setup('METADATA', self.get_max_frames())
@@ -252,6 +254,9 @@ class VoCentering(BaseFilter, CpuPlugin):
 
     def get_max_frames(self):
         return 'single'
+
+    def fix_transport(self):
+        return 'hdf5'
 
     def get_citation_information(self):
         cite_info = CitationInformation()
