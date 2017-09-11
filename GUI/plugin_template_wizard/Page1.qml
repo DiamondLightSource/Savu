@@ -7,7 +7,7 @@ import '.'
 
 Screen {
     
-    title: 'User info'
+    title: 'User information'
     hasBackButton: false
                 
     Pg1Model{

@@ -13,14 +13,14 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QGuiApplication
 from PyQt5.QtQml import QQmlApplicationEngine
 
-from template import Template  # different folder?? to organise a bit more  
+from template import Template   
 
 current_template = Template()
 
 if __name__ == '__main__':
 
 
-    def on_createTemplate(plugin_info):# note as the dictionary elemetns are only created once editing has finished if the user skips something that is called later it will crash  precreate a dictionary that already hass a ll labels ?? 
+    def on_createTemplate(plugin_info):
       
       current_template.write_template(plugin_info.toVariant())
 

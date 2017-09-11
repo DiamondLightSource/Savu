@@ -6,8 +6,6 @@ import QtQuick.Dialogs 1.2
 
 import '.'
 
-
-
 Button { 
       id : helpButton
       text: '?'

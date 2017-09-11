@@ -12,13 +12,12 @@ Rectangle {
     height: 400 
     color: 'steel blue'
 
-
     property alias hasBackButton: backButton.visible
     property alias hasNextButton: nextButton.visible   
     property alias hasCreateButton: create.visible    
     property alias title: text.text
 
-    default property alias children: columnlayout.data // each element of a page with screen as is a child of column layout 
+    default property alias children: columnlayout.data // each elements within thee wizard pages are children of column layout 
     
     signal nextScreen()
     signal prevScreen()
@@ -34,7 +33,6 @@ Rectangle {
     ColumnLayout {
         id: columnlayout
         anchors{fill: parent; margins: 40}
-
     }
         
     Button {

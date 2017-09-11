@@ -9,10 +9,10 @@ import '.'
 
 Screen {
 
-    title: 'Input data'
+    title: 'In datasets'
 
     Component {
-        id: multi_in_infoDelegate
+        id: page3_model_Delegate
         
         RowLayout {
             id: row
@@ -20,7 +20,7 @@ Screen {
             height: 30                      
             
             StandardTextLabel{ 
-                  font.bold: ptype == 2
+                  font.bold: ptype == 2 // if not a text box or dropdown its a title 
             }  
             
             StandardTextField{
@@ -36,10 +36,9 @@ Screen {
                 }                 
             }
                         
-            
             StandardComboBox{
                 id: combo
-                onCurrentIndexChanged: {
+                onPressedChanged: { // HAVE TO ACTUALLY CLICK ON THE DROP DOWN EVEN IF THE ONE SHOWING IS THE ONE YOU WANT 
                     GModel.pluginInfo[label] =  combo.currentText;
                     if( combo.currentText == 'int'){
                         textfield.visible = true 
@@ -52,15 +51,23 @@ Screen {
                 return n === +n && n === (n|0) && n != 0;
             }   
             
-            HelpButton{
+            HelpButton{ 
                 id: help_button
             }
             
             HelpButtonDialog{
                 id: help_dialog
+                text:{
+                    if (n == 1){
+                      'Please input the pattern of the in plugin dataset, if passed from plugin select pass parameter.'    ;
+                    }else if (n== 2){
+                      'Please input the no. of frames for the plugin dataset.';
+                    } else {
+                      'No documents selected.'    
+                    }
+                }    
             }
 
-            
             MessageDialog {
                 id: warning
                 title: 'Attention!'
@@ -69,21 +76,17 @@ Screen {
                 standardButtons: StandardButton.Ok
                 onAccepted : visible = false
             }
-            
-            ListModel {
-                id: combo_model    
-            }
         }
     }
 
-    ScrollView {
+    ScrollView { // adds a scroll bar if The no. of datasets means list is longer than window
       anchors.fill: parent
       frameVisible: false
       ListView {
         anchors.fill: parent
         anchors.rightMargin: 10
         model: myModel
-        delegate: multi_in_infoDelegate
+        delegate: page3_model_Delegate
       }    
     }
         
@@ -94,7 +97,6 @@ Screen {
     function addInElements(n) {
         myModel.clear();
         for ( var i = 0; i < n; i++ ) {
-            //var mylist = [{text: "option1"}, {text:"option2"}];
             myModel.append({label: 'in dataset' + (i+1), ptype: 2, n: 0, combo_options : [], placeholder: ''});
             myModel.append({label: 'in plugin pattern '+ (i+1), ptype: 1, n: 1, combo_options: [{text: 'SINOGRAM'},{text: 'PROJECTION'},{text:'TIMESERIES'},{text:'pass as parameter'}], placeholder: '' });
             myModel.append({label:'No. of frames, in plugin dataset '+ (i+1), ptype: 1, n:2, combo_options: [{text: 'single'},{text: 'multiple'}, {text: 'int'}], placeholder:'Please input an integer'});           // 'single','multiple', 'int' 

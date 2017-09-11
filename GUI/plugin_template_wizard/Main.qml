@@ -30,35 +30,22 @@ ApplicationWindow {
           
           Page1 {
               id: page1
-              onNextScreen : {
-                  handler.currentIndex += 1;
-              }
+              onNextScreen : handler.currentIndex += 1
           }
           
           Page2 {
               id: page2
-              onNextScreen : {
-                  handler.currentIndex += 1;
-              }              
-              onPrevScreen : {
-                  handler.currentIndex -= 1;
-              }
-              onNoDatasets1 : function(INvalue) {
-                  page3.addInElements(INvalue); // tells page 3 how many in datasets, calls function that creates a model based no. in . 
-              }
-              onNoDatasets2 : {
-                  page4.addOutElements(OUTvalue); //tells page 3 how many out datasets    
-              }
+              onNextScreen : handler.currentIndex += 1
+              onPrevScreen :handler.currentIndex -= 1
+            
+              onNoDatasetsIn : page3.addInElements(INvalue)//tells page 3 how many in datasets, calls function that creates a model based no. in 
+              onNoDatasetsOut : page4.addOutElements(OUTvalue) //tells page 3 how many out datasets  
           }
               
           Page3 {
               id: page3
-              onNextScreen : {
-                  handler.currentIndex += 1;
-              }              
-              onPrevScreen : {
-                  handler.currentIndex -= 1;
-              }
+              onNextScreen : handler.currentIndex += 1
+              onPrevScreen :handler.currentIndex -= 1
           }     
               
           Page4 {
@@ -67,19 +54,12 @@ ApplicationWindow {
                   handler.currentIndex += 1;
                   page5.updateModel();
               }              
-              onPrevScreen : {
-                  handler.currentIndex -= 1;
-              }
+              onPrevScreen :handler.currentIndex -= 1
           } 
               
           Page5 {
               id: page5
-              onNextScreen : {
-                  handler.currentIndex += 1;
-              }              
-              onPrevScreen : {
-                  handler.currentIndex -= 1;
-              }
+              onPrevScreen :  handler.currentIndex -= 1
             
           } 
        }

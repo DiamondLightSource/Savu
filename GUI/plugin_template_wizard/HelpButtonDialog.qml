@@ -10,16 +10,7 @@ MessageDialog {
     id: help_dialog
     title: 'Help'
     icon: StandardIcon.Question
-    text: {
-        
-        if (n == 1){
-          'Please input the pattern of the input plugin dataset, if passed from plugin select pass parameter.'    ;
-        }else if (n== 2){
-          'Please input the no of frames for the plugin dataset.';
-        } else {
-          'No documents selected.'    
-        }
-    } 
+    text: "" 
     standardButtons: StandardButton.Ok
     onAccepted : visible = false
 

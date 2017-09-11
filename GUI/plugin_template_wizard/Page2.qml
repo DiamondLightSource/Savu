@@ -7,10 +7,10 @@ import '.'
 
 Screen {
 
-    title: 'Number of input and output datasets'
+    title: 'Number of in and out datasets'
     
-    signal noDatasets1(int INvalue)
-    signal noDatasets2(int OUTvalue)
+    signal noDatasetsIn(int INvalue)
+    signal noDatasetsOut(int OUTvalue)
 
     Pg2Model {// list Model, contains content to fill delegate
         id: pg2_model

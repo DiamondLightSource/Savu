@@ -28,16 +28,14 @@ Screen {
             role : 'input'
             title: "User input "
             width: 300
-            //delegate: TextEdit {anchors.fill: parent}
         }              
         model: myModel
     }
  
-    
     function updateModel() {
 
-        myModel.clear();  // doesn't seem to be clearing !??
-        for (var key in GModel.pluginInfo) {
+        myModel.clear();
+        for (var key in GModel.pluginInfo) { // old values/entries of GModel will still show up 
             if (GModel.pluginInfo.hasOwnProperty(key)) {
                 myModel.append({label: key, input: GModel.pluginInfo[key]});
 
