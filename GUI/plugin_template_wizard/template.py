@@ -1,9 +1,8 @@
 import os 
-import fixed_template_elements.copyright
 class Template:
 
   
-######### functions used to write template ##############
+          # functions used to write template 
 
       def add_on(self,f,openfile):# adds openfile onto main file f 
           with open(openfile) as input:
@@ -22,7 +21,7 @@ class Template:
            Nin = str(int(y)-1)
            return Nin
          
-###########################################################        
+
   
       def write_template(self,plugin_info):
           modname = plugin_info["Plugin template name:"]
