@@ -1,0 +1,5 @@
+Once this folder has been downloaded to use the plugin template wizard:
+
+load savu in your terminal
+Navigate to the GUI folder of your local copy of Savu and run:
+$ python auto_plugin_wizard.py 
