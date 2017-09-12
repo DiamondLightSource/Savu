@@ -23,8 +23,6 @@ if __name__ == '__main__':
     def on_createTemplate(plugin_info):
       
       current_template.write_template(plugin_info.toVariant())
-
-          
              
     QGuiApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
     myApp = QApplication(sys.argv)

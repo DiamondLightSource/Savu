@@ -4,6 +4,7 @@ import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.2
 
 import '.'
+import "CustomComponents"
 
 Screen {
     
@@ -35,7 +36,7 @@ Screen {
                   id: textfield
                   implicitWidth: 300
                   height: parent.height                    
-                  placeholderText: placeholder //property of the model ( gives a text hint to the user, visible before they inout anything )
+                  placeholderText: placeholder //property of the model ( gives a text hint to the user, visible before they input anything )
                   onTextChanged: {
                       GModel.pluginInfo[label] = textInput.text;
                   }

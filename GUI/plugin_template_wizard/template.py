@@ -1,8 +1,10 @@
 import os 
-
+import fixed_template_elements.copyright
 class Template:
 
   
+######### functions used to write template ##############
+
       def add_on(self,f,openfile):# adds openfile onto main file f 
           with open(openfile) as input:
             f.write(input.read())
@@ -20,16 +22,23 @@ class Template:
            Nin = str(int(y)-1)
            return Nin
          
-        
-      
+###########################################################        
+  
       def write_template(self,plugin_info):
-
           modname = plugin_info["Plugin template name:"]
           modname = modname if len(modname.split('.py')) > 1 else modname + '.py'  # checks has .py format
+          
+          
+          x,y = modname.split('.py')# checking that there isn't already a file with this name 
+          original = x
+          n = 1
+          while os.path.isfile(modname) == True:
+            modname = original + str(n) + '.py'
+            n +=1
            
           with open(modname, 'a+') as f:
             
-              self.add_on(f,'copyright.py' )
+              self.add_on(f,'fixed_template_elements/copyright.py' )
 
 
               f.write('"""\n.. module::'+ plugin_info["Plugin template name:"])
@@ -37,13 +46,13 @@ class Template:
               f.write(plugin_info["Your name:"] + ' <' + plugin_info["Your e-mail:"] + '>\n\n"""\n')
               
               
-              self.add_on(f,'imports.py' )
+              self.add_on(f,'fixed_template_elements/imports.py' )
                
               
               f.write('\nclass ' + plugin_info["Plugin class name:"] + '(Plugin, CpuPlugin):\n')
               
               
-              self.add_on(f,'description.py' )
+              self.add_on(f,'fixed_template_elements/description.py' )
                        
               
               f.write('\n    def __init__(self):')
@@ -51,7 +60,7 @@ class Template:
               f.write( ', self).__init__("' + plugin_info["Plugin class name:"] + '")\n\n')   
               
               
-              self.add_on(f,'process_and_setup_intro.py')
+              self.add_on(f,'fixed_template_elements/process_and_setup_intro.py')
 
               # creating the out  datasets 
               for n in range(0, int(plugin_info["Number of out datasets "])):
