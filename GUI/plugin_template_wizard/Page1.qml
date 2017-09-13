@@ -3,7 +3,7 @@ import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.2
 
-import '.'
+import '.' // imports qmldir ( directory containing GModel)
 import "CustomComponents"
 
 Screen {
@@ -24,7 +24,7 @@ Screen {
             height: 30                      
             spacing: 50
             
-            Text { // StandardTextLabel in other pages  left in long form here so it is easy to see what it's doing ???????
+            Text { // StandardTextLabel in other pages  left in long form here so it is easy to see what it's doing 
                 id : textLabel
                   Layout.fillWidth: true
                   height: parent.height
@@ -38,7 +38,7 @@ Screen {
                   height: parent.height                    
                   placeholderText: placeholder //property of the model ( gives a text hint to the user, visible before they input anything )
                   onTextChanged: {
-                      GModel.pluginInfo[label] = textInput.text;
+                      GModel.pluginInfo[label] = textfield.text;
                   }
             }
         }
