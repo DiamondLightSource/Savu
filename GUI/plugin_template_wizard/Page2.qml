@@ -4,6 +4,7 @@ import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.2
 
 import '.'
+import "CustomComponents"
 
 Screen {
 
@@ -32,13 +33,13 @@ Screen {
                 onTextChanged: {
                     if( isInt(parseInt(textfield.text))== true){ // checks if the input is an integer
                         if (n == 1){
-                          noDatasets1(parseInt(textfield.text)); //  tells page 3 (in info)  how to populate 
+                          noDatasetsIn(parseInt(textfield.text)); //  tells page 3 (in info)  how to populate 
                         }else {
-                          noDatasets2(parseInt(textfield.text) )// tells page 4 (out info)
+                          noDatasetsOut(parseInt(textfield.text) )// tells page 4 (out info)
                         }
                     } else{
                         warning.visible = true  
-                        void remove(0,1)// Removes inout if not an inetger     
+                        void remove(0,1)// Removes input if not an inetger     
                         // note: it cannot tell that the input contains a string if  it starts with an integer e.g 12g wouldn't raise an error  
                     }   
                     GModel.pluginInfo[label] = textfield.text;
