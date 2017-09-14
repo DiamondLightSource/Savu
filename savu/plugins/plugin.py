@@ -148,6 +148,7 @@ class Plugin(PluginDatasets):
         user_items = list(set(user_items).difference(set(hidden_items)))
         self.parameters_hide = hidden_items
         self.parameters_user = user_items
+        self.final_parameter_updates()
 
     def _add_item(self, item_list, not_list):
         true_list = [i for i in item_list if i['name'] not in not_list]
@@ -155,6 +156,12 @@ class Plugin(PluginDatasets):
             self.parameters[item['name']] = item['default']
             self.parameters_types[item['name']] = item['dtype']
             self.parameters_desc[item['name']] = item['desc']
+
+    def delete_parameter_entry(self, param):
+        if param in self.parameters.keys():
+            del self.parameters[param]
+            del self.parameters_types[param]
+            del self.parameters_desc[param]
 
     def initialise_parameters(self):
         self.parameters = {}
@@ -399,6 +406,11 @@ class Plugin(PluginDatasets):
         """ The number of frames to process during each call to process_frames.
         """
         return 'single'
+
+    def final_parameter_updates(self):
+        """ An opportunity to update the parameters after they have been set.
+        """
+        pass
 
     def get_citation_information(self):
         """
