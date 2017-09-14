@@ -94,7 +94,8 @@ class Experiment(object):
                                       'datasets': []}
 
         self._barrier()
-        if self.meta_data.get('process') == 0:
+        if self.meta_data.get('process') == \
+                len(self.meta_data.get('processes')):
             plugin_list._save_plugin_list(self.meta_data.get('nxs_filename'))
         self._barrier()
 
@@ -173,15 +174,12 @@ class Experiment(object):
         filename = os.path.join(folder, fname)
         self.meta_data.set('nxs_filename', filename)
 
-        if self.meta_data.get('process') == 0:
+        if self.meta_data.get('process') == 1:
             if self.meta_data.get('bllog'):
                 log_folder_name = self.meta_data.get('bllog')
                 log_folder = open(log_folder_name, 'a')
                 log_folder.write(os.path.abspath(filename) + '\n')
                 log_folder.close()
-#
-#        if self.meta_data.get('process') == 0:
-#            self.nxs_file = h5py.File(filename, 'w')
 
     def _clear_data_objects(self):
         self.index["out_data"] = {}
