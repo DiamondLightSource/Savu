@@ -58,6 +58,12 @@ class PluginDriver(object):
                     out_data[j]._get_plugin_data()\
                         .set_fixed_dimensions(param_dims[j], param_idx[i])
 
+            self._perform_the_processing(transport, communicator=communicator)
+
+        for j in range(len(out_data)):
+            out_data[j].set_shape(out_data[j].data.shape)
+
+    def _perform_the_processing(self, transport, communicator=MPI.COMM_WORLD):
             logging.info("%s.%s", self.__class__.__name__, 'pre_process')
             self.base_pre_process()
             self.pre_process()
@@ -73,9 +79,6 @@ class PluginDriver(object):
             logging.info("%s.%s", self.__class__.__name__, 'post_process')
             self.post_process()
             self.base_post_process()
-
-        for j in range(len(out_data)):
-            out_data[j].set_shape(out_data[j].data.shape)
 
     def __get_local_dict(self):
         """ Gets the local variables of the class minus those from the Plugin
