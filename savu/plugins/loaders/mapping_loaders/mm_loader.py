@@ -22,65 +22,75 @@
 """
 
 from savu.plugins.loaders.base_loader import BaseLoader
-from savu.plugins.loaders.mapping_loaders.nxfluo_loader import NxfluoLoader
-from savu.plugins.loaders.mapping_loaders.nxxrd_loader import NxxrdLoader
-from savu.plugins.loaders.mapping_loaders.nxstxm_loader import NxstxmLoader
+from savu.plugins.loaders.mapping_loaders.nxfluo_loader \
+    import NxfluoLoader as fluo
+from savu.plugins.loaders.mapping_loaders.nxxrd_loader \
+    import NxxrdLoader as xrd
+from savu.plugins.loaders.mapping_loaders.nxstxm_loader \
+    import NxstxmLoader as stxm
 from savu.plugins.loaders.mapping_loaders.nxmonitor_loader \
-    import NxmonitorLoader
+    import NxmonitorLoader as mon
 import logging
 
 from savu.plugins.utils import register_plugin
+from savu.core.utils import docstring_parameter
+from savu.plugins.loaders.mapping_loaders.base_multi_modal_loader \
+    import BaseMultiModalLoader
 
 
 @register_plugin
 class MmLoader(BaseLoader):
-    """
-    A class to load tomography data from an NXTomo file
-
-    :param calibration_path: path to the calibration \
-        file. Default: "Savu/test_data/data/LaB6_calibration_output.nxs".
-    """
 
     def __init__(self, name='MmLoader'):
         super(MmLoader, self).__init__(name)
+        base = BaseMultiModalLoader()
+        base._populate_default_parameters()
+        self.doc_string = base.__doc__
+        self.dict = base.parameters
+        self.fluo_keys = self.set_params(fluo(), 'fluo')
+        self.xrd_keys = self.set_params(xrd(), 'xrd')
+        self.stxm_keys = self.set_params(stxm(), 'stxm')
+        self.mon_keys = self.set_params(mon(), 'monitor')
+        for key, value in self.dict.iteritems():
+            self.parameters[key] = value
+
+    def set_params(self, inst, name):
+        inst._populate_default_parameters()
+        copy_keys = inst.parameters.viewkeys() - self.dict.viewkeys()
+        for key in copy_keys:
+            self.parameters[key] = inst.parameters[key]
+        return list(copy_keys)
+
+    def separate_params(self, keys):
+        all_keys = self.dict.keys() + keys
+        new_dict = {}
+        for key in all_keys:
+            new_dict[key] = self.parameters[key]
+        return new_dict
+
+    @docstring_parameter(BaseMultiModalLoader.__doc__, xrd.__doc__,
+                         stxm.__doc__, mon.__doc__, fluo.__doc__)
+    def _override_class_docstring(self):
+        """ {0} \n {1} \n {2} \n {3} \n {4} """
+        pass
 
     def setup(self):
-        new_dict = self.amend_dictionary()
-        try:
-            self.setup_loader(NxfluoLoader(), new_dict)
-            logging.debug('This file contains an NXfluo')
-        except IndexError:
-            logging.warn('This file does not contain an NXfluo')
-        except:
-            raise
-        try:
-            self.setup_loader(NxxrdLoader(), self.parameters)
-            logging.debug('This file contains an NXxrd')
-        except IndexError:
-            logging.warn('This file does not contain an NXxrd')
-        except:
-            raise
-        try:
-            self.setup_loader(NxstxmLoader(), new_dict)
-            logging.debug('This file contains an NXstxm')
-        except IndexError:
-            logging.warn('This file does not contain an NXstxm')
-        except:
-            raise
+        self._data_loader(fluo(), 'fluo', self.fluo_keys)
+        self._data_loader(xrd(), 'xrd', self.xrd_keys)
+        self._data_loader(stxm(), 'stxm', self.stxm_keys)
+        self._data_loader(mon(), 'monitor', self.mon_keys)
 
+    def _data_loader(self, inst, name, key):
+        debug_str = 'This file contains an ' + name
+        warn_str = 'This file does not contain a ' + name
         try:
-            self.setup_loader(NxmonitorLoader(), new_dict)
-            logging.debug('This file contains an NXmonitor')
+            self.setup_loader(inst, self.separate_params(key))
+            logging.debug(debug_str)
         except IndexError:
-            logging.warn('This file does not contain an NXmonitor')
+            logging.warn(warn_str)
         except:
             raise
 
     def setup_loader(self, loader, params):
         loader._main_setup(self.exp, params)
         loader.setup()
-
-    def amend_dictionary(self):
-        new_dict = self.parameters.copy()
-        del new_dict['calibration_path']
-        return new_dict

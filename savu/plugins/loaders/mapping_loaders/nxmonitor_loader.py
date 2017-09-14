@@ -52,5 +52,5 @@ class NxmonitorLoader(BaseMultiModalLoader):
         self.exp.meta_data.set("mono_energy", mono_energy)
         self.set_motors(data_obj, stxm_entry, 'monitor')
 
-        self.add_patterns_based_on_acquisition(data_obj, 'monitor')   
+        self.add_patterns_based_on_acquisition(data_obj, 'monitor')
         self.set_data_reduction_params(data_obj)

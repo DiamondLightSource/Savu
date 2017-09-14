@@ -33,28 +33,21 @@ class I18FluoLoader(BaseI18MultiModalLoader):
     A class to load tomography data from an NXstxm file
     :u*param fluo_detector: path to \
         stxm. Default:'entry1/xspress3/AllElementSum'.
-
+    :param name: The name assigned to the dataset. Default: 'fluo'.
     """
 
     def __init__(self, name='I18FluoLoader'):
         super(I18FluoLoader, self).__init__(name)
 
     def setup(self):
-        """ Define the input nexus file.
-
-        :param path: The full path of the NeXus file to load.
-        :type path: str
-        """
         data_str = self.parameters['fluo_detector']
-        data_obj = self.multi_modal_setup('fluo')
+        data_obj = self.multi_modal_setup('fluo', self.parameters['name'])
         data_obj.data = data_obj.backing_file[data_str]
         data_obj.set_shape(data_obj.data.shape)
         npts = data_obj.get_shape()[-1]
         mData = data_obj.meta_data
-#         gain = self.parameters["fluo_gain"]
-#         energy = np.arange(self.parameters["fluo_offset"], gain*npts, gain)
         mData.set("energy", np.arange(npts)*0.01)
         self.set_motors(data_obj, 'fluo')
         self.add_patterns_based_on_acquisition(data_obj, 'fluo')
-        
+
         self.set_data_reduction_params(data_obj)

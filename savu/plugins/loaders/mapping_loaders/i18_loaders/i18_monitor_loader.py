@@ -33,21 +33,15 @@ class I18MonitorLoader(BaseI18MultiModalLoader):
     A class to load tomography data from an monitor file
     :param monitor_detector: path to \
         monitor. Default:'entry1/raster_counterTimer01/I0'.
+    :param name: The name assigned to the dataset. Default: 'monitor'.
     """
 
     def __init__(self, name='I18MonitorLoader'):
         super(I18MonitorLoader, self).__init__(name)
 
     def setup(self):
-        """
-         Define the input nexus file
-
-        :param path: The full path of the NeXus file to load.
-        :type path: str
-        """
-
         data_str = self.parameters['monitor_detector']
-        data_obj = self.multi_modal_setup('monitor')
+        data_obj = self.multi_modal_setup('monitor', self.parameters['name'])
         data_obj.data = data_obj.backing_file[data_str]
         data_obj.set_shape(data_obj.data.shape)
         self.set_motors(data_obj, 'monitor')

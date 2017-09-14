@@ -39,9 +39,6 @@ class NxstxmLoader(BaseMultiModalLoader):
     def setup(self):
         """
          Define the input nexus file
-
-        :param path: The full path of the NeXus file to load.
-        :type path: str
         """
 
         data_str = '/instrument/detector/data'
@@ -51,5 +48,5 @@ class NxstxmLoader(BaseMultiModalLoader):
         self.exp.meta_data.set("mono_energy", mono_energy)
         self.set_motors(data_obj, stxm_entry, 'stxm')
 
-        self.add_patterns_based_on_acquisition(data_obj, 'stxm')   
+        self.add_patterns_based_on_acquisition(data_obj, 'stxm')
         self.set_data_reduction_params(data_obj)

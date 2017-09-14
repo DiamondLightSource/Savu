@@ -33,7 +33,7 @@ class I18StxmLoader(BaseI18MultiModalLoader):
     A class to load tomography data from an NXstxm file
     :param stxm_detector: path to \
         stxm. Default:'entry1/raster_counterTimer01/It'.
-
+    :param name: The name assigned to the dataset. Default: 'stxm'.
     """
 
     def __init__(self, name='I18StxmLoader'):
@@ -49,7 +49,7 @@ class I18StxmLoader(BaseI18MultiModalLoader):
 
         data_str = self.parameters['stxm_detector']
         logging.debug('The detector is in: %s' % data_str)
-        data_obj = self.multi_modal_setup('stxm')
+        data_obj = self.multi_modal_setup('stxm', self.parameters['name'])
         logging.debug('Completed the stxm multimodal setup')
         data_obj.data = data_obj.backing_file[data_str]
         logging.debug('Assigned the data as %s' % data_obj.data)

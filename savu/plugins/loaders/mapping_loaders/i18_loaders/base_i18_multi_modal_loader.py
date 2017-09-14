@@ -33,23 +33,23 @@ from savu.plugins.loaders.mapping_loaders.base_multi_modal_loader \
 class BaseI18MultiModalLoader(BaseMultiModalLoader):
     """
     This class provides a base for all multi-modal loaders
-    :u*param fast_axis: what is the fast axis called. Default:"x".
-    :u*param scan_pattern: what was the scan. Default: ["rotation","x"].
-    :u*param x: where is x in the \
+    :param fast_axis: what is the fast axis called. Default:"x".
+    :param scan_pattern: what was the scan. Default: ["rotation","x"].
+    :param x: where is x in the \
         file. Default:'entry1/raster_counterTimer01/traj1ContiniousX'.
-    :u*param y: where is y in the file. Default:None.
-    :u*param rotation: where is rotation in the \
+    :param y: where is y in the file. Default:None.
+    :param rotation: where is rotation in the \
         file. Default:'entry1/raster_counterTimer01/sc_sample_thetafine'.
-    :u*param monochromator: where is the \
+    :param monochromator: where is the \
         monochromator. Default: 'entry1/instrument/DCM/energy'.
     """
     def __init__(self, name='BaseI18MultiModalLoader'):
         super(BaseI18MultiModalLoader, self).__init__(name)
 
-    def multi_modal_setup(self, ltype):
+    def multi_modal_setup(self, ltype, name):
         # set up the file handles
         exp = self.exp
-        data_obj = exp.create_data_object("in_data", ltype)
+        data_obj = exp.create_data_object("in_data", name)
         data_obj.backing_file = \
             h5py.File(exp.meta_data.get("data_file"), 'r')
         f = data_obj.backing_file

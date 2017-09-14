@@ -15,7 +15,7 @@
 """
 .. module:: mm_loader
    :platform: Unix
-   :synopsis: A class for loading multiple data types in a multi-modal
+   :synopsis: A class for loading multiple data types in a multi-modal\
        experimental setup.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
@@ -52,30 +52,45 @@ class I18MmLoader(BaseLoader):
         self.xrd_keys = self.set_params(xrd(), 'xrd')
         self.stxm_keys = self.set_params(stxm(), 'stxm')
         self.mon_keys = self.set_params(mon(), 'monitor')
+
         for key, value in self.dict.iteritems():
             self.parameters[key] = value
 
     def set_params(self, inst, name):
         inst._populate_default_parameters()
         copy_keys = inst.parameters.viewkeys() - self.dict.viewkeys()
-        for key in copy_keys:
-            self.parameters[key] = inst.parameters[key]
+        for key in [k for k in copy_keys if k != 'name']:
+            if key != 'name':
+                self.parameters[key] = inst.parameters[key]
         return list(copy_keys)
 
     def separate_params(self, keys):
         all_keys = self.dict.keys() + keys
         new_dict = {}
-        for key in all_keys:
+        for key in [k for k in all_keys if k != 'name']:
             new_dict[key] = self.parameters[key]
         return new_dict
 
     @docstring_parameter(BaseI18MultiModalLoader.__doc__, xrd.__doc__,
                          stxm.__doc__, mon.__doc__, fluo.__doc__)
     def _override_class_docstring(self):
-        """ {0} \n {1} \n {2} \n {3} \n {4} """
+        """
+        :param dataset_names: The names assigned to each dataset in the \
+            order: fluorescence, diffraction, absorption, \
+            monitor. Default: ['fluo', 'xrd', 'stxm', 'monitor'].
+
+        {0} \n {1} \n {2} \n {3} \n {4}
+
+        """
         pass
 
+    def __set_names(self):
+        fluo, xrd, stxm, monitor = self.parameters['dataset_names']
+        self.name_dict = {'fluo': fluo, 'xrd': xrd, 'stxm': stxm,
+                          'monitor': monitor}
+
     def setup(self):
+        self.__set_names()
         self._data_loader(fluo(), 'fluo', self.fluo_keys)
         self._data_loader(xrd(), 'xrd', self.xrd_keys)
         self._data_loader(stxm(), 'stxm', self.stxm_keys)
@@ -85,11 +100,19 @@ class I18MmLoader(BaseLoader):
         debug_str = 'This file contains an ' + name
         warn_str = 'This file does not contain a ' + name
         try:
-            self.setup_loader(inst, self.separate_params(key))
+            params = self.separate_params(key)
+            params['name'] = self.name_dict[name]
+            self.setup_loader(inst, params)
             logging.debug(debug_str)
-        except:
+        except IndexError:
             logging.warn(warn_str)
+        except:
+            raise
 
     def setup_loader(self, loader, params):
         loader._main_setup(self.exp, params)
         loader.setup()
+
+    def final_parameter_updates(self):
+        # names of individual datasets are not required
+        self.delete_parameter_entry('name')

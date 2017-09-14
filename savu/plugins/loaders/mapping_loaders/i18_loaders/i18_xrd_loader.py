@@ -38,10 +38,9 @@ import savu.test.test_utils as tu
 class I18XrdLoader(BaseI18MultiModalLoader):
     """
     A class to load tomography data from an NXstxm file
-    :param data_path: Path to the folder containing the \
-        data. Default: 'Savu/test_data/data/image_test/tiffs'.
-    :param calibration_path: path to the calibration \
-        file. Default: "Savu/test_data/data/LaB6_calibration_output.nxs".
+    :param data_path: Path to the folder containing the data. Default: None.
+    :param calibration_path: path to the calibration file. Default: None.
+    :param name: The name assigned to the dataset. Default: 'xrd'.
     """
 
     def __init__(self, name='I18XrdLoader'):
@@ -54,19 +53,18 @@ class I18XrdLoader(BaseI18MultiModalLoader):
         :param path: The full path of the NeXus file to load.
         :type path: str
         """
-        data_obj = self.multi_modal_setup('xrd')
-        
+        data_obj = self.multi_modal_setup('xrd', self.parameters['name'])
+
         scan_pattern = self.parameters['scan_pattern']
         frame_dim = range(len(scan_pattern))
         shape = []
-        
+
         for pattern in self.parameters['scan_pattern']:
             if pattern == 'rotation':
                 pattern = 'rotation_angle'
             shape.append(len(data_obj.meta_data.get(pattern)))
 
-        path = self.get_path('data_path')#self.parameters['data_path']
-        
+        path = self.get_path('data_path')
         data_obj.data = FabIO(path, data_obj, frame_dim, shape=tuple(shape))
 
         # dummy file
