@@ -103,7 +103,7 @@ class PluginRunner(object):
         self._transport_post_plugin()
 
         for data in finalise['remove'] + finalise['replace']:
-            #  ********* transport function ***********z
+            #  ********* transport function ***********
             self._transport_terminate_dataset(data)
 
         self.exp._reorganise_datasets(finalise)
