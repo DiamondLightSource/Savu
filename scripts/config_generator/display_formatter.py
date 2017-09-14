@@ -176,7 +176,6 @@ class DispDisplay(DisplayFormatter):
             notice = Back.RED + Fore.WHITE + "IMPORTANT PLUGIN NOTICES" +\
                 Back.RESET + Fore.RESET + "\n"
             border = "*"*width + '\n'
-            print (border + notice + warnings + '\n'+border)
 
     def get_warnings(self, width):
         # remove display styling outside of this class
