@@ -1,1 +1,0 @@
-# summer_diamond
