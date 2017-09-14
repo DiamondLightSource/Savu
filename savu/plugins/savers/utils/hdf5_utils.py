@@ -118,8 +118,10 @@ class Hdf5Utils(object):
             nProcs = self.exp.meta_data.get('nProcesses')
             # parallel hdf5 cannot handle data_size/nProcesses > 2GB
             self.__hdf5_file_write_failed_check(nBytes, nProcs)
+            logging.warn('Creating the dataset with chunks.')
             data.data = group.create_dataset(
                     "data", shape, data.dtype, chunks=chunks)
+            logging.warn('Dataset created!')
 
         self.exp._barrier()
 
