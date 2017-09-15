@@ -94,7 +94,8 @@ class Experiment(object):
                                       'datasets': []}
 
         self._barrier()
-        if self.meta_data.get('process') == 0:
+        if self.meta_data.get('process') == \
+                len(self.meta_data.get('processes')):
             plugin_list._save_plugin_list(self.meta_data.get('nxs_filename'))
         self._barrier()
 

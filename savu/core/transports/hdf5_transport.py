@@ -75,7 +75,8 @@ class Hdf5Transport(BaseTransport):
         for data in self.exp.index['out_data'].values():
             if not data.remove:
                 self.exp._barrier()
-                if self.exp.meta_data.get('process') == 0:
+                if self.exp.meta_data.get('process') == \
+                        len(self.exp.meta_data.get('processes')):
                     self._populate_nexus_file(data)
                     self.hdf5._link_datafile_to_nexus_file(data)
                 self.exp._barrier()
