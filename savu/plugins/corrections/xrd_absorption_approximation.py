@@ -52,7 +52,7 @@ class XrdAbsorptionApproximation(BaseFilter, CpuPlugin):
         mono_energy = mData.get('mono_energy')
         peak_energy = mData.get('mono_energy')
         pump_mu = self.get_mu(compound, float(mono_energy), density)
-        peak_mu = self.get_mu(compound, list(mono_energy), density) # sets outgoing x-ray energy to incoming x-ray energy
+        peak_mu = self.get_mu(compound, float(mono_energy), density) # sets outgoing x-ray energy to incoming x-ray energy
         logging.debug("THE PUMP MU IS is:"+str(pump_mu)+str(mono_energy))
         logging.debug("THE PEAK MU IS is:"+str(peak_mu)+str(peak_energy))
         self.atten_ratio = [pm/pump_mu for pm in peak_mu]
