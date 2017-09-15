@@ -130,10 +130,14 @@ def set_datasets(exp, plugin, plugin_dict):
     in_names = ('all' if len(in_names) is 0 else in_names)
     out_names = (copy.copy(in_names) if len(out_names) is 0 else out_names)
 
+    clones = plugin.nClone_datasets()
     in_names = check_nDatasets(exp, in_names, plugin_dict,
                                plugin.nInput_datasets(), "in_data")
     out_names = check_nDatasets(exp, out_names, plugin_dict,
-                                plugin.nOutput_datasets(), "out_data")
+                                plugin.nOutput_datasets() - clones, "out_data")
+
+    if clones:
+        out_names.extend(['itr_clone' + str(i) for i in range(clones)])
 
     for i in range(len(out_names)):
         new = out_names[i].split('in_datasets')

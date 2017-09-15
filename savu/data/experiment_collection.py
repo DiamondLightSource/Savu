@@ -236,7 +236,8 @@ class Experiment(object):
     def _set_all_datasets(self, name):
         data_names = []
         for key in self.index["in_data"].keys():
-            data_names.append(key)
+            if 'itr_clone' not in key:
+                data_names.append(key)
         return data_names
 
     def _barrier(self, communicator=MPI.COMM_WORLD):

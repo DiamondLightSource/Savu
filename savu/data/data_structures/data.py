@@ -153,6 +153,9 @@ class Data(DataCreate):
                              "dimensions %d." % (nDims, len(shape)))
                 raise Exception(error_msg)
 
+    def _set_name(self, name):
+        self.data_info.set('name', name)
+
     def get_name(self):
         """ Get data name.
 

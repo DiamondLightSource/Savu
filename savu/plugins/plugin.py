@@ -402,6 +402,12 @@ class Plugin(PluginDatasets):
         """
         return 1
 
+    def nClone_datasets(self):
+        """ The number of output datasets that have an clone - i.e. they take\
+        it in turns to be used as output in an iterative plugin.
+        """
+        return 0
+
     def nFrames(self):
         """ The number of frames to process during each call to process_frames.
         """
