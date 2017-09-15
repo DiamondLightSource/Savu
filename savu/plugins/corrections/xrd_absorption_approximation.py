@@ -16,7 +16,7 @@
 .. module:: XrdAbsorptionApproximation
    :platform: Unix
    :synopsis: A plugin apply xrd absorption approximation using stxm data
-.. moduleauthor:: Stephen W.T. PRice <stephen.price@diamond.ac.uk>
+.. moduleauthor:: Stephen W.T. Price <stephen.price@diamond.ac.uk>
 """
 
 import numpy as np
@@ -52,21 +52,23 @@ class XrdAbsorptionApproximation(BaseFilter, CpuPlugin):
         mono_energy = mData.get('mono_energy')
         peak_energy = mData.get('mono_energy')
         pump_mu = self.get_mu(compound, float(mono_energy), density)
-        peak_mu = self.get_mu(compound, float(mono_energy), density) # sets outgoing x-ray energy to incoming x-ray energy
+        # sets outgoing x-ray energy to incoming x-ray energy
+        peak_mu = self.get_mu(compound, float(mono_energy), density)
         logging.debug("THE PUMP MU IS is:"+str(pump_mu)+str(mono_energy))
         logging.debug("THE PEAK MU IS is:"+str(peak_mu)+str(peak_energy))
-        self.atten_ratio = [pm/pump_mu for pm in peak_mu]
-        logging.debug('The test attenuation ratios should be:[25.651, 20.909, 2.903, 2.198],'
-                            'they are: %s' % self.atten_ratio)
+
+        self.atten_ratio = peak_mu/pump_mu
         theta = mData.get('rotation_angle')
         self.dtheta = theta[1]-theta[0]
-        logging.debug('The rotation step is %s' % str(self.dtheta))
-        if np.abs(self.dtheta)>10.0:
-            logging.warn('The theta step is greater than 10 degrees! Watch out!')
-        self.npix_displacement = self.parameters['azimuthal_offset']//self.dtheta
-        logging.debug('This gives a pixel offset of %s' % str(self.npix_displacement))
+        if np.abs(self.dtheta) > 10.0:
+            logging.warn('Theta step is greater than 10 degrees! Watch out!')
+        self.npix_displacement = \
+            self.parameters['azimuthal_offset']//self.dtheta
+        logging.debug('This gives a pixel offset of %s'
+                      % str(self.npix_displacement))
         if self.parameters['log_me']:
-            self.stxm = np.log10(np.squeeze(self.exp.index['in_data']['stxm'].data[...]))
+            self.stxm = np.log10(np.squeeze(
+                    self.exp.index['in_data']['stxm'].data[...]))
         self.stxm = np.squeeze(self.exp.index['in_data']['stxm'].data[...])
 
     def process_frames(self, data):
@@ -75,21 +77,24 @@ class XrdAbsorptionApproximation(BaseFilter, CpuPlugin):
         logging.debug('the xrd shape is %s' % str(xrd.shape))
         logging.debug('the stxm shape is %s' % str(stxm_orig.shape))
         stxm = stxm_orig
-        absorption = np.roll(stxm,int(self.npix_displacement), axis=0)
+        absorption = np.roll(stxm, int(self.npix_displacement), axis=0)
         corrected_xrd, corr_fac = self.correct_sino(1., xrd, absorption)
         return corrected_xrd
 
-    def correct_sino(self,Ti_ratio, FFI0_Ti, absorption):
+    def correct_sino(self, Ti_ratio, FFI0_Ti, absorption):
         trans_ave_array = np.ndarray(shape=FFI0_Ti.shape, dtype=np.float64)
-        for n in range(len(absorption)): #columns, axis=0
+        for n in range(len(absorption)):  # columns, axis=0
             row = absorption[n]
             trans_ave_array[n] = row
-            for m in range(1, len(row), 1): #row, axis=1
-                trans_ave_array[n][m] = np.average(row[m:-1]) #average of all absorption between pixel 0 and pixel - removes t so should be mu only
-           
+            for m in range(1, len(row), 1):  # row, axis=1
+                # average of all absorption between pixel 0 and pixel
+                # - removes t so should be mu only
+                trans_ave_array[n][m] = np.average(row[m:-1])
+
         trans_ave_array = np.nan_to_num(trans_ave_array)
-        exponent_Ti = self.get_exponent_Ti_mu(Ti_ratio, absorption, trans_ave_array)
-        
+        exponent_Ti = \
+            self.get_exponent_Ti_mu(Ti_ratio, absorption, trans_ave_array)
+
         FFI0_corrected_Ti = np.multiply(FFI0_Ti, exponent_Ti)
         return FFI0_corrected_Ti, exponent_Ti
 
@@ -125,17 +130,9 @@ class XrdAbsorptionApproximation(BaseFilter, CpuPlugin):
 
     def get_max_frames(self):
         return 'single'
-    
+
     def get_mu(self, compound, energy, density):
         '''
-        returns mu for a compound for a single, or list, of energies
+        returns mu for a compound for a single energy
         '''
-        if isinstance(energy, (list)):
-            op = []
-            for e in energy:
-                op.append((xl.CS_Total_CP(compound, e)*density)*1e-2)
-            return op
-        else:
-            return (xl.CS_Total_CP(compound, energy)*density)*1e-2
-
-
+        return (xl.CS_Total_CP(compound, energy)*density)*1e-2
