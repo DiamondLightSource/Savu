@@ -140,6 +140,12 @@ touch $outfolder/user.log
 arg_parse "-d" interfolder "$@"
 if [ ! $interfolder ] ; then
   interfolder=$outfolder
+else
+  interfolder=$interfolder/$foldername
+  if [ ! -d $interfolder ]; then
+    echo -e "\t Creating the output folder "$interfolder
+    mkdir -p $interfolder;
+  fi
 fi
 
 qsub -jsv /dls_sw/apps/sge/common/JSVs/savu.pl \
