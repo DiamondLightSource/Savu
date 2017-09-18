@@ -74,7 +74,8 @@ def __option_parser():
     # Send an email on completion
     parser.add_argument("-e", "--email", dest="email", help=hide, default=None)
     # Facility email for errors
-    parser.add_argument("--facility_email", dest="femail", help=hide, default=None)
+    parser.add_argument("--facility_email", dest="femail", help=hide,
+                        default=None)
     # Set beamline log file (for online processing)
     parser.add_argument("--bllog", dest="bllog", help=hide, default=None)
     # Location of syslog server
@@ -126,7 +127,6 @@ def _set_options(args):
     inter_folder_path = __create_output_folder(args.tmp, out_folder_name)\
         if args.tmp else out_folder_path
     options['inter_path'] = inter_folder_path
-
     options['log_path'] = args.log if args.log else options['inter_path']
     options['nProcesses'] = len(options["process_names"].split(','))
 
