@@ -92,6 +92,17 @@ class Hdf5Utils(object):
             nxs_file[data_entry] = \
                 h5py.ExternalLink(h5file, group_name + '/data')
 
+    def __create_dataset_nofill(self, group, name, shape, dtype, chunks=None):
+        spaceid = h5py.h5s.create_simple(shape)
+        plist = h5py.h5p.create(h5py.h5p.DATASET_CREATE)
+        plist.set_fill_time(h5py.h5d.FILL_TIME_NEVER)
+        if chunks not in [None,[]] and isinstance(chunks, tuple):
+            plist.set_chunk(chunks)
+        typeid = h5py.h5t.py_create(dtype)
+        datasetid = h5py.h5d.create(group.file.id, group.name+'/'+name, typeid, spaceid, plist)
+        data = h5py.Dataset(datasetid)
+        return data
+            
     def _create_entries(self, data, key, current_and_next):
         self.exp._barrier()
 
@@ -117,10 +128,10 @@ class Hdf5Utils(object):
             nBytes = np.prod(shape)*np.dtype(data.dtype).itemsize
             nProcs = self.exp.meta_data.get('nProcesses')
             # parallel hdf5 cannot handle data_size/nProcesses > 2GB
-            self.__hdf5_file_write_failed_check(nBytes, nProcs)
+            # self.__hdf5_file_write_failed_check(nBytes, nProcs)
             logging.warn('Creating the dataset with chunks.')
-            data.data = group.create_dataset(
-                    "data", shape, data.dtype, chunks=chunks)
+            data.data = self.__create_dataset_nofill(
+                group,"data", shape, data.dtype, chunks=chunks)
             logging.warn('Dataset created!')
 
         self.exp._barrier()

@@ -51,6 +51,17 @@ class Hdf5Saver(BaseSaver, CpuPlugin):
         self.filename = None
         self.group_name = None
 
+    def __create_dataset_nofill(self, group, name, shape, dtype, chunks=None):
+        spaceid = h5py.h5s.create_simple(shape)
+        plist = h5py.h5p.create(h5py.h5p.DATASET_CREATE)
+        plist.set_fill_time(h5py.h5d.FILL_TIME_NEVER)
+        if chunks not in [None,[]] and isinstance(chunks, tuple):
+            plist.set_chunk(chunks)
+        typeid = h5py.h5t.py_create(dtype)
+        datasetid = h5py.h5d.create(group.file.id, group.name+'/'+name, typeid, spaceid, plist)
+        data = h5py.Dataset(datasetid)
+        return data
+        
     def pre_process(self):
         # Create the hdf5 output file
         self.hdf5 = Hdf5Utils(self.exp)
@@ -73,8 +84,8 @@ class Hdf5Saver(BaseSaver, CpuPlugin):
         chunks = chunking._calculate_chunking(shape, dtype)
         self.exp._barrier()
         self.out_data = \
-            group.create_dataset("data", shape, dtype, chunks=chunks)
-
+            self.__create_dataset_nofill(group, "data", shape, data.dtype, chunks=chunks)
+        
     def process_frames(self, data):
         self.out_data[self.get_current_slice_list()[0]] = data[0]
 
