@@ -151,7 +151,7 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
             if ((float(high_crop.sum()) / high_crop.size) > self.warn):
                 self.flag_high_warning = True
             # Set all cropped values to the crop level
-            data[low_crop] = self.parameters['lower_bound']
+            data[high_crop] = self.parameters['upper_bound']
 
     def executive_summary(self):
         summary = []
