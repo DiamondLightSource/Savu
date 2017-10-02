@@ -42,9 +42,10 @@ class IterativePlugin(PluginDriver):
         """ Runs the pre_process, process and post_process methods.
         """
         while not self._ip_complete:
-            print "...Plugin iteration", self._ip_iteration+1
             self.__set_datasets()
             self._perform_the_processing(transport)
+            if transport.no_processing:
+                self.set_processing_complete()
             if self._ip_fixed_iterations and \
                     self._ip_iteration == self._ip_fixed_iterations-1:
                 self.set_processing_complete()
