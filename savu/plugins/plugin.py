@@ -284,6 +284,9 @@ class Plugin(PluginDatasets):
         preview = data.get_preview()
         orig_indices = preview.get_starts_stops_steps()
         no_preview = [[0, 0, 0], data.get_shape(), [1, 1, 1], [1, 1, 1]]
+
+        # Set previewing params if previewing has not already been applied to
+        # the dataset.
         if no_preview == orig_indices:
             data.get_preview().revert_shape = data.get_shape()
             data.get_preview().set_preview(params)

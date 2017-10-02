@@ -60,3 +60,4 @@ class MedianFilter(BaseFilter, CpuPlugin):
 
     def get_plugin_pattern(self):
         return self.parameters['pattern']
+
