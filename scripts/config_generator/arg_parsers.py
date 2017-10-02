@@ -131,10 +131,10 @@ def _save_arg_parser(args, desc):
 def _mod_arg_parser(args, desc):
     """ Argument parser for mod command. """
 
-    # required to allow negative values in a list
+    # required to allow negative values in a list or tuple
     new_args = []
     for a in args:
-        if len(a.split('[')) > 1:
+        if len(a.split('[')) > 1 or len(a.split('(')) > 1:
             new_args.extend(['--', a])
         else:
             new_args.append(a)
