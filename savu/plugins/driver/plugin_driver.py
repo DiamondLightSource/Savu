@@ -60,6 +60,8 @@ class PluginDriver(object):
 
             self._perform_the_processing(transport, communicator=communicator)
 
+        self._revert_preview(self.parameters['in_datasets'])
+
         for j in range(len(out_data)):
             out_data[j].set_shape(out_data[j].data.shape)
 

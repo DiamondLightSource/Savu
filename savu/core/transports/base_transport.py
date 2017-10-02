@@ -42,6 +42,7 @@ class BaseTransport(object):
 
     def __init__(self):
         self.pDict = None
+        self.no_processing = False
 
     def _transport_initialise(self, options):
         """
@@ -126,6 +127,8 @@ class BaseTransport(object):
 
         # loop over the transfer data
         nTrans = pDict['nTrans']
+        self.no_processing = True if not nTrans else False
+
         for count in range(nTrans):
             end = True if count == nTrans-1 else False
             percent_complete = count/(nTrans * 0.01)
@@ -146,7 +149,6 @@ class BaseTransport(object):
             self._return_all_data(count, result, end)
 
         cu.user_message("%s - 100%% complete" % (plugin.name))
-        plugin._revert_preview(pDict['in_data'])
 
     def _get_all_slice_lists(self, data_list, dtype):
         """ Get all slice lists for the current process.
