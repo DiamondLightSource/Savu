@@ -94,28 +94,35 @@ class BaseAzimuthalIntegrator(Plugin, CpuPlugin):
         self.add_axes_to_meta_data(axis, mData)
 
     def setup(self):
-        in_dataset, out_datasets = self.get_datasets()
+        in_dataset, out_dataset = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
-        shape = in_dataset[0].get_shape()
-        in_pData[0].plugin_data_setup('DIFFRACTION', self.get_max_frames())
-        spectra = out_datasets[0]
-        num_bins = self.get_parameters('num_bins')
-        patterns = ['SINOGRAM.-1', 'PROJECTION.-1']
+        shape = list(in_dataset[0].get_shape())
+
+        rm_dim = str(in_dataset[0].get_data_patterns()
+                     ['SINOGRAM']['slice_dims'][-1])
+        patterns = ['SINOGRAM.' + rm_dim, 'PROJECTION.' + rm_dim]
+
         detX_dim = in_dataset[0].get_data_dimension_by_axis_label('detector_x')
         detY_dim = in_dataset[0].get_data_dimension_by_axis_label('detector_y')
-        if detX_dim < detY_dim:
-            detY_dim -= 1
-        axis_labels = [str(detX_dim), str(detY_dim) + '.Q.Angstrom^-1']
-        spectra.create_dataset(patterns={in_dataset[0]: patterns},
-                               axis_labels={in_dataset[0]: axis_labels},
-                               shape=shape[:-2]+(num_bins,))
+        rm_labels = sorted([detX_dim, detY_dim])[::-1]
+        axis_labels = map(str, rm_labels)
+        idx = axis_labels.index(str(detY_dim))
+        axis_labels[idx] = axis_labels[idx] + '.Q.Angstrom^-1'
+
+        for d in rm_labels:
+            del shape[d]
+        shape += (self.get_parameters('num_bins'),)
+
+        out_dataset[0].create_dataset(
+                patterns={in_dataset[0]: patterns},
+                axis_labels=axis_labels,
+                shape=tuple(shape))
 
         spectrum = \
-            {'core_dims': (-1,), 'slice_dims': tuple(range(len(shape)-2))}
-        spectra.add_pattern("SPECTRUM", **spectrum)
+            {'core_dims': (-1,), 'slice_dims': tuple(range(len(shape)-1))}
+        out_dataset[0].add_pattern("SPECTRUM", **spectrum)
 
-        logging.debug("**SPECTRA AXIS LABELS** %s", spectra.get_axis_labels())
-
+        in_pData[0].plugin_data_setup('DIFFRACTION', self.get_max_frames())
         out_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
 
     def get_max_frames(self):
