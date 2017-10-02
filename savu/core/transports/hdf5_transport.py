@@ -57,7 +57,6 @@ class Hdf5Transport(BaseTransport):
         self.hdf5 = Hdf5Utils(self.exp)
         self.exp_coll = self.exp._get_experiment_collection()
         self.data_flow = self.exp.meta_data.plugin_list._get_dataset_flow()
-
         n_plugins = range(len(self.exp_coll['datasets']))
 
         for i in n_plugins:
@@ -76,7 +75,7 @@ class Hdf5Transport(BaseTransport):
             if not data.remove:
                 self.exp._barrier()
                 if self.exp.meta_data.get('process') == \
-                        len(self.exp.meta_data.get('processes')):
+                        len(self.exp.meta_data.get('processes'))-1:
                     self._populate_nexus_file(data)
                     self.hdf5._link_datafile_to_nexus_file(data)
                 self.exp._barrier()
