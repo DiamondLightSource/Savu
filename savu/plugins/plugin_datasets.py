@@ -60,10 +60,8 @@ class PluginDatasets(object):
     def __add_raw_data(self, data_obj):
         from savu.data.data_structures.data_types.data_plus_darks_and_flats\
             import ImageKey, NoImageKey
-        if isinstance(data_obj.raw, ImageKey) or\
-           isinstance(data_obj.raw, NoImageKey):
-            return
-        data_obj.add_raw_data_obj(data_obj)
+        if isinstance(data_obj.raw, (ImageKey, NoImageKey)):
+            data_obj._add_raw_data_obj(data_obj)
 
     def __set_in_datasets(self):
         """ Set the in_data objects.

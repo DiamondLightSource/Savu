@@ -224,8 +224,7 @@ class DataCreate(object):
         axis_labels = self.get_axis_labels()
         label = label.split('~')[1].split('.')
         axis_labels.insert(int(label[0]), {label[1]: label[2]})
-        self.data_info.set(
-            'nDims', self.data_info.get('nDims') + 1)
+        self.data_info.set('nDims', self.data_info.get('nDims') + 1)
 
     def _set_data_patterns(self, patterns):
         """ Add missing dimensions to patterns and populate data info dict. """
@@ -244,16 +243,3 @@ class DataCreate(object):
         pData._set_shape_before_tuning(copy.copy(data.get_shape()))
         new_shape = copy.copy(data.get_shape()) + tuple(pData.extra_dims)
         self.set_shape(new_shape)
-
-    def _add_raw_data_obj(self, data_obj):
-        from savu.data.data_structures.data_type import ImageKey, NoImageKey
-        proj_dim = self.get_data_dimension_by_axis_label('rotation_angle')
-        if isinstance(data_obj.raw, ImageKey):
-            data_obj.data = \
-                ImageKey(data_obj, data_obj.raw.image_key, proj_dim)
-            data_obj.raw._copy(data_obj)
-        elif isinstance(data_obj.raw, NoImageKey):
-            data_obj.data = NoImageKey(data_obj, proj_dim)
-            data_obj.raw._copy(data_obj)
-        else:
-            raise Exception('Raw data type not recognised.')

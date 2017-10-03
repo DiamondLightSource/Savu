@@ -28,6 +28,8 @@ from mpi4py import MPI
 
 import savu.core.utils as cu
 from savu.data.chunking import Chunking
+from savu.data.data_structures.data_types.data_plus_darks_and_flats \
+    import ImageKey, NoImageKey
 
 NX_CLASS = 'NX_class'
 
@@ -170,9 +172,16 @@ class Hdf5Utils(object):
 
     def _reopen_file(self, data, mode):
         filename = data.backing_file.filename
-        entry = data.data.name
         self._close_file(data)
         logging.debug(
                 "Re-opening the backing file %s in mode %s" % (filename, mode))
         data.backing_file = self._open_backing_h5(filename, mode)
-        data.data = data.backing_file[entry]
+        entry = data.backing_file.keys()[0] + '/data'
+
+        if isinstance(data.data, NoImageKey):
+            data.data.data = data.backing_file[entry]
+        elif isinstance(data.data, h5py._hl.dataset.Dataset):
+            data.data = data.backing_file[entry]
+        else:
+            raise Exception('Unable to re-open the hdf5 file - unknown'
+                            ' datatype')

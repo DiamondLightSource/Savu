@@ -194,6 +194,13 @@ class ImageKey(DataWithDarksAndFlats):
     def _copy(self, new_obj):
         self._copy_base(new_obj)
 
+    def _convert_to_noimagekey(self, new_obj):
+        new_obj.dark_path = self.dark()
+        new_obj.flat_path = self.flat()
+        new_obj.flat_image_key = None
+        new_obj.dark_image_key = None
+        self._copy_base(new_obj)
+
     def __ignore_image_key_entries(self, ignore):
         a, a, start, end = self._get_start_end_idx(self.get_index(1))
         if not isinstance(ignore, list):
@@ -215,10 +222,6 @@ class ImageKey(DataWithDarksAndFlats):
         slice_list = self.data_obj._preview._get_preview_slice_list()
         if slice_list:
             self.dark_flat_slice_list = tuple(self.get_dark_flat_slice_list())
-#        if len(self.get_index(2)):
-#            self.data_obj.meta_data.set('dark', self.dark_mean())
-#        if len(self.get_index(1)):
-#            self.data_obj.meta_data.set('flat', self.flat_mean())
 
 
 class NoImageKey(DataWithDarksAndFlats):
@@ -232,12 +235,15 @@ class NoImageKey(DataWithDarksAndFlats):
         self.orig_image_key = copy.copy(image_key)
         self.flat_image_key = False
         self.dark_image_key = False
+
+        # darks and flats belong to another dataset with an image key
         if self.image_key is not None:
             self.shape = self._get_image_key_data_shape()
             self._getitem = self._getitem_imagekey
         else:
             self.shape = data_obj.data.shape
             self._getitem = self._getitem_noimagekey
+
         self.data_obj = data_obj
         self.nDims = len(self.shape)
 
@@ -250,6 +256,11 @@ class NoImageKey(DataWithDarksAndFlats):
         new_obj.flat_image_key = self.flat_image_key
         new_obj.dark_image_key = self.dark_image_key
         self._copy_base(new_obj)
+
+    def _set_fake_key(self, fakekey):
+        # useful if the darks and flats did belong to data with an
+        # image key in a previous plugin
+        self.image_key = fakekey
 
     def _set_flat_path(self, path, imagekey=False):
         self.flat_image_key = imagekey
@@ -266,19 +277,18 @@ class NoImageKey(DataWithDarksAndFlats):
         """ Get the dark data. """
         if self.dark_updated:
             return self.dark_updated
-        if self.dark_image_key is not False:
+        if self.dark_image_key:
             self.image_key = self.dark_image_key
             dark = self.dark_image_key_data()
             self.image_key = self.orig_image_key
             return dark
-
         return self.dark_path[self.dark_flat_slice_list]*self.dscale
 
     def flat(self):
         """ Get the flat data. """
         if self.flat_updated:
             return self.flat_updated()
-        if self.flat_image_key is not False:
+        if self.flat_image_key:
             self.image_key = self.flat_image_key
             flat = self.flat_image_key_data()
             self.image_key = self.orig_image_key
@@ -293,9 +303,4 @@ class NoImageKey(DataWithDarksAndFlats):
         if Map3dto4dh5 in self.__class__.__bases__:
             del self.dark_flat_slice_list[-1]
 
-#        if len(self.dark_flat_slice_list) < len(self.dark_path.shape):
-            # change dimensions here
-
         self.dark_flat_slice_list = tuple(self.dark_flat_slice_list)
-#        self.data_obj.meta_data.set('dark', self.dark_mean())
-#        self.data_obj.meta_data.set('flat', self.flat_mean())

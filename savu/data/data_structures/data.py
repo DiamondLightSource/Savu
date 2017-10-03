@@ -389,3 +389,18 @@ class Data(DataCreate):
         :rtype: tuple
         """
         return self._get_plugin_data().get_pattern().values()[0]['slice_dims']
+
+    def _add_raw_data_obj(self, data_obj):
+        from savu.data.data_structures.data_types.data_plus_darks_and_flats\
+            import ImageKey, NoImageKey
+
+        if not isinstance(data_obj.raw, (ImageKey, NoImageKey)):
+            raise Exception('Raw data type not recognised.')
+
+        proj_dim = self.get_data_dimension_by_axis_label('rotation_angle')
+        data_obj.data = NoImageKey(data_obj, None, proj_dim)
+        data_obj.data._set_dark_and_flat()
+
+        if isinstance(data_obj.raw, ImageKey):
+            data_obj.raw._convert_to_noimagekey(data_obj.data)
+            data_obj.data._set_fake_key(data_obj.raw.get_image_key())
