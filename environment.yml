@@ -14,7 +14,7 @@ dependencies:
   - pep8
   - pytest
   - mpi4py 
-  - scikit-image
+  - scikit-image=0.13.0
   - astra-toolbox
   - xraylib
   - tomopy
