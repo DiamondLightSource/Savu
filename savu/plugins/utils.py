@@ -130,11 +130,13 @@ def set_datasets(exp, plugin, plugin_dict):
     in_names = ('all' if len(in_names) is 0 else in_names)
     out_names = (copy.copy(in_names) if len(out_names) is 0 else out_names)
 
+    in_names = check_nDatasets(
+            exp, in_names, plugin_dict, plugin.nInput_datasets(), "in_data")
+
     clones = plugin.nClone_datasets()
-    in_names = check_nDatasets(exp, in_names, plugin_dict,
-                               plugin.nInput_datasets(), "in_data")
-    out_names = check_nDatasets(exp, out_names, plugin_dict,
-                                plugin.nOutput_datasets() - clones, "out_data")
+    out_names = check_nDatasets(
+            exp, out_names, plugin_dict, plugin.nOutput_datasets(),
+            "out_data", clones=clones)
 
     if clones:
         out_names.extend(['itr_clone' + str(i) for i in range(clones)])
@@ -160,7 +162,7 @@ def get_names(pdict, key):
     return data_names
 
 
-def check_nDatasets(exp, names, plugin_dict, nSets, dtype):
+def check_nDatasets(exp, names, plugin_dict, nSets, dtype, clones=0):
     plugin_id = plugin_dict['id']
 
     try:
@@ -173,7 +175,7 @@ def check_nDatasets(exp, names, plugin_dict, nSets, dtype):
     if nSets is 'var':
         nSets = len(plugin_dict['data'][dtype + 'sets'])
 
-    if len(names) is not nSets:
+    if len(names) is not (nSets - clones):
         if nSets is 0:
             names = []
         else:
