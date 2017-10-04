@@ -70,4 +70,4 @@ class TxmLoader(BaseLoader):
         data_obj.set_shape(sh)
         self.set_data_reduction_params(data_obj)
         
-        print data_obj.get_data_patterns()
+        #print data_obj.get_data_patterns()
