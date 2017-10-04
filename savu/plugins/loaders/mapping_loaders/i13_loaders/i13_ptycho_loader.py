@@ -56,7 +56,7 @@ class I13PtychoLoader(BaseMultiModalLoader):
                       data_obj.backing_file.filename, 'ptycho')
 
         data_obj.data = data_obj.backing_file['entry1/instrument/merlin_sw_hdf/data']
-        print data_obj.data.shape
+#        print data_obj.data.shape
         data_obj.set_shape(data_obj.data.shape)
         try:
             control = data_obj.backing_file['/entry1/instrument/ionc_i/ionc_i'].value

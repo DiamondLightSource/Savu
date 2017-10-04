@@ -77,6 +77,7 @@ class I18XrdLoader(BaseI18MultiModalLoader):
         self.set_motors(data_obj, 'xrd')
         self.add_patterns_based_on_acquisition(data_obj, 'xrd')
         self.set_data_reduction_params(data_obj)
+
         calibrationfile = h5py.File(self.get_path('calibration_path'), 'r')
         # lets just make this all in meters and convert for pyfai in the base integrator
         try:

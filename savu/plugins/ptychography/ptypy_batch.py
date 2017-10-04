@@ -91,12 +91,12 @@ class PtypyBatch(BasePtycho):
         last_core = self.in_core_dirs[-1]
         start_shape = self.in_shape[:first_core]
         self.obj_shape=self.b.obj.storages['S00G00'].data.shape
-        print "object shape is" + str(self.obj_shape)
+        #print "object shape is" + str(self.obj_shape)
     
     def set_size_probe(self, probe_shape):
         first_core = self.in_core_dirs[0]
         last_core = self.in_core_dirs[-1]
         start_shape = self.in_shape[:first_core]
         self.probe_size=start_shape+self.b.probe.storages['S00G00'].data.shape
-        print "probe size is" + str(self.probe_size)
+        #print "probe size is" + str(self.probe_size)
 

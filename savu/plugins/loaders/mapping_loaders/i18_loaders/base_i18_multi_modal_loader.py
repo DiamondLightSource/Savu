@@ -55,6 +55,7 @@ class BaseI18MultiModalLoader(BaseMultiModalLoader):
         f = data_obj.backing_file
         logging.debug("Creating file '%s' '%s'_entry",
                       data_obj.backing_file.filename, ltype)
+
         data_obj.meta_data.set(
             "mono_energy", f[self.parameters['monochromator']].value/1e3)
         x = f[self.parameters['x']].value
@@ -113,8 +114,8 @@ class BaseI18MultiModalLoader(BaseMultiModalLoader):
                         label='y'
                     units = 'mm'
             except KeyError as e:
-                print("exception was ",str(e))
-                print("found no motor")
+                #print("exception was ",str(e))
+                #print("found no motor")
                 motor_type.append('None')
                 #now the detector axes
                 if ltype =='fluo':

@@ -119,7 +119,7 @@ class ListToProjections(BaseFilter, CpuPlugin):
         out_pData[0].plugin_data_setup('PROJECTION', self.get_max_frames())
 #     
     def setup_grids(self,positions):
-        print positions.shape
+        #print positions.shape
         x = positions[0,:]
         y = positions[1,:]
         self.x = x

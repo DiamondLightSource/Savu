@@ -184,6 +184,6 @@ class PolyBackgroundEstimator(BaseFilter, CpuPlugin):
                             n = n - 1
                             ud = True
             c_old = c
-        print "finished", index.sum(), len(zu), Npoints, n, m
+        #print "finished", index.sum(), len(zu), Npoints, n, m
         return zu, c, poly, weight, index
 

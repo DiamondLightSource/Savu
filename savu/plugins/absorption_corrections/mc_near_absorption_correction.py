@@ -65,8 +65,10 @@ class McNearAbsorptionCorrection(BaseAbsorptionCorrection):
         #print "THE PUMP MU IS is:"+str(pump_mu)+str(mono_energy)
         #print "THE PEAK MU IS is:"+str(peak_mu)+str(peak_energy)
         self.atten_ratio = [pm/pump_mu for pm in peak_mu]
-        logging.debug('The test attenuation ratios should be:[25.651, 20.909, 2.903, 2.198],'
-                            'they are: %s' % self.atten_ratio)
+        
+        # commenting this out as it is spamming the log files
+#        logging.debug('The test attenuation ratios should be:[25.651, 20.909, 2.903, 2.198],'
+#                            'they are: %s' % self.atten_ratio)
         theta = mData.get('rotation_angle')
         self.dtheta = theta[1]-theta[0]
         logging.debug('The rotation step is %s' % str(self.dtheta))

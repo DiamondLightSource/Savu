@@ -123,7 +123,7 @@ class BaseMultiModalLoader(BaseLoader):
                         x = \
                             data_obj.backing_file[entry.name + '/' +data_axis].value
                         if x.ndim > 1:
-                            print "xshape is:"+str(x.shape)
+                            #print "xshape is:"+str(x.shape)
 #                             idx = axes_slice_list[:]# make a copy
 #                             idx[ii] = slice(0,x.shape[ii],1)
 #                             x = x[idx].squeeze()

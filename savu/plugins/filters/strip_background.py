@@ -58,7 +58,7 @@ class StripBackground(BaseFilter, CpuPlugin):
 
         npts = len(data)
         x = np.arange(npts)  # set up some x indices
-        print data.shape
+        #print data.shape
         filtered = savgol_filter(data, 35, 5) # make the start a bit a bit smoother
         # lets do it the crap, slow way first
         aved = np.zeros_like(filtered)
