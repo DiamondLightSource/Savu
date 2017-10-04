@@ -21,8 +21,9 @@
 .. moduleauthor:: Aaron D. Parsons <scientificsoftware@diamond.ac.uk>
 """
 
-import logging
+import copy
 import pyFAI
+import logging
 
 import numpy as np
 from savu.plugins.plugin import Plugin
@@ -95,24 +96,34 @@ class BaseAzimuthalIntegrator(Plugin, CpuPlugin):
 
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
-        in_pData, out_pData = self.get_plugin_datasets()
-        shape = list(in_dataset[0].get_shape())
 
+        # AMEND THE PATTERNS: The output dataset will have one dimension less
+        # than the in_dataset, so remove the final slice dimension from any
+        # patterns you want to keep.
         rm_dim = str(in_dataset[0].get_data_patterns()
                      ['SINOGRAM']['slice_dims'][-1])
         patterns = ['SINOGRAM.' + rm_dim, 'PROJECTION.' + rm_dim]
 
-        detX_dim = in_dataset[0].get_data_dimension_by_axis_label('detector_x')
-        detY_dim = in_dataset[0].get_data_dimension_by_axis_label('detector_y')
-        rm_labels = sorted([detX_dim, detY_dim])[::-1]
-        axis_labels = map(str, rm_labels)
-        idx = axis_labels.index(str(detY_dim))
-        axis_labels[idx] = axis_labels[idx] + '.Q.Angstrom^-1'
+        # AMEND THE AXIS LABELS: Find the dimensions to remove using their
+        # axis_labels to ensure the plugin is as generic as possible and will
+        # work for data in all orientations.
+        axis_labels = copy.copy(in_dataset[0].get_axis_labels())
+        rm_labels = ['detector_x', 'detector_y']
+        rm_dims = sorted([in_dataset[0].get_data_dimension_by_axis_label(a)
+                          for a in rm_labels])[::-1]
+        for d in rm_dims:
+            del axis_labels[d]
+        # Add a new axis label to the list
+        axis_labels.append({'Q': 'Angstrom^-1'})
 
-        for d in rm_labels:
+        # AMEND THE SHAPE: Remove the two unrequired dimensions from the
+        # original shape and add a new dimension shape.
+        shape = list(in_dataset[0].get_shape())
+        for d in rm_dims:
             del shape[d]
         shape += (self.get_parameters('num_bins'),)
 
+        # populate the output dataset
         out_dataset[0].create_dataset(
                 patterns={in_dataset[0]: patterns},
                 axis_labels=axis_labels,
@@ -121,9 +132,13 @@ class BaseAzimuthalIntegrator(Plugin, CpuPlugin):
         spectrum = \
             {'core_dims': (-1,), 'slice_dims': tuple(range(len(shape)-1))}
         out_dataset[0].add_pattern("SPECTRUM", **spectrum)
+        # =====================================================================
 
-        in_pData[0].plugin_data_setup('DIFFRACTION', self.get_max_frames())
-        out_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
+        # ================== populate plugin datasets =========================
+        in_pData, out_pData = self.get_plugin_datasets()
+        in_pData[0].plugin_data_setup('DIFFRACTION', 'single')
+        out_pData[0].plugin_data_setup('SPECTRUM', 'single')
+        # =====================================================================
 
     def get_max_frames(self):
         return 'single'
