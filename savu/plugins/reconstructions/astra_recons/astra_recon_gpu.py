@@ -39,6 +39,10 @@ class AstraReconGpu(BaseAstraRecon, GpuPlugin):
     :u*param algorithm: Reconstruction type (FBP_CUDA|SIRT_CUDA|\
         SART_CUDA (not currently working)|CGLS_CUDA|FP_CUDA|BP_CUDA|\
         SIRT3D_CUDA|CGLS3D_CUDA). Default: 'FBP_CUDA'.
+    :u*param FBP_filter: The FBP reconstruction filter type (none|ram-lak|\
+        shepp-logan|cosine|hamming|hann|tukey|lanczos|triangular|gaussian|\
+        barlett-hann|blackman|nuttall|blackman-harris|blackman-nuttall|\
+        flat-top|kaiser|parzen). Default: 'ram-lak'.
     """
 
     def __init__(self):

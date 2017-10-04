@@ -30,10 +30,6 @@ class BaseAstraRecon(BaseRecon):
     """
     A Plugin to perform Astra toolbox reconstruction
 
-    :u*param FBP_filter: The FBP reconstruction filter type (none|ram-lak|\
-        shepp-logan|cosine|hamming|hann|tukey|lanczos|triangular|gaussian|\
-        barlett-hann|blackman|nuttall|blackman-harris|blackman-nuttall|\
-        flat-top|kaiser|parzen). Default: 'ram-lak'.
     :u*param n_iterations: Number of Iterations - only valid for iterative \
         algorithms. Default: 1.
     """
@@ -158,7 +154,9 @@ class BaseAstraRecon(BaseRecon):
         cfg['ReconstructionDataId'] = rec_id
         cfg['ProjectionDataId'] = sino_id
         if 'FBP' in self.alg:
-            cfg['FilterType'] = self.parameters['FBP_filter']
+            fbp_filter = self.parameters['FBP_filter'] if 'FBP_filter' in \
+                self.parameters.keys() else 'none'
+            cfg['FilterType'] = fbp_filter
         if 'projector' in self.parameters.keys():
             proj_id = astra.create_projector(
                 self.parameters['projector'], proj_geom, vol_geom)
