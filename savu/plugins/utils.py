@@ -209,3 +209,16 @@ def get_plugins_paths():
     # now add the savu plugin path, which is now the whole path.
     plugins_paths.append(os.path.join(savu.__path__[0]) + '/../')
     return plugins_paths
+
+
+# Disable
+def blockPrint():
+    import tempfile
+    fname = tempfile.mkdtemp() + '/unwanted_prints.txt'
+    #sys.stdout = open(os.devnull, 'w')
+    sys.stdout = open(fname, 'w')
+
+
+# Restore
+def enablePrint():
+    sys.stdout = sys.__stdout__

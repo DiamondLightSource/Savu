@@ -26,6 +26,7 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin, dawn_compatible
 import numpy as np
 import os
+import savu.plugins.utils as pu
 import savu.test.test_utils as tu
 from PyMca5.PyMcaPhysics.xrf import McaAdvancedFitBatch
 
@@ -41,7 +42,7 @@ class Pymca(BaseFilter, CpuPlugin):
     """
 
     def __init__(self):
-        logging.debug("fitting spectrum")
+        logging.debug("fitting spectrum")        
         super(Pymca, self).__init__("Pymca")
         
     def pre_process(self):
@@ -52,7 +53,6 @@ class Pymca(BaseFilter, CpuPlugin):
 
     def process_frames(self, data):
         y = np.expand_dims(data,0)
-        print "yshape", y.shape
         self.b = self.setup_fit(y)
         self.b._McaAdvancedFitBatch__processStack()
         try:
@@ -74,7 +74,11 @@ class Pymca(BaseFilter, CpuPlugin):
         dummy_spectrum = np.random.random((1, 1, spectra_shape))
         c = self.setup_fit(dummy_spectrum)# seed it with junk, zeros made the matrix singular unsurprisingly and this bungles it.
         
+        # temporary measure to stop the next line printing arrays to screen.
+        pu.blockPrint()
         c.processList()#_McaAdvancedFitBatch__processStack()# perform an initial fit to get the shapes
+        pu.enablePrint()
+
         fit_labels = c._McaAdvancedFitBatch__images.keys() # and then take out the axis labels for the channels
         out_meta_data = out_datasets[0].meta_data
         out_meta_data.set("PeakElements",fit_labels)
@@ -116,7 +120,7 @@ class Pymca(BaseFilter, CpuPlugin):
     def setup_fit(self,y):
         '''
         takes a data shape and returns a fit-primed object
-        '''
+        '''        
         outputdir=None # nope
         roifit=0# nope
         roiwidth=y.shape[1] #need this to pretend its an image
@@ -128,7 +132,12 @@ class Pymca(BaseFilter, CpuPlugin):
                                                     fitfiles=0,
                                                     nosave=True) # prime the beauty
         b.pleaseBreak = 1
+        
+        # temporary measure to stop the next line printing arrays to screen.
+        pu.blockPrint()
         b.processList()
+        pu.enablePrint()
+
         b.pleaseBreak = 0
         return b
     
@@ -140,4 +149,3 @@ class Pymca(BaseFilter, CpuPlugin):
     
     def get_dummyhdf_path(self):
         return tu.get_test_data_path('i18_test_data.nxs')
-            
