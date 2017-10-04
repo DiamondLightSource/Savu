@@ -244,12 +244,15 @@ class Data(DataCreate):
         self.data_info.set('nDims', len(args))
         axis_labels = []
         for arg in args:
-            try:
-                axis = arg.split('.')
-                axis_labels.append({axis[0]: axis[1]})
-            except:
-                # data arrives here, but that may be an error
-                pass
+            if isinstance(arg, dict):
+                axis_labels.append(arg)
+            else:
+                try:
+                    axis = arg.split('.')
+                    axis_labels.append({axis[0]: axis[1]})
+                except:
+                    # data arrives here, but that may be an error
+                    pass
         self.data_info.set('axis_labels', axis_labels)
 
     def get_axis_labels(self):
