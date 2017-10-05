@@ -74,7 +74,8 @@ class ScikitimageFilterBackProjection(BaseRecon, CpuPlugin):
 
         dim_detX = in_pData.get_data_dimension_by_axis_label('detector_x')
         size = self.parameters['output_size']
-        size = in_pData.get_shape()[dim_detX] if size == 'auto' else size
+        size = in_pData.get_shape()[dim_detX] if size == 'auto' or \
+            size is None else size
 
         result = \
             transform.iradon(sinogram, theta=theta,
