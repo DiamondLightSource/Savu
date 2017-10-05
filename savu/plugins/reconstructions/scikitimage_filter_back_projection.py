@@ -38,7 +38,7 @@ class ScikitimageFilterBackProjection(BaseRecon, CpuPlugin):
     using the inverse radon transform from scikit-image.
 
     :param output_size: Number of rows and columns in the \
-        reconstruction. Default: None.
+        reconstruction. Default: 'auto'.
     :param filter: Filter used in frequency domain filtering Ramp filter used \
         by default. Filters available: ramp, shepp-logan, cosine, hamming, \
         hann. Assign None to use no filter. Default: 'ramp'.
@@ -71,14 +71,17 @@ class ScikitimageFilterBackProjection(BaseRecon, CpuPlugin):
         sinogram = np.swapaxes(sino, 0, 1)
         sinogram = self._shift(sinogram, centre_of_rotations)
         theta = in_meta_data.get('rotation_angle')
+
+        dim_detX = in_pData.get_data_dimension_by_axis_label('detector_x')
+        size = self.parameters['output_size']
+        size = in_pData.get_shape()[dim_detX] if size == 'auto' else size
+
         result = \
             transform.iradon(sinogram, theta=theta,
-                             output_size=(in_pData.get_shape()[1]),
-                             # self.parameters['output_size'],
-                             filter='ramp',  # self.parameters['filter'],
-                             interpolation='linear',
-                             # self.parameters['linear'],
-                             circle=False)  # self.parameters[False])
+                             output_size=(size),
+                             filter=self.parameters['filter'],
+                             interpolation=self.parameters['interpolation'],
+                             circle=self.parameters['circle'])
         return result
 
     def get_max_frames(self):
