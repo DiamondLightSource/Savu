@@ -38,12 +38,12 @@ class MultipleParameterTest(unittest.TestCase):
 
     def framework_options_setup(self):
         key1 = 'preview'
-        key2 = 'FBP_filter'
+        key2 = 'projector'
         key3 = 'centre_of_rotation'
         key4 = 'in_datasets'
         key5 = 'out_datasets'
         key6 = 'force_zero'
-        params = {key1: [':', '0', ':'], key2: 'ram-lak;hamming',
+        params = {key1: [':', '0', ':'], key2: 'line;strip',
                   key3: '85.0;85.5;86.0', key4: 'tomo', key5: 'tomo',
                   key6: '[None, None]'}
 
@@ -73,11 +73,11 @@ class MultipleParameterTest(unittest.TestCase):
 
     def test_parameter_space_str(self):
         plugin = self.plugin_setup()
-        key = 'FBP_filter'
-        params = {'preview': '[:,0,:]', key: 'ram-lak;hamming'}
+        key = 'projector'
+        params = {'preview': '[:,0,:]', key: 'line;strip'}
         plugin._set_parameters(params)
         params = plugin.parameters[key]
-        self.assertEqual(params, ['ram-lak', 'hamming'])
+        self.assertEqual(params, ['line', 'strip'])
         self.assertEqual(plugin.extra_dims[0], 2)
 
     def test_parameter_space_list(self):
@@ -91,9 +91,9 @@ class MultipleParameterTest(unittest.TestCase):
 
     def test_parameter_space_extra_dims(self):
         plugin = self.plugin_setup()
-        key1 = 'FBP_filter'
+        key1 = 'projector'
         key2 = 'centre_of_rotation'
-        params = {key1: 'ram-lak;hamming', key2: '85.0;85.5;86.0'}
+        params = {key1: 'line;strip', key2: '85.0;85.5;86.0'}
         plugin._set_parameters(params)
         out_datasets = plugin.get_out_datasets()
         for data in out_datasets:
@@ -105,7 +105,7 @@ class MultipleParameterTest(unittest.TestCase):
         tu.plugin_setup(plugin)
 
         out_dataset = plugin.get_out_datasets()[0]
-        self.assertEqual((160, 1, 160, 3, 2), out_dataset.get_shape())
+        self.assertEqual((160, 1, 160, 2, 3), out_dataset.get_shape())
 
 #    def test_parameter_space_full_run(self):
 #        options = self.framework_options_setup()
