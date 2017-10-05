@@ -53,11 +53,16 @@ class BaseAstraRecon(BaseRecon):
             in_data = self.get_in_datasets()[0]
             dim_detX = \
                 in_data.get_data_dimension_by_axis_label('y', contains=True)
-            shape = (in_data.get_shape()[dim_detX],
-                     self.parameters['n_iterations'])
+
+            nIts = self.parameters['n_iterations']
+            nIts = nIts if isinstance(nIts, list) else [nIts]
+            self.len_res = max(nIts)
+            shape = (in_data.get_shape()[dim_detX], max(nIts))
+
             label = ['vol_y.voxel', 'iteration.number']
             pattern = {'name': 'SINOGRAM', 'slice_dims': (0,),
                        'core_dims': (1,)}
+
             out_dataset[1].create_dataset(axis_labels=label, shape=shape)
             out_dataset[1].add_pattern(pattern['name'],
                                        slice_dims=pattern['slice_dims'],
@@ -108,7 +113,7 @@ class BaseAstraRecon(BaseRecon):
         cor, angles, vol_shape, init = self.get_frame_params()
         angles = np.deg2rad(angles)
         if self.res:
-            res = np.zeros(self.iters)
+            res = np.zeros(self.len_res)
         # create volume geom
         vol_geom = astra.create_vol_geom(vol_shape)
         # create projection geom
