@@ -214,7 +214,7 @@ class BaseRecon(Plugin):
         return pData.get_data_dimension_by_axis_label('x', contains=True)
 
     def get_centre_offset(self, sino, cor, detX):
-        centre_pad = self.array_pad(cor, sino.shape[detX])
+        centre_pad = self.br_array_pad(cor, sino.shape[detX])
         sino_width = sino.shape[detX]
         new_width = sino_width + max(centre_pad)
         sino_pad = \
@@ -229,7 +229,7 @@ class BaseRecon(Plugin):
     def crop_sino(self, sino, cor):
         """  Crop the sinogram so the centre of rotation is at the centre. """
         detX = self._get_detX_dim()
-        start, stop = self.array_pad(cor, sino.shape[detX])[::-1]
+        start, stop = self.br_array_pad(cor, sino.shape[detX])[::-1]
         self.cor_shift = -start
         sl = [slice(None)]*len(sino.shape)
         sl[detX] = slice(start, sino.shape[detX] - stop)
@@ -237,7 +237,7 @@ class BaseRecon(Plugin):
         self.set_mask(sino.shape)
         return sino
 
-    def array_pad(self, ctr, nPixels):
+    def br_array_pad(self, ctr, nPixels):
         width = nPixels - 1.0
         alen = ctr
         blen = width - ctr

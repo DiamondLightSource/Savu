@@ -37,14 +37,14 @@ class CcpiCglsRecon(BaseRecon, CpuPlugin):
      A Plugin to run the CCPi implementation of the CGLS reconstruction \
      algorithm.
 
-    :u*param number_of_iterations: Number of iterations. Default: 5.
+    :u*param n_iterations: Number of iterations. Default: 5.
     :u*param resolution: number of output voxels (res = n_pixels/n_voxels), \
     set res > 1 for reduced resolution. Default: 1.
     :param n_frames: This algorithm requires a multiple of 8 frames for \
     processing and this number may affect performance depending on your data \
     size (choose from 8, 16, 24, 32). Default: 16.
 
-    :*param centre_pad: Not an option. Default: False.
+    :~param centre_pad: Not an option. Default: False.
     :*param outer_pad: Not an option. Default: False.
     :*param init_vol: Not an option. Default: None.
     :*param enforce_positive: Not an option. Default: False.
@@ -54,7 +54,8 @@ class CcpiCglsRecon(BaseRecon, CpuPlugin):
         super(CcpiCglsRecon, self).__init__("CcpiCglsRecon")
 
     def pre_process(self):
-        self.n_iters = self.parameters['number_of_iterations']
+        print self.parameters.keys()
+        self.n_iters = self.parameters['n_iterations']
         self.res = self.parameters['resolution']
         in_data = self.get_in_datasets()[0]
         in_pData = self.get_plugin_in_datasets()[0]
