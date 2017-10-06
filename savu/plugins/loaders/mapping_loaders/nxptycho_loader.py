@@ -32,6 +32,7 @@ import logging
 class NxptychoLoader(BaseMultiModalLoader):
     """
     A class to load tomography data from an NXstxm file
+    :param name: The name assigned to the dataset. Default: 'ptycho'.
     """
 
     def __init__(self, name='NxptychoLoader'):
@@ -46,11 +47,12 @@ class NxptychoLoader(BaseMultiModalLoader):
         """
 
         data_str = '/instrument/detector/data'
-        data_obj, stxm_entry = self.multi_modal_setup('NXptycho', data_str)
+        data_obj, stxm_entry = self.multi_modal_setup('NXptycho', data_str,
+                                                      self.parameters['name'])
         mono_energy = data_obj.backing_file[
             stxm_entry.name + '/instrument/monochromator/energy']
         self.exp.meta_data.set("mono_energy", mono_energy)
-        
+
         labels = []
         ### set the rotation
         rotation_angle = \
