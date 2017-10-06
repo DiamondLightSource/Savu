@@ -64,17 +64,30 @@ class MmLoader(BaseLoader):
     def separate_params(self, keys):
         all_keys = self.dict.keys() + keys
         new_dict = {}
-        for key in all_keys:
+        for key in [k for k in all_keys if k != 'name']:
             new_dict[key] = self.parameters[key]
         return new_dict
 
     @docstring_parameter(BaseMultiModalLoader.__doc__, xrd.__doc__,
                          stxm.__doc__, mon.__doc__, fluo.__doc__)
     def _override_class_docstring(self):
-        """ {0} \n {1} \n {2} \n {3} \n {4} """
+        """
+        :param dataset_names: The names assigned to each dataset in the \
+            order: fluorescence, diffraction, absorption, \
+            monitor. Default: ['fluo', 'xrd', 'stxm', 'monitor'].
+
+        {0} \n {1} \n {2} \n {3} \n {4}
+
+        """
         pass
 
+    def __set_names(self):
+        fluo, xrd, stxm, monitor = self.parameters['dataset_names']
+        self.name_dict = {'fluo': fluo, 'xrd': xrd, 'stxm': stxm,
+                          'monitor': monitor}
+
     def setup(self):
+        self.__set_names()
         self._data_loader(fluo(), 'fluo', self.fluo_keys)
         self._data_loader(xrd(), 'xrd', self.xrd_keys)
         self._data_loader(stxm(), 'stxm', self.stxm_keys)
@@ -84,7 +97,9 @@ class MmLoader(BaseLoader):
         debug_str = 'This file contains an ' + name
         warn_str = 'This file does not contain a ' + name
         try:
-            self.setup_loader(inst, self.separate_params(key))
+            params = self.separate_params(key)
+            params['name'] = self.name_dict[name]
+            self.setup_loader(inst, params)
             logging.debug(debug_str)
         except IndexError:
             logging.warn(warn_str)
@@ -94,3 +109,7 @@ class MmLoader(BaseLoader):
     def setup_loader(self, loader, params):
         loader._main_setup(self.exp, params)
         loader.setup()
+
+    def final_parameter_updates(self):
+        # names of individual datasets are not required
+        self.delete_parameter_entry('name')

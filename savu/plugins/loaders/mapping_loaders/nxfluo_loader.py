@@ -33,6 +33,7 @@ class NxfluoLoader(BaseMultiModalLoader):
 
     :param fluo_offset: fluo scale offset. Default: 0.0.
     :param fluo_gain: fluo gain. Default: 0.01.
+    :param name: The name assigned to the dataset. Default: 'fluo'.
     """
 
     def __init__(self, name='NxfluoLoader'):
@@ -46,7 +47,7 @@ class NxfluoLoader(BaseMultiModalLoader):
         """
         import numpy as np
         data_str = '/instrument/fluorescence/data'
-        data_obj, fluo_entry = self.multi_modal_setup('NXfluo', data_str)
+        data_obj, fluo_entry = self.multi_modal_setup('NXfluo', data_str, self.parameters['name'])
         # the application meta data
         mData = data_obj.meta_data
         npts = data_obj.data.shape[-1]

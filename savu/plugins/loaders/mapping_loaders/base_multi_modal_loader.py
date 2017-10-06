@@ -31,13 +31,12 @@ class BaseMultiModalLoader(BaseLoader):
     """
     This class provides a base for all multi-modal loaders
     :param fast_axis: what is the fast axis called. Default: "x".
-
     """
 
-    def multi_modal_setup(self, ltype, data_str):
+    def multi_modal_setup(self, ltype, data_str, name):
         # set up the file handles
         exp = self.exp
-        data_obj = exp.create_data_object("in_data", ltype)
+        data_obj = exp.create_data_object("in_data", name)
         data_obj.backing_file = \
             h5py.File(exp.meta_data.get("data_file"), 'r')
         logging.debug("Creating file '%s' '%s'_entry",

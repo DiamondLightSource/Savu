@@ -36,6 +36,7 @@ class NxxrdLoader(BaseMultiModalLoader):
     A class to load tomography data from an NXxrd file
 
     :param calibration_path: path to the calibration file. Default: None.
+    :param name: The name assigned to the dataset. Default: 'xrd'.
     """
 
     def __init__(self):
@@ -43,15 +44,16 @@ class NxxrdLoader(BaseMultiModalLoader):
 
     def setup(self):
         data_str = '/instrument/detector/data'
-        data_obj, xrd_entry = self.multi_modal_setup('NXxrd', data_str)
+        data_obj, xrd_entry = self.multi_modal_setup('NXxrd', data_str,
+                                                     self.parameters['name'])
         mono_energy = data_obj.backing_file[
             xrd_entry.name + '/instrument/monochromator/energy'].value
         self.exp.meta_data.set("mono_energy", mono_energy)
         self.set_motors(data_obj, xrd_entry, 'xrd')
 
-
         self.add_patterns_based_on_acquisition(data_obj, 'xrd')
 
+        print self.get_cal_path()
         calibrationfile = h5py.File(self.get_cal_path(), 'r')
         try:
             logging.debug('testing the version of the calibration file')

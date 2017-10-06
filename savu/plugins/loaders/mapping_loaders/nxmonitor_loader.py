@@ -31,6 +31,7 @@ from savu.plugins.utils import register_plugin
 class NxmonitorLoader(BaseMultiModalLoader):
     """
     A class to load tomography data from an NXmonitor file
+    :param name: The name assigned to the dataset. Default: 'monitor'.
     """
 
     def __init__(self, name='NxmonitorLoader'):
@@ -45,7 +46,8 @@ class NxmonitorLoader(BaseMultiModalLoader):
         """
 
         data_str = '/instrument/detector/data'
-        data_obj, stxm_entry = self.multi_modal_setup('NXmonitor', data_str)
+        data_obj, stxm_entry = self.multi_modal_setup('NXmonitor', data_str,
+                                                      self.parameters['name'])
         mono_energy = data_obj.backing_file[
             stxm_entry.name + '/instrument/monochromator/energy']
 
