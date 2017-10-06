@@ -23,13 +23,11 @@
 
 import h5py
 import logging
-import numpy as np
 from mpi4py import MPI
 
-import savu.core.utils as cu
 from savu.data.chunking import Chunking
 from savu.data.data_structures.data_types.data_plus_darks_and_flats \
-    import ImageKey, NoImageKey
+    import NoImageKey
 
 NX_CLASS = 'NX_class'
 
@@ -98,13 +96,14 @@ class Hdf5Utils(object):
         spaceid = h5py.h5s.create_simple(shape)
         plist = h5py.h5p.create(h5py.h5p.DATASET_CREATE)
         plist.set_fill_time(h5py.h5d.FILL_TIME_NEVER)
-        if chunks not in [None,[]] and isinstance(chunks, tuple):
+        if chunks not in [None, []] and isinstance(chunks, tuple):
             plist.set_chunk(chunks)
         typeid = h5py.h5t.py_create(dtype)
-        datasetid = h5py.h5d.create(group.file.id, group.name+'/'+name, typeid, spaceid, plist)
+        datasetid = h5py.h5d.create(
+                group.file.id, group.name+'/'+name, typeid, spaceid, plist)
         data = h5py.Dataset(datasetid)
         return data
-            
+
     def _create_entries(self, data, key, current_and_next):
         self.exp._barrier()
 
@@ -127,42 +126,14 @@ class Hdf5Utils(object):
             chunking = Chunking(self.exp, current_and_next)
             chunks = chunking._calculate_chunking(shape, data.dtype)
             self.exp._barrier()
-            nBytes = np.prod(shape)*np.dtype(data.dtype).itemsize
-            nProcs = self.exp.meta_data.get('nProcesses')
-            # parallel hdf5 cannot handle data_size/nProcesses > 2GB
-            # self.__hdf5_file_write_failed_check(nBytes, nProcs)
             logging.warn('Creating the dataset with chunks.')
             data.data = self.__create_dataset_nofill(
-                group,"data", shape, data.dtype, chunks=chunks)
+                group, "data", shape, data.dtype, chunks=chunks)
             logging.warn('Dataset created!')
 
         self.exp._barrier()
 
         return group_name, group
-
-    def __hdf5_file_write_failed_check(self, nBytes, nProcs):
-        _2GB = 2e9
-
-        if nBytes/np.float(nProcs) < _2GB:
-            return
-
-        msg = "The data is too big for the number of processes, please "
-        if self.exp.meta_data.get('femail') == \
-                'scientificsoftware@diamond.ac.uk':
-            n_procs_big = 160  # number of processes for BIG data
-            savu_mpi_big = True if nProcs is n_procs_big else False
-            if savu_mpi_big or (nBytes/np.float(n_procs_big) >= _2GB):
-                if self.exp.meta_data.get('femail'):
-                    msg += ("contact %s" % self.exp.meta_data.get('femail'))
-                else:
-                    msg += "increase the number of cores."
-            else:
-                msg += "use savu_mpi_big."
-        else:
-            msg += "increase the number of cores."
-
-        cu.user_message(msg)
-        raise Exception(msg)
 
     def _close_file(self, data):
         """
