@@ -10,6 +10,7 @@ Submodules
    savu.plugins.driver.basic_driver
    savu.plugins.driver.cpu_plugin
    savu.plugins.driver.gpu_plugin
+   savu.plugins.driver.iterative_plugin
    savu.plugins.driver.multi_threaded_plugin
    savu.plugins.driver.plugin_driver
    savu.plugins.driver.single_node_multi_threaded_plugin

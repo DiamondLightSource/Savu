@@ -132,7 +132,8 @@ savu.plugins.centering
 
 .. toctree::
    api_plugin/savu.plugins.centering.vo_centering
-   api_plugin/savu.plugins.centering.vo_centering_updated
+   api_plugin/savu.plugins.centering.vo_centering_new
+   api_plugin/savu.plugins.centering.vo_centering_iterative
 
 
 savu.plugins.component_analysis
@@ -237,6 +238,7 @@ savu.plugins.driver
    api_plugin/savu.plugins.driver.all_cpus_plugin
    api_plugin/savu.plugins.driver.single_node_multi_threaded_plugin
    api_plugin/savu.plugins.driver.basic_driver
+   api_plugin/savu.plugins.driver.iterative_plugin
 
 
 savu.plugins.ring_removal

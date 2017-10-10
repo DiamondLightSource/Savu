@@ -10,7 +10,6 @@ Submodules
    savu.test.jenkins.plugin_tests.filter_tests.component_analysis_test
    savu.test.jenkins.plugin_tests.filter_tests.diffraction_absorption_test
    savu.test.jenkins.plugin_tests.filter_tests.dummy_ptycho_test
-   savu.test.jenkins.plugin_tests.filter_tests.fastxrf_test
    savu.test.jenkins.plugin_tests.filter_tests.i08_pymca_test
    savu.test.jenkins.plugin_tests.filter_tests.i14_pymca_test
    savu.test.jenkins.plugin_tests.filter_tests.image_interpolation_test
