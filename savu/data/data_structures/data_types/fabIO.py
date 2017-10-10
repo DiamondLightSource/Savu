@@ -69,8 +69,9 @@ class FabIO(BaseType):
 #        files = os.listdir(folder)
         fullpath = str.strip(folder)
         if prefix is not None:
-            fullpath = os.path.join(folder, prefix)
-        fullpath += "/*"
+            fullpath = os.path.join(folder, prefix + '*')
+        else:
+            fullpath += "/*"
         files = glob.glob(fullpath)
         self.nFrames = len(files)
 
