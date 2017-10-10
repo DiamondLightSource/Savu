@@ -41,7 +41,10 @@ class IterativePlugin(PluginDriver):
     def _run_plugin(self, exp, transport):
         """ Runs the pre_process, process and post_process methods.
         """
+        self.__set_original_datasets()
+
         while not self._ip_complete:
+            print "Iteration", self._ip_iteration, "..."
             self.__set_datasets()
             self._perform_the_processing(transport)
             if transport.no_processing:
@@ -97,3 +100,10 @@ class IterativePlugin(PluginDriver):
 
     def get_alternating_datasets(self):
         return self._ip_data_dict['iterating']
+
+    def __set_original_datasets(self):
+        self.in_data = self.parameters['in_datasets']
+        self.out_data = self.parameters['out_datasets']
+
+    def get_original_datasets(self):
+        return self.in_data, self.out_data
