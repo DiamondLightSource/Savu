@@ -50,8 +50,8 @@ class VoCentering(BaseFilter, CpuPlugin):
     :param out_datasets: The default names. Default: ['cor_raw','cor_fit'].
     :u*param start_pixel: The approximate centre. If value is None, take the \
         value from .nxs file else set to image centre. Default: None.
-    :u*param search_area: Search area from horizontal approximate centre of \
-        the image. Default: (-50, 50).
+    :u*param search_area: Search area from horizontal approximate \
+        centre of the image. Default: (-50, 50).
     """
 
     def __init__(self):
