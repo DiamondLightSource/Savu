@@ -7,7 +7,7 @@ package:
 source:
   fn: astra-{{ version }}.tar.bz2
   url: http://www.astra-toolbox.com/files/astra-{{ version }}/astra-{{ version }}.tar.bz2
-  sha256: e4dfb782cf2e547264947dd89f8c280b3aa63b7f40010abe6270949577b573d3
+  sha256: 44602e0eb0789a557622eae959fc0a067d81396bcb79ec315cb39b59d52322e7
 
 requirements:
   build:

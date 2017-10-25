@@ -45,7 +45,7 @@ def run_full_tests():
 
     path = os.path.split(test.travis.__file__)[0]
     suite = unittest.defaultTestLoader.discover(path, pattern='*test.py')
-    unittest.TextTestRunner().run(suite)
+    unittest.TextTestRunner(buffer=True).run(suite)
 
 
 def run_tests():
@@ -56,5 +56,5 @@ def run_tests():
 
     suite = \
         unittest.TestLoader().loadTestsFromTestCase(TomoPipelinePreviewTest)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    unittest.TextTestRunner(verbosity=2, buffer=True).run(suite)
     print("Test complete...")

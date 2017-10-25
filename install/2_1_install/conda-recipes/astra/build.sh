@@ -3,8 +3,10 @@
 nvcc=`command -v nvcc`
 cuda=${nvcc%/bin/nvcc}
 
-ana_path=`command -v savu`
-prefix=${ana_path%/bin/savu}/lib/python2.7/site-packages/astra
+savu_path=`command -v savu`
+ana_path=${savu_path%/savu}
+prefix=${ana_path%/bin}/lib/python2.7/site-packages/astra
+export PATH=$ana_path:$PATH
 
 cd build/linux
 

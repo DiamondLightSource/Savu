@@ -1,4 +1,4 @@
-{% set version = "2.7.0" %} # change this
+{% set version = "2.7.1" %} # change this
 
 package:
   name: h5py
@@ -17,7 +17,7 @@ requirements:
     - six
 
 build:
-  number: 100
+  number: 1
 
 about:
   home: http://www.h5py.org/
