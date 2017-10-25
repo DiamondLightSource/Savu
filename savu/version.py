@@ -30,4 +30,4 @@ with open(thepath + 'latest_version.txt', 'r') as f:
     version_file = f.readline().strip()
     __version__ = version_file.split('savu_v')[1].split('/')[0]
 
-__install__ = 'install/' + '_'.join(__version__.split('.')) + '_install'
+__install__ = 'install/' + version_file.split('/')[0]
