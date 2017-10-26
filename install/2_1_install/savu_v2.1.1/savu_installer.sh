@@ -73,7 +73,6 @@ else
   echo "Unknown Savu installation version."
 fi
 
-
 #=========================library checking==============================
 
 if [ $test_flag ] ; then
@@ -240,12 +239,11 @@ if [ "$facility" ]; then
     cp $savu_path/mpi/$facility/savu_mpijob.sh $launcher_path
 fi
 
-#-----------------------------------------------------------------
+
 echo "Installing tomopy..."
 # these packages were missing copied environment for some reason
 conda install -y -q -c dgursoy tomopy --no-deps
 conda install -y -q -c dgursoy dxchange --no-deps
-#-----------------------------------------------------------------
 
 #-----------------------------------------------------------------
 echo "Installing pyfai..."
@@ -398,12 +396,25 @@ echo -e "\n************** MPI local tests complete ******************\n"
 while true ; do
   read  -n 1 -p "Are you installing Savu for cluster use? (y/n): " input
   if [ "$input" = "y" ]; then
-    echo -e "\n\nTo run Savu across a cluster you will need to update the savu laucher scripts:"
-    echo -e "savu_launcher.sh"
-    echo -e "savu_mpijob.sh"
-    echo -e "Once these are updated run the cluster MPI tests:\n\t >>> mpi_cpu_test.sh <output_dir> "
-    echo -e "\n\t >>> mpi_gpu_test.sh <output_dir>.\n"
-    break    
+    launcher_path=`command -v savu_launcher.sh`
+    mpijob_path=`command -v savu_mpijob.sh`
+    echo -e "\n\n===============================IMPORTANT NOTICE================================="
+    echo -e "To run Savu across a cluster you will need to update the savu laucher scripts:"
+    echo -e "\n$launcher_path"
+    echo -e "$mpijob_path\n"
+    echo -e "Once these are update, run the cluster MPI tests:\n\t >>> mpi_cpu_test.sh <output_dir> "
+    echo -e "\t >>> mpi_gpu_test.sh <output_dir>."
+    echo -e "================================================================================\n"
+    while true ; do    
+      read  -n 1 -p "Continue? (y): " input
+      if [ "$input" = "y" ]; then
+        break
+      else
+        echo
+      fi
+    done
+    echo
+    break
   elif [ "$input" = "n" ]; then
     break
   else
@@ -412,14 +423,14 @@ while true ; do
 done
 
 if [ ! $test_flag ] ; then
-  echo -e "\nTo run Savu type 'source $savu_setup' to set relevant paths every time you open a new terminal."
+  echo -e "\n\nTo run Savu type 'source $savu_setup' to set relevant paths every time you open a new terminal."
   echo -e "Alternatively, if you are using the Modules system, see $DIR/module_template for an example module file." 
 
   echo -e "*************** SAVU INSTALLATION COMPLETE! ******************\n"
   echo -e "    ......Thank you for running the Savu installer......\n"
   echo -e "=============================================================\n"
 else
-  echo -e "*************** SAVU TESTS COMPLETE! ******************\n"
+  echo -e "\n\n*************** SAVU TESTS COMPLETE! ******************\n"
   echo -e "    ......Thank you for running the Savu tests......\n"
   echo -e " Please check $tmpfile for errors\n"
   echo -e "=======================================================\n"
