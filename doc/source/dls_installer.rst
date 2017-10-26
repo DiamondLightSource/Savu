@@ -10,7 +10,7 @@ Requirements:
 
 2. Run the following command and follow the installation instructions:
 
-    >>> bash savu_v2.1/savu_installer.sh
+    >>> bash savu_v2.1.1/savu_installer.sh
 
 3. Check the log file /tmp/savu_error_log.txt for installation errors.
 
