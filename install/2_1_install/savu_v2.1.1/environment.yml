@@ -193,13 +193,11 @@ dependencies:
   - mako==1.0.6
   - mrcfile==1.0.0
   - notebook==5.0.0
-  - nvidia-ml-py==375.53.1
+  - nvidia-ml-py==375.53
   - peakutils==1.1.0
   - phasepack==1.5
   - polytope==0.2.0
   - prompt-toolkit==1.0.14
-  - pyastratoolbox==1.6
-  - pyfai==0.13.1
   - pymca==5.1.4
   - pymca5==5.1.4
   - pyreadline==2.1

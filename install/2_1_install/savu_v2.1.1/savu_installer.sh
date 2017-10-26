@@ -36,7 +36,6 @@ function flag_parse ()
   flag=$1
   return=$2
   while [[ $# -gt 2 ]] ; do
-    echo $3
     if [ $3 == $flag ] ; then
       eval "$return"=true
     fi
@@ -86,7 +85,8 @@ else
   echo -e "    ......Thank you for running the Savu installer......\n"
   echo -e "Performing a library check..."
   echo -e "\nNB: An MPI implementation is required to build Savu."
-  echo -e "fftw and cuda are desirable for a full range of plugins."
+  echo -e "fftw is required to build Savu."
+  echo -e "Cuda is desirable for a full range of plugins."
   echo -e "\n============================================================="
 fi
 
@@ -241,6 +241,18 @@ if [ "$facility" ]; then
 fi
 
 #-----------------------------------------------------------------
+echo "Installing tomopy..."
+# these packages were missing copied environment for some reason
+conda install -y -q -c dgursoy tomopy --no-deps
+conda install -y -q -c dgursoy dxchange --no-deps
+#-----------------------------------------------------------------
+
+#-----------------------------------------------------------------
+echo "Installing pyfai..."
+pip install pyfai
+#-----------------------------------------------------------------
+
+#-----------------------------------------------------------------
 echo "Installing mpi4py..."
 mpi4py_version=`cat $recipes/mpi4py/version.txt`
 env MPICC=$MPICC pip install mpi4py==$mpi4py_version
@@ -248,6 +260,7 @@ env MPICC=$MPICC pip install mpi4py==$mpi4py_version
 
 #-----------------------------------------------------------------
 echo "Building hdf5..."
+conda uninstall -y -q hdf5
 conda build $recipes/hdf5
 hdf5build=`conda build $recipes/hdf5 --output`
 
@@ -257,6 +270,7 @@ conda install -y -q --use-local $hdf5build --no-deps
 
 #-----------------------------------------------------------------
 echo "Building h5py..."
+conda uninstall -y -q h5py
 conda build $recipes/h5py --no-test
 h5pybuild=`conda build $recipes/h5py --output`
 
@@ -287,12 +301,12 @@ conda install -y -q --use-local $xraylibbuild --no-deps
 #-----------------------------------------------------------------
 
 #-----------------------------------------------------------------
-echo "Building xdesign"
-conda build $recipes/xdesign
-xdesignbuild=`conda build $recipes/xdesign --output`
+#echo "Building xdesign"
+#conda build $recipes/xdesign
+#xdesignbuild=`conda build $recipes/xdesign --output`
 
-echo "Installing xdesign"
-conda install -y -q --use-local $xdesignbuild --no-deps
+#echo "Installing xdesign"
+#conda install -y -q --use-local $xdesignbuild --no-deps
 #-----------------------------------------------------------------
 
 echo -e "\n\t***************************************************"
@@ -391,7 +405,7 @@ while true ; do
     echo -e "\n\t >>> mpi_gpu_test.sh <output_dir>.\n"
     break    
   elif [ "$input" = "n" ]; then
-    continue
+    break
   else
     echo -e "\nYour input was unknown.\n"
   fi
