@@ -1,12 +1,13 @@
-name: savu_2.1
+name: root
 channels:
 - ccpi
 - local
-- conda-forge
 - dgursoy
+- conda-forge
 - defaults
 dependencies:
 - boost-cpp=1.64.0=0
+- ccpi-reconstruction=0.1=py27_0
 - boost=1.64.0=np113py27_2
 - bzip2=1.0.6=1
 - cairo=1.14.6=4
@@ -32,6 +33,9 @@ dependencies:
 - cffi=1.10.0=py27_0
 - chardet=3.0.4=py27_0
 - colorama=0.3.9=py27_0
+- conda=4.3.22=py27_0
+- conda-build=3.0.6=py27_0
+- conda-env=2.6.0=0
 - conda-verify=2.0.0=py27_0
 - configparser=3.5.0=py27_0
 - contextlib2=0.5.5=py27_0
@@ -170,6 +174,7 @@ dependencies:
 - pywavelets=0.4.0=py27_0
 - spefile=1.6=py27_0
 - tifffile=0.7.0=py27_0
+- tomopy=1.0.1=py27_0
 - pip:
   - appdirs==1.4.3
   - backports-abc==0.5
@@ -188,11 +193,12 @@ dependencies:
   - mako==1.0.6
   - mrcfile==1.0.0
   - notebook==5.0.0
-  - nvidia-ml-py==375.53
+  - nvidia-ml-py==375.53.1
   - peakutils==1.1.0
   - phasepack==1.5
   - polytope==0.2.0
   - prompt-toolkit==1.0.14
+  - pyastratoolbox==1.6
   - pyfai==0.13.1
   - pymca==5.1.4
   - pymca5==5.1.4
@@ -205,5 +211,4 @@ dependencies:
   - terminado==0.6
   - webencodings==0.5.1
   - widgetsnbextension==2.0.0
-
 

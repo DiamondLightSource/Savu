@@ -22,7 +22,7 @@ function arg_parse ()
 {
   flag=$1
   return=$2
-  while [[ $# -gt 3 ]] ; do
+  while [[ $# -gt 2 ]] ; do
     if [ $3 == $flag ] ; then
       eval "$return"=$4
     fi
@@ -35,7 +35,8 @@ function flag_parse ()
 {
   flag=$1
   return=$2
-  while [[ $# -gt 3 ]] ; do
+  while [[ $# -gt 2 ]] ; do
+    echo $3
     if [ $3 == $flag ] ; then
       eval "$return"=true
     fi
@@ -44,8 +45,7 @@ function flag_parse ()
 }
 
 # Set the test flag to true if test only
-test_flag=false
-flag_parse "--test_only" test_flag "$@"
+flag_parse "--tests_only" test_flag "$@"
 if [ $test_flag ] ; then
   test_flag=true
 fi
@@ -141,29 +141,32 @@ if [ $test_flag ] ; then
   fi
 
   echo -e "=============================================================\n"
-  read  -n 1 -p "Are you happy to proceed with the tests? (y/n): " input
-  if [ "$input" = "y" ]; then
-    echo -e "\nProceeding with the tests."
-  elif [ "$input" = "n" ]; then
-    echo -e "\nAborting the tests."
-    exit 1
-  else
-    echo -e "\nYour input was unknown.\n"
+  while true ; do
     read  -n 1 -p "Are you happy to proceed with the tests? (y/n): " input
-  fi 
+    if [ "$input" = "y" ]; then
+      echo -e "\nProceeding with the tests."
+      break
+    elif [ "$input" = "n" ]; then
+      echo -e "\nAborting the tests."
+      exit 1
+    else
+      echo -e "\nYour input was unknown.\n"
+    fi 
+  done
 else
   echo -e "=============================================================\n"
-  read  -n 1 -p "Are you happy to proceed with the installation? (y/n): " input
-  if [ "$input" = "y" ]; then
-    echo -e "\nYour input was yes"
-  elif [ "$input" = "n" ]; then
-    echo -e "\nInstallation process terminated."
-    exit 1
-  else
-    echo -e "\nYour input was unknown.\n"
+  while true ; do
     read  -n 1 -p "Are you happy to proceed with the installation? (y/n): " input
-  fi
- 
+    if [ "$input" = "y" ]; then
+      echo -e "\nYour input was yes"
+      break
+    elif [ "$input" = "n" ]; then
+      echo -e "\nInstallation process terminated."
+      exit 1
+    else
+      echo -e "\nYour input was unknown.\n"
+    fi
+  done
 #=====================installing other packages==========================
 
 echo -e "\nInstalling Savu in" $PREFIX
@@ -185,16 +188,18 @@ done
 
 if [ -d "$PREFIX" ]; then
   echo
-  read -n 1 -p "The folder $PREFIX already exists. Continue? [y/n]" input
-  if [ "$input" = "y" ]; then
-    echo -e "\nStarting the installation........"
-  elif [ "$input" = "n" ]; then
-    echo -e "\nInstallation process terminated."
-    exit 1
-  else
-    echo -e "\nYour input was unknown.\n\n"
-    read -n 1 -p -e "The folder" $PREFIX "already exists. Continue? [y/n]" input
-  fi
+  while true ; do
+    read -n 1 -p "The folder $PREFIX already exists. Continue? [y/n]" input
+    if [ "$input" = "y" ]; then
+      echo -e "\nStarting the installation........"
+      break
+    elif [ "$input" = "n" ]; then
+      echo -e "\nInstallation process terminated."
+      exit 1
+    else
+      echo -e "\nYour input was unknown.\n\n"
+    fi
+  done
 else
   # create the folder
   mkdir -p $PREFIX
@@ -202,14 +207,12 @@ fi
 
 echo -e "\nThank you!  Installing Savu into" $PREFIX"\n"
 
-echo $PREFIX
-
 wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O $PREFIX/miniconda.sh;
 bash $PREFIX/miniconda.sh -b -p $PREFIX/miniconda
 PYTHONHOME=$PREFIX/miniconda/bin
 export PATH="$PYTHONHOME:$PATH"
 
-conda install conda-build
+conda install -y -q conda-build
 
 echo
 conda info | grep 'root environment'
@@ -221,7 +224,7 @@ echo "Building Savu..."
 conda build $DIR/$savu_recipe
 savubuild=`conda build $DIR/$savu_recipe --output`
 echo "Installing Savu..."
-conda install --use-local $savubuild
+conda install -y -q --use-local $savubuild
 
 path=$(python -c "import savu; import os; print os.path.abspath(savu.__file__)")
 savu_path=${path%/savu/__init__.pyc}
@@ -249,7 +252,7 @@ conda build $recipes/hdf5
 hdf5build=`conda build $recipes/hdf5 --output`
 
 echo "Installing hdf5..."
-conda install --use-local $hdf5build --no-deps
+conda install -y -q --use-local $hdf5build --no-deps
 #-----------------------------------------------------------------
 
 #-----------------------------------------------------------------
@@ -258,7 +261,7 @@ conda build $recipes/h5py --no-test
 h5pybuild=`conda build $recipes/h5py --output`
 
 echo "Installing h5py..."
-conda install --use-local $h5pybuild --no-deps
+conda install -y -q --use-local $h5pybuild --no-deps
 #-----------------------------------------------------------------
 
 #-----------------------------------------------------------------
@@ -267,7 +270,7 @@ conda build $recipes/astra
 astrabuild=`conda build $recipes/astra --output`
 
 echo "Installing astra toolbox..."
-conda install --use-local $astrabuild --no-deps
+conda install -y -q --use-local $astrabuild --no-deps
 
 site_path=$(python -c "import site; print site.getsitepackages()[0]")
 cp $recipes/astra/astra.pth $site_path
@@ -280,7 +283,7 @@ conda build $recipes/xraylib
 xraylibbuild=`conda build $recipes/xraylib --output`
 
 echo "Installing xraylib..."
-conda install --use-local $xraylibbuild --no-deps
+conda install -y -q --use-local $xraylibbuild --no-deps
 #-----------------------------------------------------------------
 
 #-----------------------------------------------------------------
@@ -289,21 +292,23 @@ conda build $recipes/xdesign
 xdesignbuild=`conda build $recipes/xdesign --output`
 
 echo "Installing xdesign"
-conda install --use-local $xdesignbuild --no-deps
+conda install -y -q --use-local $xdesignbuild --no-deps
 #-----------------------------------------------------------------
 
 echo -e "\n\t***************************************************"
-echo -e "\t*          Package installation complete          *"
-echo -e "\t*    Check $error_log for errors     *"
+echo -e "\t          Package installation complete"
+echo -e "\t  Check $error_log for errors"
 echo -e "\t***************************************************\n"
 
 fi
 
 
 if [ ! $test_flag ] ; then
+while true; do
   read  -n 1 -p "Would you like to run the tests? (y/n): " input
   if [ "$input" = "y" ]; then
-    echo -e "\nYour input was yes"    
+    echo -e "\nYour input was yes"
+    break
   elif [ "$input" = "n" ]; then
     echo -e "Aborting test run..."
     echo -e "To run the tests later type: "
@@ -311,8 +316,8 @@ if [ ! $test_flag ] ; then
     exit 1
   else
     echo -e "\nYour input was unknown.\n"
-    read  -n 1 -p "Would you like to run the tests? (y/n): " input
   fi
+done
 
   setup_script=$PREFIX/'savu_setup.sh'
   echo -e "\nCreating a Savu setup script" $setup_script
@@ -367,7 +372,7 @@ fi
 
 if [ $nGPUs -gt 0 ]; then
   echo -e "\n***** Running Savu MPI local GPU tests *****\n"
-  #local_mpi_gpu_test.sh  $test_dir
+  local_mpi_gpu_test.sh  $test_dir
 else
   echo -e "\n***** Skipping Savu MPI local GPU tests (no GPUs found) *****\n"
 fi
@@ -376,20 +381,21 @@ rm -r $test_dir
 
 echo -e "\n************** MPI local tests complete ******************\n"
 
-#  read  -n 1 -p "Are you installing Savu for cluster use? (y/n): " input
-#  if [ "$input" = "y" ]; then
-#    echo -e "To run Savu across a cluster you will need to update the savu laucher scripts:"
-#    echo -e "savu_launcher.sh"
-#    echo -e "savu_mpijob.sh"
-#    break    
-#  elif [ "$input" = "n" ]; then
-#    continue
-#  else
-#    echo -e "\nYour input was unknown.\n"
-#    read  -n 1 -p "Are you installing Savu for cluster use? (y/n): " input
-#  fi
-
-# information about cluster tests?
+while true ; do
+  read  -n 1 -p "Are you installing Savu for cluster use? (y/n): " input
+  if [ "$input" = "y" ]; then
+    echo -e "\n\nTo run Savu across a cluster you will need to update the savu laucher scripts:"
+    echo -e "savu_launcher.sh"
+    echo -e "savu_mpijob.sh"
+    echo -e "Once these are updated run the cluster MPI tests:\n\t >>> mpi_cpu_test.sh <output_dir> "
+    echo -e "\n\t >>> mpi_gpu_test.sh <output_dir>.\n"
+    break    
+  elif [ "$input" = "n" ]; then
+    continue
+  else
+    echo -e "\nYour input was unknown.\n"
+  fi
+done
 
 if [ ! $test_flag ] ; then
   echo -e "\nTo run Savu type 'source $savu_setup' to set relevant paths every time you open a new terminal."
