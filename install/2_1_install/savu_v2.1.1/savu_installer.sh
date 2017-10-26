@@ -239,12 +239,6 @@ if [ "$facility" ]; then
     cp $savu_path/mpi/$facility/savu_mpijob.sh $launcher_path
 fi
 
-
-echo "Installing tomopy..."
-# these packages were missing copied environment for some reason
-conda install -y -q -c dgursoy tomopy --no-deps
-conda install -y -q -c dgursoy dxchange --no-deps
-
 #-----------------------------------------------------------------
 echo "Installing pyfai..."
 pip install pyfai
@@ -296,6 +290,13 @@ xraylibbuild=`conda build $recipes/xraylib --output`
 
 echo "Installing xraylib..."
 conda install -y -q --use-local $xraylibbuild --no-deps
+#-----------------------------------------------------------------
+
+#-----------------------------------------------------------------
+echo "Installing tomopy..."
+# these packages were missing in copied environment
+conda install -y -q -c dgursoy tomopy --no-deps
+conda install -y -q -c dgursoy dxchange --no-deps
 #-----------------------------------------------------------------
 
 #-----------------------------------------------------------------
