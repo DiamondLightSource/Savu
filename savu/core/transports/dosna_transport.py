@@ -1,0 +1,164 @@
+# Copyright 2015 Diamond Light Source Ltd.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+"""
+.. module:: basic_transport
+   :platform: Unix
+   :synopsis: Transports data to and from file at the beginning and end of the\
+   process list respectively.
+
+.. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
+
+"""
+
+import logging
+
+import dosna as dn
+
+from savu.core.transport_setup import MPI_setup
+from savu.plugins.savers.utils.hdf5_utils import Hdf5Utils
+from savu.core.transports.hdf5_transport import Hdf5Transport
+from savu.core.transports.base_transport import BaseTransport
+
+from savu.data.chunking import Chunking
+
+
+class DosnaTransport(BaseTransport):
+
+    def __init__(self):
+        super(DosnaTransport, self).__init__()
+        self.global_data = True
+        self.h5trans = Hdf5Transport()
+        self.data_flow = None
+        self.count = 0
+        self.hdf5_flag = True
+        self.files = []
+
+    def _transport_initialise(self, options):
+        MPI_setup(options)
+        dn.use(backend="ceph", engine="mpi")
+        self.dosna_connection = dn.Connection(
+            'savu-test', conffile="/home/hir12111/dosna_tests/ceph.conf",
+            client_id="dls")
+        self.dosna_connection.connect()
+        # initially reading from a hdf5 file so Hdf5TransportData will be used
+        # for all datasets created in a loader
+        options['transport'] = 'hdf5'
+
+    def _transport_update_plugin_list(self):
+        plugin_list = self.exp.meta_data.plugin_list
+        saver_idx = plugin_list._get_savers_index()
+        remove = []
+
+        # check the saver plugin and turn off if it is hdf5
+        for idx in saver_idx:
+            if plugin_list.plugin_list[idx]['name'] == 'Hdf5Saver':
+                remove.append(idx)
+        for idx in sorted(remove, reverse=True):
+            plugin_list._remove(idx)
+
+    def _transport_pre_plugin_list_run(self):
+        # loaders have completed now revert back to BasicTransport, so any
+        # output datasets created by a plugin will use this.
+        self.hdf5 = Hdf5Utils(self.exp)
+        self.exp_coll = self.exp._get_experiment_collection()
+        self.data_flow = self.exp.meta_data.plugin_list._get_dataset_flow()
+        self.exp.meta_data.set('transport', 'dosna')
+        plist = self.exp.meta_data.plugin_list
+        self.n_plugins = plist._get_n_processing_plugins()
+        self.final_dict = plist.plugin_list[-1]
+        for i in range(self.n_plugins):
+            self.exp._set_experiment_for_current_plugin(i)
+            self.files.append(
+                self._get_filenames(self.exp_coll['plugin_dict'][i]))
+            self._set_file_details(self.files[i])
+            self._setup_dosna_objects()  # creates the dosna objects
+
+    def _transport_post_plugin_list_run(self):
+        logging.warn('Disconnecting dosna from object store')
+        self.dosna_connection.disconnect()
+
+    def _transport_terminate_dataset(self, data):
+        if self.exp.meta_data.get('transport') == "hdf5":
+            self.hdf5._close_file(data)
+
+    def _create_dosna_dataset(self, object_id, data, key, current_and_next):
+
+        expInfo = self.exp.meta_data
+        group_name = expInfo.get(["group_name", key])
+        data.data_info.set('group_name', group_name)
+        try:
+            group_name = group_name + '_' + data.name
+        except AttributeError:
+            pass
+
+        shape = data.get_shape()
+        dataset_name = "dataset_{}_{}".format(object_id, group_name)
+        if current_and_next is 0:
+            logging.warn('Creating the dosna dataset without chunks')
+            data.data = self.dosna_connection.create_dataset(dataset_name,
+                                                             shape,
+                                                             data.dtype)
+        else:
+            chunking = Chunking(self.exp, current_and_next)
+            chunks = chunking._calculate_chunking(shape, data.dtype)
+            logging.warn('Creating the dosna dataset with chunks.')
+            data.data = self.dosna_connection.create_dataset(dataset_name,
+                                                             shape,
+                                                             data.dtype,
+                                                             chunks=chunks)
+            logging.warn('Dataset created!')
+
+    def _setup_dosna_objects(self):
+        out_data_dict = self.exp.index["out_data"]
+
+        current_and_next = [0]*len(out_data_dict)
+        if 'current_and_next' in self.exp.meta_data.get_dictionary():
+            current_and_next = self.exp.meta_data.get('current_and_next')
+
+        count = 0
+        for key in out_data_dict.keys():
+            out_data = out_data_dict[key]
+            filename = self.exp.meta_data.get(["filename", key])
+            logging.debug("creating the backing object %s", filename)
+            # out_data.backing_file = self.hdf5._open_backing_h5(filename, 'w')
+            self._create_dosna_dataset(filename, out_data, key,
+                                      current_and_next[count])
+            count += 1
+
+    def _transport_pre_plugin(self):
+        trans = self.exp.meta_data.get('transport')
+        if self.count == self.n_plugins - 1:
+            self.__set_hdf5_transport()
+
+    def _transport_post_plugin(self):
+        if self.count == self.n_plugins - 2:
+            self.exp.meta_data.set('transport', 'hdf5')
+
+        if self.count == self.n_plugins - 1:  # final plugin
+            self.h5trans.exp = self.exp
+            self.h5trans.hdf5 = Hdf5Utils(self.exp)
+            self.h5trans._transport_post_plugin()
+
+        self.count += 1
+
+    def __set_hdf5_transport(self):
+        self.hdf5_flag = True
+        self.exp.meta_data.set('transport', 'hdf5')
+        files = self._get_filenames(self.final_dict)
+        self._set_file_details(files)
+        self._setup_h5_files()
+
+    def _transport_terminate_dataset(self, data):
+        if data.backing_file:
+            self.hdf5._close_file(data)
