@@ -12,44 +12,71 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-.. module:: basic_transport
+.. module:: dosna_transport
    :platform: Unix
-   :synopsis: Transports data to and from file at the beginning and end of the\
-   process list respectively.
+   :synopsis: Transports data using DosNa(which provides several storing \
+   backends) at the beginning and end of the process list respectively.
 
-.. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
+.. moduleauthor:: Emilio Perez Juarez <scientificsoftware@diamond.ac.uk>
 
 """
 
 import logging
 
+from savu.core.transport_setup import MPI_setup
+from savu.core.transports.base_transport import BaseTransport
+from savu.core.transports.hdf5_transport import Hdf5Transport
+from savu.data.chunking import Chunking
+from savu.plugins.savers.utils.hdf5_utils import Hdf5Utils
+
 import dosna as dn
 
-from savu.core.transport_setup import MPI_setup
-from savu.plugins.savers.utils.hdf5_utils import Hdf5Utils
-from savu.core.transports.hdf5_transport import Hdf5Transport
-from savu.core.transports.base_transport import BaseTransport
-
-from savu.data.chunking import Chunking
+DEFAULT_CONNECTION = "savu-data"
+DEFAULT_BACKEND = "ceph"
+DEFAULT_ENGINE = "mpi"
+DEFAULT_CEPH_CONFFILE = "ceph.conf"
+DEFAULT_CEPH_CLIENT_ID = "dls"
+DEFAULT_HDF5_DIR = "/tmp"
 
 
 class DosnaTransport(BaseTransport):
+    """Transport implementation to use DosNa for managing storage and
+    chunking"""
 
     def __init__(self):
         super(DosnaTransport, self).__init__()
+        self.dosna_connection = None
         self.global_data = True
         self.h5trans = Hdf5Transport()
         self.data_flow = None
         self.count = 0
+        self.hdf5 = None
         self.hdf5_flag = True
         self.files = []
+        self.final_dict = None
+        self.dataset_cache = []
+        self.n_plugins = 0
 
     def _transport_initialise(self, options):
         MPI_setup(options)
-        dn.use(backend="ceph", engine="mpi")
-        self.dosna_connection = dn.Connection(
-            'savu-test', conffile="/home/hir12111/dosna_tests/ceph.conf",
-            client_id="dls")
+
+        backend = options.get("dosna_backend", DEFAULT_BACKEND)
+        engine = options.get("dosna_engine", DEFAULT_ENGINE)
+
+        dosna_connection = options.get("dosna_connection", DEFAULT_CONNECTION)
+        dosna_options = {}
+
+        if backend == "ceph":
+            dosna_options["conffile"] = options.get("dosna_ceph_conffile",
+                                                    DEFAULT_CEPH_CONFFILE)
+            dosna_options["client_id"] = options.get("dosna_ceph_client_id",
+                                                     DEFAULT_CEPH_CLIENT_ID)
+        elif backend == "hdf5":
+            dosna_options["directory"] = options.get("dosna_hdf5_dir",
+                                                     DEFAULT_HDF5_DIR)
+        dn.use(engine, backend)
+        self.dosna_connection = dn.Connection(dosna_connection,
+                                              **dosna_options)
         self.dosna_connection.connect()
         # initially reading from a hdf5 file so Hdf5TransportData will be used
         # for all datasets created in a loader
@@ -68,34 +95,38 @@ class DosnaTransport(BaseTransport):
             plugin_list._remove(idx)
 
     def _transport_pre_plugin_list_run(self):
-        # loaders have completed now revert back to BasicTransport, so any
+        # loaders have completed now revert back to DosnaTransport, so any
         # output datasets created by a plugin will use this.
         self.hdf5 = Hdf5Utils(self.exp)
-        self.exp_coll = self.exp._get_experiment_collection()
+        exp_coll = self.exp._get_experiment_collection()
         self.data_flow = self.exp.meta_data.plugin_list._get_dataset_flow()
         self.exp.meta_data.set('transport', 'dosna')
         plist = self.exp.meta_data.plugin_list
         self.n_plugins = plist._get_n_processing_plugins()
         self.final_dict = plist.plugin_list[-1]
-        for i in range(self.n_plugins):
-            self.exp._set_experiment_for_current_plugin(i)
+        for plugin_index in range(self.n_plugins):
+            self.exp._set_experiment_for_current_plugin(plugin_index)
             self.files.append(
-                self._get_filenames(self.exp_coll['plugin_dict'][i]))
-            self._set_file_details(self.files[i])
+                self._get_filenames(exp_coll['plugin_dict'][plugin_index]))
+            self._set_file_details(self.files[plugin_index])
             self._setup_dosna_objects()  # creates the dosna objects
 
     def _transport_post_plugin_list_run(self):
+        if not self.dosna_connection:
+            return
+        for dataset in self.dataset_cache:
+            self.dosna_connection.del_dataset(dataset.name)
+        self.dataset_cache = []
         logging.warn('Disconnecting dosna from object store')
         self.dosna_connection.disconnect()
+        self.dosna_connection = None
 
     def _transport_terminate_dataset(self, data):
         if self.exp.meta_data.get('transport') == "hdf5":
             self.hdf5._close_file(data)
 
     def _create_dosna_dataset(self, object_id, data, key, current_and_next):
-
-        expInfo = self.exp.meta_data
-        group_name = expInfo.get(["group_name", key])
+        group_name = self.exp.meta_data.get(["group_name", key])
         data.data_info.set('group_name', group_name)
         try:
             group_name = group_name + '_' + data.name
@@ -104,6 +135,7 @@ class DosnaTransport(BaseTransport):
 
         shape = data.get_shape()
         dataset_name = "dataset_{}_{}".format(object_id, group_name)
+
         if current_and_next is 0:
             logging.warn('Creating the dosna dataset without chunks')
             data.data = self.dosna_connection.create_dataset(dataset_name,
@@ -117,7 +149,9 @@ class DosnaTransport(BaseTransport):
                                                              shape,
                                                              data.dtype,
                                                              chunks=chunks)
-            logging.warn('Dataset created!')
+
+        logging.warn('Dataset created!')
+        self.dataset_cache.append(data.data)
 
     def _setup_dosna_objects(self):
         out_data_dict = self.exp.index["out_data"]
@@ -130,14 +164,11 @@ class DosnaTransport(BaseTransport):
         for key in out_data_dict.keys():
             out_data = out_data_dict[key]
             filename = self.exp.meta_data.get(["filename", key])
-            logging.debug("creating the backing object %s", filename)
-            # out_data.backing_file = self.hdf5._open_backing_h5(filename, 'w')
             self._create_dosna_dataset(filename, out_data, key,
-                                      current_and_next[count])
+                                       current_and_next[count])
             count += 1
 
     def _transport_pre_plugin(self):
-        trans = self.exp.meta_data.get('transport')
         if self.count == self.n_plugins - 1:
             self.__set_hdf5_transport()
 
@@ -145,7 +176,7 @@ class DosnaTransport(BaseTransport):
         if self.count == self.n_plugins - 2:
             self.exp.meta_data.set('transport', 'hdf5')
 
-        if self.count == self.n_plugins - 1:  # final plugin
+        elif self.count == self.n_plugins - 1:  # final plugin
             self.h5trans.exp = self.exp
             self.h5trans.hdf5 = Hdf5Utils(self.exp)
             self.h5trans._transport_post_plugin()
@@ -158,7 +189,3 @@ class DosnaTransport(BaseTransport):
         files = self._get_filenames(self.final_dict)
         self._set_file_details(files)
         self._setup_h5_files()
-
-    def _transport_terminate_dataset(self, data):
-        if data.backing_file:
-            self.hdf5._close_file(data)
