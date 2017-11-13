@@ -128,7 +128,7 @@ class ImageLoader(BaseLoader):
                     raise Exception('Cannot set angles in loader.')
 
         n_angles = len(angles)
-        data_angles = data_obj.data.get_shape()[0]
+        data_angles = data_obj.data.get_shape()[self.parameters['frame_dim']]
         if data_angles != n_angles:
             raise Exception("The number of angles %s does not match the data "
                             "dimension length %s", n_angles, data_angles)

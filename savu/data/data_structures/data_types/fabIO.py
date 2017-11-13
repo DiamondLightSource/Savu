@@ -43,18 +43,20 @@ class FabIO(BaseType):
             self.shape = (self.nFrames,)
         else:
             self.shape = shape
+        self.full_shape = self.image_shape + self.shape
+        self.image_dims = set(np.arange(len(self.full_shape)))\
+            .difference(set(self.frame_dim))
 
     def __getitem__(self, index):
         index = [index[i] if index[i].start is not None else
                  slice(0, self.shape[i]) for i in range(len(index))]
         size = [len(np.arange(i.start, i.stop, i.step)) for i in index]
         data = np.empty(size)
-        tiffidx = [i for i in range(len(index)) if i not in self.frame_dim]
-        tiff_slices = [index[i] for i in tiffidx]
+        tiff_slices = [index[i] for i in self.image_dims]
 
         # shift tiff dims to start from 0
         index = list(index)
-        for i in tiffidx:
+        for i in self.image_dims:
             end = \
                 len(np.arange(0, index[i].stop-index[i].start, index[i].step))
             index[i] = slice(0, end, 1)
@@ -62,8 +64,12 @@ class FabIO(BaseType):
         index, frameidx = self.__get_indices(index, size)
 
         for i in range(len(frameidx)):
-            data[index[i]] = self.start_file.getframe(
-                self.start_no + frameidx[i]).data[tiff_slices]
+            image = self.start_file.getframe(
+                    self.start_no + frameidx[i]).data[tiff_slices]
+            for d in self.frame_dim:
+                image = np.expand_dims(image, axis=d)
+            data[index[i]] = image
+
         return data
 
     def __get_file_name(self, folder, prefix):
@@ -84,7 +90,9 @@ class FabIO(BaseType):
         return fname
 
     def get_shape(self):
-        return self.shape + self.image_shape
+        dims = list(self.image_dims) + self.frame_dim
+        shape = [x for _, x in sorted(zip(dims, self.full_shape))]
+        return tuple(shape)
 
     def __get_idx(self, dim, sl, shape):
         c = int(np.prod(shape[0:dim]))

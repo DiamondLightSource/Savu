@@ -27,9 +27,16 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 
 class TiffLoaderTest(unittest.TestCase):
 
-    def test_basic_operations(self):
+    def tiff_test(self):
         data_file = tu.get_test_data_path('image_test/tiffs')
         process_file = tu.get_test_process_path('tiff_loader_test.nxs')
+        run_protected_plugin_runner(tu.set_options(data_file,
+                                                   process_file=process_file))
+
+    def tiff_test_stitch_dim(self):
+        data_file = tu.get_test_data_path('image_test/tiffs')
+        process_file = tu.get_test_process_path(
+                'tiff_loader_test_change_stitching_dim.nxs')
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
 
