@@ -45,6 +45,8 @@ class FabIO(BaseType):
             self.shape = shape
 
     def __getitem__(self, index):
+        index = [index[i] if index[i].start is not None else
+                 slice(0, self.shape[i]) for i in range(len(index))]
         size = [len(np.arange(i.start, i.stop, i.step)) for i in index]
         data = np.empty(size)
         tiffidx = [i for i in range(len(index)) if i not in self.frame_dim]
@@ -53,8 +55,9 @@ class FabIO(BaseType):
         # shift tiff dims to start from 0
         index = list(index)
         for i in tiffidx:
-            if index[i].start is not 0:
-                index[i] = slice(0, index[i].stop - index[i].start)
+            end = \
+                len(np.arange(0, index[i].stop-index[i].start, index[i].step))
+            index[i] = slice(0, end, 1)
 
         index, frameidx = self.__get_indices(index, size)
 
@@ -79,7 +82,6 @@ class FabIO(BaseType):
 
         self.start_no = [int(s) for s in re.findall(r'\d+', fname)][-1]
         return fname
-#        return folder + "/" + fname
 
     def get_shape(self):
         return self.shape + self.image_shape
@@ -105,8 +107,7 @@ class FabIO(BaseType):
         frameidx = np.zeros(lshape)
 
         for dim in range(len(sub_idx)):
-            start = index[0][self.frame_dim[dim]].start
             index[:, self.frame_dim[dim]] = \
-                [slice(i-start, i-start+1, 1) for i in idx_list[dim]]
+                [slice(i, i+1, 1) for i in range(len(idx_list[dim]))]
             frameidx[:] += idx_list[dim]*np.prod(self.shape[dim+1:])
         return index.tolist(), frameidx.astype(int)
