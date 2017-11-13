@@ -382,7 +382,6 @@ class PluginData(object):
             self.data_obj.get_preview().get_starts_stops_steps(key='chunks')
 
         self.__set_max_frames(nFrames)
-
         mft = self.meta_data.get('max_frames_transfer')
         if self._plugin and mft \
                 and (chunks[self.data_obj.get_slice_dimensions()[0]] % mft):

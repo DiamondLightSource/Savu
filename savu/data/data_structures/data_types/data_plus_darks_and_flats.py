@@ -275,7 +275,7 @@ class NoImageKey(DataWithDarksAndFlats):
 
     def dark(self):
         """ Get the dark data. """
-        if self.dark_updated:
+        if self.dark_updated is not False:
             return self.dark_updated
         if self.dark_image_key:
             self.image_key = self.dark_image_key
@@ -286,8 +286,8 @@ class NoImageKey(DataWithDarksAndFlats):
 
     def flat(self):
         """ Get the flat data. """
-        if self.flat_updated:
-            return self.flat_updated()
+        if self.flat_updated is not False:
+            return self.flat_updated
         if self.flat_image_key:
             self.image_key = self.flat_image_key
             flat = self.flat_image_key_data()

@@ -20,7 +20,6 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
-import logging
 
 from savu.plugins.plugin import Plugin
 

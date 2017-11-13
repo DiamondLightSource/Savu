@@ -80,3 +80,4 @@ class MonitorCorrection(Plugin, CpuPlugin):
 
     def nInput_datasets(self):
         return 2
+

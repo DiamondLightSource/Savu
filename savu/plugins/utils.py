@@ -215,7 +215,6 @@ def get_plugins_paths():
 def blockPrint():
     import tempfile
     fname = tempfile.mkdtemp() + '/unwanted_prints.txt'
-    #sys.stdout = open(os.devnull, 'w')
     sys.stdout = open(fname, 'w')
 
 
