@@ -61,6 +61,7 @@ class FabIO(BaseType):
         for i in range(len(frameidx)):
             data[index[i]] = self.start_file.getframe(
                 self.start_no + frameidx[i]).data[tiff_slices]
+
         return data
 
     def __get_file_name(self, folder, prefix):
@@ -100,13 +101,18 @@ class FabIO(BaseType):
             idx = self.__get_idx(dim, sub_idx[dim], sub_size)
             idx_list.append(idx.astype(int))
 
+        # Create array indices for image data
+        index[self.frame_dim[dim] + 1:] = \
+            [slice(0, size[-2], 1), slice(0, size[-1], 1)]
+
         lshape = idx_list[0].shape[0]
         index = np.tile(index, (lshape, 1))
         frameidx = np.zeros(lshape)
 
+        # Set array indices for stack/scan axes
         for dim in range(len(sub_idx)):
-            start = index[0][self.frame_dim[dim]].start
             index[:, self.frame_dim[dim]] = \
-                [slice(i-start, i-start+1, 1) for i in idx_list[dim]]
+                [slice(i, i+1, 1) for i in range(len(idx_list[dim]))]
             frameidx[:] += idx_list[dim]*np.prod(self.shape[dim+1:])
+
         return index.tolist(), frameidx.astype(int)
