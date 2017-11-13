@@ -22,10 +22,13 @@
 
 """
 
+import os
 import h5py
 import tempfile
 import numpy as np
 
+from savu.data.data_structures.data_types.data_plus_darks_and_flats \
+    import NoImageKey
 from savu.plugins.loaders.base_loader import BaseLoader
 from savu.plugins.utils import register_plugin
 from savu.data.data_structures.data_types.fabIO import FabIO
@@ -41,8 +44,10 @@ class ImageLoader(BaseLoader):
     (e.g np.linspace(0, 180, nAngles)) or a file. Default: None.
     :param frame_dim: Which dimension requires stitching? Default: 0.
     :param data_prefix: A file prefix for the data file. Default: None.
-    :param dark_prefix: A file prefix for the dark field files. Default: None.
-    :param flat_prefix: A file prefix for the flat field files. Default: None.
+    :param dark_prefix: A file prefix for the dark field files, including the\
+    folder path if different from the data. Default: None.
+    :param flat_prefix: A file prefix for the flat field files, including the\
+    folder path if different from the data. Default: None.
     """
 
     def __init__(self, name='ImageLoader'):
@@ -65,29 +70,10 @@ class ImageLoader(BaseLoader):
         data_obj.add_pattern('SINOGRAM', core_dims=(detX, rot),
                              slice_dims=(detY,))
 
-        path = exp.meta_data.get("data_file")
+        path = os.path.abspath(exp.meta_data.get("data_file"))
         data_obj.data = self._get_data_type(data_obj, path)
 
         self.set_rotation_angles(data_obj)
-        # read dark and flat images
-        if self.parameters['dark_prefix'] is not None:
-            dark = FabIO(path, data_obj, [self.parameters['frame_dim']], None,
-                         self.parameters['dark_prefix'])
-            shape = dark.get_shape()
-            index = [slice(0, shape[i], 1) for i in range(len(shape))]
-            data_obj.meta_data.set('dark', dark[index].mean(0))
-        else:
-            data_obj.meta_data.set(
-                'dark', np.zeros(data_obj.data.image_shape))
-        if self.parameters['flat_prefix'] is not None:
-            flat = FabIO(path, data_obj, [self.parameters['frame_dim']],
-                         None, self.parameters['flat_prefix'])
-            shape = flat.get_shape()
-            index = [slice(0, shape[i], 1) for i in range(len(shape))]
-            data_obj.meta_data.set('flat', flat[index].mean(0))
-        else:
-            data_obj.meta_data.set(
-                'flat', np.ones(data_obj.data.image_shape))
 
         # dummy file
         filename = path.split('/')[-1] + '.h5'
@@ -95,7 +81,33 @@ class ImageLoader(BaseLoader):
             h5py.File(tempfile.mkdtemp() + '/' + filename, 'a')
 
         data_obj.set_shape(data_obj.data.get_shape())
-        return data_obj
+        self.set_data_reduction_params(data_obj)
+        self._set_darks_and_flats(data_obj, path)
+
+    def _set_darks_and_flats(self, dObj, path):
+        if not self.parameters['dark_prefix'] or \
+                not self.parameters['flat_prefix']:
+            return
+
+        # read dark and flat images
+        dpath, dfix = self._get_path(self.parameters['dark_prefix'], path)
+        fpath, ffix = self._get_path(self.parameters['flat_prefix'], path)
+
+        dObj.data.add_base_class_with_instance(
+                NoImageKey, NoImageKey(dObj, None, 0))
+
+        fdim = self.parameters['frame_dim']
+        dark = FabIO(dpath, dObj, [fdim], None, dfix)
+        flat = FabIO(fpath, dObj, [fdim], None, ffix)
+        dObj.data._set_dark_path(dark)
+        dObj.data._set_flat_path(flat)
+        dObj.data._set_dark_and_flat()
+
+    def _get_path(self, param, data):
+        ppath, pfix = os.path.split(param)
+        ppath = \
+            os.path.join(data, ppath) if not os.path.isabs(ppath) else ppath
+        return ppath, pfix
 
     def _get_data_type(self, obj, path):
         prefix = self.parameters['data_prefix']
