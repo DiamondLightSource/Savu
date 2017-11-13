@@ -23,8 +23,9 @@
 
 """
 
-import logging
 import copy
+import logging
+import collections
 
 
 class MetaData(object):
@@ -55,7 +56,7 @@ class MetaData(object):
         maplist = (name if type(name) is list else [name])
         self.get(maplist[:-1], True)[maplist[-1]] = value
 
-    def get(self, maplist, setFlag=False):
+    def get(self, maplist, setFlag=False, value=True, units=False):
         """ Get a value from the meta data dictionary, given its key(s).
 
         :params maplist: Dictionary key(s).
@@ -68,25 +69,32 @@ class MetaData(object):
         """
         if not maplist:
             return self.dict
-        else:
-            function = lambda k, d: d[k]
-            maplist = (maplist if type(maplist) is list else [maplist])
-            it = iter(maplist)
-            accum_value = self.dict
-            for x in it:
-                while True:
-                    try:
-                        accum_value = function(x, accum_value)
-                    except KeyError:
-                        if setFlag is True:
-                            accum_value[x] = {}
-                            continue
-                        else:
-                            errorStr = 'The metadata ' + str(maplist) + \
-                                       ' does not exist'
-                            raise KeyError(errorStr)
-                    break
-            return accum_value
+
+        function = lambda k, d: d[k]
+        maplist = (maplist if type(maplist) is list else [maplist])
+        it = iter(maplist)
+        accum_value = self.dict
+        for x in it:
+            while True:
+                try:
+                    accum_value = function(x, accum_value)
+                except KeyError:
+                    if setFlag is True:
+                        accum_value[x] = {}
+                        continue
+                    else:
+                        errorStr = 'The metadata ' + str(maplist) + \
+                                   ' does not exist'
+                        raise KeyError(errorStr)
+                break
+
+        if isinstance(accum_value, dict) and accum_value:
+            options = collections.OrderedDict(
+                    [('value', value), ('units', units)])
+            if not set(accum_value.keys()).difference(set(options.keys())):
+                accum_value = [accum_value[k] for k, v in options.iteritems()
+                               if v is True]
+        return accum_value
 
     def delete(self, entry):
         """ Delete an entry from the meta data dictionary.

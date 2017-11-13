@@ -72,7 +72,7 @@ class MmLoader(BaseLoader):
                          stxm.__doc__, mon.__doc__, fluo.__doc__)
     def _override_class_docstring(self):
         """
-        :param dataset_names: The names assigned to each dataset in the \
+        :u*param dataset_names: The names assigned to each dataset in the \
             order: fluorescence, diffraction, absorption, \
             monitor. Default: ['fluo', 'xrd', 'stxm', 'monitor'].
 

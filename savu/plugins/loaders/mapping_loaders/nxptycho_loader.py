@@ -17,7 +17,7 @@
    :platform: Unix
    :synopsis: A class for loading nxstxm data
 
-.. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
+.. moduleauthor:: Aaron Parsons <scientificsoftware@diamond.ac.uk>
 
 """
 
@@ -48,7 +48,7 @@ class NxptychoLoader(BaseMultiModalLoader):
 
         data_str = '/instrument/detector/data'
         data_obj, stxm_entry = self.multi_modal_setup('NXptycho', data_str,
-                                                      self.parameters['name'])
+                                                      self.parameters['name'], patterns=False)
         mono_energy = data_obj.backing_file[
             stxm_entry.name + '/instrument/monochromator/energy']
         self.exp.meta_data.set("mono_energy", mono_energy)

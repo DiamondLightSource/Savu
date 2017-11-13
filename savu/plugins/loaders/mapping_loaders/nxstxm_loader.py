@@ -38,17 +38,12 @@ class NxstxmLoader(BaseMultiModalLoader):
         super(NxstxmLoader, self).__init__(name)
 
     def setup(self):
-        """
-         Define the input nexus file
-        """
+        path = 'instrument/detector/data'
+        data_obj, stxm_entry = \
+            self.multi_modal_setup('NXstxm', path, self.parameters['name'])
 
-        data_str = '/instrument/detector/data'
-        data_obj, stxm_entry = self.multi_modal_setup('NXstxm', data_str,
-                                                      self.parameters['name'])
         mono_energy = data_obj.backing_file[
             stxm_entry.name + '/instrument/monochromator/energy']
         self.exp.meta_data.set("mono_energy", mono_energy)
-        self.set_motors(data_obj, stxm_entry, 'stxm')
 
-        self.add_patterns_based_on_acquisition(data_obj, 'stxm')
         self.set_data_reduction_params(data_obj)
