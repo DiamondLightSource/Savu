@@ -38,6 +38,7 @@ class FabIO(BaseType):
         self.nFrames = None
         self.start_file = fabio.open(self.__get_file_name(folder, data_prefix))
         self.frame_dim = dim
+        self.dtype = self.start_file.getframe(self.start_no).data[0, 0].dtype
         self.image_shape = (self.start_file.dim2, self.start_file.dim1)
         if shape is None:
             self.shape = (self.nFrames,)
@@ -51,7 +52,7 @@ class FabIO(BaseType):
         index = [index[i] if index[i].start is not None else
                  slice(0, self.shape[i]) for i in range(len(index))]
         size = [len(np.arange(i.start, i.stop, i.step)) for i in index]
-        data = np.empty(size)
+        data = np.empty(size, dtype=self.dtype)
         tiff_slices = [index[i] for i in self.image_dims]
 
         # shift tiff dims to start from 0
@@ -83,9 +84,7 @@ class FabIO(BaseType):
             fullpath += "/*"
         files = glob.glob(fullpath)
         self.nFrames = len(files)
-
         fname = sorted(files)[0]
-
         self.start_no = [int(s) for s in re.findall(r'\d+', fname)][-1]
         return fname
 
