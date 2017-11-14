@@ -121,8 +121,10 @@ def _set_options(args):
 
     options['out_folder'] = out_folder_name
     options['out_path'] = out_folder_path
-    options['datafile_name'] = os.path.splitext(
-            os.path.basename(args.in_file))[0]
+
+    basename = os.path.basename(args.in_file)
+    options['datafile_name'] = os.path.splitext(basename) if basename \
+        else args.in_file.split('/')[-2]
 
     inter_folder_path = __create_output_folder(args.tmp, out_folder_name)\
         if args.tmp else out_folder_path
