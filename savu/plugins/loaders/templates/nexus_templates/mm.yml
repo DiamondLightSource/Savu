@@ -1,0 +1,6 @@
+inherit: 
+    - /home/qmm55171/Documents/temp_docs/temp_output/test_yml_files/fluo.yml
+    - /home/qmm55171/Documents/temp_docs/temp_output/test_yml_files/stxm.yml
+    - /home/qmm55171/Documents/temp_docs/temp_output/test_yml_files/monitor.yml
+    - /home/qmm55171/Documents/temp_docs/temp_output/test_yml_files/xrd.yml
+

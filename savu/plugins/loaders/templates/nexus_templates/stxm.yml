@@ -1,0 +1,42 @@
+inherit: None
+
+stxm:
+    data:
+        path    : entry1/stxm_entry/instrument/detector/data
+
+    params:
+        labels  : $list(dfile['entry1/stxm_entry/data'].attrs['axes'])
+        idx_rot : $labels.index('theta')
+        idx_x   : $labels.index('x')
+        idx_y   : $labels.index('y')
+
+    axis_labels:
+        0:
+            dim     : $idx_rot
+            name    : rotation_angle
+            value   : $dfile['/entry1/stxm_entry/data/theta'].value
+            units   : $dfile['/entry1/stxm_entry/data/theta'].attrs['units']
+        1:
+            dim     : $idx_y
+            name    : y
+            value   : $dfile['/entry1/stxm_entry/data/y'].value
+            units   : $dfile['/entry1/stxm_entry/data/y'].attrs['units']
+        2:
+            dim     : $idx_x
+            name    : x
+            value   : $dfile['/entry1/stxm_entry/data/x'].value
+            units   : $dfile['/entry1/stxm_entry/data/x'].attrs['units']
+
+    patterns:
+        SINOGRAM:
+            core_dims   : $(idx_rot, idx_x)
+            slice_dims  : $(idx_y,)
+        PROJECTION:
+            core_dims   : $(idx_y, idx_x)
+            slice_dims  : $(idx_rot,)
+
+    metadata:
+        mono_energy:
+            value   : $dfile['entry1/stxm_entry/instrument/monochromator/energy'].value
+            units   : eV
+
