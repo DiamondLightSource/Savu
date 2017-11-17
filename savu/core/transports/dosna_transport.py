@@ -125,6 +125,14 @@ class DosnaTransport(BaseTransport):
         if self.exp.meta_data.get('transport') == "hdf5":
             self.hdf5._close_file(data)
 
+    @staticmethod
+    def _extract_digits(data):
+        result = []
+        for char in data:
+            if ord(char) in range(ord('0'), ord('9') + 1):
+                result.append(char)
+        return "".join(result)
+
     def _create_dosna_dataset(self, object_id, data, key, current_and_next):
         group_name = self.exp.meta_data.get(["group_name", key])
         data.data_info.set('group_name', group_name)
@@ -134,7 +142,8 @@ class DosnaTransport(BaseTransport):
             pass
 
         shape = data.get_shape()
-        dataset_name = "dataset_{}_{}".format(object_id, group_name)
+        dataset_name = "{}_{}".format(group_name,
+                                      self._extract_digits(object_id))
 
         if current_and_next is 0:
             logging.warn('Creating the dosna dataset without chunks')
