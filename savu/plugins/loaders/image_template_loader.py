@@ -43,7 +43,7 @@ class ImageTemplateLoader(YamlConverter):
     def __init__(self, name='ImageTemplateLoader'):
         super(ImageTemplateLoader, self).__init__(name)
 
-    def set_data(self, name, data):
+    def set_data(self, dObj, data):
         folder = data['folder'] if 'folder' in data.keys() else None
         shape = data['shape'] if 'shape' in data.keys() else None
 
@@ -52,12 +52,9 @@ class ImageTemplateLoader(YamlConverter):
         if not shape:
             raise Exception('Please specify the final shape of the data.')
 
-        dObj = self.exp.create_data_object("in_data", name)
         folder = self.update_value(dObj, folder)
-
         file_path = self.exp.meta_data.get("data_file")
         dObj.backing_file = h5py.File(file_path, 'r')
-
         shape = tuple(self.update_value(dObj, shape))
         dObj.data = FabIO(folder, dObj, range(len(shape)), shape=shape)
         dObj.set_shape(dObj.data.get_shape())

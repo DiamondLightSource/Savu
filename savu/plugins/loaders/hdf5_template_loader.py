@@ -41,7 +41,7 @@ class Hdf5TemplateLoader(YamlConverter):
     def __init__(self, name='Hdf5TemplateLoader'):
         super(Hdf5TemplateLoader, self).__init__(name)
 
-    def set_data(self, name, data):
+    def set_data(self, dObj, data):
         path = data['path'] if 'path' in data.keys() else None
         if not path:
             emsg = 'Please specify the path to the data in the h5 file.'
@@ -49,7 +49,6 @@ class Hdf5TemplateLoader(YamlConverter):
 
         file_path = self.exp.meta_data.get("data_file") if 'file' not in \
             data.keys() else data['file']
-        dObj = self.exp.create_data_object("in_data", name)
         file_path = self.update_value(dObj, file_path)
         dObj.backing_file = h5py.File(file_path, 'r')
         dObj.data = dObj.backing_file[self.update_value(dObj, path)]
