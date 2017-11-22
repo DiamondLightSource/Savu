@@ -1,11 +1,13 @@
 # end a parameter name with 'file' (e.g. cfile) to denote this is a file
+# always use single quotes
+
 import:
     - math
     - numpy as np
 
 xrd:
     params:
-        <>cfile: $h5py.File('/home/qmm55171/Documents/Git/git_repos/Savu/test_data/data/LaB6_calibration_output.nxs', 'r')
+        cfile: $h5py.File('/home/qmm55171/Documents/Git/git_repos/Savu/test_data/data/LaB6_calibration_output.nxs', 'r')
         dorient: $cfile['entry/instrument/detector/detector_orientation'][...].reshape((3, 3))
         det_str: entry/instrument/detector
         xps: $cfile[det_str + '/x_pixel_size'].value*1e-3

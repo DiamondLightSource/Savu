@@ -407,3 +407,8 @@ class Data(DataCreate):
         if isinstance(data_obj.raw, ImageKey):
             data_obj.raw._convert_to_noimagekey(data_obj.data)
             data_obj.data._set_fake_key(data_obj.raw.get_image_key())
+        else:
+            dark_path = data_obj.raw.dark_path
+            flat_path = data_obj.raw.flat_path
+            data_obj.data._set_dark_path(dark_path)
+            data_obj.data._set_flat_path(flat_path)

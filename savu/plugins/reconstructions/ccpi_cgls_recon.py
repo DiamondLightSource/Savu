@@ -54,7 +54,6 @@ class CcpiCglsRecon(BaseRecon, CpuPlugin):
         super(CcpiCglsRecon, self).__init__("CcpiCglsRecon")
 
     def pre_process(self):
-        print self.parameters.keys()
         self.n_iters = self.parameters['n_iterations']
         self.res = self.parameters['resolution']
         in_data = self.get_in_datasets()[0]
