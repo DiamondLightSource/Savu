@@ -26,7 +26,9 @@ import h5py
 import yaml
 import collections
 import numpy as np # used in exec so do not delete
-from collections import OrderedDict
+
+import savu.plugins.utils as pu
+import savu.plugins.loaders.utils.yaml_utils as yu
 from savu.plugins.loaders.base_loader import BaseLoader
 
 
@@ -37,25 +39,40 @@ class YamlConverter(BaseLoader):
 
     :u*param yaml_file: Path to the file containing the data \
         descriptions. Default: None.
+    :*param template_param: A hidden parameter to hold parameters passed in \
+        via a savu template file. Default: {}.
     """
 
     def __init__(self, name='YamlConverter'):
         super(YamlConverter, self).__init__(name)
 
-    def setup(self):
+    def setup(self, template=False):
         #  Read YAML file
         if self.parameters['yaml_file'] is None:
             raise Exception('Please pass a yaml file to the yaml loader.')
 
-        data_dict = self._read_yaml(self.parameters['yaml_file'])
+        data_dict = yu.read_yaml(self.parameters['yaml_file'])
         data_dict = self._check_for_inheritance(data_dict, {})
         self._check_for_imports(data_dict)
+        data_dict.pop('inherit', None)
+        data_dict.pop('import', None)
+        if template:
+            return data_dict
+
+        data_dict = self._add_template_updates(data_dict)
         self._set_entries(data_dict)
 
-    def _read_yaml(self, path):
-        with open(path, 'r') as stream:
-            data_dict = self.ordered_load(stream, yaml.SafeLoader)
-        return data_dict
+    def _add_template_updates(self, ddict):
+        all_entries = ddict.pop('all', {})
+        for key, value in all_entries:
+            for entry in ddict:
+                if key in entry.keys():
+                    entry[key] = value
+
+        for entry in self.parameters['template_param']:
+            updates = self.parameters['template_param'][entry]
+            ddict[entry]['params'].update(updates)
+        return ddict
 
     def _check_for_imports(self, ddict):
         if 'import' in ddict.keys():
@@ -66,16 +83,13 @@ class YamlConverter(BaseLoader):
                 mod = __import__(imp.strip())
                 globals()[mod.__name__ if not name else name] = mod
 
-        for key, value in globals().iteritems():
-            print "print the globals dict", key, value
-
     def _check_for_inheritance(self, ddict, inherit):
         if 'inherit' in ddict.keys():
             idict = ddict['inherit']
             idict = idict if isinstance(idict, list) else [idict]
             for i in idict:
                 if i != 'None':
-                    new_dict = self._read_yaml(i)
+                    new_dict = yu.read_yaml(i)
                     inherit.update(new_dict)
                     inherit = self._check_for_inheritance(new_dict, inherit)
         self._update(inherit, ddict)
@@ -90,8 +104,6 @@ class YamlConverter(BaseLoader):
         return d
 
     def _set_entries(self, ddict):
-        ddict.pop('inherit', None)
-        ddict.pop('import', None)
         entries = ddict.keys()
         for name in entries:
             self.get_description(ddict[name], name)
@@ -103,7 +115,8 @@ class YamlConverter(BaseLoader):
 
         # --------------- check for data entry -----------------------------
         if 'data' in entry.keys():
-            data_obj = self.set_data(name, entry['data'])
+            data_obj = self.exp.create_data_object("in_data", name)
+            data_obj = self.set_data(data_obj, entry['data'])
         else:
             emsg = 'Please specify the data information in the yaml file.'
             raise Exception(emsg)
@@ -136,8 +149,9 @@ class YamlConverter(BaseLoader):
 
     def update_value(self, dObj, value):
         # setting the keywords
-        dshape = dObj.get_shape()
-        dfile = dObj.backing_file
+        if dObj is not None:
+            dshape = dObj.get_shape()
+            dfile = dObj.backing_file
         if isinstance(value, str):
             split = value.split('$')
             if len(split) > 1:
@@ -148,7 +162,6 @@ class YamlConverter(BaseLoader):
     def _convert_string(self, dObj, string):
         for old, new in self.parameters.iteritems():
             if old in string:
-                print "replacing ", old, "with", new
                 if isinstance(new, str):
                     split = new.split('$')
                     if len(split) > 1:
@@ -160,15 +173,22 @@ class YamlConverter(BaseLoader):
         return string
 
     def _set_params(self, params):
-        # find files
-        files = [k for k in params.keys() if k.endswith('file')]
-        # Open and add to the namespace then delete file params
-        thefile = None
-        for f in files:
-            exec("thefile = " + params[f].split('$')[-1])
-            globals()[str(f)] = thefile
-            del params[f]
+        # Update variable parameters that are revealed in the template
+        params = self._update_template_params(params)
         self.parameters.update(params)
+        # find files, open and add to the namespace then delete file params
+        files = [k for k in params.keys() if k.endswith('file')]
+        for f in files:
+            globals()[str(f)] = self.update_value(None, params[f])
+            del params[f]
+
+    def _update_template_params(self, params):
+        for k, v in params.iteritems():
+            v = pu.is_template_param(v)
+            if v is not False:
+                params[k] = \
+                    self.parameters[k] if k in self.parameters.keys() else v[1]
+        return params
 
     def _set_axis_labels(self, dObj, labels):
         dims = range(len(labels.keys()))
@@ -201,16 +221,3 @@ class YamlConverter(BaseLoader):
         for key, value in mdata.iteritems():
             value = self.update_value(dObj, value['value'])
             dObj.meta_data.set(key, value)
-
-    def ordered_load(self, stream, Loader=yaml.Loader,
-                     object_pairs_hook=OrderedDict):
-        class OrderedLoader(Loader):
-            pass
-
-        def construct_mapping(loader, node):
-            loader.flatten_mapping(node)
-            return object_pairs_hook(loader.construct_pairs(node))
-        OrderedLoader.add_constructor(
-            yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
-            construct_mapping)
-        return yaml.load(stream, OrderedLoader)
