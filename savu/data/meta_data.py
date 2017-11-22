@@ -25,7 +25,7 @@
 
 import copy
 import logging
-import collections
+from collections import OrderedDict
 
 
 class MetaData(object):
@@ -35,8 +35,8 @@ class MetaData(object):
     PluginList.
     """
 
-    def __init__(self, options={}):
-        self.dict = options.copy()
+    def __init__(self, options={}, ordered=False):
+        self.dict = OrderedDict(options) if ordered else options.copy()
 
     def set(self, name, value):
         """ Create and set an entry in the meta data dictionary.
@@ -89,8 +89,7 @@ class MetaData(object):
                 break
 
         if isinstance(accum_value, dict) and accum_value:
-            options = collections.OrderedDict(
-                    [('value', value), ('units', units)])
+            options = OrderedDict([('value', value), ('units', units)])
             if not set(accum_value.keys()).difference(set(options.keys())):
                 accum_value = [accum_value[k] for k, v in options.iteritems()
                                if v is True]

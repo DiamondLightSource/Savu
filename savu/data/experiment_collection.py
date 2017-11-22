@@ -62,7 +62,9 @@ class Experiment(object):
             else:
                 raise Exception('the run_type is unknown in Experiment class')
         except KeyError:
-            self.meta_data.plugin_list._populate_plugin_list(process_file)
+            template = self.meta_data.get('template')
+            self.meta_data.plugin_list._populate_plugin_list(process_file,
+                                                             template=template)
 
     def create_data_object(self, dtype, name):
         """ Create a data object.

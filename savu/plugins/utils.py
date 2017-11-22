@@ -211,13 +211,35 @@ def get_plugins_paths():
     return plugins_paths
 
 
-# Disable
+def is_template_param(param):
+    """ Identifies if the parameter should be included in an input template
+    and returns the default value of the parameter if it exists.
+    """
+    start = 0
+    ptype = 'local'
+    if isinstance(param, str):
+        param = param.strip()
+        if not param.split('global')[0]:
+            ptype = 'global'
+            start = 6
+        first, last = param[start], param[-1]
+        if first == '<' and last == '>':
+            param = param[start+1:-1]
+            try:
+                exec("param = " + param)
+            except:
+                pass
+            return [ptype, param]
+    return False
+
+
 def blockPrint():
+    """ Disable printing to stdout """
     import tempfile
     fname = tempfile.mkdtemp() + '/unwanted_prints.txt'
     sys.stdout = open(fname, 'w')
 
 
-# Restore
 def enablePrint():
+    """ Enable printing to stdout """
     sys.stdout = sys.__stdout__

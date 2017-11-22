@@ -67,9 +67,11 @@ class Content(object):
             file_error = "INPUT_ERROR: Incorrect filepath."
             raise Exception(file_error)
 
-    def save(self, filename, check='y'):
+    def save(self, filename, check='y', template=False):
         if check.lower() == 'y':
             print("Saving file %s" % (filename))
+            if template:
+                self.plugin_list.add_template(create=True)
             self.plugin_list._save_plugin_list(filename)
         else:
             print("The process list has NOT been saved.")

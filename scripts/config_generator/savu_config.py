@@ -90,7 +90,8 @@ def _save(content, args):
     print()
     DispDisplay(content.plugin_list)._notices()
     content.save(out_file, check=raw_input("Are you sure you want to save the "
-                 "current data to %s' [y/N]" % (out_file)))
+                 "current data to %s' [y/N]" % (out_file)),
+                 template=args.template)
     return content
 
 

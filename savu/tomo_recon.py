@@ -46,10 +46,16 @@ def __option_parser():
     parser.add_argument('out_folder', help='Output folder.')
     parser.add_argument('--version', action='version', version=version)
     parser.add_argument("-f", "--folder", help="Override output folder name")
+
     tmp_help = "Store intermediate files in a temp directory."
     parser.add_argument("-d", "--tmp", help=tmp_help)
+
+    template_help = "Pass a template file of plugin input parameters."
+    parser.add_argument("-t", "--template", help=template_help, default=None)
+
     log_help = "Store full log file in a separate location"
     parser.add_argument("-l", "--log", help=log_help)
+
     v_help = "Display all debug log messages"
     parser.add_argument("-v", "--verbose", help=v_help, action="store_true",
                         default=False)
@@ -64,7 +70,7 @@ def __option_parser():
     # process names
     parser.add_argument("-n", "--names", help=hide, default="CPU0")
     # transport mechanism
-    parser.add_argument("-t", "--transport", help=hide, default="hdf5")
+    parser.add_argument("--transport", help=hide, default="hdf5")
     # Set logging to cluster mode
     parser.add_argument("-m", "--mode", help=hide, default="full",
                         choices=['basic', 'full'])
@@ -102,6 +108,7 @@ def _set_options(args):
     options['data_file'] = args.in_file
     options['process_file'] = args.process_list
     options['mode'] = args.mode
+    options['template'] = args.template
     options['transport'] = 'basic' if args.mode == 'basic' else args.transport
     options['process_names'] = args.names
     options['verbose'] = args.verbose
@@ -123,7 +130,7 @@ def _set_options(args):
     options['out_path'] = out_folder_path
 
     basename = os.path.basename(args.in_file)
-    options['datafile_name'] = os.path.splitext(basename) if basename \
+    options['datafile_name'] = os.path.splitext(basename)[0] if basename \
         else args.in_file.split('/')[-2]
 
     inter_folder_path = __create_output_folder(args.tmp, out_folder_name)\

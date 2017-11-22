@@ -125,6 +125,8 @@ def _save_arg_parser(args, desc):
     parser.add_argument("filepath", nargs='?', help="The output file path.")
     parser.add_argument("-i", "--input", action="store_true", default=False,
                         help="Save to the input file.")
+    parser.add_argument("-t", "--template", action="store_true", default=False,
+                        help="Create a Savu template file.")
     return __arg_parser(parser, args)
 
 
