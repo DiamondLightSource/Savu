@@ -171,6 +171,7 @@ def set_options(path, **kwargs):
     options['lustre'] = False
     options['bllog'] = None
     options['email'] = None
+    options['template'] = None
 
     return options
 
