@@ -229,7 +229,12 @@ def main():
     print("\n*** Press Enter for a list of available commands. ***\n")
 
     while True:
-        in_list = raw_input(">>> ").strip().split(' ', 1)
+        try:
+            in_list = raw_input(">>> ").strip().split(' ', 1)
+        except KeyboardInterrupt:
+            print()
+            continue
+
         command, arg = in_list if len(in_list) is 2 else in_list+['']
         command = command if command else 'help'
         if command not in commands:
