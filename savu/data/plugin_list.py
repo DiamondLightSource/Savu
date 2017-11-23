@@ -232,7 +232,7 @@ class PluginList(object):
             name = d.data_obj.get_name()
             pattern = copy.deepcopy(d.get_pattern())
             pattern[pattern.keys()[0]]['max_frames_transfer'] = \
-                d._get_max_frames_process()
+                d._get_max_frames_transfer()
             data_list.append({'name': name, 'pattern': pattern})
         return data_list
 
