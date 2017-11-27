@@ -79,11 +79,11 @@ class VoCentering(BaseFilter, CpuPlugin):
     def _get_start_shift(self, centre):
         in_mData = self.get_in_meta_data()[0]
         if self.parameters['start_pixel'] is not None:
-            shift = centre - self.parameters['start_pixel']
+            shift = centre - self.parameters['start_pixel']/self.downlevel
         else:
             try:
                 # may need to change this entry: to be specified in loader
-                shift = centre - in_mData['centre']
+                shift = centre - in_mData.get('centre')
             except:
                 shift = 0
         return int(shift)
@@ -164,15 +164,16 @@ class VoCentering(BaseFilter, CpuPlugin):
         # Use different smooth filters for coarse and fine search.
 
         (Nrow, Ncol) = data[0].shape
-        downlevel = 4
-        if Ncol>1800:
-            sino_downsp = data[0][:,0:Ncol:downlevel]
-            sino_cs = filter.gaussian_filter(sino_downsp, (3,1))
+        self.downlevel = 1
+        if Ncol > 1800:
+            self.downlevel = 4
+            sino_downsp = data[0][:, 0:Ncol:self.downlevel]
+            sino_cs = filter.gaussian_filter(sino_downsp, (3, 1))
             logging.debug("performing coarse search")
             (raw_cor, raw_metric) = self._coarse_search(sino_cs)
-            raw_cor = raw_cor*downlevel
+            raw_cor = raw_cor*self.downlevel
         else:
-            sino_cs = filter.gaussian_filter(data[0], (3,1))        
+            sino_cs = filter.gaussian_filter(data[0], (3, 1))
             logging.debug("performing coarse search")
             (raw_cor, raw_metric) = self._coarse_search(sino_cs)
 
