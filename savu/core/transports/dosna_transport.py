@@ -31,6 +31,8 @@ from savu.plugins.savers.utils.hdf5_utils import Hdf5Utils
 
 import dosna as dn
 
+log = logging.getLogger(__name__)
+
 DEFAULT_CONNECTION = "savu-data"
 DEFAULT_BACKEND = "ceph"
 DEFAULT_ENGINE = "mpi"
@@ -60,20 +62,23 @@ class DosnaTransport(BaseTransport):
     def _transport_initialise(self, options):
         MPI_setup(options)
 
-        backend = options.get("dosna_backend", DEFAULT_BACKEND)
-        engine = options.get("dosna_engine", DEFAULT_ENGINE)
+        backend = options.get("dosna_backend") or DEFAULT_BACKEND
+        engine = options.get("dosna_engine") or DEFAULT_ENGINE
 
-        dosna_connection = options.get("dosna_connection", DEFAULT_CONNECTION)
+        dosna_connection = options.get("dosna_connection") \
+            or DEFAULT_CONNECTION
         dosna_options = {}
 
         if backend == "ceph":
-            dosna_options["conffile"] = options.get("dosna_ceph_conffile",
-                                                    DEFAULT_CEPH_CONFFILE)
-            dosna_options["client_id"] = options.get("dosna_ceph_client_id",
-                                                     DEFAULT_CEPH_CLIENT_ID)
+            dosna_options["conffile"] = options.get("dosna_ceph_conffile") \
+                or DEFAULT_CEPH_CONFFILE
+            dosna_options["client_id"] = options.get("dosna_ceph_client_id") \
+                or DEFAULT_CEPH_CLIENT_ID
         elif backend == "hdf5":
-            dosna_options["directory"] = options.get("dosna_hdf5_dir",
-                                                     DEFAULT_HDF5_DIR)
+            dosna_options["directory"] = options.get("dosna_hdf5_dir") \
+                or DEFAULT_HDF5_DIR
+        log.debug("DosNa is using backend %s engine %s and options %s",
+                  backend, engine, dosna_options)
         dn.use(engine, backend)
         self.dosna_connection = dn.Connection(dosna_connection,
                                               **dosna_options)
