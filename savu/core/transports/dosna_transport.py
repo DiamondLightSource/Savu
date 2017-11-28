@@ -117,7 +117,6 @@ class DosnaTransport(BaseTransport):
         for dataset in self.dataset_cache:
             self.dosna_connection.del_dataset(dataset.name)
         self.dataset_cache = []
-        logging.warn('Disconnecting dosna from object store')
         self.dosna_connection.disconnect()
         self.dosna_connection = None
 
@@ -146,20 +145,16 @@ class DosnaTransport(BaseTransport):
                                       self._extract_digits(object_id))
 
         if current_and_next is 0:
-            logging.warn('Creating the dosna dataset without chunks')
             data.data = self.dosna_connection.create_dataset(dataset_name,
                                                              shape,
                                                              data.dtype)
         else:
             chunking = Chunking(self.exp, current_and_next)
             chunks = chunking._calculate_chunking(shape, data.dtype)
-            logging.warn('Creating the dosna dataset with chunks.')
             data.data = self.dosna_connection.create_dataset(dataset_name,
                                                              shape,
                                                              data.dtype,
-                                                             chunks=chunks)
-
-        logging.warn('Dataset created!')
+                                                             chunk_size=chunks)
         self.dataset_cache.append(data.data)
 
     def _setup_dosna_objects(self):
