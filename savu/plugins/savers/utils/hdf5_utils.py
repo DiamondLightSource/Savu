@@ -126,10 +126,8 @@ class Hdf5Utils(object):
             chunking = Chunking(self.exp, current_and_next)
             chunks = chunking._calculate_chunking(shape, data.dtype)
             self.exp._barrier()
-            logging.warn('Creating the dataset with chunks.')
             data.data = self.__create_dataset_nofill(
                 group, "data", shape, data.dtype, chunks=chunks)
-            logging.warn('Dataset created!')
 
         self.exp._barrier()
 

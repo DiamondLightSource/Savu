@@ -40,5 +40,4 @@ echo "running the savu mpi local job"
 mpirun -np $nCPUs -mca btl ^openib python $filename $datafile $processfile $outpath -n $CPUs -v $options
 
 echo "SAVU_MPI_LOCAL:: Process complete"
-exit
 
