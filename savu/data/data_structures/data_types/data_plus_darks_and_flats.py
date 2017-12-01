@@ -144,18 +144,28 @@ class DataWithDarksAndFlats(BaseType):
 
     def __get_data(self, key):
         index = [slice(None)]*self.nDims
-        index[self.proj_dim] = self.get_index(key)
+        rot_dim = self.data_obj.get_data_dimension_by_axis_label(
+                'rotation_angle')
+
+        # separate the transfer of data for slice lists with entries far \
+        # apart, as this significantly improves hdf5 performance.
+        split_diff = 10
+        k_idx = self.get_index(key)
+        k_idx = np.split(k_idx, np.where(np.diff(k_idx) > split_diff)[0]+1)
+
+        index[self.proj_dim] = k_idx[0]
         data = self.data[tuple(index)]
+
+        for idx in k_idx[1:]:
+            index[self.proj_dim] = idx
+            data = np.append(data, self.data[tuple(index)], axis=rot_dim)
 
         if not self.dark_flat_slice_list:
             return data
 
         sl = list(copy.deepcopy(self.dark_flat_slice_list))
         if len(data.shape) is 2:
-            rot_dim = self.data_obj.get_data_dimension_by_axis_label(
-                    'rotation_angle')
             del sl[rot_dim]
-
         return data[sl]
 
     def dark_image_key_data(self):
