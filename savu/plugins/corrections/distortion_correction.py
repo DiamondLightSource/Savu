@@ -37,12 +37,10 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
 
     :param polynomial_coeffs: Parameters of the radial distortion \
     function. Default: (1.00015076, 1.9289e-6, -2.4325e-8, 1.00439e-11, -3.99352e-15).
-    :param centre_y: The det_y coordinate of the centre of \
-    distortion=(det_y, det_x) with origin (0, 0) in the top left \
-    corner. Default: 995.24.
-    :param centre_x: The det_x coordinate of the centre of \
-    distortion=(det_y, det_x) with origin (0, 0) in the top left \
-    corner. Default: 1283.25.
+    :param cod_from_top: The centre of distortion in pixels from the top of \
+    the image. Default: 995.24.
+    :param cod_from_left: The centre of distortion in pixels from the left of \
+    the image. Default: 1283.25.
     :u*param crop_edges: When applied to previewed/cropped data, the result \
     may contain zeros around the edges, which can be removed by \
     cropping the edges by a specified number of pixels. Default: 0
@@ -63,12 +61,11 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
 
         # If the data is cropped then the centre of distortion must be shifted
         # accordingly, e.g if preview is [:, a:b, c:d] then shift is (a, c)
-        centre = np.array([self.parameters['centre_x'],
-                           self.parameters['centre_y']])
-        centre[0] -= shift[det_y]
-        centre[1] -= shift[det_x]
-        # flipping the values
-        centre = centre[::-1]
+        centre = np.array([self.parameters['cod_from_left'],
+                           self.parameters['cod_from_top']])
+
+        centre[0] -= shift[det_x]
+        centre[1] -= shift[det_y]
 
         # pass two empty arrays of frame chunk size
         unwarp.setcoeff(*self.parameters['polynomial_coeffs'])
