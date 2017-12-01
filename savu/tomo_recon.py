@@ -92,6 +92,19 @@ def __option_parser():
                         help=hide, default=514)
     parser.add_argument("--test_state", dest="test_state", default='False',
                         action='store_true', help=hide)
+    # DosNa related parameters
+    parser.add_argument("--dosna_backend", dest="dosna_backend", help=hide,
+                        default=None)
+    parser.add_argument("--dosna_engine", dest="dosna_engine", help=hide,
+                        default=None)
+    parser.add_argument("--dosna_connection", dest="dosna_connection",
+                        help=hide, default=None)
+    parser.add_argument("--dosna_ceph_conffile", dest="dosna_ceph_conffile",
+                        help=hide, default=None)
+    parser.add_argument("--dosna_ceph_client_id", dest="dosna_ceph_client_id",
+                        help=hide, default=None)
+    parser.add_argument("--dosna_hdf5_dir", dest="dosna_hdf5_dir",
+                        help=hide, default=None)
 
     return parser.parse_args()
 
@@ -138,6 +151,13 @@ def _set_options(args):
     options['inter_path'] = inter_folder_path
     options['log_path'] = args.log if args.log else options['inter_path']
     options['nProcesses'] = len(options["process_names"].split(','))
+    # DosNa related options
+    options["dosna_backend"] = args.dosna_backend
+    options["dosna_engine"] = args.dosna_engine
+    options["dosna_connection"] = args.dosna_connection
+    options["dosna_ceph_conffile"] = args.dosna_ceph_conffile
+    options["dosna_ceph_client_id"] = args.dosna_ceph_client_id
+    options["dosna_hdf5_dir"] = args.dosna_hdf5_dir
 
     return options
 
