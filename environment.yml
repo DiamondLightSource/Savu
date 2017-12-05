@@ -19,9 +19,6 @@ dependencies:
   - mock
   - fabio
   - pytest-cov
-  - mock
-  - fabio 
-  - pytest-cov
   - coveralls
   - pyfai 
   - pyfftw
