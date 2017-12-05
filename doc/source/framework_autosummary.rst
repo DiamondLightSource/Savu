@@ -16,7 +16,6 @@ savu.core
 .. toctree::
    api/savu.core.utils
    api/savu.core.plugin_runner
-   api/savu.core.dist_array_process
    api/savu.core.transport_setup
    api/savu.core.basic_plugin_runner
 
@@ -48,7 +47,6 @@ savu.data.transport_data
 .. toctree::
    api/savu.data.transport_data.hdf5_transport_data
    api/savu.data.transport_data.base_transport_data
-   api/savu.data.transport_data.dist_array_transport_data
    api/savu.data.transport_data.basic_transport_data
    api/savu.data.transport_data.slice_lists
    api/savu.data.transport_data.dosna_transport_data
