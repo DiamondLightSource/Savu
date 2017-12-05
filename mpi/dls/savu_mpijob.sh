@@ -37,7 +37,7 @@ echo $CPUs
 echo "Processes running are : ${processes}"
 
 mpirun -np ${processes} \
-       -mca btl vader,self,openib \
+       -mca btl sm,self,openib \
        -x LD_LIBRARY_PATH \
        --hostfile ${TMP_FILE} \
        python $filename $datafile $processfile $outfile -n $CPUs -v $@
