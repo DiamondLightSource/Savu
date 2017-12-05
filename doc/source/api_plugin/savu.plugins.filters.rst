@@ -13,6 +13,7 @@ Submodules
    savu.plugins.filters.dials_find_spots
    savu.plugins.filters.find_peaks
    savu.plugins.filters.image_interpolation
+   savu.plugins.filters.interpolate_outliers
    savu.plugins.filters.list_to_projections
    savu.plugins.filters.median_filter
    savu.plugins.filters.paganin_filter

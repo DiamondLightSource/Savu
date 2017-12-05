@@ -17,7 +17,7 @@
    :platform: Unix
    :synopsis: checking the chunking for a variety of pattern transforms
 
-.. moduleauthor:: Aaron Parsons <scientificsoftware@diamond.ac.uk>
+.. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
 
