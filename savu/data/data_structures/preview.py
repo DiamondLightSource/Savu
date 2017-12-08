@@ -125,8 +125,13 @@ class Preview(object):
             slice_list = self._get_preview_slice_list()
             self.get_data_obj().amend_axis_label_values(slice_list)
         if load:
-            entry = self.get_data_obj().get_name() + '_preview_starts'
-            self.get_data_obj().exp.meta_data.set(entry, starts)
+            self.__add_preview_param('starts', starts)
+            self.__add_preview_param('stops', stops)
+            self.__add_preview_param('steps', steps)
+
+    def __add_preview_param(self, name, value):
+        entry = self.get_data_obj().get_name() + '_preview_' + name
+        self.get_data_obj().exp.meta_data.set(entry, value)
 
     def _get_preview_indices(self, preview_list):
         """ Get preview_list ``starts``, ``stops``, ``steps``, ``chunks``
