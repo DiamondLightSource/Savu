@@ -113,10 +113,13 @@ param_mutations = \
                    {'old': 'sino_pad', 'new': 'outer_pad'}],
      'AstraReconGpu': [{'old': 'reconstruction_type', 'new': 'algorithm'}],
      'AstraReconCpu': [{'old': 'reconstruction_type', 'new': 'algorithm'}],
-     'DistortionCorrection': [{'old': 'centre', 'new': 'cod_from_top', 'eval': 'val[0]'},
-                              {'old': 'centre', 'new': 'cod_from_left', 'eval': 'val[1]'},
-                              {'old': 'centre_x', 'new': 'cod_from_top'},
-                              {'old': 'centre_y', 'new': 'cod_from_left'}]}
+     'DistortionCorrection': [{'old': 'centre', 'new': 'centre_from_top', 'eval': 'val[0]'},
+                              {'old': 'centre', 'new': 'centre_from_left', 'eval': 'val[1]'},
+                              {'old': 'centre_x', 'new': 'centre_from_left'},
+                              {'old': 'centre_y', 'new': 'centre_from_top'},
+                              {'old': 'cod_from_left', 'new': 'centre_from_left'},
+                              {'old': 'cod_from_top', 'new': 'centre_from_top'},                              
+                              ]}
 
 plugin_notices = \
     {'Hdf5Saver': {'desc': notice_str('Hdf5Saver', hdf5_notice)}, }
