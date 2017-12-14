@@ -56,6 +56,7 @@ class PluginData(object):
         self.boundary_padding = None
         self.no_squeeze = False
         self.pre_tuning_shape = None
+        self._frame_limit = None
 
     def _get_preview(self):
         return self._preview
@@ -344,7 +345,7 @@ class PluginData(object):
         logging.debug("Setting max frames transfer for plugin %s to %d" %
                       (self._plugin, mft))
         logging.debug("Setting max frames process for plugin %s to %d" %
-                      (self._plugin, mft))
+                      (self._plugin, mfp))
         self.meta_data.set('max_frames_process', mfp)
         if check:
             self.__check_distribution(mft)
@@ -381,6 +382,9 @@ class PluginData(object):
         chunks = \
             self.data_obj.get_preview().get_starts_stops_steps(key='chunks')
 
+        if isinstance(nFrames, list):
+            nFrames, self._frame_limit = nFrames
+
         self.__set_max_frames(nFrames)
         mft = self.meta_data.get('max_frames_transfer')
         if self._plugin and mft \
@@ -412,3 +416,7 @@ class PluginData(object):
             "from 'single' and 'multiple' (or an integer in exceptional "
             "circumstances)."
             raise Exception(e_str)
+
+    def get_frame_limit(self):
+        return self._frame_limit
+
