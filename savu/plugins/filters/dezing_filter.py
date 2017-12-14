@@ -39,26 +39,43 @@ class DezingFilter(BaseFilter, CpuPlugin):
     the near neighbourhood
     :param outlier_mu: Threshold for detecting outliers, greater is less \
     sensitive. Default: 1000.0.
-    :param kernel_size: Number of frames included in average. Default: 5.
+    :param kernel_size: Number of frames included in average - if the number \
+        is not odd use kernel_size+1. Default: 5.
     """
 
     def __init__(self):
         super(DezingFilter, self).__init__("DezingFilter")
         self.zinger_proportion = 0.0
+        self.frame_limit = 8
 
     def pre_process(self):
         inData = self.get_in_datasets()[0]
-        dark = inData.data.dark()
-        flat = inData.data.flat()
+        self.proj_dim = inData.data.proj_dim
 
-        pad_list = ((self.pad, self.pad), (0, 0), (0, 0))
+        self._kernel = [1]*3
+        self._kernel[self.proj_dim] = self.kernel_size
 
-        self._kernel = (self.parameters['kernel_size'], 1, 1)
+        pad_list = [(0, 0)]*3
+        pad_list[self.proj_dim] = (self.pad, self.pad)
 
-        dark = self._dezing(np.pad(dark, pad_list, mode='edge'))
-        flat = self._dezing(np.pad(flat, pad_list, mode='edge'))
+        dark = np.pad(inData.data.dark(), pad_list, mode='edge')
+        flat = np.pad(inData.data.flat(), pad_list, mode='edge')
+        dark = self._process_calibration_frames(dark)
+        flat = self._process_calibration_frames(flat)
         inData.data.update_dark(dark[self.pad:-self.pad])
         inData.data.update_flat(flat[self.pad:-self.pad])
+
+    def _process_calibration_frames(self, data):
+        nSlices = data.shape[self.proj_dim] - 2*self.pad
+        nSublists = int(np.ceil(nSlices/float(self.frame_limit)))
+        idx = np.array_split(np.arange(self.pad, nSlices+self.pad), nSublists)
+        idx = [np.arange(a[0]-self.pad, a[-1]+self.pad+1) for a in idx]
+        out_sl = np.tile([slice(None)]*3, [len(idx), 1])
+        out_sl[:, self.proj_dim] = idx
+        result = np.empty_like(data)
+        for sl in out_sl:
+            result[tuple(sl)] = self._dezing(data[tuple(sl)])
+        return result
 
     def _dezing(self, data):
         result = data[...]
@@ -75,14 +92,19 @@ class DezingFilter(BaseFilter, CpuPlugin):
         return self._dezing(data[0])
 
     def get_max_frames(self):
-        return 'multiple'
+        """ Setting nFrames to multiple with an upper limit of 4 frames. """
+        return ['multiple', self.frame_limit]
 
     def raw_data(self):
         return True
 
     def set_filter_padding(self, in_data, out_data):
+        # kernel size must be odd
+        ksize = self.parameters['kernel_size']
+        self.kernel_size = ksize+1 if ksize % 2 == 0 else ksize
+
         in_data = in_data[0]
-        self.pad = (self.parameters['kernel_size'] - 1) / 2
+        self.pad = (self.kernel_size - 1) / 2
         self.data_size = in_data.get_shape()
         in_data.padding = {'pad_multi_frames': self.pad}
         out_data[0].padding = {'pad_multi_frames': self.pad}
