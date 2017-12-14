@@ -144,7 +144,7 @@ def _set_options(args):
 
     basename = os.path.basename(args.in_file)
     options['datafile_name'] = os.path.splitext(basename)[0] if basename \
-        else args.in_file.split('/')[-2]
+        else args.in_file.split(os.sep)[-2]
 
     inter_folder_path = __create_output_folder(args.tmp, out_folder_name)\
         if args.tmp else out_folder_path
@@ -169,8 +169,8 @@ def __get_folder_name(in_file):
     MPI.COMM_WORLD.barrier()
     split = in_file.split('.')
 
-    if len(split[-1].split('/')) > 1:
-        split = in_file.split('/')
+    if len(split[-1].split(os.sep)) > 1:
+        split = in_file.split(os.sep)
         name = split[-2] if split[-1] == '' else split[-1]
     # if the input is a file
     else:
