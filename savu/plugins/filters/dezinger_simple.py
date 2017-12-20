@@ -15,7 +15,7 @@
 
 
 """
-.. module:: dezing_filter
+.. module:: dezinger_simple
    :platform: Unix
    :synopsis: A plugin to remove dezingers
 
@@ -33,7 +33,7 @@ from savu.plugins.utils import register_plugin
 
 
 @register_plugin
-class DezingFilter(BaseFilter, CpuPlugin):
+class DezingerSimple(BaseFilter, CpuPlugin):
     """
     A plugin for cleaning x-ray strikes based on statistical evaluation of \
     the near neighbourhood
@@ -44,7 +44,7 @@ class DezingFilter(BaseFilter, CpuPlugin):
     """
 
     def __init__(self):
-        super(DezingFilter, self).__init__("DezingFilter")
+        super(DezingerSimple, self).__init__("DezingerSimple")
         self.zinger_proportion = 0.0
         self.frame_limit = 8
 
