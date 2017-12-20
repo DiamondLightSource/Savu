@@ -123,8 +123,18 @@ class Hdf5Utils(object):
             logging.warn('Creating the dataset without chunks')
             data.data = group.create_dataset("data", shape, data.dtype)
         else:
+
+            # change cache properties
+            propfaid = group.file.id.get_access_plist()
+            settings = list(propfaid.get_cache())
+            settings[2] *= 1
+            propfaid.set_cache(*settings)
+            # calculate total number of chunks and set nSlots=nChunks
+
             chunking = Chunking(self.exp, current_and_next)
-            chunks = chunking._calculate_chunking(shape, data.dtype)
+            chunks = chunking._calculate_chunking(shape, data.dtype,
+                                                  chunk_max=settings[2])
+
             self.exp._barrier()
             data.data = self.__create_dataset_nofill(
                 group, "data", shape, data.dtype, chunks=chunks)

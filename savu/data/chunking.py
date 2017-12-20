@@ -47,6 +47,7 @@ class Chunking(object):
         self.core = None
         self.slice1 = None
         self.other = None
+        self.default_chunk_max = 1000000
 
     def __lustre_workaround(self, chunks, shape):
         nChunks_to_create_file = \
@@ -64,10 +65,11 @@ class Chunking(object):
             else:
                 raise Exception('There is an error in the lustre workaround')
 
-    def _calculate_chunking(self, shape, ttype):
+    def _calculate_chunking(self, shape, ttype, chunk_max=None):
         """
         Calculate appropriate chunk sizes for this dataset
         """
+        self.chunk_max = chunk_max if chunk_max else self.default_chunk_max
         logging.debug("shape = %s", shape)
         if len(shape) < 3:
             return True
@@ -146,7 +148,7 @@ class Chunking(object):
     def __core_slice(self, dim, adj_idx, adjust, shape):
         max_frames = self.__get_max_frames_dict()[dim]
         adjust['inc']['up'][adj_idx] = '+' + str(max_frames)
-        adjust['inc']['down'][adj_idx] = '/2'
+        adjust['inc']['down'][adj_idx] = '/2' # '-' + str(max_frames)
         adjust['bounds']['max'][adj_idx] = \
             self.__max_frames_per_process(shape[dim], max_frames)
         return min(max_frames, shape[dim])
@@ -160,7 +162,7 @@ class Chunking(object):
     def __slice_slice(self, dim, adj_idx, adjust, shape):
         max_frames = self.__get_max_frames_dict()[dim]
         adjust['inc']['up'][adj_idx] = '+' + str(max_frames)
-        adjust['inc']['down'][adj_idx] = '/2'
+        adjust['inc']['down'][adj_idx] = '/2' # '-' + str(max_frames)
         adjust['bounds']['max'][adj_idx] = \
             self.__max_frames_per_process(shape[dim], max_frames)
         return min(max_frames, shape[dim])
@@ -205,7 +207,7 @@ class Chunking(object):
         """
         chunks = np.array(chunks)
         chunk_size = np.prod(chunks)*np.dtype(ttype).itemsize
-        cache_size = 1000000
+        cache_size = self.chunk_max
         if (chunk_size > cache_size):
             self.__decrease_chunks(chunks, ttype, adjust)
         else:
@@ -216,7 +218,7 @@ class Chunking(object):
         """
         Decrease the chunk size to below but as close to 1MB as possible
         """
-        while ((np.prod(chunks)*np.dtype(ttype).itemsize) > 1000000):
+        while ((np.prod(chunks)*np.dtype(ttype).itemsize) > self.chunk_max):
             idx = self.__get_idx_decrease(chunks, adjust)
             dim = adjust['dim'].index(idx)
 #            if idx == -1:
@@ -229,7 +231,7 @@ class Chunking(object):
         Increase the chunk size as close to 1MB as possible
         """
         next_chunks = copy.copy(chunks)
-        while ((np.prod(next_chunks)*np.dtype(ttype).itemsize) <= 1000000):
+        while ((np.prod(next_chunks)*np.dtype(ttype).itemsize) <= self.chunk_max):
             chunks = copy.copy(next_chunks)
             idx = self.__get_idx_increase(next_chunks, adjust)
             if idx == -1:
