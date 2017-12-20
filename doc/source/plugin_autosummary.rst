@@ -265,7 +265,6 @@ savu.plugins.filters
 .. toctree::
    api_plugin/savu.plugins.filters.band_pass
    api_plugin/savu.plugins.filters.denoise_bregman_filter
-   api_plugin/savu.plugins.filters.dezing_filter
    api_plugin/savu.plugins.filters.dials_find_spots
    api_plugin/savu.plugins.filters.image_interpolation
    api_plugin/savu.plugins.filters.find_peaks
@@ -279,8 +278,10 @@ savu.plugins.filters
    api_plugin/savu.plugins.filters.strip_background
    api_plugin/savu.plugins.filters.spectrum_crop
    api_plugin/savu.plugins.filters.threshold_filter
+   api_plugin/savu.plugins.filters.dezinger_simple
    api_plugin/savu.plugins.filters.interpolate_outliers
    api_plugin/savu.plugins.filters.umpa
+   api_plugin/savu.plugins.filters.dezinger
 
 
 savu.plugins.loaders
