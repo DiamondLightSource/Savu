@@ -33,7 +33,7 @@ class DezingFilterTest(unittest.TestCase):
 
     def test_dezing_filter(self):
         options = tu.set_experiment('tomoRaw')
-        plugin = 'savu.plugins.filters.dezing_filter'
+        plugin = 'savu.plugins.filters.dezinger_simple'
         run_protected_plugin_runner_no_process_list(options, plugin)
 
 if __name__ == "__main__":
