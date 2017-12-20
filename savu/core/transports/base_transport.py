@@ -142,12 +142,12 @@ class BaseTransport(object):
                 data = self._get_input_data(plugin, transfer_data, i, count)
                 res = self._get_output_data(
                         plugin.plugin_process_frames(data), i)
+
                 for j in pDict['nOut']:
                     out_sl = pDict['out_sl']['process'][i][j]
                     result[j][out_sl] = res[j]
 
             self._return_all_data(count, result, end)
-
         cu.user_message("%s - 100%% complete" % (plugin.name))
 
     def _get_all_slice_lists(self, data_list, dtype):
@@ -343,7 +343,6 @@ class BaseTransport(object):
         for key in out_data_dict.keys():
             out_data = out_data_dict[key]
             filename = self.exp.meta_data.get(["filename", key])
-            logging.debug("creating the backing file %s", filename)
             out_data.backing_file = self.hdf5._open_backing_h5(filename, 'w')
             out_data.group_name, out_data.group = self.hdf5._create_entries(
                 out_data, key, current_and_next[count])
@@ -390,7 +389,6 @@ class BaseTransport(object):
 
     def _populate_nexus_file(self, data):
         filename = self.exp.meta_data.get('nxs_filename')
-        logging.debug("Adding link to file %s", filename)
 
         with h5py.File(filename, 'a') as nxs_file:
             nxs_entry = nxs_file['entry']
@@ -441,8 +439,6 @@ class BaseTransport(object):
         entry.attrs['axes'] = axes
 
     def __output_data_patterns(self, data, entry):
-        logging.debug("Outputting data patterns to file")
-
         data_patterns = data.data_info.get("data_patterns")
         entry = entry.create_group('patterns')
         entry.attrs[NX_CLASS] = 'NXcollection'
@@ -454,8 +450,6 @@ class BaseTransport(object):
             nx_data.create_dataset('slice_dims', data=values['slice_dims'])
 
     def __output_metadata_dict(self, data, entry):
-        logging.debug("Outputting meta data dictionary to file")
-
         meta_data = data.meta_data.get_dictionary()
         entry = entry.create_group('meta_data')
         entry.attrs[NX_CLASS] = 'NXcollection'

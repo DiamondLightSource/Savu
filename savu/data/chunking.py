@@ -146,7 +146,7 @@ class Chunking(object):
     def __core_slice(self, dim, adj_idx, adjust, shape):
         max_frames = self.__get_max_frames_dict()[dim]
         adjust['inc']['up'][adj_idx] = '+' + str(max_frames)
-        adjust['inc']['down'][adj_idx] = '-' + str(max_frames)
+        adjust['inc']['down'][adj_idx] = '/2'
         adjust['bounds']['max'][adj_idx] = \
             self.__max_frames_per_process(shape[dim], max_frames)
         return min(max_frames, shape[dim])
@@ -160,7 +160,7 @@ class Chunking(object):
     def __slice_slice(self, dim, adj_idx, adjust, shape):
         max_frames = self.__get_max_frames_dict()[dim]
         adjust['inc']['up'][adj_idx] = '+' + str(max_frames)
-        adjust['inc']['down'][adj_idx] = '-' + str(max_frames)
+        adjust['inc']['down'][adj_idx] = '/2'
         adjust['bounds']['max'][adj_idx] = \
             self.__max_frames_per_process(shape[dim], max_frames)
         return min(max_frames, shape[dim])
