@@ -117,4 +117,4 @@ log messages."])
         if self.warnflag != 0:
             return(["WARNINGS detected in dezing plugin, Check the detailed \
 log messages."])
-        return "Nothing to Report"
+        return ["Nothing to Report"]
