@@ -28,6 +28,7 @@ import savu
 import copy
 import importlib
 import imp
+import inspect
 
 
 plugins = {}
@@ -36,6 +37,9 @@ dawn_plugins = {}
 dawn_plugin_params = {}
 count = 0
 
+OUTPUT_TYPE_DATA_ONLY = 0
+OUTPUT_TYPE_METADATA_ONLY = 1
+OUTPUT_TYPE_METADATA_AND_DATA = 2
 
 def register_plugin(clazz):
     """decorator to add plugins to a central register"""
@@ -45,20 +49,27 @@ def register_plugin(clazz):
     return clazz
 
 
-def dawn_compatible(clazz):
-    """
-    decorator to add dawn compatible plugins and details to a central register
-    """
-    dawn_plugins[clazz.__name__] = {}
-    try:
-        plugin_path = sys.modules[clazz.__module__].__file__
-        # looks out for .pyc files
-        dawn_plugins[clazz.__name__]['path2plugin'] = \
-            plugin_path.split('.py')[0]+'.py'
-    except Exception as e:
-        print e
-    return clazz
-
+def dawn_compatible(plugin_output_type=OUTPUT_TYPE_METADATA_AND_DATA):
+    def _dawn_compatible(clazz):
+        """
+        decorator to add dawn compatible plugins and details to a central register
+        """
+        dawn_plugins[clazz.__name__] = {}
+        try:
+            plugin_path = sys.modules[clazz.__module__].__file__
+            # looks out for .pyc files
+            dawn_plugins[clazz.__name__]['path2plugin'] = \
+                plugin_path.split('.py')[0]+'.py'
+            dawn_plugins[clazz.__name__]['plugin_output_type'] = _plugin_output_type
+        except Exception as e:
+            print e
+        return clazz
+    if inspect.isclass(plugin_output_type): # for backwards compatibility, if decorator is invoked without brackets...
+        _plugin_output_type = OUTPUT_TYPE_METADATA_AND_DATA
+        return _dawn_compatible(plugin_output_type)
+    else:
+        _plugin_output_type = plugin_output_type
+        return _dawn_compatible
 
 def get_plugin(plugin_name):
     """ Get an instance of the plugin class and populate default parameters.
