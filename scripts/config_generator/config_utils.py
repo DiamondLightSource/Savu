@@ -109,7 +109,8 @@ def _add_module(loader, module_name):
             pass
 
 
-def populate_plugins():
+# change this to dawn=False!!!!!!!!!!!!!!!!!!!!!!!!!
+def populate_plugins(dawn=True):
     # load all the plugins
     plugins_path = pu.get_plugins_paths()
     savu_path = plugins_path[-1].split('savu')[0]
@@ -125,6 +126,11 @@ def populate_plugins():
         if module_name.split('savu.plugins')[0] == '':
             _add_module(loader, module_name)
 
+    if dawn:
+        _dawn_setup()
+
+
+def _dawn_setup():
     for plugin in pu.dawn_plugins.keys():
         p = pu.plugins[plugin]()
         pu.dawn_plugins[plugin]['input rank'] = \

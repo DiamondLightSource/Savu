@@ -13,14 +13,14 @@ from copy import deepcopy as copy
 import time
 from collections import OrderedDict
 
-def runSavu(path2plugin, params, metaOnly, inputs, persistence):
+
+def runSavu_setup(path2plugin, params, metaOnly, inputs, persistence):
     '''
     path2plugin  - is the path to the user script that should be run
     params - are the savu parameters
     metaOnly - a boolean for whether the data is kept in metadata or is passed as data
     inputs      - is a dictionary of input objects 
     '''
-    t1 = time.time()
     sys_path_0_lock = persistence['sys_path_0_lock']
     sys_path_0_set = persistence['sys_path_0_set']
     plugin_object = persistence['plugin_object']
@@ -85,13 +85,17 @@ def runSavu(path2plugin, params, metaOnly, inputs, persistence):
     finally:
         sys_path_0_lock.release()
 
+    return plugin_object, inputs, result, aux, metaOnly
+
+
+def runSavu(plugin_object, inputs, result, aux, metaOnly):
+    t1 = time.time()
     if plugin_object.get_max_frames()>1: # we need to get round this since we are frame independant
         data = np.expand_dims(inputs['data'], 0)
     else:
         data = inputs['data']
 
-    if not metaOnly: 
-
+    if not metaOnly:
         out = plugin_object.process_frames([data])
 #         print "ran the plugin"
 
@@ -112,7 +116,6 @@ def runSavu(path2plugin, params, metaOnly, inputs, persistence):
     return result
 
 
-
 def process_init(path2plugin, inputs, parameters):
     parameters['in_datasets'] = [inputs['dataset_name']]
     parameters['out_datasets'] = [inputs['dataset_name']]
@@ -123,6 +126,7 @@ def process_init(path2plugin, inputs, parameters):
     plugin._set_parameters(parameters)
     plugin._set_plugin_datasets()
     plugin.setup()
+    
 #     print "I am her now"
     axis_labels = plugin.get_out_datasets()[0].get_axis_label_keys()
     foo = [type(ix) for ix in axis_labels]
