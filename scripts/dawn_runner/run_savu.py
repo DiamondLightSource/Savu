@@ -14,8 +14,22 @@ import time
 from collections import OrderedDict
 
 
-def get_rank(path2plugin, inputs, parameters):
-    plugin = _savu_setup(path2plugin, inputs, parameters)
+def get_output_rank(path2plugin, inputs, params, persistence):
+    sys_path_0_lock = persistence['sys_path_0_lock']
+    sys_path_0_lock.acquire()
+    try:
+        parameters = {}
+        # slight repack here
+        for key in params.keys():
+            val = params[key]["value"]
+            if type(val)==type(''):
+                val = val.replace('\n','').strip()
+                parameters[key] = val
+        plugin = _savu_setup(path2plugin, inputs, parameters)
+        persistence['plugin_object'] = plugin
+    finally:
+        sys_path_0_lock.release()
+
     return len(plugin.get_plugin_out_datasets()[0].get_core_dimensions())
 
 
@@ -59,9 +73,11 @@ def runSavu(path2plugin, params, metaOnly, inputs, persistence):
                     val = val.replace('\n','').strip()
 #                 print val
                 parameters[key] = val
+                print("val: {}".format(val))
 #             print "initialising the object"
-            plugin = _savu_setup(path2plugin, inputs, parameters)
-            plugin, axis_labels, axis_values = process_init(plugin)
+            plugin_object = _savu_setup(path2plugin, inputs, parameters)
+            persistence['plugin_object'] = plugin_object
+            axis_labels, axis_values = process_init(plugin_object)
 #             print "I did the initialisation"
 #             print "axis labels",axis_labels
 #             print "axis_values", axis_values
@@ -97,6 +113,8 @@ def runSavu(path2plugin, params, metaOnly, inputs, persistence):
     else:
         data = inputs['data']
 
+    print("metaOnly: {}".format(metaOnly))
+
     if not metaOnly: 
 
         out = plugin_object.process_frames([data])
@@ -120,10 +138,10 @@ def runSavu(path2plugin, params, metaOnly, inputs, persistence):
 
 
 def _savu_setup(path2plugin, inputs, parameters):
+    print("running _savu_setup")
     parameters['in_datasets'] = [inputs['dataset_name']]
     parameters['out_datasets'] = [inputs['dataset_name']]
     plugin = get_plugin(path2plugin.split('.py')[0]+'.py')
-#     print "I got this far"
     plugin.exp = setup_exp_and_data(inputs, inputs['data'], plugin)
     plugin._set_parameters(parameters)
     plugin._set_plugin_datasets()
