@@ -34,10 +34,15 @@ class FabIO(BaseType):
     formats. """
 
     def __init__(self, folder, Data, dim, shape=None, data_prefix=None):
+        self.folder = folder
         self._data_obj = Data
+        self.frame_dim = dim
+        self.shape = shape
+        self.prefix = data_prefix
+        super(FabIO, self).__init__()
+
         self.nFrames = None
         self.start_file = fabio.open(self.__get_file_name(folder, data_prefix))
-        self.frame_dim = dim
         self.dtype = self.start_file.getframe(self.start_no).data[0, 0].dtype
         self.image_shape = (self.start_file.dim2, self.start_file.dim1)
         if shape is None:
@@ -47,6 +52,12 @@ class FabIO(BaseType):
         self.full_shape = self.image_shape + self.shape
         self.image_dims = set(np.arange(len(self.full_shape)))\
             .difference(set(self.frame_dim))
+
+    def map_input_args(self, args, kwargs):
+        args = [self.folder, self._data_obj, self.frame_dim]
+        kwargs['shape'] = self.shape
+        kwargs['prefix'] = self.prefix
+        return args, kwargs
 
     def __getitem__(self, index):
         index = [index[i] if index[i].start is not None else

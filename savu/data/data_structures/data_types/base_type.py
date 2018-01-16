@@ -20,9 +20,15 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
+import inspect
+from savu.data.data_structures.data import Data
 
 
 class BaseType(object):
+
+    def __init__(self):
+        self._input_args = {}
+        self.base_map_input_args()
 
     def __getitem__(self, index):
         """ Override __getitem__ and map to the relevant files """
@@ -36,9 +42,39 @@ class BaseType(object):
         """ Add a base class instance to a class (merging of two data types).
 
         :params class base: a class to add as a base class
-        :params instance inst: a instance of the base class
+        :params instance inst: an instance of the base class
         """
         cls = self.__class__
         namespace = self.__class__.__dict__.copy()
         self.__dict__.update(inst.__dict__)
         self.__class__ = cls.__class__(cls.__name__, (cls, base), namespace)
+
+    def base_map_input_args(self):
+        """ Create a dictionary of required input arguments, required for
+        checkpointing. """
+        argspec = inspect.getargspec(self.__init__)
+        args, kwargs = self.map_input_args([], {})
+        if len(argspec[0])-1 != len(args) + len(kwargs.keys()):
+            raise Exception('Incorrect number of input arguments mapped.')
+
+        # remove the data objects
+        args = ['DATA_OBJECT' if isinstance(a, Data) else args for a in args]
+
+        data_lists = [True if isinstance(a, list) and isinstance(a[0], int)
+                      else False for a in args]
+
+        # If there are multiple data objects this is incompatible with
+        # checkpointing.
+        if args.count('DATA_OBJECT') > 2 or data_lists.any():
+            self._input_args = None
+        else:
+            self._input_args['args'] = args
+            self._input_args['kwargs'] = kwargs
+
+    def map_input_args(self, args, kwargs):
+        """ Create a dictionary of required input arguments, required for
+        checkpointing. """
+        raise NotImplementedError("map_required_inputs must be implemented.")
+
+    def get_required_args(self):
+        return self._input_args

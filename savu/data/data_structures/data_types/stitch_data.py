@@ -33,6 +33,8 @@ class StitchData(BaseType):
         self.obj_list = data_obj_list
         self.stack_or_cat = stack_or_cat
         self.dim = dim
+        super(StitchData, self).__init__
+
         self.shape = None
         self._set_shape()
         if self.stack_or_cat == 'stack':
@@ -43,6 +45,10 @@ class StitchData(BaseType):
             self.inc = self.obj_list[0].get_shape()[self.dim]
             self._getitem = self._getitem_cat
             self._get_lists = self._get_lists_cat
+
+    def map_input_args(self, args, kwargs):
+        args = [self.obj_list, self.]
+        return args, kwargs
 
     def __getitem__(self, idx):
         size = [len(np.arange(s.start, s.stop, s.step)) for s in idx]
@@ -126,7 +132,7 @@ class StitchData(BaseType):
         else:
             shape.insert(self.dim, nObjs)
         self.shape = tuple(shape)
-    
+
     def dark_mean(self):
         """ Get the averaged dark projection data. """
         return self.obj_list[0].data.dark_mean()

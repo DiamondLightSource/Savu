@@ -31,14 +31,12 @@ from savu.data.data_structures.data_types.base_type import BaseType
 class DataWithDarksAndFlats(BaseType):
 
     def __init__(self, data_obj, proj_dim, image_key):
-        self.data_obj = data_obj
+        super(DataWithDarksAndFlats, self).__init__()
         self.fscale = 1
         self.dscale = 1
         self.flat_updated = False
         self.dark_updated = False
-        self.image_key = image_key
         self.data = data_obj.data
-        self.proj_dim = proj_dim
         self.dark_flat_slice_list = None
 
     def _copy_base(self, new_obj):
@@ -191,12 +189,21 @@ class ImageKey(DataWithDarksAndFlats):
     """ This class is used to get data from a dataset with an image key. """
 
     def __init__(self, data_obj, image_key, proj_dim, ignore=None):
+        self.data_obj = data_obj
+        self.image_key = image_key
+        self.proj_dim = proj_dim
+        self.ignore = ignore
         super(ImageKey, self).__init__(data_obj, proj_dim, image_key)
         self.shape = self._get_image_key_data_shape()
         self.nDims = len(self.shape)
         self._getitem = self._getitem_imagekey
         if ignore:
             self.__ignore_image_key_entries(ignore)
+
+    def map_input_args(self, args, kwargs):
+        args = [self.data_obj, self.image_key, self.proj_dim]
+        kwargs['ignore'] = self.ignore
+        return args, kwargs
 
     def __getitem__(self, idx):
         return self._getitem(idx)
@@ -239,6 +246,9 @@ class NoImageKey(DataWithDarksAndFlats):
         flats. """
 
     def __init__(self, data_obj, image_key, proj_dim):
+        self.data_obj = data_obj
+        self.image_key = image_key
+        self.proj_dim = proj_dim
         super(NoImageKey, self).__init__(data_obj, proj_dim, image_key)
         self.dark_path = None
         self.flat_path = None
@@ -256,6 +266,10 @@ class NoImageKey(DataWithDarksAndFlats):
 
         self.data_obj = data_obj
         self.nDims = len(self.shape)
+
+    def map_input_args(self, args, kwargs):
+        args = [self.data_obj, self.image_key, self.proj_dim]
+        return args, kwargs
 
     def __getitem__(self, idx):
         return self._getitem(idx)
