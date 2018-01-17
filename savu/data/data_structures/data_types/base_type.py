@@ -65,7 +65,7 @@ class BaseType(object):
 
         # If there are multiple data objects this is incompatible with
         # checkpointing.
-        if args.count('DATA_OBJECT') > 2 or data_lists.any():
+        if args.count('DATA_OBJECT') > 2 or data_lists.count(True):
             self._input_args = None
         else:
             self._input_args['args'] = args
