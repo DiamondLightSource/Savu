@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -x
 
 # error log to screen and file
 log_temp=`mktemp -d`
