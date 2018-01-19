@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash -ex
 
 # error log to screen and file
 log_temp=`mktemp -d`
@@ -232,10 +232,6 @@ PYTHONHOME=$PREFIX/miniconda/bin
 export PATH="$PYTHONHOME:$PATH"
 
 conda install -y -q conda-build
-
-echo
-conda info | grep 'root environment'
-echo
 
 conda env update -n root -f $DIR/environment.yml
 
