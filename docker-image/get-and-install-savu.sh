@@ -17,10 +17,12 @@ if [[ "$SAVU_URL" == "" ]]; then
     exit -1
 fi
 
-wget -O savu.tar.gz "$SAVU_URL"
+if [[ ! -f "savu.tar.gz" ]]; then
+    wget -O savu.tar.gz "$SAVU_URL"
+fi
 
 tar -xvzf savu.tar.gz
 
 cd savu_v${VERSION}
 chmod +x savu_installer.sh
-./savu_installer.sh --no_prompts
+./savu_installer.sh --no_prompts | tee savu_installation.log

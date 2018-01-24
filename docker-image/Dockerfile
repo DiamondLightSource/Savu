@@ -8,8 +8,9 @@ USER root
 RUN yum groupinstall -y 'Development Tools'
 RUN yum -y install wget 
 RUN yum install -y mesa-libGL-devel mesa-libGLU-devel
+RUN yum install -y boost-devel
 
-ENV VERSION=2.2
+ENV VERSION=2.2.1
 ENV FTTW=3.3.7
 ENV OPENMPI=3.0.0
 

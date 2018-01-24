@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash -ex
 
 # error log to screen and file
 log_temp=`mktemp -d`
@@ -231,11 +231,7 @@ bash $PREFIX/miniconda.sh -b -p $PREFIX/miniconda
 PYTHONHOME=$PREFIX/miniconda/bin
 export PATH="$PYTHONHOME:$PATH"
 
-conda install -y -q conda-build
-
-echo
-conda info | grep 'root environment'
-echo
+conda install -y -q conda-build conda-env
 
 conda env update -n root -f $DIR/environment.yml
 
@@ -272,7 +268,7 @@ env MPICC=$MPICC pip install mpi4py==$mpi4py_version
 
 #-----------------------------------------------------------------
 echo "Building hdf5..."
-conda uninstall -y -q hdf5
+conda uninstall -y -q hdf5 || true
 conda build $recipes/hdf5
 hdf5build=`conda build $recipes/hdf5 --output`
 
@@ -282,7 +278,7 @@ conda install -y -q --use-local $hdf5build --no-deps
 
 #-----------------------------------------------------------------
 echo "Building h5py..."
-conda uninstall -y -q h5py
+conda uninstall -y -q h5py || true
 conda build $recipes/h5py --no-test
 h5pybuild=`conda build $recipes/h5py --output`
 
