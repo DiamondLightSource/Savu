@@ -231,7 +231,7 @@ bash $PREFIX/miniconda.sh -b -p $PREFIX/miniconda
 PYTHONHOME=$PREFIX/miniconda/bin
 export PATH="$PYTHONHOME:$PATH"
 
-conda install -y -q conda-build
+conda install -y -q conda-build conda-env
 
 conda env update -n root -f $DIR/environment.yml
 
