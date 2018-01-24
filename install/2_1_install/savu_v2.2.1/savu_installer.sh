@@ -233,10 +233,6 @@ export PATH="$PYTHONHOME:$PATH"
 
 conda install -y -q conda-build
 
-echo
-conda info | grep 'root environment'
-echo
-
 conda env update -n root -f $DIR/environment.yml
 
 echo "Building Savu..."
