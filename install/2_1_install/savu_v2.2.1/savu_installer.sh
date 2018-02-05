@@ -13,7 +13,8 @@ for sig in INT TERM EXIT; do
     trap "export PS1=$oldprompt; [[ $sig == EXIT ]] || kill -$sig $$" $sig
 done
 
-PREFIX=$HOME
+PREFIX="${PREFIX:-$HOME}"
+
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 savu_version=`cat $DIR/version.txt`
 
