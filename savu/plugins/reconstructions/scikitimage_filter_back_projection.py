@@ -108,5 +108,5 @@ class ScikitimageFilterBackProjection(BaseRecon, CpuPlugin):
              "%@ 089871494X\n" +
              "%D 2001\n" +
              "%I Society for Industrial and Applied Mathematics")
-        cite_info.doi = "http://dx.doi.org/10.1137/1.9780898719277"
+        cite_info.doi = "https://doi.org/10.1137/1.9780898719277"
         return cite_info
