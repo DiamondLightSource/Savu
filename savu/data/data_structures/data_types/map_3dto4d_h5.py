@@ -43,9 +43,9 @@ class Map3dto4dh5(BaseType):
         new_shape = (n_angles, shape[1], shape[2], shape[0]/n_angles)
         self.shape = new_shape
 
-    def map_input_args(self, args, kwargs):
-        args = [self.data, self.n_angles]
-        return args, kwargs
+    def map_input_args(self, args, kwargs, cls):
+        args = ['self', 'self.n_angles']
+        return args, kwargs, cls
 
     def __getitem__(self, idx):
         n_angles = self.shape[0]
