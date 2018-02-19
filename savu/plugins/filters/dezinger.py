@@ -17,7 +17,7 @@
 """
 .. module:: dezinger
    :platform: Unix
-   :synopsis: A plugin to remove dezingers
+   :synopsis: A plugin to remove zingers
 
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
