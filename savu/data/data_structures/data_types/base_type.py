@@ -20,8 +20,10 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
+
 import inspect
-from savu.data.data_structures.data import Data
+
+import savu.plugins.utils as pu
 
 
 class BaseType(object):
@@ -52,24 +54,28 @@ class BaseType(object):
     def base_map_input_args(self):
         """ Create a dictionary of required input arguments, required for
         checkpointing. """
-        argspec = inspect.getargspec(self.__init__)
-        args, kwargs = self.map_input_args([], {})
+        cls = self.__class__.__module__ + '.' + self.__class__.__name__
+        args, kwargs, cls_path = self.map_input_args([], {}, cls)
+
+        mod = '.'.join(cls_path.split('.')[:-1])
+        cls = cls_path.split('.')[-1]
+        func = pu.load_class(mod, cls).__init__
+
+        argspec = inspect.getargspec(func)
         if len(argspec[0])-1 != len(args) + len(kwargs.keys()):
             raise Exception('Incorrect number of input arguments mapped.')
-
-        # remove the data objects
-        args = ['DATA_OBJECT' if isinstance(a, Data) else args for a in args]
 
         data_lists = [True if isinstance(a, list) and isinstance(a[0], int)
                       else False for a in args]
 
         # If there are multiple data objects this is incompatible with
         # checkpointing.
-        if args.count('DATA_OBJECT') > 2 or data_lists.count(True):
+        if args.count('self') > 2 or data_lists.count(True):
             self._input_args = None
         else:
             self._input_args['args'] = args
             self._input_args['kwargs'] = kwargs
+            self._input_args['cls'] = cls_path
 
     def map_input_args(self, args, kwargs):
         """ Create a dictionary of required input arguments, required for
@@ -78,3 +84,34 @@ class BaseType(object):
 
     def get_required_args(self):
         return self._input_args
+
+    def create_clone(self, newObj):
+        dtype_dict = self.get_required_args()
+        if dtype_dict is None:
+            return None
+        args, kwargs, cls = self._get_clone_parameters()
+        args = [newObj if a == 'self' else a for a in args]
+        cls_split = cls.split('.')
+        mod = '.'.join(cls_split[:-1])
+        name = cls_split[-1]
+        cls_inst = pu.load_class(mod, cls_name=name)
+        newObj.data = cls_inst(*args, **kwargs)
+
+    def _get_clone_parameters(self):
+        dtype_dict = self.get_required_args()
+        args = dtype_dict['args']
+        kwargs = dtype_dict['kwargs']
+        args = [self.__str_to_value(self, a) for a in args]
+        for key, value in kwargs.iteritems():
+            kwargs[key] = self.__str_to_value(self, value)
+        return args, kwargs, dtype_dict['cls']
+
+    def __str_to_value(self, obj, val):
+        if not isinstance(val, str):
+            return val
+        if val == 'self':
+            return val
+        val = 'self' if val == 'DATA_OBJECT' else val
+        val = val.replace('self.', '')
+        temp = getattr(obj, val, val)
+        return temp() if inspect.ismethod(temp) else temp

@@ -37,7 +37,7 @@ class DataWithDarksAndFlats(BaseType):
         self.flat_updated = False
         self.dark_updated = False
         self.data = data_obj.data
-        self.dark_flat_slice_list = None
+        self.dark_flat_slice_list = slice(None)
 
     def _copy_base(self, new_obj):
         new_obj.flat_updated = self.flat_updated
@@ -200,10 +200,12 @@ class ImageKey(DataWithDarksAndFlats):
         if ignore:
             self.__ignore_image_key_entries(ignore)
 
-    def map_input_args(self, args, kwargs):
-        args = [self.data_obj, self.image_key, self.proj_dim]
-        kwargs['ignore'] = self.ignore
-        return args, kwargs
+    def map_input_args(self, args, kwargs, cls):
+        args = ['self', None, 'self.proj_dim']
+        kwargs['dark'] = 'self.dark'
+        kwargs['flat'] = 'self.flat'
+        cls = NoImageKey.__module__ + '.NoImageKey'
+        return args, kwargs, cls
 
     def __getitem__(self, idx):
         return self._getitem(idx)
@@ -245,13 +247,13 @@ class NoImageKey(DataWithDarksAndFlats):
     """ This class is used to get data from a dataset with separate darks and
         flats. """
 
-    def __init__(self, data_obj, image_key, proj_dim):
+    def __init__(self, data_obj, image_key, proj_dim, dark=None, flat=None):
         self.data_obj = data_obj
         self.image_key = image_key
         self.proj_dim = proj_dim
         super(NoImageKey, self).__init__(data_obj, proj_dim, image_key)
-        self.dark_path = None
-        self.flat_path = None
+        self.dark_path = dark
+        self.flat_path = flat
         self.orig_image_key = copy.copy(image_key)
         self.flat_image_key = False
         self.dark_image_key = False
@@ -267,9 +269,11 @@ class NoImageKey(DataWithDarksAndFlats):
         self.data_obj = data_obj
         self.nDims = len(self.shape)
 
-    def map_input_args(self, args, kwargs):
-        args = [self.data_obj, self.image_key, self.proj_dim]
-        return args, kwargs
+    def map_input_args(self, args, kwargs, cls):
+        args = ['self', 'self.image_key', 'self.proj_dim']
+        kwargs['dark'] = 'self.dark_path'
+        kwargs['flat'] = 'self.flat_path'
+        return args, kwargs, cls
 
     def __getitem__(self, idx):
         return self._getitem(idx)
