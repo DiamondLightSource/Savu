@@ -22,6 +22,7 @@
 
 """
 
+import os
 import h5py
 import yaml
 import collections
@@ -48,10 +49,7 @@ class YamlConverter(BaseLoader):
 
     def setup(self, template=False, metadata=True):
         #  Read YAML file
-        if self.parameters['yaml_file'] is None:
-            raise Exception('Please pass a yaml file to the yaml loader.')
-
-        data_dict = yu.read_yaml(self.parameters['yaml_file'])
+        data_dict = yu.read_yaml(self._get_yaml_file())
         data_dict = self._check_for_inheritance(data_dict, {})
         self._check_for_imports(data_dict)
         data_dict.pop('inherit', None)
@@ -61,6 +59,18 @@ class YamlConverter(BaseLoader):
 
         data_dict = self._add_template_updates(data_dict)
         self._set_entries(data_dict)
+
+    def _get_yaml_file(self):
+        yaml_file = self.parameters['yaml_file']
+        if yaml_file is None:
+            raise Exception('Please pass a yaml file to the yaml loader.')
+
+        if not os.path.exists(yaml_file):
+            path = os.path.dirname(__file__.split('savu')[0])
+            yaml_file = os.path.join(path, yaml_file)
+            if not yaml_file:
+                raise Exception('The yaml file does not exist.')
+        return yaml_file
 
     def _add_template_updates(self, ddict):
         all_entries = ddict.pop('all', {})
