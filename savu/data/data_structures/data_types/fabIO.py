@@ -53,11 +53,11 @@ class FabIO(BaseType):
         self.image_dims = set(np.arange(len(self.full_shape)))\
             .difference(set(self.frame_dim))
 
-    def map_input_args(self, args, kwargs):
-        args = [self.folder, self._data_obj, self.frame_dim]
-        kwargs['shape'] = self.shape
-        kwargs['prefix'] = self.prefix
-        return args, kwargs
+    def map_input_args(self, args, kwargs, cls):
+        args = ['self,folder', 'self', 'self.frame_dim']
+        kwargs['shape'] = 'self.shape'
+        kwargs['prefix'] = 'self.prefix'
+        return args, kwargs, cls
 
     def __getitem__(self, index):
         index = [index[i] if index[i].start is not None else
