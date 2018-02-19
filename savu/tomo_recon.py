@@ -92,6 +92,7 @@ def __option_parser():
                         help=hide, default=514)
     parser.add_argument("--test_state", dest="test_state", default='False',
                         action='store_true', help=hide)
+
     # DosNa related parameters
     parser.add_argument("--dosna_backend", dest="dosna_backend", help=hide,
                         default=None)
@@ -105,6 +106,11 @@ def __option_parser():
                         help=hide, default=None)
     parser.add_argument("--dosna_hdf5_dir", dest="dosna_hdf5_dir",
                         help=hide, default=None)
+
+    check_help = "Continue Savu processing from a checkpoint."
+    choices = ['plugin', 'subplugin']
+    parser.add_argument("--checkpoint", nargs="?", choices=choices,
+                        const='plugin', help=check_help, default=None)
 
     return parser.parse_args()
 
@@ -158,6 +164,8 @@ def _set_options(args):
     options["dosna_ceph_conffile"] = args.dosna_ceph_conffile
     options["dosna_ceph_client_id"] = args.dosna_ceph_client_id
     options["dosna_hdf5_dir"] = args.dosna_hdf5_dir
+
+    options['checkpoint'] = args.checkpoint
 
     return options
 

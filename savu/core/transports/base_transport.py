@@ -25,7 +25,6 @@
 import os
 import copy
 import h5py
-import logging
 import numpy as np
 
 import savu.core.utils as cu
@@ -120,6 +119,9 @@ class BaseTransport(object):
 
         :param plugin plugin: The current plugin instance.
         """
+        cp = self.exp.checkpoint
+        cp._initialise(plugin.get_communicator())
+
         self.process_setup(plugin)
         pDict = self.pDict
         result = [np.empty(d._get_plugin_data().get_shape_transfer(),
@@ -139,6 +141,9 @@ class BaseTransport(object):
 
             # loop over the process data
             for i in range(pDict['nProc']):
+                kill = self.exp.checkpoint.set_checkpoint(count, i)
+                if kill:
+                    break
                 data = self._get_input_data(plugin, transfer_data, i, count)
                 res = self._get_output_data(
                         plugin.plugin_process_frames(data), i)
@@ -146,9 +151,11 @@ class BaseTransport(object):
                 for j in pDict['nOut']:
                     out_sl = pDict['out_sl']['process'][i][j]
                     result[j][out_sl] = res[j]
-
+            if kill:
+                return
             self._return_all_data(count, result, end)
         cu.user_message("%s - 100%% complete" % (plugin.name))
+        cp.output_plugin_checkpoint()
 
     def _get_all_slice_lists(self, data_list, dtype):
         """ Get all slice lists for the current process.
@@ -343,7 +350,7 @@ class BaseTransport(object):
         for key in out_data_dict.keys():
             out_data = out_data_dict[key]
             filename = self.exp.meta_data.get(["filename", key])
-            out_data.backing_file = self.hdf5._open_backing_h5(filename, 'w')
+            out_data.backing_file = self.hdf5._open_backing_h5(filename, 'a')
             out_data.group_name, out_data.group = self.hdf5._create_entries(
                 out_data, key, current_and_next[count])
             count += 1
@@ -397,26 +404,63 @@ class BaseTransport(object):
             link_type = self.exp.meta_data.get(['link_type', name])
 
             if link_type is 'final_result':
-                plugin_entry = \
-                    nxs_entry.create_group('final_result_' + data.get_name())
-                plugin_entry.attrs[NX_CLASS] = 'NXdata'
-            elif link_type is 'intermediate':
+                group_name = 'final_result_' + data.get_name()
+            else:
                 link = nxs_entry.require_group(link_type)
                 link.attrs[NX_CLASS] = 'NXcollection'
-                plugin_entry = link.create_group(group_name)
-                plugin_entry.attrs[NX_CLASS] = 'NXdata'
-            else:
-                raise Exception("The link type is not known")
+                nxs_entry = link
 
-            self.__output_metadata(data, plugin_entry)
+            # delete the group if it already exists
+            if group_name in nxs_entry:
+                del nxs_entry[group_name]
 
-    def __output_metadata(self, data, entry):
+            plugin_entry = nxs_entry.require_group(group_name)
+            plugin_entry.attrs[NX_CLASS] = 'NXdata'
+            self.__output_metadata(data, plugin_entry, name)
+
+    def __output_metadata(self, data, entry, name):
         self.__output_axis_labels(data, entry)
         self.__output_data_patterns(data, entry)
-        self.__output_metadata_dict(data, entry)
+        self.__output_data_type(data, entry, name)
+        mDict = data.meta_data.get_dictionary()
+        self._output_metadata_dict(entry, mDict)
+        if self.exp.meta_data.get('link_type')[name] == 'input_data':
+            # output the filename
+            entry['file_path'] = \
+                os.path.abspath(self.exp.meta_data.get('data_file'))
+
+    def __output_data_type(self, data, entry, name):
+        if isinstance(data.data, h5py.Dataset):
+            return
+        entry = entry.create_group('data_type')
+        entry.attrs[NX_CLASS] = 'NXcollection'
+        if self.exp.meta_data.get('link_type')[name] == 'input_data':
+            cls = data.data._get_clone_parameters()[2]
+            self.__output_data(entry, cls, 'cls')
+        else:
+            args, kwargs, cls = data.data._get_clone_parameters()
+            self.__output_data(entry, args, 'args')
+            self.__output_data(entry, kwargs, 'kwargs')
+            self.__output_data(entry, cls, 'cls')
+
+    def __output_data(self, entry, data, name):
+        if isinstance(data, dict):
+            entry = entry.create_group(name)
+            entry.attrs[NX_CLASS] = 'NXcollection'
+            for key, value in data.iteritems():
+                self.__output_data(entry, value, key)
+        else:
+            try:
+                entry.create_dataset(name, data=data)
+            except TypeError:
+                import json
+                data = np.array([json.dumps(data)])
+                entry.create_dataset(name, data=data)
 
     def __output_axis_labels(self, data, entry):
         axis_labels = data.data_info.get("axis_labels")
+        ddict = data.meta_data.get_dictionary()
+
         axes = []
         count = 0
         for labels in axis_labels:
@@ -424,11 +468,8 @@ class BaseTransport(object):
             axes.append(name)
             entry.attrs[name + '_indices'] = count
 
-            try:
-                mData = data.meta_data.get(name)
-            except KeyError:
-                mData = np.arange(data.get_shape()[count])
-
+            mData = ddict[name] if name in ddict.keys() \
+                else np.arange(data.get_shape()[count])
             if isinstance(mData, list):
                 mData = np.array(mData)
 
@@ -449,11 +490,10 @@ class BaseTransport(object):
             nx_data.create_dataset('core_dims', data=values['core_dims'])
             nx_data.create_dataset('slice_dims', data=values['slice_dims'])
 
-    def __output_metadata_dict(self, data, entry):
-        meta_data = data.meta_data.get_dictionary()
+    def _output_metadata_dict(self, entry, mData):
         entry = entry.create_group('meta_data')
         entry.attrs[NX_CLASS] = 'NXcollection'
-        for mData in meta_data:
-            nx_data = entry.create_group(mData)
+        for key, value in mData.iteritems():
+            nx_data = entry.create_group(key)
             nx_data.attrs[NX_CLASS] = 'NXdata'
-            nx_data.create_dataset(mData, data=meta_data[mData])
+            self.__output_data(nx_data, value, key)

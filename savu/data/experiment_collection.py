@@ -22,14 +22,17 @@
 """
 
 import os
-import logging
 import copy
+import h5py
+import logging
 from mpi4py import MPI
 
 import savu.plugins.utils as pu
+from savu.data.meta_data import MetaData
 from savu.data.plugin_list import PluginList
 from savu.data.data_structures.data import Data
-from savu.data.meta_data import MetaData
+from savu.core.checkpointing import Checkpointing
+from savu.plugins.savers.utils.hdf5_utils import Hdf5Utils
 
 
 class Experiment(object):
@@ -40,12 +43,14 @@ class Experiment(object):
     """
 
     def __init__(self, options):
+        self.checkpoint = Checkpointing(self)
         self.meta_data = MetaData(options)
         self.__meta_data_setup(options["process_file"])
         self.experiment_collection = {}
         self.index = {"in_data": {}, "out_data": {}}
         self.initial_datasets = None
         self.plugin = None
+        self._transport = None
 
     def get(self, entry):
         """ Get the meta data dictionary. """
@@ -53,7 +58,7 @@ class Experiment(object):
 
     def __meta_data_setup(self, process_file):
         self.meta_data.plugin_list = PluginList()
-
+        self.meta_data.set('killsignal', False)
         try:
             rtype = self.meta_data.get('run_type')
             if rtype is 'test':
@@ -66,27 +71,26 @@ class Experiment(object):
             self.meta_data.plugin_list._populate_plugin_list(process_file,
                                                              template=template)
 
-    def create_data_object(self, dtype, name):
+    def create_data_object(self, dtype, name, override=True):
         """ Create a data object.
 
         Plugin developers should apply this method in loaders only.
 
         :params str dtype: either "in_data" or "out_data".
         """
-        try:
-            self.index[dtype][name]
-        except KeyError:
+        if name not in self.index[dtype].keys() or override:
             self.index[dtype][name] = Data(name, self)
             data_obj = self.index[dtype][name]
             data_obj._set_transport_data(self.meta_data.get('transport'))
         return self.index[dtype][name]
 
-    def _experiment_setup(self):
+    def _experiment_setup(self, transport):
         """ Setup an experiment collection.
         """
         n_loaders = self.meta_data.plugin_list._get_n_loaders()
         plugin_list = self.meta_data.plugin_list
         plist = plugin_list.plugin_list
+        self.__set_transport(transport)
 
         # load the loader plugins
         self._set_loaders()
@@ -96,9 +100,14 @@ class Experiment(object):
                                       'datasets': []}
 
         self._barrier()
+
+        self._check_checkpoint()  # delete the nexus file?
+        checkpoint = self.meta_data.get('checkpoint')
         if self.meta_data.get('process') == \
-                len(self.meta_data.get('processes'))-1:
+                len(self.meta_data.get('processes'))-1 and not checkpoint:
             plugin_list._save_plugin_list(self.meta_data.get('nxs_filename'))
+            # links the input data to the nexus file
+            self._add_input_data_to_nxs_file(transport)
         self._barrier()
 
         n_plugins = plugin_list._get_n_processing_plugins()
@@ -112,12 +121,43 @@ class Experiment(object):
             count += 1
         self._reset_datasets()
 
+    def __set_transport(self, transport):
+        self._transport = transport
+
+    def _get_transport(self):
+        return self._transport
+
+    def _check_checkpoint(self):
+        # if checkpointing has been set but the nxs file doesn't contain an
+        # entry then remove checkpointing (as the previous run didn't get far
+        # enough to require it).
+        if self.meta_data.get('checkpoint'):
+            with h5py.File(self.meta_data.get('nxs_filename'), 'r') as f:
+                if 'entry' not in f:
+                    self.meta_data.set('checkpoint', None)
+
     def _set_loaders(self):
         n_loaders = self.meta_data.plugin_list._get_n_loaders()
         plugin_list = self.meta_data.plugin_list.plugin_list
         for i in range(n_loaders):
             pu.plugin_loader(self, plugin_list[i])
         self.initial_datasets = copy.deepcopy(self.index['in_data'])
+
+    def _add_input_data_to_nxs_file(self, transport):
+        # save the loaded data to file
+        h5 = Hdf5Utils(self)
+        for name, data in self.index['in_data'].iteritems():
+            self.meta_data.set(['link_type', name], 'input_data')
+            self.meta_data.set(['group_name', name], name)
+            self.meta_data.set(['filename', name], data.backing_file)
+            transport._populate_nexus_file(data)
+            h5._link_datafile_to_nexus_file(data)
+
+    def _add_meta_data_to_nxs_file(self):
+        with h5py.File(self.meta_data.get('nxs_filename'), 'a') as nxs_file:
+            nxs_entry = nxs_file['entry']
+            mDict = self.meta_data.get_dictionary()
+            self._get_transport()._output_metadata_dict(nxs_entry, mDict)
 
     def _reset_datasets(self):
         self.index['in_data'] = self.initial_datasets
@@ -260,4 +300,3 @@ class Experiment(object):
         for key, value in self.index["in_data"].iteritems():
             logging.log(log_level, "out data (%s) shape = %s", key,
                         value.get_shape())
-

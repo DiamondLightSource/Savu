@@ -24,8 +24,10 @@
 import logging
 from mpi4py import MPI
 
+from savu.plugins.driver.base_driver import BaseDriver
 
-class BasicDriver(object):
+
+class BasicDriver(BaseDriver):
     """
     The base class from which all plugins should inherit.
     """
@@ -39,18 +41,26 @@ class BasicDriver(object):
         If parameter tuning is required, loop over the methods and set the
         correct parameters for each run. """
 
+        self.__set_communicator(communicator)
+
         logging.info("%s.%s", self.__class__.__name__, 'pre_process')
         self.base_pre_process()
         self.pre_process()
         logging.info("%s.%s", self.__class__.__name__, '_barrier')
-        self.exp._barrier(communicator=communicator)
+        self.plugin_barrier()
 
         logging.info("%s.%s", self.__class__.__name__, 'process_frames')
         transport._transport_process(self)
 
         logging.info("%s.%s", self.__class__.__name__, '_barrier')
-        self.exp._barrier(communicator=communicator)
+        self.plugin_barrier()
 
         logging.info("%s.%s", self.__class__.__name__, 'post_process')
         self.post_process()
         self.base_post_process()
+
+    def __set_communicator(self, comm):
+        self._communicator = comm
+
+    def get_communicator(self):
+        return self._communicator

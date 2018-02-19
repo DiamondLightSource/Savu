@@ -24,14 +24,17 @@ import logging
 import numpy as np
 from mpi4py import MPI
 
+from savu.plugins.driver.base_driver import BaseDriver
 
-class PluginDriver(object):
+
+class PluginDriver(BaseDriver):
     """
     The base class from which all plugins should inherit.
     """
 
     def __init__(self):
         super(PluginDriver, self).__init__()
+        self._communicator = None
 
     def _run_plugin_instances(self, transport, communicator=MPI.COMM_WORLD):
         """ Runs the pre_process, process and post_process methods.
@@ -39,6 +42,7 @@ class PluginDriver(object):
         If parameter tuning is required, loop over the methods and set the
         correct parameters for each run. """
 
+        self.__set_communicator(communicator)
         out_data = self.get_out_datasets()
         extra_dims = self.extra_dims
         repeat = np.prod(extra_dims) if extra_dims else 1
@@ -70,13 +74,13 @@ class PluginDriver(object):
             self.base_pre_process()
             self.pre_process()
             logging.info("%s.%s", self.__class__.__name__, '_barrier')
-            self.exp._barrier(communicator=communicator)
+            self.plugin_barrier()
 
             logging.info("%s.%s", self.__class__.__name__, 'process_frames')
             transport._transport_process(self)
 
             logging.info("%s.%s", self.__class__.__name__, '_barrier')
-            self.exp._barrier(communicator=communicator)
+            self.plugin_barrier()
 
             logging.info("%s.%s", self.__class__.__name__, 'post_process')
             self.post_process()
@@ -106,3 +110,9 @@ class PluginDriver(object):
             idx = np.ravel(np.kron(range(dims[i]), np.ones((repeat, chunk))))
             indices_list.append(idx.astype(int))
         return np.transpose(np.array(indices_list))
+
+    def __set_communicator(self, comm):
+        self._communicator = comm
+
+    def get_communicator(self):
+        return self._communicator
