@@ -46,7 +46,7 @@ class YamlConverter(BaseLoader):
     def __init__(self, name='YamlConverter'):
         super(YamlConverter, self).__init__(name)
 
-    def setup(self, template=False):
+    def setup(self, template=False, metadata=True):
         #  Read YAML file
         if self.parameters['yaml_file'] is None:
             raise Exception('Please pass a yaml file to the yaml loader.')
@@ -108,7 +108,7 @@ class YamlConverter(BaseLoader):
         for name in entries:
             self.get_description(ddict[name], name)
 
-    def get_description(self, entry, name):
+    def get_description(self, entry, name, metadata=True):
         # set params first as we may need them subsequently
         if 'params' in entry:
             self._set_params(entry['params'])
@@ -121,6 +121,10 @@ class YamlConverter(BaseLoader):
             emsg = 'Please specify the data information in the yaml file.'
             raise Exception(emsg)
 
+        if metadata:
+            self._get_meta_data_descriptions(entry, data_obj)
+
+    def _get_meta_data_descriptions(self, entry, data_obj):
         # --------------- check for axis label information -----------------
         if 'axis_labels' in entry.keys():
             self._set_axis_labels(data_obj, entry['axis_labels'])
@@ -138,9 +142,9 @@ class YamlConverter(BaseLoader):
             self._set_metadata(data_obj, entry['metadata'])
         self.set_data_reduction_params(data_obj)
 
-    def set_data(name, entry):
-        raise NotImplementedError('Please implement "get_description" function'
-                                  'in the loader')
+    def set_data(self, name, entry):
+        raise NotImplementedError('Please implement "set_data" function'
+                                  ' in the loader')
 
     def _set_keywords(self, dObj):
         filepath = str(dObj.backing_file.filename)

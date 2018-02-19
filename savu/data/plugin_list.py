@@ -80,7 +80,6 @@ class PluginList(object):
     def _populate_plugin_list(self, filename, activePass=False,
                               template=False):
         """ Populate the plugin list from a nexus file. """
-
         plugin_file = h5py.File(filename, 'r')
         plugin_group = plugin_file['entry/plugin']
         self.plugin_list = []
@@ -101,7 +100,7 @@ class PluginList(object):
                 plugin['pos'] = key.encode('ascii').strip()
 
                 for jkey in json_keys:
-                    plugin[jkey] = self.__convert_to_list(self.__byteify(
+                    plugin[jkey] = self._convert_to_list(self._byteify(
                         json.loads(plugin_group[key][jkey][0])))
                 self.plugin_list.append(plugin)
 
@@ -127,7 +126,7 @@ class PluginList(object):
 
         if self._template and self._template.creating:
             fname = os.path.splitext(out_filename)[0] + '.savu'
-            self._template._output_template(fname)
+            self._template._output_template(fname, out_filename)
 
     def __populate_plugins_group(self, plugins_group, plugin, count):
         if 'pos' in plugin.keys():
@@ -184,19 +183,19 @@ class PluginList(object):
         plugin_inst._populate_default_parameters()
         return plugin_inst.docstring_info
 
-    def __byteify(self, input):
+    def _byteify(self, input):
         if isinstance(input, dict):
-            return {self.__byteify(key): self.__byteify(value)
+            return {self._byteify(key): self._byteify(value)
                     for key, value in input.iteritems()}
         elif isinstance(input, list):
-            temp = [self.__byteify(element) for element in input]
+            temp = [self._byteify(element) for element in input]
             return temp
         elif isinstance(input, unicode):
             return input.encode('utf-8')
         else:
             return input
 
-    def __convert_to_list(self, data):
+    def _convert_to_list(self, data):
         if isinstance(data, list):
             return data
         for key in data:
@@ -345,12 +344,13 @@ class Template(object):
         self.plist = plist
         self.creating = False
 
-    def _output_template(self, fname):
+    def _output_template(self, fname, process_fname):
         plist = self.plist.plugin_list
         index = [i for i in range(len(plist)) if plist[i]['active']]
 
         local_dict = MetaData(ordered=True)
         global_dict = MetaData(ordered=True)
+        local_dict.set(['process_list'], os.path.abspath(process_fname))
 
         for i in index:
             params = self.__get_template_params(plist[i]['data'], [])
@@ -390,29 +390,6 @@ class Template(object):
         yfile = template_check[1] if template_check is not False else yfile
         yaml.parameters = {'yaml_file': yfile}
         return yaml.setup(template=True)
-
-#    def update_process_list(self, template):
-#        tdict = yu.read_yaml(template)
-#        for key, pdict in tdict.iteritems():
-#            depth = self.dict_depth(pdict)
-#            plugin = pdict.keys()[0]
-#            print key, pdict, depth
-#            if depth == 2:
-#                param = pdict[plugin].keys()[0]
-#                value = pdict[plugin][param]
-#                if isinstance(key, str):
-#                    self._set_param_for_all_instances_of_a_plugin(
-#                            plugin, param, value)
-#                else:
-#                    self._set_param_for_one_plugin(key, param, value)
-#            elif depth == 3:
-#                data = pdict[plugin].keys()[0]
-#                param = pdict[plugin][data].keys()[0]
-#                value = pdict[plugin][data][param]
-#                self._set_param_for_template_loader_plugin(
-#                        key, data, param, value)
-#            else:
-#                raise Exception("Template key not recognised.")
 
     def update_process_list(self, template):
         tdict = yu.read_yaml(template)
