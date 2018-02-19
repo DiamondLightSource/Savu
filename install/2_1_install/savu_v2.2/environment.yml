@@ -16,7 +16,7 @@ dependencies:
 - gettext=0.19.7=1
 - glib=2.51.4=0
 - icu=58.1=1
-- libnetcdf=4.4.1.1=5
+- libnetcdf=4.4.1.1=7
 - libpng=1.6.28=0
 - matplotlib=2.0.2=np113py27_0
 - netcdf4=1.2.9=np113py27_0

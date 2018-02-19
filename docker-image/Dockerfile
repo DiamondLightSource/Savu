@@ -8,8 +8,9 @@ USER root
 RUN yum groupinstall -y 'Development Tools'
 RUN yum -y install wget 
 RUN yum install -y mesa-libGL-devel mesa-libGLU-devel
+RUN yum install -y boost-devel
 
-ENV VERSION=2.2
+ENV VERSION=2.2.1
 ENV FTTW=3.3.7
 ENV OPENMPI=3.0.0
 
@@ -25,14 +26,12 @@ ADD https://www.open-mpi.org/software/ompi/v3.0/downloads/openmpi-${OPENMPI}.tar
 RUN tar -xf openmpi-${OPENMPI}.tar.gz 
 RUN /openmpi-${OPENMPI}/configure --with-sge --enable-orterun-prefix-by-default && make /openmpi-${OPENMPI}/ && make install /openmpi-${OPENMPI}/
 
-# Download Savu and build it  
-ADD https://savu.readthedocs.io/en/latest/_downloads/savu_v${VERSION}.tar.gz /savu.tar.gz
-RUN tar -xf savu.tar.gz
-
 ENV LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 
-RUN chmod +x /savu_v${VERSION}/savu_installer.sh
-RUN /bin/bash /savu_v${VERSION}/savu_installer.sh --no_prompts
+# Get and install Savu 
+COPY get-and-install-savu.sh /get-and-install-savu.sh
+RUN chmod +x /get-and-install-savu.sh
+RUN /get-and-install-savu.sh $VERSION
 
 ENV PATH=/root/miniconda/bin:$PATH
 
