@@ -55,19 +55,23 @@ class Dezinger(BaseFilter, CpuPlugin):
         flat = inData.data.flat()
         pad_list = ((self.pad, self.pad), (0, 0), (0, 0))
 
+        print dark, flat
+
         # dezing the dark field
-        (retval, self.warnflag, self.errflag) = dezing.setup_size(
-            dark.shape, self.parameters['outlier_mu'], self.pad,
-            mode=self.parameters['mode'])
-        dark = self._dezing(np.pad(dark, pad_list, mode='edge'))
-        (retval, self.warnflag, self.errflag) = dezing.cleanup()
+        if dark:
+            (retval, self.warnflag, self.errflag) = dezing.setup_size(
+                dark.shape, self.parameters['outlier_mu'], self.pad,
+                mode=self.parameters['mode'])
+            dark = self._dezing(np.pad(dark, pad_list, mode='edge'))
+            (retval, self.warnflag, self.errflag) = dezing.cleanup()
 
         # dezing the flat field
-        (retval, self.warnflag, self.errflag) = dezing.setup_size(
-            flat.shape, self.parameters['outlier_mu'],
-            self.pad, mode=self.parameters['mode'])
-        flat = self._dezing(np.pad(flat, pad_list, mode='edge'))
-        (retval, self.warnflag, self.errflag) = dezing.cleanup()
+        if flat:
+            (retval, self.warnflag, self.errflag) = dezing.setup_size(
+                flat.shape, self.parameters['outlier_mu'],
+                self.pad, mode=self.parameters['mode'])
+            flat = self._dezing(np.pad(flat, pad_list, mode='edge'))
+            (retval, self.warnflag, self.errflag) = dezing.cleanup()
 
         # setup dezing for data
         (retval, self.warnflag, self.errflag) = \

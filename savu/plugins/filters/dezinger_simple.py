@@ -58,12 +58,16 @@ class DezingerSimple(BaseFilter, CpuPlugin):
         pad_list = [(0, 0)]*3
         pad_list[self.proj_dim] = (self.pad, self.pad)
 
-        dark = np.pad(inData.data.dark(), pad_list, mode='edge')
-        flat = np.pad(inData.data.flat(), pad_list, mode='edge')
-        dark = self._process_calibration_frames(dark)
-        flat = self._process_calibration_frames(flat)
-        inData.data.update_dark(dark[self.pad:-self.pad])
-        inData.data.update_flat(flat[self.pad:-self.pad])
+        dark = inData.data.dark()
+        flat = inData.data.flat()
+        if dark:
+            dark = np.pad(inData.data.dark(), pad_list, mode='edge')
+            dark = self._process_calibration_frames(dark)
+            inData.data.update_dark(dark[self.pad:-self.pad])
+        if flat:
+            flat = np.pad(inData.data.flat(), pad_list, mode='edge')
+            flat = self._process_calibration_frames(flat)
+            inData.data.update_flat(flat[self.pad:-self.pad])
 
     def _process_calibration_frames(self, data):
         nSlices = data.shape[self.proj_dim] - 2*self.pad
