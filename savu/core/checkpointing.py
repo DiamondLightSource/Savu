@@ -46,15 +46,15 @@ class Checkpointing(object):
         self._comm = comm
         n_procs = len(self._exp.meta_data.get('processes'))
         with self._h5._open_backing_h5(self._file, 'a', comm=comm) as f:
-            if not f.keys():
-                f.create_dataset('transfer_idx', (n_procs,), dtype=np.int16)
-                f.create_dataset('process_idx', (n_procs,), dtype=np.int8)
-                f.create_dataset('completed_plugins', (1,), dtype=np.int8)
-                f['completed_plugins'][:] = 0
-            else:
-                f['transfer_idx'][:] = np.zeros(n_procs)
-                f['process_idx'][:] = np.zeros(n_procs)
+            self.__create_dataset(f, 'transfer_idx', n_procs, np.int16)
+            self.__create_dataset(f, 'process_idx', n_procs, np.int8)
+            self.__create_dataset(f, 'completed_plugins', n_procs, np.int8)
         self._exp._barrier(communicator=comm)
+
+    def __create_dataset(self, f, name, size, dtype):
+        if name in f.keys():
+            f.__delitem__(name)
+        f.create_dataset(name, data=np.zeros(size, dtype=dtype))
 
     def __set_checkpoint_info(self):
         mData = self._exp.meta_data.get
