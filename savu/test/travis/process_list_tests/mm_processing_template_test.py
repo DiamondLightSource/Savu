@@ -27,13 +27,14 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
 
-class MmProcessingTest(unittest.TestCase):
+class MmProcessingTemplateTest(unittest.TestCase):
 
     def test_process(self):
         data_file = tu.get_test_data_path('mm.nxs')
-        process_file = tu.get_test_process_path('mm_processing.nxs')
+        process_file = tu.get_test_process_path('mm_template_processing.nxs')
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
 
 if __name__ == "__main__":
     unittest.main()
+

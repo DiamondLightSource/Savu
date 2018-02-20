@@ -26,7 +26,7 @@ import os
 import h5py
 import yaml
 import collections
-import numpy as np # used in exec so do not delete
+import numpy as np  # used in exec so do not delete
 
 import savu.plugins.utils as pu
 import savu.plugins.loaders.utils.yaml_utils as yu
@@ -49,7 +49,8 @@ class YamlConverter(BaseLoader):
 
     def setup(self, template=False, metadata=True):
         #  Read YAML file
-        data_dict = yu.read_yaml(self._get_yaml_file())
+        yfile = self.parameters['yaml_file']
+        data_dict = yu.read_yaml(self._get_yaml_file(yfile))
         data_dict = self._check_for_inheritance(data_dict, {})
         self._check_for_imports(data_dict)
         data_dict.pop('inherit', None)
@@ -60,15 +61,14 @@ class YamlConverter(BaseLoader):
         data_dict = self._add_template_updates(data_dict)
         self._set_entries(data_dict)
 
-    def _get_yaml_file(self):
-        yaml_file = self.parameters['yaml_file']
+    def _get_yaml_file(self, yaml_file):
         if yaml_file is None:
             raise Exception('Please pass a yaml file to the yaml loader.')
 
         if not os.path.exists(yaml_file):
             path = os.path.dirname(__file__.split('savu')[0])
             yaml_file = os.path.join(path, yaml_file)
-            if not yaml_file:
+            if not os.path.exists(yaml_file):
                 raise Exception('The yaml file does not exist.')
         return yaml_file
 
@@ -99,7 +99,7 @@ class YamlConverter(BaseLoader):
             idict = idict if isinstance(idict, list) else [idict]
             for i in idict:
                 if i != 'None':
-                    new_dict = yu.read_yaml(i)
+                    new_dict = yu.read_yaml(self._get_yaml_file(i))
                     inherit.update(new_dict)
                     inherit = self._check_for_inheritance(new_dict, inherit)
         self._update(inherit, ddict)
@@ -193,8 +193,26 @@ class YamlConverter(BaseLoader):
         # find files, open and add to the namespace then delete file params
         files = [k for k in params.keys() if k.endswith('file')]
         for f in files:
-            globals()[str(f)] = self.update_value(None, params[f])
+            param = params[f]
+            try:
+                globals()[str(f)] = self.update_value(None, param)
+            except IOError:
+                self._check_for_test_data(f, param)
             del params[f]
+
+    def _check_for_test_data(self, f, param):
+        # check if this is Savu test data
+        substrs = param.split("'")[1:2]
+        filename = None
+        for s in substrs:
+            try:
+                filename = self._get_yaml_file(s)
+                break
+            except:
+                pass
+        param = param.replace(s, filename)
+        globals()[str(f)] = self.update_value(None, param)
+        del self.parameters[f]
 
     def _update_template_params(self, params):
         for k, v in params.iteritems():

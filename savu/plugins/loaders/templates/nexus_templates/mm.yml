@@ -1,6 +1,6 @@
 inherit: 
-    - /home/qmm55171/Documents/temp_docs/temp_output/test_yml_files/fluo.yml
-    - /home/qmm55171/Documents/temp_docs/temp_output/test_yml_files/stxm.yml
-    - /home/qmm55171/Documents/temp_docs/temp_output/test_yml_files/monitor.yml
-    - /home/qmm55171/Documents/temp_docs/temp_output/test_yml_files/xrd.yml
+    - savu/plugins/loaders/templates/nexus_templates/fluo.yml
+    - savu/plugins/loaders/templates/nexus_templates/stxm.yml
+    - savu/plugins/loaders/templates/nexus_templates/monitor.yml
+    - savu/plugins/loaders/templates/nexus_templates/xrd.yml
 
