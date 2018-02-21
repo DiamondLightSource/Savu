@@ -55,10 +55,8 @@ class Dezinger(BaseFilter, CpuPlugin):
         flat = inData.data.flat()
         pad_list = ((self.pad, self.pad), (0, 0), (0, 0))
 
-        print dark, flat
-
         # dezing the dark field
-        if dark:
+        if not dark.size:
             (retval, self.warnflag, self.errflag) = dezing.setup_size(
                 dark.shape, self.parameters['outlier_mu'], self.pad,
                 mode=self.parameters['mode'])
@@ -66,7 +64,7 @@ class Dezinger(BaseFilter, CpuPlugin):
             (retval, self.warnflag, self.errflag) = dezing.cleanup()
 
         # dezing the flat field
-        if flat:
+        if not flat.size:
             (retval, self.warnflag, self.errflag) = dezing.setup_size(
                 flat.shape, self.parameters['outlier_mu'],
                 self.pad, mode=self.parameters['mode'])
