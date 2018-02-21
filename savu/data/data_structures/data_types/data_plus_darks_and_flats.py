@@ -149,7 +149,7 @@ class DataWithDarksAndFlats(BaseType):
         # apart, as this significantly improves hdf5 performance.
         split_diff = 10
         k_idx = self.get_index(key)
-        if not k_idx.any():
+        if not k_idx.size:
             return np.array([])
 
         k_idx = np.split(k_idx, np.where(np.diff(k_idx) > split_diff)[0]+1)
