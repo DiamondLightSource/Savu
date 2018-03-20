@@ -23,12 +23,14 @@
 """
 
 import os
+import time
 import copy
 import h5py
 import numpy as np
 
 import savu.core.utils as cu
 import savu.plugins.utils as pu
+from savu.data.data_structures.data_types.base_type import BaseType
 
 NX_CLASS = 'NX_class'
 
@@ -119,43 +121,69 @@ class BaseTransport(object):
 
         :param plugin plugin: The current plugin instance.
         """
+        pDict, result, nTrans = self._initialise(plugin)
         cp = self.exp.checkpoint
         cp._initialise(plugin.get_communicator())
 
-        self.process_setup(plugin)
-        pDict = self.pDict
-        result = [np.empty(d._get_plugin_data().get_shape_transfer(),
-                           dtype=np.float32) for d in pDict['out_data']]
-
-        # loop over the transfer data
-        nTrans = pDict['nTrans']
-        self.no_processing = True if not nTrans else False
-
-        for count in range(nTrans):
+        count = 0  # temporary solution
+        prange = range(cp.get_proc_idx(), pDict['nProc'])
+        kill = False
+        for count in range(cp.get_trans_idx(), nTrans):
             end = True if count == nTrans-1 else False
-            percent_complete = count/(nTrans * 0.01)
-            cu.user_message("%s - %3i%% complete" %
-                            (plugin.name, percent_complete))
+            self._log_completion_status(count, nTrans, plugin.name)
+
             # get the transfer data
             transfer_data = self._transfer_all_data(count)
 
             # loop over the process data
-            for i in range(pDict['nProc']):
-                kill = self.exp.checkpoint.set_checkpoint(count, i)
-                if kill:
-                    break
-                data = self._get_input_data(plugin, transfer_data, i, count)
-                res = self._get_output_data(
-                        plugin.plugin_process_frames(data), i)
+            result, kill = self._process_loop(
+                    plugin, prange, transfer_data, count, pDict, result, cp)
 
-                for j in pDict['nOut']:
-                    out_sl = pDict['out_sl']['process'][i][j]
-                    result[j][out_sl] = res[j]
-            if kill:
-                return
             self._return_all_data(count, result, end)
-        cu.user_message("%s - 100%% complete" % (plugin.name))
-        cp.output_plugin_checkpoint()
+            if kill:
+                return 1
+
+        if not kill:
+            cu.user_message("%s - 100%% complete" % (plugin.name))
+
+    def _process_loop(self, plugin, prange, tdata, count, pDict, result, cp):
+        kill_signal = False
+        for i in prange:
+            if cp.is_time_to_checkpoint(self, count, i):
+                # kill signal sent so stop the processing
+                return result, True
+            data = self._get_input_data(plugin, tdata, i, count)
+            res = self._get_output_data(
+                    plugin.plugin_process_frames(data), i)
+
+            for j in pDict['nOut']:
+                out_sl = pDict['out_sl']['process'][i][j]
+                result[j][out_sl] = res[j]
+        return result, kill_signal
+
+    def _initialise(self, plugin):
+        self.process_setup(plugin)
+        pDict = self.pDict
+        result = [np.empty(d._get_plugin_data().get_shape_transfer(),
+                           dtype=np.float32) for d in pDict['out_data']]
+        # loop over the transfer data
+        nTrans = pDict['nTrans']
+        self.no_processing = True if not nTrans else False
+        return pDict, result, nTrans
+
+    def _log_completion_status(self, count, nTrans, name):
+        percent_complete = count/(nTrans * 0.01)
+        cu.user_message("%s - %3i%% complete" % (name, percent_complete))
+
+    def _transport_checkpoint(self):
+        """ The framework has determined it is time to checkpoint.  What
+        should the transport mechanism do? Override if appropriate. """
+        return False
+
+    def _transport_kill_signal(self):
+        """ An opportunity to send a kill signal to the framework.  Return
+        True or False. """
+        return False
 
     def _get_all_slice_lists(self, data_list, dtype):
         """ Get all slice lists for the current process.
@@ -350,6 +378,7 @@ class BaseTransport(object):
         for key in out_data_dict.keys():
             out_data = out_data_dict[key]
             filename = self.exp.meta_data.get(["filename", key])
+
             out_data.backing_file = self.hdf5._open_backing_h5(filename, 'a')
             out_data.group_name, out_data.group = self.hdf5._create_entries(
                 out_data, key, current_and_next[count])
@@ -381,7 +410,6 @@ class BaseTransport(object):
 
             filename = os.path.join(out_path, name)
             group_name = "%i-%s-%s" % (count, plugin_dict['name'], key)
-            self.exp._barrier()
             files["filename"][key] = filename
             files["group_name"][key] = group_name
 
@@ -416,46 +444,64 @@ class BaseTransport(object):
 
             plugin_entry = nxs_entry.require_group(group_name)
             plugin_entry.attrs[NX_CLASS] = 'NXdata'
-            self.__output_metadata(data, plugin_entry, name)
+            self._output_metadata(data, plugin_entry, name)
 
-    def __output_metadata(self, data, entry, name):
-        self.__output_axis_labels(data, entry)
-        self.__output_data_patterns(data, entry)
-        self.__output_data_type(data, entry, name)
+    def _output_metadata(self, data, entry, name, dump=False):
+        self.__output_data_type(entry, data, name)
         mDict = data.meta_data.get_dictionary()
         self._output_metadata_dict(entry, mDict)
-        if self.exp.meta_data.get('link_type')[name] == 'input_data':
-            # output the filename
-            entry['file_path'] = \
-                os.path.abspath(self.exp.meta_data.get('data_file'))
 
-    def __output_data_type(self, data, entry, name):
-        if isinstance(data.data, h5py.Dataset):
+        if not dump:
+            self.__output_axis_labels(data, entry)
+            self.__output_data_patterns(data, entry)
+            if self.exp.meta_data.get('link_type')[name] == 'input_data':
+                # output the filename
+                entry['file_path'] = \
+                    os.path.abspath(self.exp.meta_data.get('data_file'))
+
+    def __output_data_type(self, entry, data, name):
+        data = data.data if 'data' in data.__dict__.keys() else data
+        if isinstance(data, h5py.Dataset):
             return
-        entry = entry.create_group('data_type')
+
+        entry = entry.require_group('data_type')
         entry.attrs[NX_CLASS] = 'NXcollection'
-        if self.exp.meta_data.get('link_type')[name] == 'input_data':
-            cls = data.data._get_clone_parameters()[2]
-            self.__output_data(entry, cls, 'cls')
-        else:
-            args, kwargs, cls = data.data._get_clone_parameters()
-            self.__output_data(entry, args, 'args')
-            self.__output_data(entry, kwargs, 'kwargs')
-            self.__output_data(entry, cls, 'cls')
+        args, kwargs, cls = data._get_clone_parameters()
+
+        for key, value in kwargs.iteritems():
+            gp = entry.require_group('kwargs')
+            if isinstance(value, BaseType):
+                self.__output_data_type(gp.require_group(key), value, key)
+            else:
+                self.__output_data(gp, value, key)
+
+        self.__output_data(entry, args, 'args')
+        self.__output_data(entry, cls, 'cls')
+
+        if 'data' in data.__dict__.keys() and not \
+                isinstance(data.data, h5py.Dataset):
+            gp = entry.require_group('data')
+            self.__output_data_type(gp, data.data, 'data')
 
     def __output_data(self, entry, data, name):
         if isinstance(data, dict):
-            entry = entry.create_group(name)
+            entry = entry.require_group(name)
             entry.attrs[NX_CLASS] = 'NXcollection'
             for key, value in data.iteritems():
                 self.__output_data(entry, value, key)
         else:
             try:
-                entry.create_dataset(name, data=data)
-            except TypeError:
+                self.__create_dataset(entry, name, data)
+            except:
                 import json
                 data = np.array([json.dumps(data)])
-                entry.create_dataset(name, data=data)
+                self.__create_dataset(entry, name, data)
+
+    def __create_dataset(self, entry, name, data):
+        if name not in entry.keys():
+            entry.create_dataset(name, data=data)
+        else:
+            entry[name][...] = data
 
     def __output_axis_labels(self, data, entry):
         axis_labels = data.data_info.get("axis_labels")
@@ -473,7 +519,7 @@ class BaseTransport(object):
             if isinstance(mData, list):
                 mData = np.array(mData)
 
-            axis_entry = entry.create_dataset(name, mData.shape, mData.dtype)
+            axis_entry = entry.require_dataset(name, mData.shape, mData.dtype)
             axis_entry[...] = mData[...]
             axis_entry.attrs['units'] = labels.values()[0]
             count += 1
@@ -481,19 +527,19 @@ class BaseTransport(object):
 
     def __output_data_patterns(self, data, entry):
         data_patterns = data.data_info.get("data_patterns")
-        entry = entry.create_group('patterns')
+        entry = entry.require_group('patterns')
         entry.attrs[NX_CLASS] = 'NXcollection'
         for pattern in data_patterns:
-            nx_data = entry.create_group(pattern)
+            nx_data = entry.require_group(pattern)
             nx_data.attrs[NX_CLASS] = 'NXparameters'
             values = data_patterns[pattern]
-            nx_data.create_dataset('core_dims', data=values['core_dims'])
-            nx_data.create_dataset('slice_dims', data=values['slice_dims'])
+            self.__output_data(nx_data, values['core_dims'], 'core_dims')
+            self.__output_data(nx_data, values['slice_dims'], 'slice_dims')
 
     def _output_metadata_dict(self, entry, mData):
-        entry = entry.create_group('meta_data')
+        entry = entry.require_group('meta_data')
         entry.attrs[NX_CLASS] = 'NXcollection'
         for key, value in mData.iteritems():
-            nx_data = entry.create_group(key)
+            nx_data = entry.require_group(key)
             nx_data.attrs[NX_CLASS] = 'NXdata'
             self.__output_data(nx_data, value, key)

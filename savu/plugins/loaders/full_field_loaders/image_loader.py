@@ -89,12 +89,10 @@ class ImageLoader(BaseLoader):
                 not self.parameters['flat_prefix']:
             return
 
+        dObj.data = NoImageKey(dObj, None, 0)
         # read dark and flat images
         dpath, dfix = self._get_path(self.parameters['dark_prefix'], path)
         fpath, ffix = self._get_path(self.parameters['flat_prefix'], path)
-
-        dObj.data.add_base_class_with_instance(
-                NoImageKey, NoImageKey(dObj, None, 0))
 
         fdim = self.parameters['frame_dim']
         dark = FabIO(dpath, dObj, [fdim], None, dfix)

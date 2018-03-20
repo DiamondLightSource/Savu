@@ -39,6 +39,9 @@ class DataWithDarksAndFlats(BaseType):
         self.data = data_obj.data
         self.dark_flat_slice_list = slice(None)
 
+    def _override_data_type(self, data):
+        self.data = data
+
     def _copy_base(self, new_obj):
         new_obj.flat_updated = self.flat_updated
         new_obj.dark_updated = self.dark_updated

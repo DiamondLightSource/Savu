@@ -47,15 +47,22 @@ class Hdf5Utils(object):
         # info.Set("romio_cb_read", "disable")
         # info.Set("romio_cb_write", "disable")
 
-    def _open_backing_h5(self, filename, mode, comm=MPI.COMM_WORLD):
+    def _open_backing_h5(self, filename, mode, comm=MPI.COMM_WORLD, mpi=True):
         """
         Create a h5 backend for output data
         """
-        self.exp._barrier(communicator=comm)
+
+        if mpi:
+            msg = self.__class__.__name__ + "_open_backing_h5 %s" + filename
+            self.exp._barrier(communicator=comm, msg=msg+'1')
+
         kwargs = {'driver': 'mpio', 'comm': comm, 'info': self.info}\
-            if self.exp.meta_data.get('mpi') else {}
+            if self.exp.meta_data.get('mpi') and mpi else {}
+
         backing_file = h5py.File(filename, mode, **kwargs)
-        self.exp._barrier(communicator=comm)
+
+        if mpi:
+            self.exp._barrier(communicator=comm, msg=msg+'2')
 
         if backing_file is None:
             raise IOError("Failed to open the hdf5 file")
@@ -120,7 +127,8 @@ class Hdf5Utils(object):
         return data
 
     def _create_entries(self, data, key, current_and_next):
-        self.exp._barrier()
+        msg = self.__class__.__name__ + '_create_entries'
+        self.exp._barrier(msg=msg+'1')
 
         expInfo = self.exp.meta_data
         group_name = expInfo.get(["group_name", key])
@@ -130,9 +138,9 @@ class Hdf5Utils(object):
         except AttributeError:
             pass
 
-        self.exp._barrier()
+        self.exp._barrier(msg=msg+'2')
         group = data.backing_file.require_group(group_name)
-        self.exp._barrier()
+        self.exp._barrier(msg=msg+'3')
         shape = data.get_shape()
 
         if 'data' in group:
@@ -158,11 +166,11 @@ class Hdf5Utils(object):
 #            print "chunks = ", chunks
 #            print "chunk_max", settings[2]
 
-            self.exp._barrier()
+            self.exp._barrier(msg=msg+'4')
             data.data = self.create_dataset_nofill(
                     group, "data", shape, data.dtype, chunks=chunks)
 
-        self.exp._barrier()
+        self.exp._barrier(msg=msg+'5')
 
         return group_name, group
 
@@ -170,9 +178,10 @@ class Hdf5Utils(object):
         """
         Closes the backing file
         """
-        self.exp._barrier()
+        msg = self.__class__.__name__ + "_close_file" + \
+            data.backing_file.filename
+        self.exp._barrier(msg=msg)
         logging.debug("Attempting to close the file ")
-
         if data.backing_file is not None:
             try:
                 filename = data.backing_file.filename
@@ -181,7 +190,7 @@ class Hdf5Utils(object):
                 data.backing_file = None
             except:
                 logging.debug("File close unsuccessful", filename)
-        self.exp._barrier()
+        self.exp._barrier(msg=msg)
 
     def _reopen_file(self, data, mode):
         filename = data.backing_file.filename

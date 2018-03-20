@@ -53,21 +53,28 @@ class PluginRunner(object):
 
         logging.info('Setting up the experiment')
         self.exp._experiment_setup(self)
+
         exp_coll = self.exp._get_experiment_collection()
         n_plugins = plugin_list._get_n_processing_plugins()
-
-        checkpoint = self.exp.checkpoint.get_checkpoint_plugin()
 
         #  ********* transport function ***********
         logging.info('Running transport_pre_plugin_list_run()')
         self._transport_pre_plugin_list_run()
 
+        checkpoint = self.exp.checkpoint.get_checkpoint_plugin()
+
         for i in range(checkpoint, n_plugins):
             self.exp._set_experiment_for_current_plugin(i)
             self.__run_plugin(exp_coll['plugin_dict'][i])
             # end the plugin run if savu has been killed
-            if self.exp.meta_data.get('killsignal'):
+            self.exp._barrier(msg='PluginRunner: plugin complete.')
+
+            #  ********* transport functions ***********
+            if self._transport_kill_signal():
+                self._transport_cleanup(i+1)
                 break
+            self.exp._barrier(msg='PluginRunner: No kill signal... continue.')
+            self.exp.checkpoint.output_plugin_checkpoint()
 
         #  ********* transport function ***********
         logging.info('Running transport_post_plugin_list_run')
@@ -77,16 +84,16 @@ class PluginRunner(object):
         for data in self.exp.index['in_data'].values():
             self._transport_terminate_dataset(data)
 
-        # too much unnecessary information to output
-        # self.exp._add_meta_data_to_nxs_file()
         self.__output_final_message()
 
         if self.exp.meta_data.get('email'):
             cu.send_email(self.exp.meta_data.get('email'))
+
         return self.exp
 
     def __output_final_message(self):
-        kill = self.exp.meta_data.get('killsignal')
+        kill = True if 'killsignal' in \
+            self.exp.meta_data.get_dictionary().keys() else False
         msg = "interrupted by killsignal" if kill else "Complete"
         stars = 40 if kill else 23
         cu.user_message("*"*stars)
@@ -103,7 +110,7 @@ class PluginRunner(object):
         #  ******** transport 'process' function is called inside here ********
         plugin._run_plugin(self.exp, self)  # plugin driver
 
-        self.exp._barrier()
+        self.exp._barrier(msg="Plugin returned from driver in Plugin Runner")
         cu._output_summary(self.exp.meta_data.get("mpi"), plugin)
         plugin._clean_up()
         finalise = self.exp._finalise_experiment_for_current_plugin()
@@ -123,11 +130,9 @@ class PluginRunner(object):
         """
         plugin_list._check_loaders()
         n_loaders = plugin_list._get_n_loaders()
-
         self.__check_gpu()
         check_list = np.arange(len(plugin_list.plugin_list)) - n_loaders
         self.__fake_plugin_list_run(plugin_list, check_list, setnxs=True)
-        
         savers_idx_before = plugin_list._get_savers_index()
         plugin_list._add_missing_savers(self.exp.index['in_data'].keys())
 

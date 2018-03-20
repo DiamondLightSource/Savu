@@ -54,7 +54,7 @@ class FabIO(BaseType):
             .difference(set(self.frame_dim))
 
     def map_input_args(self, args, kwargs, cls):
-        args = ['self,folder', 'self', 'self.frame_dim']
+        args = ['self.folder', 'self', 'self.frame_dim']
         kwargs['shape'] = 'self.shape'
         kwargs['prefix'] = 'self.prefix'
         return args, kwargs, cls

@@ -112,7 +112,17 @@ def __option_parser():
     parser.add_argument("--checkpoint", nargs="?", choices=choices,
                         const='plugin', help=check_help, default=None)
 
-    return parser.parse_args()
+    args = parser.parse_args()
+    __check_conditions(parser, args)
+    return args
+
+
+def __check_conditions(parser, args):
+    if args.checkpoint and not args.folder:
+        msg = "--checkpoint flag requires '-f folder_name', where folder_name"\
+              " contains the partially completed Savu job.  The out_folder"\
+              " should be the path to this folder."
+        parser.error(msg)
 
 
 def _set_options(args):
@@ -191,6 +201,9 @@ def __create_output_folder(path, folder_name):
     if MPI.COMM_WORLD.rank == 0:
         if not os.path.exists(folder):
             os.makedirs(folder)
+        checkpoint_folder = os.path.join(folder, 'checkpoint')
+        if not os.path.exists(checkpoint_folder):
+            os.makedirs(os.path.join(checkpoint_folder))
     return folder
 
 
@@ -201,7 +214,6 @@ def main(input_args=None):
         args = input_args
 
     options = _set_options(args)
-
     pRunner = PluginRunner if options['mode'] == 'full' else BasicPluginRunner
 
     if options['nProcesses'] == 1:

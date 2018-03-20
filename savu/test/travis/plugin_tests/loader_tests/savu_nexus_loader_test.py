@@ -13,27 +13,30 @@
 # limitations under the License.
 
 """
-.. module:: tomo_recon
+.. module:: savu_nexus_loader_test
    :platform: Unix
-   :synopsis: runner for tests using the MPI framework
-
-.. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
+   :synopsis: test re-loading of savu output data
+.. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
-
 import unittest
 from savu.test import test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
 
-class MmProcessingTemplateTest(unittest.TestCase):
+class SavuNexusLoaderTest(unittest.TestCase):
 
-    def test_process(self):
-        data_file = tu.get_test_data_path('mm.nxs')
-        process_file = tu.get_test_process_path('mm_template_processing.nxs')
+    def test_reload(self):
+        data_file = tu.get_test_data_path('24737.nxs')
+        process_file = tu.get_test_process_path('savu_nexus_loader_test1.nxs')
+        exp = run_protected_plugin_runner(tu.set_options(data_file,
+                                                   process_file=process_file))
+        data_file = exp.meta_data.get('nxs_filename')
+        process_file = tu.get_test_process_path('savu_nexus_loader_test2.nxs')
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
 
 if __name__ == "__main__":
     unittest.main()
+

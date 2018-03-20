@@ -21,6 +21,7 @@
 
 """
 
+import os
 import json
 import h5py
 import numpy as np
@@ -42,19 +43,39 @@ class SavuNexusLoader(BaseLoader):
 
     def __init__(self, name='SavuNexusLoader'):
         super(SavuNexusLoader, self).__init__(name)
-        self._final_plugin_no = None
-        self._start_plugin_no = None
 
     def setup(self):
         datasets = []
-        with h5py.File(self.exp.meta_data.get('data_file'), 'a') as nxsfile:
-            datasets = self._read_nexus_file(nxsfile, datasets)         
-            datasets = self._set_final_plugin_no(datasets)
+        with h5py.File(self.exp.meta_data.get('data_file'), 'r') as nxsfile:
+            datasets = self._read_nexus_file(nxsfile, datasets)
+            datasets = self._update_plugin_numbers(datasets)
+
             if self.exp.meta_data.get('checkpoint_loader'):
-                datasets = self._checkpoint_datasets(datasets)
+                self.__checkpoint_reload(nxsfile, datasets)
             else:
                 datasets = self._last_unique_datasets(datasets)
-            self._create_datasets(nxsfile, datasets, 'in_data')
+                self._create_datasets(nxsfile, datasets, 'in_data')
+
+    def __checkpoint_reload(self, nxsfile, datasets):
+        cp = self.exp.checkpoint
+        level, completed_plugins = cp._get_checkpoint_params()
+        datasets = self._last_unique_datasets(datasets, completed_plugins+1)
+        self._create_datasets(nxsfile, datasets, 'in_data')
+
+        # update input data meta data
+        for name in self.exp.index['in_data'].keys():
+            self.__update_metadata('in_data', name)
+
+        if level == 'subplugin':
+            # update output data meta data
+            for name in self.exp.index['out_data'].keys():
+                self.__update_metadata('out_data', name)
+
+    def __update_metadata(self, dtype, name):
+        cp = self.exp.checkpoint
+        if name in cp.meta_data.get(dtype):
+            new_dict = cp.meta_data.get([dtype, name])
+            self.exp.index[dtype][name].meta_data._set_dictionary(new_dict)
 
     def _read_nexus_file(self, nxsfile, datasets):
         # find NXdata
@@ -83,28 +104,10 @@ class SavuNexusLoader(BaseLoader):
             pos = ksplit[0]
         return {'name': name, 'pos': pos, 'group': value}
 
-    # update this function with information from the Checkpoint class
-    def _checkpoint_datasets(self, datasets):
-        cp = self.exp.checkpoint
-        level, completed_plugins = cp._get_checkpoint_params()
-        final_plugin = self.get_final_plugin_no()
-
-        if final_plugin > completed_plugins:
-            if level == 'plugin':
-                return self._last_unique_datasets(datasets, completed_plugins)
-            elif level == 'subplugin':
-                out_datasets = [d for d in datasets if d['pos']]  # need key value pair
-                out_data_objs = self.create_datasets(f, out_datasets, 'out_data')
-                # update experiment datasets for final plugin with out_data_objs
-                return self._last_unique_datasets(datasets, completed_plugins)
-            else:
-                raise Exception("Checkpoint level %s is unknown." % level)
-        else:
-            return self._last_unique_datasets(datasets)
-
     def _last_unique_datasets(self, datasets, final=None):
         if final:
-            datasets = [d for d in datasets if d['pos'] >= final]
+            datasets = [d for d in datasets if int(d['pos']) < final]
+
         all_names = list(set([d['name'] for d in datasets]))
         entries = {}
         for n in all_names:
@@ -115,22 +118,27 @@ class SavuNexusLoader(BaseLoader):
         return entries
 
     def _create_datasets(self, nxsfile, datasets, dtype):
-        inFile = nxsfile.filename
         data_objs = []
+
         for name, group in datasets.iteritems():
             dObj = self._create_dataset(name, dtype)
-            dObj.backing_file = h5py.File(inFile, 'r')
-            dObj.data = self._set_data_type(dObj, group)
+            self._set_data_type(dObj, group, nxsfile.filename)
             self._read_nexus_group(group, dObj)
             dObj.set_shape(dObj.data.shape)
             self.set_data_reduction_params(dObj)
             data_objs.append(dObj)
         return data_objs
 
-    def _set_data_type(self, dObj, group):
+    def _set_data_type(self, dObj, group, nxs_filename):
+        link = group.get(group.attrs['signal'], getlink=True)
+        fname = os.path.join(os.path.dirname(nxs_filename), link.filename)
+
+        dObj.backing_file = h5py.File(fname, 'r')
+        dObj.data = dObj.backing_file[link.path]
+
         if 'data_type' not in group:
-            return group.get(group.attrs['signal'])
-        dObj.data = group['data']
+            return
+
         entry = group['data_type']
         args = self._get_data(entry, 'args')
         args = [a if a != 'self' else dObj for a in args]
@@ -140,7 +148,7 @@ class SavuNexusLoader(BaseLoader):
         cls_split = cls.split('.')
         cls_inst = \
             pu.load_class('.'.join(cls_split[:-1]), cls_name=cls_split[-1])
-        return cls_inst(*args, **kwargs)
+        dObj.data = cls_inst(*args, **kwargs)
 
     def _get_data(self, entry, key):
         plist = self.exp.meta_data.plugin_list
@@ -186,16 +194,17 @@ class SavuNexusLoader(BaseLoader):
         mData = group['meta_data']
         for key, value in mData.iteritems():
             entry = value.name.split('/')[-1]
-            dObj.meta_data.set(entry, value.values()[0][:])
+            dObj.meta_data.set(entry, value.values()[0][...])
 
-    def _set_final_plugin_no(self, datasets):
-        nPlugins = max([int(d['pos']) for d in datasets if d['pos'] !=
-                        'final'])+1 if datasets else 1
-        for d in datasets:
-            if d['pos'] == 'final':
-                d['pos'] = nPlugins
-        self._final_plugin_no = nPlugins - 1
+    def _update_plugin_numbers(self, datasets):
+        all_names = list(set([d['name'] for d in datasets]))
+        updated = []
+        for n in all_names:
+            this = [d for d in datasets if d['name'] == n]
+            p_numbers = [int(d['pos']) for d in this if d['pos'] != 'final']
+            nPlugins = max(p_numbers)+1 if this and p_numbers else 1
+            for d in this:
+                if d['pos'] == 'final':
+                    d['pos'] = nPlugins
+            updated.extend(this)
         return datasets
-
-    def get_final_plugin_no(self):
-        return self._final_plugin_no

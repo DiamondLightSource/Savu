@@ -51,6 +51,7 @@ class Experiment(object):
         self.initial_datasets = None
         self.plugin = None
         self._transport = None
+        self._barrier_count = 0
 
     def get(self, entry):
         """ Get the meta data dictionary. """
@@ -58,7 +59,6 @@ class Experiment(object):
 
     def __meta_data_setup(self, process_file):
         self.meta_data.plugin_list = PluginList()
-        self.meta_data.set('killsignal', False)
         try:
             rtype = self.meta_data.get('run_type')
             if rtype is 'test':
@@ -152,12 +152,6 @@ class Experiment(object):
             self.meta_data.set(['filename', name], data.backing_file)
             transport._populate_nexus_file(data)
             h5._link_datafile_to_nexus_file(data)
-
-    def _add_meta_data_to_nxs_file(self):
-        with h5py.File(self.meta_data.get('nxs_filename'), 'a') as nxs_file:
-            nxs_entry = nxs_file['entry']
-            mDict = self.meta_data.get_dictionary()
-            self._get_transport()._output_metadata_dict(nxs_entry, mDict)
 
     def _reset_datasets(self):
         self.index['in_data'] = self.initial_datasets
@@ -282,12 +276,13 @@ class Experiment(object):
                 data_names.append(key)
         return data_names
 
-    def _barrier(self, communicator=MPI.COMM_WORLD):
+    def _barrier(self, communicator=MPI.COMM_WORLD, msg=''):
         comm_dict = {'comm': communicator}
         if self.meta_data.get('mpi') is True:
-            logging.debug("About to hit a _barrier %s", comm_dict)
+            logging.debug("Barrier %d: %d processes expected: %s",
+                          self._barrier_count, communicator.size, msg)
             comm_dict['comm'].barrier()
-            logging.debug("Past the _barrier")
+        self._barrier_count += 1
 
     def log(self, log_tag, log_level=logging.DEBUG):
         """
