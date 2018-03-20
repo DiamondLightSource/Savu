@@ -201,9 +201,6 @@ def __create_output_folder(path, folder_name):
     if MPI.COMM_WORLD.rank == 0:
         if not os.path.exists(folder):
             os.makedirs(folder)
-        checkpoint_folder = os.path.join(folder, 'checkpoint')
-        if not os.path.exists(checkpoint_folder):
-            os.makedirs(os.path.join(checkpoint_folder))
     return folder
 
 

@@ -70,6 +70,12 @@ class Checkpointing(object):
         self._folder = os.path.join(mData('out_path'), 'checkpoint')
         self._file = os.path.join(self._folder, proc + self._filename)
 
+        if self._exp.meta_data.get('process') == 0:
+            checkpoint_folder = os.path.join(self._folder, 'checkpoint')
+            if not os.path.exists(checkpoint_folder):
+                os.makedirs(os.path.join(checkpoint_folder))
+        self._exp._barrier(msg='Creating checkpoint folder.')
+
     def _set_checkpoint_info_from_file(self, level):
         self._level = level
         self.__set_checkpoint_info()
