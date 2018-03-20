@@ -24,10 +24,8 @@
 import logging
 from mpi4py import MPI
 
-from savu.plugins.driver.base_driver import BaseDriver
 
-
-class BasicDriver(BaseDriver):
+class BasicDriver(object):
     """
     The base class from which all plugins should inherit.
     """
@@ -36,24 +34,19 @@ class BasicDriver(BaseDriver):
         super(BasicDriver, self).__init__()
 
     def _run_plugin_instances(self, transport, communicator=MPI.COMM_WORLD):
-        """ Runs the pre_process, process and post_process methods.
-
-        If parameter tuning is required, loop over the methods and set the
-        correct parameters for each run. """
-
         self.__set_communicator(communicator)
-
         logging.info("%s.%s", self.__class__.__name__, 'pre_process')
         self.base_pre_process()
         self.pre_process()
-        logging.info("%s.%s", self.__class__.__name__, '_barrier')
-        self.plugin_barrier()
+
+        msg = "Pre-process completed for %s" % self.__class__.__name__
+        self.plugin_barrier(msg=msg)
 
         logging.info("%s.%s", self.__class__.__name__, 'process_frames')
         transport._transport_process(self)
 
-        logging.info("%s.%s", self.__class__.__name__, '_barrier')
-        self.plugin_barrier()
+        msg = "Process_frames completed for %s" % self.__class__.__name__
+        self.plugin_barrier(msg=msg)
 
         logging.info("%s.%s", self.__class__.__name__, 'post_process')
         self.post_process()
@@ -64,3 +57,6 @@ class BasicDriver(BaseDriver):
 
     def get_communicator(self):
         return self._communicator
+
+    def plugin_barrier(self, msg=''):
+        return self.exp._barrier(communicator=self.get_communicator(), msg=msg)

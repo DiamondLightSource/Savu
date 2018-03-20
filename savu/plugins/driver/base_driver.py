@@ -22,6 +22,7 @@
 """
 
 import logging
+from mpi4py import MPI
 
 
 class BaseDriver(object):
@@ -38,3 +39,27 @@ class BaseDriver(object):
 
     def plugin_barrier(self):
         return self.exp._barrier(communicator=self.get_communicator())
+
+    def _run_plugin_instances(self, transport, communicator=MPI.COMM_WORLD):
+        """ Runs the pre_process, process and post_process methods.
+
+        If parameter tuning is required, loop over the methods and set the
+        correct parameters for each run. """
+
+        self.__set_communicator(communicator)
+
+        logging.info("%s.%s", self.__class__.__name__, 'pre_process')
+        self.base_pre_process()
+        self.pre_process()
+        logging.info("%s.%s", self.__class__.__name__, '_barrier')
+        self.plugin_barrier()
+
+        logging.info("%s.%s", self.__class__.__name__, 'process_frames')
+        transport._transport_checkpoint(transport._transport_process(self))
+
+        logging.info("%s.%s", self.__class__.__name__, '_barrier')
+        self.plugin_barrier()
+
+        logging.info("%s.%s", self.__class__.__name__, 'post_process')
+        self.post_process()
+        self.base_post_process()    

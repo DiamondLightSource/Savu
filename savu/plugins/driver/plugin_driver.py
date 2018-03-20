@@ -24,10 +24,10 @@ import logging
 import numpy as np
 from mpi4py import MPI
 
-from savu.plugins.driver.base_driver import BaseDriver
+from savu.plugins.driver.basic_driver import BasicDriver
 
 
-class PluginDriver(BaseDriver):
+class PluginDriver(BasicDriver):
     """
     The base class from which all plugins should inherit.
     """
@@ -62,29 +62,13 @@ class PluginDriver(BaseDriver):
                     out_data[j]._get_plugin_data()\
                         .set_fixed_dimensions(param_dims[j], param_idx[i])
 
-            self._perform_the_processing(transport, communicator=communicator)
+            super(PluginDriver, self).\
+                _run_plugin_instances(transport, communicator=communicator)
 
         self._revert_preview(self.parameters['in_datasets'])
 
         for j in range(len(out_data)):
             out_data[j].set_shape(out_data[j].data.shape)
-
-    def _perform_the_processing(self, transport, communicator=MPI.COMM_WORLD):
-            logging.info("%s.%s", self.__class__.__name__, 'pre_process')
-            self.base_pre_process()
-            self.pre_process()
-            logging.info("%s.%s", self.__class__.__name__, '_barrier')
-            self.plugin_barrier()
-
-            logging.info("%s.%s", self.__class__.__name__, 'process_frames')
-            transport._transport_process(self)
-
-            logging.info("%s.%s", self.__class__.__name__, '_barrier')
-            self.plugin_barrier()
-
-            logging.info("%s.%s", self.__class__.__name__, 'post_process')
-            self.post_process()
-            self.base_post_process()
 
     def __get_local_dict(self):
         """ Gets the local variables of the class minus those from the Plugin
