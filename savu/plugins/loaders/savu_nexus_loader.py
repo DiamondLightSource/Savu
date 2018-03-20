@@ -50,7 +50,8 @@ class SavuNexusLoader(BaseLoader):
             datasets = self._read_nexus_file(nxsfile, datasets)
             datasets = self._update_plugin_numbers(datasets)
 
-            if self.exp.meta_data.get('checkpoint_loader'):
+            exp_dict = self.exp.meta_data.get_dictionary()
+            if 'checkpoint_loader' in exp_dict.keys():
                 self.__checkpoint_reload(nxsfile, datasets)
             else:
                 datasets = self._last_unique_datasets(datasets)
