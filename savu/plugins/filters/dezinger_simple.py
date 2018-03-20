@@ -60,11 +60,11 @@ class DezingerSimple(BaseFilter, CpuPlugin):
 
         dark = inData.data.dark()
         flat = inData.data.flat()
-        if not dark.size:
+        if dark.size:
             dark = np.pad(inData.data.dark(), pad_list, mode='edge')
             dark = self._process_calibration_frames(dark)
             inData.data.update_dark(dark[self.pad:-self.pad])
-        if not flat.size:
+        if flat.size:
             flat = np.pad(inData.data.flat(), pad_list, mode='edge')
             flat = self._process_calibration_frames(flat)
             inData.data.update_flat(flat[self.pad:-self.pad])

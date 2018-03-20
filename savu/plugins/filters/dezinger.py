@@ -56,7 +56,7 @@ class Dezinger(BaseFilter, CpuPlugin):
         pad_list = ((self.pad, self.pad), (0, 0), (0, 0))
 
         # dezing the dark field
-        if not dark.size:
+        if dark.size:
             (retval, self.warnflag, self.errflag) = dezing.setup_size(
                 dark.shape, self.parameters['outlier_mu'], self.pad,
                 mode=self.parameters['mode'])
@@ -64,7 +64,7 @@ class Dezinger(BaseFilter, CpuPlugin):
             (retval, self.warnflag, self.errflag) = dezing.cleanup()
 
         # dezing the flat field
-        if not flat.size:
+        if flat.size:
             (retval, self.warnflag, self.errflag) = dezing.setup_size(
                 flat.shape, self.parameters['outlier_mu'],
                 self.pad, mode=self.parameters['mode'])
@@ -72,8 +72,11 @@ class Dezinger(BaseFilter, CpuPlugin):
             (retval, self.warnflag, self.errflag) = dezing.cleanup()
 
         # setup dezing for data
+        self._dezing_setup(self.data_size)
+
+    def _dezing_setup(self, shape):
         (retval, self.warnflag, self.errflag) = \
-            dezing.setup_size(self.data_size, self.parameters['outlier_mu'],
+            dezing.setup_size(shape, self.parameters['outlier_mu'],
                               self.pad, mode=self.parameters['mode'])
 
     def _process_calibration_frames(self, data):
