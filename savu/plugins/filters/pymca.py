@@ -23,15 +23,14 @@
 import logging
 from savu.plugins.filters.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-from savu.plugins.utils import register_plugin, dawn_compatible
+from savu.plugins.utils import register_plugin, dawn_compatible, OUTPUT_TYPE_METADATA_ONLY
 import numpy as np
 import os
-import savu.plugins.utils as pu
 import savu.test.test_utils as tu
 from PyMca5.PyMcaPhysics.xrf import McaAdvancedFitBatch
 
 
-@dawn_compatible
+@dawn_compatible(OUTPUT_TYPE_METADATA_ONLY)
 @register_plugin
 class Pymca(BaseFilter, CpuPlugin):
     """
@@ -75,9 +74,7 @@ class Pymca(BaseFilter, CpuPlugin):
         c = self.setup_fit(dummy_spectrum)# seed it with junk, zeros made the matrix singular unsurprisingly and this bungles it.
         
         # temporary measure to stop the next line printing arrays to screen.
-        pu.blockPrint()
         c.processList()#_McaAdvancedFitBatch__processStack()# perform an initial fit to get the shapes
-        pu.enablePrint()
 
         fit_labels = c._McaAdvancedFitBatch__images.keys() # and then take out the axis labels for the channels
         out_meta_data = out_datasets[0].meta_data
@@ -130,13 +127,12 @@ class Pymca(BaseFilter, CpuPlugin):
                                                     roifit,
                                                     roiwidth,
                                                     fitfiles=0,
-                                                    nosave=True) # prime the beauty
+                                                    nosave=True,
+                                                    quiet=True) # prime the beauty
         b.pleaseBreak = 1
         
         # temporary measure to stop the next line printing arrays to screen.
-        pu.blockPrint()
         b.processList()
-        pu.enablePrint()
 
         b.pleaseBreak = 0
         return b

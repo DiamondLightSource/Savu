@@ -31,15 +31,21 @@ class Map3dto4dh5(BaseType):
     """ This class converts a 3D dataset to a 4D dataset. """
 
     def __init__(self, data, n_angles):
+        self.data = data
+        self.n_angles = n_angles
         shape = data.shape
+        super(Map3dto4dh5, self).__init__()
 
         import inspect
         if inspect.isclass(type(data)):
             self.add_base_class_with_instance(type(data), data)
 
-        self.data = data
         new_shape = (n_angles, shape[1], shape[2], shape[0]/n_angles)
         self.shape = new_shape
+
+    def map_input_args(self, args, kwargs, cls):
+        args = ['self', 'self.n_angles']
+        return args, kwargs, cls
 
     def __getitem__(self, idx):
         n_angles = self.shape[0]

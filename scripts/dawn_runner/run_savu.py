@@ -13,6 +13,26 @@ from copy import deepcopy as copy
 import time
 from collections import OrderedDict
 
+
+def get_output_rank(path2plugin, inputs, params, persistence):
+    sys_path_0_lock = persistence['sys_path_0_lock']
+    sys_path_0_lock.acquire()
+    try:
+        parameters = {}
+        # slight repack here
+        for key in params.keys():
+            val = params[key]["value"]
+            if type(val)==type(''):
+                val = val.replace('\n','').strip()
+                parameters[key] = val
+        plugin = _savu_setup(path2plugin, inputs, parameters)
+        persistence['plugin_object'] = plugin
+    finally:
+        sys_path_0_lock.release()
+
+    return len(plugin.get_plugin_out_datasets()[0].get_core_dimensions())
+
+
 def runSavu(path2plugin, params, metaOnly, inputs, persistence):
     '''
     path2plugin  - is the path to the user script that should be run
@@ -53,8 +73,11 @@ def runSavu(path2plugin, params, metaOnly, inputs, persistence):
                     val = val.replace('\n','').strip()
 #                 print val
                 parameters[key] = val
+                print("val: {}".format(val))
 #             print "initialising the object"
-            plugin_object, axis_labels, axis_values = process_init(path2plugin, inputs, parameters)
+            plugin_object = _savu_setup(path2plugin, inputs, parameters)
+            persistence['plugin_object'] = plugin_object
+            axis_labels, axis_values = process_init(plugin_object)
 #             print "I did the initialisation"
 #             print "axis labels",axis_labels
 #             print "axis_values", axis_values
@@ -90,6 +113,8 @@ def runSavu(path2plugin, params, metaOnly, inputs, persistence):
     else:
         data = inputs['data']
 
+    print("metaOnly: {}".format(metaOnly))
+
     if not metaOnly: 
 
         out = plugin_object.process_frames([data])
@@ -112,31 +137,29 @@ def runSavu(path2plugin, params, metaOnly, inputs, persistence):
     return result
 
 
-
-def process_init(path2plugin, inputs, parameters):
+def _savu_setup(path2plugin, inputs, parameters):
+    print("running _savu_setup")
     parameters['in_datasets'] = [inputs['dataset_name']]
     parameters['out_datasets'] = [inputs['dataset_name']]
-    
     plugin = get_plugin(path2plugin.split('.py')[0]+'.py')
-#     print "I got this far"
     plugin.exp = setup_exp_and_data(inputs, inputs['data'], plugin)
     plugin._set_parameters(parameters)
     plugin._set_plugin_datasets()
     plugin.setup()
-#     print "I am her now"
+    return plugin
+
+
+def process_init(plugin):
     axis_labels = plugin.get_out_datasets()[0].get_axis_label_keys()
-    foo = [type(ix) for ix in axis_labels]
-#     print "axis label types", foo
-    axis_labels.remove('idx') # get the labels
+    axis_labels.remove('idx')  # get the labels
     axis_values = {}
-    plugin._clean_up() # this copies the metadata!
+    plugin._clean_up()  # this copies the metadata!
     for label in axis_labels:
         axis_values[label] = plugin.get_out_datasets()[0].meta_data.get(label)
-#         print label, axis_values[label].shape
     plugin.base_pre_process()
     plugin.pre_process()
-#     print "I went here"
-    return plugin, axis_labels, axis_values
+    return axis_labels, axis_values
+
 
 def setup_exp_and_data(inputs, data, plugin):
     exp = DawnExperiment(get_options())

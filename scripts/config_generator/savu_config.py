@@ -90,7 +90,8 @@ def _save(content, args):
     print()
     DispDisplay(content.plugin_list)._notices()
     content.save(out_file, check=raw_input("Are you sure you want to save the "
-                 "current data to %s' [y/N]" % (out_file)))
+                 "current data to %s' [y/N]" % (out_file)),
+                 template=args.template)
     return content
 
 
@@ -228,7 +229,12 @@ def main():
     print("\n*** Press Enter for a list of available commands. ***\n")
 
     while True:
-        in_list = raw_input(">>> ").strip().split(' ', 1)
+        try:
+            in_list = raw_input(">>> ").strip().split(' ', 1)
+        except KeyboardInterrupt:
+            print()
+            continue
+
         command, arg = in_list if len(in_list) is 2 else in_list+['']
         command = command if command else 'help'
         if command not in commands:
@@ -247,4 +253,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

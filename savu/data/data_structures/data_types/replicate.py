@@ -34,11 +34,18 @@ class Replicate(BaseType):
 
     def __init__(self, data_obj, reps):
         self.data_obj = data_obj
+        self.reps = reps
+        super(Replicate, self).__init__()
+
         self.rep_dim = len(data_obj.get_shape()) + 1
         self.shape = data_obj.get_shape() + (reps,)
         self.data = data_obj.data
         self.original_patterns = data_obj.get_data_patterns()
         self.__set_patterns(copy.deepcopy(self.original_patterns))
+
+    def map_input_args(self, args, kwargs):
+        args = [self.data_obj, self.reps]
+        return args, kwargs
 
     def __getitem__(self, idx):
         return np.expand_dims(self.data[idx[:-1]], self.rep_dim)

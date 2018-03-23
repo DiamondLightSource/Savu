@@ -67,9 +67,11 @@ class Content(object):
             file_error = "INPUT_ERROR: Incorrect filepath."
             raise Exception(file_error)
 
-    def save(self, filename, check='y'):
+    def save(self, filename, check='y', template=False):
         if check.lower() == 'y':
             print("Saving file %s" % (filename))
+            if template:
+                self.plugin_list.add_template(create=True)
             self.plugin_list._save_plugin_list(filename)
         else:
             print("The process list has NOT been saved.")
@@ -141,12 +143,13 @@ class Content(object):
                 if name in notices.keys():
                     print notices[name]['desc']
                 # if a plugin is missing then look for mutations
-                if name not in pu.plugins.keys():
-                    if not self._mutate_plugins(name, pos):
-                        str_pos = self.plugin_list.plugin_list[pos]['pos']
-                        missing.append([name, str_pos])
-                        self.remove(pos)
-                        pos -= 1
+                search = True if name not in pu.plugins.keys() else False
+                found = self._mutate_plugins(name, pos, search=search)
+                if search and not found:
+                    str_pos = self.plugin_list.plugin_list[pos]['pos']
+                    missing.append([name, str_pos])
+                    self.remove(pos)
+                    pos -= 1
                 if (name == the_list[pos]['name']):
                     break
             pos -= 1
@@ -162,14 +165,15 @@ class Content(object):
         if exception:
             raise Exception('Incompatible process list.')
 
-    def _mutate_plugins(self, name, pos):
+    def _mutate_plugins(self, name, pos, search=False):
         """ Perform plugin mutations. """
         # check for case changes in plugin name
-        for key in pu.plugins.keys():
-            if name.lower() == key.lower():
-                str_pos = self.plugin_list.plugin_list[pos]['pos']
-                self.refresh(str_pos, change=key)
-                return True
+        if search:
+            for key in pu.plugins.keys():
+                if name.lower() == key.lower():
+                    str_pos = self.plugin_list.plugin_list[pos]['pos']
+                    self.refresh(str_pos, change=key)
+                    return True
 
         # check mutations dict
         m_dict = mutations.plugin_mutations

@@ -3,8 +3,8 @@
 echo "SAVU_MPI_LOCAL:: Running Job"
 
 nNodes=1
-nCoresPerNode=`nproc`
-nGPUs=$(python -c "import savu.core.utils as cu; p, count = cu.get_available_gpus(); print count")
+nCoresPerNode=`grep '^core id' /proc/cpuinfo |sort -u|wc -l`
+nGPUs=$(nvidia-smi -L | wc -l)
 
 echo "***********************************************"
 echo -e "\tRunning on $nCoresPerNode CPUs and $nGPUs GPUs"
@@ -36,7 +36,8 @@ for i in $(seq 0 $((nGPUs-1))); do GPUs+="GPU$i " ; done
 for i in $(seq 0 $((nCPUs-1-nGPUs))); do CPUs+="CPU$i " ; done
 CPUs=$(echo $GPUs$CPUs | tr ' ' ,)
 
-mpirun -np $nCPUs python $filename $datafile $processfile $outpath -n $CPUs -v $options
+echo "running the savu mpi local job"
+mpirun -np $nCPUs -mca btl ^openib python $filename $datafile $processfile $outpath -n $CPUs -v $options
 
 echo "SAVU_MPI_LOCAL:: Process complete"
-exit
+

@@ -15,7 +15,7 @@
 """
 .. module:: gpu_plugin
    :platform: Unix
-   :synopsis: Base class for all plugins which use a GPU on the target machine
+   :synopsis: The driver for GPU plugins.
 
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
@@ -37,7 +37,7 @@ _base = BasicDriver if os.environ['savu_mode'] == 'basic' else PluginDriver
 
 class GpuPlugin(_base):
     """
-    The base class from which all plugins should inherit.
+    The driver for GPU plugins.
     """
 
     def __init__(self):
@@ -76,6 +76,7 @@ class GpuPlugin(_base):
             logging.debug("Running the GPU process %i with GPU index %i",
                           self.new_comm.Get_rank(), GPU_index)
             self.parameters['GPU_index'] = GPU_index
+            os.environ['CUDA_DEVICE'] = str(GPU_index)
             self._run_plugin_instances(transport, communicator=self.new_comm)
             self.__free_communicator()
             expInfo.set('process', MPI.COMM_WORLD.Get_rank())

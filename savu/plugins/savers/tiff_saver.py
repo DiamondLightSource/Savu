@@ -35,6 +35,7 @@ class TiffSaver(BaseSaver, CpuPlugin):
     """
     A class to save tomography data to tiff files
     :param pattern: How to slice the data. Default: 'VOLUME_XZ'.
+    :param prefix: Override the default output tiff file prefix. Default: None.
 
     :config_warn: Do not use this plugin if the raw data is greater than \
     100 GB.
@@ -47,6 +48,7 @@ class TiffSaver(BaseSaver, CpuPlugin):
         self.data_name = None
         self.file_name = None
         self.group_name = None
+        self.max_files = 100000
 
     def pre_process(self):
         self.data_name = self.get_in_datasets()[0].get_name()
@@ -54,13 +56,25 @@ class TiffSaver(BaseSaver, CpuPlugin):
         self.group_name = self._get_group_name(self.data_name)
         self.folder = "%s/%s-%s" % (self.exp.meta_data.get("out_path"),
                                     self.name, self.data_name)
-        self.filename = "%s/%s_" % (self.folder, self.data_name)
+        if self.parameters['prefix']:
+            self.filename = "%s/%s" % (self.folder, self.parameters['prefix'])
+        else:
+            self.filename = "%s/%s_" % (self.folder, self.data_name)
+            self.filename += '%s_' % self.exp.meta_data.get("datafile_name")
+
         if MPI.COMM_WORLD.rank == 0:
             if not os.path.exists(self.folder):
                 os.makedirs(self.folder)
 
+    def setup(self):
+        super(TiffSaver, self).setup()
+        in_pData = self.get_plugin_in_datasets()[0]
+        if in_pData.get_total_frames() > self.max_files:
+            emsg = "Sorry, your data is too big to use the tiff saver."
+            raise Exception(emsg)
+
     def process_frames(self, data):
         frame = self.get_global_frame_index()[0][self.count]
-        filename = self.filename + str(frame) + '.tiff'
+        filename = '%s%05i.tiff' % (self.filename, frame)
         tf.imsave(filename, data[0])
         self.count += 1

@@ -43,10 +43,24 @@ function flag_parse ()
   done
 }
 
+# Set the install PREFIX
+flag_parse "--PREFIX" prefix "$@"
+if [ $prefix ] ; then
+  PREFIX=true
+fi
+
 # Set the test flag to true if test only
 flag_parse "--tests_only" test_flag "$@"
 if [ $test_flag ] ; then
   test_flag=true
+fi
+
+# Set the prompts flag to false if no prompts are required
+flag_parse "--no_prompts" prompts "$@"
+if [ $prompts ] ; then
+  prompts=false
+else
+  prompts=true
 fi
 
 # set the intermediate folder
@@ -128,7 +142,7 @@ else
     echo "cuda has not been found."
 fi
 
-if [ $test_flag ] ; then
+if [ $test_flag ] && [ $prompts = true ] ; then
 
   PYTHONHOME=`command -v conda`
   PYTHONHOME=${PYTHONHOME%conda}
@@ -147,12 +161,12 @@ if [ $test_flag ] ; then
       break
     elif [ "$input" = "n" ]; then
       echo -e "\nAborting the tests."
-      exit 1
+      exit 0
     else
       echo -e "\nYour input was unknown.\n"
     fi 
   done
-else
+elif [ $prompts = true ] ; then
   echo -e "=============================================================\n"
   while true ; do
     read  -n 1 -p "Are you happy to proceed with the installation? (y/n): " input
@@ -161,47 +175,53 @@ else
       break
     elif [ "$input" = "n" ]; then
       echo -e "\nInstallation process terminated."
-      exit 1
+      exit 0
     else
       echo -e "\nYour input was unknown.\n"
     fi
   done
+
 #=====================installing other packages==========================
 
-echo -e "\nInstalling Savu in" $PREFIX
-read  -p ">>> Press ENTER to continue or input a different path: " input
+  echo -e "\nInstalling Savu in" $PREFIX
+  read  -p ">>> Press ENTER to continue or input a different path: " input
 
-if [ "$input" != "" ]; then
+  if [ "$input" != "" ]; then
     PREFIX=$input
-fi
-
-while true; do
-  if [ -d "$PREFIX" ]; then
-    PREFIX=$PREFIX/$conda_folder/
-    break
   fi
-  echo "The path" $PREFIX "is not recognised"
-  read  -p ">>> Please input a different installation path: " input
-  PREFIX=$input
-done
 
-if [ -d "$PREFIX" ]; then
-  echo
-  while true ; do
-    read -n 1 -p "The folder $PREFIX already exists. Continue? [y/n]" input
-    if [ "$input" = "y" ]; then
-      echo -e "\nStarting the installation........"
+  while true; do
+    if [ -d "$PREFIX" ]; then
+      PREFIX=$PREFIX/$conda_folder/
       break
-    elif [ "$input" = "n" ]; then
-      echo -e "\nInstallation process terminated."
-      exit 1
-    else
-      echo -e "\nYour input was unknown.\n\n"
     fi
+    echo "The path" $PREFIX "is not recognised"
+    read  -p ">>> Please input a different installation path: " input
+    PREFIX=$input
   done
+
+  if [ -d "$PREFIX" ]; then
+    echo
+    while true ; do
+      read -n 1 -p "The folder $PREFIX already exists. Continue? [y/n]" input
+      if [ "$input" = "y" ]; then
+        echo -e "\nStarting the installation........"
+        break
+      elif [ "$input" = "n" ]; then
+        echo -e "\nInstallation process terminated."
+        exit 0
+      else
+        echo -e "\nYour input was unknown.\n\n"
+      fi
+    done
+  else
+    # create the folder
+    mkdir -p $PREFIX
+  fi
 else
-  # create the folder
-  mkdir -p $PREFIX
+  if [ ! -d "$PREFIX" ] ; then
+    mkdir -p $PREFIX
+  fi
 fi
 
 echo -e "\nThank you!  Installing Savu into" $PREFIX"\n"
@@ -313,24 +333,25 @@ echo -e "\t          Package installation complete"
 echo -e "\t  Check $error_log for errors"
 echo -e "\t***************************************************\n"
 
-fi
-
 
 if [ ! $test_flag ] ; then
-while true; do
-  read  -n 1 -p "Would you like to run the tests? (y/n): " input
-  if [ "$input" = "y" ]; then
-    echo -e "\nYour input was yes"
-    break
-  elif [ "$input" = "n" ]; then
-    echo -e "Aborting test run..."
-    echo -e "To run the tests later type: "
-    echo -e "   >>> bash savu_v2.1/savu_installer.sh --tests_only"
-    exit 1
-  else
-    echo -e "\nYour input was unknown.\n"
+  if [ $prompts = true ] ; then
+    while true; do
+      read  -n 1 -p "Would you like to run the tests? (y/n): " input
+      if [ "$input" = "y" ]; then
+        echo -e "\nYour input was yes"
+        test_flag=true
+        break
+      elif [ "$input" = "n" ]; then
+        echo -e "Aborting test run..."
+        echo -e "To run the tests later type: "
+        echo -e "   >>> bash savu_v2.1/savu_installer.sh --tests_only"
+        exit 0
+      else
+        echo -e "\nYour input was unknown.\n"
+      fi
+    done
   fi
-done
 
   setup_script=$PREFIX/'savu_setup.sh'
   echo -e "\nCreating a Savu setup script" $setup_script
@@ -355,73 +376,76 @@ done
   source $setup_script
 fi
 
-nGPUs=$(python -c "import savu.core.utils as cu; p, count = cu.get_available_gpus(); print count")
+if [ $test_flag ] ; then
 
-echo -e "\n***** Testing Savu setup *****\n"
-savu_quick_tests
+  nGPUs=$(python -c "import savu.core.utils as cu; p, count = cu.get_available_gpus(); print count")
 
-echo -e "\n*****Running Savu single-threaded local tests *****\n"
-savu_full_tests
+  echo -e "\n***** Testing Savu setup *****\n"
+  savu_quick_tests
 
-echo -e "\n************** Single-threaded local tests complete ******************\n"
+  echo -e "\n*****Running Savu single-threaded local tests *****\n"
+  savu_full_tests
 
-test_dir=`mktemp -d`
-tmp_dir=`mktemp -d`
-tmpfile=$tmp_dir/temp_output.txt
-touch $tmpfile
-echo "tmp file is" $tmpfile
+  echo -e "\n************** Single-threaded local tests complete ******************\n"
 
-echo -e "\n***** Running Savu MPI local CPU tests *****\n"
+  test_dir=`mktemp -d`
+  tmp_dir=`mktemp -d`
+  tmpfile=$tmp_dir/temp_output.txt
+  touch $tmpfile
+  echo "tmp file is" $tmpfile
 
-local_mpi_cpu_test.sh $test_dir -r $tmpfile
+  echo -e "\n***** Running Savu MPI local CPU tests *****\n"
 
-result=$(grep -i "Processing Complete" $tmpfile)
-if [ ! $result ] ; then
-  echo -e "\n****The tests have errored: See $tmpfile for more details****\n"
-else
-  echo -e "\n***Test successfully completed!***\n"
-fi
+  local_mpi_cpu_test.sh $test_dir -r $tmpfile
 
-
-if [ $nGPUs -gt 0 ]; then
-  echo -e "\n***** Running Savu MPI local GPU tests *****\n"
-  local_mpi_gpu_test.sh  $test_dir
-else
-  echo -e "\n***** Skipping Savu MPI local GPU tests (no GPUs found) *****\n"
-fi
-
-rm -r $test_dir
-
-echo -e "\n************** MPI local tests complete ******************\n"
-
-while true ; do
-  read  -n 1 -p "Are you installing Savu for cluster use? (y/n): " input
-  if [ "$input" = "y" ]; then
-    launcher_path=`command -v savu_launcher.sh`
-    mpijob_path=`command -v savu_mpijob.sh`
-    echo -e "\n\n===============================IMPORTANT NOTICE================================="
-    echo -e "To run Savu across a cluster you will need to update the savu laucher scripts:"
-    echo -e "\n$launcher_path"
-    echo -e "$mpijob_path\n"
-    echo -e "Once these are update, run the cluster MPI tests:\n\t >>> mpi_cpu_test.sh <output_dir> "
-    echo -e "\t >>> mpi_gpu_test.sh <output_dir>."
-    echo -e "================================================================================\n"
-    while true ; do    
-      read  -n 1 -p "Continue? (y): " input
-      if [ "$input" = "y" ]; then
-        break
-      else
-        echo
-      fi
-    done
-    echo
-    break
-  elif [ "$input" = "n" ]; then
-    break
+  result=$(grep -i "Processing Complete" $tmpfile)
+  if [ ! $result ] ; then
+    echo -e "\n****The tests have errored: See $tmpfile for more details****\n"
   else
-    echo -e "\nYour input was unknown.\n"
+    echo -e "\n***Test successfully completed!***\n"
   fi
-done
+
+
+  if [ $nGPUs -gt 0 ]; then
+    echo -e "\n***** Running Savu MPI local GPU tests *****\n"
+    local_mpi_gpu_test.sh  $test_dir
+  else
+    echo -e "\n***** Skipping Savu MPI local GPU tests (no GPUs found) *****\n"
+  fi
+
+  rm -r $test_dir
+
+  echo -e "\n************** MPI local tests complete ******************\n"
+
+  while true ; do
+    read  -n 1 -p "Are you installing Savu for cluster use? (y/n): " input
+    if [ "$input" = "y" ]; then
+      launcher_path=`command -v savu_launcher.sh`
+      mpijob_path=`command -v savu_mpijob.sh`
+      echo -e "\n\n===============================IMPORTANT NOTICE================================="
+      echo -e "To run Savu across a cluster you will need to update the savu laucher scripts:"
+      echo -e "\n$launcher_path"
+      echo -e "$mpijob_path\n"
+      echo -e "Once these are update, run the cluster MPI tests:\n\t >>> mpi_cpu_test.sh <output_dir> "
+      echo -e "\t >>> mpi_gpu_test.sh <output_dir>."
+      echo -e "================================================================================\n"
+      while true ; do    
+        read  -n 1 -p "Continue? (y): " input
+        if [ "$input" = "y" ]; then
+          break
+        else
+          echo
+        fi
+      done
+      echo
+      break
+    elif [ "$input" = "n" ]; then
+      break
+    else
+      echo -e "\nYour input was unknown.\n"
+    fi
+  done
+fi
 
 if [ ! $test_flag ] ; then
   echo -e "\n\nTo run Savu type 'source $savu_setup' to set relevant paths every time you open a new terminal."
@@ -437,5 +461,5 @@ else
   echo -e "=======================================================\n"
 fi
 
-exit 1
+exit 0
 

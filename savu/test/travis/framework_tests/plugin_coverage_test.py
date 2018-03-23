@@ -103,7 +103,6 @@ class PluginCoverageTest(unittest.TestCase):
     def get_test_plugin_list(self, process_files, path):
         plugin_names = []
         for pfile in process_files:
-            print pfile
             plist = PluginList()
             plist._populate_plugin_list(path + '/' + pfile)
             for p in plist.plugin_list:
@@ -147,7 +146,6 @@ class PluginCoverageTest(unittest.TestCase):
             mod = getattr(mod, comp)
         module_name = name.split('.')[-1]
         mod2class = ''.join(x.capitalize() for x in module_name.split('_'))
-        print module_name
         clazz = getattr(mod, mod2class.split('.')[-1])()
         return clazz
 

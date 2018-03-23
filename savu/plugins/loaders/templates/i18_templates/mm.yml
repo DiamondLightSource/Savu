@@ -1,0 +1,4 @@
+inherit:
+    - /mnt/GPFS01/testdir/dasc/qmm55171/temp_run_out/my_tests/tests/multi_modal_tests/savu_2.1.1/i18_yml_files/fluo.yml
+    - /mnt/GPFS01/testdir/dasc/qmm55171/temp_run_out/my_tests/tests/multi_modal_tests/savu_2.1.1/i18_yml_files/stxm.yml
+    - /mnt/GPFS01/testdir/dasc/qmm55171/temp_run_out/my_tests/tests/multi_modal_tests/savu_2.1.1/i18_yml_files/monitor.yml

@@ -1,0 +1,67 @@
+# ================================================================================================== #
+#                                          SYNTAX NOTES:                                             #
+# 1) dfile and dshape are keywords giving access to the input data file and data shape respectively. #
+# 2) $ sign at the beginning of a statement indicates the statement should be executed.              #
+# 3) end a parameter name with 'file' (e.g. cfile) to denote this is a file.                         #
+# 4) Use single quotes only i.e '/path/to/file' and not "/path/to/file"                              #
+# ================================================================================================== #
+
+inherit: None
+
+fluo:
+    data: # required
+        # file      : use this to override the input file  # optional
+        path        : entry1/fluo_entry/instrument/fluorescence/data
+
+    params:  # optional key, value pairs
+        offset      : 0.0
+        gain        : 0.01
+        npts        : $dshape[3]
+        labels      : $list(dfile['entry1/fluo_entry/data/'].attrs['axes'])
+        idx_rot     : $labels.index('theta')
+        idx_x       : $labels.index('x')
+        idx_y       : $labels.index('y')
+        idx_energy  : $labels.index('energy')
+
+    axis_labels:  # required, and all keys in dicts required
+        0:
+            dim     : $idx_rot
+            name    : rotation_angle
+            value   : $dfile['/entry1/fluo_entry/data/theta'].value
+            units   : $dfile['/entry1/fluo_entry/data/theta'].attrs['units']
+        1:
+            dim     : $idx_y
+            name    : y
+            value   : $dfile['entry1/fluo_entry/data/y'].value
+            units   : $dfile['entry1/fluo_entry/data/y'].attrs['units']
+        2:
+            dim     : $idx_x
+            name    : x
+            value   : $dfile['entry1/fluo_entry/data/x'].value
+            units   : $dfile['entry1/fluo_entry/data/x'].attrs['units']
+        3:
+            dim     : $idx_energy
+            name    : energy
+            value   : $np.arange(offset, gain*npts, gain)
+            units   : eV
+
+    patterns:   # at least one pattern is required
+        SINOGRAM:
+            core_dims   : $(idx_rot, idx_x)
+            slice_dims  : $(idx_y, idx_energy)
+        PROJECTION:
+            core_dims   : $(idx_y, idx_x)
+            slice_dims  : $(idx_rot, idx_energy)
+        SPECTRUM:
+            core_dims   : $(idx_energy,)
+            slice_dims  : $(idx_rot, idx_y, idx_x)
+
+    metadata:  # optional, additional information associated with the dataset
+        mono_energy:
+            value   : $dfile['entry1/fluo_entry/instrument/monochromator/energy'].value
+            units   : keV
+        monitor:
+            value   : $dfile['entry1/fluo_entry/monitor/data'].value
+        average:
+            value   : $np.ones(npts)
+

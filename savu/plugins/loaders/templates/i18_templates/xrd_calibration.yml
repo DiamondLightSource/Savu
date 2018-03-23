@@ -1,0 +1,29 @@
+# end a parameter name with 'file' (e.g. cfile) to denote this is a file
+
+xrd:
+    params:
+        orien: $cfile['entry1/instrument/detector/detector_orientation'][...].reshape((3, 3))
+        det_str : entry1/instrument/detector
+    metadata:
+        x_pixel_size: 
+            value: $cfile[det_str + '/detector_module/fast_pixel_direction'].value*1e-3
+            units: m
+        beam_center_x:
+            value: $cfile[det_str + '/beam_center_x'].value*1e-3
+            units: m
+        beam_center_y:
+            value: $cfile[det_str + '/beam_center_y'].value*1e-3
+            units: m
+        distance: 
+            value: $cfile[det_str + '/distance'].value*1e-3
+            units: m
+        incident_wavelength:
+            value: $cfile['/entry1/calibration_sample/beam/incident_wavelength'].value*1e-10
+            units: Angstrom
+        yaw: 
+            value: $-cfile[det_str + '/transformations/euler_b'].value
+            units: degrees
+        roll:
+            value: $cfile[det_str + '/transformations/euler_c'].value-180.0
+            units: degrees
+

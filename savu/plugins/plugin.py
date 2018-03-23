@@ -283,7 +283,8 @@ class Plugin(PluginDatasets):
             return True
         preview = data.get_preview()
         orig_indices = preview.get_starts_stops_steps()
-        no_preview = [[0, 0, 0], data.get_shape(), [1, 1, 1], [1, 1, 1]]
+        nDims = len(orig_indices[0])
+        no_preview = [[0]*nDims, data.get_shape(), [1]*nDims, [1]*nDims]
 
         # Set previewing params if previewing has not already been applied to
         # the dataset.

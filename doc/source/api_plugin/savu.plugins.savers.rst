@@ -15,6 +15,7 @@ Submodules
 
    savu.plugins.savers.base_saver
    savu.plugins.savers.edf_saver
+   savu.plugins.savers.extended_tiff_saver
    savu.plugins.savers.hdf5_saver
    savu.plugins.savers.tiff_saver
    savu.plugins.savers.xrf_saver

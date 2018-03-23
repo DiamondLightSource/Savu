@@ -22,7 +22,6 @@
 
 import h5py
 import logging
-from savu.data.data_structures.data_add_ons import DataMapping
 
 from savu.plugins.loaders.base_loader import BaseLoader
 
@@ -30,182 +29,86 @@ from savu.plugins.loaders.base_loader import BaseLoader
 class BaseMultiModalLoader(BaseLoader):
     """
     This class provides a base for all multi-modal loaders
-    :param fast_axis: what is the fast axis called. Default: "x".
     """
 
-    def multi_modal_setup(self, ltype, data_str, name):
-        # set up the file handles
+    def __init__(self, name='BaseMultiModalLoader'):
+        super(BaseMultiModalLoader, self).__init__(name)
+        self._mtype = None
+
+    def multi_modal_setup(self, ltype, data_str, name, patterns=True):
+        data_obj = self._get_file_handle(name, ltype)
+        NXdef = 'NXstxm' if ltype == 'NXmonitor' else ltype
+        entry = self.get_NXapp(NXdef, data_obj.backing_file, 'entry1/')[0]
+
+        path = ('/').join([entry.name, data_str])
+        data_obj.data = data_obj.backing_file[path]
+        data_obj.set_shape(data_obj.data.shape)
+        self._check_for_monitor_data(data_obj, entry)
+        self.set_motors(data_obj, entry, 'fluo')
+        if patterns:
+            self.add_patterns_based_on_acquisition(data_obj, 'fluo')
+        return data_obj, entry
+
+    def _get_file_handle(self, name, ltype):
         exp = self.exp
         data_obj = exp.create_data_object("in_data", name)
-        data_obj.backing_file = \
-            h5py.File(exp.meta_data.get("data_file"), 'r')
+        data_obj.backing_file = h5py.File(exp.meta_data.get("data_file"), 'r')
         logging.debug("Creating file '%s' '%s'_entry",
                       data_obj.backing_file.filename, ltype)
-        # now lets extract the entry so we can figure out our geometries!
-        if ltype == 'NXmonitor':
-            entry = self.get_NXapp('NXstxm', data_obj.backing_file, 'entry1/')[0]
-        else:
-            entry = self.get_NXapp(ltype, data_obj.backing_file, 'entry1/')[0]
-        logging.debug(str(entry))
+        return data_obj
 
-        #lets get the data out
-        data_obj.data = data_obj.backing_file[entry.name + data_str]
-        data_obj.set_shape(data_obj.data.shape)
-        #Now the beam fluctuations
-        # the ion chamber "normalisation"
-        try:
-            control = data_obj.backing_file[entry.name+'/monitor/data']
-        # this is global since it is to do with the beam
-            exp.meta_data.set("control", control)
+    def _check_for_monitor_data(self, data_obj, entry):
+        if entry.name + '/monitor/data' in data_obj.backing_file:
+            control = data_obj.backing_file[entry.name + '/monitor/data']
+            self.exp.meta_data.set('control', control)
             logging.debug('adding the ion chamber to the meta data')
-        except:
+        else:
             logging.warn('No ion chamber information. Leaving this blank')
-        return data_obj, entry
-    
 
     def set_motors(self, data_obj, entry, ltype):
-        # now lets extract the map, if there is one!
-        # to begin with
-        data_obj.data_mapping = DataMapping()
-        logging.debug("========="+ltype+"=========")
-        axes = entry['data'].attrs['axes']
-        data_obj.data_mapping.set_axes(axes)
-        nAxes = len(axes)
-        #logging.debug nAxes
-        cts = 0
-        motors = []
-        motor_type = []
-        labels = []
-        fast_axis = self.parameters["fast_axis"]
-        axes_slice_list = [slice(0,1,1)]*nAxes
-        logging.debug("axes in the file are:"+str(str(entry['data'].attrs["axes"])))
-        for ii in range(nAxes):
-            # find the rotation axis
-            data_axis = 'data/' + entry['data'].attrs["axes"][ii]
-            logging.debug("the data axis is %s" % str(data_axis))
-            entry_axis = entry[data_axis]
-            try:
-                units = entry_axis.attrs['units']
-            except KeyError:
-                logging.debug('leaving the units out for axis %s', str(ii))
-                units = 'unit'
-            
-            try:
-                mType = entry_axis.attrs['transformation_type']
-                if (mType == "rotation"):
-                    #what axis is this? Could we store it?
-                    motors.append(data_obj.backing_file[entry.name + '/' +
-                                                        data_axis])
-                    data_obj.data_mapping._is_tomo = True
-                    motor_type.append('rotation')
-                    label = 'rotation_angle'
-                    rotation_angle = \
-                        data_obj.backing_file[entry.name + '/' +data_axis].value
-                    if rotation_angle.ndim > 1:
-#                         idx = axes_slice_list[:]# make a copy
-#                         idx[ii] = slice(0,rotation_angle.shape[ii],1)
-                        rotation_angle = rotation_angle[:,0]
-#                         rotation_angle = rotation_angle[idx].squeeze()
+        labels = list(entry['data'].attrs['axes'])
+        motors = [entry['data/' + e] for e in labels]
+        units = self._get_attrs(motors, 'units', 'unit')
+        self._mtype = self._get_attrs(motors, 'transformation_type', 'None')
+        self._set_axis_labels(data_obj, motors, labels, units)
 
-                    data_obj.meta_data.set('rotation_angle', rotation_angle)
-                    logging.debug(ltype + " reader: %s", "is a tomo scan")
-                elif (mType == "translation"):
-                    # increase the order of the map
-                    # what axes are these? Would be good to have for the
-                    # pattern stuff
-                    # attach this to the scan map
-                    motors.append(data_obj.backing_file[entry.name + '/' +
-                                                        data_axis])
-                    motor_type.append('translation')
-                    if (str(entry['data'].attrs["axes"][ii])==fast_axis):
-                        label='x'
-                        x = \
-                            data_obj.backing_file[entry.name + '/' +data_axis].value
-                        if x.ndim > 1:
-                            #print "xshape is:"+str(x.shape)
-#                             idx = axes_slice_list[:]# make a copy
-#                             idx[ii] = slice(0,x.shape[ii],1)
-#                             x = x[idx].squeeze()
-                            x = x[0,:]
-                        data_obj.meta_data.set('x', x)
-                    else:
-                        label='y'
-                        y = \
-                            data_obj.backing_file[entry.name + '/' +data_axis].value
-                        if y.ndim > 1:
-#                             idx = axes_slice_list[:]# make a copy
-#                             idx[ii] = slice(0,y.shape[ii],1)
-#                             print "yshape is:"+str(y.shape)
-#                             y = y[idx].squeeze()
-                            y = y[:,0]
-                        data_obj.meta_data.set('y', y)
-                    cts += 1
-                    
-            except KeyError:
-                motor_type.append('None')
-                label = str(entry['data'].attrs["axes"][ii])
-            labels.append(label+'.'+units)
+    def _get_attrs(self, entries, key, default):
+        return [e.attrs[key] if key in e.attrs.keys() else
+                default for e in entries]
 
-        if not motors:
-            logging.debug("%s reader: No maps found!", ltype)
-        #logging.debug labels
-        data_obj.set_axis_labels(*tuple(labels))
-        data_obj.data_mapping.set_motors(motors)
-        data_obj.data_mapping.set_motor_type(motor_type)
-        if (cts):
-            # set the map counts to be the number of linear scan dimensions
-            data_obj.data_mapping._is_map = cts
-            # chuck to meta
-        else:
-            logging.debug("'%s' reader: No translations found!", ltype)
-            pass
-        logging.debug("axis labels:"+str(labels))
-        logging.debug("motor_type:"+str(motor_type))
+    def _set_axis_labels(self, dObj, motors, labels, units):
+        trans = self.get_motor_dims('translation')
+        rot_dim = self._mtype.index('rotation')
+        angles = motors[rot_dim].value
+        labels[rot_dim] = 'rotation_angle'
+        self._set_meta_data(dObj, 'rotation_angle', angles)
+        if trans:
+            self._set_meta_data(dObj, 'x', motors[trans[-1]].value)
+            labels[trans[-1]] = 'x'
+            if len(trans) > 1:
+                self._set_meta_data(dObj, 'y', motors[trans[-2]].value)
+                labels[trans[-2]] = 'y'
+        labels = [labels[i] + '.' + units[i] for i in range(len(labels))]
+        dObj.set_axis_labels(*tuple(labels))
+
+    def _set_meta_data(self, dObj, key, value):
+        value = value[:, 0] if value.ndim > 1 else value
+        dObj.meta_data.set(key, value)
+
+    def get_motor_dims(self, key):
+        return [i for i in range(len(self._mtype)) if self._mtype[i] == key]
 
     def add_patterns_based_on_acquisition(self, data_obj, ltype):
-        motor_type = data_obj.data_mapping.get_motor_type()
-        dims = range(len(motor_type))
-        projection = []
-        for item, key in enumerate(motor_type):
-            if key == 'translation':
-                projection.append(item)
-#                 logging.debug projection
-            elif key == 'rotation':
-                rotation = item
+        dims = range(len(self._mtype))
 
-        if data_obj.data_mapping._is_map:
-            logging.debug("%s is map %s" % (ltype,data_obj.data_mapping._is_map))
-            proj_dir = tuple(projection)
-            logging.debug("is a map")
-            logging.debug("the proj cores are"+str(proj_dir))
-            logging.debug("the proj slices are"+str(tuple(set(dims) - set(proj_dir))))
-            data_obj.add_pattern("PROJECTION", core_dims=proj_dir,
-                                 slice_dims=tuple(set(dims) - set(proj_dir)))
+        proj_dims = tuple(self.get_motor_dims('translation'))
+        if proj_dims:
+            data_obj.add_pattern("PROJECTION", core_dims=proj_dims,
+                                 slice_dims=tuple(set(dims) - set(proj_dims)))
 
-        if data_obj.data_mapping._is_tomo:
-            logging.debug("%s is tomo", ltype)
-            logging.debug("I am adding a sinogram")
-            #rotation and fast axis
-            sino_dir = (rotation, proj_dir[-1])
-            logging.debug("is a tomo")
-            logging.debug("the sino cores are:"+str(sino_dir))
-            logging.debug("the sino slices are:"+str(tuple(set(dims) - set(sino_dir))))
+        rot_dim = tuple(self.get_motor_dims('rotation'))
+        if rot_dim:
+            sino_dir = rot_dim + (proj_dims[-1],) if proj_dims else rot_dim
             sino_slice_dir = tuple(set(dims) - set(sino_dir))
             data_obj.add_pattern("SINOGRAM", core_dims=sino_dir,
                                  slice_dims=sino_slice_dir)
-            
-        # I don't think this is needed anymore
-#         if data_obj.data_mapping._is_tomo and (data_obj.data_mapping._is_map==1) and len(sino_slice_dir)<2:
-#             print "I'm here"
-#             data_obj.add_pattern("PROJECTION", core_dims=(0,),
-#                         slice_dims=(1,))
-        
-        if ltype is 'xrd':
-            diff_core = (-2,-1) # it will always be this
-            diff_slice = tuple(dims[:-2])
-            logging.debug("is a diffraction")
-            logging.debug("the diffraction cores are:"+str(diff_core))
-            logging.debug("the diffraction slices are:"+str(diff_slice))
-            data_obj.add_pattern("DIFFRACTION", core_dims=diff_core,
-                                 slice_dims=diff_slice)
-

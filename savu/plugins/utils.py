@@ -28,6 +28,7 @@ import savu
 import copy
 import importlib
 import imp
+import inspect
 
 
 plugins = {}
@@ -35,6 +36,10 @@ plugins_path = {}
 dawn_plugins = {}
 dawn_plugin_params = {}
 count = 0
+
+OUTPUT_TYPE_DATA_ONLY = 0
+OUTPUT_TYPE_METADATA_ONLY = 1
+OUTPUT_TYPE_METADATA_AND_DATA = 2
 
 
 def register_plugin(clazz):
@@ -45,19 +50,30 @@ def register_plugin(clazz):
     return clazz
 
 
-def dawn_compatible(clazz):
-    """
-    decorator to add dawn compatible plugins and details to a central register
-    """
-    dawn_plugins[clazz.__name__] = {}
-    try:
-        plugin_path = sys.modules[clazz.__module__].__file__
-        # looks out for .pyc files
-        dawn_plugins[clazz.__name__]['path2plugin'] = \
-            plugin_path.split('.py')[0]+'.py'
-    except Exception as e:
-        print e
-    return clazz
+def dawn_compatible(plugin_output_type=OUTPUT_TYPE_METADATA_AND_DATA):
+    def _dawn_compatible(clazz):
+        """
+        decorator to add dawn compatible plugins and details to a central
+        register
+        """
+        dawn_plugins[clazz.__name__] = {}
+        try:
+            plugin_path = sys.modules[clazz.__module__].__file__
+            # looks out for .pyc files
+            dawn_plugins[clazz.__name__]['path2plugin'] = \
+                plugin_path.split('.py')[0]+'.py'
+            dawn_plugins[clazz.__name__]['plugin_output_type'] =\
+                _plugin_output_type
+        except Exception as e:
+            print e
+        return clazz
+    # for backwards compatibility, if decorator is invoked without brackets...
+    if inspect.isclass(plugin_output_type):
+        _plugin_output_type = OUTPUT_TYPE_METADATA_AND_DATA
+        return _dawn_compatible(plugin_output_type)
+    else:
+        _plugin_output_type = plugin_output_type
+        return _dawn_compatible
 
 
 def get_plugin(plugin_name):
@@ -74,7 +90,7 @@ def get_plugin(plugin_name):
     return instance
 
 
-def load_class(name):
+def load_class(name, cls_name=None):
     """ Returns an instance of the class associated with the module name.
 
     :param name: Module name or path to a module file
@@ -82,7 +98,8 @@ def load_class(name):
     """
     path = name if os.path.dirname(name) else None
     name = os.path.basename(os.path.splitext(name)[0]) if path else name
-    cls_name = ''.join(x.capitalize() for x in name.split('.')[-1].split('_'))
+    cls_name = ''.join(x.capitalize() for x in name.split('.')[-1].split('_'))\
+        if not cls_name else cls_name
     if cls_name in plugins.keys():
         return plugins[cls_name]
     mod = \
@@ -211,14 +228,35 @@ def get_plugins_paths():
     return plugins_paths
 
 
-# Disable
+def is_template_param(param):
+    """ Identifies if the parameter should be included in an input template
+    and returns the default value of the parameter if it exists.
+    """
+    start = 0
+    ptype = 'local'
+    if isinstance(param, str):
+        param = param.strip()
+        if not param.split('global')[0]:
+            ptype = 'global'
+            start = 6
+        first, last = param[start], param[-1]
+        if first == '<' and last == '>':
+            param = param[start+1:-1]
+            try:
+                exec("param = " + param)
+            except:
+                pass
+            return [ptype, param]
+    return False
+
+
 def blockPrint():
+    """ Disable printing to stdout """
     import tempfile
     fname = tempfile.mkdtemp() + '/unwanted_prints.txt'
-    #sys.stdout = open(os.devnull, 'w')
     sys.stdout = open(fname, 'w')
 
 
-# Restore
 def enablePrint():
+    """ Enable printing to stdout """
     sys.stdout = sys.__stdout__

@@ -9,7 +9,8 @@ Submodules
    savu.test.travis.plugin_tests.filter_tests.background_estimator_test
    savu.test.travis.plugin_tests.filter_tests.band_pass_test
    savu.test.travis.plugin_tests.filter_tests.denoise_bregman_test
-   savu.test.travis.plugin_tests.filter_tests.dezing_filter_test
+   savu.test.travis.plugin_tests.filter_tests.dezinger_simple_test
+   savu.test.travis.plugin_tests.filter_tests.dezinger_test
    savu.test.travis.plugin_tests.filter_tests.distortion_correction_test
    savu.test.travis.plugin_tests.filter_tests.downsample_filter_test
    savu.test.travis.plugin_tests.filter_tests.find_peaks_test

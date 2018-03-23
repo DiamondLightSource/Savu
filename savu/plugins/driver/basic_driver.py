@@ -34,23 +34,29 @@ class BasicDriver(object):
         super(BasicDriver, self).__init__()
 
     def _run_plugin_instances(self, transport, communicator=MPI.COMM_WORLD):
-        """ Runs the pre_process, process and post_process methods.
-
-        If parameter tuning is required, loop over the methods and set the
-        correct parameters for each run. """
-
+        self.__set_communicator(communicator)
         logging.info("%s.%s", self.__class__.__name__, 'pre_process')
         self.base_pre_process()
         self.pre_process()
-        logging.info("%s.%s", self.__class__.__name__, '_barrier')
-        self.exp._barrier(communicator=communicator)
+
+        msg = "Pre-process completed for %s" % self.__class__.__name__
+        self.plugin_barrier(msg=msg)
 
         logging.info("%s.%s", self.__class__.__name__, 'process_frames')
         transport._transport_process(self)
 
-        logging.info("%s.%s", self.__class__.__name__, '_barrier')
-        self.exp._barrier(communicator=communicator)
+        msg = "Process_frames completed for %s" % self.__class__.__name__
+        self.plugin_barrier(msg=msg)
 
         logging.info("%s.%s", self.__class__.__name__, 'post_process')
         self.post_process()
         self.base_post_process()
+
+    def __set_communicator(self, comm):
+        self._communicator = comm
+
+    def get_communicator(self):
+        return self._communicator
+
+    def plugin_barrier(self, msg=''):
+        return self.exp._barrier(communicator=self.get_communicator(), msg=msg)

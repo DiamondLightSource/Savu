@@ -166,12 +166,13 @@ def set_options(path, **kwargs):
     options['log_path'] = options['out_path']
     options['run_type'] = 'test'
     options['verbose'] = 'True'
-    options['link_type'] = 'final_result'
+    #options['link_type'] = 'final_result'
     options['test_state'] = True
     options['lustre'] = False
     options['bllog'] = None
     options['email'] = None
-
+    options['template'] = None
+    options['checkpoint'] = None
     return options
 
 

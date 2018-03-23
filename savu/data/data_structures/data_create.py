@@ -24,8 +24,8 @@
 import copy
 import numpy as np
 
-import savu.data.data_structures.data_notes as notes
 from savu.core.utils import docstring_parameter
+import savu.data.data_structures.data_notes as notes
 
 
 class DataCreate(object):
@@ -77,8 +77,7 @@ class DataCreate(object):
         self.__copy_labels(data_obj)
         self.__find_and_set_shape(data_obj)
         self._set_data_patterns(patterns)
-        if self.raw:
-            self.raw = data_obj.data
+        self.raw = data_obj.data if self.raw else None
 
     def __create_dataset_from_kwargs(self, kwargs):
         """ Create dataset from kwargs. """

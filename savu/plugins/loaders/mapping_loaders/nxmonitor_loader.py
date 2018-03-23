@@ -38,21 +38,12 @@ class NxmonitorLoader(BaseMultiModalLoader):
         super(NxmonitorLoader, self).__init__(name)
 
     def setup(self):
-        """
-         Define the input nexus file
+        path = '/instrument/detector/data'
+        data_obj, stxm_entry = \
+            self.multi_modal_setup('NXmonitor', path, self.parameters['name'])
 
-        :param path: The full path of the NeXus file to load.
-        :type path: str
-        """
-
-        data_str = '/instrument/detector/data'
-        data_obj, stxm_entry = self.multi_modal_setup('NXmonitor', data_str,
-                                                      self.parameters['name'])
         mono_energy = data_obj.backing_file[
             stxm_entry.name + '/instrument/monochromator/energy']
 
         self.exp.meta_data.set("mono_energy", mono_energy)
-        self.set_motors(data_obj, stxm_entry, 'monitor')
-
-        self.add_patterns_based_on_acquisition(data_obj, 'monitor')
         self.set_data_reduction_params(data_obj)

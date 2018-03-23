@@ -15,10 +15,12 @@ Submodules
    savu.plugins.filters.band_pass
    savu.plugins.filters.base_filter
    savu.plugins.filters.denoise_bregman_filter
-   savu.plugins.filters.dezing_filter
+   savu.plugins.filters.dezinger
+   savu.plugins.filters.dezinger_simple
    savu.plugins.filters.dials_find_spots
    savu.plugins.filters.find_peaks
    savu.plugins.filters.image_interpolation
+   savu.plugins.filters.interpolate_outliers
    savu.plugins.filters.list_to_projections
    savu.plugins.filters.median_filter
    savu.plugins.filters.paganin_filter
