@@ -281,7 +281,7 @@ class PluginData(object):
         dataset, i.e. add in any missing dimensions.
         """
         nDims = len(self.get_shape())
-        all_dims = self.get_core_directions() + self.get_slice_directions()
+        all_dims = self.get_core_dimensions() + self.get_slice_dimension()
         extra_dims = all_dims[nDims:]
         dlist = list(plist)
         for i in extra_dims:
