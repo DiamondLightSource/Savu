@@ -1,0 +1,19 @@
+# Tune these parameters to optimise Savu for your system.
+
+max_chunk_size          : 2048      # the size of the hdf5 raw data cache in MB
+
+checkpoint_interval     : 600       # interval between checkpointing in seconds
+
+mpi-io_settings:                    # MPI I/O settings
+    romio_ds_write      : disable   
+    romio_ds_read       : disable
+
+data_transfer_settings  :
+    max_mft             : 32        # max frames, per process, that can be transferred from file at a time
+    min_mft             : 16        # min frames, per process, that must be transferred from file if total frames_per_process > frame_threshold
+    frame_threshold     : 32        # see min_mft above
+
+# future considerations
+    # blosc compression (hdf5 filter)
+    # IBM_largeblock_io
+

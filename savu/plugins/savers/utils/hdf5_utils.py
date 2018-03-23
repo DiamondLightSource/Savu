@@ -42,16 +42,15 @@ class Hdf5Utils(object):
         self.plugin = None
         self.info = MPI.Info.Create()
         self.exp = exp
-        self.info.Set("romio_ds_write", "disable")  # this setting is required
-        self.info.Set("romio_ds_read", "disable")
-        # info.Set("romio_cb_read", "disable")
-        # info.Set("romio_cb_write", "disable")
+        # Get MPI I/O settings from the Savu config file
+        settings = self.exp.meta_data.get(['system_params', 'mpi-io_settings'])
+        for key, value in settings.iteritems():
+            self.info.Set(key, value)
 
     def _open_backing_h5(self, filename, mode, comm=MPI.COMM_WORLD, mpi=True):
         """
         Create a h5 backend for output data
         """
-
         if mpi:
             msg = self.__class__.__name__ + "_open_backing_h5 %s" + filename
             self.exp._barrier(communicator=comm, msg=msg+'1')
@@ -146,25 +145,15 @@ class Hdf5Utils(object):
         if 'data' in group:
             data.data = group['data']
         elif current_and_next is 0:
+            print "Creating the dataset without chunks"
             logging.warn('Creating the dataset without chunks')
             data.data = group.create_dataset("data", shape, data.dtype)
         else:
-
-            # change cache properties
-            propfaid = group.file.id.get_access_plist()
-            settings = list(propfaid.get_cache())
-            #settings[2] *= 1000
-            settings[2] *= 2048 # optimise based on chunk size!!!!!!!
-            propfaid.set_cache(*settings)
-            # calculate total number of chunks and set nSlots=nChunks
-
+            print "creating the dataset"
+            chunk_max = self.__set_optimal_hdf5_chunk_cache_size(data, group)
             chunking = Chunking(self.exp, current_and_next)
             chunks = chunking._calculate_chunking(shape, data.dtype,
-                                                  chunk_max=settings[2])
-#
-#            print "nchunks = ", settings[1]
-#            print "chunks = ", chunks
-#            print "chunk_max", settings[2]
+                                                  chunk_max=chunk_max)
 
             self.exp._barrier(msg=msg+'4')
             data.data = self.create_dataset_nofill(
@@ -173,6 +162,17 @@ class Hdf5Utils(object):
         self.exp._barrier(msg=msg+'5')
 
         return group_name, group
+
+    def __set_optimal_hdf5_chunk_cache_size(self, data, group):
+        # calculate the number first
+        # change cache properties
+        propfaid = group.file.id.get_access_plist()
+        settings = list(propfaid.get_cache())
+        max_size = self.exp.meta_data.get(['system_params', 'max_chunk_size'])
+        print "the max size is", max_size
+        settings[2] *= max_size
+        propfaid.set_cache(*settings)
+        return settings[2]
 
     def _close_file(self, data):
         """

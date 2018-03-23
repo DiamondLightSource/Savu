@@ -65,6 +65,8 @@ def __option_parser():
     parser.add_argument("--lustre_workaround", action="store_true",
                         dest="lustre", help="Avoid lustre segmentation fault",
                         default=False)
+    sys_params_help = "Override default path to Savu system parameters file."
+    parser.add_argument("--system_params", help=sys_params_help, default=None)
 
     # Hidden arguments
     # process names
@@ -150,6 +152,7 @@ def _set_options(args):
     options['bllog'] = args.bllog
     options['email'] = args.email
     options['femail'] = args.femail
+    options['system_params'] = args.system_params
 
     out_folder_name = \
         args.folder if args.folder else __get_folder_name(options['data_file'])

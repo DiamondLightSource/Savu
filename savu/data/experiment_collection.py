@@ -33,6 +33,7 @@ from savu.data.plugin_list import PluginList
 from savu.data.data_structures.data import Data
 from savu.core.checkpointing import Checkpointing
 from savu.plugins.savers.utils.hdf5_utils import Hdf5Utils
+import savu.plugins.loaders.utils.yaml_utils as yaml
 
 
 class Experiment(object):
@@ -43,8 +44,9 @@ class Experiment(object):
     """
 
     def __init__(self, options):
-        self.checkpoint = Checkpointing(self)
         self.meta_data = MetaData(options)
+        self.__set_system_params()
+        self.checkpoint = Checkpointing(self)
         self.__meta_data_setup(options["process_file"])
         self.experiment_collection = {}
         self.index = {"in_data": {}, "out_data": {}}
@@ -91,17 +93,13 @@ class Experiment(object):
         plugin_list = self.meta_data.plugin_list
         plist = plugin_list.plugin_list
         self.__set_transport(transport)
-
         # load the loader plugins
         self._set_loaders()
-
         # load the saver plugin and save the plugin list
         self.experiment_collection = {'plugin_dict': [],
                                       'datasets': []}
-
         self._barrier()
-
-        self._check_checkpoint()  # delete the nexus file?
+        self._check_checkpoint()
         checkpoint = self.meta_data.get('checkpoint')
         if self.meta_data.get('process') == \
                 len(self.meta_data.get('processes'))-1 and not checkpoint:
@@ -126,6 +124,21 @@ class Experiment(object):
 
     def _get_transport(self):
         return self._transport
+
+    def __set_system_params(self):
+        sys_file = self.meta_data.get('system_params')
+        import sys
+        if sys_file is None:
+            # look in conda environment to see which version is being used
+            savu_path = sys.modules['savu'].__path__[0]
+            sys_files = os.path.join(
+                    os.path.dirname(savu_path), 'system_files')
+            subdirs = os.listdir(sys_files)
+            sys_folder = 'dls' if len(subdirs) > 1 else subdirs[0]
+            fname = 'system_parameters.yml'
+            sys_file = os.path.join(sys_files, sys_folder, fname)
+        logging.info('Using the system parameters file: %s', sys_file)
+        self.meta_data.set('system_params', yaml.read_yaml(sys_file))
 
     def _check_checkpoint(self):
         # if checkpointing has been set but the nxs file doesn't contain an

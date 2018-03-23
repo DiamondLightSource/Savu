@@ -138,7 +138,8 @@ class Checkpointing(object):
         return self._completed_plugins
 
     def is_time_to_checkpoint(self, transport, ti, pi):
-        interval = 300
+        interval = self._exp.meta_data.get(
+                ['system_params', 'checkpoint_interval'])
         end = time.time()
         if (end - self._get_timer()) > interval:
             self.__write_subplugin_checkpoint(ti, pi)
