@@ -153,7 +153,8 @@ def _mod_arg_parser(args, desc):
 def _set_arg_parser(args, desc):
     """ Argument parser for set command. """
     parser = ArgumentParser(prog='set', description=desc)
-    parser.add_argument('plugin_pos', type=str, help="Plugin position.")
+    parser.add_argument('plugin_pos', type=str, nargs='*',
+                        help="Plugin position.")
     parser.add_argument("status", type=str, choices=['on', 'ON', 'off', 'OFF'],
                         help="Plugin status.")
     return __arg_parser(parser, args)
