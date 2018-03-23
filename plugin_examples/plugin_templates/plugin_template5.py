@@ -16,16 +16,18 @@
 .. module:: plugin_template2
    :platform: Unix
    :synopsis: A template to create a plugin with a single input dataset and \
-   multiple output datasets.
+   multiple output datasets, that do not resemble the input dataset and are \
+   not retained by the framework.
 
 .. moduleauthor:: Developer Name <email@address.ac.uk>
 
 """
-import  numpy as np
+import numpy as np
 
 from savu.plugins.plugin import Plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
+
 
 @register_plugin
 class PluginTemplate5(Plugin, CpuPlugin):
@@ -57,7 +59,7 @@ class PluginTemplate5(Plugin, CpuPlugin):
 
         # reduce the data as per data_subset parameter
         self.set_preview(in_dataset[0], self.parameters['preview'])
-        
+
         # get the reduced shape of the data after previewing
         reduced_shape = in_dataset[0].get_shape()
 
