@@ -1,5 +1,6 @@
 import os
 import sys
+import glob
 import shutil
 
 from setuptools import setup, find_packages
@@ -72,6 +73,10 @@ def _get_packages():
               'plugin_examples']
     return find_packages() + others
 
+
+mpi_all_files = glob.glob(os.path.join(facility_path, 'mpi', '*.sh'))
+mpi_files = [mfile for mfile in mpi_all_files if 'dev' not in mfile]
+
 setup(name='savu',
       version=__version__,
       description='Savu Python Tomography Pipeline',
@@ -90,9 +95,7 @@ setup(name='savu',
       license='Apache License, Version 2.0',
       packages=_get_packages(),
 
-      scripts=[facility_path+'/savu_launcher.sh',
-               facility_path+'/savu_mpijob.sh',
-               facility_path+'/savu_mpijob_local.sh',
+      scripts=mpi_files + [
                __install__ + '/tests/test_setup.sh',
                __install__ + '/tests/mpi_cpu_test.sh',
                __install__ + '/tests/mpi_gpu_test.sh',
