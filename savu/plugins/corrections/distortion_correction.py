@@ -37,12 +37,10 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
 
     :param polynomial_coeffs: Parameters of the radial distortion \
     function. Default: (1.00015076, 1.9289e-6, -2.4325e-8, 1.00439e-11, -3.99352e-15).
-    :param centre_y: The det_y coordinate of the centre of \
-    distortion=(det_y, det_x) with origin (0, 0) in the top left \
-    corner. Default: 995.24.
-    :param centre_x: The det_x coordinate of the centre of \
-    distortion=(det_y, det_x) with origin (0, 0) in the top left \
-    corner. Default: 1283.25.
+    :param centre_from_top: The centre of distortion in pixels from the top \
+    of the image. Default: 995.24.
+    :param centre_from_left: The centre of distortion in pixels from the left \
+    of the image. Default: 1283.25.
     :u*param crop_edges: When applied to previewed/cropped data, the result \
     may contain zeros around the edges, which can be removed by \
     cropping the edges by a specified number of pixels. Default: 0
@@ -55,14 +53,20 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
         in_pData = self.get_plugin_in_datasets()[0]
         data = self.get_in_datasets()[0]
 
-        dict_entry = data.get_name() + '_preview_starts'
-        shift = self.exp.meta_data.get(dict_entry)
+        name = data.get_name()
+        shift = self.exp.meta_data.get(name + '_preview_starts')
+        step = self.exp.meta_data.get(name + '_preview_steps')
 
         det_y = data.get_data_dimension_by_axis_label('detector_y')
         det_x = data.get_data_dimension_by_axis_label('detector_x')
 
+        # check stepping as should not be > 1
+        self.step_check = \
+            True if max([step[i] for i in [det_y, det_x]]) > 1 else False
+
         # If the data is cropped then the centre of distortion must be shifted
         # accordingly, e.g if preview is [:, a:b, c:d] then shift is (a, c)
+
         centre = np.array([self.parameters['centre_y'],
                            self.parameters['centre_x']])
         centre[0] -= shift[det_y]
@@ -110,3 +114,14 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
 
     def get_max_frames(self):
         return 'multiple'
+
+    def executive_summary(self):
+        if self.step_check:
+            msg = "\n\tWARNING: Incompatibility with loader 'preview' "\
+                  "parameters. \n\tThis plugin will currently produce "\
+                  "incorrect results if a \n\tdetector dimension has step "\
+                  "length greater than 1.\n\tPlease remove the stepping or "\
+                  "remove the plugin."
+            return [msg]
+        else:
+            return ["Nothing to Report"]

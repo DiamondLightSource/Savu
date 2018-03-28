@@ -1,5 +1,5 @@
 inherit: 
-    - /home/qmm55171/Documents/temp_docs/temp_output/test_yml_files/xrd_calibration_legacy.yml
+    - savu/plugins/loaders/templates/nexus_templates/xrd_calibration_legacy.yml
 
 xrd:
     data:

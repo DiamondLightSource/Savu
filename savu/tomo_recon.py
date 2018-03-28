@@ -65,6 +65,8 @@ def __option_parser():
     parser.add_argument("--lustre_workaround", action="store_true",
                         dest="lustre", help="Avoid lustre segmentation fault",
                         default=False)
+    sys_params_help = "Override default path to Savu system parameters file."
+    parser.add_argument("--system_params", help=sys_params_help, default=None)
 
     # Hidden arguments
     # process names
@@ -93,7 +95,36 @@ def __option_parser():
     parser.add_argument("--test_state", dest="test_state", default='False',
                         action='store_true', help=hide)
 
-    return parser.parse_args()
+    # DosNa related parameters
+    parser.add_argument("--dosna_backend", dest="dosna_backend", help=hide,
+                        default=None)
+    parser.add_argument("--dosna_engine", dest="dosna_engine", help=hide,
+                        default=None)
+    parser.add_argument("--dosna_connection", dest="dosna_connection",
+                        help=hide, default=None)
+    parser.add_argument("--dosna_ceph_conffile", dest="dosna_ceph_conffile",
+                        help=hide, default=None)
+    parser.add_argument("--dosna_ceph_client_id", dest="dosna_ceph_client_id",
+                        help=hide, default=None)
+    parser.add_argument("--dosna_hdf5_dir", dest="dosna_hdf5_dir",
+                        help=hide, default=None)
+
+    check_help = "Continue Savu processing from a checkpoint."
+    choices = ['plugin', 'subplugin']
+    parser.add_argument("--checkpoint", nargs="?", choices=choices,
+                        const='plugin', help=check_help, default=None)
+
+    args = parser.parse_args()
+    __check_conditions(parser, args)
+    return args
+
+
+def __check_conditions(parser, args):
+    if args.checkpoint and not args.folder:
+        msg = "--checkpoint flag requires '-f folder_name', where folder_name"\
+              " contains the partially completed Savu job.  The out_folder"\
+              " should be the path to this folder."
+        parser.error(msg)
 
 
 def _set_options(args):
@@ -121,6 +152,7 @@ def _set_options(args):
     options['bllog'] = args.bllog
     options['email'] = args.email
     options['femail'] = args.femail
+    options['system_params'] = args.system_params
 
     out_folder_name = \
         args.folder if args.folder else __get_folder_name(options['data_file'])
@@ -131,13 +163,22 @@ def _set_options(args):
 
     basename = os.path.basename(args.in_file)
     options['datafile_name'] = os.path.splitext(basename)[0] if basename \
-        else args.in_file.split('/')[-2]
+        else args.in_file.split(os.sep)[-2]
 
     inter_folder_path = __create_output_folder(args.tmp, out_folder_name)\
         if args.tmp else out_folder_path
     options['inter_path'] = inter_folder_path
     options['log_path'] = args.log if args.log else options['inter_path']
     options['nProcesses'] = len(options["process_names"].split(','))
+    # DosNa related options
+    options["dosna_backend"] = args.dosna_backend
+    options["dosna_engine"] = args.dosna_engine
+    options["dosna_connection"] = args.dosna_connection
+    options["dosna_ceph_conffile"] = args.dosna_ceph_conffile
+    options["dosna_ceph_client_id"] = args.dosna_ceph_client_id
+    options["dosna_hdf5_dir"] = args.dosna_hdf5_dir
+
+    options['checkpoint'] = args.checkpoint
 
     return options
 
@@ -149,8 +190,8 @@ def __get_folder_name(in_file):
     MPI.COMM_WORLD.barrier()
     split = in_file.split('.')
 
-    if len(split[-1].split('/')) > 1:
-        split = in_file.split('/')
+    if len(split[-1].split(os.sep)) > 1:
+        split = in_file.split(os.sep)
         name = split[-2] if split[-1] == '' else split[-1]
     # if the input is a file
     else:
@@ -173,7 +214,6 @@ def main(input_args=None):
         args = input_args
 
     options = _set_options(args)
-
     pRunner = PluginRunner if options['mode'] == 'full' else BasicPluginRunner
 
     if options['nProcesses'] == 1:

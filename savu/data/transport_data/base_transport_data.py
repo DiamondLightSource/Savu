@@ -88,10 +88,11 @@ class BaseTransportData(object):
         return mft, size_list[fchoices.index(mft)]
 
     def _set_boundaries(self):
-        max_mft = 32  # max frames that can be transferred from file at a time
-        frame_threshold = 32  # no idea if this is a good number
-        # min frames required if frames_per_process > frame_threshold
-        min_mft = 16
+        settings = self.data.exp.meta_data.get(
+                ['system_params', 'data_transfer_settings'])
+        max_mft = settings['max_mft']
+        frame_threshold = settings['frame_threshold']
+        min_mft = settings['min_mft']
         return min_mft, max_mft, frame_threshold
 
     def __get_optimum_distribution(self, nFrames):
@@ -121,7 +122,11 @@ class BaseTransportData(object):
         return int(mft), fchoices, size_list
 
     def __refine_distribution_for_multi_mfp(self, mft, size_list, fchoices):
+        flimit = self._get_data_obj()._get_plugin_data().get_frame_limit()
         mfp = self.mfp
+        if flimit and flimit < mfp:
+            mfp = flimit
+
         multi = self._find_multiples_of_b_that_divide_a(mft, mfp)
         possible = sorted(list(set(set(multi).intersection(set(fchoices)))))
 

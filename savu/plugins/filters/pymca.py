@@ -23,14 +23,14 @@
 import logging
 from savu.plugins.filters.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-from savu.plugins.utils import register_plugin, dawn_compatible
+from savu.plugins.utils import register_plugin, dawn_compatible, OUTPUT_TYPE_METADATA_ONLY
 import numpy as np
 import os
 import savu.test.test_utils as tu
 from PyMca5.PyMcaPhysics.xrf import McaAdvancedFitBatch
 
 
-@dawn_compatible
+@dawn_compatible(OUTPUT_TYPE_METADATA_ONLY)
 @register_plugin
 class Pymca(BaseFilter, CpuPlugin):
     """

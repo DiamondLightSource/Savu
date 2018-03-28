@@ -2,6 +2,8 @@ name: test-environment
 channels:
   - astra-toolbox
   - dgursoy
+  - conda-forge
+  - anaconda
 dependencies:
   - python=2.7
   - numpy
@@ -14,15 +16,15 @@ dependencies:
   - astra-toolbox
   - xraylib
   - tomopy
+  - mock
+  - fabio
+  - pytest-cov
+  - coveralls
+  - pyfai 
+  - pyfftw
+  - colorama
   - pip:
-    - mock
-    - fabio 
-    - pytest-cov
-    - coveralls
-    - pyFAI 
     - nvidia-ml-py
-    - pyfftw
     - peakutils
     - pymca
-    - colorama
 

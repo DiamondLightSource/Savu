@@ -76,9 +76,9 @@ class ImageLoader(BaseLoader):
         self.set_rotation_angles(data_obj)
 
         # dummy file
-        filename = path.split('/')[-1] + '.h5'
+        filename = path.split(os.sep)[-1] + '.h5'
         data_obj.backing_file = \
-            h5py.File(tempfile.mkdtemp() + '/' + filename, 'a')
+            h5py.File(os.path.join(tempfile.mkdtemp(), filename), 'a')
 
         data_obj.set_shape(data_obj.data.get_shape())
         self.set_data_reduction_params(data_obj)
@@ -89,12 +89,10 @@ class ImageLoader(BaseLoader):
                 not self.parameters['flat_prefix']:
             return
 
+        dObj.data = NoImageKey(dObj, None, 0)
         # read dark and flat images
         dpath, dfix = self._get_path(self.parameters['dark_prefix'], path)
         fpath, ffix = self._get_path(self.parameters['flat_prefix'], path)
-
-        dObj.data.add_base_class_with_instance(
-                NoImageKey, NoImageKey(dObj, None, 0))
 
         fdim = self.parameters['frame_dim']
         dark = FabIO(dpath, dObj, [fdim], None, dfix)

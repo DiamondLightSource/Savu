@@ -16,7 +16,6 @@ savu.core
 .. toctree::
    api_plugin/savu.core.utils
    api_plugin/savu.core.plugin_runner
-   api_plugin/savu.core.dist_array_process
    api_plugin/savu.core.transport_setup
    api_plugin/savu.core.basic_plugin_runner
 
@@ -26,9 +25,8 @@ savu.core.transports
 
 .. toctree::
    api_plugin/savu.core.transports.hdf5_transport
-   api_plugin/savu.core.transports.dist_array_utils
+   api_plugin/savu.core.transports.dosna_transport
    api_plugin/savu.core.transports.base_transport
-   api_plugin/savu.core.transports.dist_array_transport
    api_plugin/savu.core.transports.basic_transport
 
 
@@ -49,9 +47,9 @@ savu.data.transport_data
 .. toctree::
    api_plugin/savu.data.transport_data.hdf5_transport_data
    api_plugin/savu.data.transport_data.base_transport_data
-   api_plugin/savu.data.transport_data.dist_array_transport_data
    api_plugin/savu.data.transport_data.basic_transport_data
    api_plugin/savu.data.transport_data.slice_lists
+   api_plugin/savu.data.transport_data.dosna_transport_data
 
 
 savu.data.data_structures
@@ -207,6 +205,7 @@ savu.plugins.corrections
    api_plugin/savu.plugins.corrections.distortion_correction
    api_plugin/savu.plugins.corrections.monitor_correction_nd
    api_plugin/savu.plugins.corrections.xrd_absorption_approximation
+   api_plugin/savu.plugins.corrections.camera_rot_correction
 
 
 savu.plugins.fitters
@@ -266,7 +265,6 @@ savu.plugins.filters
 .. toctree::
    api_plugin/savu.plugins.filters.band_pass
    api_plugin/savu.plugins.filters.denoise_bregman_filter
-   api_plugin/savu.plugins.filters.dezing_filter
    api_plugin/savu.plugins.filters.dials_find_spots
    api_plugin/savu.plugins.filters.image_interpolation
    api_plugin/savu.plugins.filters.find_peaks
@@ -280,7 +278,10 @@ savu.plugins.filters
    api_plugin/savu.plugins.filters.strip_background
    api_plugin/savu.plugins.filters.spectrum_crop
    api_plugin/savu.plugins.filters.threshold_filter
+   api_plugin/savu.plugins.filters.dezinger_simple
+   api_plugin/savu.plugins.filters.interpolate_outliers
    api_plugin/savu.plugins.filters.umpa
+   api_plugin/savu.plugins.filters.dezinger
 
 
 savu.plugins.loaders
@@ -291,6 +292,10 @@ savu.plugins.loaders
    api_plugin/savu.plugins.loaders.multi_savu_loader
    api_plugin/savu.plugins.loaders.savu_loader
    api_plugin/savu.plugins.loaders.random_hdf5_loader
+   api_plugin/savu.plugins.loaders.yaml_converter
+   api_plugin/savu.plugins.loaders.hdf5_template_loader
+   api_plugin/savu.plugins.loaders.stitch_data_template_loader
+   api_plugin/savu.plugins.loaders.image_template_loader
 
 
 savu.plugins.loaders.full_field_loaders
@@ -306,11 +311,30 @@ savu.plugins.loaders.full_field_loaders
    api_plugin/savu.plugins.loaders.full_field_loaders.fake_nxtomo_loader
 
 
+savu.plugins.loaders.templates
+------------------------------------------------------------
+
+.. toctree::
+
+
+savu.plugins.loaders.templates.i18_templates
+------------------------------------------------------------
+
+.. toctree::
+
+
+savu.plugins.loaders.templates.nexus_templates
+------------------------------------------------------------
+
+.. toctree::
+
+
 savu.plugins.loaders.utils
 ------------------------------------------------------------
 
 .. toctree::
    api_plugin/savu.plugins.loaders.utils.mrc_header
+   api_plugin/savu.plugins.loaders.utils.yaml_utils
 
 
 savu.plugins.loaders.mapping_loaders
@@ -382,6 +406,7 @@ savu.plugins.savers
    api_plugin/savu.plugins.savers.tiff_saver
    api_plugin/savu.plugins.savers.xrf_saver
    api_plugin/savu.plugins.savers.edf_saver
+   api_plugin/savu.plugins.savers.extended_tiff_saver
 
 
 savu.plugins.savers.utils

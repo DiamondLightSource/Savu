@@ -1,0 +1,6 @@
+2.0     https://github.com/DiamondLightSource/Savu/raw/master/install/2_0_install/savu_v2.0.tar.gz
+2.1     https://github.com/DiamondLightSource/Savu/raw/master/install/2_1_install/savu_v2.1.tar.gz
+2.1.1   https://github.com/DiamondLightSource/Savu/raw/master/install/2_1_install/savu_v2.1.1.tar.gz
+2.2     https://github.com/DiamondLightSource/Savu/raw/master/install/2_1_install/savu_v2.2.tar.gz
+2.2.1   https://github.com/DiamondLightSource/Savu/raw/master/install/2_1_install/savu_v2.2.1.tar.gz
+

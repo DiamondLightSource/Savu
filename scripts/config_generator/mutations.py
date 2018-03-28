@@ -57,11 +57,11 @@ def param_changes_str(plugin):
 
 def replace_str(old_name, new_name):
     return wrap(auto_replace_str() + '\n%s has been replaced by %s. '
-                '\nPlease check the parameters.\n' % (old_name, new_name))
+                'Please check the parameters.\n' % (old_name, new_name))
 
 
 def rename_str(old_name, new_name):
-    return wrap(auto_replace_str() + '%s has been renamed as %s. \nNo '
+    return wrap(auto_replace_str() + '%s has been renamed as %s. No '
                 'further action required.' % (old_name, new_name))
 
 
@@ -96,6 +96,8 @@ hdf5_notice = 'is now used by default.\nPlease remove from the process list, '\
     'unless you wish to override the default parameters (which must be done '\
     'individually for each dataset).'
 
+dezing_notice = '\nA faster and more accurate version of DezingFilter is now'\
+    ' available as Dezinger.'
 
 plugin_mutations = \
     {'TimeseriesFieldCorrections':
@@ -105,6 +107,9 @@ plugin_mutations = \
      'Hdf5TomoSaver':
         {'replace': 'Hdf5Saver',
          'desc': replace_str('Hdf5TomoSaver', 'Hdf5Saver')},
+     'DezingFilter':
+        {'replace': 'DezingerSimple',
+         'desc': rename_str('DezingFilter', 'DezingerSimple') + dezing_notice},
      }
 
 param_mutations = \
@@ -113,8 +118,13 @@ param_mutations = \
                    {'old': 'sino_pad', 'new': 'outer_pad'}],
      'AstraReconGpu': [{'old': 'reconstruction_type', 'new': 'algorithm'}],
      'AstraReconCpu': [{'old': 'reconstruction_type', 'new': 'algorithm'}],
-     'DistortionCorrection': [{'old': 'centre', 'new': 'centre_x', 'eval': 'val[0]'},
-                              {'old': 'centre', 'new': 'centre_y', 'eval': 'val[1]'}]}
+     'DistortionCorrection': [{'old': 'centre', 'new': 'centre_from_top', 'eval': 'val[0]'},
+                              {'old': 'centre', 'new': 'centre_from_left', 'eval': 'val[1]'},
+                              {'old': 'centre_x', 'new': 'centre_from_left'},
+                              {'old': 'centre_y', 'new': 'centre_from_top'},
+                              {'old': 'cod_from_left', 'new': 'centre_from_left'},
+                              {'old': 'cod_from_top', 'new': 'centre_from_top'},
+                              ]}
 
 plugin_notices = \
     {'Hdf5Saver': {'desc': notice_str('Hdf5Saver', hdf5_notice)}, }

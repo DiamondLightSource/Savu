@@ -22,10 +22,11 @@
 """
 
 import os
+import logging
 
+from savu.core.transport_setup import MPI_setup
 from savu.plugins.savers.utils.hdf5_utils import Hdf5Utils
 from savu.core.transports.base_transport import BaseTransport
-from savu.core.transport_setup import MPI_setup
 
 
 class Hdf5Transport(BaseTransport):
@@ -33,6 +34,7 @@ class Hdf5Transport(BaseTransport):
     def __init__(self):
         super(Hdf5Transport, self).__init__()
         os.environ['savu_mode'] = 'hdf5'
+        self.count = 0
 
     def _transport_initialise(self, options):
         MPI_setup(options)
@@ -73,13 +75,53 @@ class Hdf5Transport(BaseTransport):
     def _transport_post_plugin(self):
         for data in self.exp.index['out_data'].values():
             if not data.remove:
-                self.exp._barrier()
+                msg = self.__class__.__name__ + "_transport_post_plugin."
+                self.exp._barrier(msg=msg)
                 if self.exp.meta_data.get('process') == \
                         len(self.exp.meta_data.get('processes'))-1:
                     self._populate_nexus_file(data)
                     self.hdf5._link_datafile_to_nexus_file(data)
-                self.exp._barrier()
-                self.hdf5._reopen_file(data, 'r')  # reopen file as read-only
+                self.exp._barrier(msg=msg)
+                # reopen file as read-only
+                self.hdf5._reopen_file(data, 'r')
 
     def _transport_terminate_dataset(self, data):
         self.hdf5._close_file(data)
+
+    def _transport_checkpoint(self):
+        """ The framework has determined it is time to checkpoint.  What
+        should this transport mechanism do?"""
+        cp = self.exp.checkpoint
+        with self.hdf5._open_backing_h5(cp._file, 'a', mpi=False) as f:
+            self._metadata_dump(f, 'in_data')
+            self._metadata_dump(f, 'out_data')
+
+    def _metadata_dump(self, f, gname):
+        if gname in f.keys():
+            del f[gname]
+
+        for data in self.exp.index[gname].values():
+            name = data.get_name()
+            entry = f.require_group(gname + '/' + name)
+            self._output_metadata(data, entry, name, dump=True)
+
+    def _transport_kill_signal(self):
+        """ An opportunity to send a kill signal to the framework.  Return
+        True or False. """
+        path = self.exp.meta_data.get('out_path')
+        killsignal = os.path.join(path, 'killsignal')
+        # jump to the end of the plugin run!
+
+        if os.path.exists(killsignal):
+            self.exp.meta_data.set('killsignal', True)
+            logging.debug("***************** killsignal sent ****************")
+            return True
+        return False
+
+    def _transport_cleanup(self, i):
+        """ Any remaining cleanup after kill signal sent """
+        n_plugins = len(self.exp_coll['datasets'])
+        for i in range(i, n_plugins):
+            self.exp._set_experiment_for_current_plugin(i)
+            for data in self.exp.index['out_data'].values():
+                self.hdf5._close_file(data)

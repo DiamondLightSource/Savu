@@ -21,6 +21,7 @@
 
 """
 
+import os
 import h5py
 import logging
 from mpi4py import MPI
@@ -41,24 +42,26 @@ class Hdf5Utils(object):
         self.plugin = None
         self.info = MPI.Info.Create()
         self.exp = exp
-        self.info.Set("romio_ds_write", "disable")  # this setting is required
-        self.info.Set("romio_ds_read", "disable")
-        # info.Set("romio_cb_read", "disable")
-        # info.Set("romio_cb_write", "disable")
+        # Get MPI I/O settings from the Savu config file
+        settings = self.exp.meta_data.get(['system_params', 'mpi-io_settings'])
+        for key, value in settings.iteritems():
+            self.info.Set(key, value)
 
-    def _open_backing_h5(self, filename, mode):
+    def _open_backing_h5(self, filename, mode, comm=MPI.COMM_WORLD, mpi=True):
         """
         Create a h5 backend for output data
         """
-        self.exp._barrier()
+        if mpi:
+            msg = self.__class__.__name__ + "_open_backing_h5 %s" + filename
+            self.exp._barrier(communicator=comm, msg=msg+'1')
 
-        if self.exp.meta_data.get("mpi") is True:
-            backing_file = h5py.File(filename, mode, driver='mpio',
-                                     comm=MPI.COMM_WORLD, info=self.info)
-        else:
-            backing_file = h5py.File(filename, mode)
+        kwargs = {'driver': 'mpio', 'comm': comm, 'info': self.info}\
+            if self.exp.meta_data.get('mpi') and mpi else {}
 
-        self.exp._barrier()
+        backing_file = h5py.File(filename, mode, **kwargs)
+
+        if mpi:
+            self.exp._barrier(communicator=comm, msg=msg+'2')
 
         if backing_file is None:
             raise IOError("Failed to open the hdf5 file")
@@ -71,28 +74,46 @@ class Hdf5Utils(object):
             # entry path in nexus file
             name = data.get_name()
             group_name = self.exp.meta_data.get(['group_name', name])
-            link_type = self.exp.meta_data.get(['link_type', name])
-            nxs_entry = '/entry/' + link_type
-            if link_type == 'final_result':
-                nxs_entry += '_' + data.get_name()
-            else:
-                nxs_entry += "/" + group_name
-            nxs_entry = nxs_file[nxs_entry]
-            nxs_entry.attrs['signal'] = 'data'
-            data_entry = nxs_entry.name + '/data'
-            # output file path
-            h5file = data.backing_file.filename
+            link = self.exp.meta_data.get(['link_type', name])
+            nxs_entry = self.__add_nxs_entry(nxs_file, link, group_name, name)
+            self.__add_nxs_data(nxs_file, nxs_entry, link, group_name, data)
 
+    def __add_nxs_entry(self, nxs_file, link, group_name, name):
+        nxs_entry = '/entry/' + link
+        nxs_entry += '_' + name if link == 'final_result' else "/" + group_name
+        nxs_entry = nxs_file[nxs_entry]
+        nxs_entry.attrs['signal'] = 'data'
+        return nxs_entry
+
+    def __add_nxs_data(self, nxs_file, nxs_entry, link, group_name, data):
+        data_entry = nxs_entry.name + '/data'
+        # output file path
+        h5file = data.backing_file.filename
+
+        if link == 'input_data':
+            dataset = self.__is_h5dataset(data)
+            if dataset:
+                nxs_file[data_entry] = \
+                    h5py.ExternalLink(os.path.abspath(h5file), dataset.name)
+        else:
             # entry path in output file path
             m_data = self.exp.meta_data.get
-            if not (link_type == 'intermediate' and
+            if not (link == 'intermediate' and
                     m_data('inter_path') != m_data('out_path')):
                 h5file = h5file.split(m_data('out_folder') + '/')[-1]
-
             nxs_file[data_entry] = \
                 h5py.ExternalLink(h5file, group_name + '/data')
 
-    def __create_dataset_nofill(self, group, name, shape, dtype, chunks=None):
+    def __is_h5dataset(self, data):
+        if isinstance(data.data, h5py.Dataset):
+            return data.data
+        try:
+            if isinstance(data.data.data, h5py.Dataset):
+                return data.data.data
+        except:
+            return False
+
+    def create_dataset_nofill(self, group, name, shape, dtype, chunks=None):
         spaceid = h5py.h5s.create_simple(shape)
         plist = h5py.h5p.create(h5py.h5p.DATASET_CREATE)
         plist.set_fill_time(h5py.h5d.FILL_TIME_NEVER)
@@ -105,7 +126,8 @@ class Hdf5Utils(object):
         return data
 
     def _create_entries(self, data, key, current_and_next):
-        self.exp._barrier()
+        msg = self.__class__.__name__ + '_create_entries'
+        self.exp._barrier(msg=msg+'1')
 
         expInfo = self.exp.meta_data
         group_name = expInfo.get(["group_name", key])
@@ -115,33 +137,51 @@ class Hdf5Utils(object):
         except AttributeError:
             pass
 
-        self.exp._barrier()
-        group = data.backing_file.create_group(group_name)
-        self.exp._barrier()
+        self.exp._barrier(msg=msg+'2')
+        group = data.backing_file.require_group(group_name)
+        self.exp._barrier(msg=msg+'3')
         shape = data.get_shape()
-        if current_and_next is 0:
+
+        if 'data' in group:
+            data.data = group['data']
+        elif current_and_next is 0:
+            print "Creating the dataset without chunks"
             logging.warn('Creating the dataset without chunks')
             data.data = group.create_dataset("data", shape, data.dtype)
         else:
+            print "creating the dataset"
+            chunk_max = self.__set_optimal_hdf5_chunk_cache_size(data, group)
             chunking = Chunking(self.exp, current_and_next)
-            chunks = chunking._calculate_chunking(shape, data.dtype)
-            self.exp._barrier()
-            logging.warn('Creating the dataset with chunks.')
-            data.data = self.__create_dataset_nofill(
-                group, "data", shape, data.dtype, chunks=chunks)
-            logging.warn('Dataset created!')
+            chunks = chunking._calculate_chunking(shape, data.dtype,
+                                                  chunk_max=chunk_max)
 
-        self.exp._barrier()
+            self.exp._barrier(msg=msg+'4')
+            data.data = self.create_dataset_nofill(
+                    group, "data", shape, data.dtype, chunks=chunks)
+
+        self.exp._barrier(msg=msg+'5')
 
         return group_name, group
+
+    def __set_optimal_hdf5_chunk_cache_size(self, data, group):
+        # calculate the number first
+        # change cache properties
+        propfaid = group.file.id.get_access_plist()
+        settings = list(propfaid.get_cache())
+        max_size = self.exp.meta_data.get(['system_params', 'max_chunk_size'])
+        print "the max size is", max_size
+        settings[2] *= max_size
+        propfaid.set_cache(*settings)
+        return settings[2]
 
     def _close_file(self, data):
         """
         Closes the backing file
         """
-        self.exp._barrier()
+        msg = self.__class__.__name__ + "_close_file" + \
+            data.backing_file.filename
+        self.exp._barrier(msg=msg)
         logging.debug("Attempting to close the file ")
-
         if data.backing_file is not None:
             try:
                 filename = data.backing_file.filename
@@ -150,7 +190,7 @@ class Hdf5Utils(object):
                 data.backing_file = None
             except:
                 logging.debug("File close unsuccessful", filename)
-        self.exp._barrier()
+        self.exp._barrier(msg=msg)
 
     def _reopen_file(self, data, mode):
         filename = data.backing_file.filename

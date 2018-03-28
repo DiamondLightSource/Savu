@@ -109,7 +109,8 @@ def _mod(content, args):
 @error_catcher
 def _set(content, args):
     """ Set the status of the plugin to be on or off. """
-    content.on_and_off(args.plugin_pos, args.status.upper())
+    for pos in args.plugin_pos:
+        content.on_and_off(pos, args.status.upper())
     _disp(content, '-q')
     return content
 

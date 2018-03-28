@@ -31,15 +31,16 @@ from savu.data.data_structures.data_types.base_type import BaseType
 class DataWithDarksAndFlats(BaseType):
 
     def __init__(self, data_obj, proj_dim, image_key):
-        self.data_obj = data_obj
+        super(DataWithDarksAndFlats, self).__init__()
         self.fscale = 1
         self.dscale = 1
         self.flat_updated = False
         self.dark_updated = False
-        self.image_key = image_key
         self.data = data_obj.data
-        self.proj_dim = proj_dim
-        self.dark_flat_slice_list = None
+        self.dark_flat_slice_list = slice(None)
+
+    def _override_data_type(self, data):
+        self.data = data
 
     def _copy_base(self, new_obj):
         new_obj.flat_updated = self.flat_updated
@@ -144,18 +145,31 @@ class DataWithDarksAndFlats(BaseType):
 
     def __get_data(self, key):
         index = [slice(None)]*self.nDims
-        index[self.proj_dim] = self.get_index(key)
+        rot_dim = self.data_obj.get_data_dimension_by_axis_label(
+                'rotation_angle')
+
+        # separate the transfer of data for slice lists with entries far \
+        # apart, as this significantly improves hdf5 performance.
+        split_diff = 10
+        k_idx = self.get_index(key)
+        if not k_idx.size:
+            return np.array([])
+
+        k_idx = np.split(k_idx, np.where(np.diff(k_idx) > split_diff)[0]+1)
+
+        index[self.proj_dim] = k_idx[0]
         data = self.data[tuple(index)]
+
+        for idx in k_idx[1:]:
+            index[self.proj_dim] = idx
+            data = np.append(data, self.data[tuple(index)], axis=rot_dim)
 
         if not self.dark_flat_slice_list:
             return data
 
         sl = list(copy.deepcopy(self.dark_flat_slice_list))
         if len(data.shape) is 2:
-            rot_dim = self.data_obj.get_data_dimension_by_axis_label(
-                    'rotation_angle')
             del sl[rot_dim]
-
         return data[sl]
 
     def dark_image_key_data(self):
@@ -181,12 +195,23 @@ class ImageKey(DataWithDarksAndFlats):
     """ This class is used to get data from a dataset with an image key. """
 
     def __init__(self, data_obj, image_key, proj_dim, ignore=None):
+        self.data_obj = data_obj
+        self.image_key = image_key
+        self.proj_dim = proj_dim
+        self.ignore = ignore
         super(ImageKey, self).__init__(data_obj, proj_dim, image_key)
         self.shape = self._get_image_key_data_shape()
         self.nDims = len(self.shape)
         self._getitem = self._getitem_imagekey
         if ignore:
             self.__ignore_image_key_entries(ignore)
+
+    def map_input_args(self, args, kwargs, cls):
+        args = ['self', None, 'self.proj_dim']
+        kwargs['dark'] = 'self.dark'
+        kwargs['flat'] = 'self.flat'
+        cls = NoImageKey.__module__ + '.NoImageKey'
+        return args, kwargs, cls
 
     def __getitem__(self, idx):
         return self._getitem(idx)
@@ -228,10 +253,13 @@ class NoImageKey(DataWithDarksAndFlats):
     """ This class is used to get data from a dataset with separate darks and
         flats. """
 
-    def __init__(self, data_obj, image_key, proj_dim):
+    def __init__(self, data_obj, image_key, proj_dim, dark=None, flat=None):
+        self.data_obj = data_obj
+        self.image_key = image_key
+        self.proj_dim = proj_dim
         super(NoImageKey, self).__init__(data_obj, proj_dim, image_key)
-        self.dark_path = None
-        self.flat_path = None
+        self.dark_path = dark
+        self.flat_path = flat
         self.orig_image_key = copy.copy(image_key)
         self.flat_image_key = False
         self.dark_image_key = False
@@ -246,6 +274,12 @@ class NoImageKey(DataWithDarksAndFlats):
 
         self.data_obj = data_obj
         self.nDims = len(self.shape)
+
+    def map_input_args(self, args, kwargs, cls):
+        args = ['self', 'self.image_key', 'self.proj_dim']
+        kwargs['dark'] = 'self.dark_path'
+        kwargs['flat'] = 'self.flat_path'
+        return args, kwargs, cls
 
     def __getitem__(self, idx):
         return self._getitem(idx)

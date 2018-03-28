@@ -21,7 +21,6 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 import scipy.ndimage as ndi
 import math
-import logging
 import numpy as np
 import pyfftw.interfaces.scipy_fftpack as fft
 import scipy.ndimage.filters as filter
@@ -114,8 +113,9 @@ class VoCentering(BaseFilter, CpuPlugin):
                 sino2a[:, 0:i] = compensateimage[:, 0:i]
             else:
                 sino2a[:, i:] = compensateimage[:, i:]
-            list_metric[count] = np.sum(
-                np.abs(fft.fftshift(fft.fft2(np.vstack((sino, sino2a)))))*mask)
+            fft_out = fft.fft2(np.vstack((sino, sino2a)))
+            temp = np.sum(np.abs(fft.fftshift(fft_out))*mask)
+            list_metric[count] = temp
             count += 1
         minpos = np.argmin(list_metric)
         rot_centre = centre_fliplr + list_shift[minpos]/2.0
@@ -146,6 +146,7 @@ class VoCentering(BaseFilter, CpuPlugin):
         listmetric = np.zeros(len(listshift), dtype=np.float32)
         num1 = 0
         factor1 = np.mean(sino[-1,lefttake:righttake])
+
         for i in listshift:
             sino2a = ndi.interpolation.shift(sino2, (0, i), prefilter=False)
             factor2 = np.mean(sino2a[0,lefttake:righttake])
@@ -161,26 +162,21 @@ class VoCentering(BaseFilter, CpuPlugin):
     def process_frames(self, data):
         # if data is greater than a certain size
         # data = data[0][::self.parameters['step']]
-        # Use different smooth filters for coarse and fine search.
-
+        # Use different smooth filters for coarse and fine search.            
         (Nrow, Ncol) = data[0].shape
         self.downlevel = 1
         if Ncol > 1800:
             self.downlevel = 4
             sino_downsp = data[0][:, 0:Ncol:self.downlevel]
             sino_cs = filter.gaussian_filter(sino_downsp, (3, 1))
-            logging.debug("performing coarse search")
             (raw_cor, raw_metric) = self._coarse_search(sino_cs)
             raw_cor = raw_cor*self.downlevel
         else:
             sino_cs = filter.gaussian_filter(data[0], (3, 1))
-            logging.debug("performing coarse search")
             (raw_cor, raw_metric) = self._coarse_search(sino_cs)
 
-        logging.debug("performing fine search")
         sino_fs = filter.median_filter(data[0], (2, 2))
         (cor, listmetric) = self._fine_search(sino_fs, raw_cor)
-        logging.debug("%d %d", raw_cor, cor)
         return [np.array([cor]), np.array([cor])]
 
     def post_process(self):

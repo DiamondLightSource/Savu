@@ -65,6 +65,7 @@ class SavuLoader(BaseLoader):
         if self.parameters['image_key']:
             self.__set_image_key(data_obj)
 
+        angles = None
         if self.parameters['angles']:
             exec("angles = " + self.parameters['angles'])
             data_obj.meta_data.set("rotation_angle", angles)

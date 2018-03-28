@@ -53,15 +53,9 @@ class PluginDatasets(object):
         for data in data_list:
             data_obj = self.exp.index[dtype][data]
             if data_obj.raw and data_obj.data:
-                self.__add_raw_data(data_obj)
+                data_obj.raw.create_clone(data_obj)
             data_objs.append(data_obj)
         return data_objs
-
-    def __add_raw_data(self, data_obj):
-        from savu.data.data_structures.data_types.data_plus_darks_and_flats\
-            import ImageKey, NoImageKey
-        if isinstance(data_obj.raw, (ImageKey, NoImageKey)):
-            data_obj._add_raw_data_obj(data_obj)
 
     def __set_in_datasets(self):
         """ Set the in_data objects.

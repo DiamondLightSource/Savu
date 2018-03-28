@@ -56,7 +56,9 @@ class MultiNxtomoLoader(BaseLoader):
     def setup(self):
         nxtomo = self._get_nxtomo()
         preview = self.parameters['preview']
-        nxtomo.parameters['preview'] = [x for i,x in enumerate(preview) if i!=self.parameters['stack_or_cat_dim']]
+        stitch_dim = self.parameters['stack_or_cat_dim']
+        nxtomo.parameters['preview'] = \
+            [x for i, x in enumerate(preview) if i != stitch_dim]
         data_obj_list = self._get_data_objects(nxtomo)
         data_obj = \
             self.exp.create_data_object('in_data', self.parameters['name'])
@@ -67,8 +69,7 @@ class MultiNxtomoLoader(BaseLoader):
             h5py.File(tempfile.mkdtemp() + '/' + filename, 'a')
 
         stack_or_cat = self.parameters['stack_or_cat']
-        dim = self.parameters['stack_or_cat_dim']
-        data_obj.data = StitchData(data_obj_list, stack_or_cat, dim)
+        data_obj.data = StitchData(data_obj_list, stack_or_cat, stitch_dim)
 
         if stack_or_cat == 'cat':
             nxtomo._setup_3d(data_obj)

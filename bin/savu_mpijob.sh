@@ -51,9 +51,4 @@ mpirun -np ${processes} \
        -x LD_LIBRARY_PATH \
        --hostfile ${UNIQHOSTS} \
        python $filename $datafile $processfile $outfile -n $CPUs -v $@
-<<<<<<< HEAD
-=======
-
-        #h5perf -i 3 -B 512K -d 1 -e 63M -x 512K -X 512K
->>>>>>> origin/master
 

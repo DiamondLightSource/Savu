@@ -1,5 +1,6 @@
 import os
 import sys
+import glob
 import shutil
 
 from setuptools import setup, find_packages
@@ -20,27 +21,37 @@ def readme():
         return f.read()
 
 facility = 'dls'
-facility_path = 'mpi/dls'
+facility_path = 'system_files/dls'
 
 
 def _create_new_facility(facility_path):
     #  if the folder doesn't exist then create it and add two template scripts
     path = os.path.join(os.path.dirname(os.path.realpath(__file__)))
     facility_path = path+'/'+facility_path
-    print "the facility path is", facility_path
+    dls_path = path+'/system_files/dls'
+
     if not os.path.exists(facility_path):
-        template_path = path+'/mpi/templates'
-        print "Creating the directory...", facility_path
         os.makedirs(facility_path)
-        print "Adding templates to the new directory..."
-        shutil.copy(template_path+'/savu_launcher.sh', facility_path)
-        shutil.copy(template_path+'/savu_mpijob.sh', facility_path)
+
+        for root, dirs, files in os.walk(dls_path):
+            folder = os.path.relpath(root, dls_path)
+            to_this_folder = os.path.join(facility_path, folder)
+            if not os.path.exists(to_this_folder):
+                os.makedirs(to_this_folder)
+            for f in files:
+                copy_this_file = os.path.join(root, f)
+                shutil.copy(copy_this_file, to_this_folder)
+    else:
+        dls_sys_params = os.path.join(dls_path, 'system_parameters.yml')
+        facility_sys_params = os.join(facility_path, 'system_parameters.yml')
+        if not os.exist(facility_sys_params):
+            shutil.copy(dls_sys_params, facility_path)
 
 if '--facility' in sys.argv:
     index = sys.argv.index('--facility')
     sys.argv.pop(index)
     facility = sys.argv.pop(index)
-    facility_path = 'mpi/'+facility
+    facility_path = 'system_files/'+facility
     _create_new_facility(facility_path)
 
 if '--help' in sys.argv:
@@ -58,9 +69,13 @@ def _get_packages():
               install_pkg + '.conda-recipes',
               'test_data',
               'lib',
-              'mpi',
+              'system_files',
               'plugin_examples']
     return find_packages() + others
+
+
+mpi_all_files = glob.glob(os.path.join(facility_path, 'mpi', '*.sh'))
+mpi_files = [mfile for mfile in mpi_all_files if 'dev' not in mfile]
 
 setup(name='savu',
       version=__version__,
@@ -79,13 +94,8 @@ setup(name='savu',
       author_email='scientificsoftware@diamond.ac.uk',
       license='Apache License, Version 2.0',
       packages=_get_packages(),
-      # the line below breaks the build of the docs and it is not sufficient
-      # to install Savu anyway...  Nic
-      #install_requires=['pyreadline','colorama','h5py','mpi4py'],
 
-      scripts=[facility_path+'/savu_launcher.sh',
-               facility_path+'/savu_mpijob.sh',
-               facility_path+'/savu_mpijob_local.sh',
+      scripts=mpi_files + [
                __install__ + '/tests/test_setup.sh',
                __install__ + '/tests/mpi_cpu_test.sh',
                __install__ + '/tests/mpi_gpu_test.sh',
@@ -110,7 +120,9 @@ setup(name='savu',
                         'data/image_test/*',
                         'data/image_test/tiffs/*'],
                     'lib': ['*.so'],
-                    'mpi': ['dls/*.sh'],
+                    'system_files': [
+                        facility + '/*',
+                        facility + '/mpi/*'],
                     'install': ['*.txt'],
                     __install__: ['*.txt'],
                     install_pkg + '.conda-recipes': [
@@ -123,4 +135,3 @@ setup(name='savu',
 
       include_package_data=True,
       zip_safe=False)
-
