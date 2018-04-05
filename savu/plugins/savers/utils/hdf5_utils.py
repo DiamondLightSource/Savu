@@ -145,11 +145,9 @@ class Hdf5Utils(object):
         if 'data' in group:
             data.data = group['data']
         elif current_and_next is 0:
-            print "Creating the dataset without chunks"
             logging.warn('Creating the dataset without chunks')
             data.data = group.create_dataset("data", shape, data.dtype)
         else:
-            print "creating the dataset"
             chunk_max = self.__set_optimal_hdf5_chunk_cache_size(data, group)
             chunking = Chunking(self.exp, current_and_next)
             chunks = chunking._calculate_chunking(shape, data.dtype,
@@ -169,7 +167,6 @@ class Hdf5Utils(object):
         propfaid = group.file.id.get_access_plist()
         settings = list(propfaid.get_cache())
         max_size = self.exp.meta_data.get(['system_params', 'max_chunk_size'])
-        print "the max size is", max_size
         settings[2] *= max_size
         propfaid.set_cache(*settings)
         return settings[2]
