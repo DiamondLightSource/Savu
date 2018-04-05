@@ -515,9 +515,7 @@ class BaseTransport(object):
                     self.__create_dataset(entry, name, data)
                 except:
                     try:
-                        print "before encoding", data
                         data = cu._savu_encoder(data)
-                        print "after encoding", data
                         self.__create_dataset(entry, name, data)
                     except:
                         raise Exception('Unable to output %s to file.' % name)
