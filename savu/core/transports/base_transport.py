@@ -515,19 +515,12 @@ class BaseTransport(object):
                     self.__create_dataset(entry, name, data)
                 except:
                     try:
-                        data = self.__savu_encoder(data)
+                        print "before encoding", data
+                        data = cu._savu_encoder(data)
+                        print "after encoding", data
                         self.__create_dataset(entry, name, data)
                     except:
                         raise Exception('Unable to output %s to file.' % name)
-
-    def __savu_encoder(self, data):
-        return '#savu_encoded#' + str(data)
-
-    def _savu_decoder(self, data):
-        if isinstance(data, str) and len(data.split('#savu_encoded#')) > 1:
-            exec('data = ' + data.split('#savu_encoded#')[-1])
-            return data
-        return data
 
     def __create_dataset(self, entry, name, data):
         if name not in entry.keys():

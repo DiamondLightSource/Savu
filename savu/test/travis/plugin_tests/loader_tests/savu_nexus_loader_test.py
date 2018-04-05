@@ -30,8 +30,8 @@ class SavuNexusLoaderTest(unittest.TestCase):
     def test_reload(self):
         data_file = tu.get_test_data_path('24737.nxs')
         process_file = tu.get_test_process_path('savu_nexus_loader_test1.nxs')
-        exp = run_protected_plugin_runner(tu.set_options(data_file,
-                                                   process_file=process_file))
+        exp = run_protected_plugin_runner(
+                tu.set_options(data_file, process_file=process_file))
         data_file = exp.meta_data.get('nxs_filename')
         process_file = tu.get_test_process_path('savu_nexus_loader_test2.nxs')
         run_protected_plugin_runner(tu.set_options(data_file,
@@ -39,4 +39,3 @@ class SavuNexusLoaderTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

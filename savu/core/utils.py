@@ -201,3 +201,14 @@ def _send_email(address):
     s = smtplib.SMTP('localhost')
     s.sendmail(me, [you], msg.as_string('write something here'))
     s.quit()
+
+
+def _savu_encoder(data):
+    return '#savu_encoded#' + str(data)
+
+
+def _savu_decoder(data):
+    if isinstance(data, str) and len(data.split('#savu_encoded#')) > 1:
+        exec('data = ' + data.split('#savu_encoded#')[-1])
+        return data
+    return data

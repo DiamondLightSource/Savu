@@ -27,6 +27,7 @@ import h5py
 import numpy as np
 
 import savu.plugins.utils as pu
+import savu.core.utils as cu
 from savu.plugins.utils import register_plugin
 from savu.plugins.loaders.base_loader import BaseLoader
 
@@ -165,8 +166,7 @@ class SavuNexusLoader(BaseLoader):
             try:
                 value = plist._byteify(json.loads(entry[key][()][0]))
             except:
-                value = \
-                    self.exp._get_transport()._savu_decoder(entry[key][()])
+                value = cu._savu_decoder(entry[key][()])
             return value
 
     def _create_dataset(self, name, dtype):

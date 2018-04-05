@@ -40,16 +40,5 @@ def run_protected_plugin_runner(options):
     exp = plugin_runner._run_plugin_list()
     return exp
 
-#def run_protected_plugin_runner2():
-#    import savu.tomo_recon as tr
-#
-#    args = ('/dls/i18/data/2016/sp13562-1/Experiment_1/nexus/71993_Sample1_before_calcination_1.nxs',
-#            '/home/qmm55171/Documents/Git/git_repos/Savu/scripts/config_generator/test_processes_2/steve_test.nxs',
-#            '/dls/tmp/qmm55171')
-#    tr.main(input_args=args)
-
-
-
-
 if __name__ == "__main__":
     unittest.main()
