@@ -472,7 +472,7 @@ class BaseTransport(object):
             self.__output_data(entry, data.__class__.__name__, 'cls')
             return
 
-        args, kwargs, cls, extras = data._get_clone_parameters()
+        args, kwargs, cls, extras = data._get_parameters(data.get_clone_args())
 
         for key, value in kwargs.iteritems():
             gp = entry.require_group('kwargs')

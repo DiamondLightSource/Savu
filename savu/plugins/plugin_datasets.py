@@ -58,8 +58,8 @@ class PluginDatasets(object):
     def _clone_datasets(self):
         for data_obj in self.exp.index['out_data'].values():
             if data_obj.raw and data_obj.data:
-                data_obj.raw.create_clone(data_obj)
-                data_obj.clone = True
+                data_obj.raw.create_next_instance(data_obj)
+#                data_obj.clone = True
 
     def __set_in_datasets(self):
         """ Set the in_data objects.

@@ -29,8 +29,9 @@ import savu.plugins.utils as pu
 class BaseType(object):
 
     def __init__(self):
-        self._input_args = {}
-        self.base_map_input_args()
+        self._clone_args = {}
+        self._map_args = {}
+        self.base_data_args()
 
     def __getitem__(self, index):
         """ Override __getitem__ and map to the relevant files """
@@ -51,12 +52,18 @@ class BaseType(object):
         self.__dict__.update(inst.__dict__)
         self.__class__ = cls.__class__(cls.__name__, (cls, base), namespace)
 
-    def base_map_input_args(self):
+    def base_data_args(self):
         """ Create a dictionary of required input arguments, required for
         checkpointing. """
         cls = self.__class__.__module__ + '.' + self.__class__.__name__
-        args, kwargs, cls_path, extras = self.map_input_args([], {}, cls, [])
+        args, kwargs, extras = self.clone_data_args([], {}, [])
+        self._clone_args = self._set_parameters(args, kwargs, cls, cls, extras)
 
+        args, kwargs, cls_path, extras = self.map_input_args([], {}, cls, [])
+        self._map_args = self._set_parameters(
+                args, kwargs, cls, cls_path, extras)
+
+    def _set_parameters(self, args, kwargs, cls, cls_path, extras):
         mod = '.'.join(cls_path.split('.')[:-1])
         cls = cls_path.split('.')[-1]
         func = pu.load_class(mod, cls).__init__
@@ -70,28 +77,42 @@ class BaseType(object):
 
         # If there are multiple data objects this is incompatible with
         # checkpointing.
+        ddict = {}
         if args.count('self') > 2 or data_lists.count(True):
-            self._input_args = None
+            ddict = None
         else:
-            self._input_args['args'] = args
-            self._input_args['kwargs'] = kwargs
-            self._input_args['cls'] = cls_path
-            self._input_args['extras'] = extras
+            ddict['args'] = args
+            ddict['kwargs'] = kwargs
+            ddict['cls'] = cls_path
+            ddict['extras'] = extras
+        return ddict
+
+    def clone_data_args(self, args, kwargs, extras):
+        """ Gather all information required to keep this dataset after a
+        plugin has completed (may require a conversion to a different
+        data_type.
+        """
+        raise NotImplementedError("clone_data_args must be implemented.")
 
     def map_input_args(self, args, kwargs, cls, extras):
         """ Gather all information required to recreate a datatype: For
         checkpointing and cloning """
-        raise NotImplementedError("map_required_inputs must be implemented.")
+        args, kwargs, extras = self.clone_data_args(args, kwargs, extras)
+        return args, kwargs, cls, extras
 
-    def get_required_args(self):
-        return self._input_args
+    def get_clone_args(self):
+        return self._clone_args
 
-    def create_clone(self, newObj):
-        dtype_dict = self.get_required_args()
+    def get_map_args(self):
+        return self._map_args
+
+    def create_next_instance(self, newObj):
+        dtype_dict = self.get_map_args()
         if dtype_dict is None:
             return None
-        args, kwargs, cls, extras = self._get_clone_parameters()
-        args = [newObj if a == 'self' else a for a in args]
+        args, kwargs, cls, extras = self._get_parameters(dtype_dict)
+        args = [newObj if isinstance(a, str) and a == 'self'
+                else a for a in args]
 
         cls_split = cls.split('.')
         mod = '.'.join(cls_split[:-1])
@@ -107,8 +128,7 @@ class BaseType(object):
     def _post_clone_updates(self):
         pass
 
-    def _get_clone_parameters(self):
-        dtype_dict = self.get_required_args()
+    def _get_parameters(self, dtype_dict):
         args = dtype_dict['args']
         kwargs = dtype_dict['kwargs']
         extras = dtype_dict['extras']

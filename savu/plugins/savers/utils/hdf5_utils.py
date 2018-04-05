@@ -27,8 +27,10 @@ import logging
 from mpi4py import MPI
 
 from savu.data.chunking import Chunking
-from savu.data.data_structures.data_types.data_plus_darks_and_flats \
-    import NoImageKey
+#from savu.data.data_structures.data_types.data_plus_darks_and_flats \
+#    import NoImageKey
+from savu.data.data_structures.data_types.base_type import BaseType
+
 
 NX_CLASS = 'NX_class'
 
@@ -197,7 +199,7 @@ class Hdf5Utils(object):
         data.backing_file = self._open_backing_h5(filename, mode)
         entry = data.backing_file.keys()[0] + '/data'
 
-        if isinstance(data.data, NoImageKey):
+        if isinstance(data.data, BaseType):
             data.data.data = data.backing_file[entry]
         elif isinstance(data.data, h5py._hl.dataset.Dataset):
             data.data = data.backing_file[entry]

@@ -210,11 +210,22 @@ class ImageKey(DataWithDarksAndFlats):
         if ignore:
             self.__ignore_image_key_entries(ignore)
 
+    def clone_data_args(self, args, kwargs, extras):
+        """ List the arguments required to clone this datatype
+        """
+        args = ['self', 'image_key', 'proj_dim']
+        kwargs['ignore'] = 'ignore'
+        extras = self._base_extra_params()
+        return args, kwargs, extras
+
     def map_input_args(self, args, kwargs, cls, extras):
+        """ List all information required to keep this data set after a plugin
+        has completed (may require conversion to another type)
+        """
         args = ['self', None, 'proj_dim']
         kwargs['dark'] = 'dark'
         kwargs['flat'] = 'flat'
-        extras = ['image_key'] + self._base_extra_params()
+        extras = self._base_extra_params()
         cls = NoImageKey.__module__ + '.NoImageKey'
         return args, kwargs, cls, extras
 
@@ -274,19 +285,15 @@ class NoImageKey(DataWithDarksAndFlats):
         self.data_obj = data_obj
         self.nDims = len(self.shape)
 
-    def map_input_args(self, args, kwargs, cls, extras):
+    def clone_data_args(self, args, kwargs, extras):
         # these are the arguments required when creating a class instance
         args = ['self', 'image_key', 'proj_dim']  # always 'self goes first'
         kwargs['dark'] = 'dark_path'
         kwargs['flat'] = 'flat_path'
-        # 'cls' can be overwritten if the datatype does not stay the same when
-        # cloning (e.g. ImageKey data turns into NoImageKey data after the
-        # first plugin)
-
         # global class parameter names that are updated outside of __init__
         extras = ['image_key', 'flat_image_key', 'flat_path',
                   'dark_image_key', 'dark_path'] + self._base_extra_params()
-        return args, kwargs, cls, extras
+        return args, kwargs, extras
 
     def __getitem__(self, idx):
         return self._getitem(idx)

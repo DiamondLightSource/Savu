@@ -83,6 +83,7 @@ class Hdf5Transport(BaseTransport):
                     self.hdf5._link_datafile_to_nexus_file(data)
                 self.exp._barrier(msg=msg)
                 # reopen file as read-only
+                print "reopening the file", data.backing_file.filename
                 self.hdf5._reopen_file(data, 'r')
 
     def _transport_terminate_dataset(self, data):
