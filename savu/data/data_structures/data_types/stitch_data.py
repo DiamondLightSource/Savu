@@ -46,9 +46,10 @@ class StitchData(BaseType):
             self._getitem = self._getitem_cat
             self._get_lists = self._get_lists_cat
 
-    def map_input_args(self, args, kwargs):
-        args = [self.obj_list, self.]
-        return args, kwargs
+    def map_input_args(self, args, kwargs, cls, extras):
+        args = ['obj_list', 'stack_or_cat', 'dim']
+        extras = ['shape']
+        return args, kwargs, cls, extras
 
     def __getitem__(self, idx):
         size = [len(np.arange(s.start, s.stop, s.step)) for s in idx]

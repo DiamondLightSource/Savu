@@ -49,9 +49,9 @@ class MRC(BaseType):
         self.data = np.memmap(filename, dtype=self.format['dtype'], order='F',
                               mode='r', offset=first, shape=self.shape)
 
-    def map_input_args(self, args, kwargs):
-        args = [self._data_obj, self.filename]
-        return args, kwargs
+    def map_input_args(self, args, kwargs, cls, extras):
+        args = ['self', 'filename']
+        return args, kwargs, cls, extras
 
     def __getitem__(self, idx):
         return self.data[idx]
@@ -94,4 +94,3 @@ class MRC(BaseType):
 
     def get_shape(self):
         return self.shape
-

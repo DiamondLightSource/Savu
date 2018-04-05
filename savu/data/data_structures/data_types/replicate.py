@@ -43,9 +43,9 @@ class Replicate(BaseType):
         self.original_patterns = data_obj.get_data_patterns()
         self.__set_patterns(copy.deepcopy(self.original_patterns))
 
-    def map_input_args(self, args, kwargs):
-        args = [self.data_obj, self.reps]
-        return args, kwargs
+    def map_input_args(self, args, kwargs, cls, extras):
+        args = ['self', 'reps']
+        return args, kwargs, cls, extras
 
     def __getitem__(self, idx):
         return np.expand_dims(self.data[idx[:-1]], self.rep_dim)

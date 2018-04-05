@@ -55,7 +55,7 @@ class BaseType(object):
         """ Create a dictionary of required input arguments, required for
         checkpointing. """
         cls = self.__class__.__module__ + '.' + self.__class__.__name__
-        args, kwargs, cls_path = self.map_input_args([], {}, cls)
+        args, kwargs, cls_path, extras = self.map_input_args([], {}, cls, [])
 
         mod = '.'.join(cls_path.split('.')[:-1])
         cls = cls_path.split('.')[-1]
@@ -76,10 +76,11 @@ class BaseType(object):
             self._input_args['args'] = args
             self._input_args['kwargs'] = kwargs
             self._input_args['cls'] = cls_path
+            self._input_args['extras'] = extras
 
-    def map_input_args(self, args, kwargs):
-        """ Create a dictionary of required input arguments, required for
-        checkpointing. """
+    def map_input_args(self, args, kwargs, cls, extras):
+        """ Gather all information required to recreate a datatype: For
+        checkpointing and cloning """
         raise NotImplementedError("map_required_inputs must be implemented.")
 
     def get_required_args(self):
@@ -89,24 +90,36 @@ class BaseType(object):
         dtype_dict = self.get_required_args()
         if dtype_dict is None:
             return None
-        args, kwargs, cls = self._get_clone_parameters()
+        args, kwargs, cls, extras = self._get_clone_parameters()
         args = [newObj if a == 'self' else a for a in args]
+
         cls_split = cls.split('.')
         mod = '.'.join(cls_split[:-1])
         name = cls_split[-1]
         cls_inst = pu.load_class(mod, cls_name=name)
         newObj.data = cls_inst(*args, **kwargs)
+        self._base_post_clone_updates(newObj.data, extras)
+
+    def _base_post_clone_updates(self, obj, extras):
+        self.__update_extra_params(obj, extras)
+        self._post_clone_updates()
+
+    def _post_clone_updates(self):
+        pass
 
     def _get_clone_parameters(self):
         dtype_dict = self.get_required_args()
         args = dtype_dict['args']
         kwargs = dtype_dict['kwargs']
-        args = [self.__str_to_value(self, a) for a in args]
-        for key, value in kwargs.iteritems():
-            kwargs[key] = self.__str_to_value(self, value)
-        return args, kwargs, dtype_dict['cls']
+        extras = dtype_dict['extras']
+        args = [self._str_to_value(self, a) for a in args]
 
-    def __str_to_value(self, obj, val):
+        extras = self.__get_extras_vals(extras)
+        for key, value in kwargs.iteritems():
+            kwargs[key] = self._str_to_value(self, value)
+        return args, kwargs, dtype_dict['cls'], extras
+
+    def _str_to_value(self, obj, val):
         if not isinstance(val, str):
             return val
         if val == 'self':
@@ -115,3 +128,13 @@ class BaseType(object):
         val = val.replace('self.', '')
         temp = getattr(obj, val, val)
         return temp() if inspect.ismethod(temp) else temp
+
+    def __get_extras_vals(self, vals):
+        extras = {}
+        for key in vals:
+            extras[key] = getattr(self, key)
+        return extras
+
+    def __update_extra_params(self, newObj, extras):
+        for key, value in extras.iteritems():
+            setattr(newObj, key, value)

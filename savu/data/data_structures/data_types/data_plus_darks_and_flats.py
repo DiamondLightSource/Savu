@@ -37,15 +37,17 @@ class DataWithDarksAndFlats(BaseType):
         self.flat_updated = False
         self.dark_updated = False
         self.data = data_obj.data
-        self.dark_flat_slice_list = slice(None)
+        self.dark_flat_slice_list = []
+
+    def _base_extra_params(self):
+        """ global class parameter names that are updated outside of __init__
+        """
+        extras = ['fscale', 'dscale', 'dark_updated', 'flat_updated',
+                  'dark_flat_slice_list']
+        return extras
 
     def _override_data_type(self, data):
         self.data = data
-
-    def _copy_base(self, new_obj):
-        new_obj.flat_updated = self.flat_updated
-        new_obj.dark_updated = self.dark_updated
-        self._set_dark_and_flat()
 
     def get_image_key(self):
         preview_sl = self.data_obj.get_preview()._get_preview_slice_list()
@@ -164,10 +166,10 @@ class DataWithDarksAndFlats(BaseType):
             index[self.proj_dim] = idx
             data = np.append(data, self.data[tuple(index)], axis=rot_dim)
 
-        if not self.dark_flat_slice_list:
+        if not self.dark_flat_slice_list[key]:
             return data
 
-        sl = list(copy.deepcopy(self.dark_flat_slice_list))
+        sl = list(copy.deepcopy(self.dark_flat_slice_list[key]))
         if len(data.shape) is 2:
             del sl[rot_dim]
         return data[sl]
@@ -183,11 +185,13 @@ class DataWithDarksAndFlats(BaseType):
     def update_dark(self, data):
         self.dark_updated = data
         self.dscale = 1
+        self.dark_flat_slice_list[2] = None
         self.data_obj.meta_data.set('dark', self._calc_mean(data))
 
     def update_flat(self, data):
         self.flat_updated = data
         self.fscale = 1
+        self.dark_flat_slice_list[1] = None
         self.data_obj.meta_data.set('flat', self._calc_mean(data))
 
 
@@ -206,25 +210,19 @@ class ImageKey(DataWithDarksAndFlats):
         if ignore:
             self.__ignore_image_key_entries(ignore)
 
-    def map_input_args(self, args, kwargs, cls):
-        args = ['self', None, 'self.proj_dim']
-        kwargs['dark'] = 'self.dark'
-        kwargs['flat'] = 'self.flat'
+    def map_input_args(self, args, kwargs, cls, extras):
+        args = ['self', None, 'proj_dim']
+        kwargs['dark'] = 'dark'
+        kwargs['flat'] = 'flat'
+        extras = ['image_key'] + self._base_extra_params()
         cls = NoImageKey.__module__ + '.NoImageKey'
-        return args, kwargs, cls
+        return args, kwargs, cls, extras
+
+    def _finish_cloning(self):
+        self.dark_flat_slice_list[0] = None
 
     def __getitem__(self, idx):
         return self._getitem(idx)
-
-    def _copy(self, new_obj):
-        self._copy_base(new_obj)
-
-    def _convert_to_noimagekey(self, new_obj):
-        new_obj.dark_path = self.dark()
-        new_obj.flat_path = self.flat()
-        new_obj.flat_image_key = None
-        new_obj.dark_image_key = None
-        self._copy_base(new_obj)
 
     def __ignore_image_key_entries(self, ignore):
         a, a, start, end = self._get_start_end_idx(self.get_index(1))
@@ -246,7 +244,8 @@ class ImageKey(DataWithDarksAndFlats):
     def _set_dark_and_flat(self):
         slice_list = self.data_obj._preview._get_preview_slice_list()
         if slice_list:
-            self.dark_flat_slice_list = tuple(self.get_dark_flat_slice_list())
+            self.dark_flat_slice_list = \
+                [tuple(self.get_dark_flat_slice_list())]*3
 
 
 class NoImageKey(DataWithDarksAndFlats):
@@ -275,21 +274,25 @@ class NoImageKey(DataWithDarksAndFlats):
         self.data_obj = data_obj
         self.nDims = len(self.shape)
 
-    def map_input_args(self, args, kwargs, cls):
-        args = ['self', 'self.image_key', 'self.proj_dim']
-        kwargs['dark'] = 'self.dark_path'
-        kwargs['flat'] = 'self.flat_path'
-        return args, kwargs, cls
+    def map_input_args(self, args, kwargs, cls, extras):
+        # these are the arguments required when creating a class instance
+        args = ['self', 'image_key', 'proj_dim']  # always 'self goes first'
+        kwargs['dark'] = 'dark_path'
+        kwargs['flat'] = 'flat_path'
+        # 'cls' can be overwritten if the datatype does not stay the same when
+        # cloning (e.g. ImageKey data turns into NoImageKey data after the
+        # first plugin)
+
+        # global class parameter names that are updated outside of __init__
+        extras = ['image_key', 'flat_image_key', 'flat_path',
+                  'dark_image_key', 'dark_path'] + self._base_extra_params()
+        return args, kwargs, cls, extras
 
     def __getitem__(self, idx):
         return self._getitem(idx)
 
-    def _copy(self, new_obj):
-        new_obj.dark_path = self.dark_path
-        new_obj.flat_path = self.flat_path
-        new_obj.flat_image_key = self.flat_image_key
-        new_obj.dark_image_key = self.dark_image_key
-        self._copy_base(new_obj)
+    def _post_clone_updates(self):
+        self.dark_flat_slice_list[0] = None
 
     def _set_fake_key(self, fakekey):
         # useful if the darks and flats did belong to data with an
@@ -316,7 +319,7 @@ class NoImageKey(DataWithDarksAndFlats):
             dark = self.dark_image_key_data()
             self.image_key = self.orig_image_key
             return dark
-        return self.dark_path[self.dark_flat_slice_list]*self.dscale
+        return self.dark_path[self.dark_flat_slice_list[2]]*self.dscale
 
     def flat(self):
         """ Get the flat data. """
@@ -327,7 +330,7 @@ class NoImageKey(DataWithDarksAndFlats):
             flat = self.flat_image_key_data()
             self.image_key = self.orig_image_key
             return flat
-        return self.flat_path[self.dark_flat_slice_list]*self.fscale
+        return self.flat_path[self.dark_flat_slice_list[1]]*self.fscale
 
     def _set_dark_and_flat(self):
         self.dark_flat_slice_list = self.get_dark_flat_slice_list()
@@ -337,4 +340,4 @@ class NoImageKey(DataWithDarksAndFlats):
         if Map3dto4dh5 in self.__class__.__bases__:
             del self.dark_flat_slice_list[-1]
 
-        self.dark_flat_slice_list = tuple(self.dark_flat_slice_list)
+        self.dark_flat_slice_list = [tuple(self.dark_flat_slice_list)]*3

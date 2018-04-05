@@ -297,6 +297,7 @@ class Plugin(PluginDatasets):
     def _clean_up(self):
         """ Perform necessary plugin clean up after the plugin has completed.
         """
+        self._clone_datasets()
         self.__copy_meta_data()
         self.__set_previous_patterns()
         self.__clean_up_plugin_data()
