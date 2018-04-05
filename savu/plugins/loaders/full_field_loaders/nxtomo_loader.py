@@ -78,6 +78,7 @@ class NxtomoLoader(BaseLoader):
                 self._setup_3d(data_obj)
             else:
                 self.__setup_4d(data_obj)
+            data_obj.set_original_shape(data_obj.data.shape)
             self._set_rotation_angles(data_obj)
 
         try:
@@ -105,7 +106,6 @@ class NxtomoLoader(BaseLoader):
                              slice_dims=(rot,))
         data_obj.add_pattern('SINOGRAM', core_dims=(detX, rot),
                              slice_dims=(detY,))
-        data_obj.set_original_shape(data_obj.data.shape)
 
     def __setup_3d_to_4d(self, data_obj, n_angles):
         logging.debug("setting up 4d tomography data from 3d input.")
@@ -128,7 +128,6 @@ class NxtomoLoader(BaseLoader):
                              slice_dims=(rot, scan))
         data_obj.add_pattern('SINOGRAM', core_dims=(detX, rot),
                              slice_dims=(detY, scan))
-        data_obj.set_original_shape(data_obj.data.shape)
 
     def _set_dark_and_flat(self, data_obj):
         flat = self.parameters['flat'][0]
