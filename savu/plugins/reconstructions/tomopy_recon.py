@@ -154,3 +154,4 @@ class TomopyRecon(BaseRecon, CpuPlugin):
              "%D 2014" +
              "%I International Union of Crystallography")
         cite_info.doi = "doi: 10.1107/S1600577514013939"
+        return cite_info
