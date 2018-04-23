@@ -48,7 +48,8 @@ class TomopyRecon(BaseRecon, CpuPlugin):
         ospml_hybrid|ospml_quad|pml_hybrid|pml_quad. Default: 0.0.
     :param n_iterations: Number of iterations - only valid for iterative \
     algorithms. Default: 1.
-    :~param init_vol: Hidden unrequired parameter. Default: None.
+    :~param init_vol: Not an option. Default: None.
+    :~param centre_pad: Not an option. Default: None.
     """
 
     def __init__(self):
@@ -73,26 +74,23 @@ class TomopyRecon(BaseRecon, CpuPlugin):
     def process_frames(self, data):
         self.sino = data[0]
         self.cors, angles, vol_shape, init = self.get_frame_params()
+
         if init:
             self.kwargs['init_recon'] = init
 
         recon = tomopy.recon(self.sino, np.deg2rad(angles),
                              center=self.cors[0], ncore=1, algorithm=self.alg,
                              **self.kwargs)
-
         return self._finalise_data(recon)
 
     def _apply_mask(self, recon):
-        ratio = self._get_ratio(self.sino, self.cors[0])
-        return self._transpose(tomopy.circ_mask(recon, axis=0, ratio=ratio))
+        ratio = self.parameters['ratio']
+        if ratio:
+            recon = tomopy.circ_mask(recon, axis=0, ratio=ratio)
+        return self._transpose(recon)
 
     def _transpose(self, recon):
         return np.transpose(recon, (1, 0, 2))
-
-    def _get_ratio(self, sino, cor):
-        default = self.parameters['ratio']
-        fraction = self.get_fov_fraction(sino, cor)
-        return default*fraction
 
     def get_max_frames(self):
         return 'multiple'
