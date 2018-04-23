@@ -25,8 +25,10 @@
 import os
 import h5py
 import yaml
+import copy
 import collections
 import numpy as np  # used in exec so do not delete
+from ast import literal_eval
 
 import savu.plugins.utils as pu
 import savu.plugins.loaders.utils.yaml_utils as yu
@@ -69,7 +71,7 @@ class YamlConverter(BaseLoader):
             path = os.path.dirname(__file__.split('savu')[0])
             yaml_file = os.path.join(path, yaml_file)
             if not os.path.exists(yaml_file):
-                raise Exception('The yaml file does not exist.')
+                raise Exception('The yaml file does not exist %s' % yaml_file)
         return yaml_file
 
     def _add_template_updates(self, ddict):
@@ -100,6 +102,9 @@ class YamlConverter(BaseLoader):
             for i in idict:
                 if i != 'None':
                     new_dict = yu.read_yaml(self._get_yaml_file(i))
+                    if 'override' in new_dict:
+                        old, new = new_dict.pop('override').items()[0]
+                        new_dict[new] = copy.deepcopy(inherit[old])
                     inherit.update(new_dict)
                     inherit = self._check_for_inheritance(new_dict, inherit)
         self._update(inherit, ddict)
@@ -245,9 +250,14 @@ class YamlConverter(BaseLoader):
 
     def _set_patterns(self, dObj, patterns):
         for key, dims in patterns.iteritems():
-            core_dims = self.update_value(dObj, dims['core_dims'])
-            slice_dims = self.update_value(dObj, dims['slice_dims'])
+            core_dims = self.__get_tuple(
+                    self.update_value(dObj, dims['core_dims']))
+            slice_dims = self.__get_tuple(
+                    self.update_value(dObj, dims['slice_dims']))
             dObj.add_pattern(key, core_dims=core_dims, slice_dims=slice_dims)
+
+    def __get_tuple(self, val):
+        return literal_eval(val) if not isinstance(val, tuple) else val
 
     def _set_metadata(self, dObj, mdata):
         for key, value in mdata.iteritems():
