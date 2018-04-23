@@ -22,10 +22,15 @@
 
 """
 
+import os
 import h5py
+import fnmatch
+import difflib
+import numpy as np
 
 from savu.plugins.utils import register_plugin
 from savu.plugins.loaders.yaml_converter import YamlConverter
+from savu.data.data_structures.data_types.stitch_data import StitchData
 
 
 @register_plugin
@@ -51,6 +56,51 @@ class Hdf5TemplateLoader(YamlConverter):
             data.keys() else data['file']
         file_path = self.update_value(dObj, file_path)
         dObj.backing_file = h5py.File(file_path, 'r')
+
+        basename = os.path.basename(path)
+        if len(basename.split('*')) > 1:
+            return self._stitch_data(dObj, path, data)
+        return self._setup_data(dObj, path)
+
+    def _stitch_data(self, dObj, path, data):
+        stype, dim = self._get_stitching_info(data)
+        remove = data['remove'] if 'remove' in data.keys() else None
+
+        group_name, data_name = os.path.split(path)
+        # find all files with the given name
+        group = dObj.backing_file.require_group(group_name)
+        matches = fnmatch.filter(group.keys(), data_name)
+
+        number = []
+        for m in matches:
+            for diff in difflib.ndiff(m, data_name):
+                split = diff.split('- ')
+                if len(split) > 1:
+                    number.append(int(split[-1]))
+
+        matches = [matches[i] for i in np.argsort(number)]
+        data_obj_list = []
+        for match in matches:
+            match_path = os.path.join(group_name, match)
+            sub_obj = self.exp.create_data_object('in_data', match)
+            sub_obj.backing_file = dObj.backing_file
+            data_obj_list.append(self._setup_data(sub_obj, match_path))
+            del self.exp.index['in_data'][match]
+
+        dObj.data = StitchData(data_obj_list, stype, dim, remove=remove)
+        dObj.set_original_shape(dObj.data.get_shape())
+        return dObj
+
+    def _get_stitching_info(self, data):
+        if 'stack' in data.keys():
+            return 'stack', data['stack']
+        elif 'cat' in data.keys():
+            return 'cat', data['cat']
+        else:
+            msg = 'Please specify the dimension to stack or concatenate.'
+            raise Exception(msg)
+
+    def _setup_data(self, dObj, path):
         dObj.data = dObj.backing_file[self.update_value(dObj, path)]
         dObj.set_shape(dObj.data.shape)
         return dObj
