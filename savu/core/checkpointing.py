@@ -23,6 +23,8 @@ import time
 import copy
 import logging
 import numpy as np
+from mpi4py import MPI
+from shutil import copyfile
 
 import savu.plugins.utils as pu
 from savu.data.meta_data import MetaData
@@ -78,9 +80,7 @@ class Checkpointing(object):
     def _set_checkpoint_info_from_file(self, level):
         self._level = level
         self.__set_checkpoint_info()
-
-        if not os.path.exists(self._file):
-            raise Exception("No checkpoint file found.")
+        self.__does_file_exist(self._file, level)
 
         with self._h5._open_backing_h5(self._file, 'r', mpi=False) as f:
             self._completed_plugins = \
@@ -95,10 +95,18 @@ class Checkpointing(object):
             self.__set_dataset_metadata(f, 'in_data')
             self.__set_dataset_metadata(f, 'out_data')
 
-        #os.remove(self._file)
         self.__load_data()
         msg = "%s _set_checkpoint_info_from_file" % self.__class__.__name__
         self._exp._barrier(msg=msg)
+
+    def __does_file_exist(self, thefile, level):
+        if not os.path.exists(thefile):
+            if level == 'plugin':
+                proc0 = os.path.join(self._folder, 'process0' + self._filename)
+                self.__does_file_exist(proc0, None)
+                copyfile(proc0, self._file)
+                return
+            raise Exception("No checkpoint file found.")
 
     def __set_dataset_metadata(self, f, dtype):
         self.meta_data.set(dtype, {})
@@ -133,7 +141,10 @@ class Checkpointing(object):
 
     def get_checkpoint_plugin(self):
         checkpoint_flag = self._exp.meta_data.get('checkpoint')
-        self.__set_checkpoint_info() if not checkpoint_flag else \
+        if not checkpoint_flag:
+            self.__set_checkpoint_info()
+            self._initialise(MPI.COMM_WORLD)
+        else:
             self._set_checkpoint_info_from_file(checkpoint_flag)
         return self._completed_plugins
 
