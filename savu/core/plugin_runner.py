@@ -61,9 +61,8 @@ class PluginRunner(object):
         logging.info('Running transport_pre_plugin_list_run()')
         self._transport_pre_plugin_list_run()
 
-        checkpoint = self.exp.checkpoint.get_checkpoint_plugin()
-
-        for i in range(checkpoint, n_plugins):
+        cp = self.exp.checkpoint
+        for i in range(cp.get_checkpoint_plugin(), n_plugins):
             self.exp._set_experiment_for_current_plugin(i)
             self.__run_plugin(exp_coll['plugin_dict'][i])
             # end the plugin run if savu has been killed
@@ -74,7 +73,7 @@ class PluginRunner(object):
                 self._transport_cleanup(i+1)
                 break
             self.exp._barrier(msg='PluginRunner: No kill signal... continue.')
-            self.exp.checkpoint.output_plugin_checkpoint()
+            cp.output_plugin_checkpoint()
 
         #  ********* transport function ***********
         logging.info('Running transport_post_plugin_list_run')
