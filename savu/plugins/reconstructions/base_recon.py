@@ -116,7 +116,14 @@ class BaseRecon(Plugin):
 
     def __get_outer_pad(self):
         factor = math.sqrt(2)-1  # length of diagonal of square is side*sqrt(2)
-        pad = self.parameters['outer_pad']
+        pad = self.parameters['outer_pad'] if 'outer_pad' in \
+            self.parameters.keys() else False
+
+        if pad is not False and not self.padding_alg:
+            msg = 'This reconstruction algorithm cannot be padded.'
+            cu.user_message(msg)
+            return 0
+
         if isinstance(pad, bool):
             return factor if pad is True else 0
         factor = float(pad)

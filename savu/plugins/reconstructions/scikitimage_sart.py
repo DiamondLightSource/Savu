@@ -67,7 +67,7 @@ class ScikitimageSart(BaseRecon, CpuPlugin):
         of instabilities. Values close to or higher than 1 are not \
         recommended. Default: None.
 
-    :*param outer_pad: Not required. Default: False.
+    :~param outer_pad: Not required. Default: False.
     :~param centre_pad: Not required. Default: False.
 
     """
