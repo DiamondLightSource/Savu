@@ -1,0 +1,52 @@
+# ================================================================================================== #
+#                                          SYNTAX NOTES:                                             #
+# 1) dfile and dshape are keywords giving access to the input data file and data shape respectively. #
+# 2) $ sign at the beginning of a statement indicates the statement should be executed.              #
+# 3) end a parameter name with 'file' (e.g. cfile) to denote this is a file.                         #
+# 4) Use single quotes only i.e '/path/to/file' and not "/path/to/file"                              #
+# ================================================================================================== #
+
+inherit: None
+
+pmean:
+    data: # required
+        # file      : use this to override the input file  # optional
+        path        : entry/inputs/p*mean       # adding * implies data stitching (assuming integer indexing)
+        remove      : [2, 3]    # remove dimensions of length 1
+        stack       : 2         # either 'stack' or 'cat' a dimension (required if * used in path)
+
+#    params:  # optional key, value pairs
+#        offset      : 0.0
+
+    axis_labels:  # required, and all keys in dicts required
+        0:
+            dim     : 0
+            name    : stagey_set
+            value   : 
+            units   : mm
+        1:
+            dim     : 1
+            name    : stagex_set
+            value   : 
+            units   : mm
+        2:
+            dim     : 2
+            name    : motor
+            value   : 
+            units   : int
+
+# Write another yaml file for the 4D case
+
+    patterns:   # at least one pattern is required
+        MOTOR_POSITION:
+            core_dims   : (0, 1)
+            slice_dims  : (2,)
+
+    metadata:  # optional, additional information associated with the dataset
+        program:
+            value   : $dfile['entry/inputs/program'].value
+            units   : $dfile['entry/inputs/program'].attrs['long_name']
+        variables:
+            value   : $dfile['entry/inputs/variables'].value
+            units   : $dfile['entry/inputs/variables'].attrs['long_name']
+

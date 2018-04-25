@@ -1,0 +1,5 @@
+inherit: 
+    - savu/plugins/loaders/templates/malcolm_templates/mean.yml
+    - savu/plugins/loaders/templates/malcolm_templates/min.yml
+    - savu/plugins/loaders/templates/malcolm_templates/max.yml
+
