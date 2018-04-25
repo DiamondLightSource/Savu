@@ -74,7 +74,7 @@ class SubpixelShift(BaseFilter, CpuPlugin):
                 int(np.floor(self.xshift)), self.det_x)
                 self.pad_col =self.det_x+int(np.floor(self.xshift)) -1
             self.tf = sktf.SimilarityTransform(scale = 1, rotation = 0, \
-            translation = (0, self.xshift))
+            translation = (self.xshift, 0))
     
     def process_frames_scipy(self, data):
         return sip.shift(data[0], (self.xshift, 0), mode='nearest', order=3)
