@@ -13,5 +13,6 @@ override:
     pmean: pmax  # override the inherited dataset name pmean with pmin
 
 pmax:
-    path        : entry/inputs/p*max       # adding * implies data stitching (assuming integer indexing)
+    data:
+        path        : entry/inputs/p*max       # adding * implies data stitching (assuming integer indexing)
 
