@@ -71,7 +71,7 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
                            self.parameters['centre_from_top']])
 
         centre[0] -= shift[det_x]
-	centre[1] -= shift[det_y]
+        centre[1] -= shift[det_y]
 
         # pass two empty arrays of frame chunk size
         unwarp.setcoeff(*self.parameters['polynomial_coeffs'])
@@ -80,11 +80,11 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
         temp_array = np.empty(plugin_data_shape, dtype=np.float32)
         unwarp.setup(temp_array, temp_array)
 
-        self.new_slice = [slice(None)]*3
+        self.new_slice = [slice(None)] * 3
         orig_shape = self.get_in_datasets()[0].get_shape()
         for ddir in self.core_dims:
             self.new_slice[ddir] = \
-                slice(self.crop, orig_shape[ddir]-self.crop)
+                slice(self.crop, orig_shape[ddir] - self.crop)
 
     def process_frames(self, data):
         result = np.empty_like(data[0])
@@ -107,7 +107,7 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
         self.crop = self.parameters['crop_edges']
 
         for ddir in self.core_dims:
-            self.shape[ddir] = self.shape[ddir] - 2*self.crop
+            self.shape[ddir] = self.shape[ddir] - 2 * self.crop
         out_dataset[0].create_dataset(patterns=in_dataset[0],
                                       axis_labels=in_dataset[0],
                                       shape=tuple(self.shape))
