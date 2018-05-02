@@ -117,7 +117,8 @@ class YamlConverter(BaseLoader):
         if override:
             for old, new in override.iteritems():
                 ddict[new] = ddict.pop(old)
-                self._update(ddict[new], inherit[new])
+                if new in inherit.keys():
+                    self._update(ddict[new], inherit[new])
         return ddict, isoverride
 
     def _update(self, d, u):
