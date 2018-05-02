@@ -66,11 +66,11 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
 
         # If the data is cropped then the centre of distortion must be shifted
         # accordingly, e.g if preview is [:, a:b, c:d] then shift is (a, c)
-        centre = np.array([self.parameters['centre_from_left'],
-                           self.parameters['centre_from_top']])
 
-        centre[0] -= shift[det_x]
-        centre[1] -= shift[det_y]
+        centre = np.array([self.parameters['centre_y'],
+                           self.parameters['centre_x']])
+        centre[0] -= shift[det_y]
+        centre[1] -= shift[det_x]
 
         # pass two empty arrays of frame chunk size
         unwarp.setcoeff(*self.parameters['polynomial_coeffs'])
