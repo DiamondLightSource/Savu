@@ -173,6 +173,7 @@ def set_options(path, **kwargs):
     options['email'] = None
     options['template'] = None
     options['checkpoint'] = None
+    options['system_params'] = None
     return options
 
 

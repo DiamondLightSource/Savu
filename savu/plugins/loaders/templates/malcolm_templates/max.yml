@@ -1,0 +1,17 @@
+# ================================================================================================== #
+#                                          SYNTAX NOTES:                                             #
+# 1) dfile and dshape are keywords giving access to the input data file and data shape respectively. #
+# 2) $ sign at the beginning of a statement indicates the statement should be executed.              #
+# 3) end a parameter name with 'file' (e.g. cfile) to denote this is a file.                         #
+# 4) Use single quotes only i.e '/path/to/file' and not "/path/to/file"                              #
+# ================================================================================================== #
+
+inherit: 
+    - savu/plugins/loaders/templates/malcolm_templates/mean.yml
+
+override:
+    pmean: pmax  # override the inherited dataset name pmean with pmin
+
+pmax:
+    path        : entry/inputs/p*max       # adding * implies data stitching (assuming integer indexing)
+

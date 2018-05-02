@@ -108,84 +108,84 @@ class BaseCheckpointTest(object):
         self._refresh_nxs_file(entry=None)
         self._rerun_from_checkpoint(*vals)
 
-#        # No checkpoint file
-#        os.remove(self.cfile)
-#        self._refresh_nxs_file()
-#        vals = (0, 0, 0, 'plugin')
-#        with self.assertRaises(Exception) as context:
-#            self._rerun_from_checkpoint(*vals)
-#        self.assertTrue('No checkpoint file found.', context.exception)
-#
-#    def test_plugin_level_2(self):
-#        # 2: Killed before checkpoint file fully populated (initialised)
-#        # Remove two datasets from checkpoint file
-#        vals = (0, None, None, 'plugin')
-#        self._amend_checkpoint_file(0, None, None)
-#        self._refresh_nxs_file()
-#        self._rerun_from_checkpoint(*vals)
-#
-#        # Remove one dataset from checkpoint file
-#        vals = (0, 1, 0, 'subplugin')
-#        self._amend_checkpoint_file(0, 1, None)
-#        self._refresh_nxs_file()
-#        self._rerun_from_checkpoint(*vals)
-#
-#        # Remove all datasets from checkpoint
-#        vals = (0, 0, 0, 'plugin')
-#        self._amend_checkpoint_file(None, None, None)
-#        self._refresh_nxs_file()
-#        self._rerun_from_checkpoint(*vals)
-#
-#    def test_plugin_level_3(self):
-#        # 3: Killed before processing started
-#
-#        vals = (0, 0, 0)
-#        self._amend_checkpoint_file(*vals)
-#        self._refresh_nxs_file()
-#        self._rerun_from_checkpoint(*(vals + ('plugins',)))
-#
-#    def test_plugin_level_4a(self):
-#        # 4: Killed during processing
-#        #    a) standard
-#        vals = (3, 0, 0, 'plugin')
-#        self._set_checkpoint_parameters(*vals)
-#        # rerun from checkpoint
-#        self._rerun_from_checkpoint(*vals)
-#
-#        os.remove(self.nxs_file)
-#        vals = (3, 3, 3, 'subplugin')
-#        self._set_checkpoint_parameters(*vals)
-#        # rerun from checkpoint
-#        self._rerun_from_checkpoint(*vals)
-#
-#    def test_plugin_level_4b(self):
-#        # 4: Killed during processing
-#            # b) after a plugin that doesn't populate nxs file
-#                    # - (works with full-field processing list)
-#        vals = (5, 3, 3, 'plugin')
-#        self._set_checkpoint_parameters(*vals)
-#        # rerun from checkpoint
-#        self._rerun_from_checkpoint(*vals)
-#
-#        os.remove(self.nxs_file)
-#        vals = (5, 3, 3, 'subplugin')
-#        self._set_checkpoint_parameters(*vals)
-#        # rerun from checkpoint
-#        self._rerun_from_checkpoint(*vals)
-#
-#    def test_plugin_level_4c(self):
-#        # 4: Killed during processing
-#            # c) re-loading of a different data type, e.g., ImageKey
-#        vals = (1, 3, 3, 'plugin')
-#        self._set_checkpoint_parameters(*vals)
-#        # rerun from checkpoint
-#        self._rerun_from_checkpoint(*vals)
-#
-#        os.remove(self.nxs_file)
-#        vals = (1, 3, 3, 'subplugin')
-#        self._set_checkpoint_parameters(*vals)
-#        # rerun from checkpoint
-#        self._rerun_from_checkpoint(*vals)
+        # No checkpoint file
+        os.remove(self.cfile)
+        self._refresh_nxs_file()
+        vals = (0, 0, 0, 'plugin')
+        with self.assertRaises(Exception) as context:
+            self._rerun_from_checkpoint(*vals)
+        self.assertTrue('No checkpoint file found.', context.exception)
+
+    def test_plugin_level_2(self):
+        # 2: Killed before checkpoint file fully populated (initialised)
+        # Remove two datasets from checkpoint file
+        vals = (0, None, None, 'plugin')
+        self._amend_checkpoint_file(0, None, None)
+        self._refresh_nxs_file()
+        self._rerun_from_checkpoint(*vals)
+
+        # Remove one dataset from checkpoint file
+        vals = (0, 1, 0, 'subplugin')
+        self._amend_checkpoint_file(0, 1, None)
+        self._refresh_nxs_file()
+        self._rerun_from_checkpoint(*vals)
+
+        # Remove all datasets from checkpoint
+        vals = (0, 0, 0, 'plugin')
+        self._amend_checkpoint_file(None, None, None)
+        self._refresh_nxs_file()
+        self._rerun_from_checkpoint(*vals)
+
+    def test_plugin_level_3(self):
+        # 3: Killed before processing started
+
+        vals = (0, 0, 0)
+        self._amend_checkpoint_file(*vals)
+        self._refresh_nxs_file()
+        self._rerun_from_checkpoint(*(vals + ('plugins',)))
+
+    def test_plugin_level_4a(self):
+        # 4: Killed during processing
+        #    a) standard
+        vals = (3, 0, 0, 'plugin')
+        self._set_checkpoint_parameters(*vals)
+        # rerun from checkpoint
+        self._rerun_from_checkpoint(*vals)
+
+        os.remove(self.nxs_file)
+        vals = (3, 3, 3, 'subplugin')
+        self._set_checkpoint_parameters(*vals)
+        # rerun from checkpoint
+        self._rerun_from_checkpoint(*vals)
+
+    def test_plugin_level_4b(self):
+        # 4: Killed during processing
+            # b) after a plugin that doesn't populate nxs file
+                    # - (works with full-field processing list)
+        vals = (5, 3, 3, 'plugin')
+        self._set_checkpoint_parameters(*vals)
+        # rerun from checkpoint
+        self._rerun_from_checkpoint(*vals)
+
+        os.remove(self.nxs_file)
+        vals = (5, 3, 3, 'subplugin')
+        self._set_checkpoint_parameters(*vals)
+        # rerun from checkpoint
+        self._rerun_from_checkpoint(*vals)
+
+    def test_plugin_level_4c(self):
+        # 4: Killed during processing
+            # c) re-loading of a different data type, e.g., ImageKey
+        vals = (1, 3, 3, 'plugin')
+        self._set_checkpoint_parameters(*vals)
+        # rerun from checkpoint
+        self._rerun_from_checkpoint(*vals)
+
+        os.remove(self.nxs_file)
+        vals = (1, 3, 3, 'subplugin')
+        self._set_checkpoint_parameters(*vals)
+        # rerun from checkpoint
+        self._rerun_from_checkpoint(*vals)
 
     def _set_checkpoint_parameters(self, p_no, tidx, pidx, level):
         self._amend_nxs_file(self.orig_nxs, self.nxs_file, self.plist, p_no)

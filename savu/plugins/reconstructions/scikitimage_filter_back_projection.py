@@ -48,6 +48,9 @@ class ScikitimageFilterBackProjection(BaseRecon, CpuPlugin):
     :param circle: Assume the reconstructed image is zero outside the \
         inscribed circle. Also changes the default output_size to match the \
         behaviour of radon called with circle=True. Default: False.
+
+    :~param outer_pad: Not required. Default: False.
+    :~param centre_pad: Not required. Default: False.
     """
 
     def __init__(self):

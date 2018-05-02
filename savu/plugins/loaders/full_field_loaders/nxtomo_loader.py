@@ -72,12 +72,13 @@ class NxtomoLoader(BaseLoader):
                 raise Exception('Angles are required in the loader.')
             self.__setup_4d(data_obj)
             n_angles = self._set_rotation_angles(data_obj)
-            shape = self.__setup_3d_to_4d(data_obj, n_angles)
+            self.__setup_3d_to_4d(data_obj, n_angles)
         else:
             if len(data_obj.data.shape) is 3:
-                shape = self._setup_3d(data_obj)
+                self._setup_3d(data_obj)
             else:
-                shape = self.__setup_4d(data_obj)
+                self.__setup_4d(data_obj)
+            data_obj.set_original_shape(data_obj.data.shape)
             self._set_rotation_angles(data_obj)
 
         try:
@@ -88,7 +89,6 @@ class NxtomoLoader(BaseLoader):
 
         nAngles = len(data_obj.meta_data.get('rotation_angle'))
         self.__check_angles(data_obj, nAngles)
-        data_obj.set_original_shape(shape)
 
         self.set_data_reduction_params(data_obj)
         data_obj.data._set_dark_and_flat()
@@ -106,14 +106,13 @@ class NxtomoLoader(BaseLoader):
                              slice_dims=(rot,))
         data_obj.add_pattern('SINOGRAM', core_dims=(detX, rot),
                              slice_dims=(detY,))
-        return data_obj.data.shape
 
     def __setup_3d_to_4d(self, data_obj, n_angles):
         logging.debug("setting up 4d tomography data from 3d input.")
         from savu.data.data_structures.data_types.map_3dto4d_h5 \
             import Map3dto4dh5
         data_obj.data = Map3dto4dh5(data_obj.data, n_angles)
-        return data_obj.data.get_shape()
+        data_obj.set_original_shape(data_obj.data.get_shape())
 
     def __setup_4d(self, data_obj):
         logging.debug("setting up 4d tomography data.")
@@ -129,7 +128,6 @@ class NxtomoLoader(BaseLoader):
                              slice_dims=(rot, scan))
         data_obj.add_pattern('SINOGRAM', core_dims=(detX, rot),
                              slice_dims=(detY, scan))
-        return data_obj.data.shape
 
     def _set_dark_and_flat(self, data_obj):
         flat = self.parameters['flat'][0]

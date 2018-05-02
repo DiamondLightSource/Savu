@@ -27,8 +27,10 @@ import logging
 from mpi4py import MPI
 
 from savu.data.chunking import Chunking
-from savu.data.data_structures.data_types.data_plus_darks_and_flats \
-    import NoImageKey
+#from savu.data.data_structures.data_types.data_plus_darks_and_flats \
+#    import NoImageKey
+from savu.data.data_structures.data_types.base_type import BaseType
+
 
 NX_CLASS = 'NX_class'
 
@@ -145,11 +147,9 @@ class Hdf5Utils(object):
         if 'data' in group:
             data.data = group['data']
         elif current_and_next is 0:
-            print "Creating the dataset without chunks"
             logging.warn('Creating the dataset without chunks')
             data.data = group.create_dataset("data", shape, data.dtype)
         else:
-            print "creating the dataset"
             chunk_max = self.__set_optimal_hdf5_chunk_cache_size(data, group)
             chunking = Chunking(self.exp, current_and_next)
             chunks = chunking._calculate_chunking(shape, data.dtype,
@@ -169,7 +169,6 @@ class Hdf5Utils(object):
         propfaid = group.file.id.get_access_plist()
         settings = list(propfaid.get_cache())
         max_size = self.exp.meta_data.get(['system_params', 'max_chunk_size'])
-        print "the max size is", max_size
         settings[2] *= max_size
         propfaid.set_cache(*settings)
         return settings[2]
@@ -200,7 +199,7 @@ class Hdf5Utils(object):
         data.backing_file = self._open_backing_h5(filename, mode)
         entry = data.backing_file.keys()[0] + '/data'
 
-        if isinstance(data.data, NoImageKey):
+        if isinstance(data.data, BaseType):
             data.data.data = data.backing_file[entry]
         elif isinstance(data.data, h5py._hl.dataset.Dataset):
             data.data = data.backing_file[entry]

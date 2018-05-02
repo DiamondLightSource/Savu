@@ -27,6 +27,7 @@ import h5py
 import numpy as np
 
 import savu.plugins.utils as pu
+import savu.core.utils as cu
 from savu.plugins.utils import register_plugin
 from savu.plugins.loaders.base_loader import BaseLoader
 
@@ -142,14 +143,17 @@ class SavuNexusLoader(BaseLoader):
 
         entry = group['data_type']
         args = self._get_data(entry, 'args')
+        args = [args[''.join(['args', str(i)])] for i in range(len(args))]
         args = [a if a != 'self' else dObj for a in args]
         kwargs = self._get_data(entry, 'kwargs')
+        extras = self._get_data(entry, 'extras')
 
         cls = str(self._get_data(entry, 'cls'))
         cls_split = cls.split('.')
         cls_inst = \
             pu.load_class('.'.join(cls_split[:-1]), cls_name=cls_split[-1])
         dObj.data = cls_inst(*args, **kwargs)
+        dObj.data._base_post_clone_updates(dObj.data, extras)
 
     def _get_data(self, entry, key):
         plist = self.exp.meta_data.plugin_list
@@ -160,9 +164,9 @@ class SavuNexusLoader(BaseLoader):
             return ddict
         else:
             try:
-                value = plist._byteify(json.loads(entry[key][:][0]))
+                value = plist._byteify(json.loads(entry[key][()][0]))
             except:
-                value = entry[key][...]
+                value = cu._savu_decoder(entry[key][()])
             return value
 
     def _create_dataset(self, name, dtype):

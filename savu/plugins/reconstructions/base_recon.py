@@ -21,10 +21,12 @@
 
 """
 import math
-
-
-from savu.plugins.plugin import Plugin
 import numpy as np
+
+import savu.core.utils as cu
+from savu.plugins.plugin import Plugin
+
+MAX_OUTER_PAD = 2.1
 
 
 class BaseRecon(Plugin):
@@ -37,15 +39,17 @@ class BaseRecon(Plugin):
     (doesn't currently work with preview). Default: None.
 
     :param centre_pad: Pad the sinogram to centre it in order to fill the \
-    reconstructed volume ROI for asthetic purposes - only available for \
-    selected algorithms and will be ignored if unavailable (warning: This will\
-    increase the size of the data and the time to compute the \
-    reconstruction. Default: False.
+    reconstructed volume ROI for asthetic purposes.\
+    NB: Only available for selected algorithms and will be ignored otherwise. \
+    WARNING: This will significantly increase the size of the data and the \
+    time to compute the reconstruction). Default: False.
 
-    :param outer_pad: Pad the sinogram to fill the reconstructed volume for \
-    asthetic purposes - only available for selected algorithms and if \
-    centre_pad is True (warning: This will significantly increase the size of \
-    the data and the time to compute the reconstruction). Default: False.
+    :param outer_pad: Pad the sinogram width to fill the reconstructed volume \
+    for asthetic purposes.\
+    Choose from True (defaults to sqrt(2)), False or float <= 2.1. \
+    NB: Only available for selected algorithms and will be ignored otherwise.\
+    WARNING: This will increase the size of the data and the \
+    time to compute the reconstruction). Default: False.
 
     :u*param log: Take the log of the data before reconstruction \
     (True or False). Default: True.
@@ -101,16 +105,33 @@ class BaseRecon(Plugin):
         self.slice_dirs = out_data[0].get_slice_dimensions()
 
         shape = in_pData[0].get_shape()
-        pad_len = shape[self.pad_dim] if self.parameters['outer_pad'] else 0
-
-        # this is the correct value but doesn't give a good result
-        self.sino_pad = int(math.ceil((math.sqrt(2)-1)*pad_len))
+        factor = self.__get_outer_pad()
+        self.sino_pad = int(math.ceil(factor*shape[self.pad_dim]))
 
         self.sino_func, self.cor_func = self.set_function(shape) if \
             self.padding_alg else self.set_function(False)
 
         self.range = self.parameters['force_zero']
         self.fix_sino = self.get_sino_centre_method()
+
+    def __get_outer_pad(self):
+        factor = math.sqrt(2)-1  # length of diagonal of square is side*sqrt(2)
+        pad = self.parameters['outer_pad'] if 'outer_pad' in \
+            self.parameters.keys() else False
+
+        if pad is not False and not self.padding_alg:
+            msg = 'This reconstruction algorithm cannot be padded.'
+            cu.user_message(msg)
+            return 0
+
+        if isinstance(pad, bool):
+            return factor if pad is True else 0
+        factor = float(pad)
+        if factor > MAX_OUTER_PAD:
+            factor = MAX_OUTER_PAD
+            msg = 'Maximum outer_pad value is 2.1, using this instead'
+            cu.user_message(msg)
+        return float(pad)
 
     def __set_padding_alg(self):
         """ Determine if this is an algorithm that allows sinogram padding. """
@@ -254,8 +275,12 @@ class BaseRecon(Plugin):
     def get_sino_centre_method(self):
         centre_pad = self.keep_sino
         if 'centre_pad' in self.parameters.keys():
-            centre_pad = self.pad_sino if self.parameters['centre_pad'] and \
-                self.padding_alg is True else self.crop_sino
+            cpad = self.parameters['centre_pad']
+            if not (cpad is True or cpad is False):
+                raise Exception('Unknown value for "centre_pad", please choose'
+                                ' True or False.')
+            centre_pad = self.pad_sino if cpad and self.padding_alg \
+                else self.crop_sino
         return centre_pad
 
     def __set_pad_amount(self, pad_amount):

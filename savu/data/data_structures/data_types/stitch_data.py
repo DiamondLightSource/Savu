@@ -29,10 +29,11 @@ from savu.data.data_structures.data_types.base_type import BaseType
 class StitchData(BaseType):
     """ This class is used to combine multiple data objects. """
 
-    def __init__(self, data_obj_list, stack_or_cat, dim):
+    def __init__(self, data_obj_list, stack_or_cat, dim, remove=None):
         self.obj_list = data_obj_list
         self.stack_or_cat = stack_or_cat
         self.dim = dim
+        self.remove = remove
         super(StitchData, self).__init__
 
         self.shape = None
@@ -46,9 +47,11 @@ class StitchData(BaseType):
             self._getitem = self._getitem_cat
             self._get_lists = self._get_lists_cat
 
-    def map_input_args(self, args, kwargs):
-        args = [self.obj_list, self.]
-        return args, kwargs
+    def clone_data_args(self, args, kwargs, extras):
+        args = ['obj_list', 'stack_or_cat', 'dim']
+        kwargs['remove'] = 'remove'
+        extras = ['shape']
+        return args, kwargs, extras
 
     def __getitem__(self, idx):
         size = [len(np.arange(s.start, s.stop, s.step)) for s in idx]
@@ -61,10 +64,16 @@ class StitchData(BaseType):
         return data
 
     def _getitem_stack(self, obj, sl):
-        return np.expand_dims(obj.data[tuple(sl)], self.dim)
+        data = obj.data[tuple(sl)]
+        for i in np.sort(self.remove)[::-1]:
+            data = np.squeeze(data, axis=i)
+        return np.expand_dims(data, self.dim)
 
     def _getitem_cat(self, obj, sl):
-        return obj.data[tuple(sl)]
+        data = obj.data[tuple(sl)]
+        for i in np.sort(self.remove)[::-1]:
+            data = np.squeeze(data, axis=i)
+        return data
 
     def _get_lists_stack(self, idx):
         entry = idx[self.dim]
@@ -127,6 +136,10 @@ class StitchData(BaseType):
     def _set_shape(self):
         nObjs = len(self.obj_list)
         shape = list(self.obj_list[0].data.shape)
+
+        for dim in np.sort(self.remove)[::-1]:
+            del shape[dim]
+
         if self.stack_or_cat == 'cat':
             shape[self.dim] *= nObjs
         else:

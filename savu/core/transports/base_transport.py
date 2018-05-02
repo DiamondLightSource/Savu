@@ -466,7 +466,13 @@ class BaseTransport(object):
 
         entry = entry.require_group('data_type')
         entry.attrs[NX_CLASS] = 'NXcollection'
-        args, kwargs, cls = data._get_clone_parameters()
+
+        ltype = self.exp.meta_data.get('link_type')
+        if name in ltype.keys() and ltype[name] == 'input_data':
+            self.__output_data(entry, data.__class__.__name__, 'cls')
+            return
+
+        args, kwargs, cls, extras = data._get_parameters(data.get_clone_args())
 
         for key, value in kwargs.iteritems():
             gp = entry.require_group('kwargs')
@@ -475,7 +481,17 @@ class BaseTransport(object):
             else:
                 self.__output_data(gp, value, key)
 
-        self.__output_data(entry, args, 'args')
+        for key, value in extras.iteritems():
+            gp = entry.require_group('extras')
+            if isinstance(value, BaseType):
+                self.__output_data_type(gp.require_group(key), value, key)
+            else:
+                self.__output_data(gp, value, key)
+
+        for i in range(len(args)):
+            gp = entry.require_group('args')
+            self.__output_data(gp, args[i], ''.join(['args', str(i)]))
+
         self.__output_data(entry, cls, 'cls')
 
         if 'data' in data.__dict__.keys() and not \
@@ -493,9 +509,16 @@ class BaseTransport(object):
             try:
                 self.__create_dataset(entry, name, data)
             except:
-                import json
-                data = np.array([json.dumps(data)])
-                self.__create_dataset(entry, name, data)
+                try:
+                    import json
+                    data = np.array([json.dumps(data)])
+                    self.__create_dataset(entry, name, data)
+                except:
+                    try:
+                        data = cu._savu_encoder(data)
+                        self.__create_dataset(entry, name, data)
+                    except:
+                        raise Exception('Unable to output %s to file.' % name)
 
     def __create_dataset(self, entry, name, data):
         if name not in entry.keys():
