@@ -177,11 +177,18 @@ class YamlConverter(BaseLoader):
         shape = str(dObj.get_shape())
         return {'dfile': filepath, 'dshape': shape}
 
+    def __get_wildcard_values(self, dObj):
+        if 'wildcard_values' in dObj.data_info.get_dictionary().keys():
+            return dObj.data_info.get('wildcard_values')
+        return None
+
     def update_value(self, dObj, value):
         # setting the keywords
         if dObj is not None:
             dshape = dObj.get_shape()
             dfile = dObj.backing_file
+            wildcard = self.__get_wildcard_values(dObj)
+
         if isinstance(value, str):
             split = value.split('$')
             if len(split) > 1:
