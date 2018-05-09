@@ -79,7 +79,7 @@ class Hdf5TemplateLoader(YamlConverter):
                     number.append(int(split[-1]))
 
         matches = [matches[i] for i in np.argsort(number)]
-        dObj.data_info.set('wildcard_values', matches)
+        dObj.data_info.set('wildcard_values', np.argsort(number))
 
         data_obj_list = []
         for match in matches:
