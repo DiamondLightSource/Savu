@@ -83,18 +83,17 @@ def parse_args(function):
 def error_catcher(function):
     @wraps(function)
     def error_catcher_wrap_function(content, args):
-        command = function.__name__.split('_')[1]
         try:
             return function(content, args)
         except Exception as e:
             savu_error = True if len(e.message.split()) > 1 and \
                 e.message.split()[1] == 'ERROR:' else False
+
             if error_level is 0 and savu_error:
                 print e.message
-            if error_level is 0:
-                print("Please type '%s -h' for help." % command)
-
-            if error_level is 1:
+            elif error_level is 0:
+                print "%s: %s" % (type(e).__name__, e.message)
+            elif error_level is 1:
                 traceback.print_exc(file=sys.stdout)
 
             return content

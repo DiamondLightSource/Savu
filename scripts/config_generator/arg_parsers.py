@@ -42,12 +42,13 @@ class ArgumentParser(argparse.ArgumentParser):
         raise MyException(message)
 
 
-def __arg_parser(parser, args):
+def __arg_parser(parser, args, command):
     try:
         args = parser.parse_args(args=args)
     except MyException as e:
         if e.message:
             print (e.message)
+            print("Please type '%s -h' for help." % command)
         args = e.args
     return args
 
@@ -84,7 +85,7 @@ def _open_arg_parser(args, desc):
     parser.add_argument('file', help=file_str)
     parser.add_argument('-s', '--skip', help='Skip broken plugins.',
                         action='store_true', default=False)
-    return __arg_parser(parser, args)
+    return __arg_parser(parser, args, 'open')
 
 
 def _disp_arg_parser(args, desc):
@@ -103,7 +104,7 @@ def _disp_arg_parser(args, desc):
     parser.add_argument("start", nargs='?', help="Display this list entry.")
     stop_str = "Display entries from start to stop."
     parser.add_argument("stop", nargs='?', help=stop_str)
-    return __arg_parser(parser, args)
+    return __arg_parser(parser, args, 'disp')
 
 
 def _list_arg_parser(args, desc):
@@ -116,7 +117,7 @@ def _list_arg_parser(args, desc):
     type_str = "List plugins or collections containing this string."
     parser.add_argument("string", nargs='?', help=type_str, default="")
 
-    return __arg_parser(parser, args)
+    return __arg_parser(parser, args, 'list')
 
 
 def _save_arg_parser(args, desc):
@@ -127,19 +128,13 @@ def _save_arg_parser(args, desc):
                         help="Save to the input file.")
     parser.add_argument("-t", "--template", action="store_true", default=False,
                         help="Create a Savu template file.")
-    return __arg_parser(parser, args)
+    return __arg_parser(parser, args, 'save')
 
 
 def _mod_arg_parser(args, desc):
     """ Argument parser for mod command. """
-
     # required to allow negative values in a list or tuple
-    new_args = []
-    for a in args:
-        if len(a.split('[')) > 1 or len(a.split('(')) > 1:
-            new_args.extend(['--', a])
-        else:
-            new_args.append(a)
+    args.insert(1, '--')
 
     parser = ArgumentParser(prog='mod', description=desc)
     param_str = ("The plugin parameter to modify. Either "
@@ -147,7 +142,7 @@ def _mod_arg_parser(args, desc):
     parser.add_argument("param", help=param_str)
     val_str = ("The plugin parameter value.")
     parser.add_argument("value", nargs='+', help=val_str)
-    return __arg_parser(parser, new_args)
+    return __arg_parser(parser, args, 'mod')
 
 
 def _set_arg_parser(args, desc):
@@ -157,7 +152,7 @@ def _set_arg_parser(args, desc):
                         help="Plugin position.")
     parser.add_argument("status", type=str, choices=['on', 'ON', 'off', 'OFF'],
                         help="Plugin status.")
-    return __arg_parser(parser, args)
+    return __arg_parser(parser, args, 'set')
 
 
 def _add_arg_parser(args, desc):
@@ -166,7 +161,7 @@ def _add_arg_parser(args, desc):
     parser.add_argument("name", help="The plugin name.")
     pos_str = "Plugin list position (defaults to end)."
     parser.add_argument('pos', nargs='?', help=pos_str)
-    return __arg_parser(parser, args)
+    return __arg_parser(parser, args, 'add')
 
 
 def _ref_arg_parser(args, desc):
@@ -179,14 +174,14 @@ def _ref_arg_parser(args, desc):
                         dest="defaults", help=defaults_str, default=False)
     parser.add_argument("-n", "--nodisp", action="store_true", dest="nodisp",
                         help=argparse.SUPPRESS, default=False)
-    return __arg_parser(parser, args)
+    return __arg_parser(parser, args, 'ref')
 
 
 def _rem_arg_parser(args, desc):
     """ Argument parser for rem command. """
     parser = ArgumentParser(prog='rem', description=desc)
     parser.add_argument('pos', help="Plugin position(s).")
-    return __arg_parser(parser, args)
+    return __arg_parser(parser, args, 'rem')
 
 
 def _move_arg_parser(args, desc):
@@ -194,13 +189,13 @@ def _move_arg_parser(args, desc):
     parser = ArgumentParser(prog='move', description=desc)
     parser.add_argument("orig_pos", help="Original position.")
     parser.add_argument('new_pos', help="New position.")
-    return __arg_parser(parser, args)
+    return __arg_parser(parser, args, 'move')
 
 
 def _coll_arg_parser(args, desc):
     """ Argument parser for coll command. """
     parser = ArgumentParser(prog='coll', description=desc)
-    return __arg_parser(parser, args)
+    return __arg_parser(parser, args, 'coll')
 
 
 def _get_verbosity(args):
