@@ -86,6 +86,7 @@ class Preview(object):
         :rtype: list
         """
         nEntries = 4
+        plist = [str(i) for i in plist] if isinstance(plist[0], int) else plist
         diff_len = [(nEntries - len(elem.split(':'))) for elem in plist]
         diff3 = [i for i in range(len(diff_len)) if diff_len[i] is 3]
         for dim in diff3:
