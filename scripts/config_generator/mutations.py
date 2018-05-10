@@ -110,7 +110,10 @@ plugin_mutations = \
      'DezingFilter':
         {'replace': 'DezingerSimple',
          'desc': rename_str('DezingFilter', 'DezingerSimple') + dezing_notice},
-     }
+     'SavuLoader':
+        {'replace': 'SavuNexusLoader',
+         'desc': replace_str('SavuLoader', 'SavuNexusLoader')},
+      }
 
 param_mutations = \
     {'BaseRecon': [{'old': 'center_of_rotation', 'new': 'centre_of_rotation'},
