@@ -24,6 +24,7 @@
 import os
 import json
 import h5py
+import copy
 import numpy as np
 
 import savu.plugins.utils as pu
@@ -35,17 +36,30 @@ from savu.plugins.loaders.base_loader import BaseLoader
 @register_plugin
 class SavuNexusLoader(BaseLoader):
     """
-    A class to load all datasets, and associated metadata, from a Savu output
+    A class to load datasets, and associated metadata, from a Savu output
     nexus file.
 
-    # remove preview parameter from here?!
-    # option to choose which datasets to load and from which point?
+    By default, the last instance of each unique dataset name will be loaded.
+    Opt instead to load a subset of these datasets, or individual datasets by
+    populating the parameters.
+
+    :u*param preview: A slice list of required frames to apply to ALL \
+    datasets, else a dictionary of slice lists where the key is the dataset \
+    name. Default: {}.
+
+    :u*param datasets: Override the default by choosing specific dataset(s) to\
+    load, by stating the NXdata name. Default: [].
+    :u*param names: Override the dataset names associated with the datasets \
+    parameter above. Default: [].
     """
 
     def __init__(self, name='SavuNexusLoader'):
         super(SavuNexusLoader, self).__init__(name)
+        self._all_preview_params = None
 
     def setup(self):
+        self._all_preview_params = copy.deepcopy(self.parameters['preview'])
+
         datasets = []
         with h5py.File(self.exp.meta_data.get('data_file'), 'r') as nxsfile:
             datasets = self._read_nexus_file(nxsfile, datasets)
@@ -55,8 +69,14 @@ class SavuNexusLoader(BaseLoader):
             if 'checkpoint_loader' in exp_dict.keys():
                 self.__checkpoint_reload(nxsfile, datasets)
             else:
-                datasets = self._last_unique_datasets(datasets)
-                self._create_datasets(nxsfile, datasets, 'in_data')
+                self.__reload(nxsfile, datasets)
+
+    def __reload(self, nxsfile, datasets):
+        if self.parameters['datasets']:
+            datasets = self.__get_parameter_datasets(datasets)
+        else:
+            datasets = self._last_unique_datasets(datasets)
+        self._create_datasets(nxsfile, datasets, 'in_data')
 
     def __checkpoint_reload(self, nxsfile, datasets):
         cp = self.exp.checkpoint
@@ -72,6 +92,33 @@ class SavuNexusLoader(BaseLoader):
             # update output data meta data
             for name in self.exp.index['out_data'].keys():
                 self.__update_metadata('out_data', name)
+
+    def __get_parameter_datasets(self, datasets):
+        param_datasets = self.parameters['datasets']
+        names = self.parameters['names'] if self.parameters['names'] else None
+        if names and len(names) != len(param_datasets):
+            raise Exception('Please enter a name for each dataset.')
+
+        subset = {}
+        found = []
+        for i, p in enumerate(param_datasets):
+            for d in datasets:
+                if p in d['group'].name:
+                    found.append(p)
+                    name = names[i] if names else d['name']
+                    subset[name] = d['group']
+
+        missing = set(param_datasets).difference(set(found))
+        if missing:
+            msg = "Cannot find the dataset %s in the input nexus file." \
+                % missing
+            raise Exception(msg)
+
+        if len(subset) != len(param_datasets):
+            msg = "Multiple datasets with the same name cannot co-exist."
+            raise Exception(msg)
+
+        return subset
 
     def __update_metadata(self, dtype, name):
         cp = self.exp.checkpoint
@@ -106,13 +153,14 @@ class SavuNexusLoader(BaseLoader):
             pos = ksplit[0]
         return {'name': name, 'pos': pos, 'group': value}
 
-    def _last_unique_datasets(self, datasets, final=None):
+    def _last_unique_datasets(self, datasets, final=None, names=None):
         if final:
             datasets = [d for d in datasets if int(d['pos']) < final]
 
         all_names = list(set([d['name'] for d in datasets]))
+        names = [n for n in all_names if n in names] if names else all_names
         entries = {}
-        for n in all_names:
+        for n in names:
             this_name = [d for d in datasets if d['name'] == n]
             max_pos = np.max(np.array([int(d['pos']) for d in this_name]))
             entries[n] = \
@@ -123,13 +171,19 @@ class SavuNexusLoader(BaseLoader):
         data_objs = []
 
         for name, group in datasets.iteritems():
+            self.__set_preview_params(name)
             dObj = self._create_dataset(name, dtype)
             self._set_data_type(dObj, group, nxsfile.filename)
             self._read_nexus_group(group, dObj)
             dObj.set_shape(dObj.data.shape)
-            self.set_data_reduction_params(dObj)
+            self.__apply_previewing(dObj)
             data_objs.append(dObj)
         return data_objs
+
+    def __set_preview_params(self, name):
+        if isinstance(self._all_preview_params, dict):
+            self.parameters['preview'] = self._all_preview_params[name] if \
+                name in self._all_preview_params.keys() else []
 
     def _set_data_type(self, dObj, group, nxs_filename):
         link = group.get(group.attrs['signal'], getlink=True)
@@ -213,3 +267,11 @@ class SavuNexusLoader(BaseLoader):
                     d['pos'] = nPlugins
             updated.extend(this)
         return datasets
+
+    def __apply_previewing(self, dObj):
+        preview = self._all_preview_params
+        if isinstance(preview, dict):
+            name = dObj.get_name()
+            if name in self._all_preview_params.keys():
+                self.parameters['preview'] = self._all_preview_params[name]
+        self.set_data_reduction_params(dObj)
