@@ -187,6 +187,11 @@ class SavuNexusLoader(BaseLoader):
 
     def _set_data_type(self, dObj, group, nxs_filename):
         link = group.get(group.attrs['signal'], getlink=True)
+        if isinstance(link, h5py._hl.group.HardLink) and \
+                self.exp.meta_data.get('test_state') is True:
+            link.filename = nxs_filename
+            link.path = group.name + '/data'
+
         fname = os.path.join(os.path.dirname(nxs_filename), link.filename)
 
         dObj.backing_file = h5py.File(fname, 'r')
