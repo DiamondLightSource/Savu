@@ -10,6 +10,7 @@ Submodules
    savu.test.travis.plugin_tests.filter_tests.band_pass_test
    savu.test.travis.plugin_tests.filter_tests.denoise_bregman_test
    savu.test.travis.plugin_tests.filter_tests.dezinger_simple_test
+   savu.test.travis.plugin_tests.filter_tests.dezinger_sinogram_test
    savu.test.travis.plugin_tests.filter_tests.dezinger_test
    savu.test.travis.plugin_tests.filter_tests.distortion_correction_test
    savu.test.travis.plugin_tests.filter_tests.downsample_filter_test

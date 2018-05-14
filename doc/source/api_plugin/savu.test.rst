@@ -14,6 +14,7 @@ Submodules
 
 .. toctree::
 
+   savu.test.base_checkpoint_test
    savu.test.test_utils
 
 Module contents

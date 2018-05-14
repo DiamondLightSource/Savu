@@ -6,7 +6,7 @@ Requirements:
     - fftw (tested with 3.3.7)
     - cuda (tested with 9.1)
 
-1. Download the latest version of :download:`savu <../../install/2_1_install/savu_v2.3.tar.gz>` and extract.
+1. Download the latest version of :download:`savu <../../install/2_3_install/savu_v2.3.tar.gz>` and extract.
 
 2. Run the following command and follow the installation instructions:
 

@@ -16,6 +16,7 @@ savu.core
 .. toctree::
    api/savu.core.utils
    api/savu.core.plugin_runner
+   api/savu.core.checkpointing
    api/savu.core.transport_setup
    api/savu.core.basic_plugin_runner
 
@@ -39,6 +40,7 @@ savu.data
    api/savu.data.chunking
    api/savu.data.meta_data
    api/savu.data.framework_citations
+   api/savu.data.old_plugin_list
 
 
 savu.data.transport_data
