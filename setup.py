@@ -43,7 +43,8 @@ def _create_new_facility(facility_path):
                 shutil.copy(copy_this_file, to_this_folder)
     else:
         dls_sys_params = os.path.join(dls_path, 'system_parameters.yml')
-        facility_sys_params = os.join(facility_path, 'system_parameters.yml')
+        facility_sys_params = \
+            os.path.join(facility_path, 'system_parameters.yml')
         if not os.exist(facility_sys_params):
             shutil.copy(dls_sys_params, facility_path)
 
