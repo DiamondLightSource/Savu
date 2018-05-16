@@ -45,7 +45,7 @@ def _create_new_facility(facility_path):
         dls_sys_params = os.path.join(dls_path, 'system_parameters.yml')
         facility_sys_params = \
             os.path.join(facility_path, 'system_parameters.yml')
-        if not os.exist(facility_sys_params):
+        if not os.path.exists(facility_sys_params):
             shutil.copy(dls_sys_params, facility_path)
 
 if '--facility' in sys.argv:
