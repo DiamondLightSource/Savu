@@ -160,7 +160,6 @@ class Hdf5Utils(object):
                     group, "data", shape, data.dtype, chunks=chunks)
 
         self.exp._barrier(msg=msg+'5')
-
         return group_name, group
 
     def __set_optimal_hdf5_chunk_cache_size(self, data, group):
