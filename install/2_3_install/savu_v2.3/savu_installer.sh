@@ -223,7 +223,6 @@ else
   if [ ! -d "$PREFIX" ] ; then
     mkdir -p $PREFIX
   fi
-fi
 
 echo -e "\nThank you!  Installing Savu into" $PREFIX"\n"
 
@@ -330,6 +329,7 @@ echo -e "\t          Package installation complete"
 echo -e "\t  Check $error_log for errors"
 echo -e "\t***************************************************\n"
 
+fi
 
 if [ ! $test_flag ] ; then
   if [ $prompts = true ] ; then
@@ -375,7 +375,7 @@ fi
 
 if [ $test_flag ] ; then
 
-  nGPUs=$(python -c "import savu.core.utils as cu; p, count = cu.get_available_gpus(); print count")
+  nGPUs=$(nvidia-smi -L | wc -l)
 
   echo -e "\n***** Testing Savu setup *****\n"
   savu_quick_tests
@@ -389,7 +389,6 @@ if [ $test_flag ] ; then
   tmp_dir=`mktemp -d`
   tmpfile=$tmp_dir/temp_output.txt
   touch $tmpfile
-  echo "tmp file is" $tmpfile
 
   echo -e "\n***** Running Savu MPI local CPU tests *****\n"
 
@@ -402,8 +401,8 @@ if [ $test_flag ] ; then
     echo -e "\n***Test successfully completed!***\n"
   fi
 
-
-  if [ $nGPUs -gt 0 ]; then
+  echo "The number of GPUs is", $nGPUs
+  if [ $nGPUs -gt 0 ] ; then
     echo -e "\n***** Running Savu MPI local GPU tests *****\n"
     local_mpi_gpu_test.sh  $test_dir
   else
@@ -413,40 +412,21 @@ if [ $test_flag ] ; then
   rm -r $test_dir
 
   echo -e "\n************** MPI local tests complete ******************\n"
-
-  while true ; do
-    read  -n 1 -p "Are you installing Savu for cluster use? (y/n): " input
-    if [ "$input" = "y" ]; then
-      launcher_path=`command -v savu_launcher.sh`
-      mpijob_path=`command -v savu_mpijob.sh`
-      echo -e "\n\n===============================IMPORTANT NOTICE================================="
-      echo -e "To run Savu across a cluster you will need to update the savu laucher scripts:"
-      echo -e "\n$launcher_path"
-      echo -e "$mpijob_path\n"
-      echo -e "Once these are update, run the cluster MPI tests:\n\t >>> mpi_cpu_test.sh <output_dir> "
-      echo -e "\t >>> mpi_gpu_test.sh <output_dir>."
-      echo -e "================================================================================\n"
-      while true ; do    
-        read  -n 1 -p "Continue? (y): " input
-        if [ "$input" = "y" ]; then
-          break
-        else
-          echo
-        fi
-      done
-      echo
-      break
-    elif [ "$input" = "n" ]; then
-      break
-    else
-      echo -e "\nYour input was unknown.\n"
-    fi
-  done
 fi
 
 if [ ! $test_flag ] ; then
-  echo -e "\n\nTo run Savu type 'source $savu_setup' to set relevant paths every time you open a new terminal."
-  echo -e "Alternatively, if you are using the Modules system, see $DIR/module_template for an example module file." 
+
+  launcher_path=`command -v savu_launcher.sh`
+  mpijob_path=`command -v savu_mpijob.sh`
+  echo -e "\n\n===============================IMPORTANT NOTICES================================"
+  echo -e "If you are installing Savu for cluster use, you will need to update the savu "
+  echo -e "launcher scripts:"
+  echo -e "\n$launcher_path"
+  echo -e "$mpijob_path\n"
+  echo -e "\n\nTo run Savu type 'source $savu_setup' to set relevant paths every time you"
+  echo -e "open a new terminal.  Alternatively, if you are using the Modules system, see"
+  echo -e "$DIR/module_template for an example module file."
+  echo -e "================================================================================\n" 
 
   echo -e "*************** SAVU INSTALLATION COMPLETE! ******************\n"
   echo -e "    ......Thank you for running the Savu installer......\n"
