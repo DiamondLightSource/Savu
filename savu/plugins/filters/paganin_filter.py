@@ -15,7 +15,7 @@
 """
 .. module:: paganin_filter
    :platform: Unix
-   :synopsis: A plugin to apply the Paganin filter
+   :synopsis: A plugin to apply the Paganin filter.
 
 .. moduleauthor:: Nghia Vo <scientificsoftware@diamond.ac.uk>
 
@@ -35,7 +35,7 @@ from savu.data.plugin_list import CitationInformation
 @register_plugin
 class PaganinFilter(BaseFilter, CpuPlugin):
     """
-    A plugin to apply Paganin filter (contrast enhancement) on projections
+    A plugin to apply Paganin filter (contrast enhancement) on projections.
 
     :param Energy: Given X-ray energy in keV. Default: 53.0.
     :param Distance: Distance from sample to detection - Unit is \
@@ -49,7 +49,7 @@ class PaganinFilter(BaseFilter, CpuPlugin):
         log. Default: 1.0.
 
     :config_warn: The 'log' parameter in the reconstruction should be set to \
-    FALSE..
+    FALSE.
     :config_warn: Previewing a subset of sinograms will alter the result, due \
     to the global nature of this filter. If this is necessary, ensure they \
     are consecutive.

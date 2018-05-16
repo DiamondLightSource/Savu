@@ -120,7 +120,10 @@ class DisplayFormatter(object):
     def _get_equal_lines(self, string, width, colour_on, colour_off, offset):
         if not string or not colour_on:
             return ''
-        str_list = textwrap.wrap(string, width=width-len(offset))
+        string = str.splitlines(string)
+        str_list = []
+        for s in string:
+            str_list += textwrap.wrap(s, width=width-len(offset))
         new_str_list = []
         for line in str_list:
             lwidth = width - len(line) - len(offset)

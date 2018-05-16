@@ -50,16 +50,14 @@ def _parse_args(mod_doc_lines, lines):
 
     warn_regexp = re.compile(r'^:config_warn: \s?(?P<config_warn>.*[^ ])$')
     warn, idx1 = __find_regexp(warn_regexp, lines)
-    if not warn:
-        warn = ['']
+    warn = '' if not warn else '.\n'.join(warn)+'.'
     syn_regexp = re.compile(r'^:synopsis: \s?(?P<synopsis>.*[^ ])$')
     synopsis, idx2 = __find_regexp(syn_regexp, mod_doc_lines)
-    if not synopsis:
-        synopsis = ['']
+    synopsis = '' if not synopsis else synopsis[0]+'.'
 
     info = __find_docstring_info(param_lines+idx1+idx2, lines)
 
-    return {'warn': "\n".join(warn), 'info': info, 'synopsis': synopsis[0],
+    return {'warn': warn, 'info': info, 'synopsis': synopsis,
             'param': param_list, 'hide_param': hide, 'user_param': user,
             'not_param': not_param}
 
@@ -107,4 +105,4 @@ def __find_regexp(regexp, str_list):
 def __find_docstring_info(index, str_list):
     info = [str_list[i] for i in range(len(str_list)) if i not in index]
     info = [i for i in info if i]
-    return "\n".join(info)
+    return "\n".join(info) + '.'
