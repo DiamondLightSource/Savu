@@ -56,5 +56,5 @@ def run_tests():
 
     suite = \
         unittest.TestLoader().loadTestsFromTestCase(TomoPipelinePreviewTest)
-    unittest.TextTestRunner(verbosity=2, buffer=True).run(suite)
+    unittest.TextTestRunner(verbosity=1, buffer=True).run(suite)
     print("Test complete...")
