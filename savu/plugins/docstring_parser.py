@@ -105,4 +105,5 @@ def __find_regexp(regexp, str_list):
 def __find_docstring_info(index, str_list):
     info = [str_list[i] for i in range(len(str_list)) if i not in index]
     info = [i for i in info if i]
-    return "\n".join(info) + '.'
+    info = "" if not info else "\n".join(info) + '.'
+    return info
