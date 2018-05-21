@@ -1,0 +1,30 @@
+name: test-environment
+channels:
+  - astra-toolbox
+  - dgursoy
+  - conda-forge
+  - anaconda
+dependencies:
+  - python=2.7
+  - numpy
+  - scipy
+  - pytest
+  - h5py
+  - pep8
+  - mpi4py 
+  - scikit-image
+  - astra-toolbox
+  - xraylib
+  - tomopy
+  - mock
+  - fabio
+  - pytest-cov
+  - coveralls
+  - pyfai 
+  - pyfftw
+  - colorama
+  - pip:
+    - nvidia-ml-py
+    - peakutils
+    - pymca
+
