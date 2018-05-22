@@ -16,6 +16,7 @@ Subpackages
     savu.test.travis.plugin_tests.filter_tests
     savu.test.travis.plugin_tests.loader_tests
     savu.test.travis.plugin_tests.reconstruction_tests
+    savu.test.travis.plugin_tests.ring_removal_tests
     savu.test.travis.plugin_tests.saver_tests
 
 Submodules

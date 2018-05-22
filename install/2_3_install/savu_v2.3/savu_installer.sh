@@ -223,111 +223,114 @@ else
   if [ ! -d "$PREFIX" ] ; then
     mkdir -p $PREFIX
   fi
-
-echo -e "\nThank you!  Installing Savu into" $PREFIX"\n"
-
-wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O $PREFIX/miniconda.sh;
-bash $PREFIX/miniconda.sh -b -p $PREFIX/miniconda
-PYTHONHOME=$PREFIX/miniconda/bin
-export PATH="$PYTHONHOME:$PATH"
-
-conda install -y -q conda-build conda-env
-
-conda env update -n root -f $DIR/environment.yml
-
-echo "Building Savu..."
-conda build $DIR/$savu_recipe
-savubuild=`conda build $DIR/$savu_recipe --output`
-echo "Installing Savu..."
-conda install -y -q --use-local $savubuild
-
-path=$(python -c "import savu; import os; print os.path.abspath(savu.__file__)")
-savu_path=${path%/savu/__init__.pyc}
-
-# get the savu version
-install_path=$(python -c "import savu; import savu.version as sv; print sv.__install__")
-recipes=$savu_path/$install_path/conda-recipes
-
-launcher_path=`command -v savu_launcher.sh`
-launcher_path=${launcher_path%/savu_launcher.sh}
-if [ "$facility" ]; then
-    cp $savu_path/mpi/$facility/savu_launcher.sh $launcher_path
-    cp $savu_path/mpi/$facility/savu_mpijob.sh $launcher_path
 fi
 
-#-----------------------------------------------------------------
-echo "Installing pyfai..."
-pip install pyfai
-#-----------------------------------------------------------------
+if [ ! $test_flag ] ; then
 
-#-----------------------------------------------------------------
-echo "Installing mpi4py..."
-mpi4py_version=`cat $recipes/mpi4py/version.txt`
-env MPICC=$MPICC pip install mpi4py==$mpi4py_version
-#-----------------------------------------------------------------
+  echo -e "\nThank you!  Installing Savu into" $PREFIX"\n"
 
-#-----------------------------------------------------------------
-echo "Building hdf5..."
-conda uninstall -y -q hdf5 || true
-conda build $recipes/hdf5
-hdf5build=`conda build $recipes/hdf5 --output`
+  wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O $PREFIX/miniconda.sh;
+  bash $PREFIX/miniconda.sh -b -p $PREFIX/miniconda
+  PYTHONHOME=$PREFIX/miniconda/bin
+  export PATH="$PYTHONHOME:$PATH"
 
-echo "Installing hdf5..."
-conda install -y -q --use-local $hdf5build --no-deps
-#-----------------------------------------------------------------
+  conda install -y -q conda-build conda-env
 
-#-----------------------------------------------------------------
-echo "Building h5py..."
-conda uninstall -y -q h5py || true
-conda build $recipes/h5py --no-test
-h5pybuild=`conda build $recipes/h5py --output`
+  conda env update -n root -f $DIR/environment.yml
 
-echo "Installing h5py..."
-conda install -y -q --use-local $h5pybuild --no-deps
-#-----------------------------------------------------------------
+  echo "Building Savu..."
+  conda build $DIR/$savu_recipe
+  savubuild=`conda build $DIR/$savu_recipe --output`
+  echo "Installing Savu..."
+  conda install -y -q --use-local $savubuild
 
-#-----------------------------------------------------------------
-echo "Building astra toolbox..."
-conda build $recipes/astra
-astrabuild=`conda build $recipes/astra --output`
+  path=$(python -c "import savu; import os; print os.path.abspath(savu.__file__)")
+  savu_path=${path%/savu/__init__.pyc}
 
-echo "Installing astra toolbox..."
-conda install -y -q --use-local $astrabuild --no-deps
+  # get the savu version
+  install_path=$(python -c "import savu; import savu.version as sv; print sv.__install__")
+  recipes=$savu_path/$install_path/conda-recipes
 
-site_path=$(python -c "import site; print site.getsitepackages()[0]")
-cp $recipes/astra/astra.pth $site_path
-astra_lib_path=$site_path/astra/lib
-#-----------------------------------------------------------------
+  launcher_path=`command -v savu_launcher.sh`
+  launcher_path=${launcher_path%/savu_launcher.sh}
+  if [ "$facility" ]; then
+      cp $savu_path/mpi/$facility/savu_launcher.sh $launcher_path
+      cp $savu_path/mpi/$facility/savu_mpijob.sh $launcher_path
+  fi
 
-#-----------------------------------------------------------------
-echo "Building xraylib..."
-conda build $recipes/xraylib
-xraylibbuild=`conda build $recipes/xraylib --output`
+  #-----------------------------------------------------------------
+  echo "Installing pyfai..."
+  pip install pyfai
+  #-----------------------------------------------------------------
 
-echo "Installing xraylib..."
-conda install -y -q --use-local $xraylibbuild --no-deps
-#-----------------------------------------------------------------
+  #-----------------------------------------------------------------
+  echo "Installing mpi4py..."
+  mpi4py_version=`cat $recipes/mpi4py/version.txt`
+  env MPICC=$MPICC pip install mpi4py==$mpi4py_version
+  #-----------------------------------------------------------------
 
-#-----------------------------------------------------------------
-echo "Installing tomopy..."
-# these packages were missing in copied environment
-conda install -y -q -c dgursoy tomopy --no-deps
-conda install -y -q -c dgursoy dxchange --no-deps
-#-----------------------------------------------------------------
+  #-----------------------------------------------------------------
+  echo "Building hdf5..."
+  conda uninstall -y -q hdf5 || true
+  conda build $recipes/hdf5
+  hdf5build=`conda build $recipes/hdf5 --output`
 
-#-----------------------------------------------------------------
-#echo "Building xdesign"
-#conda build $recipes/xdesign
-#xdesignbuild=`conda build $recipes/xdesign --output`
+  echo "Installing hdf5..."
+  conda install -y -q --use-local $hdf5build --no-deps
+  #-----------------------------------------------------------------
 
-#echo "Installing xdesign"
-#conda install -y -q --use-local $xdesignbuild --no-deps
-#-----------------------------------------------------------------
+  #-----------------------------------------------------------------
+  echo "Building h5py..."
+  conda uninstall -y -q h5py || true
+  conda build $recipes/h5py --no-test
+  h5pybuild=`conda build $recipes/h5py --output`
 
-echo -e "\n\t***************************************************"
-echo -e "\t          Package installation complete"
-echo -e "\t  Check $error_log for errors"
-echo -e "\t***************************************************\n"
+  echo "Installing h5py..."
+  conda install -y -q --use-local $h5pybuild --no-deps
+  #-----------------------------------------------------------------
+
+  #-----------------------------------------------------------------
+  echo "Building astra toolbox..."
+  conda build $recipes/astra
+  astrabuild=`conda build $recipes/astra --output`
+
+  echo "Installing astra toolbox..."
+  conda install -y -q --use-local $astrabuild --no-deps
+
+  site_path=$(python -c "import site; print site.getsitepackages()[0]")
+  cp $recipes/astra/astra.pth $site_path
+  astra_lib_path=$site_path/astra/lib
+  #-----------------------------------------------------------------
+
+  #-----------------------------------------------------------------
+  echo "Building xraylib..."
+  conda build $recipes/xraylib
+  xraylibbuild=`conda build $recipes/xraylib --output`
+
+  echo "Installing xraylib..."
+  conda install -y -q --use-local $xraylibbuild --no-deps
+  #-----------------------------------------------------------------
+
+  #-----------------------------------------------------------------
+  echo "Installing tomopy..."
+  # these packages were missing in copied environment
+  conda install -y -q -c dgursoy tomopy --no-deps
+  conda install -y -q -c dgursoy dxchange --no-deps
+  #-----------------------------------------------------------------
+
+  #-----------------------------------------------------------------
+  #echo "Building xdesign"
+  #conda build $recipes/xdesign
+  #xdesignbuild=`conda build $recipes/xdesign --output`
+
+  #echo "Installing xdesign"
+  #conda install -y -q --use-local $xdesignbuild --no-deps
+  #-----------------------------------------------------------------
+
+  echo -e "\n\t***************************************************"
+  echo -e "\t          Package installation complete"
+  echo -e "\t  Check $error_log for errors"
+  echo -e "\t***************************************************\n"
 
 fi
 

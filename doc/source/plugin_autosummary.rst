@@ -208,6 +208,7 @@ savu.plugins.corrections
    api_plugin/savu.plugins.corrections.monitor_correction_nd
    api_plugin/savu.plugins.corrections.xrd_absorption_approximation
    api_plugin/savu.plugins.corrections.camera_rot_correction
+   api_plugin/savu.plugins.corrections.subpixel_shift
 
 
 savu.plugins.fitters
@@ -250,6 +251,7 @@ savu.plugins.ring_removal
    api_plugin/savu.plugins.ring_removal.raven_filter
    api_plugin/savu.plugins.ring_removal.ring_removal_waveletfft
    api_plugin/savu.plugins.ring_removal.ccpi_ring_artefact_filter
+   api_plugin/savu.plugins.ring_removal.ring_removal_normalization
 
 
 savu.plugins.alignment
