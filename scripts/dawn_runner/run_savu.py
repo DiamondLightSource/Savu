@@ -207,6 +207,7 @@ class DawnExperiment(Experiment):
 
 def get_options():
     options = {}
+    options['dawn_runner'] = True
     options['transport'] = 'hdf5'
     options['process_names'] = 'CPU0'
     options['processes'] = 'CPU0'
