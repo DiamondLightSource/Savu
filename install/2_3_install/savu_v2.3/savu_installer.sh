@@ -254,8 +254,8 @@ if [ ! $test_flag ] ; then
   launcher_path=`command -v savu_launcher.sh`
   launcher_path=${launcher_path%/savu_launcher.sh}
   if [ "$facility" ]; then
-      cp $savu_path/mpi/$facility/savu_launcher.sh $launcher_path
-      cp $savu_path/mpi/$facility/savu_mpijob.sh $launcher_path
+      cp $savu_path/system_files/$facility/mpi/savu_launcher.sh $launcher_path
+      cp $savu_path/system_files/$facility/mpi/savu_mpijob.sh $launcher_path
   fi
 
   #-----------------------------------------------------------------
