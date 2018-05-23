@@ -1,6 +1,9 @@
 # Tune these parameters to optimise Savu for your system.
 
-max_chunk_size          : 2048      # the size of the hdf5 raw data cache in MB
+chunk_cache_size        : 0         # the size of the hdf5 raw data cache in MB
+max_chunk_size          : 2048      # the maximum hdf5 chunk size in MB
+# NB: Set chunk_cache_size and max_chunk_size to be the same for optimal performance,
+# unless chunk_cache_size is 0.
 
 checkpoint_interval     : 600       # interval between checkpointing in seconds
 

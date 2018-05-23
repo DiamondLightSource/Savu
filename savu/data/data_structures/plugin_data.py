@@ -379,6 +379,10 @@ class PluginData(object):
             should only ever be passed in exceptional circumstances)
         """
         self.__set_pattern(pattern)
+        mData = self.data_obj.exp.meta_data
+        if 'dawn_runner' in mData.get_dictionary().keys():
+            return
+
         chunks = \
             self.data_obj.get_preview().get_starts_stops_steps(key='chunks')
 
@@ -419,4 +423,3 @@ class PluginData(object):
 
     def get_frame_limit(self):
         return self._frame_limit
-

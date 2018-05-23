@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2014 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,12 +24,15 @@
 """
 import os
 import re
+import ast
+import yaml
 import h5py
 import json
 import copy
 import inspect
 
 import numpy as np
+from itertools import izip_longest
 from collections import defaultdict
 
 import savu.plugins.utils as pu
@@ -100,8 +102,8 @@ class PluginList(object):
                 plugin['pos'] = key.encode('ascii').strip()
 
                 for jkey in json_keys:
-                    plugin[jkey] = self._convert_to_list(self._byteify(
-                        json.loads(plugin_group[key][jkey][0])))
+                    plugin[jkey] = \
+                        self._byteify(json.loads(plugin_group[key][jkey][0]))
                 self.plugin_list.append(plugin)
 
         if template:
@@ -147,9 +149,51 @@ class PluginList(object):
                 self._output_plugin_citations(plugin['cite'], plugin_group)
 
         for key in required_keys:
-            array = np.array([json.dumps(plugin[key])]) if key in json_keys \
-                else np.array([plugin[key]])
+            # only need to apply dumps if saving in configurator
+            data = self.__dumps(plugin[key]) if key == 'data' else plugin[key]
+            array = np.array([json.dumps(data)]) if key in json_keys else\
+                np.array([plugin[key]])
             plugin_group.create_dataset(key, array.shape, array.dtype, array)
+
+    def __dumps(self, data_dict):
+        """ Replace any missing quotes around variables
+        """
+        for key, val in data_dict.iteritems():
+            if isinstance(val, str):
+                try:
+                    data_dict[key] = ast.literal_eval(val)
+                    continue
+                except:
+                    pass
+                try:
+                    data_dict[key] = yaml.load(val)
+                    continue
+                except:
+                    pass
+                try:
+                    isdict = re.findall("[\{\}]+", val)
+                    if isdict:
+                        val = val.replace("[", "'[").replace("]", "]'")
+                        data_dict[key] = self.__dumps(yaml.load(val))
+                    else:
+                        data_dict[key] = self.__parse_config_string(val)
+                    continue
+                except:
+                    # for when parameter tuning with lists is added to the framework
+                    if len(val.split(';')) > 1:
+                        pass
+                    else:
+                        raise Exception("Invalid string %s" % val)
+        return data_dict
+
+    def __parse_config_string(self, string):
+        regex = "[\[\]\, ]+"
+        split_vals = filter(None, re.split(regex, string))
+        deliminators = re.findall(regex, string)
+        split_vals = [repr(a.strip()) for a in split_vals]
+        zipped = izip_longest(deliminators, split_vals)
+        string = ''.join([i for l in zipped for i in l if i is not None])
+        return ast.literal_eval(string)
 
     def _add(self, idx, entry):
         self.plugin_list.insert(idx, entry)
@@ -194,29 +238,6 @@ class PluginList(object):
             return input.encode('utf-8')
         else:
             return input
-
-    def _convert_to_list(self, data):
-        if isinstance(data, list):
-            return data
-        for key in data:
-            value = data[key]
-            if isinstance(value, str):
-                not_tuning = False if len(value.split(';')) > 1 else True
-                not_template = \
-                    False if value.strip().split('<')[0] == '' else True
-                is_list = True if value.count('[') else False
-                if is_list and not_tuning and not_template:
-                    value = [[a.split(']')[0].split('[')[1]] for a
-                             in value.split(';')]
-                    value = [v[0].replace(' ', '').split(',') for v in value]
-                    new_str = str(value[0])
-                    if len(value) > 1:
-                        value = [new_str+';'+str(b) for b in value[1:]][0]
-                    else:
-                        value = new_str
-                    exec("value =" + value)
-            data[key] = value
-        return data
 
     def _set_datasets_list(self, plugin):
         in_pData, out_pData = plugin.get_plugin_datasets()

@@ -13,4 +13,5 @@ override:
     pmean: pmin  # override the inherited dataset name pmean with pmin
 
 pmin:
-    path        : entry/inputs/p*min       # adding * implies data stitching (assuming integer indexing)
+    data:
+        path        : entry/inputs/p*min       # adding * implies data stitching (assuming integer indexing)

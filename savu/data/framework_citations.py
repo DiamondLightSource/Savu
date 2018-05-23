@@ -32,17 +32,17 @@ def get_framework_citations():
         ("The Savu framework design is described in this paper.")
     cite_info[0]['bibtex'] = \
         ("@article{wadeson2016savu,\n" +
-         "title={Savu: A Python-based, MPI Framework for Simultaneous \
-         Processing of Multiple, N-dimensional, Large Tomography \
-         Datasets},\n" +
+         "title={Savu: A Python-based, MPI Framework for Simultaneous\n" +
+         "Processing of Multiple, N-dimensional, Large Tomography\n" +
+         "Datasets},\n" +
          "author={Wadeson, Nicola and Basham, Mark},\n" +
          "journal={arXiv preprint arXiv:1610.08015},\n" +
          "year={2016}\n" +
          "}")
     cite_info[0]['endnote'] = \
         ("%0 Journal Article\n" +
-         "%T Savu: A Python-based, MPI Framework for Simultaneous Processing \
-         of Multiple, N-dimensional, Large Tomography Datasets\n" +
+         "%T Savu: A Python-based, MPI Framework for Simultaneous Processing\n" +
+         "of Multiple, N-dimensional, Large Tomography Datasets\n" +
          "%A Wadeson, Nicola\n" +
          "%A Basham, Mark\n" +
          "%J arXiv preprint arXiv:1610.08015\n" +
@@ -65,8 +65,8 @@ def get_framework_citations():
          "%D 2014\n")
 
     cite_info.append({'name': 'MPI'})
-    cite_info[2]['description'] = ("HDF5 uses the Message Passing Interface \
-        standard for interprocess communication")
+    cite_info[2]['description'] = ("HDF5 uses the Message Passing Interface\n" +
+        "standard for interprocess communication")
     cite_info[2]['bibtex'] = \
         ("@article{walker1996mpi, \n" +
          "title={MPI: a standard message passing interface}, \n" +

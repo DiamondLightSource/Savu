@@ -43,8 +43,9 @@ def _create_new_facility(facility_path):
                 shutil.copy(copy_this_file, to_this_folder)
     else:
         dls_sys_params = os.path.join(dls_path, 'system_parameters.yml')
-        facility_sys_params = os.join(facility_path, 'system_parameters.yml')
-        if not os.exist(facility_sys_params):
+        facility_sys_params = \
+            os.path.join(facility_path, 'system_parameters.yml')
+        if not os.path.exists(facility_sys_params):
             shutil.copy(dls_sys_params, facility_path)
 
 if '--facility' in sys.argv:
@@ -118,7 +119,8 @@ setup(name='savu',
                         'data/i12_test_data/*',
                         'data/I18_test_data/*',
                         'data/image_test/*',
-                        'data/image_test/tiffs/*'],
+                        'data/image_test/tiffs/*',
+                        'data/full_field_corrected/*'],
                     'lib': ['*.so'],
                     'system_files': [
                         facility + '/*',

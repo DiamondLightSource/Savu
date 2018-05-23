@@ -79,6 +79,8 @@ class Hdf5TemplateLoader(YamlConverter):
                     number.append(int(split[-1]))
 
         matches = [matches[i] for i in np.argsort(number)]
+        dObj.data_info.set('wildcard_values', sorted(number))
+
         data_obj_list = []
         for match in matches:
             match_path = os.path.join(group_name, match)

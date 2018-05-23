@@ -41,11 +41,10 @@ class MultipleDatasetsTest(unittest.TestCase):
     def test_tomo1(self):
         options = tu.set_experiment('tomo')
         plugin = 'savu.plugins.basic_operations.basic_operations'
-        loader_dict = {'data_path': '1-TimeseriesFieldCorrections-tomo/data'}
         data_dict = {'in_datasets': ['tomo', 'tomo'], 'out_datasets': ['test'],
                      'operations': ['tomo + tomo'],  'pattern': 'PROJECTION'}
         saver_dict = {}
-        all_dicts = [loader_dict, data_dict, saver_dict]
+        all_dicts = [{}, data_dict, saver_dict]
         run_protected_plugin_runner_no_process_list(options, plugin,
                                                     data=all_dicts)
 
@@ -53,8 +52,7 @@ class MultipleDatasetsTest(unittest.TestCase):
         options = tu.set_experiment('tomo')
         plugin = 'savu.plugins.basic_operations.basic_operations'
         preview = ['10:-1:1:1', '10:-1:1:1', '10:-1:1:1']
-        loader_dict = {'data_path': '1-TimeseriesFieldCorrections-tomo/data',
-                       'preview': preview}
+        loader_dict = {'preview': preview}
         data_dict = {'in_datasets': ['tomo', 'tomo'], 'out_datasets': ['test'],
                      'operations': ['tomo + tomo'],  'pattern': 'PROJECTION'}
         all_dicts = [loader_dict, data_dict, {}]
@@ -67,8 +65,7 @@ class MultipleDatasetsTest(unittest.TestCase):
         options = tu.set_experiment('tomo')
         plugin = 'savu.plugins.basic_operations.basic_operations'
         preview = ['10:-1:10:1', '10:-1:10:1', '10:-1:10:1']
-        loader_dict = {'data_path': '1-TimeseriesFieldCorrections-tomo/data',
-                       'preview': preview}
+        loader_dict = {'preview': preview}
         data_dict = {'in_datasets': ['tomo', 'tomo'], 'out_datasets': ['test'],
                      'operations': ['tomo + tomo'],  'pattern': 'PROJECTION'}
         all_dicts = [loader_dict, data_dict, {}]
@@ -81,8 +78,7 @@ class MultipleDatasetsTest(unittest.TestCase):
         options = tu.set_experiment('tomo')
         plugin = 'savu.plugins.basic_operations.basic_operations'
         preview = ['10:-10:10:1', '10:-10:10:1', '10:-10:10:1']
-        loader_dict = {'data_path': '1-TimeseriesFieldCorrections-tomo/data',
-                       'preview': preview}
+        loader_dict = {'preview': preview}
         data_dict = {'in_datasets': ['tomo', 'tomo'], 'out_datasets': ['test'],
                      'operations': ['tomo + tomo'],  'pattern': 'PROJECTION'}
         all_dicts = [loader_dict, data_dict, {}]

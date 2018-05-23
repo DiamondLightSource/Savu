@@ -231,7 +231,8 @@ class Chunking(object):
         Increase the chunk size as close to 1MB as possible
         """
         next_chunks = copy.copy(chunks)
-        while ((np.prod(next_chunks)*np.dtype(ttype).itemsize) <= self.chunk_max):
+        while ((np.prod(next_chunks)*np.dtype(ttype).itemsize) <=
+                self.chunk_max):
             chunks = copy.copy(next_chunks)
             idx = self.__get_idx_increase(next_chunks, adjust)
             if idx == -1:

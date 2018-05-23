@@ -64,7 +64,7 @@ def get_experiment_types():
     exp_dict['tomoRaw'] = {'func': 'set_tomoRaw_experiment',
                            'filename': '24737.nxs'}
     exp_dict['tomo'] = {'func': 'set_tomo_experiment',
-                        'filename': 'savu_projections.h5'}
+                        'filename': '24737_processed.nxs'}
     exp_dict['fluo'] = {'func': 'set_fluo_experiment',
                         'filename': 'fluo.nxs'}
     exp_dict['tomo_3dto4d'] = {'func': 'set_3dto4d_experiment',
@@ -91,8 +91,8 @@ def set_tomoRaw_experiment(filename, **kwargs):
 
 
 def set_tomo_experiment(filename, **kwargs):
-    options = set_options(get_test_data_path(filename), **kwargs)
-    options['loader'] = 'savu.plugins.loaders.savu_loader'
+    options = set_options(get_test_data_path('/full_field_corrected/' + filename), **kwargs)
+    options['loader'] = 'savu.plugins.loaders.savu_nexus_loader'
     return options
 
 

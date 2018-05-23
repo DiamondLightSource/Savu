@@ -28,10 +28,10 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 class BasicOperations(unittest.TestCase):
 
     def test_basic_operations(self):
-        data_file = tu.get_test_data_path('savu_projections.h5')
         process_file = tu.get_test_process_path('basic_operations_test.nxs')
-        run_protected_plugin_runner(tu.set_options(data_file,
-                                                   process_file=process_file))
+        options = tu.set_experiment('tomo')
+        options['process_file'] = process_file
+        run_protected_plugin_runner(options)
 
 if __name__ == "__main__":
     unittest.main()

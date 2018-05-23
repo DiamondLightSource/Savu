@@ -4,6 +4,7 @@
 # 2) $ sign at the beginning of a statement indicates the statement should be executed.              #
 # 3) end a parameter name with 'file' (e.g. cfile) to denote this is a file.                         #
 # 4) Use single quotes only i.e '/path/to/file' and not "/path/to/file"                              #
+# 5) wildcard will give access to the path wildcard (*) values if used.
 # ================================================================================================== #
 
 inherit: None
@@ -32,15 +33,15 @@ pmean:
         2:
             dim     : 2
             name    : motor
-            value   : 
+            value   : $wildcard   # wildcard (*) values from data stitching path above
             units   : int
 
 # Write another yaml file for the 4D case
 
     patterns:   # at least one pattern is required
         MOTOR_POSITION:
-            core_dims   : (0, 1)
-            slice_dims  : (2,)
+            core_dims   : (2,)
+            slice_dims  : (0, 1)
 
     metadata:  # optional, additional information associated with the dataset
         program:

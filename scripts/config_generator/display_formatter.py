@@ -120,7 +120,10 @@ class DisplayFormatter(object):
     def _get_equal_lines(self, string, width, colour_on, colour_off, offset):
         if not string or not colour_on:
             return ''
-        str_list = textwrap.wrap(string, width=width-len(offset))
+        string = str.splitlines(string)
+        str_list = []
+        for s in string:
+            str_list += textwrap.wrap(s, width=width-len(offset))
         new_str_list = []
         for line in str_list:
             lwidth = width - len(line) - len(offset)
@@ -137,6 +140,7 @@ class DispDisplay(DisplayFormatter):
     def _get_quiet(self, p_dict, count, width, quiet=True):
         active = \
             '***OFF***' if 'active' in p_dict and not p_dict['active'] else ''
+        p_dict['data'] = self._remove_quotes(p_dict['data'])
         pos = p_dict['pos'].strip() if 'pos' in p_dict.keys() else count
         fore = Fore.RED + Style.DIM if active else Fore.LIGHTWHITE_EX
         back = Back.LIGHTBLACK_EX
@@ -168,6 +172,14 @@ class DispDisplay(DisplayFormatter):
         c_off = Back.RESET + Fore.RESET
         info, warn = self._get_extra_info(p_dict, width, c_off, info_c, warn_c)
         return title + synopsis + info + warn + param_details
+
+    def _remove_quotes(self, data_dict):
+        """ Remove quotes around variables for display
+        """
+        for key, val in data_dict.iteritems():
+            val = str(val).replace("'", "")
+            data_dict[key] = val
+        return data_dict
 
     def _notices(self):
         width = 86

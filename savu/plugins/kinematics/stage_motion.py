@@ -41,60 +41,113 @@ class StageMotion(Plugin, CpuPlugin):
         super(StageMotion, self).__init__("StageMotion")
 
     def pre_process(self):
-        pass
+        data = self.get_in_datasets()[0]
+        in_pData = self.get_plugin_in_datasets()[0]
+        out_pData = self.get_plugin_out_datasets()[0]
+        self.out_pshape = out_pData.get_shape()
+        # find which dimension of the data passed to process_frames has \
+        # axis label 'motor'
+        self.motor_dim = in_pData.get_data_dimension_by_axis_label('motor')
+        self.pvals = data.meta_data.get('motor')
 
     def process_frames(self, data):
         # takes in list of 3 datasets with size (n x m)
         # returns 3 datasets of size (n x m x r)
-        print len(data)
-        shape = data[0].shape + (9,)
-        res = np.random.rand(*shape)
-        return [res, res, res]
+
+        # useful to 
+        #sl = self.get_current_slice_list()[0][self.slice_dir]
+        #current_idx = self.get_global_frame_index()[0][self.count]
+        res = np.random.rand(*self.out_pshape)
+        return res
 
     def post_process(self):
         pass
+
+#    def setup(self):
+#        # take in n x m
+#        # return n x m x r
+#
+#        in_datasets, out_datasets = self.get_datasets()
+#
+#        # additional dimension information
+#        dim_length = 9  # = r
+#        dim_pos = (len(in_datasets[0].get_shape()))
+#        dim_axis_name = 'values'
+#        dim_axis_unit = 'units'
+#
+#        new_axis = '.'.join(['~' + str(dim_pos), dim_axis_name, dim_axis_unit])
+#        new_shape = in_datasets[0].get_shape() + (dim_length,)
+#
+#        pattern = self.__update_pattern_information(in_datasets[0], dim_pos)
+#
+#        # Populate the output datasets with required information
+#        for d in out_datasets:
+#            d.create_dataset(axis_labels={in_datasets[0]: [new_axis]},
+#                             shape=new_shape)
+#            d.add_pattern('MOTOR_POSITION', **pattern)
+#
+#        #================== populate plugin datasets ==========================
+#        in_pData, out_pData = self.get_plugin_datasets()
+#        for i in range(3):
+#            in_pData[i].plugin_data_setup('MOTOR_POSITION', 'single')
+#            out_pData[i].plugin_data_setup('MOTOR_POSITION', 'single')
+#        #======================================================================
+#
+#    def __update_pattern_information(self, dObj, dim_pos):
+#        # Should this be a new pattern name?
+#        pattern = copy.deepcopy(dObj.get_data_patterns()['MOTOR_POSITION'])
+#        for key, value in pattern.iteritems():
+#            value = [i if i < dim_pos else i+1 for i in list(value)]
+#            pattern[key] = tuple(value)
+#        pattern['core_dims'] += (dim_pos,)
+#        return pattern
 
     def setup(self):
         # take in n x m
         # return n x m x r
 
         in_datasets, out_datasets = self.get_datasets()
+        self.motor_data_dim = \
+            in_datasets[0].get_data_dimension_by_axis_label('motor')
 
         # additional dimension information
-        dim_length = 9  # = r
-        dim_pos = (len(in_datasets[0].get_shape()))
+        dim_len = 9  # = r
+        dim_pos = 0
         dim_axis_name = 'values'
         dim_axis_unit = 'units'
 
         new_axis = '.'.join(['~' + str(dim_pos), dim_axis_name, dim_axis_unit])
-        new_shape = in_datasets[0].get_shape() + (dim_length,)
-
+        axis_labels = {in_datasets[0]: [str(self.motor_data_dim), new_axis]}
+        self.shape = self.__get_output_shape(in_datasets[0], dim_pos, dim_len)
         pattern = self.__update_pattern_information(in_datasets[0], dim_pos)
 
         # Populate the output datasets with required information
-        for d in out_datasets:
-            d.create_dataset(axis_labels={in_datasets[0]: [new_axis]},
-                             shape=new_shape)
-            d.add_pattern('MOTOR_POSITION', **pattern)
+        out_datasets[0].create_dataset(axis_labels=axis_labels,
+                                       shape=self.shape)
+        out_datasets[0].add_pattern('MOTOR_POSITION', **pattern)
 
         #================== populate plugin datasets ==========================
         in_pData, out_pData = self.get_plugin_datasets()
-        for i in range(3):
-            in_pData[i].plugin_data_setup('MOTOR_POSITION', 'single')
-            out_pData[i].plugin_data_setup('MOTOR_POSITION', 'single')
+        in_pData[0].plugin_data_setup('MOTOR_POSITION', 'multiple')
+        out_pData[0].plugin_data_setup('MOTOR_POSITION', 'multiple')
         #======================================================================
 
     def __update_pattern_information(self, dObj, dim_pos):
-        # Should this be a new pattern name?
         pattern = copy.deepcopy(dObj.get_data_patterns()['MOTOR_POSITION'])
-        for key, value in pattern.iteritems():
-            value = [i if i < dim_pos else i+1 for i in list(value)]
-            pattern[key] = tuple(value)
-        pattern['core_dims'] += (dim_pos,)
+        pattern['core_dims'] = (dim_pos,)
+        slice_dims = pattern['slice_dims']
+        slice_dims = [i if i < dim_pos else i+1 for i in list(slice_dims)]
+        pattern['slice_dims'] = tuple(slice_dims)
         return pattern
 
+    def __get_output_shape(self, dObj, dim_pos, dim_len):
+        shape = list(dObj.get_shape())
+        del shape[self.motor_data_dim]
+        shape.insert(dim_pos, dim_len)
+        return tuple(shape)
+
     def nInput_datasets(self):
-        return 3
+        return 1
 
     def nOutput_datasets(self):
-        return 3
+        return 1

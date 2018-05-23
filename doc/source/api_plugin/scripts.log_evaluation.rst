@@ -9,7 +9,6 @@ Submodules
    scripts.log_evaluation.GraphicalThreadProfiler
    scripts.log_evaluation.GraphicalThreadProfiler_multi
    scripts.log_evaluation.VisualiseProfileData
-   scripts.log_evaluation.multi_vis
    scripts.log_evaluation.template_strings
 
 Module contents

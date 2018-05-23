@@ -22,6 +22,5 @@ Submodules
    savu.test.jenkins.plugin_tests.filter_tests.mc_near_absorption_correct_test
    savu.test.jenkins.plugin_tests.filter_tests.pca_test
    savu.test.jenkins.plugin_tests.filter_tests.ptypy_compact_test
-   savu.test.jenkins.plugin_tests.filter_tests.reproduce_fit_test
    savu.test.jenkins.plugin_tests.filter_tests.umpa_test
 

@@ -16,6 +16,7 @@ savu.core
 .. toctree::
    api_plugin/savu.core.utils
    api_plugin/savu.core.plugin_runner
+   api_plugin/savu.core.checkpointing
    api_plugin/savu.core.transport_setup
    api_plugin/savu.core.basic_plugin_runner
 
@@ -39,6 +40,7 @@ savu.data
    api_plugin/savu.data.chunking
    api_plugin/savu.data.meta_data
    api_plugin/savu.data.framework_citations
+   api_plugin/savu.data.old_plugin_list
 
 
 savu.data.transport_data
@@ -132,6 +134,7 @@ savu.plugins.centering
    api_plugin/savu.plugins.centering.vo_centering
    api_plugin/savu.plugins.centering.vo_centering_new
    api_plugin/savu.plugins.centering.vo_centering_iterative
+   api_plugin/savu.plugins.centering.vo_centering_gpu
 
 
 savu.plugins.component_analysis
@@ -171,7 +174,6 @@ savu.plugins.reconstructions
    api_plugin/savu.plugins.reconstructions.simple_recon
    api_plugin/savu.plugins.reconstructions.scikitimage_filter_back_projection
    api_plugin/savu.plugins.reconstructions.tomopy_recon
-   api_plugin/savu.plugins.reconstructions.simple_fake_gpu_recon
    api_plugin/savu.plugins.reconstructions.non_local_regularised_cgls
    api_plugin/savu.plugins.reconstructions.ccpi_cgls_recon
 
@@ -206,6 +208,7 @@ savu.plugins.corrections
    api_plugin/savu.plugins.corrections.monitor_correction_nd
    api_plugin/savu.plugins.corrections.xrd_absorption_approximation
    api_plugin/savu.plugins.corrections.camera_rot_correction
+   api_plugin/savu.plugins.corrections.subpixel_shift
 
 
 savu.plugins.fitters
@@ -238,6 +241,7 @@ savu.plugins.driver
    api_plugin/savu.plugins.driver.single_node_multi_threaded_plugin
    api_plugin/savu.plugins.driver.basic_driver
    api_plugin/savu.plugins.driver.iterative_plugin
+   api_plugin/savu.plugins.driver.base_driver
 
 
 savu.plugins.ring_removal
@@ -247,6 +251,7 @@ savu.plugins.ring_removal
    api_plugin/savu.plugins.ring_removal.raven_filter
    api_plugin/savu.plugins.ring_removal.ring_removal_waveletfft
    api_plugin/savu.plugins.ring_removal.ccpi_ring_artefact_filter
+   api_plugin/savu.plugins.ring_removal.ring_removal_normalization
 
 
 savu.plugins.alignment
@@ -257,6 +262,19 @@ savu.plugins.alignment
    api_plugin/savu.plugins.alignment.projection_vertical_alignment
    api_plugin/savu.plugins.alignment.sinogram_alignment
    api_plugin/savu.plugins.alignment.sinogram_clean
+
+
+savu.plugins.missing_data
+------------------------------------------------------------
+
+.. toctree::
+
+
+savu.plugins.kinematics
+------------------------------------------------------------
+
+.. toctree::
+   api_plugin/savu.plugins.kinematics.stage_motion
 
 
 savu.plugins.filters
@@ -279,7 +297,7 @@ savu.plugins.filters
    api_plugin/savu.plugins.filters.spectrum_crop
    api_plugin/savu.plugins.filters.threshold_filter
    api_plugin/savu.plugins.filters.dezinger_simple
-   api_plugin/savu.plugins.filters.interpolate_outliers
+   api_plugin/savu.plugins.filters.dezinger_sinogram
    api_plugin/savu.plugins.filters.umpa
    api_plugin/savu.plugins.filters.dezinger
 
@@ -290,12 +308,12 @@ savu.plugins.loaders
 .. toctree::
    api_plugin/savu.plugins.loaders.base_loader
    api_plugin/savu.plugins.loaders.multi_savu_loader
-   api_plugin/savu.plugins.loaders.savu_loader
    api_plugin/savu.plugins.loaders.random_hdf5_loader
    api_plugin/savu.plugins.loaders.yaml_converter
    api_plugin/savu.plugins.loaders.hdf5_template_loader
    api_plugin/savu.plugins.loaders.stitch_data_template_loader
    api_plugin/savu.plugins.loaders.image_template_loader
+   api_plugin/savu.plugins.loaders.savu_nexus_loader
 
 
 savu.plugins.loaders.full_field_loaders
@@ -324,6 +342,12 @@ savu.plugins.loaders.templates.i18_templates
 
 
 savu.plugins.loaders.templates.nexus_templates
+------------------------------------------------------------
+
+.. toctree::
+
+
+savu.plugins.loaders.templates.malcolm_templates
 ------------------------------------------------------------
 
 .. toctree::
@@ -406,7 +430,6 @@ savu.plugins.savers
    api_plugin/savu.plugins.savers.tiff_saver
    api_plugin/savu.plugins.savers.xrf_saver
    api_plugin/savu.plugins.savers.edf_saver
-   api_plugin/savu.plugins.savers.extended_tiff_saver
 
 
 savu.plugins.savers.utils

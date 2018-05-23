@@ -95,20 +95,31 @@ class YamlConverter(BaseLoader):
                 mod = __import__(imp.strip())
                 globals()[mod.__name__ if not name else name] = mod
 
-    def _check_for_inheritance(self, ddict, inherit):
+    def _check_for_inheritance(self, ddict, inherit, override=False):
         if 'inherit' in ddict.keys():
             idict = ddict['inherit']
             idict = idict if isinstance(idict, list) else [idict]
             for i in idict:
                 if i != 'None':
                     new_dict = yu.read_yaml(self._get_yaml_file(i))
-                    if 'override' in new_dict:
-                        old, new = new_dict.pop('override').items()[0]
-                        new_dict[new] = copy.deepcopy(inherit[old])
+                    new_dict, isoverride = \
+                        self.__override(inherit, new_dict, override)
                     inherit.update(new_dict)
-                    inherit = self._check_for_inheritance(new_dict, inherit)
+                    inherit = self._check_for_inheritance(
+                            new_dict, inherit, override=isoverride)
         self._update(inherit, ddict)
         return inherit
+
+    def __override(self, inherit, ddict, override):
+        isoverride = False
+        if 'override' in ddict:
+            isoverride = ddict.pop('override')
+        if override:
+            for old, new in override.iteritems():
+                ddict[new] = ddict.pop(old)
+                if new in inherit.keys():
+                    self._update(ddict[new], inherit[new])
+        return ddict, isoverride
 
     def _update(self, d, u):
         for k, v in u.iteritems():
@@ -166,11 +177,18 @@ class YamlConverter(BaseLoader):
         shape = str(dObj.get_shape())
         return {'dfile': filepath, 'dshape': shape}
 
+    def __get_wildcard_values(self, dObj):
+        if 'wildcard_values' in dObj.data_info.get_dictionary().keys():
+            return dObj.data_info.get('wildcard_values')
+        return None
+
     def update_value(self, dObj, value):
         # setting the keywords
         if dObj is not None:
             dshape = dObj.get_shape()
             dfile = dObj.backing_file
+            wildcard = self.__get_wildcard_values(dObj)
+
         if isinstance(value, str):
             split = value.split('$')
             if len(split) > 1:

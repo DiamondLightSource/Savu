@@ -160,7 +160,6 @@ class Hdf5Utils(object):
                     group, "data", shape, data.dtype, chunks=chunks)
 
         self.exp._barrier(msg=msg+'5')
-
         return group_name, group
 
     def __set_optimal_hdf5_chunk_cache_size(self, data, group):
@@ -168,10 +167,12 @@ class Hdf5Utils(object):
         # change cache properties
         propfaid = group.file.id.get_access_plist()
         settings = list(propfaid.get_cache())
-        max_size = self.exp.meta_data.get(['system_params', 'max_chunk_size'])
-        settings[2] *= max_size
+        pdict = self.exp.meta_data.get('system_params')
+        max_chunk_size = pdict['max_chunk_size']
+        chunk_cache_size = pdict['chunk_cache_size']
+        settings[2] *= chunk_cache_size
         propfaid.set_cache(*settings)
-        return settings[2]
+        return max_chunk_size * 1e6  # convert MB to bytes
 
     def _close_file(self, data):
         """

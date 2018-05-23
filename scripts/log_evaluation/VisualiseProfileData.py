@@ -107,3 +107,4 @@ if __name__ == "__main__":
         create_bubble_chart(get_files(filename))
     else:
         convert_all_files()
+

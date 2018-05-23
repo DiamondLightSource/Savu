@@ -59,7 +59,10 @@ class BaseRecon(Plugin):
     to zero. Default: False.
     :param ratio: Ratio of the masks diameter in pixels to the smallest edge\
         size along given axis. Default: 0.95.
+    :param log_func: Override the default log \
+        function. Default: 'np.nan_to_num(-np.log(sino))'.
     """
+
     count = 0
 
     def __init__(self, name='BaseRecon'):
@@ -162,22 +165,34 @@ class BaseRecon(Plugin):
         if not pad_shape:
             cor_func = lambda cor: cor
             if self.parameters['log']:
-                sino_func = lambda sino: -np.log(np.nan_to_num(sino)+1)
+                sino_func = self.__make_lambda()
             else:
-                sino_func = lambda sino: np.nan_to_num(sino)
+                sino_func = self.__make_lambda(log=False)
         else:
-            mode = 'edge'
-            cor_func = lambda cor: cor+self.sino_pad
-            pad_tuples = [(0, 0)]*(len(pad_shape)-1)
-            pad_tuples.insert(self.pad_dim, (self.sino_pad, self.sino_pad))
-            pad_tuples = tuple(pad_tuples)
+            cor_func = lambda cor: cor + self.sino_pad
             if self.parameters['log']:
-                sino_func = lambda sino: -np.log(np.nan_to_num(
-                    np.pad(sino, pad_tuples, mode))+1)
+                sino_func = self.__make_lambda(pad=pad_shape)
             else:
-                sino_func = lambda sino: np.nan_to_num(np.pad(
-                    sino, pad_tuples, mode))
+                sino_func = self.__make_lambda(pad=pad_shape, log=False)
         return sino_func, cor_func
+
+    def __make_lambda(self, log=True, pad=False):
+        log_func = 'np.nan_to_num(sino)' if not log else \
+            self.parameters['log_func']
+        if pad:
+            pad_tuples, mode = self.__get_pad_values(pad)
+            log_func = log_func.replace(
+                    'sino', 'np.pad(sino, %s, "%s")' % (pad_tuples, mode))
+        func = "f = lambda sino: " + log_func
+        exec(func)
+        return f
+
+    def __get_pad_values(self, pad_shape):
+        mode = 'edge'
+        pad_tuples = [(0, 0)]*(len(pad_shape)-1)
+        pad_tuples.insert(self.pad_dim, (self.sino_pad, self.sino_pad))
+        pad_tuples = tuple(pad_tuples)
+        return pad_tuples, mode
 
     def base_process_frames_before(self, data):
         """
