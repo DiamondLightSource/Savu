@@ -25,18 +25,22 @@ from savu.plugins.utils import register_plugin
 import numpy as np
 from scipy.ndimage import gaussian_filter
 
+
 @register_plugin
 class RingRemovalNormalization(Plugin, CpuPlugin):
     """
 
-    Method to remove stripe artefacts in a sinogram (<-> ring artefacts in a reconstructed image)\
-    using a normalization-based method. A simple improvement to handle partial stripes is included.    
+    Method to remove stripe artefacts in a sinogram (<-> ring artefacts \
+    in a reconstructed image) using a normalization-based method. 
+    A simple improvement to handle partial stripes is included.    
     :param radius: Radius of the Gaussian kernel. Default: 11
-    :param number_of_chunks: Divide the sinogram to many chunks of rows. Default: 1
+    :param number_of_chunks: Divide the sinogram to many chunks of rows.\
+     Default: 1
     """
 
     def __init__(self):
-        super(RingRemovalNormalization, self).__init__("RingRemovalNormalization")
+        super(RingRemovalNormalization, self).__init__(
+            "RingRemovalNormalization")
 
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
@@ -48,23 +52,26 @@ class RingRemovalNormalization(Plugin, CpuPlugin):
     def pre_process(self):
         in_pData = self.get_plugin_in_datasets()
         width_dim = in_pData[0].get_data_dimension_by_axis_label('detector_x')
-        height_dim = in_pData[0].get_data_dimension_by_axis_label('rotation_angle')        
+        height_dim = in_pData[0].get_data_dimension_by_axis_label(
+            'rotation_angle')
         sino_shape = list(in_pData[0].get_shape())
         self.width1 = sino_shape[width_dim]
-        self.height1 = sino_shape[height_dim]  
-    
+        self.height1 = sino_shape[height_dim]
+
     def process_frames(self, data):
         sinogram = np.copy(data[0])
         radius = np.clip(np.int16(self.parameters['radius']), 0, self.width1)
-        num_chunks = np.clip(np.int16(self.parameters['number_of_chunks']), 1, self.height1)
+        num_chunks = np.clip(
+            np.int16(self.parameters['number_of_chunks']), 1, self.height1)
         list_pos = np.array_split(np.arange(self.height1), num_chunks)
         for pos in list_pos:
             bindex = pos[0]
-            eindex = pos[-1]
+            eindex = pos[-1] + 1
             list_mean = np.mean(sinogram[bindex:eindex, :], axis=0)
             list_mean_filtered = gaussian_filter(list_mean, radius)
             list_coe = list_mean_filtered - list_mean
-            mat_coe = np.zeros((eindex - bindex, self.width1), dtype=np.float32)
+            mat_coe = np.zeros(
+                (eindex - bindex, self.width1), dtype=np.float32)
             mat_coe[:] = list_coe
             sinogram[bindex:eindex, :] = sinogram[bindex:eindex, :] + mat_coe
         return sinogram
