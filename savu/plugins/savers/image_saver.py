@@ -13,15 +13,15 @@
 # limitations under the License.
 
 """
-.. module:: tiff_saver
+.. module:: image_saver
    :platform: Unix
-   :synopsis: A class to save output in tiff format
+   :synopsis: A class to save output as images
 
-.. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
+.. moduleauthor:: Dan Nixon <daniel.nixon@stfc.ac.uk>
 
 """
 
-import tifffile as tf
+import skimage.io
 
 from savu.plugins.savers.base_image_saver import BaseImageSaver
 from savu.plugins.utils import register_plugin
@@ -29,21 +29,23 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 
 @register_plugin
-class TiffSaver(BaseImageSaver, CpuPlugin):
+class ImageSaver(BaseImageSaver, CpuPlugin):
     """
-    A class to save tomography data to tiff files
+    A class to save tomography data to image files
     :param pattern: How to slice the data. Default: 'VOLUME_XZ'.
-    :param prefix: Override the default output tiff file prefix. Default: None.
+    :param format: Image format. Default: 'jpeg'.
+    :param jpeg_quality: JPEG encoding quality (1 is worst, 100 is best). Default: 75.
+    :param prefix: Override the default output jpg file prefix. Default: None.
 
     :config_warn: Do not use this plugin if the raw data is greater than \
     100 GB.
     """
 
-    def __init__(self, name='TiffSaver'):
-        super(TiffSaver, self).__init__(name)
+    def __init__(self, name='ImageSaver'):
+        super(ImageSaver, self).__init__(name)
 
     def process_frames(self, data):
         frame = self.get_global_frame_index()[0][self.count]
-        filename = '%s%05i.tiff' % (self.filename, frame)
-        tf.imsave(filename, data[0])
+        filename = '%s%05i.%s' % (self.filename, frame, self.parameters['format'])
+        skimage.io.imsave(filename, data[0], quality=self.parameters['jpeg_quality'])
         self.count += 1
