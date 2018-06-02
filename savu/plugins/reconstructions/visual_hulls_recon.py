@@ -56,13 +56,13 @@ class VisualHullsRecon(BaseRecon, CpuPlugin):
         return x*np.cos(theta) - y*np.sin(theta)
 
     def _recon_hull(self, sino, centre, angles):
-        data_shape = (sino.shape[0], sino.shape[0])
+        data_shape = (sino.shape[1], sino.shape[1])
         full = np.ones(data_shape)
         for i in range(len(angles)):
             mapping_array = self._mapping_array(data_shape, centre, angles[i])
             mapping_array = np.clip(mapping_array.astype('int')+centre, 0,
-                                    sino.shape[0]-1)
-            mask = sino[:, i][mapping_array]
+                                    sino.shape[1]-1).astype('int')
+            mask = sino[i, :][mapping_array]
             full -= 1-mask
         full[full < 0.5] = 0
         return full
