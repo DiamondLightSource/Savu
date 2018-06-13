@@ -69,7 +69,7 @@ class RingRemovalNormalization(Plugin, CpuPlugin):
         list_pos = np.array_split(np.arange(self.height1), num_chunks)
         for pos in list_pos:
             bindex = pos[0]
-            eindex = pos[-1]
+            eindex = pos[-1] + 1
             list_mean = np.mean(sinogram[bindex:eindex, :], axis=0)
             list_mean_filtered = gaussian_filter(list_mean, radius)
             list_coe = list_mean_filtered - list_mean
