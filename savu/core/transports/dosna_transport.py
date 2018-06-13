@@ -36,10 +36,6 @@ log = logging.getLogger(__name__)
 DEFAULT_CONNECTION = "savu-data"
 DEFAULT_BACKEND = "ceph"
 DEFAULT_ENGINE = "mpi"
-DEFAULT_CEPH_CONFFILE = "ceph.conf"
-DEFAULT_CEPH_CLIENT_ID = "dls"
-DEFAULT_HDF5_DIR = "/tmp"
-
 
 class DosnaTransport(BaseTransport):
     """Transport implementation to use DosNa for managing storage and
@@ -64,19 +60,14 @@ class DosnaTransport(BaseTransport):
 
         backend = options.get("dosna_backend") or DEFAULT_BACKEND
         engine = options.get("dosna_engine") or DEFAULT_ENGINE
-
         dosna_connection = options.get("dosna_connection") \
             or DEFAULT_CONNECTION
+        dosna_connection_options = options.get("dosna_conection_options")
+
         dosna_options = {}
 
-        if backend == "ceph":
-            dosna_options["conffile"] = options.get("dosna_ceph_conffile") \
-                or DEFAULT_CEPH_CONFFILE
-            dosna_options["client_id"] = options.get("dosna_ceph_client_id") \
-                or DEFAULT_CEPH_CLIENT_ID
-        elif backend == "hdf5":
-            dosna_options["directory"] = options.get("dosna_hdf5_dir") \
-                or DEFAULT_HDF5_DIR
+        dosna_options.update(dict(item.split('=')
+                             for item in dosna_connection_options))
         log.debug("DosNa is using backend %s engine %s and options %s",
                   backend, engine, dosna_options)
         dn.use(engine, backend)
