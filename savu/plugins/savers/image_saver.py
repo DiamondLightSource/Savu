@@ -21,7 +21,9 @@
 
 """
 
+import skimage.exposure
 import skimage.io
+import numpy as np
 
 from savu.plugins.savers.base_image_saver import BaseImageSaver
 from savu.plugins.utils import register_plugin
@@ -44,8 +46,25 @@ class ImageSaver(BaseImageSaver, CpuPlugin):
     def __init__(self, name='ImageSaver'):
         super(ImageSaver, self).__init__(name)
 
+    def pre_process(self):
+        super(ImageSaver, self).pre_process()
+
+        # Get max and min pixel intensities across entire dataset
+        # TODO: Replace this with a read time calculation of min and max pixel
+        # intensities (see commit message for more information)
+        data = self.get_in_datasets()[0].data
+        self._data_range = (np.min(data), np.max(data))
+
     def process_frames(self, data):
         frame = self.get_global_frame_index()[0][self.count]
         filename = '%s%05i.%s' % (self.filename, frame, self.parameters['format'])
-        skimage.io.imsave(filename, data[0], quality=self.parameters['jpeg_quality'])
+
+        # Rescale image to (0.0, 1.0) range
+        resampled_image = skimage.exposure.rescale_intensity(
+                data[0], in_range=self._data_range, out_range=(0.0, 1.0))
+
+        # Save image
+        skimage.io.imsave(
+                filename, resampled_image, quality=self.parameters['jpeg_quality'])
+
         self.count += 1
