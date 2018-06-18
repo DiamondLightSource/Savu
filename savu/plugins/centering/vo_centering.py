@@ -57,28 +57,28 @@ class VoCentering(BaseFilter, CpuPlugin):
         super(VoCentering, self).__init__("VoCentering")
 
     def _create_mask(self, Nrow, Ncol, obj_radius):
-        du = 1.0/Ncol
-        dv = (Nrow-1.0)/(Nrow*2.0*math.pi)
-        cen_row = int(np.ceil(Nrow/2)-1)
-        cen_col = int(np.ceil(Ncol/2)-1)
+        du = 1.0 / Ncol
+        dv = (Nrow - 1.0) / (Nrow * 2.0 * math.pi)
+        cen_row = int(np.ceil(Nrow / 2) - 1)
+        cen_col = int(np.ceil(Ncol / 2) - 1)
         drop = self.parameters['row_drop']
         mask = np.zeros((Nrow, Ncol), dtype=np.float32)
         for i in range(Nrow):
-            num1 = np.round(((i-cen_row)*dv/obj_radius)/du)
-            p1, p2 = (np.clip(np.sort((-num1+cen_col, num1+cen_col)),
-                              0, Ncol-1)).astype(int)
-            mask[i, p1:p2+1] = np.ones(p2-p1+1, dtype=np.float32)
+            num1 = np.round(((i - cen_row) * dv / obj_radius) / du)
+            p1, p2 = (np.clip(np.sort((-num1 + cen_col, num1 + cen_col)),
+                              0, Ncol - 1)).astype(int)
+            mask[i, p1:p2 + 1] = np.ones(p2 - p1 + 1, dtype=np.float32)
 
         if drop < cen_row:
-            mask[cen_row-drop:cen_row+drop+1, :] = \
-                np.zeros((2*drop + 1, Ncol), dtype=np.float32)
-        mask[:, cen_col-1:cen_col+2] = np.zeros((Nrow, 3), dtype=np.float32)
+            mask[cen_row - drop:cen_row + drop + 1, :] = \
+                np.zeros((2 * drop + 1, Ncol), dtype=np.float32)
+        mask[:, cen_col - 1:cen_col + 2] = np.zeros((Nrow, 3), dtype=np.float32)
         return mask
 
     def _get_start_shift(self, centre):
         in_mData = self.get_in_meta_data()[0]
         if self.parameters['start_pixel'] is not None:
-            shift = centre - self.parameters['start_pixel']/self.downlevel
+            shift = centre - self.parameters['start_pixel'] / self.downlevel
         else:
             try:
                 # may need to change this entry: to be specified in loader
@@ -91,20 +91,20 @@ class VoCentering(BaseFilter, CpuPlugin):
         # search minsearch to maxsearch in 1 pixel steps
         smin, smax = self.parameters['search_area']
         (Nrow, Ncol) = sino.shape
-        centre_fliplr = (Ncol - 1.0)/2.0
+        centre_fliplr = (Ncol - 1.0) / 2.0
         # check angles here to determine if a sinogram should be chopped off.
         # Copy the sinogram and flip left right, the purpose is to make a full
         # [0;2Pi] sinogram
         sino2 = np.fliplr(sino[1:])
         # This image is used for compensating the shift of sino2
-        compensateimage = np.zeros((Nrow-1, Ncol), dtype=np.float32)
+        compensateimage = np.zeros((Nrow - 1, Ncol), dtype=np.float32)
         # Start coarse search in which the shift step is 1
         compensateimage[:] = np.flipud(sino)[1:]
-        start_shift = self._get_start_shift(centre_fliplr)*2
-        list_shift = np.arange(smin, smax + 1)*2 - start_shift
+        start_shift = self._get_start_shift(centre_fliplr) * 2
+        list_shift = np.arange(smin, smax + 1) * 2 - start_shift
         list_metric = np.zeros(len(list_shift), dtype=np.float32)
-        mask = self._create_mask(2*Nrow-1, Ncol,
-                                 0.5*self.parameters['ratio']*Ncol)
+        mask = self._create_mask(2 * Nrow - 1, Ncol,
+                                 0.5 * self.parameters['ratio'] * Ncol)
 
         count = 0
         for i in list_shift:
@@ -114,49 +114,49 @@ class VoCentering(BaseFilter, CpuPlugin):
             else:
                 sino2a[:, i:] = compensateimage[:, i:]
             fft_out = fft.fft2(np.vstack((sino, sino2a)))
-            temp = np.sum(np.abs(fft.fftshift(fft_out))*mask)
+            temp = np.sum(np.abs(fft.fftshift(fft_out)) * mask)
             list_metric[count] = temp
             count += 1
         minpos = np.argmin(list_metric)
-        rot_centre = centre_fliplr + list_shift[minpos]/2.0
+        rot_centre = centre_fliplr + list_shift[minpos] / 2.0
         return rot_centre, list_metric
 
     def _fine_search(self, sino, raw_cor):
         (Nrow, Ncol) = sino.shape
-        centerfliplr = (Ncol + 1.0)/2.0-1.0
+        centerfliplr = (Ncol + 1.0) / 2.0 - 1.0
         # Use to shift the sino2 to the raw CoR
-        shiftsino = np.int16(2*(raw_cor-centerfliplr))
+        shiftsino = np.int16(2 * (raw_cor - centerfliplr))
         sino2 = np.roll(np.fliplr(sino[1:]), shiftsino, axis=1)
         lefttake = 0
-        righttake = Ncol-1
+        righttake = Ncol - 1
         search_rad = self.parameters['search_radius']
 
         if raw_cor <= centerfliplr:
-            lefttake = np.int16(np.ceil(search_rad+1))
-            righttake = np.int16(np.floor(2*raw_cor-search_rad-1))
+            lefttake = np.int16(np.ceil(search_rad + 1))
+            righttake = np.int16(np.floor(2 * raw_cor - search_rad - 1))
         else:
-            lefttake = np.int16(np.ceil(raw_cor-(Ncol-1-raw_cor)+search_rad+1))
-            righttake = np.int16(np.floor(Ncol-1-search_rad-1))
+            lefttake = np.int16(np.ceil(raw_cor - (Ncol - 1 - raw_cor) + search_rad + 1))
+            righttake = np.int16(np.floor(Ncol - 1 - search_rad - 1))
 
-        Ncol1 = righttake-lefttake + 1
-        mask = self._create_mask(2*Nrow-1, Ncol1,
-                                 0.5*self.parameters['ratio']*Ncol)
-        numshift = np.int16((2*search_rad)/self.parameters['step'])+1
+        Ncol1 = righttake - lefttake + 1
+        mask = self._create_mask(2 * Nrow - 1, Ncol1,
+                                 0.5 * self.parameters['ratio'] * Ncol)
+        numshift = np.int16((2 * search_rad) / self.parameters['step']) + 1
         listshift = np.linspace(-search_rad, search_rad, num=numshift)
         listmetric = np.zeros(len(listshift), dtype=np.float32)
         num1 = 0
-        factor1 = np.mean(sino[-1,lefttake:righttake])
+        factor1 = np.mean(sino[-1, lefttake:righttake])
 
         for i in listshift:
             sino2a = ndi.interpolation.shift(sino2, (0, i), prefilter=False)
-            factor2 = np.mean(sino2a[0,lefttake:righttake])
-            sino2a = sino2a*factor1/factor2
+            factor2 = np.mean(sino2a[0, lefttake:righttake])
+            sino2a = sino2a * factor1 / factor2
             sinojoin = np.vstack((sino, sino2a))
             listmetric[num1] = np.sum(np.abs(fft.fftshift(
-                fft.fft2(sinojoin[:, lefttake:righttake + 1])))*mask)
+                fft.fft2(sinojoin[:, lefttake:righttake + 1]))) * mask)
             num1 = num1 + 1
         minpos = np.argmin(listmetric)
-        rotcenter = raw_cor + listshift[minpos]/2.0
+        rotcenter = raw_cor + listshift[minpos] / 2.0
         return rotcenter, listmetric
 
     def process_frames(self, data):
@@ -170,7 +170,7 @@ class VoCentering(BaseFilter, CpuPlugin):
             sino_downsp = data[0][:, 0:Ncol:self.downlevel]
             sino_cs = filter.gaussian_filter(sino_downsp, (3, 1))
             (raw_cor, raw_metric) = self._coarse_search(sino_cs)
-            raw_cor = raw_cor*self.downlevel
+            raw_cor = raw_cor * self.downlevel
         else:
             sino_cs = filter.gaussian_filter(data[0], (3, 1))
             (raw_cor, raw_metric) = self._coarse_search(sino_cs)
@@ -186,7 +186,7 @@ class VoCentering(BaseFilter, CpuPlugin):
         cor_fit = out_datasets[1].data[...]
         fit = np.zeros(cor_fit.shape)
         fit[:] = np.median(cor_raw)
-        cor_fit = fit
+        cor_fit = fit        
         out_datasets[1].data[:] = cor_fit[:]
 
         self.populate_meta_data('cor_raw', cor_raw)
@@ -257,35 +257,35 @@ class VoCentering(BaseFilter, CpuPlugin):
     def get_citation_information(self):
         cite_info = CitationInformation()
         cite_info.description = \
-            ("The center of rotation for this reconstruction was calculated " +
+            ("The center of rotation for this reconstruction was calculated " + 
              "automatically using the method described in this work")
         cite_info.bibtex = \
-            ("@article{vo2014reliable,\n" +
-             "title={Reliable method for calculating the center of rotation " +
-             "in parallel-beam tomography},\n" +
-             "author={Vo, Nghia T and Drakopoulos, Michael and Atwood, " +
-             "Robert C and Reinhard, Christina},\n" +
-             "journal={Optics Express},\n" +
-             "volume={22},\n" +
-             "number={16},\n" +
-             "pages={19078--19086},\n" +
-             "year={2014},\n" +
-             "publisher={Optical Society of America}\n" +
+            ("@article{vo2014reliable,\n" + 
+             "title={Reliable method for calculating the center of rotation " + 
+             "in parallel-beam tomography},\n" + 
+             "author={Vo, Nghia T and Drakopoulos, Michael and Atwood, " + 
+             "Robert C and Reinhard, Christina},\n" + 
+             "journal={Optics Express},\n" + 
+             "volume={22},\n" + 
+             "number={16},\n" + 
+             "pages={19078--19086},\n" + 
+             "year={2014},\n" + 
+             "publisher={Optical Society of America}\n" + 
              "}")
         cite_info.endnote = \
-            ("%0 Journal Article\n" +
-             "%T Reliable method for calculating the center of rotation in " +
-             "parallel-beam tomography\n" +
-             "%A Vo, Nghia T\n" +
-             "%A Drakopoulos, Michael\n" +
-             "%A Atwood, Robert C\n" +
-             "%A Reinhard, Christina\n" +
-             "%J Optics Express\n" +
-             "%V 22\n" +
-             "%N 16\n" +
-             "%P 19078-19086\n" +
-             "%@ 1094-4087\n" +
-             "%D 2014\n" +
+            ("%0 Journal Article\n" + 
+             "%T Reliable method for calculating the center of rotation in " + 
+             "parallel-beam tomography\n" + 
+             "%A Vo, Nghia T\n" + 
+             "%A Drakopoulos, Michael\n" + 
+             "%A Atwood, Robert C\n" + 
+             "%A Reinhard, Christina\n" + 
+             "%J Optics Express\n" + 
+             "%V 22\n" + 
+             "%N 16\n" + 
+             "%P 19078-19086\n" + 
+             "%@ 1094-4087\n" + 
+             "%D 2014\n" + 
              "%I Optical Society of America")
         cite_info.doi = "http://dx.doi.org/10.1364/OE.22.019078"
         return cite_info
