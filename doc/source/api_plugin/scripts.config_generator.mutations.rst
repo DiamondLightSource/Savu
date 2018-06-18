@@ -1,5 +1,5 @@
-scripts\.config\_generator\.mutations module
-============================================
+scripts.config_generator.mutations module
+=========================================
 
 .. automodule:: scripts.config_generator.mutations
     :members:

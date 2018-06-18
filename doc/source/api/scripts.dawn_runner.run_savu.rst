@@ -1,5 +1,5 @@
-scripts\.dawn\_runner\.run\_savu module
-=======================================
+scripts.dawn_runner.run_savu module
+===================================
 
 .. automodule:: scripts.dawn_runner.run_savu
     :members:

@@ -1,5 +1,5 @@
-plugin\_examples package
-========================
+plugin_examples package
+=======================
 
 .. automodule:: plugin_examples
     :members:

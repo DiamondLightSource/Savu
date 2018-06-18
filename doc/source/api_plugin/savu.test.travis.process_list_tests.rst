@@ -1,5 +1,5 @@
-savu\.test\.travis\.process\_list\_tests package
-================================================
+savu.test.travis.process_list_tests package
+===========================================
 
 Submodules
 ----------

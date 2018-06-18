@@ -1,5 +1,5 @@
-savu\.test\.travis\.plugin\_tests\.reconstruction\_tests package
-================================================================
+savu.test.travis.plugin_tests.reconstruction_tests package
+==========================================================
 
 Submodules
 ----------

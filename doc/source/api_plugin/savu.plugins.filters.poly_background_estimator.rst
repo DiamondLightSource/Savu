@@ -1,5 +1,5 @@
-savu\.plugins\.filters\.poly\_background\_estimator module
-==========================================================
+savu.plugins.filters.poly_background_estimator module
+=====================================================
 
 .. automodule:: savu.plugins.filters.poly_background_estimator
     :members:

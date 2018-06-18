@@ -1,5 +1,5 @@
-savu\.plugins\.savers\.utils\.hdf5\_utils module
-================================================
+savu.plugins.savers.utils.hdf5_utils module
+===========================================
 
 .. automodule:: savu.plugins.savers.utils.hdf5_utils
     :members:

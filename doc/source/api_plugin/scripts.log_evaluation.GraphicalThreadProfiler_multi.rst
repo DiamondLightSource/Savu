@@ -1,5 +1,5 @@
-scripts\.log\_evaluation\.GraphicalThreadProfiler\_multi module
-===============================================================
+scripts.log_evaluation.GraphicalThreadProfiler_multi module
+===========================================================
 
 .. automodule:: scripts.log_evaluation.GraphicalThreadProfiler_multi
     :members:

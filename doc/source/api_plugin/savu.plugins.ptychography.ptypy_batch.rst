@@ -1,5 +1,5 @@
-savu\.plugins\.ptychography\.ptypy\_batch module
-================================================
+savu.plugins.ptychography.ptypy_batch module
+============================================
 
 .. automodule:: savu.plugins.ptychography.ptypy_batch
     :members:

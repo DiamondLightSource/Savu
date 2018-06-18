@@ -1,5 +1,5 @@
-savu\.plugins\.savers package
-=============================
+savu.plugins.savers package
+===========================
 
 Subpackages
 -----------

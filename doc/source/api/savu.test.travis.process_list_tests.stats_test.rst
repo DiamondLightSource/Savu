@@ -1,5 +1,5 @@
-savu\.test\.travis\.process\_list\_tests\.stats\_test module
-============================================================
+savu.test.travis.process_list_tests.stats_test module
+=====================================================
 
 .. automodule:: savu.test.travis.process_list_tests.stats_test
     :members:

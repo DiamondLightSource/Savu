@@ -1,5 +1,5 @@
-savu\.plugins\.loaders\.mapping\_loaders\.base\_multi\_modal\_loader module
-===========================================================================
+savu.plugins.loaders.mapping_loaders.base_multi_modal_loader module
+===================================================================
 
 .. automodule:: savu.plugins.loaders.mapping_loaders.base_multi_modal_loader
     :members:

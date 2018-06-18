@@ -1,5 +1,5 @@
-savu\.test\.travis\.plugin\_tests\.saver\_tests package
-=======================================================
+savu.test.travis.plugin_tests.saver_tests package
+=================================================
 
 .. automodule:: savu.test.travis.plugin_tests.saver_tests
     :members:

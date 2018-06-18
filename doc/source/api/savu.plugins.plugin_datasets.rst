@@ -1,5 +1,5 @@
-savu\.plugins\.plugin\_datasets module
-======================================
+savu.plugins.plugin_datasets module
+===================================
 
 .. automodule:: savu.plugins.plugin_datasets
     :members:

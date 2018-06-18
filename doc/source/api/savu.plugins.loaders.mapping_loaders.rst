@@ -1,5 +1,5 @@
-savu\.plugins\.loaders\.mapping\_loaders package
-================================================
+savu.plugins.loaders.mapping_loaders package
+============================================
 
 .. automodule:: savu.plugins.loaders.mapping_loaders
     :members:

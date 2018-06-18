@@ -1,5 +1,5 @@
-install\.2\_1\_install\.conda\-recipes package
-==============================================
+install.2_1_install.conda-recipes package
+=========================================
 
 Module contents
 ---------------

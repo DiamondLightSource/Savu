@@ -1,5 +1,5 @@
-savu\.data\.data\_structures\.data\_types package
-=================================================
+savu.data.data_structures.data_types package
+============================================
 
 .. automodule:: savu.data.data_structures.data_types
     :members:

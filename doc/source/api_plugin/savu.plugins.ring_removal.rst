@@ -1,5 +1,5 @@
-savu\.plugins\.ring\_removal package
-====================================
+savu.plugins.ring_removal package
+=================================
 
 Submodules
 ----------

@@ -1,5 +1,5 @@
-savu\.plugins\.driver\.iterative\_plugin module
-===============================================
+savu.plugins.driver.iterative_plugin module
+===========================================
 
 .. automodule:: savu.plugins.driver.iterative_plugin
     :members:

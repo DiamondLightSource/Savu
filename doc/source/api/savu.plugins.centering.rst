@@ -1,5 +1,5 @@
-savu\.plugins\.centering package
-================================
+savu.plugins.centering package
+==============================
 
 .. automodule:: savu.plugins.centering
     :members:

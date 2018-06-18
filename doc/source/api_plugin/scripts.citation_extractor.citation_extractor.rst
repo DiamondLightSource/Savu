@@ -1,5 +1,5 @@
-scripts\.citation\_extractor\.citation\_extractor module
-========================================================
+scripts.citation_extractor.citation_extractor module
+====================================================
 
 .. automodule:: scripts.citation_extractor.citation_extractor
     :members:

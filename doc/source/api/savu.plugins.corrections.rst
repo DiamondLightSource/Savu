@@ -1,5 +1,5 @@
-savu\.plugins\.corrections package
-==================================
+savu.plugins.corrections package
+================================
 
 .. automodule:: savu.plugins.corrections
     :members:

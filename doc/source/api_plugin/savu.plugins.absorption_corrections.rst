@@ -1,5 +1,5 @@
-savu\.plugins\.absorption\_corrections package
-==============================================
+savu.plugins.absorption_corrections package
+===========================================
 
 Submodules
 ----------

@@ -1,5 +1,5 @@
-savu\.test\.jenkins\.plugin\_tests\.saver\_tests package
-========================================================
+savu.test.jenkins.plugin_tests.saver_tests package
+==================================================
 
 .. automodule:: savu.test.jenkins.plugin_tests.saver_tests
     :members:

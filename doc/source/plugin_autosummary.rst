@@ -175,6 +175,7 @@ savu.plugins.reconstructions
    api_plugin/savu.plugins.reconstructions.scikitimage_filter_back_projection
    api_plugin/savu.plugins.reconstructions.tomopy_recon
    api_plugin/savu.plugins.reconstructions.non_local_regularised_cgls
+   api_plugin/savu.plugins.reconstructions.visual_hulls_recon
    api_plugin/savu.plugins.reconstructions.ccpi_cgls_recon
 
 

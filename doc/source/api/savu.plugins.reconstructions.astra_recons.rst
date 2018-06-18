@@ -1,5 +1,5 @@
-savu\.plugins\.reconstructions\.astra\_recons package
-=====================================================
+savu.plugins.reconstructions.astra_recons package
+=================================================
 
 .. automodule:: savu.plugins.reconstructions.astra_recons
     :members:

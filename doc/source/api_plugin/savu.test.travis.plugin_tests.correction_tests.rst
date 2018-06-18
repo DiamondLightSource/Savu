@@ -1,5 +1,5 @@
-savu\.test\.travis\.plugin\_tests\.correction\_tests package
-============================================================
+savu.test.travis.plugin_tests.correction_tests package
+======================================================
 
 Submodules
 ----------

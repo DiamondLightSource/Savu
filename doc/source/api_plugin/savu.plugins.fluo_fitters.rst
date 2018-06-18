@@ -1,5 +1,5 @@
-savu\.plugins\.fluo\_fitters package
-====================================
+savu.plugins.fluo_fitters package
+=================================
 
 Submodules
 ----------

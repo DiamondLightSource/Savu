@@ -1,5 +1,5 @@
-savu\.plugins\.reshape\.downsample\_filter module
-=================================================
+savu.plugins.reshape.downsample_filter module
+=============================================
 
 .. automodule:: savu.plugins.reshape.downsample_filter
     :members:

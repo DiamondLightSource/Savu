@@ -1,5 +1,5 @@
-savu\.plugins\.loaders\.utils\.mrc\_header module
-=================================================
+savu.plugins.loaders.utils.mrc_header module
+============================================
 
 .. automodule:: savu.plugins.loaders.utils.mrc_header
     :members:

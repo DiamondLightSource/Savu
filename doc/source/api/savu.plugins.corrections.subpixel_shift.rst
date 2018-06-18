@@ -1,5 +1,5 @@
-savu\.plugins\.corrections\.subpixel\_shift module
-==================================================
+savu.plugins.corrections.subpixel_shift module
+==============================================
 
 .. automodule:: savu.plugins.corrections.subpixel_shift
     :members:

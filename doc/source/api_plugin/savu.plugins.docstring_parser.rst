@@ -1,5 +1,5 @@
-savu\.plugins\.docstring\_parser module
-=======================================
+savu.plugins.docstring_parser module
+====================================
 
 .. automodule:: savu.plugins.docstring_parser
     :members:

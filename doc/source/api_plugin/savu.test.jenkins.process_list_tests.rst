@@ -1,5 +1,5 @@
-savu\.test\.jenkins\.process\_list\_tests package
-=================================================
+savu.test.jenkins.process_list_tests package
+============================================
 
 Submodules
 ----------

@@ -1,5 +1,5 @@
-savu\.plugins\.reconstructions package
-======================================
+savu.plugins.reconstructions package
+====================================
 
 .. automodule:: savu.plugins.reconstructions
     :members:
@@ -26,4 +26,5 @@ Submodules
    savu.plugins.reconstructions.scikitimage_sart
    savu.plugins.reconstructions.simple_recon
    savu.plugins.reconstructions.tomopy_recon
+   savu.plugins.reconstructions.visual_hulls_recon
 

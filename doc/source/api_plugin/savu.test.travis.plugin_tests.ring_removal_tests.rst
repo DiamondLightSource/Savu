@@ -1,5 +1,5 @@
-savu\.test\.travis\.plugin\_tests\.ring\_removal\_tests package
-===============================================================
+savu.test.travis.plugin_tests.ring_removal_tests package
+========================================================
 
 Submodules
 ----------

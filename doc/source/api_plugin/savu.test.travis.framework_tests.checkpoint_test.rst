@@ -1,5 +1,5 @@
-savu\.test\.travis\.framework\_tests\.checkpoint\_test module
-=============================================================
+savu.test.travis.framework_tests.checkpoint_test module
+=======================================================
 
 .. automodule:: savu.test.travis.framework_tests.checkpoint_test
     :members:

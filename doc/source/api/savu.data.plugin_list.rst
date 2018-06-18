@@ -1,5 +1,5 @@
-savu\.data\.plugin\_list module
-===============================
+savu.data.plugin_list module
+============================
 
 .. automodule:: savu.data.plugin_list
     :members:

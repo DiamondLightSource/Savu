@@ -1,5 +1,5 @@
-savu\.plugins\.reconstructions\.non\_local\_regularised\_cgls module
-====================================================================
+savu.plugins.reconstructions.non_local_regularised_cgls module
+==============================================================
 
 .. automodule:: savu.plugins.reconstructions.non_local_regularised_cgls
     :members:

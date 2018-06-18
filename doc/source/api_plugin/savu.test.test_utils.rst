@@ -1,5 +1,5 @@
-savu\.test\.test\_utils module
-==============================
+savu.test.test_utils module
+===========================
 
 .. automodule:: savu.test.test_utils
     :members:

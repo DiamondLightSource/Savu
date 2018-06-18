@@ -1,5 +1,5 @@
-savu\.plugins\.centering\.vo\_centering module
-==============================================
+savu.plugins.centering.vo_centering module
+==========================================
 
 .. automodule:: savu.plugins.centering.vo_centering
     :members:

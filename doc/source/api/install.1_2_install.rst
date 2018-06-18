@@ -1,5 +1,5 @@
-install\.1\_2\_install package
-==============================
+install.1_2_install package
+===========================
 
 .. automodule:: install.1_2_install
     :members:

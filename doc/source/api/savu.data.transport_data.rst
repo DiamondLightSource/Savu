@@ -1,5 +1,5 @@
-savu\.data\.transport\_data package
-===================================
+savu.data.transport_data package
+================================
 
 .. automodule:: savu.data.transport_data
     :members:

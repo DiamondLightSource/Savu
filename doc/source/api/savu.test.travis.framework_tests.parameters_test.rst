@@ -1,5 +1,5 @@
-savu\.test\.travis\.framework\_tests\.parameters\_test module
-=============================================================
+savu.test.travis.framework_tests.parameters_test module
+=======================================================
 
 .. automodule:: savu.test.travis.framework_tests.parameters_test
     :members:

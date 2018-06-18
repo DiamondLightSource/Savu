@@ -1,5 +1,5 @@
-savu\.test\.jenkins\.dawn\_runner\_tests package
-================================================
+savu.test.jenkins.dawn_runner_tests package
+===========================================
 
 Submodules
 ----------

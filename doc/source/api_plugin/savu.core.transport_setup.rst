@@ -1,5 +1,5 @@
-savu\.core\.transport\_setup module
-===================================
+savu.core.transport_setup module
+================================
 
 .. automodule:: savu.core.transport_setup
     :members:

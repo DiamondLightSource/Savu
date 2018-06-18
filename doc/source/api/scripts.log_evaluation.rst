@@ -1,5 +1,5 @@
-scripts\.log\_evaluation package
-================================
+scripts.log_evaluation package
+==============================
 
 .. automodule:: scripts.log_evaluation
     :members:

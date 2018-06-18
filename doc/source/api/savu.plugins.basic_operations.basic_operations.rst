@@ -1,5 +1,5 @@
-savu\.plugins\.basic\_operations\.basic\_operations module
-==========================================================
+savu.plugins.basic_operations.basic_operations module
+=====================================================
 
 .. automodule:: savu.plugins.basic_operations.basic_operations
     :members:

@@ -1,5 +1,5 @@
-savu\.plugins\.analysis\.base\_analysis module
-==============================================
+savu.plugins.analysis.base_analysis module
+==========================================
 
 .. automodule:: savu.plugins.analysis.base_analysis
     :members:

@@ -1,5 +1,5 @@
-savu\.plugins\.azimuthal\_integrators package
-=============================================
+savu.plugins.azimuthal_integrators package
+==========================================
 
 .. automodule:: savu.plugins.azimuthal_integrators
     :members:

@@ -1,5 +1,5 @@
-savu\.plugins\.ptychography\.dummy\_ptycho module
-=================================================
+savu.plugins.ptychography.dummy_ptycho module
+=============================================
 
 .. automodule:: savu.plugins.ptychography.dummy_ptycho
     :members:

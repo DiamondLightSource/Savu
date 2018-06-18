@@ -1,5 +1,5 @@
-savu\.core\.transports\.basic\_transport module
-===============================================
+savu.core.transports.basic_transport module
+===========================================
 
 .. automodule:: savu.core.transports.basic_transport
     :members:
