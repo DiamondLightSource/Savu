@@ -27,4 +27,5 @@ dependencies:
     - nvidia-ml-py
     - peakutils
     - pymca
+    - gnureadline
 
