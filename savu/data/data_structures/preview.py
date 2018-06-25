@@ -33,6 +33,7 @@ class Preview(object):
     def __init__(self, data_obj):
         self._data_obj = data_obj
         self.revert_shape = None
+        self.revert_axis_labels = None
         self.plugin_preview = None
 
     def get_data_obj(self):

@@ -290,6 +290,12 @@ class Plugin(PluginDatasets):
         # the dataset.
         if no_preview == orig_indices:
             data.get_preview().revert_shape = data.get_shape()
+            orig_labels = {}
+            for label in data.get_axis_labels():
+                key = label.keys()[0]
+                if key in data.meta_data.get_dictionary().keys():
+                    orig_labels[key] = copy.copy(data.meta_data.get(key))
+            data.get_preview().revert_axis_labels = orig_labels
             data.get_preview().set_preview(params)
             return True
         return False
@@ -360,8 +366,12 @@ class Plugin(PluginDatasets):
         used thereafter. Remove previewing if it was added in the plugin.
         """
         for data in in_data:
-            if data.get_preview().revert_shape:
-                data.get_preview()._unset_preview()
+            preview = data.get_preview()
+            if preview.revert_shape:
+                preview._unset_preview()
+            if preview.revert_axis_labels:
+                for label, val in preview.revert_axis_labels.iteritems():
+                    data.meta_data.set(label, val)
 
     def set_global_frame_index(self, frame_idx):
         self.global_index = frame_idx
