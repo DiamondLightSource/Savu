@@ -32,7 +32,6 @@ import copy
 import inspect
 
 import numpy as np
-from itertools import izip_longest
 from collections import defaultdict
 
 import savu.plugins.utils as pu
@@ -176,7 +175,7 @@ class PluginList(object):
                         val = val.replace("[", "'[").replace("]", "]'")
                         data_dict[key] = self.__dumps(yaml.load(val))
                     else:
-                        data_dict[key] = self.__parse_config_string(val)
+                        data_dict[key] = pu.parse_config_string(val)
                     continue
                 except:
                     # for when parameter tuning with lists is added to the framework
@@ -185,15 +184,6 @@ class PluginList(object):
                     else:
                         raise Exception("Invalid string %s" % val)
         return data_dict
-
-    def __parse_config_string(self, string):
-        regex = "[\[\]\, ]+"
-        split_vals = filter(None, re.split(regex, string))
-        deliminators = re.findall(regex, string)
-        split_vals = [repr(a.strip()) for a in split_vals]
-        zipped = izip_longest(deliminators, split_vals)
-        string = ''.join([i for l in zipped for i in l if i is not None])
-        return ast.literal_eval(string)
 
     def _add(self, idx, entry):
         self.plugin_list.insert(idx, entry)
