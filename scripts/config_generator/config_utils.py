@@ -37,12 +37,12 @@ import savu.data.data_structures.utils as du
 if os.name == 'nt':
     import win_readline as readline
 else:
-    import readline
+    import gnureadline as readline
 
 histfile = os.path.join(os.path.expanduser("~"), ".savuhist")
 try:
     readline.read_history_file(histfile)
-    readline.set_history_length(1000)
+    readline.set_history_length(10)
 except IOError:
     pass
 atexit.register(readline.write_history_file, histfile)
