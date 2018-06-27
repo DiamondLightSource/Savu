@@ -28,4 +28,5 @@ dependencies:
     - peakutils
     - pymca
     - gnureadline
+    - pmacparser
 
