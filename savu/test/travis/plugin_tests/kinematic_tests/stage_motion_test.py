@@ -27,7 +27,7 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 
 class StageMotionTest(unittest.TestCase):
 
-    def test_dezinger_sinogram(self):
+    def test_stage_motion(self):
         data_file = tu.get_test_data_path('kinematics_data.nxs')
         process_file = tu.get_test_process_path('kinematic_parser_test.nxs')
         run_protected_plugin_runner(tu.set_options(data_file,
