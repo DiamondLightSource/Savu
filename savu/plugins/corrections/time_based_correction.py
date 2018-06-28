@@ -75,7 +75,7 @@ class TimeBasedCorrection(BaseCorrection, CpuPlugin):
 
     def process_frames(self, data):
         proj = data[0]
-        frame = self.get_global_frame_index()[0][self.count]
+        frame = self.get_global_frame_index()[self.count]
         flat = self.calculate_flat_field(
                 *self.find_nearest_frames(self.flat_idx, frame))
         dark = self.calculate_dark_field(

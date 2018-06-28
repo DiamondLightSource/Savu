@@ -74,7 +74,7 @@ class TiffSaver(BaseSaver, CpuPlugin):
             raise Exception(emsg)
 
     def process_frames(self, data):
-        frame = self.get_global_frame_index()[0][self.count]
+        frame = self.get_global_frame_index()[self.count]
         filename = '%s%05i.tiff' % (self.filename, frame)
         tf.imsave(filename, data[0])
         self.count += 1
