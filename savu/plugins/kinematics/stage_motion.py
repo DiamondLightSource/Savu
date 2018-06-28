@@ -31,13 +31,16 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 from pmacparser.pmac_parser import PMACParser
 
+
 @register_plugin
 class StageMotion(Plugin, CpuPlugin):
     """
     A Plugin to calculate stage motion from motion positions.
     :u*param a_value: Description of a_value. Default: None.
-    :param in_datasets: Create a list of the dataset(s). Default: ["pmin", "pmean", "pmax"].
-    :param out_datasets: Create a list of the dataset(s). Default: ["qmin", "qmean", "qmax"].
+    :param in_datasets: Create a list of the \
+        dataset(s). Default: ["pmin", "pmean", "pmax"].
+    :param out_datasets: Create a list of the \
+        dataset(s). Default: ["qmin", "qmean", "qmax"].
     """
 
     NUM_OUTPUT_Q_VARS = 9
@@ -55,8 +58,10 @@ class StageMotion(Plugin, CpuPlugin):
         self.out_pshape = out_pdata.get_shape()
 
         # Get the kinematic program to run and the static variables
-        program_from_data = self.get_in_meta_data()[0].get_dictionary()['program']
-        variables_from_data = self.get_in_meta_data()[0].get_dictionary()['variables']
+        program_from_data = \
+            self.get_in_meta_data()[0].get_dictionary()['program']
+        variables_from_data = \
+            self.get_in_meta_data()[0].get_dictionary()['variables']
 
         # Create the list of code lines from the kinematic program input
         code_lines = []
@@ -65,12 +70,14 @@ class StageMotion(Plugin, CpuPlugin):
 
         # Set the static variables from the meta input
         for i in range(len(variables_from_data)):
-            self.variables[variables_from_data['Name'][i]] = variables_from_data['Value'][i]
+            self.variables[variables_from_data['Name'][i]] = \
+                variables_from_data['Value'][i]
 
         # Create the PMACParser instance
         self.parser = PMACParser(code_lines)
 
-        # Find which dimension of the data passed to process_frames has axis label 'motor'
+        # Find which dimension of the data passed to process_frames has axis
+        # label 'motor'
         p_data = self.get_plugin_in_datasets()[0]
         self.motor_dim = p_data.get_data_dimension_by_axis_label('motor')
 
@@ -99,16 +106,18 @@ class StageMotion(Plugin, CpuPlugin):
                 min_output[i-1] = output_vars['Q'+str(i)]
                 max_output[i-1] = output_vars['Q'+str(i)]
 
-        # Dictionary to keep track of the current dataset in use (min, mean, or max) for each pval
+        # Dictionary to keep track of the current dataset in use (min, mean,
+        # or max) for each pval
         current_pval_index = {}
         for pval in self.pvals:
             current_pval_index[pval] = -1
 
         # Loop over every combination of min, mean, and max for each pval
-        # 0, 1, and 2 here represent min, mean and max index. Getting the product
-        # gets us every combination of min, mean and max for each pval
+        # 0, 1, and 2 here represent min, mean and max index. Getting the
+        # product gets us every combination of min, mean and max for each pval
         for j in itertools.product([0, 1, 2], repeat=len(self.pvals)):
-            # For each pval, set it to min, mean, or max depending on what iteration we are in
+            # For each pval, set it to min, mean, or max depending on what
+            # iteration we are in
             for index, pval in enumerate(self.pvals):
                 new_index = j[index]
                 # Only set it if it's changed since last iteration
@@ -163,17 +172,15 @@ class StageMotion(Plugin, CpuPlugin):
                                        shape=self.shape)
         out_datasets[0].add_pattern('MOTOR_POSITION', **pattern)
 
-
         out_datasets[1].create_dataset(axis_labels=axis_labels,
                                        shape=self.shape)
         out_datasets[1].add_pattern('MOTOR_POSITION', **pattern)
-
 
         out_datasets[2].create_dataset(axis_labels=axis_labels,
                                        shape=self.shape)
         out_datasets[2].add_pattern('MOTOR_POSITION', **pattern)
 
-        # ================== populate plugin datasets ==========================
+        # ================== populate plugin datasets =========================
         in_pData, out_pData = self.get_plugin_datasets()
         in_pData[0].plugin_data_setup('MOTOR_POSITION', 'multiple')
         in_pData[1].plugin_data_setup('MOTOR_POSITION', 'multiple')
@@ -181,7 +188,7 @@ class StageMotion(Plugin, CpuPlugin):
         out_pData[0].plugin_data_setup('MOTOR_POSITION', 'multiple')
         out_pData[1].plugin_data_setup('MOTOR_POSITION', 'multiple')
         out_pData[2].plugin_data_setup('MOTOR_POSITION', 'multiple')
-        # ======================================================================
+        # =====================================================================
 
     def __update_pattern_information(self, dObj, dim_pos):
         pattern = copy.deepcopy(dObj.get_data_patterns()['MOTOR_POSITION'])
@@ -202,4 +209,3 @@ class StageMotion(Plugin, CpuPlugin):
 
     def nOutput_datasets(self):
         return 3
-
