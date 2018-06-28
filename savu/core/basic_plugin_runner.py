@@ -46,6 +46,7 @@ class BasicPluginRunner(object):
     def _run_plugin_list(self):
         """ Create an experiment and run the plugin list.
         """
+        self.exp.checkpoint = None
         plugin_list = self.exp.meta_data.plugin_list
         plugin_list._check_loaders()
 
