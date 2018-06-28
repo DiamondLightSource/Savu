@@ -423,3 +423,13 @@ class PluginData(object):
 
     def get_frame_limit(self):
         return self._frame_limit
+
+    def get_current_frame_idx(self):
+        """ Returns the index of the frames currently being processed.
+        """
+        global_index = self._plugin.get_global_frame_index()
+        count = self._plugin.get_process_frames_counter()
+        mfp = self.meta_data.get('max_frames_process')
+        start = global_index[count]*mfp
+        index = np.arange(start, start + mfp)
+        return index

@@ -57,13 +57,11 @@ class BaseRecon(Plugin):
     :param force_zero: Set any values in the reconstructed image outside of \
     this range to zero. Default: [None, None].
     to zero. Default: False.
-    :param ratio: Ratio of the masks diameter in pixels to the smallest edge\
+    :param ratio: Ratio of the m2asks diameter in pixels to the smallest edge\
         size along given axis. Default: 0.95.
     :param log_func: Override the default log \
         function. Default: 'np.nan_to_num(-np.log(sino))'.
     """
-
-    count = 0
 
     def __init__(self, name='BaseRecon'):
         super(BaseRecon, self).__init__(name)
@@ -206,9 +204,8 @@ class BaseRecon(Plugin):
 
         dim_sl = sl[self.main_dir]
 
-        global_frames = self.get_global_frame_index()[0][self.count]
-
-        self.frame_cors = self.cor_func(self.cor[[global_frames]])
+        frame_nos = self.get_plugin_in_datasets()[0].get_current_frame_idx()
+        self.frame_cors = self.cor_func(self.cor[[frame_nos]])
 
         # for extra padded frames that make up the numbers
         if not self.frame_cors.shape:

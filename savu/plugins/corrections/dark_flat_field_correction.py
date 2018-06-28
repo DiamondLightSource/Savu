@@ -100,7 +100,6 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
             self.convert_size = \
                 lambda a, b, x, pad: np.pad(
                         np.tile(x[a % nSino:b], tile), pad, 'edge')
-        self.count = 0
 
     def correct_proj(self, data):
         data = data[0]
@@ -113,7 +112,8 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
     def correct_sino(self, data):
         data = data[0]
         sl = self.get_current_slice_list()[0][self.slice_dir]
-        current_idx = self.get_global_frame_index()[0][self.count]
+        count = self.get_process_frames_counter()
+        current_idx = self.get_global_frame_index()[count]
         start = (current_idx % self.reps_at)*self.mfp
         end = start + len(np.arange(sl.start, sl.stop, sl.step))
 
@@ -125,7 +125,6 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
             self.convert_size(start, end, self.flat_minus_dark, pad)
         data = np.nan_to_num((data-dark)/flat_minus_dark)
         self.__data_check(data)
-        self.count += 1
         return data
 
     def fixed_flag(self):
