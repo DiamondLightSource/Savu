@@ -51,10 +51,11 @@ class BasicTransport(BaseTransport):
         # output datasets created by a plugin will use this.
         self.hdf5 = Hdf5Utils(self.exp)
         self.data_flow = self.exp.meta_data.plugin_list._get_dataset_flow()
-        self.exp.meta_data.set('transport', 'basic')
         plist = self.exp.meta_data.plugin_list
         self.n_plugins = plist._get_n_processing_plugins()
         self.final_dict = plist.plugin_list[-1]
+        if self.n_plugins is not 1:
+            self.exp.meta_data.set('transport', 'basic')
 
     def _transport_pre_plugin(self):
         trans = self.exp.meta_data.get('transport')

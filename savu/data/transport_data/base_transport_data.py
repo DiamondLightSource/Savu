@@ -59,8 +59,9 @@ class BaseTransportData(object):
                                   " implemented in  %s", self.__class__)
 
     def _calc_max_frames_process(self, nFrames):
+        nSlices = self.params['shape'][self.params['sdir'][0]]
         mfp = 1 if nFrames == 'single' else nFrames if \
-            isinstance(nFrames, int) else self.mfp if self.mfp else self.mft
+            isinstance(nFrames, int) else self.mfp if self.mfp else nSlices
         return int(mfp)
 
     def _calc_max_frames_transfer_single(self, nFrames):
