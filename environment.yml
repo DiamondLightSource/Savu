@@ -17,7 +17,7 @@ dependencies:
   - xraylib
   - tomopy
   - mock
-  - fabio
+  - fabio==0.4.0
   - pytest-cov
   - coveralls
   - pyfai 
