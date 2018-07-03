@@ -297,7 +297,8 @@ class BaseTransport(object):
         process_frames = np.array(process_frames)
         nframes = plugin.get_plugin_in_datasets()[0].get_total_frames()
         process_frames[process_frames >= nframes] = nframes - 1
-        plugin.set_global_frame_index(process_frames[0])
+        frames = process_frames[0] if process_frames.size else process_frames
+        plugin.set_global_frame_index(frames)
 
     def _set_functions(self, data_list, name):
         """ Create a dictionary of functions to remove (squeeze) or re-add
