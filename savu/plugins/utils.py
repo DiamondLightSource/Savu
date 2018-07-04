@@ -268,8 +268,21 @@ def enablePrint():
 def parse_config_string(string):
     regex = "[\[\]\, ]+"
     split_vals = filter(None, re.split(regex, string))
-    deliminators = re.findall(regex, string)
+    delimitors = re.findall(regex, string)
     split_vals = [repr(a.strip()) for a in split_vals]
-    zipped = izip_longest(deliminators, split_vals)
+    zipped = izip_longest(delimitors, split_vals)
     string = ''.join([i for l in zipped for i in l if i is not None])
-    return ast.literal_eval(string)
+    try:
+        return ast.literal_eval(string)
+    except ValueError:
+        return ast.literal_eval(parse_array_index_as_string(string))
+
+
+def parse_array_index_as_string(string):
+    p = re.compile("'\['")
+    for m in p.finditer(string):
+        offset = m.start() - count + 3
+        end = string[offset:].index("']") + offset
+        string = string[:end] + "]'" + string[end+2:]
+    string = string.replace("'['", '[')
+    return string
