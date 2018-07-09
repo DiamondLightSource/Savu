@@ -1,18 +1,23 @@
 #!/bin/bash
 
 version=$1
+echo "Loading Savu version" $version
 module load savu/$version
 module load global/cluster-quiet
 shift 1
 
 PREVIEW=false
 BIG=false
+AUTO=false
 echo "LAUNCHING THE SCRIPT"
 if [ $1 == 'PREVIEW' ] ; then
     PREVIEW=true
     shift 1
 elif [ $1 == 'BIG' ] ; then
     BIG=true
+    shift 1
+elif [ $1 == 'AUTO' ] ; then
+    AUTO=true
     shift 1
 fi
 
@@ -86,19 +91,25 @@ shift 3
 options=$@
 
 if [ $BIG = true ] ; then
-    echo "RUNNING BIG DATA RECONSTRUCTION"
     cluster=high.q@@com14
     gpu_arch=Pascal
     outname=savu
     nNodes=4
     nCoresPerNode=20
     nGPUs=2
-elif [ $PREVIEW = true ] ; then
+elif [ $AUTO = true ] ; then
     cluster=high.q@@com07
     gpu_arch=Fermi
     outname=savu
     nNodes=1
     nCoresPerNode=12
+    nGPUs=2
+elif [ $PREVIEW = true ] ; then
+    cluster=high.q@@com14
+    gpu_arch=Pascal
+    outname=savu
+    nNodes=1
+    nCoresPerNode=20
     nGPUs=2
 else
     cluster=high.q@@com10
