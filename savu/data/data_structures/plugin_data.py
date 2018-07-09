@@ -432,4 +432,6 @@ class PluginData(object):
         mfp = self.meta_data.get('max_frames_process')
         start = global_index[count]*mfp
         index = np.arange(start, start + mfp)
+        nFrames = self.get_total_frames()
+        index[index >= nFrames] = nFrames - 1
         return index
