@@ -69,7 +69,11 @@ class BaseTransportData(object):
         self.params = self.data._get_plugin_data()._get_max_frames_parameters()
         mft = np.ceil(
                 self.params['total_frames']/float(self.params['mpi_procs']))
-        # what size are the slice dims?
+
+        # added for basic runner
+        nSlices = self.params['shape'][self.params['sdir'][0]]
+        self.mfp = nFrames if isinstance(nFrames, int) else min(mft, nSlices)
+
         fchoices, size_list = self._get_frame_choices(self.params['sdir'], mft)
         self.mft = mft
         return int(mft), size_list[fchoices.index(mft)]
@@ -85,6 +89,7 @@ class BaseTransportData(object):
         self.mfp = nFrames if isinstance(nFrames, int) else min(mft, nSlices)
         mft, fchoices, size_list = \
             self.__refine_distribution_for_multi_mfp(mft, size_list, fchoices)
+
         self.mft = mft
         return mft, size_list[fchoices.index(mft)]
 
@@ -232,6 +237,12 @@ class BaseTransportData(object):
         chunks gives the best distribution of frames per process. """
         multi_list = [(nframes/float(v))/nprocs for v in flist]
         min_val, closest_lower_idx = self._find_closest_lower(multi_list, 1)
+
+        flist = np.array(flist)
+        lbound = 5  # add this to system parameters
+        if flist[closest_lower_idx] < lbound and flist[flist > lbound]:
+            closest_lower_idx -= 1
+
         if idx:
             return flist[closest_lower_idx], closest_lower_idx
         return flist[closest_lower_idx]

@@ -95,6 +95,7 @@ class Data(DataCreate):
                          "_transport_data"
         transport_data = cu.import_class(transport_data)
         self.transport_data = transport_data(self)
+        self.data_info.set('transport', transport)
 
     def _get_transport_data(self):
         return self.transport_data
