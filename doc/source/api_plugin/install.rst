@@ -10,6 +10,7 @@ Subpackages
     install.2_0_install
     install.2_1_install
     install.2_3_install
+    install.future_install
 
 Module contents
 ---------------

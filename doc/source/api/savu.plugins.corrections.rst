@@ -14,6 +14,7 @@ Submodules
 
    savu.plugins.corrections.base_correction
    savu.plugins.corrections.camera_rot_correction
+   savu.plugins.corrections.convert_360_180_sinogram
    savu.plugins.corrections.dark_flat_field_correction
    savu.plugins.corrections.distortion_correction
    savu.plugins.corrections.monitor_correction
