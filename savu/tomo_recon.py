@@ -91,7 +91,7 @@ def __option_parser():
                         default='localhost')
     # Port to connect to syslog server on
     parser.add_argument("-p", "--syslog_port", dest="syslog_port",
-                        help=hide, default=514)
+                        help=hide, default=514, type=int)
     parser.add_argument("--test_state", dest="test_state", default='False',
                         action='store_true', help=hide)
 
