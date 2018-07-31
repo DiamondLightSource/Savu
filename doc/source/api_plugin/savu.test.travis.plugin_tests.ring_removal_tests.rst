@@ -1,5 +1,5 @@
-savu.test.travis.plugin_tests.ring_removal_tests package
-========================================================
+savu\.test\.travis\.plugin\_tests\.ring\_removal\_tests package
+===============================================================
 
 Submodules
 ----------
@@ -7,6 +7,7 @@ Submodules
 .. toctree::
 
    savu.test.travis.plugin_tests.ring_removal_tests.ring_removal_normalization_test
+   savu.test.travis.plugin_tests.ring_removal_tests.ring_removal_regularization_test
 
 Module contents
 ---------------

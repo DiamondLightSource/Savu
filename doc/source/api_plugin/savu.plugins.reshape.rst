@@ -1,5 +1,5 @@
-savu.plugins.reshape package
-============================
+savu\.plugins\.reshape package
+==============================
 
 Submodules
 ----------

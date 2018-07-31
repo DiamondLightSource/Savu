@@ -1,5 +1,5 @@
-savu.plugins.loaders.mapping_loaders package
-============================================
+savu\.plugins\.loaders\.mapping\_loaders package
+================================================
 
 Subpackages
 -----------

@@ -1,5 +1,5 @@
-savu.core.plugin_runner module
-==============================
+savu\.core\.plugin\_runner module
+=================================
 
 .. automodule:: savu.core.plugin_runner
     :members:

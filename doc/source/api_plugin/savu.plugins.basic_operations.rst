@@ -1,5 +1,5 @@
-savu.plugins.basic_operations package
-=====================================
+savu\.plugins\.basic\_operations package
+========================================
 
 Submodules
 ----------

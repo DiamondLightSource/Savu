@@ -1,5 +1,5 @@
-scripts.config_generator package
-================================
+scripts\.config\_generator package
+==================================
 
 Submodules
 ----------

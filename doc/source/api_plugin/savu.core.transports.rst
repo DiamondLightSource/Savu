@@ -1,5 +1,5 @@
-savu.core.transports package
-============================
+savu\.core\.transports package
+==============================
 
 Submodules
 ----------

@@ -1,5 +1,5 @@
-savu.plugins.loaders.mapping_loaders.i13_loaders package
-========================================================
+savu\.plugins\.loaders\.mapping\_loaders\.i13\_loaders package
+==============================================================
 
 Submodules
 ----------
