@@ -1,5 +1,5 @@
-savu.test.travis.framework_tests package
-========================================
+savu\.test\.travis\.framework\_tests package
+============================================
 
 .. automodule:: savu.test.travis.framework_tests
     :members:

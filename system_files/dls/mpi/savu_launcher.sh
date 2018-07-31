@@ -162,7 +162,7 @@ fi
 qsub -jsv /dls_sw/apps/sge/common/JSVs/savu.pl \
      -N $outname -j y -o $interfolder -e $interfolder -pe openmpi $M -l exclusive \
      -l infiniband -l gpu=$nGPUs -l gpu_arch=$gpu_arch -q $cluster $filepath $version $savupath $datafile \
-     $processfile $outpath $nCoresPerNode $nGPUs $options -c -f $foldername -s graylog2.diamond.ac.uk -p 12203 \
+     $processfile $outpath $nCoresPerNode $nGPUs $options -c -f $foldername -s graylog2.diamond.ac.uk -p 12203
      --facility_email scientificsoftware@diamond.ac.uk -l $outfolder > /dls/tmp/savu/$USER.out
 
 #qsub -N $outname -j y -o $interfolder -e $interfolder -pe openmpi $M -l exclusive \

@@ -1,5 +1,5 @@
-savu.plugins.driver package
-===========================
+savu\.plugins\.driver package
+=============================
 
 .. automodule:: savu.plugins.driver
     :members:

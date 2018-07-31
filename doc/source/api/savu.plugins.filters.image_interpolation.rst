@@ -1,5 +1,5 @@
-savu.plugins.filters.image_interpolation module
-===============================================
+savu\.plugins\.filters\.image\_interpolation module
+===================================================
 
 .. automodule:: savu.plugins.filters.image_interpolation
     :members:

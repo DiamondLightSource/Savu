@@ -1,5 +1,5 @@
-savu.plugins.kinematics package
-===============================
+savu\.plugins\.kinematics package
+=================================
 
 .. automodule:: savu.plugins.kinematics
     :members:

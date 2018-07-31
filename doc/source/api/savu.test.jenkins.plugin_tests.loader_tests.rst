@@ -1,5 +1,5 @@
-savu.test.jenkins.plugin_tests.loader_tests package
-===================================================
+savu\.test\.jenkins\.plugin\_tests\.loader\_tests package
+=========================================================
 
 .. automodule:: savu.test.jenkins.plugin_tests.loader_tests
     :members:

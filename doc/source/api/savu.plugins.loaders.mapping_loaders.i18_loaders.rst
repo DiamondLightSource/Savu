@@ -1,5 +1,5 @@
-savu.plugins.loaders.mapping_loaders.i18_loaders package
-========================================================
+savu\.plugins\.loaders\.mapping\_loaders\.i18\_loaders package
+==============================================================
 
 .. automodule:: savu.plugins.loaders.mapping_loaders.i18_loaders
     :members:
