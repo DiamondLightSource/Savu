@@ -60,7 +60,7 @@ class DosnaTransport(BaseTransport):
 
         backend = options.get("dosna_backend") or DEFAULT_BACKEND
         engine = options.get("dosna_engine") or DEFAULT_ENGINE
-        dosna_connection = options.get("dosna_connection") \
+        dosna_connection_name = options.get("dosna_connection") \
             or DEFAULT_CONNECTION
         dosna_connection_options = options.get("dosna_connection_options")
 
@@ -71,7 +71,7 @@ class DosnaTransport(BaseTransport):
         log.debug("DosNa is using backend %s engine %s and options %s",
                   backend, engine, dosna_options)
         dn.use(engine, backend)
-        self.dosna_connection = dn.Connection(dosna_connection,
+        self.dosna_connection = dn.Connection(dosna_connection_name,
                                               **dosna_options)
         self.dosna_connection.connect()
         # initially reading from a hdf5 file so Hdf5TransportData will be used
