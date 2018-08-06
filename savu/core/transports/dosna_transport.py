@@ -62,7 +62,7 @@ class DosnaTransport(BaseTransport):
         engine = options.get("dosna_engine") or DEFAULT_ENGINE
         dosna_connection = options.get("dosna_connection") \
             or DEFAULT_CONNECTION
-        dosna_connection_options = options.get("dosna_conection_options")
+        dosna_connection_options = options.get("dosna_connection_options")
 
         dosna_options = {}
 
