@@ -240,7 +240,7 @@ class BaseTransportData(object):
 
         flist = np.array(flist)
         lbound = 5  # add this to system parameters
-        if flist[closest_lower_idx] < lbound and flist[flist > lbound]:
+        if flist[closest_lower_idx] < lbound and flist[flist > lbound].any():
             closest_lower_idx -= 1
 
         if idx:
