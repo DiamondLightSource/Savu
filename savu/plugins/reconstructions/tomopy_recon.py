@@ -43,7 +43,7 @@ class TomopyRecon(BaseRecon, CpuPlugin):
         mlem|osem|ospml_hybrid|ospml_quad|pml_hybrid|pml_quad\
         |sirt). Default: 'gridrec'.
     :u*param filter_name: Valid for fbp|gridrec, options: none|shepp|cosine|\
-     hann|hamming|ramlak|parzen|butterworth). Default: None.
+     hann|hamming|ramlak|parzen|butterworth). Default: 'none'.
     :u*param reg_par: Regularization parameter for smoothing, valid for \
         ospml_hybrid|ospml_quad|pml_hybrid|pml_quad. Default: 0.0.
     :param n_iterations: Number of iterations - only valid for iterative \
@@ -58,6 +58,7 @@ class TomopyRecon(BaseRecon, CpuPlugin):
     def pre_process(self):
         self.sl = self.get_plugin_in_datasets()[0].get_slice_dimension()
         vol_shape = self.get_vol_shape()
+
         options = {'filter_name': self.parameters['filter_name'],
                    'reg_par': self.parameters['reg_par']-1,
                    'n_iterations': self.parameters['n_iterations'],
