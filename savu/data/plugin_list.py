@@ -346,8 +346,11 @@ class PluginList(object):
                 if GpuPlugin in bases:
                     return True
         except ImportError as ex:
-            logging.error('Error while importing GPU dependencies: %s',
-                          ex.message)
+            if "pynvml" in ex.message:
+                logging.error('Error while importing GPU dependencies: %s',
+                              ex.message)
+            else:
+                raise
 
         return False
 
