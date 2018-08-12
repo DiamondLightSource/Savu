@@ -22,9 +22,9 @@
 
 """
 
-import numpy as np
-import fabio
 import os
+import fabio
+import numpy as np
 
 from savu.data.data_structures.data_types.base_type import BaseType
 
