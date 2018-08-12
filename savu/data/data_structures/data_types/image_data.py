@@ -16,7 +16,7 @@
 .. module:: image_data
    :platform: Unix
    :synopsis: A module for loading any of the FabIO python module supported \
-       image formats (e.g. tiffs) and others from skimage (e.g. png)
+       image formats (e.g. tiffs)
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
@@ -24,14 +24,13 @@
 
 import numpy as np
 import fabio
-import skimage
 import os
 
 from savu.data.data_structures.data_types.base_type import BaseType
 
 
 class ImageData(BaseType):
-    """ This class loads any of the FabIO and skimage python module
+    """ This class loads any of the FabIO python module
     supported image formats. """
 
     def __init__(self, folder, Data, dim, shape=None, data_prefix=None):
@@ -43,16 +42,11 @@ class ImageData(BaseType):
         super(ImageData, self).__init__()
 
         self.nFrames = None
-        try:
-            self.loader = lambda filename: fabio.open(filename)
-            self.start_file = self.loader(self.__get_file_name(folder, data_prefix))
-            self.dtype = self.start_file.getframe(self.start_no).data[0, 0].dtype
-            self.image_shape = (self.start_file.dim2, self.start_file.dim1)
-        except:
-            self.loader = lambda filename: skimage.io.imread(filename, as_gray=True)
-            self.start_file = self.loader(self.__get_file_name(folder, data_prefix))
-            self.dtype = self.start_file.dtype
-            self.image_shape = self.start_file.shape
+
+        self.file_names = self.__get_file_names(folder, data_prefix)
+        self.start_file = fabio.open(self.file_names[0])
+        self.dtype = self.start_file.data[0, 0].dtype
+        self.image_shape = (self.start_file.dim2, self.start_file.dim1)
 
         if shape is None:
             self.shape = (self.nFrames,)
@@ -86,15 +80,14 @@ class ImageData(BaseType):
         index, frameidx = self.__get_indices(index, size)
 
         for i in range(len(frameidx)):
-            image = self.start_file.getframe(
-                    self.start_no + frameidx[i]).data[tiff_slices]
+            image = fabio.open(self.file_names[frameidx[i]]).data[tiff_slices]
             for d in self.frame_dim:
                 image = np.expand_dims(image, axis=d)
             data[index[i]] = image
 
         return data
 
-    def __get_file_name(self, folder, prefix):
+    def __get_file_names(self, folder, prefix):
         import re
         import glob
 #        files = os.listdir(folder)
@@ -105,8 +98,8 @@ class ImageData(BaseType):
             fullpath = os.path.join(fullpath, '*')
         files = glob.glob(fullpath)
         self.nFrames = len(files)
-        fname = sorted(files)[0]
-        self.start_no = [int(s) for s in re.findall(r'\d+', fname)][-1]
+        fname = sorted(files)
+        self.start_no = [int(s) for s in re.findall(r'\d+', fname[0])][-1]
         return fname
 
     def get_shape(self):

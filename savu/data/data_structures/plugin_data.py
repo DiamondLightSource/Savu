@@ -146,7 +146,7 @@ class PluginData(object):
         if dtype is None:
             data = self.data_obj.data
             dtype = data.dtype if isinstance(data, h5py._hl.dataset.Dataset)\
-                else data.data.dtype
+                else data.dtype
         else:
             dtype = np.dtype(dtype)
         nBytes = dtype.itemsize
