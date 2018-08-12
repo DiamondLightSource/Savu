@@ -13,10 +13,10 @@
 # limitations under the License.
 
 """
-.. module:: fabio
+.. module:: image_data
    :platform: Unix
    :synopsis: A module for loading any of the FabIO python module supported \
-       image formats (e.g. tiffs)
+       image formats (e.g. tiffs) and others from skimage (e.g. png)
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
@@ -24,14 +24,15 @@
 
 import numpy as np
 import fabio
+import skimage
 import os
 
 from savu.data.data_structures.data_types.base_type import BaseType
 
 
-class FabIO(BaseType):
-    """ This class loads any of the FabIO python module supported image
-    formats. """
+class ImageData(BaseType):
+    """ This class loads any of the FabIO and skimage python module
+    supported image formats. """
 
     def __init__(self, folder, Data, dim, shape=None, data_prefix=None):
         self.folder = folder
@@ -39,16 +40,25 @@ class FabIO(BaseType):
         self.frame_dim = dim
         self.shape = shape
         self.prefix = data_prefix
-        super(FabIO, self).__init__()
+        super(ImageData, self).__init__()
 
         self.nFrames = None
-        self.start_file = fabio.open(self.__get_file_name(folder, data_prefix))
-        self.dtype = self.start_file.getframe(self.start_no).data[0, 0].dtype
-        self.image_shape = (self.start_file.dim2, self.start_file.dim1)
+        try:
+            self.loader = lambda filename: fabio.open(filename)
+            self.start_file = self.loader(self.__get_file_name(folder, data_prefix))
+            self.dtype = self.start_file.getframe(self.start_no).data[0, 0].dtype
+            self.image_shape = (self.start_file.dim2, self.start_file.dim1)
+        except:
+            self.loader = lambda filename: skimage.io.imread(filename, as_gray=True)
+            self.start_file = self.loader(self.__get_file_name(folder, data_prefix))
+            self.dtype = self.start_file.dtype
+            self.image_shape = self.start_file.shape
+
         if shape is None:
             self.shape = (self.nFrames,)
         else:
             self.shape = shape
+
         self.full_shape = self.image_shape + self.shape
         self.image_dims = set(np.arange(len(self.full_shape)))\
             .difference(set(self.frame_dim))

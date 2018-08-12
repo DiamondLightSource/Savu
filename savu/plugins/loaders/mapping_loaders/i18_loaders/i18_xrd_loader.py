@@ -24,7 +24,7 @@
 from savu.plugins.loaders.mapping_loaders.i18_loaders.\
     base_i18_multi_modal_loader import BaseI18MultiModalLoader
 
-from savu.data.data_structures.data_types.fabIO import FabIO
+from savu.data.data_structures.data_types.image_data import FabIO
 from savu.plugins.utils import register_plugin
 import h5py
 import tempfile

@@ -25,7 +25,7 @@
 import h5py
 import tempfile
 
-from savu.data.data_structures.data_types.fabIO import FabIO
+from savu.data.data_structures.data_types.image_data import FabIO
 from savu.plugins.utils import register_plugin
 from savu.plugins.loaders.yaml_converter import YamlConverter
 
