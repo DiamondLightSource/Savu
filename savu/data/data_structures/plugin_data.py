@@ -139,15 +139,17 @@ class PluginData(object):
             shape[dim] = slice_size[i]
             i += 1
         self.shape_transfer = tuple(shape)
-    
+
     def get_bytes_per_frame(self):
         """ Return the size of a single frame in bytes. """
         dtype = self.data_obj.dtype
         if dtype is None:
             data = self.data_obj.data
-            data = data.data[0] if isinstance(data.data, list) else data
-            dtype = data.dtype if isinstance(data, h5py._hl.dataset.Dataset)\
-                else data.data.dtype
+            if hasattr(data, 'dtype'):
+                dtype = data.dtype
+            else:
+                h5 = h5py._hl.dataset.Dataset
+                dtype = data.dtype if isinstance(data, h5) else data.data.dtype
         else:
             dtype = np.dtype(dtype)
         nBytes = dtype.itemsize
