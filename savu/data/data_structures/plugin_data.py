@@ -145,6 +145,7 @@ class PluginData(object):
         dtype = self.data_obj.dtype
         if dtype is None:
             data = self.data_obj.data
+            data = data.data[0] if isinstance(data.data, list) else data
             dtype = data.dtype if isinstance(data, h5py._hl.dataset.Dataset)\
                 else data.data.dtype
         else:

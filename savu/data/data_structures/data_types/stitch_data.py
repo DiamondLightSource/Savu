@@ -31,6 +31,7 @@ class StitchData(BaseType):
 
     def __init__(self, data_obj_list, stack_or_cat, dim, remove=None):
         self.obj_list = data_obj_list
+        self.data = self.obj_list
         self.stack_or_cat = stack_or_cat
         self.dim = dim
         self.remove = remove
