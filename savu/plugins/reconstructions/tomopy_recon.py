@@ -59,6 +59,9 @@ class TomopyRecon(BaseRecon, CpuPlugin):
         self.sl = self.get_plugin_in_datasets()[0].get_slice_dimension()
         vol_shape = self.get_vol_shape()
 
+        filter_name = self.parameters['filter_name']
+        # for backwards compatibility
+        filter_name = 'none' if filter_name == None else filter_name
         options = {'filter_name': self.parameters['filter_name'],
                    'reg_par': self.parameters['reg_par']-1,
                    'n_iterations': self.parameters['n_iterations'],
