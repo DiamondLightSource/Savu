@@ -24,7 +24,7 @@
 from savu.plugins.loaders.mapping_loaders.i18_loaders.\
     base_i18_multi_modal_loader import BaseI18MultiModalLoader
 
-from savu.data.data_structures.data_types.image_data import FabIO
+from savu.data.data_structures.data_types.image_data import ImageData
 from savu.plugins.utils import register_plugin
 import h5py
 import tempfile
@@ -65,7 +65,7 @@ class I18XrdLoader(BaseI18MultiModalLoader):
             shape.append(len(data_obj.meta_data.get(pattern)))
 
         path = self.get_path('data_path')
-        data_obj.data = FabIO(path, data_obj, frame_dim, shape=tuple(shape))
+        data_obj.data = ImageData(path, data_obj, frame_dim, shape=tuple(shape))
 
         # dummy file
         filename = path.split('/')[-1] + '.h5'
@@ -86,7 +86,7 @@ class I18XrdLoader(BaseI18MultiModalLoader):
             mData = data_obj.meta_data
             xpix = calibrationfile[det_str + '/detector_module/fast_pixel_direction'].value*1e-3 # in metres
             mData.set("x_pixel_size",xpix)
-            
+
             mData.set("beam_center_x",
                     calibrationfile[det_str + '/beam_center_x'].value*1e-3) #in metres 
             mData.set("beam_center_y",
@@ -117,7 +117,7 @@ class I18XrdLoader(BaseI18MultiModalLoader):
                 orien = calibrationfile[det_str + '/detector_orientation'][...].reshape((3, 3))
                 yaw = math.degrees(-math.atan2(orien[2, 0], orien[2, 2]))# in degrees
                 roll = math.degrees(-math.atan2(orien[0, 1], orien[1, 1]))# in degrees
-                
+
                 mData.set("yaw", -yaw)
                 mData.set("roll", roll)
                 logging.debug('.... its the legacy version pre-DAWN 2.0')
@@ -132,4 +132,3 @@ class I18XrdLoader(BaseI18MultiModalLoader):
         if path.split(os.sep)[0] == 'Savu':
             path = tu.get_test_data_path(path.split('/test_data/data')[1])
         return path
-
