@@ -30,6 +30,7 @@ import h5py
 import json
 import copy
 import inspect
+import logging
 
 import numpy as np
 from collections import defaultdict
@@ -338,11 +339,19 @@ class PluginList(object):
 
     def _contains_gpu_processes(self):
         """ Returns True if gpu processes exist in the process list. """
-        from savu.plugins.driver.gpu_plugin import GpuPlugin
-        for i in range(self.n_plugins):
-            bases = inspect.getmro(pu.load_class(self.plugin_list[i]['id']))
-            if GpuPlugin in bases:
-                return True
+        try:
+            from savu.plugins.driver.gpu_plugin import GpuPlugin
+            for i in range(self.n_plugins):
+                bases = inspect.getmro(pu.load_class(self.plugin_list[i]['id']))
+                if GpuPlugin in bases:
+                    return True
+        except ImportError as ex:
+            if "pynvml" in ex.message:
+                logging.error('Error while importing GPU dependencies: %s',
+                              ex.message)
+            else:
+                raise
+
         return False
 
 
