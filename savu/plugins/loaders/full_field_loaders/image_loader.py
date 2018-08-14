@@ -31,7 +31,7 @@ from savu.data.data_structures.data_types.data_plus_darks_and_flats \
     import NoImageKey
 from savu.plugins.loaders.base_loader import BaseLoader
 from savu.plugins.utils import register_plugin
-from savu.data.data_structures.data_types.fabIO import FabIO
+from savu.data.data_structures.data_types.image_data import ImageData
 
 
 @register_plugin
@@ -95,8 +95,8 @@ class ImageLoader(BaseLoader):
         fpath, ffix = self._get_path(self.parameters['flat_prefix'], path)
 
         fdim = self.parameters['frame_dim']
-        dark = FabIO(dpath, dObj, [fdim], None, dfix)
-        flat = FabIO(fpath, dObj, [fdim], None, ffix)
+        dark = ImageData(dpath, dObj, [fdim], None, dfix)
+        flat = ImageData(fpath, dObj, [fdim], None, ffix)
         dObj.data._set_dark_path(dark)
         dObj.data._set_flat_path(flat)
         dObj.data._set_dark_and_flat()
@@ -109,7 +109,7 @@ class ImageLoader(BaseLoader):
 
     def _get_data_type(self, obj, path):
         prefix = self.parameters['data_prefix']
-        return FabIO(path, obj, [self.parameters['frame_dim']], None, prefix)
+        return ImageData(path, obj, [self.parameters['frame_dim']], None, prefix)
 
     def set_rotation_angles(self, data_obj):
         angles = self.parameters['angles']
