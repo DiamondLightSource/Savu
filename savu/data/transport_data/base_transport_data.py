@@ -82,7 +82,7 @@ class BaseTransportData(object):
         """ Multiple transfer per process """
         self.params = self.data._get_plugin_data()._get_max_frames_parameters()
         mft, fchoices, size_list = self.__get_optimum_distribution(nFrames)
-
+        
         if nFrames == 'single':
             return mft, size_list[fchoices.index(mft)]
         nSlices = self.params['shape'][self.params['sdir'][0]]
@@ -94,18 +94,30 @@ class BaseTransportData(object):
         return mft, size_list[fchoices.index(mft)]
 
     def _set_boundaries(self):
+        b_per_f = self.data._get_plugin_data().get_bytes_per_frame()
+        b_per_p = b_per_f*self.params['frames_per_process']
         settings = self.data.exp.meta_data.get(
                 ['system_params', 'data_transfer_settings'])
-        max_mft = settings['max_mft']
-        frame_threshold = settings['frame_threshold']
-        min_mft = settings['min_mft']
-        return min_mft, max_mft, frame_threshold
+        max_bytes = self.__convert_str(settings['max_bytes'], b_per_p)
+        bytes_threshold = \
+            self.__convert_str(settings['bytes_threshold'], b_per_p)
+        b_per_p = b_per_p if b_per_p < bytes_threshold else bytes_threshold
+        min_bytes = self.__convert_str(settings['min_bytes'], b_per_p)
+        
+        max_mft = int(np.floor(float(max_bytes)/b_per_f))
+        min_mft = int(max(np.floor(float(min_bytes)/b_per_f), 1))
+        return min_mft, max_mft
+
+    def __convert_str(self, val, b_per_p):
+        if isinstance(val, str):
+            exec("value = " + val)
+        return value
 
     def __get_optimum_distribution(self, nFrames):
         """ The number of frames each process should retrieve from file at a
         time.
         """
-        min_mft, max_mft, threshold = self.__get_boundaries(nFrames)
+        min_mft, max_mft = self.__get_boundaries(nFrames)
         if isinstance(nFrames, int) and nFrames > max_mft:
             logging.warn("The requested %s frames excedes the maximum "
                          "preferred of %s." % (nFrames, max_mft))
@@ -117,9 +129,8 @@ class BaseTransportData(object):
         fchoices, size_list = \
             self._get_frame_choices(sdir, min(max_mft, nSlices))
 
-        if self.params['frames_per_process'] > threshold:
-            min_mft = min(max(fchoices), min_mft)
-            fchoices = [f for f in fchoices if f >= min_mft]
+        apply_threshold = [f for f in fchoices if f >= min_mft]
+        fchoices = apply_threshold if apply_threshold else fchoices
 
         mft, idx = self._find_best_frame_distribution(
             fchoices, self.params['total_frames'], self.params['mpi_procs'],
@@ -148,12 +159,12 @@ class BaseTransportData(object):
         return int(mft), fchoices, size_list
 
     def __get_boundaries(self, nFrames):
-        min_mft, max_mft, frame_threshold = self._set_boundaries()
+        min_mft, max_mft = self._set_boundaries()
         if isinstance(nFrames, int) and nFrames > max_mft:
             logging.warn("The requested %s frames excedes the maximum "
                          "preferred of %s." % (nFrames, max_mft))
             max_mft = nFrames
-        return min_mft, max_mft, frame_threshold
+        return min_mft, max_mft
 
     def _get_slice_dir_index(self, dim, boolean=False):
         starts, stops, steps, chunks = \
@@ -222,14 +233,15 @@ class BaseTransportData(object):
 
     def _find_multiples_of_b_that_divide_a(self, a, b):
         """ Find all positive multiples of b that divide a. """
-        val = 1
         val_list = []
         i = 0
+        val = (int(a/b)+i)*b
         while(val > 0):
-            val = (int(a/b)+i)*b
-            val_list.append(val)
+            if a % val == 0:
+                val_list.append(val)
             i -= 1
-        return val_list[:-1]
+            val = (int(a/b)+i)*b
+        return val_list
 
     def _find_best_frame_distribution(self, flist, nframes, nprocs,
                                       idx=False):
@@ -237,11 +249,6 @@ class BaseTransportData(object):
         chunks gives the best distribution of frames per process. """
         multi_list = [(nframes/float(v))/nprocs for v in flist]
         min_val, closest_lower_idx = self._find_closest_lower(multi_list, 1)
-
-        flist = np.array(flist)
-        lbound = 5  # add this to system parameters
-        if flist[closest_lower_idx] < lbound and flist[flist > lbound]:
-            closest_lower_idx -= 1
 
         if idx:
             return flist[closest_lower_idx], closest_lower_idx

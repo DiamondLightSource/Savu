@@ -73,6 +73,7 @@ class RandomHdf5Loader(BaseLoader):
 
         data_obj.backing_file = self.__get_backing_file(data_obj)
         data_obj.data = data_obj.backing_file['/']['test']
+        data_obj.data.dtype # Need to do something to .data to keep the file open!
 
         data_obj.set_shape(data_obj.data.shape)
         self.n_entries = data_obj.get_shape()[0]
@@ -84,8 +85,7 @@ class RandomHdf5Loader(BaseLoader):
             (self.exp.get('out_path'), self.parameters['file_name'])
 
         if os.path.exists(fname):
-            f = h5py.File(fname, 'r')
-            return f
+            return h5py.File(fname, 'r')
 
         self.hdf5 = Hdf5Utils(self.exp)
 
@@ -132,10 +132,10 @@ class RandomHdf5Loader(BaseLoader):
 
         self.exp._barrier()
 
-        try:
-            h5file.close()
-        except:
-            logging.debug('There was a problem trying to close the file in random_hdf5_loader')
+#        try:
+#            h5file.close()
+#        except:
+#            logging.debug('There was a problem trying to close the file in random_hdf5_loader')
 
         return self.hdf5._open_backing_h5(fname, 'r')
 

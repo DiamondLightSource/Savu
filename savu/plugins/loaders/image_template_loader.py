@@ -23,9 +23,8 @@
 """
 
 import h5py
-import tempfile
 
-from savu.data.data_structures.data_types.fabIO import FabIO
+from savu.data.data_structures.data_types.image_data import ImageData
 from savu.plugins.utils import register_plugin
 from savu.plugins.loaders.yaml_converter import YamlConverter
 
@@ -56,6 +55,6 @@ class ImageTemplateLoader(YamlConverter):
         file_path = self.exp.meta_data.get("data_file")
         dObj.backing_file = h5py.File(file_path, 'r')
         shape = tuple(self.update_value(dObj, shape))
-        dObj.data = FabIO(folder, dObj, range(len(shape)), shape=shape)
+        dObj.data = ImageData(folder, dObj, range(len(shape)), shape=shape)
         dObj.set_shape(dObj.data.get_shape())
         return dObj

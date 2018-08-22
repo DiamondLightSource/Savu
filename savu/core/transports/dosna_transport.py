@@ -60,9 +60,9 @@ class DosnaTransport(BaseTransport):
 
         backend = options.get("dosna_backend") or DEFAULT_BACKEND
         engine = options.get("dosna_engine") or DEFAULT_ENGINE
-        dosna_connection = options.get("dosna_connection") \
+        dosna_connection_name = options.get("dosna_connection") \
             or DEFAULT_CONNECTION
-        dosna_connection_options = options.get("dosna_conection_options")
+        dosna_connection_options = options.get("dosna_connection_options")
 
         dosna_options = {}
 
@@ -71,7 +71,7 @@ class DosnaTransport(BaseTransport):
         log.debug("DosNa is using backend %s engine %s and options %s",
                   backend, engine, dosna_options)
         dn.use(engine, backend)
-        self.dosna_connection = dn.Connection(dosna_connection,
+        self.dosna_connection = dn.Connection(dosna_connection_name,
                                               **dosna_options)
         self.dosna_connection.connect()
         # initially reading from a hdf5 file so Hdf5TransportData will be used
@@ -96,7 +96,7 @@ class DosnaTransport(BaseTransport):
         self.hdf5 = Hdf5Utils(self.exp)
         exp_coll = self.exp._get_experiment_collection()
         self.data_flow = self.exp.meta_data.plugin_list._get_dataset_flow()
-        self.exp.meta_data.set('transport', 'dosna')
+        #self.exp.meta_data.set('transport', 'dosna')
         plist = self.exp.meta_data.plugin_list
         self.n_plugins = plist._get_n_processing_plugins()
         self.final_dict = plist.plugin_list[-1]
@@ -106,6 +106,9 @@ class DosnaTransport(BaseTransport):
                 self._get_filenames(exp_coll['plugin_dict'][plugin_index]))
             self._set_file_details(self.files[plugin_index])
             self._setup_dosna_objects()  # creates the dosna objects
+
+        if self.n_plugins is not 1:
+            self.exp.meta_data.set('transport', 'dosna')
 
     def _transport_post_plugin_list_run(self):
         if not self.dosna_connection:
@@ -173,10 +176,14 @@ class DosnaTransport(BaseTransport):
             self.__set_hdf5_transport()
 
     def _transport_post_plugin(self):
-        if self.count == self.n_plugins - 2:
-            self.exp.meta_data.set('transport', 'hdf5')
+        # revert back to basic if a temporary transport mechanism was used
+        if self.hdf5_flag:
+            self.__unset_hdf5_transport()
 
-        elif self.count == self.n_plugins - 1:  # final plugin
+        if self.count == self.n_plugins - 2:
+            self.exp.meta_data.set('transport', 'dosna')
+
+        if self.count == self.n_plugins - 1:  # final plugin
             self.h5trans.exp = self.exp
             self.h5trans.hdf5 = Hdf5Utils(self.exp)
             self.h5trans._transport_post_plugin()
@@ -189,3 +196,7 @@ class DosnaTransport(BaseTransport):
         files = self._get_filenames(self.final_dict)
         self._set_file_details(files)
         self._setup_h5_files()
+
+    def __unset_hdf5_transport(self):
+        self.exp.meta_data.set('transport', 'basic')
+        self.hdf5_flag = False

@@ -157,16 +157,31 @@ class BaseRecon(Plugin):
         if 'centre_of_rotation' in mData.get_dictionary().keys():
             cor = mData.get('centre_of_rotation')
         else:
-            sdirs = inData.get_slice_dimensions()
-            cor = np.ones(np.prod([inData.get_shape()[i] for i in sdirs]))
             val = self.parameters['centre_of_rotation']
-            # if centre of rotation has not been set then fix it in the centre
-            val = val if val != 0 else \
-                (self.get_vol_shape()[self._get_detX_dim()])/2
-            cor *= val
-            #mData.set('centre_of_rotation', cor) see Github ticket
+            if isinstance(val, dict):
+                cor = self.__polyfit_cor(val, inData)
+            else:
+                sdirs = inData.get_slice_dimensions()
+                cor = np.ones(np.prod([inData.get_shape()[i] for i in sdirs]))
+                # if centre of rotation has not been set then fix it in the centre
+                val = val if val != 0 else \
+                    (self.get_vol_shape()[self._get_detX_dim()])/2
+                cor *= val
+                #mData.set('centre_of_rotation', cor) see Github ticket
         self.cor = cor
         self.centre = self.cor[0]
+
+    def __polyfit_cor(self, cor_dict, inData):
+        if 'detector_y' in inData.meta_data.get_dictionary().keys():
+            y = inData.meta_data.get('detector_y')
+        else:
+            yDim = inData.get_data_dimension_by_axis_label('detector_y')
+            y = np.arange(inData.get_shape()[yDim])
+
+        z = np.polyfit(map(int, cor_dict.keys()), cor_dict.values(), 1)
+        p = np.poly1d(z)
+        cor = p(y)
+        return cor
 
     def set_function(self, pad_shape):
         if not pad_shape:

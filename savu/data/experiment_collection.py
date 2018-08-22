@@ -100,12 +100,14 @@ class Experiment(object):
                                       'datasets': []}
         self._barrier()
         self._check_checkpoint()
+        self._barrier()
         checkpoint = self.meta_data.get('checkpoint')
         if self.meta_data.get('process') == \
                 len(self.meta_data.get('processes'))-1 and not checkpoint:
             plugin_list._save_plugin_list(self.meta_data.get('nxs_filename'))
             # links the input data to the nexus file
             self._add_input_data_to_nxs_file(transport)
+        # Barrier 13
         self._barrier()
 
         n_plugins = plugin_list._get_n_processing_plugins()
