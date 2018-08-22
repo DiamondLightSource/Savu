@@ -120,17 +120,23 @@ fi
 # check for fftw
 CFLAGS=""
 LDFLAGS=""
-IFS=:
-file_base=libfftw?.so
-for p in ${LD_LIBRARY_PATH}; do
+# If no FFTWHOME provided search LD_LIBRARY_PATH for the static library
+if [ -z ${FFTWHOME+x} ]; then
+  IFS=:
+  file_base=libfftw?.so
+  for p in ${LD_LIBRARY_PATH}; do
     file_path=${p}/$file_base
     if [ "x$p" != "x" -a -e $file_path ]; then
-        FFTWHOME=${file_path%/lib/libfftw?.so}
-        CFLAGS="$FFTWHOME/include"
-        LDFLAGS="$FFTWHOME/lib"
-        break
+      FFTWHOME=${file_path%/lib/libfftw?.so}
+      break
     fi
-done
+  done
+fi
+# If a valid FFTWHOME was found or provided then use it
+if [ ${FFTWHOME} ]; then
+  CFLAGS="$FFTWHOME/include"
+  LDFLAGS="$FFTWHOME/lib"
+fi
 
 if [ "$CFLAGS" ]; then
     echo "Using fftw:    " $FFTWHOME
