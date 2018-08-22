@@ -15,7 +15,7 @@
 """
 .. module:: hilbert_filter
    :platform: Unix
-   :synopsis: A plugin to apply hilbert filter horizontally for tomo reconstruction of phase gradient images.
+   :synopsis: A plugin to apply hilbert filter horizontally for tomo reconstruction of phase gradient images. Use before Vocentering. In AstraRecon set log to false and FBP_filter to none.
 
 .. moduleauthor:: Tunhe Zhou <tunhe.zhou@diamond.ac.uk>
 
@@ -23,7 +23,7 @@
 import logging
 import numpy as np
 import pyfftw.interfaces.scipy_fftpack as fft
-#not sure exactly what needs to be imported
+
 
 from savu.plugins.filters.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
@@ -49,7 +49,7 @@ class HilbertFilter(BaseFilter, CpuPlugin):
         logging.debug("Calling super to make sure that all superclases are " +
                       " initialised")
         super(HilbertFilter, self).__init__('HilbertFilter')
-        self.filter = None
+        self.filter1 = None
 
     def pre_process(self):
         self._setup_hilbert(*self.get_plugin_in_datasets()[0].get_shape())
