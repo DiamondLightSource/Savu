@@ -35,7 +35,7 @@ class StitchData(BaseType):
         self.stack_or_cat = stack_or_cat
         self.dim = dim
         self.remove = remove
-        super(StitchData, self).__init__
+        super(StitchData, self).__init__()
 
         self.shape = None
         self._set_shape()
