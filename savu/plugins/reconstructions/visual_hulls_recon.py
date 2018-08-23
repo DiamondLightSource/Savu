@@ -59,11 +59,12 @@ class VisualHullsRecon(BaseRecon, CpuPlugin):
         data_shape = (sino.shape[1], sino.shape[1])
         full = np.ones(data_shape)
         for i in range(len(angles)):
-            mapping_array = self._mapping_array(data_shape, centre, angles[i])
+            mapping_array = self._mapping_array(data_shape, centre, np.deg2rad(angles[i]))
             mapping_array = np.clip(mapping_array.astype('int')+centre, 0,
                                     sino.shape[1]-1).astype('int')
             mask = sino[i, :][mapping_array]
             full -= 1-mask
+        full += 50
         full[full < 0.5] = 0
         return full
 
