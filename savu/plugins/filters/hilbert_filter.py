@@ -55,8 +55,7 @@ class HilbertFilter(BaseFilter, CpuPlugin):
         self._setup_hilbert(*self.get_plugin_in_datasets()[0].get_shape())
 
     def _setup_hilbert(self, height, width):
-        centerx = np.ceil(width / 2.0) - 1.0
-
+        centerx = np.ceil(width / 2.0)
         # Define the hilbert filter
         filter1 = np.ones((height, width), dtype=np.float32)
         filter1[:,0:int(centerx)] = filter1[:,0:int(centerx)]*(-1.0)
@@ -74,6 +73,6 @@ class HilbertFilter(BaseFilter, CpuPlugin):
         proj = np.nan_to_num(data[0])
         return self._hilbert(proj)
 
-    def get_max_frames(self):#don' know what, copied from paganin filter
+    def get_max_frames(self):
         return 'single'
 
