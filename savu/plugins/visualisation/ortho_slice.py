@@ -24,6 +24,8 @@ import os
 import scipy as sp
 import numpy as np
 
+import matplotlib.pyplot as plt
+
 from savu.plugins.utils import register_plugin
 from savu.plugins.filters.base_filter import BaseFilter
 
@@ -33,10 +35,11 @@ class OrthoSlice(BaseFilter, CpuPlugin):
     """
     A plugin to calculate the centre of rotation using the Vo Method
 
-    :param xy_slices: which XY slices to render. Default: [100].
-    :param yz_slices: which YZ slices to render. Default: [100].
-    :param xz_slices: which XZ slices to render. Default: [100].
-    :param file_type: File type to save as. Default: 'png'.
+    :u*param xy_slices: which XY slices to render. Default: [100].
+    :u*param yz_slices: which YZ slices to render. Default: [100].
+    :u*param xz_slices: which XZ slices to render. Default: [100].
+    :u*param file_type: File type to save as. Default: 'png'.
+    :u*param colourmap: Colour scheme to apply to the image. Default: 'magma'.
     """
 
     def __init__(self):
@@ -64,6 +67,9 @@ class OrthoSlice(BaseFilter, CpuPlugin):
                       ('yz_slices', 'VOLUME_YZ'),
                       ('xz_slices', 'VOLUME_XZ')]
 
+        #TODO this can probably be moved somewhere better
+        colourmap = plt.get_cmap(self.parameters['colourmap'])
+
         for direction, pattern in slice_info:
             slice_to_take = [slice(0)]*len(fullData.data.shape)
             for i in spatial_dims:
@@ -73,8 +79,16 @@ class OrthoSlice(BaseFilter, CpuPlugin):
                     if slice_to_take[i].stop == None:
                         slice_pos = self.parameters[direction][pos]
                         slice_to_take[i] = slice(slice_pos, slice_pos+1, 1)
-                image_data = fullData.data[slice_to_take[0], slice_to_take[1] ,slice_to_take[2]].squeeze()
+                image_data = fullData.data[slice_to_take[0],
+                                           slice_to_take[1],
+                                           slice_to_take[2]].squeeze()
+
+                image_data -= image_data.min()
+                image_data /= image_data.max()
+                image_data = colourmap(image_data, bytes=True)
+
                 filename = '%s_%03i.%s' % (pattern, pos, ext)
+
                 sp.misc.imsave(os.path.join(image_path, filename), image_data)
             else:
                 pos -= len(self.parameters['xy_slices'])
