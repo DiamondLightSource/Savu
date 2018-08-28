@@ -139,6 +139,7 @@ class BaseTransport(object):
                     plugin, prange, transfer_data, count, pDict, result, cp)
 
             self._return_all_data(count, result, end)
+
             if kill:
                 return 1
 
@@ -278,10 +279,9 @@ class BaseTransport(object):
 
         for idx in range(len(data_list)):
             if slice_list:
-                if end:
-                    result[idx] = self._remove_excess_data(
-                            data_list[idx], result[idx], slice_list[idx])
-                data_list[idx].data[slice_list[idx]] = result[idx]
+                temp = self._remove_excess_data(
+                        data_list[idx], result[idx], slice_list[idx])
+                data_list[idx].data[slice_list[idx]] = temp
             else:
                 data_list[idx].data = result[idx]
 

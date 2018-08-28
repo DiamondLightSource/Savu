@@ -82,7 +82,6 @@ class BaseTransportData(object):
         """ Multiple transfer per process """
         self.params = self.data._get_plugin_data()._get_max_frames_parameters()
         mft, fchoices, size_list = self.__get_optimum_distribution(nFrames)
-        
         if nFrames == 'single':
             return mft, size_list[fchoices.index(mft)]
         nSlices = self.params['shape'][self.params['sdir'][0]]
@@ -103,7 +102,6 @@ class BaseTransportData(object):
             self.__convert_str(settings['bytes_threshold'], b_per_p)
         b_per_p = b_per_p if b_per_p < bytes_threshold else bytes_threshold
         min_bytes = self.__convert_str(settings['min_bytes'], b_per_p)
-        
         max_mft = int(np.floor(float(max_bytes)/b_per_f))
         min_mft = int(max(np.floor(float(min_bytes)/b_per_f), 1))
         return min_mft, max_mft
@@ -129,8 +127,10 @@ class BaseTransportData(object):
         fchoices, size_list = \
             self._get_frame_choices(sdir, min(max_mft, nSlices))
 
-        apply_threshold = [f for f in fchoices if f >= min_mft]
-        fchoices = apply_threshold if apply_threshold else fchoices
+        threshold_idx = [i for i in range(len(fchoices)) if fchoices[i] >= min_mft]
+        if threshold_idx:
+            fchoices = [fchoices[i] for i in threshold_idx]
+            size_list = [size_list[i] for i in threshold_idx]
 
         mft, idx = self._find_best_frame_distribution(
             fchoices, self.params['total_frames'], self.params['mpi_procs'],
@@ -218,11 +218,9 @@ class BaseTransportData(object):
 
         while(np.prod(temp) <= max_mft):
             dshape = shape[sdir[idx]]
-            # could remove this if statement and ensure padding at the end of
-            # each slice dimension instead.
-            if dshape % temp[idx] == 0 or nDims == 1:
-                choices.append(np.prod(temp))
-                size_list.append(copy.copy(temp))
+            choices.append(np.prod(temp))
+            size_list.append(copy.copy(temp))
+
             if temp[idx] == dshape:
                 idx += 1
                 if idx == nDims:
