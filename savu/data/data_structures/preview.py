@@ -157,11 +157,11 @@ class Preview(object):
                 preview_list[i] = '0:end:1:1'
             vals = preview_list[i].split(':')
             starts[i], stops[i], steps[i], chunks[i] = \
-                self.__convert_indices(vals, i)
+                self.convert_indices(vals, i)
 
         return starts, stops, steps, chunks
 
-    def __convert_indices(self, idx, dim):
+    def convert_indices(self, idx, dim):
         """ convert keywords to integers.
         """
         dobj = self.get_data_obj()
