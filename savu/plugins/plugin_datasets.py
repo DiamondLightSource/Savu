@@ -38,6 +38,7 @@ class PluginDatasets(object):
         self.variable_data_flag = False
         self.multi_params_dict = {}
         self.extra_dims = []
+        self._max_itemsize = 0        
 
     def __get_data_objects(self, dtype):
         """ Get the data objects associated with the plugin from the experiment
@@ -60,6 +61,21 @@ class PluginDatasets(object):
             if data_obj.raw and data_obj.data:
                 data_obj.raw.create_next_instance(data_obj)
 #                data_obj.clone = True
+
+    def __set_max_itemsize(self):
+        in_data, out_data = self.get_datasets()
+        for data in in_data + out_data:
+            dtype = data.get_dtype()
+            if not dtype:
+                data.set_dtype(None)
+            self._max_itemsize = max(self._max_itemsize,
+                                     data.get_dtype().itemsize)
+
+    def get_max_itemsize(self):
+        """ Return the max itemsize (bytes) of the plugin in/out datasets. """
+        if not self._max_itemsize:
+            self.__set_max_itemsize()
+        return self._max_itemsize
 
     def __set_in_datasets(self):
         """ Set the in_data objects.

@@ -142,17 +142,7 @@ class PluginData(object):
 
     def get_bytes_per_frame(self):
         """ Return the size of a single frame in bytes. """
-        dtype = self.data_obj.dtype
-        if dtype is None:
-            data = self.data_obj.data
-            if hasattr(data, 'dtype'):
-                dtype = data.dtype
-            else:
-                h5 = h5py._hl.dataset.Dataset
-                dtype = data.dtype if isinstance(data, h5) else data.data.dtype
-        else:
-            dtype = np.dtype(dtype)
-        nBytes = dtype.itemsize
+        nBytes = self._plugin.get_max_itemsize()
         dims = self.get_pattern().values()[0]['core_dims']
         return np.prod([self.data_obj.get_shape()[d] for d in dims])*nBytes
 

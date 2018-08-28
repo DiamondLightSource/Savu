@@ -30,15 +30,16 @@ from savu.data.data_structures.data_types.base_type import BaseType
 class Map3dto4dh5(BaseType):
     """ This class converts a 3D dataset to a 4D dataset. """
 
-    def __init__(self, data, n_angles):
-        self.data = data
+    def __init__(self, data_obj, n_angles):
+        self.data_obj = data_obj
+        self.data = data_obj.data
         self.n_angles = n_angles
-        shape = data.shape
+        shape = self.data.shape
         super(Map3dto4dh5, self).__init__()
 
         import inspect
-        if inspect.isclass(type(data)):
-            self.add_base_class_with_instance(type(data), data)
+        if inspect.isclass(type(self.data)):
+            self.add_base_class_with_instance(type(self.data), self.data)
 
         new_shape = (n_angles, shape[1], shape[2], shape[0]/n_angles)
         self.shape = new_shape
@@ -48,7 +49,9 @@ class Map3dto4dh5(BaseType):
         return args, kwargs, extras
 
     def __getitem__(self, idx):
-        n_angles = self.shape[0]
+        rot_dim = \
+            self.data_obj.get_data_dimension_by_axis_label('rotation_angle')
+        n_angles = self.shape[rot_dim]
         idx_dim3 = np.arange(idx[3].start, idx[3].stop, idx[3].step)
         idx_dim0 = np.arange(idx[0].start, idx[0].stop, idx[0].step)
         idx_dim0 = np.ravel(idx_dim3.reshape(-1, 1)*n_angles + idx_dim0)

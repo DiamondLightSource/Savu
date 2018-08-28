@@ -383,6 +383,29 @@ class BaseRecon(Plugin):
         self.preview_flag = \
             self.set_preview(in_dataset[0], self.parameters['preview'])
 
+        axis_labels = in_dataset[0].data_info.get('axis_labels')[0]
+
+        dim_volX, dim_volY, dim_volZ = \
+            self.map_volume_dimensions(in_dataset[0])
+
+        axis_labels = [0]*3
+        axis_labels = {in_dataset[0]:
+                       [str(dim_volX) + '.voxel_x.voxels',
+                        str(dim_volY) + '.voxel_y.voxels',
+                        str(dim_volZ) + '.voxel_z.voxels']}
+
+        shape = list(in_dataset[0].get_shape())
+        shape[dim_volX] = shape[dim_volZ]
+
+        if 'resolution' in self.parameters.keys():
+            shape[dim_volX] /= self.parameters['resolution']
+            shape[dim_volZ] /= self.parameters['resolution']
+
+        out_dataset[0].create_dataset(axis_labels=axis_labels,
+                                      shape=tuple(shape))
+
+        out_dataset[0].add_volume_patterns(dim_volX, dim_volY, dim_volZ)
+
         # set information relating to the plugin data
         in_pData, out_pData = self.get_plugin_datasets()
 
@@ -405,41 +428,19 @@ class BaseRecon(Plugin):
             self.cor_as_dataset = True
             in_pData[idx].plugin_data_setup('METADATA', self.get_max_frames())
 
-        axis_labels = in_dataset[0].data_info.get('axis_labels')[0]
-
-        dim_volX, dim_volY, dim_volZ = \
-            self.map_volume_dimensions(in_dataset[0], in_pData[0])
-
-        axis_labels = [0]*3
-        axis_labels = {in_dataset[0]:
-                       [str(dim_volX) + '.voxel_x.voxels',
-                        str(dim_volY) + '.voxel_y.voxels',
-                        str(dim_volZ) + '.voxel_z.voxels']}
-
-        shape = list(in_dataset[0].get_shape())
-        shape[dim_volX] = shape[dim_volZ]
-
-        if 'resolution' in self.parameters.keys():
-            shape[dim_volX] /= self.parameters['resolution']
-            shape[dim_volZ] /= self.parameters['resolution']
-
-        out_dataset[0].create_dataset(axis_labels=axis_labels,
-                                      shape=tuple(shape))
-
-        out_dataset[0].add_volume_patterns(dim_volX, dim_volY, dim_volZ)
-
         # set pattern_name and nframes to process for all datasets
         out_pData[0].plugin_data_setup('VOLUME_XZ', self.get_max_frames())
 
     def get_max_frames(self):
         return 'multiple'
 
-    def map_volume_dimensions(self, data, pData):
+    def map_volume_dimensions(self, data):
         data._finalise_patterns()
         dim_rotAngle = data.get_data_patterns()['PROJECTION']['main_dir']
-        dim_detY = data.get_data_patterns()['SINOGRAM']['main_dir']
+        sinogram = data.get_data_patterns()['SINOGRAM']
+        dim_detY = sinogram['main_dir']
 
-        core_dirs = data.get_core_dimensions()
+        core_dirs = sinogram['core_dims']
         dim_detX = list(set(core_dirs).difference(set((dim_rotAngle,))))[0]
 
         dim_volX = dim_rotAngle

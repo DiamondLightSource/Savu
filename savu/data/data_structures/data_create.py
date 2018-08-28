@@ -22,6 +22,7 @@
 
 """
 import copy
+import h5py
 import numpy as np
 
 from savu.core.utils import docstring_parameter
@@ -56,7 +57,8 @@ class DataCreate(object):
         {0} \n {1} \n {2} \n {3}
 
         """
-        self.dtype = kwargs.get('dtype', np.float32)
+        #self.dtype = 
+        self.set_dtype(kwargs.get('dtype', np.float32))
         self.remove = kwargs.get('remove', False)
         self.raw = kwargs.get('raw', False)
         self.transport = kwargs.get('transport', None)
@@ -69,6 +71,23 @@ class DataCreate(object):
         else:
             self.__create_dataset_from_kwargs(kwargs)
         self.get_preview().set_preview([])
+
+    def set_dtype(self, dtype):
+        if not dtype:
+            if not self.data:
+                plugin = self._get_plugin_data()._plugin.__class__.__name__
+                raise Exception("Please create all output datasets before "
+                                "setting plugin data in %s plugin.\n" % plugin)
+            elif hasattr(self.data, 'dtype'):
+                dtype = self.data.dtype
+            else:
+                h5 = h5py._hl.dataset.Dataset
+                dtype = self.data.dtype if isinstance(self.data, h5) else \
+                    self.data.data.dtype
+        self.dtype = np.dtype(dtype)
+
+    def get_dtype(self):
+        return self.dtype
 
     def __create_dataset_from_object(self, data_obj):
         """ Create a dataset from an existing Data object.

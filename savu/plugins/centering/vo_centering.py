@@ -162,7 +162,7 @@ class VoCentering(BaseFilter, CpuPlugin):
     def process_frames(self, data):
         # if data is greater than a certain size
         # data = data[0][::self.parameters['step']]
-        # Use different smooth filters for coarse and fine search.            
+        # Use different smooth filters for coarse and fine search.
         (Nrow, Ncol) = data[0].shape
         self.downlevel = 1
         if Ncol > 1800:
@@ -206,7 +206,6 @@ class VoCentering(BaseFilter, CpuPlugin):
 
         # set up the output dataset that is created by the plugin
         in_dataset, out_dataset = self.get_datasets()
-
         self.orig_full_shape = in_dataset[0].get_shape()
 
         # if preview parameters exist then use these
@@ -217,12 +216,11 @@ class VoCentering(BaseFilter, CpuPlugin):
         # reduce the data as per data_subset parameter
         self.set_preview(in_dataset[0], self.parameters['preview'])
 
-        in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
         # copy all required information from in_dataset[0]
         fullData = in_dataset[0]
 
-        slice_dirs = np.array(in_dataset[0].get_slice_dimensions())
+        slice_dirs = list(in_dataset[0].get_data_patterns()\
+            ['SINOGRAM']['slice_dims'])
         new_shape = (np.prod(np.array(fullData.get_shape())[slice_dirs]), 1)
         self.orig_shape = \
             (np.prod(np.array(self.orig_full_shape)[slice_dirs]), 1)
@@ -240,6 +238,8 @@ class VoCentering(BaseFilter, CpuPlugin):
                                       transport='hdf5')
         out_dataset[1].add_pattern("METADATA", core_dims=(1,), slice_dims=(0,))
 
+        in_pData, out_pData = self.get_plugin_datasets()
+        in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
         out_pData[0].plugin_data_setup('METADATA', self.get_max_frames())
         out_pData[1].plugin_data_setup('METADATA', self.get_max_frames())
 
