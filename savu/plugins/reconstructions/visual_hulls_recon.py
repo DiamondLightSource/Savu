@@ -64,7 +64,8 @@ class VisualHullsRecon(BaseRecon, CpuPlugin):
                                     sino.shape[1]-1).astype('int')
             mask = sino[i, :][mapping_array]
             full -= 1-mask
-        full += 50
+        data_range = full.max() - full.min()
+        full += data_range/4
         full[full < 0.5] = 0
         return full
 

@@ -19,13 +19,15 @@
 """
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
+import os
+
 import scipy as sp
-import math
 import numpy as np
+
+import matplotlib.pyplot as plt
 
 from savu.plugins.utils import register_plugin
 from savu.plugins.filters.base_filter import BaseFilter
-from savu.data.plugin_list import CitationInformation
 
 
 @register_plugin
@@ -33,10 +35,11 @@ class OrthoSlice(BaseFilter, CpuPlugin):
     """
     A plugin to calculate the centre of rotation using the Vo Method
 
-    :param xy_slices: which XY slices to render. Default: [100].
-    :param yz_slices: which YZ slices to render. Default: [100].
-    :param xz_slices: which XZ slices to render. Default: [100].
-    :param file_type: File type to save as. Default: 'png'.
+    :u*param xy_slices: which XY slices to render. Default: [100].
+    :u*param yz_slices: which YZ slices to render. Default: [100].
+    :u*param xz_slices: which XZ slices to render. Default: [100].
+    :u*param file_type: File type to save as. Default: 'png'.
+    :u*param colourmap: Colour scheme to apply to the image. Default: 'magma'.
     """
 
     def __init__(self):
@@ -46,8 +49,13 @@ class OrthoSlice(BaseFilter, CpuPlugin):
         in_dataset, out_dataset = self.get_datasets()
         fullData = in_dataset[0]
 
+        image_path = os.path.join(self.exp.meta_data.get('out_path'), 'OrthoSlice')
+        if not os.path.exists(image_path):
+            os.makedirs(image_path)
+
         ext = self.parameters['file_type']
-        pos = 0  # TODO need to get this information
+        in_plugin_data = self.get_plugin_in_datasets()[0]
+        pos = in_plugin_data.get_current_frame_idx()[0]
 
         spatial_dims = list(in_dataset[0].get_data_patterns()['VOLUME_XY']['core_dims'])
         spatial_dims += list(in_dataset[0].get_data_patterns()['VOLUME_YZ']['core_dims'])
@@ -55,19 +63,35 @@ class OrthoSlice(BaseFilter, CpuPlugin):
 
         spatial_dims = list(set(spatial_dims))
 
-        slice_to_take = [slice(0)]*len(fullData.data.shape)
-        for i in spatial_dims:
-            slice_to_take[i] = slice(None)
+        slice_info = [('xy_slices', 'VOLUME_XY'),
+                      ('yz_slices', 'VOLUME_YZ'),
+                      ('xz_slices', 'VOLUME_XZ')]
 
-        if (pos < len(self.parameters['xy_slices'])):
-            for i in fullData.get_data_patterns()['VOLUME_XY']['slice_dims']:
-                if slice_to_take[i].stop == None:
-                    slice_pos = self.parameters['xy_slices'][pos]
-                    slice_to_take[i] = slice(slice_pos, slice_pos+1, 1)
-            image_data = fullData.data[slice_to_take[0], slice_to_take[1] ,slice_to_take[2]].squeeze()
-            sp.misc.imsave('/tmp/XY_%03i.%s' % (pos, ext), image_data)
-        else:
-            pos -= len(self.parameters['xy_slices'])
+        #TODO this can probably be moved somewhere better
+        colourmap = plt.get_cmap(self.parameters['colourmap'])
+
+        for direction, pattern in slice_info:
+            slice_to_take = [slice(0)]*len(fullData.data.shape)
+            for i in spatial_dims:
+                slice_to_take[i] = slice(None)
+            if (pos < len(self.parameters[direction])):
+                for i in fullData.get_data_patterns()[pattern]['slice_dims']:
+                    if slice_to_take[i].stop == None:
+                        slice_pos = self.parameters[direction][pos]
+                        slice_to_take[i] = slice(slice_pos, slice_pos+1, 1)
+                image_data = fullData.data[slice_to_take[0],
+                                           slice_to_take[1],
+                                           slice_to_take[2]].squeeze()
+
+                image_data -= image_data.min()
+                image_data /= image_data.max()
+                image_data = colourmap(image_data, bytes=True)
+
+                filename = '%s_%03i.%s' % (pattern, pos, ext)
+
+                sp.misc.imsave(os.path.join(image_path, filename), image_data)
+            else:
+                pos -= len(self.parameters['xy_slices'])
 
         #TODO repeat for others
 
