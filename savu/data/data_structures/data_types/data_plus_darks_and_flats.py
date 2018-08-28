@@ -194,6 +194,12 @@ class DataWithDarksAndFlats(BaseType):
         self.dark_flat_slice_list[1] = None
         self.data_obj.meta_data.set('flat', self._calc_mean(data))
 
+    def _set_dark_and_flat(self):
+        slice_list = self.data_obj._preview._get_preview_slice_list()
+        if slice_list:
+            self.dark_flat_slice_list = \
+                [tuple(self.get_dark_flat_slice_list())]*3
+
 
 class ImageKey(DataWithDarksAndFlats):
     """ This class is used to get data from a dataset with an image key. """
@@ -251,12 +257,6 @@ class ImageKey(DataWithDarksAndFlats):
         """ Get the flat data. """
         return self.flat_updated if self.flat_updated is not False else\
             self.flat_image_key_data()
-
-    def _set_dark_and_flat(self):
-        slice_list = self.data_obj._preview._get_preview_slice_list()
-        if slice_list:
-            self.dark_flat_slice_list = \
-                [tuple(self.get_dark_flat_slice_list())]*3
 
 
 class NoImageKey(DataWithDarksAndFlats):
@@ -338,13 +338,3 @@ class NoImageKey(DataWithDarksAndFlats):
             self.image_key = self.orig_image_key
             return flat
         return self.flat_path[self.dark_flat_slice_list[1]]*self.fscale
-
-    def _set_dark_and_flat(self):
-        self.dark_flat_slice_list = self.get_dark_flat_slice_list()
-        # remove extra dimension if 3d to 4d mapping
-        from savu.data.data_structures.data_types.map_3dto4d_h5 \
-            import Map3dto4dh5
-        if Map3dto4dh5 in self.__class__.__bases__:
-            del self.dark_flat_slice_list[-1]
-
-        self.dark_flat_slice_list = [tuple(self.dark_flat_slice_list)]*3
