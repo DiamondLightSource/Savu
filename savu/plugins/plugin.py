@@ -53,6 +53,7 @@ class Plugin(PluginDatasets):
         self.slice_list = None
         self.global_index = None
         self.pcount = 0
+        self.exp = None
 
     def _main_setup(self, exp, params):
         """ Performs all the required plugin setup.
@@ -65,7 +66,6 @@ class Plugin(PluginDatasets):
         :params dict params: Parameter values.
         """
         self.__reset_process_frames_counter()
-        self.exp = exp
         self._set_parameters(params)
         self._set_plugin_datasets()
         self.setup()
