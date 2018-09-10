@@ -53,10 +53,12 @@ class Dezinger(BaseFilter, CpuPlugin):
         inData = self.get_in_datasets()[0]
         dark = inData.data.dark()
         flat = inData.data.flat()
+        self.data_size = inData.get_shape()
 
         pad_list = ((self.pad, self.pad), (0, 0), (0, 0))
 
-        # dezing the dark field
+        # dezing the dark field        print "*****in data shape in base filter", in_dataset[0].get_shape()
+
         if dark.size:
             (retval, self.warnflag, self.errflag) = dezing.setup_size(
                 dark.shape, self.parameters['outlier_mu'], self.pad,
@@ -114,7 +116,6 @@ class Dezinger(BaseFilter, CpuPlugin):
     def set_filter_padding(self, in_data, out_data):
         in_data = in_data[0]
         self.pad = (self.parameters['kernel_size'] - 1) / 2
-        self.data_size = in_data.get_shape()
         in_data.padding = {'pad_multi_frames': self.pad}
         out_data[0].padding = {'pad_multi_frames': self.pad}
 
