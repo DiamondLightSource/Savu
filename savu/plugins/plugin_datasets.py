@@ -21,6 +21,8 @@
 
 """
 
+import numpy as np
+
 import savu.plugins.plugin_datasets_notes as notes
 from savu.core.utils import docstring_parameter
 from savu.data.data_structures.plugin_data import PluginData
@@ -62,20 +64,43 @@ class PluginDatasets(object):
                 data_obj.raw.create_next_instance(data_obj)
 #                data_obj.clone = True
 
-    def __set_max_itemsize(self):
+    def _finalise_datasets(self):
         in_data, out_data = self.get_datasets()
         for data in in_data + out_data:
-            dtype = data.get_dtype()
-            if not dtype:
-                data.set_dtype(None)
-            self._max_itemsize = max(self._max_itemsize,
-                                     data.get_dtype().itemsize)
+            data._finalise_patterns()
 
-    def get_max_itemsize(self):
-        """ Return the max itemsize (bytes) of the plugin in/out datasets. """
-        if not self._max_itemsize:
-            self.__set_max_itemsize()
-        return self._max_itemsize
+    def _finalise_plugin_datasets(self):
+        if 'dawn_runner' in self.exp.meta_data.get_dictionary().keys():
+            return
+
+        in_pData, out_pData = self.get_plugin_datasets()
+        params = {}
+        for pData in in_pData + out_pData:
+            pData._set_meta_data()
+            params[pData] = pData._get_plugin_data_size_params()
+        
+        max_bytes = 0
+        for key, value in params.iteritems():
+            if value['transfer_bytes'] > max_bytes:
+                max_data = key
+                max_bytes = value['transfer_bytes']
+        
+        # set mft and mfp for the largest dataset
+        max_data.plugin_data_transfer_setup()
+        to_set = list(set(params.keys()).difference(set([max_data])))
+        
+        for pData in to_set:
+            if params[pData]['total_frames'] == params[max_data]['total_frames']:
+                pData.plugin_data_transfer_setup(pData=max_data)
+            else:
+                raise Exception("The length of each slice dimension is not equal.")
+#                mData = max_data.meta_data.get
+#                sdir_shape = [mData('shape')[i] for i in mData('sdir')]
+#                mft_list = mData('size_list')
+#                nTrans = int(np.prod([np.ceil(sdir_shape[i]/float(mft_list[i])) for i in range(len(mft_list))]))
+                # need to calculate mft and mfp from nTrans!
+#                td = self.data_obj._get_transport_data()
+#                mfp = td._calc_max_frames_process(pData.max_frames)
 
     def __set_in_datasets(self):
         """ Set the in_data objects.

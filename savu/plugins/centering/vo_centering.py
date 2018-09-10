@@ -206,6 +206,10 @@ class VoCentering(BaseFilter, CpuPlugin):
 
         # set up the output dataset that is created by the plugin
         in_dataset, out_dataset = self.get_datasets()
+        in_pData, out_pData = self.get_plugin_datasets()
+        in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
+
+        slice_dirs = list(in_dataset[0].get_slice_dimensions())
         self.orig_full_shape = in_dataset[0].get_shape()
 
         # if preview parameters exist then use these
@@ -215,12 +219,12 @@ class VoCentering(BaseFilter, CpuPlugin):
 
         # reduce the data as per data_subset parameter
         self.set_preview(in_dataset[0], self.parameters['preview'])
+        total_frames = \
+            self._calc_total_frames(in_dataset[0].get_preview(), slice_dirs)
 
         # copy all required information from in_dataset[0]
         fullData = in_dataset[0]
 
-        slice_dirs = list(in_dataset[0].get_data_patterns()\
-            ['SINOGRAM']['slice_dims'])
         new_shape = (np.prod(np.array(fullData.get_shape())[slice_dirs]), 1)
         self.orig_shape = \
             (np.prod(np.array(self.orig_full_shape)[slice_dirs]), 1)
@@ -238,12 +242,17 @@ class VoCentering(BaseFilter, CpuPlugin):
                                       transport='hdf5')
         out_dataset[1].add_pattern("METADATA", core_dims=(1,), slice_dims=(0,))
 
-        in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
         out_pData[0].plugin_data_setup('METADATA', self.get_max_frames())
         out_pData[1].plugin_data_setup('METADATA', self.get_max_frames())
+        out_pData[1].meta_data.set('fix_total_frames', total_frames)
 
         self.exp.log(self.name + " End")
+
+    def _calc_total_frames(self, preview, slice_dims):
+        starts, stops, steps, _ = preview.get_starts_stops_steps()
+        lengths = [len(np.arange(starts[i], stops[i], steps[i]))
+                   for i in range(len(starts))]
+        return np.prod([lengths[i] for i in slice_dims])
 
     def nOutput_datasets(self):
         return 2

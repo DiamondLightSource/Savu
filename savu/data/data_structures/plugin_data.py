@@ -47,7 +47,6 @@ class PluginData(object):
         self.padding = None
         self.pad_dict = None
         self.shape = None
-        self.shape_transfer = None
         self.core_shape = None
         self.multi_params = {}
         self.extra_dims = []
@@ -137,14 +136,35 @@ class PluginData(object):
         i = 0
         for dim in slice_dir:
             shape[dim] = slice_size[i]
-            i += 1
-        self.shape_transfer = tuple(shape)
+            i += 1            
+        return tuple(shape)
 
-    def get_bytes_per_frame(self):
+    def __get_slice_size(self, mft):
+        """ Calculate the number of frames transfer in each dimension given
+            mft. """
+        dshape = list(self.data_obj.get_shape())
+
+        if 'fixed_dimensions' in self.meta_data.get_dictionary().keys():
+            fixed_dims = self.meta_data.get('fixed_dimensions')
+            for d in fixed_dims:
+                dshape[d] = 1
+
+        dshape = [dshape[i] for i in self.meta_data.get('slice_dims')]
+        size_list = [1]*len(dshape)
+        i = 0
+        while(mft > 0):
+            size_list[i] = min(dshape[i], mft)
+            mft = mft - size_list[i]
+            i += 1
+        return size_list
+
+    def set_bytes_per_frame(self):
         """ Return the size of a single frame in bytes. """
-        nBytes = self._plugin.get_max_itemsize()
+        nBytes = self.data_obj.get_itemsize()
         dims = self.get_pattern().values()[0]['core_dims']
-        return np.prod([self.data_obj.get_shape()[d] for d in dims])*nBytes
+        frame_shape = [self.data_obj.get_shape()[d] for d in dims]
+        b_per_f = np.prod(frame_shape)*nBytes
+        return frame_shape, b_per_f
 
     def get_shape(self):
         """ Get the shape of the data (without padding) that is passed to the
@@ -164,7 +184,7 @@ class PluginData(object):
     def get_shape_transfer(self):
         """ Get the shape of the plugin data to be transferred each time.
         """
-        return self.shape_transfer
+        return self.meta_data.get('transfer_shape')
 
     def __set_core_shape(self, shape):
         """ Set the core shape to hold only the shape of the core dimensions
@@ -322,7 +342,7 @@ class PluginData(object):
     def _get_no_squeeze(self):
         return self.no_squeeze
 
-    def _get_max_frames_parameters(self):
+    def _set_meta_data(self):
         fixed, _ = self._get_fixed_dimensions()
         sdir = \
             [s for s in self.data_obj.get_slice_dimensions() if s not in fixed]
@@ -334,7 +354,11 @@ class PluginData(object):
             shape = shape_before_tuning
             sdir = sdir[:-diff]
 
-        frames = np.prod([shape[d] for d in sdir])
+        if 'fix_total_frames' in self.meta_data.get_dictionary().keys():
+            frames = self.meta_data.get('fix_total_frames')
+        else:
+            frames = np.prod([shape[d] for d in sdir])
+
         base_names = [p.__name__ for p in self._plugin.__class__.__bases__]
         processes = self.data_obj.exp.meta_data.get('processes')
 
@@ -344,9 +368,15 @@ class PluginData(object):
             n_procs = len(processes)
 
         f_per_p = np.ceil(frames/n_procs)
-        params_dict = {'shape': shape, 'sdir': sdir, 'total_frames': frames,
-                       'mpi_procs': n_procs, 'frames_per_process': f_per_p}
-        return params_dict
+        self.meta_data.set('shape', shape)
+        self.meta_data.set('sdir', sdir)
+        self.meta_data.set('total_frames', frames)
+        self.meta_data.set('mpi_procs', n_procs)
+        self.meta_data.set('frames_per_process', f_per_p)
+        frame_shape, b_per_f = self.set_bytes_per_frame()
+        self.meta_data.set('bytes_per_frame', b_per_f)
+        self.meta_data.set('bytes_per_process', b_per_f*f_per_p)
+        self.meta_data.set('frame_shape', frame_shape)
 
     def __log_max_frames(self, mft, mfp, check=True):
         logging.debug("Setting max frames transfer for plugin %s to %d" %
@@ -359,15 +389,15 @@ class PluginData(object):
         # (((total_frames/mft)/mpi_procs) % 1)
 
     def __check_distribution(self, mft):
-        self.params = self._get_max_frames_parameters()
         warn_threshold = 0.85
-        nprocs = self.params['mpi_procs']
-        nframes = self.params['total_frames']
+        nprocs = self.meta_data.get('mpi_procs')
+        nframes = self.meta_data.get('total_frames')
         temp = (((nframes/mft)/float(nprocs)) % 1)
         if temp != 0.0 and temp < warn_threshold:
+            shape = self.meta_data.get('shape')
+            sdir = self.meta_data.get('sdir')
             logging.warn('UNEVEN FRAME DISTRIBUTION: shape %s, nframes %s ' +
-                         'sdir %s, nprocs %s', self.params['shape'],
-                         nframes, self.params['sdir'], nprocs)
+                         'sdir %s, nprocs %s', shape, nframes, sdir, nprocs)
 
     def _set_padding_dict(self):
         if self.padding and not isinstance(self.padding, Padding):
@@ -379,46 +409,66 @@ class PluginData(object):
     def plugin_data_setup(self, pattern, nFrames, split=None):
         """ Setup the PluginData object.
 
-        # add more information into here via a decorator!
         :param str pattern: A pattern name
         :param int nFrames: How many frames to process at a time.  Choose from\
             'single', 'multiple', 'fixed_multiple' or an integer (an integer \
             should only ever be passed in exceptional circumstances)
         """
         self.__set_pattern(pattern)
-        mData = self.data_obj.exp.meta_data
-        if 'dawn_runner' in mData.get_dictionary().keys():
-            return
+        if isinstance(nFrames, list):
+            nFrames, self._frame_limit = nFrames
+        self.max_frames = nFrames
+        self.split = split
 
+    def plugin_data_transfer_setup(self, pData=None):
+        """ call this from plugin.py - here pData is another plugin data
+            object to copy information from. """
         chunks = \
             self.data_obj.get_preview().get_starts_stops_steps(key='chunks')
 
-        if isinstance(nFrames, list):
-            nFrames, self._frame_limit = nFrames
+        if not pData:
+            mft, mft_shape, mfp = self._calculate_max_frames()
+        else:
+            mft = pData._get_max_frames_transfer()
+            mft_shape = self._set_shape_transfer(self.__get_slice_size(mft))
+            mfp = pData._get_max_frames_process()
 
-        self.__set_max_frames(nFrames)
-        mft = self.meta_data.get('max_frames_transfer')
+        self.__set_max_frames(mft, mft_shape, mfp)
+
         if self._plugin and mft \
                 and (chunks[self.data_obj.get_slice_dimensions()[0]] % mft):
             self._plugin.chunk = True
         self.__set_shape()
-        self.split = split
 
-    def __set_max_frames(self, nFrames):
-        self.max_frames = nFrames
+    def _calculate_max_frames(self):
+        nFrames = self.max_frames
         self.__perform_checks(nFrames)
         td = self.data_obj._get_transport_data()
-        mft, mft_shape = td._calc_max_frames_transfer(nFrames)
-        self.meta_data.set('max_frames_transfer', mft)
-        if mft:
-            self._set_shape_transfer(mft_shape)
+        mft, size_list = td._calc_max_frames_transfer(nFrames)
+        self.meta_data.set('size_list', size_list)
         mfp = td._calc_max_frames_process(nFrames)
+        if mft:
+            mft_shape = self._set_shape_transfer(list(size_list))
+        return mft, mft_shape, mfp
+
+    def __set_max_frames(self, mft, mft_shape, mfp):
+        self.meta_data.set('max_frames_transfer', mft)
+        self.meta_data.set('transfer_shape', mft_shape)
         self.meta_data.set('max_frames_process', mfp)
         self.__log_max_frames(mft, mfp)
-
         # Retain the shape if the first slice dimension has length 1
-        if mfp == 1 and nFrames == 'multiple':
+        if mfp == 1 and self.max_frames == 'multiple':
             self._set_no_squeeze()
+
+    def _get_plugin_data_size_params(self):
+        nBytes = self.data_obj.get_itemsize()
+        frame_shape = self.meta_data.get('frame_shape')
+        total_frames = self.meta_data.get('total_frames')
+        tbytes = nBytes*np.prod(frame_shape)*total_frames
+        
+        params = {'nBytes': nBytes, 'frame_shape': frame_shape,
+                  'total_frames': total_frames, 'transfer_bytes': tbytes}
+        return params
 
     def __perform_checks(self, nFrames):
         options = ['single', 'multiple']

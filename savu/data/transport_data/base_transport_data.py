@@ -66,7 +66,7 @@ class BaseTransportData(object):
 
     def _calc_max_frames_transfer_single(self, nFrames):
         """ Only one transfer per process """
-        self.params = self.data._get_plugin_data()._get_max_frames_parameters()
+        self.params = self.data._get_plugin_data().meta_data.get_dictionary()
         mft = np.ceil(
                 self.params['total_frames']/float(self.params['mpi_procs']))
 
@@ -80,7 +80,7 @@ class BaseTransportData(object):
 
     def _calc_max_frames_transfer_multi(self, nFrames):
         """ Multiple transfer per process """
-        self.params = self.data._get_plugin_data()._get_max_frames_parameters()
+        self.params = self.data._get_plugin_data().meta_data.get_dictionary()
         mft, fchoices, size_list = self.__get_optimum_distribution(nFrames)
         if nFrames == 'single':
             return mft, size_list[fchoices.index(mft)]
@@ -93,8 +93,8 @@ class BaseTransportData(object):
         return mft, size_list[fchoices.index(mft)]
 
     def _set_boundaries(self):
-        b_per_f = self.data._get_plugin_data().get_bytes_per_frame()
-        b_per_p = b_per_f*self.params['frames_per_process']
+        b_per_f = self.params.get('bytes_per_frame')
+        b_per_p = self.params.get('bytes_per_process')
         settings = self.data.exp.meta_data.get(
                 ['system_params', 'data_transfer_settings'])
         max_bytes = self.__convert_str(settings['max_bytes'], b_per_p)
