@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from savu.data.data_structures.data_notes import axis_labels
 """
 .. module:: ortho_slice
    :platform: Unix
@@ -20,6 +21,7 @@
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 import os
+import copy
 
 import scipy as sp
 import numpy as np
@@ -45,8 +47,19 @@ class OrthoSlice(BaseFilter, CpuPlugin):
     def __init__(self):
         super(OrthoSlice, self).__init__("OrthoSlice")
 
+    def pre_process(self):
+        BaseFilter.pre_process(self)
+
+
+
     def process_frames(self, data):
+        
+        data[0] 
+        
         in_dataset, out_dataset = self.get_datasets()
+        
+        
+        
         fullData = in_dataset[0]
 
         image_path = os.path.join(self.exp.meta_data.get('out_path'), 'OrthoSlice')
@@ -57,22 +70,17 @@ class OrthoSlice(BaseFilter, CpuPlugin):
         in_plugin_data = self.get_plugin_in_datasets()[0]
         pos = in_plugin_data.get_current_frame_idx()[0]
 
-        spatial_dims = list(in_dataset[0].get_data_patterns()['VOLUME_XY']['core_dims'])
-        spatial_dims += list(in_dataset[0].get_data_patterns()['VOLUME_YZ']['core_dims'])
-        spatial_dims += list(in_dataset[0].get_data_patterns()['VOLUME_XZ']['core_dims'])
-
-        spatial_dims = list(set(spatial_dims))
-
         slice_info = [('xy_slices', 'VOLUME_XY'),
                       ('yz_slices', 'VOLUME_YZ'),
                       ('xz_slices', 'VOLUME_XZ')]
+
 
         #TODO this can probably be moved somewhere better
         colourmap = plt.get_cmap(self.parameters['colourmap'])
 
         for direction, pattern in slice_info:
             slice_to_take = [slice(0)]*len(fullData.data.shape)
-            for i in spatial_dims:
+            for i in list(self.spatial_dims):
                 slice_to_take[i] = slice(None)
             if (pos < len(self.parameters[direction])):
                 for i in fullData.get_data_patterns()[pattern]['slice_dims']:
@@ -112,44 +120,59 @@ class OrthoSlice(BaseFilter, CpuPlugin):
         # set up the output dataset that is created by the plugin
         in_dataset, out_dataset = self.get_datasets()
 
-        self.orig_full_shape = in_dataset[0].get_shape()
+        full_data_shape = list(in_dataset[0].get_shape())
 
-        number_of_images = len(self.parameters['xy_slices'])
-        number_of_images += len(self.parameters['yz_slices'])
-        number_of_images += len(self.parameters['xz_slices'])
+        spatial_dims = list(in_dataset[0].get_data_patterns()['VOLUME_XY']['core_dims'])
+        spatial_dims += list(in_dataset[0].get_data_patterns()['VOLUME_YZ']['core_dims'])
+        spatial_dims += list(in_dataset[0].get_data_patterns()['VOLUME_XZ']['core_dims'])
 
-        # generate a fake slicelist to get paralel threads
-        # FIXME this is a bit of a hack
-        preview_slices = [str(number_of_images)]
-        for i in range(len(self.orig_full_shape)-1):
-            preview_slices.append('1')
-
-        preview_slices = '['+','.join(preview_slices)+']'
-        self.set_preview(in_dataset[0], preview_slices)
+        self.spatial_dims = set(spatial_dims)
 
         in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup('VOLUME_XZ', self.get_max_frames())
-        # copy all required information from in_dataset[0]
-        fullData = in_dataset[0]
 
-        slice_dirs = np.array(in_dataset[0].get_slice_dimensions())
-        new_shape = (np.prod(np.array(fullData.get_shape())[slice_dirs]), 1)
-        self.orig_shape = \
-            (np.prod(np.array(self.orig_full_shape)[slice_dirs]), 1)
+        # Sort out dataset 0
+        in_pData[0].plugin_data_setup('VOLUME_XY', self.get_max_frames())
+        fixed_dim = list(self.spatial_dims.difference(set(in_pData[0].get_pattern()['core_dims'])))
+        in_pData[0].set_fixed_dimensions(fixed_dim,[self.parameters['xy_slices']])
 
-        out_dataset[0].create_dataset(shape=new_shape,
-                                      axis_labels=['x.pixels', 'y.pixels'],
-                                      remove=True,
-                                      transport='hdf5')
+        reduced_shape = copy.copy(full_data_shape)
+        del reduced_shape[fixed_dim[0]]
+        out_dataset[0].create_dataset(axis_labels={in_dataset[0]: [str(fixed_dim[0])] },
+                                      shape=reduced_shape,
+                                      patterns={in_dataset[0]: ['VOLUME_XY.%i'%fixed_dim[0]]})
+        out_pData[0].plugin_data_setup('VOLUME_XY', self.get_max_frames())
 
-        out_dataset[0].add_pattern("METADATA", core_dims=(1,), slice_dims=(0,))
+        # Sort out dataset 1
+        in_pData[1].plugin_data_setup('VOLUME_YZ', self.get_max_frames())
+        fixed_dim = list(self.spatial_dims.difference(set(in_pData[1].get_pattern()['core_dims'])))
+        in_pData[1].set_fixed_dimensions(fixed_dim,[self.parameters['yz_slices']])
 
-        out_pData[0].plugin_data_setup('METADATA', self.get_max_frames())
+        reduced_shape = copy.copy(full_data_shape)
+        del reduced_shape[fixed_dim[0]]
+        out_dataset[1].create_dataset(axis_labels={in_dataset[1]: [str(fixed_dim[0])] },
+                                      shape=reduced_shape,
+                                      patterns={in_dataset[1]: ['VOLUME_YZ.%i'%fixed_dim[0]]})
+        out_pData[1].plugin_data_setup('VOLUME_YZ', self.get_max_frames())
+
+        # Sort out dataset 2
+        in_pData[2].plugin_data_setup('VOLUME_XZ', self.get_max_frames())
+        fixed_dim = list(self.spatial_dims.difference(set(in_pData[2].get_pattern()['core_dims'])))
+        in_pData[2].set_fixed_dimensions(fixed_dim,[self.parameters['xz_slices']])
+
+        reduced_shape = copy.copy(full_data_shape)
+        del reduced_shape[fixed_dim[0]]
+        out_dataset[2].create_dataset(axis_labels={in_dataset[2]: [str(fixed_dim[0])] },
+                                      shape=reduced_shape,
+                                      patterns={in_dataset[2]: ['VOLUME_XZ.%i'%fixed_dim[0]]})
+        out_pData[2].plugin_data_setup('VOLUME_XZ', self.get_max_frames())
 
         self.exp.log(self.name + " End")
 
+    def nInput_datasets(self):
+        return 3
+
     def nOutput_datasets(self):
-        return 1
+        return 3
 
     def get_max_frames(self):
         return 'single'
