@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from savu.data.data_structures.data_notes import axis_labels
 """
 .. module:: ortho_slice
    :platform: Unix
@@ -29,11 +28,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from savu.plugins.utils import register_plugin
+from savu.plugins.plugin import Plugin
 from savu.plugins.filters.base_filter import BaseFilter
 
 
 @register_plugin
-class OrthoSlice(BaseFilter, CpuPlugin):
+class OrthoSlice(Plugin, CpuPlugin):
     """
     A plugin to calculate the centre of rotation using the Vo Method
 
@@ -50,60 +50,61 @@ class OrthoSlice(BaseFilter, CpuPlugin):
     def pre_process(self):
         BaseFilter.pre_process(self)
 
-
-
     def process_frames(self, data):
-        
-        data[0] 
-        
-        in_dataset, out_dataset = self.get_datasets()
-        
-        
-        
-        fullData = in_dataset[0]
+        return data
 
-        image_path = os.path.join(self.exp.meta_data.get('out_path'), 'OrthoSlice')
-        if not os.path.exists(image_path):
-            os.makedirs(image_path)
-
-        ext = self.parameters['file_type']
-        in_plugin_data = self.get_plugin_in_datasets()[0]
-        pos = in_plugin_data.get_current_frame_idx()[0]
-
-        slice_info = [('xy_slices', 'VOLUME_XY'),
-                      ('yz_slices', 'VOLUME_YZ'),
-                      ('xz_slices', 'VOLUME_XZ')]
-
-
-        #TODO this can probably be moved somewhere better
-        colourmap = plt.get_cmap(self.parameters['colourmap'])
-
-        for direction, pattern in slice_info:
-            slice_to_take = [slice(0)]*len(fullData.data.shape)
-            for i in list(self.spatial_dims):
-                slice_to_take[i] = slice(None)
-            if (pos < len(self.parameters[direction])):
-                for i in fullData.get_data_patterns()[pattern]['slice_dims']:
-                    if slice_to_take[i].stop == None:
-                        slice_pos = self.parameters[direction][pos]
-                        slice_to_take[i] = slice(slice_pos, slice_pos+1, 1)
-                image_data = fullData.data[slice_to_take[0],
-                                           slice_to_take[1],
-                                           slice_to_take[2]].squeeze()
-
-                image_data -= image_data.min()
-                image_data /= image_data.max()
-                image_data = colourmap(image_data, bytes=True)
-
-                filename = '%s_%03i.%s' % (pattern, pos, ext)
-
-                sp.misc.imsave(os.path.join(image_path, filename), image_data)
-            else:
-                pos -= len(self.parameters['xy_slices'])
-
-        #TODO repeat for others
-
-        return [np.array([pos])]
+#    def process_frames(self, data):
+#        
+#        data[0] 
+#        
+#        in_dataset, out_dataset = self.get_datasets()
+#        
+#        
+#        
+#        fullData = in_dataset[0]
+#
+#        image_path = os.path.join(self.exp.meta_data.get('out_path'), 'OrthoSlice')
+#        if not os.path.exists(image_path):
+#            os.makedirs(image_path)
+#
+#        ext = self.parameters['file_type']
+#        in_plugin_data = self.get_plugin_in_datasets()[0]
+#        pos = in_plugin_data.get_current_frame_idx()[0]
+#
+#        slice_info = [('xy_slices', 'VOLUME_XY'),
+#                      ('yz_slices', 'VOLUME_YZ'),
+#                      ('xz_slices', 'VOLUME_XZ')]
+#
+#
+#        #TODO this can probably be moved somewhere better
+#        colourmap = plt.get_cmap(self.parameters['colourmap'])
+#
+#        for direction, pattern in slice_info:
+#            slice_to_take = [slice(0)]*len(fullData.data.shape)
+#            for i in list(self.spatial_dims):
+#                slice_to_take[i] = slice(None)
+#            if (pos < len(self.parameters[direction])):
+#                for i in fullData.get_data_patterns()[pattern]['slice_dims']:
+#                    if slice_to_take[i].stop == None:
+#                        slice_pos = self.parameters[direction][pos]
+#                        slice_to_take[i] = slice(slice_pos, slice_pos+1, 1)
+#                image_data = fullData.data[slice_to_take[0],
+#                                           slice_to_take[1],
+#                                           slice_to_take[2]].squeeze()
+#
+#                image_data -= image_data.min()
+#                image_data /= image_data.max()
+#                image_data = colourmap(image_data, bytes=True)
+#
+#                filename = '%s_%03i.%s' % (pattern, pos, ext)
+#
+#                sp.misc.imsave(os.path.join(image_path, filename), image_data)
+#            else:
+#                pos -= len(self.parameters['xy_slices'])
+#
+#        #TODO repeat for others
+#
+#        return [np.array([pos])]
 
 
     def populate_meta_data(self, key, value):
@@ -132,37 +133,37 @@ class OrthoSlice(BaseFilter, CpuPlugin):
 
         # Sort out dataset 0
         in_pData[0].plugin_data_setup('VOLUME_XY', self.get_max_frames())
-        fixed_dim = list(self.spatial_dims.difference(set(in_pData[0].get_pattern()['core_dims'])))
+        fixed_dim = list(self.spatial_dims.difference(set(in_pData[0].get_core_dimensions())))
         in_pData[0].set_fixed_dimensions(fixed_dim,[self.parameters['xy_slices']])
 
         reduced_shape = copy.copy(full_data_shape)
-        del reduced_shape[fixed_dim[0]]
-        out_dataset[0].create_dataset(axis_labels={in_dataset[0]: [str(fixed_dim[0])] },
-                                      shape=reduced_shape,
-                                      patterns={in_dataset[0]: ['VOLUME_XY.%i'%fixed_dim[0]]})
+        reduced_shape[fixed_dim[0]] = 1
+        out_dataset[0].create_dataset(axis_labels=in_dataset[0],
+                                      shape=tuple(reduced_shape),
+                                      patterns=in_dataset[0])
         out_pData[0].plugin_data_setup('VOLUME_XY', self.get_max_frames())
 
         # Sort out dataset 1
         in_pData[1].plugin_data_setup('VOLUME_YZ', self.get_max_frames())
-        fixed_dim = list(self.spatial_dims.difference(set(in_pData[1].get_pattern()['core_dims'])))
+        fixed_dim = list(self.spatial_dims.difference(set(in_pData[1].get_core_dimensions())))
         in_pData[1].set_fixed_dimensions(fixed_dim,[self.parameters['yz_slices']])
 
         reduced_shape = copy.copy(full_data_shape)
         del reduced_shape[fixed_dim[0]]
         out_dataset[1].create_dataset(axis_labels={in_dataset[1]: [str(fixed_dim[0])] },
-                                      shape=reduced_shape,
+                                      shape=tuple(reduced_shape),
                                       patterns={in_dataset[1]: ['VOLUME_YZ.%i'%fixed_dim[0]]})
         out_pData[1].plugin_data_setup('VOLUME_YZ', self.get_max_frames())
 
         # Sort out dataset 2
         in_pData[2].plugin_data_setup('VOLUME_XZ', self.get_max_frames())
-        fixed_dim = list(self.spatial_dims.difference(set(in_pData[2].get_pattern()['core_dims'])))
+        fixed_dim = list(self.spatial_dims.difference(set(in_pData[2].get_core_dimensions())))
         in_pData[2].set_fixed_dimensions(fixed_dim,[self.parameters['xz_slices']])
 
         reduced_shape = copy.copy(full_data_shape)
         del reduced_shape[fixed_dim[0]]
         out_dataset[2].create_dataset(axis_labels={in_dataset[2]: [str(fixed_dim[0])] },
-                                      shape=reduced_shape,
+                                      shape=tuple(reduced_shape),
                                       patterns={in_dataset[2]: ['VOLUME_XZ.%i'%fixed_dim[0]]})
         out_pData[2].plugin_data_setup('VOLUME_XZ', self.get_max_frames())
 
