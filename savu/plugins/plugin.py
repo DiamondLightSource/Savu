@@ -211,6 +211,10 @@ class Plugin(PluginDatasets):
                 seq = value[0].split(':')
                 seq = [eval(s) for s in seq]
                 value = list(np.arange(seq[0], seq[1], seq[2]))
+                if len(value) == 0:
+                    raise RuntimeError(
+                        'No values for tuned parameter "{}", '
+                        'ensure start:stop:step; values are valid.'.format(key))
             if type(value[0]) != dtype:
                 try:
                     value.remove('')
