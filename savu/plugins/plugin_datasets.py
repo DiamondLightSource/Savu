@@ -21,8 +21,6 @@
 
 """
 
-import numpy as np
-
 import savu.plugins.plugin_datasets_notes as notes
 from savu.core.utils import docstring_parameter
 from savu.data.data_structures.plugin_data import PluginData
