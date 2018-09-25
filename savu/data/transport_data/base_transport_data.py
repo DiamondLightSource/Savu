@@ -81,7 +81,7 @@ class BaseTransportData(object):
     def _calc_max_frames_transfer_multi(self, nFrames):
         """ Multiple transfer per process """
         self.params = self.data._get_plugin_data().meta_data.get_dictionary()
-        mft, fchoices, size_list = self.__get_optimum_distribution(nFrames)
+        mft, fchoices, size_list = self.__get_optimum_distribution(nFrames)        
         if nFrames == 'single':
             return mft, size_list[fchoices.index(mft)]
         nSlices = self.params['shape'][self.params['sdir'][0]]
@@ -234,7 +234,8 @@ class BaseTransportData(object):
                 idx += 1
                 if idx == nDims:
                     break
-            temp[idx] += 1
+            else:
+                temp[idx] += 1
 
         return choices[::-1], size_list[::-1]
 
