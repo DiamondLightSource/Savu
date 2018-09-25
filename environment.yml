@@ -26,7 +26,7 @@ dependencies:
   - pip:
     - nvidia-ml-py
     - peakutils
-    - pymca
+    - pymca==5.3.1
     - gnureadline
     - pmacparser
 
