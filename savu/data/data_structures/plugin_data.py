@@ -353,7 +353,7 @@ class PluginData(object):
         if diff:
             shape = shape_before_tuning
             sdir = sdir[:-diff]
-
+        
         if 'fix_total_frames' in self.meta_data.get_dictionary().keys():
             frames = self.meta_data.get('fix_total_frames')
         else:

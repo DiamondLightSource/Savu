@@ -70,7 +70,7 @@ class Plugin(PluginDatasets):
         self._set_plugin_datasets()
         self.setup()
         self.set_filter_padding(*(self.get_plugin_datasets()))
-        self._finalise_datasets()    
+        self._finalise_datasets()
         self._finalise_plugin_datasets()
 
     def __reset_process_frames_counter(self):
