@@ -152,10 +152,13 @@ class PluginData(object):
         dshape = [dshape[i] for i in self.meta_data.get('slice_dims')]
         size_list = [1]*len(dshape)
         i = 0
-        while(mft > 0):
+        
+        while(mft > 1):
             size_list[i] = min(dshape[i], mft)
-            mft = mft - np.prod(size_list)
+            mft -= np.prod(size_list) if np.prod(size_list) > 1 else 0
             i += 1
+
+        self.meta_data.set('size_list', size_list)
         return size_list
 
     def set_bytes_per_frame(self):
@@ -420,18 +423,26 @@ class PluginData(object):
         self.max_frames = nFrames
         self.split = split
 
-    def plugin_data_transfer_setup(self, pData=None):
-        """ call this from plugin.py - here pData is another plugin data
-            object to copy information from. """
+    def plugin_data_transfer_setup(self, copy=None, calc=None):
+        """ Set up the plugin data transfer frame parameters.
+        If copy=pData (another PluginData instance) then copy """
         chunks = \
             self.data_obj.get_preview().get_starts_stops_steps(key='chunks')
 
-        if not pData:
+        if not copy and not calc:
             mft, mft_shape, mfp = self._calculate_max_frames()
-        else:
-            mft = pData._get_max_frames_transfer()
+        elif calc:
+            max_mft = calc.meta_data.get('max_frames_transfer')             
+            max_mfp = calc.meta_data.get('max_frames_process')
+            max_nProc = int(np.ceil(max_mft/float(max_mfp)))
+            nProc = max_nProc
+            mfp = 1 if self.max_frames == 'single' else self.max_frames
+            mft = nProc*mfp
             mft_shape = self._set_shape_transfer(self.__get_slice_size(mft))
-            mfp = pData._get_max_frames_process()
+        elif copy:
+            mft = copy._get_max_frames_transfer()
+            mft_shape = self._set_shape_transfer(self.__get_slice_size(mft))
+            mfp = copy._get_max_frames_process()
 
         self.__set_max_frames(mft, mft_shape, mfp)
 
