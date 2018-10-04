@@ -53,6 +53,6 @@ pmean:
 
     exp_metadata:  # optional, additional global information associated with the experiment
         test:
-            value  :  10
+            value  :  $dfile['entry/inputs/program'].value
             
 
