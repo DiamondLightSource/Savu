@@ -81,14 +81,13 @@ class BaseTransportData(object):
     def _calc_max_frames_transfer_multi(self, nFrames):
         """ Multiple transfer per process """
         self.params = self.data._get_plugin_data().meta_data.get_dictionary()
-        mft, fchoices, size_list = self.__get_optimum_distribution(nFrames)        
+        mft, fchoices, size_list = self.__get_optimum_distribution(nFrames)
         if nFrames == 'single':
             return mft, size_list[fchoices.index(mft)]
         nSlices = self.params['shape'][self.params['sdir'][0]]
         self.mfp = nFrames if isinstance(nFrames, int) else min(mft, nSlices)
         mft, fchoices, size_list = \
             self.__refine_distribution_for_multi_mfp(mft, size_list, fchoices)
-
         self.mft = mft
         return mft, size_list[fchoices.index(mft)]
 
@@ -105,6 +104,9 @@ class BaseTransportData(object):
 
         min_bytes = self.__convert_str(settings['min_bytes'], b_per_p)        
         max_mft = int(np.floor(float(max_bytes)/b_per_f))
+        if max_mft == 0:
+            raise Exception("The size of a single frame exceeds the permitted "
+                            "maximum bytes per frame.")
         min_mft = int(max(np.floor(float(min_bytes)/b_per_f), 1))
         return min_mft, max_mft
 
@@ -128,6 +130,7 @@ class BaseTransportData(object):
         sdir = self.params['sdir']
         slice_shape = [self.params['shape'][d] for d in sdir]
         nSlices = np.prod(slice_shape)
+
         fchoices, size_list = \
             self._get_frame_choices(sdir, min(max_mft, nSlices))
 
@@ -136,10 +139,13 @@ class BaseTransportData(object):
             fchoices = [fchoices[i] for i in threshold_idx]
             size_list = [size_list[i] for i in threshold_idx]
 
+# use this for multiple mft slice dimensions
+#        mft, idx = self._find_best_frame_distribution(
+#            size_list, slice_shape, self.params['mpi_procs'],
+#            idx=True)
         mft, idx = self._find_best_frame_distribution(
-            size_list, slice_shape, self.params['mpi_procs'],
-            idx=True)
-        
+            fchoices, nSlices, self.params['mpi_procs'], idx=True)
+
         return int(mft), fchoices, size_list
 
     def __refine_distribution_for_multi_mfp(self, mft, size_list, fchoices):
@@ -160,8 +166,12 @@ class BaseTransportData(object):
         else:
             size_list = possible_size_list
             fchoices = possible
+# use this for multiple mft slice dimensions
+#            mft, idx = self._find_best_frame_distribution(
+#                    size_list, self.params['total_frames'],
+#                    self.params['mpi_procs'], idx=True)
             mft, idx = self._find_best_frame_distribution(
-                    size_list, self.params['total_frames'],
+                    possible, self.params['total_frames'],
                     self.params['mpi_procs'], idx=True)
 
         self.mfp = mfp
@@ -214,11 +224,35 @@ class BaseTransportData(object):
         idx = rem.index(min_val)
         return vlist[idx], idx
 
+# use this for multiple mft slice dimensions
+#    def _get_frame_choices(self, sdir, max_mft):
+#        """ Find all possible combinations of increasing slice dimension sizes
+#        with their product less than max_mft and return a list of these
+#        products. """
+#        nDims = len(sdir)
+#        temp = [1]*len(sdir)
+#        shape = self.data.get_shape()
+#        idx = 0
+#        choices = []
+#        size_list = []
+#
+#        while(np.prod(temp) <= max_mft):
+#            dshape = shape[sdir[idx]]
+#            choices.append(np.prod(temp))
+#            size_list.append(copy.copy(temp))
+#
+#            if temp[idx] == dshape:
+#                idx += 1
+#                if idx == nDims:
+#                    break
+#            temp[idx] += 1
+#
+#        return choices[::-1], size_list[::-1]
+
     def _get_frame_choices(self, sdir, max_mft):
         """ Find all possible combinations of increasing slice dimension sizes
         with their product less than max_mft and return a list of these
         products. """
-        nDims = len(sdir)
         temp = [1]*len(sdir)
         shape = self.data.get_shape()
         idx = 0
@@ -231,11 +265,8 @@ class BaseTransportData(object):
             size_list.append(copy.copy(temp))
 
             if temp[idx] == dshape:
-                idx += 1
-                if idx == nDims:
-                    break
-            else:
-                temp[idx] += 1
+                break
+            temp[idx] += 1
 
         return choices[::-1], size_list[::-1]
 
@@ -251,18 +282,28 @@ class BaseTransportData(object):
             val = (int(a/b)+i)*b
         return val_list
 
-    def _find_best_frame_distribution(self, size_list, nframes, nprocs,
-                                      idx=False, value=1):
+    def _find_best_frame_distribution(self, flist, nframes, nprocs, idx=False):
         """ Determine which of the numbers in the list of possible frame
         chunks gives the best distribution of frames per process. """
-        flist = np.prod(size_list, axis=1)
-        allframes = np.prod(nframes)
-        multi_list = [(allframes/float(v))/nprocs for v in flist]
+        multi_list = [(nframes/float(v))/nprocs for v in flist] 
         min_val, closest_lower_idx = self._find_closest_lower(multi_list, 1)
-
-        # refine final slice dimension here to reduce additional padding
-        # if slice_dims > 1
-
-        if idx:
+        if idx: 
             return flist[closest_lower_idx], closest_lower_idx
         return flist[closest_lower_idx]
+
+# use this for multiple mft slice dimensions
+#    def _find_best_frame_distribution(self, size_list, nframes, nprocs,
+#                                      idx=False, value=1):
+#        """ Determine which of the numbers in the list of possible frame
+#        chunks gives the best distribution of frames per process. """
+#        flist = np.prod(size_list, axis=1)
+#        allframes = np.prod(nframes)
+#        multi_list = [(allframes/float(v))/nprocs for v in flist]
+#        min_val, closest_lower_idx = self._find_closest_lower(multi_list, 1)
+#
+#        # refine final slice dimension here to reduce additional padding
+#        # if slice_dims > 1
+#
+#        if idx:
+#            return flist[closest_lower_idx], closest_lower_idx
+#        return flist[closest_lower_idx]
