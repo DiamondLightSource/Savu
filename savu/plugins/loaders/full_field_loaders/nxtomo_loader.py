@@ -93,9 +93,9 @@ class NxtomoLoader(BaseLoader):
         data_obj.data._set_dark_and_flat()
 
     def __get_nScans(self, dObj):
-        if self.parameters['3d_to_4d'] == False:
+        if self.parameters['3d_to_4d'] is False:
             return 0
-        if self.parameters['3d_to_4d'] == True:
+        if self.parameters['3d_to_4d'] is True:
             try:
                 # for backwards compatibility
                 exec("n_scans = " + self.parameters['angles'])
