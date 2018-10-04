@@ -415,6 +415,7 @@ class Template(object):
 
     def update_process_list(self, template):
         tdict = yu.read_yaml(template)
+        del tdict['process_list']
 
         for plugin_no, entry in tdict.iteritems():
             plugin = entry.keys()[0]
