@@ -23,6 +23,7 @@
 
 import os
 import unittest
+import numpy as np
 import savu.test.test_utils as tu
 
 
@@ -32,6 +33,8 @@ class MaxFramesTest(unittest.TestCase):
                               processes):
         data.exp.meta_data.set('processes', processes)
         pData.plugin_data_setup(pattern, nFrames)
+        pData._set_meta_data()
+        pData.plugin_data_transfer_setup()
         sl_dict = \
             data._get_transport_data()._get_slice_lists_per_process(dtype)
         return sl_dict
@@ -135,56 +138,62 @@ class MaxFramesTest(unittest.TestCase):
     def test1_parallel(self):
         loader = "random_hdf5_loader"
         params = {}
+        processes = ['p']*20        
         params['patterns'] = ['PROJECTION.0s.1s.2c.3c.4s']
         params['axis_labels'] = ['val%d.unit' % i for i in range(5)]
         params['size'] = (4, 3, 1, 1, 4)
-        sys_file = self.__get_system_parameters_file()        
+        sys_file = self.__get_system_parameters_file()
         data, pData = tu.get_data_object(tu.load_random_data(
                 loader, params, system_params=sys_file))
+        data.dtype = np.dtype(np.float32)        
 
         sl_dict = self.__get_slice_list_dict(
-                data, pData, 'PROJECTION', 'single', 'in', 'p')
-        self.__assert(pData, sl_dict, 24, 1, 2, 24, 4*3*4)
+                data, pData, 'PROJECTION', 'single', 'in', processes)
+        self.__assert(pData, sl_dict, 3, 1, 2, 3, nframes=4*3*4)
 
         sl_dict = self.__get_slice_list_dict(
                 data, pData, 'PROJECTION', 'multiple', 'in', 'p')
-        self.__assert(pData, sl_dict, 24, 4, 2, 6, 4*3*4)
+        self.__assert(pData, sl_dict, 4, 4, 12, 1, 4*3*4)
 
     def test2_parallel(self):
         loader = "random_hdf5_loader"
         params = {}
+        processes = ['p']*20        
         params['patterns'] = ['PROJECTION.0s.1s.2c.3c.4s']
         params['axis_labels'] = ['val%d.unit' % i for i in range(5)]
         params['size'] = (1, 1, 1, 1, 1)
         sys_file = self.__get_system_parameters_file()        
         data, pData = tu.get_data_object(tu.load_random_data(
                 loader, params, system_params=sys_file))
+        data.dtype = np.dtype(np.float32)        
 
         sl_dict = self.__get_slice_list_dict(
-                data, pData, 'PROJECTION', 'single', 'in', 'p')
+                data, pData, 'PROJECTION', 'single', 'in', processes)
         self.__assert(pData, sl_dict, 1, 1, 1, 1, 1)
 
         sl_dict = self.__get_slice_list_dict(
-                data, pData, 'PROJECTION', 'multiple', 'in', 'p')
+                data, pData, 'PROJECTION', 'multiple', 'in', processes)
         self.__assert(pData, sl_dict, 1, 1, 1, 1, 1)
 
     def test3_parallel(self):
         loader = "random_hdf5_loader"
         params = {}
+        processes = ['p']*20        
         params['patterns'] = ['PROJECTION.0s.1s.2c.3c.4s']
         params['axis_labels'] = ['val%d.unit' % i for i in range(5)]
         params['size'] = (15, 13, 1, 1, 4)
         sys_file = self.__get_system_parameters_file()        
         data, pData = tu.get_data_object(tu.load_random_data(
                 loader, params, system_params=sys_file))
+        data.dtype = np.dtype(np.float32)        
 
         sl_dict = self.__get_slice_list_dict(
-                data, pData, 'PROJECTION', 'single', 'in', 'p')
-        self.__assert(pData, sl_dict, 15, 1, 52, 15, 15*13*4)
+                data, pData, 'PROJECTION', 'single', 'in', processes)
+        self.__assert(pData, sl_dict, 13, 1, 6, 13, 15*13*4)
 
         sl_dict = self.__get_slice_list_dict(
-                data, pData, 'PROJECTION', 'multiple', 'in', 'p')
-        self.__assert(pData, sl_dict, 15, 15, 52, 1, 15*13*4)
+                data, pData, 'PROJECTION', 'multiple', 'in', processes)
+        self.__assert(pData, sl_dict, 13, 13, 6, 1, 15*13*4)
 
     def test4_parallel(self):
         loader = "full_field_loaders.random_3d_tomo_loader"
@@ -244,6 +253,7 @@ class MaxFramesTest(unittest.TestCase):
         sys_file = self.__get_system_parameters_file()        
         data, pData = tu.get_data_object(tu.load_random_data(
                 loader, params, system_params=sys_file))
+        data.dtype = np.dtype(np.float32)        
 
         sl_dict = self.__get_slice_list_dict(
                 data, pData, 'PROJECTION', 'single', 'in', processes)
@@ -263,6 +273,7 @@ class MaxFramesTest(unittest.TestCase):
         sys_file = self.__get_system_parameters_file()        
         data, pData = tu.get_data_object(tu.load_random_data(
                 loader, params, system_params=sys_file))
+        data.dtype = np.dtype(np.float32)        
 
         sl_dict = self.__get_slice_list_dict(
                 data, pData, 'PROJECTION', 'single', 'in', processes)

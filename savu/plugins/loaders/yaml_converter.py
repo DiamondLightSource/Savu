@@ -33,6 +33,7 @@ from ast import literal_eval
 import savu.plugins.utils as pu
 import savu.plugins.loaders.utils.yaml_utils as yu
 from savu.plugins.loaders.base_loader import BaseLoader
+from savu.data.experiment_collection import Experiment
 
 
 class YamlConverter(BaseLoader):
@@ -167,6 +168,9 @@ class YamlConverter(BaseLoader):
         if 'metadata' in entry:
             self._set_metadata(data_obj, entry['metadata'])
         self.set_data_reduction_params(data_obj)
+        
+        if 'exp_metadata' in entry:
+            self._set_metadata(data_obj, entry['exp_metadata'], exp=True)
 
     def set_data(self, name, entry):
         raise NotImplementedError('Please implement "set_data" function'
@@ -277,7 +281,8 @@ class YamlConverter(BaseLoader):
     def __get_tuple(self, val):
         return literal_eval(val) if not isinstance(val, tuple) else val
 
-    def _set_metadata(self, dObj, mdata):
+    def _set_metadata(self, dObj, mdata, exp=False):
+        populate = dObj.exp if exp else dObj
         for key, value in mdata.iteritems():
             value = self.update_value(dObj, value['value'])
-            dObj.meta_data.set(key, value)
+            populate.meta_data.set(key, value)

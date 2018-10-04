@@ -100,6 +100,7 @@ class Chunking(object):
 
         for i in range(array_len):
             adjust_max[i] = shape[adjust_dim[i]]
+        
         inc_dict = {'up': [1]*array_len, 'down': [1]*array_len}
         bounds = {'min': [1]*array_len, 'max': adjust_max}
         return {'dim': adjust_dim, 'inc': inc_dict, 'bounds': bounds}
@@ -149,9 +150,15 @@ class Chunking(object):
         max_frames = self.__get_max_frames_dict()[dim]
         adjust['inc']['up'][adj_idx] = '+' + str(max_frames)
         adjust['inc']['down'][adj_idx] = '/2' # '-' + str(max_frames)
-        adjust['bounds']['max'][adj_idx] = \
-            self.__max_frames_per_process(shape[dim], max_frames)
-        return min(max_frames, shape[dim])
+
+        # which is the slice dimension: current or next?
+        ddict = self.current if dim in self.current['slice_dims'] \
+            else self.next
+        shape, allslices = self.__get_shape(shape, ddict)
+
+        adjust['bounds']['max'][adj_idx] = self.__max_frames_per_process(
+                shape, max_frames, allslices=allslices)
+        return min(max_frames, shape)
 
     def __core_other(self, dim, adj_idx, adjust, shape):
         adjust['inc']['up'][adj_idx] = '+1'
@@ -163,9 +170,14 @@ class Chunking(object):
         max_frames = self.__get_max_frames_dict()[dim]
         adjust['inc']['up'][adj_idx] = '+' + str(max_frames)
         adjust['inc']['down'][adj_idx] = '/2' # '-' + str(max_frames)
-        adjust['bounds']['max'][adj_idx] = \
-            self.__max_frames_per_process(shape[dim], max_frames)
-        return min(max_frames, shape[dim])
+
+        shape1 = np.prod([shape[s] for s in self.current['slice_dims']])
+        shape2 = np.prod([shape[s] for s in self.next['slice_dims']])
+        ddict = self.current if shape1 < shape2 else self.next
+        shape, allslices = self.__get_shape(shape, ddict)
+        adjust['bounds']['max'][adj_idx] = self.__max_frames_per_process(
+                shape, max_frames, allslices=allslices)
+        return min(max_frames, shape)
 
     def __slice_other(self, dim, adj_idx, adjust, shape):
         adjust['inc']['up'][adj_idx] = '+1'
@@ -187,17 +199,27 @@ class Chunking(object):
                      self.next['slice_dims'][0]: self.next[mft]}
         return ddict
 
-    def __max_frames_per_process(self, shape, nFrames):
+    def __get_shape(self, shape, ddict):
+        """ Get shape taking into account padding. """
+        shape = [shape[s] for s in ddict['slice_dims']]
+        if 'transfer_shape' not in ddict.keys():
+            return shape[0], np.prod(shape)
+        size_list = [ddict['transfer_shape'][s] for s in ddict['slice_dims']]
+        trans_per_dim = np.ceil(np.array(shape)/np.array(
+                size_list, dtype=np.float32))
+        full_shape = np.prod(trans_per_dim*size_list)
+        return shape[0], full_shape
+
+    def __max_frames_per_process(self, shape, nFrames, allslices=None):
         """
         Calculate the max possible frames per process
         """
-        total_plugin_runs = np.ceil(float(shape)/nFrames)
+        nSlices = allslices if allslices else shape
+        total_plugin_runs = np.ceil(float(nSlices)/nFrames)
         frame_list = np.arange(total_plugin_runs)
         nProcs = len(self.exp.meta_data.get('processes'))
         frame_list_per_proc = np.array_split(frame_list, nProcs)
-        flist_len = []
-        for flist in frame_list_per_proc:
-            flist_len.append(len(flist))
+        flist_len = [len(f) for f in frame_list_per_proc if len(f) > 0]
         runs_per_proc = int(np.median(np.array(flist_len)))
         return int(min(runs_per_proc*nFrames, shape))
 

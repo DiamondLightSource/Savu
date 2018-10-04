@@ -182,12 +182,14 @@ class Hdf5Utils(object):
             data.backing_file.filename
         self.exp._barrier(msg=msg)
         logging.debug("Attempting to close the file ")
+
         if data.backing_file is not None:
             try:
                 filename = data.backing_file.filename
                 data.backing_file.close()
                 logging.debug("File close successful: %s", filename)
                 data.backing_file = None
+                data.filename = filename # needed for tests
             except:
                 logging.debug("File close unsuccessful", filename)
         self.exp._barrier(msg=msg)

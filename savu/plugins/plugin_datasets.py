@@ -74,6 +74,7 @@ class PluginDatasets(object):
             return
 
         in_pData, out_pData = self.get_plugin_datasets()
+
         params = {}
         for pData in in_pData + out_pData:
             pData._set_meta_data()
@@ -84,23 +85,20 @@ class PluginDatasets(object):
             if value['transfer_bytes'] > max_bytes:
                 max_data = key
                 max_bytes = value['transfer_bytes']
-        
+
         # set mft and mfp for the largest dataset
         max_data.plugin_data_transfer_setup()
         to_set = list(set(params.keys()).difference(set([max_data])))
-        
+
         for pData in to_set:
             if params[pData]['total_frames'] == params[max_data]['total_frames']:
-                pData.plugin_data_transfer_setup(pData=max_data)
+                pData.plugin_data_transfer_setup(copy=max_data)
             else:
-                raise Exception("The length of each slice dimension is not equal.")
-#                mData = max_data.meta_data.get
-#                sdir_shape = [mData('shape')[i] for i in mData('sdir')]
-#                mft_list = mData('size_list')
-#                nTrans = int(np.prod([np.ceil(sdir_shape[i]/float(mft_list[i])) for i in range(len(mft_list))]))
-                # need to calculate mft and mfp from nTrans!
-#                td = self.data_obj._get_transport_data()
-#                mfp = td._calc_max_frames_process(pData.max_frames)
+                if pData.max_frames == 'multiple':
+                    msg = "If a plugin reduces the number of frames, the " \
+                        "number of frames cannot be 'multiple'."
+                    raise Exception(msg)
+                pData.plugin_data_transfer_setup(calc=max_data)
 
     def __set_in_datasets(self):
         """ Set the in_data objects.

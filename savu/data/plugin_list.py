@@ -243,7 +243,9 @@ class PluginList(object):
             name = d.data_obj.get_name()
             pattern = copy.deepcopy(d.get_pattern())
             pattern[pattern.keys()[0]]['max_frames_transfer'] = \
-                d._get_max_frames_transfer()
+                d.meta_data.get('max_frames_transfer')
+            pattern[pattern.keys()[0]]['transfer_shape'] = \
+                d.meta_data.get('transfer_shape')
             data_list.append({'name': name, 'pattern': pattern})
         return data_list
 
@@ -413,6 +415,7 @@ class Template(object):
 
     def update_process_list(self, template):
         tdict = yu.read_yaml(template)
+        del tdict['process_list']
 
         for plugin_no, entry in tdict.iteritems():
             plugin = entry.keys()[0]

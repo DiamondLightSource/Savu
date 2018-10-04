@@ -62,7 +62,7 @@ class TomopyRecon(BaseRecon, CpuPlugin):
         filter_name = self.parameters['filter_name']
         # for backwards compatibility
         filter_name = 'none' if filter_name == None else filter_name
-        options = {'filter_name': self.parameters['filter_name'],
+        options = {'filter_name': filter_name,
                    'reg_par': self.parameters['reg_par']-1,
                    'n_iterations': self.parameters['n_iterations'],
                    'num_gridx': vol_shape[0], 'num_gridy': vol_shape[2]}

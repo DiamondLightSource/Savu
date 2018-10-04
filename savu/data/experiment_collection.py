@@ -200,14 +200,14 @@ class Experiment(object):
         throughout the processing chain.
         """
         current_datasets = datasets_lists[0]
-        patterns_list = []
+        patterns_list = {}
         for current_data in current_datasets['out_datasets']:
             current_name = current_data['name']
             current_pattern = current_data['pattern']
             next_pattern = self.__find_next_pattern(datasets_lists[1:],
                                                     current_name)
-            patterns_list.append({'current': current_pattern,
-                                  'next': next_pattern})
+            patterns_list[current_name] = \
+                {'current': current_pattern, 'next': next_pattern}
         self.meta_data.set('current_and_next', patterns_list)
 
     def __find_next_pattern(self, datasets_lists, current_name):

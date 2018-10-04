@@ -133,7 +133,6 @@ class BaseTransport(object):
 
             # get the transfer data
             transfer_data = self._transfer_all_data(count)
-
             # loop over the process data
             result, kill = self._process_loop(
                     plugin, prange, transfer_data, count, pDict, result, cp)
@@ -147,7 +146,7 @@ class BaseTransport(object):
             cu.user_message("%s - 100%% complete" % (plugin.name))
 
     def _process_loop(self, plugin, prange, tdata, count, pDict, result, cp):
-        kill_signal = False
+        kill_signal = False        
         for i in prange:
             if cp and cp.is_time_to_checkpoint(self, count, i):
                 # kill signal sent so stop the processing
@@ -155,7 +154,6 @@ class BaseTransport(object):
             data = self._get_input_data(plugin, tdata, i, count)
             res = self._get_output_data(
                     plugin.plugin_process_frames(data), i)
-
             for j in pDict['nOut']:
                 out_sl = pDict['out_sl']['process'][i][j]
                 result[j][out_sl] = res[j]
@@ -360,7 +358,10 @@ class BaseTransport(object):
     def _remove_excess_data(self, data, result, slice_list):
         """ Remove any excess results due to padding for fixed length process \
         frames. """
-        sdir = data._get_plugin_data().get_slice_dimension()
+
+        mData = data._get_plugin_data().meta_data.get_dictionary()
+        temp = np.where(np.array(mData['size_list']) > 1)[0]
+        sdir = mData['sdir'][temp[-1] if temp.size else 0]
 
         # Not currently working for basic_transport
         if isinstance(slice_list, slice):
@@ -368,6 +369,7 @@ class BaseTransport(object):
 
         sl = slice_list[sdir]
         shape = result.shape
+
         if shape[sdir] - (sl.stop - sl.start):
             unpad_sl = [slice(None)]*len(shape)
             unpad_sl[sdir] = slice(0, sl.stop - sl.start)
@@ -377,18 +379,18 @@ class BaseTransport(object):
     def _setup_h5_files(self):
         out_data_dict = self.exp.index["out_data"]
 
-        current_and_next = [0]*len(out_data_dict)
+        current_and_next = False
         if 'current_and_next' in self.exp.meta_data.get_dictionary():
             current_and_next = self.exp.meta_data.get('current_and_next')
-
+        
         count = 0
         for key in out_data_dict.keys():
             out_data = out_data_dict[key]
             filename = self.exp.meta_data.get(["filename", key])
-
             out_data.backing_file = self.hdf5._open_backing_h5(filename, 'a')
+            c_and_n = 0 if not current_and_next else current_and_next[key]
             out_data.group_name, out_data.group = self.hdf5._create_entries(
-                out_data, key, current_and_next[count])
+                out_data, key, c_and_n)
             count += 1
 
     def _set_file_details(self, files):

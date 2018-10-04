@@ -51,3 +51,8 @@ pmean:
             value   : $dfile['entry/inputs/variables'].value
             units   : $dfile['entry/inputs/variables'].attrs['long_name']
 
+    exp_metadata:  # optional, additional global information associated with the experiment
+        test:
+            value  :  $dfile['entry/inputs/program'].value
+            
+

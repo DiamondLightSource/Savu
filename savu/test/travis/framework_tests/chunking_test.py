@@ -166,7 +166,7 @@ class ChunkingTests(unittest.TestCase):
         nnext = [8, (1, 2), (0, 3)]
         chunking = self.create_chunking_instance(current, nnext, nProcs)
         chunks = chunking._calculate_chunking(shape, np.float32)
-        self.assertEqual(self.amend_chunks(chunks), (4, 8, 15, 500))
+        self.assertEqual(self.amend_chunks(chunks), (4, 8, 8, 500))
 
 if __name__ == "__main__":
     unittest.main()

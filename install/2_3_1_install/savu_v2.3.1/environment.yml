@@ -16,6 +16,7 @@ dependencies:
 - spyder==3.3.0
 - ipython==5.7.0
 - cython==0.28.3
+- boost==1.67.0
 - pip:
   - fabio==0.4.0
   - pyfftw==0.10.4

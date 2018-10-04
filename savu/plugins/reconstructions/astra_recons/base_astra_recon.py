@@ -124,7 +124,7 @@ class BaseAstraRecon(BaseRecon):
         # create sinogram id
         sino_id = astra.data2d.create("-sino", proj_geom, sino)
         # create reconstruction id
-        if init:
+        if init is not None:
             rec_id = astra.data2d.create('-vol', vol_geom, init)
         else:
             rec_id = astra.data2d.create('-vol', vol_geom)

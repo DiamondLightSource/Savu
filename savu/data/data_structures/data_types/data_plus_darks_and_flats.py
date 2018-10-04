@@ -38,6 +38,7 @@ class DataWithDarksAndFlats(BaseType):
         self.dark_updated = False
         self.data = data_obj.data
         self.dark_flat_slice_list = []
+        self.dtype = data_obj.data.dtype
 
     def _base_extra_params(self):
         """ global class parameter names that are updated outside of __init__

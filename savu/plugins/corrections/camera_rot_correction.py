@@ -35,7 +35,7 @@ class CameraRotCorrection(BaseFilter, CpuPlugin):
      for missing camera alignment.
      
     :u*param angle: The rotation angle for the output image in degrees. \
-    Default: 0.
+    Default: 0.0.
     :u*param crop_edges: When a rotation is applied to any image,\
     the result will contain zeros around the edges, which can be removed by \
     cropping the edges by a specified number of pixels. Default: 0
@@ -59,7 +59,7 @@ class CameraRotCorrection(BaseFilter, CpuPlugin):
         pass
             
     def process_frames(self, data):
-        return rotate(data[0].astype(np.float64), self.angle, center=\
+        return rotate(data[0].astype(np.float64), self.parameters['angle'], center=\
         self.centre)[self.new_slice]
 
     def post_process(self):
@@ -79,6 +79,12 @@ class CameraRotCorrection(BaseFilter, CpuPlugin):
         self.angle = self.parameters['angle']
         self.static_crop = self.parameters['crop_edges']
         self.auto_crop = self.parameters['auto_crop']
+
+        if self.auto_crop and isinstance(self.angle, list):
+            plugin = self.__class__.__name__
+            msg = "Parameter tuning on the angles in %s plugin is only " \
+                  "possible with auto_crop set to False." % plugin
+            raise Exception(msg)
 
         img_dims = self.get_in_datasets()[0].get_shape()
         if self.use_auto_centre:
