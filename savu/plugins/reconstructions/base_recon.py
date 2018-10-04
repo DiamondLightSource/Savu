@@ -224,6 +224,7 @@ class BaseRecon(Plugin):
         init = data[1] if self.init_vol else None
         angles = \
             self.angles[:, sl[self.scan_dim]] if self.scan_dim else self.angles
+
         self.frame_angles = angles
 
         dim_sl = sl[self.main_dir]
@@ -416,10 +417,10 @@ class BaseRecon(Plugin):
         if 'init_vol' in self.parameters.keys() and \
                 self.parameters['init_vol']:
             self.init_vol = True
-            from savu.data.data_structures.data_types import Replicate
-            if self.rep_dim:
-                in_dataset[idx].data = Replicate(
-                    in_dataset[idx], in_dataset[0].get_shape(self.rep_dim))
+#            from savu.data.data_structures.data_types import Replicate
+#            if self.rep_dim:
+#                in_dataset[idx].data = Replicate(
+#                    in_dataset[idx], in_dataset[0].get_shape(self.rep_dim))
             in_pData[1].plugin_data_setup('VOLUME_XZ', self.get_max_frames())
             idx += 1
 
