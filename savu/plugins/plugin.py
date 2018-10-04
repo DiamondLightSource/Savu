@@ -65,7 +65,7 @@ class Plugin(PluginDatasets):
         :param Experiment exp: The current Experiment object.
         :params dict params: Parameter values.
         """
-        self.__reset_process_frames_counter()
+        self._reset_process_frames_counter()
         self._set_parameters(params)
         self._set_plugin_datasets()
         self.setup()
@@ -73,7 +73,7 @@ class Plugin(PluginDatasets):
         self._finalise_datasets()
         self._finalise_plugin_datasets()
 
-    def __reset_process_frames_counter(self):
+    def _reset_process_frames_counter(self):
         self.pcount = 0
 
     def get_process_frames_counter(self):
