@@ -138,6 +138,7 @@ class MaxFramesTest(unittest.TestCase):
     def test1_parallel(self):
         loader = "random_hdf5_loader"
         params = {}
+        processes = ['p']*20        
         params['patterns'] = ['PROJECTION.0s.1s.2c.3c.4s']
         params['axis_labels'] = ['val%d.unit' % i for i in range(5)]
         params['size'] = (4, 3, 1, 1, 4)
@@ -147,12 +148,12 @@ class MaxFramesTest(unittest.TestCase):
         data.dtype = np.dtype(np.float32)        
 
         sl_dict = self.__get_slice_list_dict(
-                data, pData, 'PROJECTION', 'single', 'in', 'p')
-        self.__assert(pData, sl_dict, 24, 1, 2, 24, 4*3*4)
+                data, pData, 'PROJECTION', 'single', 'in', processes)
+        self.__assert(pData, sl_dict, 3, 1, 2, 3, nframes=4*3*4)
 
         sl_dict = self.__get_slice_list_dict(
                 data, pData, 'PROJECTION', 'multiple', 'in', 'p')
-        self.__assert(pData, sl_dict, 24, 4, 2, 6, 4*3*4)
+        self.__assert(pData, sl_dict, 4, 4, 12, 1, 4*3*4)
 
     def test2_parallel(self):
         loader = "random_hdf5_loader"
@@ -188,11 +189,11 @@ class MaxFramesTest(unittest.TestCase):
 
         sl_dict = self.__get_slice_list_dict(
                 data, pData, 'PROJECTION', 'single', 'in', processes)
-        self.__assert(pData, sl_dict, 30, 1, 2, 30, 15*13*4)
+        self.__assert(pData, sl_dict, 13, 1, 6, 13, 15*13*4)
 
         sl_dict = self.__get_slice_list_dict(
                 data, pData, 'PROJECTION', 'multiple', 'in', processes)
-        self.__assert(pData, sl_dict, 30, 15, 2, 2, 15*13*4)
+        self.__assert(pData, sl_dict, 13, 13, 6, 1, 15*13*4)
 
     def test4_parallel(self):
         loader = "full_field_loaders.random_3d_tomo_loader"
