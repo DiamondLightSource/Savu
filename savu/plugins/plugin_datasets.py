@@ -94,7 +94,6 @@ class PluginDatasets(object):
             if params[pData]['total_frames'] == params[max_data]['total_frames']:
                 pData.plugin_data_transfer_setup(copy=max_data)
             else:
-                #raise Exception("The length of each slice dimension is not equal.")
                 if pData.max_frames == 'multiple':
                     msg = "If a plugin reduces the number of frames, the " \
                         "number of frames cannot be 'multiple'."
