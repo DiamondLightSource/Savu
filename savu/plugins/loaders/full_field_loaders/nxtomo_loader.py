@@ -47,7 +47,8 @@ class NxtomoLoader(BaseLoader):
     :param flat: Optional Path to the flat field data file, nxs path and \
         scale value. Default: [None, None, 1].
     :param angles: A python statement to be evaluated or a file. Default: None.
-    :param 3d_to_4d: Set to true if this reshape is required. Default: False.
+    :param 3d_to_4d: If this if 4D data stored in 3D then pass an integer \
+        value equivalent to the number of scans.  Default: 1.
     :param ignore_flats: List of batch numbers of flats (start at 1) to \
         ignore. Default: None.
     """
@@ -67,19 +68,17 @@ class NxtomoLoader(BaseLoader):
 
         self._set_dark_and_flat(data_obj)
 
-        if self.parameters['3d_to_4d']:
-            if not self.parameters['angles']:
-                raise Exception('Angles are required in the loader.')
+        self.nScans = self.__get_nScans(data_obj)
+        if self.nScans > 1:
             self.__setup_4d(data_obj)
-            n_angles = self._set_rotation_angles(data_obj)
-            self.__setup_3d_to_4d(data_obj, n_angles)
+            self.__setup_3d_to_4d(data_obj, self.nScans)
         else:
             if len(data_obj.data.shape) is 3:
                 self._setup_3d(data_obj)
             else:
                 self.__setup_4d(data_obj)
             data_obj.set_original_shape(data_obj.data.shape)
-            self._set_rotation_angles(data_obj)
+        self._set_rotation_angles(data_obj)
 
         try:
             control = data_obj.backing_file['entry1/tomo_entry/control/data']
@@ -92,6 +91,23 @@ class NxtomoLoader(BaseLoader):
 
         self.set_data_reduction_params(data_obj)
         data_obj.data._set_dark_and_flat()
+
+    def __get_nScans(self, dObj):
+        if self.parameters['3d_to_4d'] == False:
+            return 0
+        if self.parameters['3d_to_4d'] == True:
+            try:
+                # for backwards compatibility
+                exec("n_scans = " + self.parameters['angles'])
+                return dObj.data.shape[0]/np.array(n_scans).shape[0]
+            except:
+                raise Exception("Please specify the angles, or the number of "
+                                "scans (via 3d_to_4d param) in the loader.")
+        if isinstance(self.parameters['3d_to_4d'], int):
+            return self.parameters['3d_to_4d']
+        else:
+            raise Exception("Unknown value for loader parameter '3d_to_4d', "
+                            "please specify an integer value")
 
     def _setup_3d(self, data_obj):
         logging.debug("Setting up 3d tomography data.")
@@ -107,11 +123,16 @@ class NxtomoLoader(BaseLoader):
         data_obj.add_pattern('SINOGRAM', core_dims=(detX, rot),
                              slice_dims=(detY,))
 
-    def __setup_3d_to_4d(self, data_obj, n_angles):
+    def __setup_3d_to_4d(self, data_obj, n_scans):
         logging.debug("setting up 4d tomography data from 3d input.")
         from savu.data.data_structures.data_types.map_3dto4d_h5 \
             import Map3dto4dh5
-        data_obj.data = Map3dto4dh5(data_obj, n_angles)
+        
+        all_angles = data_obj.data.shape[0]
+        if all_angles % n_scans != 0:
+            raise Exception("The number of scans does not divide the rotation "
+                            "angles exactly.")
+        data_obj.data = Map3dto4dh5(data_obj, all_angles/n_scans)
         data_obj.set_original_shape(data_obj.data.get_shape())
 
     def __setup_4d(self, data_obj):
@@ -192,27 +213,47 @@ class NxtomoLoader(BaseLoader):
     def _set_rotation_angles(self, data_obj):
         angles = self.parameters['angles']
         if angles is None:
-            try:
-                entry = 'entry1/tomo_entry/data/rotation_angle'
-                angles = data_obj.backing_file[entry][
-                    (data_obj.data.get_image_key()) == 0, ...]
-            except KeyError:
-                logging.warn("No rotation angle entry found in input file.")
-                angles = np.linspace(0, 180, data_obj.get_shape()[0])
-        else:
+            angles = 'entry1/tomo_entry/data/rotation_angle'
+
+        nxs_angles = self.__get_angles_from_nxs_file(data_obj, angles)
+        if nxs_angles is None:
             try:
                 exec("angles = " + angles)
-            except:
+            except Exception as e:
+                logging.warn(e.message)
                 try:
                     angles = np.loadtxt(angles)
-                except:
-                    raise Exception('Cannot set angles in loader.')
-
+                except Exception as e:
+                    logging.warn(e.message)
+                    logging.warn("No angles found so evenly distributing them "
+                                 "between 0 and 180 degrees")
+                    angles = np.linspace(0, 180, data_obj.get_shape()[0])
+        else:
+            angles = nxs_angles
         data_obj.meta_data.set("rotation_angle", angles)
         return len(angles)
+
+    def __get_angles_from_nxs_file(self, data_obj, path):
+        if path in data_obj.backing_file:
+            idx = data_obj.data.get_image_key() == 0 if \
+                isinstance(data_obj.data, ImageKey) else slice(None)
+            return data_obj.backing_file[path][idx]
+        else:
+            logging.warn("No rotation angle entry found in input file.")
+            return None
 
     def __check_angles(self, data_obj, n_angles):
         data_angles = data_obj.data.get_shape()[0]
         if data_angles != n_angles:
+            if self.nScans > 1:
+                rot_angles = data_obj.meta_data.get("rotation_angle")
+                try:
+                    rot_angles = np.reshape(
+                            rot_angles, [n_angles/data_angles, data_angles])
+                    data_obj.meta_data.set("rotation_angle",
+                                           np.transpose(rot_angles))
+                    return
+                except:
+                    pass
             raise Exception("The number of angles %s does not match the data "
-                            "dimension length %s", n_angles, data_angles)
+                            "dimension length %s" % (n_angles, data_angles))
