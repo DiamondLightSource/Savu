@@ -50,6 +50,7 @@ mpirun -np ${processes} \
 
 if [ ! $delete == false ]; then
   cd /dls/tmp/savu
-  rm -r $delete
+  cp $delete/savu.o* $delete/../
+  rm -rf $delete
 fi
 
