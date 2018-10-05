@@ -21,15 +21,17 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 import os
 import copy
+import logging
 
 import scipy as sp
-import numpy as np
 
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger('matplotlib')
+logger.setLevel(logging.WARNING)
 import matplotlib.pyplot as plt
 
 from savu.plugins.utils import register_plugin
 from savu.plugins.plugin import Plugin
-from savu.plugins.filters.base_filter import BaseFilter
 
 
 @register_plugin
@@ -48,9 +50,6 @@ class OrthoSlice(Plugin, CpuPlugin):
 
     def __init__(self):
         super(OrthoSlice, self).__init__("OrthoSlice")
-
-    def pre_process(self):
-        BaseFilter.pre_process(self)
 
     def process_frames(self, data):
         
@@ -132,8 +131,9 @@ class OrthoSlice(Plugin, CpuPlugin):
         # Sort out input data
         in_pData[0].plugin_data_setup('VOLUME_XY', self.get_max_frames())
         fixed_dim = list(self.spatial_dims.difference(set(in_pData[0].get_core_dimensions())))
-        in_pData[0].set_fixed_dimensions(fixed_dim,[self.parameters['xy_slices']])
-
+        preview = [':']*len(in_dataset[0].get_shape())
+        preview[fixed_dim[0]] = str(0)
+        self.set_preview(in_dataset[0], preview)
 
         # Create output datsets
         reduced_shape = copy.copy(full_data_shape)
@@ -143,8 +143,11 @@ class OrthoSlice(Plugin, CpuPlugin):
                                       patterns={in_dataset[0]: ['VOLUME_XY.%i'%fixed_dim[0]]})
         out_pData[0].plugin_data_setup('VOLUME_XY', self.get_max_frames())
 
+        print "in dataset shape", in_dataset[0].get_shape()
         # Sort out dataset 1
-        fixed_dim = list(self.spatial_dims.difference(set(in_pData[0].get_core_dimensions())))
+#        fixed_dim = list(self.spatial_dims.difference(set(in_pData[0].get_core_dimensions())))
+        vol_yz_core_dims = in_dataset[0].get_data_patterns()['VOLUME_YZ']['core_dims']
+        fixed_dim = list(self.spatial_dims.difference(set(vol_yz_core_dims)))
         reduced_shape = copy.copy(full_data_shape)
         del reduced_shape[fixed_dim[0]]
         out_dataset[1].create_dataset(axis_labels={in_dataset[0]: [str(fixed_dim[0])] },
@@ -153,7 +156,8 @@ class OrthoSlice(Plugin, CpuPlugin):
         out_pData[1].plugin_data_setup('VOLUME_YZ', self.get_max_frames())
 
         # Sort out dataset 2
-        fixed_dim = list(self.spatial_dims.difference(set(in_pData[0].get_core_dimensions())))
+        vol_xz_core_dims = in_dataset[0].get_data_patterns()['VOLUME_XZ']['core_dims']
+        fixed_dim = list(self.spatial_dims.difference(set(vol_xz_core_dims)))
         reduced_shape = copy.copy(full_data_shape)
         del reduced_shape[fixed_dim[0]]
         out_dataset[2].create_dataset(axis_labels={in_dataset[0]: [str(fixed_dim[0])] },
