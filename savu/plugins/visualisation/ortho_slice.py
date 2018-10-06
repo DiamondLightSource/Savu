@@ -52,11 +52,11 @@ class OrthoSlice(Plugin, CpuPlugin):
         super(OrthoSlice, self).__init__("OrthoSlice")
 
     def process_frames(self, data):
-        
-        data[0] 
-        
+        self.exp.log("XXXX Starting to run process_frames in Orthoslice")
+        print("XXXX Starting to run process_frames in Orthoslice")
+
         in_dataset = self.get_in_datasets()
-        
+
         fullData = in_dataset[0]
 
         image_path = os.path.join(self.exp.meta_data.get('out_path'), 'OrthoSlice')
@@ -65,44 +65,66 @@ class OrthoSlice(Plugin, CpuPlugin):
 
         ext = self.parameters['file_type']
         in_plugin_data = self.get_plugin_in_datasets()[0]
-        pos = in_plugin_data.get_current_frame_idx()[0]
+        pos = in_plugin_data.get_current_frame_idx()
+
+        self.exp.log("frame position is %s" % (str(pos)))
 
         slice_info = [('xy_slices', 'VOLUME_XY'),
                       ('yz_slices', 'VOLUME_YZ'),
                       ('xz_slices', 'VOLUME_XZ')]
 
-
         #TODO this can probably be moved somewhere better
         colourmap = plt.get_cmap(self.parameters['colourmap'])
-        
+
+        # Set up the output list
+        output_slices = []
 
         for direction, pattern in slice_info:
+            # build the slice list
             slice_to_take = [slice(0)]*len(fullData.data.shape)
-            for i in list(self.spatial_dims):
-                slice_to_take[i] = slice(None)
-            if (pos < len(self.parameters[direction])):
+
+            # Fix the main slice dimentions that are outside the spatial dimentions
+            slice_count = 0
+            for i in list(self.slice_dims):
+                slice_to_take[i] = slice(pos[slice_count],pos[slice_count]+1)
+                slice_count += 1
+
+            # now sort out the spatial dimentions
+            for slice_value in self.parameters[direction]:
+                # set all the spatial dimentions to get everything
+                for i in list(self.spatial_dims):
+                    slice_to_take[i] = slice(None)
+                # one slice dim for the appropriate pattern will align with the spatial dimentions
+                # this is the one which should be sliced to the specific value
                 for i in fullData.get_data_patterns()[pattern]['slice_dims']:
                     if slice_to_take[i].stop == None:
-                        slice_pos = self.parameters[direction][pos]
-                        slice_to_take[i] = slice(slice_pos, slice_pos+1, 1)
-                image_data = fullData.data[slice_to_take[0],
-                                           slice_to_take[1],
-                                           slice_to_take[2]].squeeze()
+                        slice_to_take[i] = slice(slice_value, slice_value+1)
 
-                image_data -= image_data.min()
-                image_data /= image_data.max()
-                image_data = colourmap(image_data, bytes=True)
+                print("Final slice is : %s of %s" % (str(slice_to_take), str(fullData.data.shape)))
+                self.exp.log("Final slice is : %s of %s" % (str(slice_to_take), str(fullData.data.shape)))
 
-                filename = '%s_%03i.%s' % (pattern, pos, ext)
+                # now retreive the data from the full dataset given the current slice
+                ortho_data = fullData.data[slice_to_take].squeeze()
+                output_slices.append(ortho_data)
+                
+                if ext is not 'None':
+                    image_data = ortho_data - ortho_data.min()
+                    image_data /= image_data.max()
+                    image_data = colourmap(image_data, bytes=True)
+    
+                    filename = '%s_%03i_%s.%s' % (pattern, slice_value, str(pos), ext)
+                    self.exp.log("image-data shape is %s and filename is '%s'" % (str(image_data.shape), filename))
 
-                sp.misc.imsave(os.path.join(image_path, filename), image_data)
-            else:
-                pos -= len(self.parameters['xy_slices'])
+                    sp.misc.imsave(os.path.join(image_path, filename), image_data)
 
-        #TODO repeat for others
+        return output_slices
 
-        return [data[0], yz_data, xz_data]
 
+    def get_number_of_orthoslices(self):
+        count = len(self.get_parameters('xy_slices'))
+        count += len(self.get_parameters('yz_slices'))
+        count += len(self.get_parameters('xz_slices'))
+        return count
 
     def populate_meta_data(self, key, value):
         datasets = self.parameters['datasets_to_populate']
@@ -125,6 +147,12 @@ class OrthoSlice(Plugin, CpuPlugin):
         spatial_dims += list(in_dataset[0].get_data_patterns()['VOLUME_XZ']['core_dims'])
 
         self.spatial_dims = set(spatial_dims)
+        self.all_dims = set(range(len(full_data_shape)))
+        self.slice_dims = self.all_dims.difference(self.spatial_dims)
+
+        self.exp.log("Spatial dimention set = %s" % self.spatial_dims)
+        self.exp.log("All dimention set = %s" % self.all_dims)
+        self.exp.log("Slice dimention set = %s" % self.slice_dims)
 
         in_pData, out_pData = self.get_plugin_datasets()
 
@@ -171,7 +199,7 @@ class OrthoSlice(Plugin, CpuPlugin):
         return 1
 
     def nOutput_datasets(self):
-        return 3
+        return self.get_number_of_orthoslices()
 
     def get_max_frames(self):
         return 'single'
