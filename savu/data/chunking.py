@@ -284,7 +284,7 @@ class Chunking(object):
 
     def __get_idx_order(self, adjust, chunks, direction):
         process_order = [self.slice1, self.core]
-        sl = slice(None, None, -1)
+        sl = slice(None, None, -1) 
         if direction is 'up':
             sl = slice(None, None, 1)
             process_order = process_order[::-1]
@@ -296,7 +296,7 @@ class Chunking(object):
             avail2 = list(set(adjust['dim']).intersection(process_order[1]))
             idx_order = np.argsort(chunks[avail2])[sl]
 
-        return adjust['dim'][idx_order[0]] if idx_order.size else -1
+        return avail1[idx_order[0]] if idx_order.size else -1
 
     def __check_adjust_dims(self, adjust, chunks, up_down):
         nDel = 0
