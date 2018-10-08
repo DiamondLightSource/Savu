@@ -51,6 +51,13 @@ class OrthoSlice(Plugin, CpuPlugin):
     def __init__(self):
         super(OrthoSlice, self).__init__("OrthoSlice")
 
+    def pre_process(self):
+        self.image_path = \
+            os.path.join(self.exp.meta_data.get('out_path'), 'OrthoSlice')
+        if self.exp.meta_data.get('process') == 0:
+            if not os.path.exists(self.image_path):
+                os.makedirs(self.image_path)        
+
     def process_frames(self, data):
         self.exp.log("XXXX Starting to run process_frames in Orthoslice")
         print("XXXX Starting to run process_frames in Orthoslice")
@@ -58,10 +65,6 @@ class OrthoSlice(Plugin, CpuPlugin):
         in_dataset = self.get_in_datasets()
 
         fullData = in_dataset[0]
-
-        image_path = os.path.join(self.exp.meta_data.get('out_path'), 'OrthoSlice')
-        if not os.path.exists(image_path):
-            os.makedirs(image_path)
 
         ext = self.parameters['file_type']
         in_plugin_data = self.get_plugin_in_datasets()[0]
@@ -104,7 +107,7 @@ class OrthoSlice(Plugin, CpuPlugin):
                 self.exp.log("Final slice is : %s of %s" % (str(slice_to_take), str(fullData.data.shape)))
 
                 # now retreive the data from the full dataset given the current slice
-                ortho_data = fullData.data[slice_to_take].squeeze()
+                ortho_data = fullData.data[tuple(slice_to_take)].squeeze()
                 output_slices.append(ortho_data)
                 
                 if ext is not 'None':
@@ -115,7 +118,7 @@ class OrthoSlice(Plugin, CpuPlugin):
                     filename = '%s_%03i_%s.%s' % (pattern, slice_value, str(pos), ext)
                     self.exp.log("image-data shape is %s and filename is '%s'" % (str(image_data.shape), filename))
 
-                    sp.misc.imsave(os.path.join(image_path, filename), image_data)
+                    sp.misc.imsave(os.path.join(self.image_path, filename), image_data)
 
         return output_slices
 
@@ -134,66 +137,55 @@ class OrthoSlice(Plugin, CpuPlugin):
             self.exp.index['in_data'][name].meta_data.set(key, value)
 
     def setup(self):
-
-        self.exp.log(self.name + " Start")
-
-        # set up the output dataset that is created by the plugin
         in_dataset, out_dataset = self.get_datasets()
+        in_pData, out_pData = self.get_plugin_datasets()
 
         full_data_shape = list(in_dataset[0].get_shape())
 
-        spatial_dims = list(in_dataset[0].get_data_patterns()['VOLUME_XY']['core_dims'])
-        spatial_dims += list(in_dataset[0].get_data_patterns()['VOLUME_YZ']['core_dims'])
-        spatial_dims += list(in_dataset[0].get_data_patterns()['VOLUME_XZ']['core_dims'])
+        pattern = ['VOLUME_XY', 'VOLUME_YZ', 'VOLUME_XZ']
+        fixed_axis = ['voxel_z', 'voxel_x', 'voxel_y']
 
-        self.spatial_dims = set(spatial_dims)
+        self.spatial_dims = []
+        for axis in fixed_axis:
+            self.spatial_dims.append(
+                    in_dataset[0].get_data_dimension_by_axis_label(axis))
+
         self.all_dims = set(range(len(full_data_shape)))
-        self.slice_dims = self.all_dims.difference(self.spatial_dims)
-
-        self.exp.log("Spatial dimention set = %s" % self.spatial_dims)
-        self.exp.log("All dimention set = %s" % self.all_dims)
-        self.exp.log("Slice dimention set = %s" % self.slice_dims)
-
-        in_pData, out_pData = self.get_plugin_datasets()
+        self.slice_dims = self.all_dims.difference(set(self.spatial_dims))
 
         # Sort out input data
         in_pData[0].plugin_data_setup('VOLUME_XY', self.get_max_frames())
-        fixed_dim = list(self.spatial_dims.difference(set(in_pData[0].get_core_dimensions())))
+        fixed_dim = in_dataset[0].get_data_dimension_by_axis_label('voxel_z')
         preview = [':']*len(in_dataset[0].get_shape())
-        preview[fixed_dim[0]] = str(0)
+        preview[fixed_dim] = str(0)
         self.set_preview(in_dataset[0], preview)
 
-        # Create output datsets
-        reduced_shape = copy.copy(full_data_shape)
-        del reduced_shape[fixed_dim[0]]
-        out_dataset[0].create_dataset(axis_labels={in_dataset[0]: [str(fixed_dim[0])] },
-                                      shape=tuple(reduced_shape),
-                                      patterns={in_dataset[0]: ['VOLUME_XY.%i'%fixed_dim[0]]})
-        out_pData[0].plugin_data_setup('VOLUME_XY', self.get_max_frames())
+        # use this for 3D data (need to keep slice dimension)
+        out_dataset = self.get_out_datasets()
+        out_pData = self.get_plugin_out_datasets()
 
-        print "in dataset shape", in_dataset[0].get_shape()
-        # Sort out dataset 1
-#        fixed_dim = list(self.spatial_dims.difference(set(in_pData[0].get_core_dimensions())))
-        vol_yz_core_dims = in_dataset[0].get_data_patterns()['VOLUME_YZ']['core_dims']
-        fixed_dim = list(self.spatial_dims.difference(set(vol_yz_core_dims)))
-        reduced_shape = copy.copy(full_data_shape)
-        del reduced_shape[fixed_dim[0]]
-        out_dataset[1].create_dataset(axis_labels={in_dataset[0]: [str(fixed_dim[0])] },
-                                      shape=tuple(reduced_shape),
-                                      patterns={in_dataset[0]: ['VOLUME_YZ.%i'%fixed_dim[0]]})
-        out_pData[1].plugin_data_setup('VOLUME_YZ', self.get_max_frames())
+        for i, (p, axis) in enumerate(zip(pattern, fixed_axis)):
+            fixed_dim = in_dataset[0].get_data_dimension_by_axis_label(axis)
+            shape, patterns, labels = self._get_data_params(
+                    in_dataset[0], full_data_shape, fixed_dim, p)
+            out_dataset[i].create_dataset(axis_labels=labels,
+                                          shape=tuple(shape),
+                                          patterns=patterns)
+            out_pData[i].plugin_data_setup(p, self.get_max_frames())
 
-        # Sort out dataset 2
-        vol_xz_core_dims = in_dataset[0].get_data_patterns()['VOLUME_XZ']['core_dims']
-        fixed_dim = list(self.spatial_dims.difference(set(vol_xz_core_dims)))
-        reduced_shape = copy.copy(full_data_shape)
-        del reduced_shape[fixed_dim[0]]
-        out_dataset[2].create_dataset(axis_labels={in_dataset[0]: [str(fixed_dim[0])] },
-                                      shape=tuple(reduced_shape),
-                                      patterns={in_dataset[0]: ['VOLUME_XZ.%i'%fixed_dim[0]]})
-        out_pData[2].plugin_data_setup('VOLUME_XZ', self.get_max_frames())
-
-        self.exp.log(self.name + " End")
+    def _get_data_params(self, data, full_data_shape, fixed_dim, p):
+        shape = copy.copy(full_data_shape)
+        if self.slice_dims:
+            # for > 3D data
+            del shape[fixed_dim]
+            pattern = {data: ['%s.%i'%(p, fixed_dim)]}
+            labels = {data: [str(fixed_dim)]}
+        else:
+            # for 3D data
+            shape[fixed_dim] = 1
+            pattern = {data: [p]}
+            labels = data
+        return shape, pattern, labels
 
     def nInput_datasets(self):
         return 1
