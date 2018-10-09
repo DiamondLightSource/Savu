@@ -23,7 +23,8 @@ import os
 import copy
 import logging
 
-import scipy as sp
+#import scipy as sp
+import scipy.misc
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('matplotlib')
@@ -115,7 +116,7 @@ class OrthoSlice(Plugin, CpuPlugin):
                 filename = '%s_%03i_%s.%s' % (pattern, slice_value, str(pos), ext)
                 self.exp.log("image-data shape is %s and filename is '%s'" % (str(image_data.shape), filename))
 
-                sp.misc.imsave(os.path.join(self.image_path, filename), image_data)
+                scipy.misc.imsave(os.path.join(self.image_path, filename), image_data)
 
         return output_slices
 
