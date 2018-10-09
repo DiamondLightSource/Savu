@@ -125,7 +125,7 @@ class DataCreate(object):
             data = copy_data.keys()[0]
             pattern_list = copy_data[data]
 
-            all_patterns = data.get_data_patterns()
+            all_patterns = copy.deepcopy(data.get_data_patterns())
             if len(pattern_list[0].split('.')) > 1:
                 patterns = self.__copy_patterns_removing_dimensions(
                     pattern_list, all_patterns, len(data.get_shape()))
