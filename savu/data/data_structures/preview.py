@@ -199,7 +199,10 @@ class Preview(object):
         nDims = len(starts)
         for i in range(nDims):
             if stops[i] <= starts[i]:
-                raise Exception("Error in previewing parameters!")
+                raise Exception("Error in previewing parameters! "
+                                "Check parameters that may alter data dimensions. "
+                                "(axis={}, start={}, stop={})".format(
+                                    i, starts[i], stops[i]))
 
     def __set_reduced_shape(self, starts, stops, steps, chunks):
         """ Set new shape if data is reduced by previewing.
