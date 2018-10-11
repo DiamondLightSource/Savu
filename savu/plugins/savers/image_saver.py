@@ -54,9 +54,10 @@ class ImageSaver(BaseImageSaver, CpuPlugin):
         # intensities (see commit message for more information)
         data = self.get_in_datasets()[0].data
         self._data_range = (np.min(data), np.max(data))
+        self.pData = self.get_plugin_in_datasets()[0]
 
     def process_frames(self, data):
-        frame = self.get_global_frame_index()[0][self.count]
+        frame = self.pData.get_current_frame_idx()[0]
         filename = '%s%05i.%s' % (self.filename, frame, self.parameters['format'])
 
         # Rescale image to (0.0, 1.0) range
