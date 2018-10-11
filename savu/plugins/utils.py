@@ -120,6 +120,10 @@ def plugin_loader(exp, plugin_dict, **kwargs):
         logging.error(e)
         raise e
 
+    # set up the experiment param here so exp meta data is available for
+    # dynamic data info functions
+    plugin.exp = exp
+
     check_flag = kwargs.get('check', False)
     if check_flag:
         set_datasets(exp, plugin, plugin_dict)

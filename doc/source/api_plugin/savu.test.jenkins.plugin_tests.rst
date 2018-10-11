@@ -1,5 +1,5 @@
-savu.test.jenkins.plugin_tests package
-======================================
+savu\.test\.jenkins\.plugin\_tests package
+==========================================
 
 Subpackages
 -----------

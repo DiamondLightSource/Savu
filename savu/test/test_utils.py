@@ -189,9 +189,10 @@ def _add_loader_to_plugin_list(options, params={}):
     options['plugin_list'] = plugin_list
 
 
-def load_random_data(loader, params):
+def load_random_data(loader, params, system_params=None):
     options = set_options(get_test_data_path('24737.nxs'))
     options['loader'] = 'savu.plugins.loaders.' + str(loader)
+    options['system_params'] = system_params
     _add_loader_to_plugin_list(options, params=params)
     return plugin_runner(options)
 

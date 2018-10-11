@@ -20,6 +20,7 @@ Created on 21 May 2015
 
 from __future__ import print_function
 
+import re
 import sys
 
 from content import Content
@@ -120,7 +121,7 @@ def _set(content, args):
 def _add(content, args):
     """ Add a plugin to the list. """
     elems = content.get_positions()
-    final = str(int(list(elems[-1])[0])+1) if elems else 1
+    final = str(int(re.findall(r'\d+', elems[-1])[0])+1) if elems else 1
     content.add(args.name, args.pos if args.pos else str(final))
     _disp(content, '-q')
     return content

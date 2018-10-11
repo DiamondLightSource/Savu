@@ -1,5 +1,5 @@
-savu.test.jenkins.plugin_tests.filter_tests package
-===================================================
+savu\.test\.jenkins\.plugin\_tests\.filter\_tests package
+=========================================================
 
 .. automodule:: savu.test.jenkins.plugin_tests.filter_tests
     :members:

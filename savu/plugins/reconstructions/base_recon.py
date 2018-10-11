@@ -157,16 +157,31 @@ class BaseRecon(Plugin):
         if 'centre_of_rotation' in mData.get_dictionary().keys():
             cor = mData.get('centre_of_rotation')
         else:
-            sdirs = inData.get_slice_dimensions()
-            cor = np.ones(np.prod([inData.get_shape()[i] for i in sdirs]))
             val = self.parameters['centre_of_rotation']
-            # if centre of rotation has not been set then fix it in the centre
-            val = val if val != 0 else \
-                (self.get_vol_shape()[self._get_detX_dim()])/2
-            cor *= val
-            #mData.set('centre_of_rotation', cor) see Github ticket
+            if isinstance(val, dict):
+                cor = self.__polyfit_cor(val, inData)
+            else:
+                sdirs = inData.get_slice_dimensions()
+                cor = np.ones(np.prod([inData.get_shape()[i] for i in sdirs]))
+                # if centre of rotation has not been set then fix it in the centre
+                val = val if val != 0 else \
+                    (self.get_vol_shape()[self._get_detX_dim()])/2
+                cor *= val
+                #mData.set('centre_of_rotation', cor) see Github ticket
         self.cor = cor
         self.centre = self.cor[0]
+
+    def __polyfit_cor(self, cor_dict, inData):
+        if 'detector_y' in inData.meta_data.get_dictionary().keys():
+            y = inData.meta_data.get('detector_y')
+        else:
+            yDim = inData.get_data_dimension_by_axis_label('detector_y')
+            y = np.arange(inData.get_shape()[yDim])
+
+        z = np.polyfit(map(int, cor_dict.keys()), cor_dict.values(), 1)
+        p = np.poly1d(z)
+        cor = p(y)
+        return cor
 
     def set_function(self, pad_shape):
         if not pad_shape:
@@ -209,6 +224,7 @@ class BaseRecon(Plugin):
         init = data[1] if self.init_vol else None
         angles = \
             self.angles[:, sl[self.scan_dim]] if self.scan_dim else self.angles
+
         self.frame_angles = angles
 
         dim_sl = sl[self.main_dir]
@@ -368,32 +384,10 @@ class BaseRecon(Plugin):
         self.preview_flag = \
             self.set_preview(in_dataset[0], self.parameters['preview'])
 
-        # set information relating to the plugin data
-        in_pData, out_pData = self.get_plugin_datasets()
-
-        in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
-
-        idx = 1
-        # initial volume dataset
-        if 'init_vol' in self.parameters.keys() and \
-                self.parameters['init_vol']:
-            self.init_vol = True
-            from savu.data.data_structures.data_types import Replicate
-            if self.rep_dim:
-                in_dataset[idx].data = Replicate(
-                    in_dataset[idx], in_dataset[0].get_shape(self.rep_dim))
-            in_pData[1].plugin_data_setup('VOLUME_XZ', self.get_max_frames())
-            idx += 1
-
-        # cor dataset
-        if isinstance(self.parameters['centre_of_rotation'], str):
-            self.cor_as_dataset = True
-            in_pData[idx].plugin_data_setup('METADATA', self.get_max_frames())
-
         axis_labels = in_dataset[0].data_info.get('axis_labels')[0]
 
         dim_volX, dim_volY, dim_volZ = \
-            self.map_volume_dimensions(in_dataset[0], in_pData[0])
+            self.map_volume_dimensions(in_dataset[0])
 
         axis_labels = [0]*3
         axis_labels = {in_dataset[0]:
@@ -413,18 +407,41 @@ class BaseRecon(Plugin):
 
         out_dataset[0].add_volume_patterns(dim_volX, dim_volY, dim_volZ)
 
+        # set information relating to the plugin data
+        in_pData, out_pData = self.get_plugin_datasets()
+
+        in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
+
+        idx = 1
+        # initial volume dataset
+        if 'init_vol' in self.parameters.keys() and \
+                self.parameters['init_vol']:
+            self.init_vol = True
+#            from savu.data.data_structures.data_types import Replicate
+#            if self.rep_dim:
+#                in_dataset[idx].data = Replicate(
+#                    in_dataset[idx], in_dataset[0].get_shape(self.rep_dim))
+            in_pData[1].plugin_data_setup('VOLUME_XZ', self.get_max_frames())
+            idx += 1
+
+        # cor dataset
+        if isinstance(self.parameters['centre_of_rotation'], str):
+            self.cor_as_dataset = True
+            in_pData[idx].plugin_data_setup('METADATA', self.get_max_frames())
+
         # set pattern_name and nframes to process for all datasets
         out_pData[0].plugin_data_setup('VOLUME_XZ', self.get_max_frames())
 
     def get_max_frames(self):
         return 'multiple'
 
-    def map_volume_dimensions(self, data, pData):
+    def map_volume_dimensions(self, data):
         data._finalise_patterns()
         dim_rotAngle = data.get_data_patterns()['PROJECTION']['main_dir']
-        dim_detY = data.get_data_patterns()['SINOGRAM']['main_dir']
+        sinogram = data.get_data_patterns()['SINOGRAM']
+        dim_detY = sinogram['main_dir']
 
-        core_dirs = data.get_core_dimensions()
+        core_dirs = sinogram['core_dims']
         dim_detX = list(set(core_dirs).difference(set((dim_rotAngle,))))[0]
 
         dim_volX = dim_rotAngle

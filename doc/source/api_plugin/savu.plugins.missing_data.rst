@@ -1,5 +1,5 @@
-savu.plugins.missing_data package
-=================================
+savu\.plugins\.missing\_data package
+====================================
 
 Module contents
 ---------------

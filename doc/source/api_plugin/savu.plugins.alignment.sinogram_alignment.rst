@@ -1,5 +1,5 @@
-savu.plugins.alignment.sinogram_alignment module
-================================================
+savu\.plugins\.alignment\.sinogram\_alignment module
+====================================================
 
 .. automodule:: savu.plugins.alignment.sinogram_alignment
     :members:

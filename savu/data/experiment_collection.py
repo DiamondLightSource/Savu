@@ -100,12 +100,14 @@ class Experiment(object):
                                       'datasets': []}
         self._barrier()
         self._check_checkpoint()
+        self._barrier()
         checkpoint = self.meta_data.get('checkpoint')
         if self.meta_data.get('process') == \
                 len(self.meta_data.get('processes'))-1 and not checkpoint:
             plugin_list._save_plugin_list(self.meta_data.get('nxs_filename'))
             # links the input data to the nexus file
             self._add_input_data_to_nxs_file(transport)
+        # Barrier 13
         self._barrier()
 
         n_plugins = plugin_list._get_n_processing_plugins()
@@ -198,14 +200,14 @@ class Experiment(object):
         throughout the processing chain.
         """
         current_datasets = datasets_lists[0]
-        patterns_list = []
+        patterns_list = {}
         for current_data in current_datasets['out_datasets']:
             current_name = current_data['name']
             current_pattern = current_data['pattern']
             next_pattern = self.__find_next_pattern(datasets_lists[1:],
                                                     current_name)
-            patterns_list.append({'current': current_pattern,
-                                  'next': next_pattern})
+            patterns_list[current_name] = \
+                {'current': current_pattern, 'next': next_pattern}
         self.meta_data.set('current_and_next', patterns_list)
 
     def __find_next_pattern(self, datasets_lists, current_name):

@@ -57,7 +57,7 @@ def _deepcopy_data_object(dObj, new_obj):
     new_obj.next_shape = copy.deepcopy(dObj.next_shape)
     new_obj.orig_shape = copy.deepcopy(dObj.orig_shape)
     new_obj.previous_pattern = copy.deepcopy(dObj.previous_pattern)
-    new_obj._set_transport_data(dObj.exp.meta_data.get('transport'))
+    new_obj._set_transport_data(dObj.data_info.get('transport'))
     return new_obj
 
 

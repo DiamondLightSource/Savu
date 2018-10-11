@@ -38,7 +38,7 @@ class BaseType(object):
         raise NotImplementedError("__getitem__ must be implemented.")
 
     def get_shape(self):
-        """ Get full stiched shape of a stack of files"""
+        """ Get full stitched shape of a stack of files"""
         raise NotImplementedError("get_shape must be implemented.")
 
     def add_base_class_with_instance(self, base, inst):

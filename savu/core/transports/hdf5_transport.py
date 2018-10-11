@@ -125,3 +125,4 @@ class Hdf5Transport(BaseTransport):
             self.exp._set_experiment_for_current_plugin(i)
             for data in self.exp.index['out_data'].values():
                 self.hdf5._close_file(data)
+

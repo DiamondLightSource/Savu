@@ -1,0 +1,23 @@
+# Tune these parameters to optimise Savu for your system.
+
+chunk_cache_size        : 0         # the size of the hdf5 raw data cache in MB
+max_chunk_size          : 2048      # the maximum hdf5 chunk size in MB
+# NB: Set chunk_cache_size and max_chunk_size to be the same for optimal performance,
+# unless chunk_cache_size is 0.
+
+checkpoint_interval     : 600       # interval between checkpointing in seconds
+
+mpi-io_settings:                    # MPI I/O settings
+    romio_ds_write      : disable   
+    romio_ds_read       : disable
+
+data_transfer_settings  :
+    max_bytes           : 32*1*1*4        # max bytes, per process, that can be transferred from file at a time
+    min_bytes           : 0.5*b_per_p     # b_per_p = bytes per process: min bytes, per process, transfered from file each time.
+                                          # If b_per_p > bytes_threshold, min_mft = 0.5*bytes_threshold.
+    bytes_threshold     : 32*1*1*4        # see min_bytes above
+
+# future considerations
+    # blosc compression (hdf5 filter)
+    # IBM_largeblock_io
+

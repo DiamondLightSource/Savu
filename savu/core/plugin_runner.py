@@ -157,16 +157,18 @@ class PluginRunner(object):
 
         plist = plugin_list.plugin_list
         for i in range(n_loaders):
-            pu.plugin_loader(self.exp, plugin_list.plugin_list[i])
+            plugin = pu.plugin_loader(self.exp, plugin_list.plugin_list[i])
 
         if setnxs:
             self.exp._set_nxs_filename()
+        
         check = [True if x in check_list else False for x in range(n_plugins)]
 
         count = 0
         for i in range(n_loaders, n_loaders+n_plugins):
             self.exp._barrier()
             plugin = pu.plugin_loader(self.exp, plist[i], check=check[count])
+            plugin._revert_preview(plugin.get_in_datasets())
             plist[i]['cite'] = plugin.get_citation_information()
             plugin._clean_up()
             self.exp._merge_out_data_to_in()

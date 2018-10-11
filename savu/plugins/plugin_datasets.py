@@ -21,6 +21,8 @@
 
 """
 
+import numpy as np
+
 import savu.plugins.plugin_datasets_notes as notes
 from savu.core.utils import docstring_parameter
 from savu.data.data_structures.plugin_data import PluginData
@@ -38,6 +40,7 @@ class PluginDatasets(object):
         self.variable_data_flag = False
         self.multi_params_dict = {}
         self.extra_dims = []
+        self._max_itemsize = 0        
 
     def __get_data_objects(self, dtype):
         """ Get the data objects associated with the plugin from the experiment
@@ -60,6 +63,42 @@ class PluginDatasets(object):
             if data_obj.raw and data_obj.data:
                 data_obj.raw.create_next_instance(data_obj)
 #                data_obj.clone = True
+
+    def _finalise_datasets(self):
+        in_data, out_data = self.get_datasets()
+        for data in in_data + out_data:
+            data._finalise_patterns()
+
+    def _finalise_plugin_datasets(self):
+        if 'dawn_runner' in self.exp.meta_data.get_dictionary().keys():
+            return
+
+        in_pData, out_pData = self.get_plugin_datasets()
+
+        params = {}
+        for pData in in_pData + out_pData:
+            pData._set_meta_data()
+            params[pData] = pData._get_plugin_data_size_params()
+        
+        max_bytes = 0
+        for key, value in params.iteritems():
+            if value['transfer_bytes'] > max_bytes:
+                max_data = key
+                max_bytes = value['transfer_bytes']
+
+        # set mft and mfp for the largest dataset
+        max_data.plugin_data_transfer_setup()
+        to_set = list(set(params.keys()).difference(set([max_data])))
+
+        for pData in to_set:
+            if params[pData]['total_frames'] == params[max_data]['total_frames']:
+                pData.plugin_data_transfer_setup(copy=max_data)
+            else:
+                if pData.max_frames == 'multiple':
+                    msg = "If a plugin reduces the number of frames, the " \
+                        "number of frames cannot be 'multiple'."
+                    raise Exception(msg)
+                pData.plugin_data_transfer_setup(calc=max_data)
 
     def __set_in_datasets(self):
         """ Set the in_data objects.

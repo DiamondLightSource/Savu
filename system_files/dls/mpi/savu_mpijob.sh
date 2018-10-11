@@ -8,7 +8,8 @@ processfile=$3
 outfile=$4
 nCPUs=$5
 nGPUs=$6
-shift 6
+delete=$7
+shift 7
 
 export PYTHONPATH=$savupath:$PYTHONPATH
 filename=$savupath/savu/tomo_recon.py
@@ -36,9 +37,20 @@ echo $CPUs
 
 echo "Processes running are : ${processes}"
 
+if [ ! $delete == false ]; then
+  delete=`readlink -f $delete`
+  echo "***Deleting the intermediate folder" $delete "at the end of this run"
+fi
+
 mpirun -np ${processes} \
        -mca btl sm,self,openib \
        -x LD_LIBRARY_PATH \
        --hostfile ${TMP_FILE} \
        python $filename $datafile $processfile $outfile -n $CPUs -v $@
+
+if [ ! $delete == false ]; then
+  cd /dls/tmp/savu
+  cp $delete/savu.o* $delete/../
+  rm -rf $delete
+fi
 

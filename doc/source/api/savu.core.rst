@@ -1,5 +1,5 @@
-savu.core package
-=================
+savu\.core package
+==================
 
 .. automodule:: savu.core
     :members:

@@ -1,4 +1,4 @@
-# Copyright 2014 Diamond Light Source Ltd.
+# Copyright 2018 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@
 import copy
 import numpy as np
 import itertools
+import time
+import logging
 
 from savu.plugins.plugin import Plugin
 from savu.plugins.utils import register_plugin
@@ -36,23 +38,61 @@ from pmacparser.pmac_parser import PMACParser
 class StageMotion(Plugin, CpuPlugin):
     """
     A Plugin to calculate stage motion from motion positions.
-    :u*param a_value: Description of a_value. Default: None.
     :param in_datasets: Create a list of the \
-        dataset(s). Default: ["pmin", "pmean", "pmax"].
+        dataset(s). Default: ["pmean"].
     :param out_datasets: Create a list of the \
-        dataset(s). Default: ["qmin", "qmean", "qmax"].
+        dataset(s). Default: ["qmean"].
+    :param use_min_max: Also use the min and max datasets \
+        including all combinations of min, mean and max. Default: False.
+    :param extra_in_datasets: The extra datasets \
+        to use as input for min and max. Default: ["pmin", "pmax"].
+    :param extra_out_datasets: The extra datasets \
+        to use as output for min and max. Default: ["qmin", "qmax"].
     """
 
     NUM_OUTPUT_Q_VARS = 9
-    MEAN_INDEX = 1
+    MEAN_INDEX = 0
+    NUM_DATASETS = 1
 
     def __init__(self):
         super(StageMotion, self).__init__("StageMotion")
         self.parser = None
         self.variables = {}
         self.pvals = None
+        self.num_datasets = self.NUM_DATASETS
+        self.use_min_max = False
+
+    def base_dynamic_data_info(self):
+        logging.debug("Config use min max: " + str(self.parameters['use_min_max']))
+        logging.debug("Experiment meta data use min max: " + str(self.exp.meta_data.get('use_minmax')))
+
+        # Check the parameters from the config file and the experiment data to check whether to use extra datasets
+
+        # Config value takes priority, check if None
+        if self.parameters['use_min_max'] is None:
+            # Config was None, so check the value in the experiment data file
+            if self.exp.meta_data.get('use_minmax'):
+                self.use_min_max = True
+        elif self.parameters['use_min_max']:
+            self.use_min_max = True
+
+        # If using extra datasets, set them up and increase the number of datasets
+        if self.use_min_max:
+            logging.debug("Using min and max datasets")
+            self.num_datasets += len(self.parameters['extra_in_datasets'])
+            self.parameters['in_datasets'].extend(self.parameters['extra_in_datasets'])
+            self.parameters['out_datasets'].extend(self.parameters['extra_out_datasets'])
 
     def pre_process(self):
+
+        # Check the parameters from the config file and the experiment data
+        if self.parameters['use_min_max'] is None:
+            # Config was None, so check the value in the experiment data file
+            if self.exp.meta_data.get('use_minmax'):
+                self.use_min_max = True
+        elif self.parameters['use_min_max']:
+            self.use_min_max = True
+
         # Get the output shape from the plugin
         out_pdata = self.get_plugin_out_datasets()[0]
         self.out_pshape = out_pdata.get_shape()
@@ -86,67 +126,77 @@ class StageMotion(Plugin, CpuPlugin):
         self.pvals = data.meta_data.get('motor')
 
     def process_frames(self, data):
-        # takes in list of 3 datasets with size (n x m)
-        # returns 3 datasets of size (n x m x r)
-
-        data_mean = data[self.MEAN_INDEX]
-
-        # Run the parser on the mean input data to get the mean output data
-        self.set_variables_from_data(data_mean)
-        output_vars = self.parser.parse(self.variables)
+        # Data coming in is either an array of 1 or 3 elements
+        # If 1 element, then just MEAN data, if 3 then MEAN, MIN, MAX
+        # The last dimension represents the P values for each slice
+        # Returns either 1 or 3 datasets of size to match the input
 
         mean_output = np.zeros(self.out_pshape)
-        min_output = np.zeros(self.out_pshape)
-        max_output = np.zeros(self.out_pshape)
 
-        # Set the output datasets from the parser output
-        for i in range(1, self.NUM_OUTPUT_Q_VARS + 1):
-            if 'Q'+str(i) in output_vars:
-                mean_output[i-1] = output_vars['Q'+str(i)]
-                min_output[i-1] = output_vars['Q'+str(i)]
-                max_output[i-1] = output_vars['Q'+str(i)]
+        # Check if using all combinations of min, mean and max
+        if self.use_min_max:
+            # Using min, mean and max
+            min_output = np.zeros(self.out_pshape)
+            max_output = np.zeros(self.out_pshape)
 
-        # Dictionary to keep track of the current dataset in use (min, mean,
-        # or max) for each pval
-        current_pval_index = {}
-        for pval in self.pvals:
-            current_pval_index[pval] = -1
+            num_frames, num_p = np.array(data[0]).shape
 
-        # Loop over every combination of min, mean, and max for each pval
-        # 0, 1, and 2 here represent min, mean and max index. Getting the
-        # product gets us every combination of min, mean and max for each pval
-        for j in itertools.product([0, 1, 2], repeat=len(self.pvals)):
-            # For each pval, set it to min, mean, or max depending on what
-            # iteration we are in
+            # Create a new data array consisting of all permutations of the P values
+            # for min, mean and max, in order to call the parser only once
+
+            # Create an index of the min, mean and max permutations
+            index = np.array([list(itertools.product([0, 1, 2], repeat=num_p))])
+            index = index.reshape(index.shape[0] * index.shape[1], index.shape[2])
+
+            # Stack and transpose the data array to get it so that the last two dimensions
+            # represent the min,mean,max and then the P value
+            new_array = np.dstack(np.transpose(data))
+
+            # Create the new data array by slicing the new array with the permutations
+            new_data = new_array[:, index, np.arange(num_p)]
+
+            # Now, set the variables to pass to the parser with the new data array
             for index, pval in enumerate(self.pvals):
-                new_index = j[index]
-                # Only set it if it's changed since last iteration
-                if not current_pval_index[pval] == new_index:
-                    self.set_variables_from_p_num_data(data[new_index], pval)
-                    current_pval_index[pval] = new_index
+                self.variables['P' + str(pval)] = new_data[:, :, index]
 
-            # Now run the parser with the current variable values
+            # Run the parser
             parse_result = self.parser.parse(self.variables)
 
-            # Check for and set any minimums or maximums
+            # Extract the Q values from the parse results
             for i in range(1, self.NUM_OUTPUT_Q_VARS + 1):
                 if 'Q' + str(i) in parse_result:
                     q_result = parse_result['Q' + str(i)]
-                    min_output[i - 1] = np.minimum(min_output[i - 1], q_result)
-                    max_output[i - 1] = np.maximum(max_output[i - 1], q_result)
+                    if q_result.size > 1:
+                        mean_output[i - 1] = q_result[:, self.MEAN_INDEX]
+                        max_output[i - 1] = np.amax(q_result, axis=1)
+                        min_output[i - 1] = np.amin(q_result, axis=1)
+                    else:
+                        mean_output[i - 1] = q_result
+                        max_output[i - 1] = q_result
+                        min_output[i - 1] = q_result
 
-        return [min_output, mean_output, max_output]
+            return [mean_output, min_output, max_output]
+
+        else:
+            # Only using mean data
+            data_mean = data[self.MEAN_INDEX]
+
+            # Run the parser on the mean input data to get the mean output data
+            for index, pval in enumerate(self.pvals):
+                self.variables['P' + str(pval)] = data_mean[:, index]
+
+            # Run the parser
+            output_vars = self.parser.parse(self.variables)
+
+            # Extract the Q values from the parse results
+            for i in range(1, self.NUM_OUTPUT_Q_VARS + 1):
+                if 'Q' + str(i) in output_vars:
+                    mean_output[i - 1] = output_vars['Q' + str(i)]
+
+            return [mean_output]
 
     def post_process(self):
         pass
-
-    def set_variables_from_data(self, data):
-        for index, pval in enumerate(self.pvals):
-            self.variables['P' + str(pval)] = data[:, index]
-
-    def set_variables_from_p_num_data(self, data, p_num):
-        index = self.pvals.index(p_num)
-        self.variables['P' + str(p_num)] = data[:, index]
 
     def setup(self):
         # take in n x m
@@ -168,26 +218,28 @@ class StageMotion(Plugin, CpuPlugin):
         pattern = self.__update_pattern_information(in_datasets[0], dim_pos)
 
         # Populate the output datasets with required information
-        out_datasets[0].create_dataset(axis_labels=axis_labels,
-                                       shape=self.shape)
-        out_datasets[0].add_pattern('MOTOR_POSITION', **pattern)
+        number_of_datasets_in_use = 1
+        if self.parameters['use_min_max'] is None:
+            # Config was None, so check the value in the experiment data file
+            if self.exp.meta_data.get('use_minmax'):
+                self.use_min_max = True
+        elif self.parameters['use_min_max']:
+            self.use_min_max = True
+        if self.use_min_max:
+            number_of_datasets_in_use = 3
 
-        out_datasets[1].create_dataset(axis_labels=axis_labels,
-                                       shape=self.shape)
-        out_datasets[1].add_pattern('MOTOR_POSITION', **pattern)
+        logging.debug("Number of datasets: " + str(number_of_datasets_in_use))
 
-        out_datasets[2].create_dataset(axis_labels=axis_labels,
-                                       shape=self.shape)
-        out_datasets[2].add_pattern('MOTOR_POSITION', **pattern)
+        for i in range(number_of_datasets_in_use):
+            out_datasets[i].create_dataset(axis_labels=axis_labels,
+                                           shape=self.shape)
+            out_datasets[i].add_pattern('MOTOR_POSITION', **pattern)
 
         # ================== populate plugin datasets =========================
         in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup('MOTOR_POSITION', 'multiple')
-        in_pData[1].plugin_data_setup('MOTOR_POSITION', 'multiple')
-        in_pData[2].plugin_data_setup('MOTOR_POSITION', 'multiple')
-        out_pData[0].plugin_data_setup('MOTOR_POSITION', 'multiple')
-        out_pData[1].plugin_data_setup('MOTOR_POSITION', 'multiple')
-        out_pData[2].plugin_data_setup('MOTOR_POSITION', 'multiple')
+        for i in range(number_of_datasets_in_use):
+            in_pData[i].plugin_data_setup('MOTOR_POSITION', 'multiple')
+            out_pData[i].plugin_data_setup('MOTOR_POSITION', 'multiple')
         # =====================================================================
 
     def __update_pattern_information(self, dObj, dim_pos):
@@ -205,7 +257,7 @@ class StageMotion(Plugin, CpuPlugin):
         return tuple(shape)
 
     def nInput_datasets(self):
-        return 3
+        return self.num_datasets
 
     def nOutput_datasets(self):
-        return 3
+        return self.num_datasets

@@ -1,5 +1,5 @@
-savu.core.utils module
-======================
+savu\.core\.utils module
+========================
 
 .. automodule:: savu.core.utils
     :members:

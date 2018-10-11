@@ -29,12 +29,13 @@ from savu.data.data_structures.data_types.base_type import BaseType
 class StitchData(BaseType):
     """ This class is used to combine multiple data objects. """
 
-    def __init__(self, data_obj_list, stack_or_cat, dim, remove=None):
+    def __init__(self, data_obj_list, stack_or_cat, dim, remove=[]):
         self.obj_list = data_obj_list
+        self.dtype = data_obj_list[0].data.dtype
         self.stack_or_cat = stack_or_cat
         self.dim = dim
         self.remove = remove
-        super(StitchData, self).__init__
+        super(StitchData, self).__init__()
 
         self.shape = None
         self._set_shape()

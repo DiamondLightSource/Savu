@@ -53,6 +53,7 @@ class Plugin(PluginDatasets):
         self.slice_list = None
         self.global_index = None
         self.pcount = 0
+        self.exp = None
 
     def _main_setup(self, exp, params):
         """ Performs all the required plugin setup.
@@ -64,18 +65,15 @@ class Plugin(PluginDatasets):
         :param Experiment exp: The current Experiment object.
         :params dict params: Parameter values.
         """
-        self.__reset_process_frames_counter()
-        self.exp = exp
+        self._reset_process_frames_counter()
         self._set_parameters(params)
         self._set_plugin_datasets()
         self.setup()
         self.set_filter_padding(*(self.get_plugin_datasets()))
+        self._finalise_datasets()
+        self._finalise_plugin_datasets()
 
-        in_data, out_data = self.get_datasets()
-        for data in in_data + out_data:
-            data._finalise_patterns()
-
-    def __reset_process_frames_counter(self):
+    def _reset_process_frames_counter(self):
         self.pcount = 0
 
     def get_process_frames_counter(self):
@@ -213,6 +211,10 @@ class Plugin(PluginDatasets):
                 seq = value[0].split(':')
                 seq = [eval(s) for s in seq]
                 value = list(np.arange(seq[0], seq[1], seq[2]))
+                if len(value) == 0:
+                    raise RuntimeError(
+                        'No values for tuned parameter "{}", '
+                        'ensure start:stop:step; values are valid.'.format(key))
             if type(value[0]) != dtype:
                 try:
                     value.remove('')

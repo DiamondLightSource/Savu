@@ -1,5 +1,5 @@
-savu.plugins.loaders.mapping_loaders.i22_loaders package
-========================================================
+savu\.plugins\.loaders\.mapping\_loaders\.i22\_loaders package
+==============================================================
 
 Submodules
 ----------

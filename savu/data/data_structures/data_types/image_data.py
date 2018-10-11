@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: fabio
+.. module:: image_data
    :platform: Unix
    :synopsis: A module for loading any of the FabIO python module supported \
        image formats (e.g. tiffs)
@@ -22,16 +22,16 @@
 
 """
 
-import numpy as np
-import fabio
 import os
+import fabio
+import numpy as np
 
 from savu.data.data_structures.data_types.base_type import BaseType
 
 
-class FabIO(BaseType):
-    """ This class loads any of the FabIO python module supported image
-    formats. """
+class ImageData(BaseType):
+    """ This class loads any of the FabIO python module
+    supported image formats. """
 
     def __init__(self, folder, Data, dim, shape=None, data_prefix=None):
         self.folder = folder
@@ -39,16 +39,20 @@ class FabIO(BaseType):
         self.frame_dim = dim
         self.shape = shape
         self.prefix = data_prefix
-        super(FabIO, self).__init__()
+        super(ImageData, self).__init__()
 
         self.nFrames = None
-        self.start_file = fabio.open(self.__get_file_name(folder, data_prefix))
-        self.dtype = self.start_file.getframe(self.start_no).data[0, 0].dtype
+
+        self.file_names = self.__get_file_names(folder, data_prefix)
+        self.start_file = fabio.open(self.file_names[0])
+        self.dtype = self.start_file.data[0, 0].dtype
         self.image_shape = (self.start_file.dim2, self.start_file.dim1)
+
         if shape is None:
             self.shape = (self.nFrames,)
         else:
             self.shape = shape
+
         self.full_shape = self.image_shape + self.shape
         self.image_dims = set(np.arange(len(self.full_shape)))\
             .difference(set(self.frame_dim))
@@ -76,15 +80,14 @@ class FabIO(BaseType):
         index, frameidx = self.__get_indices(index, size)
 
         for i in range(len(frameidx)):
-            image = self.start_file.getframe(
-                    self.start_no + frameidx[i]).data[tiff_slices]
+            image = fabio.open(self.file_names[frameidx[i]]).data[tiff_slices]
             for d in self.frame_dim:
                 image = np.expand_dims(image, axis=d)
             data[index[i]] = image
 
         return data
 
-    def __get_file_name(self, folder, prefix):
+    def __get_file_names(self, folder, prefix):
         import re
         import glob
 #        files = os.listdir(folder)
@@ -95,8 +98,8 @@ class FabIO(BaseType):
             fullpath = os.path.join(fullpath, '*')
         files = glob.glob(fullpath)
         self.nFrames = len(files)
-        fname = sorted(files)[0]
-        self.start_no = [int(s) for s in re.findall(r'\d+', fname)][-1]
+        fname = sorted(files)
+        self.start_no = [int(s) for s in re.findall(r'\d+', fname[0])][-1]
         return fname
 
     def get_shape(self):

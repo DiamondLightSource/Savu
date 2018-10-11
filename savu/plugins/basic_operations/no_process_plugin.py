@@ -54,8 +54,7 @@ class NoProcessPlugin(Plugin, CpuPlugin):
             pattern = in_dataset[0].get_data_patterns().keys()[0]
 
         in_pData[0].plugin_data_setup(pattern, self.get_max_frames())
-        out_pData[0].plugin_data_setup(
-                pattern, in_pData[0]._get_max_frames_process())
+        out_pData[0].plugin_data_setup(pattern, self.get_max_frames())
 
     def get_max_frames(self):
         return 'multiple'

@@ -1,5 +1,5 @@
-savu.plugins.analysis package
-=============================
+savu\.plugins\.analysis package
+===============================
 
 Submodules
 ----------

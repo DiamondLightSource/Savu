@@ -157,11 +157,11 @@ class Preview(object):
                 preview_list[i] = '0:end:1:1'
             vals = preview_list[i].split(':')
             starts[i], stops[i], steps[i], chunks[i] = \
-                self.__convert_indices(vals, i)
+                self.convert_indices(vals, i)
 
         return starts, stops, steps, chunks
 
-    def __convert_indices(self, idx, dim):
+    def convert_indices(self, idx, dim):
         """ convert keywords to integers.
         """
         dobj = self.get_data_obj()
@@ -199,7 +199,10 @@ class Preview(object):
         nDims = len(starts)
         for i in range(nDims):
             if stops[i] <= starts[i]:
-                raise Exception("Error in previewing parameters!")
+                raise Exception("Error in previewing parameters! "
+                                "Check parameters that may alter data dimensions. "
+                                "(axis={}, start={}, stop={})".format(
+                                    i, starts[i], stops[i]))
 
     def __set_reduced_shape(self, starts, stops, steps, chunks):
         """ Set new shape if data is reduced by previewing.

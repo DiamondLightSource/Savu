@@ -95,6 +95,7 @@ class Data(DataCreate):
                          "_transport_data"
         transport_data = cu.import_class(transport_data)
         self.transport_data = transport_data(self)
+        self.data_info.set('transport', transport)
 
     def _get_transport_data(self):
         return self.transport_data
@@ -392,3 +393,11 @@ class Data(DataCreate):
         :rtype: tuple
         """
         return self._get_plugin_data().get_pattern().values()[0]['slice_dims']
+
+    def get_itemsize(self):
+        """ Returns bytes per entry """
+        dtype = self.get_dtype()
+        if not dtype:
+            self.set_dtype(None)
+            dtype = self.get_dtype()
+        return self.get_dtype().itemsize

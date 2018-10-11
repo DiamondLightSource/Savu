@@ -73,7 +73,7 @@ def __option_parser():
     parser.add_argument("-n", "--names", help=hide, default="CPU0")
     # transport mechanism
     parser.add_argument("--transport", help=hide, default="hdf5")
-    # Set logging to cluster mode
+    # Set Savu mode
     parser.add_argument("-m", "--mode", help=hide, default="full",
                         choices=['basic', 'full'])
     # Set logging to cluster mode

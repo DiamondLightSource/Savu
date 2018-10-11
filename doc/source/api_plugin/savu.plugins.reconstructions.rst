@@ -1,5 +1,5 @@
-savu.plugins.reconstructions package
-====================================
+savu\.plugins\.reconstructions package
+======================================
 
 Subpackages
 -----------

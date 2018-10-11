@@ -64,6 +64,7 @@ class PluginDriver(BasicDriver):
 
             super(PluginDriver, self).\
                 _run_plugin_instances(transport, communicator=communicator)
+            self._reset_process_frames_counter()
 
         self._revert_preview(self.parameters['in_datasets'])
 

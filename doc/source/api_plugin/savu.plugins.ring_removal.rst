@@ -1,5 +1,5 @@
-savu.plugins.ring_removal package
-=================================
+savu\.plugins\.ring\_removal package
+====================================
 
 Submodules
 ----------
@@ -9,6 +9,7 @@ Submodules
    savu.plugins.ring_removal.ccpi_ring_artefact_filter
    savu.plugins.ring_removal.raven_filter
    savu.plugins.ring_removal.ring_removal_normalization
+   savu.plugins.ring_removal.ring_removal_regularization
    savu.plugins.ring_removal.ring_removal_waveletfft
 
 Module contents

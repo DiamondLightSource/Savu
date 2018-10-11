@@ -30,6 +30,7 @@ import h5py
 import json
 import copy
 import inspect
+import logging
 
 import numpy as np
 from collections import defaultdict
@@ -242,7 +243,9 @@ class PluginList(object):
             name = d.data_obj.get_name()
             pattern = copy.deepcopy(d.get_pattern())
             pattern[pattern.keys()[0]]['max_frames_transfer'] = \
-                d._get_max_frames_transfer()
+                d.meta_data.get('max_frames_transfer')
+            pattern[pattern.keys()[0]]['transfer_shape'] = \
+                d.meta_data.get('transfer_shape')
             data_list.append({'name': name, 'pattern': pattern})
         return data_list
 
@@ -338,11 +341,19 @@ class PluginList(object):
 
     def _contains_gpu_processes(self):
         """ Returns True if gpu processes exist in the process list. """
-        from savu.plugins.driver.gpu_plugin import GpuPlugin
-        for i in range(self.n_plugins):
-            bases = inspect.getmro(pu.load_class(self.plugin_list[i]['id']))
-            if GpuPlugin in bases:
-                return True
+        try:
+            from savu.plugins.driver.gpu_plugin import GpuPlugin
+            for i in range(self.n_plugins):
+                bases = inspect.getmro(pu.load_class(self.plugin_list[i]['id']))
+                if GpuPlugin in bases:
+                    return True
+        except ImportError as ex:
+            if "pynvml" in ex.message:
+                logging.error('Error while importing GPU dependencies: %s',
+                              ex.message)
+            else:
+                raise
+
         return False
 
 
@@ -404,6 +415,7 @@ class Template(object):
 
     def update_process_list(self, template):
         tdict = yu.read_yaml(template)
+        del tdict['process_list']
 
         for plugin_no, entry in tdict.iteritems():
             plugin = entry.keys()[0]

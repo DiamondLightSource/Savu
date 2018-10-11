@@ -12,9 +12,10 @@ mpi-io_settings:                    # MPI I/O settings
     romio_ds_read       : disable
 
 data_transfer_settings  :
-    max_mft             : 32        # max frames, per process, that can be transferred from file at a time
-    min_mft             : 16        # min frames, per process, that must be transferred from file if total frames_per_process > frame_threshold
-    frame_threshold     : 32        # see min_mft above
+    max_bytes           : 32*2560*2560*4        # max bytes, per process, that can be transferred from file at a time
+    min_bytes           : 0.5*b_per_p           # b_per_p = bytes per process: min bytes, per process, transfered from file each time.
+                                                # If b_per_p > bytes_threshold, min_mft = 0.5*bytes_threshold.
+    bytes_threshold     : 32*2560*2560*4        # see min_bytes above
 
 # future considerations
     # blosc compression (hdf5 filter)

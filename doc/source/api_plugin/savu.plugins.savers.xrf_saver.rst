@@ -1,5 +1,5 @@
-savu.plugins.savers.xrf_saver module
-====================================
+savu\.plugins\.savers\.xrf\_saver module
+========================================
 
 .. automodule:: savu.plugins.savers.xrf_saver
     :members:

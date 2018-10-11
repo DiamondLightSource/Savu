@@ -1,5 +1,5 @@
-savu.core.checkpointing module
-==============================
+savu\.core\.checkpointing module
+================================
 
 .. automodule:: savu.core.checkpointing
     :members:

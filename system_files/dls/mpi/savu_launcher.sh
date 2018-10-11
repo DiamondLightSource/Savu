@@ -149,6 +149,11 @@ touch $outfolder/user.log
 
 # set the intermediate folder
 arg_parse "-d" interfolder "$@"
+delete=false
+if [ ! $interfolder ] ; then
+  arg_parse "--tmp" interfolder "$@"
+fi
+
 if [ ! $interfolder ] ; then
   interfolder=$outfolder
 else
@@ -157,12 +162,15 @@ else
     echo -e "\t Creating the output folder "$interfolder
     mkdir -p $interfolder;
   fi
+  if [ $AUTO == false ] && [ $PREVIEW == false ]; then
+    delete=$interfolder
+  fi
 fi
 
 qsub -jsv /dls_sw/apps/sge/common/JSVs/savu.pl \
      -N $outname -j y -o $interfolder -e $interfolder -pe openmpi $M -l exclusive \
-     -l infiniband -l gpu=$nGPUs -l gpu_arch=$gpu_arch -q $cluster $filepath $version $savupath $datafile \
-     $processfile $outpath $nCoresPerNode $nGPUs $options -c -f $foldername -s graylog2.diamond.ac.uk -p 12203 \
+     -l infiniband -l gpu=$nGPUs -l gpu_arch=$gpu_arch -q $cluster -P tomography $filepath $version $savupath $datafile \
+     $processfile $outpath $nCoresPerNode $nGPUs $delete $options -c -f $foldername -s graylog2.diamond.ac.uk -p 12203 \
      --facility_email scientificsoftware@diamond.ac.uk -l $outfolder > /dls/tmp/savu/$USER.out
 
 #qsub -N $outname -j y -o $interfolder -e $interfolder -pe openmpi $M -l exclusive \

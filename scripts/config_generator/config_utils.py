@@ -42,7 +42,7 @@ else:
 histfile = os.path.join(os.path.expanduser("~"), ".savuhist")
 try:
     readline.read_history_file(histfile)
-    readline.set_history_length(10)
+    readline.set_history_length(1000)
 except IOError:
     pass
 atexit.register(readline.write_history_file, histfile)
