@@ -33,7 +33,9 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 @register_plugin
 class ImageSaver(BaseImageSaver, CpuPlugin):
     """
-    A class to save tomography data to image files
+    A class to save tomography data to image files.  Run the MaxAndMin plugin\
+    before this to rescale the data.
+
     :param pattern: How to slice the data. Default: 'VOLUME_XZ'.
     :param format: Image format. Default: 'jpeg'.
     :param jpeg_quality: JPEG encoding quality (1 is worst, 100 is best). Default: 75.
@@ -48,12 +50,7 @@ class ImageSaver(BaseImageSaver, CpuPlugin):
 
     def pre_process(self):
         super(ImageSaver, self).pre_process()
-
-        # Get max and min pixel intensities across entire dataset
-        # TODO: Replace this with a read time calculation of min and max pixel
-        # intensities (see commit message for more information)
-        data = self.get_in_datasets()[0].data
-        self._data_range = (np.min(data), np.max(data))
+        self._data_range = self._get_min_and_max()
         self.pData = self.get_plugin_in_datasets()[0]
 
     def process_frames(self, data):
@@ -69,3 +66,21 @@ class ImageSaver(BaseImageSaver, CpuPlugin):
                 filename, resampled_image, quality=self.parameters['jpeg_quality'])
 
         self.count += 1
+
+    def _get_min_and_max(self):
+        data = self.get_in_datasets()[0]
+        pattern = self.parameters['pattern']
+        try:
+            the_min = np.min(data.meta_data.get(['stats', 'min', pattern]))
+            the_max = np.max(data.meta_data.get(['stats', 'max', pattern]))
+            self._data_range = (the_min, the_max)
+        except KeyError:
+            self._data_range = 'image'
+        return self._data_range
+        
+    def executive_summary(self):
+        if self._data_range == 'image':
+            return ["To rescale and normalise the data between global max and "
+                    "min values, please run MaxAndMin plugin before "
+                    "ImageSaver."]
+        return ["Nothing to Report"]
