@@ -45,7 +45,7 @@ class MinAndMax(Plugin, CpuPlugin):
         # do some curve fitting here
         in_datasets, out_datasets = self.get_datasets()
         the_min = np.squeeze(out_datasets[0].data[...])
-        the_max = np.squeeze(out_datasets[0].data[...])
+        the_max = np.squeeze(out_datasets[1].data[...])
         pattern = self._get_pattern()
         in_datasets[0].meta_data.set(['stats', 'min', pattern], the_min)
         in_datasets[0].meta_data.set(['stats', 'max', pattern], the_max)
