@@ -23,16 +23,16 @@ import os
 import copy
 import logging
 
-#import scipy as sp
 import scipy.misc
 
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger('matplotlib')
-logger.setLevel(logging.WARNING)
 import matplotlib.pyplot as plt
 
 from savu.plugins.utils import register_plugin
 from savu.plugins.plugin import Plugin
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger('matplotlib')
+logger.setLevel(logging.WARNING)
 
 
 @register_plugin
@@ -45,8 +45,7 @@ class OrthoSlice(Plugin, CpuPlugin):
     :u*param xz_slices: which XZ slices to render. Default: 100.
     :u*param file_type: File type to save as. Default: 'png'.
     :u*param colourmap: Colour scheme to apply to the image. Default: 'magma'.
-    :param out_datasets: Default out dataset names. Default: ['XY', 'YZ', 'XZ'].
-    
+    :param out_datasets: Default out dataset names. Default: ['XY', 'YZ', 'XZ']
     """
 
     def __init__(self):
@@ -77,7 +76,6 @@ class OrthoSlice(Plugin, CpuPlugin):
                       ('yz_slices', 'VOLUME_YZ'),
                       ('xz_slices', 'VOLUME_XZ')]
 
-        #TODO this can probably be moved somewhere better
         colourmap = plt.get_cmap(self.parameters['colourmap'])
 
         # Set up the output list
@@ -99,12 +97,15 @@ class OrthoSlice(Plugin, CpuPlugin):
 
             # set the slice in the direction
             slice_value = self.parameters[direction]
-            slice_to_take[self.axis_loc[pattern]] = slice(slice_value, slice_value+1, 1)
+            slice_to_take[self.axis_loc[pattern]] = slice(slice_value,
+                                                          slice_value+1, 1)
 
-            print("Final slice is : %s of %s" % (str(slice_to_take), str(fullData.data.shape)))
-            self.exp.log("Final slice is : %s of %s" % (str(slice_to_take), str(fullData.data.shape)))
+            print("Final slice is : %s of %s" % (str(slice_to_take),
+                                                 str(fullData.data.shape)))
+            self.exp.log("Final slice is : %s of %s" % (str(slice_to_take),
+                                                        str(fullData.data.shape)))
 
-            # now retreive the data from the full dataset given the current slice
+            # now retreive the data from the fulldata given the current slice
             ortho_data = fullData.data[tuple(slice_to_take)].squeeze()
             output_slices.append(ortho_data)
 
@@ -113,8 +114,10 @@ class OrthoSlice(Plugin, CpuPlugin):
                 image_data /= image_data.max()
                 image_data = colourmap(image_data, bytes=True)
 
-                filename = '%s_%03i_%s.%s' % (pattern, slice_value, str(pos), ext)
-                self.exp.log("image-data shape is %s and filename is '%s'" % (str(image_data.shape), filename))
+                filename = '%s_%03i_%s.%s' % (pattern, slice_value,
+                                              str(pos), ext)
+                self.exp.log("image-data shape is %s and filename is '%s'" %
+                             (str(image_data.shape), filename))
 
                 scipy.misc.imsave(os.path.join(self.image_path, filename), image_data)
 
