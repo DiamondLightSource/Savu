@@ -23,10 +23,10 @@ dependencies:
   - pyfai 
   - pyfftw
   - colorama
+  - pymca
   - pip:
     - nvidia-ml-py
     - peakutils
-    - PyMca5
     - gnureadline
     - pmacparser
 

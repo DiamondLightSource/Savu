@@ -151,6 +151,10 @@ touch $outfolder/user.log
 arg_parse "-d" interfolder "$@"
 delete=false
 if [ ! $interfolder ] ; then
+  arg_parse "--tmp" interfolder "$@"
+fi
+
+if [ ! $interfolder ] ; then
   interfolder=$outfolder
 else
   interfolder=$interfolder/$foldername
