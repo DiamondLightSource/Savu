@@ -1,11 +1,9 @@
 name: test-environment
 channels:
   - astra-toolbox
-  - dgursoy
   - conda-forge
-  - anaconda
 dependencies:
-  - python==2.7
+  - python=2.7
   - numpy
   - scipy
   - pytest
