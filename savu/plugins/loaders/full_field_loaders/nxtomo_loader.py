@@ -106,7 +106,7 @@ class NxtomoLoader(BaseLoader):
         if isinstance(self.parameters['3d_to_4d'], int):
             return self.parameters['3d_to_4d']
         else:
-            raise Exception("Unknown value for loader parameter '3d_to_4d', "scan
+            raise Exception("Unknown value for loader parameter '3d_to_4d', "
                             "please specify an integer value")
 
     def _setup_3d(self, data_obj):
