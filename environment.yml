@@ -1,9 +1,7 @@
 name: test-environment
 channels:
   - astra-toolbox
-  - dgursoy
   - conda-forge
-  - anaconda
 dependencies:
   - python=2.7
   - numpy
@@ -23,10 +21,10 @@ dependencies:
   - pyfai 
   - pyfftw
   - colorama
+  - pymca
   - pip:
     - nvidia-ml-py
     - peakutils
-    - PyMca5
     - gnureadline
     - pmacparser
 
