@@ -66,8 +66,8 @@ class MmLoader(BaseLoader):
         new_dict = {}
         for key in [k for k in all_keys if k != 'name']:
             new_dict[key] = self.parameters[key]
-        new_dict['preview'] = self.parameters['preview'][name]
-        new_dict['name'] = self.name_dict[name]            
+        new_dict['name'] = self.name_dict[name]
+        new_dict['preview'] = self.parameters['preview'][new_dict['name']]
         return new_dict
 
     @docstring_parameter(BaseMultiModalLoader.__doc__, xrd.__doc__,
