@@ -61,6 +61,8 @@ class BaseRecon(Plugin):
         size along given axis. Default: 0.95.
     :param log_func: Override the default log \
         function. Default: 'np.nan_to_num(-np.log(sino))'.
+    :param vol_shape: Override the size of the reconstuction volume with an \
+    integer value. Default: 'fixed'.
     """
 
     def __init__(self, name='BaseRecon'):
@@ -396,7 +398,11 @@ class BaseRecon(Plugin):
                         str(dim_volZ) + '.voxel_z.voxels']}
 
         shape = list(in_dataset[0].get_shape())
-        shape[dim_volX] = shape[dim_volZ]
+        if self.parameters['vol_shape'] == 'fixed':
+            shape[dim_volX] = shape[dim_volZ]
+        else:
+            shape[dim_volX] = self.parameters['vol_shape']
+            shape[dim_volZ] = self.parameters['vol_shape']
 
         if 'resolution' in self.parameters.keys():
             shape[dim_volX] /= self.parameters['resolution']
@@ -404,7 +410,6 @@ class BaseRecon(Plugin):
 
         out_dataset[0].create_dataset(axis_labels=axis_labels,
                                       shape=tuple(shape))
-
         out_dataset[0].add_volume_patterns(dim_volX, dim_volY, dim_volZ)
 
         # set information relating to the plugin data
