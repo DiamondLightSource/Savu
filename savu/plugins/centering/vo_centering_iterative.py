@@ -468,5 +468,5 @@ class VoCenteringIterative(BaseFilter, IterativePlugin):
              "%@ 1094-4087\n" +
              "%D 2014\n" +
              "%I Optical Society of America")
-        cite_info.doi = "http://dx.doi.org/10.1364/OE.22.019078"
+        cite_info.doi = "https://doi.org/10.1364/OE.22.019078"
         return cite_info

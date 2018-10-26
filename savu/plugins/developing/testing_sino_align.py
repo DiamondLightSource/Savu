@@ -149,7 +149,7 @@ class TestingSinoAlign(Plugin, CpuPlugin):
              "pages  ={521-529}, \n" +
              "publisher  ={The Royal Society of Chemistry}, \n" +
              "doi  ={10.1039/C4CP04488F}, \n" +
-             "url  ={http://dx.doi.org/10.1039/C4CP04488F}, \n" +
+             "url  ={https://doi.org/10.1039/C4CP04488F}, \n" +
              "}")
         cite_info.endnote = \
             ("%0 Journal Article\n" +
