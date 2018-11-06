@@ -289,14 +289,14 @@ class Chunking(object):
             sl = slice(None, None, 1)
             process_order = process_order[::-1]
 
-        avail1 = list(set(adjust['dim']).intersection(process_order[0]))
-        idx_order = np.argsort(chunks[avail1])[sl]
+        avail = list(set(adjust['dim']).intersection(process_order[0]))
+        idx_order = np.argsort(chunks[avail])[sl]
 
         if not idx_order.size:
-            avail2 = list(set(adjust['dim']).intersection(process_order[1]))
-            idx_order = np.argsort(chunks[avail2])[sl]
+            avail = list(set(adjust['dim']).intersection(process_order[1]))
+            idx_order = np.argsort(chunks[avail])[sl]
 
-        return avail1[idx_order[0]] if idx_order.size else -1
+        return avail[idx_order[0]] if idx_order.size else -1
 
     def __check_adjust_dims(self, adjust, chunks, up_down):
         nDel = 0

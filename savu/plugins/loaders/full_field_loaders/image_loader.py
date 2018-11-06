@@ -85,18 +85,23 @@ class ImageLoader(BaseLoader):
         self._set_darks_and_flats(data_obj, path)
 
     def _set_darks_and_flats(self, dObj, path):
-        if not self.parameters['dark_prefix'] or \
-                not self.parameters['flat_prefix']:
+        if not self.parameters['flat_prefix']:
             return
 
         dObj.data = NoImageKey(dObj, None, 0)
-        # read dark and flat images
-        dpath, dfix = self._get_path(self.parameters['dark_prefix'], path)
-        fpath, ffix = self._get_path(self.parameters['flat_prefix'], path)
-
         fdim = self.parameters['frame_dim']
-        dark = ImageData(dpath, dObj, [fdim], None, dfix)
+
+        # read dark and flat images
+        fpath, ffix = self._get_path(self.parameters['flat_prefix'], path)
         flat = ImageData(fpath, dObj, [fdim], None, ffix)
+        
+        if self.parameters['dark_prefix']:
+            dpath, dfix = self._get_path(self.parameters['dark_prefix'], path)
+            dark = ImageData(dpath, dObj, [fdim], None, dfix)
+        else:
+            shape = dObj.get_shape()
+            dark = np.zeros([1] + [shape[i] for i in [1, 2]], dtype=flat.dtype)
+        
         dObj.data._set_dark_path(dark)
         dObj.data._set_flat_path(flat)
         dObj.data._set_dark_and_flat()

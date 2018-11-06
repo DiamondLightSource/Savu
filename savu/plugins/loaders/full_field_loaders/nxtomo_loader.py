@@ -122,6 +122,8 @@ class NxtomoLoader(BaseLoader):
                              slice_dims=(rot,))
         data_obj.add_pattern('SINOGRAM', core_dims=(detX, rot),
                              slice_dims=(detY,))
+        data_obj.add_pattern('TANGENTOGRAM', core_dims=(rot, detY),
+                             slice_dims=(detX,))
 
     def __setup_3d_to_4d(self, data_obj, n_scans):
         logging.debug("setting up 4d tomography data from 3d input.")
@@ -149,6 +151,8 @@ class NxtomoLoader(BaseLoader):
                              slice_dims=(rot, scan))
         data_obj.add_pattern('SINOGRAM', core_dims=(detX, rot),
                              slice_dims=(detY, scan))
+        data_obj.add_pattern('TANGENTOGRAM', core_dims=(rot, detY),
+                             slice_dims=(detX, scan))
 
     def _set_dark_and_flat(self, data_obj):
         flat = self.parameters['flat'][0]

@@ -94,7 +94,7 @@ class BaseAstraRecon(BaseRecon):
         self.set_mask(self.sino_shape)
 
     def set_mask(self, shape):
-        l = self.sino_shape[self.dim_detX]
+        l = self.get_plugin_out_datasets()[0].get_shape()[0]
         c = np.linspace(-l/2.0, l/2.0, l)
         x, y = np.meshgrid(c, c)
         r = (shape[self.dim_detX]-1)*self.parameters['ratio']

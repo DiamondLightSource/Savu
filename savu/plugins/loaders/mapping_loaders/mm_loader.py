@@ -61,11 +61,13 @@ class MmLoader(BaseLoader):
             self.parameters[key] = inst.parameters[key]
         return list(copy_keys)
 
-    def separate_params(self, keys):
+    def separate_params(self, name, keys):
         all_keys = self.dict.keys() + keys
         new_dict = {}
         for key in [k for k in all_keys if k != 'name']:
             new_dict[key] = self.parameters[key]
+        new_dict['name'] = self.name_dict[name]
+        new_dict['preview'] = self.parameters['preview'][new_dict['name']]
         return new_dict
 
     @docstring_parameter(BaseMultiModalLoader.__doc__, xrd.__doc__,
@@ -75,6 +77,9 @@ class MmLoader(BaseLoader):
         :u*param dataset_names: The names assigned to each dataset in the \
             order: fluorescence, diffraction, absorption, \
             monitor. Default: ['fluo', 'xrd', 'stxm', 'monitor'].
+        :u*param preview: A slice list of required frames to apply to ALL \
+        datasets, else a dictionary of slice lists where the key is the \
+        dataset name. Default: [].
 
         {0} \n {1} \n {2} \n {3} \n {4}
 
@@ -86,8 +91,18 @@ class MmLoader(BaseLoader):
         self.name_dict = {'fluo': fluo, 'xrd': xrd, 'stxm': stxm,
                           'monitor': monitor}
 
+    def __set_preview(self):
+        preview_dict = {}
+        preview = self.parameters['preview']
+        for name in self.name_dict.values():
+            preview_dict[name] = preview[name] if isinstance(preview, dict) \
+                and name in preview.keys() else preview if \
+                    isinstance(preview, list) else []
+        self.parameters['preview'] = preview_dict
+
     def setup(self):
         self.__set_names()
+        self.__set_preview()
         self._data_loader(fluo(), 'fluo', self.fluo_keys)
         self._data_loader(xrd(), 'xrd', self.xrd_keys)
         self._data_loader(stxm(), 'stxm', self.stxm_keys)
@@ -97,8 +112,7 @@ class MmLoader(BaseLoader):
         debug_str = 'This file contains an ' + name
         warn_str = 'This file does not contain a ' + name
         try:
-            params = self.separate_params(key)
-            params['name'] = self.name_dict[name]
+            params = self.separate_params(name, key)
             self.setup_loader(inst, params)
             logging.debug(debug_str)
         except IndexError:

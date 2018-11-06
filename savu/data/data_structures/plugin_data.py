@@ -291,7 +291,7 @@ class PluginData(object):
         for dim in dims:
             shape[dim] = 1
         self.data_obj.set_shape(tuple(shape))
-        self.__set_shape()
+        #self.__set_shape()
 
     def _get_fixed_dimensions(self):
         """ Get the fixed data directions and their indices
