@@ -25,11 +25,11 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
 
-class RingRemovalNormalizationTest(unittest.TestCase):
+class RingRemovalSortingTest(unittest.TestCase):
 
-    def test_ring_removal_normalization(self):
+    def test_ring_removal_sorting(self):
         data_file = tu.get_test_data_path('24737.nxs')
-        process_file = tu.get_test_process_path('ring_removal_normalization_test.nxs')
+        process_file = tu.get_test_process_path('ring_removal_sorting_test.nxs')
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
 if __name__ == "__main__":
