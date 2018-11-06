@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: tomo_recon
+.. module:: Remove stripe artefacts
    :platform: Unix
    :synopsis: runner for tests using the MPI framework
 .. moduleauthor:: Nghia Vo <scientificsoftware@diamond.ac.uk>
