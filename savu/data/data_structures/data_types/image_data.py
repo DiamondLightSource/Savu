@@ -110,25 +110,30 @@ class ImageData(BaseType):
     def __get_idx(self, dim, sl, shape):
         c = int(np.prod(shape[0:dim]))
         r = int(np.prod(shape[dim+1:]))
-        values = np.arange(sl.start, sl.stop, sl.step)
-        return np.ravel(np.kron(values, np.ones((r, c))))
+        vals = np.arange(sl.start, sl.stop, sl.step)
+        vals_shift = np.arange(0, len(vals), 1)
+        return [np.ravel(np.kron(v, np.ones((r, c)))) for v in \
+                [vals, vals_shift]]
 
     def __get_indices(self, index, size):
         """ Get the indices for the new data array and the file numbers. """
+        # indices for non-image dims only
         sub_idx = np.array(index)[np.array(self.frame_dim)]
         sub_size = [size[i] for i in self.frame_dim]
 
         idx_list = []
+        frame_list = []
         for dim in range(len(sub_idx)):
-            idx = self.__get_idx(dim, sub_idx[dim], sub_size)
+            frame, idx = self.__get_idx(dim, sub_idx[dim], sub_size)
+            frame_list.append(frame.astype(int))
             idx_list.append(idx.astype(int))
 
-        lshape = idx_list[0].shape[0]
+        lshape = idx_list[0].shape[0]  # this is just size of first frame dim? sub_size[0]
         index = np.tile(index, (lshape, 1))
         frameidx = np.zeros(lshape)
 
         for dim in range(len(sub_idx)):
             index[:, self.frame_dim[dim]] = \
-                [slice(i, i+1, 1) for i in range(len(idx_list[dim]))]
-            frameidx[:] += idx_list[dim]*np.prod(self.shape[dim+1:])
+                [slice(i, i+1, 1) for i in idx_list[dim]]
+            frameidx[:] += frame_list[dim]*np.prod(self.shape[dim+1:])
         return index.tolist(), frameidx.astype(int)
