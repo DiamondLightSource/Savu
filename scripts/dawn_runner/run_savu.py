@@ -7,6 +7,7 @@ It is currently very early in development and will be subject to massive refacto
 from savu.data.experiment_collection import Experiment
 from savu.data.meta_data import MetaData
 from savu.plugins.utils import get_plugin
+import savu.plugins.loaders.utils.yaml_utils as yaml
 import os, sys
 import numpy as np
 from copy import deepcopy as copy
@@ -218,8 +219,16 @@ def get_options():
     options['log_path'] = ''
     options['run_type'] = ''
     options['verbose'] = 'True'
+    options['system_params'] = _set_system_params()
     return options
 
-
-
-
+def _set_system_params():
+    # look in conda environment to see which version is being used
+    savu_path = sys.modules['savu'].__path__[0]
+    sys_files = os.path.join(
+            os.path.dirname(savu_path), 'system_files')
+    subdirs = os.listdir(sys_files)
+    sys_folder = 'dls' if len(subdirs) > 1 else subdirs[0]
+    fname = 'system_parameters.yml'
+    sys_file = os.path.join(sys_files, sys_folder, fname)
+    return yaml.read_yaml(sys_file)
