@@ -197,7 +197,10 @@ class YamlConverter(BaseLoader):
             split = value.split('$')
             if len(split) > 1:
                 value = self._convert_string(dObj, split[1])
-                exec('value = ' + value)
+                try:
+                    exec('value = ' + value)
+                except:
+                    raise Exception("\nError converting value %s\n" % value)
         return value
 
     def _convert_string(self, dObj, string):
