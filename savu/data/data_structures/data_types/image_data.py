@@ -98,9 +98,10 @@ class ImageData(BaseType):
             fullpath = os.path.join(fullpath, '*')
         files = glob.glob(fullpath)
         self.nFrames = len(files)
-        fname = sorted(files)
-        self.start_no = [int(s) for s in re.findall(r'\d+', fname[0])][-1]
-        return fname
+        file_nos = [int(re.findall(r'\d+', f)[-1]) for f in files]
+        sort_idx = np.argsort(file_nos)
+        self.start_no = file_nos[sort_idx[0]]
+        return list(np.array(files)[sort_idx])
 
     def get_shape(self):
         dims = list(self.image_dims) + self.frame_dim
