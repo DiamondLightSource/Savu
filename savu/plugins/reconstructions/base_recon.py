@@ -157,7 +157,7 @@ class BaseRecon(Plugin):
         if isinstance(self.parameters['centre_of_rotation'], str):
             return
         if 'centre_of_rotation' in mData.get_dictionary().keys():
-            cor = mData.get('centre_of_rotation')
+            cor = self.__set_cor_from_meta_data(mData, inData)
         else:
             val = self.parameters['centre_of_rotation']
             if isinstance(val, dict):
@@ -172,6 +172,14 @@ class BaseRecon(Plugin):
                 #mData.set('centre_of_rotation', cor) see Github ticket
         self.cor = cor
         self.centre = self.cor[0]
+
+    def __set_cor_from_meta_data(self, mData, inData):
+        cor = mData.get('centre_of_rotation')
+        sdirs = inData.get_slice_dimensions()
+        total_frames = np.prod([inData.get_shape()[i] for i in sdirs])
+        if total_frames != len(cor):
+            cor = np.tile(cor, total_frames/len(cor))
+        return cor
 
     def __polyfit_cor(self, cor_dict, inData):
         if 'detector_y' in inData.meta_data.get_dictionary().keys():
