@@ -47,6 +47,7 @@ class NxtomoLoader(BaseLoader):
     :param flat: Optional Path to the flat field data file, nxs path and \
         scale value. Default: [None, None, 1].
     :param angles: A python statement to be evaluated or a file. Default: None.
+    # FIXME this should be updated to be number of frames per scan
     :param 3d_to_4d: If this if 4D data stored in 3D then pass an integer \
         value equivalent to the number of scans.  Default: 1.
     :param ignore_flats: List of batch numbers of flats (start at 1) to \
@@ -68,10 +69,10 @@ class NxtomoLoader(BaseLoader):
 
         self._set_dark_and_flat(data_obj)
 
-        self.nScans = self.__get_nScans(data_obj)
-        if self.nScans > 1:
+        self.nFrames = self.__get_nFrames(data_obj)
+        if self.nFrames > 1:
             self.__setup_4d(data_obj)
-            self.__setup_3d_to_4d(data_obj, self.nScans)
+            self.__setup_3d_to_4d(data_obj, self.nFrames)
         else:
             if len(data_obj.data.shape) is 3:
                 self._setup_3d(data_obj)
@@ -92,17 +93,17 @@ class NxtomoLoader(BaseLoader):
         self.set_data_reduction_params(data_obj)
         data_obj.data._set_dark_and_flat()
 
-    def __get_nScans(self, dObj):
+    def __get_nFrames(self, dObj):
         if self.parameters['3d_to_4d'] is False:
             return 0
         if self.parameters['3d_to_4d'] is True:
             try:
                 # for backwards compatibility
-                exec("n_scans = " + self.parameters['angles'])
-                return dObj.data.shape[0]/np.array(n_scans).shape[0]
+                exec("n_frames = " + self.parameters['angles'])
+                return dObj.data.shape[0]/np.array(n_frames).shape[0]
             except:
                 raise Exception("Please specify the angles, or the number of "
-                                "scans (via 3d_to_4d param) in the loader.")
+                                "frames per scan (via 3d_to_4d param) in the loader.")
         if isinstance(self.parameters['3d_to_4d'], int):
             return self.parameters['3d_to_4d']
         else:
@@ -125,16 +126,16 @@ class NxtomoLoader(BaseLoader):
         data_obj.add_pattern('TANGENTOGRAM', core_dims=(rot, detY),
                              slice_dims=(detX,))
 
-    def __setup_3d_to_4d(self, data_obj, n_scans):
+    def __setup_3d_to_4d(self, data_obj, n_frames):
         logging.debug("setting up 4d tomography data from 3d input.")
         from savu.data.data_structures.data_types.map_3dto4d_h5 \
             import Map3dto4dh5
-        
+
         all_angles = data_obj.data.shape[0]
-        if all_angles % n_scans != 0:
-            raise Exception("The number of scans does not divide the rotation "
-                            "angles exactly.")
-        data_obj.data = Map3dto4dh5(data_obj, all_angles/n_scans)
+        if all_angles % n_frames != 0:
+            logging.warn("There are not a complete set of scans in this file, "
+                         "loading complete ones only")
+        data_obj.data = Map3dto4dh5(data_obj, n_frames)
         data_obj.set_original_shape(data_obj.data.get_shape())
 
     def __setup_4d(self, data_obj):
@@ -249,7 +250,7 @@ class NxtomoLoader(BaseLoader):
     def __check_angles(self, data_obj, n_angles):
         data_angles = data_obj.data.get_shape()[0]
         if data_angles != n_angles:
-            if self.nScans > 1:
+            if self.nFrames > 1:
                 rot_angles = data_obj.meta_data.get("rotation_angle")
                 try:
                     rot_angles = np.reshape(
