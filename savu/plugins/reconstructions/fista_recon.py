@@ -15,7 +15,7 @@
 """
 .. module:: fista_recon
    :platform: Unix
-   :synopsis: Wrapper around FISTA iterative algorithm in TomoPhantom software
+   :synopsis: Wrapper around FISTA iterative algorithm in FISTA-tomo
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
@@ -25,8 +25,9 @@ from savu.data.plugin_list import CitationInformation
 from savu.plugins.driver.gpu_plugin import GpuPlugin
 
 import numpy as np
-#import tomophantom
-from tomophantom.supp.recModIter import RecTools
+# install FISTA-tomo with: conda install -c dkazanc fista-tomo
+# or from https://github.com/dkazanc/FISTA-tomo
+from fista.tomo.recModIter import RecTools
 
 from savu.plugins.utils import register_plugin
 from scipy import ndimage
@@ -34,8 +35,8 @@ from scipy import ndimage
 @register_plugin
 class FistaRecon(BaseRecon, GpuPlugin):
     """
-    A Plugin to reconstruct an image by using FISTA iterative algorithm implemented \
-    in TomoPhantom package. Dependencies on ASTRA toolbox and CCPi RGL toolkit: \
+    A Plugin to reconstruct data by using FISTA iterative algorithm implemented \
+    in FISTA-tomo package. Dependencies on FISTA-tomo, ASTRA toolbox and CCPi RGL toolkit: \
     https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
 
     :param iterationsFISTA: Number of FISTA iterations. Default: 250.
