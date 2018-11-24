@@ -100,7 +100,7 @@ class NxtomoLoader(BaseLoader):
             try:
                 # for backwards compatibility
                 exec("n_frames = " + self.parameters['angles'])
-                return dObj.data.shape[0]/np.array(n_frames).shape[0]
+                return np.array(n_frames).shape[0]
             except:
                 raise Exception("Please specify the angles, or the number of "
                                 "frames per scan (via 3d_to_4d param) in the loader.")
@@ -250,6 +250,7 @@ class NxtomoLoader(BaseLoader):
     def __check_angles(self, data_obj, n_angles):
         data_angles = data_obj.data.get_shape()[0]
         if data_angles != n_angles:
+            # FIXME problem with this 
             if self.nFrames > 1:
                 rot_angles = data_obj.meta_data.get("rotation_angle")
                 try:
