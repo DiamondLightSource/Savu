@@ -40,14 +40,14 @@ class FistaRecon(BaseRecon, GpuPlugin):
     in FISTA-tomo package. Dependencies on FISTA-tomo, ASTRA toolbox and CCPi RGL toolkit: \
     https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
 
-    :param iterationsFISTA: Number of FISTA iterations. Default: 250.
+    :param iterationsFISTA: Number of FISTA iterations. Default: 200.
     :param datafidelity: Data fidelity, Least Squares only at the moment. Default: 'LS'.
-    :param ordersubsets: The number of ordered-subsets to accelerate reconstruction. Default: 24.
+    :param ordersubsets: The number of ordered-subsets to accelerate reconstruction. Default: None.
     :param converg_const: Lipschitz constant, can be set to a value. Default: 'power'.
     :param regularisation: To regularise choose ROF_TV, FGP_TV, SB_TV, LLT_ROF,\
-                            TGV, NDF, DIFF4th. Default: 'SB_TV'.
+                            TGV, NDF, DIFF4th. Default: 'FGP_TV'.
     :param regularisation_parameter: Regularisation (smoothing) value, higher \
-                            the value stronger the smoothing effect. Default: 0.01.
+                            the value stronger the smoothing effect. Default: 0.005.
     :param regularisation_iterations: The number of regularisation iterations. Default: 50.
     :param time_marching_parameter: Time marching parameter, relevant for \
                     (ROF_TV, LLT_ROF, NDF, DIFF4th) penalties. Default: 0.0025.
@@ -73,11 +73,14 @@ class FistaRecon(BaseRecon, GpuPlugin):
         self.regularisation = self.parameters['regularisation']
         self.regularisation_parameter = self.parameters['regularisation_parameter']
         self.regularisation_parameter2 = self.parameters['regularisation_parameter2']
-        self.regularisation_iterations = self.parameters['regularisation_iterations']
         self.time_marching_parameter = self.parameters['time_marching_parameter']
         self.edge_param = self.parameters['edge_param']
         self.NDF_penalty = self.parameters['NDF_penalty']
         self.Rectools = None
+        if (self.ordersubsets > 1):
+            self.regularisation_iterations = (int)(self.parameters['regularisation_iterations']/self.ordersubsets) + 1
+        else:
+            self.regularisation_iterations = self.parameters['regularisation_iterations']
 
     def process_frames(self, data):
         centre_of_rotations, angles, self.vol_shape, init  = self.get_frame_params()
@@ -86,7 +89,7 @@ class FistaRecon(BaseRecon, GpuPlugin):
         self.angles = np.deg2rad(angles.astype(np.float32))
         
         # check if the reconstruction class has been initialised and calculate 
-        # Lipschitz const if not given explicitly
+        # Lipschitz constant if not given explicitly
         self.setup_Lipschitz_constant()
        
         # Run FISTA reconstrucion algorithm
@@ -106,7 +109,7 @@ class FistaRecon(BaseRecon, GpuPlugin):
         if self.Rectools is not None:
             return 
         
-       # set parameters and initiate a TomoPhantom class object
+       # set parameters and initiate a fista-omo class object
         self.Rectools = RecTools(DetectorsDimH = self.DetectorsDimH,  # DetectorsDimH # detector dimension (horizontal)
                     DetectorsDimV = None,  # DetectorsDimV # detector dimension (vertical) for 3D case only
                     AnglesVec = self.angles, # array of angles in radians
