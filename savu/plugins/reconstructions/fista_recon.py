@@ -1,4 +1,4 @@
-# Copyright 2014 Diamond Light Source Ltd.
+# Copyright 2018 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +15,8 @@
 """
 .. module:: fista_recon
    :platform: Unix
-   :synopsis: Wrapper around FISTA iterative algorithm in FISTA-tomo
+   :synopsis: Wrapper around regularised Fast Iterative Shrinkage Thresholding Agorithm (FISTA) \
+   accelarated using ordered-subsets strategy
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
@@ -41,6 +42,7 @@ class FistaRecon(BaseRecon, GpuPlugin):
 
     :param iterationsFISTA: Number of FISTA iterations. Default: 250.
     :param datafidelity: Data fidelity, Least Squares only at the moment. Default: 'LS'.
+    :param ordersubsets: The number of ordered-subsets to accelerate reconstruction. Default: 24.
     :param converg_const: Lipschitz constant, can be set to a value. Default: 'power'.
     :param regularisation: To regularise choose ROF_TV, FGP_TV, SB_TV, LLT_ROF,\
                             TGV, NDF, DIFF4th. Default: 'SB_TV'.
@@ -66,6 +68,7 @@ class FistaRecon(BaseRecon, GpuPlugin):
         # extract given parameters
         self.iterationsFISTA = self.parameters['iterationsFISTA']
         self.datafidelity = self.parameters['datafidelity']
+        self.ordersubsets = self.parameters['ordersubsets']
         self.converg_const = self.parameters['converg_const']
         self.regularisation = self.parameters['regularisation']
         self.regularisation_parameter = self.parameters['regularisation_parameter']
@@ -76,34 +79,16 @@ class FistaRecon(BaseRecon, GpuPlugin):
         self.NDF_penalty = self.parameters['NDF_penalty']
         self.Rectools = None
 
-        # extract data and data-related parameters
-        # in_data = self.get_in_datasets()[0]
-        # print(in_data.get_shape())
-        
-        #in_pData = self.get_plugin_in_datasets()[0]
-        
-        # get the shape of the input data
-        #anglesTot, DetectorsDimH = in_pData.get_shape()
-        
-        # need to extract angles to initiate reconstruction class
-        # mData = self.get_in_meta_data()[0]
-        # see all elements of the metadata
-        #for attr in dir(mData):
-        #    print("obj.%s = %r" % (attr, getattr(mData, attr)))
-        # angles = mData.get('rotation_angle').astype(np.float32)
-        # self.angles = np.deg2rad(angles) # get angles in radians
-
-        #print(self.Lipschitz_const)
     def process_frames(self, data):
         centre_of_rotations, angles, self.vol_shape, init  = self.get_frame_params()
         sino = data[0].astype(np.float32)
         anglesTot, self.DetectorsDimH = np.shape(sino)
         self.angles = np.deg2rad(angles.astype(np.float32))
         
-        # check if the reconstruction class has been initialised and calculate Lipschitz const
-        self.get_value() 
-        # recon = np.zeros([self.vol_shape,1,self.vol_shape])
-        
+        # check if the reconstruction class has been initialised and calculate 
+        # Lipschitz const if not given explicitly
+        self.setup_Lipschitz_constant()
+       
         # Run FISTA reconstrucion algorithm
         recon = self.Rectools.FISTA(sino,\
                                     iterationsFISTA = self.iterationsFISTA,\
@@ -117,7 +102,7 @@ class FistaRecon(BaseRecon, GpuPlugin):
                                     lipschitz_const = self.Lipschitz_const)
         return recon
 
-    def get_value(self):
+    def setup_Lipschitz_constant(self):
         if self.Rectools is not None:
             return 
         
@@ -127,7 +112,8 @@ class FistaRecon(BaseRecon, GpuPlugin):
                     AnglesVec = self.angles, # array of angles in radians
                     ObjSize = self.vol_shape[0] , # a scalar to define reconstructed object dimensions
                     datafidelity=self.datafidelity,# data fidelity, choose LS, PWLS (wip), GH (wip), Student (wip)
-                    tolerance = 1e-06, # tolerance to stop outer iterations earlier
+                    OS_number = self.ordersubsets, # the number of subsets, NONE/(or > 1) ~ classical / ordered subsets
+                    tolerance = 1e-08, # tolerance to stop outer iterations earlier
                     device='gpu')
         if (self.parameters['converg_const'] == 'power'):
             self.Lipschitz_const = self.Rectools.powermethod() # calculate Lipschitz constant
