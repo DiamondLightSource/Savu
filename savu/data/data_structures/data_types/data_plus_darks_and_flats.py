@@ -307,11 +307,11 @@ class NoImageKey(DataWithDarksAndFlats):
         # image key in a previous plugin
         self.image_key = fakekey
 
-    def _set_flat_path(self, path, imagekey=False):
+    def _set_flat_path(self, path, imagekey=[]):
         self.flat_image_key = imagekey
         self.flat_path = path
 
-    def _set_dark_path(self, path, imagekey=False):
+    def _set_dark_path(self, path, imagekey=[]):
         self.dark_image_key = imagekey
         self.dark_path = path
 
