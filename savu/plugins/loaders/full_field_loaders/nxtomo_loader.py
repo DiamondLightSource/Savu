@@ -31,7 +31,6 @@ from savu.plugins.utils import register_plugin
 from savu.data.data_structures.data_types.data_plus_darks_and_flats \
     import ImageKey, NoImageKey
 
-
 @register_plugin
 class NxtomoLoader(BaseLoader):
     """
@@ -56,6 +55,11 @@ class NxtomoLoader(BaseLoader):
 
     def __init__(self, name='NxtomoLoader'):
         super(NxtomoLoader, self).__init__(name)
+        self.warnings = []
+
+    def log_warning(self, msg):
+        logging.warn(msg)
+        self.warnings.append(msg)
 
     def setup(self):
         exp = self.get_experiment()
@@ -85,7 +89,7 @@ class NxtomoLoader(BaseLoader):
             control = data_obj.backing_file['entry1/tomo_entry/control/data']
             data_obj.meta_data.set("control", control[...])
         except:
-            logging.warn("No Control information available")
+            self.log_warning("No Control information available")
 
         nAngles = len(data_obj.meta_data.get('rotation_angle'))
         self.__check_angles(data_obj, nAngles)
@@ -133,8 +137,8 @@ class NxtomoLoader(BaseLoader):
 
         all_angles = data_obj.data.shape[0]
         if all_angles % n_frames != 0:
-            logging.warn("There are not a complete set of scans in this file, "
-                         "loading complete ones only")
+            self.log_warning("There are not a complete set of scans in this file, "
+                             "loading complete ones only")
         data_obj.data = Map3dto4dh5(data_obj, n_frames)
         data_obj.set_original_shape(data_obj.data.get_shape())
 
@@ -173,14 +177,14 @@ class NxtomoLoader(BaseLoader):
             data_obj.data = \
                 ImageKey(data_obj, image_key, 0, ignore=ignore)
         except KeyError:
-            cu.user_message("An image key was not found.")
+            self.log_warning("An image key was not found.")
             try:
                 data_obj.data = NoImageKey(data_obj, None, 0)
                 entry = 'entry1/tomo_entry/instrument/detector/'
                 data_obj.data._set_flat_path(entry + 'flatfield')
                 data_obj.data._set_dark_path(entry + 'darkfield')
             except KeyError:
-                cu.user_message("Dark/flat data was not found in input file.")
+                self.log_warning("Dark/flat data was not found in input file.")
         data_obj.data._set_dark_and_flat()
         if dark:
             data_obj.data.update_dark(dark)
@@ -229,9 +233,9 @@ class NxtomoLoader(BaseLoader):
                 try:
                     angles = np.loadtxt(angles)
                 except Exception as e:
-                    logging.warn(e.message)
-                    logging.warn("No angles found so evenly distributing them "
-                                 "between 0 and 180 degrees")
+                    logging.debug(e.message)
+                    self.log_warning("No angles found so evenly distributing them "
+                                     "between 0 and 180 degrees")
                     angles = np.linspace(0, 180, data_obj.get_shape()[0])
         else:
             angles = nxs_angles
@@ -244,7 +248,7 @@ class NxtomoLoader(BaseLoader):
                 isinstance(data_obj.data, ImageKey) else slice(None)
             return data_obj.backing_file[path][idx]
         else:
-            logging.warn("No rotation angle entry found in input file.")
+            self.log_warning("No rotation angle entry found in input file.")
             return None
 
     def __check_angles(self, data_obj, n_angles):
@@ -254,8 +258,13 @@ class NxtomoLoader(BaseLoader):
             if self.nFrames > 1:
                 rot_angles = data_obj.meta_data.get("rotation_angle")
                 try:
+                    full_rotations = n_angles/data_angles
+                    cleaned_size = full_rotations*data_angles
+                    if cleaned_size != n_angles:
+                        rot_angles = rot_angles[0:cleaned_size]
+                        self.log_warning("the angle list has more values than expected in it")
                     rot_angles = np.reshape(
-                            rot_angles, [n_angles/data_angles, data_angles])
+                            rot_angles, [full_rotations, data_angles])
                     data_obj.meta_data.set("rotation_angle",
                                            np.transpose(rot_angles))
                     return
@@ -263,3 +272,17 @@ class NxtomoLoader(BaseLoader):
                     pass
             raise Exception("The number of angles %s does not match the data "
                             "dimension length %s" % (n_angles, data_angles))
+
+    def executive_summary(self):
+        """ Provide a summary to the user for the result of the plugin.
+
+        e.g.
+         - Warning, the sample may have shifted during data collection
+         - Filter operated normally
+
+        :returns:  A list of string summaries
+        """
+        if len(self.warnings) == 0:
+            return ["Nothing to Report"]
+        else:
+            return self.warnings
