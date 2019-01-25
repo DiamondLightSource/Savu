@@ -99,13 +99,13 @@ class Convert360180Sinogram(Plugin, CpuPlugin):
         center_int = np.int16(np.floor(self.center))
         self.subpixel_shift = self.center - center_int
         if self.center < self.mid_width:
-            self.overlap = 2*center_int
+            self.overlap = 2 * center_int
             self.cor = self.width + center_int
         else:
-            self.overlap = 2*(self.width - self.center_int)
+            self.overlap = 2 * (self.width - center_int)
             self.cor = center_int
 
-        self.new_height = np.int16(np.ceil(self.height/2.0))
+        self.new_height = np.int16(np.ceil(self.height / 2.0))
         list_angle = out_dataset.meta_data.get("rotation_angle")
         list_angle = list_angle[0:self.new_height]
 
@@ -122,20 +122,20 @@ class Convert360180Sinogram(Plugin, CpuPlugin):
                                            prefilter=False, mode='nearest')
         sinogram1 = sinogram[:self.new_height]
         sinogram2 = np.fliplr(sinogram[-self.new_height:])
-        sinocombine = np.zeros((self.new_height, 2*self.width),
+        sinocombine = np.zeros((self.new_height, 2 * self.width),
                                dtype=np.float32)
         if self.center < self.mid_width:
-            sinogram1 = sinogram1*self.mat_wedge_right
-            sinogram2 = sinogram2*self.mat_wedge_left
+            sinogram1 = sinogram1 * self.mat_wedge_right
+            sinogram2 = sinogram2 * self.mat_wedge_left
             sinocombine[:, 0:self.overlap] = sinogram2[:, 0:1]
             sinocombine[:, self.overlap:self.overlap + self.width] = sinogram2
             sinocombine[:, -self.width:] += sinogram1
         else:
-            sinogram1 = sinogram1*self.mat_wedge_left
-            sinogram2 = sinogram2*self.mat_wedge_right
+            sinogram1 = sinogram1 * self.mat_wedge_left
+            sinogram2 = sinogram2 * self.mat_wedge_right
             sinocombine[:, 0:self.width] = sinogram1
-            sinocombine[:, self.width-self.overlap:
-                        2*self.width - self.overlap] += sinogram2
+            sinocombine[:, self.width - self.overlap:
+                        2 * self.width - self.overlap] += sinogram2
             sinocombine[:, -self.overlap] = np.squeeze(sinogram2[:, -1:])
         return [sinocombine, np.array([self.cor])]
 
