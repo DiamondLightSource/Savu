@@ -136,7 +136,7 @@ class Convert360180Sinogram(Plugin, CpuPlugin):
             sinocombine[:, 0:self.width] = sinogram1
             sinocombine[:, self.width - self.overlap:
                         2 * self.width - self.overlap] += sinogram2
-            sinocombine[:, -self.overlap] = np.squeeze(sinogram2[:, -1:])
+            sinocombine[:, -self.overlap:] = sinogram2[:, -1:]
         return [sinocombine, np.array([self.cor])]
 
     def nOutput_datasets(self):
