@@ -42,7 +42,7 @@ class FistaRecon(BaseRecon, GpuPlugin):
 
     :param iterationsFISTA: Number of FISTA iterations. Default: 20.
     :param datafidelity: Data fidelity, Least Squares only at the moment. Default: 'LS'.
-    :param nonnegativity: nonnegativity constraint, choose on or None. Default: 'on'
+    :param nonnegativity: Nonnegativity constraint, choose on or None. Default: 'ENABLE'.
     :param ordersubsets: The number of ordered-subsets to accelerate reconstruction. Default: 6.
     :param converg_const: Lipschitz constant, can be set to a value. Default: 'power'.
     :param regularisation: To regularise choose ROF_TV, FGP_TV, SB_TV, LLT_ROF,\
@@ -54,6 +54,7 @@ class FistaRecon(BaseRecon, GpuPlugin):
                     (ROF_TV, LLT_ROF, NDF, Diff4th) penalties. Default: 0.0025.
     :param edge_param: Edge (noise) related parameter, relevant for NDF and Diff4th. Default: 0.01.
     :param regularisation_parameter2:  Regularisation (smoothing) value for LLT_ROF method. Default: 0.005.
+    :param NDF_penalty: NDF specific penalty type Huber, Perona, Tukey. Default: 'Huber'.
     """
 
     def __init__(self):
@@ -76,6 +77,8 @@ class FistaRecon(BaseRecon, GpuPlugin):
         self.regularisation_parameter2 = self.parameters['regularisation_parameter2']
         self.time_marching_parameter = self.parameters['time_marching_parameter']
         self.edge_param = self.parameters['edge_param']
+        self.NDF_penalty = self.parameters['NDF_penalty']
+        
         self.RecToolsIR = None
         if (self.ordersubsets > 1):
             self.regularisation_iterations = (int)(self.parameters['regularisation_iterations']/self.ordersubsets) + 1
@@ -100,6 +103,8 @@ class FistaRecon(BaseRecon, GpuPlugin):
                                     regularisation_iterations = self.regularisation_iterations,\
                                     regularisation_parameter2 = self.regularisation_parameter2,\
                                     time_marching_parameter = self.time_marching_parameter,\
+                                    NDF_penalty = self.NDF_penalty,\
+                                    tolerance_regul = 1e-10,\
                                     edge_param = self.edge_param,\
                                     lipschitz_const = self.Lipschitz_const)
         return recon
@@ -116,7 +121,7 @@ class FistaRecon(BaseRecon, GpuPlugin):
                     datafidelity=self.datafidelity,# data fidelity, choose LS, PWLS (wip), GH (wip), Student (wip)
                     nonnegativity=self.nonnegativity, # enable nonnegativity constraint (set to 'on')
                     OS_number = self.ordersubsets, # the number of subsets, NONE/(or > 1) ~ classical / ordered subsets
-                    tolerance = 1e-10, # tolerance to stop outer iterations earlier
+                    tolerance = 1e-9, # tolerance to stop outer iterations earlier
                     device='gpu')
         if (self.parameters['converg_const'] == 'power'):
             self.Lipschitz_const = self.Rectools.powermethod() # calculate Lipschitz constant

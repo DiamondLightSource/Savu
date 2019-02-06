@@ -38,7 +38,7 @@ class CcpiRegulToolkitGpu(Plugin, GpuPlugin):
     :param reg_par: Regularisation (smoothing) parameter. Default: 0.05.
     :param max_iterations: Total number of iterations. Default: 200.
     :param time_step: Time marching step, relevant for ROF_TV, LLT_ROF,\
-     NDF, DIFF4th methods. Default: 0.001.
+     NDF, Diff4th methods. Default: 0.001.
     :param lipshitz_constant: TGV method, Lipshitz constant. Default: 12.
     :param alpha1: TGV method, parameter to control the 1st-order term. Default: 1.0.
     :param alpha0: TGV method, parameter to control the 2nd-order term. Default: 0.8.
