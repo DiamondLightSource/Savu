@@ -37,6 +37,7 @@ class Mipmap(Plugin, CpuPlugin):
     :u*param scales_list: A list of scales to downsample the data. Default: (2,2).
     :u*param mode: One of 'mean', 'median', 'min', 'max'. Default: 'mean'.
     :u*param pattern: One of. Default: 'VOLUME_XZ'.
+    :param out_datasets: Default out dataset names. Default: ['raw', 'two_x_two']
     """
 
     def __init__(self):
@@ -78,8 +79,7 @@ class Mipmap(Plugin, CpuPlugin):
             out_dataset[i].create_dataset(patterns=in_dataset[0],
                                       axis_labels=in_dataset[0],
                                       shape=self.out_shape)
-        
-        out_pData[0].plugin_data_setup(plugin_pattern, self.get_max_frames())
+            out_pData[i].plugin_data_setup(plugin_pattern, self.get_max_frames())
 
     def new_shape(self, full_shape, data, ind):
         core_dirs = data.get_core_dimensions()
@@ -118,7 +118,7 @@ class Mipmap(Plugin, CpuPlugin):
             result1 = skim.block_reduce(data[0], block_size, sampler)
             block_size = (self.mapmap_scales[0]*self.mapmap_scales[1], self.mapmap_scales[0]*self.mapmap_scales[1])
             result2 = skim.block_reduce(data[0], block_size, sampler)
-            result = (result1,result2)
+            result = [result1,result2]
         else:
             raise("The number of given maps is too high ")
         return result
