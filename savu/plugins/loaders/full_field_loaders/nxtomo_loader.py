@@ -40,7 +40,8 @@ class NxtomoLoader(BaseLoader):
     :param data_path: Path to the data inside the \
         file. Default: 'entry1/tomo_entry/data/data'.
     :param image_key_path: Path to the image key entry inside the nxs \
-        file. Default: 'entry1/tomo_entry/instrument/detector/image_key'.
+        file. Set this parameter to "None" if use this loader for radiography\
+        Default: 'entry1/tomo_entry/instrument/detector/image_key'.
     :param dark: Optional path to the dark field data file, nxs path and \
         scale value. Default: [None, None, 1].
     :param flat: Optional Path to the flat field data file, nxs path and \
@@ -48,7 +49,8 @@ class NxtomoLoader(BaseLoader):
     :param angles: A python statement to be evaluated or a file. Default: None.
     # FIXME this should be updated to be number of frames per scan
     :param 3d_to_4d: If this if 4D data stored in 3D then pass an integer \
-        value equivalent to the number of scans.  Default: 1.
+        value equivalent to the number of projections per 180-degree scan\ 
+        . Default: False.
     :param ignore_flats: List of batch numbers of flats (start at 1) to \
         ignore. Default: None.
     """
