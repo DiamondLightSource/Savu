@@ -41,7 +41,7 @@ class NxtomoLoader(BaseLoader):
         file. Default: 'entry1/tomo_entry/data/data'.
     :param image_key_path: Path to the image key entry inside the nxs \
         file. Set this parameter to "None" if use this loader for radiography\
-        Default: 'entry1/tomo_entry/instrument/detector/image_key'.
+        . Default: 'entry1/tomo_entry/instrument/detector/image_key'.
     :param dark: Optional path to the dark field data file, nxs path and \
         scale value. Default: [None, None, 1].
     :param flat: Optional Path to the flat field data file, nxs path and \
