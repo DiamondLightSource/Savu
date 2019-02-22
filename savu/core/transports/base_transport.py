@@ -146,7 +146,7 @@ class BaseTransport(object):
             cu.user_message("%s - 100%% complete" % (plugin.name))
 
     def _process_loop(self, plugin, prange, tdata, count, pDict, result, cp):
-        kill_signal = False        
+        kill_signal = False
         for i in prange:
             if cp and cp.is_time_to_checkpoint(self, count, i):
                 # kill signal sent so stop the processing
@@ -154,9 +154,10 @@ class BaseTransport(object):
             data = self._get_input_data(plugin, tdata, i, count)
             res = self._get_output_data(
                     plugin.plugin_process_frames(data), i)
-            for j in pDict['nOut']:
-                out_sl = pDict['out_sl']['process'][i][j]
-                result[j][out_sl] = res[j]
+            if res is not None:
+                for j in pDict['nOut']:
+                    out_sl = pDict['out_sl']['process'][i][j]
+                    result[j][out_sl] = res[j]
         return result, kill_signal
 
     def __get_checkpoint_params(self, plugin):

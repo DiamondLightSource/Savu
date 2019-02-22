@@ -152,8 +152,8 @@ class PluginData(object):
         dshape = [dshape[i] for i in self.meta_data.get('slice_dims')]
         size_list = [1]*len(dshape)
         i = 0
-        
-        while(mft > 1):
+
+        while(mft > 1 and i < len(size_list)):
             size_list[i] = min(dshape[i], mft)
             mft -= np.prod(size_list) if np.prod(size_list) > 1 else 0
             i += 1
