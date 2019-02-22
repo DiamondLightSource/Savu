@@ -256,16 +256,20 @@ class VoCentering(BaseFilter, CpuPlugin):
         cor_prev = out_datasets[0].data[...]
         cor_broad = out_datasets[1].data[...]
         cor_broad[:] = np.median(np.squeeze(cor_prev))
+        self.cor_for_executive_summary = np.median(cor_broad[:])
         if self.broadcast_method == 'mean':
             cor_broad[:] = np.mean(np.squeeze(cor_prev))
+            self.cor_for_executive_summary = np.mean(cor_broad[:])
         if (self.broadcast_method == 'linear_fit') and (len(cor_prev)>1):
             afact, bfact = np.polyfit(self.plugin_prev, cor_prev[:,0], 1)
             list_cor = self.origin_prev*afact + bfact
             cor_broad[:,0] = list_cor
+            self.cor_for_executive_summary = cor_broad[:]
         if (self.broadcast_method == 'nearest') and (len(cor_prev)>1):
             for i, pos in enumerate(self.origin_prev):
                 minpos = np.argmin(np.abs(pos-self.plugin_prev))
                 cor_broad[i,0] = cor_prev[minpos,0]
+            self.cor_for_executive_summary = cor_broad[:]
         out_datasets[1].data[:] = cor_broad[:]
         self.populate_meta_data('cor_preview', np.squeeze(cor_prev))
         self.populate_meta_data('centre_of_rotation',
@@ -372,7 +376,7 @@ class VoCentering(BaseFilter, CpuPlugin):
     def executive_summary(self):
         if ((self.error_msg_1 == "")
              and (self.error_msg_2 == "") and (self.error_msg_3 == "")):
-            msg = "Nothing to Report"
+            msg = "Centre of Rotation is : %s" % (str(self.cor_for_executive_summary))
         else:
             msg = "\n" + self.error_msg_1 + "\n" \
             + self.error_msg_2 + "\n" + self.error_msg_3
