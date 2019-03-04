@@ -25,7 +25,6 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 
 from ccpi.filters.regularisers import ROF_TV, FGP_TV, SB_TV, TGV, LLT_ROF, NDF, Diff4th
-#from ccpi.filters.regularisers import PatchSelect, NLTV
 from savu.data.plugin_list import CitationInformation
 
 @register_plugin
