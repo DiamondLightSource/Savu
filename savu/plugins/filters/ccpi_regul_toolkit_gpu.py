@@ -25,7 +25,7 @@ from savu.plugins.plugin import Plugin
 from savu.plugins.driver.gpu_plugin import GpuPlugin
 from savu.plugins.utils import register_plugin
 
-from ccpi.filters.regularisers import ROF_TV, FGP_TV, SB_TV, TGV, LLT_ROF, NDF, DIFF4th
+from ccpi.filters.regularisers import ROF_TV, FGP_TV, SB_TV, TGV, LLT_ROF, NDF, Diff4th
 from savu.data.plugin_list import CitationInformation
 
 @register_plugin
@@ -38,14 +38,14 @@ class CcpiRegulToolkitGpu(Plugin, GpuPlugin):
     :param reg_par: Regularisation (smoothing) parameter. Default: 0.05.
     :param max_iterations: Total number of iterations. Default: 200.
     :param time_step: Time marching step, relevant for ROF_TV, LLT_ROF,\
-     NDF, DIFF4th methods. Default: 0.001.
+     NDF, Diff4th methods. Default: 0.001.
     :param lipshitz_constant: TGV method, Lipshitz constant. Default: 12.
     :param alpha1: TGV method, parameter to control the 1st-order term. Default: 1.0.
     :param alpha0: TGV method, parameter to control the 2nd-order term. Default: 0.8.
     :param reg_parLLT: LLT-ROF method, parameter to control the 2nd-order term. Default: 0.05.
     :param penalty_type: NDF method, Penalty type for the duffison, choose from\
     huber, perona or tukey. Default: 'huber'.
-    :param edge_par: NDF and DIFF4th methods, noise magnitude parameter. Default: 0.01.
+    :param edge_par: NDF and Diff4th methods, noise magnitude parameter. Default: 0.01.
     """
 
     def __init__(self):
@@ -74,7 +74,7 @@ class CcpiRegulToolkitGpu(Plugin, GpuPlugin):
             self.pars = {'algorithm': self.parameters['method'], \
                 'regularisation_parameter':self.parameters['reg_par'],\
                 'number_of_iterations': self.parameters['max_iterations'],\
-                'time_marching_parameter': self.parameters['time_step']}            
+                'time_marching_parameter': self.parameters['time_step']}
         if (self.parameters['method'] == 'FGP_TV'):
             # set parameters for the FGP-TV method
             self.pars = {'algorithm': self.parameters['method'], \
@@ -83,7 +83,7 @@ class CcpiRegulToolkitGpu(Plugin, GpuPlugin):
                 'tolerance_constant':1e-06,\
                 'methodTV': 0 ,\
                 'nonneg': 0 ,\
-                'printingOut': 0}            
+                'printingOut': 0}
         if (self.parameters['method'] == 'SB_TV'):
             # set parameters for the SB-TV method
             self.pars = {'algorithm': self.parameters['method'], \
@@ -91,7 +91,7 @@ class CcpiRegulToolkitGpu(Plugin, GpuPlugin):
                 'number_of_iterations': self.parameters['max_iterations'],\
                 'tolerance_constant':1e-06,\
                 'methodTV': 0 ,\
-                'printingOut': 0}            
+                'printingOut': 0}
         if (self.parameters['method'] == 'TGV'):
             # set parameters for the TGV method
             self.pars = {'algorithm': self.parameters['method'], \
@@ -99,14 +99,14 @@ class CcpiRegulToolkitGpu(Plugin, GpuPlugin):
                 'alpha1' : self.parameters['alpha1'],\
                 'alpha0': self.parameters['alpha0'],\
                 'number_of_iterations': self.parameters['max_iterations'],\
-                'LipshitzConstant' :self.parameters['lipshitz_constant']}            
+                'LipshitzConstant' :self.parameters['lipshitz_constant']}
         if (self.parameters['method'] == 'LLT_ROF'):
             # set parameters for the LLT-ROF method
             self.pars = {'algorithm': self.parameters['method'], \
                 'regularisation_parameter':self.parameters['reg_par'],\
                 'regularisation_parameterLLT':self.parameters['reg_parLLT'], \
                 'number_of_iterations': self.parameters['max_iterations'],\
-                'time_marching_parameter': self.parameters['time_step']}            
+                'time_marching_parameter': self.parameters['time_step']}
         if (self.parameters['method'] == 'NDF'):
             # set parameters for the NDF method
             if (self.parameters['penalty_type'] == 'huber'):
@@ -124,8 +124,8 @@ class CcpiRegulToolkitGpu(Plugin, GpuPlugin):
                 'number_of_iterations': self.parameters['max_iterations'],\
                 'time_marching_parameter': self.parameters['time_step'],\
                 'penalty_type': penaltyNDF}            
-        if (self.parameters['method'] == 'DIFF4th'):
-            # set parameters for the DIFF4th method
+        if (self.parameters['method'] == 'Diff4th'):
+            # set parameters for the Diff4th method
             self.pars = {'algorithm': self.parameters['method'], \
                 'regularisation_parameter':self.parameters['reg_par'],\
                 'edge_parameter':self.parameters['edge_par'],\
@@ -143,7 +143,7 @@ class CcpiRegulToolkitGpu(Plugin, GpuPlugin):
             im_res = ROF_TV(self.pars['input'], 
                		    self.pars['regularisation_parameter'],
 	                    self.pars['number_of_iterations'], 
-	                    self.pars['time_marching_parameter'],self.device)            
+	                    self.pars['time_marching_parameter'],self.device)
         if (self.parameters['method'] == 'FGP_TV'):
             im_res = FGP_TV(self.pars['input'], 
                             self.pars['regularisation_parameter'],
@@ -151,36 +151,36 @@ class CcpiRegulToolkitGpu(Plugin, GpuPlugin):
                             self.pars['tolerance_constant'], 
                             self.pars['methodTV'],
                             self.pars['nonneg'],
-                            self.pars['printingOut'],self.device )            
+                            self.pars['printingOut'],self.device )
         if (self.parameters['method'] == 'SB_TV'):
             im_res = SB_TV(self.pars['input'], 
                             self.pars['regularisation_parameter'],
                             self.pars['number_of_iterations'],
                             self.pars['tolerance_constant'], 
                             self.pars['methodTV'],
-                            self.pars['printingOut'],self.device)            
+                            self.pars['printingOut'],self.device)
         if (self.parameters['method'] == 'TGV'):
             im_res = TGV(self.pars['input'], 
            		   self.pars['regularisation_parameter'],
 		           self.pars['alpha1'],
 	                   self.pars['alpha0'],
 		           self.pars['number_of_iterations'],
-		           self.pars['LipshitzConstant'],self.device)            
+		           self.pars['LipshitzConstant'],self.device)
         if (self.parameters['method'] == 'LLT_ROF'):
             im_res = LLT_ROF(self.pars['input'],
                            self.pars['regularisation_parameter'],
                            self.pars['regularisation_parameterLLT'],
                            self.pars['number_of_iterations'],
-                           self.pars['time_marching_parameter'],self.device)            
+                           self.pars['time_marching_parameter'],self.device)
         if (self.parameters['method'] == 'NDF'):
             im_res = NDF(self.pars['input'], 
          	           self.pars['regularisation_parameter'],
                            self.pars['edge_parameter'], 
                            self.pars['number_of_iterations'],
                            self.pars['time_marching_parameter'], 
-                           self.pars['penalty_type'],self.device)            
+                           self.pars['penalty_type'],self.device)
         if (self.parameters['method'] == 'DIFF4th'):
-            im_res = DIFF4th(self.pars['input'], 
+            im_res = Diff4th(self.pars['input'], 
                            self.pars['regularisation_parameter'],
                            self.pars['edge_parameter'], 
                            self.pars['number_of_iterations'],

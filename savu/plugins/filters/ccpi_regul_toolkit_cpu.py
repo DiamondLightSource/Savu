@@ -15,7 +15,7 @@
 """
 .. module:: Wrapper for CCPi-Regularisation Toolkit (CPU) for efficient 2D/3D denoising
    :platform: Unix
-   :synopsis: CCPi-Regularisation Toolkit delivers a variety of variational 2D/3D denoising methods. The available methods are:  'ROF_TV','FGP_TV','SB_TV','TGV','LLT_ROF','NDF','DIFF4th'
+   :synopsis: CCPi-Regularisation Toolkit delivers a variety of variational 2D/3D denoising methods. The available methods are:  'ROF_TV','FGP_TV','SB_TV','TGV','LLT_ROF','NDF','Diff4th'
    
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
@@ -24,7 +24,7 @@ from savu.plugins.plugin import Plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 
-from ccpi.filters.regularisers import ROF_TV, FGP_TV, SB_TV, TGV, LLT_ROF, NDF, DIFF4th
+from ccpi.filters.regularisers import ROF_TV, FGP_TV, SB_TV, TGV, LLT_ROF, NDF, Diff4th
 from savu.data.plugin_list import CitationInformation
 
 @register_plugin
@@ -38,7 +38,7 @@ class CcpiRegulToolkitCpu(Plugin, CpuPlugin):
     'NDF': Nonlinear/Linear Diffusion model (Perona-Malik, Huber or Tukey);  
     'DIFF4th': Fourth-order nonlinear diffusion model
     
-    :param method: Choose methods |ROF_TV|FGP_TV|SB_TV|TGV|LLT_ROF|NDF|DIFF4th. Default: 'FGP_TV'.
+    :param method: Choose methods |ROF_TV|FGP_TV|SB_TV|TGV|LLT_ROF|NDF|Diff4th. Default: 'FGP_TV'.
     :param reg_par: Regularisation (smoothing) parameter. Default: 0.05.
     :param max_iterations: Total number of iterations. Default: 200.
     :param time_step: Time marching step, relevant for ROF_TV, LLT_ROF,\
@@ -49,7 +49,7 @@ class CcpiRegulToolkitCpu(Plugin, CpuPlugin):
     :param reg_parLLT: LLT-ROF method, parameter to control the 2nd-order term. Default: 0.05.
     :param penalty_type: NDF method, Penalty type for the duffison, choose from\
     huber, perona or tukey. Default: 'huber'.
-    :param edge_par: NDF and DIFF4th methods, noise magnitude parameter. Default: 0.01.
+    :param edge_par: NDF and Diff4th methods, noise magnitude parameter. Default: 0.01.
     """
 
     def __init__(self):
@@ -69,14 +69,14 @@ class CcpiRegulToolkitCpu(Plugin, CpuPlugin):
         out_pData[0].plugin_data_setup('VOLUME_XZ', 'single')
 
     def pre_process(self):
-	# accessing Ccpi-RGLTK modules
+	# accessing Ccpi-RGL toolkit modules
    	self.device = 'cpu'
         if (self.parameters['method'] == 'ROF_TV'):
             # set parameters for the ROF-TV method
             self.pars = {'algorithm': self.parameters['method'], \
                 'regularisation_parameter':self.parameters['reg_par'],\
                 'number_of_iterations': self.parameters['max_iterations'],\
-                'time_marching_parameter': self.parameters['time_step']}            
+                'time_marching_parameter': self.parameters['time_step']}
         if (self.parameters['method'] == 'FGP_TV'):
             # set parameters for the FGP-TV method
             self.pars = {'algorithm': self.parameters['method'], \
@@ -85,7 +85,7 @@ class CcpiRegulToolkitCpu(Plugin, CpuPlugin):
                 'tolerance_constant':1e-06,\
                 'methodTV': 0 ,\
                 'nonneg': 0 ,\
-                'printingOut': 0}            
+                'printingOut': 0}
         if (self.parameters['method'] == 'SB_TV'):
             # set parameters for the SB-TV method
             self.pars = {'algorithm': self.parameters['method'], \
@@ -125,8 +125,8 @@ class CcpiRegulToolkitCpu(Plugin, CpuPlugin):
                 'edge_parameter':self.parameters['edge_par'],\
                 'number_of_iterations': self.parameters['max_iterations'],\
                 'time_marching_parameter': self.parameters['time_step'],\
-                'penalty_type': penaltyNDF}            
-        if (self.parameters['method'] == 'DIFF4th'):
+                'penalty_type': penaltyNDF}
+        if (self.parameters['method'] == 'Diff4th'):
             # set parameters for the DIFF4th method
             self.pars = {'algorithm': self.parameters['method'], \
                 'regularisation_parameter':self.parameters['reg_par'],\
@@ -165,7 +165,7 @@ class CcpiRegulToolkitCpu(Plugin, CpuPlugin):
             im_res = TGV(self.pars['input'], 
            		   self.pars['regularisation_parameter'],
 		           self.pars['alpha1'],
-	                   self.pars['alpha0'],
+	               self.pars['alpha0'],
 		           self.pars['number_of_iterations'],
 		           self.pars['LipshitzConstant'],self.device)
         if (self.parameters['method'] == 'LLT_ROF'):
@@ -182,7 +182,7 @@ class CcpiRegulToolkitCpu(Plugin, CpuPlugin):
                            self.pars['time_marching_parameter'], 
                            self.pars['penalty_type'],self.device)
         if (self.parameters['method'] == 'DIFF4th'):
-            im_res = DIFF4th(self.pars['input'], 
+            im_res = Diff4th(self.pars['input'], 
                            self.pars['regularisation_parameter'],
                            self.pars['edge_parameter'], 
                            self.pars['number_of_iterations'],
@@ -191,7 +191,6 @@ class CcpiRegulToolkitCpu(Plugin, CpuPlugin):
         return im_res
     def post_process(self):
         pass
-
 
     def get_citation_information(self):
         cite_info1 = CitationInformation()
