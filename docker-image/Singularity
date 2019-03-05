@@ -1,0 +1,45 @@
+Bootstrap: docker
+From: docker-registry.diamond.ac.uk/diamond-apps/nvidia/cuda:9.0-devel-centos7
+%files
+get-and-install-savu.sh /get-and-install-savu.sh
+
+%labels
+MAINTAINER Tom Schoonjans
+
+%post
+
+# Deps
+yum groupinstall -y 'Development Tools' && yum install -y mesa-libGL-devel mesa-libGLU-devel wget boost-devel && yum clean all && rm -rf /var/cache/yum
+
+VERSION=2.3.1
+FTTW=3.3.8
+OPENMPI=3.1.3
+
+# Download openmpi ${OPENMPI} and build it 
+wget https://www.open-mpi.org/software/ompi/v3.1/downloads/openmpi-${OPENMPI}.tar.gz
+tar -xf openmpi-${OPENMPI}.tar.gz && \
+/openmpi-${OPENMPI}/configure --with-sge --enable-orterun-prefix-by-default --disable-static && make /openmpi-${OPENMPI}/ && make install /openmpi-${OPENMPI}/ && rm -rf /openmpi*
+
+# Install FTTW3
+wget http://fftw.org/fftw-${FTTW}.tar.gz
+tar -xf fftw-${FTTW}.tar.gz && \
+/fftw-${FTTW}/configure --enable-threads --enable-shared --disable-static && make /fftw-${FTTW}/ && make install /fftw-${FTTW}/ && make clean /fftw-${FTTW}/ && \
+/fftw-${FTTW}/configure --enable-threads --enable-shared --enable-float --disable-static && make /fftw-${FTTW}/ && make install /fftw-${FTTW}/ && make clean /fftw-${FTTW}/ && \
+/fftw-${FTTW}/configure --enable-threads --enable-shared --enable-long-double --disable-static && make /fftw-${FTTW}/ && make install /fftw-${FTTW}/ && rm -rf /fftw*
+
+export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+export PATH=/usr/local/bin:/usr/local/cuda/bin:$PATH
+
+# Get and install Savu 
+chmod +x /get-and-install-savu.sh && \
+/get-and-install-savu.sh $VERSION
+
+%environment
+export VERSION=2.3.1
+export FTTW=3.3.8
+export OPENMPI=3.1.3
+export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+export PATH=/usr/local/miniconda/bin:$PATH
+
+%runscript
+exec /bin/bash "$@"
