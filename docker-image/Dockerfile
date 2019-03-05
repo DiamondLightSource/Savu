@@ -7,9 +7,9 @@ USER root
 # Deps
 RUN yum groupinstall -y 'Development Tools' && yum install -y mesa-libGL-devel mesa-libGLU-devel wget boost-devel && yum clean all && rm -rf /var/cache/yum
 
-ENV VERSION=2.2.1
-ENV FTTW=3.3.7
-ENV OPENMPI=3.0.0
+ENV VERSION=2.3.1
+ENV FTTW=3.3.8
+ENV OPENMPI=3.1.3
 
 # Install FTTW3
 ADD http://fftw.org/fftw-${FTTW}.tar.gz /fftw-${FTTW}.tar.gz
@@ -19,7 +19,7 @@ RUN tar -xf fftw-${FTTW}.tar.gz && \
     /fftw-${FTTW}/configure --enable-threads --enable-shared --enable-long-double --disable-static && make /fftw-${FTTW}/ && make install /fftw-${FTTW}/ && rm -rf /fftw*
 
 # Download openmpi ${OPENMPI} and build it 
-ADD https://www.open-mpi.org/software/ompi/v3.0/downloads/openmpi-${OPENMPI}.tar.gz /openmpi-${OPENMPI}.tar.gz
+ADD https://www.open-mpi.org/software/ompi/v3.1/downloads/openmpi-${OPENMPI}.tar.gz /openmpi-${OPENMPI}.tar.gz
 RUN tar -xf openmpi-${OPENMPI}.tar.gz && \
     /openmpi-${OPENMPI}/configure --with-sge --enable-orterun-prefix-by-default --disable-static && make /openmpi-${OPENMPI}/ && make install /openmpi-${OPENMPI}/ && rm -rf /openmpi*
 
