@@ -22,6 +22,7 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 import os
 import copy
 import logging
+import math
 
 import skimage.measure as skim
 
@@ -71,7 +72,7 @@ class Mipmap2(Plugin, CpuPlugin):
 
         ext = self.parameters['file_type']
         in_plugin_data = self.get_plugin_in_datasets()[0]
-        pos = in_plugin_data.get_current_frame_idx()
+        pos = np.unique(in_plugin_data.get_current_frame_idx())
 
         self.exp.log("frame position is %s" % (str(pos)))
 
@@ -83,13 +84,15 @@ class Mipmap2(Plugin, CpuPlugin):
         output_slices = []
 
         # mipmap levels
-        for output_dataset, data, size in mipmap_info:
+        for output_dataset, data_block, size in mipmap_info:
             # build the slice list
             slice_to_take = [slice(None)]*len(fullData.data.shape)
 
-            slice_to_take[in_plugin_data.get_slice_dimension()] = pos[0,len(pos)/size]
+            mapped_slice = (pos/size)[size-1::size]
 
-            out0[slice_to_take] = output_dataset[...]
+            if mapped_slice.shape[0] > 0:
+                slice_to_take[in_plugin_data.get_slice_dimension()] = mapped_slice
+                output_dataset.data[tuple(slice_to_take)] = data_block[:, 0:mapped_slice.shape[0],:]
 
         return None
 
@@ -116,7 +119,7 @@ class Mipmap2(Plugin, CpuPlugin):
         for i in range(self.nOutput_datasets()):
             out_dataset[i].create_dataset(axis_labels=in_dataset[0],
                                           patterns=in_dataset[0],
-                                          shape=tuple([x/(2**i) for x in full_data_shape]))
+                                          shape=tuple([int(math.ceil(x/(2**i))) for x in full_data_shape]))
             out_pData[i].plugin_data_setup('VOLUME_XZ', self.get_max_frames())
 
     def nInput_datasets(self):
