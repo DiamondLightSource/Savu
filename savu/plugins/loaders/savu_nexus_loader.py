@@ -170,7 +170,7 @@ class SavuNexusLoader(BaseLoader):
     def _create_datasets(self, nxsfile, datasets, dtype):
         data_objs = []
 
-        for name, group in datasets.iteritems():
+        for name, group in datasets.items():
             self.__set_preview_params(name)
             dObj = self._create_dataset(name, dtype)
             self._set_data_type(dObj, group, nxsfile.filename)
@@ -250,13 +250,13 @@ class SavuNexusLoader(BaseLoader):
 
     def _add_patterns(self, dObj, group):
         patterns = group['patterns']
-        for key, value in patterns.iteritems():
+        for key, value in patterns.items():
             dObj.add_pattern(key, core_dims=value['core_dims'],
                              slice_dims=value['slice_dims'])
 
     def _add_meta_data(self, dObj, group):
         mData = group['meta_data']
-        for key, value in mData.iteritems():
+        for key, value in mData.items():
             entry = value.name.split('/')[-1]
             dObj.meta_data.set(entry, value.values()[0][...])
 

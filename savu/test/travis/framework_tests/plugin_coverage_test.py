@@ -54,12 +54,12 @@ class PluginCoverageTest(unittest.TestCase):
 
         # which test process lists were not in the test_process_lists folder
         nxs_unused = list(set(nxs_in_tests).difference(set(self.nxs_avail)))
-        print "==============================================================="
+        print ("===============================================================")
         print ("\nThese .nxs test files were found inside the tests, but are "
                "not available in the test_process_lists folder:\n")
         for nxs in nxs_unused:
-            print nxs
-        print "==============================================================="
+            print (nxs)
+        print ("===============================================================")
 
         # get all plugins listed in self.nxs_used process lists
         tested_plugin_list = \
@@ -69,19 +69,19 @@ class PluginCoverageTest(unittest.TestCase):
         # list all plugins
         plugin_list = self.get_plugin_list(savu_base_path + '/savu/plugins')
 
-        print "==============================================================="
+        print ("===============================================================")
         print ("\nThe following plugins are not covered by the tests:\n")
         uncovered = list(set(plugin_list).difference(set(tested_plugin_list)))
         for plugin in uncovered:
-            print plugin
-        print "==============================================================="
+            print (plugin)
+        print ("===============================================================")
 
-        print "==============================================================="
+        print ("===============================================================")
         print ("\nThe following process lists are redundant:\n")
         redundant = list(set(self.nxs_avail).difference(set(self.nxs_used)))
         for plugin in redundant:
-            print plugin
-        print "==============================================================="
+            print (plugin)
+        print ("===============================================================")
 
     def test_process_lists(self):
         # check for unused process lists

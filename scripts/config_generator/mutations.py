@@ -89,8 +89,8 @@ def param_change_str(old, new, plugin, keys):
         added_str = ["Adding parameter %s" % a for a in added]
         replaced_str = ["Replacing parameter %s with %s" % (
                 replaced[i], replacing[i]) for i in range(len(replaced))]
-        print wrap(param_changes_str(plugin) + '%s' % (
-                '\n'.join(removed_str + added_str + replaced_str)))
+        print (wrap(param_changes_str(plugin) + '%s' % (
+                '\n'.join(removed_str + added_str + replaced_str))))
 
 hdf5_notice = 'is now used by default.\nPlease remove from the process list, '\
     'unless you wish to override the default parameters (which must be done '\

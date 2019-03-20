@@ -90,9 +90,9 @@ def error_catcher(function):
                 e.message.split()[1] == 'ERROR:' else False
 
             if error_level is 0 and savu_error:
-                print e.message
+                print (e.message)
             elif error_level is 0:
-                print "%s: %s" % (type(e).__name__, e.message)
+                print ("%s: %s" % (type(e).__name__, e.message))
             elif error_level is 1:
                 traceback.print_exc(file=sys.stdout)
 
@@ -143,7 +143,7 @@ def _get_dawn_parameters(plugin):
     plugin._populate_default_parameters()
     desc = plugin.parameters_desc
     params = {}
-    for key, value in plugin.parameters.iteritems():
+    for key, value in plugin.parameters.items():
         if key not in ['in_datasets', 'out_datasets']:
             params[key] = {'value': value, 'hint': desc[key]}
     return params
@@ -165,7 +165,7 @@ def __get_filtered_plugins(pfilter):
     star_search = \
         pfilter.split('*')[0] if pfilter and '*' in pfilter else False
 
-    for key, value in pu.plugins.iteritems():
+    for key, value in pu.plugins.items():
         if star_search:
             search = '(?i)^' + star_search
             if re.match(search, value.__name__) or \

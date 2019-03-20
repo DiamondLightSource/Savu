@@ -31,8 +31,14 @@ import copy
 import importlib
 import imp
 import inspect
-from itertools import izip_longest
 
+import numpy as np
+try:
+    # Python 3
+    from itertools import zip_longest
+except ImportError:
+    # Python 2
+    from itertools import izip_longest as zip_longest
 
 plugins = {}
 plugins_path = {}
@@ -68,7 +74,7 @@ def dawn_compatible(plugin_output_type=OUTPUT_TYPE_METADATA_AND_DATA):
             dawn_plugins[clazz.__name__]['plugin_output_type'] =\
                 _plugin_output_type
         except Exception as e:
-            print e
+            print(e)
         return clazz
     # for backwards compatibility, if decorator is invoked without brackets...
     if inspect.isclass(plugin_output_type):
@@ -99,10 +105,15 @@ def load_class(name, cls_name=None):
     :param name: Module name or path to a module file
     :returns: An instance of the class associated with module.
     """
+    #FIXME this should be dealt with properly
+    if isinstance(name, np.bytes_):
+        name = name.decode("utf-8")
     path = name if os.path.dirname(name) else None
     name = os.path.basename(os.path.splitext(name)[0]) if path else name
-    cls_name = ''.join(x.capitalize() for x in name.split('.')[-1].split('_'))\
-        if not cls_name else cls_name
+    #FIXME this should be dealt with properly
+    if isinstance(name, np.bytes_):
+        name = name.decode("utf-8")
+    cls_name = ''.join(x.capitalize() for x in name.split('.')[-1].split('_')) if not cls_name else cls_name
     if cls_name in plugins.keys():
         return plugins[cls_name]
     mod = \
@@ -274,7 +285,7 @@ def parse_config_string(string):
     split_vals = filter(None, re.split(regex, string))
     delimitors = re.findall(regex, string)
     split_vals = [repr(a.strip()) for a in split_vals]
-    zipped = izip_longest(delimitors, split_vals)
+    zipped = zip_longest(delimitors, split_vals)
     string = ''.join([i for l in zipped for i in l if i is not None])
     try:
         return ast.literal_eval(string)

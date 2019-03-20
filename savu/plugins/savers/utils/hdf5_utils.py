@@ -46,7 +46,7 @@ class Hdf5Utils(object):
         self.exp = exp
         # Get MPI I/O settings from the Savu config file
         settings = self.exp.meta_data.get(['system_params', 'mpi-io_settings'])
-        for key, value in settings.iteritems():
+        for key, value in settings.items():
             self.info.Set(key, value)
 
     def _open_backing_h5(self, filename, mode, comm=MPI.COMM_WORLD, mpi=True):

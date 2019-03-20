@@ -161,7 +161,7 @@ class Experiment(object):
     def _add_input_data_to_nxs_file(self, transport):
         # save the loaded data to file
         h5 = Hdf5Utils(self)
-        for name, data in self.index['in_data'].iteritems():
+        for name, data in self.index['in_data'].items():
             self.meta_data.set(['link_type', name], 'input_data')
             self.meta_data.set(['group_name', name], name)
             self.meta_data.set(['filename', name], data.backing_file)
@@ -237,7 +237,7 @@ class Experiment(object):
         self.index["in_data"] = {}
 
     def _merge_out_data_to_in(self):
-        for key, data in self.index["out_data"].iteritems():
+        for key, data in self.index["out_data"].items():
             if data.remove is False:
                 self.index['in_data'][key] = data
         self.index["out_data"] = {}
@@ -249,7 +249,7 @@ class Experiment(object):
         finalise['remove'] = []
         finalise['keep'] = []
 
-        for key, data in self.index['out_data'].iteritems():
+        for key, data in self.index['out_data'].items():
             if data.remove is True:
                 finalise['remove'].append(data)
             else:
@@ -272,7 +272,7 @@ class Experiment(object):
             del self.index["out_data"][data.data_info.get('name')]
 
         # Add remaining output datasets to input datasets
-        for name, data in self.index['out_data'].iteritems():
+        for name, data in self.index['out_data'].items():
             data.get_preview().set_preview([])
             self.index["in_data"][name] = copy.deepcopy(data)
         self.index['out_data'] = {}
@@ -304,9 +304,9 @@ class Experiment(object):
         Log the contents of the experiment at the specified level
         """
         logging.log(log_level, "Experimental Parameters for %s", log_tag)
-        for key, value in self.index["in_data"].iteritems():
+        for key, value in self.index["in_data"].items():
             logging.log(log_level, "in data (%s) shape = %s", key,
                         value.get_shape())
-        for key, value in self.index["in_data"].iteritems():
+        for key, value in self.index["in_data"].items():
             logging.log(log_level, "out data (%s) shape = %s", key,
                         value.get_shape())

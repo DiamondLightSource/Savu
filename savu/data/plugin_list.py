@@ -221,11 +221,11 @@ class PluginList(object):
     def _byteify(self, input):
         if isinstance(input, dict):
             return {self._byteify(key): self._byteify(value)
-                    for key, value in input.iteritems()}
+                    for key, value in input.items()}
         elif isinstance(input, list):
             temp = [self._byteify(element) for element in input]
             return temp
-        elif isinstance(input, unicode):
+        elif isinstance(input, str):
             return input.encode('utf-8')
         else:
             return input
