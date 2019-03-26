@@ -25,4 +25,4 @@ tar -xvzf savu.tar.gz
 
 cd savu_v${VERSION}
 chmod +x savu_installer.sh
-./savu_installer.sh --no_prompts | tee savu_installation.log
+PREFIX=/usr/local ./savu_installer.sh --no_prompts | tee savu_installation.log
