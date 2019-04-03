@@ -1,6 +1,6 @@
-{% set version = "1.10.4" %}
+{% set version = "1.10.5" %}
 {% set release = "hdf5-1.10" %}
-{% set patch = "hdf5-1.10.4" %}
+{% set patch = "hdf5-1.10.5" %}
 
 package:
   name: hdf5
@@ -9,7 +9,7 @@ package:
 source:
   fn: {{ patch }}.tar.bz2
   url: https://www.hdfgroup.org/ftp/HDF5/releases/{{ release }}/{{ patch }}/src/{{ patch }}.tar.bz2
-  md5: 886148d0cc9ffd3c8e1fce0bd75ed07b
+  md5: 7c19d6b81ee2a3ba7d36f6922b2f90d3
 
 build:   
   number: 1

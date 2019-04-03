@@ -1,4 +1,4 @@
-{% set version = "2.7.1" %} # change this
+{% set version = "2.9.0" %} # change this
 
 package:
   name: h5py
@@ -11,7 +11,7 @@ requirements:
   build:
     - python
     - numpy
-    - hdf5
+    - hdf5 ==1.10.5
     - cython
     - pkgconfig
     - six  
