@@ -30,11 +30,11 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
 
-class CcpiRegulToolkitGpuTest(unittest.TestCase):
+class CcpiDenoisingCpuTest(unittest.TestCase):
 
-    def test_ccpi_regul_gpu(self):
+    def test_ccpi_denoise_cpu(self):
         data_file = tu.get_test_data_path('24737.nxs')
-        process_file = tu.get_test_process_path('CcpiRegulToolkitGpu_test.nxs')
+        process_file = tu.get_test_process_path('ccpi_denoising_cpu_test.nxs')
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
 
