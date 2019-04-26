@@ -22,6 +22,7 @@ dependencies:
   - pyfftw
   - colorama
   - pymca
+  - ccpi::ccpi-regulariser
   - pip:
     - nvidia-ml-py
     - peakutils

@@ -57,7 +57,7 @@ class DenoiseBregmanFilter(BaseFilter, CpuPlugin):
         eps = self.parameters['error_threshold']
         isotropic = self.parameters['isotropic']
         data = np.nan_to_num(data[0, ...])
-        result = denoise_tv_bregman(data, weight, max_iter=max_iter,
+        result = denoise_tv_bregman(np.float64(data), weight, max_iter=max_iter,
                                     eps=eps, isotropic=isotropic)
         return result
 
