@@ -1,4 +1,4 @@
-# Copyright 2014 Diamond Light Source Ltd.
+# Copyright 2019 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,138 +11,147 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """
-.. module:: mipmaping plugin (pyramid-like data downampling)
+.. module:: mipmaping plugin (a pyramid-like data downampling)
    :platform: Unix
-   :synopsis: A plugin to downsample multidimensional data 
-
-.. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
-
+   :synopsis:A plugin to downsample multidimensional data 
+.. moduleauthor:: Mark Basham & Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
-import logging
-import numpy
-import skimage.measure as skim
-
-from savu.plugins.plugin import Plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
+
+import logging
+import math
+import skimage.measure as skim
+import numpy as np
 from savu.plugins.utils import register_plugin
+from savu.plugins.plugin import Plugin
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger('matplotlib')
+logger.setLevel(logging.WARNING)
 
 
 @register_plugin
 class Mipmap(Plugin, CpuPlugin):
     """
-    A plugin to downsample multidimensional data based on a tuple of provided levels
-    
-    :u*param scales_list: A list of scales to downsample the data. Default: (2,2).
+    A plugin to downsample multidimensional data (scales of 2 and 4 are generated),\
+    Mipmap0 is the original size data, Mipmap1 is scaled down by 2 and Mipmap2 by 4
+
     :u*param mode: One of 'mean', 'median', 'min', 'max'. Default: 'mean'.
-    :u*param pattern: One of. Default: 'VOLUME_XZ'.
-    :param out_datasets: Default out dataset names. Default: ['raw', 'two_x_two']
+    :param out_datasets: Default out dataset names. Default: ['Mipmap0', 'Mipmap1', 'Mipmap2']
     """
 
     def __init__(self):
-        logging.debug("Starting Mipmapping")
-        super(Mipmap,
-              self).__init__("Mipmap")
-        self.out_shape = None
-        self.mode_dict = { 'mean'  : numpy.mean,
-                           'median': numpy.median,
-                           'min'   : numpy.min,
-                           'max'   : numpy.max }
-        self.mapsnumber = None
+        super(Mipmap, self).__init__("Mipmap")
 
-    def get_number_of_output_datasets(self):
-        self.mapmap_scales = self.parameters['scales_list']
-        # the number of mipmap maps
-        try:
-            self.mapsnumber = len(self.mapmap_scales)
-        except TypeError:
-            self.mapsnumber = 1
-            
-        return self.mapsnumber
-
-    def setup(self):
-        mapsnumber = self.get_number_of_output_datasets()
-        
-        # get all in and out datasets required by the plugin
-        in_dataset, out_dataset = self.get_datasets()
-        # get plugin specific instances of these datasets
-        in_pData, out_pData = self.get_plugin_datasets()
-
-        plugin_pattern = self.parameters['pattern']
-        in_pData[0].plugin_data_setup(plugin_pattern, self.get_max_frames())
-        
-        
-        for i in range(0,mapsnumber):
-            self.out_shape = \
-            self.new_shape(in_dataset[0].get_shape(), in_dataset[0], i)
-            out_dataset[i].create_dataset(patterns=in_dataset[0],
-                                      axis_labels=in_dataset[0],
-                                      shape=self.out_shape)
-            out_pData[i].plugin_data_setup(plugin_pattern, self.get_max_frames())
-
-    def new_shape(self, full_shape, data, ind):
-        core_dirs = data.get_core_dimensions()
-        self.mapmap_scales = self.parameters['scales_list']
-        new_shape = list(full_shape)
-        if ((ind == 0) and (self.mapsnumber > 1)):
-            for dim in core_dirs:
-                new_shape[dim] = full_shape[dim]/self.mapmap_scales[ind]
-                if (full_shape[dim] % self.mapmap_scales[ind]) > 0:
-                    new_shape[dim] += 1
-        elif ((ind == 1) and (self.mapsnumber > 1)):
-            for dim in core_dirs:
-                new_shape[dim] = full_shape[dim]/(self.mapmap_scales[ind-1]*self.mapmap_scales[ind])
-                if (full_shape[dim] % (self.mapmap_scales[ind-1]*self.mapmap_scales[ind])) > 0:
-                    new_shape[dim] += 1
-        else:
-            for dim in core_dirs:
-                new_shape[dim] = full_shape[dim]/self.mapmap_scales
-                if (full_shape[dim] % self.mapmap_scales) > 0:
-                    new_shape[dim] += 1
-        return tuple(new_shape)
+    def pre_process(self):
+        pass
 
     def process_frames(self, data):
-        logging.debug("Running Mipmapping")
+        self.mode_dict = { 'mean'  : np.mean,
+                           'median': np.median,
+                           'min'   : np.min,
+                           'max'   : np.max }
         if self.parameters['mode'] in self.mode_dict:
             sampler = self.mode_dict[self.parameters['mode']]
         else:
             logging.warning("Unknown downsample mode. Using 'mean'.")
-            sampler = numpy.mean
-        if (self.mapsnumber == 1):
-            block_size = (self.mapmap_scales, self.mapmap_scales)
-            result = skim.block_reduce(data[0], block_size, sampler)
-        elif (self.mapsnumber == 2):
-            #generate various block sizes
-            block_size = (self.mapmap_scales[0], self.mapmap_scales[0])
-            result1 = skim.block_reduce(data[0], block_size, sampler)
-            block_size = (self.mapmap_scales[0]*self.mapmap_scales[1], self.mapmap_scales[0]*self.mapmap_scales[1])
-            result2 = skim.block_reduce(data[0], block_size, sampler)
-            result = [result1,result2]
-        else:
-            raise("The number of given maps is too high ")
-        return result
-    
-    """
-    def get_output_shape(self, input_data):
-        input_shape = input_data.get_shape()
-        core_dirs = input_data.get_core_directions()
-        output_shape = []
-        for i in range(len(input_shape)):
-            if i in core_dirs:
-                output_shape.append(input_shape[i]/self.mapmap_scales[0])
-            else:
-                output_shape.append(input_shape[i])
+            sampler = np.mean
+
+        in_dataset = self.get_in_datasets()
+        out_datasets = self.get_out_datasets()
+
+        fullData = in_dataset[0]
+
+        #out0 = out_datasets[0]
+        #out1 = out_datasets[1]
+        #out2 = out_datasets[2]
+
+#       ext = self.parameters['file_type']
+        in_plugin_data = self.get_plugin_in_datasets()[0]
+        pos = np.unique(in_plugin_data.get_current_frame_idx())
+
+        self.exp.log("frame position is %s" % (str(pos)))
+        """
+        # a list of tuples
+        mipmap_info = [(out0, data[0], 1),
+                       (out1, skim.block_reduce(data[0], (2, 2, 2), sampler), 2),
+                       (out2, skim.block_reduce(data[0], (4, 4, 4), sampler), 4)]
+        """
+        """
+        mipmap_info = []
+        data_mipmap0 = tuple([out_datasets[0], data[0], 1])
+        mipmap_info.append(data_mipmap0)
+        downsample1 = skim.block_reduce(data[0], (2, 2, 2), sampler)
+        data_mipmap1 = tuple([out_datasets[1], downsample1, 2])
+        mipmap_info.append(data_mipmap1)
+        downsample2 = skim.block_reduce(downsample1, (2, 2, 2), sampler)
+        data_mipmap2 = tuple([out_datasets[2], downsample2, 4])
+        mipmap_info.append(data_mipmap2)
+        """
         
-        return output_shape
-    """
+        # Mipmapped layers appended in the loop 
+        mipmap_info = []
+        data_mipmap0 = tuple([out_datasets[0], data[0], 1])
+        mipmap_info.append(data_mipmap0)
+        inputMap = data[0]
+        counter = 2
+        for i in range(1,3):
+            downsample = skim.block_reduce(inputMap, (2, 2, 2), sampler)
+            data_mipmap = tuple([out_datasets[i], downsample, counter])
+            mipmap_info.append(data_mipmap)
+            inputMap = np.copy(downsample)
+            counter = counter + 2
+        
+        # Set up the output list
+        #output_slices = []
+        # mipmap levels
+        for output_dataset, data_block, size in mipmap_info:
+            # build the slice list
+            slice_to_take = [slice(None)]*len(fullData.data.shape)
+
+            mapped_slice = (pos/size)[size-1::size]
+
+            if mapped_slice.shape[0] > 0:
+                slice_to_take[in_plugin_data.get_slice_dimension()] = mapped_slice
+                output_dataset.data[tuple(slice_to_take)] = data_block[:, 0:mapped_slice.shape[0],:]
+
+        return None
+
+    def populate_meta_data(self, key, value):
+        datasets = self.parameters['datasets_to_populate']
+        in_meta_data = self.get_in_meta_data()[0]
+        in_meta_data.set(key, value)
+        for name in datasets:
+            self.exp.index['in_data'][name].meta_data.set(key, value)
+
+    def setup(self):
+        in_dataset, out_dataset = self.get_datasets()
+        in_pData, out_pData = self.get_plugin_datasets()
+
+        full_data_shape = list(in_dataset[0].get_shape())
+
+        # Sort out input data
+        in_pData[0].plugin_data_setup('VOLUME_XZ', self.get_max_frames())
+
+        # use this for 3D data (need to keep slice dimension)
+        out_dataset = self.get_out_datasets()
+        out_pData = self.get_plugin_out_datasets()
+
+        for i in range(self.nOutput_datasets()):
+            out_dataset[i].create_dataset(axis_labels=in_dataset[0],
+                                          patterns=in_dataset[0],
+                                          shape=tuple([int(math.ceil(x/(2**i))) for x in full_data_shape]))
+            out_pData[i].plugin_data_setup('VOLUME_XZ', self.get_max_frames())
 
     def nInput_datasets(self):
         return 1
 
     def nOutput_datasets(self):
-        return self.get_number_of_output_datasets()
+        return 3
 
     def get_max_frames(self):
-        # This filter processes one frame at a time
-        return 'single'
+        return 8
+
+    def fix_transport(self):
+        return 'hdf5'
