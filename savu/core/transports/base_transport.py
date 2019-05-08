@@ -146,7 +146,7 @@ class BaseTransport(object):
             cu.user_message("%s - 100%% complete" % (plugin.name))
 
     def _process_loop(self, plugin, prange, tdata, count, pDict, result, cp):
-        kill_signal = False        
+        kill_signal = False
         for i in prange:
             if cp and cp.is_time_to_checkpoint(self, count, i):
                 # kill signal sent so stop the processing
@@ -154,9 +154,13 @@ class BaseTransport(object):
             data = self._get_input_data(plugin, tdata, i, count)
             res = self._get_output_data(
                     plugin.plugin_process_frames(data), i)
+
             for j in pDict['nOut']:
-                out_sl = pDict['out_sl']['process'][i][j]
-                result[j][out_sl] = res[j]
+                if res is not None:
+                    out_sl = pDict['out_sl']['process'][i][j]
+                    result[j][out_sl] = res[j]
+                else:
+                    result[j] = None
         return result, kill_signal
 
     def __get_checkpoint_params(self, plugin):
@@ -209,8 +213,8 @@ class BaseTransport(object):
 
         for key in [k for k in ['process', 'unpad'] if k in sl_dict.keys()]:
             nData = range(len(sl_dict[key]))
-            rep = range(len(sl_dict[key][0]))
-            sl_dict[key] = [[sl_dict[key][i][j] for i in nData] for j in rep]
+            #rep = range(len(sl_dict[key][0]))
+            sl_dict[key] = [[sl_dict[key][i][j] for i in nData if j < len(sl_dict[key][i])] for j in range(len(sl_dict[key][0]))]
         return sl_dict
 
     def _transfer_all_data(self, count):
@@ -271,17 +275,18 @@ class BaseTransport(object):
         slice_list = None
         if 'transfer' in pDict['out_sl'].keys():
             slice_list = \
-                [pDict['out_sl']['transfer'][i][count] for i in pDict['nOut']]
+                [pDict['out_sl']['transfer'][i][count] for i in pDict['nOut'] if len(pDict['out_sl']['transfer'][i]) > count]
 
         result = [result] if type(result) is not list else result
 
         for idx in range(len(data_list)):
-            if slice_list:
-                temp = self._remove_excess_data(
-                        data_list[idx], result[idx], slice_list[idx])
-                data_list[idx].data[slice_list[idx]] = temp
-            else:
-                data_list[idx].data = result[idx]
+            if result[idx] is not None:
+                if slice_list:
+                    temp = self._remove_excess_data(
+                            data_list[idx], result[idx], slice_list[idx])
+                    data_list[idx].data[slice_list[idx]] = temp
+                else:
+                    data_list[idx].data = result[idx]
 
     def _set_global_frame_index(self, plugin, frame_list, nProc):
         """ Convert the transfer global frame index to a process global frame
