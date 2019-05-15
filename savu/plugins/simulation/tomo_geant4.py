@@ -123,7 +123,6 @@ class TomoGeant4(Plugin, CpuPlugin):
 
         #print(self.parameters['pattern'])
 
-
     def new_shape(self, full_shape, data):
         # example of a function to calculate a new output data shape based on
         # the input data shape
@@ -137,19 +136,23 @@ class TomoGeant4(Plugin, CpuPlugin):
         # set parameters for __Geant4TomoSim__:
         self.detectors_X = self.parameters['detectors_X']
         self.detectors_Y = self.parameters['detectors_Y']
-
-        self.tomosim = sim.G4TomoSim(5, True)
-        self.tomosim.addMacroFiles(self.macrofiles)
-        self.tomosim.runsingleprojection(n_particles    = 1.e5,
-                            flatfields     = False,
-                            rotation_angle = 0.,
-                            zposition      = 0.)
+        
         #print "The full data shape is", self.get_in_datasets()[0].get_shape()
         #print "Example is", self.parameters['example']
     def process_frames(self, data):
         # print "The output data shape is", data[0].shape
         # TODO:  GENERATE projection data
 
+        #tomosim = sim.G4TomoSim(5, True)
+        """
+	tomosim.addMacroFiles(self.macrofiles)
+        tomosim.runsingleprojection(n_particles    = 1.e5,
+                            	    flatfields     = False,
+                                    rotation_angle = 0.,
+                                    zposition      = 0.)
+        
+        print tomosim.absorptionData()
+	"""
         # generate angles
         #self.angles = np.linspace(0.0,179.9,self.parameters['proj_num'],dtype='float32')
         #self.out_dataset[0].meta_data.set('rotation_angle', self.angles)
