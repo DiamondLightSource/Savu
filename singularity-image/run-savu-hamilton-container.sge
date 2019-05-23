@@ -1,0 +1,83 @@
+#!/bin/bash
+
+#$ -l h_rt=02:00:00
+#$ -N savu360degTest
+#$ -pe openmpi 80
+#$ -l exclusive
+#$ -P dls_sysadmin
+#$ -l gpu=4
+
+
+#
+# --- savu module
+module purge
+module load openmpi/3.0.0
+
+
+#
+# --- savu parallel setup
+
+# GPU and CPU resources (per host)
+savu_num_cpus=${SGE_HGR_exclusive}
+savu_num_gpus=$(echo ${SGE_HGR_gpu} | wc -w)
+
+if [ "${savu_num_gpus}" -gt "${savu_num_cpus}" ]; then
+  echo " *** warning: number of GPUs greater than number of CPUs"
+  echo "              setting number of GPUs to ${savu_num_cpus}"
+  savu_num_gpus=${savu_num_cpus}
+fi
+
+export CUDA_VISIBLE_DEVICES=$(seq -s "," 0 $[savu_num_gpus-1])
+
+
+#
+# --- Singularity processing details
+savu_singularity_image=/mnt/gpfs03/wzp22541/savu/singularity/centos-7__savu-2.3__openmpi-3.0.0__cuda-9.0.sif
+
+
+#
+# --- savu processing details
+
+# working directory (to contain log and time stamps)
+savu_run_dir=${SGE_O_WORKDIR}
+# input files (data + processing list)
+savu_input_basedir=/mnt/gpfs03/wzp22541/savu/testcases/360-degree
+# output directory (basename)
+savu_output_basedir=/mnt/gpfs03/wzp22541/savu/runs/360-degree
+
+# variables passed directly to Singularity image
+# *** Note: Singularity input/output directories are bind mounted as "/savu-input" and "/savu-output"
+savu_input_file=/savu-input/data/83652.nxs
+savu_output_dir=/savu-output/output
+savu_process_file=/savu-input/typical-processing.nxs
+savu_folder_name=${JOB_ID}
+savu_log_name=${savu_output_dir}/${JOB_ID}
+
+# file for time stamps (processed by bin/date2time.py)
+savu_time_file=${savu_run_dir}/savu.container.${NSLOTS}.${JOB_ID}.time
+
+# file for output log
+savu_log_file=${savu_run_dir}/savu.container.${NSLOTS}.${JOB_ID}.log
+
+
+#
+# --- savu launch
+date  > ${savu_time_file}
+
+mpirun -np ${NSLOTS} singularity run \
+      --bind ${savu_input_basedir}:/savu-input,${savu_output_basedir}:/savu-output \
+       --nv \
+       ${savu_singularity_image} \
+       --data-file ${savu_input_file} \
+       --process-file ${savu_process_file} \
+       --output-dir  ${savu_output_dir} \
+       --folder-name ${savu_folder_name} \
+       --log-name ${savu_log_name} \
+       --cpus ${savu_num_cpus} --gpus ${savu_num_gpus} &> ${savu_log_file}
+
+date >> ${savu_time_file}
+
+
+#
+# --- clean up
+rm -fr ${savu_output_basedir}/output/${JOB_ID}

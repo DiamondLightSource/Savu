@@ -1,0 +1,271 @@
+Bootstrap: docker
+From: nvidia/cuda:9.0-devel-centos7
+
+%help
+    Singularity container for SAVU.
+
+    SAVU is a Python package for the processing and reconstruction of
+    parallel-beam tomography data (https://savu.readthedocs.io/en/latest/).
+
+    SAVU prerequisites are
+      * a MPI software stack;
+      * a FFTW library installation (single/double/quad precision support);
+      * a CUDA installation.
+
+    SAVU performance depends on GPU acceleration as well as on parallel file I/O.
+
+    SAVU installation is described at https://savu.readthedocs.io/en/latest/dls_installer/
+
+    The installation is (partially) based on information from
+      * https://devblogs.nvidia.com/making-containers-easier-with-hpc-container-maker/
+
+    and uses the following repositories
+      * Nvidia / Docker: https://hub.docker.com/r/nvidia/cuda/
+      * Miniconda installer repo: https://repo.continuum.io/miniconda
+
+
+%labels
+    maintainer M. Duta
+    version 1.0
+
+%files
+
+%post
+    #
+    # --- devel tools
+    yum groupinstall -y "Development Tools"
+    yum install -y mesa-libGL-devel mesa-libGLU-devel
+    yum install -y wget boost-devel
+
+
+    #
+    # --- infiniband
+    # = minimal installation
+    # yum install -y wget gcc-gfortran make
+    # yum install -y libibverbs libibverbs-devel infiniband-diags
+    # = group installation
+    yum groupinstall -y "Infiniband"
+    yum install      -y libibverbs-devel
+
+
+    #
+    # --- install OpenMPI
+    OPENMPI_VERSION=3.0.0
+    wget https://download.open-mpi.org/release/open-mpi/v${OPENMPI_VERSION%??}/openmpi-${OPENMPI_VERSION}.tar.gz --no-check-certificate
+    tar -xf openmpi-${OPENMPI_VERSION}.tar.gz
+    cd openmpi-${OPENMPI_VERSION}/
+    ./configure \
+       --prefix=/usr/local \
+       --enable-orterun-prefix-by-default \
+       --enable-mpirun-prefix-by-default \
+       --with-verbs
+    make
+    make install
+    cd ../
+    rm -fr openmpi-${OPENMPI_VERSION}*
+    ldconfig
+    ldconfig /usr/local/lib
+
+
+    #
+    # --- install fftw
+    FFTW_VERSION=3.3.8
+    wget http://www.fftw.org/fftw-${FFTW_VERSION}.tar.gz
+    tar -xf fftw-${FFTW_VERSION}.tar.gz
+    cd fftw-${FFTW_VERSION}/
+    export F77=gfortran
+    export FFLAGS="-O3 -mavx2 -fpic -fopenmp"
+    export CXXFLAGS="${FFLAGS}"
+    export CFLAGS="${FFLAGS}"
+    ./configure \
+      --enable-shared=yes \
+      --enable-sse2 --enable-avx --enable-avx2 \
+      --enable-fortran=yes \
+      --enable-openmp \
+      --enable-threads
+    make
+    make install
+    make distclean
+    ./configure \
+      --enable-shared=yes \
+      --enable-sse --enable-avx --enable-avx2 \
+      --enable-fortran=yes \
+      --enable-float \
+      --enable-openmp \
+      --enable-threads
+    make
+    make install
+    make distclean
+    ./configure \
+      --enable-shared=yes \
+      --enable-fortran=yes \
+      --enable-openmp \
+      --enable-threads \
+      --enable-long-double
+    make
+    make install
+    cd ../
+    rm -fr fftw-${FFTW_VERSION} fftw-${FFTW_VERSION}.tar.gz
+
+    ldconfig
+    ldconfig /usr/local/lib
+
+
+    #
+    # --- install savu
+    #   . nvcc in the path
+    export PATH=/usr/local/cuda-9.0/bin:${PATH}
+    #   . libfftw?.so in the path
+    export LD_LIBRARY_PATH=/usr/local/lib:${LD_LIBRARY_PATH}
+    #   . savu prefix
+    export PREFIX=/opt/savu/2.3.1
+    #   . install
+    SAVU_VERSION=2.3.1
+    wget https://savu.readthedocs.io/en/latest/_downloads/savu_v${SAVU_VERSION}.tar.gz
+    tar -xf savu_v${SAVU_VERSION}.tar.gz
+    bash savu_v${SAVU_VERSION}/savu_installer.sh --no_prompts | tee savu_installer.log
+    rm -fr savu_v${SAVU_VERSION}/ savu_v${SAVU_VERSION}.tar.gz
+
+
+    #
+    # --- bind points
+    mkdir -p /savu-input /savu-output
+
+
+    #
+    # --- cleanup (cleans ~1GB)
+    rm -rf /var/cache/yum
+    yum groupremove -y "Development tools"
+    yum remove -y wget
+    yum clean all && rm -rf /var/cache/yum
+    /opt/savu/2.3.1/miniconda/bin/conda build purge-all
+    /opt/savu/2.3.1/miniconda/bin/conda clean --tarballs -y
+
+
+%environment
+    CUDA_PATH=/usr/local/cuda-9.0
+    SAVU_PATH=/opt/savu/2.3.1
+    PATH=${CUDA_PATH}/bin:${PATH}
+    PATH=${SAVU_PATH}/miniconda/bin:${PATH}
+    LD_LIBRARY_PATH=/usr/local/lib:${LD_LIBRARY_PATH}
+    LD_LIBRARY_PATH=${CUDA_PATH}/lib64:${LD_LIBRARY_PATH}
+    LD_LIBRARY_PATH=${SAVU_PATH}/miniconda/lib/python2.7/site-packages/astra/lib:${LD_LIBRARY_PATH}
+    export PATH LD_LIBRARY_PATH
+
+
+%runscript
+    # initialise
+
+    # help
+    savu_container_usage() {
+        >&2 echo " "
+        >&2 echo " *** Usage:"
+        >&2 echo " "
+        >&2 echo "     ${SINGULARITY_NAME} -h|--help"
+        >&2 echo " "
+        >&2 echo "     mpirun -np <num_procs> ${SINGULARITY_NAME}"
+        >&2 echo "            -d|--data-file <savu_data_file>"
+        >&2 echo "            -p|--process-file <savu_process_file>"
+        >&2 echo "            -o|--output-dir <savu_output_dir>"
+        >&2 echo "            -f|--folder-name <savu_folder_name>"
+        >&2 echo "            -l|--log-name <savu_log_name>"
+        >&2 echo "            -c|--cpus <num_cpus> (per host)"
+        >&2 echo "            -g|--gpus <num_gpus> (per host)"
+    }
+
+    # get help if no arguments
+    if [[ $# -eq 0 ]]; then
+      savu_container_usage
+      exit 1
+    fi
+
+    # process arguments
+    while [[ $# -gt 0 ]]; do
+      key="$1"
+      case $key in
+        -d|--data-file)
+          savu_data_file="$2"
+          shift # past argument
+          shift # past value
+        ;;
+        -p|--process-file)
+          savu_process_file="$2"
+          shift # past argument
+          shift # past value
+        ;;
+        -o|--output-dir)
+          savu_output_dir="$2"
+          shift # past argument
+          shift # past value
+        ;;
+        -f|--folder-name)
+          savu_folder_name="$2"
+          shift # past argument
+          shift # past value
+        ;;
+        -l|--log-name)
+          savu_log_name="$2"
+          shift # past argument
+          shift # past value
+        ;;
+        -c|--cpus)
+          num_cpus="$2"
+          shift # past argument
+          shift # past value
+        ;;
+        -g|--gpus)
+          num_gpus="$2"
+          shift # past argument
+          shift # past value
+        ;;
+        -h|--help|*)
+          savu_container_usage
+          exit 1
+        ;;
+      esac
+    done
+
+    # --- savu driver
+    savu_path=$(python -c "import savu, os; print savu.__path__[0]")
+    savu_driver=${savu_path}/tomo_recon.py
+
+    # --- savu GPU and CPU lists (per host)
+    savu_gpu_list=$(seq -f "GPU%g" -s "," 0 $[num_gpus-1])
+    savu_cpu_list=$(seq -f "CPU%g" -s "," 0 $[num_cpus-num_gpus-1])
+
+    # --- launch savu
+    python ${savu_driver} \
+       ${savu_data_file} ${savu_process_file} ${savu_output_dir} \
+       --names "${savu_gpu_list},${savu_cpu_list}" \
+       --verbose --cluster \
+       --folder ${savu_folder_name} \
+       --log ${savu_log_name} $@
+
+
+%test
+    #
+    # --- export env
+    export PATH=/usr/local/cuda/bin:${PATH}
+    export LD_LIBRARY_PATH=/usr/local/lib:/opt/savu/2.3.1/miniconda/lib/python2.7/site-packages/astra/lib:${LD_LIBRARY_PATH}
+
+    #
+    # --- suite of tests to check the installation
+    echo " ===== checking essential Savu library components"
+#                                 ["ibv_devinfo"]="ibv_devinfo" \
+    declare -A savu_components=( ["nvcc"]="nvcc --version" \
+                                 ["ompi_info"]="ompi_info --path prefix" \
+                                 ["fftw-wisdom"]="fftw-wisdom")
+    for component in "${!savu_components[@]}"; do
+      echo " checking ${component}..."
+      ${savu_components[${component}]} || echo " *** error: ${component} not found"
+    done
+    echo " ===== checking essential Savu Python packages"
+    for component in "numpy" "h5py" "astra" "xraylib" "tomopy"; do
+      version=$(/opt/savu/2.3.1/miniconda/bin/python -c "import ${component}; print ${component}.__version__" 2> /dev/null)
+      if [ -z ${version} ]; then
+        version="unavailable"
+      fi
+      printf "%16s : %s\n" ${component} ${version}
+    done
+    # echo " ===== running Savu tests"
+    # savu_full_tests
