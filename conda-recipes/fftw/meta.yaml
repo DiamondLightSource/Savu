@@ -1,0 +1,63 @@
+{% set version = "3.3.8" %}
+
+package:
+  name: fftw
+  version: {{ version }}
+
+source:
+  fn: fftw-{{ version }}.tar.gz
+  url: http://www.fftw.org/fftw-{{ version }}.tar.gz
+  sha256: 6113262f6e92c5bd474f2875fa1b01054c4ad5040f6b0da7c03c98821d9ae303
+
+build:
+  number: 0
+
+requirements:
+  build:
+    - perl   # [not win]
+    - cmake  # [win]
+    - {{ compiler('c') }}
+    - {{ compiler('fortran') }}  # [not win]
+    - llvm-openmp >=4.0.1  # [osx]
+  host:
+    - llvm-openmp >=4.0.1  # [osx]
+  run:
+    - llvm-openmp >=4.0.1  # [osx]
+
+test:
+  requires:
+    - python
+  commands:
+    # Verify headers are installed
+    - test -f ${PREFIX}/include/fftw3.h || exit 1           # [not win]
+    - if not exist %LIBRARY_INC%\\fftw3.h exit 1            # [win]
+
+    # Verify shared libraries are installed
+    {% set fftw_libs = [
+            "libfftw3",
+            "libfftw3_threads",
+            "libfftw3f",
+            "libfftw3f_threads",
+            "libfftw3l",
+            "libfftw3l_threads",
+    ] %}
+    {% set fftw_omp_libs = [
+            "libfftw3_omp",
+            "libfftw3f_omp",
+            "libfftw3l_omp",
+    ] %}
+
+    {% for lib in fftw_libs %}
+    - python -c "import ctypes; ctypes.cdll[r'${PREFIX}/lib/{{ lib }}${SHLIB_EXT}']"  # [unix]
+    {% endfor %}
+
+    {% for lib in fftw_omp_libs %}
+    - python -c "import ctypes; ctypes.cdll[r'${PREFIX}/lib/{{ lib }}${SHLIB_EXT}']"  # [unix]
+    {% endfor %}
+
+about:
+  home: http://fftw.org
+  license: GPL 2
+  license_file: COPYING
+  summary: "The fastest Fourier transform in the west."
+
