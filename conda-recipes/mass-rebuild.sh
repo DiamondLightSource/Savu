@@ -34,3 +34,5 @@ $SINGULARITY_EXEC $CENTOS6_CONDA_BUILD $CONDA build --user savu-dep openmpi
 # HDF5 -> https://jira.diamond.ac.uk/browse/SCI-8696
 $SINGULARITY_EXEC $CENTOS6_CONDA_BUILD $CONDA build --user savu-dep -c savu-dep hdf5
 
+# mpi4py -> https://jira.diamond.ac.uk/browse/SCI-8711
+$SINGULARITY_EXEC $CENTOS6_CONDA_BUILD $CONDA build --user savu-dep -c savu-dep --python 2.7 mpi4py
