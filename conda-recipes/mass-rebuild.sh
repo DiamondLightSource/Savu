@@ -31,4 +31,6 @@ $SINGULARITY_EXEC $CENTOS6_CONDA_BUILD $CONDA build --user savu-dep fftw
 # OpenMPI -> https://jira.diamond.ac.uk/browse/SCI-8694
 $SINGULARITY_EXEC $CENTOS6_CONDA_BUILD $CONDA build --user savu-dep openmpi
 
+# HDF5 -> https://jira.diamond.ac.uk/browse/SCI-8696
+$SINGULARITY_EXEC $CENTOS6_CONDA_BUILD $CONDA build --user savu-dep -c savu-dep hdf5
 
