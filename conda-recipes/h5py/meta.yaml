@@ -1,0 +1,56 @@
+{% set version = "2.9.0" %}
+{% set build = 0 %}
+
+package:
+  name: h5py
+  version: {{ version }}
+
+source:
+  url: https://github.com/h5py/h5py/archive/{{ version }}.tar.gz
+  sha256: 49d593c07a3a4cb87ed421f502e34368b98282a4ac6d4388379aab80b11c7924
+  patches:
+    - support-1.10.5.patch
+
+build:
+  number: {{ build }}
+
+requirements:
+  build:
+    - {{ compiler("c") }}
+  host:
+    - python
+    - pip
+    - numpy
+    - mpi4py
+    - hdf5
+    - cython
+    - six
+    - pkgconfig
+    - openmpi
+    - setuptools
+  run:
+    - python
+    - {{ pin_compatible('numpy') }}
+    - openmpi
+    - mpi4py
+    - hdf5
+    - six
+    - unittest2
+
+test:
+  imports:
+    - h5py
+
+about:
+  home: http://www.h5py.org/
+  license: BSD-3-Clause
+  license_file: licenses/license.txt
+  summary: Read and write HDF5 files from Python
+
+extra:
+  recipe-maintainers:
+    - jakirkham
+    - pitrou
+    - tacaswell
+    - ocefpaf
+    - minrk

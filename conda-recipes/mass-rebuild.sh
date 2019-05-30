@@ -21,6 +21,8 @@ export SINGULARITY_TMPDIR=/scratch/tmp
 
 # pull our centos6 conda build image in
 sregistry pull s3://centos6/conda-build
+
+# get its location on the file system (somewhere in SREGISTRY_STORAGE)
 CENTOS6_CONDA_BUILD=$(sregistry get centos6/conda-build)
 
 SINGULARITY_EXEC="singularity exec -B /scratch,/dls_sw/apps"
@@ -36,3 +38,6 @@ $SINGULARITY_EXEC $CENTOS6_CONDA_BUILD $CONDA build --user savu-dep -c savu-dep 
 
 # mpi4py -> https://jira.diamond.ac.uk/browse/SCI-8711
 $SINGULARITY_EXEC $CENTOS6_CONDA_BUILD $CONDA build --user savu-dep -c savu-dep --python 2.7 mpi4py
+
+# h5py -> https://jira.diamond.ac.uk/browse/SCI-8713
+$SINGULARITY_EXEC $CENTOS6_CONDA_BUILD $CONDA build --user savu-dep -c savu-dep --python 2.7 h5py
