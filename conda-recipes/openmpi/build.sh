@@ -16,9 +16,9 @@ export FCFLAGS="$FFLAGS"
 #export LD=/usr/bin/ld
 
 # avoid absolute-paths in compilers
-#export CC=$(basename "$CC")
-#export CXX=$(basename "$CXX")
-#export FC=$(basename "$FC")
+export CC=$(basename "$CC")
+export CXX=$(basename "$CXX")
+export FC=$(basename "$FC")
 
 if [ $(uname) == Darwin ]; then
     if [[ ! -z "$CONDA_BUILD_SYSROOT" ]]; then
@@ -28,11 +28,11 @@ if [ $(uname) == Darwin ]; then
     export LDFLAGS="$LDFLAGS -Wl,-rpath,$PREFIX/lib"
 fi
 
-export LIBRARY_PATH="$PREFIX/lib"
+export LIBRARY_PATH="$PREFIX/lib:/lib64"
 
 #export CPPFLAGS="$CPPFLAGS -I/usr/include"
 #export LIBS="$LIBS -L/lib64 -libverbs"
-export LDFLAGS="$LDFLAGS -Wl,-rpath-link -Wl,/lib64 -Wl,-rpath,/lib64"
+export LDFLAGS="$LDFLAGS -Wl,-rpath,$PREFIX/lib,-rpath-link,/lib64"
 
 ./configure --prefix=$PREFIX \
             --disable-dependency-tracking \
@@ -47,8 +47,7 @@ export LDFLAGS="$LDFLAGS -Wl,-rpath-link -Wl,/lib64 -Wl,-rpath,/lib64"
             --enable-mpirun-prefix-by-default \
             --with-verbs=/usr \
             --with-verbs-libdir=/usr/lib64 \
-	    --disable-mpi-cxx \
-	    --disable-mpi-fortran \
+	    --enable-mpi-fortran=no \
             --with-sge
 
 make -j"${CPU_COUNT:-1}"
