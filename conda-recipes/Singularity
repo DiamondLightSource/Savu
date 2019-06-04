@@ -1,5 +1,5 @@
 Bootstrap: docker
-From: centos:6
+From: centos:7
 
 %help
 
@@ -16,7 +16,7 @@ version 20190530
 # Deps
 yum update -y
 yum groupinstall -y 'Development Tools'
-yum install -y wget glibc-devel.i686 libgcc.i686 libstdc++.i686 texinfo pcre-devel
+yum install -y wget which
 
 # Necessary for open-mpi to build with infiniband support!
 yum install -y libibverbs-devel
