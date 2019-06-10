@@ -16,8 +16,8 @@
 .. module:: tomobar_recon3D
    :platform: Unix
    :synopsis: A wrapper around TOmographic MOdel-BAsed Reconstruction (ToMoBAR) software \
-   for advanced iterative image reconstruction using 3D capabilities of regularisation. \
-   The plugin will run on one node and can be slow potentially. 
+   for advanced iterative image reconstruction using _3D_ capabilities of regularisation. \
+   The plugin will run on one node and can be slow. 
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
@@ -37,7 +37,7 @@ from savu.plugins.utils import register_plugin
 from scipy import ndimage
 
 @register_plugin
-class TomobarRecon(BaseRecon, MultiThreadedPlugin):
+class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
     """
     A Plugin to reconstruct full-field tomographic projection data using state-of-the-art regularised iterative algorithms from \
     the ToMoBAR package. ToMoBAR includes FISTA and ADMM iterative methods and depends on the ASTRA toolbox and the CCPi RGL toolkit: \
@@ -64,23 +64,18 @@ class TomobarRecon(BaseRecon, MultiThreadedPlugin):
     """
 
     def __init__(self):
-        super(TomobarRecon, self).__init__("TomobarRecon")
+        super(TomobarRecon3d, self).__init__("TomobarRecon3d")
 
     def _shift(self, sinogram, centre_of_rotation):
         centre_of_rotation_shift = (sinogram.shape[0]/2) - centre_of_rotation
         result = ndimage.interpolation.shift(sinogram,
                                              (centre_of_rotation_shift, 0))
         return result
+    """
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
-
-        full_data_shape = list(in_dataset[0].get_shape())
-
-        preview = [':']*len(in_dataset[0].get_shape())
-        preview[fixed_dim] = str(0)
-        self.set_preview(in_dataset[0], preview)
-    
+    """
     def pre_process(self):
         # extract given parameters
         self.iterationsFISTA = self.parameters['iterations']
@@ -105,14 +100,16 @@ class TomobarRecon(BaseRecon, MultiThreadedPlugin):
 
     def process_frames(self, data):
         centre_of_rotations, angles, self.vol_shape, init  = self.get_frame_params()
-
-        # projdata3D = in_dataset[0].data[...]
-        sino = data[0].astype(np.float32)
-        anglesTot, self.DetectorsDimH = np.shape(sino)
-        self.anglesRAD = np.deg2rad(angles.astype(np.float32))
+        
+        in_dataset, self.out_dataset = self.get_datasets()
+        projdata3D = in_dataset[0].data[...]
+        print(np.shape(projdata3D))
+        # sino = data[0].astype(np.float32)
+        # anglesTot, self.DetectorsDimH = np.shape(sino)
+        # self.anglesRAD = np.deg2rad(angles.astype(np.float32))
         
         #in_pData = self.get_plugin_in_datasets()[0]
-#        print(np.shape(sino))
+#       print(np.shape(sino))
 #       sinogram = np.swapaxes(sino, 0, 1)
         #sinogram = self._shift(sino, centre_of_rotations)
         
@@ -129,14 +126,14 @@ class TomobarRecon(BaseRecon, MultiThreadedPlugin):
         self.out_dataset[0].create_dataset(patterns=in_dataset[0],
                                            axis_labels=in_dataset[0],
                                            shape=self.out_shape)
-        """
-        
+        """        
         #anglesTot, self.DetectorsDimH = np.shape(sino)
         #print(self.DetectorsDimH)
         
         # check if the reconstruction class has been initialised and calculate 
         # Lipschitz constant if not given explicitly
-        self.setup_Lipschitz_constant()
+        # self.setup_Lipschitz_constant()
+        
         """
         # set parameters and initiate a TomoBar class object
         self.Rectools = RecToolsIR(DetectorsDimH = self.DetectorsDimH,  # DetectorsDimH # detector dimension (horizontal)
@@ -156,6 +153,7 @@ class TomobarRecon(BaseRecon, MultiThreadedPlugin):
         """
         #print(self.Lipschitz_const)
         # Run FISTA reconstrucion algorithm here
+        """
         recon = self.Rectools.FISTA(sino,\
                                     iterationsFISTA = self.iterationsFISTA,\
                                     regularisation = self.regularisation,\
@@ -168,11 +166,13 @@ class TomobarRecon(BaseRecon, MultiThreadedPlugin):
                                     edge_param = self.edge_param,\
                                     lipschitz_const = self.Lipschitz_const)
         return recon
+        """
+        return 0
 
     def setup_Lipschitz_constant(self):
         if self.RecToolsIR is not None:
-            return 
-        
+            return
+        """
        # set parameters and initiate a TomoBar class object
         self.Rectools = RecToolsIR(DetectorsDimH = self.DetectorsDimH,  # DetectorsDimH # detector dimension (horizontal)
                     DetectorsDimV = None,  # DetectorsDimV # detector dimension (vertical) for 3D case only
@@ -189,7 +189,7 @@ class TomobarRecon(BaseRecon, MultiThreadedPlugin):
         else:
             self.Lipschitz_const = self.parameters['converg_const']
         return
-    
+        """
     def get_max_frames(self):
         return 'single'
     
