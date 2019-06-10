@@ -25,7 +25,7 @@ fi
 
 
 # images to get a new build -> they will get built in this order!
-declare -a images=("SavuDeps")
+declare -a images=("SavuDeps" "SavuCore")
 
 for image in "${images[@]}" ; do
 	echo "##############################"

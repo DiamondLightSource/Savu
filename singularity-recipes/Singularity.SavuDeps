@@ -36,6 +36,9 @@ provided by Nvidia.
     yum remove -y wget
     yum clean all && rm -rf /var/cache/yum
     conda clean -a -y
+
+    # make folder to put Savu source in
+    mkdir -p /Savu-src/conda
      
 %environment
     PREFIX=/usr/local
