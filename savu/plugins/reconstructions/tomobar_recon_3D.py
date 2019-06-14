@@ -43,9 +43,8 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
     the ToMoBAR package. ToMoBAR includes FISTA and ADMM iterative methods and depends on the ASTRA toolbox and the CCPi RGL toolkit: \
     https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
 
-    :param output_size: Number of rows and columns in the \
-        reconstruction. Default: 'auto'.
-    :param iterations: Number of outer iterations for FISTA (default) or ADMM methods. Default: 20.
+    :param output_size: The dimension of the reconstructed volume (cube). Default: 'auto'.
+    :param iterations: Number of outer iterations for FISTA method. Default: 20.
     :param datafidelity: Data fidelity, Least Squares only at the moment. Default: 'LS'.
     :param nonnegativity: Nonnegativity constraint, choose Enable or None. Default: 'ENABLE'.
     :param ordersubsets: The number of ordered-subsets to accelerate reconstruction. Default: 6.
@@ -66,16 +65,21 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
     def __init__(self):
         super(TomobarRecon3d, self).__init__("TomobarRecon3d")
 
-    def _shift(self, sinogram, centre_of_rotation):
-        centre_of_rotation_shift = (sinogram.shape[0]/2) - centre_of_rotation
-        result = ndimage.interpolation.shift(sinogram,
-                                             (centre_of_rotation_shift, 0))
-        return result
     """
     def setup(self):
-        in_dataset, out_dataset = self.get_datasets()
-        in_pData, out_pData = self.get_plugin_datasets()
-    """
+#        in_dataset, out_dataset = self.get_datasets()
+#        in_pData, out_pData = self.get_plugin_datasets()
+        in_dataset, self.out_dataset = self.get_datasets()
+        #self.out_shape = self.new_shape(in_dataset[0].get_shape(), in_dataset[0])
+        #self.out_dataset[0].create_dataset(patterns=in_dataset[0],
+        #                                  axis_labels=in_dataset[0],
+        #                                   shape=(10,20,30))
+   """ 
+   
+   def get_output_shape(self):
+        return (10,20,30)
+   
+   
     def pre_process(self):
         # extract given parameters
         self.iterationsFISTA = self.parameters['iterations']
@@ -102,16 +106,28 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
         centre_of_rotations, angles, self.vol_shape, init  = self.get_frame_params()
         
         in_dataset, self.out_dataset = self.get_datasets()
+        in_pData, out_pData = self.get_plugin_datasets()
+        
         projdata3D = in_dataset[0].data[...]
         print(np.shape(projdata3D))
+        
+        
+        #outVol = self.out_dataset[0].data[...]
+        #out_dataset = self.get_out_datasets()
+        #out_pData = self.get_plugin_out_datasets()
+        #out_dataset[0].create_dataset(axis_labels=in_dataset[0], shape=(10,20,30),patterns=in_dataset[0])
+        
+        """
+        out_dataset = self.get_out_datasets()
+        out_pData = self.get_plugin_out_datasets()
+        out_dataset[i].create_dataset(axis_labels=labels,
+                                          shape=tuple(shape),
+                                          patterns=patterns)
+        """
         # sino = data[0].astype(np.float32)
         # anglesTot, self.DetectorsDimH = np.shape(sino)
         # self.anglesRAD = np.deg2rad(angles.astype(np.float32))
         
-        #in_pData = self.get_plugin_in_datasets()[0]
-#       print(np.shape(sino))
-#       sinogram = np.swapaxes(sino, 0, 1)
-        #sinogram = self._shift(sino, centre_of_rotations)
         
         #dim_detX = in_pData.get_data_dimension_by_axis_label('detector_x')
         #size = self.parameters['output_size']
@@ -122,13 +138,12 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
         #out_dataset[0].create_dataset(in_dataset[0])
         in_pData, self.out_pData = self.get_plugin_datasets()
         in_pData[0].plugin_data_setup('SINOGRAM', 'single')
+        
         self.out_shape = self.new_shape(in_dataset[0].get_shape(), in_dataset[0])
         self.out_dataset[0].create_dataset(patterns=in_dataset[0],
                                            axis_labels=in_dataset[0],
                                            shape=self.out_shape)
         """        
-        #anglesTot, self.DetectorsDimH = np.shape(sino)
-        #print(self.DetectorsDimH)
         
         # check if the reconstruction class has been initialised and calculate 
         # Lipschitz constant if not given explicitly
@@ -167,7 +182,7 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
                                     lipschitz_const = self.Lipschitz_const)
         return recon
         """
-        return 0
+        return None
 
     def setup_Lipschitz_constant(self):
         if self.RecToolsIR is not None:
@@ -190,9 +205,11 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
             self.Lipschitz_const = self.parameters['converg_const']
         return
         """
-    def get_max_frames(self):
-        return 'single'
-    
+    def nInput_datasets(self):
+        return 1
+    def nOutput_datasets(self):
+        return 1
+
     def get_citation_information(self):
         cite_info1 = CitationInformation()
         cite_info1.name = 'citation1'
