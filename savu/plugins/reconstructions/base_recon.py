@@ -254,8 +254,12 @@ class BaseRecon(Plugin):
 
         missing = [self.centre]*(len(self.frame_cors) - len_data)
         self.frame_cors = np.append(self.frame_cors, missing)
-
+        
+        # fix to remove NaNs in the initialised image
+        if init is not None:
+            init[np.where(np.isnan(init)==True)] = 0.0
         self.frame_init_data = init
+        
         data[0] = self.fix_sino(self.sino_func(data[0]), self.frame_cors[0])
         return data
 
@@ -388,13 +392,6 @@ class BaseRecon(Plugin):
                   self.get_initial_data()]
         return params
 
-
-    def get_output_shape(self):
-        """override this if you want to specify the output shape in a child
-        plugin"""
-        return None
-
-
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
         # reduce the data as per data_subset parameter
@@ -412,18 +409,16 @@ class BaseRecon(Plugin):
                         str(dim_volY) + '.voxel_y.voxels',
                         str(dim_volZ) + '.voxel_z.voxels']}
 
-	shape = self.get_output_shape()
-	if (shape == None):
-            shape = list(in_dataset[0].get_shape())
-            if self.parameters['vol_shape'] == 'fixed':
-                shape[dim_volX] = shape[dim_volZ]
-            else:
-                shape[dim_volX] = self.parameters['vol_shape']
-                shape[dim_volZ] = self.parameters['vol_shape']
-
-            if 'resolution' in self.parameters.keys():
-                shape[dim_volX] /= self.parameters['resolution']
-                shape[dim_volZ] /= self.parameters['resolution']
+        shape = list(in_dataset[0].get_shape())
+        if self.parameters['vol_shape'] == 'fixed':
+            shape[dim_volX] = shape[dim_volZ]
+        else:
+            shape[dim_volX] = self.parameters['vol_shape']
+            shape[dim_volZ] = self.parameters['vol_shape']
+    
+        if 'resolution' in self.parameters.keys():
+            shape[dim_volX] /= self.parameters['resolution']
+            shape[dim_volZ] /= self.parameters['resolution']
 
         out_dataset[0].create_dataset(axis_labels=axis_labels,
                                       shape=tuple(shape))

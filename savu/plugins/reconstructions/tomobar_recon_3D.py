@@ -34,7 +34,7 @@ import numpy as np
 from tomobar.methodsIR import RecToolsIR
 
 from savu.plugins.utils import register_plugin
-from scipy import ndimage
+#from scipy import ndimage
 
 @register_plugin
 class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
@@ -60,25 +60,87 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
     :param regularisation_parameter2:  Regularisation (smoothing) value for LLT_ROF method. Default: 0.005.
     :param NDF_penalty: NDF specific penalty type Huber, Perona, Tukey. Default: 'Huber'.
     :param tolerance: Tolerance to stop outer iterations earlier. Default: 1e-9.
+    :param ring_variable: Regularisation variable for ring removal. Default: 0.0.
+    :param ring_accelerator: Acceleration constant for ring removal (use with care). Default: 50.0.
     """
 
     def __init__(self):
         super(TomobarRecon3d, self).__init__("TomobarRecon3d")
 
-    """
+    def _get_output_size(self, in_data):
+        size = self.parameters['output_size']
+        if size == 'auto':
+            shape = in_data.get_shape()
+            detX = in_data.get_data_dimension_by_axis_label('detector_x')
+            size = shape[detX]
+        return size
+    
     def setup(self):
-#        in_dataset, out_dataset = self.get_datasets()
-#        in_pData, out_pData = self.get_plugin_datasets()
-        in_dataset, self.out_dataset = self.get_datasets()
-        #self.out_shape = self.new_shape(in_dataset[0].get_shape(), in_dataset[0])
-        #self.out_dataset[0].create_dataset(patterns=in_dataset[0],
-        #                                  axis_labels=in_dataset[0],
-        #                                   shape=(10,20,30))
-   """ 
-   
-   def get_output_shape(self):
-        return (10,20,30)
-   
+        in_dataset, out_dataset = self.get_datasets()
+        # reduce the data as per data_subset parameter
+        self.preview_flag = \
+            self.set_preview(in_dataset[0], self.parameters['preview'])
+
+        axis_labels = in_dataset[0].data_info.get('axis_labels')[0]
+
+        dim_volX, dim_volY, dim_volZ = \
+            self.map_volume_dimensions(in_dataset[0])
+
+        axis_labels = {in_dataset[0]:
+                       [str(dim_volX) + '.voxel_x.voxels',
+                        str(dim_volY) + '.voxel_y.voxels',
+                        str(dim_volZ) + '.voxel_z.voxels']}
+
+        self.output_size = self._get_output_size(in_dataset[0])
+        shape = [0]*len(in_dataset[0].get_shape())
+        # ! A TEMPORAL FIX !
+#        for dim in [dim_volX, dim_volY, dim_volZ]:
+#            shape[dim] = self.output_size
+        shape[0] = self.output_size
+        shape[1] = 135
+        shape[2] = self.output_size
+
+
+        # if there are only 3 dimensions then add a fourth for slicing
+        if len(shape) == 3:
+            axis_labels = [0]*4
+            axis_labels[dim_volX] = 'voxel_x.voxels'
+            axis_labels[dim_volY] = 'voxel_y.voxels'
+            axis_labels[dim_volZ] = 'voxel_z.voxels'
+            axis_labels[3] = 'scan.number'
+            shape.append(1)
+
+        if self.parameters['vol_shape'] == 'fixed':
+            shape[dim_volX] = shape[dim_volZ]
+        else:
+            shape[dim_volX] = self.parameters['vol_shape']
+            shape[dim_volZ] = self.parameters['vol_shape']
+
+        if 'resolution' in self.parameters.keys():
+            shape[dim_volX] /= self.parameters['resolution']
+            shape[dim_volZ] /= self.parameters['resolution']
+
+        out_dataset[0].create_dataset(axis_labels=axis_labels,
+                                      shape=tuple(shape))
+        out_dataset[0].add_volume_patterns(dim_volX, dim_volY, dim_volZ)
+        
+        ndims = range(len(shape))
+        core_dims = (dim_volX, dim_volY, dim_volZ)
+        slice_dims = tuple(set(ndims).difference(set(core_dims)))
+        out_dataset[0].add_pattern(
+                'VOLUME_3D', core_dims=core_dims, slice_dims=slice_dims)
+
+        # set information relating to the plugin data
+        in_pData, out_pData = self.get_plugin_datasets()
+
+        dim = in_dataset[0].get_data_dimension_by_axis_label('rotation_angle')
+        nSlices = in_dataset[0].get_shape()[dim]
+        #in_pData[0].plugin_data_setup('PROJECTION', nSlices,
+        #        slice_axis='rotation_angle')
+        in_pData[0].plugin_data_setup('PROJECTION', nSlices)
+        
+        # set pattern_name and nframes to process for all datasets
+        out_pData[0].plugin_data_setup('VOLUME_3D', 'single')
    
     def pre_process(self):
         # extract given parameters
@@ -90,10 +152,11 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
         self.regularisation = self.parameters['regularisation']
         self.regularisation_parameter = self.parameters['regularisation_parameter']
         self.regularisation_parameter2 = self.parameters['regularisation_parameter2']
+        self.ring_variable = self.parameters['ring_variable']
+        self.ring_accelerator = self.parameters['ring_accelerator']
         self.time_marching_parameter = self.parameters['time_marching_parameter']
         self.edge_param = self.parameters['edge_param']
         self.NDF_penalty = self.parameters['NDF_penalty']
-        self.output_size = self.parameters['output_size']
         self.tolerance = self.parameters['tolerance']
         
         self.RecToolsIR = None
@@ -101,98 +164,60 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
             self.regularisation_iterations = (int)(self.parameters['regularisation_iterations']/self.ordersubsets) + 1
         else:
             self.regularisation_iterations = self.parameters['regularisation_iterations']
+            
+        in_data = self.get_in_datasets()[0]
+        self.detector_x = in_data.get_data_dimension_by_axis_label('detector_x')
+        self.detector_y = in_data.get_data_dimension_by_axis_label('detector_y')
 
     def process_frames(self, data):
         centre_of_rotations, angles, self.vol_shape, init  = self.get_frame_params()
         
-        in_dataset, self.out_dataset = self.get_datasets()
-        in_pData, out_pData = self.get_plugin_datasets()
+        self.anglesRAD = np.deg2rad(angles.astype(np.float32))
+        self.centre_of_rotations = centre_of_rotations
+        projdata3D = data[0].astype(np.float32)
+        dim_tuple = np.shape(projdata3D)
+        self.Horiz_det = dim_tuple[self.detector_x]
+        self.Vert_det = dim_tuple[self.detector_y]
         
-        projdata3D = in_dataset[0].data[...]
-        print(np.shape(projdata3D))
+        #temp = np.random.rand(160, 160, 160)
         
-        
-        #outVol = self.out_dataset[0].data[...]
-        #out_dataset = self.get_out_datasets()
-        #out_pData = self.get_plugin_out_datasets()
-        #out_dataset[0].create_dataset(axis_labels=in_dataset[0], shape=(10,20,30),patterns=in_dataset[0])
-        
-        """
-        out_dataset = self.get_out_datasets()
-        out_pData = self.get_plugin_out_datasets()
-        out_dataset[i].create_dataset(axis_labels=labels,
-                                          shape=tuple(shape),
-                                          patterns=patterns)
-        """
-        # sino = data[0].astype(np.float32)
-        # anglesTot, self.DetectorsDimH = np.shape(sino)
-        # self.anglesRAD = np.deg2rad(angles.astype(np.float32))
-        
-        
-        #dim_detX = in_pData.get_data_dimension_by_axis_label('detector_x')
-        #size = self.parameters['output_size']
-        #size = in_pData.get_shape()[dim_detX] if size == 'auto' or \
-        #    size is None else size
-        """
-        in_dataset, self.out_dataset = self.get_datasets()
-        #out_dataset[0].create_dataset(in_dataset[0])
-        in_pData, self.out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup('SINOGRAM', 'single')
-        
-        self.out_shape = self.new_shape(in_dataset[0].get_shape(), in_dataset[0])
-        self.out_dataset[0].create_dataset(patterns=in_dataset[0],
-                                           axis_labels=in_dataset[0],
-                                           shape=self.out_shape)
-        """        
+        # print(self.centre_of_rotations)
+        projdata3D =np.swapaxes(projdata3D,0,1)
         
         # check if the reconstruction class has been initialised and calculate 
         # Lipschitz constant if not given explicitly
-        # self.setup_Lipschitz_constant()
+        self.setup_Lipschitz_constant()
         
-        """
-        # set parameters and initiate a TomoBar class object
-        self.Rectools = RecToolsIR(DetectorsDimH = self.DetectorsDimH,  # DetectorsDimH # detector dimension (horizontal)
-                    DetectorsDimV = None,  # DetectorsDimV # detector dimension (vertical) for 3D case only
-                    AnglesVec = self.anglesRAD, # array of angles in radians
-                    ObjSize = self.vol_shape[0] , # a scalar to define the reconstructed object dimensions
-                    datafidelity=self.datafidelity,# data fidelity, choose LS, PWLS
-                    nonnegativity=self.nonnegativity, # enable nonnegativity constraint (set to 'on')
-                    OS_number = self.ordersubsets, # the number of subsets, NONE/(or > 1) ~ classical / ordered subsets
-                    tolerance = 1e-9, # tolerance to stop outer iterations earlier
-                    device='gpu')
-        
-        if (self.parameters['converg_const'] == 'power'):
-            self.Lipschitz_const = self.Rectools.powermethod() # calculate Lipschitz constant
-        else:
-            self.Lipschitz_const = self.parameters['converg_const']
-        """
-        #print(self.Lipschitz_const)
+        # print(self.Lipschitz_const)
         # Run FISTA reconstrucion algorithm here
-        """
-        recon = self.Rectools.FISTA(sino,\
+        recon = self.Rectools.FISTA(projdata3D,\
                                     iterationsFISTA = self.iterationsFISTA,\
                                     regularisation = self.regularisation,\
                                     regularisation_parameter = self.regularisation_parameter,\
                                     regularisation_iterations = self.regularisation_iterations,\
                                     regularisation_parameter2 = self.regularisation_parameter2,\
                                     time_marching_parameter = self.time_marching_parameter,\
+                                    lambdaR_L1 = self.ring_variable,\
+                                    alpha_ring = self.ring_accelerator,\
                                     NDF_penalty = self.NDF_penalty,\
                                     tolerance_regul = 0.0,\
                                     edge_param = self.edge_param,\
                                     lipschitz_const = self.Lipschitz_const)
+        recon = np.swapaxes(recon,0,1) # temporal fix!
+        #print(np.shape(recon))
+        #recon = np.newaxis(recon, axis=3)
         return recon
-        """
-        return None
-
+    
     def setup_Lipschitz_constant(self):
         if self.RecToolsIR is not None:
-            return
-        """
+            return 
+        
        # set parameters and initiate a TomoBar class object
-        self.Rectools = RecToolsIR(DetectorsDimH = self.DetectorsDimH,  # DetectorsDimH # detector dimension (horizontal)
-                    DetectorsDimV = None,  # DetectorsDimV # detector dimension (vertical) for 3D case only
+        self.Rectools = RecToolsIR(DetectorsDimH = self.Horiz_det,  # DetectorsDimH # detector dimension (horizontal)
+                    DetectorsDimV = self.Vert_det,  # DetectorsDimV # detector dimension (vertical) for 3D case only
+                    CenterRotOffset = 0.0, # Center of Rotation (CoR) scalar (for 3D case only)
                     AnglesVec = self.anglesRAD, # array of angles in radians
-                    ObjSize = self.vol_shape[0] , # a scalar to define the reconstructed object dimensions
+                    ObjSize = self.output_size, # a scalar to define the reconstructed object dimensions
                     datafidelity=self.datafidelity,# data fidelity, choose LS, PWLS
                     nonnegativity=self.nonnegativity, # enable nonnegativity constraint (set to 'on')
                     OS_number = self.ordersubsets, # the number of subsets, NONE/(or > 1) ~ classical / ordered subsets
@@ -204,7 +229,7 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
         else:
             self.Lipschitz_const = self.parameters['converg_const']
         return
-        """
+    
     def nInput_datasets(self):
         return 1
     def nOutput_datasets(self):

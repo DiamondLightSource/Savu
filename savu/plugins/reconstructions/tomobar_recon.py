@@ -58,6 +58,8 @@ class TomobarRecon(BaseRecon, GpuPlugin):
     :param regularisation_parameter2:  Regularisation (smoothing) value for LLT_ROF method. Default: 0.005.
     :param NDF_penalty: NDF specific penalty type Huber, Perona, Tukey. Default: 'Huber'.
     :param tolerance: Tolerance to stop outer iterations earlier. Default: 1e-9.
+    :param ring_variable: Regularisation variable for ring removal. Default: 0.0.
+    :param ring_accelerator: Acceleration constant for ring removal (use with care). Default: 50.0.
     """
 
     def __init__(self):
@@ -79,11 +81,14 @@ class TomobarRecon(BaseRecon, GpuPlugin):
         self.regularisation = self.parameters['regularisation']
         self.regularisation_parameter = self.parameters['regularisation_parameter']
         self.regularisation_parameter2 = self.parameters['regularisation_parameter2']
+        self.ring_variable = self.parameters['ring_variable']
+        self.ring_accelerator = self.parameters['ring_accelerator']
         self.time_marching_parameter = self.parameters['time_marching_parameter']
         self.edge_param = self.parameters['edge_param']
         self.NDF_penalty = self.parameters['NDF_penalty']
         self.output_size = self.parameters['output_size']
         self.tolerance = self.parameters['tolerance']
+        
         
         self.RecToolsIR = None
         if (self.ordersubsets > 1):
@@ -96,51 +101,11 @@ class TomobarRecon(BaseRecon, GpuPlugin):
         sino = data[0].astype(np.float32)
         anglesTot, self.DetectorsDimH = np.shape(sino)
         self.anglesRAD = np.deg2rad(angles.astype(np.float32))
-        
-        #in_pData = self.get_plugin_in_datasets()[0]
-#        print(np.shape(sino))
-#       sinogram = np.swapaxes(sino, 0, 1)
-        #sinogram = self._shift(sino, centre_of_rotations)
-        
-        #dim_detX = in_pData.get_data_dimension_by_axis_label('detector_x')
-        #size = self.parameters['output_size']
-        #size = in_pData.get_shape()[dim_detX] if size == 'auto' or \
-        #    size is None else size
-        """
-        in_dataset, self.out_dataset = self.get_datasets()
-        #out_dataset[0].create_dataset(in_dataset[0])
-        in_pData, self.out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup('SINOGRAM', 'single')
-        self.out_shape = self.new_shape(in_dataset[0].get_shape(), in_dataset[0])
-        self.out_dataset[0].create_dataset(patterns=in_dataset[0],
-                                           axis_labels=in_dataset[0],
-                                           shape=self.out_shape)
-        """
-        
-        #anglesTot, self.DetectorsDimH = np.shape(sino)
-        #print(self.DetectorsDimH)
-        
+       
         # check if the reconstruction class has been initialised and calculate 
         # Lipschitz constant if not given explicitly
         self.setup_Lipschitz_constant()
-        """
-        # set parameters and initiate a TomoBar class object
-        self.Rectools = RecToolsIR(DetectorsDimH = self.DetectorsDimH,  # DetectorsDimH # detector dimension (horizontal)
-                    DetectorsDimV = None,  # DetectorsDimV # detector dimension (vertical) for 3D case only
-                    AnglesVec = self.anglesRAD, # array of angles in radians
-                    ObjSize = self.vol_shape[0] , # a scalar to define the reconstructed object dimensions
-                    datafidelity=self.datafidelity,# data fidelity, choose LS, PWLS
-                    nonnegativity=self.nonnegativity, # enable nonnegativity constraint (set to 'on')
-                    OS_number = self.ordersubsets, # the number of subsets, NONE/(or > 1) ~ classical / ordered subsets
-                    tolerance = 1e-9, # tolerance to stop outer iterations earlier
-                    device='gpu')
-        
-        if (self.parameters['converg_const'] == 'power'):
-            self.Lipschitz_const = self.Rectools.powermethod() # calculate Lipschitz constant
-        else:
-            self.Lipschitz_const = self.parameters['converg_const']
-        """
-        #print(self.Lipschitz_const)
+
         # Run FISTA reconstrucion algorithm here
         recon = self.Rectools.FISTA(sino,\
                                     iterationsFISTA = self.iterationsFISTA,\
@@ -149,6 +114,8 @@ class TomobarRecon(BaseRecon, GpuPlugin):
                                     regularisation_iterations = self.regularisation_iterations,\
                                     regularisation_parameter2 = self.regularisation_parameter2,\
                                     time_marching_parameter = self.time_marching_parameter,\
+                                    lambdaR_L1 = self.ring_variable,\
+                                    alpha_ring = self.ring_accelerator,\
                                     NDF_penalty = self.NDF_penalty,\
                                     tolerance_regul = 0.0,\
                                     edge_param = self.edge_param,\
@@ -162,6 +129,7 @@ class TomobarRecon(BaseRecon, GpuPlugin):
        # set parameters and initiate a TomoBar class object
         self.Rectools = RecToolsIR(DetectorsDimH = self.DetectorsDimH,  # DetectorsDimH # detector dimension (horizontal)
                     DetectorsDimV = None,  # DetectorsDimV # detector dimension (vertical) for 3D case only
+                    CenterRotOffset = None, # Center of Rotation (CoR) scalar (for 3D case only)
                     AnglesVec = self.anglesRAD, # array of angles in radians
                     ObjSize = self.vol_shape[0] , # a scalar to define the reconstructed object dimensions
                     datafidelity=self.datafidelity,# data fidelity, choose LS, PWLS
