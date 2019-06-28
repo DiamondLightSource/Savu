@@ -13,8 +13,10 @@ workflows:
     jobs:
       - build:
           filters:
-            branches:
-              ignore: master
+            tags:
+              only: /.*/
+#            branches:
+#              only: master
           name: "Singularity 2.6.1 - Python 3"
           singularity: 2.6.1
           singularity-3: false
@@ -38,7 +40,7 @@ jobs:
       # Download and cache dependencies
       - restore_cache:
           keys:
-          - v2-dependencies
+          - v3-dependencies
 
       - run:
           name: install dependencies
@@ -52,7 +54,6 @@ jobs:
             else
                 echo "Miniconda is already installed, continuing to build."
             fi
-            #chmod u+x ~/repo/.circleci/*.sh
 
       # Install Singularity
       - when:
@@ -71,28 +72,12 @@ jobs:
       - save_cache:
           paths:
             - /home/circleci/conda
-          key: v2-dependencies
+          key: v3-dependencies
         
       - run:
           name: build Savu images
           command: |
             cd ~/repo/singularity-recipes
             export PATH=$HOME/conda/bin:$PATH
-            ./mass-rebuild.sh
+            python mass-rebuild.py
           no_output_timeout: 60m
-
-
-      # build the container!
-      # You can add any other sregistry push commands here, and specify a client
-      # (and make sure your define the encrypted environment credentials in circle ci
-      # to push to your storage locations of choice
-
-      # Examples with upload to storage clients defined by sregistry
-      # https://singularityhub.github.io/sregistry-cli/clients
-      # Environment variables must be defined in CI encrypted secrets/settings
-      # https://circleci.com/docs/2.0/env-vars/
-      #- /bin/bash build.sh --uri collection/container --cli google-storage Singularity
-      #- /bin/bash build.sh --uri collection/container --cli google-drive Singularity
-      #- /bin/bash build.sh --uri collection/container --cli globus Singularity
-      #- /bin/bash build.sh --uri collection/container --cli registry Singularity
-
