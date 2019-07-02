@@ -14,4 +14,4 @@ Singularity container providing Savu with the Astra toolbox.
 	LD_LIBRARY_PATH=${CUDA_PATH}/lib64:${LD_LIBRARY_PATH}
 	export PATH LD_LIBRARY_PATH
 
-	conda install -y -c astra-toolbox/label/dev astra-toolbox
+	conda install -q -y -c astra-toolbox/label/dev astra-toolbox

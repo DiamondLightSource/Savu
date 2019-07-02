@@ -17,8 +17,7 @@ images = (
 # sregistry should be used only when locally or when on CIRCLECI and branch is master
 use_sregistry = False
 
-#if os.environ['CIRCLE_BRANCH'] == 'master' or 'CIRCLECI' not in os.environ:
-if 'CIRCLE_BRANCH' in os.environ or 'CIRCLECI' not in os.environ:
+if 'CIRCLE_TAG' in os.environ or os.environ.get('CIRCLE_BRANCH') == 'master' or 'CIRCLECI' not in os.environ:
     import sregistry
     use_sregistry = True
     os.environ['SREGISTRY_CLIENT'] = 's3'
@@ -32,6 +31,7 @@ username = getpass.getuser()
 sudo_options = None
 
 if use_sregistry and os.path.isdir(os.path.join('/dls/science/users', username)):
+    # DLS specific settings, for a local build on our RHEL7 workstations
     os.environ['SREGISTRY_DATABASE'] = os.path.join('/dls/science/users', username, 'singularity')
     os.environ['SREGISTRY_STORAGE'] = os.path.join(os.environ['SREGISTRY_DATABASE'], 'shub')
     os.makedirs(os.environ['SREGISTRY_STORAGE'], exist_ok=True)
@@ -48,8 +48,7 @@ for image in images:
 
     if 'CIRCLE_TAG' in os.environ:
         registry_image += ':' + os.environ['CIRCLE_TAG']
-    #elif os.environ['CIRCLE_BRANCH'] == 'master':
-    elif 'CIRCLE_BRANCH' in os.environ:
+    elif os.environ.get('CIRCLE_BRANCH') == 'master':
         registry_image += ':' + os.environ['CIRCLE_SHA1'][:8]
 
     print('#########################')
@@ -74,6 +73,7 @@ for image in images:
     #
     # build the image
     #
+    spython_client.quiet = False # circumvent problem with sregistry setting this attribute to True, which kills my local builds!
     spython_client.build(recipe='Singularity.' + image.name, image=local_image, sudo_options=sudo_options)
 
     #

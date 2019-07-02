@@ -16,11 +16,11 @@ as well as their dependencies.
 	export PATH LD_LIBRARY_PATH
  
 	# build and install savu itself
-	conda install -y conda-build conda-verify
+	conda install -q -y conda-build conda-verify
 	export FACILITY=dls
 	cd /Savu-src/conda
-	conda build savu
-	conda install -y --use-local savu
+	conda build -q savu
+	conda install -q -y --use-local savu
 
 	# install defaults and conda-forge channel dependencies -> but add our channel first!
 	# pyfftw may need to get built explicitly against our fftw conda package!
@@ -28,7 +28,7 @@ as well as their dependencies.
 		#pyreadline \
 		#gnureadline \
 		#nvidia-ml-py \
-	conda install -y -c savu-dep -c defaults -c conda-forge \
+	conda install -q -y -c savu-dep -c defaults -c conda-forge \
 		scipy \
 		colorama \
 		setuptools \
@@ -51,10 +51,10 @@ as well as their dependencies.
 		sphinx_rtd_theme \
 		xraylib
 
-	conda install -y -c david_baddeley nvidia-ml-py
+	conda install -q -y -c david_baddeley nvidia-ml-py
 
 	# cleanup
-	conda clean -a -y
+	conda clean -q -a -y
 
 %files
 	savu /Savu-src/conda/
