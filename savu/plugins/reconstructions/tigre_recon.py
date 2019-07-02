@@ -25,88 +25,52 @@ from savu.data.plugin_list import CitationInformation
 from savu.plugins.driver.gpu_plugin import GpuPlugin
 
 import numpy as np
-# IMPORT TIGRE HERE
 import tigre
 import tigre.algorithms as algs
 
 from savu.plugins.utils import register_plugin
 from scipy import ndimage
 
-
 @register_plugin
 class TigreRecon(BaseRecon, GpuPlugin):
     """
     A Plugin to reconstruct full-field tomographic projection data using ierative algorithms from \
     the TIGRE package. 
-
     <tigre.toolbox@gmail.com> <https://github.com/CERN/TIGRE/>
 
-    :param recon_method: The reconstruction method. Methods to choose: 'sart','sirt','ossart','ossart_tv','FDK',
-    'asd_pocs','awasd_pocs','fbp','cgls','fista','ista'
-    Default: 'cgls'.
+    :param recon_method: Reconstruction methods to choose: 'sart','sirt','ossart','ossart_tv','FDK',
+    'asd_pocs','awasd_pocs','fbp','cgls','fista','ista'. Default: 'cgls'.
     :param iterations: Number of iterations. Default: 20.
-
-    :param blocksize: (int)
-        number of angles to be included in each iteration
-        of proj and backproj for OS_SART, Default: 20.
-    :param lmbda: (np.float64)
-        Sets the value of the hyperparameter.
-
-    :param lmbda_red: (np.float64)
-        Reduction of lambda every iteration
-        lambda=lambdared*lambda. Default: 0.99.
-
-    :param init: (str)
-        Describes different initialization techniques.
-              "none"     : Initializes the image to zeros (default)
-              "FDK"      : intializes image to FDK reconstrucition
-              "multigrid": Initializes image by solving the problem in
-                           small scale and increasing it when relative
-                           convergence is reached.
-              "image"    : Initialization using a user specified
-                           image. Not recommended unless you really
-                           know what you are doing.
-
-    :param verbose:  (Boolean)
-        Feedback print statements for algorithm progress
-        Default: True.
-
-    :param Quameasopts: (list)
-        Asks the algorithm for a set of quality measurement
-        parameters. Input should contain a list or tuple of strings of
-        quality measurement names. Examples:
-            RMSE, CC, UQI, MSSIM
-
-    :param OrderStrategy : (str)
-        Chooses the subset ordering strategy. Options are:
-                 "ordered"        : uses them in the input order, but
-                                    divided
-                 "random"         : orders them randomply
-                 "angularDistance": chooses the next subset with the
-                                    biggest angular distance with the
-                                    ones used
-
-    :param tviter: (int)
-        For algorithms that make use of a tvdenoising step in their
-        iterations. Default (OSSART_TV) : 50
-
-    :param tvlambda: (np.float64)
-        For algorithms that make use of a tvdenoising step in their
-        iterations. Default (OSSART_TV) : 50
-
-    :param hyper: (np.float64)
-        For FISTA algorithm, proportional to the largest eigenvalue of the
-        matrix A in the equations Ax-b and ATb. Default: 2.e4
-    :param COR: (np.float64)
-        Center of rotation correction for projections.
-
-    :param regularisation:
-        regularisation methods to use. choose: minimizeTV, AwminimizeTV,
-        Default: minimizeTV
-    :param dataminimizing:
-        dataminimizing method. Choose: art_data_minimizing
-        Default: art_data_minimizing (Otherwise hardcoded, for now.)
+    :param ossart_blocksize: (int) \
+        number of angles to be included in each iteration \
+        of proj and backproj. Default: 20.
+    :param verbose: Feedback print statements for algorithm progress. Default: False.
+    :param OrderStrategy : For OS-methods chooses the subset ordering strategy: "ordered" - input order, \
+        "random" - orders them randomply, "angularDistance" - chooses the next subset \
+        with the biggest angular distance with the ones used. Default: 'ordered'.
+    :param ossart_tv_iter: (int) For algorithms that make use of a tvdenoising step in their
+        iterations. Default: 50.
+    :param ossart_tv_lambda: (float) The regularisation parameter. Default: 50.
+    :param fista_converg_const: (float) For FISTA algorithm, proportional to the largest eigenvalue of the
+        matrix A in the equations Ax-b and ATb. Default: 2.e4.
+    :param regularisation_method: regularisation methods to use: minimizeTV, AwminimizeTV. Default: 'minimizeTV'.
     """
+    # :param lmbda: (float)
+    #    Sets the value of the hyperparameter. Default: 20.
+    #    :param lmbda_red: (np.float64)
+    #     Reduction of lambda every iteration
+    #    lambda=lambdared*lambda. Default: 0.99.
+    #:param volume_init: Describes different initialization techniques: None - zero initialization, \
+    #          'multigrid' - Initializes image by solving the problem in small scale and increasing\
+    #          it when relative convergence is reached. Default: None.
+        #:param Quameasopts: (list)
+        #Asks the algorithm for a set of quality measurement
+        #parameters. Input should contain a list or tuple of strings of
+        #quality measurement names. Examples:
+            #RMSE, CC, UQI, MSSIM
+   #    :param dataminimizing: dataminimizing method. Choose: art_data_minimizing
+   #    Default: art_data_minimizing (Otherwise hardcoded, for now.)
+
 
     def __init__(self):
         super(TigreRecon, self).__init__("TigreRecon")
