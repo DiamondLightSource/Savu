@@ -53,7 +53,7 @@ class TigreRecon(BaseRecon, GpuPlugin):
     :param ossart_tv_lambda: (float) The regularisation parameter. Default: 50.
     :param fista_converg_const: (float) For FISTA algorithm, proportional to the largest eigenvalue of the
         matrix A in the equations Ax-b and ATb. Default: 2.e4.
-    :param regularisation_method: regularisation methods to use: minimizeTV, AwminimizeTV. Default: 'minimizeTV'.
+    :param regularisation_method: regularisation methods to use: minimizeTV, minimizeAwTV. Default: 'minimizeTV'.
     """
     # :param lmbda: (float)
     #    Sets the value of the hyperparameter. Default: 20.
@@ -85,15 +85,17 @@ class TigreRecon(BaseRecon, GpuPlugin):
         # extract given parameters and make them 'self'
         self.recon_method = self.parameters['recon_method']
         self.iterations = self.parameters['iterations']
-        # DEFINE GEOMETRY AND VOLUME etc. 
-        geo = tigre.geometry()
+        self.tigre_kwargs = dict(blocksize=self.parameters['ossart_blocksize'],
+                                 verbose=self.parameters['verbose'],
+                                 OrderStrategy=self.parameters['OrderStrategy'],
+                                 tviter=self.parameters['ossart_tv_iter'],
+                                 tvlambda=self.parameters['ossart_tv_lambda'],
+                                 hyper=self.parameters['fista_converg_const'],
+                                 regularisation=self.parameters['regularisation_method'],
+                                 sup_kw_warning =False)
+        # DEFINE GEOMETRY AND VOLUME etc.
 
-        for key in self.parameters:
-            if self.parameters[key] is not None:
-                if key is 'COR':
-                    geo.COR = self.parameters.pop('COR')
-                else:
-                    self.tigre_kwargs.update({key: self.parameters[key]})
+
 
     def process_frames(self, data):
         centre_of_rotations, angles, self.vol_shape, init = self.get_frame_params()
@@ -106,7 +108,7 @@ class TigreRecon(BaseRecon, GpuPlugin):
         geo.nDetector = np.array([1, self.DetectorsDimH])
         geo.sDetector = geo.nDetector
         __sino__ = np.float32(np.expand_dims(sino, axis=1))
-        recon = getattr(algs, self.recon_method)(__sino__, geo, self.anglesRAD, self.iterations)
+        recon = getattr(algs, self.recon_method)(__sino__, geo, self.anglesRAD, self.iterations,self.tigre_kwargs)
 
         return np.swapaxes(recon, 0, 1)
 
