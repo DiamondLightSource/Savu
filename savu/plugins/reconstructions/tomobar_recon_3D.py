@@ -24,7 +24,6 @@
 
 from savu.plugins.reconstructions.base_recon import BaseRecon
 from savu.data.plugin_list import CitationInformation
-#from savu.plugins.driver.gpu_plugin import GpuPlugin
 from savu.plugins.driver.multi_threaded_plugin import MultiThreadedPlugin
 
 
@@ -34,7 +33,6 @@ import numpy as np
 from tomobar.methodsIR import RecToolsIR
 
 from savu.plugins.utils import register_plugin
-#from scipy import ndimage
 
 @register_plugin
 class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
@@ -43,9 +41,9 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
     the ToMoBAR package. ToMoBAR includes FISTA and ADMM iterative methods and depends on the ASTRA toolbox and the CCPi RGL toolkit: \
     https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
 
-    :param output_size: The dimension of the reconstructed volume (cube). Default: 'auto'.
+    :param output_size: The dimension of the reconstructed volume (only X-Y dimension). Default: 'auto'.
     :param iterations: Number of outer iterations for FISTA method. Default: 20.
-    :param datafidelity: Data fidelity, Least Squares only at the moment. Default: 'LS'.
+    :param datafidelity: Data fidelity, Least Squares(LS) or PWLS. Default: 'LS'.
     :param nonnegativity: Nonnegativity constraint, choose Enable or None. Default: 'ENABLE'.
     :param ordersubsets: The number of ordered-subsets to accelerate reconstruction. Default: 6.
     :param converg_const: Lipschitz constant, can be set to a value or automatic calculation. Default: 'power'.
@@ -68,12 +66,14 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
         super(TomobarRecon3d, self).__init__("TomobarRecon3d")
 
     def _get_output_size(self, in_data):
-        size = self.parameters['output_size']
-        if size == 'auto':
-            shape = in_data.get_shape()
+        sizeX = self.parameters['output_size']
+        shape = in_data.get_shape()
+        if sizeX == 'auto':
             detX = in_data.get_data_dimension_by_axis_label('detector_x')
-            size = shape[detX]
-        return size
+            sizeX = shape[detX]
+        detY = in_data.get_data_dimension_by_axis_label('detector_y')
+        sizeY = shape[detY]
+        return (sizeX,sizeY)
     
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
@@ -90,16 +90,12 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
                        [str(dim_volX) + '.voxel_x.voxels',
                         str(dim_volY) + '.voxel_y.voxels',
                         str(dim_volZ) + '.voxel_z.voxels']}
-
-        self.output_size = self._get_output_size(in_dataset[0])
+        # specify reconstructed volume dimensions
+        (self.output_size, self.Vert_det) = self._get_output_size(in_dataset[0])
         shape = [0]*len(in_dataset[0].get_shape())
-        # ! A TEMPORAL FIX !
-#        for dim in [dim_volX, dim_volY, dim_volZ]:
-#            shape[dim] = self.output_size
-        shape[0] = self.output_size
-        shape[1] = 135
+        shape[0] = self.output_size 
+        shape[1] = self.Vert_det
         shape[2] = self.output_size
-
 
         # if there are only 3 dimensions then add a fourth for slicing
         if len(shape) == 3:
@@ -135,9 +131,12 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
 
         dim = in_dataset[0].get_data_dimension_by_axis_label('rotation_angle')
         nSlices = in_dataset[0].get_shape()[dim]
+
         #in_pData[0].plugin_data_setup('PROJECTION', nSlices,
-        #        slice_axis='rotation_angle')
-        in_pData[0].plugin_data_setup('PROJECTION', nSlices)
+        #        slice_axis='rotation_angle') # TypeError: plugin_data_setup() got an unexpected keyword argument 'slice_axis'
+        in_pData[0].plugin_data_setup('PROJECTION', nSlices) # CORRECT ?
+        
+        # in_pData[1].plugin_data_setup('PROJECTION', nSlices) # (for PWLS)
         
         # set pattern_name and nframes to process for all datasets
         out_pData[0].plugin_data_setup('VOLUME_3D', 'single')
@@ -177,18 +176,15 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
         projdata3D = data[0].astype(np.float32)
         dim_tuple = np.shape(projdata3D)
         self.Horiz_det = dim_tuple[self.detector_x]
-        self.Vert_det = dim_tuple[self.detector_y]
-        
-        #temp = np.random.rand(160, 160, 160)
-        
-        # print(self.centre_of_rotations)
+                
         projdata3D =np.swapaxes(projdata3D,0,1)
+        # WIP for PWLS fidelity
+        # rawdata3D = data[1].astype(np.float32)
+        #rawdata3D =np.swapaxes(rawdata3D,0,1)/np.max(np.float32(rawdata3D))
         
         # check if the reconstruction class has been initialised and calculate 
         # Lipschitz constant if not given explicitly
         self.setup_Lipschitz_constant()
-        
-        # print(self.Lipschitz_const)
         # Run FISTA reconstrucion algorithm here
         recon = self.Rectools.FISTA(projdata3D,\
                                     iterationsFISTA = self.iterationsFISTA,\
@@ -204,8 +200,6 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
                                     edge_param = self.edge_param,\
                                     lipschitz_const = self.Lipschitz_const)
         recon = np.swapaxes(recon,0,1) # temporal fix!
-        #print(np.shape(recon))
-        #recon = np.newaxis(recon, axis=3)
         return recon
     
     def setup_Lipschitz_constant(self):
@@ -218,7 +212,7 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
                     CenterRotOffset = 0.0, # Center of Rotation (CoR) scalar (for 3D case only)
                     AnglesVec = self.anglesRAD, # array of angles in radians
                     ObjSize = self.output_size, # a scalar to define the reconstructed object dimensions
-                    datafidelity=self.datafidelity,# data fidelity, choose LS, PWLS
+                    datafidelity=self.datafidelity,# data fidelity, choose LS
                     nonnegativity=self.nonnegativity, # enable nonnegativity constraint (set to 'on')
                     OS_number = self.ordersubsets, # the number of subsets, NONE/(or > 1) ~ classical / ordered subsets
                     tolerance = self.tolerance , # tolerance to stop outer iterations earlier
