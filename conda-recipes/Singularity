@@ -1,0 +1,25 @@
+Bootstrap: docker
+From: centos:7
+
+%help
+
+This is Singularity recipe to build the image that is used
+in mass-rebuild.sh to generate the conda packages for the
+Savu Singularity image stack.
+
+%labels
+maintainer Tom Schoonjans <Tom.Schoonjans@diamond.ac.uk>
+version 20190530
+
+%post
+
+# Deps
+yum update -y
+yum groupinstall -y 'Development Tools'
+yum install -y wget which
+
+# Necessary for open-mpi to build with infiniband support!
+yum install -y libibverbs-devel
+
+yum clean all -y
+

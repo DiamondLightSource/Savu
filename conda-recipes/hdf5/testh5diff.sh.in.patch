@@ -1,0 +1,20 @@
+--- hdf5-1.10.2/tools/test/h5diff/testh5diff.sh.in	2018-07-02 23:15:07.000000000 +0200
++++ hdf5-1.10.2/tools/test/h5diff/testh5diff.sh.in	2018-07-02 23:15:31.000000000 +0200
+@@ -284,7 +284,6 @@
+ $SRC_H5DIFF_TESTFILES/h5diff_61.txt
+ $SRC_H5DIFF_TESTFILES/h5diff_62.txt
+ $SRC_H5DIFF_TESTFILES/h5diff_63.txt
+-$SRC_H5DIFF_TESTFILES/h5diff_600.txt
+ $SRC_H5DIFF_TESTFILES/h5diff_601.txt
+ $SRC_H5DIFF_TESTFILES/h5diff_603.txt
+ $SRC_H5DIFF_TESTFILES/h5diff_604.txt
+@@ -707,9 +706,6 @@
+ # ##############################################################################
+ 
+ 
+-# 6.0: Check if the command line number of arguments is less than 3
+-TOOLTEST h5diff_600.txt h5diff_basic1.h5
+-
+ # 6.1: Check if non-exist object name is specified
+ TOOLTEST h5diff_601.txt h5diff_basic1.h5 h5diff_basic1.h5 nono_obj
+ 
