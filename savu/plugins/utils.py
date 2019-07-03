@@ -176,7 +176,8 @@ def set_datasets(exp, plugin, plugin_dict):
     plugin._set_parameters(plugin_dict['data'])
     plugin.base_dynamic_data_info()
     plugin.dynamic_data_info()
-
+    # update the dictionary
+    plugin_dict['data'].update(plugin.parameters)
 
 def get_names(pdict, key):
     try:
