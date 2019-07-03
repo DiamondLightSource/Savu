@@ -168,8 +168,8 @@ class TigreRecon(BaseRecon, GpuPlugin):
                                  regularisation=self.parameters['regularisation_method'],
                                  sup_kw_warning =False)
         in_pData = self.get_plugin_in_datasets()
-        self.dimX = in_pData[0].get_data_dimension_by_axis_label('detector_x')
-        self.dimY = in_pData[0].get_data_dimension_by_axis_label('detector_y')
+        self.dimX_ind = in_pData[0].get_data_dimension_by_axis_label('detector_x')
+        self.dimY_ind = in_pData[0].get_data_dimension_by_axis_label('detector_y')
 
     def process_frames(self, data):
         centre_of_rotations, angles, self.vol_shape, init = self.get_frame_params()
@@ -177,7 +177,10 @@ class TigreRecon(BaseRecon, GpuPlugin):
         #anglesTot, self.DetectorsDimH = np.shape(sinos)  # get dimensions out of it
         self.anglesRAD = np.deg2rad(angles.astype(np.float32))  # convert to radians
         anglesTot = len(angles)
-        print(np.shape(proj3d))
+        self.dimX = np.shape(proj3d)[self.dimX_ind]
+        self.dimY = np.shape(proj3d)[self.dimY_ind]
+        #print(np.shape(proj3d)[self.dimX_ind])
+        #print(np.shape(proj3d)[self.dimY_ind])
 
         # Reconstruct 3D proj data with TIGRE
         geo = tigre.geometry(mode='parallel', nVoxel=np.array([self.dimY, self.vol_shape[0], self.vol_shape[1]]), default=True)
@@ -185,7 +188,10 @@ class TigreRecon(BaseRecon, GpuPlugin):
         geo.sDetector = geo.nDetector
         #__sino__ = np.float32(np.expand_dims(sino, axis=1))
         kwargs = self.tigre_kwargs
+        print(geo)
+        print(np.shape(proj3d))
         recon = getattr(algs, self.recon_method)(proj3d, geo, self.anglesRAD, self.iterations, **kwargs)
+        print(np.shape(recon))
         return np.swapaxes(recon, 0, 1)
 
     def get_max_frames(self):
