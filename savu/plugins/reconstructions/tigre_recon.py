@@ -35,26 +35,24 @@ from scipy import ndimage
 class TigreRecon(BaseRecon, GpuPlugin):
     """
     A Plugin to reconstruct full-field tomographic projection data using ierative algorithms from \
-    the TIGRE package. 
-    <tigre.toolbox@gmail.com> <https://github.com/CERN/TIGRE/>
-
-    :param recon_method: Reconstruction methods to choose: 'sart','sirt','ossart','ossart_tv','FDK',
-    'asd_pocs','awasd_pocs','fbp','cgls','fista','ista'. Default: 'cgls'.
+    the TIGRE package.
+    
+    :param recon_method: Reconstruction methods to choose: sart,sirt,ossart,ossart_tv, \
+    asd_pocs,awasd_pocs, fbp,cgls, fista, ista. Default: 'cgls'.
     :param iterations: Number of iterations. Default: 20.
-    :param ossart_blocksize: (int) \
-        number of angles to be included in each iteration \
-        of proj and backproj. Default: 20.
+    :param ossart_blocksize: number of angles to be included in each iteration of proj and backproj. Default: 20.
     :param verbose: Feedback print statements for algorithm progress. Default: False.
-    :param OrderStrategy : For OS-methods chooses the subset ordering strategy: "ordered" - input order, \
-        "random" - orders them randomply, "angularDistance" - chooses the next subset \
+    :param orderstrategy: For OS-methods chooses the subset ordering strategy: ordered -input order, \
+        random - orders them randomply, angularDistance- chooses the next subset \
         with the biggest angular distance with the ones used. Default: 'ordered'.
-    :param ossart_tv_iter: (int) For algorithms that make use of a tvdenoising step in their
-        iterations. Default: 50.
-    :param ossart_tv_lambda: (float) The regularisation parameter. Default: 50.
-    :param fista_converg_const: (float) For FISTA algorithm, proportional to the largest eigenvalue of the
-        matrix A in the equations Ax-b and ATb. Default: 2.e4.
+    :param ossart_tv_iter: For algorithms that make use of a tvdenoising step in their iterations. Default: 50.
+    :param ossart_tv_lambda: The regularisation parameter. Default: 50.0.
+    :param fista_converg_const:  For FISTA algorithm, proportional to the largest eigenvalue of the \
+        matrix A in the equations Ax-b and ATb. Default: 20000.
     :param regularisation_method: regularisation methods to use: minimizeTV, minimizeAwTV. Default: 'minimizeTV'.
     """
+
+    # <tigre.toolbox@gmail.com> <https://github.com/CERN/TIGRE/>
     # :param lmbda: (float)
     #    Sets the value of the hyperparameter. Default: 20.
     #    :param lmbda_red: (np.float64)
@@ -87,16 +85,12 @@ class TigreRecon(BaseRecon, GpuPlugin):
         self.iterations = self.parameters['iterations']
         self.tigre_kwargs = dict(blocksize=self.parameters['ossart_blocksize'],
                                  verbose=self.parameters['verbose'],
-                                 OrderStrategy=self.parameters['OrderStrategy'],
+                                 OrderStrategy=self.parameters['orderstrategy'],
                                  tviter=self.parameters['ossart_tv_iter'],
-                                 tvlambda=self.parameters['ossart_tv_lambda'],
-                                 hyper=self.parameters['fista_converg_const'],
+                                 tvlambda=np.float32(self.parameters['ossart_tv_lambda']),
+                                 hyper=np.float32(self.parameters['fista_converg_const']),
                                  regularisation=self.parameters['regularisation_method'],
                                  sup_kw_warning =False)
-        # DEFINE GEOMETRY AND VOLUME etc.
-
-
-
     def process_frames(self, data):
         centre_of_rotations, angles, self.vol_shape, init = self.get_frame_params()
         sino = data[0].astype(np.float32)  # get a 2D sinogram
@@ -108,13 +102,13 @@ class TigreRecon(BaseRecon, GpuPlugin):
         geo.nDetector = np.array([1, self.DetectorsDimH])
         geo.sDetector = geo.nDetector
         __sino__ = np.float32(np.expand_dims(sino, axis=1))
-        recon = getattr(algs, self.recon_method)(__sino__, geo, self.anglesRAD, self.iterations,self.tigre_kwargs)
-
+        kwargs = self.tigre_kwargs
+        recon = getattr(algs, self.recon_method)(__sino__, geo, self.anglesRAD, self.iterations, **kwargs)
         return np.swapaxes(recon, 0, 1)
 
     def get_max_frames(self):
         return 'single'
-
+    
     def get_citation_information(self):
         cite_info1 = CitationInformation()
         cite_info1.name = 'citation1'
@@ -145,6 +139,3 @@ class TigreRecon(BaseRecon, GpuPlugin):
              "%I --\n")
         cite_info1.doi = "doi: "
         return cite_info1
-
-
-cite_info1_bibtex = ()
