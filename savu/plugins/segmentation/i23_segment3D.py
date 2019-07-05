@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: i23 beamline segmentation routine
+.. module:: i23 beamline segmentation routine 
    :platform: Unix
    :synopsis: Wraps i23 segmentation code for Gaussian Mixture clustering   \
    and subsequent postprocessing of the segmented image
@@ -22,7 +22,8 @@
 """
 
 from savu.plugins.plugin import Plugin
-from savu.plugins.driver.cpu_plugin import CpuPlugin
+#from savu.plugins.driver.cpu_plugin import CpuPlugin
+from savu.plugins.driver.multi_threaded_plugin import MultiThreadedPlugin
 from savu.plugins.utils import register_plugin
 
 import numpy as np
@@ -31,7 +32,7 @@ from sklearn.mixture import GaussianMixture
 from i23.methods.segmentation import MASK_CORR
 
 @register_plugin
-class I23Segment(Plugin, CpuPlugin):
+class I23Segment3d(Plugin, MultiThreadedPlugin):
     """
     A Plugin to segment reconstructed data from i23 beamline. The projection data \
     should be first reconstructed iteratively using the ToMoBAR plugin. The goal of \
@@ -45,7 +46,7 @@ class I23Segment(Plugin, CpuPlugin):
     """
 
     def __init__(self):
-        super(I23Segment, self).__init__("I23Segment")
+        super(I23Segment3d, self).__init__("I23Segment3d")
 
     def setup(self):
     
@@ -55,12 +56,12 @@ class I23Segment(Plugin, CpuPlugin):
         out_dataset[2].create_dataset(in_dataset[0])
         out_dataset[3].create_dataset(in_dataset[0])
         in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup('VOLUME_XZ', 'single')
-        out_pData[0].plugin_data_setup('VOLUME_XZ', 'single')
-        out_pData[1].plugin_data_setup('VOLUME_XZ', 'single')
-        out_pData[2].plugin_data_setup('VOLUME_XZ', 'single')
-        out_pData[3].plugin_data_setup('VOLUME_XZ', 'single')
-    
+        in_pData[0].plugin_data_setup('VOLUME_3D', 'single')
+        out_pData[0].plugin_data_setup('VOLUME_3D', 'single')
+        out_pData[1].plugin_data_setup('VOLUME_3D', 'single')
+        out_pData[2].plugin_data_setup('VOLUME_3D', 'single')
+        out_pData[3].plugin_data_setup('VOLUME_3D', 'single')
+        
     def pre_process(self):
         # extract given parameters
         self.iterationsNumb = self.parameters['iterations']

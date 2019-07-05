@@ -26,8 +26,6 @@ from savu.data.plugin_list import CitationInformation
 from savu.plugins.driver.gpu_plugin import GpuPlugin
 
 import numpy as np
-# TOmographic MOdel-BAsed Reconstruction (ToMoBAR)
-# https://github.com/dkazanc/ToMoBAR
 from tomobar.methodsIR import RecToolsIR
 
 from savu.plugins.utils import register_plugin
@@ -50,14 +48,14 @@ class TomobarRecon(BaseRecon, GpuPlugin):
     :param regularisation: To regularise choose methods ROF_TV, FGP_TV, SB_TV, LLT_ROF,\
                              NDF, Diff4th. Default: 'FGP_TV'.
     :param regularisation_parameter: Regularisation (smoothing) value, higher \
-                            the value stronger the smoothing effect. Default: 0.001.
-    :param regularisation_iterations: The number of regularisation iterations. Default: 300.
+                            the value stronger the smoothing effect. Default: 0.0001.
+    :param regularisation_iterations: The number of regularisation iterations. Default: 350.
     :param time_marching_parameter: Time marching parameter, relevant for \
                     (ROF_TV, LLT_ROF, NDF, Diff4th) penalties. Default: 0.0025.
     :param edge_param: Edge (noise) related parameter, relevant for NDF and Diff4th. Default: 0.01.
     :param regularisation_parameter2:  Regularisation (smoothing) value for LLT_ROF method. Default: 0.005.
     :param NDF_penalty: NDF specific penalty type Huber, Perona, Tukey. Default: 'Huber'.
-    :param tolerance: Tolerance to stop outer iterations earlier. Default: 1e-9.
+    :param tolerance: Tolerance to stop outer iterations earlier. Default: 5e-10.
     :param ring_variable: Regularisation variable for ring removal. Default: 0.0.
     :param ring_accelerator: Acceleration constant for ring removal (use with care). Default: 50.0.
     """

@@ -17,7 +17,7 @@
    :platform: Unix
    :synopsis: A wrapper around TOmographic MOdel-BAsed Reconstruction (ToMoBAR) software \
    for advanced iterative image reconstruction using _3D_ capabilities of regularisation. \
-   The plugin will run on one node and can be slow. 
+   The plugin will run on one cluster node, i.e. it can be slow. 
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
@@ -26,12 +26,8 @@ from savu.plugins.reconstructions.base_recon import BaseRecon
 from savu.data.plugin_list import CitationInformation
 from savu.plugins.driver.multi_threaded_plugin import MultiThreadedPlugin
 
-
 import numpy as np
-# TOmographic MOdel-BAsed Reconstruction (ToMoBAR)
-# https://github.com/dkazanc/ToMoBAR
 from tomobar.methodsIR import RecToolsIR
-
 from savu.plugins.utils import register_plugin
 
 @register_plugin
@@ -43,17 +39,17 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
 
     :param output_size: The dimension of the reconstructed volume (only X-Y dimension). Default: 'auto'.
     :param iterations: Number of outer iterations for FISTA method. Default: 20.
-    :param datafidelity: Data fidelity, Least Squares(LS) or PWLS. Default: 'LS'.
+    :param datafidelity: Data fidelity, Least Squares (LS) or PWLS. Default: 'LS'.
     :param nonnegativity: Nonnegativity constraint, choose Enable or None. Default: 'ENABLE'.
     :param ordersubsets: The number of ordered-subsets to accelerate reconstruction. Default: 6.
-    :param converg_const: Lipschitz constant, can be set to a value or automatic calculation. Default: 'power'.
+    :param converg_const: Lipschitz constant, can be set to a scalar value or automatic calculation using power methods. Default: 'power'.
     :param regularisation: To regularise choose methods ROF_TV, FGP_TV, SB_TV, LLT_ROF,\
-                             NDF, Diff4th. Default: 'FGP_TV'.
+                             NDF, Diff4th. Default: 'ROF_TV'.
     :param regularisation_parameter: Regularisation (smoothing) value, higher \
-                            the value stronger the smoothing effect. Default: 0.001.
-    :param regularisation_iterations: The number of regularisation iterations. Default: 300.
+                            the value stronger the smoothing effect. Default: 0.0001.
+    :param regularisation_iterations: The number of regularisation iterations. Default: 400.
     :param time_marching_parameter: Time marching parameter, relevant for \
-                    (ROF_TV, LLT_ROF, NDF, Diff4th) penalties. Default: 0.0025.
+                    (ROF_TV, LLT_ROF, NDF, Diff4th) penalties. Default: 0.002.
     :param edge_param: Edge (noise) related parameter, relevant for NDF and Diff4th. Default: 0.01.
     :param regularisation_parameter2:  Regularisation (smoothing) value for LLT_ROF method. Default: 0.005.
     :param NDF_penalty: NDF specific penalty type Huber, Perona, Tukey. Default: 'Huber'.
@@ -164,9 +160,9 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
         else:
             self.regularisation_iterations = self.parameters['regularisation_iterations']
             
-        in_data = self.get_in_datasets()[0]
-        self.detector_x = in_data.get_data_dimension_by_axis_label('detector_x')
-        self.detector_y = in_data.get_data_dimension_by_axis_label('detector_y')
+        in_pData = self.get_plugin_in_datasets()
+        self.det_dimX_ind = in_pData[0].get_data_dimension_by_axis_label('detector_x')
+        self.det_dimY_ind = in_pData[0].get_data_dimension_by_axis_label('detector_y')
 
     def process_frames(self, data):
         centre_of_rotations, angles, self.vol_shape, init  = self.get_frame_params()
@@ -175,12 +171,13 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
         self.centre_of_rotations = centre_of_rotations
         projdata3D = data[0].astype(np.float32)
         dim_tuple = np.shape(projdata3D)
-        self.Horiz_det = dim_tuple[self.detector_x]
-                
+        self.Horiz_det = dim_tuple[self.det_dimX_ind]
+
+        #print(np.shape(projdata3D))
         projdata3D =np.swapaxes(projdata3D,0,1)
         # WIP for PWLS fidelity
         # rawdata3D = data[1].astype(np.float32)
-        #rawdata3D =np.swapaxes(rawdata3D,0,1)/np.max(np.float32(rawdata3D))
+        # rawdata3D =np.swapaxes(rawdata3D,0,1)/np.max(np.float32(rawdata3D))
         
         # check if the reconstruction class has been initialised and calculate 
         # Lipschitz constant if not given explicitly
