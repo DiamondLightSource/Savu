@@ -128,10 +128,9 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
         dim = in_dataset[0].get_data_dimension_by_axis_label('rotation_angle')
         nSlices = in_dataset[0].get_shape()[dim]
 
-        #in_pData[0].plugin_data_setup('PROJECTION', nSlices,
-        #        slice_axis='rotation_angle') # TypeError: plugin_data_setup() got an unexpected keyword argument 'slice_axis'
-        in_pData[0].plugin_data_setup('PROJECTION', nSlices) # CORRECT ?
-        
+        in_pData[0].plugin_data_setup('PROJECTION', nSlices,
+                slice_axis='rotation_angle')
+
         # in_pData[1].plugin_data_setup('PROJECTION', nSlices) # (for PWLS)
         
         # set pattern_name and nframes to process for all datasets
