@@ -34,14 +34,15 @@ class MultiThreadedPlugin(PluginDriver):
     def __init__(self):
         super(MultiThreadedPlugin, self).__init__()
 
+    def get_mem_multiply(self):
+        self.processes = self.exp.meta_data.get("processes")
+        self.nNodes = self.processes.count(self.processes[0])
+        return len(self.processes)/self.nNodes
+
     def _run_plugin(self, exp, transport):
-
         process = exp.meta_data.get("process")
-        processes = exp.meta_data.get("processes")
-        nNodes = processes.count(processes[0])
-        nCores = len(processes)/nNodes
-
-        masters = self._get_masters(processes)
+        nCores = len(self.processes)/self.nNodes
+        masters = self._get_masters(self.processes)
 
         self.__create_new_communicator(masters, exp)
         self.exp._barrier()
@@ -49,7 +50,7 @@ class MultiThreadedPlugin(PluginDriver):
         if process in masters:
             self.parameters['available_CPUs'] = nCores
             self.parameters['available_GPUs'] = \
-                len([p for p in processes if 'GPU' in p])/nNodes
+                len([p for p in self.processes if 'GPU' in p])/self.nNodes
             self._run_plugin_instances(transport, communicator=self.new_comm)
             self.__free_communicator()
 
