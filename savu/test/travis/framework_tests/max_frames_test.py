@@ -25,6 +25,7 @@ import os
 import unittest
 import numpy as np
 import savu.test.test_utils as tu
+from savu.plugins.basic_operations.no_process_plugin import NoProcessPlugin
 
 
 class MaxFramesTest(unittest.TestCase):
@@ -34,6 +35,7 @@ class MaxFramesTest(unittest.TestCase):
         data.exp.meta_data.set('processes', processes)
         pData.plugin_data_setup(pattern, nFrames)
         pData._set_meta_data()
+        pData._plugin = NoProcessPlugin() # dummy plugin to set required params
         pData.plugin_data_transfer_setup()
         sl_dict = \
             data._get_transport_data()._get_slice_lists_per_process(dtype)
