@@ -3,7 +3,7 @@ sudo: true
 language: python
 python:
   - "2.7"
-  - "3.3"
+  - "3.5"
 addons:
   apt:
     packages:
@@ -35,5 +35,5 @@ after_script:
   - coveralls
   
 allow_failures:
-    - python: "3.3"
+    - python: "3.5"
 

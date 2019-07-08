@@ -107,7 +107,7 @@ class BaseRecon(Plugin):
         self.br_vol_shape = out_pData[0].get_shape()
         self.set_centre_of_rotation(in_data[0], in_meta_data, in_pData[0])
 
-        self.main_dir = in_pData[0].get_pattern()['SINOGRAM']['main_dir']
+        self.main_dir = in_data[0].get_data_patterns()['SINOGRAM']['main_dir']
         self.angles = in_meta_data.get('rotation_angle')
         if len(self.angles.shape) is not 1:
             self.scan_dim = in_data[0].get_data_dimension_by_axis_label('scan')
