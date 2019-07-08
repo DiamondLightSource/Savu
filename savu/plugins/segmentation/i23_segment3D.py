@@ -40,9 +40,10 @@ class I23Segment3d(Plugin, MultiThreadedPlugin):
     and then apply iterative model-based segmentation to further process the obtained \
     mask. https://github.com/dkazanc/i23seg
 
-    :param correction_window: The size of the correction window. Default: 9.
+    :param classes: The number of classes for GMM (take from 2D version). Default: 5.
+    :param correction_window: The size of the correction (non-local) window. Default: 8.
     :param iterations: The number of iterations for segmentation. Default: 10.
-    :param out_datasets: Default out dataset names. Default: ['maskGMM4', 'maskGMM4_proc', 'maskGMM5', 'maskGMM5_proc']
+    :param out_datasets: Default out dataset names. Default: ['maskGMM', 'maskGMM_proc']
     """
 
     def __init__(self):
@@ -53,35 +54,36 @@ class I23Segment3d(Plugin, MultiThreadedPlugin):
         in_dataset, out_dataset = self.get_datasets()
         out_dataset[0].create_dataset(in_dataset[0])
         out_dataset[1].create_dataset(in_dataset[0])
-        out_dataset[2].create_dataset(in_dataset[0])
-        out_dataset[3].create_dataset(in_dataset[0])
         in_pData, out_pData = self.get_plugin_datasets()
         in_pData[0].plugin_data_setup('VOLUME_3D', 'single')
         out_pData[0].plugin_data_setup('VOLUME_3D', 'single')
         out_pData[1].plugin_data_setup('VOLUME_3D', 'single')
-        out_pData[2].plugin_data_setup('VOLUME_3D', 'single')
-        out_pData[3].plugin_data_setup('VOLUME_3D', 'single')
         
     def pre_process(self):
         # extract given parameters
+        self.classes = self.parameters['classes']
         self.iterationsNumb = self.parameters['iterations']
         self.CorrectionWindow = self.parameters['correction_window']
         
         # some fixed parameters
-        self.class_names4 = ('crystal','air','loop') # classes to process (order matters)
-        self.restricted_combinations_4classes = (('loop','crystal','liquor','loop'),
-                                    ('air','loop','liquor','liquor'),
-                                    ('air','loop','crystal','liquor'),
-                                    ('air','crystal','loop','loop'),
-                                    ('air','crystal','liquor','liquor'),
-                                    ('air','liquor','loop','loop'))
-        self.class_names5 = ('liquor','air','loop') # classes to process (order matters)
-        self.restricted_combinations_5classes = (('loop','crystal','liquor','loop'),
-                                    ('air','artifacts','liquor','liquor'),
-                                    ('air','loop','liquor','liquor'),
-                                    ('air','artifacts','loop','loop'),
-                                    ('air','crystal','loop','loop'),
-                                    ('air','loop','crystal','crystal'))
+        if (self.classes == 4):
+            self.class_names4 = ('crystal','air','loop') # classes to process (order matters)
+            self.restricted_combinations_4classes = (('loop','crystal','liquor','loop'),
+                                        ('air','loop','liquor','liquor'),
+                                        ('air','loop','crystal','liquor'),
+                                        ('air','crystal','loop','loop'),
+                                        ('air','crystal','liquor','liquor'),
+                                        ('air','liquor','loop','loop'))
+        elif (self.classes == 5):
+            self.class_names5 = ('liquor','air','loop') # classes to process (order matters)
+            self.restricted_combinations_5classes = (('loop','crystal','liquor','loop'),
+                                        ('air','artifacts','liquor','liquor'),
+                                        ('air','loop','liquor','liquor'),
+                                        ('air','artifacts','loop','loop'),
+                                        ('air','crystal','loop','loop'),
+                                        ('air','loop','crystal','crystal'))
+        else:
+            raise ("Choose 4 or 5 classes")
 
     def process_frames(self, data):
         # Do GMM classification/segmentation first
@@ -95,59 +97,58 @@ class I23Segment3d(Plugin, MultiThreadedPlugin):
         #print(dimensdata)
         inputdata = data[0].reshape((Nsize1*Nsize2*Nsize3), 1)/np.max(data[0])
         
-        classif = GaussianMixture(n_components=4, covariance_type="tied")
-        classif.fit(inputdata)
-        cluster = classif.predict(inputdata)
-        segm = classif.means_[cluster]
-        if (dimensdata == 2):
-            segm = segm.reshape(Nsize1, Nsize3, Nsize2)
-        else:
-            segm = segm.reshape(Nsize1, Nsize2, Nsize3)
-        maskGMM4 = segm.astype(np.float64) / np.max(segm)
-        maskGMM4 = 255 * maskGMM4 # Now scale by 255
-        maskGMM4 = maskGMM4.astype(np.uint8) # obtain the GMM mask
+        if (self.classes == 4):
+            classif = GaussianMixture(n_components=4, covariance_type="tied")
+            classif.fit(inputdata)
+            cluster = classif.predict(inputdata)
+            segm = classif.means_[cluster]
+            if (dimensdata == 2):
+                segm = segm.reshape(Nsize1, Nsize3, Nsize2)
+            else:
+                segm = segm.reshape(Nsize1, Nsize2, Nsize3)
+            maskGMM = segm.astype(np.float64) / np.max(segm)
+            maskGMM = 255 * maskGMM # Now scale by 255
+            maskGMM = maskGMM.astype(np.uint8) # obtain the GMM mask
+            # Post-processing part of obtained GMM masks (4 classes processing)
+            pars4 = {'maskdata' : maskGMM,\
+            'class_names': self.class_names4,\
+            'total_classesNum': 4,\
+            'restricted_combinations': self.restricted_combinations_4classes,\
+            'CorrectionWindow' : self.CorrectionWindow ,\
+            'iterationsNumb' : self.iterationsNumb}
+            
+            maskGMM_proc = MASK_CORR(pars4['maskdata'], pars4['class_names'], \
+                    pars4['total_classesNum'], pars4['restricted_combinations'],\
+                    pars4['CorrectionWindow'], pars4['iterationsNumb'])
         
-        classif = GaussianMixture(n_components=5, covariance_type="tied")
-        classif.fit(inputdata)
-        cluster = classif.predict(inputdata)
-        segm = classif.means_[cluster]
-        if (dimensdata == 2):
-            segm = segm.reshape(Nsize1, Nsize3, Nsize2)
-        else:
-            segm = segm.reshape(Nsize1, Nsize2, Nsize3)
-        maskGMM5 = segm.astype(np.float64) / np.max(segm)
-        maskGMM5 = 255 * maskGMM5 # Now scale by 255
-        maskGMM5 = maskGMM5.astype(np.uint8) # obtain the GMM mask
+        if (self.classes == 5):
+            classif = GaussianMixture(n_components=5, covariance_type="tied")
+            classif.fit(inputdata)
+            cluster = classif.predict(inputdata)
+            segm = classif.means_[cluster]
+            if (dimensdata == 2):
+                segm = segm.reshape(Nsize1, Nsize3, Nsize2)
+            else:
+                segm = segm.reshape(Nsize1, Nsize2, Nsize3)
+            maskGMM = segm.astype(np.float64) / np.max(segm)
+            maskGMM = 255 * maskGMM # Now scale by 255
+            maskGMM = maskGMM.astype(np.uint8) # obtain the GMM mask
 
-        # Post-processing part of obtained GMM masks
-        # 4 classes processing
-        pars4 = {'maskdata' : maskGMM4,\
-        'class_names': self.class_names4,\
-        'total_classesNum': 4,\
-        'restricted_combinations': self.restricted_combinations_4classes,\
-        'CorrectionWindow' : self.CorrectionWindow ,\
-        'iterationsNumb' : self.iterationsNumb}
+            # 5 classes processing
+            pars5 = {'maskdata' : maskGMM,\
+            'class_names': self.class_names5,\
+            'total_classesNum': 5,\
+            'restricted_combinations': self.restricted_combinations_5classes,\
+            'CorrectionWindow' : self.CorrectionWindow ,\
+            'iterationsNumb' : self.iterationsNumb}
+            
+            maskGMM_proc = MASK_CORR(pars5['maskdata'], pars5['class_names'], \
+                    pars5['total_classesNum'], pars5['restricted_combinations'],\
+                    pars5['CorrectionWindow'], pars5['iterationsNumb'])
         
-        maskGMM4_proc = MASK_CORR(pars4['maskdata'], pars4['class_names'], \
-                pars4['total_classesNum'], pars4['restricted_combinations'],\
-                pars4['CorrectionWindow'], pars4['iterationsNumb'])
-        
-        # 5 classes processing
-        pars5 = {'maskdata' : maskGMM5,\
-        'class_names': self.class_names5,\
-        'total_classesNum': 5,\
-        'restricted_combinations': self.restricted_combinations_5classes,\
-        'CorrectionWindow' : self.CorrectionWindow ,\
-        'iterationsNumb' : self.iterationsNumb}
-        
-        maskGMM5_proc = MASK_CORR(pars5['maskdata'], pars5['class_names'], \
-                pars5['total_classesNum'], pars5['restricted_combinations'],\
-                pars5['CorrectionWindow'], pars5['iterationsNumb'])
-        
-        return [maskGMM4,maskGMM4_proc,maskGMM5,maskGMM5_proc]
+        return [maskGMM, maskGMM_proc]
     
     def nInput_datasets(self):
         return 1
     def nOutput_datasets(self):
-        return 4
-    
+        return 2
