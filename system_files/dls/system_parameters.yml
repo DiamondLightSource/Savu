@@ -11,6 +11,7 @@ mpi-io_settings:                    # MPI I/O settings
     romio_ds_write      : disable   
     romio_ds_read       : disable
 
+# per process transfer settings
 data_transfer_settings  :
     max_bytes           : 32*2560*2560*4        # max bytes, per process, that can be transferred from file at a time
     min_bytes           : 0.5*b_per_p           # b_per_p = bytes per process: min bytes, per process, transfered from file each time.
