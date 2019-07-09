@@ -31,6 +31,9 @@ from savu.plugins.utils import register_plugin, dawn_compatible
 
 from skimage.util.shape import view_as_windows as viewW
 
+from scipy.ndimage.interpolation import map_coordinates
+
+
 @register_plugin
 @dawn_compatible
 class SpiralRemap(BaseFilter, CpuPlugin):
@@ -46,50 +49,50 @@ class SpiralRemap(BaseFilter, CpuPlugin):
               self).__init__("SpiralRemap")
 
 
-    def strided_indexing_roll(self, a, r):
-        # Concatenate with sliced to cover all rolls
-        p = np.full((a.shape[0],a.shape[1]-1),np.nan)
-        a_ext = np.concatenate((p,a,p),axis=1)
-        # Get sliding windows; use advanced-indexing to select appropriate ones
-        n = a.shape[1]
-        return viewW(a_ext,(1,n))[np.arange(len(r)), -r + (n-1),0]
-
-
-
-    def _apply_offset(self, data, angles):
-        offsets = angles*self.parameters['y_per_theta']
-        max_height = int(data.shape[1]+np.ceil(offsets.max()))
-        remap = np.zeros((data.shape[0], max_height, data.shape[2]))
-        
-        off = ((offsets-offsets.min())*10).astype(np.int16)
-        slice = data[:,:,70]
-        
-        rollshape = list(slice.shape)
-        rollshape[1] = off.max()
-        
-        p = np.full(tuple(rollshape), np.nan)
-        
-        a_ext = np.concatenate((slice, p), axis=1)
-        
-        for i in range(off.shape[0]):
-            a_ext[i, :] = np.roll(a_ext[i,:], off[i])
-        
-        
-        #TODO : Actually remap 
-        return a_ext
-
-
-    def _restack_360(self, data, angles):
-        #TODO actually implement
-        pass
-
     def process_frames(self, data):
         # get the angles out of the metadata
         in_meta_data = self.get_in_meta_data()[0]
         angles = in_meta_data.get('rotation_angle')
-        offset = self._apply_offset(data[0], angles)
-        remap = self._restack_360(offset, angles)
-        return remap
+
+        offsets = angles*self.parameters['y_per_theta']
+        offsets = offsets-offsets.min()
+        max_height = int(np.ceil(offsets.max()))
+
+        #TODO fix this hardcoded value for number of rotation angles
+        full_rotation = 3600
+
+        pitch = 360*self.parameters['y_per_theta']
+        pitch_step = pitch/full_rotation
+
+        # build the remapping mesh
+        mapy, mapx, mapz = np.meshgrid(np.arange(0, max_height),
+                                       range(data[0].shape[0]),
+                                       range(data[0].shape[2]))
+
+        mapy = mapy - offsets.reshape(offsets.shape[0],1,1)
+
+        mapx[mapy>=(data[0].shape[1])] = -1
+        mapx[mapy<0] = -1
+
+        sections = np.split(mapx, np.arange(0, mapx.shape[0],full_rotation)[1::])
+
+        mapx = np.max(np.stack(sections[:-1], axis=3), axis=3)
+
+        mapy[mapy>=(data[0].shape[1])] = -1
+        mapy[mapy<0] = -1
+
+        sections = np.split(mapy, np.arange(0, mapy.shape[0],full_rotation)[1::])
+
+        mapy = np.max(np.stack(sections[:-1], axis=3), axis=3)
+
+        mapz = mapz[:full_rotation, :, :]
+
+
+        # Apply the data, and then 
+        remapped_data = map_coordinates(data[0], [mapx, mapy-1, mapz], cval=0)
+
+        return remapped_data
+
 
     def setup(self):
         # get all in and out datasets required by the plugin
@@ -106,7 +109,7 @@ class SpiralRemap(BaseFilter, CpuPlugin):
         out_pData[0].plugin_data_setup(self.get_plugin_pattern(), self.get_max_frames())
 
     def get_max_frames(self):
-        return 'multiple'
+        return 5
 
     def get_plugin_pattern(self):
         return "TANGENTOGRAM"
