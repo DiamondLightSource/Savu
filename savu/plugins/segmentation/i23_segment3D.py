@@ -13,10 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: i23 beamline segmentation routine 
+.. module:: i23 beamline post-segmentation routine 
    :platform: Unix
-   :synopsis: Wraps i23 segmentation code for Gaussian Mixture clustering   \
-   and subsequent postprocessing of the segmented image
+   :synopsis: Wraps i23 segmentation code for subsequent postprocessing of the segmented image
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
@@ -27,9 +26,8 @@ from savu.plugins.driver.multi_threaded_plugin import MultiThreadedPlugin
 from savu.plugins.utils import register_plugin
 
 import numpy as np
-from sklearn.mixture import GaussianMixture
-# i23 reconstruction and segmentation routines
 from i23.methods.segmentation import MASK_CORR
+# https://github.com/dkazanc/i23seg
 
 @register_plugin
 class I23Segment3d(Plugin, MultiThreadedPlugin):
@@ -37,13 +35,12 @@ class I23Segment3d(Plugin, MultiThreadedPlugin):
     A Plugin to segment reconstructed data from i23 beamline. The projection data \
     should be first reconstructed iteratively using the ToMoBAR plugin. The goal of \
     the segmentation plugin is to cluster and segment data using Gaussian Mixtures \
-    and then apply iterative model-based segmentation to further process the obtained \
-    mask. https://github.com/dkazanc/i23seg
+    and then apply iterative model-based segmentation to further process the obtained mask \
+    INPUT to the plugin is the result of gmm_segment plugin
 
-    :param classes: The number of classes for GMM (take from 2D version). Default: 5.
+    :param classes: The number of classes for GMM. Default: 5.
     :param correction_window: The size of the correction (non-local) window. Default: 8.
     :param iterations: The number of iterations for segmentation. Default: 10.
-    :param out_datasets: Default out dataset names. Default: ['maskGMM', 'maskGMM_proc']
     """
 
     def __init__(self):
@@ -52,12 +49,10 @@ class I23Segment3d(Plugin, MultiThreadedPlugin):
     def setup(self):
     
         in_dataset, out_dataset = self.get_datasets()
-        out_dataset[0].create_dataset(in_dataset[0])
-        out_dataset[1].create_dataset(in_dataset[0])
+        out_dataset[0].create_dataset(in_dataset[0], dtype=np.uint8)
         in_pData, out_pData = self.get_plugin_datasets()
         in_pData[0].plugin_data_setup('VOLUME_3D', 'single')
         out_pData[0].plugin_data_setup('VOLUME_3D', 'single')
-        out_pData[1].plugin_data_setup('VOLUME_3D', 'single')
         
     def pre_process(self):
         # extract given parameters
@@ -86,31 +81,9 @@ class I23Segment3d(Plugin, MultiThreadedPlugin):
             raise ("Choose 4 or 5 classes")
 
     def process_frames(self, data):
-        # Do GMM classification/segmentation first
-        dimensdata = data[0].ndim
-        if (dimensdata == 2):
-            (Nsize1, Nsize2) = np.shape(data[0])
-            Nsize3 = 1
-        if (dimensdata == 3):
-            (Nsize1, Nsize2, Nsize3) = np.shape(data[0])
-        
-        #print(dimensdata)
-        inputdata = data[0].reshape((Nsize1*Nsize2*Nsize3), 1)/np.max(data[0])
-        
         if (self.classes == 4):
-            classif = GaussianMixture(n_components=4, covariance_type="tied")
-            classif.fit(inputdata)
-            cluster = classif.predict(inputdata)
-            segm = classif.means_[cluster]
-            if (dimensdata == 2):
-                segm = segm.reshape(Nsize1, Nsize3, Nsize2)
-            else:
-                segm = segm.reshape(Nsize1, Nsize2, Nsize3)
-            maskGMM = segm.astype(np.float64) / np.max(segm)
-            maskGMM = 255 * maskGMM # Now scale by 255
-            maskGMM = maskGMM.astype(np.uint8) # obtain the GMM mask
             # Post-processing part of obtained GMM masks (4 classes processing)
-            pars4 = {'maskdata' : maskGMM,\
+            pars4 = {'maskdata' : data[0].astype(np.uint8),\
             'class_names': self.class_names4,\
             'total_classesNum': 4,\
             'restricted_combinations': self.restricted_combinations_4classes,\
@@ -122,20 +95,8 @@ class I23Segment3d(Plugin, MultiThreadedPlugin):
                     pars4['CorrectionWindow'], pars4['iterationsNumb'])
         
         if (self.classes == 5):
-            classif = GaussianMixture(n_components=5, covariance_type="tied")
-            classif.fit(inputdata)
-            cluster = classif.predict(inputdata)
-            segm = classif.means_[cluster]
-            if (dimensdata == 2):
-                segm = segm.reshape(Nsize1, Nsize3, Nsize2)
-            else:
-                segm = segm.reshape(Nsize1, Nsize2, Nsize3)
-            maskGMM = segm.astype(np.float64) / np.max(segm)
-            maskGMM = 255 * maskGMM # Now scale by 255
-            maskGMM = maskGMM.astype(np.uint8) # obtain the GMM mask
-
             # 5 classes processing
-            pars5 = {'maskdata' : maskGMM,\
+            pars5 = {'maskdata' : data[0].astype(np.uint8),\
             'class_names': self.class_names5,\
             'total_classesNum': 5,\
             'restricted_combinations': self.restricted_combinations_5classes,\
@@ -146,9 +107,9 @@ class I23Segment3d(Plugin, MultiThreadedPlugin):
                     pars5['total_classesNum'], pars5['restricted_combinations'],\
                     pars5['CorrectionWindow'], pars5['iterationsNumb'])
         
-        return [maskGMM, maskGMM_proc]
+        return [maskGMM_proc]
     
     def nInput_datasets(self):
         return 1
     def nOutput_datasets(self):
-        return 2
+        return 1
