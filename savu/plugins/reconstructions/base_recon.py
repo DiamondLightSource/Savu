@@ -254,8 +254,12 @@ class BaseRecon(Plugin):
 
         missing = [self.centre]*(len(self.frame_cors) - len_data)
         self.frame_cors = np.append(self.frame_cors, missing)
-
+        
+        # fix to remove NaNs in the initialised image
+        if init is not None:
+            init[np.where(np.isnan(init)==True)] = 0.0
         self.frame_init_data = init
+        
         data[0] = self.fix_sino(self.sino_func(data[0]), self.frame_cors[0])
         return data
 
@@ -411,7 +415,7 @@ class BaseRecon(Plugin):
         else:
             shape[dim_volX] = self.parameters['vol_shape']
             shape[dim_volZ] = self.parameters['vol_shape']
-
+    
         if 'resolution' in self.parameters.keys():
             shape[dim_volX] /= self.parameters['resolution']
             shape[dim_volZ] /= self.parameters['resolution']
