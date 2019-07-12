@@ -172,17 +172,16 @@ def set_datasets(exp, plugin, plugin_dict):
 
     plugin_dict["data"]["in_datasets"] = in_names
     plugin_dict["data"]["out_datasets"] = out_names
-
+    
     plugin._set_parameters(plugin_dict['data'])
-    plugin_dict.update(apply_dynamic_info(plugin))
+    plugin_dict['data'].update(apply_dynamic_info(plugin))
 
 def apply_dynamic_info(plugin):
-    dict_before = plugin.parameters.keys()
+    # currently you can only update in_datasets and out_datasets entries in the
+    # parameters dictionary dynamically before setup
     plugin.base_dynamic_data_info()
     plugin.dynamic_data_info()
-    dict_after = plugin.parameters
-    diff = set(plugin.parameters).difference(set(dict_before))
-    return dict((k, dict_after[k]) for k in diff if k in dict_after)
+    return dict((k, plugin.parameters[k]) for k in ['in_datasets', 'out_datasets'])
 
 def get_names(pdict, key):
     try:
