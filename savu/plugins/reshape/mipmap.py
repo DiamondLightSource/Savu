@@ -52,7 +52,6 @@ class Mipmap(Plugin, CpuPlugin):
 
     def __init__(self):
         super(Mipmap, self).__init__("Mipmap")
-        self.n_mipmaps = 1
 
     def dynamic_data_info(self):
         self.n_mipmaps = self.parameters['n_mipmaps']
@@ -111,7 +110,8 @@ class Mipmap(Plugin, CpuPlugin):
         return 1
 
     def nOutput_datasets(self):
-        return self.n_mipmaps
+        # dummy value the real number is decided at runtime
+        return 1
 
     def get_max_frames(self):
         return 8
