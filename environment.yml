@@ -21,7 +21,7 @@ dependencies:
   - pyfai==0.15.0
   - pyfftw
   - colorama
-  - pymca
+  - pymca==5.4.3
   - ccpi::ccpi-regulariser
   - pip:
     - nvidia-ml-py
