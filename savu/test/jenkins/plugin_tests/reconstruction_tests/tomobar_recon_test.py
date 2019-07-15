@@ -17,7 +17,7 @@
 """
 .. module:: plugins_test
    :platform: Unix
-   :synopsis: unittest test for FISTA reconstruction method
+   :synopsis: unittest test for tomobar reconstruction software
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 
@@ -30,11 +30,11 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
 
-class FistaReconTest(unittest.TestCase):
+class TomobarReconTest(unittest.TestCase):
 
-    def test_fista_recon(self):
+    def test_tomobar_recon(self):
         data_file = tu.get_test_data_path('24737.nxs')
-        process_file = tu.get_test_process_path('fista_test.nxs')
+        process_file = tu.get_test_process_path('tomobar2d_recon.nxs')
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
 

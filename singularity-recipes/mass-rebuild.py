@@ -14,14 +14,15 @@ images = (
         )
 
 
-# sregistry should be used only when locally or when on CIRCLECI and branch is master
+# sregistry should be used only when building locally or when on CIRCLECI and branch is master
 use_sregistry = False
 
 if 'CIRCLE_TAG' in os.environ or os.environ.get('CIRCLE_BRANCH') == 'master' or 'CIRCLECI' not in os.environ:
     import sregistry
     use_sregistry = True
-    os.environ['SREGISTRY_CLIENT'] = 's3'
-    os.environ['SREGISTRY_S3_BUCKET'] = 'singularity-savu'
+    os.environ['SREGISTRY_CLIENT'] = 's3' # activate S3 backend
+    os.environ['SREGISTRY_S3_BUCKET'] = 'singularity-savu' # name of the S3 bucket
+    os.environ['SREGISTRY_S3_OBJECT_ACL'] = 'public-read' # ensure S3 objects will be publicly readable
     from sregistry.main import get_client
     sregistry_client = get_client()
 

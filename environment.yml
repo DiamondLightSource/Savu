@@ -2,6 +2,8 @@ name: test-environment
 channels:
   - astra-toolbox
   - conda-forge
+  - ccpi
+  - dkazanc
 dependencies:
   - python=2.7
   - numpy
@@ -22,7 +24,9 @@ dependencies:
   - pyfftw
   - colorama
   - pymca==5.4.3
-  - ccpi::ccpi-regulariser
+  - ccpi-regulariser
+  - tomobar
+  - i23-seg
   - pip:
     - nvidia-ml-py
     - peakutils
