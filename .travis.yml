@@ -3,15 +3,15 @@ sudo: true
 language: python
 python:
   - "2.7"
-  - "3.5"
-addons:
-  apt:
-    packages:
-    - libblas-dev
-    - liblapack-dev
-    - gfortran
-    - libhdf5-serial-dev
-    - libboost-all-dev
+#  - "3.5"
+#addons:
+#  apt:
+#    packages:
+#    - libblas-dev
+#    - liblapack-dev
+#    - gfortran
+#    - libhdf5-serial-dev
+#    - libboost-all-dev
 
 before_install:
   - wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
@@ -34,6 +34,6 @@ script:
 after_script:
   - coveralls
   
-allow_failures:
-    - python: "3.5"
+#allow_failures:
+#    - python: "3.5"
 

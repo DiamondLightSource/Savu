@@ -15,7 +15,7 @@ dependencies:
   - scikit-image==0.14.0
   - astra-toolbox
   - xraylib
-  - tomopy
+  - tomopy==1.5.1
   - mock
   - fabio==0.4.0
   - pytest-cov
@@ -23,7 +23,7 @@ dependencies:
   - pyfai==0.15.0
   - pyfftw
   - colorama
-  - pymca
+  - pymca==5.4.3
   - ccpi-regulariser
   - tomobar
   - i23-seg
