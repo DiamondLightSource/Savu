@@ -88,7 +88,7 @@ class SpiralRemap(BaseFilter, CpuPlugin):
         # get plugin specific instances of these datasets
         in_pData, out_pData = self.get_plugin_datasets()
 
-        #TODO fix this hardcoded value for number of rotation angles
+        #TODO this should be a parameter
         self.full_rotation = 3600
 
         in_meta_data = self.get_in_meta_data()[0]
@@ -111,6 +111,11 @@ class SpiralRemap(BaseFilter, CpuPlugin):
                                       shape=tuple(outshape))
 
         out_pData[0].plugin_data_setup(self.get_plugin_pattern(), self.get_max_frames())
+
+        # fix the rotation angle for downstram plugins
+        out_meta_data = self.get_out_meta_data()[0]
+        out_meta_data.set('rotation_angle', np.linspace(0, 360.0, self.full_rotation))
+        out_meta_data.set('detector_y', np.arange(self.max_height))
 
     def get_max_frames(self):
         return 5
