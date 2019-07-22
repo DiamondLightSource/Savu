@@ -22,14 +22,11 @@
 """
 import logging
 import numpy as np
-from scipy.misc import imresize
 
 from savu.plugins.filters.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 from savu.plugins.utils import register_plugin, dawn_compatible
-
-from skimage.util.shape import view_as_windows as viewW
 
 from scipy.ndimage.interpolation import map_coordinates
 
@@ -52,43 +49,34 @@ class SpiralRemap(BaseFilter, CpuPlugin):
     def process_frames(self, data):
         # get the angles out of the metadata
         in_meta_data = self.get_in_meta_data()[0]
-        angles = in_meta_data.get('rotation_angle')
-
-        offsets = angles*self.parameters['y_per_theta']
-        offsets = offsets-offsets.min()
-        max_height = int(np.ceil(offsets.max()))
-
-        #TODO fix this hardcoded value for number of rotation angles
-        full_rotation = 3600
 
         pitch = 360*self.parameters['y_per_theta']
-        pitch_step = pitch/full_rotation
+        pitch_step = pitch/self.full_rotation
 
         # build the remapping mesh
-        mapy, mapx, mapz = np.meshgrid(np.arange(0, max_height),
+        mapy, mapx, mapz = np.meshgrid(np.arange(0, self.max_height),
                                        range(data[0].shape[0]),
                                        range(data[0].shape[2]))
 
-        mapy = mapy - offsets.reshape(offsets.shape[0],1,1)
+        mapy = mapy - self.offsets.reshape(self.offsets.shape[0],1,1)
 
         mapx[mapy>=(data[0].shape[1])] = -1
         mapx[mapy<0] = -1
 
-        sections = np.split(mapx, np.arange(0, mapx.shape[0],full_rotation)[1::])
+        sections = np.split(mapx, np.arange(0, mapx.shape[0],self.full_rotation)[1::])
 
         mapx = np.max(np.stack(sections[:-1], axis=3), axis=3)
 
         mapy[mapy>=(data[0].shape[1])] = -1
         mapy[mapy<0] = -1
 
-        sections = np.split(mapy, np.arange(0, mapy.shape[0],full_rotation)[1::])
+        sections = np.split(mapy, np.arange(0, mapy.shape[0],self.full_rotation)[1::])
 
         mapy = np.max(np.stack(sections[:-1], axis=3), axis=3)
 
-        mapz = mapz[:full_rotation, :, :]
+        mapz = mapz[:self.full_rotation, :, :]
 
-
-        # Apply the data, and then 
+        # Apply the data, and then.
         remapped_data = map_coordinates(data[0], [mapx, mapy-1, mapz], cval=0)
 
         return remapped_data
@@ -100,11 +88,27 @@ class SpiralRemap(BaseFilter, CpuPlugin):
         # get plugin specific instances of these datasets
         in_pData, out_pData = self.get_plugin_datasets()
 
+        #TODO fix this hardcoded value for number of rotation angles
+        self.full_rotation = 3600
+
+        in_meta_data = self.get_in_meta_data()[0]
+        angles = in_meta_data.get('rotation_angle')
+
+        self.offsets = angles*self.parameters['y_per_theta']
+        self.offsets = self.offsets-self.offsets.min()
+        self.max_height = int(np.ceil(self.offsets.max()))
+
         in_pData[0].plugin_data_setup(self.get_plugin_pattern(), self.get_max_frames())
-        inshape = in_dataset[0].get_shape()
+        outshape = list(in_dataset[0].get_shape())
+
+        rot_dim = in_dataset[0].get_data_dimension_by_axis_label('rotation_angle')
+        y_dim = in_dataset[0].get_data_dimension_by_axis_label('detector_y')
+        outshape[rot_dim] = self.full_rotation
+        outshape[y_dim] = self.max_height
+
         out_dataset[0].create_dataset(patterns=in_dataset[0],
                                       axis_labels=in_dataset[0],
-                                      shape=inshape)
+                                      shape=tuple(outshape))
 
         out_pData[0].plugin_data_setup(self.get_plugin_pattern(), self.get_max_frames())
 
