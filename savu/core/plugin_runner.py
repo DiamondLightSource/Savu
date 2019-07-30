@@ -47,6 +47,8 @@ class PluginRunner(object):
     def _run_plugin_list(self):
         """ Create an experiment and run the plugin list.
         """
+        self.exp._set_nxs_file()
+        
         plugin_list = self.exp.meta_data.plugin_list
         logging.info('Running the plugin list check')
         self._run_plugin_list_check(plugin_list)
@@ -131,7 +133,7 @@ class PluginRunner(object):
         n_loaders = plugin_list._get_n_loaders()
         self.__check_gpu()
         check_list = np.arange(len(plugin_list.plugin_list)) - n_loaders
-        self.__fake_plugin_list_run(plugin_list, check_list, setnxs=True)
+        self.__fake_plugin_list_run(plugin_list, check_list)
         savers_idx_before = plugin_list._get_savers_index()
         plugin_list._add_missing_savers(self.exp.index['in_data'].keys())
 
@@ -147,7 +149,7 @@ class PluginRunner(object):
         self.exp._clear_data_objects()
         cu.user_message("Plugin list check complete!")
 
-    def __fake_plugin_list_run(self, plugin_list, check_list, setnxs=False):
+    def __fake_plugin_list_run(self, plugin_list, check_list):
         """ Run through the plugin list without any processing (setup only)\
         and fill in missing dataset names.
         """
@@ -158,9 +160,6 @@ class PluginRunner(object):
         plist = plugin_list.plugin_list
         for i in range(n_loaders):
             plugin = pu.plugin_loader(self.exp, plugin_list.plugin_list[i])
-
-        if setnxs:
-            self.exp._set_nxs_filename()
         
         check = [True if x in check_list else False for x in range(n_plugins)]
 

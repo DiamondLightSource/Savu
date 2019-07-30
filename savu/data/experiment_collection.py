@@ -219,7 +219,7 @@ class Experiment(object):
                     return next_pattern
         return next_pattern
 
-    def _set_nxs_filename(self):
+    def _set_nxs_file(self):
         folder = self.meta_data.get('out_path')
         fname = self.meta_data.get('datafile_name') + '_processed.nxs'
         filename = os.path.join(folder, fname)
@@ -231,6 +231,17 @@ class Experiment(object):
                 log_folder = open(log_folder_name, 'a')
                 log_folder.write(os.path.abspath(filename) + '\n')
                 log_folder.close()
+
+        self._create_nxs_entry()
+    
+    def _create_nxs_entry(self):
+        logging.debug("Testing nexus file")
+        import h5py
+        if self.meta_data.get('process') == \
+                len(self.meta_data.get('processes'))-1:
+  	    with h5py.File(self.meta_data.get('nxs_filename'), 'w') as nxs_file:
+	        entry_group = nxs_file.create_group('entry')
+	        entry_group.attrs['NX_class'] = 'NXentry'
 
     def _clear_data_objects(self):
         self.index["out_data"] = {}
