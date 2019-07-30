@@ -22,24 +22,23 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
-import os
-import re
 import ast
-import yaml
-import h5py
-import json
 import copy
 import inspect
+import json
 import logging
-
-import numpy as np
+import os
+import re
 from collections import defaultdict
 
-import savu.plugins.utils as pu
-from savu.data.meta_data import MetaData
+import h5py
+import numpy as np
+import yaml
+
 import savu.data.framework_citations as fc
 import savu.plugins.loaders.utils.yaml_utils as yu
-
+import savu.plugins.utils as pu
+from savu.data.meta_data import MetaData
 
 NX_CLASS = 'NX_class'
 
@@ -79,8 +78,7 @@ class PluginList(object):
     def __get_json_keys(self):
         return ['data', 'desc', 'user', 'hide']
 
-    def _populate_plugin_list(self, filename, activePass=False,
-                              template=False):
+    def _populate_plugin_list(self, filename, active_pass=False, template=False):
         """ Populate the plugin list from a nexus file. """
         plugin_file = h5py.File(filename, 'r')
         plugin_group = plugin_file['entry/plugin']
@@ -96,14 +94,16 @@ class PluginList(object):
             if 'active' in entry_keys:
                 plugin['active'] = plugin_group[key]['active'][0]
 
-            if plugin['active'] or activePass:
+            if plugin['active'] or active_pass:
                 plugin['name'] = plugin_group[key]['name'][0]
                 plugin['id'] = plugin_group[key]['id'][0]
                 plugin['pos'] = key.encode('ascii').strip()
 
                 for jkey in json_keys:
-                    plugin[jkey] = \
-                        self._byteify(json.loads(plugin_group[key][jkey][0]))
+                    try:
+                        plugin[jkey] = self._byteify(json.loads(plugin_group[key][jkey][0]))
+                    except ValueError as e:
+                        raise ValueError("Error: {}\nCould not parse key '{}' as JSON".format(e, jkey))
                 self.plugin_list.append(plugin)
 
         if template:
@@ -151,7 +151,7 @@ class PluginList(object):
         for key in required_keys:
             # only need to apply dumps if saving in configurator
             data = self.__dumps(plugin[key]) if key == 'data' else plugin[key]
-            array = np.array([json.dumps(data)]) if key in json_keys else\
+            array = np.array([json.dumps(data)]) if key in json_keys else \
                 np.array([plugin[key]])
             plugin_group.create_dataset(key, array.shape, array.dtype, array)
 
@@ -303,7 +303,7 @@ class PluginList(object):
         loaders = self._get_loaders_index()
 
         if loaders:
-            if loaders[0] is not 0 or loaders[-1]+1 is not len(loaders):
+            if loaders[0] is not 0 or loaders[-1] + 1 is not len(loaders):
                 raise Exception("All loader plugins must be at the beginning "
                                 "of the plugin list")
         else:
@@ -319,7 +319,7 @@ class PluginList(object):
 
         for name in [data for data in data_names if data not in saved_data]:
             process = {}
-            pos = int(re.search(r'\d+', self.plugin_list[-1]['pos']).group())+1
+            pos = int(re.search(r'\d+', self.plugin_list[-1]['pos']).group()) + 1
             self.saver_idx.append(pos)
             plugin = pu.get_plugin('savu.plugins.savers.hdf5_saver')
             plugin.parameters['in_datasets'] = [name]
@@ -335,7 +335,7 @@ class PluginList(object):
         datasets_idx = []
         n_loaders = self._get_n_loaders()
         n_plugins = self._get_n_processing_plugins()
-        for i in range(self.n_loaders, n_loaders+n_plugins):
+        for i in range(self.n_loaders, n_loaders + n_plugins):
             datasets_idx.append(self.plugin_list[i]['data']['out_datasets'])
         return datasets_idx
 
@@ -381,9 +381,9 @@ class Template(object):
                 ptype, isyaml, key, value = p
                 if isyaml:
                     data_name = isyaml if ptype == 'local' else 'all'
-                    local_dict.set([i+1, name, data_name, key], value)
+                    local_dict.set([i + 1, name, data_name, key], value)
                 elif ptype == 'local':
-                    local_dict.set([i+1, name, key], value)
+                    local_dict.set([i + 1, name, key], value)
                 else:
                     global_dict.set(['all', name, key], value)
 
@@ -397,7 +397,7 @@ class Template(object):
                 yaml_dict = self._get_yaml_dict(value)
                 for entry in yaml_dict.keys():
                     self.__get_template_params(
-                            yaml_dict[entry]['params'], tlist, yaml=entry)
+                        yaml_dict[entry]['params'], tlist, yaml=entry)
             value = pu.is_template_param(value)
             if value is not False:
                 ptype, value = value
@@ -423,11 +423,11 @@ class Template(object):
                 depth = self.dict_depth(value)
                 if depth == 1:
                     self._set_param_for_template_loader_plugin(
-                            plugin_no, key, value)
+                        plugin_no, key, value)
                 elif depth == 0:
                     if plugin_no == 'all':
                         self._set_param_for_all_instances_of_a_plugin(
-                                plugin, key, value)
+                            plugin, key, value)
                     else:
                         data = self._get_plugin_data_dict(str(plugin_no))
                         data[key] = value
@@ -437,7 +437,7 @@ class Template(object):
     def dict_depth(self, d, depth=0):
         if not isinstance(d, dict) or not d:
             return depth
-        return max(self.dict_depth(v, depth+1) for k, v in d.iteritems())
+        return max(self.dict_depth(v, depth + 1) for k, v in d.iteritems())
 
     def _set_param_for_all_instances_of_a_plugin(self, plugin, param, value):
         # find all plugins with this name and replace the param
