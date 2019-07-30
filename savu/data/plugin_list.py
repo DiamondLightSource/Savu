@@ -114,8 +114,7 @@ class PluginList(object):
 
     def _save_plugin_list(self, out_filename):
         with h5py.File(out_filename, 'w') as nxs_file:
-            entry_group = nxs_file.create_group('entry')
-            entry_group.attrs[NX_CLASS] = 'NXentry'
+            entry_group = nxs_file.require_group('entry')
             citations_group = entry_group.create_group('framework_citations')
             citations_group.attrs[NX_CLASS] = 'NXcollection'
             self._save_framework_citations(citations_group)

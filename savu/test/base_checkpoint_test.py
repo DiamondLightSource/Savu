@@ -100,13 +100,7 @@ class BaseCheckpointTest(object):
         return exp
 
     def test_checkpoint_1(self):
-        # 1: Killed before checkpoint file and/or nxs file created
-
-        # No checkpoint file and empty nexus file
-        os.remove(self.cfile)
-        vals = (0, 0, 0, 'plugin')
-        self._refresh_nxs_file(entry=None)
-        self._rerun_from_checkpoint(*vals)
+        # 1: Killed before checkpoint file created
 
         # No checkpoint file
         os.remove(self.cfile)
