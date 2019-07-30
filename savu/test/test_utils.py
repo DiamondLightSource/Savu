@@ -227,7 +227,7 @@ def plugin_runner_load_plugin(options):
 
     exp = plugin_runner.exp
     pu.plugin_loader(exp, plugin_list[0])
-    exp._set_nxs_filename()
+    exp._set_nxs_file()
 
     plugin_dict = plugin_list[1]
     plugin = pu.get_plugin(plugin_dict['id'])
