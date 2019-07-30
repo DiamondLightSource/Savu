@@ -1,12 +1,12 @@
-version=savu/1.2-openmpi2.0.1
-cluster=com10
-gpu_arch=Kepler
+# either test_cluster, cluster or hamilton
+cluster=cluster
+# Fermi (com07), Kepler (com10), Pascal (com14/hamilton), Volta (hamilton)
+gpu_arch=kepler
 nodes=3
-cpus_per_node=20
-gpus_per_node=4
 cpus_to_use_per_node=20
-gpus_to_use_per_node=4
-input_file=/dls/i12/data/2017/ee16115-1/rawdata/68748.nxs
+gpus_to_use_per_node=2
+#input_file=/dls/i12/data/2019/nt23252-1/rawdata/86209.nxs
+input_file=/home/qmm55171/Documents/temp_docs/temp_output/24737.nxs
 process_file=test_full.nxs
 output_folder=.
 options=-l .
