@@ -1,0 +1,40 @@
+name: root
+channels:
+- conda-forge
+- ccpi
+- dkazanc
+- astra-toolbox/label/dev
+dependencies:
+- cython
+- spyder
+- scipy
+- pytest
+- colorama
+- setuptools
+- jinja2
+- numpy
+- pandas
+- mock
+- ipython
+- matplotlib
+- PyWavelets
+- scikit-image
+- scikit-learn
+- tomobar
+- ccpi-regulariser
+- i23-seg
+- astra-toolbox
+- xraylib
+- tomopy
+- pyfai
+- pip:
+  - fabio
+  - sphinx-rtd-theme
+  - gnureadline
+  - tifffile
+  - pyreadline
+  - pyfftw
+  - nvidia-ml-py
+  - PeakUtils
+  - pmacparser
+  - pymca
