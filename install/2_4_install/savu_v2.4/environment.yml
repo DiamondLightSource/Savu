@@ -1,5 +1,6 @@
 name: root
 channels:
+- defaults
 - conda-forge
 - ccpi
 - dkazanc
@@ -27,11 +28,12 @@ dependencies:
 - xraylib
 - tomopy
 - pyfai
+- fabio
+- sphinx-rtd-theme
+- gnureadline
+- pymca==5.4.3
+- tifffile
 - pip:
-  - fabio
-  - sphinx-rtd-theme
-  - gnureadline
-  - tifffile
   - pyreadline
   - pyfftw
   - nvidia-ml-py

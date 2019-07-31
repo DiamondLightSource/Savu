@@ -272,12 +272,6 @@ if [ ! $test_flag ] ; then
       cp $savu_path/system_files/$facility/mpi/savu_mpijob.sh $launcher_path
   fi
 
-  #-----------------------------------------------------------------
-  echo "Installing pyfai"
-  string=`awk '/^pyfai/' $versions_file`
-  pyfai_version=`echo $string | cut -d " " -f 2`
-  conda install -y -q -c conda-forge pyfai==$pyfai_version --no-deps
-  #-----------------------------------------------------------------
 
   #-----------------------------------------------------------------
   echo "Installing mpi4py..."
