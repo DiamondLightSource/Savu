@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import sys
 import getpass
 from collections import namedtuple
 from spython.main import Client as spython_client
@@ -75,7 +76,10 @@ for image in images:
     # build the image
     #
     spython_client.quiet = False # circumvent problem with sregistry setting this attribute to True, which kills my local builds!
-    spython_client.build(recipe='Singularity.' + image.name, image=local_image, sudo_options=sudo_options)
+    filename = spython_client.build(recipe='Singularity.' + image.name, image=local_image, sudo_options=sudo_options)
+    if filename is None:
+        print("Error creating singularity image {}".format(local_image))
+        sys.exit(1)
 
     #
     # add to local registry
