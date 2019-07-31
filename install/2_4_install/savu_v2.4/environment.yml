@@ -33,11 +33,10 @@ dependencies:
 - gnureadline
 - pymca
 - tifffile
+- pyfftw
+- PeakUtils
 - pip:
   - pyreadline
-  - pyfftw
   - nvidia-ml-py
-  - PeakUtils
   - pmacparser
-
 
