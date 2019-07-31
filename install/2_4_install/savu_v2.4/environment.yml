@@ -31,7 +31,7 @@ dependencies:
 - fabio
 - sphinx-rtd-theme
 - gnureadline
-- pymca==5.4.3
+- pymca
 - tifffile
 - pip:
   - pyreadline
@@ -39,4 +39,5 @@ dependencies:
   - nvidia-ml-py
   - PeakUtils
   - pmacparser
-  - pymca
+
+
