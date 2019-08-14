@@ -85,25 +85,26 @@ class PluginList(object):
         self.plugin_list = []
         single_val = ['name', 'id', 'pos', 'active']
         exclude = ['citation']
-        for key in plugin_group.keys():
+        for group in plugin_group.keys():
             plugin = self._get_plugin_entry_template()
-            entry_keys = plugin_group[key].keys()
-            json_keys = [k for k in entry_keys for e in exclude if k not in
+            entry_keys = plugin_group[group].keys()
+            parameters = [k for k in entry_keys for e in exclude if k not in
                          single_val and e not in k]
 
             if 'active' in entry_keys:
-                plugin['active'] = plugin_group[key]['active'][0]
+                plugin['active'] = plugin_group[group]['active'][0]
 
             if plugin['active'] or active_pass:
-                plugin['name'] = plugin_group[key]['name'][0]
-                plugin['id'] = plugin_group[key]['id'][0]
-                plugin['pos'] = key.encode('ascii').strip()
+                plugin['name'] = plugin_group[group]['name'][0]
+                plugin['id'] = plugin_group[group]['id'][0]
+                plugin['pos'] = group.encode('ascii').strip()
 
-                for jkey in json_keys:
+                for param in parameters:
                     try:
-                        plugin[jkey] = self._byteify(json.loads(plugin_group[key][jkey][0]))
+                        plugin[param] = self._byteify(json.loads(plugin_group[group][param][0]))
                     except ValueError as e:
-                        raise ValueError("Error: {}\nCould not parse key '{}' as JSON".format(e, jkey))
+                        raise ValueError(
+                            "Error: {}\nCould not parse key '{}' from group '{}' as JSON".format(e, param, group))
                 self.plugin_list.append(plugin)
 
         if template:
