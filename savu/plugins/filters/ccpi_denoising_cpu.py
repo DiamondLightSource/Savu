@@ -51,6 +51,7 @@ class CcpiDenoisingCpu(Plugin, CpuPlugin):
     huber, perona or tukey. Default: 'huber'.
     :param edge_par: NDF and Diff4th methods, noise magnitude parameter. Default: 0.01.
     :param tolerance_constant: tolerance constant to stop iterations earlier. Default: 0.0.
+    :param pattern: pattern to apply this to. Default: "VOLUME_XZ".
     """
 
     def __init__(self):
@@ -66,8 +67,8 @@ class CcpiDenoisingCpu(Plugin, CpuPlugin):
         in_dataset, out_dataset = self.get_datasets()
         out_dataset[0].create_dataset(in_dataset[0])
         in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup('VOLUME_XZ', 'single')
-        out_pData[0].plugin_data_setup('VOLUME_XZ', 'single')
+        in_pData[0].plugin_data_setup(self.parameters['pattern'], 'single')
+        out_pData[0].plugin_data_setup(self.parameters['pattern'], 'single')
 
     def pre_process(self):
 	# Ccpi-RGL toolkit modules
