@@ -39,13 +39,10 @@ In order to make code work one need to specify valid coordinates to initialise t
 """
 #  Geodesic distance transform, the software can be installed from 
 #  https://github.com/taigw/geodesic_distance with 
-#  python setup.py build
-#  python setup.py install
 import geodesic_distance
 
 # using Morphological snakes from
 # https://github.com/pmneila/morphsnakes
-# install with pip install morphsnakes
 from morphsnakes import circle_level_set
 
 
@@ -55,18 +52,32 @@ class GeoDistance(Plugin, CpuPlugin):
     Geodesic transformation of images with manual initialisation.
 
     :param init_coordinates: X,Y(start) and X,Y(finish) coordinates of the object of interest. Default: [0, 0, 10, 10].
-    :param circle_size: The seed will be initialised with a circle of size. Default: 10.
+    :param circle_size: The seed will be initialised with a circle of size. Default: 5.
+    :param out_datasets: The default names . Default: ['GeoDist','max_values'].
     """
 
     def __init__(self):
         super(GeoDistance, self).__init__("GeoDistance")
 
     def setup(self):
+        
         in_dataset, out_dataset = self.get_datasets()
-        out_dataset[0].create_dataset(in_dataset[0])
         in_pData, out_pData = self.get_plugin_datasets()
         in_pData[0].plugin_data_setup('VOLUME_XZ', 'single')
+        
+        out_dataset[0].create_dataset(in_dataset[0])
         out_pData[0].plugin_data_setup('VOLUME_XZ', 'single')
+        
+        
+        fullData = in_dataset[0]
+        slice_dirs = list(in_dataset[0].get_slice_dimensions())
+        self.new_shape = (np.prod(np.array(fullData.get_shape())[slice_dirs]), 1)
+        out_dataset[1].create_dataset(shape=self.new_shape,
+                                      axis_labels=['max_value', 'angle'],
+                                      remove=True,
+                                      transport='hdf5')
+        out_dataset[1].add_pattern("METADATA", core_dims=(1,), slice_dims=(0,))
+        out_pData[1].plugin_data_setup('METADATA', self.get_max_frames())
     
     def pre_process(self):
         # extract given parameters
@@ -85,11 +96,12 @@ class GeoDistance(Plugin, CpuPlugin):
         indices = np.where(np.isnan(input_temp))
         input_temp[indices] = 0.0
         geoDist = geodesic_distance.geodesic2d_raster_scan(input_temp, np.uint8(ls1), 0.5, 4)
-        #print(dimensdata)
-        return geoDist
+        maxvalues = [np.max(geoDist)]
+        return [geoDist,np.array([maxvalues])]
     
     def nInput_datasets(self):
         return 1
     def nOutput_datasets(self):
-        return 1
-    
+        return 2
+    def get_max_frames(self):
+        return 'single'
