@@ -20,7 +20,6 @@
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
 
-#:param input_vector: A vector for subsequent vector to scalar operation, specify the data name. Default: None.
 
 from savu.plugins.plugin import Plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
@@ -32,12 +31,11 @@ import numpy as np
 class ArithmeticOperations(Plugin, CpuPlugin):
     """
     Basic arithmetic operations on data: addition, subtraction, multiplication and division.\
-    Operations can be performed by providing a scalar value or a vector of values from which \
-    vector->scalar operation (e.g. min, max, mean etc.) must be performed first.
+    Operations can be performed by extracting scalars from METADATA (min, max, mean) OR providing a scalar value.
     
-    :param scalar_value: A scalar value value for arithmetic operation. Default: None.
-    :param operation: arithmetic operation to apply to data, choose from addition, subtraction, multiplication and division. Default: 'addition'.    
-    :param vector_operation: Vector operation to be applied to input vector, choose min, max, mean. Default: 'max'.
+    :param scalar_value: A scalar value value for arithmetic operation (it not in metadata). Default: None.
+    :param operation: arithmetic operation to apply to data, choose from addition, subtraction, multiplication and division. Default: 'division'.
+    :param metadata_value: A type of scalar extracted from metadata (min, max, mean). Default: 'max'.
     """
 
     def __init__(self):
@@ -50,36 +48,49 @@ class ArithmeticOperations(Plugin, CpuPlugin):
         in_pData[0].plugin_data_setup('VOLUME_XZ', 'single')
         out_pData[0].plugin_data_setup('VOLUME_XZ', 'single')
 
-        #data_t = self.get_in_datasets()[0]
-        #name = data_t.get_name()
-        #self.my_vector = in_dataset[0].meta_data.get()
-        self.my_vector = [1.0, 2.0]
-        #print(temp_vector)
-        
     def pre_process(self):
-        #perform vector -> scalar operation
-        if (self.parameters['scalar_value'] is not None):
-            # working with a provided scalar
-            self.scalar_res = self.parameters['scalar_value']
-        else:
-            # working with METADATA
-            if (self.parameters['vector_operation'] == 'min'):
-                self.scalar_res = np.min(self.my_vector)
-            if (self.parameters['vector_operation'] == 'max'):
-                self.scalar_res = np.max(self.my_vector)
-            if (self.parameters['vector_operation'] == 'mean'):
-                self.scalar_res = np.mean(self.my_vector)
+        data = self.get_in_datasets()[0]
+        self.scalar_res = 0.0
+        try:
+            the_max = data.meta_data.get(['stats', 'max', 'pattern'])
+        except KeyError:
+            the_max = self.parameters['scalar_value']
+        try:
+            the_min = data.meta_data.get(['stats', 'min', 'pattern'])
+        except KeyError:
+            the_min = self.parameters['scalar_value']
+        try:
+            the_mean = data.meta_data.get(['stats', 'mean', 'pattern'])
+        except KeyError:
+            the_mean = self.parameters['scalar_value']
+        # working with METADATA
+        if (self.parameters['metadata_value'] == 'min'):
+            if (the_min is not None):
+                self.scalar_res = the_min
+        if (self.parameters['metadata_value'] == 'max'):
+            if (the_max is not None):
+                self.scalar_res = the_max
+        if (self.parameters['metadata_value'] == 'mean'):
+            if (the_mean is not None):
+                self.scalar_res = the_mean
+        
     def process_frames(self, data):
-        if (self.parameters['operation'] == 'addition'):
-            corr_data = data[0] + self.scalar_res
-        if (self.parameters['operation'] == 'subtraction'):
-            corr_data = data[0] - self.scalar_res
-        if (self.parameters['operation'] == 'multiplication'):
-            corr_data = np.multiply(data[0], self.scalar_res)
-        if (self.parameters['operation'] == 'division'):
-            corr_data = np.true_divide(data[0], self.scalar_res)
+        if (self.scalar_res != 0.0):
+            if (self.parameters['operation'] == 'addition'):
+                corr_data = data[0] + self.scalar_res
+            if (self.parameters['operation'] == 'subtraction'):
+                corr_data = data[0] - self.scalar_res
+            if (self.parameters['operation'] == 'multiplication'):
+                corr_data = np.multiply(data[0], self.scalar_res)
+            if (self.parameters['operation'] == 'division'):
+                corr_data = np.true_divide(data[0], self.scalar_res)
         return corr_data
+    
+    def nInput_datasets(self):
+        return 1
+    
     def nOutput_datasets(self):
         return 1
+    
     def get_max_frames(self):
         return 'single'

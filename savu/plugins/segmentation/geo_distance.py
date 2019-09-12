@@ -45,7 +45,6 @@ import geodesic_distance
 # https://github.com/pmneila/morphsnakes
 from morphsnakes import circle_level_set
 
-
 @register_plugin
 class GeoDistance(Plugin, CpuPlugin):
     """
@@ -83,6 +82,7 @@ class GeoDistance(Plugin, CpuPlugin):
         # extract given parameters
         self.init_coordinates = self.parameters['init_coordinates']
         self.circle_size = self.parameters['circle_size']
+        # initialise 3D level set to pass 
 
     def process_frames(self, data):
         dimensdata = data[0].ndim
@@ -98,6 +98,11 @@ class GeoDistance(Plugin, CpuPlugin):
         geoDist = geodesic_distance.geodesic2d_raster_scan(input_temp, np.uint8(ls1), 0.5, 4)
         maxvalues = [np.max(geoDist)]
         return [geoDist,np.array([maxvalues])]
+    
+    def post_process(self):
+        data, max_values = self.get_out_datasets()
+        max_stat = np.max(max_values.data[...], axis=0)
+        data.meta_data.set(['stats', 'max', 'pattern'], max_stat)
     
     def nInput_datasets(self):
         return 1
