@@ -39,6 +39,7 @@ if [ -n "${infile+set}" ]; then
 
 	cluster=${var[0],,}
 	gpu_arch=${var[1],,}
+	gpu_arch=${gpu_arch^}
 	nNodes=${var[2]}
 	cpus_to_use_per_node=${var[3]}
 	gpus_to_use_per_node=${var[4]}
@@ -108,10 +109,10 @@ else
 		cluster=cluster
 		# determine cluster setup based on type
 		case $type in
-			'AUTO') gpu_arch=fermi ; nNodes=1 ;;
-			'PREVIEW') gpu_arch=fermi ; nNodes=1 ;;
-			'BIG') gpu_arch=pascal ; nNodes=8 ;;
-			'') gpu_arch=kepler ; nNodes=4 ;;
+			'AUTO') gpu_arch=Fermi ; nNodes=1 ;;
+			'PREVIEW') gpu_arch=Fermi ; nNodes=1 ;;
+			'BIG') gpu_arch=Pascal ; nNodes=8 ;;
+			'') gpu_arch=Kepler ; nNodes=4 ;;
 			 *) echo -e "\nUnknown 'type' optional argument"
 			    echo -e "Please choose from 'AUTO' or 'PREVIEW'"
 				exit 1 ;;
@@ -120,7 +121,7 @@ else
 	else
 		cluster='hamilton'
 		# determine cluster setup based on type
-		gpu_arch=pascal
+		gpu_arch=Pascal
 		case $type in
 			'AUTO') nNodes=1 ;;
 			'PREVIEW') nNodes=1 ;;
@@ -151,16 +152,17 @@ case $cluster in
 		cluster_queue=high.q
 	    	# which gpu architecture?
 		case $gpu_arch in
-			'fermi')
-				cluster_queue=$cluster@@com07
+			'Fermi')
+				cluster_queue=$cluster_queue@@com07
 				cpus_per_node=12
 				gpus_per_node=2 ;;
-     		'kepler')
-				cluster_queue=$cluster@@com10
+     		'Kepler')
+				cluster_queue=$cluster_queue@@com10
 				cpus_per_node=20
 				gpus_per_node=4 ;;
-     		'pascal')
-				cluster_queue=$cluster@@com14
+     		'Pascal')
+				echo -e "setting cluster to com14**************"
+				cluster_queue=$cluster_queue@@com14
 				cpus_per_node=20
 				gpus_per_node=2 ;;
 			*) echo -ne "\nERROR: Unknown GPU architecture for the cluster. "
@@ -168,15 +170,15 @@ case $cluster in
   			   exit 1 ;;
 		esac ;;
 	'hamilton')
-    	module load hamilton-quiet
+		module load hamilton-quiet
 		cluster_queue=all.q
-		cpus_per_node=40
+		cpus_per_node=30 # using only 30/40 cores per node gives equivalent mem per core as com10/com14
 		gpus_per_node=4
 
     	# which gpu architecture?
 		if [ -z $gpu_arch ] ; then
-			gpu_arch='pascal'
-		elif [ $gpu_arch != 'pascal' ] && [ $gpu_arch != 'volta' ] ; then
+			gpu_arch='Pascal'
+		elif [ $gpu_arch != 'Pascal' ] && [ $gpu_arch != 'Volta' ] ; then
 			echo -ne "\nERROR: Unknown GPU architecture for Hamilton. "
 			echo -e "Please choose from 'Pascal' or 'Volta'\n"
 			exit 1
@@ -188,6 +190,16 @@ esac
 # override cpu and gpu values if the full node is not required
 if [ -z $cpus_to_use_per_node ] ; then cpus_to_use_per_node=$cpus_per_node; fi
 if [ -z $gpus_to_use_per_node ] ; then gpus_to_use_per_node=$gpus_per_node; fi
+
+if [ $cpus_to_use_per_node -gt $cpus_per_node ] ; then
+	echo "The number of CPUs requested per node ($cpus_to_use_per_node) is greater than the maximum ($cpus_per_node)."
+	exit 1
+fi
+if [ $gpus_to_use_per_node -gt $gpus_per_node ] ; then
+	echo "The number of GPUs requested per node ($gpus_to_use_per_node) is greater than the maximum ($gpus_per_node)."
+	exit 1
+fi
+	
 
 # set total processes required
 processes=$((nNodes*cpus_per_node))
@@ -265,27 +277,29 @@ basename=`basename $process_file`
 cp $process_file $interfolder
 process_file=$interfolder/$basename
 
+echo -e "Running on project" $project
+
+# openmpi-savu stops greater than requested number of nodes being assigned to the job if memory
+# requirements are not satisfied.
+generic="-N $outname -j y -o $interfolder -e $interfolder -pe openmpi-savu $processes -l exclusive \
+-l gpu=$gpus_per_node -l gpu_arch=$gpu_arch -q $cluster_queue -P $project \
+$filepath $version $savupath $data_file $process_file $outpath $cpus_to_use_per_node \
+$gpus_to_use_per_node $delete $options -c -f $outfolder -s graylog2.diamond.ac.uk -p 12203 \
+--facility_email scientificsoftware@diamond.ac.uk -l $outfolder"
+
 case $cluster in
 	"test_cluster")
-		qsub -N $outname -j y -o $interfolder -e $interfolder -pe openmpi $processes -l exclusive \
-		-l infiniband -l gpu=$gpus_per_node -l gpu_arch=$gpu_arch -q $cluster_queue -P $project \
-		$filepath $version $savupath $data_file $process_file $outpath $cpus_to_use_per_node \
-		$gpus_to_use_per_node $delete $options -c -f $outfolder -s graylog2.diamond.ac.uk -p 12203 \
-		--facility_email scientificsoftware@diamond.ac.uk -l $outfolder > /dls/tmp/savu/$USER.out ;;
+		qsub -l infiniband $generic > /dls/tmp/savu/$USER.out ;;
 	"cluster")
+		# RAM com10 252G com14 252G ~ 12G per core  - m_mem_free requested in JSV script
 	  	qsub -jsv /dls_sw/apps/sge/common/JSVs/savu.pl \
-		-N $outname -j y -o $interfolder -e $interfolder -pe openmpi $processes -l exclusive \
-		-l infiniband -l gpu=$gpus_per_node -l gpu_arch=$gpu_arch -q $cluster_queue -P $project \
-		$filepath $version $savupath $data_file $process_file $outpath $cpus_to_use_per_node \
-		$gpus_to_use_per_node $delete $options -c -f $foldername -s graylog2.diamond.ac.uk -p 12203 \
-		--facility_email scientificsoftware@diamond.ac.uk -l $outfolder > /dls/tmp/savu/$USER.out ;;
+		-l infiniband $generic > /dls/tmp/savu/$USER.out ;;
 	"hamilton")
-		qsub -N $outname -j y -o $interfolder -e $interfolder -pe openmpi $processes -l exclusive \
-		-l gpu=$gpus_per_node -l gpu_arch=$gpu_arch -q $cluster_queue -P $project $filepath $version \
-		$savupath $data_file $process_file $outpath $cpus_to_use_per_node $gpus_to_use_per_node \
-		$delete $options -c -f $foldername -s graylog2.diamond.ac.uk -p 12203 \
-		--facility_email scientificsoftware@diamond.ac.uk -l $outfolder > /dls/tmp/savu/$USER.out ;;
-esac	
+		# RAM 384G per core (but 377G available?) ~ 9G per core
+		# requesting 7G per core as minimum (required to be available on startup),but will use all
+		# memory unless system jobs need it (then could be rolled back to the minimum 7G)
+		qsub -l m_mem_free=7G $generic > /dls/tmp/savu/$USER.out ;;
+esac
 
 # get the job number here
 filename=`echo $outname.o`

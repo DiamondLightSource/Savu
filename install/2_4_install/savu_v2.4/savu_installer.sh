@@ -92,8 +92,8 @@ else
   echo "Unknown Savu installation version."
 fi
 
-# override the install folder
-arg_parse "-i" install_version "$@"
+# override the conda recipes folder
+arg_parse "-r" recipes "$@"
 
 #=========================library checking==============================
 
@@ -258,12 +258,10 @@ if [ ! $test_flag ] ; then
   savu_path=${path%/savu/__init__.pyc}
 
   # get the savu version
-  if [ -z $install_version ] ; then
+  if [ -z $recipes ] ; then
 	install_path=$(python -c "import savu; import savu.version as sv; print sv.__install__")
-  else
-	install_path="/install/"$install_version
+	recipes=$savu_path/$install_path/conda-recipes
   fi
-  recipes=$savu_path/$install_path/conda-recipes
 
   launcher_path=`command -v savu_launcher.sh`
   launcher_path=${launcher_path%/savu_launcher.sh}
