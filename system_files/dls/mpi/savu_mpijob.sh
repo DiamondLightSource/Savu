@@ -1,3 +1,5 @@
+# update for singularity run
+
 version=$1
 shift 1
 module load savu/$version
