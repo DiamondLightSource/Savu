@@ -263,7 +263,6 @@ if [ ! $interfolder ] ; then
 else
 	interfolder=$interfolder/$foldername
 	if [ ! -d $interfolder ]; then
-		echo -e "\t Creating the output folder "$interfolder
 		create_folder $interfolder
 	fi
 	if [ ! $type == 'AUTO' ] && [ ! $type == 'PREVIEW' ] ; then
@@ -276,8 +275,6 @@ process_file=`readlink -f $process_file`
 basename=`basename $process_file`
 cp $process_file $interfolder
 process_file=$interfolder/$basename
-
-echo -e "Running on project" $project
 
 # openmpi-savu stops greater than requested number of nodes being assigned to the job if memory
 # requirements are not satisfied.
