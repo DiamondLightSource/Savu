@@ -126,7 +126,7 @@ setup(name='savu',
                     'system_files': [
                         facility + '/*',
                         facility + '/mpi/*'],
-					'test.travis.framework_tests': [*.yml],
+					'test.travis.framework_tests': ['*.yml'],
                     'install': ['*.txt'],
                     __install__: ['*.txt'],
                     install_pkg + '.conda-recipes': [
