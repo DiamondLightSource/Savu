@@ -28,6 +28,7 @@ import fnmatch
 import difflib
 import numpy as np
 
+import savu.core.utils as cu
 from savu.plugins.utils import register_plugin
 from savu.plugins.loaders.yaml_converter import YamlConverter
 from savu.data.data_structures.data_types.stitch_data import StitchData
@@ -91,8 +92,12 @@ class Hdf5TemplateLoader(YamlConverter):
             data_obj_list.append(self._setup_data(sub_obj, match_path))
             del self.exp.index['in_data'][match]
 
-        dObj.data = StitchData(data_obj_list, stype, dim, remove=remove)
-        dObj.set_original_shape(dObj.data.get_shape())
+        if data_obj_list:
+            dObj.data = StitchData(data_obj_list, stype, dim, remove=remove)
+            dObj.set_original_shape(dObj.data.get_shape())
+        else:
+            cu.user_message("The data set %s is empty." % data_name)
+
         return dObj
 
     def _get_stitching_info(self, data):
