@@ -25,7 +25,6 @@ from savu.plugins.plugin import Plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 
-import numpy as np
 """
 Geodesic transformation of images can be implementated with two approaches: \
 fast marching and raster scan. Fast marching is based on the iterative \
@@ -35,11 +34,12 @@ In GeoS, the authors proposed to use a 3x3 kernel for forward and \
 backward passes for efficient geodesic distance transform, which was used for  \
 image segmentation. # https://github.com/taigw/geodesic_distance \
 In order to make code work one need to specify valid coordinates to initialise the point\
-(seed) from which the distances will be calculated. 
+(seed) from which the distances will be calculated.
 """
-#  Geodesic distance transform, the software can be installed from 
-#  https://github.com/taigw/geodesic_distance with 
+#  Geodesic distance transform, the software can be installed from
+#  https://github.com/taigw/geodesic_distance with
 import geodesic_distance
+import numpy as np
 
 @register_plugin
 class GeoDistance(Plugin, CpuPlugin):
@@ -53,16 +53,16 @@ class GeoDistance(Plugin, CpuPlugin):
         super(GeoDistance, self).__init__("GeoDistance")
 
     def setup(self):
-        
+
         in_dataset, out_dataset = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
         in_pData[0].plugin_data_setup('VOLUME_YZ', 'single')
         in_pData[1].plugin_data_setup('VOLUME_YZ', 'single') # the initialisation (mask)
-        
+
         out_dataset[0].create_dataset(in_dataset[0])
         out_pData[0].plugin_data_setup('VOLUME_YZ', 'single')
-        
-        
+
+
         fullData = in_dataset[0]
         slice_dirs = list(in_dataset[0].get_slice_dimensions())
         self.new_shape = (np.prod(np.array(fullData.get_shape())[slice_dirs]), 1)
@@ -72,21 +72,24 @@ class GeoDistance(Plugin, CpuPlugin):
                                       transport='hdf5')
         out_dataset[1].add_pattern("METADATA", core_dims=(1,), slice_dims=(0,))
         out_pData[1].plugin_data_setup('METADATA', self.get_max_frames())
-    
+
 
     def process_frames(self, data):
         input_temp = data[0]
         indices = np.where(np.isnan(input_temp))
         input_temp[indices] = 0.0
-        geoDist = geodesic_distance.geodesic2d_raster_scan(input_temp, data[1], 0.5, 4)
+        if (np.sum(data[1]) > 0):
+            geoDist = geodesic_distance.geodesic2d_raster_scan(input_temp, data[1], 0.5, 4)
+        else:
+            geoDist = np.float32(np.zeros(np.shape(data[0])))
         maxvalues = [np.max(geoDist)]
         return [geoDist,np.array([maxvalues])]
-    
+
     def post_process(self):
         data, max_values = self.get_out_datasets()
         max_stat = np.max(max_values.data[...], axis=0)
         data.meta_data.set(['stats', 'max', 'pattern'], max_stat)
-    
+
     def nInput_datasets(self):
         return 2
     def nOutput_datasets(self):
