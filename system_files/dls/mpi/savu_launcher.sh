@@ -161,7 +161,6 @@ case $cluster in
 				cpus_per_node=20
 				gpus_per_node=4 ;;
      		'Pascal')
-				echo -e "setting cluster to com14**************"
 				cluster_queue=$cluster_queue@@com14
 				cpus_per_node=20
 				gpus_per_node=2 ;;
@@ -172,7 +171,8 @@ case $cluster in
 	'hamilton')
 		module load hamilton-quiet
 		cluster_queue=all.q
-		cpus_per_node=30 # using only 30/40 cores per node gives equivalent mem per core as com10/com14
+		cpus_per_node=40
+		#cpus_to_use_per_node=30
 		gpus_per_node=4
 
     	# which gpu architecture?
