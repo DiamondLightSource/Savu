@@ -5,7 +5,7 @@ channels:
 - conda-forge
 - ccpi
 - dkazanc
-- astra-toolbox
+- astra-toolbox/label/dev
 dependencies:
 - cython
 - spyder
@@ -26,7 +26,7 @@ dependencies:
 - ccpi-regulariser
 - ccpi-reconstruction
 - i23-seg
-- astra-toolbox
+- astra-toolbox=1.9.0.dev8
 - xraylib
 - tomopy
 - pyfai
@@ -40,6 +40,6 @@ dependencies:
   - pyreadline
   - nvidia-ml-py
   - pmacparser
-  - gnureadline==6.3.8
+  - gnureadline
   - sphinx-rtd-theme
 
