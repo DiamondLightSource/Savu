@@ -45,6 +45,7 @@ class MorphSnakes(Plugin, CpuPlugin):
     :param smoothing: Number of times the smoothing operator is applied per iteration, \
         reasonable values are around 1-4 and larger values lead to smoother segmentations. Default: 1.
     :param iterations: The number of iterations. Default: 350.
+    :param pattern: pattern to apply this to. Default: "VOLUME_YZ".
     """
 
     def __init__(self):
@@ -54,11 +55,11 @@ class MorphSnakes(Plugin, CpuPlugin):
 
         in_dataset, out_dataset = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup('VOLUME_YZ', 'single')
-        in_pData[1].plugin_data_setup('VOLUME_YZ', 'single') # the initialisation (mask)
+        in_pData[0].plugin_data_setup(self.parameters['pattern'], 'single')
+        in_pData[1].plugin_data_setup(self.parameters['pattern'], 'single') # the initialisation (mask)
 
         out_dataset[0].create_dataset(in_dataset[0], dtype=np.uint8)
-        out_pData[0].plugin_data_setup('VOLUME_YZ', 'single')
+        out_pData[0].plugin_data_setup(self.parameters['pattern'], 'single')
 
     def pre_process(self):
         # extract given parameters
