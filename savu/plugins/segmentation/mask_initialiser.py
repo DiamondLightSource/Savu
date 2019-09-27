@@ -66,7 +66,7 @@ class MaskInitialiser(Plugin, CpuPlugin):
         self.coordX1 = self.init_coordinates[3]
         self.coordY1 = self.init_coordinates[4]
         self.coordZ1 = self.init_coordinates[5]
-
+        
         steps = self.coordZ1 - self.coordZ0
         self.distance = np.sqrt((self.coordX1 - self.coordX0)**2 + (self.coordY1 - self.coordY0)**2)
         self.d_dist = self.distance/(steps - 1.0)
@@ -78,20 +78,24 @@ class MaskInitialiser(Plugin, CpuPlugin):
         [dimX,dimY] = np.shape(data[0])
         mask = np.uint8(np.zeros(np.shape(data[0])))
         if ((index_current >= self.coordZ0) & (index_current <= self.coordZ1)):
-            if (self.coordX0 != 0 & self.coordY0 != 0 & self.coordX1 != 0 & self.coordY1 != 0):
-                self.d_step = (index_current - self.coordZ0)*self.d_dist
-                t = self.d_step/self.distance
-                x_t = np.round((1.0 - t)*self.coordX0 + t*self.coordX1)
-                y_t = np.round((1.0 - t)*self.coordY0 + t*self.coordY1)
-                if (self.coordX0 == self.coordX1):
-                    x_t = self.coordX0
-                if(self.coordY0 == self.coordY1):
-                    y_t = self.coordY0
-                mask = np.uint8(circle_level_set(np.shape(data[0]), (np.round(y_t[0]), np.round(x_t[0])), self.circle_radius))
-            else:
+            if ((self.coordX0 == 0) & (self.coordY0 == 0) & (self.coordX1 == 0) & (self.coordY1 == 0)):
                 # create a full region mask (except the boundaries)
                 bound_width=2 # outer boundary width
                 mask[bound_width:dimX-bound_width, bound_width:dimY-bound_width] = 1
+            else:
+                self.d_step = (index_current - self.coordZ0)*self.d_dist
+                t = self.d_step/self.distance
+                if (self.coordX0 == self.coordX1):
+                    x_t = np.int(self.coordX0)
+                else:
+                    x_t1 = np.round((1.0 - t)*self.coordX0 + t*self.coordX1)
+                    x_t = np.int(x_t1[0])
+                if(self.coordY0 == self.coordY1):
+                    y_t = np.int(self.coordY0)
+                else:
+                    y_t1 = np.round((1.0 - t)*self.coordY0 + t*self.coordY1)
+                    y_t = np.int(y_t1[0])
+                mask = np.uint8(circle_level_set(np.shape(data[0]), (y_t, x_t), self.circle_radius))
         return [mask]
 
     def nInput_datasets(self):
