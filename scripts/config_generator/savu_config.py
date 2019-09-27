@@ -23,14 +23,18 @@ from __future__ import print_function
 import re
 import sys
 
-from content import Content
-from completer import Completer
-from display_formatter import ListDisplay, DispDisplay
-import arg_parsers as parsers
-from savu.plugins import utils as pu
-import config_utils as utils
-from config_utils import parse_args
-from config_utils import error_catcher
+
+import warnings
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    from content import Content
+    from completer import Completer
+    from display_formatter import ListDisplay, DispDisplay
+    import arg_parsers as parsers
+    from savu.plugins import utils as pu
+    import config_utils as utils
+    from config_utils import parse_args
+    from config_utils import error_catcher
 
 
 def _help(content, args):
@@ -208,6 +212,7 @@ commands = {'open': _open,
 
 def main():
 
+    print("Running the configurator")
     # required for travis tests
     if len(sys.argv) > 2 and sys.argv[-2] == 'scripts/configurator_tests/':
         sys.argv = [sys.argv[:-2]]
@@ -218,7 +223,10 @@ def main():
 
     print("Starting Savu Config tool (please wait for prompt)")
 
-    utils.populate_plugins()
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        utils.populate_plugins()
+
     comp = Completer(commands=commands, plugin_list=pu.plugins)
     utils._set_readline(comp.complete)
 

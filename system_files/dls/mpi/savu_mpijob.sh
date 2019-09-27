@@ -43,9 +43,9 @@ if [ ! $delete == false ]; then
   delete=`readlink -f $delete`
   echo "***Deleting the intermediate folder" $delete "at the end of this run"
 fi
+       #-mca btl sm,self,openib \
 
 mpirun -np ${processes} \
-       -mca btl sm,self,openib \
        -x LD_LIBRARY_PATH \
        --hostfile ${TMP_FILE} \
        python $filename $datafile $processfile $outfile -n $CPUs -v $@

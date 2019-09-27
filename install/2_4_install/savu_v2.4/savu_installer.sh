@@ -113,11 +113,13 @@ fi
 
 # set compiler wrapper
 MPICC=$(command -v mpicc)
+MPI_HOME=${MPICC%/mpicc}
 if ! [ "$MPICC" ]; then
     echo "ERROR: I require mpicc but I can't find it.  Check /path/to/mpi_implementation/bin is in your PATH"
     exit 1
 else
     echo "Using mpicc:   " $MPICC
+	export PATH=$MPI_HOME:$PATH
 fi
 
 # check for fftw
@@ -146,6 +148,8 @@ nvcc=`command -v nvcc`
 CUDAHOME=${nvcc%/bin/nvcc}
 if [ "$CUDAHOME" ]; then
     echo "Using cuda:    " $CUDAHOME
+	export PATH=$CUDAHOME/bin:$PATH
+	export LD_LIBRARY_PATH=$CUDAHOME/lib64:$LD_LIBRARY_PATH
 else
     echo "cuda has not been found."
 fi
@@ -246,7 +250,6 @@ if [ ! $test_flag ] ; then
 
   conda install -y -q conda-build conda-env
   conda install -y -q conda-verify
-  conda env update -n root -f $DIR/environment.yml
 
   echo "Building Savu..."
   conda build $DIR/$savu_recipe
@@ -270,13 +273,13 @@ if [ ! $test_flag ] ; then
       cp $savu_path/system_files/$facility/mpi/savu_mpijob.sh $launcher_path
   fi
 
-
+  # moving things here to see if this works better
   #-----------------------------------------------------------------
   echo "Installing mpi4py..."
   pip uninstall -y -q mpi4py || true
   string=`awk '/^mpi4py/' $versions_file`
   mpi4py_version=`echo $string | cut -d " " -f 2`
-  env MPICC=$MPICC pip install mpi4py==$mpi4py_version
+  pip install mpi4py==$mpi4py_version
   #-----------------------------------------------------------------
 
   #-----------------------------------------------------------------
@@ -298,6 +301,9 @@ if [ ! $test_flag ] ; then
   echo "Installing h5py..."
   conda install -y -q --use-local $h5pybuild
   #-----------------------------------------------------------------
+
+
+  conda env update -n root -f $DIR/environment.yml
 
 
   echo -e "\n\t***************************************************"
