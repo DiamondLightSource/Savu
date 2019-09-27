@@ -38,8 +38,7 @@ class MaskInitialiser(Plugin, CpuPlugin):
     and a connecting line (or a 3D cylinder of a certain radius) will be cast between them \
     Importantly the Z coordinate is given following VOLUME_XY vertical pattern
 
-    :param init_coordinates: X0,Y0,Z0 and X1,Y1,Z1 coordinates of two points, if None is \
-    provided then mask initialised at the outer edge of the input volume. Default: [10, 10, 0, 20, 20, 20].
+    :param init_coordinates: X0,Y0,Z0 and X1,Y1,Z1 coordinates of two points. Default: [10, 10, 0, 20, 20, 20].
     :param circle_radius: The seed will be initialised with a circle of radius. Default: 5.
     :param out_datasets: The default names . Default: ['INIT_MASK'].
     """
@@ -61,34 +60,38 @@ class MaskInitialiser(Plugin, CpuPlugin):
         self.circle_radius = self.parameters['circle_radius']
         self.init_coordinates = self.parameters['init_coordinates']
         
-        if (self.init_coordinates is not None):
-            self.coordX0 = self.init_coordinates[0]
-            self.coordY0 = self.init_coordinates[1]
-            self.coordZ0 = self.init_coordinates[2]
-            self.coordX1 = self.init_coordinates[3]
-            self.coordY1 = self.init_coordinates[4]
-            self.coordZ1 = self.init_coordinates[5]
-            
-            steps = self.coordZ1 - self.coordZ0
-            self.distance = np.sqrt((self.coordX1 - self.coordX0)**2 + (self.coordY1 - self.coordY0)**2)
-            self.d_dist = self.distance/(steps - 1.0)
-            self.d_step = self.d_dist
+        self.coordX0 = self.init_coordinates[0]
+        self.coordY0 = self.init_coordinates[1]
+        self.coordZ0 = self.init_coordinates[2]
+        self.coordX1 = self.init_coordinates[3]
+        self.coordY1 = self.init_coordinates[4]
+        self.coordZ1 = self.init_coordinates[5]
+
+        steps = self.coordZ1 - self.coordZ0
+        self.distance = np.sqrt((self.coordX1 - self.coordX0)**2 + (self.coordY1 - self.coordY0)**2)
+        self.d_dist = self.distance/(steps - 1.0)
+        self.d_step = self.d_dist
 
     def process_frames(self, data):
         # get the index of a current frame
         index_current = self.get_plugin_in_datasets()[0].get_current_frame_idx()
+        [dimX,dimY] = np.shape(data[0])
+        mask = np.uint8(np.zeros(np.shape(data[0])))
         if ((index_current >= self.coordZ0) & (index_current <= self.coordZ1)):
-            self.d_step = (index_current - self.coordZ0)*self.d_dist
-            t = self.d_step/self.distance
-            x_t = np.round((1.0 - t)*self.coordX0 + t*self.coordX1)
-            y_t = np.round((1.0 - t)*self.coordY0 + t*self.coordY1)
-            if (self.coordX0 == self.coordX1):
-                x_t = self.coordX0
-            if(self.coordY0 == self.coordY1):
-                y_t = self.coordY0
-            mask = np.uint8(circle_level_set(np.shape(data[0]), (np.round(y_t[0]), np.round(x_t[0])), self.circle_radius))
-        else:
-            mask = np.uint8(np.zeros(np.shape(data[0])))
+            if (self.coordX0 != 0 & self.coordY0 != 0 & self.coordX1 != 0 & self.coordY1 != 0):
+                self.d_step = (index_current - self.coordZ0)*self.d_dist
+                t = self.d_step/self.distance
+                x_t = np.round((1.0 - t)*self.coordX0 + t*self.coordX1)
+                y_t = np.round((1.0 - t)*self.coordY0 + t*self.coordY1)
+                if (self.coordX0 == self.coordX1):
+                    x_t = self.coordX0
+                if(self.coordY0 == self.coordY1):
+                    y_t = self.coordY0
+                mask = np.uint8(circle_level_set(np.shape(data[0]), (np.round(y_t[0]), np.round(x_t[0])), self.circle_radius))
+            else:
+                # create a full region mask (except the boundaries)
+                bound_width=2 # outer boundary width
+                mask[bound_width:dimX-bound_width, bound_width:dimY-bound_width] = 1
         return [mask]
 
     def nInput_datasets(self):

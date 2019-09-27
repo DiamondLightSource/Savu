@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: creates a 
+.. module:: creates final segmentation for i23 data, apply at the end of the process list
    :platform: Unix
-   :synopsis: Wrapper around Morphsnakes for Morphological countours segmentation
+   :synopsis: creates final segmentation for i23 data, apply at the end of the process list
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
@@ -25,58 +25,51 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 
 import numpy as np
-# using Morphological snakes module from
-# https://github.com/pmneila/morphsnakes
-from morphsnakes import morphological_chan_vese
-
 
 @register_plugin
-class MorphSnakes(Plugin, CpuPlugin):
+class FinalSegmentI23(Plugin, CpuPlugin):
     """
-    A Plugin to segment reconstructed data using Morphsnakes module. When initialised
-    with a mask, the active contour propagates to find the minimum of energy (a possible edge countour).
+    Apply at the end when all objects have been segmented independently (crystal, liquor, whole object)
 
-    :param lambda1:  Weight parameter for the outer region, if lambda1 is larger than \
-        lambda2, the outer region will contain a larger range of values than \
-        the inner region. Default: 1.
-    :param lambda2:  Weight parameter for the inner region, if lambda2 is larger than \
-        lambda1, the inner region will contain a larger range of values than \
-        the outer region. Default: 1.
-    :param smoothing: Number of times the smoothing operator is applied per iteration, \
-        reasonable values are around 1-4 and larger values lead to smoother segmentations. Default: 1.
-    :param iterations: The number of iterations. Default: 350.
-    :param pattern: pattern to apply this to. Default: "VOLUME_YZ".
+    :param set_classes_val: Set the values for all 4 classes (crystal, liquor, loop, vacuum). Default: [255,128, 64, 0].
     """
 
     def __init__(self):
-        super(MorphSnakes, self).__init__("MorphSnakes")
+        super(FinalSegmentI23, self).__init__("FinalSegmentI23")
 
     def setup(self):
 
         in_dataset, out_dataset = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
         in_pData[0].plugin_data_setup(self.parameters['pattern'], 'single')
-        in_pData[1].plugin_data_setup(self.parameters['pattern'], 'single') # the initialisation (mask)
 
         out_dataset[0].create_dataset(in_dataset[0], dtype=np.uint8)
         out_pData[0].plugin_data_setup(self.parameters['pattern'], 'single')
 
     def pre_process(self):
         # extract given parameters
-        self.lambda1 = self.parameters['lambda1']
-        self.lambda2 = self.parameters['lambda2']
-        self.smoothing = self.parameters['smoothing']
-        self.iterations = self.parameters['iterations']
+        self.set_classes_val = self.parameters['set_classes_val']
 
     def process_frames(self, data):
-        # run MorphSnakes here:
-        if (np.sum(data[1]) > 0):
-            segment_result = morphological_chan_vese(data[0], iterations=self.iterations, lambda1=self.lambda1, lambda2=self.lambda2, init_level_set=data[1])
-        else:
-            segment_result = np.uint8(np.zeros(np.shape(data[0])))
-        return [segment_result]
+        CrystSegm = data[0] 
+        LiquorSegm = data[1]
+        WholeObjSegm = data[2]
+        LoopSegm = WholeObjSegm - LiquorSegm
+        notnull_ind = np.where(LoopSegm == 1) 
+        LoopSegm[notnull_ind] = self.set_classes_val[2]
+        
+        FinalSegm = CrystSegm+LiquorSegm+LoopSegm
+        # now FinalSegm has got 4 values [0,1,2,loop_val] for [vacuum, liquor, crystal, loop]
+        
+        ind_d = np.where(FinalSegm == 0) # vacuum
+        FinalSegm[ind_d] = self.set_classes_val[3]
+        ind_d = np.where(FinalSegm == 1) # liquor
+        FinalSegm[ind_d] = self.set_classes_val[1]
+        ind_d = np.where(FinalSegm == 2) # crystal
+        FinalSegm[ind_d] = self.set_classes_val[0]
+        return [FinalSegm]
 
     def nInput_datasets(self):
-        return 2
+        return 3
     def nOutput_datasets(self):
         return 1
