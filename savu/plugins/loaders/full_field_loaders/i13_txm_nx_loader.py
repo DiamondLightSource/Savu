@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: i13_txm_nxloader
+.. module:: i13_txm_nx_loader
    :platform: Unix
-   :synopsis: A class for loading standard tomography data in Nexus format.
+   :synopsis: A class for loading I13 TXM data (extension to standard tomography data in Nexus format).
 
 .. moduleauthor:: Malte Storm <malte.storm@diamond.ac.uk>
 
