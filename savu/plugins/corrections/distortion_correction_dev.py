@@ -22,6 +22,7 @@
 
 """
 
+import os
 import logging
 import numpy as np
 from scipy.ndimage import map_coordinates
@@ -109,7 +110,8 @@ class DistortionCorrectionDev(BaseFilter, CpuPlugin):
                 preview larger than 1 \n\
                 ***********************************************\n\
                 "
-            logging.warn(self.msg)            
+            logging.warn(self.msg)
+            raise ValueError(self.msg)            
 
         x_offset = shift[x_dim]
         y_offset = shift[y_dim]
@@ -124,6 +126,9 @@ class DistortionCorrectionDev(BaseFilter, CpuPlugin):
                                    dtype = np.float32) - y_offset
             list_fact = np.float32(self.parameters['polynomial_coeffs'])
         else:
+            if not (os.path.isfile(file_path)):
+                raise ValueError(
+                    "!!! No such file!!! Please check the file path")
             try:
                 (x_center, y_center, list_fact) = self.load_metadata_txt(
                     file_path)
@@ -133,8 +138,9 @@ class DistortionCorrectionDev(BaseFilter, CpuPlugin):
                 self.msg = "\n*****************************************\n"\
                     "!!! ERROR !!! -> Can't locate or open this file: %s \n"\
                     "*****************************************\n\
-                    " % str(file_path)
-                logging.warn(self.msg)                
+                    " % str(file_path)                
+                logging.warn(self.msg)
+                raise ValueError(self.msg)                
 
         data_shape = data.get_shape()
         self.height, self.width = data_shape[y_dim], data_shape[x_dim]
@@ -156,7 +162,8 @@ class DistortionCorrectionDev(BaseFilter, CpuPlugin):
                     "!!! ERROR !!! -> You need to increase the preview size"\
                     " for this plugin to work \n\n"\
                     "*****************************************\n"
-            logging.warn(self.msg)            
+            logging.warn(self.msg)
+            raise ValueError(self.msg)            
         self.indices = np.reshape(yd_mat, (-1, 1)),\
                         np.reshape(xd_mat, (-1, 1))
 
