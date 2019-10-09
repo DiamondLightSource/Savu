@@ -24,8 +24,12 @@
 
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
+
 # import tomopy before numpy
+logging.getLogger().setLevel(logging.WARN)
 import tomopy
+logging.getLogger().setLevel(logging.DEBUG)
+
 import numpy as np
 
 from savu.data.plugin_list import CitationInformation
