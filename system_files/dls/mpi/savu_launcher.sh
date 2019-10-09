@@ -172,7 +172,7 @@ case $cluster in
 		module load hamilton-quiet
 		cluster_queue=all.q
 		cpus_per_node=40
-		#cpus_to_use_per_node=30
+		cpus_to_use_per_node=30
 		gpus_per_node=4
 
     	# which gpu architecture?
@@ -233,13 +233,22 @@ filepath=$DIR'/savu_mpijob.sh'
 savupath=$(python -c "import savu, os; print savu.__path__[0]")
 savupath=${savupath%/savu}
 
+# set the suffix
+arg_parse "-suffix" suffix $options
+options=${options//"-suffix $suffix"/}
+if [ ! $suffix ] ; then 
+  suffix=""
+else
+  suffix=_$suffix
+fi
+
 # Set output and intermediate file paths
 basename=`basename $data_file`
 # set the output folder
 arg_parse "-f" foldername $options
 if [ ! $foldername ] ; then
   IFS=. read path ext <<<"${basename##*-}"
-  foldername=$(date +%Y%m%d%H%M%S)"_$(basename $path)"
+  foldername=$(date +%Y%m%d%H%M%S)"_$(basename $path)"$suffix
 fi
 outfolder=$outpath/$foldername
 
