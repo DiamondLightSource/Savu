@@ -463,7 +463,7 @@ class BaseTransport(object):
     def _output_metadata(self, data, entry, name, dump=False):
         self.__output_data_type(entry, data, name)
         mDict = data.meta_data.get_dictionary()
-        self._output_metadata_dict(entry, mDict)
+        self._output_metadata_dict(entry.require_group('meta_data'), mDict)
 
         if not dump:
             self.__output_axis_labels(data, entry)
@@ -574,9 +574,11 @@ class BaseTransport(object):
             self.__output_data(nx_data, values['slice_dims'], 'slice_dims')
 
     def _output_metadata_dict(self, entry, mData):
-        entry = entry.require_group('meta_data')
         entry.attrs[NX_CLASS] = 'NXcollection'
         for key, value in mData.iteritems():
             nx_data = entry.require_group(key)
-            nx_data.attrs[NX_CLASS] = 'NXdata'
-            self.__output_data(nx_data, value, key)
+            if isinstance(value, dict):
+                self._output_metadata_dict(nx_data, value)
+            else:
+                nx_data.attrs[NX_CLASS] = 'NXdata'
+                self.__output_data(nx_data, value, key)
