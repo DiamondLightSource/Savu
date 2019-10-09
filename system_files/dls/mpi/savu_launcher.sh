@@ -134,7 +134,7 @@ else
 	fi
 
 	# which project?
-	project=`echo $pathtodatafile | grep -o -P '(?<=/dls/).*(?=/data)'`
+	project=`echo $pathtodatafile | grep -o -P '(?<=/dls/).*?(?=/data)'`
 	if [ -z "$project" ] ; then
 	  project=tomography
 	fi
@@ -289,7 +289,7 @@ case $cluster in
 		qsub -l infiniband $generic > /dls/tmp/savu/$USER.out ;;
 	"cluster")
 		# RAM com10 252G com14 252G ~ 12G per core  - m_mem_free requested in JSV script
-	  	qsub -jsv /dls_sw/apps/sge/common/JSVs/savu.pl \
+		qsub -jsv /dls_sw/cluster/common/JSVs/savu_20190909.pl \
 		-l infiniband $generic > /dls/tmp/savu/$USER.out ;;
 	"hamilton")
 		# RAM 384G per core (but 377G available?) ~ 9G per core
