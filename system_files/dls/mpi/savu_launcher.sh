@@ -8,12 +8,13 @@ function is_gpfs03 ()
   return=$2
   check=$3
   pathtofile=`readlink -f $file`
-  gpfs03="$(df $pathtofile | grep gpfs03)"
-  if [ "$check" = true ] && [ ! -z $pathtodatafile ] ; then
+  if [ "$check" = true ] && [ ! -f $pathtofile ] ; then
 		echo $file": No such file or directory"
-		exit 1
-	fi	
-  if [ ! $gpfs03 ] ; then
+		return 1
+  fi
+
+  gpfs03="$(df $pathtofile | grep gpfs03)"
+  if [ ! "$gpfs03" ] ; then
 	eval "$return"=false
   else
     eval "$return"=true
