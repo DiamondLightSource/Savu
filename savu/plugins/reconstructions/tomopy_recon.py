@@ -27,9 +27,9 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 import logging
 
 # import tomopy before numpy
-logging.getLogger().setLevel(logging.WARN)
+logging.getLogger().setLevel(logging.CRITICAL)
 import tomopy
-logging.getLogger().setLevel(logging.DEBUG)
+logging.getLogger().setLevel(logging.NOTSET)
 
 import numpy as np
 
