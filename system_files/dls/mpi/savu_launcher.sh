@@ -1,5 +1,26 @@
 #!/bin/bash
 
+# function for checking which data centre
+# assuming only gpfs03 in new data centre - to be updated
+function is_gpfs03 ()
+{
+  file=$1
+  return=$2
+  check=$3
+  pathtofile=`readlink -f $file`
+  if [ "$check" = true ] && [ ! -f $pathtofile ] ; then
+		echo $file": No such file or directory"
+		return 1
+  fi
+
+  gpfs03="$(df $pathtofile | grep gpfs03)"
+  if [ ! "$gpfs03" ] ; then
+	eval "$return"=false
+  else
+    eval "$return"=true
+  fi
+}
+
 # input optional arguments
 while getopts ":t:i:s::" opt; do
 	case ${opt} in
@@ -51,11 +72,10 @@ if [ -n "${infile+set}" ]; then
 
 
 	# check cluster and data path are compatible
-	pathtodatafile=`readlink -f $data_file`
-	gpfs03="$(df $pathtodatafile | grep gpfs03)"
+	is_gpfs03 $data_file gpfs03 false
 	if { [ ! -z "$gpfs03" ] && [ $cluster != 'hamilton' ] ; \
 			} || { [ -z "$gpfs03" ] && [ $cluster == 'hamilton' ] ; }; then
-		echo "The data is not visible on "$cluster "in the final"
+		echo "The data is not visible on "$cluster
 		exit 1
 	fi
 
@@ -98,13 +118,7 @@ else
 	options=$@
 
 	# determine the cluster from the data path
-	pathtodatafile=`readlink -f $data_file`
-	if [ -z $pathtodatafile ] ; then
-		echo $data_file": No such file or directory"
-		exit 1
-	fi
-
-	gpfs03="$(df $pathtodatafile | grep gpfs03)"
+    is_gpfs03 $data_file gpfs03 true 
 	if [ -z "$gpfs03" ] ; then
 		cluster=cluster
 		# determine cluster setup based on type
@@ -172,7 +186,7 @@ case $cluster in
 		module load hamilton-quiet
 		cluster_queue=all.q
 		cpus_per_node=40
-		#cpus_to_use_per_node=30
+		cpus_to_use_per_node=30
 		gpus_per_node=4
 
     	# which gpu architecture?
@@ -233,13 +247,22 @@ filepath=$DIR'/savu_mpijob.sh'
 savupath=$(python -c "import savu, os; print savu.__path__[0]")
 savupath=${savupath%/savu}
 
+# set the suffix
+arg_parse "-suffix" suffix $options
+options=${options//"-suffix $suffix"/}
+if [ ! $suffix ] ; then 
+  suffix=""
+else
+  suffix=_$suffix
+fi
+
 # Set output and intermediate file paths
 basename=`basename $data_file`
 # set the output folder
 arg_parse "-f" foldername $options
 if [ ! $foldername ] ; then
   IFS=. read path ext <<<"${basename##*-}"
-  foldername=$(date +%Y%m%d%H%M%S)"_$(basename $path)"
+  foldername=$(date +%Y%m%d%H%M%S)"_$(basename $path)"$suffix
 fi
 outfolder=$outpath/$foldername
 
@@ -268,6 +291,24 @@ else
 	if [ ! $type == 'AUTO' ] && [ ! $type == 'PREVIEW' ] ; then
 		delete=$interfolder
 	fi
+fi
+
+# check all files are in the same data centre
+is_gpfs03 $data_file is_gpfs03_in false
+is_gpfs03 $interfolder is_gpfs03_inter false
+is_gpfs03 $outfolder is_gpfs03_out false
+if ! ([ $is_gpfs03_in = $is_gpfs03_inter ] && [ $is_gpfs03_inter = $is_gpfs03_out ]) ; then
+tput setaf 3
+	echo -e "\n\t**************************** ERROR MESSAGE ****************************"
+tput setaf 1
+#tput sgr0
+	echo -e "\tAll the input and output data locations must be in the same data centre."
+	echo -e "\tPlease email scientific.software@diamond.ac.uk for more information."
+
+tput setaf 3
+	echo -e "\t***********************************************************************\n"
+tput sgr0
+	exit 1
 fi
 
 # copy process list to the intermediate folder
