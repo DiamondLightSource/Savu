@@ -73,7 +73,7 @@ if [ -n "${infile+set}" ]; then
 
 	# check cluster and data path are compatible
 	is_gpfs03 $data_file gpfs03 false
-	if { [ ! -z "$gpfs03" ] && [ $cluster != 'hamilton' ] ; \
+	if { [ ! "$gpfs03" ] && [ $cluster != 'hamilton' ] ; \
 			} || { [ -z "$gpfs03" ] && [ $cluster == 'hamilton' ] ; }; then
 		echo "The data is not visible on "$cluster
 		exit 1
