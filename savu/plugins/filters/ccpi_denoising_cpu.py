@@ -25,6 +25,7 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 
 from ccpi.filters.regularisers import ROF_TV, FGP_TV, SB_TV, LLT_ROF, TGV, NDF, Diff4th
+from ccpi.filters.regularisers import PatchSelect, NLTV
 from savu.data.plugin_list import CitationInformation
 
 @register_plugin
@@ -32,13 +33,14 @@ class CcpiDenoisingCpu(Plugin, CpuPlugin):
     """
     'ROF_TV': Rudin-Osher-Fatemi Total Variation model;  
     'FGP_TV': Fast Gradient Projection Total Variation model;  
-    'SB_TV': Split Bregman Total Variation model;  
+    'SB_TV': Split Bregman Total Variation model;
+    'NLTV': Nonlocal Total Variation model;
     'TGV': Total Generalised Variation model;  
     'LLT_ROF': Lysaker, Lundervold and Tai model combined with Rudin-Osher-Fatemi;  
     'NDF': Nonlinear/Linear Diffusion model (Perona-Malik, Huber or Tukey);  
     'DIFF4th': Fourth-order nonlinear diffusion model
     
-    :param method: Choose methods |ROF_TV|FGP_TV|SB_TV|TGV|LLT_ROF|NDF|Diff4th. Default: 'FGP_TV'.
+    :param method: Choose methods |ROF_TV|FGP_TV|SB_TV|NLTV|TGV|LLT_ROF|NDF|Diff4th. Default: 'FGP_TV'.
     :param reg_par: Regularisation (smoothing) parameter. Default: 0.01.
     :param max_iterations: Total number of iterations. Default: 300.
     :param time_step: Time marching step, relevant for ROF_TV, LLT_ROF,\
@@ -51,6 +53,7 @@ class CcpiDenoisingCpu(Plugin, CpuPlugin):
     huber, perona or tukey. Default: 'huber'.
     :param edge_par: NDF and Diff4th methods, noise magnitude parameter. Default: 0.01.
     :param tolerance_constant: tolerance constant to stop iterations earlier. Default: 0.0.
+    :param pattern: pattern to apply this to. Default: "VOLUME_XZ".
     """
 
     def __init__(self):
@@ -66,8 +69,8 @@ class CcpiDenoisingCpu(Plugin, CpuPlugin):
         in_dataset, out_dataset = self.get_datasets()
         out_dataset[0].create_dataset(in_dataset[0])
         in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup('VOLUME_XZ', 'single')
-        out_pData[0].plugin_data_setup('VOLUME_XZ', 'single')
+        in_pData[0].plugin_data_setup(self.parameters['pattern'], 'single')
+        out_pData[0].plugin_data_setup(self.parameters['pattern'], 'single')
 
     def pre_process(self):
 	# Ccpi-RGL toolkit modules
@@ -102,7 +105,7 @@ class CcpiDenoisingCpu(Plugin, CpuPlugin):
                 'alpha0': self.parameters['alpha0'],\
                 'number_of_iterations': self.parameters['max_iterations'],\
                 'LipshitzConstant' :self.parameters['lipshitz_constant'],\
-                'tolerance_constant': self.parameters['tolerance_constant']}            
+                'tolerance_constant': self.parameters['tolerance_constant']}
         if (self.parameters['method'] == 'LLT_ROF'):
             # set parameters for the LLT-ROF method
             self.pars = {'algorithm': self.parameters['method'], \
@@ -110,7 +113,7 @@ class CcpiDenoisingCpu(Plugin, CpuPlugin):
                 'regularisation_parameterLLT':self.parameters['reg_parLLT'], \
                 'number_of_iterations': self.parameters['max_iterations'],\
                 'time_marching_parameter': self.parameters['time_step'],\
-                'tolerance_constant': self.parameters['tolerance_constant']}            
+                'tolerance_constant': self.parameters['tolerance_constant']}
         if (self.parameters['method'] == 'NDF'):
             # set parameters for the NDF method
             if (self.parameters['penalty_type'] == 'huber'):
@@ -136,74 +139,108 @@ class CcpiDenoisingCpu(Plugin, CpuPlugin):
                 'edge_parameter':self.parameters['edge_par'],\
                 'number_of_iterations': self.parameters['max_iterations'],\
                 'time_marching_parameter': self.parameters['time_step'],\
-                'tolerance_constant': self.parameters['tolerance_constant']}        
+                'tolerance_constant': self.parameters['tolerance_constant']}
+        if (self.parameters['method'] == 'NLTV'):
+            # set parameters for the NLTV method
+            self.pars = {'algorithm': self.parameters['method'], \
+                'regularisation_parameter':self.parameters['reg_par'],\
+                'edge_parameter':self.parameters['edge_par'],\
+                'number_of_iterations': self.parameters['max_iterations']}
         return self.pars
         #print "The full data shape is", self.get_in_datasets()[0].get_shape()
         #print "Example is", self.parameters['example']
     def process_frames(self, data):
-        #print "The input data shape is", data[0].shape	
-	import numpy as np	
-	self.pars['input'] = np.nan_to_num(data[0])
-        # Running Ccpi-RGLTK modules on CPU
+        import numpy as np
+        #input_temp = data[0]
+        #indices = np.where(np.isnan(input_temp))
+        #input_temp[indices] = 0.0
+        #self.pars['input'] = input_temp
+        input_temp = np.nan_to_num(data[0])
+        input_temp[input_temp > 10**15] = 0.0
+        self.pars['input'] = input_temp
+        #self.pars['input'] = np.nan_to_num(data[0])
+    
+        # Running Ccpi-RGLTK modules on GPU
         if (self.parameters['method'] == 'ROF_TV'):
-            (im_res,infocpu) = ROF_TV(self.pars['input'], 
-               		    self.pars['regularisation_parameter'],
-	                    self.pars['number_of_iterations'], 
-	                    self.pars['time_marching_parameter'],
-	                    self.pars['tolerance_constant'],
-	                    self.device)
+            (im_res,infogpu) = ROF_TV(self.pars['input'], 
+                            self.pars['regularisation_parameter'],
+                            self.pars['number_of_iterations'], 
+                            self.pars['time_marching_parameter'],
+                            self.pars['tolerance_constant'],
+                            self.device)
         if (self.parameters['method'] == 'FGP_TV'):
-            (im_res,infocpu) = FGP_TV(self.pars['input'], 
+            (im_res,infogpu) = FGP_TV(self.pars['input'], 
                             self.pars['regularisation_parameter'],
                             self.pars['number_of_iterations'],
                             self.pars['tolerance_constant'], 
                             self.pars['methodTV'],
-                            self.pars['nonneg'], 
-                            self.device)
+                            self.pars['nonneg'], self.device)
         if (self.parameters['method'] == 'SB_TV'):
-            (im_res,infocpu) = SB_TV(self.pars['input'], 
+            (im_res,infogpu) = SB_TV(self.pars['input'], 
                             self.pars['regularisation_parameter'],
                             self.pars['number_of_iterations'],
                             self.pars['tolerance_constant'], 
-                            self.pars['methodTV'], 
-                            self.device)
+                            self.pars['methodTV'], self.device)
         if (self.parameters['method'] == 'TGV'):
-            (im_res,infocpu) = TGV(self.pars['input'], 
-           		   self.pars['regularisation_parameter'],
-		           self.pars['alpha1'],
-	                   self.pars['alpha0'],
-		           self.pars['number_of_iterations'],
-		           self.pars['LipshitzConstant'],
-		           self.pars['tolerance_constant'], 
-		           self.device)
+            (im_res,infogpu) = TGV(self.pars['input'],
+                            self.pars['regularisation_parameter'],
+                            self.pars['alpha1'],
+                            self.pars['alpha0'],
+                            self.pars['number_of_iterations'],
+                            self.pars['LipshitzConstant'],
+                            self.pars['tolerance_constant'], self.device)
         if (self.parameters['method'] == 'LLT_ROF'):
-            (im_res,infocpu) = LLT_ROF(self.pars['input'],
+            (im_res,infogpu) = LLT_ROF(self.pars['input'],
                            self.pars['regularisation_parameter'],
                            self.pars['regularisation_parameterLLT'],
                            self.pars['number_of_iterations'],
                            self.pars['time_marching_parameter'],
-                           self.pars['tolerance_constant'], 
-                           self.device)
+                           self.pars['tolerance_constant'], self.device)
         if (self.parameters['method'] == 'NDF'):
-            (im_res,infocpu) = NDF(self.pars['input'], 
+            (im_res,infogpu) = NDF(self.pars['input'], 
          	           self.pars['regularisation_parameter'],
                            self.pars['edge_parameter'], 
                            self.pars['number_of_iterations'],
                            self.pars['time_marching_parameter'], 
                            self.pars['penalty_type'],
-                           self.pars['tolerance_constant'], 
-                           self.device)
+                           self.pars['tolerance_constant'], self.device)
         if (self.parameters['method'] == 'DIFF4th'):
-            (im_res,infocpu) = Diff4th(self.pars['input'], 
+            (im_res,infogpu) = Diff4th(self.pars['input'], 
                            self.pars['regularisation_parameter'],
                            self.pars['edge_parameter'], 
                            self.pars['number_of_iterations'],
                           self.pars['time_marching_parameter'],
-                          self.pars['tolerance_constant'], 
-                          self.device)
-	#print "The input data shape is", im_res.shape	
+                          self.pars['tolerance_constant'], self.device)
+        if (self.parameters['method'] == 'NLTV'):
+            pars_NLTV = {'algorithm' : PatchSelect, \
+                         'input' : self.pars['input'],\
+                         'searchwindow': 9, \
+                         'patchwindow': 2,\
+                         'neighbours' : 17 ,\
+                         'edge_parameter':self.pars['edge_parameter']}
+            H_i, H_j, Weights = PatchSelect(pars_NLTV['input'], 
+                                            pars_NLTV['searchwindow'],
+                                            pars_NLTV['patchwindow'], 
+                                            pars_NLTV['neighbours'],
+                                            pars_NLTV['edge_parameter'], self.device)
+            parsNLTV_init = {'algorithm' : NLTV, \
+                             'input' : pars_NLTV['input'],\
+                             'H_i': H_i, \
+                             'H_j': H_j,\
+                             'H_k' : 0,\
+                             'Weights' : Weights,\
+                             'regularisation_parameter': self.pars['regularisation_parameter'],\
+                             'iterations': self.pars['number_of_iterations']}
+            im_res = NLTV(parsNLTV_init['input'], 
+                              parsNLTV_init['H_i'],
+                              parsNLTV_init['H_j'], 
+                              parsNLTV_init['H_k'],
+                              parsNLTV_init['Weights'],
+                              parsNLTV_init['regularisation_parameter'],
+                              parsNLTV_init['iterations'])
+            del H_i,H_j,Weights
+        #print "calling process frames", data[0].shape
         return im_res
-        
     def post_process(self):
         pass
 
@@ -217,9 +254,9 @@ class CcpiDenoisingCpu(Plugin, CpuPlugin):
              "title={CCPi-Regularisation Toolkit for computed tomographic image reconstruction with proximal splitting algorithms},\n" +
              "author={Daniil and Kazantsev, Edoardo and Pasca, Martin and Turner, Philip and Withers},\n" +
              "journal={Software X},\n" +
-             "volume={accepted},\n" +
-             "number={--},\n" +
-             "pages={--},\n" +
+             "volume={9},\n" +
+             "number={},\n" +
+             "pages={317-323},\n" +
              "year={2019},\n" +
              "publisher={Elsevier}\n" +
              "}")
@@ -231,13 +268,13 @@ class CcpiDenoisingCpu(Plugin, CpuPlugin):
              "%A Turner, Martin\n" +
              "%A Withers, Philip\n" +
              "%J Software X\n" +
-             "%V --\n" +
-             "%N --\n" +
-             "%P --\n" +
+             "%V 9\n" +
+             "%N \n" +
+             "%P 317--323\n" +
              "%@ --\n" +
              "%D 2019\n" +
              "%I Elsevier\n")
-        cite_info1.doi = "doi: "
+        cite_info1.doi = "doi: 10.1016/j.softx.2019.04.003"
         
         if (self.parameters['method'] == 'ROF_TV'):
             cite_info2 = CitationInformation()
@@ -439,5 +476,31 @@ class CcpiDenoisingCpu(Plugin, CpuPlugin):
              "%D 2011\n" +
              "%I Springer\n")
             cite_info2.doi = "doi: 10.1007/s11263-010-0330-1"
-            
+        if (self.parameters['method'] == 'NLTV'):
+            cite_info2 = CitationInformation()
+            cite_info2.name = 'citation2'
+            cite_info2.description = ("Nonlocal discrete regularization on weighted graphs: a framework for image and manifold processing")
+            cite_info2.bibtex = \
+            ("@article{abd2008,\n" +
+             "title={Nonlocal discrete regularization on weighted graphs: a framework for image and manifold processing},\n" +
+             "author={Abderrahim and Lezoray and Bougleux},\n" +
+             "journal={IEEE Trans. Image Processing},\n" +
+             "volume={17},\n" +
+             "number={7},\n" +
+             "pages={1047--1060},\n" +
+             "year={2008},\n" +
+             "publisher={IEEE}\n" +
+             "}")
+            cite_info2.endnote = \
+            ("%0 Journal Article\n" +
+             "%T Nonlocal discrete regularization on weighted graphs: a framework for image and manifold processing\n" +
+             "%A Abderrahim, Lezoray, Bougleux\n" +
+             "%J IEEE Trans. Image Processing\n" +
+             "%V 17\n" +
+             "%N 7\n" +
+             "%P 1047--1060\n" +
+             "%@ \n" +
+             "%D 2008\n" +
+             "%I IEEE\n")
+            cite_info2.doi = "doi: 10.1109/TIP.2008.924284"
         return [cite_info1, cite_info2]

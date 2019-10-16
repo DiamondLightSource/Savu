@@ -74,10 +74,12 @@ class Hdf5TemplateLoader(YamlConverter):
 
         number = []
         for m in matches:
+            diff_number = ''
             for diff in difflib.ndiff(m, data_name):
                 split = diff.split('- ')
                 if len(split) > 1:
-                    number.append(int(split[-1]))
+                    diff_number += split[-1]
+            number.append(int(diff_number))
 
         matches = [matches[i] for i in np.argsort(number)]
         dObj.data_info.set('wildcard_values', sorted(number))

@@ -163,13 +163,11 @@ class DosnaTransport(BaseTransport):
         if 'current_and_next' in self.exp.meta_data.get_dictionary():
             current_and_next = self.exp.meta_data.get('current_and_next')
 
-        count = 0
         for key in out_data_dict.keys():
             out_data = out_data_dict[key]
             filename = self.exp.meta_data.get(["filename", key])
             self._create_dosna_dataset(filename, out_data, key,
-                                       current_and_next[count])
-            count += 1
+                                       current_and_next[key])
 
     def _transport_pre_plugin(self):
         if self.count == self.n_plugins - 1:

@@ -22,7 +22,8 @@ provided by Nvidia.
     export PREFIX=/usr/local
 
     # Install Miniconda
-    wget -q https://repo.anaconda.com/miniconda/Miniconda2-latest-Linux-x86_64.sh -O $PREFIX/miniconda.sh
+    # wget -q https://repo.anaconda.com/miniconda/Miniconda2-latest-Linux-x86_64.sh -O $PREFIX/miniconda.sh
+    wget -q https://repo.continuum.io/miniconda/Miniconda2-4.6.14-Linux-x86_64.sh -O $PREFIX/miniconda.sh
     bash $PREFIX/miniconda.sh -b -p $PREFIX/miniconda
     PYTHONHOME=$PREFIX/miniconda/bin
     export PATH="$PYTHONHOME:$PATH"
