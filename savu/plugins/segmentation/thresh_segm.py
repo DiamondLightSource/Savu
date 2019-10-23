@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: 2D morphological processing of binary or grayscale datasets
+.. module:: Segmentation by threhsolding based on lower and upper limits
    :platform: Unix
-   :synopsis: Wrapper around skimage morphology routines for 2D morphological processing of binary or grayscale datasets
+   :synopsis: Segmentation by threhsolding based on lower and upper limits
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
@@ -25,23 +25,20 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 
 import numpy as np
-# importing skimage functions
-from skimage.morphology import *
 
 @register_plugin
-class MorphProc(Plugin, CpuPlugin):
+class ThreshSegm(Plugin, CpuPlugin):
     """
-    A Plugin to perform morphological operations on grayscale images \
-    (use: erosion, dilation, opening, closing) or binary images \
-    (use: binary_erosion, binary_dilation, binary_opening, binary_closing)
+    A Plugin to segment the data by providing two scalar values for lower and upper limits
 
-    :param disk_radius:  The radius of the disk-shaped structuring element for morphology. Default: 5.
-    :param morph_operation: The type of morphological operation. Default: 'binary_opening'.
-    :param pattern: pattern to apply this to. Default: "VOLUME_XZ".
+    :param min_limit: A scalar to define lower limit for values, all values below set to zero. Default: 0.
+    :param max_limit: A scalar to define upper limit for values, all values above set to zero. Default: 0.01.
+    :param value: An integer to set all values between min_limit and max_limit. Default: 1.
+    :param pattern: pattern to apply this to. Default: "VOLUME_YZ".
     """
 
     def __init__(self):
-        super(MorphProc, self).__init__("MorphProc")
+        super(ThreshSegm, self).__init__("ThreshSegm")
 
     def setup(self):
 
@@ -54,21 +51,17 @@ class MorphProc(Plugin, CpuPlugin):
 
     def pre_process(self):
         # extract given parameters
-        self.disk_radius = self.parameters['disk_radius']
-        self.morph_operation = self.parameters['morph_operation']
-        self.selem = disk(self.disk_radius)
+        self.min_limit = self.parameters['min_limit']
+        self.max_limit = self.parameters['max_limit']
+        self.value = self.parameters['value']
 
     def process_frames(self, data):
-        # run morphological operations here:
-        integerMax = np.max(data[0])
-        if (np.sum(data[0]) > 0):
-            morph_result = eval(self.morph_operation)(data[0], self.selem)
-            morph_result = np.uint8(morph_result*integerMax)
-        else:
-            morph_result = np.uint8(np.zeros(np.shape(data[0])))
-        return [morph_result]
+        thresh_result = np.uint8(np.zeros(np.shape(data[0])))
+        thresh_result[(data[0] >= self.min_limit) & (data[0] < self.max_limit)] = self.value
+        return thresh_result
 
     def nInput_datasets(self):
         return 1
+
     def nOutput_datasets(self):
         return 1
