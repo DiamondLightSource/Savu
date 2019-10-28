@@ -63,7 +63,7 @@ class Experiment(object):
         self.meta_data.plugin_list = PluginList()
         try:
             rtype = self.meta_data.get('run_type')
-            if rtype is 'test':
+            if rtype == 'test':
                 self.meta_data.plugin_list.plugin_list = \
                     self.meta_data.get('plugin_list')
             else:
@@ -239,9 +239,9 @@ class Experiment(object):
         import h5py
         if self.meta_data.get('process') == \
                 len(self.meta_data.get('processes'))-1:
-  	    with h5py.File(self.meta_data.get('nxs_filename'), 'w') as nxs_file:
-	        entry_group = nxs_file.create_group('entry')
-	        entry_group.attrs['NX_class'] = 'NXentry'
+                    with h5py.File(self.meta_data.get('nxs_filename'), 'w') as nxs_file:
+                        entry_group = nxs_file.create_group('entry')
+                        entry_group.attrs['NX_class'] = 'NXentry'
 
     def _clear_data_objects(self):
         self.index["out_data"] = {}
