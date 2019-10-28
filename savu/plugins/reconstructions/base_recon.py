@@ -107,7 +107,7 @@ class BaseRecon(Plugin):
         self.br_vol_shape = out_pData[0].get_shape()
         self.set_centre_of_rotation(in_data[0], in_meta_data, in_pData[0])
 
-        self.main_dir = in_pData[0].get_pattern()['SINOGRAM']['main_dir']
+        self.main_dir = in_data[0].get_data_patterns()['SINOGRAM']['main_dir']
         self.angles = in_meta_data.get('rotation_angle')
         if len(self.angles.shape) is not 1:
             self.scan_dim = in_data[0].get_data_dimension_by_axis_label('scan')
@@ -254,8 +254,12 @@ class BaseRecon(Plugin):
 
         missing = [self.centre]*(len(self.frame_cors) - len_data)
         self.frame_cors = np.append(self.frame_cors, missing)
-
+        
+        # fix to remove NaNs in the initialised image
+        if init is not None:
+            init[np.where(np.isnan(init)==True)] = 0.0
         self.frame_init_data = init
+        
         data[0] = self.fix_sino(self.sino_func(data[0]), self.frame_cors[0])
         return data
 
@@ -411,7 +415,7 @@ class BaseRecon(Plugin):
         else:
             shape[dim_volX] = self.parameters['vol_shape']
             shape[dim_volZ] = self.parameters['vol_shape']
-
+    
         if 'resolution' in self.parameters.keys():
             shape[dim_volX] /= self.parameters['resolution']
             shape[dim_volZ] /= self.parameters['resolution']

@@ -1,5 +1,6 @@
 eclipse.preferences.version=1
 encoding//doc/source/conf.py=utf-8
+encoding//savu/data/experiment_collection.py=utf-8
 encoding//savu/plugins/base_astra_recon.py=utf-8
 encoding//savu/plugins/base_recon.py=utf-8
 encoding//savu/test/astra_recon_cpu_test.py=utf-8

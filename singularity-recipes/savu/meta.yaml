@@ -1,0 +1,25 @@
+{% set version = "devel" %}
+
+package:
+  name: savu
+  version: {{ version }}
+
+source:
+  path: ../..
+
+requirements:
+  build:
+    - python
+    - setuptools
+    - pip
+    - git
+
+build:
+  script_env:
+    - FACILITY
+
+about:
+  home: https://github.com/diamondlightsource/Savu
+  license: Apache V2 and GPL V3
+  license_file: LICENCE.txt
+

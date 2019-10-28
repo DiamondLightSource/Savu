@@ -35,8 +35,9 @@ class RingRemovalFiltering(Plugin, CpuPlugin):
     """
 
     Method to remove stripe artefacts in a sinogram (<-> ring artefacts in a \
-    reconstructed image) using a filtering-based method. Note that it's 
-    different to FFT-based or wavelet-FFT-based method.
+    reconstructed image) using a filtering-based method in the combination \
+    with a sorting-based method. Note that it's different to a FFT-based or \
+    wavelet-FFT-based method.
 
     :param sigma: Sigma of the Gaussian window. Used to separate the low-pass\
      and high-pass components of each sinogram column. Default: 3.
@@ -66,13 +67,35 @@ class RingRemovalFiltering(Plugin, CpuPlugin):
         self.pad = 150 # To reduce artifact caused by FFT
         self.width1 = sino_shape[width_dim] 
         self.height1 = sino_shape[height_dim] + 2*self.pad
+        listindex = np.arange(0.0, sino_shape[height_dim], 1.0)
+        self.matindex = np.tile(listindex, (self.width1, 1))        
         sigma = np.clip(np.int16(self.parameters['sigma']), 1, self.height1-1)
         self.window = signal.gaussian(self.height1, std = sigma)
         self.listsign = np.power(-1.0,np.arange(self.height1))
 
+    def remove_stripe_based_sorting(self, matindex, sinogram, size):
+        """
+        Remove stripes using the sorting technique.
+        ---------
+        Parameters: - sinogram: 2D array.
+                    - size: window size of the median filter.
+        ---------
+        Return:     - stripe-removed sinogram.
+        """
+        sinogram = np.transpose(sinogram)
+        matcomb = np.asarray(np.dstack((matindex, sinogram)))
+        matsort = np.asarray(
+            [row[row[:, 1].argsort()] for row in matcomb])
+        matsort[:, :, 1] = median_filter(matsort[:, :, 1], (size, 1))
+        matsortback = np.asarray(
+            [row[row[:, 0].argsort()] for row in matsort])
+        sino_corrected = matsortback[:, :, 1]
+        return np.transpose(sino_corrected)
+
     def process_frames(self, data):
         sinogram = np.transpose(np.copy(data[0]))
-        sinogram2 = np.pad(sinogram,((0, 0),(self.pad, self.pad)), mode = 'reflect')
+        sinogram2 = np.pad(
+            sinogram,((0, 0),(self.pad, self.pad)), mode = 'reflect')
         size = np.clip(np.int16(self.parameters['size']), 1, self.width1-1)
         sinosmooth = np.zeros_like(sinogram)
         for i,sinolist in enumerate(sinogram2):        
@@ -80,14 +103,16 @@ class RingRemovalFiltering(Plugin, CpuPlugin):
                             *self.listsign)*self.window)
                             *self.listsign)[self.pad:self.height1-self.pad]
         sinosharp = sinogram - sinosmooth
-        sinosmooth_cor = median_filter(sinosmooth,(size,1))
+        sinosmooth_cor = np.transpose(
+            self.remove_stripe_based_sorting(
+                self.matindex, np.transpose(sinosmooth), size))
         return np.transpose(sinosmooth_cor + sinosharp)
 
     def get_citation_information(self):
         cite_info = CitationInformation()
         cite_info.description = \
             ("The code of ring removal is the implementation of the work of \
-            Nghia T. Vo et al. taken from algorithm 2 in this paper.")
+            Nghia T. Vo et al. taken from algorithm 2 and 3 in this paper.")
         cite_info.bibtex = \
             ("@article{Vo:18,\n" +
              "title={Superior techniques for eliminating ring artifacts in\

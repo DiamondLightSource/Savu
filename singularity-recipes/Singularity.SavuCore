@@ -1,0 +1,155 @@
+Bootstrap: localimage
+From: SavuDeps.simg
+
+%help
+
+Singularity container providing the Savu core components,
+as well as their dependencies.
+
+%post
+	# update PATH etc
+	PREFIX=/usr/local
+	CUDA_PATH=/usr/local/cuda-9.0
+	PATH=${CUDA_PATH}/bin:${PATH}
+	PATH=${PREFIX}/miniconda/bin:${PATH}
+	LD_LIBRARY_PATH=${CUDA_PATH}/lib64:${LD_LIBRARY_PATH}
+	export PATH LD_LIBRARY_PATH
+ 
+	# build and install savu itself
+	conda install -q -y conda-build conda-verify
+	export FACILITY=dls
+	cd /Savu-src/conda
+	conda build -q savu
+	conda install -q -y --use-local savu
+
+	# install defaults and conda-forge channel dependencies -> but add our channel first!
+	# pyfftw may need to get built explicitly against our fftw conda package!
+	# for now disabling
+		#pyreadline \
+		#gnureadline \
+		#nvidia-ml-py \
+	conda install -q -y -c savu-dep -c defaults -c conda-forge \
+		scipy \
+		colorama \
+		setuptools \
+		jinja2 \
+		numpy \
+		pandas \
+		mock \
+		pywavelets \
+		scikit-image \
+		scikit-learn \
+		pytest \
+		ipython \
+		cython \
+		boost \
+		fabio \
+		pyfftw \
+		peakutils \
+		pymca \
+		tifffile \
+		sphinx_rtd_theme \
+		xraylib
+
+	conda install -q -y -c david_baddeley nvidia-ml-py
+
+	# cleanup
+	conda clean -q -a -y
+
+%files
+	savu /Savu-src/conda/
+	../savu /Savu-src/
+	../install /Savu-src/
+	../setup.* /Savu-src/
+	../README.rst /Savu-src/
+	../MANIFEST.in /Savu-src/
+	../LICENCE.txt /Savu-src/
+	../scripts /Savu-src/
+	../test_data /Savu-src/
+	../lib /Savu-src/
+	../system_files /Savu-src/
+	../plugin_examples /Savu-src/
+
+%runscript
+    # initialise
+
+    # help
+    savu_container_usage() {
+        >&2 echo " "
+        >&2 echo " *** Usage:"
+        >&2 echo " "
+        >&2 echo "     ${SINGULARITY_NAME} -h|--help"
+        >&2 echo " "
+        >&2 echo "     mpirun -np <num_procs> singularity run ${SINGULARITY_NAME}"
+        >&2 echo "            -d|--data-file <savu_data_file>"
+        >&2 echo "            -p|--process-file <savu_process_file>"
+        >&2 echo "            -o|--output-dir <savu_output_dir>"
+        >&2 echo "            -f|--folder-name <savu_folder_name>"
+        >&2 echo "            -l|--log-name <savu_log_name>"
+        >&2 echo "            -c|--cpus <num_cpus> (per host)"
+        >&2 echo "            -g|--gpus <num_gpus> (per host)"
+    }
+
+    # get help if no arguments
+    if [[ $# -eq 0 ]]; then
+      savu_container_usage
+      exit 1
+    fi
+
+    # process arguments
+    while [[ $# -gt 0 ]]; do
+      key="$1"
+      case $key in
+        -d|--data-file)
+          savu_data_file="$2"
+          shift # past argument
+          shift # past value
+        ;;
+        -p|--process-file)
+          savu_process_file="$2"
+          shift # past argument
+          shift # past value
+        ;;
+        -o|--output-dir)
+          savu_output_dir="$2"
+          shift # past argument
+          shift # past value
+        ;;
+        -f|--folder-name)
+          savu_folder_name="$2"
+          shift # past argument
+          shift # past value
+        ;;
+        -l|--log-name)
+          savu_log_name="$2"
+          shift # past argument
+          shift # past value
+        ;;
+        -c|--cpus)
+          num_cpus="$2"
+          shift # past argument
+          shift # past value
+        ;;
+        -g|--gpus)
+          num_gpus="$2"
+          shift # past argument
+          shift # past value
+        ;;
+        -h|--help|*)
+          savu_container_usage
+          exit 1
+        ;;
+      esac
+    done
+
+    # --- savu GPU and CPU lists (per host)
+    savu_gpu_list=$(seq -f "GPU%g" -s "," 0 $[num_gpus-1])
+    savu_cpu_list=$(seq -f "CPU%g" -s "," 0 $[num_cpus-num_gpus-1])
+
+    # --- launch savu
+    savu \
+       ${savu_data_file} ${savu_process_file} ${savu_output_dir} \
+       --names "${savu_gpu_list},${savu_cpu_list}" \
+       --verbose --cluster \
+       --folder ${savu_folder_name} \
+       --log ${savu_log_name} $@

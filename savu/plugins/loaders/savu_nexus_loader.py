@@ -255,10 +255,11 @@ class SavuNexusLoader(BaseLoader):
                              slice_dims=value['slice_dims'])
 
     def _add_meta_data(self, dObj, group):
-        mData = group['meta_data']
-        for key, value in mData.items():
-            entry = value.name.split('/')[-1]
-            dObj.meta_data.set(entry, value.values()[0][...])
+        def get_meta_data_entries(name, obj):
+            for key, val in obj.attrs.iteritems():
+                if val == 'NXdata':
+                    dObj.meta_data.set(name.split('/'), obj.values()[0][...])
+        group['meta_data'].visititems(get_meta_data_entries)
 
     def _update_plugin_numbers(self, datasets):
         all_names = list(set([d['name'] for d in datasets]))

@@ -1,0 +1,53 @@
+{% set version = '3.0.1' %}
+{% set sha256 = '6549a5b81931303baf6600fa2e3bc04d8bd1d5c82f3c21379d0d64a9abcca851' %}
+
+package:
+  name: mpi4py
+  version: {{ version }}
+
+source:
+  fn: mpi4py-{{ version }}.tar.gz
+  url: https://bitbucket.org/mpi4py/mpi4py/downloads/mpi4py-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  number: 0
+  script: {{ PYTHON }} -m pip install --no-deps --ignore-installed --no-cache-dir -vvv .
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+  host:
+    - python
+    - pip
+    - openmpi
+    - setuptools
+  run:
+    - python
+    - openmpi
+
+test:
+  files:
+    - mpiexec.sh
+    - helloworld.py
+  script: run_test.sh
+
+about:
+  home: https://mpi4py.bitbucket.io/
+  license: BSD 2-clause
+  license_family: BSD
+  license_file: LICENSE.rst
+  summary: Python bindings for MPI
+  description: |
+     MPI for Python provides bindings of the Message Passing Interface (MPI)
+     standard for the Python programming language, allowing any Python program
+     to exploit multiple processors.
+  doc_url: https://mpi4py.readthedocs.org/
+  dev_url: https://bitbucket.org/mpi4py/mpi4py
+
+extra:
+  recipe-maintainers:
+    - dalcinl
+    - minrk
+    - msarahan
+    - ocefpaf

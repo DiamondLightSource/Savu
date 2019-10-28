@@ -94,12 +94,16 @@ class BaseTransportData(object):
     def _set_boundaries(self):
         b_per_f = self.params.get('bytes_per_frame')
         b_per_p = self.params.get('bytes_per_process')
+        
+        mem_multiply = \
+            self._get_data_obj()._get_plugin_data()._plugin.get_mem_multiply()
 
         settings = self.data.exp.meta_data.get(
                 ['system_params', 'data_transfer_settings'])
-        max_bytes = self.__convert_str(settings['max_bytes'], b_per_p)
-        bytes_threshold = \
-            self.__convert_str(settings['bytes_threshold'], b_per_p)
+        max_bytes = self.__convert_str(
+                settings['max_bytes'], b_per_p)*mem_multiply
+        bytes_threshold = self.__convert_str(
+                settings['bytes_threshold'], b_per_p)*mem_multiply
         b_per_p = b_per_p if b_per_p < bytes_threshold else bytes_threshold
 
         min_bytes = self.__convert_str(settings['min_bytes'], b_per_p)        
@@ -108,6 +112,7 @@ class BaseTransportData(object):
             raise Exception("The size of a single frame exceeds the permitted "
                             "maximum bytes per frame.")
         min_mft = int(max(np.floor(float(min_bytes)/b_per_f), 1))
+        
         return min_mft, max_mft
 
     def __convert_str(self, val, b_per_p):

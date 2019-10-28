@@ -166,7 +166,13 @@ class StageMotion(Plugin, CpuPlugin):
             for i in range(1, self.NUM_OUTPUT_Q_VARS + 1):
                 if 'Q' + str(i) in parse_result:
                     q_result = parse_result['Q' + str(i)]
-                    if q_result.size > 1:
+                    
+                    if not hasattr(q_result, 'size'):
+                        size = 1
+                    else:
+                        size = q_result.size
+
+                    if size > 1:
                         mean_output[i - 1] = q_result[:, self.MEAN_INDEX]
                         max_output[i - 1] = np.amax(q_result, axis=1)
                         min_output[i - 1] = np.amin(q_result, axis=1)

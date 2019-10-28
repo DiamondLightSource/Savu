@@ -1,0 +1,50 @@
+Bootstrap: docker
+From: nvidia/cuda:9.0-devel-centos7
+
+%help
+
+Singularity container with OpenMPI (with Infiniband support),
+FFTW, HDF5, MPI4PY and H5PY, all installed as conda packages.
+Built on top of an Centos7 Docker image, containing CUDA 9,
+provided by Nvidia.
+
+
+%post
+
+    # Install development tools and libraries
+    yum groupinstall -q -y "Development Tools"
+    yum install -q -y mesa-libGL-devel mesa-libGLU-devel
+    yum install -q -y wget
+
+    # Install Infiniband drivers
+    yum install -q -y libibverbs librdmacm
+
+    export PREFIX=/usr/local
+
+    # Install Miniconda
+    # wget -q https://repo.anaconda.com/miniconda/Miniconda2-latest-Linux-x86_64.sh -O $PREFIX/miniconda.sh
+    wget -q https://repo.continuum.io/miniconda/Miniconda2-4.6.14-Linux-x86_64.sh -O $PREFIX/miniconda.sh
+    bash $PREFIX/miniconda.sh -b -p $PREFIX/miniconda
+    PYTHONHOME=$PREFIX/miniconda/bin
+    export PATH="$PYTHONHOME:$PATH"
+
+    conda update --all -y -q
+    conda install -q -y -c savu-dep openmpi h5py hdf5 mpi4py fftw
+   
+    # cleanup
+    rm -rf /var/cache/yum
+    yum groupremove -q -y "Development tools"
+    yum remove -q -y wget
+    yum clean all -q && rm -rf /var/cache/yum
+    conda clean -a -y -q
+
+    # make folder to put Savu source in
+    mkdir -p /Savu-src/conda
+     
+%environment
+    PREFIX=/usr/local
+    CUDA_PATH=/usr/local/cuda-9.0
+    PATH=${CUDA_PATH}/bin:${PATH}
+    PATH=${PREFIX}/miniconda/bin:${PATH}
+    LD_LIBRARY_PATH=${CUDA_PATH}/lib64:${LD_LIBRARY_PATH}
+    export PATH LD_LIBRARY_PATH
