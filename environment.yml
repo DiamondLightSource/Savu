@@ -5,7 +5,8 @@ channels:
   - ccpi
   - dkazanc
 dependencies:
-  - python=2.7
+  - python>=3.7
+  - pip
   - numpy
   - scipy
   - pytest
