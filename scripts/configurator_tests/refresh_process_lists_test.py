@@ -46,7 +46,7 @@ class RefreshProcessListsTest(unittest.TestCase):
         test_path2 = path + '/test_data/process_lists'
         exclude = ['simple_fit_test_XRF.nxs']
         for f in [n for n in nxs_used if n not in exclude]:
-            print "Refreshing process list", f, "..."
+            print("Refreshing process list", f, "...")
             if os.path.exists(os.path.join(test_path, f)):
                 self._refresh_process_file(os.path.join(test_path, f))
             else:

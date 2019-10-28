@@ -8,7 +8,11 @@ from __future__ import print_function
 import sys
 import unittest
 from mock import patch
-from StringIO import StringIO
+#from StringIO import StringIO
+try:
+    from StringIO import StringIO ## for Python 2
+except ImportError:
+    from io import StringIO ## for Python 3
 
 from scripts.config_generator import savu_config
 

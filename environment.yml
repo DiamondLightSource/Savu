@@ -8,6 +8,7 @@ dependencies:
   - python==3.6
   - pip
   - numpy
+  - coveralls
 #  - scipy
 #  - pytest
 #  - h5py
@@ -20,7 +21,6 @@ dependencies:
 #  - mock
 #  - fabio
 #  - pytest-cov
-#  - coveralls
 #  - pyfai
 #  - pyfftw
 #  - colorama
