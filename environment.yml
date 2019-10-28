@@ -8,29 +8,29 @@ dependencies:
   - python==3.6
   - pip
   - numpy
-  - scipy
-  - pytest
-  - h5py
-  - pep8
-  - mpi4py 
-  - scikit-image
-  - astra-toolbox
-  - xraylib
-  - tomopy
-  - mock
-  - fabio
-  - pytest-cov
-  - coveralls
-  - pyfai
-  - pyfftw
-  - colorama
-  - pymca
-  - ccpi-regulariser
-  - tomobar
-  - i23-seg
-  - pip:
-    - nvidia-ml-py
-    - peakutils
-    - gnureadline
-    - pmacparser
+#  - scipy
+#  - pytest
+#  - h5py
+#  - pep8
+#  - mpi4py 
+#  - scikit-image
+#  - astra-toolbox
+#  - xraylib
+#  - tomopy
+#  - mock
+#  - fabio
+#  - pytest-cov
+#  - coveralls
+#  - pyfai
+#  - pyfftw
+#  - colorama
+#  - pymca
+#  - ccpi-regulariser
+#  - tomobar
+#  - i23-seg
+#  - pip:
+#    - nvidia-ml-py
+#    - peakutils
+#    - gnureadline
+#    - pmacparser
 
