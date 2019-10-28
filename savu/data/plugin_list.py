@@ -165,7 +165,7 @@ class PluginList(object):
                 except:
                     pass
                 try:
-                    data_dict[key] = yaml.load(val)
+                    data_dict[key] = yaml.load(val, Loader=yaml.SafeLoader)
                     continue
                 except:
                     pass

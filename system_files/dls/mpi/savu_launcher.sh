@@ -73,8 +73,8 @@ if [ -n "${infile+set}" ]; then
 
 	# check cluster and data path are compatible
 	is_gpfs03 $data_file gpfs03 false
-	if { [ ! "$gpfs03" ] && [ $cluster != 'hamilton' ] ; \
-			} || { [ -z "$gpfs03" ] && [ $cluster == 'hamilton' ] ; }; then
+	if { [ "$gpfs03" = true ] && [ $cluster != 'hamilton' ] ; \
+			} || { [ "$gpfs03" = false ] && [ $cluster == 'hamilton' ] ; }; then
 		echo "The data is not visible on "$cluster
 		exit 1
 	fi
@@ -119,7 +119,7 @@ else
 
 	# determine the cluster from the data path
     is_gpfs03 $data_file gpfs03 true 
-	if [ -z "$gpfs03" ] ; then
+	if [ "$gpfs03" = false ] ; then
 		cluster=cluster
 		# determine cluster setup based on type
 		case $type in
