@@ -13,7 +13,7 @@ dependencies:
   - scipy
   - pytest
   - mpi4py 
-#  - h5py
+  - h5py
 #  - pep8
 #  - scikit-image
 #  - astra-toolbox
