@@ -9,18 +9,18 @@ dependencies:
   - pip
   - numpy
   - coveralls
-#  - scipy
-#  - pytest
+  - pytest-cov
+  - scipy
+  - pytest
+  - mpi4py 
 #  - h5py
 #  - pep8
-#  - mpi4py 
 #  - scikit-image
 #  - astra-toolbox
 #  - xraylib
 #  - tomopy
 #  - mock
 #  - fabio
-#  - pytest-cov
 #  - pyfai
 #  - pyfftw
 #  - colorama
