@@ -32,6 +32,7 @@ from savu.plugins.filters.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 from savu.data.plugin_list import CitationInformation
+import savu.core.utils as cu
 
 
 @register_plugin
@@ -111,6 +112,7 @@ class DistortionCorrectionDev(BaseFilter, CpuPlugin):
                 ***********************************************\n\
                 "
             logging.warn(self.msg)
+            cu.user_message(self.msg)
             raise ValueError(self.msg)            
 
         x_offset = shift[x_dim]
@@ -127,8 +129,10 @@ class DistortionCorrectionDev(BaseFilter, CpuPlugin):
             list_fact = np.float32(self.parameters['polynomial_coeffs'])
         else:
             if not (os.path.isfile(file_path)):
-                raise ValueError(
-                    "!!! No such file!!! Please check the file path")
+                self.msg = "!!! No such file: %s !!!"\
+                        " Please check the file path" %str(file_path)
+                cu.user_message(self.msg)
+                raise ValueError(self.msg)
             try:
                 (x_center, y_center, list_fact) = self.load_metadata_txt(
                     file_path)
@@ -136,10 +140,11 @@ class DistortionCorrectionDev(BaseFilter, CpuPlugin):
                 y_center = y_center - y_offset 
             except IOError:
                 self.msg = "\n*****************************************\n"\
-                    "!!! ERROR !!! -> Can't locate or open this file: %s \n"\
+                    "!!! ERROR !!! -> Can't open this file: %s \n"\
                     "*****************************************\n\
                     " % str(file_path)                
                 logging.warn(self.msg)
+                cu.user_message(self.msg)
                 raise ValueError(self.msg)                
 
         data_shape = data.get_shape()
@@ -163,6 +168,8 @@ class DistortionCorrectionDev(BaseFilter, CpuPlugin):
                     " for this plugin to work \n\n"\
                     "*****************************************\n"
             logging.warn(self.msg)
+            cu.user_message(self.msg)
+
             raise ValueError(self.msg)            
         self.indices = np.reshape(yd_mat, (-1, 1)),\
                         np.reshape(xd_mat, (-1, 1))
@@ -176,8 +183,8 @@ class DistortionCorrectionDev(BaseFilter, CpuPlugin):
 
     def executive_summary(self):
         if self.msg != "":
-            return [self.msg]
-            raise
+            cu.user_message(self.msg)
+            raise ValueError(self.msg)
         else:
             return ["Nothing to Report"]
 
