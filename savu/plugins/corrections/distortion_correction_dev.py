@@ -169,6 +169,7 @@ class DistortionCorrectionDev(BaseFilter, CpuPlugin):
                     "*****************************************\n"
             logging.warn(self.msg)
             cu.user_message(self.msg)
+
             raise ValueError(self.msg)            
         self.indices = np.reshape(yd_mat, (-1, 1)),\
                         np.reshape(xd_mat, (-1, 1))
