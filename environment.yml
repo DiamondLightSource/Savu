@@ -14,12 +14,12 @@ dependencies:
   - pytest
   - mpi4py 
   - h5py
+  - mock
+  - astra-toolbox
 #  - pep8
 #  - scikit-image
-#  - astra-toolbox
 #  - xraylib
 #  - tomopy
-#  - mock
 #  - fabio
 #  - pyfai
 #  - pyfftw

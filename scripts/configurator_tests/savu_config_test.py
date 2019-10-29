@@ -7,7 +7,13 @@ from __future__ import print_function
 
 import sys
 import unittest
-from mock import patch
+
+import sys
+if sys.version_info >= (3, 3):
+    from unittest.mock import patch
+else:
+    from mock import patch    
+
 #from StringIO import StringIO
 try:
     from StringIO import StringIO ## for Python 2
