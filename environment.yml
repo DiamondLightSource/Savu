@@ -19,18 +19,18 @@ dependencies:
 #  - scikit-image
   - pep8
   - peakutils
-#  - xraylib
-#  - tomopy
-#  - fabio
-#  - pyfai
-#  - pyfftw
-#  - colorama
-#  - pymca
-#  - ccpi-regulariser
-#  - tomobar
+  - xraylib
+  - tomopy
+  - fabio
+  - pyfai
+  - pyfftw
+  - colorama
+  - pymca
+  - ccpi-regulariser
+  - tomobar
 #  - i23-seg
-#  - pip:
-#    - nvidia-ml-py
-#    - gnureadline
-#    - pmacparser
+  - pip:
+    - nvidia-ml-py
+    - gnureadline
+    - pmacparser
 
