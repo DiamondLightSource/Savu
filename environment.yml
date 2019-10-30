@@ -16,8 +16,9 @@ dependencies:
   - h5py
   - mock
   - astra-toolbox
-  - scikit-image
+#  - scikit-image
   - pep8
+  - peakutils
 #  - xraylib
 #  - tomopy
 #  - fabio
@@ -30,7 +31,6 @@ dependencies:
 #  - i23-seg
   - pip:
     - nvidia-ml-py
-    - peakutils
     - gnureadline
     - pmacparser
 
