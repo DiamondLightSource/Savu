@@ -16,7 +16,7 @@ dependencies:
   - h5py
   - mock
   - astra-toolbox
-  - scikit-image
+#  - scikit-image
   - pep8
   - peakutils
 #  - xraylib
