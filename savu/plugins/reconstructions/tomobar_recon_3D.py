@@ -48,6 +48,7 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
     :param regularisation_parameter: Regularisation (smoothing) value, higher \
                             the value stronger the smoothing effect. Default: 0.0001.
     :param regularisation_iterations: The number of regularisation iterations. Default: 400.
+    :param huber_data_threshold: Threshold parameter for __Huber__ data fidelity . Default: 0.0.
     :param time_marching_parameter: Time marching parameter, relevant for \
                     (ROF_TV, LLT_ROF, NDF, Diff4th) penalties. Default: 0.002.
     :param edge_param: Edge (noise) related parameter, relevant for NDF and Diff4th. Default: 0.01.
@@ -152,6 +153,7 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
         self.edge_param = self.parameters['edge_param']
         self.NDF_penalty = self.parameters['NDF_penalty']
         self.tolerance = self.parameters['tolerance']
+        self.huber_data_threshold = self.parameters['huber_data_threshold']
         
         self.RecToolsIR = None
         if (self.ordersubsets > 1):
@@ -188,6 +190,7 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
                                     regularisation_parameter = self.regularisation_parameter,\
                                     regularisation_iterations = self.regularisation_iterations,\
                                     regularisation_parameter2 = self.regularisation_parameter2,\
+                                    huber_data_threshold = self.huber_data_threshold,\
                                     time_marching_parameter = self.time_marching_parameter,\
                                     lambdaR_L1 = self.ring_variable,\
                                     alpha_ring = self.ring_accelerator,\

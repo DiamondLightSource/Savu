@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: Calculate geodesic distance transforms
+.. module:: Calculate geodesic distance transforms in 3D
    :platform: Unix
    :synopsis: Wraps the code for calculating geodesic distance transforms, can be a \
    usefull tool for data segmentation with a proper seed initialisation
@@ -22,7 +22,7 @@
 """
 
 from savu.plugins.plugin import Plugin
-from savu.plugins.driver.cpu_plugin import CpuPlugin
+from savu.plugins.driver.multi_threaded_plugin import MultiThreadedPlugin
 from savu.plugins.utils import register_plugin
 
 """
@@ -46,63 +46,43 @@ import geodesic_distance
 import numpy as np
 
 @register_plugin
-class GeoDistance(Plugin, CpuPlugin):
+class GeoDistance3d(Plugin, MultiThreadedPlugin):
     """
-    Geodesic transformation of images with manual initialisation.
-    
+    3D geodesic transformation of images with manual initialisation.
+
     :param lambda: weighting betwween 0 and 1 . Default: 0.5.
     :param iterations: number of iteration for raster scanning . Default: 4.
-    :param out_datasets: The default names . Default: ['GeoDist','max_values'].
+    :param out_datasets: The default names . Default: ['GeoDist'].
     """
 
     def __init__(self):
-        super(GeoDistance, self).__init__("GeoDistance")
+        super(GeoDistance3d, self).__init__("GeoDistance3d")
+
+    def setup(self):
+        in_dataset, out_dataset = self.get_datasets()
+        in_pData, out_pData = self.get_plugin_datasets()
+        in_pData[0].plugin_data_setup('VOLUME_3D', 'single')
+        in_pData[1].plugin_data_setup('VOLUME_3D', 'single') # the initialisation (mask)
+
+        out_dataset[0].create_dataset(in_dataset[0])
+        out_pData[0].plugin_data_setup('VOLUME_3D', 'single')
 
     def pre_process(self):
         # extract given parameters
         self.lambda_par = self.parameters['lambda']
         self.iterations = self.parameters['iterations']
 
-    def setup(self):
-        in_dataset, out_dataset = self.get_datasets()
-        in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup('VOLUME_YZ', 'single')
-        in_pData[1].plugin_data_setup('VOLUME_YZ', 'single') # the initialisation (mask)
-
-        out_dataset[0].create_dataset(in_dataset[0])
-        out_pData[0].plugin_data_setup('VOLUME_YZ', 'single')
-
-
-        fullData = in_dataset[0]
-        slice_dirs = list(in_dataset[0].get_slice_dimensions())
-        self.new_shape = (np.prod(np.array(fullData.get_shape())[slice_dirs]), 1)
-        out_dataset[1].create_dataset(shape=self.new_shape,
-                                      axis_labels=['max_value', 'angle'],
-                                      remove=True,
-                                      transport='hdf5')
-        out_dataset[1].add_pattern("METADATA", core_dims=(1,), slice_dims=(0,))
-        out_pData[1].plugin_data_setup('METADATA', self.get_max_frames())
-
-
     def process_frames(self, data):
         input_temp = data[0]
         indices = np.where(np.isnan(input_temp))
         input_temp[indices] = 0.0
         if (np.sum(data[1]) > 0):
-            geoDist = geodesic_distance.geodesic2d_raster_scan(input_temp, data[1], self.lambda_par, self.iterations)
+            geoDist = geodesic_distance.geodesic3d_raster_scan(input_temp, data[1], self.lambda_par, self.iterations)
         else:
             geoDist = np.float32(np.zeros(np.shape(data[0])))
-        maxvalues = [np.max(geoDist)]
-        return [geoDist,np.array([maxvalues])]
-
-    def post_process(self):
-        data, max_values = self.get_out_datasets()
-        max_stat = np.max(max_values.data[...], axis=0)
-        data.meta_data.set(['stats', 'max', 'pattern'], max_stat)
+        return geoDist
 
     def nInput_datasets(self):
         return 2
     def nOutput_datasets(self):
-        return 2
-    def get_max_frames(self):
-        return 'single'
+        return 1

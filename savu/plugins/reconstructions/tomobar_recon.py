@@ -52,6 +52,7 @@ class TomobarRecon(BaseRecon, GpuPlugin):
     :param regularisation_iterations: The number of regularisation iterations. Default: 350.
     :param time_marching_parameter: Time marching parameter, relevant for \
                     (ROF_TV, LLT_ROF, NDF, Diff4th) penalties. Default: 0.0025.
+    :param huber_data_threshold: Threshold parameter for __Huber__ data fidelity . Default: 0.0.
     :param edge_param: Edge (noise) related parameter, relevant for NDF and Diff4th. Default: 0.01.
     :param regularisation_parameter2:  Regularisation (smoothing) value for LLT_ROF method. Default: 0.005.
     :param NDF_penalty: NDF specific penalty type Huber, Perona, Tukey. Default: 'Huber'.
@@ -86,6 +87,7 @@ class TomobarRecon(BaseRecon, GpuPlugin):
         self.NDF_penalty = self.parameters['NDF_penalty']
         self.output_size = self.parameters['output_size']
         self.tolerance = self.parameters['tolerance']
+        self.huber_data_threshold = self.parameters['huber_data_threshold']
         
         
         self.RecToolsIR = None
@@ -112,6 +114,7 @@ class TomobarRecon(BaseRecon, GpuPlugin):
                                     regularisation_iterations = self.regularisation_iterations,\
                                     regularisation_parameter2 = self.regularisation_parameter2,\
                                     time_marching_parameter = self.time_marching_parameter,\
+                                    huber_data_threshold = self.huber_data_threshold,\
                                     lambdaR_L1 = self.ring_variable,\
                                     alpha_ring = self.ring_accelerator,\
                                     NDF_penalty = self.NDF_penalty,\

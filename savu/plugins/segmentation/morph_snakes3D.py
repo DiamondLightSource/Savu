@@ -51,7 +51,6 @@ class MorphSnakes3d(Plugin, MultiThreadedPlugin):
         super(MorphSnakes3d, self).__init__("MorphSnakes3d")
 
     def setup(self):
-
         in_dataset, out_dataset = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
         in_pData[0].plugin_data_setup('VOLUME_3D', 'single')
