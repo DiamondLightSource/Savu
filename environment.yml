@@ -17,8 +17,8 @@ dependencies:
   - mock
   - astra-toolbox
 #  - scikit-image
-  - pep8
-  - peakutils
+#  - pep8
+#  - peakutils
 #  - xraylib
 #  - tomopy
 #  - fabio
