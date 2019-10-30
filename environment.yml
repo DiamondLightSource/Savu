@@ -29,8 +29,8 @@ dependencies:
 #  - ccpi-regulariser
 #  - tomobar
 #  - i23-seg
-  - pip:
-    - nvidia-ml-py
-    - gnureadline
-    - pmacparser
+#  - pip:
+#    - nvidia-ml-py
+#    - gnureadline
+#    - pmacparser
 
