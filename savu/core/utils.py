@@ -64,6 +64,16 @@ def docstring_parameter(*sub):
     return dec
 
 
+def log_msg_suppressor(func):
+    """ Decorator to temporarily reduce logging level."""    
+    def dec(args):
+        loglevel = logging.getLogger().getEffectiveLevel()
+        logging.getLogger().setLevel(logging.CRITICAL)
+        func(args)
+        logging.getLogger().setLevel(loglevel)
+    return dec
+
+
 def import_class(class_name):
     """ Import a class.
 
@@ -79,6 +89,16 @@ def import_class(class_name):
     temp = name.split('.')[-1]
     module2class = ''.join(x.capitalize() for x in temp.split('_'))
     return getattr(mod, module2class.split('.')[-1])
+
+
+@log_msg_suppressor
+def quiet_import(pkg_name):
+    return __import__(pkg_name)
+
+
+@log_msg_suppressor
+def quiet_instance(theClass):
+    return theClass()
 
 
 def add_base(this, base):
