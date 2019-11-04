@@ -218,7 +218,7 @@ class ImageKey(DataWithDarksAndFlats):
             self.__ignore_image_key_entries(ignore)
 
     def clone_data_args(self, args, kwargs, extras):
-        """ List the arguments required to clone this dadark_updatedtatype
+        """ List the arguments required to clone this datatype
         """
         args = ['self', 'image_key', 'proj_dim']
         kwargs['ignore'] = 'ignore'
