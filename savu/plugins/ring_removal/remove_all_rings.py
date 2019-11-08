@@ -33,7 +33,28 @@ from scipy import interpolate
 @register_plugin
 class RemoveAllRings(Plugin, CpuPlugin):
     """
-
+---
+      - name: RemoveAllRings
+        category: Filter
+        synopsis: Method to remove all types of stripe artifacts in a sinogram (<-> ring artefacts in a reconstructed image).
+        parameters:
+           - la_size:
+                  visibility: param
+                  type: int
+                  description: Size of the median filter window to remove large stripes.
+                  default: 71
+           - sm_size:
+                  visibility: param
+                  type: int
+                  description: Size of the median filter window to remove small-to-medium stripes.
+                  default: 31
+           - snr:
+                  visibility: param
+                  type: float
+                  description: Ratio used to detect locations of stripes. Greater is less sensitive.
+                  default: 3.0
+    """
+    """
     Method to remove all types of stripe artefacts in a sinogram \
     (<-> ring artefacts in a reconstructed image). 
 

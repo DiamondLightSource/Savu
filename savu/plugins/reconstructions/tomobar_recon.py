@@ -16,7 +16,7 @@
 .. module:: tomobar_recon
    :platform: Unix
    :synopsis: A wrapper around TOmographic MOdel-BAsed Reconstruction (ToMoBAR) software \
-   for advanced iterative image reconstruction 
+   for advanced iterative image reconstruction
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
@@ -34,6 +34,150 @@ from scipy import ndimage
 @register_plugin
 class TomobarRecon(BaseRecon, GpuPlugin):
     """
+---
+      - name: TomobarRecon
+        category: Reconstructor
+        synopsis: A wrapper around TOmographic MOdel-BAsed Reconstruction (ToMoBAR) software for advanced iterative image reconstruction.
+        verbose: A plugin to reconstruct full-field tomographic projection data using state-of-the-art regularised iterative algorithms from the ToMoBAR package. ToMoBAR includes FISTA and ADMM iterative methods and depends on the ASTRA toolbox and the CCPi RGL toolkit
+        parameters:
+           - output_size:
+                  visibility: user
+                  type: str
+                  description: Number of rows and columns in the reconstruction.
+                  default: auto
+           - iterations:
+                  visibility: user
+                  type: int
+                  description: Number of outer iterations for FISTA (default) or ADMM methods.
+                  default: 20
+           - datafidelity:
+                  visibility: user
+                  type: str
+                  description: Least Squares only at the moment.
+                  default: LS
+           - nonnegativity:
+                  visibility: user
+                  type: str
+                  options: [Enable, None]
+                  description: Non negativity constraint, choose Enable or None.
+                  default: Enable
+           - ordersubsets:
+                  visibility: user
+                  type: int
+                  description: The number of ordered-subsets to accelerate reconstruction.
+                  default: 6
+           - converg_const:
+                  visibility: user
+                  type: str
+                  description: Lipschitz constant, can be set to a value or automatic calculation.
+                  default: power
+           - method:
+                  visibility: user
+                  type: str
+                  options: [ROF_TV, FGP_TV, SB_TV, NLTV, TGV, LLT_ROF, NDF, Diff4th]
+                  description:
+                    summary: The denoising method - This is a short description
+                    verbose: To regularise choose methods ROF_TV, FGP_TV, SB_TV, LLT_ROF, NDF, Diff4th.
+                    options:
+                        ROF_TV: Rudin-Osher-Fatemi Total Variation model
+                        FGP_TV: Fast Gradient Projection Total Variation model
+                        SB_TV: Split Bregman Total Variation model
+                        NLTV: Nonlocal Total Variation model
+                        TGV: Total Generalised Variation model
+                        LLT_ROF: Lysaker, Lundervold and Tai model combined with Rudin-Osher-Fatemi
+                        NDF: Nonlinear/Linear Diffusion model (Perona-Malik, Huber or Tukey)
+                        DIFF4th: Fourth-order nonlinear diffusion model
+                  default: FGP_TV
+           - reg_par:
+                  visibility: user
+                  type: float
+                  description:
+                    summary: Regularisation parameter. The higher the value, the stronger the smoothing effect
+                    range: Recommended between 0 and 1
+                  default: 0.0001
+           - max_iterations:
+                  visibility: user
+                  type: int
+                  description: Total number of regularisation iterations
+                  default: 350
+                  dependency:
+                  method:
+                    ROF_TV: 1000
+                    FGP_TV: 500
+                    SB_TV: 100
+                    NLTV: 3
+                    TGV: 1000
+                    LLT_ROF: 1000
+                    NDF: 1000
+                    DIFF4th: 1000
+           - time_step:
+                  visibility: user
+                  type: float
+                  dependency:
+                    method: [ROF_TV, LLT_ROF, NDF, Diff4th]
+                  description:
+                    summary: Time marching step
+                    range: Recommended between 0.0001 and 0.001
+                  default: 0.001
+           - edge_param:
+                  visibility: user
+                  type: float
+                  dependency:
+                    method: [NDF, Diff4th]
+                  description:
+                    summary: Edge (noise) related parameter
+                    range:
+                  default: 0.01
+           - regularisation_parameter2:
+                  visibility: user
+                  type: float
+                  dependency:
+                    method: LLT_ROF
+                  description:
+                    summary: Regularisation (smoothing) value
+                    range:
+                  default: 0.005
+           - NDF_penalty:
+                  visibility: user
+                  type: str
+                  options: [Huber, Perona, Tukey]
+                  description:
+                    summary: Penalty type
+                    verbose: Nonlinear/Linear Diffusion model (NDF) specific penalty type.
+                    options:
+                      Huber: Huber
+                      Perona: Perona-Malik model
+                      Tukey: Tukey
+                  dependency:
+                    method: NDF
+                  default: Huber
+           - tolerance:
+                  visibility: user
+                  type: float
+                  description:
+                    summary: Tolerance to stop outer iterations earlier.
+                    range:
+                  default: 5e-10
+           - ring_variable:
+                  visibility: user
+                  type: float
+                  dependency:
+                    method: LLT_ROF
+                  description:
+                    summary: Regularisation variable for ring removal
+                    range:
+                  default: 0.0
+           - ring_accelerator:
+                  visibility: user
+                  type: float
+                  description:
+                    summary: Acceleration constant for ring removal (use with care)
+                    range:
+                  default: 50.0
+    """
+
+    '''
+                  
     A Plugin to reconstruct full-field tomographic projection data using state-of-the-art regularised iterative algorithms from \
     the ToMoBAR package. ToMoBAR includes FISTA and ADMM iterative methods and depends on the ASTRA toolbox and the CCPi RGL toolkit: \
     https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
@@ -58,7 +202,7 @@ class TomobarRecon(BaseRecon, GpuPlugin):
     :param tolerance: Tolerance to stop outer iterations earlier. Default: 5e-10.
     :param ring_variable: Regularisation variable for ring removal. Default: 0.0.
     :param ring_accelerator: Acceleration constant for ring removal (use with care). Default: 50.0.
-    """
+    '''
 
     def __init__(self):
         super(TomobarRecon, self).__init__("TomobarRecon")
@@ -105,6 +249,7 @@ class TomobarRecon(BaseRecon, GpuPlugin):
         self.setup_Lipschitz_constant()
 
         # Run FISTA reconstrucion algorithm here
+        # Fast Iterative Shrinking Thresholding Algorithm
         recon = self.Rectools.FISTA(sino,\
                                     iterationsFISTA = self.iterationsFISTA,\
                                     regularisation = self.regularisation,\

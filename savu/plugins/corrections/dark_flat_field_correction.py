@@ -33,6 +33,41 @@ from savu.plugins.utils import register_plugin
 @register_plugin
 class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
     """
+---
+      - name: DarkFlatFieldCorrection
+        category: Correction
+        synopsis: A Plugin to apply a simple dark and flat field correction to data.
+        verbose: Dark flat field correction
+        parameters:
+           - pattern:
+                  visibility: param
+                  type: '[int]'
+                  options: ['SINOGRAM', 'PROJECTION']
+                  description:
+                    summary: Data processing pattern
+                    options:
+                        SINOGRAM:
+                        PROJECTION:
+                  default: 'PROJECTION'
+           - lower_bound:
+                  visibility: param
+                  type: float
+                  description: Set all values below the lower_bound to this value.
+                  default: 'None'
+           - upper_bound:
+                  visibility: param
+                  type: float
+                  description: Set all values above the upper bound to this value.
+                  default: 'None'
+           - warn_proportion:
+                  visibility: param
+                  type: float
+                  description:
+                    summary: Output a warning if this proportion of values, or greater, are below and/or above the lower/upper bounds
+                    verbose: Enter 0.05 for 5%
+                  default: 0.05
+    """
+    """
     A Plugin to apply a simple dark and flat field correction to data.
     :param pattern: Data processing pattern is 'PROJECTION' or \
         'SINOGRAM'. Default: 'PROJECTION'.
