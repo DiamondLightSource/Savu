@@ -16,7 +16,7 @@
 .. module:: tomobar_recon
    :platform: Unix
    :synopsis: A wrapper around TOmographic MOdel-BAsed Reconstruction (ToMoBAR) software \
-   for advanced iterative image reconstruction 
+   for advanced iterative image reconstruction
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
@@ -53,6 +53,7 @@ class TomobarRecon(BaseRecon, GpuPlugin):
     :param time_marching_parameter: Time marching parameter, relevant for \
                     (ROF_TV, LLT_ROF, NDF, Diff4th) penalties. Default: 0.0025.
     :param huber_data_threshold: Threshold parameter for __Huber__ data fidelity . Default: 0.0.
+    :param ring_model_horiz_size: better model to supress ring artifacts, size of the window defines a possible thickness of artifacts. Default: None.
     :param edge_param: Edge (noise) related parameter, relevant for NDF and Diff4th. Default: 0.01.
     :param regularisation_parameter2:  Regularisation (smoothing) value for LLT_ROF method. Default: 0.005.
     :param NDF_penalty: NDF specific penalty type Huber, Perona, Tukey. Default: 'Huber'.
@@ -69,7 +70,7 @@ class TomobarRecon(BaseRecon, GpuPlugin):
         result = ndimage.interpolation.shift(sinogram,
                                              (centre_of_rotation_shift, 0))
         return result
-    
+
     def pre_process(self):
         # extract given parameters
         self.iterationsFISTA = self.parameters['iterations']
@@ -88,8 +89,9 @@ class TomobarRecon(BaseRecon, GpuPlugin):
         self.output_size = self.parameters['output_size']
         self.tolerance = self.parameters['tolerance']
         self.huber_data_threshold = self.parameters['huber_data_threshold']
-        
-        
+        self.ring_model_horiz_size = self.parameters['ring_model_horiz_size']
+
+
         self.RecToolsIR = None
         if (self.ordersubsets > 1):
             self.regularisation_iterations = (int)(self.parameters['regularisation_iterations']/self.ordersubsets) + 1
@@ -101,8 +103,8 @@ class TomobarRecon(BaseRecon, GpuPlugin):
         sino = data[0].astype(np.float32)
         anglesTot, self.DetectorsDimH = np.shape(sino)
         self.anglesRAD = np.deg2rad(angles.astype(np.float32))
-       
-        # check if the reconstruction class has been initialised and calculate 
+
+        # check if the reconstruction class has been initialised and calculate
         # Lipschitz constant if not given explicitly
         self.setup_Lipschitz_constant()
 
@@ -115,6 +117,7 @@ class TomobarRecon(BaseRecon, GpuPlugin):
                                     regularisation_parameter2 = self.regularisation_parameter2,\
                                     time_marching_parameter = self.time_marching_parameter,\
                                     huber_data_threshold = self.huber_data_threshold,\
+                                    ring_model_horiz_size = self.ring_model_horiz_size,\
                                     lambdaR_L1 = self.ring_variable,\
                                     alpha_ring = self.ring_accelerator,\
                                     NDF_penalty = self.NDF_penalty,\
@@ -125,8 +128,8 @@ class TomobarRecon(BaseRecon, GpuPlugin):
 
     def setup_Lipschitz_constant(self):
         if self.RecToolsIR is not None:
-            return 
-        
+            return
+
        # set parameters and initiate a TomoBar class object
         self.Rectools = RecToolsIR(DetectorsDimH = self.DetectorsDimH,  # DetectorsDimH # detector dimension (horizontal)
                     DetectorsDimV = None,  # DetectorsDimV # detector dimension (vertical) for 3D case only
@@ -138,16 +141,16 @@ class TomobarRecon(BaseRecon, GpuPlugin):
                     OS_number = self.ordersubsets, # the number of subsets, NONE/(or > 1) ~ classical / ordered subsets
                     tolerance = self.tolerance , # tolerance to stop outer iterations earlier
                     device='gpu')
-                                        
+
         if (self.parameters['converg_const'] == 'power'):
             self.Lipschitz_const = self.Rectools.powermethod() # calculate Lipschitz constant
         else:
             self.Lipschitz_const = self.parameters['converg_const']
         return
-    
+
     def get_max_frames(self):
         return 'single'
-    
+
     def get_citation_information(self):
         cite_info1 = CitationInformation()
         cite_info1.name = 'citation1'
