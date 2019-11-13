@@ -173,7 +173,7 @@ class DataWithDarksAndFlats(BaseType):
         sl = list(copy.deepcopy(self.dark_flat_slice_list[key]))
         if len(data.shape) is 2:
             del sl[rot_dim]
-        return data[sl]
+        return data[tuple(sl)]
 
     def dark_image_key_data(self):
         """ Get the dark data. """
