@@ -49,6 +49,7 @@ outname=savu
 # If this is developer mode
 if [ -n "${infile+set}" ]; then
 	echo "Running Savu in developer mode"
+    dev_mode=true
   	# read the values from file (ignoring lines starting with #)
 	count=0
 	while read -r entry; do
@@ -84,6 +85,7 @@ else
 	#echo "Running Savu in production mode"
 	# parse additional command line arguments
 	# Check required arguments exist
+    dev_mode=false
 	vars=$@
 	x="${vars%%' -'*}"
 	[[ $x = $vars ]] && temp=${#vars} || temp=${#x}
@@ -123,8 +125,8 @@ else
 		cluster=cluster
 		# determine cluster setup based on type
 		case $type in
-			'AUTO') gpu_arch=Fermi ; nNodes=1 ;;
-			'PREVIEW') gpu_arch=Fermi ; nNodes=1 ;;
+			'AUTO') gpu_arch=Kepler ; nNodes=1 ;;
+			'PREVIEW') gpu_arch=Kepler ; nNodes=1 ;;
 			'BIG') gpu_arch=Pascal ; nNodes=8 ;;
 			'') gpu_arch=Kepler ; nNodes=4 ;;
 			 *) echo -e "\nUnknown 'type' optional argument"
@@ -186,7 +188,9 @@ case $cluster in
 		module load hamilton-quiet
 		cluster_queue=all.q
 		cpus_per_node=40
-		cpus_to_use_per_node=30
+		if [ ! $dev_mode ]; then
+			cpus_to_use_per_node=30
+		fi
 		gpus_per_node=4
 
     	# which gpu architecture?

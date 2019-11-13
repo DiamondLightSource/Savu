@@ -1,5 +1,5 @@
-savu\.plugins\.loaders\.utils package
-=====================================
+savu.plugins.loaders.utils package
+==================================
 
 Submodules
 ----------

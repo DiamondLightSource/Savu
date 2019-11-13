@@ -1,5 +1,5 @@
-savu\.plugins\.filters\.umpa module
-===================================
+savu.plugins.filters.umpa module
+================================
 
 .. automodule:: savu.plugins.filters.umpa
     :members:

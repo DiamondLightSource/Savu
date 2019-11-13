@@ -1,5 +1,5 @@
-savu\.plugins\.filters\.pymca module
-====================================
+savu.plugins.filters.pymca module
+=================================
 
 .. automodule:: savu.plugins.filters.pymca
     :members:

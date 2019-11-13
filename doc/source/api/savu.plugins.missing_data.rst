@@ -1,5 +1,5 @@
-savu\.plugins\.missing\_data package
-====================================
+savu.plugins.missing\_data package
+==================================
 
 .. automodule:: savu.plugins.missing_data
     :members:

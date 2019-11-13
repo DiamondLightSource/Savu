@@ -1,5 +1,5 @@
-savu\.plugins\.fluo\_fitters package
-====================================
+savu.plugins.fluo\_fitters package
+==================================
 
 .. automodule:: savu.plugins.fluo_fitters
     :members:

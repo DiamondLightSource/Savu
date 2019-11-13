@@ -1,5 +1,5 @@
-savu\.test\.travis\.framework\_tests package
-============================================
+savu.test.travis.framework\_tests package
+=========================================
 
 Submodules
 ----------
@@ -19,6 +19,7 @@ Submodules
    savu.test.travis.framework_tests.plugin_coverage_test
    savu.test.travis.framework_tests.plugin_runner_test
    savu.test.travis.framework_tests.plugins_util_test
+   savu.test.travis.framework_tests.test_utils
 
 Module contents
 ---------------

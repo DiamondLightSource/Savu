@@ -223,6 +223,8 @@ def main():
 
     print("Starting Savu Config tool (please wait for prompt)")
 
+    _reduce_logging_level()
+
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         utils.populate_plugins()
@@ -260,6 +262,10 @@ def main():
         utils.readline.write_history_file(utils.histfile)
 
     print("Thanks for using the application")
+
+def _reduce_logging_level():
+    import logging
+    logging.getLogger().setLevel(logging.CRITICAL)
 
 if __name__ == '__main__':
     main()

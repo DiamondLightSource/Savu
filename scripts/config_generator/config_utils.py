@@ -108,8 +108,7 @@ def _add_module(loader, module_name):
             pass
 
 
-# change this to dawn=False!!!!!!!!!!!!!!!!!!!!!!!!!
-def populate_plugins(dawn=True):
+def populate_plugins(dawn=False):
     # load all the plugins
     plugins_path = pu.get_plugins_paths()
     savu_path = plugins_path[-1].split('savu')[0]

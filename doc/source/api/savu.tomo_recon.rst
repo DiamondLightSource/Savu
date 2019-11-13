@@ -1,5 +1,5 @@
-savu\.tomo\_recon module
-========================
+savu.tomo\_recon module
+=======================
 
 .. automodule:: savu.tomo_recon
     :members:

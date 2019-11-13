@@ -340,7 +340,7 @@ class BaseTransport(object):
         new_slice[slice_dirs[0]] = None
         possible_slices.append(copy.copy(new_slice))
         possible_slices = possible_slices[::-1]
-        return lambda x: x[possible_slices[len(x.shape)-n_core_dirs]]
+        return lambda x: x[tuple(possible_slices[len(x.shape)-n_core_dirs])]
 
     def __create_squeeze_function(self, data):
         """ Create a function that removes dimensions of length 1.

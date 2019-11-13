@@ -1,5 +1,5 @@
-savu\.plugins\.corrections\.camera\_rot\_correction module
-==========================================================
+savu.plugins.corrections.camera\_rot\_correction module
+=======================================================
 
 .. automodule:: savu.plugins.corrections.camera_rot_correction
     :members:

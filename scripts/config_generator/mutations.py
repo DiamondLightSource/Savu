@@ -23,7 +23,7 @@
 """
 
 import textwrap
-from colorama import Back
+from colorama import Back, Fore
 import display_formatter as df
 
 
@@ -99,6 +99,10 @@ hdf5_notice = 'is now used by default.\nPlease remove from the process list, '\
 dezing_notice = '\nA faster and more accurate version of DezingFilter is now'\
     ' available as Dezinger.'
 
+distortion_notice = 'A new version of DistortionCorrection is available with'\
+    ' the version available in 2.3 \nand below being renamed as '\
+    'DistortionCorrectionDeprecated.  Please replace with \nthe new version.'
+
 plugin_mutations = \
     {'TimeseriesFieldCorrections':
         {'replace': 'DarkFlatFieldCorrection',
@@ -113,7 +117,10 @@ plugin_mutations = \
      'SavuLoader':
         {'replace': 'SavuNexusLoader',
          'desc': replace_str('SavuLoader', 'SavuNexusLoader')},
-      }
+     'DistortionCorrection':
+        {'replace': 'DistortionCorrectionDeprecated',
+         'desc': '\n' + Fore.RED + auto_replace_str() + distortion_notice + Fore.RESET}
+     }
 
 param_mutations = \
     {'BaseRecon': [{'old': 'center_of_rotation', 'new': 'centre_of_rotation'},

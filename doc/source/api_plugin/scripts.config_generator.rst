@@ -1,5 +1,5 @@
-scripts\.config\_generator package
-==================================
+scripts.config\_generator package
+=================================
 
 Submodules
 ----------
@@ -12,6 +12,7 @@ Submodules
    scripts.config_generator.content
    scripts.config_generator.display_formatter
    scripts.config_generator.mutations
+   scripts.config_generator.parameter_extractor
    scripts.config_generator.savu_config
    scripts.config_generator.update_template
    scripts.config_generator.win_readline
