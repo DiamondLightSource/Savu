@@ -24,10 +24,8 @@
 
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
-import savu.core.utils as cu
-
 # import tomopy before numpy
-tomopy = cu.quiet_import('tomopy')
+import tomopy
 import numpy as np
 
 from savu.data.plugin_list import CitationInformation
