@@ -40,7 +40,7 @@ jobs:
       # Download and cache dependencies
       - restore_cache:
           keys:
-          - v5-dependencies
+          - v7-dependencies
 
       - run:
           name: install dependencies
@@ -72,7 +72,7 @@ jobs:
       - save_cache:
           paths:
             - /home/circleci/conda
-          key: v6-dependencies
+          key: v7-dependencies
         
       - run:
           name: build Savu images
