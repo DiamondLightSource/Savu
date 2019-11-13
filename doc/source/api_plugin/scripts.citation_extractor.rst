@@ -1,5 +1,5 @@
-scripts\.citation\_extractor package
-====================================
+scripts.citation\_extractor package
+===================================
 
 Submodules
 ----------

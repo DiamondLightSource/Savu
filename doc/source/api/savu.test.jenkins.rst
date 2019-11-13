@@ -1,5 +1,5 @@
-savu\.test\.jenkins package
-===========================
+savu.test.jenkins package
+=========================
 
 .. automodule:: savu.test.jenkins
     :members:

@@ -1,5 +1,5 @@
-savu\.plugins\.ptychography package
-===================================
+savu.plugins.ptychography package
+=================================
 
 Submodules
 ----------

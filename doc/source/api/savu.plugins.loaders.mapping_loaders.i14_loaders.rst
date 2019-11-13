@@ -1,5 +1,5 @@
-savu\.plugins\.loaders\.mapping\_loaders\.i14\_loaders package
-==============================================================
+savu.plugins.loaders.mapping\_loaders.i14\_loaders package
+==========================================================
 
 .. automodule:: savu.plugins.loaders.mapping_loaders.i14_loaders
     :members:
