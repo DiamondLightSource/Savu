@@ -6,7 +6,7 @@ channels:
   - dkazanc
 dependencies:
   - python=2.7
-  - numpy=1.16.1
+  - numpy=1.16
   - scipy
   - pytest
   - h5py
