@@ -17,7 +17,7 @@
    :platform: Unix
    :synopsis: A wrapper around TOmographic MOdel-BAsed Reconstruction (ToMoBAR) software \
    for advanced iterative image reconstruction using _3D_ capabilities of regularisation. \
-   The plugin will run on one cluster node, i.e. it can be slow. 
+   The plugin will run on one cluster node, i.e. it can be slow.
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
@@ -57,6 +57,9 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
     :param tolerance: Tolerance to stop outer iterations earlier. Default: 1e-9.
     :param ring_variable: Regularisation variable for ring removal. Default: 0.0.
     :param ring_accelerator: Acceleration constant for ring removal (use with care). Default: 50.0.
+    :param ring_model_horiz_size: better model to supress ring artifacts, size of the window defines a possible thickness of artifacts. Default: None.
+    :param ring_model_vert_size: adds more stability to ring based model, set to 1 or 2. Default: 0.
+    :param ring_model_slices_size:  adds more stability to ring based model, set to 1 or 2. Default: 0.
     """
 
     def __init__(self):
@@ -71,7 +74,7 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
         detY = in_data.get_data_dimension_by_axis_label('detector_y')
         sizeY = shape[detY]
         return (sizeX,sizeY)
-    
+
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
         # reduce the data as per data_subset parameter
@@ -90,7 +93,7 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
         # specify reconstructed volume dimensions
         (self.output_size, self.Vert_det) = self._get_output_size(in_dataset[0])
         shape = [0]*len(in_dataset[0].get_shape())
-        shape[0] = self.output_size 
+        shape[0] = self.output_size
         shape[1] = self.Vert_det
         shape[2] = self.output_size
 
@@ -116,7 +119,7 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
         out_dataset[0].create_dataset(axis_labels=axis_labels,
                                       shape=tuple(shape))
         out_dataset[0].add_volume_patterns(dim_volX, dim_volY, dim_volZ)
-        
+
         ndims = range(len(shape))
         core_dims = (dim_volX, dim_volY, dim_volZ)
         slice_dims = tuple(set(ndims).difference(set(core_dims)))
@@ -133,10 +136,10 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
                 slice_axis='rotation_angle')
 
         # in_pData[1].plugin_data_setup('PROJECTION', nSlices) # (for PWLS)
-        
+
         # set pattern_name and nframes to process for all datasets
         out_pData[0].plugin_data_setup('VOLUME_3D', 'single')
-   
+
     def pre_process(self):
         # extract given parameters
         self.iterationsFISTA = self.parameters['iterations']
@@ -154,20 +157,23 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
         self.NDF_penalty = self.parameters['NDF_penalty']
         self.tolerance = self.parameters['tolerance']
         self.huber_data_threshold = self.parameters['huber_data_threshold']
-        
+        self.ring_model_horiz_size = self.parameters['ring_model_horiz_size']
+        self.ring_model_vert_size = self.parameters['ring_model_vert_size']
+        self.ring_model_slices_size = self.parameters['ring_model_slices_size']
+
         self.RecToolsIR = None
         if (self.ordersubsets > 1):
             self.regularisation_iterations = (int)(self.parameters['regularisation_iterations']/self.ordersubsets) + 1
         else:
             self.regularisation_iterations = self.parameters['regularisation_iterations']
-            
+
         in_pData = self.get_plugin_in_datasets()
         self.det_dimX_ind = in_pData[0].get_data_dimension_by_axis_label('detector_x')
         self.det_dimY_ind = in_pData[0].get_data_dimension_by_axis_label('detector_y')
 
     def process_frames(self, data):
         centre_of_rotations, angles, self.vol_shape, init  = self.get_frame_params()
-        
+
         self.anglesRAD = np.deg2rad(angles.astype(np.float32))
         self.centre_of_rotations = centre_of_rotations
         projdata3D = data[0].astype(np.float32)
@@ -179,8 +185,8 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
         # WIP for PWLS fidelity
         # rawdata3D = data[1].astype(np.float32)
         # rawdata3D =np.swapaxes(rawdata3D,0,1)/np.max(np.float32(rawdata3D))
-        
-        # check if the reconstruction class has been initialised and calculate 
+
+        # check if the reconstruction class has been initialised and calculate
         # Lipschitz constant if not given explicitly
         self.setup_Lipschitz_constant()
         # Run FISTA reconstrucion algorithm here
@@ -191,6 +197,9 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
                                     regularisation_iterations = self.regularisation_iterations,\
                                     regularisation_parameter2 = self.regularisation_parameter2,\
                                     huber_data_threshold = self.huber_data_threshold,\
+                                    ring_model_horiz_size = self.ring_model_horiz_size,\
+                                    ring_model_vert_size = self.ring_model_vert_size,\
+                                    ring_model_slices_size = self.ring_model_slices_size,\
                                     time_marching_parameter = self.time_marching_parameter,\
                                     lambdaR_L1 = self.ring_variable,\
                                     alpha_ring = self.ring_accelerator,\
@@ -200,11 +209,11 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
                                     lipschitz_const = self.Lipschitz_const)
         recon = np.swapaxes(recon,0,1) # temporal fix!
         return recon
-    
+
     def setup_Lipschitz_constant(self):
         if self.RecToolsIR is not None:
-            return 
-        
+            return
+
        # set parameters and initiate a TomoBar class object
         self.Rectools = RecToolsIR(DetectorsDimH = self.Horiz_det,  # DetectorsDimH # detector dimension (horizontal)
                     DetectorsDimV = self.Vert_det,  # DetectorsDimV # detector dimension (vertical) for 3D case only
@@ -216,13 +225,13 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
                     OS_number = self.ordersubsets, # the number of subsets, NONE/(or > 1) ~ classical / ordered subsets
                     tolerance = self.tolerance , # tolerance to stop outer iterations earlier
                     device='gpu')
-                                        
+
         if (self.parameters['converg_const'] == 'power'):
             self.Lipschitz_const = self.Rectools.powermethod() # calculate Lipschitz constant
         else:
             self.Lipschitz_const = self.parameters['converg_const']
         return
-    
+
     def nInput_datasets(self):
         return 1
     def nOutput_datasets(self):
