@@ -1,4 +1,4 @@
-# Copyright 2015 Diamond Light Source Ltd.
+# Copyright 2014 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,11 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-'''
-Created on 21 May 2015
+"""
+.. module:: savu_config.py
+   :platform: Unix
+   :synopsis: A command line tool for creating Savu plugin lists
 
-@author: ssg37927
-'''
+.. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
+
+"""
 
 from __future__ import print_function
 
