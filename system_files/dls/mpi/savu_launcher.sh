@@ -128,7 +128,7 @@ else
 			'AUTO') gpu_arch=Kepler ; nNodes=1 ;;
 			'PREVIEW') gpu_arch=Kepler ; nNodes=1 ;;
 			'BIG') gpu_arch=Pascal ; nNodes=8 ;;
-			'') gpu_arch=Kepler ; nNodes=4 ;;
+			'') type="STANDARD"; gpu_arch=Kepler ; nNodes=4 ;;
 			 *) echo -e "\nUnknown 'type' optional argument"
 			    echo -e "Please choose from 'AUTO' or 'PREVIEW'"
 				exit 1 ;;
@@ -142,7 +142,7 @@ else
 			'AUTO') nNodes=1 ;;
 			'PREVIEW') nNodes=1 ;;
 			'BIG') nNodes=4 ;;
-			'') nNodes=2 ;;
+			'') type="STANDARD"; nNodes=2 ;;
 			 *) echo -e "\nUnknown 'type' optional argument\n"
 			    echo -e "Please choose from 'AUTO' or 'PREVIEW'" 
 				exit 1 ;;
