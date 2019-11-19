@@ -53,8 +53,7 @@ class TomobarReconCpu(BaseRecon, CpuPlugin):
     :param time_marching_parameter: Time marching parameter, relevant for \
                     (ROF_TV, LLT_ROF, NDF, Diff4th) penalties. Default: 0.0025.
     :param huber_data_threshold: Threshold parameter for __Huber__ data fidelity . Default: 0.0.
-    :param ring_model_horiz_size: better model to supress ring artifacts, size of the window defines a possible thickness of artifacts. Default: None.
-    :param ring_model_vert_size: adds more stability to ring based model. Default: 0.
+    :param ring_model_horiz_window: Enables a better model to supress artifacts, set the size of the window from 7 to 15. Default: 0.
     :param edge_param: Edge (noise) related parameter, relevant for NDF and Diff4th. Default: 0.01.
     :param regularisation_parameter2:  Regularisation (smoothing) value for LLT_ROF method. Default: 0.005.
     :param NDF_penalty: NDF specific penalty type Huber, Perona, Tukey. Default: 'Huber'.
@@ -90,8 +89,7 @@ class TomobarReconCpu(BaseRecon, CpuPlugin):
         self.output_size = self.parameters['output_size']
         self.tolerance = self.parameters['tolerance']
         self.huber_data_threshold = self.parameters['huber_data_threshold']
-        self.ring_model_horiz_size = self.parameters['ring_model_horiz_size']
-        self.ring_model_vert_size = self.parameters['ring_model_vert_size']
+        self.ring_model_horiz_window = self.parameters['ring_model_horiz_window']
 
         self.RecToolsIR = None
         if (self.ordersubsets > 1):
@@ -118,8 +116,7 @@ class TomobarReconCpu(BaseRecon, CpuPlugin):
                                     regularisation_parameter2 = self.regularisation_parameter2,\
                                     time_marching_parameter = self.time_marching_parameter,\
                                     huber_data_threshold = self.huber_data_threshold,\
-                                    ring_model_horiz_size = self.ring_model_horiz_size,\
-                                    ring_model_vert_size = self.ring_model_vert_size,\
+                                    ring_model_horiz_window = self.ring_model_horiz_window,\
                                     lambdaR_L1 = self.ring_variable,\
                                     alpha_ring = self.ring_accelerator,\
                                     NDF_penalty = self.NDF_penalty,\

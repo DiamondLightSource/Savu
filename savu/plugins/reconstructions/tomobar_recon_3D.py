@@ -57,9 +57,8 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
     :param tolerance: Tolerance to stop outer iterations earlier. Default: 1e-9.
     :param ring_variable: Regularisation variable for ring removal. Default: 0.0.
     :param ring_accelerator: Acceleration constant for ring removal (use with care). Default: 50.0.
-    :param ring_model_horiz_size: better model to supress ring artifacts, size of the window defines a possible thickness of artifacts. Default: None.
-    :param ring_model_vert_size: adds more stability to ring based model, set to 1 or 2. Default: 0.
-    :param ring_model_slices_size:  adds more stability to ring based model, set to 1 or 2. Default: 0.
+    :param ring_model_horiz_window: Enables a better model to supress artifacts, set the size of the window from 7 to 15. Default: 0.
+    :param ring_model_slices_window: Enables a better model to supress artifacts, set the size of the window from 7 to 15. Default: 0.
     """
 
     def __init__(self):
@@ -157,9 +156,8 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
         self.NDF_penalty = self.parameters['NDF_penalty']
         self.tolerance = self.parameters['tolerance']
         self.huber_data_threshold = self.parameters['huber_data_threshold']
-        self.ring_model_horiz_size = self.parameters['ring_model_horiz_size']
-        self.ring_model_vert_size = self.parameters['ring_model_vert_size']
-        self.ring_model_slices_size = self.parameters['ring_model_slices_size']
+        self.ring_model_horiz_window = self.parameters['ring_model_horiz_window']
+        self.ring_model_slices_window = self.parameters['ring_model_slices_window']
 
         self.RecToolsIR = None
         if (self.ordersubsets > 1):
@@ -197,9 +195,8 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
                                     regularisation_iterations = self.regularisation_iterations,\
                                     regularisation_parameter2 = self.regularisation_parameter2,\
                                     huber_data_threshold = self.huber_data_threshold,\
-                                    ring_model_horiz_size = self.ring_model_horiz_size,\
-                                    ring_model_vert_size = self.ring_model_vert_size,\
-                                    ring_model_slices_size = self.ring_model_slices_size,\
+                                    ring_model_horiz_window = self.ring_model_horiz_window,\
+                                    ring_model_slices_window = self.ring_model_slices_window,\
                                     time_marching_parameter = self.time_marching_parameter,\
                                     lambdaR_L1 = self.ring_variable,\
                                     alpha_ring = self.ring_accelerator,\
