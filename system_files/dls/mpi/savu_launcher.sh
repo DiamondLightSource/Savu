@@ -23,12 +23,14 @@ function is_gpfs03 ()
 
 # input optional arguments
 zocalo=false
-while getopts ":t:i:s:z::" opt; do
+keep=false
+while getopts ":t:i:s:z:k::" opt; do
 	case ${opt} in
 		t ) type=$OPTARG ;;
 		i ) infile=$OPTARG ;;
 		s ) version=$OPTARG ;;
         z ) zocalo=$OPTARG ;;
+        k ) keep=$OPTARG ;;
 		\? ) echo "Invalid option: $OPTARG" 1>&2 ;;
 		: ) echo "Invalid option: $OPTARG requires an argument" 1>&2 ;;
 	esac
@@ -281,12 +283,8 @@ fi
 # create the user log
 touch $outfolder/user.log
 
-arg_parse "-k" keep $options
-echo $keep
-
 # set the intermediate folder
 arg_parse "-d" interfolder $options
-echo "interfolder option is" $interfolder
 delete=false
 if [ ! $interfolder ] ; then
 	arg_parse "--tmp" interfolder $options
@@ -299,9 +297,7 @@ else
 	if [ ! -d $interfolder ]; then
 		create_folder $interfolder
 	fi
-    echo "type is "$type
-	if [ ! $type == 'AUTO' ] && [ ! $type == 'PREVIEW' ] ; then
-        echo "inter folder is" $interfolder
+    if [ ! $type == 'AUTO' ] && [ ! $type == 'PREVIEW' ] && [ ! $keep == true ] ; then
 		delete=$interfolder
 	fi
 fi
