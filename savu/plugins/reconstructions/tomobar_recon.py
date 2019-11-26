@@ -33,50 +33,50 @@ from scipy import ndimage
 
 @register_plugin
 class TomobarRecon(BaseRecon, GpuPlugin):
+    #REMOVE NAME CATEGORY SYNOPSIS
     """
 ---
-      - name: TomobarRecon
-        category: Reconstructor
-        synopsis: A wrapper around TOmographic MOdel-BAsed Reconstruction (ToMoBAR) software for advanced iterative image reconstruction.
-        verbose: A plugin to reconstruct full-field tomographic projection data using state-of-the-art regularised iterative algorithms from the ToMoBAR package. ToMoBAR includes FISTA and ADMM iterative methods and depends on the ASTRA toolbox and the CCPi RGL toolkit
+      - verbose: A plugin to reconstruct full-field tomographic projection data using state-of-the-art regularised iterative algorithms from the ToMoBAR package. ToMoBAR includes FISTA and ADMM iterative methods and depends on the ASTRA toolbox and the CCPi RGL toolkit
         parameters:
            - output_size:
-                  visibility: user
+                  visibility: param
                   type: str
                   description: Number of rows and columns in the reconstruction.
                   default: auto
            - iterations:
-                  visibility: user
+                  visibility: param
                   type: int
-                  description: Number of outer iterations for FISTA (default) or ADMM methods.
+                  description:
+                    summary: Number of outer iterations for FISTA (default) or ADMM methods.
+                    verbose: Less than 10 iterations for the iterative method (FISTA) can deliver a blurry reconstruction. The suggested value is 15 iterations, however the algorithm can stop prematurely based on the tolerance value.
                   default: 20
            - datafidelity:
-                  visibility: user
+                  visibility: param
                   type: str
                   description: Least Squares only at the moment.
                   default: LS
            - nonnegativity:
-                  visibility: user
+                  visibility: param
                   type: str
                   options: [Enable, None]
                   description: Non negativity constraint, choose Enable or None.
                   default: Enable
            - ordersubsets:
-                  visibility: user
+                  visibility: param
                   type: int
-                  description: The number of ordered-subsets to accelerate reconstruction.
+                  description: The number of ordered-subsets to accelerate reconstruction. A value >12 can result in the algorithm diverging.
                   default: 6
            - converg_const:
-                  visibility: user
+                  visibility: param
                   type: str
                   description: Lipschitz constant, can be set to a value or automatic calculation.
                   default: power
            - method:
-                  visibility: user
+                  visibility: param
                   type: str
                   options: [ROF_TV, FGP_TV, SB_TV, NLTV, TGV, LLT_ROF, NDF, Diff4th]
                   description:
-                    summary: The denoising method - This is a short description
+                    summary: The denoising method - Iterative methods can help to solve ill-posed inverse problems by choosing a suitable noise model for the measurements
                     verbose: To regularise choose methods ROF_TV, FGP_TV, SB_TV, LLT_ROF, NDF, Diff4th.
                     options:
                         ROF_TV: Rudin-Osher-Fatemi Total Variation model
@@ -89,29 +89,28 @@ class TomobarRecon(BaseRecon, GpuPlugin):
                         DIFF4th: Fourth-order nonlinear diffusion model
                   default: FGP_TV
            - reg_par:
-                  visibility: user
+                  visibility: param
                   type: float
                   description:
                     summary: Regularisation parameter. The higher the value, the stronger the smoothing effect
                     range: Recommended between 0 and 1
                   default: 0.0001
            - max_iterations:
-                  visibility: user
+                  visibility: param
                   type: int
-                  description: Total number of regularisation iterations
-                  default: 350
-                  dependency:
-                  method:
-                    ROF_TV: 1000
-                    FGP_TV: 500
-                    SB_TV: 100
-                    NLTV: 3
-                    TGV: 1000
-                    LLT_ROF: 1000
-                    NDF: 1000
-                    DIFF4th: 1000
+                  description: Total number of regularisation iterations. The smaller the number of iterations, the smaller the effect of the filtering is. A larger number will affect the speed of the algortihm.
+                  default:
+                      method:
+                        ROF_TV: 1000
+                        FGP_TV: 500
+                        SB_TV: 100
+                        NLTV: 3
+                        TGV: 1000
+                        LLT_ROF: 1000
+                        NDF: 1000
+                        DIFF4th: 1000
            - time_step:
-                  visibility: user
+                  visibility: param
                   type: float
                   dependency:
                     method: [ROF_TV, LLT_ROF, NDF, Diff4th]
@@ -120,25 +119,24 @@ class TomobarRecon(BaseRecon, GpuPlugin):
                     range: Recommended between 0.0001 and 0.001
                   default: 0.001
            - edge_param:
-                  visibility: user
+                  visibility: param
                   type: float
                   dependency:
                     method: [NDF, Diff4th]
                   description:
                     summary: Edge (noise) related parameter
-                    range:
                   default: 0.01
            - regularisation_parameter2:
-                  visibility: user
+                  visibility: param
                   type: float
                   dependency:
                     method: LLT_ROF
                   description:
                     summary: Regularisation (smoothing) value
-                    range:
+                    verbose: The higher the value stronger the smoothing effect.
                   default: 0.005
            - NDF_penalty:
-                  visibility: user
+                  visibility: param
                   type: str
                   options: [Huber, Perona, Tukey]
                   description:
@@ -152,23 +150,21 @@ class TomobarRecon(BaseRecon, GpuPlugin):
                     method: NDF
                   default: Huber
            - tolerance:
-                  visibility: user
+                  visibility: param
                   type: float
                   description:
                     summary: Tolerance to stop outer iterations earlier.
-                    range:
                   default: 5e-10
            - ring_variable:
-                  visibility: user
+                  visibility: param
                   type: float
                   dependency:
                     method: LLT_ROF
                   description:
                     summary: Regularisation variable for ring removal
-                    range:
                   default: 0.0
            - ring_accelerator:
-                  visibility: user
+                  visibility: param
                   type: float
                   description:
                     summary: Acceleration constant for ring removal (use with care)
