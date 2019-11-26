@@ -25,6 +25,7 @@ from savu.plugins.plugin import Plugin
 
 
 class BaseLoader(Plugin):
+
     """
     A base plugin from which all data loader plugins should inherit.
 
@@ -33,7 +34,30 @@ class BaseLoader(Plugin):
     :~param out_datasets:
 
     """
+    """
+---
+      - name: BaseLoader
+        category: Loader
+        synopsis: A base class for loader plugins
+        verbose: A base plugin from which all data loader plugins should inherit.
+        parameters:
+           - preview:
+                  visibility: user
+                  type: str
+                  description: A slice list of required frames.
+                  default: []
+           - in_datasets:
+                  visibility: hide_param
+                  type: '[int]'
+                  description:
+                  default:
+           - out_datasets:
+                  visibility: not_param
+                  type: '[int]'
+                  description:
+                  default:
 
+    """
     def __init__(self, name='BaseLoader'):
         super(BaseLoader, self).__init__(name)
         self.hits = []
