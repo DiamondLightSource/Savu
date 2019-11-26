@@ -35,6 +35,7 @@ import logging
 import numpy as np
 from collections import defaultdict
 
+from colorama import Fore
 import savu.plugins.utils as pu
 from savu.data.meta_data import MetaData
 import savu.data.framework_citations as fc
@@ -73,7 +74,8 @@ class PluginList(object):
                     'desc': None,
                     'data': None,
                     'user': [],
-                    'hide': []}
+                    'hide': [],
+                    'types': None}
         return template
 
     def __get_json_keys(self):
@@ -82,6 +84,7 @@ class PluginList(object):
     def _populate_plugin_list(self, filename, activePass=False,
                               template=False):
         """ Populate the plugin list from a nexus file. """
+
         plugin_file = h5py.File(filename, 'r')
         plugin_group = plugin_file['entry/plugin']
         self.plugin_list = []
@@ -97,6 +100,7 @@ class PluginList(object):
                 plugin['active'] = plugin_group[key]['active'][0]
 
             if plugin['active'] or activePass:
+
                 plugin['name'] = plugin_group[key]['name'][0]
                 plugin['id'] = plugin_group[key]['id'][0]
                 plugin['pos'] = key.encode('ascii').strip()
@@ -111,6 +115,191 @@ class PluginList(object):
             self._template.update_process_list(template)
 
         plugin_file.close()
+
+    def _is_valid(self, value, subelem, pos):
+        parameter_valid = False
+        options = ''
+        formats = ''
+        examples = ''
+
+        if subelem in self.plugin_list[pos]['types']:
+            # The parameter is within the types
+            ptype = self.plugin_list[pos]['types'][subelem]
+            pdesc = self.plugin_list[pos]['desc'][subelem]
+            if not isinstance(pdesc, str):
+                if 'options' in pdesc.keys():
+                    options = pdesc['options']
+                if 'format' in pdesc:
+                    formats = pdesc['format']
+                if 'examples' in pdesc:
+                    examples = pdesc['examples']
+
+            if len(options) >= 1:
+                options = [i.lower() for i in options]
+                if value.lower() in options:
+                    parameter_valid = True
+                else:
+                    print(Fore.CYAN + '\nSome options are:')
+                    for o in options:
+                        print(o)
+                    print(Fore.RESET)
+            else:
+                if ptype == '[int]':
+                    sequence = False
+                    if isinstance(value, str) and ';' in value:
+                        value = value.split(';')
+                        if len(value[0]) == 1 and isinstance(value[0], int):
+                            value = list(np.arange(0, value[0], 1))
+                            parameter_valid = True
+                            sequence = True
+                        if ":" in value[0]:
+                            # <first-value>:<last-value>:<difference>;
+                            seq = value[0].split(':')
+                            seq = [eval(s) for s in seq]
+                            if len(seq) == 3:
+                                # The sequence values
+                                sequence_values = list(np.arange(seq[0], seq[1], seq[2]))
+                                if len(sequence_values) == 0:
+                                    raise RuntimeError('Ensure start:stop:step; values are valid.')
+                                else:
+                                    sequence = True
+                                    parameter_valid = True
+                                # value = [ast.literal_eval(i) for i in value]
+                            elif len(seq) == 2:
+                                if isinstance(seq[0], int) and isinstance(seq[1], int):
+                                    value = list(np.arange(seq[0], seq[1], 1))
+                                    parameter_valid = True
+                                    sequence = True
+                            else:
+                                print('The format should be start:stop:step;')
+                    if not sequence:
+                        bracket_value = value.split('[')
+                        bracket_value = bracket_value[1].split(']')
+                        value = bracket_value[0]
+                        entries = value.split(',')
+                        # TO DO further split check
+
+                elif ptype == 'range':
+                    entries = value.split(',')
+                    if len(entries) == 2:
+                        if isinstance(entries[0], int) and isinstance(entries[1], int):
+                            parameter_valid = True
+
+                elif ptype == '[path, int_path, int]':
+                    try:
+                        entries = value.split(',')
+                        if len(entries) == 3:
+                            file_path = entries[0]
+                            if os.path.isfile(file_path):
+                                int_path = entries[1]
+                                hf = h5py.File(file_path, 'r')
+                                try:
+                                    # This returns a HDF5 dataset object
+                                    int_data = hf.get(int_path)
+                                    int_data = np.array(int_data)
+                                    if len(int_data) >= 1:
+                                        try:
+                                            compensation_fact = int(entries[2])
+                                            if isinstance(compensation_fact, int):
+                                                parameter_valid = True
+                                            else:
+                                                print(Fore.BLUE + 'The compensation factor is'
+                                                                  ' not valid.' + Fore.RESET)
+                                        except ValueError:
+                                            print('The compensation factor is not an integer.')
+                                        except Exception:
+                                            print('There is a problem converting the compensation'
+                                                  ' factor to an integer.')
+
+                                except AttributeError as ae:
+                                    print(Fore.BLUE + '\nPlease choose another interior'
+                                                      ' path.' + Fore.RESET)
+                                    print('Attribute Error: ' + ae)
+
+                                except Exception as e:
+                                    print('Error: ' + e)
+
+                                hf.close()
+                            else:
+                                print(Fore.BLUE + 'This file does not exist at this'
+                                                  ' location.' + Fore.RESET)
+                        else:
+                            print(Fore.RED + 'Please enter three parameters.' + Fore.RESET)
+
+                    except ValueError:
+                        parameter_valid = False
+                        print('Valid items have a format [<file path>,'
+                              ' <interior file path>, int].')
+                    except Exception as e:
+                        print('Error')
+                        print(e)
+
+                elif ptype == 'path':
+                    path = os.path.dirname(value)
+                    path = path if path else '.'
+                    if os.path.isdir(path):
+                        parameter_valid = True
+                        print('This path is to a directory.')
+                    elif os.path.isfile(path):
+                        parameter_valid = True
+                        print('This path is to a file.')
+                    else:
+                        print('Valid items contain numbers, letters and \'/\'')
+                        file_error = "INPUT_ERROR: Incorrect filepath."
+                        raise Exception(file_error)
+
+                elif ptype == 'int_path':
+                    # Check if the entry is a string
+                    # Could check if valid, but only if file_path known for another parameter
+                    if isinstance(value, str):
+                        parameter_valid = True
+                    else:
+                        print('Not a valid string.')
+
+                elif ptype == 'int':
+                    if isinstance(value, int):
+                        parameter_valid = True
+                    else:
+                        print('%s is not a valid integer.' % value)
+
+                elif ptype == 'bool':
+                    if isinstance(value, bool):
+                        parameter_valid = True
+                    else:
+                        print('Not a valid boolean.')
+
+                elif ptype == 'str':
+                    if isinstance(value, str):
+                        parameter_valid = True
+                    else:
+                        print('Not a valid string.')
+
+                elif ptype == 'float':
+                    if isinstance(value, float):
+                        parameter_valid = True
+                    else:
+                        print('Not a valid float.')
+                else:
+                    parameter_valid = False
+
+                if parameter_valid is False:
+                    print('\nYour input for the parameter \'%s\' must match the'
+                          ' required type %s' % (subelem, ptype))
+
+                    if len(formats) >= 1:
+                        print(Fore.CYAN + 'Format accepted for the parameter '
+                                          'named \'%s\':' % subelem)
+                        for f in formats:
+                            print(f)
+    
+                    if len(examples) >= 1:
+                        print(Fore.RED + '\nSome examples are:')
+                        for e in examples:
+                            print(e)
+                    print(Fore.RESET)
+        else:
+            print('Not in parameter keys.')
+        return parameter_valid
 
     def _save_plugin_list(self, out_filename):
         with h5py.File(out_filename, 'w') as nxs_file:
@@ -295,19 +484,32 @@ class PluginList(object):
         self.n_loaders = len(loader_idx)
         self.n_savers = len(saver_idx)
 
-    def _check_loaders(self):
+    def _check_loaders_and_savers(self):
         """ Check plugin list starts with a loader and ends with a saver.
         """
         self.__set_loaders_and_savers()
         loaders = self._get_loaders_index()
+        savers = self._get_savers_index()
 
         if loaders:
             if loaders[0] is not 0 or loaders[-1]+1 is not len(loaders):
                 raise Exception("All loader plugins must be at the beginning "
-                                "of the plugin list")
+                                "of the process list")
+            if len(loaders) > 1:
+                print('You have more than one loader plugin.')
         else:
-            raise Exception("The first plugin in the plugin list must be a "
+            raise Exception("The first item in the process list must be a "
                             "loader plugin.")
+
+        if savers:
+            if savers[-1]+1 is not self.n_plugins:
+                raise Exception("All saver plugins must be at the end "
+                                "of the process list")
+            if len(savers) > 1:
+                print('You have more than one saver plugin.')
+        else:
+            raise Exception("The last item in the process list must be a "
+                            "saver plugin.")
 
     def _add_missing_savers(self, data_names):
         """ Add savers for missing datasets. """
