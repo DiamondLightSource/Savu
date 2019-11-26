@@ -59,7 +59,6 @@ class VoCentering(BaseFilter, CpuPlugin):
     :param average_radius: Averaging sinograms around a required sinogram to\
         improve signal-to-noise ratio. Default: 0.
     """
-
     def __init__(self):
         super(VoCentering, self).__init__("VoCentering")
 
@@ -381,3 +380,32 @@ class VoCentering(BaseFilter, CpuPlugin):
             msg = "\n" + self.error_msg_1 + "\n" \
             + self.error_msg_2 + "\n" + self.error_msg_3
         return [msg]
+
+    '''
+    Using VoCentering:
+
+        It must be used after the DarkFlatFieldCorrection plugin.
+        It must be used after the distortion correction plugins.
+        It must be used before any plugin may blur the image (PaganinFilter, FresnelFilter,..). 
+        It should be used after ring removal plugins, but not strictly. 
+        If the images (sinograms) are at very low contrast and VoCentering doesn't work well:
+            Increase the "average_radius" to ~ 10. This means that the "preview" in the NxtomoLoader need to be increased correspondingly  (~ +/- 10).
+        If the results of Vocentering are unstable between scans or slices:
+            Increase the "preview" slices of the VoCentering. Note that users have to increase the "preview" in the NxtomoLoader equivalently. By doing these, VoCentering will calculate center of rotation (CoR) of every previewing slices. Then the final CoR will be the median, mean, or fitted value of those calculated which users can specify in the "broadcast_method".
+        If the sample is too big compared with the field of view of the camera and VoCentering doesn't work well:
+            Increase the "ratio" to something ~ larger 2.
+            Use the tip of increase the "preview"  in 4.6. If this doesn't work, combine with the tip 4.5.
+        If the data was collected using 360-degree scanning (but not off-setting CoR for doubling the field of view):
+            Change the "preview" to [0:mid, <user-choice>,:]. Because the VoCentering only works on 180-degree sinogram, by doing that we make sure the plugin only get data in the range of 180 degree.
+        If none of the above tips work:
+            make sure that:
+                There's no motion artifacts.
+                Data was collected in the range of [0;180] degree (not limited-angle tomography).
+                The sample is inside the field of view the previewing slices.
+                Dark and flat are collected properly: shutter was completely closed when collecting dark; there's no sample in the flat image.
+                There's no non-rotating part in the image, e.g the image of some experiment components such as window of a furnace.
+            otherwise:
+                Users have to find CoR manually by doing parameter turning in the reconstruction plugins.
+                Send e-mail and a sinogram (or location of the data) to Nghia (nghia.vo@diamond.ac.uk).
+
+  '''
