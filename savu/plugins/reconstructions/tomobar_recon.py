@@ -54,7 +54,7 @@ class TomobarRecon(BaseRecon, GpuPlugin):
     :param regularisation_PD_lip: Primal-dual parameter for convergence. Default: 12.
     :param regularisation_methodTV:  0/1 - TV specific isotropic/anisotropic choice. Default: 0.
     :param regularisation_timestep: Time marching parameter, relevant for \
-                    (ROF_TV, LLT_ROF, NDF, Diff4th) penalties. Default: 0.0025.
+                    (ROF_TV, LLT_ROF, NDF, Diff4th) penalties. Default: 0.001.
     :param regularisation_edge_thresh: Edge (noise) related parameter, relevant for NDF and Diff4th. Default: 0.01.
     :param regularisation_parameter2:  Regularisation (smoothing) value for LLT_ROF method. Default: 0.005.
     :param regularisation_NDF_penalty: NDF specific penalty type Huber, Perona, Tukey. Default: 'Huber'.
@@ -94,7 +94,6 @@ class TomobarRecon(BaseRecon, GpuPlugin):
                                 'PD_LipschitzConstant' : self.parameters['regularisation_PD_lip'],
                                 'NDF_penalty' : self.parameters['regularisation_NDF_penalty'],
                                 'methodTV' : self.parameters['regularisation_methodTV']}
-        self.RecToolsIR = None
 
     def process_frames(self, data):
         centre_of_rotations, angles, self.vol_shape, init  = self.get_frame_params()
