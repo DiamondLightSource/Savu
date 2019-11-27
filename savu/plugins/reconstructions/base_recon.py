@@ -99,7 +99,9 @@ class BaseRecon(Plugin):
         - log:
                visibility: user
                type: boolean
-               description: Take the log of the data before reconstruction (True or False). 
+               description: 
+                summary: Take the log of the data before reconstruction (True or False). 
+                verbose: Should be set to false if PaganinFilter is set beforehand
                default: True
         - preview:
                visibility: user
@@ -114,7 +116,7 @@ class BaseRecon(Plugin):
          - ratio:
                visibility: param
                type: list
-               description: Ratio of the m2asks diameter in pixels to the smallest edge size along given axis.
+               description: Ratio of the masks diameter in pixels to the smallest edge size along given axis.
                default: 0.95
           - log_func:
                visibility: param
