@@ -84,6 +84,7 @@ class Content(object):
         if name not in pu.plugins.keys():
             raise Exception("INPUT ERROR: Unknown plugin %s" % name)
         plugin = pu.plugins[name]()
+        #plugin._load_yaml_details()
         plugin._populate_default_parameters()
         pos, str_pos = self.convert_pos(str_pos)
         self.insert(plugin, pos, str_pos)
@@ -204,14 +205,24 @@ class Content(object):
         self.plugin_list.plugin_list[new_pos] = entry
         self.plugin_list.plugin_list[new_pos]['pos'] = new
 
-    def modify(self, pos_str, subelem, value, ref=False):
-        if not ref:
-            value = self.value(value)
-        pos = self.find_position(pos_str)
-        data_elements = self.plugin_list.plugin_list[pos]['data']
-        if subelem.isdigit():
-            subelem = self.plugin_list.plugin_list[pos]['map'][int(subelem)-1]
-        data_elements[subelem] = value
+    def modify(self, pos_str, param_name, value, ref=False):
+        try:
+            if not ref:
+                value = self.value(value)
+            pos = self.find_position(pos_str)
+            data_elements = self.plugin_list.plugin_list[pos]['data']
+            if param_name.isdigit():
+                param_name = self.plugin_list.plugin_list[pos]['map'][int(param_name)-1]
+            if self.plugin_list._is_valid(value, param_name, pos):
+                data_elements[param_name] = value
+            else:
+                print('This value has not been saved as it was not a valid entry.')
+        except SyntaxError:
+            print ("There is a syntax error. Please check your input.")
+        except EOFError:
+            print ("There is an end of line error. Please check your input for the character \"\'\".")
+        except Exception:
+            print('There is an error. Please check your input.')
 
     def value(self, value):
         if not value.count(';'):
@@ -306,9 +317,13 @@ class Content(object):
     def find_position(self, pos):
         """ Find the numerical index of a position (a string). """
         pos_list = self.get_positions()
-        if pos not in pos_list:
-            raise Exception("INPUT ERROR: Incorrect plugin position.")
-        return pos_list.index(pos)
+        if not pos_list:
+            print('There are no items to access in your list.')
+            raise Exception('Please add an item to the process list.')
+        else:
+            if pos not in pos_list:
+                raise Exception("Incorrect plugin position.")
+            return pos_list.index(pos)
 
     def inc_positions(self, start, pos_list, entry, inc):
         if len(entry) is 1:
@@ -346,6 +361,7 @@ class Content(object):
         plugin_dict['desc'] = plugin.parameters_desc
         plugin_dict['hide'] = plugin.parameters_hide
         plugin_dict['user'] = plugin.parameters_user
+        plugin_dict['types'] = plugin.parameters_types
 
         dev_keys = [k for k in plugin_dict['data'].keys() if k not in
                     plugin_dict['user'] + plugin_dict['hide']]
