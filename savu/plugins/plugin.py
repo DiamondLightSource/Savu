@@ -106,7 +106,8 @@ class Plugin(PluginDatasets):
         Load yaml details from docstring of this instance of the plugin.
 
         """
-        print('YAML Called')
+        # Improve method of loading test plugins
+        #print('YAML Called')
         if self.name == 'RemoveAllRings' or self.name == 'TomobarRecon' \
                 or self.name == 'NxtomoLoader'or self.name == 'DarkFlatFieldCorrection'\
                 or self.name == 'NoProcess':
