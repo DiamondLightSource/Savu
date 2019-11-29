@@ -31,6 +31,7 @@ import savu.plugins.docstring_parser as doc
 from savu.data.data_structures.data_types.data_plus_darks_and_flats \
     import ImageKey, NoImageKey
 
+
 @register_plugin
 class NxtomoLoader(BaseLoader):
     # Docstring with yaml syntax
@@ -38,57 +39,21 @@ class NxtomoLoader(BaseLoader):
 ---
           - verbose: A class to load tomography data from a hdf5 file
             parameters:
-                - preview:
-                          visibility: param
-                          type: '[int]'
-                          description: A slice list of required frames.
-                          default: []
-                - name:
-                              visibility: param
-                              type: str
-                              description: A name assigned to the dataset.
-                              default: 'tomo'
-                - data_path:
-                              visibility: param
-                              type: str
-                              description: Path to the data inside the file.
-                              default: null
-                - image_key_path:
-                              visibility: param
-                              type: int_path
-                              description: Path to the image key entry inside the nxs file. Set this parameter to "None" if use this loader for radiography.
-                              default: 'entry1/tomo_entry/instrument/detector/image_key'
-                - dark:
-                              visibility: param
-                              type: '[path, int_path, int]'
-                              description: Specify the nexus file location where the dark field images are stored. Then specify the path within this nexus file, at which the dark images are located. The last value will be a scale value.
-                              default: '[None, None, 1]'
-                - flat:
-                              visibility: param
-                              type: '[path, int_path, int]'
-                              description: This parameter needs to be specified only if flats not stored in the same dataset as sample projections. Optional Path to the flat field data file, nxs path and scale value.
-                              default: '[None, None, 1]'
-                - angles:
-                              visibility: param
-                              type: '[int]'
-                              description: If this if 4D data stored in 3D then pass an integer value equivalent to the number of projections per 180 degree scan. If the angles parameter is set to None, then values from default dataset used.
-                              default: 'None'
-                - three_to_4d:
-                              visibility: param
-                              type: bool
-                              options: [True,False]
-                              description: Many tomography datasets can be loaded. Value of True indicates the data must be reshaped.
-                              default: False
-                - ignore_flats:
-                              visibility: param
-                              type: '[int]'
-                              description: List of batch numbers of flats to ignore (starting at 1). Useful for excluding comprimised flats in combined data sets containing multiple batches of interspaced flats. The batch indexing begins at 1.
-                              default: 'None'
-
+               -{preview}
+               -{name}
+               -{data_path}
+               -{image_key_path}
+               -{dark}
+               -{flat}
+               -{angles}
+               -{three_to_4d}
+               -{ignore_flats}
     """
+
     def __init__(self, name='NxtomoLoader'):
         super(NxtomoLoader, self).__init__(name)
         self.warnings = []
+        self.append_docstring()
 
     def log_warning(self, msg):
         logging.warn(msg)
@@ -320,8 +285,64 @@ class NxtomoLoader(BaseLoader):
         else:
             return self.warnings
 
+    def append_docstring(self):
+        """- preview:
+                      visibility: param
+                      type: '[int]'
+                      description: A slice list of required frames.
+                      default: []
+        - name:
+                      visibility: param
+                      type: str
+                      description: A name assigned to the dataset.
+                      default: 'tomo'
+        - data_path:
+                      visibility: param
+                      type: str
+                      description: Path to the data inside the file.
+                      default: null
+        - image_key_path:
+                      visibility: param
+                      type: int_path
+                      description: Path to the image key entry inside the nxs file. Set this parameter to "None" if use this loader for radiography.
+                      default: 'entry1/tomo_entry/instrument/detector/image_key'
+        - dark:
+                      visibility: param
+                      type: '[path, int_path, int]'
+                      description: Specify the nexus file location where the dark field images are stored. Then specify the path within this nexus file, at which the dark images are located. The last value will be a scale value.
+                      default: '[None, None, 1]'
+        - flat:
+                      visibility: param
+                      type: '[path, int_path, int]'
+                      description: This parameter needs to be specified only if flats not stored in the same dataset as sample projections. Optional Path to the flat field data file, nxs path and scale value.
+                      default: '[None, None, 1]'
+        - angles:
+                      visibility: param
+                      type: '[int]'
+                      description: If this if 4D data stored in 3D then pass an integer value equivalent to the number of projections per 180 degree scan. If the angles parameter is set to None, then values from default dataset used.
+                      default: 'None'
+        - three_to_4d:
+                      visibility: param
+                      type: bool
+                      options: [True,False]
+                      description: Many tomography datasets can be loaded. Value of True indicates the data must be reshaped.
+                      default: False
+        - ignore_flats:
+                      visibility: param
+                      type: '[int]'
+                      description: List of batch numbers of flats to ignore (starting at 1). Useful for excluding comprimised flats in combined data sets containing multiple batches of interspaced flats. The batch indexing begins at 1.
+                      default: 'None'
+        """
+        # Splitting using '-' which can cause errors if split occurs earlier than expected at next parameter
+        parameter_sections = self.append_docstring.__doc__.split('-')
+        # Seperate parameter names from syntax
+        parameter_names = [i.split(':')[0] for i in parameter_sections]
+        p_strings = [i.split()[0] for i in parameter_names[1:]]
+        param_section_strings = {i: parameter_sections[n + 1] for n, i in enumerate(p_strings)}
+        # Formatting style using name placeholders placed in the docstring of the class
+        self.__doc__ = self.__doc__.format(**param_section_strings)
         '''
-        
+
                A class to load tomography data from a hdf5 file {0}
 
                :param name: The name assigned to the dataset. Default: 'tomo'.
