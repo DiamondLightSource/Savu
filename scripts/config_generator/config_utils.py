@@ -90,9 +90,9 @@ def error_catcher(function):
                 e.message.split()[1] == 'ERROR:' else False
 
             if error_level is 0 and savu_error:
-                print e.message
+                print(e.message)
             elif error_level is 0:
-                print "%s: %s" % (type(e).__name__, e.message)
+                print("%s: %s" % (type(e).__name__, e.message))
             elif error_level is 1:
                 traceback.print_exc(file=sys.stdout)
 
