@@ -20,7 +20,7 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
-
+import os
 import textwrap
 
 from colorama import Fore, Back, Style
@@ -71,7 +71,7 @@ class DisplayFormatter(object):
                           active="", quiet=False, pos=None):
         pos = "%2s" % (str(pos) + ")") if pos else ""
         title = "%s %s %s" % (active, pos, p_dict['name'])
-        title = title if quiet else title+"(%s)" % p_dict['id']
+        title = title if quiet else title+" (%s)" % p_dict['id']
         width -= len(title)
         return back_colour + fore_colour + title + " "*width + Style.RESET_ALL
 
@@ -84,7 +84,51 @@ class DisplayFormatter(object):
             return ''
         return "\n" + colour_on + synopsis + colour_off
 
-    def _get_param_details(self, level, p_dict, width, desc=False):
+    def _get_verbose_param_details(self, p_dict, param_key, desc, key, params, width):
+        margin = 4
+        joiner = "\n" + " " * margin
+        if param_key == 'verbose':
+            verbose = desc[key][param_key]
+            # Account for margin space
+            verbose = joiner.join(textwrap.wrap(verbose,
+                                                width=width - margin))
+            temp = joiner + Fore.GREEN + "%s" + Fore.RESET
+            params += temp % verbose
+
+        if param_key == 'options':
+            options = desc[key][param_key]
+            if p_dict['data'][key]:
+                option_text = Fore.BLUE + 'Chosen option:'
+                option_text = joiner.join(textwrap.wrap(option_text,
+                                                        width=width - margin))
+                temp = joiner + "%s"
+                params += temp % option_text
+                # Display verbose for current option
+                opt_key = p_dict['data'][key]
+                option_verbose = ''
+                option_verbose += Fore.BLUE + u'\u0009' + u'\u2022' + opt_key \
+                                            + ': ' + Fore.GREEN + options[opt_key]
+                option_verbose = joiner.join(textwrap.wrap(option_verbose,
+                                                           width=width - margin))
+                temp = joiner + "%s" + Fore.RESET
+                params += temp % option_verbose
+
+        if param_key == 'range':
+            p_range = desc[key]['range']
+            if p_range:
+                try:
+                    p_range = joiner.join(textwrap.wrap(p_range,
+                                                        width=width - margin))
+                    temp = joiner + Fore.RED + "%s" + Fore.RESET
+                    params += temp % p_range
+                except TypeError:
+                    print('You have not filled in the %s field within the'
+                          ' yaml information.' % param_key)
+
+        return params
+
+    def _get_param_details(self, level, p_dict, width, desc=False,
+                           v_verbose=False):
         margin = 4
         keycount = 0
         joiner = "\n" + " "*margin
@@ -92,19 +136,40 @@ class DisplayFormatter(object):
 
         dev_keys = [k for k in p_dict['data'].keys() if k not in
                     p_dict['user'] + p_dict['hide']]
-        keys = p_dict['user'] if level == 'user' else p_dict['user'] + dev_keys
+        # P_dict is:
+        # ['map', 'hide', 'name', 'pos', 'user', 'active', 'data', 'id', 'types', 'desc']
+        try:
+            keys = p_dict['user'] if level == 'user' else p_dict['user'] + dev_keys
 
-        for key in keys:
-            keycount += 1
-            temp = "\n   %2i)   %20s : %s"
-            # keycount = all_keys.index(key)+1
-            params += temp % (keycount, key, p_dict['data'][key])
-            if desc:
-                pdesc = " ".join(desc[key].split())
-                pdesc = joiner.join(textwrap.wrap(pdesc, width=width-margin))
-                temp = '\n' + Fore.CYAN + ' '*margin + "%s" + Fore.RESET
-                params += temp % pdesc
-        return params
+            for key in keys:
+                keycount += 1
+                temp = "\n   %2i)   %20s : %s"
+                params += temp % (keycount, key, p_dict['data'][key])
+                # Add description for this parameter
+                if desc:
+                    if isinstance(desc[key], str):
+                        pdesc = " ".join(desc[key].split())
+                        # Restrict the margin so that the lines don't overflow.
+                        pdesc = joiner.join(textwrap.wrap(pdesc, width=width-margin))
+                        temp = joiner + Fore.CYAN + "%s" + Fore.RESET
+                        params += temp % pdesc
+                    else:
+                        # There is an ordered dictionary of parameters
+                        required_keys = desc[key].keys()
+                        for param_key in required_keys:
+                            # desc[key][param_key] is the value at this parameter
+                            if param_key == 'summary':
+                                pdesc = desc[key][param_key]
+                                pdesc = joiner.join(textwrap.wrap(pdesc,
+                                                                  width=width - margin))
+                                temp = joiner + Fore.CYAN + "%s" + Fore.RESET
+                                params += temp % pdesc
+                            if v_verbose:
+                                params = self._get_verbose_param_details(p_dict, param_key, desc, key, params, width)
+            return params
+        except Exception as e:
+            print('ERROR', e.strerror)
+            raise
 
     def _get_extra_info(self, p_dict, width, colour_off, info_colour,
                         warn_colour):
@@ -131,7 +196,6 @@ class DisplayFormatter(object):
                 colour_on + offset + line + " "*lwidth + colour_off)
         return "\n".join(new_str_list)
 
-
 class DispDisplay(DisplayFormatter):
 
     def __init__(self, plugin_list):
@@ -152,21 +216,24 @@ class DispDisplay(DisplayFormatter):
         params = self._get_param_details(level, p_dict, width)
         return title + params
 
-    def _get_verbose(self, level, p_dict, count, width, breakdown=False):
+    def _get_verbose(self, level, p_dict, count, width, breakdown=False,
+                     v_verbose=False):
         title = self._get_quiet(p_dict, count, width, quiet=False)
         colour_on = Back.LIGHTBLACK_EX + Fore.LIGHTWHITE_EX
         colour_off = Back.RESET + Fore.RESET
         synopsis = \
             self._get_synopsis(p_dict['name'], width, colour_on, colour_off)
         params = \
-            self._get_param_details(level, p_dict, width, desc=p_dict['desc'])
+            self._get_param_details(level, p_dict, width, desc=p_dict['desc'],
+                                    v_verbose=v_verbose)
         if breakdown:
             return title, synopsis, params
         return title + synopsis + params
 
     def _get_verbose_verbose(self, level, p_dict, count, width):
         title, synopsis, param_details = \
-            self._get_verbose(level, p_dict, count, width, breakdown=True)
+            self._get_verbose(level, p_dict, count, width, breakdown=True,
+                              v_verbose=True)
         info_c = Back.CYAN + Fore.LIGHTWHITE_EX
         warn_c = Back.WHITE + Fore.RED
         c_off = Back.RESET + Fore.RESET

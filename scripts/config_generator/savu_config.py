@@ -23,7 +23,6 @@ from __future__ import print_function
 import re
 import sys
 
-
 import warnings
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
@@ -39,7 +38,7 @@ with warnings.catch_warnings():
 
 def _help(content, args):
     """ Display the help information"""
-    print('%s Savu configurator commands %s\n' % tuple(['*'*21]*2))
+    print('%s Savu (local) configurator commands %s\n' % tuple(['*'*21]*2))
     for key in commands.keys():
         doc = commands[key].__doc__
         if doc:
@@ -63,13 +62,15 @@ def _open(content, args):
 @error_catcher
 def _disp(content, args):
     """ Display the plugins in the current list."""
-    range_dict = utils.__get_start_stop(content, args.start, args.stop)
-    formatter = DispDisplay(content.plugin_list)
-    verbosity = parsers._get_verbosity(args)
-    level = 'all' if args.all else content.disp_level
-    content.display(formatter, level=level, verbose=verbosity, **range_dict)
-    return content
-
+    try:
+        range_dict = utils.__get_start_stop(content, args.start, args.stop)
+        formatter = DispDisplay(content.plugin_list)
+        verbosity = parsers._get_verbosity(args)
+        level = 'all' if args.all else content.disp_level
+        content.display(formatter, level=level, verbose=verbosity, **range_dict)
+        return content
+    except:
+        raise
 
 @parse_args
 @error_catcher
@@ -80,23 +81,32 @@ def _list(content, args):
     if not len(list_content.plugin_list.plugin_list):
         print("No result found.")
         return content
+
+    # Sort the list of dictionaries. Sort by the name of the plugin within each dictionary
+    list_content.plugin_list.plugin_list = sorted(list_content.plugin_list.plugin_list, key=lambda i: i['name'])
+
     formatter = ListDisplay(list_content.plugin_list)
     verbosity = parsers._get_verbosity(args)
     list_content.display(formatter, verbose=verbosity)
     return content
 
-
 @parse_args
 @error_catcher
 def _save(content, args):
     """ Save the current process list to file."""
-    out_file = content.filename if args.input else args.filepath
-    content.check_file(out_file)
-    print()
-    DispDisplay(content.plugin_list)._notices()
-    content.save(out_file, check=raw_input("Are you sure you want to save the "
-                 "current data to %s' [y/N]" % (out_file)),
-                 template=args.template)
+
+    # Check if the plug in list has been populated.
+    if len(content.plugin_list.plugin_list):
+        # Check if a loader and saver are present.
+        content.plugin_list._check_loaders_and_savers()
+        out_file = content.filename if args.input else args.filepath
+        content.check_file(out_file)
+        DispDisplay(content.plugin_list)._notices()
+        content.save(out_file, check=raw_input("Are you sure you want to save the "
+                     "current data to %s' [y/N]" % (out_file)),
+                     template=args.template)
+
+    raise Exception("No items were found in your process list. Type 'add' to add a plugin to the list.")
     return content
 
 
@@ -104,9 +114,23 @@ def _save(content, args):
 @error_catcher
 def _mod(content, args):
     """ Modify plugin parameters. """
-    pos_str, subelem = args.param.split('.')
-    content.modify(pos_str, subelem, ' '.join(args.value))
-    _disp(content, pos_str)
+    try:
+        pos_str, subelem = args.param.split('.')
+        pos = content.find_position(pos_str)
+        data_elements = content.plugin_list.plugin_list[pos]['data']
+        try:
+            content.modify(pos_str, subelem, ' '.join(args.value))
+        except Exception as e:
+            print('Error modifying the parameter.')
+            print(e)
+            raise
+        _disp(content, pos_str)
+    except ValueError:
+        print('Incorrect parameter number: Please enter the parameter number to'
+              ' select the parameter you want to modify. Use a decimal format.')
+        # Otherwise message is - ValueError: need more than 1 value to unpack
+        # Should I tailor the error message with this additional try except or
+        # still use the decorator error_catcher
     return content
 
 
