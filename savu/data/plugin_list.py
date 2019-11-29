@@ -177,6 +177,7 @@ class PluginList(object):
                         bracket_value = bracket_value[1].split(']')
                         value = bracket_value[0]
                         entries = value.split(',')
+                        print('Not a sequence')
                         # TO DO further split check
 
                 elif ptype == 'range':
@@ -214,11 +215,10 @@ class PluginList(object):
                                 except AttributeError as ae:
                                     print(Fore.BLUE + '\nPlease choose another interior'
                                                       ' path.' + Fore.RESET)
-                                    print('Attribute Error: ' + ae)
+                                    print('Attribute Error: ' + ae.strerror)
 
                                 except Exception as e:
-                                    print('Error: ' + e)
-
+                                    print('Error: ' + e.strerror)
                                 hf.close()
                             else:
                                 print(Fore.BLUE + 'This file does not exist at this'
@@ -232,7 +232,7 @@ class PluginList(object):
                               ' <interior file path>, int].')
                     except Exception as e:
                         print('Error')
-                        print(e)
+                        print(e.strerror)
 
                 elif ptype == 'path':
                     path = os.path.dirname(value)
@@ -264,6 +264,8 @@ class PluginList(object):
 
                 elif ptype == 'bool':
                     if isinstance(value, bool):
+                        parameter_valid = True
+                    elif value == 'true' | value == 'false':
                         parameter_valid = True
                     else:
                         print('Not a valid boolean.')

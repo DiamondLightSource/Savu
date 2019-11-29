@@ -137,6 +137,7 @@ def _mod_arg_parser(args, desc):
     args.insert(1, '--')
 
     parser = ArgumentParser(prog='mod', description=desc)
+    # If parameter name is entered - error message is - ValueError: need more than 1 value to unpack
     param_str = ("The plugin parameter to modify. Either "
                  "'plugin_pos.param_name' or ' plugin_pos.param_no'")
     parser.add_argument("param", help=param_str)
