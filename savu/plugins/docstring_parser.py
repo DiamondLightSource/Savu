@@ -22,7 +22,8 @@
 """
 import sys
 import re
-
+import savu.plugins.loaders.utils.yaml_utils as yu
+import os
 
 def find_args(dclass, inst=None):
     """
@@ -43,6 +44,49 @@ def find_args(dclass, inst=None):
     lines = _get_doc_lines(docstring)
 
     return _parse_args(mod_doc_lines, lines)
+
+
+def _load_yaml(docstring):
+    """
+    Load the docstring and read in the yaml format. Call yaml_utils.py
+    ----------
+    Parameters:
+            - docstring: String of information
+    ----------
+    Return:
+            - param_entry: Ordered dict of parameters
+            - verbose: Further description
+            - warning:
+    """
+    all_params = ''
+    synopsis = ''
+    warning = ''
+    verbose = ''
+    if os.path.isfile(docstring):
+        text = yu.read_yaml(docstring)
+    else:
+        text = yu.read_yaml_from_doc(docstring)
+    try:
+        for doc in text:
+            # Each yaml document
+            for info in doc:
+                all_params = info['parameters']
+                # parameter is info['parameters'][0]
+                if 'warning' in info.keys():
+                    warning = info['warning']
+                else:
+                    warning = ''
+                if 'verbose' in info.keys():
+                    verbose = info['verbose']
+                else:
+                    verbose = ''
+    except:
+        print('The way that the parameters are formatted has been altered'
+              ' inside the yaml file. Please check this inside the plugin'
+              ' docstring.')
+        print("Unexpected error:", str(sys.exc_info()[0]))
+        raise
+    return all_params, synopsis, warning, verbose
 
 
 def _parse_args(mod_doc_lines, lines):
