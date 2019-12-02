@@ -1,5 +1,26 @@
 #!/bin/bash
 
+# function for checking which data centre
+# assuming only gpfs03 in new data centre - to be updated
+function is_gpfs03 ()
+{
+  file=$1
+  return=$2
+  check=$3
+  pathtofile=`readlink -f $file`
+  if [ "$check" = true ] && [ ! -f $pathtofile ] ; then
+		echo $file": No such file or directory"
+		return 1
+  fi
+
+  gpfs03="$(df $pathtofile | grep gpfs03)"
+  if [ ! "$gpfs03" ] ; then
+	eval "$return"=false
+  else
+    eval "$return"=true
+  fi
+}
+
 # input optional arguments
 while getopts ":t:i:s::" opt; do
 	case ${opt} in
@@ -28,6 +49,7 @@ outname=savu
 # If this is developer mode
 if [ -n "${infile+set}" ]; then
 	echo "Running Savu in developer mode"
+    dev_mode=true
   	# read the values from file (ignoring lines starting with #)
 	count=0
 	while read -r entry; do
@@ -51,11 +73,10 @@ if [ -n "${infile+set}" ]; then
 
 
 	# check cluster and data path are compatible
-	pathtodatafile=`readlink -f $data_file`
-	gpfs03="$(df $pathtodatafile | grep gpfs03)"
-	if { [ ! -z "$gpfs03" ] && [ $cluster != 'hamilton' ] ; \
-			} || { [ -z "$gpfs03" ] && [ $cluster == 'hamilton' ] ; }; then
-		echo "The data is not visible on "$cluster "in the final"
+	is_gpfs03 $data_file gpfs03 false
+	if { [ "$gpfs03" = true ] && [ $cluster != 'hamilton' ] ; \
+			} || { [ "$gpfs03" = false ] && [ $cluster == 'hamilton' ] ; }; then
+		echo "The data is not visible on "$cluster
 		exit 1
 	fi
 
@@ -64,6 +85,7 @@ else
 	#echo "Running Savu in production mode"
 	# parse additional command line arguments
 	# Check required arguments exist
+    dev_mode=false
 	vars=$@
 	x="${vars%%' -'*}"
 	[[ $x = $vars ]] && temp=${#vars} || temp=${#x}
@@ -98,19 +120,13 @@ else
 	options=$@
 
 	# determine the cluster from the data path
-	pathtodatafile=`readlink -f $data_file`
-	if [ -z $pathtodatafile ] ; then
-		echo $data_file": No such file or directory"
-		exit 1
-	fi
-
-	gpfs03="$(df $pathtodatafile | grep gpfs03)"
-	if [ -z "$gpfs03" ] ; then
+    is_gpfs03 $data_file gpfs03 true 
+	if [ "$gpfs03" = false ] ; then
 		cluster=cluster
 		# determine cluster setup based on type
 		case $type in
-			'AUTO') gpu_arch=Fermi ; nNodes=1 ;;
-			'PREVIEW') gpu_arch=Fermi ; nNodes=1 ;;
+			'AUTO') gpu_arch=Kepler ; nNodes=1 ;;
+			'PREVIEW') gpu_arch=Kepler ; nNodes=1 ;;
 			'BIG') gpu_arch=Pascal ; nNodes=8 ;;
 			'') gpu_arch=Kepler ; nNodes=4 ;;
 			 *) echo -e "\nUnknown 'type' optional argument"
@@ -134,7 +150,7 @@ else
 	fi
 
 	# which project?
-	project=`echo $pathtodatafile | grep -o -P '(?<=/dls/).*(?=/data)'`
+	project=`echo $pathtodatafile | grep -o -P '(?<=/dls/).*?(?=/data)'`
 	if [ -z "$project" ] ; then
 	  project=tomography
 	fi
@@ -172,7 +188,9 @@ case $cluster in
 		module load hamilton-quiet
 		cluster_queue=all.q
 		cpus_per_node=40
-		#cpus_to_use_per_node=30
+		if [ ! $dev_mode ]; then
+			cpus_to_use_per_node=30
+		fi
 		gpus_per_node=4
 
     	# which gpu architecture?
@@ -233,13 +251,22 @@ filepath=$DIR'/savu_mpijob.sh'
 savupath=$(python -c "import savu, os; print savu.__path__[0]")
 savupath=${savupath%/savu}
 
+# set the suffix
+arg_parse "-suffix" suffix $options
+options=${options//"-suffix $suffix"/}
+if [ ! $suffix ] ; then 
+  suffix=""
+else
+  suffix=_$suffix
+fi
+
 # Set output and intermediate file paths
 basename=`basename $data_file`
 # set the output folder
 arg_parse "-f" foldername $options
 if [ ! $foldername ] ; then
   IFS=. read path ext <<<"${basename##*-}"
-  foldername=$(date +%Y%m%d%H%M%S)"_$(basename $path)"
+  foldername=$(date +%Y%m%d%H%M%S)"_$(basename $path)"$suffix
 fi
 outfolder=$outpath/$foldername
 
@@ -270,6 +297,24 @@ else
 	fi
 fi
 
+# check all files are in the same data centre
+is_gpfs03 $data_file is_gpfs03_in false
+is_gpfs03 $interfolder is_gpfs03_inter false
+is_gpfs03 $outfolder is_gpfs03_out false
+if ! ([ $is_gpfs03_in = $is_gpfs03_inter ] && [ $is_gpfs03_inter = $is_gpfs03_out ]) ; then
+tput setaf 3
+	echo -e "\n\t**************************** ERROR MESSAGE ****************************"
+tput setaf 1
+#tput sgr0
+	echo -e "\tAll the input and output data locations must be in the same data centre."
+	echo -e "\tPlease email scientific.software@diamond.ac.uk for more information."
+
+tput setaf 3
+	echo -e "\t***********************************************************************\n"
+tput sgr0
+	exit 1
+fi
+
 # copy process list to the intermediate folder
 process_file=`readlink -f $process_file`
 basename=`basename $process_file`
@@ -289,7 +334,7 @@ case $cluster in
 		qsub -l infiniband $generic > /dls/tmp/savu/$USER.out ;;
 	"cluster")
 		# RAM com10 252G com14 252G ~ 12G per core  - m_mem_free requested in JSV script
-	  	qsub -jsv /dls_sw/apps/sge/common/JSVs/savu.pl \
+		qsub -jsv /dls_sw/cluster/common/JSVs/savu_20190909.pl \
 		-l infiniband $generic > /dls/tmp/savu/$USER.out ;;
 	"hamilton")
 		# RAM 384G per core (but 377G available?) ~ 9G per core

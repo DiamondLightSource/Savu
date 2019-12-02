@@ -51,6 +51,7 @@ class MRC(BaseType):
 
     def clone_data_args(self, args, kwargs, extras):
         args = ['self', 'filename']
+        kwargs['stats'] = 'stats'
         return args, kwargs, extras
 
     def __getitem__(self, idx):

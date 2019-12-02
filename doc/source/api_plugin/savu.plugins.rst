@@ -1,5 +1,5 @@
-savu\.plugins package
-=====================
+savu.plugins package
+====================
 
 Subpackages
 -----------
@@ -27,6 +27,9 @@ Subpackages
     savu.plugins.reshape
     savu.plugins.ring_removal
     savu.plugins.savers
+    savu.plugins.segmentation
+    savu.plugins.stats
+    savu.plugins.visualisation
 
 Submodules
 ----------

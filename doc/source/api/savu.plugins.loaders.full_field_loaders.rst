@@ -1,5 +1,5 @@
-savu\.plugins\.loaders\.full\_field\_loaders package
-====================================================
+savu.plugins.loaders.full\_field\_loaders package
+=================================================
 
 .. automodule:: savu.plugins.loaders.full_field_loaders
     :members:

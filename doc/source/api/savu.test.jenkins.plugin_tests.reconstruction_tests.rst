@@ -1,5 +1,5 @@
-savu\.test\.jenkins\.plugin\_tests\.reconstruction\_tests package
-=================================================================
+savu.test.jenkins.plugin\_tests.reconstruction\_tests package
+=============================================================
 
 .. automodule:: savu.test.jenkins.plugin_tests.reconstruction_tests
     :members:
@@ -15,6 +15,6 @@ Submodules
    savu.test.jenkins.plugin_tests.reconstruction_tests.CGLS_astra_test
    savu.test.jenkins.plugin_tests.reconstruction_tests.astra_recon_gpu_test
    savu.test.jenkins.plugin_tests.reconstruction_tests.ccpi_cgls_recon_test
-   savu.test.jenkins.plugin_tests.reconstruction_tests.nlreg_cgls_test
+   savu.test.jenkins.plugin_tests.reconstruction_tests.tomobar_recon_test
    savu.test.jenkins.plugin_tests.reconstruction_tests.tomopy_test
 

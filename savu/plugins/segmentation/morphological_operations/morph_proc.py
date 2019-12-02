@@ -60,9 +60,10 @@ class MorphProc(Plugin, CpuPlugin):
 
     def process_frames(self, data):
         # run morphological operations here:
+        integerMax = np.max(data[0])
         if (np.sum(data[0]) > 0):
             morph_result = eval(self.morph_operation)(data[0], self.selem)
-            morph_result = np.uint8(morph_result*1)
+            morph_result = np.uint8(morph_result*integerMax)
         else:
             morph_result = np.uint8(np.zeros(np.shape(data[0])))
         return [morph_result]

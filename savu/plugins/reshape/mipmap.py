@@ -20,17 +20,12 @@
 
 import math
 import h5py
-import logging
 import numpy as np
 import skimage.measure as skim
 
 from savu.plugins.plugin import Plugin
 from savu.plugins.utils import register_plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger('matplotlib')
-logger.setLevel(logging.WARNING)
 
 
 @register_plugin

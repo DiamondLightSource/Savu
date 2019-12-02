@@ -1,5 +1,5 @@
-savu\.plugins\.reshape package
-==============================
+savu.plugins.reshape package
+============================
 
 .. automodule:: savu.plugins.reshape
     :members:
@@ -14,4 +14,5 @@ Submodules
 
    savu.plugins.reshape.data_removal
    savu.plugins.reshape.downsample_filter
+   savu.plugins.reshape.mipmap
 

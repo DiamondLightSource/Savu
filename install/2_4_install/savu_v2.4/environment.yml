@@ -5,7 +5,7 @@ channels:
 - conda-forge
 - ccpi
 - dkazanc
-- astra-toolbox
+- astra-toolbox/label/dev
 dependencies:
 - cython
 - spyder

@@ -309,7 +309,8 @@ class BaseRecon(Plugin):
         else:
             frame_nos = \
                 self.get_plugin_in_datasets()[0].get_current_frame_idx()
-            self.frame_cors = self.cor_func(self.cor[[frame_nos]])
+            a = self.cor[tuple([frame_nos])]
+            self.frame_cors = self.cor_func(a)
 
         # for extra padded frames that make up the numbers
         if not self.frame_cors.shape:
@@ -322,7 +323,7 @@ class BaseRecon(Plugin):
         
         # fix to remove NaNs in the initialised image
         if init is not None:
-            init[np.where(np.isnan(init)==True)] = 0.0
+            init[np.isnan(init)] == 0.0
         self.frame_init_data = init
         
         data[0] = self.fix_sino(self.sino_func(data[0]), self.frame_cors[0])

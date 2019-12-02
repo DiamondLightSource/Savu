@@ -1,5 +1,5 @@
-savu\.plugins\.fitters\.simple\_fit module
-==========================================
+savu.plugins.fitters.simple\_fit module
+=======================================
 
 .. automodule:: savu.plugins.fitters.simple_fit
     :members:

@@ -1,5 +1,5 @@
-scripts\.log\_evaluation package
-================================
+scripts.log\_evaluation package
+===============================
 
 Submodules
 ----------
