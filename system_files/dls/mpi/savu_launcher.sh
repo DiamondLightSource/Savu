@@ -42,6 +42,7 @@ if [ -z $version ] ; then
 	echo -ne "\n*** Loading the latest stable version of Savu as "
 	echo -e "a specific version has not been requested ***\n"
 	module load savu
+    version=default
 else
 	module load savu/$version
 fi
@@ -193,7 +194,7 @@ case $cluster in
 		module load hamilton-quiet
 		cluster_queue=all.q
 		cpus_per_node=40
-		if [ ! $dev_mode ]; then
+		if [ $dev_mode==false ]; then
 			cpus_to_use_per_node=30
 		fi
 		gpus_per_node=4
@@ -343,7 +344,11 @@ case $cluster in
 		qsub -l infiniband $generic > /dls/tmp/savu/$USER.out ;;
 	"cluster")
 		# RAM com10 252G com14 252G ~ 12G per core  - m_mem_free requested in JSV script
-		qsub -jsv /dls_sw/cluster/common/JSVs/savu_20190909.pl \
+		qsub -jsv /dls_sw/cluster/common/JSVs/savu_20191122.pl \
+		-l infiniband $generic > /dls/tmp/savu/$USER.out ;;
+	"zocalo_cluster")
+		# RAM com10 252G com14 252G ~ 12G per core  - m_mem_free requested in JSV script
+		qsub -jsv /dls_sw/cluster/common/JSVs/savu_20191122.pl -sync y\
 		-l infiniband $generic > /dls/tmp/savu/$USER.out ;;
 	"zocalo_cluster")
 		# RAM com10 252G com14 252G ~ 12G per core  - m_mem_free requested in JSV script
