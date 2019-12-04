@@ -193,7 +193,9 @@ class PluginList(object):
 
                 elif ptype == '[path, int_path, int]':
                     try:
-                        entries = value.split(',')
+                        bracket_value = value.split('[')
+                        bracket_value = bracket_value[1].split(']')
+                        entries = bracket_value[0].split(',')
                         if len(entries) == 3:
                             file_path = entries[0]
                             if os.path.isfile(file_path):
@@ -202,42 +204,50 @@ class PluginList(object):
                                 try:
                                     # This returns a HDF5 dataset object
                                     int_data = hf.get(int_path)
-                                    int_data = np.array(int_data)
-                                    if len(int_data) >= 1:
-                                        try:
-                                            compensation_fact = int(entries[2])
-                                            if isinstance(compensation_fact, int):
-                                                parameter_valid = True
-                                            else:
-                                                print(Fore.BLUE + 'The compensation factor is'
-                                                                  ' not valid.' + Fore.RESET)
-                                        except ValueError:
-                                            print('The compensation factor is not an integer.')
-                                        except Exception:
-                                            print('There is a problem converting the compensation'
-                                                  ' factor to an integer.')
+                                    if int_data is None:
+                                        print('\nThere is no data stored at that internal path.')
+                                    else:
+                                        int_data = np.array(int_data)
+                                        if int_data.size >= 1:
+                                            try:
+                                                compensation_fact = int(entries[2])
+                                                if isinstance(compensation_fact, int):
+                                                    parameter_valid = True
+                                                else:
+                                                    print(Fore.BLUE + '\nThe compensation factor is'
+                                                                      ' not valid.' + Fore.RESET)
+                                            except ValueError:
+                                                print('\nThe compensation factor is not an integer.')
+                                            except Exception:
+                                                print('There is a problem converting the compensation'
+                                                      ' factor to an integer.')
 
-                                except AttributeError as ae:
+                                except AttributeError:
+                                    print('Attribute error.')
+                                except:
                                     print(Fore.BLUE + '\nPlease choose another interior'
                                                       ' path.' + Fore.RESET)
-                                    print('Attribute Error: ' + ae.strerror)
-
-                                except Exception as e:
-                                    print('Error: ' + e.strerror)
+                                    print('Example interior paths: ')
+                                    for group in hf:
+                                        for subgroup in hf[group]:
+                                            subgroup_str = '/' + group + '/' + subgroup
+                                            print(u'\t' + subgroup_str)
+                                    raise
                                 hf.close()
                             else:
-                                print(Fore.BLUE + 'This file does not exist at this'
+                                print(Fore.BLUE + '\nThis file does not exist at this'
                                                   ' location.' + Fore.RESET)
                         else:
-                            print(Fore.RED + 'Please enter three parameters.' + Fore.RESET)
+                            print(Fore.RED + '\nPlease enter three parameters.' + Fore.RESET)
 
                     except ValueError:
                         parameter_valid = False
                         print('Valid items have a format [<file path>,'
                               ' <interior file path>, int].')
+                    except AttributeError:
+                        print('You need to place some informtion inside the square brackets.')
                     except Exception as e:
-                        print('Error')
-                        print(e.strerror)
+                        print(e)
 
                 elif ptype == 'path':
                     path = os.path.dirname(value)
