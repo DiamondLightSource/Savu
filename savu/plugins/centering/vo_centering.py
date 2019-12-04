@@ -58,7 +58,7 @@ class VoCentering(BaseFilter, CpuPlugin):
     :param row_drop: Drop lines around vertical center of the \
         mask. Default: 20.
     :param average_radius: Averaging sinograms around a required sinogram to\
-        improve signal-to-noise ratio. Default: 0.
+        improve signal-to-noise ratio. Default: 5.
     """
 
     def __init__(self):
