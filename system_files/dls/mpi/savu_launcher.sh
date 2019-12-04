@@ -22,11 +22,15 @@ function is_gpfs03 ()
 }
 
 # input optional arguments
-while getopts ":t:i:s::" opt; do
+zocalo=false
+keep=false
+while getopts ":t:i:s:z:k::" opt; do
 	case ${opt} in
 		t ) type=$OPTARG ;;
 		i ) infile=$OPTARG ;;
 		s ) version=$OPTARG ;;
+        z ) zocalo=$OPTARG ;;
+        k ) keep=$OPTARG ;;
 		\? ) echo "Invalid option: $OPTARG" 1>&2 ;;
 		: ) echo "Invalid option: $OPTARG requires an argument" 1>&2 ;;
 	esac
@@ -38,6 +42,7 @@ if [ -z $version ] ; then
 	echo -ne "\n*** Loading the latest stable version of Savu as "
 	echo -e "a specific version has not been requested ***\n"
 	module load savu
+    version=default
 else
 	module load savu/$version
 fi
@@ -50,6 +55,7 @@ outname=savu
 if [ -n "${infile+set}" ]; then
 	echo "Running Savu in developer mode"
     dev_mode=true
+    type=STANDARD
   	# read the values from file (ignoring lines starting with #)
 	count=0
 	while read -r entry; do
@@ -128,7 +134,7 @@ else
 			'AUTO') gpu_arch=Kepler ; nNodes=1 ;;
 			'PREVIEW') gpu_arch=Kepler ; nNodes=1 ;;
 			'BIG') gpu_arch=Pascal ; nNodes=8 ;;
-			'') gpu_arch=Kepler ; nNodes=4 ;;
+			'') type="STANDARD"; gpu_arch=Kepler ; nNodes=4 ;;
 			 *) echo -e "\nUnknown 'type' optional argument"
 			    echo -e "Please choose from 'AUTO' or 'PREVIEW'"
 				exit 1 ;;
@@ -142,7 +148,7 @@ else
 			'AUTO') nNodes=1 ;;
 			'PREVIEW') nNodes=1 ;;
 			'BIG') nNodes=4 ;;
-			'') nNodes=2 ;;
+			'') type="STANDARD"; nNodes=2 ;;
 			 *) echo -e "\nUnknown 'type' optional argument\n"
 			    echo -e "Please choose from 'AUTO' or 'PREVIEW'" 
 				exit 1 ;;
@@ -188,7 +194,7 @@ case $cluster in
 		module load hamilton-quiet
 		cluster_queue=all.q
 		cpus_per_node=40
-		if [ ! $dev_mode ]; then
+		if [ $dev_mode==false ]; then
 			cpus_to_use_per_node=30
 		fi
 		gpus_per_node=4
@@ -292,7 +298,7 @@ else
 	if [ ! -d $interfolder ]; then
 		create_folder $interfolder
 	fi
-	if [ ! $type == 'AUTO' ] && [ ! $type == 'PREVIEW' ] ; then
+    if [ ! $type == 'AUTO' ] && [ ! $type == 'PREVIEW' ] && [ ! $keep == true ] ; then
 		delete=$interfolder
 	fi
 fi
@@ -329,12 +335,24 @@ $filepath $version $savupath $data_file $process_file $outpath $cpus_to_use_per_
 $gpus_to_use_per_node $delete $options -c -f $outfolder -s graylog2.diamond.ac.uk -p 12203 \
 --facility_email scientificsoftware@diamond.ac.uk -l $outfolder"
 
+if [ $cluster = "cluster" ] && [ $zocalo = true ] ; then
+    cluster=zocalo_cluster
+fi
+
 case $cluster in
 	"test_cluster")
 		qsub -l infiniband $generic > /dls/tmp/savu/$USER.out ;;
 	"cluster")
 		# RAM com10 252G com14 252G ~ 12G per core  - m_mem_free requested in JSV script
-		qsub -jsv /dls_sw/cluster/common/JSVs/savu_20190909.pl \
+		qsub -jsv /dls_sw/cluster/common/JSVs/savu_20191122.pl \
+		-l infiniband $generic > /dls/tmp/savu/$USER.out ;;
+	"zocalo_cluster")
+		# RAM com10 252G com14 252G ~ 12G per core  - m_mem_free requested in JSV script
+		qsub -jsv /dls_sw/cluster/common/JSVs/savu_20191122.pl -sync y\
+		-l infiniband $generic > /dls/tmp/savu/$USER.out ;;
+	"zocalo_cluster")
+		# RAM com10 252G com14 252G ~ 12G per core  - m_mem_free requested in JSV script
+		qsub -jsv /dls_sw/cluster/common/JSVs/savu_20190909.pl -sync y\
 		-l infiniband $generic > /dls/tmp/savu/$USER.out ;;
 	"hamilton")
 		# RAM 384G per core (but 377G available?) ~ 9G per core
