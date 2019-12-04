@@ -28,59 +28,13 @@ import numpy as np
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.corrections.base_correction import BaseCorrection
 from savu.plugins.utils import register_plugin
+from savu.plugins.utils import register_test_plugin
 
 
-@register_plugin
+@register_test_plugin
 class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
-# If dark and flat are collected separately, in the NxtomoLoader, users need to change these parameters. Change "flat" from [None, None, 1] to [<path-to-the-flat>,<hdf-key-path>, ratio]. Do the same with "dark". If flats are collected using different exposure time compared with projections → Change the "ratio" above to the ratio of <projection-exposure-time>/<flat-exposure-time>
     """
----
-      - name: DarkFlatFieldCorrection
-        category: Correction
-        synopsis: A Plugin to apply a simple dark and flat field correction to data.
-        verbose: n
-
-        parameters:
-           - pattern:
-                  visibility: param
-                  type: str
-                  options: ['SINOGRAM', 'PROJECTION']
-                  description:
-                    summary: Data processing pattern
-                    options:
-                        SINOGRAM:
-                        PROJECTION:
-                  default: 'PROJECTION'
-           - lower_bound:
-                  visibility: param
-                  type: float
-                  description: Set all values below the lower_bound to this value.
-                  default: None
-           - upper_bound:
-                  visibility: param
-                  type: float
-                  description: Set all values above the upper bound to this value.
-                  default: None
-           - warn_proportion:
-                  visibility: param
-                  type: float
-                  description:
-                    summary: Output a warning if this proportion of values, or greater, are below and/or above the lower/upper bounds
-                    verbose: Enter 0.05 for 5%
-                  default: 0.05
     """
-    '''
-        A Plugin to apply a simple dark a= inData.data.dark_mean()nd flat field correction to data.
-        :param pattern: Data processing pattern is 'PROJECTION' or \
-            'SINOGRAM'. Default: 'PROJECTION'.
-        :param lower_bound: Set all values below the lower_bound to this \
-            value. Default: None.
-        :param upper_bound: Set all values above the upper bound to this \
-            value. Default: None.
-        :param warn_proportion: Output a warning if this proportion of values, \
-            or greater, are below and/or above the lower/upper bounds, \
-            e.g enter 0.05 for 5%. Default: 0.05.
-    '''
     def __init__(self):
         super(DarkFlatFieldCorrection,
               self).__init__("DarkFlatFieldCorrection")
@@ -205,3 +159,15 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
             return summary
 
         return ["Nothing to Report"]
+        '''
+            A Plugin to apply a simple dark and flat field correction to data.
+            :param pattern: Data processing pattern is 'PROJECTION' or \
+                'SINOGRAM'. Default: 'PROJECTION'.
+            :param lower_bound: Set all values below the lower_bound to this \
+                value. Default: None.
+            :param upper_bound: Set all values above the upper bound to this \
+                value. Default: None.
+            :param warn_proportion: Output a warning if this proportion of values, \
+                or greater, are below and/or above the lower/upper bounds, \
+                e.g enter 0.05 for 5%. Default: 0.05.
+        '''

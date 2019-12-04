@@ -103,7 +103,6 @@ class Content(object):
         if name not in pu.plugins.keys():
             raise Exception("INPUT ERROR: Unknown plugin %s" % name)
         plugin = pu.plugins[name]()
-        #plugin._load_yaml_details()
         plugin._populate_default_parameters()
         pos, str_pos = self.convert_pos(str_pos)
         self.insert(plugin, pos, str_pos)

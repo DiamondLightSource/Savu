@@ -32,7 +32,7 @@ from savu.data.data_structures.data_types.data_plus_darks_and_flats \
     import ImageKey, NoImageKey
 
 
-@register_plugin
+#@register_plugin
 class NxtomoLoader(BaseLoader):
     # Docstring with yaml syntax
     """

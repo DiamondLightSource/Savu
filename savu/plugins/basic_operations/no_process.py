@@ -21,28 +21,14 @@
 """
 from savu.plugins.plugin import Plugin
 from savu.plugins.utils import register_plugin
+from savu.plugins.utils import register_test_plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 
-@register_plugin
+@register_test_plugin
 class NoProcess(Plugin, CpuPlugin):
     """
----
-          - name: NoProcess
-            verbose: A test plugin for parameter types.
-            parameters:
-               - pattern:
-                    visibility: not_param
-                    type: str
-                    description: Explicitly state the slicing pattern.
-                    default: None
-               - other:
-                    visibility: param
-                    type: int
-                    description: Dummy parameter for testing.
-                    default: 10
     """
-
     def __init__(self):
         super(NoProcess, self).__init__("NoProcess")
 

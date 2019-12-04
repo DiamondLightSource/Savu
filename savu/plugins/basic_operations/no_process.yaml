@@ -1,0 +1,13 @@
+---
+          - verbose: A test plugin for parameter types.
+            parameters:
+               - pattern:
+                    visibility: not_param
+                    type: str
+                    description: Explicitly state the slicing pattern.
+                    default: None
+               - other:
+                    visibility: param
+                    type: int
+                    description: Dummy parameter for testing.
+                    default: 10

@@ -23,6 +23,7 @@
 from savu.plugins.plugin import Plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
+from savu.plugins.utils import register_test_plugin
 from savu.data.plugin_list import CitationInformation
 import numpy as np
 from scipy.ndimage import median_filter
@@ -30,42 +31,10 @@ from scipy.ndimage import binary_dilation
 from scipy.ndimage import uniform_filter1d
 from scipy import interpolate
 
-@register_plugin
+@register_test_plugin
 class RemoveAllRings(Plugin, CpuPlugin):
     """
----
-      - name: RemoveAllRings
-        category: Filter
-        synopsis: Method to remove all types of stripe artifacts in a sinogram (<-> ring artefacts in a reconstructed image).
-        parameters:
-           - la_size:
-                  visibility: param
-                  type: int
-                  description: Size of the median filter window to remove large stripes.
-                  default: 71
-           - sm_size:
-                  visibility: param
-                  type: int
-                  description: Size of the median filter window to remove small-to-medium stripes.
-                  default: 31
-           - snr:
-                  visibility: param
-                  type: float
-                  description: Ratio used to detect locations of stripes. Greater is less sensitive.
-                  default: 3.0
     """
-    """
-    Method to remove all types of stripe artefacts in a sinogram \
-    (<-> ring artefacts in a reconstructed image). 
-
-    :param la_size: Size of the median filter window to remove large stripes\
-    . Default: 71.
-    :param sm_size: Size of the median filter window to remove small-to-medium\
-    stripes. Default: 31.
-    :param snr: Ratio used to detect locations of stripes. Greater is\
-     less sensitive. Default: 3.0.
-    """
-
     def __init__(self):
         super(RemoveAllRings, self).__init__(
                 "RemoveAllRings")
@@ -233,3 +202,14 @@ class RemoveAllRings(Plugin, CpuPlugin):
              "}")
         cite_info.doi = "doi: DOI: 10.1364/OE.26.028396"
         return cite_info
+        """
+        Method to remove all types of stripe artefacts in a sinogram \
+        (<-> ring artefacts in a reconstructed image). 
+
+        :param la_size: Size of the median filter window to remove large stripes\
+        . Default: 71.
+        :param sm_size: Size of the median filter window to remove small-to-medium\
+        stripes. Default: 31.
+        :param snr: Ratio used to detect locations of stripes. Greater is\
+         less sensitive. Default: 3.0.
+        """
