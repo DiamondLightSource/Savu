@@ -47,6 +47,11 @@ OUTPUT_TYPE_METADATA_AND_DATA = 2
 
 def register_plugin(clazz):
     """decorator to add plugins to a central register"""
+    return clazz
+
+
+def register_test_plugin(clazz):
+    """decorator to add plugins to a central register"""
     plugins[clazz.__name__] = clazz
     if clazz.__module__.split('.')[0] != 'savu':
         plugins_path[clazz.__name__] = clazz.__module__
