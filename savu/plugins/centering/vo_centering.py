@@ -69,7 +69,7 @@ class VoCentering(BaseFilter, CpuPlugin):
         dv = (nrow - 1.0) / (nrow * 2.0 * np.pi)
         cen_row = np.int16(np.ceil(nrow / 2.0) - 1)
         cen_col = np.int16(np.ceil(ncol / 2.0) - 1)
-        drop = min(drop, np.int16(np.ceil(0.1 * nrow)))
+        drop = min(drop, np.int16(np.ceil(0.05 * nrow)))
         mask = np.zeros((nrow, ncol), dtype='float32')
         for i in range(nrow):
             pos = np.int16(np.round(((i - cen_row) * dv / radius) / du))
