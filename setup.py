@@ -109,7 +109,10 @@ setup(name='savu',
                         'savu_quick_tests=savu:run_tests',
                         'savu_full_tests=savu:run_full_tests',
                         'savu_citations=scripts.citation_extractor.citation_extractor:main',
-                        'savu_profile=scripts.log_evaluation.GraphicalThreadProfiler:main',],},
+                        'savu_profile=scripts.log_evaluation.GraphicalThreadProfiler:main',
+						'savu_param_extractor=scripts.savu_config.parameter_extractor:main',
+						'savu_template_extractor=scripts.savu_config.hdf5_template_extractor:main',
+						],},
 
       package_data={'test_data': [
                         'data/*',
