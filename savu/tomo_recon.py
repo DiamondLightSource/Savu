@@ -151,8 +151,11 @@ def _set_options(args):
     options['femail'] = args.femail
     options['system_params'] = args.system_params
 
-    out_folder_name = \
-        args.folder if args.folder else __get_folder_name(options['data_file'])
+    if args.folder:
+        out_folder_name = os.path.basename(args.folder)
+    else:
+        out_folder_name = __create_folder_name(options['data_file'])
+
     out_folder_path = __create_output_folder(args.out_folder, out_folder_name)
 
     options['out_folder'] = out_folder_name
@@ -161,9 +164,10 @@ def _set_options(args):
     basename = os.path.basename(args.in_file)
     options['datafile_name'] = os.path.splitext(basename)[0] if basename \
         else args.in_file.split(os.sep)[-2]
-
+        
     inter_folder_path = __create_output_folder(args.tmp, out_folder_name)\
         if args.tmp else out_folder_path
+            
     options['inter_path'] = inter_folder_path
     options['log_path'] = args.log if args.log else options['inter_path']
     options['nProcesses'] = len(options["process_names"].split(','))
@@ -178,20 +182,16 @@ def _set_options(args):
     return options
 
 
-def __get_folder_name(in_file):
+def __create_folder_name(dpath):
+    if os.path.isfile(dpath):
+        dpath = os.path.splitext(dpath)[0]
+    elif os.path.isdir(dpath):
+        dpath = os.path.dirname(dpath)
     import time
     MPI.COMM_WORLD.barrier()
     timestamp = time.strftime("%Y%m%d%H%M%S")
     MPI.COMM_WORLD.barrier()
-    split = in_file.split('.')
-
-    if len(split[-1].split(os.sep)) > 1:
-        split = in_file.split(os.sep)
-        name = split[-2] if split[-1] == '' else split[-1]
-    # if the input is a file
-    else:
-        name = os.path.basename(split[-2])
-    return '_'.join([timestamp, name])
+    return "_".join([timestamp, os.path.basename(dpath)])
 
 
 def __create_output_folder(path, folder_name):
