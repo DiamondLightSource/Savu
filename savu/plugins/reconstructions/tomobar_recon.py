@@ -40,28 +40,29 @@ class TomobarRecon(BaseRecon, GpuPlugin):
 
     :param output_size: Number of rows and columns in the \
         reconstruction. Default: 'auto'.
+    :param data_fidelity: Data fidelity, Least Squares only at the moment. Default: 'LS'.
+    :param data_Huber_thresh: Threshold parameter for __Huber__ data fidelity . Default: None.
+    :param data_any_rings: a parameter to suppress various artifacts including rings and streaks. Default: None.
+    :param data_any_rings_winsizes: half window sizes to collect background information [detector, angles, num of projections]. Default: (9,7,0).
+    :param data_any_rings_power: a power parameter for Huber model. Default: 1.5.
+    :param data_full_ring_GH: Regularisation variable for full constant ring removal (GH model). Default: None.
+    :param data_full_ring_accelerator_GH: Acceleration constant for GH ring removal. Default: 10.0.
     :param algorithm_iterations: Number of outer iterations for FISTA (default) or ADMM methods. Default: 20.
     :param algorithm_verbose: print iterations number and other messages ('off' by default). Default: 'off'.
     :param algorithm_ordersubsets: The number of ordered-subsets to accelerate reconstruction. Default: 6.
-    :param data_fidelity: Data fidelity, Least Squares only at the moment. Default: 'LS'.
-    :param data_Huber_thresh: Threshold parameter for __Huber__ data fidelity . Default: None.
     :param regularisation_method: To regularise choose methods ROF_TV, FGP_TV, PD_TV, SB_TV, LLT_ROF,\
                              NDF, Diff4th. Default: 'FGP_TV'.
     :param regularisation_parameter: Regularisation (smoothing) value, higher \
                             the value stronger the smoothing effect. Default: 0.0001.
     :param regularisation_iterations: The number of regularisation iterations. Default: 350.
     :param regularisation_device: The number of regularisation iterations. Default: 'gpu'.
-    :param regularisation_PD_lip: Primal-dual parameter for convergence. Default: 12.
+    :param regularisation_PD_lip: Primal-dual parameter for convergence. Default: 8.
     :param regularisation_methodTV:  0/1 - TV specific isotropic/anisotropic choice. Default: 0.
     :param regularisation_timestep: Time marching parameter, relevant for \
-                    (ROF_TV, LLT_ROF, NDF, Diff4th) penalties. Default: 0.001.
+                    (ROF_TV, PD_TV, LLT_ROF, NDF, Diff4th) penalties. Default: 0.001.
     :param regularisation_edge_thresh: Edge (noise) related parameter, relevant for NDF and Diff4th. Default: 0.01.
     :param regularisation_parameter2:  Regularisation (smoothing) value for LLT_ROF method. Default: 0.005.
     :param regularisation_NDF_penalty: NDF specific penalty type Huber, Perona, Tukey. Default: 'Huber'.
-    :param data_artifacts_threshold: a parameter to suppress various artifacts including ring and streaks. Default: None.
-    :param data_artifacts_threshold_tuple: artifacts reduction a tuple for half window sizes as [detector, angles, num of projections]. Default: (7,5,7).
-    :param data_ring_variableGH: Regularisation variable for full constant ring removal (GH). Default: None.
-    :param data_ring_acceleratorGH: Acceleration constant for GH ring removal. Default: 50.0.
     """
 
     def __init__(self):
@@ -75,14 +76,16 @@ class TomobarRecon(BaseRecon, GpuPlugin):
 
     def pre_process(self):
         # extract given parameters into dictionaries suitable for ToMoBAR input
-        self._data_ = {'huber_threshold' : self.parameters['data_Huber_thresh'],
-                     'ring_weights_threshold' :  self.parameters['data_artifacts_threshold'],
-                     'ring_tuple_halfsizes' :  self.parameters['data_artifacts_threshold_tuple'],
-                     'ringGH_lambda' :  self.parameters['data_ring_variableGH'],
-                     'ringGH_accelerate' :  self.parameters['data_ring_acceleratorGH']}
+        self._data_ = {'OS_number' : self.parameters['algorithm_ordersubsets'],
+                       'huber_threshold' : self.parameters['data_Huber_thresh'],
+                       'ring_weights_threshold' :  self.parameters['data_any_rings'],
+                       'ring_tuple_halfsizes' :  self.parameters['data_any_rings_winsizes'],
+                       'ring_huber_power' :  self.parameters['data_any_rings_power'],
+                       'ringGH_lambda' :  self.parameters['data_full_ring_GH'],
+                       'ringGH_accelerate' :  self.parameters['data_full_ring_accelerator_GH']}
 
         self._algorithm_ = {'iterations' : self.parameters['algorithm_iterations'],
-                                'verbose' : self.parameters['algorithm_verbose']}
+                            'verbose' : self.parameters['algorithm_verbose']}
 
         self._regularisation_ = {'method' : self.parameters['regularisation_method'],
                                 'regul_param' : self.parameters['regularisation_parameter'],
@@ -100,7 +103,6 @@ class TomobarRecon(BaseRecon, GpuPlugin):
         sinogram = data[0].astype(np.float32)
         anglesTot, self.DetectorsDimH = np.shape(sinogram)
         self.anglesRAD = np.deg2rad(angles.astype(np.float32))
-
         self._data_.update({'projection_norm_data' : sinogram})
 
         # set parameters and initiate the ToMoBAR class object
@@ -110,7 +112,6 @@ class TomobarRecon(BaseRecon, GpuPlugin):
                     AnglesVec = self.anglesRAD, # array of angles in radians
                     ObjSize = self.vol_shape[0] , # a scalar to define the reconstructed object dimensions
                     datafidelity=self.parameters['data_fidelity'],# data fidelity, choose LS, PWLS
-                    OS_number = self.parameters['algorithm_ordersubsets'], # the number of subsets, NONE/(or > 1) ~ classical / ordered subsets
                     device_projector='gpu')
 
         # Run FISTA reconstrucion algorithm here

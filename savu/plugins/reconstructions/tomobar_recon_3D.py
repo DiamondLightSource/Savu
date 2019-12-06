@@ -38,28 +38,29 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
     https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
 
     :param output_size: The dimension of the reconstructed volume (only X-Y dimension). Default: 'auto'.
+    :param data_fidelity: Data fidelity, Least Squares only at the moment. Default: 'LS'.
+    :param data_Huber_thresh: Threshold parameter for __Huber__ data fidelity . Default: None.
+    :param data_any_rings: a parameter to suppress various artifacts including rings and streaks. Default: None.
+    :param data_any_rings_winsizes: half window sizes to collect background information [detector, angles, num of projections]. Default: (9,7,9).
+    :param data_any_rings_power: a power parameter for Huber model. Default: 1.5.
+    :param data_full_ring_GH: Regularisation variable for full constant ring removal (GH model). Default: None.
+    :param data_full_ring_accelerator_GH: Acceleration constant for GH ring removal. Default: 10.0.
     :param algorithm_iterations: Number of outer iterations for FISTA (default) or ADMM methods. Default: 20.
     :param algorithm_verbose: print iterations number and other messages ('off' by default). Default: 'off'.
     :param algorithm_ordersubsets: The number of ordered-subsets to accelerate reconstruction. Default: 6.
-    :param data_fidelity: Data fidelity, Least Squares only at the moment. Default: 'LS'.
-    :param data_Huber_thresh: Threshold parameter for __Huber__ data fidelity . Default: None.
     :param regularisation_method: To regularise choose methods ROF_TV, FGP_TV, PD_TV, SB_TV, LLT_ROF,\
                              NDF, Diff4th. Default: 'FGP_TV'.
     :param regularisation_parameter: Regularisation (smoothing) value, higher \
                             the value stronger the smoothing effect. Default: 0.0001.
     :param regularisation_iterations: The number of regularisation iterations. Default: 350.
     :param regularisation_device: The number of regularisation iterations. Default: 'gpu'.
-    :param regularisation_PD_lip: Primal-dual parameter for convergence. Default: 12.
+    :param regularisation_PD_lip: Primal-dual parameter for convergence. Default: 8.
     :param regularisation_methodTV:  0/1 - TV specific isotropic/anisotropic choice. Default: 0.
     :param regularisation_timestep: Time marching parameter, relevant for \
-                    (ROF_TV, LLT_ROF, NDF, Diff4th) penalties. Default: 0.001.
+                    (ROF_TV, PD_TV, LLT_ROF, NDF, Diff4th) penalties. Default: 0.001.
     :param regularisation_edge_thresh: Edge (noise) related parameter, relevant for NDF and Diff4th. Default: 0.01.
     :param regularisation_parameter2:  Regularisation (smoothing) value for LLT_ROF method. Default: 0.005.
     :param regularisation_NDF_penalty: NDF specific penalty type Huber, Perona, Tukey. Default: 'Huber'.
-    :param data_artifacts_threshold: a parameter to suppress various artifacts including ring and streaks. Default: None.
-    :param data_artifacts_threshold_tuple: artifacts reduction a tuple for half window sizes as [detector, angles, num of projections]. Default: (7,5,7).
-    :param data_ring_variableGH: Regularisation variable for full constant ring removal (GH). Default: None.
-    :param data_ring_acceleratorGH: Acceleration constant for GH ring removal. Default: 50.0.
     """
 
     def __init__(self):
@@ -141,16 +142,17 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
         out_pData[0].plugin_data_setup('VOLUME_3D', 'single')
 
     def pre_process(self):
-        # extract given parameters
         # extract given parameters into dictionaries suitable for ToMoBAR input
-        self._data_ = {'huber_threshold' : self.parameters['data_Huber_thresh'],
-                     'ring_weights_threshold' :  self.parameters['data_artifacts_threshold'],
-                     'ring_tuple_halfsizes' :  self.parameters['data_artifacts_threshold_tuple'],
-                     'ringGH_lambda' :  self.parameters['data_ring_variableGH'],
-                     'ringGH_accelerate' :  self.parameters['data_ring_acceleratorGH']}
+        self._data_ = {'OS_number' : self.parameters['algorithm_ordersubsets'],
+                       'huber_threshold' : self.parameters['data_Huber_thresh'],
+                       'ring_weights_threshold' :  self.parameters['data_any_rings'],
+                       'ring_tuple_halfsizes' :  self.parameters['data_any_rings_winsizes'],
+                       'ring_huber_power' :  self.parameters['data_any_rings_power'],
+                       'ringGH_lambda' :  self.parameters['data_full_ring_GH'],
+                       'ringGH_accelerate' :  self.parameters['data_full_ring_accelerator_GH']}
 
         self._algorithm_ = {'iterations' : self.parameters['algorithm_iterations'],
-                                'verbose' : self.parameters['algorithm_verbose']}
+                            'verbose' : self.parameters['algorithm_verbose']}
 
         self._regularisation_ = {'method' : self.parameters['regularisation_method'],
                                 'regul_param' : self.parameters['regularisation_parameter'],
@@ -162,7 +164,7 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
                                 'PD_LipschitzConstant' : self.parameters['regularisation_PD_lip'],
                                 'NDF_penalty' : self.parameters['regularisation_NDF_penalty'],
                                 'methodTV' : self.parameters['regularisation_methodTV']}
-        
+
         in_pData = self.get_plugin_in_datasets()
         self.det_dimX_ind = in_pData[0].get_data_dimension_by_axis_label('detector_x')
         self.det_dimY_ind = in_pData[0].get_data_dimension_by_axis_label('detector_y')
@@ -180,9 +182,9 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
         projdata3D =np.swapaxes(projdata3D,0,1)
         # WIP for PWLS fidelity
         # rawdata3D = data[1].astype(np.float32)
-        # rawdata3D =np.swapaxes(rawdata3D,0,1)/np.max(np.float32(rawdata3D))     
-        self._data_.update({'projection_norm_data' : projdata3D})         
-        
+        # rawdata3D =np.swapaxes(rawdata3D,0,1)/np.max(np.float32(rawdata3D))
+        self._data_.update({'projection_norm_data' : projdata3D})
+
        # set parameters and initiate a TomoBar class object
         self.Rectools = RecToolsIR(DetectorsDimH = self.Horiz_det,  # DetectorsDimH # detector dimension (horizontal)
                     DetectorsDimV = self.Vert_det,  # DetectorsDimV # detector dimension (vertical) for 3D case only
@@ -190,13 +192,11 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
                     AnglesVec = self.anglesRAD, # array of angles in radians
                     ObjSize = self.output_size, # a scalar to define the reconstructed object dimensions
                     datafidelity=self.parameters['data_fidelity'],# data fidelity, choose LS
-                    OS_number = self.parameters['algorithm_ordersubsets'], # the number of subsets, NONE/(or > 1) ~ classical / ordered subsets
                     device_projector='gpu')
-        
+
         # Run FISTA reconstrucion algorithm here
         recon = self.Rectools.FISTA(self._data_, self._algorithm_, self._regularisation_)
-        
-        recon = np.swapaxes(recon,0,1) # temporal fix!
+        recon = np.swapaxes(recon,0,1)
         return recon
 
     def nInput_datasets(self):
