@@ -100,16 +100,18 @@ def error_catcher(function):
     return error_catcher_wrap_function
 
 
-def _add_module(loader, module_name):
+def _add_module(loader, module_name, error_mode):
     if module_name not in sys.modules:
         try:
             loader.find_module(module_name).load_module(module_name)
-        except Exception:
-            pass
+        except Exception as e:
+            if error_mode:
+                print e.message
+            else:
+                pass
 
 
-# change this to dawn=False!!!!!!!!!!!!!!!!!!!!!!!!!
-def populate_plugins(dawn=True):
+def populate_plugins(dawn=False, error_mode=False):
     # load all the plugins
     plugins_path = pu.get_plugins_paths()
     savu_path = plugins_path[-1].split('savu')[0]
@@ -118,12 +120,12 @@ def populate_plugins(dawn=True):
 
     # load local plugins
     for loader, module_name, is_pkg in pkgutil.walk_packages(local_plugins):
-        _add_module(loader, module_name)
+        _add_module(loader, module_name, error_mode)
 
     # load savu plugins
     for loader, module_name, is_pkg in pkgutil.walk_packages(savu_plugins):
         if module_name.split('savu.plugins')[0] == '':
-            _add_module(loader, module_name)
+            _add_module(loader, module_name, error_mode)
 
     if dawn:
         _dawn_setup()

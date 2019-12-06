@@ -1,5 +1,5 @@
-savu\.data\.data\_structures package
-====================================
+savu.data.data\_structures package
+==================================
 
 Subpackages
 -----------

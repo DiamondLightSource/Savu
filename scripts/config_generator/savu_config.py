@@ -1,4 +1,4 @@
-# Copyright 2015 Diamond Light Source Ltd.
+# Copyright 2014 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,11 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-'''
-Created on 21 May 2015
+"""
+.. module:: savu_config.py
+   :platform: Unix
+   :synopsis: A command line tool for creating Savu plugin lists
 
-@author: ssg37927
-'''
+.. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
+
+"""
 
 from __future__ import print_function
 
@@ -223,9 +226,11 @@ def main():
 
     print("Starting Savu Config tool (please wait for prompt)")
 
+    _reduce_logging_level()
+
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        utils.populate_plugins()
+        utils.populate_plugins(error_mode=args.error)
 
     comp = Completer(commands=commands, plugin_list=pu.plugins)
     utils._set_readline(comp.complete)
@@ -260,6 +265,10 @@ def main():
         utils.readline.write_history_file(utils.histfile)
 
     print("Thanks for using the application")
+
+def _reduce_logging_level():
+    import logging
+    logging.getLogger().setLevel(logging.CRITICAL)
 
 if __name__ == '__main__':
     main()

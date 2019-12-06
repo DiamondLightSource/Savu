@@ -1,5 +1,5 @@
-savu\.plugins\.corrections package
-==================================
+savu.plugins.corrections package
+================================
 
 .. automodule:: savu.plugins.corrections
     :members:
@@ -17,6 +17,7 @@ Submodules
    savu.plugins.corrections.convert_360_180_sinogram
    savu.plugins.corrections.dark_flat_field_correction
    savu.plugins.corrections.distortion_correction
+   savu.plugins.corrections.distortion_correction_deprecated
    savu.plugins.corrections.monitor_correction
    savu.plugins.corrections.monitor_correction_nd
    savu.plugins.corrections.subpixel_shift

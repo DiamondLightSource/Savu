@@ -1,5 +1,5 @@
-scripts\.config\_generator\.arg\_parsers module
-===============================================
+scripts.config\_generator.arg\_parsers module
+=============================================
 
 .. automodule:: scripts.config_generator.arg_parsers
     :members:

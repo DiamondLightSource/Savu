@@ -1,5 +1,5 @@
-savu\.data\.chunking module
-===========================
+savu.data.chunking module
+=========================
 
 .. automodule:: savu.data.chunking
     :members:

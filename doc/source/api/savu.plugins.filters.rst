@@ -1,5 +1,5 @@
-savu\.plugins\.filters package
-==============================
+savu.plugins.filters package
+============================
 
 .. automodule:: savu.plugins.filters
     :members:
@@ -14,12 +14,16 @@ Submodules
 
    savu.plugins.filters.band_pass
    savu.plugins.filters.base_filter
+   savu.plugins.filters.ccpi_denoising_cpu
+   savu.plugins.filters.ccpi_denoising_gpu
    savu.plugins.filters.denoise_bregman_filter
    savu.plugins.filters.dezinger
    savu.plugins.filters.dezinger_simple
    savu.plugins.filters.dezinger_sinogram
    savu.plugins.filters.dials_find_spots
    savu.plugins.filters.find_peaks
+   savu.plugins.filters.fresnel_filter
+   savu.plugins.filters.hilbert_filter
    savu.plugins.filters.image_interpolation
    savu.plugins.filters.list_to_projections
    savu.plugins.filters.median_filter

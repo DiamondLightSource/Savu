@@ -1,5 +1,5 @@
-savu\.plugins\.developing package
-=================================
+savu.plugins.developing package
+===============================
 
 Submodules
 ----------

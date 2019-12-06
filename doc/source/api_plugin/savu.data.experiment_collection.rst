@@ -1,5 +1,5 @@
-savu\.data\.experiment\_collection module
-=========================================
+savu.data.experiment\_collection module
+=======================================
 
 .. automodule:: savu.data.experiment_collection
     :members:

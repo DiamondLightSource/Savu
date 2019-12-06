@@ -23,7 +23,7 @@
 """
 
 import textwrap
-from colorama import Back
+from colorama import Back, Fore
 import display_formatter as df
 
 
@@ -99,6 +99,10 @@ hdf5_notice = 'is now used by default.\nPlease remove from the process list, '\
 dezing_notice = '\nA faster and more accurate version of DezingFilter is now'\
     ' available as Dezinger.'
 
+distortion_notice = 'A new version of DistortionCorrection is available with'\
+    ' the version available in 2.3 \nand below being renamed as '\
+    'DistortionCorrectionDeprecated.  Please replace with \nthe new version.'
+
 plugin_mutations = \
     {'TimeseriesFieldCorrections':
         {'replace': 'DarkFlatFieldCorrection',
@@ -113,21 +117,28 @@ plugin_mutations = \
      'SavuLoader':
         {'replace': 'SavuNexusLoader',
          'desc': replace_str('SavuLoader', 'SavuNexusLoader')},
-      }
+     'DistortionCorrection':
+        {'replace': 'DistortionCorrectionDeprecated',
+         'up_to_version': '2.4', # if the plist version is less than 2.4 (or not defined) then apply this mutation
+         'desc': '\n' + Fore.RED + auto_replace_str() + distortion_notice + Fore.RESET}
+     }
 
 param_mutations = \
-    {'BaseRecon': [{'old': 'center_of_rotation', 'new': 'centre_of_rotation'},
+    {'BaseRecon': {'params': [{'old': 'center_of_rotation', 'new': 'centre_of_rotation'},
                    {'old': 'number_of_iterations', 'new': 'n_iterations'},
                    {'old': 'sino_pad', 'new': 'outer_pad'}],
-     'AstraReconGpu': [{'old': 'reconstruction_type', 'new': 'algorithm'}],
-     'AstraReconCpu': [{'old': 'reconstruction_type', 'new': 'algorithm'}],
-     'DistortionCorrection': [{'old': 'centre', 'new': 'centre_from_top', 'eval': 'val[0]'},
+                   'up_to_version': '2.4'},
+     'AstraReconGpu': {'params': [{'old': 'reconstruction_type', 'new': 'algorithm'}],
+                       'up_to_version': '2.4'},
+     'AstraReconCpu': {'params': [{'old': 'reconstruction_type', 'new': 'algorithm'}],
+                                  'up_to_version': '2.4'},
+     'DistortionCorrection': {'params': [{'old': 'centre', 'new': 'centre_from_top', 'eval': 'val[0]'},
                               {'old': 'centre', 'new': 'centre_from_left', 'eval': 'val[1]'},
                               {'old': 'centre_x', 'new': 'centre_from_left'},
                               {'old': 'centre_y', 'new': 'centre_from_top'},
                               {'old': 'cod_from_left', 'new': 'centre_from_left'},
                               {'old': 'cod_from_top', 'new': 'centre_from_top'},
-                              ]}
+                              ], 'up_to_version': '2.4'}}
 
 plugin_notices = \
     {'Hdf5Saver': {'desc': notice_str('Hdf5Saver', hdf5_notice)}, }
