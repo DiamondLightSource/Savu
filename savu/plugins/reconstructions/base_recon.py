@@ -31,105 +31,7 @@ MAX_OUTER_PAD = 2.1
 
 class BaseRecon(Plugin):
     """
-    A base class for reconstruction plugins
-
-    :u*param centre_of_rotation: Centre of rotation to use for the \
-    reconstruction. Default: 0.0.
-    :u*param init_vol: Dataset to use as volume initialiser \
-    (doesn't currently work with preview). Default: None.
-
-    :param centre_pad: Pad the sinogram to centre it in order to fill the \
-    reconstructed volume ROI for asthetic purposes.\
-    NB: Only available for selected algorithms and will be ignored otherwise. \
-    WARNING: This will significantly increase the size of the data and the \
-    time to compute the reconstruction). Default: False.
-
-    :param outer_pad: Pad the sinogram width to fill the reconstructed volume \
-    for asthetic purposes.\
-    Choose from True (defaults to sqrt(2)), False or float <= 2.1. \
-    NB: Only available for selected algorithms and will be ignored otherwise.\
-    WARNING: This will increase the size of the data and the \
-    time to compute the reconstruction). Default: False.
-
-    :u*param log: Take the log of the data before reconstruction \
-    (True or False). Default: True.
-    :u*param preview: A slice list of required frames. Default: [].
-    :param force_zero: Set any values in the reconstructed image outside of \
-    this range to zero. Default: [None, None].
-    to zero. Default: False.
-    :param ratio: Ratio of the m2asks diameter in pixels to the smallest edge\
-        size along given axis. Default: 0.95.
-    :param log_func: Override the default log \
-        function. Default: 'np.nan_to_num(-np.log(sino))'.
-    :param vol_shape: Override the size of the reconstuction volume with an \
-    integer value. Default: 'fixed'.
     """
-    """
----
-   - name: BaseRecon
-     category: Reconstructor
-     synopsis: A base class for reconstruction plugins
-     parameters:
-        - centre_of_rotation:
-               visibility: user
-               type: float
-               description: Centre of rotation to use for the reconstruction.
-               default: 0.0
-        - init_vol:
-               visibility: user
-               type: float
-               description: Dataset to use as volume initialiser (doesn't currently work with preview)
-               default: None
-        - centre_pad:
-               visibility: param
-               type: float
-               description: Pad the sinogram to centre it in order to fill the
-                            reconstructed volume ROI for asthetic purposes.
-                            NB: Only available for selected algorithms and will be ignored otherwise.
-               warning: This will significantly increase the size of the data and the time to compute the reconstruction)
-               default: False
-        - outer_pad:
-               visibility: param
-               type: float
-               description: Pad the sinogram width to fill the reconstructed volume for asthetic purposes.\
-                            Choose from True (defaults to sqrt(2)), False or float <= 2.1. \
-                            NB: Only available for selected algorithms and will be ignored otherwise.
-               warning: This will increase the size of the data and the time to compute the reconstruction.
-               default: False
-        - log:
-               visibility: user
-               type: boolean
-               description: 
-                summary: Take the log of the data before reconstruction (True or False). 
-                verbose: Should be set to false if PaganinFilter is set beforehand
-               default: True
-        - preview:
-               visibility: user
-               type: list
-               description: A slice list of required frames.
-               default: '[]'
-        - force_zero:
-               visibility: param
-               type: list
-               description: Set any values in the reconstructed image outside of this range to zero. 
-               default: [None, None]
-         - ratio:
-               visibility: param
-               type: list
-               description: Ratio of the masks diameter in pixels to the smallest edge size along given axis.
-               default: 0.95
-          - log_func:
-               visibility: param
-               type: int
-               description: Override the default log function
-               default: np.nan_to_num(-np.log(sino))
-          - vol_shape:
-               visibility: param
-               type: str
-               description: Override the size of the reconstuction volume with an integer value. 
-               default: fixed
-    """
-
     def __init__(self, name='BaseRecon'):
         super(BaseRecon, self).__init__(name)
         self.nOut = 1
@@ -552,3 +454,37 @@ class BaseRecon(Plugin):
         if len(summary) > 0:
             return summary
         return ["Nothing to Report"]
+        '''
+                A base class for reconstruction plugins
+    
+        :u*param centre_of_rotation: Centre of rotation to use for the \
+        reconstruction. Default: 0.0.
+        :u*param init_vol: Dataset to use as volume initialiser \
+        (doesn't currently work with preview). Default: None.
+    
+        :param centre_pad: Pad the sinogram to centre it in order to fill the \
+        reconstructed volume ROI for asthetic purposes.\
+        NB: Only available for selected algorithms and will be ignored otherwise. \
+        WARNING: This will significantly increase the size of the data and the \
+        time to compute the reconstruction). Default: False.
+    
+        :param outer_pad: Pad the sinogram width to fill the reconstructed volume \
+        for asthetic purposes.\
+        Choose from True (defaults to sqrt(2)), False or float <= 2.1. \
+        NB: Only available for selected algorithms and will be ignored otherwise.\
+        WARNING: This will increase the size of the data and the \
+        time to compute the reconstruction). Default: False.
+    
+        :u*param log: Take the log of the data before reconstruction \
+        (True or False). Default: True.
+        :u*param preview: A slice list of required frames. Default: [].
+        :param force_zero: Set any values in the reconstructed image outside of \
+        this range to zero. Default: [None, None].
+        to zero. Default: False.
+        :param ratio: Ratio of the m2asks diameter in pixels to the smallest edge\
+            size along given axis. Default: 0.95.
+        :param log_func: Override the default log \
+            function. Default: 'np.nan_to_num(-np.log(sino))'.
+        :param vol_shape: Override the size of the reconstuction volume with an \
+        integer value. Default: 'fixed'.
+        '''
