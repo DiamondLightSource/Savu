@@ -36,13 +36,7 @@ from collections import OrderedDict
 
 class Plugin(PluginDatasets):
     """
-    The base class from which all plugins should inherit.
-    :param in_datasets: Create a list of the dataset(s) to \
-        process. Default: [].
-    :param out_datasets: Create a list of the dataset(s) to \
-        create. Default: [].
     """
-
     def __init__(self, name='Plugin'):
         super(Plugin, self).__init__()
         self.name = name
@@ -101,85 +95,92 @@ class Plugin(PluginDatasets):
             self.parameters[name] = info['values'][indices[count]]
             count += 1
 
+    def _return_yaml_path(self, clazz):
+        current_path = inspect.getfile(clazz)
+        filename = os.path.basename(current_path)
+        yaml_name = filename.split('.')[0] + '.yaml'
+        current_path = current_path.split(filename)[0]
+        yaml_path = current_path + yaml_name
+        return yaml_path
+
     def _load_yaml_details(self):
         """parameters_desc
         Load yaml details from docstring of this instance of the plugin.
 
         """
-        # Test Plugins are: 'RemoveAllRings' 'TomobarRecon' 'NxtomoLoader' 'DarkFlatFieldCorrection' 'NoProcess'
-        try:
-            hidden_items = []
-            user_items = []
-            params = []
-            not_params = []
+        # Test Plugins are: 'RemoveAllRings' 'TomobarRecon'
+        # 'NxtomoLoader' 'DarkFlatFieldCorrection' 'NoProcess'
 
-            current_path = inspect.getfile(self.__class__)
-            filename = os.path.basename(current_path)
-            yaml_name = filename.split('.')[0] + '.yaml'
-            current_path = current_path.split(filename)[0]
-            yaml_path = current_path + yaml_name
+        hidden_items = []
+        user_items = []
+        params = []
+        not_params = []
+        for clazz in inspect.getmro(self.__class__)[::-1]:
+            # Return a tuple of class cls’s base classes, including cls
+            if clazz != object:
+                try:
+                    yaml_path = self._return_yaml_path(clazz)
 
-            if os.path.isfile(yaml_path):
-                all_params, synopsis, warning, verbose = doc._load_yaml(yaml_path)
-            else:
-                all_params, synopsis, warning, verbose = doc._load_yaml(self.__doc__)
-
-            self.docstring_info['warn'] = warning
-            self.docstring_info['synopsis'] = synopsis
-            self.docstring_info['info'] = verbose
-
-            for i, p in enumerate(all_params):
-                p_key = p.keys()[0]
-                self.parameters_visibility[p_key] = p[p_key]['visibility']
-                visibility = self.parameters_visibility[p_key]
-
-                if visibility == 'not_param':
-                    not_params.append(p_key)
-
-                if visibility != 'not_param':
-
-                    if isinstance(p[p_key]['default'], OrderedDict):
-                        # Set the default value if there is a dependency
-                        parent_param = p[p_key]['default'].keys()[0]
-                        parent_choices = p[p_key]['default'][parent_param]
-                        parent_value = self.parameters[parent_param]
-                        for item in parent_choices.keys():
-                            if parent_value == item:
-                                self.parameters[p_key] = parent_choices[item]
+                    if os.path.isfile(yaml_path):
+                        all_params, synopsis, warning, verbose = doc._load_yaml(yaml_path)
                     else:
-                        self.parameters[p_key] = p[p_key]['default']
-                    self.parameters_types[p_key] = p[p_key]['type']
-                    p_desc = p[p_key]['description']
+                        all_params, synopsis, warning, verbose = doc._load_yaml(self.__doc__)
 
-                    if not isinstance(p_desc, str):
-                        self.parameters_desc[p_key] = p_desc
-                        if 'format' in p_desc.keys():
-                            self.parameters_format[p_key] = p_desc['format']
-                        if 'examples' in p_desc.keys():
-                            self.parameters_examples[p_key] = p_desc['examples']
-                    else:
-                        self.parameters_desc[p_key] = p_desc
+                    self.docstring_info['warn'] = warning
+                    self.docstring_info['synopsis'] = synopsis
+                    self.docstring_info['info'] = verbose
 
-                    if 'options' in p[p_key].keys():
-                        self.parameters_options[p_key] = p[p_key]['options']
+                    for i, p in enumerate(all_params):
+                        p_key = p.keys()[0]
+                        self.parameters_visibility[p_key] = p[p_key]['visibility']
+                        visibility = self.parameters_visibility[p_key]
 
-                    if visibility == 'param':
-                        params.append(p_key)
-                    if visibility == 'hide':
-                        hidden_items.append(p_key)
-                    if visibility == 'user':
-                        user_items.append(p_key)
+                        if visibility == 'not_param':
+                            not_params.append(p_key)
 
-            user_items = [u for u in user_items if u not in not_params]
-            hidden_items = [h for h in hidden_items if h not in not_params]
-            user_items = list(set(user_items).difference(set(hidden_items)))
-            self.parameters_hide = hidden_items
-            self.parameters_user = user_items
+                        if visibility != 'not_param':
 
-        except:
-            print("Unexpected error:", sys.exc_info()[0])
-            print('Error at doc.load_yaml')
-            raise
+                            if isinstance(p[p_key]['default'], OrderedDict):
+                                # Set the default value if there is a dependency
+                                parent_param = p[p_key]['default'].keys()[0]
+                                parent_choices = p[p_key]['default'][parent_param]
+                                parent_value = self.parameters[parent_param]
+                                for item in parent_choices.keys():
+                                    if parent_value == item:
+                                        self.parameters[p_key] = parent_choices[item]
+                            else:
+                                self.parameters[p_key] = p[p_key]['default']
+                            self.parameters_types[p_key] = p[p_key]['type']
+                            p_desc = p[p_key]['description']
+
+                            if not isinstance(p_desc, str):
+                                self.parameters_desc[p_key] = p_desc
+                                if 'format' in p_desc.keys():
+                                    self.parameters_format[p_key] = p_desc['format']
+                                if 'examples' in p_desc.keys():
+                                    self.parameters_examples[p_key] = p_desc['examples']
+                            else:
+                                self.parameters_desc[p_key] = p_desc
+
+                            if 'options' in p[p_key].keys():
+                                self.parameters_options[p_key] = p[p_key]['options']
+
+                            if visibility == 'param':
+                                params.append(p_key)
+                            if visibility == 'hide':
+                                hidden_items.append(p_key)
+                            if visibility == 'user':
+                                user_items.append(p_key)
+                except:
+                    print("Unexpected error:", sys.exc_info()[0])
+                    print('Error at doc.load_yaml')
+                    raise
+
+        user_items = [u for u in user_items if u not in not_params]
+        hidden_items = [h for h in hidden_items if h not in not_params]
+        user_items = list(set(user_items).difference(set(hidden_items)))
+        self.parameters_hide = hidden_items
+        self.parameters_user = user_items
 
     def base_dynamic_data_info(self):
         """ Provides an opportunity to override the number and name of input
@@ -543,3 +544,10 @@ class Plugin(PluginDatasets):
         :returns:  A list of string summaries
         """
         return ["Nothing to Report"]
+        """
+            The base class from which all plugins should inherit.
+        :param in_datasets: Create a list of the dataset(s) to \
+            process. Default: [].
+        :param out_datasets: Create a list of the dataset(s) to \
+            create. Default: [].
+        """
