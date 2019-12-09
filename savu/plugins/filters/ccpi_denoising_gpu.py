@@ -50,7 +50,7 @@ class CcpiDenoisingGpu(Plugin, GpuPlugin):
     :param alpha1: TGV method, parameter to control the 1st-order term. Default: 1.0.
     :param alpha0: TGV method, parameter to control the 2nd-order term. Default: 2.0.
     :param reg_parLLT: LLT-ROF method, parameter to control the 2nd-order term. Default: 0.05.
-    :param penalty_type: NDF method, Penalty type for the duffison, choose from\
+    :param penalty_type: NDF method, Penalty type for the diffusion, choose from\
     huber, perona or tukey. Default: 'huber'.
     :param edge_par: NDF and Diff4th methods, noise magnitude parameter. Default: 0.01.
     :param tolerance_constant: tolerance constant to stop iterations earlier. Default: 0.0.
