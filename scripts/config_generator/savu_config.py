@@ -254,7 +254,7 @@ def main():
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        utils.populate_plugins()
+        utils.populate_plugins(error_mode=args.error)
 
     comp = Completer(commands=commands, plugin_list=pu.plugins)
     utils._set_readline(comp.complete)

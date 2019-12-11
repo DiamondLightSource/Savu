@@ -350,10 +350,6 @@ case $cluster in
 		# RAM com10 252G com14 252G ~ 12G per core  - m_mem_free requested in JSV script
 		qsub -jsv /dls_sw/cluster/common/JSVs/savu_20191122.pl -sync y\
 		-l infiniband $generic > /dls/tmp/savu/$USER.out ;;
-	"zocalo_cluster")
-		# RAM com10 252G com14 252G ~ 12G per core  - m_mem_free requested in JSV script
-		qsub -jsv /dls_sw/cluster/common/JSVs/savu_20190909.pl -sync y\
-		-l infiniband $generic > /dls/tmp/savu/$USER.out ;;
 	"hamilton")
 		# RAM 384G per core (but 377G available?) ~ 9G per core
 		# requesting 7G per core as minimum (required to be available on startup),but will use all
