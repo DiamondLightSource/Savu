@@ -116,11 +116,10 @@ class Plugin(PluginDatasets):
         params = []
         not_params = []
         for clazz in inspect.getmro(self.__class__)[::-1]:
-            # Return a tuple of class cls’s base classes, including cls
+            # return a tuple of class cls's base classes, including cls
             if clazz != object:
                 try:
                     yaml_path = self._return_yaml_path(clazz)
-
                     if os.path.isfile(yaml_path):
                         all_params, synopsis, warning, verbose = doc._load_yaml(yaml_path)
                     else:
@@ -150,6 +149,7 @@ class Plugin(PluginDatasets):
                                         self.parameters[p_key] = parent_choices[item]
                             else:
                                 self.parameters[p_key] = p[p_key]['default']
+
                             self.parameters_types[p_key] = p[p_key]['type']
                             p_desc = p[p_key]['description']
 
@@ -171,9 +171,15 @@ class Plugin(PluginDatasets):
                                 hidden_items.append(p_key)
                             if visibility == 'user':
                                 user_items.append(p_key)
+                except KeyError:
+                    print('Please check the spelling of the dictionary key'
+                          ' values. Eg. visibility, type, description. '
+                          'default')
+                    raise
+                    # if no raise, plug in will only save half of the data
                 except:
                     print("Unexpected error:", sys.exc_info()[0])
-                    print('Error at doc.load_yaml')
+                    print('Error with saving the plugin details.')
                     raise
 
         user_items = [u for u in user_items if u not in not_params]
@@ -349,7 +355,7 @@ class Plugin(PluginDatasets):
 
     def plugin_process_frames(self, data):
         frames = self.base_process_frames_after(self.process_frames(
-                self.base_process_frames_before(data)))
+            self.base_process_frames_before(data)))
         self.pcount += 1
         return frames
 
@@ -386,7 +392,7 @@ class Plugin(PluginDatasets):
         preview = data.get_preview()
         orig_indices = preview.get_starts_stops_steps()
         nDims = len(orig_indices[0])
-        no_preview = [[0]*nDims, data.get_shape(), [1]*nDims, [1]*nDims]
+        no_preview = [[0] * nDims, data.get_shape(), [1] * nDims, [1] * nDims]
 
         # Set previewing params if previewing has not already been applied to
         # the dataset.
@@ -471,7 +477,6 @@ class Plugin(PluginDatasets):
     def get_global_frame_index(self):
         """ Get the global frame index. """
         return self.global_index
-        
 
     def set_current_slice_list(self, sl):
         self.slice_list = sl
