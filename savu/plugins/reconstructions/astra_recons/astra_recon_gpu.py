@@ -27,22 +27,12 @@ from savu.plugins.reconstructions.astra_recons.base_astra_recon \
 from savu.plugins.driver.gpu_plugin import GpuPlugin
 from savu.data.plugin_list import CitationInformation
 from savu.plugins.utils import register_plugin
+from savu.plugins.utils import register_test_plugin
 
 
-@register_plugin
+@register_test_plugin
 class AstraReconGpu(BaseAstraRecon, GpuPlugin):
     """
-    A Plugin to run the astra reconstruction
-
-    :u*param res_norm: Output the residual norm at each iteration\
-        (Error in the solution - iterative solvers only). Default: False.
-    :u*param algorithm: Reconstruction type (FBP_CUDA|SIRT_CUDA|\
-        SART_CUDA (not currently working)|CGLS_CUDA|FP_CUDA|BP_CUDA|\
-        SIRT3D_CUDA|CGLS3D_CUDA). Default: 'FBP_CUDA'.
-    :u*param FBP_filter: The FBP reconstruction filter type (none|ram-lak|\
-        shepp-logan|cosine|hamming|hann|tukey|lanczos|triangular|gaussian|\
-        barlett-hann|blackman|nuttall|blackman-harris|blackman-nuttall|\
-        flat-top|kaiser|parzen). Default: 'ram-lak'.
     """
 
     def __init__(self):
@@ -232,3 +222,16 @@ class AstraReconGpu(BaseAstraRecon, GpuPlugin):
 
         return super(AstraReconGpu, self).get_citation_information() + \
             [cite_info]
+        """
+            A Plugin to run the astra reconstruction
+
+        :u*param res_norm: Output the residual norm at each iteration\
+            (Error in the solution - iterative solvers only). Default: False.
+        :u*param algorithm: Reconstruction type (FBP_CUDA|SIRT_CUDA|\
+            SART_CUDA (not currently working)|CGLS_CUDA|FP_CUDA|BP_CUDA|\
+            SIRT3D_CUDA|CGLS3D_CUDA). Default: 'FBP_CUDA'.
+        :u*param FBP_filter: The FBP reconstruction filter type (none|ram-lak|\
+            shepp-logan|cosine|hamming|hann|tukey|lanczos|triangular|gaussian|\
+            barlett-hann|blackman|nuttall|blackman-harris|blackman-nuttall|\
+            flat-top|kaiser|parzen). Default: 'ram-lak'.
+        """

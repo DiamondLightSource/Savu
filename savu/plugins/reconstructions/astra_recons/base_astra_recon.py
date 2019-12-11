@@ -28,10 +28,6 @@ from savu.data.plugin_list import CitationInformation
 
 class BaseAstraRecon(BaseRecon):
     """
-    A Plugin to perform Astra toolbox reconstruction
-
-    :u*param n_iterations: Number of Iterations - only valid for iterative \
-        algorithms. Default: 1.
     """
 
     def __init__(self, name='BaseAstraRecon'):
@@ -261,3 +257,9 @@ class BaseAstraRecon(BaseRecon):
         cite_info2.doi = "doi: 10.1364/OE.24.025129"
 
         return [cite_info1, cite_info2]
+        """
+            A Plugin to perform Astra toolbox reconstruction
+    
+        :u*param n_iterations: Number of Iterations - only valid for iterative \
+            algorithms. Default: 1.
+        """

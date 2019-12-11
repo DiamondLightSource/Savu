@@ -1,5 +1,9 @@
 ---
-      - verbose: A plugin to reconstruct full-field tomographic projection data using state-of-the-art regularised iterative algorithms from the ToMoBAR package. ToMoBAR includes FISTA and ADMM iterative methods and depends on the ASTRA toolbox and the CCPi RGL toolkit
+      - verbose: A plugin to reconstruct full-field tomographic projection
+          data using state-of-the-art regularised iterative algorithms
+          from the ToMoBAR package. ToMoBAR includes FISTA and ADMM
+          iterative methods and depends on the ASTRA toolbox and the
+          CCPi RGL toolkit
         parameters:
            - output_size:
                   visibility: param
@@ -10,8 +14,13 @@
                   visibility: param
                   type: int
                   description:
-                    summary: Number of outer iterations for FISTA (default) or ADMM methods.
-                    verbose: Less than 10 iterations for the iterative method (FISTA) can deliver a blurry reconstruction. The suggested value is 15 iterations, however the algorithm can stop prematurely based on the tolerance value.
+                    summary: Number of outer iterations for FISTA (default)
+                      or ADMM methods.
+                    verbose: Less than 10 iterations for the iterative method
+                      (FISTA) can deliver a blurry reconstruction. The
+                      suggested value is 15 iterations, however the
+                      algorithm can stop prematurely based on the tolerance
+                      value.
                   default: 20
            - datafidelity:
                   visibility: param
@@ -27,41 +36,54 @@
            - ordersubsets:
                   visibility: param
                   type: int
-                  description: The number of ordered-subsets to accelerate reconstruction. A value >12 can result in the algorithm diverging.
+                  description: The number of ordered-subsets to accelerate
+                    reconstruction. A value >12 can result in the algorithm
+                    diverging.
                   default: 6
            - converg_const:
                   visibility: param
                   type: str
-                  description: Lipschitz constant, can be set to a value or automatic calculation.
+                  description: Lipschitz constant, can be set to a value or
+                    automatic calculation.
                   default: power
            - method:
                   visibility: param
                   type: str
-                  options: [ROF_TV, FGP_TV, SB_TV, NLTV, TGV, LLT_ROF, NDF, Diff4th]
+                  options: [ROF_TV, FGP_TV, SB_TV, NLTV, TGV, LLT_ROF, NDF
+                    , Diff4th]
                   description:
-                    summary: The denoising method - Iterative methods can help to solve ill-posed inverse problems by choosing a suitable noise model for the measurements
-                    verbose: To regularise choose methods ROF_TV, FGP_TV, SB_TV, LLT_ROF, NDF, Diff4th.
+                    summary: The denoising method - Iterative methods can
+                      help to solve ill-posed inverse problems by choosing
+                      a suitable noise model for the measurements
+                    verbose: To regularise choose methods ROF_TV, FGP_TV,
+                      SB_TV, LLT_ROF, NDF, Diff4th.
                     options:
                         ROF_TV: Rudin-Osher-Fatemi Total Variation model
                         FGP_TV: Fast Gradient Projection Total Variation model
                         SB_TV: Split Bregman Total Variation model
                         NLTV: Nonlocal Total Variation model
                         TGV: Total Generalised Variation model
-                        LLT_ROF: Lysaker, Lundervold and Tai model combined with Rudin-Osher-Fatemi
-                        NDF: Nonlinear/Linear Diffusion model (Perona-Malik, Huber or Tukey)
+                        LLT_ROF: Lysaker, Lundervold and Tai model combined
+                          with Rudin-Osher-Fatemi
+                        NDF: Nonlinear/Linear Diffusion model (Perona-Malik,
+                          Huber or Tukey)
                         DIFF4th: Fourth-order nonlinear diffusion model
                   default: FGP_TV
            - reg_par:
                   visibility: param
                   type: float
                   description:
-                    summary: Regularisation parameter. The higher the value, the stronger the smoothing effect
+                    summary: Regularisation parameter. The higher the value,
+                      the stronger the smoothing effect
                     range: Recommended between 0 and 1
                   default: 0.0001
            - max_iterations:
                   visibility: param
                   type: int
-                  description: Total number of regularisation iterations. The smaller the number of iterations, the smaller the effect of the filtering is. A larger number will affect the speed of the algortihm.
+                  description: Total number of regularisation iterations.
+                    The smaller the number of iterations, the smaller the effect
+                    of the filtering is. A larger number will affect the speed
+                    of the algortihm.
                   default:
                       method:
                         ROF_TV: 1000
@@ -96,7 +118,8 @@
                     method: LLT_ROF
                   description:
                     summary: Regularisation (smoothing) value
-                    verbose: The higher the value stronger the smoothing effect.
+                    verbose: The higher the value stronger the smoothing
+                      effect.
                   default: 0.005
            - NDF_penalty:
                   visibility: param
@@ -104,7 +127,8 @@
                   options: [Huber, Perona, Tukey]
                   description:
                     summary: Penalty type
-                    verbose: Nonlinear/Linear Diffusion model (NDF) specific penalty type.
+                    verbose: Nonlinear/Linear Diffusion model (NDF) specific
+                      penalty type.
                     options:
                       Huber: Huber
                       Perona: Perona-Malik model
@@ -130,6 +154,7 @@
                   visibility: param
                   type: float
                   description:
-                    summary: Acceleration constant for ring removal (use with care)
+                    summary: Acceleration constant for ring removal
+                      (use with care)
                     range:
                   default: 50.0
