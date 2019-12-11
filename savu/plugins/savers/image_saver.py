@@ -55,38 +55,44 @@ class ImageSaver(BaseImageSaver, CpuPlugin):
     def pre_process(self):
         super(ImageSaver, self).pre_process()
         self.file_format = self.parameters['format']
-        self._data_range = self._get_min_and_max()
+        num_bit = self.parameters['num_bit']
         self.pData = self.get_plugin_in_datasets()[0]
-
+        if not (num_bit==8 or num_bit==16 or num_bit==32):
+            self.num_bit = 32
+            msg = "\n***********************************************\n"\
+                "This option %s is not available. Reset to 32 \n"\
+                %str(num_bit)
+            cu.user_message(msg)
+        else:
+            self.num_bit = num_bit
+        self._data_range = self._get_min_and_max()
     def process_frames(self, data):
         frame = self.pData.get_current_frame_idx()[0]
         filename = '%s%05i.%s' % (self.filename, frame, self.file_format)
         if (self.file_format=="tiff") or (self.file_format =="tif"):
-            num_bit = self.parameters['num_bit']
             global_min = self.parameters['min']
             global_max = self.parameters['max']
-            if global_min is None:
-                if self.the_min is not None:
-                    global_min = self.the_min
-                else:
-                    global_min = np.min(data[0])
-            if global_max is None:
-                if self.the_max is not None:
-                    global_max = self.the_max
-                else:
-                    global_max = np.max(data[0])
-            if not(num_bit==8 or num_bit==16 or num_bit==32):
-                num_bit = 32
-            rescaled_image = np.clip(data[0], global_min, global_max)
-            rescaled_image = (rescaled_image - global_min) \
-                                / (global_max - global_min)
-            if num_bit==16:
-                rescaled_image = np.clip(
-                    np.uint16(rescaled_image * 65535), 0, 65535)
-            elif num_bit==8:
-                rescaled_image = np.clip(np.uint8(rescaled_image * 255), 0, 255)
-            else:
+            if self.num_bit==32:
                 rescaled_image = data[0]
+            else:
+                if global_min is None:
+                    if self.the_min is not None:
+                        global_min = self.the_min
+                    else:
+                        global_min = np.min(data[0])
+                if global_max is None:
+                    if self.the_max is not None:
+                        global_max = self.the_max
+                    else:
+                        global_max = np.max(data[0])
+                rescaled_image = np.clip(data[0], global_min, global_max)
+                rescaled_image = (rescaled_image - global_min) \
+                                    / (global_max - global_min)
+                if self.num_bit==16:
+                    rescaled_image = np.clip(
+                        np.uint16(rescaled_image * 65535), 0, 65535)
+                else:
+                    rescaled_image = np.clip(np.uint8(rescaled_image * 255), 0, 255)
             img = Image.fromarray(rescaled_image)
             img.save(filename)
         else:
@@ -116,7 +122,8 @@ class ImageSaver(BaseImageSaver, CpuPlugin):
                 "and local maximum will be used for rescaling. This may\n"\
                 "result the fluctuation of brightness between slices.\n"\
                 "***********************************************\n"
-                cu.user_message(msg)                
+                if (self.num_bit == 8) or (self.num_bit==16):
+                    cu.user_message(msg)
         return self._data_range
 
     def executive_summary(self):
