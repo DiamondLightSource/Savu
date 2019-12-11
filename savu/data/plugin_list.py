@@ -126,7 +126,6 @@ class PluginList(object):
         options = ''
         formats = ''
         examples = ''
-
         if subelem in self.plugin_list[pos]['types']:
             # The parameter is within the types
             ptype = self.plugin_list[pos]['types'][subelem]
@@ -190,7 +189,8 @@ class PluginList(object):
                     if len(entries) == 2:
                         if isinstance(entries[0], int) and isinstance(entries[1], int):
                             parameter_valid = True
-
+                elif ptype == 'yaml_file':
+                    pass
                 elif ptype == '[path, int_path, int]':
                     try:
                         bracket_value = value.split('[')
@@ -245,7 +245,7 @@ class PluginList(object):
                         print('Valid items have a format [<file path>,'
                               ' <interior file path>, int].')
                     except AttributeError:
-                        print('You need to place some informtion inside the square brackets.')
+                        print('You need to place some information inside the square brackets.')
                     except Exception as e:
                         print(e)
 

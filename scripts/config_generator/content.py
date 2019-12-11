@@ -239,8 +239,9 @@ class Content(object):
             print ("There is a syntax error. Please check your input.")
         except EOFError:
             print ("There is an end of line error. Please check your input for the character \"\'\".")
-        except Exception:
+        except Exception as e:
             print('There is an error. Please check your input.')
+            print(e)
 
     def value(self, value):
         if not value.count(';'):
