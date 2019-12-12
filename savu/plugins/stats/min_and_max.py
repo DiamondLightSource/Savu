@@ -19,7 +19,7 @@
 """
 
 import numpy as np
-
+from scipy.ndimage import gaussian_filter
 from savu.plugins.plugin import Plugin
 from savu.plugins.utils import register_plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
@@ -32,6 +32,7 @@ class MinAndMax(Plugin, CpuPlugin):
     by the pattern parameter)
 
     :u*param pattern: How to slice the data. Default: 'VOLUME_XZ'.
+    :param smoothing: Apply a smoothing filter or not. Default: True.
     :param out_datasets: The default names. Default: ['the_min','the_max'].
     """
 
@@ -39,7 +40,13 @@ class MinAndMax(Plugin, CpuPlugin):
         super(MinAndMax, self).__init__("MinAndMax")
 
     def process_frames(self, data):
-        return [np.array([np.min(data[0])]), np.array([np.max(data[0])])]
+        use_filter = self.parameters['smoothing']
+        if use_filter:
+            frame = gaussian_filter(data[0],(3,3))
+        else:
+            frame = data[0]
+        return [np.array([np.min(frame)], dtype=np.float32),\
+                 np.array([np.max(frame)], dtype=np.float32)]
 
     def post_process(self):
         # do some curve fitting here
