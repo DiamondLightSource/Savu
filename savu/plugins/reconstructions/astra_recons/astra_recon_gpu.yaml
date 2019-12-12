@@ -1,42 +1,38 @@
 ---
-          - verbose: A Plugin to run the astra reconstruction
-            parameters:
-               - res_norm:
-                    visibility: user
-                    type: int
-                    description: Output the residual norm at each iteration
-                      (Error in the solution - iterative solvers only)
-                    default: False
-               - algorithm:
-                    visibility: user
-                    type: str
-                    options: [FBP, SIRT, SART, ART, CGLS, FP, BP]
-                    description:
-                      summary: Reconstruction type
-                      options:
-                        FBP_CUDA: Filtered Backprojection
-                        SIRT_CUDA: Simultaneous Iterative Reconstruction
-                          Technique
-                        SART_CUDA: Simultaneous Algebraic Reconstruction
-                          Technique
-                        CGLS_CUDA: Conjugate Gradient Least Squares
-                        FP_CUDA:
-                        BP_CUDA:
-                        SIRT3D_CUDA:
-                        CGLS3D_CUDA:
-                    default: FBP_CUDA
-               - FBP_filter:
-                    visibility: user
-                    type: str
-                    options: [none, ram-lak, shepp-logan, cosine, hamming,
-                              hann, tukey, lanczos, triangular, gaussian
-                              barlett-hann, blackman, nuttall,
-                              blackman-harris, blackman-nuttall, flat-top,
-                              kaiser, parzen]
-                    description:
-                      summary: The FBP reconstruction filter type (none|
-                        ram-lak|shepp-logan|cosine|hamming|hann|tukey|lanczos
-                        |triangular|gaussian|barlett-hann|blackman|nuttall|
-                        blackman-harris|blackman-nuttall|flat-top|kaiser|
-                        parzen)
-                    default: ram-lak
+- verbose: A Plugin to run the astra reconstruction
+  parameters:
+     - res_norm:
+          visibility: user
+          type: int
+          description: Output the residual norm at each iteration (Error in
+            the solution - iterative solvers only)
+          default: False
+     - algorithm:
+          visibility: user
+          type: str
+          options: [FBP, SIRT, SART, ART, CGLS, FP, BP]
+          description:
+            summary: Reconstruction type
+            options:
+              FBP_CUDA: Filtered Backprojection
+              SIRT_CUDA: Simultaneous Iterative Reconstruction Technique
+              SART_CUDA: Simultaneous Algebraic Reconstruction Technique
+              CGLS_CUDA: Conjugate Gradient Least Squares
+              FP_CUDA:
+              BP_CUDA:
+              SIRT3D_CUDA:
+              CGLS3D_CUDA:
+          default: FBP_CUDA
+     - FBP_filter:
+          visibility: user
+          type: str
+          options: [none, ram-lak, shepp-logan, cosine, hamming, hann,
+                    tukey, lanczos, triangular, gaussian barlett-hann,
+                    blackman, nuttall, blackman-harris, blackman-nuttall,
+                    flat-top, kaiser, parzen]
+          description:
+            summary: The FBP reconstruction filter type (none|ram-lak|
+              shepp-logan|cosine|hamming|hann|tukey|lanczos|triangular|
+              gaussian|barlett-hann|blackman|nuttall|blackman-harris|
+              blackman-nuttall|flat-top|kaiser|parzen)
+          default: ram-lak

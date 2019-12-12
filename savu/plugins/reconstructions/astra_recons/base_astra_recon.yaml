@@ -1,9 +1,8 @@
 ---
-          - verbose: A Plugin to perform Astra toolbox reconstruction
-            parameters:
-               - n_iterations:
-                    visibility: user
-                    type: int
-                    description: Number of Iterations - only valid for
-                      iterative algorithms
-                    default: 1
+- verbose: A Plugin to perform Astra toolbox reconstruction
+  parameters:
+     - n_iterations:
+          visibility: user
+          type: int
+          description: Number of Iterations - only valid for iterative algorithms
+          default: 1
