@@ -1,0 +1,13 @@
+# It extends the default yamllint config by adjusting some options.
+
+extends: default
+
+rules:
+  comments-indentation: disable
+  # Allow values [true, false, True, False]
+  truthy: {allowed-values: ["True", "False"]}
+  # No strict indentation pattern
+  indentation: disable
+  # {indent-sequences: whatever, spaces: consistent, level: warning}
+  # 80 chars should be long enough for line length, don't fail if a line is longer
+  line-length: {max: 80, level: warning, allow-non-breakable-inline-mappings: true}
