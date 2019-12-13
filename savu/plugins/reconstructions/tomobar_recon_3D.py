@@ -52,7 +52,7 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
                              NDF, Diff4th. Default: 'FGP_TV'.
     :param regularisation_parameter: Regularisation (smoothing) value, higher \
                             the value stronger the smoothing effect. Default: 0.0001.
-    :param regularisation_iterations: The number of regularisation iterations. Default: 350.
+    :param regularisation_iterations: The number of regularisation iterations. Default: 80.
     :param regularisation_device: The number of regularisation iterations. Default: 'gpu'.
     :param regularisation_PD_lip: Primal-dual parameter for convergence. Default: 8.
     :param regularisation_methodTV:  0/1 - TV specific isotropic/anisotropic choice. Default: 0.

@@ -13,62 +13,59 @@
 # limitations under the License.
 
 """
-.. module:: Wrapper for CCPi-Regularisation Toolkit (GPU) for \
-    efficient 2D/3D denoising
+.. module:: Wrapper for CCPi-Regularisation Toolkit (CPU) for efficient 2D/3D denoising
    :platform: Unix
-   :synopsis: GPU modules of CCPi-Regularisation Toolkit (CcpiRegulToolkitCpu)
-   
+   :synopsis: CCPi-Regularisation/denoising Toolkit delivers a variety of variational 2D/3D denoising methods. The available methods are:  'ROF_TV','FGP_TV' (default),'SB_TV','TGV','LLT_ROF','NDF','Diff4th'
+
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
 
 from savu.plugins.plugin import Plugin
-from savu.plugins.driver.gpu_plugin import GpuPlugin
+from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 
-from ccpi.filters.regularisers import ROF_TV, FGP_TV, SB_TV, TGV, LLT_ROF, NDF, Diff4th
+from ccpi.filters.regularisers import ROF_TV, FGP_TV, SB_TV, PD_TV, LLT_ROF, TGV, NDF, Diff4th
 from ccpi.filters.regularisers import PatchSelect, NLTV
 from savu.data.plugin_list import CitationInformation
 
 @register_plugin
-class CcpiDenoisingGpu(Plugin, GpuPlugin):
+class CcpiDenoisingCpu(Plugin, CpuPlugin):
     """
-    'ROF_TV': Rudin-Osher-Fatemi Total Variation model;  
-    'FGP_TV': Fast Gradient Projection Total Variation model;  
+    'ROF_TV': Rudin-Osher-Fatemi Total Variation model;
+    'FGP_TV': Fast Gradient Projection Total Variation model;
     'SB_TV': Split Bregman Total Variation model;
+    'PD_TV': Primal-Dual Total variation model;
     'NLTV': Nonlocal Total Variation model;
-    'TGV': Total Generalised Variation model;  
-    'LLT_ROF': Lysaker, Lundervold and Tai model combined with Rudin-Osher-Fatemi;  
-    'NDF': Nonlinear/Linear Diffusion model (Perona-Malik, Huber or Tukey);  
+    'TGV': Total Generalised Variation model;
+    'LLT_ROF': Lysaker, Lundervold and Tai model combined with Rudin-Osher-Fatemi;
+    'NDF': Nonlinear/Linear Diffusion model (Perona-Malik, Huber or Tukey);
     'DIFF4th': Fourth-order nonlinear diffusion model
-    
+
     :param method: Choose methods |ROF_TV|FGP_TV|SB_TV|NLTV|TGV|LLT_ROF|NDF|Diff4th. Default: 'FGP_TV'.
     :param reg_par: Regularisation (smoothing) parameter. Default: 0.01.
     :param max_iterations: Total number of iterations. Default: 300.
     :param time_step: Time marching step, relevant for ROF_TV, LLT_ROF,\
-     NDF, Diff4th methods. Default: 0.001.
+     NDF, DIFF4th methods. Default: 0.001.
     :param lipshitz_constant: TGV method, Lipshitz constant. Default: 12.
     :param alpha1: TGV method, parameter to control the 1st-order term. Default: 1.0.
     :param alpha0: TGV method, parameter to control the 2nd-order term. Default: 2.0.
     :param reg_parLLT: LLT-ROF method, parameter to control the 2nd-order term. Default: 0.05.
     :param penalty_type: NDF method, Penalty type for the duffison, choose from\
-    huber, perona or tukey. Default: 'huber'.
+    huber, perona, tukey or constr. Default: 'huber'.
     :param edge_par: NDF and Diff4th methods, noise magnitude parameter. Default: 0.01.
     :param tolerance_constant: tolerance constant to stop iterations earlier. Default: 0.0.
     :param pattern: pattern to apply this to. Default: "VOLUME_XZ".
     """
 
     def __init__(self):
-        super(CcpiDenoisingGpu, self).__init__('CcpiDenoisingGpu')
-        self.GPU_index = None
-        self.res = False
-        self.start = 0
+        super(CcpiDenoisingCpu, self).__init__('CcpiDenoisingCpu')
 
     def nInput_datasets(self):
         return 1
 
     def nOutput_datasets(self):
         return 1
-    
+
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
         out_dataset[0].create_dataset(in_dataset[0])
@@ -77,7 +74,8 @@ class CcpiDenoisingGpu(Plugin, GpuPlugin):
         out_pData[0].plugin_data_setup(self.parameters['pattern'], 'single')
 
     def pre_process(self):
-        self.device = 'gpu'
+	# Ccpi-RGL toolkit modules
+   	self.device = 'cpu'
         if (self.parameters['method'] == 'ROF_TV'):
             # set parameters for the ROF-TV method
             self.pars = {'algorithm': self.parameters['method'], \
@@ -108,7 +106,7 @@ class CcpiDenoisingGpu(Plugin, GpuPlugin):
                 'alpha0': self.parameters['alpha0'],\
                 'number_of_iterations': self.parameters['max_iterations'],\
                 'LipshitzConstant' :self.parameters['lipshitz_constant'],\
-                'tolerance_constant': self.parameters['tolerance_constant']} 
+                'tolerance_constant': self.parameters['tolerance_constant']}
         if (self.parameters['method'] == 'LLT_ROF'):
             # set parameters for the LLT-ROF method
             self.pars = {'algorithm': self.parameters['method'], \
@@ -128,6 +126,9 @@ class CcpiDenoisingGpu(Plugin, GpuPlugin):
             if (self.parameters['penalty_type'] == 'tukey'):
                 # Tukey Biweight function for the diffusivity
                 penaltyNDF = 3
+            if (self.parameters['penalty_type'] == 'constr'):
+                #  Threshold-constrained linear diffusion
+                penaltyNDF = 4
             self.pars = {'algorithm': self.parameters['method'], \
                 'regularisation_parameter':self.parameters['reg_par'],\
                 'edge_parameter':self.parameters['edge_par'],\
@@ -136,7 +137,7 @@ class CcpiDenoisingGpu(Plugin, GpuPlugin):
                 'penalty_type': penaltyNDF,\
                 'tolerance_constant': self.parameters['tolerance_constant']}
         if (self.parameters['method'] == 'Diff4th'):
-            # set parameters for the Diff4th method
+            # set parameters for the DIFF4th method
             self.pars = {'algorithm': self.parameters['method'], \
                 'regularisation_parameter':self.parameters['reg_par'],\
                 'edge_parameter':self.parameters['edge_par'],\
@@ -162,27 +163,27 @@ class CcpiDenoisingGpu(Plugin, GpuPlugin):
         input_temp[input_temp > 10**15] = 0.0
         self.pars['input'] = input_temp
         #self.pars['input'] = np.nan_to_num(data[0])
-    
+
         # Running Ccpi-RGLTK modules on GPU
         if (self.parameters['method'] == 'ROF_TV'):
-            (im_res,infogpu) = ROF_TV(self.pars['input'], 
+            (im_res,infogpu) = ROF_TV(self.pars['input'],
                             self.pars['regularisation_parameter'],
-                            self.pars['number_of_iterations'], 
+                            self.pars['number_of_iterations'],
                             self.pars['time_marching_parameter'],
                             self.pars['tolerance_constant'],
                             self.device)
         if (self.parameters['method'] == 'FGP_TV'):
-            (im_res,infogpu) = FGP_TV(self.pars['input'], 
+            (im_res,infogpu) = FGP_TV(self.pars['input'],
                             self.pars['regularisation_parameter'],
                             self.pars['number_of_iterations'],
-                            self.pars['tolerance_constant'], 
+                            self.pars['tolerance_constant'],
                             self.pars['methodTV'],
                             self.pars['nonneg'], self.device)
         if (self.parameters['method'] == 'SB_TV'):
-            (im_res,infogpu) = SB_TV(self.pars['input'], 
+            (im_res,infogpu) = SB_TV(self.pars['input'],
                             self.pars['regularisation_parameter'],
                             self.pars['number_of_iterations'],
-                            self.pars['tolerance_constant'], 
+                            self.pars['tolerance_constant'],
                             self.pars['methodTV'], self.device)
         if (self.parameters['method'] == 'TGV'):
             (im_res,infogpu) = TGV(self.pars['input'],
@@ -200,17 +201,17 @@ class CcpiDenoisingGpu(Plugin, GpuPlugin):
                            self.pars['time_marching_parameter'],
                            self.pars['tolerance_constant'], self.device)
         if (self.parameters['method'] == 'NDF'):
-            (im_res,infogpu) = NDF(self.pars['input'], 
+            (im_res,infogpu) = NDF(self.pars['input'],
          	           self.pars['regularisation_parameter'],
-                           self.pars['edge_parameter'], 
+                           self.pars['edge_parameter'],
                            self.pars['number_of_iterations'],
-                           self.pars['time_marching_parameter'], 
+                           self.pars['time_marching_parameter'],
                            self.pars['penalty_type'],
                            self.pars['tolerance_constant'], self.device)
         if (self.parameters['method'] == 'DIFF4th'):
-            (im_res,infogpu) = Diff4th(self.pars['input'], 
+            (im_res,infogpu) = Diff4th(self.pars['input'],
                            self.pars['regularisation_parameter'],
-                           self.pars['edge_parameter'], 
+                           self.pars['edge_parameter'],
                            self.pars['number_of_iterations'],
                           self.pars['time_marching_parameter'],
                           self.pars['tolerance_constant'], self.device)
@@ -221,9 +222,9 @@ class CcpiDenoisingGpu(Plugin, GpuPlugin):
                          'patchwindow': 2,\
                          'neighbours' : 17 ,\
                          'edge_parameter':self.pars['edge_parameter']}
-            H_i, H_j, Weights = PatchSelect(pars_NLTV['input'], 
+            H_i, H_j, Weights = PatchSelect(pars_NLTV['input'],
                                             pars_NLTV['searchwindow'],
-                                            pars_NLTV['patchwindow'], 
+                                            pars_NLTV['patchwindow'],
                                             pars_NLTV['neighbours'],
                                             pars_NLTV['edge_parameter'], self.device)
             parsNLTV_init = {'algorithm' : NLTV, \
@@ -234,9 +235,9 @@ class CcpiDenoisingGpu(Plugin, GpuPlugin):
                              'Weights' : Weights,\
                              'regularisation_parameter': self.pars['regularisation_parameter'],\
                              'iterations': self.pars['number_of_iterations']}
-            im_res = NLTV(parsNLTV_init['input'], 
+            im_res = NLTV(parsNLTV_init['input'],
                               parsNLTV_init['H_i'],
-                              parsNLTV_init['H_j'], 
+                              parsNLTV_init['H_j'],
                               parsNLTV_init['H_k'],
                               parsNLTV_init['Weights'],
                               parsNLTV_init['regularisation_parameter'],
@@ -278,7 +279,7 @@ class CcpiDenoisingGpu(Plugin, GpuPlugin):
              "%D 2019\n" +
              "%I Elsevier\n")
         cite_info1.doi = "doi: 10.1016/j.softx.2019.04.003"
-        
+
         if (self.parameters['method'] == 'ROF_TV'):
             cite_info2 = CitationInformation()
             cite_info2.name = 'citation2'

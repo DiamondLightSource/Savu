@@ -40,7 +40,7 @@ class TomobarRecon(BaseRecon, GpuPlugin):
 
     :param output_size: Number of rows and columns in the \
         reconstruction. Default: 'auto'.
-    :param data_fidelity: Data fidelity, Least Squares only at the moment. Default: 'LS'.
+    :param data_fidelity: Data fidelity, chosoe Least Squares only at the moment. Default: 'LS'.
     :param data_Huber_thresh: Threshold parameter for __Huber__ data fidelity . Default: None.
     :param data_any_rings: a parameter to suppress various artifacts including rings and streaks. Default: None.
     :param data_any_rings_winsizes: half window sizes to collect background information [detector, angles, num of projections]. Default: (9,7,0).
@@ -54,7 +54,7 @@ class TomobarRecon(BaseRecon, GpuPlugin):
                              NDF, Diff4th. Default: 'FGP_TV'.
     :param regularisation_parameter: Regularisation (smoothing) value, higher \
                             the value stronger the smoothing effect. Default: 0.0001.
-    :param regularisation_iterations: The number of regularisation iterations. Default: 350.
+    :param regularisation_iterations: The number of regularisation iterations. Default: 80.
     :param regularisation_device: The number of regularisation iterations. Default: 'gpu'.
     :param regularisation_PD_lip: Primal-dual parameter for convergence. Default: 8.
     :param regularisation_methodTV:  0/1 - TV specific isotropic/anisotropic choice. Default: 0.
@@ -104,6 +104,13 @@ class TomobarRecon(BaseRecon, GpuPlugin):
         anglesTot, self.DetectorsDimH = np.shape(sinogram)
         self.anglesRAD = np.deg2rad(angles.astype(np.float32))
         self._data_.update({'projection_norm_data' : sinogram})
+        """
+        # if one selects PWLS model and provides raw input data
+        if (self.parameters['data_fidelity'] == 'PWLS'):
+        rawdata = data[1].astype(np.float32)
+        rawdata /= np.max(rawdata)
+        self._data_.update({'projection_raw_data' : rawdata})
+        """
 
         # set parameters and initiate the ToMoBAR class object
         self.Rectools = RecToolsIR(DetectorsDimH = self.DetectorsDimH,  # DetectorsDimH # detector dimension (horizontal)
