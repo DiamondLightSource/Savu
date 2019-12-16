@@ -52,7 +52,7 @@ class CcpiDenoisingGpu3d(Plugin, MultiThreadedPlugin):
     :param alpha0: TGV method, parameter to control the 2nd-order term. Default: 2.0.
     :param reg_parLLT: LLT-ROF method, parameter to control the 2nd-order term. Default: 0.05.
     :param penalty_type: NDF method, Penalty type for the duffison, choose from\
-    huber, perona, tukey or constr. Default: 'huber'.
+    huber, perona, tukey, constr, constrhuber. Default: 'huber'.
     :param edge_par: NDF and Diff4th methods, noise magnitude parameter. Default: 0.01.
     :param tolerance_constant: tolerance constant to stop iterations earlier. Default: 0.0.
     """
@@ -122,6 +122,9 @@ class CcpiDenoisingGpu3d(Plugin, MultiThreadedPlugin):
             if (self.parameters['penalty_type'] == 'constr'):
                 #  Threshold-constrained linear diffusion
                 penaltyNDF = 4
+            if (self.parameters['penalty_type'] == 'constrhuber'):
+                #  Threshold-constrained huber diffusion
+                penaltyNDF = 5
             self.pars = {'algorithm': self.parameters['method'], \
                 'regularisation_parameter':self.parameters['reg_par'],\
                 'edge_parameter':self.parameters['edge_par'],\

@@ -31,7 +31,7 @@ class PluginRunnerDenoiseBregmanTest(unittest.TestCase):
 
     def test_denoise_bregman_test(self):
         options = tu.set_experiment('tomo')
-        plugin = 'savu.plugins.filters.denoise_bregman_filter'
+        plugin = 'savu.plugins.filters.denoising.denoise_bregman_filter'
         run_protected_plugin_runner_no_process_list(options, plugin)
 
 if __name__ == "__main__":
