@@ -34,6 +34,8 @@ import logging
 
 import numpy as np
 from collections import defaultdict
+from yamllint.config import YamlLintConfig
+from yamllint import linter
 
 from colorama import Fore
 import savu.plugins.utils as pu
@@ -126,6 +128,7 @@ class PluginList(object):
         options = ''
         formats = ''
         examples = ''
+
         if subelem in self.plugin_list[pos]['types']:
             # The parameter is within the types
             ptype = self.plugin_list[pos]['types'][subelem]
@@ -190,7 +193,20 @@ class PluginList(object):
                         if isinstance(entries[0], int) and isinstance(entries[1], int):
                             parameter_valid = True
                 elif ptype == 'yaml_file':
-                    pass
+                    if isinstance(value, str):
+                        config_file = open('/home/glb23482/git_projects/Savu/savu/plugins/loaders/utils/yaml_config.yaml')
+                        conf = YamlLintConfig(config_file)
+                        f = open(value)
+                        gen = linter.run(f, conf)
+                        errors = list(gen)
+                        if errors:
+                            print('There were some errors with your yaml file structure.\n')
+
+                            for e in errors:
+                                print(e)
+                        else:
+                            parameter_valid = True
+
                 elif ptype == '[path, int_path, int]':
                     try:
                         bracket_value = value.split('[')
