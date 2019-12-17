@@ -20,10 +20,12 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
-
+import sys
+import traceback
 import yaml
 from collections import OrderedDict
-
+from yamllint.config import YamlLintConfig
+from yamllint import linter
 
 def ordered_load(stream, Loader=yaml.Loader, object_pairs_hook=OrderedDict):
     class OrderedLoader(Loader):
@@ -55,14 +57,29 @@ def ordered_dump(data, stream=None, Dumper=yaml.Dumper, **kwds):
     
     return yaml.dump(data, stream, OrderedDumper, **kwds)
 
+def check_yaml_errors(data):
+    config_file = open('/home/glb23482/git_projects/Savu/savu/plugins/loaders/utils/yaml_config.yaml')
+    conf = YamlLintConfig(config_file)
+    gen = linter.run(data, conf)
+    errors = list(gen)
+    return errors
 
 def read_yaml(path):
+    text = open(path)
+    errors = check_yaml_errors(text)
     try:
         with open(path, 'r') as stream:
             data_dict = ordered_load(stream, yaml.SafeLoader)
             return [data for data in data_dict]
-    except yaml.YAMLError as e:
+    except (yaml.scanner.ScannerError, yaml.parser.ParserError) as se:
+        print('Error with the yaml file %s' % path)
+        for e in errors:
+            print(e)
+        raise
+
+    except yaml.YAMLError as ye:
         print('Error reading the yaml structure with YamlLoader.')
+        print(sys.exc_info())
         raise
 
 
@@ -76,14 +93,19 @@ def read_yaml_from_doc(docstring):
     Return:
             - data_dict: Generator with ordered dictionaries for each yaml document.
     """
+    errors = check_yaml_errors(docstring)
     try:
         # SafeLoader loads a subset of the YAML language, safely. This is recommended for loading untrusted input
         data_dict = ordered_load(docstring, yaml.SafeLoader)
         return data_dict
-    except yaml.YAMLError as e:
-        print('Error reading the yaml structure with YamlLoader.')
+    except (yaml.scanner.ScannerError, yaml.parser.ParserError) as se:
+        for e in errors:
+            print(e)
         raise
-
+    except yaml.YAMLError as ye:
+        print('Error reading the yaml structure with YamlLoader.')
+        print(sys.exc_info())
+        raise
 
 def dump_yaml(template, stream):
     ordered_dump(template, stream=stream, Dumper=yaml.SafeDumper,

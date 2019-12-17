@@ -9,8 +9,13 @@
                - other:
                     visibility: param
                     type: int
-                    description: Dummy parameter for testing.
+                    description: Temporary parameter for testing.
                     default: 10
+               - yaml_file:
+                   visibility: param
+                   type: yaml_file
+                   description: Yaml file path.
+                   default: /home/glb23482/git_projects/Savu/savu/plugins/loaders/full_field_loaders/nxtomo_loader.yaml
                - vocentering_search_area:
                     visibility: user
                     type: list
@@ -65,7 +70,7 @@
                     visibility: user
                     type: list
                     description: A list of data access patterns e.g.
-                      SINOGRAM.0c.1s.2c, PROJECTION.0s.1c.2s], where 'c'
+                      [SINOGRAM.0c.1s.2c, PROJECTION.0s.1c.2s], where 'c'
                       and 's' represent core and slice dimensions respectively
                       and every dimension must be specified.
                     default: []

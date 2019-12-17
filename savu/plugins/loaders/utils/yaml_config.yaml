@@ -10,4 +10,5 @@ rules:
   indentation: disable
   # {indent-sequences: whatever, spaces: consistent, level: warning}
   # 80 chars should be long enough for line length, don't fail if a line is longer
-  line-length: {max: 80, level: warning, allow-non-breakable-inline-mappings: true}
+  line-length: disable
+  #line-length: {max: 80, level: warning, allow-non-breakable-inline-mappings: true}

@@ -65,27 +65,21 @@ def _load_yaml(docstring):
     if os.path.isfile(docstring):
         text = yu.read_yaml(docstring)
     else:
-        text = yu.read_yaml_from_doc(docstring)
-    try:
-        for doc in text:
-            # Each yaml document
-            for info in doc:
-                all_params = info['parameters']
-                # parameter is info['parameters'][0]
-                if 'warning' in info.keys():
-                    warning = info['warning']
-                else:
-                    warning = ''
-                if 'verbose' in info.keys():
-                    verbose = info['verbose']
-                else:
-                    verbose = ''
-    except:
-        print('The way that the parameters are formatted has been altered'
-              ' inside the yaml file. Please check this inside the plugin'
-              ' docstring.')
-        print("Unexpected error:", str(sys.exc_info()[0]))
-        raise
+        print('That is not a yaml file path.')
+        #text = yu.read_yaml_from_doc(docstring)
+    for doc in text:
+        # Each yaml document
+        for info in doc:
+            all_params = info['parameters']
+            # parameter is info['parameters'][0]
+            if 'warning' in info.keys():
+                warning = info['warning']
+            else:
+                warning = ''
+            if 'verbose' in info.keys():
+                verbose = info['verbose']
+            else:
+                verbose = ''
     return all_params, synopsis, warning, verbose
 
 
