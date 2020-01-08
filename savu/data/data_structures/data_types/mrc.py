@@ -22,6 +22,7 @@
 """
 from savu.data.data_structures.data_types.base_type import BaseType
 import mrcfile
+import numpy as np
 
 
 class MRC(BaseType):
@@ -31,10 +32,13 @@ class MRC(BaseType):
         self.filename = filename
         super(MRC, self).__init__()
 
-        self.file = mrcfile.open(filename)
+        self.file = mrcfile.mmap(filename, 'r')
+        self.dtype = self.file.data.dtype
 
     def __getitem__(self, idx):
-        return self.file.data[idx]
+        data = self.file.data[idx].astype(np.float32)
+        data = data/1000.0
+        return data
 
     def get_shape(self):
         return self.file.data.shape
@@ -43,3 +47,6 @@ class MRC(BaseType):
         args = ['self', 'filename']
         kwargs['stats'] = 'stats'
         return args, kwargs, extras
+
+    def close(self):
+        self.file.close()
