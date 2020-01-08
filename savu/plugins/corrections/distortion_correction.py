@@ -106,11 +106,10 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
         step_check = \
                 True if max([step[i] for i in [x_dim, y_dim]]) > 1 else False
         if step_check:
-            self.msg = "\n***********************************************\n\
-                !!! ERROR !!! -> Plugin doesn't work with the steps in the \
-                preview larger than 1 \n\
-                ***********************************************\n\
-                "
+            self.msg = "\n***********************************************\n"\
+                "!!! ERROR !!! -> Plugin doesn't work with the step in the "\
+                "preview larger than 1 \n"\
+                "***********************************************\n"
             logging.warn(self.msg)
             cu.user_message(self.msg)
             raise ValueError(self.msg)            
