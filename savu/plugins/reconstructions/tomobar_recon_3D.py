@@ -17,7 +17,7 @@
    :platform: Unix
    :synopsis: A wrapper around TOmographic MOdel-BAsed Reconstruction (ToMoBAR) software \
    for advanced iterative image reconstruction using _3D_ capabilities of regularisation. \
-   The plugin will run on one cluster node, i.e. it can be slow. 
+   The plugin will run on one cluster node, i.e. it can be slow.
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
@@ -38,24 +38,29 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
     https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
 
     :param output_size: The dimension of the reconstructed volume (only X-Y dimension). Default: 'auto'.
-    :param iterations: Number of outer iterations for FISTA method. Default: 20.
-    :param datafidelity: Data fidelity, Least Squares (LS) or PWLS. Default: 'LS'.
-    :param nonnegativity: Nonnegativity constraint, choose Enable or None. Default: 'ENABLE'.
-    :param ordersubsets: The number of ordered-subsets to accelerate reconstruction. Default: 6.
-    :param converg_const: Lipschitz constant, can be set to a scalar value or automatic calculation using power methods. Default: 'power'.
-    :param regularisation: To regularise choose methods ROF_TV, FGP_TV, SB_TV, LLT_ROF,\
-                             NDF, Diff4th. Default: 'ROF_TV'.
+    :param data_fidelity: Data fidelity, Least Squares only at the moment. Default: 'LS'.
+    :param data_Huber_thresh: Threshold parameter for __Huber__ data fidelity . Default: None.
+    :param data_any_rings: a parameter to suppress various artifacts including rings and streaks. Default: None.
+    :param data_any_rings_winsizes: half window sizes to collect background information [detector, angles, num of projections]. Default: (9,7,9).
+    :param data_any_rings_power: a power parameter for Huber model. Default: 1.5.
+    :param data_full_ring_GH: Regularisation variable for full constant ring removal (GH model). Default: None.
+    :param data_full_ring_accelerator_GH: Acceleration constant for GH ring removal. Default: 10.0.
+    :param algorithm_iterations: Number of outer iterations for FISTA (default) or ADMM methods. Default: 20.
+    :param algorithm_verbose: print iterations number and other messages ('off' by default). Default: 'off'.
+    :param algorithm_ordersubsets: The number of ordered-subsets to accelerate reconstruction. Default: 6.
+    :param regularisation_method: To regularise choose methods ROF_TV, FGP_TV, PD_TV, SB_TV, LLT_ROF,\
+                             NDF, Diff4th. Default: 'FGP_TV'.
     :param regularisation_parameter: Regularisation (smoothing) value, higher \
                             the value stronger the smoothing effect. Default: 0.0001.
-    :param regularisation_iterations: The number of regularisation iterations. Default: 400.
-    :param time_marching_parameter: Time marching parameter, relevant for \
-                    (ROF_TV, LLT_ROF, NDF, Diff4th) penalties. Default: 0.002.
-    :param edge_param: Edge (noise) related parameter, relevant for NDF and Diff4th. Default: 0.01.
+    :param regularisation_iterations: The number of regularisation iterations. Default: 80.
+    :param regularisation_device: The number of regularisation iterations. Default: 'gpu'.
+    :param regularisation_PD_lip: Primal-dual parameter for convergence. Default: 8.
+    :param regularisation_methodTV:  0/1 - TV specific isotropic/anisotropic choice. Default: 0.
+    :param regularisation_timestep: Time marching parameter, relevant for \
+                    (ROF_TV, LLT_ROF, NDF, Diff4th) penalties. Default: 0.003.
+    :param regularisation_edge_thresh: Edge (noise) related parameter, relevant for NDF and Diff4th. Default: 0.01.
     :param regularisation_parameter2:  Regularisation (smoothing) value for LLT_ROF method. Default: 0.005.
-    :param NDF_penalty: NDF specific penalty type Huber, Perona, Tukey. Default: 'Huber'.
-    :param tolerance: Tolerance to stop outer iterations earlier. Default: 1e-9.
-    :param ring_variable: Regularisation variable for ring removal. Default: 0.0.
-    :param ring_accelerator: Acceleration constant for ring removal (use with care). Default: 50.0.
+    :param regularisation_NDF_penalty: NDF specific penalty type Huber, Perona, Tukey. Default: 'Huber'.
     """
 
     def __init__(self):
@@ -70,7 +75,7 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
         detY = in_data.get_data_dimension_by_axis_label('detector_y')
         sizeY = shape[detY]
         return (sizeX,sizeY)
-    
+
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
         # reduce the data as per data_subset parameter
@@ -89,7 +94,7 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
         # specify reconstructed volume dimensions
         (self.output_size, self.Vert_det) = self._get_output_size(in_dataset[0])
         shape = [0]*len(in_dataset[0].get_shape())
-        shape[0] = self.output_size 
+        shape[0] = self.output_size
         shape[1] = self.Vert_det
         shape[2] = self.output_size
 
@@ -115,7 +120,7 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
         out_dataset[0].create_dataset(axis_labels=axis_labels,
                                       shape=tuple(shape))
         out_dataset[0].add_volume_patterns(dim_volX, dim_volY, dim_volZ)
-        
+
         ndims = range(len(shape))
         core_dims = (dim_volX, dim_volY, dim_volZ)
         slice_dims = tuple(set(ndims).difference(set(core_dims)))
@@ -132,40 +137,41 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
                 slice_axis='rotation_angle')
 
         # in_pData[1].plugin_data_setup('PROJECTION', nSlices) # (for PWLS)
-        
+
         # set pattern_name and nframes to process for all datasets
         out_pData[0].plugin_data_setup('VOLUME_3D', 'single')
-   
+
     def pre_process(self):
-        # extract given parameters
-        self.iterationsFISTA = self.parameters['iterations']
-        self.datafidelity = self.parameters['datafidelity']
-        self.nonnegativity = self.parameters['nonnegativity']
-        self.ordersubsets = self.parameters['ordersubsets']
-        self.converg_const = self.parameters['converg_const']
-        self.regularisation = self.parameters['regularisation']
-        self.regularisation_parameter = self.parameters['regularisation_parameter']
-        self.regularisation_parameter2 = self.parameters['regularisation_parameter2']
-        self.ring_variable = self.parameters['ring_variable']
-        self.ring_accelerator = self.parameters['ring_accelerator']
-        self.time_marching_parameter = self.parameters['time_marching_parameter']
-        self.edge_param = self.parameters['edge_param']
-        self.NDF_penalty = self.parameters['NDF_penalty']
-        self.tolerance = self.parameters['tolerance']
-        
-        self.RecToolsIR = None
-        if (self.ordersubsets > 1):
-            self.regularisation_iterations = (int)(self.parameters['regularisation_iterations']/self.ordersubsets) + 1
-        else:
-            self.regularisation_iterations = self.parameters['regularisation_iterations']
-            
+        # extract given parameters into dictionaries suitable for ToMoBAR input
+        self._data_ = {'OS_number' : self.parameters['algorithm_ordersubsets'],
+                       'huber_threshold' : self.parameters['data_Huber_thresh'],
+                       'ring_weights_threshold' :  self.parameters['data_any_rings'],
+                       'ring_tuple_halfsizes' :  self.parameters['data_any_rings_winsizes'],
+                       'ring_huber_power' :  self.parameters['data_any_rings_power'],
+                       'ringGH_lambda' :  self.parameters['data_full_ring_GH'],
+                       'ringGH_accelerate' :  self.parameters['data_full_ring_accelerator_GH']}
+
+        self._algorithm_ = {'iterations' : self.parameters['algorithm_iterations'],
+                            'verbose' : self.parameters['algorithm_verbose']}
+
+        self._regularisation_ = {'method' : self.parameters['regularisation_method'],
+                                'regul_param' : self.parameters['regularisation_parameter'],
+                                'iterations' : self.parameters['regularisation_iterations'],
+                                'device_regulariser' : self.parameters['regularisation_device'],
+                                'edge_threhsold' : self.parameters['regularisation_edge_thresh'],
+                                'time_marching_step' : self.parameters['regularisation_timestep'],
+                                'regul_param2' : self.parameters['regularisation_parameter2'],
+                                'PD_LipschitzConstant' : self.parameters['regularisation_PD_lip'],
+                                'NDF_penalty' : self.parameters['regularisation_NDF_penalty'],
+                                'methodTV' : self.parameters['regularisation_methodTV']}
+
         in_pData = self.get_plugin_in_datasets()
         self.det_dimX_ind = in_pData[0].get_data_dimension_by_axis_label('detector_x')
         self.det_dimY_ind = in_pData[0].get_data_dimension_by_axis_label('detector_y')
 
     def process_frames(self, data):
         centre_of_rotations, angles, self.vol_shape, init  = self.get_frame_params()
-        
+
         self.anglesRAD = np.deg2rad(angles.astype(np.float32))
         self.centre_of_rotations = centre_of_rotations
         projdata3D = data[0].astype(np.float32)
@@ -177,49 +183,22 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
         # WIP for PWLS fidelity
         # rawdata3D = data[1].astype(np.float32)
         # rawdata3D =np.swapaxes(rawdata3D,0,1)/np.max(np.float32(rawdata3D))
-        
-        # check if the reconstruction class has been initialised and calculate 
-        # Lipschitz constant if not given explicitly
-        self.setup_Lipschitz_constant()
-        # Run FISTA reconstrucion algorithm here
-        recon = self.Rectools.FISTA(projdata3D,\
-                                    iterationsFISTA = self.iterationsFISTA,\
-                                    regularisation = self.regularisation,\
-                                    regularisation_parameter = self.regularisation_parameter,\
-                                    regularisation_iterations = self.regularisation_iterations,\
-                                    regularisation_parameter2 = self.regularisation_parameter2,\
-                                    time_marching_parameter = self.time_marching_parameter,\
-                                    lambdaR_L1 = self.ring_variable,\
-                                    alpha_ring = self.ring_accelerator,\
-                                    NDF_penalty = self.NDF_penalty,\
-                                    tolerance_regul = 0.0,\
-                                    edge_param = self.edge_param,\
-                                    lipschitz_const = self.Lipschitz_const)
-        recon = np.swapaxes(recon,0,1) # temporal fix!
-        return recon
-    
-    def setup_Lipschitz_constant(self):
-        if self.RecToolsIR is not None:
-            return 
-        
+        self._data_.update({'projection_norm_data' : projdata3D})
+
        # set parameters and initiate a TomoBar class object
         self.Rectools = RecToolsIR(DetectorsDimH = self.Horiz_det,  # DetectorsDimH # detector dimension (horizontal)
                     DetectorsDimV = self.Vert_det,  # DetectorsDimV # detector dimension (vertical) for 3D case only
                     CenterRotOffset = 0.0, # Center of Rotation (CoR) scalar (for 3D case only)
                     AnglesVec = self.anglesRAD, # array of angles in radians
                     ObjSize = self.output_size, # a scalar to define the reconstructed object dimensions
-                    datafidelity=self.datafidelity,# data fidelity, choose LS
-                    nonnegativity=self.nonnegativity, # enable nonnegativity constraint (set to 'on')
-                    OS_number = self.ordersubsets, # the number of subsets, NONE/(or > 1) ~ classical / ordered subsets
-                    tolerance = self.tolerance , # tolerance to stop outer iterations earlier
-                    device='gpu')
-                                        
-        if (self.parameters['converg_const'] == 'power'):
-            self.Lipschitz_const = self.Rectools.powermethod() # calculate Lipschitz constant
-        else:
-            self.Lipschitz_const = self.parameters['converg_const']
-        return
-    
+                    datafidelity=self.parameters['data_fidelity'],# data fidelity, choose LS
+                    device_projector='gpu')
+
+        # Run FISTA reconstrucion algorithm here
+        recon = self.Rectools.FISTA(self._data_, self._algorithm_, self._regularisation_)
+        recon = np.swapaxes(recon,0,1)
+        return recon
+
     def nInput_datasets(self):
         return 1
     def nOutput_datasets(self):

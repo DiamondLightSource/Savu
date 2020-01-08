@@ -35,6 +35,7 @@ class MaskEvolve(Plugin, CpuPlugin):
     precisely through the segmented object otherwise segmentation will be incorrect.
 
     :param threshold: important parameter to control mask propagation. Default: 0.001.
+    :param method: evolve based on the mean in the mask (choose 0) or max intensity value as threshold (choose 1). Default: 1.
     :param iterations: The number of iterations. Default: 500.
     :param pattern: pattern to apply this to. Default: "VOLUME_YZ".
     :param out_datasets: The default names . Default: ['MASK_EVOLVED'].
@@ -44,7 +45,6 @@ class MaskEvolve(Plugin, CpuPlugin):
         super(MaskEvolve, self).__init__("MaskEvolve")
 
     def setup(self):
-
         in_dataset, out_dataset = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
         in_pData[0].plugin_data_setup(self.parameters['pattern'], 'single')
@@ -57,13 +57,14 @@ class MaskEvolve(Plugin, CpuPlugin):
         # extract given parameters
         self.threshold = self.parameters['threshold']
         self.iterations = self.parameters['iterations']
+        self.method = self.parameters['method']
 
     def process_frames(self, data):
         input_temp = data[0]
         indices = np.where(np.isnan(input_temp))
         input_temp[indices] = 0.0
         if (np.sum(data[1]) > 0):
-            mask_evolve = MASK_ITERATE(input_temp, data[1], self.threshold, self.iterations)
+            mask_evolve = MASK_ITERATE(input_temp, data[1], self.threshold, self.iterations, self.method)
         else:
             mask_evolve = np.uint8(np.zeros(np.shape(data[0])))
         return mask_evolve
