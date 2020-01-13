@@ -46,12 +46,12 @@ def find_args(dclass, inst=None):
     return _parse_args(mod_doc_lines, lines)
 
 
-def _load_yaml(docstring):
+def _load_yaml(lines):
     """
-    Load the docstring and read in the yaml format. Call yaml_utils.py
+    Load in the yaml format. Call yaml_utils.py
     ----------
     Parameters:
-            - docstring: String of information
+            - lines: String of information
     ----------
     Return:
             - param_entry: Ordered dict of parameters
@@ -59,28 +59,20 @@ def _load_yaml(docstring):
             - warning:
     """
     all_params = ''
-    synopsis = ''
-    warning = ''
     verbose = ''
-    if os.path.isfile(docstring):
-        text = yu.read_yaml(docstring)
-    else:
-        print('That is not a yaml file path.')
-        #text = yu.read_yaml_from_doc(docstring)
-    for doc in text:
-        # Each yaml document
-        for info in doc:
-            all_params = info['parameters']
-            # parameter is info['parameters'][0]
-            if 'warning' in info.keys():
-                warning = info['warning']
-            else:
-                warning = ''
-            if 'verbose' in info.keys():
-                verbose = info['verbose']
-            else:
-                verbose = ''
-    return all_params, synopsis, warning, verbose
+    if os.path.isfile(lines):
+        text = yu.read_yaml(lines)
+        for doc in text:
+            # Each yaml document
+            for info in doc:
+                all_params = info['parameters']
+                # parameter is info['parameters'][0]
+                if 'verbose' in info.keys():
+                    verbose = info['verbose']
+                else:
+                    verbose = ''
+
+    return all_params, verbose
 
 
 def _parse_args(mod_doc_lines, lines):
