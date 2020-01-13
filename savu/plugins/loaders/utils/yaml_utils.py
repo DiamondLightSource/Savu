@@ -65,6 +65,15 @@ def check_yaml_errors(data):
     return errors
 
 def read_yaml(path):
+    """
+        Take the yaml file path and use ordered_loading to read in the yaml format as an ordered dict.
+        ----------
+        Parameters:
+                - path: String
+        ----------
+        Return:
+                - data_dict: Generator with ordered dictionaries for each yaml document.
+        """
     text = open(path)
     errors = check_yaml_errors(text)
     try:
@@ -76,7 +85,6 @@ def read_yaml(path):
         for e in errors:
             print(e)
         raise
-
     except yaml.YAMLError as ye:
         print('Error reading the yaml structure with YamlLoader.')
         print(sys.exc_info())
