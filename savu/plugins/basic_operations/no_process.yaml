@@ -18,7 +18,7 @@
                    default: /home/glb23482/git_projects/Savu/savu/plugins/loaders/full_field_loaders/nxtomo_loader.yaml
                - vocentering_search_area:
                     visibility: user
-                    type: list
+                    type: tuple
                     description: Search area around the estimated centre of
                       rotation
                     default: '(-50, 50)'
@@ -29,17 +29,17 @@
                     default: 'None'
                - distcorr_polynomial_coeffs:
                     visibility: user
-                    type: list
+                    type: tuple
                     description: Parameters of the radial distortion function.
                     default: '(1.0, 0.0e-1, 0.0e-2, 0.0e-3, 0.0e-4)'
                - pymca_config:
                     visibility: user
-                    type: list
+                    type: config_file
                     description: Path to config file
                     default: 'Savu/test_data/data/test_config.cfg'
                - medianfilt_kernel_size:
                     visibility: user
-                    type: list[int]
+                    type: tuple
                     description: Kernel size for filter
                     default: "(1, 3, 3)"
                - yamlconverter_yaml_file:
@@ -76,7 +76,7 @@
                     default: []
                - randomhdf5loader_dtype:
                     visibility: user
-                    type: list
+                    type: nptype
                     description: A numpy array data type
                     default: int16
                - randomhdf5loader_angles:
@@ -109,11 +109,11 @@
                     default: "[[0, 1], [2, 3]]"
                - dxchangeloader_dark:
                     visibility: param
-                    type: list
+                    type: [path, int]
                     description: dark data path and scale value
                     default: "['exchange/data_dark', 1]"
                - dxchangeloader_flat:
                     visibility: param
-                    type: list
+                    type: [path, int]
                     description: flat data path and scale value
                     default: "['exchange/data_white', 1]"
