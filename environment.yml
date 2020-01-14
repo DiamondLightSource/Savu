@@ -28,6 +28,7 @@ dependencies:
   - ccpi-regulariser
   - tomobar=2019.10
   - i23-seg
+  - yamllint
   - pip:
     - nvidia-ml-py
     - peakutils
