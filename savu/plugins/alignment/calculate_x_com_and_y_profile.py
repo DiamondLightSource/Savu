@@ -31,6 +31,7 @@ from savu.plugins.utils import register_plugin
 from savu.plugins.filters.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
+from scipy.signal import savgol_filter
 
 @register_plugin
 class CalculateXComAndYProfile(BaseFilter, CpuPlugin):
@@ -50,14 +51,16 @@ class CalculateXComAndYProfile(BaseFilter, CpuPlugin):
         y_profile = np.sum(frame, axis=1)
 
         # flip the fram as we want the dark areas to be more massive for this caluculation
-        frame = np.abs(frame-np.max(frame))
-        # trim out the low values to emphasise the bigger pieces # may not be good!
-        frame[frame<frame.mean()] = 0
-        frame[frame<frame.mean()] = 0
+        x_profile = np.sum(frame, axis=0)
+        window = int(x_profile.shape[0]/20)
+        if(window%2==0):
+            window += 1
+        x_profile = savgol_filter(x_profile, window, 3)
+        x_profile = np.abs(x_profile-np.max(x_profile))
 
-        x, y = center_of_mass(frame)
+        x = center_of_mass(x_profile)
 
-        return [np.array([y]), y_profile]
+        return [np.array([x]), y_profile]
 
     def post_process(self):
         x_com = self.get_out_datasets()[0]

@@ -50,24 +50,35 @@ class ProjectionShiftFromXComAndYProfile(BaseFilter, CpuPlugin):
         result = (a*np.sin(np.deg2rad(data-b)))+c
         return result
 
+    def _profilefunc(self, data, a):
+        result = sci_shift(self.match_profile, [a], mode='nearest')
+        return result
+
     def pre_process(self):
         data = self.get_in_datasets()[0]
-        # get the values out of the previous step which we want to use
+        # First sort out the x centre of mass calculation
         x_com = data.meta_data.get('x_com')
-        y_profile = data.meta_data.get('y_profile')
         rot_angle = data.meta_data.get('rotation_angle')
 
-        fitpars, covmat = curve_fit(self._sinfunc, rot_angle, x_com)
-        variances = covmat.diagonal()
-        std_devs = np.sqrt(variances)
+        fitpars, _ = curve_fit(self._sinfunc, rot_angle, x_com)
         fitted = self._sinfunc(rot_angle, *fitpars)
         residual = fitted - x_com
 
-        # FIXME I have the centre of rotation too, should put it somewhere
-        centre_of_rotation = fitpars[2]
+        self.centre_of_rotation = fitpars[2]
 
         self.x_shifts = residual
+
+        # Now work out the y shifts
+        y_profile = data.meta_data.get('y_profile')
+
+        # get the middle profile
+        self.match_profile = y_profile[int(y_profile.shape[0]/2), :]
         self.y_shifts = np.zeros_like(x_com, dtype=np.int32)
+
+        for i in range(y_profile.shape[0]):
+            profile = y_profile[i, :]
+            fitpars, _ = curve_fit(self._profilefunc, profile, profile)
+            self.y_shifts[i] = fitpars[0]
 
     def process_frames(self, data):
         data = data[0]
@@ -83,3 +94,5 @@ class ProjectionShiftFromXComAndYProfile(BaseFilter, CpuPlugin):
     def get_max_frames(self):
         return 1
 
+    def post_process(self):
+        self.populate_meta_data('centre_of_rotation', self.centre_of_rotation)
