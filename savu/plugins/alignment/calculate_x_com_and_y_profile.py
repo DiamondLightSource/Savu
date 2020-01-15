@@ -24,10 +24,6 @@
 
 import logging
 import numpy as np
-from skimage.feature import match_template, match_descriptors, ORB
-from scipy.linalg import lstsq
-from skimage.transform import AffineTransform
-from skimage.measure import ransac
 
 from scipy.ndimage.measurements import center_of_mass
 
@@ -58,10 +54,18 @@ class CalculateXComAndYProfile(BaseFilter, CpuPlugin):
         # trim out the low values to emphasise the bigger pieces # may not be good!
         frame[frame<frame.mean()] = 0
         frame[frame<frame.mean()] = 0
-        
+
         x, y = center_of_mass(frame)
 
-        return [np.array([x]), y_profile]
+        return [np.array([y]), y_profile]
+
+    def post_process(self):
+        x_com = self.get_out_datasets()[0]
+        y_prof = self.get_out_datasets()[1]
+        self.get_in_datasets()[0].meta_data.set(
+            'x_com', x_com.data[...].squeeze())
+        self.get_in_datasets()[0].meta_data.set(
+            'y_profile', y_prof.data[...])
 
     def get_max_frames(self):
         return 1
@@ -84,8 +88,9 @@ class CalculateXComAndYProfile(BaseFilter, CpuPlugin):
         out_dataset[0].add_pattern("METADATA", core_dims=(1,), slice_dims=(0,))
         out_pData[0].plugin_data_setup('METADATA', self.get_max_frames())
 
-        # Output dataset 2 is the y profiles
-        new_shape = (in_dataset[0].get_shape()[0],in_dataset[0].get_shape()[2])
+        # Output dataset 2 is the y profiles 
+        #FIXME this should be the proper lookup for the Y dimention
+        new_shape = (in_dataset[0].get_shape()[0],in_dataset[0].get_shape()[1])
 
         out_dataset[1].create_dataset(shape=new_shape,
                                       axis_labels=['x.pixels', 'y.pixels'])
