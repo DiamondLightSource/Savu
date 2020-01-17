@@ -41,7 +41,7 @@ class Test(unittest.TestCase):
                           plugin.process_frames, None)
 
     def testfind_args(self):
-        plugin = pu.get_plugin("savu.plugins.filters.denoise_bregman_filter")
+        plugin = pu.get_plugin("savu.plugins.filters.denoising.denoise_bregman_filter")
         params = doc.find_args(plugin)
         self.assertEqual(len(params['param']), 4)
 
