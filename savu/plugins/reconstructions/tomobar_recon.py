@@ -140,7 +140,7 @@ class TomobarRecon(BaseRecon, GpuPlugin):
 
         :param output_size: Number of rows and columns in the \
             reconstruction. Default: 'auto'.
-        :param data_fidelity: Data fidelity, chosoe Least Squares only at the moment. Default: 'LS'.
+        :param data_fidelity: Data fidelity, choose Least Squares only at the moment. Default: 'LS'.
         :param data_Huber_thresh: Threshold parameter for __Huber__ data fidelity . Default: None.
         :param data_any_rings: a parameter to suppress various artifacts including rings and streaks. Default: None.
         :param data_any_rings_winsizes: half window sizes to collect background information [detector, angles, num of projections]. Default: (9,7,0).
