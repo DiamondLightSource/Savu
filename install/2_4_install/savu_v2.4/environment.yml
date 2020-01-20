@@ -36,6 +36,7 @@ dependencies:
 - pyfftw
 - PeakUtils
 - pip
+- yamllint
 - pip:
   - pyreadline
   - nvidia-ml-py
