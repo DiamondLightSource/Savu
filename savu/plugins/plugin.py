@@ -29,7 +29,6 @@ import h5py
 import logging
 import inspect
 import numpy as np
-
 import savu.plugins.docstring_parser as doc
 from savu.plugins.plugin_datasets import PluginDatasets
 from collections import OrderedDict
@@ -42,13 +41,11 @@ class Plugin(PluginDatasets):
         self.name = name
         self.parameters = OrderedDict()
         self.parameters_types = {}
-        self.parameters_format = {}
         self.parameters_options = {}
-        self.parameters_examples = {}
         self.parameters_visibility = {}
+        self.parameters_dependencies = {}
+        self.parameters_defaults = {}
         self.parameters_desc = {}
-        self.parameters_hide = []
-        self.parameters_user = []
         self.chunk = False
         self.docstring_info = {}
         self.slice_list = None
@@ -107,84 +104,40 @@ class Plugin(PluginDatasets):
         """parameters_desc
         Load yaml details from docstring of this instance of the plugin.
 
+        Determines the parameters for this instance of the plugin.
         """
         # Test Plugins are: 'RemoveAllRings' 'TomobarRecon'
         # 'NxtomoLoader' 'DarkFlatFieldCorrection' 'NoProcess'
 
-        hidden_items = []
-        user_items = []
-        params = []
-        not_params = []
         for clazz in inspect.getmro(self.__class__)[::-1]:
             # return a tuple of class cls's base classes, including cls
             if clazz != object:
+                desc = doc.find_args(clazz, self)
+                self.docstring_info['warn'] = desc['warn']
+                self.docstring_info['synopsis'] = desc['synopsis']
 
-                    yaml_path = self._return_yaml_path(clazz)
-                    if os.path.isfile(yaml_path):
-                        all_params, synopsis, warning, verbose = doc._load_yaml(yaml_path)
+                yaml_path = self._return_yaml_path(clazz)
+                all_params, verbose = doc._load_yaml(yaml_path)
+                self.docstring_info['info'] = verbose
+                try:
+                    for i, p in enumerate(all_params):
+                        p_key = p.keys()[0]
+                        self.parameters_visibility[p_key] = p[p_key]['visibility']
+                        visibility = self.parameters_visibility[p_key]
 
-                        self.docstring_info['warn'] = warning
-                        self.docstring_info['synopsis'] = synopsis
-                        self.docstring_info['info'] = verbose
-
-                        try:
-                            for i, p in enumerate(all_params):
-                                p_key = p.keys()[0]
-                                self.parameters_visibility[p_key] = p[p_key]['visibility']
-                                visibility = self.parameters_visibility[p_key]
-
-                                if visibility == 'not_param':
-                                    not_params.append(p_key)
-
-                                if visibility != 'not_param':
-
-                                    if isinstance(p[p_key]['default'], OrderedDict):
-                                        # Set the default value if there is a dependency
-                                        parent_param = p[p_key]['default'].keys()[0]
-                                        parent_choices = p[p_key]['default'][parent_param]
-                                        parent_value = self.parameters[parent_param]
-                                        for item in parent_choices.keys():
-                                            if parent_value == item:
-                                                self.parameters[p_key] = parent_choices[item]
-                                    else:
-                                        self.parameters[p_key] = p[p_key]['default']
-
-                                    self.parameters_types[p_key] = p[p_key]['type']
-                                    p_desc = p[p_key]['description']
-
-                                    if not isinstance(p_desc, str):
-                                        self.parameters_desc[p_key] = p_desc
-                                        if 'format' in p_desc.keys():
-                                            self.parameters_format[p_key] = p_desc['format']
-                                        if 'examples' in p_desc.keys():
-                                            self.parameters_examples[p_key] = p_desc['examples']
-                                    else:
-                                        self.parameters_desc[p_key] = p_desc
-
-                                    if 'options' in p[p_key].keys():
-                                        self.parameters_options[p_key] = p[p_key]['options']
-
-                                    if visibility == 'param':
-                                        params.append(p_key)
-                                    if visibility == 'hide':
-                                        hidden_items.append(p_key)
-                                    if visibility == 'user':
-                                        user_items.append(p_key)
-                        except KeyError:
-                            print('Please check the spelling of the dictionary key'
-                                  ' values. Eg. visibility, type, description. '
-                                  'default')
-                            raise
-                            # if no raise, plugin will only save half of the data
-                        except:
-                            print("Unexpected error saving plugin: %s " % sys.exc_info()[0])
-                            raise
-
-        user_items = [u for u in user_items if u not in not_params]
-        hidden_items = [h for h in hidden_items if h not in not_params]
-        user_items = list(set(user_items).difference(set(hidden_items)))
-        self.parameters_hide = hidden_items
-        self.parameters_user = user_items
+                        if visibility != 'not_param':
+                            self._add_yaml_item(p, p_key)
+                            self._check_dependencies(p, p_key)
+                except KeyError:
+                    print('Please check the spelling of the dictionary key'
+                          ' values in yaml file. Eg. visibility, type,'
+                          ' description, default')
+                    raise
+                    # if no raise, plugin will only save half of the data.
+                except:
+                    print("Unexpected error saving plugin: %s " %
+                          sys.exc_info()[0])
+                    raise
 
     def base_dynamic_data_info(self):
         """ Provides an opportunity to override the number and name of input
@@ -257,6 +210,51 @@ class Plugin(PluginDatasets):
             self.parameters[item['name']] = item['default']
             self.parameters_types[item['name']] = item['dtype']
             self.parameters_desc[item['name']] = item['desc']
+
+    def _add_yaml_item(self, p, p_key):
+        """ Determines the parameters for this instance of the plugin
+
+        param hidden_items is returned with dependent parameters hidden
+        """
+        self.parameters_types[p_key] = p[p_key]['type']
+        self.parameters_desc[p_key] = p[p_key]['description']
+        if 'default' in p[p_key].keys():
+            self.parameters_defaults[p_key] = p[p_key]['default']
+            self._update_defaults(p, p_key)
+        if 'options' in p[p_key].keys():
+            self.parameters_options[p_key] = p[p_key]['options']
+
+    def _update_defaults(self, p, p_key):
+        '''Set the default value for dependent parameters
+        '''
+        defaults = p[p_key]['default']
+        if isinstance(defaults, OrderedDict):
+            # Set the default value if there is a dependency
+            parent_param = defaults.keys()[0]
+            parent_choices = defaults[parent_param]
+            parent_value = self.parameters[parent_param]
+            for item in parent_choices.keys():
+                if parent_value == item:
+                    self.parameters[p_key] = parent_choices[item]
+        else:
+            self.parameters[p_key] = defaults
+
+    def _check_dependencies(self, p, p_key):
+        """ Determines which parameter values are dependent on a parent
+         value and whether they should be hidden or shown
+        """
+        if 'dependency' in p[p_key].keys():
+            dependencies = p[p_key]['dependency']
+            self.parameters_dependencies[p_key] = dependencies
+            if isinstance(dependencies, OrderedDict):
+                parent_param_name = dependencies.keys()[0]
+                parent_choice_list = dependencies[parent_param_name]
+                # The choices which must be in the parent value
+                parent_original_value = self.parameters[parent_param_name]
+                if parent_original_value in parent_choice_list:
+                    self.parameters_visibility[p_key] = 'param'
+                else:
+                    self.parameters_visibility[p_key] = 'hide'
 
     def delete_parameter_entry(self, param):
         if param in self.parameters.keys():
