@@ -78,7 +78,7 @@ class DisplayFormatter(object):
         user_keys = [k for k in param_dict['data'].keys() if param_dict['visibility'][k] == 'user']
 
         try:
-            keys = user_keys if level == 'user' else user_keys + dev_keys
+            keys = user_keys + dev_keys
             for key in keys:
                 keycount += 1
                 if int(subelem) == int(keycount):
@@ -166,6 +166,7 @@ class DisplayFormatter(object):
 
         try:
             keys = user_keys if level == 'user' else user_keys + dev_keys
+
             for key in keys:
                 keycount += 1
                 temp = "\n   %2i)   %20s : %s"
