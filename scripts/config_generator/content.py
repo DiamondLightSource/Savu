@@ -27,6 +27,7 @@ import inspect
 
 from savu.plugins import utils as pu
 from savu.data.plugin_list import PluginList
+from collections import OrderedDict
 import mutations
 
 
@@ -230,18 +231,70 @@ class Content(object):
             pos = self.find_position(pos_str)
             data_elements = self.plugin_list.plugin_list[pos]['data']
             if param_name.isdigit():
-                param_name = self.plugin_list.plugin_list[pos]['map'][int(param_name)-1]
+                param_name = \
+                    self.plugin_list.plugin_list[pos]['map'][int(param_name)-1]
             if self.plugin_list._is_valid(value, param_name, pos):
                 data_elements[param_name] = value
+                self.update_defaults(pos, param_name, value)
+                # Update the list of parameters to hide those dependent on others
+                self._check_dependencies(pos, param_name, value)
             else:
-                print('This value has not been saved as it was not a valid entry.')
+                print('This value has not been saved as it was not'
+                      ' a valid entry.')
         except SyntaxError:
             print ("There is a syntax error. Please check your input.")
         except EOFError:
-            print ("There is an end of line error. Please check your input for the character \"\'\".")
+            print ("There is an end of line error. Please check your"
+                   " input for the character \"\'\".")
         except Exception as e:
             print('There is an error. Please check your input.')
             print(e)
+
+    def update_defaults(self, pos, param_name, value):
+        ''' When a parent parameter is modified, update the
+        dependent parameters
+        '''
+        defaults = self.plugin_list.plugin_list[pos]['defaults']
+        desc = self.plugin_list.plugin_list[pos]['desc']
+        for dep_param_name in defaults.keys():
+            if isinstance(defaults[dep_param_name], OrderedDict):
+                for parent_param_name in defaults[dep_param_name].keys():
+                    if parent_param_name == param_name:
+                        # Set the default value if there is a dependency
+                        update_default = desc[dep_param_name]['range']
+                        new_value = defaults[dep_param_name][parent_param_name][value]
+                        #exec (update_default)
+                        desc[dep_param_name]['range'] = \
+                            'The recommended value with the chosen '\
+                            + str(parent_param_name) + ' would be '\
+                            + str(new_value)
+                        recommendation = 'It\'s recommended that you update '\
+                                         + str(dep_param_name) + ' to ' \
+                                         + str(new_value)
+                        print(recommendation)
+
+    def _check_dependencies(self, pos, param_name, value):
+        ''' When a paraent parameter is modified, update which
+        parameters are on display. Edit the list of hidden parameters.
+        '''
+        dependencies = self.plugin_list.plugin_list[pos]['dependencies']
+        visibility = self.plugin_list.plugin_list[pos]['visibility']
+        hidden_items = [k for k in visibility.keys() if visibility[k] == 'hide']
+
+        for dep_param_name in dependencies.keys():
+            if isinstance(dependencies[dep_param_name], OrderedDict):
+                for parent_param_name in dependencies[dep_param_name].keys():
+                    if parent_param_name == param_name:
+                        # If the parent parameter has been altered,
+                        # check if we need to display that dependent parameter
+                        parent_choice_list = \
+                            dependencies[dep_param_name][parent_param_name]
+                        if value in parent_choice_list:
+                            if dep_param_name in hidden_items:
+                                visibility[dep_param_name] = 'param'
+                        else:
+                            if dep_param_name not in hidden_items:
+                                visibility[dep_param_name] = 'hide'
 
     def value(self, value):
         if not value.count(';'):
@@ -378,14 +431,16 @@ class Content(object):
         plugin_dict['data'] = plugin.parameters
         plugin_dict['active'] = True
         plugin_dict['desc'] = plugin.parameters_desc
-        plugin_dict['hide'] = plugin.parameters_hide
-        plugin_dict['user'] = plugin.parameters_user
+        plugin_dict['visibility'] = plugin.parameters_visibility
         plugin_dict['types'] = plugin.parameters_types
+        plugin_dict['dependencies'] = plugin.parameters_dependencies
+        plugin_dict['defaults'] = plugin.parameters_defaults
 
-        dev_keys = [k for k in plugin_dict['data'].keys() if k not in
-                    plugin_dict['user'] + plugin_dict['hide']]
-        plugin_dict['map'] = \
-            plugin_dict['user'] + dev_keys + plugin_dict['hide']
+        dev_keys = [k for k in plugin_dict['data'].keys() if plugin_dict['visibility'][k] not in ['user', 'hide']]
+        user_keys = [k for k in plugin_dict['data'].keys() if plugin_dict['visibility'][k] == 'user']
+        hidden_keys = [k for k in plugin_dict['data'].keys() if plugin_dict['visibility'][k] == 'hide']
+        # Is the order 'user' 'dev' 'hidden' here for a reason
+        plugin_dict['map'] = user_keys + dev_keys + hidden_keys
         return plugin_dict
 
     def get(self, pos):
