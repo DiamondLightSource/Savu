@@ -50,8 +50,9 @@
            options: [ROF_TV, FGP_TV, SB_TV, NLTV, TGV, LLT_ROF, NDF, Diff4th]
            description:
              summary: The denoising method
-             verbose: Iterative methods can help to solve ill-posed inverse problems by choosing
-                        a suitable noise model for the measurement
+             verbose: Iterative methods can help to solve ill-posed
+                        inverse problems by choosing a suitable noise
+                        model for the measurement
              options:
                  ROF_TV: Rudin-Osher-Fatemi Total Variation model
                  FGP_TV: Fast Gradient Projection Total Variation model
@@ -79,8 +80,8 @@
              summary: Total number of regularisation iterations.
                The smaller the number of iterations, the smaller the effect
                of the filtering is. A larger number will affect the speed
-               of the algortihm.
-             range: 'Recommended value this_dict[max_iterations][default][method][this_dict[method]]'
+               of the algorithm.
+             range: Recommended value dependent upon method.
            default:
                method:
                  ROF_TV: 1000

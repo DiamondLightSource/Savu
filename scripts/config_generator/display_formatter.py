@@ -22,6 +22,7 @@
 """
 import os
 import textwrap
+import copy
 
 from colorama import Fore, Back, Style
 
@@ -41,21 +42,64 @@ class DisplayFormatter(object):
 
         start = kwargs.get('start', 0)
         stop = kwargs.get('stop', len(self.plugin_list))
+        subelem = kwargs.get('subelem', None)
         if stop == -1:
             stop = len(self.plugin_list)
 
         count = start
         plugin_list = self.plugin_list[start:stop]
-
         line_break = ('%s' % ('-'*WIDTH))
         out_string.append(line_break)
+
         for p_dict in plugin_list:
             count += 1
-            description = \
-                self._get_description(WIDTH, level, p_dict, count, verbosity)
-            out_string.append(description)
-            out_string.append(line_break)
+            if subelem is not None:
+                if subelem.isdigit():
+                    sub_dict = self._select_param(p_dict, subelem, level)
+                    p_dict = sub_dict
+                    verbosity = '-vv'
+                    level = 'all'
+                else:
+                    print('The sub element value was not an integer.')
+            if p_dict is not None:
+                description = \
+                    self._get_description(WIDTH, level, p_dict, count, verbosity)
+                out_string.append(description)
+                out_string.append(line_break)
         return '\n'.join(out_string)
+
+    def _select_param(self, temp_param_dict, subelem, level):
+        # Display subelement
+        element_present = False
+        keycount = 0
+        # Prevent mutable changes by copying
+        param_dict = copy.deepcopy(temp_param_dict)
+        dev_keys = [k for k in param_dict['data'].keys() if param_dict['visibility'][k] not in ['user', 'hide']]
+        user_keys = [k for k in param_dict['data'].keys() if param_dict['visibility'][k] == 'user']
+
+        try:
+            keys = user_keys if level == 'user' else user_keys + dev_keys
+            for key in keys:
+                keycount += 1
+                if int(subelem) == int(keycount):
+                    element_present = True
+                    for i in list(param_dict['map']):
+                        # use list to force a copy of keys to be made
+                        if i != key:
+                            param_dict['map'].remove(i)
+
+                    for i in list(param_dict['visibility']):
+                        if i != key:
+                            param_dict['visibility'][i] = 'hide'
+
+            if element_present is False:
+                print('No matching sub element number found.')
+                return None
+            return param_dict
+
+        except Exception as e:
+            print('ERROR: ' + str(e))
+            raise
 
     def _get_description(self, width, level, p_dict, count, verbose):
         if verbose == '-q':
@@ -84,7 +128,8 @@ class DisplayFormatter(object):
             return ''
         return "\n" + colour_on + synopsis + colour_off
 
-    def _get_verbose_param_details(self, p_dict, param_key, desc, key, params, width):
+    def _get_verbose_param_details(self, p_dict, param_key, desc, key,
+                                   params, width):
         margin = 4
         joiner = "\n" + " " * margin
         if param_key == 'verbose':
@@ -116,68 +161,74 @@ class DisplayFormatter(object):
         joiner = "\n" + " "*margin
         params = ''
 
-        dev_keys = [k for k in p_dict['data'].keys() if k not in
-                    p_dict['user'] + p_dict['hide']]
-        # P_dict is:
-        # ['map', 'hide', 'name', 'pos', 'user', 'active', 'data', 'id', 'types', 'desc']
-        try:
-            keys = p_dict['user'] if level == 'user' else p_dict['user'] + dev_keys
+        dev_keys = [k for k in p_dict['data'].keys() if p_dict['visibility'][k] not in ['user', 'hide']]
+        user_keys = [k for k in p_dict['data'].keys() if p_dict['visibility'][k] == 'user']
 
+        try:
+            keys = user_keys if level == 'user' else user_keys + dev_keys
             for key in keys:
                 keycount += 1
                 temp = "\n   %2i)   %20s : %s"
                 params += temp % (keycount, key, p_dict['data'][key])
                 # Add description for this parameter
                 if desc:
-                    if isinstance(desc[key], str):
-                        pdesc = " ".join(desc[key].split())
-                        # Restrict the margin so that the lines don't overflow.
-                        pdesc = joiner.join(textwrap.wrap(pdesc, width=width-margin))
-                        temp = joiner + Fore.CYAN + "%s" + Fore.RESET
-                        params += temp % pdesc
-                    else:
-                        # There is an ordered dictionary of parameters
-                        required_keys = desc[key].keys()
-                        for param_key in required_keys:
-                            # desc[key][param_key] is the value at this parameter
-                            if param_key == 'summary':
-                                pdesc = desc[key][param_key]
-                                pdesc = joiner.join(textwrap.wrap(pdesc,
-                                                                  width=width - margin))
-                                temp = joiner + Fore.CYAN + "%s" + Fore.RESET
-                                params += temp % pdesc
-
-                            if breakdown:
-                                params = self._get_verbose_param_details(p_dict, param_key, desc, key, params, width)
-
-                            if param_key == 'options':
-                                options = desc[key][param_key]
-
-                                option_text = Fore.BLUE + 'Options:'
-                                option_text = joiner.join(textwrap.wrap(option_text,
-                                                                        width=width - margin))
-                                temp = joiner + "%s"
-                                params += temp % option_text
-
-                                for opt in options:
-                                    current_opt = p_dict['data'][key]
-                                    if current_opt == opt:
-                                        colour = Fore.GREEN
-                                    else:
-                                        colour = Fore.BLUE
-                                    option_verbose = ''
-                                    option_verbose += colour + u'\u0009' + u'\u2022' + opt
-                                    if breakdown:
-                                        option_verbose += ': ' + Fore.GREEN + options[opt]
-                                    option_verbose = joiner.join(textwrap.wrap(option_verbose,
-                                                                               width=width - margin))
-                                    temp = joiner + "%s" + Fore.RESET
-                                    params += temp % option_verbose
-
+                    params = self._append_description(desc, key, p_dict, joiner, width,
+                                                      margin, params, breakdown)
             return params
         except Exception as e:
             print('ERROR: ' + str(e))
             raise
+
+    def _append_description(self, desc, key, p_dict, joiner, width, margin,
+                            params, breakdown):
+        if isinstance(desc[key], str):
+            pdesc = " ".join(desc[key].split())
+            # Restrict the margin so that the lines don't overflow.
+            pdesc = joiner.join(textwrap.wrap(pdesc, width=width - margin))
+            temp = joiner + Fore.CYAN + "%s" + Fore.RESET
+            params += temp % pdesc
+        else:
+            # There is an ordered dictionary of parameters
+            required_keys = desc[key].keys()
+            for param_key in required_keys:
+                # desc[key][param_key] is the value at this parameter
+                if param_key == 'summary':
+                    pdesc = desc[key][param_key]
+                    pdesc = joiner.join(textwrap.wrap(pdesc,
+                                                      width=width - margin))
+                    temp = joiner + Fore.CYAN + "%s" + Fore.RESET
+                    params += temp % pdesc
+
+                if breakdown:
+                    params = self._get_verbose_param_details(p_dict, param_key,
+                                                             desc, key, params, width)
+
+                if param_key == 'options':
+                    options = desc[key][param_key]
+
+                    option_text = Fore.BLUE + 'Options:'
+                    option_text = joiner.join(textwrap.wrap(option_text,
+                                                            width=width - margin))
+                    temp = joiner + "%s"
+                    params += temp % option_text
+
+                    for opt in options:
+                        current_opt = p_dict['data'][key]
+                        if current_opt == opt:
+                            colour = Fore.LIGHTCYAN_EX
+                            verbose_color = Fore.LIGHTCYAN_EX
+                        else:
+                            colour = Fore.BLUE
+                            verbose_color = Fore.GREEN
+                        option_verbose = ''
+                        option_verbose += colour + u'\u0009' + u'\u2022' + opt
+                        if breakdown:
+                            option_verbose += ': ' + verbose_color + options[opt]
+                        option_verbose = joiner.join(textwrap.wrap(option_verbose,
+                                                                   width=width - margin))
+                        temp = joiner + "%s" + Fore.RESET
+                        params += temp % option_verbose
+        return params
 
     def _get_extra_info(self, p_dict, width, colour_off, info_colour,
                         warn_colour):

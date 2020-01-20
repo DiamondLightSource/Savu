@@ -119,21 +119,18 @@ def _mod(content, args):
     """ Modify plugin parameters. """
     try:
         pos_str, subelem = args.param.split('.')
-        pos = content.find_position(pos_str)
-        data_elements = content.plugin_list.plugin_list[pos]['data']
         try:
             content.modify(pos_str, subelem, ' '.join(args.value))
         except Exception as e:
             print('Error modifying the parameter.')
             print(e)
             raise
-        _disp(content, pos_str)
+        # If modified then display, and show recommendations
+        _disp(content, str(args.param) + ' -vv')
     except ValueError:
         print('Incorrect parameter number: Please enter the parameter number to'
               ' select the parameter you want to modify. Use a decimal format.')
         # Otherwise message is - ValueError: need more than 1 value to unpack
-        # Should I tailor the error message with this additional try except or
-        # still use the decorator error_catcher
     return content
 
 
