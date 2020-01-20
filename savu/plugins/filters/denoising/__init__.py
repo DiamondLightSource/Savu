@@ -13,26 +13,10 @@
 # limitations under the License.
 
 """
-.. module:: tomo_recon
-   :platform: Unix
-   :synopsis: runner for tests using the MPI framework
+All the plugin architecture for Savu is contained here
+
 
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
-import unittest
-from savu.test import test_utils as tu
 
-from savu.test.travis.framework_tests.plugin_runner_test import \
-    run_protected_plugin_runner_no_process_list
-
-
-class PluginRunnerDenoiseBregmanTest(unittest.TestCase):
-
-    def test_denoise_bregman_test(self):
-        options = tu.set_experiment('tomo')
-        plugin = 'savu.plugins.filters.denoising.denoise_bregman_filter'
-        run_protected_plugin_runner_no_process_list(options, plugin)
-
-if __name__ == "__main__":
-    unittest.main()

@@ -35,6 +35,10 @@ backward passes for efficient geodesic distance transform, which was used for  \
 image segmentation. # https://github.com/taigw/geodesic_distance \
 In order to make code work one need to specify valid coordinates to initialise the point\
 (seed) from which the distances will be calculated.
+
+lambda: weighting betwween 0.0 and 1.0
+          if lambda==0.0, return spatial euclidean distance without considering gradient
+          if lambda==1.0, the distance is based on gradient only without using spatial distance
 """
 #  Geodesic distance transform, the software can be installed from
 #  https://github.com/taigw/geodesic_distance with
@@ -45,15 +49,21 @@ import numpy as np
 class GeoDistance(Plugin, CpuPlugin):
     """
     Geodesic transformation of images with manual initialisation.
-
+    
+    :param lambda: weighting betwween 0 and 1 . Default: 0.5.
+    :param iterations: number of iteration for raster scanning . Default: 4.
     :param out_datasets: The default names . Default: ['GeoDist','max_values'].
     """
 
     def __init__(self):
         super(GeoDistance, self).__init__("GeoDistance")
 
-    def setup(self):
+    def pre_process(self):
+        # extract given parameters
+        self.lambda_par = self.parameters['lambda']
+        self.iterations = self.parameters['iterations']
 
+    def setup(self):
         in_dataset, out_dataset = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
         in_pData[0].plugin_data_setup('VOLUME_YZ', 'single')
@@ -79,7 +89,7 @@ class GeoDistance(Plugin, CpuPlugin):
         indices = np.where(np.isnan(input_temp))
         input_temp[indices] = 0.0
         if (np.sum(data[1]) > 0):
-            geoDist = geodesic_distance.geodesic2d_raster_scan(input_temp, data[1], 0.5, 4)
+            geoDist = geodesic_distance.geodesic2d_raster_scan(input_temp, data[1], self.lambda_par, self.iterations)
         else:
             geoDist = np.float32(np.zeros(np.shape(data[0])))
         maxvalues = [np.max(geoDist)]

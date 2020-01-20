@@ -31,7 +31,7 @@ class FinalSegmentI23(Plugin, CpuPlugin):
     """
     Apply at the end when all objects have been segmented independently (crystal, liquor, whole object)
 
-    :param set_classes_val: Set the values for all 4 classes (crystal, liquor, loop, vacuum). Default: [255,128, 64, 0].
+    :param set_classes_val: Set the values for all 4 classes (crystal, liquor, loop, vacuum). Default: [255, 128, 64, 0].
     """
 
     def __init__(self):

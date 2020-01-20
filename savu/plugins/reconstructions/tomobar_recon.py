@@ -47,84 +47,61 @@ class TomobarRecon(BaseRecon, GpuPlugin):
         result = ndimage.interpolation.shift(sinogram,
                                              (centre_of_rotation_shift, 0))
         return result
-    
+
     def pre_process(self):
-        # extract given parameters
-        self.iterationsFISTA = self.parameters['iterations']
-        self.datafidelity = self.parameters['datafidelity']
-        self.nonnegativity = self.parameters['nonnegativity']
-        self.ordersubsets = self.parameters['ordersubsets']
-        self.converg_const = self.parameters['converg_const']
-        self.regularisation = self.parameters['regularisation']
-        self.regularisation_parameter = self.parameters['regularisation_parameter']
-        self.regularisation_parameter2 = self.parameters['regularisation_parameter2']
-        self.ring_variable = self.parameters['ring_variable']
-        self.ring_accelerator = self.parameters['ring_accelerator']
-        self.time_marching_parameter = self.parameters['time_marching_parameter']
-        self.edge_param = self.parameters['edge_param']
-        self.NDF_penalty = self.parameters['NDF_penalty']
-        self.output_size = self.parameters['output_size']
-        self.tolerance = self.parameters['tolerance']
-        
-        
-        self.RecToolsIR = None
-        if (self.ordersubsets > 1):
-            self.regularisation_iterations = (int)(self.parameters['regularisation_iterations']/self.ordersubsets) + 1
-        else:
-            self.regularisation_iterations = self.parameters['regularisation_iterations']
+        # extract given parameters into dictionaries suitable for ToMoBAR input
+        self._data_ = {'OS_number' : self.parameters['algorithm_ordersubsets'],
+                       'huber_threshold' : self.parameters['data_Huber_thresh'],
+                       'ring_weights_threshold' :  self.parameters['data_any_rings'],
+                       'ring_tuple_halfsizes' :  self.parameters['data_any_rings_winsizes'],
+                       'ring_huber_power' :  self.parameters['data_any_rings_power'],
+                       'ringGH_lambda' :  self.parameters['data_full_ring_GH'],
+                       'ringGH_accelerate' :  self.parameters['data_full_ring_accelerator_GH']}
+
+        self._algorithm_ = {'iterations' : self.parameters['algorithm_iterations'],
+                            'verbose' : self.parameters['algorithm_verbose']}
+
+        self._regularisation_ = {'method' : self.parameters['regularisation_method'],
+                                'regul_param' : self.parameters['regularisation_parameter'],
+                                'iterations' : self.parameters['regularisation_iterations'],
+                                'device_regulariser' : self.parameters['regularisation_device'],
+                                'edge_threhsold' : self.parameters['regularisation_edge_thresh'],
+                                'time_marching_step' : self.parameters['regularisation_timestep'],
+                                'regul_param2' : self.parameters['regularisation_parameter2'],
+                                'PD_LipschitzConstant' : self.parameters['regularisation_PD_lip'],
+                                'NDF_penalty' : self.parameters['regularisation_NDF_penalty'],
+                                'methodTV' : self.parameters['regularisation_methodTV']}
 
     def process_frames(self, data):
         centre_of_rotations, angles, self.vol_shape, init  = self.get_frame_params()
-        sino = data[0].astype(np.float32)
-        anglesTot, self.DetectorsDimH = np.shape(sino)
+        sinogram = data[0].astype(np.float32)
+        anglesTot, self.DetectorsDimH = np.shape(sinogram)
         self.anglesRAD = np.deg2rad(angles.astype(np.float32))
-       
-        # check if the reconstruction class has been initialised and calculate 
-        # Lipschitz constant if not given explicitly
-        self.setup_Lipschitz_constant()
+        self._data_.update({'projection_norm_data' : sinogram})
+        """
+        # if one selects PWLS model and provides raw input data
+        if (self.parameters['data_fidelity'] == 'PWLS'):
+        rawdata = data[1].astype(np.float32)
+        rawdata /= np.max(rawdata)
+        self._data_.update({'projection_raw_data' : rawdata})
+        """
 
-        # Run FISTA reconstrucion algorithm here
-        # Fast Iterative Shrinking Thresholding Algorithm
-        recon = self.Rectools.FISTA(sino,\
-                                    iterationsFISTA = self.iterationsFISTA,\
-                                    regularisation = self.regularisation,\
-                                    regularisation_parameter = self.regularisation_parameter,\
-                                    regularisation_iterations = self.regularisation_iterations,\
-                                    regularisation_parameter2 = self.regularisation_parameter2,\
-                                    time_marching_parameter = self.time_marching_parameter,\
-                                    lambdaR_L1 = self.ring_variable,\
-                                    alpha_ring = self.ring_accelerator,\
-                                    NDF_penalty = self.NDF_penalty,\
-                                    tolerance_regul = 0.0,\
-                                    edge_param = self.edge_param,\
-                                    lipschitz_const = self.Lipschitz_const)
-        return recon
-
-    def setup_Lipschitz_constant(self):
-        if self.RecToolsIR is not None:
-            return 
-        
-       # set parameters and initiate a TomoBar class object
+        # set parameters and initiate the ToMoBAR class object
         self.Rectools = RecToolsIR(DetectorsDimH = self.DetectorsDimH,  # DetectorsDimH # detector dimension (horizontal)
                     DetectorsDimV = None,  # DetectorsDimV # detector dimension (vertical) for 3D case only
                     CenterRotOffset = None, # Center of Rotation (CoR) scalar (for 3D case only)
                     AnglesVec = self.anglesRAD, # array of angles in radians
                     ObjSize = self.vol_shape[0] , # a scalar to define the reconstructed object dimensions
-                    datafidelity=self.datafidelity,# data fidelity, choose LS, PWLS
-                    nonnegativity=self.nonnegativity, # enable nonnegativity constraint (set to 'on')
-                    OS_number = self.ordersubsets, # the number of subsets, NONE/(or > 1) ~ classical / ordered subsets
-                    tolerance = self.tolerance , # tolerance to stop outer iterations earlier
-                    device='gpu')
-                                        
-        if (self.parameters['converg_const'] == 'power'):
-            self.Lipschitz_const = self.Rectools.powermethod() # calculate Lipschitz constant
-        else:
-            self.Lipschitz_const = self.parameters['converg_const']
-        return
-    
+                    datafidelity=self.parameters['data_fidelity'],# data fidelity, choose LS, PWLS
+                    device_projector='gpu')
+
+        # Run FISTA reconstrucion algorithm here
+        recon = self.Rectools.FISTA(self._data_, self._algorithm_, self._regularisation_)
+        return recon
+
     def get_max_frames(self):
         return 'single'
-    
+
     def get_citation_information(self):
         cite_info1 = CitationInformation()
         cite_info1.name = 'citation1'
@@ -163,22 +140,27 @@ class TomobarRecon(BaseRecon, GpuPlugin):
 
         :param output_size: Number of rows and columns in the \
             reconstruction. Default: 'auto'.
-        :param iterations: Number of outer iterations for FISTA (default) or ADMM methods. Default: 20.
-        :param datafidelity: Data fidelity, Least Squares only at the moment. Default: 'LS'.
-        :param nonnegativity: Nonnegativity constraint, choose Enable or None. Default: 'ENABLE'.
-        :param ordersubsets: The number of ordered-subsets to accelerate reconstruction. Default: 6.
-        :param converg_const: Lipschitz constant, can be set to a value or automatic calculation. Default: 'power'.
-        :param regularisation: To regularise choose methods ROF_TV, FGP_TV, SB_TV, LLT_ROF,\
+        :param data_fidelity: Data fidelity, chosoe Least Squares only at the moment. Default: 'LS'.
+        :param data_Huber_thresh: Threshold parameter for __Huber__ data fidelity . Default: None.
+        :param data_any_rings: a parameter to suppress various artifacts including rings and streaks. Default: None.
+        :param data_any_rings_winsizes: half window sizes to collect background information [detector, angles, num of projections]. Default: (9,7,0).
+        :param data_any_rings_power: a power parameter for Huber model. Default: 1.5.
+        :param data_full_ring_GH: Regularisation variable for full constant ring removal (GH model). Default: None.
+        :param data_full_ring_accelerator_GH: Acceleration constant for GH ring removal. Default: 10.0.
+        :param algorithm_iterations: Number of outer iterations for FISTA (default) or ADMM methods. Default: 20.
+        :param algorithm_verbose: print iterations number and other messages ('off' by default). Default: 'off'.
+        :param algorithm_ordersubsets: The number of ordered-subsets to accelerate reconstruction. Default: 6.
+        :param regularisation_method: To regularise choose methods ROF_TV, FGP_TV, PD_TV, SB_TV, LLT_ROF,\
                                  NDF, Diff4th. Default: 'FGP_TV'.
         :param regularisation_parameter: Regularisation (smoothing) value, higher \
                                 the value stronger the smoothing effect. Default: 0.0001.
-        :param regularisation_iterations: The number of regularisation iterations. Default: 350.
-        :param time_marching_parameter: Time marching parameter, relevant for \
-                        (ROF_TV, LLT_ROF, NDF, Diff4th) penalties. Default: 0.0025.
-        :param edge_param: Edge (noise) related parameter, relevant for NDF and Diff4th. Default: 0.01.
+        :param regularisation_iterations: The number of regularisation iterations. Default: 80.
+        :param regularisation_device: The number of regularisation iterations. Default: 'gpu'.
+        :param regularisation_PD_lip: Primal-dual parameter for convergence. Default: 8.
+        :param regularisation_methodTV:  0/1 - TV specific isotropic/anisotropic choice. Default: 0.
+        :param regularisation_timestep: Time marching parameter, relevant for \
+                        (ROF_TV, LLT_ROF, NDF, Diff4th) penalties. Default: 0.003.
+        :param regularisation_edge_thresh: Edge (noise) related parameter, relevant for NDF and Diff4th. Default: 0.01.
         :param regularisation_parameter2:  Regularisation (smoothing) value for LLT_ROF method. Default: 0.005.
-        :param NDF_penalty: NDF specific penalty type Huber, Perona, Tukey. Default: 'Huber'.
-        :param tolerance: Tolerance to stop outer iterations earlier. Default: 5e-10.
-        :param ring_variable: Regularisation variable for ring removal. Default: 0.0.
-        :param ring_accelerator: Acceleration constant for ring removal (use with care). Default: 50.0.
+        :param regularisation_NDF_penalty: NDF specific penalty type Huber, Perona, Tukey. Default: 'Huber'.
         '''

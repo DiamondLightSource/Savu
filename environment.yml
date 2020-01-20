@@ -24,10 +24,11 @@ dependencies:
   - pyfai
   - pyfftw
   - colorama
-  - pymca
+  - pymca=5.5.2
   - ccpi-regulariser
-  - tomobar=2019.10
+  - tomobar
   - i23-seg
+  - yamllint
   - pip:
     - nvidia-ml-py
     - peakutils
