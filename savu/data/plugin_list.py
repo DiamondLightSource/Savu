@@ -34,15 +34,13 @@ import logging
 
 import numpy as np
 from collections import defaultdict
-from yamllint.config import YamlLintConfig
-from yamllint import linter
 
 from colorama import Fore
 import savu.plugins.utils as pu
+import savu.plugins.parameter_utils as param_u
 from savu.data.meta_data import MetaData
 import savu.data.framework_citations as fc
 import savu.plugins.loaders.utils.yaml_utils as yu
-
 
 NX_CLASS = 'NX_class'
 
@@ -76,13 +74,12 @@ class PluginList(object):
                     'id': None,
                     'desc': None,
                     'data': None,
-                    'user': [],
-                    'hide': [],
+                    'visibility': None,
                     'types': None}
         return template
 
     def __get_json_keys(self):
-        return ['data', 'desc', 'user', 'hide']
+        return ['data', 'desc', 'visibility']
 
     def _populate_plugin_list(self, filename, activePass=False,
                               template=False):
@@ -126,9 +123,6 @@ class PluginList(object):
     def _is_valid(self, value, subelem, pos):
         parameter_valid = False
         options = ''
-        formats = ''
-        examples = ''
-
         if subelem in self.plugin_list[pos]['types']:
             # The parameter is within the types
             ptype = self.plugin_list[pos]['types'][subelem]
@@ -136,199 +130,23 @@ class PluginList(object):
             if not isinstance(pdesc, str):
                 if 'options' in pdesc.keys():
                     options = pdesc['options']
-                if 'format' in pdesc:
-                    formats = pdesc['format']
-                if 'examples' in pdesc:
-                    examples = pdesc['examples']
 
             if len(options) >= 1:
-                options = [i.lower() for i in options]
-                if value.lower() in options:
-                    parameter_valid = True
+                options = [i.lower() for i in options if isinstance(i, str)]
+                if isinstance(value, str):
+                    if value.lower() in options:
+                        parameter_valid = True
                 else:
                     print(Fore.CYAN + '\nSome options are:')
                     for o in options:
                         print(o)
                     print(Fore.RESET)
             else:
-                if ptype == '[int]':
-                    sequence = False
-                    if isinstance(value, str) and ';' in value:
-                        value = value.split(';')
-                        if len(value[0]) == 1 and isinstance(value[0], int):
-                            value = list(np.arange(0, value[0], 1))
-                            parameter_valid = True
-                            sequence = True
-                        if ":" in value[0]:
-                            # <first-value>:<last-value>:<difference>;
-                            seq = value[0].split(':')
-                            seq = [eval(s) for s in seq]
-                            if len(seq) == 3:
-                                # The sequence values
-                                sequence_values = list(np.arange(seq[0], seq[1], seq[2]))
-                                if len(sequence_values) == 0:
-                                    raise RuntimeError('Ensure start:stop:step; values are valid.')
-                                else:
-                                    sequence = True
-                                    parameter_valid = True
-                                # value = [ast.literal_eval(i) for i in value]
-                            elif len(seq) == 2:
-                                if isinstance(seq[0], int) and isinstance(seq[1], int):
-                                    value = list(np.arange(seq[0], seq[1], 1))
-                                    parameter_valid = True
-                                    sequence = True
-                            else:
-                                print('The format should be start:stop:step;')
-                    if not sequence:
-                        bracket_value = value.split('[')
-                        bracket_value = bracket_value[1].split(']')
-                        value = bracket_value[0]
-                        entries = value.split(',')
-                        print('Not a sequence')
-                        # TO DO further split check
-
-                elif ptype == 'range':
-                    entries = value.split(',')
-                    if len(entries) == 2:
-                        if isinstance(entries[0], int) and isinstance(entries[1], int):
-                            parameter_valid = True
-                elif ptype == 'yaml_file':
-                    if isinstance(value, str):
-                        config_file = open('/home/glb23482/git_projects/Savu/savu/plugins/loaders/utils/yaml_config.yaml')
-                        conf = YamlLintConfig(config_file)
-                        f = open(value)
-                        gen = linter.run(f, conf)
-                        errors = list(gen)
-                        if errors:
-                            print('There were some errors with your yaml file structure.\n')
-
-                            for e in errors:
-                                print(e)
-                        else:
-                            parameter_valid = True
-
-                elif ptype == '[path, int_path, int]':
-                    try:
-                        bracket_value = value.split('[')
-                        bracket_value = bracket_value[1].split(']')
-                        entries = bracket_value[0].split(',')
-                        if len(entries) == 3:
-                            file_path = entries[0]
-                            if os.path.isfile(file_path):
-                                int_path = entries[1]
-                                hf = h5py.File(file_path, 'r')
-                                try:
-                                    # This returns a HDF5 dataset object
-                                    int_data = hf.get(int_path)
-                                    if int_data is None:
-                                        print('\nThere is no data stored at that internal path.')
-                                    else:
-                                        int_data = np.array(int_data)
-                                        if int_data.size >= 1:
-                                            try:
-                                                compensation_fact = int(entries[2])
-                                                if isinstance(compensation_fact, int):
-                                                    parameter_valid = True
-                                                else:
-                                                    print(Fore.BLUE + '\nThe compensation factor is'
-                                                                      ' not valid.' + Fore.RESET)
-                                            except ValueError:
-                                                print('\nThe compensation factor is not an integer.')
-                                            except Exception:
-                                                print('There is a problem converting the compensation'
-                                                      ' factor to an integer.')
-
-                                except AttributeError:
-                                    print('Attribute error.')
-                                except:
-                                    print(Fore.BLUE + '\nPlease choose another interior'
-                                                      ' path.' + Fore.RESET)
-                                    print('Example interior paths: ')
-                                    for group in hf:
-                                        for subgroup in hf[group]:
-                                            subgroup_str = '/' + group + '/' + subgroup
-                                            print(u'\t' + subgroup_str)
-                                    raise
-                                hf.close()
-                            else:
-                                print(Fore.BLUE + '\nThis file does not exist at this'
-                                                  ' location.' + Fore.RESET)
-                        else:
-                            print(Fore.RED + '\nPlease enter three parameters.' + Fore.RESET)
-
-                    except ValueError:
-                        parameter_valid = False
-                        print('Valid items have a format [<file path>,'
-                              ' <interior file path>, int].')
-                    except AttributeError:
-                        print('You need to place some information inside the square brackets.')
-                    except Exception as e:
-                        print(e)
-
-                elif ptype == 'path':
-                    path = os.path.dirname(value)
-                    path = path if path else '.'
-                    if os.path.isdir(path):
-                        parameter_valid = True
-                        print('This path is to a directory.')
-                    elif os.path.isfile(path):
-                        parameter_valid = True
-                        print('This path is to a file.')
-                    else:
-                        print('Valid items contain numbers, letters and \'/\'')
-                        file_error = "INPUT_ERROR: Incorrect filepath."
-                        raise Exception(file_error)
-
-                elif ptype == 'int_path':
-                    # Check if the entry is a string
-                    # Could check if valid, but only if file_path known for another parameter
-                    if isinstance(value, str):
-                        parameter_valid = True
-                    else:
-                        print('Not a valid string.')
-
-                elif ptype == 'int':
-                    if isinstance(value, int):
-                        parameter_valid = True
-                    else:
-                        print('%s is not a valid integer.' % value)
-
-                elif ptype == 'bool':
-                    if isinstance(value, bool):
-                        parameter_valid = True
-                    elif value == 'true' | value == 'false':
-                        parameter_valid = True
-                    else:
-                        print('Not a valid boolean.')
-
-                elif ptype == 'str':
-                    if isinstance(value, str):
-                        parameter_valid = True
-                    else:
-                        print('Not a valid string.')
-
-                elif ptype == 'float':
-                    if isinstance(value, float):
-                        parameter_valid = True
-                    else:
-                        print('Not a valid float.')
-                else:
-                    parameter_valid = False
-
+                parameter_valid = param_u.is_valid(ptype, value)
                 if parameter_valid is False:
                     print('\nYour input for the parameter \'%s\' must match the'
                           ' required type %s' % (subelem, ptype))
 
-                    if len(formats) >= 1:
-                        print(Fore.CYAN + 'Format accepted for the parameter '
-                                          'named \'%s\':' % subelem)
-                        for f in formats:
-                            print(f)
-    
-                    if len(examples) >= 1:
-                        print(Fore.RED + '\nSome examples are:')
-                        for e in examples:
-                            print(e)
                     print(Fore.RESET)
         else:
             print('Not in parameter keys.')
@@ -701,7 +519,6 @@ class Template(object):
         plist = self.plist.plugin_list
         index = [plist[i]['pos'] for i in range(len(plist))]
         return plist[index.index(plugin_no)]['data']
-
 
 class CitationInformation(object):
     """
