@@ -29,6 +29,7 @@ dependencies:
   - tomobar
   - i23-seg
   - yamllint
+  - mrcfile
   - pip:
     - nvidia-ml-py
     - peakutils
