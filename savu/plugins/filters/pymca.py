@@ -57,7 +57,7 @@ class Pymca(BaseFilter, CpuPlugin):
         try:
             stack = self.b.outbuffer['parameters']
             op_stack = np.rollaxis(stack,0,3)
-        except AttributeError as e:
+        except (AttributeError, KeyError) as e:
             op_stack = -np.ones((1,1,self.outputshape[-1]))
             logging.warn("Error in fit:%s",e) 
         op = op_stack[0,0]

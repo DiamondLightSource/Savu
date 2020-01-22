@@ -66,6 +66,7 @@ class ImageSaver(BaseImageSaver, CpuPlugin):
         else:
             self.num_bit = num_bit
         self._data_range = self._get_min_and_max()
+
     def process_frames(self, data):
         frame = self.pData.get_current_frame_idx()[0]
         filename = '%s%05i.%s' % (self.filename, frame, self.file_format)
