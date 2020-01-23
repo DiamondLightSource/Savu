@@ -262,10 +262,7 @@ class NxtomoLoader(BaseLoader):
             return None
 
     def _get_data_file(self):
-        if self.parameters['data_file'] != '<>': # still using this?
-            data = self.parameters['data_file']
-        else:
-            data = self.exp.meta_data.get("data_file")
+        data = self.exp.meta_data.get("data_file")
         return h5py.File(data, 'r')
 
     def __check_angles(self, data_obj, n_angles):
