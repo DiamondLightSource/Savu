@@ -254,6 +254,7 @@ def is_template_param(param):
         first, last = param[start], param[-1]
         if first == '<' and last == '>':
             param = param[start+1:-1]
+            param = None if not param else param
             try:
                 exec("param = " + param)
             except:
