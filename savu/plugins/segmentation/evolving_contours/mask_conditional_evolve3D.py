@@ -45,7 +45,7 @@ class MaskConditionalEvolve3d(Plugin, MultiThreadedPlugin):
     """
 
     def __init__(self):
-        super(MaskConditionalEvolve3d, self).__init__("k")
+        super(MaskConditionalEvolve3d, self).__init__("MaskConditionalEvolve3d")
 
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
