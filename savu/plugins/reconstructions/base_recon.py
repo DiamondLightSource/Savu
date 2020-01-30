@@ -177,7 +177,7 @@ class BaseRecon(Plugin):
         cor = mData.get('centre_of_rotation')
         sdirs = inData.get_slice_dimensions()
         total_frames = np.prod([inData.get_shape()[i] for i in sdirs])
-        if total_frames != len(cor):
+        if total_frames > len(cor):
             cor = np.tile(cor, total_frames/len(cor))
         return cor
 
