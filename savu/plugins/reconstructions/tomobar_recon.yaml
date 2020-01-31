@@ -84,7 +84,7 @@
                NDF: Nonlinear/Linear Diffusion model (Perona-Malik,
                  Huber or Tukey)
                DIFF4th: Fourth-order nonlinear diffusion model
-         default: FGP_TV
+         default: PD_TV
      - regularisation_parameter:
          visibility: param
          type: float
@@ -171,6 +171,7 @@
              regularisation_method:
                ROF_TV: 1000
                FGP_TV: 500
+               PD_TV: 100
                SB_TV: 100
                LLT_ROF: 1000
                NDF: 1000
