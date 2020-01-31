@@ -31,12 +31,14 @@ import numpy as np
 @register_plugin
 class MaskEvolve3d(Plugin, MultiThreadedPlugin):
     """
-    Fast segmentation by evolving the given 3D mask, the mask must be given \
-    precisely through the segmented object otherwise segmentation will be incorrect.
+    Fast segmentation by evolving the given 3D mask, the initial mask must be given \
+    precisely through the object, otherwise segmentation will be incorrect.
 
-    :param threshold: important parameter to control mask propagation. Default: 0.001.
-    :param method: evolve based on the mean in the mask (choose 0) or max intensity value as threshold (choose 1). Default: 1.
+    :param threshold: important parameter to control mask propagation. Default: 1.0.
+    :param method: choose 0 to evolve based on the given intensity threshold only, chose 1 for\
+    mean calculated in the mask and Mean Absolute deviation for thresholding, chose 2 for median. Default: 1.
     :param iterations: The number of iterations. Default: 500.
+    :param connectivity: The connectivity of the local neighbourhood. Default: 6.
     :param out_datasets: The default names . Default: ['MASK_EVOLVED'].
     """
 
@@ -56,6 +58,7 @@ class MaskEvolve3d(Plugin, MultiThreadedPlugin):
         # extract given parameters
         self.threshold = self.parameters['threshold']
         self.iterations = self.parameters['iterations']
+        self.connectivity = self.parameters['connectivity']
         self.method = self.parameters['method']
 
     def process_frames(self, data):
@@ -63,7 +66,7 @@ class MaskEvolve3d(Plugin, MultiThreadedPlugin):
         indices = np.where(np.isnan(input_temp))
         input_temp[indices] = 0.0
         if (np.sum(data[1]) > 0):
-            mask_evolve = MASK_ITERATE(input_temp, data[1], self.threshold, self.iterations, self.method)
+            mask_evolve = MASK_ITERATE(input_temp, data[1], self.threshold, self.iterations, self.connectivity, self.method)
         else:
             mask_evolve = np.uint8(np.zeros(np.shape(data[0])))
         return mask_evolve

@@ -38,8 +38,10 @@ class MaskInitialiser(Plugin, CpuPlugin):
     and connecting them with a cylinder of a certain radius. \
     Importantly the Z coordinate is given following VOLUME_XY vertical pattern
 
-    :param init_coordinates: X0,Y0,Z0 (start) X1,Y1,Z1 (middle) and X2,Y2,Z2 (finish) coordinates of three points. Default: [10, 10, 0, 15, 15, 15, 20, 20, 20].
-    :param circle_radius: The seed will be initialised with a circle of radius. Default: 5.
+    :param mask1_coordinates: X0,Y0,Z0 (start) X1,Y1,Z1 (middle) and X2,Y2,Z2 (finish) coordinates of three points. Default: [10, 10, 0, 15, 15, 15, 20, 20, 20].
+    :param mask1_radius: Mask1 will be initialised with an ellipse of radius. Default: 5.
+    :param mask2_coordinates: The second mask coordinates. Default: None.
+    :param mask2_radius: Mask2 will be initialised with an ellipse of radius. Default: None.
     :param out_datasets: The default names . Default: ['INIT_MASK'].
     """
 
@@ -50,79 +52,58 @@ class MaskInitialiser(Plugin, CpuPlugin):
         in_dataset, out_dataset = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
         in_pData[0].plugin_data_setup('VOLUME_YZ', 'single')
-        
+
         out_dataset[0].create_dataset(in_dataset[0], dtype=np.uint8)
         out_pData[0].plugin_data_setup('VOLUME_YZ', 'single')
         self.full_input_shape = in_dataset[0].get_shape()
-        
+
     def pre_process(self):
         # extract given parameters
-        self.circle_radius = self.parameters['circle_radius']
-        self.init_coordinates = self.parameters['init_coordinates']
-        
-        self.coordX0 = self.init_coordinates[0]
-        self.coordY0 = self.init_coordinates[1]
-        self.coordZ0 = self.init_coordinates[2]
-        self.coordX1 = self.init_coordinates[3]
-        self.coordY1 = self.init_coordinates[4]
-        self.coordZ1 = self.init_coordinates[5]
-        self.coordX2 = self.init_coordinates[6]
-        self.coordY2 = self.init_coordinates[7]
-        self.coordZ2 = self.init_coordinates[8]
-        
-        steps1 = self.coordZ1 - self.coordZ0
-        self.distance1 = np.sqrt((self.coordX1 - self.coordX0)**2 + (self.coordY1 - self.coordY0)**2)
-        self.d_dist1 = self.distance1/(steps1 - 1.0)
-        self.d_step1 = self.d_dist1
-        steps2 = self.coordZ2 - self.coordZ1
-        self.distance2 = np.sqrt((self.coordX2 - self.coordX1)**2 + (self.coordY2 - self.coordY1)**2)
-        self.d_dist2 = self.distance2/(steps2 - 1.0)
-        self.d_step2 = self.d_dist2
+        self.mask1_coordinates = self.parameters['mask1_coordinates']
+        self.mask1_radius = self.parameters['mask1_radius']
+        self.mask2_coordinates = self.parameters['mask2_coordinates']
+        self.mask2_radius = self.parameters['mask2_radius']
+
+        self.coordX = [0.0, 0.0, 0.0]
+        self.coordY = [0.0, 0.0, 0.0]
+        self.coordZ = [0.0, 0.0, 0.0]
+
+        self.coordX[0] = self.mask1_coordinates[0]
+        self.coordY[0] = self.mask1_coordinates[1]
+        self.coordZ[0] = self.mask1_coordinates[2]
+        self.coordX[1] = self.mask1_coordinates[3]
+        self.coordY[1] = self.mask1_coordinates[4]
+        self.coordZ[1] = self.mask1_coordinates[5]
+        self.coordX[2] = self.mask1_coordinates[6]
+        self.coordY[2] = self.mask1_coordinates[7]
+        self.coordZ[2] = self.mask1_coordinates[8]
+
+        if (self.mask2_coordinates is not None):
+            self.coord2X = [0.0, 0.0, 0.0]
+            self.coord2Y = [0.0, 0.0, 0.0]
+            self.coord2Z = [0.0, 0.0, 0.0]
+
+            self.coord2X[0] = self.mask2_coordinates[0]
+            self.coord2Y[0] = self.mask2_coordinates[1]
+            self.coord2Z[0] = self.mask2_coordinates[2]
+            self.coord2X[1] = self.mask2_coordinates[3]
+            self.coord2Y[1] = self.mask2_coordinates[4]
+            self.coord2Z[1] = self.mask2_coordinates[5]
+            self.coord2X[2] = self.mask2_coordinates[6]
+            self.coord2Y[2] = self.mask2_coordinates[7]
+            self.coord2Z[2] = self.mask2_coordinates[8]
 
     def process_frames(self, data):
         # get the index of a current frame
         index_current = self.get_plugin_in_datasets()[0].get_current_frame_idx()
         [dimX,dimY] = np.shape(data[0])
         mask = np.uint8(np.zeros(np.shape(data[0])))
-        if ((index_current >= self.coordZ0) & (index_current <= self.coordZ1)):
-            if ((self.coordX0 == 0) & (self.coordY0 == 0) & (self.coordX1 == 0) & (self.coordY1 == 0)):
-                # create a full region mask (except the boundaries)
-                bound_width=2 # outer boundary width
-                mask[bound_width:dimX-bound_width, bound_width:dimY-bound_width] = 1
-            else:
-                self.d_step1 = (index_current - self.coordZ0)*self.d_dist1
-                t = self.d_step1/self.distance1
-                if (self.coordX0 == self.coordX1):
-                    x_t = np.int(self.coordX0)
-                else:
-                    x_t1 = np.round((1.0 - t)*self.coordX0 + t*self.coordX1)
-                    x_t = np.int(x_t1[0])
-                if(self.coordY0 == self.coordY1):
-                    y_t = np.int(self.coordY0)
-                else:
-                    y_t1 = np.round((1.0 - t)*self.coordY0 + t*self.coordY1)
-                    y_t = np.int(y_t1[0])
-                mask = np.uint8(circle_level_set(np.shape(data[0]), (y_t, x_t), self.circle_radius))
-        if ((index_current > self.coordZ1) & (index_current <= self.coordZ2)):
-            if ((self.coordX1 == 0) & (self.coordY1 == 0) & (self.coordX2 == 0) & (self.coordY2 == 0)):
-                # create a full region mask (except the boundaries)
-                bound_width=2 # outer boundary width
-                mask[bound_width:dimX-bound_width, bound_width:dimY-bound_width] = 1
-            else:
-                self.d_step2 = (index_current - self.coordZ1)*self.d_dist2
-                t = self.d_step2/self.distance2
-                if (self.coordX1 == self.coordX2):
-                    x_t = np.int(self.coordX1)
-                else:
-                    x_t1 = np.round((1.0 - t)*self.coordX1 + t*self.coordX2)
-                    x_t = np.int(x_t1[0])
-                if(self.coordY1 == self.coordY2):
-                    y_t = np.int(self.coordY1)
-                else:
-                    y_t1 = np.round((1.0 - t)*self.coordY1 + t*self.coordY2)
-                    y_t = np.int(y_t1[0])
-                mask = np.uint8(circle_level_set(np.shape(data[0]), (y_t, x_t), self.circle_radius))
-        return [mask]
+        mask = mask_gen(mask, self.coordX, self.coordY, self.coordZ, self.mask1_radius, dimX, dimY, index_current)
+        if (self.mask2_coordinates is not None):
+            mask2 = np.uint8(np.zeros(np.shape(data[0])))
+            mask2 = mask_gen(mask2, self.coord2X, self.coord2Y, self.coord2Z, self.mask2_radius, dimX, dimY, index_current)
+            mask = np.add(mask, mask2)
+        return mask
 
     def nInput_datasets(self):
         return 1
@@ -130,3 +111,59 @@ class MaskInitialiser(Plugin, CpuPlugin):
         return 1
     def get_max_frames(self):
         return 'single'
+
+
+def mask_gen(mask, coordX, coordY, coordZ, mask_radius, dimX, dimY, index_current):
+    steps1 = coordZ[1] - coordZ[0]
+    distance1 = np.sqrt((coordX[1] - coordX[0])**2 + (coordY[1] - coordY[0])**2)
+    d_dist1 = distance1/(steps1 - 1.0)
+    d_step1 = d_dist1
+    steps2 = coordZ[2] - coordZ[1]
+    distance2 = np.sqrt((coordX[2] - coordX[1])**2 + (coordY[2] - coordY[1])**2)
+    d_dist2 = distance2/(steps2 - 1.0)
+    d_step2 = d_dist2
+    if ((index_current >= coordZ[0]) & (index_current <= coordZ[1])):
+        if ((coordX[0] == 0) & (coordY[0] == 0) & (coordX[1] == 0) & (coordY[1] == 0)):
+            # create a full region mask (except the boundaries)
+            bound_width=2 # outer boundary width
+            mask[bound_width:dimX-bound_width, bound_width:dimY-bound_width] = 1
+        else:
+            d_step1 = (index_current - coordZ[0])*d_dist1
+            if (distance1 != 0.0):
+                t = d_step1/distance1
+            else:
+                t = 0.0
+            if (coordX[0] == coordX[1]):
+                x_t = np.int(coordX[0])
+            else:
+                x_t1 = np.round((1.0 - t)*coordX[0] + t*coordX[1])
+                x_t = np.int(x_t1[0])
+            if(coordY[0] == coordY[1]):
+                y_t = np.int(coordY[0])
+            else:
+                y_t1 = np.round((1.0 - t)*coordY[0] + t*coordY[1])
+                y_t = np.int(y_t1[0])
+            mask = np.uint8(circle_level_set(np.shape(mask), (y_t, x_t), mask_radius))
+    if ((index_current > coordZ[1]) & (index_current <= coordZ[2])):
+        if ((coordX[1] == 0) & (coordY[1] == 0) & (coordX[2] == 0) & (coordY[2] == 0)):
+            # create a full region mask (except the boundaries)
+            bound_width=2 # outer boundary width
+            mask[bound_width:dimX-bound_width, bound_width:dimY-bound_width] = 1
+        else:
+            d_step2 = (index_current - coordZ[1])*d_dist2
+            if (distance2 != 0.0):
+                t = d_step2/distance2
+            else:
+                t = 0.0
+            if (coordX[1] == coordX[2]):
+                x_t = np.int(coordX[1])
+            else:
+                x_t1 = np.round((1.0 - t)*coordX[1] + t*coordX[2])
+                x_t = np.int(x_t1[0])
+            if(coordY[1] == coordY[2]):
+                y_t = np.int(coordY[1])
+            else:
+                y_t1 = np.round((1.0 - t)*coordY[1] + t*coordY[2])
+                y_t = np.int(y_t1[0])
+            mask = np.uint8(circle_level_set(np.shape(mask), (y_t, x_t), mask_radius))
+    return [mask]
