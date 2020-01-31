@@ -17,7 +17,8 @@
    :platform: Unix
    :synopsis: A wrapper around TOmographic MOdel-BAsed Reconstruction (ToMoBAR) software \
    for advanced iterative image reconstruction using _3D_ capabilities of regularisation. \
-   The plugin will run on one cluster node, i.e. it can be slow.
+   The plugin will run on ONE cluster node taking all available memory, i.e. it can be slow\
+   and it can crash potenitally when out of memory.
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
@@ -50,7 +51,7 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
     :param algorithm_ordersubsets: The number of ordered-subsets to accelerate reconstruction. Default: 6.
     :param algorithm_nonnegativity: ENABLE or DISABLE nonnegativity constraint. Default: 'ENABLE'.
     :param regularisation_method: To regularise choose methods ROF_TV, FGP_TV, PD_TV, SB_TV, LLT_ROF,\
-                             NDF, Diff4th. Default: 'FGP_TV'.
+                             NDF, TGV, Diff4th. Default: 'FGP_TV'.
     :param regularisation_parameter: Regularisation (smoothing) value, higher \
                             the value stronger the smoothing effect. Default: 0.00001.
     :param regularisation_iterations: The number of regularisation iterations. Default: 80.
