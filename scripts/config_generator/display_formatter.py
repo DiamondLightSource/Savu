@@ -69,10 +69,13 @@ class DisplayFormatter(object):
         return '\n'.join(out_string)
 
     def _select_param(self, temp_param_dict, subelem, level):
-        # Display subelement
+        """ Display sub element when specified in savu_config.
+
+        Prevent mutable changes by copying the dict.
+        """
         element_present = False
         keycount = 0
-        # Prevent mutable changes by copying
+
         param_dict = copy.deepcopy(temp_param_dict)
         dev_keys = [k for k in param_dict['data'].keys() if param_dict['visibility'][k] not in ['user', 'hide']]
         user_keys = [k for k in param_dict['data'].keys() if param_dict['visibility'][k] == 'user']
@@ -84,7 +87,7 @@ class DisplayFormatter(object):
                 if int(subelem) == int(keycount):
                     element_present = True
                     for i in list(param_dict['map']):
-                        # use list to force a copy of keys to be made
+                        # Use list to make a copy of keys
                         if i != key:
                             param_dict['map'].remove(i)
 
@@ -119,11 +122,10 @@ class DisplayFormatter(object):
         width -= len(title)
         return back_colour + fore_colour + title + " "*width + Style.RESET_ALL
 
-    def _get_synopsis(self, plugin_name, width, colour_on, colour_off):
-        doc_str = \
-            self.plugin_list_inst._get_docstring_info(plugin_name)['synopsis']
+    def _get_synopsis(self, p_dict, width, colour_on, colour_off):
+        doc_str = p_dict['doc']
         synopsis = \
-            self._get_equal_lines(doc_str, width, colour_on, colour_off, " "*2)
+            self._get_equal_lines(doc_str['synopsis'], width, colour_on, colour_off, " "*2)
         if not synopsis:
             return ''
         return "\n" + colour_on + synopsis + colour_off
@@ -233,10 +235,10 @@ class DisplayFormatter(object):
 
     def _get_extra_info(self, p_dict, width, colour_off, info_colour,
                         warn_colour):
-        extra_info = self.plugin_list_inst._get_docstring_info(p_dict['name'])
-        info = self._get_equal_lines(extra_info['info'], width, info_colour,
+        doc_str = p_dict['doc']
+        info = self._get_equal_lines(doc_str['info'], width, info_colour,
                                      colour_off, " "*2)
-        warn = self._get_equal_lines(extra_info['warn'], width, warn_colour,
+        warn = self._get_equal_lines(doc_str['warn'], width, warn_colour,
                                      colour_off, " "*2)
         info = "\n"+info if info else ''
         warn = "\n"+warn if warn else ''
@@ -281,7 +283,7 @@ class DispDisplay(DisplayFormatter):
         colour_on = Back.LIGHTBLACK_EX + Fore.LIGHTWHITE_EX
         colour_off = Back.RESET + Fore.RESET
         synopsis = \
-            self._get_synopsis(p_dict['name'], width, colour_on, colour_off)
+            self._get_synopsis(p_dict, width, colour_on, colour_off)
         params = \
             self._get_param_details(level, p_dict, width, desc=p_dict['desc'])
         if breakdown:
@@ -298,6 +300,8 @@ class DispDisplay(DisplayFormatter):
         warn_c = Back.WHITE + Fore.RED
         c_off = Back.RESET + Fore.RESET
         info, warn = self._get_extra_info(p_dict, width, c_off, info_c, warn_c)
+        # Synopsis and get_extra info both call plugin instance and populate parameters which means
+        # yaml_load will be called twice
         return title + synopsis + info + warn + param_details
 
     def _remove_quotes(self, data_dict):
@@ -325,8 +329,7 @@ class DispDisplay(DisplayFormatter):
         for plugin in self.plugin_list:
             if plugin['name'] not in names:
                 names.append(plugin['name'])
-                warn = self.plugin_list_inst._get_docstring_info(
-                        plugin['name'])['warn']
+                warn = plugin['doc']['warn']
                 if warn:
                     for w in warn.split('\n'):
                         string = plugin['name'] + ": " + w + '.'
@@ -348,7 +351,7 @@ class ListDisplay(DisplayFormatter):
     def _get_default(self, level, p_dict, count, width):
         title = self._get_quiet(p_dict, count, width)
         synopsis = \
-            self._get_synopsis(p_dict['name'], width, Fore.CYAN, Fore.RESET)
+            self._get_synopsis(p_dict, width, Fore.CYAN, Fore.RESET)
         return title + synopsis
 
     def _get_verbose(self, level, p_dict, count, width, breakdown=False):
