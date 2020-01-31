@@ -31,6 +31,7 @@ from tomobar.methodsIR import RecToolsIR
 from savu.plugins.utils import register_plugin
 from savu.plugins.utils import register_test_plugin
 from scipy import ndimage
+from savu.plugins.tomobar_recon_info import TomoBarReconInfo
 
 #@register_plugin
 @register_test_plugin
@@ -41,6 +42,10 @@ class TomobarRecon(BaseRecon, GpuPlugin):
 
     def __init__(self):
         super(TomobarRecon, self).__init__("TomobarRecon")
+        self.info = TomoBarReconInfo()
+        self.parameters = self.info.plugin_info.get('parameters')
+        self.citations = self.info.plugin_info.get('citation_info')
+        self.documentation = self.info.plugin_info.get('documentation')
 
     def _shift(self, sinogram, centre_of_rotation):
         centre_of_rotation_shift = (sinogram.shape[0]/2) - centre_of_rotation
@@ -107,31 +112,38 @@ class TomobarRecon(BaseRecon, GpuPlugin):
         cite_info1.name = 'citation1'
         cite_info1.description = \
             ("First-order optimisation algorithm for linear inverse problems.")
-        cite_info1.bibtex = \
-            ("@article{beck2009,\n" +
-             "title={A fast iterative shrinkage-thresholding algorithm for linear inverse problems},\n" +
-             "author={Amir and Beck, Mark and Teboulle},\n" +
-             "journal={SIAM Journal on Imaging Sciences},\n" +
-             "volume={2},\n" +
-             "number={1},\n" +
-             "pages={183--202},\n" +
-             "year={2009},\n" +
-             "publisher={SIAM}\n" +
-             "}")
-        cite_info1.endnote = \
-            ("%0 Journal Article\n" +
-             "%T A fast iterative shrinkage-thresholding algorithm for linear inverse problems\n" +
-             "%A Beck, Amir\n" +
-             "%A Teboulle, Mark\n" +
-             "%J SIAM Journal on Imaging Sciences\n" +
-             "%V 2\n" +
-             "%N 1\n" +
-             "%P 183--202\n" +
-             "%@ --\n" +
-             "%D 2009\n" +
-             "%I SIAM\n")
+        cite_info1.bibtex = self.get_bibtex().__doc__
+        cite_info1.endnote = self.get_endnote().__doc__
         cite_info1.doi = "doi: "
         return cite_info1
+
+    def get_endnote(self):
+        """%0 Journal Article
+        %T A fast iterative shrinkage thresholding algorithm for linear inverse problems
+        %A Beck, Amir
+        %A Teboulle, Mark
+        %J SIAM Journal on Imaging Sciences
+        %V 2
+        %N 1
+        %P 183202
+        %@
+        %D 2009
+        %I SIAM
+        """
+
+    def get_bibtex(self):
+        """@article{beck2009fast,
+        title = {A fast iterative shrinkage thresholding algorithm for linear inverse problems},
+        author={Beck, Amir and Teboulle, Marc},
+        journal={SIAM journal on imaging sciences},
+        volume={2},
+        number={1},
+        pages={183 202},
+        year={2009},
+        publisher={SIAM}
+        }
+        """
+
         '''
 
         A Plugin to reconstruct full-field tomographic projection data using state-of-the-art regularised iterative algorithms from \
