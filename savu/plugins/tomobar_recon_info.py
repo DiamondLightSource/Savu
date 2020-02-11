@@ -42,7 +42,7 @@ class TomoBarReconInfo(PluginInfo):
             visibility: advanced
             type: float
             description: a power parameter for Huber model.
-            default: 1.5
+            default: 1.4
         """
 
 
