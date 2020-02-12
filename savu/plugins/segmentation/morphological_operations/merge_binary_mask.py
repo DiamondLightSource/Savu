@@ -15,8 +15,7 @@
 """
 .. module:: module to remove gaps in the provided binary mask by merging the boundaries
    :platform: Unix
-   :synopsis: module to remove gaps in the provided binary mask by merging\
-   the boundaries
+   :synopsis: module to remove gaps in the provided binary mask by merging the boundaries
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
@@ -36,19 +35,19 @@ class MergeBinaryMask(Plugin, CpuPlugin):
     :param selectedclass: The selected class for merging. Default: 0.
     :param correction_window: The size of the correction window. Default: 9.
     :param iterations: The number of iterations for segmentation. Default: 10.
-    :param out_datasets: Default out dataset names. Default: ['mask_merged']
+    :param pattern: pattern to apply this to. Default: "VOLUME_XY".
     """
 
     def __init__(self):
         super(MergeBinaryMask, self).__init__("MergeBinaryMask")
 
-    def setup(self):
-    
+    def setup(self):    
         in_dataset, out_dataset = self.get_datasets()
-        out_dataset[0].create_dataset(in_dataset[0])
         in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup('VOLUME_XZ', 'single')
-        out_pData[0].plugin_data_setup('VOLUME_XZ', 'single')
+        in_pData[0].plugin_data_setup(self.parameters['pattern'], 'single')
+
+        out_dataset[0].create_dataset(in_dataset[0], dtype=np.uint8)
+        out_pData[0].plugin_data_setup(self.parameters['pattern'], 'single')
     
     def pre_process(self):
         # extract given parameters
@@ -58,7 +57,7 @@ class MergeBinaryMask(Plugin, CpuPlugin):
 
     def process_frames(self, data):
         # run class merging here:
-        pars = {'maskdata' : data[0].astype(np.uint8),\
+        pars = {'maskdata' : np.uint8(data[0]),\
         'selectedClass': self.selectedClass,\
         'CorrectionWindow' : self.CorrectionWindow ,\
         'iterationsNumb' : self.iterationsNumb}
@@ -66,7 +65,7 @@ class MergeBinaryMask(Plugin, CpuPlugin):
         mask_merged = MASK_CORR_BINARY(pars['maskdata'], 
                 pars['selectedClass'], pars['CorrectionWindow'], pars['iterationsNumb'])        
        
-        return [mask_merged]
+        return mask_merged
     
     def nInput_datasets(self):
         return 1
