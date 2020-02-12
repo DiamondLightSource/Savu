@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: tomobar_recon3D
+.. module:: Tomographic Model-Based Reconstruction module for an approximated (faster) 3D reconstruction
    :platform: Unix
    :synopsis: A wrapper around TOmographic MOdel-BAsed Reconstruction (ToMoBAR) software \
    for advanced iterative image reconstruction using _3D_ capabilities of regularisation. \
@@ -32,14 +32,14 @@ from tomobar.methodsIR import RecToolsIR
 from savu.plugins.utils import register_plugin
 
 @register_plugin
-class TomobarRecon3dMultinode(BaseRecon, GpuPlugin):
+class TomobarRecon3d(BaseRecon, GpuPlugin):
     """
     A Plugin to reconstruct full-field tomographic projection data using state-of-the-art regularised iterative algorithms from \
     the ToMoBAR package. ToMoBAR includes FISTA and ADMM iterative methods and depends on the ASTRA toolbox and the CCPi RGL toolkit: \
     https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
 
     :param output_size: The dimension of the reconstructed volume (only X-Y dimension). Default: 'auto'.
-    :param padding: The amount of pixels to pad each slab of the cropped projection data. Default: 15.
+    :param padding: The amount of pixels to pad each slab of the cropped projection data. Default: 17.
     :param data_fidelity: Data fidelity, Least Squares only at the moment. Default: 'LS'.
     :param data_Huber_thresh: Threshold parameter for __Huber__ data fidelity . Default: None.
     :param data_any_rings: a parameter to suppress various artifacts including rings and streaks. Default: None.
@@ -67,7 +67,7 @@ class TomobarRecon3dMultinode(BaseRecon, GpuPlugin):
     """
 
     def __init__(self):
-        super(TomobarRecon3dMultinode, self).__init__("TomobarRecon3dMultinode")
+        super(TomobarRecon3d, self).__init__("TomobarRecon3d")
 
     def _get_output_size(self, in_data):
         sizeX = self.parameters['output_size']
