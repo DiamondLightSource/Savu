@@ -61,7 +61,7 @@ class BaseRecon(Plugin):
         size along given axis. Default: 0.95.
     :param log_func: Override the default log \
         function. Default: 'np.nan_to_num(-np.log(sino))'.
-    :param vol_shape: Override the size of the reconstuction volume with an \
+    :param vol_shape: Override the size of the reconstruction volume with an \
     integer value. Default: 'fixed'.
     """
 

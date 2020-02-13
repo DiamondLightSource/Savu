@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: Segmentation by threhsolding based on lower and upper intensities
+.. module:: module to remove gaps in the provided binary mask by merging the boundaries
    :platform: Unix
-   :synopsis: Segmentation by threhsolding based on lower and upper intensities
+   :synopsis: module to remove gaps in the provided binary mask by merging the boundaries
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
@@ -25,43 +25,50 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 
 import numpy as np
+from i23.methods.segmentation import MASK_CORR_BINARY
 
 @register_plugin
-class ThreshSegm(Plugin, CpuPlugin):
+class MergeBinaryMask(Plugin, CpuPlugin):
     """
-    A Plugin to segment the data by providing two scalar values for lower and upper intensities
+    A plugin to remove gaps in the provided binary mask by merging the boundaries
 
-    :param min_intensity: A scalar to define lower limit for intensity, all values below are set to zero. Default: 0.
-    :param max_intensity: A scalar to define upper limit for intensity, all values above are set to zero. Default: 0.01.
-    :param value: An integer to set all values between min_intensity and max_intensity. Default: 1.
-    :param pattern: pattern to apply this to. Default: "VOLUME_YZ".
+    :param selectedclass: The selected class for merging. Default: 0.
+    :param correction_window: The size of the correction window. Default: 9.
+    :param iterations: The number of iterations for segmentation. Default: 10.
+    :param pattern: pattern to apply this to. Default: "VOLUME_XY".
     """
 
     def __init__(self):
-        super(ThreshSegm, self).__init__("ThreshSegm")
+        super(MergeBinaryMask, self).__init__("MergeBinaryMask")
 
-    def setup(self):
-
+    def setup(self):    
         in_dataset, out_dataset = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
         in_pData[0].plugin_data_setup(self.parameters['pattern'], 'single')
 
         out_dataset[0].create_dataset(in_dataset[0], dtype=np.uint8)
         out_pData[0].plugin_data_setup(self.parameters['pattern'], 'single')
-
+    
     def pre_process(self):
         # extract given parameters
-        self.min_limit = self.parameters['min_intensity']
-        self.max_limit = self.parameters['max_intensity']
-        self.value = self.parameters['value']
+        self.selectedClass = self.parameters['selectedclass']
+        self.iterationsNumb = self.parameters['iterations']
+        self.CorrectionWindow = self.parameters['correction_window']        
 
     def process_frames(self, data):
-        thresh_result = np.uint8(np.zeros(np.shape(data[0])))
-        thresh_result[(data[0] >= self.min_limit) & (data[0] < self.max_limit)] = self.value
-        return thresh_result
-
+        # run class merging here:
+        pars = {'maskdata' : np.uint8(data[0]),\
+        'selectedClass': self.selectedClass,\
+        'CorrectionWindow' : self.CorrectionWindow ,\
+        'iterationsNumb' : self.iterationsNumb}
+        
+        mask_merged = MASK_CORR_BINARY(pars['maskdata'], 
+                pars['selectedClass'], pars['CorrectionWindow'], pars['iterationsNumb'])        
+       
+        return mask_merged
+    
     def nInput_datasets(self):
         return 1
-
     def nOutput_datasets(self):
         return 1
+    
