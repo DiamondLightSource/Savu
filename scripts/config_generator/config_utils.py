@@ -114,13 +114,11 @@ def _add_module(failed_imports, loader, module_name, error_mode):
                 pass
 
 
-def populate_plugins(dawn=False, error_mode=False):
+def populate_plugins(dawn=False, error_mode=False, examples=False):
     # load all the plugins
-    plugins_path = pu.get_plugins_paths()
-    savu_path = plugins_path[-1].split('savu')[0]
+    plugins_path = pu.get_plugins_paths(examples=examples)
     savu_plugins = plugins_path[-1:]
-    local_plugins = plugins_path[0:-1] + [savu_path +
-                                'plugin_examples/plugin_templates']
+    local_plugins = plugins_path[0:-1]
 
     failed_imports = {}
     # load local plugins
