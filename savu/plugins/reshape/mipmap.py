@@ -49,12 +49,6 @@ class Mipmap(Plugin, CpuPlugin):
     def __init__(self):
         super(Mipmap, self).__init__("Mipmap")
 
-    def dynamic_data_info(self):
-        self.n_mipmaps = self.parameters['n_mipmaps']
-        name = self.parameters['out_dataset_prefix']
-        self.parameters['out_datasets'] = \
-            ['%s_%i' % (name, 2**i) for i in range(self.n_mipmaps)]
-
     def process_frames(self, data):
         self.mode_dict = { 'mean'  : np.mean,
                            'median': np.median,
@@ -106,8 +100,11 @@ class Mipmap(Plugin, CpuPlugin):
         return 1
 
     def nOutput_datasets(self):
-        # dummy value the real number is decided at runtime
-        return 1
+        n_mipmaps = self.parameters['n_mipmaps']
+        name = self.parameters['out_dataset_prefix']
+        self.parameters['out_datasets'] = \
+            ['%s_%i' % (name, 2**i) for i in range(n_mipmaps)]        
+        return n_mipmaps
 
     def get_max_frames(self):
         return 8
