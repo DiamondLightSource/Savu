@@ -127,7 +127,7 @@ def set_plugin_list(options, pnames, *args):
     data = [{}, {}] if not args else [args[0], args[-1]]
     for i in range(len(plugin_names)):
         ID.insert(i+1, plugin_names[i])
-        plugin = pu.get_plugin(plugin_names[i])
+        plugin = pu.load_class(plugin_names[i])()
         data_dict = set_data_dict(['tomo'], get_output_datasets(plugin))
         data_dict = args[i+1] if args else data_dict
         data.insert(i+1, data_dict)
@@ -189,11 +189,13 @@ def _add_loader_to_plugin_list(options, params={}):
     options['plugin_list'] = plugin_list
 
 
-def load_random_data(loader, params, system_params=None):
+def load_random_data(loader, params, system_params=None, fake=False):
     options = set_options(get_test_data_path('24737.nxs'))
     options['loader'] = 'savu.plugins.loaders.' + str(loader)
     options['system_params'] = system_params
     _add_loader_to_plugin_list(options, params=params)
+    if fake:
+        return fake_plugin_runner(options).exp
     return plugin_runner(options)
 
 
@@ -216,11 +218,13 @@ def set_process(exp, process, processes):
 
 
 def plugin_runner(options):
+    # the real plugin runner runs a full plugin list
     plugin_runner = PluginRunner(options)
     return plugin_runner._run_plugin_list()
 
-
-def plugin_runner_load_plugin(options):
+def fake_plugin_runner(options):
+    # Stripped down version of the plugin runner
+    # Loads the loader plugin but stops before processing plugins
     plugin_runner = PluginRunner(options)
     plugin_runner.exp = Experiment(options)
     plugin_list = plugin_runner.exp.meta_data.plugin_list.plugin_list
@@ -228,32 +232,26 @@ def plugin_runner_load_plugin(options):
     exp = plugin_runner.exp
     pu.plugin_loader(exp, plugin_list[0])
     exp._set_nxs_file()
+    return plugin_runner
 
+
+def plugin_runner_load_plugin(options):
+    # Loads the loader plugin and the first plugin in the list and initialises
+    # it (i.e. sets parameters and calls setup method)
+    pRunner = fake_plugin_runner(options)
+    plugin_list = pRunner.exp.meta_data.plugin_list.plugin_list
     plugin_dict = plugin_list[1]
-    plugin = pu.get_plugin(plugin_dict['id'])
-    plugin.exp = exp
-
+    plugin = pu.plugin_loader(pRunner.exp, plugin_dict)
     return plugin
-
-
-def plugin_setup(plugin):
-    plugin_list = plugin.exp.meta_data.plugin_list.plugin_list
-    plugin_dict = plugin_list[1]
-    pu.set_datasets(plugin.exp, plugin, plugin_dict)
-    plugin._set_parameters(plugin_dict['data'])
-    plugin._set_plugin_datasets()
-    plugin.setup()
 
 
 def plugin_runner_real_plugin_run(options):
     plugin_runner = PluginRunner(options)
-    plugin_runner.exp = Experiment(options)
     plugin_list_inst = plugin_runner.exp.meta_data.plugin_list
     plugin_list = plugin_list_inst.plugin_list
     plugin_runner._run_plugin_list_check(plugin_list_inst)
 
     exp = plugin_runner.exp
-
     pu.plugin_loader(exp, plugin_list[0])
 
     start_in_data = copy.deepcopy(exp.index['in_data'])
@@ -267,12 +265,6 @@ def plugin_runner_real_plugin_run(options):
 
     plugin = pu.plugin_loader(exp, plugin_list[1])
     plugin._run_plugin(exp, plugin_runner)
-
-#    out_datasets = plugin.parameters["out_datasets"]
-#    exp._reorganise_datasets(out_datasets, 'final_result')
-#
-#    for key in exp.index["in_data"].keys():
-#        exp.index["in_data"][key].close_file()
 
 
 def get_test_process_list(folder):
