@@ -25,9 +25,6 @@ from savu.plugins.utils import register_plugin
 import numpy as np
 import pyfftw.interfaces.scipy_fftpack as fft
 from savu.data.plugin_list import CitationInformation
-from PIL import Image
-import errno
-import os
 
 
 @register_plugin
