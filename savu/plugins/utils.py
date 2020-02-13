@@ -133,7 +133,7 @@ def get_plugins_paths(examples=True):
     # get user and environment plugin paths
     user_path = [os.path.join(os.path.expanduser("~"), 'savu_plugins')]
     env_paths = list(itertools.ifilter(None, (
-            os.getenv("SAVU_PLUGIN_PATH") or "").replace(" ","").split(":")))
+            os.getenv("SAVU_PLUGINS_PATH") or "").replace(" ","").split(":")))
     
     # If examples have been requested then add them to the path
     eg_path = os.path.join(savu.__path__[0],
