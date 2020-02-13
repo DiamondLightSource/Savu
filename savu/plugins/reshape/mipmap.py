@@ -20,6 +20,7 @@
 
 import math
 import h5py
+import logging
 import numpy as np
 import skimage.measure as skim
 
@@ -85,8 +86,8 @@ class Mipmap(Plugin, CpuPlugin):
 
         # Sort out input data
         max_frames = self.get_max_frames()
-        in_pData[0].plugin_data_setup('VOLUME_XY', max_frames,
-                slice_axis='voxel_z')
+        in_pData[0].plugin_data_setup('VOLUME_XZ', max_frames,
+                slice_axis='voxel_y')
 
         # use this for 3D data (need to keep slice dimension)
         out_dataset = self.get_out_datasets()
@@ -98,8 +99,8 @@ class Mipmap(Plugin, CpuPlugin):
             out_dataset[i].create_dataset(axis_labels=in_dataset[0],
                                           patterns=in_dataset[0],
                                           shape=shape)
-            out_pData[i].plugin_data_setup('VOLUME_XY', max_frames/2**i,
-                     slice_axis='voxel_z')
+            out_pData[i].plugin_data_setup('VOLUME_XZ', max_frames/2**i,
+                     slice_axis='voxel_y')
 
     def nInput_datasets(self):
         return 1
