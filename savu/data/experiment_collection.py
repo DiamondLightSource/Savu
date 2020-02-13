@@ -93,7 +93,7 @@ class Experiment(object):
         plugin_list = self.meta_data.plugin_list
         plist = plugin_list.plugin_list
         self.__set_transport(transport)
-        # load the loader plugins
+        # load the loader plugins        
         self._set_loaders()
         # load the saver plugin and save the plugin list
         self.experiment_collection = {'plugin_dict': [],
@@ -103,9 +103,9 @@ class Experiment(object):
         self._barrier()
         checkpoint = self.meta_data.get('checkpoint')
         if self.meta_data.get('process') == \
-                len(self.meta_data.get('processes'))-1 and not checkpoint:
+                len(self.meta_data.get('processes'))-1 and not checkpoint:                  
             plugin_list._save_plugin_list(self.meta_data.get('nxs_filename'))
-            # links the input data to the nexus file
+            # links the input data to the nexus file            
             self._add_input_data_to_nxs_file(transport)
         # Barrier 13
         self._barrier()
@@ -240,8 +240,8 @@ class Experiment(object):
         if self.meta_data.get('process') == \
                 len(self.meta_data.get('processes'))-1:
   	    with h5py.File(self.meta_data.get('nxs_filename'), 'w') as nxs_file:
-	        entry_group = nxs_file.create_group('entry')
-	        entry_group.attrs['NX_class'] = 'NXentry'
+              entry_group = nxs_file.create_group('entry')
+              entry_group.attrs['NX_class'] = 'NXentry'
 
     def _clear_data_objects(self):
         self.index["out_data"] = {}

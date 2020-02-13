@@ -47,7 +47,7 @@ class NxtomoLoader(BaseLoader):
     :param flat: Optional Path to the flat field data file, nxs path and \
         scale value. Default: [None, None, 1].
     :param angles: A python statement to be evaluated or a file. Default: None.
-    :param 3d_to_4d: If this if 4D data stored in 3D then pass an integer \
+    :param 3d_to_4d: If this is 4D data stored in 3D then pass an integer \
         value equivalent to the number of projections per 180-degree scan\
         . Default: False.
     :param ignore_flats: List of batch numbers of flats (start at 1) to \
