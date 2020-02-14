@@ -232,9 +232,10 @@ class Content(object):
                 value = self.value(value)
             pos = self.find_position(pos_str)
             data_elements = self.plugin_list.plugin_list[pos]['data']
+            current_params = [k for k, v in self.plugin_list.plugin_list[pos]['info'].items() if v['visibility'] != 'hide']
+            # Filter the parameter names to find those not hidden
             if param_name.isdigit():
-                param_name = \
-                    self.plugin_list.plugin_list[pos]['map'][int(param_name)-1]
+                param_name = current_params[int(param_name)-1]
             if self.plugin_list._is_valid(value, param_name, pos):
                 data_elements[param_name] = value
                 self.update_defaults(pos, mod=True)
@@ -257,23 +258,21 @@ class Content(object):
         dependent parameters
         '''
         data_elements = self.plugin_list.plugin_list[pos]['data']
-        map = self.plugin_list.plugin_list[pos]['map']
-        default_list = self.plugin_list.plugin_list[pos]['defaults']
-        for param_name in map:
-            defaults = default_list.get(param_name)
-            desc = self.plugin_list.plugin_list[pos]['desc'][param_name]
-
-            if isinstance(defaults, OrderedDict):
-                parent_param = defaults.keys()[0]
-                dep_param_choices = defaults[parent_param]
+        p_list = self.plugin_list.plugin_list[pos]['info']
+        for p_name, p_value in p_list.items():
+            default = p_list.get('default')
+            desc = p_list.get('description')
+            if isinstance(default, OrderedDict):
+                parent_param = default.keys()[0]
+                dep_param_choices = default[parent_param]
                 parent_value = data_elements[parent_param]
                 for item in dep_param_choices.keys():
                     if parent_value == item:
-                        desc['range'] = 'The recommended value with the chosen '\
-                            + str(parent_param) + ' would be ' \
-                            + str(dep_param_choices[item])
+                        desc['range'] = 'The recommended value with the chosen ' \
+                                        + str(parent_param) + ' would be ' \
+                                        + str(dep_param_choices[item])
                         recommendation = 'It\'s recommended that you update ' \
-                                         + str(param_name) + ' to ' \
+                                         + str(p_name) + ' to ' \
                                          + str(dep_param_choices[item])
                         if mod is True:
                             print(recommendation)
@@ -283,24 +282,23 @@ class Content(object):
         value and whether they should be hidden or shown
         """
         data_elements = self.plugin_list.plugin_list[pos]['data']
-        map = self.plugin_list.plugin_list[pos]['map']
-        visibility = self.plugin_list.plugin_list[pos]['visibility']
-        hidden_items = [k for k in visibility.keys() if visibility[k] == 'hide']
 
-        for param_name in map:
-            dependencies = self.plugin_list.plugin_list[pos]['dependencies'].get(param_name)
-            if isinstance(dependencies, OrderedDict):
-                parent_param_name = dependencies.keys()[0]
-                parent_choice_list = dependencies[parent_param_name]
-                # The choices which must be in the parent value
-                parent_value = data_elements[parent_param_name]
+        p_list = self.plugin_list.plugin_list[pos]['info']
+        for p_name, p_value in p_list.items():
+            if p_value is not None:
+                dependencies = p_value.get('dependency') or {}
+                if isinstance(dependencies, OrderedDict):
+                    parent_param_name = dependencies.keys()[0]
+                    parent_choice_list = dependencies[parent_param_name]
+                    # The choices which must be in the parent value
+                    parent_value = data_elements[parent_param_name]
 
-                if parent_value in parent_choice_list:
-                    if param_name in hidden_items:
-                        visibility[param_name] = 'param'
-                else:
-                    if param_name not in hidden_items:
-                        visibility[param_name] = 'hide'
+                    if parent_value in parent_choice_list:
+                        if p_value.get('visibility') == 'hide':
+                            p_value['visibility'] = 'param'
+                    else:
+                        if p_value.get('visibility') != 'hide':
+                            p_value['visibility'] = 'hide'
 
     def value(self, value):
         if not value.count(';'):
@@ -436,18 +434,8 @@ class Content(object):
         plugin_dict['id'] = plugin.__module__
         plugin_dict['data'] = plugin.parameters
         plugin_dict['active'] = True
-        plugin_dict['desc'] = plugin.parameters_desc
-        plugin_dict['visibility'] = plugin.parameters_visibility
-        plugin_dict['types'] = plugin.parameters_types
-        plugin_dict['dependencies'] = plugin.parameters_dependencies
-        plugin_dict['defaults'] = plugin.parameters_defaults
+        plugin_dict['info'] = plugin.param
         plugin_dict['doc'] = plugin.docstring_info
-
-        dev_keys = [k for k in plugin_dict['data'].keys() if plugin_dict['visibility'][k] not in ['user', 'hide']]
-        user_keys = [k for k in plugin_dict['data'].keys() if plugin_dict['visibility'][k] == 'user']
-        hidden_keys = [k for k in plugin_dict['data'].keys() if plugin_dict['visibility'][k] == 'hide']
-        # Is the order 'user' 'dev' 'hidden' here for a reason
-        plugin_dict['map'] = user_keys + dev_keys + hidden_keys
         return plugin_dict
 
     def get(self, pos):
