@@ -14,7 +14,7 @@ class PluginCitations(object):
 
     def cite_set(self):
         self.cite_info.set('bibtex', self.get_bibtex.__doc__)
-        self.cite_info.set('endnote', self.get_endnote().__doc__)
+        self.cite_info.set('endnote', self.get_endnote.__doc__)
 
     def get_bibtex(self):
         pass
@@ -29,26 +29,20 @@ class PluginParameters(object):
     def __init__(self):
         super(PluginParameters, self).__init__()
         self.param_info = MetaData()
-        self._get_plugin_parameters()
+        self.param_info = self.get_plugin_parameters()
 
-    def _get_plugin_parameters(self):
+    def get_plugin_parameters(self):
         # function to get plugin parameters
         params = MetaData()
-        # get the docstring
-        # read yaml structure
-        # check the parameter
         yaml_text = self.define_parameters.__doc__
-        all_params, verbose = doc._load_yaml(yaml_text)
-
-        for key, value in params.get_dictionary().iteritems():
-            name = key
-            param_dict = value
-            vis = all_params['vis']
-            dtype = all_params['type']
-            dep = all_params['dep'] if 'dep' in param_dict.keys() else None
-            self.param_info.set(name, param_dict)
-            #params[name] = Parameter(vis, dtype, dep)
-        # create dictionary
+        all_params, verbose = doc._load_yaml_doc(yaml_text)
+        for p_name, p_value in all_params.items():
+            params.set(p_name, p_value)
+            #vis = p_value['visibility']
+            #dtype = p_value['type']
+            #dep = p_value['dependency'] if 'dependency' in all_params.keys() else None
+            #params[p_name] = Parameter(vis, dtype, dep)
+        return params
 
     def define_parameters(self):
         pass
@@ -80,6 +74,10 @@ class PluginDocumentation(object):
     def __init__(self):
         super(PluginDocumentation, self).__init__()
         self.doc_info = MetaData()
+        self.doc_set()
+
+    def doc_set(self):
+        self.doc_info.set('doc', self.__doc__)
 
 class PluginInfo(PluginCitations, PluginParameters, PluginDocumentation):
 

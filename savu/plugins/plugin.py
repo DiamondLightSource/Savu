@@ -32,6 +32,7 @@ import numpy as np
 import savu.plugins.docstring_parser as doc
 from savu.plugins.plugin_datasets import PluginDatasets
 from collections import OrderedDict
+from savu.plugins.plugin_base_info import PluginBaseInfo
 
 class Plugin(PluginDatasets):
     """
@@ -40,18 +41,14 @@ class Plugin(PluginDatasets):
         super(Plugin, self).__init__()
         self.name = name
         self.parameters = OrderedDict()
-        self.parameters_types = {}
-        self.parameters_options = {}
-        self.parameters_visibility = {}
-        self.parameters_dependencies = {}
-        self.parameters_defaults = {}
-        self.parameters_desc = {}
         self.chunk = False
         self.docstring_info = {}
         self.slice_list = None
         self.global_index = None
         self.pcount = 0
         self.exp = None
+        self.info = PluginBaseInfo()
+        self.param = OrderedDict()
 
     def _main_setup(self, exp, params):
         """ Performs all the required plugin setup.
@@ -92,16 +89,11 @@ class Plugin(PluginDatasets):
             self.parameters[name] = info['values'][indices[count]]
             count += 1
 
-    def _return_yaml_path(self, clazz):
-        current_path = inspect.getfile(clazz)
-        filename = os.path.basename(current_path)
-        yaml_name = filename.split('.')[0] + '.yaml'
-        current_path = current_path.split(filename)[0]
-        yaml_path = current_path + yaml_name
-        return yaml_path
+    def load_param_info(self):
+        return self.info
 
     def _load_yaml_details(self):
-        """parameters_desc
+        """
         Load yaml details from docstring of this instance of the plugin.
 
         Determines the parameters for this instance of the plugin.
@@ -113,20 +105,18 @@ class Plugin(PluginDatasets):
             # return a tuple of class cls's base classes, including cls
             if clazz != object:
                 desc = doc.find_args(clazz, self)
+                if hasattr(clazz, 'load_param_info'):
+                    all_params = clazz().load_param_info().plugin_info.get('parameters')
+                    for p_key, p in all_params.items():
+                        self.check_required_keys(p, p_key)
+                        visibility = p.get('visibility') or {}
+                        if visibility != 'not_param':
+                            self.param[p_key] = p
+                            self._set_defaults(p, p_key)
                 self.docstring_info['warn'] = desc['warn']
                 self.docstring_info['synopsis'] = desc['synopsis']
+                self.docstring_info['info'] = 'Additional information if needed.'
 
-                yaml_path = self._return_yaml_path(clazz)
-                all_params, verbose = doc._load_yaml(yaml_path)
-                self.docstring_info['info'] = verbose
-
-                for p in all_params:
-                    p_key = p.keys()[0]
-                    self.check_required_keys(p, p_key)
-                    visibility = p[p_key].get('visibility') or {}
-                    self.parameters_visibility[p_key] = visibility
-                    if visibility != 'not_param':
-                        self._add_yaml_item(p, p_key)
 
     def base_dynamic_data_info(self):
         """ Provides an opportunity to override the number and name of input
@@ -197,28 +187,12 @@ class Plugin(PluginDatasets):
         true_list = [i for i in item_list if i['name'] not in not_list]
         for item in true_list:
             self.parameters[item['name']] = item['default']
-            self.parameters_types[item['name']] = item['dtype']
-            self.parameters_desc[item['name']] = item['desc']
-
-    def _add_yaml_item(self, p, p_key):
-        """ Determines the parameters for this instance of the plugin
-
-        param hidden_items is returned with dependent parameters hidden
-        """
-        self.parameters_types[p_key] = p[p_key].get('type') or {}
-        self.parameters_desc[p_key] = p[p_key].get('description') or {}
-        self.parameters_defaults[p_key] = p[p_key].get('default')
-        self._set_defaults(p, p_key)
-        if 'dependency' in p[p_key].keys():
-            self.parameters_dependencies[p_key] = p[p_key].get('dependency')
-        if 'options' in p[p_key].keys():
-            self.parameters_options[p_key] = p[p_key].get('options')
 
     def _set_defaults(self, p, p_key):
         '''Set the default value for dependent parameters
         It may be sensible to check the type of the defaults as a precaution
         '''
-        defaults = p[p_key].get('default')
+        defaults = p.get('default')
         if isinstance(defaults, OrderedDict):
             # Set the default value if there is a dependency
             parent_param = defaults.keys()[0]
@@ -232,7 +206,7 @@ class Plugin(PluginDatasets):
 
     def check_required_keys(self, p, p_key):
         required_keys = ['type', 'description', 'visibility', 'default']
-        all_keys = p[p_key].keys()
+        all_keys = p.keys()
         if not all(d in all_keys for d in required_keys):
             print('The missing required keys for ' + str(p_key) + ' are: ')
             print(', '.join(set(required_keys) - set(all_keys)))
@@ -240,12 +214,9 @@ class Plugin(PluginDatasets):
     def delete_parameter_entry(self, param):
         if param in self.parameters.keys():
             del self.parameters[param]
-            del self.parameters_types[param]
-            del self.parameters_desc[param]
 
     def initialise_parameters(self):
         self.parameters = {}
-        self.parameters_types = {}
         self._populate_default_parameters()
         self.multi_params_dict = {}
         self.extra_dims = []
@@ -278,7 +249,8 @@ class Plugin(PluginDatasets):
         associated parameters, so the framework knows the new size of the data
         and which plugins to re-run.
         """
-        dtype = self.parameters_types[key]
+        dtype = self.param[key].get('type')
+
         if isinstance(value, str) and ';' in value:
             value = value.split(';')
             if ":" in value[0]:

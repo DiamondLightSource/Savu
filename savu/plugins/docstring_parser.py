@@ -71,9 +71,29 @@ def _load_yaml(lines):
                     verbose = info['verbose']
                 else:
                     verbose = ''
-
     return all_params, verbose
 
+def _load_yaml_doc(lines):
+    """
+    Load in the yaml format. Call yaml_utils.py
+    ----------
+    Parameters:
+            - lines: String of information
+    ----------
+    Return:
+            - param_entry: Ordered dict of parameters
+            - verbose: Further description
+            - warning:
+    """
+    all_params = ''
+    verbose = ''
+
+    text = yu.read_yaml_from_doc(lines)
+    for doc in text:
+        # Each yaml document
+        all_params = doc
+
+    return all_params, verbose
 
 def _parse_args(mod_doc_lines, lines):
     param_list, user, hide, not_param, param_lines = __get_params(lines)

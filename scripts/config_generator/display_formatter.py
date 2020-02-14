@@ -77,23 +77,16 @@ class DisplayFormatter(object):
         keycount = 0
 
         param_dict = copy.deepcopy(temp_param_dict)
-        dev_keys = [k for k in param_dict['data'].keys() if param_dict['visibility'][k] not in ['user', 'hide']]
-        user_keys = [k for k in param_dict['data'].keys() if param_dict['visibility'][k] == 'user']
+        keys = [k for k, v in param_dict['info'].items() if v['visibility'] != 'hide']
 
         try:
-            keys = user_keys + dev_keys
             for key in keys:
                 keycount += 1
                 if int(subelem) == int(keycount):
                     element_present = True
-                    for i in list(param_dict['map']):
-                        # Use list to make a copy of keys
+                    for i in list(param_dict['info']):
                         if i != key:
-                            param_dict['map'].remove(i)
-
-                    for i in list(param_dict['visibility']):
-                        if i != key:
-                            param_dict['visibility'][i] = 'hide'
+                            param_dict['info'][i]['visibility'] = 'hide'
 
             if element_present is False:
                 print('No matching sub element number found.')
@@ -142,18 +135,6 @@ class DisplayFormatter(object):
             temp = joiner + Fore.GREEN + "%s" + Fore.RESET
             params += temp % verbose
 
-        if param_key == 'range':
-            p_range = desc[key]['range']
-            if p_range:
-                try:
-                    p_range = joiner.join(textwrap.wrap(p_range,
-                                                        width=width - margin))
-                    temp = joiner + Fore.MAGENTA + "%s" + Fore.RESET
-                    params += temp % p_range
-                except TypeError:
-                    print('You have not filled in the %s field within the'
-                          ' yaml information.' % param_key)
-
         return params
 
     def _get_param_details(self, level, p_dict, width, desc=False,
@@ -163,8 +144,8 @@ class DisplayFormatter(object):
         joiner = "\n" + " "*margin
         params = ''
 
-        dev_keys = [k for k in p_dict['data'].keys() if p_dict['visibility'][k] not in ['user', 'hide']]
-        user_keys = [k for k in p_dict['data'].keys() if p_dict['visibility'][k] == 'user']
+        dev_keys = [k for k, v in p_dict['info'].items() if v['visibility'] not in ['user', 'hide']]
+        user_keys = [k for k, v in p_dict['info'].items() if v['visibility'] == 'user']
 
         try:
             keys = user_keys if level == 'user' else user_keys + dev_keys
@@ -284,11 +265,12 @@ class DispDisplay(DisplayFormatter):
         colour_off = Back.RESET + Fore.RESET
         synopsis = \
             self._get_synopsis(p_dict, width, colour_on, colour_off)
+        param_desc = {k: v['description'] for k, v in p_dict['info'].items()}
         params = \
-            self._get_param_details(level, p_dict, width, desc=p_dict['desc'])
+            self._get_param_details(level, p_dict, width, desc=param_desc)
         if breakdown:
             params = \
-                self._get_param_details(level, p_dict, width, desc=p_dict['desc'],
+                self._get_param_details(level, p_dict, width, desc=param_desc,
                                         breakdown=breakdown)
             return title, synopsis, params
         return title + synopsis + params

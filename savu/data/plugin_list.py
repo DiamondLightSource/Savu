@@ -72,14 +72,12 @@ class PluginList(object):
         template = {'active': True,
                     'name': None,
                     'id': None,
-                    'desc': None,
                     'data': None,
-                    'visibility': None,
-                    'types': None}
+                    'info': None}
         return template
 
     def __get_json_keys(self):
-        return ['data', 'desc', 'visibility']
+        return ['data', 'info']
 
     def _populate_plugin_list(self, filename, activePass=False,
                               template=False):
@@ -123,10 +121,13 @@ class PluginList(object):
     def _is_valid(self, value, subelem, pos):
         parameter_valid = False
         options = ''
-        if subelem in self.plugin_list[pos]['types']:
-            # The parameter is within the types
-            ptype = self.plugin_list[pos]['types'][subelem]
-            pdesc = self.plugin_list[pos]['desc'][subelem]
+        if subelem in self.plugin_list[pos]['info']:
+            # The parameter is within the current shown parameter list
+
+            pinfo = self.plugin_list[pos]['info'][subelem]
+            pdesc = pinfo['description']
+            ptype = pinfo['type']
+
             if not isinstance(pdesc, str):
                 if 'options' in pdesc.keys():
                     options = pdesc['options']
@@ -136,7 +137,16 @@ class PluginList(object):
                 if isinstance(value, str):
                     if value.lower() in options:
                         parameter_valid = True
+                    else:
+                        print('That does not match one of the required options.')
+                        print(Fore.CYAN + '\nSome options are:')
+                        for o in options:
+                            print(o)
+                        print(Fore.RESET)
                 else:
+                    print('\nYour input for the parameter \'%s\' must match the'
+                          ' required type %s' % (subelem, ptype))
+
                     print(Fore.CYAN + '\nSome options are:')
                     for o in options:
                         print(o)
@@ -390,7 +400,7 @@ class PluginList(object):
             process['pos'] = str(pos)
             process['data'] = plugin.parameters
             process['active'] = True
-            process['desc'] = plugin.parameters_desc
+            process['info'] = plugin.param
             self._add(pos, process)
 
     def _get_dataset_flow(self):
