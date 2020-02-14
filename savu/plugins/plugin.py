@@ -48,7 +48,7 @@ class Plugin(PluginDatasets):
         self.pcount = 0
         self.exp = None
         self.info = PluginBaseInfo()
-        self.param = OrderedDict()
+        self.plugin_info = OrderedDict()
 
     def _main_setup(self, exp, params):
         """ Performs all the required plugin setup.
@@ -111,7 +111,7 @@ class Plugin(PluginDatasets):
                         self.check_required_keys(p, p_key)
                         visibility = p.get('visibility') or {}
                         if visibility != 'not_param':
-                            self.param[p_key] = p
+                            self.plugin_info[p_key] = p
                             self._set_defaults(p, p_key)
                 self.docstring_info['warn'] = desc['warn']
                 self.docstring_info['synopsis'] = desc['synopsis']
@@ -249,7 +249,7 @@ class Plugin(PluginDatasets):
         associated parameters, so the framework knows the new size of the data
         and which plugins to re-run.
         """
-        dtype = self.param[key].get('type')
+        dtype = self.plugin_info[key].get('type')
 
         if isinstance(value, str) and ';' in value:
             value = value.split(';')

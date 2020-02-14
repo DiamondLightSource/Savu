@@ -434,7 +434,7 @@ class Content(object):
         plugin_dict['id'] = plugin.__module__
         plugin_dict['data'] = plugin.parameters
         plugin_dict['active'] = True
-        plugin_dict['info'] = plugin.param
+        plugin_dict['info'] = plugin.plugin_info
         plugin_dict['doc'] = plugin.docstring_info
         return plugin_dict
 
