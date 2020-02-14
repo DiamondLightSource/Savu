@@ -61,6 +61,7 @@ class TomobarRecon(BaseRecon, GpuPlugin):
                        'ringGH_accelerate' :  self.parameters['data_full_ring_accelerator_GH']}
 
         self._algorithm_ = {'iterations' : self.parameters['algorithm_iterations'],
+			    'nonnegativity' : self.parameters['algorithm_nonnegativity'],
                             'verbose' : self.parameters['algorithm_verbose']}
 
         self._regularisation_ = {'method' : self.parameters['regularisation_method'],

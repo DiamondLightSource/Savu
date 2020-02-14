@@ -40,6 +40,7 @@ class Content(object):
         self.param_mutations = mutations.param_mutations
         self.filename = filename
         self._finished = False
+        self.failed = {}
 
     def set_finished(self, check='y'):
         self._finished = True if check.lower() == 'y' else False
@@ -102,7 +103,12 @@ class Content(object):
 
     def add(self, name, str_pos):
         if name not in pu.plugins.keys():
-            raise Exception("INPUT ERROR: Unknown plugin %s" % name)
+            if name in self.failed.keys():
+                msg = "IMPORT ERROR: %s is unavailable due to the following"\
+                " error:\n\t%s" % (name, self.failed[name])
+                raise Exception(msg)
+            else:
+                raise Exception("INPUT ERROR: Unknown plugin %s" % name)
         plugin = pu.plugins[name]()
         plugin._populate_default_parameters()
         pos, str_pos = self.convert_pos(str_pos)

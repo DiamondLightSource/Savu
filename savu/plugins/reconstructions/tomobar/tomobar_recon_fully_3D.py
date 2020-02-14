@@ -13,11 +13,12 @@
 # limitations under the License.
 
 """
-.. module:: tomobar_recon3D
+.. module:: Tomographic Model-Based Reconstruction module for an exact (slower) 3D reconstruction
    :platform: Unix
    :synopsis: A wrapper around TOmographic MOdel-BAsed Reconstruction (ToMoBAR) software \
    for advanced iterative image reconstruction using _3D_ capabilities of regularisation. \
-   The plugin will run on one cluster node, i.e. it can be slow.
+   The plugin will run on ONE cluster node taking all available memory, i.e. it can be slow\
+   and it can crash potenitally when out of memory.
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
@@ -31,7 +32,7 @@ from tomobar.methodsIR import RecToolsIR
 from savu.plugins.utils import register_plugin
 
 @register_plugin
-class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
+class TomobarReconFully3d(BaseRecon, MultiThreadedPlugin):
     """
     A Plugin to reconstruct full-field tomographic projection data using state-of-the-art regularised iterative algorithms from \
     the ToMoBAR package. ToMoBAR includes FISTA and ADMM iterative methods and depends on the ASTRA toolbox and the CCPi RGL toolkit: \
@@ -48,10 +49,11 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
     :param algorithm_iterations: Number of outer iterations for FISTA (default) or ADMM methods. Default: 20.
     :param algorithm_verbose: print iterations number and other messages ('off' by default). Default: 'off'.
     :param algorithm_ordersubsets: The number of ordered-subsets to accelerate reconstruction. Default: 6.
+    :param algorithm_nonnegativity: ENABLE or DISABLE nonnegativity constraint. Default: 'ENABLE'.
     :param regularisation_method: To regularise choose methods ROF_TV, FGP_TV, PD_TV, SB_TV, LLT_ROF,\
-                             NDF, Diff4th. Default: 'FGP_TV'.
+                             NDF, TGV, Diff4th. Default: 'FGP_TV'.
     :param regularisation_parameter: Regularisation (smoothing) value, higher \
-                            the value stronger the smoothing effect. Default: 0.0001.
+                            the value stronger the smoothing effect. Default: 0.00001.
     :param regularisation_iterations: The number of regularisation iterations. Default: 80.
     :param regularisation_device: The number of regularisation iterations. Default: 'gpu'.
     :param regularisation_PD_lip: Primal-dual parameter for convergence. Default: 8.
@@ -64,7 +66,7 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
     """
 
     def __init__(self):
-        super(TomobarRecon3d, self).__init__("TomobarRecon3d")
+        super(TomobarReconFully3d, self).__init__("TomobarReconFully3d")
 
     def _get_output_size(self, in_data):
         sizeX = self.parameters['output_size']
@@ -152,6 +154,7 @@ class TomobarRecon3d(BaseRecon, MultiThreadedPlugin):
                        'ringGH_accelerate' :  self.parameters['data_full_ring_accelerator_GH']}
 
         self._algorithm_ = {'iterations' : self.parameters['algorithm_iterations'],
+      			    'nonnegativity' : self.parameters['algorithm_nonnegativity'],
                             'verbose' : self.parameters['algorithm_verbose']}
 
         self._regularisation_ = {'method' : self.parameters['regularisation_method'],

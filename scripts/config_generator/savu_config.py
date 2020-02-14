@@ -249,14 +249,15 @@ def main():
 
     _reduce_logging_level()
 
+    content = Content(level="all" if args.disp_all else 'user')
+
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        utils.populate_plugins(error_mode=args.error)
+        content.failed = utils.populate_plugins(error_mode=args.error)
 
     comp = Completer(commands=commands, plugin_list=pu.plugins)
     utils._set_readline(comp.complete)
 
-    content = Content(level="all" if args.disp_all else 'user')
 
     # if file flag is passed then open it here
     if args.file:

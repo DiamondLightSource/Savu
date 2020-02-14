@@ -119,13 +119,16 @@ def error_catcher_valid(function):
             return value
     return error_catcher_wrap_function
 
-def _add_module(loader, module_name, error_mode):
+def _add_module(failed_imports, loader, module_name, error_mode):
     if module_name not in sys.modules:
         try:
             loader.find_module(module_name).load_module(module_name)
         except Exception as e:
+            clazz = ''.join([w.capitalize() for w in \
+                             module_name.split('.')[-1].split('_')])
+            failed_imports[clazz] = e
             if error_mode:
-                print e.message
+                print("\nUnable to load plugin %s\n%s" % (module_name, e))
             else:
                 pass
 
@@ -135,19 +138,23 @@ def populate_plugins(dawn=False, error_mode=False):
     plugins_path = pu.get_plugins_paths()
     savu_path = plugins_path[-1].split('savu')[0]
     savu_plugins = plugins_path[-1:]
-    local_plugins = plugins_path[0:-1] + [savu_path + 'plugins_examples']
+    local_plugins = plugins_path[0:-1] + [savu_path +
+                                'plugin_examples/plugin_templates']
 
+    failed_imports = {}
     # load local plugins
     for loader, module_name, is_pkg in pkgutil.walk_packages(local_plugins):
-        _add_module(loader, module_name, error_mode)
+        _add_module(failed_imports, loader, module_name, error_mode)
 
     # load savu plugins
     for loader, module_name, is_pkg in pkgutil.walk_packages(savu_plugins):
         if module_name.split('savu.plugins')[0] == '':
-            _add_module(loader, module_name, error_mode)
+            _add_module(failed_imports, loader, module_name, error_mode)
 
     if dawn:
         _dawn_setup()
+
+    return failed_imports
 
 
 def _dawn_setup():

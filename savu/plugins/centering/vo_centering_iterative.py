@@ -34,7 +34,7 @@ from savu.plugins.driver.iterative_plugin import IterativePlugin
 
 #    :u*param search_area: Search area in pixels from horizontal approximate \
 #        centre of the image. Default: (-50, 50).
-
+#    Deprecated !!!
 
 @register_plugin
 class VoCenteringIterative(BaseFilter, IterativePlugin):

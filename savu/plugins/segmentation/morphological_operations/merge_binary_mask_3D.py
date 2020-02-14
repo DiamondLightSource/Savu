@@ -13,30 +13,33 @@
 # limitations under the License.
 
 """
-.. module:: Gaussian mixture models for classification-segmentation routine
+.. module:: module to remove gaps in the provided 3D binary mask by merging the boundaries
    :platform: Unix
-   :synopsis: Wrapper around scikit GMM function
+   :synopsis: module to remove gaps in the provided 3D binary mask by merging the boundaries
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
 
 from savu.plugins.plugin import Plugin
+#from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.driver.multi_threaded_plugin import MultiThreadedPlugin
 from savu.plugins.utils import register_plugin
 
 import numpy as np
-from sklearn.mixture import GaussianMixture
+from i23.methods.segmentation import MASK_CORR_BINARY
 
 @register_plugin
-class GmmSegment3d(Plugin, MultiThreadedPlugin):
+class MergeBinaryMask3d(Plugin, MultiThreadedPlugin):
     """
-    A Plugin to segment data using Gaussian Mixtures from scikit
+    A plugin to remove gaps in the provided 3D binary mask by merging the boundaries
 
-    :param classes: The number of classes for GMM. Default: 5.
+    :param selectedclass: The selected class for merging. Default: 0.
+    :param correction_window: The size of the correction window. Default: 9.
+    :param iterations: The number of iterations for segmentation. Default: 10.
     """
 
     def __init__(self):
-        super(GmmSegment3d, self).__init__("GmmSegment3d")
+        super(MergeBinaryMask3d, self).__init__("MergeBinaryMask3d")
 
     def setup(self):
     
@@ -48,32 +51,21 @@ class GmmSegment3d(Plugin, MultiThreadedPlugin):
         
     def pre_process(self):
         # extract given parameters
-        self.classes = self.parameters['classes']
+        self.selectedClass = self.parameters['selectedclass']
+        self.CorrectionWindow = self.parameters['correction_window']        
+        self.iterationsNumb = self.parameters['iterations']       
 
     def process_frames(self, data):
-        # Do GMM classification/segmentation first
-        dimensdata = data[0].ndim
-        if (dimensdata == 2):
-            (Nsize1, Nsize2) = np.shape(data[0])
-            Nsize3 = 1
-        if (dimensdata == 3):
-            (Nsize1, Nsize2, Nsize3) = np.shape(data[0])
+        # run class merging here:
+        inputdata = data[0].copy(order='C')
+        pars = {'maskdata' : np.uint8(inputdata),\
+        'selectedClass': self.selectedClass,\
+        'CorrectionWindow' : self.CorrectionWindow ,\
+        'iterationsNumb' : self.iterationsNumb}               
         
-        inputdata = data[0].reshape((Nsize1*Nsize2*Nsize3), 1)/np.max(data[0])
-        
-        classif = GaussianMixture(n_components=self.classes, covariance_type="tied")
-        classif.fit(inputdata)
-        cluster = classif.predict(inputdata)
-        segm = classif.means_[cluster]
-        if (dimensdata == 2):
-            segm = segm.reshape(Nsize1, Nsize3, Nsize2)
-        else:
-            segm = segm.reshape(Nsize1, Nsize2, Nsize3)
-        maskGMM = segm.astype(np.float64) / np.max(segm)
-        maskGMM = 255 * maskGMM # Now scale by 255
-        maskGMM = maskGMM.astype(np.uint8) # obtain the GMM mask
-            
-        return [maskGMM]
+        mask_merged = MASK_CORR_BINARY(pars['maskdata'], pars['selectedClass'],\
+                                       pars['CorrectionWindow'], pars['iterationsNumb'])       
+        return mask_merged
     
     def nInput_datasets(self):
         return 1
