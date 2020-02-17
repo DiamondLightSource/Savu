@@ -3,11 +3,12 @@ from savu.plugins.plugin_info import PluginInfo
 
 class TomoBarReconInfo(PluginInfo):
     """
-    .. module:: tomobar_recon
-       :platform: Unix
-       :synopsis: A wrapper around TOmographic MOdel-BAsed Reconstruction \
-         (ToMoBAR) software for advanced iterative image reconstruction
-    .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
+    module:: tomobar_recon
+    platform: Unix
+    synopsis: A wrapper around TOmographic MOdel-BAsed Reconstruction
+      (ToMoBAR) software for advanced iterative image reconstruction
+    moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
+
     """
     def define_parameters(self):
         """---

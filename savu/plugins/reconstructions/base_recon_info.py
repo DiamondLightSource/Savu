@@ -3,10 +3,11 @@ from savu.plugins.plugin_info import PluginInfo
 
 class BaseReconInfo(PluginInfo):
     """
-    .. module:: base_recon
-       :platform: Unix
-       :synopsis: A base class for all reconstruction methods
-    .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
+    module:: base_recon
+    platform: Unix
+    synopsis: A base class for all reconstruction methods
+    moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
+
     """
     def define_parameters(self):
         """---
