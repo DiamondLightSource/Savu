@@ -31,7 +31,7 @@ from tomobar.methodsIR import RecToolsIR
 from savu.plugins.utils import register_plugin
 from savu.plugins.utils import register_test_plugin
 from scipy import ndimage
-from savu.plugins.reconstructions.tomobar_recon_info import TomoBarReconInfo
+from savu.plugins.reconstructions.tomobar_recon_tools import TomoBarReconTools
 
 #@register_plugin
 @register_test_plugin
@@ -41,7 +41,7 @@ class TomobarRecon(BaseRecon, GpuPlugin):
 
     def __init__(self):
         super(TomobarRecon, self).__init__("TomobarRecon")
-        self.info = TomoBarReconInfo()
+        self.tools = TomoBarReconTools()
 
     # self.documentation = __doc__
     def _shift(self, sinogram, centre_of_rotation):

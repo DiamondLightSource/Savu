@@ -73,11 +73,11 @@ class PluginList(object):
                     'name': None,
                     'id': None,
                     'data': None,
-                    'info': None}
+                    'tools': None}
         return template
 
     def __get_json_keys(self):
-        return ['data', 'info']
+        return ['data', 'tools']
 
     def _populate_plugin_list(self, filename, activePass=False,
                               template=False):
@@ -121,16 +121,16 @@ class PluginList(object):
     def _is_valid(self, value, subelem, pos):
         parameter_valid = False
         options = ''
-        if subelem in self.plugin_list[pos]['info']:
+        if subelem in self.plugin_list[pos]['tools']:
             # The parameter is within the current shown parameter list
 
-            pinfo = self.plugin_list[pos]['info'][subelem]
-            pdesc = pinfo['description']
-            ptype = pinfo['dtype']
+            ptools = self.plugin_list[pos]['tools'][subelem]
+            desc = ptools['description']
+            dtype = ptools['dtype']
 
-            if not isinstance(pdesc, str):
-                if 'options' in pdesc.keys():
-                    options = pdesc['options']
+            if not isinstance(desc, str):
+                if 'options' in desc.keys():
+                    options = desc['options']
 
             if len(options) >= 1:
                 options = [i.lower() for i in options if isinstance(i, str)]
@@ -140,24 +140,21 @@ class PluginList(object):
                     else:
                         print('That does not match one of the required options.')
                         print(Fore.CYAN + '\nSome options are:')
-                        for o in options:
-                            print(o)
+                        print('\n'.join(options))
                         print(Fore.RESET)
                 else:
-                    print('\nYour input for the parameter \'%s\' must match the'
-                          ' required type %s' % (subelem, ptype))
-
+                    print('\nYour input for the parameter \'%s\' must be in a '
+                          'string format.')
                     print(Fore.CYAN + '\nSome options are:')
-                    for o in options:
-                        print(o)
+                    print('\n'.join(options))
                     print(Fore.RESET)
             else:
-                parameter_valid = param_u.is_valid(ptype, value)
+                parameter_valid = param_u.is_valid(dtype, value)
                 if parameter_valid is False:
                     print('\nYour input for the parameter \'%s\' must match the'
-                          ' required type %s' % (subelem, ptype))
-
+                          ' required type %s' % (subelem, dtype))
                     print(Fore.RESET)
+
         else:
             print('Not in parameter keys.')
         return parameter_valid
@@ -400,7 +397,7 @@ class PluginList(object):
             process['pos'] = str(pos)
             process['data'] = plugin.parameters
             process['active'] = True
-            process['info'] = plugin.param
+            process['tools'] = plugin.param
             self._add(pos, process)
 
     def _get_dataset_flow(self):

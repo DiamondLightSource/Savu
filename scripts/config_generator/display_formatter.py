@@ -77,16 +77,16 @@ class DisplayFormatter(object):
         keycount = 0
 
         param_dict = copy.deepcopy(temp_param_dict)
-        keys = [k for k, v in param_dict['info'].items() if v['visibility'] != 'hide']
+        keys = [k for k, v in param_dict['tools'].items() if v['visibility'] != 'hide']
 
         try:
             for key in keys:
                 keycount += 1
                 if int(subelem) == int(keycount):
                     element_present = True
-                    for i in list(param_dict['info']):
+                    for i in list(param_dict['tools']):
                         if i != key:
-                            param_dict['info'][i]['visibility'] = 'hide'
+                            param_dict['tools'][i]['visibility'] = 'hide'
 
             if element_present is False:
                 print('No matching sub element number found.')
@@ -144,8 +144,8 @@ class DisplayFormatter(object):
         joiner = "\n" + " "*margin
         params = ''
 
-        dev_keys = [k for k, v in p_dict['info'].items() if v['visibility'] not in ['user', 'hide']]
-        user_keys = [k for k, v in p_dict['info'].items() if v['visibility'] == 'user']
+        dev_keys = [k for k, v in p_dict['tools'].items() if v['visibility'] not in ['user', 'hide']]
+        user_keys = [k for k, v in p_dict['tools'].items() if v['visibility'] == 'user']
 
         try:
             keys = user_keys if level == 'user' else user_keys + dev_keys
@@ -265,7 +265,7 @@ class DispDisplay(DisplayFormatter):
         colour_off = Back.RESET + Fore.RESET
         synopsis = \
             self._get_synopsis(p_dict, width, colour_on, colour_off)
-        param_desc = {k: v['description'] for k, v in p_dict['info'].items()}
+        param_desc = {k: v['description'] for k, v in p_dict['tools'].items()}
         params = \
             self._get_param_details(level, p_dict, width, desc=param_desc)
         if breakdown:
