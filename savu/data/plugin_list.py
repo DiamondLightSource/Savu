@@ -126,7 +126,7 @@ class PluginList(object):
 
             pinfo = self.plugin_list[pos]['info'][subelem]
             pdesc = pinfo['description']
-            ptype = pinfo['type']
+            ptype = pinfo['dtype']
 
             if not isinstance(pdesc, str):
                 if 'options' in pdesc.keys():

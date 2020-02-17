@@ -14,12 +14,12 @@ class PluginBaseInfo(PluginInfo):
         """---
         in_datasets:
             visibility: param
-            type: list
+            dtype: list
             description: Create a list of the dataset(s) to process
             default: []
         out_datasets:
             visibility: param
-            type: list
+            dtype: list
             description: Create a list of the dataset(s) to create
             default: []
 

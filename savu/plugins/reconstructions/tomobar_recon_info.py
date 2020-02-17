@@ -13,57 +13,57 @@ class TomoBarReconInfo(PluginInfo):
         """---
         output_size:
             visibility: advanced
-            type: Union[int, tuple]
+            dtype: Union[int, tuple]
             description: Number of rows and columns in the reconstruction.
             default: auto
 
         data_fidelity:
             visibility: advanced
-            type: str
+            dtype: str
             description: Least Squares only at the moment.
             default: LS
 
         data_Huber_thresh:
             visibility: advanced
-            type: int
+            dtype: int
             description: Threshold parameter for __Huber__ data fidelity.
             default: None
 
         data_any_rings:
             visibility: advanced
-            type: int
+            dtype: int
             description: a parameter to suppress various artifacts including
               rings and streaks
             default: None
 
         data_any_rings_winsizes:
            visibility: advanced
-           type: tuple
+           dtype: tuple
            description: half window sizes to collect background information
              [detector, angles, num of projections]
            default: (9,7,0)
 
         data_any_rings_power:
             visibility: advanced
-            type: float
+            dtype: float
             description: a power parameter for Huber model.
             default: 1.4
 
         data_full_ring_GH:
              visibility: param
-             type: str
+             dtype: str
              description: Regularisation variable for full constant ring removal (GH model).
              default: None
 
         data_full_ring_accelerator_GH:
              visibility: param
-             type: float
+             dtype: float
              description: Acceleration constant for GH ring removal. (use with care)
              default: 10
 
         algorithm_iterations:
              visibility: param
-             type: int
+             dtype: int
              description:
                summary: Number of outer iterations for FISTA (default)or ADMM methods.
                verbose: Less than 10 iterations for the iterative method
@@ -75,19 +75,19 @@ class TomoBarReconInfo(PluginInfo):
 
         algorithm_verbose:
              visibility: param
-             type: str
+             dtype: str
              description: print iterations number and other messages (off by default).
              default: 'off'
 
         algorithm_ordersubsets:
              visibility: param
-             type: int
+             dtype: int
              description: The number of ordered-subsets to accelerate reconstruction.
              default: 6
 
         regularisation_method:
              visibility: param
-             type: str
+             dtype: str
              options: [ROF_TV, FGP_TV, PD_TV, SB_TV, LLT_ROF, NDF, Diff4th]
              description:
                summary: The denoising method
@@ -108,7 +108,7 @@ class TomoBarReconInfo(PluginInfo):
 
         regularisation_parameter:
              visibility: param
-             type: float
+             dtype: float
              description:
                summary: Regularisation parameter. The higher the value, the
                  stronger the smoothing effect
@@ -117,19 +117,19 @@ class TomoBarReconInfo(PluginInfo):
 
         regularisation_iterations:
              visibility: param
-             type: int
+             dtype: int
              description: The number of regularisation iterations.
              default: 80
 
         regularisation_device:
              visibility: param
-             type: str
+             dtype: str
              description: The number of regularisation iterations.
              default: gpu
 
         regularisation_PD_lip:
              visibility: param
-             type: int
+             dtype: int
              description: Primal-dual parameter for convergence.
              default: 8
              dependency:
@@ -137,7 +137,7 @@ class TomoBarReconInfo(PluginInfo):
 
         regularisation_methodTV:
              visibility: param
-             type: str
+             dtype: str
              description: 0/1 - TV specific isotropic/anisotropic choice.
              default: 0
              dependency:
@@ -145,7 +145,7 @@ class TomoBarReconInfo(PluginInfo):
 
         regularisation_timestep:
              visibility: param
-             type: float
+             dtype: float
              dependency:
                regularisation_method: [ROF_TV, LLT_ROF, NDF, Diff4th]
              description:
@@ -155,7 +155,7 @@ class TomoBarReconInfo(PluginInfo):
 
         regularisation_edge_thresh:
              visibility: param
-             type: float
+             dtype: float
              dependency:
                regularisation_method: [NDF, Diff4th]
              description:
@@ -164,7 +164,7 @@ class TomoBarReconInfo(PluginInfo):
 
         regularisation_parameter2:
              visibility: param
-             type: float
+             dtype: float
              dependency:
                regularisation_method: LLT_ROF
              description:
@@ -174,10 +174,10 @@ class TomoBarReconInfo(PluginInfo):
 
         NDF_penalty:
              visibility: param
-             type: str
+             dtype: str
              options: [Huber, Perona, Tukey]
              description:
-               summary: Penalty type
+               summary: Penalty dtype
                verbose: Nonlinear/Linear Diffusion model (NDF) specific penalty
                  type.
                options:
@@ -190,7 +190,7 @@ class TomoBarReconInfo(PluginInfo):
 
         max_iterations:
              visibility: param
-             type: int
+             dtype: int
              description:
                summary: Total number of regularisation iterations.
                  The smaller the number of iterations, the smaller the effect

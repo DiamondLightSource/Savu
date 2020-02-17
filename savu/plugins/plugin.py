@@ -205,7 +205,7 @@ class Plugin(PluginDatasets):
             self.parameters[p_key] = defaults
 
     def check_required_keys(self, p, p_key):
-        required_keys = ['type', 'description', 'visibility', 'default']
+        required_keys = ['dtype', 'description', 'visibility', 'default']
         all_keys = p.keys()
         if not all(d in all_keys for d in required_keys):
             print('The missing required keys for ' + str(p_key) + ' are: ')
@@ -249,7 +249,7 @@ class Plugin(PluginDatasets):
         associated parameters, so the framework knows the new size of the data
         and which plugins to re-run.
         """
-        dtype = self.plugin_info[key].get('type')
+        dtype = self.plugin_info[key].get('dtype')
 
         if isinstance(value, str) and ';' in value:
             value = value.split(';')

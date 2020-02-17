@@ -73,7 +73,7 @@ def _load_yaml(lines):
                     verbose = ''
     return all_params, verbose
 
-def _load_yaml_doc(lines):
+def load_yaml_doc(lines):
     """
     Load in the yaml format. Call yaml_utils.py
     ----------
