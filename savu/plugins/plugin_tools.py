@@ -9,12 +9,12 @@ class PluginCitations(object):
         """
     def __init__(self):
         super(PluginCitations, self).__init__()
-        self.cite_info = MetaData()
-        self.cite_set()
+        self.cite = MetaData()
+        self.set_cite()
 
-    def cite_set(self):
-        self.cite_info.set('bibtex', self.get_bibtex.__doc__)
-        self.cite_info.set('endnote', self.get_endnote.__doc__)
+    def set_cite(self):
+        self.cite.set('bibtex', self.get_bibtex.__doc__)
+        self.cite.set('endnote', self.get_endnote.__doc__)
 
     def get_bibtex(self):
         pass
@@ -28,8 +28,8 @@ class PluginParameters(object):
     """
     def __init__(self):
         super(PluginParameters, self).__init__()
-        self.param_info = MetaData()
-        self.param_info = self.get_plugin_parameters()
+        self.param = MetaData()
+        self.param = self.get_plugin_parameters()
 
     def get_plugin_parameters(self):
         # function to get plugin parameters
@@ -40,7 +40,8 @@ class PluginParameters(object):
             params.set(p_name, p_value)
             vis = p_value['visibility']
             dtype = p_value['dtype']
-            dep = p_value['dependency'] if 'dependency' in all_params.keys() else None
+            dep = p_value['dependency'] \
+                if 'dependency' in all_params.keys() else None
             #params[p_name] = Parameter(vis, dtype, dep)
         return params
 
@@ -73,18 +74,19 @@ class PluginDocumentation(object):
     """
     def __init__(self):
         super(PluginDocumentation, self).__init__()
-        self.doc_info = MetaData()
+        self.doc = MetaData()
         self.doc_set()
 
     def doc_set(self):
-        self.doc_info.set('doc', self.__doc__)
+        self.doc.set('doc', self.__doc__)
 
-class PluginInfo(PluginCitations, PluginParameters, PluginDocumentation):
+class PluginTools(PluginCitations, PluginParameters, PluginDocumentation):
 
     def __init__(self):
-        self.plugin_info = MetaData()
-        super(PluginInfo, self).__init__()
-        self.plugin_info.set('citation_info', self.cite_info.get_dictionary())
-        self.plugin_info.set('parameters', self.param_info.get_dictionary())
-        self.plugin_info.set('documentation', self.doc_info.get_dictionary())
+        print "creating an instance of PluginTools"
+        self.plugin_tools = MetaData()
+        super(PluginTools, self).__init__()
+        self.plugin_tools.set('cite', self.cite.get_dictionary())
+        self.plugin_tools.set('param', self.param.get_dictionary())
+        self.plugin_tools.set('doc', self.doc.get_dictionary())
 

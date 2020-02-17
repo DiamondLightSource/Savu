@@ -1,7 +1,7 @@
 # replaces base_recon.yaml
-from savu.plugins.plugin_info import PluginInfo
+from savu.plugins.plugin_tools import PluginTools
 
-class BaseReconInfo(PluginInfo):
+class BaseReconTools(PluginTools):
     """
     module:: base_recon
     platform: Unix

@@ -238,7 +238,10 @@ class Content(object):
                 value = self.value(value)
             pos = self.find_position(pos_str)
             data_elements = self.plugin_list.plugin_list[pos]['data']
-            current_params = [k for k, v in self.plugin_list.plugin_list[pos]['info'].items() if v['visibility'] != 'hide']
+            current_params = \
+                [k for k, v
+                 in self.plugin_list.plugin_list[pos]['tools'].items()
+                 if v['visibility'] != 'hide']
             # Filter the parameter names to find those not hidden
             if param_name.isdigit():
                 param_name = current_params[int(param_name)-1]
@@ -264,7 +267,7 @@ class Content(object):
         dependent parameters
         '''
         data_elements = self.plugin_list.plugin_list[pos]['data']
-        p_list = self.plugin_list.plugin_list[pos]['info']
+        p_list = self.plugin_list.plugin_list[pos]['tools']
         for p_name, p_value in p_list.items():
             default = p_list.get('default')
             desc = p_list.get('description')
@@ -289,7 +292,7 @@ class Content(object):
         """
         data_elements = self.plugin_list.plugin_list[pos]['data']
 
-        p_list = self.plugin_list.plugin_list[pos]['info']
+        p_list = self.plugin_list.plugin_list[pos]['tools']
         for p_name, p_value in p_list.items():
             if p_value is not None:
                 dependencies = p_value.get('dependency') or {}
@@ -440,7 +443,7 @@ class Content(object):
         plugin_dict['id'] = plugin.__module__
         plugin_dict['data'] = plugin.parameters
         plugin_dict['active'] = True
-        plugin_dict['info'] = plugin.plugin_info
+        plugin_dict['tools'] = plugin.plugin_tools
         plugin_dict['doc'] = plugin.docstring_info
         return plugin_dict
 

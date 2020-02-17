@@ -1,7 +1,7 @@
 # replaces tomobar_recon_yaml.py
-from savu.plugins.plugin_info import PluginInfo
+from savu.plugins.plugin_tools import PluginTools
 
-class TomoBarReconInfo(PluginInfo):
+class TomoBarReconTools(PluginTools):
     """
     module:: tomobar_recon
     platform: Unix

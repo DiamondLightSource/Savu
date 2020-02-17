@@ -32,7 +32,7 @@ import numpy as np
 import savu.plugins.docstring_parser as doc
 from savu.plugins.plugin_datasets import PluginDatasets
 from collections import OrderedDict
-from savu.plugins.plugin_base_info import PluginBaseInfo
+from savu.plugins.base_tools import BaseTools
 
 class Plugin(PluginDatasets):
     """
@@ -47,8 +47,9 @@ class Plugin(PluginDatasets):
         self.global_index = None
         self.pcount = 0
         self.exp = None
-        self.info = PluginBaseInfo()
-        self.plugin_info = OrderedDict()
+        self.tools = BaseTools()
+        self.plugin_tools = OrderedDict()
+        #self.parameters = self.plugin_tools['parameters']
 
     def _main_setup(self, exp, params):
         """ Performs all the required plugin setup.
@@ -89,8 +90,8 @@ class Plugin(PluginDatasets):
             self.parameters[name] = info['values'][indices[count]]
             count += 1
 
-    def load_param_info(self):
-        return self.info
+    def load_param_tools(self):
+        return self.tools
 
     def _load_yaml_details(self):
         """
@@ -105,13 +106,14 @@ class Plugin(PluginDatasets):
             # return a tuple of class cls's base classes, including cls
             if clazz != object:
                 desc = doc.find_args(clazz, self)
-                if hasattr(clazz, 'load_param_info'):
-                    all_params = clazz().load_param_info().plugin_info.get('parameters')
+                if hasattr(clazz, 'load_param_tools'):
+                    all_params = clazz().load_param_tools().plugin_tools.get('param')
+                    doc_i = clazz().load_param_tools().plugin_tools.get('doc')
                     for p_key, p in all_params.items():
                         self.check_required_keys(p, p_key)
                         visibility = p.get('visibility') or {}
                         if visibility != 'not_param':
-                            self.plugin_info[p_key] = p
+                            self.plugin_tools[p_key] = p
                             self._set_defaults(p, p_key)
                 self.docstring_info['warn'] = desc['warn']
                 self.docstring_info['synopsis'] = desc['synopsis']

@@ -25,7 +25,7 @@ import numpy as np
 
 import savu.core.utils as cu
 from savu.plugins.plugin import Plugin
-from savu.plugins.reconstructions.base_recon_info import BaseReconInfo
+from savu.plugins.reconstructions.base_recon_tools import BaseReconTools
 
 MAX_OUTER_PAD = 2.1
 
@@ -50,7 +50,7 @@ class BaseRecon(Plugin):
         self.cor_shift = 0
         self.init_vol = False
         self.cor_as_dataset = False
-        self.info = BaseReconInfo()
+        self.tools = BaseReconTools()
 
     def base_dynamic_data_info(self):
         if 'init_vol' in self.parameters.keys() and \
