@@ -85,8 +85,10 @@ def _list(content, args):
         print("No result found.")
         return content
 
-    # Sort the list of dictionaries. Sort by the name of the plugin within each dictionary
-    list_content.plugin_list.plugin_list = sorted(list_content.plugin_list.plugin_list, key=lambda i: i['name'])
+    # Sort the list of dictionaries.
+    # Sort by the name of the plugin within each dictionary.
+    list_content.plugin_list.plugin_list = \
+        sorted(list_content.plugin_list.plugin_list, key=lambda i: i['name'])
 
     formatter = ListDisplay(list_content.plugin_list)
     verbosity = parsers._get_verbosity(args)
@@ -109,7 +111,8 @@ def _save(content, args):
                      "current data to %s' [y/N]" % (out_file)),
                      template=args.template)
 
-    raise Exception("No items were found in your process list. Type 'add' to add a plugin to the list.")
+    raise Exception("No items were found in your process list. "
+                    "Type 'add' to add a plugin to the list.")
     return content
 
 

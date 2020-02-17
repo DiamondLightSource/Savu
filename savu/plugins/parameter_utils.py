@@ -68,7 +68,8 @@ def _yamlfile(value):
     """ yamlfile """
     parameter_valid = False
     if isinstance(value, str):
-        config_file = open('/home/glb23482/git_projects/Savu/savu/plugins/loaders/utils/yaml_config.yaml')
+        config_file = open('/home/glb23482/git_projects/'
+                      'Savu/savu/plugins/loaders/utils/yaml_config.yaml')
         conf = YamlLintConfig(config_file)
         f = open(value)
         gen = linter.run(f, conf)
@@ -85,6 +86,7 @@ def _yamlfile(value):
 @error_catcher_valid
 def _intgroup(value):
     """ [path, int_path, int] """
+    # To be replaced
     parameter_valid = False
     try:
         bracket_value = value.split('[')
@@ -139,7 +141,8 @@ def _intgroup(value):
         print('Valid items have a format [<file path>,'
               ' <interior file path>, int].')
     except AttributeError:
-        print('You need to place some information inside the square brackets.')
+        print('You need to place some information inside the'
+              ' square brackets.')
     except Exception as e:
         print(e)
 
@@ -178,7 +181,8 @@ def _intgroup1(value):
         print('Valid items have a format [<file path>,'
               ', int].')
     except AttributeError:
-        print('You need to place some information inside the square brackets.')
+        print('You need to place some information inside the'
+              ' square brackets.')
     except Exception as e:
         print(e)
 
@@ -306,13 +310,10 @@ type_list = {'[int]': _intlist,
             'tuple': _tuple}
 
 
-def is_valid(ptype_t, value):
-    # comp = Completer(commands=type_list, plugin_list=pu.plugins)
-    ptype = ptype_t
-    if ptype not in type_list:
+def is_valid(dtype, value):
+    if dtype not in type_list:
         print("That type is not valid.")
         ptype_res = False
     else:
-        ptype_res = type_list[ptype](value)
-
+        ptype_res = type_list[dtype](value)
     return ptype_res
