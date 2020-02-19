@@ -56,6 +56,17 @@ class MetaData(object):
         maplist = (name if type(name) is list else [name])
         self.get(maplist[:-1], True)[maplist[-1]] = value
 
+    def append(self, name, value):
+        """ Append an entry in the meta data dictionary.
+        :param value value: dictionary value
+        """
+        if name in self.get_dictionary().keys():
+            previous_value = self.get_dictionary()[name]
+            new_value = OrderedDict(previous_value.items() + value.items())
+            self.set(name, new_value)
+        else:
+            self.set(name, value)
+
     def get(self, maplist, setFlag=False, value=True, units=False):
         """ Get a value from the meta data dictionary, given its key(s).
 

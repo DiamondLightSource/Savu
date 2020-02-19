@@ -269,8 +269,8 @@ class Content(object):
         data_elements = self.plugin_list.plugin_list[pos]['data']
         p_list = self.plugin_list.plugin_list[pos]['tools']
         for p_name, p_value in p_list.items():
-            default = p_list.get('default')
-            desc = p_list.get('description')
+            default = p_value.get('default')
+            desc = p_value.get('description')
             if isinstance(default, OrderedDict):
                 parent_param = default.keys()[0]
                 dep_param_choices = default[parent_param]
@@ -285,14 +285,17 @@ class Content(object):
                                          + str(dep_param_choices[item])
                         if mod is True:
                             print(recommendation)
+                        else:
+                            # At initial pass
+                            data_elements[p_name] = dep_param_choices[item]
 
     def check_dependencies(self, pos):
         """ Determines which parameter values are dependent on a parent
         value and whether they should be hidden or shown
         """
         data_elements = self.plugin_list.plugin_list[pos]['data']
-
         p_list = self.plugin_list.plugin_list[pos]['tools']
+
         for p_name, p_value in p_list.items():
             if p_value is not None:
                 dependencies = p_value.get('dependency') or {}

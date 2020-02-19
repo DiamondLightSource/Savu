@@ -1,6 +1,7 @@
 from savu.data.meta_data import MetaData
 import savu.plugins.docstring_parser as doc
 # from dataclasses import dataclass
+from collections import OrderedDict
 
 
 class PluginCitations(object):
@@ -28,22 +29,21 @@ class PluginParameters(object):
     """
     def __init__(self):
         super(PluginParameters, self).__init__()
-        self.param = MetaData()
-        self.param = self.get_plugin_parameters()
+        self.param = MetaData(ordered=True)
+        self.set_plugin_parameters()
 
-    def get_plugin_parameters(self):
+    def set_plugin_parameters(self):
         # function to get plugin parameters
-        params = MetaData()
+
         yaml_text = self.define_parameters.__doc__
         all_params, verbose = doc.load_yaml_doc(yaml_text)
         for p_name, p_value in all_params.items():
-            params.set(p_name, p_value)
-            vis = p_value['visibility']
-            dtype = p_value['dtype']
-            dep = p_value['dependency'] \
-                if 'dependency' in all_params.keys() else None
+            self.param.set(p_name, p_value)
+            #vis = p_value['visibility']
+            #dtype = p_value['dtype']
+            #dep = p_value['dependency'] \
+            #    if 'dependency' in all_params.keys() else None
             #params[p_name] = Parameter(vis, dtype, dep)
-        return params
 
     def define_parameters(self):
         pass
@@ -61,8 +61,9 @@ class PluginParameters(object):
         dependency: Optional[]
 
         def _get_param(self):
+            param_dict = {}
             param_dict['visibility'] = self.visibility
-            param_dict['type'] = self.datatype
+            param_dict['type'] = self.dtype
             param_dict['description'] = self.description
             # and the rest
             return param_dict
@@ -78,15 +79,17 @@ class PluginDocumentation(object):
         self.doc_set()
 
     def doc_set(self):
-        self.doc.set('doc', self.__doc__)
+        self.doc.set('verbose', self.__doc__)
 
 class PluginTools(PluginCitations, PluginParameters, PluginDocumentation):
 
-    def __init__(self):
-        print "creating an instance of PluginTools"
-        self.plugin_tools = MetaData()
+    def __init__(self, plugin_tools=MetaData()):
+        self.plugin_tools = plugin_tools
         super(PluginTools, self).__init__()
-        self.plugin_tools.set('cite', self.cite.get_dictionary())
-        self.plugin_tools.set('param', self.param.get_dictionary())
-        self.plugin_tools.set('doc', self.doc.get_dictionary())
+        self.plugin_tools.append('cite', self.cite.get_dictionary())
+        self.plugin_tools.append('param', self.param.get_dictionary())
+        self.plugin_tools.append('doc', self.doc.get_dictionary())
+
+
+
 
