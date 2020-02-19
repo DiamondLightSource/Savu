@@ -28,7 +28,7 @@ from savu.plugins.driver.gpu_plugin import GpuPlugin
 from savu.data.plugin_list import CitationInformation
 from savu.plugins.utils import register_plugin
 from savu.plugins.utils import register_test_plugin
-
+from savu.plugins.reconstructions.astra_recons.astra_recon_gpu_tools import AstraReconGpuTools
 
 @register_test_plugin
 class AstraReconGpu(BaseAstraRecon, GpuPlugin):
@@ -40,6 +40,7 @@ class AstraReconGpu(BaseAstraRecon, GpuPlugin):
         self.GPU_index = None
         self.res = False
         self.start = 0
+        self.tools = AstraReconGpuTools()
 
     def set_options(self, cfg):
         if 'option' not in cfg.keys():
