@@ -20,8 +20,10 @@
 """
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
+from savu.plugins.utils import register_test_plugin
 from savu.plugins.filters.base_filter import BaseFilter
 from savu.data.plugin_list import CitationInformation
+from savu.plugins.centering.vo_centering_tools import VoCenteringTools
 import savu.core.utils as cu
 
 import logging
@@ -29,40 +31,14 @@ import numpy as np
 import scipy.ndimage as ndi
 import pyfftw.interfaces.scipy_fftpack as fft
 
-
-
-import sys
-
-@register_plugin
+@register_test_plugin
 class VoCentering(BaseFilter, CpuPlugin):
     """
-    A plugin to calculate the centre of rotation using the Vo Method
-    :u*param preview: A slice list of required frames (sinograms) to use in \
-    the calulation of the centre of rotation (this will not reduce the data \
-    size for subsequent plugins). Default: [].
-    :u*param start_pixel: The estimated centre of rotation. If value is None,\
-        use the horizontal centre of the image. Default: None.
-    :u*param search_area: Search area around the estimated centre of rotation\
-        . Default: (-50, 50).
-    :u*param ratio: The ratio between the size of object and FOV of \
-        the camera. Default: 0.5.
-    :param search_radius: Use for fine searching. Default: 6.
-    :param step: Step of fine searching. Default: 0.5.
-    :param datasets_to_populate: A list of datasets which require this \
-        information. Default: [].
-    :param out_datasets: The default names\
-        . Default: ['cor_preview','cor_broadcast'].
-    :param broadcast_method: Method of broadcasting centre values calculated\
-        from preview slices to full dataset. Available option: 'median', \
-        'mean', 'nearest', 'linear_fit'. Default: 'median'.
-    :param row_drop: Drop lines around vertical center of the \
-        mask. Default: 20.
-    :param average_radius: Averaging sinograms around a required sinogram to\
-        improve signal-to-noise ratio. Default: 5.
     """
 
     def __init__(self):
         super(VoCentering, self).__init__("VoCentering")
+        self.tools = VoCenteringTools()
 
     def _create_mask(self, nrow, ncol, radius, drop):
         du = 1.0 / ncol
@@ -412,4 +388,30 @@ class VoCentering(BaseFilter, CpuPlugin):
                 Users have to find CoR manually by doing parameter turning in the reconstruction plugins.
                 Send e-mail and a sinogram (or location of the data) to Nghia (nghia.vo@diamond.ac.uk).
 
+    '''
+    '''
+        
+    A plugin to calculate the centre of rotation using the Vo Method
+    :u*param preview: A slice list of required frames (sinograms) to use in \
+    the calulation of the centre of rotation (this will not reduce the data \
+    size for subsequent plugins). Default: [].
+    :u*param start_pixel: The estimated centre of rotation. If value is None,\
+        use the horizontal centre of the image. Default: None.
+    :u*param search_area: Search area around the estimated centre of rotation\
+        . Default: (-50, 50).
+    :u*param ratio: The ratio between the size of object and FOV of \
+        the camera. Default: 0.5.
+    :param search_radius: Use for fine searching. Default: 6.
+    :param step: Step of fine searching. Default: 0.5.
+    :param datasets_to_populate: A list of datasets which require this \
+        information. Default: [].
+    :param out_datasets: The default names\
+        . Default: ['cor_preview','cor_broadcast'].
+    :param broadcast_method: Method of broadcasting centre values calculated\
+        from preview slices to full dataset. Available option: 'median', \
+        'mean', 'nearest', 'linear_fit'. Default: 'median'.
+    :param row_drop: Drop lines around vertical center of the \
+        mask. Default: 20.
+    :param average_radius: Averaging sinograms around a required sinogram to\
+        improve signal-to-noise ratio. Default: 5.
     '''

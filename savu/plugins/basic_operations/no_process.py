@@ -19,10 +19,13 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
+from savu.data.meta_data import MetaData
+
 from savu.plugins.plugin import Plugin
 from savu.plugins.utils import register_plugin
 from savu.plugins.utils import register_test_plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
+from savu.plugins.basic_operations.no_process_tools import NoProcessTools
 
 
 @register_test_plugin
@@ -31,6 +34,7 @@ class NoProcess(Plugin, CpuPlugin):
     """
     def __init__(self):
         super(NoProcess, self).__init__("NoProcess")
+        self.tools = NoProcessTools()
 
     def process_frames(self, data):
         return data[0]
