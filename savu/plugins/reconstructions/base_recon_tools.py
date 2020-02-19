@@ -2,12 +2,7 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class BaseReconTools(PluginTools):
-    """
-    module:: base_recon
-    platform: Unix
-    synopsis: A base class for all reconstruction methods
-    moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
-
+    """A base class for reconstruction plugins
     """
     def define_parameters(self):
         """---

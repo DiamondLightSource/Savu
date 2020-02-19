@@ -2,12 +2,7 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class BaseTools(PluginTools):
-    """
-    module: plugin
-    platform: Unix
-    synopsis: Base class for all plugins used by Savu
-    moduleauthor: Mark Basham <scientificsoftware@diamond.ac.uk>
-
+    """The base class from which all plugins should inherit.
     """
     def define_parameters(self):
         """---

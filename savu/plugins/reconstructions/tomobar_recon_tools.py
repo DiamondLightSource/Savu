@@ -2,13 +2,10 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class TomoBarReconTools(PluginTools):
-    """
-    module:: tomobar_recon
-    platform: Unix
-    synopsis: A wrapper around TOmographic MOdel-BAsed Reconstruction
-      (ToMoBAR) software for advanced iterative image reconstruction
-    moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
-
+    """A plugin to reconstruct full-field tomographic projection data
+    using state-of-the-art regularised iterative algorithms from the
+    ToMoBAR package. ToMoBAR includes FISTA and ADMM iterative methods
+    and depends on the ASTRA toolbox and the CCPi RGL toolkit
     """
     def define_parameters(self):
         """---
