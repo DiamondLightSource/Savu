@@ -47,8 +47,8 @@ class Plugin(PluginDatasets):
         self.global_index = None
         self.pcount = 0
         self.exp = None
-        self.tools = BaseTools()
         self.plugin_tools = OrderedDict()
+        self.tools = BaseTools()
         #self.parameters = self.plugin_tools['parameters']
 
     def _main_setup(self, exp, params):
@@ -93,32 +93,8 @@ class Plugin(PluginDatasets):
     def load_param_tools(self):
         return self.tools
 
-    def _load_yaml_details(self):
-        """
-        Load yaml details from docstring of this instance of the plugin.
-
-        Determines the parameters for this instance of the plugin.
-        """
-        # Test Plugins are: 'RemoveAllRings' 'TomobarRecon'
-        # 'NxtomoLoader' 'DarkFlatFieldCorrection' 'NoProcess'
-
-        for clazz in inspect.getmro(self.__class__)[::-1]:
-            # return a tuple of class cls's base classes, including cls
-            if clazz != object:
-                desc = doc.find_args(clazz, self)
-                if hasattr(clazz, 'load_param_tools'):
-                    all_params = clazz().load_param_tools().plugin_tools.get('param')
-                    doc_i = clazz().load_param_tools().plugin_tools.get('doc')
-                    for p_key, p in all_params.items():
-                        self.check_required_keys(p, p_key)
-                        visibility = p.get('visibility') or {}
-                        if visibility != 'not_param':
-                            self.plugin_tools[p_key] = p
-                            self._set_defaults(p, p_key)
-                self.docstring_info['warn'] = desc['warn']
-                self.docstring_info['synopsis'] = desc['synopsis']
-                self.docstring_info['info'] = 'Additional information if needed.'
-
+    def load_doc(self):
+        return self.__doc__
 
     def base_dynamic_data_info(self):
         """ Provides an opportunity to override the number and name of input
@@ -152,59 +128,33 @@ class Plugin(PluginDatasets):
         values.  it is used for checking to see if new parameter values are
         appropriate
 
-        It makes use of the classes including parameter information in the
-        class docstring such as this
+        """
+        # Test Plugins are: 'RemoveAllRings' 'TomobarRecon'
+        # 'NxtomoLoader' 'DarkFlatFieldCorrection' 'NoProcess'
+        print('My name is: ' + self.__class__.__name__)
 
-        :param error_threshold: Convergence threshold. Default: 0.001.
-        """
-        """
-        hidden_items = []
-        user_items = []
-        params = []
-        not_params = []
-        for clazz in inspect.getmro(self.__class__)[::-1]:
-            if clazz != object:
-                desc = doc.find_args(clazz, self)
-                self.docstring_info['warn'] = desc['warn']
-                self.docstring_info['info'] = desc['info']
-                self.docstring_info['synopsis'] = desc['synopsis']
-                params.extend(desc['param'])
-                if desc['hide_param']:
-                    hidden_items.extend(desc['hide_param'])
-                if desc['user_param']:
-                    user_items.extend(desc['user_param'])
-                if desc['not_param']:
-                    not_params.extend(desc['not_param'])
-        self._add_item(params, not_params)
-        user_items = [u for u in user_items if u not in not_params]
-        hidden_items = [h for h in hidden_items if h not in not_params]
-        user_items = list(set(user_items).difference(set(hidden_items)))
-        self.parameters_hide = hidden_items
-        self.parameters_user = user_items
-        self.final_parameter_updates()
-        """
-        self._load_yaml_details()
+        all_params = self.__class__.load_param_tools(self).plugin_tools.get('param')
+        verbose = self.__class__.load_param_tools(self).plugin_tools.get('doc').get('verbose')
+
+        #print(self.__class__.load_doc(self))
+        self.docstring_info['warn'] = ''
+        self.docstring_info['synopsis'] = ''
+        self.docstring_info['info'] = verbose
+
+        for p_key, p in all_params.items():
+            self.check_required_keys(p, p_key)
+            visibility = p.get('visibility') or {}
+            if visibility != 'not_param':
+                self.plugin_tools[p_key] = p
+                self.parameters[p_key] = p.get('default')
+
+        # Reset the parameter dictionary
+        self.__class__.load_param_tools(self).plugin_tools.set('param', OrderedDict())
 
     def _add_item(self, item_list, not_list):
         true_list = [i for i in item_list if i['name'] not in not_list]
         for item in true_list:
             self.parameters[item['name']] = item['default']
-
-    def _set_defaults(self, p, p_key):
-        '''Set the default value for dependent parameters
-        It may be sensible to check the type of the defaults as a precaution
-        '''
-        defaults = p.get('default')
-        if isinstance(defaults, OrderedDict):
-            # Set the default value if there is a dependency
-            parent_param = defaults.keys()[0]
-            parent_choices = defaults[parent_param]
-            parent_value = self.parameters[parent_param]
-            for item in parent_choices.keys():
-                if parent_value == item:
-                    self.parameters[p_key] = parent_choices[item]
-        else:
-            self.parameters[p_key] = defaults
 
     def check_required_keys(self, p, p_key):
         required_keys = ['dtype', 'description', 'visibility', 'default']

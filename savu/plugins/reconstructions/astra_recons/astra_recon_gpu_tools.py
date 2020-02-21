@@ -26,7 +26,7 @@ class AstraReconGpuTools(PluginTools):
                   BP_CUDA:
                   SIRT3D_CUDA:
                   CGLS3D_CUDA:
-                default: FBP_CUDA
+            default: FBP_CUDA
         FBP_filter:
             visibility: user
             dtype: str

@@ -39,11 +39,6 @@ class PluginParameters(object):
         all_params, verbose = doc.load_yaml_doc(yaml_text)
         for p_name, p_value in all_params.items():
             self.param.set(p_name, p_value)
-            #vis = p_value['visibility']
-            #dtype = p_value['dtype']
-            #dep = p_value['dependency'] \
-            #    if 'dependency' in all_params.keys() else None
-            #params[p_name] = Parameter(vis, dtype, dep)
 
     def define_parameters(self):
         pass
@@ -76,9 +71,9 @@ class PluginDocumentation(object):
     def __init__(self):
         super(PluginDocumentation, self).__init__()
         self.doc = MetaData()
-        self.doc_set()
+        self.set_doc()
 
-    def doc_set(self):
+    def set_doc(self):
         self.doc.set('verbose', self.__doc__)
 
 class PluginTools(PluginCitations, PluginParameters, PluginDocumentation):
