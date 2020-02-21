@@ -120,41 +120,16 @@ class PluginList(object):
 
     def _is_valid(self, value, subelem, pos):
         parameter_valid = False
-        options = ''
         if subelem in self.plugin_list[pos]['tools']:
             # The parameter is within the current shown parameter list
-
             ptools = self.plugin_list[pos]['tools'][subelem]
-            desc = ptools['description']
             dtype = ptools['dtype']
 
-            if not isinstance(desc, str):
-                if 'options' in desc.keys():
-                    options = desc['options']
-
-            if len(options) >= 1:
-                options = [i.lower() for i in options if isinstance(i, str)]
-                if isinstance(value, str):
-                    if value.lower() in options:
-                        parameter_valid = True
-                    else:
-                        print('That does not match one of the required options.')
-                        print(Fore.CYAN + '\nSome options are:')
-                        print('\n'.join(options))
-                        print(Fore.RESET)
-                else:
-                    print('\nYour input for the parameter \'%s\' must be in a '
-                          'string format.')
-                    print(Fore.CYAN + '\nSome options are:')
-                    print('\n'.join(options))
-                    print(Fore.RESET)
-            else:
-                parameter_valid = param_u.is_valid(dtype, value)
-                if parameter_valid is False:
-                    print('\nYour input for the parameter \'%s\' must match the'
-                          ' required type %s' % (subelem, dtype))
-                    print(Fore.RESET)
-
+            parameter_valid = param_u.is_valid(dtype, ptools, value)
+            if parameter_valid is False:
+                print('\nYour input for the parameter \'%s\' must match the'
+                      ' type %s' % (subelem, dtype))
+                print(Fore.RESET)
         else:
             print('Not in parameter keys.')
         return parameter_valid

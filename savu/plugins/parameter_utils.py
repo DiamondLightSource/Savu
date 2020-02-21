@@ -37,6 +37,7 @@ import warnings
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     from scripts.config_generator.config_utils import error_catcher_valid
+    from scripts.config_generator.config_utils import error_catcher
 
 @error_catcher_valid
 def _intlist(value):
@@ -264,11 +265,22 @@ def _boolean(value):
     return parameter_valid
 
 
-@error_catcher_valid
-def _string(value):
+@error_catcher
+def _string(value, ptools):
     parameter_valid = False
+    options = ptools['options'] or {}
+
     if isinstance(value, str):
-        parameter_valid = True
+        if len(options) >= 1:
+            options = [i.lower() for i in options if isinstance(i, str)]
+            if value.lower() in options:
+                parameter_valid = True
+            else:
+                print('That does not match one of the required options.')
+                print(Fore.CYAN + '\nSome options are:')
+                print('\n'.join(options) + Fore.RESET)
+        else:
+            parameter_valid = True
     else:
         print('Not a valid string.')
     return parameter_valid
@@ -310,10 +322,13 @@ type_list = {'[int]': _intlist,
             'tuple': _tuple}
 
 
-def is_valid(dtype, value):
+def is_valid(dtype, ptools, value):
     if dtype not in type_list:
         print("That type is not valid.")
-        ptype_res = False
+        pvalid = False
     else:
-        ptype_res = type_list[dtype](value)
-    return ptype_res
+        if dtype == 'str':
+            pvalid = type_list[dtype](value, ptools)
+        else:
+            pvalid = type_list[dtype](value)
+    return pvalid
