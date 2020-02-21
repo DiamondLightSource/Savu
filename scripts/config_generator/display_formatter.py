@@ -135,6 +135,18 @@ class DisplayFormatter(object):
             temp = joiner + Fore.GREEN + "%s" + Fore.RESET
             params += temp % verbose
 
+        if param_key == 'range':
+            p_range = desc[key]['range']
+            if p_range:
+                try:
+                    p_range = joiner.join(textwrap.wrap(p_range,
+                                                        width=width - margin))
+                    temp = joiner + Fore.MAGENTA + "%s" + Fore.RESET
+                    params += temp % p_range
+                except TypeError:
+                    print('You have not filled in the %s field within the'
+                          ' yaml information.' % param_key)
+
         return params
 
     def _get_param_details(self, level, p_dict, width, desc=False,
@@ -187,31 +199,35 @@ class DisplayFormatter(object):
                     params = self._get_verbose_param_details(p_dict, param_key,
                                                              desc, key, params, width)
 
-                if param_key == 'options':
-                    options = desc[key][param_key]
+        options = p_dict['tools'][key].get('options')
+        if options:
+            option_text = Fore.BLUE + 'Options:'
+            option_text = joiner.join(textwrap.wrap(option_text,
+                                                    width=width - margin))
+            temp = joiner + "%s"
+            params += temp % option_text
 
-                    option_text = Fore.BLUE + 'Options:'
-                    option_text = joiner.join(textwrap.wrap(option_text,
-                                                            width=width - margin))
-                    temp = joiner + "%s"
-                    params += temp % option_text
+            for opt in options:
+                opt_low = opt.lower()
+                current_opt = p_dict['data'][key].lower()
+                if current_opt == opt_low:
+                    colour = Fore.LIGHTCYAN_EX
+                    verbose_color = Fore.LIGHTCYAN_EX
+                else:
+                    colour = Fore.BLUE
+                    verbose_color = Fore.GREEN
+                option_verbose = ''
+                option_verbose += colour + u'\u0009' + u'\u2022' + opt
 
-                    for opt in options:
-                        current_opt = p_dict['data'][key]
-                        if current_opt == opt:
-                            colour = Fore.LIGHTCYAN_EX
-                            verbose_color = Fore.LIGHTCYAN_EX
-                        else:
-                            colour = Fore.BLUE
-                            verbose_color = Fore.GREEN
-                        option_verbose = ''
-                        option_verbose += colour + u'\u0009' + u'\u2022' + opt
-                        if breakdown:
-                            option_verbose += ': ' + verbose_color + options[opt]
+                options_desc = {k.lower(): v for k, v in desc[key][param_key].items()}
+                if opt_low in options_desc.keys():
+                    if breakdown:
+                        option_verbose += ': ' + verbose_color + options_desc[opt_low]
                         option_verbose = joiner.join(textwrap.wrap(option_verbose,
                                                                    width=width - margin))
-                        temp = joiner + "%s" + Fore.RESET
-                        params += temp % option_verbose
+                temp = joiner + "%s" + Fore.RESET
+                params += temp % option_verbose
+
         return params
 
     def _get_extra_info(self, p_dict, width, colour_off, info_colour,
