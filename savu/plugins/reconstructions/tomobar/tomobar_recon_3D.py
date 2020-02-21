@@ -153,7 +153,7 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
         # in_pData[1].plugin_data_setup('PROJECTION', nSlices) # (for PWLS)
 
         # set pattern_name and nframes to process for all datasets
-        out_pData[0].plugin_data_setup('VOLUME_XZ', nSlices)
+	out_pData[0].plugin_data_setup('VOLUME_XZ', nSlices)
 
     def pre_process(self):
         in_pData = self.get_plugin_in_datasets()[0]
