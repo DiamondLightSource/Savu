@@ -206,11 +206,10 @@ class DisplayFormatter(object):
                                                     width=width - margin))
             temp = joiner + "%s"
             params += temp % option_text
-
             for opt in options:
-                opt_low = opt.lower()
-                current_opt = p_dict['data'][key].lower()
-                if current_opt == opt_low:
+                opt = self._apply_lower_case(opt)
+                current_opt = self._apply_lower_case(p_dict['data'][key])
+                if current_opt == opt:
                     colour = Fore.LIGHTCYAN_EX
                     verbose_color = Fore.LIGHTCYAN_EX
                 else:
@@ -219,16 +218,19 @@ class DisplayFormatter(object):
                 option_verbose = ''
                 option_verbose += colour + u'\u0009' + u'\u2022' + opt
 
-                options_desc = {k.lower(): v for k, v in desc[key][param_key].items()}
-                if opt_low in options_desc.keys():
+                options_desc = {self._apply_lower_case(k): v for k, v in desc[key][param_key].items()}
+                if opt in options_desc.keys():
                     if breakdown:
-                        option_verbose += ': ' + verbose_color + options_desc[opt_low]
+                        option_verbose += ': ' + verbose_color + options_desc[opt]
                         option_verbose = joiner.join(textwrap.wrap(option_verbose,
                                                                    width=width - margin))
                 temp = joiner + "%s" + Fore.RESET
                 params += temp % option_verbose
 
         return params
+
+    def _apply_lower_case(self, item):
+        return item.lower() if isinstance(item, str) else item
 
     def _get_extra_info(self, p_dict, width, colour_off, info_colour,
                         warn_colour):
