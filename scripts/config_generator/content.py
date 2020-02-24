@@ -28,6 +28,7 @@ import inspect
 from savu.plugins import utils as pu
 from savu.data.plugin_list import PluginList
 from collections import OrderedDict
+from colorama import Fore
 import mutations
 
 
@@ -247,7 +248,7 @@ class Content(object):
                 param_name = current_params[int(param_name)-1]
             if self.plugin_list._is_valid(value, param_name, pos):
                 data_elements[param_name] = value
-                self.update_defaults(pos, mod=True)
+                self.update_defaults(pos, mod=param_name)
                 # Update the list of parameters to hide those dependent on others
                 self.check_dependencies(pos)
             else:
@@ -276,15 +277,17 @@ class Content(object):
                 dep_param_choices = default[parent_param]
                 parent_value = data_elements[parent_param]
                 for item in dep_param_choices.keys():
-                    if parent_value == item:
+
+                    if parent_value == item or parent_value.lower() == item.lower():
                         desc['range'] = 'The recommended value with the chosen ' \
                                         + str(parent_param) + ' would be ' \
                                         + str(dep_param_choices[item])
                         recommendation = 'It\'s recommended that you update ' \
                                          + str(p_name) + ' to ' \
                                          + str(dep_param_choices[item])
-                        if mod is True:
-                            print(recommendation)
+                        if mod:
+                            if mod == parent_param:
+                                print(Fore.RED + recommendation + Fore.RESET)
                         else:
                             # At initial pass
                             data_elements[p_name] = dep_param_choices[item]
