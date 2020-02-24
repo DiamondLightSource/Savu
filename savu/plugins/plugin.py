@@ -56,10 +56,11 @@ class Plugin(PluginDatasets):
         self.exp = None
         self.check = False
     
-    def initialise(self, params, exp):
+    def initialise(self, params, exp, check=False):
+        self.check=check
         self.exp = exp
         self._populate_default_parameters()
-        self._set_parameters(params)
+        self._set_parameters(copy.deepcopy(params))
         self._main_setup()
         
     def _main_setup(self):

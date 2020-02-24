@@ -151,13 +151,16 @@ class PluginDatasets(object):
         """ Fill in empty in/out_dataset entries with default values.
         """
         params = self.parameters
+        orig_in = copy.copy(params['in_datasets'])
         in_names = self._set_in_dataset_names(params)
         params['in_datasets'] = in_names
+        # case that an extra in_dataset is added in the plugin
+        in_names = orig_in if len(orig_in) and \
+            len(in_names) > len(orig_in) else in_names
         params['out_datasets'] = self._set_out_dataset_names(params, in_names)
 
     def _set_in_dataset_names(self, params):
-        nIn = self.nInput_datasets()
-        
+        nIn = self.nInput_datasets()        
         names = params['in_datasets'] if 'in_datasets' in params.keys() else []
         names = ['all'] if len(names) == 0 else names
         return self.check_nDatasets(names, nIn, 'in_data')
