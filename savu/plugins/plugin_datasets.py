@@ -169,8 +169,9 @@ class PluginDatasets(object):
         names = params['out_datasets'] if 'out_datasets' in params.keys() else []
         names = (copy.copy(in_names) if len(names) == 0 else names)
         clones = self.nClone_datasets()
-        self.parameters['out_datasets'] = names
+        params['out_datasets'] = names
         nOut = self.nOutput_datasets()
+        names = params['out_datasets']
         names = self.check_nDatasets(names, nOut, "out_data", clones=clones)
         if clones:
             names.extend(['itr_clone' + str(i) for i in range(clones)])
