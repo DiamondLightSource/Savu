@@ -265,22 +265,11 @@ def _boolean(value):
     return parameter_valid
 
 
-@error_catcher
-def _string(value, ptools):
+@error_catcher_valid
+def _string(value):
     parameter_valid = False
-    options = ptools['options'] or {}
-
     if isinstance(value, str):
-        if len(options) >= 1:
-            options = [i.lower() for i in options if isinstance(i, str)]
-            if value.lower() in options:
-                parameter_valid = True
-            else:
-                print('That does not match one of the required options.')
-                print(Fore.CYAN + '\nSome options are:')
-                print('\n'.join(options) + Fore.RESET)
-        else:
-            parameter_valid = True
+        parameter_valid = True
     else:
         print('Not a valid string.')
     return parameter_valid
@@ -327,8 +316,23 @@ def is_valid(dtype, ptools, value):
         print("That type is not valid.")
         pvalid = False
     else:
-        if dtype == 'str':
-            pvalid = type_list[dtype](value, ptools)
+        pvalid = type_list[dtype](value)
+
+    pvalid = check_options(ptools, value, pvalid)
+    return pvalid
+
+
+def check_options(ptools, value, pvalid):
+    options = ptools.get('options') or {}
+    if len(options) >= 1:
+        options = [i.lower() for i in options if isinstance(i, str)]
+        if isinstance(value, str):
+            value = value.lower()
+        if value in options:
+            pvalid = True
         else:
-            pvalid = type_list[dtype](value)
+            print('That does not match one of the required options.')
+            print(Fore.CYAN + '\nSome options are:')
+            print('\n'.join(options) + Fore.RESET)
+            pvalid = False
     return pvalid
