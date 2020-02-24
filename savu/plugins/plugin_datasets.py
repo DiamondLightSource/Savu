@@ -160,16 +160,17 @@ class PluginDatasets(object):
         params['out_datasets'] = self._set_out_dataset_names(params, in_names)
 
     def _set_in_dataset_names(self, params):
-        nIn = self.nInput_datasets()        
         names = params['in_datasets'] if 'in_datasets' in params.keys() else []
         names = ['all'] if len(names) == 0 else names
+        nIn = self.nInput_datasets()
         return self.check_nDatasets(names, nIn, 'in_data')
       
     def _set_out_dataset_names(self, params, in_names):
-        nOut = self.nOutput_datasets()
         names = params['out_datasets'] if 'out_datasets' in params.keys() else []
         names = (copy.copy(in_names) if len(names) == 0 else names)
         clones = self.nClone_datasets()
+        self.parameters['out_datasets'] = names
+        nOut = self.nOutput_datasets()
         names = self.check_nDatasets(names, nOut, "out_data", clones=clones)
         if clones:
             names.extend(['itr_clone' + str(i) for i in range(clones)])
