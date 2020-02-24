@@ -26,24 +26,21 @@
 """
 
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-from savu.plugins.corrections.base_correction import BaseCorrection
+from savu.plugins.corrections.flatdark.base_correction import BaseCorrection
 
 import numpy as np
 
 from savu.plugins.utils import register_plugin
 
-
+@register_plugin
 class TimeseriesFieldCorrections(BaseCorrection, CpuPlugin):
     """
     A Plugin to apply a simple dark and flatfield correction to some
     raw timeseries data
     """
-
-    def __init__(self):
-        super(TimeseriesFieldCorrections,
-              self).__init__("TimeseriesFieldCorrections")
-        # TODO these should probably be parameters
-        self.LOW_CROP_LEVEL = 0.0
+    def __init__(self, name="TimeseriesFieldCorrections"):
+    	super(TimeseriesFieldCorrections, self).__init__(name)
+ 	self.LOW_CROP_LEVEL = 0.0
         self.HIGH_CROP_LEVEL = 2.0
         self.WARN_PROPORTION = 0.05  # 5%
         self.flag_low_warning = False

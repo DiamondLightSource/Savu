@@ -27,12 +27,12 @@ from skimage.feature import match_template
 from scipy.ndimage.interpolation import shift as sci_shift
 
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-from savu.plugins.corrections.time_based_correction import TimeBasedCorrection
+from savu.plugins.corrections.timeseries.time_based_correction import TimeBasedCorrection
 from savu.plugins.utils import register_plugin
 
 
 @register_plugin
-class TimeBasedPlusDriftCorrection(TimeBasedCorrection, CpuPlugin):
+class TimePlusDriftCorr(TimeBasedCorrection, CpuPlugin):
     """
     Apply a time-based dark and flat field correction on data with an\
     image drift using linear interpolation and template matching.
@@ -40,11 +40,11 @@ class TimeBasedPlusDriftCorrection(TimeBasedCorrection, CpuPlugin):
     """
 
     def __init__(self):
-        super(TimeBasedPlusDriftCorrection, self).__init__(
-            "TimeBasedPlusDriftCorrection")
+        super(TimePlusDriftCorr, self).__init__(
+            "TimePlusDriftCorr")
 
     def pre_process(self):
-        super(TimeBasedPlusDriftCorrection, self).pre_process()
+        super(TimePlusDriftCorr, self).pre_process()
 
         self.shift_array = np.zeros((len(self.data_idx), 2))
         # find shift between flat field frames

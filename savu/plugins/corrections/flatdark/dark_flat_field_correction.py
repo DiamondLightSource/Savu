@@ -26,7 +26,7 @@ import logging
 import numpy as np
 
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-from savu.plugins.corrections.base_correction import BaseCorrection
+from savu.plugins.corrections.flatdark.base_correction import BaseCorrection
 from savu.plugins.utils import register_plugin
 
 
