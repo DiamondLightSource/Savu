@@ -50,6 +50,8 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
         self.dark = inData.data.dark_mean()
         logging.debug('getting the flat data')
         self.flat = inData.data.flat_mean()
+        #np.save('avflats.npy', self.flat)
+        #print(np.shape(self.flat))
 
         pData_shape = in_pData.get_shape()
         tile = [1]*len(pData_shape)
@@ -62,6 +64,7 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
             self._sino_pre_process(inData, tile, rot_dim)
 
         self.flat_minus_dark = self.flat - self.dark
+        self.flat_minus_dark[self.flat_minus_dark == 0.0] = 1.0
         self.warn = self.parameters['warn_proportion']
         self.low = self.parameters['lower_bound']
         self.high = self.parameters['upper_bound']

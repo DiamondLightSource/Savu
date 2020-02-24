@@ -20,10 +20,12 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
+
 import h5py
 import logging
 import numpy as np
 
+import savu.core.utils as cu
 from savu.plugins.loaders.base_loader import BaseLoader
 from savu.plugins.utils import register_test_plugin
 from savu.plugins.utils import register_plugin
@@ -93,7 +95,7 @@ class NxtomoLoader(BaseLoader):
         if self.parameters['3d_to_4d'] is True:
             try:
                 # for backwards compatibility
-                exec ("n_frames = " + self.parameters['angles'])
+                exec("n_frames = " + self.parameters['angles'])
                 return np.array(n_frames).shape[0]
             except:
                 raise Exception("Please specify the angles, or the number of "
@@ -199,7 +201,7 @@ class NxtomoLoader(BaseLoader):
         if path.split('/')[0] == 'test_data':
             import os
             path = \
-                os.path.dirname(os.path.abspath(__file__)) + '/../../../../' + path
+                os.path.dirname(os.path.abspath(__file__))+'/../../../../'+path
 
         ffile = h5py.File(path, 'r')
         try:
@@ -220,7 +222,7 @@ class NxtomoLoader(BaseLoader):
         
         if nxs_angles is None:
             try:
-                exec ("angles = " + angles)
+                exec("angles = " + angles)
             except Exception as e:
                 logging.warn(e.message)
                 try:
@@ -251,17 +253,17 @@ class NxtomoLoader(BaseLoader):
     def __check_angles(self, data_obj, n_angles):
         data_angles = data_obj.data.get_shape()[0]
         if data_angles != n_angles:
-            # FIXME problem with this
+            # FIXME problem with this 
             if self.nFrames > 1:
                 rot_angles = data_obj.meta_data.get("rotation_angle")
                 try:
-                    full_rotations = n_angles / data_angles
-                    cleaned_size = full_rotations * data_angles
+                    full_rotations = n_angles/data_angles
+                    cleaned_size = full_rotations*data_angles
                     if cleaned_size != n_angles:
                         rot_angles = rot_angles[0:cleaned_size]
                         self.log_warning("the angle list has more values than expected in it")
                     rot_angles = np.reshape(
-                        rot_angles, [full_rotations, data_angles])
+                            rot_angles, [full_rotations, data_angles])
                     data_obj.meta_data.set("rotation_angle",
                                            np.transpose(rot_angles))
                     return
