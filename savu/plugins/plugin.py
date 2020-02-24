@@ -130,15 +130,14 @@ class Plugin(PluginDatasets):
 
         """
         # Test Plugins are: 'RemoveAllRings' 'TomobarRecon'
-        # 'NxtomoLoader' 'DarkFlatFieldCorrection' 'NoProcess'
-        print('My name is: ' + self.__class__.__name__)
+        # 'NxtomoLoader' 'DarkFlatFieldCorrection' 'NoProcess' 'Astra' 'Vocentering'
 
         all_params = self.__class__.load_param_tools(self).plugin_tools.get('param')
         verbose = self.__class__.load_param_tools(self).plugin_tools.get('doc').get('verbose')
 
-        #print(self.__class__.load_doc(self))
-        self.docstring_info['warn'] = ''
-        self.docstring_info['synopsis'] = ''
+        desc = doc.find_args(self.__class__, self)
+        self.docstring_info['warn'] = desc['warn']
+        self.docstring_info['synopsis'] = desc['synopsis']
         self.docstring_info['info'] = verbose
 
         for p_key, p in all_params.items():
