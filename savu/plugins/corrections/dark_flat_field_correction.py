@@ -73,7 +73,7 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
             self._sino_pre_process(inData, tile, rot_dim)
 
         self.flat_minus_dark = self.flat - self.dark
-        self.flat_minus_dark[(np.where(self.flat_minus_dark == 0.0))] = 1.0
+        self.flat_minus_dark[self.flat_minus_dark == 0.0] = 1.0
         self.warn = self.parameters['warn_proportion']
         self.low = self.parameters['lower_bound']
         self.high = self.parameters['upper_bound']
