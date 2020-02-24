@@ -55,9 +55,9 @@ class Pymca(BaseFilter, CpuPlugin):
         self.b = self.setup_fit(y)
         self.b._McaAdvancedFitBatch__processStack()
         try:
-            stack = np.array(self.b._McaAdvancedFitBatch__images.values())
+            stack = self.b.outbuffer['parameters']
             op_stack = np.rollaxis(stack,0,3)
-        except AttributeError as e:
+        except (AttributeError, KeyError) as e:
             op_stack = -np.ones((1,1,self.outputshape[-1]))
             logging.warn("Error in fit:%s",e) 
         op = op_stack[0,0]
@@ -76,7 +76,7 @@ class Pymca(BaseFilter, CpuPlugin):
         # temporary measure to stop the next line printing arrays to screen.
         c.processList()#_McaAdvancedFitBatch__processStack()# perform an initial fit to get the shapes
 
-        fit_labels = c._McaAdvancedFitBatch__images.keys() # and then take out the axis labels for the channels
+        fit_labels = c.outbuffer.labels('parameters') # and then take out the axis labels for the channels
         out_meta_data = out_datasets[0].meta_data
         out_meta_data.set("PeakElements",fit_labels)
         

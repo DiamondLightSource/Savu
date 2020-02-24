@@ -12,21 +12,24 @@ dependencies:
   - h5py
   - pep8
   - mpi4py 
-  - scikit-image==0.14.0
+  - scikit-image
   - astra-toolbox
   - xraylib
-  - tomopy==1.5.1
+  - opencv=4.1.1
+  - tomopy
   - mock
-  - fabio==0.4.0
+  - fabio
   - pytest-cov
   - coveralls
-  - pyfai==0.15.0
+  - pyfai
   - pyfftw
   - colorama
-  - pymca==5.4.3
+  - pymca=5.5.2
   - ccpi-regulariser
   - tomobar
   - i23-seg
+  - yamllint
+  - mrcfile
   - pip:
     - nvidia-ml-py
     - peakutils

@@ -19,7 +19,7 @@ class DawnCompatibleTest(unittest.TestCase):
         self.assertGreater(len(pu.dawn_plugins), 0)
 
     def test_dawn_plugin_params_found(self):
-        cu.populate_plugins()
+        cu.populate_plugins(dawn=True)
         self.assertTrue(isinstance(
                 pu.dawn_plugin_params[pu.dawn_plugins.keys()[0]], dict))
 

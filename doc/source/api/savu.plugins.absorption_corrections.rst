@@ -1,5 +1,5 @@
-savu\.plugins\.absorption\_corrections package
-==============================================
+savu.plugins.absorption\_corrections package
+============================================
 
 .. automodule:: savu.plugins.absorption_corrections
     :members:

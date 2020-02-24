@@ -1,5 +1,7 @@
 name: root
 channels:
+- local
+- defaults
 - conda-forge
 - ccpi
 - dkazanc
@@ -22,19 +24,23 @@ dependencies:
 - scikit-learn
 - tomobar
 - ccpi-regulariser
+- ccpi-reconstruction
 - i23-seg
 - astra-toolbox
 - xraylib
 - tomopy
 - pyfai
+- fabio
+- pymca
+- tifffile
+- pyfftw
+- PeakUtils
+- pip
+- yamllint
 - pip:
-  - fabio
-  - sphinx-rtd-theme
-  - gnureadline
-  - tifffile
   - pyreadline
-  - pyfftw
   - nvidia-ml-py
-  - PeakUtils
   - pmacparser
-  - pymca
+  - gnureadline==6.3.8
+  - sphinx-rtd-theme
+

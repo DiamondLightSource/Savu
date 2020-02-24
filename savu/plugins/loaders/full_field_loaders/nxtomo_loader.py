@@ -64,13 +64,12 @@ class NxtomoLoader(BaseLoader):
 
     def setup(self):
         exp = self.get_experiment()
-
         data_obj = exp.create_data_object('in_data', self.parameters['name'])
 
-        data_obj.backing_file = \
-            h5py.File(self.exp.meta_data.get("data_file"), 'r')
+        data_obj.backing_file = self._get_data_file()
 
-        data_obj.data = data_obj.backing_file[self.parameters['data_path']]
+        data_obj.data = self._get_h5_entry(
+                data_obj.backing_file, self.parameters['data_path'])
 
         self._set_dark_and_flat(data_obj)
 
@@ -87,7 +86,8 @@ class NxtomoLoader(BaseLoader):
         self._set_rotation_angles(data_obj)
 
         try:
-            control = data_obj.backing_file['entry1/tomo_entry/control/data']
+            control = self._get_h5_path(
+                    data_obj.backing_file, 'entry1/tomo_entry/control/data')
             data_obj.meta_data.set("control", control[...])
         except:
             self.log_warning("No Control information available")
@@ -97,6 +97,12 @@ class NxtomoLoader(BaseLoader):
 
         self.set_data_reduction_params(data_obj)
         data_obj.data._set_dark_and_flat()
+
+    def _get_h5_entry(self, filename, path):
+        if path in filename:
+            return filename[path]
+        else:
+            raise Exception("Path %s not found in %s" % (path, filename))
 
     def __get_nFrames(self, dObj):
         if self.parameters['3d_to_4d'] is False:
@@ -159,6 +165,8 @@ class NxtomoLoader(BaseLoader):
                              slice_dims=(detY, scan))
         data_obj.add_pattern('TANGENTOGRAM', core_dims=(rot, detY),
                              slice_dims=(detX, scan))
+        data_obj.add_pattern('SINOMOVIE', core_dims=(detX, rot, scan),
+                             slice_dims=(detY,))
 
     def _set_dark_and_flat(self, data_obj):
         flat = self.parameters['flat'][0]
@@ -226,6 +234,7 @@ class NxtomoLoader(BaseLoader):
             angles = 'entry1/tomo_entry/data/rotation_angle'
 
         nxs_angles = self.__get_angles_from_nxs_file(data_obj, angles)
+        
         if nxs_angles is None:
             try:
                 exec("angles = " + angles)
@@ -251,6 +260,10 @@ class NxtomoLoader(BaseLoader):
         else:
             self.log_warning("No rotation angle entry found in input file.")
             return None
+
+    def _get_data_file(self):
+        data = self.exp.meta_data.get("data_file")
+        return h5py.File(data, 'r')
 
     def __check_angles(self, data_obj, n_angles):
         data_angles = data_obj.data.get_shape()[0]

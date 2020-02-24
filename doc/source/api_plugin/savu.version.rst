@@ -1,5 +1,5 @@
-savu\.version module
-====================
+savu.version module
+===================
 
 .. automodule:: savu.version
     :members:

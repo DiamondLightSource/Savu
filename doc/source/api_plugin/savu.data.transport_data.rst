@@ -1,5 +1,5 @@
-savu\.data\.transport\_data package
-===================================
+savu.data.transport\_data package
+=================================
 
 Submodules
 ----------

@@ -1,11 +1,36 @@
 #!/bin/bash
 
+# function for checking which data centre
+# assuming only gpfs03 in new data centre - to be updated
+function is_gpfs03 ()
+{
+  file=$1
+  return=$2
+  check=$3
+  pathtofile=`readlink -f $file`
+  if [ "$check" = true ] && [ ! -f $pathtofile ] ; then
+		echo $file": No such file or directory"
+		return 1
+  fi
+
+  gpfs03="$(df $pathtofile | grep gpfs03)"
+  if [ ! "$gpfs03" ] ; then
+	eval "$return"=false
+  else
+    eval "$return"=true
+  fi
+}
+
 # input optional arguments
-while getopts ":t:i:s::" opt; do
+zocalo=false
+keep=false
+while getopts ":t:i:s:z:k::" opt; do
 	case ${opt} in
 		t ) type=$OPTARG ;;
 		i ) infile=$OPTARG ;;
 		s ) version=$OPTARG ;;
+        z ) zocalo=$OPTARG ;;
+        k ) keep=$OPTARG ;;
 		\? ) echo "Invalid option: $OPTARG" 1>&2 ;;
 		: ) echo "Invalid option: $OPTARG requires an argument" 1>&2 ;;
 	esac
@@ -17,6 +42,7 @@ if [ -z $version ] ; then
 	echo -ne "\n*** Loading the latest stable version of Savu as "
 	echo -e "a specific version has not been requested ***\n"
 	module load savu
+    version=default
 else
 	module load savu/$version
 fi
@@ -28,6 +54,8 @@ outname=savu
 # If this is developer mode
 if [ -n "${infile+set}" ]; then
 	echo "Running Savu in developer mode"
+    dev_mode=true
+    type=STANDARD
   	# read the values from file (ignoring lines starting with #)
 	count=0
 	while read -r entry; do
@@ -39,6 +67,7 @@ if [ -n "${infile+set}" ]; then
 
 	cluster=${var[0],,}
 	gpu_arch=${var[1],,}
+	gpu_arch=${gpu_arch^}
 	nNodes=${var[2]}
 	cpus_to_use_per_node=${var[3]}
 	gpus_to_use_per_node=${var[4]}
@@ -50,11 +79,10 @@ if [ -n "${infile+set}" ]; then
 
 
 	# check cluster and data path are compatible
-	pathtodatafile=`readlink -f $data_file`
-	gpfs03="$(df $pathtodatafile | grep gpfs03)"
-	if { [ ! -z "$gpfs03" ] && [ $cluster != 'hamilton' ] ; \
-			} || { [ -z "$gpfs03" ] && [ $cluster == 'hamilton' ] ; }; then
-		echo "The data is not visible on "$cluster "in the final"
+	is_gpfs03 $data_file gpfs03 false
+	if { [ "$gpfs03" = true ] && [ $cluster != 'hamilton' ] ; \
+			} || { [ "$gpfs03" = false ] && [ $cluster == 'hamilton' ] ; }; then
+		echo "The data is not visible on "$cluster
 		exit 1
 	fi
 
@@ -63,6 +91,7 @@ else
 	#echo "Running Savu in production mode"
 	# parse additional command line arguments
 	# Check required arguments exist
+    dev_mode=false
 	vars=$@
 	x="${vars%%' -'*}"
 	[[ $x = $vars ]] && temp=${#vars} || temp=${#x}
@@ -97,21 +126,15 @@ else
 	options=$@
 
 	# determine the cluster from the data path
-	pathtodatafile=`readlink -f $data_file`
-	if [ -z $pathtodatafile ] ; then
-		echo $data_file": No such file or directory"
-		exit 1
-	fi
-
-	gpfs03="$(df $pathtodatafile | grep gpfs03)"
-	if [ -z "$gpfs03" ] ; then
+    is_gpfs03 $data_file gpfs03 true 
+	if [ "$gpfs03" = false ] ; then
 		cluster=cluster
 		# determine cluster setup based on type
 		case $type in
-			'AUTO') gpu_arch=fermi ; nNodes=1 ;;
-			'PREVIEW') gpu_arch=fermi ; nNodes=1 ;;
-			'BIG') gpu_arch=pascal ; nNodes=8 ;;
-			'') gpu_arch=kepler ; nNodes=4 ;;
+			'AUTO') gpu_arch=Kepler ; nNodes=1 ;;
+			'PREVIEW') gpu_arch=Kepler ; nNodes=1 ;;
+			'BIG') gpu_arch=Pascal ; nNodes=8 ;;
+			'') type="STANDARD"; gpu_arch=Kepler ; nNodes=4 ;;
 			 *) echo -e "\nUnknown 'type' optional argument"
 			    echo -e "Please choose from 'AUTO' or 'PREVIEW'"
 				exit 1 ;;
@@ -120,12 +143,12 @@ else
 	else
 		cluster='hamilton'
 		# determine cluster setup based on type
-		gpu_arch=pascal
+		gpu_arch=Pascal
 		case $type in
 			'AUTO') nNodes=1 ;;
 			'PREVIEW') nNodes=1 ;;
 			'BIG') nNodes=4 ;;
-			'') nNodes=2 ;;
+			'') type="STANDARD"; nNodes=2 ;;
 			 *) echo -e "\nUnknown 'type' optional argument\n"
 			    echo -e "Please choose from 'AUTO' or 'PREVIEW'" 
 				exit 1 ;;
@@ -133,7 +156,7 @@ else
 	fi
 
 	# which project?
-	project=`echo $pathtodatafile | grep -o -P '(?<=/dls/).*(?=/data)'`
+	project=`echo $pathtodatafile | grep -o -P '(?<=/dls/).*?(?=/data)'`
 	if [ -z "$project" ] ; then
 	  project=tomography
 	fi
@@ -151,16 +174,16 @@ case $cluster in
 		cluster_queue=high.q
 	    	# which gpu architecture?
 		case $gpu_arch in
-			'fermi')
-				cluster_queue=$cluster@@com07
+			'Fermi')
+				cluster_queue=$cluster_queue@@com07
 				cpus_per_node=12
 				gpus_per_node=2 ;;
-     		'kepler')
-				cluster_queue=$cluster@@com10
+     		'Kepler')
+				cluster_queue=$cluster_queue@@com10
 				cpus_per_node=20
 				gpus_per_node=4 ;;
-     		'pascal')
-				cluster_queue=$cluster@@com14
+     		'Pascal')
+				cluster_queue=$cluster_queue@@com14
 				cpus_per_node=20
 				gpus_per_node=2 ;;
 			*) echo -ne "\nERROR: Unknown GPU architecture for the cluster. "
@@ -168,15 +191,18 @@ case $cluster in
   			   exit 1 ;;
 		esac ;;
 	'hamilton')
-    	module load hamilton-quiet
+		module load hamilton-quiet
 		cluster_queue=all.q
 		cpus_per_node=40
+		if [ $dev_mode==false ]; then
+			cpus_to_use_per_node=30
+		fi
 		gpus_per_node=4
 
     	# which gpu architecture?
 		if [ -z $gpu_arch ] ; then
-			gpu_arch='pascal'
-		elif [ $gpu_arch != 'pascal' ] && [ $gpu_arch != 'volta' ] ; then
+			gpu_arch='Pascal'
+		elif [ $gpu_arch != 'Pascal' ] && [ $gpu_arch != 'Volta' ] ; then
 			echo -ne "\nERROR: Unknown GPU architecture for Hamilton. "
 			echo -e "Please choose from 'Pascal' or 'Volta'\n"
 			exit 1
@@ -188,6 +214,16 @@ esac
 # override cpu and gpu values if the full node is not required
 if [ -z $cpus_to_use_per_node ] ; then cpus_to_use_per_node=$cpus_per_node; fi
 if [ -z $gpus_to_use_per_node ] ; then gpus_to_use_per_node=$gpus_per_node; fi
+
+if [ $cpus_to_use_per_node -gt $cpus_per_node ] ; then
+	echo "The number of CPUs requested per node ($cpus_to_use_per_node) is greater than the maximum ($cpus_per_node)."
+	exit 1
+fi
+if [ $gpus_to_use_per_node -gt $gpus_per_node ] ; then
+	echo "The number of GPUs requested per node ($gpus_to_use_per_node) is greater than the maximum ($gpus_per_node)."
+	exit 1
+fi
+	
 
 # set total processes required
 processes=$((nNodes*cpus_per_node))
@@ -221,13 +257,22 @@ filepath=$DIR'/savu_mpijob.sh'
 savupath=$(python -c "import savu, os; print savu.__path__[0]")
 savupath=${savupath%/savu}
 
+# set the suffix
+arg_parse "-suffix" suffix $options
+options=${options//"-suffix $suffix"/}
+if [ ! $suffix ] ; then 
+  suffix=""
+else
+  suffix=_$suffix
+fi
+
 # Set output and intermediate file paths
 basename=`basename $data_file`
 # set the output folder
 arg_parse "-f" foldername $options
 if [ ! $foldername ] ; then
   IFS=. read path ext <<<"${basename##*-}"
-  foldername=$(date +%Y%m%d%H%M%S)"_$(basename $path)"
+  foldername=$(date +%Y%m%d%H%M%S)"_$(basename $path)"$suffix
 fi
 outfolder=$outpath/$foldername
 
@@ -251,12 +296,29 @@ if [ ! $interfolder ] ; then
 else
 	interfolder=$interfolder/$foldername
 	if [ ! -d $interfolder ]; then
-		echo -e "\t Creating the output folder "$interfolder
 		create_folder $interfolder
 	fi
-	if [ ! $type == 'AUTO' ] && [ ! $type == 'PREVIEW' ] ; then
+    if [ ! $type == 'AUTO' ] && [ ! $type == 'PREVIEW' ] && [ ! $keep == true ] ; then
 		delete=$interfolder
 	fi
+fi
+
+# check all files are in the same data centre
+is_gpfs03 $data_file is_gpfs03_in false
+is_gpfs03 $interfolder is_gpfs03_inter false
+is_gpfs03 $outfolder is_gpfs03_out false
+if ! ([ $is_gpfs03_in = $is_gpfs03_inter ] && [ $is_gpfs03_inter = $is_gpfs03_out ]) ; then
+tput setaf 3
+	echo -e "\n\t**************************** ERROR MESSAGE ****************************"
+tput setaf 1
+#tput sgr0
+	echo -e "\tAll the input and output data locations must be in the same data centre."
+	echo -e "\tPlease email scientific.software@diamond.ac.uk for more information."
+
+tput setaf 3
+	echo -e "\t***********************************************************************\n"
+tput sgr0
+	exit 1
 fi
 
 # copy process list to the intermediate folder
@@ -265,27 +327,35 @@ basename=`basename $process_file`
 cp $process_file $interfolder
 process_file=$interfolder/$basename
 
+# openmpi-savu stops greater than requested number of nodes being assigned to the job if memory
+# requirements are not satisfied.
+generic="-N $outname -j y -o $interfolder -e $interfolder -pe openmpi-savu $processes -l exclusive \
+-l gpu=$gpus_per_node -l gpu_arch=$gpu_arch -q $cluster_queue -P $project \
+$filepath $version $savupath $data_file $process_file $outpath $cpus_to_use_per_node \
+$gpus_to_use_per_node $delete $options -c -f $outfolder -s graylog2.diamond.ac.uk -p 12203 \
+--facility_email scientificsoftware@diamond.ac.uk -l $outfolder"
+
+if [ $cluster = "cluster" ] && [ $zocalo = true ] ; then
+    cluster=zocalo_cluster
+fi
+
 case $cluster in
 	"test_cluster")
-		qsub -N $outname -j y -o $interfolder -e $interfolder -pe openmpi $processes -l exclusive \
-		-l infiniband -l gpu=$gpus_per_node -l gpu_arch=$gpu_arch -q $cluster_queue -P $project \
-		$filepath $version $savupath $data_file $process_file $outpath $cpus_to_use_per_node \
-		$gpus_to_use_per_node $delete $options -c -f $outfolder -s graylog2.diamond.ac.uk -p 12203 \
-		--facility_email scientificsoftware@diamond.ac.uk -l $outfolder > /dls/tmp/savu/$USER.out ;;
+		qsub -l infiniband $generic > /dls/tmp/savu/$USER.out ;;
 	"cluster")
-	  	qsub -jsv /dls_sw/apps/sge/common/JSVs/savu.pl \
-		-N $outname -j y -o $interfolder -e $interfolder -pe openmpi $processes -l exclusive \
-		-l infiniband -l gpu=$gpus_per_node -l gpu_arch=$gpu_arch -q $cluster_queue -P $project \
-		$filepath $version $savupath $data_file $process_file $outpath $cpus_to_use_per_node \
-		$gpus_to_use_per_node $delete $options -c -f $foldername -s graylog2.diamond.ac.uk -p 12203 \
-		--facility_email scientificsoftware@diamond.ac.uk -l $outfolder > /dls/tmp/savu/$USER.out ;;
+		# RAM com10 252G com14 252G ~ 12G per core  - m_mem_free requested in JSV script
+		qsub -jsv /dls_sw/cluster/common/JSVs/savu_20191122.pl \
+		-l infiniband $generic > /dls/tmp/savu/$USER.out ;;
+	"zocalo_cluster")
+		# RAM com10 252G com14 252G ~ 12G per core  - m_mem_free requested in JSV script
+		qsub -jsv /dls_sw/cluster/common/JSVs/savu_20191122.pl -sync y\
+		-l infiniband $generic > /dls/tmp/savu/$USER.out ;;
 	"hamilton")
-		qsub -N $outname -j y -o $interfolder -e $interfolder -pe openmpi $processes -l exclusive \
-		-l gpu=$gpus_per_node -l gpu_arch=$gpu_arch -q $cluster_queue -P $project $filepath $version \
-		$savupath $data_file $process_file $outpath $cpus_to_use_per_node $gpus_to_use_per_node \
-		$delete $options -c -f $foldername -s graylog2.diamond.ac.uk -p 12203 \
-		--facility_email scientificsoftware@diamond.ac.uk -l $outfolder > /dls/tmp/savu/$USER.out ;;
-esac	
+		# RAM 384G per core (but 377G available?) ~ 9G per core
+		# requesting 7G per core as minimum (required to be available on startup),but will use all
+		# memory unless system jobs need it (then could be rolled back to the minimum 7G)
+		qsub -l m_mem_free=7G $generic > /dls/tmp/savu/$USER.out ;;
+esac
 
 # get the job number here
 filename=`echo $outname.o`

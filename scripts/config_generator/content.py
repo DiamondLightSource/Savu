@@ -35,8 +35,11 @@ class Content(object):
     def __init__(self, filename=None, level='user'):
         self.disp_level = level
         self.plugin_list = PluginList()
+        self.plugin_mutations = mutations.plugin_mutations
+        self.param_mutations = mutations.param_mutations
         self.filename = filename
         self._finished = False
+        self.failed = {}
 
     def set_finished(self, check='y'):
         self._finished = True if check.lower() == 'y' else False
@@ -51,7 +54,24 @@ class Content(object):
             raise Exception('INPUT ERROR: The file does not exist.')
         self.filename = infile
         if update:
+            self.plugin_mutations = self.check_mutations(self.plugin_mutations)
+            self.param_mutations = self.check_mutations(self.param_mutations)
             self._apply_plugin_updates(skip)
+
+    def check_mutations(self, mut_dict):
+        plist_version = self._version_to_float(self.plugin_list.version)
+        for key, subdict in mut_dict.items():
+            if 'up_to_version' in subdict.keys():
+                up_to_version = self._version_to_float(subdict['up_to_version'])
+                if plist_version >= up_to_version:
+                    del mut_dict[key]
+        return mut_dict
+
+    def _version_to_float(self, version):
+        if version == None:
+            return 0
+        split_vals = version.split('.')
+        return float('.'.join([split_vals[0], ''.join(split_vals[1:])]))
 
     def display(self, formatter, **kwargs):
         if 'level' not in kwargs.keys():
@@ -82,7 +102,12 @@ class Content(object):
 
     def add(self, name, str_pos):
         if name not in pu.plugins.keys():
-            raise Exception("INPUT ERROR: Unknown plugin %s" % name)
+            if name in self.failed.keys():
+                msg = "IMPORT ERROR: %s is unavailable due to the following"\
+                " error:\n\t%s" % (name, self.failed[name])
+                raise Exception(msg)
+            else:
+                raise Exception("INPUT ERROR: Unknown plugin %s" % name)
         plugin = pu.plugins[name]()
         plugin._populate_default_parameters()
         pos, str_pos = self.convert_pos(str_pos)
@@ -108,12 +133,12 @@ class Content(object):
             self.modify(str_pos, param, keep[param], ref=True)
         # add any parameter mutations here
         classes = [c.__name__ for c in inspect.getmro(plugin.__class__)]
-        m_dict = mutations.param_mutations
+        m_dict = self.param_mutations
         keys = [k for k in m_dict.keys() if k in classes]
 
         changes = False
         for k in keys:
-            for entry in m_dict[k]:
+            for entry in m_dict[k]['params']:
                 if entry['old'] in keep.keys():
                     changes = True
                     val = keep[entry['old']]
@@ -176,7 +201,7 @@ class Content(object):
                     return True
 
         # check mutations dict
-        m_dict = mutations.plugin_mutations
+        m_dict = self.plugin_mutations
         if name in m_dict.keys():
             mutate = m_dict[name]
             if 'replace' in mutate.keys():

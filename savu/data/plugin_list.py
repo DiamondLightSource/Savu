@@ -60,6 +60,7 @@ class PluginList(object):
         self.datasets_list = []
         self.saver_plugin_status = True
         self._template = None
+        self.version = None
 
     def add_template(self, create=False):
         self._template = Template(self)
@@ -83,6 +84,10 @@ class PluginList(object):
                               template=False):
         """ Populate the plugin list from a nexus file. """
         plugin_file = h5py.File(filename, 'r')
+        
+        if 'entry/savu_notes/version' in plugin_file:
+            self.version = plugin_file['entry/savu_notes/version'][()]
+
         plugin_group = plugin_file['entry/plugin']
         self.plugin_list = []
         single_val = ['name', 'id', 'pos', 'active']
@@ -115,9 +120,15 @@ class PluginList(object):
     def _save_plugin_list(self, out_filename):
         with h5py.File(out_filename, 'w') as nxs_file:
             entry_group = nxs_file.require_group('entry')
+            
             citations_group = entry_group.create_group('framework_citations')
             citations_group.attrs[NX_CLASS] = 'NXcollection'
             self._save_framework_citations(citations_group)
+            
+            savu_notes_group = entry_group.create_group('savu_notes')
+            savu_notes_group.attrs[NX_CLASS] = 'NXnote'
+            self.__save_savu_notes(savu_notes_group)
+            
             plugins_group = entry_group.create_group('plugin')
             plugins_group.attrs[NX_CLASS] = 'NXprocess'
 
@@ -128,6 +139,10 @@ class PluginList(object):
         if self._template and self._template.creating:
             fname = os.path.splitext(out_filename)[0] + '.savu'
             self._template._output_template(fname, out_filename)
+
+    def __save_savu_notes(self, notes):
+        from savu.version import __version__
+        notes['version'] = __version__
 
     def __populate_plugins_group(self, plugins_group, plugin, count):
         if 'pos' in plugin.keys():
@@ -165,7 +180,7 @@ class PluginList(object):
                 except:
                     pass
                 try:
-                    data_dict[key] = yaml.load(val)
+                    data_dict[key] = yaml.load(val, Loader=yaml.SafeLoader)
                     continue
                 except:
                     pass

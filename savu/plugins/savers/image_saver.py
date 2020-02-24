@@ -17,18 +17,19 @@
    :platform: Unix
    :synopsis: A class to save output as images
 
-.. moduleauthor:: Dan Nixon <daniel.nixon@stfc.ac.uk>
+.. moduleauthor:: Dan Nixon, Nghia Vo <scientificsoftware@diamond.ac.uk>
 
 """
 
 import skimage.exposure
 import skimage.io
 import numpy as np
+from PIL import Image
 
 from savu.plugins.savers.base_image_saver import BaseImageSaver
 from savu.plugins.utils import register_plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-
+import savu.core.utils as cu
 
 @register_plugin
 class ImageSaver(BaseImageSaver, CpuPlugin):
@@ -37,7 +38,10 @@ class ImageSaver(BaseImageSaver, CpuPlugin):
     before this to rescale the data.
 
     :param pattern: How to slice the data. Default: 'VOLUME_XZ'.
-    :param format: Image format. Default: 'jpeg'.
+    :u*param format: Image format. Default: 'tif'.
+    :u*param num_bit: Bit depth of the tiff format (8, 16 or 32). Default: 16.
+    :param max: Global max for tiff scaling. Default: None.
+    :param min: Global min for tiff scaling. Default: None.
     :param jpeg_quality: JPEG encoding quality (1 is worst, 100 is best). Default: 75.
     :param prefix: Override the default output jpg file prefix. Default: None.
 
@@ -50,34 +54,79 @@ class ImageSaver(BaseImageSaver, CpuPlugin):
 
     def pre_process(self):
         super(ImageSaver, self).pre_process()
-        self._data_range = self._get_min_and_max()
+        self.file_format = self.parameters['format']
+        num_bit = self.parameters['num_bit']
         self.pData = self.get_plugin_in_datasets()[0]
+        if not (num_bit==8 or num_bit==16 or num_bit==32):
+            self.num_bit = 32
+            msg = "\n***********************************************\n"\
+                "This option %s is not available. Reset to 32 \n"\
+                %str(num_bit)
+            cu.user_message(msg)
+        else:
+            self.num_bit = num_bit
+        self._data_range = self._get_min_and_max()
 
     def process_frames(self, data):
         frame = self.pData.get_current_frame_idx()[0]
-        filename = '%s%05i.%s' % (self.filename, frame, self.parameters['format'])
-
-        # Rescale image to (0.0, 1.0) range
-        resampled_image = skimage.exposure.rescale_intensity(
-                data[0], in_range=self._data_range, out_range=(0.0, 1.0))
-
-        # Save image
-        skimage.io.imsave(
-                filename, resampled_image, quality=self.parameters['jpeg_quality'])
-
-        self.count += 1
+        filename = '%s%05i.%s' % (self.filename, frame, self.file_format)
+        if (self.file_format=="tiff") or (self.file_format =="tif"):
+            global_min = self.parameters['min']
+            global_max = self.parameters['max']
+            if self.num_bit==32:
+                rescaled_image = data[0]
+            else:
+                if global_min is None:
+                    if self.the_min is not None:
+                        global_min = self.the_min
+                    else:
+                        global_min = np.min(data[0])
+                if global_max is None:
+                    if self.the_max is not None:
+                        global_max = self.the_max
+                    else:
+                        global_max = np.max(data[0])
+                rescaled_image = np.clip(data[0], global_min, global_max)
+                rescaled_image = (rescaled_image - global_min) \
+                                    / (global_max - global_min)
+                if self.num_bit==16:
+                    rescaled_image = np.clip(
+                        np.uint16(rescaled_image * 65535), 0, 65535)
+                else:
+                    rescaled_image = np.clip(np.uint8(rescaled_image * 255), 0, 255)
+            img = Image.fromarray(rescaled_image)
+            img.save(filename)
+        else:
+            # Rescale image to (0.0, 1.0) range
+            rescaled_image = skimage.exposure.rescale_intensity(
+                    data[0], in_range=self._data_range, out_range=(0.0, 1.0))
+            # Save image
+            skimage.io.imsave(
+                    filename, rescaled_image, quality=self.parameters['jpeg_quality'])
 
     def _get_min_and_max(self):
         data = self.get_in_datasets()[0]
         pattern = self.parameters['pattern']
         try:
-            the_min = np.min(data.meta_data.get(['stats', 'min', pattern]))
-            the_max = np.max(data.meta_data.get(['stats', 'max', pattern]))
-            self._data_range = (the_min, the_max)
+            self.the_min = np.min(data.meta_data.get(['stats', 'min', pattern]))
+            self.the_max = np.max(data.meta_data.get(['stats', 'max', pattern]))
+            self._data_range = (self.the_min, self.the_max)
         except KeyError:
             self._data_range = 'image'
+            if (self.file_format=="tiff") or (self.file_format =="tif"):
+                self.the_min = None
+                self.the_max = None
+                msg = "\n***********************************************\n"\
+                "!!!Warning!!!-> No global maximum and global minimum found\n"\
+                "in the metadata. Please run the MaxAndMin plugin before\n" \
+                "ImageSaver or input manually. Otherwise, local minimum\n" \
+                "and local maximum will be used for rescaling. This may\n"\
+                "result the fluctuation of brightness between slices.\n"\
+                "***********************************************\n"
+                if (self.num_bit == 8) or (self.num_bit==16):
+                    cu.user_message(msg)
         return self._data_range
-        
+
     def executive_summary(self):
         if self._data_range == 'image':
             return ["To rescale and normalise the data between global max and "

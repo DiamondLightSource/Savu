@@ -1,5 +1,5 @@
-savu\.plugins\.loaders\.full\_field\_loaders package
-====================================================
+savu.plugins.loaders.full\_field\_loaders package
+=================================================
 
 Submodules
 ----------

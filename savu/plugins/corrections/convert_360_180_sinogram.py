@@ -125,12 +125,18 @@ class Convert360180Sinogram(Plugin, CpuPlugin):
         sinocombine = np.zeros((self.new_height, 2 * self.width),
                                dtype=np.float32)
         if self.center < self.mid_width:
+            num1 = np.mean(np.abs(sinogram1[:,:self.overlap]))
+            num2 = np.mean(np.abs(sinogram2[:,-self.overlap:]))
+            sinogram2 = sinogram2 * num1 / num2
             sinogram1 = sinogram1 * self.mat_wedge_right
             sinogram2 = sinogram2 * self.mat_wedge_left
             sinocombine[:, 0:self.overlap] = sinogram2[:, 0:1]
             sinocombine[:, self.overlap:self.overlap + self.width] = sinogram2
             sinocombine[:, -self.width:] += sinogram1
         else:
+            num1 = np.mean(np.abs(sinogram1[:,-self.overlap:]))
+            num2 = np.mean(np.abs(sinogram2[:,:self.overlap]))
+            sinogram2 = sinogram2 * num1 / num2
             sinogram1 = sinogram1 * self.mat_wedge_left
             sinogram2 = sinogram2 * self.mat_wedge_right
             sinocombine[:, 0:self.width] = sinogram1

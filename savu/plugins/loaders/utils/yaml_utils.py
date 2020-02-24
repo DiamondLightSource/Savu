@@ -47,6 +47,11 @@ def ordered_dump(data, stream=None, Dumper=yaml.Dumper, **kwds):
             yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
             data.items())
     OrderedDumper.add_representer(OrderedDict, _dict_representer)
+    
+    def represent_none(self, _):
+        return self.represent_scalar('tag:yaml.org,2002:null', '')
+    OrderedDumper.add_representer(type(None), represent_none)
+    
     return yaml.dump(data, stream, OrderedDumper, **kwds)
 
 
@@ -59,3 +64,4 @@ def read_yaml(path):
 def dump_yaml(template, stream):
     ordered_dump(template, stream=stream, Dumper=yaml.SafeDumper,
                  default_flow_style=False)
+

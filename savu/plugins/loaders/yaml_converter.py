@@ -69,7 +69,8 @@ class YamlConverter(BaseLoader):
             raise Exception('Please pass a yaml file to the yaml loader.')
 
         if not os.path.exists(yaml_file):
-            path = os.path.dirname(__file__.split('savu')[0])
+            path = os.path.dirname(
+                __file__.split(os.path.join('savu', 'plugins'))[0])
             yaml_file = os.path.join(path, yaml_file)
             if not os.path.exists(yaml_file):
                 raise Exception('The yaml file does not exist %s' % yaml_file)

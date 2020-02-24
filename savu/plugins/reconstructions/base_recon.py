@@ -61,7 +61,7 @@ class BaseRecon(Plugin):
         size along given axis. Default: 0.95.
     :param log_func: Override the default log \
         function. Default: 'np.nan_to_num(-np.log(sino))'.
-    :param vol_shape: Override the size of the reconstuction volume with an \
+    :param vol_shape: Override the size of the reconstruction volume with an \
     integer value. Default: 'fixed'.
     """
 
@@ -177,7 +177,7 @@ class BaseRecon(Plugin):
         cor = mData.get('centre_of_rotation')
         sdirs = inData.get_slice_dimensions()
         total_frames = np.prod([inData.get_shape()[i] for i in sdirs])
-        if total_frames != len(cor):
+        if total_frames > len(cor):
             cor = np.tile(cor, total_frames/len(cor))
         return cor
 
@@ -244,7 +244,8 @@ class BaseRecon(Plugin):
         else:
             frame_nos = \
                 self.get_plugin_in_datasets()[0].get_current_frame_idx()
-            self.frame_cors = self.cor_func(self.cor[[frame_nos]])
+            a = self.cor[tuple([frame_nos])]
+            self.frame_cors = self.cor_func(a)
 
         # for extra padded frames that make up the numbers
         if not self.frame_cors.shape:
@@ -257,7 +258,7 @@ class BaseRecon(Plugin):
         
         # fix to remove NaNs in the initialised image
         if init is not None:
-            init[np.where(np.isnan(init)==True)] = 0.0
+            init[np.isnan(init)] == 0.0
         self.frame_init_data = init
         
         data[0] = self.fix_sino(self.sino_func(data[0]), self.frame_cors[0])
