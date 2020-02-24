@@ -110,7 +110,7 @@ def load_class(name, cls_name=None):
     return getattr(mod, cls_name)
 
 
-def plugin_loader(exp, plugin_dict):
+def plugin_loader(exp, plugin_dict, check=False):
     logging.debug("Running plugin loader")
 
     try:
@@ -121,6 +121,8 @@ def plugin_loader(exp, plugin_dict):
         # re-raise the original error
         raise
 
+    # If we are just checking the plugin we should reduce the effort
+    plugin.check = check
     logging.debug("finished plugin loader")
     return plugin
 

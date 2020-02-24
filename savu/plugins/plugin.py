@@ -53,7 +53,8 @@ class Plugin(PluginDatasets):
         self.slice_list = None
         self.global_index = None
         self.pcount = 0
-        self.exp = None     
+        self.exp = None
+        self.check = False
     
     def initialise(self, params, exp):
         self.exp = exp
@@ -73,9 +74,11 @@ class Plugin(PluginDatasets):
             self._set_plugin_datasets()
         self._reset_process_frames_counter()
         self.setup()
-        self.set_filter_padding(*(self.get_plugin_datasets()))
-        self._finalise_datasets()
-        self._finalise_plugin_datasets()
+        
+        if not self.check: # reduce the processing if just checking
+            self.set_filter_padding(*(self.get_plugin_datasets()))
+            self._finalise_datasets()
+            self._finalise_plugin_datasets()
 
     def _reset_process_frames_counter(self):
         self.pcount = 0
