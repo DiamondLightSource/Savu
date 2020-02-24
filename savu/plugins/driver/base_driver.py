@@ -54,7 +54,7 @@ class BaseDriver(object):
         logging.info("%s.%s", self.__class__.__name__, '_barrier')
         self.plugin_barrier()
 
-        logging.info("%s.%s", self.__class__.__name__, 'process_frames')
+        logging.info("%s.%s", self.__class__.__name__, 'transport_process_frames')
         transport._transport_checkpoint(transport._transport_process(self))
 
         logging.info("%s.%s", self.__class__.__name__, '_barrier')
@@ -62,4 +62,4 @@ class BaseDriver(object):
 
         logging.info("%s.%s", self.__class__.__name__, 'post_process')
         self.post_process()
-        self.base_post_process()    
+        self.base_post_process()

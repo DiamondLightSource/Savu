@@ -79,7 +79,7 @@ def dawn_compatible(plugin_output_type=OUTPUT_TYPE_METADATA_AND_DATA):
         return _dawn_compatible
 
 
-def get_plugin(plugin_name, params, exp):
+def get_plugin(plugin_name, params, exp, check=False):
     """ Get an instance of the plugin class and populate default parameters.
 
     :param plugin_name: Name of the plugin to import
@@ -88,11 +88,13 @@ def get_plugin(plugin_name, params, exp):
     """
     logging.debug("Importing the module %s", plugin_name)
     instance = load_class(plugin_name)()
-    instance.initialise(params, exp)
+    instance.initialise(params, exp, check=check)
     return instance
+
 
 def _get_cls_name(name):
     return ''.join(x.capitalize() for x in name.split('.')[-1].split('_'))
+
 
 def load_class(name, cls_name=None):
     """ Returns an instance of the class associated with the module name.
@@ -112,9 +114,9 @@ def load_class(name, cls_name=None):
 
 def plugin_loader(exp, plugin_dict, check=False):
     logging.debug("Running plugin loader")
-
     try:
-        plugin = get_plugin(plugin_dict['id'], plugin_dict['data'], exp)
+        plugin = get_plugin(
+                plugin_dict['id'], plugin_dict['data'], exp, check=check)
     except Exception as e:
         logging.error("failed to load the plugin")
         logging.error(e)
@@ -122,9 +124,9 @@ def plugin_loader(exp, plugin_dict, check=False):
         raise
 
     # If we are just checking the plugin we should reduce the effort
-    plugin.check = check
     logging.debug("finished plugin loader")
     return plugin
+
 
 def get_plugins_paths(examples=True):
     """
