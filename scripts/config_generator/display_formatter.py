@@ -77,7 +77,14 @@ class DisplayFormatter(object):
         keycount = 0
 
         param_dict = copy.deepcopy(temp_param_dict)
-        keys = [k for k, v in param_dict['tools'].items() if v['visibility'] != 'hide']
+
+        # Select the correct order of parameters according to that on display
+        # to the user. This ensures the correct parameter is modified.
+        dev_keys = [k for k, v in param_dict['tools'].items()
+                    if v['visibility'] not in ['user', 'hide']]
+        user_keys = [k for k, v in param_dict['tools'].items()
+                     if v['visibility'] == 'user']
+        keys = user_keys + dev_keys
 
         try:
             for key in keys:
@@ -156,8 +163,10 @@ class DisplayFormatter(object):
         joiner = "\n" + " "*margin
         params = ''
 
-        dev_keys = [k for k, v in p_dict['tools'].items() if v['visibility'] not in ['user', 'hide']]
-        user_keys = [k for k, v in p_dict['tools'].items() if v['visibility'] == 'user']
+        dev_keys = [k for k, v in p_dict['tools'].items()
+                    if v['visibility'] not in ['user', 'hide']]
+        user_keys = [k for k, v in p_dict['tools'].items()
+                     if v['visibility'] == 'user']
 
         try:
             keys = user_keys if level == 'user' else user_keys + dev_keys
@@ -218,7 +227,8 @@ class DisplayFormatter(object):
                 option_verbose = ''
                 option_verbose += colour + u'\u0009' + u'\u2022' + opt
 
-                options_desc = {self._apply_lower_case(k): v for k, v in desc[key][param_key].items() if v}
+                options_desc = {self._apply_lower_case(k): v
+                                for k, v in desc[key][param_key].items() if v}
                 if opt in options_desc.keys():
                     if breakdown:
                         option_verbose += ': ' + verbose_color + options_desc[opt]
@@ -300,8 +310,8 @@ class DispDisplay(DisplayFormatter):
         warn_c = Back.WHITE + Fore.RED
         c_off = Back.RESET + Fore.RESET
         info, warn = self._get_extra_info(p_dict, width, c_off, info_c, warn_c)
-        # Synopsis and get_extra info both call plugin instance and populate parameters which means
-        # yaml_load will be called twice
+        # Synopsis and get_extra info both call plugin instance and populate
+        # parameters which means yaml_load will be called twice
         return title + synopsis + info + warn + param_details
 
     def _remove_quotes(self, data_dict):
