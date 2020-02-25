@@ -239,10 +239,16 @@ class Content(object):
                 value = self.value(value)
             pos = self.find_position(pos_str)
             data_elements = self.plugin_list.plugin_list[pos]['data']
-            current_params = \
-                [k for k, v
-                 in self.plugin_list.plugin_list[pos]['tools'].items()
-                 if v['visibility'] != 'hide']
+            tools = self.plugin_list.plugin_list[pos]['tools']
+
+            # Select the correct order of parameters according to that on
+            # display to the user. This ensures correct parameter is modified.
+            dev_keys = [k for k, v in tools.items()
+                        if v['visibility'] not in ['user', 'hide']]
+            user_keys = [k for k, v in tools.items()
+                         if v['visibility'] == 'user']
+            current_params = user_keys + dev_keys
+
             # Filter the parameter names to find those not hidden
             if param_name.isdigit():
                 param_name = current_params[int(param_name)-1]
@@ -269,11 +275,13 @@ class Content(object):
         '''
         data_elements = self.plugin_list.plugin_list[pos]['data']
         p_list = self.plugin_list.plugin_list[pos]['tools']
-        def_list = {k: v['default'] for k, v in p_list.items() if isinstance(v['default'], OrderedDict)}
+        def_list = {k: v['default'] for k, v in p_list.items()
+                    if isinstance(v['default'], OrderedDict)}
         for p_name, default in def_list.items():
             desc = p_list[p_name]['description']
             parent_param = default.keys()[0]
-            dep_param_choices = {self._apply_lower_case(k): v for k, v in default[parent_param].items()}
+            dep_param_choices = {self._apply_lower_case(k): v
+                                 for k, v in default[parent_param].items()}
             parent_value = self._apply_lower_case(data_elements[parent_param])
             for item in dep_param_choices.keys():
                 if parent_value == item:
@@ -296,13 +304,16 @@ class Content(object):
         """
         data_elements = self.plugin_list.plugin_list[pos]['data']
         p_list = self.plugin_list.plugin_list[pos]['tools']
-        dep_list = {k: v['dependency'] for k, v in p_list.items() if 'dependency' in v}
+        dep_list = {k: v['dependency']
+                    for k, v in p_list.items() if 'dependency' in v}
         for p_name, dependency in dep_list.items():
             if isinstance(dependency, OrderedDict):
                 parent_param_name = dependency.keys()[0]
-                parent_choice_list = [self._apply_lower_case(i) for i in dependency[parent_param_name]]
+                parent_choice_list = [self._apply_lower_case(i)
+                                      for i in dependency[parent_param_name]]
                 # The choices which must be in the parent value
-                parent_value = self._apply_lower_case(data_elements[parent_param_name])
+                parent_value = \
+                    self._apply_lower_case(data_elements[parent_param_name])
                 if parent_value in parent_choice_list:
                     if p_list[p_name].get('visibility') == 'hide':
                         p_list[p_name]['visibility'] = 'param'
