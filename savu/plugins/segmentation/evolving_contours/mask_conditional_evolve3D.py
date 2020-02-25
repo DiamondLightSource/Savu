@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: Fast mask-constrained segmentation by evolving the given mask in 3D space
+.. module:: mask_conditional_evolve3D
    :platform: Unix
    :synopsis: Fast segmentation by evolving the given mask in 3D space using additional\
     mask to constrain the evolution process
@@ -25,7 +25,7 @@ from savu.plugins.plugin import Plugin
 from savu.plugins.driver.multi_threaded_plugin import MultiThreadedPlugin
 from savu.plugins.utils import register_plugin
 
-from i23.methods.segmentation import MASK_CONDITIONAL_ITERATE
+from larix.methods.segmentation import MASK_CONDITIONAL_EVOLVE
 
 import numpy as np
 
@@ -37,8 +37,7 @@ class MaskConditionalEvolve3d(Plugin, MultiThreadedPlugin):
     mask will constrain the evolution process.
 
     :param threshold: important parameter to control mask propagation. Default: 1.0.
-    :param method: choose 0 to evolve based on the given intensity threshold only, chose 1 for\
-    mean calculated in the mask and Mean Absolute deviation for thresholding, chose 2 for median. Default: 1.
+    :param method: method to collect statistics from the mask (mean. median, value). Default: 'mean'.
     :param iterations: The number of iterations. Default: 500.
     :param connectivity: The connectivity of the local neighbourhood. Default: 6.
     :param out_datasets: The default names . Default: ['MASK_EVOLVED'].
@@ -68,8 +67,17 @@ class MaskConditionalEvolve3d(Plugin, MultiThreadedPlugin):
         input_temp = data[0]
         indices = np.where(np.isnan(input_temp))
         input_temp[indices] = 0.0
+        pars = {'input_data' : input_temp,         # input grayscale image
+                'maskData' : np.uint8(data[1]),    # generated initialisation mask
+                'maskCond' : np.uint8(data[2]),    # conditional mask
+                'threhsold' : self.threshold,      # threhsold controls where evolution stops (>=1)
+                'iterationsNumb' : self.iterations,# the number of iterations (depends on the size of the phase)
+                'connectivity' : self.connectivity,# voxel connectivity rule, choose between 4 (2D), 6, 8 (2D), and 26
+                'method' : self.method}            # method to collect statistics from the mask (mean. median, value)  
         if (np.sum(data[1]) > 0):
-            mask_evolve = MASK_CONDITIONAL_ITERATE(input_temp, np.uint8(data[1]), np.uint8(data[2]), self.threshold, self.iterations, self.connectivity, self.method)
+            mask_evolve = MASK_CONDITIONAL_EVOLVE(pars['input_data'], pars['maskData'],\
+                           pars['maskCond'], pars['threhsold'], pars['iterationsNumb'],\
+                           pars['connectivity'], pars['method'])
         else:
             mask_evolve = np.uint8(np.zeros(np.shape(data[0])))
         return mask_evolve
