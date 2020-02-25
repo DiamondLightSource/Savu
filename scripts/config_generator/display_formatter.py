@@ -218,7 +218,7 @@ class DisplayFormatter(object):
                 option_verbose = ''
                 option_verbose += colour + u'\u0009' + u'\u2022' + opt
 
-                options_desc = {self._apply_lower_case(k): v for k, v in desc[key][param_key].items()}
+                options_desc = {self._apply_lower_case(k): v for k, v in desc[key][param_key].items() if v}
                 if opt in options_desc.keys():
                     if breakdown:
                         option_verbose += ': ' + verbose_color + options_desc[opt]
