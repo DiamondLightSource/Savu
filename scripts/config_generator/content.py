@@ -269,28 +269,26 @@ class Content(object):
         '''
         data_elements = self.plugin_list.plugin_list[pos]['data']
         p_list = self.plugin_list.plugin_list[pos]['tools']
-        for p_name, p_value in p_list.items():
-            default = p_value.get('default')
-            desc = p_value.get('description')
-            if isinstance(default, OrderedDict):
-                parent_param = default.keys()[0]
-                dep_param_choices = default[parent_param]
-                parent_value = data_elements[parent_param]
-                for item in dep_param_choices.keys():
-
-                    if parent_value == item or parent_value.lower() == item.lower():
-                        desc['range'] = 'The recommended value with the chosen ' \
-                                        + str(parent_param) + ' would be ' \
-                                        + str(dep_param_choices[item])
-                        recommendation = 'It\'s recommended that you update ' \
-                                         + str(p_name) + ' to ' \
-                                         + str(dep_param_choices[item])
-                        if mod:
-                            if mod == parent_param:
-                                print(Fore.RED + recommendation + Fore.RESET)
-                        else:
-                            # At initial pass
-                            data_elements[p_name] = dep_param_choices[item]
+        def_list = {k: v['default'] for k, v in p_list.items() if isinstance(v['default'], OrderedDict)}
+        for p_name, default in def_list.items():
+            desc = p_list[p_name]['description']
+            parent_param = default.keys()[0]
+            dep_param_choices = {self._apply_lower_case(k): v for k, v in default[parent_param].items()}
+            parent_value = self._apply_lower_case(data_elements[parent_param])
+            for item in dep_param_choices.keys():
+                if parent_value == item:
+                    desc['range'] = 'The recommended value with the chosen ' \
+                                    + str(parent_param) + ' would be ' \
+                                    + str(dep_param_choices[item])
+                    recommendation = 'It\'s recommended that you update ' \
+                                     + str(p_name) + ' to ' \
+                                     + str(dep_param_choices[item])
+                    if mod:
+                        if mod == parent_param:
+                            print(Fore.RED + recommendation + Fore.RESET)
+                    else:
+                        # At initial pass
+                        data_elements[p_name] = dep_param_choices[item]
 
     def check_dependencies(self, pos):
         """ Determines which parameter values are dependent on a parent
@@ -298,22 +296,22 @@ class Content(object):
         """
         data_elements = self.plugin_list.plugin_list[pos]['data']
         p_list = self.plugin_list.plugin_list[pos]['tools']
+        dep_list = {k: v['dependency'] for k, v in p_list.items() if 'dependency' in v}
+        for p_name, dependency in dep_list.items():
+            if isinstance(dependency, OrderedDict):
+                parent_param_name = dependency.keys()[0]
+                parent_choice_list = [self._apply_lower_case(i) for i in dependency[parent_param_name]]
+                # The choices which must be in the parent value
+                parent_value = self._apply_lower_case(data_elements[parent_param_name])
+                if parent_value in parent_choice_list:
+                    if p_list[p_name].get('visibility') == 'hide':
+                        p_list[p_name]['visibility'] = 'param'
+                else:
+                    if p_list[p_name].get('visibility') != 'hide':
+                        p_list[p_name]['visibility'] = 'hide'
 
-        for p_name, p_value in p_list.items():
-            if p_value is not None:
-                dependencies = p_value.get('dependency') or {}
-                if isinstance(dependencies, OrderedDict):
-                    parent_param_name = dependencies.keys()[0]
-                    parent_choice_list = dependencies[parent_param_name]
-                    # The choices which must be in the parent value
-                    parent_value = data_elements[parent_param_name]
-
-                    if parent_value in parent_choice_list:
-                        if p_value.get('visibility') == 'hide':
-                            p_value['visibility'] = 'param'
-                    else:
-                        if p_value.get('visibility') != 'hide':
-                            p_value['visibility'] = 'hide'
+    def _apply_lower_case(self, item):
+        return item.lower() if isinstance(item, str) else item
 
     def value(self, value):
         if not value.count(';'):
