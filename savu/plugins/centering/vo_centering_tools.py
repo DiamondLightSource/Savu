@@ -41,7 +41,7 @@ class VoCenteringTools(PluginTools):
         datasets_to_populate:
              visibility: param
              dtype: range
-             description:  A list of datasets which require this information
+             description: A list of datasets which require this information
              default: '[]'
         out_datasets:
              visibility: param

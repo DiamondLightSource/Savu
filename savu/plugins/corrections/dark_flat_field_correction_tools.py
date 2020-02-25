@@ -10,8 +10,8 @@ class DarkFlatFieldCorrectionTools(PluginTools):
             dtype: str
             options: [SINOGRAM, PROJECTION]
             description:
-            summary: Data processing pattern
-            options:
+              summary: Data processing pattern
+              options:
                 SINOGRAM: Sinogram
                 PROJECTION: Projection
             default: PROJECTION

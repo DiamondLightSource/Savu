@@ -17,6 +17,7 @@ class AstraReconCpuTools(PluginTools):
                 SART: Simultaneous Algebraic Reconstruction Technique
                 ART: Iterative Reconstruction Technique
                 CGLS: Conjugate Gradient Least Squares
+                FP:
                 BP: Back Projection
             default: FBP
         projector:
