@@ -42,6 +42,8 @@ class NxtomoLoader(BaseLoader):
     :param image_key_path: Path to the image key entry inside the nxs \
         file. Set this parameter to "None" if use this loader for radiography\
         . Default: 'entry1/tomo_entry/instrument/detector/image_key'.
+    :param image_shift: Shifts for each image in a (rot, xy) format. If None, \
+        defaults to values in nxs file. Default: None.
     :param dark: Optional path to the dark field data file, nxs path and \
         scale value. Default: [None, None, 1].
     :param flat: Optional Path to the flat field data file, nxs path and \
@@ -78,7 +80,7 @@ class NxtomoLoader(BaseLoader):
             self.__setup_4d(data_obj)
             self.__setup_3d_to_4d(data_obj, self.nFrames)
         else:
-            if len(data_obj.data.shape) is 3:
+            if len(data_obj.data.shape) == 3:
                 self._setup_3d(data_obj)
             else:
                 self.__setup_4d(data_obj)
@@ -93,7 +95,11 @@ class NxtomoLoader(BaseLoader):
             self.log_warning("No Control information available")
 
         nAngles = len(data_obj.meta_data.get('rotation_angle'))
-        self.__check_angles(data_obj, nAngles)
+        self.__check_angles(data_obj, nAngles)        
+        
+        self._set_image_shifts(data_obj)
+        nShift = len(data_obj.meta_data.get('image_shift'))
+        self.__check_angles(data_obj, nShift)
 
         self.set_data_reduction_params(data_obj)
         data_obj.data._set_dark_and_flat()
@@ -227,6 +233,28 @@ class NxtomoLoader(BaseLoader):
             func(ffile[entry])
 
         data_obj.data._set_scale(name, scale)
+
+    def _set_image_shifts(self, data_obj):
+        shift = self.parameters['image_shift']
+        if shift is None:
+            try:
+                shift = 'entry1/instrument/image_shift/image_shifts'
+                shift = data_obj.backing_file[shift][
+                    (data_obj.data.get_image_key()) == 0, ...]
+            except KeyError:
+                logging.warn("No shift values found in input file.")
+                shift = np.zeros((data_obj.get_shape()[0]), 2)
+        else:
+            try:
+                exec("shift = " + shift)
+            except:
+                try:
+                    shift = np.loadtxt(shift)
+                except:
+                    raise Exception('Cannot set TXM shift in loader.')
+
+        data_obj.meta_data.set("image_shift", shift)
+        return len(shift)
 
     def _set_rotation_angles(self, data_obj):
         angles = self.parameters['angles']
