@@ -35,7 +35,7 @@ class CropProjections(Plugin, CpuPlugin):
     Default: 0.
     :u*param cropY: Crop in pixels applied to the y-dimensions (on each side).\
     Default: 0.
-    :u*param useAbsoluteSizes: If True, absolute xsize and ysize parameters \
+    :u*param useAbsoluteSizes: If True, absolute sizeX and sizeY parameters \
     will be used to determine the new image size. If False, the image will be \
     cropped by cropX and cropY parameters. Default: True.
     :u*param sizeX: The x-size of the cropped image in pixels. A setting of -1\
