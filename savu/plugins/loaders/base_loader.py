@@ -22,6 +22,7 @@
 """
 
 from savu.plugins.plugin import Plugin
+from savu.plugins.loaders.base_loader_tools import BaseLoaderTools
 
 
 class BaseLoader(Plugin):
@@ -32,6 +33,7 @@ class BaseLoader(Plugin):
         self.hits = []
         self.application = None
         self.reduction_flag = False
+        self.tools = BaseLoaderTools()
 
     def _main_setup(self, exp, params):
         """

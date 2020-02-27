@@ -90,7 +90,7 @@ class NoProcessTools(PluginTools):
             default: None
         multisavuloader_filename:
             visibility: param
-            dtype: str
+            dtype: filename
             description: The shared part of the name of each file
               (not including .nxs)
             default: None

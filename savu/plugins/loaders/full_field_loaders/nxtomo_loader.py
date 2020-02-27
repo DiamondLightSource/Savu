@@ -33,6 +33,7 @@ import savu.plugins.docstring_parser as doc
 
 from savu.data.data_structures.data_types.data_plus_darks_and_flats \
     import ImageKey, NoImageKey
+from savu.plugins.loaders.full_field_loaders.nxtomo_loader_tools import NxtomoLoaderTools
 
 #@register_plugin
 @register_test_plugin
@@ -42,6 +43,7 @@ class NxtomoLoader(BaseLoader):
     def __init__(self, name='NxtomoLoader'):
         super(NxtomoLoader, self).__init__(name)
         self.warnings = []
+        self.tools = NxtomoLoaderTools()
 
     def log_warning(self, msg):
         logging.warn(msg)

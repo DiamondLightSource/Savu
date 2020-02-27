@@ -25,22 +25,17 @@ import logging
 import os
 import copy
 
+from savu.plugins.savers.hdf5_saver_tools import Hdf5SaverTools
 from savu.plugins.savers.utils.hdf5_utils import Hdf5Utils
 from savu.plugins.savers.base_saver import BaseSaver
 from savu.plugins.driver.cpu_plugin import CpuPlugin
+from savu.plugins.utils import register_test_plugin
 from savu.plugins.utils import register_plugin
 from savu.data.chunking import Chunking
 
-
-@register_plugin
+@register_test_plugin
 class Hdf5Saver(BaseSaver, CpuPlugin):
     """
-    A class to save tomography data to a hdf5 file
-
-    :param pattern: Optimise data storage to this access pattern: 'optimum' \
-        will automate this process by choosing the output pattern from the \
-        previous plugin, if it exists, else the first \
-        pattern. Default: 'optimum'.
     """
 
     def __init__(self, name='Hdf5Saver'):
@@ -50,6 +45,7 @@ class Hdf5Saver(BaseSaver, CpuPlugin):
         self.data_name = None
         self.filename = None
         self.group_name = None
+        self.tools = Hdf5SaverTools()
 
     def pre_process(self):
         # Create the hdf5 output file
@@ -104,3 +100,11 @@ class Hdf5Saver(BaseSaver, CpuPlugin):
             plugin_dict['id'].split('.')[-1] + '.h5'
         out_path = self.exp.meta_data.get('out_path')
         return os.path.join(out_path, fname)
+        """
+         A class to save tomography data to a hdf5 file
+    
+        :param pattern: Optimise data storage to this access pattern: 'optimum' \
+            will automate this process by choosing the output pattern from the \
+            previous plugin, if it exists, else the first \
+            pattern. Default: 'optimum'.
+        """
