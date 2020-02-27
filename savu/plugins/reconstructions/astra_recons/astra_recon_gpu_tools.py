@@ -11,10 +11,12 @@ class AstraReconGpuTools(PluginTools):
             description: Output the residual norm at each iteration
               (Error in the solution - iterative solvers only)
             default: False
+            dependency:
+              algorithm: [SIRT_CUDA, SART_CUDA, CGLS_CUDA]
         algorithm:
             visibility: user
             dtype: str
-            options: [FBP, SIRT, SART, ART, CGLS, FP, BP]
+            options: [FBP_CUDA, SIRT_CUDA, SART_CUDA, CGLS_CUDA, FP_CUDA, BP_CUDA]
             description:
                 summary: Reconstruction type
                 options:

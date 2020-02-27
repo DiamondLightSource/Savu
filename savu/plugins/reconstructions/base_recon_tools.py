@@ -29,6 +29,8 @@ class BaseReconTools(PluginTools):
                Only available for selected algorithms and will be
                ignored otherwise.
              default: false
+             dependency:
+               algorithm: [FP_CUDA, FBP_CUDA, BP_CUDA, FP, FBP, BP]
         outer_pad:
              visibility: param
              dtype: float
@@ -40,6 +42,8 @@ class BaseReconTools(PluginTools):
                the time to compute the reconstruction. Only available
                for selected algorithms and will be ignored otherwise.
              default: false
+             dependency:
+               algorithm: [FP_CUDA, FBP_CUDA, BP_CUDA, FP, FBP, BP]
         log:
              visibility: user
              dtype: bool
