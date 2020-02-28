@@ -3,7 +3,7 @@
 set -e -x
 
 module purge
-module load python/3.7
+module load python/3.8
 
 # our conda interpreter
 CONDA=$(which conda)
@@ -11,22 +11,21 @@ IMAGE=centos7/conda-build
 LOCAL_IMAGE=/scratch/singularity/images/savu-conda.simg
 
 # sregistry setup
-# AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY are necessary for this to work...
-# come and ask me for them, export them in your shell, but never commit them!
-export SREGISTRY_S3_BUCKET=singularity-savu
+export SREGISTRY_GOOGLE_STORAGE_BUCKET=singularity-savu
 export SREGISTRY_DATABASE=/dls/science/users/$USER/singularity
 export SREGISTRY_STORAGE=${SREGISTRY_DATABASE}/shub
+export GOOGLE_APPLICATION_CREDENTIALS=$HOME/.singularity-savu-google-storage.json
 
-# activate S3 backend
-sregistry backend activate s3
+# activate google-storage backend
+sregistry backend activate google-storage
 
 # singularity
 export SINGULARITY_CACHEDIR=/scratch/singularity
 export SINGULARITY_TMPDIR=/scratch/tmp
 
-# if the remote image in the S3 bucket needs to get a rebuild, remove it and its local copy with:
+# if the remote image in the GCP bucket needs to get a rebuild, remove it and its local copy with:
 #
-#sregistry delete -f s3://$IMAGE
+#sregistry delete -f google-storage://$IMAGE
 #sregistry rm $IMAGE
 #
 # this will trigger a rebuild on the next line!
@@ -34,12 +33,12 @@ export SINGULARITY_TMPDIR=/scratch/tmp
 
 # pull our centos7 conda build image in if necessary. If it doesn't exist in the bucket, build it locally and push it (if possible)
 sregistry get $IMAGE || \
- 	sregistry pull s3://$IMAGE || ( \
+ 	sregistry pull google-storage://$IMAGE || ( \
 	rm -f $LOCAL_IMAGE && \
 	sudo --preserve-env=SINGULARITY_CACHEDIR,SINGULARITY_TMPDIR singularity build $LOCAL_IMAGE Singularity && \
 	sregistry add --copy --name $IMAGE $LOCAL_IMAGE && (\
 	sregistry push --name $IMAGE $LOCAL_IMAGE || \
-	echo "Could not push to S3 bucket!"))
+	echo "Could not push to google-storage bucket!"))
 
 
 
