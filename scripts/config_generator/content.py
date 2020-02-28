@@ -266,7 +266,6 @@ class Content(object):
             print ("There is an end of line error. Please check your"
                    " input for the character \"\'\".")
         except Exception as e:
-            print('There is an error. Please check your input.')
             print(e)
 
     def update_defaults(self, pos, mod=False):
@@ -312,14 +311,16 @@ class Content(object):
                 parent_choice_list = [self._apply_lower_case(i)
                                       for i in dependency[parent_param_name]]
                 # The choices which must be in the parent value
-                parent_value = \
-                    self._apply_lower_case(data_elements[parent_param_name])
-                if parent_value in parent_choice_list:
-                    if p_list[p_name].get('visibility') == 'hide':
-                        p_list[p_name]['visibility'] = 'param'
-                else:
-                    if p_list[p_name].get('visibility') != 'hide':
-                        p_list[p_name]['visibility'] = 'hide'
+                if parent_param_name in data_elements:
+                    # Check that the parameter is in the current plug in
+                    parent_value = \
+                        self._apply_lower_case(data_elements[parent_param_name])
+                    if parent_value in parent_choice_list:
+                        if p_list[p_name].get('visibility') == 'hide':
+                            p_list[p_name]['visibility'] = 'param'
+                    else:
+                        if p_list[p_name].get('visibility') != 'hide':
+                                p_list[p_name]['visibility'] = 'hide'
 
     def _apply_lower_case(self, item):
         return item.lower() if isinstance(item, str) else item
