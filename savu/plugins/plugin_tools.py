@@ -6,7 +6,8 @@ from collections import OrderedDict
 
 class PluginCitations(object):
     """ Get this citation dictionary so get_dictionary of the metadata type
-        should return a dictionary of all the citation info as taken from docstring
+        should return a dictionary of all the citation info as taken from
+        docstring
         """
     def __init__(self):
         super(PluginCitations, self).__init__()
@@ -36,9 +37,13 @@ class PluginParameters(object):
         # function to get plugin parameters
 
         yaml_text = self.define_parameters.__doc__
-        all_params, verbose = doc.load_yaml_doc(yaml_text)
-        for p_name, p_value in all_params.items():
-            self.param.set(p_name, p_value)
+        all_params = doc.load_yaml_doc(yaml_text)
+        if isinstance(all_params, OrderedDict):
+            for p_name, p_value in all_params.items():
+                self.param.set(p_name, p_value)
+        else:
+            print('The parameters have not been read in correctly for '
+                  + str(self.__class__.__name__) + '.')
 
     def define_parameters(self):
         pass
@@ -64,9 +69,9 @@ class PluginParameters(object):
             return param_dict
     """
 class PluginDocumentation(object):
-    """ Get this documentation
-     diction so get_dictionary of the metadata type
-        should return a dictionary of all the parameters as taken from docstring
+    """ Get this documentation dictionary so get_dictionary of
+    the metadata type should return a dictionary of all the
+    documentation details taken from docstring
     """
     def __init__(self):
         super(PluginDocumentation, self).__init__()
@@ -81,10 +86,10 @@ class PluginTools(PluginCitations, PluginParameters, PluginDocumentation):
     def __init__(self, plugin_tools=MetaData()):
         self.plugin_tools = plugin_tools
         super(PluginTools, self).__init__()
-        self.plugin_tools.append('cite', self.cite.get_dictionary())
-        self.plugin_tools.append('param', self.param.get_dictionary())
-        self.plugin_tools.append('doc', self.doc.get_dictionary())
 
+        self.plugin_tools.append('doc', self.doc.get_dictionary())
+        self.plugin_tools.append('param', self.param.get_dictionary())
+        self.plugin_tools.append('cite', self.cite.get_dictionary())
 
 
 
