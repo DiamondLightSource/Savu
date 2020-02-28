@@ -105,7 +105,7 @@ def read_yaml_from_doc(docstring):
     try:
         # SafeLoader loads a subset of the YAML language, safely. This is recommended for loading untrusted input
         data_dict = ordered_load(docstring, yaml.SafeLoader)
-        return data_dict
+        return [data for data in data_dict]
     except (yaml.scanner.ScannerError, yaml.parser.ParserError) as se:
         for e in errors:
             print(e)
