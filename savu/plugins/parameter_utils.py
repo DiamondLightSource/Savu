@@ -23,15 +23,17 @@
 
 from __future__ import print_function
 
-import os
+import os, re
 import h5py
+import posixpath
 import numpy as np
 import configparser
 
-from savu.plugins.utils import parse_config_string as parse_str
-from yamllint.config import YamlLintConfig
 from yamllint import linter
 from colorama import Fore
+
+from savu.plugins.utils import parse_config_string as parse_str
+from yamllint.config import YamlLintConfig
 
 import warnings
 with warnings.catch_warnings():
@@ -59,19 +61,20 @@ def _range(value):
     parameter_valid = False
     entries = value.split(',')
     if len(entries) == 2:
-        if isinstance(entries[0], int) and isinstance(entries[1], int):
+        if _integer(entries[0]) and _integer(entries[1]):
             parameter_valid = True
+    else:
+        print(Fore.RED + '\nPlease enter two values.' + Fore.RESET)
     return parameter_valid
 
 
 @error_catcher_valid
 def _yamlfile(value):
-    """ yamlfile """
+    """ yaml_file """
     parameter_valid = False
-    if isinstance(value, str):
-        config_file = open('/home/glb23482/git_projects/'
-                      'Savu/savu/plugins/loaders/utils/yaml_config.yaml')
-        conf = YamlLintConfig(config_file)
+    config_file = open('savu/plugins/loaders/utils/yaml_config.yaml')
+    conf = YamlLintConfig(config_file)
+    if _filepath(value):
         f = open(value)
         gen = linter.run(f, conf)
         errors = list(gen)
@@ -95,7 +98,7 @@ def _intgroup(value):
         entries = bracket_value[0].split(',')
         if len(entries) == 3:
             file_path = entries[0]
-            if os.path.isfile(file_path):
+            if _filepath(file_path):
                 int_path = entries[1]
                 hf = h5py.File(file_path, 'r')
                 try:
@@ -104,20 +107,14 @@ def _intgroup(value):
                     if int_data is None:
                         print('\nThere is no data stored at that internal path.')
                     else:
+                        # Internal path is valid
                         int_data = np.array(int_data)
                         if int_data.size >= 1:
                             try:
                                 compensation_fact = int(entries[2])
-                                if isinstance(compensation_fact, int):
-                                    parameter_valid = True
-                                else:
-                                    print(Fore.BLUE + '\nThe compensation factor is'
-                                                      ' not valid.' + Fore.RESET)
-                            except ValueError:
+                                parameter_valid = _integer(compensation_fact)
+                            except (Exception, ValueError):
                                 print('\nThe compensation factor is not an integer.')
-                            except Exception:
-                                print('There is a problem converting the compensation'
-                                      ' factor to an integer.')
 
                 except AttributeError:
                     print('Attribute error.')
@@ -131,21 +128,12 @@ def _intgroup(value):
                             print(u'\t' + subgroup_str)
                     raise
                 hf.close()
-            else:
-                print(Fore.BLUE + '\nThis file does not exist at this'
-                                  ' location.' + Fore.RESET)
         else:
             print(Fore.RED + '\nPlease enter three parameters.' + Fore.RESET)
         return parameter_valid
-    except ValueError:
-        parameter_valid = False
+    except (Exception, ValueError, AttributeError):
         print('Valid items have a format [<file path>,'
               ' <interior file path>, int].')
-    except AttributeError:
-        print('You need to place some information inside the'
-              ' square brackets.')
-    except Exception as e:
-        print(e)
 
 
 @error_catcher_valid
@@ -158,57 +146,48 @@ def _intgroup1(value):
         entries = bracket_value[0].split(',')
         if len(entries) == 2:
             file_path = entries[0]
-            if os.path.isfile(file_path):
+            if _filepath(file_path):
                 try:
                     scale_fact = int(entries[1])
-                    if isinstance(scale_fact, int):
-                        parameter_valid = True
-                    else:
-                        print(Fore.BLUE + '\nThe scale factor is'
-                                          ' not valid.' + Fore.RESET)
-                except ValueError:
+                    parameter_valid = _integer(scale_fact)
+                except (Exception, ValueError):
                     print('\nThe scale factor is not an integer.')
-                except Exception:
-                    print('There is a problem converting the scale'
-                          ' factor to an integer.')
-            else:
-                print(Fore.BLUE + '\nThis file does not exist at this'
-                                  ' location.' + Fore.RESET)
         else:
             print(Fore.RED + '\nPlease enter two parameters.' + Fore.RESET)
         return parameter_valid
-    except ValueError:
-        parameter_valid = False
-        print('Valid items have a format [<file path>,'
-              ', int].')
-    except AttributeError:
-        print('You need to place some information inside the'
-              ' square brackets.')
-    except Exception as e:
-        print(e)
+    except (Exception, ValueError, AttributeError):
+        print('Valid items have a format [<file path>, int].')
 
 
 @error_catcher_valid
-def _path(value):
-    """ path """
+def _directory(value):
+    """ directory """
     parameter_valid = False
-    path = os.path.dirname(value)
-    path = path if path else '.'
+    # take the directory from the path
+    # path = os.path.dirname(value)
+    path = value if value else '.'
     if os.path.isdir(path):
         parameter_valid = True
         print('This path is to a directory.')
-    elif os.path.isfile(path):
-        parameter_valid = True
-        print('This path is to a file.')
     else:
-        print('Valid items contain numbers, letters and \'/\'')
-        file_error = "INPUT_ERROR: Incorrect filepath."
-        raise Exception(file_error)
+        print('Invalid directory.')
+    return parameter_valid
+
+
+@error_catcher_valid
+def _filepath(value):
+    """ file path """
+    parameter_valid = False
+    if os.path.isfile(value):
+        parameter_valid = True
+    else:
+        print('Incorrect filepath.')
     return parameter_valid
 
 
 @error_catcher_valid
 def _intpathway(value):
+    # Interior file path
     parameter_valid = False
     # Check if the entry is a string
     # Could check if valid, but only if file_path known for another parameter
@@ -222,15 +201,36 @@ def _intpathway(value):
 @error_catcher_valid
 def _configfile(value):
     parameter_valid = False
-    if isinstance(value, str):
+    if _filepath(value):
         filetovalidate = configparser.ConfigParser()
         filetovalidate.read(value)
         content = filetovalidate.sections()
         if content:
             parameter_valid = True
-    else:
-        print('Not a valid string.')
+    return parameter_valid
 
+
+@error_catcher_valid
+def _filename(value):
+    parameter_valid = False
+    if _string(value):
+        filename = posixpath.normpath(value)
+        # Normalize a pathname by collapsing redundant separators and up-level
+        # references so that //B, A/B/, A/./B and A/foo/../B all become A/B.
+        _os_alt_seps = list(sep for sep in [os.path.sep, os.path.altsep]
+                            if sep not in (None, '/'))
+        # Find which separators the operating system provides, excluding slash
+        for sep in _os_alt_seps:
+            if sep in filename:
+                return False
+        # if path is an absolute pathname. On Unix, that means it begins with
+        # a slash, on Windows that it begins with a (back)slash after removing
+        # drive letter.
+        if os.path.isabs(filename) or filename.startswith('../'):
+            print('Please make sure the filename is absolute and doesn\'t'
+                  ' change directory.')
+            return False
+        parameter_valid = True
     return parameter_valid
 
 
@@ -295,29 +295,62 @@ def _tuple(value):
     return parameter_valid
 
 
+@error_catcher_valid
+def _list(value):
+    parameter_valid = False
+    if isinstance(value, list):
+        # This is a list of integer values
+        parameter_valid = True
+    else:
+        parameter_valid = _string_list(value)
+    return parameter_valid
+
+
+@error_catcher_valid
+def _string_list(value):
+    parameter_valid = False
+    try:
+        bracket_value = value.split('[')
+        bracket_value = bracket_value[1].split(']')
+        if bracket_value[1]:
+            print('There are values outside of the square brackets')
+        else:
+            entries = bracket_value[0].split(',')
+            str_list = [v for v in entries]
+            parameter_valid = True
+    except:
+        print('Not a valid list.')
+    return parameter_valid
+
+
 type_list = {'[int]': _intlist,
             'range': _range,
             'yaml_file': _yamlfile,
             '[path, int_path, int]': _intgroup,
             '[path, int]': _intgroup1,
-            'path': _path,
+            'filepath': _filepath,
+            'directory': _directory,
             'int_path': _intpathway,
             'config_file': _configfile,
+            'filename': _filename,
             'nptype': _nptype,
             'int': _integer,
             'bool': _boolean,
             'str': _string,
             'float': _float,
-            'tuple': _tuple}
+            'tuple': _tuple,
+             'list': _list}
 
 
 def is_valid(dtype, ptools, value):
     if dtype not in type_list:
-        print("That type is not valid.")
+        print("That type definition is not configured properly.")
         pvalid = False
     else:
         pvalid = type_list[dtype](value)
-
+    # Valid type check, followed by check if present in options
+    # If the items in options have not been type checked, or have errors,
+    # it may cause problems.
     pvalid = check_options(ptools, value, pvalid)
     return pvalid
 

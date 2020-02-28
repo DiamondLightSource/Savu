@@ -5,7 +5,7 @@ extends: default
 rules:
   comments-indentation: disable
   # Allow values [true, false, True, False]
-  truthy: {allowed-values: ["True", "False"]}
+  truthy: {allowed-values: ["True", "False",'true','false']}
   # No strict indentation pattern
   indentation: disable
   # {indent-sequences: whatever, spaces: consistent, level: warning}

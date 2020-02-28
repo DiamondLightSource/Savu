@@ -19,7 +19,7 @@ class NoProcessTools(PluginTools):
             visibility: param
             dtype: yaml_file
             description: Yaml file path.
-            default: /home/glb23482/git_projects/Savu/savu/plugins/loaders/full_field_loaders/nxtomo_loader.yaml
+            default: savu/plugins/loaders/full_field_loaders/nxtomo_loader.yaml
         vocentering_search_area:
             visibility: user
             dtype: tuple
@@ -48,7 +48,7 @@ class NoProcessTools(PluginTools):
             default: "(1, 3, 3)"
         yamlconverter_yaml_file:
             visibility: user
-            dtype: yaml_path
+            dtype: yaml_file
             description: Path to file containing data descriptions
             default: None
         savunexusloader_datasets:
