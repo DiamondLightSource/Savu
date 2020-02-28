@@ -86,14 +86,14 @@ def load_yaml_doc(lines):
             - warning:
     """
     all_params = ''
-    verbose = ''
-
-    text = yu.read_yaml_from_doc(lines)
-    for doc in text:
-        # Each yaml document
-        all_params = doc
-
-    return all_params, verbose
+    try:
+        text = yu.read_yaml_from_doc(lines)
+        for doc in text:
+            # Each yaml document
+            all_params = doc
+    except:
+        print('Error reading the yaml structure from Yaml Utils.')
+    return all_params
 
 def _parse_args(mod_doc_lines, lines):
     param_list, user, hide, not_param, param_lines = __get_params(lines)
