@@ -35,7 +35,7 @@ class MaskEvolve(Plugin, CpuPlugin):
     precisely through the object, otherwise segmentation will be incorrect.
 
     :param threshold: important parameter to control mask propagation. Default: 1.0.
-    :param method: method to collect statistics from the mask (mean. median, value). Default: 'mean'.
+    :param method: method to collect statistics from the mask (mean, median, value). Default: 'mean'.
     :param iterations: The number of iterations. Default: 500.
     :param connectivity: The connectivity of the local neighbourhood. Default: 4.
     :param pattern: pattern to apply this to. Default: "VOLUME_YZ".
@@ -59,7 +59,12 @@ class MaskEvolve(Plugin, CpuPlugin):
         self.threshold = self.parameters['threshold']
         self.iterations = self.parameters['iterations']
         self.connectivity = self.parameters['connectivity']
-        self.method = self.parameters['method']
+        if (str(self.parameters['method']) == 'mean'):
+            self.method = 'mean'
+        elif (str(self.parameters['method']) == 'median'):
+            self.method = 'median'            
+        else:
+            self.method = 'value'
 
     def process_frames(self, data):
         input_temp = data[0]

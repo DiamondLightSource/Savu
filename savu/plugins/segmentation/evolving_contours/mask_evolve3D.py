@@ -35,7 +35,7 @@ class MaskEvolve3d(Plugin, MultiThreadedPlugin):
     precisely through the object, otherwise segmentation will be incorrect.
 
     :param threshold: important parameter to control mask propagation. Default: 1.0.
-    :param method: method to collect statistics from the mask (mean. median, value). Default: 'mean'.
+    :param method: method to collect statistics from the mask (mean, median, value). Default: 'mean'.
     :param iterations: The number of iterations. Default: 500.
     :param connectivity: The connectivity of the local neighbourhood. Default: 6.
     :param out_datasets: The default names . Default: ['MASK_EVOLVED'].
@@ -57,13 +57,18 @@ class MaskEvolve3d(Plugin, MultiThreadedPlugin):
         # extract given parameters
         self.threshold = self.parameters['threshold']
         self.iterations = self.parameters['iterations']
-        self.connectivity = self.parameters['connectivity']
-        self.method = self.parameters['method']
+        self.connectivity = self.parameters['connectivity']        
+        if (str(self.parameters['method']) == 'mean'):
+            self.method = 'mean'
+        elif (str(self.parameters['method']) == 'median'):
+            self.method = 'median'            
+        else:
+            self.method = 'value'
 
     def process_frames(self, data):
         input_temp = data[0]
         indices = np.where(np.isnan(input_temp))
-        input_temp[indices] = 0.0
+        input_temp[indices] = 0.0          
         
         pars = {'input_data' : input_temp, # input grayscale image
         'maskData' : np.uint8(data[1]),    # generated initialisation mask
