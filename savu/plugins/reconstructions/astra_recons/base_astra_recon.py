@@ -160,9 +160,9 @@ class BaseAstraRecon(BaseRecon):
         cfg['ProjectionDataId'] = sino_id
         if 'FBP' in self.alg:
             fbp_filter = self.parameters['FBP_filter'] if 'FBP_filter' in \
-                self.parameters.keys() else 'none'
+                list(self.parameters.keys()) else 'none'
             cfg['FilterType'] = fbp_filter
-        if 'projector' in self.parameters.keys():
+        if 'projector' in list(self.parameters.keys()):
             proj_id = astra.create_projector(
                 self.parameters['projector'], proj_geom, vol_geom)
             cfg['ProjectorId'] = proj_id

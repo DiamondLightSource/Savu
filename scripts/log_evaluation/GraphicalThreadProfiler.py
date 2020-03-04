@@ -16,8 +16,8 @@ def convert(log_file_list, path, log_level):
         html_filename = \
             set_file_name('/'.join([path, os.path.basename(log_file)]))
         render_template(frame, machine_names, the_interval, html_filename)
-        print "html file created:", html_filename
-        print "Open the html file in your browser to view the profile."
+        print("html file created:", html_filename)
+        print("Open the html file in your browser to view the profile.")
 
     return frame
 
@@ -33,7 +33,7 @@ def get_frame(log_file, the_key, log_level):
 
     data['Key'] = data['Machine'] + data['CPU']
     frame = ((data[data.Type == log_level])[data.columns[[6, 5, 1]]])
-    frame.insert(0, 'Index', range(len(frame)))
+    frame.insert(0, 'Index', list(range(len(frame))))
     frame = frame.sort_values(by=['Key', 'Index'])
     del frame['Index']
 
@@ -70,7 +70,7 @@ def get_machine_names(frame):
 
 def render_template(frame, machine_names, the_interval, outfilename):
     from jinja2 import Template
-    import template_strings as ts
+    from . import template_strings as ts
 
     frame = frame[(frame.Time_end - frame.Time) > the_interval].values
 
@@ -78,8 +78,8 @@ def render_template(frame, machine_names, the_interval, outfilename):
     style = os.path.dirname(__file__) + '/style_sheet.css'
     template = Template(ts.set_template_string_single(1300))
 
-    f_out.write(template.render(vals=map(list, frame[:, 0:4]),
-                                machines=map(list, machine_names.values),
+    f_out.write(template.render(vals=list(map(list, frame[:, 0:4])),
+                                machines=list(map(list, machine_names.values)),
                                 style_sheet=style))
     f_out.close()
 

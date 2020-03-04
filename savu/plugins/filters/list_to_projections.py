@@ -98,11 +98,11 @@ class ListToProjections(BaseFilter, CpuPlugin):
         outshape.insert(proj_in_core_dirs+1,out_projection_shape[1])
         
         axis_labels = in_datasets[0].get_axis_labels()
-        axis_labels = [ix.keys()[0]+'.'+ix[ix.keys()[0]] for ix in axis_labels]
+        axis_labels = [list(ix.keys())[0]+'.'+ix[list(ix.keys())[0]] for ix in axis_labels]
         axis_labels[proj_in_core_dirs] = 'x.microns'
         axis_labels.insert(proj_in_core_dirs+1,'y.microns')
         proj_out_core_dirs = (proj_in_core_dirs, proj_in_core_dirs+1)
-        allDimsOut = range(len(outshape))
+        allDimsOut = list(range(len(outshape)))
         proj_out_slice_dirs = list(set(allDimsOut)-set(list(proj_out_core_dirs)))
 
         
@@ -110,7 +110,7 @@ class ListToProjections(BaseFilter, CpuPlugin):
         reshaped_projections.create_dataset(shape=tuple(outshape), axis_labels=axis_labels)
         reshaped_projections.add_pattern("PROJECTION", core_dims=proj_out_core_dirs, slice_dims=proj_out_slice_dirs)
         in_patterns = in_datasets[0].get_data_patterns()
-        for pattern in in_patterns.keys():
+        for pattern in list(in_patterns.keys()):
             if pattern != "PROJECTION":
                 core_dir = in_patterns[pattern]['core_dims']
                 slice_dir = list(set(allDimsOut)-set(core_dir))

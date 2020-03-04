@@ -144,7 +144,7 @@ class PluginData(object):
             mft. """
         dshape = list(self.data_obj.get_shape())
 
-        if 'fixed_dimensions' in self.meta_data.get_dictionary().keys():
+        if 'fixed_dimensions' in list(self.meta_data.get_dictionary().keys()):
             fixed_dims = self.meta_data.get('fixed_dimensions')
             for d in fixed_dims:
                 dshape[d] = 1
@@ -164,7 +164,7 @@ class PluginData(object):
     def set_bytes_per_frame(self):
         """ Return the size of a single frame in bytes. """
         nBytes = self.data_obj.get_itemsize()
-        dims = self.get_pattern().values()[0]['core_dims']
+        dims = list(self.get_pattern().values())[0]['core_dims']
         frame_shape = [self.data_obj.get_shape()[d] for d in dims]
         b_per_f = np.prod(frame_shape)*nBytes
         return frame_shape, b_per_f
@@ -366,7 +366,7 @@ class PluginData(object):
             shape = shape_before_tuning
             sdir = sdir[:-diff]
         
-        if 'fix_total_frames' in self.meta_data.get_dictionary().keys():
+        if 'fix_total_frames' in list(self.meta_data.get_dictionary().keys()):
             frames = self.meta_data.get('fix_total_frames')
         else:
             frames = np.prod([shape[d] for d in sdir])
@@ -415,7 +415,7 @@ class PluginData(object):
         if self.padding and not isinstance(self.padding, Padding):
             self.pad_dict = copy.deepcopy(self.padding)
             self.padding = Padding(self)
-            for key in self.pad_dict.keys():
+            for key in list(self.pad_dict.keys()):
                 getattr(self.padding, key)(self.pad_dict[key])
 
     def plugin_data_setup(self, pattern, nFrames, split=None, slice_axis=None):

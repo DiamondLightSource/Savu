@@ -80,7 +80,7 @@ class YamlConverter(BaseLoader):
         all_entries = ddict.pop('all', {})
         for key, value in all_entries:
             for entry in ddict:
-                if key in entry.keys():
+                if key in list(entry.keys()):
                     entry[key] = value
 
         for entry in self.parameters['template_param']:
@@ -89,7 +89,7 @@ class YamlConverter(BaseLoader):
         return ddict
 
     def _check_for_imports(self, ddict):
-        if 'import' in ddict.keys():
+        if 'import' in list(ddict.keys()):
             for imp in ddict['import']:
                 name = False
                 if len(imp.split()) > 1:
@@ -98,7 +98,7 @@ class YamlConverter(BaseLoader):
                 globals()[mod.__name__ if not name else name] = mod
 
     def _check_for_inheritance(self, ddict, inherit, override=False):
-        if 'inherit' in ddict.keys():
+        if 'inherit' in list(ddict.keys()):
             idict = ddict['inherit']
             idict = idict if isinstance(idict, list) else [idict]
             for i in idict:
@@ -117,14 +117,14 @@ class YamlConverter(BaseLoader):
         if 'override' in ddict:
             isoverride = ddict.pop('override')
         if override:
-            for old, new in override.iteritems():
+            for old, new in override.items():
                 ddict[new] = ddict.pop(old)
-                if new in inherit.keys():
+                if new in list(inherit.keys()):
                     self._update(ddict[new], inherit[new])
         return ddict, isoverride
 
     def _update(self, d, u):
-        for k, v in u.iteritems():
+        for k, v in u.items():
             if isinstance(v, collections.Mapping):
                 d[k] = self._update(d.get(k, {}), v)
             else:
@@ -132,7 +132,7 @@ class YamlConverter(BaseLoader):
         return d
 
     def _set_entries(self, ddict):
-        entries = ddict.keys()
+        entries = list(ddict.keys())
         for name in entries:
             self.get_description(ddict[name], name)
 
@@ -142,7 +142,7 @@ class YamlConverter(BaseLoader):
             self._set_params(entry['params'])
 
         # --------------- check for data entry -----------------------------
-        if 'data' in entry.keys():
+        if 'data' in list(entry.keys()):
             data_obj = self.exp.create_data_object("in_data", name)
             data_obj = self.set_data(data_obj, entry['data'])
         else:
@@ -154,13 +154,13 @@ class YamlConverter(BaseLoader):
 
     def _get_meta_data_descriptions(self, entry, data_obj):
         # --------------- check for axis label information -----------------
-        if 'axis_labels' in entry.keys():
+        if 'axis_labels' in list(entry.keys()):
             self._set_axis_labels(data_obj, entry['axis_labels'])
         else:
             raise Exception('Please specify the axis labels in the yaml file.')
 
         # --------------- check for data access patterns -------------------
-        if 'patterns' in entry.keys():
+        if 'patterns' in list(entry.keys()):
             self._set_patterns(data_obj, entry['patterns'])
         else:
             raise Exception('Please specify the patterns in the yaml file.')
@@ -183,7 +183,7 @@ class YamlConverter(BaseLoader):
         return {'dfile': filepath, 'dshape': shape}
 
     def __get_wildcard_values(self, dObj):
-        if 'wildcard_values' in dObj.data_info.get_dictionary().keys():
+        if 'wildcard_values' in list(dObj.data_info.get_dictionary().keys()):
             return dObj.data_info.get('wildcard_values')
         return None
 
@@ -205,7 +205,7 @@ class YamlConverter(BaseLoader):
         return value
 
     def _convert_string(self, dObj, string):
-        for old, new in self.parameters.iteritems():
+        for old, new in self.parameters.items():
             if old in string:
                 if isinstance(new, str):
                     split = new.split('$')
@@ -222,7 +222,7 @@ class YamlConverter(BaseLoader):
         params = self._update_template_params(params)
         self.parameters.update(params)
         # find files, open and add to the namespace then delete file params
-        files = [k for k in params.keys() if k.endswith('file')]
+        files = [k for k in list(params.keys()) if k.endswith('file')]
         for f in files:
             param = params[f]
             try:
@@ -246,20 +246,20 @@ class YamlConverter(BaseLoader):
         del self.parameters[f]
 
     def _update_template_params(self, params):
-        for k, v in params.iteritems():
+        for k, v in params.items():
             v = pu.is_template_param(v)
             if v is not False:
                 params[k] = \
-                    self.parameters[k] if k in self.parameters.keys() else v[1]
+                    self.parameters[k] if k in list(self.parameters.keys()) else v[1]
         return params
 
     def _set_axis_labels(self, dObj, labels):
-        dims = range(len(labels.keys()))
-        axis_labels = [None]*len(labels.keys())
+        dims = list(range(len(list(labels.keys()))))
+        axis_labels = [None]*len(list(labels.keys()))
         for d in dims:
             self._check_label_entry(labels[d])
             l = labels[d]
-            for key in l.keys():
+            for key in list(l.keys()):
                 l[key] = self.update_value(dObj, l[key])
             axis_labels[l['dim']] = (l['name'] + '.' + l['units'])
             if l['value'] is not None:
@@ -275,7 +275,7 @@ class YamlConverter(BaseLoader):
                             axis labels")
 
     def _set_patterns(self, dObj, patterns):
-        for key, dims in patterns.iteritems():
+        for key, dims in patterns.items():
             core_dims = self.__get_tuple(
                     self.update_value(dObj, dims['core_dims']))
             slice_dims = self.__get_tuple(
@@ -287,6 +287,6 @@ class YamlConverter(BaseLoader):
 
     def _set_metadata(self, dObj, mdata, exp=False):
         populate = dObj.exp if exp else dObj
-        for key, value in mdata.iteritems():
+        for key, value in mdata.items():
             value = self.update_value(dObj, value['value'])
             populate.meta_data.set(key, value)

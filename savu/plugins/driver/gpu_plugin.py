@@ -27,7 +27,7 @@ import logging
 import numpy as np
 import pynvml as pv
 from mpi4py import MPI
-from itertools import chain, izip
+from itertools import chain
 
 from savu.plugins.driver.plugin_driver import PluginDriver
 from savu.plugins.driver.basic_driver import BasicDriver
@@ -66,7 +66,7 @@ class GpuPlugin(_base):
         diff = np.diff(np.array(idx)) if len(idx) > 1 else 1
         split = np.max(diff) if not isinstance(diff, int) else len(ranks)
         split_ranks = [ranks[n:n+split] for n in range(0, len(ranks), split)]
-        ranks = list(chain.from_iterable(izip(*split_ranks)))
+        ranks = list(chain.from_iterable(zip(*split_ranks)))
 
         self.__create_new_communicator(ranks, exp, process)
 

@@ -92,9 +92,9 @@ class PluginList(object):
         self.plugin_list = []
         single_val = ['name', 'id', 'pos', 'active']
         exclude = ['citation']
-        for key in plugin_group.keys():
+        for key in list(plugin_group.keys()):
             plugin = self._get_plugin_entry_template()
-            entry_keys = plugin_group[key].keys()
+            entry_keys = list(plugin_group[key].keys())
             json_keys = [k for k in entry_keys for e in exclude if k not in
                          single_val and e not in k]
 
@@ -150,7 +150,7 @@ class PluginList(object):
         notes['version'] = __version__
 
     def __populate_plugins_group(self, plugins_group, plugin, count):
-        if 'pos' in plugin.keys():
+        if 'pos' in list(plugin.keys()):
             num = int(re.findall('\d+', plugin['pos'])[0])
             letter = re.findall('[a-z]', plugin['pos'])
             letter = letter[0] if letter else ""
@@ -160,10 +160,10 @@ class PluginList(object):
             plugin_group = plugins_group.create_group("%*i" % (4, count))
 
         plugin_group.attrs[NX_CLASS] = 'NXnote'
-        required_keys = self._get_plugin_entry_template().keys()
+        required_keys = list(self._get_plugin_entry_template().keys())
         json_keys = self.__get_json_keys()
 
-        if 'cite' in plugin.keys():
+        if 'cite' in list(plugin.keys()):
             if plugin['cite'] is not None:
                 self._output_plugin_citations(plugin['cite'], plugin_group)
 
@@ -177,7 +177,7 @@ class PluginList(object):
     def __dumps(self, data_dict):
         """ Replace any missing quotes around variables
         """
-        for key, val in data_dict.iteritems():
+        for key, val in data_dict.items():
             if isinstance(val, str):
                 try:
                     data_dict[key] = ast.literal_eval(val)
@@ -227,7 +227,7 @@ class PluginList(object):
             citation_group = group.require_group(cite['name'])
             citation = CitationInformation()
             del cite['name']
-            for key, value in cite.iteritems():
+            for key, value in cite.items():
                 exec('citation.' + key + '= value')
             citation.write(citation_group)
             count += 1
@@ -240,11 +240,11 @@ class PluginList(object):
     def _byteify(self, input):
         if isinstance(input, dict):
             return {self._byteify(key): self._byteify(value)
-                    for key, value in input.iteritems()}
+                    for key, value in input.items()}
         elif isinstance(input, list):
             temp = [self._byteify(element) for element in input]
             return temp
-        elif isinstance(input, unicode):
+        elif isinstance(input, str):
             return input.encode('utf-8')
         else:
             return input
@@ -261,9 +261,9 @@ class PluginList(object):
         for d in data:
             name = d.data_obj.get_name()
             pattern = copy.deepcopy(d.get_pattern())
-            pattern[pattern.keys()[0]]['max_frames_transfer'] = \
+            pattern[list(pattern.keys())[0]]['max_frames_transfer'] = \
                 d.meta_data.get('max_frames_transfer')
-            pattern[pattern.keys()[0]]['transfer_shape'] = \
+            pattern[list(pattern.keys())[0]]['transfer_shape'] = \
                 d.meta_data.get('transfer_shape')
             data_list.append({'name': name, 'pattern': pattern})
         return data_list
@@ -414,10 +414,10 @@ class Template(object):
             yu.dump_yaml(local_dict.get_dictionary(), stream)
 
     def __get_template_params(self, params, tlist, yaml=False):
-        for key, value in params.iteritems():
+        for key, value in params.items():
             if key == 'yaml_file':
                 yaml_dict = self._get_yaml_dict(value)
-                for entry in yaml_dict.keys():
+                for entry in list(yaml_dict.keys()):
                     self.__get_template_params(
                             yaml_dict[entry]['params'], tlist, yaml=entry)
             value = pu.is_template_param(value)
@@ -439,9 +439,9 @@ class Template(object):
         tdict = yu.read_yaml(template)
         del tdict['process_list']
 
-        for plugin_no, entry in tdict.iteritems():
-            plugin = entry.keys()[0]
-            for key, value in entry.values()[0].iteritems():
+        for plugin_no, entry in tdict.items():
+            plugin = list(entry.keys())[0]
+            for key, value in list(entry.values())[0].iteritems():
                 depth = self.dict_depth(value)
                 if depth == 1:
                     self._set_param_for_template_loader_plugin(
@@ -459,7 +459,7 @@ class Template(object):
     def dict_depth(self, d, depth=0):
         if not isinstance(d, dict) or not d:
             return depth
-        return max(self.dict_depth(v, depth+1) for k, v in d.iteritems())
+        return max(self.dict_depth(v, depth+1) for k, v in d.items())
 
     def _set_param_for_all_instances_of_a_plugin(self, plugin, param, value):
         # find all plugins with this name and replace the param
@@ -468,8 +468,8 @@ class Template(object):
                 p['data'][param] = value
 
     def _set_param_for_template_loader_plugin(self, plugin_no, data, value):
-        param_key = value.keys()[0]
-        param_val = value.values()[0]
+        param_key = list(value.keys())[0]
+        param_val = list(value.values())[0]
         pdict = self._get_plugin_data_dict(str(plugin_no))['template_param']
         pdict = defaultdict(dict) if not pdict else pdict
         pdict[data][param_key] = param_val

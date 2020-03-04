@@ -56,7 +56,7 @@ class I18XrdLoader(BaseI18MultiModalLoader):
         data_obj = self.multi_modal_setup('xrd', self.parameters['name'])
 
         scan_pattern = self.parameters['scan_pattern']
-        frame_dim = range(len(scan_pattern))
+        frame_dim = list(range(len(scan_pattern)))
         shape = []
 
         for pattern in self.parameters['scan_pattern']:

@@ -73,7 +73,7 @@ class BaseMultiModalLoader(BaseLoader):
         self._set_axis_labels(data_obj, motors, labels, units)
 
     def _get_attrs(self, entries, key, default):
-        return [e.attrs[key] if key in e.attrs.keys() else
+        return [e.attrs[key] if key in list(e.attrs.keys()) else
                 default for e in entries]
 
     def _set_axis_labels(self, dObj, motors, labels, units):
@@ -99,7 +99,7 @@ class BaseMultiModalLoader(BaseLoader):
         return [i for i in range(len(self._mtype)) if self._mtype[i] == key]
 
     def add_patterns_based_on_acquisition(self, data_obj, ltype):
-        dims = range(len(self._mtype))
+        dims = list(range(len(self._mtype)))
 
         proj_dims = tuple(self.get_motor_dims('translation'))
         if proj_dims:

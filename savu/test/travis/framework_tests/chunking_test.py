@@ -45,7 +45,7 @@ class ChunkingTests(unittest.TestCase):
         current = self.create_pattern('a', current_list)
         nnext = self.create_pattern('b', nnext_list)
         options = tu.set_experiment('tomoRaw')
-        options['processes'] = range(nProcs)
+        options['processes'] = list(range(nProcs))
         # set a dummy process list
         options['process_file'] = \
             tu.get_test_process_path('loaders/basic_tomo_process.nxs')

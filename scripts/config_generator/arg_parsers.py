@@ -47,8 +47,8 @@ def __arg_parser(parser, args, command):
         args = parser.parse_args(args=args)
     except MyException as e:
         if e.message:
-            print (e.message)
-            print("Please type '%s -h' for help." % command)
+            print((e.message))
+            print(("Please type '%s -h' for help." % command))
         args = e.args
     return args
 

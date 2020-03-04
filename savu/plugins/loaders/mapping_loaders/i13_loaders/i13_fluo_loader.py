@@ -92,7 +92,7 @@ class I13FluoLoader(BaseLoader):
         data_obj.set_axis_labels(*tuple(labels))
 
         
-        dims = range(len(data_obj.get_shape()))
+        dims = list(range(len(data_obj.get_shape())))
         spec_core = (-1,) # it will always be this
 #         print spec_core
         

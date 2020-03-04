@@ -42,8 +42,8 @@ class PluginCoverageTest(unittest.TestCase):
         # remove data files from the list
         data_list = self.get_data_list(savu_base_path + '/test_data/data')
         nxs_in_tests = list(set(nxs_in_tests).difference(set(data_list)))
-        
-        # since now some nxs files are in the subfolders, we need to make sure 
+
+        # since now some nxs files are in the subfolders, we need to make sure
         # that we extract the basename only (without the "head")
         nxs_in_tests_mod = []
         for nxs in nxs_in_tests:
@@ -65,13 +65,13 @@ class PluginCoverageTest(unittest.TestCase):
 
         # which test process lists were not in the test_process_lists folder
         nxs_unused = list(set(nxs_in_tests).difference(set(self.nxs_avail)))
-        print ("===============================================================")
-        print ("\nThese .nxs test files were found inside the tests, but are "
+        print("===============================================================")
+        print("\nThese .nxs test files were found inside the tests, but are "
                "not available in the test_process_lists folder:\n")
         for nxs in nxs_unused:
-            print (nxs)
-        print ("===============================================================")
-        
+            print(nxs)
+        print("===============================================================")
+
         # get all plugins listed in self.nxs_used process lists
         tested_plugin_list = \
             self.get_test_plugin_list(self.nxs_used, test_process_path)
@@ -79,20 +79,20 @@ class PluginCoverageTest(unittest.TestCase):
 
         # list all plugins
         plugin_list = self.get_plugin_list(savu_base_path + '/savu/plugins')
-        
-        print ("===============================================================")
-        print ("\nThe following plugins are not covered by the tests:\n")
+
+        print("===============================================================")
+        print("\nThe following plugins are not covered by the tests:\n")
         uncovered = list(set(plugin_list).difference(set(tested_plugin_list)))
         for plugin in uncovered:
             print (plugin)
-        print ("===============================================================")
+        print("===============================================================")
 
-        print ("===============================================================")
-        print ("\nThe following process lists are redundant:\n")
+        print("===============================================================")
+        print("\nThe following process lists are redundant:\n")
         redundant = list(set(self.nxs_avail).difference(set(self.nxs_used)))
         for plugin in redundant:
             print (plugin)
-        print ("===============================================================")
+        print("===============================================================")
 
     def test_process_lists(self):
         # check for unused process lists
@@ -123,8 +123,8 @@ class PluginCoverageTest(unittest.TestCase):
                     for p in pList:
                         plugin_names.append(p + '.py')
                 except ImportError as e:
-                    print("Failed to run test as libraries not available (%s),"
-                          % (e) + " passing test")
+                    print(("Failed to run test as libraries not available (%s),"
+                          % (e) + " passing test"))
                     pass
         return list(set(plugin_names))
 

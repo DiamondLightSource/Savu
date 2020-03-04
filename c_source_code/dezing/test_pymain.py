@@ -14,7 +14,7 @@ def get_image_array():
    inim=np.expand_dims(tifffile.imread("p_00600.tif"),0)
    inimt=np.tile(inim,(100,1,1))
    inim3=np.ascontiguousarray(inimt)
-   print "shape: ",inim3.shape
+   print("shape: ",inim3.shape)
    outim=np.empty_like(inim3)
    return(inim3,outim)
 #end of get_image_array
@@ -27,7 +27,7 @@ def read_image_set(pnum):
       imname="/dls/i12/data/2014/cm4963-3/tmp/extracted/%i/projections/p_%05d.tif"%(imnum,pnum)
       inim=tifffile.imread(imname)
       instack[i+2]=inim
-      print("image %i in stack position %i"%(imnum,i+2))
+      print(("image %i in stack position %i"%(imnum,i+2)))
    #pad the ends by two
    instack[0]=instack[8]
    instack[1]=instack[9]
@@ -81,7 +81,7 @@ def main():
    tifffile.imsave("in.tif",inim3[:,:,0])
    tifffile.imsave("inflop.tif",inim3[0,:,:])
 
-   print "in test_pymain: array shape is:",inim3.shape
+   print("in test_pymain: array shape is:",inim3.shape)
    mu=float(sys.argv[1])
    npad=2
    dezing.setup_size(inim3.shape,mu,npad)

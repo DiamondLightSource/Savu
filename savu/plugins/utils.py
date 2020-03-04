@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """
 .. module:: utils
    :platform: Unix
@@ -32,7 +31,6 @@ import importlib
 import imp
 import inspect
 import itertools
-
 
 plugins = {}
 plugins_path = {}
@@ -68,8 +66,9 @@ def dawn_compatible(plugin_output_type=OUTPUT_TYPE_METADATA_AND_DATA):
             dawn_plugins[clazz.__name__]['plugin_output_type'] =\
                 _plugin_output_type
         except Exception as e:
-            print e
+            print(e)
         return clazz
+
     # for backwards compatibility, if decorator is invoked without brackets...
     if inspect.isclass(plugin_output_type):
         _plugin_output_type = OUTPUT_TYPE_METADATA_AND_DATA
@@ -115,8 +114,10 @@ def load_class(name, cls_name=None):
 def plugin_loader(exp, plugin_dict, check=False):
     logging.debug("Running plugin loader")
     try:
-        plugin = get_plugin(
-                plugin_dict['id'], plugin_dict['data'], exp, check=check)
+        plugin = get_plugin(plugin_dict['id'],
+                            plugin_dict['data'],
+                            exp,
+                            check=check)
     except Exception as e:
         logging.error("failed to load the plugin")
         logging.error(e)
@@ -136,9 +137,10 @@ def get_plugins_paths(examples=True):
     plugins_paths = []
     # get user and environment plugin paths
     user_path = [os.path.join(os.path.expanduser("~"), 'savu_plugins')]
-    env_paths = list(itertools.ifilter(None, (
-            os.getenv("SAVU_PLUGINS_PATH") or "").replace(" ","").split(":")))
-    
+    env_paths = list(
+        itertools.ifilter(None, (os.getenv("SAVU_PLUGINS_PATH")
+                                 or "").replace(" ", "").split(":")))
+
     # If examples have been requested then add them to the path
     eg_path = os.path.join(savu.__path__[0],
                            "../plugin_examples/plugin_templates")
@@ -172,7 +174,7 @@ def is_template_param(param):
             start = 6
         first, last = param[start], param[-1]
         if first == '<' and last == '>':
-            param = param[start+1:-1]
+            param = param[start + 1:-1]
             param = None if not param else param
             try:
                 exec("param = " + param)
@@ -196,7 +198,7 @@ def enablePrint():
 
 def parse_config_string(string):
     regex = "[\[\]\, ]+"
-    split_vals = filter(None, re.split(regex, string))
+    split_vals = [_f for _f in re.split(regex, string) if _f]
     delimitors = re.findall(regex, string)
     split_vals = [repr(a.strip()) for a in split_vals]
     zipped = itertools.izip_longest(delimitors, split_vals)
@@ -212,6 +214,6 @@ def parse_array_index_as_string(string):
     for m in p.finditer(string):
         offset = m.start() - count + 3
         end = string[offset:].index("']") + offset
-        string = string[:end] + "]'" + string[end+2:]
+        string = string[:end] + "]'" + string[end + 2:]
     string = string.replace("'['", '[')
     return string

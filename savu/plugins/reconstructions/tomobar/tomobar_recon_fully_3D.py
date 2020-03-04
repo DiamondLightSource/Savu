@@ -115,7 +115,7 @@ class TomobarReconFully3d(BaseRecon, MultiThreadedPlugin):
             shape[dim_volX] = self.parameters['vol_shape']
             shape[dim_volZ] = self.parameters['vol_shape']
 
-        if 'resolution' in self.parameters.keys():
+        if 'resolution' in list(self.parameters.keys()):
             shape[dim_volX] /= self.parameters['resolution']
             shape[dim_volZ] /= self.parameters['resolution']
 
@@ -123,7 +123,7 @@ class TomobarReconFully3d(BaseRecon, MultiThreadedPlugin):
                                       shape=tuple(shape))
         out_dataset[0].add_volume_patterns(dim_volX, dim_volY, dim_volZ)
 
-        ndims = range(len(shape))
+        ndims = list(range(len(shape)))
         core_dims = (dim_volX, dim_volY, dim_volZ)
         slice_dims = tuple(set(ndims).difference(set(core_dims)))
         out_dataset[0].add_pattern(

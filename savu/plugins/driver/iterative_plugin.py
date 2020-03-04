@@ -44,7 +44,7 @@ class IterativePlugin(PluginDriver):
         self.__set_original_datasets()
 
         while not self._ip_complete:
-            print "Iteration", self._ip_iteration, "..."
+            print("Iteration", self._ip_iteration, "...")
             self.__set_datasets()
             self._perform_the_processing(transport)
             if transport.no_processing:
@@ -57,12 +57,12 @@ class IterativePlugin(PluginDriver):
 
     def __set_datasets(self):
         params = self.parameters
-        if self._ip_iteration in self._ip_data_dict.keys():
+        if self._ip_iteration in list(self._ip_data_dict.keys()):
             params['in_datasets'] = self._ip_data_dict[self._ip_iteration][0]
             params['out_datasets'] = self._ip_data_dict[self._ip_iteration][1]
         elif self._ip_iteration > 0:
             p = [params['in_datasets'], params['out_datasets']]
-            for s1, s2 in self._ip_data_dict['iterating'].iteritems():
+            for s1, s2 in self._ip_data_dict['iterating'].items():
                 a = [0, p[0].index(s1)] if s1 in p[0] else [1, p[1].index(s1)]
                 b = [0, p[0].index(s2)] if s2 in p[0] else [1, p[1].index(s2)]
                 p[a[0]][a[1]], p[b[0]][b[1]] = p[b[0]][b[1]], p[a[0]][a[1]]
@@ -71,7 +71,7 @@ class IterativePlugin(PluginDriver):
         return self._ip_iteration
 
     def __finalise_datasets(self):
-        for s1, s2 in self._ip_data_dict['iterating'].iteritems():
+        for s1, s2 in self._ip_data_dict['iterating'].items():
             name = s1.get_name()
             name = name if 'itr_clone' not in name else s2.get_name()
             final_dataset = s1 if s1 in self.parameters['out_datasets'] else s2

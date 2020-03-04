@@ -87,7 +87,7 @@ class BaseFluoFitter(Plugin, CpuPlugin):
         numpeaks = len(idx)
         new_shape = shape[:-1] + (numpeaks,)
 
-        channel = {'core_dims': (-1,), 'slice_dims': range(len(shape)-1)}
+        channel = {'core_dims': (-1,), 'slice_dims': list(range(len(shape)-1))}
         fitAreas.create_dataset(patterns={in_dataset[0]: pattern_list},
                                 axis_labels={in_dataset[0]: axis_labels},
                                 shape=new_shape)

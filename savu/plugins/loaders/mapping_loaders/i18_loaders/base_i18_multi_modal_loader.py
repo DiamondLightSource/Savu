@@ -172,7 +172,7 @@ class BaseI18MultiModalLoader(BaseMultiModalLoader):
 #                 logging.debug projection
             elif key == 'rotation':
                 rotation = item
-        dims = range(len(data_obj.get_shape()))
+        dims = list(range(len(data_obj.get_shape())))
         if data_obj.data_mapping._is_map:
             proj_dir = tuple(projection)
             data_obj.add_pattern("PROJECTION", core_dims=proj_dir,

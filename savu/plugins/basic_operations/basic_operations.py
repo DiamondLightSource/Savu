@@ -93,7 +93,7 @@ class BasicOperations(Plugin, CpuPlugin):
         operations = self.parameters['operations']
         new_ops = []
         for op in operations:
-            for key, value in mappings_dict.iteritems():
+            for key, value in mappings_dict.items():
                 op = op.replace(key, value)
             new_ops.append(op)
         return new_ops

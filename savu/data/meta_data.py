@@ -91,7 +91,7 @@ class MetaData(object):
         if isinstance(accum_value, dict) and accum_value:
             options = OrderedDict([('value', value), ('units', units)])
             if not set(accum_value.keys()).difference(set(options.keys())):
-                accum_value = [accum_value[k] for k, v in options.iteritems()
+                accum_value = [accum_value[k] for k, v in options.items()
                                if v is True]
         return accum_value
 

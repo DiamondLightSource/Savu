@@ -21,7 +21,7 @@
 
 """
 
-from __future__ import print_function
+
 
 import re
 import sys
@@ -30,20 +30,20 @@ import sys
 import warnings
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
-    from content import Content
-    from completer import Completer
-    from display_formatter import ListDisplay, DispDisplay
-    import arg_parsers as parsers
+    from .content import Content
+    from .completer import Completer
+    from .display_formatter import ListDisplay, DispDisplay
+    from . import arg_parsers as parsers
     from savu.plugins import utils as pu
-    import config_utils as utils
-    from config_utils import parse_args
-    from config_utils import error_catcher
+    from . import config_utils as utils
+    from .config_utils import parse_args
+    from .config_utils import error_catcher
 
 
 def _help(content, args):
     """ Display the help information"""
     print('%s Savu configurator commands %s\n' % tuple(['*'*21]*2))
-    for key in commands.keys():
+    for key in list(commands.keys()):
         doc = commands[key].__doc__
         if doc:
             print("%8s : %s" % (key, commands[key].__doc__))
@@ -97,7 +97,7 @@ def _save(content, args):
     content.check_file(out_file)
     print()
     DispDisplay(content.plugin_list)._notices()
-    content.save(out_file, check=raw_input("Are you sure you want to save the "
+    content.save(out_file, check=input("Are you sure you want to save the "
                  "current data to %s' [y/N]" % (out_file)),
                  template=args.template)
     return content
@@ -178,14 +178,14 @@ def _coll(content, arg):
 
 def _clear(content, arg):
     """ Clear the current plugin list."""
-    content.clear(check=raw_input("Are you sure you want to clear the current "
+    content.clear(check=input("Are you sure you want to clear the current "
                   "plugin list? [y/N]"))
     return content
 
 
 def _exit(content, arg):
     """ Close the program."""
-    content.set_finished(check=raw_input("Are you sure? [y/N]"))
+    content.set_finished(check=input("Are you sure? [y/N]"))
     return content
 
 
@@ -249,7 +249,7 @@ def main():
 
     while True:
         try:
-            in_list = raw_input(">>> ").strip().split(' ', 1)
+            in_list = input(">>> ").strip().split(' ', 1)
         except KeyboardInterrupt:
             print()
             continue

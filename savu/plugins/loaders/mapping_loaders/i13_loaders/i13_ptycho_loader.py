@@ -110,7 +110,7 @@ class I13PtychoLoader(BaseMultiModalLoader):
         logging.debug('The labels are: %s',labels)
 
         data_obj.set_axis_labels(*tuple(labels))        
-        dims = range(len(data_obj.get_shape()))
+        dims = list(range(len(data_obj.get_shape())))
         diff_core = (-2,-1) # it will always be this
         diff_slice = tuple(dims[:-2])
         logging.debug("is a diffraction")

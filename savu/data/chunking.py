@@ -32,16 +32,16 @@ class Chunking(object):
 
     def __init__(self, exp, patternDict):
         self.pattern_dict = patternDict
-        self.current = patternDict['current'][patternDict['current'].keys()[0]]
+        self.current = patternDict['current'][list(patternDict['current'].keys())[0]]
         if patternDict['next']:
-            self.next = patternDict['next'][patternDict['next'].keys()[0]]
+            self.next = patternDict['next'][list(patternDict['next'].keys())[0]]
         else:
             self.next = self.current
 
         try:
-            self.next_pattern = patternDict['next'].keys()[0]
+            self.next_pattern = list(patternDict['next'].keys())[0]
         except AttributeError:
-            self.next_pattern = patternDict['current'].keys()[0]
+            self.next_pattern = list(patternDict['current'].keys())[0]
 
         self.exp = exp
         self.core = None
@@ -53,7 +53,7 @@ class Chunking(object):
         nChunks_to_create_file = \
             np.ceil(np.prod(np.array(shape)/np.array(chunks, dtype=np.float)))
         nProcesses = self.exp.meta_data.get('processes')
-        dims = range(len(shape))
+        dims = list(range(len(shape)))
         chunks = list(chunks)
         if nChunks_to_create_file < nProcesses:
             idx = [i for i in dims if shape[i] - chunks[i] > 0 and
@@ -153,7 +153,7 @@ class Chunking(object):
 
         # which is the slice dimension: current or next?
         ddict = self.current if dim in self.current['slice_dims'] \
-            else self.next
+            else self.__next__
         shape, allslices = self.__get_shape(shape, ddict)
 
         adjust['bounds']['max'][adj_idx] = self.__max_frames_per_process(
@@ -173,7 +173,7 @@ class Chunking(object):
 
         shape1 = np.prod([shape[s] for s in self.current['slice_dims']])
         shape2 = np.prod([shape[s] for s in self.next['slice_dims']])
-        ddict = self.current if shape1 < shape2 else self.next
+        ddict = self.current if shape1 < shape2 else self.__next__
         shape, allslices = self.__get_shape(shape, ddict)
         adjust['bounds']['max'][adj_idx] = self.__max_frames_per_process(
                 shape, max_frames, allslices=allslices)
@@ -202,7 +202,7 @@ class Chunking(object):
     def __get_shape(self, shape, ddict):
         """ Get shape taking into account padding. """
         shape = [shape[s] for s in ddict['slice_dims']]
-        if 'transfer_shape' not in ddict.keys():
+        if 'transfer_shape' not in list(ddict.keys()):
             return shape[0], np.prod(shape)
         size_list = [ddict['transfer_shape'][s] for s in ddict['slice_dims']]
         trans_per_dim = np.ceil(np.array(shape)/np.array(

@@ -12,7 +12,7 @@ def get_image_array():
    inim=np.expand_dims(tifffile.imread("i32.tif"),0)
    inimt=np.tile(inim,(nbatch,1,1))
    inim3=np.ascontiguousarray(inimt.astype(np.uint16))
-   print "shape: ",inim3.shape
+   print("shape: ",inim3.shape)
    outim=np.empty_like(inim3)
    return(inim3,outim)
 #end of get_image_array

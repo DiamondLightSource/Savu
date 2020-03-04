@@ -87,7 +87,7 @@ class BasePtycho(Plugin, CpuPlugin):  # also make one for gpu
         positions.create_dataset(axis_labels=position_labels,
                                  shape=positions_shape)
         
-        rest_pos = range(len(position_labels))
+        rest_pos = list(range(len(position_labels)))
         
         pos_md = \
             {'core_dims':tuple(set(rest_pos) - set([0])), 'slice_dims':(0,)}
@@ -172,7 +172,7 @@ class BasePtycho(Plugin, CpuPlugin):  # also make one for gpu
         
         '''
         probe_dims = len(probe_labels) # the number of dimensions from the axis labels
-        rest_probe = range(probe_dims) # all the dimensions we have
+        rest_probe = list(range(probe_dims)) # all the dimensions we have
         self.set_projection_pattern(probe, rest_probe)
         self.set_probe_rotation_patterns(probe, rest_probe)
         self.set_probe_energy_patterns(probe, rest_probe)
@@ -188,7 +188,7 @@ class BasePtycho(Plugin, CpuPlugin):  # also make one for gpu
         '''
         obj_dims = len(object_labels) # the number of dimensions from the axis labels
 #         print "object has "+str(obj_dims)+"dimensions"
-        rest_obj = range(obj_dims) # all the dimensions we have
+        rest_obj = list(range(obj_dims)) # all the dimensions we have
         self.set_projection_pattern(object_trans, rest_obj)
         self.set_object_rotation_patterns(object_trans, rest_obj)
         self.set_object_energy_patterns(object_trans, rest_obj)
@@ -205,7 +205,7 @@ class BasePtycho(Plugin, CpuPlugin):  # also make one for gpu
         '''
         PATTERN_LABELS = ['xy', 'detectorX', 'detectorY']
         in_labels = in_dataset[0].data_info.get('axis_labels') # this is a list of dictionarys
-        existing_labels = [d.keys()[0] for d in in_labels] # this just gets the axes names
+        existing_labels = [list(d.keys())[0] for d in in_labels] # this just gets the axes names
         logging.debug('The existing labels are:%s, we will remove:%s' % (existing_labels, PATTERN_LABELS))
         logging.debug('removing these labels from the list')
         core_labels_raw = [l for l in existing_labels if l not in PATTERN_LABELS] # removes them from the list

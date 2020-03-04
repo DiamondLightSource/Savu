@@ -21,11 +21,11 @@ class DawnCompatibleTest(unittest.TestCase):
     def test_dawn_plugin_params_found(self):
         cu.populate_plugins()
         self.assertTrue(isinstance(
-                pu.dawn_plugin_params[pu.dawn_plugins.keys()[0]], dict))
+                pu.dawn_plugin_params[list(pu.dawn_plugins.keys())[0]], dict))
 
     def test_load_plugin(self):
         cu.populate_plugins()
-        plugin_path = pu.dawn_plugins[dawn_plugins.keys()[0]]['path2plugin']
+        plugin_path = pu.dawn_plugins[list(dawn_plugins.keys())[0]]['path2plugin']
         inst = pu.get_plugin(plugin_path)
         sl = inst.__dict__['slice_list']
         exp = inst.__dict__['exp']

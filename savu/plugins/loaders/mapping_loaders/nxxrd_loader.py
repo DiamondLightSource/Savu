@@ -62,7 +62,7 @@ class NxxrdLoader(BaseMultiModalLoader):
         detX = dObj.get_data_dimension_by_axis_label('detector_x')
         detY = dObj.get_data_dimension_by_axis_label('detector_y')
         cdims = (detX, detY)
-        all_dims = range(len(dObj.get_shape()))
+        all_dims = list(range(len(dObj.get_shape())))
         sdims = tuple(set(all_dims).difference(cdims))
         dObj.add_pattern("DIFFRACTION", core_dims=cdims, slice_dims=sdims)
 

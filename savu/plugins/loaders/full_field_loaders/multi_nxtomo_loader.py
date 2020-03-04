@@ -91,7 +91,7 @@ class MultiNxtomoLoader(BaseLoader):
 
     def _get_data_objects(self, nxtomo):
         rrange = self.parameters['range']
-        file_list = range(rrange[0], rrange[1]+1)
+        file_list = list(range(rrange[0], rrange[1]+1))
         file_path = copy.copy(self.exp.meta_data.get('data_file'))
         file_name = '' if self.parameters['file_name'] is None else\
             self.parameters['file_name']
@@ -128,7 +128,7 @@ class MultiNxtomoLoader(BaseLoader):
 
     def _extend_axis_label_values(self, data_obj_list, data_obj):
         dim = self.parameters['stack_or_cat_dim']
-        axis_name = data_obj.get_axis_labels()[dim].keys()[0].split('.')[0]
+        axis_name = list(data_obj.get_axis_labels()[dim].keys())[0].split('.')[0]
 
         new_values = np.zeros(data_obj.data.get_shape()[dim])
         inc = len(data_obj_list[0].meta_data.get(axis_name))

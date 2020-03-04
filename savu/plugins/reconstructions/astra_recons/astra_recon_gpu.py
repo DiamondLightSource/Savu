@@ -52,7 +52,7 @@ class AstraReconGpu(BaseAstraRecon, GpuPlugin):
         self.start = 0
 
     def set_options(self, cfg):
-        if 'option' not in cfg.keys():
+        if 'option' not in list(cfg.keys()):
             cfg['option'] = {}
         cfg['option']['GPUindex'] = self.parameters['GPU_index']
         return cfg

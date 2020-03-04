@@ -227,7 +227,7 @@ class Data(DataCreate):
     def __get_dirs_for_volume(self, dim1, dim2, sdir):
         """ Calculate core_dir and slice_dir for a volume pattern.
         """
-        all_dims = range(len(self.get_shape()))
+        all_dims = list(range(len(self.get_shape())))
         vol_dict = {}
         vol_dict['core_dims'] = (dim1, dim2)
         slice_dir = [sdir]
@@ -279,11 +279,11 @@ class Data(DataCreate):
         axis_labels = self.data_info.get('axis_labels')
         for i in range(len(axis_labels)):
             if contains is True:
-                for names in axis_labels[i].keys():
+                for names in list(axis_labels[i].keys()):
                     if name in names:
                         return i
             else:
-                if name in axis_labels[i].keys():
+                if name in list(axis_labels[i].keys()):
                     return i
         raise Exception("Cannot find the specifed axis label.")
 
@@ -315,10 +315,10 @@ class Data(DataCreate):
         """ Replace negative indices in pattern kwargs.
         """
         pattern = self.get_data_patterns()[dtype]
-        if 'main_dir' in pattern.keys():
+        if 'main_dir' in list(pattern.keys()):
             del pattern['main_dir']
 
-        nDims = sum([len(i) for i in pattern.values()])
+        nDims = sum([len(i) for i in list(pattern.values())])
         for p in pattern:
             ddirs = pattern[p]
             pattern[p] = self._non_negative_directions(ddirs, nDims)
@@ -363,7 +363,7 @@ class Data(DataCreate):
         axis_labels = self.data_info.get('axis_labels')
         axis_label_keys = []
         for labels in axis_labels:
-            for key in labels.keys():
+            for key in list(labels.keys()):
                 axis_label_keys.append(key)
         return axis_label_keys
 
@@ -373,8 +373,8 @@ class Data(DataCreate):
         """
         axis_labels = self.get_axis_labels()
         for i in range(len(slice_list)):
-            label = axis_labels[i].keys()[0]
-            if label in self.meta_data.get_dictionary().keys():
+            label = list(axis_labels[i].keys())[0]
+            if label in list(self.meta_data.get_dictionary().keys()):
                 values = self.meta_data.get(label)
                 preview_sl = [slice(None)]*len(values.shape)
                 preview_sl[0] = slice_list[i]
@@ -386,7 +386,7 @@ class Data(DataCreate):
         :returns: value associated with pattern key ``core_dims``
         :rtype: tuple
         """
-        return self._get_plugin_data().get_pattern().values()[0]['core_dims']
+        return list(self._get_plugin_data().get_pattern().values())[0]['core_dims']
 
     def get_slice_dimensions(self):
         """ Get the slice data dimensions associated with the current pattern.
@@ -394,7 +394,7 @@ class Data(DataCreate):
         :returns: value associated with pattern key ``slice_dims``
         :rtype: tuple
         """
-        return self._get_plugin_data().get_pattern().values()[0]['slice_dims']
+        return list(self._get_plugin_data().get_pattern().values())[0]['slice_dims']
 
     def get_itemsize(self):
         """ Returns bytes per entry """

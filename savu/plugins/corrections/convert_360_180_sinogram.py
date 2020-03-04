@@ -49,7 +49,7 @@ class Convert360180Sinogram(Plugin, CpuPlugin):
 
         self.center = 0
         key = "centre_of_rotation"
-        if key in in_dataset[0].meta_data.get_dictionary().keys():
+        if key in list(in_dataset[0].meta_data.get_dictionary().keys()):
             self.center = in_dataset[0].meta_data.get(key)
 
         old_shape = in_dataset[0].get_shape()

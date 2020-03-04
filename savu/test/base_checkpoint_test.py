@@ -83,7 +83,7 @@ class BaseCheckpointTest(object):
         options = self.set_data_options()
         options['out_path'] = self.tmpdir
         options['nxs_filename'] = self.cfile if cfile else None
-        options['processes'] = range(1)
+        options['processes'] = list(range(1))
         options['process'] = 0
         options['mpi'] = False
         options['inter_path'] = self.tmpdir
@@ -223,7 +223,7 @@ class BaseCheckpointTest(object):
             self._create_dataset(f, 'completed_plugins', p_no)
 
     def _create_dataset(self, f, name, data):
-        if name in f.keys():
+        if name in list(f.keys()):
             f.__delitem__(name)
         if data is not None:
             f.create_dataset(name, data=np.zeros(1, dtype=np.int8))
@@ -231,7 +231,7 @@ class BaseCheckpointTest(object):
 
     def _read_nexus_file(self, nxsfile, datasets):
         # find NXdata
-        for key, value in nxsfile.items():
+        for key, value in list(nxsfile.items()):
             if self._is_nxdata(value):
                 datasets.append(value)
             elif isinstance(value, h5py.Group) and key != 'input_data':
@@ -239,7 +239,7 @@ class BaseCheckpointTest(object):
         return datasets
 
     def _is_nxdata(self, value):
-        check = 'NX_class' in value.attrs.keys() and\
+        check = 'NX_class' in list(value.attrs.keys()) and\
             value.attrs['NX_class'] == 'NXdata'
         return check
 

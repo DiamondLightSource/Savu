@@ -219,7 +219,7 @@ def main(input_args=None):
             plugin_runner = pRunner(options)
             plugin_runner._run_plugin_list()
         except Exception as error:
-            print error.message
+            print(error.message)
             traceback.print_exc(file=sys.stdout)
             MPI.COMM_WORLD.Abort(1)
 

@@ -62,7 +62,7 @@ class MPI_setup(object):
 
         rank_map = [i for s in uniq_hosts for i in range(n_cores)
                     if s == hosts[i]]
-        index = sorted(range(len(rank_map)), key=lambda k: rank_map[k])
+        index = sorted(list(range(len(rank_map))), key=lambda k: rank_map[k])
         all_processes = [(names*n_nodes)[index[i]] for i in range(n_cores)]
         options['processes'] = all_processes
         rank = MPI.COMM_WORLD.rank
@@ -138,7 +138,7 @@ class MPI_setup(object):
         logger = logging.getLogger()
         filename = os.path.join(options['out_path'], 'user.log')
         cu.add_user_log_handler(logger, filename)
-        if 'syslog_server' in options.keys():
+        if 'syslog_server' in list(options.keys()):
             try:
                 cu.add_syslog_log_handler(logger, options['syslog_server'],
                                           options['syslog_port'])

@@ -93,8 +93,8 @@ class RandomHdf5Loader(BaseLoader):
 
         patterns = data_obj.get_data_patterns()
         p_name = patterns[self.parameters['pattern']] if \
-            self.parameters['pattern'] is not None else patterns.keys()[0]
-        p_name = patterns.keys()[0]
+            self.parameters['pattern'] is not None else list(patterns.keys())[0]
+        p_name = list(patterns.keys())[0]
         p_dict = patterns[p_name]
         p_dict['max_frames_transfer'] = 1
         nnext = {p_name: p_dict}
@@ -108,7 +108,7 @@ class RandomHdf5Loader(BaseLoader):
 
         self.exp._barrier()
 
-        slice_dirs = nnext.values()[0]['slice_dims']
+        slice_dirs = list(nnext.values())[0]['slice_dims']
         nDims = len(dset.shape)
         total_frames = np.prod([dset.shape[i] for i in slice_dirs])
         sub_size = \
@@ -143,7 +143,7 @@ class RandomHdf5Loader(BaseLoader):
         n_processes = len(self.exp.get('processes'))
         rank = self.exp.get('process')
         frames = np.array_split(np.arange(n_frames), n_processes)[rank]
-        f_range = range(0, frames[0]) if len(frames) else []
+        f_range = list(range(0, frames[0])) if len(frames) else []
         sl = [slice(0, 1) if i in slice_dirs else slice(None)
               for i in range(len(shape))]
         idx = 0

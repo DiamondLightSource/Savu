@@ -7,7 +7,7 @@ import h5py
 def read_image_set(data,pstart=0,pstop=50,npad=2):
    padstart=True
    padend=True
-   print data.shape
+   print(data.shape)
    intype=data.dtype
    sidx=pstart
    eidx=pstop
@@ -25,18 +25,18 @@ def read_image_set(data,pstart=0,pstop=50,npad=2):
    if padstart:
       spadarray=np.empty((npad,data.shape[1],data.shape[2]),dtype=intype)
       for i in range(0,npad):
-         print (pstart+npad-i),"->",i
+         print((pstart+npad-i),"->",i)
          np.copyto(spadarray[i,:,:],data[pstart+npad-i])
 
    #pad the very end
    if padend:
       epadarray=np.empty((npad,data.shape[1],data.shape[2]),dtype=intype)
       for i in range(0,npad):
-         print (pstop-i),"->",i
+         print((pstop-i),"->",i)
          np.copyto(epadarray[i,:,:],data[pstop-i])
 
    dset=data[sidx:eidx,:,:]
-   print dset.shape
+   print(dset.shape)
 
    #concatenate the very beginning and/or very end padding
    outarray=dset
@@ -49,7 +49,7 @@ def read_image_set(data,pstart=0,pstop=50,npad=2):
          print ("Padding end")
          outarray=np.vstack((outarray,epadarray))
 
-   print outarray.shape
+   print(outarray.shape)
    return(np.ascontiguousarray(outarray))
 
 
@@ -57,10 +57,10 @@ def main():
    slabsize=4
    h5chunksize=4
    if len(sys.argv) <= 4 :
-      print "   "
-      print sys.argv[0]
-      print "USAGE: %s  h5file chunkstart chunkstop h5outputfile "%sys.argv[0]
-      print "chunk must not be smaller than  %i  projections"%h5chunksize
+      print("   ")
+      print(sys.argv[0])
+      print("USAGE: %s  h5file chunkstart chunkstop h5outputfile "%sys.argv[0])
+      print("chunk must not be smaller than  %i  projections"%h5chunksize)
       sys.exit(0)
    npad=0 # should be 0 
    input=sys.argv[1] #first argument, filename of h5 file , should contain /entry/instrument/detector/data and be uint16
@@ -80,9 +80,9 @@ def main():
    outgrp=h5outp.create_group("/entry1/tomo_entry/data")
    outdset=outgrp.create_dataset("data",(chunksize,data.shape[1],data.shape[2]),chunks=(h5chunksize,h5chunksize,data.shape[2]))
 
-   print "nslabs=%i"%nslabs
+   print("nslabs=%i"%nslabs)
    lastslabsize=chunksize-(nslabs*slabsize)
-   print "lastslabsize=%i"%lastslabsize
+   print("lastslabsize=%i"%lastslabsize)
    #set the coefficients -- this coudl be rolled into setup with additional args?
    #unwarp.setcoeff(1,-1e-3,-6e-7,5e-10,-4e-13) #fisheye test
    #unwarp.setctr(500,1000) #fisheye test
@@ -97,7 +97,7 @@ def main():
    unwarp.setup(instack,outim) #call the program to initialize the arrays
 
    for slab in range(nslabs):
-      print "SLAB %i of %i"%(slab,nslabs)
+      print("SLAB %i of %i"%(slab,nslabs))
       slabstart=slab*slabsize
       slabstop=slabstart+slabsize
       instack=read_image_set(data,slabstart,slabstop,npad) #npad is optional, default is 2
@@ -118,7 +118,7 @@ def main():
    if lastslabsize > 0:
 
       outim=np.empty((lastslabsize+2*npad,data.shape[1],data.shape[2]),dtype=np.uint16) #create an empty array , the program will fill it up
-      print "last outim shape",outim.shape
+      print("last outim shape",outim.shape)
 
       laststart=chunkstart+nslabs*slabsize
       slabstart=laststart
@@ -133,10 +133,10 @@ def main():
       for slice in range(slabstart,slabstop):
          tifffile.imsave("/dls/i12/data/2015/cm12163-5/tmp/out_%05d.tif"%slice,outim[slice-slabstart]) #example, save the chunk
 
-      print "slabstart=",slabstart, "slabstop=",slabstop
-      print "output shape",output.shape
-      print "outdset shape",outdset.shape
-      print "chunksize",chunksize
+      print("slabstart=",slabstart, "slabstop=",slabstop)
+      print("output shape",output.shape)
+      print("outdset shape",outdset.shape)
+      print("chunksize",chunksize)
       outdset[slabstart-chunkstart:slabstop-chunkstart,:,:]=output
 
       unwarp.cleanup()       #call the program to de-allocate the arrays
@@ -155,5 +155,5 @@ def main():
 
 
 if __name__ == "__main__":
-   print "Running main procedure"
+   print("Running main procedure")
    main()

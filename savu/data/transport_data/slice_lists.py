@@ -162,12 +162,12 @@ class SliceLists(object):
         return tuple(working_slice)
 
     def _split_list(self, the_list, size):
-        return [the_list[x:x+size] for x in xrange(0, len(the_list), size)]
+        return [the_list[x:x+size] for x in range(0, len(the_list), size)]
 
     # This method only works if the split dimensions in the slice list contain
     # slice objects
     def __split_frames(self, slice_list, split_list):
-        split = [map(int, a.split('.')) for a in split_list]
+        split = [list(map(int, a.split('.'))) for a in split_list]
         dims = [s[0] for s in split]
         length = [s[1] for s in split]
         replace = self.__get_split_frame_entries(slice_list, dims, length)
@@ -175,7 +175,7 @@ class SliceLists(object):
         array_list = []
         for sl in slice_list:
             new_list = np.array([sl for i in range(len(replace[0]))])
-            for d, i in zip(dims, range(len(dims))):
+            for d, i in zip(dims, list(range(len(dims)))):
                 new_list[:, d] = replace[i]
             array_list += [tuple(a) for a in new_list]
 
@@ -231,7 +231,7 @@ class SliceLists(object):
         pad_dict = pData.padding._get_padding_directions()
 
         shape = self.data.get_shape()
-        for ddir, value in pad_dict.iteritems():
+        for ddir, value in pad_dict.items():
             exec('inc_start = ' + inc_start_str)
             exec('inc_stop = ' + inc_stop_str)
             for i in range(len(slice_list)):
@@ -371,7 +371,7 @@ class LocalData(object):
         if not self.pData.padding:
             return tuple([tuple(sl)]*reps)
         pad_dict = self.pData.padding._get_padding_directions()
-        for ddir, value in pad_dict.iteritems():
+        for ddir, value in pad_dict.items():
             sl[ddir] = slice(value['before'], -value['after'])
         return tuple([tuple(sl)]*reps)
 
@@ -446,7 +446,7 @@ class GlobalData(object):
             pad_list.append([0, 0])
 
         data_dict = self.data.data_info.get_dictionary()
-        shape = data_dict['orig_shape'] if 'orig_shape' in data_dict.keys() \
+        shape = data_dict['orig_shape'] if 'orig_shape' in list(data_dict.keys()) \
             else self.data.get_shape()
 
         for dim in range(len(pad_dims)):

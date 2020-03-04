@@ -162,7 +162,7 @@ class Plugin(PluginDatasets):
             self.parameters_desc[item['name']] = item['desc']
 
     def delete_parameter_entry(self, param):
-        if param in self.parameters.keys():
+        if param in list(self.parameters.keys()):
             del self.parameters[param]
             del self.parameters_types[param]
             del self.parameters_desc[param]
@@ -184,8 +184,8 @@ class Plugin(PluginDatasets):
         plugin, or None if no customisation is required.
         """
         self.initialise_parameters()
-        for key in parameters.keys():
-            if key in self.parameters.keys():
+        for key in list(parameters.keys()):
+            if key in list(self.parameters.keys()):
                 value = self.__convert_multi_params(parameters[key], key)
                 self.parameters[key] = value
             else:
@@ -220,7 +220,7 @@ class Plugin(PluginDatasets):
                     pass
                 if isinstance(value[0], str):
                     value = [ast.literal_eval(i) for i in value]
-                value = map(dtype, value)
+                value = list(map(dtype, value))
             label = key + '_params.' + type(value[0]).__name__
             self.multi_params_dict[len(self.multi_params_dict)] = \
                 {'label': label, 'values': value}

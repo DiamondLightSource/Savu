@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """
 .. module:: plugin_runner
    :platform: Unix
@@ -30,7 +29,6 @@ from savu.data.experiment_collection import Experiment
 class PluginRunner(object):
     """ Plugin list runner, which passes control to the transport layer.
     """
-
     def __init__(self, options, name='PluginRunner'):
         class_name = "savu.core.transports." + options["transport"] \
                      + "_transport"
@@ -48,7 +46,7 @@ class PluginRunner(object):
         """ Create an experiment and run the plugin list.
         """
         self.exp._set_nxs_file()
-        
+
         plugin_list = self.exp.meta_data.plugin_list
         logging.info('Running the plugin list check')
         self._run_plugin_list_setup(plugin_list)
@@ -69,7 +67,7 @@ class PluginRunner(object):
 
             #  ********* transport functions ***********
             if self._transport_kill_signal():
-                self._transport_cleanup(i+1)
+                self._transport_cleanup(i + 1)
                 break
             self.exp._barrier(msg='PluginRunner: No kill signal... continue.')
             cp.output_plugin_checkpoint()
@@ -79,7 +77,7 @@ class PluginRunner(object):
         self._transport_post_plugin_list_run()
 
         # terminate any remaining datasets
-        for data in self.exp.index['in_data'].values():
+        for data in list(self.exp.index['in_data'].values()):
             self._transport_terminate_dataset(data)
 
         self.__output_final_message()
@@ -91,12 +89,12 @@ class PluginRunner(object):
 
     def __output_final_message(self):
         kill = True if 'killsignal' in \
-            self.exp.meta_data.get_dictionary().keys() else False
+            list(self.exp.meta_data.get_dictionary().keys()) else False
         msg = "interrupted by killsignal" if kill else "Complete"
         stars = 40 if kill else 23
-        cu.user_message("*"*stars)
+        cu.user_message("*" * stars)
         cu.user_message("* Processing " + msg + " *")
-        cu.user_message("*"*stars)
+        cu.user_message("*" * stars)
 
     def __run_plugin(self, plugin_dict):
         plugin = self._transport_load_plugin(self.exp, plugin_dict)
@@ -132,7 +130,7 @@ class PluginRunner(object):
         n_loaders = self.exp.meta_data.plugin_list._get_n_loaders()
         n_plugins = plugin_list._get_n_processing_plugins()
         plist = plugin_list.plugin_list
-        
+
         self.exp._setup(self, plugin_list)
         # set loaders
         for i in range(n_loaders):
@@ -142,10 +140,10 @@ class PluginRunner(object):
         # run all plugin setup methods and store information in experiment
         # collection
         count = 0
-        for plugin_dict in plist[n_loaders:n_loaders+n_plugins]:
+        for plugin_dict in plist[n_loaders:n_loaders + n_plugins]:
             plugin = pu.plugin_loader(self.exp, plugin_dict, check=True)
             plugin._revert_preview(plugin.get_in_datasets())
-            plugin_dict['cite'] = plugin.get_citation_information()            
+            plugin_dict['cite'] = plugin.get_citation_information()
             plugin._clean_up()
             self.exp._update(plugin_dict)
             self.exp._merge_out_data_to_in()
@@ -156,7 +154,6 @@ class PluginRunner(object):
         cu.user_message("Plugin list check complete!")
         #  ********* transport function ***********
         self._transport_update_plugin_list()
-
 
     def __check_gpu(self):
         """ Check if the process list contains GPU processes and determine if
@@ -189,8 +186,8 @@ class PluginRunner(object):
         processes = self.exp.meta_data.get('processes')
         if not [i for i in processes if 'GPU' in i]:
             logging.debug("GPU processes missing. GPUs found so adding them.")
-            cpus = ['CPU'+str(i) for i in range(count)]
-            gpus = ['GPU'+str(i) for i in range(count)]
+            cpus = ['CPU' + str(i) for i in range(count)]
+            gpus = ['GPU' + str(i) for i in range(count)]
             for i in range(min(count, len(processes))):
                 processes[processes.index(cpus[i])] = gpus[i]
             self.exp.meta_data.set('processes', processes)

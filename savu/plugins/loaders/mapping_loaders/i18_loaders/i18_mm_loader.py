@@ -53,19 +53,19 @@ class I18MmLoader(BaseLoader):
         self.stxm_keys = self.set_params(stxm(), 'stxm')
         self.mon_keys = self.set_params(mon(), 'monitor')
 
-        for key, value in self.dict.iteritems():
+        for key, value in self.dict.items():
             self.parameters[key] = value
 
     def set_params(self, inst, name):
         inst._populate_default_parameters()
-        copy_keys = inst.parameters.viewkeys() - self.dict.viewkeys()
+        copy_keys = inst.parameters.keys() - self.dict.keys()
         for key in [k for k in copy_keys if k != 'name']:
             if key != 'name':
                 self.parameters[key] = inst.parameters[key]
         return list(copy_keys)
 
     def separate_params(self, keys):
-        all_keys = self.dict.keys() + keys
+        all_keys = list(self.dict.keys()) + keys
         new_dict = {}
         for key in [k for k in all_keys if k != 'name']:
             new_dict[key] = self.parameters[key]

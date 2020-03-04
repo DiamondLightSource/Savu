@@ -87,7 +87,7 @@ class Pymca(BaseFilter, CpuPlugin):
         axis_labels = ['-1.PeakElements.label']
         in_patterns = in_dataset[0].get_data_patterns()
 #         pattern_list = ['SINOGRAM', 'PROJECTION']
-        pattern_list = in_patterns.keys()
+        pattern_list = list(in_patterns.keys())
 
         fitResult = out_datasets[0]
 

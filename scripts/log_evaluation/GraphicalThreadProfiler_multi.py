@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-import GraphicalThreadProfiler as gtp
+from . import GraphicalThreadProfiler as gtp
 import os
 
 
@@ -40,7 +40,7 @@ def get_index(frame):
     index = []
     for i in range(np.size(frame.Key.unique())):
         nth.append(frame[frame.Key == frame.Key.unique()[i]].count()[0])
-        index.append(range(nth[i]))
+        index.append(list(range(nth[i])))
 
     return [index, nth]
 
@@ -78,15 +78,15 @@ def get_links(filename):
 
 def render_template(frame, the_interval, outfilename, theLinks, theStats):
     from jinja2 import Template
-    import template_strings as ts
+    from . import template_strings as ts
 
     frame = frame[(frame.Time_end - frame.Time) > the_interval].values
 
     f_out = open(outfilename, 'w')
-    print outfilename
+    print(outfilename)
     style = os.path.dirname(__file__) + '/style_sheet.css'
     template = Template(ts.set_template_string_multi(1300))
-    f_out.write(template.render(vals=map(list, frame[:, 0:4]), links=theLinks,
+    f_out.write(template.render(vals=list(map(list, frame[:, 0:4])), links=theLinks,
                                 stats=theStats, style_sheet=style))
     f_out.close()
 
@@ -130,6 +130,6 @@ if __name__ == "__main__":
     parser = optparse.OptionParser(usage=usage)
 
     (options, args) = parser.parse_args()
-    print args
+    print(args)
     filename = [(os.getcwd() + '/' + file) for file in args]
     convert(filename)

@@ -133,7 +133,7 @@ class RalFit(BaseFitter):
                                  axis_labels={in_dataset[0]: axis_labels},
                                  shape=new_shape)
 
-        channel = {'core_dims': (-1,), 'slice_dims': range(len(shape)-1)}
+        channel = {'core_dims': (-1,), 'slice_dims': list(range(len(shape)-1))}
 
         fitAreas.add_pattern("CHANNEL", **channel)
         fitHeights.add_pattern("CHANNEL", **channel)
@@ -153,7 +153,7 @@ class RalFit(BaseFitter):
 
     def dfunc(self, p, fun, y, x, pos):
     #     print fun.__name__
-        print "Here"
+        print("Here")
         rest = p
         npts = len(p) / 2
         order = 1

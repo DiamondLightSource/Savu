@@ -98,7 +98,7 @@ class VoCenteringIterative(BaseFilter, IterativePlugin):
         else:
             in_mData = self.get_in_meta_data()[0]
             shift = centre - in_mData['centre'] if 'centre' in \
-                in_mData.get_dictionary().keys() else 0
+                list(in_mData.get_dictionary().keys()) else 0
         return int(shift)
 
     def _coarse_search(self, sino, list_shift):

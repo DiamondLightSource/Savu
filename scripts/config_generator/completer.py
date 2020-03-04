@@ -26,7 +26,7 @@ import re
 
 from savu.plugins import utils as pu
 if os.name == 'nt':
-    import win_readline as readline
+    from . import win_readline as readline
 else:
     import readline
 
@@ -121,8 +121,8 @@ class Completer(object):
 
     def complete_params(self, args):
         if not args[0]:
-            return pu.plugins.keys()
-        return [x for x in pu.plugins.keys() if x.startswith(args[0])]
+            return list(pu.plugins.keys())
+        return [x for x in list(pu.plugins.keys()) if x.startswith(args[0])]
 
     def complete(self, text, state):
         "Generic readline completion entry point."
@@ -134,7 +134,7 @@ class Completer(object):
         # show all commands
         line = readline.get_line_buffer().split()
         if not line:
-            return [c + ' ' for c in self.commands.keys()]
+            return [c + ' ' for c in list(self.commands.keys())]
         else:
             # account for last argument ending in a space
             if RE_SPACE.match(read_buffer):
@@ -142,11 +142,11 @@ class Completer(object):
 
             # resolve command to the implementation function
             cmd = line[0].strip()
-            if cmd in self.commands.keys():
+            if cmd in list(self.commands.keys()):
                 impl = getattr(self, 'complete_%s' % cmd)
                 args = line[1:]
                 if args:
                     return (impl(args) + [None])
                 return [cmd + ' ']
-            return [c + ' ' for c in self.commands.keys() if
+            return [c + ' ' for c in list(self.commands.keys()) if
                     c.startswith(cmd)] + [None]

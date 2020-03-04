@@ -76,7 +76,7 @@ class Mipmap(Plugin, CpuPlugin):
         full_data_shape = list(in_dataset[0].get_shape())
         axis_labels = in_dataset[0].get_axis_labels()
         voxel_dims = \
-            [i for i, e in enumerate(axis_labels) if 'voxel' in e.keys()[0]]
+            [i for i, e in enumerate(axis_labels) if 'voxel' in list(e.keys())[0]]
 
         # Sort out input data
         max_frames = self.get_max_frames()

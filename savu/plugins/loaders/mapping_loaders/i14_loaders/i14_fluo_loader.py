@@ -85,7 +85,7 @@ class I14FluoLoader(BaseLoader):
 #         print "the labels are:"+str(labels)
         data_obj.set_axis_labels(*tuple(scan_axis))
 
-        dims = range(len(data_obj.get_shape()))
+        dims = list(range(len(data_obj.get_shape())))
         spec_core = (-1,) # it will always be this
 #         print spec_core
         

@@ -3,12 +3,12 @@ Created on 24 May 2016
 
 @author: ssg37927
 '''
-from __future__ import print_function
+
 
 import sys
 import unittest
 from mock import patch
-from StringIO import StringIO
+from io import StringIO
 
 from scripts.config_generator import savu_config
 

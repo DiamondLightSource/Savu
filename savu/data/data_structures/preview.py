@@ -185,7 +185,7 @@ class Preview(object):
         """
         mData = self.get_data_obj().data_info
 
-        if 'starts' not in mData.get_dictionary().keys():
+        if 'starts' not in list(mData.get_dictionary().keys()):
             return None if key else [None]*4
 
         if key is not None:
