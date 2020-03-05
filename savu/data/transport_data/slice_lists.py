@@ -152,7 +152,7 @@ class SliceLists(object):
                 nDims += 1
             else:
                 break
-        return prod, nDims-1
+        return prod, nDims-2
 
     def _group_dimension(self, sl, dim, step):
         start = sl[0][dim].start

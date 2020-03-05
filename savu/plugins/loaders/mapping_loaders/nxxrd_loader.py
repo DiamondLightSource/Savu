@@ -46,6 +46,7 @@ class NxxrdLoader(BaseMultiModalLoader):
         self.angstrom = 1e-10
 
     def setup(self):
+        self.parameters['in_datasets'] = self.parameters['name']
         path = 'instrument/detector/data'
         data_obj, xrd_entry = \
             self.multi_modal_setup('NXxrd', path, self.parameters['name'])
