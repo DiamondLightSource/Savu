@@ -3,23 +3,24 @@ channels:
 - local
 - defaults
 - conda-forge
+- astra-toolbox/label/dev
 - ccpi
 - dkazanc
-- astra-toolbox/label/dev
 dependencies:
+- h5py=2.10.0=mpi_openmpi_py36h8f0990d_2
 - cython
 - scipy
 - numpy
 - pandas
 - PyWavelets
-- scikit-image # doesn't like something
+#- scikit-image # doesn't like something
 - scikit-learn
 - tomobar
 - ccpi-regulariser
 - ccpi-reconstruction
 - astra-toolbox
 - xraylib
-- tomopy
+#- tomopy # can't seem to resolve some dependency
 - pyfai
 - pymca
 - pyfftw

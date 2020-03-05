@@ -112,15 +112,15 @@ else
 fi
 
 # set compiler wrapper
-MPICC=$(command -v mpicc)
-MPI_HOME=${MPICC%/mpicc}
-if ! [ "$MPICC" ]; then
-    echo "ERROR: I require mpicc but I can't find it.  Check /path/to/mpi_implementation/bin is in your PATH"
-    exit 1
-else
-    echo "Using mpicc:   " $MPICC
-	export PATH=$MPI_HOME:$PATH
-fi
+#MPICC=$(command -v mpicc)
+#MPI_HOME=${MPICC%/mpicc}
+#if ! [ "$MPICC" ]; then
+#    echo "ERROR: I require mpicc but I can't find it.  Check /path/to/mpi_implementation/bin is in your PATH"
+#    exit 1
+#else
+#    echo "Using mpicc:   " $MPICC
+#	export PATH=$MPI_HOME:$PATH
+#fi
 
 # check for fftw
 # CFLAGS=""
@@ -143,16 +143,16 @@ fi
 #     echo "fftw has not been found."
 # fi
 
-# check for cuda
-nvcc=`command -v nvcc`
-CUDAHOME=${nvcc%/bin/nvcc}
-if [ "$CUDAHOME" ]; then
-    echo "Using cuda:    " $CUDAHOME
-	export PATH=$CUDAHOME/bin:$PATH
-	export LD_LIBRARY_PATH=$CUDAHOME/lib64:$LD_LIBRARY_PATH
-else
-    echo "cuda has not been found."
-fi
+# ~~check for cuda~~ Astra installs it's own Cuda toolkit
+#nvcc=`command -v nvcc`
+#CUDAHOME=${nvcc%/bin/nvcc}
+#if [ "$CUDAHOME" ]; then
+#    echo "Using cuda:    " $CUDAHOME
+#	export PATH=$CUDAHOME/bin:$PATH
+#	export LD_LIBRARY_PATH=$CUDAHOME/lib64:$LD_LIBRARY_PATH
+#else
+#    echo "cuda has not been found."
+#fi
 
 if [ $test_flag ] && [ $prompts = true ] ; then
 
@@ -273,31 +273,31 @@ if [ ! $test_flag ] ; then
       cp $savu_path/system_files/$facility/mpi/savu_mpijob.sh $launcher_path
   fi
 
-  echo "Installing mpi4py..."
-  pip uninstall -y -q mpi4py || true
-  string=`awk '/^mpi4py/' $versions_file`
-  mpi4py_version=`echo $string | cut -d " " -f 2`
-  pip install mpi4py==$mpi4py_version
-  #-----------------------------------------------------------------
-
-  #-----------------------------------------------------------------
-  echo "Building hdf5..."
-  conda uninstall -y -q hdf5 || true
-  conda build $recipes/hdf5
-  hdf5build=`conda build $recipes/hdf5 --output`
-
-  echo "Installing hdf5..."
-  conda install -y -q --use-local $hdf5build
-  #-----------------------------------------------------------------
-
-  #-----------------------------------------------------------------
-  echo "Building h5py..."
-  conda uninstall -y -q h5py || true
-  conda build $recipes/h5py --no-test
-  h5pybuild=`conda build $recipes/h5py --output`
-
-  echo "Installing h5py..."
-  conda install -y -q --use-local $h5pybuild
+#  echo "Installing mpi4py..."
+#  pip uninstall -y -q mpi4py || true
+#  string=`awk '/^mpi4py/' $versions_file`
+#  mpi4py_version=`echo $string | cut -d " " -f 2`
+#  pip install mpi4py==$mpi4py_version
+#  #-----------------------------------------------------------------
+#
+#  #-----------------------------------------------------------------
+#  echo "Building hdf5..."
+#  conda uninstall -y -q hdf5 || true
+#  conda build $recipes/hdf5
+#  hdf5build=`conda build $recipes/hdf5 --output`
+#
+#  echo "Installing hdf5..."
+#  conda install -y -q --use-local $hdf5build
+#  #-----------------------------------------------------------------
+#
+#  #-----------------------------------------------------------------
+#  echo "Building h5py..."
+#  conda uninstall -y -q h5py || true
+#  conda build $recipes/h5py --no-test
+#  h5pybuild=`conda build $recipes/h5py --output`
+#
+#  echo "Installing h5py..."
+#  conda install -y -q --use-local $h5pybuild
   #-----------------------------------------------------------------
 
   # TODO astra missing? but it's installed with environment.yml
