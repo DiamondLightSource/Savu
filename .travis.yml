@@ -22,7 +22,7 @@ before_install:
   - ls -lah
 
 install:
-  - ./savu_installer.sh --no-prompts --PREFIX /tmp
+  - ./savu_installer.sh --no_prompts --PREFIX /tmp
 
 script:
   - py.test scripts/configurator_tests/ -v
