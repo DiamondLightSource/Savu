@@ -61,8 +61,10 @@ class MaxFramesTest(unittest.TestCase):
         loader = "full_field_loaders.random_3d_tomo_loader"
         params = {'size': (140, 1, 1)}  # data size is (136, 1, 1)
         sys_file = self.__get_system_parameters_file()
+        # create a process list?
+        
         data, pData = tu.get_data_object(tu.load_random_data(
-                loader, params, system_params=sys_file))
+                loader, params, system_params=sys_file, fake=True))
 
         sl_dict = self.__get_slice_list_dict(
                 data, pData, 'PROJECTION', 'single', 'in', 'p')
@@ -84,8 +86,8 @@ class MaxFramesTest(unittest.TestCase):
         loader = "full_field_loaders.random_3d_tomo_loader"
         params = {'size': (313, 1, 1)}  # data size is (309, 1, 1)
         sys_file = self.__get_system_parameters_file()
-        data, pData = tu.get_data_object(
-                tu.load_random_data(loader, params, system_params=sys_file))
+        data, pData = tu.get_data_object(tu.load_random_data(
+                loader, params, system_params=sys_file, fake=True))
 
         sl_dict = self.__get_slice_list_dict(
                 data, pData, 'PROJECTION', 'single', 'in', 'p')
@@ -104,7 +106,7 @@ class MaxFramesTest(unittest.TestCase):
         params = {'size': (45, 1, 1)}  # data size is (41, 1, 1)
         sys_file = self.__get_system_parameters_file()
         data, pData = tu.get_data_object(tu.load_random_data(
-                loader, params, system_params=sys_file))
+                loader, params, system_params=sys_file, fake=True))
 
         sl_dict = self.__get_slice_list_dict(
                 data, pData, 'PROJECTION', 'single', 'in', 'p')
@@ -123,7 +125,7 @@ class MaxFramesTest(unittest.TestCase):
         params = {'size': (4500, 1, 1)}  # data size is (4496, 1, 1)
         sys_file = self.__get_system_parameters_file()        
         data, pData = tu.get_data_object(tu.load_random_data(
-                loader, params, system_params=sys_file))
+                loader, params, system_params=sys_file, fake=True))
 
         sl_dict = self.__get_slice_list_dict(
                 data, pData, 'PROJECTION', 'single', 'in', 'p')
@@ -146,7 +148,7 @@ class MaxFramesTest(unittest.TestCase):
         params['size'] = (4, 3, 1, 1, 4)
         sys_file = self.__get_system_parameters_file()
         data, pData = tu.get_data_object(tu.load_random_data(
-                loader, params, system_params=sys_file))
+                loader, params, system_params=sys_file, fake=True))
         data.dtype = np.dtype(np.float32)        
 
         sl_dict = self.__get_slice_list_dict(
@@ -166,7 +168,7 @@ class MaxFramesTest(unittest.TestCase):
         params['size'] = (1, 1, 1, 1, 1)
         sys_file = self.__get_system_parameters_file()        
         data, pData = tu.get_data_object(tu.load_random_data(
-                loader, params, system_params=sys_file))
+                loader, params, system_params=sys_file, fake=True))
         data.dtype = np.dtype(np.float32)        
 
         sl_dict = self.__get_slice_list_dict(
@@ -186,7 +188,7 @@ class MaxFramesTest(unittest.TestCase):
         params['size'] = (15, 13, 1, 1, 4)
         sys_file = self.__get_system_parameters_file()        
         data, pData = tu.get_data_object(tu.load_random_data(
-                loader, params, system_params=sys_file))
+                loader, params, system_params=sys_file, fake=True))
         data.dtype = np.dtype(np.float32)        
 
         sl_dict = self.__get_slice_list_dict(
@@ -203,7 +205,7 @@ class MaxFramesTest(unittest.TestCase):
         params = {'size': (24, 1, 1)}  # data size is (20, 1, 1)
         sys_file = self.__get_system_parameters_file()        
         data, pData = tu.get_data_object(tu.load_random_data(
-                loader, params, system_params=sys_file))
+                loader, params, system_params=sys_file, fake=True))
 
         sl_dict = self.__get_slice_list_dict(
                 data, pData, 'PROJECTION', 'single', 'in', processes)
@@ -219,7 +221,7 @@ class MaxFramesTest(unittest.TestCase):
         params = {'size': (24, 1, 1)}  # data size is (20, 1, 1)
         sys_file = self.__get_system_parameters_file()        
         data, pData = tu.get_data_object(tu.load_random_data(
-                loader, params, system_params=sys_file))
+                loader, params, system_params=sys_file, fake=True))
 
         sl_dict = self.__get_slice_list_dict(
                 data, pData, 'PROJECTION', 'single', 'in', processes)
@@ -235,7 +237,7 @@ class MaxFramesTest(unittest.TestCase):
         params = {'size': (4500, 1, 1)}  # data size is (4496, 1, 1)
         sys_file = self.__get_system_parameters_file()        
         data, pData = tu.get_data_object(tu.load_random_data(
-                loader, params, system_params=sys_file))
+                loader, params, system_params=sys_file, fake=True))
 
         sl_dict = self.__get_slice_list_dict(
                 data, pData, 'PROJECTION', 'single', 'in', processes)
@@ -252,9 +254,9 @@ class MaxFramesTest(unittest.TestCase):
         params['axis_labels'] = ['val%d.unit' % i for i in range(5)]
         params['size'] = (4, 3, 1, 1, 4)
         processes = ['p']*15
-        sys_file = self.__get_system_parameters_file()        
+        sys_file = self.__get_system_parameters_file()
         data, pData = tu.get_data_object(tu.load_random_data(
-                loader, params, system_params=sys_file))
+                loader, params, system_params=sys_file, fake=True))
         data.dtype = np.dtype(np.float32)        
 
         sl_dict = self.__get_slice_list_dict(
@@ -274,7 +276,7 @@ class MaxFramesTest(unittest.TestCase):
         processes = ['p']*36
         sys_file = self.__get_system_parameters_file()        
         data, pData = tu.get_data_object(tu.load_random_data(
-                loader, params, system_params=sys_file))
+                loader, params, system_params=sys_file, fake=True))
         data.dtype = np.dtype(np.float32)        
 
         sl_dict = self.__get_slice_list_dict(
