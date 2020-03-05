@@ -15,9 +15,10 @@ python:
 
 before_install:
   - cd $TRAVIS_BUILD_DIR/install/3_0_install/savu_v3.0
+  - ls -lah
 
 install:
-  - ./savu_installer --no-prompts --PREFIX /tmp
+  - ./savu_installer.sh --no-prompts --PREFIX /tmp
 
 script:
   - py.test scripts/configurator_tests/ -v
