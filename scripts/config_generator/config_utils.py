@@ -37,16 +37,10 @@ import savu.data.data_structures.utils as du
 if os.name == 'nt':
     import win_readline as readline
 else:
-    import gnureadline as readline
+    import readline
 
 histfile = os.path.join(os.path.expanduser("~"), ".savuhist")
-try:
-    readline.read_history_file(histfile)
-    readline.set_history_length(1000)
-except IOError:
-    pass
-atexit.register(readline.write_history_file, histfile)
-
+histlen = 1000
 logging.basicConfig(level='CRITICAL')
 error_level = 0
 
@@ -60,6 +54,19 @@ def _redirect_stdout():
     sys.stdout = DummyFile()
     return save_stdout
 
+def load_history_file(hfile):
+    try:
+        readline.read_history_file(hfile)
+        readline.set_history_length(histlen)
+    except IOError:
+        pass
+    atexit.register(write_history_to_file)
+
+def write_history_to_file():
+    try:
+        readline.write_history_file(histfile)
+    except IOError:
+        pass
 
 def _set_readline(completer):
     # we want to treat '/' as part of a word, so override the delimiters

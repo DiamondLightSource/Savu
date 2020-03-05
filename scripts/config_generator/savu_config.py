@@ -245,6 +245,8 @@ def main():
 
     print("\n*** Press Enter for a list of available commands. ***\n")
 
+    utils.load_history_file(utils.histfile)
+
     while True:
         try:
             in_list = raw_input(">>> ").strip().split(' ', 1)
@@ -252,7 +254,7 @@ def main():
             print()
             continue
 
-        command, arg = in_list if len(in_list) is 2 else in_list+['']
+        command, arg = in_list if len(in_list) == 2 else in_list+['']
         command = command if command else 'help'
         if command not in commands:
             print("I'm sorry, that's not a command I recognise. Press Enter "
@@ -262,9 +264,6 @@ def main():
 
         if content.is_finished():
             break
-
-        # write the history to the history file
-        utils.readline.write_history_file(utils.histfile)
 
     print("Thanks for using the application")
 
