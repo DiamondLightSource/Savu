@@ -228,20 +228,24 @@ def main():
 
     _reduce_logging_level()
 
+    content = Content(level="all" if args.disp_all else 'user')
+
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        utils.populate_plugins(error_mode=args.error)
+        content.failed = utils.populate_plugins(error_mode=args.error,
+                                                examples=args.examples)
 
     comp = Completer(commands=commands, plugin_list=pu.plugins)
     utils._set_readline(comp.complete)
 
-    content = Content(level="all" if args.disp_all else 'user')
 
     # if file flag is passed then open it here
     if args.file:
         commands['open'](content, args.file)
 
     print("\n*** Press Enter for a list of available commands. ***\n")
+
+    utils.load_history_file(utils.histfile)
 
     while True:
         try:
@@ -250,7 +254,7 @@ def main():
             print()
             continue
 
-        command, arg = in_list if len(in_list) is 2 else in_list+['']
+        command, arg = in_list if len(in_list) == 2 else in_list+['']
         command = command if command else 'help'
         if command not in commands:
             print("I'm sorry, that's not a command I recognise. Press Enter "
@@ -260,9 +264,6 @@ def main():
 
         if content.is_finished():
             break
-
-        # write the history to the history file
-        utils.readline.write_history_file(utils.histfile)
 
     print("Thanks for using the application")
 

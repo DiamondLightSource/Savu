@@ -57,7 +57,7 @@ class Hdf5Transport(BaseTransport):
     def _transport_pre_plugin_list_run(self):
         # run through the experiment (no processing) and create output files
         self.hdf5 = Hdf5Utils(self.exp)
-        self.exp_coll = self.exp._get_experiment_collection()
+        self.exp_coll = self.exp._get_collection()
         self.data_flow = self.exp.meta_data.plugin_list._get_dataset_flow()
         n_plugins = range(len(self.exp_coll['datasets']))
 
