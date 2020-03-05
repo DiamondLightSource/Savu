@@ -7,7 +7,6 @@ channels:
 - ccpi
 - dkazanc
 dependencies:
-- h5py=2.10.0=mpi_openmpi_py36h8f0990d_2
 - cython
 - scipy
 - numpy
@@ -21,26 +20,22 @@ dependencies:
 - astra-toolbox
 - xraylib
 #- tomopy # can't seem to resolve some dependency
-- pyfai
+#- pyfai # cuda driver not compatible with 10.1?
 - pymca
 - pyfftw
 - PeakUtils
 # - i23-seg # no py 3.6 build
 - tifffile
 - fabio
-- jinja2
-- spyder
 - colorama
+- jinja2
 - ipython
-- matplotlib
 - pytest
 - setuptools
-- mock
-- yamllint
 - pip:
+  - matplotlib
   - pyreadline
-  - nvidia-ml-py
   - pmacparser
   - gnureadline==6.3.8
   - sphinx-rtd-theme
-
+  - nvidia-ml-py

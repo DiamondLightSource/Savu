@@ -1,11 +1,11 @@
 #!/bin/bash -ex
 
 # change to 'latest' for the latest version
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 versions_file=$DIR/versions_file.txt
 
 # error log to screen and file
-log_temp=`mktemp -d`
+log_temp=$(mktemp -d)
 error_log=$log_temp/savu_error_log.txt
 exec 2> >(tee -ia $error_log)
 
@@ -14,21 +14,20 @@ newprompt=">>> "
 export PS1=$newprompt
 
 for sig in INT TERM EXIT; do
-    trap "export PS1=$oldprompt; [[ $sig == EXIT ]] || kill -$sig $$" $sig
+  trap "export PS1=$oldprompt; [[ $sig == EXIT ]] || kill -$sig $$" $sig
 done
 
 PREFIX="${PREFIX:-$HOME}"
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-savu_version=`cat $DIR/version.txt`
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+savu_version=$(cat $DIR/version.txt)
 
 # function for parsing optional arguments
-function arg_parse ()
-{
+function arg_parse() {
   flag=$1
   return=$2
-  while [[ $# -gt 2 ]] ; do
-    if [ $3 == $flag ] ; then
+  while [[ $# -gt 2 ]]; do
+    if [ $3 == $flag ]; then
       eval "$return"=$4
     fi
     shift
@@ -36,12 +35,11 @@ function arg_parse ()
 }
 
 # function for parsing flags without arguments
-function flag_parse ()
-{
+function flag_parse() {
   flag=$1
   return=$2
-  while [[ $# -gt 2 ]] ; do
-    if [ $3 == $flag ] ; then
+  while [[ $# -gt 2 ]]; do
+    if [ $3 == $flag ]; then
       eval "$return"=true
     fi
     shift
@@ -50,19 +48,19 @@ function flag_parse ()
 
 # Set the install PREFIX
 flag_parse "--PREFIX" prefix "$@"
-if [ $prefix ] ; then
+if [ $prefix ]; then
   PREFIX=true
 fi
 
 # Set the test flag to true if test only
 flag_parse "--tests_only" test_flag "$@"
-if [ $test_flag ] ; then
+if [ $test_flag ]; then
   test_flag=true
 fi
 
 # Set the prompts flag to false if no prompts are required
 flag_parse "--no_prompts" prompts "$@"
-if [ $prompts ] ; then
+if [ $prompts ]; then
   prompts=false
 else
   prompts=true
@@ -70,7 +68,7 @@ fi
 
 # set the facility
 arg_parse "-f" facility "$@"
-if [ ! $facility ] ; then
+if [ ! $facility ]; then
   facility=dls # change this default?
 fi
 
@@ -78,15 +76,15 @@ export FACILITY=$facility
 
 # set the conda folder
 arg_parse "-c" conda_folder "$@"
-if [ ! $conda_folder ] ; then
+if [ ! $conda_folder ]; then
   conda_folder=Savu_$savu_version
 fi
 
 # set the savu recipe
 arg_parse "-s" savu_recipe "$@"
-if [ ! $savu_recipe ] ; then
+if [ ! $savu_recipe ]; then
   savu_recipe=savu
-elif [ $savu_recipe = 'master' ] ; then
+elif [ $savu_recipe = 'master' ]; then
   savu_recipe=savu_master
 else
   echo "Unknown Savu installation version."
@@ -95,9 +93,16 @@ fi
 # override the conda recipes folder
 arg_parse "-r" recipes "$@"
 
+# Specify whether this is running on CI
+arg_parse "--ci" running_on_ci "$@"
+if [ ! $running_on_ci ]; then
+  running_on_ci=false
+else
+  running_on_ci=true
+fi
 #=========================library checking==============================
 
-if [ $test_flag ] ; then
+if [ $test_flag ]; then
   echo -e "\n============================================================="
   echo -e "    ......Thank you for running the Savu tests......\n"
   echo -e "Performing a library check..."
@@ -112,15 +117,15 @@ else
 fi
 
 # set compiler wrapper
-#MPICC=$(command -v mpicc)
-#MPI_HOME=${MPICC%/mpicc}
-#if ! [ "$MPICC" ]; then
-#    echo "ERROR: I require mpicc but I can't find it.  Check /path/to/mpi_implementation/bin is in your PATH"
-#    exit 1
-#else
-#    echo "Using mpicc:   " $MPICC
-#	export PATH=$MPI_HOME:$PATH
-#fi
+MPICC=$(command -v mpicc)
+MPI_HOME=${MPICC%/mpicc}
+if ! [ "$MPICC" ]; then
+  echo "ERROR: I require mpicc but I can't find it.  Check /path/to/mpi_implementation/bin is in your PATH"
+  exit 1
+else
+  echo "Using mpicc:   " $MPICC
+  export PATH=$MPI_HOME:$PATH
+fi
 
 # check for fftw
 # CFLAGS=""
@@ -143,22 +148,11 @@ fi
 #     echo "fftw has not been found."
 # fi
 
-# ~~check for cuda~~ Astra installs it's own Cuda toolkit
-#nvcc=`command -v nvcc`
-#CUDAHOME=${nvcc%/bin/nvcc}
-#if [ "$CUDAHOME" ]; then
-#    echo "Using cuda:    " $CUDAHOME
-#	export PATH=$CUDAHOME/bin:$PATH
-#	export LD_LIBRARY_PATH=$CUDAHOME/lib64:$LD_LIBRARY_PATH
-#else
-#    echo "cuda has not been found."
-#fi
+if [ $test_flag ] && [ $prompts = true ]; then
 
-if [ $test_flag ] && [ $prompts = true ] ; then
-
-  PYTHONHOME=`command -v conda`
+  PYTHONHOME=$(command -v conda)
   PYTHONHOME=${PYTHONHOME%conda}
-  if [ ! $PYTHONHOME ] ; then
+  if [ ! $PYTHONHOME ]; then
     echo -e "No conda environment found in PATH. Try:"
     echo -e "   >>> source <path_to_savu_installation>/savu_setup.sh"
     echo -e "Aborting the tests."
@@ -166,8 +160,8 @@ if [ $test_flag ] && [ $prompts = true ] ; then
   fi
 
   echo -e "=============================================================\n"
-  while true ; do
-    read  -n 1 -p "Are you happy to proceed with the tests? (y/n): " input
+  while true; do
+    read -n 1 -p "Are you happy to proceed with the tests? (y/n): " input
     if [ "$input" = "y" ]; then
       echo -e "\nProceeding with the tests."
       break
@@ -178,10 +172,10 @@ if [ $test_flag ] && [ $prompts = true ] ; then
       echo -e "\nYour input was unknown.\n"
     fi
   done
-elif [ $prompts = true ] ; then
+elif [ $prompts = true ]; then
   echo -e "=============================================================\n"
-  while true ; do
-    read  -n 1 -p "Are you happy to proceed with the installation? (y/n): " input
+  while true; do
+    read -n 1 -p "Are you happy to proceed with the installation? (y/n): " input
     if [ "$input" = "y" ]; then
       echo -e "\nYour input was yes"
       break
@@ -193,10 +187,10 @@ elif [ $prompts = true ] ; then
     fi
   done
 
-#=====================installing other packages==========================
+  #=====================installing other packages==========================
 
   echo -e "\nInstalling Savu in" $PREFIX
-  read  -p ">>> Press ENTER to continue or input a different path: " input
+  read -p ">>> Press ENTER to continue or input a different path: " input
 
   if [ "$input" != "" ]; then
     PREFIX=$input
@@ -208,13 +202,13 @@ elif [ $prompts = true ] ; then
       break
     fi
     echo "The path" $PREFIX "is not recognised"
-    read  -p ">>> Please input a different installation path: " input
+    read -p ">>> Please input a different installation path: " input
     PREFIX=$input
   done
 
   if [ -d "$PREFIX" ]; then
     echo
-    while true ; do
+    while true; do
       read -n 1 -p "The folder $PREFIX already exists. Continue? [y/n]" input
       if [ "$input" = "y" ]; then
         echo -e "\nStarting the installation........"
@@ -231,19 +225,19 @@ elif [ $prompts = true ] ; then
     mkdir -p $PREFIX
   fi
 else
-  if [ ! -d "$PREFIX" ] ; then
+  if [ ! -d "$PREFIX" ]; then
     mkdir -p $PREFIX
   fi
 fi
 
-if [ ! $test_flag ] ; then
+if [ ! $test_flag ]; then
 
   echo -e "\nThank you!  Installing Savu into" $PREFIX"\n"
 
   unset IFS
-  string=`awk '/^miniconda/' $versions_file`
-  miniconda_version=`echo $string | cut -d " " -f 2`
-  wget https://repo.continuum.io/miniconda/Miniconda3-$miniconda_version-Linux-x86_64.sh -O $PREFIX/miniconda.sh;
+  string=$(awk '/^miniconda/' $versions_file)
+  miniconda_version=$(echo $string | cut -d " " -f 2)
+  wget https://repo.continuum.io/miniconda/Miniconda3-$miniconda_version-Linux-x86_64.sh -O $PREFIX/miniconda.sh
   bash $PREFIX/miniconda.sh -b -p $PREFIX/miniconda
   PYTHONHOME=$PREFIX/miniconda/bin
   export PATH="$PYTHONHOME:$PATH"
@@ -253,7 +247,7 @@ if [ ! $test_flag ] ; then
 
   echo "Building Savu..."
   conda build $DIR/$savu_recipe
-  savubuild=`conda build $DIR/$savu_recipe --output`
+  savubuild=$(conda build $DIR/$savu_recipe --output)
   echo "Installing Savu..."
   conda install -y -q --use-local $savubuild
 
@@ -261,57 +255,46 @@ if [ ! $test_flag ] ; then
   savu_path=${path%/savu/__init__.py*}
 
   # get the savu version
-  if [ -z $recipes ] ; then
-	install_path=$(python -c "import savu; import savu.version as sv; print(sv.__install__)")
-	recipes=$savu_path/$install_path/conda-recipes
+  if [ -z $recipes ]; then
+    install_path=$(python -c "import savu; import savu.version as sv; print(sv.__install__)")
+    recipes=$savu_path/$install_path/conda-recipes
   fi
 
-  launcher_path=`command -v savu_launcher.sh`
+  launcher_path=$(command -v savu_launcher.sh)
   launcher_path=${launcher_path%/savu_launcher.sh}
   if [ "$facility" ]; then
-      cp $savu_path/system_files/$facility/mpi/savu_launcher.sh $launcher_path
-      cp $savu_path/system_files/$facility/mpi/savu_mpijob.sh $launcher_path
+    cp $savu_path/system_files/$facility/mpi/savu_launcher.sh $launcher_path
+    cp $savu_path/system_files/$facility/mpi/savu_mpijob.sh $launcher_path
   fi
 
-#  echo "Installing mpi4py..."
-#  pip uninstall -y -q mpi4py || true
-#  string=`awk '/^mpi4py/' $versions_file`
-#  mpi4py_version=`echo $string | cut -d " " -f 2`
-#  pip install mpi4py==$mpi4py_version
-#  #-----------------------------------------------------------------
-#
-#  #-----------------------------------------------------------------
-#  echo "Building hdf5..."
-#  conda uninstall -y -q hdf5 || true
-#  conda build $recipes/hdf5
-#  hdf5build=`conda build $recipes/hdf5 --output`
-#
-#  echo "Installing hdf5..."
-#  conda install -y -q --use-local $hdf5build
-#  #-----------------------------------------------------------------
-#
-#  #-----------------------------------------------------------------
-#  echo "Building h5py..."
-#  conda uninstall -y -q h5py || true
-#  conda build $recipes/h5py --no-test
-#  h5pybuild=`conda build $recipes/h5py --output`
-#
-#  echo "Installing h5py..."
-#  conda install -y -q --use-local $h5pybuild
-  #-----------------------------------------------------------------
+  if [ $running_on_ci = false ]; then
+    echo "Installing mpi4py..."
+    pip uninstall -y -q mpi4py || true
+    string=$(awk '/^mpi4py/' $versions_file)
+    mpi4py_version=$(echo $string | cut -d " " -f 2)
+    pip install mpi4py==$mpi4py_version
 
-  # TODO astra missing? but it's installed with environment.yml
-  # and it should pick up CUDA automagically?
-  # echo "Building astra..."
-  # conda uninstall -y -q astra || true
-  # conda build $recipes/astra --no-test
-  # astrabuild=`conda build $recipes/astra --output`
+    # module load hdf5/1.10.5
+    echo "Building hdf5..."
+    conda uninstall -y -q hdf5 || true
+    conda build $recipes/hdf5
+    hdf5build=$(conda build $recipes/hdf5 --output)
 
-  # echo "Installing astra..."
-  # conda install -y -q --use-local $astrabuild
+    echo "Installing hdf5..."
+    conda install -y -q --use-local $hdf5build
 
+    echo "Building h5py..."
+    conda uninstall -y -q h5py || true
+    conda build $recipes/h5py --no-test
+    h5pybuild=$(conda build $recipes/h5py --output)
+
+    echo "Installing h5py..."
+    conda install -y -q --use-local $h5pybuild
+  else
+    echo "Installing mpi4py/hdf5/h5py from conda for CI run"
+    conda env update -n root -f $DIR/environment_ci.yml
+  fi
   conda env update -n root -f $DIR/environment.yml
-
 
   echo -e "\n\t***************************************************"
   echo -e "\t          Package installation complete"
@@ -320,10 +303,10 @@ if [ ! $test_flag ] ; then
 
 fi
 
-if [ ! $test_flag ] ; then
-  if [ $prompts = true ] ; then
+if [ ! $test_flag ]; then
+  if [ $prompts = true ]; then
     while true; do
-      read  -n 1 -p "Would you like to run the tests? (y/n): " input
+      read -n 1 -p "Would you like to run the tests? (y/n): " input
       if [ "$input" = "y" ]; then
         echo -e "\nYour input was yes"
         test_flag=true
@@ -341,28 +324,28 @@ if [ ! $test_flag ] ; then
 
   setup_script=$PREFIX/'savu_setup.sh'
   echo -e "\nCreating a Savu setup script" $setup_script
-  ( [ -e "$setup_script" ] || touch "$setup_script" ) && [ ! -w "$setup_script" ] && echo cannot write to $setup_script && exit 1
+  ([ -e "$setup_script" ] || touch "$setup_script") && [ ! -w "$setup_script" ] && echo cannot write to $setup_script && exit 1
   MPIHOME="$(dirname "$(dirname $MPICC)")"
-  echo '#!bin/bash' > $setup_script
-  echo ""export PATH=$MPIHOME/bin:'$PATH'"" >> $setup_script
-  echo ""export LD_LIBRARY_PATH=$MPIHOME/lib:'$LD_LIBRARY_PATH'"" >> $setup_script
-  echo ""export PYTHONUSERSITE True"" >> $setup_script
-  echo ""export PATH=$PYTHONHOME:'$PATH'"" >> $setup_script
-  echo ""export LD_LIBRARY_PATH=$PYTHONHOME/lib:'$LD_LIBRARY_PATH'"" >> $setup_script
-  echo ""export LD_LIBRARY_PATH=$astra_lib_path:'$LD_LIBRARY_PATH'"" >> $setup_script
+  echo '#!bin/bash' >$setup_script
+  echo ""export PATH=$MPIHOME/bin:'$PATH'"" >>$setup_script
+  echo ""export LD_LIBRARY_PATH=$MPIHOME/lib:'$LD_LIBRARY_PATH'"" >>$setup_script
+  echo ""export PYTHONUSERSITE True"" >>$setup_script
+  echo ""export PATH=$PYTHONHOME:'$PATH'"" >>$setup_script
+  echo ""export LD_LIBRARY_PATH=$PYTHONHOME/lib:'$LD_LIBRARY_PATH'"" >>$setup_script
+  echo ""export LD_LIBRARY_PATH=$astra_lib_path:'$LD_LIBRARY_PATH'"" >>$setup_script
   if [ "$CUDAHOME" ]; then
-    echo ""export PATH=$CUDAHOME/bin:'$PATH'"" >> $setup_script
-    echo ""export LD_LIBRARY_PATH=$CUDAHOME/lib64:'$LD_LIBRARY_PATH'"" >> $setup_script
+    echo ""export PATH=$CUDAHOME/bin:'$PATH'"" >>$setup_script
+    echo ""export LD_LIBRARY_PATH=$CUDAHOME/lib64:'$LD_LIBRARY_PATH'"" >>$setup_script
   fi
   if [ "$FFTWHOME" ]; then
-    echo ""export FFTWDIR=$FFTWHOME"" >> $setup_script
-    echo ""export LD_LIBRARY_PATH=$FFTWHOME/lib:'$LD_LIBRARY_PATH'"" >> $setup_script
+    echo ""export FFTWDIR=$FFTWHOME"" >>$setup_script
+    echo ""export LD_LIBRARY_PATH=$FFTWHOME/lib:'$LD_LIBRARY_PATH'"" >>$setup_script
   fi
 
   source $setup_script
 fi
 
-if [ $test_flag ] ; then
+if [ $test_flag ]; then
 
   nGPUs=$(nvidia-smi -L | wc -l)
 
@@ -374,17 +357,17 @@ if [ $test_flag ] ; then
 
   echo -e "\n************** Single-threaded local tests complete ******************\n"
 
-  test_dir=`mktemp -d`
-  tmp_dir=`mktemp -d`
+  test_dir=$(mktemp -d)
+  tmp_dir=$(mktemp -d)
   tmpfile=$tmp_dir/temp_output.txt
   touch $tmpfile
 
 fi
 
-if [ ! $test_flag ] ; then
+if [ ! $test_flag ]; then
 
-  launcher_path=`command -v savu_launcher.sh`
-  mpijob_path=`command -v savu_mpijob.sh`
+  launcher_path=$(command -v savu_launcher.sh)
+  mpijob_path=$(command -v savu_mpijob.sh)
   echo -e "\n\n===============================IMPORTANT NOTICES================================"
   echo -e "If you are installing Savu for cluster use, you will need to update the savu "
   echo -e "launcher scripts:"
@@ -406,4 +389,3 @@ else
 fi
 
 exit 0
-

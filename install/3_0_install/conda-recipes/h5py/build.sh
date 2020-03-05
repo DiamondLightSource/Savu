@@ -2,7 +2,7 @@
 
 # set compiler wrapper
 mpicc=$(command -v mpicc)
-mpi=`dirname $mpicc`
+mpi=${mpicc%/bin/mpicc}
 
 # set anaconda distribution
 ana_path=$(command -v savu)
