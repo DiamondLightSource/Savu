@@ -264,7 +264,7 @@ if [ ! $test_flag ]; then
     recipes=$savu_path/$install_path/conda-recipes
   fi
 
-  launcher_path=$(command -v savu_launcher.sh)
+  launcher_path=`command -v savu_launcher.sh`
   launcher_path=${launcher_path%/savu_launcher.sh}
   if [ "$facility" ]; then
     cp $savu_path/system_files/$facility/mpi/savu_launcher.sh $launcher_path
