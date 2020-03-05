@@ -54,12 +54,12 @@ class CropProjections(Plugin, CpuPlugin):
         pass
 
     def process_frames(self, data):
-        in_dataset, out_dataset = self.get_datasets()
-        print(in_dataset[0].meta_data.get("indices2crop"))
-        indices2crop = in_dataset[0].meta_data.get('indices2crop')
-        shapeX = int(indices2crop[1]-indices2crop[0])
-        shapeY = int(indices2crop[3]-indices2crop[2])
-        print(shapeX, shapeY)
+        #in_dataset, out_dataset = self.get_datasets()
+        #print(in_dataset[0].meta_data.get("indices2crop"))
+        #indices2crop = in_dataset[0].meta_data.get('indices2crop')
+        #shapeX = int(indices2crop[1]-indices2crop[0])
+        #shapeY = int(indices2crop[3]-indices2crop[2])
+        #print(shapeX, shapeY)
         return data[0][self.new_slice]
 
     def post_process(self):
@@ -101,11 +101,11 @@ class CropProjections(Plugin, CpuPlugin):
             self.shape[det_y] -= 2 * cropY
         elif self.parameters['mode'] == 'automatic':
             print(in_dataset[0].get_name())
-            print(in_dataset[0].meta_data.get_dictionary().keys())
-            #print(in_dataset[0].meta_data.get('indices2crop'))
-            
+            print(in_dataset[0].meta_data.get_dictionary().keys())         
             for key, value in in_dataset[0].meta_data.get_dictionary().iteritems():
                 print (key, value)
+            
+            #print(in_dataset[0].meta_data.get('indices2crop'))
             # getting indices to crop the data            
             #sample_data[int(indices2crop[2]):int(indices2crop[3]),int(indices2crop[0]):int(indices2crop[1])]
             #indices2crop = in_dataset[0].meta_data.get('indices2crop')
