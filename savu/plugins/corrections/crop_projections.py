@@ -55,7 +55,11 @@ class CropProjections(Plugin, CpuPlugin):
 
     def process_frames(self, data):
         in_dataset, out_dataset = self.get_datasets()
-        print(in_dataset[0].meta_data.get("crop_left"))
+        print(in_dataset[0].meta_data.get("indices2crop"))
+        indices2crop = in_dataset[0].meta_data.get('indices2crop')
+        shapeX = int(indices2crop[1]-indices2crop[0])
+        shapeY = int(indices2crop[3]-indices2crop[2])
+        print(shapeX, shapeY)
         return data[0][self.new_slice]
 
     def post_process(self):
@@ -98,16 +102,27 @@ class CropProjections(Plugin, CpuPlugin):
         elif self.parameters['mode'] == 'automatic':
             print(in_dataset[0].get_name())
             print(in_dataset[0].meta_data.get_dictionary().keys())
-            #print in_dataset[0].meta_data.get("crop_left")
+            #print(in_dataset[0].meta_data.get('indices2crop'))
             
             for key, value in in_dataset[0].meta_data.get_dictionary().iteritems():
                 print (key, value)
-            #print(in_dataset[0].meta_data.get('crop_left'))
+            # getting indices to crop the data            
+            #sample_data[int(indices2crop[2]):int(indices2crop[3]),int(indices2crop[0]):int(indices2crop[1])]
+            #indices2crop = in_dataset[0].meta_data.get('indices2crop')
+            #shapeX = int(indices2crop[1]-indices2crop[0])
+            #shapeY = int(indices2crop[3]-indices2crop[2])
+            #self.new_slice = [slice(indices2crop[0], indices2crop[1]),
+            #     slice(indices2crop[2], indices2crop[3])]
+            #self.new_slice = [slice(indices2crop[2], indices2crop[3]),
+            #     slice(indices2crop[0], indices2crop[1])]
+            #print(shapeX, shapeY)
+            #self.shape[det_x] = shapeX
+            #self.shape[det_y] = shapeY
+            #print(img_dims[det_x], img_dims[det_y])            
             self.new_slice = (None, None)
 
         out_dataset[0].create_dataset(patterns=in_dataset[0],
                                       axis_labels=in_dataset[0],
                                       shape=tuple(self.shape))
-        out_pData[0].plugin_data_setup('PROJECTION', 'single')
+        out_pData[0].plugin_data_setup('PROJECTION', 'single')  
         
-        print(in_dataset[0].meta_data.get("crop_left"))
