@@ -1,8 +1,12 @@
 cache: apt
 sudo: true
-language: python
-python:
-  - "3.6"
+language: cpp
+compiler:
+  - gcc
+env:
+  - OMP_NUM_THREADS=2
+#python:
+#  - "3.6"
 #  - "3.5"
 #addons:
 #  apt:
