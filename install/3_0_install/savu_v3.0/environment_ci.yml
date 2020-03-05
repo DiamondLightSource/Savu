@@ -1,5 +1,4 @@
 # Extra packages needed for CI
-name: root
 channels:
 - conda-forge
 dependencies:

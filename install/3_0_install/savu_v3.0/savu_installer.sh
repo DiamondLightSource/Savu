@@ -296,9 +296,9 @@ if [ ! $test_flag ]; then
     conda install -y -q --use-local $h5pybuild
   else
     echo "Installing mpi4py/hdf5/h5py from conda for CI run"
-    conda env update -n root -f $DIR/environment_ci.yml
+    conda env update -n base -f $DIR/environment_ci.yml
   fi
-  conda env update -n root -f $DIR/environment.yml
+  conda env update -n base -f $DIR/environment.yml
 
   echo -e "\n\t***************************************************"
   echo -e "\t          Package installation complete"

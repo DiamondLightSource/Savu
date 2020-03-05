@@ -1,4 +1,3 @@
-name: root
 channels:
 - local
 - defaults
@@ -32,6 +31,7 @@ dependencies:
 - ipython
 - pytest
 - setuptools
+- pip
 - pip:
   - matplotlib
   - pyreadline
