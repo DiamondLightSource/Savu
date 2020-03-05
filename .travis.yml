@@ -2,7 +2,7 @@ cache: apt
 sudo: true
 language: python
 python:
-  - "2.7"
+  - "3.6"
 #  - "3.5"
 #addons:
 #  apt:
@@ -14,18 +14,10 @@ python:
 #    - libboost-all-dev
 
 before_install:
-  - wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
-  - bash miniconda.sh -b -p $HOME/miniconda
-  - export PATH="$HOME/miniconda/bin:$PATH"
-  - hash -r
-  - conda config --set always_yes yes --set changeps1 no
-  - conda update -q conda
-  - conda info -a
+  - cd $TRAVIS_BUILD_DIR/install/3_0_install/savu_v3.0
 
 install:
-  - conda env create --file environment.yml
-  - source activate test-environment
-  - python setup.py install
+  - ./savu_installer --no-prompts --PREFIX /tmp
 
 script:
   - py.test scripts/configurator_tests/ -v

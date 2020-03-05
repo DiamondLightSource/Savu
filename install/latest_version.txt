@@ -1,2 +1,2 @@
-2_4_install/savu_v2.4/version.txt
+3_0_install/savu_v3.0/version.txt
 
