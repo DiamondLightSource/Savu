@@ -116,15 +116,19 @@ else
   echo -e "\n============================================================="
 fi
 
-# set compiler wrapper
-MPICC=$(command -v mpicc)
-MPI_HOME=${MPICC%/mpicc}
-if ! [ "$MPICC" ]; then
-  echo "ERROR: I require mpicc but I can't find it.  Check /path/to/mpi_implementation/bin is in your PATH"
-  exit 1
+if [ $running_on_ci = false ]; then
+  # set compiler wrapper
+  MPICC=$(command -v mpicc)
+  MPI_HOME=${MPICC%/mpicc}
+  if ! [ "$MPICC" ]; then
+    echo "ERROR: I require mpicc but I can't find it.  Check /path/to/mpi_implementation/bin is in your PATH"
+    exit 1
+  else
+    echo "Using mpicc:   " $MPICC
+    export PATH=$MPI_HOME:$PATH
+  fi
 else
-  echo "Using mpicc:   " $MPICC
-  export PATH=$MPI_HOME:$PATH
+  echo "Going to use the openmpi installation from conda"
 fi
 
 # check for fftw
