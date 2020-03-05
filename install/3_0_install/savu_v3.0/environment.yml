@@ -1,0 +1,45 @@
+name: root
+channels:
+- local
+- defaults
+- conda-forge
+- ccpi
+- dkazanc
+- astra-toolbox/label/dev
+dependencies:
+- cython
+- scipy
+- numpy
+- pandas
+- PyWavelets
+- scikit-image # doesn't like something
+- scikit-learn
+- tomobar
+- ccpi-regulariser
+- ccpi-reconstruction
+- astra-toolbox
+- xraylib
+- tomopy
+- pyfai
+- pymca
+- pyfftw
+- PeakUtils
+# - i23-seg # no py 3.6 build
+- tifffile
+- fabio
+- jinja2
+- spyder
+- colorama
+- ipython
+- matplotlib
+- pytest
+- setuptools
+- mock
+- yamllint
+- pip:
+  - pyreadline
+  - nvidia-ml-py
+  - pmacparser
+  - gnureadline==6.3.8
+  - sphinx-rtd-theme
+
