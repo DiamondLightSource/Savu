@@ -24,7 +24,7 @@ before_install:
 install:
   - ./savu_installer.sh --ci --no_prompts --PREFIX /tmp
 # todo don't version lock to 3.0
-  - . /tmp/Savu_3.0/miniconda/bin/activate
+  - . /tmp/miniconda/bin/activate
   - conda list
 
 script:
