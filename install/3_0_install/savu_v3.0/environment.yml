@@ -1,11 +1,11 @@
 channels:
-- local
-- defaults
-- anaconda
-- conda-forge
-- astra-toolbox/label/dev
-- ccpi
-- dkazanc
+  - local
+  - defaults
+  - anaconda
+  - conda-forge
+  - astra-toolbox/label/dev
+  - ccpi
+  - dkazanc
 dependencies:
   - tomopy
   - scikit-image
@@ -33,38 +33,11 @@ dependencies:
   - setuptools
   - mock
   - pip
-  #- cython
-#- scipy
-#- numpy
-#- pandas
-#- PyWavelets
-#- scikit-image # doesn't like something
-#- scikit-learn
-#- tomobar
-#- ccpi-regulariser
-#- ccpi-reconstruction
-#- astra-toolbox
-#- pyfai
-#- xraylib
-#- pymca
-#- pyfftw
-#- PeakUtils
-#- tifffile
-#- fabio
-#- colorama
-#- jinja2
-#- ipython
-#- pytest
-#- setuptools
-#- mock
-#- pip
-#- tomopy # can't seem to resolve some dependency
-#- i23-seg # no py 3.6 build
-- pip:
-  - matplotlib
-  - pyreadline
-  - pmacparser
-  - gnureadline==6.3.8
-  - sphinx-rtd-theme
-  - nvidia-ml-py
+  - pip:
+      - matplotlib
+      - pyreadline
+      - pmacparser
+      - gnureadline==6.3.8
+      - sphinx-rtd-theme
+      - nvidia-ml-py
 
