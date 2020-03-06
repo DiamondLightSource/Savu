@@ -6,17 +6,17 @@ class BaseLoaderTools(PluginTools):
     def define_parameters(self):
         """---
         preview:
-              visibility: user
+              visibility: basic
               dtype: '[int]'
               description: A slice list of required frames.
               default: []
         in_datasets:
-              visibility: hide
+              visibility: hidden
               dtype: list
               description: Create a list of the dataset(s) to process
               default: []
         out_datasets:
-              visibility: hide
+              visibility: hidden
               dtype: list
               description: Create a list of the dataset(s) to create
               default: []

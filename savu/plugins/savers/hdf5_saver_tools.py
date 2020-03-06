@@ -6,7 +6,7 @@ class Hdf5SaverTools(PluginTools):
     def define_parameters(self):
         """---
         pattern:
-            visibility: user
+            visibility: basic
             dtype: str
             description: Optimise data storage to this access pattern
               'optimum' will automate this process by choosing the output

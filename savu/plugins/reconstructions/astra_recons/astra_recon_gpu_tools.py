@@ -6,7 +6,7 @@ class AstraReconGpuTools(PluginTools):
     def define_parameters(self):
         """---
         res_norm:
-            visibility: user
+            visibility: basic
             dtype: int
             description: Output the residual norm at each iteration
               (Error in the solution - iterative solvers only)
@@ -14,7 +14,7 @@ class AstraReconGpuTools(PluginTools):
             dependency:
               algorithm: [SIRT_CUDA, SART_CUDA, CGLS_CUDA]
         algorithm:
-            visibility: user
+            visibility: basic
             dtype: str
             options: [FBP_CUDA, SIRT_CUDA, SART_CUDA, CGLS_CUDA, FP_CUDA, BP_CUDA]
             description:
@@ -30,7 +30,7 @@ class AstraReconGpuTools(PluginTools):
                   CGLS3D_CUDA:
             default: FBP_CUDA
         FBP_filter:
-            visibility: user
+            visibility: basic
             dtype: str
             options:  [none,
                 ram-lak,

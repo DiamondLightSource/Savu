@@ -21,17 +21,18 @@
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
 
+
+import numpy as np
+from scipy import ndimage
+from tomobar.methodsIR import RecToolsIR
+
+from savu.plugins.reconstructions.tomobar.tomobar_recon_tools import TomoBarReconTools
 from savu.plugins.reconstructions.base_recon import BaseRecon
 from savu.data.plugin_list import CitationInformation
 from savu.plugins.driver.gpu_plugin import GpuPlugin
-
-import numpy as np
-from tomobar.methodsIR import RecToolsIR
-
-from savu.plugins.utils import register_plugin
 from savu.plugins.utils import register_test_plugin
-from scipy import ndimage
-from savu.plugins.reconstructions.tomobar_recon_tools import TomoBarReconTools
+from savu.plugins.utils import register_plugin
+
 
 #@register_plugin
 @register_test_plugin

@@ -6,12 +6,12 @@ class BaseSaverTools(PluginTools):
     def define_parameters(self):
         """---
         out_datasets:
-            visibility: hide
+            visibility: hidden
             default: []
             description:
             dtype: '[int]'
         in_datasets:
-            visibility: param
+            visibility: advanced
             description:
             default: []
             dtype: '[int]'

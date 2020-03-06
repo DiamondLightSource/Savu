@@ -7,19 +7,19 @@ class BaseReconTools(PluginTools):
     def define_parameters(self):
         """---
         centre_of_rotation:
-             visibility: user
+             visibility: advanced
              dtype: float
              description: Centre of rotation to use for the
                reconstruction.
              default: 0.0
         init_vol:
-             visibility: user
+             visibility: advanced
              dtype: float
              description: Dataset to use as volume initialiser
                (doesn't currently work with preview)
              default: 'None'
         centre_pad:
-             visibility: param
+             visibility: basic
              dtype: float
              description: Pad the sinogram to centre it in order
                to fill the reconstructed volume ROI for asthetic
@@ -32,7 +32,7 @@ class BaseReconTools(PluginTools):
              dependency:
                algorithm: [FP_CUDA, FBP_CUDA, BP_CUDA, FP, FBP, BP]
         outer_pad:
-             visibility: param
+             visibility: basic
              dtype: float
              description: Pad the sinogram width to fill the
                reconstructed volume for asthetic purposes. Choose
@@ -45,7 +45,7 @@ class BaseReconTools(PluginTools):
              dependency:
                algorithm: [FP_CUDA, FBP_CUDA, BP_CUDA, FP, FBP, BP]
         log:
-             visibility: user
+             visibility: advanced
              dtype: bool
              description:
               summary: Take the log of the data before reconstruction
@@ -54,29 +54,29 @@ class BaseReconTools(PluginTools):
                 set beforehand
              default: true
         preview:
-             visibility: user
+             visibility: advanced
              dtype: list
              description: A slice list of required frames.
              default: '[]'
         force_zero:
-             visibility: param
+             visibility: basic
              dtype: range
              description: Set any values in the reconstructed image
                outside of this range to zero.
              default: 'None, None'
         ratio:
-             visibility: param
+             visibility: basic
              dtype: float
              description: Ratio of the masks diameter in pixels to
                the smallest edge size along given axis.
              default: 0.95
         log_func:
-             visibility: param
+             visibility: basic
              dtype: int
              description: Override the default log function
              default: np.nan_to_num(-np.log(sino))
         vol_shape:
-             visibility: param
+             visibility: basic
              dtype: str
              description: Override the size of the reconstuction
                volume with an integer value.

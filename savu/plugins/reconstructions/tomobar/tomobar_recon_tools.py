@@ -28,39 +28,39 @@ and depends on the ASTRA toolbox and the CCPi RGL toolkit
             default: None
 
         data_any_rings:
-            visibility: advanced
+            visibility: hidden
             dtype: int
             description: a parameter to suppress various artifacts including
               rings and streaks
             default: None
 
         data_any_rings_winsizes:
-           visibility: advanced
+           visibility: hidden
            dtype: tuple
            description: half window sizes to collect background information
              [detector, angles, num of projections]
            default: (9,7,0)
 
         data_any_rings_power:
-            visibility: advanced
+            visibility: hidden
             dtype: float
             description: a power parameter for Huber model.
             default: 1.4
 
         data_full_ring_GH:
-             visibility: param
+             visibility: advanced
              dtype: str
              description: Regularisation variable for full constant ring removal (GH model).
              default: None
 
         data_full_ring_accelerator_GH:
-             visibility: param
+             visibility: advanced
              dtype: float
              description: Acceleration constant for GH ring removal. (use with care)
              default: 10
 
         algorithm_iterations:
-             visibility: param
+             visibility: basic
              dtype: int
              description:
                summary: Number of outer iterations for FISTA (default)or ADMM methods.
@@ -72,19 +72,19 @@ and depends on the ASTRA toolbox and the CCPi RGL toolkit
              default: 20
 
         algorithm_verbose:
-             visibility: param
+             visibility: advanced
              dtype: str
              description: print iterations number and other messages (off by default).
              default: 'off'
 
         algorithm_ordersubsets:
-             visibility: param
+             visibility: advanced
              dtype: int
              description: The number of ordered-subsets to accelerate reconstruction.
              default: 6
 
         regularisation_method:
-             visibility: param
+             visibility: advanced
              dtype: str
              options: [ROF_TV, FGP_TV, PD_TV, SB_TV, LLT_ROF, NDF, Diff4th]
              description:
@@ -105,7 +105,7 @@ and depends on the ASTRA toolbox and the CCPi RGL toolkit
              default: PD_TV
 
         regularisation_parameter:
-             visibility: param
+             visibility: basic
              dtype: float
              description:
                summary: Regularisation parameter. The higher the value, the
@@ -114,80 +114,7 @@ and depends on the ASTRA toolbox and the CCPi RGL toolkit
              default: 0.0001
 
         regularisation_iterations:
-             visibility: param
-             dtype: int
-             description: The number of regularisation iterations.
-             default: 80
-
-        regularisation_device:
-             visibility: param
-             dtype: str
-             description: The number of regularisation iterations.
-             default: gpu
-
-        regularisation_PD_lip:
-             visibility: param
-             dtype: int
-             description: Primal-dual parameter for convergence.
-             default: 8
-             dependency:
-               regularisation_method: PD_TV
-
-        regularisation_methodTV:
-             visibility: param
-             dtype: str
-             description: 0/1 - TV specific isotropic/anisotropic choice.
-             default: 0
-             dependency:
-               regularisation_method: [ROF_TV, FGP_TV, SB_TV, NLTV]
-
-        regularisation_timestep:
-             visibility: param
-             dtype: float
-             dependency:
-               regularisation_method: [ROF_TV, LLT_ROF, NDF, Diff4th]
-             description:
-               summary: Time marching parameter
-               range: Recommended between 0.0001 and 0.003
-             default: 0.003
-
-        regularisation_edge_thresh:
-             visibility: param
-             dtype: float
-             dependency:
-               regularisation_method: [NDF, Diff4th]
-             description:
-               summary: Edge (noise) related parameter
-             default: 0.01
-
-        regularisation_parameter2:
-             visibility: param
-             dtype: float
-             dependency:
-               regularisation_method: LLT_ROF
-             description:
-               summary: Regularisation (smoothing) value
-               verbose: The higher the value stronger the smoothing effect
-             default: 0.005
-
-        NDF_penalty:
-             visibility: param
-             dtype: str
-             options: [Huber, Perona, Tukey]
-             description:
-               summary: Penalty dtype
-               verbose: Nonlinear/Linear Diffusion model (NDF) specific penalty
-                 type.
-               options:
-                 Huber: Huber
-                 Perona: Perona-Malik model
-                 Tukey: Tukey
-             dependency:
-               regularisation_method: NDF
-             default: Huber
-
-        max_iterations:
-             visibility: param
+             visibility: basic
              dtype: int
              description:
                summary: Total number of regularisation iterations.
@@ -204,6 +131,74 @@ and depends on the ASTRA toolbox and the CCPi RGL toolkit
                    LLT_ROF: 1000
                    NDF: 1000
                    DIFF4th: 1000
+
+        regularisation_device:
+             visibility: advanced
+             dtype: str
+             description: The device for regularisation
+             default: gpu
+
+        regularisation_PD_lip:
+             visibility: advanced
+             dtype: int
+             description: Primal-dual parameter for convergence.
+             default: 8
+             dependency:
+               regularisation_method: PD_TV
+
+        regularisation_methodTV:
+             visibility: advanced
+             dtype: str
+             description: 0/1 - TV specific isotropic/anisotropic choice.
+             default: 0
+             dependency:
+               regularisation_method: [ROF_TV, FGP_TV, SB_TV, NLTV]
+
+        regularisation_timestep:
+             visibility: advanced
+             dtype: float
+             dependency:
+               regularisation_method: [ROF_TV, LLT_ROF, NDF, Diff4th]
+             description:
+               summary: Time marching parameter
+               range: Recommended between 0.0001 and 0.003
+             default: 0.003
+
+        regularisation_edge_thresh:
+             visibility: advanced
+             dtype: float
+             dependency:
+               regularisation_method: [NDF, Diff4th]
+             description:
+               summary: Edge (noise) related parameter
+             default: 0.01
+
+        regularisation_parameter2:
+             visibility: advanced
+             dtype: float
+             dependency:
+               regularisation_method: LLT_ROF
+             description:
+               summary: Regularisation (smoothing) value
+               verbose: The higher the value stronger the smoothing effect
+             default: 0.005
+
+        NDF_penalty:
+             visibility: advanced
+             dtype: str
+             options: [Huber, Perona, Tukey]
+             description:
+               summary: Penalty dtype
+               verbose: Nonlinear/Linear Diffusion model (NDF) specific penalty
+                 type.
+               options:
+                 Huber: Huber
+                 Perona: Perona-Malik model
+                 Tukey: Tukey
+             dependency:
+               regularisation_method: NDF
+             default: Huber
+
         """
 
 

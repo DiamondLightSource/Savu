@@ -6,7 +6,7 @@ class AstraReconCpuTools(PluginTools):
     def define_parameters(self):
         """---
         algorithm:
-            visibility: user
+            visibility: basic
             dtype: str
             options: [FBP,SIRT,SART,ART,CGLS,FP,BP]
             description:
@@ -21,7 +21,7 @@ class AstraReconCpuTools(PluginTools):
                 BP: Back Projection
             default: FBP
         projector:
-            visibility: param
+            visibility: advanced
             dtype: str
             options: [line, strip, linear]
             description:
