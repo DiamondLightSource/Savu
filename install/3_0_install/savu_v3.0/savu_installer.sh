@@ -91,11 +91,11 @@ fi
 arg_parse "-r" recipes "$@"
 
 # Specify whether this is running on CI
-arg_parse "--ci" running_on_ci "$@"
-if [ ! $running_on_ci ]; then
-  running_on_ci=false
+arg_parse "--local" local_installation "$@"
+if [ ! $local_installation ]; then
+  local_installation=false
 else
-  running_on_ci=true
+  local_installation=true
 fi
 #=========================library checking==============================
 
@@ -113,7 +113,7 @@ else
   echo -e "\n============================================================="
 fi
 
-if [ $running_on_ci = false ]; then
+if [ $local_installation = false ]; then
   # set compiler wrapper
   MPICC=$(command -v mpicc)
   MPI_HOME=${MPICC%/mpicc}
@@ -268,7 +268,7 @@ if [ ! $test_flag ]; then
     cp $savu_path/system_files/$facility/mpi/savu_mpijob.sh $launcher_path
   fi
 
-  if [ $running_on_ci = false ]; then
+  if [ $local_installation = false ]; then
     echo "Installing mpi4py..."
     pip uninstall -y -q mpi4py || true
     string=$(awk '/^mpi4py/' $versions_file)

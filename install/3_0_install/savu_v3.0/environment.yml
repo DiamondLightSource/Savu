@@ -6,14 +6,14 @@ channels:
 - ccpi
 - dkazanc
 dependencies:
-- cython
-- scipy
-- numpy
-- pandas
-- PyWavelets
+#- cython
+#- scipy
+#- numpy
+#- pandas
+#- PyWavelets
 #- scikit-image # doesn't like something
-- scikit-learn
-- tomobar
+#- scikit-learn
+#- tomobar
 - ccpi-regulariser
 - ccpi-reconstruction
 - astra-toolbox
