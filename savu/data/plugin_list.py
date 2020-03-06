@@ -362,7 +362,7 @@ class PluginList(object):
             raise Exception("The last item in the process list must be a "
                             "saver plugin.")
 
-    def _add_missing_savers(self, data_names):
+
     def _add_missing_savers(self, exp):
         """ Add savers for missing datasets. """
         data_names = exp.index['in_data'].keys()
