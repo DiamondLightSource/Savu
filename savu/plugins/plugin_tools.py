@@ -15,8 +15,8 @@ class PluginCitations(object):
         self.set_cite()
 
     def set_cite(self):
-        self.cite.set('bibtex', self.get_bibtex.__doc__)
-        self.cite.set('endnote', self.get_endnote.__doc__)
+        citation = {'bibtex': self.get_bibtex.__doc__,  'endnote': self.get_endnote.__doc__}
+        self.cite.set(self.__class__.__name__, citation)
 
     def get_bibtex(self):
         pass
@@ -87,9 +87,12 @@ class PluginTools(PluginCitations, PluginParameters, PluginDocumentation):
         self.plugin_tools = plugin_tools
         super(PluginTools, self).__init__()
 
-        self.plugin_tools.append('doc', self.doc.get_dictionary())
+        if self.__class__.__name__ == 'BaseTools':
+            self.plugin_tools.set('param', OrderedDict())
+            self.plugin_tools.set('cite', OrderedDict())
+            self.plugin_tools.set('doc', MetaData())
+
+        self.plugin_tools.set('doc', self.doc.get_dictionary())
         self.plugin_tools.append('param', self.param.get_dictionary())
         self.plugin_tools.append('cite', self.cite.get_dictionary())
-
-
 

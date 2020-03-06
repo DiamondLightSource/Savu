@@ -172,6 +172,14 @@ def _ref(content, args):
 
 @parse_args
 @error_catcher
+def _cite(content, args):
+    """ Display citations for a plugin. """
+    content.cite(content.find_position(args.pos))
+    return content
+
+
+@parse_args
+@error_catcher
 def _rem(content, args):
     """ Remove plugin(s) from the list. """
     content.remove(content.find_position(args.pos))
@@ -231,6 +239,7 @@ commands = {'open': _open,
             'rem': _rem,
             'move': _move,
             'ref': _ref,
+            'cite': _cite,
             'coll': _coll,
             'clear': _clear,
             'exit': _exit,

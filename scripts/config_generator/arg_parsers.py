@@ -185,6 +185,13 @@ def _rem_arg_parser(args, desc):
     return __arg_parser(parser, args, 'rem')
 
 
+def _cite_arg_parser(args, desc):
+    """ Argument parser for cite command. """
+    parser = ArgumentParser(prog='cite', description=desc)
+    parser.add_argument('pos', help="Plugin position(s).")
+    return __arg_parser(parser, args, 'cite')
+
+
 def _move_arg_parser(args, desc):
     """ Argument parser for move command. """
     parser = ArgumentParser(prog='move', description=desc)
