@@ -471,7 +471,7 @@ class Content(object):
             raise Exception("Cannot find citations for this plugin %s as it does not exist."
                             % self.plugin_list.plugin_list[pos]['name'])
         p_cite = self.plugin_list.plugin_list[pos]['tools'].get('cite')
-
+        # To Do - Citation storage and display
         for k, v in p_cite.items():
             if v.get('bibtex'):
                 print(v['bibtex'])

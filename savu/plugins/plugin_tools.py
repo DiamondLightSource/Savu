@@ -87,6 +87,7 @@ class PluginTools(PluginCitations, PluginParameters, PluginDocumentation):
         self.plugin_tools = plugin_tools
         super(PluginTools, self).__init__()
 
+        # To do - reset the plugin tools when each new plugin loaded
         if self.__class__.__name__ == 'BaseTools':
             self.plugin_tools.set('param', OrderedDict())
             self.plugin_tools.set('cite', OrderedDict())

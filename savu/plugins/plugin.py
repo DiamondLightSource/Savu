@@ -148,7 +148,7 @@ class Plugin(PluginDatasets):
         verbose = p_tools.plugin_tools.get('doc').get('verbose')
 
         self.check_required_keys(all_params)
-        # This key check will be moved to another section
+        # To do - this key check will be moved to another section
 
         self.set_docstring(verbose)
         self.tools_dict = p_tools.plugin_tools
