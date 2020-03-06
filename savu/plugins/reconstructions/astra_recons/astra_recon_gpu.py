@@ -48,15 +48,13 @@ class AstraReconGpu(BaseAstraRecon, GpuPlugin):
         cfg['option']['GPUindex'] = self.parameters['GPU_index']
         return cfg
 
-    def dynamic_data_info(self):
+    def nOutput_datasets(self):
         alg = self.parameters['algorithm']
         if self.parameters['res_norm'] is True and 'FBP' not in alg:
             self.res = True
-            self.nOut += 1
-            if not self.parameters['out_datasets']:
-                self.parameters['out_datasets'] = ['in_dataset[0]', 'res_norm']
-            else:
-                self.parameters['out_datasets'].append('res_norm')
+            self.parameters['out_datasets'].append('res_norm')
+            return 2
+        return 1
 
     def astra_setup(self):
         options_list = ["FBP_CUDA", "SIRT_CUDA", "SART_CUDA", "CGLS_CUDA",

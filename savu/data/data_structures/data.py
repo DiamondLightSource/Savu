@@ -37,6 +37,7 @@ class Data(DataCreate):
     def __init__(self, name, exp):
         super(Data, self).__init__(name)
         self.meta_data = MetaData()
+        self.related = {}
         self.pattern_list = self.__get_available_pattern_list()
         self.data_info = MetaData()
         self.__initialise_data_info(name)
@@ -212,7 +213,7 @@ class Data(DataCreate):
                             dtype, str(self.pattern_list))
 
     def add_volume_patterns(self, x, y, z):
-        """ Adds 3D volume patterns
+        """ Adds volume patterns
 
         :params int x: dimension to be associated with x-axis
         :params int y: dimension to be associated with y-axis
@@ -222,8 +223,9 @@ class Data(DataCreate):
         self.add_pattern("VOLUME_XZ", **self.__get_dirs_for_volume(x, z, y))
         self.add_pattern("VOLUME_XY", **self.__get_dirs_for_volume(x, y, z))
 
+
     def __get_dirs_for_volume(self, dim1, dim2, sdir):
-        """ Calculate core_dir and slice_dir for a 3D volume pattern.
+        """ Calculate core_dir and slice_dir for a volume pattern.
         """
         all_dims = range(len(self.get_shape()))
         vol_dict = {}

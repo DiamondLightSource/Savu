@@ -52,19 +52,6 @@ class BaseRecon(Plugin):
         self.cor_as_dataset = False
         self.tools = BaseReconTools()
 
-    def base_dynamic_data_info(self):
-        if 'init_vol' in self.parameters.keys() and \
-                                             self.parameters['init_vol']:
-            if len(self.parameters['init_vol'].split('.')) is 3:
-                name, temp, self.rep_dim = self.parameters['init_vol']
-                self.parameters['init_vol'] = name
-            self.nIn += 1
-            self.parameters['in_datasets'].append(self.parameters['init_vol'])
-        if isinstance(self.parameters['centre_of_rotation'], str):
-            self.parameters['in_datasets'].append(
-                    self.parameters['centre_of_rotation'])
-            self.nIn += 1
-
     def base_pre_process(self):
         in_data, out_data = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
@@ -438,7 +425,19 @@ class BaseRecon(Plugin):
         return dim_volX, dim_volY, dim_volZ
 
     def nInput_datasets(self):
-        return self.nIn
+        nIn = 1
+        if 'init_vol' in self.parameters.keys() and \
+                                             self.parameters['init_vol']:
+            if len(self.parameters['init_vol'].split('.')) == 3:
+                name, temp, self.rep_dim = self.parameters['init_vol']
+                self.parameters['init_vol'] = name
+            nIn += 1
+            self.parameters['in_datasets'].append(self.parameters['init_vol'])
+        if isinstance(self.parameters['centre_of_rotation'], str):
+            self.parameters['in_datasets'].append(
+                    self.parameters['centre_of_rotation'])
+            nIn += 1
+        return nIn
 
     def nOutput_datasets(self):
         return self.nOut

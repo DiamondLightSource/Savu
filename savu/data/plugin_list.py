@@ -137,19 +137,17 @@ class PluginList(object):
         return parameter_valid
 
     def _save_plugin_list(self, out_filename):
-        with h5py.File(out_filename, 'w') as nxs_file:
-            entry_group = nxs_file.require_group('entry')
-            
-            citations_group = entry_group.create_group('framework_citations')
-            citations_group.attrs[NX_CLASS] = 'NXcollection'
-            self._save_framework_citations(citations_group)
-            
-            savu_notes_group = entry_group.create_group('savu_notes')
-            savu_notes_group.attrs[NX_CLASS] = 'NXnote'
-            self.__save_savu_notes(savu_notes_group)
-            
-            plugins_group = entry_group.create_group('plugin')
-            plugins_group.attrs[NX_CLASS] = 'NXprocess'
+        with h5py.File(out_filename) as nxs_file:
+
+            entry = nxs_file.require_group('entry')
+
+            self._save_framework_citations(self._overwrite_group(
+                    entry, 'framework_citations', 'NXcollection'))
+
+            self.__save_savu_notes(self._overwrite_group(
+                    entry, 'savu_notes', 'NXnote'))
+
+            plugins_group = self._overwrite_group(entry, 'plugin', 'NXprocess')
 
             count = 1
             for plugin in self.plugin_list:
@@ -158,6 +156,13 @@ class PluginList(object):
         if self._template and self._template.creating:
             fname = os.path.splitext(out_filename)[0] + '.savu'
             self._template._output_template(fname, out_filename)
+
+    def _overwrite_group(self, entry, name, nxclass):
+        if name in entry:
+            entry.pop(name)
+        group = entry.create_group(name)
+        group.attrs[NX_CLASS] = nxclass
+        return group
 
     def __save_savu_notes(self, notes):
         from savu.version import __version__
@@ -238,7 +243,7 @@ class PluginList(object):
         framework_cites = fc.get_framework_citations()
         count = 0
         for cite in framework_cites:
-            citation_group = group.create_group(cite['name'])
+            citation_group = group.require_group(cite['name'])
             citation = CitationInformation()
             del cite['name']
             for key, value in cite.iteritems():
@@ -317,7 +322,8 @@ class PluginList(object):
         self.n_plugins = len(self.plugin_list)
 
         for i in range(self.n_plugins):
-            bases = inspect.getmro(pu.load_class(self.plugin_list[i]['id']))
+            pid = self.plugin_list[i]['id']
+            bases = inspect.getmro(pu.load_class(pid))
             loader_list = [b for b in bases if b == BaseLoader]
             saver_list = [b for b in bases if b == BaseSaver]
             if loader_list:
@@ -357,7 +363,9 @@ class PluginList(object):
                             "saver plugin.")
 
     def _add_missing_savers(self, data_names):
+    def _add_missing_savers(self, exp):
         """ Add savers for missing datasets. """
+        data_names = exp.index['in_data'].keys()
         saved_data = []
         for i in self._get_savers_index():
             saved_data.append(self.plugin_list[i]['data']['in_datasets'])
@@ -367,7 +375,8 @@ class PluginList(object):
             process = {}
             pos = int(re.search(r'\d+', self.plugin_list[-1]['pos']).group())+1
             self.saver_idx.append(pos)
-            plugin = pu.get_plugin('savu.plugins.savers.hdf5_saver')
+            plugin = pu.get_plugin('savu.plugins.savers.hdf5_saver',
+                                   {'in_datasets': [name]}, exp)
             plugin.parameters['in_datasets'] = [name]
             process['name'] = plugin.name
             process['id'] = plugin.__module__

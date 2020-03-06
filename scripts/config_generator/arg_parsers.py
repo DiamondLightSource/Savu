@@ -64,6 +64,8 @@ def _config_arg_parser():
     parser.add_argument("-i", "--input", dest="file", help=input_str)
     parser.add_argument("-e", "--error", dest="error", help=argparse.SUPPRESS,
                         action='store_true', default=False)
+    parser.add_argument("--examples", dest="examples", action='store_true',
+                        help="Add example plugins", default=False)
     return parser.parse_args()
 
 

@@ -37,16 +37,10 @@ import savu.data.data_structures.utils as du
 if os.name == 'nt':
     import win_readline as readline
 else:
-    import gnureadline as readline
+    import readline
 
 histfile = os.path.join(os.path.expanduser("~"), ".savuhist")
-try:
-    readline.read_history_file(histfile)
-    readline.set_history_length(1000)
-except IOError:
-    pass
-atexit.register(readline.write_history_file, histfile)
-
+histlen = 1000
 logging.basicConfig(level='CRITICAL')
 error_level = 0
 
@@ -60,6 +54,19 @@ def _redirect_stdout():
     sys.stdout = DummyFile()
     return save_stdout
 
+def load_history_file(hfile):
+    try:
+        readline.read_history_file(hfile)
+        readline.set_history_length(histlen)
+    except IOError:
+        pass
+    atexit.register(write_history_to_file)
+
+def write_history_to_file():
+    try:
+        readline.write_history_file(histfile)
+    except IOError:
+        pass
 
 def _set_readline(completer):
     # we want to treat '/' as part of a word, so override the delimiters
@@ -133,13 +140,11 @@ def _add_module(failed_imports, loader, module_name, error_mode):
                 pass
 
 
-def populate_plugins(dawn=False, error_mode=False):
+def populate_plugins(dawn=False, error_mode=False, examples=False):
     # load all the plugins
-    plugins_path = pu.get_plugins_paths()
-    savu_path = plugins_path[-1].split('savu')[0]
+    plugins_path = pu.get_plugins_paths(examples=examples)
     savu_plugins = plugins_path[-1:]
-    local_plugins = plugins_path[0:-1] + [savu_path +
-                                'plugin_examples/plugin_templates']
+    local_plugins = plugins_path[0:-1]
 
     failed_imports = {}
     # load local plugins

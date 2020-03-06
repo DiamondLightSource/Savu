@@ -49,9 +49,18 @@ class Plugin(PluginDatasets):
         self.global_index = None
         self.pcount = 0
         self.exp = None
+        self.check = False
         self.tools_dict = OrderedDict()
         self.p_dict = OrderedDict()
         self.tools = BaseTools()
+
+    def initialise(self, params, exp, check=False):
+        self.check=check
+        self.exp = exp
+        self._populate_default_parameters()
+        self._set_parameters(copy.deepcopy(params))
+        self._main_setup()
+
 
     def _main_setup(self, exp, params):
         """ Performs all the required plugin setup.
@@ -59,17 +68,17 @@ class Plugin(PluginDatasets):
         It sets the experiment, then the parameters and replaces the
         in/out_dataset strings in ``self.parameters`` with the relevant data
         objects. It then creates PluginData objects for each of these datasets.
-
-        :param Experiment exp: The current Experiment object.
-        :params dict params: Parameter values.
         """
+        # Don't do this step if loaders haven't been loaded yet
+        if self.exp and self.exp.index['in_data']:
+            self._set_plugin_datasets()
         self._reset_process_frames_counter()
-        self._set_parameters(params)
-        self._set_plugin_datasets()
         self.setup()
-        self.set_filter_padding(*(self.get_plugin_datasets()))
-        self._finalise_datasets()
-        self._finalise_plugin_datasets()
+
+        if not self.check: # reduce the processing if just checking
+            self.set_filter_padding(*(self.get_plugin_datasets()))
+            self._finalise_datasets()
+            self._finalise_plugin_datasets()
 
     def _reset_process_frames_counter(self):
         self.pcount = 0
@@ -457,10 +466,3 @@ class Plugin(PluginDatasets):
         :returns:  A list of string summaries
         """
         return ["Nothing to Report"]
-        """
-            The base class from which all plugins should inherit.
-        :param in_datasets: Create a list of the dataset(s) to \
-            process. Default: [].
-        :param out_datasets: Create a list of the dataset(s) to \
-            create. Default: [].
-        """

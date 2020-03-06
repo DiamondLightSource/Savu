@@ -40,8 +40,7 @@ class BaseSaver(Plugin):
 
     def _get_group_name(self, name):
         nPlugin = self.exp.meta_data.get('nPlugin')
-        plugin_dict = \
-            self.exp._get_experiment_collection()['plugin_dict'][nPlugin]
+        plugin_dict = self.exp._get_collection()['plugin_dict'][nPlugin]
         return "%i-%s-%s" % (nPlugin, plugin_dict['name'], name)
 
     def get_pattern(self):
