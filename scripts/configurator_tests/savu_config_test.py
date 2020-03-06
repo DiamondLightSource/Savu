@@ -16,7 +16,7 @@ from scripts.config_generator import savu_config
 class Test(unittest.TestCase):
 
     def savu_config_runner(self, input_list, output_checks):
-        with patch('__builtin__.raw_input', side_effect=input_list):
+        with patch('builtins.input', side_effect=input_list):
 
             saved_stdout = sys.stdout
             try:

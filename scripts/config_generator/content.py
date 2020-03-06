@@ -390,5 +390,6 @@ class Content(object):
         pos_list = self.get_split_positions()
         self.inc_positions(pos, pos_list, pos_str, -1)
 
+    @property
     def size(self):
         return len(self.plugin_list.plugin_list)
