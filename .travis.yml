@@ -33,8 +33,8 @@ script:
   - pytest scripts/configurator_tests/ -v
   - pytest savu/test/travis -v --cov savu --cov-report term-missing
 
-after_script:
-  - coveralls
+#after_script:
+#  - coveralls
   
 #allow_failures:
 #    - python: "3.5"
