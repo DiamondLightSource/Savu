@@ -29,10 +29,12 @@ import h5py
 import logging
 import inspect
 import numpy as np
-import savu.plugins.docstring_parser as doc
-from savu.plugins.plugin_datasets import PluginDatasets
 from collections import OrderedDict
+
+from savu.data.meta_data import MetaData
+import savu.plugins.docstring_parser as doc
 from savu.plugins.base_tools import BaseTools
+from savu.plugins.plugin_datasets import PluginDatasets
 
 class Plugin(PluginDatasets):
     """
@@ -47,9 +49,9 @@ class Plugin(PluginDatasets):
         self.global_index = None
         self.pcount = 0
         self.exp = None
-        self.plugin_tools = OrderedDict()
+        self.tools_dict = OrderedDict()
+        self.p_dict = OrderedDict()
         self.tools = BaseTools()
-        #self.parameters = self.plugin_tools['parameters']
 
     def _main_setup(self, exp, params):
         """ Performs all the required plugin setup.
@@ -129,38 +131,43 @@ class Plugin(PluginDatasets):
         appropriate
 
         """
-        # Test Plugins are: 'RemoveAllRings' 'TomobarRecon'
+        # Test Plugins are: 'RemoveAllRings' 'TomobarRecon' 'Hdf5saver'
         # 'NxtomoLoader' 'DarkFlatFieldCorrection' 'NoProcess' 'Astra' 'Vocentering'
 
-        all_params = self.__class__.load_param_tools(self).plugin_tools.get('param')
-        verbose = self.__class__.load_param_tools(self).plugin_tools.get('doc').get('verbose')
+        p_tools = self.load_param_tools()
+        all_params = p_tools.plugin_tools.get('param')
+        verbose = p_tools.plugin_tools.get('doc').get('verbose')
 
-        desc = doc.find_args(self.__class__, self)
-        self.docstring_info['warn'] = desc['warn']
-        self.docstring_info['synopsis'] = desc['synopsis']
-        self.docstring_info['info'] = verbose
+        self.check_required_keys(all_params)
+        # This key check will be moved to another section
 
-        for p_key, p in all_params.items():
-            self.check_required_keys(p, p_key)
-            visibility = p.get('visibility') or {}
-            if visibility != 'not_param':
-                self.plugin_tools[p_key] = p
-                self.parameters[p_key] = p.get('default')
+        self.set_docstring(verbose)
+        self.tools_dict = p_tools.plugin_tools
+        self.p_dict = all_params
+        self.parameters = OrderedDict([(k, v['default']) for k, v in all_params.items()])
 
-        # Reset the parameter dictionary
-        self.__class__.load_param_tools(self).plugin_tools.set('param', OrderedDict())
 
     def _add_item(self, item_list, not_list):
         true_list = [i for i in item_list if i['name'] not in not_list]
         for item in true_list:
             self.parameters[item['name']] = item['default']
 
-    def check_required_keys(self, p, p_key):
+    def check_required_keys(self, all_params):
         required_keys = ['dtype', 'description', 'visibility', 'default']
-        all_keys = p.keys()
-        if not all(d in all_keys for d in required_keys):
-            print('The missing required keys for ' + str(p_key) + ' are: ')
-            print(', '.join(set(required_keys) - set(all_keys)))
+        for p_key, p in all_params.items():
+            all_keys = p.keys()
+            if p.get('visibility') == 'hidden':
+                required_keys = ['default']
+
+            if not all(d in all_keys for d in required_keys):
+                print('The missing required keys for ' + str(p_key) + ' are: ')
+                print(', '.join(set(required_keys) - set(all_keys)))
+
+    def set_docstring(self, verbose):
+        desc = doc.find_args(self)
+        self.docstring_info['warn'] = desc['warn']
+        self.docstring_info['synopsis'] = desc['synopsis']
+        self.docstring_info['info'] = verbose
 
     def delete_parameter_entry(self, param):
         if param in self.parameters.keys():

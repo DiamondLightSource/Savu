@@ -21,9 +21,8 @@
 
 """
 import os
-import textwrap
 import copy
-
+import textwrap
 from colorama import Fore, Back, Style
 
 WIDTH = 85
@@ -55,10 +54,12 @@ class DisplayFormatter(object):
             count += 1
             if subelem is not None:
                 if subelem.isdigit():
+                    # Manually set user level to all. This level is only returning the current command level.
+                    # Check what the previous user command level was
+                    level = 'all'
                     sub_dict = self._select_param(p_dict, subelem, level)
                     p_dict = sub_dict
                     verbosity = '-vv'
-                    level = 'all'
                 else:
                     print('The sub element value was not an integer.')
             if p_dict is not None:
@@ -80,20 +81,19 @@ class DisplayFormatter(object):
 
         # Select the correct order of parameters according to that on display
         # to the user. This ensures the correct parameter is modified.
-        dev_keys = [k for k, v in param_dict['tools'].items()
-                    if v['visibility'] not in ['user', 'hide']]
-        user_keys = [k for k, v in param_dict['tools'].items()
-                     if v['visibility'] == 'user']
-        keys = user_keys + dev_keys
-
+        dev_keys = [k for k, v in param_dict['param'].items()
+                    if v['visibility'] in ['advanced', 'basic']]
+        user_keys = [k for k, v in param_dict['param'].items()
+                     if v['visibility'] == 'basic']
+        keys = user_keys if level == 'user' else dev_keys
         try:
             for key in keys:
                 keycount += 1
                 if int(subelem) == int(keycount):
                     element_present = True
-                    for i in list(param_dict['tools']):
+                    for i in list(param_dict['param']):
                         if i != key:
-                            param_dict['tools'][i]['visibility'] = 'hide'
+                            param_dict['param'][i]['visibility'] = 'hidden'
 
             if element_present is False:
                 print('No matching sub element number found.')
@@ -163,14 +163,12 @@ class DisplayFormatter(object):
         joiner = "\n" + " "*margin
         params = ''
 
-        dev_keys = [k for k, v in p_dict['tools'].items()
-                    if v['visibility'] not in ['user', 'hide']]
-        user_keys = [k for k, v in p_dict['tools'].items()
-                     if v['visibility'] == 'user']
-
+        dev_keys = [k for k, v in p_dict['param'].items()
+                    if v['visibility'] in ['advanced', 'basic']]
+        user_keys = [k for k, v in p_dict['param'].items()
+                     if v['visibility'] == 'basic']
         try:
-            keys = user_keys if level == 'user' else user_keys + dev_keys
-
+            keys = user_keys if level == 'user' else dev_keys
             for key in keys:
                 keycount += 1
                 temp = "\n   %2i)   %20s : %s"
@@ -207,7 +205,7 @@ class DisplayFormatter(object):
                     params = self._get_verbose_param_details(p_dict, param_key,
                                                              desc, key, params, width)
 
-        options = p_dict['tools'][key].get('options')
+        options = p_dict['param'][key].get('options')
         if options:
             option_text = Fore.BLUE + 'Options:'
             option_text = joiner.join(textwrap.wrap(option_text,
@@ -294,7 +292,7 @@ class DispDisplay(DisplayFormatter):
         colour_off = Back.RESET + Fore.RESET
         synopsis = \
             self._get_synopsis(p_dict, width, colour_on, colour_off)
-        param_desc = {k: v['description'] for k, v in p_dict['tools'].items()}
+        param_desc = {k: v['description'] for k, v in p_dict['param'].items()}
         params = \
             self._get_param_details(level, p_dict, width, desc=param_desc)
         if breakdown:

@@ -24,12 +24,12 @@
 import re
 import os
 import inspect
+import mutations
+from colorama import Fore
+from collections import OrderedDict
 
 from savu.plugins import utils as pu
 from savu.data.plugin_list import PluginList
-from collections import OrderedDict
-from colorama import Fore
-import mutations
 
 
 class Content(object):
@@ -239,16 +239,15 @@ class Content(object):
                 value = self.value(value)
             pos = self.find_position(pos_str)
             data_elements = self.plugin_list.plugin_list[pos]['data']
-            tools = self.plugin_list.plugin_list[pos]['tools']
+            param = self.plugin_list.plugin_list[pos]['param']
 
             # Select the correct order of parameters according to that on
             # display to the user. This ensures correct parameter is modified.
-            dev_keys = [k for k, v in tools.items()
-                        if v['visibility'] not in ['user', 'hide']]
-            user_keys = [k for k, v in tools.items()
-                         if v['visibility'] == 'user']
-            current_params = user_keys + dev_keys
-
+            dev_keys = [k for k, v in param.items()
+                        if v['visibility'] in ['basic', 'advanced']]
+            user_keys = [k for k, v in param.items()
+                         if v['visibility'] == 'basic']
+            current_params = user_keys if self.disp_level == 'user' else dev_keys
             # Filter the parameter names to find those not hidden
             if param_name.isdigit():
                 param_name = current_params[int(param_name)-1]
@@ -273,7 +272,7 @@ class Content(object):
         dependent parameters
         '''
         data_elements = self.plugin_list.plugin_list[pos]['data']
-        p_list = self.plugin_list.plugin_list[pos]['tools']
+        p_list = self.plugin_list.plugin_list[pos]['param']
         def_list = {k: v['default'] for k, v in p_list.items()
                     if isinstance(v['default'], OrderedDict)}
         for p_name, default in def_list.items():
@@ -302,7 +301,7 @@ class Content(object):
         value and whether they should be hidden or shown
         """
         data_elements = self.plugin_list.plugin_list[pos]['data']
-        p_list = self.plugin_list.plugin_list[pos]['tools']
+        p_list = self.plugin_list.plugin_list[pos]['param']
         dep_list = {k: v['dependency']
                     for k, v in p_list.items() if 'dependency' in v}
         for p_name, dependency in dep_list.items():
@@ -316,11 +315,11 @@ class Content(object):
                     parent_value = \
                         self._apply_lower_case(data_elements[parent_param_name])
                     if parent_value in parent_choice_list:
-                        if p_list[p_name].get('visibility') == 'hide':
-                            p_list[p_name]['visibility'] = 'param'
+                        if p_list[p_name].get('visibility') == 'hidden':
+                            p_list[p_name]['visibility'] = 'basic'
                     else:
-                        if p_list[p_name].get('visibility') != 'hide':
-                                p_list[p_name]['visibility'] = 'hide'
+                        if p_list[p_name].get('visibility') != 'hidden':
+                                p_list[p_name]['visibility'] = 'hidden'
 
     def _apply_lower_case(self, item):
         return item.lower() if isinstance(item, str) else item
@@ -459,12 +458,23 @@ class Content(object):
         plugin_dict['id'] = plugin.__module__
         plugin_dict['data'] = plugin.parameters
         plugin_dict['active'] = True
-        plugin_dict['tools'] = plugin.plugin_tools
+        plugin_dict['tools'] = plugin.tools_dict
+        plugin_dict['param'] = plugin.p_dict
         plugin_dict['doc'] = plugin.docstring_info
         return plugin_dict
 
     def get(self, pos):
         return self.plugin_list.plugin_list[pos]
+
+    def cite(self, pos):
+        if pos >= self.size:
+            raise Exception("Cannot find citations for this plugin %s as it does not exist."
+                            % self.plugin_list.plugin_list[pos]['name'])
+        p_cite = self.plugin_list.plugin_list[pos]['tools'].get('cite')
+
+        for k, v in p_cite.items():
+            if v.get('bibtex'):
+                print(v['bibtex'])
 
     def remove(self, pos):
         if pos >= self.size:

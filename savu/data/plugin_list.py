@@ -33,13 +33,13 @@ import inspect
 import logging
 
 import numpy as np
+from colorama import Fore
 from collections import defaultdict
 
-from colorama import Fore
 import savu.plugins.utils as pu
-import savu.plugins.parameter_utils as param_u
 from savu.data.meta_data import MetaData
 import savu.data.framework_citations as fc
+import savu.plugins.parameter_utils as param_u
 import savu.plugins.loaders.utils.yaml_utils as yu
 
 NX_CLASS = 'NX_class'
@@ -73,11 +73,12 @@ class PluginList(object):
                     'name': None,
                     'id': None,
                     'data': None,
-                    'tools': None}
+                    'tools': None,
+                    'param': None}
         return template
 
     def __get_json_keys(self):
-        return ['data', 'tools']
+        return ['data', 'tools', 'param']
 
     def _populate_plugin_list(self, filename, activePass=False,
                               template=False):
@@ -120,12 +121,13 @@ class PluginList(object):
 
     def _is_valid(self, value, subelem, pos):
         parameter_valid = False
-        if subelem in self.plugin_list[pos]['tools']:
+        params = self.plugin_list[pos]['param']
+        if subelem in params:
             # The parameter is within the current shown parameter list
-            ptools = self.plugin_list[pos]['tools'][subelem]
-            dtype = ptools['dtype']
+            p = params[subelem]
+            dtype = p['dtype']
 
-            parameter_valid = param_u.is_valid(dtype, ptools, value)
+            parameter_valid = param_u.is_valid(dtype, p, value)
             if parameter_valid is False:
                 print('\nYour input for the parameter \'%s\' must match the'
                       ' type %s' % (subelem, dtype))
@@ -372,7 +374,8 @@ class PluginList(object):
             process['pos'] = str(pos)
             process['data'] = plugin.parameters
             process['active'] = True
-            process['tools'] = plugin.param
+            process['tools'] = plugin.tools_dict
+            process['param'] = plugin.p_dict
             self._add(pos, process)
 
     def _get_dataset_flow(self):
