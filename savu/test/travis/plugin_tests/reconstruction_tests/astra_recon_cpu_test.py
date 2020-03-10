@@ -26,20 +26,44 @@
 import unittest
 import savu.test.test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
-    run_protected_plugin_runner_no_process_list
-
+    run_protected_plugin_runner_no_process_list    
+import savu.test.base_checkpoint_test
+import tempfile
+import os
 
 class AstraReconCPUTest(unittest.TestCase):
-
+        
     def test_astra_recon_cpu(self):
-        options = tu.set_experiment('tomo')
         plugin = 'savu.plugins.reconstructions.astra_recons.astra_recon_cpu'
-        run_protected_plugin_runner_no_process_list(options, plugin)
+        self.test_folder = tempfile.mkdtemp(suffix='my_test/')        
+        # set options 
+        options = tu.set_experiment('tomo')
+        options['out_path'] = os.path.join(self.test_folder)        
+        #run the test
+        run_protected_plugin_runner_no_process_list(options, plugin)     
+        # perform folder cleaning 
+        classb = savu.test.base_checkpoint_test.BaseCheckpointTest()        
+        cp_folder = os.path.join(self.test_folder, 'checkpoint')
+        classb._empty_folder(cp_folder)  
+        os.removedirs(cp_folder)
+        classb._empty_folder(self.test_folder)
+        os.removedirs(self.test_folder)
 
     def test_astra_recon_cpu_stxm(self):
-        options = tu.set_experiment('tomo')
         plugin = 'savu.plugins.reconstructions.astra_recons.astra_recon_cpu'
+        #create a temporal folder
+        self.test_folder = tempfile.mkdtemp(suffix='my_test/')        
+        options = tu.set_experiment('tomo')
+        options['out_path'] = os.path.join(self.test_folder)              
+        #run the test
         run_protected_plugin_runner_no_process_list(options, plugin)
+        # perform folder cleaning 
+        classb = savu.test.base_checkpoint_test.BaseCheckpointTest()        
+        cp_folder = os.path.join(self.test_folder, 'checkpoint')
+        classb._empty_folder(cp_folder)  
+        os.removedirs(cp_folder)
+        classb._empty_folder(self.test_folder)
+        os.removedirs(self.test_folder)
 
 if __name__ == "__main__":
     unittest.main()
