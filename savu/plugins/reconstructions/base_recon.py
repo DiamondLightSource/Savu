@@ -25,10 +25,8 @@ import numpy as np
 
 import savu.core.utils as cu
 from savu.plugins.plugin import Plugin
-from savu.plugins.reconstructions.base_recon_tools import BaseReconTools
 
 MAX_OUTER_PAD = 2.1
-
 
 class BaseRecon(Plugin):
     """
@@ -50,7 +48,6 @@ class BaseRecon(Plugin):
         self.cor_shift = 0
         self.init_vol = False
         self.cor_as_dataset = False
-        self.tools = BaseReconTools()
 
     def base_pre_process(self):
         in_data, out_data = self.get_datasets()

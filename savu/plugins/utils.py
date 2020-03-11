@@ -27,13 +27,13 @@ import sys
 import ast
 import logging
 import savu
-import copy
 import importlib
 import imp
 import inspect
 import itertools
 
 
+load_tools = {}
 plugins = {}
 plugins_path = {}
 dawn_plugins = {}
@@ -55,6 +55,12 @@ def register_test_plugin(clazz):
     plugins[clazz.__name__] = clazz
     if clazz.__module__.split('.')[0] != 'savu':
         plugins_path[clazz.__name__] = clazz.__module__
+    return clazz
+
+
+def register_plugin_tool(clazz):
+    """decorator to add plugin tools to a central register"""
+    load_tools[clazz.__module__] = clazz
     return clazz
 
 

@@ -22,7 +22,6 @@
 """
 
 from savu.plugins.plugin import Plugin
-from savu.plugins.savers.base_saver_tools import BaseSaverTools
 
 class BaseSaver(Plugin):
     """
@@ -31,7 +30,6 @@ class BaseSaver(Plugin):
     def __init__(self, name="BaseSaver"):
         super(BaseSaver, self).__init__(name)
         self.frame = None
-        self.tools = BaseSaverTools()
 
     def setup(self):
         in_pData = self.get_plugin_in_datasets()

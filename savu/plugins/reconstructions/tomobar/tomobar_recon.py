@@ -26,7 +26,6 @@ import numpy as np
 from scipy import ndimage
 from tomobar.methodsIR import RecToolsIR
 
-from savu.plugins.reconstructions.tomobar.tomobar_recon_tools import TomoBarReconTools
 from savu.plugins.reconstructions.base_recon import BaseRecon
 from savu.data.plugin_list import CitationInformation
 from savu.plugins.driver.gpu_plugin import GpuPlugin
@@ -42,9 +41,7 @@ class TomobarRecon(BaseRecon, GpuPlugin):
 
     def __init__(self):
         super(TomobarRecon, self).__init__("TomobarRecon")
-        self.tools = TomoBarReconTools()
 
-    # self.documentation = __doc__
     def _shift(self, sinogram, centre_of_rotation):
         centre_of_rotation_shift = (sinogram.shape[0]/2) - centre_of_rotation
         result = ndimage.interpolation.shift(sinogram,

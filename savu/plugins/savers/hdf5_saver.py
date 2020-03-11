@@ -45,7 +45,6 @@ class Hdf5Saver(BaseSaver, CpuPlugin):
         self.data_name = None
         self.filename = None
         self.group_name = None
-        self.tools = Hdf5SaverTools()
 
     def pre_process(self):
         # Create the hdf5 output file

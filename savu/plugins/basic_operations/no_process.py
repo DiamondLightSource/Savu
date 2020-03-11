@@ -34,7 +34,6 @@ class NoProcess(Plugin, CpuPlugin):
     """
     def __init__(self):
         super(NoProcess, self).__init__("NoProcess")
-        self.tools = NoProcessTools()
 
     def process_frames(self, data):
         return data[0]

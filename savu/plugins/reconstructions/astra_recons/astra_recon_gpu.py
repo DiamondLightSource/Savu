@@ -22,25 +22,22 @@
 import astra
 import numpy as np
 
-from savu.plugins.reconstructions.astra_recons.base_astra_recon \
-    import BaseAstraRecon
-from savu.plugins.driver.gpu_plugin import GpuPlugin
-from savu.data.plugin_list import CitationInformation
 from savu.plugins.utils import register_plugin
 from savu.plugins.utils import register_test_plugin
-from savu.plugins.reconstructions.astra_recons.astra_recon_gpu_tools import AstraReconGpuTools
+from savu.plugins.driver.gpu_plugin import GpuPlugin
+from savu.data.plugin_list import CitationInformation
+from savu.plugins.reconstructions.astra_recons.base_astra_recon \
+    import BaseAstraRecon
 
 @register_test_plugin
 class AstraReconGpu(BaseAstraRecon, GpuPlugin):
     """
     """
-
     def __init__(self):
         super(AstraReconGpu, self).__init__("AstraReconGpu")
         self.GPU_index = None
         self.res = False
         self.start = 0
-        self.tools = AstraReconGpuTools()
 
     def set_options(self, cfg):
         if 'option' not in cfg.keys():

@@ -24,7 +24,6 @@ import numpy as np
 
 from savu.plugins.reconstructions.base_recon import BaseRecon
 from savu.data.plugin_list import CitationInformation
-from savu.plugins.reconstructions.astra_recons.base_astra_tools import BaseAstraTools
 
 class BaseAstraRecon(BaseRecon):
     """
@@ -33,7 +32,6 @@ class BaseAstraRecon(BaseRecon):
     def __init__(self, name='BaseAstraRecon'):
         super(BaseAstraRecon, self).__init__(name)
         self.res = False
-        self.tools = BaseAstraTools()
 
     def setup(self):
         self.alg = self.parameters['algorithm']

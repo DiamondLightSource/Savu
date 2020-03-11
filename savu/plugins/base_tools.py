@@ -1,6 +1,7 @@
-# replaces tomobar_recon_yaml.py
 from savu.plugins.plugin_tools import PluginTools
+from savu.plugins.utils import register_plugin_tool
 
+@register_plugin_tool
 class BaseTools(PluginTools):
     """The base class from which all plugins should inherit.
     """

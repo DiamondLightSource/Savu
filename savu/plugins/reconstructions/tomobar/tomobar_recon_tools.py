@@ -1,7 +1,8 @@
-# replaces tomobar_recon_yaml.py
 from savu.plugins.plugin_tools import PluginTools
+from savu.plugins.utils import register_plugin_tool
 
-class TomoBarReconTools(PluginTools):
+@register_plugin_tool
+class TomobarReconTools(PluginTools):
     """A plugin to reconstruct full-field tomographic projection data\
 using state-of-the-art regularised iterative algorithms from the\
 ToMoBAR package. ToMoBAR includes FISTA and ADMM iterative methods\

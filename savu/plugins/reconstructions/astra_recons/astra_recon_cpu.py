@@ -20,12 +20,11 @@
 
 """
 
-from savu.plugins.reconstructions.astra_recons.base_astra_recon \
-    import BaseAstraRecon
-from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 from savu.plugins.utils import register_test_plugin
-from savu.plugins.reconstructions.astra_recons.astra_recon_cpu_tools import AstraReconCpuTools
+from savu.plugins.driver.cpu_plugin import CpuPlugin
+from savu.plugins.reconstructions.astra_recons.base_astra_recon\
+    import BaseAstraRecon
 
 @register_test_plugin
 class AstraReconCpu(BaseAstraRecon, CpuPlugin):
@@ -34,7 +33,6 @@ class AstraReconCpu(BaseAstraRecon, CpuPlugin):
     """
     def __init__(self):
         super(AstraReconCpu, self).__init__("AstraReconCpu")
-        self.tools = AstraReconCpuTools()
 
     def astra_setup(self):
         options_list = ["FBP", "SIRT", "SART", "ART", "CGLS", "FP", "BP"]

@@ -41,7 +41,6 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
         self.flag_low_warning = False
         self.flag_high_warning = False
         self.flag = True
-        self.tools = DarkFlatFieldCorrectionTools()
 
     def pre_process(self):
         inData = self.get_in_datasets()[0]

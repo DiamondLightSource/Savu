@@ -1,6 +1,7 @@
-# replaces base_recon.yaml
 from savu.plugins.plugin_tools import PluginTools
+from savu.plugins.utils import register_plugin_tool
 
+@register_plugin_tool
 class BaseReconTools(PluginTools):
     """A base class for reconstruction plugins
     """
@@ -83,3 +84,17 @@ class BaseReconTools(PluginTools):
              default: fixed
 
         """
+
+    def get_bibtex(self):
+        """@article{baserecon2009fast,
+         title={A fast iterative shrinkage-thresholding algorithm for linear inverse problems},
+         author={Beck, Amir and Teboulle, Marc},
+         journal={SIAM journal on imaging sciences},
+         volume={2},
+         number={1},
+         pages={183--202},
+         year={2009},
+         publisher={SIAM}
+        }
+        """
+

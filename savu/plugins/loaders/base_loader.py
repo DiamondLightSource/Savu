@@ -33,7 +33,6 @@ class BaseLoader(Plugin):
         self.hits = []
         self.application = None
         self.reduction_flag = False
-        self.tools = BaseLoaderTools()
 
     def _main_setup(self):
         """
