@@ -46,9 +46,8 @@ def __arg_parser(parser, args, command):
     try:
         args = parser.parse_args(args=args)
     except MyException as e:
-        if e.message:
-            print((e.message))
-            print(("Please type '%s -h' for help." % command))
+        print(e)
+        print(f"Please type '{command} -h' for help.")
         args = e.args
     return args
 
@@ -62,7 +61,7 @@ def _config_arg_parser():
                         help=disp_str, default=False)
     input_str = "Open a Savu process list."
     parser.add_argument("-i", "--input", dest="file", help=input_str)
-    parser.add_argument("-e", "--error", dest="error", help=argparse.SUPPRESS,
+    parser.add_argument("-e", "--error", dest="error", help="Shows all errors that Savu encounters.",
                         action='store_true', default=False)
     parser.add_argument("--examples", dest="examples", action='store_true',
                         help="Add example plugins", default=False)
@@ -142,7 +141,7 @@ def _mod_arg_parser(args, desc):
     param_str = ("The plugin parameter to modify. Either "
                  "'plugin_pos.param_name' or ' plugin_pos.param_no'")
     parser.add_argument("param", help=param_str)
-    val_str = ("The plugin parameter value.")
+    val_str = "The plugin parameter value."
     parser.add_argument("value", nargs='+', help=val_str)
     return __arg_parser(parser, args, 'mod')
 

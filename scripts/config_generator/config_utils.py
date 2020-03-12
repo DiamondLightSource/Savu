@@ -33,7 +33,6 @@ from . import arg_parsers as parsers
 import savu.plugins.utils as pu
 import savu.data.data_structures.utils as du
 
-
 if os.name == 'nt':
     from . import win_readline as readline
 else:
@@ -84,6 +83,7 @@ def parse_args(function):
         if not args:
             return content
         return function(content, args)
+
     return _parse_args_wrap_function
 
 
@@ -93,17 +93,18 @@ def error_catcher(function):
         try:
             return function(content, args)
         except Exception as e:
-            savu_error = True if len(e.message.split()) > 1 and \
-                e.message.split()[1] == 'ERROR:' else False
+            err_msg_list = str(e).split()
+            savu_error = True if len(err_msg_list) > 1 and err_msg_list[1] == 'ERROR:' else False
 
             if error_level is 0 and savu_error:
-                print(e.message)
+                print(e)
             elif error_level is 0:
-                print("%s: %s" % (type(e).__name__, e.message))
+                print(f"{type(e).__name__}: {e}")
             elif error_level is 1:
                 traceback.print_exc(file=sys.stdout)
 
             return content
+
     return error_catcher_wrap_function
 
 

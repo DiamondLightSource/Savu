@@ -40,7 +40,6 @@ from savu.data.meta_data import MetaData
 import savu.data.framework_citations as fc
 import savu.plugins.loaders.utils.yaml_utils as yu
 
-
 NX_CLASS = 'NX_class'
 
 
@@ -92,23 +91,25 @@ class PluginList(object):
         self.plugin_list = []
         single_val = ['name', 'id', 'pos', 'active']
         exclude = ['citation']
-        for key in list(plugin_group.keys()):
+        for group in plugin_group.keys():
             plugin = self._get_plugin_entry_template()
-            entry_keys = list(plugin_group[key].keys())
-            json_keys = [k for k in entry_keys for e in exclude if k not in
-                         single_val and e not in k]
+            entry_keys = plugin_group[group].keys()
+            parameters = [k for k in entry_keys for e in exclude if k not in
+                          single_val and e not in k]
 
             if 'active' in entry_keys:
-                plugin['active'] = plugin_group[key]['active'][0]
+                plugin['active'] = plugin_group[group]['active'][0]
 
             if plugin['active'] or activePass:
-                plugin['name'] = plugin_group[key]['name'][0]
-                plugin['id'] = plugin_group[key]['id'][0]
-                plugin['pos'] = key.encode('ascii').strip()
+                plugin['name'] = plugin_group[group]['name'][0].decode("utf-8")
+                plugin['id'] = plugin_group[group]['id'][0].decode("utf-8")
+                plugin['pos'] = group.strip()
 
-                for jkey in json_keys:
-                    plugin[jkey] = \
-                        self._byteify(json.loads(plugin_group[key][jkey][0]))
+                for param in parameters:
+                    try:
+                        plugin[param] = json.loads(plugin_group[group][param][0])
+                    except ValueError as e:
+                        raise ValueError(f"Error: {e}\n Could not parse key '{param}' from group '{group}' as JSON")
                 self.plugin_list.append(plugin)
 
         if template:
@@ -141,13 +142,13 @@ class PluginList(object):
     def _overwrite_group(self, entry, name, nxclass):
         if name in entry:
             entry.pop(name)
-        group = entry.create_group(name)
-        group.attrs[NX_CLASS] = nxclass
+        group = entry.create_group(name.encode("ascii"))
+        group.attrs[NX_CLASS] = nxclass.encode("ascii")
         return group
 
     def __save_savu_notes(self, notes):
         from savu.version import __version__
-        notes['version'] = __version__
+        notes['version'] = __version__.encode('ascii')
 
     def __populate_plugins_group(self, plugins_group, plugin, count):
         if 'pos' in list(plugin.keys()):
@@ -160,19 +161,27 @@ class PluginList(object):
             plugin_group = plugins_group.create_group("%*i" % (4, count))
 
         plugin_group.attrs[NX_CLASS] = 'NXnote'
-        required_keys = list(self._get_plugin_entry_template().keys())
+        required_keys = self._get_plugin_entry_template().keys()
         json_keys = self.__get_json_keys()
 
-        if 'cite' in list(plugin.keys()):
+        if 'cite' in plugin.keys():
             if plugin['cite'] is not None:
                 self._output_plugin_citations(plugin['cite'], plugin_group)
 
         for key in required_keys:
             # only need to apply dumps if saving in configurator
             data = self.__dumps(plugin[key]) if key == 'data' else plugin[key]
-            array = np.array([json.dumps(data)]) if key in json_keys else\
-                np.array([plugin[key]])
-            plugin_group.create_dataset(key, array.shape, array.dtype, array)
+
+            # get the string value
+            data = json.dumps(data) if key in json_keys else plugin[key]
+
+            if isinstance(data, str):
+                data = data.encode("ascii")
+
+            data = np.array(data)
+            # array = np.array([json.dumps(data)]) if key in json_keys else \
+            #     np.array([plugin[key]])
+            plugin_group.create_dataset(key.encode('ascii'), data.shape, data.dtype, data)
 
     def __dumps(self, data_dict):
         """ Replace any missing quotes around variables
@@ -222,15 +231,15 @@ class PluginList(object):
 
     def _save_framework_citations(self, group):
         framework_cites = fc.get_framework_citations()
-        count = 0
         for cite in framework_cites:
             citation_group = group.require_group(cite['name'])
             citation = CitationInformation()
-            del cite['name']
-            for key, value in cite.items():
-                exec('citation.' + key + '= value')
+            citation.name = cite["name"]
+            citation.description = cite["description"]
+            citation.bibtex = cite["bibtex"]
+            citation.endnote = cite["endnote"]
+
             citation.write(citation_group)
-            count += 1
 
     def _get_docstring_info(self, plugin):
         plugin_inst = pu.plugins[plugin]()
@@ -323,7 +332,7 @@ class PluginList(object):
         loaders = self._get_loaders_index()
 
         if loaders:
-            if loaders[0] is not 0 or loaders[-1]+1 is not len(loaders):
+            if loaders[0] is not 0 or loaders[-1] + 1 is not len(loaders):
                 raise Exception("All loader plugins must be at the beginning "
                                 "of the plugin list")
         else:
@@ -340,7 +349,7 @@ class PluginList(object):
 
         for name in [data for data in data_names if data not in saved_data]:
             process = {}
-            pos = int(re.search(r'\d+', self.plugin_list[-1]['pos']).group())+1
+            pos = int(re.search(r'\d+', self.plugin_list[-1]['pos']).group()) + 1
             self.saver_idx.append(pos)
             plugin = pu.get_plugin('savu.plugins.savers.hdf5_saver',
                                    {'in_datasets': [name]}, exp)
@@ -357,7 +366,7 @@ class PluginList(object):
         datasets_idx = []
         n_loaders = self._get_n_loaders()
         n_plugins = self._get_n_processing_plugins()
-        for i in range(self.n_loaders, n_loaders+n_plugins):
+        for i in range(self.n_loaders, n_loaders + n_plugins):
             datasets_idx.append(self.plugin_list[i]['data']['out_datasets'])
         return datasets_idx
 
@@ -403,9 +412,9 @@ class Template(object):
                 ptype, isyaml, key, value = p
                 if isyaml:
                     data_name = isyaml if ptype == 'local' else 'all'
-                    local_dict.set([i+1, name, data_name, key], value)
+                    local_dict.set([i + 1, name, data_name, key], value)
                 elif ptype == 'local':
-                    local_dict.set([i+1, name, key], value)
+                    local_dict.set([i + 1, name, key], value)
                 else:
                     global_dict.set(['all', name, key], value)
 
@@ -419,7 +428,7 @@ class Template(object):
                 yaml_dict = self._get_yaml_dict(value)
                 for entry in list(yaml_dict.keys()):
                     self.__get_template_params(
-                            yaml_dict[entry]['params'], tlist, yaml=entry)
+                        yaml_dict[entry]['params'], tlist, yaml=entry)
             value = pu.is_template_param(value)
             if value is not False:
                 ptype, value = value
@@ -445,11 +454,11 @@ class Template(object):
                 depth = self.dict_depth(value)
                 if depth == 1:
                     self._set_param_for_template_loader_plugin(
-                            plugin_no, key, value)
+                        plugin_no, key, value)
                 elif depth == 0:
                     if plugin_no == 'all':
                         self._set_param_for_all_instances_of_a_plugin(
-                                plugin, key, value)
+                            plugin, key, value)
                     else:
                         data = self._get_plugin_data_dict(str(plugin_no))
                         data[key] = value
@@ -459,7 +468,7 @@ class Template(object):
     def dict_depth(self, d, depth=0):
         if not isinstance(d, dict) or not d:
             return depth
-        return max(self.dict_depth(v, depth+1) for k, v in d.items())
+        return max(self.dict_depth(v, depth + 1) for k, v in d.items())
 
     def _set_param_for_all_instances_of_a_plugin(self, plugin, param, value):
         # find all plugins with this name and replace the param
@@ -486,33 +495,31 @@ class CitationInformation(object):
     Descriptor of Citation Information for plugins
     """
 
-    def __init__(self):
-        super(CitationInformation, self).__init__()
-        self.description = "Default Description"
-        self.doi = "Default DOI"
-        self.endnote = "Default Endnote"
-        self.bibtex = "Default Bibtex"
-        self.name = 'citation'
+    name: str = 'citation'
+    bibtex: str = "Default Bibtex"
+    description: str = "Default Description"
+    doi: str = "Default DOI"
+    endnote: str = "Default Endnote"
 
     def write(self, citation_group):
-        citation_group.attrs[NX_CLASS] = 'NXcite'
-        description_array = np.array([self.description])
-        citation_group.create_dataset('description',
+        citation_group.attrs[NX_CLASS] = 'NXcite'.encode('ascii')
+        description_array = np.array([self.description.encode('ascii')])
+        citation_group.create_dataset('description'.encode('ascii'),
                                       description_array.shape,
                                       description_array.dtype,
                                       description_array)
-        doi_array = np.array([self.doi])
-        citation_group.create_dataset('doi',
+        doi_array = np.array([self.doi.encode('ascii')])
+        citation_group.create_dataset('doi'.encode('ascii'),
                                       doi_array.shape,
                                       doi_array.dtype,
                                       doi_array)
-        endnote_array = np.array([self.endnote])
-        citation_group.create_dataset('endnote',
+        endnote_array = np.array([self.endnote.encode('ascii')])
+        citation_group.create_dataset('endnote'.encode('ascii'),
                                       endnote_array.shape,
                                       endnote_array.dtype,
                                       endnote_array)
-        bibtex_array = np.array([self.bibtex])
-        citation_group.create_dataset('bibtex',
+        bibtex_array = np.array([self.bibtex.encode('ascii')])
+        citation_group.create_dataset('bibtex'.encode('ascii'),
                                       bibtex_array.shape,
                                       bibtex_array.dtype,
                                       bibtex_array)

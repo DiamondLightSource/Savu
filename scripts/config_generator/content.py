@@ -89,7 +89,7 @@ class Content(object):
 
     def save(self, filename, check='y', template=False):
         if check.lower() == 'y':
-            print(("Saving file %s" % (filename)))
+            print(f"Saving file {filename}")
             if template:
                 self.plugin_list.add_template(create=True)
             self.plugin_list._save_plugin_list(filename)
@@ -103,8 +103,8 @@ class Content(object):
     def add(self, name, str_pos):
         if name not in list(pu.plugins.keys()):
             if name in list(self.failed.keys()):
-                msg = "IMPORT ERROR: %s is unavailable due to the following"\
-                " error:\n\t%s" % (name, self.failed[name])
+                msg = "IMPORT ERROR: %s is unavailable due to the following" \
+                      " error:\n\t%s" % (name, self.failed[name])
                 raise Exception(msg)
             else:
                 raise Exception("INPUT ERROR: Unknown plugin %s" % name)
@@ -155,7 +155,7 @@ class Content(object):
             self.increment_positions()
 
         missing = []
-        pos = len(the_list)-1
+        pos = len(the_list) - 1
         notices = mutations.plugin_notices
 
         for plugin in the_list[::-1]:
@@ -163,29 +163,30 @@ class Content(object):
             if 'active' not in list(plugin.keys()):
                 plugin['active'] = True
 
-            while(True):
+            while True:
                 name = the_list[pos]['name']
-                if name in list(notices.keys()):
+                if name in notices.keys():
                     print(notices[name]['desc'])
-                # if a plugin is missing then look for mutations
-                search = True if name not in list(pu.plugins.keys()) else False
+
+                # if a plugin is missing from all available plugins
+                # then look for mutations in the plugin name
+                search = True if name not in pu.plugins.keys() else False
                 found = self._mutate_plugins(name, pos, search=search)
                 if search and not found:
                     str_pos = self.plugin_list.plugin_list[pos]['pos']
                     missing.append([name, str_pos])
                     self.remove(pos)
                     pos -= 1
-                if (name == the_list[pos]['name']):
+                if name == the_list[pos]['name']:
                     break
             pos -= 1
 
         exception = False
         for name, pos in missing[::-1]:
             if skip:
-                print(('Skipping plugin %s: %s' % (pos, name)))
+                print(f"Skipping plugin {pos}: {name}")
             else:
-                print(("PLUGIN ERROR: The plugin %s is unavailable in this "
-                      "version of Savu." % name))
+                print(f"PLUGIN ERROR: The plugin {name} is unavailable in this version of Savu.")
                 exception = True
         if exception:
             raise Exception('Incompatible process list.')
@@ -194,7 +195,7 @@ class Content(object):
         """ Perform plugin mutations. """
         # check for case changes in plugin name
         if search:
-            for key in list(pu.plugins.keys()):
+            for key in pu.plugins.keys():
                 if name.lower() == key.lower():
                     str_pos = self.plugin_list.plugin_list[pos]['pos']
                     self.refresh(str_pos, change=key)
@@ -202,17 +203,16 @@ class Content(object):
 
         # check mutations dict
         m_dict = self.plugin_mutations
-        if name in list(m_dict.keys()):
+        if name in m_dict.keys():
             mutate = m_dict[name]
-            if 'replace' in list(mutate.keys()):
+            if 'replace' in mutate.keys():
                 if mutate['replace'] in list(pu.plugins.keys()):
                     str_pos = self.plugin_list.plugin_list[pos]['pos']
                     self.refresh(str_pos, change=mutate['replace'])
                     print(mutate['desc'])
                     return True
-                raise Exception('Replacement plugin %s unavailable for %s'
-                                % (mutate['replace'], name))
-            elif 'remove' in list(mutate.keys()):
+                raise Exception(f"Replacement plugin {mutate['replace']} unavailable for {name}")
+            elif 'remove' in mutate.keys():
                 self.remove(pos)
                 print(mutate['desc'])
             else:
@@ -235,7 +235,7 @@ class Content(object):
         pos = self.find_position(pos_str)
         data_elements = self.plugin_list.plugin_list[pos]['data']
         if subelem.isdigit():
-            subelem = self.plugin_list.plugin_list[pos]['map'][int(subelem)-1]
+            subelem = self.plugin_list.plugin_list[pos]['map'][int(subelem) - 1]
         data_elements[subelem] = value
 
     def value(self, value):
@@ -284,19 +284,19 @@ class Content(object):
             if len(entry) is 2:
                 if len(pos_list[start]) is 2:
                     idx = int([i for i in range(len(num_list)) if
-                               (num_list[i] == entry[0])][-1])+1
-                    entry = [entry[0], str(chr(ord(pos_list[idx-1][1])+1))]
+                               (num_list[i] == entry[0])][-1]) + 1
+                    entry = [entry[0], str(chr(ord(pos_list[idx - 1][1]) + 1))]
                     return idx, ''.join(entry)
                 if entry[1] == 'a':
                     self.plugin_list.plugin_list[start]['pos'] = entry[0] + 'b'
                     return start, ''.join(entry)
                 else:
                     self.plugin_list.plugin_list[start]['pos'] = entry[0] + 'a'
-                    return start+1, entry[0] + 'b'
+                    return start + 1, entry[0] + 'b'
             return self.inc_positions(start, pos_list, entry, 1)
 
         # number not in list
-        entry[0] = str(int(num_list[-1])+1 if num_list else 1)
+        entry[0] = str(int(num_list[-1]) + 1 if num_list else 1)
         if len(entry) is 2:
             entry[1] = 'a'
         return len(self.plugin_list.plugin_list), ''.join(entry)
@@ -323,7 +323,7 @@ class Content(object):
         positions = self.get_positions()
         split_pos = []
         for i in range(len(positions)):
-            num = re.findall('\d+', positions[i])[0]
+            num = re.findall(r'\d+', positions[i])[0]
             letter = re.findall('[a-z]', positions[i])
             split_pos.append([num, letter[0]] if letter else [num])
         return split_pos
@@ -346,12 +346,12 @@ class Content(object):
 
     def inc_numbers(self, start, pos_list, inc):
         for i in range(start, len(pos_list)):
-            pos_list[i][0] = str(int(pos_list[i][0])+inc)
+            pos_list[i][0] = str(int(pos_list[i][0]) + inc)
             self.plugin_list.plugin_list[i]['pos'] = ''.join(pos_list[i])
 
     def inc_letters(self, idx, pos_list, inc):
         for i in idx:
-            pos_list[i][1] = str(chr(ord(pos_list[i][1])+inc))
+            pos_list[i][1] = str(chr(ord(pos_list[i][1]) + inc))
             self.plugin_list.plugin_list[i]['pos'] = ''.join(pos_list[i])
 
     def insert(self, plugin, pos, str_pos, replace=False):
