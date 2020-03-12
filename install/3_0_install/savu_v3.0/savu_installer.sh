@@ -239,12 +239,18 @@ if [ ! $test_flag ]; then
   string=$(awk '/^miniconda/' $versions_file)
   miniconda_version=$(echo $string | cut -d " " -f 2)
   wget https://repo.continuum.io/miniconda/Miniconda3-$miniconda_version-Linux-x86_64.sh -O $PREFIX/miniconda.sh
-  bash $PREFIX/miniconda.sh -b -p $PREFIX/miniconda
-  PYTHONHOME=$PREFIX/miniconda/bin
-  export PATH="$PYTHONHOME:$PATH"
+
+  miniconda_dir=$PREFIX/miniconda
+  env_dir=$PREFIX/savu
+
+  bash $PREFIX/miniconda.sh -b -p $miniconda_dir
+  PYTHONHOME=$env_dir/bin
   # rm $PREFIX/miniconda.sh
 
-  conda install -y -q python==3.6 conda-build conda-env conda-verify
+  "$miniconda_dir"/bin/conda create -y -p $env_dir
+  source $miniconda_dir/bin/activate $env_dir
+
+  conda install -y -q conda-build conda-verify
 
   echo "Building Savu..."
   conda build $DIR/$savu_recipe
@@ -275,7 +281,6 @@ if [ ! $test_flag ]; then
     mpi4py_version=$(echo $string | cut -d " " -f 2)
     pip install mpi4py==$mpi4py_version
 
-    # module load hdf5/1.10.5
     echo "Building hdf5..."
     conda uninstall -y -q hdf5 || true
     conda build $recipes/hdf5
@@ -293,9 +298,10 @@ if [ ! $test_flag ]; then
     conda install -y -q --use-local $h5pybuild
   else
     echo "Installing mpi4py/hdf5/h5py from conda for CI run"
-    conda env update -n base -f $DIR/environment_ci.yml
+    conda env update -n savu -f $DIR/environment_ci.yml
   fi
-  conda env update -n base -f $DIR/environment.yml
+  conda env update -n savu -f $DIR/environment.yml
+  conda build purge
 
   echo -e "\n\t***************************************************"
   echo -e "\t          Package installation complete"

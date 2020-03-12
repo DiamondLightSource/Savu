@@ -1,7 +1,6 @@
 channels:
   - local
   - defaults
-  - anaconda
   - conda-forge
   - astra-toolbox/label/dev
   - ccpi
@@ -16,8 +15,9 @@ dependencies:
   - PyWavelets
   - scikit-learn
   - tomobar
-  - ccpi-regulariser
-  - ccpi-reconstruction # but the ccpi downgrade tomopy to 1.4.2
+#  - ccpi-regulariser
+#  - ccpi-reconstruction # but the ccpi downgrades tomopy to 1.4.2
+#  - i23-seg
   - astra-toolbox
   - pyfai
   - pymca
@@ -40,4 +40,3 @@ dependencies:
       - gnureadline==6.3.8
       - sphinx-rtd-theme
       - nvidia-ml-py
-
