@@ -58,14 +58,18 @@ class Content(object):
             self.param_mutations = self.check_mutations(self.param_mutations)
             self._apply_plugin_updates(skip)
 
-    def check_mutations(self, mut_dict):
+    def check_mutations(self, mut_dict:dict):
         plist_version = self._version_to_float(self.plugin_list.version)
-        for key, subdict in list(mut_dict.items()):
-            if 'up_to_version' in list(subdict.keys()):
+        # deleting elements while iterating invalidates the iterator
+        # which raises a RuntimeError in Python 3.
+        # Instead a copy of the dict is mutated and returned
+        mut_dict_copy = mut_dict.copy()
+        for key, subdict in mut_dict.items():
+            if 'up_to_version' in subdict.keys():
                 up_to_version = self._version_to_float(subdict['up_to_version'])
                 if plist_version >= up_to_version:
-                    del mut_dict[key]
-        return mut_dict
+                    del mut_dict_copy[key]
+        return mut_dict_copy
 
     def _version_to_float(self, version):
         if version == None:

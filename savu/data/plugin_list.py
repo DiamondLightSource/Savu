@@ -148,10 +148,10 @@ class PluginList(object):
 
     def __save_savu_notes(self, notes):
         from savu.version import __version__
-        notes['version'] = __version__.encode('ascii')
+        notes['version'] = __version__
 
     def __populate_plugins_group(self, plugins_group, plugin, count):
-        if 'pos' in list(plugin.keys()):
+        if 'pos' in plugin.keys():
             num = int(re.findall('\d+', plugin['pos'])[0])
             letter = re.findall('[a-z]', plugin['pos'])
             letter = letter[0] if letter else ""
@@ -160,7 +160,7 @@ class PluginList(object):
         else:
             plugin_group = plugins_group.create_group("%*i" % (4, count))
 
-        plugin_group.attrs[NX_CLASS] = 'NXnote'
+        plugin_group.attrs[NX_CLASS] = 'NXnote'.encode('ascii')
         required_keys = self._get_plugin_entry_template().keys()
         json_keys = self.__get_json_keys()
 
@@ -174,13 +174,11 @@ class PluginList(object):
 
             # get the string value
             data = json.dumps(data) if key in json_keys else plugin[key]
-
+            # if the data is string it has to be encoded to ascii so that
+            # hdf5 can save out the bytes
             if isinstance(data, str):
                 data = data.encode("ascii")
-
-            data = np.array(data)
-            # array = np.array([json.dumps(data)]) if key in json_keys else \
-            #     np.array([plugin[key]])
+            data = np.array([data])
             plugin_group.create_dataset(key.encode('ascii'), data.shape, data.dtype, data)
 
     def __dumps(self, data_dict):
