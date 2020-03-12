@@ -22,8 +22,9 @@
 """
 import sys
 import re
+from collections import OrderedDict
+
 import savu.plugins.loaders.utils.yaml_utils as yu
-import os
 
 def find_args(dclass, inst=None):
     """
@@ -45,34 +46,6 @@ def find_args(dclass, inst=None):
 
     return _parse_args(mod_doc_lines, lines)
 
-
-def _load_yaml(lines):
-    """
-    Load in the yaml format. Call yaml_utils.py
-    ----------
-    Parameters:
-            - lines: String of information
-    ----------
-    Return:
-            - param_entry: Ordered dict of parameters
-            - verbose: Further description
-            - warning:
-    """
-    all_params = ''
-    verbose = ''
-    if os.path.isfile(lines):
-        text = yu.read_yaml(lines)
-        for doc in text:
-            # Each yaml document
-            for info in doc:
-                all_params = info['parameters']
-                # parameter is info['parameters'][0]
-                if 'verbose' in info.keys():
-                    verbose = info['verbose']
-                else:
-                    verbose = ''
-    return all_params, verbose
-
 def load_yaml_doc(lines):
     """
     Load in the yaml format. Call yaml_utils.py
@@ -92,7 +65,7 @@ def load_yaml_doc(lines):
             # Each yaml document
             all_params = doc
     except:
-        print('Error reading the yaml structure from Yaml Utils.')
+        print('\nError reading the yaml structure from Yaml Utils.')
     return all_params
 
 def _parse_args(mod_doc_lines, lines):

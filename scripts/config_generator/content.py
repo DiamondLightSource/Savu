@@ -240,14 +240,13 @@ class Content(object):
             pos = self.find_position(pos_str)
             data_elements = self.plugin_list.plugin_list[pos]['data']
             param = self.plugin_list.plugin_list[pos]['param']
-
             # Select the correct order of parameters according to that on
             # display to the user. This ensures correct parameter is modified.
             dev_keys = [k for k, v in param.items()
                         if v['visibility'] in ['basic', 'advanced']]
             user_keys = [k for k, v in param.items()
                          if v['visibility'] == 'basic']
-            current_params = user_keys if self.disp_level == 'user' else dev_keys
+            current_params = dev_keys
             # Filter the parameter names to find those not hidden
             if param_name.isdigit():
                 param_name = current_params[int(param_name)-1]
@@ -302,13 +301,12 @@ class Content(object):
         """
         data_elements = self.plugin_list.plugin_list[pos]['data']
         p_list = self.plugin_list.plugin_list[pos]['param']
-        dep_list = {k: v['dependency']
+        dep_dict = {k: v['dependency']
                     for k, v in p_list.items() if 'dependency' in v}
-        for p_name, dependency in dep_list.items():
+        for p_name, dependency in dep_dict.items():
             if isinstance(dependency, OrderedDict):
                 parent_param_name = dependency.keys()[0]
-                parent_choice_list = [self._apply_lower_case(i)
-                                      for i in dependency[parent_param_name]]
+                parent_choice_list = self._apply_lower_case(dependency[parent_param_name])
                 # The choices which must be in the parent value
                 if parent_param_name in data_elements:
                     # Check that the parameter is in the current plug in
@@ -319,10 +317,15 @@ class Content(object):
                             p_list[p_name]['visibility'] = 'basic'
                     else:
                         if p_list[p_name].get('visibility') != 'hidden':
-                                p_list[p_name]['visibility'] = 'hidden'
+                            p_list[p_name]['visibility'] = 'hidden'
 
     def _apply_lower_case(self, item):
-        return item.lower() if isinstance(item, str) else item
+        lower_case_item = item
+        if isinstance(lower_case_item, str):
+            lower_case_item = lower_case_item.lower()
+        elif isinstance(lower_case_item, list):
+            lower_case_item = [self._apply_lower_case(i) for i in lower_case_item]
+        return lower_case_item
 
     def value(self, value):
         if not value.count(';'):
@@ -458,7 +461,7 @@ class Content(object):
         plugin_dict['id'] = plugin.__module__
         plugin_dict['data'] = plugin.parameters
         plugin_dict['active'] = True
-        plugin_dict['tools'] = plugin.tools_dict
+        plugin_dict['tools'] = plugin.tools
         plugin_dict['param'] = plugin.p_dict
         plugin_dict['doc'] = plugin.docstring_info
         return plugin_dict

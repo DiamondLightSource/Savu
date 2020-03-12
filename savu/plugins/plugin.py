@@ -20,20 +20,14 @@
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
-import sys
-import os
-import re
 import ast
 import copy
-import h5py
 import logging
-import inspect
 import numpy as np
 from collections import OrderedDict
 
-from savu.data.meta_data import MetaData
+import savu.plugins.utils as pu
 import savu.plugins.docstring_parser as doc
-from savu.plugins.base_tools import BaseTools
 from savu.plugins.plugin_datasets import PluginDatasets
 
 class Plugin(PluginDatasets):
@@ -50,17 +44,15 @@ class Plugin(PluginDatasets):
         self.pcount = 0
         self.exp = None
         self.check = False
-        self.tools_dict = OrderedDict()
+        self.tools = OrderedDict()
         self.p_dict = OrderedDict()
-        self.tools = BaseTools()
 
     def initialise(self, params, exp, check=False):
-        self.check=check
+        self.check = check
         self.exp = exp
         self._populate_default_parameters()
         self._set_parameters(copy.deepcopy(params))
         self._main_setup()
-
 
     def _main_setup(self, exp, params):
         """ Performs all the required plugin setup.
@@ -101,9 +93,6 @@ class Plugin(PluginDatasets):
             self.parameters[name] = info['values'][indices[count]]
             count += 1
 
-    def load_param_tools(self):
-        return self.tools
-
     def load_doc(self):
         return self.__doc__
 
@@ -133,6 +122,25 @@ class Plugin(PluginDatasets):
         logging.error("set_up needs to be implemented")
         raise NotImplementedError("setup needs to be implemented")
 
+    def _get_plugin_tools(self):
+        tool_class = None
+        plugin_tools_id = self.__class__.__module__ + '_tools'
+        if plugin_tools_id == 'savu.plugins.plugin_tools':
+            plugin_tools_id = 'savu.plugins.base_tools'
+        if pu.load_tools.get(plugin_tools_id):
+            tool_class = pu.load_tools[plugin_tools_id](cls=self)
+        else:
+            base_classes = ['savu.plugins.driver.basic_driver_tools',
+                            'savu.plugins.driver.plugin_driver_tools',
+                            'savu.plugins.driver.cpu_plugin_tools',
+                            'savu.plugins.plugin_datasets_tools',
+                            'savu.plugins.driver.gpu_plugin_tools',
+                            'savu.plugins.filters.base_filter_tools',
+                            '__builtin___tools']
+            if plugin_tools_id not in base_classes:
+                print('Error loading tools id: ' + str(plugin_tools_id))
+        return tool_class
+
     def _populate_default_parameters(self):
         """
         This method should populate all the required parameters with default
@@ -141,36 +149,20 @@ class Plugin(PluginDatasets):
 
         """
         # Test Plugins are: 'RemoveAllRings' 'TomobarRecon' 'Hdf5saver'
-        # 'NxtomoLoader' 'DarkFlatFieldCorrection' 'NoProcess' 'Astra' 'Vocentering'
+        # 'NxtomoLoader' 'DarkFlatFieldCorrection' 'NoProcess' 'Astra'
+        # 'Vocentering'
 
-        p_tools = self.load_param_tools()
-        all_params = p_tools.plugin_tools.get('param')
-        verbose = p_tools.plugin_tools.get('doc').get('verbose')
-
-        self.check_required_keys(all_params)
-        # To do - this key check will be moved to another section
-
-        self.set_docstring(verbose)
-        self.tools_dict = p_tools.plugin_tools
-        self.p_dict = all_params
-        self.parameters = OrderedDict([(k, v['default']) for k, v in all_params.items()])
-
+        p_tools = self._get_plugin_tools()
+        if p_tools:
+            self.tools = p_tools.plugin_tools
+            self.p_dict = p_tools.get_param()
+            self.parameters = OrderedDict([(k, v['default']) for k, v in p_tools.get_param().items()])
+            self.set_docstring(p_tools.get_doc().get('verbose'))
 
     def _add_item(self, item_list, not_list):
         true_list = [i for i in item_list if i['name'] not in not_list]
         for item in true_list:
             self.parameters[item['name']] = item['default']
-
-    def check_required_keys(self, all_params):
-        required_keys = ['dtype', 'description', 'visibility', 'default']
-        for p_key, p in all_params.items():
-            all_keys = p.keys()
-            if p.get('visibility') == 'hidden':
-                required_keys = ['default']
-
-            if not all(d in all_keys for d in required_keys):
-                print('The missing required keys for ' + str(p_key) + ' are: ')
-                print(', '.join(set(required_keys) - set(all_keys)))
 
     def set_docstring(self, verbose):
         desc = doc.find_args(self)

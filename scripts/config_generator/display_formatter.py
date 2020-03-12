@@ -54,8 +54,9 @@ class DisplayFormatter(object):
             count += 1
             if subelem is not None:
                 if subelem.isdigit():
-                    # Manually set user level to all. This level is only returning the current command level.
-                    # Check what the previous user command level was
+                    # Manually set user level to all. This level is only
+                    # returning the current entered command level.
+                    # Is there a way to access the previous user command level.
                     level = 'all'
                     sub_dict = self._select_param(p_dict, subelem, level)
                     p_dict = sub_dict
@@ -64,7 +65,8 @@ class DisplayFormatter(object):
                     print('The sub element value was not an integer.')
             if p_dict is not None:
                 description = \
-                    self._get_description(WIDTH, level, p_dict, count, verbosity)
+                    self._get_description(WIDTH, level, p_dict,
+                                          count, verbosity)
                 out_string.append(description)
                 out_string.append(line_break)
         return '\n'.join(out_string)
@@ -125,7 +127,8 @@ class DisplayFormatter(object):
     def _get_synopsis(self, p_dict, width, colour_on, colour_off):
         doc_str = p_dict['doc']
         synopsis = \
-            self._get_equal_lines(doc_str['synopsis'], width, colour_on, colour_off, " "*2)
+            self._get_equal_lines(doc_str['synopsis'], width, colour_on,
+                                  colour_off, " "*2)
         if not synopsis:
             return ''
         return "\n" + colour_on + synopsis + colour_off
@@ -175,8 +178,8 @@ class DisplayFormatter(object):
                 params += temp % (keycount, key, p_dict['data'][key])
                 # Add description for this parameter
                 if desc:
-                    params = self._append_description(desc, key, p_dict, joiner, width,
-                                                      margin, params, breakdown)
+                    params = self._append_description(desc, key, p_dict,
+                                joiner, width, margin, params, breakdown)
             return params
         except Exception as e:
             print('ERROR: ' + str(e))
@@ -202,8 +205,8 @@ class DisplayFormatter(object):
                     params += temp % pdesc
 
                 if breakdown:
-                    params = self._get_verbose_param_details(p_dict, param_key,
-                                                             desc, key, params, width)
+                    params = self._get_verbose_param_details(p_dict,
+                                      param_key, desc, key, params, width)
 
         options = p_dict['param'][key].get('options')
         if options:
@@ -230,9 +233,11 @@ class DisplayFormatter(object):
                                     for k, v in desc[key][param_key].items() if v}
                     if opt in options_desc.keys():
                         if breakdown:
-                            option_verbose += ': ' + verbose_color + options_desc[opt]
-                            option_verbose = joiner.join(textwrap.wrap(option_verbose,
-                                                         width=width - margin))
+                            option_verbose += ': ' \
+                                              + verbose_color \
+                                              + options_desc[opt]
+                            option_verbose = joiner.join(textwrap.wrap(
+                                option_verbose, width=width - margin))
                 temp = joiner + "%s" + Fore.RESET
                 params += temp % option_verbose
 

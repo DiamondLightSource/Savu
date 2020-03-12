@@ -383,7 +383,7 @@ class PluginList(object):
             process['pos'] = str(pos)
             process['data'] = plugin.parameters
             process['active'] = True
-            process['tools'] = plugin.tools_dict
+            process['tools'] = plugin.tools
             process['param'] = plugin.p_dict
             self._add(pos, process)
 
