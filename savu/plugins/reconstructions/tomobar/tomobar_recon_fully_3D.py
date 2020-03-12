@@ -31,6 +31,7 @@ import numpy as np
 from tomobar.methodsIR import RecToolsIR
 from savu.plugins.utils import register_plugin
 
+
 @register_plugin
 class TomobarReconFully3d(BaseRecon, MultiThreadedPlugin):
     """
@@ -76,7 +77,7 @@ class TomobarReconFully3d(BaseRecon, MultiThreadedPlugin):
             sizeX = shape[detX]
         detY = in_data.get_data_dimension_by_axis_label('detector_y')
         sizeY = shape[detY]
-        return (sizeX,sizeY)
+        return (sizeX, sizeY)
 
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
@@ -90,19 +91,19 @@ class TomobarReconFully3d(BaseRecon, MultiThreadedPlugin):
             self.map_volume_dimensions(in_dataset[0])
 
         axis_labels = {in_dataset[0]:
-                       [str(dim_volX) + '.voxel_x.voxels',
-                        str(dim_volY) + '.voxel_y.voxels',
-                        str(dim_volZ) + '.voxel_z.voxels']}
+                           [str(dim_volX) + '.voxel_x.voxels',
+                            str(dim_volY) + '.voxel_y.voxels',
+                            str(dim_volZ) + '.voxel_z.voxels']}
         # specify reconstructed volume dimensions
         (self.output_size, self.Vert_det) = self._get_output_size(in_dataset[0])
-        shape = [0]*len(in_dataset[0].get_shape())
+        shape = [0] * len(in_dataset[0].get_shape())
         shape[0] = self.output_size
         shape[1] = self.Vert_det
         shape[2] = self.output_size
 
         # if there are only 3 dimensions then add a fourth for slicing
         if len(shape) == 3:
-            axis_labels = [0]*4
+            axis_labels = [0] * 4
             axis_labels[dim_volX] = 'voxel_x.voxels'
             axis_labels[dim_volY] = 'voxel_y.voxels'
             axis_labels[dim_volZ] = 'voxel_z.voxels'
@@ -127,7 +128,7 @@ class TomobarReconFully3d(BaseRecon, MultiThreadedPlugin):
         core_dims = (dim_volX, dim_volY, dim_volZ)
         slice_dims = tuple(set(ndims).difference(set(core_dims)))
         out_dataset[0].add_pattern(
-                'VOLUME_3D', core_dims=core_dims, slice_dims=slice_dims)
+            'VOLUME_3D', core_dims=core_dims, slice_dims=slice_dims)
 
         # set information relating to the plugin data
         in_pData, out_pData = self.get_plugin_datasets()
@@ -136,7 +137,7 @@ class TomobarReconFully3d(BaseRecon, MultiThreadedPlugin):
         nSlices = in_dataset[0].get_shape()[dim]
 
         in_pData[0].plugin_data_setup('PROJECTION', nSlices,
-                slice_axis='rotation_angle')
+                                      slice_axis='rotation_angle')
 
         # in_pData[1].plugin_data_setup('PROJECTION', nSlices) # (for PWLS)
 
@@ -145,35 +146,35 @@ class TomobarReconFully3d(BaseRecon, MultiThreadedPlugin):
 
     def pre_process(self):
         # extract given parameters into dictionaries suitable for ToMoBAR input
-        self._data_ = {'OS_number' : self.parameters['algorithm_ordersubsets'],
-                       'huber_threshold' : self.parameters['data_Huber_thresh'],
-                       'ring_weights_threshold' :  self.parameters['data_any_rings'],
-                       'ring_tuple_halfsizes' :  self.parameters['data_any_rings_winsizes'],
-                       'ring_huber_power' :  self.parameters['data_any_rings_power'],
-                       'ringGH_lambda' :  self.parameters['data_full_ring_GH'],
-                       'ringGH_accelerate' :  self.parameters['data_full_ring_accelerator_GH']}
+        self._data_ = {'OS_number': self.parameters['algorithm_ordersubsets'],
+                       'huber_threshold': self.parameters['data_Huber_thresh'],
+                       'ring_weights_threshold': self.parameters['data_any_rings'],
+                       'ring_tuple_halfsizes': self.parameters['data_any_rings_winsizes'],
+                       'ring_huber_power': self.parameters['data_any_rings_power'],
+                       'ringGH_lambda': self.parameters['data_full_ring_GH'],
+                       'ringGH_accelerate': self.parameters['data_full_ring_accelerator_GH']}
 
-        self._algorithm_ = {'iterations' : self.parameters['algorithm_iterations'],
-      			    'nonnegativity' : self.parameters['algorithm_nonnegativity'],
-                            'verbose' : self.parameters['algorithm_verbose']}
+        self._algorithm_ = {'iterations': self.parameters['algorithm_iterations'],
+                            'nonnegativity': self.parameters['algorithm_nonnegativity'],
+                            'verbose': self.parameters['algorithm_verbose']}
 
-        self._regularisation_ = {'method' : self.parameters['regularisation_method'],
-                                'regul_param' : self.parameters['regularisation_parameter'],
-                                'iterations' : self.parameters['regularisation_iterations'],
-                                'device_regulariser' : self.parameters['regularisation_device'],
-                                'edge_threhsold' : self.parameters['regularisation_edge_thresh'],
-                                'time_marching_step' : self.parameters['regularisation_timestep'],
-                                'regul_param2' : self.parameters['regularisation_parameter2'],
-                                'PD_LipschitzConstant' : self.parameters['regularisation_PD_lip'],
-                                'NDF_penalty' : self.parameters['regularisation_NDF_penalty'],
-                                'methodTV' : self.parameters['regularisation_methodTV']}
+        self._regularisation_ = {'method': self.parameters['regularisation_method'],
+                                 'regul_param': self.parameters['regularisation_parameter'],
+                                 'iterations': self.parameters['regularisation_iterations'],
+                                 'device_regulariser': self.parameters['regularisation_device'],
+                                 'edge_threhsold': self.parameters['regularisation_edge_thresh'],
+                                 'time_marching_step': self.parameters['regularisation_timestep'],
+                                 'regul_param2': self.parameters['regularisation_parameter2'],
+                                 'PD_LipschitzConstant': self.parameters['regularisation_PD_lip'],
+                                 'NDF_penalty': self.parameters['regularisation_NDF_penalty'],
+                                 'methodTV': self.parameters['regularisation_methodTV']}
 
         in_pData = self.get_plugin_in_datasets()
         self.det_dimX_ind = in_pData[0].get_data_dimension_by_axis_label('detector_x')
         self.det_dimY_ind = in_pData[0].get_data_dimension_by_axis_label('detector_y')
 
     def process_frames(self, data):
-        centre_of_rotations, angles, self.vol_shape, init  = self.get_frame_params()
+        centre_of_rotations, angles, self.vol_shape, init = self.get_frame_params()
 
         self.anglesRAD = np.deg2rad(angles.astype(np.float32))
         self.centre_of_rotations = centre_of_rotations
@@ -181,29 +182,31 @@ class TomobarReconFully3d(BaseRecon, MultiThreadedPlugin):
         dim_tuple = np.shape(projdata3D)
         self.Horiz_det = dim_tuple[self.det_dimX_ind]
 
-        #print(np.shape(projdata3D))
-        projdata3D =np.swapaxes(projdata3D,0,1)
+        # print(np.shape(projdata3D))
+        projdata3D = np.swapaxes(projdata3D, 0, 1)
         # WIP for PWLS fidelity
         # rawdata3D = data[1].astype(np.float32)
         # rawdata3D =np.swapaxes(rawdata3D,0,1)/np.max(np.float32(rawdata3D))
-        self._data_.update({'projection_norm_data' : projdata3D})
+        self._data_.update({'projection_norm_data': projdata3D})
 
-       # set parameters and initiate a TomoBar class object
-        self.Rectools = RecToolsIR(DetectorsDimH = self.Horiz_det,  # DetectorsDimH # detector dimension (horizontal)
-                    DetectorsDimV = self.Vert_det,  # DetectorsDimV # detector dimension (vertical) for 3D case only
-                    CenterRotOffset = 0.0, # Center of Rotation (CoR) scalar (for 3D case only)
-                    AnglesVec = self.anglesRAD, # array of angles in radians
-                    ObjSize = self.output_size, # a scalar to define the reconstructed object dimensions
-                    datafidelity=self.parameters['data_fidelity'],# data fidelity, choose LS
-                    device_projector='gpu')
+        # set parameters and initiate a TomoBar class object
+        self.Rectools = RecToolsIR(DetectorsDimH=self.Horiz_det,  # DetectorsDimH # detector dimension (horizontal)
+                                   DetectorsDimV=self.Vert_det,
+                                   # DetectorsDimV # detector dimension (vertical) for 3D case only
+                                   CenterRotOffset=0.0,  # Center of Rotation (CoR) scalar (for 3D case only)
+                                   AnglesVec=self.anglesRAD,  # array of angles in radians
+                                   ObjSize=self.output_size,  # a scalar to define the reconstructed object dimensions
+                                   datafidelity=self.parameters['data_fidelity'],  # data fidelity, choose LS
+                                   device_projector='gpu')
 
         # Run FISTA reconstrucion algorithm here
         recon = self.Rectools.FISTA(self._data_, self._algorithm_, self._regularisation_)
-        recon = np.swapaxes(recon,0,1)
+        recon = np.swapaxes(recon, 0, 1)
         return recon
 
     def nInput_datasets(self):
         return 1
+
     def nOutput_datasets(self):
         return 1
 

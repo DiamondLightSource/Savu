@@ -184,8 +184,8 @@ class Plugin(PluginDatasets):
         plugin, or None if no customisation is required.
         """
         self.initialise_parameters()
-        for key in list(parameters.keys()):
-            if key in list(self.parameters.keys()):
+        for key in parameters.keys():
+            if key in self.parameters.keys():
                 value = self.__convert_multi_params(parameters[key], key)
                 self.parameters[key] = value
             else:
@@ -379,7 +379,7 @@ class Plugin(PluginDatasets):
     def get_global_frame_index(self):
         """ Get the global frame index. """
         return self.global_index
-        
+
 
     def set_current_slice_list(self, sl):
         self.slice_list = sl
