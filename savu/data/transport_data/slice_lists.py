@@ -65,7 +65,7 @@ class SliceLists(object):
         for i in range(len(slice_dirs)):
             c = chunk[i]
             r = repeat[i]
-            exec('values = ' + value)
+            values = eval(value)
             idx = np.ravel(np.kron(values, np.ones((r, c))))
             idx_list.append(idx.astype(int))
         return np.array(idx_list)
@@ -221,7 +221,7 @@ class SliceLists(object):
             slice_list = []
         return slice_list, frames
 
-    def _pad_slice_list(self, slice_list, inc_start_str, inc_stop_str):
+    def _pad_slice_list(self, slice_list, inc_start_str: str, inc_stop_str: str):
         """ Amend the slice lists to include padding.  Includes variations for
         transfer and process slice lists. """
         pData = self.data._get_plugin_data()
@@ -232,8 +232,8 @@ class SliceLists(object):
 
         shape = self.data.get_shape()
         for ddir, value in pad_dict.items():
-            exec('inc_start = ' + inc_start_str)
-            exec('inc_stop = ' + inc_stop_str)
+            inc_start = eval(inc_start_str)
+            inc_stop = eval(inc_stop_str)
             for i in range(len(slice_list)):
                 slice_list[i] = list(slice_list[i])
                 sl = slice_list[i][ddir]

@@ -94,7 +94,7 @@ class BaseTransportData(object):
     def _set_boundaries(self):
         b_per_f = self.params.get('bytes_per_frame')
         b_per_p = self.params.get('bytes_per_process')
-        
+
         mem_multiply = \
             self._get_data_obj()._get_plugin_data()._plugin.get_mem_multiply()
 
@@ -106,26 +106,27 @@ class BaseTransportData(object):
                 settings['bytes_threshold'], b_per_p)*mem_multiply
         b_per_p = b_per_p if b_per_p < bytes_threshold else bytes_threshold
 
-        min_bytes = self.__convert_str(settings['min_bytes'], b_per_p)        
+        min_bytes = self.__convert_str(settings['min_bytes'], b_per_p)
         max_mft = int(np.floor(float(max_bytes)/b_per_f))
         if max_mft == 0:
             raise Exception("The size of a single frame exceeds the permitted "
                             "maximum bytes per frame.")
         min_mft = int(max(np.floor(float(min_bytes)/b_per_f), 1))
-        
+
         return min_mft, max_mft
 
     def __convert_str(self, val, b_per_p):
         if isinstance(val, str):
-            exec("value = " + val)
-        return value
+            # FIXME this is still a potential security risk!
+            value = eval(val, {'__builtins__': None, 'b_per_p': b_per_p})
+            return value
 
     def __get_optimum_distribution(self, nFrames):
         """ The number of frames each process should retrieve from file at a
         time.
         """
         min_mft, max_mft = self.__get_boundaries(nFrames)
-        
+
         if isinstance(nFrames, int) and nFrames > max_mft:
             logging.warn("The requested %s frames excedes the maximum "
                          "preferred of %s." % (nFrames, max_mft))
@@ -185,7 +186,7 @@ class BaseTransportData(object):
     def __get_boundaries(self, nFrames):
         min_mft, max_mft = self._set_boundaries()
         if isinstance(nFrames, int) and nFrames > max_mft:
-            logging.warn("The requested %s frames excedes the maximum "
+            logging.warning("The requested %s frames excedes the maximum "
                          "preferred of %s." % (nFrames, max_mft))
             max_mft = nFrames
         return min_mft, max_mft
@@ -290,9 +291,9 @@ class BaseTransportData(object):
     def _find_best_frame_distribution(self, flist, nframes, nprocs, idx=False):
         """ Determine which of the numbers in the list of possible frame
         chunks gives the best distribution of frames per process. """
-        multi_list = [(nframes/float(v))/nprocs for v in flist] 
+        multi_list = [(nframes/float(v))/nprocs for v in flist]
         min_val, closest_lower_idx = self._find_closest_lower(multi_list, 1)
-        if idx: 
+        if idx:
             return flist[closest_lower_idx], closest_lower_idx
         return flist[closest_lower_idx]
 

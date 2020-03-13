@@ -396,7 +396,7 @@ class BaseTransport(object):
             current_and_next = self.exp.meta_data.get('current_and_next')
 
         count = 0
-        for key in list(out_data_dict.keys()):
+        for key in out_data_dict.keys():
             out_data = out_data_dict[key]
             filename = self.exp.meta_data.get(["filename", key])
             out_data.backing_file = self.hdf5._open_backing_h5(filename, 'a')
