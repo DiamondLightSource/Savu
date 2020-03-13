@@ -30,13 +30,12 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
 
-class TomobarReconTest(unittest.TestCase):
+class TomobarTest(unittest.TestCase):
 
     def test_tomobar_recon(self):
         data_file = tu.get_test_data_path('24737.nxs')
         process_file = tu.get_test_process_path('tomobar2d_recon.nxs')
-        run_protected_plugin_runner(tu.set_options(data_file,
-                                                   process_file=process_file))
+        run_protected_plugin_runner(tu.set_options(data_file, process_file=process_file))
 
 if __name__ == "__main__":
     unittest.main()
