@@ -45,14 +45,15 @@ class TomobarFully3dTest(unittest.TestCase):
         run_protected_plugin_runner(options)
 
         #read the file using SavuNexusLoader
-        #options = tu.set_experiment('tomo')
         path_to_rec = self.test_folder + 'test_processed.nxs'
-        #self.test_folder2 = tempfile.mkdtemp(suffix='my_test2/')
-        print(path_to_rec)
+        self.test_folder2 = tempfile.mkdtemp(suffix='my_test2/')
+        print(self.test_folder2)
         options['data_file'] = path_to_rec
-        #options['out_path'] = os.path.join(self.test_folder2)
-        options['process_file'] = tu.get_test_process_path('tomobar_fully3d_recon.nxs')
-        #run_protected_plugin_runner(options)
+        options['out_path'] = os.path.join(self.test_folder2)
+        options['process_file'] = tu.get_test_process_path('savu_nexus_loader_test3.nxs')
+        run_protected_plugin_runner(options)
+        
+        # perform cleaning (to add)
 
 if __name__ == "__main__":
     unittest.main()
