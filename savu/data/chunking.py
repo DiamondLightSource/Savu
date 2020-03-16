@@ -152,8 +152,7 @@ class Chunking(object):
         adjust['inc']['down'][adj_idx] = '/2' # '-' + str(max_frames)
 
         # which is the slice dimension: current or next?
-        ddict = self.current if dim in self.current['slice_dims'] \
-            else self.__next__
+        ddict = self.current if dim in self.current['slice_dims'] else self.next
         shape, allslices = self.__get_shape(shape, ddict)
 
         adjust['bounds']['max'][adj_idx] = self.__max_frames_per_process(
@@ -173,7 +172,7 @@ class Chunking(object):
 
         shape1 = np.prod([shape[s] for s in self.current['slice_dims']])
         shape2 = np.prod([shape[s] for s in self.next['slice_dims']])
-        ddict = self.current if shape1 < shape2 else self.__next__
+        ddict = self.current if shape1 < shape2 else self.next
         shape, allslices = self.__get_shape(shape, ddict)
         adjust['bounds']['max'][adj_idx] = self.__max_frames_per_process(
                 shape, max_frames, allslices=allslices)
