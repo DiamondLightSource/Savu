@@ -94,14 +94,14 @@ class ImageLoader(BaseLoader):
         # read dark and flat images
         fpath, ffix = self._get_path(self.parameters['flat_prefix'], path)
         flat = ImageData(fpath, dObj, [fdim], None, ffix)
-        
+
         if self.parameters['dark_prefix']:
             dpath, dfix = self._get_path(self.parameters['dark_prefix'], path)
             dark = ImageData(dpath, dObj, [fdim], None, dfix)
         else:
             shape = dObj.get_shape()
             dark = np.zeros([1] + [shape[i] for i in [1, 2]], dtype=flat.dtype)
-        
+
         dObj.data._set_dark_path(dark)
         dObj.data._set_flat_path(flat)
         dObj.data._set_dark_and_flat()
@@ -123,7 +123,7 @@ class ImageLoader(BaseLoader):
             angles = np.linspace(0, 180, data_obj.data.get_shape()[0])
         else:
             try:
-                exec("angles = " + angles)
+                angles = eval(angles)
             except:
                 try:
                     angles = np.loadtxt(angles)

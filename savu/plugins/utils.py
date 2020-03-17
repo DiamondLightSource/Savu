@@ -177,7 +177,7 @@ def is_template_param(param):
             param = param[start + 1:-1]
             param = None if not param else param
             try:
-                exec("param = " + param)
+                paral = eval(param)
             except:
                 pass
             return [ptype, param]

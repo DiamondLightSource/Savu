@@ -169,7 +169,7 @@ class YamlConverter(BaseLoader):
         if 'metadata' in entry:
             self._set_metadata(data_obj, entry['metadata'])
         self.set_data_reduction_params(data_obj)
-        
+
         if 'exp_metadata' in entry:
             self._set_metadata(data_obj, entry['exp_metadata'], exp=True)
 
@@ -199,7 +199,7 @@ class YamlConverter(BaseLoader):
             if len(split) > 1:
                 value = self._convert_string(dObj, split[1])
                 try:
-                    exec('value = ' + value)
+                    value = eval(value)
                 except:
                     raise Exception("\nError converting value %s\n" % value)
         return value

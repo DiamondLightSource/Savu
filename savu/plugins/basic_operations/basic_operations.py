@@ -45,7 +45,7 @@ class BasicOperations(Plugin, CpuPlugin):
 
     def process_frames(self, data):
         for i in range(len(self.operations)):
-            exec(self.out_data[i] + "=" + self.operations[i])
+            self.out_data[i] = eval(self.operations[i])
         return [eval(out) for out in self.out_data]
 
     def setup(self):

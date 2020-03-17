@@ -195,7 +195,7 @@ def _send_email(address):
     msg['Subject'] = 'Your Savu job has completed'
     msg['From'] = me
     msg['To'] = you
-    
+
     # Send the message via our own SMTP server, but don't include the
     # envelope header.
     s = smtplib.SMTP('localhost')
@@ -209,6 +209,5 @@ def _savu_encoder(data):
 
 def _savu_decoder(data):
     if isinstance(data, str) and len(data.split('#savu_encoded#')) > 1:
-        exec('data = ' + data.split('#savu_encoded#')[-1])
-        return data
+        return eval(data.split('#savu_encoded#')[-1])
     return data

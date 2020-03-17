@@ -245,9 +245,9 @@ class Content(object):
     def value(self, value):
         if not value.count(';'):
             try:
-                exec("value = " + value)
+                value = eval(value)
             except (NameError, SyntaxError):
-                exec("value = " + "'" + value + "'")
+                value = eval(f"'{value}'")
         return value
 
     def convert_to_ascii(self, value):

@@ -196,15 +196,12 @@ class BaseRecon(Plugin):
         return sino_func, cor_func
 
     def __make_lambda(self, log=True, pad=False):
-        log_func = 'np.nan_to_num(sino)' if not log else \
-            self.parameters['log_func']
+        log_func = 'np.nan_to_num(sino)' if not log else self.parameters['log_func']
         if pad:
             pad_tuples, mode = self.__get_pad_values(pad)
             log_func = log_func.replace(
                     'sino', 'np.pad(sino, %s, "%s")' % (pad_tuples, mode))
-        func = "f = lambda sino: " + log_func
-        exec(func)
-        return f
+        return eval("lambda sino: " + log_func)
 
     def __get_pad_values(self, pad_shape):
         mode = 'edge'

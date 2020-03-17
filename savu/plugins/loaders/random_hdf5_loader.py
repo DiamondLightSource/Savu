@@ -175,7 +175,7 @@ class RandomHdf5Loader(BaseLoader):
             angles = np.linspace(0, 180, n_entries)
         else:
             try:
-                exec("angles = " + angles)
+                angles = eval(angles)
             except:
                 raise Exception('Cannot set angles in loader.')
 

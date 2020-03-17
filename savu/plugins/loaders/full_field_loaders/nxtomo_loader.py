@@ -110,7 +110,7 @@ class NxtomoLoader(BaseLoader):
         if self.parameters['3d_to_4d'] is True:
             try:
                 # for backwards compatibility
-                exec("n_frames = " + self.parameters['angles'])
+                n_frames = self.parameters['angles']
                 return np.array(n_frames).shape[0]
             except:
                 raise Exception("Please specify the angles, or the number of "
@@ -234,10 +234,10 @@ class NxtomoLoader(BaseLoader):
             angles = 'entry1/tomo_entry/data/rotation_angle'
 
         nxs_angles = self.__get_angles_from_nxs_file(data_obj, angles)
-        
+
         if nxs_angles is None:
             try:
-                exec("angles = " + angles)
+                angles = eval(angles)
             except Exception as e:
                 logging.warn(e.message)
                 try:
@@ -268,7 +268,7 @@ class NxtomoLoader(BaseLoader):
     def __check_angles(self, data_obj, n_angles):
         data_angles = data_obj.data.get_shape()[0]
         if data_angles != n_angles:
-            # FIXME problem with this 
+            # FIXME problem with this
             if self.nFrames > 1:
                 rot_angles = data_obj.meta_data.get("rotation_angle")
                 try:
