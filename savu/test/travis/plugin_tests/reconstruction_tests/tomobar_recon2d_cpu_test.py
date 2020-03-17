@@ -19,7 +19,7 @@
    :platform: Unix
    :synopsis: unittest test classes for plugins
 
-.. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
+.. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 
 """
 
@@ -31,22 +31,21 @@ import savu.test.base_checkpoint_test
 import tempfile
 import os
 
-class TomobarRecon3dTest(unittest.TestCase):
+class TomobarRecon2dCpuTest(unittest.TestCase):
 
-    def test_tomobar_recon3d_cpu(self):
+    def test_tomobar_recon2d_cpu(self):
         data_file = tu.get_test_data_path('24737.nxs')
         self.test_folder = tempfile.mkdtemp(suffix='my_test/')
         # set options
-        options = tu.set_experiment('tomo')
+        options = tu.set_experiment('tomo')        
+        options['data_file'] = data_file
         options['out_path'] = os.path.join(self.test_folder)
-        #run the test
-        process_file = \
-            tu.get_test_process_path('tomobar3d_test_process.nxs')
-        run_protected_plugin_runner(tu.set_options(data_file,
-                                                   process_file=process_file))
+        options['process_file'] = tu.get_test_process_path('tomobar_2d_cpu_test.nxs')
+        run_protected_plugin_runner(options)        
+
         # perform folder cleaning
         classb = savu.test.base_checkpoint_test.BaseCheckpointTest()
-        cp_folder = os.path.join(self.test_folder, 'checkpoint')
+        cp_folder = os.path.join(self.test_folder, 'checkpoint')        
         classb._empty_folder(cp_folder)
         os.removedirs(cp_folder)
         classb._empty_folder(self.test_folder)
@@ -54,3 +53,4 @@ class TomobarRecon3dTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
