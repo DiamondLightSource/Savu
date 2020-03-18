@@ -34,7 +34,7 @@ import os
 
 class TomobarFully3dTest(unittest.TestCase):
 
-    def test_tomobar3d(self):
+    def test_tomobar3d_full(self):
         data_file = tu.get_test_data_path('24737.nxs')
         self.test_folder = tempfile.mkdtemp(suffix='my_test/')
         # set options
@@ -47,13 +47,24 @@ class TomobarFully3dTest(unittest.TestCase):
         #read the file using SavuNexusLoader
         path_to_rec = self.test_folder + 'test_processed.nxs'
         self.test_folder2 = tempfile.mkdtemp(suffix='my_test2/')
-        print(self.test_folder2)
         options['data_file'] = path_to_rec
         options['out_path'] = os.path.join(self.test_folder2)
         options['process_file'] = tu.get_test_process_path('savu_nexus_loader_test3.nxs')
         run_protected_plugin_runner(options)
         
-        # perform cleaning (to add)
+        # perform folder cleaning
+        classb = savu.test.base_checkpoint_test.BaseCheckpointTest()
+        cp_folder = os.path.join(self.test_folder, 'checkpoint')        
+        classb._empty_folder(cp_folder)
+        os.removedirs(cp_folder)
+        classb._empty_folder(self.test_folder)
+        os.removedirs(self.test_folder)
+        
+        cp_folder = os.path.join(self.test_folder2, 'checkpoint')        
+        classb._empty_folder(cp_folder)
+        os.removedirs(cp_folder)
+        classb._empty_folder(self.test_folder2)
+        os.removedirs(self.test_folder2)
 
 if __name__ == "__main__":
     unittest.main()
