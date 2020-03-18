@@ -272,7 +272,7 @@ class Content(object):
         :rtype: (pos, str_pos)
         """
         pos_list = self.get_split_positions()
-        num = re.findall("\d+", str_pos)[0]
+        num = re.findall(r"\d+", str_pos)[0]
         letter = re.findall("[a-z]", str_pos)
         entry = [num, letter[0]] if letter else [num]
 
@@ -310,7 +310,7 @@ class Content(object):
         start from 1. """
         for plugin in self.plugin_list.plugin_list:
             str_pos = plugin['pos']
-            num = str(int(re.findall("\d+", str_pos)[0]) + 1)
+            num = str(int(re.findall(r'\d+', str_pos)[0]) + 1)
             letter = re.findall("[a-z]", str_pos)
             plugin['pos'] = ''.join([num, letter[0]] if letter else [num])
 

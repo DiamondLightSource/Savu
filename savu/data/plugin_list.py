@@ -152,7 +152,7 @@ class PluginList(object):
 
     def __populate_plugins_group(self, plugins_group, plugin, count):
         if 'pos' in plugin.keys():
-            num = int(re.findall('\d+', plugin['pos'])[0])
+            num = int(re.findall(r'\d+', plugin['pos'])[0])
             letter = re.findall('[a-z]', plugin['pos'])
             letter = letter[0] if letter else ""
             plugin_group = \

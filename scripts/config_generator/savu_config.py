@@ -216,8 +216,8 @@ commands = {'open': _open,
 def main():
 
     print("Running the configurator")
-    # required for travis tests
-    if len(sys.argv) > 2 and sys.argv[-2] == 'scripts/configurator_tests/':
+    # required for running the tests locally or on travis
+    if len(sys.argv) > 2 and 'scripts/configurator_tests/' in sys.argv[-2]:
         sys.argv = [sys.argv[:-2]]
 
     args = parsers._config_arg_parser()
