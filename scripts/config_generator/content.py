@@ -190,10 +190,9 @@ class Content(object):
             if skip:
                 print(f"Skipping plugin {pos}: {name}")
             else:
-                print(f"PLUGIN ERROR: The plugin {name} is unavailable in this version of Savu.")
-                exception = True
-        if exception:
-            raise Exception('Incompatible process list.')
+                message = f"PLUGIN ERROR: The plugin {name} is unavailable in this version of Savu."
+                print(message)
+                raise Exception(f'Incompatible process list.{message}')
 
     def _mutate_plugins(self, name, pos, search=False):
         """ Perform plugin mutations. """
