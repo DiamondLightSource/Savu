@@ -17,7 +17,7 @@ dependencies:
   - tomobar
 #  - ccpi-regulariser
 #  - ccpi-reconstruction # but the ccpi downgrades tomopy to 1.4.2
-#  - i23-seg
+  - i23-seg
   - astra-toolbox
   - pyfai
   - pymca
@@ -39,4 +39,4 @@ dependencies:
       - pmacparser
       - gnureadline==6.3.8
       - sphinx-rtd-theme
-      - nvidia-ml-py
+      - nvidia-ml-py3
