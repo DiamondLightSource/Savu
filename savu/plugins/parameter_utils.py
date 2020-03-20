@@ -59,14 +59,15 @@ def _intlist(value):
 def _range(value):
     '''range'''
     parameter_valid = False
-    entries = value.split(',')
-    if len(entries) == 2:
-        if _integer(entries[0]) and _integer(entries[1]):
-            parameter_valid = True
+    if isinstance(value, tuple):
+        if len(value) == 2:
+            if _integer(value[0]) and _integer(value[1]):
+                    parameter_valid = True
+        else:
+            print(Fore.RED + '\nPlease enter two values.' + Fore.RESET)
     else:
-        print(Fore.RED + '\nPlease enter two values.' + Fore.RESET)
+            print('Valid items have a format <value 1>, <value 2>')
     return parameter_valid
-
 
 @error_catcher_valid
 def _yamlfile(value):
@@ -189,7 +190,6 @@ def _filepath(value):
 def _intpathway(value):
     # Interior file path
     parameter_valid = False
-    # Check if the entry is a string
     # Could check if valid, but only if file_path known for another parameter
     if isinstance(value, str):
         parameter_valid = True

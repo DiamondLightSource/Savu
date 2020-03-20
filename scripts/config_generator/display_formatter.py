@@ -175,7 +175,8 @@ class DisplayFormatter(object):
             for key in keys:
                 keycount += 1
                 temp = "\n   %2i)   %20s : %s"
-                params += temp % (keycount, key, p_dict['data'][key])
+                params += \
+                    temp % (keycount, key, p_dict['param'][key]['current_value'])
                 # Add description for this parameter
                 if desc:
                     params = self._append_description(desc, key, p_dict,
@@ -217,7 +218,8 @@ class DisplayFormatter(object):
             params += temp % option_text
             for opt in options:
                 opt = self._apply_lower_case(opt)
-                current_opt = self._apply_lower_case(p_dict['data'][key])
+                current_opt = \
+                    self._apply_lower_case(p_dict['param'][key]['current_value'])
                 if current_opt == opt:
                     colour = Fore.LIGHTCYAN_EX
                     verbose_color = Fore.LIGHTCYAN_EX
@@ -230,7 +232,8 @@ class DisplayFormatter(object):
                 if isinstance(desc[key][param_key], dict):
                     # If there are option descriptions present
                     options_desc = {self._apply_lower_case(k): v
-                                    for k, v in desc[key][param_key].items() if v}
+                                    for k, v in desc[key][param_key].items()
+                                    if v}
                     if opt in options_desc.keys():
                         if breakdown:
                             option_verbose += ': ' \
@@ -279,7 +282,7 @@ class DispDisplay(DisplayFormatter):
     def _get_quiet(self, p_dict, count, width, quiet=True):
         active = \
             '***OFF***' if 'active' in p_dict and not p_dict['active'] else ''
-        p_dict['data'] = self._remove_quotes(p_dict['data'])
+        p_dict['param'] = self._remove_quotes(p_dict['param'])
         pos = p_dict['pos'].strip() if 'pos' in p_dict.keys() else count
         fore = Fore.RED + Style.DIM if active else Fore.LIGHTWHITE_EX
         back = Back.LIGHTBLACK_EX
@@ -321,9 +324,10 @@ class DispDisplay(DisplayFormatter):
     def _remove_quotes(self, data_dict):
         """ Remove quotes around variables for display
         """
-        for key, val in data_dict.iteritems():
-            val = str(val).replace("'", "")
-            data_dict[key] = val
+        for key, val in data_dict.items():
+            current_val = val['current_value']
+            current_val = str(current_val).replace("'", "")
+            data_dict[key]['current_value'] = current_val
         return data_dict
 
     def _notices(self):

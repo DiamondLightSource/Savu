@@ -36,7 +36,6 @@ class Plugin(PluginDatasets):
     def __init__(self, name='Plugin'):
         super(Plugin, self).__init__()
         self.name = name
-        self.parameters = OrderedDict()
         self.chunk = False
         self.docstring_info = {}
         self.slice_list = None
@@ -44,7 +43,7 @@ class Plugin(PluginDatasets):
         self.pcount = 0
         self.exp = None
         self.check = False
-        self.tools = OrderedDict()
+        self.tools = None
         self.p_dict = OrderedDict()
 
     def initialise(self, params, exp, check=False):
@@ -90,7 +89,7 @@ class Plugin(PluginDatasets):
         for dim in dims:
             info = self.multi_params_dict[dim]
             name = info['label'].split('_param')[0]
-            self.parameters[name] = info['values'][indices[count]]
+            self.p_dict[name]['current_value'] = info['values'][indices[count]]
             count += 1
 
     def load_doc(self):
@@ -154,15 +153,9 @@ class Plugin(PluginDatasets):
 
         p_tools = self._get_plugin_tools()
         if p_tools:
-            self.tools = p_tools.plugin_tools
+            self.tools = p_tools
             self.p_dict = p_tools.get_param()
-            self.parameters = OrderedDict([(k, v['default']) for k, v in p_tools.get_param().items()])
             self.set_docstring(p_tools.get_doc().get('verbose'))
-
-    def _add_item(self, item_list, not_list):
-        true_list = [i for i in item_list if i['name'] not in not_list]
-        for item in true_list:
-            self.parameters[item['name']] = item['default']
 
     def set_docstring(self, verbose):
         desc = doc.find_args(self)
@@ -171,11 +164,11 @@ class Plugin(PluginDatasets):
         self.docstring_info['info'] = verbose
 
     def delete_parameter_entry(self, param):
-        if param in self.parameters.keys():
-            del self.parameters[param]
+        if param in self.p_dict.keys():
+            del self.p_dict[param]['current_value']
 
     def initialise_parameters(self):
-        self.parameters = {}
+        self.p_dict = OrderedDict()
         self._populate_default_parameters()
         self.multi_params_dict = {}
         self.extra_dims = []
@@ -191,9 +184,9 @@ class Plugin(PluginDatasets):
         """
         self.initialise_parameters()
         for key in parameters.keys():
-            if key in self.parameters.keys():
-                value = self.__convert_multi_params(parameters[key], key)
-                self.parameters[key] = value
+            if key in self.p_dict.keys():
+                value = self.__convert_multi_params(parameters[key]['current_value'], key)
+                self.p_dict[key]['current_value'] = value
             else:
                 error = ("Parameter '%s' is not valid for plugin %s. \nTry "
                          "opening and re-saving the process list in the "
@@ -241,7 +234,7 @@ class Plugin(PluginDatasets):
         :returns: the associated value in ``self.parameters``
         :rtype: dict value
         """
-        return self.parameters[name]
+        return self.p_dict[name]['current_value']
 
     def base_pre_process(self):
         """ This method is called after the plugin has been created by the
