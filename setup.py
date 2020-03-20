@@ -69,7 +69,6 @@ def _get_packages():
               install_pkg,
               install_pkg + '.conda-recipes',
               'test_data',
-              'lib',
               'system_files',
               'plugin_examples']
     return find_packages() + others
