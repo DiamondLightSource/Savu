@@ -252,7 +252,8 @@ if [ ! $test_flag ]; then
 
   # conda-build needed to build the savu/hdf5/h5py packages
   # cython needed to compile dezing and unwarp savu plugins
-  conda install -y -q conda-build conda-verify cython
+  # and numpy is a dependency of dezing
+  conda install -y -q conda-build conda-verify cython numpy
 
   echo "Building Savu..."
   conda build $DIR/$savu_recipe
