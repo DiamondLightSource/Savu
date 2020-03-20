@@ -249,6 +249,9 @@ if [ ! $test_flag ]; then
 
   "$miniconda_dir"/bin/conda create -y -p $env_dir
   source $miniconda_dir/bin/activate $env_dir
+  # conda create -y -p $env_dir python=3.7
+  # eval "$(conda shell.bash hook)"
+  # conda activate $env_dir
 
   # conda-build needed to build the savu/hdf5/h5py packages
   # cython needed to compile dezing and unwarp savu plugins
