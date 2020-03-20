@@ -4,7 +4,6 @@ Created on 24 May 2016
 @author: ssg37927
 '''
 
-
 import sys
 import unittest
 from mock import patch
@@ -14,7 +13,6 @@ from scripts.config_generator import savu_config
 
 
 class Test(unittest.TestCase):
-
     def savu_config_runner(self, input_list, output_checks):
         with patch('builtins.input', side_effect=input_list):
 
@@ -36,15 +34,18 @@ class Test(unittest.TestCase):
 
     def testHelpBlank(self):
         input_list = ['', 'exit', 'y']
-        output_checks = ['help :  Display the help information',
-                         'exit :  Close the program']
+        output_checks = [
+            'help :  Display the help information', 'exit :  Close the program'
+        ]
         self.savu_config_runner(input_list, output_checks)
 
     def testHelpCommand(self):
         input_list = ['help', 'exit', 'y']
-        output_checks = ['help :  Display the help information',
-                         'exit :  Close the program']
+        output_checks = [
+            'help :  Display the help information', 'exit :  Close the program'
+        ]
         self.savu_config_runner(input_list, output_checks)
+
 
 if __name__ == "__main__":
     unittest.main()
