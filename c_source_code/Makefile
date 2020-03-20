@@ -1,5 +1,10 @@
 .PHONY: distortion dezing all
 
+# This will build both dezing and distortion(unwarp)
+# and "install" them by moving the built shared objects
+# into the ../lib folder they are expected.
+# Currently this is done in ./savu_installer.sh
+# at the conda build of the savu recipe.
 all: clean dezing distortion
 	mkdir -p ../lib
 	mv dezing/dezing.cpython*.so ../lib
