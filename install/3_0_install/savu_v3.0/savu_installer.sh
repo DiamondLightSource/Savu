@@ -253,7 +253,7 @@ if [ ! $test_flag ]; then
   # conda-build needed to build the savu/hdf5/h5py packages
   # cython needed to compile dezing and unwarp savu plugins
   # and numpy is a dependency of dezing
-  conda install -y -q conda-build conda-verify cython numpy
+  conda install -y -q conda-build conda-verify
 
   echo "Building Savu..."
   conda build $DIR/$savu_recipe
@@ -276,6 +276,12 @@ if [ ! $test_flag ]; then
     cp $savu_path/system_files/$facility/mpi/savu_launcher.sh $launcher_path
     cp $savu_path/system_files/$facility/mpi/savu_mpijob.sh $launcher_path
   fi
+
+  echo "Building Dezing plugin..."
+  conda build $recipes/dezing
+  dezingbuild=$(conda build $recipes/dezing --output)
+  echo "Installing Dezing..."
+  conda install -y -q --use-local $dezingbuild
 
   if [ $local_installation = false ]; then
     echo "Installing mpi4py..."
@@ -307,7 +313,7 @@ if [ ! $test_flag ]; then
 
   # cleanup base miniconda and build artifacts
   rm $PREFIX/miniconda.sh
-  rm -rf $PREFIX/miniconda
+  # rm -rf $PREFIX/miniconda
 
   conda build purge
   conda clean -y --all

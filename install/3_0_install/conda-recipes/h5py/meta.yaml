@@ -1,4 +1,4 @@
-{% set version = "2.10.0" %} # change this
+{% set version = "2.10.0" %}
 
 package:
   name: h5py

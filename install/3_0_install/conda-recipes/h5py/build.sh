@@ -12,9 +12,10 @@ hdf5_build_no=1
 
 export LD_LIBRARY_PATH=$mpi/lib:$mpi/include:$ana_path/lib:$LD_LIBRARY_PATH
 export LD_RUN_PATH=$LD_LIBRARY_PATH
-export PYTHONPATH=$PYTHONPATH:$ana_path/lib/python3.7/site-packages
-export PATH=$PATH:$ana_path/bin/
 export CC=$mpicc
+
+source $ana_path/bin/activate $ana_path
+export PYTHONPATH=$PYTHONPATH:$(python -c 'import site; print(site.getsitepackages())')
 
 echo Running with Python: $(which python)
 $PYTHON setup.py configure --hdf5=$ana_path

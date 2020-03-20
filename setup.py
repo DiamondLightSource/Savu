@@ -125,7 +125,6 @@ setup(name='savu',
                         'data/image_test/*',
                         'data/image_test/tiffs/*',
                         'data/full_field_corrected/*'],
-                    'lib': ['*.so'],
                     'system_files': [
                         facility + '/*',
                         facility + '/mpi/*'],
