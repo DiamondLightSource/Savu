@@ -134,7 +134,7 @@ def test_run(width=2550,length=2500,batchsize=100):
          xidx=xarray[d]
          yidx=yarray[d]
          inarray[xidx,yidx,i]=100*np.random.rand()
-   
+
    print "getting slice of input"
    in50=inarray[:,:,50]
    print "setting inarray element 0 to %i"%inarray[0,0,0]
