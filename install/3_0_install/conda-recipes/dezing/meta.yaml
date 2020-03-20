@@ -1,0 +1,24 @@
+{% set version = "1.0" %}
+
+package:
+  name: dezing
+  version: {{ version }}
+
+source:
+  git_url: ../../../
+
+requirements:
+  build:
+    - python
+    - cython
+    - numpy
+
+build:
+  preserve_egg_dir: True
+  script_env:
+    - FACILITY
+
+about:
+  home: https://github.com/diamondlightsource/Savu
+  license: Apache V2 and GPL V3
+  license_file: LICENCE.txt
