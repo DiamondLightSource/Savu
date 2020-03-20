@@ -23,6 +23,7 @@ dependencies:
   - pyfftw
   - xraylib
   - PeakUtils
+  - mrcfile
   - tifffile
   - fabio
   - colorama
