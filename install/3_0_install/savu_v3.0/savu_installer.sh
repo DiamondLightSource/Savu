@@ -281,12 +281,6 @@ if [ ! $test_flag ]; then
     cp $savu_path/system_files/$facility/mpi/savu_mpijob.sh $launcher_path
   fi
 
-  echo "Building Dezing plugin..."
-  conda build $DIR/../conda-recipes/dezing
-  dezingbuild=$(conda build $DIR/../conda-recipes/dezing --output)
-  echo "Installing Dezing..."
-  conda install -y -q --use-local $dezingbuild
-
   if [ $local_installation = false ]; then
     echo "Installing mpi4py..."
     pip uninstall -y -q mpi4py || true
