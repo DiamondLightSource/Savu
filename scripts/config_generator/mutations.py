@@ -76,9 +76,9 @@ def notice_str(name, notice):
 def param_change_str(old, new, plugin, keys):
     removed = list(set(old).difference(set(new)))
     added = list(set(new).difference(set(old)))
-    replaced = [entry['old'] for k in keys for entry in param_mutations[k]
+    replaced = [entry['old'] for k in keys for entry in param_mutations[k]['params']
                 if entry['old'] in old.keys()]
-    replacing = [entry['new'] for k in keys for entry in param_mutations[k]
+    replacing = [entry['new'] for k in keys for entry in param_mutations[k]['params']
                  if entry['old'] in old.keys()]
 
     removed = [x for x in removed if x not in replaced]
