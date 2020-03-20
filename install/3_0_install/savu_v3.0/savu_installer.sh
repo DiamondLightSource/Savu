@@ -238,6 +238,7 @@ if [ ! $test_flag ]; then
   unset IFS
   string=$(awk '/^miniconda/' $versions_file)
   miniconda_version=$(echo $string | cut -d " " -f 2)
+  # TODO replace with module load python/ana if conda is not on PATH - for non-local builds!
   wget https://repo.continuum.io/miniconda/Miniconda3-$miniconda_version-Linux-x86_64.sh -O $PREFIX/miniconda.sh
 
   miniconda_dir=$PREFIX/miniconda
@@ -245,12 +246,13 @@ if [ ! $test_flag ]; then
 
   bash $PREFIX/miniconda.sh -b -p $miniconda_dir
   PYTHONHOME=$env_dir/bin
-  # rm $PREFIX/miniconda.sh
 
   "$miniconda_dir"/bin/conda create -y -p $env_dir
   source $miniconda_dir/bin/activate $env_dir
 
-  conda install -y -q conda-build conda-verify
+  # conda-build needed to build the savu/hdf5/h5py packages
+  # cython needed to compile dezing and unwarp savu plugins
+  conda install -y -q conda-build conda-verify cython
 
   echo "Building Savu..."
   conda build $DIR/$savu_recipe
@@ -298,10 +300,16 @@ if [ ! $test_flag ]; then
     conda install -y -q --use-local $h5pybuild
   else
     echo "Installing mpi4py/hdf5/h5py from conda for CI run"
-    conda env update -n savu -f $DIR/environment_ci.yml
+    conda env update -f $DIR/environment_ci.yml
   fi
-  conda env update -n savu -f $DIR/environment.yml
+  conda env update -f $DIR/environment.yml
+
+  # cleanup base miniconda and build artifacts
+  rm $PREFIX/miniconda.sh
+  rm -rf $PREFIX/miniconda
+
   conda build purge
+  conda clean -y --all
 
   echo -e "\n\t***************************************************"
   echo -e "\t          Package installation complete"
