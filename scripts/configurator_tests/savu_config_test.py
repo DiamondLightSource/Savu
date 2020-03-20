@@ -22,7 +22,7 @@ class Test(unittest.TestCase):
             try:
                 out = StringIO()
                 sys.stdout = out
-                savu_config.main()
+                savu_config.main(test=True)
                 output = out.getvalue().strip()
                 for check in output_checks:
                     assert check in output

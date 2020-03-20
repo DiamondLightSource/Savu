@@ -213,12 +213,13 @@ commands = {'open': _open,
             'history': _history}
 
 
-def main():
+def main(test=False):
 
     print("Running the configurator")
     # required for running the tests locally or on travis
-    if len(sys.argv) > 2 and 'scripts/configurator_tests/' in sys.argv[-2]:
-        sys.argv = [sys.argv[:-2]]
+    # drops the last argument from pytest which is the test file/module
+    if test:
+        sys.argv = sys.argv[:-1]
 
     args = parsers._config_arg_parser()
     if args.error:
@@ -253,6 +254,9 @@ def main():
         except KeyboardInterrupt:
             print()
             continue
+        except EOFError:
+            # makes possible exiting on CTRL + D (EOF, like Python interpreter)
+            break
 
         command, arg = in_list if len(in_list) == 2 else in_list+['']
         command = command if command else 'help'
