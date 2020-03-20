@@ -248,7 +248,8 @@ if [ ! $test_flag ]; then
   PYTHONHOME=$env_dir/bin
 
   "$miniconda_dir"/bin/conda create -y -p $env_dir
-  source $miniconda_dir/bin/activate $env_dir
+  eval "$($miniconda_dir/bin/conda shell.bash hook)"
+  conda activate $env_dir
   # conda create -y -p $env_dir python=3.7
   # eval "$(conda shell.bash hook)"
   # conda activate $env_dir
@@ -281,8 +282,8 @@ if [ ! $test_flag ]; then
   fi
 
   echo "Building Dezing plugin..."
-  conda build $recipes/dezing
-  dezingbuild=$(conda build $recipes/dezing --output)
+  conda build $DIR/../conda-recipes/dezing
+  dezingbuild=$(conda build $DIR/../conda-recipes/dezing --output)
   echo "Installing Dezing..."
   conda install -y -q --use-local $dezingbuild
 
