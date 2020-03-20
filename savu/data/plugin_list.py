@@ -119,23 +119,6 @@ class PluginList(object):
 
         plugin_file.close()
 
-    def _is_valid(self, value, subelem, pos):
-        parameter_valid = False
-        params = self.plugin_list[pos]['param']
-        if subelem in params:
-            # The parameter is within the current shown parameter list
-            p = params[subelem]
-            dtype = p['dtype']
-
-            parameter_valid = param_u.is_valid(dtype, p, value)
-            if parameter_valid is False:
-                print('\nYour input for the parameter \'%s\' must match the'
-                      ' type %s' % (subelem, dtype))
-                print(Fore.RESET)
-        else:
-            print('Not in parameter keys.')
-        return parameter_valid
-
     def _save_plugin_list(self, out_filename):
         with h5py.File(out_filename) as nxs_file:
 

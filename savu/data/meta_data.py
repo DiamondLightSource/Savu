@@ -117,3 +117,6 @@ class MetaData(object):
     def _set_dictionary(self, ddict):
         """ Set the meta data dictionary """
         self.dict = copy.deepcopy(ddict)
+
+    def __getitem__(self, key):
+        return self.dict[key]
