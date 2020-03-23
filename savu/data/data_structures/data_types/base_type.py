@@ -68,7 +68,7 @@ class BaseType(object):
         cls = cls_path.split('.')[-1]
         func = pu.load_class(mod, cls).__init__
 
-        argspec = inspect.getargspec(func)
+        argspec = inspect.getfullargspec(func)
         if len(argspec[0])-1 != len(args) + len(list(kwargs.keys())):
             raise Exception('Incorrect number of input arguments mapped.')
 
