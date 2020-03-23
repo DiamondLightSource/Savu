@@ -247,12 +247,12 @@ if [ ! $test_flag ]; then
   bash $PREFIX/miniconda.sh -b -p $miniconda_dir
   PYTHONHOME=$env_dir/bin
 
-  "$miniconda_dir"/bin/conda create -y -p $env_dir
+  "$miniconda_dir"/bin/conda create -y -p $env_dir python=3.7
+  # a bit of shuffling to remove miniconda/bin from PATH
+  # which causes a fake inconsistent environment error
+  # after the conda env update -f ... steps below
+  source $miniconda_dir/bin/deactivate
   source $miniconda_dir/bin/activate $env_dir
-  conda activate $env_dir
-  # conda create -y -p $env_dir python=3.7
-  # eval "$(conda shell.bash hook)"
-  # conda activate $env_dir
 
   # conda-build needed to build the savu/hdf5/h5py packages
   # cython needed to compile dezing and unwarp savu plugins
