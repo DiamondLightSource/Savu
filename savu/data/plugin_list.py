@@ -155,10 +155,11 @@ class PluginList(object):
             num = int(re.findall(r'\d+', plugin['pos'])[0])
             letter = re.findall('[a-z]', plugin['pos'])
             letter = letter[0] if letter else ""
-            plugin_group = \
-                plugins_group.create_group("%*i%*s" % (4, num, 1, letter))
+            group_name = "%*i%*s" % (4, num, 1, letter)
         else:
-            plugin_group = plugins_group.create_group("%*i" % (4, count))
+            group_name = "%*i" % (4, count)
+
+        plugin_group = plugins_group.create_group(group_name.encode("ascii"))
 
         plugin_group.attrs[NX_CLASS] = 'NXnote'.encode('ascii')
         required_keys = self._get_plugin_entry_template().keys()
@@ -189,12 +190,12 @@ class PluginList(object):
                 try:
                     data_dict[key] = ast.literal_eval(val)
                     continue
-                except:
+                except Exception:
                     pass
                 try:
                     data_dict[key] = yaml.load(val, Loader=yaml.SafeLoader)
                     continue
-                except:
+                except Exception:
                     pass
                 try:
                     isdict = re.findall("[\{\}]+", val)
@@ -204,7 +205,7 @@ class PluginList(object):
                     else:
                         data_dict[key] = pu.parse_config_string(val)
                     continue
-                except:
+                except Exception:
                     # for when parameter tuning with lists is added to the framework
                     if len(val.split(';')) > 1:
                         pass
@@ -224,7 +225,7 @@ class PluginList(object):
         if not isinstance(citations, list):
             citations = [citations]
         for cite in citations:
-            citation_group = group.create_group(cite.name)
+            citation_group = group.create_group(cite.name.encode("ascii"))
             cite.write(citation_group)
 
     def _save_framework_citations(self, group):
@@ -330,7 +331,7 @@ class PluginList(object):
         loaders = self._get_loaders_index()
 
         if loaders:
-            if loaders[0] is not 0 or loaders[-1] + 1 is not len(loaders):
+            if loaders[0] != 0 or loaders[-1] + 1 != len(loaders):
                 raise Exception("All loader plugins must be at the beginning "
                                 "of the plugin list")
         else:

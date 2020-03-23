@@ -46,7 +46,7 @@ for i in $(seq 0 $((nCPUs-1-nGPUs))); do CPUs+="CPU$i " ; done
 CPUs=$(echo $GPUs$CPUs | tr ' ' ,)
 
 echo "running the savu mpi local job with process parameters: $CPUs"
-#mpirun -np $nCPUs -mca btl ^openib python $filename $datafile $processfile $outpath -n $CPUs -v $options
+
 PYTHONPATH=$savupath:$PYTHONPATH mpirun -np $nCPUs -mca btl self,openib,vader -mca orte_forward_job_control 1 python $filename $datafile $processfile $outpath -n $CPUs -v $options
 
 echo "SAVU_MPI_LOCAL:: Process complete"

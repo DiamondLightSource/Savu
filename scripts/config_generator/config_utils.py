@@ -113,8 +113,7 @@ def _add_module(failed_imports, loader, module_name, error_mode):
         try:
             loader.find_module(module_name).load_module(module_name)
         except Exception as e:
-            clazz = ''.join([w.capitalize() for w in \
-                             module_name.split('.')[-1].split('_')])
+            clazz = ''.join([w.capitalize() for w in module_name.split('.')[-1].split('_')])
             failed_imports[clazz] = e
             if error_mode:
                 print(("\nUnable to load plugin %s\n%s" % (module_name, e)))
