@@ -58,7 +58,7 @@ class Content(object):
             self.param_mutations = self.check_mutations(self.param_mutations)
             self._apply_plugin_updates(skip)
 
-    def check_mutations(self, mut_dict:dict):
+    def check_mutations(self, mut_dict: dict):
         plist_version = self._version_to_float(self.plugin_list.version)
         # deleting elements while iterating invalidates the iterator
         # which raises a RuntimeError in Python 3.
@@ -72,8 +72,10 @@ class Content(object):
         return mut_dict_copy
 
     def _version_to_float(self, version):
-        if version == None:
+        if version is None:
             return 0
+        if isinstance(version, bytes):
+            version = version.decode("ascii")
         split_vals = version.split('.')
         return float('.'.join([split_vals[0], ''.join(split_vals[1:])]))
 
@@ -185,14 +187,13 @@ class Content(object):
                     break
             pos -= 1
 
-        exception = False
         for name, pos in missing[::-1]:
             if skip:
                 print(f"Skipping plugin {pos}: {name}")
             else:
                 message = f"PLUGIN ERROR: The plugin {name} is unavailable in this version of Savu."
                 print(message)
-                raise Exception(f'Incompatible process list.{message}')
+                raise Exception(f'Incompatible process list. {message}')
 
     def _mutate_plugins(self, name, pos, search=False):
         """ Perform plugin mutations. """
