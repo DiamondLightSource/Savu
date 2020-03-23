@@ -63,7 +63,7 @@ class BaseMultiModalLoader(BaseLoader):
             self.exp.meta_data.set('control', control)
             logging.debug('adding the ion chamber to the meta data')
         else:
-            logging.warn('No ion chamber information. Leaving this blank')
+            logging.warning('No ion chamber information. Leaving this blank')
 
     def set_motors(self, data_obj, entry, ltype):
         labels = [e.decode("ascii") for e in entry['data'].attrs['axes']]

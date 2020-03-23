@@ -128,7 +128,7 @@ class BaseTransportData(object):
         min_mft, max_mft = self.__get_boundaries(nFrames)
 
         if isinstance(nFrames, int) and nFrames > max_mft:
-            logging.warn("The requested %s frames excedes the maximum "
+            logging.warning("The requested %s frames excedes the maximum "
                          "preferred of %s." % (nFrames, max_mft))
             max_mft = nFrames
 

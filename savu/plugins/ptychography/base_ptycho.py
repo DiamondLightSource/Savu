@@ -41,7 +41,7 @@ class BasePtycho(Plugin, CpuPlugin):  # also make one for gpu
     def setup(self):
         self.exp.log(self.name + " Setting up the ptycho")
         in_dataset, out_dataset = self.get_datasets()
-        
+
         in_meta_data = in_dataset[0].meta_data# grab the positions from the metadata
         logging.debug('getting the positions...')
         self.positions = in_meta_data.get('xy') # get the positions and bind them
@@ -55,7 +55,7 @@ class BasePtycho(Plugin, CpuPlugin):  # also make one for gpu
         ### PROBE ###
         probe = out_dataset[0]
 #         probe_shape = in_dataset[0].get_shape()[-2:] + (self.get_num_probe_modes(),)
-        
+
         self.set_size_probe(in_dataset[0].get_shape()[-2:])
         logging.debug("##### PROBE #####")
         #print("probe shape is:%s",str(self.get_size_probe()))
@@ -71,12 +71,12 @@ class BasePtycho(Plugin, CpuPlugin):  # also make one for gpu
         logging.debug("##### OBJECT #####")
         #print("object shape is:%s",str(object_shape))
 #         print object_labels
-        
+
         object_trans.create_dataset(axis_labels=object_labels,
                                     shape=object_shape) # create the dataset
-                                    
+
         self.object_pattern_setup(object_labels, object_trans)
-        
+
         ### POSITIONS ###
         logging.debug('##### POSITIONS #####')
         positions = out_dataset[2]
@@ -86,9 +86,9 @@ class BasePtycho(Plugin, CpuPlugin):  # also make one for gpu
         #print "positions shape",positions_shape
         positions.create_dataset(axis_labels=position_labels,
                                  shape=positions_shape)
-        
+
         rest_pos = list(range(len(position_labels)))
-        
+
         pos_md = \
             {'core_dims':tuple(set(rest_pos) - set([0])), 'slice_dims':(0,)}
         positions.add_pattern("CHANNEL", **pos_md)
@@ -104,7 +104,7 @@ class BasePtycho(Plugin, CpuPlugin):  # also make one for gpu
 
     '''
     The below methods influence the set-up and can be over-ridden depending on which software package we are using
-    
+
     '''
 
     def get_plugin_pattern(self):
@@ -124,10 +124,10 @@ class BasePtycho(Plugin, CpuPlugin):  # also make one for gpu
 
     def get_num_object_modes(self):
         return 1
-    
+
     def get_positions(self):
         return self.positions
-    
+
     def get_pixel_size(self):
         return 30e-9
 
@@ -146,19 +146,19 @@ class BasePtycho(Plugin, CpuPlugin):  # also make one for gpu
 
     def get_size_object(self):
         return self.obj_shape
-    
+
     def set_size_probe(self,val):
         self.probe_size = (1,)+val + (self.get_num_probe_modes(),)
-    
+
     def get_size_probe(self):
         '''
         returns tuple
         '''
         return self.probe_size
-    
+
     def get_max_frames(self):
         return 'single'
-    
+
     def get_output_axis_units(self):
         return 'nm'
 
@@ -168,8 +168,8 @@ class BasePtycho(Plugin, CpuPlugin):  # also make one for gpu
         I've created the TIMESERIES because we could in theory have a time series of spectra
         probe_patterns: PROJECTION, TIMESERIES (for each projection), SPECTRUM (for each energy)
         object_patterns: PROJECTION, SINOGRAM, SPECTRUM (for each energy)
-        position_patterns: 1D_METADATA 
-        
+        position_patterns: 1D_METADATA
+
         '''
         probe_dims = len(probe_labels) # the number of dimensions from the axis labels
         rest_probe = list(range(probe_dims)) # all the dimensions we have
@@ -183,8 +183,8 @@ class BasePtycho(Plugin, CpuPlugin):  # also make one for gpu
         I've created the TIMESERIES because we could in theory have a time series of spectra
         probe_patterns: PROJECTION, TIMESERIES (for each projection), SPECTRUM (for each energy)
         object_patterns: PROJECTION, SINOGRAM, SPECTRUM (for each energy)
-        position_patterns: 1D_METADATA 
-        
+        position_patterns: 1D_METADATA
+
         '''
         obj_dims = len(object_labels) # the number of dimensions from the axis labels
 #         print "object has "+str(obj_dims)+"dimensions"
@@ -196,7 +196,7 @@ class BasePtycho(Plugin, CpuPlugin):  # also make one for gpu
     def setup_axis_labels(self, in_dataset):
         '''
         This is where we set up the axis labels
-        the 4D scan will contain labels that are: 'xy', 'detectorX', 'detectorY', but the data 
+        the 4D scan will contain labels that are: 'xy', 'detectorX', 'detectorY', but the data
         itself may be scanned in energy or rotation or something else. We want to remove all the above,
         and amend them to be the following (preferably with additional scan axes at the front):
         probe: 'x','y','mode_idx'
@@ -212,7 +212,7 @@ class BasePtycho(Plugin, CpuPlugin):  # also make one for gpu
         core_labels = [l + '.' + in_labels[0][l] for l in core_labels_raw] # add the units in for the ones we are keeping
         # now we just have to add the new ones to this.
         trans_units = self.get_output_axis_units()
-        
+
         probe_labels = list(core_labels) # take a copy
         probe_labels.extend(['mode_idx.number','x.' + trans_units, 'y.' + trans_units, ])
         logging.debug('the labels for the probe are:%s' % str(probe_labels))
@@ -231,7 +231,7 @@ class BasePtycho(Plugin, CpuPlugin):  # also make one for gpu
         try:
             rot_axis = probe.get_data_dimension_by_axis_label('rotation_angle', contains=True) # get the rotation axis
         except Exception as e:
-            logging.warn(str(e) + 'we were looking for "rotation_angle"')
+            logging.warning(str(e) + 'we were looking for "rotation_angle"')
             logging.debug('This is not a tomography, so no time series for the probe')
         else:
             # print('the rotation axis is:%s' % str(rot_axis))
@@ -244,7 +244,7 @@ class BasePtycho(Plugin, CpuPlugin):  # also make one for gpu
         try:
             energy_axis = probe.get_data_dimension_by_axis_label('energy', contains=True) # get an energy axis
         except Exception as e:
-            logging.warn(str(e) + 'we were looking for "energy"')
+            logging.warning(str(e) + 'we were looking for "energy"')
             logging.debug('This is not spectro-microscopy, so no spectrum/timeseries for the probe')
         else:
             probe_spec = {'core_dims':tuple(energy_axis), 'slice_dims':tuple(set(rest_probe) - set([energy_axis]))}
@@ -265,7 +265,7 @@ class BasePtycho(Plugin, CpuPlugin):  # also make one for gpu
         try:
             energy_axis = object_trans.get_data_dimension_by_axis_label('energy', contains=True) # get an energy axis
         except Exception as e:
-            logging.warn(str(e) + 'we were looking for "energy"')
+            logging.warning(str(e) + 'we were looking for "energy"')
             logging.debug('This is not spectro-microscopy, so no spectrum for the object')
         else:
             obj_spec = {'core_dims':tuple(energy_axis), 'slice_dims':tuple(set(rest_obj) - set([energy_axis]))}
@@ -277,7 +277,7 @@ class BasePtycho(Plugin, CpuPlugin):  # also make one for gpu
         try:
             rot_axis = object_trans.get_data_dimension_by_axis_label('rotation_angle', contains=True) # get the rotation axis
         except Exception as e:
-            logging.warn(str(e) + 'we were looking for "rotation_angle"')
+            logging.warning(str(e) + 'we were looking for "rotation_angle"')
             logging.debug('This is not a tomography, so no sinograms for the object transmission')
         else:
             x_axis = object_trans.get_data_dimension_by_axis_label('x', contains=True) # get the x axis

@@ -136,7 +136,7 @@ class PluginData(object):
         i = 0
         for dim in slice_dir:
             shape[dim] = slice_size[i]
-            i += 1            
+            i += 1
         return tuple(shape)
 
     def __get_slice_size(self, mft):
@@ -236,7 +236,7 @@ class PluginData(object):
             pattern['slice_dims'] = tuple(slice_dims)
 
         self.meta_data.set('slice_dims', tuple(slice_dims))
-        
+
     def get_slice_dimension(self):
         """
         Return the position of the slice dimension in relation to the data
@@ -365,7 +365,7 @@ class PluginData(object):
         if diff:
             shape = shape_before_tuning
             sdir = sdir[:-diff]
-        
+
         if 'fix_total_frames' in list(self.meta_data.get_dictionary().keys()):
             frames = self.meta_data.get('fix_total_frames')
         else:
@@ -408,7 +408,7 @@ class PluginData(object):
         if temp != 0.0 and temp < warn_threshold:
             shape = self.meta_data.get('shape')
             sdir = self.meta_data.get('sdir')
-            logging.warn('UNEVEN FRAME DISTRIBUTION: shape %s, nframes %s ' +
+            logging.warning('UNEVEN FRAME DISTRIBUTION: shape %s, nframes %s ' +
                          'sdir %s, nprocs %s', shape, nframes, sdir, nprocs)
 
     def _set_padding_dict(self):
@@ -442,7 +442,7 @@ class PluginData(object):
         if not copy and not calc:
             mft, mft_shape, mfp = self._calculate_max_frames()
         elif calc:
-            max_mft = calc.meta_data.get('max_frames_transfer')             
+            max_mft = calc.meta_data.get('max_frames_transfer')
             max_mfp = calc.meta_data.get('max_frames_process')
             max_nProc = int(np.ceil(max_mft/float(max_mfp)))
             nProc = max_nProc
@@ -486,7 +486,7 @@ class PluginData(object):
         frame_shape = self.meta_data.get('frame_shape')
         total_frames = self.meta_data.get('total_frames')
         tbytes = nBytes*np.prod(frame_shape)*total_frames
-        
+
         params = {'nBytes': nBytes, 'frame_shape': frame_shape,
                   'total_frames': total_frames, 'transfer_bytes': tbytes}
         return params

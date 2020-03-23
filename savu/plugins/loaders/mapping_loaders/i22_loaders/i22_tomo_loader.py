@@ -47,7 +47,7 @@ class I22TomoLoader(BaseLoader):
             h5py.File(exp.meta_data.get("data_file"), 'r')
         data_obj.data = data_obj.backing_file['entry/result/data']
         data_obj.set_shape(data_obj.data.shape)
-        logging.warn('the data as shape %s' % str(data_obj.data.shape))
+        logging.warning('the data as shape %s' % str(data_obj.data.shape))
         data_obj.set_axis_labels('y.units', 'x.units',
                                  'rotation_angle.degrees', 'Q.angstrom^-1')
 

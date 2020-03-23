@@ -103,7 +103,7 @@ class I18MmLoader(BaseLoader):
             inst.initialise(self.separate_params(key), self.exp)
             logging.debug(debug_str)
         except IndexError:
-            logging.warn(warn_str)
+            logging.warning(warn_str)
         except:
             raise
 

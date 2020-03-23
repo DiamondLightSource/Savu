@@ -88,7 +88,7 @@ class I18XrdLoader(BaseI18MultiModalLoader):
             mData.set("x_pixel_size",xpix)
 
             mData.set("beam_center_x",
-                    calibrationfile[det_str + '/beam_center_x'].value*1e-3) #in metres 
+                    calibrationfile[det_str + '/beam_center_x'].value*1e-3) #in metres
             mData.set("beam_center_y",
                             calibrationfile[det_str + '/beam_center_y'].value*1e-3) # in metres
             mData.set("distance",
@@ -122,7 +122,7 @@ class I18XrdLoader(BaseI18MultiModalLoader):
                 mData.set("roll", roll)
                 logging.debug('.... its the legacy version pre-DAWN 2.0')
             except KeyError:
-                logging.warn("We don't know what type of calibration file this is")
+                logging.warning("We don't know what type of calibration file this is")
 
         self.set_data_reduction_params(data_obj)
         calibrationfile.close()

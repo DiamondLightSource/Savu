@@ -103,7 +103,7 @@ class MetaData(object):
         try:
             del self.get_dictionary()[entry]
         except KeyError:
-            logging.warn("Trying to delete a dictionary entry that doesn't "
+            logging.warning("Trying to delete a dictionary entry that doesn't "
                          "exist.")
 
     def get_dictionary(self):

@@ -43,7 +43,7 @@ class ListToProjections(BaseFilter, CpuPlugin):
     def __init__(self):
         logging.debug("interpolating projections")
         super(ListToProjections, self).__init__("ListToProjections")
-        
+
     def pre_process(self):
         # assume all the projections are on the same axes
         in_datasets, _out_datasets = self.get_datasets()
@@ -54,7 +54,7 @@ class ListToProjections(BaseFilter, CpuPlugin):
         elif in_positions.ndim==2:
             positions = in_positions# assume they are the same for all postiions
         self.setup_grids(positions)
-        
+
     def process_frames(self, data):
         meshgridx, meshgridy = self.meshgrids
         data = data[0]
@@ -65,16 +65,16 @@ class ListToProjections(BaseFilter, CpuPlugin):
         elif isinstance(self.parameters['fill_value'],int):
             self.fill_value = float(self.parameters['fill_value'])
         else:
-            logging.warn("I don't recognise your fill type of:%s , using 0 instead" % self.parameters['fill_value'])
+            logging.warning("I don't recognise your fill type of:%s , using 0 instead" % self.parameters['fill_value'])
             self.fill_value = 0
-        
+
         return griddata((self.x, self.y),data, (meshgridx, meshgridy),fill_value=self.fill_value)[1:,1:]
 
     def setup(self):
         logging.debug('setting up the interpolation')
         in_dataset, out_datasets = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
-        
+
         inshape = in_dataset[0].get_shape()
 
         in_datasets, _out_datasets = self.get_datasets()
@@ -91,12 +91,12 @@ class ListToProjections(BaseFilter, CpuPlugin):
 
         if len(proj_in_core_dirs)>1:
             raise IndexError("This plugin won't work since there are more than 1 core direction for the projection")
-        
+
         outshape = list(inshape)
         proj_in_core_dirs = proj_in_core_dirs[0]
         outshape[proj_in_core_dirs] = out_projection_shape[0]
         outshape.insert(proj_in_core_dirs+1,out_projection_shape[1])
-        
+
         axis_labels = in_datasets[0].get_axis_labels()
         axis_labels = [list(ix.keys())[0]+'.'+ix[list(ix.keys())[0]] for ix in axis_labels]
         axis_labels[proj_in_core_dirs] = 'x.microns'
@@ -105,7 +105,7 @@ class ListToProjections(BaseFilter, CpuPlugin):
         allDimsOut = list(range(len(outshape)))
         proj_out_slice_dirs = list(set(allDimsOut)-set(list(proj_out_core_dirs)))
 
-        
+
         reshaped_projections = out_datasets[0]
         reshaped_projections.create_dataset(shape=tuple(outshape), axis_labels=axis_labels)
         reshaped_projections.add_pattern("PROJECTION", core_dims=proj_out_core_dirs, slice_dims=proj_out_slice_dirs)
@@ -117,7 +117,7 @@ class ListToProjections(BaseFilter, CpuPlugin):
                 dim_info = {'core_dims': core_dir, 'slice_dims': slice_dir}
                 reshaped_projections.add_pattern(pattern, **dim_info)
         out_pData[0].plugin_data_setup('PROJECTION', self.get_max_frames())
-#     
+#
     def setup_grids(self,positions):
         #print positions.shape
         x = positions[0,:]
@@ -130,14 +130,14 @@ class ListToProjections(BaseFilter, CpuPlugin):
             abs_diff_x = abs(np.diff(x))
             abs_diff_x_masked = abs_diff_x[abs_diff_x>0.1]
             self.step_size_x = min(abs_diff_x_masked)
-            
+
         if self.parameters['step_size_y'] is not None:
             self.step_size_y = self.parameters['step_size_y']
         else:
             abs_diff_y = abs(np.diff(y))
             abs_diff_y_masked = abs_diff_y[abs_diff_y>0.1]
             self.step_size_y = min(abs_diff_y_masked)
-        
+
         min_x = np.min(x)
         max_x = np.max(x)
         min_y = np.min(y)
@@ -146,7 +146,7 @@ class ListToProjections(BaseFilter, CpuPlugin):
         nptsy  = ((max_y - min_y) / self.step_size_y) +1
         grid_x = np.arange(min_x, max_x, (max_x-min_x)/ (nptsx))
         grid_y = np.arange(min_y, max_y, (max_y-min_y)/ (nptsy))
-        self.meshgrids = np.meshgrid(grid_x, grid_y) 
+        self.meshgrids = np.meshgrid(grid_x, grid_y)
 
 
     def get_max_frames(self):

@@ -80,7 +80,7 @@ class NxxrdLoader(BaseMultiModalLoader):
                 logging.debug('.... its the legacy version pre-DAWN 2.0')
             except KeyError:
                 emsg = "We don't know what type of calibration file this is"
-                logging.warn(emsg)
+                logging.warning(emsg)
         cfile.close()
 
     def _set_calibration_new(self, mData, det_str, cfile):

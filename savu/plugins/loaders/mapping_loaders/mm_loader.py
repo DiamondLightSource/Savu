@@ -119,7 +119,7 @@ class MmLoader(BaseLoader):
             # Delete the data object if it has already been created.
             if name in self.exp.index['in_data']:
                 del self.exp.index['in_data'][name]
-            logging.warn(warn_str)
+            logging.warning(warn_str)
         except:
             raise
 

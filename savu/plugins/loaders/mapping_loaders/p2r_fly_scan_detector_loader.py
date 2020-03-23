@@ -81,7 +81,7 @@ class P2rFlyScanDetectorLoader(BaseLoader):
             control = data_obj.backing_file['entry1/tomo_entry/control/data']
             data_obj.meta_data.set("control", control[...])
         except:
-            logging.warn("No Control information available")
+            logging.warning("No Control information available")
 
         nAngles = len(data_obj.meta_data.get('rotation_angle'))
         self.__check_angles(data_obj, nAngles)
@@ -193,7 +193,7 @@ class P2rFlyScanDetectorLoader(BaseLoader):
                 angles = data_obj.backing_file[entry][
                     (data_obj.data.get_image_key()) == 0, ...]
             except KeyError:
-                logging.warn("No rotation angle entry found in input file.")
+                logging.warning("No rotation angle entry found in input file.")
                 angles = np.linspace(0, 180, data_obj.get_shape()[0])
         else:
             try:

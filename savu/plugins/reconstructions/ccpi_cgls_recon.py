@@ -93,6 +93,6 @@ class CcpiCglsRecon(BaseRecon, CpuPlugin):
         n_frames = self.parameters['n_frames']
         if n_frames % 8 != 0:
             n_frames = default
-            logging.warn('incorrect number of frames requested for cgls_recon,'
+            logging.warning('incorrect number of frames requested for cgls_recon,'
                          ' using %s', default)
         return n_frames

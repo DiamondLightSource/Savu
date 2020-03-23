@@ -59,7 +59,7 @@ class NxtomoLoader(BaseLoader):
         self.warnings = []
 
     def log_warning(self, msg):
-        logging.warn(msg)
+        logging.warning(msg)
         self.warnings.append(msg)
 
     def setup(self):
@@ -239,7 +239,7 @@ class NxtomoLoader(BaseLoader):
             try:
                 angles = eval(angles)
             except Exception as e:
-                logging.warn(e.message)
+                logging.warning(e.message)
                 try:
                     angles = np.loadtxt(angles)
                 except Exception as e:

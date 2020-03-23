@@ -112,12 +112,12 @@ class VoCentering(BaseFilter, CpuPlugin):
         if minpos==0:
             self.error_msg_1 = "!!! WARNING !!! Global minimum is out of "\
             "the searching range. Please extend smin"
-            logging.warn(self.error_msg_1)
+            logging.warning(self.error_msg_1)
             cu.user_message(self.error_msg_1)
         if minpos==len(list_metric)-1:
             self.error_msg_2 = "!!! WARNING !!! Global minimum is out of "\
              "the searching range. Please extend smax"
-            logging.warn(self.error_msg_2)
+            logging.warning(self.error_msg_2)
             cu.user_message(self.error_msg_2)
         rot_centre = list_cor[minpos]
         return rot_centre
@@ -201,7 +201,7 @@ class VoCentering(BaseFilter, CpuPlugin):
                   or (self.broadcast_method == 'nearest')):
             self.error_msg_3 = "!!! WARNING !!! Selected broadcasting "\
              "method is out of the list. Use the default option: 'median'"
-            logging.warn(self.error_msg_3)
+            logging.warning(self.error_msg_3)
             cu.user_message(self.error_msg_3)
             self.broadcast_method = 'median'
         in_pData = self.get_plugin_in_datasets()[0]
