@@ -78,7 +78,7 @@ class NxtomoLoader(BaseLoader):
             self.__setup_4d(data_obj)
             self.__setup_3d_to_4d(data_obj, self.nFrames)
         else:
-            if len(data_obj.data.shape) is 3:
+            if len(data_obj.data.shape) == 3:
                 self._setup_3d(data_obj)
             else:
                 self.__setup_4d(data_obj)
