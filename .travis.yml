@@ -17,25 +17,13 @@ env:
 #    - libhdf5-serial-dev
 #    - libboost-all-dev
 
-before_install:
-  - cd $TRAVIS_BUILD_DIR/install/3_0_install/savu_v3.0
-  - ls -lah
-
 install:
   - ./savu_installer.sh --local --no_prompts --PREFIX /tmp
-  - . /tmp/miniconda/bin/activate
-  - conda list
 
 script:
+  - . /tmp/miniconda/bin/activate /tmp/savu
   - path=$(python -c "import savu; import os; print(os.path.abspath(savu.__file__))")
   - savu_path=${path%/savu/__init__.py*}
   - cd $savu_path
   - pytest scripts/configurator_tests/ -v
   - pytest savu/test/travis -v --cov savu --cov-report term-missing
-
-#after_script:
-#  - coveralls
-  
-#allow_failures:
-#    - python: "3.5"
-

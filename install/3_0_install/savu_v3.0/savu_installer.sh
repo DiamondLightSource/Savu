@@ -248,15 +248,13 @@ if [ ! $test_flag ]; then
   PYTHONHOME=$env_dir/bin
 
   "$miniconda_dir"/bin/conda create -y -p $env_dir python=3.7
-  # a bit of shuffling to remove miniconda/bin from PATH
-  # which causes a fake inconsistent environment error
-  # after the conda env update -f ... steps below
+  # removes the .../miniconda/bin from PATH
+  # which causes an inconsistent environment error
+  # after the conda env update -f ... step below
   source $miniconda_dir/bin/deactivate
   source $miniconda_dir/bin/activate $env_dir
 
-  # conda-build needed to build the savu/hdf5/h5py packages
-  # cython needed to compile dezing and unwarp savu plugins
-  # and numpy is a dependency of dezing
+  # conda-build needed to build the savu/hdf5/h5py recipes
   conda install -y -q conda-build conda-verify
 
   echo "Building Savu..."
