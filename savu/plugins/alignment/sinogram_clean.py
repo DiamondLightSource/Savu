@@ -45,21 +45,18 @@ class SinogramClean(BaseFilter, CpuPlugin):
         super(SinogramClean, self).__init__("SinogramClean")
 
     def _create_mask(self, Nrow, Ncol, obj_radius):
-        du = 1.0/Ncol
+        du = 1.0 / Ncol
         dv = (Nrow-1.0)/(Nrow*2.0*math.pi)
         cen_row = np.ceil(Nrow / 2.0)-1
         cen_col = np.ceil(Ncol / 2.0)-1
         drop = self.parameters['row_drop']
         mask = np.zeros((Nrow, Ncol), dtype=np.float32)
         for i in range(Nrow):
-            num1 = \
-                np.round(((i-cen_row)*dv/obj_radius)/du)
-            (p1, p2) = \
-                np.clip(np.sort((-num1+cen_col, num1+cen_col)), 0, Ncol-1)
+            num1 = np.round(((i-cen_row)*dv/obj_radius)/du)
+            (p1, p2) = np.clip(np.sort((-num1+cen_col, num1+cen_col)), 0, Ncol-1)
             mask[i, p1:p2+1] = np.ones(p2-p1+1, dtype=np.float32)
         if drop < cen_row:
-            mask[cen_row-drop:cen_row+drop+1, :] = \
-                np.zeros((2*drop + 1, Ncol), dtype=np.float32)
+            mask[cen_row-drop:cen_row+drop+1, :] = np.zeros((2*drop + 1, Ncol), dtype=np.float32)
         return mask
 
     def process_frames(self, data):

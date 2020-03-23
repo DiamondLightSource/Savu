@@ -128,26 +128,25 @@ class ListToProjections(BaseFilter, CpuPlugin):
             self.step_size_x = self.parameters['step_size_x']
         else:
             abs_diff_x = abs(np.diff(x))
-            abs_diff_x_masked = abs_diff_x[abs_diff_x>0.1]
+            abs_diff_x_masked = abs_diff_x[abs_diff_x > 0.1]
             self.step_size_x = min(abs_diff_x_masked)
 
         if self.parameters['step_size_y'] is not None:
             self.step_size_y = self.parameters['step_size_y']
         else:
             abs_diff_y = abs(np.diff(y))
-            abs_diff_y_masked = abs_diff_y[abs_diff_y>0.1]
+            abs_diff_y_masked = abs_diff_y[abs_diff_y > 0.1]
             self.step_size_y = min(abs_diff_y_masked)
 
         min_x = np.min(x)
         max_x = np.max(x)
         min_y = np.min(y)
         max_y = np.max(y)
-        nptsx  = ((max_x - min_x) / self.step_size_x) +1
-        nptsy  = ((max_y - min_y) / self.step_size_y) +1
-        grid_x = np.arange(min_x, max_x, (max_x-min_x)/ (nptsx))
-        grid_y = np.arange(min_y, max_y, (max_y-min_y)/ (nptsy))
+        nptsx = ((max_x - min_x) // self.step_size_x) + 1
+        nptsy = ((max_y - min_y) // self.step_size_y) + 1
+        grid_x = np.arange(min_x, max_x, (max_x-min_x) // nptsx)
+        grid_y = np.arange(min_y, max_y, (max_y-min_y) // nptsy)
         self.meshgrids = np.meshgrid(grid_x, grid_y)
-
 
     def get_max_frames(self):
         return 'single'

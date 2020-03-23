@@ -188,7 +188,7 @@ class BaseTransport(object):
         return pDict, result, nTrans
 
     def _log_completion_status(self, count, nTrans, name):
-        percent_complete = count/(nTrans * 0.01)
+        percent_complete: float = count / (nTrans * 0.01)
         cu.user_message("%s - %3i%% complete" % (name, percent_complete))
 
     def _transport_checkpoint(self):

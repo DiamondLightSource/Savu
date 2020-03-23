@@ -175,7 +175,7 @@ class BaseFluoFitter(Plugin, CpuPlugin):
                             count += 1.0
                     if(count == 0.0):
                         break
-                    linepos = linepos/count
+                    linepos = linepos // count
                     if(linepos > fitting_range[0] and
                             linepos < fitting_range[1]):
                         peakpos.append(linepos)
@@ -221,13 +221,9 @@ class BaseFluoFitter(Plugin, CpuPlugin):
     def getAreas(self, fun, x, positions, fitmatrix):
         rest = fitmatrix
         numargsinp = self.getFitFunctionNumArgs(str(fun.__name__))  # 2 in
-        npts = len(fitmatrix) / numargsinp
-        #print npts
+        npts = len(fitmatrix) // numargsinp
         weights = rest[:npts]
-        #print 'the weights are'+str(weights)
         widths = rest[npts:2*npts]
-        #print 'the widths are'+str(widths)
-        #print(len(widths))
         areas = []
         for ii in range(len(weights)):
             areas.append(np.sum(fun(weights[ii],
@@ -258,36 +254,29 @@ class BaseFluoFitter(Plugin, CpuPlugin):
         return self.lookup[key]
 
     def _resid(self, p, fun, y, x, pos):
-        #print fun.__name__
         r = y-self._spectrum_sum(fun, x, pos, *p)
-        
+
         return r
 
     def dfunc(self, p, fun, y, x, pos):
         if fun.__name__ == 'gaussian' or fun.__name__ == 'lorentzian': # took the lorentzian out. Weird
-            #print fun.__name__
             rest = p
-            #print "parameter shape is "+ str(p.shape)
-            npts = len(p) / 2
+            npts = len(p) // 2
             a = rest[:npts]
             sig = rest[npts:2*npts]
             mu = pos
-        #    print "len mu"+str(len(mu))
-        #    print "len x"+str(len(x))
             if fun.__name__ == 'gaussian':
                 da = self.spectrum_sum_dfun(fun, 1./a, x, mu, *p)
-                #dmu_mult = np.zeros((len(mu), len(x)))
                 dsig_mult = np.zeros((npts, len(x)))
                 for i in range(npts):
                     dsig_mult[i] = ((x-mu[i])**2) / sig[i]**3
                 dsig = self.spectrum_sum_dfun(fun, dsig_mult, x, mu, *p)
                 op = np.concatenate([-da, -dsig])
             elif fun.__name__ == 'lorentzian':
-                #print "hey"
                 da = self.spectrum_sum_dfun(fun, 1./a, x, mu, *p)
                 dsig = np.zeros((npts, len(x)))
                 for i in range(npts):
-                    nom = 8 * a[i]* sig[i] * (x - mu[i]) ** 2 
+                    nom = 8 * a[i] * sig[i] * (x - mu[i]) ** 2
                     denom = (sig[i]**2 + 4.0 * (x - mu[i])**2)**2
                     dsig[i] = nom / denom
                 op = np.concatenate([-da, -dsig])
@@ -297,11 +286,9 @@ class BaseFluoFitter(Plugin, CpuPlugin):
 
     def _spectrum_sum(self, fun, x, positions, *p):
         rest = np.abs(p)
-        npts = len(p) / 2
+        npts = len(p) // 2
         weights = rest[:npts]
-        #print weights
         widths = rest[npts:2*npts]
-        #print widths
         spec = np.zeros((len(x),))
         for ii in range(len(weights)):
             spec += fun(weights[ii], widths[ii], x, positions[ii])
@@ -309,12 +296,9 @@ class BaseFluoFitter(Plugin, CpuPlugin):
 
     def spectrum_sum_dfun(self, fun, multiplier, x, pos, *p):
         rest = p
-        npts = len(p) / 2
-    #    print npts
+        npts = len(p) // 2
         weights = rest[:npts]
-        #print weights
         widths = rest[npts:2*npts]
-        #print widths
         positions = pos
     #    print(len(positions))
         spec = np.zeros((npts, len(x)))
@@ -329,10 +313,6 @@ class BaseFluoFitter(Plugin, CpuPlugin):
         return spec
 
 def lorentzian(a, w, x, c):
-#     w = np.abs(w)
-#     numerator = (w**2)
-#     denominator = (x - c)**2 + w**2
-#     y = np.abs(a)*(numerator/denominator)
     y = a / (1.0 + (2.0 * (c - x) / w) ** 2)
     return y
 

@@ -41,7 +41,7 @@ class Map3dto4dh5(BaseType):
         if inspect.isclass(type(self.data)):
             self.add_base_class_with_instance(type(self.data), self.data)
 
-        new_shape = (n_angles, shape[1], shape[2], shape[0]/n_angles)
+        new_shape = (n_angles, shape[1], shape[2], shape[0] // n_angles)
         self.shape = new_shape
 
     def clone_data_args(self, args, kwargs, extras):

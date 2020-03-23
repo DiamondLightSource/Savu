@@ -115,7 +115,7 @@ class Dezinger(BaseFilter, CpuPlugin):
 
     def set_filter_padding(self, in_data, out_data):
         in_data = in_data[0]
-        self.pad = (self.parameters['kernel_size'] - 1) / 2
+        self.pad = (self.parameters['kernel_size'] - 1) // 2
         in_data.padding = {'pad_multi_frames': self.pad}
         out_data[0].padding = {'pad_multi_frames': self.pad}
 

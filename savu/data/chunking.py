@@ -191,7 +191,7 @@ class Chunking(object):
         if current_sdir == next_sdir:
             c_max = self.current[mft]
             n_max = self.next[mft]
-            least_common_multiple = (c_max*n_max)/gcd(c_max, n_max)
+            least_common_multiple = (c_max*n_max) // gcd(c_max, n_max)
             ddict = {current_sdir: least_common_multiple}
         else:
             ddict = {self.current['slice_dims'][0]: self.current[mft],
@@ -214,7 +214,7 @@ class Chunking(object):
         Calculate the max possible frames per process
         """
         nSlices = allslices if allslices else shape
-        total_plugin_runs = np.ceil(float(nSlices)/nFrames)
+        total_plugin_runs = np.ceil(float(nSlices) / nFrames)
         frame_list = np.arange(total_plugin_runs)
         nProcs = len(self.exp.meta_data.get('processes'))
         frame_list_per_proc = np.array_split(frame_list, nProcs)

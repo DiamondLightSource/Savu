@@ -67,7 +67,7 @@ class BaseFitter(Plugin, CpuPlugin):
                                  shape=outshape)
 
         channel = {'core_dims': (-1,), 'slice_dims': list(range(len(shape)-1))}
-        
+
         fitAreas.add_pattern("CHANNEL", **channel)
         fitHeights.add_pattern("CHANNEL", **channel)
         fitWidths.add_pattern("CHANNEL", **channel)
@@ -91,7 +91,7 @@ class BaseFitter(Plugin, CpuPlugin):
 
     def nOutput_datasets(self):
         return 4
-    
+
     def setPositions(self, in_meta_data):
         try:
             positions = in_meta_data.get('PeakIndex')
@@ -102,34 +102,28 @@ class BaseFitter(Plugin, CpuPlugin):
     def _resid(self, p, fun, y, x, pos):
         #print fun.__name__
         r = y-self._spectrum_sum(fun, x, pos, *p)
-        
+
         return r
-    
+
     def dfunc(self, p, fun, y, x, pos):
-        if fun.__name__ == 'gaussian' or fun.__name__ == 'lorentzian': # took the lorentzian out. Weird
-            #print fun.__name__
+        if fun.__name__ == 'gaussian' or fun.__name__ == 'lorentzian':  # took the lorentzian out. Weird
             rest = p
-            #print "parameter shape is "+ str(p.shape)
-            npts = len(p) / 2
+            npts = len(p) // 2
             a = rest[:npts]
             sig = rest[npts:2*npts]
             mu = pos
-        #    print "len mu"+str(len(mu))
-        #    print "len x"+str(len(x))
             if fun.__name__ == 'gaussian':
-                da = self.spectrum_sum_dfun(fun, 1./a, x, mu, *p)
-                #dmu_mult = np.zeros((len(mu), len(x)))
+                da = self.spectrum_sum_dfun(fun, 1. / a, x, mu, *p)
                 dsig_mult = np.zeros((npts, len(x)))
                 for i in range(npts):
                     dsig_mult[i] = ((x-mu[i])**2) / sig[i]**3
                 dsig = self.spectrum_sum_dfun(fun, dsig_mult, x, mu, *p)
                 op = np.concatenate([-da, -dsig])
             elif fun.__name__ == 'lorentzian':
-                #print "hey"
-                da = self.spectrum_sum_dfun(fun, 1./a, x, mu, *p)
+                da = self.spectrum_sum_dfun(fun, 1. / a, x, mu, *p)
                 dsig = np.zeros((npts, len(x)))
                 for i in range(npts):
-                    nom = 8 * a[i]* sig[i] * (x - mu[i]) ** 2 
+                    nom = 8 * a[i]* sig[i] * (x - mu[i]) ** 2
                     denom = (sig[i]**2 + 4.0 * (x - mu[i])**2)**2
                     dsig[i] = nom / denom
                 op = np.concatenate([-da, -dsig])
@@ -139,28 +133,20 @@ class BaseFitter(Plugin, CpuPlugin):
 
     def _spectrum_sum(self, fun, x, positions, *p):
         rest = np.abs(p)
-        npts = len(p) / 2
+        npts = len(p) // 2
         weights = rest[:npts]
-        #print weights
         widths = rest[npts:2*npts]
-        #print widths
         spec = np.zeros((len(x),))
         for ii in range(len(weights)):
             spec += fun(weights[ii], widths[ii], x, positions[ii])
         return spec
 
-    def getFitFunction(self,key):
-        self.lookup = {
-                       "lorentzian": lorentzian,
-                       "gaussian": gaussian
-                       }
+    def getFitFunction(self, key):
+        self.lookup = {"lorentzian": lorentzian, "gaussian": gaussian}
         return self.lookup[key]
-    
-    def getFitFunctionNumArgs(self,key):
-        self.lookup = {
-                       "lorentzian": 2,
-                       "gaussian": 2
-                       }
+
+    def getFitFunctionNumArgs(self, key):
+        self.lookup = {"lorentzian": 2, "gaussian": 2}
         return self.lookup[key]
 
     def getAreas(self, fun, x, positions, fitmatrix):
@@ -184,31 +170,17 @@ class BaseFitter(Plugin, CpuPlugin):
 
     def spectrum_sum_dfun(self, fun, multiplier, x, pos, *p):
         rest = p
-        npts = len(p) / 2
-    #    print npts
+        npts = len(p) // 2
         weights = rest[:npts]
-        #print weights
         widths = rest[npts:2*npts]
-        #print widths
         positions = pos
-    #    print(len(positions))
         spec = np.zeros((npts, len(x)))
-        #print "len x is "+str(len(spec))
-    #    print len(spec), type(spec)
-    #    print len(positions), type(positions)
-    #    print len(weights), type(weights)
         for ii in range(len(weights)):
-            spec[ii] = multiplier[ii]*fun(weights[ii],
-                                          widths[ii],
-                                          x, positions[ii])
+            spec[ii] = multiplier[ii]*fun(weights[ii], widths[ii], x, positions[ii])
         return spec
 
 
 def lorentzian(a, w, x, c):
-#     w = np.abs(w)
-#     numerator = (w**2)
-#     denominator = (x - c)**2 + w**2
-#     y = np.abs(a)*(numerator/denominator)
     y = a / (1.0 + (2.0 * (c - x) / w) ** 2)
     return y
 

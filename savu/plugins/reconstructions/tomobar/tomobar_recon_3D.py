@@ -103,7 +103,7 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
                             str(dim_volY) + '.voxel_y.voxels',
                             str(dim_volZ) + '.voxel_z.voxels']}
 
-        # specify reconstructed volume dimensions       
+        # specify reconstructed volume dimensions
         self.output_size = self._get_output_size(in_dataset[0])
         shape = list(in_dataset[0].get_shape())
         rot_dim = in_dataset[0].get_data_dimension_by_axis_label(
@@ -198,7 +198,6 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
         dim_tuple = np.shape(projdata3D)
         self.Horiz_det = dim_tuple[self.det_dimX_ind]
 
-        # print(np.shape(projdata3D))
         projdata3D = np.swapaxes(projdata3D, 0, 1)
         # WIP for PWLS fidelity
         # rawdata3D = data[1].astype(np.float32)

@@ -67,7 +67,7 @@ class MPI_setup(object):
         options['processes'] = all_processes
         rank = MPI.COMM_WORLD.rank
         options['process'] = rank
-        node_number = rank_map.index(rank)/n_cores_per_node
+        node_number = rank_map.index(rank) // n_cores_per_node
         local_name = all_processes[rank]
 
         self.__set_logger_parallel("%03i" % node_number, local_name, options)
@@ -103,7 +103,7 @@ class MPI_setup(object):
     def __set_logger_parallel(self, number, rank, options):
         """ Set parallel logger.
         """
-        machine = 'M%-5s%-6s' % (number, rank)        
+        machine = 'M%-5s%-6s' % (number, rank)
         log_format = 'L %(relativeCreated)12d ' + machine +\
                      ' %(levelname)-6s %(message)s'
         level = cu._get_log_level(options)

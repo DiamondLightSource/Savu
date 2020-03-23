@@ -165,7 +165,7 @@ class BaseRecon(Plugin):
         sdirs = inData.get_slice_dimensions()
         total_frames = np.prod([inData.get_shape()[i] for i in sdirs])
         if total_frames > len(cor):
-            cor = np.tile(cor, total_frames/len(cor))
+            cor = np.tile(cor, total_frames // len(cor))
         return cor
 
     def __polyfit_cor(self, cor_dict, inData):
@@ -278,7 +278,7 @@ class BaseRecon(Plugin):
         centre_pad = self.br_array_pad(cor, sino.shape[detX])
         sino_width = sino.shape[detX]
         new_width = sino_width + max(centre_pad)
-        sino_pad = int(math.ceil(float(sino_width)/new_width * self.sino_pad) // 2)
+        sino_pad = int(math.ceil(float(sino_width) / new_width * self.sino_pad) // 2)
         pad = np.array([sino_pad]*2) + centre_pad
         return pad
 

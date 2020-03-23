@@ -70,14 +70,14 @@ class RalFit(BaseFitter):
                                           'nlls_method': 4,
                                           'stop_g_absolute': 1e-7,
                                           'stop_g_relative': 1e-7,
-                                          'relative_tr_radius': 0, 
+                                          'relative_tr_radius': 0,
                                           'initial_radius_scale': 1.0,
                                           'maximum_radius': 1e8,
                                           'eta_successful':1e-8,
                                           'eta_success_but_reduce': 1e-8,
                                           'eta_very_successful':0.9,
                                           'eta_too_successful': 2.0,
-                                          'radius_increase': 2.0, 
+                                          'radius_increase': 2.0,
                                           'radius_reduce': 0.5,
                                           'radius_reduce_max': 1/16,
                                           'tr_update_strategy': 2,
@@ -155,7 +155,7 @@ class RalFit(BaseFitter):
     #     print fun.__name__
         print("Here")
         rest = p
-        npts = len(p) / 2
+        npts = len(p) // 2
         order = 1
         if (order == 1):
             a = rest[:npts].astype('float64')
@@ -166,32 +166,22 @@ class RalFit(BaseFitter):
         else:
             raise NameError('Bad value of order')
         mu = pos.astype('float64')
-        da = self.spectrum_sum_dfun(fun, 1./a, x, mu, order, *p).astype('float64')
-    #     dsig_mult = np.zeros((len(mu), len(x))).astype('float64')
-    #     for i in range(len(mu)):
-    #         #dmu_mult[i] = 2.0*(x-mu[i])/((x-mu[i])**2+sig[i]**2)
-    #         nom =  2.0*sig[i]**2
-    #         denom = ((x-mu[i])**2+sig[i]**2)
-    #         print str(nom)
-    #         print str(denom)
-    #         dsig_mult[i] =  1.0 - nom /denom # a minus here makes it work somewhat better...
-    #         print dsig_mult[i]
-    #     dsig = spectrum_sum_dfun(fun, dsig_mult, x, mu, order, *p)
-    #     da = spectrum_sum_dfun(fun, 1./a, x, mu, *p)
+        da = self.spectrum_sum_dfun(fun, 1. / a, x, mu, order, *p).astype('float64')
+
         dsig = np.zeros((npts, len(x)))
         for i in range(npts):
-            nom = 8 * a[i]* sig[i] * (x - mu[i]) ** 2 
+            nom = 8 * a[i] * sig[i] * (x - mu[i]) ** 2
             denom = (sig[i]**2 + 4.0 * (x - mu[i])**2)**2
             dsig[i] = nom / denom
     #     op = np.concatenate([-da, -dsig])
         if (order == 1):
             op = np.concatenate([-da, -dsig])
         elif (order == 2):
-            op = np.empty((2*npts,len(y)))
+            op = np.empty((2 * npts, len(y)))
             op[::2,:] = -da
             op[1::2,:] = -dsig
-            
+
 #         if (transpose == 1):
         op = np.transpose(op)
-    
+
         return op
