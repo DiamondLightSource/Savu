@@ -10,7 +10,7 @@ export LD_RUN_PATH=$LD_LIBRARY_PATH
 ana_path=$(command -v savu)
 
 CC=$mpicc ./configure --with-zlib --enable-parallel --enable-shared --prefix=$PREFIX
-make
+make -j$(nproc)
 make install
 
 rm -rf $PREFIX/share/hdf5_examples
