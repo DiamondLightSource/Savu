@@ -214,6 +214,13 @@ commands = {'open': _open,
 
 
 def main(test=False):
+    """
+    :param test: If test is True the last argument from sys.argv is removed,
+                 as it contains the directory of the test scripts, which fails the
+                 parsing of the arguments as it has an unexpected argument.
+
+                 If test is False then nothing is touched.
+    """
 
     print("Running the configurator")
     # required for running the tests locally or on travis

@@ -66,6 +66,10 @@ if __name__ == "__main__":
             path = os.path.join(test_path, f)
         else:
             path = os.path.join(test_path2, f)
+
+        # generates a function that calls refresh_process_file for each file
         test = generate_test(path)
+        # then sets the function as an attribute of the test class, so that
+        # every process list is ran as an independent test
         setattr(RefreshProcessListsTest, f"test_{path}", test)
     unittest.main()
