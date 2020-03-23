@@ -24,6 +24,7 @@
 import copy
 import logging
 import numpy as np
+from typing import List
 
 
 class BaseTransportData(object):
@@ -290,7 +291,7 @@ class BaseTransportData(object):
     def _find_best_frame_distribution(self, flist, nframes, nprocs, idx=False):
         """ Determine which of the numbers in the list of possible frame
         chunks gives the best distribution of frames per process. """
-        multi_list = [(nframes/float(v)) // nprocs for v in flist]
+        multi_list: List[float] = [(nframes / float(v)) / nprocs for v in flist]
         min_val, closest_lower_idx = self._find_closest_lower(multi_list, 1)
         if idx:
             return flist[closest_lower_idx], closest_lower_idx
