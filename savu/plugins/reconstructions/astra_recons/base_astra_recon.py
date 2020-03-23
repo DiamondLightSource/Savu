@@ -95,7 +95,7 @@ class BaseAstraRecon(BaseRecon):
 
     def set_mask(self, shape):
         l = self.get_plugin_out_datasets()[0].get_shape()[0]
-        c = np.linspace(-l/2.0, l/2.0, l)
+        c = np.linspace(-l / 2.0, l / 2.0, l)
         x, y = np.meshgrid(c, c)
         r = (shape[self.dim_detX]-1)*self.parameters['ratio']
 
@@ -103,7 +103,7 @@ class BaseAstraRecon(BaseRecon):
             else False
         if not outer_pad:
             self.manual_mask = \
-                np.array((x**2 + y**2 < (r/2.0)**2), dtype=np.float)
+                np.array((x**2 + y**2 < (r / 2.0)**2), dtype=np.float)
             self.manual_mask[self.manual_mask == 0] = np.nan
         else:
             self.manual_mask = False

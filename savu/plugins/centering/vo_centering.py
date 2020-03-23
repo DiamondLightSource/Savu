@@ -15,7 +15,7 @@
 .. module:: vo_centering
    :platform: Unix
    :synopsis: A plugin to find the center of rotation per frame
-.. moduleauthor:: Mark Basham, Nghia Vo, Nicola Wadeson \ 
+.. moduleauthor:: Mark Basham, Nghia Vo, Nicola Wadeson \
                     <scientificsoftware@diamond.ac.uk>
 """
 from savu.plugins.driver.cpu_plugin import CpuPlugin
@@ -167,11 +167,11 @@ class VoCentering(BaseFilter, CpuPlugin):
         Return:     - Downsampled image.
         """
         (height, width) = image.shape
-        dsp_fact0 = np.clip(np.int16(dsp_fact0), 1, height//2)
-        dsp_fact1 = np.clip(np.int16(dsp_fact1), 1, width//2)
+        dsp_fact0 = np.clip(np.int16(dsp_fact0), 1, height // 2)
+        dsp_fact1 = np.clip(np.int16(dsp_fact1), 1, width // 2)
         height_dsp = height//dsp_fact0
         width_dsp = width//dsp_fact1
-        if  (dsp_fact0 == 1) and (dsp_fact1 ==1):
+        if dsp_fact0 == 1 and dsp_fact1 == 1:
             image_dsp = image
         else:
             image_dsp = image[0:dsp_fact0*height_dsp,0:dsp_fact1*width_dsp]
@@ -181,7 +181,7 @@ class VoCentering(BaseFilter, CpuPlugin):
 
     def set_filter_padding(self, in_data, out_data):
         padding = np.int16(self.parameters['average_radius'])
-        if padding>0: 
+        if padding>0:
             in_data[0].padding = {'pad_multi_frames': padding}
 
     def pre_process(self):
@@ -194,7 +194,7 @@ class VoCentering(BaseFilter, CpuPlugin):
         self.broadcast_method = str(self.parameters['broadcast_method'])
         self.error_msg_1 = ""
         self.error_msg_2 = ""
-        self.error_msg_3 = "" 
+        self.error_msg_3 = ""
         if not((self.broadcast_method == 'mean')
                 or (self.broadcast_method == 'median')
                  or (self.broadcast_method == 'linear_fit')
@@ -236,9 +236,9 @@ class VoCentering(BaseFilter, CpuPlugin):
         sino_fsearch = ndi.gaussian_filter(sino, (2,2), mode='reflect')
         sino_dsp = self._downsample(sino_csearch, dsp_row, dsp_col)
         fine_srange = max(self.search_radius, dsp_col)
-        off_set = 0.5*dsp_col if dsp_col>1 else 0.0
+        off_set = 0.5*dsp_col if dsp_col > 1 else 0.0
         if self.est_cor is None:
-            self.est_cor = (ncol-1.0)/2.0
+            self.est_cor = (ncol-1.0) / 2.0
         else:
             self.est_cor = np.float32(self.est_cor)
         start_cor = np.int16(
@@ -341,35 +341,35 @@ class VoCentering(BaseFilter, CpuPlugin):
     def get_citation_information(self):
         cite_info = CitationInformation()
         cite_info.description = \
-            ("The center of rotation for this reconstruction was calculated " + 
+            ("The center of rotation for this reconstruction was calculated " +
              "automatically using the method described in this work")
         cite_info.bibtex = \
-            ("@article{vo2014reliable,\n" + 
-             "title={Reliable method for calculating the center of rotation " + 
-             "in parallel-beam tomography},\n" + 
-             "author={Vo, Nghia T and Drakopoulos, Michael and Atwood, " + 
-             "Robert C and Reinhard, Christina},\n" + 
-             "journal={Optics Express},\n" + 
-             "volume={22},\n" + 
-             "number={16},\n" + 
-             "pages={19078--19086},\n" + 
-             "year={2014},\n" + 
-             "publisher={Optical Society of America}\n" + 
+            ("@article{vo2014reliable,\n" +
+             "title={Reliable method for calculating the center of rotation " +
+             "in parallel-beam tomography},\n" +
+             "author={Vo, Nghia T and Drakopoulos, Michael and Atwood, " +
+             "Robert C and Reinhard, Christina},\n" +
+             "journal={Optics Express},\n" +
+             "volume={22},\n" +
+             "number={16},\n" +
+             "pages={19078--19086},\n" +
+             "year={2014},\n" +
+             "publisher={Optical Society of America}\n" +
              "}")
         cite_info.endnote = \
-            ("%0 Journal Article\n" + 
-             "%T Reliable method for calculating the center of rotation in " + 
-             "parallel-beam tomography\n" + 
-             "%A Vo, Nghia T\n" + 
-             "%A Drakopoulos, Michael\n" + 
-             "%A Atwood, Robert C\n" + 
-             "%A Reinhard, Christina\n" + 
-             "%J Optics Express\n" + 
-             "%V 22\n" + 
-             "%N 16\n" + 
-             "%P 19078-19086\n" + 
-             "%@ 1094-4087\n" + 
-             "%D 2014\n" + 
+            ("%0 Journal Article\n" +
+             "%T Reliable method for calculating the center of rotation in " +
+             "parallel-beam tomography\n" +
+             "%A Vo, Nghia T\n" +
+             "%A Drakopoulos, Michael\n" +
+             "%A Atwood, Robert C\n" +
+             "%A Reinhard, Christina\n" +
+             "%J Optics Express\n" +
+             "%V 22\n" +
+             "%N 16\n" +
+             "%P 19078-19086\n" +
+             "%@ 1094-4087\n" +
+             "%D 2014\n" +
              "%I Optical Society of America")
         cite_info.doi = "https://doi.org/10.1364/OE.22.019078"
         return cite_info
@@ -378,7 +378,7 @@ class VoCentering(BaseFilter, CpuPlugin):
         if ((self.error_msg_1 == "")
              and (self.error_msg_2 == "")):
             msg = "Centre of rotation is : %s" % (str(self.cor_for_executive_summary))
-        else:            
+        else:
             msg = "\n" + self.error_msg_1 + "\n" + self.error_msg_2
             msg2 = "(Not well) estimated centre of rotation is : %s" % (str(
                 self.cor_for_executive_summary))

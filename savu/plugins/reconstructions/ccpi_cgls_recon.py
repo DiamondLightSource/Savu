@@ -78,14 +78,14 @@ class CcpiCglsRecon(BaseRecon, CpuPlugin):
         width = nPixels - 1.0
         alen = ctr
         blen = width - ctr
-        mid = (width-1.0)/2.0
+        mid = (width-1.0) / 2.0
         shift = round(abs(blen-alen))
         p_low = 0 if (ctr > mid) else shift
         p_high = shift + 0 if (ctr > mid) else 0
         pad = max(p_low, p_high)
         if pad == 0:
             return 0, -1
-        return int(pad/2-1), int(-np.ceil(pad/2.0))
+        return int(pad / 2.0 - 1), int(-np.ceil(pad / 2.0))
 
     def get_max_frames(self):
         # this algorithm requires a multiple of 8 frames

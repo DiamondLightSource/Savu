@@ -83,10 +83,10 @@ class AstraReconGpu(BaseAstraRecon, GpuPlugin):
         self.slice_dir = pData.get_slice_dimension()
         self.slice_func = self.slice_sino(self.nDims)
         l = self.sino_shape[self.sino_dim_detX]
-        c = np.linspace(-l/2.0, l/2.0, l)
+        c = np.linspace(-l / 2.0, l / 2.0, l)
         x, y = np.meshgrid(c, c)
         self.mask_id = False
-        mask = np.array((x**2 + y**2 < (l/2.0)**2), dtype=np.float)
+        mask = np.array((x**2 + y**2 < (l / 2.0)**2), dtype=np.float)
         self.mask = np.transpose(
             np.tile(mask, (self.get_max_frames(), 1, 1)), (1, 0, 2))
         self.manual_mask = True if not self.parameters['sino_pad'] else False
@@ -170,7 +170,7 @@ class AstraReconGpu(BaseAstraRecon, GpuPlugin):
         # add a mask
         angles = np.deg2rad(angles)
         vectors = np.zeros((len(angles), 12))
-        shift = detX/2.0 - cors[0] # temporary
+        shift = detX / 2.0 - cors[0]
         for i in range(len(angles)):
             # ray direction
             vectors[i, 0] = np.cos(angles[i])

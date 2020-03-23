@@ -113,11 +113,11 @@ class SliceLists(object):
         for c in core_dirs:
             if (chunks[c]) > 1:
                 if (stops[c] - starts[c] == 1):
-                    start = starts[c] - int(chunks[c]/2)
+                    start = starts[c] - int(chunks[c] / 2.0)
                     if start < 0:
                         raise Exception('Cannot have a negative value in the '
                                         'slice list.')
-                    stop = starts[c] + (chunks[c] - int(chunks[c]/2))
+                    stop = starts[c] + (chunks[c] - int(chunks[c] / 2.0))
                     core_slice.append(slice(start, stop, 1))
                 else:
                     raise Exception("The core dimension does not support "
@@ -133,7 +133,7 @@ class SliceLists(object):
         sdir_shape = [shape[i] for i in slice_dirs]
         split, split_dim = self.__get_split_length(max_frames, sdir_shape)
         split_list = self._split_list(slice_list, split)
-        
+
         banked = []
         for s in split_list:
             b = self._split_list(s, max_frames)

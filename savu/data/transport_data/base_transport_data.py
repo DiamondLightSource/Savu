@@ -218,7 +218,7 @@ class BaseTransportData(object):
             self.data.get_preview().get_starts_stops_steps()
         chunk = chunks[dim]
         a = np.tile(np.arange(starts[dim], stops[dim], steps[dim]), (chunk, 1))
-        b = np.transpose(np.tile(np.arange(chunk)-chunk/2, (a.shape[1], 1)))
+        b = np.transpose(np.tile(np.arange(chunk)-chunk // 2, (a.shape[1], 1)))
         dim_idx = a + b
         if dim_idx[dim_idx < 0].size:
             raise Exception('Cannot have a negative value in the slice list.')

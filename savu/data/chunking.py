@@ -60,7 +60,7 @@ class Chunking(object):
                    chunks[i] > 1]
             idx = idx if idx else [i for i in dims if chunks[i] > 1]
             if idx:
-                chunks[idx[0]] = int(np.ceil(chunks[idx[0]]/2.0))
+                chunks[idx[0]] = int(np.ceil(chunks[idx[0]] / 2.0))
                 return tuple(chunks)
             else:
                 raise Exception('There is an error in the lustre workaround')
@@ -100,7 +100,7 @@ class Chunking(object):
 
         for i in range(array_len):
             adjust_max[i] = shape[adjust_dim[i]]
-        
+
         inc_dict = {'up': [1]*array_len, 'down': [1]*array_len}
         bounds = {'min': [1]*array_len, 'max': adjust_max}
         return {'dim': adjust_dim, 'inc': inc_dict, 'bounds': bounds}
@@ -142,14 +142,14 @@ class Chunking(object):
 
     def __core_core(self, dim, adj_idx, adjust, shape):
         adjust['inc']['up'][adj_idx] = '+1'
-        adjust['inc']['down'][adj_idx] = '/2'
+        adjust['inc']['down'][adj_idx] = '//2'
         adjust['bounds']['max'][adj_idx] = shape[dim]
         return shape[dim]
 
     def __core_slice(self, dim, adj_idx, adjust, shape):
         max_frames = self.__get_max_frames_dict()[dim]
         adjust['inc']['up'][adj_idx] = '+' + str(max_frames)
-        adjust['inc']['down'][adj_idx] = '/2' # '-' + str(max_frames)
+        adjust['inc']['down'][adj_idx] = '//2'  # '-' + str(max_frames)
 
         # which is the slice dimension: current or next?
         ddict = self.current if dim in self.current['slice_dims'] else self.next
@@ -168,7 +168,7 @@ class Chunking(object):
     def __slice_slice(self, dim, adj_idx, adjust, shape):
         max_frames = self.__get_max_frames_dict()[dim]
         adjust['inc']['up'][adj_idx] = '+' + str(max_frames)
-        adjust['inc']['down'][adj_idx] = '/2' # '-' + str(max_frames)
+        adjust['inc']['down'][adj_idx] = '//2'
 
         shape1 = np.prod([shape[s] for s in self.current['slice_dims']])
         shape2 = np.prod([shape[s] for s in self.next['slice_dims']])
@@ -283,7 +283,7 @@ class Chunking(object):
 
     def __get_idx_order(self, adjust, chunks, direction):
         process_order = [self.slice1, self.core]
-        sl = slice(None, None, -1) 
+        sl = slice(None, None, -1)
         if direction is 'up':
             sl = slice(None, None, 1)
             process_order = process_order[::-1]

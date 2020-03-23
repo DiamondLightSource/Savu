@@ -65,8 +65,8 @@ class RavenFilter(BaseFilter, CpuPlugin):
         u0 = np.abs(self.parameters['uvalue'])
         n = np.abs(self.parameters['nvalue'])
         # Create filter
-        centerx = np.ceil(width1/2.0)-1.0
-        centery = np.int16(np.ceil(height1/2.0)-1)
+        centerx = np.ceil(width1 / 2.0) - 1.0
+        centery = np.int16(np.ceil(height1 / 2.0) - 1)
         self.row1 = centery - v0
         self.row2 = centery + v0+1
         listx = np.arange(width1)-centerx

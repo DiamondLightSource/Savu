@@ -40,7 +40,7 @@ def _set_preview_note():
                 represents the set of indices specified by:
 
                 >>> a = np.tile(np.arange(start, stop, step), (chunk, 1))
-                >>> b = np.transpose(np.tile(np.arange(chunk)-chunk/2, \
+                >>> b = np.transpose(np.tile(np.arange(chunk)-chunk // 2, \
 (a.shape[1], 1)))
                 >>> indices = np.ravel(np.transpose(a + b))
 
@@ -52,16 +52,16 @@ def _set_preview_note():
                     then the list is invalid. When chunk > 1, new start and
                     end values will be:
 
-                    >>> new_start = start - int(chunk/2)
+                    >>> new_start = start - int(chunk / 2)
                     >>> new_end = range(start, stop, step)[-1] + \
-(step - int(chunk/2))
+(step - int(chunk / 2))
 
         **accepted values**:
             Each entry is executed using :func:`eval` so simple formulas are\
             allowed and may contain the following keywords:
 
             * ``:`` is a simplification for 0:end:1:1 (all values)
-            * ``mid`` is int(shape[dim]/2)-1
+            * ``mid`` is int(shape[dim] / 2)-1
             * ``end`` is shape[dim]
     """
 

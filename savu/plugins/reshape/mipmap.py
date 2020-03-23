@@ -14,7 +14,7 @@
 """
 .. module:: mipmaping plugin (a pyramid-like data downampling)
    :platform: Unix
-   :synopsis:A plugin to downsample multidimensional data 
+   :synopsis:A plugin to downsample multidimensional data
 .. moduleauthor:: Mark Basham & Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
 
@@ -35,7 +35,7 @@ class Mipmap(Plugin, CpuPlugin):
     A plugin to downsample multidimensional data successively by powers of 2.\
     The output is multiple 'mipmapped' datasets, each a power of 2 smaller in \
     each dimension than the previous dataset.
-    
+
     :u*param mode: One of 'mean', 'median', 'min', 'max'. Default: 'mean'.
     :u*param n_mipmaps:  The number of successive downsamples of powers of 2 \
         (e.g. n_mipmaps=3 implies downsamples (of the original data) of \
@@ -93,7 +93,7 @@ class Mipmap(Plugin, CpuPlugin):
             out_dataset[i].create_dataset(axis_labels=in_dataset[0],
                                           patterns=in_dataset[0],
                                           shape=shape)
-            out_pData[i].plugin_data_setup('VOLUME_XZ', max_frames/2**i,
+            out_pData[i].plugin_data_setup('VOLUME_XZ', max_frames / 2**i,
                      slice_axis='voxel_y')
 
     def nInput_datasets(self):
@@ -103,7 +103,7 @@ class Mipmap(Plugin, CpuPlugin):
         n_mipmaps = self.parameters['n_mipmaps']
         name = self.parameters['out_dataset_prefix']
         self.parameters['out_datasets'] = \
-            ['%s_%i' % (name, 2**i) for i in range(n_mipmaps)]        
+            ['%s_%i' % (name, 2**i) for i in range(n_mipmaps)]
         return n_mipmaps
 
     def get_max_frames(self):

@@ -77,8 +77,8 @@ class Preview(object):
         for i in range(len(preview_list)):
             if preview_list[i] == 'nprocs':
                 nprocs = self.get_data_obj().exp.meta_data.get('nProcesses')
-                start = int(np.floor(nprocs/2.0))
-                end = int(np.ceil(nprocs/2.0))
+                start = int(np.floor(nprocs / 2.0))
+                end = int(np.ceil(nprocs / 2.0))
                 preview_list[i] = f'mid-{start}:mid-{end}'
         return preview_list
 
@@ -166,7 +166,7 @@ class Preview(object):
         """
         dobj = self.get_data_obj()
         shape = dobj.get_shape()
-        mid = np.clip(np.ceil(shape[dim]/2.0).astype('int') - 1, 0, None)
+        mid = np.clip(np.ceil(shape[dim] / 2.0).astype('int') - 1, 0, None)
         end = shape[dim]
         idx = [eval(equ, {"builtins": None}, {'mid': mid, 'end': end}) for equ in idx]
         idx = [idx[i] if idx[i] > -1 else shape[dim]+1+idx[i] for i in

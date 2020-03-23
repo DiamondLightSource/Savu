@@ -154,7 +154,7 @@ class BaseRecon(Plugin):
                 cor = np.ones(np.prod([inData.get_shape()[i] for i in sdirs]))
                 # if centre of rotation has not been set then fix it in the centre
                 val = val if val != 0 else \
-                    (self.get_vol_shape()[self._get_detX_dim()])/2
+                    (self.get_vol_shape()[self._get_detX_dim()]) // 2
                 cor *= val
                 #mData.set('centre_of_rotation', cor) see Github ticket
         self.cor = cor
@@ -239,12 +239,12 @@ class BaseRecon(Plugin):
 
         missing = [self.centre]*(len(self.frame_cors) - len_data)
         self.frame_cors = np.append(self.frame_cors, missing)
-        
+
         # fix to remove NaNs in the initialised image
         if init is not None:
             init[np.isnan(init)] == 0.0
         self.frame_init_data = init
-        
+
         data[0] = self.fix_sino(self.sino_func(data[0]), self.frame_cors[0])
         return data
 
@@ -278,8 +278,7 @@ class BaseRecon(Plugin):
         centre_pad = self.br_array_pad(cor, sino.shape[detX])
         sino_width = sino.shape[detX]
         new_width = sino_width + max(centre_pad)
-        sino_pad = \
-            int(math.ceil(float(sino_width)/new_width * self.sino_pad)/2)
+        sino_pad = int(math.ceil(float(sino_width)/new_width * self.sino_pad) // 2)
         pad = np.array([sino_pad]*2) + centre_pad
         return pad
 
@@ -302,7 +301,7 @@ class BaseRecon(Plugin):
         width = nPixels - 1.0
         alen = ctr
         blen = width - ctr
-        mid = (width-1.0)/2.0
+        mid = (width-1.0) / 2.0
         shift = round(abs(blen-alen))
         p_low = 0 if (ctr > mid) else shift
         p_high = shift + 0 if (ctr > mid) else 0
@@ -400,7 +399,7 @@ class BaseRecon(Plugin):
         else:
             shape[dim_volX] = self.parameters['vol_shape']
             shape[dim_volZ] = self.parameters['vol_shape']
-    
+
         if 'resolution' in list(self.parameters.keys()):
             shape[dim_volX] /= self.parameters['resolution']
             shape[dim_volZ] /= self.parameters['resolution']

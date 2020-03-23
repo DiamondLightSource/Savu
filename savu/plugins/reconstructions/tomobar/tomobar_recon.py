@@ -70,7 +70,7 @@ class TomobarRecon(BaseRecon, GpuPlugin):
         super(TomobarRecon, self).__init__("TomobarRecon")
 
     def _shift(self, sinogram, centre_of_rotation):
-        centre_of_rotation_shift = (sinogram.shape[0]/2) - centre_of_rotation
+        centre_of_rotation_shift = (sinogram.shape[0] // 2) - centre_of_rotation
         result = ndimage.interpolation.shift(sinogram,
                                              (centre_of_rotation_shift, 0))
         return result

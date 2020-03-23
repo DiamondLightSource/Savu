@@ -47,8 +47,8 @@ class SinogramClean(BaseFilter, CpuPlugin):
     def _create_mask(self, Nrow, Ncol, obj_radius):
         du = 1.0/Ncol
         dv = (Nrow-1.0)/(Nrow*2.0*math.pi)
-        cen_row = np.ceil(Nrow/2)-1
-        cen_col = np.ceil(Ncol/2)-1
+        cen_row = np.ceil(Nrow / 2.0)-1
+        cen_col = np.ceil(Ncol / 2.0)-1
         drop = self.parameters['row_drop']
         mask = np.zeros((Nrow, Ncol), dtype=np.float32)
         for i in range(Nrow):
