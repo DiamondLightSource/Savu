@@ -75,10 +75,10 @@ class RavenFilter(BaseFilter, CpuPlugin):
         filtershapepad2d[:] = np.float64(filtershape)
         self.filtercomplex = filtershapepad2d + filtershapepad2d*1j
 
-        a = pyfftw.n_byte_align_empty((height1, width1), 16, 'complex128')
-        b = pyfftw.n_byte_align_empty((height1, width1), 16, 'complex128')
-        c = pyfftw.n_byte_align_empty((height1, width1), 16, 'complex128')
-        d = pyfftw.n_byte_align_empty((height1, width1), 16, 'complex128')
+        a = pyfftw.empty_aligned((height1, width1), dtype='complex128', n=16)
+        b = pyfftw.empty_aligned((height1, width1), dtype='complex128', n=16)
+        c = pyfftw.empty_aligned((height1, width1), dtype='complex128', n=16)
+        d = pyfftw.empty_aligned((height1, width1), dtype='complex128', n=16)
         self.fft_object = pyfftw.FFTW(a, b, axes=(0, 1))
         self.ifft_object = pyfftw.FFTW(c, d, axes=(0, 1),
                                        direction='FFTW_BACKWARD')
