@@ -460,7 +460,7 @@ class GlobalData(object):
                 slice_list[dim] = \
                     slice(slice_list[dim].start, sl.stop - diff, sl.step)
 
-        data = self.data.data[slice_list]
+        data = self.data.data[tuple(slice_list)]
 
         if np.sum(pad_list):
             mode = pData.padding.mode if pData.padding else 'edge'

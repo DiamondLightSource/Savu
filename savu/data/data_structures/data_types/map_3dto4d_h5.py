@@ -65,7 +65,7 @@ class Map3dto4dh5(BaseType):
         length = stop - start
 
         for i in range(len(start)):
-            new_slice = [slice(start[i], stop[i], idx[0].step), idx[1], idx[2]]
+            new_slice = (slice(start[i], stop[i], idx[0].step), idx[1], idx[2])
             data[0:length[i], :, :, i] = self.data[new_slice]
         return data
 
