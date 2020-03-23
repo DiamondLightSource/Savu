@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export LD_RUN_PATH=$LD_LIBRARY_PATH
+
 # set compiler wrapper
 mpicc=$(command -v mpicc)
 mpi=${mpicc%/bin/mpicc}
