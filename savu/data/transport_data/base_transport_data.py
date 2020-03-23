@@ -137,8 +137,7 @@ class BaseTransportData(object):
         slice_shape = [self.params['shape'][d] for d in sdir]
         nSlices = np.prod(slice_shape)
 
-        fchoices, size_list = \
-            self._get_frame_choices(sdir, min(max_mft, nSlices))
+        fchoices, size_list = self._get_frame_choices(sdir, min(max_mft, nSlices))
 
         threshold_idx = [i for i in range(len(fchoices)) if fchoices[i] >= min_mft]
         if threshold_idx:
