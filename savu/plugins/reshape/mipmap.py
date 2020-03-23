@@ -93,8 +93,7 @@ class Mipmap(Plugin, CpuPlugin):
             out_dataset[i].create_dataset(axis_labels=in_dataset[0],
                                           patterns=in_dataset[0],
                                           shape=shape)
-            out_pData[i].plugin_data_setup('VOLUME_XZ', max_frames / 2**i,
-                     slice_axis='voxel_y')
+            out_pData[i].plugin_data_setup('VOLUME_XZ', max_frames // 2**i, slice_axis='voxel_y')
 
     def nInput_datasets(self):
         return 1

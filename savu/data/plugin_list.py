@@ -231,7 +231,7 @@ class PluginList(object):
     def _save_framework_citations(self, group):
         framework_cites = fc.get_framework_citations()
         for cite in framework_cites:
-            citation_group = group.require_group(cite['name'])
+            citation_group = group.require_group(cite['name'].encode("ascii"))
             citation = CitationInformation()
             citation.name = cite["name"]
             citation.description = cite["description"]
@@ -501,7 +501,8 @@ class CitationInformation(object):
     endnote: str = "Default Endnote"
 
     def write(self, citation_group):
-        citation_group.attrs[NX_CLASS] = 'NXcite'.encode('ascii')
+        # classes don't have to be encoded to ASCII
+        citation_group.attrs[NX_CLASS] = 'NXcite'
         description_array = np.array([self.description.encode('ascii')])
         citation_group.create_dataset('description'.encode('ascii'),
                                       description_array.shape,

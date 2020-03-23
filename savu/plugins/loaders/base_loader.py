@@ -58,7 +58,7 @@ class BaseLoader(Plugin):
         self.data_mapping()
         data_obj.get_preview().set_preview(pDict['preview'], load=True)
         # update axis labels
-        #data_obj.amend_axis_label_values()        
+        #data_obj.amend_axis_label_values()
         # set previewing for Related datasets
         #for data in data_obj.related.values():
             # find common axes
@@ -76,9 +76,9 @@ class BaseLoader(Plugin):
 
     def _visit_NXapp(self, name, obj):
         if "NX_class" in list(obj.attrs.keys()):
-            if obj.attrs["NX_class"] in ["NXentry", "NXsubentry"]:
+            if obj.attrs["NX_class"].decode("ascii") in ["NXentry", "NXsubentry"]:
                 if "definition" in list(obj.keys()):
-                    if obj["definition"].value == self.application:
+                    if obj["definition"][()].decode("ascii") == self.application:
                         self.hits.append(obj)
 
     def get_NXdata(self, nx_file, detector_list):
@@ -92,7 +92,7 @@ class BaseLoader(Plugin):
 
     def _visit_NXdata(self, name, obj):
         if "NX_class" in list(obj.attrs.keys()):
-            if obj.attrs["NX_class"] in ["NXdata"]:
+            if obj.attrs["NX_class"].decode("ascii") in ["NXdata"]:
                 self.hits.append(obj)
 
     def data_mapping(self):
