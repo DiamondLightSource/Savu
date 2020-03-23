@@ -57,7 +57,7 @@ class DataCreate(object):
         {0} \n {1} \n {2} \n {3}
 
         """
-        #self.dtype = 
+        #self.dtype =
         self.set_dtype(kwargs.get('dtype', np.float32))
         self.remove = kwargs.get('remove', False)
         self.raw = kwargs.get('raw', False)
@@ -198,7 +198,7 @@ class DataCreate(object):
         axis_labels = self.data_info.get('axis_labels')
         axis_labels.extend([0]*len(params_dict))
         for key, value in params_dict.items():
-            title = value['label'].encode('ascii', 'ignore')
+            title = value['label']
             name, unit = title.split('.')
             axis_labels[nDims + key] = {name: unit}
             # add parameter values to the meta_data

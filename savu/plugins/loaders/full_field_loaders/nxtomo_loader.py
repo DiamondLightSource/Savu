@@ -89,7 +89,7 @@ class NxtomoLoader(BaseLoader):
             control = self._get_h5_path(
                     data_obj.backing_file, 'entry1/tomo_entry/control/data')
             data_obj.meta_data.set("control", control[...])
-        except:
+        except Exception:
             self.log_warning("No Control information available")
 
         nAngles = len(data_obj.meta_data.get('rotation_angle'))
@@ -110,9 +110,9 @@ class NxtomoLoader(BaseLoader):
         if self.parameters['3d_to_4d'] is True:
             try:
                 # for backwards compatibility
-                n_frames = self.parameters['angles']
+                n_frames = eval(self.parameters["angles"], {"builtins": None, "np": np})
                 return np.array(n_frames).shape[0]
-            except:
+            except Exception:
                 raise Exception("Please specify the angles, or the number of "
                                 "frames per scan (via 3d_to_4d param) in the loader.")
         if isinstance(self.parameters['3d_to_4d'], int):
