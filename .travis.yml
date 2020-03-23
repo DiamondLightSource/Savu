@@ -5,17 +5,10 @@ compiler:
   - gcc
 env:
   - OMP_NUM_THREADS=2
-#python:
-#  - "3.6"
-#  - "3.5"
-#addons:
-#  apt:
-#    packages:
-#    - libblas-dev
-#    - liblapack-dev
-#    - gfortran
-#    - libhdf5-serial-dev
-#    - libboost-all-dev
+
+before_install:
+  - cd $TRAVIS_BUILD_DIR/install/3_0_install/savu_v3.0
+  - ls -lah
 
 install:
   - ./savu_installer.sh --local --no_prompts --PREFIX /tmp
