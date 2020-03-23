@@ -57,7 +57,7 @@ class TemplateLoaderTest(unittest.TestCase):
         self.yaml['xrd']['params'].update({'idx_A': 0,
                                            'idx_detx': 1,
                                            'idx_dety': 2,
-                                           'A_vals': "$dfile['entry/A'].value",
+                                           'A_vals': "$dfile['entry/A'][()]",
                                            'dims': "$range(0, 3)"})
 
         # add some axis labels
@@ -105,8 +105,8 @@ class TemplateLoaderTest(unittest.TestCase):
                                            'idx_B': 1,
                                            'idx_detx': 2,
                                            'idx_dety': 3,
-                                           'A_vals': "$dfile['entry/A'].value",
-                                           'B_vals': "$dfile['entry/B'].value",
+                                           'A_vals': "$dfile['entry/A'][()]",
+                                           'B_vals': "$dfile['entry/B'][()]",
                                            'dims': "$range(0, 4)"})
 
         self.yaml['xrd']['axis_labels'] = {0: {'dim': '$idx_A', 'name': 'A', 'value': '$A_vals', 'units': 'pixels'},
@@ -153,9 +153,9 @@ class TemplateLoaderTest(unittest.TestCase):
                                            'idx_C': 2,
                                            'idx_detx': 3,
                                            'idx_dety': 4,
-                                           'A_vals': "$dfile['entry/A'].value",
-                                           'B_vals': "$dfile['entry/B'].value",
-                                           'C_vals': "$dfile['entry/C'].value",
+                                           'A_vals': "$dfile['entry/A'][()]",
+                                           'B_vals': "$dfile['entry/B'][()]",
+                                           'C_vals': "$dfile['entry/C'][()]",
                                            'dims': "$range(0, 4)"})
 
         self.yaml['xrd']['axis_labels'] = {0: {'dim': '$idx_A', 'name': 'A', 'value': '$A_vals', 'units': 'pixels'},

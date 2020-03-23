@@ -52,28 +52,28 @@ class I13StxmXrfLoader(BaseLoader):
         data_obj.data = data_obj.backing_file['/entry1/xmapMca/fullSpectrum']
         sh = data_obj.data.shape
         #print sh
-        
+
         if self.parameters['is_map']:
             lab_sxy = data_obj.backing_file['entry1/instrument/lab_sxy/']
-            data_obj.meta_data.set('xy', (lab_sxy['lab_sx'].value,lab_sxy['lab_sy'].value))
+            data_obj.meta_data.set('xy', (lab_sxy['lab_sx'][()],lab_sxy['lab_sy'][()]))
             data_obj.set_axis_labels('xy.microns','ch.unit', 'spectrum.eV')
             data_obj.add_pattern('PROJECTION', core_dims=(0,),slice_dims=(1,2))
             data_obj.add_pattern('SPECTRUM', core_dims=(2,), slice_dims=(0,1))
         else:
             ### set the rotation
             rotation_angle = \
-                data_obj.backing_file['entry1/merlin_sw_hdf/t1_theta'].value.astype(float)
+                data_obj.backing_file['entry1/merlin_sw_hdf/t1_theta'][()].astype(float)
             if rotation_angle.ndim>1:
                 rotation_angle = rotation_angle[:,0]
             #print rotation_angle.shape
             data_obj.meta_data.set('rotation_angle', rotation_angle)
             data_obj.set_axis_labels('rotation_angle.degrees',
                                      'x.pixel','ch.unit', 'spectrum.eV')
-    
+
             data_obj.add_pattern('PROJECTION', core_dims=(1,),slice_dims=(0,2,3))
             data_obj.add_pattern('SINOGRAM', core_dims=(0,1),slice_dims=(2,3))
     #         data_obj.add_pattern('PROJECTION', core_dims=(0,), slice_dims=(1,2,3))
             data_obj.add_pattern('SPECTRUM', core_dims=(3,), slice_dims=(0,1,2))
-        
+
         data_obj.set_shape(sh)
         self.set_data_reduction_params(data_obj)

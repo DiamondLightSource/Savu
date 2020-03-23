@@ -57,8 +57,8 @@ class BaseI18MultiModalLoader(BaseMultiModalLoader):
                       data_obj.backing_file.filename, ltype)
 
         data_obj.meta_data.set(
-            "mono_energy", f[self.parameters['monochromator']].value/1e3)
-        x = f[self.parameters['x']].value
+            "mono_energy", f[self.parameters['monochromator']][()]/1e3)
+        x = f[self.parameters['x']][()]
 
         if self.parameters['x'] is not None:
             if x.ndim > 1:
@@ -67,10 +67,10 @@ class BaseI18MultiModalLoader(BaseMultiModalLoader):
                 data_obj.meta_data.set("x", x)
 
         if self.parameters['y'] is not None:
-            y = f[self.parameters['y']].value
+            y = f[self.parameters['y']][()]
             data_obj.meta_data.set("y", y)
         if self.parameters['rotation'] is not None:
-            rotation_angle = f[self.parameters['rotation']].value
+            rotation_angle = f[self.parameters['rotation']][()]
             if rotation_angle.ndim > 1:
                 rotation_angle = rotation_angle[:, 0]
 
@@ -128,7 +128,7 @@ class BaseI18MultiModalLoader(BaseMultiModalLoader):
                         label = 'detector_y'
                     units = 'index'
                     chk=chk+1
-            
+
             except IndexError:
                 '''
                 some additional singleton dimensions have been added in the latest mapping project stuff on I18
@@ -185,20 +185,20 @@ class BaseI18MultiModalLoader(BaseMultiModalLoader):
             if slice_dims:
                 data_obj.add_pattern("SINOGRAM", core_dims=sino_dir,
                                      slice_dims=slice_dims)
-        
+
         if ltype == 'fluo':
             spec_core = (-1,) # it will always be this
             spec_slice = tuple(dims[:-1])
             data_obj.add_pattern("SPECTRUM", core_dims=spec_core,
                                  slice_dims=spec_slice)
-        
-        
+
+
         if ltype == 'xrd':
             diff_core = (-2,-1) # it will always be this
             diff_slice = tuple(dims[:-2])
             data_obj.add_pattern("DIFFRACTION", core_dims=diff_core,
                                  slice_dims=diff_slice)
-        
+
         if ltype == 'monitor':
             # this is needed for I0 corrections of single sinogram ND data
             channel_core = (dims[-1],)

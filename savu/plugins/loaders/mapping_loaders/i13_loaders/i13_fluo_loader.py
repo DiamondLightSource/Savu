@@ -38,7 +38,7 @@ class I13FluoLoader(BaseLoader):
     :param theta_step: The theta step. Default:1.0.
     :param theta_start: The theta start. Default: -90.0.
     :param theta_end: The theta end. Default: 90.0.
-    :param mono_energy: The mono energy. Default: 11.8. 
+    :param mono_energy: The mono energy. Default: 11.8.
     """
 
     def __init__(self, name='I13FluoLoader'):
@@ -71,13 +71,13 @@ class I13FluoLoader(BaseLoader):
             labels.append('rotation_angle.degrees')
             data_obj.meta_data.set('rotation_angle', rotation_angle)
         x = \
-            data_obj.backing_file['entry1/instrument/lab_sxy/lab_sx'].value
+            data_obj.backing_file['entry1/instrument/lab_sxy/lab_sx'][()]
         data_obj.meta_data.set('x', x)
         # axis label
-        
+
         ### set the y
         y = \
-            data_obj.backing_file['entry1/instrument/lab_sxy/lab_sy'].value
+            data_obj.backing_file['entry1/instrument/lab_sxy/lab_sy'][()]
         pos = np.zeros((2,len(y[0])))
         pos[0,:] = x[0]
         pos[1,:] = y[0]
@@ -91,11 +91,11 @@ class I13FluoLoader(BaseLoader):
 #         print "the labels are:"+str(labels)
         data_obj.set_axis_labels(*tuple(labels))
 
-        
+
         dims = list(range(len(data_obj.get_shape())))
         spec_core = (-1,) # it will always be this
 #         print spec_core
-        
+
         spec_slice = tuple(dims[:-1])
 #         print spec_slice
         logging.debug("is a spectrum")
@@ -106,9 +106,9 @@ class I13FluoLoader(BaseLoader):
         logging.debug("the spectrum slices are:"+str(spec_slice))
         data_obj.add_pattern("SPECTRUM_STACK", core_dims=spec_core[:-1],
                              slice_dims=(-2,)+spec_slice)
-        
-        
-        
+
+
+
         positions_label = (data_obj.get_data_dimension_by_axis_label('xy', contains=True),)
         rotation_label = (data_obj.get_data_dimension_by_axis_label('rotation_angle', contains=True),)
 
@@ -116,10 +116,10 @@ class I13FluoLoader(BaseLoader):
         sino_cores = rotation_label + positions_label
         data_obj.add_pattern("SINOGRAM", core_dims=sino_cores, slice_dims = tuple(set(dims)-set(sino_cores)))
 
-        
+
         data_obj.add_pattern("4D_SCAN", core_dims=tuple(set(dims)-set(rotation_label)),
                         slice_dims=rotation_label)
-  
+
 #         data_obj.add_pattern("SINOGRAM", core_dir=(0,1),
 #                      slice_dir=(2,3))
 #         data_obj.add_pattern("PROJECTION", core_dir=(0,3),

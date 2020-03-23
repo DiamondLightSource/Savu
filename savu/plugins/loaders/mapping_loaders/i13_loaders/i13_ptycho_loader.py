@@ -59,7 +59,7 @@ class I13PtychoLoader(BaseMultiModalLoader):
 #        print data_obj.data.shape
         data_obj.set_shape(data_obj.data.shape)
         try:
-            control = data_obj.backing_file['/entry1/instrument/ionc_i/ionc_i'].value
+            control = data_obj.backing_file['/entry1/instrument/ionc_i/ionc_i'][()]
         # this is global since it is to do with the beam
             exp.meta_data.set("control", control)
             logging.debug('adding the ion chamber to the meta data')
@@ -77,7 +77,7 @@ class I13PtychoLoader(BaseMultiModalLoader):
             data_obj.meta_data.set('rotation_angle', rotation_angle)
 
 #             try:
-#                 rotation_angle = data_obj.backing_file['entry1/instrument/t1_theta/t1_theta'].value
+#                 rotation_angle = data_obj.backing_file['entry1/instrument/t1_theta/t1_theta'][()]
 #                 if rotation_angle.ndim > 1:
 #                     rotation_angle = rotation_angle[:, 0]
 #                 # axis label
@@ -88,9 +88,9 @@ class I13PtychoLoader(BaseMultiModalLoader):
 #                 logging.debug("Not a tomography!")
 
         ### GET THE AXES ###
-        x = data_obj.backing_file['entry1/instrument/lab_sxy/lab_sx'].value*1e-6
+        x = data_obj.backing_file['entry1/instrument/lab_sxy/lab_sx'][()]*1e-6
         data_obj.meta_data.set('x', x)
-        y = data_obj.backing_file['entry1/instrument/lab_sxy/lab_sy'].value*1e-6
+        y = data_obj.backing_file['entry1/instrument/lab_sxy/lab_sy'][()]*1e-6
         data_obj.meta_data.set('y', y)
         if rotation_angle is not None and len(x.shape)>1:
             pos = np.zeros((x.shape[0],2,x.shape[1]))

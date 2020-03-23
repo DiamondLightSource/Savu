@@ -56,23 +56,23 @@ class NxptychoLoader(BaseMultiModalLoader):
         labels = []
         ### set the rotation
         rotation_angle = \
-            data_obj.backing_file[stxm_entry.name + '/data/theta'].value
+            data_obj.backing_file[stxm_entry.name + '/data/theta'][()]
         if rotation_angle.ndim > 1:
             rotation_angle = rotation_angle[:, 0]
         # axis label
         labels.append('rotation_angle.degrees')
-        
+
         data_obj.meta_data.set('rotation_angle', rotation_angle)
-        
+
         ### set the x
         x = \
-            data_obj.backing_file[stxm_entry.name + '/data/lab_sxy/lab_sx'].value*1e-6
+            data_obj.backing_file[stxm_entry.name + '/data/lab_sxy/lab_sx'][()]*1e-6
         data_obj.meta_data.set('x', x)
         # axis label
-        
+
         ### set the y
         y = \
-            data_obj.backing_file[stxm_entry.name + '/data/lab_sxy/lab_sy'].value*1e-6
+            data_obj.backing_file[stxm_entry.name + '/data/lab_sxy/lab_sy'][()]*1e-6
         pos = np.zeros((2,len(y)))
         pos[0,:] = y
         pos[1,:] = x
@@ -85,11 +85,11 @@ class NxptychoLoader(BaseMultiModalLoader):
         #print labels
         data_obj.set_axis_labels(*tuple(labels))
 
-        
+
         dims = list(range(len(data_obj.get_shape())))
         diff_core = (-2,-1) # it will always be this
         #print diff_core
-        
+
         diff_slice = tuple(dims[:-2])
         #print diff_slice
         logging.debug("is a diffraction")
@@ -97,8 +97,8 @@ class NxptychoLoader(BaseMultiModalLoader):
         logging.debug("the diffraction slices are:"+str(diff_slice))
         data_obj.add_pattern("DIFFRACTION", core_dims=diff_core,
                              slice_dims=diff_slice)
-        
+
         data_obj.add_pattern("4D_SCAN", core_dims=(1,2,3),
                         slice_dims=(0,))
-  
+
         self.set_data_reduction_params(data_obj)

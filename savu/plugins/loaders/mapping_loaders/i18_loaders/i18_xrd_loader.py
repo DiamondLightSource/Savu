@@ -84,36 +84,36 @@ class I18XrdLoader(BaseI18MultiModalLoader):
             logging.debug('testing the version of the calibration file')
             det_str = 'entry1/instrument/detector'
             mData = data_obj.meta_data
-            xpix = calibrationfile[det_str + '/detector_module/fast_pixel_direction'].value*1e-3 # in metres
+            xpix = calibrationfile[det_str + '/detector_module/fast_pixel_direction'][()]*1e-3 # in metres
             mData.set("x_pixel_size",xpix)
 
             mData.set("beam_center_x",
-                    calibrationfile[det_str + '/beam_center_x'].value*1e-3) #in metres
+                    calibrationfile[det_str + '/beam_center_x'][()]*1e-3) #in metres
             mData.set("beam_center_y",
-                            calibrationfile[det_str + '/beam_center_y'].value*1e-3) # in metres
+                            calibrationfile[det_str + '/beam_center_y'][()]*1e-3) # in metres
             mData.set("distance",
-                            calibrationfile[det_str + '/distance'].value*1e-3) # in metres
+                            calibrationfile[det_str + '/distance'][()]*1e-3) # in metres
             mData.set("incident_wavelength",
                             calibrationfile['/entry1/calibration_sample/beam'
-                                            '/incident_wavelength'].value*1e-10) # in metres
-            mData.set("yaw", -calibrationfile[det_str + '/transformations/euler_b'].value)# in degrees
-            mData.set("roll",calibrationfile[det_str + '/transformations/euler_c'].value-180.0)# in degrees
+                                            '/incident_wavelength'][()]*1e-10) # in metres
+            mData.set("yaw", -calibrationfile[det_str + '/transformations/euler_b'][()])# in degrees
+            mData.set("roll",calibrationfile[det_str + '/transformations/euler_c'][()]-180.0)# in degrees
             logging.debug('.... its the version in DAWN 2.0')
         except KeyError:
             try:
                 det_str = 'entry/instrument/detector'
                 mData = data_obj.meta_data
-                xpix = calibrationfile[det_str + '/x_pixel_size'].value * 1e-3
+                xpix = calibrationfile[det_str + '/x_pixel_size'][()] * 1e-3
                 mData.set("x_pixel_size", xpix) # in metres
                 mData.set("beam_center_x",
-                        calibrationfile[det_str + '/beam_center_x'].value*xpix)# in metres
+                        calibrationfile[det_str + '/beam_center_x'][()]*xpix)# in metres
                 mData.set("beam_center_y",
-                                calibrationfile[det_str + '/beam_center_y'].value*xpix) # in metres
+                                calibrationfile[det_str + '/beam_center_y'][()]*xpix) # in metres
                 mData.set("distance",
-                                calibrationfile[det_str + '/distance'].value*1e-3) # in metres
+                                calibrationfile[det_str + '/distance'][()]*1e-3) # in metres
                 mData.set("incident_wavelength",
                                 calibrationfile['/entry/calibration_sample/beam'
-                                                '/incident_wavelength'].value*1e-10)# in metres
+                                                '/incident_wavelength'][()]*1e-10)# in metres
                 orien = calibrationfile[det_str + '/detector_orientation'][...].reshape((3, 3))
                 yaw = math.degrees(-math.atan2(orien[2, 0], orien[2, 2]))# in degrees
                 roll = math.degrees(-math.atan2(orien[0, 1], orien[1, 1]))# in degrees
