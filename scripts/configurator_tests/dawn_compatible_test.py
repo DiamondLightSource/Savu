@@ -25,10 +25,11 @@ class DawnCompatibleTest(unittest.TestCase):
 
     def test_load_plugin(self):
         cu.populate_plugins()
-        plugin_path = pu.dawn_plugins[dawn_plugins.keys()[0]]['path2plugin']
+        dawn_plugins_keys = list(dawn_plugins.keys())
+        plugin_path = pu.dawn_plugins[dawn_plugins_keys[0]]['path2plugin']
         inst = pu.load_class(plugin_path)()
-        sl = inst.__dict__['slice_list']
-        exp = inst.__dict__['exp']
+        inst.__dict__['slice_list']
+        inst.__dict__['exp']
 
 
 if __name__ == '__main__':
