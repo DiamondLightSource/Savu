@@ -15,7 +15,8 @@ export LD_RUN_PATH=$LD_LIBRARY_PATH
 export CC=$mpicc
 
 source $ana_path/bin/activate $ana_path
-export PYTHONPATH=$PYTHONPATH:$(python -c 'import site; print(site.getsitepackages())')
+# export PYTHONPATH=$PYTHONPATH:$ana_path/lib/python3.7/site-packages
+export PYTHONPATH=$PYTHONPATH:$(python -c 'import site; print(site.getsitepackages()[0])')
 
 echo Running with Python: $(which python)
 $PYTHON setup.py configure --hdf5=$ana_path
