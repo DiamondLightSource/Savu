@@ -26,7 +26,7 @@ import os
 import h5py
 import yaml
 import copy
-import collections
+import collections.abc as collections
 import numpy as np  # used in exec so do not delete
 from ast import literal_eval
 
@@ -199,8 +199,8 @@ class YamlConverter(BaseLoader):
             if len(split) > 1:
                 value = self._convert_string(dObj, split[1])
                 try:
-                    value = eval(value)
-                except:
+                    value = eval(value, {}, {'dshape': dshape, 'dfile': dfile, 'wildcard': wildcard})
+                except Exception:
                     raise Exception("\nError converting value %s\n" % value)
         return value
 
