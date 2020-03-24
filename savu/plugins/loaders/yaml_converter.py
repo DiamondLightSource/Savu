@@ -199,9 +199,9 @@ class YamlConverter(BaseLoader):
             if len(split) > 1:
                 value = self._convert_string(dObj, split[1])
                 try:
-                    value = eval(value, {}, {'dshape': dshape, 'dfile': dfile, 'wildcard': wildcard})
+                    value = eval(value, globals(), locals())
                 except Exception:
-                    raise Exception("\nError converting value %s\n" % value)
+                    raise Exception(f"Error evaluating value: '{value}''")
         return value
 
     def _convert_string(self, dObj, string):

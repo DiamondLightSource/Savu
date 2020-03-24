@@ -44,9 +44,16 @@ class BasicOperations(Plugin, CpuPlugin):
         self.out_data = self._set_out_data_names()
 
     def process_frames(self, data):
+        # creates an 'environment' that will store the variables created inside the exec statement
+        exec_environment = {'data': data}
+
         for i in range(len(self.operations)):
-            self.out_data[i] = eval(self.operations[i])
-        return [eval(out) for out in self.out_data]
+            # runs the exec with no builtins, and only 'data' available as a variable initially
+            exec(f"{self.out_data[i]} = {self.operations[i]}", {"builtins": None}, exec_environment)
+
+        # Find the result from each exec. Does list comprehension on the results instead of just
+        # exec_environment.items to keep the order the same as in out_data
+        return [exec_environment[out] for out in self.out_data]
 
     def setup(self):
         """

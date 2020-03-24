@@ -66,7 +66,6 @@ class TemplateLoaderTest(unittest.TestCase):
                                            2: self.detY_axis_label}
 
         self.save_yaml_and_change_process_list()
-
         run_protected_plugin_runner(tu.set_options(self.data_file_path,
                                                    process_file=self.process_list_path,
                                                    out_path=self.test_folder))
@@ -215,7 +214,6 @@ class TemplateLoaderTest(unittest.TestCase):
         self.data_file_path = 'test_data.nxs'
         self.data_file = h5.File(self.data_file_path, 'w')  # this will have the axes in.
 
-
     def tearDown(self):
         shutil.rmtree(self.test_folder)
 
@@ -237,8 +235,11 @@ class TemplateLoaderTest(unittest.TestCase):
         with open(yml_path, 'w') as f:
             yu.dump_yaml(self.yaml, f)
         # now set the template path in the process list
-        self.process_list.modify('1', '2', yml_path)
+        # uses the parameter name instead of number
+        # because the number can change between runs
+        self.process_list.modify('1', 'yaml_file', yml_path)
         self.process_list.save(self.process_list_path)
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     unittest.main()
