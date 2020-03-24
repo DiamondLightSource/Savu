@@ -28,6 +28,8 @@ import unittest
 import savu.plugins.utils as pu
 import savu.test.test_utils as tu
 
+from collections import OrderedDict
+
 
 class AstraMultipleParameterTest(unittest.TestCase):
 
@@ -37,11 +39,11 @@ class AstraMultipleParameterTest(unittest.TestCase):
         return plugin
 
     def framework_options_setup(self):
-        key1 = 'algorithm'
-        key2 = 'n_iterations'
+        key1 = 'n_iterations'
+        key2 = 'algorithm'
         key3 = 'in_datasets'
         key4 = 'out_datasets'
-        params = {key1: 'FBP;CGLS', key2: '1;2;3', key3: 'tomo', key4: 'tomo'}
+        params = OrderedDict({key1: '1;2;3', key2: 'FBP;CGLS', key3: 'tomo', key4: 'tomo'})
 
         options = tu.set_experiment('tomo')
         plugin = 'savu.plugins.reconstructions.astra_recons.astra_recon_cpu'
@@ -79,7 +81,6 @@ class AstraMultipleParameterTest(unittest.TestCase):
     def test_parameter_space_data_shape(self):
         options = self.framework_options_setup()
         plugin = tu.plugin_runner_load_plugin(options)
-        #tu.plugin_setup(plugin)
 
         out_dataset = plugin.get_out_datasets()[0]
         self.assertEqual((160, 135, 160, 3, 2), out_dataset.get_shape())
