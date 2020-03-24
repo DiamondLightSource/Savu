@@ -455,7 +455,7 @@ class BaseTransport(object):
             if link_type is 'final_result':
                 group_name = 'final_result_' + data.get_name()
             else:
-                link = nxs_entry.require_group(link_type)
+                link = nxs_entry.require_group(link_type.encode("ascii"))
                 link.attrs[NX_CLASS] = 'NXcollection'
                 nxs_entry = link
 
@@ -562,6 +562,11 @@ class BaseTransport(object):
                 else np.arange(data.get_shape()[count])
             if isinstance(mData, list):
                 mData = np.array(mData)
+
+            if mData.dtype == np.dtype('<U18'):
+                mData = mData.astype(np.string_)
+            elif 'U' in str(mData.dtype):
+                logging.warning(f"Potentially unhandled Unicode dtype: {mData.dtype}")
 
             axis_entry = entry.require_dataset(name, mData.shape, mData.dtype)
             axis_entry[...] = mData[...]
