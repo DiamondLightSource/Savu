@@ -209,8 +209,8 @@ class Experiment(object):
         import h5py
         if self.meta_data.get('process') == len(self.meta_data.get('processes')) - 1:
             with h5py.File(self.meta_data.get('nxs_filename'), 'w') as nxs_file:
-                entry_group = nxs_file.create_group('entry'.encode("ascii"))
-                entry_group.attrs['NX_class'] = 'NXentry'.encode("ascii")
+                entry_group = nxs_file.create_group('entry')
+                entry_group.attrs['NX_class'] = 'NXentry'
 
     def _clear_data_objects(self):
         self.index["out_data"] = {}

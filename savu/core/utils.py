@@ -24,6 +24,22 @@ import logging
 import logging.handlers as handlers
 import itertools
 from mpi4py import MPI
+from typing import Union
+
+
+def ensure_string(string: Union[str, bytes]) -> str:
+    """
+    Python 3 and HDF5 mixture has created a somewhat ambiguous situation
+    where the strings in Python 3 are UTF-8 by default,
+    but HDF5 strings cannot be unicode.
+
+    This function should wrap strings coming in from HDF5 to ensure that they
+    are decoded to UTF-8 so that they can be treated at `str` in Python, and
+    not `bytes`.
+    """
+    if isinstance(string, bytes):
+        return string.decode("ascii")
+    return string
 
 
 def logfunction(func):

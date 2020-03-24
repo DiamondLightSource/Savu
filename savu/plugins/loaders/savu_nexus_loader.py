@@ -32,6 +32,8 @@ import savu.core.utils as cu
 from savu.plugins.utils import register_plugin
 from savu.plugins.loaders.base_loader import BaseLoader
 
+from savu.core.utils import ensure_string
+
 
 @register_plugin
 class SavuNexusLoader(BaseLoader):
@@ -128,7 +130,7 @@ class SavuNexusLoader(BaseLoader):
 
     def _read_nexus_file(self, nxsfile, datasets):
         # find NXdata
-        for key, value in list(nxsfile.items()):
+        for key, value in nxsfile.items():
             if self._is_nxdata(value):
                 datasets.append(self._get_dataset_info(key, value))
             elif isinstance(value, h5py.Group) and key != 'input_data':
@@ -136,18 +138,17 @@ class SavuNexusLoader(BaseLoader):
         return datasets
 
     def _is_nxdata(self, value):
-        check = 'NX_class' in list(value.attrs.keys()) and\
-            value.attrs['NX_class'] == 'NXdata'
+        check = 'NX_class' in value.attrs.keys() and ensure_string(value.attrs['NX_class']) == 'NXdata'
         return check
 
     def _get_dataset_info(self, key, value):
         import unicodedata
-        key = unicodedata.normalize('NFKD', key).encode('ascii', 'ignore')
+        key = unicodedata.normalize('NFKD', key)
         ksplit = key.split('-')
 
         if len(ksplit) == 1 and ''.join(key.split('_')[0:2]) == 'finalresult':
             name = '_'.join(key.split('_')[2:])
-            pos = 'final'  # arbitrarily large number
+            pos = 'final'
         else:
             name = ''.join(ksplit[2:])
             pos = ksplit[0]
@@ -224,7 +225,7 @@ class SavuNexusLoader(BaseLoader):
         else:
             try:
                 value = plist._byteify(json.loads(entry[key][()][0]))
-            except:
+            except Exception:
                 value = cu._savu_decoder(entry[key][()])
             return value
 
@@ -239,13 +240,15 @@ class SavuNexusLoader(BaseLoader):
     def _add_axis_labels(self, dObj, group):
         axes = group.attrs['axes']
         ordered_axes = [None]*len(axes)
-        for i in range(len(axes)):
-            ordered_axes[group.attrs['_'.join((axes[i], 'indices'))]] = axes[i]
-
         axis_labels = []
-        for a in axes:
-            dObj.meta_data.set(a, group[a][:])
-            axis_labels.append('.'.join((a, group[a].attrs['units'])))
+
+        for ax in axes:
+            ax = ensure_string(ax)
+            ordered_axes[group.attrs['_'.join((ax, 'indices'))]] = ax
+            dObj.meta_data.set(ax, group[ax][:])
+            units = ensure_string(group[ax].attrs['units'])
+            axis_labels.append('.'.join((ax, units)))
+
         dObj.set_axis_labels(*axis_labels)
 
     def _add_patterns(self, dObj, group):

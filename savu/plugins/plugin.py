@@ -55,14 +55,14 @@ class Plugin(PluginDatasets):
         self.pcount = 0
         self.exp = None
         self.check = False
-    
+
     def initialise(self, params, exp, check=False):
-        self.check=check
+        self.check = check
         self.exp = exp
         self._populate_default_parameters()
         self._set_parameters(copy.deepcopy(params))
         self._main_setup()
-        
+
     def _main_setup(self):
         """ Performs all the required plugin setup.
 
@@ -75,7 +75,7 @@ class Plugin(PluginDatasets):
             self._set_plugin_datasets()
         self._reset_process_frames_counter()
         self.setup()
-        
+
         if not self.check: # reduce the processing if just checking
             self.set_filter_padding(*(self.get_plugin_datasets()))
             self._finalise_datasets()
@@ -184,6 +184,8 @@ class Plugin(PluginDatasets):
         plugin, or None if no customisation is required.
         """
         self.initialise_parameters()
+        # reverse sorting added on Python 3 conversion to make the behaviour
+        # similar (hopefully the same) as on Python 2
         for key in parameters.keys():
             if key in self.parameters.keys():
                 value = self.__convert_multi_params(parameters[key], key)
@@ -213,10 +215,10 @@ class Plugin(PluginDatasets):
                     raise RuntimeError(
                         'No values for tuned parameter "{}", '
                         'ensure start:stop:step; values are valid.'.format(key))
-            if type(value[0]) != dtype:
+            if not isinstance(value[0], dtype):
                 try:
                     value.remove('')
-                except:
+                except Exception:
                     pass
                 if isinstance(value[0], str):
                     value = [ast.literal_eval(i) for i in value]

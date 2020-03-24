@@ -32,14 +32,9 @@ from typing import Union
 from savu.plugins.plugin import Plugin
 from savu.plugins.utils import register_plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
+from savu.core.utils import ensure_string
 
 from pmacparser.pmac_parser import PMACParser
-
-
-def ensure_string(string: Union[str, bytes]) -> str:
-    if isinstance(string, bytes):
-        return string.decode("ascii")
-    return string
 
 
 @register_plugin
