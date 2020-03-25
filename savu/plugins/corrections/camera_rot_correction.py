@@ -59,8 +59,7 @@ class CameraRotCorrection(BaseFilter, CpuPlugin):
         pass
 
     def process_frames(self, data):
-        return rotate(data[0].astype(np.float64), self.parameters['angle'], center=\
-        self.centre)[self.new_slice]
+        return rotate(data[0].astype(np.float64), self.parameters['angle'], center=self.centre)[tuple(self.new_slice)]
 
     def post_process(self):
         pass
