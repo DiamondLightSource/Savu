@@ -193,7 +193,7 @@ def enablePrint():
 
 
 def parse_config_string(string):
-    regex = "[\[\]\, ]+"
+    regex = r"[\[\]\, ]+"
     split_vals = [_f for _f in re.split(regex, string) if _f]
     delimitors = re.findall(regex, string)
     split_vals = [repr(a.strip()) for a in split_vals]
@@ -206,7 +206,7 @@ def parse_config_string(string):
 
 
 def parse_array_index_as_string(string):
-    p = re.compile("'\['")
+    p = re.compile(r"'\['")
     for m in p.finditer(string):
         offset = m.start() - count + 3
         end = string[offset:].index("']") + offset
