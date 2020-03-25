@@ -532,7 +532,7 @@ class BaseTransport(object):
             except:
                 try:
                     import json
-                    data = np.array([json.dumps(data)])
+                    data = np.array([json.dumps(data).encode("ascii")])
                     self.__create_dataset(entry, name, data)
                 except:
                     try:

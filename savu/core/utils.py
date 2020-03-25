@@ -220,10 +220,11 @@ def _send_email(address):
 
 
 def _savu_encoder(data):
-    return '#savu_encoded#' + str(data)
+    return f'#savu_encoded#{data}'.encode("ascii")
 
 
 def _savu_decoder(data):
+    data = ensure_string(data)
     if isinstance(data, str) and len(data.split('#savu_encoded#')) > 1:
         return eval(data.split('#savu_encoded#')[-1])
     return data
