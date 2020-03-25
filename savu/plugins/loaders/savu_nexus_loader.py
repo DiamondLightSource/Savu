@@ -216,7 +216,6 @@ class SavuNexusLoader(BaseLoader):
         dObj.data._base_post_clone_updates(dObj.data, extras)
 
     def _get_data(self, entry, key):
-        plist = self.exp.meta_data.plugin_list
         if isinstance(entry[key], h5py.Group):
             ddict = {}
             for subkey in entry[key]:
@@ -224,7 +223,7 @@ class SavuNexusLoader(BaseLoader):
             return ddict
         else:
             try:
-                value = plist._byteify(json.loads(entry[key][()][0]))
+                value = json.loads(entry[key][()][0])
             except Exception:
                 value = cu._savu_decoder(entry[key][()])
             return value
