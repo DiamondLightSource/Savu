@@ -154,8 +154,7 @@ class BaseCheckpointTest(object):
 
     def test_plugin_level_4b(self):
         # 4: Killed during processing
-            # b) after a plugin that doesn't populate nxs file
-                    # - (works with full-field processing list)
+        #    b) after a plugin that doesn't populate nxs file - (works with full-field processing list)
         vals = (5, 3, 3, 'plugin')
         self._set_checkpoint_parameters(*vals)
         # rerun from checkpoint
@@ -169,7 +168,7 @@ class BaseCheckpointTest(object):
 
     def test_plugin_level_4c(self):
         # 4: Killed during processing
-            # c) re-loading of a different data type, e.g., ImageKey
+        #    c) re-loading of a different data type, e.g., ImageKey
         vals = (1, 3, 3, 'plugin')
         self._set_checkpoint_parameters(*vals)
         # rerun from checkpoint
@@ -226,8 +225,7 @@ class BaseCheckpointTest(object):
         if name in list(f.keys()):
             f.__delitem__(name)
         if data is not None:
-            f.create_dataset(name, data=np.zeros(1, dtype=np.int8))
-            f[name][:] = data
+            f.create_dataset(name, data=data, dtype=np.int16)
 
     def _read_nexus_file(self, nxsfile, datasets):
         # find NXdata

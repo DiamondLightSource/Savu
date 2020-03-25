@@ -59,7 +59,8 @@ class PluginRunner(object):
         self._transport_pre_plugin_list_run()
 
         cp = self.exp.checkpoint
-        for i in range(cp.get_checkpoint_plugin(), n_plugins):
+        checkpoint_plugin = cp.get_checkpoint_plugin()
+        for i in range(checkpoint_plugin, n_plugins):
             self.exp._set_experiment_for_current_plugin(i)
             self.__run_plugin(exp_coll['plugin_dict'][i])
             # end the plugin run if savu has been killed
