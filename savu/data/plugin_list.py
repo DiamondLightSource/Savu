@@ -198,7 +198,7 @@ class PluginList(object):
                 except Exception:
                     pass
                 try:
-                    isdict = re.findall("[\{\}]+", val)
+                    isdict = re.findall(r"[\{\}]+", val)
                     if isdict:
                         val = val.replace("[", "'[").replace("]", "]'")
                         data_dict[key] = self.__dumps(yaml.load(val))
