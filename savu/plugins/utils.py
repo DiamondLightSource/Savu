@@ -199,7 +199,7 @@ def parse_config_string(string):
     split_vals = [_f for _f in re.split(regex, string) if _f]
     delimitors = re.findall(regex, string)
     split_vals = [repr(a.strip()) for a in split_vals]
-    zipped = itertools.izip_longest(delimitors, split_vals)
+    zipped = itertools.zip_longest(delimitors, split_vals)
     string = ''.join([i for l in zipped for i in l if i is not None])
     try:
         return ast.literal_eval(string)
