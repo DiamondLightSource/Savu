@@ -30,6 +30,7 @@ from shutil import copyfile
 
 from savu.core.plugin_runner import PluginRunner
 from savu.core.checkpointing import Checkpointing
+from savu.core.utils import ensure_string
 from savu.data.experiment_collection import Experiment
 
 
@@ -237,8 +238,7 @@ class BaseCheckpointTest(object):
         return datasets
 
     def _is_nxdata(self, value):
-        check = 'NX_class' in list(value.attrs.keys()) and\
-            value.attrs['NX_class'] == 'NXdata'
+        check = 'NX_class' in list(value.attrs.keys()) and ensure_string(value.attrs['NX_class']) == 'NXdata'
         return check
 
     def _assert_checkpoint_params_equal(self, p_no, tidx, pidx, level, exp):

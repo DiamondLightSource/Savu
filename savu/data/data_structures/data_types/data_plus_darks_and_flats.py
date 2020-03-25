@@ -91,7 +91,7 @@ class DataWithDarksAndFlats(BaseType):
         return slice_list
 
     def _set_scale(self, name, scale):
-        self.set_flat_scale(scale) if name is 'flat' else \
+        self.set_flat_scale(scale) if name == 'flat' else \
             self.set_dark_scale(scale)
 
     def set_flat_scale(self, fscale):
@@ -137,7 +137,7 @@ class DataWithDarksAndFlats(BaseType):
         # all data entries
         data_idx = np.where(self.image_key == 0)[0]
         preview_idx = np.arange(len(data_idx))[slice_list]
-        # check the inconsistency regarding the preview of angles, e.g [0:10,:,:]        
+        # check the inconsistency regarding the preview of angles, e.g [0:10,:,:]
         if len(data_idx) == len(preview_idx):
             remove_idx = np.delete(data_idx, preview_idx[::-1])
         else:
