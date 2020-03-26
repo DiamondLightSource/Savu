@@ -14,9 +14,10 @@ dependencies:
   - PyWavelets
   - scikit-learn
   - tomobar
+# waiting for 3.7 packages for these two
 #  - ccpi-regulariser
-#  - ccpi-reconstruction # but the ccpi downgrades tomopy to 1.4.2
-  - i23-seg
+#  - ccpi-reconstruction
+  - larix
   - astra-toolbox
   - pyfai
   - pymca

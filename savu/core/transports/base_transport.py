@@ -529,12 +529,12 @@ class BaseTransport(object):
         else:
             try:
                 self.__create_dataset(entry, name, data)
-            except:
+            except Exception:
                 try:
                     import json
                     data = np.array([json.dumps(data).encode("ascii")])
                     self.__create_dataset(entry, name, data)
-                except:
+                except Exception:
                     try:
                         data = cu._savu_encoder(data)
                         self.__create_dataset(entry, name, data)

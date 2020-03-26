@@ -128,27 +128,6 @@ else
   echo "Going to use the openmpi installation from conda"
 fi
 
-# check for fftw
-# CFLAGS=""
-# LDFLAGS=""
-# IFS=:
-# file_base=libfftw?.so
-# for p in ${LD_LIBRARY_PATH}; do
-#     file_path=${p}/$file_base
-#     if [ "x$p" != "x" -a -e $file_path ]; then
-#         FFTWHOME=${file_path%/lib/libfftw?.so}
-#         CFLAGS="$FFTWHOME/include"
-#         LDFLAGS="$FFTWHOME/lib"
-#         break
-#     fi
-# done
-
-# if [ "$CFLAGS" ]; then
-#     echo "Using fftw:    " $FFTWHOME
-# else
-#     echo "fftw has not been found."
-# fi
-
 if [ $test_flag ] && [ $prompts = true ]; then
 
   PYTHONHOME=$(command -v conda)
@@ -238,7 +217,7 @@ if [ ! $test_flag ]; then
   unset IFS
   string=$(awk '/^miniconda/' $versions_file)
   miniconda_version=$(echo $string | cut -d " " -f 2)
-  # TODO replace with module load python/ana if conda is not on PATH - for non-local builds!
+
   wget https://repo.continuum.io/miniconda/Miniconda3-$miniconda_version-Linux-x86_64.sh -O $PREFIX/miniconda.sh
 
   miniconda_dir=$PREFIX/miniconda
