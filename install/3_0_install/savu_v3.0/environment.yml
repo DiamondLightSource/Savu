@@ -1,7 +1,6 @@
 channels:
-  - local
-  - defaults
   - conda-forge
+  - defaults
   - astra-toolbox/label/dev
   - ccpi
   - dkazanc
