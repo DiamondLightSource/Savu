@@ -15,9 +15,10 @@ install:
 
 script:
   - . /tmp/miniconda/bin/activate /tmp/savu
+  - pip install coverage pytest-cov
   - path=$(python -c "import savu; import os; print(os.path.abspath(savu.__file__))")
   - savu_path=${path%/savu/__init__.py*}
   - cd $savu_path
-  - pytest scripts/configurator_tests/
-  - pytest savu/test/travis
+  - pytest scripts/configurator_tests/ --cov=scripts
+  - pytest savu/test/travis --cov=savu
   # - pytest savu/test/travis -v --cov savu --cov-report term-missing

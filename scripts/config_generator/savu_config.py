@@ -226,7 +226,14 @@ def main(test=False):
     # required for running the tests locally or on travis
     # drops the last argument from pytest which is the test file/module
     if test:
-        sys.argv = sys.argv[:-1]
+        try:
+            # find where the /scripts argument is
+            index_of_scripts_argument = ["scripts" in arg for arg in sys.argv].index(True)
+            # remove it, including every arguments after it (e.g --cov)
+            sys.argv = sys.argv[:index_of_scripts_argument]
+        except ValueError:
+            # scripts was not part of the arguments passed in by the test
+            pass
 
     args = parsers._config_arg_parser()
     if args.error:
