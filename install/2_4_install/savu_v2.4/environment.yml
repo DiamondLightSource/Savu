@@ -25,7 +25,7 @@ dependencies:
 - tomobar
 - ccpi-regulariser
 - ccpi-reconstruction
-- i23-seg
+- larix
 - astra-toolbox
 - xraylib
 - tomopy
