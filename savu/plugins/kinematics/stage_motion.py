@@ -61,12 +61,15 @@ class StageMotion(Plugin, CpuPlugin):
         self.pvals = None
         self.num_datasets = self.NUM_DATASETS
         self.use_min_max = False
+        
+    def _check_parameters(self):
+        use_min_max = self.parameters['use_min_max']
+        logging.debug("Config use min max: " + str(use_min_max))
+        logging.debug("Experiment meta data use min max: " + \
+                          str(self.exp.meta_data.get('use_minmax')))
 
-    def base_dynamic_data_info(self):
-        logging.debug("Config use min max: " + str(self.parameters['use_min_max']))
-        logging.debug("Experiment meta data use min max: " + str(self.exp.meta_data.get('use_minmax')))
-
-        # Check the parameters from the config file and the experiment data to check whether to use extra datasets
+        # Check the parameters from the config file and the experiment data
+        # to check whether to use extra datasets
 
         # Config value takes priority, check if None
         if self.parameters['use_min_max'] is None:
@@ -76,15 +79,7 @@ class StageMotion(Plugin, CpuPlugin):
         elif self.parameters['use_min_max']:
             self.use_min_max = True
 
-        # If using extra datasets, set them up and increase the number of datasets
-        if self.use_min_max:
-            logging.debug("Using min and max datasets")
-            self.num_datasets += len(self.parameters['extra_in_datasets'])
-            self.parameters['in_datasets'].extend(self.parameters['extra_in_datasets'])
-            self.parameters['out_datasets'].extend(self.parameters['extra_out_datasets'])
-
     def pre_process(self):
-
         # Check the parameters from the config file and the experiment data
         if self.parameters['use_min_max'] is None:
             # Config was None, so check the value in the experiment data file
@@ -263,7 +258,17 @@ class StageMotion(Plugin, CpuPlugin):
         return tuple(shape)
 
     def nInput_datasets(self):
+        self._check_parameters()
+        # If using extra datasets, set them up and increase the number of datasets
+        if self.use_min_max:
+            logging.debug("Using min and max datasets")
+            self.num_datasets += len(self.parameters['extra_in_datasets'])
+            self.parameters['in_datasets'].extend(
+                    self.parameters['extra_in_datasets'])
         return self.num_datasets
 
     def nOutput_datasets(self):
+        if self.use_min_max:
+            self.parameters['out_datasets'].extend(
+                    self.parameters['extra_out_datasets'])        
         return self.num_datasets

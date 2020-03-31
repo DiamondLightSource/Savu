@@ -33,7 +33,7 @@ class MultipleParameterTest(unittest.TestCase):
 
     def plugin_setup(self):
         ppath = 'savu.plugins.reconstructions.astra_recons.astra_recon_cpu'
-        plugin = pu.get_plugin(ppath)
+        plugin = pu.load_class(ppath)()
         return plugin
 
     def framework_options_setup(self):
@@ -102,14 +102,8 @@ class MultipleParameterTest(unittest.TestCase):
     def test_parameter_space_data_shape(self):
         options = self.framework_options_setup()
         plugin = tu.plugin_runner_load_plugin(options)
-        tu.plugin_setup(plugin)
-
         out_dataset = plugin.get_out_datasets()[0]
         self.assertEqual((160, 1, 160, 2, 3), out_dataset.get_shape())
-
-#    def test_parameter_space_full_run(self):
-#        options = self.framework_options_setup()
-#        tu.plugin_runner_real_plugin_run(options)
 
 if __name__ == "__main__":
     unittest.main()
