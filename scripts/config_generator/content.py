@@ -122,20 +122,14 @@ class Content(object):
         active = plugin_entry['active']
         plugin = pu.plugins[name]()
         plugin._populate_default_parameters()
-        current_values = \
-            OrderedDict([(k, v['current_value'])
-                        for k, v in self.get(pos)['param'].items()])
-        keep = current_values if not defaults else None
+        keep = self.get(pos)['data'] if not defaults else None
         self.insert(plugin, pos, str_pos, replace=True)
         self.plugin_list.plugin_list[pos]['active'] = active
         if keep:
             self._update_parameters(plugin, name, keep, str_pos)
 
     def _update_parameters(self, plugin, name, keep, str_pos):
-        original_values = \
-            OrderedDict([(k, v['current_value'])
-                        for k, v in plugin.p_dict.items()])
-        union_params = set(keep).intersection(set(original_values))
+        union_params = set(keep).intersection(set(plugin.parameters))
         # Names of the parameter names present in both lists
         for param in union_params:
             self.modify(str_pos, param, keep[param], ref=True)
@@ -154,7 +148,7 @@ class Content(object):
                         val = eval(entry['eval'])
                     self.modify(str_pos, entry['new'], val, ref=True)
         if changes:
-            mutations.param_change_str(keep, original_values, name, keys)
+            mutations.param_change_str(keep, plugin.parameters, name, keys)
 
     def _apply_plugin_updates(self, skip=False):
         # Update old process lists that start from 0
@@ -241,19 +235,20 @@ class Content(object):
         pos = self.find_position(pos_str)
         tools = self.plugin_list.plugin_list[pos]['tools']
         params = self.plugin_list.plugin_list[pos]['param']
+        parameters = self.plugin_list.plugin_list[pos]['data']
         # Select the correct group and order of parameters according to that
         # on display to the user. This ensures correct parameter is modified.
         dev_keys = [k for k, v in params.items()
-                    if v['visibility'] in ['basic', 'advanced']]
+                    if v['visibility'] == 'advanced' and v['display'] == 'on']
         user_keys = [k for k, v in params.items()
-                     if v['visibility'] == 'basic']
-        current_params = dev_keys
+                     if v['visibility'] == 'basic' and v['display'] == 'on']
+        current_params = user_keys + dev_keys
         if param_name.isdigit():
             param_name = current_params[int(param_name)-1]
         try:
             if not ref:
                 value = self.value(value)
-            tools.modify(value, param_name)
+            tools.modify(parameters, value, param_name)
         except SyntaxError:
             print ("There is a syntax error. Please check your input.")
         except EOFError:
@@ -403,6 +398,7 @@ class Content(object):
         plugin_dict = {}
         plugin_dict['name'] = plugin.name
         plugin_dict['id'] = plugin.__module__
+        plugin_dict['data'] = plugin.parameters
         plugin_dict['active'] = True
         plugin_dict['tools'] = plugin.tools
         plugin_dict['param'] = plugin.p_dict

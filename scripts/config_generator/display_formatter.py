@@ -52,61 +52,13 @@ class DisplayFormatter(object):
 
         for p_dict in plugin_list:
             count += 1
-            if subelem is not None:
-                if subelem.isdigit():
-                    # Manually set user level to all. This level is only
-                    # returning the current entered command level.
-                    # Is there a way to access the previous user command level.
-                    level = 'all'
-                    sub_dict = self._select_param(p_dict, subelem, level)
-                    p_dict = sub_dict
-                    verbosity = '-vv'
-                else:
-                    print('The sub element value was not an integer.')
-            if p_dict is not None:
-                description = \
-                    self._get_description(WIDTH, level, p_dict,
-                                          count, verbosity)
-                out_string.append(description)
-                out_string.append(line_break)
+            description = \
+                self._get_description(WIDTH, level, p_dict, count, verbosity, subelem=subelem)
+            out_string.append(description)
+            out_string.append(line_break)
         return '\n'.join(out_string)
 
-    def _select_param(self, temp_param_dict, subelem, level):
-        """ Display sub element when specified in savu_config.
-
-        Prevent mutable changes by copying the dict.
-        """
-        element_present = False
-        keycount = 0
-
-        param_dict = copy.deepcopy(temp_param_dict)
-
-        # Select the correct order of parameters according to that on display
-        # to the user. This ensures the correct parameter is modified.
-        dev_keys = [k for k, v in param_dict['param'].items()
-                    if v['visibility'] in ['advanced', 'basic']]
-        user_keys = [k for k, v in param_dict['param'].items()
-                     if v['visibility'] == 'basic']
-        keys = user_keys if level == 'user' else dev_keys
-        try:
-            for key in keys:
-                keycount += 1
-                if int(subelem) == int(keycount):
-                    element_present = True
-                    for i in list(param_dict['param']):
-                        if i != key:
-                            param_dict['param'][i]['visibility'] = 'hidden'
-
-            if element_present is False:
-                print('No matching sub element number found.')
-                return None
-            return param_dict
-
-        except Exception as e:
-            print('ERROR: ' + str(e))
-            raise
-
-    def _get_description(self, width, level, p_dict, count, verbose):
+    def _get_description(self, width, level, p_dict, count, verbose, subelem=False):
         if verbose == '-q':
             return self._get_quiet(p_dict, count, width)
         if not verbose:
@@ -114,7 +66,7 @@ class DisplayFormatter(object):
         if verbose == '-v':
             return self._get_verbose(level, p_dict, count, width)
         if verbose == '-vv':
-            return self._get_verbose_verbose(level, p_dict, count, width)
+            return self._get_verbose_verbose(level, p_dict, count, width, subelem=subelem)
 
     def _get_plugin_title(self, p_dict, width, fore_colour, back_colour,
                           active="", quiet=False, pos=None):
@@ -160,27 +112,36 @@ class DisplayFormatter(object):
         return params
 
     def _get_param_details(self, level, p_dict, width, desc=False,
-                           breakdown=False):
+                           breakdown=False, subelem=False):
         margin = 4
         keycount = 0
         joiner = "\n" + " "*margin
         params = ''
 
         dev_keys = [k for k, v in p_dict['param'].items()
-                    if v['visibility'] in ['advanced', 'basic']]
+                    if v['visibility'] == 'advanced' and v['display'] == 'on']
         user_keys = [k for k, v in p_dict['param'].items()
-                     if v['visibility'] == 'basic']
+                     if v['visibility'] == 'basic' and v['display'] == 'on']
         try:
-            keys = user_keys if level == 'user' else dev_keys
+            keys = user_keys if level == 'user' else user_keys + dev_keys
             for key in keys:
                 keycount += 1
-                temp = "\n   %2i)   %20s : %s"
-                params += \
-                    temp % (keycount, key, p_dict['param'][key]['current_value'])
-                # Add description for this parameter
-                if desc:
-                    params = self._append_description(desc, key, p_dict,
-                                joiner, width, margin, params, breakdown)
+                if subelem:
+                    # If there is a sub parameter specified, only show this one
+                    if int(keycount) == int(subelem):
+                        temp = "\n   %2i)   %20s : %s"
+                        params += \
+                            temp % (keycount, key, p_dict['data'][key])
+                        if desc:
+                            params = self._append_description(desc, key, p_dict,
+                                        joiner, width, margin, params, breakdown)
+                else:
+                    temp = "\n   %2i)   %20s : %s"
+                    params += \
+                        temp % (keycount, key, p_dict['data'][key])
+                    if desc:
+                        params = self._append_description(desc, key, p_dict,
+                                    joiner, width, margin, params, breakdown)
             return params
         except Exception as e:
             print('ERROR: ' + str(e))
@@ -219,7 +180,7 @@ class DisplayFormatter(object):
             for opt in options:
                 opt = self._apply_lower_case(opt)
                 current_opt = \
-                    self._apply_lower_case(p_dict['param'][key]['current_value'])
+                    self._apply_lower_case(p_dict['data'][key])
                 if current_opt == opt:
                     colour = Fore.LIGHTCYAN_EX
                     verbose_color = Fore.LIGHTCYAN_EX
@@ -282,7 +243,7 @@ class DispDisplay(DisplayFormatter):
     def _get_quiet(self, p_dict, count, width, quiet=True):
         active = \
             '***OFF***' if 'active' in p_dict and not p_dict['active'] else ''
-        p_dict['param'] = self._remove_quotes(p_dict['param'])
+        p_dict['data'] = self._remove_quotes(p_dict['data'])
         pos = p_dict['pos'].strip() if 'pos' in p_dict.keys() else count
         fore = Fore.RED + Style.DIM if active else Fore.LIGHTWHITE_EX
         back = Back.LIGHTBLACK_EX
@@ -294,7 +255,7 @@ class DispDisplay(DisplayFormatter):
         params = self._get_param_details(level, p_dict, width)
         return title + params
 
-    def _get_verbose(self, level, p_dict, count, width, breakdown=False):
+    def _get_verbose(self, level, p_dict, count, width, breakdown=False, subelem=False):
         title = self._get_quiet(p_dict, count, width, quiet=False)
         colour_on = Back.LIGHTBLACK_EX + Fore.LIGHTWHITE_EX
         colour_off = Back.RESET + Fore.RESET
@@ -306,13 +267,13 @@ class DispDisplay(DisplayFormatter):
         if breakdown:
             params = \
                 self._get_param_details(level, p_dict, width, desc=param_desc,
-                                        breakdown=breakdown)
+                                        breakdown=breakdown, subelem=subelem)
             return title, synopsis, params
         return title + synopsis + params
 
-    def _get_verbose_verbose(self, level, p_dict, count, width):
+    def _get_verbose_verbose(self, level, p_dict, count, width, subelem=False):
         title, synopsis, param_details = \
-            self._get_verbose(level, p_dict, count, width, breakdown=True)
+            self._get_verbose(level, p_dict, count, width, breakdown=True, subelem=subelem)
         info_c = Back.CYAN + Fore.LIGHTWHITE_EX
         warn_c = Back.WHITE + Fore.RED
         c_off = Back.RESET + Fore.RESET
@@ -324,10 +285,9 @@ class DispDisplay(DisplayFormatter):
     def _remove_quotes(self, data_dict):
         """ Remove quotes around variables for display
         """
-        for key, val in data_dict.items():
-            current_val = val['current_value']
-            current_val = str(current_val).replace("'", "")
-            data_dict[key]['current_value'] = current_val
+        for key, val in data_dict.iteritems():
+            val = str(val).replace("'", "")
+            data_dict[key] = val
         return data_dict
 
     def _notices(self):
