@@ -17,7 +17,7 @@
 """
 .. module:: plugins_test
    :platform: Unix
-   :synopsis: unittest test for tomobar 3d reconstruction software
+   :synopsis: unittest test for tomobar 3d (GPU) reconstruction software
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 
@@ -42,26 +42,26 @@ class Tomobar3dTest(unittest.TestCase):
         options = tu.set_experiment('tomo')
         options['data_file'] = data_file
         options['out_path'] = os.path.join(self.test_folder)
-        options['process_file'] = tu.get_test_process_path('tomobar3d_recon.nxs')
+        options['process_file'] = tu.get_test_process_path('tomobar/tomobar3d_gpu_recon.nxs')
         run_protected_plugin_runner(options)
-        
+
         #read the file using SavuNexusLoader
         path_to_rec = self.test_folder + 'test_processed.nxs'
         self.test_folder2 = tempfile.mkdtemp(suffix='my_test2/')
         options['data_file'] = path_to_rec
         options['out_path'] = os.path.join(self.test_folder2)
-        options['process_file'] = tu.get_test_process_path('savu_nexus_loader_test3.nxs')
+        options['process_file'] = tu.get_test_process_path('loaders/savu_nexus_loader_test3.nxs')
         run_protected_plugin_runner(options)
-        
+
         # perform folder cleaning
         classb = savu.test.base_checkpoint_test.BaseCheckpointTest()
-        cp_folder = os.path.join(self.test_folder, 'checkpoint')        
+        cp_folder = os.path.join(self.test_folder, 'checkpoint')
         classb._empty_folder(cp_folder)
         os.removedirs(cp_folder)
         classb._empty_folder(self.test_folder)
         os.removedirs(self.test_folder)
-        
-        cp_folder = os.path.join(self.test_folder2, 'checkpoint')        
+
+        cp_folder = os.path.join(self.test_folder2, 'checkpoint')
         classb._empty_folder(cp_folder)
         os.removedirs(cp_folder)
         classb._empty_folder(self.test_folder2)

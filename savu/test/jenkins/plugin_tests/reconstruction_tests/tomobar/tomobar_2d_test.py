@@ -17,7 +17,7 @@
 """
 .. module:: plugins_test
    :platform: Unix
-   :synopsis: unittest test for tomobar reconstruction software
+   :synopsis: unittest test for tomobar 2D (GPU) reconstruction software
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 
@@ -28,14 +28,30 @@ import unittest
 import savu.test.test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
+import savu.test.base_checkpoint_test
+import tempfile
+import os
 
 
-class TomobarTest(unittest.TestCase):
+class Tomobar2dTest(unittest.TestCase):
 
-    def test_tomobar_recon(self):
+    def test_tomobar_2drecon(self):
         data_file = tu.get_test_data_path('24737.nxs')
-        process_file = tu.get_test_process_path('tomobar2d_recon.nxs')
-        run_protected_plugin_runner(tu.set_options(data_file, process_file=process_file))
+        self.test_folder = tempfile.mkdtemp(suffix='my_test/')
+        # set options
+        options = tu.set_experiment('tomo')
+        options['data_file'] = data_file
+        options['out_path'] = os.path.join(self.test_folder)
+        options['process_file'] = tu.get_test_process_path('tomobar/tomobar2d_gpu_recon.nxs')
+        run_protected_plugin_runner(options)
+
+        # perform folder cleaning
+        classb = savu.test.base_checkpoint_test.BaseCheckpointTest()
+        cp_folder = os.path.join(self.test_folder, 'checkpoint')
+        classb._empty_folder(cp_folder)
+        os.removedirs(cp_folder)
+        classb._empty_folder(self.test_folder)
+        os.removedirs(self.test_folder)
 
 if __name__ == "__main__":
     unittest.main()

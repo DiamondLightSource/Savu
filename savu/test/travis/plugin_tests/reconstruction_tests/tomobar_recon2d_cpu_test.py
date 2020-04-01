@@ -17,7 +17,7 @@
 """
 .. module:: plugins_test
    :platform: Unix
-   :synopsis: unittest test classes for plugins
+   :synopsis: tomobar 2d cpu test
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 
@@ -37,15 +37,15 @@ class TomobarRecon2dCpuTest(unittest.TestCase):
         data_file = tu.get_test_data_path('24737.nxs')
         self.test_folder = tempfile.mkdtemp(suffix='my_test/')
         # set options
-        options = tu.set_experiment('tomo')        
+        options = tu.set_experiment('tomo')
         options['data_file'] = data_file
         options['out_path'] = os.path.join(self.test_folder)
-        options['process_file'] = tu.get_test_process_path('tomobar_2d_cpu_test.nxs')
-        run_protected_plugin_runner(options)        
+        options['process_file'] = tu.get_test_process_path('tomobar/tomobar2d_cpu_recon.nxs')
+        run_protected_plugin_runner(options)
 
         # perform folder cleaning
         classb = savu.test.base_checkpoint_test.BaseCheckpointTest()
-        cp_folder = os.path.join(self.test_folder, 'checkpoint')        
+        cp_folder = os.path.join(self.test_folder, 'checkpoint')
         classb._empty_folder(cp_folder)
         os.removedirs(cp_folder)
         classb._empty_folder(self.test_folder)
@@ -53,4 +53,3 @@ class TomobarRecon2dCpuTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
