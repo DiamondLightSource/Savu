@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2014 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,35 +12,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 """
-.. module:: plugins_test
+.. module:: tomo_recon
    :platform: Unix
-   :synopsis: unittest test classes for plugins
+   :synopsis: runner for tests using the MPI framework
 
-.. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
+.. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
-
 import unittest
-
-import savu.test.test_utils as tu
+from savu.test import test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
-        run_protected_plugin_runner
+    run_protected_plugin_runner
 import savu.test.base_checkpoint_test
 import tempfile
 import os
 
-class CcpiDenoisingGpuTest(unittest.TestCase):
+class PluginRunnerDenoiseBregmanTest(unittest.TestCase):
 
-    def test_ccpi_denoise_gpu(self):
+    def test_denoise_bregman_test(self):
         data_file = tu.get_test_data_path('24737.nxs')
         self.test_folder = tempfile.mkdtemp(suffix='my_test/')
         # set options
         options = tu.set_experiment('tomo')
         options['data_file'] = data_file
         options['out_path'] = os.path.join(self.test_folder)
-        options['process_file'] = tu.get_test_process_path('ccpi/ccpi_denoising_gpu_test.nxs')
+        options['process_file'] = tu.get_test_process_path('denoise/denoise_bregman_test.nxs')
         run_protected_plugin_runner(options)
 
         # perform folder cleaning

@@ -28,14 +28,26 @@ import unittest
 import savu.test.test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner_no_process_list
-
+import savu.test.base_checkpoint_test
+import tempfile
+import os
 
 class BandPassTest(unittest.TestCase):
 
     def test_band_pass(self):
+        self.test_folder = tempfile.mkdtemp(suffix='my_test/')
         options = tu.set_experiment('tomo')
+        options['out_path'] = os.path.join(self.test_folder)
         plugin = 'savu.plugins.filters.band_pass'
         run_protected_plugin_runner_no_process_list(options, plugin)
+
+        # perform folder cleaning
+        classb = savu.test.base_checkpoint_test.BaseCheckpointTest()
+        cp_folder = os.path.join(self.test_folder, 'checkpoint')
+        classb._empty_folder(cp_folder)
+        os.removedirs(cp_folder)
+        classb._empty_folder(self.test_folder)
+        os.removedirs(self.test_folder)
 
 if __name__ == "__main__":
     unittest.main()

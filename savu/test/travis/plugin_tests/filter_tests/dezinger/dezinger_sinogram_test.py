@@ -20,17 +20,31 @@
 """
 import unittest
 from savu.test import test_utils as tu
-
 from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
-
+import savu.test.base_checkpoint_test
+import tempfile
+import os
 
 class DezingerSinogramTest(unittest.TestCase):
 
     def test_dezinger_sinogram(self):
         data_file = tu.get_test_data_path('24737.nxs')
-        process_file = tu.get_test_process_path('dezinger_sinogram_test.nxs')
-        run_protected_plugin_runner(tu.set_options(data_file,
-                                                   process_file=process_file))
+        self.test_folder = tempfile.mkdtemp(suffix='my_test/')
+        # set options
+        options = tu.set_experiment('tomo')
+        options['data_file'] = data_file
+        options['out_path'] = os.path.join(self.test_folder)
+        options['process_file'] = tu.get_test_process_path('dezinger/dezinger_sinogram_test.nxs')
+        run_protected_plugin_runner(options)
+
+        # perform folder cleaning
+        classb = savu.test.base_checkpoint_test.BaseCheckpointTest()
+        cp_folder = os.path.join(self.test_folder, 'checkpoint')
+        classb._empty_folder(cp_folder)
+        os.removedirs(cp_folder)
+        classb._empty_folder(self.test_folder)
+        os.removedirs(self.test_folder)
+
 if __name__ == "__main__":
     unittest.main()
