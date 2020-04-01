@@ -40,7 +40,7 @@ class TomopyReconTest(unittest.TestCase):
         options = tu.set_experiment('tomo')
         options['data_file'] = data_file
         options['out_path'] = os.path.join(self.test_folder)
-        options['process_file'] = tu.get_test_process_path('tomopy/tomopy_test.nxs')
+        options['process_file'] = tu.get_test_process_path('tomopy_test.nxs')
         run_protected_plugin_runner(options)
 
         # perform folder cleaning
