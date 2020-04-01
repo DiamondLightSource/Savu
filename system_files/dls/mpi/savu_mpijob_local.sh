@@ -12,7 +12,7 @@
 echo "SAVU_MPI_LOCAL:: Running Job with Savu at $1"
 
 nNodes=1
-nCoresPerNode=`grep '^core id' /proc/cpuinfo |sort -u|wc -l`
+nCoresPerNode=`lscpu --all --parse=CORE,SOCKET | grep -Ev "^#" | wc -l`
 nGPUs=$(nvidia-smi -L | wc -l)
 
 echo "***********************************************"
@@ -48,6 +48,8 @@ echo "running the savu mpi local job with process parameters: $CPUs"
 
 echo "Using python at $(which python)"
 
-OMPI_MCA_opal_cuda_support=true PYTHONPATH=$savupath:$PYTHONPATH mpirun -np $nCPUs -mca btl self,openib,vader -mca orte_forward_job_control 1 python $filename $datafile $processfile $outpath -n $CPUs -v $options
+OMPI_MCA_opal_cuda_support=true PYTHONPATH=$savupath:$PYTHONPATH mpirun -np $nCPUs --use-hwthread-cpus \
+                                                                -mca btl self,vader -mca orte_forward_job_control 1 \
+                                                                python $filename $datafile $processfile $outpath -n $CPUs -v $options
 
 echo "SAVU_MPI_LOCAL:: Process complete"
