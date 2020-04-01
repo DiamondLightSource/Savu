@@ -25,7 +25,7 @@ outpath=$3
 shift 3
 options=$@
 
-savupath=$(python -c "import savu, os; print savu.__path__[0]")
+savupath=$(python -c "import savu; print(savu.__path__[0])")
 savupath=${savupath%/savu}
 echo "savupath is:" $savupath
 
