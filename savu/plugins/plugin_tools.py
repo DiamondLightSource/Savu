@@ -13,24 +13,25 @@ class PluginParameters(object):
     def __init__(self, cls, **kwargs):
         super(PluginParameters, self).__init__(**kwargs)
         self.param = MetaData(ordered=True)
-        self.populate_parameters(cls)
+        self._populate_parameters(cls)
 
-    def populate_parameters(self, cls):
-        """ Using method order resolution, find base classes"""
+    def _populate_parameters(self, cls):
+        """ Using method resolution order, find base class tools
+        """
         for clazz in cls.__class__.__mro__[::-1]:
-            p_tools = self.get_plugin_tools(clazz)
+            p_tools = self._get_plugin_tools(clazz)
             if p_tools:
-                self.set_plugin_parameters(p_tools)
+                self._set_plugin_parameters(p_tools)
 
-    def set_plugin_parameters(self, clazz):
+    def _set_plugin_parameters(self, clazz):
         """ Load the parameters for each base class"""
-        all_params = self.load_parameters(clazz)
-        self.check_required_keys(all_params, clazz)
-        self.set_values(all_params)
+        all_params = self._load_param_from_doc(clazz)
+        self._check_required_keys(all_params, clazz)
+        self._set_display(all_params)
         for p_name, p_value in all_params.items():
             self.param.set(p_name, p_value)
 
-    def get_plugin_tools(self, clazz):
+    def _get_plugin_tools(self, clazz):
         """ Return the tools class"""
         tool_class = None
         plugin_tools_id = clazz.__module__ + '_tools'
@@ -40,8 +41,10 @@ class PluginParameters(object):
             tool_class = pu.load_tools[plugin_tools_id]
         return tool_class
 
-    def load_parameters(self, clazz):
-        """Find the parameter yaml information from the method docstring"""
+    def _load_param_from_doc(self, clazz):
+        """Find the parameter information from the method docstring
+        This is provided in a yaml format.
+        """
         yaml_text = clazz.define_parameters.__doc__
         all_params = doc.load_yaml_doc(yaml_text)
         if not isinstance(all_params, OrderedDict):
@@ -49,12 +52,14 @@ class PluginParameters(object):
                   + str(clazz.__name__) + '.')
         return all_params
 
-    def modify(self, value, param_name):
+    def modify(self, parameters, value, param_name):
+        # This is accessed from outside this class
         if self._is_valid(value, param_name):
-            self.param[param_name]['current_value'] = value
-            self.update_defaults(self.param.get_dictionary(), mod=param_name)
+            parameters[param_name] = value
+            self.update_defaults(parameters, self.param.get_dictionary(),
+                                 mod=param_name)
             # Update the list of parameters to hide those dependent on others
-            self.check_dependencies(self.param.get_dictionary())
+            self.check_dependencies(parameters, self.param.get_dictionary())
         else:
             print('This value has not been saved as it was not'
                   ' a valid entry.')
@@ -74,7 +79,7 @@ class PluginParameters(object):
             print('Not in parameter keys.')
         return parameter_valid
 
-    def check_required_keys(self, all_params, clazz):
+    def _check_required_keys(self, all_params, clazz):
         required_keys = ['dtype', 'description', 'visibility', 'default']
         for p_key, p in all_params.items():
             all_keys = p.keys()
@@ -89,16 +94,14 @@ class PluginParameters(object):
                       + ' are: ')
                 print(', '.join(set(required_keys) - set(all_keys)))
 
-    def set_values(self, all_params):
+    def _set_display(self, all_params):
         for k, v in all_params.items():
-            v['current_value'] = v['default']
-        self.update_defaults(all_params)
-        self.check_dependencies(all_params)
+            v['display'] = 'on'
 
-    def update_defaults(self, all_params, mod=False):
+    def update_defaults(self, parameters, all_params, mod=False):
         """ Check if the default field of each parameter holds a dictionary.
-        If it does, then check the default parameter keys to find the default value of
-        the given parameter
+        If it does, then check the default parameter keys to find the default
+        value of the given parameter
         """
         default_list = {k: v['default'] for k, v in all_params.items()
                         if isinstance(v['default'], OrderedDict)}
@@ -108,8 +111,14 @@ class PluginParameters(object):
             parent_param = default.keys()[0]
             dep_param_choices = {self._apply_lower_case(k): v
                                  for k, v in default[parent_param].items()}
-            parent_value = \
-                self._apply_lower_case(all_params[parent_param]['current_value'])
+            if mod:
+                # If there was a modification, find current parent value
+                parent_value = \
+                    self._apply_lower_case(parameters[parent_param])
+            else:
+                # If there was no modification, on load, find the parent default
+                parent_value = \
+                    self._apply_lower_case(all_params[parent_param]['default'])
             for item in dep_param_choices.keys():
                 if parent_value == item:
                     desc['range'] = 'The recommended value with the chosen ' \
@@ -122,37 +131,45 @@ class PluginParameters(object):
                         if mod == parent_param:
                             print(Fore.RED + recommendation + Fore.RESET)
                     else:
-                        all_params[p_name]['current_value'] = dep_param_choices[item]
+                        # If there was no modification, on loading the plugin set
+                        # the correct default value
+                        parameters[p_name] = dep_param_choices[item]
 
-    def check_dependencies(self, all_params):
+    def check_dependencies(self, parameters, all_params):
         """ Determine which parameter values are dependent on a parent
         value and whether they should be hidden or shown
         """
-        current_values = {k: v['current_value'] for k, v in all_params.items()}
         dep_list = {k: v['dependency']
                     for k, v in all_params.items() if 'dependency' in v}
         for p_name, dependency in dep_list.items():
             if isinstance(dependency, OrderedDict):
                 parent_param_name = dependency.keys()[0]
-                parent_choice_list = self._apply_lower_case(dependency[parent_param_name])
+                parent_choice_list = \
+                    self._apply_lower_case(dependency[parent_param_name])
                 # The choices which must be in the parent value
-                if parent_param_name in current_values:
-                    # Check that the parameter is in the current plug in
+
+                if parent_param_name in parameters:
+                    ''' Check that the parameter is in the current plug in
+                    This is relevant for base classes which have several
+                    dependent classes
+                    '''
                     parent_value = \
-                        self._apply_lower_case(all_params[parent_param_name]['current_value'])
+                        self._apply_lower_case(parameters[parent_param_name])
+
                     if parent_value in parent_choice_list:
-                        if all_params[p_name].get('visibility') == 'hidden':
-                            all_params[p_name]['visibility'] = 'basic'
+                        if all_params[p_name].get('display') == 'off':
+                            all_params[p_name]['display'] = 'on'
                     else:
-                        if all_params[p_name].get('visibility') != 'hidden':
-                            all_params[p_name]['visibility'] = 'hidden'
+                        if all_params[p_name].get('display') != 'off':
+                            all_params[p_name]['display'] = 'off'
 
     def _apply_lower_case(self, item):
         lower_case_item = item
         if isinstance(lower_case_item, str):
             lower_case_item = lower_case_item.lower()
         elif isinstance(lower_case_item, list):
-            lower_case_item = [self._apply_lower_case(i) for i in lower_case_item]
+            lower_case_item = [self._apply_lower_case(i)
+                               for i in lower_case_item]
         return lower_case_item
 
     def define_parameters(self):
@@ -179,6 +196,7 @@ class PluginParameters(object):
             return param_dict
     """
 
+
 class PluginCitations(object):
     """ Get this citation dictionary so get_dictionary of the metadata type
         should return a dictionary of all the citation info as taken from
@@ -200,6 +218,7 @@ class PluginCitations(object):
 
     def get_endnote(self):
         pass
+
 
 class PluginDocumentation(object):
     """ Get this documentation dictionary so get_dictionary of

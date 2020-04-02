@@ -174,7 +174,7 @@ def _dawn_setup():
 
 def _get_dawn_parameters(plugin):
     plugin._populate_default_parameters()
-    desc = plugin.parameters_desc
+    desc = plugin.p_dict['description']
     params = {}
     for key, value in plugin.parameters.iteritems():
         if key not in ['in_datasets', 'out_datasets']:

@@ -108,7 +108,6 @@ class DisplayFormatter(object):
                 except TypeError:
                     print('You have not filled in the %s field within the'
                           ' yaml information.' % param_key)
-
         return params
 
     def _get_param_details(self, level, p_dict, width, desc=False,
@@ -119,11 +118,12 @@ class DisplayFormatter(object):
         params = ''
 
         dev_keys = [k for k, v in p_dict['param'].items()
-                    if v['visibility'] == 'advanced' and v['display'] == 'on']
+                    if v['visibility'] in ['intermediate', 'advanced']
+                    and v['display'] == 'on']
         user_keys = [k for k, v in p_dict['param'].items()
                      if v['visibility'] == 'basic' and v['display'] == 'on']
         try:
-            keys = user_keys if level == 'user' else user_keys + dev_keys
+            keys = user_keys if (level == 'user' and not subelem) else user_keys + dev_keys
             for key in keys:
                 keycount += 1
                 if subelem:

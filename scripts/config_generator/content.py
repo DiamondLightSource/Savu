@@ -239,12 +239,13 @@ class Content(object):
         # Select the correct group and order of parameters according to that
         # on display to the user. This ensures correct parameter is modified.
         dev_keys = [k for k, v in params.items()
-                    if v['visibility'] == 'advanced' and v['display'] == 'on']
+                    if v['visibility'] in ['intermediate', 'advanced']
+                    and v['display'] == 'on']
         user_keys = [k for k, v in params.items()
                      if v['visibility'] == 'basic' and v['display'] == 'on']
-        current_params = user_keys + dev_keys
+        keys = user_keys + dev_keys
         if param_name.isdigit():
-            param_name = current_params[int(param_name)-1]
+            param_name = keys[int(param_name)-1]
         try:
             if not ref:
                 value = self.value(value)
