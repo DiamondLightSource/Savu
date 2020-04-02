@@ -380,16 +380,23 @@ def initialise_options(data, experiment, process_path):
     initialises options and creates a temporal directory in tmp for output.
 
     :param str data: data to run test with (can be None)
-    :param str experiment: experiment type to run test with
+    :param str experiment: experiment type to run test with (can be None)
     :param str process_path: a path to the preocess list (can be None)
     """
     test_folder = tempfile.mkdtemp(suffix='my_test/')
-    options = set_experiment(experiment)
-    options['out_path'] = os.path.join(test_folder)
     if data is not None:
-        options['data_file'] = get_test_data_path(data)
+        data_file = get_test_data_path(data)
     if process_path is not None:
-        options['process_file'] = get_test_process_path(process_path)
+        process_file = get_test_process_path(process_path)
+    if (experiment is not None) & (data is None):
+        options = set_experiment(experiment)
+    elif (experiment is not None) & (data is not None):
+        options = set_experiment(experiment)
+        options['data_file'] = data_file
+        options['process_file'] = process_file
+    else:
+        options = set_options(data_file, process_file=process_file)
+    options['out_path'] = os.path.join(test_folder)
     return options
 
 def cleanup(options):
