@@ -26,63 +26,29 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner_no_process_list
 from savu.test.travis.framework_tests.plugin_runner_test import \
         run_protected_plugin_runner
-import savu.test.base_checkpoint_test
-import tempfile
-import os
-
 
 class DezingerTest(unittest.TestCase):
+    global data_file, experiment
+    data_file = '24737.nxs'
+    experiment = 'tomo'
 
     def test_dezing_filter(self):
-        self.test_folder = tempfile.mkdtemp(suffix='my_test/')
-        options = tu.set_experiment('tomoRaw')
-        options['out_path'] = os.path.join(self.test_folder)
+        options = tu.initialise_options(None, 'tomoRaw', None)
         plugin = 'savu.plugins.filters.dezinger_simple'
         run_protected_plugin_runner_no_process_list(options, plugin)
-
-        # perform folder cleaning
-        classb = savu.test.base_checkpoint_test.BaseCheckpointTest()
-        cp_folder = os.path.join(self.test_folder, 'checkpoint')
-        classb._empty_folder(cp_folder)
-        os.removedirs(cp_folder)
-        classb._empty_folder(self.test_folder)
-        os.removedirs(self.test_folder)
+        tu.cleanup(options)
 
     def test_dezinger(self):
-        data_file = tu.get_test_data_path('24737.nxs')
-        self.test_folder = tempfile.mkdtemp(suffix='my_test/')
-        # set options
-        options = tu.set_experiment('tomo')
-        options['data_file'] = data_file
-        options['out_path'] = os.path.join(self.test_folder)
-        options['process_file'] = tu.get_test_process_path('dezinger/dezinger_test.nxs')
+        process_list = 'dezinger/dezinger_test.nxs'
+        options = tu.initialise_options(data_file, experiment, process_list)
         run_protected_plugin_runner(options)
-
-        # perform folder cleaning
-        classb = savu.test.base_checkpoint_test.BaseCheckpointTest()
-        cp_folder = os.path.join(self.test_folder, 'checkpoint')
-        classb._empty_folder(cp_folder)
-        os.removedirs(cp_folder)
-        classb._empty_folder(self.test_folder)
-        os.removedirs(self.test_folder)
+        tu.cleanup(options)
 
     def test_dezinger_sinogram(self):
-        data_file = tu.get_test_data_path('24737.nxs')
-        self.test_folder = tempfile.mkdtemp(suffix='my_test/')
-        # set options
-        options = tu.set_experiment('tomo')
-        options['data_file'] = data_file
-        options['out_path'] = os.path.join(self.test_folder)
-        options['process_file'] = tu.get_test_process_path('dezinger/dezinger_sinogram_test.nxs')
+        process_list = 'dezinger/dezinger_sinogram_test.nxs'
+        options = tu.initialise_options(data_file, experiment, process_list)
         run_protected_plugin_runner(options)
-
-        # perform folder cleaning
-        classb = savu.test.base_checkpoint_test.BaseCheckpointTest()
-        cp_folder = os.path.join(self.test_folder, 'checkpoint')
-        classb._empty_folder(cp_folder)
-        os.removedirs(cp_folder)
-        classb._empty_folder(self.test_folder)
-        os.removedirs(self.test_folder)
+        tu.cleanup(options)
 
 if __name__ == "__main__":
     unittest.main()
