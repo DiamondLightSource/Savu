@@ -30,7 +30,7 @@ class MonitorCorrectionTest(unittest.TestCase):
 
     def test_monitor_correction(self):
         data_file = tu.get_test_data_path('mm.nxs')
-        process_file = tu.get_test_process_path('monitor_correction_test.nxs')
+        process_file = tu.get_test_process_path('pymca/monitor_correction_test.nxs')
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
 
