@@ -30,6 +30,7 @@ from savu.core.plugin_runner import PluginRunner
 from savu.data.experiment_collection import Experiment
 from savu.data.data_structures.plugin_data import PluginData
 import savu.plugins.utils as pu
+import savu.test.base_checkpoint_test
 
 
 def get_test_data_path(name):
@@ -372,3 +373,33 @@ def get_param_value_from_file(param, in_file):
             value = line.split('=')[1].strip()
             param_list.append(value)
     return param_list
+
+
+def initialise_options(data, experiment, process_path):
+    """
+    initialises options and creates a temporal directory in tmp for output.
+
+    :param str data: data to run test with
+    :param str experiment: experiment type to run test with
+    :param str process_path: a path to the preocess list
+    """
+    test_folder = tempfile.mkdtemp(suffix='my_test/')
+    options = set_experiment(experiment)
+    options['data_file'] = get_test_data_path(data)
+    options['out_path'] = os.path.join(test_folder)
+    options['process_file'] = get_test_process_path(process_path)
+    return options
+
+def cleanup(options):
+    """
+    Performs folders cleaning in tmp/.
+    Some folders with logs can still remain, but the folders with the output data
+    are cleaned.
+    """
+    classb = savu.test.base_checkpoint_test.BaseCheckpointTest()
+    cp_folder = os.path.join(options["out_path"], 'checkpoint')
+    classb._empty_folder(cp_folder)
+    os.removedirs(cp_folder)
+    classb._empty_folder(options["out_path"])
+    os.removedirs(options["out_path"])
+    return options
