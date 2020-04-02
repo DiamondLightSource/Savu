@@ -20,6 +20,8 @@
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
+from __future__ import print_function, division, absolute_import
+
 import ast
 import copy
 import logging

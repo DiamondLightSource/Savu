@@ -1,3 +1,5 @@
+from __future__ import print_function, division, absolute_import
+
 from colorama import Fore
 from collections import OrderedDict
 
@@ -42,7 +44,7 @@ class PluginParameters(object):
         return tool_class
 
     def _load_param_from_doc(self, clazz):
-        """Find the parameter information from the method docstring
+        """Find the parameter information from the method docstring.
         This is provided in a yaml format.
         """
         yaml_text = clazz.define_parameters.__doc__

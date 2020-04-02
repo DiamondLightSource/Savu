@@ -20,6 +20,7 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
+from __future__ import print_function, division, absolute_import
 
 import re
 import os
@@ -78,7 +79,7 @@ class Content(object):
     def display(self, formatter, **kwargs):
         if 'level' not in kwargs.keys():
             kwargs['level'] = self.disp_level
-        print '\n' + formatter._get_string(**kwargs) + '\n'
+        print('\n' + formatter._get_string(**kwargs) + '\n')
 
     def check_file(self, filename):
         if not filename:
@@ -168,7 +169,7 @@ class Content(object):
             while(True):
                 name = the_list[pos]['name']
                 if name in notices.keys():
-                    print notices[name]['desc']
+                    print(notices[name]['desc'])
                 # if a plugin is missing then look for mutations
                 search = True if name not in pu.plugins.keys() else False
                 found = self._mutate_plugins(name, pos, search=search)
@@ -210,13 +211,13 @@ class Content(object):
                 if mutate['replace'] in pu.plugins.keys():
                     str_pos = self.plugin_list.plugin_list[pos]['pos']
                     self.refresh(str_pos, change=mutate['replace'])
-                    print mutate['desc']
+                    print(mutate['desc'])
                     return True
                 raise Exception('Replacement plugin %s unavailable for %s'
                                 % (mutate['replace'], name))
             elif 'remove' in mutate.keys():
                 self.remove(pos)
-                print mutate['desc']
+                prin(mutate['desc'])
             else:
                 raise Exception('Unknown mutation type.')
         return False
