@@ -35,7 +35,7 @@ class MedianFilterTest(unittest.TestCase):
     experiment = 'tomo'
 
     def test_median_filter(self):
-        process_list = 'denoise/median_filter_test.nxs'
+        process_list = 'filters/denoise/median_filter_test.nxs'
         options = tu.initialise_options(data_file, experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)

@@ -408,6 +408,15 @@ def cleanup(options):
     classb = savu.test.base_checkpoint_test.BaseCheckpointTest()
     cp_folder = os.path.join(options["out_path"], 'checkpoint')
     classb._empty_folder(cp_folder)
+    # delete folders after imagesavers
+    im_folder = os.path.join(options["out_path"], 'ImageSaver-tomo')
+    if os.path.isdir(im_folder):
+        classb._empty_folder(im_folder)
+        os.removedirs(im_folder)
+    im_folder = os.path.join(options["out_path"], 'TiffSaver-tomo')
+    if os.path.isdir(im_folder):
+        classb._empty_folder(im_folder)
+        os.removedirs(im_folder)
     os.removedirs(cp_folder)
     classb._empty_folder(options["out_path"])
     os.removedirs(options["out_path"])

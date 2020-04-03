@@ -34,7 +34,7 @@ class CcpiDenoisingCpuTest(unittest.TestCase):
     experiment = 'tomo'
 
     def test_ccpi_denoise_cpu(self):
-        process_list = 'ccpi/ccpi_denoising_cpu_test.nxs'
+        process_list = 'filters/ccpi/ccpi_denoising_cpu_test.nxs'
         options = tu.initialise_options(data_file, experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)

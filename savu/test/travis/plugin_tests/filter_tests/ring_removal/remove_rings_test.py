@@ -29,37 +29,37 @@ class RemoveRingsTest(unittest.TestCase):
     experiment = 'tomo'
 
     def test_remove_large_rings(self):
-        process_list = 'ring_removal/ring_removal_large_test.nxs'
+        process_list = 'filters/ring_removal/ring_removal_large_test.nxs'
         options = tu.initialise_options(data_file, experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
 
     def test_ring_removal_filtering(self):
-        process_list = 'ring_removal/ring_removal_filtering_test.nxs'
+        process_list = 'filters/ring_removal/ring_removal_filtering_test.nxs'
         options = tu.initialise_options(data_file, experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
 
     def test_ring_removal_fitting(self):
-        process_list = 'ring_removal/ring_removal_fitting_test.nxs'
+        process_list = 'filters/ring_removal/ring_removal_fitting_test.nxs'
         options = tu.initialise_options(data_file, experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
 
     def test_ring_removal_normalization(self):
-        process_list = 'ring_removal/ring_removal_normalization_test.nxs'
+        process_list = 'filters/ring_removal/ring_removal_normalization_test.nxs'
         options = tu.initialise_options(data_file, experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
 
     def test_ring_removal_regularization(self):
-        process_list = 'ring_removal/ring_removal_regularization_test.nxs'
+        process_list = 'filters/ring_removal/ring_removal_regularization_test.nxs'
         options = tu.initialise_options(data_file, experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
 
     def test_ring_removal_sorting(self):
-        process_list = 'ring_removal/ring_removal_sorting_test.nxs'
+        process_list = 'filters/ring_removal/ring_removal_sorting_test.nxs'
         options = tu.initialise_options(data_file, experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)

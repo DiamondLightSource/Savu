@@ -31,7 +31,7 @@ class PluginRunnerDenoiseBregmanTest(unittest.TestCase):
     experiment = 'tomo'
 
     def test_denoise_bregman_test(self):
-        process_list = 'denoise/denoise_bregman_test.nxs'
+        process_list = 'filters/denoise/denoise_bregman_test.nxs'
         options = tu.initialise_options(data_file, experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)

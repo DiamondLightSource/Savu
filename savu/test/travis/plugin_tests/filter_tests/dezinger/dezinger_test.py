@@ -39,13 +39,13 @@ class DezingerTest(unittest.TestCase):
         tu.cleanup(options)
 
     def test_dezinger(self):
-        process_list = 'dezinger/dezinger_test.nxs'
+        process_list = 'filters/dezinger/dezinger_test.nxs'
         options = tu.initialise_options(data_file, experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
 
     def test_dezinger_sinogram(self):
-        process_list = 'dezinger/dezinger_sinogram_test.nxs'
+        process_list = 'filters/dezinger/dezinger_sinogram_test.nxs'
         options = tu.initialise_options(data_file, experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)

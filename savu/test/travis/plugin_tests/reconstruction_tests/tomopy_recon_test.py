@@ -27,29 +27,13 @@ import unittest
 import savu.test.test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
         run_protected_plugin_runner
-import savu.test.base_checkpoint_test
-import tempfile
-import os
 
 class TomopyReconTest(unittest.TestCase):
 
     def test_tomopy_gridrec(self):
-        data_file = tu.get_test_data_path('24737.nxs')
-        self.test_folder = tempfile.mkdtemp(suffix='my_test/')
-        # set options
-        options = tu.set_experiment('tomo')
-        options['data_file'] = data_file
-        options['out_path'] = os.path.join(self.test_folder)
-        options['process_file'] = tu.get_test_process_path('tomopy_test.nxs')
+        options = tu.initialise_options('24737.nxs', 'tomo', 'reconstruction/tomopy_test.nxs')
         run_protected_plugin_runner(options)
-
-        # perform folder cleaning
-        classb = savu.test.base_checkpoint_test.BaseCheckpointTest()
-        cp_folder = os.path.join(self.test_folder, 'checkpoint')
-        classb._empty_folder(cp_folder)
-        os.removedirs(cp_folder)
-        classb._empty_folder(self.test_folder)
-        os.removedirs(self.test_folder)
+        tu.cleanup(options)
 
 if __name__ == "__main__":
     unittest.main()

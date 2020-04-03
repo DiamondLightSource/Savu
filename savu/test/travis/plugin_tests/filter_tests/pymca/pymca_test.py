@@ -27,8 +27,10 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 
 class PymcaTest(unittest.TestCase):
     def test_simple_fit_runs(self):
+#         data_file = '/dls/i13-1/data/2016/mt14190-1/raw/91318.nxs'#
         data_file = tu.get_test_data_path('i18_test_data.nxs')
         process_file = tu.get_test_process_path('pymca/pymca_test.nxs')
+#         process_file = '/dls/i13-1/data/2016/mt14190-1/processing/savu/process_lists/pymca_process.nxs'
         options = tu.set_options(data_file, process_file=process_file)
         self.datapath = options['out_path']
         run_protected_plugin_runner(options)

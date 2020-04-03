@@ -13,9 +13,28 @@
 # limitations under the License.
 
 """
-Test suites for Savu are here
-
+.. module:: tomo_recon
+   :platform: Unix
+   :synopsis: runner for tests using the MPI framework
 
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
+import unittest
+from savu.test import test_utils as tu
+from savu.test.travis.framework_tests.plugin_runner_test import \
+    run_protected_plugin_runner
+
+class TiffSaverTest(unittest.TestCase):
+    global data_file, experiment
+    data_file = '24737.nxs'
+    experiment = None
+
+    def test_tiff_saver(self):
+        process_list = 'imagesavers/tiff_saver_test.nxs'
+        options = tu.initialise_options(data_file, experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
+
+if __name__ == "__main__":
+    unittest.main()

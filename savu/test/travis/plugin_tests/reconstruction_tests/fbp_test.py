@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2014 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,23 +25,27 @@
 import unittest
 import savu.test.test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
-    run_protected_plugin_runner_no_process_list
-from savu.test.travis.framework_tests.plugin_runner_test import \
         run_protected_plugin_runner
 
+class FbpTest(unittest.TestCase):
 
-class AstraReconCpuTests(unittest.TestCase):
-
-    def test_astra_recon_cpu(self):
-        options = tu.initialise_options(None, 'tomo', None)
-        plugin = 'savu.plugins.reconstructions.astra_recons.astra_recon_cpu'
-        run_protected_plugin_runner_no_process_list(options, plugin)
-        tu.cleanup(options)
-
-    def test_astra_recon_init_vol(self):
-        options = tu.initialise_options('24737.nxs', 'tomo', 'astra/astra_init_vol_test.nxs')
+    def test_fbp(self):
+        options = tu.initialise_options('24737.nxs', 'tomo', 'reconstruction/simple_recon_test_process.nxs')
         run_protected_plugin_runner(options)
         tu.cleanup(options)
+#
+#class ScikitimageSartTest(unittest.TestCase):
+#
+#    def test_scikit_sart(self):
+#        options = tu.set_experiment('tomo')
+#        plugin = 'savu.plugins.reconstructions.scikitimage_sart'
+#        loader_dict = {'starts': [0, 0, 0],
+#                       'stops': [-1, -1, -1],
+#                       'steps': [20, 20, 20]}
+#        data_dict = {'in_datasets': ['tomo'], 'out_datasets': ['test']}
+#        saver_dict = {}
+#        all_dicts = [loader_dict, data_dict, saver_dict]
+#        run_protected_plugin_runner_no_process_list(options, plugin, all_dicts)
 
 if __name__ == "__main__":
     unittest.main()
