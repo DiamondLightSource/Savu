@@ -13,25 +13,30 @@
 # limitations under the License.
 
 """
-.. module:: histogram
+.. module:: ListToProjectionsTest
    :platform: Unix
-   :synopsis: testing the histogram plugin
-.. moduleauthor:: Aaron Parsons <scientificsoftware@diamond.ac.uk>
+   :synopsis: Test all the component analyses
+
+.. moduleauthor:: Aaron D. Parsons <scientificsoftware@diamond.ac.uk>
 
 """
+
 import unittest
 from savu.test import test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
 
-class HistogramTest(unittest.TestCase):
+class ListToProjectionsTest(unittest.TestCase):
+    global data_file, experiment
+    data_file = 'fluo_p1_pymca.h5'
+    experiment = None
 
-    def test_histogram(self):
-        data_file = tu.get_test_data_path('mm.nxs')
-        process_file = tu.get_test_process_path('histogramtest.nxs')
-        run_protected_plugin_runner(tu.set_options(data_file,
-                                                   process_file=process_file))
-
+    def test_process(self):
+        process_list = 'pymca/interpolation_test.nxs'
+        options = tu.initialise_options(data_file, experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
+        
 if __name__ == "__main__":
     unittest.main()

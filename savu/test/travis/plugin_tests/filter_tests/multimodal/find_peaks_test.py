@@ -25,14 +25,13 @@ from savu.test import test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
-
-class RavenFilterTest(unittest.TestCase):
+class FindPeaksTest(unittest.TestCase):
     global data_file, experiment
-    data_file = '24737.nxs'
+    data_file = 'mm.nxs'
     experiment = None
 
-    def test_raven_fbp(self):
-        process_list = 'raven_filter_test.nxs'
+    def test_simple_fit_XRD(self):
+        process_list = 'multimodal/findpeakstest.nxs'
         options = tu.initialise_options(data_file, experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: pyfai_azimuthal_integration_test
+.. module:: background_estimator_test
    :platform: Unix
    :synopsis: runner for tests using the MPI framework
 
@@ -21,18 +21,20 @@
 
 """
 import unittest
-from savu.test import test_utils as tu
+import savu.test.test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
+class BackgroundEstimatorTest(unittest.TestCase):
+    global data_file, experiment
+    data_file = 'mm.nxs'
+    experiment = 'tomo'
 
-class StripBackgroundTest(unittest.TestCase):
-
-    def test_process(self):
-        data_file = tu.get_test_data_path('mm.nxs')
-        process_file = tu.get_test_process_path('strip_background_test.nxs')
-        run_protected_plugin_runner(tu.set_options(data_file,
-                                                   process_file=process_file))
+    def test_background_estimator(self):
+        process_list = 'multimodal/poly_background_test.nxs'
+        options = tu.initialise_options(data_file, experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
 
 if __name__ == "__main__":
     unittest.main()

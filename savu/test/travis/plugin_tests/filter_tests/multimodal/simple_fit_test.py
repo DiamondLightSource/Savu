@@ -30,13 +30,13 @@ class SimpleFitTest(unittest.TestCase):
             'Ticket: https://github.com/DiamondLightSource/Savu/issues/318 ')
     def test_simple_fit_runs(self):
         data_file = tu.get_test_data_path('mm.nxs')
-        process_file = tu.get_test_process_path('simple_fit_test_XRF.nxs')
+        process_file = tu.get_test_process_path('multimodal/simple_fit_test_XRF.nxs')
         options = tu.set_options(data_file, process_file=process_file)
         self.datapath = options['out_path']
         run_protected_plugin_runner(options)
-        
+
 #     def test_output_data(self):
-#         
+#
 
 if __name__ == "__main__":
     unittest.main()
