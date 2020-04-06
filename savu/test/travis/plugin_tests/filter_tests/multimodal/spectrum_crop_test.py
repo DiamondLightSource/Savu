@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2014 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,31 +12,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 """
-.. module:: tomo_pipeline_preview_test
+.. module:: pyfai_azimuthal_integration_test
    :platform: Unix
-   :synopsis: i12 tomography test run
+   :synopsis: runner for tests using the MPI framework
 
-.. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
+.. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
-
 import unittest
-import savu.test.test_utils as tu
+from savu.test import test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
 
-#@unittest.skip('Runs as a standalone test but not in the suite. Error to be investigated')
-class TomoPipelinePreviewTest(unittest.TestCase):
+class SpectrumCropTest(unittest.TestCase):
+    global data_file, experiment
+    data_file = 'mm.nxs'
+    experiment = None
 
-    def test_process_preview(self):
-        data_file = tu.get_test_data_path('24737.nxs')
-        process_file = \
-            tu.get_test_process_path('tomo_pipeline_preview_test.nxs')
-        run_protected_plugin_runner(tu.set_options(data_file,
-                                                   process_file=process_file))
+    def test_process(self):
+        process_list = 'multimodal/spectrum_crop_test.nxs'
+        options = tu.initialise_options(data_file, experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
 
 if __name__ == "__main__":
     unittest.main()
