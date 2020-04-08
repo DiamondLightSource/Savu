@@ -25,6 +25,7 @@ import inspect
 import tempfile
 import os
 import copy
+import glob
 
 from savu.core.plugin_runner import PluginRunner
 from savu.data.experiment_collection import Experiment
@@ -267,15 +268,16 @@ def plugin_runner_real_plugin_run(options):
     plugin = pu.plugin_loader(exp, plugin_list[1])
     plugin._run_plugin(exp, plugin_runner)
 
-
 def get_test_process_list(folder):
     test_process_list = []
     for root, dirs, files in os.walk(folder, topdown=True):
         files[:] = [fi for fi in files if fi.split('.')[-1] == 'nxs']
+        # since there are some nxs files inside the subfolders we attach the subfolder
+        # name to nxs without the root folder
+        files = [os.path.join(root[root.index(folder)+1+len(folder):], file) for file in files]
         for f in files:
             test_process_list.append(f)
     return test_process_list
-
 
 def get_process_list(folder, search=False):
     process_list = []

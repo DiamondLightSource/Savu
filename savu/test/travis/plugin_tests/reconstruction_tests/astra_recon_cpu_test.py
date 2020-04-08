@@ -32,6 +32,9 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 
 
 class AstraReconCpuTests(unittest.TestCase):
+    global data_file, experiment
+    data_file = '24737.nxs'
+    experiment = 'tomo'
 
     def test_astra_recon_cpu(self):
         options = tu.initialise_options(None, 'tomo', None)
@@ -40,7 +43,8 @@ class AstraReconCpuTests(unittest.TestCase):
         tu.cleanup(options)
 
     def test_astra_recon_init_vol(self):
-        options = tu.initialise_options('24737.nxs', 'tomo', 'reconstruction/astra_init_vol_test.nxs')
+        process_list = 'reconstruction/astra_init_vol_test.nxs'
+        options = tu.initialise_options(data_file, experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
 

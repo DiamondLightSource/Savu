@@ -27,14 +27,15 @@ import unittest
 import savu.test.test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test \
     import run_protected_plugin_runner
-import savu.test.base_checkpoint_test
-import tempfile
-import os
 
 class TomobarRecon2dCpuTest(unittest.TestCase):
+    global data_file, experiment
+    data_file = '24737.nxs'
+    experiment = 'tomo'
 
     def test_tomobar_recon2d_cpu(self):
-        options = tu.initialise_options('24737.nxs', 'tomo', 'reconstruction/tomobar/tomobar2d_cpu_recon.nxs')
+        process_list = 'reconstruction/tomobar/tomobar2d_cpu_recon.nxs'
+        options = tu.initialise_options(data_file, experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
 
