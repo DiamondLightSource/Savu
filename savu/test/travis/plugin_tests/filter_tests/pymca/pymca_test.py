@@ -27,7 +27,7 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 
 class PymcaTest(unittest.TestCase):
     global data_file, experiment
-    data_file = 'i18_test_data.h5'
+    data_file = 'i18_test_data.nxs'
     experiment = None
 
     def test_simple_fit_runs(self):

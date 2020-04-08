@@ -28,12 +28,16 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
         run_protected_plugin_runner
 
 class FbpTest(unittest.TestCase):
+    global data_file, experiment
+    data_file = '24737.nxs'
+    experiment = 'tomo'
 
     def test_fbp(self):
-        options = tu.initialise_options('24737.nxs', 'tomo', 'reconstruction/simple_recon_test_process.nxs')
+        process_list = 'reconstruction/simple_recon_test_process.nxs'
+        options = tu.initialise_options(data_file, experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
-#
+                
 #class ScikitimageSartTest(unittest.TestCase):
 #
 #    def test_scikit_sart(self):
