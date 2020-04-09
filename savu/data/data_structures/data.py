@@ -378,7 +378,7 @@ class Data(DataCreate):
                 values = self.meta_data.get(label)
                 preview_sl = [slice(None)]*len(values.shape)
                 preview_sl[0] = slice_list[i]
-                self.meta_data.set(label, values[preview_sl])
+                self.meta_data.set(label, values[tuple(preview_sl)])
 
     def get_core_dimensions(self):
         """ Get the core data dimensions associated with the current pattern.

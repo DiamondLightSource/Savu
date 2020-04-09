@@ -385,7 +385,7 @@ class BaseTransport(object):
         if shape[sdir] - (sl.stop - sl.start):
             unpad_sl = [slice(None)]*len(shape)
             unpad_sl[sdir] = slice(0, sl.stop - sl.start)
-            result = result[unpad_sl]
+            result = result[tuple(unpad_sl)]
         return result
 
     def _setup_h5_files(self):
@@ -394,7 +394,7 @@ class BaseTransport(object):
         current_and_next = False
         if 'current_and_next' in self.exp.meta_data.get_dictionary():
             current_and_next = self.exp.meta_data.get('current_and_next')
-        
+
         count = 0
         for key in out_data_dict.keys():
             out_data = out_data_dict[key]

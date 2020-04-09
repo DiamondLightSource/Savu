@@ -28,8 +28,6 @@ class DiffractionAbsorptionTest(unittest.TestCase):
 
     def test_diffraction_correction(self):
         data_file = tu.get_test_data_path('i18_test_data.nxs')
-
-#         data_file = '/dls/i18/data/2016/sp13939-1/Experiment_1/nexus/75996_alphanitrateRT_1.nxs'
         process_file = tu.get_test_process_path('diffraction_absorption_correction_test.nxs')
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))

@@ -25,11 +25,13 @@ import inspect
 import tempfile
 import os
 import copy
+import glob
 
 from savu.core.plugin_runner import PluginRunner
 from savu.data.experiment_collection import Experiment
 from savu.data.data_structures.plugin_data import PluginData
 import savu.plugins.utils as pu
+import savu.test.base_checkpoint_test
 
 
 def get_test_data_path(name):
@@ -266,15 +268,16 @@ def plugin_runner_real_plugin_run(options):
     plugin = pu.plugin_loader(exp, plugin_list[1])
     plugin._run_plugin(exp, plugin_runner)
 
-
 def get_test_process_list(folder):
     test_process_list = []
     for root, dirs, files in os.walk(folder, topdown=True):
         files[:] = [fi for fi in files if fi.split('.')[-1] == 'nxs']
+        # since there are some nxs files inside the subfolders we attach the subfolder
+        # name to nxs without the root folder
+        files = [os.path.join(root[root.index(folder)+1+len(folder):], file) for file in files]
         for f in files:
             test_process_list.append(f)
     return test_process_list
-
 
 def get_process_list(folder, search=False):
     process_list = []
@@ -372,3 +375,51 @@ def get_param_value_from_file(param, in_file):
             value = line.split('=')[1].strip()
             param_list.append(value)
     return param_list
+
+
+def initialise_options(data, experiment, process_path):
+    """
+    initialises options and creates a temporal directory in tmp for output.
+
+    :param str data: data to run test with (can be None)
+    :param str experiment: experiment type to run test with (can be None)
+    :param str process_path: a path to the preocess list (can be None)
+    """
+    test_folder = tempfile.mkdtemp(suffix='my_test/')
+    if data is not None:
+        data_file = get_test_data_path(data)
+    if process_path is not None:
+        process_file = get_test_process_path(process_path)
+    if (experiment is not None) & (data is None):
+        options = set_experiment(experiment)
+    elif (experiment is not None) & (data is not None):
+        options = set_experiment(experiment)
+        options['data_file'] = data_file
+        options['process_file'] = process_file
+    else:
+        options = set_options(data_file, process_file=process_file)
+    options['out_path'] = os.path.join(test_folder)
+    return options
+
+def cleanup(options):
+    """
+    Performs folders cleaning in tmp/.
+    Some folders with logs can still remain, but the folders with the output data
+    are cleaned.
+    """
+    classb = savu.test.base_checkpoint_test.BaseCheckpointTest()
+    cp_folder = os.path.join(options["out_path"], 'checkpoint')
+    classb._empty_folder(cp_folder)
+    # delete folders after imagesavers
+    im_folder = os.path.join(options["out_path"], 'ImageSaver-tomo')
+    if os.path.isdir(im_folder):
+        classb._empty_folder(im_folder)
+        os.removedirs(im_folder)
+    im_folder = os.path.join(options["out_path"], 'TiffSaver-tomo')
+    if os.path.isdir(im_folder):
+        classb._empty_folder(im_folder)
+        os.removedirs(im_folder)
+    os.removedirs(cp_folder)
+    classb._empty_folder(options["out_path"])
+    os.removedirs(options["out_path"])
+    return options
