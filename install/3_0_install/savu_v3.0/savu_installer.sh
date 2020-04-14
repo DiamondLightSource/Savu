@@ -46,9 +46,6 @@ function flag_parse() {
   done
 }
 
-# Set the install PREFIX
-arg_parse "--PREFIX" PREFIX "$@"
-
 # Set the test flag to true if test only
 flag_parse "--tests_only" test_flag "$@"
 if [ $test_flag ]; then

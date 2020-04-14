@@ -13,7 +13,7 @@ before_install:
   - "echo channel_priority: strict >> ~/.condarc"
 
 install:
-  - ./savu_installer.sh --local --no_prompts --PREFIX /tmp
+  - PREFIX=/tmp ./savu_installer.sh --local --no_prompts
 
 script:
   - . /tmp/miniconda/bin/activate /tmp/savu
