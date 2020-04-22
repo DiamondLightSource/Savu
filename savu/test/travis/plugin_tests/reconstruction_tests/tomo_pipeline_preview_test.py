@@ -28,7 +28,7 @@ import savu.test.test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
-#@unittest.skip('Runs as a standalone test but not in the suite. Error to be investigated')
+#@unittest.skip('Runs as a standalone test but not in the suite. Error to be investigated_')
 class TomoPipelinePreviewTest(unittest.TestCase):
     global data_file, experiment
     data_file = '24737.nxs'
