@@ -13,9 +13,6 @@ dependencies:
   - PyWavelets
   - scikit-learn
   - tomobar
-# waiting for 3.7 packages for these two
-#  - ccpi-regulariser
-#  - ccpi-reconstruction
   - larix
   - astra-toolbox
   - pyfai
