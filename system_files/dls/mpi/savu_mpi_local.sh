@@ -11,7 +11,7 @@
 echo "SAVU_MPI_LOCAL:: Running Job"
 
 nNodes=1
-nCoresPerNode=`lscpu --all --parse=CORE,SOCKET | grep -Ev "^#" | wc -l`
+nCoresPerNode=`lscpu --all --parse=CORE,SOCKET | grep -E "^[0-9]" | wc -l`
 nGPUs=$(nvidia-smi -L | wc -l)
 
 echo "***********************************************"

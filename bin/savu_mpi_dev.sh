@@ -9,7 +9,7 @@
 # must already be activated.
 #
 # Example usage with full paths:
-# /scratch/dev/savu/bin/savu_mpi_local_dev.sh /scratch/dev/savu /scratch/dev/savu/test_data/data/24737.nxs /scratch/dev/savu/test_data/process_lists/ica_test.nxs /scratch/output
+# /scratch/dev/savu/bin/savu_mpi_dev.sh /scratch/dev/savu /scratch/dev/savu/test_data/data/24737.nxs /scratch/dev/savu/test_data/process_lists/ica_test.nxs /scratch/output
 #
 # Example usage while inside the repository root:
 # bin/savu_mpi_local_dev.sh . test_data/data/24737.nxs test_data/process_lists/ica_test.nxs /scratch/output
@@ -17,7 +17,7 @@
 echo "SAVU_MPI_LOCAL:: Running Job with Savu at $1"
 
 nNodes=1
-nCoresPerNode=`lscpu --all --parse=CORE,SOCKET | grep -Ev "^#" | wc -l`
+nCoresPerNode=`lscpu --all --parse=CORE,SOCKET | grep -E "^[0-9]" | wc -l`
 nGPUs=$(nvidia-smi -L | wc -l)
 
 echo "***********************************************"
