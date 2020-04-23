@@ -14,6 +14,7 @@ dependencies:
   - scikit-learn
   - tomobar
   - larix
+  - ccpi-regulariser
   - astra-toolbox
   - pyfai
   - pymca
