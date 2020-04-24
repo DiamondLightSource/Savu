@@ -38,7 +38,7 @@ This documentation in full is available at https://savu.readthedocs.org/en/lates
 
 .. start_of_main_text
 
-.. image:: doc/source/files_and_images/Savu_logo_2_L_Res_trans.png
+.. image:: ../source/files_and_images/Savu_logo_2_L_Res_trans.png
    :scale: 40 %
    :align: right
 
