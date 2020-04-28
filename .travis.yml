@@ -16,11 +16,12 @@ install:
   - PREFIX=/tmp ./savu_installer.sh --local --no_prompts
 
 script:
-  - . /tmp/miniconda/bin/activate /tmp/savu
+  - source /tmp/miniconda/bin/activate /tmp/savu
   - pip install coverage pytest-cov
-  - path=$(python -c "import savu; import os; print(os.path.abspath(savu.__file__))")
-  - savu_path=${path%/savu/__init__.py*}
-  - cd $savu_path
+  # - path=$(python -c "import savu; import os; print(os.path.abspath(savu.__file__))")
+  # - savu_path=${path%/savu/__init__.py*}
+  # - cd $savu_path
+  - cd $TRAVIS_BUILD_DIR
   - pytest scripts/configurator_tests/ --cov=scripts
   - pytest savu/test/travis --cov=savu
   # - pytest savu/test/travis -v --cov savu --cov-report term-missing
