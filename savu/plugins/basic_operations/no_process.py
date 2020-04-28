@@ -25,7 +25,6 @@ from savu.plugins.plugin import Plugin
 from savu.plugins.utils import register_plugin
 from savu.plugins.utils import register_test_plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-from savu.plugins.basic_operations.no_process_tools import NoProcessTools
 
 
 @register_test_plugin

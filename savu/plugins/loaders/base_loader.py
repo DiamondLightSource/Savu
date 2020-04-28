@@ -22,8 +22,6 @@
 """
 
 from savu.plugins.plugin import Plugin
-from savu.plugins.loaders.base_loader_tools import BaseLoaderTools
-
 
 class BaseLoader(Plugin):
     """

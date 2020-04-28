@@ -12,6 +12,11 @@ class BaseLoaderTools(PluginTools):
               dtype: '[int]'
               description: A slice list of required frames.
               default: []
+        data_file:
+              visibility: hidden
+              dtype: str
+              description: hidden parameter for savu template
+              default: :"<>"
         in_datasets:
               visibility: hidden
               dtype: list

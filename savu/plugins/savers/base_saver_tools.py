@@ -1,6 +1,7 @@
 from savu.plugins.plugin_tools import PluginTools
 from savu.plugins.utils import register_plugin_tool
 
+
 @register_plugin_tool
 class BaseSaverTools(PluginTools):
     """A base plugin from which all data saver plugins should inherit.
@@ -9,12 +10,12 @@ class BaseSaverTools(PluginTools):
         """---
         out_datasets:
             visibility: hidden
+            dtype: list
+            description: none
             default: []
-            description:
-            dtype: '[int]'
         in_datasets:
             visibility: advanced
-            description:
+            dtype: list
+            description: none
             default: []
-            dtype: '[int]'
         """

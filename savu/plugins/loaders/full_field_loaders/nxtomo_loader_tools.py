@@ -21,7 +21,7 @@ class NxtomoLoaderTools(PluginTools):
             visibility: basic
             dtype: str
             description: Path to the data inside the file.
-            default: null
+            default: 'entry1/tomo_entry/data/data'
         image_key_path:
             visibility: basic
             dtype: int_path
@@ -51,14 +51,13 @@ class NxtomoLoaderTools(PluginTools):
               scan. If the angles parameter is set to None, then values from
               default dataset used.
             default: 'None'
-        three_to_4d:
+        3d_to_4d:
             visibility: basic
             dtype: bool
-            options: ['False', 'True']
             description:
               summary: Many tomography datasets can be loaded. Value of
                 True indicates the data must be reshaped.
-            default: 'False'
+            default: False
         ignore_flats:
             visibility: basic
             dtype: '[int]'
