@@ -49,7 +49,7 @@ class Content(object):
 
     def fopen(self, infile, update=False, skip=False):
         if os.path.exists(infile):
-            self.plugin_list._populate_plugin_list(infile, activePass=True)
+            self.plugin_list._populate_plugin_list(infile, active_pass=True)
         else:
             raise Exception('INPUT ERROR: The file does not exist.')
         self.filename = infile

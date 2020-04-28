@@ -22,23 +22,23 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
-import os
-import re
 import ast
-import yaml
-import h5py
-import json
 import copy
 import inspect
+import json
 import logging
-
-import numpy as np
+import os
+import re
 from collections import defaultdict
 
-import savu.plugins.utils as pu
-from savu.data.meta_data import MetaData
+import h5py
+import numpy as np
+import yaml
+
 import savu.data.framework_citations as fc
 import savu.plugins.loaders.utils.yaml_utils as yu
+import savu.plugins.utils as pu
+from savu.data.meta_data import MetaData
 
 NX_CLASS = 'NX_class'
 
@@ -79,8 +79,7 @@ class PluginList(object):
     def __get_json_keys(self):
         return ['data', 'desc', 'user', 'hide']
 
-    def _populate_plugin_list(self, filename, activePass=False,
-                              template=False):
+    def _populate_plugin_list(self, filename, active_pass=False, template=False):
         """ Populate the plugin list from a nexus file. """
         plugin_file = h5py.File(filename, 'r')
 
@@ -467,11 +466,10 @@ class Template(object):
     def dict_depth(self, d, depth=0):
         if not isinstance(d, dict) or not d:
             return depth
+<<<<<<< HEAD
         return max(self.dict_depth(v, depth + 1) for k, v in d.items())
-
-    def _set_param_for_all_instances_of_a_plugin(self, plugin, param, value):
-        # find all plugins with this name and replace the param
-        for p in self.plist.plugin_list:
+=======
+        return max(self.dict_depth(v, depth + 1) for k, v in d.iteritems())
             if p['name'] == plugin:
                 p['data'][param] = value
 

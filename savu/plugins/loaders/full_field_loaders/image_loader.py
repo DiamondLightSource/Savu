@@ -23,15 +23,17 @@
 """
 
 import os
-import h5py
 import tempfile
+import warnings
+
+import h5py
 import numpy as np
 
 from savu.data.data_structures.data_types.data_plus_darks_and_flats \
     import NoImageKey
+from savu.data.data_structures.data_types.image_data import ImageData
 from savu.plugins.loaders.base_loader import BaseLoader
 from savu.plugins.utils import register_plugin
-from savu.data.data_structures.data_types.image_data import ImageData
 
 
 @register_plugin
@@ -123,12 +125,13 @@ class ImageLoader(BaseLoader):
             angles = np.linspace(0, 180, data_obj.data.get_shape()[0])
         else:
             try:
-                angles = eval(angles)
-            except:
+                exec("angles = " + angles)
+            except Exception as e:
+                warnings.warn("Could not execute statement: {}".format(e))
                 try:
                     angles = np.loadtxt(angles)
-                except:
-                    raise Exception('Cannot set angles in loader.')
+                except Exception as e:
+                    raise Exception('Cannot set angles in loader. Error: {}'.format(e))
 
         n_angles = len(angles)
         data_angles = data_obj.data.get_shape()[self.parameters['frame_dim']]

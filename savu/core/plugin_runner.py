@@ -180,7 +180,7 @@ class PluginRunner(object):
                         raise Exception("Unfortunately, GPU %i is busy. Try \
                             resubmitting the job to the queue." % i)
         except Exception as e:
-            raise Exception("Unable to run GPU plugins: %s", e.message)
+            raise Exception("Unable to run GPU plugins: %s", str(e))
         self.__set_gpu_processes(count)
 
     def __set_gpu_processes(self, count):
