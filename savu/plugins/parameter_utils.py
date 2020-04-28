@@ -54,6 +54,10 @@ def _intlist(value):
     except:
         print('Error parsing string.')
     # To Do - check preview list
+    if isinstance(value, type(None)):
+        parameter_valid = True
+    elif value == []:
+        parameter_valid = True
     return parameter_valid
 
 @error_catcher_valid
@@ -95,41 +99,45 @@ def _intgroup(value):
     # To be replaced
     parameter_valid = False
     try:
-        bracket_value = value.split('[')
-        bracket_value = bracket_value[1].split(']')
-        entries = bracket_value[0].split(',')
+        if _list(value):
+            entries = value
         if len(entries) == 3:
             file_path = entries[0]
-            if _filepath(file_path):
-                int_path = entries[1]
-                hf = h5py.File(file_path, 'r')
-                try:
-                    # This returns a HDF5 dataset object
-                    int_data = hf.get(int_path)
-                    if int_data is None:
-                        print('\nThere is no data stored at that internal path.')
-                    else:
-                        # Internal path is valid
-                        int_data = np.array(int_data)
-                        if int_data.size >= 1:
-                            try:
-                                compensation_fact = int(entries[2])
-                                parameter_valid = _integer(compensation_fact)
-                            except (Exception, ValueError):
-                                print('\nThe compensation factor is not an integer.')
 
-                except AttributeError:
-                    print('Attribute error.')
-                except:
-                    print(Fore.BLUE + '\nPlease choose another interior'
-                                      ' path.' + Fore.RESET)
-                    print('Example interior paths: ')
-                    for group in hf:
-                        for subgroup in hf[group]:
-                            subgroup_str = '/' + group + '/' + subgroup
-                            print(u'\t' + subgroup_str)
-                    raise
-                hf.close()
+            if entries == [None, None, 1]:
+                parameter_valid = True
+            else:
+
+                if _filepath(file_path):
+                    int_path = entries[1]
+                    hf = h5py.File(file_path, 'r')
+                    try:
+                        # This returns a HDF5 dataset object
+                        int_data = hf.get(int_path)
+                        if int_data is None:
+                            print('\nThere is no data stored at that internal path.')
+                        else:
+                            # Internal path is valid
+                            int_data = np.array(int_data)
+                            if int_data.size >= 1:
+                                try:
+                                    compensation_fact = int(entries[2])
+                                    parameter_valid = _integer(compensation_fact)
+                                except (Exception, ValueError):
+                                    print('\nThe compensation factor is not an integer.')
+
+                    except AttributeError:
+                        print('Attribute error.')
+                    except:
+                        print(Fore.BLUE + '\nPlease choose another interior'
+                                          ' path.' + Fore.RESET)
+                        print('Example interior paths: ')
+                        for group in hf:
+                            for subgroup in hf[group]:
+                                subgroup_str = '/' + group + '/' + subgroup
+                                print(u'\t' + subgroup_str)
+                        raise
+                    hf.close()
         else:
             print(Fore.RED + '\nPlease enter three parameters.' + Fore.RESET)
         return parameter_valid
@@ -249,6 +257,8 @@ def _nptype(value):
 def _integer(value):
     parameter_valid = False
     if isinstance(value, int):
+        parameter_valid = True
+    elif isinstance(value, type(None)):
         parameter_valid = True
     else:
         print('%s is not a valid integer.' % value)
