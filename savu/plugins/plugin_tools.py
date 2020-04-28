@@ -14,15 +14,18 @@ class PluginParameters(object):
     """
     def __init__(self, cls, **kwargs):
         super(PluginParameters, self).__init__(**kwargs)
+        self.tool_list = []
         self.param = MetaData(ordered=True)
         self._populate_parameters(cls)
 
     def _populate_parameters(self, cls):
         """ Using method resolution order, find base class tools
         """
+        print('Populating parameters..')
         for clazz in cls.__class__.__mro__[::-1]:
-            p_tools = self._get_plugin_tools(clazz)
+            p_tools = self._get_plugin_tool_base(clazz)
             if p_tools:
+                self.tool_list.append(p_tools.__module__)
                 self._set_plugin_parameters(p_tools)
 
     def _set_plugin_parameters(self, clazz):
@@ -33,7 +36,7 @@ class PluginParameters(object):
         for p_name, p_value in all_params.items():
             self.param.set(p_name, p_value)
 
-    def _get_plugin_tools(self, clazz):
+    def _get_plugin_tool_base(self, clazz):
         """ Return the tools class"""
         tool_class = None
         plugin_tools_id = clazz.__module__ + '_tools'
@@ -244,6 +247,7 @@ class PluginTools(PluginParameters, PluginCitations, PluginDocumentation):
         self.plugin_tools.set('param', self.param.get_dictionary())
         self.plugin_tools.set('cite', self.cite.get_dictionary())
         self.plugin_tools.set('doc', self.doc.get_dictionary())
+        self.plugin_tools.set('tool_list', self.tool_list)
 
     def get_param(self):
         return self.plugin_tools.get('param')
@@ -253,3 +257,6 @@ class PluginTools(PluginParameters, PluginCitations, PluginDocumentation):
 
     def get_doc(self):
         return self.plugin_tools.get('doc')
+
+    def get_tool_list(self):
+        return self.plugin_tools.get('tool_list')

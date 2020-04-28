@@ -217,7 +217,7 @@ class Content(object):
                                 % (mutate['replace'], name))
             elif 'remove' in mutate.keys():
                 self.remove(pos)
-                prin(mutate['desc'])
+                print(mutate['desc'])
             else:
                 raise Exception('Unknown mutation type.')
         return False
@@ -405,6 +405,7 @@ class Content(object):
         plugin_dict['tools'] = plugin.tools
         plugin_dict['param'] = plugin.p_dict
         plugin_dict['doc'] = plugin.docstring_info
+        plugin_dict['tool_list'] = plugin.tools.get_tool_list()
         return plugin_dict
 
     def get(self, pos):

@@ -73,12 +73,12 @@ class PluginList(object):
                     'name': None,
                     'id': None,
                     'data': None,
-                    'tools': None,
-                    'param': None}
+                    'param': None,
+                    'tool_list': None}
         return template
 
     def __get_json_keys(self):
-        return ['data', 'tools', 'param']
+        return ['data', 'param', 'tool_list']
 
     def _populate_plugin_list(self, filename, activePass=False,
                               template=False):
@@ -306,6 +306,9 @@ class PluginList(object):
 
         for i in range(self.n_plugins):
             pid = self.plugin_list[i]['id']
+            tool_list = self.plugin_list[i]['tool_list']
+            for tool_id in tool_list:
+                pu.load_class(tool_id)
             bases = inspect.getmro(pu.load_class(pid))
             loader_list = [b for b in bases if b == BaseLoader]
             saver_list = [b for b in bases if b == BaseSaver]
@@ -366,8 +369,8 @@ class PluginList(object):
             process['pos'] = str(pos)
             process['data'] = plugin.parameters
             process['active'] = True
-            process['tools'] = plugin.tools
             process['param'] = plugin.p_dict
+            process['tool_list'] = plugin.tools.get_tool_list()
             self._add(pos, process)
 
     def _get_dataset_flow(self):
