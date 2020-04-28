@@ -25,11 +25,13 @@ import inspect
 import tempfile
 import os
 import copy
+import glob
 
 from savu.core.plugin_runner import PluginRunner
 from savu.data.experiment_collection import Experiment
 from savu.data.data_structures.plugin_data import PluginData
 import savu.plugins.utils as pu
+import savu.test.base_checkpoint_test
 
 
 def get_test_data_path(name):
@@ -127,7 +129,7 @@ def set_plugin_list(options, pnames, *args):
     data = [{}, {}] if not args else [args[0], args[-1]]
     for i in range(len(plugin_names)):
         ID.insert(i+1, plugin_names[i])
-        plugin = pu.get_plugin(plugin_names[i])
+        plugin = pu.load_class(plugin_names[i])()
         data_dict = set_data_dict(['tomo'], get_output_datasets(plugin))
         data_dict = args[i+1] if args else data_dict
         data.insert(i+1, data_dict)
@@ -189,11 +191,13 @@ def _add_loader_to_plugin_list(options, params={}):
     options['plugin_list'] = plugin_list
 
 
-def load_random_data(loader, params, system_params=None):
+def load_random_data(loader, params, system_params=None, fake=False):
     options = set_options(get_test_data_path('24737.nxs'))
     options['loader'] = 'savu.plugins.loaders.' + str(loader)
     options['system_params'] = system_params
     _add_loader_to_plugin_list(options, params=params)
+    if fake:
+        return fake_plugin_runner(options).exp
     return plugin_runner(options)
 
 
@@ -216,44 +220,40 @@ def set_process(exp, process, processes):
 
 
 def plugin_runner(options):
+    # the real plugin runner runs a full plugin list
     plugin_runner = PluginRunner(options)
     return plugin_runner._run_plugin_list()
 
-
-def plugin_runner_load_plugin(options):
+def fake_plugin_runner(options):
+    # Stripped down version of the plugin runner
+    # Loads the loader plugin but stops before processing plugins
     plugin_runner = PluginRunner(options)
     plugin_runner.exp = Experiment(options)
     plugin_list = plugin_runner.exp.meta_data.plugin_list.plugin_list
 
     exp = plugin_runner.exp
     pu.plugin_loader(exp, plugin_list[0])
-    exp._set_nxs_filename()
+    exp._set_nxs_file()
+    return plugin_runner
 
+
+def plugin_runner_load_plugin(options):
+    # Loads the loader plugin and the first plugin in the list and initialises
+    # it (i.e. sets parameters and calls setup method)
+    pRunner = fake_plugin_runner(options)
+    plugin_list = pRunner.exp.meta_data.plugin_list.plugin_list
     plugin_dict = plugin_list[1]
-    plugin = pu.get_plugin(plugin_dict['id'])
-    plugin.exp = exp
-
+    plugin = pu.plugin_loader(pRunner.exp, plugin_dict)
     return plugin
-
-
-def plugin_setup(plugin):
-    plugin_list = plugin.exp.meta_data.plugin_list.plugin_list
-    plugin_dict = plugin_list[1]
-    pu.set_datasets(plugin.exp, plugin, plugin_dict)
-    plugin._set_parameters(plugin_dict['data'])
-    plugin._set_plugin_datasets()
-    plugin.setup()
 
 
 def plugin_runner_real_plugin_run(options):
     plugin_runner = PluginRunner(options)
-    plugin_runner.exp = Experiment(options)
     plugin_list_inst = plugin_runner.exp.meta_data.plugin_list
     plugin_list = plugin_list_inst.plugin_list
     plugin_runner._run_plugin_list_check(plugin_list_inst)
 
     exp = plugin_runner.exp
-
     pu.plugin_loader(exp, plugin_list[0])
 
     start_in_data = copy.deepcopy(exp.index['in_data'])
@@ -268,21 +268,16 @@ def plugin_runner_real_plugin_run(options):
     plugin = pu.plugin_loader(exp, plugin_list[1])
     plugin._run_plugin(exp, plugin_runner)
 
-#    out_datasets = plugin.parameters["out_datasets"]
-#    exp._reorganise_datasets(out_datasets, 'final_result')
-#
-#    for key in exp.index["in_data"].keys():
-#        exp.index["in_data"][key].close_file()
-
-
 def get_test_process_list(folder):
     test_process_list = []
     for root, dirs, files in os.walk(folder, topdown=True):
         files[:] = [fi for fi in files if fi.split('.')[-1] == 'nxs']
+        # since there are some nxs files inside the subfolders we attach the subfolder
+        # name to nxs without the root folder
+        files = [os.path.join(root[root.index(folder)+1+len(folder):], file) for file in files]
         for f in files:
             test_process_list.append(f)
     return test_process_list
-
 
 def get_process_list(folder, search=False):
     process_list = []
@@ -380,3 +375,51 @@ def get_param_value_from_file(param, in_file):
             value = line.split('=')[1].strip()
             param_list.append(value)
     return param_list
+
+
+def initialise_options(data, experiment, process_path):
+    """
+    initialises options and creates a temporal directory in tmp for output.
+
+    :param str data: data to run test with (can be None)
+    :param str experiment: experiment type to run test with (can be None)
+    :param str process_path: a path to the preocess list (can be None)
+    """
+    test_folder = tempfile.mkdtemp(suffix='my_test/')
+    if data is not None:
+        data_file = get_test_data_path(data)
+    if process_path is not None:
+        process_file = get_test_process_path(process_path)
+    if (experiment is not None) & (data is None):
+        options = set_experiment(experiment)
+    elif (experiment is not None) & (data is not None):
+        options = set_experiment(experiment)
+        options['data_file'] = data_file
+        options['process_file'] = process_file
+    else:
+        options = set_options(data_file, process_file=process_file)
+    options['out_path'] = os.path.join(test_folder)
+    return options
+
+def cleanup(options):
+    """
+    Performs folders cleaning in tmp/.
+    Some folders with logs can still remain, but the folders with the output data
+    are cleaned.
+    """
+    classb = savu.test.base_checkpoint_test.BaseCheckpointTest()
+    cp_folder = os.path.join(options["out_path"], 'checkpoint')
+    classb._empty_folder(cp_folder)
+    # delete folders after imagesavers
+    im_folder = os.path.join(options["out_path"], 'ImageSaver-tomo')
+    if os.path.isdir(im_folder):
+        classb._empty_folder(im_folder)
+        os.removedirs(im_folder)
+    im_folder = os.path.join(options["out_path"], 'TiffSaver-tomo')
+    if os.path.isdir(im_folder):
+        classb._empty_folder(im_folder)
+        os.removedirs(im_folder)
+    os.removedirs(cp_folder)
+    classb._empty_folder(options["out_path"])
+    os.removedirs(options["out_path"])
+    return options

@@ -28,10 +28,6 @@ from savu.plugins.plugin import Plugin
 from savu.plugins.utils import register_plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger('matplotlib')
-logger.setLevel(logging.WARNING)
-
 
 @register_plugin
 class Mipmap(Plugin, CpuPlugin):
@@ -52,12 +48,6 @@ class Mipmap(Plugin, CpuPlugin):
 
     def __init__(self):
         super(Mipmap, self).__init__("Mipmap")
-
-    def dynamic_data_info(self):
-        self.n_mipmaps = self.parameters['n_mipmaps']
-        name = self.parameters['out_dataset_prefix']
-        self.parameters['out_datasets'] = \
-            ['%s_%i' % (name, 2**i) for i in range(self.n_mipmaps)]
 
     def process_frames(self, data):
         self.mode_dict = { 'mean'  : np.mean,
@@ -90,8 +80,8 @@ class Mipmap(Plugin, CpuPlugin):
 
         # Sort out input data
         max_frames = self.get_max_frames()
-        in_pData[0].plugin_data_setup('VOLUME_XY', max_frames,
-                slice_axis='voxel_z')
+        in_pData[0].plugin_data_setup('VOLUME_XZ', max_frames,
+                slice_axis='voxel_y')
 
         # use this for 3D data (need to keep slice dimension)
         out_dataset = self.get_out_datasets()
@@ -103,15 +93,18 @@ class Mipmap(Plugin, CpuPlugin):
             out_dataset[i].create_dataset(axis_labels=in_dataset[0],
                                           patterns=in_dataset[0],
                                           shape=shape)
-            out_pData[i].plugin_data_setup('VOLUME_XY', max_frames/2**i,
-                     slice_axis='voxel_z')
+            out_pData[i].plugin_data_setup('VOLUME_XZ', max_frames/2**i,
+                     slice_axis='voxel_y')
 
     def nInput_datasets(self):
         return 1
 
     def nOutput_datasets(self):
-        # dummy value the real number is decided at runtime
-        return 1
+        n_mipmaps = self.parameters['n_mipmaps']
+        name = self.parameters['out_dataset_prefix']
+        self.parameters['out_datasets'] = \
+            ['%s_%i' % (name, 2**i) for i in range(n_mipmaps)]        
+        return n_mipmaps
 
     def get_max_frames(self):
         return 8

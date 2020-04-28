@@ -1,5 +1,5 @@
-savu\.data\.meta\_data module
-=============================
+savu.data.meta\_data module
+===========================
 
 .. automodule:: savu.data.meta_data
     :members:

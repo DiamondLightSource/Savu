@@ -1,5 +1,5 @@
-scripts\.log\_evaluation\.VisualiseProfileData module
-=====================================================
+scripts.log\_evaluation.VisualiseProfileData module
+===================================================
 
 .. automodule:: scripts.log_evaluation.VisualiseProfileData
     :members:

@@ -225,17 +225,18 @@ class PluginData(object):
         """ Set the slice dimensions in the pluginData meta data dictionary.\
         Reorder pattern slice_dims to ensure first_sdim is at the front.
         """
-        slice_dims = self.data_obj.get_data_patterns()[
-            self.get_pattern_name()]['slice_dims']
+        pattern = self.data_obj.get_data_patterns()[self.get_pattern_name()]
+        slice_dims = pattern['slice_dims']
 
         if first_sdim:
             slice_dims = list(slice_dims)
             first_sdim = \
                 self.data_obj.get_data_dimension_by_axis_label(first_sdim)
             slice_dims.insert(0, slice_dims.pop(slice_dims.index(first_sdim)))
+            pattern['slice_dims'] = tuple(slice_dims)
 
         self.meta_data.set('slice_dims', tuple(slice_dims))
-
+        
     def get_slice_dimension(self):
         """
         Return the position of the slice dimension in relation to the data
@@ -257,20 +258,20 @@ class PluginData(object):
             plugin_dims += (self.get_slice_dimension(),)
         return list(set(plugin_dims)).index(label_dim)
 
-    def set_slicing_order(self, order):
+    def set_slicing_order(self, order):  # should this function be deleted?
         """
         Reorder the slice dimensions.  The fastest changing slice dimension
         will always be the first one stated in the pattern key ``slice_dir``.
         The input param is a tuple stating the desired order of slicing
         dimensions relative to the current order.
         """
-        slice_dirs = self.get_slice_directions()
+        slice_dirs = self.data_obj.get_slice_dimensions()
         if len(slice_dirs) < len(order):
             raise Exception("Incorrect number of dimensions specifed.")
         ordered = [slice_dirs[o] for o in order]
         remaining = [s for s in slice_dirs if s not in ordered]
         new_slice_dirs = tuple(ordered + remaining)
-        self.get_current_pattern()['slice_dir'] = new_slice_dirs
+        self.get_pattern()['slice_dir'] = new_slice_dirs
 
     def get_core_dimensions(self):
         """

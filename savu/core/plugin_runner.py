@@ -47,14 +47,13 @@ class PluginRunner(object):
     def _run_plugin_list(self):
         """ Create an experiment and run the plugin list.
         """
+        self.exp._set_nxs_file()
+        
         plugin_list = self.exp.meta_data.plugin_list
         logging.info('Running the plugin list check')
-        self._run_plugin_list_check(plugin_list)
+        self._run_plugin_list_setup(plugin_list)
 
-        logging.info('Setting up the experiment')
-        self.exp._experiment_setup(self)
-
-        exp_coll = self.exp._get_experiment_collection()
+        exp_coll = self.exp._get_collection()
         n_plugins = plugin_list._get_n_processing_plugins()
 
         #  ********* transport function ***********
@@ -123,56 +122,41 @@ class PluginRunner(object):
 
         self.exp._reorganise_datasets(finalise)
 
-    def _run_plugin_list_check(self, plugin_list):
+    def _run_plugin_list_setup(self, plugin_list):
         """ Run the plugin list through the framework without executing the
         main processing.
         """
         plugin_list._check_loaders()
-        n_loaders = plugin_list._get_n_loaders()
         self.__check_gpu()
-        check_list = np.arange(len(plugin_list.plugin_list)) - n_loaders
-        self.__fake_plugin_list_run(plugin_list, check_list, setnxs=True)
-        savers_idx_before = plugin_list._get_savers_index()
-        plugin_list._add_missing_savers(self.exp.index['in_data'].keys())
 
+        n_loaders = self.exp.meta_data.plugin_list._get_n_loaders()
+        n_plugins = plugin_list._get_n_processing_plugins()
+        plist = plugin_list.plugin_list
+        
+        self.exp._setup(self, plugin_list)
+        # set loaders
+        for i in range(n_loaders):
+            pu.plugin_loader(self.exp, plist[i])
+            self.exp._set_initial_datasets()
+
+        # run all plugin setup methods and store information in experiment
+        # collection
+        count = 0
+        for plugin_dict in plist[n_loaders:n_loaders+n_plugins]:
+            plugin = pu.plugin_loader(self.exp, plugin_dict, check=True)
+            plugin._revert_preview(plugin.get_in_datasets())
+            plugin_dict['cite'] = plugin.get_citation_information()            
+            plugin._clean_up()
+            self.exp._update(plugin_dict)
+            self.exp._merge_out_data_to_in()
+            count += 1
+        self.exp._reset_datasets()
+
+        plugin_list._add_missing_savers(self.exp)
+        cu.user_message("Plugin list check complete!")
         #  ********* transport function ***********
         self._transport_update_plugin_list()
 
-        self.exp._clear_data_objects()
-
-        check_list = np.array(list(set(plugin_list._get_savers_index()).
-                              difference(set(savers_idx_before)))) - n_loaders
-        self.__fake_plugin_list_run(plugin_list, check_list)
-
-        self.exp._clear_data_objects()
-        cu.user_message("Plugin list check complete!")
-
-    def __fake_plugin_list_run(self, plugin_list, check_list, setnxs=False):
-        """ Run through the plugin list without any processing (setup only)\
-        and fill in missing dataset names.
-        """
-        # plugin_list._reset_datasets_list()
-        n_loaders = self.exp.meta_data.plugin_list._get_n_loaders()
-        n_plugins = plugin_list._get_n_processing_plugins()
-
-        plist = plugin_list.plugin_list
-        for i in range(n_loaders):
-            plugin = pu.plugin_loader(self.exp, plugin_list.plugin_list[i])
-
-        if setnxs:
-            self.exp._set_nxs_filename()
-        
-        check = [True if x in check_list else False for x in range(n_plugins)]
-
-        count = 0
-        for i in range(n_loaders, n_loaders+n_plugins):
-            self.exp._barrier()
-            plugin = pu.plugin_loader(self.exp, plist[i], check=check[count])
-            plugin._revert_preview(plugin.get_in_datasets())
-            plist[i]['cite'] = plugin.get_citation_information()
-            plugin._clean_up()
-            self.exp._merge_out_data_to_in()
-            count += 1
 
     def __check_gpu(self):
         """ Check if the process list contains GPU processes and determine if

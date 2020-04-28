@@ -20,11 +20,9 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
-
-import numpy as np
-
-import savu.plugins.loaders.utils.mrc_header as header_format
 from savu.data.data_structures.data_types.base_type import BaseType
+import mrcfile
+import numpy as np
 
 
 class MRC(BaseType):
@@ -34,63 +32,21 @@ class MRC(BaseType):
         self.filename = filename
         super(MRC, self).__init__()
 
-        self.yz_swapped = False
-        header_size = 1024
-        self.file = open(filename, 'rb')
-        # get the header information and file pointer position of first data
-        # entry
-        header, first = self.__get_header(self.file, header_size)
-        self.header_dict = self.__get_header_dict(header)
-        self.format = self.__set_data_format(header)
-        self.shape = self.__set_shape(header)
-        if self.format['mode'] == 16:
-            self.shape = self.shape + (3,)
+        self.file = mrcfile.mmap(filename, 'r')
+        self.dtype = self.file.data.dtype
 
-        self.data = np.memmap(filename, dtype=self.format['dtype'], order='F',
-                              mode='r', offset=first, shape=self.shape)
+    def __getitem__(self, idx):
+        data = self.file.data[idx].astype(np.float32)
+        data = data/1000.0
+        return data
+
+    def get_shape(self):
+        return self.file.data.shape
 
     def clone_data_args(self, args, kwargs, extras):
         args = ['self', 'filename']
+        kwargs['stats'] = 'stats'
         return args, kwargs, extras
 
-    def __getitem__(self, idx):
-        return self.data[idx]
-
-    def __get_header(self, fd, size):
-        rec_header_dtype = np.dtype(header_format.rec_header_dtd)
-        assert rec_header_dtype.itemsize == size
-        header = np.fromfile(fd, dtype=header_format.rec_header_dtd, count=1)
-        # Seek header
-        if header['next'] > 0:
-            fd.seek(header['next'])  # ignore extended header
-        return header, fd.tell()
-
-    def __get_header_dict(self, header):
-        header_dict = {}
-        for name in header.dtype.names:
-            header_dict[name] = header[name][0] if len(header[name]) == 1 \
-                                else header[name]
-        return header_dict
-
-    def __set_data_format(self, header):
-        mode = header['mode']
-        # BitOrder: little or big endian
-        bo = "<" if header['stamp'][0, 0] == 68 and \
-             header['stamp'][0, 1] == 65 else "<"
-        sign = "i1" if header['imodFlags'] == 1 else "u1"  # signed or unsigned
-        dtype = [sign, "i2", "f",  "c4", "c8", None, "u2", None, None, None,
-                 None, None, None, None, None, None, "u1"][mode]
-        dsize = [1, 2, 4, 4, 8, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3][mode]
-        return {'mode': mode, 'bo': bo, 'sign': sign, 'dtype': bo+dtype,
-                'dsize': dsize}
-
-    def __set_shape(self, header):
-        nx, ny, nz = header['nx'], header['ny'], header['nz']
-        if not isinstance(nx, int):
-            nx = nx[0]
-            ny = ny[0]
-            nz = nz[0]
-        return (nx, ny, nz)
-
-    def get_shape(self):
-        return self.shape
+    def close(self):
+        self.file.close()

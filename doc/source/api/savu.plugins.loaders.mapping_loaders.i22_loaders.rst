@@ -1,5 +1,5 @@
-savu\.plugins\.loaders\.mapping\_loaders\.i22\_loaders package
-==============================================================
+savu.plugins.loaders.mapping\_loaders.i22\_loaders package
+==========================================================
 
 .. automodule:: savu.plugins.loaders.mapping_loaders.i22_loaders
     :members:

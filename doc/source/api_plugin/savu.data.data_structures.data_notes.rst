@@ -1,5 +1,5 @@
-savu\.data\.data\_structures\.data\_notes module
-================================================
+savu.data.data\_structures.data\_notes module
+=============================================
 
 .. automodule:: savu.data.data_structures.data_notes
     :members:

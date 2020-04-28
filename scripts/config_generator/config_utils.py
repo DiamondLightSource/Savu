@@ -37,16 +37,10 @@ import savu.data.data_structures.utils as du
 if os.name == 'nt':
     import win_readline as readline
 else:
-    import gnureadline as readline
+    import readline
 
 histfile = os.path.join(os.path.expanduser("~"), ".savuhist")
-try:
-    readline.read_history_file(histfile)
-    readline.set_history_length(1000)
-except IOError:
-    pass
-atexit.register(readline.write_history_file, histfile)
-
+histlen = 1000
 logging.basicConfig(level='CRITICAL')
 error_level = 0
 
@@ -60,6 +54,19 @@ def _redirect_stdout():
     sys.stdout = DummyFile()
     return save_stdout
 
+def load_history_file(hfile):
+    try:
+        readline.read_history_file(hfile)
+        readline.set_history_length(histlen)
+    except IOError:
+        pass
+    atexit.register(write_history_to_file)
+
+def write_history_to_file():
+    try:
+        readline.write_history_file(histfile)
+    except IOError:
+        pass
 
 def _set_readline(completer):
     # we want to treat '/' as part of a word, so override the delimiters
@@ -100,33 +107,40 @@ def error_catcher(function):
     return error_catcher_wrap_function
 
 
-def _add_module(loader, module_name):
+def _add_module(failed_imports, loader, module_name, error_mode):
     if module_name not in sys.modules:
         try:
             loader.find_module(module_name).load_module(module_name)
-        except Exception:
-            pass
+        except Exception as e:
+            clazz = ''.join([w.capitalize() for w in \
+                             module_name.split('.')[-1].split('_')])
+            failed_imports[clazz] = e
+            if error_mode:
+                print("\nUnable to load plugin %s\n%s" % (module_name, e))
+            else:
+                pass
 
 
-# change this to dawn=False!!!!!!!!!!!!!!!!!!!!!!!!!
-def populate_plugins(dawn=True):
+def populate_plugins(dawn=False, error_mode=False, examples=False):
     # load all the plugins
-    plugins_path = pu.get_plugins_paths()
-    savu_path = plugins_path[-1].split('savu')[0]
+    plugins_path = pu.get_plugins_paths(examples=examples)
     savu_plugins = plugins_path[-1:]
-    local_plugins = plugins_path[0:-1] + [savu_path + 'plugins_examples']
+    local_plugins = plugins_path[0:-1]
 
+    failed_imports = {}
     # load local plugins
     for loader, module_name, is_pkg in pkgutil.walk_packages(local_plugins):
-        _add_module(loader, module_name)
+        _add_module(failed_imports, loader, module_name, error_mode)
 
     # load savu plugins
     for loader, module_name, is_pkg in pkgutil.walk_packages(savu_plugins):
         if module_name.split('savu.plugins')[0] == '':
-            _add_module(loader, module_name)
+            _add_module(failed_imports, loader, module_name, error_mode)
 
     if dawn:
         _dawn_setup()
+
+    return failed_imports
 
 
 def _dawn_setup():

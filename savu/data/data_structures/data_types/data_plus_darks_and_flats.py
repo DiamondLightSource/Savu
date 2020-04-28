@@ -137,7 +137,11 @@ class DataWithDarksAndFlats(BaseType):
         # all data entries
         data_idx = np.where(self.image_key == 0)[0]
         preview_idx = np.arange(len(data_idx))[slice_list]
-        remove_idx = np.delete(data_idx, preview_idx[::-1])
+        # check the inconsistency regarding the preview of angles, e.g [0:10,:,:]        
+        if (len(data_idx) == len(preview_idx)):
+	        remove_idx = np.delete(data_idx, preview_idx[::-1])
+	else: 
+		remove_idx = []
         return np.delete(self.image_key, remove_idx)
 
     def __get_reduced_index(self, key, slice_list):
@@ -173,7 +177,7 @@ class DataWithDarksAndFlats(BaseType):
         sl = list(copy.deepcopy(self.dark_flat_slice_list[key]))
         if len(data.shape) is 2:
             del sl[rot_dim]
-        return data[sl]
+        return data[tuple(sl)]
 
     def dark_image_key_data(self):
         """ Get the dark data. """
@@ -218,7 +222,7 @@ class ImageKey(DataWithDarksAndFlats):
             self.__ignore_image_key_entries(ignore)
 
     def clone_data_args(self, args, kwargs, extras):
-        """ List the arguments required to clone this dadark_updatedtatype
+        """ List the arguments required to clone this datatype
         """
         args = ['self', 'image_key', 'proj_dim']
         kwargs['ignore'] = 'ignore'

@@ -28,7 +28,7 @@ from savu.plugins import utils as pu
 if os.name == 'nt':
     import win_readline as readline
 else:
-    import gnureadline as readline
+    import readline
 
 RE_SPACE = re.compile('.*\s+$', re.M)
 

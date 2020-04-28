@@ -22,6 +22,7 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 from savu.plugins.filters.base_filter import BaseFilter
 from savu.data.plugin_list import CitationInformation
+import savu.core.utils as cu
 
 import logging
 import numpy as np
@@ -53,11 +54,11 @@ class VoCentering(BaseFilter, CpuPlugin):
         . Default: ['cor_preview','cor_broadcast'].
     :param broadcast_method: Method of broadcasting centre values calculated\
         from preview slices to full dataset. Available option: 'median', \
-        'mean', 'nearest', 'linear_fit'. Default: 'median'.      
+        'mean', 'nearest', 'linear_fit'. Default: 'median'.
     :param row_drop: Drop lines around vertical center of the \
         mask. Default: 20.
     :param average_radius: Averaging sinograms around a required sinogram to\
-        improve signal-to-noise ratio. Default: 0.
+        improve signal-to-noise ratio. Default: 5.
     """
 
     def __init__(self):
@@ -68,7 +69,7 @@ class VoCentering(BaseFilter, CpuPlugin):
         dv = (nrow - 1.0) / (nrow * 2.0 * np.pi)
         cen_row = np.int16(np.ceil(nrow / 2.0) - 1)
         cen_col = np.int16(np.ceil(ncol / 2.0) - 1)
-        drop = min(drop, np.int16(np.ceil(0.1 * nrow)))
+        drop = min(drop, np.int16(np.ceil(0.05 * nrow)))
         mask = np.zeros((nrow, ncol), dtype='float32')
         for i in range(nrow):
             pos = np.int16(np.round(((i - cen_row) * dv / radius) / du))
@@ -82,21 +83,21 @@ class VoCentering(BaseFilter, CpuPlugin):
     def _coarse_search(self, sino, start_cor, stop_cor, ratio, drop):
         """
         Coarse search for finding the rotation center.
-        """        
+        """
         (nrow, ncol) = sino.shape
         start_cor, stop_cor = np.sort((start_cor,stop_cor))
         start_cor = np.int16(np.clip(start_cor, 0, ncol-1))
         stop_cor = np.int16(np.clip(stop_cor, 0, ncol-1))
-        cen_fliplr = (ncol - 1.0) / 2.0    
+        cen_fliplr = (ncol - 1.0) / 2.0
         # Flip left-right the [0:Pi ] sinogram to make a full [0;2Pi] sinogram
         flip_sino = np.fliplr(sino)
         # Below image is used for compensating the shift of the [Pi;2Pi] sinogram
         # It helps to avoid local minima.
-        comp_sino = np.flipud(sino)    
+        comp_sino = np.flipud(sino)
         list_cor = np.arange(start_cor, stop_cor + 1.0)
         list_metric = np.zeros(len(list_cor), dtype=np.float32)
         mask = self._create_mask(2 * nrow, ncol, 0.5 * ratio * ncol, drop)
-        sino_sino = np.vstack((sino, flip_sino))        
+        sino_sino = np.vstack((sino, flip_sino))
         for i, cor in enumerate(list_cor):
             shift = np.int16(2.0*(cor - cen_fliplr))
             _sino = sino_sino[nrow:]
@@ -104,20 +105,20 @@ class VoCentering(BaseFilter, CpuPlugin):
             if shift >= 0:
                 _sino[:, :shift] = comp_sino[:, :shift]
             else:
-                _sino[:, shift:] = comp_sino[:, shift:]             
+                _sino[:, shift:] = comp_sino[:, shift:]
             list_metric[i] = np.mean(
                 np.abs(np.fft.fftshift(fft.fft2(sino_sino)))*mask)
         minpos = np.argmin(list_metric)
         if minpos==0:
-            logging.warn('!!! WARNING !!! Global minimum is out of'
-                         ' the searching range. Please extend smin')
             self.error_msg_1 = "!!! WARNING !!! Global minimum is out of "\
-            "the searching range. Please extend smin"             
+            "the searching range. Please extend smin"
+            logging.warn(self.error_msg_1)
+            cu.user_message(self.error_msg_1)
         if minpos==len(list_metric)-1:
-            logging.warn('!!! WARNING !!! Global minimum is out of'
-                         ' the searching range. Please extend smax')
             self.error_msg_2 = "!!! WARNING !!! Global minimum is out of "\
-             "the searching range. Please extend smax"            
+             "the searching range. Please extend smax"
+            logging.warn(self.error_msg_2)
+            cu.user_message(self.error_msg_2)
         rot_centre = list_cor[minpos]
         return rot_centre
 
@@ -126,7 +127,7 @@ class VoCentering(BaseFilter, CpuPlugin):
         """
         Fine search for finding the rotation center.
         """
-        # Denoising        
+        # Denoising
         (nrow, ncol) = sino.shape
         flip_sino = np.fliplr(sino)
         search_radius = np.clip(np.abs(search_radius), 1, ncol//10 - 1)
@@ -170,12 +171,12 @@ class VoCentering(BaseFilter, CpuPlugin):
         dsp_fact1 = np.clip(np.int16(dsp_fact1), 1, width//2)
         height_dsp = height//dsp_fact0
         width_dsp = width//dsp_fact1
-        if  (dsp_fact0 == 1) and (dsp_fact1 ==1): 
+        if  (dsp_fact0 == 1) and (dsp_fact1 ==1):
             image_dsp = image
         else:
             image_dsp = image[0:dsp_fact0*height_dsp,0:dsp_fact1*width_dsp]
             image_dsp = image_dsp.reshape(
-                height_dsp,dsp_fact0,width_dsp,dsp_fact1).mean(-1).mean(1)            
+                height_dsp,dsp_fact0,width_dsp,dsp_fact1).mean(-1).mean(1)
         return image_dsp
 
     def set_filter_padding(self, in_data, out_data):
@@ -198,11 +199,11 @@ class VoCentering(BaseFilter, CpuPlugin):
                 or (self.broadcast_method == 'median')
                  or (self.broadcast_method == 'linear_fit')
                   or (self.broadcast_method == 'nearest')):
-            logging.warn("!!! WARNING !!! Selected broadcasting method is"
-                         " out of the list. Use 'median' instead")
             self.error_msg_3 = "!!! WARNING !!! Selected broadcasting "\
-             "method is out of the list. Use the default option: 'median'"                        
-            self.broadcast_method = 'median' 
+             "method is out of the list. Use the default option: 'median'"
+            logging.warn(self.error_msg_3)
+            cu.user_message(self.error_msg_3)
+            self.broadcast_method = 'median'
         in_pData = self.get_plugin_in_datasets()[0]
         data = self.get_in_datasets()[0]
         starts,stops,steps = data.get_preview().get_starts_stops_steps()[0:3]
@@ -212,23 +213,23 @@ class VoCentering(BaseFilter, CpuPlugin):
         name = data.get_name()
         pre_start = self.exp.meta_data.get(name + '_preview_starts')[1]
         pre_stop = self.exp.meta_data.get(name + '_preview_stops')[1]
-        pre_step = self.exp.meta_data.get(name + '_preview_steps')[1]        
+        pre_step = self.exp.meta_data.get(name + '_preview_steps')[1]
         self.origin_prev = np.arange(pre_start,pre_stop, pre_step)
         self.plugin_prev = self.origin_prev[start_ind:stop_ind:step_ind]
 
-    def process_frames(self, data):        
+    def process_frames(self, data):
         if len(data[0].shape)>2:
             sino = np.mean(data[0],axis=1)
         else:
             sino = data[0]
         (nrow, ncol) = sino.shape
         dsp_row = 1
-        dsp_col = 1                    
+        dsp_col = 1
         if ncol>2000:
-            dsp_col = 4             
+            dsp_col = 4
         if nrow>2000:
-            dsp_row = 2        
-        # Denoising 
+            dsp_row = 2
+        # Denoising
         # There's a critical reason to use different window sizes
         # between coarse and fine search.
         sino_csearch = ndi.gaussian_filter(sino, (3,1), mode='reflect')
@@ -241,7 +242,7 @@ class VoCentering(BaseFilter, CpuPlugin):
         else:
             self.est_cor = np.float32(self.est_cor)
         start_cor = np.int16(
-            np.floor(1.0 * (self.est_cor + self.smin) / dsp_col))        
+            np.floor(1.0 * (self.est_cor + self.smin) / dsp_col))
         stop_cor = np.int16(
             np.ceil(1.0 * (self.est_cor + self.smax) / dsp_col))
         raw_cor = self._coarse_search(sino_dsp, start_cor, stop_cor,
@@ -251,7 +252,7 @@ class VoCentering(BaseFilter, CpuPlugin):
              self.search_step, self.ratio, self.drop)
         return [np.array([cor]), np.array([cor])]
 
-    def post_process(self):        
+    def post_process(self):
         in_datasets, out_datasets = self.get_datasets()
         cor_prev = out_datasets[0].data[...]
         cor_broad = out_datasets[1].data[...]
@@ -375,9 +376,11 @@ class VoCentering(BaseFilter, CpuPlugin):
 
     def executive_summary(self):
         if ((self.error_msg_1 == "")
-             and (self.error_msg_2 == "") and (self.error_msg_3 == "")):
-            msg = "Centre of Rotation is : %s" % (str(self.cor_for_executive_summary))
-        else:
-            msg = "\n" + self.error_msg_1 + "\n" \
-            + self.error_msg_2 + "\n" + self.error_msg_3
+             and (self.error_msg_2 == "")):
+            msg = "Centre of rotation is : %s" % (str(self.cor_for_executive_summary))
+        else:            
+            msg = "\n" + self.error_msg_1 + "\n" + self.error_msg_2
+            msg2 = "(Not well) estimated centre of rotation is : %s" % (str(
+                self.cor_for_executive_summary))
+            cu.user_message(msg2)
         return [msg]

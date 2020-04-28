@@ -11,7 +11,7 @@ Subpackages
     install.2_1_install
     install.2_3_1_install
     install.2_3_install
-    install.future_install
+    install.2_4_install
 
 Module contents
 ---------------

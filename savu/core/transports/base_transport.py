@@ -26,6 +26,7 @@ import os
 import time
 import copy
 import h5py
+import logging
 import numpy as np
 
 import savu.core.utils as cu
@@ -121,7 +122,9 @@ class BaseTransport(object):
 
         :param plugin plugin: The current plugin instance.
         """
+        logging.info("transport_process initialise")
         pDict, result, nTrans = self._initialise(plugin)
+        logging.info("transport_process get_checkpoint_params")
         cp, sProc, sTrans = self.__get_checkpoint_params(plugin)
 
         count = 0  # temporary solution
@@ -132,11 +135,15 @@ class BaseTransport(object):
             self._log_completion_status(count, nTrans, plugin.name)
 
             # get the transfer data
+            logging.info("Transferring the data")
             transfer_data = self._transfer_all_data(count)
+
             # loop over the process data
+            logging.info("process frames loop")
             result, kill = self._process_loop(
                     plugin, prange, transfer_data, count, pDict, result, cp)
 
+            logging.info("Returning the data")
             self._return_all_data(count, result, end)
 
             if kill:
@@ -340,7 +347,7 @@ class BaseTransport(object):
         new_slice[slice_dirs[0]] = None
         possible_slices.append(copy.copy(new_slice))
         possible_slices = possible_slices[::-1]
-        return lambda x: x[possible_slices[len(x.shape)-n_core_dirs]]
+        return lambda x: x[tuple(possible_slices[len(x.shape)-n_core_dirs])]
 
     def __create_squeeze_function(self, data):
         """ Create a function that removes dimensions of length 1.
@@ -378,7 +385,7 @@ class BaseTransport(object):
         if shape[sdir] - (sl.stop - sl.start):
             unpad_sl = [slice(None)]*len(shape)
             unpad_sl[sdir] = slice(0, sl.stop - sl.start)
-            result = result[unpad_sl]
+            result = result[tuple(unpad_sl)]
         return result
 
     def _setup_h5_files(self):
@@ -387,7 +394,7 @@ class BaseTransport(object):
         current_and_next = False
         if 'current_and_next' in self.exp.meta_data.get_dictionary():
             current_and_next = self.exp.meta_data.get('current_and_next')
-        
+
         count = 0
         for key in out_data_dict.keys():
             out_data = out_data_dict[key]
@@ -463,7 +470,7 @@ class BaseTransport(object):
     def _output_metadata(self, data, entry, name, dump=False):
         self.__output_data_type(entry, data, name)
         mDict = data.meta_data.get_dictionary()
-        self._output_metadata_dict(entry, mDict)
+        self._output_metadata_dict(entry.require_group('meta_data'), mDict)
 
         if not dump:
             self.__output_axis_labels(data, entry)
@@ -574,9 +581,11 @@ class BaseTransport(object):
             self.__output_data(nx_data, values['slice_dims'], 'slice_dims')
 
     def _output_metadata_dict(self, entry, mData):
-        entry = entry.require_group('meta_data')
         entry.attrs[NX_CLASS] = 'NXcollection'
         for key, value in mData.iteritems():
             nx_data = entry.require_group(key)
-            nx_data.attrs[NX_CLASS] = 'NXdata'
-            self.__output_data(nx_data, value, key)
+            if isinstance(value, dict):
+                self._output_metadata_dict(nx_data, value)
+            else:
+                nx_data.attrs[NX_CLASS] = 'NXdata'
+                self.__output_data(nx_data, value, key)
