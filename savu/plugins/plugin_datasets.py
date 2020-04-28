@@ -80,16 +80,18 @@ class PluginDatasets(object):
         for pData in in_pData + out_pData:
             pData._set_meta_data()
             params[pData] = pData._get_plugin_data_size_params()
-        
+
         max_bytes = 0
         for key, value in params.iteritems():
             if value['transfer_bytes'] > max_bytes:
                 max_data = key
                 max_bytes = value['transfer_bytes']
-
-        # set mft and mfp for the largest dataset
-        max_data.plugin_data_transfer_setup()
-        to_set = list(set(params.keys()).difference(set([max_data])))
+        try:
+            # set mft and mfp for the largest dataset
+            max_data.plugin_data_transfer_setup()
+            to_set = list(set(params.keys()).difference(set([max_data])))
+        except Exception:
+            print('Max data error')
 
         for pData in to_set:
             if params[pData]['total_frames'] == params[max_data]['total_frames']:
@@ -175,7 +177,7 @@ class PluginDatasets(object):
         names = self.check_nDatasets(names, nOut, "out_data", clones=clones)
         if clones:
             names.extend(['itr_clone' + str(i) for i in range(clones)])
-    
+
         for i in range(len(names)):
             new = names[i].split('in_datasets')
             if len(new) == 2:

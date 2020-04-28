@@ -341,7 +341,7 @@ class ListDisplay(DisplayFormatter):
         info, warn = self._get_extra_info(p_dict, width, c_off, info_c, info_c)
         return default_str + info
 
-    def _get_verbose_verbose(self, level, p_dict, count, width):
+    def _get_verbose_verbose(self, level, p_dict, count, width, subelem=False):
         all_params = self._get_param_details('all', p_dict, 100)
         default_str = self._get_default(level, p_dict, count, width)
         info_c = Fore.CYAN

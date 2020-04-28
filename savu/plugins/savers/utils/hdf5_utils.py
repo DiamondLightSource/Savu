@@ -45,7 +45,8 @@ class Hdf5Utils(object):
         self.info = MPI.Info.Create()
         self.exp = exp
         # Get MPI I/O settings from the Savu config file
-        settings = self.exp.meta_data.get(['system_params', 'mpi-io_settings'])
+        system_param = self.exp.meta_data.get(['system_params'][0])
+        settings = system_param[0]['mpi-io_settings']
         for key, value in settings.iteritems():
             self.info.Set(key, value)
 

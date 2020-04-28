@@ -32,6 +32,7 @@ import savu.plugins.utils as pu
 import savu.plugins.docstring_parser as doc
 from savu.plugins.plugin_datasets import PluginDatasets
 
+
 class Plugin(PluginDatasets):
     """
     """
@@ -50,13 +51,14 @@ class Plugin(PluginDatasets):
         self.p_dict = OrderedDict()
 
     def initialise(self, params, exp, check=False):
+        print('initialise 1')
         self.check = check
         self.exp = exp
         self._populate_default_parameters()
         self._set_parameters(copy.deepcopy(params))
         self._main_setup()
 
-    def _main_setup(self, exp, params):
+    def _main_setup(self):
         """ Performs all the required plugin setup.
 
         It sets the experiment, then the parameters and replaces the
@@ -94,9 +96,6 @@ class Plugin(PluginDatasets):
             name = info['label'].split('_param')[0]
             self.parameters[name] = info['values'][indices[count]]
             count += 1
-
-    def load_doc(self):
-        return self.__doc__
 
     def base_dynamic_data_info(self):
         """ Provides an opportunity to override the number and name of input
@@ -176,6 +175,7 @@ class Plugin(PluginDatasets):
             del self.parameters[param]
 
     def initialise_parameters(self):
+        print('initialise 2')
         self.parameters = OrderedDict()
         self.p_dict = OrderedDict()
         self._populate_default_parameters()
