@@ -102,7 +102,7 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
                         str(dim_volY) + '.voxel_y.voxels',
                         str(dim_volZ) + '.voxel_z.voxels']}
 
-        # specify reconstructed volume dimensions       
+        # specify reconstructed volume dimensions
         self.output_size = self._get_output_size(in_dataset[0])
         shape = list(in_dataset[0].get_shape())
         rot_dim = in_dataset[0].get_data_dimension_by_axis_label(
@@ -147,13 +147,13 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
         procs = len([i for i in procs if 'GPU' in i])
         dim = in_dataset[0].get_data_dimension_by_axis_label('detector_y')
     	nSlices = int(np.ceil(shape[dim]/float(procs)))
-    	
+
         in_pData[0].plugin_data_setup('SINOGRAM', nSlices, slice_axis='detector_y')
 
         # in_pData[1].plugin_data_setup('PROJECTION', nSlices) # (for PWLS)
 
         # set pattern_name and nframes to process for all datasets
-	out_pData[0].plugin_data_setup('VOLUME_XZ', nSlices)
+        out_pData[0].plugin_data_setup('VOLUME_XZ', nSlices)
 
     def pre_process(self):
         in_pData = self.get_plugin_in_datasets()[0]
