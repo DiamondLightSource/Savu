@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://github.com/DiamondLightSource/Savu/archive/master.zip
-  sha256: 457c7fa30590fafe340407f04fc129be08ce803a49d930eb5abce9e97a33ed87
+  sha256: c2b7b1de05ea017d824b780da0de1f90f162672270d8b839f56554d84c5b09b3
 
 build:
   number: 0
