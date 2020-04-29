@@ -100,7 +100,6 @@ class BaseTransportData(object):
 
         settings = self.data.exp.meta_data.get(
                 ['system_params', 'data_transfer_settings'])
-        # Error with Key data transfer
         max_bytes = self.__convert_str(
                 settings['max_bytes'], b_per_p)*mem_multiply
         bytes_threshold = self.__convert_str(

@@ -9,7 +9,7 @@ ToMoBAR package. ToMoBAR includes FISTA and ADMM iterative methods\
 and depends on the ASTRA toolbox and the CCPi RGL toolkit
     """
     def define_parameters(self):
-        """---
+        """
         output_size:
             visibility: advanced
             dtype: Union[int, tuple]

@@ -60,10 +60,7 @@ def load_yaml_doc(lines):
     """
     all_params = ''
     try:
-        text = yu.read_yaml_from_doc(lines)
-        for doc in text:
-            # Each yaml document
-            all_params = doc
+        all_params = yu.read_yaml_from_doc(lines)
     except:
         print('\nError reading the yaml structure from Yaml Utils.')
     return all_params

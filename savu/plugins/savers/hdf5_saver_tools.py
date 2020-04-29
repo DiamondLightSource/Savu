@@ -6,7 +6,7 @@ class Hdf5SaverTools(PluginTools):
     """A class to save tomography data to a hdf5 file
     """
     def define_parameters(self):
-        """---
+        """
         pattern:
             visibility: basic
             dtype: str

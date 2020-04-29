@@ -106,12 +106,9 @@ def _save(content, args):
         out_file = content.filename if args.input else args.filepath
         content.check_file(out_file)
         DispDisplay(content.plugin_list)._notices()
-        try:
-            content.save(out_file, check=raw_input("Are you sure you want to save the "
-                         "current data to %s' [y/N]" % (out_file)),
-                         template=args.template)
-        except Exception as e:
-            print(e)
+        content.save(out_file, check=raw_input("Are you sure you want to save the "
+                     "current data to %s' [y/N]" % (out_file)),
+                     template=args.template)
     else:
         raise Exception("No items were found in your process list. "
                     "Type 'add' to add a plugin to the list.")

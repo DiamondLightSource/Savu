@@ -6,7 +6,7 @@ class BaseTools(PluginTools):
     """The base class from which all plugins should inherit.
     """
     def define_parameters(self):
-        """---
+        """
         in_datasets:
             visibility: basic
             dtype: list

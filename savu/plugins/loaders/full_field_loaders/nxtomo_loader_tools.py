@@ -6,7 +6,7 @@ class NxtomoLoaderTools(PluginTools):
     """A class to load tomography data from a hdf5 file
     """
     def define_parameters(self):
-        """---
+        """
         preview:
             visibility: basic
             dtype: '[int]'

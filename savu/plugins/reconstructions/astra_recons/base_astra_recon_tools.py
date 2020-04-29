@@ -6,7 +6,7 @@ class BaseAstraReconTools(PluginTools):
     """A Plugin to perform Astra toolbox reconstruction
     """
     def define_parameters(self):
-        """---
+        """
         n_iterations:
             visibility: basic
             dtype: int

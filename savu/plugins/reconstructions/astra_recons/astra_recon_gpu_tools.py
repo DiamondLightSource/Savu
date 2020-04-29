@@ -6,7 +6,7 @@ class AstraReconGpuTools(PluginTools):
     """A Plugin to run the astra reconstruction
     """
     def define_parameters(self):
-        """---
+        """
         res_norm:
             visibility: basic
             dtype: int

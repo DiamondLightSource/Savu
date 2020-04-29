@@ -6,7 +6,7 @@ class BaseLoaderTools(PluginTools):
     """A base class for loader plugins. A base plugin from which all data loader plugins should inherit.
     """
     def define_parameters(self):
-        """---
+        """
         preview:
               visibility: basic
               dtype: '[int]'

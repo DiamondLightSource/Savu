@@ -6,7 +6,7 @@ class BaseReconTools(PluginTools):
     """A base class for reconstruction plugins
     """
     def define_parameters(self):
-        """---
+        """
         centre_of_rotation:
              visibility: advanced
              dtype: float

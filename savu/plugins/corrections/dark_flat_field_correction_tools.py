@@ -6,7 +6,7 @@ class DarkFlatFieldCorrectionTools(PluginTools):
     """A Plugin to apply a simple dark and flat field correction to data.
     """
     def define_parameters(self):
-        """---
+        """
         pattern:
             visibility: advanced
             dtype: str

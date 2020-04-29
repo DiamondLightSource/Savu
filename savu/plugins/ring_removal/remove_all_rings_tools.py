@@ -8,7 +8,7 @@ class RemoveAllRingsTools(PluginTools):
 
     """
     def define_parameters(self):
-        """---
+        """
         la_size:
             visibility: param
             dtype: int

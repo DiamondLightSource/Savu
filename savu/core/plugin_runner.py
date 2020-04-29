@@ -151,10 +151,8 @@ class PluginRunner(object):
             self.exp._merge_out_data_to_in()
             count += 1
         self.exp._reset_datasets()
-        try:
-            plugin_list._add_missing_savers(self.exp)
-        except Exception as e:
-            print(e)
+
+        plugin_list._add_missing_savers(self.exp)
         cu.user_message("Plugin list check complete!")
         #  ********* transport function ***********
         self._transport_update_plugin_list()

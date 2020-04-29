@@ -6,7 +6,7 @@ class VoCenteringTools(PluginTools):
     """A plugin to calculate the centre of rotation using the Vo Method
     """
     def define_parameters(self):
-        """---
+        """
         preview:
              visibility: basic
              dtype: '[int]'

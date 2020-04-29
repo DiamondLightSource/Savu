@@ -6,7 +6,7 @@ class BaseCorrectionTools(PluginTools):
     """A base class for dark and flat field correction plugins.
     """
     def define_parameters(self):
-        """---
+        """
         in_datasets:
             visibility: hidden
             dtype: '[int]'

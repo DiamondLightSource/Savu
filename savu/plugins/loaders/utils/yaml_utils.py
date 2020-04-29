@@ -38,7 +38,7 @@ def ordered_load(stream, Loader=yaml.Loader, object_pairs_hook=OrderedDict):
         yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
         construct_mapping)
     # 'Load all' is used so that multiple yaml documents may be appended with --- and read in also
-    return yaml.load_all(stream, OrderedLoader)
+    return yaml.load(stream, OrderedLoader)
 
 
 def ordered_dump(data, stream=None, Dumper=yaml.Dumper, **kwds):
@@ -65,31 +65,9 @@ def check_yaml_errors(data):
     return errors
 
 def read_yaml(path):
-    """
-        Take the yaml file path and use ordered_loading to read in the yaml format as an ordered dict.
-        ----------
-        Parameters:
-                - path: String
-        ----------
-        Return:
-                - data_dict: Generator with ordered dictionaries for each yaml document.
-        """
-    text = open(path)
-    errors = check_yaml_errors(text)
-    try:
-        with open(path, 'r') as stream:
-            data_dict = ordered_load(stream, yaml.SafeLoader)
-            return [data for data in data_dict]
-    except (yaml.scanner.ScannerError, yaml.parser.ParserError) as se:
-        print('Error with the yaml file %s' % path)
-        for e in errors:
-            print(e)
-        raise
-    except yaml.YAMLError as ye:
-        print('Error reading the yaml structure with YamlLoader.')
-        print(sys.exc_info())
-        raise
-
+    with open(path, 'r') as stream:
+        data_dict = ordered_load(stream, yaml.SafeLoader)
+    return data_dict
 
 def read_yaml_from_doc(docstring):
     """
@@ -105,7 +83,7 @@ def read_yaml_from_doc(docstring):
     try:
         # SafeLoader loads a subset of the YAML language, safely. This is recommended for loading untrusted input
         data_dict = ordered_load(docstring, yaml.SafeLoader)
-        return [data for data in data_dict]
+        return data_dict
     except (yaml.scanner.ScannerError, yaml.parser.ParserError) as se:
         for e in errors:
             print(e)

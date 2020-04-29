@@ -6,7 +6,7 @@ class NoProcessTools(PluginTools):
     """The base class from which all plugins should inherit.
     """
     def define_parameters(self):
-        """---
+        """
         pattern:
             visibility: advanced
             dtype: str
