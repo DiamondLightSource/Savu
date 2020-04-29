@@ -321,12 +321,11 @@ class PluginList(object):
         self.n_loaders = len(loader_idx)
         self.n_savers = len(saver_idx)
 
-    def _check_loaders_and_savers(self):
-        """ Check plugin list starts with a loader and ends with a saver.
+    def _check_loaders(self):
+        """ Check plugin list starts with a loader.
         """
         self.__set_loaders_and_savers()
         loaders = self._get_loaders_index()
-        savers = self._get_savers_index()
 
         if loaders:
             if loaders[0] is not 0 or loaders[-1]+1 is not len(loaders):
@@ -337,17 +336,6 @@ class PluginList(object):
         else:
             raise Exception("The first item in the process list must be a "
                             "loader plugin.")
-
-        if savers:
-            if savers[-1]+1 is not self.n_plugins:
-                raise Exception("All saver plugins must be at the end "
-                                "of the process list")
-            if len(savers) > 1:
-                print('You have more than one saver plugin.')
-        else:
-            raise Exception("The last item in the process list must be a "
-                            "saver plugin.")
-
 
     def _add_missing_savers(self, exp):
         """ Add savers for missing datasets. """

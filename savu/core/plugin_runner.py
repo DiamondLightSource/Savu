@@ -126,7 +126,7 @@ class PluginRunner(object):
         """ Run the plugin list through the framework without executing the
         main processing.
         """
-        plugin_list._check_loaders_and_savers()
+        plugin_list._check_loaders()
         self.__check_gpu()
 
         n_loaders = self.exp.meta_data.plugin_list._get_n_loaders()

@@ -102,7 +102,7 @@ def _save(content, args):
     # Check if the plug in list has been populated.
     if len(content.plugin_list.plugin_list) > 0:
         # Check if a loader and saver are present.
-        content.plugin_list._check_loaders_and_savers()
+        content.plugin_list._check_loaders()
         out_file = content.filename if args.input else args.filepath
         content.check_file(out_file)
         DispDisplay(content.plugin_list)._notices()
