@@ -44,20 +44,22 @@ pipeline {
                         conda config --set anaconda_upload no
                         cd install/savu_lite27/
                         conda build .
+                        conda install --yes -c file://${CONDA_PREFIX}/conda-bld/ savu-lite
                     '''
             }
         }
 
-        /*
-        stage('Tests py35') {
+
+        stage('Tests py27') {
             steps {
-                sh  ''' source activate "${BUILD_TAG}py35"
+                sh  ''' source activate "${BUILD_TAG}py27"
                         conda install pytest pytest-cov
-                        pytest -v --cov tests/
+                        cd savu/test/travis/plugin_tests/filter_tests/denoise
+                        pytest -v --cov
                     '''
             }
         }
-
+        /*
         stage("Deploy py35") {
              steps {
                  sh ''' source activate "${BUILD_TAG}py35"
