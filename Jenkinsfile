@@ -28,6 +28,8 @@ pipeline {
             steps {
                 echo "Building py27 virtualenv"
                 sh  ''' conda create --yes -n "${BUILD_TAG}py27" python=2.7
+                        conda install conda-build
+                        conda install anaconda-client
                     '''
             }
         }
