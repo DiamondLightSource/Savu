@@ -1,0 +1,77 @@
+{% set name = "savu-lite" %}
+{% set version = "master" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/DiamondLightSource/Savu/archive/master.zip
+  sha256: 457c7fa30590fafe340407f04fc129be08ce803a49d930eb5abce9e97a33ed87
+
+build:
+  number: 0
+  skip: True # [not linux64 and not py==27]
+
+requirements:
+  host:
+    - python <3
+    - pip
+    - wheel
+
+  run:
+    - python=2.7
+    - numpy
+    - astra-toolbox
+    - cudatoolkit
+    - scipy
+    - fftw
+    - pyfftw
+    - hdf5
+    - tomobar
+    - ccpi-reconstruction
+    - ccpi-regulariser
+    - larix
+    - h5py=*=mpi_openmpi*
+    - openmpi
+    - mpi4py
+    - colorama
+    - linecache2
+    - traceback2
+    - pyyaml
+    - scikit-image
+    - fabio
+    - peakutils
+    - tifffile
+    - nvidia-ml
+    - pyfai
+
+test:
+  imports:
+    - colorama
+    - h5py
+    - mpi4py
+    - numpy
+    - scipy
+    - pyfftw
+    - tomobar
+    - linecache2
+    - traceback2
+    - savu
+    - yaml
+
+  commands:
+    - savu --version
+    - savu_config -h
+    - savu_quick_tests
+
+about:
+  home: https://github.com/DiamondLightSource/Savu
+  license: Apache V2 and GPL V3
+  license_family: GPL3
+  doc_url: https://savu.readthedocs.io/en/latest/
+  summary: "Savu-Lite - Tomography Reconstruction and Processing Pipeline"
+
+extra:
+  recipe-maintainers:
+    - AlunRobinson
