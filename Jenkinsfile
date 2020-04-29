@@ -44,7 +44,7 @@ pipeline {
                         conda config --set anaconda_upload no
                         cd install/savu_lite27/
                         conda build .
-                        conda install --yes -c file://${CONDA_PREFIX}/conda-bld/ savu-lite
+                        conda install /var/lib/jenkins/miniconda3/savu_install/linux-64/*.tar.bz2
                     '''
             }
         }
