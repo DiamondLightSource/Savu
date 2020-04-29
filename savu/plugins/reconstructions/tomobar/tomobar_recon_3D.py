@@ -147,14 +147,14 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
         procs = self.exp.meta_data.get("processes")
         procs = len([i for i in procs if 'GPU' in i])
         dim = in_dataset[0].get_data_dimension_by_axis_label('detector_y')
-        nSlices = int(np.ceil(shape[dim] / float(procs)))
+        nSlices = int(np.ceil(shape[dim]/float(procs)))
 
         in_pData[0].plugin_data_setup('SINOGRAM', nSlices, slice_axis='detector_y')
 
         # in_pData[1].plugin_data_setup('PROJECTION', nSlices) # (for PWLS)
 
         # set pattern_name and nframes to process for all datasets
-	out_pData[0].plugin_data_setup('VOLUME_XZ', nSlices)
+        out_pData[0].plugin_data_setup('VOLUME_XZ', nSlices)
 
     def pre_process(self):
         in_pData = self.get_plugin_in_datasets()[0]
@@ -162,28 +162,28 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
         self.Vert_det = in_pData.get_shape()[detY] + 2 * self.pad
 
         # extract given parameters into dictionaries suitable for ToMoBAR input
-        self._data_ = {'OS_number': self.parameters['algorithm_ordersubsets'],
-                       'huber_threshold': self.parameters['data_Huber_thresh'],
-                       'ring_weights_threshold': self.parameters['data_any_rings'],
-                       'ring_tuple_halfsizes': self.parameters['data_any_rings_winsizes'],
-                       'ring_huber_power': self.parameters['data_any_rings_power'],
-                       'ringGH_lambda': self.parameters['data_full_ring_GH'],
-                       'ringGH_accelerate': self.parameters['data_full_ring_accelerator_GH']}
+        self._data_ = {'OS_number' : self.parameters['algorithm_ordersubsets'],
+                       'huber_threshold' : self.parameters['data_Huber_thresh'],
+                       'ring_weights_threshold' :  self.parameters['data_any_rings'],
+                       'ring_tuple_halfsizes' :  self.parameters['data_any_rings_winsizes'],
+                       'ring_huber_power' :  self.parameters['data_any_rings_power'],
+                       'ringGH_lambda' :  self.parameters['data_full_ring_GH'],
+                       'ringGH_accelerate' :  self.parameters['data_full_ring_accelerator_GH']}
 
-        self._algorithm_ = {'iterations': self.parameters['algorithm_iterations'],
-                            'nonnegativity': self.parameters['algorithm_nonnegativity'],
-                            'verbose': self.parameters['algorithm_verbose']}
+        self._algorithm_ = {'iterations' : self.parameters['algorithm_iterations'],
+                      'nonnegativity' : self.parameters['algorithm_nonnegativity'],
+                            'verbose' : self.parameters['algorithm_verbose']}
 
-        self._regularisation_ = {'method': self.parameters['regularisation_method'],
-                                 'regul_param': self.parameters['regularisation_parameter'],
-                                 'iterations': self.parameters['regularisation_iterations'],
-                                 'device_regulariser': self.parameters['regularisation_device'],
-                                 'edge_threhsold': self.parameters['regularisation_edge_thresh'],
-                                 'time_marching_step': self.parameters['regularisation_timestep'],
-                                 'regul_param2': self.parameters['regularisation_parameter2'],
-                                 'PD_LipschitzConstant': self.parameters['regularisation_PD_lip'],
-                                 'NDF_penalty': self.parameters['regularisation_NDF_penalty'],
-                                 'methodTV': self.parameters['regularisation_methodTV']}
+        self._regularisation_ = {'method' : self.parameters['regularisation_method'],
+                                'regul_param' : self.parameters['regularisation_parameter'],
+                                'iterations' : self.parameters['regularisation_iterations'],
+                                'device_regulariser' : self.parameters['regularisation_device'],
+                                'edge_threhsold' : self.parameters['regularisation_edge_thresh'],
+                                'time_marching_step' : self.parameters['regularisation_timestep'],
+                                'regul_param2' : self.parameters['regularisation_parameter2'],
+                                'PD_LipschitzConstant' : self.parameters['regularisation_PD_lip'],
+                                'NDF_penalty' : self.parameters['regularisation_NDF_penalty'],
+                                'methodTV' : self.parameters['regularisation_methodTV']}
 
         in_pData = self.get_plugin_in_datasets()
         self.det_dimX_ind = in_pData[0].get_data_dimension_by_axis_label('detector_x')

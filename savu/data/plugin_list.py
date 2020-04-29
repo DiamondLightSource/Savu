@@ -466,10 +466,7 @@ class Template(object):
     def dict_depth(self, d, depth=0):
         if not isinstance(d, dict) or not d:
             return depth
-<<<<<<< HEAD
         return max(self.dict_depth(v, depth + 1) for k, v in d.items())
-=======
-        return max(self.dict_depth(v, depth + 1) for k, v in d.iteritems())
             if p['name'] == plugin:
                 p['data'][param] = value
 
