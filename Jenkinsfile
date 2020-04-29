@@ -49,8 +49,7 @@ pipeline {
             }
         }
 
-
-        stage('Tests py27') {
+        stage('Savu Tests') {
             steps {
                 sh  ''' source activate "${BUILD_TAG}py27"
                         conda install pytest pytest-cov
@@ -59,17 +58,16 @@ pipeline {
                     '''
             }
         }
-        /*
-        stage("Deploy py35") {
+
+        stage("Deploy savu-py27") {
              steps {
-                 sh ''' source activate "${BUILD_TAG}py35"
+                 sh ''' source activate "${BUILD_TAG}py27"
                         conda config --set anaconda_upload yes
                         source /var/lib/jenkins/upload.sh
-                        anaconda -t $CONDA_UPLOAD_TOKEN upload -u dkazanc /var/lib/jenkins/.conda/envs/"${BUILD_TAG}py35"/conda-bld/linux-64/*.tar.bz2 --force
+                        anaconda -t $CONDA_UPLOAD_TOKEN upload -u dkazanc /var/lib/jenkins/miniconda3/savu_install/linux-64/*.tar.bz2 --force
                     '''
              }
         }
-        */
     }
 
     post {
