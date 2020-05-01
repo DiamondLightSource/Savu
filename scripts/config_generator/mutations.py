@@ -103,6 +103,10 @@ distortion_notice = 'A new version of DistortionCorrection is available with'\
     ' the version available in 2.3 \nand below being renamed as '\
     'DistortionCorrectionDeprecated.  Please replace with \nthe new version.'
 
+medianfilt_notice = '\n Two new versions of the Median Filter on a CPU'\
+    '(MedianFilterLarix) and on GPU (MedianFilterGpu) are available with'\
+    ' the Savu version 3.0. \n Please use the newer faster versions.'
+
 plugin_mutations = \
     {'TimeseriesFieldCorrections':
         {'replace': 'DarkFlatFieldCorrection',
@@ -120,7 +124,11 @@ plugin_mutations = \
      'DistortionCorrection':
         {'replace': 'DistortionCorrectionDeprecated',
          'up_to_version': '2.4', # if the plist version is less than 2.4 (or not defined) then apply this mutation
-         'desc': '\n' + Fore.RED + auto_replace_str() + distortion_notice + Fore.RESET}
+         'desc': '\n' + Fore.RED + auto_replace_str() + distortion_notice + Fore.RESET},
+     'MedianFilter':
+        {'replace': 'MedianFilterDeprecated',
+         'up_to_version': '3.0', # if the plist version is less than 3.0 (or not defined) then apply this mutation
+         'desc': '\n' + Fore.RED + auto_replace_str() + medianfilt_notice + Fore.RESET}
      }
 
 param_mutations = \
