@@ -55,7 +55,7 @@ class BasicPluginRunner(object):
             fname = self.exp.meta_data.get('nxs_filename')
             plugin_list._save_plugin_list(fname)
 
-        self.exp._set_loaders()
+        self.exp.__set_loaders_and_savers()
 
         #  ********* transport function ***********
         self._transport_pre_plugin_list_run()
