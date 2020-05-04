@@ -358,7 +358,7 @@ class PluginList(object):
             process['data'] = plugin.parameters
             process['active'] = True
             process['param'] = plugin.p_dict
-            process['tool_list'] = plugin.tools.get_tool_list()
+            process['tool_list'] = plugin.tool_list
             self._add(pos, process)
 
     def _get_dataset_flow(self):

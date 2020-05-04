@@ -21,7 +21,6 @@ class PluginParameters(object):
     def _populate_parameters(self, cls):
         """ Using method resolution order, find base class tools
         """
-        print('Populating parameters..')
         for clazz in cls.__class__.__mro__[::-1]:
             p_tools = self._get_plugin_tool_base(clazz)
             if p_tools:

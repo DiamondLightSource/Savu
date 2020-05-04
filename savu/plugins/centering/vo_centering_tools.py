@@ -75,3 +75,31 @@ class VoCenteringTools(PluginTools):
                improve signal-to-noise ratio
              default: 5
         """
+
+    def get_bibtex(self):
+        """@article{vo2014reliable,
+          title={Reliable method for calculating the center of rotation in parallel-beam tomography},
+          author={Vo, Nghia T and Drakopoulos, Michael and Atwood, Robert C and Reinhard, Christina},
+          journal={Optics express},
+          volume={22},
+          number={16},
+          pages={19078--19086},
+          year={2014},
+          publisher={Optical Society of America}
+        }"""
+
+    def get_endnote(self):
+        """%0 Journal Article
+        %T Reliable method for calculating the center of rotation in parallel-beam tomography
+        %A Vo, Nghia T
+        %A Drakopoulos, Michael
+        %A Atwood, Robert C
+        %A Reinhard, Christina
+        %J Optics express
+        %V 22
+        %N 16
+        %P 19078-19086
+        %@ 1094-4087
+        %D 2014
+        %I Optical Society of America
+        """

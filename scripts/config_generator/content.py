@@ -405,7 +405,7 @@ class Content(object):
         plugin_dict['tools'] = plugin.tools
         plugin_dict['param'] = plugin.p_dict
         plugin_dict['doc'] = plugin.docstring_info
-        plugin_dict['tool_list'] = plugin.tools.get_tool_list()
+        plugin_dict['tool_list'] = plugin.tool_list
         return plugin_dict
 
     def get(self, pos):

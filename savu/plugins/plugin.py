@@ -49,9 +49,9 @@ class Plugin(PluginDatasets):
         self.parameters = OrderedDict()
         self.tools = None
         self.p_dict = OrderedDict()
+        self.tool_list = []
 
     def initialise(self, params, exp, check=False):
-        print('initialise 1')
         self.check = check
         self.exp = exp
         self._populate_default_parameters()
@@ -157,6 +157,7 @@ class Plugin(PluginDatasets):
         if p_tools:
             self.tools = p_tools
             self.p_dict = p_tools.get_param()
+            self.tool_list = p_tools.get_tool_list()
             self.set_docstring(p_tools.get_doc().get('verbose'))
             self.parameters = \
                 OrderedDict([(k, v['default'])
@@ -175,7 +176,6 @@ class Plugin(PluginDatasets):
             del self.parameters[param]
 
     def initialise_parameters(self):
-        print('initialise 2')
         self.parameters = OrderedDict()
         self.p_dict = OrderedDict()
         self._populate_default_parameters()
