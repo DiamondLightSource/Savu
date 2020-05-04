@@ -1,4 +1,4 @@
-# Copyright 2014 Diamond Light Source Ltd.
+# Copyright 2020 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,34 +13,39 @@
 # limitations under the License.
 
 """
-.. module:: median filter from the Larix software
+.. module:: a GPU dezinger filter (based on the median) from the Larix software
    :platform: Unix
-   :synopsis: A plugin to apply 2D/3D median filter
+   :synopsis: A 2D/3D median-based GPU dezinger plugin to apply to any data
 
 .. moduleauthor::Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 
 """
 from savu.plugins.plugin import Plugin
-from savu.plugins.driver.cpu_plugin import CpuPlugin
+from savu.plugins.driver.gpu_plugin import GpuPlugin
 from savu.plugins.utils import register_plugin
 
 import numpy as np
-from larix.methods.misc import MEDIAN_FILT
+from larix.methods.misc_gpu import MEDIAN_DEZING_GPU
 
 @register_plugin
-class MedianFilter(Plugin, CpuPlugin):
+class DezingerGpu(Plugin, GpuPlugin):
     """
-    A plugin to apply 2D/3D median filter. The 3D capability is enabled\
-    through padding. Not the kernel_size in 2D will be kernel_size x kernel_size
+    A plugin to apply 2D/3D median-based dezinger on GPU. The 3D capability is enabled\
+    through padding. Note that the kernel_size in 2D will be kernel_size x kernel_size
     and in 3D case kernel_size x kernel_size x kernel_size.
 
     :u*param kernel_size: Kernel size of the median filter. Default: 3.
+    :param outlier_mu: Threshold for detecting outliers, greater is less \
+    sensitive. If very small, dezinger acts like a median filter. Default: 1.0.
     :u*param dimension: dimensionality of the filter 2D/3D. Default: '3D'.
     :u*param pattern: pattern to apply this to. Default: "PROJECTION".
     """
 
     def __init__(self):
-        super(MedianFilter, self).__init__("MedianFilter")
+        super(DezingerGpu, self).__init__("DezingerGpu")
+        self.GPU_index = None
+        self.res = False
+        self.start = 0
 
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
@@ -58,7 +63,7 @@ class MedianFilter(Plugin, CpuPlugin):
                 input_temp =np.swapaxes(input_temp,0,2)
             if ((self.parameters['pattern'] == 'VOLUME_XZ') or (self.parameters['pattern'] == 'SINOGRAM')):
                 input_temp =np.swapaxes(input_temp,0,1)
-        result = MEDIAN_FILT(input_temp.copy(order='C'), self.parameters['kernel_size'])
+        result = MEDIAN_DEZING_GPU(input_temp.copy(order='C'), self.parameters['kernel_size'], self.parameters['outlier_mu'])
         if (self.parameters['dimension'] == '3D'):
             if (self.parameters['pattern'] == 'VOLUME_XY'):
                 result =np.swapaxes(result,0,2)

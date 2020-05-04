@@ -27,7 +27,7 @@ import numpy as np
 
 
 @register_plugin
-class DezingerSinogram(Plugin, CpuPlugin):
+class DezingerSinogramDeprecated(Plugin, CpuPlugin):
     """
     Method to remove scratches in the reconstructed image caused by zingers
     :u*param tolerance: Threshold for detecting zingers, greater is less \
@@ -36,7 +36,7 @@ class DezingerSinogram(Plugin, CpuPlugin):
     """
 
     def __init__(self):
-        super(DezingerSinogram, self).__init__("DezingerSinogram")
+        super(DezingerSinogramDeprecated, self).__init__("DezingerSinogramDeprecated")
 
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
@@ -78,4 +78,4 @@ class DezingerSinogram(Plugin, CpuPlugin):
         sinogram[mat_ratio_u > nhigh] = sinogram_u[mat_ratio_u > nhigh]
         sinogram[0] = list_top
         sinogram[-1] = list_bottom
-        return sinogram 
+        return sinogram

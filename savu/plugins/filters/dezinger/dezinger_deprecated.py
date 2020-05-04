@@ -15,7 +15,7 @@
 
 
 """
-.. module:: dezinger_simple
+.. module:: dezinger
    :platform: Unix
    :synopsis: A plugin to remove zingers
 
@@ -24,8 +24,7 @@
 """
 
 import numpy as np
-
-import scipy.signal.signaltools as sig
+import dezing
 
 from savu.plugins.filters.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
@@ -33,41 +32,57 @@ from savu.plugins.utils import register_plugin
 
 
 @register_plugin
-class DezingerSimple(BaseFilter, CpuPlugin):
+class DezingerDeprecated(BaseFilter, CpuPlugin):
     """
     A plugin for cleaning x-ray strikes based on statistical evaluation of \
     the near neighbourhood
-    :param outlier_mu: Threshold for detecting outliers, greater is less \
-    sensitive. Default: 1000.0.
-    :param kernel_size: Number of frames included in average - if the number \
-        is not odd use kernel_size+1. Default: 5.
+    :param outlier_mu: Threshold for defecting outliers, greater is less \
+    sensitive. Default: 10.0.
+    :param kernel_size: Number of frames included in average. Default: 5.
+    :param mode: output mode, 0=normal 5=zinger strength 6=zinger \
+        yes/no. Default: 0.
     """
 
     def __init__(self):
-        super(DezingerSimple, self).__init__("DezingerSimple")
-        self.zinger_proportion = 0.0
-        self.frame_limit = 8
+        super(DezingerDeprecated, self).__init__("DezingerDeprecated")
+        self.warnflag = 0
+        self.errflag = 0
 
     def pre_process(self):
+        # Apply dezing to dark and flat images
         inData = self.get_in_datasets()[0]
-        self.proj_dim = inData.data.proj_dim
-
-        self._kernel = [1]*3
-        self._kernel[self.proj_dim] = self.kernel_size
-
-        pad_list = [(0, 0)]*3
-        pad_list[self.proj_dim] = (self.pad, self.pad)
-
         dark = inData.data.dark()
         flat = inData.data.flat()
+        self.data_size = inData.get_shape()
+
+        pad_list = ((self.pad, self.pad), (0, 0), (0, 0))
+
+        # dezing the dark field        print "*****in data shape in base filter", in_dataset[0].get_shape()
+
         if dark.size:
-            dark = np.pad(inData.data.dark(), pad_list, mode='edge')
-            dark = self._process_calibration_frames(dark)
+            (retval, self.warnflag, self.errflag) = dezing.setup_size(
+                dark.shape, self.parameters['outlier_mu'], self.pad,
+                mode=self.parameters['mode'])
+            dark = self._dezing(np.pad(dark, pad_list, mode='edge'))
             inData.data.update_dark(dark[self.pad:-self.pad])
+            (retval, self.warnflag, self.errflag) = dezing.cleanup()
+
+        # dezing the flat field
         if flat.size:
-            flat = np.pad(inData.data.flat(), pad_list, mode='edge')
-            flat = self._process_calibration_frames(flat)
+            (retval, self.warnflag, self.errflag) = dezing.setup_size(
+                flat.shape, self.parameters['outlier_mu'],
+                self.pad, mode=self.parameters['mode'])
+            flat = self._dezing(np.pad(flat, pad_list, mode='edge'))
             inData.data.update_flat(flat[self.pad:-self.pad])
+            (retval, self.warnflag, self.errflag) = dezing.cleanup()
+
+        # setup dezing for data
+        self._dezing_setup(self.data_size)
+
+    def _dezing_setup(self, shape):
+        (retval, self.warnflag, self.errflag) = \
+            dezing.setup_size(shape, self.parameters['outlier_mu'],
+                              self.pad, mode=self.parameters['mode'])
 
     def _process_calibration_frames(self, data):
         nSlices = data.shape[self.proj_dim] - 2*self.pad
@@ -82,40 +97,33 @@ class DezingerSimple(BaseFilter, CpuPlugin):
         return result
 
     def _dezing(self, data):
-        result = data[...]
-        median_result = sig.medfilt(data, self._kernel)
-        differrence = np.abs(data-median_result)
-        replace_mask = differrence > self.parameters['outlier_mu']
-        self.zinger_proportion = \
-            max(self.zinger_proportion, np.sum(replace_mask)/(
-                np.size(replace_mask)*1.0))
-        result[replace_mask] = median_result[replace_mask]
+        result = np.empty_like(data)
+        (retval, self.warnflag, self.errflag) = dezing.run(data, result)
         return result
 
     def process_frames(self, data):
         return self._dezing(data[0])
 
+    def post_process(self):
+        (retval, self.warnflag, self.errflag) = dezing.cleanup()
+
     def get_max_frames(self):
-        """ Setting nFrames to multiple with an upper limit of 4 frames. """
-        return ['multiple', self.frame_limit]
+        return 'multiple'
 
     def raw_data(self):
         return True
 
     def set_filter_padding(self, in_data, out_data):
-        # kernel size must be odd
-        ksize = self.parameters['kernel_size']
-        self.kernel_size = ksize+1 if ksize % 2 == 0 else ksize
-
         in_data = in_data[0]
-        self.pad = (self.kernel_size - 1) / 2
-        self.data_size = in_data.get_shape()
+        self.pad = (self.parameters['kernel_size'] - 1) / 2
         in_data.padding = {'pad_multi_frames': self.pad}
         out_data[0].padding = {'pad_multi_frames': self.pad}
 
     def executive_summary(self):
-        if self.zinger_proportion > 0.5:
-            return ["Over 50% of the pixels were treated as zingers!!"]
-        if self.zinger_proportion > 0.05:
-            return ["Over 5% of the pixels were treated as zingers"]
+        if self.errflag != 0:
+            return(["ERRORS detected in dezing plugin, Check the detailed \
+log messages."])
+        if self.warnflag != 0:
+            return(["WARNINGS detected in dezing plugin, Check the detailed \
+log messages."])
         return ["Nothing to Report"]
