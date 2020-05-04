@@ -27,7 +27,7 @@ dependencies:
   - pymca=5.5.2
   - ccpi-regulariser
   - tomobar
-  - i23-seg
+  - larix
   - yamllint
   - mrcfile
   - pip:
