@@ -1,3 +1,4 @@
+dist: bionic
 cache: apt
 sudo: true
 language: python
@@ -21,7 +22,6 @@ before_install:
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
   - conda info -a
-  - ldd --version
 
 install:
   - conda env create --file environment.yml
