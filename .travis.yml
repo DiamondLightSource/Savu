@@ -1,3 +1,4 @@
+dist: bionic
 cache: apt
 sudo: true
 language: python
