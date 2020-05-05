@@ -89,7 +89,7 @@ class NxtomoLoader(BaseLoader):
         self._set_rotation_angles(data_obj)
 
         try:
-            control = self._get_h5_path(
+            control = self._get_h5_entry(
                     data_obj.backing_file, 'entry1/tomo_entry/control/data')
             data_obj.meta_data.set("control", control[...])
         except:

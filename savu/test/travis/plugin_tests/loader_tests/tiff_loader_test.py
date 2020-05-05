@@ -24,21 +24,22 @@ from savu.test import test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
-
 class TiffLoaderTest(unittest.TestCase):
+    global data_file, experiment
+    data_file = 'image_test/tiffs'
+    experiment = None
 
     def tiff_test(self):
-        data_file = tu.get_test_data_path('image_test/tiffs')
-        process_file = tu.get_test_process_path('tiff_loader_test.nxs')
-        run_protected_plugin_runner(tu.set_options(data_file,
-                                                   process_file=process_file))
+        process_list = 'loaders/tiff_loader_test.nxs'
+        options = tu.initialise_options(data_file, experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
 
     def tiff_test_stitch_dim(self):
-        data_file = tu.get_test_data_path('image_test/tiffs')
-        process_file = tu.get_test_process_path(
-                'tiff_loader_test_change_stitching_dim.nxs')
-        run_protected_plugin_runner(tu.set_options(data_file,
-                                                   process_file=process_file))
+        process_list = 'loaders/tiff_loader_test_change_stitching_dim.nxs'
+        options = tu.initialise_options(data_file, experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
 
 if __name__ == "__main__":
     unittest.main()

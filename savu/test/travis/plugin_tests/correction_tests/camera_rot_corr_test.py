@@ -22,19 +22,20 @@
 """
 import unittest
 from savu.test import test_utils as tu
-
 from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
 
 class CameraRotCorrTest(unittest.TestCase):
+    global data_file, experiment
+    data_file = '24737.nxs'
+    experiment = None
 
     def test_correction(self):
-        data_file = tu.get_test_data_path('24737.nxs')
-        process_file = \
-            tu.get_test_process_path('camera_rot_corr_test.nxs')
-        run_protected_plugin_runner(tu.set_options(data_file,
-                                                   process_file=process_file))
+        process_list = 'corrections/camera_rot_corr_test.nxs'
+        options = tu.initialise_options(data_file, experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
 
 if __name__ == "__main__":
     unittest.main()
