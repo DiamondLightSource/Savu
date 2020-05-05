@@ -24,20 +24,22 @@
 """
 
 import unittest
-
-import savu.test.test_utils as tu
+from savu.test import test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
-    run_protected_plugin_runner_no_process_list
-import savu.plugins.reconstructions.astra_recons as astra_recons
+    run_protected_plugin_runner
+
 
 
 class AstraReconGPUTest(unittest.TestCase):
-   
-    @unittest.skip('Skipping as test instrastructure does not have a good enoguh GPU. At the moment')
+    global data_file, experiment
+    data_file = '24737.nxs'
+    experiment = None
+
     def test_astra_recon_gpu(self):
-        options = tu.set_experiment('tomo', process_names='GPU0')
-        plugin = astra_recons.__name__ + '.astra_recon_gpu'
-        run_protected_plugin_runner_no_process_list(options, plugin)
+        process_list = 'reconstruction/astra_cgls.nxs'
+        options = tu.initialise_options(data_file, experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
 
 if __name__ == "__main__":
     unittest.main()

@@ -102,7 +102,7 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
                         str(dim_volY) + '.voxel_y.voxels',
                         str(dim_volZ) + '.voxel_z.voxels']}
 
-        # specify reconstructed volume dimensions       
+        # specify reconstructed volume dimensions
         self.output_size = self._get_output_size(in_dataset[0])
         shape = list(in_dataset[0].get_shape())
         rot_dim = in_dataset[0].get_data_dimension_by_axis_label(
@@ -143,11 +143,11 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
         # set information relating to the plugin data
         in_pData, out_pData = self.get_plugin_datasets()
 
-    	procs = self.exp.meta_data.get("processes")
+        procs = self.exp.meta_data.get("processes")
         procs = len([i for i in procs if 'GPU' in i])
         dim = in_dataset[0].get_data_dimension_by_axis_label('detector_y')
-    	nSlices = int(np.ceil(shape[dim]/float(procs)))
-    	
+        nSlices = int(np.ceil(shape[dim]/float(procs)))
+
         in_pData[0].plugin_data_setup('SINOGRAM', nSlices, slice_axis='detector_y')
 
         # in_pData[1].plugin_data_setup('PROJECTION', nSlices) # (for PWLS)
@@ -170,7 +170,7 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
                        'ringGH_accelerate' :  self.parameters['data_full_ring_accelerator_GH']}
 
         self._algorithm_ = {'iterations' : self.parameters['algorithm_iterations'],
-      			    'nonnegativity' : self.parameters['algorithm_nonnegativity'],
+                      'nonnegativity' : self.parameters['algorithm_nonnegativity'],
                             'verbose' : self.parameters['algorithm_verbose']}
 
         self._regularisation_ = {'method' : self.parameters['regularisation_method'],

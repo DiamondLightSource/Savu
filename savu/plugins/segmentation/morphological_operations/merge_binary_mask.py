@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: module to remove gaps in the provided binary mask by merging the boundaries
+.. module:: merge_binary_mask
    :platform: Unix
    :synopsis: module to remove gaps in the provided binary mask by merging the boundaries
 
@@ -25,16 +25,16 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 
 import numpy as np
-from i23.methods.segmentation import MASK_CORR_BINARY
+from larix.methods.segmentation import MASK_MORPH
 
 @register_plugin
 class MergeBinaryMask(Plugin, CpuPlugin):
     """
     A plugin to remove gaps in the provided binary mask by merging the boundaries
 
-    :param selectedclass: The selected class for merging. Default: 0.
-    :param correction_window: The size of the correction window. Default: 9.
-    :param iterations: The number of iterations for segmentation. Default: 10.
+    :param primeclass: class to start morphological processing from. Default: 0.
+    :param correction_window: The size of the correction window. Default: 7.
+    :param iterations: The number of iterations for segmentation. Default: 15.
     :param pattern: pattern to apply this to. Default: "VOLUME_XY".
     """
 
@@ -51,20 +51,21 @@ class MergeBinaryMask(Plugin, CpuPlugin):
     
     def pre_process(self):
         # extract given parameters
-        self.selectedClass = self.parameters['selectedclass']
+        self.primeclass = self.parameters['primeclass']
         self.CorrectionWindow = self.parameters['correction_window']        
-        self.iterationsNumb = self.parameters['iterations']        
+        self.iterationsNumb = self.parameters['iterations']       
 
-    def process_frames(self, data):
-        # run class merging here:
+    def process_frames(self, data):        
         inputdata = data[0].copy(order='C')
-        pars = {'maskdata' : np.uint8(inputdata),\
-        'selectedClass': self.selectedClass,\
-        'CorrectionWindow' : self.CorrectionWindow ,\
-        'iterationsNumb' : self.iterationsNumb}               
         
-        mask_merged = MASK_CORR_BINARY(pars['maskdata'], pars['selectedClass'],\
-                                       pars['CorrectionWindow'], pars['iterationsNumb'])       
+        pars = {'maskdata' : np.uint8(inputdata),\
+        'primeClass': self.primeclass,\
+        'CorrectionWindow' : self.CorrectionWindow ,\
+        'iterationsNumb' : self.iterationsNumb}                
+        
+        # run class merging here:
+        mask_merged = MASK_MORPH(pars['maskdata'], pars['primeClass'], 
+                          pars['CorrectionWindow'], pars['iterationsNumb'])     
         return mask_merged
     
     def nInput_datasets(self):

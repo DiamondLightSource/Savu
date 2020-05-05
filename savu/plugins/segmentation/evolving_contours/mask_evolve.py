@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: Fast segmentation by evolving the given mask
+.. module:: mask_evolve
    :platform: Unix
-   :synopsis: Fast segmentation by evolving the given mask
+   :synopsis: Fast segmentation by evolving the given mask (initialised)
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
@@ -24,7 +24,7 @@ from savu.plugins.plugin import Plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 
-from i23.methods.segmentation import MASK_ITERATE
+from larix.methods.segmentation import MASK_EVOLVE
 
 import numpy as np
 
@@ -35,8 +35,7 @@ class MaskEvolve(Plugin, CpuPlugin):
     precisely through the object, otherwise segmentation will be incorrect.
 
     :param threshold: important parameter to control mask propagation. Default: 1.0.
-    :param method: choose 0 to evolve based on the given intensity threshold only, chose 1 for\
-    mean calculated in the mask and Mean Absolute deviation for thresholding, chose 2 for median. Default: 1.
+    :param method: method to collect statistics from the mask (mean, median, value). Default: 'mean'.
     :param iterations: The number of iterations. Default: 500.
     :param connectivity: The connectivity of the local neighbourhood. Default: 4.
     :param pattern: pattern to apply this to. Default: "VOLUME_YZ".
@@ -60,14 +59,29 @@ class MaskEvolve(Plugin, CpuPlugin):
         self.threshold = self.parameters['threshold']
         self.iterations = self.parameters['iterations']
         self.connectivity = self.parameters['connectivity']
-        self.method = self.parameters['method']
+        if (str(self.parameters['method']) == 'mean'):
+            self.method = 'mean'
+        elif (str(self.parameters['method']) == 'median'):
+            self.method = 'median'            
+        else:
+            self.method = 'value'
 
     def process_frames(self, data):
         input_temp = data[0]
         indices = np.where(np.isnan(input_temp))
         input_temp[indices] = 0.0
+        
+        pars = {'input_data' : input_temp, # input grayscale image
+        'maskData' : np.uint8(data[1]),    # generated initialisation mask
+        'threhsold' : self.threshold,      # threhsold controls where evolution stops (>=1)
+        'iterationsNumb' : self.iterations,# the number of iterations (depends on the size of the phase)
+        'connectivity' : self.connectivity,# voxel connectivity rule, choose between 4 (2D), 6, 8 (2D), and 26
+        'method' : self.method}            # method to collect statistics from the mask (mean. median, value)
+        
         if (np.sum(data[1]) > 0):
-            mask_evolve = MASK_ITERATE(input_temp, data[1], self.threshold, self.iterations, self.connectivity, self.method)
+            mask_evolve = MASK_EVOLVE(pars['input_data'], pars['maskData'],\
+                           pars['threhsold'], pars['iterationsNumb'],\
+                           pars['connectivity'], pars['method'])
         else:
             mask_evolve = np.uint8(np.zeros(np.shape(data[0])))
         return mask_evolve

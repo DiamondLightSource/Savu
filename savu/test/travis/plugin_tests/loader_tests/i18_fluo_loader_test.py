@@ -27,13 +27,15 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 
 
 class I18FluoLoaderTest(unittest.TestCase):
+    global data_file, experiment
+    data_file = 'i18_test_data.nxs'
+    experiment = None
 
-#     @unittest.skip("something missing from the .nxs file?")
     def test_i18_fluo(self):
-        data_file = tu.get_test_data_path('i18_test_data.nxs')
-        process_file = tu.get_test_process_path('basic_fluo_process_i18.nxs')
-        run_protected_plugin_runner(tu.set_options(data_file,
-                                                   process_file=process_file))
+        process_list = 'loaders/basic_fluo_process_i18.nxs'
+        options = tu.initialise_options(data_file, experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
 
 if __name__ == "__main__":
     unittest.main()
