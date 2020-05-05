@@ -103,7 +103,7 @@ distortion_notice = 'A new version of DistortionCorrection is available with'\
     ' the version available in 2.3 \nand below being renamed as '\
     'DistortionCorrectionDeprecated.  Please replace with \nthe new version.'
 
-medianfilt_notice = '\n Two new versions of the Median Filter on a CPU'\
+medianfilt_notice = '\n Two new versions of median filter on a CPU'\
     ' (MedianFilterLarix) and on a GPU (MedianFilterGpu) are available with'\
     ' the Savu version 3.0. \n Please use the newer faster versions.'
 
