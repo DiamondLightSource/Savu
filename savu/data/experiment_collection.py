@@ -20,6 +20,7 @@
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 """
+from __future__ import print_function, division, absolute_import
 
 import os
 import copy
@@ -27,7 +28,6 @@ import h5py
 import logging
 from mpi4py import MPI
 
-import savu.plugins.utils as pu
 from savu.data.meta_data import MetaData
 from savu.data.plugin_list import PluginList
 from savu.data.data_structures.data import Data
@@ -63,7 +63,7 @@ class Experiment(object):
         self.meta_data.plugin_list = PluginList()
         try:
             rtype = self.meta_data.get('run_type')
-            if rtype is 'test':
+            if rtype == 'test':
                 self.meta_data.plugin_list.plugin_list = \
                     self.meta_data.get('plugin_list')
             else:
@@ -95,12 +95,12 @@ class Experiment(object):
         checkpoint = self.meta_data.get('checkpoint')
         # save the plugin list - one process, first time only
         if self.meta_data.get('process') == \
-                len(self.meta_data.get('processes'))-1 and not checkpoint:                  
+                len(self.meta_data.get('processes'))-1 and not checkpoint:
             plugin_list._save_plugin_list(self.meta_data.get('nxs_filename'))
-            # links the input data to the nexus file            
+            # links the input data to the nexus file
             self._add_input_data_to_nxs_file(transport)
         self._barrier()
-        
+
         # create experiment collection here
         self.collection = {'plugin_dict': [], 'datasets': []}
 
@@ -125,7 +125,7 @@ class Experiment(object):
             # look in conda environment to see which version is being used
             savu_path = sys.modules['savu'].__path__[0]
             sys_files = os.path.join(
-                    os.path.dirname(savu_path), 'system_files')
+                os.path.dirname(savu_path), 'system_files')
             subdirs = os.listdir(sys_files)
             sys_folder = 'dls' if len(subdirs) > 1 else subdirs[0]
             fname = 'system_parameters.yml'
@@ -204,15 +204,15 @@ class Experiment(object):
                 log_folder.close()
 
         self._create_nxs_entry()
-    
+
     def _create_nxs_entry(self):
         logging.debug("Testing nexus file")
         import h5py
         if self.meta_data.get('process') == \
                 len(self.meta_data.get('processes'))-1:
-  	    with h5py.File(self.meta_data.get('nxs_filename'), 'w') as nxs_file:
-              entry_group = nxs_file.create_group('entry')
-              entry_group.attrs['NX_class'] = 'NXentry'
+            with h5py.File(self.meta_data.get('nxs_filename'), 'w') as nxs_file:
+                entry_group = nxs_file.create_group('entry')
+                entry_group.attrs['NX_class'] = 'NXentry'
 
     def _clear_data_objects(self):
         self.index["out_data"] = {}

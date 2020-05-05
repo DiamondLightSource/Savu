@@ -68,6 +68,13 @@ def __option_parser():
     sys_params_help = "Override default path to Savu system parameters file."
     parser.add_argument("--system_params", help=sys_params_help, default=None)
 
+    memory_usage_help = "Record the memory usage of the process before and \
+                        after executing each plugin. Stored in the metadata\
+                        key 'memory_before/after-N' where N is the Plugin position\
+                        in the process list"
+    parser.add_argument("--memory-usage", action="store_true",
+                        help=memory_usage_help)
+
     # Hidden arguments
     # process names
     parser.add_argument("-n", "--names", help=hide, default="CPU0")
@@ -150,6 +157,7 @@ def _set_options(args):
     options['email'] = args.email
     options['femail'] = args.femail
     options['system_params'] = args.system_params
+    options["memory_usage"] = args.memory_usage
 
     if args.folder:
         out_folder_name = os.path.basename(args.folder)
@@ -164,10 +172,10 @@ def _set_options(args):
     basename = os.path.basename(args.in_file)
     options['datafile_name'] = os.path.splitext(basename)[0] if basename \
         else args.in_file.split(os.sep)[-2]
-        
+
     inter_folder_path = __create_output_folder(args.tmp, out_folder_name)\
         if args.tmp else out_folder_path
-            
+
     options['inter_path'] = inter_folder_path
     options['log_path'] = args.log if args.log else options['inter_path']
     options['nProcesses'] = len(options["process_names"].split(','))
@@ -226,4 +234,3 @@ def main(input_args=None):
 
 if __name__ == '__main__':
     main()
-

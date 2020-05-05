@@ -42,6 +42,7 @@ def logfunction(func):
 
 def logmethod(func):
     """ Decorator to add logging information around calls for use with . """
+
     def _wrapper(self, *args, **kwds):
         logging.info("Start::%s.%s:%s",
                      func.__module__,
@@ -195,7 +196,7 @@ def _send_email(address):
     msg['Subject'] = 'Your Savu job has completed'
     msg['From'] = me
     msg['To'] = you
-    
+
     # Send the message via our own SMTP server, but don't include the
     # envelope header.
     s = smtplib.SMTP('localhost')
@@ -212,3 +213,25 @@ def _savu_decoder(data):
         exec('data = ' + data.split('#savu_encoded#')[-1])
         return data
     return data
+
+
+def get_memory_usage_linux(kb=False, mb=True):
+    """
+    :param kb: Return the value in Kilobytes
+    :param mb: Return the value in Megabytes
+    :return: The string of the value in either KB or MB
+    :rtype str
+    """
+
+    try:
+        # Windows doesn't seem to have resource package, so this will
+        # silently fail
+        import resource as res
+    except ImportError:
+        return 0, 0
+
+    if kb:
+        return "{} KB".format(int(res.getrusage(res.RUSAGE_SELF).ru_maxrss))
+
+    if mb:
+        return "{} MB".format(int(res.getrusage(res.RUSAGE_SELF).ru_maxrss) / 1024)

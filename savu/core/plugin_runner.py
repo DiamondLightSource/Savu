@@ -20,7 +20,6 @@
 """
 
 import logging
-import numpy as np
 
 import savu.core.utils as cu
 import savu.plugins.utils as pu
@@ -48,13 +47,16 @@ class PluginRunner(object):
         """ Create an experiment and run the plugin list.
         """
         self.exp._set_nxs_file()
-        
+
         plugin_list = self.exp.meta_data.plugin_list
         logging.info('Running the plugin list check')
         self._run_plugin_list_setup(plugin_list)
 
         exp_coll = self.exp._get_collection()
         n_plugins = plugin_list._get_n_processing_plugins()
+
+        record_memory = self.options["memory_usage"]
+        cu.user_message("Recording memory: {}".format(record_memory))
 
         #  ********* transport function ***********
         logging.info('Running transport_pre_plugin_list_run()')
@@ -63,7 +65,17 @@ class PluginRunner(object):
         cp = self.exp.checkpoint
         for i in range(cp.get_checkpoint_plugin(), n_plugins):
             self.exp._set_experiment_for_current_plugin(i)
+            if record_memory:
+                # self.exp.meta_data.set('memory_before-{}'.format(i),
+                #                        cu.get_memory_usage_linux())
+                cu.user_message('memory_before-{}'.format(
+                    cu.get_memory_usage_linux()))
             self.__run_plugin(exp_coll['plugin_dict'][i])
+            if record_memory:
+                # self.exp.meta_data.set('memory_after-{}'.format(i),
+                #                        cu.get_memory_usage_linux())
+                cu.user_message('memory_after-{}'.format(
+                    cu.get_memory_usage_linux()))
             # end the plugin run if savu has been killed
             self.exp._barrier(msg='PluginRunner: plugin complete.')
 
@@ -132,7 +144,7 @@ class PluginRunner(object):
         n_loaders = self.exp.meta_data.plugin_list._get_n_loaders()
         n_plugins = plugin_list._get_n_processing_plugins()
         plist = plugin_list.plugin_list
-        
+
         self.exp._setup(self, plugin_list)
         # set loaders
         for i in range(n_loaders):
@@ -145,7 +157,7 @@ class PluginRunner(object):
         for plugin_dict in plist[n_loaders:n_loaders+n_plugins]:
             plugin = pu.plugin_loader(self.exp, plugin_dict, check=True)
             plugin._revert_preview(plugin.get_in_datasets())
-            plugin_dict['cite'] = plugin.get_citation_information()            
+            plugin_dict['cite'] = plugin.get_citation_information()
             plugin._clean_up()
             self.exp._update(plugin_dict)
             self.exp._merge_out_data_to_in()
@@ -157,7 +169,6 @@ class PluginRunner(object):
         #  ********* transport function ***********
         self._transport_update_plugin_list()
 
-
     def __check_gpu(self):
         """ Check if the process list contains GPU processes and determine if
         GPUs exists. Add GPU processes to the processes list if required."""
@@ -166,7 +177,7 @@ class PluginRunner(object):
 
         try:
             import pynvml as pv
-        except:
+        except Exception:
             logging.debug("pyNVML module not found")
             raise Exception("pyNVML module not found")
 
