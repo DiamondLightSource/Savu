@@ -1,11 +1,11 @@
-import pandas as pd
 import argparse
-import tempfile
 import os
+import tempfile
+
+import pandas as pd
 
 
 def convert(log_file_list, path, log_level):
-
     for log_file in log_file_list:
         the_key = ""
         the_interval = 0  # millisecs
@@ -16,8 +16,8 @@ def convert(log_file_list, path, log_level):
         html_filename = \
             set_file_name('/'.join([path, os.path.basename(log_file)]))
         render_template(frame, machine_names, the_interval, html_filename)
-        print "html file created:", html_filename
-        print "Open the html file in your browser to view the profile."
+        print("html file created:", html_filename)
+        print("Open the html file in your browser to view the profile.")
 
     return frame
 
@@ -28,8 +28,8 @@ def get_frame(log_file, the_key, log_level):
     names = ['L', 'Time', 'Machine', 'CPU', 'Type', 'Message']
     data = pd.io.parsers.read_fwf(log_file, widths=[2, 13, 6, 6, 7, 1000],
                                   names=names)
-#    data = pd.io.parsers.read_fwf(file, widths=[2, 13, 5, 6, 7, 1000],
-#                                  names=names)
+    #    data = pd.io.parsers.read_fwf(file, widths=[2, 13, 5, 6, 7, 1000],
+    #                                  names=names)
 
     data['Key'] = data['Machine'] + data['CPU']
     frame = ((data[data.Type == log_level])[data.columns[[6, 5, 1]]])
@@ -42,7 +42,7 @@ def get_frame(log_file, the_key, log_level):
 
     shift = []
     for i in range(len(nElems)):
-        shift.append([startTime[i]]*nElems[i])
+        shift.append([startTime[i]] * nElems[i])
     shift = list(itertools.chain(*shift))
 
     frame.Time = frame.Time - shift
@@ -70,15 +70,17 @@ def get_machine_names(frame):
 
 def render_template(frame, machine_names, the_interval, outfilename):
     from jinja2 import Template
-    import template_strings as ts
 
     frame = frame[(frame.Time_end - frame.Time) > the_interval].values
 
     f_out = open(outfilename, 'w')
-    style = os.path.dirname(__file__) + '/style_sheet.css'
-    template = Template(ts.set_template_string_single(1300))
+    dirname = os.path.dirname(__file__)
+    style = os.path.join(dirname, 'style_sheet.css')
+    with open(os.path.join(dirname, 'string_single.html'), 'r') as template_file:
+        template = Template(template_file.read())
 
-    f_out.write(template.render(vals=map(list, frame[:, 0:4]),
+    f_out.write(template.render(chart_width=1300, position=[16, 9],
+                                vals=map(list, frame[:, 0:4]),
                                 machines=map(list, machine_names.values),
                                 style_sheet=style))
     f_out.close()
@@ -87,7 +89,6 @@ def render_template(frame, machine_names, the_interval, outfilename):
 
 
 def set_file_name(filename):
-
     dir_path = os.path.dirname(filename)
     temp = os.path.basename(filename).split('.')
     filename = temp[0] + '_' + temp[1] + '.html'
@@ -112,7 +113,6 @@ def __option_parser():
 
 
 def main():
-
     args = __option_parser()
 
     filename = args.file
