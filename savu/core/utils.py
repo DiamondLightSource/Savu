@@ -231,7 +231,7 @@ def get_memory_usage_linux(kb=False, mb=True):
         return 0, 0
 
     if kb:
-        return "{} KB".format(int(res.getrusage(res.RUSAGE_SELF).ru_maxrss))
+        return int(res.getrusage(res.RUSAGE_SELF).ru_maxrss)
 
     if mb:
-        return "{} MB".format(int(res.getrusage(res.RUSAGE_SELF).ru_maxrss) / 1024)
+        return int(res.getrusage(res.RUSAGE_SELF).ru_maxrss) / 1024

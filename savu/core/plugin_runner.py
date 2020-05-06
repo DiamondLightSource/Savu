@@ -65,9 +65,10 @@ class PluginRunner(object):
         cp = self.exp.checkpoint
         for i in range(cp.get_checkpoint_plugin(), n_plugins):
             self.exp._set_experiment_for_current_plugin(i)
-            # how about that
+
             if record_memory:
                 memory_before = cu.get_memory_usage_linux()
+
             plugin_name = self.__run_plugin(exp_coll['plugin_dict'][i])
 
             self.exp._barrier(msg='PluginRunner: plugin complete.')

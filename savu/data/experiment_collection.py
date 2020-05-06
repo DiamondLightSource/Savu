@@ -225,11 +225,9 @@ class Experiment(object):
         self.index["out_data"] = {}
 
     def _finalise_experiment_for_current_plugin(self):
-        finalise = {}
+        finalise = {'remove': [], 'keep': []}
         # populate nexus file with out_dataset information and determine which
         # datasets to remove from the framework.
-        finalise['remove'] = []
-        finalise['keep'] = []
 
         for key, data in self.index['out_data'].iteritems():
             if data.remove is True:
