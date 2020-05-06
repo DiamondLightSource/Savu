@@ -32,11 +32,11 @@ class DezingerTest(unittest.TestCase):
     data_file = '24737.nxs'
     experiment = 'tomo'
 
-    def test_dezing_filter(self):
-        options = tu.initialise_options(None, 'tomoRaw', None)
-        plugin = 'savu.plugins.filters.dezinger_simple'
-        run_protected_plugin_runner_no_process_list(options, plugin)
-        tu.cleanup(options)
+    #def test_dezing_filter(self):
+    #    options = tu.initialise_options(None, 'tomoRaw', None)
+    #    plugin = 'savu.plugins.filters.dezinger_simple'
+    #    run_protected_plugin_runner_no_process_list(options, plugin)
+    #    tu.cleanup(options)
 
     def test_dezinger(self):
         process_list = 'filters/dezinger/dezinger_test.nxs'
@@ -49,6 +49,18 @@ class DezingerTest(unittest.TestCase):
         options = tu.initialise_options(data_file, experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
-
+        
+    def test_dezinger_larix(self):
+        process_list = 'filters/dezinger/dezinger_larix_test.nxs'
+        options = tu.initialise_options(data_file, experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)        
+        
+    def test_dezinger_gpu(self):
+        process_list = 'filters/dezinger/dezinger_gpu_test.nxs'
+        options = tu.initialise_options(data_file, experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)        
+        
 if __name__ == "__main__":
     unittest.main()
