@@ -54,13 +54,8 @@ class DezingerTest(unittest.TestCase):
         process_list = 'filters/dezinger/dezinger_larix_test.nxs'
         options = tu.initialise_options(data_file, experiment, process_list)
         run_protected_plugin_runner(options)
-        tu.cleanup(options)        
-        
-    def test_dezinger_gpu(self):
-        process_list = 'filters/dezinger/dezinger_gpu_test.nxs'
-        options = tu.initialise_options(data_file, experiment, process_list)
-        run_protected_plugin_runner(options)
-        tu.cleanup(options)        
+        tu.cleanup(options)              
+
         
 if __name__ == "__main__":
     unittest.main()
