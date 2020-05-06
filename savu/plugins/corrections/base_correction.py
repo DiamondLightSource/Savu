@@ -27,7 +27,10 @@ from savu.plugins.plugin import Plugin
 
 class BaseCorrection(Plugin):
     """
+    A base class for dark and flat field correction plugins.
+
     """
+
     def __init__(self, name='BaseCorrection'):
         super(BaseCorrection, self).__init__(name)
 

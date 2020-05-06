@@ -49,7 +49,6 @@ class Plugin(PluginDatasets):
         self.parameters = OrderedDict()
         self.tools = None
         self.p_dict = OrderedDict()
-        self.tool_list = []
 
     def initialise(self, params, exp, check=False):
         self.check = check
@@ -124,22 +123,8 @@ class Plugin(PluginDatasets):
         raise NotImplementedError("setup needs to be implemented")
 
     def _get_plugin_tools(self):
-        tool_class = None
         plugin_tools_id = self.__class__.__module__ + '_tools'
-        if plugin_tools_id == 'savu.plugins.plugin_tools':
-            plugin_tools_id = 'savu.plugins.base_tools'
-        if pu.load_tools.get(plugin_tools_id):
-            tool_class = pu.load_tools[plugin_tools_id](cls=self)
-        else:
-            base_classes = ['savu.plugins.driver.basic_driver_tools',
-                            'savu.plugins.driver.plugin_driver_tools',
-                            'savu.plugins.driver.cpu_plugin_tools',
-                            'savu.plugins.plugin_datasets_tools',
-                            'savu.plugins.driver.gpu_plugin_tools',
-                            'savu.plugins.filters.base_filter_tools',
-                            '__builtin___tools']
-            if plugin_tools_id not in base_classes:
-                print('Error loading tools id: ' + str(plugin_tools_id))
+        tool_class = pu.get_tools_class(plugin_tools_id, cls=self)
         return tool_class
 
     def _populate_default_parameters(self):
@@ -157,7 +142,6 @@ class Plugin(PluginDatasets):
         if p_tools:
             self.tools = p_tools
             self.p_dict = p_tools.get_param()
-            self.tool_list = p_tools.get_tool_list()
             self.set_docstring(p_tools.get_doc().get('verbose'))
             self.parameters = \
                 OrderedDict([(k, v['default'])

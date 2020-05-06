@@ -1,7 +1,5 @@
 from savu.plugins.plugin_tools import PluginTools
-from savu.plugins.utils import register_plugin_tool
 
-@register_plugin_tool
 class VoCenteringTools(PluginTools):
     """A plugin to calculate the centre of rotation using the Vo Method
     """
@@ -15,28 +13,28 @@ class VoCenteringTools(PluginTools):
                size for subsequent plugins).
              default: '[]'
         start_pixel:
-             visibility: basic
+             visibility: intermediate
              dtype: float
              description: The estimated centre of rotation. If value is None,
                use the horizontal centre of the image.
              default: 'None'
         search_area:
-             visibility: basic
+             visibility: intermediate
              dtype: float
              description: Search area around the estimated centre of rotation
              default: '(-50, 50)'
         ratio:
-             visibility: basic
+             visibility: intermediate
              dtype: float
              description: The ratio between the size of object and FOV of the camera
              default: 0.5
         search_radius:
-             visibility: basic
+             visibility: intermediate
              dtype: int
              description: Use for fine searching
              default: 6
         step:
-             visibility: basic
+             visibility: intermediate
              dtype: float
              description: Step of fine searching
              default: 0.5
@@ -46,7 +44,7 @@ class VoCenteringTools(PluginTools):
              description: A list of datasets which require this information
              default: '[]'
         out_datasets:
-             visibility: advanced
+             visibility: basic
              dtype: float
              description: The default names
              default: "['cor_preview','cor_broadcast']"

@@ -1,7 +1,5 @@
 from savu.plugins.plugin_tools import PluginTools
-from savu.plugins.utils import register_plugin_tool
 
-@register_plugin_tool
 class TomobarReconTools(PluginTools):
     """A plugin to reconstruct full-field tomographic projection data\
 using state-of-the-art regularised iterative algorithms from the\

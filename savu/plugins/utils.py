@@ -58,12 +58,6 @@ def register_test_plugin(clazz):
     return clazz
 
 
-def register_plugin_tool(clazz):
-    """decorator to add plugin tools to a central register"""
-    load_tools[clazz.__module__] = clazz
-    return clazz
-
-
 def dawn_compatible(plugin_output_type=OUTPUT_TYPE_METADATA_AND_DATA):
     def _dawn_compatible(clazz):
         """
@@ -138,6 +132,28 @@ def plugin_loader(exp, plugin_dict, check=False):
     logging.debug("finished plugin loader")
     return plugin
 
+
+def get_tools_class(plugin_tools_id, cls=False):
+    tool_class = None
+    if plugin_tools_id == 'savu.plugins.plugin_tools':
+        plugin_tools_id = 'savu.plugins.base_tools'
+    base_classes = ['savu.plugins.driver.basic_driver_tools',
+                    'savu.plugins.driver.plugin_driver_tools',
+                    'savu.plugins.driver.cpu_plugin_tools',
+                    'savu.plugins.plugin_datasets_tools',
+                    'savu.plugins.driver.gpu_plugin_tools',
+                    'savu.plugins.filters.base_filter_tools',
+                    '__builtin___tools']
+    if plugin_tools_id not in base_classes:
+        try:
+            if cls:
+                tool_class = load_class(plugin_tools_id)(cls=cls)
+            else:
+                tool_class = load_class(plugin_tools_id)
+        except Exception as e:
+            print('Error loading tools id: ' + str(plugin_tools_id))
+
+    return tool_class
 
 def get_plugins_paths(examples=True):
     """

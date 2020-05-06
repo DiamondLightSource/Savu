@@ -1,7 +1,5 @@
 from savu.plugins.plugin_tools import PluginTools
-from savu.plugins.utils import register_plugin_tool
 
-@register_plugin_tool
 class RemoveAllRingsTools(PluginTools):
     """Method to remove all types of stripe artifacts in a sinogram (<-> ring artefacts
     in a reconstructed image).

@@ -14,7 +14,6 @@ class PluginParameters(object):
     """
     def __init__(self, cls, **kwargs):
         super(PluginParameters, self).__init__(**kwargs)
-        self.tool_list = []
         self.param = MetaData(ordered=True)
         self._populate_parameters(cls)
 
@@ -24,7 +23,6 @@ class PluginParameters(object):
         for clazz in cls.__class__.__mro__[::-1]:
             p_tools = self._get_plugin_tool_base(clazz)
             if p_tools:
-                self.tool_list.append(p_tools.__module__)
                 self._set_plugin_parameters(p_tools)
 
     def _set_plugin_parameters(self, clazz):
@@ -37,12 +35,8 @@ class PluginParameters(object):
 
     def _get_plugin_tool_base(self, clazz):
         """ Return the tools class"""
-        tool_class = None
         plugin_tools_id = clazz.__module__ + '_tools'
-        if plugin_tools_id == 'savu.plugins.plugin_tools':
-            plugin_tools_id = 'savu.plugins.base_tools'
-        if pu.load_tools.get(plugin_tools_id):
-            tool_class = pu.load_tools[plugin_tools_id]
+        tool_class = pu.get_tools_class(plugin_tools_id)
         return tool_class
 
     def _load_param_from_doc(self, clazz):
@@ -246,7 +240,6 @@ class PluginTools(PluginParameters, PluginCitations, PluginDocumentation):
         self.plugin_tools.set('param', self.param.get_dictionary())
         self.plugin_tools.set('cite', self.cite.get_dictionary())
         self.plugin_tools.set('doc', self.doc.get_dictionary())
-        self.plugin_tools.set('tool_list', self.tool_list)
 
     def get_param(self):
         return self.plugin_tools.get('param')
@@ -256,6 +249,3 @@ class PluginTools(PluginParameters, PluginCitations, PluginDocumentation):
 
     def get_doc(self):
         return self.plugin_tools.get('doc')
-
-    def get_tool_list(self):
-        return self.plugin_tools.get('tool_list')

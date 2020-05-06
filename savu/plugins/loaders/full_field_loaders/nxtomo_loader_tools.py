@@ -1,7 +1,5 @@
 from savu.plugins.plugin_tools import PluginTools
-from savu.plugins.utils import register_plugin_tool
 
-@register_plugin_tool
 class NxtomoLoaderTools(PluginTools):
     """A class to load tomography data from a hdf5 file
     """

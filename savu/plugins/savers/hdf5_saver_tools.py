@@ -1,7 +1,5 @@
 from savu.plugins.plugin_tools import PluginTools
-from savu.plugins.utils import register_plugin_tool
 
-@register_plugin_tool
 class Hdf5SaverTools(PluginTools):
     """A class to save tomography data to a hdf5 file
     """
