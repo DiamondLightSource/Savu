@@ -47,7 +47,7 @@ class Convert360180Sinogram(Plugin, CpuPlugin):
         in_dataset, out_dataset = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
 
-        self.center = 0
+        self.center = 0.0
         key = "centre_of_rotation"
         if key in in_dataset[0].meta_data.get_dictionary().keys():
             self.center = in_dataset[0].meta_data.get(key)
@@ -91,7 +91,7 @@ class Convert360180Sinogram(Plugin, CpuPlugin):
         self.width = sino_shape[width_dim]
         self.height = sino_shape[height_dim]
         center_manu = float(self.parameters['center'])
-        if center_manu != 0:
+        if center_manu != 0.0:
             self.center = center_manu
         self.mid_width = self.width / 2.0
         if (self.center <= 0) or (self.center > self.width):
