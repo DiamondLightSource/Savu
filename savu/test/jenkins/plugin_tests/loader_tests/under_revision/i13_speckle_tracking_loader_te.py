@@ -29,7 +29,7 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 class I13SpeckleTrackingLoaderTest(unittest.TestCase):
     def test_i13_speckle_tracking(self):
         data_file = tu.get_test_big_data_path('speckle_tracking.h5')
-        process_file = tu.get_test_process_path('i13_speckle_loader_process.nxs')
+        process_file = tu.get_test_process_path('to_revise/i13_speckle_loader_process.nxs')
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
 

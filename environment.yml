@@ -1,4 +1,4 @@
-name: test-environment
+name: savu_py27
 channels:
   - astra-toolbox
   - conda-forge
@@ -27,7 +27,7 @@ dependencies:
   - pymca=5.5.2
   - ccpi-regulariser
   - tomobar
-  - i23-seg
+  - larix
   - yamllint
   - mrcfile
   - pip:
