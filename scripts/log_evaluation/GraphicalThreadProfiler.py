@@ -2,6 +2,7 @@ import argparse
 import os
 import tempfile
 
+import numpy as np
 import pandas as pd
 
 
@@ -28,8 +29,6 @@ def get_frame(log_file, the_key, log_level):
     names = ['L', 'Time', 'Machine', 'CPU', 'Type', 'Message']
     data = pd.io.parsers.read_fwf(log_file, widths=[2, 13, 6, 6, 7, 1000],
                                   names=names)
-    #    data = pd.io.parsers.read_fwf(file, widths=[2, 13, 5, 6, 7, 1000],
-    #                                  names=names)
 
     data['Key'] = data['Machine'] + data['CPU']
     frame = ((data[data.Type == log_level])[data.columns[[6, 5, 1]]])
@@ -37,6 +36,7 @@ def get_frame(log_file, the_key, log_level):
     frame = frame.sort_values(by=['Key', 'Index'])
     del frame['Index']
 
+    frame.Time = frame.Time.astype(np.int32)
     startTime = (frame.groupby('Key').first()).Time
     nElems = frame.groupby('Key').size()
 
@@ -56,9 +56,8 @@ def get_frame(log_file, the_key, log_level):
 
 def get_machine_names(frame):
     machine_names = frame.copy(deep=True)
-    machine_names = machine_names[frame.Message.str.contains('Rank')]
-    machine_names.Message = [m.split(':')[-1].strip() for m in frame.Message
-                             if 'Rank' in m]
+    machine_names = machine_names[frame.Message.str.contains('Rank').replace(np.nan, False)]
+    machine_names.Message = [m.split(':')[-1].strip() for m in frame.Message if isinstance(m, str) and 'Rank' in m]
     machine_names = machine_names.drop(['Time', 'Time_end'], axis=1)
     machine_names.Key = [k.split('CPU')[0] for k in machine_names.Key]
     machine_names.Key = [k.split('GPU')[0] for k in machine_names.Key]
@@ -115,13 +114,11 @@ def __option_parser():
 def main():
     args = __option_parser()
 
-    filename = args.file
-    if not filename.startswith(os.path.sep):
-        filename = os.getcwd() + os.path.sep + filename
+    filename = os.path.abspath(args.file)
 
     # create the log file for profiling
-    name, ext = os.path.basename(filename).split('.')
-    log_filename = '/'.join([tempfile.mkdtemp(), name + '_' + ext + '.log'])
+    name, ext = os.path.splitext(os.path.basename(filename))
+    log_filename = os.path.join(tempfile.mkdtemp(), '{}_{}.log'.format(name, ext))
 
     lfilter = ['L '] + args.find
     with open(filename, 'r') as finput:
