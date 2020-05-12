@@ -1,4 +1,4 @@
-name: savu_py27
+name: test-environment
 channels:
   - astra-toolbox
   - conda-forge
@@ -7,12 +7,14 @@ channels:
 dependencies:
   - python=2.7
   - numpy
+  - pip
   - scipy
   - pytest
   - h5py
   - pep8
-  - mpi4py
+  - mpi4py 
   - scikit-image
+  - scikit-learn
   - astra-toolbox
   - xraylib
   - opencv=4.1.1
@@ -33,5 +35,6 @@ dependencies:
   - pip:
     - nvidia-ml-py
     - peakutils
-    - gnureadlin
+    - gnureadline
     - pmacparser
+
