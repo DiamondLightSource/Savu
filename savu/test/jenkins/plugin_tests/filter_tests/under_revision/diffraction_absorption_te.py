@@ -13,27 +13,26 @@
 # limitations under the License.
 
 """
-.. module:: ComponentAnalysisTest
+.. module:: pyfai_azimuthal_integration_test
    :platform: Unix
-   :synopsis: Test all the component analyses
-
-.. moduleauthor:: Aaron D. Parsons <scientificsoftware@diamond.ac.uk>
-
+   :synopsis: runner for tests using the MPI framework
+.. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 """
-
 import unittest
 from savu.test import test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
 
-class PcaTest(unittest.TestCase):
+class DiffractionAbsorptionTest(unittest.TestCase):
+    global data_file, experiment
+    data_file = 'i18_test_data.nxs'
 
-    def test_process(self):
-        data_file = tu.get_test_big_data_path('xrd_tomo_p3_astra_recon_cpu.h5')
-        process_file = tu.get_test_process_path('pca_test.nxs')
-        run_protected_plugin_runner(tu.set_options(data_file,
-                                                   process_file=process_file))
+    def test_diffraction_correction(self):
+        process_list = 'diffraction/diffraction_absorption_correction_test.nxs'
+        options = tu.initialise_options(data_file, None, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
 
 if __name__ == "__main__":
     unittest.main()

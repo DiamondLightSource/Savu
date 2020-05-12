@@ -13,6 +13,7 @@ dependencies:
   - pep8
   - mpi4py 
   - scikit-image
+  - scikit-learn
   - astra-toolbox
   - xraylib
   - opencv=4.1.1
@@ -33,6 +34,6 @@ dependencies:
   - pip:
     - nvidia-ml-py
     - peakutils
-    - gnureadline
+    - gnureadlin
     - pmacparser
 
