@@ -50,7 +50,7 @@ def run_full_tests():
 
 def run_tests():
     import unittest
-    from savu.test.travis.process_list_tests.tomo_pipeline_preview_test \
+    from savu.test.travis.plugin_tests.reconstruction_tests.tomo_pipeline_preview_test \
         import TomoPipelinePreviewTest
     print("Running a quick test...")
 

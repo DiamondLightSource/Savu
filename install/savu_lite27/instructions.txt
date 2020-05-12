@@ -1,0 +1,6 @@
+To build savu-lite for py27 do the following steps:
+
+1. modify envs_dirs and conda-build dirs in the provided .condarc file to somewhere writeable
+2. enable provided .condarc file by placing it in your ~/ directory
+3. you might need to correct SHA256 in meta.yaml after the first run
+4. build the project using `conda build .`
