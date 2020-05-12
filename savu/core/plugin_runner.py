@@ -56,7 +56,6 @@ class PluginRunner(object):
         n_plugins = plugin_list._get_n_processing_plugins()
 
         record_memory = self.options["memory_usage"]
-        cu.user_message("Recording memory: {}".format(record_memory))
 
         #  ********* transport function ***********
         logging.info('Running transport_pre_plugin_list_run()')
