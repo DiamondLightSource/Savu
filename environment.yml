@@ -11,9 +11,8 @@ dependencies:
   - pytest
   - h5py
   - pep8
-  - mpi4py 
+  - mpi4py
   - scikit-image
-  - scikit-learn
   - astra-toolbox
   - xraylib
   - opencv=4.1.1
@@ -36,4 +35,3 @@ dependencies:
     - peakutils
     - gnureadlin
     - pmacparser
-
