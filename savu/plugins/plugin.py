@@ -146,6 +146,8 @@ class Plugin(PluginDatasets):
             self.parameters = \
                 OrderedDict([(k, v['default'])
                              for k, v in p_tools.get_param().items()])
+            # parameters holds current values, this is edited outside of the
+            # tools class so default and dependency display values are updated here
             p_tools.update_defaults(self.parameters, self.p_dict)
             p_tools.check_dependencies(self.parameters, self.p_dict)
 

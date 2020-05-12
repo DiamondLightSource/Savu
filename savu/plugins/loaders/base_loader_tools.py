@@ -16,12 +16,12 @@ class BaseLoaderTools(PluginTools):
               description: hidden parameter for savu template
               default: :"<>"
         in_datasets:
-              visibility: hidden
+              visibility: datasets
               dtype: list
               description: Create a list of the dataset(s) to process
               default: []
         out_datasets:
-              visibility: hidden
+              visibility: datasets
               dtype: list
               description: Create a list of the dataset(s) to create
               default: []

@@ -9,8 +9,9 @@ import savu.plugins.docstring_parser as doc
 import savu.plugins.parameter_utils as param_u
 
 class PluginParameters(object):
-    """ Get this parameter dictionary so get_dictionary of the metadata type
-    should return a dictionary of all the parameters as taken from docstring
+    """ Get this parameter dictionary so get_dictionary of the metadata
+    type should return a dictionary of all the parameters as taken
+    from docstring
     """
     def __init__(self, cls, **kwargs):
         super(PluginParameters, self).__init__(**kwargs)
@@ -21,23 +22,19 @@ class PluginParameters(object):
         """ Using method resolution order, find base class tools
         """
         for clazz in cls.__class__.__mro__[::-1]:
-            p_tools = self._get_plugin_tool_base(clazz)
+            plugin_tools_id = clazz.__module__ + '_tools'
+            p_tools = pu.get_tools_class(plugin_tools_id)
             if p_tools:
                 self._set_plugin_parameters(p_tools)
 
     def _set_plugin_parameters(self, clazz):
-        """ Load the parameters for each base class"""
+        """ Load the parameters for each base class and set values"""
         all_params = self._load_param_from_doc(clazz)
         self._check_required_keys(all_params, clazz)
+        self._check_data_keys(all_params)
         self._set_display(all_params)
         for p_name, p_value in all_params.items():
             self.param.set(p_name, p_value)
-
-    def _get_plugin_tool_base(self, clazz):
-        """ Return the tools class"""
-        plugin_tools_id = clazz.__module__ + '_tools'
-        tool_class = pu.get_tools_class(plugin_tools_id)
-        return tool_class
 
     def _load_param_from_doc(self, clazz):
         """Find the parameter information from the method docstring.
@@ -51,6 +48,11 @@ class PluginParameters(object):
         return all_params
 
     def modify(self, parameters, value, param_name):
+        """
+        Check the new parameter value is valid, modify the parameter
+        value, update defaults, check if dependent parameters should
+        be made visible or hidden
+        """
         # This is accessed from outside this class
         if self._is_valid(value, param_name):
             parameters[param_name] = value
@@ -63,6 +65,10 @@ class PluginParameters(object):
                   ' a valid entry.')
 
     def _is_valid(self, value, subelem):
+        """
+        Check if the value provided is the same type as the type specified
+        in the yaml file.
+        """
         parameter_valid = False
         if self.param.get(subelem):
             # The parameter is within the current shown parameter list
@@ -78,6 +84,10 @@ class PluginParameters(object):
         return parameter_valid
 
     def _check_required_keys(self, all_params, clazz):
+        """
+        Check there are four keys ['dtype', 'description', 'visibility', 'default']
+        inside the dictionary given for each parameter
+        """
         required_keys = ['dtype', 'description', 'visibility', 'default']
         for p_key, p in all_params.items():
             all_keys = p.keys()
@@ -92,7 +102,22 @@ class PluginParameters(object):
                       + ' are: ')
                 print(', '.join(set(required_keys) - set(all_keys)))
 
+    def _check_data_keys(self, all_params):
+        """
+        Make sure that the visibility of dataset parameters is 'datasets'
+        so that the display order is unchanged
+        """
+        datasets = ['in_datasets', 'out_datasets']
+        for p_key, p in all_params.items():
+            if p_key in datasets:
+                if p['visibility'] != 'datasets':
+                    p['visibility'] = 'datasets'
+
     def _set_display(self, all_params):
+        """
+        Initially, set all of the parameters to display 'on'
+        This is later altered for dependent parameters to be shown and hidden
+        """
         for k, v in all_params.items():
             v['display'] = 'on'
 
@@ -162,6 +187,7 @@ class PluginParameters(object):
                             all_params[p_name]['display'] = 'off'
 
     def _apply_lower_case(self, item):
+        """Change list or string to lower case"""
         lower_case_item = item
         if isinstance(lower_case_item, str):
             lower_case_item = lower_case_item.lower()

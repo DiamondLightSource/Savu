@@ -33,14 +33,13 @@ import inspect
 import logging
 
 import numpy as np
-from colorama import Fore
 from collections import defaultdict
 
 import savu.plugins.utils as pu
 from savu.data.meta_data import MetaData
 import savu.data.framework_citations as fc
-import savu.plugins.parameter_utils as param_u
 import savu.plugins.loaders.utils.yaml_utils as yu
+
 
 NX_CLASS = 'NX_class'
 
@@ -82,7 +81,6 @@ class PluginList(object):
     def _populate_plugin_list(self, filename, activePass=False,
                               template=False):
         """ Populate the plugin list from a nexus file. """
-
         plugin_file = h5py.File(filename, 'r')
 
         if 'entry/savu_notes/version' in plugin_file:
@@ -102,7 +100,6 @@ class PluginList(object):
                 plugin['active'] = plugin_group[key]['active'][0]
 
             if plugin['active'] or activePass:
-
                 plugin['name'] = plugin_group[key]['name'][0]
                 plugin['id'] = plugin_group[key]['id'][0]
                 plugin['pos'] = key.encode('ascii').strip()
@@ -482,6 +479,7 @@ class Template(object):
         plist = self.plist.plugin_list
         index = [plist[i]['pos'] for i in range(len(plist))]
         return plist[index.index(plugin_no)]['data']
+
 
 class CitationInformation(object):
     """

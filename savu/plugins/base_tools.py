@@ -6,12 +6,12 @@ class BaseTools(PluginTools):
     def define_parameters(self):
         """
         in_datasets:
-            visibility: basic
+            visibility: datasets
             dtype: list
             description: Create a list of the dataset(s) to process
             default: []
         out_datasets:
-            visibility: basic
+            visibility: datasets
             dtype: list
             description: Create a list of the dataset(s) to create
             default: []

@@ -44,7 +44,7 @@ class VoCenteringTools(PluginTools):
              description: A list of datasets which require this information
              default: '[]'
         out_datasets:
-             visibility: basic
+             visibility: datasets
              dtype: float
              description: The default names
              default: "['cor_preview','cor_broadcast']"

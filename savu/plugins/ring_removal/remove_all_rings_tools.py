@@ -1,9 +1,8 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class RemoveAllRingsTools(PluginTools):
-    """Method to remove all types of stripe artifacts in a sinogram (<-> ring artefacts
-    in a reconstructed image).
-
+    """Method to remove all types of stripe artifacts in a sinogram (<->
+ring artefacts in a reconstructed image).
     """
     def define_parameters(self):
         """

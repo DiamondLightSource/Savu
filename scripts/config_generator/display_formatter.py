@@ -55,7 +55,8 @@ class DisplayFormatter(object):
         for p_dict in plugin_list:
             count += 1
             description = \
-                self._get_description(WIDTH, level, p_dict, count, verbosity, subelem=subelem)
+                self._get_description(WIDTH, level, p_dict, count, verbosity,
+                                      subelem=subelem)
             out_string.append(description)
             out_string.append(line_break)
         return '\n'.join(out_string)
@@ -122,10 +123,14 @@ class DisplayFormatter(object):
         dev_keys = [k for k, v in p_dict['param'].items()
                     if v['visibility'] in ['intermediate', 'advanced']
                     and v['display'] == 'on']
+        data_keys = [k for k, v in p_dict['param'].items()
+                     if v['visibility'] in ['datasets']
+                     and v['display'] == 'on']
         user_keys = [k for k, v in p_dict['param'].items()
                      if v['visibility'] == 'basic' and v['display'] == 'on']
         try:
-            keys = user_keys if (level == 'user' and not subelem) else user_keys + dev_keys
+            keys = user_keys if (level == 'user' and not subelem) \
+                else user_keys + dev_keys + data_keys
             for key in keys:
                 keycount += 1
                 if subelem:
@@ -257,7 +262,8 @@ class DispDisplay(DisplayFormatter):
         params = self._get_param_details(level, p_dict, width)
         return title + params
 
-    def _get_verbose(self, level, p_dict, count, width, breakdown=False, subelem=False):
+    def _get_verbose(self, level, p_dict, count, width,
+                     breakdown=False, subelem=False):
         title = self._get_quiet(p_dict, count, width, quiet=False)
         colour_on = Back.LIGHTBLACK_EX + Fore.LIGHTWHITE_EX
         colour_off = Back.RESET + Fore.RESET
@@ -275,7 +281,8 @@ class DispDisplay(DisplayFormatter):
 
     def _get_verbose_verbose(self, level, p_dict, count, width, subelem=False):
         title, synopsis, param_details = \
-            self._get_verbose(level, p_dict, count, width, breakdown=True, subelem=subelem)
+            self._get_verbose(level, p_dict, count, width,
+                              breakdown=True, subelem=subelem)
         info_c = Back.CYAN + Fore.LIGHTWHITE_EX
         warn_c = Back.WHITE + Fore.RED
         c_off = Back.RESET + Fore.RESET

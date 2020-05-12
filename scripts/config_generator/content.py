@@ -240,11 +240,14 @@ class Content(object):
         # Select the correct group and order of parameters according to that
         # on display to the user. This ensures correct parameter is modified.
         dev_keys = [k for k, v in params.items()
-                    if v['visibility'] in ['intermediate', 'advanced']
+                    if v['visibility'] in ['intermediate', 'advanced', 'datasets']
+                    and v['display'] == 'on']
+        data_keys = [k for k, v in params.items()
+                    if v['visibility'] in ['datasets']
                     and v['display'] == 'on']
         user_keys = [k for k, v in params.items()
                      if v['visibility'] == 'basic' and v['display'] == 'on']
-        keys = user_keys + dev_keys
+        keys = user_keys + dev_keys + data_keys
         if param_name.isdigit():
             param_name = keys[int(param_name)-1]
         try:
