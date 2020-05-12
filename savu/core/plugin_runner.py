@@ -74,7 +74,7 @@ class PluginRunner(object):
 
             if record_memory:
                 memory_after = cu.get_memory_usage_linux()
-                logging.debug("Memory usage for '{}': before: {} MB, after: {} MB, change: {} MB".format(
+                logging.debug("{} memory usage before: {} MB, after: {} MB, change: {} MB".format(
                     plugin_name, memory_before, memory_after, memory_after - memory_before))
 
             #  ********* transport functions ***********

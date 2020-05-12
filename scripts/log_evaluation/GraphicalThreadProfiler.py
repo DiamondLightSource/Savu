@@ -1,9 +1,43 @@
 import argparse
+import itertools
 import os
+import re
 import tempfile
 
 import numpy as np
 import pandas as pd
+
+
+def reset_first_entry(memory_data):
+    """
+    Resets the first memory entry for each unique component in the series
+    """
+
+    def _reset(s):
+        try:
+            for i in range(64):
+                memory_data.Memory[memory_data.Key.str.contains(s.format(i))].iloc[0][1] = '0'
+        except IndexError:
+            pass
+
+    _reset("CPU{}")
+    _reset("GPU{}")
+
+    return memory_data
+
+
+def get_memory_data(frame):
+    memory_data = frame[frame.Message.str.contains("memory usage")]
+    number_finder = re.compile('[0-9]+')
+    memory_data.insert(4, "Memory", [list(itertools.chain(msg.split()[0:1], number_finder.findall(msg))) for msg in
+                                     memory_data.Message])
+
+    memory_data = pd.concat([memory_data.Key, memory_data.Memory], axis=1, join="outer")
+    return reset_first_entry(memory_data)
+    # memory_data.Memory = pd.Series([number_finder.findall(msg) for msg in memory_data.Message], index=memory_data.index)
+    # memory_data.PluginNames = pd.Series(
+    #     [[string.split()[0]] for string in memory_data.Message[memory_data.Key.str.contains("CPU0")]])
+    # del memory_data["Message"]
 
 
 def convert(log_file_list, path, log_level):
@@ -12,11 +46,12 @@ def convert(log_file_list, path, log_level):
         the_interval = 0  # millisecs
         frame = get_frame(log_file, the_key, 'DEBUG')
         machine_names = get_machine_names(frame)
+        memory_data = get_memory_data(frame)
         if log_level != 'DEBUG':
             frame = get_frame(log_file, the_key, log_level)
         html_filename = \
             set_file_name('/'.join([path, os.path.basename(log_file)]))
-        render_template(frame, machine_names, the_interval, html_filename)
+        render_template(frame, machine_names, memory_data, the_interval, html_filename)
         print("html file created:", html_filename)
         print("Open the html file in your browser to view the profile.")
 
@@ -67,7 +102,7 @@ def get_machine_names(frame):
     return machine_names
 
 
-def render_template(frame, machine_names, the_interval, outfilename):
+def render_template(frame, machine_names, memory_data, the_interval, outfilename):
     from jinja2 import Template
 
     frame = frame[(frame.Time_end - frame.Time) > the_interval].values
@@ -81,6 +116,7 @@ def render_template(frame, machine_names, the_interval, outfilename):
     f_out.write(template.render(chart_width=1300, position=[16, 9],
                                 vals=map(list, frame[:, 0:4]),
                                 machines=map(list, machine_names.values),
+                                memory=map(list, memory_data.values),
                                 style_sheet=style))
     f_out.close()
 

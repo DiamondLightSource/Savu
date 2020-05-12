@@ -34,6 +34,20 @@
             const chart = new google.visualization.Timeline(document.getElementById('gantt_div'));
             chart.draw(dataTable, options);
 
+            const memoryTable = new google.visualization.DataTable();
+            memoryTable.addColumn({type: 'string', id: 'Core'})
+            memoryTable.addColumn({type: 'string', id: 'Plugin'})
+            memoryTable.addColumn({type: 'string', role: 'tooltip'})
+            memoryTable.addColumn({type: 'number', id: 'Start'})
+            memoryTable.addColumn({type: 'number', id: 'End'})
+            memoryTable.addRows([
+                {% for mem in memory %}
+                    ['{{ mem[0] }}', '{{ mem[1][0] }}', " Memory before {{ mem[1][0] }}: {{ mem[1][1] }} MB, after: {{ mem[1][2] }} MB, change: {{ mem[1][3] }} MB", {{ mem[1][1] }}, {{ mem[1][2] }}],
+                {% endfor %}
+            ]);
+
+            const memory_chart = new google.visualization.Timeline(document.getElementById('memory_chart'));
+            memory_chart.draw(memoryTable, options);
         }
     </script>
 </head>
@@ -45,8 +59,10 @@
         {{ m[1] }} : {{ m[0] }}
         <br>
     {% endfor %}
-    <div id="gantt_div" style="position: absolute; left: {{ position[0] }}%; top:{{ position[1] }}%;
+    <div id="gantt_div" style="position:absolute; left: {{ position[0] }}%; top:{{ position[1] }}%;
             width: {{ chart_width }}px; height: 1000px;"></div>
+    <div id="memory_chart" style="position:absolute; left: {{ position[0] }}%; top: 500px;
+            display:block; width: 1300px; height: 1000px;"></div>
 </div>
 </body>
 </html>
