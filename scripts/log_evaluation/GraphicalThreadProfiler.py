@@ -34,10 +34,6 @@ def get_memory_data(frame):
 
     memory_data = pd.concat([memory_data.Key, memory_data.Memory], axis=1, join="outer")
     return reset_first_entry(memory_data)
-    # memory_data.Memory = pd.Series([number_finder.findall(msg) for msg in memory_data.Message], index=memory_data.index)
-    # memory_data.PluginNames = pd.Series(
-    #     [[string.split()[0]] for string in memory_data.Message[memory_data.Key.str.contains("CPU0")]])
-    # del memory_data["Message"]
 
 
 def convert(log_file_list, path, log_level):

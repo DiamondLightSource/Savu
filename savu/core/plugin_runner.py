@@ -55,8 +55,6 @@ class PluginRunner(object):
         exp_coll = self.exp._get_collection()
         n_plugins = plugin_list._get_n_processing_plugins()
 
-        record_memory = self.options["memory_usage"]
-
         #  ********* transport function ***********
         logging.info('Running transport_pre_plugin_list_run()')
         self._transport_pre_plugin_list_run()
@@ -64,18 +62,15 @@ class PluginRunner(object):
         cp = self.exp.checkpoint
         for i in range(cp.get_checkpoint_plugin(), n_plugins):
             self.exp._set_experiment_for_current_plugin(i)
-
-            if record_memory:
-                memory_before = cu.get_memory_usage_linux()
+            memory_before = cu.get_memory_usage_linux()
 
             plugin_name = self.__run_plugin(exp_coll['plugin_dict'][i])
 
             self.exp._barrier(msg='PluginRunner: plugin complete.')
 
-            if record_memory:
-                memory_after = cu.get_memory_usage_linux()
-                logging.debug("{} memory usage before: {} MB, after: {} MB, change: {} MB".format(
-                    plugin_name, memory_before, memory_after, memory_after - memory_before))
+            memory_after = cu.get_memory_usage_linux()
+            logging.debug("{} memory usage before: {} MB, after: {} MB, change: {} MB".format(
+                plugin_name, memory_before, memory_after, memory_after - memory_before))
 
             #  ********* transport functions ***********
             # end the plugin run if savu has been killed
