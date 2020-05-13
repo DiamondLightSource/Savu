@@ -17,11 +17,15 @@ shift 3
 options=$@
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
+savupath=$(python -c "import savu, os; print savu.__path__[0]")
+savupath=${savupath%/savu}
+echo "savupath is:" $savupath
 
 nCPUs=$((nNodes*nCoresPerNode))
 
 # launch mpi job
 export PYTHONPATH=$savupath:$PYTHONPATH
+filename=$savupath/savu/tomo_recon.py
 
 echo "running on host: "$HOSTNAME
 echo "Processes running are : ${nCPUs}"
@@ -33,7 +37,7 @@ for i in $(seq 0 $((nCPUs-1-nGPUs))); do CPUs+="CPU$i " ; done
 CPUs=$(echo $GPUs$CPUs | tr ' ' ,)
 
 echo "running the savu mpi local job"
-mpirun -np $nCPUs -mca btl self,vader python -m savu.tomo_recon --memory-usage $filename $datafile $processfile $outpath -n $CPUs -v $options
+mpirun -np $nCPUs -mca btl ^openib python $filename $datafile $processfile $outpath -n $CPUs -v $options
 
 echo "SAVU_MPI_LOCAL:: Process complete"
 
