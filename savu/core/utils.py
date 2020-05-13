@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 """
 .. module:: utils
    :platform: Unix
@@ -20,14 +21,18 @@
 
 """
 
+from __future__ import print_function, division
+
+import itertools
 import logging
 import logging.handlers as handlers
-import itertools
+
 from mpi4py import MPI
 
 
 def logfunction(func):
     """ Decorator to add logging information around calls for use with . """
+
     def _wrapper(*args, **kwds):
         logging.info("Start::%s:%s",
                      func.__module__,
@@ -37,6 +42,7 @@ def logfunction(func):
                      func.__module__,
                      func.__name__)
         return returnval
+
     return _wrapper
 
 
@@ -54,14 +60,17 @@ def logmethod(func):
                      self.__class__.__name__,
                      func.__name__)
         return returnval
+
     return _wrapper
 
 
 def docstring_parameter(*sub):
     """ Decorator to add strings to a doc string."""
+
     def dec(obj):
         obj.__doc__ = obj.__doc__.format(*sub)
         return obj
+
     return dec
 
 
@@ -186,10 +195,10 @@ def _send_email(address):
     you = address
     # Open a plain text file for reading.  For this example, assume that
     # the text file contains only ASCII characters.
-#    fp = open(textfile, 'rb')
-#    # Create a text/plain message
-#    msg = MIMEText(fp.read())
-#    fp.close()
+    #    fp = open(textfile, 'rb')
+    #    # Create a text/plain message
+    #    msg = MIMEText(fp.read())
+    #    fp.close()
 
     # me == the sender's email address
     # you == the recipient's email address
@@ -210,7 +219,7 @@ def _savu_encoder(data):
 
 def _savu_decoder(data):
     if isinstance(data, str) and len(data.split('#savu_encoded#')) > 1:
-        exec('data = ' + data.split('#savu_encoded#')[-1])
+        exec ('data = ' + data.split('#savu_encoded#')[-1])
         return data
     return data
 
@@ -234,4 +243,4 @@ def get_memory_usage_linux(kb=False, mb=True):
         return int(res.getrusage(res.RUSAGE_SELF).ru_maxrss)
 
     if mb:
-        return int(res.getrusage(res.RUSAGE_SELF).ru_maxrss) / 1024
+        return int(res.getrusage(res.RUSAGE_SELF).ru_maxrss) // 1024
