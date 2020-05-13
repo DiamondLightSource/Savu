@@ -103,6 +103,10 @@ def _disp_arg_parser(args, desc):
     parser.add_argument("-a", "--all", action='store_true', help=all_str,
                         default=False)
 
+    dataset_str = "Display in_datasets and out_datasets."
+    parser.add_argument("-datasets", "--datasets", action='store_true', help=dataset_str,
+                        default=False)
+
     parser.add_argument("start", nargs='?', help="Display this list entry.")
     stop_str = "Display entries from start to stop."
     parser.add_argument("stop", nargs='?', help=stop_str)

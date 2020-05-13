@@ -69,7 +69,9 @@ def _disp(content, args):
         formatter = DispDisplay(content.plugin_list)
         verbosity = parsers._get_verbosity(args)
         level = 'all' if args.all else content.disp_level
-        content.display(formatter, level=level, verbose=verbosity, **range_dict)
+        datasets = True if args.datasets else False
+        content.display(formatter, level=level, verbose=verbosity,
+                        datasets=datasets, **range_dict)
         return content
     except:
         raise

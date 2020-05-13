@@ -7,17 +7,17 @@ ring artefacts in a reconstructed image).
     def define_parameters(self):
         """
         la_size:
-            visibility: param
+            visibility: intermediate
             dtype: int
             description: Size of the median filter window to remove large stripes.
             default: 71
         sm_size:
-            visibility: param
+            visibility: intermediate
             dtype: int
             description: Size of the median filter window to remove small-to-medium stripes.
             default: 31
         snr:
-            visibility: param
+            visibility: intermediate
             dtype: float
             description: Ratio used to detect locations of stripes. Greater is less sensitive.
             default: 3.0

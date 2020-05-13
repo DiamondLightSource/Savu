@@ -132,17 +132,18 @@ def plugin_loader(exp, plugin_dict, check=False):
     logging.debug("finished plugin loader")
     return plugin
 
-
 def get_tools_class(plugin_tools_id, cls=False):
     tool_class = None
     if plugin_tools_id == 'savu.plugins.plugin_tools':
         plugin_tools_id = 'savu.plugins.base_tools'
+
     base_classes = ['savu.plugins.driver.basic_driver_tools',
                     'savu.plugins.driver.plugin_driver_tools',
                     'savu.plugins.driver.cpu_plugin_tools',
                     'savu.plugins.plugin_datasets_tools',
                     'savu.plugins.driver.gpu_plugin_tools',
                     'savu.plugins.filters.base_filter_tools',
+                    'savu.plugins.corrections.base_correction_tools',
                     '__builtin___tools']
     if plugin_tools_id not in base_classes:
         try:
@@ -151,9 +152,9 @@ def get_tools_class(plugin_tools_id, cls=False):
             else:
                 tool_class = load_class(plugin_tools_id)
         except Exception as e:
-            print('Error loading tools id: ' + str(plugin_tools_id))
-
+            print('Error loading tools id: '+str(plugin_tools_id))
     return tool_class
+
 
 def get_plugins_paths(examples=True):
     """
