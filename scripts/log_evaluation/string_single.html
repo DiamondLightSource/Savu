@@ -42,6 +42,11 @@
             memoryTable.addColumn({type: 'number', id: 'End'})
             memoryTable.addRows([
                 {% for mem in memory %}
+                    {#
+                    Follows the data format from
+                    https://developers.google.com/chart/interactive/docs/gallery/timeline#data-format
+                    [row label, bar label, tooltip, start, end]
+                    #}
                     ['{{ mem[0] }}', '{{ mem[1][0] }}', " Memory before {{ mem[1][0] }}: {{ mem[1][1] }} MB, after: {{ mem[1][2] }} MB, change: {{ mem[1][3] }} MB", {{ mem[1][1] }}, {{ mem[1][2] }}],
                 {% endfor %}
             ]);
