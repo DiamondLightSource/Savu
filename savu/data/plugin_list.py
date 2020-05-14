@@ -123,10 +123,10 @@ class PluginList(object):
             entry = nxs_file.require_group('entry')
 
             self._save_framework_citations(self._overwrite_group(
-                    entry, 'framework_citations', 'NXcollection'))
+                entry, 'framework_citations', 'NXcollection'))
 
             self.__save_savu_notes(self._overwrite_group(
-                    entry, 'savu_notes', 'NXnote'))
+                entry, 'savu_notes', 'NXnote'))
 
             plugins_group = self._overwrite_group(entry, 'plugin', 'NXprocess')
 
@@ -467,6 +467,10 @@ class Template(object):
         if not isinstance(d, dict) or not d:
             return depth
         return max(self.dict_depth(v, depth + 1) for k, v in d.items())
+
+    def _set_param_for_all_instances_of_a_plugin(self, plugin, param, value):
+        # find all plugins with this name and replace the param
+        for p in self.plist.plugin_list:
             if p['name'] == plugin:
                 p['data'][param] = value
 
