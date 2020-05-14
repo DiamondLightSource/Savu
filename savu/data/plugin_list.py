@@ -99,7 +99,7 @@ class PluginList(object):
             if 'active' in entry_keys:
                 plugin['active'] = plugin_group[group]['active'][0]
 
-            if plugin['active'] or activePass:
+            if plugin['active'] or active_pass:
                 plugin['name'] = plugin_group[group]['name'][0].decode("utf-8")
                 plugin['id'] = plugin_group[group]['id'][0].decode("utf-8")
                 plugin['pos'] = group.strip()
