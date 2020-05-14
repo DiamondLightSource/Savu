@@ -123,7 +123,9 @@ def plugin_loader(exp, plugin_dict, check=False):
         # re-raise the original error
         raise
 
-    # If we are just checking the plugin we should reduce the effort
+    if check:
+        exp.meta_data.plugin_list._set_datasets_list(plugin)
+
     logging.debug("finished plugin loader")
     return plugin
 
