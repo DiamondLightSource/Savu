@@ -27,12 +27,15 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 
 
 class NxStxmLoaderTest(unittest.TestCase):
+    global data_file, experiment
+    data_file = 'mm.nxs'
+    experiment = None
 
     def test_nx_stxm(self):
-        data_file = tu.get_test_data_path('mm.nxs')
-        process_file = tu.get_test_process_path('basic_stxm_process.nxs')
-        run_protected_plugin_runner(tu.set_options(data_file,
-                                                   process_file=process_file))
+        process_list = 'loaders/basic_stxm_process.nxs'
+        options = tu.initialise_options(data_file, experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
 
 if __name__ == "__main__":
     unittest.main()

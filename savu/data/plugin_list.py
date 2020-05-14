@@ -84,7 +84,7 @@ class PluginList(object):
                               template=False):
         """ Populate the plugin list from a nexus file. """
         plugin_file = h5py.File(filename, 'r')
-        
+
         if 'entry/savu_notes/version' in plugin_file:
             self.version = plugin_file['entry/savu_notes/version'][()]
 
@@ -118,7 +118,7 @@ class PluginList(object):
         plugin_file.close()
 
     def _save_plugin_list(self, out_filename):
-        with h5py.File(out_filename) as nxs_file:
+        with h5py.File(out_filename, 'a') as nxs_file:
 
             entry = nxs_file.require_group('entry')
 

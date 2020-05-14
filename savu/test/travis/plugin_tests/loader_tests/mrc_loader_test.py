@@ -24,15 +24,15 @@ from savu.test import test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
+class MrcLoaderTest(unittest.TestCase):
+    global data_file, experiment
+    data_file = 'test_image.mrc'
+    experiment = None
 
-class SavuNexusLoaderTest(unittest.TestCase):
-
-    def test_reload(self):
-        data_file = tu.get_test_data_path('test_image.mrc')
-        process_file = tu.get_test_process_path('mrc_loader_test.nxs')
-        run_protected_plugin_runner(
-                tu.set_options(data_file, process_file=process_file))
-
-
+    def test_mrc_loader(self):
+        process_list = 'loaders/mrc_loader_test.nxs'
+        options = tu.initialise_options(data_file, experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
 if __name__ == "__main__":
     unittest.main()
