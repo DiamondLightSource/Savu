@@ -1,9 +1,9 @@
 name: test-environment
 channels:
-  - astra-toolbox
   - conda-forge
   - ccpi
   - dkazanc
+  - astra-toolbox/label/dev
 dependencies:
   - python=2.7
   - numpy
