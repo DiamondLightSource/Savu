@@ -152,7 +152,7 @@ class SliceLists(object):
                 nDims += 1
             else:
                 break
-        return prod, nDims-2
+        return prod, nDims-1
 
     def _group_dimension(self, sl, dim, step):
         start = sl[0][dim].start
@@ -424,7 +424,7 @@ class GlobalData(object):
         slice_dims = self.data.get_slice_dimensions()
         transfer_gsl = self.trans._group_slice_list_in_multiple_dimensions(
                 transfer_ssl, mft, slice_dims, pad=pad)
-
+        
         if current_sl:
             mfp = self.pData._get_max_frames_process()
             current_sl = self.trans._group_slice_list_in_multiple_dimensions(
