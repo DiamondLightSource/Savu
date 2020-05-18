@@ -133,7 +133,7 @@ class SliceLists(object):
         sdir_shape = [shape[i] for i in slice_dirs]
         split, split_dim = self.__get_split_length(max_frames, sdir_shape)
         split_list = self._split_list(slice_list, split)
-        
+
         banked = []
         for s in split_list:
             b = self._split_list(s, max_frames)
@@ -145,14 +145,13 @@ class SliceLists(object):
         return banked
 
     def __get_split_length(self, max_frames, shape):
-        nDims = 1
-        while(nDims <= len(shape)):
+        nDims = 0
+        while(nDims < len(shape)):
+            nDims += 1
             prod = np.prod([shape[i] for i in range(nDims)])
-            if prod/float(max_frames) <=1:
-                nDims += 1
-            else:
+            if prod/float(max_frames) >= 1:
                 break
-        return prod, nDims-2
+        return prod, nDims-1
 
     def _group_dimension(self, sl, dim, step):
         start = sl[0][dim].start
@@ -250,7 +249,6 @@ class SliceLists(object):
         s = sl[sdir[dim]]
         sl[sdir[dim]] = slice(s.start, s.stop + length*s.step, s.step)
         return tuple(sl)
-
 
     def _get_local_single_slice_list(self, shape):
         slice_dirs = self.data.get_slice_dimensions()
@@ -424,7 +422,7 @@ class GlobalData(object):
         slice_dims = self.data.get_slice_dimensions()
         transfer_gsl = self.trans._group_slice_list_in_multiple_dimensions(
                 transfer_ssl, mft, slice_dims, pad=pad)
-
+        
         if current_sl:
             mfp = self.pData._get_max_frames_process()
             current_sl = self.trans._group_slice_list_in_multiple_dimensions(
