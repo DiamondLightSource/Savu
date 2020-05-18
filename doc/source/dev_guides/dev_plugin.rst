@@ -140,22 +140,18 @@ Plugin Class example:
 2. Plugin Tools Class
 ======================
 
-This Tools class holds the parameter details in a yaml format.
-To begin, import the PluginTools class and the function decorator \
-register_plugin_tool.
+This tools class holds the parameter details in a yaml format.
+To begin, import the PluginTools class.
 
 .. code-block:: python
 
    from savu.plugins.plugin_tools import PluginTools
-   from savu.plugins.utils import register_plugin_tool
 
-Then call the decorator function register_plugin_tool in the line immediately \
-above the class definition. Beneath the class definition, write a docstring \
+Beneath the class definition, write a docstring \
 with a sentence to describe in further detail what your plugin does.
 
 .. code-block:: python
 
-    @register_plugin_tool
     class NoProcessTools(PluginTools):
         """The base class from which all plugins should inherit.
         """
@@ -170,16 +166,14 @@ An example of a plugin tools class.
 .. code-block:: python
 
     from savu.plugins.plugin_tools import PluginTools
-    from savu.plugins.utils import register_plugin_tool
 
-    @register_plugin_tool
     class NoProcessTools(PluginTools):
         """The base class from which all plugins should inherit.
         """
         def define_parameters(self):
             """---
             pattern:
-                visibility: advanced
+                visibility: basic
                 dtype: str
                 description: Explicitly state the slicing pattern.
                 default: None
@@ -201,7 +195,6 @@ Yaml Text
 
 .. code-block:: yaml
 
-    ---
     pattern:
         visibility: advanced
         dtype: str
@@ -218,8 +211,7 @@ Yaml Text
         description: Yaml file path.
         default: savu/plugins/loaders/full_field_loaders/nxtomo_loader.yaml
 
-The yaml text should begin with three dashes to indicate the beginning \
-of the file. Then list the names of parameters required. After each name you \
+You should list the names of parameters required. After each name you \
 need a colon. Then you include an indent and put four pieces of information: \
 visibility, dtype, description, default.
 
@@ -315,7 +307,6 @@ method is NDF.
     NDF_penalty:
         dependency:
             regularisation_method: NDF
-
 
 Options
 '''''''
