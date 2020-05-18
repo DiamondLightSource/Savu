@@ -74,9 +74,10 @@ class PluginParameters(object):
             # The parameter is within the current shown parameter list
             p = self.param.get(subelem)
             dtype = p['dtype']
-            parameter_valid = param_u.is_valid(dtype, p, value)
+            default_value = p['default']
+            parameter_valid = param_u.is_valid(dtype, p, value, default_value)
             if parameter_valid is False:
-                print('\nYour input for the parameter \'%s\' must match the'
+                print('Your input for the parameter \'%s\' must match the'
                       ' type %s' % (subelem, dtype))
                 print(Fore.RESET)
         else:

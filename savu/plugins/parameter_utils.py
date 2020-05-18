@@ -48,15 +48,8 @@ def _intlist(value):
     ['int']
     '''
     parameter_valid = False
-    try:
-        value = parse_str(value) if \
-            isinstance(value, str) else value
-    except:
-        print('Error parsing string.')
-    # To Do - check preview list
-    if isinstance(value, type(None)):
-        parameter_valid = True
-    elif value == []:
+    # Currently the check is for a list, but this can later be more extensive
+    if _list(value):
         parameter_valid = True
     return parameter_valid
 
@@ -69,7 +62,7 @@ def _range(value):
             if _integer(value[0]) and _integer(value[1]):
                     parameter_valid = True
         else:
-            print(Fore.RED + '\nPlease enter two values.' + Fore.RESET)
+            print(Fore.RED + 'Please enter two values.' + Fore.RESET)
     else:
             print('Valid items have a format <value 1>, <value 2>')
     return parameter_valid
@@ -85,7 +78,7 @@ def _yamlfile(value):
         gen = linter.run(f, conf)
         errors = list(gen)
         if errors:
-            print('There were some errors with your yaml file structure.\n')
+            print('There were some errors with your yaml file structure.')
             for e in errors:
                 print(e)
         else:
@@ -107,7 +100,6 @@ def _intgroup(value):
             if entries == [None, None, 1]:
                 parameter_valid = True
             else:
-
                 if _filepath(file_path):
                     int_path = entries[1]
                     hf = h5py.File(file_path, 'r')
@@ -115,21 +107,21 @@ def _intgroup(value):
                         # This returns a HDF5 dataset object
                         int_data = hf.get(int_path)
                         if int_data is None:
-                            print('\nThere is no data stored at that internal path.')
+                            print('There is no data stored at that internal path.')
                         else:
                             # Internal path is valid
                             int_data = np.array(int_data)
                             if int_data.size >= 1:
                                 try:
-                                    compensation_fact = int(entries[2])
+                                    compensation_fact = entries[2]
                                     parameter_valid = _integer(compensation_fact)
                                 except (Exception, ValueError):
-                                    print('\nThe compensation factor is not an integer.')
+                                    print('The compensation factor is not an integer.')
 
                     except AttributeError:
                         print('Attribute error.')
                     except:
-                        print(Fore.BLUE + '\nPlease choose another interior'
+                        print(Fore.BLUE + 'Please choose another interior'
                                           ' path.' + Fore.RESET)
                         print('Example interior paths: ')
                         for group in hf:
@@ -139,7 +131,7 @@ def _intgroup(value):
                         raise
                     hf.close()
         else:
-            print(Fore.RED + '\nPlease enter three parameters.' + Fore.RESET)
+            print(Fore.RED + 'Please enter three parameters.' + Fore.RESET)
         return parameter_valid
     except (Exception, ValueError, AttributeError):
         print('Valid items have a format [<file path>,'
@@ -161,9 +153,9 @@ def _intgroup1(value):
                     scale_fact = int(entries[1])
                     parameter_valid = _integer(scale_fact)
                 except (Exception, ValueError):
-                    print('\nThe scale factor is not an integer.')
+                    print('The scale factor is not an integer.')
         else:
-            print(Fore.RED + '\nPlease enter two parameters.' + Fore.RESET)
+            print(Fore.RED + 'Please enter two parameters.' + Fore.RESET)
         return parameter_valid
     except (Exception, ValueError, AttributeError):
         print('Valid items have a format [<file path>, int].')
@@ -258,8 +250,6 @@ def _integer(value):
     parameter_valid = False
     if isinstance(value, int):
         parameter_valid = True
-    elif isinstance(value, type(None)):
-        parameter_valid = True
     else:
         print('%s is not a valid integer.' % value)
     return parameter_valid
@@ -353,18 +343,31 @@ type_list = {'[int]': _intlist,
              'list': _list}
 
 
-def is_valid(dtype, ptools, value):
-    if dtype not in type_list:
-        print("That type definition is not configured properly.")
-        pvalid = False
-    else:
-        pvalid = type_list[dtype](value)
-    # Valid type check, followed by check if present in options
-    # If the items in options have not been type checked, or have errors,
-    # it may cause problems.
-    pvalid = check_options(ptools, value, pvalid)
+def is_valid(dtype, ptools, value, default_value):
+    """
+    Check if the value matches default options
+    Then type check, followed by check if present in options
+    If the items in options have not been type checked, or have errors,
+    it may cause problems.
+    """
+
+    pvalid = _check_default(value, default_value)
+    if pvalid == False:
+        if dtype not in type_list:
+            print("That type definition is not configured properly.")
+            pvalid = False
+        else:
+            pvalid = type_list[dtype](value)
+        # Then check if the option is valid
+        pvalid = check_options(ptools, value, pvalid)
+
     return pvalid
 
+def _check_default(value, default_value):
+    if default_value == str(value) or default_value == value:
+        return True
+    else:
+        return False
 
 def check_options(ptools, value, pvalid):
     options = ptools.get('options') or {}

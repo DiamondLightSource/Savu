@@ -20,7 +20,7 @@ class VoCenteringTools(PluginTools):
              default: 'None'
         search_area:
              visibility: intermediate
-             dtype: float
+             dtype: tuple
              description: Search area around the estimated centre of rotation
              default: '(-50, 50)'
         ratio:
@@ -45,9 +45,9 @@ class VoCenteringTools(PluginTools):
              default: '[]'
         out_datasets:
              visibility: datasets
-             dtype: float
+             dtype: list
              description: The default names
-             default: "['cor_preview','cor_broadcast']"
+             default: "['cor_preview', 'cor_broadcast']"
         broadcast_method:
              visibility: advanced
              dtype: str
