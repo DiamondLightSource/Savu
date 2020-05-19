@@ -146,6 +146,7 @@ def get_tools_class(plugin_tools_id, cls=False):
                     'savu.plugins.driver.gpu_plugin_tools',
                     'savu.plugins.filters.base_filter_tools',
                     'savu.plugins.corrections.base_correction_tools',
+                    'savu.plugins.savers.base_image_saver_tools',
                     '__builtin___tools']
     if plugin_tools_id not in base_classes:
         try:

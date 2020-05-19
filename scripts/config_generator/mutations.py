@@ -47,6 +47,10 @@ def auto_remove_str():
     return header('***AUTO-REMOVAL NOTICE***:')
 
 
+def deprecation_str():
+    return header('**DEPRECATION NOTICE***:')
+
+
 def plugin_notice_str():
     return header('***PLUGIN NOTICE***:')
 
@@ -63,6 +67,11 @@ def replace_str(old_name, new_name):
 def rename_str(old_name, new_name):
     return wrap(auto_replace_str() + '%s has been renamed as %s. No '
                 'further action required.' % (old_name, new_name))
+
+
+def plugin_deprecation_str(name):
+    return wrap(deprecation_str() + '%s will be deprecated in the next release. '
+                'Please contact us if you would like to keep this plugin.' % (name))
 
 
 def remove_str(name, reason):

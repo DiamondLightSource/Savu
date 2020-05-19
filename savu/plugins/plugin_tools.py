@@ -200,6 +200,9 @@ class PluginParameters(object):
     def define_parameters(self):
         pass
 
+    def config_warn(self):
+        pass
+
     """
     @dataclass
     class Parameter:
@@ -257,6 +260,7 @@ class PluginDocumentation(object):
 
     def set_doc(self):
         self.doc.set('verbose', self.__doc__)
+        self.doc.set('warn', self.config_warn.__doc__)
 
 
 class PluginTools(PluginParameters, PluginCitations, PluginDocumentation):

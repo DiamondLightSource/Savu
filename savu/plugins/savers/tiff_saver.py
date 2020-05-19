@@ -24,19 +24,14 @@
 import tifffile as tf
 
 from savu.plugins.savers.base_image_saver import BaseImageSaver
+from savu.plugins.utils import register_test_plugin
 from savu.plugins.utils import register_plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 
-@register_plugin
+@register_test_plugin
 class TiffSaver(BaseImageSaver, CpuPlugin):
     """
-    A class to save tomography data to tiff files
-    :param pattern: How to slice the data. Default: 'VOLUME_XZ'.
-    :param prefix: Override the default output tiff file prefix. Default: None.
-
-    :config_warn: Do not use this plugin if the raw data is greater than \
-    100 GB.
     """
 
     def __init__(self, name='TiffSaver'):

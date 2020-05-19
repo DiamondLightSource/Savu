@@ -132,7 +132,7 @@ class Plugin(PluginDatasets):
         if p_tools:
             self.tools = p_tools
             self.p_dict = p_tools.get_param()
-            self.set_docstring(p_tools.get_doc().get('verbose'))
+            self.set_docstring(p_tools.get_doc())
             self.parameters = \
                 OrderedDict([(k, v['default'])
                              for k, v in p_tools.get_param().items()])
@@ -141,11 +141,11 @@ class Plugin(PluginDatasets):
             p_tools.update_defaults(self.parameters, self.p_dict)
             p_tools.check_dependencies(self.parameters, self.p_dict)
 
-    def set_docstring(self, verbose):
+    def set_docstring(self, doc_str):
         desc = doc.find_args(self)
-        self.docstring_info['warn'] = desc['warn']
+        self.docstring_info['info'] = doc_str.get('verbose')
+        self.docstring_info['warn'] = doc_str.get('warn')
         self.docstring_info['synopsis'] = desc['synopsis']
-        self.docstring_info['info'] = verbose
 
     def delete_parameter_entry(self, param):
         if param in self.parameters.keys():
