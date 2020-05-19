@@ -25,6 +25,7 @@ from __future__ import print_function, division, absolute_import
 import ast
 import copy
 import logging
+import inspect
 import numpy as np
 from collections import OrderedDict
 
@@ -69,11 +70,10 @@ class Plugin(PluginDatasets):
             self._set_plugin_datasets()
         self._reset_process_frames_counter()
         self.setup()
-
-        if not self.check: # reduce the processing if just checking
-            self.set_filter_padding(*(self.get_plugin_datasets()))
-            self._finalise_datasets()
-            self._finalise_plugin_datasets()
+        
+        self.set_filter_padding(*(self.get_plugin_datasets()))
+        self._finalise_plugin_datasets()
+        self._finalise_datasets()
 
     def _reset_process_frames_counter(self):
         self.pcount = 0
@@ -95,16 +95,6 @@ class Plugin(PluginDatasets):
             name = info['label'].split('_param')[0]
             self.parameters[name] = info['values'][indices[count]]
             count += 1
-
-    def base_dynamic_data_info(self):
-        """ Provides an opportunity to override the number and name of input
-        and output datasets before they are created in the base classes. """
-        pass
-
-    def dynamic_data_info(self):
-        """ Provides an opportunity to override the number and name of input
-        and output datasets before they are created. """
-        pass
 
     def set_filter_padding(self, in_data, out_data):
         """
@@ -252,7 +242,7 @@ class Plugin(PluginDatasets):
 
     def plugin_process_frames(self, data):
         frames = self.base_process_frames_after(self.process_frames(
-            self.base_process_frames_before(data)))
+                self.base_process_frames_before(data)))
         self.pcount += 1
         return frames
 
@@ -289,7 +279,7 @@ class Plugin(PluginDatasets):
         preview = data.get_preview()
         orig_indices = preview.get_starts_stops_steps()
         nDims = len(orig_indices[0])
-        no_preview = [[0] * nDims, data.get_shape(), [1] * nDims, [1] * nDims]
+        no_preview = [[0]*nDims, data.get_shape(), [1]*nDims, [1]*nDims]
 
         # Set previewing params if previewing has not already been applied to
         # the dataset.

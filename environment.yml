@@ -1,6 +1,6 @@
 name: test-environment
 channels:
-  - astra-toolbox
+  - astra-toolbox/label/dev
   - conda-forge
   - ccpi
   - dkazanc
