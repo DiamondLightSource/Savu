@@ -25,7 +25,7 @@ import unittest
 import os
 
 from savu.data.plugin_list import PluginList
-import savu.test.test_utils as tu
+import savu.test.test_process_list_utils as tplu
 
 
 class PluginCoverageTest(unittest.TestCase):
@@ -37,7 +37,7 @@ class PluginCoverageTest(unittest.TestCase):
         # lists all .nxs process lists used in the tests, and all plugins
         # directly called in the tests
         [nxs_in_tests, plugins_in_tests] = \
-            tu.get_process_list(savu_base_path + '/savu/test')
+            tplu.get_process_list(savu_base_path + '/savu/test')
 
         # remove data files from the list
         data_list = self.get_data_list(savu_base_path + '/test_data/data')
@@ -50,13 +50,12 @@ class PluginCoverageTest(unittest.TestCase):
             try:
                 filename_nxs = os.path.basename(nxs)
                 nxs_in_tests_mod.append(filename_nxs)
-            except:
+            except Exception:
                 print("The failed basename file:", nxs)
-                pass
 
         # list all test process lists available in test_process_lists folder
         test_process_path = savu_base_path + 'test_data/test_process_lists'
-        self.nxs_avail = tu.get_test_process_list(test_process_path)
+        self.nxs_avail = tplu.get_test_process_list(test_process_path)
 
         # list the .nxs found in tests that are located in the
         # test_process_lists folder
@@ -67,10 +66,10 @@ class PluginCoverageTest(unittest.TestCase):
         nxs_unused = list(set(nxs_in_tests).difference(set(self.nxs_avail)))
         print("===============================================================")
         print("\nThese .nxs test files were found inside the tests, but are "
-               "not available in the test_process_lists folder:\n")
+              "not available in the test_process_lists folder:\n")
         for nxs in nxs_unused:
-            print(nxs)
-        print("===============================================================")
+            print (nxs)
+        print ("===============================================================")
 
         # get all plugins listed in self.nxs_used process lists
         tested_plugin_list = \
@@ -80,8 +79,8 @@ class PluginCoverageTest(unittest.TestCase):
         # list all plugins
         plugin_list = self.get_plugin_list(savu_base_path + '/savu/plugins')
 
-        print("===============================================================")
-        print("\nThe following plugins are not covered by the tests:\n")
+        print ("===============================================================")
+        print ("\nThe following plugins are not covered by the tests:\n")
         uncovered = list(set(plugin_list).difference(set(tested_plugin_list)))
         for plugin in uncovered:
             print (plugin)
@@ -123,9 +122,8 @@ class PluginCoverageTest(unittest.TestCase):
                     for p in pList:
                         plugin_names.append(p + '.py')
                 except ImportError as e:
-                    print(("Failed to run test as libraries not available (%s),"
-                          % (e) + " passing test"))
-                    pass
+                    print("Failed to run test as libraries not available (%s),"
+                          % (e) + " passing test")
         return list(set(plugin_names))
 
     def add_plugin(self, plugin_id):
@@ -159,6 +157,7 @@ class PluginCoverageTest(unittest.TestCase):
         mod2class = ''.join(x.capitalize() for x in module_name.split('_'))
         clazz = getattr(mod, mod2class.split('.')[-1])()
         return clazz
+
 
 if __name__ == "__main__":
     unittest.main()

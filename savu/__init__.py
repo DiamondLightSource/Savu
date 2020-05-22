@@ -39,8 +39,8 @@ def run_full_tests():
     import unittest
 
     print("Tests will run shortly, and may take some time to complete")
-    print("The tests may raise errors, please don't worry about these as " + \
-        "they may be raised deliberately.")
+    print("The tests may raise errors, please don't worry about these as "
+          "they may be raised deliberately.")
     print("The key information is in the final test results")
 
     path = os.path.split(test.travis.__file__)[0]
