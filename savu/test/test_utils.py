@@ -271,16 +271,13 @@ def plugin_runner_real_plugin_run(options):
 
 
 def get_test_process_list(folder):
-    """
-    """
     test_process_list = []
     for root, dirs, files in os.walk(folder, topdown=True):
         files[:] = [fi for fi in files if fi.split('.')[-1] == 'nxs']
         # since there are some nxs files inside the subfolders we attach the subfolder
         # name to nxs without the root folder
         files = [os.path.join(root[root.index(folder)+1+len(folder):], file) for file in files]
-        for f in files:
-            test_process_list.append(f)
+        test_process_list.extend(files)
     return test_process_list
 
 

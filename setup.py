@@ -4,6 +4,7 @@ import glob
 import shutil
 
 from setuptools import setup, find_packages
+from savu.test.test_utils import get_test_process_list
 
 __version__ = None
 __install__ = None
@@ -116,40 +117,15 @@ setup(name='savu',
           'savu_template_extractor=scripts.savu_config.hdf5_template_extractor:main',
       ], },
 
-      package_data={'test_data': [
-          'data/*',
-          'process_lists/*',
-          'test_process_lists/*',
-          'test_process_lists/corrections/*',
-          'test_process_lists/filters/*',
-          'test_process_lists/filters/ccpi/*',
-          'test_process_lists/filters/denoise/*',
-          'test_process_lists/filters/dezinger/*',
-          'test_process_lists/filters/ring_removal/*',
-          'test_process_lists/imagesavers/*',
-          'test_process_lists/loaders/*',
-          'test_process_lists/multimodal/*',
-          'test_process_lists/pyfai/*',
-          'test_process_lists/pymca/*',
-          'test_process_lists/reconstruction/*',
-          'test_process_lists/reconstruction/tomobar/*',
-          'test_process_lists/vo_centering_test/*',
-          'test_process_lists/to_revise/*',
-          'data/i12_test_data/*',
-          'data/I18_test_data/*',
-          'data/i18_templates/*',
-          'data/image_test/*',
-          'data/image_test/tiffs/*',
-          'data/full_field_corrected/*'],
-
-          'lib': ['*.so'],
-          'system_files': [
-          facility + '/*',
-          facility + '/mpi/*'],
-          'savu.test.travis.framework_tests': ['*.yml'],
-          'install': ['*.txt'],
-          __install__: ['*.txt'],
-          install_pkg + '.conda-recipes': [
+      package_data={'test_data': get_test_process_list("test_data"),
+                    'lib': ['*.so'],
+                    'system_files': [
+                        facility + '/*',
+                        facility + '/mpi/*'],
+                    'savu.test.travis.framework_tests': ['*.yml'],
+                    'install': ['*.txt'],
+                    __install__: ['*.txt'],
+                    install_pkg + '.conda-recipes': [
                         'hdf5/*',
                         'h5py/*',
                         'savu/*',
