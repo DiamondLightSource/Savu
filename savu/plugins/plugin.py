@@ -75,11 +75,10 @@ class Plugin(PluginDatasets):
             self._set_plugin_datasets()
         self._reset_process_frames_counter()
         self.setup()
-
-        if not self.check: # reduce the processing if just checking
-            self.set_filter_padding(*(self.get_plugin_datasets()))
-            self._finalise_datasets()
-            self._finalise_plugin_datasets()
+        
+        self.set_filter_padding(*(self.get_plugin_datasets()))
+        self._finalise_plugin_datasets()
+        self._finalise_datasets()
 
     def _reset_process_frames_counter(self):
         self.pcount = 0

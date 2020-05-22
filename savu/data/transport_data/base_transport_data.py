@@ -107,8 +107,8 @@ class BaseTransportData(object):
                 settings['bytes_threshold'], b_per_p)*mem_multiply
         b_per_p = b_per_p if b_per_p < bytes_threshold else bytes_threshold
 
-        min_bytes = self.__convert_str(settings['min_bytes'], b_per_p)
-        max_mft = int(np.floor(float(max_bytes) / b_per_f))
+        min_bytes = self.__convert_str(settings['min_bytes'], b_per_p)     
+        max_mft = int(np.floor(float(max_bytes)/b_per_f))
         if max_mft == 0:
             raise Exception("The size of a single frame exceeds the permitted "
                             "maximum bytes per frame.")
@@ -135,12 +135,15 @@ class BaseTransportData(object):
 
         # find all possible choices of nFrames, being careful with boundaries
         sdir = self.params['sdir']
-        slice_shape = [self.params['shape'][d] for d in sdir]
-        nSlices = np.prod(slice_shape)
+        # for multiple mft slice dimensions
+        #slice_shape = [self.params['shape'][d] for d in sdir]
+        #nSlices = np.prod(slice_shape)
+        nSlices = self.params['shape'][sdir[0]]
 
         fchoices, size_list = self._get_frame_choices(sdir, min(max_mft, nSlices))
 
         threshold_idx = [i for i in range(len(fchoices)) if fchoices[i] >= min_mft]
+
         if threshold_idx:
             fchoices = [fchoices[i] for i in threshold_idx]
             size_list = [size_list[i] for i in threshold_idx]
@@ -254,6 +257,8 @@ class BaseTransportData(object):
 #            temp[idx] += 1
 #
 #        return choices[::-1], size_list[::-1]
+# the above method is commented out as it was found to be slower than the one
+# below - try again in a different version of HDF5
 
     def _get_frame_choices(self, sdir, max_mft):
         """ Find all possible combinations of increasing slice dimension sizes

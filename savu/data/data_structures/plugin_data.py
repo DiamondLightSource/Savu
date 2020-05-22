@@ -379,7 +379,11 @@ class PluginData(object):
         else:
             n_procs = len(processes)
 
-        f_per_p = np.ceil(frames/n_procs)
+        # Fixing f_per_p to be just the first slice dimension for now due to
+        # slow performance from HDF5 when not slicing multiple dimensions
+        # concurrently
+        #f_per_p = np.ceil(frames/n_procs)
+        f_per_p = np.ceil(shape[sdir[0]]/n_procs)
         self.meta_data.set('shape', shape)
         self.meta_data.set('sdir', sdir)
         self.meta_data.set('total_frames', frames)

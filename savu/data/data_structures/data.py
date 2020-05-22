@@ -54,6 +54,9 @@ class Data(DataCreate):
         self.previous_pattern = None
         self.transport_data = None
 
+#    def get_data(self, related):
+#        return self.related[related].data
+
     def __initialise_data_info(self, name):
         """ Initialise entries in the data_info meta data.
         """
@@ -181,17 +184,21 @@ class Data(DataCreate):
             :const:`pattern_list`
             :data:`savu.data.data_structures.utils.pattern_list`
             :data:`pattern_list`:
-        :keyword tuple core_dir: Dimension indices of core dimensions
-        :keyword tuple slice_dir: Dimension indices of slice dimensions
+        :keyword tuple core_dims: Dimension indices of core dimensions
+        :keyword tuple slice_dims: Dimension indices of slice dimensions
         """
         if dtype in self.pattern_list:
             nDims = 0
             for args in kwargs:
+                dlen = len(kwargs[args])
+                if not dlen:
+                    raise Exception("Pattern Error: Pattern %s must have at"
+                                    " least one %s" % (dtype, args))
                 nDims += len(kwargs[args])
                 self.data_info.set(['data_patterns', dtype, args],
                                    kwargs[args])
 
-            self.__convert_pattern_directions(dtype)
+            self.__convert_pattern_dimensions(dtype)
             if self.get_shape():
                 diff = len(self.get_shape()) - nDims
                 if diff:
@@ -223,20 +230,32 @@ class Data(DataCreate):
         self.add_pattern("VOLUME_XZ", **self.__get_dirs_for_volume(x, z, y))
         self.add_pattern("VOLUME_XY", **self.__get_dirs_for_volume(x, y, z))
 
+        if self.data_info.get("nDims") > 3:
+            self.add_pattern("VOLUME_3D", **self.__get_dirs_for_volume_3D())
 
-    def __get_dirs_for_volume(self, dim1, dim2, sdir):
+    def __get_dirs_for_volume(self, dim1, dim2, sdir, dim3=None):
         """ Calculate core_dir and slice_dir for a volume pattern.
         """
-        all_dims = list(range(len(self.get_shape())))
+        all_dims = range(self.data_info.get("nDims"))
         vol_dict = {}
         vol_dict['core_dims'] = (dim1, dim2)
+
         slice_dir = [sdir]
-        # *** need to add this for other patterns
         for ddir in all_dims:
             if ddir not in [dim1, dim2, sdir]:
                 slice_dir.append(ddir)
         vol_dict['slice_dims'] = tuple(slice_dir)
         return vol_dict
+
+    def __get_dirs_for_volume_3D(self):
+        # create volume 3D pattern here
+        patterns = self.get_data_patterns()
+        cdim = []
+        for v in ['VOLUME_YZ', 'VOLUME_XY', 'VOLUME_XZ']:
+            cdim += (patterns[v]['core_dims'])
+        cdim = set(cdim)
+        sdim = tuple(set(range(self.data_info.get("nDims"))).difference(cdim))
+        return {"core_dims": tuple(cdim), "slice_dims": sdim}
 
     def set_axis_labels(self, *args):
         """ Set the axis labels associated with each data dimension.
@@ -311,7 +330,7 @@ class Data(DataCreate):
             return 0
         return 1
 
-    def __convert_pattern_directions(self, dtype):
+    def __convert_pattern_dimensions(self, dtype):
         """ Replace negative indices in pattern kwargs.
         """
         pattern = self.get_data_patterns()[dtype]
