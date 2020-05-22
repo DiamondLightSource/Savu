@@ -4,7 +4,7 @@ import glob
 import shutil
 
 from setuptools import setup, find_packages
-from savu.test.test_utils import get_test_process_list
+from savu.test.test_process_list_utils import get_test_process_list
 
 __version__ = None
 __install__ = None
