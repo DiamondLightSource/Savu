@@ -23,7 +23,7 @@
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
 
-from savu.plugins.reconstructions.base_recon import BaseRecon
+from savu.plugins.reconstructions.base_vector_recon import BaseVectorRecon
 from savu.data.plugin_list import CitationInformation
 from savu.plugins.driver.multi_threaded_plugin import MultiThreadedPlugin
 
@@ -32,7 +32,7 @@ from tomobar.methodsIR import RecToolsIR
 from savu.plugins.utils import register_plugin
 
 @register_plugin
-class TomobarReconFully3d(BaseRecon, MultiThreadedPlugin):
+class TomobarReconFully3d(BaseVectorRecon, MultiThreadedPlugin):
     """
     A Plugin to reconstruct full-field tomographic projection data using state-of-the-art regularised iterative algorithms from \
     the ToMoBAR package. ToMoBAR includes FISTA and ADMM iterative methods and depends on the ASTRA toolbox and the CCPi RGL toolkit: \
@@ -154,7 +154,7 @@ class TomobarReconFully3d(BaseRecon, MultiThreadedPlugin):
                        'ringGH_accelerate' :  self.parameters['data_full_ring_accelerator_GH']}
 
         self._algorithm_ = {'iterations' : self.parameters['algorithm_iterations'],
-      			    'nonnegativity' : self.parameters['algorithm_nonnegativity'],
+      			            'nonnegativity' : self.parameters['algorithm_nonnegativity'],
                             'verbose' : self.parameters['algorithm_verbose']}
 
         self._regularisation_ = {'method' : self.parameters['regularisation_method'],
@@ -173,26 +173,24 @@ class TomobarReconFully3d(BaseRecon, MultiThreadedPlugin):
         self.det_dimY_ind = in_pData[0].get_data_dimension_by_axis_label('detector_y')
 
     def process_frames(self, data):
-        centre_of_rotations, angles, self.vol_shape, init  = self.get_frame_params()
-
+        cor, angles, self.vol_shape, init = self.get_frame_params()
         self.anglesRAD = np.deg2rad(angles.astype(np.float32))
-        self.centre_of_rotations = centre_of_rotations
         projdata3D = data[0].astype(np.float32)
         dim_tuple = np.shape(projdata3D)
         self.Horiz_det = dim_tuple[self.det_dimX_ind]
-
-        #print(np.shape(projdata3D))
+        half_det_width = 0.5*self.Horiz_det
+        cor_astra = half_det_width - cor
         projdata3D =np.swapaxes(projdata3D,0,1)
+        self._data_.update({'projection_norm_data' : projdata3D})
         # WIP for PWLS fidelity
         # rawdata3D = data[1].astype(np.float32)
         # rawdata3D =np.swapaxes(rawdata3D,0,1)/np.max(np.float32(rawdata3D))
-        self._data_.update({'projection_norm_data' : projdata3D})
 
        # set parameters and initiate a TomoBar class object
         self.Rectools = RecToolsIR(DetectorsDimH = self.Horiz_det,  # DetectorsDimH # detector dimension (horizontal)
                     DetectorsDimV = self.Vert_det,  # DetectorsDimV # detector dimension (vertical) for 3D case only
-                    CenterRotOffset = 0.0, # Center of Rotation (CoR) scalar (for 3D case only)
-                    AnglesVec = self.anglesRAD, # array of angles in radians
+                    CenterRotOffset = cor_astra[0] - 0.5, # The center of rotation (CoR) scalar
+                    AnglesVec = self.anglesRAD, # a vector of angles in radians
                     ObjSize = self.output_size, # a scalar to define the reconstructed object dimensions
                     datafidelity=self.parameters['data_fidelity'],# data fidelity, choose LS
                     device_projector='gpu')

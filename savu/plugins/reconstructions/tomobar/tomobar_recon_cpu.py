@@ -16,12 +16,12 @@
 .. module:: TomoBAR CPU reconstruction
    :platform: Unix
    :synopsis: A wrapper around TOmographic MOdel-BAsed Reconstruction (ToMoBAR) software \
-   for advanced iterative image reconstruction using CPU
+   for advanced iterative image reconstruction using CPU (2D case)
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
 
-from savu.plugins.reconstructions.base_recon import BaseRecon
+from savu.plugins.reconstructions.base_vector_recon import BaseVectorRecon
 from savu.data.plugin_list import CitationInformation
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
@@ -32,7 +32,7 @@ from savu.plugins.utils import register_plugin
 from scipy import ndimage
 
 @register_plugin
-class TomobarReconCpu(BaseRecon, CpuPlugin):
+class TomobarReconCpu(BaseVectorRecon, CpuPlugin):
     """
     A Plugin to reconstruct full-field tomographic projection data using state-of-the-art regularised iterative algorithms from \
     the ToMoBAR package. ToMoBAR includes FISTA and ADMM iterative methods and depends on the ASTRA toolbox and the CCPi RGL toolkit: \
@@ -69,12 +69,6 @@ class TomobarReconCpu(BaseRecon, CpuPlugin):
     def __init__(self):
         super(TomobarReconCpu, self).__init__("TomobarReconCpu")
 
-    def _shift(self, sinogram, centre_of_rotation):
-        centre_of_rotation_shift = (sinogram.shape[0]/2) - centre_of_rotation
-        result = ndimage.interpolation.shift(sinogram,
-                                             (centre_of_rotation_shift, 0))
-        return result
-
     def pre_process(self):
         # extract given parameters into dictionaries suitable for ToMoBAR input
         self._data_ = {'OS_number' : self.parameters['algorithm_ordersubsets'],
@@ -86,7 +80,7 @@ class TomobarReconCpu(BaseRecon, CpuPlugin):
                        'ringGH_accelerate' :  self.parameters['data_full_ring_accelerator_GH']}
 
         self._algorithm_ = {'iterations' : self.parameters['algorithm_iterations'],
-       			    'nonnegativity' : self.parameters['algorithm_nonnegativity'],
+       			            'nonnegativity' : self.parameters['algorithm_nonnegativity'],
                             'verbose' : self.parameters['algorithm_verbose']}
 
         self._regularisation_ = {'method' : self.parameters['regularisation_method'],
@@ -101,17 +95,19 @@ class TomobarReconCpu(BaseRecon, CpuPlugin):
                                 'methodTV' : self.parameters['regularisation_methodTV']}
 
     def process_frames(self, data):
-        centre_of_rotations, angles, self.vol_shape, init  = self.get_frame_params()
+        cor, angles, self.vol_shape, init = self.get_frame_params()
         sinogram = data[0].astype(np.float32)
         anglesTot, self.DetectorsDimH = np.shape(sinogram)
+        half_det_width = 0.5*self.DetectorsDimH
+        cor_astra = half_det_width - cor
         self.anglesRAD = np.deg2rad(angles.astype(np.float32))
         self._data_.update({'projection_norm_data' : sinogram})
 
         # set parameters and initiate the ToMoBAR class object
         self.Rectools = RecToolsIR(DetectorsDimH = self.DetectorsDimH,  # DetectorsDimH # detector dimension (horizontal)
                     DetectorsDimV = None,  # DetectorsDimV # detector dimension (vertical) for 3D case only
-                    CenterRotOffset = None, # Center of Rotation (CoR) scalar (for 3D case only)
-                    AnglesVec = self.anglesRAD, # array of angles in radians
+                    CenterRotOffset = cor_astra - 0.5, # The center of rotation (CoR) scalar
+                    AnglesVec = self.anglesRAD, # the vector of angles in radians
                     ObjSize = self.vol_shape[0] , # a scalar to define the reconstructed object dimensions
                     datafidelity=self.parameters['data_fidelity'],# data fidelity, choose LS, PWLS
                     device_projector='cpu')
