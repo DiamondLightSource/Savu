@@ -224,6 +224,7 @@ def plugin_runner(options):
     plugin_runner = PluginRunner(options)
     return plugin_runner._run_plugin_list()
 
+
 def fake_plugin_runner(options):
     # Stripped down version of the plugin runner
     # Loads the loader plugin but stops before processing plugins
@@ -268,7 +269,10 @@ def plugin_runner_real_plugin_run(options):
     plugin = pu.plugin_loader(exp, plugin_list[1])
     plugin._run_plugin(exp, plugin_runner)
 
+
 def get_test_process_list(folder):
+    """
+    """
     test_process_list = []
     for root, dirs, files in os.walk(folder, topdown=True):
         files[:] = [fi for fi in files if fi.split('.')[-1] == 'nxs']
@@ -278,6 +282,7 @@ def get_test_process_list(folder):
         for f in files:
             test_process_list.append(f)
     return test_process_list
+
 
 def get_process_list(folder, search=False):
     process_list = []
@@ -400,6 +405,7 @@ def initialise_options(data, experiment, process_path):
         options = set_options(data_file, process_file=process_file)
     options['out_path'] = os.path.join(test_folder)
     return options
+
 
 def cleanup(options):
     """
