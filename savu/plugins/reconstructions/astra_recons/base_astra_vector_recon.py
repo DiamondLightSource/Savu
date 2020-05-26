@@ -76,7 +76,7 @@ class BaseAstraVectorRecon(BaseVectorRecon):
 
         if '3D' in self.alg:
             self.setup_3D()
-            self.process_frames = self.astra_3D_recon
+            self.process_frames = self.astra_3D_vector_recon
         else:
             self.setup_2D()
             self.process_frames = self.astra_2D_vector_recon
@@ -92,6 +92,30 @@ class BaseAstraVectorRecon(BaseVectorRecon):
         self.nDims = len(self.sino_shape)
         self.nCols = self.sino_shape[self.dim_detX]
         self.set_mask(self.sino_shape)
+
+    def setup_3D(self):
+        pData = self.get_plugin_in_datasets()[0]
+        self.sino_dim_detX = \
+            pData.get_data_dimension_by_axis_label('x', contains=True)
+        self.sino_dim_detY = \
+            pData.get_data_dimension_by_axis_label('y', contains=True)        
+        self.det_rot = \
+            pData.get_data_dimension_by_axis_label('angle', contains=True)
+        self.sino_shape = pData.get_shape()
+        self.nDims = len(self.sino_shape)
+        #self.nCols = self.sino_shape[self.sino_dim_detX]
+        self.slice_dir = pData.get_slice_dimension()
+        #self.slice_func = self.slice_sino(self.nDims)
+        """
+        l = self.sino_shape[self.sino_dim_detX]
+        c = np.linspace(-l/2.0, l/2.0, l)
+        x, y = np.meshgrid(c, c)
+        self.mask_id = False
+        mask = np.array((x**2 + y**2 < (l/2.0)**2), dtype=np.float)
+        self.mask = np.transpose(
+            np.tile(mask, (self.get_max_frames(), 1, 1)), (1, 0, 2))
+        self.manual_mask = True if not self.parameters['sino_pad'] else False
+        """
 
     def set_mask(self, shape):
         l = self.get_plugin_out_datasets()[0].get_shape()[0]
