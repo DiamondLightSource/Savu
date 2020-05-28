@@ -1,6 +1,14 @@
 import os
 
 
+def get_all_files_from(folder):
+    all_files = []
+    for root, dirs, files in os.walk(folder, topdown=True):
+        files = [os.path.join(root[root.index(folder)+1+len(folder):], file) for file in files]
+        all_files.extend(files)
+    return all_files
+
+
 def get_test_process_list(folder):
     test_process_list = []
     for root, dirs, files in os.walk(folder, topdown=True):
