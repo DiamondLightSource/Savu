@@ -105,33 +105,34 @@ class TomobarRecon(BaseRecon, GpuPlugin):
 
         '''
 
-        A Plugin to reconstruct full-field tomographic projection data using state-of-the-art regularised iterative algorithms from \
-        the ToMoBAR package. ToMoBAR includes FISTA and ADMM iterative methods and depends on the ASTRA toolbox and the CCPi RGL toolkit: \
-        https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
+         A Plugin to reconstruct full-field tomographic projection data using state-of-the-art regularised iterative algorithms from \
+    the ToMoBAR package. ToMoBAR includes FISTA and ADMM iterative methods and depends on the ASTRA toolbox and the CCPi RGL toolkit: \
+    https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
 
-        :param output_size: Number of rows and columns in the \
-            reconstruction. Default: 'auto'.
-        :param data_fidelity: Data fidelity, choose Least Squares only at the moment. Default: 'LS'.
-        :param data_Huber_thresh: Threshold parameter for __Huber__ data fidelity . Default: None.
-        :param data_any_rings: a parameter to suppress various artifacts including rings and streaks. Default: None.
-        :param data_any_rings_winsizes: half window sizes to collect background information [detector, angles, num of projections]. Default: (9,7,0).
-        :param data_any_rings_power: a power parameter for Huber model. Default: 1.5.
-        :param data_full_ring_GH: Regularisation variable for full constant ring removal (GH model). Default: None.
-        :param data_full_ring_accelerator_GH: Acceleration constant for GH ring removal. Default: 10.0.
-        :param algorithm_iterations: Number of outer iterations for FISTA (default) or ADMM methods. Default: 20.
-        :param algorithm_verbose: print iterations number and other messages ('off' by default). Default: 'off'.
-        :param algorithm_ordersubsets: The number of ordered-subsets to accelerate reconstruction. Default: 6.
-        :param regularisation_method: To regularise choose methods ROF_TV, FGP_TV, PD_TV, SB_TV, LLT_ROF,\
-                                 NDF, Diff4th. Default: 'FGP_TV'.
-        :param regularisation_parameter: Regularisation (smoothing) value, higher \
-                                the value stronger the smoothing effect. Default: 0.0001.
-        :param regularisation_iterations: The number of regularisation iterations. Default: 80.
-        :param regularisation_device: The number of regularisation iterations. Default: 'gpu'.
-        :param regularisation_PD_lip: Primal-dual parameter for convergence. Default: 8.
-        :param regularisation_methodTV:  0/1 - TV specific isotropic/anisotropic choice. Default: 0.
-        :param regularisation_timestep: Time marching parameter, relevant for \
-                        (ROF_TV, LLT_ROF, NDF, Diff4th) penalties. Default: 0.003.
-        :param regularisation_edge_thresh: Edge (noise) related parameter, relevant for NDF and Diff4th. Default: 0.01.
-        :param regularisation_parameter2:  Regularisation (smoothing) value for LLT_ROF method. Default: 0.005.
-        :param regularisation_NDF_penalty: NDF specific penalty type Huber, Perona, Tukey. Default: 'Huber'.
-        '''
+    :param output_size: Number of rows and columns in the \
+        reconstruction. Default: 'auto'.
+    :param data_fidelity: Data fidelity, chosoe Least Squares only at the moment. Default: 'LS'.
+    :param data_Huber_thresh: Threshold parameter for __Huber__ data fidelity . Default: None.
+    :param data_any_rings: a parameter to suppress various artifacts including rings and streaks. Default: None.
+    :param data_any_rings_winsizes: half window sizes to collect background information [detector, angles, num of projections]. Default: (9,7,0).
+    :param data_any_rings_power: a power parameter for Huber model. Default: 1.5.
+    :param data_full_ring_GH: Regularisation variable for full constant ring removal (GH model). Default: None.
+    :param data_full_ring_accelerator_GH: Acceleration constant for GH ring removal. Default: 10.0.
+    :param algorithm_iterations: Number of outer iterations for FISTA (default) or ADMM methods. Default: 20.
+    :param algorithm_verbose: print iterations number and other messages ('off' by default). Default: 'off'.
+    :param algorithm_ordersubsets: The number of ordered-subsets to accelerate reconstruction. Default: 6.
+    :param algorithm_nonnegativity: ENABLE or DISABLE nonnegativity constraint. Default: 'ENABLE'.
+    :param regularisation_method: To regularise choose methods ROF_TV, FGP_TV, PD_TV, SB_TV, LLT_ROF,\
+                             NDF, TGV, NLTV, Diff4th. Default: 'FGP_TV'.
+    :param regularisation_parameter: Regularisation (smoothing) value, higher \
+                            the value stronger the smoothing effect. Default: 0.00001.
+    :param regularisation_iterations: The number of regularisation iterations. Default: 80.
+    :param regularisation_device: The number of regularisation iterations. Default: 'gpu'.
+    :param regularisation_PD_lip: Primal-dual parameter for convergence. Default: 8.
+    :param regularisation_methodTV:  0/1 - TV specific isotropic/anisotropic choice. Default: 0.
+    :param regularisation_timestep: Time marching parameter, relevant for \
+                    (ROF_TV, LLT_ROF, NDF, Diff4th) penalties. Default: 0.003.
+    :param regularisation_edge_thresh: Edge (noise) related parameter, relevant for NDF and Diff4th. Default: 0.01.
+    :param regularisation_parameter2:  Regularisation (smoothing) value for LLT_ROF method. Default: 0.005.
+    :param regularisation_NDF_penalty: NDF specific penalty type Huber, Perona, Tukey. Default: 'Huber'.
+    '''

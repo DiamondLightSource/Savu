@@ -14,7 +14,7 @@ class BaseLoaderTools(PluginTools):
               visibility: hidden
               dtype: str
               description: hidden parameter for savu template
-              default: :"<>"
+              default: '<>'
         in_datasets:
               visibility: datasets
               dtype: list

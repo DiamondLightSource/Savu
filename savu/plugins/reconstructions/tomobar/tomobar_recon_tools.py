@@ -10,7 +10,7 @@ and depends on the ASTRA toolbox and the CCPi RGL toolkit
         """
         output_size:
             visibility: advanced
-            dtype: Union[int, tuple]
+            dtype: tuple
             description: Number of rows and columns in the reconstruction.
             default: auto
 
@@ -38,13 +38,13 @@ and depends on the ASTRA toolbox and the CCPi RGL toolkit
            dtype: tuple
            description: half window sizes to collect background information
              [detector, angles, num of projections]
-           default: (9,7,0)
+           default: (9,7,9)
 
         data_any_rings_power:
             visibility: hidden
             dtype: float
             description: a power parameter for Huber model.
-            default: 1.4
+            default: 1.5
 
         data_full_ring_GH:
              visibility: advanced
@@ -56,7 +56,7 @@ and depends on the ASTRA toolbox and the CCPi RGL toolkit
              visibility: advanced
              dtype: float
              description: Acceleration constant for GH ring removal. (use with care)
-             default: 10
+             default: 10.0
 
         algorithm_iterations:
              visibility: basic
@@ -72,8 +72,8 @@ and depends on the ASTRA toolbox and the CCPi RGL toolkit
 
         algorithm_verbose:
              visibility: advanced
-             dtype: str
-             description: print iterations number and other messages (off by default).
+             dtype: bool
+             description: Print iterations number and other messages (off by default).
              default: 'off'
 
         algorithm_ordersubsets:
@@ -82,10 +82,18 @@ and depends on the ASTRA toolbox and the CCPi RGL toolkit
              description: The number of ordered-subsets to accelerate reconstruction.
              default: 6
 
+        algorithm_nonnegativity:
+            visibility: advanced
+            dtype: str
+            options: [ENABLE, DISABLE]
+            description:
+                summary: ENABLE or DISABLE nonnegativity constraint.
+            default: ENABLE
+
         regularisation_method:
              visibility: advanced
              dtype: str
-             options: [ROF_TV, FGP_TV, PD_TV, SB_TV, LLT_ROF, NDF, Diff4th]
+             options: [ROF_TV, FGP_TV, PD_TV, SB_TV, LLT_ROF, NDF, TGV, NLTV, Diff4th]
              description:
                summary: The denoising method
                verbose: Iterative methods can help to solve ill-posed
@@ -100,8 +108,10 @@ and depends on the ASTRA toolbox and the CCPi RGL toolkit
                      with Rudin-Osher-Fatemi
                    NDF: Nonlinear/Linear Diffusion model (Perona-Malik,
                      Huber or Tukey)
+                   TGV: Total Generalised Variation
+                   NLTV: Non Local Total Variation
                    DIFF4th: Fourth-order nonlinear diffusion model
-             default: PD_TV
+             default: FGP_TV
 
         regularisation_parameter:
              visibility: basic
@@ -130,6 +140,8 @@ and depends on the ASTRA toolbox and the CCPi RGL toolkit
                    LLT_ROF: 1000
                    NDF: 1000
                    DIFF4th: 1000
+                   TGV: 80
+                   NLTV: 80
 
         regularisation_device:
              visibility: advanced
@@ -182,7 +194,7 @@ and depends on the ASTRA toolbox and the CCPi RGL toolkit
                verbose: The higher the value stronger the smoothing effect
              default: 0.005
 
-        NDF_penalty:
+        regularisation_NDF_penalty:
              visibility: advanced
              dtype: str
              options: [Huber, Perona, Tukey]

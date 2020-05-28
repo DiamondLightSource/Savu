@@ -324,7 +324,7 @@ def _string_list(value):
     return parameter_valid
 
 
-type_list = {'[int]': _intlist,
+type_dict = {'[int]': _intlist,
             'range': _range,
             'yaml_file': _yamlfile,
             '[path, int_path, int]': _intgroup,
@@ -340,7 +340,7 @@ type_list = {'[int]': _intlist,
             'str': _string,
             'float': _float,
             'tuple': _tuple,
-             'list': _list}
+            'list': _list}
 
 
 def is_valid(dtype, ptools, value, default_value):
@@ -353,11 +353,11 @@ def is_valid(dtype, ptools, value, default_value):
 
     pvalid = _check_default(value, default_value)
     if pvalid == False:
-        if dtype not in type_list:
+        if dtype not in type_dict:
             print("That type definition is not configured properly.")
             pvalid = False
         else:
-            pvalid = type_list[dtype](value)
+            pvalid = type_dict[dtype](value)
         # Then check if the option is valid
         pvalid = check_options(ptools, value, pvalid)
 

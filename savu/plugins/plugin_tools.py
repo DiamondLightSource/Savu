@@ -32,6 +32,7 @@ class PluginParameters(object):
         all_params = self._load_param_from_doc(clazz)
         self._check_required_keys(all_params, clazz)
         self._check_data_keys(all_params)
+        self._check_dtype(all_params, clazz)
         self._set_display(all_params)
         for p_name, p_value in all_params.items():
             self.param.set(p_name, p_value)
@@ -113,6 +114,27 @@ class PluginParameters(object):
             if p_key in datasets:
                 if p['visibility'] != 'datasets':
                     p['visibility'] = 'datasets'
+
+    def _check_dtype(self, all_params, clazz):
+        """
+        Make sure that the dtype input is valid
+        """
+        for p_key, p in all_params.items():
+            if p['dtype'] not in param_u.type_dict:
+                print('Inside %s the %s parameter is assigned an invalid type'
+                      ' \'%s\'' % (self.__class__.__name__, p_key, p['dtype']))
+                print('The type options are: ')
+                for key in param_u.type_dict.keys():
+                    print('     ' + str(key))
+
+    def _check_options(self, all_params, clazz):
+        """
+        Make sure that option verbose descriptions match the actual options
+        """
+        for p_key, p in all_params.items():
+            desc = all_params[p_key]['description']
+            if desc.get('options'):
+                pass
 
     def _set_display(self, all_params):
         """
