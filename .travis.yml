@@ -21,5 +21,5 @@ script:
   - cd $TRAVIS_BUILD_DIR
   - pytest scripts/configurator_tests/ --cov=scripts
   - pytest savu/test/travis --cov=savu --cov-report term-missing
-  - savu_quick_tests
-  - savu_full_tests
+  - python -c "import savu; savu.run_tests()"
+  - python -c "import savu; savu.run_full_tests()"
