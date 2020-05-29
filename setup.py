@@ -4,7 +4,7 @@ import glob
 import shutil
 
 from setuptools import setup, find_packages
-from savu.test.test_process_list_utils import get_test_process_list
+from savu.test.test_process_list_utils import get_all_files_from
 
 __version__ = None
 __install__ = None
@@ -117,7 +117,7 @@ setup(name='savu',
           'savu_template_extractor=scripts.savu_config.hdf5_template_extractor:main',
       ], },
 
-      package_data={'test_data': get_test_process_list("test_data"),
+      package_data={'test_data': get_all_files_from("test_data"),
                     'lib': ['*.so'],
                     'system_files': [
                         facility + '/*',
