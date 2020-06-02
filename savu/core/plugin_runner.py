@@ -133,11 +133,12 @@ class PluginRunner(object):
         n_plugins = plugin_list._get_n_processing_plugins()
         plist = plugin_list.plugin_list
         
-        self.exp._setup(self, plugin_list)
         # set loaders
         for i in range(n_loaders):
             pu.plugin_loader(self.exp, plist[i])
             self.exp._set_initial_datasets()
+
+        self.exp._setup(self, plugin_list)
 
         # run all plugin setup methods and store information in experiment
         # collection
