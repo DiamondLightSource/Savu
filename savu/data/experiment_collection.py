@@ -86,23 +86,23 @@ class Experiment(object):
             data_obj._set_transport_data(self.meta_data.get('transport'))
         return self.index[dtype][name]
 
-    def _setup(self, transport, plugin_list):
-        self.__set_transport(self)
+    def _setup(self, transport):
+        self._set_nxs_file()
+        self._set_transport(transport)
+        self.collection = {'plugin_dict': [], 'datasets': []}
+
         self._barrier()
         self._check_checkpoint()
         self._barrier()
 
+    def _finalise_setup(self, plugin_list):
         checkpoint = self.meta_data.get('checkpoint')
         # save the plugin list - one process, first time only
         if self.meta_data.get('process') == \
                 len(self.meta_data.get('processes'))-1 and not checkpoint:                  
+            # links the input data to the nexus file
             plugin_list._save_plugin_list(self.meta_data.get('nxs_filename'))
-            # links the input data to the nexus file            
-            self._add_input_data_to_nxs_file(transport)
-        self._barrier()
-        
-        # create experiment collection here
-        self.collection = {'plugin_dict': [], 'datasets': []}
+            self._add_input_data_to_nxs_file(self._get_transport())
 
     def _set_initial_datasets(self):
         self.initial_datasets = copy.deepcopy(self.index['in_data'])
@@ -112,7 +112,7 @@ class Experiment(object):
         self.collection['datasets'].append(data)
         self.collection['plugin_dict'].append(plugin_dict)
 
-    def __set_transport(self, transport):
+    def _set_transport(self, transport):
         self._transport = transport
 
     def _get_transport(self):
