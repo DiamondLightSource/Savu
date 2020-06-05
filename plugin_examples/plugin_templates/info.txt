@@ -7,4 +7,6 @@ plugin_template4.py : A template for a plugin that takes in two datasets and ret
 plugin_template5.py : A template to create a plugin with a single input dataset and multiple output datasets, that do not resemble the
                       input dataset and are not retained by the framework.
 plugin_template6.py : A template to create a plugin that changes the shape of the data.
-
+plugin_template7.py : A template to create a plugin that takes an input dataset and adds an extra dimension to the output dataset.
+Plugin_template8.py : A plugin template that dynamically determines the number of output tasets based on the number of entries in the out_datasets parameter list
+Plugin_template9.py : A plugin template that dynamically determines the number of output datasets based on a parameter 
