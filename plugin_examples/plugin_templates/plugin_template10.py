@@ -28,46 +28,41 @@ from savu.plugins.utils import register_plugin
 
 
 @register_plugin
-class PluginTemplate9(Plugin, CpuPlugin):
+class PluginTemplate10(Plugin, CpuPlugin):
     """
-	A plugin template that dynamically determines the number of output \
-    datasets based on a parameter.
+	A plugin template that dynamically determines the number of input \
+    datasets based on the number of entries in the in_datasets parameter list.
 
-    :param n_out: Add this number of output datasets. Default: 1.
-    :param out_prefix: What should the datasets be called. Default: None.
     """
 
-    def __init__(self, name="PluginTemplate9"):
-        super(PluginTemplate9, self).__init__(name)
+    def __init__(self, name="PluginTemplate10"):
+        super(PluginTemplate10, self).__init__(name)
+        self.nOut = None
 
     def nInput_datasets(self):
-        return 1
+        return max(len(self.parameters['in_datasets']), 1)
 
     def nOutput_datasets(self):
-        nOut = self.parameters['n_out']
-        # the output datasets do not yet have names so add them here
-        name = self.parameters['out_prefix']
-        # update the out_datasets list to contain the uniquely named datasets
-        self.parameters['out_datasets'] = ['%s_%i' % (name, i) for i in range(nOut)]
-        return nOut
+        return 1
 
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup('SINOGRAM', 'single')
         
-        for i in range(len(out_dataset)):
-            out_dataset[i].create_dataset(in_dataset[0])
-            out_pData[i].plugin_data_setup('SINOGRAM', 'single')
+        for i in range(len(in_dataset)):
+            in_pData[i].plugin_data_setup('SINOGRAM', 'single')
+
+        out_dataset[0].create_dataset(in_dataset[0])
+        out_pData[0].plugin_data_setup('SINOGRAM', 'single')
+
 
     def pre_process(self):
-        out_datasets = self.get_out_datasets()
-        self.nOut = len(out_datasets)
+        pass
 
     def process_frames(self, data):
+        # data will be a list of numpy arrays of the specified length
         # do some processing here
-        res = [data[0]]*self.nOut
-        return res
+        return data[0]
 
     def post_process(self):
         pass

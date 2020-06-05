@@ -4,6 +4,7 @@ import glob
 import shutil
 
 from setuptools import setup, find_packages
+from savu.test.test_process_list_utils import get_all_files_from
 
 __version__ = None
 __install__ = None
@@ -19,6 +20,7 @@ def readme():
     with open(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                            'README.rst')) as f:
         return f.read()
+
 
 facility = 'dls'
 facility_path = 'system_files/dls'
@@ -47,6 +49,7 @@ def _create_new_facility(facility_path):
             os.path.join(facility_path, 'system_parameters.yml')
         if not os.path.exists(facility_sys_params):
             shutil.copy(dls_sys_params, facility_path)
+
 
 if '--facility' in sys.argv:
     index = sys.argv.index('--facility')
@@ -83,13 +86,13 @@ setup(name='savu',
       description='Savu Python Tomography Pipeline',
       long_description=readme(),
       classifiers=[
-        'Development Status :: 5 - Production/Stable',
-        'Intended Audience :: Science/Research',
-        'License :: OSI Approved :: Apache Software License',
-        'Natural Language :: English',
-        'Programming Language :: Python :: 2.7',
-        'Topic :: Scientific/Engineering'
-        'Operating System :: POSIX :: Linux'
+          'Development Status :: 5 - Production/Stable',
+          'Intended Audience :: Science/Research',
+          'License :: OSI Approved :: Apache Software License',
+          'Natural Language :: English',
+          'Programming Language :: Python :: 2.7',
+          'Topic :: Scientific/Engineering'
+          'Operating System :: POSIX :: Linux'
       ],
       author='Mark Basham',
       author_email='scientificsoftware@diamond.ac.uk',
@@ -97,49 +100,24 @@ setup(name='savu',
       packages=_get_packages(),
 
       scripts=mpi_files + [
-               __install__ + '/tests/test_setup.sh',
-               __install__ + '/tests/mpi_cpu_test.sh',
-               __install__ + '/tests/mpi_gpu_test.sh',
-               __install__ + '/tests/local_mpi_cpu_test.sh',
-               __install__ + '/tests/local_mpi_gpu_test.sh'],
+          __install__ + '/tests/test_setup.sh',
+          __install__ + '/tests/mpi_cpu_test.sh',
+          __install__ + '/tests/mpi_gpu_test.sh',
+          __install__ + '/tests/local_mpi_cpu_test.sh',
+          __install__ + '/tests/local_mpi_gpu_test.sh'],
 
       entry_points={'console_scripts': [
-                        'savu_config=scripts.config_generator.savu_config:main',
-                        'savu=savu.tomo_recon:main',
-                        'savu_quick_tests=savu:run_tests',
-                        'savu_full_tests=savu:run_full_tests',
-                        'savu_citations=scripts.citation_extractor.citation_extractor:main',
-                        'savu_profile=scripts.log_evaluation.GraphicalThreadProfiler:main',
-						'savu_param_extractor=scripts.savu_config.parameter_extractor:main',
-						'savu_template_extractor=scripts.savu_config.hdf5_template_extractor:main',
-						],},
+          'savu_config=scripts.config_generator.savu_config:main',
+          'savu=savu.tomo_recon:main',
+          'savu_quick_tests=savu:run_tests',
+          'savu_full_tests=savu:run_full_tests',
+          'savu_citations=scripts.citation_extractor.citation_extractor:main',
+          'savu_profile=scripts.log_evaluation.GraphicalThreadProfiler:main',
+          'savu_param_extractor=scripts.savu_config.parameter_extractor:main',
+          'savu_template_extractor=scripts.savu_config.hdf5_template_extractor:main',
+      ], },
 
-      package_data={'test_data': [
-                        'data/*',
-                        'process_lists/*',
-                        'test_process_lists/*',                        
-                        'test_process_lists/corrections/*',
-                        'test_process_lists/filters/*',
-                        'test_process_lists/filters/ccpi/*',
-                        'test_process_lists/filters/denoise/*',
-                        'test_process_lists/filters/dezinger/*',
-                        'test_process_lists/filters/ring_removal/*',
-                        'test_process_lists/imagesavers/*',
-                        'test_process_lists/loaders/*',
-                        'test_process_lists/multimodal/*',
-                        'test_process_lists/pyfai/*',
-                        'test_process_lists/pymca/*',
-                        'test_process_lists/reconstruction/*',
-                        'test_process_lists/reconstruction/tomobar/*',
-                        'test_process_lists/vo_centering_test/*',
-                        'test_process_lists/to_revise/*',
-                        'data/i12_test_data/*',
-                        'data/I18_test_data/*',
-                        'data/i18_templates/*',
-                        'data/image_test/*',
-                        'data/image_test/tiffs/*',
-                        'data/full_field_corrected/*'],
-      
+      package_data={'test_data': get_all_files_from("test_data"),
                     'lib': ['*.so'],
                     'system_files': [
                         facility + '/*',
