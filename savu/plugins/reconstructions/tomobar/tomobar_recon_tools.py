@@ -1,9 +1,9 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class TomobarReconTools(PluginTools):
-    """A plugin to reconstruct full-field tomographic projection data\
-using state-of-the-art regularised iterative algorithms from the\
-ToMoBAR package. ToMoBAR includes FISTA and ADMM iterative methods\
+    """A plugin to reconstruct full-field tomographic projection data \
+using state-of-the-art regularised iterative algorithms from the \
+ToMoBAR package. ToMoBAR includes FISTA and ADMM iterative methods \
 and depends on the ASTRA toolbox and the CCPi RGL toolkit
     """
     def define_parameters(self):
@@ -29,14 +29,14 @@ and depends on the ASTRA toolbox and the CCPi RGL toolkit
         data_any_rings:
             visibility: hidden
             dtype: int
-            description: a parameter to suppress various artifacts including
+            description: a parameter to suppress various artifacts including \
               rings and streaks
             default: None
 
         data_any_rings_winsizes:
            visibility: hidden
            dtype: tuple
-           description: half window sizes to collect background information
+           description: half window sizes to collect background information \
              [detector, angles, num of projections]
            default: (9,7,9)
 
@@ -104,9 +104,9 @@ and depends on the ASTRA toolbox and the CCPi RGL toolkit
                    FGP_TV: Fast Gradient Projection Total Variation model
                    PD_TV: Primal-Dual Total Variation
                    SB_TV: Split Bregman Total Variation model
-                   LLT_ROF: Lysaker, Lundervold and Tai model combined
+                   LLT_ROF: Lysaker, Lundervold and Tai model combined \
                      with Rudin-Osher-Fatemi
-                   NDF: Nonlinear/Linear Diffusion model (Perona-Malik,
+                   NDF: Nonlinear/Linear Diffusion model (Perona-Malik, \
                      Huber or Tukey)
                    TGV: Total Generalised Variation
                    NLTV: Non Local Total Variation
@@ -117,7 +117,7 @@ and depends on the ASTRA toolbox and the CCPi RGL toolkit
              visibility: basic
              dtype: float
              description:
-               summary: Regularisation parameter. The higher the value, the
+               summary: Regularisation parameter. The higher the value, the \
                  stronger the smoothing effect
                range: Recommended between 0 and 1
              default: 0.0001

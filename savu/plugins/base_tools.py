@@ -10,6 +10,7 @@ class BaseTools(PluginTools):
             dtype: list
             description: Create a list of the dataset(s) to process
             default: []
+
         out_datasets:
             visibility: datasets
             dtype: list

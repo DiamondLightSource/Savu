@@ -1,0 +1,56 @@
+from savu.plugins.plugin_tools import PluginTools
+
+class VisualHullsReconTools(PluginTools):
+    """A Plugin to reconstruct an image by filter back projection \
+using the inverse radon transform from scikit-image.
+    """
+    def define_parameters(self):
+        """
+        threshold:
+            visibility: advanced
+            dtype: float
+            description: Threshold to binarize the input sinogram.
+            default: 0.5
+
+        outer_pad:
+            visibility: hidden
+            dtype: str
+            description: Not required.
+            default: False
+
+        centre_pad:
+            visibility: hidden
+            dtype: int
+            description: Not required.
+            default: False
+
+        """
+
+
+    def get_bibtex(self):
+        """@article{laurentini1994visual,
+          title={The visual hull concept for silhouette-based image understanding},
+          author={Laurentini, Aldo},
+          journal={IEEE Transactions on pattern analysis and machine intelligence},
+          volume={16},
+          number={2},
+          pages={150--162},
+          year={1994},
+          publisher={IEEE}
+          }
+        """
+
+
+    def get_endnote(self):
+        """%0 Journal Article
+            %T The visual hull concept for silhouette-based image understanding
+            %A Laurentini, Aldo
+            %J IEEE Transactions on pattern analysis and machine intelligence
+            %V 16
+            %N 2
+            %P 150-162
+            %@ 0162-8828
+            %D 1994
+            %I IEEE
+        """
+

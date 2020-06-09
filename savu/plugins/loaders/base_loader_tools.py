@@ -1,13 +1,14 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class BaseLoaderTools(PluginTools):
-    """A base class for loader plugins. A base plugin from which all data loader plugins should inherit.
+    """A base class for loader plugins. A base plugin from which all \
+data loader plugins should inherit.
     """
     def define_parameters(self):
         """
-        preview:
+        preview::
               visibility: basic
-              dtype: '[int]'
+              dtype: int_list
               description: A slice list of required frames.
               default: []
         data_file:
