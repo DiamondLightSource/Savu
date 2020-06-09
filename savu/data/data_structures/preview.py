@@ -91,9 +91,10 @@ class Preview(object):
         :rtype: list
         """
         nEntries = 4
-        plist = [str(i) for i in plist] if isinstance(plist[0], int) else plist
+        #plist = [str(i) for i in plist] if isinstance(plist[0], int) else plist
+        plist = [str(i) if isinstance(i, int) else i for i in plist]
         diff_len = [(nEntries - len(elem.split(':'))) for elem in plist]
-        diff3 = [i for i in range(len(diff_len)) if diff_len[i] is 3]
+        diff3 = [i for i in range(len(diff_len)) if diff_len[i] == 3]
         for dim in diff3:
             plist[dim] = plist[dim] + ':' + plist[dim] + '+1'
             diff_len[dim] = 2

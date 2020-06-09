@@ -13,24 +13,25 @@
 # limitations under the License.
 
 """
-.. module:: pyfai_azimuthal_integration_test
+.. module:: ComponentAnalysisTest
    :platform: Unix
-   :synopsis: runner for tests using the MPI framework
+   :synopsis: Test all the component analyses
 
-.. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
+.. moduleauthor:: Aaron D. Parsons <scientificsoftware@diamond.ac.uk>
 
 """
+
 import unittest
 from savu.test import test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
 
-class McNearAbsorptionCorrectTest(unittest.TestCase):
+class PcaTest(unittest.TestCase):
 
-    def test_mcnear(self):
-        data_file = tu.get_test_data_path('i18_test_data.nxs')
-        process_file = tu.get_test_process_path('mcnear_absorption_correction.nxs')
+    def test_process(self):
+        data_file = tu.get_test_big_data_path('xrd_tomo_p3_astra_recon_cpu.h5')
+        process_file = tu.get_test_process_path('to_revise/pca_test.nxs')
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
 

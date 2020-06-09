@@ -24,7 +24,7 @@
 """
 import os
 import unittest
-import savu.test.test_utils as tu
+import savu.test.test_process_list_utils as tplu
 import scripts.config_generator.config_utils as cu
 from scripts.config_generator.content import Content
 
@@ -36,10 +36,10 @@ class RefreshProcessListsTest(unittest.TestCase):
         path = os.path.dirname(os.path.realpath(__file__)).split('scripts')[0]
 
         nxs_in_tests, plugins_in_tests = \
-            tu.get_process_list(path + '/savu/test/travis')
+            tplu.get_process_list(path + '/savu/test/travis')
 
-        lists = tu.get_test_process_list(path + 'test_data/process_lists') \
-            + tu.get_test_process_list(path+'test_data/test_process_lists')
+        lists = tplu.get_test_process_list(path + 'test_data/process_lists') \
+            + tplu.get_test_process_list(path+'test_data/test_process_lists')
         nxs_used = list(set(nxs_in_tests).intersection(set(lists)))
 
         test_path = path + '/test_data/test_process_lists'
