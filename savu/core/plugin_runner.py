@@ -47,8 +47,8 @@ class PluginRunner(object):
     def _run_plugin_list(self):
         """ Create an experiment and run the plugin list.
         """
-        self.exp._set_nxs_file()
-
+        self.exp._setup(self)
+        
         plugin_list = self.exp.meta_data.plugin_list
         logging.info('Running the plugin list check')
         self._run_plugin_list_setup(plugin_list)
@@ -133,7 +133,6 @@ class PluginRunner(object):
         n_plugins = plugin_list._get_n_processing_plugins()
         plist = plugin_list.plugin_list
 
-        self.exp._setup(self, plugin_list)
         # set loaders
         for i in range(n_loaders):
             pu.plugin_loader(self.exp, plist[i])
@@ -145,15 +144,17 @@ class PluginRunner(object):
         for plugin_dict in plist[n_loaders:n_loaders+n_plugins]:
             plugin = pu.plugin_loader(self.exp, plugin_dict, check=True)
             plugin._revert_preview(plugin.get_in_datasets())
-            plugin_dict['cite'] = plugin.get_citation_information()            
+            plugin_dict['cite'] = plugin.get_citation_information()
             plugin._clean_up()
             self.exp._update(plugin_dict)
             self.exp._merge_out_data_to_in()
             count += 1
         self.exp._reset_datasets()
 
+        self.exp._finalise_setup(plugin_list)
         plugin_list._add_missing_savers(self.exp)
         cu.user_message("Plugin list check complete!")
+
         #  ********* transport function ***********
         self._transport_update_plugin_list()
 

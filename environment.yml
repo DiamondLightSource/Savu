@@ -7,12 +7,14 @@ channels:
 dependencies:
   - python=2.7
   - numpy
+  - pip
   - scipy
   - pytest
   - h5py
   - pep8
   - mpi4py 
   - scikit-image
+  - scikit-learn
   - astra-toolbox
   - xraylib
   - opencv=4.1.1
@@ -27,7 +29,7 @@ dependencies:
   - pymca=5.5.2
   - ccpi-regulariser
   - tomobar
-  - i23-seg
+  - larix
   - yamllint
   - mrcfile
   - pip:

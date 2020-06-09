@@ -65,6 +65,7 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
         self.warn = self.parameters['warn_proportion']
         self.low = self.parameters['lower_bound']
         self.high = self.parameters['upper_bound']
+        self.in_pData = in_pData
 
     def _proj_pre_process(self, data, shape, tile, dim):
         tile[dim] = shape[dim]
@@ -78,9 +79,9 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
         self.process_frames = self.correct_sino
         self.n_plugin_frames = pData.get_shape()[self.slice_dir]
 
-        length = full_shape[self.slice_dir]
+        self.length = full_shape[self.slice_dir]
         self.mfp = pData._get_max_frames_process()
-        self.reps_at = int(np.ceil(length/float(self.mfp)))
+        self.reps_at = int(np.ceil(self.length/float(self.mfp)))
 
         if len(full_shape) is 3:
             self.convert_size = lambda a, b, x, pad: np.pad(
@@ -105,18 +106,24 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
         sl = self.get_current_slice_list()[0][self.slice_dir]
         count = self.get_process_frames_counter()
         current_idx = self.get_global_frame_index()[count]
+        
         start = (current_idx % self.reps_at)*self.mfp
         end = start + len(np.arange(sl.start, sl.stop, sl.step))
-
-        pad = [[0, 0] for i in range(3)]
-        pad[self.slice_dir][1] = self.n_plugin_frames - (end - start)
+        pad = self._get_pad_amount(end)
 
         dark = self.convert_size(start, end, self.dark, pad)
         flat_minus_dark = \
             self.convert_size(start, end, self.flat_minus_dark, pad)
+
         data = np.nan_to_num((data-dark)/flat_minus_dark)
         self.__data_check(data)
         return data
+
+    def _get_pad_amount(self, end):
+        pad = [[0, 0] for i in range(3)]
+        if end > self.length:
+            pad[self.slice_dir][1] = end - self.length
+        return pad
 
     def fixed_flag(self):
         if self.parameters['pattern'] == 'PROJECTION':
