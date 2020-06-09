@@ -47,14 +47,14 @@ OUTPUT_TYPE_METADATA_AND_DATA = 2
 
 def register_plugin(clazz):
     """decorator to add plugins to a central register"""
+    plugins[clazz.__name__] = clazz
+    if clazz.__module__.split('.')[0] != 'savu':
+        plugins_path[clazz.__name__] = clazz.__module__
     return clazz
 
 
 def register_test_plugin(clazz):
-    """decorator to add plugins to a central register"""
-    plugins[clazz.__name__] = clazz
-    if clazz.__module__.split('.')[0] != 'savu':
-        plugins_path[clazz.__name__] = clazz.__module__
+    """decorator to add test plugins to a central register"""
     return clazz
 
 
@@ -140,9 +140,8 @@ def get_tools_class(plugin_tools_id, cls=False):
         plugin_tools_id = 'savu.plugins.base_tools'
 
     # determine Savu base path
-    base_file_path = os.path.abspath('../..')
     path_name = plugin_tools_id.replace('.', '/')
-    file_path =  base_file_path + '/' + path_name + '.py'
+    file_path =  savu.__path__[0] + '/../' + path_name + '.py'
 
     # Currently no warning as if the tools file is not valid it may be a base file not requiring tools
     if os.path.isfile(file_path):
@@ -152,6 +151,7 @@ def get_tools_class(plugin_tools_id, cls=False):
             else:
                 tool_class = load_class(plugin_tools_id)
         except Exception as e:
+            print(e)
             print('Error loading tools id: '+str(plugin_tools_id))
     return tool_class
 

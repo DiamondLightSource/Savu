@@ -45,6 +45,7 @@ class DisplayFormatter(object):
         start = kwargs.get('start', 0)
         stop = kwargs.get('stop', len(self.plugin_list))
         subelem = kwargs.get('subelem', False)
+
         if stop == -1:
             stop = len(self.plugin_list)
 
@@ -88,10 +89,9 @@ class DisplayFormatter(object):
     def _get_synopsis(self, p_dict, width, colour_on, colour_off):
         doc_str = p_dict['doc']
         synopsis = \
-            self._get_equal_lines(doc_str['synopsis'], width, colour_on,
+            self._get_equal_lines(doc_str.get('synopsis'), width, colour_on,
                                   colour_off, " "*2)
-        if not synopsis:
-            return ''
+
         return "\n" + colour_on + synopsis + colour_off
 
     def _get_verbose_param_details(self, p_dict, param_key, desc, key,
@@ -123,8 +123,8 @@ class DisplayFormatter(object):
                            desc=False, breakdown=False):
         params =''
         keycount = 0
-        subelem = display_args['subelem'] if display_args else False
-        datasets = display_args['datasets'] if display_args else False
+        subelem = display_args['subelem'] if display_args else None
+        datasets = display_args['datasets'] if display_args else None
 
         dev_keys = [k for k, v in p_dict['param'].items()
                     if v['visibility'] in ['intermediate', 'advanced']
@@ -133,14 +133,26 @@ class DisplayFormatter(object):
                      if v['visibility'] in ['datasets'] and v['display'] == 'on']
         user_keys = [k for k, v in p_dict['param'].items()
                      if v['visibility'] == 'basic' and v['display'] == 'on']
+
+        keys = user_keys if (level == 'user') and not (subelem or datasets) \
+            else user_keys + dev_keys + data_keys
+
+        if subelem:
+            if subelem.isdigit():
+                subelem = int(subelem)
+                if subelem > len(keys):
+                    raise Exception('This parameter number is not valid for this plug in.')
+            elif subelem in keys:
+                subelem = keys.index(subelem) + 1
+            else:
+                raise Exception('This parameter is not present in this plug in.')
+
         try:
-            keys = user_keys if (level == 'user') and not (subelem or datasets) \
-                   else user_keys + dev_keys + data_keys
             for key in keys:
                 keycount += 1
                 if subelem:
                     # If there is a sub parameter specified, only show this
-                    if int(keycount) == int(subelem):
+                    if keycount == subelem:
                         params = self._create_display_string(desc, key, p_dict,
                                                 params, keycount, width, breakdown)
                 elif datasets:
@@ -172,6 +184,7 @@ class DisplayFormatter(object):
 
     def _append_description(self, desc, key, p_dict, joiner, width, margin,
                             params, breakdown):
+        description_verbose = False
         if isinstance(desc[key], str):
             pdesc = " ".join(desc[key].split())
             # Restrict the margin so that the lines don't overflow.
@@ -179,8 +192,10 @@ class DisplayFormatter(object):
             temp = joiner + Fore.CYAN + "%s" + Fore.RESET
             params += temp % pdesc
         elif isinstance(desc[key], dict):
-            required_keys = desc[key].keys()
-            for param_key in required_keys:
+            # If the description is a dictionary format instead of a string
+            description_keys = desc[key].keys()
+            # The verbose description keys present
+            for param_key in description_keys:
                 # desc[key][param_key] is the value at this parameter
                 if param_key == 'summary':
                     pdesc = desc[key][param_key]
@@ -192,6 +207,7 @@ class DisplayFormatter(object):
                 if breakdown:
                     params = self._get_verbose_param_details(p_dict,
                                       param_key, desc, key, params, width)
+                    description_verbose = True
 
         options = p_dict['param'][key].get('options')
         if options:
@@ -211,20 +227,18 @@ class DisplayFormatter(object):
                     colour = Fore.BLUE
                     verbose_color = Fore.GREEN
                 option_verbose = ''
-                option_verbose += colour + u'\u0009' + u'\u2022' + opt
-
-                if isinstance(desc[key][param_key], dict):
+                option_verbose += colour + u'\u0009' + u'\u2022' + str(opt)
+                if (description_verbose == True) and ('options' in description_keys):
                     # If there are option descriptions present
                     options_desc = {self._apply_lower_case(k): v
-                                    for k, v in desc[key][param_key].items()
+                                    for k, v in desc[key]['options'].items()
                                     if v}
                     if opt in options_desc.keys():
-                        if breakdown:
-                            option_verbose += ': ' \
-                                              + verbose_color \
-                                              + options_desc[opt]
-                            option_verbose = joiner.join(textwrap.wrap(
-                                option_verbose, width=width - margin))
+                        option_verbose += ': ' + verbose_color \
+                                          + options_desc[opt]
+                        option_verbose = joiner.join(textwrap.wrap(
+                            option_verbose, width=width - margin))
+
                 temp = joiner + "%s" + Fore.RESET
                 params += temp % option_verbose
 
@@ -236,9 +250,9 @@ class DisplayFormatter(object):
     def _get_extra_info(self, p_dict, width, colour_off, info_colour,
                         warn_colour):
         doc_str = p_dict['doc']
-        info = self._get_equal_lines(doc_str['info'], width, info_colour,
+        info = self._get_equal_lines(doc_str.get('info'), width, info_colour,
                                      colour_off, " "*2)
-        warn = self._get_equal_lines(doc_str['warn'], width, warn_colour,
+        warn = self._get_equal_lines(doc_str.get('warn'), width, warn_colour,
                                      colour_off, " "*2)
         info = "\n"+info if info else ''
         warn = "\n"+warn if warn else ''
@@ -301,7 +315,7 @@ class DispDisplay(DisplayFormatter):
             self._get_verbose(level, p_dict, count, width, display_args,
                               breakdown=True)
         info_c = Back.CYAN + Fore.LIGHTWHITE_EX
-        warn_c = Back.WHITE + Fore.RED
+        warn_c =  Style.RESET_ALL + Fore.RED
         c_off = Back.RESET + Fore.RESET
         info, warn = self._get_extra_info(p_dict, width, c_off, info_c, warn_c)
         # Synopsis and get_extra info both call plugin instance and populate

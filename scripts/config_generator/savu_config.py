@@ -125,9 +125,8 @@ def _mod(content, args):
         pos_str, subelem = args.param.split('.')
         try:
             content.modify(pos_str, subelem, ' '.join(args.value))
-        except Exception as e:
+        except Exception:
             print('Error modifying the parameter.')
-            print(e)
             raise
         # If modified then display, and show recommendations
         _disp(content, str(args.param) + ' -vv')

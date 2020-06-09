@@ -248,8 +248,16 @@ class Content(object):
         user_keys = [k for k, v in params.items()
                      if v['visibility'] == 'basic' and v['display'] == 'on']
         keys = user_keys + dev_keys + data_keys
+
         if param_name.isdigit():
-            param_name = keys[int(param_name)-1]
+            param_name = int(param_name)
+            if param_name <= len(keys):
+                param_name = keys[param_name-1]
+            else:
+                raise Exception('This parameter number is not valid for this plug in.')
+        elif param_name not in keys:
+            raise Exception('This parameter is not present in this plug in.')
+
         try:
             if not ref:
                 value = self.value(value)

@@ -30,22 +30,25 @@ class PluginParameters(object):
     def _set_plugin_parameters(self, clazz):
         """ Load the parameters for each base class and set values"""
         all_params = self._load_param_from_doc(clazz)
-        self._check_required_keys(all_params, clazz)
-        self._check_data_keys(all_params)
-        self._check_dtype(all_params, clazz)
-        self._set_display(all_params)
-        for p_name, p_value in all_params.items():
-            self.param.set(p_name, p_value)
+        if all_params:
+            self._check_required_keys(all_params, clazz)
+            self._check_data_keys(all_params)
+            self._check_dtype(all_params, clazz)
+            self._set_display(all_params)
+            for p_name, p_value in all_params.items():
+                self.param.set(p_name, p_value)
 
     def _load_param_from_doc(self, clazz):
         """Find the parameter information from the method docstring.
         This is provided in a yaml format.
         """
+        all_params = None
         yaml_text = clazz.define_parameters.__doc__
-        all_params = doc.load_yaml_doc(yaml_text)
-        if not isinstance(all_params, OrderedDict):
-            print('The parameters have not been read in correctly for '
-                  + str(clazz.__name__) + '.')
+        if yaml_text is not None:
+            all_params = doc.load_yaml_doc(yaml_text)
+            if not isinstance(all_params, OrderedDict):
+                print('The parameters have not been read in correctly for '
+                      + str(clazz.__name__) + '.')
         return all_params
 
     def modify(self, parameters, value, param_name):
@@ -78,9 +81,16 @@ class PluginParameters(object):
             default_value = p['default']
             parameter_valid = param_u.is_valid(dtype, p, value, default_value)
             if parameter_valid is False:
-                print('Your input for the parameter \'%s\' must match the'
-                      ' type %s' % (subelem, dtype))
-                print(Fore.RESET)
+                if isinstance(dtype, list):
+                    type_options = ' or '.join([str(t) for t in dtype])
+                    print('Your input for the parameter \'%s\' must match the'
+                          ' type %s.' % (subelem, type_options) + Fore.RESET)
+                    print()
+
+                else:
+                    print('Your input for the parameter \'%s\' must match the'
+                      ' type %s' % (subelem, dtype) + Fore.RESET)
+
         else:
             print('Not in parameter keys.')
         return parameter_valid
@@ -94,6 +104,7 @@ class PluginParameters(object):
         for p_key, p in all_params.items():
             all_keys = p.keys()
             if p.get('visibility') == 'hidden':
+                # For hidden keys, only require a default value key
                 required_keys = ['default']
 
             if not all(d in all_keys for d in required_keys):
@@ -120,12 +131,18 @@ class PluginParameters(object):
         Make sure that the dtype input is valid
         """
         for p_key, p in all_params.items():
-            if p['dtype'] not in param_u.type_dict:
-                print('Inside %s the %s parameter is assigned an invalid type'
-                      ' \'%s\'' % (self.__class__.__name__, p_key, p['dtype']))
-                print('The type options are: ')
-                for key in param_u.type_dict.keys():
-                    print('     ' + str(key))
+            if isinstance(p['dtype'], list):
+                for item in p['dtype']:
+                    if item not in param_u.type_dict:
+                        print('Inside %s the %s parameter is assigned an invalid type'
+                              ' \'%s\'' % (clazz.__name__, p_key, item))
+            else:
+                if p['dtype'] not in param_u.type_dict:
+                    print('Inside %s the %s parameter is assigned an invalid type'
+                          ' \'%s\'' % (clazz.__name__, p_key, p['dtype']))
+                    print('The type options are: ')
+                    for key in param_u.type_dict.keys():
+                        print('     ' + str(key))
 
     def _check_options(self, all_params, clazz):
         """
@@ -152,34 +169,35 @@ class PluginParameters(object):
         default_list = {k: v['default'] for k, v in all_params.items()
                         if isinstance(v['default'], OrderedDict)}
         for p_name, default in default_list.items():
-
             desc = all_params[p_name]['description']
-            parent_param = default.keys()[0]
-            dep_param_choices = {self._apply_lower_case(k): v
-                                 for k, v in default[parent_param].items()}
-            if mod:
-                # If there was a modification, find current parent value
-                parent_value = \
-                    self._apply_lower_case(parameters[parent_param])
-            else:
-                # If there was no modification, on load, find the parent default
-                parent_value = \
-                    self._apply_lower_case(all_params[parent_param]['default'])
-            for item in dep_param_choices.keys():
-                if parent_value == item:
-                    desc['range'] = 'The recommended value with the chosen ' \
-                                    + str(parent_param) + ' would be ' \
-                                    + str(dep_param_choices[item])
-                    recommendation = 'It\'s recommended that you update ' \
-                                     + str(p_name) + ' to ' \
-                                     + str(dep_param_choices[item])
-                    if mod:
-                        if mod == parent_param:
-                            print(Fore.RED + recommendation + Fore.RESET)
-                    else:
-                        # If there was no modification, on loading the plugin set
-                        # the correct default value
-                        parameters[p_name] = dep_param_choices[item]
+            parent_param = default.keys()[0] if default.keys() else ''
+
+            if parent_param:
+                dep_param_choices = {self._apply_lower_case(k): v
+                                     for k, v in default[parent_param].items()}
+                if mod:
+                    # If there was a modification, find current parent value
+                    parent_value = \
+                        self._apply_lower_case(parameters[parent_param])
+                else:
+                    # If there was no modification, on load, find the parent default
+                    parent_value = \
+                        self._apply_lower_case(all_params[parent_param]['default'])
+                for item in dep_param_choices.keys():
+                    if parent_value == item:
+                        desc['range'] = 'The recommended value with the chosen ' \
+                                        + str(parent_param) + ' would be ' \
+                                        + str(dep_param_choices[item])
+                        recommendation = 'It\'s recommended that you update ' \
+                                         + str(p_name) + ' to ' \
+                                         + str(dep_param_choices[item])
+                        if mod:
+                            if mod == parent_param:
+                                print(Fore.RED + recommendation + Fore.RESET)
+                        else:
+                            # If there was no modification, on loading the plugin set
+                            # the correct default value
+                            parameters[p_name] = dep_param_choices[item]
 
     def check_dependencies(self, parameters, all_params):
         """ Determine which parameter values are dependent on a parent

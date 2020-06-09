@@ -22,8 +22,6 @@
 """
 from __future__ import print_function, division, absolute_import
 
-from __future__ import print_function
-
 import os, re
 import h5py
 import posixpath
@@ -35,6 +33,7 @@ from colorama import Fore
 
 from savu.plugins.utils import parse_config_string as parse_str
 from yamllint.config import YamlLintConfig
+import savu.plugins.loaders.utils.yaml_utils as yu
 
 import warnings
 with warnings.catch_warnings():
@@ -71,18 +70,18 @@ def _range(value):
 def _yamlfile(value):
     """ yaml_file """
     parameter_valid = False
-    config_file = open('savu/plugins/loaders/utils/yaml_config.yaml')
-    conf = YamlLintConfig(config_file)
     if _filepath(value):
         f = open(value)
-        gen = linter.run(f, conf)
-        errors = list(gen)
-        if errors:
-            print('There were some errors with your yaml file structure.')
-            for e in errors:
-                print(e)
-        else:
+        errors = yu.check_yaml_errors(f)
+        try:
+            yu.read_yaml(value)
             parameter_valid = True
+        except:
+            if errors:
+                print('There were some errors with your yaml file structure.')
+                for e in errors:
+                    print(e)
+
     return parameter_valid
 
 
@@ -97,39 +96,36 @@ def _intgroup(value):
         if len(entries) == 3:
             file_path = entries[0]
 
-            if entries == [None, None, 1]:
-                parameter_valid = True
-            else:
-                if _filepath(file_path):
-                    int_path = entries[1]
-                    hf = h5py.File(file_path, 'r')
-                    try:
-                        # This returns a HDF5 dataset object
-                        int_data = hf.get(int_path)
-                        if int_data is None:
-                            print('There is no data stored at that internal path.')
-                        else:
-                            # Internal path is valid
-                            int_data = np.array(int_data)
-                            if int_data.size >= 1:
-                                try:
-                                    compensation_fact = entries[2]
-                                    parameter_valid = _integer(compensation_fact)
-                                except (Exception, ValueError):
-                                    print('The compensation factor is not an integer.')
+            if _filepath(file_path):
+                int_path = entries[1]
+                hf = h5py.File(file_path, 'r')
+                try:
+                    # This returns a HDF5 dataset object
+                    int_data = hf.get(int_path)
+                    if int_data is None:
+                        print('There is no data stored at that internal path.')
+                    else:
+                        # Internal path is valid
+                        int_data = np.array(int_data)
+                        if int_data.size >= 1:
+                            try:
+                                compensation_fact = entries[2]
+                                parameter_valid = _integer(compensation_fact)
+                            except (Exception, ValueError):
+                                print('The compensation factor is not an integer.')
 
-                    except AttributeError:
-                        print('Attribute error.')
-                    except:
-                        print(Fore.BLUE + 'Please choose another interior'
-                                          ' path.' + Fore.RESET)
-                        print('Example interior paths: ')
-                        for group in hf:
-                            for subgroup in hf[group]:
-                                subgroup_str = '/' + group + '/' + subgroup
-                                print(u'\t' + subgroup_str)
-                        raise
-                    hf.close()
+                except AttributeError:
+                    print('Attribute error.')
+                except:
+                    print(Fore.BLUE + 'Please choose another interior'
+                                      ' path.' + Fore.RESET)
+                    print('Example interior paths: ')
+                    for group in hf:
+                        for subgroup in hf[group]:
+                            subgroup_str = '/' + group + '/' + subgroup
+                            print(u'\t' + subgroup_str)
+                    raise
+                hf.close()
         else:
             print(Fore.RED + 'Please enter three parameters.' + Fore.RESET)
         return parameter_valid
@@ -140,15 +136,14 @@ def _intgroup(value):
 
 @error_catcher_valid
 def _intgroup1(value):
-    """ [path, int] """
+    """ [int_path, int] """
     parameter_valid = False
     try:
-        bracket_value = value.split('[')
-        bracket_value = bracket_value[1].split(']')
-        entries = bracket_value[0].split(',')
+        if _list(value):
+            entries = value
         if len(entries) == 2:
-            file_path = entries[0]
-            if _filepath(file_path):
+            int_path = entries[0]
+            if _intpathway(int_path):
                 try:
                     scale_fact = int(entries[1])
                     parameter_valid = _integer(scale_fact)
@@ -158,7 +153,7 @@ def _intgroup1(value):
             print(Fore.RED + 'Please enter two parameters.' + Fore.RESET)
         return parameter_valid
     except (Exception, ValueError, AttributeError):
-        print('Valid items have a format [<file path>, int].')
+        print('Valid items have a format [<interior file path>, int].')
 
 
 @error_catcher_valid
@@ -251,7 +246,7 @@ def _integer(value):
     if isinstance(value, int):
         parameter_valid = True
     else:
-        print('%s is not a valid integer.' % value)
+        print('Not a valid integer.')
     return parameter_valid
 
 @error_catcher_valid
@@ -324,11 +319,11 @@ def _string_list(value):
     return parameter_valid
 
 
-type_dict = {'[int]': _intlist,
+type_dict = {'int_list': _intlist,
             'range': _range,
             'yaml_file': _yamlfile,
-            '[path, int_path, int]': _intgroup,
-            '[path, int]': _intgroup1,
+            'file_int_path_int': _intgroup,
+            'int_path_int': _intgroup1,
             'filepath': _filepath,
             'directory': _directory,
             'int_path': _intpathway,
@@ -353,7 +348,14 @@ def is_valid(dtype, ptools, value, default_value):
 
     pvalid = _check_default(value, default_value)
     if pvalid == False:
-        if dtype not in type_dict:
+        if isinstance(dtype, list):
+            #This is a list of possible types
+            for individual_type in dtype:
+                pvalid = type_dict[individual_type](value)
+                if pvalid == True:
+                    break
+
+        elif dtype not in type_dict:
             print("That type definition is not configured properly.")
             pvalid = False
         else:
