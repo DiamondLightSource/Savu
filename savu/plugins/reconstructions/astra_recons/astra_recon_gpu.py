@@ -23,13 +23,12 @@ import astra
 import numpy as np
 
 from savu.plugins.utils import register_plugin
-from savu.plugins.utils import register_test_plugin
 from savu.plugins.driver.gpu_plugin import GpuPlugin
 from savu.data.plugin_list import CitationInformation
 from savu.plugins.reconstructions.astra_recons.base_astra_recon \
     import BaseAstraRecon
 
-@register_test_plugin
+@register_plugin
 class AstraReconGpu(BaseAstraRecon, GpuPlugin):
     """
     """

@@ -41,6 +41,10 @@ class NoProcessTools(PluginTools):
             dtype: config_file
             description: Path to config file
             default: 'Savu/test_data/data/test_config.cfg'
+            visibility: intermediate
+            dtype: str
+            description: Pattern used to create and store the hdf5 dataset \
+              default is the first pattern in the pattern dictionary.
         medianfilt_kernel_size:
             visibility: basic
             dtype: tuple
@@ -113,12 +117,12 @@ class NoProcessTools(PluginTools):
             default: "[[0, 1], [2, 3]]"
         dxchangeloader_dark:
             visibility: basic
-            dtype: '[path, int]'
+            dtype: int_path_int
             description: dark data path and scale value
             default: "['exchange/data_dark', 1]"
         dxchangeloader_flat:
             visibility: basic
-            dtype: '[path, int]'
+            dtype: int_path_int
             description: flat data path and scale value
             default: "['exchange/data_white', 1]"
 

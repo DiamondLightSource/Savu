@@ -29,12 +29,10 @@ from tomobar.methodsIR import RecToolsIR
 from savu.plugins.reconstructions.base_recon import BaseRecon
 from savu.data.plugin_list import CitationInformation
 from savu.plugins.driver.gpu_plugin import GpuPlugin
-from savu.plugins.utils import register_test_plugin
 from savu.plugins.utils import register_plugin
 
 
-#@register_plugin
-@register_test_plugin
+@register_plugin
 class TomobarRecon(BaseRecon, GpuPlugin):
     """
     """

@@ -7,14 +7,14 @@ class VoCenteringTools(PluginTools):
         """
         preview:
              visibility: basic
-             dtype: '[int]'
+             dtype: int_list
              description: A slice list of required frames (sinograms) to use in
                the calculation of the centre of rotation (this will not reduce the data
                size for subsequent plugins).
              default: '[]'
         start_pixel:
              visibility: intermediate
-             dtype: float
+             dtype: int
              description: The estimated centre of rotation. If value is None,
                use the horizontal centre of the image.
              default: 'None'

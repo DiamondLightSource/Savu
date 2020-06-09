@@ -21,12 +21,11 @@
 """
 
 from savu.plugins.utils import register_plugin
-from savu.plugins.utils import register_test_plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.reconstructions.astra_recons.base_astra_recon\
     import BaseAstraRecon
 
-@register_test_plugin
+@register_plugin
 class AstraReconCpu(BaseAstraRecon, CpuPlugin):
     """
 

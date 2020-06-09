@@ -28,10 +28,8 @@ import numpy as np
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.corrections.base_correction import BaseCorrection
 from savu.plugins.utils import register_plugin
-from savu.plugins.utils import register_test_plugin
-from savu.plugins.corrections.dark_flat_field_correction_tools import DarkFlatFieldCorrectionTools
 
-@register_test_plugin
+@register_plugin
 class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
     """
     """

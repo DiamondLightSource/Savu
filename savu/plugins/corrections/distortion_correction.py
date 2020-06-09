@@ -52,35 +52,7 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
     may contain unwanted values around the edges, which can be removed by \
     cropping the edges by a specified number of pixels. Default: 0
     """
-    '''
----
-      - name: DistortionCorrection
-        category: Filter
-        synopsis: A plugin to apply a distortion correction.S
-        verbose: A plugin to apply radial distortion correction.
-        parameters:
-           - polynomial_coeffs:
-                  visibility: param
-                  type: str
-                  description: Parameters of the radial distortion
-                  default: (1.00015076, 1.9289e-6, -2.4325e-8, 1.00439e-11, -3.99352e-15)
-           - centre_from_top:
-                  visibility: param
-                  type: float
-                  description: The centre of distortion in pixels from the top of the image.
-                  default: 995.24
-           - centre_from_left:
-                  visibility: param
-                  type: float
-                  description: The centre of distortion in pixels from the left of the image.
-                  default: 1283.25
-           - crop_edges:
-                  visibility: user
-                  type: int
-                  description: When applied to previewed/cropped data, the result may contain zeros around the edges, which can be removed by cropping the edges by a specified number of pixels
-                  default: 0
 
-    '''
     def __init__(self):
         super(DistortionCorrection, self).__init__("DistortionCorrection")
 

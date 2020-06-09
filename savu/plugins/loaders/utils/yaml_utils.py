@@ -21,6 +21,7 @@
 
 """
 import sys
+import savu
 import traceback
 import yaml
 from collections import OrderedDict
@@ -58,8 +59,9 @@ def ordered_dump(data, stream=None, Dumper=yaml.Dumper, **kwds):
     return yaml.dump(data, stream, OrderedDumper, **kwds)
 
 def check_yaml_errors(data):
-    config_file = open('/home/glb23482/git_projects/Savu/savu/plugins/loaders/utils/yaml_config.yaml')
-    conf = YamlLintConfig(config_file)
+    config_file = savu.__path__[0] + '/plugins/loaders/utils/yaml_config.yaml'
+    config_file_data = open(config_file)
+    conf = YamlLintConfig(config_file_data)
     gen = linter.run(data, conf)
     errors = list(gen)
     return errors

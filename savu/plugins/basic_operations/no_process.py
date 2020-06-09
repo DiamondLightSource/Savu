@@ -23,11 +23,10 @@ from savu.data.meta_data import MetaData
 
 from savu.plugins.plugin import Plugin
 from savu.plugins.utils import register_plugin
-from savu.plugins.utils import register_test_plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 
-@register_test_plugin
+@register_plugin
 class NoProcess(Plugin, CpuPlugin):
     """
     """

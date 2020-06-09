@@ -20,10 +20,8 @@
 """
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
-from savu.plugins.utils import register_test_plugin
 from savu.plugins.filters.base_filter import BaseFilter
 from savu.data.plugin_list import CitationInformation
-from savu.plugins.centering.vo_centering_tools import VoCenteringTools
 import savu.core.utils as cu
 
 import logging
@@ -31,7 +29,7 @@ import numpy as np
 import scipy.ndimage as ndi
 import pyfftw.interfaces.scipy_fftpack as fft
 
-@register_test_plugin
+@register_plugin
 class VoCentering(BaseFilter, CpuPlugin):
     """
     """

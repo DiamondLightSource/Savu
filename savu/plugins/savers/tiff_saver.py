@@ -24,12 +24,11 @@
 import tifffile as tf
 
 from savu.plugins.savers.base_image_saver import BaseImageSaver
-from savu.plugins.utils import register_test_plugin
 from savu.plugins.utils import register_plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 
-@register_test_plugin
+@register_plugin
 class TiffSaver(BaseImageSaver, CpuPlugin):
     """
     """

@@ -31,9 +31,7 @@ import numpy as np
 @register_plugin
 class Pca(BaseComponentAnalysis):
     """
-    This plugin performs independent component analysis on XRD/XRF spectra.
     """
-
     def __init__(self):
         super(Pca, self).__init__("Pca")
 

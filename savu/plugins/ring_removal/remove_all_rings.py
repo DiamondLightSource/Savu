@@ -23,7 +23,6 @@
 from savu.plugins.plugin import Plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
-from savu.plugins.utils import register_test_plugin
 from savu.data.plugin_list import CitationInformation
 import numpy as np
 from scipy.ndimage import median_filter
@@ -31,7 +30,7 @@ from scipy.ndimage import binary_dilation
 from scipy.ndimage import uniform_filter1d
 from scipy import interpolate
 
-@register_test_plugin
+@register_plugin
 class RemoveAllRings(Plugin, CpuPlugin):
     """
     """
