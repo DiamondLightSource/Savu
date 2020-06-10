@@ -1,4 +1,4 @@
-name: savu_py27_test
+name: test-environment
 channels:
   - astra-toolbox/label/dev
   - conda-forge
