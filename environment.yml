@@ -1,4 +1,4 @@
-name: test-environment
+name: savu_py27_test
 channels:
   - astra-toolbox/label/dev
   - conda-forge
@@ -12,7 +12,7 @@ dependencies:
   - pytest
   - h5py
   - pep8
-  - mpi4py 
+  - mpi4py
   - scikit-image
   - scikit-learn
   - astra-toolbox
@@ -37,4 +37,3 @@ dependencies:
     - peakutils
     - gnureadline
     - pmacparser
-

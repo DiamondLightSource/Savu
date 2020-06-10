@@ -13,12 +13,12 @@
 # limitations under the License.
 
 """
-.. module:: Tomographic Model-Based Reconstruction module for an exact (slower) 3D reconstruction
+.. module:: tomobar_recon_fully_3D
    :platform: Unix
    :synopsis: A wrapper around TOmographic MOdel-BAsed Reconstruction (ToMoBAR) software \
    for advanced iterative image reconstruction using _3D_ capabilities of regularisation. \
-   The plugin will run on ONE cluster node taking all available memory, i.e. it can be slow\
-   and it can crash potenitally when out of memory.
+   This plugin will run on ONE cluster node while using all available memory, i.e. it can be slow\
+   and it can crash potenitally when out of GPU or CPU memory limit.
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
@@ -39,19 +39,18 @@ class TomobarReconFully3d(BaseVectorRecon, MultiThreadedPlugin):
     https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
 
     :param output_size: The dimension of the reconstructed volume (only X-Y dimension). Default: 'auto'.
-    :param data_fidelity: Data fidelity, Least Squares only at the moment. Default: 'LS'.
+    :param data_fidelity: Data fidelity, choose LS, PWLS, SWLS or KL. Default: 'LS'.
     :param data_Huber_thresh: Threshold parameter for __Huber__ data fidelity . Default: None.
-    :param data_any_rings: a parameter to suppress various artifacts including rings and streaks. Default: None.
-    :param data_any_rings_winsizes: half window sizes to collect background information [detector, angles, num of projections]. Default: (9,7,9).
-    :param data_any_rings_power: a power parameter for Huber model. Default: 1.5.
+    :param data_beta_SWLS: A parameter for stripe-weighted model. Default: 0.1.
     :param data_full_ring_GH: Regularisation variable for full constant ring removal (GH model). Default: None.
     :param data_full_ring_accelerator_GH: Acceleration constant for GH ring removal. Default: 10.0.
     :param algorithm_iterations: Number of outer iterations for FISTA (default) or ADMM methods. Default: 20.
     :param algorithm_verbose: print iterations number and other messages ('off' by default). Default: 'off'.
+    :param algorithm_mask: set to 1.0 to enable a circular mask diameter or < 1.0 to shrink the mask. Default: 1.0.
     :param algorithm_ordersubsets: The number of ordered-subsets to accelerate reconstruction. Default: 6.
     :param algorithm_nonnegativity: ENABLE or DISABLE nonnegativity constraint. Default: 'ENABLE'.
     :param regularisation_method: To regularise choose methods ROF_TV, FGP_TV, PD_TV, SB_TV, LLT_ROF,\
-                             NDF, TGV, Diff4th. Default: 'FGP_TV'.
+                             NDF, TGV, NLTV, Diff4th. Default: 'FGP_TV'.
     :param regularisation_parameter: Regularisation (smoothing) value, higher \
                             the value stronger the smoothing effect. Default: 0.00001.
     :param regularisation_iterations: The number of regularisation iterations. Default: 80.
@@ -135,10 +134,9 @@ class TomobarReconFully3d(BaseVectorRecon, MultiThreadedPlugin):
         dim = in_dataset[0].get_data_dimension_by_axis_label('rotation_angle')
         nSlices = in_dataset[0].get_shape()[dim]
 
-        in_pData[0].plugin_data_setup('PROJECTION', nSlices,
-                slice_axis='rotation_angle')
-
-        # in_pData[1].plugin_data_setup('PROJECTION', nSlices) # (for PWLS)
+        # modifing it for multiple nInput_datasets
+        for i in range(len(in_dataset)):
+            in_pData[i].plugin_data_setup('PROJECTION', nSlices, slice_axis='rotation_angle')
 
         # set pattern_name and nframes to process for all datasets
         out_pData[0].plugin_data_setup('VOLUME_3D', 'single')
@@ -147,14 +145,12 @@ class TomobarReconFully3d(BaseVectorRecon, MultiThreadedPlugin):
         # extract given parameters into dictionaries suitable for ToMoBAR input
         self._data_ = {'OS_number' : self.parameters['algorithm_ordersubsets'],
                        'huber_threshold' : self.parameters['data_Huber_thresh'],
-                       'ring_weights_threshold' :  self.parameters['data_any_rings'],
-                       'ring_tuple_halfsizes' :  self.parameters['data_any_rings_winsizes'],
-                       'ring_huber_power' :  self.parameters['data_any_rings_power'],
                        'ringGH_lambda' :  self.parameters['data_full_ring_GH'],
                        'ringGH_accelerate' :  self.parameters['data_full_ring_accelerator_GH']}
 
         self._algorithm_ = {'iterations' : self.parameters['algorithm_iterations'],
-      			            'nonnegativity' : self.parameters['algorithm_nonnegativity'],
+			                'nonnegativity' : self.parameters['algorithm_nonnegativity'],
+                            'mask_diameter' : self.parameters['algorithm_mask'],
                             'verbose' : self.parameters['algorithm_verbose']}
 
         self._regularisation_ = {'method' : self.parameters['regularisation_method'],
@@ -179,20 +175,26 @@ class TomobarReconFully3d(BaseVectorRecon, MultiThreadedPlugin):
         dim_tuple = np.shape(projdata3D)
         self.Horiz_det = dim_tuple[self.det_dimX_ind]
         half_det_width = 0.5*self.Horiz_det
-        cor_astra = half_det_width - cor
+        cor_astra = half_det_width - cor[0]
+        projdata3D[projdata3D > 10**10] = 0.0
         projdata3D =np.swapaxes(projdata3D,0,1)
         self._data_.update({'projection_norm_data' : projdata3D})
-        # WIP for PWLS fidelity
-        # rawdata3D = data[1].astype(np.float32)
-        # rawdata3D =np.swapaxes(rawdata3D,0,1)/np.max(np.float32(rawdata3D))
+
+        # if one selects PWLS or SWLS models then raw data is also required (2 inputs)
+        if ((self.parameters['data_fidelity'] == 'PWLS') or (self.parameters['data_fidelity'] == 'SWLS')):
+            rawdata3D = data[1].astype(np.float32)
+            rawdata3D[rawdata3D > 10**15] = 0.0
+            rawdata3D = np.swapaxes(rawdata3D,0,1)/np.max(np.float32(rawdata3D))
+            self._data_.update({'projection_raw_data' : rawdata3D})
+            self._data_.update({'beta_SWLS' : self.parameters['data_beta_SWLS']*np.ones(self.Horiz_det)})
 
        # set parameters and initiate a TomoBar class object
         self.Rectools = RecToolsIR(DetectorsDimH = self.Horiz_det,  # DetectorsDimH # detector dimension (horizontal)
                     DetectorsDimV = self.Vert_det,  # DetectorsDimV # detector dimension (vertical) for 3D case only
-                    CenterRotOffset = cor_astra[0] - 0.5, # The center of rotation (CoR) scalar
-                    AnglesVec = self.anglesRAD, # a vector of angles in radians
+                    CenterRotOffset = cor_astra.item() - 0.5, # The center of rotation (CoR) scalar or a vector
+                    AnglesVec = self.anglesRAD, # the vector of angles in radians
                     ObjSize = self.output_size, # a scalar to define the reconstructed object dimensions
-                    datafidelity=self.parameters['data_fidelity'],# data fidelity, choose LS
+                    datafidelity=self.parameters['data_fidelity'],# data fidelity, choose LS, PWLS, SWLS
                     device_projector='gpu')
 
         # Run FISTA reconstrucion algorithm here
@@ -201,9 +203,13 @@ class TomobarReconFully3d(BaseVectorRecon, MultiThreadedPlugin):
         return recon
 
     def nInput_datasets(self):
-        return 1
+        return max(len(self.parameters['in_datasets']), 1)
+
     def nOutput_datasets(self):
         return 1
+
+    def get_max_frames(self):
+        return 'single'
 
     def get_citation_information(self):
         cite_info1 = CitationInformation()

@@ -16,7 +16,7 @@
 .. module:: tomobar_recon
    :platform: Unix
    :synopsis: A wrapper around TOmographic MOdel-BAsed Reconstruction (ToMoBAR) software \
-   for advanced iterative image reconstruction (2D case)
+   for advanced iterative image reconstruction (2D case) using GPU
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
@@ -29,26 +29,24 @@ import numpy as np
 from tomobar.methodsIR import RecToolsIR
 
 from savu.plugins.utils import register_plugin
-from scipy import ndimage
 
 @register_plugin
 class TomobarRecon(BaseVectorRecon, GpuPlugin):
     """
-    A Plugin to reconstruct full-field tomographic projection data using state-of-the-art regularised iterative algorithms from \
+    A GPU plugin to reconstruct full-field tomographic projection data using state-of-the-art regularised iterative algorithms from \
     the ToMoBAR package. ToMoBAR includes FISTA and ADMM iterative methods and depends on the ASTRA toolbox and the CCPi RGL toolkit: \
     https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
 
     :param output_size: Number of rows and columns in the \
         reconstruction. Default: 'auto'.
-    :param data_fidelity: Data fidelity, chosoe Least Squares only at the moment. Default: 'LS'.
+    :param data_fidelity: Data fidelity, choose LS, PWLS, SWLS or KL. Default: 'LS'.
     :param data_Huber_thresh: Threshold parameter for __Huber__ data fidelity . Default: None.
-    :param data_any_rings: a parameter to suppress various artifacts including rings and streaks. Default: None.
-    :param data_any_rings_winsizes: half window sizes to collect background information [detector, angles, num of projections]. Default: (9,7,0).
-    :param data_any_rings_power: a power parameter for Huber model. Default: 1.5.
+    :param data_beta_SWLS: A parameter for stripe-weighted model. Default: 0.1.
     :param data_full_ring_GH: Regularisation variable for full constant ring removal (GH model). Default: None.
     :param data_full_ring_accelerator_GH: Acceleration constant for GH ring removal. Default: 10.0.
     :param algorithm_iterations: Number of outer iterations for FISTA (default) or ADMM methods. Default: 20.
     :param algorithm_verbose: print iterations number and other messages ('off' by default). Default: 'off'.
+    :param algorithm_mask: set to 1.0 to enable a circular mask diameter or < 1.0 to shrink the mask. Default: 1.0.
     :param algorithm_ordersubsets: The number of ordered-subsets to accelerate reconstruction. Default: 6.
     :param algorithm_nonnegativity: ENABLE or DISABLE nonnegativity constraint. Default: 'ENABLE'.
     :param regularisation_method: To regularise choose methods ROF_TV, FGP_TV, PD_TV, SB_TV, LLT_ROF,\
@@ -56,7 +54,6 @@ class TomobarRecon(BaseVectorRecon, GpuPlugin):
     :param regularisation_parameter: Regularisation (smoothing) value, higher \
                             the value stronger the smoothing effect. Default: 0.00001.
     :param regularisation_iterations: The number of regularisation iterations. Default: 80.
-    :param regularisation_device: The number of regularisation iterations. Default: 'gpu'.
     :param regularisation_PD_lip: Primal-dual parameter for convergence. Default: 8.
     :param regularisation_methodTV:  0/1 - TV specific isotropic/anisotropic choice. Default: 0.
     :param regularisation_timestep: Time marching parameter, relevant for \
@@ -69,24 +66,80 @@ class TomobarRecon(BaseVectorRecon, GpuPlugin):
     def __init__(self):
         super(TomobarRecon, self).__init__("TomobarRecon")
 
+    def setup(self):
+        in_dataset, out_dataset = self.get_datasets()
+        in_pData, out_pData = self.get_plugin_datasets()
+
+        for i in range(len(in_dataset)):
+            in_pData[i].plugin_data_setup('SINOGRAM', 'single')
+
+        axis_labels = in_dataset[0].data_info.get('axis_labels')[0]
+
+        dim_volX, dim_volY, dim_volZ = \
+            self.map_volume_dimensions(in_dataset[0])
+
+        axis_labels = [0]*3
+        axis_labels = {in_dataset[0]:
+                       [str(dim_volX) + '.voxel_x.voxels',
+                        str(dim_volY) + '.voxel_y.voxels',
+                        str(dim_volZ) + '.voxel_z.voxels']}
+
+        shape = list(in_dataset[0].get_shape())
+        if self.parameters['vol_shape'] == 'fixed':
+            shape[dim_volX] = shape[dim_volZ]
+        else:
+            shape[dim_volX] = self.parameters['vol_shape']
+            shape[dim_volZ] = self.parameters['vol_shape']
+
+        if 'resolution' in self.parameters.keys():
+            shape[dim_volX] /= self.parameters['resolution']
+            shape[dim_volZ] /= self.parameters['resolution']
+
+        out_dataset[0].create_dataset(axis_labels=axis_labels,
+                                      shape=tuple(shape))
+        out_dataset[0].add_volume_patterns(dim_volX, dim_volY, dim_volZ)
+
+        idx = 1
+        # initial volume dataset
+        if 'init_vol' in self.parameters.keys() and \
+                self.parameters['init_vol']:
+            self.init_vol = True
+            in_pData[1].plugin_data_setup('VOLUME_XZ', self.get_max_frames())
+            idx += 1
+
+        # cor dataset
+        if isinstance(self.parameters['centre_of_rotation'], str):
+            self.cor_as_dataset = True
+            in_pData[idx].plugin_data_setup('METADATA', self.get_max_frames())
+
+        # set pattern_name and nframes to process for all datasets
+        out_pData[0].plugin_data_setup('VOLUME_XZ', self.get_max_frames())
+
     def pre_process(self):
         # extract given parameters into dictionaries suitable for ToMoBAR input
+        """
+        # current parameters not fully working yet
+        :param data_any_rings: a parameter to suppress various artifacts including rings and streaks. Default: None.
+        :param data_any_rings_winsizes: half window sizes to collect background information [detector, angles, num of projections]. Default: (9,7,0).
+        :param data_any_rings_power: a power parameter for Huber model. Default: 1.5.
+        'ring_weights_threshold' :  self.parameters['data_any_rings'],
+        'ring_tuple_halfsizes' :  self.parameters['data_any_rings_winsizes'],
+        'ring_huber_power' :  self.parameters['data_any_rings_power'],
+        """
         self._data_ = {'OS_number' : self.parameters['algorithm_ordersubsets'],
                        'huber_threshold' : self.parameters['data_Huber_thresh'],
-                       'ring_weights_threshold' :  self.parameters['data_any_rings'],
-                       'ring_tuple_halfsizes' :  self.parameters['data_any_rings_winsizes'],
-                       'ring_huber_power' :  self.parameters['data_any_rings_power'],
                        'ringGH_lambda' :  self.parameters['data_full_ring_GH'],
                        'ringGH_accelerate' :  self.parameters['data_full_ring_accelerator_GH']}
 
         self._algorithm_ = {'iterations' : self.parameters['algorithm_iterations'],
 			                'nonnegativity' : self.parameters['algorithm_nonnegativity'],
+                            'mask_diameter' : self.parameters['algorithm_mask'],
                             'verbose' : self.parameters['algorithm_verbose']}
 
         self._regularisation_ = {'method' : self.parameters['regularisation_method'],
                                 'regul_param' : self.parameters['regularisation_parameter'],
                                 'iterations' : self.parameters['regularisation_iterations'],
-                                'device_regulariser' : self.parameters['regularisation_device'],
+                                'device_regulariser' : 'gpu',
                                 'edge_threhsold' : self.parameters['regularisation_edge_thresh'],
                                 'time_marching_step' : self.parameters['regularisation_timestep'],
                                 'regul_param2' : self.parameters['regularisation_parameter2'],
@@ -102,26 +155,32 @@ class TomobarRecon(BaseVectorRecon, GpuPlugin):
         cor_astra = half_det_width - cor
         self.anglesRAD = np.deg2rad(angles.astype(np.float32))
         self._data_.update({'projection_norm_data' : sinogram})
-        """
-        # if one selects PWLS model and provides raw input data
-        if (self.parameters['data_fidelity'] == 'PWLS'):
-        rawdata = data[1].astype(np.float32)
-        rawdata /= np.max(rawdata)
-        self._data_.update({'projection_raw_data' : rawdata})
-        """
+
+        # if one selects PWLS or SWLS models then raw data is also required (2 inputs)
+        if ((self.parameters['data_fidelity'] == 'PWLS') or (self.parameters['data_fidelity'] == 'SWLS')):
+            rawdata = data[1].astype(np.float32)
+            rawdata /= np.max(rawdata)
+            self._data_.update({'projection_raw_data' : rawdata})
+            self._data_.update({'beta_SWLS' : self.parameters['data_beta_SWLS']*np.ones(self.DetectorsDimH)})
 
         # set parameters and initiate the ToMoBAR class object
         self.Rectools = RecToolsIR(DetectorsDimH = self.DetectorsDimH,  # DetectorsDimH # detector dimension (horizontal)
                     DetectorsDimV = None,  # DetectorsDimV # detector dimension (vertical) for 3D case only
-                    CenterRotOffset = cor_astra - 0.5, # The center of rotation (CoR) scalar
+                    CenterRotOffset = cor_astra.item() - 0.5, # The center of rotation (CoR) scalar or a vector
                     AnglesVec = self.anglesRAD, # the vector of angles in radians
                     ObjSize = self.vol_shape[0] , # a scalar to define the reconstructed object dimensions
-                    datafidelity=self.parameters['data_fidelity'],# data fidelity, choose LS, PWLS
+                    datafidelity=self.parameters['data_fidelity'],# data fidelity, choose LS, PWLS, SWLS
                     device_projector='gpu')
 
         # Run FISTA reconstrucion algorithm here
         recon = self.Rectools.FISTA(self._data_, self._algorithm_, self._regularisation_)
         return recon
+
+    def nInput_datasets(self):
+        return max(len(self.parameters['in_datasets']), 1)
+
+    def nOutput_datasets(self):
+        return 1
 
     def get_max_frames(self):
         return 'single'

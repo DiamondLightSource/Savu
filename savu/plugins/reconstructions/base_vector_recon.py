@@ -462,9 +462,6 @@ class BaseVectorRecon(Plugin):
 
     def executive_summary(self):
         summary = []
-        if not self.preview_flag:
-            summary.append(("WARNING: Ignoring preview parameters as a preview"
-                            " has already been applied to the data."))
         if len(summary) > 0:
             return summary
         return ["Nothing to Report"]
