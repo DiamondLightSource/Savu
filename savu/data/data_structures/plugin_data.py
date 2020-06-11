@@ -1,4 +1,4 @@
-# Copyright 2014 Diamond Light Source Ltd.
+# Copyright 201i Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -75,13 +75,13 @@ class PluginData(object):
             temp *= self.data_obj.get_shape()[tslice]
         return temp
 
-    def __set_pattern(self, name):
+    def __set_pattern(self, name, first_sdim=None):
         """ Set the pattern related information in the meta data dict.
         """
         pattern = self.data_obj.get_data_patterns()[name]
         self.meta_data.set("name", name)
         self.meta_data.set("core_dims", pattern['core_dims'])
-        self.__set_slice_dimensions()
+        self.__set_slice_dimensions(first_sdim=first_sdim)
 
     def get_pattern_name(self):
         """ Get the pattern name.
@@ -152,8 +152,8 @@ class PluginData(object):
         dshape = [dshape[i] for i in self.meta_data.get('slice_dims')]
         size_list = [1]*len(dshape)
         i = 0
-        
-        while(mft > 1):
+
+        while(mft > 1 and i < len(size_list)):
             size_list[i] = min(dshape[i], mft)
             mft -= np.prod(size_list) if np.prod(size_list) > 1 else 0
             i += 1
@@ -221,13 +221,22 @@ class PluginData(object):
         if (len(core_dir)+len(slice_dir)) is not nDims:
             sys.exit("Incorrect number of data dimensions specified.")
 
-    def __set_slice_dimensions(self):
-        """ Set the slice dimensions in the pluginData meta data dictionary.
+    def __set_slice_dimensions(self, first_sdim=None):
+        """ Set the slice dimensions in the pluginData meta data dictionary.\
+        Reorder pattern slice_dims to ensure first_sdim is at the front.
         """
-        slice_dirs = self.data_obj.get_data_patterns()[
-            self.get_pattern_name()]['slice_dims']
-        self.meta_data.set('slice_dims', slice_dirs)
+        pattern = self.data_obj.get_data_patterns()[self.get_pattern_name()]
+        slice_dims = pattern['slice_dims']
 
+        if first_sdim:
+            slice_dims = list(slice_dims)
+            first_sdim = \
+                self.data_obj.get_data_dimension_by_axis_label(first_sdim)
+            slice_dims.insert(0, slice_dims.pop(slice_dims.index(first_sdim)))
+            pattern['slice_dims'] = tuple(slice_dims)
+
+        self.meta_data.set('slice_dims', tuple(slice_dims))
+        
     def get_slice_dimension(self):
         """
         Return the position of the slice dimension in relation to the data
@@ -249,20 +258,20 @@ class PluginData(object):
             plugin_dims += (self.get_slice_dimension(),)
         return list(set(plugin_dims)).index(label_dim)
 
-    def set_slicing_order(self, order):
+    def set_slicing_order(self, order):  # should this function be deleted?
         """
         Reorder the slice dimensions.  The fastest changing slice dimension
         will always be the first one stated in the pattern key ``slice_dir``.
         The input param is a tuple stating the desired order of slicing
         dimensions relative to the current order.
         """
-        slice_dirs = self.get_slice_directions()
+        slice_dirs = self.data_obj.get_slice_dimensions()
         if len(slice_dirs) < len(order):
             raise Exception("Incorrect number of dimensions specifed.")
         ordered = [slice_dirs[o] for o in order]
         remaining = [s for s in slice_dirs if s not in ordered]
         new_slice_dirs = tuple(ordered + remaining)
-        self.get_current_pattern()['slice_dir'] = new_slice_dirs
+        self.get_pattern()['slice_dir'] = new_slice_dirs
 
     def get_core_dimensions(self):
         """
@@ -370,7 +379,11 @@ class PluginData(object):
         else:
             n_procs = len(processes)
 
-        f_per_p = np.ceil(frames/n_procs)
+        # Fixing f_per_p to be just the first slice dimension for now due to
+        # slow performance from HDF5 when not slicing multiple dimensions
+        # concurrently
+        #f_per_p = np.ceil(frames/n_procs)
+        f_per_p = np.ceil(shape[sdir[0]]/n_procs)
         self.meta_data.set('shape', shape)
         self.meta_data.set('sdir', sdir)
         self.meta_data.set('total_frames', frames)
@@ -409,7 +422,7 @@ class PluginData(object):
             for key in self.pad_dict.keys():
                 getattr(self.padding, key)(self.pad_dict[key])
 
-    def plugin_data_setup(self, pattern, nFrames, split=None):
+    def plugin_data_setup(self, pattern, nFrames, split=None, slice_axis=None):
         """ Setup the PluginData object.
 
         :param str pattern: A pattern name
@@ -417,7 +430,8 @@ class PluginData(object):
             'single', 'multiple', 'fixed_multiple' or an integer (an integer \
             should only ever be passed in exceptional circumstances)
         """
-        self.__set_pattern(pattern)
+        # slice_axis is first slice dimension
+        self.__set_pattern(pattern, first_sdim=slice_axis)
         if isinstance(nFrames, list):
             nFrames, self._frame_limit = nFrames
         self.max_frames = nFrames

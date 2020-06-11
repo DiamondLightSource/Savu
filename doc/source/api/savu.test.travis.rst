@@ -1,5 +1,5 @@
-savu\.test\.travis package
-==========================
+savu.test.travis package
+========================
 
 .. automodule:: savu.test.travis
     :members:

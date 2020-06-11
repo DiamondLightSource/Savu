@@ -1,5 +1,5 @@
-savu\.plugins\.reconstructions package
-======================================
+savu.plugins.reconstructions package
+====================================
 
 .. automodule:: savu.plugins.reconstructions
     :members:
@@ -21,10 +21,12 @@ Submodules
 
    savu.plugins.reconstructions.base_recon
    savu.plugins.reconstructions.ccpi_cgls_recon
-   savu.plugins.reconstructions.non_local_regularised_cgls
    savu.plugins.reconstructions.scikitimage_filter_back_projection
    savu.plugins.reconstructions.scikitimage_sart
    savu.plugins.reconstructions.simple_recon
+   savu.plugins.reconstructions.tomobar_recon
+   savu.plugins.reconstructions.tomobar_recon_3D
+   savu.plugins.reconstructions.tomobar_recon_cpu
    savu.plugins.reconstructions.tomopy_recon
    savu.plugins.reconstructions.visual_hulls_recon
 

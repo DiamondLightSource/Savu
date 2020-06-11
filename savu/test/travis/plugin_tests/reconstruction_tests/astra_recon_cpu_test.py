@@ -27,19 +27,26 @@ import unittest
 import savu.test.test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner_no_process_list
+from savu.test.travis.framework_tests.plugin_runner_test import \
+        run_protected_plugin_runner
 
 
-class AstraReconCPUTest(unittest.TestCase):
+class AstraReconCpuTests(unittest.TestCase):
+    global data_file, experiment
+    data_file = '24737.nxs'
+    experiment = 'tomo'
 
     def test_astra_recon_cpu(self):
-        options = tu.set_experiment('tomo')
+        options = tu.initialise_options(None, 'tomo', None)
         plugin = 'savu.plugins.reconstructions.astra_recons.astra_recon_cpu'
         run_protected_plugin_runner_no_process_list(options, plugin)
+        tu.cleanup(options)
 
-    def test_astra_recon_cpu_stxm(self):
-        options = tu.set_experiment('tomo')
-        plugin = 'savu.plugins.reconstructions.astra_recons.astra_recon_cpu'
-        run_protected_plugin_runner_no_process_list(options, plugin)
+    def test_astra_recon_init_vol(self):
+        process_list = 'reconstruction/astra_init_vol_test.nxs'
+        options = tu.initialise_options(data_file, experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
 
 if __name__ == "__main__":
     unittest.main()

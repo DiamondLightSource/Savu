@@ -34,43 +34,49 @@ from savu.plugins import plugin as test_plugin
 class Test(unittest.TestCase):
 
     def testGetPlugin(self):
-        plugin = pu.get_plugin("savu.plugins.plugin")
+        mod = "savu.plugins.plugin"
+        plugin = pu.load_class(mod)()
         self.assertEqual(plugin.__class__, test_plugin.Plugin,
                          "Failed to load the correct class")
         self.assertRaises(NotImplementedError,
                           plugin.process_frames, None)
 
     def testfind_args(self):
-        plugin = pu.get_plugin("savu.plugins.filters.denoise_bregman_filter")
+        mod = "savu.plugins.filters.denoising.denoise_bregman_filter"
+        plugin = pu.load_class(mod)()
         params = doc.find_args(plugin)
         self.assertEqual(len(params['param']), 4)
 
     def test_get_plugin_external_path(self):
         savu_path = os.path.split(savu.__path__[0])[0]
-        plugin = pu.get_plugin(os.path.join(savu_path, "plugin_examples",
-                                            "example_median_filter.py"))
+        mod = os.path.join(
+                savu_path, "plugin_examples", "example_median_filter.py")
+        plugin = pu.load_class(mod)()
         self.assertEqual(plugin.name, "ExampleMedianFilter")
 
+    def _add_to_plugins_path(self, add_paths):
+        env = "SAVU_PLUGINS_PATH"
+        path = os.environ[env] if env in os.environ.keys() else ""
+        os.environ[env] = ':'.join([path, add_paths])
+        
     def test_get_plugins_paths(self):
         n_paths = len(pu.get_plugins_paths())
-        os.environ["SAVU_PLUGINS_PATH"] = "/tmp/"
+        self._add_to_plugins_path('/tmp')
         paths = pu.get_plugins_paths()
         self.assertEqual(len(paths), n_paths+1)
-        os.environ["SAVU_PLUGINS_PATH"] = ""
 
     def test_get_plugins_paths2(self):
         n_paths = len(pu.get_plugins_paths())
-        os.environ["SAVU_PLUGINS_PATH"] = "/tmp/:/dev/:/home/"
+        self._add_to_plugins_path("/tmp/:/dev/:/home/")
         paths = pu.get_plugins_paths()
         self.assertEqual(len(paths), n_paths+3)
-        os.environ["SAVU_PLUGINS_PATH"] = ""
 
     def test_get_plugins_path_and_load(self):
         savu_path = os.path.split(savu.__path__[0])[0]
         plugin_path = os.path.join(savu_path, "plugin_examples")
         os.environ["SAVU_PLUGINS_PATH"] = plugin_path
         pu.get_plugins_paths()
-        plugin = pu.get_plugin("example_median_filter")
+        plugin = pu.load_class("example_median_filter")()
         self.assertEqual(plugin.name, "ExampleMedianFilter")
         os.environ["SAVU_PLUGINS_PATH"] = ""
 

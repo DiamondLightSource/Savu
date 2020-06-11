@@ -137,7 +137,11 @@ class DataWithDarksAndFlats(BaseType):
         # all data entries
         data_idx = np.where(self.image_key == 0)[0]
         preview_idx = np.arange(len(data_idx))[slice_list]
-        remove_idx = np.delete(data_idx, preview_idx[::-1])
+        # check the inconsistency regarding the preview of angles, e.g [0:10,:,:]        
+        if (len(data_idx) == len(preview_idx)):
+	        remove_idx = np.delete(data_idx, preview_idx[::-1])
+	else: 
+		remove_idx = []
         return np.delete(self.image_key, remove_idx)
 
     def __get_reduced_index(self, key, slice_list):
@@ -173,7 +177,7 @@ class DataWithDarksAndFlats(BaseType):
         sl = list(copy.deepcopy(self.dark_flat_slice_list[key]))
         if len(data.shape) is 2:
             del sl[rot_dim]
-        return data[sl]
+        return data[tuple(sl)]
 
     def dark_image_key_data(self):
         """ Get the dark data. """
@@ -272,8 +276,8 @@ class NoImageKey(DataWithDarksAndFlats):
         self.dark_path = dark
         self.flat_path = flat
         self.orig_image_key = copy.copy(image_key)
-        self.flat_image_key = False
-        self.dark_image_key = False
+        self.flat_image_key = []
+        self.dark_image_key = []
 
         # darks and flats belong to another dataset with an image key
         if self.image_key is not None:
@@ -307,11 +311,11 @@ class NoImageKey(DataWithDarksAndFlats):
         # image key in a previous plugin
         self.image_key = fakekey
 
-    def _set_flat_path(self, path, imagekey=False):
+    def _set_flat_path(self, path, imagekey=[]):
         self.flat_image_key = imagekey
         self.flat_path = path
 
-    def _set_dark_path(self, path, imagekey=False):
+    def _set_dark_path(self, path, imagekey=[]):
         self.dark_image_key = imagekey
         self.dark_path = path
 
@@ -322,7 +326,7 @@ class NoImageKey(DataWithDarksAndFlats):
         """ Get the dark data. """
         if self.dark_updated is not False:
             return self.dark_updated
-        if self.dark_image_key:
+        if len(self.dark_image_key) > 0:
             self.image_key = self.dark_image_key
             dark = self.dark_image_key_data()
             self.image_key = self.orig_image_key
@@ -333,7 +337,7 @@ class NoImageKey(DataWithDarksAndFlats):
         """ Get the flat data. """
         if self.flat_updated is not False:
             return self.flat_updated
-        if self.flat_image_key:
+        if len(self.flat_image_key) > 0:
             self.image_key = self.flat_image_key
             flat = self.flat_image_key_data()
             self.image_key = self.orig_image_key

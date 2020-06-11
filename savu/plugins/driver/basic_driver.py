@@ -33,6 +33,9 @@ class BasicDriver(object):
     def __init__(self):
         super(BasicDriver, self).__init__()
 
+    def get_mem_multiply(self):
+        return 1
+
     def _run_plugin_instances(self, transport, communicator=MPI.COMM_WORLD):
         self.__set_communicator(communicator)
         logging.info("%s.%s", self.__class__.__name__, 'pre_process')

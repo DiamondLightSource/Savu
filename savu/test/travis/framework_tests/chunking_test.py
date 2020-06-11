@@ -48,7 +48,7 @@ class ChunkingTests(unittest.TestCase):
         options['processes'] = range(nProcs)
         # set a dummy process list
         options['process_file'] = \
-            tu.get_test_process_path('basic_tomo_process.nxs')
+            tu.get_test_process_path('loaders/basic_tomo_process.nxs')
         exp = Experiment(options)
         test_dict = {'current': current, 'next': nnext}
         chunking = Chunking(exp, test_dict)

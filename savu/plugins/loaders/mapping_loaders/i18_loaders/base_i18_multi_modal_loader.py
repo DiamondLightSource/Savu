@@ -175,41 +175,31 @@ class BaseI18MultiModalLoader(BaseMultiModalLoader):
         dims = range(len(data_obj.get_shape()))
         if data_obj.data_mapping._is_map:
             proj_dir = tuple(projection)
-            logging.debug("is a map")
-            logging.debug("the proj cores are"+str(proj_dir))
-            logging.debug("the proj slices are"+str(tuple(set(dims) - set(proj_dir))))
             data_obj.add_pattern("PROJECTION", core_dims=proj_dir,
                                  slice_dims=tuple(set(dims) - set(proj_dir)))
 
         if data_obj.data_mapping._is_tomo:
             #rotation and fast axis
             sino_dir = (rotation, proj_dir[-1])
-            logging.debug("is a tomo")
-            logging.debug("the sino cores are:"+str(sino_dir))
-            logging.debug("the sino slices are:"+str(tuple(set(dims) - set(sino_dir))))
-            data_obj.add_pattern("SINOGRAM", core_dims=sino_dir,
-                                 slice_dims=tuple(set(dims) - set(sino_dir)))
+            slice_dims = tuple(set(dims) - set(sino_dir))
+            if slice_dims:
+                data_obj.add_pattern("SINOGRAM", core_dims=sino_dir,
+                                     slice_dims=slice_dims)
         
-        if ltype is 'fluo':
+        if ltype == 'fluo':
             spec_core = (-1,) # it will always be this
             spec_slice = tuple(dims[:-1])
-            logging.debug("is a fluo")
-            logging.debug("the fluo cores are:"+str(spec_core))
-            logging.debug("the fluo slices are:"+str(spec_slice))
             data_obj.add_pattern("SPECTRUM", core_dims=spec_core,
                                  slice_dims=spec_slice)
         
         
-        if ltype is 'xrd':
+        if ltype == 'xrd':
             diff_core = (-2,-1) # it will always be this
             diff_slice = tuple(dims[:-2])
-            logging.debug("is a diffraction")
-            logging.debug("the diffraction cores are:"+str(diff_core))
-            logging.debug("the diffraction slices are:"+str(diff_slice))
             data_obj.add_pattern("DIFFRACTION", core_dims=diff_core,
                                  slice_dims=diff_slice)
         
-        if ltype is 'monitor':
+        if ltype == 'monitor':
             # this is needed for I0 corrections of single sinogram ND data
             channel_core = (dims[-1],)
             channel_slice = tuple(dims[:-1])

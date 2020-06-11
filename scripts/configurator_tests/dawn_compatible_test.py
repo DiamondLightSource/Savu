@@ -19,14 +19,14 @@ class DawnCompatibleTest(unittest.TestCase):
         self.assertGreater(len(pu.dawn_plugins), 0)
 
     def test_dawn_plugin_params_found(self):
-        cu.populate_plugins()
+        cu.populate_plugins(dawn=True)
         self.assertTrue(isinstance(
                 pu.dawn_plugin_params[pu.dawn_plugins.keys()[0]], dict))
 
     def test_load_plugin(self):
         cu.populate_plugins()
         plugin_path = pu.dawn_plugins[dawn_plugins.keys()[0]]['path2plugin']
-        inst = pu.get_plugin(plugin_path)
+        inst = pu.load_class(plugin_path)()
         sl = inst.__dict__['slice_list']
         exp = inst.__dict__['exp']
 

@@ -1,27 +1,37 @@
 name: test-environment
 channels:
-  - astra-toolbox
+  - astra-toolbox/label/dev
   - conda-forge
+  - ccpi
+  - dkazanc
 dependencies:
   - python=2.7
   - numpy
+  - pip
   - scipy
   - pytest
   - h5py
   - pep8
   - mpi4py 
-  - scikit-image==0.14.0
+  - scikit-image
+  - scikit-learn
   - astra-toolbox
   - xraylib
+  - opencv=4.1.1
   - tomopy
   - mock
-  - fabio==0.4.0
+  - fabio
   - pytest-cov
   - coveralls
-  - pyfai 
+  - pyfai
   - pyfftw
   - colorama
-  - pymca
+  - pymca=5.5.2
+  - ccpi-regulariser
+  - tomobar
+  - larix
+  - yamllint
+  - mrcfile
   - pip:
     - nvidia-ml-py
     - peakutils

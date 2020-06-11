@@ -40,8 +40,8 @@ class Plugin(PluginDatasets):
         create. Default: [].
     """
 
-    def __init__(self, name='Plugin'):
-        super(Plugin, self).__init__()
+    def __init__(self, name="Plugin"):
+        super(Plugin, self).__init__(name)
         self.name = name
         self.parameters = {}
         self.parameters_types = {}
@@ -54,24 +54,31 @@ class Plugin(PluginDatasets):
         self.global_index = None
         self.pcount = 0
         self.exp = None
-
-    def _main_setup(self, exp, params):
+        self.check = False
+    
+    def initialise(self, params, exp, check=False):
+        self.check=check
+        self.exp = exp
+        self._populate_default_parameters()
+        self._set_parameters(copy.deepcopy(params))
+        self._main_setup()
+        
+    def _main_setup(self):
         """ Performs all the required plugin setup.
 
         It sets the experiment, then the parameters and replaces the
         in/out_dataset strings in ``self.parameters`` with the relevant data
         objects. It then creates PluginData objects for each of these datasets.
-
-        :param Experiment exp: The current Experiment object.
-        :params dict params: Parameter values.
         """
+        # Don't do this step if loaders haven't been loaded yet
+        if self.exp and self.exp.index['in_data']:
+            self._set_plugin_datasets()
         self._reset_process_frames_counter()
-        self._set_parameters(params)
-        self._set_plugin_datasets()
         self.setup()
+        
         self.set_filter_padding(*(self.get_plugin_datasets()))
-        self._finalise_datasets()
         self._finalise_plugin_datasets()
+        self._finalise_datasets()
 
     def _reset_process_frames_counter(self):
         self.pcount = 0
@@ -93,16 +100,6 @@ class Plugin(PluginDatasets):
             name = info['label'].split('_param')[0]
             self.parameters[name] = info['values'][indices[count]]
             count += 1
-
-    def base_dynamic_data_info(self):
-        """ Provides an opportunity to override the number and name of input
-        and output datasets before they are created in the base classes. """
-        pass
-
-    def dynamic_data_info(self):
-        """ Provides an opportunity to override the number and name of input
-        and output datasets before they are created. """
-        pass
 
     def set_filter_padding(self, in_data, out_data):
         """

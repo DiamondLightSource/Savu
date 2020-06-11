@@ -1,5 +1,5 @@
-savu\.plugins\.filters\.spectrum\_crop module
-=============================================
+savu.plugins.filters.spectrum\_crop module
+==========================================
 
 .. automodule:: savu.plugins.filters.spectrum_crop
     :members:

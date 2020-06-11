@@ -1,5 +1,5 @@
-install\.2\_1\_install package
-==============================
+install.2\_1\_install package
+=============================
 
 Subpackages
 -----------

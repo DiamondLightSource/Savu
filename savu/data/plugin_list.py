@@ -60,6 +60,7 @@ class PluginList(object):
         self.datasets_list = []
         self.saver_plugin_status = True
         self._template = None
+        self.version = None
 
     def add_template(self, create=False):
         self._template = Template(self)
@@ -83,6 +84,10 @@ class PluginList(object):
                               template=False):
         """ Populate the plugin list from a nexus file. """
         plugin_file = h5py.File(filename, 'r')
+
+        if 'entry/savu_notes/version' in plugin_file:
+            self.version = plugin_file['entry/savu_notes/version'][()]
+
         plugin_group = plugin_file['entry/plugin']
         self.plugin_list = []
         single_val = ['name', 'id', 'pos', 'active']
@@ -113,14 +118,17 @@ class PluginList(object):
         plugin_file.close()
 
     def _save_plugin_list(self, out_filename):
-        with h5py.File(out_filename, 'w') as nxs_file:
-            entry_group = nxs_file.create_group('entry')
-            entry_group.attrs[NX_CLASS] = 'NXentry'
-            citations_group = entry_group.create_group('framework_citations')
-            citations_group.attrs[NX_CLASS] = 'NXcollection'
-            self._save_framework_citations(citations_group)
-            plugins_group = entry_group.create_group('plugin')
-            plugins_group.attrs[NX_CLASS] = 'NXprocess'
+        with h5py.File(out_filename, 'a') as nxs_file:
+
+            entry = nxs_file.require_group('entry')
+
+            self._save_framework_citations(self._overwrite_group(
+                    entry, 'framework_citations', 'NXcollection'))
+
+            self.__save_savu_notes(self._overwrite_group(
+                    entry, 'savu_notes', 'NXnote'))
+
+            plugins_group = self._overwrite_group(entry, 'plugin', 'NXprocess')
 
             count = 1
             for plugin in self.plugin_list:
@@ -129,6 +137,17 @@ class PluginList(object):
         if self._template and self._template.creating:
             fname = os.path.splitext(out_filename)[0] + '.savu'
             self._template._output_template(fname, out_filename)
+
+    def _overwrite_group(self, entry, name, nxclass):
+        if name in entry:
+            entry.pop(name)
+        group = entry.create_group(name)
+        group.attrs[NX_CLASS] = nxclass
+        return group
+
+    def __save_savu_notes(self, notes):
+        from savu.version import __version__
+        notes['version'] = __version__
 
     def __populate_plugins_group(self, plugins_group, plugin, count):
         if 'pos' in plugin.keys():
@@ -166,7 +185,7 @@ class PluginList(object):
                 except:
                     pass
                 try:
-                    data_dict[key] = yaml.load(val)
+                    data_dict[key] = yaml.load(val, Loader=yaml.SafeLoader)
                     continue
                 except:
                     pass
@@ -205,7 +224,7 @@ class PluginList(object):
         framework_cites = fc.get_framework_citations()
         count = 0
         for cite in framework_cites:
-            citation_group = group.create_group(cite['name'])
+            citation_group = group.require_group(cite['name'])
             citation = CitationInformation()
             del cite['name']
             for key, value in cite.iteritems():
@@ -284,7 +303,8 @@ class PluginList(object):
         self.n_plugins = len(self.plugin_list)
 
         for i in range(self.n_plugins):
-            bases = inspect.getmro(pu.load_class(self.plugin_list[i]['id']))
+            pid = self.plugin_list[i]['id']
+            bases = inspect.getmro(pu.load_class(pid))
             loader_list = [b for b in bases if b == BaseLoader]
             saver_list = [b for b in bases if b == BaseSaver]
             if loader_list:
@@ -310,8 +330,9 @@ class PluginList(object):
             raise Exception("The first plugin in the plugin list must be a "
                             "loader plugin.")
 
-    def _add_missing_savers(self, data_names):
+    def _add_missing_savers(self, exp):
         """ Add savers for missing datasets. """
+        data_names = exp.index['in_data'].keys()
         saved_data = []
         for i in self._get_savers_index():
             saved_data.append(self.plugin_list[i]['data']['in_datasets'])
@@ -321,7 +342,8 @@ class PluginList(object):
             process = {}
             pos = int(re.search(r'\d+', self.plugin_list[-1]['pos']).group())+1
             self.saver_idx.append(pos)
-            plugin = pu.get_plugin('savu.plugins.savers.hdf5_saver')
+            plugin = pu.get_plugin('savu.plugins.savers.hdf5_saver',
+                                   {'in_datasets': [name]}, exp)
             plugin.parameters['in_datasets'] = [name]
             process['name'] = plugin.name
             process['id'] = plugin.__module__

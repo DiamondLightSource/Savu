@@ -100,18 +100,12 @@ class I18MmLoader(BaseLoader):
         debug_str = 'This file contains an ' + name
         warn_str = 'This file does not contain a ' + name
         try:
-            params = self.separate_params(key)
-            params['name'] = self.name_dict[name]
-            self.setup_loader(inst, params)
+            inst.initialise(self.separate_params(key), self.exp)
             logging.debug(debug_str)
         except IndexError:
             logging.warn(warn_str)
         except:
             raise
-
-    def setup_loader(self, loader, params):
-        loader._main_setup(self.exp, params)
-        loader.setup()
 
     def final_parameter_updates(self):
         # names of individual datasets are not required

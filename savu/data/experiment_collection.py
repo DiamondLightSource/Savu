@@ -48,7 +48,7 @@ class Experiment(object):
         self.__set_system_params()
         self.checkpoint = Checkpointing(self)
         self.__meta_data_setup(options["process_file"])
-        self.experiment_collection = {}
+        self.collection = {}
         self.index = {"in_data": {}, "out_data": {}}
         self.initial_datasets = None
         self.plugin = None
@@ -86,42 +86,33 @@ class Experiment(object):
             data_obj._set_transport_data(self.meta_data.get('transport'))
         return self.index[dtype][name]
 
-    def _experiment_setup(self, transport):
-        """ Setup an experiment collection.
-        """
-        n_loaders = self.meta_data.plugin_list._get_n_loaders()
-        plugin_list = self.meta_data.plugin_list
-        plist = plugin_list.plugin_list
-        self.__set_transport(transport)
-        # load the loader plugins
-        self._set_loaders()
-        # load the saver plugin and save the plugin list
-        self.experiment_collection = {'plugin_dict': [],
-                                      'datasets': []}
+    def _setup(self, transport):
+        self._set_nxs_file()
+        self._set_transport(transport)
+        self.collection = {'plugin_dict': [], 'datasets': []}
+
         self._barrier()
         self._check_checkpoint()
         self._barrier()
+
+    def _finalise_setup(self, plugin_list):
         checkpoint = self.meta_data.get('checkpoint')
+        # save the plugin list - one process, first time only
         if self.meta_data.get('process') == \
-                len(self.meta_data.get('processes'))-1 and not checkpoint:
-            plugin_list._save_plugin_list(self.meta_data.get('nxs_filename'))
+                len(self.meta_data.get('processes'))-1 and not checkpoint:                  
             # links the input data to the nexus file
-            self._add_input_data_to_nxs_file(transport)
-        # Barrier 13
-        self._barrier()
+            plugin_list._save_plugin_list(self.meta_data.get('nxs_filename'))
+            self._add_input_data_to_nxs_file(self._get_transport())
 
-        n_plugins = plugin_list._get_n_processing_plugins()
-        count = 0
-        # first run through of the plugin setup methods
-        for plugin_dict in plist[n_loaders:n_loaders+n_plugins]:
-            data = self.__plugin_setup(plugin_dict, count)
-            self.experiment_collection['datasets'].append(data)
-            self.experiment_collection['plugin_dict'].append(plugin_dict)
-            self._merge_out_data_to_in()
-            count += 1
-        self._reset_datasets()
+    def _set_initial_datasets(self):
+        self.initial_datasets = copy.deepcopy(self.index['in_data'])
 
-    def __set_transport(self, transport):
+    def _update(self, plugin_dict):
+        data = self.index['out_data'].copy()
+        self.collection['datasets'].append(data)
+        self.collection['plugin_dict'].append(plugin_dict)
+
+    def _set_transport(self, transport):
         self._transport = transport
 
     def _get_transport(self):
@@ -151,13 +142,6 @@ class Experiment(object):
                 if 'entry' not in f:
                     self.meta_data.set('checkpoint', None)
 
-    def _set_loaders(self):
-        n_loaders = self.meta_data.plugin_list._get_n_loaders()
-        plugin_list = self.meta_data.plugin_list.plugin_list
-        for i in range(n_loaders):
-            pu.plugin_loader(self, plugin_list[i])
-        self.initial_datasets = copy.deepcopy(self.index['in_data'])
-
     def _add_input_data_to_nxs_file(self, transport):
         # save the loaded data to file
         h5 = Hdf5Utils(self)
@@ -171,25 +155,12 @@ class Experiment(object):
     def _reset_datasets(self):
         self.index['in_data'] = self.initial_datasets
 
-    def __plugin_setup(self, plugin_dict, count):
-        """ Determine plugin specific information.
-        """
-        plugin_id = plugin_dict["id"]
-        logging.debug("Loading plugin %s", plugin_id)
-        # Run main_setup method
-        plugin = pu.plugin_loader(self, plugin_dict)
-        plugin._revert_preview(plugin.get_in_datasets())
-        # Populate the metadata
-        plugin._clean_up()
-        data = self.index['out_data'].copy()
-        return data
-
-    def _get_experiment_collection(self):
-        return self.experiment_collection
+    def _get_collection(self):
+        return self.collection
 
     def _set_experiment_for_current_plugin(self, count):
         datasets_list = self.meta_data.plugin_list._get_datasets_list()[count:]
-        exp_coll = self._get_experiment_collection()
+        exp_coll = self._get_collection()
         self.index['out_data'] = exp_coll['datasets'][count]
         if datasets_list:
             self._get_current_and_next_patterns(datasets_list)
@@ -219,7 +190,7 @@ class Experiment(object):
                     return next_pattern
         return next_pattern
 
-    def _set_nxs_filename(self):
+    def _set_nxs_file(self):
         folder = self.meta_data.get('out_path')
         fname = self.meta_data.get('datafile_name') + '_processed.nxs'
         filename = os.path.join(folder, fname)
@@ -231,6 +202,17 @@ class Experiment(object):
                 log_folder = open(log_folder_name, 'a')
                 log_folder.write(os.path.abspath(filename) + '\n')
                 log_folder.close()
+
+        self._create_nxs_entry()
+    
+    def _create_nxs_entry(self):
+        logging.debug("Testing nexus file")
+        import h5py
+        if self.meta_data.get('process') == \
+                len(self.meta_data.get('processes'))-1:
+  	    with h5py.File(self.meta_data.get('nxs_filename'), 'w') as nxs_file:
+              entry_group = nxs_file.create_group('entry')
+              entry_group.attrs['NX_class'] = 'NXentry'
 
     def _clear_data_objects(self):
         self.index["out_data"] = {}

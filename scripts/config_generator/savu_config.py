@@ -1,4 +1,4 @@
-# Copyright 2015 Diamond Light Source Ltd.
+# Copyright 2014 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,25 +12,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-'''
-Created on 21 May 2015
+"""
+.. module:: savu_config.py
+   :platform: Unix
+   :synopsis: A command line tool for creating Savu plugin lists
 
-@author: ssg37927
-'''
+.. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
+
+"""
 
 from __future__ import print_function
 
 import re
 import sys
 
-from content import Content
-from completer import Completer
-from display_formatter import ListDisplay, DispDisplay
-import arg_parsers as parsers
-from savu.plugins import utils as pu
-import config_utils as utils
-from config_utils import parse_args
-from config_utils import error_catcher
+
+import warnings
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    from content import Content
+    from completer import Completer
+    from display_formatter import ListDisplay, DispDisplay
+    import arg_parsers as parsers
+    from savu.plugins import utils as pu
+    import config_utils as utils
+    from config_utils import parse_args
+    from config_utils import error_catcher
 
 
 def _help(content, args):
@@ -208,6 +215,7 @@ commands = {'open': _open,
 
 def main():
 
+    print("Running the configurator")
     # required for travis tests
     if len(sys.argv) > 2 and sys.argv[-2] == 'scripts/configurator_tests/':
         sys.argv = [sys.argv[:-2]]
@@ -218,17 +226,26 @@ def main():
 
     print("Starting Savu Config tool (please wait for prompt)")
 
-    utils.populate_plugins()
+    _reduce_logging_level()
+
+    content = Content(level="all" if args.disp_all else 'user')
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        content.failed = utils.populate_plugins(error_mode=args.error,
+                                                examples=args.examples)
+
     comp = Completer(commands=commands, plugin_list=pu.plugins)
     utils._set_readline(comp.complete)
 
-    content = Content(level="all" if args.disp_all else 'user')
 
     # if file flag is passed then open it here
     if args.file:
         commands['open'](content, args.file)
 
     print("\n*** Press Enter for a list of available commands. ***\n")
+
+    utils.load_history_file(utils.histfile)
 
     while True:
         try:
@@ -237,7 +254,7 @@ def main():
             print()
             continue
 
-        command, arg = in_list if len(in_list) is 2 else in_list+['']
+        command, arg = in_list if len(in_list) == 2 else in_list+['']
         command = command if command else 'help'
         if command not in commands:
             print("I'm sorry, that's not a command I recognise. Press Enter "
@@ -248,10 +265,11 @@ def main():
         if content.is_finished():
             break
 
-        # write the history to the history file
-        utils.readline.write_history_file(utils.histfile)
-
     print("Thanks for using the application")
+
+def _reduce_logging_level():
+    import logging
+    logging.getLogger().setLevel(logging.CRITICAL)
 
 if __name__ == '__main__':
     main()

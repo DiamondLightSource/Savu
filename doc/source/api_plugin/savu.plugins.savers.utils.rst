@@ -1,5 +1,5 @@
-savu\.plugins\.savers\.utils package
-====================================
+savu.plugins.savers.utils package
+=================================
 
 Submodules
 ----------

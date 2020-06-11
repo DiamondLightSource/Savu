@@ -1,5 +1,5 @@
-savu\.plugins\.reshape package
-==============================
+savu.plugins.reshape package
+============================
 
 Submodules
 ----------
@@ -8,6 +8,7 @@ Submodules
 
    savu.plugins.reshape.data_removal
    savu.plugins.reshape.downsample_filter
+   savu.plugins.reshape.mipmap
 
 Module contents
 ---------------

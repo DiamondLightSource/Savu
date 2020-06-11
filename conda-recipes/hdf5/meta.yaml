@@ -1,0 +1,108 @@
+{% set version = "1.10.5" %}
+{% set maj_min_ver = ".".join(version.split(".")[:2]) %}
+{% set build = 0 %}
+
+package:
+  name: hdf5
+  version: {{ version }}
+
+source:
+  fn: hdf5-{{ version }}.tar.gz
+  url: https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-{{ maj_min_ver }}/hdf5-{{ version }}/src/hdf5-{{ version }}.tar.gz
+  sha256: 6d4ce8bf902a97b050f6f491f4268634e252a63dadd6656a1a9be5b7b7726fa8
+  patches:
+    # Patches the test suite to skip the cache, cache_image, and fheap tests
+    # This test has been found to rather resource intensive.
+    # In particular, it caused Travis CI's Mac builds to hang.
+    # Given that we simply skip the test on all platforms.
+    - test_Makefile.in.patch
+    # same thing, but for parallel tests:
+    - testpar_Makefile.in.patch
+    # ref: http://hdf-forum.184993.n3.nabble.com/HDF5-1-8-14-15-16-with-OpenMPI-1-10-1-and-Intel-16-1-td4028533.html
+    - testpar_pflush.sh.in.openmpi.patch
+    # h5diff help output test is flaky with mpi
+    - testh5diff.sh.in.patch
+
+build:
+  number: {{ build }}
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - libtool
+  host:
+    - openmpi
+    - zlib
+  run:
+    - openmpi
+    - zlib
+
+test:
+  requires:
+    - {{ compiler('c') }}
+    - pkg-config
+
+  files:
+    - h5_cmprss.c
+
+  commands:
+    # Verify UNIX CLI tools.
+    {% set h5_compilers = [
+        "h5pcc",
+    ] %}
+    {% set hdf5_unix_cmds = h5_compilers + [
+        "h5perf_serial",
+        "h5redeploy",
+    ] %}
+    {% for each_hdf5_unix_cmd in hdf5_unix_cmds %}
+    - command -v {{ each_hdf5_unix_cmd }}
+    {% endfor %}
+
+    # Verify CLI tools.
+    {% set hdf5_cmds = [
+        "gif2h5",
+        "h52gif",
+        "h5copy",
+        "h5debug",
+        "h5diff",
+        "h5dump",
+        "h5import",
+        "h5jam",
+        "h5ls",
+        "h5mkgrp",
+        "h5repack",
+        "h5repart",
+        "h5stat",
+        "h5unjam"
+    ] %}
+    {% for each_hdf5_cmd in hdf5_cmds %}
+    - command -v {{ each_hdf5_cmd }}
+    {% endfor %}
+
+    # Verify libraries.
+    {% set hdf5_libs = [
+        "hdf5",
+        "hdf5_hl",
+    ] %}
+    {% for each_hdf5_lib in hdf5_libs %}
+    - test -f $PREFIX/lib/lib{{ each_hdf5_lib }}.a                           # [unix]
+    - test -f $PREFIX/lib/lib{{ each_hdf5_lib }}${SHLIB_EXT}                 # [unix]
+    {% endfor %}
+
+about:
+  home: http://www.hdfgroup.org/HDF5/
+  license: HDF5
+  license_family: BSD
+  license_file: COPYING
+  summary: HDF5 is a data model, library, and file format for storing and managing data
+
+extra:
+  recipe-maintainers:
+    - jakirkham
+    - gillins
+    - groutr
+    - ocefpaf
+    - astrofrog-conda-forge
+    - marqh
+    - marcelotrevisani
+    - scopatz

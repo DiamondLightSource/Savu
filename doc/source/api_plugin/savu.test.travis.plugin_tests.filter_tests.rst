@@ -1,5 +1,5 @@
-savu\.test\.travis\.plugin\_tests\.filter\_tests package
-========================================================
+savu.test.travis.plugin\_tests.filter\_tests package
+====================================================
 
 Submodules
 ----------
@@ -15,6 +15,7 @@ Submodules
    savu.test.travis.plugin_tests.filter_tests.distortion_correction_test
    savu.test.travis.plugin_tests.filter_tests.downsample_filter_test
    savu.test.travis.plugin_tests.filter_tests.find_peaks_test
+   savu.test.travis.plugin_tests.filter_tests.hilbert_test
    savu.test.travis.plugin_tests.filter_tests.histogram_test
    savu.test.travis.plugin_tests.filter_tests.list_to_projections_test
    savu.test.travis.plugin_tests.filter_tests.median_filter_test

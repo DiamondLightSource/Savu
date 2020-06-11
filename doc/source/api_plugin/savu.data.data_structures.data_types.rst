@@ -1,5 +1,5 @@
-savu\.data\.data\_structures\.data\_types package
-=================================================
+savu.data.data\_structures.data\_types package
+==============================================
 
 Submodules
 ----------
@@ -8,7 +8,7 @@ Submodules
 
    savu.data.data_structures.data_types.base_type
    savu.data.data_structures.data_types.data_plus_darks_and_flats
-   savu.data.data_structures.data_types.fabIO
+   savu.data.data_structures.data_types.image_data
    savu.data.data_structures.data_types.map_3dto4d_h5
    savu.data.data_structures.data_types.mrc
    savu.data.data_structures.data_types.replicate
