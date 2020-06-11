@@ -1,9 +1,9 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class RandomHdf5LoaderTools(PluginTools):
-    """A hdf5 dataset of a specified size is created at runtime using numpy\
-random sampling (numpy.random) and saved to file. This created dataset\
-will be used as the input file, and the input file path passed to Savu\
+    """A hdf5 dataset of a specified size is created at runtime using numpy \
+random sampling (numpy.random) and saved to file. This created dataset \
+will be used as the input file, and the input file path passed to Savu \
 will be ignored (use a dummy).
     """
     def define_parameters(self):
@@ -16,7 +16,7 @@ will be ignored (use a dummy).
         axis_labels:
               visibility: basic
               dtype: list
-              description: "A list of the axis labels to be associated #
+              description: "A list of the axis labels to be associated \
                 with each dimension, of the form ['name1.unit1', 'name2.unit2',...]"
               default: []
         patterns:

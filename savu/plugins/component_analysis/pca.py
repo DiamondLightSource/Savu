@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: ica
+.. module:: pca
    :platform: Unix
    :synopsis: A plugin to fit peaks
 

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: mm_loader
+.. module:: i18_mm_loader
    :platform: Unix
    :synopsis: A class for loading multiple data types in a multi-modal\
        experimental setup.

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: sinogram_alignment
+.. module:: testing_sino_align
    :platform: Unix
    :synopsis: A plugin to determine the centre of rotation of a sinogram and\
        to align the rows of a sinogram e.g. in the case of motor backlash.

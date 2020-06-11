@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: ptypy_compact
+.. module:: ptypy_batch
    :platform: Unix
    :synopsis: A plugin to perform ptychography using ptypy
 

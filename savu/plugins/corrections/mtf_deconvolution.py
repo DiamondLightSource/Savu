@@ -13,10 +13,11 @@
 # limitations under the License.
 
 """
-.. module:: Point-spread-function correction
+.. module:: mtf_deconvolution
    :platform: Unix
-   :synopsis: A plugin for MTF (modulation transfer function) deconvolution\
-    or PSF (point spread function) correction in the Fourier domain.
+   :synopsis: Point-spread-function correction. A plugin for MTF (modulation \
+    transfer function) deconvolution or PSF (point spread function) correction \
+    in the Fourier domain.
 .. moduleauthor:: Nghia Vo <scientificsoftware@diamond.ac.uk>
 
 """

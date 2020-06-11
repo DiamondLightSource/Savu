@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: A plugin to calculate global statistics (max, min sum, mean) of the input data
+.. module:: get_data_statistics
    :platform: Unix
    :synopsis: A plugin to calculate global statistics (max, min, sum, mean) of the input data
 

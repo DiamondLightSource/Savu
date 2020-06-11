@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: TomoBAR CPU reconstruction
+.. module:: tomobar_recon_cpu
    :platform: Unix
    :synopsis: A wrapper around TOmographic MOdel-BAsed Reconstruction (ToMoBAR) software \
    for advanced iterative image reconstruction using CPU

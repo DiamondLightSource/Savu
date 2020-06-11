@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: yaml_loader
+.. module:: yaml_converter
    :platform: Unix
    :synopsis: A class to load data from a non-standard nexus/hdf5 file using \
    descriptions loaded from a yaml file.

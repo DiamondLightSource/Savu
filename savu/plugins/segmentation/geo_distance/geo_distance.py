@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: Calculate geodesic distance transforms
+.. module:: geo_distance
    :platform: Unix
-   :synopsis: Wraps the code for calculating geodesic distance transforms, can be a \
+   :synopsis: Calculate geodesic distance transforms. Wraps the code for calculating geodesic distance transforms, can be a \
    usefull tool for data segmentation with a proper seed initialisation
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>

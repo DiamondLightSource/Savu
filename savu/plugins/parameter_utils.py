@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: savu_config.py
+.. module:: parameter_utils
    :platform: Unix
-   :synopsis: A command line tool for creating Savu plugin lists
+   :synopsis: Parameter utilities
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 

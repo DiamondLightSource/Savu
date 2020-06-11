@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: 3D segmentation using Morphological Level Sets or active countours
+.. module:: morph_snakes3D
    :platform: Unix
-   :synopsis: Wrapper around Morphsnakes for Morphological countours segmentation
+   :synopsis: 3D segmentation using Morphological Level Sets or active countours.
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """

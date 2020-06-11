@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: mutations.py
+.. module:: mutations
    :platform: Unix
    :synopsis: A dictionary detailing changes to plugins, actions and \
        descriptions that are required by the configurator.

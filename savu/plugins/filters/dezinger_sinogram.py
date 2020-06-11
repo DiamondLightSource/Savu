@@ -13,8 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: Remove zingers (caused by scattered X-rays hitting the CCD chip \
-                            directly)
+.. module:: dezinger_sinogram
    :platform: Unix
    :synopsis: A plugin working in sinogram space to removes zingers
 .. moduleauthor:: Nghia Vo <scientificsoftware@diamond.ac.uk>

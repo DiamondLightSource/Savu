@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
- .. module:: perform elemetary arithmetic operations on data: addition, subtraction, multiplication and division
+.. module:: arithmetic_operations
    :platform: Unix
    :synopsis: perform elemetary arithmetic operations on data: addition, subtraction, multiplication and division
 

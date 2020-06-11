@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: ring_artefact_filter
+.. module:: ccpi_ring_artefact_filter
    :platform: Unix
    :synopsis: A plugin to perform ring artefact removal
 

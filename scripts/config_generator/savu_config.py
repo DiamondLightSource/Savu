@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: savu_config.py
+.. module:: savu_config
    :platform: Unix
    :synopsis: A command line tool for creating Savu plugin lists
 

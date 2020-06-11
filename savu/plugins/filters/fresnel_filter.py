@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: Improve contrast (similar to the Paganin filter)
+.. module:: fresnel_filter
    :platform: Unix
    :synopsis: A plugin to improve the contrast of the reconstruction image.
 .. moduleauthor:: Nghia Vo <scientificsoftware@diamond.ac.uk>

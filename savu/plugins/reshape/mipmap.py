@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-.. module:: mipmaping plugin (a pyramid-like data downampling)
+.. module:: mipmap
    :platform: Unix
-   :synopsis:A plugin to downsample multidimensional data 
+   :synopsis: Mipmapping plugin (a pyramid-like data downampling). A plugin to downsample multidimensional data
 .. moduleauthor:: Mark Basham & Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
 

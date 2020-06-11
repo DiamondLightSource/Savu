@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
- .. module:: rescale_intensity to (0, 1) levels by stretching or shrinking the data intensity levels
+.. module:: data_rescale
    :platform: Unix
    :synopsis: performs stretching or shrinking the data intensity levels based on skimage rescale_intensity module
 

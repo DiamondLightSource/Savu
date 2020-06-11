@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: Tomographic Model-Based Reconstruction module for an approximated (faster) 3D reconstruction
+.. module:: tomobar_recon_3D
    :platform: Unix
    :synopsis: A wrapper around TOmographic MOdel-BAsed Reconstruction (ToMoBAR) software \
    for advanced iterative image reconstruction using _3D_ capabilities of regularisation. \

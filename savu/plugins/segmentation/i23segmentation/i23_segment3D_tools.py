@@ -9,7 +9,6 @@ INPUT to the plugin is the result of gmm_segment plugin
     """
     def define_parameters(self):
         """
-
         classes:
             visibility: intermediate
             dtype: int

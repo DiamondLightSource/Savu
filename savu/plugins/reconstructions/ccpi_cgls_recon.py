@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: cgls_recon
+.. module:: ccpi_cgls_recon
    :platform: Unix
    :synopsis: Wrapper around the CCPi cgls reconstruction algorithm.
 

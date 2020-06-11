@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: Remove stripe artefacts
+.. module:: remove_unresponsive_and_fluctuating_rings
    :platform: Unix
    :synopsis: A plugin working in sinogram space to remove large stripe artefacts
 .. moduleauthor:: Nghia Vo <scientificsoftware@diamond.ac.uk>

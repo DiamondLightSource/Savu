@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: Gaussian mixture models for classification-segmentation routine
+.. module:: gmm_segment3D
    :platform: Unix
-   :synopsis: Wrapper around scikit GMM function
+   :synopsis: Gaussian mixture models for classification-segmentation routine. Wrapper around scikit GMM function
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """

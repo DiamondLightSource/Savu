@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: spectrum_crop
+.. module:: list_to_projections
    :platform: Unix
    :synopsis: A plugin to crop a spectra
 

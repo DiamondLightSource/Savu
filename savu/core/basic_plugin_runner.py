@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: plugin_runner
+.. module:: basic_plugin_runner
    :platform: Unix
    :synopsis: Plugin list runner, which passes control to the transport layer.
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>

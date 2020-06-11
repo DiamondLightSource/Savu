@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: median_3x3_filter
+.. module:: median_filter
    :platform: Unix
    :synopsis: A plugin to filter each frame with a 3x3 median filter
 

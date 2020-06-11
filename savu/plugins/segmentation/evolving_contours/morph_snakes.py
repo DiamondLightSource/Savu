@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: 2D segmentation using Morphological Level Sets or active countours
+.. module:: morph_snakes
    :platform: Unix
-   :synopsis: Wrapper around Morphsnakes for Morphological countours segmentation
+   :synopsis: 2D segmentation using Morphological Level Sets or active countours.
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """

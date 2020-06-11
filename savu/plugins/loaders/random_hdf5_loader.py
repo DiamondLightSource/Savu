@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: temp_loader
+.. module:: random_hdf5_loader
    :platform: Unix
    :synopsis: A loader that creates a random number generated hdf5 dataset of\
        any size.

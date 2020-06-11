@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: nxstxm_loader
+.. module:: nxptycho_loader
    :platform: Unix
    :synopsis: A class for loading nxstxm data
 

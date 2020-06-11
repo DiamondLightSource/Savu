@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: i13fluo_loader
+.. module:: i13_fluo_loader
    :platform: Unix
    :synopsis: A class for loading xrf data
 

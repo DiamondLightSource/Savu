@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: Remove objects smaller than the specified size.
+.. module:: morph_remove_objects
    :platform: Unix
-   :synopsis: Wrapper around skimage morphology to remove smaller objects
+   :synopsis: Wrapper around skimage morphology to remove objects smaller than the specified size.
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: nxstxm_loader
+.. module:: i13_ptycho_loader
    :platform: Unix
    :synopsis: A class for loading nxstxm data
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>

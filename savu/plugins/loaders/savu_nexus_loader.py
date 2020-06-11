@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: savu_loader
+.. module:: savu_nexus_loader
    :platform: Unix
    :synopsis: A class for loading savu output data.
 

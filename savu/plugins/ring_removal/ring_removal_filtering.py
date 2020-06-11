@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: Remove stripe artefacts
+.. module:: ring_removal_filtering
    :platform: Unix
    :synopsis: A plugin working in sinogram space to remove stripe artefacts
 .. moduleauthor:: Nghia Vo <scientificsoftware@diamond.ac.uk>

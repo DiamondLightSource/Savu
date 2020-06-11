@@ -13,8 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: Wrapper for CCPi-Regularisation Toolkit (GPU) for \
-    efficient 2D/3D denoising
+.. module:: ccpi_denoising_cpu_3D
    :platform: Unix
    :synopsis: GPU modules of CCPi-Regularisation Toolkit (CcpiRegulToolkitCpu)
 
