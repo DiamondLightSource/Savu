@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2014 Diamond Light Source Ltd.
+# Copyright 2020 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,27 +15,32 @@
 
 
 """
-.. module:: plugins_test
+.. module:: tomophantom_test
    :platform: Unix
-   :synopsis: unittest test classes for plugins
+   :synopsis: unittest for the tomophantom package
 
-.. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
+.. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 
 """
 
 import unittest
-from savu.test import test_utils as tu
+import savu.test.test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
-    run_protected_plugin_runner
+        run_protected_plugin_runner
 
-
-class MedianFilterTest(unittest.TestCase):
+class TomophantomTest(unittest.TestCase):
     global data_file, experiment
     data_file = '24737.nxs'
     experiment = 'tomo'
 
-    def test_median_filter(self):
-        process_list = 'filters/denoise/median_filter_test.nxs'
+    def test_tomophantom(self):
+        process_list = 'simulation/tomophantom/tomophant_test.nxs'
+        options = tu.initialise_options(data_file, experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
+
+    def test_quantification_tomophantom(self):
+        process_list = 'simulation/tomophantom/tomophant_quantif_test.nxs'
         options = tu.initialise_options(data_file, experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
