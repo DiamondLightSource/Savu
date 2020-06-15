@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: tomophantom_quantification
+.. module:: tomo_phantom_quantification
    :platform: Unix
    :synopsis: A Tomophantom plugin to calculate quantitative values e.g. MSE, RMSE, SSIM
 
@@ -29,7 +29,7 @@ import tomophantom
 from tomophantom.supp.qualitymetrics import QualityTools
 
 @register_plugin
-class TomophantomQuantification(Plugin, CpuPlugin):
+class TomoPhantomQuantification(Plugin, CpuPlugin):
     """
     A plugin to calculate some standard image quality metrics
 
@@ -37,42 +37,38 @@ class TomophantomQuantification(Plugin, CpuPlugin):
     """
 
     def __init__(self):
-        super(TomophantomQuantification, self).__init__("TomophantomQuantification")
+        super(TomoPhantomQuantification, self).__init__("TomoPhantomQuantification")
 
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
         in_pData[0].plugin_data_setup('VOLUME_XZ', 'single')
+        in_pData[1].plugin_data_setup('VOLUME_XZ', 'single')
 
         fullData = in_dataset[0]
         slice_dirs = list(in_dataset[0].get_slice_dimensions())
-        self.new_shape = (np.prod(np.array(fullData.get_shape())[slice_dirs]), 4)
-        out_dataset[1].create_dataset(shape=self.new_shape,
-                                      axis_labels=['stattype', 'value'],
+        self.new_shape = (np.prod(np.array(fullData.get_shape())[slice_dirs]), 1)
+        out_dataset[0].create_dataset(shape=self.new_shape,
+                                      axis_labels=['quantval', 'value'],
                                       remove=True,
                                       transport='hdf5')
-        out_dataset[1].add_pattern("METADATA", core_dims=(1,), slice_dims=(0,))
-        out_pData[1].plugin_data_setup('METADATA', self.get_max_frames())
+        out_dataset[0].add_pattern("METADATA", core_dims=(1,), slice_dims=(0,))
+        out_pData[0].plugin_data_setup('METADATA', self.get_max_frames())
 
     def process_frames(self, data):
-        data_temp = data[0]
-        indices = np.where(np.isnan(data_temp))
-        data_temp[indices] = 0.0
-        # collecting values for each slice
-        slice_values = [np.max(data_temp), np.min(data_temp), np.sum(data_temp), np.mean(data_temp)]
-        return [data_temp, np.array([slice_values])]
+        data_temp1 = data[0]
+        data_temp2 = data[1]
+        indices = np.where(np.isnan(data_temp1))
+        data_temp1[indices] = 0.0
+        indices = np.where(np.isnan(data_temp2))
+        data_temp2[indices] = 0.0
 
-    def post_process(self):
-        data, slice_values = self.get_out_datasets()
-        all_slice_values = slice_values.data[...]
-        max_stat = np.max(all_slice_values[:,0])
-        min_stat = np.max(all_slice_values[:,1])
-        sum_stat = np.sum(all_slice_values[:,2])
-        mean_stat = np.sum(all_slice_values[:,3])
-        data.meta_data.set(['stats', 'max', 'pattern'], max_stat)
-        #data.meta_data.set(['stats', 'min', 'pattern'], min_stat)
-        #data.meta_data.set(['stats', 'sum', 'pattern'], sum_stat)
-        #data.meta_data.set(['stats', 'mean', 'pattern'], mean_stat)
+        # collecting values for each slice
+        Qtools = QualityTools(data_temp1, data_temp2)
+        RMSE = Qtools.rmse()
+        print("The Root Mean Square Error is {}".format(RMSE))
+        slice_values = [RMSE]
+        return np.array([slice_values])
 
     def nInput_datasets(self):
         return 2
