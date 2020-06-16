@@ -232,12 +232,10 @@ class Experiment(object):
         finalise['keep'] = []
 
         for key, data in self.index['out_data'].iteritems():
-            if data.remove is True:
-                finalise['remove'].append(data)
-            else:
-                finalise['keep'].append(data)
+            thelist = 'remove' if data.remove else 'keep'
+            finalise[thelist].append(data)
 
-        # find in datasets to replace
+        # find in datasets to replace 
         finalise['replace'] = []
         for out_name in self.index['out_data'].keys():
             if out_name in self.index['in_data'].keys():
