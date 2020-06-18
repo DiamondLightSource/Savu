@@ -174,7 +174,7 @@ class DisplayFormatter(object):
         margin = 4
         joiner = "\n" + " " * margin
 
-        temp = "\n   %2i)   %20s : %s"
+        temp = "\n   %2i)   %29s : %s"
         params += \
             temp % (keycount, key, p_dict['data'][key])
         if desc:
