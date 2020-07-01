@@ -123,7 +123,9 @@ def plugin_loader(exp, plugin_dict, check=False):
         # re-raise the original error
         raise
 
-    # If we are just checking the plugin we should reduce the effort
+    if check:
+        exp.meta_data.plugin_list._set_datasets_list(plugin)
+
     logging.debug("finished plugin loader")
     return plugin
 
@@ -140,9 +142,10 @@ def get_plugins_paths(examples=True):
             os.getenv("SAVU_PLUGINS_PATH") or "").replace(" ","").split(":")))
     
     # If examples have been requested then add them to the path
-    eg_path = os.path.join(savu.__path__[0],
+    # add all sub folders
+    eg_base_path = os.path.join(savu.__path__[0],
                            "../plugin_examples/plugin_templates")
-    eg_path = [eg_path] if examples else []
+    eg_path = [x[0] for x in os.walk(eg_base_path)] if examples else []
     # check all paths exist and add the the plugin paths
     for ppath in user_path + env_paths + eg_path:
         if os.path.exists(ppath):

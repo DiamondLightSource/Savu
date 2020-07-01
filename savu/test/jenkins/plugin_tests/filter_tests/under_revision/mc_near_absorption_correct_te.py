@@ -13,11 +13,11 @@
 # limitations under the License.
 
 """
-.. module:: nx_xrd_loader_test
+.. module:: pyfai_azimuthal_integration_test
    :platform: Unix
-   :synopsis: testing the nx_xrd loader
+   :synopsis: runner for tests using the MPI framework
 
-.. moduleauthor:: Aaron Parsons <scientificsoftware@diamond.ac.uk>
+.. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
 import unittest
@@ -26,10 +26,11 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
 
-class ImageInterpolationTest(unittest.TestCase):
-    def test_image_interpolation(self):
-        data_file = tu.get_test_big_data_path('speckle_tracking.h5')
-        process_file = tu.get_test_process_path('image_interpolation_test.nxs')
+class McNearAbsorptionCorrectTest(unittest.TestCase):
+
+    def test_mcnear(self):
+        data_file = tu.get_test_data_path('i18_test_data.nxs')
+        process_file = tu.get_test_process_path('to_revise/mcnear_absorption_correction.nxs')
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
 

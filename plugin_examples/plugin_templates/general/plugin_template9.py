@@ -40,33 +40,15 @@ class PluginTemplate9(Plugin, CpuPlugin):
     def __init__(self, name="PluginTemplate9"):
         super(PluginTemplate9, self).__init__(name)
 
-#    def dynamic_data_info(self):
-#        self.n_mipmaps = self.parameters['n_mipmaps']
-#        name = self.parameters['out_dataset_prefix']
-#        self.parameters['out_datasets'] = \
-#            ['%s_%i' % (name, 2**i) for i in range(self.n_mipmaps)]
-
-#    def dynamic_data_info(self):
-#        # can I do dynamic data info here?
-#        # You can't create anything here that is used later on (change this?)
-#        nOut = self.parameters['n_out']
-#        # the output datasets do not yet have names so add them here
-#        name = self.parameters['out_prefix']
-#        # update the out_datasets list to contain the uniquely named datasets
-#        self.parameters['out_datasets'] = ['%s_%i' % (name, i) for i in range(nOut)]
-
     def nInput_datasets(self):
         return 1
 
     def nOutput_datasets(self):
-        # can I do dynamic data info here?
-        # You can't create anything here that is used later on (change this?)
         nOut = self.parameters['n_out']
         # the output datasets do not yet have names so add them here
         name = self.parameters['out_prefix']
         # update the out_datasets list to contain the uniquely named datasets
         self.parameters['out_datasets'] = ['%s_%i' % (name, i) for i in range(nOut)]
-        print self.parameters['out_datasets']
         return nOut
 
     def setup(self):

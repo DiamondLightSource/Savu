@@ -139,8 +139,8 @@ class PluginRunner(object):
         n_loaders = self.exp.meta_data.plugin_list._get_n_loaders()
         n_plugins = plugin_list._get_n_processing_plugins()
         plist = plugin_list.plugin_list
-
         self.exp._setup(self, plugin_list)
+        
         # set loaders
         for i in range(n_loaders):
             pu.plugin_loader(self.exp, plist[i])
@@ -159,8 +159,10 @@ class PluginRunner(object):
             count += 1
         self.exp._reset_datasets()
 
+        self.exp._finalise_setup(plugin_list)
         plugin_list._add_missing_savers(self.exp)
         cu.user_message("Plugin list check complete!")
+        
         #  ********* transport function ***********
         self._transport_update_plugin_list()
 

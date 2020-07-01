@@ -1,18 +1,20 @@
 name: test-environment
 channels:
-  - astra-toolbox
+  - astra-toolbox/label/dev
   - conda-forge
-  - ccpi
   - dkazanc
+  - ccpi
 dependencies:
   - python=2.7
   - numpy
+  - pip
   - scipy
   - pytest
   - h5py
   - pep8
-  - mpi4py 
+  - mpi4py
   - scikit-image
+  - scikit-learn
   - astra-toolbox
   - xraylib
   - opencv=4.1.1
@@ -27,7 +29,8 @@ dependencies:
   - pymca=5.5.2
   - ccpi-regulariser
   - tomobar
-  - i23-seg
+  - tomophantom
+  - larix
   - yamllint
   - mrcfile
   - pip:
@@ -35,4 +38,3 @@ dependencies:
     - peakutils
     - gnureadline
     - pmacparser
-
