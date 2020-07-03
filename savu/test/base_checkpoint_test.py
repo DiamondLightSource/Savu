@@ -27,6 +27,7 @@ import h5py
 import unittest
 import numpy as np
 from shutil import copyfile
+import shutil
 
 from savu.core.plugin_runner import PluginRunner
 from savu.core.checkpointing import Checkpointing
@@ -58,10 +59,12 @@ class BaseCheckpointTest(object):
 
     def tearDown(self):
         cp_folder = os.path.join(self.tmpdir, 'checkpoint')
-        self._empty_folder(cp_folder)
-        os.removedirs(cp_folder)
-        self._empty_folder(self.tmpdir)
-        os.removedirs(self.tmpdir)
+        #self._empty_folder(cp_folder)
+        #os.removedirs(cp_folder)
+        #self._empty_folder(self.tmpdir)
+        #os.removedirs(self.tmpdir)
+        shutil.rmtree(cp_folder, ignore_errors=True)
+        shutil.rmtree(self.tmpdir, ignore_errors=True)
 
     def _empty_folder(self, folder):
         for f in os.listdir(folder):
