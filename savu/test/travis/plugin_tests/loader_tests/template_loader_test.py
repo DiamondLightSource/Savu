@@ -217,7 +217,7 @@ class TemplateLoaderTest(unittest.TestCase):
 
 
     def tearDown(self):
-        shutil.rmtree(self.test_folder)
+        shutil.rmtree(self.test_folder, ignore_errors=True)
 
     def create_N_tiffs(self, N, file_pattern='%04d.tif', frame_size=(10, 13)):
         '''
