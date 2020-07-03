@@ -301,7 +301,7 @@ def cleanup(options):
     Performs folders cleaning in tmp/.
     using _shutil_ module in order to delete everything recursively
     """
-    shutil.rmtree(options["out_path"])
+    shutil.rmtree(options["out_path"], ignore_errors=True)
     """
     classb = savu.test.base_checkpoint_test.BaseCheckpointTest()
     cp_folder = os.path.join(options["out_path"], 'checkpoint')
