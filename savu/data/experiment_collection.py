@@ -100,9 +100,9 @@ class Experiment(object):
         # save the plugin list - one process, first time only
         if self.meta_data.get('process') == \
                 len(self.meta_data.get('processes'))-1 and not checkpoint:
-            plugin_list._save_plugin_list(self.meta_data.get('nxs_filename'))
             # links the input data to the nexus file
-            self._add_input_data_to_nxs_file(transport)
+            plugin_list._save_plugin_list(self.meta_data.get('nxs_filename'))
+            self._add_input_data_to_nxs_file(self._get_transport())
         self._barrier()
 
         # create experiment collection here
