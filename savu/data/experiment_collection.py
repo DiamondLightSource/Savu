@@ -99,14 +99,10 @@ class Experiment(object):
         checkpoint = self.meta_data.get('checkpoint')
         # save the plugin list - one process, first time only
         if self.meta_data.get('process') == \
-                len(self.meta_data.get('processes'))-1 and not checkpoint:
+                len(self.meta_data.get('processes'))-1 and not checkpoint:                  
             # links the input data to the nexus file
             plugin_list._save_plugin_list(self.meta_data.get('nxs_filename'))
             self._add_input_data_to_nxs_file(self._get_transport())
-        self._barrier()
-
-        # create experiment collection here
-        self.collection = {'plugin_dict': [], 'datasets': []}
 
     def _set_initial_datasets(self):
         self.initial_datasets = copy.deepcopy(self.index['in_data'])
