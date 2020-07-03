@@ -20,6 +20,7 @@
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 """
+from __future__ import print_function, division, absolute_import
 
 import os
 import copy
@@ -27,7 +28,6 @@ import h5py
 import logging
 from mpi4py import MPI
 
-import savu.plugins.utils as pu
 from savu.data.meta_data import MetaData
 from savu.data.plugin_list import PluginList
 from savu.data.data_structures.data import Data
@@ -63,7 +63,7 @@ class Experiment(object):
         self.meta_data.plugin_list = PluginList()
         try:
             rtype = self.meta_data.get('run_type')
-            if rtype is 'test':
+            if rtype == 'test':
                 self.meta_data.plugin_list.plugin_list = \
                     self.meta_data.get('plugin_list')
             else:
@@ -125,7 +125,7 @@ class Experiment(object):
             # look in conda environment to see which version is being used
             savu_path = sys.modules['savu'].__path__[0]
             sys_files = os.path.join(
-                    os.path.dirname(savu_path), 'system_files')
+                os.path.dirname(savu_path), 'system_files')
             subdirs = os.listdir(sys_files)
             sys_folder = 'dls' if len(subdirs) > 1 else subdirs[0]
             fname = 'system_parameters.yml'
@@ -145,7 +145,7 @@ class Experiment(object):
     def _add_input_data_to_nxs_file(self, transport):
         # save the loaded data to file
         h5 = Hdf5Utils(self)
-        for name, data in self.index['in_data'].iteritems():
+        for name, data in self.index['in_data'].items():
             self.meta_data.set(['link_type', name], 'input_data')
             self.meta_data.set(['group_name', name], name)
             self.meta_data.set(['filename', name], data.backing_file)
@@ -204,36 +204,36 @@ class Experiment(object):
                 log_folder.close()
 
         self._create_nxs_entry()
-    
+
     def _create_nxs_entry(self):
         logging.debug("Testing nexus file")
         import h5py
         if self.meta_data.get('process') == \
                 len(self.meta_data.get('processes'))-1:
-  	    with h5py.File(self.meta_data.get('nxs_filename'), 'w') as nxs_file:
-              entry_group = nxs_file.create_group('entry')
-              entry_group.attrs['NX_class'] = 'NXentry'
+            with h5py.File(self.meta_data.get('nxs_filename'), 'w') as nxs_file:
+                entry_group = nxs_file.create_group('entry')
+                entry_group.attrs['NX_class'] = 'NXentry'
 
     def _clear_data_objects(self):
         self.index["out_data"] = {}
         self.index["in_data"] = {}
 
     def _merge_out_data_to_in(self):
-        for key, data in self.index["out_data"].iteritems():
+        for key, data in self.index["out_data"].items():
             if data.remove is False:
                 self.index['in_data'][key] = data
         self.index["out_data"] = {}
 
     def _finalise_experiment_for_current_plugin(self):
-        finalise = {}
+        finalise = {'remove': [], 'keep': []}
         # populate nexus file with out_dataset information and determine which
         # datasets to remove from the framework.
-        finalise['remove'] = []
-        finalise['keep'] = []
 
-        for key, data in self.index['out_data'].iteritems():
-            thelist = 'remove' if data.remove else 'keep'
-            finalise[thelist].append(data)
+        for key, data in self.index['out_data'].items():
+            if data.remove is True:
+                finalise['remove'].append(data)
+            else:
+                finalise['keep'].append(data)
 
         # find in datasets to replace 
         finalise['replace'] = []
@@ -252,7 +252,7 @@ class Experiment(object):
             del self.index["out_data"][data.data_info.get('name')]
 
         # Add remaining output datasets to input datasets
-        for name, data in self.index['out_data'].iteritems():
+        for name, data in self.index['out_data'].items():
             data.get_preview().set_preview([])
             self.index["in_data"][name] = copy.deepcopy(data)
         self.index['out_data'] = {}
@@ -262,7 +262,7 @@ class Experiment(object):
         from savu.data.data_structures.data_types.replicate import Replicate
         for in_data in in_data_list.values():
             if isinstance(in_data.data, Replicate):
-                in_data.data = in_data.data.reset()
+                in_data.data = in_data.data._reset()
 
     def _set_all_datasets(self, name):
         data_names = []
@@ -284,9 +284,9 @@ class Experiment(object):
         Log the contents of the experiment at the specified level
         """
         logging.log(log_level, "Experimental Parameters for %s", log_tag)
-        for key, value in self.index["in_data"].iteritems():
+        for key, value in self.index["in_data"].items():
             logging.log(log_level, "in data (%s) shape = %s", key,
                         value.get_shape())
-        for key, value in self.index["in_data"].iteritems():
+        for key, value in self.index["in_data"].items():
             logging.log(log_level, "out data (%s) shape = %s", key,
                         value.get_shape())
