@@ -2,9 +2,10 @@ channels:
   - conda-forge
   - defaults
   - astra-toolbox/label/dev
-  - ccpi
   - dkazanc
+  - ccpi
 dependencies:
+  - python=3.7
   - tomopy
   - scikit-image
   - scipy
