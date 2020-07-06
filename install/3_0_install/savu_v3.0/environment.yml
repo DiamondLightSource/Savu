@@ -12,9 +12,11 @@ dependencies:
   - pandas
   - PyWavelets
   - scikit-learn
+  - scikit-image
   - tomobar
   - larix
   - ccpi-regulariser
+  - tomophantom
   - astra-toolbox
   - pyfai
   - pymca

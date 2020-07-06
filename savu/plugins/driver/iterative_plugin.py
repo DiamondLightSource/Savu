@@ -46,7 +46,7 @@ class IterativePlugin(PluginDriver):
         self.__set_original_datasets()
 
         while not self._ip_complete:
-            print "Iteration", self._ip_iteration, "..."
+            print ("Iteration", self._ip_iteration, "...")
             self.__set_datasets()  # change the pattern in this function?
             self._run_plugin_instances(transport, self.get_communicator())
             if transport.no_processing:
