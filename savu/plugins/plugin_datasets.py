@@ -60,7 +60,7 @@ class PluginDatasets(object):
         return data_objs
 
     def _clone_datasets(self):
-        for data_obj in self.exp.index['out_data'].values():
+        for data_obj in list(self.exp.index['out_data'].values()):
             if data_obj.raw and data_obj.data:
                 data_obj.raw.create_next_instance(data_obj)
 #                data_obj.clone = True
@@ -71,7 +71,7 @@ class PluginDatasets(object):
             data._finalise_patterns()
 
     def _finalise_plugin_datasets(self):
-        if 'dawn_runner' in self.exp.meta_data.get_dictionary().keys():
+        if 'dawn_runner' in list(self.exp.meta_data.get_dictionary().keys()):
             return
 
         in_pData, out_pData = self.get_plugin_datasets()
@@ -82,7 +82,7 @@ class PluginDatasets(object):
             params[pData] = pData._get_plugin_data_size_params()
         
         max_bytes = 0
-        for key, value in params.iteritems():
+        for key, value in params.items():
             if value['transfer_bytes'] > max_bytes:
                 max_data = key
                 max_bytes = value['transfer_bytes']

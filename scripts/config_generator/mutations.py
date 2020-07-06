@@ -24,7 +24,7 @@
 
 import textwrap
 from colorama import Back, Fore
-import display_formatter as df
+from . import display_formatter as df
 
 
 def wrap(string):
@@ -77,9 +77,9 @@ def param_change_str(old, new, plugin, keys):
     removed = list(set(old).difference(set(new)))
     added = list(set(new).difference(set(old)))
     replaced = [entry['old'] for k in keys for entry in param_mutations[k]
-                if entry['old'] in old.keys()]
+                if entry['old'] in list(old.keys())]
     replacing = [entry['new'] for k in keys for entry in param_mutations[k]
-                 if entry['old'] in old.keys()]
+                 if entry['old'] in list(old.keys())]
 
     removed = [x for x in removed if x not in replaced]
     added = [x for x in added if x not in replacing]
@@ -89,8 +89,8 @@ def param_change_str(old, new, plugin, keys):
         added_str = ["Adding parameter %s" % a for a in added]
         replaced_str = ["Replacing parameter %s with %s" % (
                 replaced[i], replacing[i]) for i in range(len(replaced))]
-        print wrap(param_changes_str(plugin) + '%s' % (
-                '\n'.join(removed_str + added_str + replaced_str)))
+        print(wrap(param_changes_str(plugin) + '%s' % (
+                '\n'.join(removed_str + added_str + replaced_str))))
 
 hdf5_notice = 'is now used by default.\nPlease remove from the process list, '\
     'unless you wish to override the default parameters (which must be done '\

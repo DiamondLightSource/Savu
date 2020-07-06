@@ -1,6 +1,0 @@
-build/
-*.a
-*.o
-*.so
-dezing.c
-dezing.h

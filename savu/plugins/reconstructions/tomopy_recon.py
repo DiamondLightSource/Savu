@@ -75,7 +75,7 @@ class TomopyRecon(BaseRecon, CpuPlugin):
         self.alg_keys = self.get_allowed_kwargs()
         self.alg = self.parameters['algorithm']
         self.kwargs = {key: options[key] for key in self.alg_keys[self.alg] if
-                       key in options.keys()}
+                       key in list(options.keys())}
 
         self._finalise_data = self._transpose if self.parameters['outer_pad']\
             else self._apply_mask

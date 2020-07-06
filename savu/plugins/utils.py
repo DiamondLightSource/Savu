@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """
 .. module:: utils
    :platform: Unix
@@ -27,12 +26,9 @@ import sys
 import ast
 import logging
 import savu
-import copy
 import importlib
-import imp
 import inspect
 import itertools
-
 
 plugins = {}
 plugins_path = {}
@@ -63,13 +59,12 @@ def dawn_compatible(plugin_output_type=OUTPUT_TYPE_METADATA_AND_DATA):
         try:
             plugin_path = sys.modules[clazz.__module__].__file__
             # looks out for .pyc files
-            dawn_plugins[clazz.__name__]['path2plugin'] = \
-                plugin_path.split('.py')[0]+'.py'
-            dawn_plugins[clazz.__name__]['plugin_output_type'] =\
-                _plugin_output_type
+            dawn_plugins[clazz.__name__]['path2plugin'] = plugin_path.split('.py')[0] + '.py'
+            dawn_plugins[clazz.__name__]['plugin_output_type'] = _plugin_output_type
         except Exception as e:
-            print e
+            print(e)
         return clazz
+
     # for backwards compatibility, if decorator is invoked without brackets...
     if inspect.isclass(plugin_output_type):
         _plugin_output_type = OUTPUT_TYPE_METADATA_AND_DATA
@@ -107,16 +102,20 @@ def load_class(name, cls_name=None):
     cls_name = _get_cls_name(name) if not cls_name else cls_name
     if cls_name in plugins.keys():
         return plugins[cls_name]
-    mod = \
-        imp.load_source(name, path) if path else importlib.import_module(name)
+    if path:
+        mod = importlib.machinery.SourceFileLoader(name, path).load_module()
+    else:
+        mod = importlib.import_module(name)
     return getattr(mod, cls_name)
 
 
 def plugin_loader(exp, plugin_dict, check=False):
     logging.debug("Running plugin loader")
     try:
-        plugin = get_plugin(
-                plugin_dict['id'], plugin_dict['data'], exp, check=check)
+        plugin = get_plugin(plugin_dict['id'],
+                            plugin_dict['data'],
+                            exp,
+                            check=check)
     except Exception as e:
         logging.error("failed to load the plugin")
         logging.error(e)
@@ -138,9 +137,8 @@ def get_plugins_paths(examples=True):
     plugins_paths = []
     # get user and environment plugin paths
     user_path = [os.path.join(os.path.expanduser("~"), 'savu_plugins')]
-    env_paths = list(itertools.ifilter(None, (
-            os.getenv("SAVU_PLUGINS_PATH") or "").replace(" ","").split(":")))
-    
+    env_paths = os.getenv("SAVU_PLUGINS_PATH", "").replace(" ", "").split(":")
+
     # If examples have been requested then add them to the path
     # add all sub folders
     eg_base_path = os.path.join(savu.__path__[0],
@@ -175,10 +173,10 @@ def is_template_param(param):
             start = 6
         first, last = param[start], param[-1]
         if first == '<' and last == '>':
-            param = param[start+1:-1]
+            param = param[start + 1:-1]
             param = None if not param else param
             try:
-                exec("param = " + param)
+                paral = eval(param)
             except:
                 pass
             return [ptype, param]
@@ -198,11 +196,11 @@ def enablePrint():
 
 
 def parse_config_string(string):
-    regex = "[\[\]\, ]+"
-    split_vals = filter(None, re.split(regex, string))
+    regex = r"[\[\]\, ]+"
+    split_vals = [_f for _f in re.split(regex, string) if _f]
     delimitors = re.findall(regex, string)
     split_vals = [repr(a.strip()) for a in split_vals]
-    zipped = itertools.izip_longest(delimitors, split_vals)
+    zipped = itertools.zip_longest(delimitors, split_vals)
     string = ''.join([i for l in zipped for i in l if i is not None])
     try:
         return ast.literal_eval(string)
@@ -211,10 +209,10 @@ def parse_config_string(string):
 
 
 def parse_array_index_as_string(string):
-    p = re.compile("'\['")
+    p = re.compile(r"'\['")
     for m in p.finditer(string):
         offset = m.start() - count + 3
         end = string[offset:].index("']") + offset
-        string = string[:end] + "]'" + string[end+2:]
+        string = string[:end] + "]'" + string[end + 2:]
     string = string.replace("'['", '[')
     return string

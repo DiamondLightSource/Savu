@@ -65,7 +65,7 @@ def get_frame(log_file, the_key, log_level):
 
     data['Key'] = data['Machine'] + data['CPU']
     frame = ((data[data.Type == log_level])[data.columns[[6, 5, 1]]])
-    frame.insert(0, 'Index', range(len(frame)))
+    frame.insert(0, 'Index', list(range(len(frame))))
     frame = frame.sort_values(by=['Key', 'Index'])
     del frame['Index']
 

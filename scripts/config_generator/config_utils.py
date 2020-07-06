@@ -29,13 +29,12 @@ import traceback
 import pkgutil
 
 from functools import wraps
-import arg_parsers as parsers
+from . import arg_parsers as parsers
 import savu.plugins.utils as pu
 import savu.data.data_structures.utils as du
 
-
 if os.name == 'nt':
-    import win_readline as readline
+    from . import win_readline as readline
 else:
     import readline
 
@@ -84,6 +83,7 @@ def parse_args(function):
         if not args:
             return content
         return function(content, args)
+
     return _parse_args_wrap_function
 
 
@@ -93,17 +93,18 @@ def error_catcher(function):
         try:
             return function(content, args)
         except Exception as e:
-            savu_error = True if len(e.message.split()) > 1 and \
-                e.message.split()[1] == 'ERROR:' else False
+            err_msg_list = str(e).split()
+            savu_error = True if len(err_msg_list) > 1 and err_msg_list[1] == 'ERROR:' else False
 
             if error_level is 0 and savu_error:
-                print e.message
+                print(e)
             elif error_level is 0:
-                print "%s: %s" % (type(e).__name__, e.message)
+                print(f"{type(e).__name__}: {e}")
             elif error_level is 1:
                 traceback.print_exc(file=sys.stdout)
 
             return content
+
     return error_catcher_wrap_function
 
 
@@ -112,11 +113,10 @@ def _add_module(failed_imports, loader, module_name, error_mode):
         try:
             loader.find_module(module_name).load_module(module_name)
         except Exception as e:
-            clazz = ''.join([w.capitalize() for w in \
-                             module_name.split('.')[-1].split('_')])
+            clazz = ''.join([w.capitalize() for w in module_name.split('.')[-1].split('_')])
             failed_imports[clazz] = e
             if error_mode:
-                print("\nUnable to load plugin %s\n%s" % (module_name, e))
+                print(("\nUnable to load plugin %s\n%s" % (module_name, e)))
             else:
                 pass
 
@@ -144,7 +144,7 @@ def populate_plugins(dawn=False, error_mode=False, examples=False):
 
 
 def _dawn_setup():
-    for plugin in pu.dawn_plugins.keys():
+    for plugin in list(pu.dawn_plugins.keys()):
         p = pu.plugins[plugin]()
         pu.dawn_plugins[plugin]['input rank'] = \
             du.get_pattern_rank(p.get_plugin_pattern())
@@ -157,7 +157,7 @@ def _get_dawn_parameters(plugin):
     plugin._populate_default_parameters()
     desc = plugin.parameters_desc
     params = {}
-    for key, value in plugin.parameters.iteritems():
+    for key, value in plugin.parameters.items():
         if key not in ['in_datasets', 'out_datasets']:
             params[key] = {'value': value, 'hint': desc[key]}
     return params
@@ -179,7 +179,7 @@ def __get_filtered_plugins(pfilter):
     star_search = \
         pfilter.split('*')[0] if pfilter and '*' in pfilter else False
 
-    for key, value in pu.plugins.iteritems():
+    for key, value in pu.plugins.items():
         if star_search:
             search = '(?i)^' + star_search
             if re.match(search, value.__name__) or \

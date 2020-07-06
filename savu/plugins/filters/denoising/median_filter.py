@@ -48,7 +48,7 @@ class MedianFilter(BaseFilter, CpuPlugin):
         return result
 
     def set_filter_padding(self, in_data, out_data):
-        padding = (self.parameters['kernel_size'][0]-1)/2
+        padding = (self.parameters['kernel_size'][0]-1) // 2
         in_data[0].padding = {'pad_multi_frames': padding}
         out_data[0].padding = {'pad_multi_frames': padding}
 

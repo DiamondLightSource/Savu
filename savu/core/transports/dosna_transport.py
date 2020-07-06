@@ -163,7 +163,7 @@ class DosnaTransport(BaseTransport):
         if 'current_and_next' in self.exp.meta_data.get_dictionary():
             current_and_next = self.exp.meta_data.get('current_and_next')
 
-        for key in out_data_dict.keys():
+        for key in list(out_data_dict.keys()):
             out_data = out_data_dict[key]
             filename = self.exp.meta_data.get(["filename", key])
             self._create_dosna_dataset(filename, out_data, key,

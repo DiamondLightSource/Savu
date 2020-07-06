@@ -90,7 +90,7 @@ class MultiSavuLoader(BaseLoader):
 
     def _get_data_objects(self, savu):
         rrange = self.parameters['range']
-        file_list = range(rrange[0], rrange[1]+1)
+        file_list = list(range(rrange[0], rrange[1]+1))
         file_path = copy.copy(self.exp.meta_data.get('data_file'))
         file_name = '' if self.parameters['file_name'] is None else\
             self.parameters['file_name']

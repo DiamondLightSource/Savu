@@ -17,8 +17,8 @@
    :platform: Unix
    :synopsis: A plugin removes ring artefacts
 
-.. moduleauthor: Nghia Vo. 
-   Adapted from  tomopy source code: 
+.. moduleauthor: Nghia Vo.
+   Adapted from  tomopy source code:
    http://tomopy.github.io/tomopy/_modules/tomopy/algorithms/preprocess/stripe_removal.html
 """
 
@@ -94,10 +94,10 @@ class RingRemovalWaveletfft(BaseFilter, CpuPlugin):
                 fcV = np.fft.fftshift(np.fft.fft2(cV[j]))
                 my, mx = fcV.shape
                 # Damping of ring artifact information.
-                y_hat = (np.arange(-my, my, 2, dtype='float') + 1) / 2
+                y_hat = (np.arange(-my, my, 2, dtype='float') + 1) / 2.0
                 damp = 1 - np.exp(-np.power(y_hat, 2) / (2 * np.power(self.sigma, 2)))
                 fcV = np.multiply(fcV, np.transpose(np.tile(damp, (mx, 1))))
-    
+
                  # Inverse FFT.
                 cV[j] = np.real(np.fft.ifft2(np.fft.ifftshift(fcV)))
             # Wavelet reconstruction.

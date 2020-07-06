@@ -1,0 +1,5 @@
+# Extra packages needed for CI
+channels:
+- conda-forge
+dependencies:
+  - h5py=2.10.0=mpi_openmpi_py37h8f0990d_2

@@ -60,9 +60,9 @@ for image in images:
 
     print('#########################')
     print('#')
-    print('#   Building {}'.format(image.name))
-    print('#   local_image: {}'.format(local_image))
-    print('#   registry_image: {}'.format(registry_image))
+    print(('#   Building {}'.format(image.name)))
+    print(('#   local_image: {}'.format(local_image)))
+    print(('#   registry_image: {}'.format(registry_image)))
     print('#')
     print('#########################')
 
@@ -83,7 +83,7 @@ for image in images:
     spython_client.quiet = False # circumvent problem with sregistry setting this attribute to True, which kills my local builds!
     filename = spython_client.build(recipe='Singularity.' + image.name, image=local_image, sudo_options=sudo_options)
     if filename is None:
-        print("Error creating singularity image {}".format(local_image))
+        print(("Error creating singularity image {}".format(local_image)))
         sys.exit(1)
 
     #
@@ -96,6 +96,6 @@ for image in images:
     # push to GS bucket
     #
     if image.push is True and use_sregistry is True and 'CIRCLECI' in os.environ:
-        print("Pushing {} to {}".format(local_image, registry_image))
+        print(("Pushing {} to {}".format(local_image, registry_image)))
         sregistry_client.push(path=local_image, name=registry_image)
 

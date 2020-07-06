@@ -64,7 +64,7 @@ def _deepcopy_data_object(dObj, new_obj):
 
 
 def get_available_pattern_types():
-    return pattern_list.keys()
+    return list(pattern_list.keys())
 
 
 def get_pattern_rank(pattern):

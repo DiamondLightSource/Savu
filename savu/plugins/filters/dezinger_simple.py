@@ -108,7 +108,7 @@ class DezingerSimple(BaseFilter, CpuPlugin):
         self.kernel_size = ksize+1 if ksize % 2 == 0 else ksize
 
         in_data = in_data[0]
-        self.pad = (self.kernel_size - 1) / 2
+        self.pad = (self.kernel_size - 1) // 2
         self.data_size = in_data.get_shape()
         in_data.padding = {'pad_multi_frames': self.pad}
         out_data[0].padding = {'pad_multi_frames': self.pad}

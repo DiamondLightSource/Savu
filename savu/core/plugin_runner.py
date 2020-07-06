@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """
 .. module:: plugin_runner
    :platform: Unix
@@ -29,7 +28,6 @@ from savu.data.experiment_collection import Experiment
 class PluginRunner(object):
     """ Plugin list runner, which passes control to the transport layer.
     """
-
     def __init__(self, options, name='PluginRunner'):
         class_name = "savu.core.transports." + options["transport"] \
                      + "_transport"
@@ -45,7 +43,7 @@ class PluginRunner(object):
 
     def _run_plugin_list(self):
         """ Create an experiment and run the plugin list.
-        """        
+        """
         self.exp._setup(self)
 
         plugin_list = self.exp.meta_data.plugin_list
@@ -60,7 +58,8 @@ class PluginRunner(object):
         self._transport_pre_plugin_list_run()
 
         cp = self.exp.checkpoint
-        for i in range(cp.get_checkpoint_plugin(), n_plugins):
+        checkpoint_plugin = cp.get_checkpoint_plugin()
+        for i in range(checkpoint_plugin, n_plugins):
             self.exp._set_experiment_for_current_plugin(i)
             memory_before = cu.get_memory_usage_linux()
 
@@ -85,7 +84,7 @@ class PluginRunner(object):
         self._transport_post_plugin_list_run()
 
         # terminate any remaining datasets
-        for data in self.exp.index['in_data'].values():
+        for data in list(self.exp.index['in_data'].values()):
             self._transport_terminate_dataset(data)
 
         self.__output_final_message()
@@ -139,12 +138,12 @@ class PluginRunner(object):
         n_loaders = self.exp.meta_data.plugin_list._get_n_loaders()
         n_plugins = plugin_list._get_n_processing_plugins()
         plist = plugin_list.plugin_list
-        
+
         # set loaders
         for i in range(n_loaders):
             pu.plugin_loader(self.exp, plist[i])
             self.exp._set_initial_datasets()
-            
+
         # run all plugin setup methods and store information in experiment
         # collection
         count = 0
@@ -161,7 +160,7 @@ class PluginRunner(object):
         self.exp._finalise_setup(plugin_list)
         plugin_list._add_missing_savers(self.exp)
         cu.user_message("Plugin list check complete!")
-        
+
         #  ********* transport function ***********
         self._transport_update_plugin_list()
 
@@ -189,7 +188,7 @@ class PluginRunner(object):
                         raise Exception("Unfortunately, GPU %i is busy. Try \
                             resubmitting the job to the queue." % i)
         except Exception as e:
-            raise Exception("Unable to run GPU plugins: %s", e.message)
+            raise Exception("Unable to run GPU plugins: %s", str(e))
         self.__set_gpu_processes(count)
 
     def __set_gpu_processes(self, count):

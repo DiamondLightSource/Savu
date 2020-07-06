@@ -80,7 +80,7 @@ class Experiment(object):
 
         :params str dtype: either "in_data" or "out_data".
         """
-        if name not in self.index[dtype].keys() or override:
+        if name not in list(self.index[dtype].keys()) or override:
             self.index[dtype][name] = Data(name, self)
             data_obj = self.index[dtype][name]
             data_obj._set_transport_data(self.meta_data.get('transport'))
@@ -99,7 +99,7 @@ class Experiment(object):
         checkpoint = self.meta_data.get('checkpoint')
         # save the plugin list - one process, first time only
         if self.meta_data.get('process') == \
-                len(self.meta_data.get('processes'))-1 and not checkpoint:                  
+                len(self.meta_data.get('processes'))-1 and not checkpoint:
             # links the input data to the nexus file
             plugin_list._save_plugin_list(self.meta_data.get('nxs_filename'))
             self._add_input_data_to_nxs_file(self._get_transport())
@@ -208,8 +208,7 @@ class Experiment(object):
     def _create_nxs_entry(self):
         logging.debug("Testing nexus file")
         import h5py
-        if self.meta_data.get('process') == \
-                len(self.meta_data.get('processes'))-1:
+        if self.meta_data.get('process') == len(self.meta_data.get('processes')) - 1:
             with h5py.File(self.meta_data.get('nxs_filename'), 'w') as nxs_file:
                 entry_group = nxs_file.create_group('entry')
                 entry_group.attrs['NX_class'] = 'NXentry'
@@ -235,10 +234,10 @@ class Experiment(object):
             else:
                 finalise['keep'].append(data)
 
-        # find in datasets to replace 
+        # find in datasets to replace
         finalise['replace'] = []
-        for out_name in self.index['out_data'].keys():
-            if out_name in self.index['in_data'].keys():
+        for out_name in list(self.index['out_data'].keys()):
+            if out_name in list(self.index['in_data'].keys()):
                 finalise['replace'].append(self.index['in_data'][out_name])
 
         return finalise
@@ -260,13 +259,13 @@ class Experiment(object):
     def __unreplicate_data(self):
         in_data_list = self.index['in_data']
         from savu.data.data_structures.data_types.replicate import Replicate
-        for in_data in in_data_list.values():
+        for in_data in list(in_data_list.values()):
             if isinstance(in_data.data, Replicate):
                 in_data.data = in_data.data._reset()
 
     def _set_all_datasets(self, name):
         data_names = []
-        for key in self.index["in_data"].keys():
+        for key in list(self.index["in_data"].keys()):
             if 'itr_clone' not in key:
                 data_names.append(key)
         return data_names

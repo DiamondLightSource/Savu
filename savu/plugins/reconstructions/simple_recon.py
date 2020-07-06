@@ -41,7 +41,7 @@ class SimpleRecon(BaseRecon, CpuPlugin):
 
     def _filter(self, sinogram):
         ff = np.arange(sinogram.shape[0])
-        ff -= sinogram.shape[0]/2
+        ff -= sinogram.shape[0] // 2
         ff = np.abs(ff)
         fs = np.fft.fft(sinogram)
         ffs = fs*ff
@@ -62,8 +62,8 @@ class SimpleRecon(BaseRecon, CpuPlugin):
         sinogram = sino[:, np.newaxis, :]
         try:
             centre = self.kwargs['centre']
-        except:
-            centre = (vol_shape[0]/2, vol_shape[1]/2)
+        except Exception:
+            centre = (vol_shape[0] // 2, vol_shape[1] // 2)
 
         results = []
         for j in range(sinogram.shape[1]):

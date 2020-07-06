@@ -31,6 +31,7 @@ import numpy as np
 from tomobar.methodsIR import RecToolsIR
 from savu.plugins.utils import register_plugin
 
+
 @register_plugin
 class TomobarRecon3d(BaseRecon, GpuPlugin):
     """
@@ -98,27 +99,27 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
             self.map_volume_dimensions(in_dataset[0])
 
         axis_labels = {in_dataset[0]:
-                       [str(dim_volX) + '.voxel_x.voxels',
-                        str(dim_volY) + '.voxel_y.voxels',
-                        str(dim_volZ) + '.voxel_z.voxels']}
+                           [str(dim_volX) + '.voxel_x.voxels',
+                            str(dim_volY) + '.voxel_y.voxels',
+                            str(dim_volZ) + '.voxel_z.voxels']}
 
         # specify reconstructed volume dimensions
         self.output_size = self._get_output_size(in_dataset[0])
         shape = list(in_dataset[0].get_shape())
         rot_dim = in_dataset[0].get_data_dimension_by_axis_label(
-                'rotation_angle')
+            'rotation_angle')
         detX_dim = in_dataset[0].get_data_dimension_by_axis_label('detector_x')
         shape[rot_dim] = self.output_size
         shape[detX_dim] = self.output_size
 
         # if there are only 3 dimensions then add a fourth for slicing
-#        if len(shape) == 2:
-#            axis_labels = [0]*3
-#            axis_labels[dim_volX] = 'voxel_x.voxels'
-#            axis_labels[dim_volY] = 'voxel_y.voxels'
-#            axis_labels[dim_volZ] = 'voxel_z.voxels'
-#            axis_labels[3] = 'scan.number'
-#            shape.append(1)
+        #        if len(shape) == 2:
+        #            axis_labels = [0]*3
+        #            axis_labels[dim_volX] = 'voxel_x.voxels'
+        #            axis_labels[dim_volY] = 'voxel_y.voxels'
+        #            axis_labels[dim_volZ] = 'voxel_z.voxels'
+        #            axis_labels[3] = 'scan.number'
+        #            shape.append(1)
 
         if self.parameters['vol_shape'] == 'fixed':
             shape[dim_volX] = shape[dim_volZ]
@@ -126,7 +127,7 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
             shape[dim_volX] = self.parameters['vol_shape']
             shape[dim_volZ] = self.parameters['vol_shape']
 
-        if 'resolution' in self.parameters.keys():
+        if 'resolution' in list(self.parameters.keys()):
             shape[dim_volX] /= self.parameters['resolution']
             shape[dim_volZ] /= self.parameters['resolution']
 
@@ -134,11 +135,11 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
                                       shape=tuple(shape))
         out_dataset[0].add_volume_patterns(dim_volX, dim_volY, dim_volZ)
 
-        ndims = range(len(shape))
+        ndims = list(range(len(shape)))
         core_dims = (dim_volX, dim_volY, dim_volZ)
         slice_dims = tuple(set(ndims).difference(set(core_dims)))
         out_dataset[0].add_pattern(
-                'VOLUME_3D', core_dims=core_dims, slice_dims=slice_dims)
+            'VOLUME_3D', core_dims=core_dims, slice_dims=slice_dims)
 
         # set information relating to the plugin data
         in_pData, out_pData = self.get_plugin_datasets()
@@ -158,7 +159,7 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
     def pre_process(self):
         in_pData = self.get_plugin_in_datasets()[0]
         detY = in_pData.get_data_dimension_by_axis_label('detector_y')
-        self.Vert_det = in_pData.get_shape()[detY] + 2*self.pad
+        self.Vert_det = in_pData.get_shape()[detY] + 2 * self.pad
 
         # extract given parameters into dictionaries suitable for ToMoBAR input
         self._data_ = {'OS_number' : self.parameters['algorithm_ordersubsets'],
@@ -189,7 +190,7 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
         self.det_dimY_ind = in_pData[0].get_data_dimension_by_axis_label('detector_y')
 
     def process_frames(self, data):
-        centre_of_rotations, angles, self.vol_shape, init  = self.get_frame_params()
+        centre_of_rotations, angles, self.vol_shape, init = self.get_frame_params()
 
         self.anglesRAD = np.deg2rad(angles.astype(np.float32))
         self.centre_of_rotations = centre_of_rotations
@@ -197,29 +198,30 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
         dim_tuple = np.shape(projdata3D)
         self.Horiz_det = dim_tuple[self.det_dimX_ind]
 
-        #print(np.shape(projdata3D))
-        projdata3D =np.swapaxes(projdata3D,0,1)
+        projdata3D = np.swapaxes(projdata3D, 0, 1)
         # WIP for PWLS fidelity
         # rawdata3D = data[1].astype(np.float32)
         # rawdata3D =np.swapaxes(rawdata3D,0,1)/np.max(np.float32(rawdata3D))
-        self._data_.update({'projection_norm_data' : projdata3D})
+        self._data_.update({'projection_norm_data': projdata3D})
 
-       # set parameters and initiate a TomoBar class object
-        self.Rectools = RecToolsIR(DetectorsDimH = self.Horiz_det,  # DetectorsDimH # detector dimension (horizontal)
-                    DetectorsDimV = self.Vert_det,  # DetectorsDimV # detector dimension (vertical) for 3D case only
-                    CenterRotOffset = 0.0, # Center of Rotation (CoR) scalar (for 3D case only)
-                    AnglesVec = self.anglesRAD, # array of angles in radians
-                    ObjSize = self.output_size, # a scalar to define the reconstructed object dimensions
-                    datafidelity=self.parameters['data_fidelity'],# data fidelity, choose LS
-                    device_projector='gpu')
+        # set parameters and initiate a TomoBar class object
+        self.Rectools = RecToolsIR(DetectorsDimH=self.Horiz_det,  # DetectorsDimH # detector dimension (horizontal)
+                                   DetectorsDimV=self.Vert_det,
+                                   # DetectorsDimV # detector dimension (vertical) for 3D case only
+                                   CenterRotOffset=0.0,  # Center of Rotation (CoR) scalar (for 3D case only)
+                                   AnglesVec=self.anglesRAD,  # array of angles in radians
+                                   ObjSize=self.output_size,  # a scalar to define the reconstructed object dimensions
+                                   datafidelity=self.parameters['data_fidelity'],  # data fidelity, choose LS
+                                   device_projector='gpu')
 
         # Run FISTA reconstrucion algorithm here
         recon = self.Rectools.FISTA(self._data_, self._algorithm_, self._regularisation_)
-        recon = np.swapaxes(recon,0,1)
+        recon = np.swapaxes(recon, 0, 1)
         return recon
 
     def nInput_datasets(self):
         return 1
+
     def nOutput_datasets(self):
         return 1
 

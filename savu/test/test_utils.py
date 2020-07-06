@@ -209,7 +209,7 @@ def load_test_data(exp_type):
 
 
 def get_data_object(exp):
-    data = exp.index['in_data'][exp.index['in_data'].keys()[0]]
+    data = exp.index['in_data'][list(exp.index['in_data'].keys())[0]]
     data._set_plugin_data(PluginData(data))
     pData = data._get_plugin_data()
     return data, pData
@@ -259,7 +259,7 @@ def plugin_runner_real_plugin_run(options):
     pu.plugin_loader(exp, plugin_list[0])
 
     start_in_data = copy.deepcopy(exp.index['in_data'])
-    in_data = exp.index["in_data"][exp.index["in_data"].keys()[0]]
+    in_data = exp.index["in_data"][list(exp.index["in_data"].keys())[0]]
     out_data_objs, stop = in_data._load_data(1)
     exp._clear_data_objects()
     exp.index['in_data'] = copy.deepcopy(start_in_data)

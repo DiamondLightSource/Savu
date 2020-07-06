@@ -41,7 +41,7 @@ def get_index(frame):
     index = []
     for i in range(np.size(frame.Key.unique())):
         nth.append(frame[frame.Key == frame.Key.unique()[i]].count()[0])
-        index.append(range(nth[i]))
+        index.append(list(range(nth[i])))
 
     return [index, nth]
 
@@ -131,6 +131,6 @@ if __name__ == "__main__":
     parser = optparse.OptionParser(usage=usage)
 
     (options, args) = parser.parse_args()
-    print args
+    print(args)
     filename = [(os.getcwd() + '/' + file) for file in args]
     convert(filename)

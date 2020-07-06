@@ -59,14 +59,14 @@ class PluginTemplate4(Plugin, CpuPlugin):
         # example of getting information from the dataset metadata dictionary
         # this may have been populated by a previous plugin
         mData = in_dataset[0].meta_data
-        if 'PeakEnergy' in mData.get_dictionary().keys():
+        if 'PeakEnergy' in list(mData.get_dictionary().keys()):
             nChannels = mData.get('PeakEnergy')
         else:
             nChannels = 4096  # for test data
 
         self.set_preview(in_dataset[1], self.parameters['preview'])
 
-        print out_dataset[0].get_axis_labels()
+        print(out_dataset[0].get_axis_labels())
 
         in_pData[0].plugin_data_setup('SINOGRAM', nChannels)
         in_pData[1].plugin_data_setup('SINOGRAM', 'single')

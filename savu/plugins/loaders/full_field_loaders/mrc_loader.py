@@ -88,7 +88,7 @@ class MrcLoader(BaseLoader):
             angles = np.linspace(0, 180, data_obj.data.get_shape()[0])
         else:
             try:
-                exec("angles = " + angles)
+                angles = eval(angles)
             except:
                 try:
                     angles = np.loadtxt(angles)

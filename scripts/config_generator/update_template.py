@@ -38,7 +38,7 @@ def update_template(filename, entry, key, val):
     template = yu.read_yaml(filename)
     entry = _string_to_val(entry)
     val = _string_to_val(val)
-    template[entry][template[entry].keys()[0]][key] = val
+    template[entry][list(template[entry].keys())[0]][key] = val
 
     with open(filename, 'w') as stream:
         yu.dump_yaml(template, stream)
