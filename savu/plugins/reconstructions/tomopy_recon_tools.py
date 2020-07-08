@@ -1,7 +1,7 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class TomopyReconTools(PluginTools):
-    """A wrapper to the tomopy reconstruction library. Extra keywords not \
+    """A wrapper to the tomopy reconstruction library. Extra keywords not
 required for the chosen algorithm will be ignored.
     """
     def define_parameters(self):
@@ -9,14 +9,14 @@ required for the chosen algorithm will be ignored.
         algorithm:
             visibility: intermediate
             dtype: tuple
-            description: "The reconstruction algorithm (art|bart|fbp|gridrec| \
+            description: "The reconstruction algorithm (art|bart|fbp|gridrec|
               mlem|osem|ospml_hybrid|ospml_quad|pml_hybrid|pml_quad|sirt)."
             default: gridrec
 
         filter_name:
             visibility: intermediate
             dtype: str
-            description: "Valid for fbp|gridrec, options - none|shepp|cosine| \
+            description: "Valid for fbp|gridrec, options - none|shepp|cosine|
               hann|hamming|ramlak|parzen|butterworth)."
             default: ramlak
             options: [none,shepp,cosine,hann,hamming,ramlak,parzen,butterworth]
@@ -26,7 +26,7 @@ required for the chosen algorithm will be ignored.
         reg_par:
             visibility: intermediate
             dtype: float
-            description: "Regularization parameter for smoothing, valid for \
+            description: "Regularization parameter for smoothing, valid for
               ospml_hybrid|ospml_quad|pml_hybrid|pml_quad."
             default: 0.0
             dependencies:
@@ -35,7 +35,7 @@ required for the chosen algorithm will be ignored.
         n_iterations:
             visibility: intermediate
             dtype: int
-            description: "Number of iterations - only valid for iterative \
+            description: "Number of iterations - only valid for iterative
               algorithms."
             default: 1
 
@@ -64,8 +64,7 @@ required for the chosen algorithm will be ignored.
         number={5},
         pages={1188--1193},
         year={2014},
-        publisher={International Union of Crystallography}
-        }
+        publisher={International Union of Crystallography}}
         """
 
 

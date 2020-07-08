@@ -1,8 +1,8 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class RingRemovalNormalizationTools(PluginTools):
-    """Method to remove stripe artefacts in a sinogram (<-> ring artefacts in a \
-reconstructed image) using a normalization-based method. A simple \
+    """Method to remove stripe artefacts in a sinogram (<-> ring artefacts in a
+reconstructed image) using a normalization-based method. A simple
 improvement to handle partial stripes is included.
 
     """

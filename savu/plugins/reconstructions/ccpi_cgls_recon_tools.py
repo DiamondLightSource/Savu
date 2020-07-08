@@ -1,7 +1,7 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class CcpiCglsReconTools(PluginTools):
-    """A Plugin to run the CCPi implementation of the CGLS reconstruction \
+    """A Plugin to run the CCPi implementation of the CGLS reconstruction
 algorithm.
     """
 
@@ -17,7 +17,7 @@ algorithm.
         resolution:
             visibility: basic
             dtype: str
-            description: Number of output voxels (res = n_pixels/n_voxels), \
+            description: Number of output voxels (res = n_pixels/n_voxels),
               set res > 1 for reduced resolution.
             default: 1
 

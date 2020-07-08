@@ -54,14 +54,16 @@ class RemoveLargeRings(Plugin, CpuPlugin):
         out_pData[0].plugin_data_setup('SINOGRAM', 'single')
 
     def detect_stripe(self, listdata, snr):
-        """
-        Algorithm 4 in the paper. Used to locate stripe positions.
-        ---------
-        Parameters: - listdata: 1D normalized array.
-                    - snr: ratio used to discriminate between useful
-                        information and noise.
-        ---------
-        Return:     - 1D binary mask.
+        """Algorithm 4 in the paper. Used to locate stripe positions.
+
+        Parameters
+        ----------
+            listdata : 1D normalized array.
+            snr : ratio used to discriminate between useful information and noise.
+
+        Returns
+        --------
+             listmask : 1D binary mask.
         """
         numdata = len(listdata)
         listsorted = np.sort(listdata)[::-1]

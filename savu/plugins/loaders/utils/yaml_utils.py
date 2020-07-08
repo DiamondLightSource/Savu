@@ -72,14 +72,18 @@ def read_yaml(path):
     return data_dict
 
 def read_yaml_from_doc(docstring):
-    """
-    Take the docstring and use ordered_loading to read in the yaml format as an ordered dict.
-    ----------
-    Parameters:
-            - docstring: String of information.
-    ----------
-    Return:
-            - data_dict: Generator with ordered dictionaries for each yaml document.
+    """Take the docstring and use ordered_loading to read in the yaml format as an ordered dict.
+
+    Parameters
+    -----------
+    docstring : str
+        String of information.
+
+    Returns
+    -------
+    data_dict : dict
+        Generator with ordered dictionaries for each yaml document.
+
     """
     errors = check_yaml_errors(docstring)
     try:

@@ -47,16 +47,20 @@ def find_args(dclass, inst=None):
     return _parse_args(mod_doc_lines, lines)
 
 def load_yaml_doc(lines):
-    """
-    Load in the yaml format. Call yaml_utils.py
+    """Load in the yaml format. Call yaml_utils.py
+
+    Parameters
     ----------
-    Parameters:
-            - lines: String of information
+    lines : str
+        String of information
+
+    Returns
     ----------
-    Return:
-            - param_entry: Ordered dict of parameters
-            - verbose: Further description
-            - warning:
+    param_entry: OrderedDict
+        Ordered dict of parameters
+    verbose: str
+        Further description
+
     """
     all_params = ''
     try:

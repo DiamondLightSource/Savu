@@ -32,8 +32,7 @@ from morphsnakes import morphological_chan_vese
 
 @register_plugin
 class MorphSnakes(Plugin, CpuPlugin):
-    """
-    A Plugin to segment reconstructed data using Morphsnakes module. When initialised
+    """A Plugin to segment reconstructed data using Morphsnakes module. When initialised
     with a mask, the active contour propagates to find the minimum of energy (a possible edge countour).
 
     :param lambda1:  Weight parameter for the outer region, if lambda1 is larger than \

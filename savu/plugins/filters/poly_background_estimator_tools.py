@@ -28,7 +28,7 @@ class PolyBackgroundEstimatorTools(PluginTools):
         pvalue:
               visibility: intermediate
               dtype: float
-              description: 'Ratio of variance between successive poly \
+              description: 'Ratio of variance between successive poly
                 iterations.'
               default: 0.9
 

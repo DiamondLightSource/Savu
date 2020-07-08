@@ -14,9 +14,9 @@ class DenoiseBregmanFilterTools(PluginTools):
         max_iterations:
              visibility: basic
              dtype: int
-             description: "Total number of regularisation iterations. \
-               The smaller the number of iterations, the smaller the effect \
-               of the filtering is. A larger number will affect the speed \
+             description: "Total number of regularisation iterations.
+               The smaller the number of iterations, the smaller the effect
+               of the filtering is. A larger number will affect the speed
                of the algorithm."
              default: 30
 

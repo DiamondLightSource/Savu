@@ -1,7 +1,7 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class CcpiDenoisingCpu3dTools(PluginTools):
-    """Wrapper for CCPi-Regularisation Toolkit (GPU) for \
+    """Wrapper for CCPi-Regularisation Toolkit (GPU) for
 efficient 2D/3D denoising.
     """
     def define_parameters(self):
@@ -12,16 +12,16 @@ efficient 2D/3D denoising.
              options: [ROF_TV, FGP_TV, SB_TV, NLTV, TGV, LLT_ROF, NDF, Diff4th]
              description:
                summary: The denoising method
-               verbose: "Iterative methods can help to solve ill-posed \
-                          inverse problems by choosing a suitable noise \
+               verbose: "Iterative methods can help to solve ill-posed
+                          inverse problems by choosing a suitable noise
                           model for the measurement"
                options:
                    ROF_TV: Rudin-Osher-Fatemi Total Variation model
                    FGP_TV: Fast Gradient Projection Total Variation model
                    SB_TV: Split Bregman Total Variation model
-                   LLT_ROF: "Lysaker, Lundervold and Tai model combined \
+                   LLT_ROF: "Lysaker, Lundervold and Tai model combined
                      with Rudin-Osher-Fatemi"
-                   NDF: "Nonlinear/Linear Diffusion model (Perona-Malik, \
+                   NDF: "Nonlinear/Linear Diffusion model (Perona-Malik,
                      Huber or Tukey)"
                    TGV: Total Generalised Variation
                    NLTV: Non Local Total Variation
@@ -32,7 +32,7 @@ efficient 2D/3D denoising.
              visibility: basic
              dtype: float
              description:
-               summary: "Regularisation (smoothing) parameter. The higher the value, the \
+               summary: "Regularisation (smoothing) parameter. The higher the value, the
                  stronger the smoothing effect"
                range: Recommended between 0 and 1
              default: 0.01
@@ -90,7 +90,7 @@ efficient 2D/3D denoising.
              options: [Huber, Perona, Tukey, Constr, Constrhuber]
              description:
                summary: Penalty type
-               verbose: "Nonlinear/Linear Diffusion model (NDF) specific penalty \
+               verbose: "Nonlinear/Linear Diffusion model (NDF) specific penalty
                  type."
                options:
                  Huber: Huber

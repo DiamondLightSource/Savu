@@ -1,7 +1,7 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class BaseComponentAnalysisTools(PluginTools):
-    """A base plugin for doing component analysis. This sorts out the main \
+    """A base plugin for doing component analysis. This sorts out the main
 features of a component analysis
     """
 

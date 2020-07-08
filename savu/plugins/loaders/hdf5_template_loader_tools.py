@@ -1,7 +1,7 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class Hdf5TemplateLoaderTools(PluginTools):
-    """A class to load data from a non-standard nexus/hdf5 file using \
+    """A class to load data from a non-standard nexus/hdf5 file using
 descriptions loaded from a yaml file.
     """
     def define_parameters(self):

@@ -1,10 +1,10 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class TomobarReconCpuTools(PluginTools):
-    """A Plugin to reconstruct full-field tomographic projection data \
-using state-of-the-art regularised iterative algorithms from \
-the ToMoBAR package. ToMoBAR includes FISTA and ADMM iterative \
-methods and depends on the ASTRA toolbox and the CCPi RGL toolkit: \
+    """A Plugin to reconstruct full-field tomographic projection data using
+state-of-the-art regularised iterative algorithms from the ToMoBAR package.
+ToMoBAR includes FISTA and ADMM iterative methods and depends on the ASTRA
+toolbox and the CCPi RGL toolkit:
 https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
     """
     def define_parameters(self):
@@ -12,7 +12,7 @@ https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
         output_size:
             visibility: advanced
             dtype: tuple
-            description:  The dimension of the reconstructed volume\
+            description:  The dimension of the reconstructed volume
               (only X-Y dimension).
             default: auto
 
@@ -38,7 +38,7 @@ https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
         data_any_rings_winsizes:
            visibility: hidden
            dtype: tuple
-           description: half window sizes to collect background information\
+           description: half window sizes to collect background information
              [detector, angles, num of projections]
            default: (9,7,9)
 
@@ -51,7 +51,8 @@ https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
         data_full_ring_GH:
              visibility: advanced
              dtype: str
-             description: Regularisation variable for full constant ring removal (GH model).
+             description: Regularisation variable for full constant
+               ring removal (GH model).
              default: None
 
         data_full_ring_accelerator_GH:
@@ -64,24 +65,27 @@ https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
              visibility: basic
              dtype: int
              description:
-               summary: Number of outer iterations for FISTA (default)or ADMM methods.
-               verbose: Less than 10 iterations for the iterative method\
-                  (FISTA) can deliver a blurry reconstruction. The\
-                  suggested value is 15 iterations, however the\
-                  algorithm can stop prematurely based on the tolerance\
+               summary: Number of outer iterations for FISTA (default)or
+                 ADMM methods.
+               verbose: Less than 10 iterations for the iterative method
+                  (FISTA) can deliver a blurry reconstruction. The
+                  suggested value is 15 iterations, however the
+                  algorithm can stop prematurely based on the tolerance
                   value.
              default: 20
 
         algorithm_verbose:
              visibility: advanced
              dtype: bool
-             description: Print iterations number and other messages (off by default).
+             description: Print iterations number and other messages
+               (off by default).
              default: 'off'
 
         algorithm_ordersubsets:
              visibility: advanced
              dtype: int
-             description: The number of ordered-subsets to accelerate reconstruction.
+             description: The number of ordered-subsets to accelerate
+               reconstruction.
              default: 6
 
         algorithm_nonnegativity:
@@ -98,8 +102,8 @@ https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
              options: [ROF_TV, FGP_TV, PD_TV, SB_TV, LLT_ROF, NDF, Diff4th]
              description:
                summary: The denoising method
-               verbose: Iterative methods can help to solve ill-posed\
-                          inverse problems by choosing a suitable noise\
+               verbose: Iterative methods can help to solve ill-posed
+                          inverse problems by choosing a suitable noise
                           model for the measurement
                options:
                    ROF_TV: Rudin-Osher-Fatemi Total Variation model
@@ -119,7 +123,7 @@ https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
              visibility: basic
              dtype: float
              description:
-               summary: Regularisation parameter. The higher the value, the\
+               summary: Regularisation parameter. The higher the value, the
                  stronger the smoothing effect
                range: Recommended between 0 and 1
              default: 0.0001
@@ -128,9 +132,9 @@ https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
              visibility: basic
              dtype: int
              description:
-               summary: Total number of regularisation iterations.\
-                 The smaller the number of iterations, the smaller the effect\
-                 of the filtering is. A larger number will affect the speed\
+               summary: Total number of regularisation iterations.
+                 The smaller the number of iterations, the smaller the effect
+                 of the filtering is. A larger number will affect the speed
                  of the algorithm.
              default: 80
 

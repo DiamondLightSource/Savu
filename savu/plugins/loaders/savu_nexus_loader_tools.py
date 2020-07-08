@@ -1,11 +1,11 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class SavuNexusLoaderTools(PluginTools):
-    """A class to load datasets, and associated metadata, from a Savu output \
+    """A class to load datasets, and associated metadata, from a Savu output
 nexus file.
 
-By default, the last instance of each unique dataset name will be loaded. \
-Opt instead to load a subset of these datasets, or individual datasets by \
+By default, the last instance of each unique dataset name will be loaded.
+Opt instead to load a subset of these datasets, or individual datasets by
 populating the parameters.
 
     """

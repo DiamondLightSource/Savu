@@ -1,7 +1,7 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class ImageSaverTools(PluginTools):
-    """A class to save tomography data to image files.  Run the MaxAndMin plugin \
+    """A class to save tomography data to image files.  Run the MaxAndMin plugin
 before this to rescale the data.
     """
     def define_parameters(self):

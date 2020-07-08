@@ -1,8 +1,8 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class SinogramAlignmentTools(PluginTools):
-    """The centre of mass of each row is determined and then a sine function fit \
-through these to determine the centre of rotation.  The residual between \
+    """The centre of mass of each row is determined and then a sine function fit
+through these to determine the centre of rotation.  The residual between
 each centre of mass and the sine function is then used to align each row.
     """
     def define_parameters(self):
@@ -15,13 +15,13 @@ each centre of mass and the sine function is then used to align each row.
         p0:
               visibility: basic
               dtype: tuple
-              description:  Initial guess for the parameters of \
+              description:  Initial guess for the parameters of
                 scipy.optimize.curve_fit.
               default: (1, 1, 1)
         type:
               visibility: intermediate
               dtype: list
-              description: Either centre_of_mass or shift, with the latter requiring \
+              description: Either centre_of_mass or shift, with the latter requiring
                 ProjectionVerticalAlignment prior to this plugin.
               default: centre_of_mass
 

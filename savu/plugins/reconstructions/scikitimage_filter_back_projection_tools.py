@@ -1,7 +1,7 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class ScikitimageFilterBackProjectionTools(PluginTools):
-    """A Plugin to reconstruct an image by filter back projection using the \
+    """A Plugin to reconstruct an image by filter back projection using the
 inverse radon transform from scikit-image.
     """
 
@@ -17,7 +17,7 @@ inverse radon transform from scikit-image.
         filter:
             visibility: intermediate
             dtype: str
-            description: "Filter used in frequency domain filtering. Ramp \
+            description: "Filter used in frequency domain filtering. Ramp
               filter used by default. Assign None to use no filter."
             options: [ramp, shepp-logan, cosine, hamming, hann, None]
             default: ramp
@@ -25,8 +25,8 @@ inverse radon transform from scikit-image.
         interpolation:
             visibility: advanced
             dtype: int
-            description: "Interpolation method used in reconstruction. \
-              Methods available: 'linear', 'nearest', and 'cubic' \
+            description: "Interpolation method used in reconstruction.
+              Methods available: 'linear', 'nearest', and 'cubic'
               ('cubic' is slow)."
             options: [linear,nearest,cubic]
             default: linear
@@ -34,8 +34,8 @@ inverse radon transform from scikit-image.
         circle:
             visibility: advanced
             dtype: bool
-            description: "Assume the reconstructed image is zero outside \
-              the inscribed circle. Also changes the default output_size \
+            description: "Assume the reconstructed image is zero outside
+              the inscribed circle. Also changes the default output_size
               to match the behaviour of radon called with circle=True."
             default: False
 

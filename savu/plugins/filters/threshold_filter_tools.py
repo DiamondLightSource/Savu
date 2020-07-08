@@ -9,7 +9,7 @@ class ThresholdFilterTools(PluginTools):
         explicit_threshold:
               visibility: basic
               dtype: bool
-              description: False if plugin calculates black/white threshold, \
+              description: False if plugin calculates black/white threshold,
                 True if it's user-defined.
               default: True
         intensity_threshold:

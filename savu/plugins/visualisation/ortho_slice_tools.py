@@ -26,7 +26,7 @@ class OrthoSliceTools(PluginTools):
         file_type:
             visibility: intermediate
             dtype: str
-            description: File type to save as. \
+            description: File type to save as.
               rings and streaks
             default: 'png'
 

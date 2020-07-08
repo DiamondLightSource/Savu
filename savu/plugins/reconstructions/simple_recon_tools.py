@@ -6,15 +6,14 @@ class SimpleReconTools(PluginTools):
 
     def get_bibtex(self):
         """@article{kak2002principles,
-              title={Principles of computerized tomographic imaging},
-              author={Kak, Avinash C and Slaney, Malcolm and Wang, Ge},
-              journal={Medical Physics},
-              volume={29},
-              number={1},
-              pages={107--107},
-              year={2002},
-              publisher={Wiley Online Library}
-            }
+        title={Principles of computerized tomographic imaging},
+        author={Kak, Avinash C and Slaney, Malcolm and Wang, Ge},
+        journal={Medical Physics},
+        volume={29},
+        number={1},
+        pages={107--107},
+        year={2002},
+        publisher={Wiley Online Library}}
         """
 
 

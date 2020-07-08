@@ -74,13 +74,16 @@ class RingRemovalFiltering(Plugin, CpuPlugin):
         self.listsign = np.power(-1.0,np.arange(self.height1))
 
     def remove_stripe_based_sorting(self, matindex, sinogram, size):
-        """
-        Remove stripes using the sorting technique.
+        """Remove stripes using the sorting technique.
+
+        Parameters
         ---------
-        Parameters: - sinogram: 2D array.
-                    - size: window size of the median filter.
+            sinogram : 2D array.
+            size : window size of the median filter.
+
+        Returns
         ---------
-        Return:     - stripe-removed sinogram.
+            stripe-removed sinogram.
         """
         sinogram = np.transpose(sinogram)
         matcomb = np.asarray(np.dstack((matindex, sinogram)))

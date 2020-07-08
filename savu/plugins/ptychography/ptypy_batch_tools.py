@@ -1,8 +1,8 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class PtypyBatchTools(PluginTools):
-    """This plugin performs ptychography using the ptypy package.\
-The same parameter set is used across all slices and is based \
+    """This plugin performs ptychography using the ptypy package.
+The same parameter set is used across all slices and is based
 on the output from a previous reconstruction.
     """
     def define_parameters(self):

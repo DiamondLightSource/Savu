@@ -1,7 +1,7 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class MinAndMaxTools(PluginTools):
-    """A plugin to calculate the min and max values of each slice (as determined \
+    """A plugin to calculate the min and max values of each slice (as determined
 by the pattern parameter)
     """
     def define_parameters(self):

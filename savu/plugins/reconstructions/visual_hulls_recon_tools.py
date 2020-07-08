@@ -1,7 +1,7 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class VisualHullsReconTools(PluginTools):
-    """A Plugin to reconstruct an image by filter back projection \
+    """A Plugin to reconstruct an image by filter back projection
 using the inverse radon transform from scikit-image.
     """
     def define_parameters(self):

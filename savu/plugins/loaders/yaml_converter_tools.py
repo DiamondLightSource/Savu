@@ -1,7 +1,7 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class YamlConverterTools(PluginTools):
-    """A class to load data from a non-standard nexus/hdf5 file using \
+    """A class to load data from a non-standard nexus/hdf5 file using
 descriptions loaded from a yaml file.
     """
     def define_parameters(self):
@@ -14,7 +14,7 @@ descriptions loaded from a yaml file.
         template_param:
               visibility: hidden
               dtype: str
-              description: A hidden parameter to hold parameters passed in \
+              description: A hidden parameter to hold parameters passed in
                 via a savu template file.
               default: {}
         """

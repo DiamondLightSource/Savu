@@ -1,7 +1,7 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class ValueMaskReplacementTools(PluginTools):
-    """The function looks for a specific value in the provided second array \
+    """The function looks for a specific value in the provided second array
 (e.g. a mask) and substitutes the value in the first array with a given value.
     """
     def define_parameters(self):

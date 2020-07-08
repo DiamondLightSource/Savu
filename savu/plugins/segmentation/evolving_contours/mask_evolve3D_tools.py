@@ -1,7 +1,7 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class MaskEvolve3dTools(PluginTools):
-    """Fast segmentation by evolving the given 3D mask, the initial mask must be given \
+    """Fast segmentation by evolving the given 3D mask, the initial mask must be given
 precisely through the object, otherwise segmentation will be incorrect.
 
     """

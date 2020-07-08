@@ -1,7 +1,7 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class XrdAbsorptionApproximationTools(PluginTools):
-    """McNears absorption correction, takes in a normalised absorption sinogram \
+    """McNears absorption correction, takes in a normalised absorption sinogram
 and xrd sinogram stack. A base absorption correction for stxm and xrd
     """
     def define_parameters(self):

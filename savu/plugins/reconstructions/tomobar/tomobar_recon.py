@@ -15,8 +15,8 @@
 """
 .. module:: tomobar_recon
    :platform: Unix
-   :synopsis: A wrapper around TOmographic MOdel-BAsed Reconstruction (ToMoBAR) software \
-   for advanced iterative image reconstruction
+   :synopsis: 'A wrapper around TOmographic MOdel-BAsed Reconstruction (ToMoBAR) software \
+        for advanced iterative image reconstruction'
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """

@@ -16,7 +16,7 @@ Operations can be performed by extracting scalars from METADATA (min, max, mean)
         operation:
               visibility: intermediate
               dtype: str
-              description: Arithmetic operation to apply to data, choose from addition, \
+              description: Arithmetic operation to apply to data, choose from addition, 
                subtraction, multiplication and division.
               options: [addition, subtraction, multiplication, division]
               default: division

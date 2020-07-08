@@ -1,14 +1,13 @@
 from savu.plugins.plugin_tools import PluginTools
 
-class PtpyCompactTools(PluginTools):
+class PtypyCompactTools(PluginTools):
     """This plugin performs ptychography using the ptypy package.
     """
     def define_parameters(self):
         """
         data_center:
               visibility: intermediate
-              dtype: str
-              # list tuple or str
+              dtype: [tuple, list, str]
               description: 'Center (pixel) of the optical axes in raw data'
               default: None
         data_orientation:

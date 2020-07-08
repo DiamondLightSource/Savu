@@ -14,7 +14,7 @@ class SinogramCleanTools(PluginTools):
         row_drop:
               visibility: basic
               dtype: int
-              description: 'Drop lines around vertical center of the mask \
+              description: 'Drop lines around vertical center of the mask
                 scipy.optimize.curve_fit.'
               default: 20
         out_datasets:

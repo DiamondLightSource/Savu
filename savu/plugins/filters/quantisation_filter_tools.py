@@ -8,7 +8,7 @@ class QuantisationFilterTools(PluginTools):
         explicit_min_max:
               visibility: intermediate
               dtype: bool
-              description: "False if min/max intensity comes from the \
+              description: "False if min/max intensity comes from the
                 metadata, True if it's user-defined. "
               default: False
         min_intensity:

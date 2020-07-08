@@ -13,20 +13,20 @@ class DistortionCorrectionDeprecatedTools(PluginTools):
         centre_from_top:
               visibility: intermediate
               dtype: float
-              description: The centre of distortion in pixels from the top \
+              description: The centre of distortion in pixels from the top
                 of the image.
               default: 995.24
         centre_from_left:
               visibility: intermediate
               dtype: float
-              description: The centre of distortion in pixels from the left \
+              description: The centre of distortion in pixels from the left
                 of the image.
               default: 1283.25
         crop_edges:
               visibility: intermediate
               dtype: int
-              description: When applied to previewed/cropped data, the \
-                result may contain zeros around the edges, which can be \
+              description: When applied to previewed/cropped data, the
+                result may contain zeros around the edges, which can be
                 removed by cropping the edges by a specified number of pixels
               default: 0
 

@@ -8,7 +8,7 @@ class RavenFilterTools(PluginTools):
         uvalue:
             visibility: basic
             dtype: int
-            description: "To define the shape of filter, e.g. bad=10, \
+            description: "To define the shape of filter, e.g. bad=10,
               moderate=20, minor=50."
             default: 20
         vvalue:
@@ -29,8 +29,7 @@ class RavenFilterTools(PluginTools):
         """
 
     def get_bibtex(self):
-        """
-        @article{raven1998numerical,
+        """@article{raven1998numerical,
         title={Numerical removal of ring artifacts in microtomography},
         author={Raven, Carsten},
         journal={Review of scientific instruments},
@@ -43,8 +42,7 @@ class RavenFilterTools(PluginTools):
         """
 
     def get_endnote(self):
-        """
-        %0 Journal Article
+        """%0 Journal Article
         %T Numerical removal of ring artifacts in microtomography
         %A Raven, Carsten
         %J Review of scientific instruments

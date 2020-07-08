@@ -46,8 +46,7 @@ class RemoveAllRings(Plugin, CpuPlugin):
         out_pData[0].plugin_data_setup('SINOGRAM', 'single')
 
     def remove_stripe_based_sorting(self, matindex, sinogram, size):
-        """
-        Algorithm 3 in the paper. Remove partial and full stripes\
+        """Algorithm 3 in the paper. Remove partial and full stripes \
         using the sorting technique.        
         """
         sinogram = np.transpose(sinogram)
@@ -61,14 +60,17 @@ class RemoveAllRings(Plugin, CpuPlugin):
         return np.transpose(sino_corrected)
 
     def detect_stripe(self, listdata, snr):
-        """
-        Algorithm 4 in the paper. Used to locate stripe positions.
-        ---------
-        Parameters: - listdata: 1D normalized array.
-                    - snr: ratio used to discriminate between useful
-                        information and noise.
-        ---------
-        Return:     - 1D binary mask.
+        """Algorithm 4 in the paper. Used to locate stripe positions.
+
+        Parameters
+        -----------
+            listdata : 1D normalized array.
+            snr : ratio used to discriminate between useful information and noise.
+
+        Returns
+        -------
+            listmask : 1D binary mask.
+
         """
         numdata = len(listdata)
         listsorted = np.sort(listdata)[::-1]
@@ -90,15 +92,18 @@ class RemoveAllRings(Plugin, CpuPlugin):
         return listmask
     
     def remove_large_stripe(self, matindex, sinogram, snr, size):
-        """
-        Algorithm 5 in the paper. Use to remove large stripes
-        ---------
-        Parameters: - sinogram: 2D array.
-                    - snr: ratio used to discriminate between useful
-                        information and noise.
-                    - size: window size of the median filter.
-        ---------
-        Return:     - stripe-removed sinogram.
+        """Algorithm 5 in the paper. Use to remove large stripes
+
+        Parameters
+        -----------
+            sinogram : 2D array.
+            snr : ratio used to discriminate between useful information and noise.
+            size : window size of the median filter.
+
+        Returns
+        -------
+            sinogram : stripe-removed sinogram.
+
         """
         badpixelratio = 0.05
         (nrow, ncol) = sinogram.shape
@@ -125,15 +130,18 @@ class RemoveAllRings(Plugin, CpuPlugin):
         return sinogram
 
     def remove_unresponsive_and_fluctuating_stripe(self, sinogram, snr, size):
-        """
-        Algorithm 6 in the paper. Remove unresponsive or fluctuating stripes.
-        ---------
-        Parameters: - sinogram: 2D array.
-                    - snr: ratio used to discriminate between useful
-                        information and noise
-                    - size: window size of the median filter.
-        ---------
-        Return:     - stripe-removed sinogram.
+        """Algorithm 6 in the paper. Remove unresponsive or fluctuating stripes.
+
+        Parameters
+        -----------
+            sinogram : 2D array.
+            snr : ratio used to discriminate between useful information and noise
+            size : window size of the median filter.
+
+        Returns
+        -------
+            sinogram : stripe-removed sinogram.
+
         """
         (nrow, _) = sinogram.shape
         sinosmoothed = np.apply_along_axis(uniform_filter1d, 0, sinogram, 10)

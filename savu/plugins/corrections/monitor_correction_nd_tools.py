@@ -8,7 +8,7 @@ class MonitorCorrectionNdTools(PluginTools):
         in_datasets:
               visibility: datasets
               dtype: list
-              description: "A list of the dataset(s) to \
+              description: "A list of the dataset(s) to
                 process."
               default: "['to_be_corrected', 'monitor']"
 

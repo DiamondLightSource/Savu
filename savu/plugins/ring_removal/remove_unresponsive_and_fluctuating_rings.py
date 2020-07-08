@@ -55,14 +55,17 @@ class RemoveUnresponsiveAndFluctuatingRings(Plugin, CpuPlugin):
         out_pData[0].plugin_data_setup('SINOGRAM', 'single')
 
     def detect_stripe(self, listdata, snr):
-        """
-        Algorithm 4 in the paper. Used to locate stripe positions.
+        """Algorithm 4 in the paper. Used to locate stripe positions.
+
+        Parameters
         ---------
-        Parameters: - listdata: 1D normalized array.
-                    - snr: ratio used to discriminate between useful
-                        information and noise.
+            listdata : 1D normalized array.
+            snr : ratio used to discriminate between useful information and noise.
+
+        Returns
         ---------
-        Return:     - 1D binary mask.
+            listmask : 1D binary mask.
+
         """
         numdata = len(listdata)
         listsorted = np.sort(listdata)[::-1]
@@ -84,15 +87,18 @@ class RemoveUnresponsiveAndFluctuatingRings(Plugin, CpuPlugin):
         return listmask
     
     def remove_large_stripe(self, matindex, sinogram, snr, size):
-        """
-        Algorithm 5 in the paper. Use to remove residual stripes
+        """Algorithm 5 in the paper. Use to remove residual stripes
+
+        Parameters
+        -----------
+            sinogram : 2D array.
+            snr : ratio used to discriminate between useful information and noise.
+            size : window size of the median filter.
+
+        Returns
         ---------
-        Parameters: - sinogram: 2D array.
-                    - snr: ratio used to discriminate between useful
-                        information and noise.
-                    - size: window size of the median filter.
-        ---------
-        Return:     - stripe-removed sinogram.
+            sinogram : stripe-removed sinogram.
+
         """
         badpixelratio = 0.05
         (nrow, ncol) = sinogram.shape

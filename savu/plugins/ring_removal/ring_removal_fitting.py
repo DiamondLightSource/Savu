@@ -56,13 +56,16 @@ class RingRemovalFitting(Plugin, CpuPlugin):
         out_pData[0].plugin_data_setup('SINOGRAM', 'single')
 
     def _create_2d_window(self, height, width, sigmax, sigmay):
-        """
-        Create a 2D Gaussian window.
+        """Create a 2D Gaussian window.
+
+        Parameters
+        -----------
+            height, width : shape of the window.
+            sigmax, sigmay : sigmas of the window.
+
+        Returns
         ---------
-        Parameters: - height, width: shape of the window.
-                    - sigmax, sigmay: sigmas of the window.
-        ---------
-        Return:     - 2D window.
+            win2d : 2D window.
         """
         centerx = (width-1.0)/2.0
         centery = (height-1.0)/2.0    

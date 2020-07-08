@@ -1,7 +1,7 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class ImageTemplateLoaderTools(PluginTools):
-    """A class to load data from a folder of FabIO compatible images using data \
+    """A class to load data from a folder of FabIO compatible images using data
 descriptions loaded from a yaml file.
     """
     def define_parameters(self):

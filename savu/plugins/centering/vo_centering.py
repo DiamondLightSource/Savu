@@ -130,14 +130,17 @@ class VoCentering(BaseFilter, CpuPlugin):
         return cor
 
     def _downsample(self, image, dsp_fact0, dsp_fact1):
-        """
-        Downsample an image by averaging.
+        """Downsample an image by averaging.
+
+        Parameters
+        ----------
+            image : 2D array.
+            dsp_fact0 : downsampling factor along axis 0.
+            dsp_fact1 : downsampling factor along axis 1.
+
+        Returns
         ---------
-        Parameters: - image: 2D array.
-                    - dsp_fact0: downsampling factor along axis 0.
-                    - dsp_fact1: downsampling factor along axis 1.
-        ---------
-        Return:     - Downsampled image.
+            image_dsp : Downsampled image.
         """
         (height, width) = image.shape
         dsp_fact0 = np.clip(np.int16(dsp_fact0), 1, height//2)

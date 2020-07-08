@@ -15,7 +15,9 @@
 """
 .. module:: ccpi_denoising_cpu
    :platform: Unix
-   :synopsis: CCPi-Regularisation/denoising Toolkit delivers a variety of variational 2D/3D denoising methods. The available methods are:  'ROF_TV','FGP_TV' (default),'SB_TV','TGV','LLT_ROF','NDF','Diff4th'
+   :synopsis: "CCPi-Regularisation/denoising Toolkit delivers a variety \
+                of variational 2D/3D denoising methods. The available methods are:  ROF_TV, \
+                FGP_TV(default), SB_TV, TGV, LLT_ROF, NDF, Diff4th"
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """

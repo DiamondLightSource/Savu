@@ -1,10 +1,10 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class RingRemovalFilteringTools(PluginTools):
-    """Method to remove stripe artefacts in a sinogram (<-> ring \
-artefacts in a reconstructed image) using a filtering-based \
-method in the combination with a sorting-based method.\
-Note that it's different to a FFT-based or wavelet-FFT-based \
+    """Method to remove stripe artefacts in a sinogram (<-> ring
+artefacts in a reconstructed image) using a filtering-based
+method in the combination with a sorting-based method.
+Note that it's different to a FFT-based or wavelet-FFT-based
 method.
     """
     def define_parameters(self):
@@ -24,7 +24,7 @@ method.
         """
 
     def get_bibtex(self):
-        """@article{vo2018superior,
+        r"""@article{vo2018superior,
             title = {Superior techniques for eliminating ring artifacts in X-ray micro-tomography},
             author={Vo, Nghia T and Atwood, Robert C and Drakopoulos, Michael},
             journal={Optics express},

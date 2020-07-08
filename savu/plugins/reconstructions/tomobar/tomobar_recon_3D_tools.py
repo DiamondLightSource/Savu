@@ -1,9 +1,9 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class TomobarRecon3dTools(PluginTools):
-    """A Plugin to reconstruct full-field tomographic projection data using \
-state-of-the-art regularised iterative algorithms from the ToMoBAR package. \
-ToMoBAR includes FISTA and ADMM iterative methods and depends on the ASTRA \
+    """A Plugin to reconstruct full-field tomographic projection data using
+state-of-the-art regularised iterative algorithms from the ToMoBAR package.
+ToMoBAR includes FISTA and ADMM iterative methods and depends on the ASTRA
 toolbox and the CCPi RGL toolkit: https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
     """
     def define_parameters(self):
@@ -35,14 +35,14 @@ toolbox and the CCPi RGL toolkit: https://github.com/vais-ral/CCPi-Regularisatio
         data_any_rings:
             visibility: hidden
             dtype: int
-            description: "A parameter to suppress various artifacts including \
+            description: "A parameter to suppress various artifacts including
               rings and streaks"
             default: None
 
         data_any_rings_winsizes:
            visibility: hidden
            dtype: tuple
-           description: "half window sizes to collect background information \
+           description: "half window sizes to collect background information
              [detector, angles, num of projections]"
            default: (9,7,9)
 
@@ -69,9 +69,9 @@ toolbox and the CCPi RGL toolkit: https://github.com/vais-ral/CCPi-Regularisatio
              dtype: int
              description:
                summary: "Number of outer iterations for FISTA (default)or ADMM methods."
-               verbose: "Less than 10 iterations for the iterative method \
-                  (FISTA) can deliver a blurry reconstruction. The \
-                  suggested value is 15 iterations, however the \
+               verbose: "Less than 10 iterations for the iterative method
+                  (FISTA) can deliver a blurry reconstruction. The
+                  suggested value is 15 iterations, however the
                   algorithm can stop prematurely based on the tolerance
                   value."
              default: 20
@@ -102,17 +102,17 @@ toolbox and the CCPi RGL toolkit: https://github.com/vais-ral/CCPi-Regularisatio
              options: [ROF_TV, FGP_TV, PD_TV, SB_TV, LLT_ROF, NDF, Diff4th]
              description:
                summary: The denoising method
-               verbose: "Iterative methods can help to solve ill-posed \
-                          inverse problems by choosing a suitable noise \
+               verbose: "Iterative methods can help to solve ill-posed
+                          inverse problems by choosing a suitable noise
                           model for the measurement"
                options:
                    ROF_TV: Rudin-Osher-Fatemi Total Variation model
                    FGP_TV: Fast Gradient Projection Total Variation model
                    PD_TV: Primal-Dual Total Variation
                    SB_TV: Split Bregman Total Variation model
-                   LLT_ROF: "Lysaker, Lundervold and Tai model combined \
+                   LLT_ROF: "Lysaker, Lundervold and Tai model combined
                      with Rudin-Osher-Fatemi"
-                   NDF: "Nonlinear/Linear Diffusion model (Perona-Malik, \
+                   NDF: "Nonlinear/Linear Diffusion model (Perona-Malik,
                      Huber or Tukey)"
                    TGV: Total Generalised Variation
                    NLTV: Non Local Total Variation
@@ -123,7 +123,7 @@ toolbox and the CCPi RGL toolkit: https://github.com/vais-ral/CCPi-Regularisatio
              visibility: basic
              dtype: float
              description:
-               summary: "Regularisation parameter. The higher the value, the\
+               summary: "Regularisation parameter. The higher the value, the
                  stronger the smoothing effect"
                range: Recommended between 0 and 1
              default: 0.0001
@@ -132,9 +132,9 @@ toolbox and the CCPi RGL toolkit: https://github.com/vais-ral/CCPi-Regularisatio
              visibility: basic
              dtype: int
              description:
-               summary: "Total number of regularisation iterations. \
-                 The smaller the number of iterations, the smaller the effect \
-                 of the filtering is. A larger number will affect the speed \
+               summary: "Total number of regularisation iterations.
+                 The smaller the number of iterations, the smaller the effect
+                 of the filtering is. A larger number will affect the speed
                  of the algorithm."
              default: 80
 
@@ -195,7 +195,7 @@ toolbox and the CCPi RGL toolkit: https://github.com/vais-ral/CCPi-Regularisatio
              options: [Huber, Perona, Tukey]
              description:
                summary: Penalty dtype
-               verbose: "Nonlinear/Linear Diffusion model (NDF) specific penalty \
+               verbose: "Nonlinear/Linear Diffusion model (NDF) specific penalty
                  type."
                options:
                  Huber: Huber

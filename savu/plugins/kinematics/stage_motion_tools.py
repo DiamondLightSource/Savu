@@ -20,7 +20,7 @@ class StageMotionTools(PluginTools):
         use_min_max:
             visibility: intermediate
             dtype: bool
-            description: Also use the min and max datasets \
+            description: Also use the min and max datasets
               including all combinations of min, mean and max.
             default: False
 

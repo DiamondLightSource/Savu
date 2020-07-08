@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module::
+.. module:: i23_segment3D
    :platform: Unix
    :synopsis: i23 beamline post-segmentation routine. Wraps i23 \
    segmentation code for subsequent postprocessing of the segmented image

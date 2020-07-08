@@ -1,4 +1,4 @@
-# Copyright 2019 Diamond Light Source Ltd.
+# Copyright 2014 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,10 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 """
 .. module:: mipmap
    :platform: Unix
-   :synopsis: Mipmapping plugin (a pyramid-like data downampling). A plugin to downsample multidimensional data
+   :synopsis: 'Mipmapping plugin (a pyramid-like data downampling). \
+                A plugin to downsample multidimensional data
+
 .. moduleauthor:: Mark Basham & Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
 

@@ -28,20 +28,20 @@ class VoCenteringIterativeTools(PluginTools):
         expand_by:
              visibility: advanced
              dtype: int
-             description: The number of pixels to expand the search region by \
+             description: The number of pixels to expand the search region by
                on each iteration
              default: 5
         boundary_distance:
              visibility: advanced
              dtype: int
-             description: Accepted distance of minima from the boundary of \
+             description: Accepted distance of minima from the boundary of
                the listshift in the coarse search.
              default: 3
         preview:
              visibility: intermediate
              dtype: int_list
-             description: 'A slice list of required frames (sinograms) to use in \
-               the calculation of the centre of rotation (this will not reduce the data \
+             description: 'A slice list of required frames (sinograms) to use in
+               the calculation of the centre of rotation (this will not reduce the data
                size for subsequent plugins).'
              default: '[]'
         datasets_to_populate:
@@ -57,7 +57,7 @@ class VoCenteringIterativeTools(PluginTools):
         start_pixel:
              visibility: advanced
              dtype: int
-             description: 'The approximate centre. If value is None, take the \
+             description: 'The approximate centre. If value is None, take the
                value from .nxs file else set to image centre.'
              default: None
         """

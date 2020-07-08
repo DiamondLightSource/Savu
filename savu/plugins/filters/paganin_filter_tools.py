@@ -13,7 +13,7 @@ class PaganinFilterTools(PluginTools):
         Distance:
               visibility: basic
               dtype: float
-              description: 'Distance from sample to detection - Unit is \
+              description: 'Distance from sample to detection - Unit is
                 metre.'
               default: 1.0
         Resolution:
@@ -44,14 +44,14 @@ class PaganinFilterTools(PluginTools):
         increment:
               visibility: intermediate
               dtype: float
-              description: Increment all values by this amount before taking the \
+              description: Increment all values by this amount before taking the
                 log.
               default: 0.0
 
         """
     def config_warn(self):
-        """The 'log' parameter in the reconstruction should be set to \
-FALSE. Previewing a subset of sinograms will alter the result, due \
-to the global nature of this filter. If this is necessary, ensure they \
+        """The 'log' parameter in the reconstruction should be set to
+FALSE. Previewing a subset of sinograms will alter the result, due
+to the global nature of this filter. If this is necessary, ensure they
 are consecutive.
         """

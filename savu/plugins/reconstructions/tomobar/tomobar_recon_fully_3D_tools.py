@@ -1,10 +1,10 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class TomobarReconFully3dTools(PluginTools):
-    """A Plugin to reconstruct full-field tomographic projection data \
-using state-of-the-art regularised iterative algorithms from \
-the ToMoBAR package. ToMoBAR includes FISTA and ADMM iterative \
-methods and depends on the ASTRA toolbox and the CCPi RGL toolkit: \
+    """A Plugin to reconstruct full-field tomographic projection data
+using state-of-the-art regularised iterative algorithms from
+the ToMoBAR package. ToMoBAR includes FISTA and ADMM iterative
+methods and depends on the ASTRA toolbox and the CCPi RGL toolkit:
 https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
     """
     def define_parameters(self):
@@ -51,14 +51,14 @@ https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
         data_full_ring_GH:
              visibility: advanced
              dtype: str
-             description: "Regularisation variable for full constant ring \
+             description: "Regularisation variable for full constant ring
                removal (GH model)."
              default: None
 
         data_full_ring_accelerator_GH:
             visibility: advanced
             dtype: float
-            description: "Acceleration constant for GH ring removal. \
+            description: "Acceleration constant for GH ring removal.
                (use with care)"
             default: 10.0
 
@@ -67,10 +67,10 @@ https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
             dtype: int
             description:
                summary: "Number of outer iterations for FISTA (default)or ADMM methods."
-               verbose: "Less than 10 iterations for the iterative method \
-                  (FISTA) can deliver a blurry reconstruction. The \
-                  suggested value is 15 iterations, however the \
-                  algorithm can stop prematurely based on the tolerance \
+               verbose: "Less than 10 iterations for the iterative method
+                  (FISTA) can deliver a blurry reconstruction. The
+                  suggested value is 15 iterations, however the
+                  algorithm can stop prematurely based on the tolerance
                   value."
             default: 20
 
@@ -100,8 +100,8 @@ https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
             options: [ROF_TV, FGP_TV, PD_TV, SB_TV, LLT_ROF, NDF, Diff4th]
             description:
                 summary: The denoising method
-                verbose: "Iterative methods can help to solve ill-posed \
-                          inverse problems by choosing a suitable noise \
+                verbose: "Iterative methods can help to solve ill-posed
+                          inverse problems by choosing a suitable noise
                           model for the measurement"
                 options:
                    ROF_TV: Rudin-Osher-Fatemi Total Variation model
@@ -121,7 +121,7 @@ https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
             visibility: basic
             dtype: float
             description:
-                summary: "Regularisation parameter. The higher the value, the \
+                summary: "Regularisation parameter. The higher the value, the
                   stronger the smoothing effect"
                 range: Recommended between 0 and 1
             default: 0.0001
@@ -129,9 +129,9 @@ https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
         regularisation_iterations:
             visibility: basic
             dtype: int
-            description: "Total number of regularisation iterations. \
-              The smaller the number of iterations, the smaller the \
-              effect of the filtering is. A larger number will affect \
+            description: "Total number of regularisation iterations.
+              The smaller the number of iterations, the smaller the
+              effect of the filtering is. A larger number will affect
               the speed of the algorithm."
             default: 80
 
@@ -205,8 +205,7 @@ https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
         """
 
     def get_bibtex(self):
-        """
-        @article{beck2009fast,
+        """@article{beck2009fast,
         title={A fast iterative shrinkage-thresholding algorithm for linear inverse problems},
         author={Beck, Amir and Teboulle, Marc},
         journal={SIAM journal on imaging sciences},
@@ -219,8 +218,7 @@ https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
         """
 
     def get_endnote(self):
-        """
-        %0 Journal Article
+        """%0 Journal Article
         %T A fast iterative shrinkage-thresholding algorithm for linear inverse problems
         %A Beck, Amir
         %A Teboulle, Marc

@@ -43,7 +43,7 @@ class NoProcessTools(PluginTools):
             default: 'Savu/test_data/data/test_config.cfg'
             visibility: intermediate
             dtype: str
-            description: Pattern used to create and store the hdf5 dataset \
+            description: Pattern used to create and store the hdf5 dataset
               default is the first pattern in the pattern dictionary.
         medianfilt_kernel_size:
             visibility: basic

@@ -13,7 +13,7 @@ class ImageLoaderTools(PluginTools):
         angles:
             visibility: intermediate
             dtype: str
-            description: 'A python statement to be evaluated \
+            description: 'A python statement to be evaluated
               (e.g np.linspace(0, 180, nAngles)) or a file.'
             default: None
         frame_dim:

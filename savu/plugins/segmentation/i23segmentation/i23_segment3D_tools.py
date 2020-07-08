@@ -1,10 +1,10 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class I23Segment3dTools(PluginTools):
-    """A Plugin to segment reconstructed data from i23 beamline. The projection data \
-should be first reconstructed iteratively using the ToMoBAR plugin. The goal of \
-the segmentation plugin is to cluster and segment data using Gaussian Mixtures \
-and then apply iterative model-based segmentation to further process the obtained mask \
+    """A Plugin to segment reconstructed data from i23 beamline. The projection data
+should be first reconstructed iteratively using the ToMoBAR plugin. The goal of
+the segmentation plugin is to cluster and segment data using Gaussian Mixtures
+and then apply iterative model-based segmentation to further process the obtained mask
 INPUT to the plugin is the result of gmm_segment plugin
     """
     def define_parameters(self):
