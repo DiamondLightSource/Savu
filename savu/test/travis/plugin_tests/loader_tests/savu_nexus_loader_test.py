@@ -37,14 +37,9 @@ class SavuNexusLoaderTest(unittest.TestCase):
         run_protected_plugin_runner(options1)
 
         #read the output file using SavuNexusLoader
-        path_to_rec = options1['out_path'] + 'test_processed.nxs'
-        self.test_folder2 = tempfile.mkdtemp(suffix='my_test2/')
-        options2 = tu.set_experiment('tomo')
-        options2['data_file'] = path_to_rec
-        options2['out_path'] = os.path.join(self.test_folder2)
-        options2['process_file'] = tu.get_test_process_path('loaders/savu_nexus_loader_test2.nxs')
+        data_file2 = options1['out_path'] + 'test_processed.nxs'
+        options2 = tu.initialise_options(data_file2, 'load_data', 'loaders/savu_nexus_loader_test4.nxs')
         run_protected_plugin_runner(options2)
-
         tu.cleanup(options1)
         tu.cleanup(options2)
 

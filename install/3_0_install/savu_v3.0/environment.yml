@@ -7,7 +7,6 @@ channels:
 dependencies:
   - python=3.7
   - tomopy
-  - scikit-image
   - scipy
   - numpy
   - pandas

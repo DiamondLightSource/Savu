@@ -287,8 +287,12 @@ def initialise_options(data, experiment, process_path):
     if (experiment is not None) & (data is None):
         options = set_experiment(experiment)
     elif (experiment is not None) & (data is not None):
-        options = set_experiment(experiment)
-        options['data_file'] = data_file
+        if experiment == 'load_data':
+            options = set_experiment('tomo')
+            options['data_file'] = data
+        else:
+            options = set_experiment(experiment)
+            options['data_file'] = data_file
         options['process_file'] = process_file
     else:
         options = set_options(data_file, process_file=process_file)
