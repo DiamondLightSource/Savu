@@ -26,6 +26,7 @@ import tempfile
 import os
 import copy
 import glob
+import shutil
 
 from savu.core.plugin_runner import PluginRunner
 from savu.data.experiment_collection import Experiment
@@ -298,8 +299,9 @@ def initialise_options(data, experiment, process_path):
 def cleanup(options):
     """
     Performs folders cleaning in tmp/.
-    Some folders with logs can still remain, but the folders with the output data
-    are cleaned.
+    using _shutil_ module in order to delete everything recursively
+    """
+    shutil.rmtree(options["out_path"], ignore_errors=True)
     """
     classb = savu.test.base_checkpoint_test.BaseCheckpointTest()
     cp_folder = os.path.join(options["out_path"], 'checkpoint')
@@ -316,4 +318,5 @@ def cleanup(options):
     os.removedirs(cp_folder)
     classb._empty_folder(options["out_path"])
     os.removedirs(options["out_path"])
+    """
     return options

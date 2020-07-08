@@ -36,7 +36,9 @@ class IterativePlugin(PluginDriver):
         self._ip_fixed_iterations = False
         self._ip_complete = False
         self._ip_data_dict = {}
+        self._ip_pattern_dict = {}
         self._ip_data_dict['iterating'] = {}
+        self._ip_pattern_dict['iterating'] = {}
 
     def _run_plugin(self, exp, transport):
         """ Runs the pre_process, process and post_process methods.
@@ -45,8 +47,8 @@ class IterativePlugin(PluginDriver):
 
         while not self._ip_complete:
             print "Iteration", self._ip_iteration, "..."
-            self.__set_datasets()
-            self._perform_the_processing(transport)
+            self.__set_datasets()  # change the pattern in this function?
+            self._run_plugin_instances(transport, self.get_communicator())
             if transport.no_processing:
                 self.set_processing_complete()
             if self._ip_fixed_iterations and \
@@ -67,6 +69,19 @@ class IterativePlugin(PluginDriver):
                 b = [0, p[0].index(s2)] if s2 in p[0] else [1, p[1].index(s2)]
                 p[a[0]][a[1]], p[b[0]][b[1]] = p[b[0]][b[1]], p[a[0]][a[1]]
 
+#    def __set_patterns(self):
+#        # The pattern dict key
+#        # pattern_dict can be:
+#        # dict[int=itr] = [list of string patterns]
+#        # dict[int=itr] = {dictionary of <dataset, pattern> key value pairs}
+#        # dict['iterating'] = [list of string patterns]
+#        # dict['iterating'] = {dictionary of <dataset, pattern> key value pairs}
+#        params = self.parameters
+#        if self._ip_iteration in self._ip_pattern_dict.keys():
+#            # initial attempt at recalculating every time
+#            params['in_datasets'] = 
+
+
     def get_iteration(self):
         return self._ip_iteration
 
@@ -77,7 +92,11 @@ class IterativePlugin(PluginDriver):
             final_dataset = s1 if s1 in self.parameters['out_datasets'] else s2
             obsolete = s1 if s1 is not final_dataset else s2
             obsolete.remove = True
-            final_dataset._set_name(name)
+            # switch names if necessary
+            if final_dataset.get_name() != name:
+                temp = obsolete
+                self.exp.index['out_data'][name] = final_dataset
+                self.exp.index['out_data'][s2.get_name()] = temp
 
     def set_processing_complete(self):
         self._ip_complete = True
@@ -88,8 +107,15 @@ class IterativePlugin(PluginDriver):
         else:
             raise Exception('nIterations should be an integer.')
 
-    def set_iteration_datasets(self, itr, in_data, out_data):
+    def set_iteration_datasets(self, itr, in_data, out_data, pattern=None):
         self._ip_data_dict[itr] = [in_data, out_data]
+        self._ip_pattern_dict[itr] = pattern
+
+    def create_clone(self, clone, data):
+        clone.create_dataset(data)
+        clone.data_info.set('clone', data.get_name())
+        # alternate a dataset with its clone
+        self.set_alternating_datasets(data, clone)
 
     def set_alternating_datasets(self, d1, d2):
         names = [d1.get_name(), d2.get_name()]
@@ -97,6 +123,15 @@ class IterativePlugin(PluginDriver):
             raise Exception('Alternating datasets must contain a clone.  These'
                             ' are found at the end of the out_datasets list')
         self._ip_data_dict['iterating'][d1] = d2
+
+    def set_alternating_patterns(self, patterns):
+        if isinstance(patterns, list):
+            self._ip_pattern_dict['iterating'] = patterns
+        elif isinstance(patterns, dict):
+            for data, plist in patterns:
+                self._ip_pattern_dict['iterating'][data] = plist
+        else:
+            raise Exception("Please pass the patterns as a list or a dict.")
 
     def get_alternating_datasets(self):
         return self._ip_data_dict['iterating']

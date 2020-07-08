@@ -161,12 +161,17 @@ class Data(DataCreate):
     def _set_name(self, name):
         self.data_info.set('name', name)
 
-    def get_name(self):
+    def get_name(self, orig=False):
         """ Get data name.
 
+        :keyword bool orig: Set this flag to true to return the original cloned
+            dataset name if this dataset is a clone
         :returns: the name associated with the dataset
         :rtype: str
         """
+        if orig:
+            dinfo = self.data_info.get_dictionary()
+            return dinfo['clone'] if 'clone' in dinfo.keys() else dinfo['name']
         return self.data_info.get('name')
 
     def __get_available_pattern_list(self):
