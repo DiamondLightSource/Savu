@@ -20,7 +20,7 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
-from __future__ import print_function, division, absolute_import
+from __future__ import print_function, division
 
 import re
 import os
@@ -233,6 +233,7 @@ class Content(object):
         self.plugin_list.plugin_list[new_pos]['pos'] = new
 
     def modify(self, pos_str, param_name, value, ref=False):
+        valid_modification = False
         pos = self.find_position(pos_str)
         tools = self.plugin_list.plugin_list[pos]['tools']
         params = self.plugin_list.plugin_list[pos]['param']
@@ -261,7 +262,7 @@ class Content(object):
         try:
             if not ref:
                 value = self.value(value)
-            tools.modify(parameters, value, param_name)
+            valid_modification = tools.modify(parameters, value, param_name)
         except SyntaxError:
             print ("There is a syntax error. Please check your input.")
         except EOFError:
@@ -269,15 +270,7 @@ class Content(object):
                    " input for the character \"\'\".")
         except Exception as e:
             print(e)
-
-    def _apply_lower_case(self, item):
-        lower_case_item = item
-        if isinstance(lower_case_item, str):
-            lower_case_item = lower_case_item.lower()
-        elif isinstance(lower_case_item, list):
-            lower_case_item = [self._apply_lower_case(i)
-                               for i in lower_case_item]
-        return lower_case_item
+        return valid_modification
 
     def value(self, value):
         if not value.count(';'):

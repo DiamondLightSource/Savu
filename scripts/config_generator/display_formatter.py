@@ -103,7 +103,7 @@ class DisplayFormatter(object):
             # Account for margin space
             verbose = joiner.join(textwrap.wrap(verbose,
                                                 width=width - margin))
-            temp = joiner + Fore.GREEN + "%s" + Fore.RESET
+            temp = joiner + Fore.CYAN + '\033[3m' + "%s" + Fore.RESET + '\033[0m'
             params += temp % verbose
 
         if param_key == 'range':
@@ -217,35 +217,35 @@ class DisplayFormatter(object):
             temp = joiner + "%s"
             params += temp % option_text
             for opt in options:
-                opt = self._apply_lower_case(opt)
-                current_opt = \
-                    self._apply_lower_case(p_dict['data'][key])
+                current_opt = p_dict['data'][key]
                 if current_opt == opt:
-                    colour = Fore.LIGHTCYAN_EX
-                    verbose_color = Fore.LIGHTCYAN_EX
+                    colour = Fore.BLUE + Style.BRIGHT
+                    verbose_color = Fore.GREEN
                 else:
                     colour = Fore.BLUE
                     verbose_color = Fore.GREEN
                 option_verbose = ''
-                option_verbose += colour + u'\u0009' + u'\u2022' + str(opt)
+                option_verbose += u'\u0009' + u'\u2022' + colour + str(opt)
+                option_verbose = joiner.join(textwrap.wrap(
+                    option_verbose, width=width - (margin*2)))
                 if (description_verbose == True) and ('options' in description_keys):
                     # If there are option descriptions present
-                    options_desc = {self._apply_lower_case(k): v
+                    options_desc = {k: v
                                     for k, v in desc[key]['options'].items()
                                     if v}
                     if opt in options_desc.keys():
                         option_verbose += ': ' + verbose_color \
                                           + options_desc[opt]
-                        option_verbose = joiner.join(textwrap.wrap(
-                            option_verbose, width=width - margin))
+                        option_str_length = len(opt) + 3
+                        bullet_spacing = (option_str_length+(margin*2))*' '
+                        option_verbose=joiner.join(textwrap.wrap(
+                          option_verbose, width=width -(2*margin),
+                          subsequent_indent=bullet_spacing))
 
-                temp = joiner + "%s" + Fore.RESET
+                temp = joiner + "%s" + Fore.RESET + Style.RESET_ALL
                 params += temp % option_verbose
 
         return params
-
-    def _apply_lower_case(self, item):
-        return item.lower() if isinstance(item, str) else item
 
     def _get_extra_info(self, p_dict, width, colour_off, info_colour,
                         warn_colour):

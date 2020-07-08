@@ -20,7 +20,7 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
-from __future__ import print_function, division, absolute_import
+from __future__ import print_function, division
 
 import re
 import sys
@@ -124,12 +124,13 @@ def _mod(content, args):
     try:
         pos_str, subelem = args.param.split('.')
         try:
-            content.modify(pos_str, subelem, ' '.join(args.value))
+            content_modified = content.modify(pos_str, subelem, ' '.join(args.value))
+            if content_modified:
+                _disp(content, str(args.param) + ' -vv')
         except Exception:
             print('Error modifying the parameter.')
             raise
-        # If modified then display, and show recommendations
-        _disp(content, str(args.param) + ' -vv')
+
     except ValueError:
         print('Incorrect parameter number: Please enter the parameter number to'
               ' select the parameter you want to modify. Use a decimal format.')

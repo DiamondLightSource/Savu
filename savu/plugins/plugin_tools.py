@@ -87,9 +87,11 @@ class PluginParameters(object):
                                  mod=param_name)
             # Update the list of parameters to hide those dependent on others
             self.check_dependencies(parameters, self.param.get_dictionary())
+            return True
         else:
             print('This value has not been saved as it was not'
                   ' a valid entry.')
+            return False
 
     def _is_valid(self, value, subelem):
         """
@@ -196,16 +198,14 @@ class PluginParameters(object):
             parent_param = default.keys()[0] if default.keys() else ''
 
             if parent_param:
-                dep_param_choices = {self._apply_lower_case(k): v
+                dep_param_choices = {k: v
                                      for k, v in default[parent_param].items()}
                 if mod:
                     # If there was a modification, find current parent value
-                    parent_value = \
-                        self._apply_lower_case(parameters[parent_param])
+                    parent_value = parameters[parent_param]
                 else:
                     # If there was no modification, on load, find the parent default
-                    parent_value = \
-                        self._apply_lower_case(all_params[parent_param]['default'])
+                    parent_value = all_params[parent_param]['default']
                 for item in dep_param_choices.keys():
                     if parent_value == item:
                         desc['range'] = 'The recommended value with the chosen ' \
@@ -231,8 +231,7 @@ class PluginParameters(object):
         for p_name, dependency in dep_list.items():
             if isinstance(dependency, OrderedDict):
                 parent_param_name = dependency.keys()[0]
-                parent_choice_list = \
-                    self._apply_lower_case(dependency[parent_param_name])
+                parent_choice_list = dependency[parent_param_name]
                 # The choices which must be in the parent value
 
                 if parent_param_name in parameters:
@@ -240,8 +239,7 @@ class PluginParameters(object):
                     This is relevant for base classes which have several
                     dependent classes
                     '''
-                    parent_value = \
-                        self._apply_lower_case(parameters[parent_param_name])
+                    parent_value = parameters[parent_param_name]
 
                     if parent_value in parent_choice_list:
                         if all_params[p_name].get('display') == 'off':
@@ -250,15 +248,6 @@ class PluginParameters(object):
                         if all_params[p_name].get('display') != 'off':
                             all_params[p_name]['display'] = 'off'
 
-    def _apply_lower_case(self, item):
-        """Change list or string to lower case"""
-        lower_case_item = item
-        if isinstance(lower_case_item, str):
-            lower_case_item = lower_case_item.lower()
-        elif isinstance(lower_case_item, list):
-            lower_case_item = [self._apply_lower_case(i)
-                               for i in lower_case_item]
-        return lower_case_item
 
     def define_parameters(self):
         pass
