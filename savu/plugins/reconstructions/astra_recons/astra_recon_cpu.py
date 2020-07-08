@@ -20,16 +20,26 @@
 
 """
 
-from savu.plugins.utils import register_plugin
-from savu.plugins.driver.cpu_plugin import CpuPlugin
-from savu.plugins.reconstructions.astra_recons.base_astra_recon\
+from savu.plugins.reconstructions.astra_recons.base_astra_recon \
     import BaseAstraRecon
+from savu.plugins.driver.cpu_plugin import CpuPlugin
+from savu.plugins.utils import register_plugin
+
 
 @register_plugin
 class AstraReconCpu(BaseAstraRecon, CpuPlugin):
     """
+    A Plugin to run the astra reconstruction
 
+    :u*param algorithm: Reconstruction type \
+        (FBP|SIRT|SART|ART|CGLS|FP|BP|). Default: 'FBP'.
+    :u*param FBP_filter: The FBP reconstruction filter type (none|ram-lak|\
+        shepp-logan|cosine|hamming|hann|tukey|lanczos|triangular|gaussian|\
+        barlett-hann|blackman|nuttall|blackman-harris|blackman-nuttall|\
+        flat-top|kaiser|parzen). Default: 'ram-lak'.
+    :param projector: Set astra projector (line|strip|linear). Default: 'line'.
     """
+
     def __init__(self):
         super(AstraReconCpu, self).__init__("AstraReconCpu")
 
@@ -40,10 +50,3 @@ class AstraReconCpu(BaseAstraRecon, CpuPlugin):
 
     def set_options(self, cfg):
         return cfg
-    """
-    A Plugin to run the astra reconstruction
-
-    :u*param algorithm: Reconstruction type \
-        (FBP|SIRT|SART|ART|CGLS|FP|BP|). Default: 'FBP'.
-    :param projector: Set astra projector (line|strip|linear). Default: 'line'.
-    """
