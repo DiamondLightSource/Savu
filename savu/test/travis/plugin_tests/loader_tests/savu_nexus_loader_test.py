@@ -38,7 +38,7 @@ class SavuNexusLoaderTest(unittest.TestCase):
 
         #read the output file using SavuNexusLoader
         data_file2 = options1['out_path'] + 'test_processed.nxs'
-        options2 = tu.initialise_options(data_file2, 'load_data', 'loaders/savu_nexus_loader_test4.nxs')
+        options2 = tu.initialise_options(data_file2, 'load_data', 'loaders/savu_nexus_loader_test2.nxs')
         run_protected_plugin_runner(options2)
         tu.cleanup(options1)
         tu.cleanup(options2)
