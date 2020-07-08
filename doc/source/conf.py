@@ -120,8 +120,7 @@ release = __version__
 #exclude_patterns = ['_templates', '', '../../savu/test',
 #                    '../../savu/core/transports/dist_array_transport.py',
 #                    'setup.py', 'install']
-exclude_patterns = ['api/savu.test*', 'api/setup*', 
-                    'api_plugin/savu.test*', 'api_plugin/setup*']
+exclude_patterns = ['api_plugin/savu.test*', 'api_plugin/setup*']
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 #default_role = None

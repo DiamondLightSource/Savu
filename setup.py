@@ -89,6 +89,7 @@ if '--help' in sys.argv:
 def _get_packages():
     others = ['scripts',
               'scripts.config_generator',
+              'scripts.documentation_generator',
               'scripts.log_evaluation',
               'scripts.citation_extractor',
               'install',
@@ -131,6 +132,7 @@ setup(name='savu',
 
       entry_points={'console_scripts': [
           'savu_config=scripts.config_generator.savu_config:main',
+          'savu_documentation=scripts.documentation_generator.savu_documentation:main',
           'savu=savu.tomo_recon:main',
           'savu_quick_tests=savu:run_tests',
           'savu_full_tests=savu:run_full_tests',

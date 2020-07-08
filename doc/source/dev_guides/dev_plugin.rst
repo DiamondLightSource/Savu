@@ -3,7 +3,7 @@ Developing a Savu plugin
 
 Each plugin performs a specific independent task, such as correction, \
 filtering, reconstruction.  For a list of available plugins \
-see `plugin API <file:///home/qmm55171/Documents/Git/git_repos/Savu/doc/build/plugin_autosummary.html>`_.
+see :ref:`plugin documentation<plugin_documentation>`.
 
 Plugins are grouped into categories of similar functionality.  Loaders and savers are two of these categories and each
 process list must begin with a loader plugin and optionally end with a saver plugin (hdf5 is the default), with at
@@ -334,12 +334,12 @@ When you add options, you can include more fields within the description.
              Tukey: Tukey
 
 
-Plugin Developer API
+Plugin Documentation
 --------------------
 
 .. toctree::
    :maxdepth: 2
 
-   ../dev_autosummary
+   ../plugin_documentation
 
 

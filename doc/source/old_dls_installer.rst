@@ -1,5 +1,8 @@
+:orphan:
+
+=====================================
 Notes for installing Savu at Diamond
-====================================
+=====================================
 
 (1) Install Python Anaconda for Python 2.7 version (https://www.continuum.io/downloads). Then:
     >> export PATH=/path/to/anaconda/bin:$PATH
@@ -19,11 +22,11 @@ Notes for installing Savu at Diamond
         >> savubuild=`conda build savu_test --output`
         >> conda install --use-local $savubuild
 
-==================================================================================
-NB: Case of (4)(b): If changes are required to conda recipes and they have not
-been pushed to the master repository then, before running step (5), do
->> export RECIPES=/path/to/folder/containing/recipes
-==================================================================================
+.. note::
+    NB: Case of (4)(b): If changes are required to conda recipes and they have not
+    been pushed to the master repository then, before running step (5), do
+    >> export RECIPES=/path/to/folder/containing/recipes
+
 
 (5) >> savu_installer.sh dls
 
