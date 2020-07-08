@@ -15,7 +15,7 @@
 
 
 """
-.. module:: i12_data_mapping_test
+.. module:: mapping_3Dto4D
    :platform: Unix
    :synopsis: unittest test classes for plugins
 

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: histogram
+.. module:: basic_operations_test
    :platform: Unix
    :synopsis: testing the histogram plugin
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>

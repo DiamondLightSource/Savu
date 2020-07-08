@@ -15,8 +15,7 @@
 """
 .. module:: mutations
    :platform: Unix
-   :synopsis: A dictionary detailing changes to plugins, actions and \
-       descriptions that are required by the configurator.
+   :synopsis: A dictionary detailing changes to plugins, actions and descriptions that are required by the configurator.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
