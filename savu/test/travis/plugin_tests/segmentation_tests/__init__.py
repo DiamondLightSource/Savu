@@ -13,10 +13,9 @@
 # limitations under the License.
 
 """
-All the plugin architecture for Savu is contained here
+Test suites for Savu are here
 
 
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
-

@@ -13,6 +13,8 @@ dependencies:
   - PyWavelets
   - scikit-learn
   - scikit-image
+  - geodistk
+  - morphsnakes
   - tomobar
   - larix
   - ccpi-regulariser
