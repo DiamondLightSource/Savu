@@ -45,6 +45,7 @@ class MorphSnakes3d(Plugin, MultiThreadedPlugin):
     :param smoothing: Number of times the smoothing operator is applied per iteration, \
         reasonable values are around 1-4 and larger values lead to smoother segmentations. Default: 1.
     :param iterations: The number of iterations. Default: 350.
+    :param out_datasets: The default names. Default: ['MASK_MORPH_EVOLVED3D'].
     """
 
     def __init__(self):
