@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: merge_binary_mask
+.. module:: morph_proc_line
    :platform: Unix
-   :synopsis: module to remove gaps in the provided binary mask by merging the boundaries
+   :synopsis: a Larix module to remove inconsistent gaps in the resulted binary mask by merging the boundaries
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
@@ -25,51 +25,51 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 
 import numpy as np
-from larix.methods.segmentation import MASK_MORPH
+from larix.methods.segmentation import MORPH_PROC_LINE
 
 @register_plugin
-class MergeBinaryMask(Plugin, CpuPlugin):
+class MorphProcLine(Plugin, CpuPlugin):
     """
-    A plugin to remove gaps in the provided binary mask by merging the boundaries
+    A Larix morphological processing module using line segments to remove inconsistent gaps
 
-    :param primeclass: class to start morphological processing from. Default: 0.
-    :param correction_window: The size of the correction window. Default: 7.
-    :param iterations: The number of iterations for segmentation. Default: 15.
-    :param pattern: pattern to apply this to. Default: "VOLUME_XY".
+    :param primeclass: a mask class to start morphological processing from. Default: 0.
+    :param correction_window: the size of the correction window. Default: 7.
+    :param iterations: the number of iterations for segmentation. Default: 15.
+    :param pattern: pattern to apply this to. Default: "VOLUME_YZ".
     """
 
     def __init__(self):
-        super(MergeBinaryMask, self).__init__("MergeBinaryMask")
+        super(MorphProcLine, self).__init__("MorphProcLine")
 
-    def setup(self):    
+    def setup(self):
         in_dataset, out_dataset = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
         in_pData[0].plugin_data_setup(self.parameters['pattern'], 'single')
 
         out_dataset[0].create_dataset(in_dataset[0], dtype=np.uint8)
         out_pData[0].plugin_data_setup(self.parameters['pattern'], 'single')
-    
+
     def pre_process(self):
         # extract given parameters
         self.primeclass = self.parameters['primeclass']
-        self.CorrectionWindow = self.parameters['correction_window']        
-        self.iterationsNumb = self.parameters['iterations']       
+        self.CorrectionWindow = self.parameters['correction_window']
+        self.iterationsNumb = self.parameters['iterations']
 
-    def process_frames(self, data):        
+    def process_frames(self, data):
         inputdata = data[0].copy(order='C')
-        
-        pars = {'maskdata' : np.uint8(inputdata),\
-        'primeClass': self.primeclass,\
-        'CorrectionWindow' : self.CorrectionWindow ,\
-        'iterationsNumb' : self.iterationsNumb}                
-        
-        # run class merging here:
-        mask_merged = MASK_MORPH(pars['maskdata'], pars['primeClass'], 
-                          pars['CorrectionWindow'], pars['iterationsNumb'])     
+        if (np.sum(inputdata) > 0):
+            pars = {'maskdata' : np.uint8(inputdata),\
+            'primeClass': self.primeclass,\
+            'CorrectionWindow' : self.CorrectionWindow ,\
+            'iterationsNumb' : self.iterationsNumb}
+            # run class merging module here:
+            mask_merged = MORPH_PROC_LINE(pars['maskdata'], pars['primeClass'],
+                              pars['CorrectionWindow'], pars['iterationsNumb'])
+        else:
+            mask_merged = np.uint8(np.zeros(np.shape(inputdata)))
         return mask_merged
-    
+
     def nInput_datasets(self):
         return 1
     def nOutput_datasets(self):
         return 1
-    
