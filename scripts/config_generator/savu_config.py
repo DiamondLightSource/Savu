@@ -68,7 +68,7 @@ def _disp(content, args):
         range_dict = utils.__get_start_stop(content, args.start, args.stop)
         formatter = DispDisplay(content.plugin_list)
         verbosity = parsers._get_verbosity(args)
-        level = 'all' if args.all else content.disp_level
+        level = 'advanced' if args.all else content.disp_level
         datasets = True if args.datasets else False
         content.display(formatter, level=level, verbose=verbosity,
                         datasets=datasets, **range_dict)
@@ -126,7 +126,7 @@ def _mod(content, args):
         try:
             content_modified = content.modify(pos_str, subelem, ' '.join(args.value))
             if content_modified:
-                _disp(content, str(args.param) + ' -vv')
+                _disp(content, str(args.param))
         except Exception:
             print('Error modifying the parameter.')
             raise
@@ -221,6 +221,13 @@ def _exit(content, arg):
     content.set_finished(check=raw_input("Are you sure? [y/N]"))
     return content
 
+@parse_args
+@error_catcher
+def _level(content, args):
+    """ Set a visibility level for the program."""
+    content.level(args.level)
+    return content
+
 
 def _history(content, arg):
     hlen = utils.readline.get_current_history_length()
@@ -244,6 +251,7 @@ commands = {'open': _open,
             'coll': _coll,
             'clear': _clear,
             'exit': _exit,
+            'level': _level,
             'history': _history}
 
 
@@ -262,7 +270,7 @@ def main():
 
     _reduce_logging_level()
 
-    content = Content(level="all" if args.disp_all else 'user')
+    content = Content(level="advanced" if args.disp_all else 'basic')
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")

@@ -39,7 +39,7 @@ class DisplayFormatter(object):
     def _get_string(self, **kwargs):
         out_string = []
         verbosity = kwargs.get('verbose', False)
-        level = kwargs.get('level', 'user')
+        level = kwargs.get('level', 'basic')
         datasets = kwargs.get('datasets', False)
 
         start = kwargs.get('start', 0)
@@ -126,16 +126,29 @@ class DisplayFormatter(object):
         subelem = display_args['subelem'] if display_args else None
         datasets = display_args['datasets'] if display_args else None
 
-        dev_keys = [k for k, v in p_dict['param'].items()
-                    if v['visibility'] in ['intermediate', 'advanced']
-                    and v['display'] == 'on']
-        data_keys = [k for k, v in p_dict['param'].items()
-                     if v['visibility'] in ['datasets'] and v['display'] == 'on']
-        user_keys = [k for k, v in p_dict['param'].items()
-                     if v['visibility'] == 'basic' and v['display'] == 'on']
+        data_keys = []
+        basic_keys = []
+        interm_keys = []
+        adv_keys = []
+        for k,v in p_dict['param'].items():
+            if v['display']=='on':
+                if v['visibility'] == 'datasets':
+                    data_keys.append(k)
+                if v['visibility'] == 'basic':
+                    basic_keys.append(k)
+                if v['visibility'] == 'intermediate':
+                    interm_keys.append(k)
+                if v['visibility'] == 'advanced':
+                    adv_keys.append(k)
 
-        keys = user_keys if (level == 'user') and not (subelem or datasets) \
-            else user_keys + dev_keys + data_keys
+        keys = basic_keys
+        if not (subelem or datasets):
+            if level == 'intermediate':
+                keys = keys + interm_keys + data_keys
+            if level == 'advanced':
+                keys = keys + interm_keys + adv_keys + data_keys
+        else:
+            keys = keys + interm_keys + adv_keys + data_keys
 
         if subelem:
             if subelem.isdigit():
@@ -218,14 +231,17 @@ class DisplayFormatter(object):
             params += temp % option_text
             for opt in options:
                 current_opt = p_dict['data'][key]
+                c_off = Back.RESET + Fore.RESET
                 if current_opt == opt:
-                    colour = Fore.BLUE + Style.BRIGHT
-                    verbose_color = Fore.GREEN
+                    # colour = Fore.BLUE + Style.BRIGHT
+                    # Highlight the currently selected option
+                    colour = Back.BLUE + Fore.LIGHTWHITE_EX
+                    verbose_color = Back.GREEN + Fore.LIGHTWHITE_EX
                 else:
                     colour = Fore.BLUE
                     verbose_color = Fore.GREEN
                 option_verbose = ''
-                option_verbose += u'\u0009' + u'\u2022' + colour + str(opt)
+                option_verbose +=  u'\u0009' + u'\u2022' + colour + str(opt)
                 option_verbose = joiner.join(textwrap.wrap(
                     option_verbose, width=width - (margin*2)))
                 if (description_verbose == True) and ('options' in description_keys):
@@ -237,12 +253,12 @@ class DisplayFormatter(object):
                         option_verbose += ': ' + verbose_color \
                                           + options_desc[opt]
                         option_str_length = len(opt) + 3
-                        bullet_spacing = (option_str_length+(margin*2))*' '
+                        bullet_spacing = (option_str_length+(margin*2))*" "
                         option_verbose=joiner.join(textwrap.wrap(
                           option_verbose, width=width -(2*margin),
                           subsequent_indent=bullet_spacing))
 
-                temp = joiner + "%s" + Fore.RESET + Style.RESET_ALL
+                temp = joiner + "%s" + Fore.RESET + Style.RESET_ALL + Back.RESET
                 params += temp % option_verbose
 
         return params
@@ -347,7 +363,8 @@ class DispDisplay(DisplayFormatter):
         for plugin in self.plugin_list:
             if plugin['name'] not in names:
                 names.append(plugin['name'])
-                warn = plugin['doc']['warn']
+                doc_str = plugin['doc']
+                warn = doc_str.get('warn')
                 if warn:
                     for w in warn.split('\n'):
                         string = plugin['name'] + ": " + w + '.'

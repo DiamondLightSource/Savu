@@ -212,6 +212,14 @@ def _coll_arg_parser(args, desc):
     return __arg_parser(parser, args, 'coll')
 
 
+def _level_arg_parser(args, desc):
+    """ Argument parser for level command. """
+    parser = ArgumentParser(prog='level', description=desc)
+    parser.add_argument("level", type = str, help="The visibility level."
+                        , choices=['basic', 'intermediate', 'advanced'])
+    return __arg_parser(parser, args, 'level')
+
+
 def _get_verbosity(args):
     if args.vverbose:
         return '-vv'

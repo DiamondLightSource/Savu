@@ -20,12 +20,12 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
-from __future__ import print_function, division
+from __future__ import print_function, division, absolute_import
 
 import re
 import os
 import inspect
-import mutations
+import scripts.config_generator.mutations as mutations
 from colorama import Fore
 from collections import OrderedDict
 
@@ -35,7 +35,7 @@ from savu.data.plugin_list import PluginList
 
 class Content(object):
 
-    def __init__(self, filename=None, level='user'):
+    def __init__(self, filename=None, level='basic'):
         self.disp_level = level
         self.plugin_list = PluginList()
         self.plugin_mutations = mutations.plugin_mutations
@@ -240,15 +240,23 @@ class Content(object):
         parameters = self.plugin_list.plugin_list[pos]['data']
         # Select the correct group and order of parameters according to that
         # on display to the user. This ensures correct parameter is modified.
-        dev_keys = [k for k, v in params.items()
-                    if v['visibility'] in ['intermediate', 'advanced']
-                    and v['display'] == 'on']
-        data_keys = [k for k, v in params.items()
-                    if v['visibility'] in ['datasets']
-                    and v['display'] == 'on']
-        user_keys = [k for k, v in params.items()
-                     if v['visibility'] == 'basic' and v['display'] == 'on']
-        keys = user_keys + dev_keys + data_keys
+
+        data_keys = []
+        basic_keys = []
+        interm_keys = []
+        adv_keys = []
+        for k, v in params.items():
+            if v['display'] == 'on':
+                if v['visibility'] == 'datasets':
+                    data_keys.append(k)
+                if v['visibility'] == 'basic':
+                    basic_keys.append(k)
+                if v['visibility'] == 'intermediate':
+                    interm_keys.append(k)
+                if v['visibility'] == 'advanced':
+                    adv_keys.append(k)
+
+        keys = basic_keys + interm_keys + adv_keys + data_keys
 
         if param_name.isdigit():
             param_name = int(param_name)
