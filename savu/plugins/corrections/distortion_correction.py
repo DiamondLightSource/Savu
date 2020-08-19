@@ -186,24 +186,3 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
             raise ValueError(self.msg)
         else:
             return ["Nothing to Report"]
-
-    def get_citation_information(self):
-        cite_info = CitationInformation()
-        cite_info.description = \
-            ("The distortion correction used in this processing chain is taken\
-             from this work.")
-        cite_info.bibtex = \
-            ("@article{Vo:15,\n" +
-             "title={Radial lens distortion correction with sub-pixel accuracy \
-             for X-ray micro-tomography},\n" +
-             "author={Nghia T. Vo and Robert C. Atwood and \
-             Michael Drakopoulos},\n" +
-             "journal={Optics. Express},\n" +
-             "volume={23},\n" +
-             "number={25},\n" +
-             "pages={32859--32868},\n" +
-             "year={2015},\n" +
-             "publisher={OSA Publishing}" +
-             "}")
-        cite_info.doi = "doi: DOI: 10.1364/OE.23.032859"
-        return cite_info

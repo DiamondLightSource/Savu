@@ -30,7 +30,6 @@ import numpy as np
 
 from savu.plugins.utils import register_plugin
 from savu.plugins.plugin import Plugin
-from savu.data.plugin_list import CitationInformation
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 
@@ -129,47 +128,3 @@ class TestingSinoAlign(Plugin, CpuPlugin):
 
     def get_max_frames(self):
         return 'single'
-
-    def get_citation_information(self):
-        cite_info = CitationInformation()
-        cite_info.description = \
-            ("The Tomographic filtering performed in this processing " +
-             "chain is derived from this work.")
-        cite_info.bibtex = \
-            ("@Article{C4CP04488F, \n" +
-             "author ={Price, S. W. T. and Ignatyev, K. and Geraki, K. and \
-             Basham, M. and Filik, J. and Vo, N. T. and Witte, P. T. and \
-             Beale, A. M. and Mosselmans, J. F. W.}, \n" +
-             "title  ={Chemical imaging of single catalyst particles with \
-             scanning [small mu ]-XANES-CT and [small mu ]-XRF-CT}, \n" +
-             "journal  ={Phys. Chem. Chem. Phys.}, \n" +
-             "year  ={2015}, \n" +
-             "volume  ={17}, \n" +
-             "issue  ={1}, \n" +
-             "pages  ={521-529}, \n" +
-             "publisher  ={The Royal Society of Chemistry}, \n" +
-             "doi  ={10.1039/C4CP04488F}, \n" +
-             "url  ={https://doi.org/10.1039/C4CP04488F}, \n" +
-             "}")
-        cite_info.endnote = \
-            ("%0 Journal Article\n" +
-             "%T Chemical imaging of single catalyst particles with scanning \
-            [small mu ]-XANES-CT and [small mu ]-XRF-CT\n" +
-             "%A Price, Stephen W.T.\n" +
-             "%A Ignatyev, Konstantin\n" +
-             "%A Geraki, Kalotina\n" +
-             "%A Basham, Mark\n" +
-             "%A Filik, Jacob\n" +
-             "%A Vo, Nghia T.\n" +
-             "%A Witte, Peter T.\n" +
-             "%A Beale, Andrew M.\n" +
-             "%A Mosselmans, J. Fred W.\n" +
-             "%J Physical Chemistry Chemical Physics\n" +
-             "%V 17\n" +
-             "%N 1\n" +
-             "%P 521-529\n" +
-             "%@ 1094-4087\n" +
-             "%D 2015\n" +
-             "%I Royal Society of Chemistry")
-        cite_info.doi = "doi: 10.1039/c4cp04488f"
-        return cite_info

@@ -71,12 +71,11 @@ class PluginList(object):
         template = {'active': True,
                     'name': None,
                     'id': None,
-                    'data': None,
-                    'param': None}
+                    'data': None}
         return template
 
     def __get_json_keys(self):
-        return ['data', 'param']
+        return ['data']
 
     def _populate_plugin_list(self, filename, activePass=False,
                               template=False):
@@ -102,6 +101,15 @@ class PluginList(object):
             if plugin['active'] or activePass:
                 plugin['name'] = plugin_group[key]['name'][0]
                 plugin['id'] = plugin_group[key]['id'][0]
+
+                # Load the related class
+                plugin_class = pu.load_class(plugin_group[key]['id'][0])()
+                # Populate the parameters (including those from it's base classes)
+                plugin_class._populate_default_parameters()
+
+                plugin['doc'] = plugin_class.docstring_info
+                plugin['tools'] = plugin_class.tools
+                plugin['param'] = plugin_class.p_dict
                 plugin['pos'] = key.encode('ascii').strip()
 
                 for jkey in json_keys:
@@ -153,9 +161,9 @@ class PluginList(object):
             letter = re.findall('[a-z]', plugin['pos'])
             letter = letter[0] if letter else ""
             plugin_group = \
-                plugins_group.create_group("%*i%*s" % (4, num, 1, letter))
+                plugins_group.create_group('%i%s' % (num, letter))
         else:
-            plugin_group = plugins_group.create_group("%*i" % (4, count))
+            plugin_group = plugins_group.create_group(count)
 
         plugin_group.attrs[NX_CLASS] = 'NXnote'
         required_keys = self._get_plugin_entry_template().keys()
@@ -351,6 +359,8 @@ class PluginList(object):
             process['data'] = plugin.parameters
             process['active'] = True
             process['param'] = plugin.p_dict
+            process['doc'] = plugin.docstring_info
+            process['tools'] = plugin.tools
             self._add(pos, process)
 
     def _get_dataset_flow(self):
@@ -488,10 +498,10 @@ class CitationInformation(object):
 
     def __init__(self):
         super(CitationInformation, self).__init__()
-        self.description = "Default Description"
-        self.doi = "Default DOI"
-        self.endnote = "Default Endnote"
-        self.bibtex = "Default Bibtex"
+        self.description = ''
+        self.doi = ''
+        self.endnote = ''
+        self.bibtex = ''
         self.name = 'citation'
 
     def write(self, citation_group):

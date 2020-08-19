@@ -23,7 +23,6 @@
 from savu.plugins.plugin import Plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
-from savu.data.plugin_list import CitationInformation
 
 import numpy as np
 from scipy.ndimage import median_filter
@@ -111,23 +110,3 @@ class RingRemovalFiltering(Plugin, CpuPlugin):
                 self.matindex, np.transpose(sinosmooth), size))
         return np.transpose(sinosmooth_cor + sinosharp)
 
-    def get_citation_information(self):
-        cite_info = CitationInformation()
-        cite_info.description = \
-            ("The code of ring removal is the implementation of the work of \
-            Nghia T. Vo et al. taken from algorithm 2 and 3 in this paper.")
-        cite_info.bibtex = \
-            ("@article{Vo:18,\n" +
-             "title={Superior techniques for eliminating ring artifacts in\
-              X-ray micro-tomography},\n" +
-             "author={Nghia T. Vo, Robert C. Atwood,\
-              and Michael Drakopoulos},\n" +
-             "journal={Opt. Express},\n" +
-             "volume={26},\n" +
-             "number={22},\n" +
-             "pages={28396--28412},\n" +
-             "year={2018},\n" +
-             "publisher={OSA}" +
-             "}")
-        cite_info.doi = "doi: DOI: 10.1364/OE.26.028396"
-        return cite_info

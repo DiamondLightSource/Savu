@@ -21,7 +21,6 @@
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 from savu.plugins.filters.base_filter import BaseFilter
-from savu.data.plugin_list import CitationInformation
 import savu.core.utils as cu
 
 import logging
@@ -313,42 +312,6 @@ class VoCentering(BaseFilter, CpuPlugin):
 
     def fix_transport(self):
         return 'hdf5'
-
-    def get_citation_information(self):
-        cite_info = CitationInformation()
-        cite_info.description = \
-            ("The center of rotation for this reconstruction was calculated " + 
-             "automatically using the method described in this work")
-        cite_info.bibtex = \
-            ("@article{vo2014reliable,\n" + 
-             "title={Reliable method for calculating the center of rotation " + 
-             "in parallel-beam tomography},\n" + 
-             "author={Vo, Nghia T and Drakopoulos, Michael and Atwood, " + 
-             "Robert C and Reinhard, Christina},\n" + 
-             "journal={Optics Express},\n" + 
-             "volume={22},\n" + 
-             "number={16},\n" + 
-             "pages={19078--19086},\n" + 
-             "year={2014},\n" + 
-             "publisher={Optical Society of America}\n" + 
-             "}")
-        cite_info.endnote = \
-            ("%0 Journal Article\n" + 
-             "%T Reliable method for calculating the center of rotation in " + 
-             "parallel-beam tomography\n" + 
-             "%A Vo, Nghia T\n" + 
-             "%A Drakopoulos, Michael\n" + 
-             "%A Atwood, Robert C\n" + 
-             "%A Reinhard, Christina\n" + 
-             "%J Optics Express\n" + 
-             "%V 22\n" + 
-             "%N 16\n" + 
-             "%P 19078-19086\n" + 
-             "%@ 1094-4087\n" + 
-             "%D 2014\n" + 
-             "%I Optical Society of America")
-        cite_info.doi = "https://doi.org/10.1364/OE.22.019078"
-        return cite_info
 
     def executive_summary(self):
         if ((self.error_msg_1 == "")

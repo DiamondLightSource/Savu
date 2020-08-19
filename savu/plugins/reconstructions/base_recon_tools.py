@@ -81,15 +81,5 @@ class BaseReconTools(PluginTools):
 
         """
 
-    def get_bibtex(self):
-        """@article{baserecon2009fast,
-        title={A fast iterative shrinkage-thresholding algorithm for linear inverse problems},
-        author={Beck, Amir and Teboulle, Marc},
-        journal={SIAM journal on imaging sciences},
-        volume={2},
-        number={1},
-        pages={183--202},
-        year={2009},
-        publisher={SIAM}}
-        """
+
 

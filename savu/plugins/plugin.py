@@ -417,15 +417,6 @@ class Plugin(PluginDatasets):
         """
         pass
 
-    def get_citation_information(self):
-        """
-        Gets the Citation Information for a plugin
-
-        :returns:  A populated savu.data.plugin_info.CitationInformation
-
-        """
-        return None
-
     def executive_summary(self):
         """ Provide a summary to the user for the result of the plugin.
 

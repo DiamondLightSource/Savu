@@ -1,3 +1,5 @@
+# coding=utf-8
+
 from savu.plugins.plugin_tools import PluginTools
 
 class TomopyReconTools(PluginTools):
@@ -53,34 +55,35 @@ required for the chosen algorithm will be ignored.
 
         """
 
-
-    def get_bibtex(self):
-        """
-        @article{gursoy2014tomopy,
-        title={TomoPy: a framework for the analysis of synchrotron tomographic data},
-        author={G{\"u}rsoy, Doga and De Carlo, Francesco and Xiao, Xianghui and Jacobsen, Chris},
-        journal={Journal of synchrotron radiation},
-        volume={21},
-        number={5},
-        pages={1188--1193},
-        year={2014},
-        publisher={International Union of Crystallography}}
-        """
-
-
-    def get_endnote(self):
-        """
-        %0 Journal Article
-        %T TomoPy: a framework for the analysis of synchrotron tomographic data
-        %A G{\"u}rsoy, Doga
-        %A De Carlo, Francesco
-        %A Xiao, Xianghui
-        %A Jacobsen, Chris
-        %J Journal of synchrotron radiation
-        %V 21
-        %N 5
-        %P 1188-1193
-        %@ 1600-5775
-        %D 2014
-        %I International Union of Crystallography
-        """
+def get_citation(self):
+    """
+    citation1:
+        description: An algorithm from the TomoPy framework is used to
+          perform the reconstruction in this processing pipeline.
+        bibtex: |
+                @article{gursoy2014tomopy,
+                title={TomoPy: a framework for the analysis of synchrotron tomographic data},
+                author={G{\"u}rsoy, Doga and De Carlo, Francesco and Xiao, Xianghui and Jacobsen, Chris},
+                journal={Journal of synchrotron radiation},
+                volume={21},
+                number={5},
+                pages={1188--1193},
+                year={2014},
+                publisher={International Union of Crystallography}
+                }
+        endnote: |
+                %0 Journal Article
+                %T TomoPy: a framework for the analysis of synchrotron tomographic data
+                %A Gu'ü'rsoy, Doga
+                %A De Carlo, Francesco
+                %A Xiao, Xianghui
+                %A Jacobsen, Chris
+                %J Journal of synchrotron radiation
+                %V 21
+                %N 5
+                %P 1188-1193
+                %@ 1600-5775
+                %D 2014
+                %I International Union of Crystallography
+        doi: "10.1107/S1600577514013939"
+    """

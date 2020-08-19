@@ -27,7 +27,7 @@ class NoProcessTools(PluginTools):
               rotation
             default: '(-50, 50)'
         ica_w_init:
-            visibility: param
+            visibility: intermediate
             dtype: list
             description: The initial mixing matrix
             default: 'None'

@@ -22,11 +22,12 @@
 """
 import sys
 import savu
-import traceback
 import yaml
+import traceback
+
+from yamllint import linter
 from collections import OrderedDict
 from yamllint.config import YamlLintConfig
-from yamllint import linter
 
 def ordered_load(stream, Loader=yaml.Loader, object_pairs_hook=OrderedDict):
     class OrderedLoader(Loader):
@@ -91,13 +92,13 @@ def read_yaml_from_doc(docstring):
         data_dict = ordered_load(docstring, yaml.SafeLoader)
         return data_dict
     except (yaml.scanner.ScannerError, yaml.parser.ParserError) as se:
+        print('')
         for e in errors:
             print(e)
         raise
     except yaml.YAMLError as ye:
         print('Error reading the yaml structure with YamlLoader.')
-        print(sys.exc_info())
-        raise
+        raise Exception(sys.exc_info())
 
 def dump_yaml(template, stream):
     ordered_dump(template, stream=stream, Dumper=yaml.SafeDumper,

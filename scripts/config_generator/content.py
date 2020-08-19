@@ -424,13 +424,34 @@ class Content(object):
 
     def cite(self, pos):
         if pos >= self.size:
-            raise Exception("Cannot find citations for this plugin %s as it does not exist."
+            raise Exception("Cannot find citations for this plugin %s "
+                            "as it does not exist."
                             % self.plugin_list.plugin_list[pos]['name'])
-        p_cite = self.plugin_list.plugin_list[pos]['tools'].get_citations()
-        # To Do - Citation storage and display
-        for k, v in p_cite.items():
-            if v.get('bibtex'):
-                print(v['bibtex'])
+        citation_dict = self.plugin_list.plugin_list[pos]['tools'].get_citations()
+        parameters = self.plugin_list.plugin_list[pos]['data']
+        for citation in citation_dict.values():
+            if hasattr(citation, 'dependency'):
+                for citation_dependent_parameter, citation_dependent_value \
+                        in citation.dependency.items():
+                    current_value = parameters[citation_dependent_parameter]
+                    if current_value == citation_dependent_value:
+                        print('This citation is for the '
+                              + citation_dependent_value + ' '
+                              + citation_dependent_parameter)
+                        self._print_citation(citation)
+            else:
+                self._print_citation(citation)
+
+    def _print_citation(self, citation):
+        print("\nINFORMATION\n%s\n\nDESCRIPTION\n%s\n\nDOI\n%s\n\n"
+              "BIBTEX\n%s\n\nENDNOTE\n%s" % \
+              (citation.name, citation.description, citation.doi, \
+               citation.bibtex, citation.endnote))
+        print('-------------------------------------------'
+              '-----------------------------------------')
+
+    def level(self, level):
+        self.disp_level = level
 
     def remove(self, pos):
         if pos >= self.size:

@@ -26,31 +26,32 @@ using the inverse radon transform from scikit-image.
 
         """
 
-
-    def get_bibtex(self):
-        """@article{laurentini1994visual,
-          title={The visual hull concept for silhouette-based image understanding},
-          author={Laurentini, Aldo},
-          journal={IEEE Transactions on pattern analysis and machine intelligence},
-          volume={16},
-          number={2},
-          pages={150--162},
-          year={1994},
-          publisher={IEEE}
-          }
+    def get_citation(self):
         """
-
-
-    def get_endnote(self):
-        """%0 Journal Article
-            %T The visual hull concept for silhouette-based image understanding
-            %A Laurentini, Aldo
-            %J IEEE Transactions on pattern analysis and machine intelligence
-            %V 16
-            %N 2
-            %P 150-162
-            %@ 0162-8828
-            %D 1994
-            %I IEEE
+        citation1:
+            description: The reconstruction performed in this processing
+              chain is derived from this work
+            bibtex: |
+                    @article{laurentini1994visual,
+                    title={The visual hull concept for silhouette-based image understanding},
+                    author={Laurentini, Aldo},
+                    journal={IEEE Transactions on pattern analysis and machine intelligence},
+                    volume={16},
+                    number={2},
+                    pages={150--162},
+                    year={1994},
+                    publisher={IEEE}
+                    }
+            endnote: |
+                    %0 Journal Article
+                    %T The visual hull concept for silhouette-based image understanding
+                    %A Laurentini, Aldo
+                    %J IEEE Transactions on pattern analysis and machine intelligence
+                    %V 16
+                    %N 2
+                    %P 150-162
+                    %@ 0162-8828
+                    %D 1994
+                    %I IEEE
+            doi: "http://dx.doi.org/10.1109/34.273735"
         """
-

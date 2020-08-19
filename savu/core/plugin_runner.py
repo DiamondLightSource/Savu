@@ -151,7 +151,7 @@ class PluginRunner(object):
         for plugin_dict in plist[n_loaders:n_loaders + n_plugins]:
             plugin = pu.plugin_loader(self.exp, plugin_dict, check=True)
             plugin._revert_preview(plugin.get_in_datasets())
-            plugin_dict['cite'] = plugin.get_citation_information()
+            plugin_dict['cite'] = plugin.tools.get_citations()
             plugin._clean_up()
             self.exp._update(plugin_dict)
             self.exp._merge_out_data_to_in()

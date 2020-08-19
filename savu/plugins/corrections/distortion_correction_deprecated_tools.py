@@ -31,3 +31,34 @@ class DistortionCorrectionDeprecatedTools(PluginTools):
               default: 0
 
         """
+    def get_citations(self):
+        """
+        citation1:
+            description: The distortion correction used in this processing chain is taken
+             from this work.
+            bibtex: |
+                    @article{vo2015radial,
+                      title={Radial lens distortion correction with sub-pixel accuracy for X-ray micro-tomography},
+                      author={Vo, Nghia T and Atwood, Robert C and Drakopoulos, Michael},
+                      journal={Optics express},
+                      volume={23},
+                      number={25},
+                      pages={32859--32868},
+                      year={2015},
+                      publisher={Optical Society of America}
+                    }
+            endnote: |
+                    %0 Journal Article
+                    %T Radial lens distortion correction with sub-pixel accuracy for X-ray micro-tomography
+                    %A Vo, Nghia T
+                    %A Atwood, Robert C
+                    %A Drakopoulos, Michael
+                    %J Optics express
+                    %V 23
+                    %N 25
+                    %P 32859-32868
+                    %@ 1094-4087
+                    %D 2015
+                    %I Optical Society of America
+            doi: "10.1364/OE.23.032859"
+        """
