@@ -30,33 +30,54 @@ import savu.plugins.utils as pu
 from savu.data.meta_data import MetaData
 import savu.plugins.docstring_parser as doc
 import savu.plugins.parameter_utils as param_u
+from savu.data.plugin_list import CitationInformation
 
-class PluginParameters(object):
-    """ Get this parameter dictionary so get_dictionary of the metadata
-    type should return a dictionary of all the parameters as taken
-    from docstring
+class MainPlugin(object):
+    """ Set the class variable
     """
-    def __init__(self, cls, **kwargs):
-        super(PluginParameters, self).__init__(**kwargs)
-        self.param = MetaData(ordered=True)
-        self._populate_parameters(cls)
+    def __init__(self, cls):
+        self.cls = cls
+        self.tool_list = self._find_tools()
 
-    def _populate_parameters(self, cls):
-        """ Using method resolution order, find base class tools
+    def _find_tools(self):
+        """Using the method resolution order, find base class tools
         """
-        for clazz in cls.__class__.__mro__[::-1]:
+        tool_list = []
+        for clazz in self.cls.__class__.__mro__[::-1]:
             plugin_tools_id = clazz.__module__ + '_tools'
             p_tools = pu.get_tools_class(plugin_tools_id)
             if p_tools:
-                self._set_plugin_parameters(p_tools)
+                tool_list.append(p_tools)
+        return tool_list
+
+class PluginParameters(MainPlugin):
+    """ Save the parameters for the plugin and base classes to a
+    dictionary. The parameters are in yaml format inside the
+    define_parameter function. These are read and checked for problems.
+    """
+    def __init__(self, cls):
+        super(PluginParameters, self).__init__(cls)
+        self.param = MetaData(ordered=True)
+        self._populate_parameters(self.cls)
+
+    def _populate_parameters(self, cls):
+        """ Set the plugin parameters for each of the tools classes
+        """
+        map(lambda tool_class: self._set_plugin_parameters(tool_class), self.tool_list)
 
     def _set_plugin_parameters(self, clazz):
-        """ Load the parameters for each base class and set values"""
+        """ Load the parameters for each base class, c, check the
+        dataset visibility, check data types, set dictionary values.
+        """
         all_params = self._load_param_from_doc(clazz)
         if all_params:
+            # Check if the required keys are included
             self._check_required_keys(all_params, clazz)
-            self._check_data_keys(all_params)
+            # Check that the dataset visibility is set
+            self._check_visibility(all_params, clazz)
+            # Check that the visibility levels are valid
             self._check_dtype(all_params, clazz)
+            # Use a display option to apply to dependent parameters later.
             self._set_display(all_params)
             for p_name, p_value in all_params.items():
                 self.param.set(p_name, p_value)
@@ -66,22 +87,24 @@ class PluginParameters(object):
         This is provided in a yaml format.
         """
         all_params = None
-        yaml_text = clazz.define_parameters.__doc__
-        if yaml_text is not None:
-            all_params = doc.load_yaml_doc(yaml_text)
-            if not isinstance(all_params, OrderedDict):
-                print('The parameters have not been read in correctly for '
-                      + str(clazz.__name__) + '.')
+        if hasattr(clazz, 'define_parameters'):
+            yaml_text = clazz.define_parameters.__doc__
+            if yaml_text is not None:
+                all_params = doc.load_yaml_doc(yaml_text)
+                if not isinstance(all_params, OrderedDict):
+                    print('The parameters have not been read in correctly for',
+                          clazz.__name__,'.')
         return all_params
 
     def modify(self, parameters, value, param_name):
-        """
-        Check the new parameter value is valid, modify the parameter
+        """ Check the new parameter value is valid, modify the parameter
         value, update defaults, check if dependent parameters should
-        be made visible or hidden
+        be made visible or hidden.
         """
         # This is accessed from outside this class
         if self._is_valid(value, param_name):
+            value = self.check_for_default(value, param_name, parameters,
+                                           self.param.get_dictionary())
             parameters[param_name] = value
             self.update_defaults(parameters, self.param.get_dictionary(),
                                  mod=param_name)
@@ -93,10 +116,35 @@ class PluginParameters(object):
                   ' a valid entry.')
             return False
 
-    def _is_valid(self, value, subelem):
+    def check_for_default(self, value, param_name, parameters, all_params):
+        """ If the value is changed to be 'default', then set the original
+        default value. If the default contains a dictionary, then search
+        for the correct value
         """
-        Check if the value provided is the same type as the type specified
-        in the yaml file.
+        if value == 'default':
+            default = all_params[param_name]['default']
+            if isinstance(default, OrderedDict):
+                desc = all_params[param_name]['description']
+                parent_param = default.keys()[0] if default.keys() else ''
+                if parent_param:
+                    dep_param_choices = {k: v
+                                         for k, v
+                                         in default[parent_param].items()}
+                    # Find current parent value
+                    parent_value = parameters[parent_param]
+                    for item in dep_param_choices.keys():
+                        if parent_value == item:
+                            desc['range'] = 'The recommended value with the ' \
+                                            'chosen', parent_param, 'would be', \
+                                            dep_param_choices[item]
+                            value = dep_param_choices[item]
+            else:
+                value = all_params[param_name]['default']
+        return value
+
+    def _is_valid(self, value, subelem):
+        """ Check if the value provided is the same type as the type
+        specified in the yaml file.
         """
         parameter_valid = False
         if self.param.get(subelem):
@@ -108,24 +156,29 @@ class PluginParameters(object):
             if parameter_valid is False:
                 if isinstance(dtype, list):
                     type_options = ' or '.join([str(t) for t in dtype])
-                    print('Your input for the parameter \'%s\' must match the'
-                          ' type %s.' % (subelem, type_options) + Fore.RESET)
+                    print('Your input for the parameter \'', subelem,
+                          '\' must match the type ', type_options, '.',
+                          Fore.RESET, sep = '')
                     print()
 
                 else:
-                    print('Your input for the parameter \'%s\' must match the'
-                      ' type %s' % (subelem, dtype) + Fore.RESET)
+                    print('Your input for the parameter \'', subelem,
+                          '\' must match the type ', dtype, '.',
+                          Fore.RESET, sep = '')
 
         else:
             print('Not in parameter keys.')
         return parameter_valid
 
     def _check_required_keys(self, all_params, clazz):
-        """
-        Check there are four keys ['dtype', 'description', 'visibility', 'default']
-        inside the dictionary given for each parameter
+        """ Check the four keys ['dtype', 'description', 'visibility',
+        'default'] are included inside the dictionary given for each
+        parameter.
         """
         required_keys = ['dtype', 'description', 'visibility', 'default']
+        missing_keys = False
+        missing_key_dict = {}
+
         for p_key, p in all_params.items():
             all_keys = p.keys()
             if p.get('visibility') == 'hidden':
@@ -133,55 +186,86 @@ class PluginParameters(object):
                 required_keys = ['default']
 
             if not all(d in all_keys for d in required_keys):
-                print('Loading '+str(self.__class__.__name__))
-                print(str(clazz.__name__)
-                      + ' doesn\'t contain all of the required parameters.')
-                print('The missing required keys for ' + str(p_key)
-                      + ' are: ')
-                print(', '.join(set(required_keys) - set(all_keys)))
+                missing_key_dict[p_key] = set(required_keys) - set(all_keys)
+                missing_keys = True
 
-    def _check_data_keys(self, all_params):
-        """
-        Make sure that the visibility of dataset parameters is 'datasets'
-        so that the display order is unchanged
-        """
-        datasets = ['in_datasets', 'out_datasets']
-        for p_key, p in all_params.items():
-            if p_key in datasets:
-                if p['visibility'] != 'datasets':
-                    p['visibility'] = 'datasets'
+        if missing_keys:
+            print(clazz.__name__,
+                  'doesn\'t contain all of the required keys.')
+            for param, missing_values in missing_key_dict.items():
+                print('The missing required keys for \'', param, '\' are:',
+                      sep = '')
+                print(*missing_values, sep=', ')
+
+            raise Exception('Please edit %s' % clazz.__name__)
 
     def _check_dtype(self, all_params, clazz):
         """
         Make sure that the dtype input is valid
         """
+        dtype_valid = True
         for p_key, p in all_params.items():
             if isinstance(p['dtype'], list):
                 for item in p['dtype']:
                     if item not in param_u.type_dict:
-                        print('Inside %s the %s parameter is assigned an invalid type'
-                              ' \'%s\'' % (clazz.__name__, p_key, item))
+                        print('The ', p_key, ' parameter has been assigned '
+                             'an invalid type \'', item, '\'.', sep = '')
             else:
                 if p['dtype'] not in param_u.type_dict:
-                    print('Inside %s the %s parameter is assigned an invalid type'
-                          ' \'%s\'' % (clazz.__name__, p_key, p['dtype']))
-                    print('The type options are: ')
-                    for key in param_u.type_dict.keys():
-                        print('     ' + str(key))
+                    print('The ', p_key, ' parameter has been assigned an '
+                          'invalid type \'', p['dtype'], '\'.', sep = '')
+                    dtype_valid = False
+        if not dtype_valid:
+            print('The type options are: ')
+            type_list = ['    {0}'.format(key)
+                         for key in param_u.type_dict.keys()]
+            print(*type_list, sep='\n')
+            raise Exception('Please edit %s' % clazz.__name__)
+
+    def _check_visibility(self, all_params, clazz):
+        """Make sure that the visibility choice is valid
+        """
+        visibility_levels = ['basic', 'intermediate', 'advanced',
+                             'datasets', 'hidden']
+        visibility_valid = True
+        for p_key, p in all_params.items():
+            self._check_data_keys(p_key, p)
+            # Check that the data types are valid choices
+            if p['visibility'] not in visibility_levels:
+                print('Inside ', clazz.__name__, ' the ', p_key, ' parameter '
+                      'is assigned an invalid visibility level \'',
+                       p['visibility'], '\'')
+                print('Valid choices are:')
+                print(*visibility_levels, sep=', ')
+                visibility_valid = False
+
+        if not visibility_valid:
+            raise Exception('Please change the file for %s' % clazz.__name__)
+
+    def _check_data_keys(self, p_key, p):
+        """ Make sure that the visibility of dataset parameters is 'datasets'
+        so that the display order is unchanged.
+        """
+        datasets = ['in_datasets', 'out_datasets']
+        if p_key in datasets:
+            if p['visibility'] != 'datasets':
+                p['visibility'] = 'datasets'
 
     def _check_options(self, all_params, clazz):
-        """
-        Make sure that option verbose descriptions match the actual options
+        """ Make sure that option verbose descriptions match the actual
+        options
         """
         for p_key, p in all_params.items():
             desc = all_params[p_key]['description']
             if desc.get('options'):
+                # TODO Make sure that option verbose descriptions match
+                #  the actual options
                 pass
 
     def _set_display(self, all_params):
-        """
-        Initially, set all of the parameters to display 'on'
-        This is later altered for dependent parameters to be shown and hidden
+        """ Initially, set all of the parameters to display 'on'
+        This is later altered when dependent parameters need to be shown
+        or hidden
         """
         for k, v in all_params.items():
             v['display'] = 'on'
@@ -204,7 +288,8 @@ class PluginParameters(object):
                     # If there was a modification, find current parent value
                     parent_value = parameters[parent_param]
                 else:
-                    # If there was no modification, on load, find the parent default
+                    # If there was no modification, on load, find the
+                    # parent default
                     parent_value = all_params[parent_param]['default']
                 for item in dep_param_choices.keys():
                     if parent_value == item:
@@ -218,8 +303,8 @@ class PluginParameters(object):
                             if mod == parent_param:
                                 print(Fore.RED + recommendation + Fore.RESET)
                         else:
-                            # If there was no modification, on loading the plugin set
-                            # the correct default value
+                            # If there was no modification, on loading the
+                            # plugin set the correct default value
                             parameters[p_name] = dep_param_choices[item]
 
     def check_dependencies(self, parameters, all_params):
@@ -277,36 +362,88 @@ class PluginParameters(object):
     """
 
 
-class PluginCitations(object):
+class PluginCitations(MainPlugin):
     """ Get this citation dictionary so get_dictionary of the metadata type
         should return a dictionary of all the citation info as taken from
         docstring
         """
-    def __init__(self, **kwargs):
-        super(PluginCitations, self).__init__(**kwargs)
-        self.cite = MetaData()
-        self.set_cite()
+    def __init__(self, cls):
+        super(PluginCitations, self).__init__(cls)
+        self.cite = MetaData(ordered=True)
+        self.set_cite(self.cls)
 
-    def set_cite(self):
-        citation = {'bibtex': self.get_bibtex.__doc__,
-                    'endnote': self.get_endnote.__doc__}
-        self.cite.set(self.__class__.__name__, citation)
-        # To do - Save the citation for mro
+    def set_cite(self, cls):
+        """ Set the citations for each of the tools classes
+        Change to list() for python 3
+        """
+        map(lambda tool_class: self._set_plugin_citations(tool_class), self.tool_list)
 
-    def get_bibtex(self):
+    def _set_plugin_citations(self, clazz):
+        """ Load the parameters for each base class and set values"""
+        citations = self._load_cite_from_doc(clazz)
+        if citations:
+            for citation in citations.values():
+                new_citation = CitationInformation()
+                for k, v in citation.items():
+                    setattr(new_citation, k, v)
+                new_citation.name = self._set_citation_name(new_citation)
+                self.cite.set(new_citation.name, new_citation)
+
+    def _citation_keys_valid(self):
+        # TODO Check that required citation keys are present
         pass
 
-    def get_endnote(self):
-        pass
+    def _set_citation_name(self, new_citation):
+        """ Create a short identifier using the short name of the article
+        and the first author
+        """
+        if hasattr(new_citation, 'endnote') \
+                and hasattr(new_citation, 'short_name_article'):
+            cite_name = new_citation.short_name_article.title() + ' by ' \
+                        + self._get_first_author(new_citation) + ' et al.'
+        elif hasattr(new_citation, 'endnote'):
+            cite_name = self._get_title(new_citation) + ' by ' \
+                        + self._get_first_author(new_citation) + ' et al.'
+        else:
+            cite_name = new_citation.description
+        return cite_name
+
+    def _get_first_author(self, new_citation):
+        """ Retrieve the first author name from the endnote """
+        seperation_word = '%A'
+        endnote = new_citation.endnote
+        first_author = endnote.partition(seperation_word)[2].split('\n')[0]
+        return first_author
+
+    def _get_title(self, new_citation):
+        """ Retrieve the title from the endnote """
+        seperation_word = '%T'
+        endnote = new_citation.endnote
+        first_author = endnote.partition(seperation_word)[2].split('\n')[0]
+        return first_author
+
+    def _load_cite_from_doc(self, clazz):
+        """Find the citation information from the method docstring.
+        This is provided in a yaml format.
+        """
+        all_c = None
+        if hasattr(clazz, 'get_citation'):
+            yaml_text = clazz.get_citation.__doc__
+            if yaml_text is not None:
+                all_c = doc.load_yaml_doc(yaml_text)
+                if not isinstance(all_c, OrderedDict):
+                    print('The citation information has not been read in '
+                          'correctly for', clazz.__name__,'.')
+        return all_c
 
 
-class PluginDocumentation(object):
+class PluginDocumentation(MainPlugin):
     """ Get this documentation dictionary so get_dictionary of
     the metadata type should return a dictionary of all the
     documentation details taken from docstring
     """
-    def __init__(self, **kwargs):
-        super(PluginDocumentation, self).__init__()
+    def __init__(self, cls):
+        super(PluginDocumentation, self).__init__(cls)
         self.doc = MetaData()
         self.set_doc()
 
@@ -314,11 +451,13 @@ class PluginDocumentation(object):
         self.doc.set('verbose', self.__doc__)
         self.doc.set('warn', self.config_warn.__doc__)
 
+    def config_warn(self):
+        pass
 
 class PluginTools(PluginParameters, PluginCitations, PluginDocumentation):
 
-    def __init__(self, cls, **kwargs):
-        super(PluginTools, self).__init__(cls=cls, **kwargs)
+    def __init__(self, cls):
+        super(PluginTools, self).__init__(cls)
         self.plugin_tools = MetaData()
         self.plugin_tools.set('param', self.param.get_dictionary())
         self.plugin_tools.set('cite', self.cite.get_dictionary())

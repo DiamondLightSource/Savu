@@ -114,7 +114,7 @@ class Plugin(PluginDatasets):
 
     def _get_plugin_tools(self):
         plugin_tools_id = self.__class__.__module__ + '_tools'
-        tool_class = pu.get_tools_class(plugin_tools_id, cls=self)
+        tool_class = pu.get_tools_class(plugin_tools_id, self)
         return tool_class
 
     def _populate_default_parameters(self):

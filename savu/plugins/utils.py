@@ -142,17 +142,12 @@ def get_tools_class(plugin_tools_id, cls=False):
     # determine Savu base path
     path_name = plugin_tools_id.replace('.', '/')
     file_path =  savu.__path__[0] + '/../' + path_name + '.py'
-
-    # Currently no warning as if the tools file is not valid it may be a base file not requiring tools
     if os.path.isfile(file_path):
-        try:
-            if cls:
-                tool_class = load_class(plugin_tools_id)(cls=cls)
-            else:
-                tool_class = load_class(plugin_tools_id)
-        except Exception as e:
-            print(e)
-            print('Error loading tools id: '+str(plugin_tools_id))
+        if cls:
+            tool_class = load_class(plugin_tools_id)(cls)
+        else:
+            tool_class = load_class(plugin_tools_id)
+
     return tool_class
 
 
