@@ -455,6 +455,8 @@ class PluginDocumentation(MainPlugin):
         pass
 
 class PluginTools(PluginParameters, PluginCitations, PluginDocumentation):
+    """Holds all of the parameter, citation and documentation information
+    for one plugin class - cls"""
 
     def __init__(self, cls):
         super(PluginTools, self).__init__(cls)

@@ -366,7 +366,11 @@ def is_valid(dtype, ptools, value, default_value):
     return pvalid
 
 def _check_default(value, default_value):
-    if default_value == str(value) or default_value == value:
+    # Return true if the new value is either a match for the default
+    # value or the string 'default'
+    if default_value == str(value) \
+            or default_value == value\
+            or value == 'default':
         return True
     else:
         return False
@@ -374,9 +378,6 @@ def _check_default(value, default_value):
 def check_options(ptools, value, pvalid):
     options = ptools.get('options') or {}
     if len(options) >= 1:
-        options = [i.lower() for i in options if isinstance(i, str)]
-        if isinstance(value, str):
-            value = value.lower()
         if value in options:
             pvalid = True
         else:
