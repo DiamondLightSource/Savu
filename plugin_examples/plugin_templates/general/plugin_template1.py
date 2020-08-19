@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: plugin_template
+.. module:: plugin_template1
    :platform: Unix
    :synopsis: A template to create a simple plugin that takes one dataset as\
    input and returns a similar dataset as output.
@@ -21,6 +21,8 @@
 .. moduleauthor:: Developer Name <email@address.ac.uk>
 
 """
+
+import sys
 
 from savu.plugins.plugin import Plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin

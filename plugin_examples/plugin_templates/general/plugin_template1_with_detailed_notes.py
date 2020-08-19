@@ -16,7 +16,7 @@
 # the information below is used in the auto-API creation for documentation
 # and the synopsis appears in the configurator.
 """
-.. module:: plugin_template
+.. module:: plugin_template1_with_detailed_notes
    :platform: Unix
    :synopsis: A template to create a simple plugin that takes one dataset as\
    input and returns a similar dataset as output.

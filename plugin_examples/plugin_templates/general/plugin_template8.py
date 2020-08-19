@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: plugin_template
+.. module:: plugin_template8
    :platform: Unix
    :synopsis: A template to create a simple plugin that takes one dataset as\
    input and returns a similar dataset as output.

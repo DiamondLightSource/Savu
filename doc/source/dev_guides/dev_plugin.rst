@@ -1,32 +1,25 @@
 Developing a Savu plugin
 ************************
 
-Each plugin performs a specific independent task, such as correction, \
-filtering, reconstruction.  For a list of available plugins \
-see :ref:`plugin documentation<plugin_documentation>`.
+A module is a file containing python definitions and statements. To \
+create a plugin for Savu you will need to create two modules:
 
-Plugins are grouped into categories of similar functionality.  Loaders and savers are two of these categories and each
-process list must begin with a loader plugin and optionally end with a saver plugin (hdf5 is the default), with at
-least one processing plugin in-between.  The loader informs the framework of the data location and format along
-with important metadata such as shape, axis information, and associated patterns (e.g. sinogram, projection).
-Therefore, the choice of loader is dependent upon the format of the data.
-
-To create a plugin for Savu you will need to create two files:
-
-1. plugin_name.py containing a class PluginName
-2. plugin_name_tools.py containing a class PluginNameTools
+1. A plugin module, named plugin_name.py containing a class PluginName
+2. A plugin tools module named plugin_name_tools.py, containing a class PluginNameTools
 
 PluginName should be replaced by the name of your plugin without \
 any spaces. The words should be capitalised.
 
 Examples are:
 
-* AstraReconCpu
-* RemoveAllRings
-* TomobarRecon
+* 1. A plugin module astra_recon_cpu.py containing a class AstraReconCpu
+  2. A plugin tools module astra_recon_cpu_tools.py containing a class AstraReconCpuTools
 
-1. Plugin Class
-================
+* 1. A plugin module remove_all_rings.py containing a class RemoveAllRings
+  2. A plugin tools module remove_all_rings_tools.py containing a class RemoveAllRingsTools
+
+1. Introduction to creating a Plugin
+========================================
 
 A docstring is a piece of text contained by three quotation marks """ \
 <docstring_text> """. In the beginning docstring, write your plugin name \
@@ -76,7 +69,7 @@ Initialise the class template:
         def __init__(self):
             super(PluginName, self).__init__("PluginName")
 
-Initialise the class example:
+Initialise the class example, with the class NoPlugin replacing the template name:
 
 .. code-block:: python
 
@@ -84,6 +77,15 @@ Initialise the class example:
     class NoProcess(Plugin, CpuPlugin):
         def __init__(self):
             super(NoProcess, self).__init__("NoProcess")
+
+Below is an example of the template plugin class.
+
+.. literalinclude:: ../files_and_images/documentation/plugin_name_example.py
+    :language: python
+
+You can download it :download:`here <../files_and_images/documentation/plugin_name_example.py>`.
+An extended version is available :download:`here <../../../plugin_examples/plugin_templates/general/plugin_template1_with_detailed_notes.py>`.
+All template downloads are available here: :ref:`plugin_templates`.
 
 Below is an example of the entire NoProcess plugin class.
 
@@ -137,8 +139,8 @@ Plugin Class example:
         def nOutput_datasets(self):
             return 1
 
-2. Plugin Tools Class
-======================
+2. How to create the tools class and documentation
+===================================================
 
 This tools class holds the parameter details in a yaml format.
 To begin, import the PluginTools class.
@@ -267,8 +269,8 @@ The default value of the parameter. For example, False, 0, 0.01
         default: 0.01
 
 This can be filled in with further details if this parameter is reliant on another.
-For example, depending on the current value for the regularisation method, \
-the default value for 'iterations' will change. When the method selected is \
+For example, depending on the current value for the regularisation method,
+the default value for 'iterations' will change. When the method selected is
 ROF_TV, then the iterations value should be 1000.
 
 .. code-block:: yaml
@@ -296,10 +298,10 @@ Three additional fields may be included:
 Dependency
 ''''''''''
 
-If the parameter is only applicable to certain other parameter choices \
+If the parameter is only applicable to certain other parameter choices
 you can make it only appear when a certain value is chosen.
 
-For example, the NDF penalty should only be displayed when the regulartisation \
+For example, the NDF penalty should only be displayed when the regulartisation
 method is NDF.
 
 .. code-block:: yaml
@@ -311,7 +313,7 @@ method is NDF.
 Options
 '''''''
 
-If you have a closed list of options for your parameter, you should enter \
+If you have a closed list of options for your parameter, you should enter
 them here. The case will not matter.
 
 .. code-block:: yaml
@@ -334,8 +336,31 @@ When you add options, you can include more fields within the description.
              Tukey: Tukey
 
 
+
+Document your plugin in restructured text
+-------------------------------------------
+
+If you are creating your plugin with the 'savu_documentation' command, then
+the restructured text file will be created automatically for you and the
+link to this file will be printed to the terminal window.
+
+You will need to open the linked file and write down instructions about
+how to use your plugin. The language this file should be written is is
+reStructured text. This is described in more detail here:
+https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html
+
+An example would be:
+
+.. literalinclude:: ../files_and_images/documentation/plugin_name_doc.rst
+   :language: rst
+   :start-after: :orphan:
+
+
 Plugin Documentation
 --------------------
+
+Below is a list of the current plugins grouped by type. You may also use the
+search bar on the left to find a specific one.
 
 .. toctree::
    :maxdepth: 2
@@ -343,3 +368,65 @@ Plugin Documentation
    ../plugin_documentation
 
 
+3. How to create a test
+============================================
+
+
+Testing something else in line with text example_
+
+In order to submit a new plugin to Savu on Github, you **MUST** provide a test for your new plugin.
+To create a test follow the steps below:
+
+    1. Choose a `test template`_
+    2. Choose a `test dataset`_
+    3. `Amend the parameters`_ r1,...,r8 in the file.
+    4. Save the file.
+    5. Add the file to your local repository.
+
+.. _`test template`:
+
+Test templates
+------------------
+
+If your plugin is not dependent on any others (i.e. it can be run on its own on raw or corrected data), then
+download the :download:`sample test WITHOUT a process list<../files_and_images/example_test.py>`. This will test
+the plugin with default parameters.
+
+If your plugin is dependent on other plugins, you will need to create a process list **create a process list link**
+and download the :download:`sample test WITH a process list <../files_and_images/example_test_with_process_list.py>`.
+
+
+.. _`test dataset`:
+
+Test data
+------------
+
+List of test data available.
+What to do if you require different test data.
+You can submit a new test dataset to Savu, with the requirement that it is less than 10MB in size.
+
+
+.. _`Amend the parameters`:
+
+Amending the parameters
+-------------------------
+
+See the real test modules:
+    1. :download:`median_filter_test.py <../files_and_images/median_filter_test.py>` tests the median_filter_plugin.py plugin **WITH NO PROCESS LIST**.
+    2. :download:`median_filter_test.py <../files_and_images/median_filter_test.py>` tests the median_filter_plugin.py plugin **WITH NO PROCESS LIST**.
+
+
+Save the file as "your_module_name.py"
+
+.. warning:: Ensure the test file name has the same name as the module name (r1)
+
+.. note:: Have a look at the :download:`real test <../files_and_images/median_filter_test.py>` for the median_filter_plugin.py module.
+
+List of test data available.
+What to do if you require different test data.
+
+Internal crossreferences, like example_.
+
+.. _example:
+
+This is an example crossreference target.

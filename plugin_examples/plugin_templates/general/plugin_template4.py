@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: plugin_template
+.. module:: plugin_template4
    :platform: Unix
    :synopsis: A template for a plugin that takes in two datasets and returns\
        one dataset.

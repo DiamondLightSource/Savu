@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: plugin_template2
+.. module:: plugin_template5
    :platform: Unix
    :synopsis: A template to create a plugin with a single input dataset and \
    multiple output datasets, that do not resemble the input dataset and are \

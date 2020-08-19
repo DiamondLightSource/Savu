@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: plugin_template3
+.. module:: plugin_template7
    :platform: Unix
    :synopsis: A template to create a plugin that reduces the data dimensions.
 

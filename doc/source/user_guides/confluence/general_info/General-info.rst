@@ -1,39 +1,6 @@
 General Information
 **********************
 
-Documentation from confluence.
-
-General
-----------------------------------------
-.. toctree::
-   :glob:
-
-   ../general_info/*
-
-
-Savu
-----------------------------------------
-.. toctree::
-   :glob:
-
-   ../savu/*
-
-
-Reconstruction
-----------------------------------------
-.. toctree::
-   :glob:
-
-   ../reconstruction/*
-
-
-Plugins
-----------------------------------------
-.. toctree::
-   :glob:
-
-   ../plugins/*
-
 .. raw:: html
 
     <!DOCTYPE html>
