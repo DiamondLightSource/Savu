@@ -347,20 +347,40 @@ Savu - tutorial on basic use
 
     &gt;&gt;&gt; </pre>
      </div>
-    </div><p><br/></p><p><br/></p><div class="table-wrap"><table class="wrapped confluenceTable"><colgroup><col/></colgroup><tbody><tr><th class="highlight-yellow confluenceTh" data-highlight-colour="yellow"><h3 id="ReconstructionfromimagedataintheHDFformat:Savu-tutorialonbasicuse-SaveProcessChaintofile"><span style="color: rgb(0,0,0);"><strong>Save Process Chain to file<br/></strong></span></h3></th></tr></tbody></table></div><p>Now, use the <strong><em>save</em></strong> command to store the currently active <strong>Savu process list</strong> in a <strong>Nexus</strong> file in an accessible directory of your choice, here <em>/dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/savu_process_lists/<strong>tomo_recon_base_config.nxs</strong></em> (note that the destination directory must already exist, and that the <em><strong>save</strong></em> command overwrites any existing files with the same name):</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeHeader panelHeader pdl" style="border-bottom-width: 1px;"><b>Savu Configurator command: save &lt;filename&gt;.nxs</b></div><div class="codeContent panelContent pdl">
-    <pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence">&gt;&gt;&gt; save /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/savu_process_lists/tomo_recon_base_config.nxs
+    </div><p><br/></p><p><br/></p><div class="table-wrap"><table class="wrapped confluenceTable"><colgroup><col/></colgroup><tbody><tr><th class="highlight-yellow confluenceTh" data-highlight-colour="yellow"><h3 id="ReconstructionfromimagedataintheHDFformat:Savu-tutorialonbasicuse-SaveProcessChaintofile"><span style="color: rgb(0,0,0);"><strong>Save Process Chain to file<br/></strong></span></h3></th></tr></tbody></table></div><p>Now, use the <strong><em>save</em></strong> command to store the currently active <strong>Savu process list</strong> in a <strong>Nexus</strong> file in an accessible directory of your choice, here <em>/dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/savu_process_lists/<strong>tomo_recon_base_config.nxs</strong></em> (note that the destination directory must already exist, and that the <em><strong>save</strong></em> command overwrites any existing files with the same name):</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeHeader panelHeader pdl" style="border-bottom-width: 1px;">
+    </div>
+
+    <div class="codeContent panelContent pdl">
+
+
+Savu Configurator command: save <filename>.nxs
+
+.. code-block:: none
+
+    >>> save /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/savu_process_lists/tomo_recon_base_config.nxs
     Are you sure you want to save the current data to &#39;/dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/savu_process_lists/tomo_recon_base_config.nxs&#39; [y/N]y
     Saving file /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/savu_process_lists/tomo_recon_base_config.nxs
-    &gt;&gt;&gt; </pre>
+
+
+.. raw:: html
+
     </div></div><p><br/></p><p>If desired, the <em><strong>exit</strong></em> command can now be invoked to leave <strong>Savu Configurator</strong> to return to the original (<em><strong>savu</strong></em>-enabled) Linux session<strong><br/></strong></p><div class="code panel pdl" style="border-width: 1px;"><div class="codeHeader panelHeader pdl" style="border-bottom-width: 1px;"><b>Savu Configurator command: exit</b></div><div class="codeContent panelContent pdl">
     <pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence">&gt;&gt;&gt; exit
     Are you sure? [y/N]y
     Thanks for using the application
     (savu_v1.2) ~&gt;</pre>
-    </div></div><p><br/></p><p>which in turn enables one to explicitly verify that the <strong><em>tomo_recon_base_config.nxs</em></strong> file can indeed be found in the <em>/dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/savu_process_lists/ </em>directory:</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeHeader panelHeader pdl" style="border-bottom-width: 1px;"><b>Linux command: ls -l</b></div><div class="codeContent panelContent pdl">
-    <pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence">(savu_v1.2) ~&gt;ll /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/savu_process_lists/tomo_recon_base_config.nxs
+    </div></div><p><br/></p><p>which in turn enables one to explicitly verify that the <strong><em>tomo_recon_base_config.nxs</em></strong> file can indeed be found in the <em>/dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/savu_process_lists/ </em>directory:</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeHeader panelHeader pdl" style="border-bottom-width: 1px;"><b></b></div><div class="codeContent panelContent pdl">
+
+Linux command: ls -l
+
+.. code-block:: none
+
+   (savu_v1.2) ~>ll /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/savu_process_lists/tomo_recon_base_config.nxs
     -rw-rw----+ 1 vxu94780 vxu94780 34216 Mar  1 13:44 /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/savu_process_lists/tomo_recon_base_config.nxs
-    (savu_v1.2) ~&gt;</pre>
+    (savu_v1.2) ~>
+
+.. raw:: html
+
     </div></div><p><br/></p><p>Incidentally, note that all the processes in the above<em><strong> tomo_recon_base_config.nxs </strong></em>file are on their <strong>default settings</strong>. See <strong>Appendix A</strong> for information about viewing and interpreting the contents of <strong>Savu</strong> <strong>process-list files</strong>.</p><p><br/></p><p><br/></p><div class="table-wrap"><table class="wrapped confluenceTable"><colgroup><col/></colgroup><tbody><tr><th class="highlight-yellow confluenceTh" data-highlight-colour="yellow"><h2 id="ReconstructionfromimagedataintheHDFformat:Savu-tutorialonbasicuse-HowtofindoptimalvalueofCoRinSavu?"><strong>How to find optimal value of CoR in Savu?</strong></h2></th></tr></tbody></table></div><p><strong><br/></strong></p><p>As in the case of the <em><strong>tomo-centre</strong></em> command, an optimal value of CoR can be determined by visual inspection of a number of trial reconstructions of a test slice (or a set of test slices). Similarly to the <em><strong>tomo-centre</strong></em> command, one needs to specify the index of a test slice (or the indices of a set of test slices) and a list of trial CoRs. These additional parameters can be specified in <strong>Savu</strong> by modifying appropriate fields in <strong><em>tomo_recon_base_config.nxs</em></strong>. In what follows,<em> <strong><span style="color: rgb(0,128,0);">/dls/mx-scratch/tomo/2013/cm12345-1/13429_subx.nxs</span></strong></em> is used as an example Nexus scan file (c.f. <a href="https://confluence.diamond.ac.uk/display/DT/Session+A.+DAWN+Training+-+Tomography">Session A. DAWN Training - Tomography</a>) for finding an optimal CoR by reconstructing slice with index <span style="color: rgb(153,51,0);"><strong>1093</strong></span> with the following <span style="color: rgb(153,51,0);"><strong>5</strong></span> trial values for CoR:</p><p><span style="color: rgb(153,51,0);"><strong>1919.8</strong></span> (= 2019.8 - 2*50.0)</p><p><span style="color: rgb(153,51,0);"><strong>1969.8</strong></span>  (= 2019.8 - 50.0)</p><p><span style="color: rgb(0,0,0);"><span style="color: rgb(153,51,0);"><strong>2019.8 </strong></span>(this particular value is known to be optimal for this tomography dataset)</span></p><p><span style="color: rgb(153,51,0);"><strong>2069.8</strong></span> (= 2019.8 + 50.0)</p><p><span style="color: rgb(153,51,0);"><strong>2119.8</strong></span> (= 2019.8 + 2*50.0)</p><p>If not already available, launch <strong>Savu Configurator</strong> (see the top of this page), and then use the <em><strong>open</strong></em> command to load the previously-created<strong><em> tomo_recon_base_config.nxs</em></strong> file into <strong>Savu Configurator</strong>:</p><div class="code panel pdl" style="border-width: 1px;">
      <div class="codeHeader panelHeader pdl hide-border-bottom" style="border-bottom-width: 1px;">
       <b class="code-title">Savu Configurator command: open &lt;path-to-process-list-file&gt;</b>
@@ -474,11 +494,20 @@ Savu - tutorial on basic use
         6)                 uvalue : 20
 
     &gt;&gt;&gt; </pre>
-    </div></div><p>See <strong>Appendix C</strong> for information on how to view the results of this modification in <em><strong>hdfview</strong></em>.</p><p><br/></p><p>Finally, the above modifications of <em>/dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/savu_process_lists<strong>/tomo_recon_base_config.nxs</strong></em> can conveniently be saved to a new file, named <em>/dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/savu_process_lists/<strong>tomo_recon_base_config_raven_off.nxs</strong></em></p><div class="code panel pdl" style="border-width: 1px;"><div class="codeHeader panelHeader pdl" style="border-bottom-width: 1px;"><b>Savu Configurator command: save &lt;path-to-process-list-file&gt;</b></div><div class="codeContent panelContent pdl">
-    <pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence">&gt;&gt;&gt; save /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/savu_process_lists/tomo_recon_base_config_raven_off.nxs
-    Are you sure you want to save the current data to &#39;/dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/savu_process_lists/tomo_recon_base_config_raven_off.nxs&#39; [y/N]y
+    </div></div><p>See <strong>Appendix C</strong> for information on how to view the results of this modification in <em><strong>hdfview</strong></em>.</p><p><br/></p><p>Finally, the above modifications of <em>/dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/savu_process_lists<strong>/tomo_recon_base_config.nxs</strong></em> can conveniently be saved to a new file, named <em>/dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/savu_process_lists/<strong>tomo_recon_base_config_raven_off.nxs</strong></em></p><div class="code panel pdl" style="border-width: 1px;"><div class="codeHeader panelHeader pdl" style="border-bottom-width: 1px;"><b></b></div><div class="codeContent panelContent pdl">
+
+Savu Configurator command: save <path-to-process-list-file>
+
+.. code-block:: none
+
+    >>> save /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/savu_process_lists/tomo_recon_base_config_raven_off.nxs
+    Are you sure you want to save the current data to '/dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/savu_process_lists/tomo_recon_base_config_raven_off.nxs' [y/N]y
     Saving file /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/savu_process_lists/tomo_recon_base_config_raven_off.nxs
-    &gt;&gt;&gt; </pre>
+    >>>
+
+
+.. raw:: html
+
     </div></div><p><br/></p><p>Now, exit <strong>Savu Configurator </strong>to return to the original (<em><strong>savu</strong></em>-enabled) Linux session:<strong><br/></strong></p><div class="code panel pdl" style="border-width: 1px;"><div class="codeHeader panelHeader pdl" style="border-bottom-width: 1px;"><b>Savu Configurator command: exit</b></div><div class="codeContent panelContent pdl">
     <pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence">&gt;&gt;&gt; exit
     Are you sure? [y/N]y
@@ -486,32 +515,41 @@ Savu - tutorial on basic use
     (savu_v1.2) ~&gt;</pre>
     </div></div><p><br/></p><h3 id="ReconstructionfromimagedataintheHDFformat:Savu-tutorialonbasicuse-.1"><strong><br/></strong></h3><div class="table-wrap"><table class="wrapped confluenceTable"><colgroup><col/></colgroup><tbody><tr><th class="highlight-yellow confluenceTh" data-highlight-colour="yellow"><h3 id="ReconstructionfromimagedataintheHDFformat:Savu-tutorialonbasicuse-Thesavu_mpicommandforCoRoptimisation"><strong>The savu_mpi command for CoR optimisation</strong></h3></th></tr></tbody></table></div><p><strong><br/></strong></p><p>The trial reconstructions are carried out by executing the <em><strong>savu_mpi</strong></em> command, using the following <strong>3</strong>-argument syntax (note that the output directory is automatically created if it doesn't already exist):</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeHeader panelHeader pdl" style="border-bottom-width: 1px;"><b>Savu syntax: savu_mpi</b></div><div class="codeContent panelContent pdl">
     <pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence">savu_mpi &lt;path-to-Nexus-scan-file&gt; &lt;path-to-Savu-process-list-file&gt; &lt;path-to-output-directory&gt;</pre>
-    </div></div><p><br/></p><p>In the case at hand, this leads to the following:</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeHeader panelHeader pdl" style="border-bottom-width: 1px;"><b>Savu command: savu_mpi</b></div><div class="codeContent panelContent pdl">
-    <pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence">(savu_v1.2) ~&gt;savu_mpi /dls/mx-scratch/tomo/2013/cm12345-1/13429_subx.nxs /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/savu_process_lists/tomo_recon_base_config_raven_off.nxs /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/13429/
-        Loading 64-bit Anaconda Python, version 4.2.13
-         The Savu path is: /dls_sw/apps/savu/anaconda/envs/savu_v1.2/lib/python2.7/site-packages/savu-1.2-py2.7.egg
-         Creating the output folder /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/13429//20170301145340_13429_subx
+    </div></div><p><br/></p><p>In the case at hand, this leads to the following:</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeHeader panelHeader pdl" style="border-bottom-width: 1px;"><b></b></div><div class="codeContent panelContent pdl">
 
-        ************************************************************************
+Savu command: savu_mpi
 
-                 *** THANK YOU FOR USING SAVU! ***
+.. code-block:: none
 
-         Your job has been submitted to the cluster with job number 17902742.
+     (savu_v1.2) ~>savu_mpi /dls/mx-scratch/tomo/2013/cm12345-1/13429_subx.nxs /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/savu_process_lists/tomo_recon_base_config_raven_off.nxs /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/13429/
+     Loading 64-bit Anaconda Python, version 4.2.13
+     The Savu path is: /dls_sw/apps/savu/anaconda/envs/savu_v1.2/lib/python2.7/site-packages/savu-1.2-py2.7.egg
+     Creating the output folder /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/13429//20170301145340_13429_subx
 
-            * Monitor the status of your job on the cluster:
-               &gt;&gt; module load global/cluster
-               &gt;&gt; qstat
+    ************************************************************************
 
-            * Monitor the progression of your Savu job:
-               &gt;&gt; tail -f /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/13429//20170301145340_13429_subx/user.log
-               &gt;&gt; Ctrl+C (to quit)
+             *** THANK YOU FOR USING SAVU! ***
 
-         For a more detailed log file see:
-           /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/13429//20170301145340_13429_subx/savu.o17902742
+     Your job has been submitted to the cluster with job number 17902742.
 
-        ************************************************************************
+        * Monitor the status of your job on the cluster:
+           >> module load global/cluster
+           >> qstat
 
-    (savu_v1.2) ~&gt;</pre>
+        * Monitor the progression of your Savu job:
+           >> tail -f /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/13429//20170301145340_13429_subx/user.log
+           >> Ctrl+C (to quit)
+
+     For a more detailed log file see:
+       /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/13429//20170301145340_13429_subx/savu.o17902742
+
+    ************************************************************************
+
+    (savu_v1.2) ~>
+
+
+.. raw:: html
+
     </div></div><p>As the above output from the <em><strong>savu_mpi</strong></em> command suggests, one should wait until the relevant cluster jobs are finished before examining any output images<strong><em>. </em></strong>The actual output directory is a<strong> time-stamped </strong>sub-directory of the command-line, nominal output directory, <em>/dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/13429/</em>. In this particular case, all the output files can be found inside the <span style="color: rgb(0,0,255);"><em><strong>20170301145340_13429_subx</strong></em></span> sub-directory,  with the directory name being generated from template <span style="color: rgb(0,0,255);"><em>&lt;YYYY&gt;&lt;MM&gt;&lt;DD&gt;&lt;hh&gt;&lt;mm&gt;&lt;ss&gt;_&lt;Nexus-scan-filename&gt;</em></span>. The actual output directory contains a number of different files whose names are self-explanatory:</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeHeader panelHeader pdl" style="border-bottom-width: 1px;"><b>Linux command: ls -l</b></div><div class="codeContent panelContent pdl">
     <pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence">(savu_v1.2) ~&gt;ll /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/13429/
     total 0
@@ -529,17 +567,24 @@ Savu - tutorial on basic use
     (savu_v1.2) ~&gt;</pre>
     </div></div><p><br/></p><p>The <span style="color: rgb(0,0,255);"><em><strong>subx_processed.nxs</strong></em></span> file is the <strong>principal</strong> <strong>output</strong> <strong>file</strong> for this <strong>Savu</strong> reconstruction, the filename being derived from template <span style="color: rgb(0,0,255);"><em>&lt;Nexus-scan-filename&gt;_processed.nxs</em></span>. The <span style="color: rgb(153,51,0);"><strong>5</strong></span> trial reconstructions are stored in the <strong>/entry/final_result_tomo</strong> dataset. Note that this <span style="color: rgb(0,0,255);"><em><strong>subx_processed.nxs</strong></em></span> contains links to <strong>2</strong> external HDF5 files:</p><p><em><strong>tomo_p1_dark_flat_field_correction.h5</strong></em> (dark-and-flat-field-corrected dataset)</p><p>and</p><p><strong><em>tomo_p2_astra_recon_gpu.h5</em> </strong>(reconstructed images).</p><p>Note also that <strong>/entry/final_result_tomo</strong> is in fact a link to the <strong>2-AstraReconGpu-tomo</strong> group inside the <em><strong>tomo_p2_astra_recon_gpu.h5</strong></em> file. These links can easily be identified in the following output from the <strong><em>h5dump</em> <em>-n</em></strong> command (do <strong>not</strong> forget to include the <strong>n</strong>-option or otherwise all datasets will be printed to the screen as long arrays of numbers!):</p><div class="code panel pdl" style="border-width: 1px;">
      <div class="codeHeader panelHeader pdl hide-border-bottom" style="border-bottom-width: 1px;">
-      <b class="code-title">Linux command: h5dump -n &lt;file-path&gt;</b>
+      <b class="code-title"></b>
       <span class="collapse-source expand-control" style="display:none;"><span class="expand-control-icon icon">&nbsp;</span><span class="expand-control-text">Expand source</span></span>
       <span class="collapse-spinner-wrapper"></span>
      </div>
      <div class="codeContent panelContent pdl hide-toolbar">
-      <pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence; collapse: true" data-theme="Confluence">(savu_v1.2) ~&gt;h5dump -n /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/13429/20170301145340_13429_subx/subx_processed.nxs
-    HDF5 "/dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/13429/20170301145340_13429_subx/subx_processed.nxs" {
+
+Linux command: h5dump -n <file-path>
+
+.. code-block:: none
+
+    (savu_v1.2) ~>hdfview /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/13429//20170301171639_13429_subx/subx_processed.nxs &
+    [1] 14037
+    (savu_v1.2) ~>h5dump -n /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/13429//20170301171639_13429_subx/subx_processed.nxs
+    HDF5 "/dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/13429//20170301171639_13429_subx/subx_processed.nxs" {
     FILE_CONTENTS {
      group      /
      group      /entry
-     ext link   /entry/final_result_tomo -&gt; tomo_p2_astra_recon_gpu.h5 2-AstraReconGpu-tomo
+     ext link   /entry/final_result_tomo -> tomo_p3_astra_recon_gpu.h5 3-AstraReconGpu-tomo
      group      /entry/framework_citations
      group      /entry/framework_citations/HDF5
      dataset    /entry/framework_citations/HDF5/bibtex
@@ -557,7 +602,8 @@ Savu - tutorial on basic use
      dataset    /entry/framework_citations/Savu/doi
      dataset    /entry/framework_citations/Savu/endnote
      group      /entry/intermediate
-     ext link   /entry/intermediate/1-DarkFlatFieldCorrection-tomo_tomo -&gt; tomo_p1_dark_flat_field_correction.h5 1-DarkFlatFieldCorrection-tomo
+     ext link   /entry/intermediate/1-DarkFlatFieldCorrection-tomo_tomo -> tomo_p1_dark_flat_field_correction.h5 1-DarkFlatFieldCorrection-tomo
+     ext link   /entry/intermediate/2-RavenFilter-tomo_tomo -> tomo_p2_raven_filter.h5 2-RavenFilter-tomo
      group      /entry/plugin
      group      /entry/plugin/   1
      dataset    /entry/plugin/   1 /active
@@ -571,6 +617,17 @@ Savu - tutorial on basic use
      dataset    /entry/plugin/   2 /desc
      dataset    /entry/plugin/   2 /id
      dataset    /entry/plugin/   2 /name
+     group      /entry/plugin/   3
+     dataset    /entry/plugin/   3 /active
+     group      /entry/plugin/   3 /citation
+     dataset    /entry/plugin/   3 /citation/bibtex
+     dataset    /entry/plugin/   3 /citation/description
+     dataset    /entry/plugin/   3 /citation/doi
+     dataset    /entry/plugin/   3 /citation/endnote
+     dataset    /entry/plugin/   3 /data
+     dataset    /entry/plugin/   3 /desc
+     dataset    /entry/plugin/   3 /id
+     dataset    /entry/plugin/   3 /name
      group      /entry/plugin/   4
      dataset    /entry/plugin/   4 /active
      group      /entry/plugin/   4 /citation1
@@ -600,7 +657,13 @@ Savu - tutorial on basic use
      dataset    /entry/plugin/   5 /name
      }
     }
-    (savu_v1.2) ~&gt;</pre>
+    [1]+  Done                    hdfview /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/13429//20170301171639_13429_subx/subx_processed.nxs
+    (savu_v1.2) ~>
+
+
+.. raw:: html
+
+
      </div>
     </div><p>See<strong> Appendix D</strong> for screenshots of the contents of a selection of centring output files, viewed in <em><strong>hdfview</strong></em> and<strong> </strong><strong>DAWN</strong>.</p><p><br/></p><p><br/></p><div class="table-wrap"><table class="wrapped confluenceTable"><colgroup><col/></colgroup><tbody><tr><th class="highlight-yellow confluenceTh" data-highlight-colour="yellow"><h2 id="ReconstructionfromimagedataintheHDFformat:Savu-tutorialonbasicuse-HowtoreconstructasubsetofslicesortheentiredatasetinSavu?"><strong>How to reconstruct a subset of slices or the entire dataset in Savu?</strong></h2></th></tr></tbody></table></div><p><strong><br/></strong></p><p>The functionality provided by the <em><strong>tomo-recon</strong></em> command can easily be replaced by that furnished by the <em><strong>savu_mpi</strong></em> command. If not already available, launch <strong>Savu Configurator</strong> (see the top of this page), and then use the <em><strong>open</strong></em> command to load the previously-created, all-default-settings<strong> <em>tomo_recon_base_config.nxs</em></strong> file into <strong>Savu Configurator</strong>:</p><div class="code panel pdl" style="border-width: 1px;">
      <div class="codeHeader panelHeader pdl hide-border-bottom" style="border-bottom-width: 1px;">
@@ -780,42 +843,58 @@ Savu - tutorial on basic use
 
     &gt;&gt;&gt; </pre>
      </div>
-    </div><p><span style="color: rgb(0,0,0);">  </span></p><div><span style="color: rgb(0,0,0);"><br/></span></div><p>Now, use the <em><strong>save</strong></em> command to store all the above modifications of <em>/dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/savu_process_lists<strong>/tomo_recon_base_config.nxs</strong></em> in the same file:</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeHeader panelHeader pdl" style="border-bottom-width: 1px;"><b>Savu Configurator command: save &lt;path-to-process-list-file&gt;</b></div><div class="codeContent panelContent pdl">
-    <pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence">&gt;&gt;&gt; save /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/savu_process_lists/tomo_recon_base_config.nxs
-    Are you sure you want to save the current data to &#39;/dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/savu_process_lists/tomo_recon_base_config.nxs&#39; [y/N]y
+    </div><p><span style="color: rgb(0,0,0);">  </span></p><div><span style="color: rgb(0,0,0);"><br/></span></div><p>Now, use the <em><strong>save</strong></em> command to store all the above modifications of <em>/dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/savu_process_lists<strong>/tomo_recon_base_config.nxs</strong></em> in the same file:</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeHeader panelHeader pdl" style="border-bottom-width: 1px;"><b></b></div><div class="codeContent panelContent pdl">
+
+Savu Configurator command: save <path-to-process-list-file>
+
+.. code-block:: none
+
+    >>> save /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/savu_process_lists/tomo_recon_base_config.nxs
+    Are you sure you want to save the current data to '/dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/savu_process_lists/tomo_recon_base_config.nxs' [y/N]y
     Saving file /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/savu_process_lists/tomo_recon_base_config.nxs
-    &gt;&gt;&gt; </pre>
+    >>>
+
+.. raw:: html
+
     </div></div><p><br/></p><p>Then, exit <strong>Savu Configurator</strong> to return to to the original (<em><strong>savu</strong></em>-enabled) Linux session:<strong><br/></strong></p><div class="code panel pdl" style="border-width: 1px;"><div class="codeHeader panelHeader pdl" style="border-bottom-width: 1px;"><b>Savu Configurator command: exit</b></div><div class="codeContent panelContent pdl">
     <pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence">&gt;&gt;&gt; exit
     Are you sure? [y/N]y
     Thanks for using the application
     (savu_v1.2) ~&gt;</pre>
-    </div></div><p><br/></p><p><br/></p><div class="table-wrap"><table class="wrapped confluenceTable"><colgroup><col/></colgroup><tbody><tr><th class="highlight-yellow confluenceTh" data-highlight-colour="yellow"><h3 id="ReconstructionfromimagedataintheHDFformat:Savu-tutorialonbasicuse-Thesavu_mpicommandforrunningfull(orpartial)reconstruction"><strong>The savu_mpi command for running full (or partial) reconstruction</strong></h3></th></tr></tbody></table></div><p><strong><br/></strong></p><p>Finally, the selected slab of <span style="color: rgb(153,51,0);"><strong>4</strong></span> slices can be reconstructed, using the previously-determined optimal CoR value of <span style="color: rgb(153,51,0);"><strong>2019.8</strong></span>, with the help of the following <em><strong>savu_mpi</strong> </em>command:</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeHeader panelHeader pdl" style="border-bottom-width: 1px;"><b>Savu command: savu_mpi &lt;path-to-Nexus-scan-file&gt; &lt;path-to-Savu-process-list-file&gt; &lt;path-to-output-directory&gt;</b></div><div class="codeContent panelContent pdl">
-    <pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence">(savu_v1.2) ~&gt;savu_mpi /dls/mx-scratch/tomo/2013/cm12345-1/13429_subx.nxs /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/savu_process_lists/tomo_recon_base_config.nxs /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/13429/
-        Loading 64-bit Anaconda Python, version 4.2.13
-         The Savu path is: /dls_sw/apps/savu/anaconda/envs/savu_v1.2/lib/python2.7/site-packages/savu-1.2-py2.7.egg
-         Creating the output folder /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/13429//20170301171639_13429_subx
+    </div></div><p><br/></p><p><br/></p><div class="table-wrap"><table class="wrapped confluenceTable"><colgroup><col/></colgroup><tbody><tr><th class="highlight-yellow confluenceTh" data-highlight-colour="yellow"><h3 id="ReconstructionfromimagedataintheHDFformat:Savu-tutorialonbasicuse-Thesavu_mpicommandforrunningfull(orpartial)reconstruction"><strong>The savu_mpi command for running full (or partial) reconstruction</strong></h3></th></tr></tbody></table></div><p><strong><br/></strong></p><p>Finally, the selected slab of <span style="color: rgb(153,51,0);"><strong>4</strong></span> slices can be reconstructed, using the previously-determined optimal CoR value of <span style="color: rgb(153,51,0);"><strong>2019.8</strong></span>, with the help of the following <em><strong>savu_mpi</strong> </em>command:</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeHeader panelHeader pdl" style="border-bottom-width: 1px;"><b></b></div><div class="codeContent panelContent pdl">
 
-        ************************************************************************
+Savu command: savu_mpi <path-to-Nexus-scan-file> <path-to-Savu-process-list-file> <path-to-output-directory>
 
-                 *** THANK YOU FOR USING SAVU! ***
+.. code-block:: none
 
-         Your job has been submitted to the cluster with job number 17905569.
+     (savu_v1.2) ~>savu_mpi /dls/mx-scratch/tomo/2013/cm12345-1/13429_subx.nxs /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/savu_process_lists/tomo_recon_base_config.nxs /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/13429/
+     Loading 64-bit Anaconda Python, version 4.2.13
+     The Savu path is: /dls_sw/apps/savu/anaconda/envs/savu_v1.2/lib/python2.7/site-packages/savu-1.2-py2.7.egg
+     Creating the output folder /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/13429//20170301171639_13429_subx
 
-            * Monitor the status of your job on the cluster:
-               &gt;&gt; module load global/cluster
-               &gt;&gt; qstat
+    ************************************************************************
 
-            * Monitor the progression of your Savu job:
-               &gt;&gt; tail -f /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/13429//20170301171639_13429_subx/user.log
-               &gt;&gt; Ctrl+C (to quit)
+             *** THANK YOU FOR USING SAVU! ***
 
-         For a more detailed log file see:
-           /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/13429//20170301171639_13429_subx/savu.o17905569
+     Your job has been submitted to the cluster with job number 17905569.
 
-        ************************************************************************
+        * Monitor the status of your job on the cluster:
+           >> module load global/cluster
+           >> qstat
 
-    (savu_v1.2) ~&gt;</pre>
+        * Monitor the progression of your Savu job:
+           >> tail -f /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/13429//20170301171639_13429_subx/user.log
+           >> Ctrl+C (to quit)
+
+     For a more detailed log file see:
+       /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/13429//20170301171639_13429_subx/savu.o17905569
+
+    ************************************************************************
+
+    (savu_v1.2) ~>
+
+.. raw:: html
+
     </div></div><p>As the above output from the<em> <strong>savu_mpi</strong></em> command suggests, one should wait until the relevant cluster jobs are finished before examining any output images<strong><em>.</em></strong> As in the case of the centring task, the actual output directory is a <strong>time-stamped</strong> sub-directory, called <em><span style="color: rgb(0,0,255);"><strong>20170301171639_13429_subx</strong></span>,</em> of the command-line, nominal output directory, <em>/dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/13429/</em>; it contains the following files:</p><div class="code panel pdl" style="border-width: 1px;"><div class="codeHeader panelHeader pdl" style="border-bottom-width: 1px;"><b>Linux command: ls -l</b></div><div class="codeContent panelContent pdl">
     <pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence" data-theme="Confluence">(savu_v1.2) ~&gt;ll /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/13429/
     total 0
@@ -1245,19 +1324,30 @@ Savu - tutorial on basic use
      </div>
     </div><div class="table-wrap"><table class="wrapped confluenceTable"><colgroup><col/></colgroup><tbody><tr><th class="highlight-yellow confluenceTh" data-highlight-colour="yellow"><h3 id="ReconstructionfromimagedataintheHDFformat:Savu-tutorialonbasicuse-AppendixH:SavuTips&amp;Tricks">Appendix H: Savu Tips &amp; Tricks</h3></th></tr></tbody></table></div><p><br/></p><ol><li>The contents of any Nexus file (generated by <strong>Savu</strong>) are best viewed in <strong>DAWN, </strong>using either the <strong><em>File Browsing</em></strong> or <strong><em>DExplore</em></strong> perspective. However, if you intend to use <strong>DAWN</strong> in the same Linux terminal as <strong>Savu</strong>, then remember that it is essential to execute 'module add savu' <strong>after</strong> 'module add dawn' (as otherwise <strong>Savu</strong> might not work in the <strong>DAWN</strong> environment).<br/><br/></li><li>Use the <em><strong>savu_mpi</strong></em> command with either the <em><strong>-d</strong></em> or the<strong> </strong><em><strong>--tmp</strong></em> option to save any intermediate, auxiliary files to a temporary, periodically-purged directory, e.g. <strong><em>/dls/i13/data/2017/cm16786-1/tmp/</em></strong> or, more generally, <em>/dls/&lt;ixx&gt;/data/&lt;YYYY&gt;/&lt;visit-id&gt;/tmp/</em>. For more information about this option, execute the <em><strong>savu -h</strong></em> command.  <br/><br/></li><li><p>If neither destination path nor filename are provided on invoking the <em><strong>save</strong></em> command on the currently-open process list in <strong>Savu Configurator</strong>, then this process list gets saved in (overwrites) the original process-list file (i.e. the file whose path was supplied on invoking the preceding <em><strong>open</strong></em> command), e.g.</p><div class="code panel pdl" style="border-width: 1px;">
      <div class="codeHeader panelHeader pdl hide-border-bottom" style="border-bottom-width: 1px;">
-      <b class="code-title">Savu Configurator command: save</b>
-      <span class="collapse-source expand-control" style="display:none;"><span class="expand-control-icon icon">&nbsp;</span><span class="expand-control-text">Expand source</span></span>
+
+
+      <b class="code-title"></b>
+      <span class="collapse-source expand-control" style="display:none;">
+      <span class="expand-control-icon icon">&nbsp;</span><span class="expand-control-text">Expand source</span></span>
       <span class="collapse-spinner-wrapper"></span>
      </div>
      <div class="codeContent panelContent pdl hide-toolbar">
-      <pre class="syntaxhighlighter-pre" data-syntaxhighlighter-params="brush: java; gutter: false; theme: Confluence; collapse: true" data-theme="Confluence">&gt;&gt;&gt; open /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/savu_process_lists/tomo_recon_base_config_raven_off.nxs
+
+Savu Configurator command: save
+
+.. code-block:: none
+
+    >>> open /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/savu_process_lists/tomo_recon_base_config_raven_off.nxs
     Opening file /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/savu_process_lists/tomo_recon_base_config_raven_off.nxs
     ...
-    &gt;&gt;&gt; save
+    >>> save
     Are you sure you want to save the current data to '/dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/savu_process_lists/tomo_recon_base_config_raven_off.nxs' [y/N]y
     Saving file /dls/i13/data/2017/cm16786-1/processing/savu/vxu94780/savu_process_lists/tomo_recon_base_config_raven_off.nxs
-    &gt;&gt;&gt; </pre>
-     </div>
+
+
+.. raw:: html
+
+    </div>
     </div></li><li><p>If filename only (without an absolute or relative path) is provided on invoking the <em><strong>save</strong></em> command on the currently-open process list in <strong>Savu Configurator</strong>, then this process list gets saved under that filename in the <strong>current working directory</strong>, e.g.</p><div class="code panel pdl" style="border-width: 1px;">
      <div class="codeHeader panelHeader pdl hide-border-bottom" style="border-bottom-width: 1px;">
       <b class="code-title">Savu configurator command: save &lt;filename&gt;</b>
