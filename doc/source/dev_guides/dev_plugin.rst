@@ -237,23 +237,54 @@ Dtype
 
 Choose the data type. This is used to check the parameter input is valid.
 
-* [int]
-* range
-* yaml_file
-* '[path, int_path, int]'
-* '[path, int]'
-* filepath
-* directory
-* int_path
-* config_file
-* filename
-* nptype
-* int
-* bool
-* str
-* float
-* tuple
-* list
+.. list-table::
+    :header-rows: 1
+    :widths: 50 50
+
+    * - Data Type
+      - Description
+    * - int
+      - An integer
+    * - bool
+      - A boolean
+    * - str
+      - A string
+    * - float
+      - A float
+    * - tuple
+      - A tuple
+    * - list
+      - A list
+    * - int_list
+      - A list of integers
+    * - range
+      - A range e.g. (0,1)
+    * - yaml_file
+      - A yaml file
+    * - file_int_path_int
+      - A sequence of items. The first item in the list should be a
+        file path, the next should be an interior file path, the last
+        item should be an integer. [<file path>, <interior path>, <integer>]
+    * - int_path_int
+      - A sequence of items. The first item in the list should be an
+        interior file path, the last item should be an integer.
+        [<interior path> , <integer>]
+    * - filepath
+      - A file path
+    * - directory
+      - A file directory
+    * - int_path
+      - An interior path
+    * - config_file
+      - A configuration file
+    * - filename
+      - A file name
+    * - nptype
+      - A numpy type
+
+
+If more than one data type is allowed, then include these in a list format.
+e.g. [int, float] would mean that integers or floats are valid data types.
 
 Description
 '''''''''''
@@ -340,12 +371,12 @@ When you add options, you can include more fields within the description.
 Document your plugin in restructured text
 -------------------------------------------
 
-If you are creating your plugin with the 'savu_documentation' command, then
+If you are creating your plugin with the 'savu_plugin_generator' command, then
 the restructured text file will be created automatically for you and the
 link to this file will be printed to the terminal window.
 
 You will need to open the linked file and write down instructions about
-how to use your plugin. The language this file should be written is is
+how to use your plugin. The language this file should be written in is
 reStructured text. This is described in more detail here:
 https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html
 

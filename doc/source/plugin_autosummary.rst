@@ -5,13 +5,16 @@ Api Plugin
 **********************
 
 .. toctree::
+   :maxdepth: 1 
+
 
 
 Absorption Corrections
 ########################################################
 
 .. toctree::
-   Base Absorption Correction <api_plugin/plugins.absorption_corrections.base_absorption_correction>
+   :maxdepth: 1 
+
    Mc Near Absorption Correction <api_plugin/plugins.absorption_corrections.mc_near_absorption_correction>
 
 
@@ -19,6 +22,8 @@ Alignment
 ########################################################
 
 .. toctree::
+   :maxdepth: 1 
+
    Projection Shift <api_plugin/plugins.alignment.projection_shift>
    Projection Vertical Alignment <api_plugin/plugins.alignment.projection_vertical_alignment>
    Sinogram Alignment <api_plugin/plugins.alignment.sinogram_alignment>
@@ -29,7 +34,8 @@ Analysis
 ########################################################
 
 .. toctree::
-   Base Analysis <api_plugin/plugins.analysis.base_analysis>
+   :maxdepth: 1 
+
    Histogram <api_plugin/plugins.analysis.histogram>
    Stats <api_plugin/plugins.analysis.stats>
    Stxm Analysis <api_plugin/plugins.analysis.stxm_analysis>
@@ -39,7 +45,8 @@ Azimuthal Integrators
 ########################################################
 
 .. toctree::
-   Base Azimuthal Integrator <api_plugin/plugins.azimuthal_integrators.base_azimuthal_integrator>
+   :maxdepth: 1 
+
    Pyfai Azimuthal Integrator <api_plugin/plugins.azimuthal_integrators.pyfai_azimuthal_integrator>
    Pyfai Azimuthal Integrator Separate <api_plugin/plugins.azimuthal_integrators.pyfai_azimuthal_integrator_separate>
    Pyfai Azimuthal Integrator With Bragg Filter <api_plugin/plugins.azimuthal_integrators.pyfai_azimuthal_integrator_with_bragg_filter>
@@ -49,6 +56,8 @@ Basic Operations
 ########################################################
 
 .. toctree::
+   :maxdepth: 1 
+
    Arithmetic Operations <api_plugin/plugins.basic_operations.arithmetic_operations>
    Basic Operations <api_plugin/plugins.basic_operations.basic_operations>
    Data Rescale <api_plugin/plugins.basic_operations.data_rescale>
@@ -64,6 +73,8 @@ Centering
 ########################################################
 
 .. toctree::
+   :maxdepth: 1 
+
    Vo Centering <api_plugin/plugins.centering.vo_centering>
    Vo Centering Iterative <api_plugin/plugins.centering.vo_centering_iterative>
 

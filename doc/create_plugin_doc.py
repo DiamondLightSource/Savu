@@ -62,12 +62,11 @@ def add_package_entry(f, files, output, module_name):
             pass
     f.write('\n\n')
 
-def create_plugin_documentation(files, output, module_name):
-    savu_base_path = os.path.abspath('../')
+def create_plugin_documentation(files, output, module_name, savu_base_path):
     # Only document the plugin python files
-    if not os.path.exists(savu_base_path + '/doc/source/' + output):
+    if not os.path.exists(savu_base_path + 'doc/source/' + output):
         # Create the directory if it does not exist
-        os.makedirs(savu_base_path + '/doc/source/' + output)
+        os.makedirs(savu_base_path + 'doc/source/' + output)
 
     for fi in files:
         file_path = module_name + '.' + fi.split('.py')[0]
@@ -86,19 +85,24 @@ def create_plugin_documentation(files, output, module_name):
             if p_tools_list:
                 # Create an empty rst file inside this directory where
                 # the plugin tools documentation will be stored
-                new_rst_file = open(savu_base_path + '/doc/source/'
+                new_rst_file = open(savu_base_path + 'doc/source/'
                                     + output + '/' + file_path
                                     + '.rst', 'w+')
                 # Populate this file
-                populate_plugin_doc_files(new_rst_file, p_tools_list, file_path, plugin_class)
+                populate_plugin_doc_files(new_rst_file, p_tools_list,
+                                          file_path, plugin_class,
+                                          savu_base_path)
         except Exception as e:
             print(e)
+
 
 def convert_title(original_title):
     new_title = original_title.replace('_',' ').title()
     return new_title
 
-def populate_plugin_doc_files(new_rst_file, tool_class_list, file_path, plugin_class):
+
+def populate_plugin_doc_files(new_rst_file, tool_class_list, file_path,
+                              plugin_class, savu_base_path):
     title = file_path.split('.')
     # Depending on the number of nested directories, determine which section
     # heading and title to apply
@@ -129,7 +133,8 @@ def populate_plugin_doc_files(new_rst_file, tool_class_list, file_path, plugin_c
         for bases_tool_class in tool_class_list:
             plugin_parameters = bases_tool_class.define_parameters.__doc__
             if plugin_parameters:
-                # Go through all plugin classes and get the function and docstring
+                # Go through all plugin classes and get the function and
+                # docstring
                 new_rst_file.write('\n    ' + plugin_parameters)
                 # TODO Append the tools parameters
 
@@ -137,12 +142,12 @@ def populate_plugin_doc_files(new_rst_file, tool_class_list, file_path, plugin_c
         new_rst_file.write('\nKey\n^^^^^^^^^^\n')
         new_rst_file.write('\n')
         new_rst_file.write('.. literalinclude:: '
-                           '/../source/files_and_images/documentation/short_parameter_key.yaml')
+                           '/../source/files_and_images/documentation/'
+                           'short_parameter_key.yaml')
         new_rst_file.write('\n    :language: yaml\n')
 
     # Locate documentation file
-    savu_base_path = os.path.abspath('../')
-    doc_folder = savu_base_path + '/doc/source/documentation/'
+    doc_folder = savu_base_path + 'doc/source/documentation/'
     file_str = doc_folder + title[-1] + '_doc.rst'
     inner_file_str = '/../documentation/' + title[-1] + '_doc.rst'
 
@@ -202,16 +207,15 @@ def _indent(text):
     return text
 
 
-def create_plugin_template_downloads():
+def create_plugin_template_downloads(savu_base_path):
     """ Inside plugin_examples/plugin_templates/general
     If the file begins with 'plugin_template' then select it
     Read the lines of the files docstring and set as a descriptor
     """
-
-    savu_base_path = os.path.abspath('../')
-    doc_template_file = savu_base_path + '/doc/source/dev_guides/dev_plugin_templates.rst'
-
-    plugin_ex_path = savu_base_path + '/plugin_examples/plugin_templates/general'
+    doc_template_file = savu_base_path \
+                        + 'doc/source/dev_guides/dev_plugin_templates.rst'
+    plugin_ex_path = savu_base_path \
+                     + 'plugin_examples/plugin_templates/general'
     # create entries in the autosummary for each package
 
     for root, dirs, files in os.walk(plugin_ex_path, topdown=True):
@@ -238,7 +242,8 @@ def create_plugin_template_downloads():
     doc_f.write('Plugin templates \n=======================\n')
     doc_f.write('\n')
 
-    template_file = savu_base_path + '/plugin_examples/plugin_templates/general'
+    template_file = savu_base_path \
+                    + 'plugin_examples/plugin_templates/general'
 
     all_files = []
     for (dirpath, dirnames, filenames) in os.walk(template_file):
@@ -248,8 +253,8 @@ def create_plugin_template_downloads():
     for file in all_files:
         if file.startswith('plugin_template'):
             doc_str = file.split('.py')[0]
-            doc_f.write(':download:`'+ doc_str + ' <' + inner_file_str +  '/' + file
-                + '>`')
+            doc_f.write(':download:`'+ doc_str + ' <' + inner_file_str
+                        +  '/' + file + '>`')
             doc_f.write('\n\n\n')
 
     doc_f.close()
@@ -258,25 +263,27 @@ if __name__ == "__main__":
     out_folder, rst_file, api_type = sys.argv[1:]
 
     # determine Savu base path
-    savu_base_path = os.path.abspath('../')
+    savu_base_path = \
+        os.path.dirname(os.path.realpath(__file__)).split('doc')[0]
 
-    create_plugin_template_downloads()
+    create_plugin_template_downloads(savu_base_path)
 
     # open the autosummary file
-    f = open(savu_base_path + '/doc/source/' + rst_file, 'w')
+    f = open(savu_base_path + 'doc/source/' + rst_file, 'w')
 
     document_title = convert_title(out_folder)
     f.write('.. _' + out_folder+':\n')
     f.write('\n**********************\n' + document_title
             +' \n**********************\n')
 
-    base_path = savu_base_path + '/savu/plugins'
+    base_path = savu_base_path + 'savu/plugins'
     # create entries in the autosummary for each package
 
     exclude_file = ['__init__.py',
                     'parameter_utils.py', 'docstring_parser.py', 'plugin.py',
-                    'plugin_datasets.py', 'plugin_datasets_notes.py','utils.py',
-                    'plugin_tools.py', 'yaml_utils.py', 'hdf5_utils.py']
+                    'plugin_datasets.py', 'plugin_datasets_notes.py',
+                    'utils.py', 'plugin_tools.py', 'yaml_utils.py',
+                    'hdf5_utils.py']
     exclude_dir = ['driver']
 
     for root, dirs, files in os.walk(base_path, topdown=True):
@@ -297,4 +304,5 @@ if __name__ == "__main__":
             if 'plugins' in module_name:
                 add_package_entry(f, files, out_folder, module_name)
                 if out_folder == 'plugin_documentation':
-                    create_plugin_documentation(files, out_folder, module_name)
+                    create_plugin_documentation(files, out_folder,
+                                            module_name, savu_base_path)

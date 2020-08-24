@@ -134,7 +134,6 @@ def _mod(content, args):
     except ValueError:
         print('Incorrect parameter number: Please enter the parameter number to'
               ' select the parameter you want to modify. Use a decimal format.')
-        # Otherwise message is - ValueError: need more than 1 value to unpack
     return content
 
 

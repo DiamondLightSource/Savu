@@ -2,7 +2,7 @@ from savu.plugins.plugin_tools import PluginTools
 
 class SubpixelShiftTools(PluginTools):
     """A plugin to apply a sub-pixel correction to images, for example to allow
-    subpixel alignment for the AstraGpu plugin.
+subpixel alignment for the AstraGpu plugin.
     """
     def define_parameters(self):
         """

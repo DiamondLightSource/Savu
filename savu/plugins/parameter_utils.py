@@ -208,18 +208,20 @@ def _configfile(value):
 
 @error_catcher_valid
 def _filename(value):
+    """Check if the value is a valid filename string
+    """
     parameter_valid = False
     if _string(value):
         filename = posixpath.normpath(value)
-        # Normalize a pathname by collapsing redundant separators and up-level
-        # references so that //B, A/B/, A/./B and A/foo/../B all become A/B.
+        # Normalise the pathname by collapsing redundant separators and
+        # references so that //B, A/B/, A/./B and A/../B all become A/B.
         _os_alt_seps = list(sep for sep in [os.path.sep, os.path.altsep]
                             if sep not in (None, '/'))
         # Find which separators the operating system provides, excluding slash
         for sep in _os_alt_seps:
             if sep in filename:
                 return False
-        # if path is an absolute pathname. On Unix, that means it begins with
+        # If path is an absolute pathname. On Unix, that means it begins with
         # a slash, on Windows that it begins with a (back)slash after removing
         # drive letter.
         if os.path.isabs(filename) or filename.startswith('../'):
@@ -232,6 +234,9 @@ def _filename(value):
 
 @error_catcher_valid
 def _nptype(value):
+    """Check if the value is a numpy data type.
+    Return true if it is.
+    """
     parameter_valid = False
     if (value in np.typecodes) or (value in np.sctypeDict.keys()):
         parameter_valid = True
@@ -304,6 +309,7 @@ def _list(value):
 
 @error_catcher_valid
 def _string_list(value):
+    """ A list of string values"""
     parameter_valid = False
     try:
         bracket_value = value.split('[')
@@ -318,7 +324,9 @@ def _string_list(value):
         print('Not a valid list.')
     return parameter_valid
 
-
+# If you are editing the type dictionary, please update the documentation
+# files dev_plugin.rst and the files included inside dev_param_key.rst to
+# provide guidance for plugin creators
 type_dict = {'int_list': _intlist,
             'range': _range,
             'yaml_file': _yamlfile,
@@ -339,9 +347,8 @@ type_dict = {'int_list': _intlist,
 
 
 def is_valid(dtype, ptools, value, default_value):
-    """
-    Check if the value matches default options
-    Then type check, followed by check if present in options
+    """ Check if the value matches the default value.
+    Then type check, followed by a check on whether it is present in options
     If the items in options have not been type checked, or have errors,
     it may cause problems.
     """
@@ -366,8 +373,9 @@ def is_valid(dtype, ptools, value, default_value):
     return pvalid
 
 def _check_default(value, default_value):
-    # Return true if the new value is either a match for the default
-    # value or the string 'default'
+    """ Return true if the new value is either a match for the default
+    parameter value or the string 'default'
+    """
     if default_value == str(value) \
             or default_value == value\
             or value == 'default':
@@ -376,6 +384,8 @@ def _check_default(value, default_value):
         return False
 
 def check_options(ptools, value, pvalid):
+    """ Check if the input value matches one of the valid parameter options
+    """
     options = ptools.get('options') or {}
     if len(options) >= 1:
         if value in options:

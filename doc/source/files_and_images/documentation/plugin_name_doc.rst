@@ -11,7 +11,7 @@ A text description including different steps to follow when using the plugin.
 
 This is an example image:
 
-.. figure:: ../files_and_images/documentation/example.jpg
+.. figure:: example.jpg
   :figwidth: 50 %
   :align: center
   :figclass: align-center
