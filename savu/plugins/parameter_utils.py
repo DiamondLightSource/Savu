@@ -346,17 +346,19 @@ type_dict = {'int_list': _intlist,
             'list': _list}
 
 
-def is_valid(dtype, ptools, value, default_value):
+def is_valid(param_name, value, current_parameter_details):
     """ Check if the value matches the default value.
     Then type check, followed by a check on whether it is present in options
     If the items in options have not been type checked, or have errors,
     it may cause problems.
     """
 
+    dtype = current_parameter_details['dtype']
+    default_value = current_parameter_details['default']
     pvalid = _check_default(value, default_value)
-    if pvalid == False:
+    if pvalid is False:
         if isinstance(dtype, list):
-            #This is a list of possible types
+            # This is a list of possible types
             for individual_type in dtype:
                 pvalid = type_dict[individual_type](value)
                 if pvalid == True:
@@ -368,7 +370,10 @@ def is_valid(dtype, ptools, value, default_value):
         else:
             pvalid = type_dict[dtype](value)
         # Then check if the option is valid
-        pvalid = check_options(ptools, value, pvalid)
+        pvalid = _check_options(current_parameter_details, value, pvalid)
+
+    if pvalid is False:
+        _error_message(dtype, param_name)
 
     return pvalid
 
@@ -383,10 +388,10 @@ def _check_default(value, default_value):
     else:
         return False
 
-def check_options(ptools, value, pvalid):
+def _check_options(current_parameter_details, value, pvalid):
     """ Check if the input value matches one of the valid parameter options
     """
-    options = ptools.get('options') or {}
+    options = current_parameter_details.get('options') or {}
     if len(options) >= 1:
         if value in options:
             pvalid = True
@@ -396,3 +401,17 @@ def check_options(ptools, value, pvalid):
             print('\n'.join(options) + Fore.RESET)
             pvalid = False
     return pvalid
+
+
+def _error_message(dtype, param_name):
+    if isinstance(dtype, list):
+        type_options = ' or '.join([str(t) for t in dtype])
+        print('Your input for the parameter \'', param_name,
+              '\' must match the type ', type_options, '.',
+              Fore.RESET, sep='')
+        print()
+
+    else:
+        print('Your input for the parameter \'', param_name,
+              '\' must match the type ', dtype, '.',
+              Fore.RESET, sep='')

@@ -97,24 +97,36 @@ class PluginParameters(MainPlugin):
         return all_params
 
     def modify(self, parameters, value, param_name):
-        """ Check the new parameter value is valid, modify the parameter
+        """ Check the parameter is within the current parameter list.
+        Check the new parameter value is valid, modify the parameter
         value, update defaults, check if dependent parameters should
         be made visible or hidden.
         """
         # This is accessed from outside this class
-        if self._is_valid(value, param_name):
-            value = self.check_for_default(value, param_name, parameters,
-                                           self.param.get_dictionary())
-            parameters[param_name] = value
-            self.update_defaults(parameters, self.param.get_dictionary(),
-                                 mod=param_name)
-            # Update the list of parameters to hide those dependent on others
-            self.check_dependencies(parameters, self.param.get_dictionary())
-            return True
+
+        parameter_valid = False
+        current_parameter_details = self.param.get(param_name)
+        # If found, then the parameter is within the current parameter list
+        # displayed to the user
+        if current_parameter_details:
+            parameter_valid = param_u.is_valid(param_name, value, current_parameter_details)
+            # Check that the value is an accepted input for the chosen parameter
+            if parameter_valid:
+                value = self.check_for_default(value, param_name, parameters,
+                                               self.param.get_dictionary())
+                parameters[param_name] = value
+                self.update_defaults(parameters, self.param.get_dictionary(),
+                                     mod=param_name)
+                # Update the list of parameters to hide those dependent on others
+                self.check_dependencies(parameters, self.param.get_dictionary())
+                parameter_valid = True
+            else:
+                print('This value has not been saved as it was not'
+                      ' a valid entry.')
         else:
-            print('This value has not been saved as it was not'
-                  ' a valid entry.')
-            return False
+            print('Not in parameter keys.')
+
+        return parameter_valid
 
     def check_for_default(self, value, param_name, parameters, all_params):
         """ If the value is changed to be 'default', then set the original
@@ -142,33 +154,6 @@ class PluginParameters(MainPlugin):
                 value = all_params[param_name]['default']
         return value
 
-    def _is_valid(self, value, subelem):
-        """ Check if the value provided is the same type as the type
-        specified in the yaml file.
-        """
-        parameter_valid = False
-        if self.param.get(subelem):
-            # The parameter is within the current shown parameter list
-            p = self.param.get(subelem)
-            dtype = p['dtype']
-            default_value = p['default']
-            parameter_valid = param_u.is_valid(dtype, p, value, default_value)
-            if parameter_valid is False:
-                if isinstance(dtype, list):
-                    type_options = ' or '.join([str(t) for t in dtype])
-                    print('Your input for the parameter \'', subelem,
-                          '\' must match the type ', type_options, '.',
-                          Fore.RESET, sep = '')
-                    print()
-
-                else:
-                    print('Your input for the parameter \'', subelem,
-                          '\' must match the type ', dtype, '.',
-                          Fore.RESET, sep = '')
-
-        else:
-            print('Not in parameter keys.')
-        return parameter_valid
 
     def _check_required_keys(self, all_params, clazz):
         """ Check the four keys ['dtype', 'description', 'visibility',
