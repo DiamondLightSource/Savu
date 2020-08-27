@@ -13,15 +13,14 @@
 # limitations under the License.
 
 """
-.. module:: savu_config.py
+.. module:: parameter_utils
    :platform: Unix
-   :synopsis: A command line tool for creating Savu plugin lists
+   :synopsis: Parameter utilities
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
-
-from __future__ import print_function
+from __future__ import print_function, division, absolute_import
 
 import os, re
 import h5py
@@ -34,6 +33,7 @@ from colorama import Fore
 
 from savu.plugins.utils import parse_config_string as parse_str
 from yamllint.config import YamlLintConfig
+import savu.plugins.loaders.utils.yaml_utils as yu
 
 import warnings
 with warnings.catch_warnings():
@@ -47,43 +47,41 @@ def _intlist(value):
     ['int']
     '''
     parameter_valid = False
-    try:
-        value = parse_str(value) if \
-            isinstance(value, str) else value
-    except:
-        print('Error parsing string.')
-    # To Do - check preview list
+    # Currently the check is for a list, but this can later be more extensive
+    if _list(value):
+        parameter_valid = True
     return parameter_valid
 
 @error_catcher_valid
 def _range(value):
     '''range'''
     parameter_valid = False
-    entries = value.split(',')
-    if len(entries) == 2:
-        if _integer(entries[0]) and _integer(entries[1]):
-            parameter_valid = True
+    if isinstance(value, tuple):
+        if len(value) == 2:
+            if _integer(value[0]) and _integer(value[1]):
+                    parameter_valid = True
+        else:
+            print(Fore.RED + 'Please enter two values.' + Fore.RESET)
     else:
-        print(Fore.RED + '\nPlease enter two values.' + Fore.RESET)
+            print('Valid items have a format <value 1>, <value 2>')
     return parameter_valid
-
 
 @error_catcher_valid
 def _yamlfile(value):
     """ yaml_file """
     parameter_valid = False
-    config_file = open('savu/plugins/loaders/utils/yaml_config.yaml')
-    conf = YamlLintConfig(config_file)
     if _filepath(value):
         f = open(value)
-        gen = linter.run(f, conf)
-        errors = list(gen)
-        if errors:
-            print('There were some errors with your yaml file structure.\n')
-            for e in errors:
-                print(e)
-        else:
+        errors = yu.check_yaml_errors(f)
+        try:
+            yu.read_yaml(value)
             parameter_valid = True
+        except:
+            if errors:
+                print('There were some errors with your yaml file structure.')
+                for e in errors:
+                    print(e)
+
     return parameter_valid
 
 
@@ -93,11 +91,11 @@ def _intgroup(value):
     # To be replaced
     parameter_valid = False
     try:
-        bracket_value = value.split('[')
-        bracket_value = bracket_value[1].split(']')
-        entries = bracket_value[0].split(',')
+        if _list(value):
+            entries = value
         if len(entries) == 3:
             file_path = entries[0]
+
             if _filepath(file_path):
                 int_path = entries[1]
                 hf = h5py.File(file_path, 'r')
@@ -105,21 +103,21 @@ def _intgroup(value):
                     # This returns a HDF5 dataset object
                     int_data = hf.get(int_path)
                     if int_data is None:
-                        print('\nThere is no data stored at that internal path.')
+                        print('There is no data stored at that internal path.')
                     else:
                         # Internal path is valid
                         int_data = np.array(int_data)
                         if int_data.size >= 1:
                             try:
-                                compensation_fact = int(entries[2])
+                                compensation_fact = entries[2]
                                 parameter_valid = _integer(compensation_fact)
                             except (Exception, ValueError):
-                                print('\nThe compensation factor is not an integer.')
+                                print('The compensation factor is not an integer.')
 
                 except AttributeError:
                     print('Attribute error.')
                 except:
-                    print(Fore.BLUE + '\nPlease choose another interior'
+                    print(Fore.BLUE + 'Please choose another interior'
                                       ' path.' + Fore.RESET)
                     print('Example interior paths: ')
                     for group in hf:
@@ -129,7 +127,7 @@ def _intgroup(value):
                     raise
                 hf.close()
         else:
-            print(Fore.RED + '\nPlease enter three parameters.' + Fore.RESET)
+            print(Fore.RED + 'Please enter three parameters.' + Fore.RESET)
         return parameter_valid
     except (Exception, ValueError, AttributeError):
         print('Valid items have a format [<file path>,'
@@ -138,25 +136,24 @@ def _intgroup(value):
 
 @error_catcher_valid
 def _intgroup1(value):
-    """ [path, int] """
+    """ [int_path, int] """
     parameter_valid = False
     try:
-        bracket_value = value.split('[')
-        bracket_value = bracket_value[1].split(']')
-        entries = bracket_value[0].split(',')
+        if _list(value):
+            entries = value
         if len(entries) == 2:
-            file_path = entries[0]
-            if _filepath(file_path):
+            int_path = entries[0]
+            if _intpathway(int_path):
                 try:
                     scale_fact = int(entries[1])
                     parameter_valid = _integer(scale_fact)
                 except (Exception, ValueError):
-                    print('\nThe scale factor is not an integer.')
+                    print('The scale factor is not an integer.')
         else:
-            print(Fore.RED + '\nPlease enter two parameters.' + Fore.RESET)
+            print(Fore.RED + 'Please enter two parameters.' + Fore.RESET)
         return parameter_valid
     except (Exception, ValueError, AttributeError):
-        print('Valid items have a format [<file path>, int].')
+        print('Valid items have a format [<interior file path>, int].')
 
 
 @error_catcher_valid
@@ -189,7 +186,6 @@ def _filepath(value):
 def _intpathway(value):
     # Interior file path
     parameter_valid = False
-    # Check if the entry is a string
     # Could check if valid, but only if file_path known for another parameter
     if isinstance(value, str):
         parameter_valid = True
@@ -212,18 +208,20 @@ def _configfile(value):
 
 @error_catcher_valid
 def _filename(value):
+    """Check if the value is a valid filename string
+    """
     parameter_valid = False
     if _string(value):
         filename = posixpath.normpath(value)
-        # Normalize a pathname by collapsing redundant separators and up-level
-        # references so that //B, A/B/, A/./B and A/foo/../B all become A/B.
+        # Normalise the pathname by collapsing redundant separators and
+        # references so that //B, A/B/, A/./B and A/../B all become A/B.
         _os_alt_seps = list(sep for sep in [os.path.sep, os.path.altsep]
                             if sep not in (None, '/'))
         # Find which separators the operating system provides, excluding slash
         for sep in _os_alt_seps:
             if sep in filename:
                 return False
-        # if path is an absolute pathname. On Unix, that means it begins with
+        # If path is an absolute pathname. On Unix, that means it begins with
         # a slash, on Windows that it begins with a (back)slash after removing
         # drive letter.
         if os.path.isabs(filename) or filename.startswith('../'):
@@ -236,6 +234,9 @@ def _filename(value):
 
 @error_catcher_valid
 def _nptype(value):
+    """Check if the value is a numpy data type.
+    Return true if it is.
+    """
     parameter_valid = False
     if (value in np.typecodes) or (value in np.sctypeDict.keys()):
         parameter_valid = True
@@ -250,7 +251,7 @@ def _integer(value):
     if isinstance(value, int):
         parameter_valid = True
     else:
-        print('%s is not a valid integer.' % value)
+        print('Not a valid integer.')
     return parameter_valid
 
 @error_catcher_valid
@@ -308,6 +309,7 @@ def _list(value):
 
 @error_catcher_valid
 def _string_list(value):
+    """ A list of string values"""
     parameter_valid = False
     try:
         bracket_value = value.split('[')
@@ -322,12 +324,14 @@ def _string_list(value):
         print('Not a valid list.')
     return parameter_valid
 
-
-type_list = {'[int]': _intlist,
+# If you are editing the type dictionary, please update the documentation
+# files dev_plugin.rst and the files included inside dev_param_key.rst to
+# provide guidance for plugin creators
+type_dict = {'int_list': _intlist,
             'range': _range,
             'yaml_file': _yamlfile,
-            '[path, int_path, int]': _intgroup,
-            '[path, int]': _intgroup1,
+            'file_int_path_int': _intgroup,
+            'int_path_int': _intgroup1,
             'filepath': _filepath,
             'directory': _directory,
             'int_path': _intpathway,
@@ -339,28 +343,56 @@ type_list = {'[int]': _intlist,
             'str': _string,
             'float': _float,
             'tuple': _tuple,
-             'list': _list}
+            'list': _list}
 
 
-def is_valid(dtype, ptools, value):
-    if dtype not in type_list:
-        print("That type definition is not configured properly.")
-        pvalid = False
-    else:
-        pvalid = type_list[dtype](value)
-    # Valid type check, followed by check if present in options
-    # If the items in options have not been type checked, or have errors,
-    # it may cause problems.
-    pvalid = check_options(ptools, value, pvalid)
+def is_valid(param_name, value, current_parameter_details):
+    """ Check if the value matches the default value.
+    Then type check, followed by a check on whether it is present in options
+    If the items in options have not been type checked, or have errors,
+    it may cause problems.
+    """
+
+    dtype = current_parameter_details['dtype']
+    default_value = current_parameter_details['default']
+    pvalid = _check_default(value, default_value)
+    if pvalid is False:
+        if isinstance(dtype, list):
+            # This is a list of possible types
+            for individual_type in dtype:
+                pvalid = type_dict[individual_type](value)
+                if pvalid == True:
+                    break
+
+        elif dtype not in type_dict:
+            print("That type definition is not configured properly.")
+            pvalid = False
+        else:
+            pvalid = type_dict[dtype](value)
+        # Then check if the option is valid
+        pvalid = _check_options(current_parameter_details, value, pvalid)
+
+    if pvalid is False:
+        _error_message(dtype, param_name)
+
     return pvalid
 
+def _check_default(value, default_value):
+    """ Return true if the new value is either a match for the default
+    parameter value or the string 'default'
+    """
+    if default_value == str(value) \
+            or default_value == value\
+            or value == 'default':
+        return True
+    else:
+        return False
 
-def check_options(ptools, value, pvalid):
-    options = ptools.get('options') or {}
+def _check_options(current_parameter_details, value, pvalid):
+    """ Check if the input value matches one of the valid parameter options
+    """
+    options = current_parameter_details.get('options') or {}
     if len(options) >= 1:
-        options = [i.lower() for i in options if isinstance(i, str)]
-        if isinstance(value, str):
-            value = value.lower()
         if value in options:
             pvalid = True
         else:
@@ -369,3 +401,17 @@ def check_options(ptools, value, pvalid):
             print('\n'.join(options) + Fore.RESET)
             pvalid = False
     return pvalid
+
+
+def _error_message(dtype, param_name):
+    if isinstance(dtype, list):
+        type_options = ' or '.join([str(t) for t in dtype])
+        print('Your input for the parameter \'', param_name,
+              '\' must match the type ', type_options, '.',
+              Fore.RESET, sep='')
+        print()
+
+    else:
+        print('Your input for the parameter \'', param_name,
+              '\' must match the type ', dtype, '.',
+              Fore.RESET, sep='')

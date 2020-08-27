@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: Segmentation by threhsolding based on lower and upper intensities
+.. module:: thresh_segm
    :platform: Unix
    :synopsis: Segmentation by threhsolding based on lower and upper intensities
 

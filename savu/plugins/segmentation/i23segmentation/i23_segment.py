@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: i23 beamline segmentation routine
+.. module:: i23_segment
    :platform: Unix
-   :synopsis: Wraps i23 segmentation code for Gaussian Mixture clustering   \
+   :synopsis: i23 beamline segmentation routine. Wraps i23 segmentation code for Gaussian Mixture clustering   \
    and subsequent postprocessing of the segmented image
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>

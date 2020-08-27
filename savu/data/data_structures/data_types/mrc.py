@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: base_type
+.. module:: mrc
    :platform: Unix
    :synopsis: A module to load MRC image data.
 

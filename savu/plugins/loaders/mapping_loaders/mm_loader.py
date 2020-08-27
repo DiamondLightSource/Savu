@@ -40,7 +40,8 @@ from savu.plugins.loaders.mapping_loaders.base_multi_modal_loader \
 
 @register_plugin
 class MmLoader(BaseLoader):
-
+    """
+    """
     def __init__(self, name='MmLoader'):
         super(MmLoader, self).__init__(name)
         base = BaseMultiModalLoader()
@@ -113,7 +114,7 @@ class MmLoader(BaseLoader):
         warn_str = 'This file does not contain a ' + name
         try:
             params = self.separate_params(name, key)
-            self.setup_loader(inst, params)
+            inst.initialise(params, self.exp)
             logging.debug(debug_str)
         except IndexError:
             # Delete the data object if it has already been created.
@@ -122,10 +123,6 @@ class MmLoader(BaseLoader):
             logging.warn(warn_str)
         except:
             raise
-
-    def setup_loader(self, loader, params):
-        loader._main_setup(self.exp, params)
-        loader.setup()
 
     def final_parameter_updates(self):
         # names of individual datasets are not required

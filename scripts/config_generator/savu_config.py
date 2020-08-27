@@ -13,15 +13,14 @@
 # limitations under the License.
 
 """
-.. module:: savu_config.py
+.. module:: savu_config
    :platform: Unix
    :synopsis: A command line tool for creating Savu plugin lists
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
-
-from __future__ import print_function
+from __future__ import print_function, division
 
 import re
 import sys
@@ -69,8 +68,10 @@ def _disp(content, args):
         range_dict = utils.__get_start_stop(content, args.start, args.stop)
         formatter = DispDisplay(content.plugin_list)
         verbosity = parsers._get_verbosity(args)
-        level = 'all' if args.all else content.disp_level
-        content.display(formatter, level=level, verbose=verbosity, **range_dict)
+        level = 'advanced' if args.all else content.disp_level
+        datasets = True if args.datasets else False
+        content.display(formatter, level=level, verbose=verbosity,
+                        datasets=datasets, **range_dict)
         return content
     except:
         raise
@@ -101,17 +102,17 @@ def _save(content, args):
     """ Save the current process list to file."""
 
     # Check if the plug in list has been populated.
-    if len(content.plugin_list.plugin_list):
+    if len(content.plugin_list.plugin_list) > 0:
         # Check if a loader and saver are present.
-        content.plugin_list._check_loaders_and_savers()
+        content.plugin_list._check_loaders()
         out_file = content.filename if args.input else args.filepath
         content.check_file(out_file)
         DispDisplay(content.plugin_list)._notices()
         content.save(out_file, check=raw_input("Are you sure you want to save the "
                      "current data to %s' [y/N]" % (out_file)),
                      template=args.template)
-
-    raise Exception("No items were found in your process list. "
+    else:
+        raise Exception("No items were found in your process list. "
                     "Type 'add' to add a plugin to the list.")
     return content
 
@@ -123,17 +124,16 @@ def _mod(content, args):
     try:
         pos_str, subelem = args.param.split('.')
         try:
-            content.modify(pos_str, subelem, ' '.join(args.value))
-        except Exception as e:
+            content_modified = content.modify(pos_str, subelem, ' '.join(args.value))
+            if content_modified:
+                _disp(content, str(args.param))
+        except Exception:
             print('Error modifying the parameter.')
-            print(e)
             raise
-        # If modified then display, and show recommendations
-        _disp(content, str(args.param) + ' -vv')
+
     except ValueError:
         print('Incorrect parameter number: Please enter the parameter number to'
               ' select the parameter you want to modify. Use a decimal format.')
-        # Otherwise message is - ValueError: need more than 1 value to unpack
     return content
 
 
@@ -167,6 +167,14 @@ def _ref(content, args):
         content.refresh(pos_str, defaults=args.defaults)
         if not args.nodisp:
             _disp(content, pos_str)
+    return content
+
+
+@parse_args
+@error_catcher
+def _cite(content, args):
+    """ Display citations for a plugin. """
+    content.cite(content.find_position(args.pos))
     return content
 
 
@@ -212,6 +220,13 @@ def _exit(content, arg):
     content.set_finished(check=raw_input("Are you sure? [y/N]"))
     return content
 
+@parse_args
+@error_catcher
+def _level(content, args):
+    """ Set a visibility level for the program."""
+    content.level(args.level)
+    return content
+
 
 def _history(content, arg):
     hlen = utils.readline.get_current_history_length()
@@ -231,9 +246,11 @@ commands = {'open': _open,
             'rem': _rem,
             'move': _move,
             'ref': _ref,
+            'cite': _cite,
             'coll': _coll,
             'clear': _clear,
             'exit': _exit,
+            'level': _level,
             'history': _history}
 
 
@@ -252,11 +269,12 @@ def main():
 
     _reduce_logging_level()
 
-    content = Content(level="all" if args.disp_all else 'user')
+    content = Content(level="advanced" if args.disp_all else 'basic')
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        content.failed = utils.populate_plugins(error_mode=args.error)
+        content.failed = utils.populate_plugins(error_mode=args.error,
+                                                examples=args.examples)
 
     comp = Completer(commands=commands, plugin_list=pu.plugins)
     utils._set_readline(comp.complete)
@@ -268,6 +286,8 @@ def main():
 
     print("\n*** Press Enter for a list of available commands. ***\n")
 
+    utils.load_history_file(utils.histfile)
+
     while True:
         try:
             in_list = raw_input(">>> ").strip().split(' ', 1)
@@ -275,7 +295,7 @@ def main():
             print()
             continue
 
-        command, arg = in_list if len(in_list) is 2 else in_list+['']
+        command, arg = in_list if len(in_list) == 2 else in_list+['']
         command = command if command else 'help'
         if command not in commands:
             print("I'm sorry, that's not a command I recognise. Press Enter "
@@ -285,9 +305,6 @@ def main():
 
         if content.is_finished():
             break
-
-        # write the history to the history file
-        utils.readline.write_history_file(utils.histfile)
 
     print("Thanks for using the application")
 

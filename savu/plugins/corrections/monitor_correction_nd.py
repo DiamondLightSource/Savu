@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: monitor_correction
+.. module:: monitor_correction_nd
    :platform: Unix
    :synopsis: A plugin to crop a spectra
 

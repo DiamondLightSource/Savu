@@ -164,10 +164,10 @@ def _set_options(args):
     basename = os.path.basename(args.in_file)
     options['datafile_name'] = os.path.splitext(basename)[0] if basename \
         else args.in_file.split(os.sep)[-2]
-        
+
     inter_folder_path = __create_output_folder(args.tmp, out_folder_name)\
         if args.tmp else out_folder_path
-            
+
     options['inter_path'] = inter_folder_path
     options['log_path'] = args.log if args.log else options['inter_path']
     options['nProcesses'] = len(options["process_names"].split(','))
@@ -226,4 +226,3 @@ def main(input_args=None):
 
 if __name__ == '__main__':
     main()
-

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: mm_loader
+.. module:: i18_mm_loader
    :platform: Unix
    :synopsis: A class for loading multiple data types in a multi-modal\
        experimental setup.
@@ -41,7 +41,9 @@ from savu.core.utils import docstring_parameter
 
 @register_plugin
 class I18MmLoader(BaseLoader):
+    """
 
+    """
     def __init__(self, name='I18MmLoader'):
         super(I18MmLoader, self).__init__(name)
         base = BaseI18MultiModalLoader()
@@ -100,18 +102,12 @@ class I18MmLoader(BaseLoader):
         debug_str = 'This file contains an ' + name
         warn_str = 'This file does not contain a ' + name
         try:
-            params = self.separate_params(key)
-            params['name'] = self.name_dict[name]
-            self.setup_loader(inst, params)
+            inst.initialise(self.separate_params(key), self.exp)
             logging.debug(debug_str)
         except IndexError:
             logging.warn(warn_str)
         except:
             raise
-
-    def setup_loader(self, loader, params):
-        loader._main_setup(self.exp, params)
-        loader.setup()
 
     def final_parameter_updates(self):
         # names of individual datasets are not required

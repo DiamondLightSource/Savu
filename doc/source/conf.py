@@ -13,6 +13,7 @@
 
 
 import sys, os
+import savu
 from os import path
 
 autodoc_mock_imports = ['numpy', 'mpi4py', 'astra', 'scipy', 'h5py', 'pyfftw',
@@ -119,8 +120,7 @@ release = __version__
 #exclude_patterns = ['_templates', '', '../../savu/test',
 #                    '../../savu/core/transports/dist_array_transport.py',
 #                    'setup.py', 'install']
-exclude_patterns = ['api/savu.test*', 'api/setup*', 
-                    'api_plugin/savu.test*', 'api_plugin/setup*']
+exclude_patterns = ['api_plugin/savu.test*', 'api_plugin/setup*']
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 #default_role = None
@@ -168,6 +168,8 @@ html_theme_path = ["_themes", ]
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
 #html_logo = 'files_and_images/Savu_black_square_downsample2.png'
+file_path =  savu.__path__[0] + '/../'
+html_logo = file_path + 'doc/source/files_and_images/logo_downsample.png'
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32

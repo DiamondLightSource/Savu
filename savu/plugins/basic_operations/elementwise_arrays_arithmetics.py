@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
- .. module:: perform elementwise arithmetic operations on two input datasets: addition, subtraction, multiplication and division
+.. module:: elementwise_arrays_arithmetics
    :platform: Unix
    :synopsis: perform elementwise arithmetic operations on two input datasets: addition, subtraction, multiplication and division
 

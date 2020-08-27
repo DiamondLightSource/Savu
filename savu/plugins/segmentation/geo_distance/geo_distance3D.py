@@ -13,10 +13,11 @@
 # limitations under the License.
 
 """
-.. module:: Calculate geodesic distance transforms in 3D
+.. module:: geo_distance_3D
    :platform: Unix
-   :synopsis: Wraps the code for calculating geodesic distance transforms, can be a \
-   usefull tool for data segmentation with a proper seed initialisation
+   :synopsis: Calculate geodesic distance transforms in 3D. \
+Wraps the code for calculating geodesic distance transforms, can be a \
+usefull tool for data segmentation with a proper seed initialisation.
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """

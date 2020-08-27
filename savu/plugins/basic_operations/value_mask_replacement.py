@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
- .. module:: looks for a specific value in the provided second array (e.g. a mask) and substitutes the value in the first array with a given value
+.. module:: value_mask_replacement
    :platform: Unix
    :synopsis: looks for a specific value in the provided second array (e.g. a mask) and substitutes the value in the first array with a given value
 

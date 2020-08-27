@@ -3,8 +3,8 @@ channels:
 - local
 - defaults
 - conda-forge
-- ccpi
 - dkazanc
+- ccpi
 - astra-toolbox/label/dev
 dependencies:
 - cython
@@ -23,9 +23,10 @@ dependencies:
 - scikit-image
 - scikit-learn
 - tomobar
+- tomophantom
 - ccpi-regulariser
+- larix
 - ccpi-reconstruction
-- i23-seg
 - astra-toolbox
 - xraylib
 - tomopy
@@ -43,4 +44,3 @@ dependencies:
   - pmacparser
   - gnureadline==6.3.8
   - sphinx-rtd-theme
-

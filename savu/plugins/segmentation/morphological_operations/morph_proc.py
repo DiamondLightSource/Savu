@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: 2D morphological processing of binary or grayscale datasets
+.. module:: morph_proc
    :platform: Unix
    :synopsis: Wrapper around skimage morphology routines for 2D morphological processing of binary or grayscale datasets
 

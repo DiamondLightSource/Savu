@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: XrdAbsorptionApproximation
+.. module:: xrd_absorption_approximation
    :platform: Unix
    :synopsis: A plugin apply xrd absorption approximation using stxm data
 .. moduleauthor:: Stephen W.T. Price <stephen.price@diamond.ac.uk>

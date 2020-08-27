@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: tiff_saver
+.. module:: xrf_saver
    :platform: Unix
    :synopsis: A class to save output in tiff format
 

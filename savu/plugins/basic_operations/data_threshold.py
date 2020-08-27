@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
- .. module:: module to threshold the data (less, lessequal, equal, greater, greaterequal) than the given value
+.. module:: data_threshold
    :platform: Unix
    :synopsis: module to threshold the data (less, lessequal, equal, greater, greaterequal) than the given value
 

@@ -1,504 +1,533 @@
-Plugin API 
-===================
-Information on specific functions, classes, and methods.
- 
-savu
-------------------------------------------------------------
+.. _api_plugin:
+
+**********************
+Api Plugin 
+**********************
 
 .. toctree::
-   api_plugin/savu.tomo_recon
-   api_plugin/savu.version
+   :maxdepth: 1 
 
 
-savu.core
-------------------------------------------------------------
 
-.. toctree::
-   api_plugin/savu.core.plugin_runner
-   api_plugin/savu.core.transport_setup
-   api_plugin/savu.core.utils
-   api_plugin/savu.core.basic_plugin_runner
-   api_plugin/savu.core.checkpointing
-
-
-savu.core.transports
-------------------------------------------------------------
+Absorption Corrections
+########################################################
 
 .. toctree::
-   api_plugin/savu.core.transports.base_transport
-   api_plugin/savu.core.transports.basic_transport
-   api_plugin/savu.core.transports.hdf5_transport
-   api_plugin/savu.core.transports.dosna_transport
+   :maxdepth: 1 
+
+   Mc Near Absorption Correction <api_plugin/plugins.absorption_corrections.mc_near_absorption_correction>
 
 
-savu.data
-------------------------------------------------------------
-
-.. toctree::
-   api_plugin/savu.data.chunking
-   api_plugin/savu.data.experiment_collection
-   api_plugin/savu.data.plugin_list
-   api_plugin/savu.data.framework_citations
-   api_plugin/savu.data.meta_data
-
-
-savu.data.data_structures
-------------------------------------------------------------
+Alignment
+########################################################
 
 .. toctree::
-   api_plugin/savu.data.data_structures.data
-   api_plugin/savu.data.data_structures.data_add_ons
-   api_plugin/savu.data.data_structures.data_create
-   api_plugin/savu.data.data_structures.data_notes
-   api_plugin/savu.data.data_structures.plugin_data
-   api_plugin/savu.data.data_structures.preview
-   api_plugin/savu.data.data_structures.utils
+   :maxdepth: 1 
+
+   Projection Shift <api_plugin/plugins.alignment.projection_shift>
+   Projection Vertical Alignment <api_plugin/plugins.alignment.projection_vertical_alignment>
+   Sinogram Alignment <api_plugin/plugins.alignment.sinogram_alignment>
+   Sinogram Clean <api_plugin/plugins.alignment.sinogram_clean>
 
 
-savu.data.data_structures.data_types
-------------------------------------------------------------
-
-.. toctree::
-   api_plugin/savu.data.data_structures.data_types.data_plus_darks_and_flats
-   api_plugin/savu.data.data_structures.data_types.base_type
-   api_plugin/savu.data.data_structures.data_types.image_data
-   api_plugin/savu.data.data_structures.data_types.map_3dto4d_h5
-   api_plugin/savu.data.data_structures.data_types.mrc
-   api_plugin/savu.data.data_structures.data_types.replicate
-   api_plugin/savu.data.data_structures.data_types.stitch_data
-
-
-savu.data.transport_data
-------------------------------------------------------------
+Analysis
+########################################################
 
 .. toctree::
-   api_plugin/savu.data.transport_data.base_transport_data
-   api_plugin/savu.data.transport_data.hdf5_transport_data
-   api_plugin/savu.data.transport_data.basic_transport_data
-   api_plugin/savu.data.transport_data.dosna_transport_data
-   api_plugin/savu.data.transport_data.slice_lists
+   :maxdepth: 1 
+
+   Histogram <api_plugin/plugins.analysis.histogram>
+   Stats <api_plugin/plugins.analysis.stats>
+   Stxm Analysis <api_plugin/plugins.analysis.stxm_analysis>
 
 
-savu.plugins
-------------------------------------------------------------
-
-.. toctree::
-   api_plugin/savu.plugins.docstring_parser
-   api_plugin/savu.plugins.plugin
-   api_plugin/savu.plugins.plugin_datasets
-   api_plugin/savu.plugins.plugin_datasets_notes
-   api_plugin/savu.plugins.utils
-
-
-savu.plugins.absorption_corrections
-------------------------------------------------------------
+Azimuthal Integrators
+########################################################
 
 .. toctree::
-   api_plugin/savu.plugins.absorption_corrections.base_absorption_correction
-   api_plugin/savu.plugins.absorption_corrections.mc_near_absorption_correction
+   :maxdepth: 1 
+
+   Pyfai Azimuthal Integrator <api_plugin/plugins.azimuthal_integrators.pyfai_azimuthal_integrator>
+   Pyfai Azimuthal Integrator Separate <api_plugin/plugins.azimuthal_integrators.pyfai_azimuthal_integrator_separate>
+   Pyfai Azimuthal Integrator With Bragg Filter <api_plugin/plugins.azimuthal_integrators.pyfai_azimuthal_integrator_with_bragg_filter>
 
 
-savu.plugins.alignment
-------------------------------------------------------------
-
-.. toctree::
-   api_plugin/savu.plugins.alignment.projection_shift
-   api_plugin/savu.plugins.alignment.projection_vertical_alignment
-   api_plugin/savu.plugins.alignment.sinogram_alignment
-   api_plugin/savu.plugins.alignment.sinogram_clean
-
-
-savu.plugins.analysis
-------------------------------------------------------------
+Basic Operations
+########################################################
 
 .. toctree::
-   api_plugin/savu.plugins.analysis.stxm_analysis
-   api_plugin/savu.plugins.analysis.base_analysis
-   api_plugin/savu.plugins.analysis.histogram
-   api_plugin/savu.plugins.analysis.stats
+   :maxdepth: 1 
+
+   Arithmetic Operations <api_plugin/plugins.basic_operations.arithmetic_operations>
+   Basic Operations <api_plugin/plugins.basic_operations.basic_operations>
+   Data Rescale <api_plugin/plugins.basic_operations.data_rescale>
+   Get Data Statistics <api_plugin/plugins.basic_operations.get_data_statistics>
+   No Process Plugin <api_plugin/plugins.basic_operations.no_process_plugin>
+   Data Threshold <api_plugin/plugins.basic_operations.data_threshold>
+   Value Mask Replacement <api_plugin/plugins.basic_operations.value_mask_replacement>
+   Elementwise Arrays Arithmetics <api_plugin/plugins.basic_operations.elementwise_arrays_arithmetics>
+   No Process <api_plugin/plugins.basic_operations.no_process>
 
 
-savu.plugins.azimuthal_integrators
-------------------------------------------------------------
-
-.. toctree::
-   api_plugin/savu.plugins.azimuthal_integrators.base_azimuthal_integrator
-   api_plugin/savu.plugins.azimuthal_integrators.pyfai_azimuthal_integrator_with_bragg_filter
-   api_plugin/savu.plugins.azimuthal_integrators.pyfai_azimuthal_integrator
-   api_plugin/savu.plugins.azimuthal_integrators.pyfai_azimuthal_integrator_separate
-
-
-savu.plugins.basic_operations
-------------------------------------------------------------
+Centering
+########################################################
 
 .. toctree::
-   api_plugin/savu.plugins.basic_operations.basic_operations
-   api_plugin/savu.plugins.basic_operations.no_process_plugin
-   api_plugin/savu.plugins.basic_operations.arithmetic_operations
-   api_plugin/savu.plugins.basic_operations.data_rescale
-   api_plugin/savu.plugins.basic_operations.get_data_statistics
+   :maxdepth: 1 
+
+   Vo Centering <api_plugin/plugins.centering.vo_centering>
+   Vo Centering Iterative <api_plugin/plugins.centering.vo_centering_iterative>
 
 
-savu.plugins.centering
-------------------------------------------------------------
-
-.. toctree::
-   api_plugin/savu.plugins.centering.vo_centering
-   api_plugin/savu.plugins.centering.vo_centering_iterative
-   api_plugin/savu.plugins.centering.vo_centering_gpu
-
-
-savu.plugins.component_analysis
-------------------------------------------------------------
+Component Analysis
+########################################################
 
 .. toctree::
-   api_plugin/savu.plugins.component_analysis.base_component_analysis
-   api_plugin/savu.plugins.component_analysis.ica
-   api_plugin/savu.plugins.component_analysis.pca
+   :maxdepth: 1 
+
+   Ica <api_plugin/plugins.component_analysis.ica>
+   Pca <api_plugin/plugins.component_analysis.pca>
 
 
-savu.plugins.corrections
-------------------------------------------------------------
-
-.. toctree::
-   api_plugin/savu.plugins.corrections.base_correction
-   api_plugin/savu.plugins.corrections.dark_flat_field_correction
-   api_plugin/savu.plugins.corrections.monitor_correction
-   api_plugin/savu.plugins.corrections.convert_360_180_sinogram
-   api_plugin/savu.plugins.corrections.time_based_correction
-   api_plugin/savu.plugins.corrections.camera_rot_correction
-   api_plugin/savu.plugins.corrections.distortion_correction
-   api_plugin/savu.plugins.corrections.monitor_correction_nd
-   api_plugin/savu.plugins.corrections.subpixel_shift
-   api_plugin/savu.plugins.corrections.time_based_plus_drift_correction
-   api_plugin/savu.plugins.corrections.timeseries_field_corrections
-   api_plugin/savu.plugins.corrections.xrd_absorption_approximation
-   api_plugin/savu.plugins.corrections.distortion_correction_deprecated
-
-
-savu.plugins.developing
-------------------------------------------------------------
+Corrections
+########################################################
 
 .. toctree::
-   api_plugin/savu.plugins.developing.testing_sino_align
+   :maxdepth: 1 
+
+   Camera Rot Correction <api_plugin/plugins.corrections.camera_rot_correction>
+   Convert 360 180 Sinogram <api_plugin/plugins.corrections.convert_360_180_sinogram>
+   Dark Flat Field Correction <api_plugin/plugins.corrections.dark_flat_field_correction>
+   Distortion Correction <api_plugin/plugins.corrections.distortion_correction>
+   Monitor Correction <api_plugin/plugins.corrections.monitor_correction>
+   Monitor Correction Nd <api_plugin/plugins.corrections.monitor_correction_nd>
+   Subpixel Shift <api_plugin/plugins.corrections.subpixel_shift>
+   Time Based Correction <api_plugin/plugins.corrections.time_based_correction>
+   Time Based Plus Drift Correction <api_plugin/plugins.corrections.time_based_plus_drift_correction>
+   Timeseries Field Corrections <api_plugin/plugins.corrections.timeseries_field_corrections>
+   Xrd Absorption Approximation <api_plugin/plugins.corrections.xrd_absorption_approximation>
+   Mtf Deconvolution <api_plugin/plugins.corrections.mtf_deconvolution>
+   Distortion Correction Deprecated <api_plugin/plugins.corrections.distortion_correction_deprecated>
 
 
-savu.plugins.driver
-------------------------------------------------------------
-
-.. toctree::
-   api_plugin/savu.plugins.driver.all_cpus_plugin
-   api_plugin/savu.plugins.driver.cpu_plugin
-   api_plugin/savu.plugins.driver.gpu_plugin
-   api_plugin/savu.plugins.driver.plugin_driver
-   api_plugin/savu.plugins.driver.base_driver
-   api_plugin/savu.plugins.driver.basic_driver
-   api_plugin/savu.plugins.driver.multi_threaded_plugin
-   api_plugin/savu.plugins.driver.iterative_plugin
-   api_plugin/savu.plugins.driver.single_node_multi_threaded_plugin
-
-
-savu.plugins.filters
-------------------------------------------------------------
-
-.. toctree::
-   api_plugin/savu.plugins.filters.denoise_bregman_filter
-   api_plugin/savu.plugins.filters.band_pass
-   api_plugin/savu.plugins.filters.base_filter
-   api_plugin/savu.plugins.filters.paganin_filter
-   api_plugin/savu.plugins.filters.ccpi_denoising_cpu
-   api_plugin/savu.plugins.filters.ccpi_denoising_gpu
-   api_plugin/savu.plugins.filters.list_to_projections
-   api_plugin/savu.plugins.filters.dials_find_spots
-   api_plugin/savu.plugins.filters.find_peaks
-   api_plugin/savu.plugins.filters.median_filter
-   api_plugin/savu.plugins.filters.dezinger
-   api_plugin/savu.plugins.filters.poly_background_estimator
-   api_plugin/savu.plugins.filters.dezinger_simple
-   api_plugin/savu.plugins.filters.dezinger_sinogram
-   api_plugin/savu.plugins.filters.pymca
-   api_plugin/savu.plugins.filters.quantisation_filter
-   api_plugin/savu.plugins.filters.spectrum_crop
-   api_plugin/savu.plugins.filters.strip_background
-   api_plugin/savu.plugins.filters.threshold_filter
-   api_plugin/savu.plugins.filters.hilbert_filter
-   api_plugin/savu.plugins.filters.image_interpolation
-   api_plugin/savu.plugins.filters.umpa
-   api_plugin/savu.plugins.filters.fresnel_filter
-
-
-savu.plugins.fitters
-------------------------------------------------------------
+Developing
+########################################################
 
 .. toctree::
-   api_plugin/savu.plugins.fitters.base_fitter
-   api_plugin/savu.plugins.fitters.ral_fit
-   api_plugin/savu.plugins.fitters.reproduce_fit
-   api_plugin/savu.plugins.fitters.simple_fit
+   :maxdepth: 1 
+
+   Testing Sino Align <api_plugin/plugins.developing.testing_sino_align>
 
 
-savu.plugins.fluo_fitters
-------------------------------------------------------------
-
-.. toctree::
-   api_plugin/savu.plugins.fluo_fitters.base_fluo_fitter
-   api_plugin/savu.plugins.fluo_fitters.fastxrf_fitting
-   api_plugin/savu.plugins.fluo_fitters.simple_fit_xrf
-
-
-savu.plugins.kinematics
-------------------------------------------------------------
+Filters
+########################################################
 
 .. toctree::
-   api_plugin/savu.plugins.kinematics.stage_motion
+   :maxdepth: 1 
+
+   Band Pass <api_plugin/plugins.filters.band_pass>
+   Pymca <api_plugin/plugins.filters.pymca>
+   Dezinger <api_plugin/plugins.filters.dezinger>
+   Dezinger Simple <api_plugin/plugins.filters.dezinger_simple>
+   Dezinger Sinogram <api_plugin/plugins.filters.dezinger_sinogram>
+   Find Peaks <api_plugin/plugins.filters.find_peaks>
+   Fresnel Filter <api_plugin/plugins.filters.fresnel_filter>
+   Hilbert Filter <api_plugin/plugins.filters.hilbert_filter>
+   Image Interpolation <api_plugin/plugins.filters.image_interpolation>
+   List To Projections <api_plugin/plugins.filters.list_to_projections>
+   Paganin Filter <api_plugin/plugins.filters.paganin_filter>
+   Poly Background Estimator <api_plugin/plugins.filters.poly_background_estimator>
+   Quantisation Filter <api_plugin/plugins.filters.quantisation_filter>
+   Spectrum Crop <api_plugin/plugins.filters.spectrum_crop>
+   Strip Background <api_plugin/plugins.filters.strip_background>
+   Threshold Filter <api_plugin/plugins.filters.threshold_filter>
 
 
-savu.plugins.loaders
-------------------------------------------------------------
-
-.. toctree::
-   api_plugin/savu.plugins.loaders.base_loader
-   api_plugin/savu.plugins.loaders.random_hdf5_loader
-   api_plugin/savu.plugins.loaders.hdf5_template_loader
-   api_plugin/savu.plugins.loaders.stitch_data_template_loader
-   api_plugin/savu.plugins.loaders.multi_savu_loader
-   api_plugin/savu.plugins.loaders.image_template_loader
-   api_plugin/savu.plugins.loaders.savu_nexus_loader
-   api_plugin/savu.plugins.loaders.yaml_converter
-
-
-savu.plugins.loaders.full_field_loaders
-------------------------------------------------------------
-
-.. toctree::
-   api_plugin/savu.plugins.loaders.full_field_loaders.image_loader
-   api_plugin/savu.plugins.loaders.full_field_loaders.fake_nxtomo_loader
-   api_plugin/savu.plugins.loaders.full_field_loaders.multi_nxtomo_loader
-   api_plugin/savu.plugins.loaders.full_field_loaders.mrc_loader
-   api_plugin/savu.plugins.loaders.full_field_loaders.nxtomo_loader
-   api_plugin/savu.plugins.loaders.full_field_loaders.dxchange_loader
-   api_plugin/savu.plugins.loaders.full_field_loaders.random_3d_tomo_loader
-
-
-savu.plugins.loaders.mapping_loaders
-------------------------------------------------------------
+Denoising
+********************************************************
 
 .. toctree::
-   api_plugin/savu.plugins.loaders.mapping_loaders.base_multi_modal_loader
-   api_plugin/savu.plugins.loaders.mapping_loaders.mm_loader
-   api_plugin/savu.plugins.loaders.mapping_loaders.nxfluo_loader
-   api_plugin/savu.plugins.loaders.mapping_loaders.nxmonitor_loader
-   api_plugin/savu.plugins.loaders.mapping_loaders.nxptycho_loader
-   api_plugin/savu.plugins.loaders.mapping_loaders.nxstxm_loader
-   api_plugin/savu.plugins.loaders.mapping_loaders.nxxrd_loader
-   api_plugin/savu.plugins.loaders.mapping_loaders.txm_loader
-   api_plugin/savu.plugins.loaders.mapping_loaders.p2r_fly_scan_detector_loader
+   :maxdepth: 1 
+
+   Ccpi Denoising Cpu <api_plugin/plugins.filters.denoising.ccpi_denoising_cpu>
+   Ccpi Denoising Cpu 3D <api_plugin/plugins.filters.denoising.ccpi_denoising_cpu_3D>
+   Ccpi Denoising Gpu <api_plugin/plugins.filters.denoising.ccpi_denoising_gpu>
+   Ccpi Denoising Gpu 3D <api_plugin/plugins.filters.denoising.ccpi_denoising_gpu_3D>
+   Denoise Bregman Filter <api_plugin/plugins.filters.denoising.denoise_bregman_filter>
+   Median Filter <api_plugin/plugins.filters.denoising.median_filter>
 
 
-savu.plugins.loaders.mapping_loaders.i08_loaders
-------------------------------------------------------------
-
-.. toctree::
-   api_plugin/savu.plugins.loaders.mapping_loaders.i08_loaders.i08_fluo_loader
-
-
-savu.plugins.loaders.mapping_loaders.i13_loaders
-------------------------------------------------------------
+Fitters
+########################################################
 
 .. toctree::
-   api_plugin/savu.plugins.loaders.mapping_loaders.i13_loaders.i13_stxm_monitor_loader
-   api_plugin/savu.plugins.loaders.mapping_loaders.i13_loaders.i13_fluo_loader
-   api_plugin/savu.plugins.loaders.mapping_loaders.i13_loaders.i13_ptycho_loader
-   api_plugin/savu.plugins.loaders.mapping_loaders.i13_loaders.i13_speckle_loader
-   api_plugin/savu.plugins.loaders.mapping_loaders.i13_loaders.i13_stxm_loader
-   api_plugin/savu.plugins.loaders.mapping_loaders.i13_loaders.i13_stxm_xrf_loader
+   :maxdepth: 1 
+
+   Reproduce Fit <api_plugin/plugins.fitters.reproduce_fit>
+   Simple Fit <api_plugin/plugins.fitters.simple_fit>
 
 
-savu.plugins.loaders.mapping_loaders.i14_loaders
-------------------------------------------------------------
+Fluo Fitters
+########################################################
 
 .. toctree::
-   api_plugin/savu.plugins.loaders.mapping_loaders.i14_loaders.i14_fluo_loader
+   :maxdepth: 1 
+
+   Fastxrf Fitting <api_plugin/plugins.fluo_fitters.fastxrf_fitting>
+   Simple Fit Xrf <api_plugin/plugins.fluo_fitters.simple_fit_xrf>
 
 
-savu.plugins.loaders.mapping_loaders.i18_loaders
-------------------------------------------------------------
-
-.. toctree::
-   api_plugin/savu.plugins.loaders.mapping_loaders.i18_loaders.base_i18_multi_modal_loader
-   api_plugin/savu.plugins.loaders.mapping_loaders.i18_loaders.i18_xrd_loader
-   api_plugin/savu.plugins.loaders.mapping_loaders.i18_loaders.i18_fluo_loader
-   api_plugin/savu.plugins.loaders.mapping_loaders.i18_loaders.i18_mm_loader
-   api_plugin/savu.plugins.loaders.mapping_loaders.i18_loaders.i18_monitor_loader
-   api_plugin/savu.plugins.loaders.mapping_loaders.i18_loaders.i18_stxm_loader
-
-
-savu.plugins.loaders.mapping_loaders.i22_loaders
-------------------------------------------------------------
+Kinematics
+########################################################
 
 .. toctree::
-   api_plugin/savu.plugins.loaders.mapping_loaders.i22_loaders.i22_tomo_loader
+   :maxdepth: 1 
+
+   Stage Motion <api_plugin/plugins.kinematics.stage_motion>
 
 
-savu.plugins.loaders.templates
-------------------------------------------------------------
-
-.. toctree::
-
-
-savu.plugins.loaders.templates.i18_templates
-------------------------------------------------------------
+Loaders
+########################################################
 
 .. toctree::
+   :maxdepth: 1 
+
+   Hdf5 Template Loader <api_plugin/plugins.loaders.hdf5_template_loader>
+   Image Template Loader <api_plugin/plugins.loaders.image_template_loader>
+   Random Hdf5 Loader <api_plugin/plugins.loaders.random_hdf5_loader>
+   Savu Nexus Loader <api_plugin/plugins.loaders.savu_nexus_loader>
+   Yaml Converter <api_plugin/plugins.loaders.yaml_converter>
 
 
-savu.plugins.loaders.templates.malcolm_templates
-------------------------------------------------------------
-
-.. toctree::
-
-
-savu.plugins.loaders.templates.nexus_templates
-------------------------------------------------------------
-
-.. toctree::
-
-
-savu.plugins.loaders.utils
-------------------------------------------------------------
+Full Field Loaders
+********************************************************
 
 .. toctree::
-   api_plugin/savu.plugins.loaders.utils.yaml_utils
-   api_plugin/savu.plugins.loaders.utils.mrc_header
+   :maxdepth: 1 
+
+   Dxchange Loader <api_plugin/plugins.loaders.full_field_loaders.dxchange_loader>
+   Image Loader <api_plugin/plugins.loaders.full_field_loaders.image_loader>
+   Mrc Loader <api_plugin/plugins.loaders.full_field_loaders.mrc_loader>
+   Multi Nxtomo Loader <api_plugin/plugins.loaders.full_field_loaders.multi_nxtomo_loader>
+   Nxtomo Loader <api_plugin/plugins.loaders.full_field_loaders.nxtomo_loader>
+   Random 3D Tomo Loader <api_plugin/plugins.loaders.full_field_loaders.random_3d_tomo_loader>
 
 
-savu.plugins.missing_data
-------------------------------------------------------------
-
-.. toctree::
-
-
-savu.plugins.ptychography
-------------------------------------------------------------
-
-.. toctree::
-   api_plugin/savu.plugins.ptychography.base_ptycho
-   api_plugin/savu.plugins.ptychography.ptypy_batch
-   api_plugin/savu.plugins.ptychography.dummy_ptycho
-   api_plugin/savu.plugins.ptychography.ptypy_compact
-
-
-savu.plugins.reconstructions
-------------------------------------------------------------
+Mapping Loaders
+********************************************************
 
 .. toctree::
-   api_plugin/savu.plugins.reconstructions.tomopy_recon
-   api_plugin/savu.plugins.reconstructions.base_recon
-   api_plugin/savu.plugins.reconstructions.ccpi_cgls_recon
-   api_plugin/savu.plugins.reconstructions.scikitimage_filter_back_projection
-   api_plugin/savu.plugins.reconstructions.scikitimage_sart
-   api_plugin/savu.plugins.reconstructions.simple_recon
-   api_plugin/savu.plugins.reconstructions.visual_hulls_recon
-   api_plugin/savu.plugins.reconstructions.tomobar_recon_cpu
-   api_plugin/savu.plugins.reconstructions.tomobar_recon
-   api_plugin/savu.plugins.reconstructions.tomobar_recon_3D
+   :maxdepth: 1 
+
+   Mm Loader <api_plugin/plugins.loaders.mapping_loaders.mm_loader>
+   Nxfluo Loader <api_plugin/plugins.loaders.mapping_loaders.nxfluo_loader>
+   Nxmonitor Loader <api_plugin/plugins.loaders.mapping_loaders.nxmonitor_loader>
+   Nxptycho Loader <api_plugin/plugins.loaders.mapping_loaders.nxptycho_loader>
+   Nxstxm Loader <api_plugin/plugins.loaders.mapping_loaders.nxstxm_loader>
+   Nxxrd Loader <api_plugin/plugins.loaders.mapping_loaders.nxxrd_loader>
+   P2R Fly Scan Detector Loader <api_plugin/plugins.loaders.mapping_loaders.p2r_fly_scan_detector_loader>
+   Txm Loader <api_plugin/plugins.loaders.mapping_loaders.txm_loader>
 
 
-savu.plugins.reconstructions.astra_recons
-------------------------------------------------------------
-
-.. toctree::
-   api_plugin/savu.plugins.reconstructions.astra_recons.astra_recon_cpu
-   api_plugin/savu.plugins.reconstructions.astra_recons.astra_recon_gpu
-   api_plugin/savu.plugins.reconstructions.astra_recons.base_astra_recon
-
-
-savu.plugins.reshape
-------------------------------------------------------------
+I08 Loaders
+--------------------------------------------------------
 
 .. toctree::
-   api_plugin/savu.plugins.reshape.data_removal
-   api_plugin/savu.plugins.reshape.downsample_filter
-   api_plugin/savu.plugins.reshape.mipmap
+   :maxdepth: 1 
+
+   I08 Fluo Loader <api_plugin/plugins.loaders.mapping_loaders.i08_loaders.i08_fluo_loader>
 
 
-savu.plugins.ring_removal
-------------------------------------------------------------
-
-.. toctree::
-   api_plugin/savu.plugins.ring_removal.ccpi_ring_artefact_filter
-   api_plugin/savu.plugins.ring_removal.raven_filter
-   api_plugin/savu.plugins.ring_removal.remove_all_rings
-   api_plugin/savu.plugins.ring_removal.remove_large_rings
-   api_plugin/savu.plugins.ring_removal.ring_removal_normalization
-   api_plugin/savu.plugins.ring_removal.ring_removal_regularization
-   api_plugin/savu.plugins.ring_removal.ring_removal_filtering
-   api_plugin/savu.plugins.ring_removal.ring_removal_waveletfft
-   api_plugin/savu.plugins.ring_removal.ring_removal_fitting
-   api_plugin/savu.plugins.ring_removal.ring_removal_sorting
-   api_plugin/savu.plugins.ring_removal.remove_unresponsive_and_fluctuating_rings
-
-
-savu.plugins.savers
-------------------------------------------------------------
+I13 Loaders
+--------------------------------------------------------
 
 .. toctree::
-   api_plugin/savu.plugins.savers.base_saver
-   api_plugin/savu.plugins.savers.hdf5_saver
-   api_plugin/savu.plugins.savers.tiff_saver
-   api_plugin/savu.plugins.savers.base_image_saver
-   api_plugin/savu.plugins.savers.edf_saver
-   api_plugin/savu.plugins.savers.image_saver
-   api_plugin/savu.plugins.savers.xrf_saver
+   :maxdepth: 1 
+
+   I13 Fluo Loader <api_plugin/plugins.loaders.mapping_loaders.i13_loaders.i13_fluo_loader>
+   I13 Ptycho Loader <api_plugin/plugins.loaders.mapping_loaders.i13_loaders.i13_ptycho_loader>
+   I13 Speckle Loader <api_plugin/plugins.loaders.mapping_loaders.i13_loaders.i13_speckle_loader>
+   I13 Stxm Loader <api_plugin/plugins.loaders.mapping_loaders.i13_loaders.i13_stxm_loader>
+   I13 Stxm Monitor Loader <api_plugin/plugins.loaders.mapping_loaders.i13_loaders.i13_stxm_monitor_loader>
+   I13 Stxm Xrf Loader <api_plugin/plugins.loaders.mapping_loaders.i13_loaders.i13_stxm_xrf_loader>
 
 
-savu.plugins.savers.utils
-------------------------------------------------------------
-
-.. toctree::
-   api_plugin/savu.plugins.savers.utils.hdf5_utils
-
-
-savu.plugins.segmentation
-------------------------------------------------------------
+I14 Loaders
+--------------------------------------------------------
 
 .. toctree::
-   api_plugin/savu.plugins.segmentation.gmm_segment3D
-   api_plugin/savu.plugins.segmentation.geo_distance
-   api_plugin/savu.plugins.segmentation.mask_evolve
-   api_plugin/savu.plugins.segmentation.mask_initialiser
-   api_plugin/savu.plugins.segmentation.morph_snakes
-   api_plugin/savu.plugins.segmentation.morph_snakes3D
-   api_plugin/savu.plugins.segmentation.thresh_segm
+   :maxdepth: 1 
+
+   I14 Fluo Loader <api_plugin/plugins.loaders.mapping_loaders.i14_loaders.i14_fluo_loader>
 
 
-savu.plugins.segmentation.i23segmentation
-------------------------------------------------------------
+I18 Loaders
+--------------------------------------------------------
 
 .. toctree::
-   api_plugin/savu.plugins.segmentation.i23segmentation.final_segment_i23
-   api_plugin/savu.plugins.segmentation.i23segmentation.i23_segment
-   api_plugin/savu.plugins.segmentation.i23segmentation.i23_segment3D
+   :maxdepth: 1 
+
+   I18 Fluo Loader <api_plugin/plugins.loaders.mapping_loaders.i18_loaders.i18_fluo_loader>
+   I18 Mm Loader <api_plugin/plugins.loaders.mapping_loaders.i18_loaders.i18_mm_loader>
+   I18 Monitor Loader <api_plugin/plugins.loaders.mapping_loaders.i18_loaders.i18_monitor_loader>
+   I18 Stxm Loader <api_plugin/plugins.loaders.mapping_loaders.i18_loaders.i18_stxm_loader>
+   I18 Xrd Loader <api_plugin/plugins.loaders.mapping_loaders.i18_loaders.i18_xrd_loader>
 
 
-savu.plugins.segmentation.morphological_operations
-------------------------------------------------------------
-
-.. toctree::
-   api_plugin/savu.plugins.segmentation.morphological_operations.morph_proc
-
-
-savu.plugins.visualisation
-------------------------------------------------------------
+I22 Loaders
+--------------------------------------------------------
 
 .. toctree::
-   api_plugin/savu.plugins.visualisation.ortho_slice
+   :maxdepth: 1 
+
+   I22 Tomo Loader <api_plugin/plugins.loaders.mapping_loaders.i22_loaders.i22_tomo_loader>
 
 
-savu.plugins.stats
-------------------------------------------------------------
+Templates
+********************************************************
 
 .. toctree::
-   api_plugin/savu.plugins.stats.min_and_max
+   :maxdepth: 1 
+
+
+
+I18 Templates
+--------------------------------------------------------
+
+.. toctree::
+   :maxdepth: 1 
+
+
+
+Malcolm Templates
+--------------------------------------------------------
+
+.. toctree::
+   :maxdepth: 1 
+
+
+
+Nexus Templates
+--------------------------------------------------------
+
+.. toctree::
+   :maxdepth: 1 
+
+
+
+Utils
+********************************************************
+
+.. toctree::
+   :maxdepth: 1 
+
+
+
+Missing Data
+########################################################
+
+.. toctree::
+   :maxdepth: 1 
+
+
+
+Ptychography
+########################################################
+
+.. toctree::
+   :maxdepth: 1 
+
+   Dummy Ptycho <api_plugin/plugins.ptychography.dummy_ptycho>
+
+
+Reconstructions
+########################################################
+
+.. toctree::
+   :maxdepth: 1 
+
+   Ccpi Cgls Recon <api_plugin/plugins.reconstructions.ccpi_cgls_recon>
+   Scikitimage Filter Back Projection <api_plugin/plugins.reconstructions.scikitimage_filter_back_projection>
+   Scikitimage Sart <api_plugin/plugins.reconstructions.scikitimage_sart>
+   Simple Recon <api_plugin/plugins.reconstructions.simple_recon>
+   Tomopy Recon <api_plugin/plugins.reconstructions.tomopy_recon>
+   Visual Hulls Recon <api_plugin/plugins.reconstructions.visual_hulls_recon>
+
+
+Astra Recons
+********************************************************
+
+.. toctree::
+   :maxdepth: 1 
+
+   Astra Recon Cpu <api_plugin/plugins.reconstructions.astra_recons.astra_recon_cpu>
+   Astra Recon Gpu <api_plugin/plugins.reconstructions.astra_recons.astra_recon_gpu>
+
+
+Tomobar
+********************************************************
+
+.. toctree::
+   :maxdepth: 1 
+
+   Tomobar Recon <api_plugin/plugins.reconstructions.tomobar.tomobar_recon>
+   Tomobar Recon 3D <api_plugin/plugins.reconstructions.tomobar.tomobar_recon_3D>
+   Tomobar Recon Cpu <api_plugin/plugins.reconstructions.tomobar.tomobar_recon_cpu>
+   Tomobar Recon Fully 3D <api_plugin/plugins.reconstructions.tomobar.tomobar_recon_fully_3D>
+
+
+Reshape
+########################################################
+
+.. toctree::
+   :maxdepth: 1 
+
+   Data Removal <api_plugin/plugins.reshape.data_removal>
+   Downsample Filter <api_plugin/plugins.reshape.downsample_filter>
+   Mipmap <api_plugin/plugins.reshape.mipmap>
+
+
+Ring Removal
+########################################################
+
+.. toctree::
+   :maxdepth: 1 
+
+   Ccpi Ring Artefact Filter <api_plugin/plugins.ring_removal.ccpi_ring_artefact_filter>
+   Raven Filter <api_plugin/plugins.ring_removal.raven_filter>
+   Remove All Rings <api_plugin/plugins.ring_removal.remove_all_rings>
+   Remove Large Rings <api_plugin/plugins.ring_removal.remove_large_rings>
+   Remove Unresponsive And Fluctuating Rings <api_plugin/plugins.ring_removal.remove_unresponsive_and_fluctuating_rings>
+   Ring Removal Filtering <api_plugin/plugins.ring_removal.ring_removal_filtering>
+   Ring Removal Fitting <api_plugin/plugins.ring_removal.ring_removal_fitting>
+   Ring Removal Normalization <api_plugin/plugins.ring_removal.ring_removal_normalization>
+   Ring Removal Regularization <api_plugin/plugins.ring_removal.ring_removal_regularization>
+   Ring Removal Sorting <api_plugin/plugins.ring_removal.ring_removal_sorting>
+   Ring Removal Waveletfft <api_plugin/plugins.ring_removal.ring_removal_waveletfft>
+
+
+Savers
+########################################################
+
+.. toctree::
+   :maxdepth: 1 
+
+   Edf Saver <api_plugin/plugins.savers.edf_saver>
+   Hdf5 Saver <api_plugin/plugins.savers.hdf5_saver>
+   Image Saver <api_plugin/plugins.savers.image_saver>
+   Tiff Saver <api_plugin/plugins.savers.tiff_saver>
+   Xrf Saver <api_plugin/plugins.savers.xrf_saver>
+
+
+Utils
+********************************************************
+
+.. toctree::
+   :maxdepth: 1 
+
+
+
+Segmentation
+########################################################
+
+.. toctree::
+   :maxdepth: 1 
+
+
+
+I23Segmentation
+********************************************************
+
+.. toctree::
+   :maxdepth: 1 
+
+   Final Segment I23 <api_plugin/plugins.segmentation.i23segmentation.final_segment_i23>
+   I23 Segment <api_plugin/plugins.segmentation.i23segmentation.i23_segment>
+   I23 Segment3D <api_plugin/plugins.segmentation.i23segmentation.i23_segment3D>
+
+
+Morphological Operations
+********************************************************
+
+.. toctree::
+   :maxdepth: 1 
+
+   Morph Proc <api_plugin/plugins.segmentation.morphological_operations.morph_proc>
+   Morph Remove Objects <api_plugin/plugins.segmentation.morphological_operations.morph_remove_objects>
+
+
+Evolving Contours
+********************************************************
+
+.. toctree::
+   :maxdepth: 1 
+
+   Morph Snakes <api_plugin/plugins.segmentation.evolving_contours.morph_snakes>
+   Morph Snakes3D <api_plugin/plugins.segmentation.evolving_contours.morph_snakes3D>
+
+
+Gaussian Mixtures
+********************************************************
+
+.. toctree::
+   :maxdepth: 1 
+
+   Gmm Segment3D <api_plugin/plugins.segmentation.gaussian_mixtures.gmm_segment3D>
+
+
+Geo Distance
+********************************************************
+
+.. toctree::
+   :maxdepth: 1 
+
+   Geo Distance <api_plugin/plugins.segmentation.geo_distance.geo_distance>
+   Geo Distance3D <api_plugin/plugins.segmentation.geo_distance.geo_distance3D>
+
+
+Masks Initialise
+********************************************************
+
+.. toctree::
+   :maxdepth: 1 
+
+   Mask Initialiser <api_plugin/plugins.segmentation.masks_initialise.mask_initialiser>
+
+
+Thresholding
+********************************************************
+
+.. toctree::
+   :maxdepth: 1 
+
+   Thresh Segm <api_plugin/plugins.segmentation.thresholding.thresh_segm>
+
+
+Stats
+########################################################
+
+.. toctree::
+   :maxdepth: 1 
+
+   Min And Max <api_plugin/plugins.stats.min_and_max>
+
+
+Visualisation
+########################################################
+
+.. toctree::
+   :maxdepth: 1 
+
+   Ortho Slice <api_plugin/plugins.visualisation.ortho_slice>
+
+
+Simulation
+########################################################
+
+.. toctree::
+   :maxdepth: 1 
+
+   Tomo Phantom <api_plugin/plugins.simulation.tomo_phantom>
+   Tomo Phantom Quantification <api_plugin/plugins.simulation.tomo_phantom_quantification>
 
 

@@ -13,10 +13,11 @@
 # limitations under the License.
 
 """
-.. module:: Point-spread-function correction
+.. module:: mtf_deconvolution
    :platform: Unix
-   :synopsis: A plugin for MTF (modulation transfer function) deconvolution\
-    or PSF (point spread function) correction in the Fourier domain.
+   :synopsis: Point-spread-function correction. A plugin for MTF (modulation \
+    transfer function) deconvolution or PSF (point spread function) correction \
+    in the Fourier domain.
 .. moduleauthor:: Nghia Vo <scientificsoftware@diamond.ac.uk>
 
 """
@@ -28,7 +29,6 @@ import pyfftw.interfaces.scipy_fftpack as fft
 from savu.plugins.plugin import Plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
-from savu.data.plugin_list import CitationInformation
 import savu.core.utils as cu
 
 
@@ -147,26 +147,3 @@ class MtfDeconvolution(Plugin, CpuPlugin):
     def process_frames(self, data):
         return self.psf_correction(data[0], self.mtf_array, self.pad_width)
 
-    def get_citation_information(self):
-        cite_info = CitationInformation()
-        cite_info.description = \
-            ("The PSF correction used in this plugin is taken\
-             from this work.")
-        cite_info.bibtex = ("@inproceedings{10.1117/12.2530324,\n"\
-            "author = {Nghia T. Vo and Robert C. Atwood "\
-            "and Michael Drakopoulos},\n"\
-            "title = {{Preprocessing techniques for removing artifacts in "\
-            "synchrotron-based tomographic images}},\n"\
-            "volume = {11113},\n"\
-            "booktitle = {Developments in X-Ray Tomography XII},\n"\
-            "editor = {Bert Muller and Ge Wang},\n"\
-            "organization = {International Society for Optics and Photonics},\n"\
-            "publisher = {SPIE},\n"\
-            "pages = {309 -- 328},\n"\
-            "year = {2019},\n"\
-            "doi = {10.1117/12.2530324},\n"\
-            "URL = {https://doi.org/10.1117/12.2530324}\n"\
-            "}")
-        cite_info.doi = "doi: DOI: 10.1117/12.2530324"
-        return cite_info
-        

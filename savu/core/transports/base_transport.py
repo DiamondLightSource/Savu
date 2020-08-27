@@ -26,6 +26,7 @@ import os
 import time
 import copy
 import h5py
+import logging
 import numpy as np
 
 import savu.core.utils as cu
@@ -121,7 +122,9 @@ class BaseTransport(object):
 
         :param plugin plugin: The current plugin instance.
         """
+        logging.info("transport_process initialise")
         pDict, result, nTrans = self._initialise(plugin)
+        logging.info("transport_process get_checkpoint_params")
         cp, sProc, sTrans = self.__get_checkpoint_params(plugin)
 
         count = 0  # temporary solution
@@ -132,11 +135,15 @@ class BaseTransport(object):
             self._log_completion_status(count, nTrans, plugin.name)
 
             # get the transfer data
+            logging.info("Transferring the data")
             transfer_data = self._transfer_all_data(count)
+
             # loop over the process data
+            logging.info("process frames loop")
             result, kill = self._process_loop(
                     plugin, prange, transfer_data, count, pDict, result, cp)
 
+            logging.info("Returning the data")
             self._return_all_data(count, result, end)
 
             if kill:
@@ -378,7 +385,7 @@ class BaseTransport(object):
         if shape[sdir] - (sl.stop - sl.start):
             unpad_sl = [slice(None)]*len(shape)
             unpad_sl[sdir] = slice(0, sl.stop - sl.start)
-            result = result[unpad_sl]
+            result = result[tuple(unpad_sl)]
         return result
 
     def _setup_h5_files(self):
@@ -387,7 +394,7 @@ class BaseTransport(object):
         current_and_next = False
         if 'current_and_next' in self.exp.meta_data.get_dictionary():
             current_and_next = self.exp.meta_data.get('current_and_next')
-        
+
         count = 0
         for key in out_data_dict.keys():
             out_data = out_data_dict[key]

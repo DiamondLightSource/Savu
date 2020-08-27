@@ -1,0 +1,19 @@
+from savu.plugins.plugin_tools import PluginTools
+
+class MrcLoaderTools(PluginTools):
+    """Load Medical Research Council (MRC) formatted image data.
+    """
+    def define_parameters(self):
+        """
+        angles:
+            visibility: basic
+            dtype: str
+            description: A python statement to be evaluated
+              (e.g np.linspace(0, 180, nAngles)) or a file.
+            default: None
+        name:
+            visibility: basic
+            dtype: str
+            description: The name assigned to the dataset
+            default: tomo
+        """

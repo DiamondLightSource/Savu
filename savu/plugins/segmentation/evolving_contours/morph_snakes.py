@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: 2D segmentation using Morphological Level Sets or active countours
+.. module:: morph_snakes
    :platform: Unix
-   :synopsis: Wrapper around Morphsnakes for Morphological countours segmentation
+   :synopsis: 2D segmentation using Morphological Level Sets or active countours.
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
@@ -32,8 +32,7 @@ from morphsnakes import morphological_chan_vese
 
 @register_plugin
 class MorphSnakes(Plugin, CpuPlugin):
-    """
-    A Plugin to segment reconstructed data using Morphsnakes module. When initialised
+    """A Plugin to segment reconstructed data using Morphsnakes module. When initialised
     with a mask, the active contour propagates to find the minimum of energy (a possible edge countour).
 
     :param lambda1:  Weight parameter for the outer region, if lambda1 is larger than \

@@ -20,10 +20,7 @@
 """
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
-from savu.plugins.utils import register_test_plugin
 from savu.plugins.filters.base_filter import BaseFilter
-from savu.data.plugin_list import CitationInformation
-from savu.plugins.centering.vo_centering_tools import VoCenteringTools
 import savu.core.utils as cu
 
 import logging
@@ -31,14 +28,13 @@ import numpy as np
 import scipy.ndimage as ndi
 import pyfftw.interfaces.scipy_fftpack as fft
 
-@register_test_plugin
+@register_plugin
 class VoCentering(BaseFilter, CpuPlugin):
     """
     """
 
     def __init__(self):
         super(VoCentering, self).__init__("VoCentering")
-        self.tools = VoCenteringTools()
 
     def _create_mask(self, nrow, ncol, radius, drop):
         du = 1.0 / ncol
@@ -133,14 +129,17 @@ class VoCentering(BaseFilter, CpuPlugin):
         return cor
 
     def _downsample(self, image, dsp_fact0, dsp_fact1):
-        """
-        Downsample an image by averaging.
+        """Downsample an image by averaging.
+
+        Parameters
+        ----------
+            image : 2D array.
+            dsp_fact0 : downsampling factor along axis 0.
+            dsp_fact1 : downsampling factor along axis 1.
+
+        Returns
         ---------
-        Parameters: - image: 2D array.
-                    - dsp_fact0: downsampling factor along axis 0.
-                    - dsp_fact1: downsampling factor along axis 1.
-        ---------
-        Return:     - Downsampled image.
+            image_dsp : Downsampled image.
         """
         (height, width) = image.shape
         dsp_fact0 = np.clip(np.int16(dsp_fact0), 1, height//2)
@@ -314,42 +313,6 @@ class VoCentering(BaseFilter, CpuPlugin):
     def fix_transport(self):
         return 'hdf5'
 
-    def get_citation_information(self):
-        cite_info = CitationInformation()
-        cite_info.description = \
-            ("The center of rotation for this reconstruction was calculated " + 
-             "automatically using the method described in this work")
-        cite_info.bibtex = \
-            ("@article{vo2014reliable,\n" + 
-             "title={Reliable method for calculating the center of rotation " + 
-             "in parallel-beam tomography},\n" + 
-             "author={Vo, Nghia T and Drakopoulos, Michael and Atwood, " + 
-             "Robert C and Reinhard, Christina},\n" + 
-             "journal={Optics Express},\n" + 
-             "volume={22},\n" + 
-             "number={16},\n" + 
-             "pages={19078--19086},\n" + 
-             "year={2014},\n" + 
-             "publisher={Optical Society of America}\n" + 
-             "}")
-        cite_info.endnote = \
-            ("%0 Journal Article\n" + 
-             "%T Reliable method for calculating the center of rotation in " + 
-             "parallel-beam tomography\n" + 
-             "%A Vo, Nghia T\n" + 
-             "%A Drakopoulos, Michael\n" + 
-             "%A Atwood, Robert C\n" + 
-             "%A Reinhard, Christina\n" + 
-             "%J Optics Express\n" + 
-             "%V 22\n" + 
-             "%N 16\n" + 
-             "%P 19078-19086\n" + 
-             "%@ 1094-4087\n" + 
-             "%D 2014\n" + 
-             "%I Optical Society of America")
-        cite_info.doi = "https://doi.org/10.1364/OE.22.019078"
-        return cite_info
-
     def executive_summary(self):
         if ((self.error_msg_1 == "")
              and (self.error_msg_2 == "")):
@@ -361,34 +324,6 @@ class VoCentering(BaseFilter, CpuPlugin):
             cu.user_message(msg2)
         return [msg]
 
-    '''
-    Using VoCentering:
-
-        It must be used after the DarkFlatFieldCorrection plugin.
-        It must be used after the distortion correction plugins.
-        It must be used before any plugin may blur the image (PaganinFilter, FresnelFilter,..). 
-        It should be used after ring removal plugins, but not strictly. 
-        If the images (sinograms) are at very low contrast and VoCentering doesn't work well:
-            Increase the "average_radius" to ~ 10. This means that the "preview" in the NxtomoLoader need to be increased correspondingly  (~ +/- 10).
-        If the results of Vocentering are unstable between scans or slices:
-            Increase the "preview" slices of the VoCentering. Note that users have to increase the "preview" in the NxtomoLoader equivalently. By doing these, VoCentering will calculate center of rotation (CoR) of every previewing slices. Then the final CoR will be the median, mean, or fitted value of those calculated which users can specify in the "broadcast_method".
-        If the sample is too big compared with the field of view of the camera and VoCentering doesn't work well:
-            Increase the "ratio" to something ~ larger 2.
-            Use the tip of increase the "preview"  in 4.6. If this doesn't work, combine with the tip 4.5.
-        If the data was collected using 360-degree scanning (but not off-setting CoR for doubling the field of view):
-            Change the "preview" to [0:mid, <user-choice>,:]. Because the VoCentering only works on 180-degree sinogram, by doing that we make sure the plugin only get data in the range of 180 degree.
-        If none of the above tips work:
-            make sure that:
-                There's no motion artifacts.
-                Data was collected in the range of [0;180] degree (not limited-angle tomography).
-                The sample is inside the field of view the previewing slices.
-                Dark and flat are collected properly: shutter was completely closed when collecting dark; there's no sample in the flat image.
-                There's no non-rotating part in the image, e.g the image of some experiment components such as window of a furnace.
-            otherwise:
-                Users have to find CoR manually by doing parameter turning in the reconstruction plugins.
-                Send e-mail and a sinogram (or location of the data) to Nghia (nghia.vo@diamond.ac.uk).
-
-    '''
     '''
         
     A plugin to calculate the centre of rotation using the Vo Method

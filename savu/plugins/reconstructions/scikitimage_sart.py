@@ -21,7 +21,6 @@
 
 import logging
 from savu.plugins.reconstructions.base_recon import BaseRecon
-from savu.data.plugin_list import CitationInformation
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 import skimage.transform as transform
@@ -116,25 +115,3 @@ class ScikitimageSart(BaseRecon, CpuPlugin):
     def get_max_frames(self):
         return 'single'
 
-    def get_citation_information(self):
-        cite_info = CitationInformation()
-        cite_info.description = \
-            ("The Tomographic reconstruction performed in this processing " +
-             "chain is derived from this work.")
-        cite_info.bibtex = \
-            ("@book{avinash2001principles,\n" +
-             " title={Principles of computerized tomographic imaging},\n" +
-             " author={Kak, Avinash C. and Slaney, Malcolm},\n" +
-             " year={2001},\n" +
-             " publisher={Society for Industrial and Applied Mathematics}\n" +
-             "}")
-        cite_info.endnote = \
-            ("%0 Book\n" +
-             "%T Principles of computerized tomographic imaging\n" +
-             "%A Kak, Avinash C.\n" +
-             "%A Slaney, Malcolm\n" +
-             "%@ 089871494X\n" +
-             "%D 2001\n" +
-             "%I Society for Industrial and Applied Mathematics")
-        cite_info.doi = "https://doi.org/10.1137/1.9780898719277"
-        return cite_info

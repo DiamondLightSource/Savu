@@ -35,12 +35,11 @@ import logging
 import numpy as np
 from collections import defaultdict
 
-from colorama import Fore
 import savu.plugins.utils as pu
-import savu.plugins.parameter_utils as param_u
 from savu.data.meta_data import MetaData
 import savu.data.framework_citations as fc
 import savu.plugins.loaders.utils.yaml_utils as yu
+
 
 NX_CLASS = 'NX_class'
 
@@ -72,19 +71,17 @@ class PluginList(object):
         template = {'active': True,
                     'name': None,
                     'id': None,
-                    'data': None,
-                    'tools': None}
+                    'data': None}
         return template
 
     def __get_json_keys(self):
-        return ['data', 'tools']
+        return ['data']
 
     def _populate_plugin_list(self, filename, activePass=False,
                               template=False):
         """ Populate the plugin list from a nexus file. """
-
         plugin_file = h5py.File(filename, 'r')
-        
+
         if 'entry/savu_notes/version' in plugin_file:
             self.version = plugin_file['entry/savu_notes/version'][()]
 
@@ -102,9 +99,17 @@ class PluginList(object):
                 plugin['active'] = plugin_group[key]['active'][0]
 
             if plugin['active'] or activePass:
-
                 plugin['name'] = plugin_group[key]['name'][0]
                 plugin['id'] = plugin_group[key]['id'][0]
+
+                # Load the related class
+                plugin_class = pu.load_class(plugin_group[key]['id'][0])()
+                # Populate the parameters (including those from it's base classes)
+                plugin_class._populate_default_parameters()
+
+                plugin['doc'] = plugin_class.docstring_info
+                plugin['tools'] = plugin_class.tools
+                plugin['param'] = plugin_class.p_dict
                 plugin['pos'] = key.encode('ascii').strip()
 
                 for jkey in json_keys:
@@ -118,36 +123,18 @@ class PluginList(object):
 
         plugin_file.close()
 
-    def _is_valid(self, value, subelem, pos):
-        parameter_valid = False
-        if subelem in self.plugin_list[pos]['tools']:
-            # The parameter is within the current shown parameter list
-            ptools = self.plugin_list[pos]['tools'][subelem]
-            dtype = ptools['dtype']
-
-            parameter_valid = param_u.is_valid(dtype, ptools, value)
-            if parameter_valid is False:
-                print('\nYour input for the parameter \'%s\' must match the'
-                      ' type %s' % (subelem, dtype))
-                print(Fore.RESET)
-        else:
-            print('Not in parameter keys.')
-        return parameter_valid
-
     def _save_plugin_list(self, out_filename):
-        with h5py.File(out_filename, 'w') as nxs_file:
-            entry_group = nxs_file.require_group('entry')
-            
-            citations_group = entry_group.create_group('framework_citations')
-            citations_group.attrs[NX_CLASS] = 'NXcollection'
-            self._save_framework_citations(citations_group)
-            
-            savu_notes_group = entry_group.create_group('savu_notes')
-            savu_notes_group.attrs[NX_CLASS] = 'NXnote'
-            self.__save_savu_notes(savu_notes_group)
-            
-            plugins_group = entry_group.create_group('plugin')
-            plugins_group.attrs[NX_CLASS] = 'NXprocess'
+        with h5py.File(out_filename, 'a') as nxs_file:
+
+            entry = nxs_file.require_group('entry')
+
+            self._save_framework_citations(self._overwrite_group(
+                    entry, 'framework_citations', 'NXcollection'))
+
+            self.__save_savu_notes(self._overwrite_group(
+                    entry, 'savu_notes', 'NXnote'))
+
+            plugins_group = self._overwrite_group(entry, 'plugin', 'NXprocess')
 
             count = 1
             for plugin in self.plugin_list:
@@ -156,6 +143,13 @@ class PluginList(object):
         if self._template and self._template.creating:
             fname = os.path.splitext(out_filename)[0] + '.savu'
             self._template._output_template(fname, out_filename)
+
+    def _overwrite_group(self, entry, name, nxclass):
+        if name in entry:
+            entry.pop(name)
+        group = entry.create_group(name)
+        group.attrs[NX_CLASS] = nxclass
+        return group
 
     def __save_savu_notes(self, notes):
         from savu.version import __version__
@@ -167,9 +161,9 @@ class PluginList(object):
             letter = re.findall('[a-z]', plugin['pos'])
             letter = letter[0] if letter else ""
             plugin_group = \
-                plugins_group.create_group("%*i%*s" % (4, num, 1, letter))
+                plugins_group.create_group('%i%s' % (num, letter))
         else:
-            plugin_group = plugins_group.create_group("%*i" % (4, count))
+            plugin_group = plugins_group.create_group(count)
 
         plugin_group.attrs[NX_CLASS] = 'NXnote'
         required_keys = self._get_plugin_entry_template().keys()
@@ -236,7 +230,7 @@ class PluginList(object):
         framework_cites = fc.get_framework_citations()
         count = 0
         for cite in framework_cites:
-            citation_group = group.create_group(cite['name'])
+            citation_group = group.require_group(cite['name'])
             citation = CitationInformation()
             del cite['name']
             for key, value in cite.iteritems():
@@ -315,7 +309,8 @@ class PluginList(object):
         self.n_plugins = len(self.plugin_list)
 
         for i in range(self.n_plugins):
-            bases = inspect.getmro(pu.load_class(self.plugin_list[i]['id']))
+            pid = self.plugin_list[i]['id']
+            bases = inspect.getmro(pu.load_class(pid))
             loader_list = [b for b in bases if b == BaseLoader]
             saver_list = [b for b in bases if b == BaseSaver]
             if loader_list:
@@ -327,12 +322,11 @@ class PluginList(object):
         self.n_loaders = len(loader_idx)
         self.n_savers = len(saver_idx)
 
-    def _check_loaders_and_savers(self):
-        """ Check plugin list starts with a loader and ends with a saver.
+    def _check_loaders(self):
+        """ Check plugin list starts with a loader.
         """
         self.__set_loaders_and_savers()
         loaders = self._get_loaders_index()
-        savers = self._get_savers_index()
 
         if loaders:
             if loaders[0] is not 0 or loaders[-1]+1 is not len(loaders):
@@ -344,18 +338,9 @@ class PluginList(object):
             raise Exception("The first item in the process list must be a "
                             "loader plugin.")
 
-        if savers:
-            if savers[-1]+1 is not self.n_plugins:
-                raise Exception("All saver plugins must be at the end "
-                                "of the process list")
-            if len(savers) > 1:
-                print('You have more than one saver plugin.')
-        else:
-            raise Exception("The last item in the process list must be a "
-                            "saver plugin.")
-
-    def _add_missing_savers(self, data_names):
+    def _add_missing_savers(self, exp):
         """ Add savers for missing datasets. """
+        data_names = exp.index['in_data'].keys()
         saved_data = []
         for i in self._get_savers_index():
             saved_data.append(self.plugin_list[i]['data']['in_datasets'])
@@ -365,14 +350,17 @@ class PluginList(object):
             process = {}
             pos = int(re.search(r'\d+', self.plugin_list[-1]['pos']).group())+1
             self.saver_idx.append(pos)
-            plugin = pu.get_plugin('savu.plugins.savers.hdf5_saver')
+            plugin = pu.get_plugin('savu.plugins.savers.hdf5_saver',
+                                   {'in_datasets': [name]}, exp)
             plugin.parameters['in_datasets'] = [name]
             process['name'] = plugin.name
             process['id'] = plugin.__module__
             process['pos'] = str(pos)
             process['data'] = plugin.parameters
             process['active'] = True
-            process['tools'] = plugin.param
+            process['param'] = plugin.p_dict
+            process['doc'] = plugin.docstring_info
+            process['tools'] = plugin.tools
             self._add(pos, process)
 
     def _get_dataset_flow(self):
@@ -502,6 +490,7 @@ class Template(object):
         index = [plist[i]['pos'] for i in range(len(plist))]
         return plist[index.index(plugin_no)]['data']
 
+
 class CitationInformation(object):
     """
     Descriptor of Citation Information for plugins
@@ -509,10 +498,10 @@ class CitationInformation(object):
 
     def __init__(self):
         super(CitationInformation, self).__init__()
-        self.description = "Default Description"
-        self.doi = "Default DOI"
-        self.endnote = "Default Endnote"
-        self.bibtex = "Default Bibtex"
+        self.description = ''
+        self.doi = ''
+        self.endnote = ''
+        self.bibtex = ''
         self.name = 'citation'
 
     def write(self, citation_group):

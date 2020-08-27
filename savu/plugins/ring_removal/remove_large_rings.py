@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: Remove stripe artefacts
+.. module:: remove_large_rings
    :platform: Unix
    :synopsis: A plugin working in sinogram space to remove large stripe artefacts
 .. moduleauthor:: Nghia Vo <scientificsoftware@diamond.ac.uk>
@@ -23,7 +23,6 @@
 from savu.plugins.plugin import Plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
-from savu.data.plugin_list import CitationInformation
 import numpy as np
 from scipy.ndimage import median_filter
 from scipy.ndimage import binary_dilation
@@ -54,14 +53,16 @@ class RemoveLargeRings(Plugin, CpuPlugin):
         out_pData[0].plugin_data_setup('SINOGRAM', 'single')
 
     def detect_stripe(self, listdata, snr):
-        """
-        Algorithm 4 in the paper. Used to locate stripe positions.
-        ---------
-        Parameters: - listdata: 1D normalized array.
-                    - snr: ratio used to discriminate between useful
-                        information and noise.
-        ---------
-        Return:     - 1D binary mask.
+        """Algorithm 4 in the paper. Used to locate stripe positions.
+
+        Parameters
+        ----------
+            listdata : 1D normalized array.
+            snr : ratio used to discriminate between useful information and noise.
+
+        Returns
+        --------
+             listmask : 1D binary mask.
         """
         numdata = len(listdata)
         listsorted = np.sort(listdata)[::-1]
@@ -125,24 +126,3 @@ class RemoveLargeRings(Plugin, CpuPlugin):
         listxmiss = np.where(listmask > 0.0)[0]
         sinogram[:, listxmiss] = sino_corrected[:, listxmiss]
         return sinogram
-
-    def get_citation_information(self):
-        cite_info = CitationInformation()
-        cite_info.description = \
-            ("The code of ring removal is the implementation of the work of \
-            Nghia T. Vo et al. taken from algorithm 4, 5 in this paper.")
-        cite_info.bibtex = \
-            ("@article{Vo:18,\n" +
-             "title={Superior techniques for eliminating ring artifacts in\
-              X-ray micro-tomography},\n" +
-             "author={Nghia T. Vo, Robert C. Atwood,\
-              and Michael Drakopoulos},\n" +
-             "journal={Opt. Express},\n" +
-             "volume={26},\n" +
-             "number={22},\n" +
-             "pages={28396--28412},\n" +
-             "year={2018},\n" +
-             "publisher={OSA}" +
-             "}")
-        cite_info.doi = "doi: DOI: 10.1364/OE.26.028396"
-        return cite_info

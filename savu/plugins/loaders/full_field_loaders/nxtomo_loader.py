@@ -25,25 +25,21 @@ import h5py
 import logging
 import numpy as np
 
-import savu.core.utils as cu
 from savu.plugins.loaders.base_loader import BaseLoader
-from savu.plugins.utils import register_test_plugin
 from savu.plugins.utils import register_plugin
 import savu.plugins.docstring_parser as doc
+import savu.core.utils as cu
 
 from savu.data.data_structures.data_types.data_plus_darks_and_flats \
     import ImageKey, NoImageKey
-from savu.plugins.loaders.full_field_loaders.nxtomo_loader_tools import NxtomoLoaderTools
 
-#@register_plugin
-@register_test_plugin
+@register_plugin
 class NxtomoLoader(BaseLoader):
     """
     """
     def __init__(self, name='NxtomoLoader'):
         super(NxtomoLoader, self).__init__(name)
         self.warnings = []
-        self.tools = NxtomoLoaderTools()
 
     def log_warning(self, msg):
         logging.warn(msg)
@@ -73,7 +69,7 @@ class NxtomoLoader(BaseLoader):
         self._set_rotation_angles(data_obj)
 
         try:
-            control = self._get_h5_path(
+            control = self._get_h5_entry(
                     data_obj.backing_file, 'entry1/tomo_entry/control/data')
             data_obj.meta_data.set("control", control[...])
         except:
@@ -287,25 +283,3 @@ class NxtomoLoader(BaseLoader):
             return ["Nothing to Report"]
         else:
             return self.warnings
-
-        '''
-        
-               A class to load tomography data from a hdf5 file {0}
-
-               :param name: The name assigned to the dataset. Default: 'tomo'.
-               :param data_path: Path to the data inside the \
-                   file. Default: 'entry1/tomo_entry/data/data'.
-               :param image_key_path: Path to the image key entry inside the nxs \
-                   file. Set this parameter to "None" if use this loader for radiography\
-                   . Default: 'entry1/tomo_entry/instrument/detector/image_key'.
-               :param dark: Optional path to the dark field data file, nxs path and \
-                   scale value. Default: [None, None, 1].
-               :param flat: Optional Path to the flat field data file, nxs path and \
-                   scale value. Default: [None, None, 1].
-               :param angles: A python statement to be evaluated or a file. Default: None.
-               :param 3d_to_4d: If this if 4D data stored in 3D then pass an integer \
-                   value equivalent to the number of projections per 180-degree scan\
-                   . Default: False.
-               :param ignore_flats: List of batch numbers of flats (start at 1) to \
-                   ignore. Default: None.
-        '''

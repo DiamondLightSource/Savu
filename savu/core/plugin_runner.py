@@ -20,7 +20,6 @@
 """
 
 import logging
-import numpy as np
 
 import savu.core.utils as cu
 import savu.plugins.utils as pu
@@ -46,17 +45,14 @@ class PluginRunner(object):
 
     def _run_plugin_list(self):
         """ Create an experiment and run the plugin list.
-        """
-        self.exp._set_nxs_file()
-        
+        """        
+        self.exp._setup(self)
+
         plugin_list = self.exp.meta_data.plugin_list
         logging.info('Running the plugin list check')
-        self._run_plugin_list_check(plugin_list)
+        self._run_plugin_list_setup(plugin_list)
 
-        logging.info('Setting up the experiment')
-        self.exp._experiment_setup(self)
-
-        exp_coll = self.exp._get_experiment_collection()
+        exp_coll = self.exp._get_collection()
         n_plugins = plugin_list._get_n_processing_plugins()
 
         #  ********* transport function ***********
@@ -66,13 +62,20 @@ class PluginRunner(object):
         cp = self.exp.checkpoint
         for i in range(cp.get_checkpoint_plugin(), n_plugins):
             self.exp._set_experiment_for_current_plugin(i)
-            self.__run_plugin(exp_coll['plugin_dict'][i])
-            # end the plugin run if savu has been killed
+            memory_before = cu.get_memory_usage_linux()
+
+            plugin_name = self.__run_plugin(exp_coll['plugin_dict'][i])
+
             self.exp._barrier(msg='PluginRunner: plugin complete.')
 
+            memory_after = cu.get_memory_usage_linux()
+            logging.debug("{} memory usage before: {} MB, after: {} MB, change: {} MB".format(
+                plugin_name, memory_before, memory_after, memory_after - memory_before))
+
             #  ********* transport functions ***********
+            # end the plugin run if savu has been killed
             if self._transport_kill_signal():
-                self._transport_cleanup(i+1)
+                self._transport_cleanup(i + 1)
                 break
             self.exp._barrier(msg='PluginRunner: No kill signal... continue.')
             cp.output_plugin_checkpoint()
@@ -94,12 +97,12 @@ class PluginRunner(object):
 
     def __output_final_message(self):
         kill = True if 'killsignal' in \
-            self.exp.meta_data.get_dictionary().keys() else False
+                       self.exp.meta_data.get_dictionary().keys() else False
         msg = "interrupted by killsignal" if kill else "Complete"
         stars = 40 if kill else 23
-        cu.user_message("*"*stars)
+        cu.user_message("*" * stars)
         cu.user_message("* Processing " + msg + " *")
-        cu.user_message("*"*stars)
+        cu.user_message("*" * stars)
 
     def __run_plugin(self, plugin_dict):
         plugin = self._transport_load_plugin(self.exp, plugin_dict)
@@ -124,54 +127,43 @@ class PluginRunner(object):
             self._transport_terminate_dataset(data)
 
         self.exp._reorganise_datasets(finalise)
+        return plugin.name
 
-    def _run_plugin_list_check(self, plugin_list):
+    def _run_plugin_list_setup(self, plugin_list):
         """ Run the plugin list through the framework without executing the
         main processing.
         """
         plugin_list._check_loaders()
-        n_loaders = plugin_list._get_n_loaders()
         self.__check_gpu()
-        check_list = np.arange(len(plugin_list.plugin_list)) - n_loaders
-        self.__fake_plugin_list_run(plugin_list, check_list)
-        savers_idx_before = plugin_list._get_savers_index()
-        plugin_list._add_missing_savers(self.exp.index['in_data'].keys())
+
+        n_loaders = self.exp.meta_data.plugin_list._get_n_loaders()
+        n_plugins = plugin_list._get_n_processing_plugins()
+        plist = plugin_list.plugin_list
+
+        # set loaders
+        for i in range(n_loaders):
+            pu.plugin_loader(self.exp, plist[i])
+            self.exp._set_initial_datasets()
+            
+        # run all plugin setup methods and store information in experiment
+        # collection
+        count = 0
+        for plugin_dict in plist[n_loaders:n_loaders + n_plugins]:
+            plugin = pu.plugin_loader(self.exp, plugin_dict, check=True)
+            plugin._revert_preview(plugin.get_in_datasets())
+            plugin_dict['cite'] = plugin.tools.get_citations()
+            plugin._clean_up()
+            self.exp._update(plugin_dict)
+            self.exp._merge_out_data_to_in()
+            count += 1
+        self.exp._reset_datasets()
+
+        self.exp._finalise_setup(plugin_list)
+        plugin_list._add_missing_savers(self.exp)
+        cu.user_message("Plugin list check complete!")
 
         #  ********* transport function ***********
         self._transport_update_plugin_list()
-
-        self.exp._clear_data_objects()
-
-        check_list = np.array(list(set(plugin_list._get_savers_index()).
-                              difference(set(savers_idx_before)))) - n_loaders
-        self.__fake_plugin_list_run(plugin_list, check_list)
-
-        self.exp._clear_data_objects()
-        cu.user_message("Plugin list check complete!")
-
-    def __fake_plugin_list_run(self, plugin_list, check_list):
-        """ Run through the plugin list without any processing (setup only)\
-        and fill in missing dataset names.
-        """
-        # plugin_list._reset_datasets_list()
-        n_loaders = self.exp.meta_data.plugin_list._get_n_loaders()
-        n_plugins = plugin_list._get_n_processing_plugins()
-
-        plist = plugin_list.plugin_list
-        for i in range(n_loaders):
-            plugin = pu.plugin_loader(self.exp, plugin_list.plugin_list[i])
-        
-        check = [True if x in check_list else False for x in range(n_plugins)]
-
-        count = 0
-        for i in range(n_loaders, n_loaders+n_plugins):
-            self.exp._barrier()
-            plugin = pu.plugin_loader(self.exp, plist[i], check=check[count])
-            plugin._revert_preview(plugin.get_in_datasets())
-            plist[i]['cite'] = plugin.get_citation_information()
-            plugin._clean_up()
-            self.exp._merge_out_data_to_in()
-            count += 1
 
     def __check_gpu(self):
         """ Check if the process list contains GPU processes and determine if
@@ -181,7 +173,7 @@ class PluginRunner(object):
 
         try:
             import pynvml as pv
-        except:
+        except Exception:
             logging.debug("pyNVML module not found")
             raise Exception("pyNVML module not found")
 
@@ -204,8 +196,8 @@ class PluginRunner(object):
         processes = self.exp.meta_data.get('processes')
         if not [i for i in processes if 'GPU' in i]:
             logging.debug("GPU processes missing. GPUs found so adding them.")
-            cpus = ['CPU'+str(i) for i in range(count)]
-            gpus = ['GPU'+str(i) for i in range(count)]
+            cpus = ['CPU' + str(i) for i in range(count)]
+            gpus = ['GPU' + str(i) for i in range(count)]
             for i in range(min(count, len(processes))):
                 processes[processes.index(cpus[i])] = gpus[i]
             self.exp.meta_data.set('processes', processes)

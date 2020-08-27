@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: Tomographic Model-Based Reconstruction module for an approximated (faster) 3D reconstruction
+.. module:: tomobar_recon_3D
    :platform: Unix
    :synopsis: A wrapper around TOmographic MOdel-BAsed Reconstruction (ToMoBAR) software \
    for advanced iterative image reconstruction using _3D_ capabilities of regularisation. \
@@ -24,7 +24,6 @@
 """
 
 from savu.plugins.reconstructions.base_recon import BaseRecon
-from savu.data.plugin_list import CitationInformation
 from savu.plugins.driver.gpu_plugin import GpuPlugin
 
 import numpy as np
@@ -102,7 +101,7 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
                         str(dim_volY) + '.voxel_y.voxels',
                         str(dim_volZ) + '.voxel_z.voxels']}
 
-        # specify reconstructed volume dimensions       
+        # specify reconstructed volume dimensions
         self.output_size = self._get_output_size(in_dataset[0])
         shape = list(in_dataset[0].get_shape())
         rot_dim = in_dataset[0].get_data_dimension_by_axis_label(
@@ -143,11 +142,11 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
         # set information relating to the plugin data
         in_pData, out_pData = self.get_plugin_datasets()
 
-    	procs = self.exp.meta_data.get("processes")
+        procs = self.exp.meta_data.get("processes")
         procs = len([i for i in procs if 'GPU' in i])
         dim = in_dataset[0].get_data_dimension_by_axis_label('detector_y')
-    	nSlices = int(np.ceil(shape[dim]/float(procs)))
-    	
+        nSlices = int(np.ceil(shape[dim]/float(procs)))
+
         in_pData[0].plugin_data_setup('SINOGRAM', nSlices, slice_axis='detector_y')
 
         # in_pData[1].plugin_data_setup('PROJECTION', nSlices) # (for PWLS)
@@ -170,7 +169,7 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
                        'ringGH_accelerate' :  self.parameters['data_full_ring_accelerator_GH']}
 
         self._algorithm_ = {'iterations' : self.parameters['algorithm_iterations'],
-      			    'nonnegativity' : self.parameters['algorithm_nonnegativity'],
+                      'nonnegativity' : self.parameters['algorithm_nonnegativity'],
                             'verbose' : self.parameters['algorithm_verbose']}
 
         self._regularisation_ = {'method' : self.parameters['regularisation_method'],
@@ -222,34 +221,3 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
         return 1
     def nOutput_datasets(self):
         return 1
-
-    def get_citation_information(self):
-        cite_info1 = CitationInformation()
-        cite_info1.name = 'citation1'
-        cite_info1.description = \
-            ("First-order optimisation algorithm for linear inverse problems.")
-        cite_info1.bibtex = \
-            ("@article{beck2009,\n" +
-             "title={A fast iterative shrinkage-thresholding algorithm for linear inverse problems},\n" +
-             "author={Amir and Beck, Mark and Teboulle},\n" +
-             "journal={SIAM Journal on Imaging Sciences},\n" +
-             "volume={2},\n" +
-             "number={1},\n" +
-             "pages={183--202},\n" +
-             "year={2009},\n" +
-             "publisher={SIAM}\n" +
-             "}")
-        cite_info1.endnote = \
-            ("%0 Journal Article\n" +
-             "%T A fast iterative shrinkage-thresholding algorithm for linear inverse problems\n" +
-             "%A Beck, Amir\n" +
-             "%A Teboulle, Mark\n" +
-             "%J SIAM Journal on Imaging Sciences\n" +
-             "%V 2\n" +
-             "%N 1\n" +
-             "%P 183--202\n" +
-             "%@ --\n" +
-             "%D 2009\n" +
-             "%I SIAM\n")
-        cite_info1.doi = "doi: "
-        return cite_info1

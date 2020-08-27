@@ -22,8 +22,6 @@
 """
 
 from savu.plugins.plugin import Plugin
-from savu.plugins.loaders.base_loader_tools import BaseLoaderTools
-
 
 class BaseLoader(Plugin):
     """
@@ -33,15 +31,12 @@ class BaseLoader(Plugin):
         self.hits = []
         self.application = None
         self.reduction_flag = False
-        self.tools = BaseLoaderTools()
 
-    def _main_setup(self, exp, params):
+    def _main_setup(self):
         """
         Overwrites the main_setup function in plugin.py as the loader is a
         special case of plugin that doesn't require setup of in/out_datasets
         """
-        self._set_parameters(params)
-        self.exp = exp
         data_obj = self.setup()
         if data_obj and not self.reduction_flag:
             self.set_data_reduction_params(data_obj)
@@ -53,6 +48,13 @@ class BaseLoader(Plugin):
         pDict = self.parameters
         self.data_mapping()
         data_obj.get_preview().set_preview(pDict['preview'], load=True)
+        # update axis labels
+        #data_obj.amend_axis_label_values()
+        # set previewing for Related datasets
+        #for data in data_obj.related.values():
+            # find common axes
+        #    pass
+        # update axis labels for Related datasets
         self.reduction_flag = True
 
     def get_NXapp(self, ltype, nx_file, entry):
@@ -86,10 +88,3 @@ class BaseLoader(Plugin):
 
     def data_mapping(self):
         pass
-        """
-            A base plugin from which all data loader plugins should inherit.
-    
-            :u*param preview: A slice list of required frames. Default: [].
-            :~param in_datasets:
-            :~param out_datasets:
-        """

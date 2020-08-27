@@ -20,19 +20,19 @@
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
-import sys
-import os
-import re
+from __future__ import print_function, division, absolute_import
+
 import ast
 import copy
-import h5py
 import logging
 import inspect
 import numpy as np
+from collections import OrderedDict
+
+import savu.plugins.utils as pu
 import savu.plugins.docstring_parser as doc
 from savu.plugins.plugin_datasets import PluginDatasets
-from collections import OrderedDict
-from savu.plugins.base_tools import BaseTools
+
 
 class Plugin(PluginDatasets):
     """
@@ -40,34 +40,40 @@ class Plugin(PluginDatasets):
     def __init__(self, name='Plugin'):
         super(Plugin, self).__init__()
         self.name = name
-        self.parameters = OrderedDict()
         self.chunk = False
         self.docstring_info = {}
         self.slice_list = None
         self.global_index = None
         self.pcount = 0
         self.exp = None
-        self.plugin_tools = OrderedDict()
-        self.tools = BaseTools()
-        #self.parameters = self.plugin_tools['parameters']
+        self.check = False
+        self.parameters = OrderedDict()
+        self.tools = None
+        self.p_dict = OrderedDict()
 
-    def _main_setup(self, exp, params):
+    def initialise(self, params, exp, check=False):
+        self.check = check
+        self.exp = exp
+        self._populate_default_parameters()
+        self._set_parameters(copy.deepcopy(params))
+        self._main_setup()
+
+    def _main_setup(self):
         """ Performs all the required plugin setup.
 
         It sets the experiment, then the parameters and replaces the
         in/out_dataset strings in ``self.parameters`` with the relevant data
         objects. It then creates PluginData objects for each of these datasets.
-
-        :param Experiment exp: The current Experiment object.
-        :params dict params: Parameter values.
         """
+        # Don't do this step if loaders haven't been loaded yet
+        if self.exp and self.exp.index['in_data']:
+            self._set_plugin_datasets()
         self._reset_process_frames_counter()
-        self._set_parameters(params)
-        self._set_plugin_datasets()
         self.setup()
+        
         self.set_filter_padding(*(self.get_plugin_datasets()))
-        self._finalise_datasets()
         self._finalise_plugin_datasets()
+        self._finalise_datasets()
 
     def _reset_process_frames_counter(self):
         self.pcount = 0
@@ -90,22 +96,6 @@ class Plugin(PluginDatasets):
             self.parameters[name] = info['values'][indices[count]]
             count += 1
 
-    def load_param_tools(self):
-        return self.tools
-
-    def load_doc(self):
-        return self.__doc__
-
-    def base_dynamic_data_info(self):
-        """ Provides an opportunity to override the number and name of input
-        and output datasets before they are created in the base classes. """
-        pass
-
-    def dynamic_data_info(self):
-        """ Provides an opportunity to override the number and name of input
-        and output datasets before they are created. """
-        pass
-
     def set_filter_padding(self, in_data, out_data):
         """
         Should be overridden to define how wide the frame should be for each
@@ -122,6 +112,11 @@ class Plugin(PluginDatasets):
         logging.error("set_up needs to be implemented")
         raise NotImplementedError("setup needs to be implemented")
 
+    def _get_plugin_tools(self):
+        plugin_tools_id = self.__class__.__module__ + '_tools'
+        tool_class = pu.get_tools_class(plugin_tools_id, self)
+        return tool_class
+
     def _populate_default_parameters(self):
         """
         This method should populate all the required parameters with default
@@ -129,45 +124,36 @@ class Plugin(PluginDatasets):
         appropriate
 
         """
-        # Test Plugins are: 'RemoveAllRings' 'TomobarRecon'
-        # 'NxtomoLoader' 'DarkFlatFieldCorrection' 'NoProcess' 'Astra' 'Vocentering'
+        # Test Plugins are: 'RemoveAllRings' 'TomobarRecon' 'Hdf5saver'
+        # 'NxtomoLoader' 'DarkFlatFieldCorrection' 'NoProcess' 'Astra'
+        # 'Vocentering'
 
-        all_params = self.__class__.load_param_tools(self).plugin_tools.get('param')
-        verbose = self.__class__.load_param_tools(self).plugin_tools.get('doc').get('verbose')
+        p_tools = self._get_plugin_tools()
+        if p_tools:
+            self.tools = p_tools
+            self.p_dict = p_tools.get_param()
+            self.set_docstring(p_tools.get_doc())
+            self.parameters = \
+                OrderedDict([(k, v['default'])
+                             for k, v in p_tools.get_param().items()])
+            # parameters holds current values, this is edited outside of the
+            # tools class so default and dependency display values are updated here
+            p_tools.update_defaults(self.parameters, self.p_dict)
+            p_tools.check_dependencies(self.parameters, self.p_dict)
 
-        desc = doc.find_args(self.__class__, self)
-        self.docstring_info['warn'] = desc['warn']
+    def set_docstring(self, doc_str):
+        desc = doc.find_args(self)
+        self.docstring_info['info'] = doc_str.get('verbose')
+        self.docstring_info['warn'] = doc_str.get('warn')
         self.docstring_info['synopsis'] = desc['synopsis']
-        self.docstring_info['info'] = verbose
-
-        for p_key, p in all_params.items():
-            self.check_required_keys(p, p_key)
-            visibility = p.get('visibility') or {}
-            if visibility != 'not_param':
-                self.plugin_tools[p_key] = p
-                self.parameters[p_key] = p.get('default')
-
-        # Reset the parameter dictionary
-        self.__class__.load_param_tools(self).plugin_tools.set('param', OrderedDict())
-
-    def _add_item(self, item_list, not_list):
-        true_list = [i for i in item_list if i['name'] not in not_list]
-        for item in true_list:
-            self.parameters[item['name']] = item['default']
-
-    def check_required_keys(self, p, p_key):
-        required_keys = ['dtype', 'description', 'visibility', 'default']
-        all_keys = p.keys()
-        if not all(d in all_keys for d in required_keys):
-            print('The missing required keys for ' + str(p_key) + ' are: ')
-            print(', '.join(set(required_keys) - set(all_keys)))
 
     def delete_parameter_entry(self, param):
         if param in self.parameters.keys():
             del self.parameters[param]
 
     def initialise_parameters(self):
-        self.parameters = {}
+        self.parameters = OrderedDict()
+        self.p_dict = OrderedDict()
         self._populate_default_parameters()
         self.multi_params_dict = {}
         self.extra_dims = []
@@ -200,7 +186,7 @@ class Plugin(PluginDatasets):
         associated parameters, so the framework knows the new size of the data
         and which plugins to re-run.
         """
-        dtype = self.plugin_info[key].get('dtype')
+        dtype = self.p_dict[key].get('dtype')
 
         if isinstance(value, str) and ';' in value:
             value = value.split(';')
@@ -256,7 +242,7 @@ class Plugin(PluginDatasets):
 
     def plugin_process_frames(self, data):
         frames = self.base_process_frames_after(self.process_frames(
-            self.base_process_frames_before(data)))
+                self.base_process_frames_before(data)))
         self.pcount += 1
         return frames
 
@@ -293,7 +279,7 @@ class Plugin(PluginDatasets):
         preview = data.get_preview()
         orig_indices = preview.get_starts_stops_steps()
         nDims = len(orig_indices[0])
-        no_preview = [[0] * nDims, data.get_shape(), [1] * nDims, [1] * nDims]
+        no_preview = [[0]*nDims, data.get_shape(), [1]*nDims, [1]*nDims]
 
         # Set previewing params if previewing has not already been applied to
         # the dataset.
@@ -431,15 +417,6 @@ class Plugin(PluginDatasets):
         """
         pass
 
-    def get_citation_information(self):
-        """
-        Gets the Citation Information for a plugin
-
-        :returns:  A populated savu.data.plugin_info.CitationInfomation
-
-        """
-        return None
-
     def executive_summary(self):
         """ Provide a summary to the user for the result of the plugin.
 
@@ -450,10 +427,3 @@ class Plugin(PluginDatasets):
         :returns:  A list of string summaries
         """
         return ["Nothing to Report"]
-        """
-            The base class from which all plugins should inherit.
-        :param in_datasets: Create a list of the dataset(s) to \
-            process. Default: [].
-        :param out_datasets: Create a list of the dataset(s) to \
-            create. Default: [].
-        """

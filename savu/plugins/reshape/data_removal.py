@@ -16,6 +16,7 @@
 .. module:: data_removal
    :platform: Unix
    :synopsis: Plugin to remove unwanted data.
+
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """

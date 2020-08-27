@@ -23,19 +23,30 @@ import unittest
 from savu.test import test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
-
+import tempfile
+import os
 
 class SavuNexusLoaderTest(unittest.TestCase):
+    global data_file, experiment
+    data_file = '24737.nxs'
+    experiment = None
 
     def test_reload(self):
-        data_file = tu.get_test_data_path('24737.nxs')
-        process_file = tu.get_test_process_path('savu_nexus_loader_test1.nxs')
-        exp = run_protected_plugin_runner(
-                tu.set_options(data_file, process_file=process_file))
-        data_file = exp.meta_data.get('nxs_filename')
-        process_file = tu.get_test_process_path('savu_nexus_loader_test2.nxs')
-        run_protected_plugin_runner(tu.set_options(data_file,
-                                                   process_file=process_file))
+        process_list = 'loaders/savu_nexus_loader_test1.nxs'
+        options1 = tu.initialise_options(data_file, experiment, process_list)
+        run_protected_plugin_runner(options1)
+
+        #read the output file using SavuNexusLoader
+        path_to_rec = options1['out_path'] + 'test_processed.nxs'
+        self.test_folder2 = tempfile.mkdtemp(suffix='my_test2/')
+        options2 = tu.set_experiment('tomo')
+        options2['data_file'] = path_to_rec
+        options2['out_path'] = os.path.join(self.test_folder2)
+        options2['process_file'] = tu.get_test_process_path('loaders/savu_nexus_loader_test2.nxs')
+        run_protected_plugin_runner(options2)
+
+        tu.cleanup(options1)
+        tu.cleanup(options2)
 
 if __name__ == "__main__":
     unittest.main()

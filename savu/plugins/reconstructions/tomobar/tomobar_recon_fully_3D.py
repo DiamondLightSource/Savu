@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: Tomographic Model-Based Reconstruction module for an exact (slower) 3D reconstruction
+.. module:: tomobar_recon_fully_3D
    :platform: Unix
    :synopsis: A wrapper around TOmographic MOdel-BAsed Reconstruction (ToMoBAR) software \
    for advanced iterative image reconstruction using _3D_ capabilities of regularisation. \
@@ -24,7 +24,6 @@
 """
 
 from savu.plugins.reconstructions.base_recon import BaseRecon
-from savu.data.plugin_list import CitationInformation
 from savu.plugins.driver.multi_threaded_plugin import MultiThreadedPlugin
 
 import numpy as np
@@ -206,34 +205,3 @@ class TomobarReconFully3d(BaseRecon, MultiThreadedPlugin):
         return 1
     def nOutput_datasets(self):
         return 1
-
-    def get_citation_information(self):
-        cite_info1 = CitationInformation()
-        cite_info1.name = 'citation1'
-        cite_info1.description = \
-            ("First-order optimisation algorithm for linear inverse problems.")
-        cite_info1.bibtex = \
-            ("@article{beck2009,\n" +
-             "title={A fast iterative shrinkage-thresholding algorithm for linear inverse problems},\n" +
-             "author={Amir and Beck, Mark and Teboulle},\n" +
-             "journal={SIAM Journal on Imaging Sciences},\n" +
-             "volume={2},\n" +
-             "number={1},\n" +
-             "pages={183--202},\n" +
-             "year={2009},\n" +
-             "publisher={SIAM}\n" +
-             "}")
-        cite_info1.endnote = \
-            ("%0 Journal Article\n" +
-             "%T A fast iterative shrinkage-thresholding algorithm for linear inverse problems\n" +
-             "%A Beck, Amir\n" +
-             "%A Teboulle, Mark\n" +
-             "%J SIAM Journal on Imaging Sciences\n" +
-             "%V 2\n" +
-             "%N 1\n" +
-             "%P 183--202\n" +
-             "%@ --\n" +
-             "%D 2009\n" +
-             "%I SIAM\n")
-        cite_info1.doi = "doi: "
-        return cite_info1

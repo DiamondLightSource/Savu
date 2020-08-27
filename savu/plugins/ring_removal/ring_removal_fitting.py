@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: Remove stripe artefacts
+.. module:: ring_removal_fitting
    :platform: Unix
    :synopsis: A plugin working in sinogram space to remove stripe artefacts
 .. moduleauthor:: Nghia Vo <scientificsoftware@diamond.ac.uk>
@@ -23,7 +23,6 @@
 from savu.plugins.plugin import Plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
-from savu.data.plugin_list import CitationInformation
 
 import numpy as np
 from scipy.ndimage import median_filter
@@ -56,13 +55,16 @@ class RingRemovalFitting(Plugin, CpuPlugin):
         out_pData[0].plugin_data_setup('SINOGRAM', 'single')
 
     def _create_2d_window(self, height, width, sigmax, sigmay):
-        """
-        Create a 2D Gaussian window.
+        """Create a 2D Gaussian window.
+
+        Parameters
+        -----------
+            height, width : shape of the window.
+            sigmax, sigmay : sigmas of the window.
+
+        Returns
         ---------
-        Parameters: - height, width: shape of the window.
-                    - sigmax, sigmay: sigmas of the window.
-        ---------
-        Return:     - 2D window.
+            win2d : 2D window.
         """
         centerx = (width-1.0)/2.0
         centery = (height-1.0)/2.0    
@@ -114,24 +116,3 @@ class RingRemovalFitting(Plugin, CpuPlugin):
         num2 = np.mean(sinofitsmooth)
         sinofitsmooth = num1*sinofitsmooth/num2
         return sinogram/sinofit*sinofitsmooth
-
-    def get_citation_information(self):
-        cite_info = CitationInformation()
-        cite_info.description = \
-            ("The code of ring removal is the implementation of the work of \
-            Nghia T. Vo et al. taken from algorithm 1 in this paper.")
-        cite_info.bibtex = \
-            ("@article{Vo:18,\n" +
-             "title={Superior techniques for eliminating ring artifacts in\
-              X-ray micro-tomography},\n" +
-             "author={Nghia T. Vo, Robert C. Atwood,\
-              and Michael Drakopoulos},\n" +
-             "journal={Opt. Express},\n" +
-             "volume={26},\n" +
-             "number={22},\n" +
-             "pages={28396--28412},\n" +
-             "year={2018},\n" +
-             "publisher={OSA}" +
-             "}")
-        cite_info.doi = "doi: DOI: 10.1364/OE.26.028396"
-        return cite_info

@@ -13,10 +13,10 @@
 # limitations under the License.
 
 """
-.. module:: yaml_loader
+.. module:: image_template_loader
    :platform: Unix
-   :synopsis: A class to load data from a folder of Fabio compatible images \
-   using data descriptions loaded from a yaml file.
+   :synopsis: 'A class to load data from a folder of Fabio compatible images \
+        using data descriptions loaded from a yaml file.'
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 

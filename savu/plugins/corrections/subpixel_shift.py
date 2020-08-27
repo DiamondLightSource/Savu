@@ -32,17 +32,10 @@ import skimage.transform as sktf
 @register_plugin
 class SubpixelShift(BaseFilter, CpuPlugin):
     """
-    A plugin to apply a sub-pixel correction to images, for example to allow \
-    subpixel alignment for the AstraGpu plugin.
-    
-    :u*param x_shift: The shift in x for the output image in pixels. Positive \
-    values correspond to data being shifted towards larger indices. \
-    Default: 0.0.
-    :param transform_module: The module (skimage|scipy) to be used for image \
-    translation. skimage corresponds to skimage.transform.SimilarityTransform \
-    while scipy corresponds to scipy.ndimage.interpolation. Default: 'skimage'.
-
+    A plugin to apply a sub-pixel correction to images, for example to allow
+subpixel alignment for the AstraGpu plugin.
     """
+
     def __init__(self):
         super(SubpixelShift, self).__init__('SubpixelShift')
 
@@ -88,3 +81,12 @@ class SubpixelShift(BaseFilter, CpuPlugin):
     def post_process(self):
         pass
 
+    """
+    :u*param x_shift: The shift in x for the output image in pixels. Positive \
+    values correspond to data being shifted towards larger indices. \
+    Default: 0.0.
+    :param transform_module: The module (skimage|scipy) to be used for image \
+    translation. skimage corresponds to skimage.transform.SimilarityTransform \
+    while scipy corresponds to scipy.ndimage.interpolation. Default: 'skimage'.
+
+    """

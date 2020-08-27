@@ -4,15 +4,15 @@ class BaseSaverTools(PluginTools):
     """A base plugin from which all data saver plugins should inherit.
     """
     def define_parameters(self):
-        """---
+        """
         out_datasets:
-            visibility: hide
+            visibility: datasets
+            dtype: list
+            description: none
             default: []
-            description:
-            dtype: '[int]'
         in_datasets:
-            visibility: param
-            description:
+            visibility: datasets
+            dtype: list
+            description: none
             default: []
-            dtype: '[int]'
         """

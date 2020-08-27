@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: mipmap
+.. module:: mipmap_test
    :platform: Unix
    :synopsis: runner for tests using the MPI framework
 

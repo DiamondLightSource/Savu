@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: creates final segmentation for i23 data, apply at the end of the process list
+.. module:: final_segment_i23
    :platform: Unix
    :synopsis: creates final segmentation for i23 data, apply at the end of the process list
 

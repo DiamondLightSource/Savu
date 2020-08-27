@@ -4,9 +4,9 @@ class AstraReconCpuTools(PluginTools):
     """A Plugin to run the astra reconstruction
     """
     def define_parameters(self):
-        """---
+        """
         algorithm:
-            visibility: user
+            visibility: basic
             dtype: str
             options: [FBP,SIRT,SART,ART,CGLS,FP,BP]
             description:
@@ -17,24 +17,66 @@ class AstraReconCpuTools(PluginTools):
                 SART: Simultaneous Algebraic Reconstruction Technique
                 ART: Iterative Reconstruction Technique
                 CGLS: Conjugate Gradient Least Squares
-                FP:
+                FP: Forward Projection
                 BP: Back Projection
             default: FBP
+        FBP_filter:
+            visibility: basic
+            dtype: str
+            options: [none,
+                ram-lak,
+                shepp-logan,
+                cosine,
+                hamming,
+                hann,
+                tukey,
+                lanczos,
+                triangular,
+                gaussian,
+                barlett-hann,
+                blackman,
+                nuttall,
+                blackman-harris,
+                blackman-nuttall,
+                flat-top,
+                kaiser,
+                parzen]
+            description:
+              summary: The FBP reconstruction filter type
+              options:
+                none: No filtering
+                ram-lak: Ram-Lak or ramp filter
+                shepp-logan: Multiplies the Ram-Lak filter by a sinc function
+                cosine: Multiplies the Ram-Lak filter by a cosine function
+                hamming: Multiplies the Ram-Lak filter by a hamming window
+                hann: Multiplies the Ram-Lak filter by a hann window
+                tukey:
+                lanczos:
+                triangular:
+                gaussian:
+                barlett-hann:
+                blackman:
+                nuttall:
+                blackman-harris:
+                blackman-nuttall:
+                flat-top:
+                kaiser:
+                parzen:
+            default: 'ram-lak'
         projector:
-            visibility: param
+            visibility: advanced
             dtype: str
             options: [line, strip, linear]
             description:
               summary: Set astra projector
               options:
-                line: The weight of a ray/pixel pair is given by the length
+                line: 'The weight of a ray/pixel pair is given by the length
                   of the intersection of the pixel and the ray, considered
-                  as a zero-thickness line.
-                strip: The weight of a ray/pixel pair is given by the area
+                  as a zero-thickness line.'
+                strip: 'The weight of a ray/pixel pair is given by the area
                   of the intersection of the pixel and the ray, considered
-                  as a strip with the same width as a detector pixel.
-                linear: Linear interpolation between the two nearest volume
-                  pixels of the intersection of the ray and the column/row.
+                  as a strip with the same width as a detector pixel.'
+                linear: 'Linear interpolation between the two nearest volume
+                  pixels of the intersection of the ray and the column/row.'
             default: line
-
         """

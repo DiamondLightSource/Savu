@@ -20,21 +20,22 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
+from __future__ import print_function, division, absolute_import
 
 import re
 import os
 import inspect
+import scripts.config_generator.mutations as mutations
+from colorama import Fore
+from collections import OrderedDict
 
 from savu.plugins import utils as pu
 from savu.data.plugin_list import PluginList
-from collections import OrderedDict
-from colorama import Fore
-import mutations
 
 
 class Content(object):
 
-    def __init__(self, filename=None, level='user'):
+    def __init__(self, filename=None, level='basic'):
         self.disp_level = level
         self.plugin_list = PluginList()
         self.plugin_mutations = mutations.plugin_mutations
@@ -78,7 +79,7 @@ class Content(object):
     def display(self, formatter, **kwargs):
         if 'level' not in kwargs.keys():
             kwargs['level'] = self.disp_level
-        print '\n' + formatter._get_string(**kwargs) + '\n'
+        print('\n' + formatter._get_string(**kwargs) + '\n')
 
     def check_file(self, filename):
         if not filename:
@@ -114,8 +115,6 @@ class Content(object):
         plugin._populate_default_parameters()
         pos, str_pos = self.convert_pos(str_pos)
         self.insert(plugin, pos, str_pos)
-        self.update_defaults(pos)
-        self.check_dependencies(pos)
 
     def refresh(self, str_pos, defaults=False, change=False):
         pos = self.find_position(str_pos)
@@ -124,7 +123,6 @@ class Content(object):
         active = plugin_entry['active']
         plugin = pu.plugins[name]()
         plugin._populate_default_parameters()
-
         keep = self.get(pos)['data'] if not defaults else None
         self.insert(plugin, pos, str_pos, replace=True)
         self.plugin_list.plugin_list[pos]['active'] = active
@@ -133,6 +131,7 @@ class Content(object):
 
     def _update_parameters(self, plugin, name, keep, str_pos):
         union_params = set(keep).intersection(set(plugin.parameters))
+        # Names of the parameter names present in both lists
         for param in union_params:
             self.modify(str_pos, param, keep[param], ref=True)
         # add any parameter mutations here
@@ -170,7 +169,7 @@ class Content(object):
             while(True):
                 name = the_list[pos]['name']
                 if name in notices.keys():
-                    print notices[name]['desc']
+                    print(notices[name]['desc'])
                 # if a plugin is missing then look for mutations
                 search = True if name not in pu.plugins.keys() else False
                 found = self._mutate_plugins(name, pos, search=search)
@@ -212,13 +211,13 @@ class Content(object):
                 if mutate['replace'] in pu.plugins.keys():
                     str_pos = self.plugin_list.plugin_list[pos]['pos']
                     self.refresh(str_pos, change=mutate['replace'])
-                    print mutate['desc']
+                    print(mutate['desc'])
                     return True
                 raise Exception('Replacement plugin %s unavailable for %s'
                                 % (mutate['replace'], name))
             elif 'remove' in mutate.keys():
                 self.remove(pos)
-                print mutate['desc']
+                print(mutate['desc'])
             else:
                 raise Exception('Unknown mutation type.')
         return False
@@ -234,32 +233,44 @@ class Content(object):
         self.plugin_list.plugin_list[new_pos]['pos'] = new
 
     def modify(self, pos_str, param_name, value, ref=False):
+        valid_modification = False
+        pos = self.find_position(pos_str)
+        tools = self.plugin_list.plugin_list[pos]['tools']
+        params = self.plugin_list.plugin_list[pos]['param']
+        parameters = self.plugin_list.plugin_list[pos]['data']
+        # Select the correct group and order of parameters according to that
+        # on display to the user. This ensures correct parameter is modified.
+
+        data_keys = []
+        basic_keys = []
+        interm_keys = []
+        adv_keys = []
+        for k, v in params.items():
+            if v['display'] == 'on':
+                if v['visibility'] == 'datasets':
+                    data_keys.append(k)
+                if v['visibility'] == 'basic':
+                    basic_keys.append(k)
+                if v['visibility'] == 'intermediate':
+                    interm_keys.append(k)
+                if v['visibility'] == 'advanced':
+                    adv_keys.append(k)
+
+        keys = basic_keys + interm_keys + adv_keys + data_keys
+
+        if param_name.isdigit():
+            param_name = int(param_name)
+            if param_name <= len(keys):
+                param_name = keys[param_name-1]
+            else:
+                raise Exception('This parameter number is not valid for this plug in.')
+        elif param_name not in keys:
+            raise Exception('This parameter is not present in this plug in.')
+
         try:
             if not ref:
                 value = self.value(value)
-            pos = self.find_position(pos_str)
-            data_elements = self.plugin_list.plugin_list[pos]['data']
-            tools = self.plugin_list.plugin_list[pos]['tools']
-
-            # Select the correct order of parameters according to that on
-            # display to the user. This ensures correct parameter is modified.
-            dev_keys = [k for k, v in tools.items()
-                        if v['visibility'] not in ['user', 'hide']]
-            user_keys = [k for k, v in tools.items()
-                         if v['visibility'] == 'user']
-            current_params = user_keys + dev_keys
-
-            # Filter the parameter names to find those not hidden
-            if param_name.isdigit():
-                param_name = current_params[int(param_name)-1]
-            if self.plugin_list._is_valid(value, param_name, pos):
-                data_elements[param_name] = value
-                self.update_defaults(pos, mod=param_name)
-                # Update the list of parameters to hide those dependent on others
-                self.check_dependencies(pos)
-            else:
-                print('This value has not been saved as it was not'
-                      ' a valid entry.')
+            valid_modification = tools.modify(parameters, value, param_name)
         except SyntaxError:
             print ("There is a syntax error. Please check your input.")
         except EOFError:
@@ -267,63 +278,7 @@ class Content(object):
                    " input for the character \"\'\".")
         except Exception as e:
             print(e)
-
-    def update_defaults(self, pos, mod=False):
-        ''' When a parent parameter is modified, update the default value
-        dependent parameters
-        '''
-        data_elements = self.plugin_list.plugin_list[pos]['data']
-        p_list = self.plugin_list.plugin_list[pos]['tools']
-        def_list = {k: v['default'] for k, v in p_list.items()
-                    if isinstance(v['default'], OrderedDict)}
-        for p_name, default in def_list.items():
-            desc = p_list[p_name]['description']
-            parent_param = default.keys()[0]
-            dep_param_choices = {self._apply_lower_case(k): v
-                                 for k, v in default[parent_param].items()}
-            parent_value = self._apply_lower_case(data_elements[parent_param])
-            for item in dep_param_choices.keys():
-                if parent_value == item:
-                    desc['range'] = 'The recommended value with the chosen ' \
-                                    + str(parent_param) + ' would be ' \
-                                    + str(dep_param_choices[item])
-                    recommendation = 'It\'s recommended that you update ' \
-                                     + str(p_name) + ' to ' \
-                                     + str(dep_param_choices[item])
-                    if mod:
-                        if mod == parent_param:
-                            print(Fore.RED + recommendation + Fore.RESET)
-                    else:
-                        # At initial pass
-                        data_elements[p_name] = dep_param_choices[item]
-
-    def check_dependencies(self, pos):
-        """ Determines which parameter values are dependent on a parent
-        value and whether they should be hidden or shown
-        """
-        data_elements = self.plugin_list.plugin_list[pos]['data']
-        p_list = self.plugin_list.plugin_list[pos]['tools']
-        dep_list = {k: v['dependency']
-                    for k, v in p_list.items() if 'dependency' in v}
-        for p_name, dependency in dep_list.items():
-            if isinstance(dependency, OrderedDict):
-                parent_param_name = dependency.keys()[0]
-                parent_choice_list = [self._apply_lower_case(i)
-                                      for i in dependency[parent_param_name]]
-                # The choices which must be in the parent value
-                if parent_param_name in data_elements:
-                    # Check that the parameter is in the current plug in
-                    parent_value = \
-                        self._apply_lower_case(data_elements[parent_param_name])
-                    if parent_value in parent_choice_list:
-                        if p_list[p_name].get('visibility') == 'hide':
-                            p_list[p_name]['visibility'] = 'param'
-                    else:
-                        if p_list[p_name].get('visibility') != 'hide':
-                                p_list[p_name]['visibility'] = 'hide'
-
-    def _apply_lower_case(self, item):
-        return item.lower() if isinstance(item, str) else item
+        return valid_modification
 
     def value(self, value):
         if not value.count(';'):
@@ -459,12 +414,44 @@ class Content(object):
         plugin_dict['id'] = plugin.__module__
         plugin_dict['data'] = plugin.parameters
         plugin_dict['active'] = True
-        plugin_dict['tools'] = plugin.plugin_tools
+        plugin_dict['tools'] = plugin.tools
+        plugin_dict['param'] = plugin.p_dict
         plugin_dict['doc'] = plugin.docstring_info
         return plugin_dict
 
     def get(self, pos):
         return self.plugin_list.plugin_list[pos]
+
+    def cite(self, pos):
+        if pos >= self.size:
+            raise Exception("Cannot find citations for this plugin %s "
+                            "as it does not exist."
+                            % self.plugin_list.plugin_list[pos]['name'])
+        citation_dict = self.plugin_list.plugin_list[pos]['tools'].get_citations()
+        parameters = self.plugin_list.plugin_list[pos]['data']
+        for citation in citation_dict.values():
+            if hasattr(citation, 'dependency'):
+                for citation_dependent_parameter, citation_dependent_value \
+                        in citation.dependency.items():
+                    current_value = parameters[citation_dependent_parameter]
+                    if current_value == citation_dependent_value:
+                        print('This citation is for the '
+                              + citation_dependent_value + ' '
+                              + citation_dependent_parameter)
+                        self._print_citation(citation)
+            else:
+                self._print_citation(citation)
+
+    def _print_citation(self, citation):
+        print("\nINFORMATION\n%s\n\nDESCRIPTION\n%s\n\nDOI\n%s\n\n"
+              "BIBTEX\n%s\n\nENDNOTE\n%s" % \
+              (citation.name, citation.description, citation.doi, \
+               citation.bibtex, citation.endnote))
+        print('-------------------------------------------'
+              '-----------------------------------------')
+
+    def level(self, level):
+        self.disp_level = level
 
     def remove(self, pos):
         if pos >= self.size:

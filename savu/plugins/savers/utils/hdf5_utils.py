@@ -77,6 +77,7 @@ class Hdf5Utils(object):
             name = data.get_name()
             group_name = self.exp.meta_data.get(['group_name', name])
             link = self.exp.meta_data.get(['link_type', name])
+            name = data.get_name(orig=True)
             nxs_entry = self.__add_nxs_entry(nxs_file, link, group_name, name)
             self.__add_nxs_data(nxs_file, nxs_entry, link, group_name, data)
 
@@ -178,21 +179,20 @@ class Hdf5Utils(object):
         """
         Closes the backing file
         """
-        msg = self.__class__.__name__ + "_close_file" + \
-            data.backing_file.filename
-        self.exp._barrier(msg=msg)
-        logging.debug("Attempting to close the file ")
-
         if data.backing_file is not None:
             try:
+                msg = self.__class__.__name__ + "_close_file" + \
+                data.backing_file.filename
+                self.exp._barrier(msg=msg)
+                logging.debug("Attempting to close the file ")
                 filename = data.backing_file.filename
                 data.backing_file.close()
                 logging.debug("File close successful: %s", filename)
                 data.backing_file = None
                 data.filename = filename # needed for tests
+                self.exp._barrier(msg=msg)
             except:
                 logging.debug("File close unsuccessful", filename)
-        self.exp._barrier(msg=msg)
 
     def _reopen_file(self, data, mode):
         filename = data.backing_file.filename

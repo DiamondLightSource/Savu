@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: simple_fit
+.. module:: ral_fit
    :platform: Unix
    :synopsis: A plugin to fit peaks
 

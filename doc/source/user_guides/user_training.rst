@@ -230,7 +230,7 @@ Example 2
 1. Open the process list.
     >>> savu_config
     >>> open process_lists/test.nxs
-2. Apply parameter tuning to centre value (:ref:`parameter`).
+2. Apply parameter tuning to centre value (:ref:`parameter_tuning`).
     >>> mod 6.7 84:87:0.5;
 3. Modify the reconstruction algorithm to CGLS_CUDA and increase iterations.
     >>> disp 6 -v

@@ -22,7 +22,6 @@
 """
 
 from savu.plugins.plugin import Plugin
-from savu.plugins.savers.base_saver_tools import BaseSaverTools
 
 class BaseSaver(Plugin):
     """
@@ -31,7 +30,6 @@ class BaseSaver(Plugin):
     def __init__(self, name="BaseSaver"):
         super(BaseSaver, self).__init__(name)
         self.frame = None
-        self.tools = BaseSaverTools()
 
     def setup(self):
         in_pData = self.get_plugin_in_datasets()
@@ -40,8 +38,7 @@ class BaseSaver(Plugin):
 
     def _get_group_name(self, name):
         nPlugin = self.exp.meta_data.get('nPlugin')
-        plugin_dict = \
-            self.exp._get_experiment_collection()['plugin_dict'][nPlugin]
+        plugin_dict = self.exp._get_collection()['plugin_dict'][nPlugin]
         return "%i-%s-%s" % (nPlugin, plugin_dict['name'], name)
 
     def get_pattern(self):

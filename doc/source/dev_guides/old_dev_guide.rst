@@ -1,3 +1,4 @@
+
 Savu Developer Information
 **************************
 
@@ -94,13 +95,13 @@ Testing a new plugin using DAWN
 DAWN can be downloaded from http://www.dawnsci.org/ and general user tutorials 
 are found at https://www.youtube.com/user/DAWNScience
 
-Using the Debug perspective, create a new test, e.g. "plugin_test_recon.py"
+Using the Debug perspective, create a new test, e.g. "tomopy_recon_test.py"
 to test your plugin in "/Savu/savu/test/", in this case the 
 "example_filter_back_projection.py" plugin for reconstructing data, setting the
 self.plugin_name appropriately.  After saving the file, right-click on it in 
 the PyDev Package Explorer window and Run As a Python unit-test
 
-.. literalinclude:: ../../../savu/test/plugin_test_recon.py
+.. literalinclude:: ../../../savu/test/travis/plugin_tests/reconstruction_tests/tomopy_recon_test.py
    :linenos:
 
 This runs a series of tests and produces an output file with the result of the
@@ -136,7 +137,6 @@ http://docs.cython.org/src/tutorial/clibraries.html
    :linenos:
 
 Compile this file, passing appropriate C compiler flags if necessary, to obtain a \*.so file.
-::
 
 e.g.
 export CFLAGS="-I . $CFLAGS" \

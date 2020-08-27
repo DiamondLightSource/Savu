@@ -25,15 +25,13 @@ import logging
 import os
 import copy
 
-from savu.plugins.savers.hdf5_saver_tools import Hdf5SaverTools
 from savu.plugins.savers.utils.hdf5_utils import Hdf5Utils
 from savu.plugins.savers.base_saver import BaseSaver
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-from savu.plugins.utils import register_test_plugin
 from savu.plugins.utils import register_plugin
 from savu.data.chunking import Chunking
 
-@register_test_plugin
+@register_plugin
 class Hdf5Saver(BaseSaver, CpuPlugin):
     """
     """
@@ -45,7 +43,6 @@ class Hdf5Saver(BaseSaver, CpuPlugin):
         self.data_name = None
         self.filename = None
         self.group_name = None
-        self.tools = Hdf5SaverTools()
 
     def pre_process(self):
         # Create the hdf5 output file

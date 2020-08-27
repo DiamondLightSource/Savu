@@ -64,6 +64,8 @@ def _config_arg_parser():
     parser.add_argument("-i", "--input", dest="file", help=input_str)
     parser.add_argument("-e", "--error", dest="error", help=argparse.SUPPRESS,
                         action='store_true', default=False)
+    parser.add_argument("--examples", dest="examples", action='store_true',
+                        help="Add example plugins", default=False)
     return parser.parse_args()
 
 
@@ -99,6 +101,10 @@ def _disp_arg_parser(args, desc):
 
     all_str = "Display ALL parameters (user parameters only by default)."
     parser.add_argument("-a", "--all", action='store_true', help=all_str,
+                        default=False)
+
+    dataset_str = "Display in_datasets and out_datasets."
+    parser.add_argument("-datasets", "--datasets", action='store_true', help=dataset_str,
                         default=False)
 
     parser.add_argument("start", nargs='?', help="Display this list entry.")
@@ -137,7 +143,6 @@ def _mod_arg_parser(args, desc):
     args.insert(1, '--')
 
     parser = ArgumentParser(prog='mod', description=desc)
-    # If parameter name is entered - error message is - ValueError: need more than 1 value to unpack
     param_str = ("The plugin parameter to modify. Either "
                  "'plugin_pos.param_name' or ' plugin_pos.param_no'")
     parser.add_argument("param", help=param_str)
@@ -185,6 +190,13 @@ def _rem_arg_parser(args, desc):
     return __arg_parser(parser, args, 'rem')
 
 
+def _cite_arg_parser(args, desc):
+    """ Argument parser for cite command. """
+    parser = ArgumentParser(prog='cite', description=desc)
+    parser.add_argument('pos', help="Plugin position(s).")
+    return __arg_parser(parser, args, 'cite')
+
+
 def _move_arg_parser(args, desc):
     """ Argument parser for move command. """
     parser = ArgumentParser(prog='move', description=desc)
@@ -197,6 +209,14 @@ def _coll_arg_parser(args, desc):
     """ Argument parser for coll command. """
     parser = ArgumentParser(prog='coll', description=desc)
     return __arg_parser(parser, args, 'coll')
+
+
+def _level_arg_parser(args, desc):
+    """ Argument parser for level command. """
+    parser = ArgumentParser(prog='level', description=desc)
+    parser.add_argument("level", type = str, help="The visibility level."
+                        , choices=['basic', 'intermediate', 'advanced'])
+    return __arg_parser(parser, args, 'level')
 
 
 def _get_verbosity(args):
