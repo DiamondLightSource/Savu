@@ -6,17 +6,22 @@ class BaseReconTools(PluginTools):
     def define_parameters(self):
         """
         centre_of_rotation:
-             visibility: advanced
-             dtype: float
+             visibility: basic
+             dtype: [float, int]
              description: Centre of rotation to use for the
                reconstruction.
              default: 0.0
+             example: It could be scalar or list of centre of rotation
+
         init_vol:
              visibility: advanced
-             dtype: float
+             dtype: str
              description: Dataset to use as volume initialiser
                (does not currently work with preview)
              default: 'None'
+             example: "Type the name of the initialised dataset
+               e.g. ['tomo']"
+
         centre_pad:
              visibility: intermediate
              dtype: float
@@ -30,6 +35,8 @@ class BaseReconTools(PluginTools):
              default: false
              dependency:
                algorithm: [FP_CUDA, FBP_CUDA, BP_CUDA, FP, FBP, BP]
+             example: 'Is it a scalar or a list?'
+
         outer_pad:
              visibility: intermediate
              dtype: float
@@ -50,35 +57,50 @@ class BaseReconTools(PluginTools):
                 summary: 'Take the log of the data before reconstruction (true or false).'
                 verbose: 'Should be set to false if PaganinFilter is set beforehand'
              default: true
+             example: Set to True to take the log of the data before reconstruction
+
         preview:
              visibility: advanced
              dtype: list
              description: A slice list of required frames.
              default: '[]'
+             example: "[angle, detectorZ, detectorY], where detectorZ is the vertical coordinate,
+               detectorY is the horizontal coordinate."
+
         force_zero:
-             visibility: basic
+             visibility: intermediate
              dtype: range
              description: Set any values in the reconstructed image
                outside of this range to zero.
-             default: 'None, None'
+             default: '[None, None]'
+             example: '[0,1]'
+
         ratio:
-             visibility: basic
+             visibility: intermediate
              dtype: float
              description: Ratio of the masks diameter in pixels to
                the smallest edge size along given axis.
              default: 0.95
+             example: 'Is this a proper name for this parameter?
+               Would mask_diameter or mask_circle be more accurate?'
+
         log_func:
-             visibility: basic
-             dtype: int
+             visibility: advanced
+             dtype: str
              description: Override the default log function
              default: np.nan_to_num(-np.log(sino))
+             example: You write a function as default
+
         vol_shape:
              visibility: basic
-             dtype: str
-             description: Override the size of the reconstuction
-               volume with an integer value.
+             dtype: [str, int]
+             description:
+               summary: Override the size of the reconstuction
+                 volume with an integer value.
+               verbose: 'When fixed, you get the dimension of the horizontal
+                 detector Or you can specify any reconstruction size you like
+                 with an integer.'
              default: fixed
-
         """
 
 

@@ -12,6 +12,9 @@ class VoCenteringTools(PluginTools):
                the calculation of the centre of rotation (this will not reduce the data
                size for subsequent plugins).
              default: '[]'
+             example: 'The typical three dimensional data structure is [angles, detY, detZ], e.g. for
+               sinogram choose [:,sliceNo,:] [angles, detZ, detY]. If the data is four dimensional,
+               include a time parameter.'
         start_pixel:
              visibility: intermediate
              dtype: int

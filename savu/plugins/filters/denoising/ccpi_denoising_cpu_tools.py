@@ -15,7 +15,9 @@ class CcpiDenoisingCpuTools(PluginTools):
                   inverse problems by choosing a suitable noise
                   model for the measurement"
                 options:
-                    ROF_TV: Rudin-Osher-Fatemi Total Variation model
+                    ROF_TV: Rudin-Osher-Fatemi Total Variation model.
+                     It is a good model for piecewise-constant images with
+                     sharp abrupt boundaries.
                     FGP_TV: Fast Gradient Projection Total Variation model
                     SB_TV: Split Bregman Total Variation model
                     LLT_ROF: "Lysaker, Lundervold and Tai model combined
@@ -28,35 +30,53 @@ class CcpiDenoisingCpuTools(PluginTools):
             default: FGP_TV
 
         reg_parameter:
-            visibility: basic
-            dtype: float
-            description:
-                summary: "Regularisation (smoothing) parameter. The higher the value, the
-                  stronger the smoothing effect"
-                range: Recommended between 0 and 1
-            default: 0.01
+             visibility: basic
+             dtype: [float, int]
+             description:
+               summary: Regularisation parameter could control the level
+                 of smoothing or denoising.
+               verbose: Higher regularisation values lead to stronger smoothing
+                 effect. If the value is too high, you will obtain a very blurry
+                 reconstructed image.
+               range: Recommended between 0.0001 and 0.1
+             example: 'A good value to start with is {default}, {range}'
+             default: 0.0001
 
         max_iterations:
-            visibility: basic
-            dtype: int
-            description: "Total number of regularisation iterations.
-               The smaller the number of iterations, the smaller the effect
-               of the filtering is. A larger number will affect the speed
-               of the algorithm."
-            default: 300
+             visibility: basic
+             dtype: int
+             description:
+               summary: Total number of regularisation iterations.
+                 The smaller the number of iterations, the smaller the effect
+                 of the filtering is. A larger number will affect the speed
+                 of the algorithm.
+               range: Recommended value dependent upon method.
+             default:
+                 reg_parameter:
+                   ROF_TV: 2000
+                   FGP_TV: 500
+                   PD_TV: 500
+                   SB_TV: 100
+                   LLT_ROF: 2000
+                   NDF: 2000
+                   DIFF4th: 1000
+                   TGV: 500
+                   NLTV: 5
 
         time_step:
-            visibility: advanced
-            dtype: int
-            description: 'Time marching step, relevant for ROF_TV, LLT_ROF,
-               NDF, DIFF4th methods.'
-            default: 0.001
-            dependency:
-                method: [ROF_TV, LLT_ROF, NDF, DIFF4th]
+             visibility: advanced
+             dtype: float
+             dependency:
+               regularisation_method: [ROF_TV, LLT_ROF, NDF, Diff4th]
+             description:
+               summary: Time marching parameter for convergence of explicit schemes
+               verbose: the time step constant defines the speed of convergence, the larger values can lead to divergence
+               range: Recommended between 0.0001 and 0.003
+             default: 0.003
 
         lipshitz_constant:
             visibility: advanced
-            dtype: int
+            dtype: float
             description: TGV method, Lipshitz constant.
             default: 12
             dependency:
