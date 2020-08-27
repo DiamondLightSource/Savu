@@ -12,7 +12,7 @@ class AstraReconCpuTools(PluginTools):
             description:
               summary: Reconstruction type
               options:
-                FBP: Filtered Backprojection
+                FBP: Filtered Backprojection Method
                 SIRT: Simultaneous Iterative Reconstruction Technique
                 SART: Simultaneous Algebraic Reconstruction Technique
                 ART: Iterative Reconstruction Technique

@@ -20,7 +20,7 @@ class AstraReconGpuTools(PluginTools):
             description:
                 summary: Reconstruction type
                 options:
-                  FBP_CUDA: Filtered Backprojection
+                  FBP_CUDA: Filtered Backprojection Method
                   SIRT_CUDA: Simultaneous Iterative Reconstruction Technique
                   SART_CUDA: Simultaneous Algebraic Reconstruction Technique
                   CGLS_CUDA: Conjugate Gradient Least Squares
@@ -107,4 +107,3 @@ class AstraReconGpuTools(PluginTools):
                     %I Elsevier
             doi: "10.1016/j.jsb.2011.07.017"
         """
-
