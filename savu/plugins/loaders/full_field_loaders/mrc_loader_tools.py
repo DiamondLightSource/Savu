@@ -8,7 +8,7 @@ class MrcLoaderTools(PluginTools):
         angles:
             visibility: basic
             dtype: str
-            description: A python statement to be evaluated\
+            description: A python statement to be evaluated
               (e.g np.linspace(0, 180, nAngles)) or a file.
             default: None
         name:

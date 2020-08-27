@@ -13,7 +13,7 @@ class MultiNxtomoLoaderTools(PluginTools):
         file_name:
             visibility: intermediate
             dtype: filename
-            description: The shared part of the name of each file\
+            description: The shared part of the name of each file
               (not including .nxs).
             default: None
         data_path:

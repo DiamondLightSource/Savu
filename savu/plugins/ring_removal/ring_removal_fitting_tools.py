@@ -11,7 +11,7 @@ blurry rings.
         sigmax:
             visibility: intermediate
             dtype: int
-            description: Sigma of the Gaussian window in x-direction which\
+            description: Sigma of the Gaussian window in x-direction which
               controls the strength of the removal.
             default: 5
         sigmay:

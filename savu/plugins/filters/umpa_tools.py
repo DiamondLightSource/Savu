@@ -23,8 +23,8 @@ class UmpaTools(PluginTools):
         step:
               visibility: basic
               dtype: int
-              description: 'Perform the analysis on every other _step_ pixels \
-                in both directions. '
+              description: 'Perform the analysis on every other
+                _step_ pixels in both directions. '
               default: 1
         max_shift:
               visibility: basic

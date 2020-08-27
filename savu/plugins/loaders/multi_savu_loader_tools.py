@@ -8,7 +8,7 @@ class MultiSavuLoaderTools(PluginTools):
         file_name:
               visibility: basic
               dtype: str
-              description: The shared part of the name of each file\
+              description: The shared part of the name of each file
                 (not including .nxs).
               default: None
         data_path:
@@ -29,7 +29,7 @@ class MultiSavuLoaderTools(PluginTools):
         axis_label:
               visibility: intermediate
               dtype: str
-              description: "New axis label, if required, in the form\
+              description: "New axis label, if required, in the form
                 'name.units'."
               default: 'scan.number'
         range:

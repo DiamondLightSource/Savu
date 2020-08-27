@@ -12,13 +12,13 @@ method.
         sigma:
             visibility: intermediate
             dtype: int
-            description: Sigma of the Gaussian window. Used to separate the\
+            description: Sigma of the Gaussian window. Used to separate the
               low-pass and high-pass components of each sinogram column.
             default: 3
         size:
             visibility: intermediate
             dtype: int
-            description:  Size of the median filter window. Used to\
+            description:  Size of the median filter window. Used to
               clean stripes.
             default: 31
         """

@@ -1,7 +1,7 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class BasicOperationsTools(PluginTools):
-    """A class that performs basic mathematical operations on datasets.\
+    """A class that performs basic mathematical operations on datasets.
 How should the information be passed to the plugin?
     """
     def define_parameters(self):

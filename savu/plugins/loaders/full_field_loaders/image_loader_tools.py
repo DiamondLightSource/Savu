@@ -29,13 +29,13 @@ class ImageLoaderTools(PluginTools):
         dark_prefix:
             visibility: intermediate
             dtype: str
-            description: A file prefix for the dark field files, including the\
+            description: A file prefix for the dark field files, including the
               folder path if different from the data.
             default: None
         flat_prefix:
             visibility: intermediate
             dtype: str
-            description: A file prefix for the flat field files, including the\
+            description: A file prefix for the flat field files, including the
               folder path if different from the data.
             default: None
 

@@ -14,20 +14,20 @@ populating the parameters.
         preview:
               visibility: basic
               dtype: list
-              description: A slice list of required frames to apply to ALL\
-                datasets, else a dictionary of slice lists where the key is\
+              description: A slice list of required frames to apply to ALL
+                datasets, else a dictionary of slice lists where the key is
                 the dataset name.
               default: {}
         datasets:
               visibility: basic
               dtype: list
-              description: Override the default by choosing specific dataset(s) to\
-                load, by stating the NXdata name.
+              description: Override the default by choosing specific
+                dataset(s) to load, by stating the NXdata name.
               default: []
         names:
               visibility: basic
               dtype: list
-              description: Override the dataset names associated with the datasets\
-                parameter above.
+              description: Override the dataset names associated with the
+                datasets parameter above.
               default: []
         """

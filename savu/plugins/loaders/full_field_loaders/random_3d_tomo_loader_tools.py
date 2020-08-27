@@ -29,7 +29,7 @@ re-loaded with the nxtomo_loader.
         image_key:
             visibility: intermediate
             dtype: list
-            description: 'Specify position of darks and flats (in that order)\
+            description: 'Specify position of darks and flats (in that order)
               in the data.'
             default: [[0, 1], [2, 3]]
 

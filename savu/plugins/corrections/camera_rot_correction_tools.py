@@ -1,7 +1,7 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class CameraRotCorrectionTools(PluginTools):
-    """A plugin to apply a rotation to projection images, for example to correct\
+    """A plugin to apply a rotation to projection images, for example to correct
 for missing camera alignment.
     """
     def define_parameters(self):

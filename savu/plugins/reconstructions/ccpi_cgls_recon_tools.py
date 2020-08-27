@@ -24,8 +24,8 @@ algorithm.
         n_frames:
             visibility: basic
             dtype: int
-            description:  This algorithm requires a multiple of 8 frames for\
-              processing and this number may affect performance depending on\
+            description:  This algorithm requires a multiple of 8 frames for
+              processing and this number may affect performance depending on
               your data size (choose from 8, 16, 24, 32)
             options: [8,16,24,32]
             default: 16

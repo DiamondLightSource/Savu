@@ -46,7 +46,7 @@ efficient 2D/3D denoising.
         time_step:
              visibility: advanced
              dtype: int
-             description: 'Time marching step, relevant for ROF_TV, LLT_ROF,\
+             description: 'Time marching step, relevant for ROF_TV, LLT_ROF,
                NDF, DIFF4th methods.'
              default: 0.001
              dependency:
