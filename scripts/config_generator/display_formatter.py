@@ -233,13 +233,15 @@ class DisplayFormatter(object):
                 current_opt = p_dict['data'][key]
                 c_off = Back.RESET + Fore.RESET
                 if current_opt == opt:
-                    # colour = Fore.BLUE + Style.BRIGHT
-                    # Highlight the currently selected option
+                    # Highlight the currently selected option by setting a
+                    # background colour and white text
                     colour = Back.BLUE + Fore.LIGHTWHITE_EX
                     verbose_color = Back.GREEN + Fore.LIGHTWHITE_EX
                 else:
-                    colour = Fore.BLUE
-                    verbose_color = Fore.GREEN
+                    # Make the option bold using Style.BRIGHT
+                    colour = Fore.BLUE + Style.BRIGHT
+                    # Remove bold style for the description
+                    verbose_color = Style.RESET_ALL + Fore.GREEN
                 option_verbose = ''
                 option_verbose +=  u'\u0009' + u'\u2022' + colour + str(opt)
                 option_verbose = joiner.join(textwrap.wrap(
