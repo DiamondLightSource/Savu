@@ -4,11 +4,6 @@
 Api Plugin 
 **********************
 
-.. toctree::
-   :maxdepth: 1 
-
-
-
 Absorption Corrections
 ########################################################
 
@@ -283,54 +278,6 @@ I22 Loaders
    I22 Tomo Loader <api_plugin/plugins.loaders.mapping_loaders.i22_loaders.i22_tomo_loader>
 
 
-Templates
-********************************************************
-
-.. toctree::
-   :maxdepth: 1 
-
-
-
-I18 Templates
---------------------------------------------------------
-
-.. toctree::
-   :maxdepth: 1 
-
-
-
-Malcolm Templates
---------------------------------------------------------
-
-.. toctree::
-   :maxdepth: 1 
-
-
-
-Nexus Templates
---------------------------------------------------------
-
-.. toctree::
-   :maxdepth: 1 
-
-
-
-Utils
-********************************************************
-
-.. toctree::
-   :maxdepth: 1 
-
-
-
-Missing Data
-########################################################
-
-.. toctree::
-   :maxdepth: 1 
-
-
-
 Ptychography
 ########################################################
 
@@ -417,22 +364,6 @@ Savers
    Image Saver <api_plugin/plugins.savers.image_saver>
    Tiff Saver <api_plugin/plugins.savers.tiff_saver>
    Xrf Saver <api_plugin/plugins.savers.xrf_saver>
-
-
-Utils
-********************************************************
-
-.. toctree::
-   :maxdepth: 1 
-
-
-
-Segmentation
-########################################################
-
-.. toctree::
-   :maxdepth: 1 
-
 
 
 I23Segmentation

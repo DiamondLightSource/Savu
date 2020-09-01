@@ -28,6 +28,7 @@ Subpackages
     plugins.ring_removal
     plugins.savers
     plugins.segmentation
+    plugins.simulation
     plugins.stats
     plugins.visualisation
 
