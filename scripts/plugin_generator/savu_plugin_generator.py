@@ -35,7 +35,8 @@ with warnings.catch_warnings():
     from scripts.config_generator import config_utils as utils
 
 def __option_parser():
-    """ Option parser for command line arguments.
+    """ Option parser for command line arguments. Use -d for file deletion
+    and -q for quick template.
     """
     parser = argparse.ArgumentParser(prog='savu_plugin_generator.py')
     parser.add_argument('plugin_name', help='Plugin name to create file',
@@ -68,27 +69,38 @@ def get_plugin_class(plugin_name):
     return plugin_class
 
 
-def append_file(f,openfile):
-    """ Append the openfile on to main file f """
-    with open(openfile) as input:
+def append_file(f, additional_file):
+    """ Append the additional_file on to main file f """
+    with open(additional_file) as input:
         f.write(input.read())
         input.close
 
 
 def create_plugin_template(file_path, module, quick_arg, savu_base_path):
-    """ Find the file path for the selected plugin. Generate template files
-    for those which are not present already
+    """
+    Find the file path for the selected plugin. Generate template files
+    for those which are not present already.
+
+    :param file_path: File path to the new file
+    :param module: The module name of the new plugin
+    :param quick_arg: bool True if the user wants a quick template
+    :param savu_base_path: The base directory
+
     """
     plugin_folder = savu_base_path + file_path
     title = module.split('.')
     capital_title = convert_title(title[-1]).replace(' ', '')
     file_str = plugin_folder + '.py'
+    generator_dir = savu_base_path + 'scripts/plugin_generator/'
+    copyright_template = generator_dir + 'template_elements/copyright.py'
+    detailed_template = generator_dir + 'template_elements/process_and_setup_detailed_notes.py'
+    quick_template = generator_dir + 'template_elements/process_and_setup.py'
 
     if os.path.isfile(file_str):
         print('A plugin file exists at', file_str)
     else:
         with open(file_str, 'w+') as new_py_file:
-            append_file(new_py_file, 'template_elements/copyright.py')
+            append_file(new_py_file, copyright_template)
             new_py_file.write(get_module_info(title[-1]).strip())
             new_py_file.write('\n')
             new_py_file.write('from savu.plugins.utils import register_plugin\n')
@@ -108,12 +120,10 @@ def create_plugin_template(file_path, module, quick_arg, savu_base_path):
 
             if quick_arg == True:
                 # Concise template for previous users
-                append_file(new_py_file,
-                            'template_elements/process_and_setup.py')
+                append_file(new_py_file, quick_template)
             else:
                 # Detailed template for new users
-                append_file(new_py_file,
-                    'template_elements/process_and_setup_detailed_notes.py')
+                append_file(new_py_file, detailed_template)
 
         new_py_file.close()
         print('A plugin file has been created at', file_str)
@@ -128,14 +138,15 @@ def create_tools_template(file_path, module, savu_base_path):
     title = module.split('.')
     capital_title = convert_title(title[-1]).replace(' ', '')
     file_str = plugin_folder  +'_tools.py'
+    generator_dir = savu_base_path + 'scripts/plugin_generator/'
+    param_definition_template = generator_dir + 'template_elements/parameter_definition.py'
 
     if os.path.isfile(file_str):
         print('A tools file exists at ' + file_str)
     else:
         with open(file_str, 'w+') as new_tools_file:
             new_tools_file.write(get_tools_info(capital_title))
-            append_file(new_tools_file,
-                        'template_elements/parameter_definition.py')
+            append_file(new_tools_file, param_definition_template)
 
         new_tools_file.close()
         print('A tools file has been created at', file_str)
@@ -238,6 +249,11 @@ def check_decision(check):
 
 
 def remove_file(file_str, error_str):
+    """ Remove the file at the provided file path
+
+    :param file_str: The file path to the file to remove
+    :param error_str: The error message to display
+    """
     if os.path.isfile(file_str):
         os.remove(file_str)
         print('The file at', file_str, 'was removed.')
@@ -271,7 +287,8 @@ def main():
     else:
         print('Please write the plugin name in the format plugin_name with '
               'a lowercase letter as the first character and underscores in '
-              'the place of spaces.')
+              'the place of spaces. For example, to create a plugin named '
+              'Median Filter, type median_filter.')
 
 
 if __name__ == '__main__':
