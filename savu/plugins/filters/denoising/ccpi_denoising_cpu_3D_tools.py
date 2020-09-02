@@ -25,7 +25,7 @@ efficient 2D/3D denoising.
                      Huber or Tukey)"
                    TGV: Total Generalised Variation
                    NLTV: Non Local Total Variation
-                   DIFF4th: Fourth-order nonlinear diffusion model
+                   Diff4th: Fourth-order nonlinear diffusion model
              default: FGP_TV
 
         reg_parameter:
@@ -47,10 +47,10 @@ efficient 2D/3D denoising.
              visibility: advanced
              dtype: int
              description: 'Time marching step, relevant for ROF_TV, LLT_ROF,
-               NDF, DIFF4th methods.'
+               NDF, Diff4th methods.'
              default: 0.001
              dependency:
-                 method: [ROF_TV, LLT_ROF, NDF, DIFF4th]
+                 method: [ROF_TV, LLT_ROF, NDF, Diff4th]
 
         lipshitz_constant:
              visibility: advanced

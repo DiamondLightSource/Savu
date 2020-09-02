@@ -99,7 +99,8 @@ toolbox and the CCPi RGL toolkit: https://github.com/vais-ral/CCPi-Regularisatio
         regularisation_method:
              visibility: advanced
              dtype: str
-             options: [ROF_TV, FGP_TV, PD_TV, SB_TV, LLT_ROF, NDF, Diff4th]
+             options: [ROF_TV, FGP_TV, PD_TV, SB_TV, LLT_ROF, NDF,
+              TGV, NLTV, Diff4th]
              description:
                summary: The denoising method
                verbose: "Iterative methods can help to solve ill-posed
@@ -116,7 +117,7 @@ toolbox and the CCPi RGL toolkit: https://github.com/vais-ral/CCPi-Regularisatio
                      Huber or Tukey)"
                    TGV: Total Generalised Variation
                    NLTV: Non Local Total Variation
-                   DIFF4th: Fourth-order nonlinear diffusion model
+                   Diff4th: Fourth-order nonlinear diffusion model
              default: FGP_TV
 
         regularisation_parameter:

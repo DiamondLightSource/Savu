@@ -26,7 +26,7 @@ class CcpiDenoisingCpuTools(PluginTools):
                          Huber or Tukey)"
                     TGV: Total Generalised Variation
                     NLTV: Non Local Total Variation
-                    DIFF4th: Fourth-order nonlinear diffusion model
+                    Diff4th: Fourth-order nonlinear diffusion model
             default: FGP_TV
 
         reg_parameter:
@@ -59,7 +59,7 @@ class CcpiDenoisingCpuTools(PluginTools):
                    SB_TV: 100
                    LLT_ROF: 2000
                    NDF: 2000
-                   DIFF4th: 1000
+                   Diff4th: 1000
                    TGV: 500
                    NLTV: 5
 

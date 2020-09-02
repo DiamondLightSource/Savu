@@ -132,7 +132,7 @@ toolbox and the CCPi RGL toolkit
                      Huber or Tukey)
                    TGV: Total Generalised Variation
                    NLTV: Non Local Total Variation
-                   DIFF4th: Fourth-order nonlinear diffusion model
+                   Diff4th: Fourth-order nonlinear diffusion model
              default: FGP_TV
 
         regularisation_parameter:
@@ -167,7 +167,7 @@ toolbox and the CCPi RGL toolkit
                    SB_TV: 100
                    LLT_ROF: 1000
                    NDF: 1000
-                   DIFF4th: 1000
+                   Diff4th: 1000
                    TGV: 80
                    NLTV: 80
              dependency:
