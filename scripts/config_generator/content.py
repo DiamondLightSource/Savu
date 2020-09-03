@@ -267,7 +267,7 @@ class Content(object):
             if param_name <= len(keys):
                 param_name = keys[param_name-1]
             else:
-                raise Exception('This parameter number is not valid for this plug in:', param_name)
+                raise Exception('This parameter number is not valid for this plugin')
         elif param_name not in keys:
             raise Exception('This parameter is not present in this plug in.')
 
