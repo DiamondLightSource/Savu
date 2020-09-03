@@ -255,15 +255,19 @@ class Content(object):
                     interm_keys.append(k)
                 if v['visibility'] == 'advanced':
                     adv_keys.append(k)
-
-        keys = basic_keys + interm_keys + adv_keys + data_keys
+        if ref:
+            # For a refresh, refresh all keys, including those with
+            # dependencies (which have the display off)
+            keys = params.keys()
+        else:
+            keys = basic_keys + interm_keys + adv_keys + data_keys
 
         if param_name.isdigit():
             param_name = int(param_name)
             if param_name <= len(keys):
                 param_name = keys[param_name-1]
             else:
-                raise Exception('This parameter number is not valid for this plug in.')
+                raise Exception('This parameter number is not valid for this plug in:', param_name)
         elif param_name not in keys:
             raise Exception('This parameter is not present in this plug in.')
 
