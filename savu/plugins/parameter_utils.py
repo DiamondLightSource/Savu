@@ -381,12 +381,13 @@ def _check_default(value, default_value):
     """ Return true if the new value is either a match for the default
     parameter value or the string 'default'
     """
-    if default_value == str(value) \
-            or default_value == value\
-            or value == 'default':
-        return True
-    else:
-        return False
+    default_present = False
+
+    if default_value == str(value) or default_value == value\
+                or value == 'default' or str(default_value) == str(value):
+        default_present = True
+
+    return default_present
 
 def _check_options(current_parameter_details, value, pvalid):
     """ Check if the input value matches one of the valid parameter options

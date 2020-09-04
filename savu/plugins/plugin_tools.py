@@ -283,7 +283,7 @@ class PluginParameters(object):
                                          + str(p_name) + ' to ' \
                                          + str(dep_param_choices[item])
                         if mod:
-                            if mod == parent_param:
+                            if mod == p_name:
                                 print(Fore.RED + recommendation + Fore.RESET)
                         else:
                             # If there was no modification, on loading the
