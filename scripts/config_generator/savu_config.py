@@ -247,6 +247,7 @@ def main(test=False):
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
+        # imports all the (working) plugin modules
         content.failed = utils.populate_plugins(error_mode=args.error,
                                                 examples=args.examples)
 

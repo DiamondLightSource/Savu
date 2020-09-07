@@ -134,29 +134,21 @@ def get_plugins_paths(examples=True):
     This gets the plugin paths, but also adds any that are not on the
     pythonpath to it.
     """
-    plugins_paths = []
-    # get user and environment plugin paths
+    plugins_paths = {}
+    # get user, environment and example plugin paths
     user_path = [os.path.join(os.path.expanduser("~"), 'savu_plugins')]
     env_paths = os.getenv("SAVU_PLUGINS_PATH", "").replace(" ", "").split(":")
+    templates = "../plugin_examples/plugin_templates"
+    eg_path = [os.path.join(savu.__path__[0], templates)] if examples else []
 
-    # If examples have been requested then add them to the path
-    # add all sub folders
-    eg_base_path = os.path.join(savu.__path__[0],
-                           "../plugin_examples/plugin_templates")
-    eg_path = [x[0] for x in os.walk(eg_base_path)] if examples else []
-    # check all paths exist and add the the plugin paths
     for ppath in user_path + env_paths + eg_path:
         if os.path.exists(ppath):
-            plugins_paths.append(ppath)
+            plugins_paths[ppath] = os.path.basename(ppath) + '.'
+            if ppath not in sys.path:
+                sys.path.append(os.path.dirname(ppath))
 
-    # before we add the savu plugins to the list, add all items in the list
-    # so far to the pythonpath
-    for ppath in plugins_paths:
-        if ppath not in sys.path:
-            sys.path.append(ppath)
-
-    # now add the savu plugin path, which is now the whole path.
-    plugins_paths.append(os.path.join(savu.__path__[0]) + '/../')
+    # now add the savu plugin path
+    plugins_paths[os.path.join(savu.__path__[0]) + '/plugins'] = 'savu.plugins.'
     return plugins_paths
 
 
