@@ -210,7 +210,7 @@ https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
         """
 
 
-    def get_citation(self):
+    def define_citations(self):
         """
         citation1:
             description: First-order optimisation algorithm for linear inverse problems

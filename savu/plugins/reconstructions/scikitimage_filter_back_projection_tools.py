@@ -53,7 +53,7 @@ inverse radon transform from scikit-image.
 
         """
 
-    def get_citation(self):
+    def define_citations(self):
         """
         citation:
             short_name_article: Principles of CT imaging

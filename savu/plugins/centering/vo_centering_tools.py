@@ -77,8 +77,7 @@ class VoCenteringTools(PluginTools):
              default: 5
         """
 
-
-    def get_citation(self):
+    def define_citations(self):
         """
         citation1:
             description: The center of rotation for this reconstruction was calculated

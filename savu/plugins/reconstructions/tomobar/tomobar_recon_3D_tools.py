@@ -209,7 +209,7 @@ toolbox and the CCPi RGL toolkit: https://github.com/vais-ral/CCPi-Regularisatio
         """
 
 
-    def get_citation(self):
+    def define_citations(self):
         """
         citation1:
             description: First-order optimisation algorithm for linear inverse problems

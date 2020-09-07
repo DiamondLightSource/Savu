@@ -55,7 +55,7 @@ required for the chosen algorithm will be ignored.
 
         """
 
-def get_citation(self):
+def define_citations(self):
     """
     citation1:
         description: An algorithm from the TomoPy framework is used to

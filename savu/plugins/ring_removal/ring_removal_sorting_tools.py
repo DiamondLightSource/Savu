@@ -14,7 +14,7 @@ It works particularly well for removing partial rings.
             default: 31
         """
 
-    def get_citation(self):
+    def define_citations(self):
         """
         citation1:
             description: The code of ring removal is the implementation of the work of

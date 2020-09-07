@@ -4,7 +4,7 @@ class SimpleReconTools(PluginTools):
     """A Plugin to apply a simple reconstruction with no dependancies
     """
 
-def get_citation(self):
+def define_citations(self):
     """
     citation1:
         description: The Tomographic reconstruction performed in this

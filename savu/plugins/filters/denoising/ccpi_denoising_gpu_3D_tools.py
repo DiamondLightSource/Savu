@@ -119,7 +119,7 @@ efficient 2D/3D denoising
              default: 0.0
         """
 
-    def get_citation(self):
+    def define_citations(self):
         """
         citation1:
             description: The CCPi-Regularisation toolkit provides a set of

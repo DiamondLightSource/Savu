@@ -19,7 +19,7 @@ method. A simple improvement to handle partial stripes is included.
             default: 1
         """
 
-    def get_citation(self):
+    def define_citations(self):
             """
             citation1:
                 description: The code of ring removal is the implementation

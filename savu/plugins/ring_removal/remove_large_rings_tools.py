@@ -20,7 +20,7 @@ artefacts in a reconstructed image).
         """
 
 
-    def get_citation(self):
+    def define_citations(self):
         """
         citation1:
             description: The code of ring removal is the implementation

@@ -57,7 +57,7 @@ to the global nature of this filter. If this is necessary, ensure they
 are consecutive.
         """
 
-    def get_citation(self):
+    def define_citations(self):
         """
         citation1:
             description: The contrast enhancement used in this processing chain is taken

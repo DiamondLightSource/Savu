@@ -16,7 +16,7 @@
                 parameter_name_1: [3, 9]
         """
 
-    def get_citation(self):
+    def define_citations(self):
         """
         citation1:
             description: A description of the citation

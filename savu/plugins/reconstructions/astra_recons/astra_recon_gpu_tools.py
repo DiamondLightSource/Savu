@@ -77,7 +77,7 @@ class AstraReconGpuTools(PluginTools):
         """
 
 
-    def get_citation(self):
+    def define_citations(self):
         """
         citation1:
             description: The tomography reconstruction algorithm used in this processing

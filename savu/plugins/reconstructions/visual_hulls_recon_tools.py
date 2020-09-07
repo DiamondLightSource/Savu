@@ -26,7 +26,7 @@ using the inverse radon transform from scikit-image.
 
         """
 
-    def get_citation(self):
+    def define_citations(self):
         """
         citation1:
             description: The reconstruction performed in this processing

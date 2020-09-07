@@ -117,7 +117,7 @@ efficient 2D/3D denoising.
         """
 
 
-    def get_citation(self):
+    def define_citations(self):
         """
         citation1:
             short_name_article: ccpi regularisation toolkit for CT

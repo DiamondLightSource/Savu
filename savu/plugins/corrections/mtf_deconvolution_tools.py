@@ -21,7 +21,7 @@ Working on raw projections and flats.
 
         """
 
-    def get_citations(self):
+    def define_citations(self):
         """
         citation1:
             description: The PSF correction used in this plugin is taken

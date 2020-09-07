@@ -28,7 +28,7 @@ tomo_recon reconstruction software.
             default: 1
         """
 
-    def get_citation(self):
+    def define_citations(self):
         """
         citation1:
             description: The ring artefact removal algorithm used in this

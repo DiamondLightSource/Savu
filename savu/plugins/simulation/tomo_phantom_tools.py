@@ -83,7 +83,7 @@ Phantom3DLibrary.dat)
         """
 
 
-    def get_citation(self):
+    def define_citations(self):
         """
         citation1:
             description: TomoPhantom is a software package to generate 2D-4D

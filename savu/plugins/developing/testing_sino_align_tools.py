@@ -23,7 +23,7 @@ each centre of mass and the sine function is then used to align each row.
 
         """
 
-    def get_citation(self):
+    def define_citations(self):
         # u notation for unicode characters - mew
         u"""
         citation1:

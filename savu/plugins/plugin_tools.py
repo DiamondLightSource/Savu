@@ -464,8 +464,8 @@ class PluginCitations(object):
         This is provided in a yaml format.
         """
         all_c = None
-        if hasattr(tool_class, 'get_citation'):
-            yaml_text = tool_class.get_citation.__doc__
+        if hasattr(tool_class, 'define_citations'):
+            yaml_text = tool_class.define_citations.__doc__
             if yaml_text is not None:
                 all_c = doc.load_yaml_doc(yaml_text)
                 if not isinstance(all_c, OrderedDict):

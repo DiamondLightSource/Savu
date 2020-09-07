@@ -247,7 +247,7 @@ toolbox and the CCPi RGL toolkit
         """
 
 
-    def get_citation(self):
+    def define_citations(self):
         """
         citation1:
             description: First-order optimisation algorithm for linear inverse problems

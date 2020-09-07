@@ -31,7 +31,7 @@ class DistortionCorrectionDeprecatedTools(PluginTools):
               default: 0
 
         """
-    def get_citations(self):
+    def define_citations(self):
         """
         citation1:
             description: The distortion correction used in this processing chain is taken
