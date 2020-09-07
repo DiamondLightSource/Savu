@@ -1,13 +1,20 @@
+.. raw:: html
+
+    <style> .red {color:red} </style>
+
+.. role:: red
+
+
 Developing a Savu plugin
 ************************
 
 A module is a file containing python definitions and statements. To \
 create a plugin for Savu you will need to create two modules:
 
-1. A plugin module, named plugin_name.py containing a class PluginName
-2. A plugin tools module named plugin_name_tools.py, containing a class PluginNameTools
+1. A plugin module, named :red:`plugin_name`.py containing a class :red:`PluginName`
+2. A plugin tools module named :red:`plugin_name_tools`.py, containing a class :red:`PluginNameTools`
 
-PluginName should be replaced by the name of your plugin without \
+:red:`PluginName` should be replaced by the name of your plugin without \
 any spaces. The words should be capitalised.
 
 Examples are:
@@ -69,7 +76,7 @@ Initialise the class template:
         def __init__(self):
             super(PluginName, self).__init__("PluginName")
 
-Initialise the class example, with the class NoPlugin replacing the template name:
+Initialise the class example, with the class NoProcess replacing the template name:
 
 .. code-block:: python
 
@@ -157,10 +164,8 @@ with a sentence to describe in further detail what your plugin does.
     class NoProcessTools(PluginTools):
         """The base class from which all plugins should inherit.
         """
-        def define_parameters(self):
-            pass
 
-Inside the function define_parameters you should write a docstring which will \
+Inside the method define_parameters you should write a docstring which will \
 contain the parameter details. The text should be in a yaml format.
 
 An example of a plugin tools class.
@@ -173,7 +178,7 @@ An example of a plugin tools class.
         """The base class from which all plugins should inherit.
         """
         def define_parameters(self):
-            """---
+            """
             pattern:
                 visibility: basic
                 dtype: str
@@ -213,11 +218,12 @@ Yaml Text
         description: Yaml file path.
         default: savu/plugins/loaders/full_field_loaders/nxtomo_loader.yaml
 
-You should list the names of parameters required. After each name you \
-need a colon. Then you include an indent and put four pieces of information: \
-visibility, dtype, description, default.
+You should list the names of parameters required. After each name you
+need a colon. Then you include an indent and put four pieces of information:
+visibility, dtype, description, default. The indentation level should be
+consistent.
 
-These should contain:
+The parameter information included should be:
 
 * visibility - The level of understanding needed to edit the parameter
 * dtype - The data type of the parameter value
@@ -226,11 +232,12 @@ These should contain:
 
 Visibility
 ''''''''''
-You should choose one of three options.
+You should choose one of four options.
 
 * basic - A basic parameter will need to be adjusted with each use of the plugin and will be on display to all users
 * intermediate - An intermediate parameter can be used to tailor the plugin result more carefully.
 * advanced - Advanced parameters should only need to be changed occasionally by developers.
+* hidden - Hidden parameters are not editable from the user interface. This may be useful during plugin development.
 
 Dtype
 ''''''
@@ -286,6 +293,9 @@ Choose the data type. This is used to check the parameter input is valid.
 If more than one data type is allowed, then include these in a list format.
 e.g. [int, float] would mean that integers or floats are valid data types.
 
+If you are a developer and would like to create your own data type then you
+should edit the file parameter_utils.py.
+
 Description
 '''''''''''
 Any string of text
@@ -332,7 +342,7 @@ Dependency
 If the parameter is only applicable to certain other parameter choices
 you can make it only appear when a certain value is chosen.
 
-For example, the NDF penalty should only be displayed when the regulartisation
+For example, the NDF penalty should only be displayed when the regularisation
 method is NDF.
 
 .. code-block:: yaml
@@ -341,11 +351,14 @@ method is NDF.
         dependency:
             regularisation_method: NDF
 
+If you want this parameter to appear when the value is not a None value,
+you can type the string 'not None'.
+
 Options
 '''''''
 
 If you have a closed list of options for your parameter, you should enter
-them here. The case will not matter.
+them here. The case will matter.
 
 .. code-block:: yaml
 
@@ -353,6 +366,7 @@ them here. The case will not matter.
         options: [ROF_TV, FGP_TV, PD_TV, SB_TV, LLT_ROF, NDF, Diff4th]
 
 When you add options, you can include more fields within the description.
+The indentation level should be consistent.
 
 .. code-block:: yaml
 
@@ -366,6 +380,224 @@ When you add options, you can include more fields within the description.
              Perona: Perona-Malik model
              Tukey: Tukey
 
+
+Citation Text
+--------------
+
+The citations are included inside the method define_citations. You should
+write a docstring which will contain the citation details. The text should
+be in a yaml format.
+
+.. code-block:: python
+
+    from savu.plugins.plugin_tools import PluginTools
+
+    class NoProcessTools(PluginTools):
+        """The base class from which all plugins should inherit.
+        """
+        def define_parameters(self):
+            """
+            """
+        def define_citations(self):
+            """
+            citation1:
+                description: Short description
+                bibtex: |
+                        Bibtex block of text.
+                endnote: |
+                        Endnote block of text.
+                doi: doi link
+            """
+
+If unicode characters are included, for example the character mew, you can
+precede the docstring with the letter 'u'.
+
+.. code-block:: python
+
+        def define_citations(self):
+            u"""
+            citation1:
+                description: The Tomographic filtering performed in this processing
+                  chain is derived from this work.
+                bibtex: |
+                        @article{price2015chemical,
+                        title={Chemical imaging of single catalyst particles with scanning $\mu$-XANES-CT and $\mu$-XRF-CT},
+                        author={Price, SWT and Ignatyev, K and Geraki, K and Basham, M and Filik, J and Vo, NT and Witte, PT and Beale, AM and Mosselmans, JFW},
+                        journal={Physical Chemistry Chemical Physics},
+                        volume={17},
+                        number={1},
+                        pages={521--529},
+                        year={2015},
+                        publisher={Royal Society of Chemistry}}
+                endnote: |
+                        %0 Journal Article
+                        %T Chemical imaging of single catalyst particles with scanning \u03BC-XANES-CT and \u03BC-XRF-CT
+                        %A Price, SWT
+                        %A Ignatyev, K
+                        %A Geraki, K
+                        %A Basham, M
+                        %A Filik, J
+                        %A Vo, NT
+                        %A Witte, PT
+                        %A Beale, AM
+                        %A Mosselmans, JFW
+                        %J Physical Chemistry Chemical Physics
+                        %V 17
+                        %N 1
+                        %P 521-529
+                        %D 2015
+                        %I Royal Society of Chemistry
+                doi: "10.1039/c4cp04488f"
+
+            """
+
+Below is a longer example of the yaml text.
+
+.. code-block:: yaml
+
+    citation1:
+        short_name_article: ccpi regularisation toolkit for CT
+        description: The CCPi-Regularisation toolkit provides a set of
+          variational regularisers (denoisers) which can be embedded in
+          a plug-and-play fashion into proximal splitting methods for
+          image reconstruction. CCPi-RGL comes with algorithms that can
+          satisfy various prior expectations of the reconstructed object,
+          for example being piecewise-constant or piecewise-smooth nature.
+        bibtex: |
+                @article{kazantsev2019ccpi,
+                title={Ccpi-regularisation toolkit for computed tomographic image reconstruction with proximal splitting algorithms},
+                author={Kazantsev, Daniil and Pasca, Edoardo and Turner, Martin J and Withers, Philip J},
+                journal={SoftwareX},
+                volume={9},
+                pages={317--323},
+                year={2019},
+                publisher={Elsevier}
+                }
+        endnote: |
+                %0 Journal Article
+                %T Ccpi-regularisation toolkit for computed tomographic image reconstruction with proximal splitting algorithms
+                %A Kazantsev, Daniil
+                %A Pasca, Edoardo
+                %A Turner, Martin J
+                %A Withers, Philip J
+                %J SoftwareX
+                %V 9
+                %P 317-323
+                %@ 2352-7110
+                %D 2019
+                %I Elsevier
+        doi: "10.1016/j.softx.2019.04.003"
+
+    citation2:
+        description: Rudin-Osher-Fatemi explicit PDE minimisation method
+          for smoothed Total Variation regulariser
+        bibtex: |
+                @article{rudin1992nonlinear,
+                  title={Nonlinear total variation based noise removal algorithms},
+                  author={Rudin, Leonid I and Osher, Stanley and Fatemi, Emad},
+                  journal={Physica D: nonlinear phenomena},
+                  volume={60},
+                  number={1-4},
+                  pages={259--268},
+                  year={1992},
+                  publisher={North-Holland}
+                }
+        endnote: |
+                %0 Journal Article
+                %T Nonlinear total variation based noise removal algorithms
+                %A Rudin, Leonid I
+                %A Osher, Stanley
+                %A Fatemi, Emad
+                %J Physica D: nonlinear phenomena
+                %V 60
+                %N 1-4
+                %P 259-268
+                %@ 0167-2789
+                %D 1992
+                %I North-Holland
+        doi: "10.1016/0167-2789(92)90242-F"
+        dependency:
+            method: ROF_TV
+
+
+
+Description
+''''''''''''
+
+This is a string describing the citation.
+
+
+.. code-block:: yaml
+
+    description: A string to describe the citation
+
+
+Bibtex
+''''''''''
+
+The bibtex text. This is preceded by the symbol '|'. It means that the text
+following that symbol will have a 'literal' style and keep its line breaks
+as new lines.
+
+.. code-block:: yaml
+
+    bibtex:
+            |
+            @article{kazantsev2019ccpi,
+            title={Ccpi-regularisation toolkit for computed tomographic image reconstruction with proximal splitting algorithms},
+            author={Kazantsev, Daniil and Pasca, Edoardo and Turner, Martin J and Withers, Philip J},
+            journal={SoftwareX},
+            volume={9},
+            pages={317--323},
+            year={2019},
+            publisher={Elsevier}
+            }
+
+Endnote
+''''''''''
+
+The endnote text. This is preceded by the symbol '|'. It means that the text
+following that symbol will have a 'literal' style and keep its line breaks
+as new lines.
+
+.. code-block:: yaml
+
+    endnote:
+            |
+            @article{kazantsev2019ccpi,
+            title={Ccpi-regularisation toolkit for computed tomographic image reconstruction with proximal splitting algorithms},
+            author={Kazantsev, Daniil and Pasca, Edoardo and Turner, Martin J and Withers, Philip J},
+            journal={SoftwareX},
+            volume={9},
+            pages={317--323},
+            year={2019},
+            publisher={Elsevier}
+            }
+
+Digital Object Identifier
+'''''''''''''''''''''''''''
+
+The DOI identifies a journal or article. It should remain fixed over
+the lifetime of the journal. It is a character string divided into two
+parts, a prefix and a suffix, separated by a slash.
+
+.. code-block:: yaml
+
+    doi: "10.1016/0167-2789(92)90242-F"
+
+Dependency
+''''''''''
+
+If the citation is only applicable to certain other parameter choices
+you can make it only appear when a certain value is chosen.
+
+For example, the ROF_TV citation should only be displayed when the
+method is ROF_TV.
+
+.. code-block:: yaml
+
+    dependency:
+        method: ROF_TV
 
 
 Document your plugin in restructured text
