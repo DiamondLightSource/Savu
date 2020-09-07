@@ -52,3 +52,51 @@ Key
 
 .. literalinclude:: /../source/files_and_images/documentation/short_parameter_key.yaml
     :language: yaml
+
+Documentation
+--------------------------
+
+Citations
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+Radial lens distortion correction with sub-pixel accuracy for X-ray micro-tomography by  Vo, Nghia T et al.
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+The distortion correction used in this processing chain is taken from this work.
+
+Bibtex
+````````````````````````````````````````````````
+
+.. code-block:: none
+
+    @article{vo2015radial,
+      title={Radial lens distortion correction with sub-pixel accuracy for X-ray micro-tomography},
+      author={Vo, Nghia T and Atwood, Robert C and Drakopoulos, Michael},
+      journal={Optics express},
+      volume={23},
+      number={25},
+      pages={32859--32868},
+      year={2015},
+      publisher={Optical Society of America}
+    }
+    
+
+Endnote
+````````````````````````````````````````````````
+
+.. code-block:: none
+
+    %0 Journal Article
+    %T Radial lens distortion correction with sub-pixel accuracy for X-ray micro-tomography
+    %A Vo, Nghia T
+    %A Atwood, Robert C
+    %A Drakopoulos, Michael
+    %J Optics express
+    %V 23
+    %N 25
+    %P 32859-32868
+    %@ 1094-4087
+    %D 2015
+    %I Optical Society of America
+    
+

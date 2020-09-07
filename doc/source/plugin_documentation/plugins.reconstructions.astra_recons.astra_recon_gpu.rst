@@ -131,7 +131,7 @@ Parameter definitions
         algorithm:
             visibility: basic
             dtype: str
-            options: ['FBP_CUDA', 'SIRT_CUDA', 'SART_CUDA', 'CGLS_CUDA', 'FP_CUDA', 'BP_CUDA']
+            options: ['FBP_CUDA', 'SIRT_CUDA', 'SART_CUDA', 'CGLS_CUDA', 'FP_CUDA', 'BP_CUDA', 'SIRT3D_CUDA', 'CGLS3D_CUDA']
             description: 
                 summary: Reconstruction type
                 options: 

@@ -214,7 +214,7 @@ Parameter definitions
                     NDF: Nonlinear/Linear Diffusion model (Perona-Malik, Huber or Tukey)
                     TGV: Total Generalised Variation
                     NLTV: Non Local Total Variation
-                    DIFF4th: Fourth-order nonlinear diffusion model
+                    Diff4th: Fourth-order nonlinear diffusion model
             default: FGP_TV
         
         regularisation_parameter:
@@ -227,8 +227,7 @@ Parameter definitions
             example: A good value to start with is {default}, {range}
             default: 0.0001
             dependency: 
-                regularisation_method: 
-                    not None:
+                regularisation_method: not None
         
         regularisation_iterations:
             visibility: basic
@@ -244,12 +243,11 @@ Parameter definitions
                     SB_TV: 100
                     LLT_ROF: 1000
                     NDF: 1000
-                    DIFF4th: 1000
+                    Diff4th: 1000
                     TGV: 80
                     NLTV: 80
             dependency: 
-                regularisation_method: 
-                    not None:
+                regularisation_method: not None
         
         regularisation_device:
             visibility: advanced
@@ -257,8 +255,7 @@ Parameter definitions
             description: The device for regularisation
             default: gpu
             dependency: 
-                regularisation_method: 
-                    not None:
+                regularisation_method: not None
         
         regularisation_PD_lip:
             visibility: advanced
