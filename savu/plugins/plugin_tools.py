@@ -121,23 +121,39 @@ class PluginParameters(object):
         """
         if value == 'default':
             default = all_params[param_name]['default']
-            if isinstance(default, OrderedDict):
-                desc = all_params[param_name]['description']
-                parent_param = default.keys()[0] if default.keys() else ''
-                if parent_param:
-                    dep_param_choices = {k: v
-                                         for k, v
-                                         in default[parent_param].items()}
-                    # Find current parent value
-                    parent_value = parameters[parent_param]
-                    for item in dep_param_choices.keys():
-                        if parent_value == item:
-                            desc['range'] = 'The recommended value with the ' \
-                                            'chosen', parent_param, 'would be', \
-                                            dep_param_choices[item]
-                            value = dep_param_choices[item]
-            else:
-                value = all_params[param_name]['default']
+            value = self._set_default(default, all_params, parameters, param_name)
+        return value
+
+    def _set_default(self, default, all_params, parameters, param_name):
+        """Check if the default value is a dictionary which depends on
+        another parameter value. If it is, then find the
+        dependent value. If there is no option, set the default to None.
+        An example would be:
+
+        default:
+            regularisation_method:
+                FGP_TV: 100
+                NLTV: 500
+        """
+        if isinstance(default, OrderedDict):
+            desc = all_params[param_name]['description']
+            parent_param = default.keys()[0] if default.keys() else ''
+            if parent_param:
+                dep_param_choices = {k: v
+                                     for k, v
+                                     in default[parent_param].items()}
+                # Find current parent value
+                parent_value = parameters[parent_param]
+                if parent_value in dep_param_choices.keys():
+                    desc['range'] = 'The recommended value with the ' \
+                                    'chosen', parent_param, 'would be', \
+                                    dep_param_choices[parent_value]
+                    value = dep_param_choices[parent_value]
+                else:
+                    # The default value was not found in the dictionary
+                    value = None
+        else:
+            value = default
         return value
 
 
@@ -273,22 +289,27 @@ class PluginParameters(object):
                 else:
                     # If there was no modification, on load, find the
                     # parent default
-                    parent_value = all_params[parent_param]['default']
-                for item in dep_param_choices.keys():
-                    if parent_value == item:
+                    temp_default = all_params[parent_param]['default']
+                    parent_value = self._set_default(temp_default, all_params, parameters, parent_param)
+
+                    if parent_value in dep_param_choices.keys():
                         desc['range'] = 'The recommended value with the chosen ' \
                                         + str(parent_param) + ' would be ' \
-                                        + str(dep_param_choices[item])
+                                        + str(dep_param_choices[parent_value])
                         recommendation = 'It\'s recommended that you update ' \
                                          + str(p_name) + ' to ' \
-                                         + str(dep_param_choices[item])
+                                         + str(dep_param_choices[parent_value])
                         if mod:
                             if mod == p_name:
                                 print(Fore.RED + recommendation + Fore.RESET)
                         else:
                             # If there was no modification, on loading the
                             # plugin set the correct default value
-                            parameters[p_name] = dep_param_choices[item]
+                            parameters[p_name] = dep_param_choices[parent_value]
+                    else:
+                        # If there is no match
+                        parameters[p_name] = None
+
 
     def check_dependencies(self, parameters, all_params):
         """ Determine which parameter values are dependent on a parent
@@ -299,8 +320,8 @@ class PluginParameters(object):
         for p_name, dependency in dep_list.items():
             if isinstance(dependency, OrderedDict):
                 parent_param_name = dependency.keys()[0]
-                parent_choice_list = dependency[parent_param_name]
                 # The choices which must be in the parent value
+                parent_choice_list = dependency[parent_param_name]
 
                 if parent_param_name in parameters:
                     ''' Check that the parameter is in the current plug in
@@ -309,12 +330,16 @@ class PluginParameters(object):
                     '''
                     parent_value = parameters[parent_param_name]
 
-                    if parent_value in parent_choice_list:
-                        if all_params[p_name].get('display') == 'off':
-                            all_params[p_name]['display'] = 'on'
-                    else:
-                        if all_params[p_name].get('display') != 'off':
+                    if parent_choice_list == 'not None':
+                        if parent_value == 'None' \
+                                or isinstance(parent_value, type(None)):
                             all_params[p_name]['display'] = 'off'
+                        else:
+                            all_params[p_name]['display'] = 'on'
+                    elif parent_value in parent_choice_list:
+                        all_params[p_name]['display'] = 'on'
+                    else:
+                        all_params[p_name]['display'] = 'off'
 
 
     def define_parameters(self):

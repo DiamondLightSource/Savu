@@ -148,7 +148,7 @@ toolbox and the CCPi RGL toolkit
              example: 'A good value to start with is {default}, {range}'
              default: 0.0001
              dependency:
-                regularisation_method: {not None}
+                regularisation_method: not None
 
         regularisation_iterations:
              visibility: basic
@@ -171,7 +171,7 @@ toolbox and the CCPi RGL toolkit
                    TGV: 80
                    NLTV: 80
              dependency:
-                regularisation_method: {not None}
+                regularisation_method: not None
 
 
         regularisation_device:
@@ -180,7 +180,7 @@ toolbox and the CCPi RGL toolkit
              description: The device for regularisation
              default: gpu
              dependency:
-                regularisation_method: {not None}
+                regularisation_method: not None
 
         regularisation_PD_lip:
              visibility: advanced

@@ -233,6 +233,18 @@ class Content(object):
         self.plugin_list.plugin_list[new_pos]['pos'] = new
 
     def modify(self, pos_str, param_name, value, ref=False):
+        """ Modify the plugin at pos_str and the parameter at param_name
+        The new value will be set if it is valid.
+
+        :param pos_str: The plugin position
+        :param param_name: The parameter position/name
+        :param value: The new parameter value
+        :param ref: boolean Refresh the plugin
+
+        returns: A boolean True if the value is a valid input for the
+          selected parameter and a str of the parameter name to use inside
+          the display
+        """
         valid_modification = False
         pos = self.find_position(pos_str)
         tools = self.plugin_list.plugin_list[pos]['tools']
@@ -261,16 +273,7 @@ class Content(object):
             keys = params.keys()
         else:
             keys = basic_keys + interm_keys + adv_keys + data_keys
-
-        if param_name.isdigit():
-            param_name = int(param_name)
-            if param_name <= len(keys):
-                param_name = keys[param_name-1]
-            else:
-                raise Exception('This parameter number is not valid for this plugin')
-        elif param_name not in keys:
-            raise Exception('This parameter is not present in this plug in.')
-
+        param_name = self.param_to_str(param_name, keys)
         try:
             if not ref:
                 value = self.value(value)
@@ -282,7 +285,7 @@ class Content(object):
                    " input for the character \"\'\".")
         except Exception as e:
             print(e)
-        return valid_modification
+        return valid_modification, param_name
 
     def value(self, value):
         if not value.count(';'):
@@ -411,6 +414,21 @@ class Content(object):
             self.plugin_list.plugin_list[pos] = plugin_dict
         else:
             self.plugin_list.plugin_list.insert(pos, plugin_dict)
+
+    def param_to_str(self, param_name, keys):
+        """ Check the parameter is within the provided list and
+        return the string name.
+        """
+        if param_name.isdigit():
+            param_name = int(param_name)
+            if param_name <= len(keys):
+                param_name = keys[param_name-1]
+            else:
+                raise Exception('This parameter number is not valid for this plugin')
+        elif param_name not in keys:
+            raise Exception('This parameter is not present in this plug in.')
+
+        return param_name
 
     def create_plugin_dict(self, plugin):
         plugin_dict = {}

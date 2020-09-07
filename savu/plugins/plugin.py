@@ -135,11 +135,11 @@ class Plugin(PluginDatasets):
             self.set_docstring(p_tools.get_doc())
             self.parameters = \
                 OrderedDict([(k, v['default'])
-                             for k, v in p_tools.get_param().items()])
+                             for k, v in self.p_dict.items()])
             # parameters holds current values, this is edited outside of the
             # tools class so default and dependency display values are updated here
-            p_tools.update_defaults(self.parameters, self.p_dict)
-            p_tools.check_dependencies(self.parameters, self.p_dict)
+            self.tools.update_defaults(self.parameters, self.p_dict)
+            self.tools.check_dependencies(self.parameters, self.p_dict)
 
     def set_docstring(self, doc_str):
         desc = doc.find_args(self)

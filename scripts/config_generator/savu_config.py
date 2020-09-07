@@ -124,8 +124,11 @@ def _mod(content, args):
     try:
         pos_str, subelem = args.param.split('.')
         try:
-            content_modified = content.modify(pos_str, subelem, ' '.join(args.value))
+            content_modified, param_name = content.modify(pos_str, subelem, ' '.join(args.value))
+            # Get the name of the modified parameter so that the display
+            # lists the correct item when the parameter order has been updated
             if content_modified:
+                args.param = pos_str + '.' + param_name
                 _disp(content, str(args.param))
         except Exception:
             print('Error modifying the parameter.')
