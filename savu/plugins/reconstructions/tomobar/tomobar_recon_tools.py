@@ -114,7 +114,7 @@ toolbox and the CCPi RGL toolkit
         regularisation_method:
              visibility: advanced
              dtype: str
-             options: [ROF_TV, FGP_TV, PD_TV, SB_TV, LLT_ROF, NDF, TGV, NLTV, Diff4th]
+             options: [ROF_TV, FGP_TV, PD_TV, SB_TV, LLT_ROF, NDF, TGV, NLTV, Diff4th, None]
              description:
                summary: The regularisation (denoising) method to stabilise
                 the iterative method

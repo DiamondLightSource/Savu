@@ -445,6 +445,10 @@ class Content(object):
         return self.plugin_list.plugin_list[pos]
 
     def cite(self, pos):
+        """ Find the citations and print them. Only display citations
+        if they are required. For example, if certain methods are being
+        used.
+        """
         if pos >= self.size:
             raise Exception("Cannot find citations for this plugin %s "
                             "as it does not exist."
@@ -465,14 +469,21 @@ class Content(object):
                 self._print_citation(citation)
 
     def _print_citation(self, citation):
-        print("\nINFORMATION\n%s\n\nDESCRIPTION\n%s\n\nDOI\n%s\n\n"
-              "BIBTEX\n%s\n\nENDNOTE\n%s" % \
-              (citation.name, citation.description, citation.doi, \
-               citation.bibtex, citation.endnote))
+        """ Print certain information about the citation in order.
+        """
+        cite_keys = ['name', 'description', 'doi', 'bibtex', 'endnote']
+        cite_dict = citation.__dict__
+        for key in cite_keys:
+            if key in cite_dict:
+                if key == 'doi':
+                    print(key.upper(), '\ndoi:', cite_dict[key], '\n')
+                else:
+                    print(key.upper(), '\n', cite_dict[key], '\n')
         print('-------------------------------------------'
               '-----------------------------------------')
 
     def level(self, level):
+        """ Set the visibility level of parameters """
         self.disp_level = level
 
     def remove(self, pos):

@@ -52,7 +52,7 @@ class CcpiDenoisingCpuTools(PluginTools):
                  of the algorithm.
                range: Recommended value dependent upon method.
              default:
-                 reg_parameter:
+                 method:
                    ROF_TV: 2000
                    FGP_TV: 500
                    PD_TV: 500
