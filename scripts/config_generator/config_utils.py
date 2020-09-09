@@ -119,10 +119,11 @@ def populate_plugins(error_mode=False, examples=False):
         for finder, module_name, is_pkg in pkgutil.walk_packages([path], name):
             if not is_pkg:
                 _load_module(finder, module_name, failed_imports, error_mode)
-
+    
 
 def _load_module(finder, module_name, failed_imports, error_mode):
     try:
+        # need to ignore loading of plugin.utils as it is emptying the list
         spec = finder.find_spec(module_name)
         mod = importlib.util.module_from_spec(spec)
         sys.modules[spec.name] = mod

@@ -30,10 +30,11 @@ import importlib
 import inspect
 import itertools
 
+from collections import OrderedDict
+
+# can I remove these from here?
 plugins = {}
 plugins_path = {}
-dawn_plugins = {}
-dawn_plugin_params = {}
 count = 0
 
 OUTPUT_TYPE_DATA_ONLY = 0
@@ -134,21 +135,28 @@ def get_plugins_paths(examples=True):
     This gets the plugin paths, but also adds any that are not on the
     pythonpath to it.
     """
-    plugins_paths = {}
+    plugins_paths = OrderedDict()
+    
+    # Add the savu plugins paths first so it is overridden by user folders
+    savu_plugins_path = os.path.join(savu.__path__[0], 'plugins')
+    savu_plugins_subpaths = [d for d in next(os.walk(savu_plugins_path))[1] \
+                             if d != "__pycache__"]
+    for path in savu_plugins_subpaths:
+        plugins_paths[os.path.join(savu_plugins_path, path)] = \
+            ''.join(['savu.plugins.', path, '.'])
+    
     # get user, environment and example plugin paths
     user_path = [os.path.join(os.path.expanduser("~"), 'savu_plugins')]
     env_paths = os.getenv("SAVU_PLUGINS_PATH", "").replace(" ", "").split(":")
     templates = "../plugin_examples/plugin_templates"
     eg_path = [os.path.join(savu.__path__[0], templates)] if examples else []
 
-    for ppath in user_path + env_paths + eg_path:
+    for ppath in env_paths + user_path + eg_path:
         if os.path.exists(ppath):
             plugins_paths[ppath] = os.path.basename(ppath) + '.'
             if ppath not in sys.path:
                 sys.path.append(os.path.dirname(ppath))
 
-    # now add the savu plugin path
-    plugins_paths[os.path.join(savu.__path__[0]) + '/plugins'] = 'savu.plugins.'
     return plugins_paths
 
 
@@ -168,7 +176,7 @@ def is_template_param(param):
             param = param[start + 1:-1]
             param = None if not param else param
             try:
-                paral = eval(param)
+                param = eval(param)
             except:
                 pass
             return [ptype, param]
