@@ -163,7 +163,7 @@ class DisplayFormatter(object):
                 keycount += 1
                 if subelem:
                     # If there is a sub parameter specified, only show this
-                    if keycount == subelem:
+                    if key == subelem:
                         params = self._create_display_string(desc, key, p_dict,
                                                 params, keycount, width, breakdown)
                 elif datasets:

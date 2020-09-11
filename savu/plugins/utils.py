@@ -291,6 +291,6 @@ def set_order_by_visibility(parameters, level=False):
         else:
             keys = basic_keys + interm_keys + adv_keys + data_keys
     else:
-        keys =  basic_keys + interm_keys + adv_keys + data_keys
+        keys = basic_keys + interm_keys + adv_keys + data_keys
 
     return keys

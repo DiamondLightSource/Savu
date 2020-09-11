@@ -121,7 +121,7 @@ class PluginParameters(object):
         default value. If the default contains a dictionary, then search
         for the correct value
         """
-        if value == 'default':
+        if str(value) == 'default':
             default = all_params[param_name]['default']
             value = self._set_default(default, all_params, parameters, param_name)
         return value
@@ -338,7 +338,7 @@ class PluginParameters(object):
                             all_params[p_name]['display'] = 'off'
                         else:
                             all_params[p_name]['display'] = 'on'
-                    elif parent_value in parent_choice_list:
+                    elif str(parent_value) in parent_choice_list:
                         all_params[p_name]['display'] = 'on'
                     else:
                         all_params[p_name]['display'] = 'off'
