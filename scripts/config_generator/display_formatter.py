@@ -267,10 +267,18 @@ class DisplayFormatter(object):
                         warn_colour):
         doc_str = p_dict['doc']
         info = self._get_equal_lines(doc_str.get('info'), width, info_colour,
-                                     colour_off, " "*2)
+                                     colour_off, " " * 2)
+        info = "\n"+info if info else ''
+
+        if doc_str.get('documentation_link'):
+            link_str = 'Documentation: '\
+                         +doc_str.get('documentation_link')
+            documentation_link = self._get_equal_lines(link_str, width,
+                                            info_colour, colour_off, " " * 2)
+            info +="\n"+documentation_link
+
         warn = self._get_equal_lines(doc_str.get('warn'), width, warn_colour,
                                      colour_off, " "*2)
-        info = "\n"+info if info else ''
         warn = "\n"+warn if warn else ''
         return info, warn
 

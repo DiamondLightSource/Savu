@@ -145,6 +145,7 @@ class Plugin(PluginDatasets):
         desc = doc.find_args(self)
         self.docstring_info['info'] = doc_str.get('verbose')
         self.docstring_info['warn'] = doc_str.get('warn')
+        self.docstring_info['documentation_link'] = doc_str.get('documentation_link')
         self.docstring_info['synopsis'] = desc['synopsis']
 
     def delete_parameter_entry(self, param):

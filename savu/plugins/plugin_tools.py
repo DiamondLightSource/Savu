@@ -23,6 +23,8 @@
 
 from __future__ import print_function, division, absolute_import
 
+import os
+
 from colorama import Fore
 from collections import OrderedDict
 
@@ -490,6 +492,27 @@ class PluginDocumentation(object):
         # Use the tools class at the 'top'
         self.doc.set('verbose', tools_list[-1].__doc__)
         self.doc.set('warn', tools_list[-1].config_warn.__doc__)
+        self.set_doc_link()
+
+    def set_doc_link(self):
+        """ If there is a restructured text documentation file inside the
+        doc/source/documentation folder, then save the link to the page.
+
+        """
+        # determine Savu base path
+        savu_base_path = \
+            os.path.dirname(os.path.realpath(__file__)).split('savu')[0]
+
+        # Locate documentation file
+        doc_folder = savu_base_path + 'doc/source/documentation/'
+        module = self.plugin_class.__module__.split('.')
+        file_ =  module[-1] + '_doc'
+        file_name = file_ + '.rst'
+        file_path = doc_folder + file_name
+        sphinx_link = 'https://savu.readthedocs.io/en/latest/' \
+                          'documentation/' + file_
+        if os.path.isfile(file_path):
+            self.doc.set('documentation_link', sphinx_link)
 
     def config_warn(self):
         pass

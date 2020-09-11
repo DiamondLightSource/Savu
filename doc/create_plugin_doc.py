@@ -87,23 +87,17 @@ def create_plugin_documentation(files, output, module_name, savu_base_path):
         py_module_name = 'savu.' + str(file_path)
         try:
             # Load the associated class
-            plugin_class = pu.load_class(py_module_name)
-            p_tools_list =[]
-            # Using method resolution order, find base class tools
-            for clazz in plugin_class.__mro__[::-1]:
-                py_module_name = clazz.__module__ + '_tools'
-                p_tools = pu.get_tools_class(py_module_name)
-                if p_tools and p_tools!= 'plugins.plugin_tools':
-                    p_tools_list.append(p_tools)
-
-            if p_tools_list:
+            plugin_class = pu.load_class(py_module_name)()
+            plugin_class._populate_default_parameters()
+            plugin_tools = plugin_class.tools.tools_list
+            if plugin_tools:
                 # Create an empty rst file inside this directory where
                 # the plugin tools documentation will be stored
                 new_rst_file = open(savu_base_path + 'doc/source/'
                                     + output + '/' + file_path
                                     + '.rst', 'w+')
                 # Populate this file
-                populate_plugin_doc_files(new_rst_file, p_tools_list,
+                populate_plugin_doc_files(new_rst_file, plugin_tools,
                                           file_path, plugin_class,
                                           savu_base_path)
         except Exception as e:
@@ -135,11 +129,8 @@ def populate_plugin_doc_files(new_rst_file, tool_class_list, file_path,
     new_rst_file.write(convert_title(plugin_type) +
       '\n#################################################################\n')
 
-    # Populate the class and display the parameter detail
-    p = plugin_class()
-    p._populate_default_parameters()
-    plugin_data = p.p_dict
-    plugin_citations = p.tools.get_citations()
+    plugin_data = plugin_class.p_dict
+    plugin_citations = plugin_class.tools.get_citations()
 
     tool_class = tool_class_list[-1]
     if tool_class.__doc__:
@@ -151,6 +142,19 @@ def populate_plugin_doc_files(new_rst_file, tool_class_list, file_path,
             new_rst_file.write('\n')
             new_rst_file.write(tool_class.__doc__)
 
+        # Locate documentation file
+        doc_folder = savu_base_path + 'doc/source/documentation/'
+        file_str = doc_folder + title[-1] + '_doc.rst'
+        inner_file_str = '/../documentation/' + title[-1] + '_doc.rst'
+
+        if os.path.isfile(file_str):
+            # If there is a documentation file
+            new_rst_file.write('\n')
+            new_rst_file.write('.. toctree::')
+            new_rst_file.write('\n    Plugin documention and guidelines'
+                               ' on use <' + inner_file_str + '>')
+            new_rst_file.write('\n')
+
     if tool_class.define_parameters.__doc__:
         # Check define parameters exists
         new_rst_file.write('\nParameter definitions'
@@ -161,7 +165,9 @@ def populate_plugin_doc_files(new_rst_file, tool_class_list, file_path,
         if plugin_data:
             # Go through all plugin parameters
             for p_name, p_dict in plugin_data.items():
-                new_rst_file.write('\n' + indent_multi_line_str(get_parameter_info(p_name, p_dict), 2))
+                new_rst_file.write('\n'
+                       + indent_multi_line_str
+                           (get_parameter_info(p_name, p_dict), 2))
 
         # Key to explain parameters
         new_rst_file.write('\nKey\n^^^^^^^^^^\n')
@@ -171,27 +177,12 @@ def populate_plugin_doc_files(new_rst_file, tool_class_list, file_path,
                            'short_parameter_key.yaml')
         new_rst_file.write('\n    :language: yaml\n')
 
-    # Locate documentation file
-    doc_folder = savu_base_path + 'doc/source/documentation/'
-    file_str = doc_folder + title[-1] + '_doc.rst'
-    inner_file_str = '/../documentation/' + title[-1] + '_doc.rst'
-
-    if os.path.isfile(file_str) \
-            or plugin_citations:
+    if plugin_citations:
         # If documentation information is present, then display it
-        new_rst_file.write('\nDocumentation'
+        new_rst_file.write('\nCitations'
                            '\n--------------------------\n')
 
-        if os.path.isfile(file_str):
-            # If there is a documentation file
-            new_rst_file.write('\n')
-            new_rst_file.write('.. toctree::')
-            new_rst_file.write('\n    Plugin documention and guidelines on use <'
-                               + inner_file_str + '>')
-            new_rst_file.write('\n')
-
-        if plugin_citations:
-            write_citations_to_file(new_rst_file, plugin_citations)
+        write_citations_to_file(new_rst_file, plugin_citations)
 
 
 def get_parameter_info(p_name, parameter):
@@ -232,10 +223,12 @@ def print_parameter_dict(input_dict, parameter_info, indent_level):
             # Check if the string contains characters which may need
             # to be surrounded by quotes
             if no_yaml_char(v):
-                parameter_info += indent(k + ': ' + str(v) + '\n', indent_level)
+                parameter_info += indent(k + ': ' + str(v)
+                                         + '\n', indent_level)
             else:
                 # Encase the string with quotation marks
-                parameter_info += indent(k + ': "' + str(v) + '"\n', indent_level)
+                parameter_info += indent(k + ': "' + str(v)
+                                         + '"\n', indent_level)
         elif isinstance(v, type(None)):
             parameter_info += indent(k + ':\n', indent_level)
         elif isinstance(v, list):
@@ -276,24 +269,24 @@ def indent(text, indent_level=1):
 
 def write_citations_to_file(new_rst_file, plugin_citations):
     """Create the citation text format """
-    new_rst_file.write('\nCitations'
-                       '\n^^^^^^^^^^^^^^^^^^^^^^^^\n')
-
     for name, citation in plugin_citations.items():
         new_rst_file.write('\n' + name.encode('utf-8').lstrip() +
-                           '\n""""""""""""""""""""""""""""""""""""""""""""""'
-                           '""""""""""""""""""""""""""""""""""""""""""""""""'
-                           '""""""""""""""""""""""""""""""""""""""""""""""""'
-                           '""""""""""""""""""""""""""""""""""""""""""""""""\n\n')
-        new_rst_file.write(citation.description)
-        new_rst_file.write('\n')
-
+                           '\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'
+                           '^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'
+                           '^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'
+                           '^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^')
+        if hasattr(citation, 'dependency'):
+            for k, v in citation.dependency.items():
+                new_rst_file.write('\n(Please use this citation if '
+                                   'you are using the '
+                                   + v + ' ' + k +')\n')
         bibtex = citation.bibtex
         endnote = citation.endnote
         # Where new lines are, append an indentation
         if bibtex:
             new_rst_file.write('\nBibtex'
-                               '\n````````````````````````````````````````````````\n')
+                               '\n""""""""""""""""""""'
+                               '""""""""""""""""""""""\n')
             new_rst_file.write('\n.. code-block:: none')
             new_rst_file.write('\n\n')
             new_rst_file.write(indent_multi_line_str(bibtex, True))
@@ -301,10 +294,12 @@ def write_citations_to_file(new_rst_file, plugin_citations):
 
         if endnote:
             new_rst_file.write('\nEndnote'
-                               '\n````````````````````````````````````````````````\n')
+                               '\n""""""""""""""""""""'
+                               '""""""""""""""""""""""\n')
             new_rst_file.write('\n.. code-block:: none')
             new_rst_file.write('\n\n')
-            new_rst_file.write(indent_multi_line_str(endnote.encode('utf-8'), True))
+            new_rst_file.write(indent_multi_line_str
+                               (endnote.encode('utf-8'), True))
             new_rst_file.write('\n')
 
     new_rst_file.write('\n')
