@@ -29,9 +29,8 @@ from savu.plugins.utils import register_plugin
 
 @register_plugin
 class PluginTemplate10(Plugin, CpuPlugin):
-    """
-	A plugin template that dynamically determines the number of input \
-    datasets based on the number of entries in the in_datasets parameter list.
+    """A plugin template that dynamically determines the number of input
+datasets based on the number of entries in the in_datasets parameter list.
 
     """
 

@@ -29,9 +29,8 @@ from savu.plugins.utils import register_plugin
 
 @register_plugin
 class PluginTemplate9(Plugin, CpuPlugin):
-    """
-	A plugin template that dynamically determines the number of output \
-    datasets based on a parameter.
+    """A plugin template that dynamically determines the number of output
+datasets based on a parameter.
 
     :param n_out: Add this number of output datasets. Default: 1.
     :param out_prefix: What should the datasets be called. Default: None.
