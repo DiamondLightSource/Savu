@@ -253,27 +253,13 @@ class Content(object):
         # Select the correct group and order of parameters according to that
         # on display to the user. This ensures correct parameter is modified.
 
-        data_keys = []
-        basic_keys = []
-        interm_keys = []
-        adv_keys = []
-        for k, v in params.items():
-            if v['display'] == 'on':
-                if v['visibility'] == 'datasets':
-                    data_keys.append(k)
-                if v['visibility'] == 'basic':
-                    basic_keys.append(k)
-                if v['visibility'] == 'intermediate':
-                    interm_keys.append(k)
-                if v['visibility'] == 'advanced':
-                    adv_keys.append(k)
         if ref:
             # For a refresh, refresh all keys, including those with
             # dependencies (which have the display off)
             keys = params.keys()
         else:
-            keys = basic_keys + interm_keys + adv_keys + data_keys
-        param_name = self.param_to_str(param_name, keys)
+            keys = pu.set_order_by_visibility(params)
+        param_name = pu.param_to_str(param_name, keys)
         try:
             if not ref:
                 value = self.value(value)
@@ -285,7 +271,7 @@ class Content(object):
                    " input for the character \"\'\".")
         except Exception as e:
             print(e)
-        return valid_modification, param_name
+        return valid_modification
 
     def value(self, value):
         if not value.count(';'):
@@ -414,21 +400,6 @@ class Content(object):
             self.plugin_list.plugin_list[pos] = plugin_dict
         else:
             self.plugin_list.plugin_list.insert(pos, plugin_dict)
-
-    def param_to_str(self, param_name, keys):
-        """ Check the parameter is within the provided list and
-        return the string name.
-        """
-        if param_name.isdigit():
-            param_name = int(param_name)
-            if param_name <= len(keys):
-                param_name = keys[param_name-1]
-            else:
-                raise Exception('This parameter number is not valid for this plugin')
-        elif param_name not in keys:
-            raise Exception('This parameter is not present in this plug in.')
-
-        return param_name
 
     def create_plugin_dict(self, plugin):
         plugin_dict = {}

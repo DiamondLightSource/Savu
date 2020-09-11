@@ -25,7 +25,10 @@ from __future__ import print_function, division, absolute_import
 import os
 import copy
 import textwrap
+
 from colorama import Fore, Back, Style
+
+from savu.plugins import utils as pu
 
 WIDTH = 85
 
@@ -121,44 +124,39 @@ class DisplayFormatter(object):
 
     def _get_param_details(self, level, p_dict, width, display_args=False,
                            desc=False, breakdown=False):
+        """
+        Return a list of parameters organised by visibility level
+
+        :param level: The visibility level controls which parameters the
+           user can see
+        :param p_dict: Parameter dictionary for one plugin
+        :param width: The terminal display width for output strings
+        :param display_args: A dictionary with subelem and datasets.
+          This filters the visible parameters again. If subelem is chosen,
+          only that one parameter is shoen (this is useful when ONE parameter
+          is modified in the terminal). If datasets is chosen, ONLY the
+          in/out dataset parameters are shown
+        :param desc: The description for use later on within the display
+          formatter
+        :param breakdown: Boolean True if the verbose verbose information
+          should be shown
+        :return: List of parameters in order
+        """
         params =''
         keycount = 0
+
+        # Check if the parameters need to be filtered
         subelem = display_args['subelem'] if display_args else None
         datasets = display_args['datasets'] if display_args else None
 
-        data_keys = []
-        basic_keys = []
-        interm_keys = []
-        adv_keys = []
-        for k,v in p_dict['param'].items():
-            if v['display']=='on':
-                if v['visibility'] == 'datasets':
-                    data_keys.append(k)
-                if v['visibility'] == 'basic':
-                    basic_keys.append(k)
-                if v['visibility'] == 'intermediate':
-                    interm_keys.append(k)
-                if v['visibility'] == 'advanced':
-                    adv_keys.append(k)
-
-        keys = basic_keys
         if not (subelem or datasets):
-            if level == 'intermediate':
-                keys = keys + interm_keys + data_keys
-            if level == 'advanced':
-                keys = keys + interm_keys + adv_keys + data_keys
+            # Return the list of parameters according to the visibility level
+            keys = pu.set_order_by_visibility(p_dict['param'], level=level)
         else:
-            keys = keys + interm_keys + adv_keys + data_keys
+            # Have a list of ALL keys to filter later on
+            keys = pu.set_order_by_visibility(p_dict['param'])
 
-        if subelem:
-            if subelem.isdigit():
-                subelem = int(subelem)
-                if subelem > len(keys):
-                    raise Exception('This parameter number is not valid for this plug in.')
-            elif subelem in keys:
-                subelem = keys.index(subelem) + 1
-            else:
-                raise Exception('This parameter is not present in this plug in.')
+        subelem = pu.param_to_str(subelem, keys) if subelem else subelem
 
         try:
             for key in keys:

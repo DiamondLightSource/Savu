@@ -239,3 +239,58 @@ def parse_array_index_as_string(string):
         string = string[:end] + "]'" + string[end+2:]
     string = string.replace("'['", '[')
     return string
+
+
+def param_to_str(param_name, keys):
+    """ Check the parameter is within the provided list and
+    return the string name.
+    """
+    if param_name.isdigit():
+        param_name = int(param_name)
+        if param_name <= len(keys):
+            param_name = keys[param_name-1]
+        else:
+            raise Exception('This parameter number is not valid for this plugin')
+    elif param_name not in keys:
+        raise Exception('This parameter is not present in this plug in.')
+
+    return param_name
+
+
+def set_order_by_visibility(parameters, level=False):
+    """ Return an ordered list of parameters depending on the
+    visibility level
+
+    :param parameters: The dictionary of parameters
+    :param level: The visibility level
+    :return: An ordered list of parameters
+    """
+    data_keys = []
+    basic_keys = []
+    interm_keys = []
+    adv_keys = []
+    for k, v in parameters.items():
+        if v['display'] == 'on':
+            if v['visibility'] == 'datasets':
+                data_keys.append(k)
+            if v['visibility'] == 'basic':
+                basic_keys.append(k)
+            if v['visibility'] == 'intermediate':
+                interm_keys.append(k)
+            if v['visibility'] == 'advanced':
+                adv_keys.append(k)
+    if level:
+        if level == 'datasets':
+            keys = data_keys
+        elif level == 'basic':
+            keys = basic_keys
+        elif level == 'intermediate':
+            keys = basic_keys + interm_keys + data_keys
+        elif level == 'advanced':
+            keys = basic_keys + interm_keys + adv_keys + data_keys
+        else:
+            keys = basic_keys + interm_keys + adv_keys + data_keys
+    else:
+        keys =  basic_keys + interm_keys + adv_keys + data_keys
+
+    return keys

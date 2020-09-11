@@ -123,11 +123,20 @@ def _mod(content, args):
     """ Modify plugin parameters. """
     try:
         pos_str, subelem = args.param.split('.')
+
+        # Get the name of the modified parameter so that the display
+        # lists the correct item when the parameter order has been updated
+        plugin_position = content.find_position(pos_str)
+        current_parameter_list = content.plugin_list.plugin_list[plugin_position]['param']
+        current_parameter_list_ordered = pu.set_order_by_visibility(current_parameter_list)
+        param_name = pu.param_to_str(subelem, current_parameter_list_ordered)
+
         try:
-            content_modified, param_name = content.modify(pos_str, subelem, ' '.join(args.value))
-            # Get the name of the modified parameter so that the display
-            # lists the correct item when the parameter order has been updated
+            content_modified = content.modify(pos_str, subelem, ' '.join(args.value))
             if content_modified:
+                # Use the param_name str instead of a number, as after the
+                # modification new dependent parameter may appear inside the list
+                # and mean the parameter has moved
                 args.param = pos_str + '.' + param_name
                 _disp(content, str(args.param))
         except Exception:
