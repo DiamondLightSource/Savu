@@ -96,7 +96,7 @@ class PluginParameters(object):
         # If found, then the parameter is within the current parameter list
         # displayed to the user
         if current_parameter_details:
-            parameter_valid = param_u.is_valid(param_name, value,
+            parameter_valid, error_str = param_u.is_valid(param_name, value,
                                                current_parameter_details)
             # Check that the value is an accepted input for the chosen parameter
             if parameter_valid:
@@ -109,8 +109,8 @@ class PluginParameters(object):
                 self.check_dependencies(parameters, self.param.get_dictionary())
                 parameter_valid = True
             else:
-                print('This value has not been saved as it was not'
-                      ' a valid entry.')
+                print(error_str)
+                print('This value has not been saved.')
         else:
             print('Not in parameter keys.')
 
