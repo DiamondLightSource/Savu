@@ -26,8 +26,7 @@ import re
 import os
 import inspect
 import scripts.config_generator.mutations as mutations
-from colorama import Fore
-from collections import OrderedDict
+from colorama import Fore, Back, Style
 
 from savu.plugins import utils as pu
 from savu.data.plugin_list import PluginList
@@ -432,9 +431,9 @@ class Content(object):
                         in citation.dependency.items():
                     current_value = parameters[citation_dependent_parameter]
                     if current_value == citation_dependent_value:
-                        print('This citation is for the '
+                        print(Style.BRIGHT + 'This citation is for the '
                               + citation_dependent_value + ' '
-                              + citation_dependent_parameter)
+                              + citation_dependent_parameter + '\n' + Style.RESET_ALL)
                         self._print_citation(citation)
             else:
                 self._print_citation(citation)

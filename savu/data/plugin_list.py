@@ -170,8 +170,9 @@ class PluginList(object):
         json_keys = self.__get_json_keys()
 
         if 'cite' in plugin.keys():
-            if plugin['cite'] is not None:
-                self._output_plugin_citations(plugin['cite'], plugin_group)
+            citation_plugin = plugin['cite']
+            if citation_plugin:
+                self._output_plugin_citations(citation_plugin, plugin_group)
 
         for key in required_keys:
             # only need to apply dumps if saving in configurator
@@ -220,10 +221,11 @@ class PluginList(object):
         self.__set_loaders_and_savers()
 
     def _output_plugin_citations(self, citations, group):
-        if not isinstance(citations, list):
-            citations = [citations]
-        for cite in citations:
-            citation_group = group.create_group(cite.name)
+        """Set the inner file path of the nexus file to be the citation
+        id to avoid using long titles including spaces.
+        """
+        for cite in citations.values():
+            citation_group = group.create_group(cite.id)
             cite.write(citation_group)
 
     def _save_framework_citations(self, group):
@@ -502,7 +504,8 @@ class CitationInformation(object):
         self.doi = ''
         self.endnote = ''
         self.bibtex = ''
-        self.name = 'citation'
+        self.name = ''
+        self.id = ''
 
     def write(self, citation_group):
         citation_group.attrs[NX_CLASS] = 'NXcite'

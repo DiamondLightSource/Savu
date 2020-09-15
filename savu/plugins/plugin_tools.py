@@ -396,6 +396,8 @@ class PluginCitations(object):
                         setattr(new_citation, k, v)
                     new_citation.name = self._set_citation_name(new_citation,
                                                                 tool_class)
+                    new_citation.id = self._set_citation_id(new_citation,
+                                                                tool_class)
                     self.cite.set(new_citation.name, new_citation)
                 else:
                     print('The citation for', tool_class.__name__,
@@ -447,19 +449,40 @@ class PluginCitations(object):
             cite_name = module_name.split('tools')[0].title()
         return cite_name
 
+    def _set_citation_id(self, new_citation, tool_class):
+        """ Create a short identifier using the bibtex identification
+        """
+        bibtex = new_citation.bibtex.strip()
+        # Remove blank space
+        if bibtex:
+            cite_id = self._get_id(new_citation)
+        else:
+            # Set the tools class name as the citation name
+            module_name = tool_class.__module__.split('.')[-1]
+            cite_id = module_name
+        return cite_id
+
+    def _get_id(self, new_citation):
+        """ Retrieve the id from the bibtex """
+        seperation_str = '@article{'
+        bibtex = new_citation.bibtex
+        cite_id = bibtex.partition(seperation_str)[2].split(',')[0]
+        return cite_id
+
     def _get_first_author(self, new_citation):
         """ Retrieve the first author name from the endnote """
-        seperation_word = '%A'
-        endnote = new_citation.endnote
-        first_author = endnote.partition(seperation_word)[2].split('\n')[0]
+        first_author = self.seperate_endnote('%A', new_citation)
         return first_author
 
     def _get_title(self, new_citation):
         """ Retrieve the title from the endnote """
-        seperation_word = '%T'
+        title = self.seperate_endnote('%T', new_citation)
+        return title
+
+    def seperate_endnote(self, seperation_char, new_citation):
         endnote = new_citation.endnote
-        first_author = endnote.partition(seperation_word)[2].split('\n')[0]
-        return first_author
+        item = endnote.partition(seperation_char)[2].split('\n')[0]
+        return item
 
     def _load_cite_from_doc(self, tool_class):
         """Find the citation information from the method docstring.
