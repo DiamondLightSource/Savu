@@ -312,50 +312,73 @@ def create_plugin_template_downloads(savu_base_path):
     """
     doc_template_file = savu_base_path \
                         + 'doc/source/dev_guides/dev_plugin_templates.rst'
-    plugin_ex_path = savu_base_path \
-                     + 'plugin_examples/plugin_templates/general'
-    # create entries in the autosummary for each package
+    # Populate dictionary with template class and template class docstring
+    docstring_text = create_template_class_dict(savu_base_path)
 
-    for root, dirs, files in os.walk(plugin_ex_path, topdown=True):
-        files[:] = [fi for fi in files if fi.split('.')[-1] == 'py']
-        if '__' not in root:
-            pkg_path = root.split('Savu/')[1]
-            module_name = pkg_path.replace('/', '.')
-
-    for fi in files:
-        cls_module ='savu.'+ module_name +'.'+ fi.split('.py')[0]
-        # TODO Display the template docstrings
-        # import plugin_examples.plugin_templates.general.plugin_template1 as pt1
-        # print(cls_module)
-        # importlib.import_module(cls_module)
-        # cls_loaded = pu.load_class(cls_module)
-
-    # open the autosummary file
     doc_f = open(doc_template_file, 'w')
 
-    # add header
     doc_f.write('.. _plugin_templates:\n')
     doc_f.write('\n')
 
     doc_f.write('Plugin templates \n=======================\n')
     doc_f.write('\n')
 
-    template_file = savu_base_path \
-                    + 'plugin_examples/plugin_templates/general'
-
-    all_files = []
-    for (dirpath, dirnames, filenames) in os.walk(template_file):
-        all_files.extend(filenames)
-
     inner_file_str = '../../../' + 'plugin_examples/plugin_templates/general'
-    for file in all_files:
-        if file.startswith('plugin_template'):
-            doc_str = file.split('.py')[0]
-            doc_f.write(':download:`'+ doc_str + ' <' + inner_file_str
-                        +  '/' + file + '>`')
-            doc_f.write('\n\n\n')
+    for doc_name, doc_str in docstring_text.items():
+        title = convert_title(doc_name)
+        title = filter_template_numbers(title)
+        doc_f.write(title
+                    + '\n--------------------------------'
+                      '----------------------------------\n')
+        doc_f.write(doc_str)
+        doc_f.write('\n:download:`'+ title + ' <' + inner_file_str
+                    +  '/' + doc_name + '.py>`')
+        doc_f.write('\n\n\n')
 
     doc_f.close()
+
+def filter_template_numbers(name_string):
+    """
+    :param name_string: The name of the template
+    :return: A string with the template number seperated by a space
+    """
+    number = ''.join(l for l in name_string if l.isdigit())
+    letters = ''.join(l for l in name_string if l.isalpha())
+    split_uppercase = [l for l in re.split("([A-Z][^A-Z]*)", letters) if l]
+    title = ' '.join(split_uppercase)
+    name = title + ' ' + number
+    return name
+
+def create_template_class_dict(savu_base_path):
+    """ Iterate through the plugin example folder and store the class
+    and it's class docstring into a dicitonary docstring_text
+
+    :param savu_base_path:
+    :return: docstring_text dictionary of class and docstring
+    """
+    docstring_text = {}
+    plugin_ex_path = savu_base_path \
+                     + 'plugin_examples/plugin_templates/general'
+
+    for t_root, t_dirs, template_files \
+            in os.walk(plugin_ex_path, topdown=True):
+        template_files[:] = [fi for fi in template_files
+                             if fi.split('.')[-1] == 'py']
+        if '__' not in t_root:
+            pkg_path = t_root.split('Savu/')[1]
+            module_name = pkg_path.replace('/', '.')
+
+        for fi in template_files:
+            file_name = fi.split('.py')[0]
+            cls_module = module_name + '.' + file_name
+            try:
+                cls_loaded = pu.load_class(cls_module)
+            except:
+                cls_loaded = None
+
+            if cls_loaded:
+                docstring_text[file_name] = cls_loaded.__doc__
+    return docstring_text
 
 if __name__ == "__main__":
     out_folder, rst_file, api_type = sys.argv[1:]
