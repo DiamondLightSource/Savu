@@ -77,34 +77,33 @@ class AstraReconGpuTools(PluginTools):
         """
 
 
-    def define_citations(self):
+    def citation(self):
         """
-        citation1:
-            description: The tomography reconstruction algorithm used in this processing
-              pipeline is part of the ASTRA Toolbox
-            bibtex: |
-                    @article{palenstijn2011performance,
-                      title={Performance improvements for iterative electron tomography reconstruction using graphics processing units (GPUs)},
-                      author={Palenstijn, WJ and Batenburg, KJ and Sijbers, J},
-                      journal={Journal of structural biology},
-                      volume={176},
-                      number={2},
-                      pages={250--253},
-                      year={2011},
-                      publisher={Elsevier}
-                    }
-            endnote: |
-                    %0 Journal Article
-                    %T Performance improvements for iterative electron tomography reconstruction using graphics processing units (GPUs)
-                    %A Palenstijn, WJ
-                    %A Batenburg, KJ
-                    %A Sijbers, J
-                    %J Journal of structural biology
-                    %V 176
-                    %N 2
-                    %P 250-253
-                    %@ 1047-8477
-                    %D 2011
-                    %I Elsevier
-            doi: "10.1016/j.jsb.2011.07.017"
+        The tomography reconstruction algorithm used in this processing
+        pipeline is part of the ASTRA Toolbox
+        bibtex:
+                @article{palenstijn2011performance,
+                  title={Performance improvements for iterative electron tomography reconstruction using graphics processing units (GPUs)},
+                  author={Palenstijn, WJ and Batenburg, KJ and Sijbers, J},
+                  journal={Journal of structural biology},
+                  volume={176},
+                  number={2},
+                  pages={250--253},
+                  year={2011},
+                  publisher={Elsevier}
+                }
+        endnote:
+                %0 Journal Article
+                %T Performance improvements for iterative electron tomography reconstruction using graphics processing units (GPUs)
+                %A Palenstijn, WJ
+                %A Batenburg, KJ
+                %A Sijbers, J
+                %J Journal of structural biology
+                %V 176
+                %N 2
+                %P 250-253
+                %@ 1047-8477
+                %D 2011
+                %I Elsevier
+        doi: "10.1016/j.jsb.2011.07.017"
         """

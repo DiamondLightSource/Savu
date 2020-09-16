@@ -20,8 +20,7 @@ projections. Used to improve the contrast of the reconstruction image.
               default: SINOGRAM
 
         """
-    def define_citations(self):
+    def citation(self):
         """
-        citation1:
-            description: The filter built is based on the Fresnel propagator
+        The filter built is based on the Fresnel propagator
         """

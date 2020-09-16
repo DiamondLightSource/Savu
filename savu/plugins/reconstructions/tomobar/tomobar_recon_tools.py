@@ -247,32 +247,31 @@ toolbox and the CCPi RGL toolkit
         """
 
 
-    def define_citations(self):
+    def citation(self):
         """
-        citation1:
-            description: First-order optimisation algorithm for linear inverse problems
-            bibtex: |
-                    @article{beck2009fast,
-                    title={A fast iterative shrinkage-thresholding algorithm for linear inverse problems},
-                    author={Beck, Amir and Teboulle, Marc},
-                    journal={SIAM journal on imaging sciences},
-                    volume={2},
-                    number={1},
-                    pages={183--202},
-                    year={2009},
-                    publisher={SIAM}
-                    }
-            endnote: |
-                    %0 Journal Article
-                    %T A fast iterative shrinkage-thresholding algorithm for linear inverse problems
-                    %A Beck, Amir
-                    %A Teboulle, Marc
-                    %J SIAM journal on imaging sciences
-                    %V 2
-                    %N 1
-                    %P 183-202
-                    %@ 1936-4954
-                    %D 2009
-                    %I SIAM
-            doi: "10.1016/j.jsb.2011.07.017"
+        First-order optimisation algorithm for linear inverse problems
+        bibtex:
+                @article{beck2009fast,
+                title={A fast iterative shrinkage-thresholding algorithm for linear inverse problems},
+                author={Beck, Amir and Teboulle, Marc},
+                journal={SIAM journal on imaging sciences},
+                volume={2},
+                number={1},
+                pages={183--202},
+                year={2009},
+                publisher={SIAM}
+                }
+        endnote:
+                %0 Journal Article
+                %T A fast iterative shrinkage-thresholding algorithm for linear inverse problems
+                %A Beck, Amir
+                %A Teboulle, Marc
+                %J SIAM journal on imaging sciences
+                %V 2
+                %N 1
+                %P 183-202
+                %@ 1936-4954
+                %D 2009
+                %I SIAM
+        doi: "10.1016/j.jsb.2011.07.017"
         """
