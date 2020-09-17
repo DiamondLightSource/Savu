@@ -390,14 +390,8 @@ class PluginCitations(object):
         citations = self._load_cite_from_doc(tool_class)
         if citations:
             for citation in citations.values():
-                new_citation = CitationInformation()
                 if self._citation_keys_valid(citation, tool_class):
-                    for k, v in citation.items():
-                        setattr(new_citation, k, v)
-                    new_citation.name = self._set_citation_name(new_citation,
-                                                                tool_class)
-                    new_citation.id = self._set_citation_id(new_citation,
-                                                                tool_class)
+                    new_citation = CitationInformation(**citation)
                     self.cite.set(new_citation.name, new_citation)
                 else:
                     print('The citation for', tool_class.__name__,
@@ -407,17 +401,13 @@ class PluginCitations(object):
         """ Check that required citation keys are present. Return false if
         required keys are missing
         """
-        citation_keys_valid = False
         required_keys = ['description']
         # Inside the fresnel filter there is only a description
         citation_keys = [k for k in new_citation.keys()]
         # Check that all of the required keys are contained inside the
         # citation definition
         check_keys = all(item in citation_keys for item in required_keys)
-        if check_keys is False:
-            citation_keys_valid = False
-        else:
-            citation_keys_valid = True
+        citation_keys_valid = False if check_keys is False else True
 
         all_keys = ['short_name_article', 'description', 'bibtex',
                     'endnote', 'doi', 'dependency']
@@ -431,75 +421,55 @@ class PluginCitations(object):
 
         return citation_keys_valid
 
-    def _set_citation_name(self, new_citation, tool_class):
-        """ Create a short identifier using the short name of the article
-        and the first author
-        """
-        endnote = new_citation.endnote.strip()
-        # Remove blank space
-        if endnote and hasattr(new_citation, 'short_name_article'):
-            cite_name = new_citation.short_name_article.title() + ' by ' \
-                        + self._get_first_author(new_citation) + ' et al.'
-        elif endnote:
-            cite_name = self._get_title(new_citation) + ' by ' \
-                        + self._get_first_author(new_citation) + ' et al.'
-        else:
-            # Set the tools class name as the citation name
-            module_name = tool_class.__module__.split('.')[-1].replace('_', ' ')
-            cite_name = module_name.split('tools')[0].title()
-        return cite_name
-
-    def _set_citation_id(self, new_citation, tool_class):
-        """ Create a short identifier using the bibtex identification
-        """
-        bibtex = new_citation.bibtex.strip()
-        # Remove blank space
-        if bibtex:
-            cite_id = self._get_id(new_citation)
-        else:
-            # Set the tools class name as the citation name
-            module_name = tool_class.__module__.split('.')[-1]
-            cite_id = module_name
-        return cite_id
-
-    def _get_id(self, new_citation):
-        """ Retrieve the id from the bibtex """
-        seperation_str = '@article{'
-        bibtex = new_citation.bibtex
-        cite_id = bibtex.partition(seperation_str)[2].split(',')[0]
-        return cite_id
-
-    def _get_first_author(self, new_citation):
-        """ Retrieve the first author name from the endnote """
-        first_author = self.seperate_endnote('%A', new_citation)
-        return first_author
-
-    def _get_title(self, new_citation):
-        """ Retrieve the title from the endnote """
-        title = self.seperate_endnote('%T', new_citation)
-        return title
-
-    def seperate_endnote(self, seperation_char, new_citation):
-        endnote = new_citation.endnote
-        item = endnote.partition(seperation_char)[2].split('\n')[0]
-        return item
 
     def _load_cite_from_doc(self, tool_class):
         """Find the citation information from the method docstring.
         This is provided in a yaml format.
+
+        :param tool_class: Tool to retrieve citation docstring from
+        :return: All citations from this tool class
         """
-        all_c = None
-        if hasattr(tool_class, 'define_citations'):
-            yaml_text = tool_class.define_citations.__doc__
+        all_c = OrderedDict()
+        # Seperate the citation methods. __dict__ returns instance attributes.
+        citation_methods = {key: value for key, value in tool_class.__dict__.items() if key.startswith('citation')}
+        for c_method_name, c_method in citation_methods.items():
+            yaml_text = c_method.__doc__
             if yaml_text is not None:
-                all_c = doc.load_yaml_doc(yaml_text)
-                if not isinstance(all_c, OrderedDict):
+                yaml_text = self.seperate_description(yaml_text)
+                current_citation = doc.load_yaml_doc(yaml_text)
+                if not isinstance(current_citation, OrderedDict):
                     print('The citation information has not been read in '
-                          'correctly for', tool_class.__name__, '.')
+                      'correctly for', tool_class.__name__, '.')
+                else:
+                    all_c[c_method_name] = current_citation
         return all_c
 
-    def define_citations(self):
-        pass
+    def seperate_description(self, yaml_text):
+        """ Change the format of the docstring to retain new lines for the
+        endnote and bibtex and create a key for the description so that
+        it be read as a yaml file
+
+        :param yaml_text:
+        :return: Reformatted yaml text
+        """
+        description =  yaml_text.partition('bibtex:')[0].splitlines()
+        description = [l.strip() for l in description]
+        desc_str = '        description:' + ' '.join(description)
+
+        bibtex_text =  yaml_text.partition('bibtex:')[2].partition('endnote:')[0]
+        end_text = yaml_text.partition('bibtex:')[2].partition('endnote:')[2]
+
+        if bibtex_text and end_text:
+            final_str = desc_str + '\n        bibtex: |' + bibtex_text \
+                      + 'endnote: |' + end_text
+        elif end_text:
+            final_str = desc_str + '\n        endnote: |' + end_text
+        elif bibtex_text:
+            final_str = desc_str + '\n        bibtex: |' + bibtex_text
+        else:
+            final_str = desc_str
+
+        return final_str
 
 
 class PluginDocumentation(object):

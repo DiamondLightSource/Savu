@@ -426,7 +426,7 @@ class Content(object):
         citation_dict = self.plugin_list.plugin_list[pos]['tools'].get_citations()
         parameters = self.plugin_list.plugin_list[pos]['data']
         for citation in citation_dict.values():
-            if hasattr(citation, 'dependency'):
+            if citation.dependency:
                 for citation_dependent_parameter, citation_dependent_value \
                         in citation.dependency.items():
                     current_value = parameters[citation_dependent_parameter]
@@ -444,7 +444,7 @@ class Content(object):
         cite_keys = ['name', 'description', 'doi', 'bibtex', 'endnote']
         cite_dict = citation.__dict__
         for key in cite_keys:
-            if key in cite_dict:
+            if cite_dict[key]:
                 if key == 'doi':
                     print(key.upper(), '\ndoi:', cite_dict[key], '\n')
                 else:

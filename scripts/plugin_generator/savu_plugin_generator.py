@@ -268,8 +268,7 @@ def main():
     if valid_name(args.plugin_name):
         plugin_title = convert_title(args.plugin_name).replace(' ', '')
         plugin = get_plugin_class(plugin_title)
-        #TODO Locate plugins in nested directories
-        if plugin == None:
+        if plugin is None:
             plugin_module_name = args.plugin_name
             module = 'savu.plugins.' + plugin_module_name
         else:
