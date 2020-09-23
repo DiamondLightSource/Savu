@@ -11,9 +11,9 @@ class CcpiDenoisingCpuTools(PluginTools):
             options: [ROF_TV, FGP_TV, SB_TV, NLTV, TGV, LLT_ROF, NDF, Diff4th]
             description:
                 summary: The denoising method
-                verbose: "Iterative methods can help to solve ill-posed
+                verbose: Iterative methods can help to solve ill-posed
                   inverse problems by choosing a suitable noise
-                  model for the measurement"
+                  model for the measurement
                 options:
                     ROF_TV: Rudin-Osher-Fatemi Total Variation model.
                      It is a good model for piecewise-constant images with

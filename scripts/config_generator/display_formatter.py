@@ -232,12 +232,12 @@ class DisplayFormatter(object):
                     # Highlight the currently selected option by setting a
                     # background colour and white text
                     colour = Back.BLUE + Fore.LIGHTWHITE_EX
-                    verbose_color = Back.GREEN + Fore.LIGHTWHITE_EX
+                    verbose_color = Back.BLACK + Fore.LIGHTWHITE_EX
                 else:
                     # Make the option bold using Style.BRIGHT
                     colour = Fore.BLUE + Style.BRIGHT
                     # Remove bold style for the description
-                    verbose_color = Style.RESET_ALL + Fore.GREEN
+                    verbose_color = Style.RESET_ALL + Fore.BLACK
                 option_verbose =''
                 unicode_bullet_point = u'\u2022'
                 if (description_verbose == True) \
