@@ -457,3 +457,79 @@ class ListDisplay(DisplayFormatter):
         c_off = Back.RESET + Fore.RESET
         info, warn = self._get_extra_info(p_dict, width, c_off, info_c, warn_c)
         return default_str + info + warn + all_params
+
+
+class CiteDisplay(DisplayFormatter):
+
+    def __init__(self, plugin_list):
+        super(CiteDisplay, self).__init__(plugin_list)
+
+    def _get_quiet(self, p_dict, count, width, quiet=True):
+        active = \
+            '***OFF***' if 'active' in p_dict and not p_dict['active'] else ''
+        pos = p_dict['pos'].strip() if 'pos' in p_dict.keys() else count
+        fore = Fore.RED + Style.DIM if active else Fore.LIGHTWHITE_EX
+        back = Back.LIGHTBLACK_EX
+        return self._get_plugin_title(p_dict, width, fore, back,
+                                      active=active, quiet=quiet, pos=pos)
+
+    def _get_default(self, level, p_dict, count, width, display_args=False):
+        """ Find the citations and print them. Only display citations
+        if they are required. For example, if certain methods are being
+        used.
+        """
+        margin = 6
+        str_margin = " " * margin
+
+        cite = ''
+        parameters = p_dict['data']
+        citation_dict = p_dict['tools'].get_citations()
+
+        title = self._get_quiet(p_dict, count, width)
+        line_break = '\n' + str_margin + '-' * (width-margin) + '\n'
+
+        for citation in citation_dict.values():
+            if citation.dependency:
+                # If the citation is dependent upon a certain parameter value
+                # being chosen
+                for citation_dependent_parameter, citation_dependent_value \
+                        in citation.dependency.items():
+                    current_value = parameters[citation_dependent_parameter]
+                    if current_value == citation_dependent_value:
+                        str_dep = 'This citation is for the ' \
+                                   + citation_dependent_value + ' '\
+                                   + citation_dependent_parameter
+                        str_dep = self._get_equal_lines(str_dep, width,
+                                   Style.BRIGHT, Style.RESET_ALL, str_margin)
+                        cite += line_break + str_dep + '\n'\
+                                + self._get_citation_lines(citation, width,
+                                                           str_margin)
+            else:
+                cite += line_break \
+                        + self._get_citation_lines(citation, width,
+                                                   str_margin)
+        return title + cite
+
+
+    def _get_citation_lines(self, citation, width, str_margin):
+        """ Print certain information about the citation in order.
+        """
+        cite_keys = ['name', 'description', 'doi', 'bibtex', 'endnote']
+        cite_dict = citation.__dict__
+        cite_str = ''
+
+        style_on = Style.BRIGHT
+        style_off = Style.RESET_ALL
+
+        for key in cite_keys:
+            if cite_dict[key]:
+                # Set the key name to be bold
+                cite_key = self._get_equal_lines(key.title(), width,
+                                     style_on, style_off, str_margin)
+                # No style for the citation content
+                cite_value = self._get_equal_lines(cite_dict[key],
+                                width, style_off, style_off, str_margin)
+                # New line for each item
+                cite_str += '\n' + cite_key + '\n' + cite_value + '\n'
+
+        return cite_str

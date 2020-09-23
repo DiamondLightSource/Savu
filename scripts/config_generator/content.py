@@ -414,44 +414,6 @@ class Content(object):
     def get(self, pos):
         return self.plugin_list.plugin_list[pos]
 
-    def cite(self, pos):
-        """ Find the citations and print them. Only display citations
-        if they are required. For example, if certain methods are being
-        used.
-        """
-        if pos >= self.size:
-            raise Exception("Cannot find citations for this plugin %s "
-                            "as it does not exist."
-                            % self.plugin_list.plugin_list[pos]['name'])
-        citation_dict = self.plugin_list.plugin_list[pos]['tools'].get_citations()
-        parameters = self.plugin_list.plugin_list[pos]['data']
-        for citation in citation_dict.values():
-            if citation.dependency:
-                for citation_dependent_parameter, citation_dependent_value \
-                        in citation.dependency.items():
-                    current_value = parameters[citation_dependent_parameter]
-                    if current_value == citation_dependent_value:
-                        print(Style.BRIGHT + 'This citation is for the '
-                              + citation_dependent_value + ' '
-                              + citation_dependent_parameter + '\n' + Style.RESET_ALL)
-                        self._print_citation(citation)
-            else:
-                self._print_citation(citation)
-
-    def _print_citation(self, citation):
-        """ Print certain information about the citation in order.
-        """
-        cite_keys = ['name', 'description', 'doi', 'bibtex', 'endnote']
-        cite_dict = citation.__dict__
-        for key in cite_keys:
-            if cite_dict[key]:
-                if key == 'doi':
-                    print(key.upper(), '\ndoi:', cite_dict[key], '\n')
-                else:
-                    print(key.upper(), '\n', cite_dict[key], '\n')
-        print('-------------------------------------------'
-              '-----------------------------------------')
-
     def level(self, level):
         """ Set the visibility level of parameters """
         self.disp_level = level
