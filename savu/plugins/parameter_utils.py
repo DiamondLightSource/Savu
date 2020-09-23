@@ -295,12 +295,10 @@ type_dict = {'int_list': _intlist,
             'list': _list}
 
 type_error_dict = {'int_list': 'list of integers',
-            'range': 'range. Valid items have a format <value 1>, <value 2>',
+            'range': 'range\'. Valid items have a format \'<value 1>, <value 2>',
             'yaml_file': 'yaml format',
-            'file_int_path_int': 'input. Valid items have a format '
-                                 '[<file path>, <interior file path>, int]',
-            'int_path_int': 'input. Valid items have a format '
-                            '[<interior file path>, int]',
+            'file_int_path_int': '[filepath, interior file path, int]',
+            'int_path_int': '[interior file path, int]',
             'filepath': 'filepath',
             'directory': 'directory',
             'int_path': 'string',
