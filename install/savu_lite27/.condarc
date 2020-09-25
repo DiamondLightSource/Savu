@@ -1,0 +1,15 @@
+channels:
+  - conda-forge
+  - defaults
+  - astra-toolbox/label/dev # or just remove it and leave astra to be taken from ccpi!
+  - ccpi
+  - dkazanc
+channel_priority: flexible
+auto_activate_base: false
+envs_dirs:
+  - /var/lib/jenkins/miniconda3/envs
+conda-build:
+  root-dir: /var/lib/jenkins/miniconda3/envs/install
+show_channel_urls: true
+unsatisfiable_hints: true
+anaconda_upload: false

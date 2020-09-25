@@ -1,0 +1,61 @@
+Installation notes (for creating a new release and installing at Diamond)
+Updated to give correct order.
+=========================================================================
+
+1) Create new install folder (Savu/install/$version_install)
+    a) Create folder
+    b) Copy all files and folders from previous installation into it
+    c) Clone the previous version_future environment and add to it (if future install exists)
+        OR if creating new fully updated release (e.g. future version), clone without version numbers
+        - conda env export -n root > environment.yml
+        - Remove libraries (mpi4py, hdf5, h5py, astra, xraylib, savu, pycuda, tomopy)
+    d) Update conda recipes (including version number in savu recipe)
+
+2) a) Update Savu/install/latest_version.py to contain the new version number (and the corresponding file)
+   b) Update Savu/install/all_versions.txt file to include this release (do this at the very last minute).
+   c) copy the latest module version and update according to the instructions.
+    -e.g. create 2.0_stable, 2.0_branch, 2.0_future  (see below)
+   d) Update installation notes with the latest tested versions of libraries and new link
+
+3) Create tar.gz of the new install folder
+   >>> tar -zcvf savu_v2.3.tar.gz savu_v2.3/
+   >>> update docs and re-build
+
+4) Push all changes to Github (ensure all tests passing)
+
+5) Test conda installation against Savu master version
+   a) Download and unzip folder from Savu installation guide
+   b) >>> bash /path_to_download/Savu_v2.0/savu_installer.sh -f dls -c 2.3_stable -s master
+	# Add e.g. -i 2_4_install if you want to use these conda recipes without updating the latest version file (and not pushing to github)
+
+Check SAVU_PLUGINS_PATH is working by 'module load savu/2.3' and checking configurator list
+
+6) a) Install any new libraries
+   b) Re-clone environment ( conda env export -n root > environment.yml) and update savu_installer.sh if necessary  - remove libraries again (detailed above).
+   c) Add all changes to Github
+   e) Update zip folder
+   d) Re-run installation again
+
+7) Run full-field and multi-modal mapping tests (from cluster testdir)
+
+8) Create release
+
+9) remove master install and conda install new version of Savu
+    >>> module load savu/2.3_stable
+    >>> conda uninstall savu
+    Download new conda zip file.
+    >>> export FACILITY=dls
+    >>> conda build savu_v2.3/savu
+    >>> savu_build=`conda build savu_v2.3/savu --output`
+    >>> conda install $savu_build
+
+Check module file again after release (current testing install in scratch location).
+
+========================EXTRA THINGS======================================
+- add SAVU_PLUGINS_PATH=/dls_sw/apps/savu/savu_plugins_v2.3
+    (or something similar) to module load file.
+- need to unzip the ccpi python egg so it doesn't extract at run time.
+- Fix tomopy
+- Add new release to all_versions file (prior to release)!!!
+==========================================================================
+

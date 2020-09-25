@@ -1,0 +1,50 @@
+10/09/2020 - Refine installation process (and folders)
+These are the new notes to follow when creating a new release/installation
+
+1) Change version number in savu.version to the latest one
+2) Delete the savu/install/savu_hpc/savu_installer zip file
+
+Try cloning the python 3 environment.
+To Dimitar:  Why can we not install into the Savu conda environment for v3.0
+Also need to try a new install
+
+*** temporarily amended the master savu recipe to point to python 3 branch
+
+
+# How to do a test install
+export FACILITY=dls
+module load openmpi/3.1.4
+
+
+
+Q's
+- Do I need FFTW?
+- Do I need CUDA?
+
+------------------------------------------------------------------------------------------
+TODO
+
+1) Try cloning the environment
+        - conda env export -n root > environment.yml
+        - Remove libraries (mpi4py, hdf5, h5py?)
+2) Install from the clone
+3) Add flag to choose cloned or original environment file
+4) Find tool to check all libraries from plugins are included using the tool I created
+
+------------------------------------------------------------------------------------------
+
+Updating the old installation notes
+Updated
+1) Update installation folder
+    a) Remove the environment_clone.txt file
+    b) Check all libraries from plugins are included in the old environment.txt file
+    d) Update conda recipes (including version number in savu recipe)
+    c) Create a new installation from master with flag to use environment.txt file
+    bash /path_to_download/Savu_v2.0/savu_installer.sh -f dls -c 2.3_stable -s master (add new flag)
+
+To update
+2) a) Update Savu/install/latest_version.py to contain the new version number (and the corresponding file)
+   b) Update Savu/install/all_versions.txt file to include this release (do this at the very last minute).
+   c) copy the latest module version and update according to the instructions.
+    -e.g. create 2.0_stable, 2.0_branch, 2.0_future  (see below)
+   d) Update installation notes with the latest tested versions of libraries and new link
