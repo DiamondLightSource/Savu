@@ -15,6 +15,7 @@ dependencies:
   - PyWavelets
   - scikit-learn
   - scikit-image
+  - pystackreg
   - geodistk
   - morphsnakes
   - tomobar
