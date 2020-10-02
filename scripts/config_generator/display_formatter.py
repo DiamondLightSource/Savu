@@ -271,10 +271,9 @@ class DisplayFormatter(object):
                                      colour_off, " " * 2)
         info = "\n"+info if info else ''
 
-        if doc_str.get('documentation_link'):
-            link_str = 'Documentation: '\
-                         +doc_str.get('documentation_link')
-            documentation_link = self._get_equal_lines(link_str, width,
+        doc_link = doc_str.get('documentation_link')
+        if doc_link:
+            documentation_link = self._get_equal_lines(doc_link, width,
                                             info_colour, colour_off, " " * 2)
             info +="\n"+documentation_link
 
