@@ -25,6 +25,8 @@ import os
 import re
 import sys
 
+from collections import OrderedDict
+
 from savu.plugins import utils as pu
 
 def add_package_entry(f, files_present, output, module_name):
@@ -275,11 +277,16 @@ def write_citations_to_file(new_rst_file, plugin_citations):
                            '^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'
                            '^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'
                            '^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^')
-        if hasattr(citation, 'dependency'):
-            for k, v in citation.dependency.items():
+        if citation.dependency:
+            # If the citation is dependent upon a certain parameter value
+            # being chosen
+            for citation_dependent_parameter, citation_dependent_value \
+                    in citation.dependency.items():
                 new_rst_file.write('\n(Please use this citation if '
                                    'you are using the '
-                                   + v + ' ' + k +')\n')
+                                   + citation_dependent_value
+                                   + ' '
+                                   + citation_dependent_parameter +')\n')
         bibtex = citation.bibtex
         endnote = citation.endnote
         # Where new lines are, append an indentation
@@ -326,11 +333,11 @@ def create_plugin_template_downloads(savu_base_path):
     inner_file_str = '../../../' + 'plugin_examples/plugin_templates/general'
     for doc_name, doc_str in docstring_text.items():
         title = convert_title(doc_name)
-        title = filter_template_numbers(title)
+        title, number = filter_template_numbers(title)
         doc_f.write(title
                     + '\n--------------------------------'
                       '----------------------------------\n')
-        doc_f.write(doc_str)
+        doc_f.write(doc_str['docstring'])
         doc_f.write('\n:download:`'+ title + ' <' + inner_file_str
                     +  '/' + doc_name + '.py>`')
         doc_f.write('\n\n\n')
@@ -347,11 +354,11 @@ def filter_template_numbers(name_string):
     split_uppercase = [l for l in re.split("([A-Z][^A-Z]*)", letters) if l]
     title = ' '.join(split_uppercase)
     name = title + ' ' + number
-    return name
+    return name, number
 
 def create_template_class_dict(savu_base_path):
     """ Iterate through the plugin example folder and store the class
-    and it's class docstring into a dicitonary docstring_text
+    and it's class docstring into a dictionary docstring_text
 
     :param savu_base_path:
     :return: docstring_text dictionary of class and docstring
@@ -377,7 +384,15 @@ def create_template_class_dict(savu_base_path):
                 cls_loaded = None
 
             if cls_loaded:
-                docstring_text[file_name] = cls_loaded.__doc__
+                title = convert_title(file_name)
+                name, number = filter_template_numbers(title)
+                docstring_text[file_name] = \
+                    {'docstring': cls_loaded.__doc__, 'number': int(number)}
+
+    # Order templates by number
+    docstring_text = OrderedDict(sorted(docstring_text.items(),
+                                        key=lambda i: i[1]['number']))
+
     return docstring_text
 
 if __name__ == "__main__":
