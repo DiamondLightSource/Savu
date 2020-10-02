@@ -79,8 +79,9 @@ class PluginParameters(object):
             if yaml_text is not None:
                 all_params = doc.load_yaml_doc(yaml_text)
                 if not isinstance(all_params, OrderedDict):
-                    print('The parameters have not been read in correctly '
-                          'for', tool_class.__name__, '.')
+                    error_msg = 'The parameters have not been read in correctly for {}'.format(tool_class.__name__)
+                    raise Exception(error_msg)
+
         return all_params
 
     def modify(self, parameters, value, param_name):
