@@ -148,8 +148,9 @@ def _directory(value):
 def _filepath(value):
     """ file path """
     parameter_valid = False
-    if os.path.isfile(value):
-        parameter_valid = True
+    if _string(value):
+        if os.path.isfile(value):
+            parameter_valid = True
     return parameter_valid
 
 
@@ -274,8 +275,9 @@ def _string_list(value):
         return parameter_valid
 
 # If you are editing the type dictionary, please update the documentation
-# files dev_plugin.rst and the files included inside dev_param_key.rst to
-# provide guidance for plugin creators
+# files dev_plugin.rst and the files included inside
+# doc/source/files_and_images/dev_param_key.rst to provide guidance for
+# plugin creators
 type_dict = {'int_list': _intlist,
             'range': _range,
             'yaml_file': _yamlfile,
@@ -302,7 +304,7 @@ type_error_dict = {'int_list': 'list of integers',
             'filepath': 'filepath',
             'directory': 'directory',
             'int_path': 'string',
-            'config_file': 'config file',
+            'config_file': 'configuration file',
             'filename': 'file name',
             'nptype': 'numpy data type',
             'int': 'integer',

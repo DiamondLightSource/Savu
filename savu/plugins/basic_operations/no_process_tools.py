@@ -5,6 +5,11 @@ class NoProcessTools(PluginTools):
     """
     def define_parameters(self):
         """
+        preview:
+            visibility: basic
+            dtype: list
+            description:
+            default: []
         pattern:
             visibility: advanced
             dtype: str
