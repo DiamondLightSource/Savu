@@ -23,6 +23,12 @@ Parameter definitions
             description: Create a list of the dataset(s) to create
             default: []
         
+        preview:
+            visibility: basic
+            dtype: list
+            description:
+            default: []
+        
         pattern:
             visibility: advanced
             dtype: str

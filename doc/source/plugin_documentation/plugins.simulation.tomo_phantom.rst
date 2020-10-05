@@ -109,19 +109,13 @@ Key
 .. literalinclude:: /../source/files_and_images/documentation/short_parameter_key.yaml
     :language: yaml
 
-Documentation
+Citations
 --------------------------
 
-Citations
-^^^^^^^^^^^^^^^^^^^^^^^^
-
-TomoPhantom, a software package to generate 2D-4D analytical phantoms for CT image reconstruction algorithm benchmarks by  Kazantsev, Daniil et al.
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-TomoPhantom is a software package to generate 2D-4D analytical phantoms and their Radon transforms for various testing purposes.
-
+TomoPhantom, a software package to generate 2D-4D analytical phantoms for CT image reconstruction algorithm benchmarks by Kazantsev, Daniil et al.
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Bibtex
-````````````````````````````````````````````````
+""""""""""""""""""""""""""""""""""""""""""
 
 .. code-block:: none
 
@@ -137,7 +131,7 @@ Bibtex
     
 
 Endnote
-````````````````````````````````````````````````
+""""""""""""""""""""""""""""""""""""""""""
 
 .. code-block:: none
 

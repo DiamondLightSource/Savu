@@ -48,19 +48,13 @@ Key
 .. literalinclude:: /../source/files_and_images/documentation/short_parameter_key.yaml
     :language: yaml
 
-Documentation
+Citations
 --------------------------
 
-Citations
-^^^^^^^^^^^^^^^^^^^^^^^^
-
-Regularization methods for inverse problems in x-ray tomography by  Titarenko, Valeriy et al.
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-The ring artefact removal algorithm used in this processing chain is taken from this work.
-
+Regularization methods for inverse problems in x-ray tomography by Titarenko, Valeriy et al.
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Bibtex
-````````````````````````````````````````````````
+""""""""""""""""""""""""""""""""""""""""""
 
 .. code-block:: none
 
@@ -77,7 +71,7 @@ Bibtex
     
 
 Endnote
-````````````````````````````````````````````````
+""""""""""""""""""""""""""""""""""""""""""
 
 .. code-block:: none
 

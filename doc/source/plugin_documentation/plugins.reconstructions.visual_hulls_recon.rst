@@ -107,19 +107,13 @@ Key
 .. literalinclude:: /../source/files_and_images/documentation/short_parameter_key.yaml
     :language: yaml
 
-Documentation
+Citations
 --------------------------
 
-Citations
-^^^^^^^^^^^^^^^^^^^^^^^^
-
-The visual hull concept for silhouette-based image understanding by  Laurentini, Aldo et al.
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-The reconstruction performed in this processing chain is derived from this work
-
+The visual hull concept for silhouette-based image understanding by Laurentini, Aldo et al.
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Bibtex
-````````````````````````````````````````````````
+""""""""""""""""""""""""""""""""""""""""""
 
 .. code-block:: none
 
@@ -136,7 +130,7 @@ Bibtex
     
 
 Endnote
-````````````````````````````````````````````````
+""""""""""""""""""""""""""""""""""""""""""
 
 .. code-block:: none
 

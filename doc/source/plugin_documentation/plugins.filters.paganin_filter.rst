@@ -77,19 +77,13 @@ Key
 .. literalinclude:: /../source/files_and_images/documentation/short_parameter_key.yaml
     :language: yaml
 
-Documentation
+Citations
 --------------------------
 
-Citations
-^^^^^^^^^^^^^^^^^^^^^^^^
-
-Simultaneous phase and amplitude extraction from a single defocused image of a homogeneous object by  Paganin, David et al.
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-The contrast enhancement used in this processing chain is taken from this work.
-
+Simultaneous phase and amplitude extraction from a single defocused image of a homogeneous object by Paganin, David et al.
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Bibtex
-````````````````````````````````````````````````
+""""""""""""""""""""""""""""""""""""""""""
 
 .. code-block:: none
 
@@ -106,7 +100,7 @@ Bibtex
     
 
 Endnote
-````````````````````````````````````````````````
+""""""""""""""""""""""""""""""""""""""""""
 
 .. code-block:: none
 

@@ -127,19 +127,13 @@ Key
 .. literalinclude:: /../source/files_and_images/documentation/short_parameter_key.yaml
     :language: yaml
 
-Documentation
+Citations
 --------------------------
 
-Citations
-^^^^^^^^^^^^^^^^^^^^^^^^
-
-Principles Of Ct Imaging by  Kak, Avinash C et al.
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-The Tomographic reconstruction performed in this processing chain is derived from this work
-
+Principles Of Ct Imaging by Kak, Avinash C et al.
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Bibtex
-````````````````````````````````````````````````
+""""""""""""""""""""""""""""""""""""""""""
 
 .. code-block:: none
 
@@ -156,7 +150,7 @@ Bibtex
     
 
 Endnote
-````````````````````````````````````````````````
+""""""""""""""""""""""""""""""""""""""""""
 
 .. code-block:: none
 

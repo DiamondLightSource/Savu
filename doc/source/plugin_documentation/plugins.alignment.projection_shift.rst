@@ -14,6 +14,9 @@ robust ransac matching to calculate the translation between different
 combinations of 10 consecutive projection images. A least squares solution to
 the shift values between images is calculated and returned for the middle 8 images.
     
+.. toctree::
+    Plugin documention and guidelines on use </../documentation/projection_shift_doc.rst>
+
 Parameter definitions
 --------------------------
 
@@ -61,9 +64,3 @@ Key
 
 .. literalinclude:: /../source/files_and_images/documentation/short_parameter_key.yaml
     :language: yaml
-
-Documentation
---------------------------
-
-.. toctree::
-    Plugin documention and guidelines on use </../documentation/projection_shift_doc.rst>

@@ -132,3 +132,46 @@ Key
 
 .. literalinclude:: /../source/files_and_images/documentation/short_parameter_key.yaml
     :language: yaml
+
+Citations
+--------------------------
+
+TomoPy: a framework for the analysis of synchrotron tomographic data by Gu'ü'rsoy, Doga et al.
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Bibtex
+""""""""""""""""""""""""""""""""""""""""""
+
+.. code-block:: none
+
+    @article{gursoy2014tomopy,
+    title={TomoPy: a framework for the analysis of synchrotron tomographic data},
+    author={G{"u}rsoy, Doga and De Carlo, Francesco and Xiao, Xianghui and Jacobsen, Chris},
+    journal={Journal of synchrotron radiation},
+    volume={21},
+    number={5},
+    pages={1188--1193},
+    year={2014},
+    publisher={International Union of Crystallography}
+    }
+    
+
+Endnote
+""""""""""""""""""""""""""""""""""""""""""
+
+.. code-block:: none
+
+    %0 Journal Article
+    %T TomoPy: a framework for the analysis of synchrotron tomographic data
+    %A Gu'ü'rsoy, Doga
+    %A De Carlo, Francesco
+    %A Xiao, Xianghui
+    %A Jacobsen, Chris
+    %J Journal of synchrotron radiation
+    %V 21
+    %N 5
+    %P 1188-1193
+    %@ 1600-5775
+    %D 2014
+    %I International Union of Crystallography
+    
+
