@@ -154,5 +154,21 @@ class ParameterTypeTest(unittest.TestCase):
         valid_modification = plugin.tools.modify(plugin.parameters, value, key)
         self.assertFalse(valid_modification)
 
+    def test_pos_int(self):
+        # Check that positive integers are accepted
+        plugin = self.initial_setup()
+        key = 'positive_test'
+        value = 2
+        valid_modification = plugin.tools.modify(plugin.parameters, value, key)
+        self.assertTrue(valid_modification)
+
+    def test_pos_int_1(self):
+        # Check that negative integers are not accepted
+        plugin = self.initial_setup()
+        key = 'positive_test'
+        value = -2
+        valid_modification = plugin.tools.modify(plugin.parameters, value, key)
+        self.assertFalse(valid_modification)
+
 if __name__ == "__main__":
     unittest.main()
