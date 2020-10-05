@@ -8,7 +8,7 @@ projections. Used to improve the contrast of the reconstruction image.
     def define_parameters(self):
         """
         ratio:
-              visibility: datasets
+              visibility: basic
               dtype: float
               description: Control the strength of the filter. Greater is stronger
               default: 100.0

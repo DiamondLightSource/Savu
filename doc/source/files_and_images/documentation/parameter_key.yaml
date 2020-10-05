@@ -10,6 +10,7 @@ dtype:
     description: The type of data
     values:
         int: integer
+        pos_int: positive integer
         bool: boolean
         str: string
         float: float

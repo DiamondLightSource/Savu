@@ -252,6 +252,8 @@ Choose the data type. This is used to check the parameter input is valid.
       - Description
     * - int
       - An integer
+    * - pos_int
+      - A positive integer
     * - bool
       - A boolean
     * - str
@@ -398,15 +400,14 @@ be in a yaml format.
         def define_parameters(self):
             """
             """
-        def define_citations(self):
+        def citation(self):
             """
-            citation1:
-                description: Short description
-                bibtex: |
-                        Bibtex block of text.
-                endnote: |
-                        Endnote block of text.
-                doi: doi link
+            Short description
+            bibtex:
+                    Bibtex block of text.
+            endnote:
+                    Endnote block of text.
+            doi: doi link
             """
 
 If unicode characters are included, for example the character mew, you can
@@ -416,38 +417,37 @@ precede the docstring with the letter 'u'.
 
         def define_citations(self):
             u"""
-            citation1:
-                description: The Tomographic filtering performed in this processing
-                  chain is derived from this work.
-                bibtex: |
-                        @article{price2015chemical,
-                        title={Chemical imaging of single catalyst particles with scanning $\mu$-XANES-CT and $\mu$-XRF-CT},
-                        author={Price, SWT and Ignatyev, K and Geraki, K and Basham, M and Filik, J and Vo, NT and Witte, PT and Beale, AM and Mosselmans, JFW},
-                        journal={Physical Chemistry Chemical Physics},
-                        volume={17},
-                        number={1},
-                        pages={521--529},
-                        year={2015},
-                        publisher={Royal Society of Chemistry}}
-                endnote: |
-                        %0 Journal Article
-                        %T Chemical imaging of single catalyst particles with scanning \u03BC-XANES-CT and \u03BC-XRF-CT
-                        %A Price, SWT
-                        %A Ignatyev, K
-                        %A Geraki, K
-                        %A Basham, M
-                        %A Filik, J
-                        %A Vo, NT
-                        %A Witte, PT
-                        %A Beale, AM
-                        %A Mosselmans, JFW
-                        %J Physical Chemistry Chemical Physics
-                        %V 17
-                        %N 1
-                        %P 521-529
-                        %D 2015
-                        %I Royal Society of Chemistry
-                doi: "10.1039/c4cp04488f"
+            The Tomographic filtering performed in this processing
+            chain is derived from this work.
+            bibtex:
+                    @article{price2015chemical,
+                    title={Chemical imaging of single catalyst particles with scanning $\mu$-XANES-CT and $\mu$-XRF-CT},
+                    author={Price, SWT and Ignatyev, K and Geraki, K and Basham, M and Filik, J and Vo, NT and Witte, PT and Beale, AM and Mosselmans, JFW},
+                    journal={Physical Chemistry Chemical Physics},
+                    volume={17},
+                    number={1},
+                    pages={521--529},
+                    year={2015},
+                    publisher={Royal Society of Chemistry}}
+            endnote:
+                    %0 Journal Article
+                    %T Chemical imaging of single catalyst particles with scanning \u03BC-XANES-CT and \u03BC-XRF-CT
+                    %A Price, SWT
+                    %A Ignatyev, K
+                    %A Geraki, K
+                    %A Basham, M
+                    %A Filik, J
+                    %A Vo, NT
+                    %A Witte, PT
+                    %A Beale, AM
+                    %A Mosselmans, JFW
+                    %J Physical Chemistry Chemical Physics
+                    %V 17
+                    %N 1
+                    %P 521-529
+                    %D 2015
+                    %I Royal Society of Chemistry
+            doi: "10.1039/c4cp04488f"
 
             """
 
@@ -455,15 +455,16 @@ Below is a longer example of the yaml text.
 
 .. code-block:: yaml
 
-    citation1:
+    def citation():
+        """
+        The CCPi-Regularisation toolkit provides a set of
+        variational regularisers (denoisers) which can be embedded in
+        a plug-and-play fashion into proximal splitting methods for
+        image reconstruction. CCPi-RGL comes with algorithms that can
+        satisfy various prior expectations of the reconstructed object,
+        for example being piecewise-constant or piecewise-smooth nature.
         short_name_article: ccpi regularisation toolkit for CT
-        description: The CCPi-Regularisation toolkit provides a set of
-          variational regularisers (denoisers) which can be embedded in
-          a plug-and-play fashion into proximal splitting methods for
-          image reconstruction. CCPi-RGL comes with algorithms that can
-          satisfy various prior expectations of the reconstructed object,
-          for example being piecewise-constant or piecewise-smooth nature.
-        bibtex: |
+        bibtex:
                 @article{kazantsev2019ccpi,
                 title={Ccpi-regularisation toolkit for computed tomographic image reconstruction with proximal splitting algorithms},
                 author={Kazantsev, Daniil and Pasca, Edoardo and Turner, Martin J and Withers, Philip J},
@@ -473,7 +474,7 @@ Below is a longer example of the yaml text.
                 year={2019},
                 publisher={Elsevier}
                 }
-        endnote: |
+        endnote:
                 %0 Journal Article
                 %T Ccpi-regularisation toolkit for computed tomographic image reconstruction with proximal splitting algorithms
                 %A Kazantsev, Daniil
@@ -487,11 +488,13 @@ Below is a longer example of the yaml text.
                 %D 2019
                 %I Elsevier
         doi: "10.1016/j.softx.2019.04.003"
+        """
 
-    citation2:
-        description: Rudin-Osher-Fatemi explicit PDE minimisation method
-          for smoothed Total Variation regulariser
-        bibtex: |
+    def citation2():
+        """
+        Rudin-Osher-Fatemi explicit PDE minimisation method
+        for smoothed Total Variation regulariser
+        bibtex:
                 @article{rudin1992nonlinear,
                   title={Nonlinear total variation based noise removal algorithms},
                   author={Rudin, Leonid I and Osher, Stanley and Fatemi, Emad},
@@ -502,7 +505,7 @@ Below is a longer example of the yaml text.
                   year={1992},
                   publisher={North-Holland}
                 }
-        endnote: |
+        endnote:
                 %0 Journal Article
                 %T Nonlinear total variation based noise removal algorithms
                 %A Rudin, Leonid I
@@ -535,14 +538,11 @@ This is a string describing the citation.
 Bibtex
 ''''''''''
 
-The bibtex text. This is preceded by the symbol '|'. It means that the text
-following that symbol will have a 'literal' style and keep its line breaks
-as new lines.
+The bibtex text.
 
 .. code-block:: yaml
 
     bibtex:
-            |
             @article{kazantsev2019ccpi,
             title={Ccpi-regularisation toolkit for computed tomographic image reconstruction with proximal splitting algorithms},
             author={Kazantsev, Daniil and Pasca, Edoardo and Turner, Martin J and Withers, Philip J},
@@ -556,14 +556,11 @@ as new lines.
 Endnote
 ''''''''''
 
-The endnote text. This is preceded by the symbol '|'. It means that the text
-following that symbol will have a 'literal' style and keep its line breaks
-as new lines.
+The endnote text.
 
 .. code-block:: yaml
 
     endnote:
-            |
             @article{kazantsev2019ccpi,
             title={Ccpi-regularisation toolkit for computed tomographic image reconstruction with proximal splitting algorithms},
             author={Kazantsev, Daniil and Pasca, Edoardo and Turner, Martin J and Withers, Philip J},
