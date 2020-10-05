@@ -323,26 +323,91 @@ def create_plugin_template_downloads(savu_base_path):
     docstring_text = create_template_class_dict(savu_base_path)
 
     doc_f = open(doc_template_file, 'w')
-
+    # Create a 'ref' for linking to other rst files
     doc_f.write('.. _plugin_templates:\n')
     doc_f.write('\n')
 
     doc_f.write('Plugin templates \n=======================\n')
     doc_f.write('\n')
 
+    doc_name = 'plugin_template1_with_detailed_notes'
+    detailed_template = docstring_text[doc_name]
+    docstring_text.pop(doc_name)
+    title = convert_title(doc_name)
+    title, number = filter_template_numbers(title)
     inner_file_str = '../../../' + 'plugin_examples/plugin_templates/general'
+    doc_text = detailed_template['docstring'].split(':param')[0]
+    doc_text = " ".join(doc_text.splitlines())
+    doc_f.write(title
+                + '\n--------------------------------'
+                  '----------------------------------\n')
+    doc_f.write(doc_text)
+    doc_f.write('\n')
+    doc_f.write('\n')
+    doc_f.write(':download:`' + title + ' <' + inner_file_str
+                + '/' + doc_name + '.py>`\n\n')
+
+    doc_f.write('Further Examples'
+                + '\n--------------------------------'
+                  '----------------------------------\n')
+    # Begin the table layout
+    doc_f.write('''
+.. list-table::  
+   :widths: 10 90
+   :header-rows: 1
+
+   * - Link
+     - Description''')
+
     for doc_name, doc_str in docstring_text.items():
         title = convert_title(doc_name)
         title, number = filter_template_numbers(title)
-        doc_f.write(title
-                    + '\n--------------------------------'
-                      '----------------------------------\n')
-        doc_f.write(doc_str['docstring'])
-        doc_f.write('\n:download:`'+ title + ' <' + inner_file_str
-                    +  '/' + doc_name + '.py>`')
-        doc_f.write('\n\n\n')
+        # Remove the parameter information from the docstring
+        doc_text = doc_str['docstring'].split(':param')[0]
+        doc_text = " ".join(doc_text.splitlines())
+        # Create a link to the restructured text page view of the python
+        # code for the template
+        doc_f.write('\n   * - :ref:`'+doc_name+'`')
+        # The template description from the docstring
+        doc_f.write('\n     - '+doc_text)
+        doc_f.write('\n')
+        # Create the restructured text page for the plugin template
+        # python code
+        generate_template_files(doc_name, title)
 
+    doc_f.write('\n')
     doc_f.close()
+
+
+def generate_template_files(doc_name, title):
+    """ Create a restructured text file which will inclide the python
+     code for the plugin template 'doc_name'
+
+    :param doc_name: The name of the template file
+    :param title:
+    :return:
+    """
+    inner_file_str = '../../../../' + 'plugin_examples/plugin_templates/general'
+    template_file_path = savu_base_path \
+                        + 'doc/source/dev_guides/templates/'\
+                         + doc_name + '.rst'
+    template_file = open(template_file_path, 'w')
+    # Add the orphan instruction as this file is not inside a toctree
+    template_file.write(':orphan:\n')
+    template_file.write('\n')
+    template_file.write('.. _' + doc_name + ':\n')
+    template_file.write('\n')
+    template_file.write(title+'\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n')
+    template_file.write('\n')
+    template_file.write(':download:`Download <' + inner_file_str
+                + '/' + doc_name + '.py>`\n\n')
+    template_file.write('\n')
+    template_file.write('.. literalinclude:: '
+                       '/../../plugin_examples/plugin_templates/general/'
+                        + doc_name + '.py')
+    template_file.write('\n    :language: python\n')
+    template_file.close()
+
 
 def filter_template_numbers(name_string):
     """
