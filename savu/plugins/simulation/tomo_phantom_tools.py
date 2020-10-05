@@ -83,36 +83,35 @@ Phantom3DLibrary.dat)
         """
 
 
-    def get_citation(self):
+    def citation(self):
         """
-        citation1:
-            description: TomoPhantom is a software package to generate 2D-4D
-              analytical phantoms and their Radon transforms for various
-              testing purposes.
-            bibtex: |
-                    @article{kazantsev2018tomophantom,
-                      title={TomoPhantom, a software package to generate 2D-4D analytical phantoms for CT image reconstruction algorithm benchmarks},
-                      author={Kazantsev, Daniil and Pickalov, Valery and Nagella, Srikanth and Pasca, Edoardo and Withers, Philip J},
-                      journal={SoftwareX},
-                      volume={7},
-                      pages={150--155},
-                      year={2018},
-                      publisher={Elsevier}
-                    }
-            endnote: |
-                    %0 Journal Article
-                    %T TomoPhantom, a software package to generate 2D-4D analytical phantoms for CT image reconstruction algorithm benchmarks
-                    %A Kazantsev, Daniil
-                    %A Pickalov, Valery
-                    %A Nagella, Srikanth
-                    %A Pasca, Edoardo
-                    %A Withers, Philip J
-                    %J SoftwareX
-                    %V 7
-                    %P 150-155
-                    %@ 2352-7110
-                    %D 2018
-                    %I Elsevier
+        TomoPhantom is a software package to generate 2D-4D
+        analytical phantoms and their Radon transforms for various
+        testing purposes.
+        bibtex:
+                @article{kazantsev2018tomophantom,
+                  title={TomoPhantom, a software package to generate 2D-4D analytical phantoms for CT image reconstruction algorithm benchmarks},
+                  author={Kazantsev, Daniil and Pickalov, Valery and Nagella, Srikanth and Pasca, Edoardo and Withers, Philip J},
+                  journal={SoftwareX},
+                  volume={7},
+                  pages={150--155},
+                  year={2018},
+                  publisher={Elsevier}
+                }
+        endnote:
+                %0 Journal Article
+                %T TomoPhantom, a software package to generate 2D-4D analytical phantoms for CT image reconstruction algorithm benchmarks
+                %A Kazantsev, Daniil
+                %A Pickalov, Valery
+                %A Nagella, Srikanth
+                %A Pasca, Edoardo
+                %A Withers, Philip J
+                %J SoftwareX
+                %V 7
+                %P 150-155
+                %@ 2352-7110
+                %D 2018
+                %I Elsevier
 
-            doi: "10.1016/j.softx.2018.05.003"
+        doi: "10.1016/j.softx.2018.05.003"
         """

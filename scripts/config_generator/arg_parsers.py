@@ -193,7 +193,9 @@ def _rem_arg_parser(args, desc):
 def _cite_arg_parser(args, desc):
     """ Argument parser for cite command. """
     parser = ArgumentParser(prog='cite', description=desc)
-    parser.add_argument('pos', help="Plugin position(s).")
+    parser.add_argument("start", nargs='?', help="Display this plugin citation.")
+    stop_str = "Display plugins from start to stop."
+    parser.add_argument("stop", nargs='?', help=stop_str)
     return __arg_parser(parser, args, 'cite')
 
 

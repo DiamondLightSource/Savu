@@ -11,18 +11,26 @@ Parameter definitions
 
 .. code-block:: yaml
 
-    
+        in_datasets:
+            visibility: datasets
+            dtype: list
+            description: none
+            default: []
+        
+        out_datasets:
+            visibility: datasets
+            dtype: list
+            description: none
+            default: []
+        
         pattern:
             visibility: basic
             dtype: str
-            description: Optimise data storage to this access pattern
-              'optimum' will automate this process by choosing the output
-              pattern from the previous plugin, if it exists, else the
-              first pattern.
-            default: 'optimum'
+            description: "Optimise data storage to this access pattern 'optimum' will automate this process by choosing the output pattern from the previous plugin, if it exists, else the first pattern."
+            default: optimum
         
 Key
 ^^^^^^^^^^
 
-.. literalinclude:: /../source/documentation/short_parameter_key.yaml
+.. literalinclude:: /../source/files_and_images/documentation/short_parameter_key.yaml
     :language: yaml

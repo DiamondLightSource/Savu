@@ -30,7 +30,7 @@ with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     from content import Content
     from completer import Completer
-    from display_formatter import ListDisplay, DispDisplay
+    from display_formatter import ListDisplay, DispDisplay, CiteDisplay
     import arg_parsers as parsers
     from savu.plugins import utils as pu
     import config_utils as utils
@@ -123,9 +123,21 @@ def _mod(content, args):
     """ Modify plugin parameters. """
     try:
         pos_str, subelem = args.param.split('.')
+
+        # Get the name of the modified parameter so that the display
+        # lists the correct item when the parameter order has been updated
+        plugin_position = content.find_position(pos_str)
+        current_parameter_list = content.plugin_list.plugin_list[plugin_position]['param']
+        current_parameter_list_ordered = pu.set_order_by_visibility(current_parameter_list)
+        param_name = pu.param_to_str(subelem, current_parameter_list_ordered)
+
         try:
             content_modified = content.modify(pos_str, subelem, ' '.join(args.value))
             if content_modified:
+                # Use the param_name str instead of a number, as after the
+                # modification new dependent parameter may appear inside the list
+                # and mean the parameter has moved
+                args.param = pos_str + '.' + param_name
                 _disp(content, str(args.param))
         except Exception:
             print('Error modifying the parameter.')
@@ -173,8 +185,12 @@ def _ref(content, args):
 @parse_args
 @error_catcher
 def _cite(content, args):
-    """ Display citations for a plugin. """
-    content.cite(content.find_position(args.pos))
+    """ Display citations for a plugin. You can select a plugin number
+    or range. All plugins are selected if there is not a number argument.
+    """
+    range_dict = utils.__get_start_stop(content, args.start, args.stop)
+    formatter = CiteDisplay(content.plugin_list)
+    content.display(formatter, **range_dict)
     return content
 
 

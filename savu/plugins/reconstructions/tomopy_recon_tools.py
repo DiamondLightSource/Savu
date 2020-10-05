@@ -55,12 +55,11 @@ required for the chosen algorithm will be ignored.
 
         """
 
-def get_citation(self):
-    """
-    citation1:
-        description: An algorithm from the TomoPy framework is used to
-          perform the reconstruction in this processing pipeline.
-        bibtex: |
+    def citation(self):
+        """
+        An algorithm from the TomoPy framework is used to
+        perform the reconstruction in this processing pipeline.
+        bibtex:
                 @article{gursoy2014tomopy,
                 title={TomoPy: a framework for the analysis of synchrotron tomographic data},
                 author={G{\"u}rsoy, Doga and De Carlo, Francesco and Xiao, Xianghui and Jacobsen, Chris},
@@ -71,7 +70,7 @@ def get_citation(self):
                 year={2014},
                 publisher={International Union of Crystallography}
                 }
-        endnote: |
+        endnote:
                 %0 Journal Article
                 %T TomoPy: a framework for the analysis of synchrotron tomographic data
                 %A Gu'ü'rsoy, Doga
@@ -86,4 +85,4 @@ def get_citation(self):
                 %D 2014
                 %I International Union of Crystallography
         doi: "10.1107/S1600577514013939"
-    """
+        """

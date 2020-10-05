@@ -11,21 +11,26 @@ Parameter definitions
 
 .. code-block:: yaml
 
-    
-        center:
-              visibility: intermediate
-              dtype: float
-              description: Center of rotation.
-              default: 0.0
+        in_datasets:
+            visibility: datasets
+            dtype: list
+            description: Create a list of the dataset(s) to process
+            default: []
+        
         out_datasets:
-              visibility: intermediate
-              dtype: list
-              description: Create a list of the output datatsets to create.
-              default: ['in_datasets[0]', 'cor']
-
+            visibility: datasets
+            dtype: list
+            description: Create a list of the output datatsets to create.
+            default: ['in_datasets[0]', 'cor']
+        
+        center:
+            visibility: intermediate
+            dtype: float
+            description: Center of rotation.
+            default: 0.0
         
 Key
 ^^^^^^^^^^
 
-.. literalinclude:: /../source/documentation/short_parameter_key.yaml
+.. literalinclude:: /../source/files_and_images/documentation/short_parameter_key.yaml
     :language: yaml

@@ -15,28 +15,38 @@ Parameter definitions
 
 .. code-block:: yaml
 
-    
+        in_datasets:
+            visibility: datasets
+            dtype: list
+            description: Create a list of the dataset(s) to process
+            default: []
+        
+        out_datasets:
+            visibility: datasets
+            dtype: list
+            description: Create a list of the dataset(s) to create
+            default: []
+        
         classes:
             visibility: intermediate
             dtype: int
             description: The number of classes for GMM.
             default: 5
-
+        
         correction_window:
             visibility: basic
             dtype: int
             description: The size of the correction (non-local) window
             default: 8
-
+        
         iterations:
             visibility: basic
             dtype: int
             description: The number of iterations for segmentation.
             default: 10
-
         
 Key
 ^^^^^^^^^^
 
-.. literalinclude:: /../source/documentation/short_parameter_key.yaml
+.. literalinclude:: /../source/files_and_images/documentation/short_parameter_key.yaml
     :language: yaml

@@ -11,9 +11,9 @@ class CcpiDenoisingCpuTools(PluginTools):
             options: [ROF_TV, FGP_TV, SB_TV, NLTV, TGV, LLT_ROF, NDF, Diff4th]
             description:
                 summary: The denoising method
-                verbose: "Iterative methods can help to solve ill-posed
+                verbose: Iterative methods can help to solve ill-posed
                   inverse problems by choosing a suitable noise
-                  model for the measurement"
+                  model for the measurement
                 options:
                     ROF_TV: Rudin-Osher-Fatemi Total Variation model.
                      It is a good model for piecewise-constant images with
@@ -26,7 +26,7 @@ class CcpiDenoisingCpuTools(PluginTools):
                          Huber or Tukey)"
                     TGV: Total Generalised Variation
                     NLTV: Non Local Total Variation
-                    DIFF4th: Fourth-order nonlinear diffusion model
+                    Diff4th: Fourth-order nonlinear diffusion model
             default: FGP_TV
 
         reg_parameter:
@@ -52,14 +52,14 @@ class CcpiDenoisingCpuTools(PluginTools):
                  of the algorithm.
                range: Recommended value dependent upon method.
              default:
-                 reg_parameter:
+                 method:
                    ROF_TV: 2000
                    FGP_TV: 500
                    PD_TV: 500
                    SB_TV: 100
                    LLT_ROF: 2000
                    NDF: 2000
-                   DIFF4th: 1000
+                   Diff4th: 1000
                    TGV: 500
                    NLTV: 5
 
@@ -144,281 +144,304 @@ class CcpiDenoisingCpuTools(PluginTools):
         """
 
 
-    def get_citation(self):
+    def citation1(self):
         """
-        citation1:
-            description: The CCPi-Regularisation toolkit provides a set of
-              variational regularisers (denoisers) which can be embedded in
-              a plug-and-play fashion into proximal splitting methods for
-              image reconstruction. CCPi-RGL comes with algorithms that can
-              satisfy various prior expectations of the reconstructed object,
-              for example being piecewise-constant or piecewise-smooth nature.
-            bibtex: |
-                    @article{kazantsev2019ccpi,
-                    title={Ccpi-regularisation toolkit for computed tomographic image reconstruction with proximal splitting algorithms},
-                    author={Kazantsev, Daniil and Pasca, Edoardo and Turner, Martin J and Withers, Philip J},
-                    journal={SoftwareX},
-                    volume={9},
-                    pages={317--323},
-                    year={2019},
-                    publisher={Elsevier}
-                    }
-            endnote: |
-                    %0 Journal Article
-                    %T Ccpi-regularisation toolkit for computed tomographic image reconstruction with proximal splitting algorithms
-                    %A Kazantsev, Daniil
-                    %A Pasca, Edoardo
-                    %A Turner, Martin J
-                    %A Withers, Philip J
-                    %J SoftwareX
-                    %V 9
-                    %P 317-323
-                    %@ 2352-7110
-                    %D 2019
-                    %I Elsevier
-            doi: "10.1016/j.softx.2019.04.003"
+        The CCPi-Regularisation toolkit provides a set of
+        variational regularisers (denoisers) which can be embedded in
+        a plug-and-play fashion into proximal splitting methods for
+        image reconstruction. CCPi-RGL comes with algorithms that can
+        satisfy various prior expectations of the reconstructed object,
+        for example being piecewise-constant or piecewise-smooth nature.
+        bibtex:
+                @article{kazantsev2019ccpi,
+                title={Ccpi-regularisation toolkit for computed tomographic image reconstruction with proximal splitting algorithms},
+                author={Kazantsev, Daniil and Pasca, Edoardo and Turner, Martin J and Withers, Philip J},
+                journal={SoftwareX},
+                volume={9},
+                pages={317--323},
+                year={2019},
+                publisher={Elsevier}
+                }
+        endnote:
+                %0 Journal Article
+                %T Ccpi-regularisation toolkit for computed tomographic image reconstruction with proximal splitting algorithms
+                %A Kazantsev, Daniil
+                %A Pasca, Edoardo
+                %A Turner, Martin J
+                %A Withers, Philip J
+                %J SoftwareX
+                %V 9
+                %P 317-323
+                %@ 2352-7110
+                %D 2019
+                %I Elsevier
+        doi: "10.1016/j.softx.2019.04.003"
+        """
 
-        citation2:
-            description: Rudin-Osher-Fatemi explicit PDE minimisation method
-              for smoothed Total Variation regulariser
-            bibtex: |
-                    @article{rudin1992nonlinear,
-                      title={Nonlinear total variation based noise removal algorithms},
-                      author={Rudin, Leonid I and Osher, Stanley and Fatemi, Emad},
-                      journal={Physica D: nonlinear phenomena},
-                      volume={60},
-                      number={1-4},
-                      pages={259--268},
-                      year={1992},
-                      publisher={North-Holland}
-                    }
-            endnote: |
-                    %0 Journal Article
-                    %T Nonlinear total variation based noise removal algorithms
-                    %A Rudin, Leonid I
-                    %A Osher, Stanley
-                    %A Fatemi, Emad
-                    %J Physica D: nonlinear phenomena
-                    %V 60
-                    %N 1-4
-                    %P 259-268
-                    %@ 0167-2789
-                    %D 1992
-                    %I North-Holland
-            doi: "10.1016/0167-2789(92)90242-F"
-            dependency:
-                method: ROF_TV
 
-        citation3:
-            description: Fast-Gradient-Projection algorithm for
-              Total Variation regulariser
-            bibtex: |
-                    @article{beck2009fast,
-                      title={Fast gradient-based algorithms for constrained total variation image denoising and deblurring problems},
-                      author={Beck, Amir and Teboulle, Marc},
-                      journal={IEEE transactions on image processing},
-                      volume={18},
-                      number={11},
-                      pages={2419--2434},
-                      year={2009},
-                      publisher={IEEE}
-                    }
-            endnote: |
-                    %0 Journal Article
-                    %T Fast gradient-based algorithms for constrained total variation image denoising and deblurring problems
-                    %A Beck, Amir
-                    %A Teboulle, Marc
-                    %J IEEE transactions on image processing
-                    %V 18
-                    %N 11
-                    %P 2419-2434
-                    %@ 1057-7149
-                    %D 2009
-                    %I IEEE
-            doi: "10.1109/TIP.2009.2028250"
-            dependency:
-                method: FGP_TV
+    def citation2(self):
+        """
+        Rudin-Osher-Fatemi explicit PDE minimisation method
+        for smoothed Total Variation regulariser
+        bibtex:
+                @article{rudin1992nonlinear,
+                  title={Nonlinear total variation based noise removal algorithms},
+                  author={Rudin, Leonid I and Osher, Stanley and Fatemi, Emad},
+                  journal={Physica D: nonlinear phenomena},
+                  volume={60},
+                  number={1-4},
+                  pages={259--268},
+                  year={1992},
+                  publisher={North-Holland}
+                }
+        endnote:
+                %0 Journal Article
+                %T Nonlinear total variation based noise removal algorithms
+                %A Rudin, Leonid I
+                %A Osher, Stanley
+                %A Fatemi, Emad
+                %J Physica D: nonlinear phenomena
+                %V 60
+                %N 1-4
+                %P 259-268
+                %@ 0167-2789
+                %D 1992
+                %I North-Holland
+        doi: "10.1016/0167-2789(92)90242-F"
+        dependency:
+            method: ROF_TV
+        """
 
-        citation4:
-            description: The Split Bregman approach for Total Variation
-              regulariser
-            bibtex: |
-                   @article{goldstein2009split,
-                      title={The split Bregman method for L1-regularized problems},
-                      author={Goldstein, Tom and Osher, Stanley},
-                      journal={SIAM journal on imaging sciences},
-                      volume={2},
-                      number={2},
-                      pages={323--343},
-                      year={2009},
-                      publisher={SIAM}
-                    }
-            endnote: |
-                    %0 Journal Article
-                    %T The split Bregman method for L1-regularized problems
-                    %A Goldstein, Tom
-                    %A Osher, Stanley
-                    %J SIAM journal on imaging sciences
-                    %V 2
-                    %N 2
-                    %P 323-343
-                    %@ 1936-4954
-                    %D 2009
-                    %I SIAM
-            doi: "10.1137/080725891"
-            dependency:
-                method: SB_TV
 
-        citation5:
-            description: Total generalized variation regulariser for
-              piecewise-smooth recovery
-            bibtex: |
-                   @article{bredies2010total,
-                      title={Total generalized variation},
-                      author={Bredies, Kristian and Kunisch, Karl and Pock, Thomas},
-                      journal={SIAM Journal on Imaging Sciences},
-                      volume={3},
-                      number={3},
-                      pages={492--526},
-                      year={2010},
-                      publisher={SIAM}
-                    }
-            endnote: |
-                    %0 Journal Article
-                    %T Total generalized variation
-                    %A Bredies, Kristian
-                    %A Kunisch, Karl
-                    %A Pock, Thomas
-                    %J SIAM Journal on Imaging Sciences
-                    %V 3
-                    %N 3
-                    %P 492-526
-                    %@ 1936-4954
-                    %D 2010
-                    %I SIAM
-            doi: "10.1137/080725891"
-            dependency:
-                method: TGV
+    def citation3(self):
+        """
+        Fast-Gradient-Projection algorithm for
+        Total Variation regulariser
+        bibtex:
+                @article{beck2009fast,
+                  title={Fast gradient-based algorithms for constrained total variation image denoising and deblurring problems},
+                  author={Beck, Amir and Teboulle, Marc},
+                  journal={IEEE transactions on image processing},
+                  volume={18},
+                  number={11},
+                  pages={2419--2434},
+                  year={2009},
+                  publisher={IEEE}
+                }
+        endnote:
+                %0 Journal Article
+                %T Fast gradient-based algorithms for constrained total variation image denoising and deblurring problems
+                %A Beck, Amir
+                %A Teboulle, Marc
+                %J IEEE transactions on image processing
+                %V 18
+                %N 11
+                %P 2419-2434
+                %@ 1057-7149
+                %D 2009
+                %I IEEE
+        doi: "10.1109/TIP.2009.2028250"
+        dependency:
+            method: FGP_TV
+        """
 
-        citation6:
-            description: Combination for ROF model and LLT for
-              piecewise-smooth recovery
-            bibtex: |
-                   @article{kazantsev2017model,
-                    title={Model-based iterative reconstruction using higher-order regularization of dynamic synchrotron data},
-                    author={Kazantsev, Daniil and Guo, Enyu and Phillion, AB and Withers, Philip J and Lee, Peter D},
-                    journal={Measurement Science and Technology},
-                    volume={28},
-                    number={9},
-                    pages={094004},
-                    year={2017},
-                    publisher={IOP Publishing}
-                    }
-            endnote: |
-                    %0 Journal Article
-                    %T Model-based iterative reconstruction using higher-order regularization of dynamic synchrotron data
-                    %A Kazantsev, Daniil
-                    %A Guo, Enyu
-                    %A Phillion, AB
-                    %A Withers, Philip J
-                    %A Lee, Peter D
-                    %J Measurement Science and Technology
-                    %V 28
-                    %N 9
-                    %P 094004
-                    %@ 0957-0233
-                    %D 2017
-                    %I IOP Publishing
-            doi: "10.1088/1361-6501"
-            dependency:
-                method: LLT_ROF
 
-        citation7:
-            description: Nonlinear or linear duffison as a regulariser
-            bibtex: |
-                   @article{perona1990scale,
-                      title={Scale-space and edge detection using anisotropic diffusion},
-                      author={Perona, Pietro and Malik, Jitendra},
-                      journal={IEEE Transactions on pattern analysis and machine intelligence},
-                      volume={12},
-                      number={7},
-                      pages={629--639},
-                      year={1990},
-                      publisher={IEEE}}
-            endnote: |
-                    %0 Journal Article
-                    %T Scale-space and edge detection using anisotropic diffusion
-                    %A Perona, Pietro
-                    %A Malik, Jitendra
-                    %J IEEE Transactions on pattern analysis and machine intelligence
-                    %V 12
-                    %N 7
-                    %P 629-639
-                    %@ 0162-8828
-                    %D 1990
-                    %I IEEE
-            doi: "10.1109/34.56205"
-            dependency:
-                method: NDF
+    def citation4(self):
+        """
+        The Split Bregman approach for Total Variation
+        regulariser
+        bibtex:
+               @article{goldstein2009split,
+                  title={The split Bregman method for L1-regularized problems},
+                  author={Goldstein, Tom and Osher, Stanley},
+                  journal={SIAM journal on imaging sciences},
+                  volume={2},
+                  number={2},
+                  pages={323--343},
+                  year={2009},
+                  publisher={SIAM}
+                }
+        endnote:
+                %0 Journal Article
+                %T The split Bregman method for L1-regularized problems
+                %A Goldstein, Tom
+                %A Osher, Stanley
+                %J SIAM journal on imaging sciences
+                %V 2
+                %N 2
+                %P 323-343
+                %@ 1936-4954
+                %D 2009
+                %I SIAM
+        doi: "10.1137/080725891"
+        dependency:
+            method: SB_TV
+        """
 
-        citation8:
-            description: Anisotropic diffusion of higher order for
-              piecewise-smooth recovery
-            bibtex: |
-                   @article{hajiaboli2011anisotropic,
-                    title={An anisotropic fourth-order diffusion filter for image noise removal},
-                    author={Hajiaboli, Mohammad Reza},
-                    journal={International Journal of Computer Vision},
-                    volume={92},
-                    number={2},
-                    pages={177--191},
-                    year={2011},
-                    publisher={Springer}
-                    }
-            endnote: |
-                    %0 Journal Article
-                    %T An anisotropic fourth-order diffusion filter for image noise removal
-                    %A Hajiaboli, Mohammad Reza
-                    %J International Journal of Computer Vision
-                    %V 92
-                    %N 2
-                    %P 177-191
-                    %@ 0920-5691
-                    %D 2011
-                    %I Springer
-            doi: "10.1007/s11263-010-0330-1"
-            dependency:
-                method: Diff4th
 
-        citation9:
-            description: Nonlocal discrete regularization on weighted
-              graphs - a framework for image and manifold processing
-            bibtex: |
-                    @article{elmoataz2008nonlocal,
-                      title={Nonlocal discrete regularization on weighted graphs: a framework for image and manifold processing},
-                      author={Elmoataz, Abderrahim and Lezoray, Olivier and Bougleux, S{\'e}bastien},
-                      journal={IEEE transactions on Image Processing},
-                      volume={17},
-                      number={7},
-                      pages={1047--1060},
-                      year={2008},
-                      publisher={IEEE}
-                    }
-            endnote: |
-                    %0 Journal Article
-                    %T Nonlocal discrete regularization on weighted graphs, a framework for image and manifold processing
-                    %A Elmoataz, Abderrahim
-                    %A Lezoray, Olivier
-                    %A Bougleux, Sebastien
-                    %J IEEE transactions on Image Processing
-                    %V 17
-                    %N 7
-                    %P 1047-1060
-                    %@ 1057-7149
-                    %D 2008
-                    %I IEEE
-            doi: '10.1109/TIP.2008.924284'
-            dependency:
-                method: NLTV
+    def citation5(self):
+        """
+        Total generalized variation regulariser for
+        piecewise-smooth recovery
+        bibtex:
+               @article{bredies2010total,
+                  title={Total generalized variation},
+                  author={Bredies, Kristian and Kunisch, Karl and Pock, Thomas},
+                  journal={SIAM Journal on Imaging Sciences},
+                  volume={3},
+                  number={3},
+                  pages={492--526},
+                  year={2010},
+                  publisher={SIAM}
+                }
+        endnote:
+                %0 Journal Article
+                %T Total generalized variation
+                %A Bredies, Kristian
+                %A Kunisch, Karl
+                %A Pock, Thomas
+                %J SIAM Journal on Imaging Sciences
+                %V 3
+                %N 3
+                %P 492-526
+                %@ 1936-4954
+                %D 2010
+                %I SIAM
+        doi: "10.1137/080725891"
+        dependency:
+            method: TGV
+        """
+
+
+    def citation6(self):
+        """
+        Combination for ROF model and LLT for
+        piecewise-smooth recovery
+        bibtex:
+               @article{kazantsev2017model,
+                title={Model-based iterative reconstruction using higher-order regularization of dynamic synchrotron data},
+                author={Kazantsev, Daniil and Guo, Enyu and Phillion, AB and Withers, Philip J and Lee, Peter D},
+                journal={Measurement Science and Technology},
+                volume={28},
+                number={9},
+                pages={094004},
+                year={2017},
+                publisher={IOP Publishing}
+                }
+        endnote:
+                %0 Journal Article
+                %T Model-based iterative reconstruction using higher-order regularization of dynamic synchrotron data
+                %A Kazantsev, Daniil
+                %A Guo, Enyu
+                %A Phillion, AB
+                %A Withers, Philip J
+                %A Lee, Peter D
+                %J Measurement Science and Technology
+                %V 28
+                %N 9
+                %P 094004
+                %@ 0957-0233
+                %D 2017
+                %I IOP Publishing
+        doi: "10.1088/1361-6501"
+        dependency:
+            method: LLT_ROF
+        """
+
+
+    def citation7(self):
+        """
+        Nonlinear or linear duffison as a regulariser
+        bibtex:
+               @article{perona1990scale,
+                  title={Scale-space and edge detection using anisotropic diffusion},
+                  author={Perona, Pietro and Malik, Jitendra},
+                  journal={IEEE Transactions on pattern analysis and machine intelligence},
+                  volume={12},
+                  number={7},
+                  pages={629--639},
+                  year={1990},
+                  publisher={IEEE}}
+        endnote:
+                %0 Journal Article
+                %T Scale-space and edge detection using anisotropic diffusion
+                %A Perona, Pietro
+                %A Malik, Jitendra
+                %J IEEE Transactions on pattern analysis and machine intelligence
+                %V 12
+                %N 7
+                %P 629-639
+                %@ 0162-8828
+                %D 1990
+                %I IEEE
+        doi: "10.1109/34.56205"
+        dependency:
+            method: NDF
+        """
+
+
+    def citation8(self):
+        """
+        Anisotropic diffusion of higher order for
+        piecewise-smooth recovery
+        bibtex:
+               @article{hajiaboli2011anisotropic,
+                title={An anisotropic fourth-order diffusion filter for image noise removal},
+                author={Hajiaboli, Mohammad Reza},
+                journal={International Journal of Computer Vision},
+                volume={92},
+                number={2},
+                pages={177--191},
+                year={2011},
+                publisher={Springer}
+                }
+        endnote:
+                %0 Journal Article
+                %T An anisotropic fourth-order diffusion filter for image noise removal
+                %A Hajiaboli, Mohammad Reza
+                %J International Journal of Computer Vision
+                %V 92
+                %N 2
+                %P 177-191
+                %@ 0920-5691
+                %D 2011
+                %I Springer
+        doi: "10.1007/s11263-010-0330-1"
+        dependency:
+            method: Diff4th
+        """
+
+
+    def citation9(self):
+        """
+        Nonlocal discrete regularization on weighted
+        graphs - a framework for image and manifold processing
+        bibtex:
+                @article{elmoataz2008nonlocal,
+                  title={Nonlocal discrete regularization on weighted graphs: a framework for image and manifold processing},
+                  author={Elmoataz, Abderrahim and Lezoray, Olivier and Bougleux, S{\'e}bastien},
+                  journal={IEEE transactions on Image Processing},
+                  volume={17},
+                  number={7},
+                  pages={1047--1060},
+                  year={2008},
+                  publisher={IEEE}
+                }
+        endnote:
+                %0 Journal Article
+                %T Nonlocal discrete regularization on weighted graphs, a framework for image and manifold processing
+                %A Elmoataz, Abderrahim
+                %A Lezoray, Olivier
+                %A Bougleux, Sebastien
+                %J IEEE transactions on Image Processing
+                %V 17
+                %N 7
+                %P 1047-1060
+                %@ 1057-7149
+                %D 2008
+                %I IEEE
+        doi: '10.1109/TIP.2008.924284'
+        dependency:
+            method: NLTV
 
         """

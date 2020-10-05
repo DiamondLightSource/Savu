@@ -11,46 +11,74 @@ Parameter definitions
 
 .. code-block:: yaml
 
-    
+        in_datasets:
+            visibility: datasets
+            dtype: list
+            description: Create a list of the dataset(s) to process
+            default: []
+        
+        out_datasets:
+            visibility: datasets
+            dtype: list
+            description: Create a list of the dataset(s) to create
+            default: []
+        
+        preview:
+            visibility: basic
+            dtype: int_list
+            description: A slice list of required frames.
+            default: []
+        
+        data_file:
+            visibility: hidden
+            dtype: str
+            description: hidden parameter for savu template
+            default: <>
+        
         name:
             visibility: basic
             dtype: str
             description: The name assigned to the dataset.
-            default: 'tomo'
+            default: tomo
+        
         file_name:
             visibility: intermediate
             dtype: filename
-            description: The shared part of the name of each file              (not including .nxs).
+            description: The shared part of the name of each file (not including .nxs).
             default: None
+        
         data_path:
             visibility: intermediate
             dtype: int_path
             description: Path to the data inside the file.
-            default: 'entry1/tomo_entry/data/data'
+            default: entry1/tomo_entry/data/data
+        
         stack_or_cat:
             visibility: intermediate
             dtype: str
             description: Stack or concatenate the data (4D and 3D respectively)
-            default: 'stack'
+            default: stack
+        
         stack_or_cat_dim:
             visibility: intermediate
             dtype: int
             description: Dimension to stack or concatenate.
             default: 3
+        
         axis_label:
             visibility: intermediate
             dtype: str
             description: "New axis label, if required, in the form 'name.units'"
-            default: 'scan.number'
+            default: scan.number
+        
         range:
             visibility: intermediate
             dtype: range
             description: The start and end of file numbers
-            default: [0,10]
-
+            default: [0, 10]
         
 Key
 ^^^^^^^^^^
 
-.. literalinclude:: /../source/documentation/short_parameter_key.yaml
+.. literalinclude:: /../source/files_and_images/documentation/short_parameter_key.yaml
     :language: yaml

@@ -12,28 +12,38 @@ Parameter definitions
 
 .. code-block:: yaml
 
-    
+        in_datasets:
+            visibility: datasets
+            dtype: list
+            description: Create a list of the dataset(s) to process
+            default: []
+        
+        out_datasets:
+            visibility: datasets
+            dtype: list
+            description: Create a list of the dataset(s) to create
+            default: []
+        
         outlier_mu:
-              visibility: basic
-              dtype: float
-              description: Threshold for defecting outliers, greater is less
-                sensitive.
-              default: 10.0
+            visibility: basic
+            dtype: float
+            description: Threshold for defecting outliers, greater is less sensitive.
+            default: 10.0
+        
         kernel_size:
-              visibility: basic
-              dtype: int
-              description: Number of frames included in average.
-              default: 5
+            visibility: basic
+            dtype: int
+            description: Number of frames included in average.
+            default: 5
+        
         mode:
-              visibility: basic
-              dtype: int
-              description: 'output mode, 0=normal 5=zinger strength 6=zinger
-                yes/no.'
-              default: 0
-
+            visibility: basic
+            dtype: int
+            description: output mode, 0=normal 5=zinger strength 6=zinger yes/no.
+            default: 0
         
 Key
 ^^^^^^^^^^
 
-.. literalinclude:: /../source/documentation/short_parameter_key.yaml
+.. literalinclude:: /../source/files_and_images/documentation/short_parameter_key.yaml
     :language: yaml

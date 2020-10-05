@@ -11,15 +11,26 @@ Parameter definitions
 
 .. code-block:: yaml
 
-    
+        in_datasets:
+            visibility: datasets
+            dtype: list
+            description: Create a list of the dataset(s) to process
+            default: []
+        
+        out_datasets:
+            visibility: datasets
+            dtype: list
+            description: Create a list of the dataset(s) to create
+            default: []
+        
         set_classes_val:
             visibility: basic
             dtype: list
-            description: 'Set the values for all 4 classes (crystal, liquor, loop, vacuum).'
+            description: Set the values for all 4 classes (crystal, liquor, loop, vacuum).
             default: [255, 128, 64, 0]
         
 Key
 ^^^^^^^^^^
 
-.. literalinclude:: /../source/documentation/short_parameter_key.yaml
+.. literalinclude:: /../source/files_and_images/documentation/short_parameter_key.yaml
     :language: yaml

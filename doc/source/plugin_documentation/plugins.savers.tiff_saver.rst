@@ -11,12 +11,24 @@ Parameter definitions
 
 .. code-block:: yaml
 
-    
+        in_datasets:
+            visibility: datasets
+            dtype: list
+            description: none
+            default: []
+        
+        out_datasets:
+            visibility: datasets
+            dtype: list
+            description: none
+            default: []
+        
         pattern:
             visibility: basic
             dtype: str
             description: How to slice the data
-            default: 'VOLUME_XZ'
+            default: VOLUME_XZ
+        
         prefix:
             visibility: basic
             dtype: str
@@ -26,5 +38,5 @@ Parameter definitions
 Key
 ^^^^^^^^^^
 
-.. literalinclude:: /../source/documentation/short_parameter_key.yaml
+.. literalinclude:: /../source/files_and_images/documentation/short_parameter_key.yaml
     :language: yaml

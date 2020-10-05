@@ -17,25 +17,44 @@ Parameter definitions
 
 .. code-block:: yaml
 
-    
+        in_datasets:
+            visibility: datasets
+            dtype: list
+            description: Create a list of the dataset(s) to process
+            default: []
+        
+        out_datasets:
+            visibility: datasets
+            dtype: list
+            description: Create a list of the dataset(s) to create
+            default: []
+        
         preview:
-              visibility: basic
-              dtype: list
-              description: A slice list of required frames to apply to ALL                datasets, else a dictionary of slice lists where the key is                the dataset name.
-              default: {}
+            visibility: basic
+            dtype: list
+            description: A slice list of required frames to apply to ALL datasets, else a dictionary of slice lists where the key is the dataset name.
+            default: 
+        
+        data_file:
+            visibility: hidden
+            dtype: str
+            description: hidden parameter for savu template
+            default: <>
+        
         datasets:
-              visibility: basic
-              dtype: list
-              description: Override the default by choosing specific dataset(s) to                load, by stating the NXdata name.
-              default: []
+            visibility: basic
+            dtype: list
+            description: Override the default by choosing specific dataset(s) to load, by stating the NXdata name.
+            default: []
+        
         names:
-              visibility: basic
-              dtype: list
-              description: Override the dataset names associated with the datasets                parameter above.
-              default: []
+            visibility: basic
+            dtype: list
+            description: Override the dataset names associated with the datasets parameter above.
+            default: []
         
 Key
 ^^^^^^^^^^
 
-.. literalinclude:: /../source/documentation/short_parameter_key.yaml
+.. literalinclude:: /../source/files_and_images/documentation/short_parameter_key.yaml
     :language: yaml

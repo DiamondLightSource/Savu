@@ -12,26 +12,32 @@ Parameter definitions
 
 .. code-block:: yaml
 
-    
+        in_datasets:
+            visibility: datasets
+            dtype: list
+            description: Create a list of the dataset(s) to process
+            default: []
+        
         out_datasets:
-              visibility: datasets
-              dtype: list
-              description: 'Create a list of the dataset(s).'
-              default: ['Peaks']
+            visibility: datasets
+            dtype: list
+            description: Create a list of the dataset(s).
+            default: ['Peaks']
+        
         thresh:
-              visibility: basic
-              dtype: float
-              description: Threshold for peak detection
-              default: 0.03
+            visibility: basic
+            dtype: float
+            description: Threshold for peak detection
+            default: 0.03
+        
         min_distance:
-              visibility: basic
-              dtype: int
-              description: Minimum distance for peak detection.
-              default: 15
-
+            visibility: basic
+            dtype: int
+            description: Minimum distance for peak detection.
+            default: 15
         
 Key
 ^^^^^^^^^^
 
-.. literalinclude:: /../source/documentation/short_parameter_key.yaml
+.. literalinclude:: /../source/files_and_images/documentation/short_parameter_key.yaml
     :language: yaml

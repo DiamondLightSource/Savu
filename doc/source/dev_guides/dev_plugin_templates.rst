@@ -3,36 +3,48 @@
 Plugin templates 
 =======================
 
-:download:`plugin_template1 <../../../plugin_examples/plugin_templates/general/plugin_template1.py>`
+Plugin Template With Detailed Notes 1
+------------------------------------------------------------------
+A description of the plugin - the synopsis above appears as the short plugin description in the configurator and anything written here appears as the longer description (-vv flag).      
 
+:download:`Plugin Template With Detailed Notes 1 <../../../plugin_examples/plugin_templates/general/plugin_template1_with_detailed_notes.py>`
 
-:download:`plugin_template10 <../../../plugin_examples/plugin_templates/general/plugin_template10.py>`
+Further Examples
+------------------------------------------------------------------
 
+.. list-table::  
+   :widths: 10 90
+   :header-rows: 1
 
-:download:`plugin_template1_with_detailed_notes <../../../plugin_examples/plugin_templates/general/plugin_template1_with_detailed_notes.py>`
+   * - Link
+     - Description
+   * - :ref:`plugin_template1`
+     - A simple plugin template with one in_dataset and one out_dataset with similar characteristics, e.g. median filter.      
 
+   * - :ref:`plugin_template2`
+     - A simple plugin template with multiple input and output datasets.      
 
-:download:`plugin_template2 <../../../plugin_examples/plugin_templates/general/plugin_template2.py>`
+   * - :ref:`plugin_template3`
+     - A plugin template that reduces the data dimensions, e.g. azimuthal integration.      
 
+   * - :ref:`plugin_template4`
+     - A template for a plugin that takes in two datasets and returns one dataset, e.g. absorption correction.      
 
-:download:`plugin_template3 <../../../plugin_examples/plugin_templates/general/plugin_template3.py>`
+   * - :ref:`plugin_template5`
+     - A plugin template with one in_dataset and two out_datasets that do not resemble the in_dataset and are not retained by the framework, e.g. vo_centering.      
 
+   * - :ref:`plugin_template6`
+     - A template to create a plugin that changes the shape of the data, e.g. downsample_filter.      
 
-:download:`plugin_template4 <../../../plugin_examples/plugin_templates/general/plugin_template4.py>`
+   * - :ref:`plugin_template7`
+     - A plugin template that increases the data dimensions.      
 
+   * - :ref:`plugin_template8`
+     - A plugin template that dynamically determines the number of output datasets based on the number of entries in the out_datasets parameter list.      
 
-:download:`plugin_template5 <../../../plugin_examples/plugin_templates/general/plugin_template5.py>`
+   * - :ref:`plugin_template9`
+     - A plugin template that dynamically determines the number of output datasets based on a parameter.      
 
-
-:download:`plugin_template6 <../../../plugin_examples/plugin_templates/general/plugin_template6.py>`
-
-
-:download:`plugin_template7 <../../../plugin_examples/plugin_templates/general/plugin_template7.py>`
-
-
-:download:`plugin_template8 <../../../plugin_examples/plugin_templates/general/plugin_template8.py>`
-
-
-:download:`plugin_template9 <../../../plugin_examples/plugin_templates/general/plugin_template9.py>`
-
+   * - :ref:`plugin_template10`
+     - A plugin template that dynamically determines the number of input datasets based on the number of entries in the in_datasets parameter list.      
 

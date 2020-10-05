@@ -16,17 +16,17 @@
                 parameter_name_1: [3, 9]
         """
 
-    def get_citation(self):
+    def citation1(self):
+        # use a u notation for unicode characters - for example, mew
         """
-        citation1:
-            description: A description of the citation
-            bibtex: |
-                    A bibtex string with the symbol '|' on the above line to
-                    maintain the multiple new line format.
-            endnote: |
-                    An endnote string with the symbol '|' on the above line to
-                    maintain the multiple new line format.
-            doi: A link in the form of numbers and letters
-            dependency:
-                parameter_name_1: The name of the method for which this citation is for
+        A description of the citation
+        bibtex:
+                A bibtex string with the symbol '|' on the above line to
+                maintain the multiple new line format.
+        endnote:
+                An endnote string with the symbol '|' on the above line to
+                maintain the multiple new line format.
+        doi: A link in the form of numbers and letters
+        dependency:
+            parameter_name_1: The name of the method for which this citation is for
         """

@@ -11,53 +11,112 @@ Parameter definitions
 
 .. code-block:: yaml
 
-    
+        in_datasets:
+            visibility: datasets
+            dtype: list
+            description: Create a list of the dataset(s) to process
+            default: []
+        
+        out_datasets:
+            visibility: datasets
+            dtype: list
+            description: Create a list of the dataset(s) to create
+            default: []
+        
         Energy:
-              visibility: basic
-              dtype: float
-              description: Given X-ray energy in keV.
-              default: 53.0
+            visibility: basic
+            dtype: float
+            description: Given X-ray energy in keV.
+            default: 53.0
+        
         Distance:
-              visibility: basic
-              dtype: float
-              description: 'Distance from sample to detection - Unit is
-                metre.'
-              default: 1.0
+            visibility: basic
+            dtype: float
+            description: Distance from sample to detection - Unit is metre.
+            default: 1.0
+        
         Resolution:
-              visibility: intermediate
-              dtype: float
-              description: 'Pixel size - Unit is micron.'
-              default: 1.28
+            visibility: intermediate
+            dtype: float
+            description: Pixel size - Unit is micron.
+            default: 1.28
+        
         Ratio:
-              visibility: intermediate
-              dtype: float
-              description: 'Ratio of delta/beta.'
-              default: 250.0
+            visibility: intermediate
+            dtype: float
+            description: Ratio of delta/beta.
+            default: 250.0
+        
         Padtopbottom:
-              visibility: intermediate
-              dtype: float
-              description: Pad to the top and bottom of projection.
-              default: 10
+            visibility: intermediate
+            dtype: float
+            description: Pad to the top and bottom of projection.
+            default: 10
+        
         Padleftright:
-              visibility: intermediate
-              dtype: float
-              description: Pad to the left and right of projection.
-              default: 10
+            visibility: intermediate
+            dtype: float
+            description: Pad to the left and right of projection.
+            default: 10
+        
         Padmethod:
-              visibility: intermediate
-              dtype: str
-              description: Numpy pad method.
-              default: edge
+            visibility: intermediate
+            dtype: str
+            description: Numpy pad method.
+            default: edge
+        
         increment:
-              visibility: intermediate
-              dtype: float
-              description: Increment all values by this amount before taking the
-                log.
-              default: 0.0
-
+            visibility: intermediate
+            dtype: float
+            description: Increment all values by this amount before taking the log.
+            default: 0.0
         
 Key
 ^^^^^^^^^^
 
-.. literalinclude:: /../source/documentation/short_parameter_key.yaml
+.. literalinclude:: /../source/files_and_images/documentation/short_parameter_key.yaml
     :language: yaml
+
+Citations
+--------------------------
+
+Simultaneous phase and amplitude extraction from a single defocused image of a homogeneous object by Paganin, David et al.
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Bibtex
+""""""""""""""""""""""""""""""""""""""""""
+
+.. code-block:: none
+
+    @article{paganin2002simultaneous,
+    title={Simultaneous phase and amplitude extraction from a single defocused image of a homogeneous object},
+    author={Paganin, David and Mayo, Sheridan C and Gureyev, Tim E and Miller, Peter R and Wilkins, Steve W},
+    journal={Journal of microscopy},
+    volume={206},
+    number={1},
+    pages={33--40},
+    year={2002},
+    publisher={Wiley Online Library}
+    }
+    
+
+Endnote
+""""""""""""""""""""""""""""""""""""""""""
+
+.. code-block:: none
+
+    %0 Journal Article
+    %T Simultaneous phase and amplitude extraction from a single defocused image of a homogeneous object
+    %A Paganin, David
+    %A Mayo, Sheridan C
+    %A Gureyev, Tim E
+    %A Miller, Peter R
+    %A Wilkins, Steve W
+    %J Journal of microscopy
+    %V 206
+    %N 1
+    %P 33-40
+    %@ 0022-2720
+    %D 2002
+    %I Wiley Online Library
+    
+

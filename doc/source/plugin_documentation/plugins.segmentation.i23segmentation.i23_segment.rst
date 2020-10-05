@@ -15,28 +15,32 @@ Parameter definitions
 
 .. code-block:: yaml
 
-    
+        in_datasets:
+            visibility: datasets
+            dtype: list
+            description: Create a list of the dataset(s) to process
+            default: []
+        
+        out_datasets:
+            visibility: datasets
+            dtype: list
+            description: Default out dataset names.
+            default: "['maskGMM4', 'maskGMM4_proc', 'maskGMM5', 'maskGMM5_proc']"
+        
         correction_window:
             visibility: basic
             dtype: int
             description: The size of the correction window
             default: 9
-
+        
         iterations:
             visibility: basic
             dtype: int
             description: The number of iterations for segmentation.
             default: 10
-
-        out_datasets:
-            visibility: intermediate
-            dtype: list
-            description: Default out dataset names.
-            default: "['maskGMM4', 'maskGMM4_proc', 'maskGMM5', 'maskGMM5_proc']"
-
         
 Key
 ^^^^^^^^^^
 
-.. literalinclude:: /../source/documentation/short_parameter_key.yaml
+.. literalinclude:: /../source/files_and_images/documentation/short_parameter_key.yaml
     :language: yaml

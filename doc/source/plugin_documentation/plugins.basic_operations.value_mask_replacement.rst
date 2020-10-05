@@ -12,20 +12,32 @@ Parameter definitions
 
 .. code-block:: yaml
 
-    
+        in_datasets:
+            visibility: datasets
+            dtype: list
+            description: Create a list of the dataset(s) to process
+            default: []
+        
+        out_datasets:
+            visibility: datasets
+            dtype: list
+            description: Create a list of the dataset(s) to create
+            default: []
+        
         seek_value:
-              visibility: basic
-              dtype: int
-              description: The value to be located in the provided second array.
-              default: 0
+            visibility: basic
+            dtype: int
+            description: The value to be located in the provided second array.
+            default: 0
+        
         new_value:
-              visibility: basic
-              dtype: int
-              description: The value to be replaced with in the first array.
-              default: 1
+            visibility: basic
+            dtype: int
+            description: The value to be replaced with in the first array.
+            default: 1
         
 Key
 ^^^^^^^^^^
 
-.. literalinclude:: /../source/documentation/short_parameter_key.yaml
+.. literalinclude:: /../source/files_and_images/documentation/short_parameter_key.yaml
     :language: yaml

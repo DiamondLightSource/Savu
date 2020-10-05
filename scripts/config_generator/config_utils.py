@@ -107,25 +107,6 @@ def error_catcher(function):
     return error_catcher_wrap_function
 
 
-def error_catcher_valid(function):
-    @wraps(function)
-    def error_catcher_wrap_function(value):
-        try:
-            return function(value)
-        except Exception as e:
-            savu_error = True if len(e.message.split()) > 1 and \
-                e.message.split()[1] == 'ERROR:' else False
-
-            if error_level is 0 and savu_error:
-                print(e.message)
-            elif error_level is 0:
-                print("%s: %s" % (type(e).__name__, e.message))
-            elif error_level is 1:
-                traceback.print_exc(file=sys.stdout)
-
-            return value
-    return error_catcher_wrap_function
-
 def _add_module(failed_imports, loader, module_name, error_mode):
     if module_name not in sys.modules:
         try:

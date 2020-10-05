@@ -57,36 +57,35 @@ to the global nature of this filter. If this is necessary, ensure they
 are consecutive.
         """
 
-    def get_citation(self):
+    def citation(self):
         """
-        citation1:
-            description: The contrast enhancement used in this processing chain is taken
-              from this work.
-            bibtex: |
-                    @article{paganin2002simultaneous,
-                    title={Simultaneous phase and amplitude extraction from a single defocused image of a homogeneous object},
-                    author={Paganin, David and Mayo, Sheridan C and Gureyev, Tim E and Miller, Peter R and Wilkins, Steve W},
-                    journal={Journal of microscopy},
-                    volume={206},
-                    number={1},
-                    pages={33--40},
-                    year={2002},
-                    publisher={Wiley Online Library}
-                    }
-            endnote: |
-                    %0 Journal Article
-                    %T Simultaneous phase and amplitude extraction from a single defocused image of a homogeneous object
-                    %A Paganin, David
-                    %A Mayo, Sheridan C
-                    %A Gureyev, Tim E
-                    %A Miller, Peter R
-                    %A Wilkins, Steve W
-                    %J Journal of microscopy
-                    %V 206
-                    %N 1
-                    %P 33-40
-                    %@ 0022-2720
-                    %D 2002
-                    %I Wiley Online Library
-            doi: "10.1046/j.1365-2818.2002.01010.x"
+        The contrast enhancement used in this processing chain is taken
+        from this work.
+        bibtex:
+                @article{paganin2002simultaneous,
+                title={Simultaneous phase and amplitude extraction from a single defocused image of a homogeneous object},
+                author={Paganin, David and Mayo, Sheridan C and Gureyev, Tim E and Miller, Peter R and Wilkins, Steve W},
+                journal={Journal of microscopy},
+                volume={206},
+                number={1},
+                pages={33--40},
+                year={2002},
+                publisher={Wiley Online Library}
+                }
+        endnote:
+                %0 Journal Article
+                %T Simultaneous phase and amplitude extraction from a single defocused image of a homogeneous object
+                %A Paganin, David
+                %A Mayo, Sheridan C
+                %A Gureyev, Tim E
+                %A Miller, Peter R
+                %A Wilkins, Steve W
+                %J Journal of microscopy
+                %V 206
+                %N 1
+                %P 33-40
+                %@ 0022-2720
+                %D 2002
+                %I Wiley Online Library
+        doi: "10.1046/j.1365-2818.2002.01010.x"
         """

@@ -13,22 +13,39 @@ Parameter definitions
 
 .. code-block:: yaml
 
-    
+        in_datasets:
+            visibility: datasets
+            dtype: list
+            description: Create a list of the dataset(s) to process
+            default: []
+        
+        out_datasets:
+            visibility: datasets
+            dtype: list
+            description: Create a list of the dataset(s) to create
+            default: []
+        
         ratio:
-              visibility: datasets
-              dtype: float
-              description: Control the strength of the filter. Greater is stronger
-              default: 100.0
+            visibility: datasets
+            dtype: float
+            description: Control the strength of the filter. Greater is stronger
+            default: 100.0
+        
         pattern:
-              visibility: basic
-              dtype: str
-              description: Data processing pattern
-              options: [PROJECTION, SINOGRAM]
-              default: SINOGRAM
-
+            visibility: basic
+            dtype: str
+            description: Data processing pattern
+            options: ['PROJECTION', 'SINOGRAM']
+            default: SINOGRAM
         
 Key
 ^^^^^^^^^^
 
-.. literalinclude:: /../source/documentation/short_parameter_key.yaml
+.. literalinclude:: /../source/files_and_images/documentation/short_parameter_key.yaml
     :language: yaml
+
+Citations
+--------------------------
+
+The filter built is based on the Fresnel propagator
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

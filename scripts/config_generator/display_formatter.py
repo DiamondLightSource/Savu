@@ -22,10 +22,11 @@
 """
 from __future__ import print_function, division, absolute_import
 
-import os
-import copy
 import textwrap
+
 from colorama import Fore, Back, Style
+
+from savu.plugins import utils as pu
 
 WIDTH = 85
 
@@ -91,29 +92,30 @@ class DisplayFormatter(object):
         synopsis = \
             self._get_equal_lines(doc_str.get('synopsis'), width, colour_on,
                                   colour_off, " "*2)
-
-        return "\n" + colour_on + synopsis + colour_off
+        return "\n" +synopsis
 
     def _get_verbose_param_details(self, p_dict, param_key, desc, key,
                                    params, width):
-        margin = 4
-        joiner = "\n" + " " * margin
+        margin = 6
+        str_margin = " "*margin
         if param_key == 'verbose':
             verbose = desc[key][param_key]
             # Account for margin space
-            verbose = joiner.join(textwrap.wrap(verbose,
-                                                width=width - margin))
-            temp = joiner + Fore.CYAN + '\033[3m' + "%s" + Fore.RESET + '\033[0m'
-            params += temp % verbose
+            style_on = Fore.CYAN + '\033[3m'
+            style_off = Fore.RESET + '\033[0m'
+            verbose = self._get_equal_lines(verbose, width,
+                                            style_on, style_off, str_margin)
+            params += '\n' + verbose
 
         if param_key == 'range':
             p_range = desc[key]['range']
             if p_range:
                 try:
-                    p_range = joiner.join(textwrap.wrap(p_range,
-                                                        width=width - margin))
-                    temp = joiner + Fore.MAGENTA + "%s" + Fore.RESET
-                    params += temp % p_range
+                    r_color = Fore.MAGENTA
+                    r_off = Fore.RESET
+                    p_range = self._get_equal_lines(p_range, width,
+                                            r_color, r_off, str_margin)
+                    params += '\n' + p_range
                 except TypeError:
                     print('You have not filled in the %s field within the'
                           ' yaml information.' % param_key)
@@ -121,53 +123,48 @@ class DisplayFormatter(object):
 
     def _get_param_details(self, level, p_dict, width, display_args=False,
                            desc=False, breakdown=False):
+        """
+        Return a list of parameters organised by visibility level
+
+        :param level: The visibility level controls which parameters the
+           user can see
+        :param p_dict: Parameter dictionary for one plugin
+        :param width: The terminal display width for output strings
+        :param display_args: A dictionary with subelem and datasets.
+          This filters the visible parameters again. If subelem is chosen,
+          only that one parameter is shoen (this is useful when ONE parameter
+          is modified in the terminal). If datasets is chosen, ONLY the
+          in/out dataset parameters are shown
+        :param desc: The description for use later on within the display
+          formatter
+        :param breakdown: Boolean True if the verbose verbose information
+          should be shown
+        :return: List of parameters in order
+        """
         params =''
         keycount = 0
+
+        # Check if the parameters need to be filtered
         subelem = display_args['subelem'] if display_args else None
         datasets = display_args['datasets'] if display_args else None
 
-        data_keys = []
-        basic_keys = []
-        interm_keys = []
-        adv_keys = []
-        for k,v in p_dict['param'].items():
-            if v['display']=='on':
-                if v['visibility'] == 'datasets':
-                    data_keys.append(k)
-                if v['visibility'] == 'basic':
-                    basic_keys.append(k)
-                if v['visibility'] == 'intermediate':
-                    interm_keys.append(k)
-                if v['visibility'] == 'advanced':
-                    adv_keys.append(k)
-
-        keys = basic_keys
         if not (subelem or datasets):
-            if level == 'intermediate':
-                keys = keys + interm_keys + data_keys
-            if level == 'advanced':
-                keys = keys + interm_keys + adv_keys + data_keys
+            # Return the list of parameters according to the visibility level
+            keys = pu.set_order_by_visibility(p_dict['param'], level=level)
         else:
-            keys = keys + interm_keys + adv_keys + data_keys
+            # Have a list of ALL keys to filter later on
+            keys = pu.set_order_by_visibility(p_dict['param'])
 
-        if subelem:
-            if subelem.isdigit():
-                subelem = int(subelem)
-                if subelem > len(keys):
-                    raise Exception('This parameter number is not valid for this plug in.')
-            elif subelem in keys:
-                subelem = keys.index(subelem) + 1
-            else:
-                raise Exception('This parameter is not present in this plug in.')
+        subelem = pu.param_to_str(subelem, keys) if subelem else subelem
 
         try:
             for key in keys:
                 keycount += 1
                 if subelem:
                     # If there is a sub parameter specified, only show this
-                    if keycount == subelem:
-                        params = self._create_display_string(desc, key, p_dict,
-                                                params, keycount, width, breakdown)
+                    if key == subelem:
+                        params = self._create_display_string(desc, key,
+                                p_dict, params, keycount, width, breakdown)
                 elif datasets:
                     # If datasets parameter specified, only show these
                     dataset_list = ['in_datasets', 'out_datasets']
@@ -176,7 +173,7 @@ class DisplayFormatter(object):
                                          params, keycount, width, breakdown)
                 else:
                     params = self._create_display_string(desc, key, p_dict,
-                                                params, keycount, width, breakdown)
+                                        params, keycount, width, breakdown)
             return params
         except Exception as e:
             print('ERROR: ' + str(e))
@@ -184,26 +181,28 @@ class DisplayFormatter(object):
 
     def _create_display_string(self, desc, key, p_dict, params, keycount,
                                width, breakdown):
-        margin = 4
-        joiner = "\n" + " " * margin
-
+        margin = 6
+        str_margin = " "*margin
         temp = "\n   %2i)   %29s : %s"
         params += \
             temp % (keycount, key, p_dict['data'][key])
         if desc:
-            params = self._append_description(desc, key, p_dict, joiner,
-                                        width, margin, params, breakdown)
+            params = self._append_description(desc, key, p_dict, str_margin,
+                                        width, params, breakdown)
         return params
 
-    def _append_description(self, desc, key, p_dict, joiner, width, margin,
+    def _append_description(self, desc, key, p_dict, str_margin, width,
                             params, breakdown):
+        opt_margin = str_margin + (2*' ')
+        c_off = Back.RESET + Fore.RESET
         description_verbose = False
         if isinstance(desc[key], str):
             pdesc = " ".join(desc[key].split())
             # Restrict the margin so that the lines don't overflow.
-            pdesc = joiner.join(textwrap.wrap(pdesc, width=width - margin))
-            temp = joiner + Fore.CYAN + "%s" + Fore.RESET
-            params += temp % pdesc
+            pdesc = self._get_equal_lines(pdesc, width,
+                                          Fore.CYAN, Fore.RESET,
+                                          str_margin)
+            params += '\n' + pdesc
         elif isinstance(desc[key], dict):
             # If the description is a dictionary format instead of a string
             description_keys = desc[key].keys()
@@ -212,10 +211,9 @@ class DisplayFormatter(object):
                 # desc[key][param_key] is the value at this parameter
                 if param_key == 'summary':
                     pdesc = desc[key][param_key]
-                    pdesc = joiner.join(textwrap.wrap(pdesc,
-                                                      width=width - margin))
-                    temp = joiner + Fore.CYAN + "%s" + Fore.RESET
-                    params += temp % pdesc
+                    pdesc = self._get_equal_lines(pdesc, width, Fore.CYAN,
+                                                  Fore.RESET, str_margin)
+                    params += '\n' + pdesc
 
                 if breakdown:
                     params = self._get_verbose_param_details(p_dict,
@@ -224,41 +222,44 @@ class DisplayFormatter(object):
 
         options = p_dict['param'][key].get('options')
         if options:
-            option_text = Fore.BLUE + 'Options:'
-            option_text = joiner.join(textwrap.wrap(option_text,
-                                                    width=width - margin))
-            temp = joiner + "%s"
-            params += temp % option_text
+            option_text = 'Options:'
+            option_text = self._get_equal_lines(option_text, width,
+                                        Fore.BLUE, Fore.RESET, str_margin)
+            params += '\n'+option_text
             for opt in options:
                 current_opt = p_dict['data'][key]
-                c_off = Back.RESET + Fore.RESET
                 if current_opt == opt:
-                    # colour = Fore.BLUE + Style.BRIGHT
-                    # Highlight the currently selected option
+                    # Highlight the currently selected option by setting a
+                    # background colour and white text
                     colour = Back.BLUE + Fore.LIGHTWHITE_EX
-                    verbose_color = Back.GREEN + Fore.LIGHTWHITE_EX
+                    verbose_color = Back.BLACK + Fore.LIGHTWHITE_EX
                 else:
-                    colour = Fore.BLUE
-                    verbose_color = Fore.GREEN
-                option_verbose = ''
-                option_verbose +=  u'\u0009' + u'\u2022' + colour + str(opt)
-                option_verbose = joiner.join(textwrap.wrap(
-                    option_verbose, width=width - (margin*2)))
-                if (description_verbose == True) and ('options' in description_keys):
+                    # Make the option bold using Style.BRIGHT
+                    colour = Fore.BLUE + Style.BRIGHT
+                    # Remove bold style for the description
+                    verbose_color = Style.RESET_ALL + Fore.BLACK
+                option_verbose =''
+                unicode_bullet_point = u'\u2022'
+                if (description_verbose == True) \
+                        and ('options' in description_keys):
                     # If there are option descriptions present
                     options_desc = {k: v
                                     for k, v in desc[key]['options'].items()
                                     if v}
                     if opt in options_desc.keys():
-                        option_verbose += ': ' + verbose_color \
-                                          + options_desc[opt]
-                        option_str_length = len(opt) + 3
-                        bullet_spacing = (option_str_length+(margin*2))*" "
-                        option_verbose=joiner.join(textwrap.wrap(
-                          option_verbose, width=width -(2*margin),
-                          subsequent_indent=bullet_spacing))
+                        opt_d = unicode_bullet_point + str(opt) + ': ' \
+                                + options_desc[opt]
+                        option_verbose +='\n' + opt_d
+                        option_verbose=self._get_equal_lines(option_verbose,
+                                          width, verbose_color, c_off,
+                                          opt_margin, option_colour=colour)
+                else:
+                    option_verbose = unicode_bullet_point + str(opt)
+                    option_verbose = self._get_equal_lines(option_verbose,
+                                          width, colour, c_off, opt_margin,
+                                          option_colour=colour)
 
-                temp = joiner + "%s" + Fore.RESET + Style.RESET_ALL + Back.RESET
+                temp = '\n' + "%s" + c_off + Style.RESET_ALL
                 params += temp % option_verbose
 
         return params
@@ -267,26 +268,77 @@ class DisplayFormatter(object):
                         warn_colour):
         doc_str = p_dict['doc']
         info = self._get_equal_lines(doc_str.get('info'), width, info_colour,
-                                     colour_off, " "*2)
+                                     colour_off, " " * 2)
+        info = "\n"+info if info else ''
+
+        doc_link = doc_str.get('documentation_link')
+        if doc_link:
+            documentation_link = self._get_equal_lines(doc_link, width,
+                                            info_colour, colour_off, " " * 2)
+            info +="\n"+documentation_link
+
         warn = self._get_equal_lines(doc_str.get('warn'), width, warn_colour,
                                      colour_off, " "*2)
-        info = "\n"+info if info else ''
         warn = "\n"+warn if warn else ''
         return info, warn
 
-    def _get_equal_lines(self, string, width, colour_on, colour_off, offset):
+    def _get_equal_lines(self, string, width, colour_on, colour_off, offset,
+                         option_colour = False):
+        """ Format the input string so that it is the width specified.
+        Surround the string with provided colour.
+        """
         if not string or not colour_on:
             return ''
-        string = str.splitlines(string)
+        # Call method directly for split to be used with string and unicode
+        string = string.splitlines()
         str_list = []
         for s in string:
             str_list += textwrap.wrap(s, width=width-len(offset))
         new_str_list = []
+        if option_colour:
+            # Alternate colour choice and doesn't colour the full width
+            new_str_list = self._get_option_format(str_list, width,
+                            colour_on, colour_off, offset, option_colour,
+                            new_str_list)
+        else:
+            # Fill the whole line with the colour
+            for line in str_list:
+                lwidth = width - len(line) - len(offset)
+                new_str_list.append(
+                    colour_on + offset + line + " " * lwidth + colour_off)
+        return "\n".join(new_str_list)
+
+    def _get_option_format(self, str_list, width, colour_on, colour_off,
+                           offset, option_colour, new_str_list):
+        """ Special format for the options list """
+        count = 0
         for line in str_list:
             lwidth = width - len(line) - len(offset)
-            new_str_list.append(
-                colour_on + offset + line + " "*lwidth + colour_off)
-        return "\n".join(new_str_list)
+            count += 1
+            if count == 1:
+                '''At the first line, split the key so that it's colour is
+                different. This is done here so that I keep the key and 
+                value on the same line.
+                I have not passed in the unicode colour before this 
+                point as the textwrap does not take unicode into 
+                account when calculating the final string width.
+                '''
+                if ':' in line:
+                    option_text = line.split(':')[0]
+                    opt_descr_text = line.split(':')[1]
+                    line = option_colour + option_text + ':' + colour_on \
+                           + opt_descr_text
+                    new_str_list.append(
+                        offset + line + colour_off + " " * lwidth)
+                else:
+                    # Assumes that the option string is one line, the length
+                    # of the width
+                    new_str_list.append(offset + option_colour + line
+                                         + colour_off + " " * lwidth)
+            else:
+                new_str_list.append(
+                    offset + colour_on + line + colour_off + " " * lwidth)
+        return new_str_list
 
 class DispDisplay(DisplayFormatter):
 
@@ -404,3 +456,79 @@ class ListDisplay(DisplayFormatter):
         c_off = Back.RESET + Fore.RESET
         info, warn = self._get_extra_info(p_dict, width, c_off, info_c, warn_c)
         return default_str + info + warn + all_params
+
+
+class CiteDisplay(DisplayFormatter):
+
+    def __init__(self, plugin_list):
+        super(CiteDisplay, self).__init__(plugin_list)
+
+    def _get_quiet(self, p_dict, count, width, quiet=True):
+        active = \
+            '***OFF***' if 'active' in p_dict and not p_dict['active'] else ''
+        pos = p_dict['pos'].strip() if 'pos' in p_dict.keys() else count
+        fore = Fore.RED + Style.DIM if active else Fore.LIGHTWHITE_EX
+        back = Back.LIGHTBLACK_EX
+        return self._get_plugin_title(p_dict, width, fore, back,
+                                      active=active, quiet=quiet, pos=pos)
+
+    def _get_default(self, level, p_dict, count, width, display_args=False):
+        """ Find the citations and print them. Only display citations
+        if they are required. For example, if certain methods are being
+        used.
+        """
+        margin = 6
+        str_margin = " " * margin
+
+        cite = ''
+        parameters = p_dict['data']
+        citation_dict = p_dict['tools'].get_citations()
+
+        title = self._get_quiet(p_dict, count, width)
+        line_break = '\n' + str_margin + '-' * (width-margin) + '\n'
+
+        for citation in citation_dict.values():
+            if citation.dependency:
+                # If the citation is dependent upon a certain parameter value
+                # being chosen
+                for citation_dependent_parameter, citation_dependent_value \
+                        in citation.dependency.items():
+                    current_value = parameters[citation_dependent_parameter]
+                    if current_value == citation_dependent_value:
+                        str_dep = 'This citation is for the ' \
+                                   + citation_dependent_value + ' '\
+                                   + citation_dependent_parameter
+                        str_dep = self._get_equal_lines(str_dep, width,
+                                   Style.BRIGHT, Style.RESET_ALL, str_margin)
+                        cite += line_break + str_dep + '\n'\
+                                + self._get_citation_lines(citation, width,
+                                                           str_margin)
+            else:
+                cite += line_break \
+                        + self._get_citation_lines(citation, width,
+                                                   str_margin)
+        return title + cite
+
+
+    def _get_citation_lines(self, citation, width, str_margin):
+        """ Print certain information about the citation in order.
+        """
+        cite_keys = ['name', 'description', 'doi', 'bibtex', 'endnote']
+        cite_dict = citation.__dict__
+        cite_str = ''
+
+        style_on = Style.BRIGHT
+        style_off = Style.RESET_ALL
+
+        for key in cite_keys:
+            if cite_dict[key]:
+                # Set the key name to be bold
+                cite_key = self._get_equal_lines(key.title(), width,
+                                     style_on, style_off, str_margin)
+                # No style for the citation content
+                cite_value = self._get_equal_lines(cite_dict[key],
+                                width, style_off, style_off, str_margin)
+                # New line for each item
+                cite_str += '\n' + cite_key + '\n' + cite_value + '\n'
+
+        return cite_str

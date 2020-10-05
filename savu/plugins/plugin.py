@@ -31,6 +31,7 @@ from collections import OrderedDict
 
 import savu.plugins.utils as pu
 import savu.plugins.docstring_parser as doc
+import savu.plugins.parameter_utils as param_u
 from savu.plugins.plugin_datasets import PluginDatasets
 
 
@@ -135,16 +136,17 @@ class Plugin(PluginDatasets):
             self.set_docstring(p_tools.get_doc())
             self.parameters = \
                 OrderedDict([(k, v['default'])
-                             for k, v in p_tools.get_param().items()])
+                             for k, v in self.p_dict.items()])
             # parameters holds current values, this is edited outside of the
             # tools class so default and dependency display values are updated here
-            p_tools.update_defaults(self.parameters, self.p_dict)
-            p_tools.check_dependencies(self.parameters, self.p_dict)
+            self.tools.update_defaults(self.parameters, self.p_dict)
+            self.tools.check_dependencies(self.parameters, self.p_dict)
 
     def set_docstring(self, doc_str):
         desc = doc.find_args(self)
         self.docstring_info['info'] = doc_str.get('verbose')
         self.docstring_info['warn'] = doc_str.get('warn')
+        self.docstring_info['documentation_link'] = doc_str.get('documentation_link')
         self.docstring_info['synopsis'] = desc['synopsis']
 
     def delete_parameter_entry(self, param):
@@ -171,7 +173,11 @@ class Plugin(PluginDatasets):
         for key in parameters.keys():
             if key in self.parameters.keys():
                 value = self.__convert_multi_params(parameters[key], key)
-                self.parameters[key] = value
+                self.tools.modify(self.parameters, value, key)
+                # parameters holds current values, this is edited outside of the
+                # tools class so default and dependency display values are updated here
+                self.tools.update_defaults(self.parameters, self.p_dict, mod=key)
+                self.tools.check_dependencies(self.parameters, self.p_dict)
             else:
                 error = ("Parameter '%s' is not valid for plugin %s. \nTry "
                          "opening and re-saving the process list in the "
@@ -187,6 +193,7 @@ class Plugin(PluginDatasets):
         and which plugins to re-run.
         """
         dtype = self.p_dict[key].get('dtype')
+        current_parameter_details = self.p_dict[key]
 
         if isinstance(value, str) and ';' in value:
             value = value.split(';')
@@ -198,14 +205,24 @@ class Plugin(PluginDatasets):
                     raise RuntimeError(
                         'No values for tuned parameter "{}", '
                         'ensure start:stop:step; values are valid.'.format(key))
-            if type(value[0]) != dtype:
+
+            parameter_valid, error_str = param_u.is_valid(key, value[0],
+                                                          current_parameter_details)
+            if not parameter_valid:
                 try:
                     value.remove('')
                 except:
                     pass
                 if isinstance(value[0], str):
                     value = [ast.literal_eval(i) for i in value]
-                value = map(dtype, value)
+
+                if isinstance(dtype, list):
+                    for instance_type in dtype:
+                        if type(value[0]) == instance_type:
+                            # TODO Check the mapping use here
+                            value = map(type, value)
+                else:
+                    value = map(dtype, value)
             label = key + '_params.' + type(value[0]).__name__
             self.multi_params_dict[len(self.multi_params_dict)] = \
                 {'label': label, 'values': value}

@@ -170,8 +170,9 @@ class PluginList(object):
         json_keys = self.__get_json_keys()
 
         if 'cite' in plugin.keys():
-            if plugin['cite'] is not None:
-                self._output_plugin_citations(plugin['cite'], plugin_group)
+            citation_plugin = plugin['cite']
+            if citation_plugin:
+                self._output_plugin_citations(citation_plugin, plugin_group)
 
         for key in required_keys:
             # only need to apply dumps if saving in configurator
@@ -220,10 +221,11 @@ class PluginList(object):
         self.__set_loaders_and_savers()
 
     def _output_plugin_citations(self, citations, group):
-        if not isinstance(citations, list):
-            citations = [citations]
-        for cite in citations:
-            citation_group = group.create_group(cite.name)
+        """Set the inner file path of the nexus file to be the citation
+        id to avoid using long titles including spaces.
+        """
+        for cite in citations.values():
+            citation_group = group.create_group(cite.id)
             cite.write(citation_group)
 
     def _save_framework_citations(self, group):
@@ -496,13 +498,95 @@ class CitationInformation(object):
     Descriptor of Citation Information for plugins
     """
 
-    def __init__(self):
-        super(CitationInformation, self).__init__()
-        self.description = ''
-        self.doi = ''
-        self.endnote = ''
-        self.bibtex = ''
-        self.name = 'citation'
+    def __init__(self, description, bibtex='', endnote='', doi='',
+                 short_name_article='', dependency=''):
+        self.description = description
+        self.short_name_article = short_name_article
+        self.bibtex = bibtex
+        self.endnote = endnote
+        self.doi = doi
+        self.dependency = dependency
+        self.name = self._set_citation_name()
+        self.id = self._set_id()
+
+    def _set_citation_name(self):
+        """ Create a short identifier using the short name of the article
+        and the first author
+        """
+        cite_info = True if self.endnote or self.bibtex else False
+
+        if cite_info and self.short_name_article:
+            cite_name = self.short_name_article.title() + ' by ' \
+                        + self._get_first_author() + ' et al.'
+        elif cite_info:
+            cite_name = self._get_title() + ' by ' \
+                        + self._get_first_author() + ' et al.'
+        else:
+            # Set the tools class name as the citation name causes overwriting
+            # module_name = tool_class.__module__.split('.')[-1].replace('_', ' ')
+            # cite_name = module_name.split('tools')[0].title()
+            cite_name = self.description
+        return cite_name
+
+    def _set_citation_id(self, tool_class):
+        """ Create a short identifier using the bibtex identification
+        """
+        # Remove blank space
+        if self.bibtex:
+            cite_id = self._get_id()
+        else:
+            # Set the tools class name as the citation name
+            module_name = tool_class.__module__.split('.')[-1]
+            cite_id = module_name
+        return cite_id
+
+    def _set_id(self):
+        """ Retrieve the id from the bibtex """
+        cite_id = self.seperate_bibtex('@article{', ',')
+        return cite_id
+
+    def _get_first_author(self):
+        """ Retrieve the first author name """
+        if self.endnote:
+            first_author = self.seperate_endnote('%A ')
+        elif self.bibtex:
+            first_author = self.seperate_bibtex('author={', '}', author=True)
+        return first_author
+
+    def _get_title(self):
+        """ Retrieve the title """
+        if self.endnote:
+            title = self.seperate_endnote('%T ')
+        elif self.bibtex:
+            title = self.seperate_bibtex('title={', '}')
+        return title
+
+    def seperate_endnote(self, seperation_char):
+        """ Return the string contained between start characters
+        and a new line
+
+        :param seperation_char: Character to split the string at
+        :param endnote:
+        :return: The string contained between start characters and a new line
+        """
+        item = self.endnote.partition(seperation_char)[2].split('\n')[0]
+        return item
+
+    def seperate_bibtex(self, start_char, end_char, author=False):
+        """ Return the string contained between provided characters
+
+        :param start_char: Character to split the string at
+        :param end_char: Character to end the split at
+        :param bibtex:
+        :return: The string contained between both characters
+        """
+        item = self.bibtex.partition(start_char)[2].split(end_char)[0]
+        if author:
+            # Return one author only
+            if ' and ' in item:
+                item = item.split(' and ')[0]
+
+        return item
 
     def write(self, citation_group):
         citation_group.attrs[NX_CLASS] = 'NXcite'

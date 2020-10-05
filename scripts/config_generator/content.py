@@ -26,8 +26,7 @@ import re
 import os
 import inspect
 import scripts.config_generator.mutations as mutations
-from colorama import Fore
-from collections import OrderedDict
+from colorama import Fore, Back, Style
 
 from savu.plugins import utils as pu
 from savu.data.plugin_list import PluginList
@@ -233,6 +232,18 @@ class Content(object):
         self.plugin_list.plugin_list[new_pos]['pos'] = new
 
     def modify(self, pos_str, param_name, value, ref=False):
+        """ Modify the plugin at pos_str and the parameter at param_name
+        The new value will be set if it is valid.
+
+        :param pos_str: The plugin position
+        :param param_name: The parameter position/name
+        :param value: The new parameter value
+        :param ref: boolean Refresh the plugin
+
+        returns: A boolean True if the value is a valid input for the
+          selected parameter and a str of the parameter name to use inside
+          the display
+        """
         valid_modification = False
         pos = self.find_position(pos_str)
         tools = self.plugin_list.plugin_list[pos]['tools']
@@ -241,32 +252,13 @@ class Content(object):
         # Select the correct group and order of parameters according to that
         # on display to the user. This ensures correct parameter is modified.
 
-        data_keys = []
-        basic_keys = []
-        interm_keys = []
-        adv_keys = []
-        for k, v in params.items():
-            if v['display'] == 'on':
-                if v['visibility'] == 'datasets':
-                    data_keys.append(k)
-                if v['visibility'] == 'basic':
-                    basic_keys.append(k)
-                if v['visibility'] == 'intermediate':
-                    interm_keys.append(k)
-                if v['visibility'] == 'advanced':
-                    adv_keys.append(k)
-
-        keys = basic_keys + interm_keys + adv_keys + data_keys
-
-        if param_name.isdigit():
-            param_name = int(param_name)
-            if param_name <= len(keys):
-                param_name = keys[param_name-1]
-            else:
-                raise Exception('This parameter number is not valid for this plug in.')
-        elif param_name not in keys:
-            raise Exception('This parameter is not present in this plug in.')
-
+        if ref:
+            # For a refresh, refresh all keys, including those with
+            # dependencies (which have the display off)
+            keys = params.keys()
+        else:
+            keys = pu.set_order_by_visibility(params)
+        param_name = pu.param_to_str(param_name, keys)
         try:
             if not ref:
                 value = self.value(value)
@@ -422,35 +414,8 @@ class Content(object):
     def get(self, pos):
         return self.plugin_list.plugin_list[pos]
 
-    def cite(self, pos):
-        if pos >= self.size:
-            raise Exception("Cannot find citations for this plugin %s "
-                            "as it does not exist."
-                            % self.plugin_list.plugin_list[pos]['name'])
-        citation_dict = self.plugin_list.plugin_list[pos]['tools'].get_citations()
-        parameters = self.plugin_list.plugin_list[pos]['data']
-        for citation in citation_dict.values():
-            if hasattr(citation, 'dependency'):
-                for citation_dependent_parameter, citation_dependent_value \
-                        in citation.dependency.items():
-                    current_value = parameters[citation_dependent_parameter]
-                    if current_value == citation_dependent_value:
-                        print('This citation is for the '
-                              + citation_dependent_value + ' '
-                              + citation_dependent_parameter)
-                        self._print_citation(citation)
-            else:
-                self._print_citation(citation)
-
-    def _print_citation(self, citation):
-        print("\nINFORMATION\n%s\n\nDESCRIPTION\n%s\n\nDOI\n%s\n\n"
-              "BIBTEX\n%s\n\nENDNOTE\n%s" % \
-              (citation.name, citation.description, citation.doi, \
-               citation.bibtex, citation.endnote))
-        print('-------------------------------------------'
-              '-----------------------------------------')
-
     def level(self, level):
+        """ Set the visibility level of parameters """
         self.disp_level = level
 
     def remove(self, pos):

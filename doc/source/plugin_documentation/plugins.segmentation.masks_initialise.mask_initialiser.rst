@@ -15,41 +15,44 @@ Parameter definitions
 
 .. code-block:: yaml
 
-    
-        mask1_coordinates:
-            visibility: basic
+        in_datasets:
+            visibility: datasets
             dtype: list
-            description: "X0,Y0,Z0 (start) X1,Y1,Z1 (middle) and
-              X2,Y2,Z2 (finish) coordinates of three points."
-            default: [10, 10, 0, 15, 15, 15, 20, 20, 20]
-
-        mask1_radius:
-            visibility: basic
-            dtype: int
-            description: Mask1 will be initialised with an ellipse of radius.
-            default: 5
-
-        mask2_coordinates:
-            visibility: basic
-            dtype: list
-            description: The second mask coordinates.
-            default: None
-
-        mask2_radius:
-            visibility: basic
-            dtype: int
-            description: Mask2 will be initialised with an ellipse of radius.
-            default: None
-
+            description: Create a list of the dataset(s) to process
+            default: []
+        
         out_datasets:
             visibility: datasets
             dtype: list
             description: The default names
             default: ['INIT_MASK']
-
+        
+        mask1_coordinates:
+            visibility: basic
+            dtype: list
+            description: X0,Y0,Z0 (start) X1,Y1,Z1 (middle) and X2,Y2,Z2 (finish) coordinates of three points.
+            default: [10, 10, 0, 15, 15, 15, 20, 20, 20]
+        
+        mask1_radius:
+            visibility: basic
+            dtype: int
+            description: Mask1 will be initialised with an ellipse of radius.
+            default: 5
+        
+        mask2_coordinates:
+            visibility: basic
+            dtype: list
+            description: The second mask coordinates.
+            default: None
+        
+        mask2_radius:
+            visibility: basic
+            dtype: int
+            description: Mask2 will be initialised with an ellipse of radius.
+            default: None
         
 Key
 ^^^^^^^^^^
 
-.. literalinclude:: /../source/documentation/short_parameter_key.yaml
+.. literalinclude:: /../source/files_and_images/documentation/short_parameter_key.yaml
     :language: yaml

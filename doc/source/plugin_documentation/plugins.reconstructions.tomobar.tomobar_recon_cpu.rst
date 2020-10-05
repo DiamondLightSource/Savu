@@ -15,245 +15,651 @@ Parameter definitions
 
 .. code-block:: yaml
 
-    
+        in_datasets:
+            visibility: datasets
+            dtype: list
+            description: Create a list of the dataset(s) to process
+            default: []
+        
+        out_datasets:
+            visibility: datasets
+            dtype: list
+            description: Create a list of the dataset(s) to create
+            default: []
+        
+        centre_of_rotation:
+            visibility: basic
+            dtype: ['float', 'int']
+            description: Centre of rotation to use for the reconstruction.
+            default: 0.0
+            example: It could be scalar or list of centre of rotation
+        
+        init_vol:
+            visibility: advanced
+            dtype: str
+            description: Dataset to use as volume initialiser (does not currently work with preview)
+            default: None
+            example: "Type the name of the initialised dataset e.g. ['tomo']"
+        
+        centre_pad:
+            visibility: intermediate
+            dtype: float
+            description: Pad the sinogram to centre it in order to fill the reconstructed volume ROI for asthetic purposes.
+            default: False
+            dependency: 
+                algorithm: 
+                    FP_CUDA
+                    FBP_CUDA
+                    BP_CUDA
+                    FP
+                    FBP
+                    BP
+            example: "Is it a scalar or a list?"
+        
+        outer_pad:
+            visibility: intermediate
+            dtype: float
+            description: Pad the sinogram width to fill the reconstructed volume for asthetic purposes. Choose from True (defaults to sqrt(2)), False or float <= 2.1.
+            default: False
+            dependency: 
+                algorithm: 
+                    FP_CUDA
+                    FBP_CUDA
+                    BP_CUDA
+                    FP
+                    FBP
+                    BP
+        
+        log:
+            visibility: advanced
+            dtype: bool
+            description: 
+                summary: Take the log of the data before reconstruction (true or false).
+                verbose: Should be set to false if PaganinFilter is set beforehand
+            default: True
+            example: Set to True to take the log of the data before reconstruction
+        
+        preview:
+            visibility: advanced
+            dtype: list
+            description: A slice list of required frames.
+            default: "[]"
+            example: "[angle, detectorZ, detectorY], where detectorZ is the vertical coordinate, detectorY is the horizontal coordinate."
+        
+        force_zero:
+            visibility: intermediate
+            dtype: range
+            description: Set any values in the reconstructed image outside of this range to zero.
+            default: "[None, None]"
+            example: "[0,1]"
+        
+        ratio:
+            visibility: intermediate
+            dtype: float
+            description: Ratio of the masks diameter in pixels to the smallest edge size along given axis.
+            default: 0.95
+            example: "Is this a proper name for this parameter? Would mask_diameter or mask_circle be more accurate?"
+        
+        log_func:
+            visibility: advanced
+            dtype: str
+            description: Override the default log function
+            default: np.nan_to_num(-np.log(sino))
+            example: You write a function as default
+        
+        vol_shape:
+            visibility: basic
+            dtype: ['str', 'int']
+            description: 
+                summary: Override the size of the reconstuction volume with an integer value.
+                verbose: When fixed, you get the dimension of the horizontal detector Or you can specify any reconstruction size you like with an integer.
+            default: fixed
+        
         output_size:
             visibility: advanced
             dtype: tuple
-            description:  The dimension of the reconstructed volume
-              (only X-Y dimension).
+            description: The dimension of the reconstructed volume (only X-Y dimension).
             default: auto
-
+        
         data_fidelity:
             visibility: advanced
             dtype: str
             description: Least Squares only at the moment.
             default: LS
-
+        
         data_Huber_thresh:
             visibility: advanced
             dtype: int
             description: Threshold parameter for __Huber__ data fidelity.
             default: None
-
+        
         data_any_rings:
             visibility: hidden
             dtype: int
-            description: a parameter to suppress various artifacts including
-              rings and streaks
+            description: a parameter to suppress various artifacts including rings and streaks
             default: None
-
+        
         data_any_rings_winsizes:
-           visibility: hidden
-           dtype: tuple
-           description: half window sizes to collect background information
-             [detector, angles, num of projections]
-           default: (9,7,9)
-
+            visibility: hidden
+            dtype: tuple
+            description: "half window sizes to collect background information [detector, angles, num of projections]"
+            default: (9,7,9)
+        
         data_any_rings_power:
             visibility: hidden
             dtype: float
             description: a power parameter for Huber model.
             default: 1.5
-
+        
         data_full_ring_GH:
-             visibility: advanced
-             dtype: str
-             description: Regularisation variable for full constant
-               ring removal (GH model).
-             default: None
-
+            visibility: advanced
+            dtype: str
+            description: Regularisation variable for full constant ring removal (GH model).
+            default: None
+        
         data_full_ring_accelerator_GH:
-             visibility: advanced
-             dtype: float
-             description: Acceleration constant for GH ring removal. (use with care)
-             default: 10.0
-
+            visibility: advanced
+            dtype: float
+            description: Acceleration constant for GH ring removal. (use with care)
+            default: 10.0
+        
         algorithm_iterations:
-             visibility: basic
-             dtype: int
-             description:
-               summary: Number of outer iterations for FISTA (default)or
-                 ADMM methods.
-               verbose: Less than 10 iterations for the iterative method
-                  (FISTA) can deliver a blurry reconstruction. The
-                  suggested value is 15 iterations, however the
-                  algorithm can stop prematurely based on the tolerance
-                  value.
-             default: 20
-
+            visibility: basic
+            dtype: int
+            description: 
+                summary: Number of outer iterations for FISTA (default)or ADMM methods.
+                verbose: Less than 10 iterations for the iterative method (FISTA) can deliver a blurry reconstruction. The suggested value is 15 iterations, however the algorithm can stop prematurely based on the tolerance value.
+            default: 20
+        
         algorithm_verbose:
-             visibility: advanced
-             dtype: bool
-             description: Print iterations number and other messages
-               (off by default).
-             default: 'off'
-
+            visibility: advanced
+            dtype: bool
+            description: Print iterations number and other messages (off by default).
+            default: off
+        
         algorithm_ordersubsets:
-             visibility: advanced
-             dtype: int
-             description: The number of ordered-subsets to accelerate
-               reconstruction.
-             default: 6
-
+            visibility: advanced
+            dtype: int
+            description: The number of ordered-subsets to accelerate reconstruction.
+            default: 6
+        
         algorithm_nonnegativity:
             visibility: advanced
             dtype: str
-            options: [ENABLE, DISABLE]
-            description:
+            options: ['ENABLE', 'DISABLE']
+            description: 
                 summary: ENABLE or DISABLE nonnegativity constraint.
             default: ENABLE
-
+        
         regularisation_method:
-             visibility: advanced
-             dtype: str
-             options: [ROF_TV, FGP_TV, PD_TV, SB_TV, LLT_ROF, NDF, Diff4th]
-             description:
-               summary: The denoising method
-               verbose: Iterative methods can help to solve ill-posed
-                          inverse problems by choosing a suitable noise
-                          model for the measurement
-               options:
-                   ROF_TV: Rudin-Osher-Fatemi Total Variation model
-                   FGP_TV: Fast Gradient Projection Total Variation model
-                   PD_TV: Primal-Dual Total Variation
-                   SB_TV: Split Bregman Total Variation model
-                   LLT_ROF: Lysaker, Lundervold and Tai model combined
-                     with Rudin-Osher-Fatemi
-                   NDF: Nonlinear/Linear Diffusion model (Perona-Malik,
-                     Huber or Tukey)
-                   TGV: Total Generalised Variation
-                   NLTV: Non Local Total Variation
-                   DIFF4th: Fourth-order nonlinear diffusion model
-             default: FGP_TV
-
+            visibility: advanced
+            dtype: str
+            options: ['ROF_TV', 'FGP_TV', 'PD_TV', 'SB_TV', 'LLT_ROF', 'NDF', 'TGV', 'NLTV', 'Diff4th']
+            description: 
+                summary: The denoising method
+                verbose: Iterative methods can help to solve ill-posed inverse problems by choosing a suitable noise model for the measurement
+                options: 
+                    ROF_TV: Rudin-Osher-Fatemi Total Variation model
+                    FGP_TV: Fast Gradient Projection Total Variation model
+                    PD_TV: Primal-Dual Total Variation
+                    SB_TV: Split Bregman Total Variation model
+                    LLT_ROF: Lysaker, Lundervold and Tai model combined with Rudin-Osher-Fatemi
+                    NDF: Nonlinear/Linear Diffusion model (Perona-Malik, Huber or Tukey)
+                    TGV: Total Generalised Variation
+                    NLTV: Non Local Total Variation
+                    Diff4th: Fourth-order nonlinear diffusion model
+            default: FGP_TV
+        
         regularisation_parameter:
-             visibility: basic
-             dtype: float
-             description:
-               summary: Regularisation parameter. The higher the value, the
-                 stronger the smoothing effect
-               range: Recommended between 0 and 1
-             default: 0.0001
-
+            visibility: basic
+            dtype: float
+            description: 
+                summary: Regularisation parameter. The higher the value, the stronger the smoothing effect
+                range: Recommended between 0 and 1
+            default: 0.0001
+        
         regularisation_iterations:
-             visibility: basic
-             dtype: int
-             description:
-               summary: Total number of regularisation iterations.
-                 The smaller the number of iterations, the smaller the effect
-                 of the filtering is. A larger number will affect the speed
-                 of the algorithm.
-             default: 80
-
+            visibility: basic
+            dtype: int
+            description: 
+                summary: Total number of regularisation iterations. The smaller the number of iterations, the smaller the effect of the filtering is. A larger number will affect the speed of the algorithm.
+            default: 80
+        
         regularisation_device:
-             visibility: advanced
-             dtype: str
-             description: The device for regularisation
-             default: cpu
-
+            visibility: advanced
+            dtype: str
+            description: The device for regularisation
+            default: cpu
+        
         regularisation_PD_lip:
-             visibility: advanced
-             dtype: int
-             description: Primal-dual parameter for convergence.
-             default: 8
-             dependency:
-               regularisation_method: PD_TV
-
+            visibility: advanced
+            dtype: int
+            description: Primal-dual parameter for convergence.
+            default: 8
+            dependency: 
+                regularisation_method: PD_TV
+        
         regularisation_methodTV:
-             visibility: advanced
-             dtype: str
-             description: 0/1 - TV specific isotropic/anisotropic choice.
-             default: 0
-             dependency:
-               regularisation_method: [ROF_TV, FGP_TV, SB_TV, NLTV]
-
+            visibility: advanced
+            dtype: str
+            description: 0/1 - TV specific isotropic/anisotropic choice.
+            default: 0
+            dependency: 
+                regularisation_method: 
+                    ROF_TV
+                    FGP_TV
+                    SB_TV
+                    NLTV
+        
         regularisation_timestep:
-             visibility: advanced
-             dtype: float
-             dependency:
-               regularisation_method: [ROF_TV, LLT_ROF, NDF, Diff4th]
-             description:
-               summary: Time marching parameter
-               range: Recommended between 0.0001 and 0.003
-             default: 0.003
-
+            visibility: advanced
+            dtype: float
+            dependency: 
+                regularisation_method: 
+                    ROF_TV
+                    LLT_ROF
+                    NDF
+                    Diff4th
+            description: 
+                summary: Time marching parameter
+                range: Recommended between 0.0001 and 0.003
+            default: 0.003
+        
         regularisation_edge_thresh:
-             visibility: advanced
-             dtype: float
-             dependency:
-               regularisation_method: [NDF, Diff4th]
-             description:
-               summary: Edge (noise) related parameter
-             default: 0.01
-
+            visibility: advanced
+            dtype: float
+            dependency: 
+                regularisation_method: 
+                    NDF
+                    Diff4th
+            description: 
+                summary: Edge (noise) related parameter
+            default: 0.01
+        
         regularisation_parameter2:
-             visibility: advanced
-             dtype: float
-             dependency:
-               regularisation_method: LLT_ROF
-             description:
-               summary: Regularisation (smoothing) value
-               verbose: The higher the value stronger the smoothing effect
-             default: 0.005
-
+            visibility: advanced
+            dtype: float
+            dependency: 
+                regularisation_method: LLT_ROF
+            description: 
+                summary: Regularisation (smoothing) value
+                verbose: The higher the value stronger the smoothing effect
+            default: 0.005
+        
         regularisation_NDF_penalty:
-             visibility: advanced
-             dtype: str
-             options: [Huber, Perona, Tukey]
-             description:
-               summary: Penalty dtype
-               verbose: Nonlinear/Linear Diffusion model (NDF) specific penalty
-                 type.
-               options:
-                 Huber: Huber
-                 Perona: Perona-Malik model
-                 Tukey: Tukey
-             dependency:
-               regularisation_method: NDF
-             default: Huber
-
+            visibility: advanced
+            dtype: str
+            options: ['Huber', 'Perona', 'Tukey']
+            description: 
+                summary: Penalty dtype
+                verbose: Nonlinear/Linear Diffusion model (NDF) specific penalty type.
+                options: 
+                    Huber: Huber
+                    Perona: Perona-Malik model
+                    Tukey: Tukey
+            dependency: 
+                regularisation_method: NDF
+            default: Huber
         
 Key
 ^^^^^^^^^^
 
-.. literalinclude:: /../source/documentation/short_parameter_key.yaml
+.. literalinclude:: /../source/files_and_images/documentation/short_parameter_key.yaml
     :language: yaml
 
-Documentation
+Citations
 --------------------------
 
+A fast iterative shrinkage-thresholding algorithm for linear inverse problems by Beck, Amir et al.
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Bibtex
-^^^^^^^^^^^^^^^^^^
+""""""""""""""""""""""""""""""""""""""""""
 
 .. code-block:: none
 
     @article{beck2009fast,
-         title={A fast iterative shrinkage-thresholding algorithm for linear inverse problems},
-         author={Beck, Amir and Teboulle, Marc},
-         journal={SIAM journal on imaging sciences},
-         volume={2},
-         number={1},
-         pages={183--202},
-         year={2009},
-         publisher={SIAM}
-        }
-        
+    title={A fast iterative shrinkage-thresholding algorithm for linear inverse problems},
+    author={Beck, Amir and Teboulle, Marc},
+    journal={SIAM journal on imaging sciences},
+    volume={2},
+    number={1},
+    pages={183--202},
+    year={2009},
+    publisher={SIAM}
+    }
+    
 
 Endnote
-^^^^^^^^^^^^^^^^^^^^
+""""""""""""""""""""""""""""""""""""""""""
 
 .. code-block:: none
 
     %0 Journal Article
-        %T A fast iterative shrinkage-thresholding algorithm for linear inverse problems
-        %A Beck, Amir
-        %A Teboulle, Marc
-        %J SIAM journal on imaging sciences
-        %V 2
-        %N 1
-        %P 183-202
-        %@ 1936-4954
-        %D 2009
-        %I SIAM
-        
+    %T A fast iterative shrinkage-thresholding algorithm for linear inverse problems
+    %A Beck, Amir
+    %A Teboulle, Marc
+    %J SIAM journal on imaging sciences
+    %V 2
+    %N 1
+    %P 183-202
+    %@ 1936-4954
+    %D 2009
+    %I SIAM
+    
+
+Nonlinear total variation based noise removal algorithms by Rudin, Leonid I et al.
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Please use this citation if you are using the ROF_TV regularisation_method)
+
+Bibtex
+""""""""""""""""""""""""""""""""""""""""""
+
+.. code-block:: none
+
+    @article{rudin1992nonlinear,
+      title={Nonlinear total variation based noise removal algorithms},
+      author={Rudin, Leonid I and Osher, Stanley and Fatemi, Emad},
+      journal={Physica D: nonlinear phenomena},
+      volume={60},
+      number={1-4},
+      pages={259--268},
+      year={1992},
+      publisher={North-Holland}
+    }
+    
+
+Endnote
+""""""""""""""""""""""""""""""""""""""""""
+
+.. code-block:: none
+
+    %0 Journal Article
+    %T Nonlinear total variation based noise removal algorithms
+    %A Rudin, Leonid I
+    %A Osher, Stanley
+    %A Fatemi, Emad
+    %J Physica D: nonlinear phenomena
+    %V 60
+    %N 1-4
+    %P 259-268
+    %@ 0167-2789
+    %D 1992
+    %I North-Holland
+    
+
+Fast gradient-based algorithms for constrained total variation image denoising and deblurring problems by Beck, Amir et al.
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Please use this citation if you are using the FGP_TV regularisation_method)
+
+Bibtex
+""""""""""""""""""""""""""""""""""""""""""
+
+.. code-block:: none
+
+    @article{beck2009fast,
+      title={Fast gradient-based algorithms for constrained total variation image denoising and deblurring problems},
+      author={Beck, Amir and Teboulle, Marc},
+      journal={IEEE transactions on image processing},
+      volume={18},
+      number={11},
+      pages={2419--2434},
+      year={2009},
+      publisher={IEEE}
+    }
+    
+
+Endnote
+""""""""""""""""""""""""""""""""""""""""""
+
+.. code-block:: none
+
+    %0 Journal Article
+    %T Fast gradient-based algorithms for constrained total variation image denoising and deblurring problems
+    %A Beck, Amir
+    %A Teboulle, Marc
+    %J IEEE transactions on image processing
+    %V 18
+    %N 11
+    %P 2419-2434
+    %@ 1057-7149
+    %D 2009
+    %I IEEE
+    
+
+The split Bregman method for L1-regularized problems by Goldstein, Tom et al.
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Please use this citation if you are using the SB_TV regularisation_method)
+
+Bibtex
+""""""""""""""""""""""""""""""""""""""""""
+
+.. code-block:: none
+
+    @article{goldstein2009split,
+       title={The split Bregman method for L1-regularized problems},
+       author={Goldstein, Tom and Osher, Stanley},
+       journal={SIAM journal on imaging sciences},
+       volume={2},
+       number={2},
+       pages={323--343},
+       year={2009},
+       publisher={SIAM}
+     }
+    
+
+Endnote
+""""""""""""""""""""""""""""""""""""""""""
+
+.. code-block:: none
+
+    %0 Journal Article
+    %T The split Bregman method for L1-regularized problems
+    %A Goldstein, Tom
+    %A Osher, Stanley
+    %J SIAM journal on imaging sciences
+    %V 2
+    %N 2
+    %P 323-343
+    %@ 1936-4954
+    %D 2009
+    %I SIAM
+    
+
+Total generalized variation by Bredies, Kristian et al.
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Please use this citation if you are using the TGV regularisation_method)
+
+Bibtex
+""""""""""""""""""""""""""""""""""""""""""
+
+.. code-block:: none
+
+    @article{bredies2010total,
+       title={Total generalized variation},
+       author={Bredies, Kristian and Kunisch, Karl and Pock, Thomas},
+       journal={SIAM Journal on Imaging Sciences},
+       volume={3},
+       number={3},
+       pages={492--526},
+       year={2010},
+       publisher={SIAM}
+     }
+    
+
+Endnote
+""""""""""""""""""""""""""""""""""""""""""
+
+.. code-block:: none
+
+    %0 Journal Article
+    %T Total generalized variation
+    %A Bredies, Kristian
+    %A Kunisch, Karl
+    %A Pock, Thomas
+    %J SIAM Journal on Imaging Sciences
+    %V 3
+    %N 3
+    %P 492-526
+    %@ 1936-4954
+    %D 2010
+    %I SIAM
+    
+
+Model-based iterative reconstruction using higher-order regularization of dynamic synchrotron data by Kazantsev, Daniil et al.
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Please use this citation if you are using the LLT_ROF regularisation_method)
+
+Bibtex
+""""""""""""""""""""""""""""""""""""""""""
+
+.. code-block:: none
+
+    @article{kazantsev2017model,
+     title={Model-based iterative reconstruction using higher-order regularization of dynamic synchrotron data},
+     author={Kazantsev, Daniil and Guo, Enyu and Phillion, AB and Withers, Philip J and Lee, Peter D},
+     journal={Measurement Science and Technology},
+     volume={28},
+     number={9},
+     pages={094004},
+     year={2017},
+     publisher={IOP Publishing}
+     }
+    
+
+Endnote
+""""""""""""""""""""""""""""""""""""""""""
+
+.. code-block:: none
+
+    %0 Journal Article
+    %T Model-based iterative reconstruction using higher-order regularization of dynamic synchrotron data
+    %A Kazantsev, Daniil
+    %A Guo, Enyu
+    %A Phillion, AB
+    %A Withers, Philip J
+    %A Lee, Peter D
+    %J Measurement Science and Technology
+    %V 28
+    %N 9
+    %P 094004
+    %@ 0957-0233
+    %D 2017
+    %I IOP Publishing
+    
+
+Scale-space and edge detection using anisotropic diffusion by Perona, Pietro et al.
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Please use this citation if you are using the NDF regularisation_method)
+
+Bibtex
+""""""""""""""""""""""""""""""""""""""""""
+
+.. code-block:: none
+
+    @article{perona1990scale,
+       title={Scale-space and edge detection using anisotropic diffusion},
+       author={Perona, Pietro and Malik, Jitendra},
+       journal={IEEE Transactions on pattern analysis and machine intelligence},
+       volume={12},
+       number={7},
+       pages={629--639},
+       year={1990},
+       publisher={IEEE}}
+    
+
+Endnote
+""""""""""""""""""""""""""""""""""""""""""
+
+.. code-block:: none
+
+    %0 Journal Article
+    %T Scale-space and edge detection using anisotropic diffusion
+    %A Perona, Pietro
+    %A Malik, Jitendra
+    %J IEEE Transactions on pattern analysis and machine intelligence
+    %V 12
+    %N 7
+    %P 629-639
+    %@ 0162-8828
+    %D 1990
+    %I IEEE
+    
+
+An anisotropic fourth-order diffusion filter for image noise removal by Hajiaboli, Mohammad Reza et al.
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Please use this citation if you are using the Diff4th regularisation_method)
+
+Bibtex
+""""""""""""""""""""""""""""""""""""""""""
+
+.. code-block:: none
+
+    @article{hajiaboli2011anisotropic,
+     title={An anisotropic fourth-order diffusion filter for image noise removal},
+     author={Hajiaboli, Mohammad Reza},
+     journal={International Journal of Computer Vision},
+     volume={92},
+     number={2},
+     pages={177--191},
+     year={2011},
+     publisher={Springer}
+     }
+    
+
+Endnote
+""""""""""""""""""""""""""""""""""""""""""
+
+.. code-block:: none
+
+    %0 Journal Article
+    %T An anisotropic fourth-order diffusion filter for image noise removal
+    %A Hajiaboli, Mohammad Reza
+    %J International Journal of Computer Vision
+    %V 92
+    %N 2
+    %P 177-191
+    %@ 0920-5691
+    %D 2011
+    %I Springer
+    
+
+Nonlocal discrete regularization on weighted graphs, a framework for image and manifold processing by Elmoataz, Abderrahim et al.
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Please use this citation if you are using the NLTV regularisation_method)
+
+Bibtex
+""""""""""""""""""""""""""""""""""""""""""
+
+.. code-block:: none
+
+    @article{elmoataz2008nonlocal,
+      title={Nonlocal discrete regularization on weighted graphs: a framework for image and manifold processing},
+      author={Elmoataz, Abderrahim and Lezoray, Olivier and Bougleux, S{'e}bastien},
+      journal={IEEE transactions on Image Processing},
+      volume={17},
+      number={7},
+      pages={1047--1060},
+      year={2008},
+      publisher={IEEE}
+    }
+    
+
+Endnote
+""""""""""""""""""""""""""""""""""""""""""
+
+.. code-block:: none
+
+    %0 Journal Article
+    %T Nonlocal discrete regularization on weighted graphs, a framework for image and manifold processing
+    %A Elmoataz, Abderrahim
+    %A Lezoray, Olivier
+    %A Bougleux, Sebastien
+    %J IEEE transactions on Image Processing
+    %V 17
+    %N 7
+    %P 1047-1060
+    %@ 1057-7149
+    %D 2008
+    %I IEEE
+    
 
