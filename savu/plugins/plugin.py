@@ -31,6 +31,7 @@ from collections import OrderedDict
 
 import savu.plugins.utils as pu
 import savu.plugins.docstring_parser as doc
+import savu.plugins.parameter_utils as param_u
 from savu.plugins.plugin_datasets import PluginDatasets
 
 
@@ -172,7 +173,11 @@ class Plugin(PluginDatasets):
         for key in parameters.keys():
             if key in self.parameters.keys():
                 value = self.__convert_multi_params(parameters[key], key)
-                self.parameters[key] = value
+                self.tools.modify(self.parameters, value, key)
+                # parameters holds current values, this is edited outside of the
+                # tools class so default and dependency display values are updated here
+                self.tools.update_defaults(self.parameters, self.p_dict, mod=key)
+                self.tools.check_dependencies(self.parameters, self.p_dict)
             else:
                 error = ("Parameter '%s' is not valid for plugin %s. \nTry "
                          "opening and re-saving the process list in the "
@@ -188,6 +193,7 @@ class Plugin(PluginDatasets):
         and which plugins to re-run.
         """
         dtype = self.p_dict[key].get('dtype')
+        current_parameter_details = self.p_dict[key]
 
         if isinstance(value, str) and ';' in value:
             value = value.split(';')
@@ -199,14 +205,24 @@ class Plugin(PluginDatasets):
                     raise RuntimeError(
                         'No values for tuned parameter "{}", '
                         'ensure start:stop:step; values are valid.'.format(key))
-            if type(value[0]) != dtype:
+
+            parameter_valid, error_str = param_u.is_valid(key, value[0],
+                                                          current_parameter_details)
+            if not parameter_valid:
                 try:
                     value.remove('')
                 except:
                     pass
                 if isinstance(value[0], str):
                     value = [ast.literal_eval(i) for i in value]
-                value = map(dtype, value)
+
+                if isinstance(dtype, list):
+                    for instance_type in dtype:
+                        if type(value[0]) == instance_type:
+                            # TODO Check the mapping use here
+                            value = map(type, value)
+                else:
+                    value = map(dtype, value)
             label = key + '_params.' + type(value[0]).__name__
             self.multi_params_dict[len(self.multi_params_dict)] = \
                 {'label': label, 'values': value}
