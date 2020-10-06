@@ -116,3 +116,12 @@ def get_param_value_from_file(param, in_file):
             value = line.split('=')[1].strip()
             param_list.append(value)
     return param_list
+
+
+def create_dir(file_path):
+    """ Check if directories provided exist at this file path. If they don't
+    create the directories.
+    """
+    directory = os.path.dirname(file_path)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
