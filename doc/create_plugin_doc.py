@@ -146,8 +146,9 @@ def populate_plugin_doc_files(new_rst_file, tool_class_list, file_path,
 
         # Locate documentation file
         doc_folder = savu_base_path + 'doc/source/documentation/'
-        file_str = doc_folder + title[-1] + '_doc.rst'
-        inner_file_str = '/../documentation/' + title[-1] + '_doc.rst'
+        plugin_file_path = file_path.replace('.','/')
+        file_str = doc_folder + plugin_file_path + '_doc.rst'
+        inner_file_str = '/../documentation/' + plugin_file_path + '_doc.rst'
 
         if os.path.isfile(file_str):
             # If there is a documentation file
