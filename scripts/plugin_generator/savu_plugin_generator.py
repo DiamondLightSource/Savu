@@ -28,6 +28,7 @@ import sys
 import string
 import argparse
 
+import savu.test.test_process_list_utils as tplu
 import warnings
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
@@ -59,6 +60,8 @@ def get_plugin_class(plugin_name):
     if plugin_name in failed_plugins.keys():
         print("IMPORT ERROR:", plugin_name, "is unavailable due to the "
                         "following error:\n\t", failed_plugins[plugin_name])
+        # At the moment a new file is then created in the general folder.
+        # A yes or no confirmation should be provided before that is created
         plugin_class = None
     elif plugin_name not in pu.plugins.keys():
         print('The plugin named', plugin_name, 'is not in the list of '
@@ -163,25 +166,40 @@ class ''' + title + '''Tools(PluginTools):
     return tools_info
 
 
-def create_documentation_template(module, savu_base_path):
+def create_documentation_template(file_path, module, savu_base_path):
     # Locate documentation file
-    doc_folder = savu_base_path + 'doc/source/documentation/'
+    plugin_path = file_path.replace('savu/','')
+    doc_folder = savu_base_path + 'doc/source/documentation/' + plugin_path
     title = module.split('.')
-    file_str = doc_folder + title[-1] + '_doc.rst'
+    file_str = doc_folder + '_doc.rst'
+    doc_image_folder = savu_base_path \
+                        + 'doc/source/files_and_images/documentation/' \
+                        + plugin_path \
+                        + '.png'
 
     if os.path.isfile(file_str):
         print('A documentation file exists at ' + file_str)
     else:
+        # Create the file directory for the documentation if it doesn't exist
+        tplu.create_dir(file_str)
+        # Create the file for the documentation images
+        tplu.create_dir(doc_image_folder)
+        doc_image_folder_inline = doc_image_folder.split('files_and_images/')[1]
         with open(file_str, 'w+') as new_rst_file:
+            new_rst_file.write(':orphan:\n\n')
             new_rst_file.write(convert_title(title[-1]) + ' Documentation' +
                                '\n##########################################'
                                '#######################\n')
             new_rst_file.write('\n(Change this) Include your plugin '
                                'documentation here. Use a restructured '
                                'text format.\n')
+            new_rst_file.write('\n..')
+            new_rst_file.write('\n    This is a comment. Include an image or file by using the '
+                               'following text \"'
+                               '.. figure:: ../files_and_images/'
+                               + doc_image_folder_inline + '\"\n')
         new_rst_file.close()
         print('A documentation file has been created at', file_str)
-
 
 def get_module_info(title):
     module_info =\
@@ -235,10 +253,12 @@ def remove_plugin_files(file_path, module, savu_base_path):
         remove_file(file_str, tools_error_str)
 
         # Delete documentation file
-        doc_folder = savu_base_path + 'doc/source/documentation/'
-        file_str = doc_folder + title[-1] + '_doc.rst'
+        doc_file_path = file_path.replace('savu/','')
+        doc_folder = savu_base_path + 'doc/source/documentation/' \
+                     + doc_file_path
+        doc_file_str = doc_folder + '_doc.rst'
         doc_error_str = 'No documentation file was located for this plugin.'
-        remove_file(file_str, doc_error_str)
+        remove_file(doc_file_str, doc_error_str)
 
 
 def check_decision(check):
@@ -282,7 +302,7 @@ def main():
         else:
             create_plugin_template(file_path, module, args.quick, savu_base_path)
             create_tools_template(file_path, module, savu_base_path)
-            create_documentation_template(module, savu_base_path)
+            create_documentation_template(file_path, module, savu_base_path)
     else:
         print('Please write the plugin name in the format plugin_name with '
               'a lowercase letter as the first character and underscores in '

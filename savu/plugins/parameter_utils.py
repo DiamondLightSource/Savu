@@ -215,6 +215,14 @@ def _integer(value):
     return parameter_valid
 
 
+def _positive_integer(value):
+    parameter_valid = False
+    if isinstance(value, int):
+        if value > 0:
+            parameter_valid = True
+    return parameter_valid
+
+
 def _boolean(value):
     parameter_valid = False
     if isinstance(value, bool):
@@ -290,6 +298,7 @@ type_dict = {'int_list': _intlist,
             'filename': _filename,
             'nptype': _nptype,
             'int': _integer,
+            'pos_int': _positive_integer,
             'bool': _boolean,
             'str': _string,
             'float': _float,
@@ -308,6 +317,7 @@ type_error_dict = {'int_list': 'list of integers',
             'filename': 'file name',
             'nptype': 'numpy data type',
             'int': 'integer',
+            'pos_int': 'positive integer',
             'bool': 'boolean',
             'str': 'string',
             'float': 'float',

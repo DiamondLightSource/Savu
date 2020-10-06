@@ -130,5 +130,10 @@ class NoProcessTools(PluginTools):
             dtype: int_path_int
             description: flat data path and scale value
             default: "['exchange/data_white', 1]"
+        positive_test:
+            visibility: basic
+            dtype: pos_int
+            description: flat data path and scale value
+            default: 4
 
 """
