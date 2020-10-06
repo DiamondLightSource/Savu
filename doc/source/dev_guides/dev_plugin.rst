@@ -409,6 +409,15 @@ be in a yaml format.
                     Endnote block of text.
             doi: doi link
             """
+        def citation2(self):
+            """
+            Short description
+            bibtex:
+                    Bibtex block of text.
+            endnote:
+                    Endnote block of text.
+            doi: doi link
+            """
 
 If unicode characters are included, for example the character mew, you can
 precede the docstring with the letter 'u'.
@@ -455,8 +464,6 @@ Below is a longer example of the yaml text.
 
 .. code-block:: yaml
 
-    def citation():
-        """
         The CCPi-Regularisation toolkit provides a set of
         variational regularisers (denoisers) which can be embedded in
         a plug-and-play fashion into proximal splitting methods for
@@ -488,40 +495,6 @@ Below is a longer example of the yaml text.
                 %D 2019
                 %I Elsevier
         doi: "10.1016/j.softx.2019.04.003"
-        """
-
-    def citation2():
-        """
-        Rudin-Osher-Fatemi explicit PDE minimisation method
-        for smoothed Total Variation regulariser
-        bibtex:
-                @article{rudin1992nonlinear,
-                  title={Nonlinear total variation based noise removal algorithms},
-                  author={Rudin, Leonid I and Osher, Stanley and Fatemi, Emad},
-                  journal={Physica D: nonlinear phenomena},
-                  volume={60},
-                  number={1-4},
-                  pages={259--268},
-                  year={1992},
-                  publisher={North-Holland}
-                }
-        endnote:
-                %0 Journal Article
-                %T Nonlinear total variation based noise removal algorithms
-                %A Rudin, Leonid I
-                %A Osher, Stanley
-                %A Fatemi, Emad
-                %J Physica D: nonlinear phenomena
-                %V 60
-                %N 1-4
-                %P 259-268
-                %@ 0167-2789
-                %D 1992
-                %I North-Holland
-        doi: "10.1016/0167-2789(92)90242-F"
-        dependency:
-            method: ROF_TV
-
 
 
 Description
