@@ -63,8 +63,12 @@ def add_package_entry(f, files_present, output, module_name):
         for fi in files_present:
             # TODO At the moment if a directory contains files, and none of
             #  their classes load correctly, the content will be blank
-            file_path = module_name + '.' + fi.split('.py')[0]
-            py_module_name = 'savu.' + str(file_path)
+            mod_path = module_name + '.' + fi.split('.py')[0]
+            # Use the module path '.' file name for api documentation
+            # Use the file path '/' file name for plugin documentation
+            file_path = mod_path.replace('.', '/') \
+                if output == 'plugin_documentation' else mod_path
+            py_module_name = 'savu.' + str(mod_path)
             try:
                 # If the plugin class exists, put it's name into the contents
                 plugin_class = pu.load_class(py_module_name)
@@ -75,18 +79,27 @@ def add_package_entry(f, files_present, output, module_name):
         f.write('\n\n')
 
 
+def create_dir(file_path):
+    """ Check if directories provided exist at this file path. If they don't
+    create the directories.
+    """
+    directory = os.path.dirname(file_path)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+
 def create_plugin_documentation(files, output, module_name, savu_base_path):
     # Create template download page
     create_plugin_template_downloads(savu_base_path)
 
     # Only document the plugin python files
-    if not os.path.exists(savu_base_path + 'doc/source/' + output):
-        # Create the directory if it does not exist
-        os.makedirs(savu_base_path + 'doc/source/' + output)
+    # Create the directory if it does not exist
+    create_dir(savu_base_path + 'doc/source/' + output)
 
     for fi in files:
-        file_path = module_name + '.' + fi.split('.py')[0]
-        py_module_name = 'savu.' + str(file_path)
+        mod_path = module_name + '.' + fi.split('.py')[0]
+        file_path = mod_path.replace('.', '/')
+        py_module_name = 'savu.' + str(mod_path)
         try:
             # Load the associated class
             plugin_class = pu.load_class(py_module_name)()
@@ -95,9 +108,10 @@ def create_plugin_documentation(files, output, module_name, savu_base_path):
             if plugin_tools:
                 # Create an empty rst file inside this directory where
                 # the plugin tools documentation will be stored
-                new_rst_file = open(savu_base_path + 'doc/source/'
-                                    + output + '/' + file_path
-                                    + '.rst', 'w+')
+                full_file_path = savu_base_path + 'doc/source/' + output \
+                                 + '/' + file_path + '.rst'
+                create_dir(full_file_path)
+                new_rst_file = open(full_file_path, 'w+')
                 # Populate this file
                 populate_plugin_doc_files(new_rst_file, plugin_tools,
                                           file_path, plugin_class,
@@ -124,7 +138,7 @@ def populate_plugin_doc_files(new_rst_file, tool_class_list, file_path,
     :param savu_base_path: Savu file path
     """
 
-    title = file_path.split('.')
+    title = file_path.split('/')
     # Depending on the number of nested directories, determine which section
     # heading and title to apply
     plugin_type = title[-1]
@@ -146,9 +160,8 @@ def populate_plugin_doc_files(new_rst_file, tool_class_list, file_path,
 
         # Locate documentation file
         doc_folder = savu_base_path + 'doc/source/documentation/'
-        plugin_file_path = file_path.replace('.','/')
-        file_str = doc_folder + plugin_file_path + '_doc.rst'
-        inner_file_str = '/../documentation/' + plugin_file_path + '_doc.rst'
+        file_str = doc_folder + file_path + '_doc.rst'
+        inner_file_str = '/../documentation/' + file_path + '_doc.rst'
 
         if os.path.isfile(file_str):
             # If there is a documentation file
