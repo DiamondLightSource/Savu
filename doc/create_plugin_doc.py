@@ -324,6 +324,33 @@ def create_plugin_template_downloads(savu_base_path):
     docstring_text = create_template_class_dict(savu_base_path)
 
     doc_f = open(doc_template_file, 'w')
+    # button style
+    doc_f.write('''
+.. raw:: html
+
+    <style> 
+            td a:link, td a:visited {
+                line-height: 2em;
+                border-radius: .25rem;
+                display: inline;
+                padding: .25rem .5rem;
+                color: white;
+                background-color: #2c7aa3;
+            }
+
+            td a:hover, td a:active {
+              line-height: 2em;
+                border-radius: .25rem;
+                display: inline;
+                padding: .25rem .5rem;
+                color: white;
+                background-color: #609ebf;
+            }
+
+    </style>
+
+''')
+    doc_f.write('\n')
     # Create a 'ref' for linking to other rst files
     doc_f.write('.. _plugin_templates:\n')
     doc_f.write('\n')
@@ -396,7 +423,33 @@ def generate_template_files(doc_name, title):
     # Add the orphan instruction as this file is not inside a toctree
     template_file.write(':orphan:\n')
     template_file.write('\n')
-    template_file.write('.. _' + doc_name + ':\n')
+    # button style
+    template_file.write('''
+.. raw:: html
+
+        <style> 
+            a:link .download, a:visited .download {
+                line-height: 2em;
+                border-radius: .25rem;
+                display: inline;
+                padding: .25rem .5rem;
+                color: white;
+                background-color: #2c7aa3;
+            }
+
+            a:hover .download, a:active .download {
+                line-height: 2em;
+                border-radius: .25rem;
+                display: inline;
+                padding: .25rem .5rem;
+                color: white;
+                background-color: #609ebf;
+            }
+        </style>
+
+    ''')
+    template_file.write('\n')
+    template_file.write('\n.. _' + doc_name + ':\n')
     template_file.write('\n')
     template_file.write(title+'\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n')
     template_file.write('\n')

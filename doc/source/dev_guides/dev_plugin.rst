@@ -1,8 +1,8 @@
 .. raw:: html
 
-    <style> .red {color:red} </style>
+    <style> .blue {color:#2c7aa3} </style>
 
-.. role:: red
+.. role:: blue
 
 
 Developing a Savu plugin
@@ -11,10 +11,10 @@ Developing a Savu plugin
 A module is a file containing python definitions and statements. To \
 create a plugin for Savu you will need to create two modules:
 
-1. A plugin module, named :red:`plugin_name`.py containing a class :red:`PluginName`
-2. A plugin tools module named :red:`plugin_name_tools`.py, containing a class :red:`PluginNameTools`
+1. A plugin module, named :blue:`plugin_name`.py containing a class :blue:`PluginName`
+2. A plugin tools module named :blue:`plugin_name_tools`.py, containing a class :blue:`PluginNameTools`
 
-:red:`PluginName` should be replaced by the name of your plugin without \
+:blue:`PluginName` should be replaced by the name of your plugin without \
 any spaces. The words should be capitalised.
 
 Examples are:
@@ -462,7 +462,7 @@ precede the docstring with the letter 'u'.
 
 Below is a longer example of the yaml text.
 
-.. code-block:: yaml
+.. code-block:: none
 
         The CCPi-Regularisation toolkit provides a set of
         variational regularisers (denoisers) which can be embedded in
@@ -470,7 +470,6 @@ Below is a longer example of the yaml text.
         image reconstruction. CCPi-RGL comes with algorithms that can
         satisfy various prior expectations of the reconstructed object,
         for example being piecewise-constant or piecewise-smooth nature.
-        short_name_article: ccpi regularisation toolkit for CT
         bibtex:
                 @article{kazantsev2019ccpi,
                 title={Ccpi-regularisation toolkit for computed tomographic image reconstruction with proximal splitting algorithms},
@@ -494,6 +493,7 @@ Below is a longer example of the yaml text.
                 %@ 2352-7110
                 %D 2019
                 %I Elsevier
+        short_name_article: ccpi regularisation toolkit for CT
         doi: "10.1016/j.softx.2019.04.003"
 
 
@@ -513,7 +513,7 @@ Bibtex
 
 The bibtex text.
 
-.. code-block:: yaml
+.. code-block:: none
 
     bibtex:
             @article{kazantsev2019ccpi,
@@ -531,7 +531,7 @@ Endnote
 
 The endnote text.
 
-.. code-block:: yaml
+.. code-block:: none
 
     endnote:
             @article{kazantsev2019ccpi,
