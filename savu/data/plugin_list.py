@@ -232,9 +232,9 @@ class PluginList(object):
         framework_cites = fc.get_framework_citations()
         count = 0
         for cite in framework_cites:
-            citation_group = group.require_group(cite['name'])
-            citation = CitationInformation()
-            del cite['name']
+            citation_group = group.require_group(cite['short_name_article'])
+            citation = CitationInformation(**cite)
+            del cite['short_name_article']
             for key, value in cite.iteritems():
                 exec('citation.' + key + '= value')
             citation.write(citation_group)
