@@ -97,6 +97,7 @@ else
 fi
 #=========================library checking==============================
 
+
 if [ $test_flag ]; then
   echo -e "\n============================================================="
   echo -e "    ......Thank you for running the Savu tests......\n"
@@ -208,6 +209,7 @@ else
   fi
 fi
 
+
 if [ ! $test_flag ]; then
 
   echo -e "\nThank you!  Installing Savu into" $PREFIX"\n"
@@ -218,22 +220,9 @@ if [ ! $test_flag ]; then
 
   wget https://repo.continuum.io/miniconda/Miniconda3-$miniconda_version-Linux-x86_64.sh -O $PREFIX/miniconda.sh
 
-  #miniconda_dir=$PREFIX/miniconda
-  #env_dir=$PREFIX/savu
-
-  #bash $PREFIX/miniconda.sh -b -p $miniconda_dir
-  #PYTHONHOME=$env_dir/bin
-
   bash $PREFIX/miniconda.sh -b -p $PREFIX/miniconda
   PYTHONHOME=$PREFIX/miniconda/bin
   export PATH="$PYTHONHOME:$PATH"
-  
-  #"$miniconda_dir"/bin/conda create -y -p $env_dir python=3.7
-  # removes the .../miniconda/bin from PATH
-  # which causes an inconsistent environment error
-  # after the conda env update -f ... step below
-  #source $miniconda_dir/bin/deactivate
-  #source $miniconda_dir/bin/activate $env_dir
 
   # conda-build needed to build the savu/hdf5/h5py recipes
   conda install -y -q conda-build conda-env
@@ -241,7 +230,7 @@ if [ ! $test_flag ]; then
 
   echo "Building Savu..."
   conda build $DIR/$savu_recipe
-  savubuild=$(conda build $DIR/$savu_recipe --output)
+  savubuild=`conda build $DIR/$savu_recipe --output`
   echo "Installing Savu..."
   conda install -y -q --use-local $savubuild
 
@@ -251,46 +240,26 @@ if [ ! $test_flag ]; then
   # get the savu version
   if [ -z $recipes ]; then
     install_path=$(python -c "import savu; import savu.version as sv; print(sv.__install__)")
-    recipes=$savu_path/$install_path/conda-recipes
-  fi
-
-  exit 1
-  
-  
-  launcher_path=`command -v savu_launcher.sh`
-  launcher_path=${launcher_path%/savu_launcher.sh}
-  if [ "$facility" ]; then
-    cp $savu_path/system_files/$facility/mpi/savu_launcher.sh $launcher_path
-    cp $savu_path/system_files/$facility/mpi/savu_mpijob.sh $launcher_path
-  fi
+    recipes=$savu_path/$install_path/../conda-recipes
+  fi  
 
   if [ $local_installation = false ]; then
     echo "Installing mpi4py..."
-    pip uninstall -y -q mpi4py || true
     string=$(awk '/^mpi4py/' $versions_file)
     mpi4py_version=$(echo $string | cut -d " " -f 2)
     pip install mpi4py==$mpi4py_version
 
-    echo "Building hdf5..."
-    conda uninstall -y -q hdf5 || true
-    conda build $recipes/hdf5
-    hdf5build=$(conda build $recipes/hdf5 --output)
+    . $recipes/installer.sh "hdf5"
+    . $recipes/installer.sh "h5py"
 
-    echo "Installing hdf5..."
-    conda install -y -q --use-local $hdf5build
-
-    echo "Building h5py..."
-    conda uninstall -y -q h5py || true
-    conda build $recipes/h5py --no-test
-    h5pybuild=$(conda build $recipes/h5py --output)
-
-    echo "Installing h5py..."
-    conda install -y -q --use-local $h5pybuild
   else
     echo "Installing mpi4py/hdf5/h5py from conda for CI run"
     conda env update -f $DIR/environment_ci.yml
   fi
-  conda env update -f $DIR/environment.yml
+
+  conda env update -n root -f $DIR/environment.yml
+
+  . $recipes/installer.sh "tomophantom"
 
   # cleanup base miniconda and build artifacts
   rm $PREFIX/miniconda.sh
@@ -317,7 +286,7 @@ if [ ! $test_flag ]; then
       elif [ "$input" = "n" ]; then
         echo -e "Aborting test run..."
         echo -e "To run the tests later type: "
-        echo -e "   >>> bash savu_v3/savu_installer.sh --tests_only"
+        echo -e "   >>> bash savu_installer/savu_installer.sh --tests_only"
         exit 0
       else
         echo -e "\nYour input was unknown.\n"
@@ -347,7 +316,7 @@ if [ ! $test_flag ]; then
 
   source $setup_script
 fi
-
+ 
 if [ $test_flag ]; then
 
   nGPUs=$(nvidia-smi -L | wc -l)
@@ -360,27 +329,10 @@ if [ $test_flag ]; then
 
   echo -e "\n************** Single-threaded local tests complete ******************\n"
 
-  test_dir=$(mktemp -d)
-  tmp_dir=$(mktemp -d)
-  tmpfile=$tmp_dir/temp_output.txt
-  touch $tmpfile
-
 fi
-
+ 
 if [ ! $test_flag ]; then
-
-  launcher_path=$(command -v savu_launcher.sh)
-  mpijob_path=$(command -v savu_mpijob.sh)
-  echo -e "\n\n===============================IMPORTANT NOTICES================================"
-  echo -e "If you are installing Savu for cluster use, you will need to update the savu "
-  echo -e "launcher scripts:"
-  echo -e "\n$launcher_path"
-  echo -e "$mpijob_path\n"
-  echo -e "\n\nTo run Savu type 'source $savu_setup' to set relevant paths every time you"
-  echo -e "open a new terminal.  Alternatively, if you are using the Modules system, see"
-  echo -e "$DIR/module_template for an example module file."
-  echo -e "================================================================================\n"
-
+ 
   echo -e "*************** SAVU INSTALLATION COMPLETE! ******************\n"
   echo -e "    ......Thank you for running the Savu installer......\n"
   echo -e "=============================================================\n"
@@ -391,4 +343,9 @@ else
   echo -e "=======================================================\n"
 fi
 
+echo -e "\n\t***************************************************"
+echo -e "\t          Package installation complete"
+echo -e "\t  Check $error_log for errors"
+echo -e "\t***************************************************\n"  
+  
 exit 0

@@ -18,10 +18,9 @@ dependencies:
   - tomobar
   - larix
   - ccpi-regulariser
-  - tomophantom
   - astra-toolbox
   - pyfai
-  - pymca
+  - pymca==5.5.5
   - pyfftw
   - xraylib
   - PeakUtils
@@ -34,6 +33,7 @@ dependencies:
   - pytest
   - setuptools
   - mock
+  - spyder
   - pip
   - pip:
       - matplotlib

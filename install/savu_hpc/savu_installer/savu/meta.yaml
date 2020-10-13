@@ -5,7 +5,7 @@ package:
   version: {{ version }}
 
 source:
-  git_url: ../../../../
+  url: https://github.com/DiamondLightSource/Savu/archive/v{{ version }}.tar.gz
 
 requirements:
   build:
