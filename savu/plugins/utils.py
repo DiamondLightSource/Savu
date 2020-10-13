@@ -35,6 +35,7 @@ from collections import OrderedDict
 # can I remove these from here?
 plugins = {}
 plugins_path = {}
+dawn_plugins = {}
 count = 0
 
 OUTPUT_TYPE_DATA_ONLY = 0
