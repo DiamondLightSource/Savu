@@ -247,12 +247,16 @@ class DisplayFormatter(object):
                                     for k, v in desc[key]['options'].items()
                                     if v}
                     if opt in options_desc.keys():
+                        # Append the description
                         opt_d = unicode_bullet_point + str(opt) + ': ' \
                                 + options_desc[opt]
-                        option_verbose +='\n' + opt_d
-                        option_verbose=self._get_equal_lines(option_verbose,
-                                          width, verbose_color, c_off,
-                                          opt_margin, option_colour=colour)
+                    else:
+                        # No description if the field is blank
+                        opt_d = unicode_bullet_point + str(opt) + ': '
+                    option_verbose += '\n' + opt_d
+                    option_verbose = self._get_equal_lines(option_verbose,
+                                                           width, verbose_color, c_off,
+                                                           opt_margin, option_colour=colour)
                 else:
                     option_verbose = unicode_bullet_point + str(opt)
                     option_verbose = self._get_equal_lines(option_verbose,
