@@ -34,8 +34,8 @@ class YamlParameterTest(unittest.TestCase):
 
     def initial_setup(self, test_function):
         """
-        Create the parameter class and set plugin parameters based
-        upon the docstring of the passed in function
+        Create a testing parameter class and set plugin parameters based
+        upon the docstring of the passed in function - define_parameters
 
         :param test_function: The function containing the docstring
          text for the test
@@ -196,6 +196,57 @@ class YamlParameterTest(unittest.TestCase):
 
         self.assertTrue('The parameters have not been read in correctly'
                         in str(context.exception))
+
+
+    def test_parameter_options(self):
+        """
+        # Options
+        parameter:
+            visibility: basic
+            dtype: str
+            description: An option list
+            default: FBP
+            options: [FBP, SIRT, SART]
+
+        """
+        # No error message
+        param_dict = self.initial_setup(self.test_parameter_options)
+
+
+    def test_parameter_options_1(self):
+        """
+        # Options as tuple
+        parameter:
+            visibility: basic
+            dtype: str
+            description: An option list
+            default: FBP
+            options: (FBP, SIRT, SART)
+
+        """
+        # No error message at the moment, but to be read in correctly
+        # options must be surrounded by square brackets
+        param_dict = self.initial_setup(self.test_parameter_options_1)
+
+    def test_parameter_options_2(self):
+        """
+        # Invalid option choice in description
+        parameter:
+            visibility: basic
+            dtype: str
+            description:
+              summary: An option list
+              options:
+                SIRT: One description
+                SLING: Invalid option choice
+                FBP: A description
+            default: FBP
+            options: [FBP, SIRT, SART]
+
+        """
+        # Error message
+        with self.assertRaises(Exception):
+            param_dict = self.initial_setup(self.test_parameter_options_2)
 
 
 class PluginToolTestingClass(PluginTools):
