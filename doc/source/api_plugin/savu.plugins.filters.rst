@@ -1,16 +1,22 @@
 savu.plugins.filters package
 ============================
 
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   savu.plugins.filters.denoising
+
 Submodules
 ----------
 
 .. toctree::
+   :maxdepth: 4
 
    savu.plugins.filters.band_pass
    savu.plugins.filters.base_filter
-   savu.plugins.filters.ccpi_denoising_cpu
-   savu.plugins.filters.ccpi_denoising_gpu
-   savu.plugins.filters.denoise_bregman_filter
    savu.plugins.filters.dezinger
    savu.plugins.filters.dezinger_simple
    savu.plugins.filters.dezinger_sinogram
@@ -20,7 +26,6 @@ Submodules
    savu.plugins.filters.hilbert_filter
    savu.plugins.filters.image_interpolation
    savu.plugins.filters.list_to_projections
-   savu.plugins.filters.median_filter
    savu.plugins.filters.paganin_filter
    savu.plugins.filters.poly_background_estimator
    savu.plugins.filters.pymca
@@ -34,6 +39,6 @@ Module contents
 ---------------
 
 .. automodule:: savu.plugins.filters
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:

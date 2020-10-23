@@ -5,15 +5,18 @@ Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 4
 
-    savu.plugins.loaders.full_field_loaders
-    savu.plugins.loaders.mapping_loaders
-    savu.plugins.loaders.utils
+   savu.plugins.loaders.full_field_loaders
+   savu.plugins.loaders.mapping_loaders
+   savu.plugins.loaders.templates
+   savu.plugins.loaders.utils
 
 Submodules
 ----------
 
 .. toctree::
+   :maxdepth: 4
 
    savu.plugins.loaders.base_loader
    savu.plugins.loaders.hdf5_template_loader
@@ -21,13 +24,12 @@ Submodules
    savu.plugins.loaders.multi_savu_loader
    savu.plugins.loaders.random_hdf5_loader
    savu.plugins.loaders.savu_nexus_loader
-   savu.plugins.loaders.stitch_data_template_loader
    savu.plugins.loaders.yaml_converter
 
 Module contents
 ---------------
 
 .. automodule:: savu.plugins.loaders
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:

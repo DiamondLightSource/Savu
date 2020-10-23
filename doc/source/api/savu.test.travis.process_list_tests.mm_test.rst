@@ -2,7 +2,7 @@ savu.test.travis.process\_list\_tests.mm\_test module
 =====================================================
 
 .. automodule:: savu.test.travis.process_list_tests.mm_test
-    :members:
-    :private-members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:

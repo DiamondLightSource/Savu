@@ -8,17 +8,23 @@ a high performance parallel filesystem, such as GPFS or Lustre.
 
 Requirements: 
     - An MPI implementation (tested with openmpi 3.1.4)
-    
 
 Installation:
 
-1. Ensure that your MPI libraries are can be found in the PATH?
-
-1. Download the latest version of :download:`savu <../../install/savu_hpc/savu_installer/savu_installer.tar.gz>` and extract.
+1. Download the latest version of :download:`savu <https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/DiamondLightSource/Savu/tree/v2.4/install/2_4_install>` and extract.
 
 2. Run the following command and follow the installation instructions:
 
     >>> bash savu_installer/savu_installer.sh
+
+3.  Check the output of the tests that run automatically at the end of the 
+    installation process.  If there are any errors then 
+    
+
+To re-run the tests again with 
+
+
+
 
 
 # what does Savu install?

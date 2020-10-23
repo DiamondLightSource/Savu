@@ -5,6 +5,7 @@ Submodules
 ----------
 
 .. toctree::
+   :maxdepth: 4
 
    savu.plugins.alignment.projection_shift
    savu.plugins.alignment.projection_vertical_alignment
@@ -15,6 +16,6 @@ Module contents
 ---------------
 
 .. automodule:: savu.plugins.alignment
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:
