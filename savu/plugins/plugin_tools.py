@@ -31,7 +31,7 @@ from collections import OrderedDict
 import savu.plugins.utils as pu
 from savu.data.meta_data import MetaData
 import savu.plugins.docstring_parser as doc
-import savu.plugins.parameter_utils as param_u
+import scripts.config_generator.parameter_utils as param_u
 from savu.data.plugin_list import CitationInformation
 
 
@@ -108,7 +108,6 @@ class PluginParameters(object):
                                      mod=param_name)
                 # Update the list of parameters to hide those dependent on others
                 self.check_dependencies(parameters, self.param.get_dictionary())
-                parameter_valid = True
             else:
                 print(error_str)
                 print('This value has not been saved.')
@@ -295,23 +294,25 @@ class PluginParameters(object):
                     temp_default = all_params[parent_param]['default']
                     parent_value = self._set_default(temp_default, all_params, parameters, parent_param)
 
-                    if parent_value in dep_param_choices.keys():
-                        desc['range'] = 'The recommended value with the chosen ' \
-                                        + str(parent_param) + ' would be ' \
-                                        + str(dep_param_choices[parent_value])
-                        recommendation = 'It\'s recommended that you update ' \
-                                         + str(p_name) + ' to ' \
-                                         + str(dep_param_choices[parent_value])
-                        if mod:
-                            if mod == p_name:
-                                print(Fore.RED + recommendation + Fore.RESET)
-                        else:
-                            # If there was no modification, on loading the
-                            # plugin set the correct default value
-                            parameters[p_name] = dep_param_choices[parent_value]
+                if parent_value in dep_param_choices.keys():
+                    desc['range'] = 'The recommended value with the chosen ' \
+                                    + str(parent_param) + ' would be ' \
+                                    + str(dep_param_choices[parent_value])
+                    recommendation = 'It\'s recommended that you update ' \
+                                     + str(p_name) + ' to ' \
+                                     + str(dep_param_choices[parent_value])
+                    if mod:
+                        # If a modification is being made don't automatically
+                        # change other parameters, print a warning
+                        if mod == p_name:
+                            print(Fore.RED + recommendation + Fore.RESET)
                     else:
-                        # If there is no match
-                        parameters[p_name] = None
+                        # If there was no modification, on loading the
+                        # plugin set the correct default value
+                        parameters[p_name] = dep_param_choices[parent_value]
+                else:
+                    # If there is no match
+                    parameters[p_name] = None
 
 
     def check_dependencies(self, parameters, all_params):

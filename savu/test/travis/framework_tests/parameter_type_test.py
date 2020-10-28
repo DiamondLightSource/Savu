@@ -27,7 +27,6 @@ from __future__ import print_function, division, absolute_import
 import unittest
 
 import savu.plugins.utils as pu
-import savu.plugins.parameter_utils as param_u
 
 class ParameterTypeTest(unittest.TestCase):
 
