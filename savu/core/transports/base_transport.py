@@ -282,7 +282,8 @@ class BaseTransport(object):
         slice_list = None
         if 'transfer' in list(pDict['out_sl'].keys()):
             slice_list = \
-                [pDict['out_sl']['transfer'][i][count] for i in pDict['nOut'] if len(pDict['out_sl']['transfer'][i]) > count]
+                [pDict['out_sl']['transfer'][i][count] for i in pDict['nOut'] \
+                     if len(pDict['out_sl']['transfer'][i]) > count]
 
         result = [result] if type(result) is not list else result
 
@@ -340,6 +341,10 @@ class BaseTransport(object):
         new_slice = [slice(None)]*len(data.get_shape())
         possible_slices = [copy.copy(new_slice)]
 
+        pData = data._get_plugin_data()
+        if pData._get_rank_inc():
+            possible_slices[0] += [0]*pData._get_rank_inc()
+
         if len(slice_dirs) > 1:
             for sl in slice_dirs[1:]:
                 new_slice[sl] = None
@@ -362,9 +367,14 @@ class BaseTransport(object):
         pad = True if pData.padding and data.get_slice_dimensions()[0] in \
             list(pData.padding._get_padding_directions().keys()) else False
 
+        n_core_dims = len(data.get_core_dimensions())
         squeeze_dims = data.get_slice_dimensions()
         if max_frames > 1 or pData._get_no_squeeze() or pad:
             squeeze_dims = squeeze_dims[1:]
+            n_core_dims +=1
+        if pData._get_rank_inc():
+            sl = [(slice(None))]*n_core_dims + [None]*pData._get_rank_inc()
+            return lambda x: np.squeeze(x[tuple(sl)], axis=squeeze_dims)
         return lambda x: np.squeeze(x, axis=squeeze_dims)
 
     def _remove_excess_data(self, data, result, slice_list):

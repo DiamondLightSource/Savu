@@ -57,6 +57,7 @@ class PluginData(object):
         self.no_squeeze = False
         self.pre_tuning_shape = None
         self._frame_limit = None
+        self._increase_rank = 0
 
     def _get_preview(self):
         return self._preview
@@ -353,6 +354,21 @@ class PluginData(object):
 
     def _get_no_squeeze(self):
         return self.no_squeeze
+    
+    def _set_rank_inc(self, n):
+        """ Increase the rank of the array passed to the plugin by n.
+        
+        :param int n: Rank increment.
+        """
+        self._increase_rank = n
+    
+    def _get_rank_inc(self):
+        """ Return the increased rank value
+        
+        :returns: Rank increment
+        :rtype: int
+        """
+        return self._increase_rank
 
     def _set_meta_data(self):
         fixed, _ = self._get_fixed_dimensions()
@@ -422,20 +438,44 @@ class PluginData(object):
             for key in list(self.pad_dict.keys()):
                 getattr(self.padding, key)(self.pad_dict[key])
 
-    def plugin_data_setup(self, pattern, nFrames, split=None, slice_axis=None):
+    def plugin_data_setup(self, pattern, nFrames, split=None, slice_axis=None,
+                          getall=None):
         """ Setup the PluginData object.
 
         :param str pattern: A pattern name
-        :param int nFrames: How many frames to process at a time.  Choose from\
-            'single', 'multiple', 'fixed_multiple' or an integer (an integer \
+        :param int nFrames: How many frames to process at a time.  Choose from
+            'single', 'multiple', 'fixed_multiple' or an integer (an integer
             should only ever be passed in exceptional circumstances)
+        :keyword str slice_axis: An axis label associated with the fastest
+            changing (first) slice dimension.
+        :keyword list[pattern, axis_label] getall: A list of two values.  If
+        the requested pattern doesn't exist then use all of "axis_label"
+        dimension of "pattern" as this is equivalent to one slice of the
+        original pattern.
         """
+
+        if pattern not in self.data_obj.get_data_patterns() and getall:
+            pattern, nFrames = self.__set_getall_pattern(getall, nFrames)
+
         # slice_axis is first slice dimension
         self.__set_pattern(pattern, first_sdim=slice_axis)
         if isinstance(nFrames, list):
             nFrames, self._frame_limit = nFrames
         self.max_frames = nFrames
         self.split = split
+
+    def __set_getall_pattern(self, getall, nFrames):
+        """ Set framework changes required to get all of a pattern of lower
+        rank.
+        """
+        pattern, slice_axis = getall
+        dim = self.data_obj.get_data_dimension_by_axis_label(slice_axis)
+        # ensure data remains the same shape when 'getall' dim has length 1
+        self._set_no_squeeze()
+        if nFrames == 'multiple' or (isinstance(nFrames, int) and nFrames > 1):
+            self._set_rank_inc(1)
+        nFrames = self.data_obj.get_shape()[dim]
+        return pattern, nFrames
 
     def plugin_data_transfer_setup(self, copy=None, calc=None):
         """ Set up the plugin data transfer frame parameters.
@@ -497,10 +537,10 @@ class PluginData(object):
 
     def __perform_checks(self, nFrames):
         options = ['single', 'multiple']
-        if not isinstance(nFrames, int) and nFrames not in options:
-            e_str = "The value of nFrames is not recognised.  Please choose "
-            "from 'single' and 'multiple' (or an integer in exceptional "
-            "circumstances)."
+        if not np.issubdtype(type(nFrames), int) and nFrames not in options:
+            e_str = ("The value of nFrames is not recognised.  Please choose "
+            + "from 'single' and 'multiple' (or an integer in exceptional "
+            + "circumstances).")
             raise Exception(e_str)
 
     def get_frame_limit(self):
