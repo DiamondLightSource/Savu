@@ -78,8 +78,9 @@ class GeoDistance3d(Plugin, MultiThreadedPlugin):
         input_temp = data[0]
         indices = np.where(np.isnan(input_temp))
         input_temp[indices] = 0.0
+        spacing = [1.0, 1.0, 1.0]
         if (np.sum(data[1]) > 0):
-            geoDist = GeodisTK.geodesic3d_raster_scan(input_temp, data[1], self.lambda_par, self.iterations)
+            geoDist = GeodisTK.geodesic3d_raster_scan(input_temp, data[1], spacing, self.lambda_par, self.iterations)
         else:
             geoDist = np.float32(np.zeros(np.shape(data[0])))
         return geoDist
