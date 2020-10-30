@@ -135,5 +135,17 @@ class NoProcessTools(PluginTools):
             dtype: pos_int
             description: flat data path and scale value
             default: 4
+        algorithm:
+            visibility: basic
+            dtype: str
+            description: Option list
+            default: FBP
+            options: [SIRT,SART,FBP,ART,CGLS,BP,FP]
+        range_param:
+            visibility: basic
+            dtype: range
+            description: Range required
+            default: (0,1)
+
 
 """

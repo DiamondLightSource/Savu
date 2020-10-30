@@ -32,6 +32,7 @@ import imp
 import inspect
 import itertools
 
+import numpy as np
 
 load_tools = {}
 plugins = {}
@@ -294,3 +295,87 @@ def set_order_by_visibility(parameters, level=False):
         keys = basic_keys + interm_keys + adv_keys + data_keys
 
     return keys
+
+
+def convert_multi_params(param_name, value):
+    """ Check if value is a multi parameter and check if each item is valid.
+    Change from the input multi parameter string to a list
+
+    :param param_name: Name of the parameter
+    :param value: Parameter value
+    :return: List or unchanged value
+    """
+    error_str = ''
+    multi_parameters = (isinstance(value, str) and (';' in value)
+                        and param_name != 'preview')
+    if multi_parameters:
+        value = value.split(';')
+        if ":" in value[0]:
+            seq = value[0].split(':')
+            try:
+                seq = [eval(s) for s in seq]
+                if len(value) == 0:
+                    error_str = 'No values for tuned parameter "{}" ' \
+                                'ensure start:stop:step; values are ' \
+                                'valid.'.format(param_name)
+                elif len(seq) == 2:
+                    value = list(np.arange(seq[0], seq[1]))
+                elif len(seq) > 2:
+                    value = list(np.arange(seq[0], seq[1], seq[2]))
+                else:
+                    error_str = 'Ensure start:stop:step; values are ' \
+                                'valid.'
+            except:
+                error_str = 'Ensure start:stop:step; values are ' \
+                            'valid.'
+        val_list = parse_config_string(value) if isinstance(value, str) else value
+        # Remove blank list entries
+        # Change type to int, float or str
+        val_list = [_cast_str_to_type(val)
+                    for val in val_list if val]
+        value = val_list
+    return value, error_str
+
+
+def _cast_str_to_type(value):
+    """ Change the string to an integer, float, tuple, list or str
+    """
+    try:
+        val = int(value)
+    except ValueError:
+        try:
+            val = float(value)
+        except ValueError:
+            if '(' and ')' in value:
+                val = _cast_to_tuple(value)
+            elif '[' and ']' in value:
+                val = _cast_to_list(value)
+            else:
+                # Return the string
+                val = value
+    return val
+
+
+def _cast_to_list(value):
+    # Change type to list
+    inner_list = value.replace('[', '').replace(']', '')
+    if ',' in inner_list:
+        list_content = inner_list.split(',')
+        list_content = [_cast_str_to_type(i) for i in list_content]
+        val = list_content
+    else:
+        val = [_cast_str_to_type(inner_list)]
+    return val
+
+
+def _cast_to_tuple(value):
+    # Change type to tuple
+    inner_tuple = value.replace('(', '').replace(')', '')
+    if ',' in inner_tuple:
+        tuple_content = inner_tuple.split(',')
+        tuple_content = [_cast_str_to_type(i) for i in tuple_content]
+        val = tuple(tuple_content)
+    else:
+        inner_tuple_iterable = [_cast_str_to_type(inner_tuple)]
+        val = tuple(inner_tuple_iterable)
+    return val

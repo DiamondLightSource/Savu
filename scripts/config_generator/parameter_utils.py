@@ -31,6 +31,8 @@ import configparser
 from colorama import Fore
 
 import savu.plugins.loaders.utils.yaml_utils as yu
+from savu.plugins.utils import parse_config_string as parse_str
+from savu.plugins.utils import convert_multi_params
 
 def _intlist(value):
     '''['int'] '''
@@ -331,31 +333,96 @@ def is_valid(param_name, value, current_parameter_details):
     If the items in options have not been type checked, or have errors,
     it may cause problems.
     """
+    option_error_str = ''
+    type_error_str = ''
+
     dtype = current_parameter_details['dtype']
     default_value = current_parameter_details['default']
     # If a default value is used, this is a valid option
     pvalid = _check_default(value, default_value)
-    type_error_str = ''
+
     if pvalid is False:
         if isinstance(dtype, list):
-            # This is a list of possible types
+            # If there are multiple possible types
             for individual_type in dtype:
-                pvalid = type_dict[individual_type](value)
+                # Errors can be overwitten as later types may match the value type
+                pvalid, type_error_str = \
+                    _check_type(individual_type, param_name, value,
+                                current_parameter_details)
                 if pvalid is True:
+                    # If the value type matches one of the possible types then exit
                     break
-
-        elif dtype not in type_dict.keys():
-            type_error_str = 'That type definition is not configured properly.'
-            pvalid = False
         else:
-            pvalid = type_dict[dtype](value)
+            pvalid, type_error_str = _check_type(dtype, param_name, value,
+                                                 current_parameter_details)
         # Then check if the option is valid
-        pvalid, option_error_str = _check_options(current_parameter_details, value, pvalid)
+        if not _is_multi_param(param_name, value):
+            # If it is a multi parameter, each item is checked individually
+            pvalid, option_error_str = _check_options\
+                (current_parameter_details, value, pvalid)
 
     if pvalid is False:
-        type_error_str = option_error_str if option_error_str else _error_message(dtype, param_name)
+        # If an option error exists then use this error message
+        type_error_str = option_error_str if option_error_str \
+            else _error_message(dtype, param_name)
 
     return pvalid, type_error_str
+
+
+def _check_type(dtype, param_name, value, current_parameter_details):
+    """ Check if the provided value matches the required date type
+
+    :param dtype: The required data type
+    :param param_name: The parameter name
+    :param value: The new value
+    :param current_parameter_details: Paramter detail dictionary
+    :return: pvalid, True if the value type matches the required dtype
+             type_error_str, Error message
+    """
+    if dtype not in type_dict.keys():
+        type_error_str = 'That type definition is not configured properly.'
+        pvalid = False
+    elif _is_multi_param(param_name, value):
+        # If there are multiple parameters, check each individually
+        pvalid, type_error_str = _check_multi_params(param_name, value,
+                                                current_parameter_details)
+    else:
+        pvalid = type_dict[dtype](value)
+        type_error_str = ''
+    return pvalid, type_error_str
+
+
+def _check_multi_params(param_name, value,
+                                     current_parameter_details):
+    """ Check if value is a multi parameter and check if each item is valid.
+    Change from the input multi parameter string to a list
+
+    :param param_name: Name of the parameter
+    :param value: Parameter value
+    :param current_parameter_details: Parameter dictionary
+    :return: boolean True if all parameters are valid
+             An error string
+    """
+    type_error_str = ''
+    parameter_valid = False
+    if _is_multi_param(param_name, value):
+        val_list, type_error_str = convert_multi_params(param_name, value)
+        if not type_error_str:
+            for item in val_list:
+                parameter_valid, type_error_str = is_valid(param_name, item,
+                                                    current_parameter_details)
+                if parameter_valid == False:
+                    # If one value inside the list is not valid, then return false
+                    break
+
+    return parameter_valid, type_error_str
+
+
+def _is_multi_param(param_name, value):
+    """Return True if the value is made up of multiple parameters"""
+    return (isinstance(value, str) and (';' in value)
+     and param_name != 'preview')
+
 
 def _check_default(value, default_value):
     """ Return true if the new value is either a match for the default
@@ -390,5 +457,6 @@ def _error_message(dtype, param_name):
                     ' the type {}.'.format(param_name, type_options)
     else:
         error_str = 'Your input for the parameter \'{}\' must match' \
-                    ' the type \'{}\'.'.format(param_name, type_error_dict[dtype])
+                    ' the type \'{}\'.'.format(param_name,
+                                               type_error_dict[dtype])
     return error_str
