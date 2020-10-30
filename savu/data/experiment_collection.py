@@ -54,6 +54,7 @@ class Experiment(object):
         self.plugin = None
         self._transport = None
         self._barrier_count = 0
+        self._dataset_names_complete = False
 
     def get(self, entry):
         """ Get the meta data dictionary. """
@@ -97,6 +98,7 @@ class Experiment(object):
 
     def _finalise_setup(self, plugin_list):
         checkpoint = self.meta_data.get('checkpoint')
+        self._set_dataset_names_complete()
         # save the plugin list - one process, first time only
         if self.meta_data.get('process') == \
                 len(self.meta_data.get('processes'))-1 and not checkpoint:
@@ -151,6 +153,14 @@ class Experiment(object):
             self.meta_data.set(['filename', name], data.backing_file)
             transport._populate_nexus_file(data)
             h5._link_datafile_to_nexus_file(data)
+
+    def _set_dataset_names_complete(self):
+        """ Missing in/out_datasets fields have been populated
+        """
+        self._dataset_names_complete = True
+
+    def _get_dataset_names_complete(self):
+        return self._dataset_names_complete
 
     def _reset_datasets(self):
         self.index['in_data'] = self.initial_datasets

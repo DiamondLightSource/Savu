@@ -59,7 +59,6 @@ class Plugin(PluginDatasets):
     def initialise(self, params, exp, check=False):
         self.check = check
         self.exp = exp
-        self._populate_default_parameters()
         self._set_parameters(copy.deepcopy(params))
         self._main_setup()
 
@@ -70,12 +69,9 @@ class Plugin(PluginDatasets):
         in/out_dataset strings in ``self.parameters`` with the relevant data
         objects. It then creates PluginData objects for each of these datasets.
         """
-        # Don't do this step if loaders haven't been loaded yet
-        if self.exp and self.exp.index['in_data']:
-            self._set_plugin_datasets()
+        self._set_plugin_datasets()
         self._reset_process_frames_counter()
         self.setup()
-        
         self.set_filter_padding(*(self.get_plugin_datasets()))
         self._finalise_plugin_datasets()
         self._finalise_datasets()

@@ -346,8 +346,9 @@ class PluginList(object):
         saved_data = set([s for sub_list in saved_data for s in sub_list])
 
         for name in [data for data in data_names if data not in saved_data]:
+            pos = exp.meta_data.get('nPlugin')+1
+            exp.meta_data.set('nPlugin', pos)
             process = {}
-            pos = int(re.search(r'\d+', self.plugin_list[-1]['pos']).group()) + 1
             self.saver_idx.append(pos)
             plugin = pu.get_plugin('savu.plugins.savers.hdf5_saver',
                                    {'in_datasets': [name]}, exp)
@@ -359,6 +360,16 @@ class PluginList(object):
             process['active'] = True
             process['desc'] = plugin.parameters_desc
             self._add(pos, process)
+
+    def _update_datasets(self, plugin_no, data_dict):
+        n_loaders = self._get_n_loaders()
+        n_plugins = self._get_n_processing_plugins()
+        datasets_idx = []
+        
+        idx = self._get_n_loaders() + plugin_no
+        self.plugin_list[idx]['data'].update(data_dict)
+        for i in range(self.n_loaders, n_loaders + n_plugins):
+            datasets_idx.append(self.plugin_list[i]['data']['out_datasets'])
 
     def _get_dataset_flow(self):
         datasets_idx = []

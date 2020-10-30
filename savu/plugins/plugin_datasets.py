@@ -41,7 +41,7 @@ class PluginDatasets(object):
         self.variable_data_flag = False
         self.multi_params_dict = {}
         self.extra_dims = []
-        self._max_itemsize = 0        
+        self._max_itemsize = 0
 
     def __get_data_objects(self, dtype):
         """ Get the data objects associated with the plugin from the experiment
@@ -157,7 +157,11 @@ class PluginDatasets(object):
         # case that an extra in_dataset is added in the plugin
         in_names = orig_in if len(orig_in) and \
             len(in_names) > len(orig_in) else in_names
-        params['out_datasets'] = self._set_out_dataset_names(params, in_names)
+        out_names = self._set_out_dataset_names(params, in_names)
+        params['out_datasets'] = out_names
+        data_dict = {"in_datasets": in_names, "out_datasets": out_names}
+        idx = self.exp.meta_data.get('nPlugin')
+        self.exp.meta_data.plugin_list._update_datasets(idx, data_dict)
 
     def _set_in_dataset_names(self, params):
         names = params['in_datasets'] if 'in_datasets' in params.keys() else []
@@ -201,7 +205,8 @@ class PluginDatasets(object):
         """ Populate ``self.parameters`` in/out_datasets and
         plugin_in/out_datasets with the relevant objects (Data or PluginData).
         """
-        self._set_plugin_dataset_names()
+        if not self.exp._get_dataset_names_complete():
+            self._set_plugin_dataset_names()
         self.parameters['in_datasets'] = self.__set_in_datasets()
         self.parameters['out_datasets'] = self.__set_out_datasets()
         self.parameters['plugin_in_datasets'] = \

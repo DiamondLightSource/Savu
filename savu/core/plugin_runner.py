@@ -148,6 +148,7 @@ class PluginRunner(object):
         # collection
         count = 0
         for plugin_dict in plist[n_loaders:n_loaders + n_plugins]:
+            self.exp.meta_data.set("nPlugin", count)
             plugin = pu.plugin_loader(self.exp, plugin_dict, check=True)
             plugin._revert_preview(plugin.get_in_datasets())
             plugin_dict['cite'] = plugin.get_citation_information()
@@ -159,6 +160,7 @@ class PluginRunner(object):
 
         self.exp._finalise_setup(plugin_list)
         plugin_list._add_missing_savers(self.exp)
+        #self.exp._set_datasets_complete()
         cu.user_message("Plugin list check complete!")
 
         #  ********* transport function ***********
