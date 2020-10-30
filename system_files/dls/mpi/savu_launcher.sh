@@ -99,7 +99,7 @@ else
 	nargs=${#args[@]}
 
 	if [ $nargs != 3 ] ; then
-	    tput setaf 1
+	    tput setaf 1    
 	    echo -e "\n\t************************* SAVU INPUT ERROR ******************************"
 	    tput setaf 6
 	    echo -e "\n\t You have entered an incorrect number of input arguments.  Please follow"
@@ -126,7 +126,7 @@ else
 	options=$@
 
 	# determine the cluster from the data path
-    is_gpfs03 $data_file gpfs03 true
+    is_gpfs03 $data_file gpfs03 true 
 	if [ "$gpfs03" = false ] ; then
 		cluster=cluster
 		# determine cluster setup based on type
@@ -150,12 +150,13 @@ else
 			'BIG') nNodes=4 ;;
 			'') type="STANDARD"; nNodes=2 ;;
 			 *) echo -e "\nUnknown 'type' optional argument\n"
-			    echo -e "Please choose from 'AUTO' or 'PREVIEW'"
+			    echo -e "Please choose from 'AUTO' or 'PREVIEW'" 
 				exit 1 ;;
 		esac
 	fi
 
 	# which project?
+	pathtodatafile=`readlink -f $data_file`
 	project=`echo $pathtodatafile | grep -o -P '(?<=/dls/).*?(?=/data)'`
 	if [ -z "$project" ] ; then
 	  project=tomography
@@ -223,7 +224,7 @@ if [ $gpus_to_use_per_node -gt $gpus_per_node ] ; then
 	echo "The number of GPUs requested per node ($gpus_to_use_per_node) is greater than the maximum ($gpus_per_node)."
 	exit 1
 fi
-
+	
 
 # set total processes required
 processes=$((nNodes*cpus_per_node))
@@ -254,13 +255,13 @@ function create_folder()
 # get the Savu path
 DIR="$(cd "$(dirname "$0")" && pwd)"
 filepath=$DIR'/savu_mpijob.sh'
-savupath=$(python -c "import savu; print(savu.__path__[0])")
+savupath=$(python -c "import savu, os; print (savu.__path__[0])")
 savupath=${savupath%/savu}
 
 # set the suffix
 arg_parse "-suffix" suffix $options
 options=${options//"-suffix $suffix"/}
-if [ ! $suffix ] ; then
+if [ ! $suffix ] ; then 
   suffix=""
 else
   suffix=_$suffix
@@ -339,6 +340,10 @@ if [ $cluster = "cluster" ] && [ $zocalo = true ] ; then
     cluster=zocalo_cluster
 fi
 
+if [ $cluster = "hamilton" ] && [ $zocalo = true ] ; then
+    cluster=zocalo_hamilton
+fi
+
 case $cluster in
 	"test_cluster")
 		qsub -l infiniband $generic > /dls/tmp/savu/$USER.out ;;
@@ -355,6 +360,11 @@ case $cluster in
 		# requesting 7G per core as minimum (required to be available on startup),but will use all
 		# memory unless system jobs need it (then could be rolled back to the minimum 7G)
 		qsub -l m_mem_free=7G $generic > /dls/tmp/savu/$USER.out ;;
+	"zocalo_hamilton")
+		# RAM 384G per core (but 377G available?) ~ 9G per core
+		# requesting 7G per core as minimum (required to be available on startup),but will use all
+		# memory unless system jobs need it (then could be rolled back to the minimum 7G)
+		qsub -sync y -l m_mem_free=7G $generic > /dls/tmp/savu/$USER.out ;;
 esac
 
 # get the job number here
