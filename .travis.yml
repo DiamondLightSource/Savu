@@ -1,5 +1,4 @@
 cache: apt
-sudo: true
 language: cpp
 compiler:
   - gcc
