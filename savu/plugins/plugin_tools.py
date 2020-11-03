@@ -499,13 +499,13 @@ class PluginDocumentation(object):
             os.path.dirname(os.path.realpath(__file__)).split('savu')[0]
 
         # Locate documentation file
-        doc_folder = savu_base_path + 'doc/source/documentation/'
-        module = self.plugin_class.__module__.split('.')
-        file_ =  module[-1] + '_doc'
+        doc_folder = savu_base_path + 'doc/source/documentation'
+        module_path = self.plugin_class.__module__.replace('.','/').replace('savu','')
+        file_ =  module_path + '_doc'
         file_name = file_ + '.rst'
         file_path = doc_folder + file_name
         sphinx_link = 'https://savu.readthedocs.io/en/latest/' \
-                          'documentation/' + file_
+                          'documentation' + file_
         if os.path.isfile(file_path):
             self.doc.set('documentation_link', sphinx_link)
 
