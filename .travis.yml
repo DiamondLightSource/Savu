@@ -7,7 +7,7 @@ env:
   - OMP_NUM_THREADS=2
 
 before_install:
-  - cd $TRAVIS_BUILD_DIR/install/3_0_install/savu_v3.0
+  - cd $TRAVIS_BUILD_DIR/install/savu_hpc/savu_installer
   - ls -lah
   - touch ~/.condarc
   - "echo channel_priority: strict >> ~/.condarc"
