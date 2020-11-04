@@ -215,7 +215,7 @@ class PluginParameters(object):
         """Make sure that the visibility choice is valid
         """
         visibility_levels = ['basic', 'intermediate', 'advanced',
-                             'datasets', 'hidden']
+                             'datasets', 'hidden', 'not']
         visibility_valid = True
         for p_key, p in all_params.items():
             self._check_data_keys(p_key, p)
@@ -237,7 +237,7 @@ class PluginParameters(object):
         """
         datasets = ['in_datasets', 'out_datasets']
         if p_key in datasets:
-            if p['visibility'] != 'datasets':
+            if p['visibility'] != 'datasets' and  p['visibility'] != 'not':
                 p['visibility'] = 'datasets'
 
     def _check_options(self, all_params, tool_class):
