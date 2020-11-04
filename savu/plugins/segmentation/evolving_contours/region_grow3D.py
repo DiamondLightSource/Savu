@@ -46,11 +46,13 @@ class RegionGrow3d(Plugin, MultiThreadedPlugin):
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup('VOLUME_3D', 'single')
-        in_pData[1].plugin_data_setup('VOLUME_3D', 'single') # the initialised mask
+        
+        getall = ['VOLUME_XZ', 'voxel_y']
+        in_pData[0].plugin_data_setup('VOLUME_3D', 'single', getall=getall)
+        in_pData[1].plugin_data_setup('VOLUME_3D', 'single', getall=getall) # the initialised mask
 
         out_dataset[0].create_dataset(in_dataset[0], dtype=np.uint8)
-        out_pData[0].plugin_data_setup('VOLUME_3D', 'single')
+        out_pData[0].plugin_data_setup('VOLUME_3D', 'single', getall=getall)
 
     def pre_process(self):
         # extract given parameters
