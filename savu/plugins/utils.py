@@ -379,3 +379,12 @@ def _cast_to_tuple(value):
         inner_tuple_iterable = [_cast_str_to_type(inner_tuple)]
         val = tuple(inner_tuple_iterable)
     return val
+
+
+def create_dir(file_path):
+    """ Check if directories provided exist at this file path. If they don't
+    create the directories.
+    """
+    directory = os.path.dirname(file_path)
+    if not os.path.exists(directory):
+        os.makedirs(directory)

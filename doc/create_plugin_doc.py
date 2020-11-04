@@ -79,22 +79,13 @@ def add_package_entry(f, files_present, output, module_name):
         f.write('\n\n')
 
 
-def create_dir(file_path):
-    """ Check if directories provided exist at this file path. If they don't
-    create the directories.
-    """
-    directory = os.path.dirname(file_path)
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-
-
 def create_plugin_documentation(files, output, module_name, savu_base_path):
     # Create template download page
     create_plugin_template_downloads(savu_base_path)
 
     # Only document the plugin python files
     # Create the directory if it does not exist
-    create_dir(savu_base_path + 'doc/source/' + output)
+    pu.create_dir(savu_base_path + 'doc/source/' + output)
 
     for fi in files:
         mod_path = module_name + '.' + fi.split('.py')[0]
@@ -110,7 +101,7 @@ def create_plugin_documentation(files, output, module_name, savu_base_path):
                 # the plugin tools documentation will be stored
                 full_file_path = savu_base_path + 'doc/source/' + output \
                                  + '/' + file_path + '.rst'
-                create_dir(full_file_path)
+                pu.create_dir(full_file_path)
                 new_rst_file = open(full_file_path, 'w+')
                 # Populate this file
                 populate_plugin_doc_files(new_rst_file, plugin_tools,

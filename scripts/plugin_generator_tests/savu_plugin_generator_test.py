@@ -25,7 +25,7 @@ from __future__ import print_function
 import os
 import unittest
 
-
+import savu.plugins.utils as pu
 import savu.test.test_process_list_utils as tplu
 import savu.test.travis.framework_tests.plugin_coverage_test as pct
 
@@ -122,8 +122,8 @@ class SavuPluginGeneratorTest(unittest.TestCase):
         for file in plugin_files:
             doc_dir = doc_path + file
             image_dir = doc_image_path + file
-            tplu.create_dir(doc_dir)
-            tplu.create_dir(image_dir)
+            pu.create_dir(doc_dir)
+            pu.create_dir(image_dir)
 
 
 if __name__ == "__main__":
