@@ -11,6 +11,8 @@ before_install:
 
 install:
   - PREFIX=$HOME bash savu_installer.sh --local --no_prompts
+  - cd $TRAVIS_BUILD_DIR
+  - python setup.py install
 
 script:
   - pip install coverage pytest-cov

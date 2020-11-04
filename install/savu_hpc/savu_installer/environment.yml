@@ -35,10 +35,13 @@ dependencies:
   - mock
   - spyder
   - pip
+  - fastai==1.0.59
   - pip:
       - matplotlib
       - pyreadline
       - pmacparser
       - gnureadline==6.3.8
       - sphinx-rtd-theme
+      - sphinx-argparse
       - nvidia-ml-py3
+

@@ -1,13 +1,11 @@
-{% set repo = "local_repo" %}
+{% set repo = "master" %}
 
 package:
   name: savu
-  version: "local_repo"
+  version: "master"
 
 source:
-  # change this to git_url?
-  #url: https://github.com/DiamondLightSource/Savu/archive/{{ repo }}.tar.gz
-  path: /home/qmm55171/Documents/Git/git_repos/Savu
+  url: https://github.com/DiamondLightSource/Savu/archive/{{ repo }}.tar.gz
 
 requirements:
   build:

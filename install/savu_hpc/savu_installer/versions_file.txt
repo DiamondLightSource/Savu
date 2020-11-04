@@ -1,2 +1,3 @@
 miniconda   4.6.14
 mpi4py      3.0.2
+cudatoolkit 10.1

@@ -77,13 +77,12 @@ fi
 
 # set the savu recipe
 arg_parse "-s" savu_recipe "$@"
-if [ ! $savu_recipe ]; then
-  savu_recipe=savu
-elif [ $savu_recipe = 'master' ]; then
-  savu_recipe=savu_master
-else
-  echo "Unknown Savu installation version."
-fi
+case $savu_recipe in
+  "master") savu_recipe="savu_master" ;;
+  "local") savu_recipe="savu_local" ;;
+  "") savu_recipe="savu" ;;
+  *) echo "Unknown Savu installation version."; exit 1 ;;
+esac
 
 # override the conda recipes folder
 arg_parse "-r" recipes "$@"
@@ -107,8 +106,7 @@ else
   echo -e "    ......Thank you for running the Savu installer......\n"
   echo -e "Performing a library check..."
   echo -e "\nNB: An MPI implementation is required to build Savu."
-#  echo -e "fftw is required to build Savu."
-#  echo -e "Cuda is desirable for a full range of plugins."
+  #echo -e "Cuda is desirable for a full range of plugins."
   echo -e "\n============================================================="
 fi
 
@@ -126,6 +124,17 @@ if [ $local_installation = false ]; then
 else
   echo "Going to use the openmpi installation from conda"
 fi
+
+# # check for cuda
+# nvcc=`command -v nvcc`
+# CUDAHOME=${nvcc%/bin/nvcc}
+# if [ "$CUDAHOME" ]; then
+#     echo "Using cuda:    " $CUDAHOME
+# 	export PATH=$CUDAHOME/bin:$PATH
+# 	export LD_LIBRARY_PATH=$CUDAHOME/lib64:$LD_LIBRARY_PATH
+# else
+#     echo "No cuda libraries found."
+# fi
 
 if [ $test_flag ] && [ $prompts = true ]; then
 
@@ -228,42 +237,48 @@ if [ ! $test_flag ]; then
   conda install -y -q conda-build conda-env
   conda install -y -q conda-build conda-verify
 
-  echo "Building Savu..."
-  conda build $DIR/$savu_recipe
-  savubuild=`conda build $DIR/$savu_recipe --output`
-  echo "Installing Savu..."
-  conda install -y -q --use-local $savubuild
-
-  path=$(python -c "import savu; import os; print(os.path.abspath(savu.__file__))")
-  savu_path=${path%/savu/__init__.py*}
-
-  # get the savu version
-  if [ -z $recipes ]; then
-    install_path=$(python -c "import savu; import savu.version as sv; print(sv.__install__)")
-    recipes=$savu_path/$install_path/../conda-recipes
-  fi  
-
   if [ $local_installation = false ]; then
+
+    echo "Building Savu..."
+    conda build $DIR/$savu_recipe
+    savubuild=`conda build $DIR/$savu_recipe --output`
+    echo "Installing Savu..."
+    conda install -y -q --use-local $savubuild
+
+    path=$(python -c "import savu; import os; print(os.path.abspath(savu.__file__))")
+    savu_path=${path%/savu/__init__.py*}
+
+    # get the savu version
+    if [ -z $recipes ]; then
+      install_path=$(python -c "import savu; import savu.version as sv; print(sv.__install__)")
+      recipes=$savu_path/$install_path/../conda-recipes
+    fi  
+
     echo "Installing mpi4py..."
     string=$(awk '/^mpi4py/' $versions_file)
     mpi4py_version=$(echo $string | cut -d " " -f 2)
-    pip install mpi4py==$mpi4py_version
+    pip install mpi4py==$mpi4py_version    
 
     . $recipes/installer.sh "hdf5"
     . $recipes/installer.sh "h5py"
 
   else
     echo "Installing mpi4py/hdf5/h5py from conda for CI run"
+    recipes=$DIR/../conda-recipes
     conda env update -f $DIR/environment_ci.yml
   fi
 
+  echo "Installing pytorch..."
+  string=$(awk '/^cudatoolkit/' $versions_file)
+  cudatoolkit_version=$(echo $string | cut -d " " -f 2)
+  conda install pytorch torchvision cudatoolkit=$cudatoolkit_version -c pytorch
+ 
   conda env update -n root -f $DIR/environment.yml
 
   . $recipes/installer.sh "tomophantom"
 
-  # cleanup base miniconda and build artifacts
+  # cleanup build artifacts
   rm $PREFIX/miniconda.sh
-  # rm -rf $PREFIX/miniconda
 
   conda build purge
   conda clean -y --all
@@ -349,3 +364,4 @@ echo -e "\t  Check $error_log for errors"
 echo -e "\t***************************************************\n"  
   
 exit 0
+
