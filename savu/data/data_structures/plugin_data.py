@@ -537,7 +537,7 @@ class PluginData(object):
 
     def __perform_checks(self, nFrames):
         options = ['single', 'multiple']
-        if not np.issubdtype(type(nFrames), int) and nFrames not in options:
+        if not np.issubdtype(type(nFrames), np.int64) and nFrames not in options:
             e_str = ("The value of nFrames is not recognised.  Please choose "
             + "from 'single' and 'multiple' (or an integer in exceptional "
             + "circumstances).")

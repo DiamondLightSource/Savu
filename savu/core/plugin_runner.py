@@ -160,9 +160,7 @@ class PluginRunner(object):
 
         self.exp._finalise_setup(plugin_list)
         plugin_list._add_missing_savers(self.exp)
-        #self.exp._set_datasets_complete()
         cu.user_message("Plugin list check complete!")
-
         #  ********* transport function ***********
         self._transport_update_plugin_list()
 
