@@ -265,13 +265,13 @@ if [ ! $test_flag ]; then
   else
     echo "Installing mpi4py/hdf5/h5py from conda for CI run"
     recipes=$DIR/../conda-recipes
-    conda env update -f $DIR/environment_ci.yml
+    conda env update -n root -f $DIR/environment_ci.yml
   fi
 
   echo "Installing pytorch..."
   string=$(awk '/^cudatoolkit/' $versions_file)
   cudatoolkit_version=$(echo $string | cut -d " " -f 2)
-  conda install pytorch torchvision cudatoolkit=$cudatoolkit_version -c pytorch
+  conda install -y -q pytorch torchvision cudatoolkit=$cudatoolkit_version -c pytorch
  
   conda env update -n root -f $DIR/environment.yml
 
