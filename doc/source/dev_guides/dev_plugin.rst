@@ -14,8 +14,10 @@ create a plugin for Savu you will need to create two modules:
 1. A plugin module, named :blue:`plugin_name`.py containing a class :blue:`PluginName`
 2. A plugin tools module named :blue:`plugin_name_tools`.py, containing a class :blue:`PluginNameTools`
 
-:blue:`PluginName` should be replaced by the name of your plugin without \
-any spaces. The words should be capitalised.
+.. note::
+
+    :blue:`PluginName` should be replaced by the name of your plugin without \
+    any spaces. The words should be capitalised.
 
 Examples are:
 
