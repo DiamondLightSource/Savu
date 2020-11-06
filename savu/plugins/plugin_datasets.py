@@ -205,8 +205,7 @@ class PluginDatasets(object):
         """ Populate ``self.parameters`` in/out_datasets and
         plugin_in/out_datasets with the relevant objects (Data or PluginData).
         """
-        if not self.exp._get_dataset_names_complete():
-            self._set_plugin_dataset_names()
+        self._set_plugin_dataset_names()
         self.parameters['in_datasets'] = self.__set_in_datasets()
         self.parameters['out_datasets'] = self.__set_out_datasets()
         self.parameters['plugin_in_datasets'] = \

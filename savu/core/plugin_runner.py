@@ -148,21 +148,32 @@ class PluginRunner(object):
         # collection
         count = 0
         for plugin_dict in plist[n_loaders:n_loaders + n_plugins]:
-            self.exp.meta_data.set("nPlugin", count)
-            plugin = pu.plugin_loader(self.exp, plugin_dict, check=True)
-            plugin._revert_preview(plugin.get_in_datasets())
-            plugin_dict['cite'] = plugin.get_citation_information()
-            plugin._clean_up()
-            self.exp._update(plugin_dict)
-            self.exp._merge_out_data_to_in()
+            self.__plugin_setup(plugin_dict, count)
             count += 1
-        self.exp._reset_datasets()
 
-        self.exp._finalise_setup(plugin_list)
         plugin_list._add_missing_savers(self.exp)
-        cu.user_message("Plugin list check complete!")
+
         #  ********* transport function ***********
         self._transport_update_plugin_list()
+
+        # check added savers
+        for plugin_dict in plist[n_loaders + count:]:
+            self.__plugin_setup(plugin_dict, count)
+            count += 1
+
+        self.exp._reset_datasets()
+        self.exp._finalise_setup(plugin_list)
+        cu.user_message("Plugin list check complete!")
+
+
+    def __plugin_setup(self, plugin_dict, count):
+        self.exp.meta_data.set("nPlugin", count)
+        plugin = pu.plugin_loader(self.exp, plugin_dict, check=True)
+        plugin._revert_preview(plugin.get_in_datasets())
+        plugin_dict['cite'] = plugin.get_citation_information()
+        plugin._clean_up()
+        self.exp._update(plugin_dict)
+        self.exp._merge_out_data_to_in()
 
     def __check_gpu(self):
         """ Check if the process list contains GPU processes and determine if
@@ -179,6 +190,8 @@ class PluginRunner(object):
         try:
             pv.nvmlInit()
             count = int(pv.nvmlDeviceGetCount())
+            if count == 0:
+                raise Exception("No GPUs found")
             logging.debug("%s GPUs have been found.", count)
 
             if not self.exp.meta_data.get('test_state'):
