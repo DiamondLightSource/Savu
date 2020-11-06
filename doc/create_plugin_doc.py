@@ -90,6 +90,9 @@ def create_plugin_documentation(files, output, module_name, savu_base_path):
             plugin_class._populate_default_parameters()
             plugin_tools = plugin_class.tools.tools_list
             if plugin_tools:
+                # Create rst additional documentation directory
+                # and file and image directory
+                create_documentation_directory(savu_base_path, fi)
                 # Create an empty rst file inside this directory where
                 # the plugin tools documentation will be stored
                 full_file_path = savu_base_path + 'doc/source/' + output \
@@ -455,6 +458,23 @@ def create_template_class_dict(savu_base_path):
                                         key=lambda i: i[1]['number']))
 
     return docstring_text
+
+
+def create_documentation_directory(savu_base_path, plugin_file):
+    """ Create plugin directory inside documentation and
+    documentation file and image folders
+    """
+    # Create directory inside
+    doc_path = savu_base_path + 'doc/source/documentation/plugins/'
+    doc_image_path = savu_base_path \
+        + 'doc/source/files_and_images/documentation/plugins/'
+
+    # find the directories to create
+    doc_dir = doc_path + plugin_file
+    image_dir = doc_image_path + plugin_file
+    pu.create_dir(doc_dir)
+    pu.create_dir(image_dir)
+
 
 if __name__ == "__main__":
     out_folder, rst_file, api_type = sys.argv[1:]
