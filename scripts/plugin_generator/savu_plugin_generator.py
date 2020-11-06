@@ -295,7 +295,7 @@ def main():
         savu_base_path = \
             os.path.dirname(os.path.realpath(__file__)).split('scripts')[0]
         file_path = module.replace('.', '/')
-        if args.delete == True:
+        if args.delete:
             remove_plugin_files(file_path, module, savu_base_path)
         else:
             create_plugin_template(file_path, module, args.quick, savu_base_path)
