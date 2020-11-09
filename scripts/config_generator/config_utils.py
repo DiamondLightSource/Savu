@@ -172,6 +172,21 @@ def _populate_plugin_list(content, pfilter=""):
         content.add(key, str(count))
         count += 1
 
+def _search_plugin_file(module_name, pfilter):
+    """Check for string inside file"""
+    string_found = False
+
+    savu_base_path = \
+        os.path.dirname(os.path.realpath(__file__)).split('scripts')[0]
+    file_dir = module_name.replace('.', '/')
+    file_path = savu_base_path + file_dir + '.py'
+    if os.path.isfile(file_path):
+        plugin_file = open(file_path, "r")
+        data = plugin_file.read().split()
+        if pfilter in data:
+            string_found = True
+        plugin_file.close()
+    return string_found
 
 def __get_filtered_plugins(pfilter):
     """ Get a sorted, filter list of plugins. """
@@ -187,6 +202,10 @@ def __get_filtered_plugins(pfilter):
                 key_list.append(key)
         elif pfilter in value.__module__ or pfilter in value.__name__:
             key_list.append(key)
+        else:
+            # Check if the word is present in the file
+            if _search_plugin_file(value.__module__, pfilter):
+                key_list.append(key)
 
     key_list.sort()
     return key_list

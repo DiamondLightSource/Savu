@@ -1,0 +1,17 @@
+a:link .download, a:visited .download {
+    line-height: 2em;
+    border-radius: .25rem;
+    display: inline;
+    padding: .25rem .5rem;
+    color: white;
+    background-color: #2c7aa3;
+}
+
+a:hover .download, a:active .download {
+    line-height: 2em;
+    border-radius: .25rem;
+    display: inline;
+    padding: .25rem .5rem;
+    color: white;
+    background-color: #609ebf;
+}

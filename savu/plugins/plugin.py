@@ -25,13 +25,11 @@ from __future__ import print_function, division, absolute_import
 import ast
 import copy
 import logging
-import inspect
 import numpy as np
 from collections import OrderedDict
 
 import savu.plugins.utils as pu
 import savu.plugins.docstring_parser as doc
-import savu.plugins.parameter_utils as param_u
 from savu.plugins.plugin_datasets import PluginDatasets
 
 
@@ -120,15 +118,10 @@ class Plugin(PluginDatasets):
 
     def _populate_default_parameters(self):
         """
-        This method should populate all the required parameters with default
-        values.  it is used for checking to see if new parameter values are
-        appropriate
-
+        This method should populate all the required parameters with
+        default values. It is used for checking to see if parameter
+        values are appropriate
         """
-        # Test Plugins are: 'RemoveAllRings' 'TomobarRecon' 'Hdf5saver'
-        # 'NxtomoLoader' 'DarkFlatFieldCorrection' 'NoProcess' 'Astra'
-        # 'Vocentering'
-
         p_tools = self._get_plugin_tools()
         if p_tools:
             self.tools = p_tools
@@ -164,7 +157,8 @@ class Plugin(PluginDatasets):
         """
         This method is called after the plugin has been created by the
         pipeline framework.  It replaces ``self.parameters`` default values
-        with those given in the input process list.
+        with those given in the input process list. It checks for multi
+        parameter strings, eg. 57;68;56;
 
         :param dict parameters: A dictionary of the parameters for this \
         plugin, or None if no customisation is required.
@@ -172,12 +166,8 @@ class Plugin(PluginDatasets):
         self.initialise_parameters()
         for key in parameters.keys():
             if key in self.parameters.keys():
-                value = self.__convert_multi_params(parameters[key], key)
-                self.tools.modify(self.parameters, value, key)
-                # parameters holds current values, this is edited outside of the
-                # tools class so default and dependency display values are updated here
-                self.tools.update_defaults(self.parameters, self.p_dict, mod=key)
-                self.tools.check_dependencies(self.parameters, self.p_dict)
+                self.tools.modify(self.parameters, parameters[key], key)
+                self.__check_multi_params(self.parameters, parameters[key], key)
             else:
                 error = ("Parameter '%s' is not valid for plugin %s. \nTry "
                          "opening and re-saving the process list in the "
@@ -185,49 +175,20 @@ class Plugin(PluginDatasets):
                          % (key, self.name))
                 raise ValueError(error)
 
-    def __convert_multi_params(self, value, key):
-        """ Set up parameter tuning.
-
-        Convert parameter value to a list if it uses parameter tuning and set
+    def __check_multi_params(self, parameters, value, key):
+        """ Convert parameter value to a list if it uses parameter tuning and set
         associated parameters, so the framework knows the new size of the data
         and which plugins to re-run.
         """
-        dtype = self.p_dict[key].get('dtype')
-        current_parameter_details = self.p_dict[key]
-
-        if isinstance(value, str) and ';' in value:
-            value = value.split(';')
-            if ":" in value[0]:
-                seq = value[0].split(':')
-                seq = [eval(s) for s in seq]
-                value = list(np.arange(seq[0], seq[1], seq[2]))
-                if len(value) == 0:
-                    raise RuntimeError(
-                        'No values for tuned parameter "{}", '
-                        'ensure start:stop:step; values are valid.'.format(key))
-
-            parameter_valid, error_str = param_u.is_valid(key, value[0],
-                                                          current_parameter_details)
-            if not parameter_valid:
-                try:
-                    value.remove('')
-                except:
-                    pass
-                if isinstance(value[0], str):
-                    value = [ast.literal_eval(i) for i in value]
-
-                if isinstance(dtype, list):
-                    for instance_type in dtype:
-                        if type(value[0]) == instance_type:
-                            # TODO Check the mapping use here
-                            value = map(type, value)
-                else:
-                    value = map(dtype, value)
+        # If the value is in a split string format then the value is returned
+        # as a list
+        value, error_str = pu.convert_multi_params(key, value)
+        if not error_str:
+            parameters[key] = value
             label = key + '_params.' + type(value[0]).__name__
             self.multi_params_dict[len(self.multi_params_dict)] = \
                 {'label': label, 'values': value}
             self.extra_dims.append(len(value))
-        return value
 
     def get_parameters(self, name):
         """ Return a plugin parameter

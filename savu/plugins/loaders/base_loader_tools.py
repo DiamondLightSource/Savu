@@ -17,12 +17,14 @@ data loader plugins should inherit.
               description: hidden parameter for savu template
               default: '<>'
         in_datasets:
-              visibility: datasets
+              # not inherited and not needed
+              visibility: not
               dtype: list
               description: Create a list of the dataset(s) to process
               default: []
         out_datasets:
-              visibility: datasets
+              # not inherited and not needed
+              visibility: not
               dtype: list
               description: Create a list of the dataset(s) to create
               default: []

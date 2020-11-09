@@ -168,7 +168,7 @@ html_theme_path = ["_themes", ]
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
 #html_logo = 'files_and_images/Savu_black_square_downsample2.png'
-file_path =  savu.__path__[0] + '/../'
+file_path =  os.path.dirname(os.path.realpath(__file__)).split('doc')[0]
 html_logo = file_path + 'doc/source/files_and_images/logo_downsample.png'
 
 # The name of an image file (within the static path) to use as favicon of the
@@ -179,7 +179,7 @@ html_logo = file_path + 'doc/source/files_and_images/logo_downsample.png'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-#html_static_path = ['_static']
+html_static_path = ['_static']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
@@ -304,3 +304,7 @@ texinfo_documents = [
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'http://docs.python.org/': None}
 
+
+def setup(app):
+    app.add_stylesheet( "css/plugin_template.css" )
+    app.add_stylesheet( "css/plugin_template_download.css" )

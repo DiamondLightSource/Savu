@@ -7,11 +7,12 @@ class BaseReconTools(PluginTools):
         """
         centre_of_rotation:
              visibility: basic
-             dtype: [float, int]
+             dtype: [float, int, str]
              description: Centre of rotation to use for the
                reconstruction.
              default: 0.0
-             example: It could be scalar or list of centre of rotation
+             example: It could be a scalar, a list, or a file
+              containing centre of rotations
 
         init_vol:
              visibility: advanced

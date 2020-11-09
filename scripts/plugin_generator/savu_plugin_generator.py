@@ -24,11 +24,9 @@
 from __future__ import print_function, division
 
 import os
-import sys
 import string
 import argparse
 
-import savu.test.test_process_list_utils as tplu
 import warnings
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
@@ -181,9 +179,9 @@ def create_documentation_template(file_path, module, savu_base_path):
         print('A documentation file exists at ' + file_str)
     else:
         # Create the file directory for the documentation if it doesn't exist
-        tplu.create_dir(file_str)
+        pu.create_dir(file_str)
         # Create the file for the documentation images
-        tplu.create_dir(doc_image_folder)
+        pu.create_dir(doc_image_folder)
         doc_image_folder_inline = doc_image_folder.split('files_and_images/')[1]
         with open(file_str, 'w+') as new_rst_file:
             new_rst_file.write(':orphan:\n\n')
@@ -297,7 +295,7 @@ def main():
         savu_base_path = \
             os.path.dirname(os.path.realpath(__file__)).split('scripts')[0]
         file_path = module.replace('.', '/')
-        if args.delete == True:
+        if args.delete:
             remove_plugin_files(file_path, module, savu_base_path)
         else:
             create_plugin_template(file_path, module, args.quick, savu_base_path)
