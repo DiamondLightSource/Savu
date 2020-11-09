@@ -45,7 +45,7 @@ def ordered_dump(data, stream=None, Dumper=yaml.Dumper, **kwds):
     def _dict_representer(dumper, data):
         return dumper.represent_mapping(
             yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
-            data.items())
+            list(data.items()))
     OrderedDumper.add_representer(OrderedDict, _dict_representer)
     
     def represent_none(self, _):

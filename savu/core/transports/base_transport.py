@@ -103,10 +103,10 @@ class BaseTransport(object):
         pDict['in_data'], pDict['out_data'] = plugin.get_datasets()
         pDict['in_sl'] = self._get_all_slice_lists(pDict['in_data'], 'in')
         pDict['out_sl'] = self._get_all_slice_lists(pDict['out_data'], 'out')
-        pDict['nIn'] = range(len(pDict['in_data']))
-        pDict['nOut'] = range(len(pDict['out_data']))
+        pDict['nIn'] = list(range(len(pDict['in_data'])))
+        pDict['nOut'] = list(range(len(pDict['out_data'])))
         pDict['nProc'] = len(pDict['in_sl']['process'])
-        if 'transfer' in pDict['in_sl'].keys():
+        if 'transfer' in list(pDict['in_sl'].keys()):
             pDict['nTrans'] = len(pDict['in_sl']['transfer'][0])
         else:
             pDict['nTrans'] = 1
@@ -128,7 +128,7 @@ class BaseTransport(object):
         cp, sProc, sTrans = self.__get_checkpoint_params(plugin)
 
         count = 0  # temporary solution
-        prange = range(sProc, pDict['nProc'])
+        prange = list(range(sProc, pDict['nProc']))
         kill = False
         for count in range(sTrans, nTrans):
             end = True if count == nTrans-1 else False
@@ -188,7 +188,7 @@ class BaseTransport(object):
         return pDict, result, nTrans
 
     def _log_completion_status(self, count, nTrans, name):
-        percent_complete = count/(nTrans * 0.01)
+        percent_complete: float = count / (nTrans * 0.01)
         cu.user_message("%s - %3i%% complete" % (name, percent_complete))
 
     def _transport_checkpoint(self):
@@ -212,14 +212,14 @@ class BaseTransport(object):
         sl_dict = {}
         for data in data_list:
             sl = data._get_transport_data()._get_slice_lists_per_process(dtype)
-            for key, value in sl.iteritems():
+            for key, value in sl.items():
                 if key not in sl_dict:
                     sl_dict[key] = [value]
                 else:
                     sl_dict[key].append(value)
 
-        for key in [k for k in ['process', 'unpad'] if k in sl_dict.keys()]:
-            nData = range(len(sl_dict[key]))
+        for key in [k for k in ['process', 'unpad'] if k in list(sl_dict.keys())]:
+            nData = list(range(len(sl_dict[key])))
             #rep = range(len(sl_dict[key][0]))
             sl_dict[key] = [[sl_dict[key][i][j] for i in nData if j < len(sl_dict[key][i])] for j in range(len(sl_dict[key][0]))]
         return sl_dict
@@ -234,7 +234,7 @@ class BaseTransport(object):
         pDict = self.pDict
         data_list = pDict['in_data']
 
-        if 'transfer' in pDict['in_sl'].keys():
+        if 'transfer' in list(pDict['in_sl'].keys()):
             slice_list = \
                 [pDict['in_sl']['transfer'][i][count] for i in pDict['nIn']]
         else:
@@ -280,9 +280,10 @@ class BaseTransport(object):
         data_list = pDict['out_data']
 
         slice_list = None
-        if 'transfer' in pDict['out_sl'].keys():
+        if 'transfer' in list(pDict['out_sl'].keys()):
             slice_list = \
-                [pDict['out_sl']['transfer'][i][count] for i in pDict['nOut'] if len(pDict['out_sl']['transfer'][i]) > count]
+                [pDict['out_sl']['transfer'][i][count] for i in pDict['nOut'] \
+                     if len(pDict['out_sl']['transfer'][i]) > count]
 
         result = [result] if type(result) is not list else result
 
@@ -302,7 +303,7 @@ class BaseTransport(object):
         process_frames = []
         for f in frame_list:
             if len(f):
-                process_frames.append(range(f[0]*nProc, (f[-1]+1)*nProc))
+                process_frames.append(list(range(f[0]*nProc, (f[-1]+1)*nProc)))
 
         process_frames = np.array(process_frames)
         nframes = plugin.get_plugin_in_datasets()[0].get_total_frames()
@@ -340,6 +341,10 @@ class BaseTransport(object):
         new_slice = [slice(None)]*len(data.get_shape())
         possible_slices = [copy.copy(new_slice)]
 
+        pData = data._get_plugin_data()
+        if pData._get_rank_inc():
+            possible_slices[0] += [0]*pData._get_rank_inc()
+
         if len(slice_dirs) > 1:
             for sl in slice_dirs[1:]:
                 new_slice[sl] = None
@@ -360,11 +365,16 @@ class BaseTransport(object):
         max_frames = pData._get_max_frames_process()
 
         pad = True if pData.padding and data.get_slice_dimensions()[0] in \
-            pData.padding._get_padding_directions().keys() else False
+            list(pData.padding._get_padding_directions().keys()) else False
 
+        n_core_dims = len(data.get_core_dimensions())
         squeeze_dims = data.get_slice_dimensions()
         if max_frames > 1 or pData._get_no_squeeze() or pad:
             squeeze_dims = squeeze_dims[1:]
+            n_core_dims +=1
+        if pData._get_rank_inc():
+            sl = [(slice(None))]*n_core_dims + [None]*pData._get_rank_inc()
+            return lambda x: np.squeeze(x[tuple(sl)], axis=squeeze_dims)
         return lambda x: np.squeeze(x, axis=squeeze_dims)
 
     def _remove_excess_data(self, data, result, slice_list):
@@ -410,7 +420,7 @@ class BaseTransport(object):
         self.exp.meta_data.set('link_type', {})
         self.exp.meta_data.set('filename', {})
         self.exp.meta_data.set('group_name', {})
-        for key in self.exp.index['out_data'].keys():
+        for key in list(self.exp.index['out_data'].keys()):
             self.exp.meta_data.set(['link_type', key], files['link_type'][key])
             self.exp.meta_data.set(['filename', key], files['filename'][key])
             self.exp.meta_data.set(['group_name', key],
@@ -419,7 +429,7 @@ class BaseTransport(object):
     def _get_filenames(self, plugin_dict):
         count = self.exp.meta_data.get('nPlugin') + 1
         files = {"filename": {}, "group_name": {}, "link_type": {}}
-        for key in self.exp.index["out_data"].keys():
+        for key in list(self.exp.index["out_data"].keys()):
             name = key + '_p' + str(count) + '_' + \
                 plugin_dict['id'].split('.')[-1] + '.h5'
             link_type = self._get_link_type(key)
@@ -455,7 +465,7 @@ class BaseTransport(object):
             if link_type is 'final_result':
                 group_name = 'final_result_' + data.get_name()
             else:
-                link = nxs_entry.require_group(link_type)
+                link = nxs_entry.require_group(link_type.encode("ascii"))
                 link.attrs[NX_CLASS] = 'NXcollection'
                 nxs_entry = link
 
@@ -481,7 +491,7 @@ class BaseTransport(object):
                     os.path.abspath(self.exp.meta_data.get('data_file'))
 
     def __output_data_type(self, entry, data, name):
-        data = data.data if 'data' in data.__dict__.keys() else data
+        data = data.data if 'data' in list(data.__dict__.keys()) else data
         if isinstance(data, h5py.Dataset):
             return
 
@@ -489,20 +499,20 @@ class BaseTransport(object):
         entry.attrs[NX_CLASS] = 'NXcollection'
 
         ltype = self.exp.meta_data.get('link_type')
-        if name in ltype.keys() and ltype[name] == 'input_data':
+        if name in list(ltype.keys()) and ltype[name] == 'input_data':
             self.__output_data(entry, data.__class__.__name__, 'cls')
             return
 
         args, kwargs, cls, extras = data._get_parameters(data.get_clone_args())
 
-        for key, value in kwargs.iteritems():
+        for key, value in kwargs.items():
             gp = entry.require_group('kwargs')
             if isinstance(value, BaseType):
                 self.__output_data_type(gp.require_group(key), value, key)
             else:
                 self.__output_data(gp, value, key)
 
-        for key, value in extras.iteritems():
+        for key, value in extras.items():
             gp = entry.require_group('extras')
             if isinstance(value, BaseType):
                 self.__output_data_type(gp.require_group(key), value, key)
@@ -515,7 +525,7 @@ class BaseTransport(object):
 
         self.__output_data(entry, cls, 'cls')
 
-        if 'data' in data.__dict__.keys() and not \
+        if 'data' in list(data.__dict__.keys()) and not \
                 isinstance(data.data, h5py.Dataset):
             gp = entry.require_group('data')
             self.__output_data_type(gp, data.data, 'data')
@@ -524,17 +534,17 @@ class BaseTransport(object):
         if isinstance(data, dict):
             entry = entry.require_group(name)
             entry.attrs[NX_CLASS] = 'NXcollection'
-            for key, value in data.iteritems():
+            for key, value in data.items():
                 self.__output_data(entry, value, key)
         else:
             try:
                 self.__create_dataset(entry, name, data)
-            except:
+            except Exception:
                 try:
                     import json
-                    data = np.array([json.dumps(data)])
+                    data = np.array([json.dumps(data).encode("ascii")])
                     self.__create_dataset(entry, name, data)
-                except:
+                except Exception:
                     try:
                         data = cu._savu_encoder(data)
                         self.__create_dataset(entry, name, data)
@@ -542,7 +552,7 @@ class BaseTransport(object):
                         raise Exception('Unable to output %s to file.' % name)
 
     def __create_dataset(self, entry, name, data):
-        if name not in entry.keys():
+        if name not in list(entry.keys()):
             entry.create_dataset(name, data=data)
         else:
             entry[name][...] = data
@@ -554,18 +564,23 @@ class BaseTransport(object):
         axes = []
         count = 0
         for labels in axis_labels:
-            name = labels.keys()[0]
+            name = list(labels.keys())[0]
             axes.append(name)
             entry.attrs[name + '_indices'] = count
 
-            mData = ddict[name] if name in ddict.keys() \
+            mData = ddict[name] if name in list(ddict.keys()) \
                 else np.arange(data.get_shape()[count])
             if isinstance(mData, list):
                 mData = np.array(mData)
 
+            if mData.dtype == np.dtype('<U18'):
+                mData = mData.astype(np.string_)
+            elif 'U' in str(mData.dtype):
+                logging.warning(f"Potentially unhandled Unicode dtype: {mData.dtype}")
+
             axis_entry = entry.require_dataset(name, mData.shape, mData.dtype)
             axis_entry[...] = mData[...]
-            axis_entry.attrs['units'] = labels.values()[0]
+            axis_entry.attrs['units'] = list(labels.values())[0]
             count += 1
         entry.attrs['axes'] = axes
 
@@ -582,7 +597,7 @@ class BaseTransport(object):
 
     def _output_metadata_dict(self, entry, mData):
         entry.attrs[NX_CLASS] = 'NXcollection'
-        for key, value in mData.iteritems():
+        for key, value in mData.items():
             nx_data = entry.require_group(key)
             if isinstance(value, dict):
                 self._output_metadata_dict(nx_data, value)

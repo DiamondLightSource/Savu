@@ -2,7 +2,7 @@ savu.test.travis.plugin\_tests.reconstruction\_tests.astra\_recon\_cpu\_test mod
 ===================================================================================
 
 .. automodule:: savu.test.travis.plugin_tests.reconstruction_tests.astra_recon_cpu_test
-    :members:
-    :private-members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:

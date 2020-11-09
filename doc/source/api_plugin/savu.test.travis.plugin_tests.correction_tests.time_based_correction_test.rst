@@ -2,6 +2,6 @@ savu.test.travis.plugin\_tests.correction\_tests.time\_based\_correction\_test m
 =====================================================================================
 
 .. automodule:: savu.test.travis.plugin_tests.correction_tests.time_based_correction_test
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:

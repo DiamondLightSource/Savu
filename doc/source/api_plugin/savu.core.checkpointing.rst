@@ -2,6 +2,6 @@ savu.core.checkpointing module
 ==============================
 
 .. automodule:: savu.core.checkpointing
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:

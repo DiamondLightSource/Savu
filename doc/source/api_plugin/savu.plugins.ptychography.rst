@@ -5,6 +5,7 @@ Submodules
 ----------
 
 .. toctree::
+   :maxdepth: 4
 
    savu.plugins.ptychography.base_ptycho
    savu.plugins.ptychography.dummy_ptycho
@@ -15,6 +16,6 @@ Module contents
 ---------------
 
 .. automodule:: savu.plugins.ptychography
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:

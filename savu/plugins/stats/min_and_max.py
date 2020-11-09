@@ -81,7 +81,7 @@ class MinAndMax(Plugin, CpuPlugin):
                 "!!! ERROR !!! -> Wrong method. Please use only one of "\
                 "the provided options \n"\
                 "***********************************************\n"
-            logging.warn(msg)
+            logging.warning(msg)
             cu.user_message(msg)
             raise ValueError(msg)
         self.p_min, self.p_max = np.sort(np.clip(np.asarray(

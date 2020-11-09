@@ -54,6 +54,9 @@ class Data(DataCreate):
         self.previous_pattern = None
         self.transport_data = None
 
+#    def get_data(self, related):
+#        return self.related[related].data
+
     def __initialise_data_info(self, name):
         """ Initialise entries in the data_info meta data.
         """
@@ -158,12 +161,17 @@ class Data(DataCreate):
     def _set_name(self, name):
         self.data_info.set('name', name)
 
-    def get_name(self):
+    def get_name(self, orig=False):
         """ Get data name.
 
+        :keyword bool orig: Set this flag to true to return the original cloned
+            dataset name if this dataset is a clone
         :returns: the name associated with the dataset
         :rtype: str
         """
+        if orig:
+            dinfo = self.data_info.get_dictionary()
+            return dinfo['clone'] if 'clone' in dinfo.keys() else dinfo['name']
         return self.data_info.get('name')
 
     def __get_available_pattern_list(self):
@@ -181,17 +189,21 @@ class Data(DataCreate):
             :const:`pattern_list`
             :data:`savu.data.data_structures.utils.pattern_list`
             :data:`pattern_list`:
-        :keyword tuple core_dir: Dimension indices of core dimensions
-        :keyword tuple slice_dir: Dimension indices of slice dimensions
+        :keyword tuple core_dims: Dimension indices of core dimensions
+        :keyword tuple slice_dims: Dimension indices of slice dimensions
         """
         if dtype in self.pattern_list:
             nDims = 0
             for args in kwargs:
+                dlen = len(kwargs[args])
+                if not dlen:
+                    raise Exception("Pattern Error: Pattern %s must have at"
+                                    " least one %s" % (dtype, args))
                 nDims += len(kwargs[args])
                 self.data_info.set(['data_patterns', dtype, args],
                                    kwargs[args])
 
-            self.__convert_pattern_directions(dtype)
+            self.__convert_pattern_dimensions(dtype)
             if self.get_shape():
                 diff = len(self.get_shape()) - nDims
                 if diff:
@@ -223,20 +235,32 @@ class Data(DataCreate):
         self.add_pattern("VOLUME_XZ", **self.__get_dirs_for_volume(x, z, y))
         self.add_pattern("VOLUME_XY", **self.__get_dirs_for_volume(x, y, z))
 
+        if self.data_info.get("nDims") > 3:
+            self.add_pattern("VOLUME_3D", **self.__get_dirs_for_volume_3D())
 
-    def __get_dirs_for_volume(self, dim1, dim2, sdir):
+    def __get_dirs_for_volume(self, dim1, dim2, sdir, dim3=None):
         """ Calculate core_dir and slice_dir for a volume pattern.
         """
-        all_dims = range(len(self.get_shape()))
+        all_dims = range(self.data_info.get("nDims"))
         vol_dict = {}
         vol_dict['core_dims'] = (dim1, dim2)
+
         slice_dir = [sdir]
-        # *** need to add this for other patterns
         for ddir in all_dims:
             if ddir not in [dim1, dim2, sdir]:
                 slice_dir.append(ddir)
         vol_dict['slice_dims'] = tuple(slice_dir)
         return vol_dict
+
+    def __get_dirs_for_volume_3D(self):
+        # create volume 3D pattern here
+        patterns = self.get_data_patterns()
+        cdim = []
+        for v in ['VOLUME_YZ', 'VOLUME_XY', 'VOLUME_XZ']:
+            cdim += (patterns[v]['core_dims'])
+        cdim = set(cdim)
+        sdim = tuple(set(range(self.data_info.get("nDims"))).difference(cdim))
+        return {"core_dims": tuple(cdim), "slice_dims": sdim}
 
     def set_axis_labels(self, *args):
         """ Set the axis labels associated with each data dimension.
@@ -279,11 +303,11 @@ class Data(DataCreate):
         axis_labels = self.data_info.get('axis_labels')
         for i in range(len(axis_labels)):
             if contains is True:
-                for names in axis_labels[i].keys():
+                for names in list(axis_labels[i].keys()):
                     if name in names:
                         return i
             else:
-                if name in axis_labels[i].keys():
+                if name in list(axis_labels[i].keys()):
                     return i
         raise Exception("Cannot find the specifed axis label.")
 
@@ -311,14 +335,14 @@ class Data(DataCreate):
             return 0
         return 1
 
-    def __convert_pattern_directions(self, dtype):
+    def __convert_pattern_dimensions(self, dtype):
         """ Replace negative indices in pattern kwargs.
         """
         pattern = self.get_data_patterns()[dtype]
-        if 'main_dir' in pattern.keys():
+        if 'main_dir' in list(pattern.keys()):
             del pattern['main_dir']
 
-        nDims = sum([len(i) for i in pattern.values()])
+        nDims = sum([len(i) for i in list(pattern.values())])
         for p in pattern:
             ddirs = pattern[p]
             pattern[p] = self._non_negative_directions(ddirs, nDims)
@@ -363,7 +387,7 @@ class Data(DataCreate):
         axis_labels = self.data_info.get('axis_labels')
         axis_label_keys = []
         for labels in axis_labels:
-            for key in labels.keys():
+            for key in list(labels.keys()):
                 axis_label_keys.append(key)
         return axis_label_keys
 
@@ -373,8 +397,8 @@ class Data(DataCreate):
         """
         axis_labels = self.get_axis_labels()
         for i in range(len(slice_list)):
-            label = axis_labels[i].keys()[0]
-            if label in self.meta_data.get_dictionary().keys():
+            label = list(axis_labels[i].keys())[0]
+            if label in list(self.meta_data.get_dictionary().keys()):
                 values = self.meta_data.get(label)
                 preview_sl = [slice(None)]*len(values.shape)
                 preview_sl[0] = slice_list[i]
@@ -386,7 +410,7 @@ class Data(DataCreate):
         :returns: value associated with pattern key ``core_dims``
         :rtype: tuple
         """
-        return self._get_plugin_data().get_pattern().values()[0]['core_dims']
+        return list(self._get_plugin_data().get_pattern().values())[0]['core_dims']
 
     def get_slice_dimensions(self):
         """ Get the slice data dimensions associated with the current pattern.
@@ -394,7 +418,7 @@ class Data(DataCreate):
         :returns: value associated with pattern key ``slice_dims``
         :rtype: tuple
         """
-        return self._get_plugin_data().get_pattern().values()[0]['slice_dims']
+        return list(self._get_plugin_data().get_pattern().values())[0]['slice_dims']
 
     def get_itemsize(self):
         """ Returns bytes per entry """

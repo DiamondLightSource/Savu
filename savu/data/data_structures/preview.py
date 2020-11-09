@@ -77,9 +77,9 @@ class Preview(object):
         for i in range(len(preview_list)):
             if preview_list[i] == 'nprocs':
                 nprocs = self.get_data_obj().exp.meta_data.get('nProcesses')
-                start = int(np.floor(nprocs/2.0))
-                end = int(np.ceil(nprocs/2.0))
-                preview_list[i] = 'mid-' + str(start) + ':mid+' + str(end)
+                start = int(np.floor(nprocs / 2.0))
+                end = int(np.ceil(nprocs / 2.0))
+                preview_list[i] = f'mid-{start}:mid-{end}'
         return preview_list
 
     def _add_preview_defaults(self, plist):
@@ -91,9 +91,10 @@ class Preview(object):
         :rtype: list
         """
         nEntries = 4
-        plist = [str(i) for i in plist] if isinstance(plist[0], int) else plist
+        #plist = [str(i) for i in plist] if isinstance(plist[0], int) else plist
+        plist = [str(i) if isinstance(i, int) else i for i in plist]
         diff_len = [(nEntries - len(elem.split(':'))) for elem in plist]
-        diff3 = [i for i in range(len(diff_len)) if diff_len[i] is 3]
+        diff3 = [i for i in range(len(diff_len)) if diff_len[i] == 3]
         for dim in diff3:
             plist[dim] = plist[dim] + ':' + plist[dim] + '+1'
             diff_len[dim] = 2
@@ -153,7 +154,7 @@ class Preview(object):
         chunks = len(preview_list)*[None]
 
         for i in range(len(preview_list)):
-            if preview_list[i] is ':':
+            if preview_list[i] == ':':
                 preview_list[i] = '0:end:1:1'
             vals = preview_list[i].split(':')
             starts[i], stops[i], steps[i], chunks[i] = \
@@ -166,9 +167,9 @@ class Preview(object):
         """
         dobj = self.get_data_obj()
         shape = dobj.get_shape()
-        mid = np.clip(np.ceil(shape[dim]/2.0).astype('int') - 1, 0, None)        
+        mid = np.clip(np.ceil(shape[dim] / 2.0).astype('int') - 1, 0, None)
         end = shape[dim]
-        idx = [eval(equ) for equ in idx]
+        idx = [eval(equ, {"builtins": None}, {'mid': mid, 'end': end}) for equ in idx]
         idx = [idx[i] if idx[i] > -1 else shape[dim]+1+idx[i] for i in
                range(len(idx))]
         return idx
@@ -185,7 +186,7 @@ class Preview(object):
         """
         mData = self.get_data_obj().data_info
 
-        if 'starts' not in mData.get_dictionary().keys():
+        if 'starts' not in list(mData.get_dictionary().keys()):
             return None if key else [None]*4
 
         if key is not None:

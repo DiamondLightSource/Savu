@@ -110,9 +110,9 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
                 "!!! ERROR !!! -> Plugin doesn't work with the step in the "\
                 "preview larger than 1 \n"\
                 "***********************************************\n"
-            logging.warn(self.msg)
+            logging.warning(self.msg)
             cu.user_message(self.msg)
-            raise ValueError(self.msg)            
+            raise ValueError(self.msg)
 
         x_offset = shift[x_dim]
         y_offset = shift[y_dim]
@@ -136,15 +136,15 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
                 (x_center, y_center, list_fact) = self.load_metadata_txt(
                     file_path)
                 x_center = x_center - x_offset
-                y_center = y_center - y_offset 
+                y_center = y_center - y_offset
             except IOError:
                 self.msg = "\n*****************************************\n"\
                     "!!! ERROR !!! -> Can't open this file: %s \n"\
                     "*****************************************\n\
-                    " % str(file_path)                
-                logging.warn(self.msg)
+                    " % str(file_path)
+                logging.warning(self.msg)
                 cu.user_message(self.msg)
-                raise ValueError(self.msg)                
+                raise ValueError(self.msg)
 
         data_shape = data.get_shape()
         self.height, self.width = data_shape[y_dim], data_shape[x_dim]
@@ -166,14 +166,14 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
                     "!!! ERROR !!! -> You need to increase the preview size"\
                     " for this plugin to work \n\n"\
                     "*****************************************\n"
-            logging.warn(self.msg)
+            logging.warning(self.msg)
             cu.user_message(self.msg)
 
-            raise ValueError(self.msg)            
+            raise ValueError(self.msg)
         self.indices = np.reshape(yd_mat, (-1, 1)),\
                         np.reshape(xd_mat, (-1, 1))
 
-    def process_frames(self, data): 
+    def process_frames(self, data):
         mat_corrected = np.reshape(map_coordinates(
                 data[0], self.indices, order=1, mode='reflect'),
              (self.height, self.width))

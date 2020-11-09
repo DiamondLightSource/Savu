@@ -2,6 +2,6 @@ savu.data.chunking module
 =========================
 
 .. automodule:: savu.data.chunking
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:

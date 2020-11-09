@@ -48,13 +48,13 @@ class Hdf5TemplateLoader(YamlConverter):
         super(Hdf5TemplateLoader, self).__init__(name)
 
     def set_data(self, dObj, data):
-        path = data['path'] if 'path' in data.keys() else None
+        path = data['path'] if 'path' in list(data.keys()) else None
         if not path:
             emsg = 'Please specify the path to the data in the h5 file.'
             raise Exception(emsg)
 
         file_path = self.exp.meta_data.get("data_file") if 'file' not in \
-            data.keys() else data['file']
+            list(data.keys()) else data['file']
         file_path = self.update_value(dObj, file_path)
         dObj.backing_file = h5py.File(file_path, 'r')
 
@@ -65,12 +65,12 @@ class Hdf5TemplateLoader(YamlConverter):
 
     def _stitch_data(self, dObj, path, data):
         stype, dim = self._get_stitching_info(data)
-        remove = data['remove'] if 'remove' in data.keys() else None
+        remove = data['remove'] if 'remove' in list(data.keys()) else None
 
         group_name, data_name = os.path.split(path)
         # find all files with the given name
         group = dObj.backing_file.require_group(group_name)
-        matches = fnmatch.filter(group.keys(), data_name)
+        matches = fnmatch.filter(list(group.keys()), data_name)
 
         number = []
         for m in matches:
@@ -101,9 +101,9 @@ class Hdf5TemplateLoader(YamlConverter):
         return dObj
 
     def _get_stitching_info(self, data):
-        if 'stack' in data.keys():
+        if 'stack' in list(data.keys()):
             return 'stack', data['stack']
-        elif 'cat' in data.keys():
+        elif 'cat' in list(data.keys()):
             return 'cat', data['cat']
         else:
             msg = 'Please specify the dimension to stack or concatenate.'

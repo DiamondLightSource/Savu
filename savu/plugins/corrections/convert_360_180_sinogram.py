@@ -33,7 +33,7 @@ class Convert360180Sinogram(Plugin, CpuPlugin):
     """
 
     Method to convert the 0-360 degree sinogram to 0-180 sinogram.
-    :param center: Center of rotation. Default: 0
+    :param center: Center of rotation. Default: 0.0
     :param out_datasets: Create a list of the dataset(s) to \
         create. Default: ['in_datasets[0]', 'cor'].
 
@@ -47,9 +47,9 @@ class Convert360180Sinogram(Plugin, CpuPlugin):
         in_dataset, out_dataset = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
 
-        self.center = 0
+        self.center = 0.0
         key = "centre_of_rotation"
-        if key in in_dataset[0].meta_data.get_dictionary().keys():
+        if key in list(in_dataset[0].meta_data.get_dictionary().keys()):
             self.center = in_dataset[0].meta_data.get(key)
 
         old_shape = in_dataset[0].get_shape()
@@ -90,8 +90,8 @@ class Convert360180Sinogram(Plugin, CpuPlugin):
         sino_shape = list(in_pData[0].get_shape())
         self.width = sino_shape[width_dim]
         self.height = sino_shape[height_dim]
-        center_manu = self.parameters['center']
-        if center_manu != 0:
+        center_manu = float(self.parameters['center'])
+        if center_manu != 0.0:
             self.center = center_manu
         self.mid_width = self.width / 2.0
         if (self.center <= 0) or (self.center > self.width):
@@ -125,8 +125,8 @@ class Convert360180Sinogram(Plugin, CpuPlugin):
         sinocombine = np.zeros((self.new_height, 2 * self.width),
                                dtype=np.float32)
         if self.center < self.mid_width:
-            num1 = np.mean(np.abs(sinogram1[:,:self.overlap]))
-            num2 = np.mean(np.abs(sinogram2[:,-self.overlap:]))
+            num1 = np.mean(np.abs(sinogram1[:, :self.overlap]))
+            num2 = np.mean(np.abs(sinogram2[:, -self.overlap:]))
             sinogram2 = sinogram2 * num1 / num2
             sinogram1 = sinogram1 * self.mat_wedge_right
             sinogram2 = sinogram2 * self.mat_wedge_left
@@ -134,8 +134,8 @@ class Convert360180Sinogram(Plugin, CpuPlugin):
             sinocombine[:, self.overlap:self.overlap + self.width] = sinogram2
             sinocombine[:, -self.width:] += sinogram1
         else:
-            num1 = np.mean(np.abs(sinogram1[:,-self.overlap:]))
-            num2 = np.mean(np.abs(sinogram2[:,:self.overlap]))
+            num1 = np.mean(np.abs(sinogram1[:, -self.overlap:]))
+            num2 = np.mean(np.abs(sinogram2[:, :self.overlap]))
             sinogram2 = sinogram2 * num1 / num2
             sinogram1 = sinogram1 * self.mat_wedge_left
             sinogram2 = sinogram2 * self.mat_wedge_right

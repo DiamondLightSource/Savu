@@ -5,6 +5,7 @@ Submodules
 ----------
 
 .. toctree::
+   :maxdepth: 4
 
    savu.plugins.fitters.base_fitter
    savu.plugins.fitters.ral_fit
@@ -15,6 +16,6 @@ Module contents
 ---------------
 
 .. automodule:: savu.plugins.fitters
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:

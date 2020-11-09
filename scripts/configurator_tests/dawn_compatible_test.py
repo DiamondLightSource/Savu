@@ -10,7 +10,6 @@ from savu.plugins.utils import dawn_plugins
 
 
 class DawnCompatibleTest(unittest.TestCase):
-
     def test_populate_plugins(self):
         cu.populate_plugins()
 
@@ -20,15 +19,17 @@ class DawnCompatibleTest(unittest.TestCase):
 
     def test_dawn_plugin_params_found(self):
         cu.populate_plugins(dawn=True)
-        self.assertTrue(isinstance(
-                pu.dawn_plugin_params[pu.dawn_plugins.keys()[0]], dict))
+        self.assertTrue(
+            isinstance(pu.dawn_plugin_params[list(pu.dawn_plugins.keys())[0]],
+                       dict))
 
     def test_load_plugin(self):
         cu.populate_plugins()
-        plugin_path = pu.dawn_plugins[dawn_plugins.keys()[0]]['path2plugin']
+        dawn_plugins_keys = list(dawn_plugins.keys())
+        plugin_path = pu.dawn_plugins[dawn_plugins_keys[0]]['path2plugin']
         inst = pu.load_class(plugin_path)()
-        sl = inst.__dict__['slice_list']
-        exp = inst.__dict__['exp']
+        inst.__dict__['slice_list']
+        inst.__dict__['exp']
 
 
 if __name__ == '__main__':

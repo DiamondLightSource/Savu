@@ -2,15 +2,16 @@ savu.data.data\_structures.data\_types package
 ==============================================
 
 .. automodule:: savu.data.data_structures.data_types
-    :members:
-    :private-members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
 
 Submodules
 ----------
 
 .. toctree::
+   :maxdepth: 4
 
    savu.data.data_structures.data_types.base_type
    savu.data.data_structures.data_types.data_plus_darks_and_flats
@@ -19,4 +20,3 @@ Submodules
    savu.data.data_structures.data_types.mrc
    savu.data.data_structures.data_types.replicate
    savu.data.data_structures.data_types.stitch_data
-

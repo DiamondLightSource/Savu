@@ -2,6 +2,6 @@ savu.plugins.utils module
 =========================
 
 .. automodule:: savu.plugins.utils
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:

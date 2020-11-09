@@ -5,13 +5,15 @@ Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 4
 
-    savu.plugins.savers.utils
+   savu.plugins.savers.utils
 
 Submodules
 ----------
 
 .. toctree::
+   :maxdepth: 4
 
    savu.plugins.savers.base_image_saver
    savu.plugins.savers.base_saver
@@ -25,6 +27,6 @@ Module contents
 ---------------
 
 .. automodule:: savu.plugins.savers
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:

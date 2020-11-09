@@ -1,4 +1,4 @@
-from __future__ import print_function, unicode_literals, absolute_import
+
 from pyreadline.rlmain import Readline
 
 __all__ = [ 'parse_and_bind',

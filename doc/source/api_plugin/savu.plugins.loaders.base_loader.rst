@@ -2,6 +2,6 @@ savu.plugins.loaders.base\_loader module
 ========================================
 
 .. automodule:: savu.plugins.loaders.base_loader
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:

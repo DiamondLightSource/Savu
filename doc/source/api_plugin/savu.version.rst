@@ -2,6 +2,6 @@ savu.version module
 ===================
 
 .. automodule:: savu.version
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:

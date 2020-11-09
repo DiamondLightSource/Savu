@@ -103,7 +103,7 @@ class StitchData(BaseType):
         index = np.where(np.diff(array) < 0)[0] + 1
 
         val_list = np.array_split(array, index)
-        obj_vals = init_vals[np.append(0, index)]/inc
+        obj_vals = init_vals[np.append(0, index)] // inc
         active_obj_list = []
         for i in obj_vals:
             active_obj_list.append(self.obj_list[i])

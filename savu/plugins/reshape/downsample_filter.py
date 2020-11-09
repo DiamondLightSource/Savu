@@ -58,7 +58,7 @@ class DownsampleFilter(Plugin, CpuPlugin):
                 output_shape.append(input_shape[i]/self.parameters['bin_size'])
             else:
                 output_shape.append(input_shape[i])
-        
+
         return output_shape
 
     def process_frames(self, data):
@@ -94,7 +94,7 @@ class DownsampleFilter(Plugin, CpuPlugin):
         core_dirs = data.get_core_dimensions()
         new_shape = list(full_shape)
         for dim in core_dirs:
-            new_shape[dim] = full_shape[dim]/self.parameters['bin_size']
+            new_shape[dim] = full_shape[dim] // self.parameters['bin_size']
             if (full_shape[dim] % self.parameters['bin_size']) > 0:
                 new_shape[dim] += 1
         return tuple(new_shape)
