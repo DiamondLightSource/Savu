@@ -233,9 +233,11 @@ if [ ! $test_flag ]; then
   PYTHONHOME=$PREFIX/miniconda/bin
   export PATH="$PYTHONHOME:$PATH"
 
-  # conda-build needed to build the savu/hdf5/h5py recipes
-  conda install -y -q conda-build conda-env
-  conda install -y -q conda-build conda-verify
+  conda install -y -q conda-build
+  
+#   # conda-build needed to build the savu/hdf5/h5py recipes
+#   conda install -y -q conda-build conda-env
+#   conda install -y -q conda-build conda-verify
 
   if [ $local_installation = false ]; then
 
@@ -265,7 +267,7 @@ if [ ! $test_flag ]; then
   else
     echo "Installing mpi4py/hdf5/h5py from conda for CI run"
     recipes=$DIR/../conda-recipes
-    conda env update -n root -f $DIR/environment_ci.yml
+    conda env update -n root python=3.7 -f $DIR/environment_ci.yml
   fi
 
   echo "Installing pytorch..."
