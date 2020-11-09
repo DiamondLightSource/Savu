@@ -1,3 +1,4 @@
+dist: bionic
 cache: apt
 language: python
 python:

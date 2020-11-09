@@ -31,7 +31,7 @@ from savu.plugins.utils import register_plugin
 
 
 @register_plugin
-class MedianFilter(BaseFilter, CpuPlugin):
+class MedianFilterDeprecated(BaseFilter, CpuPlugin):
     """
     A plugin to filter each frame with a 3x3 median filter
 
@@ -41,7 +41,7 @@ class MedianFilter(BaseFilter, CpuPlugin):
 
     def __init__(self):
         logging.debug("Starting Median Filter")
-        super(MedianFilter, self).__init__("MedianFilter")
+        super(MedianFilterDeprecated, self).__init__("MedianFilterDeprecated")
 
     def process_frames(self, data):
         result = sig.medfilt(data[0], self.parameters['kernel_size'])
