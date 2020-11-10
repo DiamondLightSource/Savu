@@ -234,7 +234,7 @@ if [ ! $test_flag ]; then
   export PATH="$PYTHONHOME:$PATH"
 
   conda install -y -q conda-build
-  
+
 #   # conda-build needed to build the savu/hdf5/h5py recipes
 #   conda install -y -q conda-build conda-env
 #   conda install -y -q conda-build conda-verify
@@ -254,12 +254,12 @@ if [ ! $test_flag ]; then
     if [ -z $recipes ]; then
       install_path=$(python -c "import savu; import savu.version as sv; print(sv.__install__)")
       recipes=$savu_path/$install_path/../conda-recipes
-    fi  
+    fi
 
     echo "Installing mpi4py..."
     string=$(awk '/^mpi4py/' $versions_file)
     mpi4py_version=$(echo $string | cut -d " " -f 2)
-    pip install mpi4py==$mpi4py_version    
+    pip install mpi4py==$mpi4py_version
 
     . $recipes/installer.sh "hdf5"
     . $recipes/installer.sh "h5py"
@@ -267,14 +267,14 @@ if [ ! $test_flag ]; then
   else
     echo "Installing mpi4py/hdf5/h5py from conda for CI run"
     recipes=$DIR/../conda-recipes
-    conda env update -n root python=3.7 -f $DIR/environment_ci.yml
+    conda env update -n root -f $DIR/environment_ci.yml
   fi
 
   echo "Installing pytorch..."
   string=$(awk '/^cudatoolkit/' $versions_file)
   cudatoolkit_version=$(echo $string | cut -d " " -f 2)
   conda install -y -q pytorch torchvision cudatoolkit=$cudatoolkit_version -c pytorch
- 
+
   conda env update -n root -f $DIR/environment.yml
 
   . $recipes/installer.sh "tomophantom"
@@ -333,7 +333,7 @@ if [ ! $test_flag ]; then
 
   source $setup_script
 fi
- 
+
 if [ $test_flag ]; then
 
   nGPUs=$(nvidia-smi -L | wc -l)
@@ -347,9 +347,9 @@ if [ $test_flag ]; then
   echo -e "\n************** Single-threaded local tests complete ******************\n"
 
 fi
- 
+
 if [ ! $test_flag ]; then
- 
+
   echo -e "*************** SAVU INSTALLATION COMPLETE! ******************\n"
   echo -e "    ......Thank you for running the Savu installer......\n"
   echo -e "=============================================================\n"
@@ -363,7 +363,6 @@ fi
 echo -e "\n\t***************************************************"
 echo -e "\t          Package installation complete"
 echo -e "\t  Check $error_log for errors"
-echo -e "\t***************************************************\n"  
-  
-exit 0
+echo -e "\t***************************************************\n"
 
+exit 0
