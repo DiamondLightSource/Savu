@@ -2,6 +2,6 @@ savu.plugins.filters.umpa module
 ================================
 
 .. automodule:: savu.plugins.filters.umpa
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:

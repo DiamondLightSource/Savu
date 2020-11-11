@@ -24,7 +24,7 @@
 
 import textwrap
 from colorama import Back, Fore
-import display_formatter as df
+from . import display_formatter as df
 
 
 def wrap(string):
@@ -77,9 +77,9 @@ def param_change_str(old, new, plugin, keys):
     removed = list(set(old).difference(set(new)))
     added = list(set(new).difference(set(old)))
     replaced = [entry['old'] for k in keys for entry in param_mutations[k]
-                if entry['old'] in old.keys()]
+                if entry['old'] in list(old.keys())]
     replacing = [entry['new'] for k in keys for entry in param_mutations[k]
-                 if entry['old'] in old.keys()]
+                 if entry['old'] in list(old.keys())]
 
     removed = [x for x in removed if x not in replaced]
     added = [x for x in added if x not in replacing]
@@ -89,8 +89,8 @@ def param_change_str(old, new, plugin, keys):
         added_str = ["Adding parameter %s" % a for a in added]
         replaced_str = ["Replacing parameter %s with %s" % (
                 replaced[i], replacing[i]) for i in range(len(replaced))]
-        print wrap(param_changes_str(plugin) + '%s' % (
-                '\n'.join(removed_str + added_str + replaced_str)))
+        print(wrap(param_changes_str(plugin) + '%s' % (
+                '\n'.join(removed_str + added_str + replaced_str))))
 
 hdf5_notice = 'is now used by default.\nPlease remove from the process list, '\
     'unless you wish to override the default parameters (which must be done '\
@@ -102,6 +102,17 @@ dezing_notice = '\nA faster and more accurate version of DezingFilter is now'\
 distortion_notice = 'A new version of DistortionCorrection is available with'\
     ' the version available in 2.3 \nand below being renamed as '\
     'DistortionCorrectionDeprecated.  Please replace with \nthe new version.'
+
+medianfilt_notice = '\n Two new versions of median filter on a CPU'\
+    ' (MedianFilterLarix) and on a GPU (MedianFilterGpu) are available with'\
+    ' the Savu version 3.0. \n Please use the newer faster versions.'
+
+dezinger_notice = '\n Two new versions of Dezinger Filter on a CPU'\
+    ' (DezingerLarix) and on a GPU (DezingerGpu) are available with'\
+    ' the Savu version 3.0. \n Please note that the new Dezinger'\
+    ' should be applied to normalised projections/sinograms.' \
+    '\n Please use the newer version and report if there are any issues with it.'
+
 
 plugin_mutations = \
     {'TimeseriesFieldCorrections':
@@ -120,7 +131,23 @@ plugin_mutations = \
      'DistortionCorrection':
         {'replace': 'DistortionCorrectionDeprecated',
          'up_to_version': '2.4', # if the plist version is less than 2.4 (or not defined) then apply this mutation
-         'desc': '\n' + Fore.RED + auto_replace_str() + distortion_notice + Fore.RESET}
+         'desc': '\n' + Fore.RED + auto_replace_str() + distortion_notice + Fore.RESET},
+     'MedianFilter':
+        {'replace': 'MedianFilterDeprecated',
+         'up_to_version': '3.0', # if the plist version is less than 3.0 (or not defined) then apply this mutation
+         'desc': '\n' + Fore.RED + auto_replace_str() + medianfilt_notice + Fore.RESET},
+     'Dezinger':
+        {'replace': 'DezingerDeprecated',
+         'up_to_version': '3.0', # if the plist version is less than 3.0 (or not defined) then apply this mutation
+         'desc': '\n' + Fore.RED + auto_replace_str() + dezinger_notice + Fore.RESET},
+      'DezingerSimple':
+         {'replace': 'DezingerSimpleDeprecated',
+          'up_to_version': '3.0', # if the plist version is less than 3.0 (or not defined) then apply this mutation
+          'desc': '\n' + Fore.RED + auto_replace_str() + dezinger_notice + Fore.RESET},
+      'DezingerSinogram':
+         {'replace': 'DezingerSinogramDeprecated',
+          'up_to_version': '3.0', # if the plist version is less than 3.0 (or not defined) then apply this mutation
+          'desc': '\n' + Fore.RED + auto_replace_str() + dezinger_notice + Fore.RESET}        
      }
 
 param_mutations = \

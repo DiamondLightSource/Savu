@@ -7,4 +7,4 @@ Table of Contents
 .. toctree::
    :maxdepth: 2
 
-   dls_installer
+   savu_hpc

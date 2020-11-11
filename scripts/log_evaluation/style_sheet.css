@@ -1,38 +1,35 @@
-/* Stylesheet 1: */ 
+/* Stylesheet 1: */
 
-body { 
-	font: 80% Lucida Sans; 
-	margin: 20px; 
-	line-height: 8px; 
-	#background-color:rgb(196, 196, 196)
-	} 
+body {
+    font: 80% Lucida Sans;
+    margin: 20px;
+    line-height: 8px;
+}
 
-h1 { 
-	text-align:center; 
-	position:relative;
-	}
+h1 {
+    text-align: center;
+    position: relative;
+}
 
-.boxed {    
-	text-align:center;
-	line-height: 30px; 
-	width: 700px;
-      height: 30px;
-	border: 2px solid red;
-      position: relative;
-	left: 600px;
-      top: 5px;
-	}
+.boxed {
+    text-align: center;
+    line-height: 30px;
+    width: 700px;
+    height: 30px;
+    border: 2px solid red;
+    position: relative;
+    left: 600px;
+    top: 5px;
+}
 
-.boxedLink {    
-	font: 150% Lucida Sans; 
-	margin: 3%; 
-	line-height: 18px; 
-	#background-color:rgb(196, 196, 196)
-	}
+.boxedLink {
+    font: 150% Lucida Sans;
+    margin: 3%;
+    line-height: 18px;
+}
 
-.boxedMachines {    
-	font: 100% Lucida Sans; 
-	margin-top: 3%;
-	line-height: 18px; 
-	#background-color:rgb(196, 196, 196);
-	}
+.boxedMachines {
+    font: 100% Lucida Sans;
+    margin-top: 3%;
+    line-height: 18px;
+}

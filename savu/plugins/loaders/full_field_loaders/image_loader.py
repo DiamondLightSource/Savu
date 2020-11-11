@@ -23,15 +23,17 @@
 """
 
 import os
-import h5py
 import tempfile
+import warnings
+
+import h5py
 import numpy as np
 
 from savu.data.data_structures.data_types.data_plus_darks_and_flats \
     import NoImageKey
+from savu.data.data_structures.data_types.image_data import ImageData
 from savu.plugins.loaders.base_loader import BaseLoader
 from savu.plugins.utils import register_plugin
-from savu.data.data_structures.data_types.image_data import ImageData
 
 
 @register_plugin
@@ -94,14 +96,14 @@ class ImageLoader(BaseLoader):
         # read dark and flat images
         fpath, ffix = self._get_path(self.parameters['flat_prefix'], path)
         flat = ImageData(fpath, dObj, [fdim], None, ffix)
-        
+
         if self.parameters['dark_prefix']:
             dpath, dfix = self._get_path(self.parameters['dark_prefix'], path)
             dark = ImageData(dpath, dObj, [fdim], None, dfix)
         else:
             shape = dObj.get_shape()
             dark = np.zeros([1] + [shape[i] for i in [1, 2]], dtype=flat.dtype)
-        
+
         dObj.data._set_dark_path(dark)
         dObj.data._set_flat_path(flat)
         dObj.data._set_dark_and_flat()
@@ -124,11 +126,12 @@ class ImageLoader(BaseLoader):
         else:
             try:
                 exec("angles = " + angles)
-            except:
+            except Exception as e:
+                warnings.warn("Could not execute statement: {}".format(e))
                 try:
                     angles = np.loadtxt(angles)
-                except:
-                    raise Exception('Cannot set angles in loader.')
+                except Exception as e:
+                    raise Exception('Cannot set angles in loader. Error: {}'.format(e))
 
         n_angles = len(angles)
         data_angles = data_obj.data.get_shape()[self.parameters['frame_dim']]

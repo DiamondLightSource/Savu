@@ -79,8 +79,7 @@ class ScikitimageSart(BaseRecon, CpuPlugin):
         super(ScikitimageSart, self).__init__("ScikitimageSart")
 
     def _shift(self, sinogram, centre_of_rotation):
-        centre_of_rotation_shift = (sinogram.shape[0]/2) - \
-            float(centre_of_rotation)
+        centre_of_rotation_shift = (sinogram.shape[0] // 2) - float(centre_of_rotation)
         return ndimage.interpolation.shift(sinogram, centre_of_rotation_shift)
 
     def process_frames(self, data):
@@ -101,7 +100,7 @@ class ScikitimageSart(BaseRecon, CpuPlugin):
                              circle=False)  # self.parameters[False])
 
         for i in range(self.parameters["iterations"]):
-            print "Iteration %i" % i
+            print("Iteration %i" % i)
             result = transform.iradon_sart(sino, theta=theta, image=result,
                                            # self.parameters['result'],
                                            projection_shifts=None,

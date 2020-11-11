@@ -31,6 +31,7 @@ import numpy as np
 from tomobar.methodsIR import RecToolsIR
 from savu.plugins.utils import register_plugin
 
+
 @register_plugin
 class TomobarReconFully3d(BaseVectorRecon, MultiThreadedPlugin):
     """
@@ -75,7 +76,7 @@ class TomobarReconFully3d(BaseVectorRecon, MultiThreadedPlugin):
             sizeX = shape[detX]
         detY = in_data.get_data_dimension_by_axis_label('detector_y')
         sizeY = shape[detY]
-        return (sizeX,sizeY)
+        return (sizeX, sizeY)
 
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
@@ -89,19 +90,19 @@ class TomobarReconFully3d(BaseVectorRecon, MultiThreadedPlugin):
             self.map_volume_dimensions(in_dataset[0])
 
         axis_labels = {in_dataset[0]:
-                       [str(dim_volX) + '.voxel_x.voxels',
-                        str(dim_volY) + '.voxel_y.voxels',
-                        str(dim_volZ) + '.voxel_z.voxels']}
+                           [str(dim_volX) + '.voxel_x.voxels',
+                            str(dim_volY) + '.voxel_y.voxels',
+                            str(dim_volZ) + '.voxel_z.voxels']}
         # specify reconstructed volume dimensions
         (self.output_size, self.Vert_det) = self._get_output_size(in_dataset[0])
-        shape = [0]*len(in_dataset[0].get_shape())
+        shape = [0] * len(in_dataset[0].get_shape())
         shape[0] = self.output_size
         shape[1] = self.Vert_det
         shape[2] = self.output_size
 
         # if there are only 3 dimensions then add a fourth for slicing
         if len(shape) == 3:
-            axis_labels = [0]*4
+            axis_labels = [0] * 4
             axis_labels[dim_volX] = 'voxel_x.voxels'
             axis_labels[dim_volY] = 'voxel_y.voxels'
             axis_labels[dim_volZ] = 'voxel_z.voxels'
@@ -114,7 +115,7 @@ class TomobarReconFully3d(BaseVectorRecon, MultiThreadedPlugin):
             shape[dim_volX] = self.parameters['vol_shape']
             shape[dim_volZ] = self.parameters['vol_shape']
 
-        if 'resolution' in self.parameters.keys():
+        if 'resolution' in list(self.parameters.keys()):
             shape[dim_volX] /= self.parameters['resolution']
             shape[dim_volZ] /= self.parameters['resolution']
 
@@ -122,11 +123,11 @@ class TomobarReconFully3d(BaseVectorRecon, MultiThreadedPlugin):
                                       shape=tuple(shape))
         out_dataset[0].add_volume_patterns(dim_volX, dim_volY, dim_volZ)
 
-        ndims = range(len(shape))
+        ndims = list(range(len(shape)))
         core_dims = (dim_volX, dim_volY, dim_volZ)
         slice_dims = tuple(set(ndims).difference(set(core_dims)))
         out_dataset[0].add_pattern(
-                'VOLUME_3D', core_dims=core_dims, slice_dims=slice_dims)
+            'VOLUME_3D', core_dims=core_dims, slice_dims=slice_dims)
 
         # set information relating to the plugin data
         in_pData, out_pData = self.get_plugin_datasets()
@@ -199,7 +200,7 @@ class TomobarReconFully3d(BaseVectorRecon, MultiThreadedPlugin):
 
         # Run FISTA reconstrucion algorithm here
         recon = self.Rectools.FISTA(self._data_, self._algorithm_, self._regularisation_)
-        recon = np.swapaxes(recon,0,1)
+        recon = np.swapaxes(recon, 0, 1)
         return recon
 
     def nInput_datasets(self):

@@ -65,14 +65,14 @@ class MtfDeconvolution(Plugin, CpuPlugin):
         file_ext = ".tif"
         if file_path is None:
             msg = "!!! Please provide a file path to the MTF !!!"
-            logging.warn(msg)
+            logging.warning(msg)
             cu.user_message(msg)
             raise ValueError(msg)
         else:
             if not os.path.isfile(file_path):
                 msg = "!!! No such file: %s !!!"\
                         " Please check the file path" %str(file_path)
-                logging.warn(msg)
+                logging.warning(msg)
                 cu.user_message(msg)
                 raise ValueError(msg)
             else:
@@ -109,7 +109,7 @@ class MtfDeconvolution(Plugin, CpuPlugin):
                     "!!! ERROR !!! -> Can't open this file: %s \n"\
                     "*****************************************\n\
                     " % str(file_path)
-                logging.warn(msg)
+                logging.warning(msg)
                 cu.user_message(msg)
                 raise ValueError(msg)
         else:
@@ -120,7 +120,7 @@ class MtfDeconvolution(Plugin, CpuPlugin):
                     "!!! ERROR !!! -> Can't open this file: %s \n"\
                     "*****************************************\n\
                     " % str(file_path)
-                logging.warn(msg)
+                logging.warning(msg)
                 cu.user_message(msg)
                 raise ValueError(msg)
 
@@ -132,7 +132,7 @@ class MtfDeconvolution(Plugin, CpuPlugin):
             "!!! ERROR !!!-> Projection shape: ({0},{1}) is not the same as "\
             "the mtf shape: ({2},{3})".format(
                 self.height, self.width, height_mtf, width_mtf)
-            logging.warn(msg)
+            logging.warning(msg)
             cu.user_message(msg)
             raise ValueError(msg)
 
@@ -169,4 +169,3 @@ class MtfDeconvolution(Plugin, CpuPlugin):
             "}")
         cite_info.doi = "doi: DOI: 10.1117/12.2530324"
         return cite_info
-        

@@ -53,7 +53,7 @@ class Hdf5TransportData(BaseTransportData, SliceLists):
         return self.__combine_dicts(trans_dict, proc_dict)
 
     def __combine_dicts(self, d1, d2):
-        for key, value in d2.iteritems():
+        for key, value in d2.items():
             d1[key] = value
         return d1
 

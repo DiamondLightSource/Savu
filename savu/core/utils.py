@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 """
 .. module:: utils
    :platform: Unix
@@ -20,14 +21,34 @@
 
 """
 
+from __future__ import print_function, division
+
+import itertools
 import logging
 import logging.handlers as handlers
-import itertools
+
 from mpi4py import MPI
+from typing import Union
+
+
+def ensure_string(string: Union[str, bytes]) -> str:
+    """
+    Python 3 and HDF5 mixture has created a somewhat ambiguous situation
+    where the strings in Python 3 are UTF-8 by default,
+    but HDF5 strings cannot be unicode.
+
+    This function should wrap strings coming in from HDF5 to ensure that they
+    are decoded to UTF-8 so that they can be treated at `str` in Python, and
+    not `bytes`.
+    """
+    if isinstance(string, bytes):
+        return string.decode("ascii")
+    return string
 
 
 def logfunction(func):
     """ Decorator to add logging information around calls for use with . """
+
     def _wrapper(*args, **kwds):
         logging.info("Start::%s:%s",
                      func.__module__,
@@ -37,11 +58,13 @@ def logfunction(func):
                      func.__module__,
                      func.__name__)
         return returnval
+
     return _wrapper
 
 
 def logmethod(func):
     """ Decorator to add logging information around calls for use with . """
+
     def _wrapper(self, *args, **kwds):
         logging.info("Start::%s.%s:%s",
                      func.__module__,
@@ -53,14 +76,17 @@ def logmethod(func):
                      self.__class__.__name__,
                      func.__name__)
         return returnval
+
     return _wrapper
 
 
 def docstring_parameter(*sub):
     """ Decorator to add strings to a doc string."""
+
     def dec(obj):
         obj.__doc__ = obj.__doc__.format(*sub)
         return obj
+
     return dec
 
 
@@ -185,17 +211,17 @@ def _send_email(address):
     you = address
     # Open a plain text file for reading.  For this example, assume that
     # the text file contains only ASCII characters.
-#    fp = open(textfile, 'rb')
-#    # Create a text/plain message
-#    msg = MIMEText(fp.read())
-#    fp.close()
+    #    fp = open(textfile, 'rb')
+    #    # Create a text/plain message
+    #    msg = MIMEText(fp.read())
+    #    fp.close()
 
     # me == the sender's email address
     # you == the recipient's email address
     msg['Subject'] = 'Your Savu job has completed'
     msg['From'] = me
     msg['To'] = you
-    
+
     # Send the message via our own SMTP server, but don't include the
     # envelope header.
     s = smtplib.SMTP('localhost')
@@ -204,11 +230,30 @@ def _send_email(address):
 
 
 def _savu_encoder(data):
-    return '#savu_encoded#' + str(data)
-
+    return f'#savu_encoded#{data}'.encode("ascii")
 
 def _savu_decoder(data):
+    data = ensure_string(data)
     if isinstance(data, str) and len(data.split('#savu_encoded#')) > 1:
-        exec('data = ' + data.split('#savu_encoded#')[-1])
-        return data
-    return data
+        return eval(data.split('#savu_encoded#')[-1])
+
+def get_memory_usage_linux(kb=False, mb=True):
+    """
+    :param kb: Return the value in Kilobytes
+    :param mb: Return the value in Megabytes
+    :return: The string of the value in either KB or MB
+    :rtype str
+    """
+
+    try:
+        # Windows doesn't seem to have resource package, so this will
+        # silently fail
+        import resource as res
+    except ImportError:
+        return 0, 0
+
+    if kb:
+        return int(res.getrusage(res.RUSAGE_SELF).ru_maxrss)
+
+    if mb:
+        return int(res.getrusage(res.RUSAGE_SELF).ru_maxrss) // 1024

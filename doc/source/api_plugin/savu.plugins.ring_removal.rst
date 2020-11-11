@@ -5,6 +5,7 @@ Submodules
 ----------
 
 .. toctree::
+   :maxdepth: 4
 
    savu.plugins.ring_removal.ccpi_ring_artefact_filter
    savu.plugins.ring_removal.raven_filter
@@ -22,6 +23,6 @@ Module contents
 ---------------
 
 .. automodule:: savu.plugins.ring_removal
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:

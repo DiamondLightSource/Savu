@@ -41,7 +41,7 @@ class PluginDatasets(object):
         self.variable_data_flag = False
         self.multi_params_dict = {}
         self.extra_dims = []
-        self._max_itemsize = 0        
+        self._max_itemsize = 0
 
     def __get_data_objects(self, dtype):
         """ Get the data objects associated with the plugin from the experiment
@@ -60,7 +60,7 @@ class PluginDatasets(object):
         return data_objs
 
     def _clone_datasets(self):
-        for data_obj in self.exp.index['out_data'].values():
+        for data_obj in list(self.exp.index['out_data'].values()):
             if data_obj.raw and data_obj.data:
                 data_obj.raw.create_next_instance(data_obj)
 #                data_obj.clone = True
@@ -71,7 +71,7 @@ class PluginDatasets(object):
             data._finalise_patterns()
 
     def _finalise_plugin_datasets(self):
-        if 'dawn_runner' in self.exp.meta_data.get_dictionary().keys():
+        if 'dawn_runner' in list(self.exp.meta_data.get_dictionary().keys()):
             return
 
         in_pData, out_pData = self.get_plugin_datasets()
@@ -82,7 +82,7 @@ class PluginDatasets(object):
             params[pData] = pData._get_plugin_data_size_params()
         
         max_bytes = 0
-        for key, value in params.iteritems():
+        for key, value in params.items():
             if value['transfer_bytes'] > max_bytes:
                 max_data = key
                 max_bytes = value['transfer_bytes']
@@ -157,7 +157,11 @@ class PluginDatasets(object):
         # case that an extra in_dataset is added in the plugin
         in_names = orig_in if len(orig_in) and \
             len(in_names) > len(orig_in) else in_names
-        params['out_datasets'] = self._set_out_dataset_names(params, in_names)
+        out_names = self._set_out_dataset_names(params, in_names)
+        params['out_datasets'] = out_names
+        data_dict = {"in_datasets": in_names, "out_datasets": out_names}
+        idx = self.exp.meta_data.get('nPlugin')
+        self.exp.meta_data.plugin_list._update_datasets(idx, data_dict)
 
     def _set_in_dataset_names(self, params):
         names = params['in_datasets'] if 'in_datasets' in params.keys() else []

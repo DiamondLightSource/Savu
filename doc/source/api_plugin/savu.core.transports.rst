@@ -5,6 +5,7 @@ Submodules
 ----------
 
 .. toctree::
+   :maxdepth: 4
 
    savu.core.transports.base_transport
    savu.core.transports.basic_transport
@@ -15,6 +16,6 @@ Module contents
 ---------------
 
 .. automodule:: savu.core.transports
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:

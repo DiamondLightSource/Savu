@@ -24,6 +24,7 @@
 import copy
 import logging
 import numpy as np
+from typing import List
 
 
 class BaseTransportData(object):
@@ -94,7 +95,7 @@ class BaseTransportData(object):
     def _set_boundaries(self):
         b_per_f = self.params.get('bytes_per_frame')
         b_per_p = self.params.get('bytes_per_process')
-        
+
         mem_multiply = \
             self._get_data_obj()._get_plugin_data()._plugin.get_mem_multiply()
 
@@ -111,14 +112,15 @@ class BaseTransportData(object):
         if max_mft == 0:
             raise Exception("The size of a single frame exceeds the permitted "
                             "maximum bytes per frame.")
-        min_mft = int(max(np.floor(float(min_bytes)/b_per_f), 1))
-        
+        min_mft = int(max(np.floor(float(min_bytes) / b_per_f), 1))
+
         return min_mft, max_mft
 
     def __convert_str(self, val, b_per_p):
         if isinstance(val, str):
-            exec("value = " + val)
-        return value
+            # FIXME this is still a potential security risk!
+            value = eval(val, {'__builtins__': None, 'b_per_p': b_per_p})
+            return value
 
     def __get_optimum_distribution(self, nFrames):
         """ The number of frames each process should retrieve from file at a
@@ -127,7 +129,7 @@ class BaseTransportData(object):
         min_mft, max_mft = self.__get_boundaries(nFrames)
 
         if isinstance(nFrames, int) and nFrames > max_mft:
-            logging.warn("The requested %s frames excedes the maximum "
+            logging.warning("The requested %s frames excedes the maximum "
                          "preferred of %s." % (nFrames, max_mft))
             max_mft = nFrames
 
@@ -138,8 +140,7 @@ class BaseTransportData(object):
         #nSlices = np.prod(slice_shape)
         nSlices = self.params['shape'][sdir[0]]
 
-        fchoices, size_list = \
-            self._get_frame_choices(sdir, min(max_mft, nSlices))
+        fchoices, size_list = self._get_frame_choices(sdir, min(max_mft, nSlices))
 
         threshold_idx = [i for i in range(len(fchoices)) if fchoices[i] >= min_mft]
 
@@ -188,7 +189,7 @@ class BaseTransportData(object):
     def __get_boundaries(self, nFrames):
         min_mft, max_mft = self._set_boundaries()
         if isinstance(nFrames, int) and nFrames > max_mft:
-            logging.warn("The requested %s frames excedes the maximum "
+            logging.warning("The requested %s frames excedes the maximum "
                          "preferred of %s." % (nFrames, max_mft))
             max_mft = nFrames
         return min_mft, max_mft
@@ -220,7 +221,7 @@ class BaseTransportData(object):
             self.data.get_preview().get_starts_stops_steps()
         chunk = chunks[dim]
         a = np.tile(np.arange(starts[dim], stops[dim], steps[dim]), (chunk, 1))
-        b = np.transpose(np.tile(np.arange(chunk)-chunk/2, (a.shape[1], 1)))
+        b = np.transpose(np.tile(np.arange(chunk)-chunk // 2, (a.shape[1], 1)))
         dim_idx = a + b
         if dim_idx[dim_idx < 0].size:
             raise Exception('Cannot have a negative value in the slice list.')
@@ -295,25 +296,8 @@ class BaseTransportData(object):
     def _find_best_frame_distribution(self, flist, nframes, nprocs, idx=False):
         """ Determine which of the numbers in the list of possible frame
         chunks gives the best distribution of frames per process. """
-        multi_list = [(nframes/float(v))/nprocs for v in flist] 
+        multi_list: List[float] = [(nframes / float(v)) / nprocs for v in flist]
         min_val, closest_lower_idx = self._find_closest_lower(multi_list, 1)
-        if idx: 
+        if idx:
             return flist[closest_lower_idx], closest_lower_idx
         return flist[closest_lower_idx]
-
-# use this for multiple mft slice dimensions
-#    def _find_best_frame_distribution(self, size_list, nframes, nprocs,
-#                                      idx=False, value=1):
-#        """ Determine which of the numbers in the list of possible frame
-#        chunks gives the best distribution of frames per process. """
-#        flist = np.prod(size_list, axis=1)
-#        allframes = np.prod(nframes)
-#        multi_list = [(allframes/float(v))/nprocs for v in flist]
-#        min_val, closest_lower_idx = self._find_closest_lower(multi_list, 1)
-#
-#        # refine final slice dimension here to reduce additional padding
-#        # if slice_dims > 1
-#
-#        if idx:
-#            return flist[closest_lower_idx], closest_lower_idx
-#        return flist[closest_lower_idx]

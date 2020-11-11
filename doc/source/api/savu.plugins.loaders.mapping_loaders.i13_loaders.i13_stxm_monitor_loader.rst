@@ -2,7 +2,7 @@ savu.plugins.loaders.mapping\_loaders.i13\_loaders.i13\_stxm\_monitor\_loader mo
 ====================================================================================
 
 .. automodule:: savu.plugins.loaders.mapping_loaders.i13_loaders.i13_stxm_monitor_loader
-    :members:
-    :private-members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
