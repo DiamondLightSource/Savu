@@ -53,7 +53,7 @@ class TomobarGpuTest(unittest.TestCase):
         options = tu.initialise_options(data_file, experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
-
+"""
     def test_tomobar3d_fast(self):
         process_list = 'reconstruction/tomobar/tomobar3d_gpu_recon.nxs'
         options1 = tu.initialise_options(data_file, experiment, process_list)
@@ -65,6 +65,6 @@ class TomobarGpuTest(unittest.TestCase):
         run_protected_plugin_runner(options2)
         tu.cleanup(options1)
         tu.cleanup(options2)
-
+"""
 if __name__ == "__main__":
     unittest.main()

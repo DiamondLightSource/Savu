@@ -22,11 +22,11 @@
 import astra
 import numpy as np
 
-from savu.plugins.reconstructions.base_vector_recon import BaseVectorRecon
+from savu.plugins.reconstructions.base_recon import BaseRecon
 from savu.data.plugin_list import CitationInformation
 
 
-class BaseAstraVectorRecon(BaseVectorRecon):
+class BaseAstraVectorRecon(BaseRecon):
     """
     A Plugin to perform Astra toolbox reconstruction using vector geometry
 
@@ -98,7 +98,7 @@ class BaseAstraVectorRecon(BaseVectorRecon):
         self.sino_dim_detX = \
             pData.get_data_dimension_by_axis_label('x', contains=True)
         self.sino_dim_detY = \
-            pData.get_data_dimension_by_axis_label('y', contains=True)        
+            pData.get_data_dimension_by_axis_label('y', contains=True)
         self.det_rot = \
             pData.get_data_dimension_by_axis_label('angle', contains=True)
         self.sino_shape = pData.get_shape()

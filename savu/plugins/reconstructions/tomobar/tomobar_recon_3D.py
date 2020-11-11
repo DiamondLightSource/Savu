@@ -164,12 +164,8 @@ class TomobarRecon3d(BaseVectorRecon, GpuPlugin):
     def pre_process(self):
         in_pData = self.get_plugin_in_datasets()[0]
         detY = in_pData.get_data_dimension_by_axis_label('detector_y')
-<<<<<<< HEAD
         # ! padding vertical detector !
         self.Vert_det = in_pData.get_shape()[detY] + 2*self.pad
-=======
-        self.Vert_det = in_pData.get_shape()[detY] + 2 * self.pad
->>>>>>> py37_local
 
         # extract given parameters into dictionaries suitable for ToMoBAR input
         self._data_ = {'OS_number' : self.parameters['algorithm_ordersubsets'],
@@ -198,17 +194,12 @@ class TomobarRecon3d(BaseVectorRecon, GpuPlugin):
         self.det_dimY_ind = in_pData[0].get_data_dimension_by_axis_label('detector_y')
 
     def process_frames(self, data):
-<<<<<<< HEAD
         cor, angles, self.vol_shape, init = self.get_frame_params()
-=======
-        centre_of_rotations, angles, self.vol_shape, init = self.get_frame_params()
 
->>>>>>> py37_local
         self.anglesRAD = np.deg2rad(angles.astype(np.float32))
         projdata3D = data[0].astype(np.float32)
         dim_tuple = np.shape(projdata3D)
         self.Horiz_det = dim_tuple[self.det_dimX_ind]
-<<<<<<< HEAD
         half_det_width = 0.5*self.Horiz_det
         cor_astra = half_det_width - cor[0]
         projdata3D[projdata3D > 10**10] = 0.0
@@ -233,24 +224,6 @@ class TomobarRecon3d(BaseVectorRecon, GpuPlugin):
                     ObjSize = self.output_size, # a scalar to define the reconstructed object dimensions
                     datafidelity=self.parameters['data_fidelity'],# data fidelity, choose LS, PWLS, SWLS
                     device_projector='gpu')
-=======
-
-        projdata3D = np.swapaxes(projdata3D, 0, 1)
-        # WIP for PWLS fidelity
-        # rawdata3D = data[1].astype(np.float32)
-        # rawdata3D =np.swapaxes(rawdata3D,0,1)/np.max(np.float32(rawdata3D))
-        self._data_.update({'projection_norm_data': projdata3D})
-
-        # set parameters and initiate a TomoBar class object
-        self.Rectools = RecToolsIR(DetectorsDimH=self.Horiz_det,  # DetectorsDimH # detector dimension (horizontal)
-                                   DetectorsDimV=self.Vert_det,
-                                   # DetectorsDimV # detector dimension (vertical) for 3D case only
-                                   CenterRotOffset=0.0,  # Center of Rotation (CoR) scalar (for 3D case only)
-                                   AnglesVec=self.anglesRAD,  # array of angles in radians
-                                   ObjSize=self.output_size,  # a scalar to define the reconstructed object dimensions
-                                   datafidelity=self.parameters['data_fidelity'],  # data fidelity, choose LS
-                                   device_projector='gpu')
->>>>>>> py37_local
 
         # Run FISTA reconstrucion algorithm here
         recon = self.Rectools.FISTA(self._data_, self._algorithm_, self._regularisation_)
@@ -258,11 +231,7 @@ class TomobarRecon3d(BaseVectorRecon, GpuPlugin):
         return recon
 
     def nInput_datasets(self):
-<<<<<<< HEAD
         return max(len(self.parameters['in_datasets']), 1)
-=======
-        return 1
->>>>>>> py37_local
 
     def nOutput_datasets(self):
         return 1
