@@ -33,7 +33,7 @@ from savu.plugins.utils import register_plugin
 
 
 @register_plugin
-class DezingerSimple(BaseFilter, CpuPlugin):
+class DezingerSimpleDeprecated(BaseFilter, CpuPlugin):
     """
     A plugin for cleaning x-ray strikes based on statistical evaluation of \
     the near neighbourhood
@@ -44,7 +44,7 @@ class DezingerSimple(BaseFilter, CpuPlugin):
     """
 
     def __init__(self):
-        super(DezingerSimple, self).__init__("DezingerSimple")
+        super(DezingerSimpleDeprecated, self).__init__("DezingerSimpleDeprecated")
         self.zinger_proportion = 0.0
         self.frame_limit = 8
 

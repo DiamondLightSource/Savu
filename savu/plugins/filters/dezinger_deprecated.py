@@ -32,11 +32,10 @@ from savu.plugins.utils import register_plugin
 
 
 @register_plugin
-class Dezinger(BaseFilter, CpuPlugin):
+class DezingerDeprecated(BaseFilter, CpuPlugin):
     """
     A plugin for cleaning x-ray strikes based on statistical evaluation of \
     the near neighbourhood
-    
     :param outlier_mu: Threshold for defecting outliers, greater is less \
     sensitive. Default: 10.0.
     :param kernel_size: Number of frames included in average. Default: 5.
@@ -45,7 +44,7 @@ class Dezinger(BaseFilter, CpuPlugin):
     """
 
     def __init__(self):
-        super(Dezinger, self).__init__("Dezinger")
+        super(DezingerDeprecated, self).__init__("DezingerDeprecated")
         self.warnflag = 0
         self.errflag = 0
 
@@ -116,7 +115,7 @@ class Dezinger(BaseFilter, CpuPlugin):
 
     def set_filter_padding(self, in_data, out_data):
         in_data = in_data[0]
-        self.pad = (self.parameters['kernel_size'] - 1) // 2
+        self.pad = (self.parameters['kernel_size'] - 1) / 2
         in_data.padding = {'pad_multi_frames': self.pad}
         out_data[0].padding = {'pad_multi_frames': self.pad}
 

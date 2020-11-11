@@ -43,7 +43,7 @@ class GmmSegment3d(Plugin, MultiThreadedPlugin):
         in_dataset, out_dataset = self.get_datasets()
         out_dataset[0].create_dataset(in_dataset[0], dtype=np.uint8)
         in_pData, out_pData = self.get_plugin_datasets()
-        
+
         getall = ["VOLUME_XZ", "voxel_y"]
         in_pData[0].plugin_data_setup('VOLUME_3D', 'single', getall=getall)
         out_pData[0].plugin_data_setup('VOLUME_3D', 'single', getall=getall)
@@ -63,7 +63,7 @@ class GmmSegment3d(Plugin, MultiThreadedPlugin):
 
         inputdata = data[0].reshape((Nsize1*Nsize2*Nsize3), 1)/np.max(data[0])
 
-        #run classification and segmentation 
+        #run classification and segmentation
         classif = GaussianMixture(n_components=self.classes, covariance_type="tied")
         classif.fit(inputdata)
         cluster = classif.predict(inputdata)

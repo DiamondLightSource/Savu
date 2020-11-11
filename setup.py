@@ -33,7 +33,7 @@ def _create_new_facility(facility_path):
             for f in files:
                 copy_this_file = os.path.join(root, f)
                 shutil.copy(copy_this_file, to_this_folder)
-                
+
     else:
         dls_sys_params = os.path.join(dls_path, 'system_parameters.yml')
         facility_sys_params = \
@@ -104,7 +104,7 @@ setup(name='savu',
       ], },
 
       package_data={'savu.test.travis.framework_tests': ['*.yml']},
-    
+
       data_files=[(os.path.dirname(version_file), [version_file]),
                   (os.path.dirname(sys_file), [sys_file]),
                   (os.path.dirname(mod_file), [mod_file]),
