@@ -267,7 +267,7 @@ if [ ! $test_flag ]; then
   else
     echo "Installing mpi4py/hdf5/h5py from conda for CI run"
     recipes=$DIR/../conda-recipes
-    conda env update -n root python=3.7 -f $DIR/environment_ci.yml
+    conda env update -n root -f $DIR/environment_ci.yml
   fi
 
   echo "Installing pytorch..."
