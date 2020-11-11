@@ -13,6 +13,7 @@ before_install:
 install:
   - PREFIX=$HOME bash savu_installer.sh --local --no_prompts
   - export PATH=$HOME/miniconda/bin
+  - export PATH=$PATH:/bin
   - export FACILITY=dls
   - cd $TRAVIS_BUILD_DIR
   - python setup.py install
