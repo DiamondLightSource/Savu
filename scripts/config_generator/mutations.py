@@ -107,11 +107,13 @@ medianfilt_notice = '\n Two new versions of median filter on a CPU'\
     ' (MedianFilterLarix) and on a GPU (MedianFilterGpu) are available with'\
     ' the Savu version 3.0. \n Please use the newer faster versions.'
 
-dezinger_notice = '\n Two new versions of Dezinger Filter on a CPU'\
-    ' (DezingerLarix) and on a GPU (DezingerGpu) are available with'\
-    ' the Savu version 3.0. \n Please note that the new Dezinger'\
-    ' should be applied to normalised projections/sinograms.' \
-    '\n Please use the newer version and report if there are any issues with it.'
+dezinger_dep_notice ='is now deprecated.  Please replace with the new version'\
+                    ' of Dezinger (or DezingerGPU).'
+
+dezinger_notice = '\nDezinger plugin has been replaced with a new version, '\
+    'please update the parameters.  '\
+    '\nNB: Dezinger should now be applied to normalised data. A GPU version '\
+    'DezingerGPU is also available.'
 
 
 plugin_mutations = \
@@ -124,30 +126,30 @@ plugin_mutations = \
          'desc': replace_str('Hdf5TomoSaver', 'Hdf5Saver')},
      'DezingFilter':
         {'replace': 'DezingerSimple',
-         'desc': rename_str('DezingFilter', 'DezingerSimple') + dezing_notice},
+         'desc': rename_str('DezingFilter', 'DezingerSimple') + wrap(dezing_notice)},
      'SavuLoader':
         {'replace': 'SavuNexusLoader',
          'desc': replace_str('SavuLoader', 'SavuNexusLoader')},
      'DistortionCorrection':
         {'replace': 'DistortionCorrectionDeprecated',
          'up_to_version': '2.4', # if the plist version is less than 2.4 (or not defined) then apply this mutation
-         'desc': '\n' + Fore.RED + auto_replace_str() + distortion_notice + Fore.RESET},
+         'desc': '\n' + Fore.RED + auto_replace_str() + wrap(distortion_notice) + Fore.RESET},
      'MedianFilter':
         {'replace': 'MedianFilterDeprecated',
          'up_to_version': '3.0', # if the plist version is less than 3.0 (or not defined) then apply this mutation
-         'desc': '\n' + Fore.RED + auto_replace_str() + medianfilt_notice + Fore.RESET},
+         'desc': '\n' + Fore.RED + auto_replace_str() + wrap(medianfilt_notice) + Fore.RESET},
      'Dezinger':
-        {'replace': 'DezingerDeprecated',
+        {'replace': 'Dezinger',
          'up_to_version': '3.0', # if the plist version is less than 3.0 (or not defined) then apply this mutation
-         'desc': '\n' + Fore.RED + auto_replace_str() + dezinger_notice + Fore.RESET},
+         'desc': '\n' + Fore.RED + auto_replace_str() + wrap(dezinger_notice) + Fore.RESET},
       'DezingerSimple':
          {'replace': 'DezingerSimpleDeprecated',
           'up_to_version': '3.0', # if the plist version is less than 3.0 (or not defined) then apply this mutation
-          'desc': '\n' + Fore.RED + auto_replace_str() + dezinger_notice + Fore.RESET},
+          'desc': '\n' + Fore.RED + auto_replace_str() + wrap("\nDezingerSimple " + dezinger_dep_notice) + Fore.RESET},
       'DezingerSinogram':
          {'replace': 'DezingerSinogramDeprecated',
           'up_to_version': '3.0', # if the plist version is less than 3.0 (or not defined) then apply this mutation
-          'desc': '\n' + Fore.RED + auto_replace_str() + dezinger_notice + Fore.RESET}        
+          'desc': '\n' + Fore.RED + auto_replace_str() + wrap("\nDezingerSinogram " + dezinger_dep_notice) + Fore.RESET}        
      }
 
 param_mutations = \
