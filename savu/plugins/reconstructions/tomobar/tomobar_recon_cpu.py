@@ -21,7 +21,7 @@
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
 
-from savu.plugins.reconstructions.base_vector_recon import BaseVectorRecon
+from savu.plugins.reconstructions.base_recon import BaseRecon
 from savu.data.plugin_list import CitationInformation
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
@@ -31,7 +31,7 @@ from tomobar.methodsIR import RecToolsIR
 from savu.plugins.utils import register_plugin
 
 @register_plugin
-class TomobarReconCpu(BaseVectorRecon, CpuPlugin):
+class TomobarReconCpu(BaseRecon, CpuPlugin):
     """
     A Plugin to reconstruct full-field tomographic projection data using state-of-the-art regularised iterative algorithms from \
     the ToMoBAR package. ToMoBAR includes FISTA and ADMM iterative methods and depends on the ASTRA toolbox and the CCPi RGL toolkit: \
@@ -69,6 +69,9 @@ class TomobarReconCpu(BaseVectorRecon, CpuPlugin):
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
+
+        self.preview_flag = \
+            self.set_preview(in_dataset[0], self.parameters['preview'])
 
         for i in range(len(in_dataset)):
             in_pData[i].plugin_data_setup('SINOGRAM', 'single')

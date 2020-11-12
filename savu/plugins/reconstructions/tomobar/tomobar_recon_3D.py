@@ -22,7 +22,7 @@
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
 
-from savu.plugins.reconstructions.base_vector_recon import BaseVectorRecon
+from savu.plugins.reconstructions.base_recon import BaseRecon
 from savu.data.plugin_list import CitationInformation
 from savu.plugins.driver.gpu_plugin import GpuPlugin
 
@@ -32,7 +32,7 @@ from savu.plugins.utils import register_plugin
 
 
 @register_plugin
-class TomobarRecon3d(BaseVectorRecon, GpuPlugin):
+class TomobarRecon3d(BaseRecon, GpuPlugin):
     """
     A Plugin to reconstruct full-field tomographic projection data using state-of-the-art regularised iterative algorithms from \
     the ToMoBAR package. ToMoBAR includes FISTA and ADMM iterative methods and depends on the ASTRA toolbox and the CCPi RGL toolkit: \
