@@ -24,11 +24,9 @@
 """
 
 import unittest
-
-import savu.test.test_utils as tu
+from savu.test import test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
-
 
 class CcpiCglsReconTest(unittest.TestCase):
     global data_file, experiment
@@ -40,5 +38,6 @@ class CcpiCglsReconTest(unittest.TestCase):
         options = tu.initialise_options(data_file, experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
+        
 if __name__ == "__main__":
     unittest.main()
