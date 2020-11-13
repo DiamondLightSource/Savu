@@ -28,7 +28,7 @@ import numpy as np
 from larix.methods.misc import MEDIAN_FILT
 
 @register_plugin
-class MedianFilterLarix(Plugin, CpuPlugin):
+class MedianFilter(Plugin, CpuPlugin):
     """
     A plugin to apply 2D/3D median filter. The 3D capability is enabled\
     through padding. Note that the kernel_size in 2D will be kernel_size x kernel_size
@@ -40,7 +40,7 @@ class MedianFilterLarix(Plugin, CpuPlugin):
     """
 
     def __init__(self):
-        super(MedianFilterLarix, self).__init__("MedianFilterLarix")
+        super(MedianFilter, self).__init__("MedianFilter")
 
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()

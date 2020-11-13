@@ -103,9 +103,8 @@ distortion_notice = 'A new version of DistortionCorrection is available with'\
     ' the version available in 2.3 \nand below being renamed as '\
     'DistortionCorrectionDeprecated.  Please replace with \nthe new version.'
 
-medianfilt_notice = '\n Two new versions of median filter on a CPU'\
-    ' (MedianFilterLarix) and on a GPU (MedianFilterGpu) are available with'\
-    ' the Savu version 3.0. \n Please use the newer faster versions.'
+medianfilt_notice = '\nThis version of MedianFilter is now deprecated. Please'\
+' replace with the newer faster versions - MedianFilter or MedianFilterGpu.'
 
 dezinger_dep_notice ='is now deprecated.  Please replace with the new version'\
                     ' of Dezinger (or DezingerGPU).'
