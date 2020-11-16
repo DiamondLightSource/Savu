@@ -153,44 +153,45 @@ class PluginDatasets(object):
         params = self.parameters
         orig_in = copy.copy(params['in_datasets'])
         in_names = self._set_in_dataset_names(params)
-        params['in_datasets'] = in_names
         # case that an extra in_dataset is added in the plugin
         in_names = orig_in if len(orig_in) and \
-            len(in_names) > len(orig_in) else in_names
-        out_names = self._set_out_dataset_names(params, in_names)
-        params['out_datasets'] = out_names
-        data_dict = {"in_datasets": in_names, "out_datasets": out_names}
+            len(in_names) > len(orig_in) else in_names        
+        self._set_out_dataset_names(params, in_names)
+        # update the entry in the process list
+        data_dict = {'in_datasets': params['in_datasets'],
+                      'out_datasets': params['out_datasets']}
         idx = self.exp.meta_data.get('nPlugin')
         self.exp.meta_data.plugin_list._update_datasets(idx, data_dict)
 
     def _set_in_dataset_names(self, params):
-        names = params['in_datasets'] if 'in_datasets' in params.keys() else []
-        names = ['all'] if len(names) == 0 else names
-        nIn = self.nInput_datasets()
-        return self.check_nDatasets(names, nIn, 'in_data')
-      
+        dIn = params['in_datasets']
+        dIn = dIn if isinstance(dIn, list) else [dIn]
+        dIn = self.exp._set_all_datasets('in_data') if len(dIn) ==0 else dIn
+        params['in_datasets'] = dIn
+        nIn = self.nInput_datasets() # datasets many be added dynamically here
+        return self.check_nDatasets(params['in_datasets'], nIn, 'in_data')
+
     def _set_out_dataset_names(self, params, in_names):
-        names = params['out_datasets'] if 'out_datasets' in params.keys() else []
-        names = (copy.copy(in_names) if len(names) == 0 else names)
+        dOut = params['out_datasets'] if 'out_datasets' in params.keys() else []
+        dOut = dOut if isinstance(dOut, list) else [dOut]
+        dOut = (copy.copy(in_names) if len(dOut) == 0 else dOut)
         clones = self.nClone_datasets()
-        params['out_datasets'] = names
+        params['out_datasets'] = dOut
         nOut = self.nOutput_datasets()
-        names = params['out_datasets']
-        names = self.check_nDatasets(names, nOut, "out_data", clones=clones)
+        names = self.check_nDatasets(params['out_datasets'], nOut,
+                                     "out_data", clones=clones)
         if clones:
-            names.extend(['itr_clone' + str(i) for i in range(clones)])
+            dOut.extend(['itr_clone' + str(i) for i in range(clones)])
     
         for i in range(len(names)):
             new = names[i].split('in_datasets')
             if len(new) == 2:
                 names[i] = in_names[int(list(new[1])[1])]
+        params["out_datasets"] = names
         return names
 
     def check_nDatasets(self, names, nSets, dtype, clones=0):
-        names = self.exp._set_all_datasets(dtype) if 'all' in names[0] else names
-        names = ([names] if type(names) is not list else names)
         nSets = len(self.parameters[dtype + 'sets']) if nSets=='var' else nSets
-    
         if len(names) is not (nSets - clones):
             if nSets == 0:
                 names = []
@@ -205,7 +206,8 @@ class PluginDatasets(object):
         """ Populate ``self.parameters`` in/out_datasets and
         plugin_in/out_datasets with the relevant objects (Data or PluginData).
         """
-        self._set_plugin_dataset_names()
+        if not self.exp._get_dataset_names_complete():
+            self._set_plugin_dataset_names()
         self.parameters['in_datasets'] = self.__set_in_datasets()
         self.parameters['out_datasets'] = self.__set_out_datasets()
         self.parameters['plugin_in_datasets'] = \
