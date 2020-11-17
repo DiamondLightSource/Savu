@@ -37,6 +37,9 @@ class DezingerGpu(Plugin, GpuPlugin):
     sensitive. If very small, dezinger acts like a median filter. Default: 1.0.
     :u*param dimension: dimensionality of the filter 2D/3D. Default: '3D'.
     :u*param pattern: pattern to apply this to. Default: "PROJECTION".
+    
+    :config_warn: The dezinger plugin should be applied to normalised data \
+    (e.g. AFTER DarkFlatFieldCorrection)    
     """
 
     def __init__(self):

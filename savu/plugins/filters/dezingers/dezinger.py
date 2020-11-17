@@ -26,7 +26,7 @@ import numpy as np
 from larix.methods.misc import MEDIAN_DEZING
 
 @register_plugin
-class DezingerLarix(Plugin, CpuPlugin):
+class Dezinger(Plugin, CpuPlugin):
     """
     A plugin to apply 2D/3D median-based dezinger. The 3D capability is enabled\
     through padding. Note that the kernel_size in 2D will be kernel_size x kernel_size
@@ -37,10 +37,13 @@ class DezingerLarix(Plugin, CpuPlugin):
     sensitive. If very small, dezinger acts like a median filter. Default: 1.0.
     :u*param dimension: dimensionality of the filter 2D/3D. Default: '3D'.
     :u*param pattern: pattern to apply this to. Default: "PROJECTION".
+
+    :config_warn: The dezinger plugin should be applied to normalised data \
+    (e.g. AFTER DarkFlatFieldCorrection)
     """
 
     def __init__(self):
-        super(DezingerLarix, self).__init__("DezingerLarix")
+        super(Dezinger, self).__init__("Dezinger")
 
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
