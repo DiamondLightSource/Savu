@@ -252,6 +252,12 @@ if [ ! $test_flag ]; then
       recipes=$savu_path/$install_path/../conda-recipes
     fi
 
+    echo "Checking that Savu is installed into conda environment"
+    export PACKAGE=savu
+    VER_PACKAGE=$savu_version
+    conda list $PACKAGE > check_conda_package.txt
+    ./check_package.sh
+
     echo "Installing mpi4py..."
     string=$(awk '/^mpi4py/' $versions_file)
     mpi4py_version=$(echo $string | cut -d " " -f 2)
@@ -265,6 +271,17 @@ if [ ! $test_flag ]; then
     recipes=$DIR/../conda-recipes
     conda env update -n root -f $DIR/environment_ci.yml
   fi
+
+  echo "Checking that mpi4py/hdf5/h5py are installed into conda environment"
+  export PACKAGE=h5py
+  export VER_PACKAGE=2.10.0
+  conda list $PACKAGE > check_conda_package.txt
+  ./check_package.sh
+
+  export PACKAGE=mpi4py
+  VER_PACKAGE=$mpi4py_version
+  conda list $PACKAGE > check_conda_package.txt
+  ./check_package.sh
 
   echo "Installing pytorch..."
   string=$(awk '/^cudatoolkit/' $versions_file)
