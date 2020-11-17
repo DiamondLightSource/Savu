@@ -281,7 +281,12 @@ if [ ! $test_flag ]; then
   export PACKAGE=mpi4py
   VER_PACKAGE=$mpi4py_version
   conda list $PACKAGE > check_conda_package.txt
-  ./check_package.sh
+  if grep -q $VER_PACKAGE check_conda_package.txt; then
+      echo -e "\nPackage $PACKAGE of v.$VER_PACKAGE is found in Savu's environment, continue with installation..."
+  else
+      echo -e "\nPackage $PACKAGE of v.$VER_PACKAGE is NOT found in Savu's environment! \nInstallation process terminated!"
+      exit 0
+  fi
 
   echo "Installing pytorch..."
   string=$(awk '/^cudatoolkit/' $versions_file)
