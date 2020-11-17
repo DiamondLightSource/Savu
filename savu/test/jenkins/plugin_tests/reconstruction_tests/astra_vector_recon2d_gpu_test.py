@@ -28,16 +28,16 @@ from savu.test import test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
-class CcpiCglsReconTest(unittest.TestCase):
+class AstraVectorRecon2dGpuTest(unittest.TestCase):
     global data_file, experiment
     data_file = '24737.nxs'
     experiment = None
 
-    def test_cgls_recon(self):
-        process_list = 'reconstruction/ccpi_cgls_recon_test.nxs'
+    def test_astra_vector_recon2d_gpu(self):
+        process_list = 'reconstruction/astra_vector_gpu_test.nxs'
         options = tu.initialise_options(data_file, experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
-        
+
 if __name__ == "__main__":
     unittest.main()
