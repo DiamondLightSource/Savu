@@ -140,8 +140,8 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
         ndims = list(range(len(shape)))
         core_dims = (dim_volX, dim_volY, dim_volZ)
         slice_dims = tuple(set(ndims).difference(set(core_dims)))
-        out_dataset[0].add_pattern(
-            'VOLUME_3D', core_dims=core_dims, slice_dims=slice_dims)
+        if slice_dims:
+            out_dataset[0].add_pattern('VOLUME_3D', core_dims=core_dims, slice_dims=slice_dims)
 
         # set information relating to the plugin data
         in_pData, out_pData = self.get_plugin_datasets()
@@ -154,10 +154,10 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
         # making it work for a number of inputs
         for i in range(len(in_dataset)):
             in_pData[i].plugin_data_setup('SINOGRAM', nSlices,  slice_axis='detector_y')
+            #in_pData[i].plugin_data_setup('PROJECTION', nSlices)
 
         #in_pData[0].plugin_data_setup('SINOGRAM', nSlices, slice_axis='detector_y')
-        # in_pData[1].plugin_data_setup('PROJECTION', nSlices) # (for PWLS)
-
+        #in_pData[1].plugin_data_setup('PROJECTION', nSlices) # (for PWLS)
         # set pattern_name and nframes to process for all datasets
         out_pData[0].plugin_data_setup('VOLUME_XZ', nSlices)
 
@@ -167,7 +167,10 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
         # ! padding vertical detector !
         self.Vert_det = in_pData.get_shape()[detY] + 2*self.pad
 
-        # extract given parameters into dictionaries suitable for ToMoBAR input
+        in_pData = self.get_plugin_in_datasets()
+        self.det_dimX_ind = in_pData[0].get_data_dimension_by_axis_label('detector_x')
+        self.det_dimY_ind = in_pData[0].get_data_dimension_by_axis_label('detector_y')
+            # extract given parameters into dictionaries suitable for ToMoBAR input
         self._data_ = {'OS_number' : self.parameters['algorithm_ordersubsets'],
                        'huber_threshold' : self.parameters['data_Huber_thresh'],
                        'ringGH_lambda' :  self.parameters['data_full_ring_GH'],
@@ -189,10 +192,6 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
                                 'NDF_penalty' : self.parameters['regularisation_NDF_penalty'],
                                 'methodTV' : self.parameters['regularisation_methodTV']}
 
-        in_pData = self.get_plugin_in_datasets()
-        self.det_dimX_ind = in_pData[0].get_data_dimension_by_axis_label('detector_x')
-        self.det_dimY_ind = in_pData[0].get_data_dimension_by_axis_label('detector_y')
-
     def process_frames(self, data):
         cor, angles, self.vol_shape, init = self.get_frame_params()
 
@@ -202,17 +201,17 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
         self.Horiz_det = dim_tuple[self.det_dimX_ind]
         half_det_width = 0.5*self.Horiz_det
         cor_astra = half_det_width - cor[0]
-        projdata3D[projdata3D > 10**10] = 0.0
-        print(np.shape(projdata3D))
+        projdata3D[projdata3D > 10**15] = 0.0
         projdata3D =np.swapaxes(projdata3D,0,1)
+        #print(f"Shape of projdata3D is {np.shape(projdata3D)}")
         self._data_.update({'projection_norm_data' : projdata3D})
 
         # if one selects PWLS or SWLS models then raw data is also required (2 inputs)
         if ((self.parameters['data_fidelity'] == 'PWLS') or (self.parameters['data_fidelity'] == 'SWLS')):
             rawdata3D = data[1].astype(np.float32)
-            print(np.shape(rawdata3D))
             rawdata3D[rawdata3D > 10**15] = 0.0
             rawdata3D = np.swapaxes(rawdata3D,0,1)/np.max(np.float32(rawdata3D))
+            #print(f"Shape of rawdata3D is {np.shape(rawdata3D)}")
             self._data_.update({'projection_raw_data' : rawdata3D})
             self._data_.update({'beta_SWLS' : self.parameters['data_beta_SWLS']*np.ones(self.Horiz_det)})
 
