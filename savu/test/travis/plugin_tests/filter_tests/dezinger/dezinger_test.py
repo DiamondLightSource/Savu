@@ -44,8 +44,8 @@ class DezingerTest(unittest.TestCase):
         run_protected_plugin_runner(options)
         tu.cleanup(options)
         
-    def test_dezinger_larix(self):
-        process_list = 'filters/dezinger/dezinger_larix_test.nxs'
+    def test_dezinger(self):
+        process_list = 'filters/dezinger/dezinger_test.nxs'
         options = tu.initialise_options(data_file, experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)              
