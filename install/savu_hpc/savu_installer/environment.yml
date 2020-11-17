@@ -18,6 +18,7 @@ dependencies:
   - morphsnakes
   - tomobar
   - larix
+  - ccpi-reconstruction
   - ccpi-regulariser
   - astra-toolbox
   - pyfai

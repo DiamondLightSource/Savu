@@ -401,8 +401,8 @@ class BaseRecon(Plugin):
             shape[dim_volZ] = self.parameters['vol_shape']
 
         if 'resolution' in list(self.parameters.keys()):
-            shape[dim_volX] /= self.parameters['resolution']
-            shape[dim_volZ] /= self.parameters['resolution']
+            shape[dim_volX] //= self.parameters['resolution']
+            shape[dim_volZ] //= self.parameters['resolution']
 
         out_dataset[0].create_dataset(axis_labels=axis_labels,
                                       shape=tuple(shape))

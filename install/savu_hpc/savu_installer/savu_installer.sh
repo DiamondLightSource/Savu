@@ -235,10 +235,6 @@ if [ ! $test_flag ]; then
 
   conda install -y -q conda-build
 
-#   # conda-build needed to build the savu/hdf5/h5py recipes
-#   conda install -y -q conda-build conda-env
-#   conda install -y -q conda-build conda-verify
-
   if [ $local_installation = false ]; then
 
     echo "Building Savu..."
