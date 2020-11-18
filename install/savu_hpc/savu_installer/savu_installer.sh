@@ -253,10 +253,19 @@ if [ ! $test_flag ]; then
     fi
 
     echo "Checking that Savu is installed into conda environment"
+    # Get PID
+    PID=$$
+    echo $PID
     export PACKAGE=savu
     VER_PACKAGE=$savu_version
     conda list $PACKAGE > check_conda_package.txt
-    ./check_package.sh
+    if grep -q $VER_PACKAGE check_conda_package.txt; then
+        echo -e "\nPackage $PACKAGE of v.$VER_PACKAGE is found in Savu's environment, continue with installation..."
+    else
+        echo -e "\nPackage $PACKAGE of v.$VER_PACKAGE is NOT found in Savu's environment! \nInstallation process terminated!"
+        exit 0
+    fi
+    rm -f check_conda_package.txt
 
     echo "Installing mpi4py..."
     string=$(awk '/^mpi4py/' $versions_file)
@@ -275,17 +284,13 @@ if [ ! $test_flag ]; then
   echo "Checking that mpi4py/hdf5/h5py are installed into conda environment"
   export PACKAGE=h5py
   export VER_PACKAGE=2.10.0
+  conda list $PACKAGE
   conda list $PACKAGE > check_conda_package.txt
   if grep -q $VER_PACKAGE check_conda_package.txt; then
       echo -e "\nPackage $PACKAGE of v.$VER_PACKAGE is found in Savu's environment, continue with installation..."
   else
       echo -e "\nPackage $PACKAGE of v.$VER_PACKAGE is NOT found in Savu's environment! \nInstallation process terminated!"
-      # Get PID
-      PID=$$
-      # Wait for 2 seconds
-      sleep 2
-      # Kill it
-      kill $PID
+      exit 0
   fi
   rm -f check_conda_package.txt
 
@@ -296,12 +301,7 @@ if [ ! $test_flag ]; then
       echo -e "\nPackage $PACKAGE of v.$VER_PACKAGE is found in Savu's environment, continue with installation..."
   else
       echo -e "\nPackage $PACKAGE of v.$VER_PACKAGE is NOT found in Savu's environment! \nInstallation process terminated!"
-      # Get PID
-      PID=$$
-      # Wait for 2 seconds
-      sleep 2
-      # Kill it
-      kill $PID
+      exit 0
   fi
   rm -f check_conda_package.txt
 
