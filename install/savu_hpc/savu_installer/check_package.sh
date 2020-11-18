@@ -1,11 +1,8 @@
 #!/bin/bash
-trap "rm -f check_conda_package.txt" EXIT
 if grep -q $VER_PACKAGE check_conda_package.txt; then
     echo -e "\nPackage $PACKAGE of v.$VER_PACKAGE is found in Savu's environment, continue with installation..."
 else
     echo -e "\nPackage $PACKAGE of v.$VER_PACKAGE is NOT found in Savu's environment! \nInstallation process terminated!"
-    # Wait for 2 seconds
-    sleep 2
-    # Kill it
-    kill $PID
+    exit 0
 fi
+rm -f check_conda_package.txt

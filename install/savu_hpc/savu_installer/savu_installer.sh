@@ -1,5 +1,6 @@
 #!/bin/bash -ex
 
+set -e
 # change to 'latest' for the latest version
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 versions_file=$DIR/versions_file.txt
