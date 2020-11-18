@@ -287,12 +287,12 @@ if [ ! $test_flag ]; then
   export VER_PACKAGE=2.10.0
   conda list $PACKAGE
   conda list $PACKAGE > check_conda_package.txt
-  ./check_package
+  ./check_package.sh
 
   export PACKAGE=mpi4py
   VER_PACKAGE=$mpi4py_version
   conda list $PACKAGE > check_conda_package.txt
-  ./check_package
+  ./check_package.sh
 
   echo "Installing pytorch..."
   string=$(awk '/^cudatoolkit/' $versions_file)
