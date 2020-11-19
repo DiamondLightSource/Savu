@@ -295,8 +295,7 @@ if [ ! $test_flag ]; then
   fi
 
   export PACKAGE=mpi4py
-  VER_PACKAGE=$mpi4py_version
-  echo $mpi4py_version
+  export VER_PACKAGE=3.0.3
   conda list $PACKAGE > check_conda_package.txt
   if grep -q $VER_PACKAGE check_conda_package.txt; then
       echo -e "\nPackage $PACKAGE of v.$VER_PACKAGE is found in Savu's environment, continue with installation..."
