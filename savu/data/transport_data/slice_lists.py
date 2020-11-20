@@ -26,10 +26,11 @@ import numpy as np
 
 class SliceLists(object):
     """
-    The Hdf5TransportData class performs the organising and movement of data.
+    SliceLists class creates global and local slices lists used to transfer
+    the data
     """
 
-    def __init__(self, name='Hdf5TransportData'):
+    def __init__(self, name='SliceLists'):
         super(SliceLists, self).__init__()
         self.pad = False
         self.transfer_data = None
@@ -139,6 +140,7 @@ class SliceLists(object):
             b = self._split_list(s, max_frames)
             if pad:
                 diff = max_frames - len(b[-1])
+                #print("diff", diff, max_frames, len(b[-1]))
                 b[-1][-1] = self._fix_list_length(b[-1][-1], diff, split_dim) if diff \
                     else b[-1][-1]
             banked.extend(b)
@@ -360,7 +362,7 @@ class LocalData(object):
         process_ssl = self.td._get_local_single_slice_list(shape)
 
         process_gsl = self.td._group_slice_list_in_one_dimension(
-                process_ssl, mf_process, self.sdir)
+                process_ssl, mf_process, self.sdir, pad=True) # pad if mfp is > nSlices (e.g. mfp = fixed int)
         return process_gsl
 
     def __get_unpad_slice_list(self, reps):
@@ -422,7 +424,7 @@ class GlobalData(object):
         slice_dims = self.data.get_slice_dimensions()
         transfer_gsl = self.trans._group_slice_list_in_multiple_dimensions(
                 transfer_ssl, mft, slice_dims, pad=pad)
-        
+
         if current_sl:
             mfp = self.pData._get_max_frames_process()
             current_sl = self.trans._group_slice_list_in_multiple_dimensions(

@@ -39,7 +39,8 @@ pattern_list = {"SINOGRAM": 2,
                 "TIMESERIES": 1,
                 "MOTOR_POSITION": 2,
                 "TANGENTOGRAM": 2,
-                "SINOMOVIE": 3}
+                "SINOMOVIE": 3,
+                "SINOGRAM_STACK": 3}
 
 
 def _deepcopy_data_object(dObj, new_obj):

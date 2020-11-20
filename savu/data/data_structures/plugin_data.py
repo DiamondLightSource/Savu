@@ -156,7 +156,7 @@ class PluginData(object):
 
         while(mft > 1 and i < len(size_list)):
             size_list[i] = min(dshape[i], mft)
-            mft -= np.prod(size_list) if np.prod(size_list) > 1 else 0
+            mft //= np.prod(size_list) if np.prod(size_list) > 1 else 1
             i += 1
 
         self.meta_data.set('size_list', size_list)

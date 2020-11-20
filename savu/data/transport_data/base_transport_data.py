@@ -140,7 +140,9 @@ class BaseTransportData(object):
         #nSlices = np.prod(slice_shape)
         nSlices = self.params['shape'][sdir[0]]
 
-        fchoices, size_list = self._get_frame_choices(sdir, min(max_mft, nSlices))
+        nFrames = 1 if isinstance(nFrames, str) else nFrames
+        fchoices, size_list = self._get_frame_choices(
+            sdir, nFrames, min(max_mft, max(nFrames, nSlices)))
 
         threshold_idx = [i for i in range(len(fchoices)) if fchoices[i] >= min_mft]
 
@@ -154,7 +156,6 @@ class BaseTransportData(object):
 #            idx=True)
         mft, idx = self._find_best_frame_distribution(
             fchoices, nSlices, self.params['mpi_procs'], idx=True)
-
         return int(mft), fchoices, size_list
 
     def __refine_distribution_for_multi_mfp(self, mft, size_list, fchoices):
@@ -260,11 +261,12 @@ class BaseTransportData(object):
 # the above method is commented out as it was found to be slower than the one
 # below - try again in a different version of HDF5
 
-    def _get_frame_choices(self, sdir, max_mft):
+    def _get_frame_choices(self, sdir, min_mft, max_mft):
         """ Find all possible combinations of increasing slice dimension sizes
         with their product less than max_mft and return a list of these
         products. """
         temp = [1]*len(sdir)
+        #temp[0] = min_mft # this works for ccpi but not mpimap
         shape = self.data.get_shape()
         idx = 0
         choices = []

@@ -162,6 +162,29 @@ class Preview(object):
 
         return starts, stops, steps, chunks
 
+    def get_integer_entries(self, plist):
+        """
+        Convert Savu preview syntax to python slicing (similar) syntax, by
+        replacing Savu Built-in constants.
+        
+        Parameters
+        ----------
+        plist : list
+            A Savu data preview list to reduce the data dimensions.
+
+        Returns
+        -------
+        list
+            A Savu preview list containing integers and no strings.
+
+        """
+        if plist:
+            vals = self._get_preview_indices(self._add_preview_defaults(plist))
+        else:
+            shape = self.get_data_obj().get_shape()
+            vals = [[0]*len(shape), shape, [1]*len(shape), [1]*len(shape)]        
+        return [':'.join(map(str, l)) for l in list(zip(*vals))]
+
     def convert_indices(self, idx, dim):
         """ convert keywords to integers.
         """
