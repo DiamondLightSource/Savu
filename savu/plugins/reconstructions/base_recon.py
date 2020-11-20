@@ -286,9 +286,8 @@ class BaseRecon(Plugin):
         centre_pad = self.br_array_pad(cor, sino.shape[detX])
         sino_width = sino.shape[detX]
         new_width = sino_width + max(centre_pad)
-        sino_pad = \
-            int(math.ceil(float(sino_width) / new_width * self.sino_pad) / 2.0)
-        pad = np.array([sino_pad] * 2.0) + centre_pad
+        sino_pad = int(math.ceil(float(sino_width) / new_width * self.sino_pad) // 2)
+        pad = np.array([sino_pad]*2) + centre_pad
         return pad
 
     def get_centre_shift(self, sino, cor):
