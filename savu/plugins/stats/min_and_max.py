@@ -26,6 +26,7 @@ from savu.plugins.utils import register_plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 import savu.core.utils as cu
 
+
 @register_plugin
 class MinAndMax(Plugin, CpuPlugin):
     """
@@ -74,9 +75,9 @@ class MinAndMax(Plugin, CpuPlugin):
                     ratio = 1.0
             self.mask = self.circle_mask(width, ratio)
         else:
-            self.mask = np.ones((width,width), dtype=np.float32)
+            self.mask = np.ones((width, width), dtype=np.float32)
         self.method = self.parameters['method']
-        if not (self.method=='percentile' or self.method=='extrema'):
+        if not (self.method == 'percentile' or self.method == 'extrema'):
             msg = "\n***********************************************\n"\
                 "!!! ERROR !!! -> Wrong method. Please use only one of "\
                 "the provided options \n"\
@@ -89,17 +90,18 @@ class MinAndMax(Plugin, CpuPlugin):
 
     def process_frames(self, data):
         use_filter = self.parameters['smoothing']
+        frame = np.nan_to_num(data[0])
         if use_filter is True:
-            frame = gaussian_filter(data[0],(3,3))*self.mask
+            frame = gaussian_filter(frame, (3, 3)) * self.mask
         else:
-            frame = data[0]*self.mask
+            frame = frame * self.mask
         if self.method == 'percentile':
             list_out = [np.array(
-                [np.percentile(frame, self.p_min)], dtype=np.float32), \
-                np.array([np.percentile(frame, self.p_max)],dtype=np.float32)]
+                [np.percentile(frame, self.p_min)], dtype=np.float32),
+                np.array([np.percentile(frame, self.p_max)], dtype=np.float32)]
         else:
-            list_out =[np.array([np.min(frame)], dtype=np.float32),\
-                       np.array([np.max(frame)], dtype=np.float32)]
+            list_out = [np.array([np.min(frame)], dtype=np.float32),
+                        np.array([np.max(frame)], dtype=np.float32)]
         return list_out
 
     def post_process(self):
@@ -122,9 +124,9 @@ class MinAndMax(Plugin, CpuPlugin):
         labels = ['x.pixels', 'y.pixels']
         for i in range(len(out_datasets)):
             out_datasets[i].create_dataset(shape=new_shape, axis_labels=labels,
-                        remove=True, transport='hdf5')
+                                           remove=True, transport='hdf5')
             out_datasets[i].add_pattern(
-                    "METADATA", core_dims=(1,), slice_dims=(0,))
+                "METADATA", core_dims=(1,), slice_dims=(0,))
             out_pData[i].plugin_data_setup('METADATA', 'single')
 
     def _get_pattern(self):

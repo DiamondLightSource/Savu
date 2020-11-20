@@ -63,39 +63,55 @@ class TomopyRecon(BaseRecon, CpuPlugin):
     def pre_process(self):
         self.sl = self.get_plugin_in_datasets()[0].get_slice_dimension()
         vol_shape = self.get_vol_shape()
-
         filter_name = self.parameters['filter_name']
         # for backwards compatibility
         filter_name = 'none' if filter_name == None else filter_name
         options = {'filter_name': filter_name,
-                   'reg_par': self.parameters['reg_par']-1,
+                   'reg_par': self.parameters['reg_par'] - 1,
                    'n_iterations': self.parameters['n_iterations'],
                    'num_gridx': vol_shape[0], 'num_gridy': vol_shape[2]}
+
+        l = vol_shape[0]
+        c = np.linspace(-l / 2.0, l / 2.0, l)
+        x, y = np.meshgrid(c, c)
+        ratio = self.parameters['ratio']
+        if isinstance(ratio, list) or isinstance(ratio, tuple):
+            self.ratio_mask = ratio[0]
+            outer_mask = ratio[1]
+            if isinstance(outer_mask, str):
+                outer_mask = np.nan
+        else:
+            self.ratio_mask = ratio
+            outer_mask = 0.0
+
+        if isinstance(self.ratio_mask, float):
+            r = (l - 1) * self.ratio_mask
+            self.manual_mask = \
+                np.array((x**2 + y**2 >= (r / 2.0)**2), dtype=np.float)
+            self.manual_mask[self.manual_mask == 1] = outer_mask
 
         self.alg_keys = self.get_allowed_kwargs()
         self.alg = self.parameters['algorithm']
         self.kwargs = {key: options[key] for key in self.alg_keys[self.alg] if
-                       key in list(options.keys())}
-
+                       key in options.keys()}
         self._finalise_data = self._transpose if self.parameters['outer_pad']\
             else self._apply_mask
 
     def process_frames(self, data):
         self.sino = data[0]
         self.cors, angles, vol_shape, init = self.get_frame_params()
-
         if init:
             self.kwargs['init_recon'] = init
-
         recon = tomopy.recon(self.sino, np.deg2rad(angles),
                              center=self.cors[0], ncore=1, algorithm=self.alg,
                              **self.kwargs)
         return self._finalise_data(recon)
 
     def _apply_mask(self, recon):
-        ratio = self.parameters['ratio']
-        if ratio:
-            recon = tomopy.circ_mask(recon, axis=0, ratio=ratio)
+        if isinstance(self.ratio_mask, float):
+            recon = tomopy.circ_mask(recon, axis=0, ratio=self.ratio_mask)
+            recon = recon[0] + self.manual_mask
+            recon = np.expand_dims(recon, 0)
         return self._transpose(recon)
 
     def _transpose(self, recon):
