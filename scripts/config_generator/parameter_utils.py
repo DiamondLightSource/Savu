@@ -35,9 +35,8 @@ from savu.plugins.utils import parse_config_string as parse_str
 from savu.plugins.utils import convert_multi_params
 
 def _intlist(value):
-    '''['int'] '''
+    ''' int_list '''
     parameter_valid = False
-    # Currently the check is for a list, but this can later be more extensive
     if isinstance(value, list):
         parameter_valid = True
     return parameter_valid
@@ -256,9 +255,10 @@ def _tuple(value):
 
 
 def _list(value):
+    # List of digits or strings
     parameter_valid = False
     if isinstance(value, list):
-        # This is a list of integer values
+        # This is a list of integer or float values
         parameter_valid = True
     else:
         parameter_valid = _string_list(value)
@@ -272,7 +272,7 @@ def _string_list(value):
         if '[' and ']' in value:
             bracket_value = value.split('[')
             first_bracket_value = bracket_value[1].split(']')
-            if first_bracket_value < 2:
+            if len(first_bracket_value) <= 2:
                 if first_bracket_value[1]:
                     print('There are values outside of the square brackets')
                 else:
@@ -280,7 +280,7 @@ def _string_list(value):
                     str_list = [v for v in entries]
                     parameter_valid = True
             else:
-                print('Please enter three values inside your list.')
+                print('Please enter values inside your list.')
     finally:
         return parameter_valid
 
