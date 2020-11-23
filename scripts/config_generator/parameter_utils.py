@@ -308,7 +308,7 @@ type_dict = {'int_list': _intlist,
             'list': _list}
 
 type_error_dict = {'int_list': 'list of integers',
-            'range': 'range\'. Valid items have a format \'<value 1>, <value 2>',
+            'range': 'range\'. For example \'<value 1>, <value 2>',
             'yaml_file': 'yaml format',
             'file_int_path_int': '[filepath, interior file path, int]',
             'int_path_int': '[interior file path, int]',
@@ -459,4 +459,12 @@ def _error_message(dtype, param_name):
         error_str = 'Your input for the parameter \'{}\' must match' \
                     ' the type \'{}\'.'.format(param_name,
                                                type_error_dict[dtype])
+    return error_str
+
+def _gui_error_message(dtype, param_name):
+    if isinstance(dtype, list):
+        type_options = '\' or \''.join([str(t) for t in dtype])
+        error_str = 'Type must match \'{}\'.'.format(type_options)
+    else:
+        error_str = 'Type must match \'{}\'.'.format(type_error_dict[dtype])
     return error_str
