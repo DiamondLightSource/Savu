@@ -268,6 +268,10 @@ Choose the data type. This is used to check the parameter input is valid.
       - A list
     * - int_list
       - A list of integers
+    * - num_list
+      - A list of numbers
+    * - preview
+      - Preview slice list
     * - range
       - A range e.g. (0,1)
     * - yaml_file

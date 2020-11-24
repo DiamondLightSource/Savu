@@ -39,7 +39,7 @@ class P2rFlyScanDetectorLoaderTools(PluginTools):
             default: False
         ignore_flats:
             visibility: intermediate
-            dtype: list
+            dtype: int_list
             description: List of batch numbers of flats (start at 1) to\
               ignore.
             default: None

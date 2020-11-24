@@ -146,6 +146,16 @@ class NoProcessTools(PluginTools):
             dtype: range
             description: Range required
             default: (0,1)
+        integer_list_param:
+            visibility: basic
+            dtype: int_list
+            description: int list required
+            default: [0,1]
+        num_list_param:
+            visibility: basic
+            dtype: num_list
+            description: list of numbers required
+            default: [0,1]
 
 
 """

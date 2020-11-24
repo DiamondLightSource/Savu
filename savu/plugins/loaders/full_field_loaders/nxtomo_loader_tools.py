@@ -57,7 +57,7 @@ class NxtomoLoaderTools(PluginTools):
             default: False
         ignore_flats:
             visibility: intermediate
-            dtype: list
+            dtype: int_list
             description: List of batch numbers of flats to ignore (starting
               at 1). Useful for excluding comprimised flats in combined data
               sets containing multiple batches of interspaced flats. The
