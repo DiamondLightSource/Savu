@@ -62,7 +62,7 @@ class BaseReconTools(PluginTools):
 
         preview:
              visibility: advanced
-             dtype: list
+             dtype: preview
              description: A slice list of required frames.
              default: '[]'
              example: "[angle, detectorZ, detectorY], where detectorZ is the vertical coordinate,

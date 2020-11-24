@@ -7,7 +7,7 @@ class VoCenteringTools(PluginTools):
         """
         preview:
              visibility: basic
-             dtype: int_list
+             dtype: preview
              description: A slice list of required frames (sinograms) to use in
                the calculation of the centre of rotation (this will not reduce the data
                size for subsequent plugins).

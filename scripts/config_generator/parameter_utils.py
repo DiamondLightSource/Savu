@@ -33,6 +33,13 @@ from colorama import Fore
 import savu.plugins.loaders.utils.yaml_utils as yu
 from savu.plugins.utils import convert_multi_params
 
+def _preview(value):
+    ''' preview value '''
+    parameter_valid = False
+    if isinstance(value, list):
+        parameter_valid = True
+    return parameter_valid
+
 def _intlist(value):
     ''' int_list '''
     parameter_valid = False

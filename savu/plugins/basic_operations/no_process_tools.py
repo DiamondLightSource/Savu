@@ -7,7 +7,7 @@ class NoProcessTools(PluginTools):
         """
         preview:
             visibility: basic
-            dtype: list
+            dtype: preview
             description:
             default: []
         pattern:

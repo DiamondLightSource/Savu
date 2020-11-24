@@ -7,7 +7,7 @@ class NxtomoLoaderTools(PluginTools):
         """
         preview:
             visibility: basic
-            dtype: int_list
+            dtype: preview
             description: A slice list of required frames.
             default: []
         name:
