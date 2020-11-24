@@ -306,5 +306,6 @@ intersphinx_mapping = {'http://docs.python.org/': None}
 
 
 def setup(app):
+    app.add_stylesheet( "css/general.css" )
     app.add_stylesheet( "css/plugin_template.css" )
     app.add_stylesheet( "css/plugin_template_download.css" )
