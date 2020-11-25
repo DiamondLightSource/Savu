@@ -7,3 +7,8 @@ Median Filter Documentation
 
 ..
     This is a comment. Include an image or file by using the following text ".. figure:: ../files_and_images/documentation/plugins/filters/denoising/median_filter.png"
+
+>>> add MedianFilter
+>>> mod 1.1 ['data']
+>>> mod 1.3 4
+>>> disp -a

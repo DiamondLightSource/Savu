@@ -9,3 +9,9 @@ Remove All Rings Documentation
    :figwidth: 50 %
    :align: center
    :figclass: align-center
+
+An example of adding RingRemoval to your plugin list:
+
+    >>> add RemoveAllRings
+    >>> mod 1.3 FBP
+    >>> disp -vv
