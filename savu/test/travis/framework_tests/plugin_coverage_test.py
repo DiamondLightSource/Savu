@@ -23,6 +23,7 @@
 
 import unittest
 import os
+import fnmatch
 
 from savu.data.plugin_list import PluginList
 import savu.test.test_process_list_utils as tplu
@@ -36,9 +37,11 @@ class PluginCoverageTest(unittest.TestCase):
 
         # lists all .nxs process lists used in the tests, and all plugins
         # directly called in the tests
+        tests_plugins_dir = savu_base_path + '/savu/test'
         [nxs_in_tests, plugins_in_tests] = \
-            tplu.get_process_list(savu_base_path + '/savu/test')
+            tplu.get_process_list(tests_plugins_dir)
 
+        print(list(set(plugins_in_tests)))
         # remove data files from the list
         data_list = self.get_data_list(savu_base_path + '/test_data/data')
         nxs_in_tests = list(set(nxs_in_tests).difference(set(data_list)))
@@ -54,7 +57,7 @@ class PluginCoverageTest(unittest.TestCase):
                 print("The failed basename file:", nxs)
 
         # list all test process lists available in test_process_lists folder
-        test_process_path = savu_base_path + 'test_data/test_process_lists'
+        test_process_path = savu_base_path + '/test_data/test_process_lists'
         self.nxs_avail = tplu.get_test_process_list(test_process_path)
 
         # list the .nxs found in tests that are located in the
@@ -68,7 +71,9 @@ class PluginCoverageTest(unittest.TestCase):
         print("\nThese .nxs test files were found inside the tests, but are "
               "not available in the test_process_lists folder:\n")
         for nxs in nxs_unused:
-            print (nxs)
+            print("-->", nxs)
+        #for f in list(set(plugins_in_tests)):
+        #    print(f)
         print ("===============================================================")
 
         # get all plugins listed in self.nxs_used process lists
@@ -77,20 +82,26 @@ class PluginCoverageTest(unittest.TestCase):
         tested_plugin_list += plugins_in_tests
 
         # list all plugins
-        plugin_list = self.get_plugin_list(savu_base_path + '/savu/plugins')
+        dir_plugin_path = savu_base_path + '/savu/plugins'
+        plugin_list = self.get_plugin_list(dir_plugin_path)
 
         print ("===============================================================")
         print ("\nThe following plugins are not covered by the tests:\n")
         uncovered = list(set(plugin_list).difference(set(tested_plugin_list)))
         for plugin in uncovered:
-            print (plugin)
-        print("===============================================================")
-
-        print("===============================================================")
+            for root, dirs, files in os.walk(dir_plugin_path):
+                for name in files:
+                    if fnmatch.fnmatch(name, plugin):
+                        print("-->", name, "|||", os.path.relpath(root, savu_base_path))
+        print ("===============================================================")
+        print ("===============================================================")
         print("\nThe following process lists are redundant:\n")
         redundant = list(set(self.nxs_avail).difference(set(self.nxs_used)))
         for plugin in redundant:
-            print (plugin)
+            for root, dirs, files in os.walk(test_process_path):
+                for name in files:
+                    if fnmatch.fnmatch(name, plugin):
+                        print("-->", name, "|||", os.path.relpath(root, savu_base_path))
         print("===============================================================")
 
     def test_process_lists(self):

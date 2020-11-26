@@ -1,6 +1,5 @@
 import os
 
-
 def get_all_files_from(folder):
     all_files = []
     for root, dirs, files in os.walk(folder, topdown=True):
@@ -46,6 +45,7 @@ def get_process_list_in_file(root, files):
         for line in in_file:
             if '.nxs' in line:
                 processes.append(get_nxs_file_name(line))
+        in_file.close()
     return processes
 
 
@@ -64,6 +64,7 @@ def get_no_process_list_tests(root, files):
             for pid in plugin_id_list:
                 plugin_name = pid.split('.')[-1].split("'")[0]
                 processes.append(plugin_name + '.py')
+        in_file.close()
     return processes
 
 
