@@ -41,7 +41,6 @@ class PluginCoverageTest(unittest.TestCase):
         [nxs_in_tests, plugins_in_tests] = \
             tplu.get_process_list(tests_plugins_dir)
 
-        print(list(set(plugins_in_tests)))
         # remove data files from the list
         data_list = self.get_data_list(savu_base_path + '/test_data/data')
         nxs_in_tests = list(set(nxs_in_tests).difference(set(data_list)))
@@ -60,6 +59,7 @@ class PluginCoverageTest(unittest.TestCase):
         test_process_path = savu_base_path + '/test_data/test_process_lists'
         self.nxs_avail = tplu.get_test_process_list(test_process_path)
 
+        dir_plugin_path = savu_base_path + '/savu/plugins'
         # list the .nxs found in tests that are located in the
         # test_process_lists folder
         self.nxs_used = \
@@ -71,9 +71,8 @@ class PluginCoverageTest(unittest.TestCase):
         print("\nThese .nxs test files were found inside the tests, but are "
               "not available in the test_process_lists folder:\n")
         for nxs in nxs_unused:
-            print("-->", nxs)
-        #for f in list(set(plugins_in_tests)):
-        #    print(f)
+            associated_plugin = tplu.find_plugin_for_process_list(tests_plugins_dir, str(nxs))
+            print("-->", nxs, "|||", os.path.relpath(str(associated_plugin), savu_base_path))
         print ("===============================================================")
 
         # get all plugins listed in self.nxs_used process lists
@@ -82,7 +81,6 @@ class PluginCoverageTest(unittest.TestCase):
         tested_plugin_list += plugins_in_tests
 
         # list all plugins
-        dir_plugin_path = savu_base_path + '/savu/plugins'
         plugin_list = self.get_plugin_list(dir_plugin_path)
 
         print ("===============================================================")

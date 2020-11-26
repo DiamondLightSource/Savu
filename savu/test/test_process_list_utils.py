@@ -1,4 +1,5 @@
 import os
+import fnmatch
 
 def get_all_files_from(folder):
     all_files = []
@@ -48,6 +49,21 @@ def get_process_list_in_file(root, files):
         in_file.close()
     return processes
 
+def find_plugin_for_process_list(folder, proc_list):
+    plugin_name = []
+    for root, dirs, files in os.walk(folder):
+        for name in files:
+            fname = root + '/' + name
+            if (fname.split('.')[1] == 'py'):
+                in_file = open(fname, 'r')
+                for line in in_file:
+                    if '.nxs' in line:
+                        nxs_name = get_nxs_file_name(line)
+                        if fnmatch.fnmatch(str(nxs_name), proc_list):
+                            plugin_name = fname
+                            break
+                in_file.close()
+    return plugin_name
 
 def get_no_process_list_tests(root, files):
     processes = []
@@ -74,7 +90,6 @@ def get_nxs_file_name(line):
         if 'nxs' in entry:
             if (len(entry.split(' ')) == 1):
                 return entry
-
 
 def get_param_name(func, pos, in_file, exclude=[]):
     """ Find the name of an argument passed to a function.
