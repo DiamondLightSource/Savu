@@ -97,7 +97,6 @@ class FresnelFilter(Plugin, CpuPlugin):
             (depth1, height1, width1, _) = self.data_size
         else:
             (depth1, height1, width1) = self.data_size
-        print("Shape of the data {0} {1} {2}".format(depth1, height1, width1))
         ratio = self.parameters['ratio']
         if self.pattern == "PROJECTION":
             self.window = self.make_window(
@@ -111,10 +110,10 @@ class FresnelFilter(Plugin, CpuPlugin):
             data[0], self.window, self.pattern, self.pad_width)
         return mat_filt
 
-    def get_citation_information(self):
-        cite_info = CitationInformation()
-        cite_info.description = \
-            ("The filter built is based on the Fresnel propagator")
-        cite_info.bibtex = ()
-        cite_info.doi = " "
-        return cite_info
+    # def get_citation_information(self):
+    #     cite_info = CitationInformation()
+    #     cite_info.description = \
+    #         ("The filter built is based on the Fresnel propagator")
+    #     cite_info.bibtex = ()
+    #     cite_info.doi = " "
+    #     return cite_info
