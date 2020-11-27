@@ -113,6 +113,9 @@ class Experiment(object):
 
     def _update(self, plugin_dict):
         data = self.index['out_data'].copy()
+        # clear output metadata after first setup
+        for d in list(data.values()):
+            d.meta_data._set_dictionary({})
         self.collection['datasets'].append(data)
         self.collection['plugin_dict'].append(plugin_dict)
 
@@ -252,6 +255,7 @@ class Experiment(object):
             if out_name in list(self.index['in_data'].keys()):
                 finalise['replace'].append(self.index['in_data'][out_name])
 
+        
         return finalise
 
     def _reorganise_datasets(self, finalise):
