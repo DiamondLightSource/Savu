@@ -35,30 +35,32 @@ from savu.data.data_structures.data_types.stitch_data import StitchData
 
 
 @register_plugin
-class MultiNxtomoLoader(BaseLoader):
+class LfovLoader(BaseLoader):
     """
-    A class to load multiple scans in Nexus format into one dataset.
+    A class to load 2 scans in Nexus/hdf format into one dataset.
 
     :param name: The name assigned to the dataset. Default: 'tomo'.
     :param file_name: The shared part of the name of each file\
-        (not including .nxs). Default: None.
+        (not including .nxs). Default: 'projection'.
     :param data_path: Path to the data inside the \
-        file. Default: 'entry1/tomo_entry/data/data'.
-    :param stack_or_cat: Stack or concatenate the data\
-        (4D and 3D respectively). Default: 'stack'.
-    :param stack_or_cat_dim: Dimension to stack or concatenate. Default: 3.
-    :param axis_label: New axis label, if required, in the form\
-        'name.units'. Default: 'scan.number'.
-    :param range: The start and end of file numbers. Default: [0, 10].
+        file. Default: 'entry/data/data'.
+    :param dark: Optional path to the dark field data file, nxs path and \
+        scale value. Default: [None, None, 1].
+    :param flat: Optional Path to the flat field data file, nxs path and \
+        scale value. Default: [None, None, 1].        
+    :param order: Order of datasets used for stitching. Default: [1, 0].
+    :param row_offset: Offsets of row indices between datasets. Default: [0, -2].
+    :param angles: A python statement to be evaluated or a file. Default: None.
     """
 
-    def __init__(self, name='MultiNxtomoLoader'):
-        super(MultiNxtomoLoader, self).__init__(name)
+    def __init__(self, name='LfovLoader'):
+        super(LfovLoader, self).__init__(name)
 
     def setup(self):
         nxtomo = self._get_nxtomo()
         preview = self.parameters['preview']
-        stitch_dim = self.parameters['stack_or_cat_dim']
+        self.shared_name = self.parameters['file_name']
+        stitch_dim = 3
         nxtomo.parameters['preview'] = \
             [x for i, x in enumerate(preview) if i != stitch_dim]
         data_obj_list = self._get_data_objects(nxtomo)
@@ -70,18 +72,14 @@ class MultiNxtomoLoader(BaseLoader):
         data_obj.backing_file = \
             h5py.File(tempfile.mkdtemp() + '/' + filename, 'a')
 
-        stack_or_cat = self.parameters['stack_or_cat']
+        stack_or_cat = 'stack'
         data_obj.data = StitchData(data_obj_list, stack_or_cat, stitch_dim)
 
-        if stack_or_cat == 'cat':
-            nxtomo._setup_3d(data_obj)
-            self._extend_axis_label_values(data_obj_list, data_obj)
-        else:
+        if stack_or_cat == 'stack':
             self._setup_4d(data_obj)
             # may want to add this as a parameter...
             self._set_nD_rotation_angle(data_obj_list, data_obj)
 
-        # print "setting the final data shape", data_obj.data.get_shape()
         data_obj.set_original_shape(data_obj.data.get_shape())
         self.set_data_reduction_params(data_obj)
 
@@ -90,26 +88,99 @@ class MultiNxtomoLoader(BaseLoader):
         nxtomo.exp = self.exp
         nxtomo._populate_default_parameters()
         nxtomo.parameters["data_path"] = self.parameters["data_path"]
-        # print(nxtomo.parameters["data_path"])
+        nxtomo.parameters["angles"] = self.parameters["angles"]
         return nxtomo
 
+    def _offset_sinogram_index(self, preview, offset):
+        if (offset != 0) and len(preview) > 0:
+            preview = [idx for idx in preview]
+            pre_mod = preview[1]
+            if pre_mod == "mid":
+                pre_mod = pre_mod + str(offset)
+            if (pre_mod != "end") and (pre_mod != ":") and (pre_mod != "mid"):
+                try:
+                    idx = int(pre_mod)
+                    idx = idx + offset
+                    pre_mod = str(idx)
+                except:
+                    names = pre_mod.split(":")
+                    if len(names) == 3:
+                        step = int(names[2])
+                        if step > 1:
+                            if "mid" in names[0]:
+                                s1 = names[0].split("mid")
+                                if s1[-1] == "":
+                                    num = offset
+                                else:
+                                    num = int(s1[-1]) + offset
+                                if num > 0:
+                                    names[0] = "mid +" + str(num)
+                                else:
+                                    names[0] = "mid" + str(num)
+                            else:
+                                num = int(names[0]) + offset
+                                if num > 0:
+                                    names[0] = "mid +" + str(num)
+                                else:
+                                    names[0] = "mid" + str(num)
+
+                            if "mid" in names[1]:
+                                s1 = names[1].split("mid")
+                                if s1[-1] == "":
+                                    num = offset
+                                else:
+                                    num = int(s1[-1]) + offset
+                                if num > 0:
+                                    names[1] = "mid +" + str(num)
+                                else:
+                                    names[1] = "mid" + str(num)
+                            else:
+                                num = int(names[1]) + offset
+                                if num > 0:
+                                    names[1] = "mid +" + str(num)
+                                else:
+                                    names[1] = "mid" + str(num)
+
+                            pre_mod = names[0] + ":" + \
+                                names[1] + ":" + names[-1]
+            preview[1] = pre_mod
+        return preview
+
     def _get_data_objects(self, nxtomo):
-        order = self.parameters['range']
+        row_offset = self.parameters['row_offset']
+        order = self.parameters['order']
         if order[0] < order[-1]:
             order_list = np.arange(order[0], order[1] + 1)
         else:
             order_list = np.arange(order[0], order[1] - 1, -1)
         file_path = copy.copy(self.exp.meta_data.get('data_file'))
-        file_list = sorted(glob.glob(file_path + "/*.hdf"))
-        if len(file_list) == 0:
-            file_list = sorted(glob.glob(file_path + "/*.nxs"))
+        if self.shared_name is None:
+            file_list = sorted(glob.glob(file_path + "/*.hdf"))
+            if len(file_list) == 0:
+                file_list = sorted(glob.glob(file_path + "/*.nxs"))
+        else:
+            file_list = sorted(
+                glob.glob(file_path + "/*" + self.shared_name + "*"))
         if len(order_list) != len(file_list):
             raise ValueError(
                 "Number of files found in the folder is not the same as the requested number")
         data_obj_list = []
-        for file in file_list:
-            print("File: {}".format(file))
-            self.exp.meta_data.set('data_file', file)
+        dark_folder, dark_key, dark_scale = self.parameters['dark']
+        flat_folder, flat_key, flat_scale = self.parameters['flat']
+        dark_list = sorted(glob.glob(dark_folder + "/*dark*"))
+        flat_list = sorted(glob.glob(flat_folder + "/*flat*"))
+        for i in order_list:
+            self.exp.meta_data.set('data_file', file_list[i])
+            if dark_folder is not None:
+                nxtomo.parameters['dark'] = [
+                    dark_list[i], dark_key, dark_scale]
+            if flat_folder is not None:
+                nxtomo.parameters['flat'] = [
+                    flat_list[i], flat_key, flat_scale]
+            preview = nxtomo.parameters['preview']
+            if len(preview) > 0:
+                preview = self._offset_sinogram_index(preview, row_offset[i])
+            nxtomo.parameters['preview'] = preview
             nxtomo.setup()
             data_obj_list.append(self.exp.index['in_data']['tomo'])
             self.exp.index['in_data'] = {}
@@ -120,7 +191,7 @@ class MultiNxtomoLoader(BaseLoader):
         axis_labels = \
             ['rotation_angle.degrees', 'detector_y.pixel', 'detector_x.pixel']
 
-        extra_label = self.parameters['axis_label']
+        extra_label = 'scan.number'
         axis_labels.append(extra_label)
 
         rot = axis_labels.index('rotation_angle.degrees')
@@ -141,7 +212,7 @@ class MultiNxtomoLoader(BaseLoader):
                              slice_dims=(extra, detY))
 
     def _extend_axis_label_values(self, data_obj_list, data_obj):
-        dim = self.parameters['stack_or_cat_dim']
+        dim = 3
         axis_name = data_obj.get_axis_labels()[dim].keys()[0].split('.')[0]
 
         new_values = np.zeros(data_obj.data.get_shape()[dim])
