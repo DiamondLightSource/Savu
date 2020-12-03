@@ -103,9 +103,14 @@ setup(name='savu',
           'savu_template_extractor=scripts.savu_config.hdf5_template_extractor:main',
       ], },
 
-      package_data={'savu.test.travis.framework_tests': ['*.yml']},
+      package_data={
+          'savu.test.travis.framework_tests': ['*.yml'],},
 
-      data_files=[(os.path.dirname(version_file), [version_file]),
+      data_files=[('htmls', ['scripts/log_evaluation/string_single.html']),
+                  ('htmls', ['scripts/log_evaluation/string_multi.html']),
+                  ('htmls', ['scripts/log_evaluation/testing.html']),
+                  ('css', ['scripts/log_evaluation/style_sheet.css']),
+                  (os.path.dirname(version_file), [version_file]),
                   (os.path.dirname(sys_file), [sys_file]),
                   (os.path.dirname(mod_file), [mod_file]),
                   (os.path.dirname(env_file), [env_file])] \

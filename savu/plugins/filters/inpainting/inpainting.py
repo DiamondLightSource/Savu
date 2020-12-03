@@ -33,9 +33,10 @@ class Inpainting(Plugin, CpuPlugin):
     A plugin to apply 2D/3D inpainting technique to data. If there is a chunk of
     data missing or one needs to inpaint some data features.
 
-    :u*param iterations: depends on how many pixels needed to be inpainted. Default: 500.
     :u*param mask_range: mask for inpainting is set as a threhsold in a range. Default: [1.0,100].
-    :u*param sigma: discard data bellow the given value. Default: 0.0.
+    :u*param iterations: controls the smoothing level of the inpainted region. Default: 50.
+    :u*param windowsize_half: half-size of the smoothing window. Default: 3.
+    :u*param sigma: maximum value for the inpainted region. Default: 0.5.
     :u*param pattern: pattern to apply this to. Default: "SINOGRAM".
     """
 
@@ -56,20 +57,22 @@ class Inpainting(Plugin, CpuPlugin):
         indices = np.where(np.isnan(input_temp))
         input_temp[indices] = 0.0
         mask[(input_temp >= self.mask_range[0]) & (input_temp < self.mask_range[1])] = 1.0
-        input_data_cut = input_temp*(1-mask)
-        input_data_cut = np.ascontiguousarray(input_data_cut, dtype=np.float32);
-        mask = np.ascontiguousarray(mask, dtype=np.uint8);
+        #input_data_cut = np.ascontiguousarray(input_data_cut, dtype=np.float32);
+        #mask = np.ascontiguousarray(mask, dtype=np.uint8);
 
         pars = {'algorithm' : INPAINT_LINCOMB, \
-                'input' : input_data_cut,\
+                'input' : input_temp,\
                 'maskData' : mask,
                 'number_of_iterations' : self.parameters['iterations'],
+                'windowsize_half' : self.parameters['windowsize_half'],
                 'sigma' : self.parameters['sigma']}
 
+
         (result, mask_upd) = INPAINT_LINCOMB(pars['input'],
-                      pars['maskData'],
-                      pars['number_of_iterations'],
-                      pars['sigma'])
+                              pars['maskData'],
+                              pars['number_of_iterations'],
+                              pars['windowsize_half'],
+                              pars['sigma'])
         return result
 
     def nInput_datasets(self):
