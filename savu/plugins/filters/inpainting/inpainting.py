@@ -57,8 +57,8 @@ class Inpainting(Plugin, CpuPlugin):
         indices = np.where(np.isnan(input_temp))
         input_temp[indices] = 0.0
         mask[(input_temp >= self.mask_range[0]) & (input_temp < self.mask_range[1])] = 1.0
-        #input_data_cut = np.ascontiguousarray(input_data_cut, dtype=np.float32);
-        #mask = np.ascontiguousarray(mask, dtype=np.uint8);
+        input_temp = np.ascontiguousarray(input_temp, dtype=np.float32);
+        mask = np.ascontiguousarray(mask, dtype=np.uint8);
 
         pars = {'algorithm' : INPAINT_LINCOMB, \
                 'input' : input_temp,\
