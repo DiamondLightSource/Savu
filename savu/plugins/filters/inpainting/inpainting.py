@@ -65,7 +65,7 @@ class Inpainting(Plugin, CpuPlugin):
                 'maskData' : mask,
                 'number_of_iterations' : self.parameters['iterations'],
                 'windowsize_half' : self.parameters['windowsize_half'],
-                'sigma' : self.parameters['sigma']}
+                'sigma' : np.exp(self.parameters['sigma'])}
 
 
         (result, mask_upd) = INPAINT_LINCOMB(pars['input'],
