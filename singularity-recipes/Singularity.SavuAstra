@@ -1,0 +1,17 @@
+Bootstrap: localimage
+From: SavuCore.simg
+
+%help
+
+Singularity container providing Savu with the Astra toolbox.
+
+%post
+	# update PATH etc
+	PREFIX=/usr/local
+	CUDA_PATH=/usr/local/cuda-9.0
+	PATH=${CUDA_PATH}/bin:${PATH}
+	PATH=${PREFIX}/miniconda/bin:${PATH}
+	LD_LIBRARY_PATH=${CUDA_PATH}/lib64:${LD_LIBRARY_PATH}
+	export PATH LD_LIBRARY_PATH
+
+	conda install -q -y -c astra-toolbox/label/dev astra-toolbox

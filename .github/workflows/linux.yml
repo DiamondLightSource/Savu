@@ -50,7 +50,11 @@ jobs:
       run: |
         conda install --yes conda-build anaconda-client setuptools
 
-    #- name: Test with pytest
-    #  run: |
-    #    conda install pytest
-    #    $CONDA/bin/pytest ./savu/test/travis/
+    - name: Install Savu
+      run: |
+        python setup.py install
+
+    - name: Running Tests
+      run: |
+        conda install coverage pytest pytest-cov
+        $CONDA/bin/pytest ./savu/test/travis --cov=savu --cov-report term-missing
