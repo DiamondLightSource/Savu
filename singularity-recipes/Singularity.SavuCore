@@ -8,13 +8,14 @@ as well as their dependencies.
 
 %post
 	# update PATH etc
+	export PYTHONIOENCODING=utf8
 	PREFIX=/usr/local
 	CUDA_PATH=/usr/local/cuda-9.0
 	PATH=${CUDA_PATH}/bin:${PATH}
 	PATH=${PREFIX}/miniconda/bin:${PATH}
 	LD_LIBRARY_PATH=${CUDA_PATH}/lib64:${LD_LIBRARY_PATH}
 	export PATH LD_LIBRARY_PATH
- 
+
 	# build and install savu itself
 	conda install -q -y conda-build conda-verify
 	export FACILITY=dls

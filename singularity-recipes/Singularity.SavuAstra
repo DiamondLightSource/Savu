@@ -6,6 +6,7 @@ From: SavuCore.simg
 Singularity container providing Savu with the Astra toolbox.
 
 %post
+	export PYTHONIOENCODING=utf8
 	# update PATH etc
 	PREFIX=/usr/local
 	CUDA_PATH=/usr/local/cuda-9.0
