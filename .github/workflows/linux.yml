@@ -46,8 +46,9 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         $CONDA/bin/flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
-    - name: Install additional conda packages
+    - name: Update environment and install additional conda packages
       run: |
+        $CONDA/bin/conda env update --file ./install/savu_hpc/savu_installer/environment_ci.yml --name base
         conda install --yes conda-build anaconda-client setuptools
 
     - name: Install Savu
