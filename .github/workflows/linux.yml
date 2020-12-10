@@ -50,6 +50,7 @@ jobs:
       run: |
         $CONDA/bin/conda env update --file ./install/savu_hpc/savu_installer/environment_ci.yml --name base
         conda install --yes conda-build anaconda-client setuptools
+        conda install -c ccpi/label/dev tomophantom
 
     - name: Install Savu
       run: |
