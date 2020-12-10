@@ -95,7 +95,7 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
         self.mfp = pData._get_max_frames_process()
         self.reps_at = int(np.ceil(self.length/float(self.mfp)))
 
-        if len(full_shape) is 3:
+        if len(full_shape) == 3:
             self.convert_size = lambda a, b, x, pad: np.pad(
                     np.tile(x[a:b], tile), pad, 'edge')
         else:
@@ -118,7 +118,7 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
         sl = self.get_current_slice_list()[0][self.slice_dir]
         count = self.get_process_frames_counter()
         current_idx = self.get_global_frame_index()[count]
-        
+
         start = (current_idx % self.reps_at)*self.mfp
         end = start + len(np.arange(sl.start, sl.stop, sl.step))
         pad = self._get_pad_amount(end)

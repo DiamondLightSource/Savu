@@ -112,7 +112,7 @@ class DataWithDarksAndFlats(BaseType):
         return self._calc_mean(self.flat())
 
     def _calc_mean(self, data):
-        return data if len(data.shape) is 2 else \
+        return data if len(data.shape) == 2 else \
             data.mean(self.proj_dim).astype(np.float32)
 
     def get_index(self, key, full=False):
@@ -175,7 +175,7 @@ class DataWithDarksAndFlats(BaseType):
             return data
 
         sl = list(copy.deepcopy(self.dark_flat_slice_list[key]))
-        if len(data.shape) is 2:
+        if len(data.shape) == 2:
             del sl[rot_dim]
         return data[tuple(sl)]
 

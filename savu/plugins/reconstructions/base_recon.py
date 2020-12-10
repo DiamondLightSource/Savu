@@ -102,7 +102,7 @@ class BaseRecon(Plugin):
 
         self.main_dir = in_data[0].get_data_patterns()['SINOGRAM']['main_dir']
         self.angles = in_meta_data.get('rotation_angle')
-        if len(self.angles.shape) is not 1:
+        if len(self.angles.shape) != 1:
             self.scan_dim = in_data[0].get_data_dimension_by_axis_label('scan')
         self.slice_dirs = out_data[0].get_slice_dimensions()
 

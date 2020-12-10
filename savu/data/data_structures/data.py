@@ -319,10 +319,10 @@ class Data(DataCreate):
         check += self.__check_pattern('SINOGRAM')
         check += self.__check_pattern('PROJECTION')
 
-        if check is 2 and len(self.get_shape()) > 2:
+        if check == 2 and len(self.get_shape()) > 2:
             self.__set_main_axis('SINOGRAM')
             self.__set_main_axis('PROJECTION')
-        elif check is 1:
+        elif check == 1:
             pass
 
     def __check_pattern(self, pattern_name):
@@ -366,7 +366,7 @@ class Data(DataCreate):
         dimension
         """
         patterns = self.get_data_patterns()
-        n1 = 'PROJECTION' if pname is 'SINOGRAM' else 'SINOGRAM'
+        n1 = 'PROJECTION' if pname == 'SINOGRAM' else 'SINOGRAM'
         d1 = patterns[n1]['core_dims']
         d2 = patterns[pname]['slice_dims']
         tdir = set(d1).intersection(set(d2))

@@ -115,7 +115,7 @@ def set_3dto4d_experiment(filename, **kwargs):
 def get_output_datasets(plugin):
     n_out = plugin.nOutput_datasets()
     out_data = []
-    if n_out is 'var':
+    if n_out == 'var':
         return None
     for n in range(n_out):
         out_data.append('test' + str(n))
