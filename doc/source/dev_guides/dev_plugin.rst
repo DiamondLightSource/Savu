@@ -1,3 +1,5 @@
+.. _plugin_guide:
+
 .. raw:: html
 
     <style> .blue {color:#2c7aa3} </style>
@@ -147,6 +149,8 @@ Plugin Class example:
 
         def nOutput_datasets(self):
             return 1
+
+.. _toolclassguide:
 
 2. How to create the tools class and documentation
 ===================================================
@@ -579,7 +583,8 @@ method is ROF_TV.
 Document your plugin in restructured text
 -------------------------------------------
 
-If you are creating your plugin with the 'savu_plugin_generator' command, then
+
+If you are creating your plugin with the :ref:`'savu_plugin_generator'<plugin_generator_guide>` command, then
 the restructured text file will be created automatically for you and the
 link to this file will be printed to the terminal window.
 

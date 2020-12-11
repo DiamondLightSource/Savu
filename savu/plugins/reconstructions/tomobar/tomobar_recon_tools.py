@@ -1,5 +1,8 @@
 from savu.plugins.plugin_tools import PluginTools
 
+# Lines 15-248 of this file are used for the yaml file template example
+# doc/source/dev_guides/dev_plugin_tools/dev_param_ex.rst
+
 class TomobarReconTools(PluginTools):
     """A plugin to reconstruct full-field tomographic projection data using
 state-of-the-art regularised iterative algorithms from the ToMoBAR package.
