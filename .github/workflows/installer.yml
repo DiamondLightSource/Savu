@@ -39,6 +39,6 @@ jobs:
 
     - name: conda test
       run: |
-        conda info --envs
-        conda activate root
-        conda list
+        $CONDA/bin/conda info --envs
+        $CONDA/bin/conda activate root
+        $CONDA/bin/conda list
