@@ -45,7 +45,6 @@ jobs:
         conda config --set channel_priority strict
         conda config --set auto_activate_base false
         conda config --set show_channel_urls true
-        conda config --set unsatisfiable_hints true
         conda install --yes conda-build anaconda-client setuptools
         python --version
         conda config --show-sources
