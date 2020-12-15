@@ -10,7 +10,7 @@ jobs:
         include:
           # 18.04 supports CUDA 10.1+ (gxx <= 8)
           - os: ubuntu-20.04
-            cuda: "11.0"
+            cuda: "10.2"
             gcc: 8
           # 16.04 supports CUDA 8+
           #- os: ubuntu-16.04
@@ -35,28 +35,32 @@ jobs:
 
     - name: Running Savu-lite conda build
       run: |
-        conda config --add channels default
-        conda config --prepend channels conda-forge
-        conda config --prepend channels astra-toolbox/label/dev
-        conda config --prepend channels ccpi
-        conda config --prepend channels dkazanc
+        rm -rf ~/.condarc
+        conda config --add channels defaults
+        conda config --append channels conda-forge
+        conda config --append channels astra-toolbox/label/dev
+        conda config --append channels ccpi
+        conda config --append channels dkazanc
         conda config --set anaconda_upload no
-        conda config --set channel_priority flexible
+        conda config --set channel_priority strict
         conda config --set auto_activate_base false
         conda config --set show_channel_urls true
         conda config --set unsatisfiable_hints true
         conda install --yes conda-build anaconda-client setuptools
-        cd ./install/savu_lite37/
-        conda build .
+        python --version
+        conda config --show-sources
+        conda info 
+#       cd ./install/savu_lite37/
+#        conda build .
 
-    - name: Installing savu-lite package
-      run: |
-        conda install --channel /usr/share/miniconda/conda-bld/ savu-lite --offline --override-channels
+    #- name: Installing savu-lite package
+    #  run: |
+    #    conda install --channel /usr/share/miniconda/conda-bld/ savu-lite --offline --override-channels
 
-    - name: Lint with flake8
-      run: |
-        $CONDA/bin/conda install flake8
+    #- name: Lint with flake8
+    #  run: |
+    #    $CONDA/bin/conda install flake8
         # stop the build if there are Python syntax errors or undefined names
-        $CONDA/bin/flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+    #    $CONDA/bin/flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        $CONDA/bin/flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    #    $CONDA/bin/flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
