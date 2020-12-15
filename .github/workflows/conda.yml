@@ -35,6 +35,7 @@ jobs:
 
     - name: Running Savu-lite conda build
       run: |
+        conda activate foo
         rm -rf ~/.condarc
         conda config --add channels defaults
         conda config --append channels conda-forge
