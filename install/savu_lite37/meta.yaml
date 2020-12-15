@@ -1,0 +1,94 @@
+{% set repo = "inpainting" %}
+{% set version = "3.0" %}
+
+package:
+  name: savu-lite
+  version: {{ version }}
+
+source:
+  url: https://github.com/DiamondLightSource/Savu/archive/{{ repo }}.tar.gz
+
+build:
+  preserve_egg_dir: True
+  number: 0
+  script: python setup.py install
+
+requirements:
+  host:
+    - python
+    - pip
+    - wheel
+
+  run:
+    - python=3.7
+    - numpy=1.15
+    - hdf5
+    - openmpi
+    - h5py=2.10.0=mpi_openmpi*
+    - mpi4py
+    - tomopy
+    - scipy
+    - numpy
+    - pandas
+    - PyWavelets
+    - scikit-learn
+    - scikit-image
+    - geodistk
+    - morphsnakes
+    - tomobar
+    - tomophantom
+    - larix
+    - ccpi-reconstruction
+    - ccpi-regulariser
+    - astra-toolbox
+    - pyfai
+    - pymca==5.5.5
+    - pyfftw
+    - xraylib
+    - PeakUtils
+    - mrcfile
+    - tifffile
+    - fabio
+    - colorama
+    - jinja2
+    - ipython
+    - pytest
+    - setuptools
+    - mock
+    - spyder
+    - pip
+    - linecache2
+    - traceback2
+    - pynvml
+    - pmacparser
+
+test:
+  imports:
+    - colorama
+    - h5py
+    - mpi4py
+    - numpy
+    - scipy
+    - pyfftw
+    - tomobar
+    - linecache2
+    - traceback2
+    - savu
+    - yaml
+
+  commands:
+    - savu --version
+    - savu_config -h
+    - savu_quick_tests
+
+about:
+  home: https://github.com/DiamondLightSource/Savu
+  license: Apache V2 and GPL V3
+  license_family: GPL3
+  doc_url: https://savu-lite.readthedocs.io/en/latest/
+  dev_url: https://github.com/DiamondLightSource/Savu/
+  summary: "Savu-Lite - Minimal version of Savu Tomography Reconstruction and Processing Pipeline"
+
+extra:
+  recipe-maintainers:
+    - DaniilKazantsev

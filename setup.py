@@ -104,7 +104,8 @@ setup(name='savu',
       ], },
 
       package_data={
-          'savu.test.travis.framework_tests': ['*.yml'],},
+           'savu.test.travis.framework_tests': ['*.yml'],
+      },
 
       data_files=[('htmls', ['scripts/log_evaluation/string_single.html']),
                   ('htmls', ['scripts/log_evaluation/string_multi.html']),
