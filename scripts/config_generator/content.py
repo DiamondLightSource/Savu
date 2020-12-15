@@ -26,7 +26,6 @@ import re
 import os
 import inspect
 import scripts.config_generator.mutations as mutations
-from colorama import Fore, Back, Style
 
 from savu.plugins import utils as pu
 from savu.data.plugin_list import PluginList

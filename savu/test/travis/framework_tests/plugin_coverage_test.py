@@ -27,7 +27,6 @@ import unittest
 import os
 
 from savu.data.plugin_list import PluginList
-import savu.test.test_utils as tu
 import savu.test.test_process_list_utils as tplu
 
 
