@@ -30,12 +30,11 @@ jobs:
     - uses: conda-incubator/setup-miniconda@v2
       with:
         miniconda-version: 4.6.14
-        activate-environment: foo
+        activate-environment: base
         python-version: 3.7
 
     - name: Running Savu-lite conda build
       run: |
-        conda activate foo
         rm -rf ~/.condarc
         conda config --add channels defaults
         conda config --append channels conda-forge
@@ -50,6 +49,7 @@ jobs:
         python --version
         conda config --show-sources
         conda info
+        conda info --envs
 #       cd ./install/savu_lite37/
 #        conda build .
 
