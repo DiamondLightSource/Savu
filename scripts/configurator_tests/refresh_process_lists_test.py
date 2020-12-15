@@ -26,7 +26,6 @@ import os
 import unittest
 import savu.test.test_process_list_utils as tplu
 import scripts.config_generator.config_utils as cu
-from scripts.config_generator.content import Content
 
 
 class RefreshProcessListsTest(unittest.TestCase):
@@ -48,20 +47,9 @@ class RefreshProcessListsTest(unittest.TestCase):
         for f in [n for n in nxs_used if n not in exclude]:
             print "Refreshing process list", f, "..."
             if os.path.exists(os.path.join(test_path, f)):
-                self._refresh_process_file(os.path.join(test_path, f))
+                tplu.refresh_process_file(os.path.join(test_path, f))
             else:
-                self._refresh_process_file(os.path.join(test_path2, f))
-
-    def _refresh_process_file(self, path):
-        content = Content()
-        # open
-        content.fopen(path, update=True)
-        # refresh
-        positions = content.get_positions()
-        for pos_str in positions:
-            content.refresh(pos_str)
-        # save
-        content.save(content.filename)
+                tplu.refresh_process_file(os.path.join(test_path2, f))
 
 
 if __name__ == "__main__":

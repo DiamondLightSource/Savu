@@ -1,5 +1,5 @@
 import os
-
+from scripts.config_generator.content import Content
 
 def get_all_files_from(folder):
     all_files = []
@@ -116,3 +116,15 @@ def get_param_value_from_file(param, in_file):
             value = line.split('=')[1].strip()
             param_list.append(value)
     return param_list
+
+
+def refresh_process_file(path):
+    content = Content()
+    # open
+    content.fopen(path, update=True)
+    # refresh
+    positions = content.get_positions()
+    for pos_str in positions:
+        content.refresh(pos_str)
+    # save
+    content.save(content.filename)
