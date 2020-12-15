@@ -15,7 +15,7 @@
 
 
 """
-.. module:: savu_config_utils
+.. module:: savu_config_runner
    :platform: Unix
    :synopsis: unittest test classes for savu_config
 

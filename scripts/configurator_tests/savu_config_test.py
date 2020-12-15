@@ -11,7 +11,7 @@ from __future__ import print_function
 
 import unittest
 
-import scripts.configurator_tests.savu_config_utils as scu
+import scripts.configurator_tests.savu_config_runner as scu
 
 class SavuConfigTest(unittest.TestCase):
 
