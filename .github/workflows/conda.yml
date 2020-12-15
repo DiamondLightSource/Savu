@@ -9,7 +9,7 @@ jobs:
       matrix:
         include:
           # 18.04 supports CUDA 10.1+ (gxx <= 8)
-          - os: ubuntu-18.04
+          - os: ubuntu-20.04
             cuda: "11.0"
             gcc: 8
           # 16.04 supports CUDA 8+
