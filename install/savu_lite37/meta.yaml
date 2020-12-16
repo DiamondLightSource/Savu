@@ -22,11 +22,11 @@ requirements:
   run:
     - python=3.7
     - numpy=1.15
+    - tomopy=1.8.1
     - hdf5
     - openmpi
     - h5py=2.10.0=mpi_openmpi*
     - mpi4py
-    - tomopy
     - scipy
     - numpy
     - pandas
@@ -79,7 +79,7 @@ test:
   commands:
     - savu --version
     - savu_config -h
-    - savu_full_tests
+    - savu_quick_tests
 
 about:
   home: https://github.com/DiamondLightSource/Savu

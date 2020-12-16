@@ -9,8 +9,8 @@ jobs:
       matrix:
         include:
           # 18.04 supports CUDA 10.1+ (gxx <= 8)
-          - os: ubuntu-20.04
-            cuda: "10.2"
+          - os: ubuntu-18.04
+            cuda: "10.1"
             gcc: 8
           # 16.04 supports CUDA 8+
           #- os: ubuntu-16.04
@@ -38,7 +38,7 @@ jobs:
       with:
         python-version: 3.7
 
-    - name: Building savu-lite and run tests
+    - name: Building savu-lite
       shell: bash -l {0}
       run: |
         rm -rf ~/.condarc
@@ -56,6 +56,11 @@ jobs:
         python --version
         cd ./install/savu_lite37/
         conda build .
+
+    - name: Run savu savu_full_tests
+      shell: bash -l {0}
+      run: |
+        savu_full_tests
 
     - name: Decrypt a secret
       run: ./install/savu_lite37/scripts/decrypt_secret.sh
