@@ -24,6 +24,9 @@ from __future__ import print_function, division
 
 import re
 import sys
+import logging
+
+logger = logging.getLogger('documentationLog')
 
 import warnings
 with warnings.catch_warnings():
@@ -306,7 +309,9 @@ def main():
 
     while True:
         try:
-            in_list = raw_input(">>> ").strip().split(' ', 1)
+            in_text = raw_input(">>> ").strip()
+            in_list = in_text.split(' ', 1)
+            logger.debug('TEST COMMAND: ' + in_text)
         except KeyboardInterrupt:
             print()
             continue

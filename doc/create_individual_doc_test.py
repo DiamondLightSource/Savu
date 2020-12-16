@@ -159,13 +159,17 @@ def get_unittest_process_list_function(process_lists):
             if file_exists:
                 # Write the process list being tested to the logger
                 logger.debug('TEST PROCESS LIST: ' + savu_base_path + process_list_path)
-                out = StringIO()
-                sys.stdout = out
-                tplu.refresh_process_file(savu_base_path + process_list_path)
-                output_value = out.getvalue().strip()
-                for check in output_checks:
-                    error_msg = 'Refresh failed: ' + check + ' in the output.'
-                    assert check not in output_value, error_msg
+                saved_stdout = sys.stdout
+                try:
+                    out = StringIO()
+                    sys.stdout = out
+                    tplu.refresh_process_file(savu_base_path + process_list_path)
+                    output_value = out.getvalue().strip()
+                    for check in output_checks:
+                        error_msg = 'Refresh failed: ' + check + ' in the output.'
+                        assert check not in output_value, error_msg
+                finally:
+                    sys.stdout = saved_stdout
         '''
     return refresh_process_start, refresh_process_end, process_list_format
 
@@ -196,7 +200,7 @@ def get_unittest_commands(testing_lines, process_lists, file_name):
         input_list = ['''
     unittest_function_end = '''"exit", "y"]
         output_checks = ['Exception','Error','ERROR']
-        scu.savu_config_runner(input_list, output_checks, 
+        sctu.savu_config_runner(input_list, output_checks, 
                                 error_str=True)'''
     return unittest_function_start, unittest_function_end, test_list
 
@@ -251,7 +255,7 @@ from StringIO import StringIO
 import savu.plugins.utils as pu
 import savu.test.test_process_list_utils as tplu
 import savu.test.travis.doc_tests.doc_test_utils as dtu
-import scripts.configurator_tests.savu_config_runner as scu
+import scripts.configurator_tests.savu_config_test_utils as sctu
 
 # Determine Savu base path
 savu_base_path = \\

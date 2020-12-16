@@ -11,33 +11,33 @@ from __future__ import print_function
 
 import unittest
 
-import scripts.configurator_tests.savu_config_runner as scu
+import scripts.configurator_tests.savu_config_test_utils as sctu
 
 class SavuConfigTest(unittest.TestCase):
 
     def testExit(self):
         input_list = ['exit', 'y']
         output_checks = ['Thanks for using the application']
-        scu.savu_config_runner(input_list, output_checks)
+        sctu.savu_config_runner(input_list, output_checks)
 
     def testHelpBlank(self):
         input_list = ['', 'exit', 'y']
         output_checks = ['help :  Display the help information',
                          'exit :  Close the program']
-        scu.savu_config_runner(input_list, output_checks)
+        sctu.savu_config_runner(input_list, output_checks)
 
     def testHelpCommand(self):
         input_list = ['help', 'exit', 'y']
         output_checks = ['help :  Display the help information',
                          'exit :  Close the program']
-        scu.savu_config_runner(input_list, output_checks)
+        sctu.savu_config_runner(input_list, output_checks)
 
     def testAdd(self):
         input_list = ['add NxtomoLoader',
                       'exit',
                       'y']
         output_checks = ['Exception']
-        scu.savu_config_runner(input_list, output_checks,
+        sctu.savu_config_runner(input_list, output_checks,
                                 error_str=True)
 
     def testAddMod(self):
@@ -47,7 +47,7 @@ class SavuConfigTest(unittest.TestCase):
                       'exit',
                       'y']
         output_checks = ['Exception']
-        scu.savu_config_runner(input_list, output_checks,
+        sctu.savu_config_runner(input_list, output_checks,
                                 error_str=True)
 
     def testAddMod_2(self):
@@ -57,7 +57,7 @@ class SavuConfigTest(unittest.TestCase):
                       'exit',
                       'y']
         output_checks = ['Exception']
-        scu.savu_config_runner(input_list, output_checks,
+        sctu.savu_config_runner(input_list, output_checks,
                                 error_str=True)
 
     def testAddMod_3(self):
@@ -68,7 +68,7 @@ class SavuConfigTest(unittest.TestCase):
                       'exit',
                       'y']
         output_checks = ['Exception']
-        scu.savu_config_runner(input_list, output_checks)
+        sctu.savu_config_runner(input_list, output_checks)
 
 
 if __name__ == "__main__":
