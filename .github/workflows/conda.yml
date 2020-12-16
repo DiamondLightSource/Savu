@@ -32,20 +32,10 @@ jobs:
         miniconda-version: 4.6.14
         activate-environment: savu
         python-version: 3.7
-    - name: Bash
+
+    - name: Running savu-lite conda build under correct miniconda
       shell: bash -l {0}
       run: |
-        conda info
-        conda list
-    - name: PowerShell Core
-      shell: pwsh
-      run: |
-        conda info
-        conda list
-
-    - name: Running Savu-lite conda build
-      run: |
-        conda activate savu      
         rm -rf ~/.condarc
         conda config --add channels defaults
         conda config --append channels conda-forge
@@ -57,16 +47,15 @@ jobs:
         conda config --set auto_activate_base false
         conda config --set show_channel_urls true
         conda install --yes conda-build anaconda-client setuptools
-        python --version
-        conda config --show-sources
         conda info
-        conda info --envs
-#       cd ./install/savu_lite37/
-#        conda build .
+        python --version
+        cd ./install/savu_lite37/
+        conda build .
 
-    #- name: Installing savu-lite package
-    #  run: |
-    #    conda install --channel /usr/share/miniconda/conda-bld/ savu-lite --offline --override-channels
+    - name: Installing savu-lite package
+      shell: bash -l {0}
+      run: |
+        conda install --channel /usr/share/miniconda/conda-bld/ savu-lite --offline --override-channels
 
     #- name: Lint with flake8
     #  run: |
