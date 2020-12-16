@@ -32,6 +32,11 @@ jobs:
         miniconda-version: 4.6.14
         activate-environment: savu
         python-version: 3.7
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.7
 
     - name: Running savu-lite conda build under correct miniconda
       shell: bash -l {0}
