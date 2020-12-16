@@ -30,11 +30,22 @@ jobs:
     - uses: conda-incubator/setup-miniconda@v2
       with:
         miniconda-version: 4.6.14
-        activate-environment: base
+        activate-environment: savu
         python-version: 3.7
+    - name: Bash
+      shell: bash -l {0}
+      run: |
+        conda info
+        conda list
+    - name: PowerShell Core
+      shell: pwsh
+      run: |
+        conda info
+        conda list
 
     - name: Running Savu-lite conda build
       run: |
+        conda activate savu      
         rm -rf ~/.condarc
         conda config --add channels defaults
         conda config --append channels conda-forge
