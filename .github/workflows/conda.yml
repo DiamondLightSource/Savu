@@ -54,6 +54,7 @@ jobs:
         conda install --yes conda-build anaconda-client setuptools
         conda info
         python --version
+        ll /usr/share/miniconda3/bin/anaconda
         cd ./install/savu_lite37/
         conda build .
 
@@ -63,7 +64,7 @@ jobs:
         LARGE_SECRET_PASSPHRASE: ${{ secrets.LARGE_SECRET_PASSPHRASE }}
 
     - name: Uploading savu-lite package to conda with dev label
-      shell: bash -l {0}
       run: |
+        conda install --yes conda-build anaconda-client
         chmod +x ./install/savu_lite37/scripts/conda_upload.sh
         ./install/savu_lite37/scripts/conda_upload.sh
