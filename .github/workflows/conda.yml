@@ -38,7 +38,7 @@ jobs:
       with:
         python-version: 3.7
 
-    - name: Running savu-lite conda build under correct miniconda
+    - name: Building savu-lite and run tests
       shell: bash -l {0}
       run: |
         rm -rf ~/.condarc

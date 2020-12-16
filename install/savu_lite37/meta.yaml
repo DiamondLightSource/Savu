@@ -79,7 +79,7 @@ test:
   commands:
     - savu --version
     - savu_config -h
-    - savu_quick_tests
+    - savu_full_tests
 
 about:
   home: https://github.com/DiamondLightSource/Savu
