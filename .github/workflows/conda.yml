@@ -60,6 +60,7 @@ jobs:
     - name: Run savu savu_full_tests
       shell: bash -l {0}
       run: |
+        conda activate /usr/share/miniconda3/envs/savu
         savu_full_tests
 
     - name: Decrypt a secret
