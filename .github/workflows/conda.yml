@@ -54,7 +54,6 @@ jobs:
         conda install --yes conda-build anaconda-client setuptools
         conda info
         python --version
-        ll /usr/share/miniconda3/bin/anaconda
         cd ./install/savu_lite37/
         conda build .
 
