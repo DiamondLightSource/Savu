@@ -60,12 +60,9 @@ jobs:
     - name: Installing savu-lite package
       shell: bash -l {0}
       run: |
-        conda install --channel /usr/share/miniconda/conda-bld/ savu-lite --offline --override-channels
+        conda install --channel /usr/share/miniconda3/envs/savu/conda-bld/linux-64/ savu-lite --offline --override-channels
 
-    #- name: Lint with flake8
-    #  run: |
-    #    $CONDA/bin/conda install flake8
-        # stop the build if there are Python syntax errors or undefined names
-    #    $CONDA/bin/flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-    #    $CONDA/bin/flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - name: Running savu tests
+      shell: bash -l {0}
+      run: |
+        pytest ./savu/test/travis/
