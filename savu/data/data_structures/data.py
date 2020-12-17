@@ -136,6 +136,17 @@ class Data(DataCreate):
         self.orig_shape = shape
         self.set_shape(shape)
 
+    def get_original_shape(self):
+        """
+        Returns the original shape of the data before previewing
+        
+        Returns
+        -------
+        tuple
+            Original data shape.
+        """
+        return self.orig_shape
+
     def get_shape(self):
         """ Get the dataset shape
 
@@ -231,11 +242,15 @@ class Data(DataCreate):
         :params int y: dimension to be associated with y-axis
         :params int z: dimension to be associated with z-axis
         """
-        self.add_pattern("VOLUME_YZ", **self.__get_dirs_for_volume(y, z, x))
         self.add_pattern("VOLUME_XZ", **self.__get_dirs_for_volume(x, z, y))
-        self.add_pattern("VOLUME_XY", **self.__get_dirs_for_volume(x, y, z))
 
-        if self.data_info.get("nDims") > 3:
+        if y:
+            self.add_pattern(
+                "VOLUME_YZ", **self.__get_dirs_for_volume(y, z, x))
+            self.add_pattern(
+                "VOLUME_XY", **self.__get_dirs_for_volume(x, y, z))
+
+        if self.data_info.get("nDims") > 3 and y:
             self.add_pattern("VOLUME_3D", **self.__get_dirs_for_volume_3D())
 
     def __get_dirs_for_volume(self, dim1, dim2, sdir, dim3=None):
@@ -245,10 +260,10 @@ class Data(DataCreate):
         vol_dict = {}
         vol_dict['core_dims'] = (dim1, dim2)
 
-        slice_dir = [sdir]
+        slice_dir = [sdir] if sdir is not None else []
         for ddir in all_dims:
             if ddir not in [dim1, dim2, sdir]:
-                slice_dir.append(ddir)
+                slice_dir.append(ddir)                
         vol_dict['slice_dims'] = tuple(slice_dir)
         return vol_dict
 
@@ -258,6 +273,7 @@ class Data(DataCreate):
         cdim = []
         for v in ['VOLUME_YZ', 'VOLUME_XY', 'VOLUME_XZ']:
             cdim += (patterns[v]['core_dims'])
+            
         cdim = set(cdim)
         sdim = tuple(set(range(self.data_info.get("nDims"))).difference(cdim))
         return {"core_dims": tuple(cdim), "slice_dims": sdim}
@@ -290,13 +306,14 @@ class Data(DataCreate):
         """
         return self.data_info.get('axis_labels')
 
-    def get_data_dimension_by_axis_label(self, name, contains=False):
+    def get_data_dimension_by_axis_label(self, name, contains=False, exists=False):
         """ Get the dimension of the data associated with a particular
         axis_label.
 
         :param str name: The name of the axis_label
         :keyword bool contains: Set this flag to true if the name is only part
             of the axis_label name
+        :keyword bool exists: Set to True to return False rather than Exception
         :returns: The associated axis number
         :rtype: int
         """
@@ -309,21 +326,21 @@ class Data(DataCreate):
             else:
                 if name in list(axis_labels[i].keys()):
                     return i
+        if exists:
+            return False
         raise Exception("Cannot find the specifed axis label.")
 
     def _finalise_patterns(self):
         """ Adds a main axis (fastest changing) to SINOGRAM and PROJECTON
         patterns.
         """
-        check = 0
+        check = 0        
         check += self.__check_pattern('SINOGRAM')
         check += self.__check_pattern('PROJECTION')
 
-        if check is 2 and len(self.get_shape()) > 2:
+        if check == 2 and len(self.get_shape()) > 2:
             self.__set_main_axis('SINOGRAM')
             self.__set_main_axis('PROJECTION')
-        elif check is 1:
-            pass
 
     def __check_pattern(self, pattern_name):
         """ Check if a pattern exists.
