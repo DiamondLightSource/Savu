@@ -473,7 +473,6 @@ class BaseRecon(Plugin):
         shape = list(in_dataset.get_shape())
         volX, volY, volZ = self._get_volume_dimensions()
 
-        self.parameters['vol_shape'] = 'auto'
         if self.parameters['vol_shape'] in ('auto', 'fixed'):
             shape[volX] = shape[volZ]
         else:
