@@ -102,7 +102,7 @@ class BaseRecon(Plugin):
 
         self.main_dir = in_data[0].get_data_patterns()['SINOGRAM']['main_dir']
         self.angles = in_meta_data.get('rotation_angle')
-        if len(self.angles.shape) is not 1:
+        if len(self.angles.shape) != 1:
             self.scan_dim = in_data[0].get_data_dimension_by_axis_label('scan')
         self.slice_dirs = out_data[0].get_slice_dimensions()
 
@@ -390,42 +390,29 @@ class BaseRecon(Plugin):
         self.preview_flag = \
             self.set_preview(in_dataset[0], self.parameters['preview'])
 
-        axis_labels = in_dataset[0].data_info.get('axis_labels')[0]
+        self._set_volume_dimensions(in_dataset[0])
+        axis_labels = self._get_axis_labels(in_dataset[0])
+        shape = self._get_shape(in_dataset[0])
 
-        dim_volX, dim_volY, dim_volZ = \
-            self.map_volume_dimensions(in_dataset[0])
-
-        axis_labels = [0] * 3
-        axis_labels = {in_dataset[0]:
-                       [str(dim_volX) + '.voxel_x.voxels',
-                        str(dim_volY) + '.voxel_y.voxels',
-                        str(dim_volZ) + '.voxel_z.voxels']}
-
-        shape = list(in_dataset[0].get_shape())
-        if self.parameters['vol_shape'] == 'fixed':
-            shape[dim_volX] = shape[dim_volZ]
-        else:
-            shape[dim_volX] = self.parameters['vol_shape']
-            shape[dim_volZ] = self.parameters['vol_shape']
-
-        if 'resolution' in self.parameters.keys():
-            shape[dim_volX] /= self.parameters['resolution']
-            shape[dim_volZ] /= self.parameters['resolution']
-
-        out_dataset[0].create_dataset(axis_labels=axis_labels,
-                                      shape=tuple(shape))
-        out_dataset[0].add_volume_patterns(dim_volX, dim_volY, dim_volZ)
+        # output dataset
+        out_dataset[0].create_dataset(axis_labels=axis_labels, shape=shape)
+        out_dataset[0].add_volume_patterns(*self._get_volume_dimensions())
 
         # set information relating to the plugin data
         in_pData, out_pData = self.get_plugin_datasets()
 
-        in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
+        self.init_vol = 1 if 'init_vol' in list(self.parameters.keys()) and\
+            self.parameters['init_vol'] else 0
+        self.cor_as_dataset = 1 if isinstance(
+            self.parameters['centre_of_rotation'], str) else 0
+            
+        for i in range(len(in_dataset) - self.init_vol - self.cor_as_dataset):
+            in_pData[i].plugin_data_setup('SINOGRAM', self.get_max_frames(),
+                                          slice_axis=self.get_slice_axis())
+            idx = 1
 
-        idx = 1
         # initial volume dataset
-        if 'init_vol' in list(self.parameters.keys()) and \
-                self.parameters['init_vol']:
-            self.init_vol = True
+        if self.init_vol:
 #            from savu.data.data_structures.data_types import Replicate
 #            if self.rep_dim:
 #                in_dataset[idx].data = Replicate(
@@ -434,29 +421,94 @@ class BaseRecon(Plugin):
             idx += 1
 
         # cor dataset
-        if isinstance(self.parameters['centre_of_rotation'], str):
+        if self.cor_as_dataset:
             self.cor_as_dataset = True
             in_pData[idx].plugin_data_setup('METADATA', self.get_max_frames())
 
         # set pattern_name and nframes to process for all datasets
         out_pData[0].plugin_data_setup('VOLUME_XZ', self.get_max_frames())
 
-    def get_max_frames(self):
-        return 'multiple'
+    def _get_axis_labels(self, in_dataset):
+        """
+        Get the new axis labels for the output dataset - this is now a volume.
 
-    def map_volume_dimensions(self, data):
+        Parameters
+        ----------
+        in_dataset : :class:`savu.data.data_structures.data.Data`
+            The input dataset to the plugin.
+
+        Returns
+        -------
+        labels : dict
+            The axis labels for the dataset that is output from the plugin.
+
+        """
+        labels = in_dataset.data_info.get('axis_labels')[0]
+        volX, volY, volZ = self._get_volume_dimensions()
+        labels = [str(volX) + '.voxel_x.voxels', str(volZ) + '.voxel_z.voxels']
+        if volY:
+            labels.append(str(volY) + '.voxel_y.voxels')
+        labels = {in_dataset: labels}
+        return labels
+
+    def _set_volume_dimensions(self, data):
+        """
+        Map the input dimensions to the output volume dimensions
+
+        Parameters
+        ----------
+        in_dataset : :class:`savu.data.data_structures.data.Data`
+            The input dataset to the plugin.
+        """
         data._finalise_patterns()
-        dim_rotAngle = data.get_data_patterns()['PROJECTION']['main_dir']
-        sinogram = data.get_data_patterns()['SINOGRAM']
-        dim_detY = sinogram['main_dir']
+        self.volX = data.get_data_dimension_by_axis_label("rotation_angle")
+        self.volZ = data.get_data_dimension_by_axis_label("x", contains=True)
+        self.volY = data.get_data_dimension_by_axis_label(
+            "y", contains=True, exists=True)
 
-        core_dirs = sinogram['core_dims']
-        dim_detX = list(set(core_dirs).difference(set((dim_rotAngle,))))[0]
+    def _get_volume_dimensions(self):
+        return self.volX, self.volY, self.volZ
 
-        dim_volX = dim_rotAngle
-        dim_volY = dim_detY
-        dim_volZ = dim_detX
-        return dim_volX, dim_volY, dim_volZ
+    def _get_shape(self, in_dataset):
+        shape = list(in_dataset.get_shape())
+        volX, volY, volZ = self._get_volume_dimensions()
+
+        self.parameters['vol_shape'] = 'auto'
+        if self.parameters['vol_shape'] in ('auto', 'fixed'):
+            shape[volX] = shape[volZ]
+        else:
+            shape[volX] = self.parameters['vol_shape']
+            shape[volZ] = self.parameters['vol_shape']
+
+        if 'resolution' in self.parameters.keys():
+            shape[volX] /= self.parameters['resolution']
+            shape[volZ] /= self.parameters['resolution']
+        return tuple(shape)
+
+    def get_max_frames(self):
+        """
+        Number of data frames to pass to each instance of process_frames func
+
+        Returns
+        -------
+        str or int
+            "single", "multiple" or integer (only to be used if the number of
+                                             frames MUST be fixed.)
+        """
+        return 'multiple'
+    
+    def get_slice_axis(self):
+        """
+        Fix the fastest changing slice dimension
+
+        Returns
+        -------
+        str or None
+            str should be the axis_label corresponding to the fastest changing
+            dimension
+
+        """
+        return None
 
     def nInput_datasets(self):
         nIn = 1
