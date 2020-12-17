@@ -259,8 +259,7 @@ class Data(DataCreate):
         all_dims = range(self.data_info.get("nDims"))
         vol_dict = {}
         vol_dict['core_dims'] = (dim1, dim2)
-
-        slice_dir = [sdir] if sdir is not None else []
+        slice_dir = [sdir] if type(sdir) is int else []
         for ddir in all_dims:
             if ddir not in [dim1, dim2, sdir]:
                 slice_dir.append(ddir)                
