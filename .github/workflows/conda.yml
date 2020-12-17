@@ -68,9 +68,9 @@ jobs:
         chmod +x ./install/savu_lite37/scripts/conda_upload.sh
         ./install/savu_lite37/scripts/conda_upload.sh
 
-    - name: Install the dev savu from the conda channel and run savu savu_full_tests
+    - name: Install dev-savu and run savu savu_full_tests
       shell: bash -l {0}
       run: |
         conda activate /usr/share/miniconda3/envs/savu
-        conda install --yes -c dkazanc/label/dev savu-lite
+        conda install --yes -c savu-dep/label/dev savu-lite        
         savu_full_tests
