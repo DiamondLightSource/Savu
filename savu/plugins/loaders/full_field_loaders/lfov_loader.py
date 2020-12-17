@@ -40,15 +40,13 @@ class LfovLoader(MultiNxtomoLoader):
     :param data_path: Path to the data inside the \
         file. Default: 'entry/data/data'.
     :param order: Order of datasets used for stitching. Default: [1, 0].
-    :param row_offset: Offsets of row indices between datasets. Default: [0, -2].
+    :param row_offset: Offsets of row indices between datasets. Default: [0, -1].
 
     :*param stack_or_cat: Stack or concatenate the data\
         (4D and 3D respectively). Default: 'stack'.
     :*param stack_or_cat_dim: Dimension to stack or concatenate. Default: 3.
     :*param axis_label: New axis label, if required, in the form\
         'name.units'. Default: 'scan.number'.
-    :*param range: The start and end of file numbers. Default: [0, 10].
-        
     """
 
     def __init__(self, name='LfovLoader'):
@@ -71,16 +69,19 @@ class LfovLoader(MultiNxtomoLoader):
         """
         if not offset or not preview:
             return preview
-        
         dObj = self.exp.index['in_data']['tomo']
+
+        # Revert the data shape to before previewing was applied
+        dObj.set_shape(dObj.get_original_shape())
         preview = dObj.get_preview().get_integer_entries(preview)
         sino_slice_dim = dObj.get_data_dimension_by_axis_label("detector_y")
+        max_sino_idx = dObj.data.shape[sino_slice_dim]
         sl = list(map(int, preview[sino_slice_dim].split(":")))
-        nSinos = len(np.arange(*sl[0:-1]))
-        
-        if (nSinos < (abs(offset)+1)):
-            idx = 0 if offset < 1 else 1
-            sl[idx] += offset        
+        sl_0 = sl[0] + offset
+        sl_1 = sl[1] + offset
+        if (max_sino_idx >= sl_0 >= 0) and (max_sino_idx >= sl_1 >= 0):
+            sl[0] = sl_0
+            sl[1] = sl_1   
             preview[sino_slice_dim] = ":".join(map(str, sl))
             self.parameters['preview'][sino_slice_dim] = preview[sino_slice_dim]
         return preview
@@ -133,11 +134,11 @@ class LfovLoader(MultiNxtomoLoader):
             if flat_folder is not None:
                 nxtomo.parameters['flat'] = [
                     flat_list[i], flat_key, flat_scale]
-            
             nxtomo.setup()
             # update preview
-            nxtomo.parameters['preview'] = \
-                self._update_preview(nxtomo.parameters['preview'], offset[i])
+            if offset[i] != 0:
+                nxtomo.parameters['preview'] = \
+                    self._update_preview(nxtomo.parameters['preview'], offset[i])
             data_obj_list.append(self.exp.index['in_data']['tomo'])
             self.exp.index['in_data'] = {}
         return data_obj_list
