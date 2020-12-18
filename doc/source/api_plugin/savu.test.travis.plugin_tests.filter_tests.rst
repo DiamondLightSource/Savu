@@ -22,6 +22,7 @@ Submodules
 
    savu.test.travis.plugin_tests.filter_tests.distortion_correction_test
    savu.test.travis.plugin_tests.filter_tests.downsample_filter_test
+   savu.test.travis.plugin_tests.filter_tests.fresnel_filter_test
    savu.test.travis.plugin_tests.filter_tests.hilbert_test
    savu.test.travis.plugin_tests.filter_tests.paganin_test
    savu.test.travis.plugin_tests.filter_tests.quantisation_filter_test

@@ -14,6 +14,7 @@ Submodules
    savu.plugins.ring_removal.remove_unresponsive_and_fluctuating_rings
    savu.plugins.ring_removal.ring_removal_filtering
    savu.plugins.ring_removal.ring_removal_fitting
+   savu.plugins.ring_removal.ring_removal_interpolation
    savu.plugins.ring_removal.ring_removal_normalization
    savu.plugins.ring_removal.ring_removal_regularization
    savu.plugins.ring_removal.ring_removal_sorting

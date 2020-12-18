@@ -18,11 +18,3 @@ Subpackages
    scripts.configurator_tests
    scripts.dawn_runner
    scripts.log_evaluation
-
-Submodules
-----------
-
-.. toctree::
-   :maxdepth: 4
-
-   scripts.incomplete_jobs_finder

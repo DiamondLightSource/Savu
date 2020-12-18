@@ -209,10 +209,8 @@ savu.plugins.filters
    api_plugin/savu.plugins.filters.base_filter
    api_plugin/savu.plugins.filters.paganin_filter
    api_plugin/savu.plugins.filters.dezinger
-   api_plugin/savu.plugins.filters.dezinger_simple
-   api_plugin/savu.plugins.filters.dezinger_sinogram
-   api_plugin/savu.plugins.filters.list_to_projections
    api_plugin/savu.plugins.filters.fresnel_filter
+   api_plugin/savu.plugins.filters.list_to_projections
    api_plugin/savu.plugins.filters.hilbert_filter
    api_plugin/savu.plugins.filters.poly_background_estimator
    api_plugin/savu.plugins.filters.dials_find_spots
@@ -220,9 +218,20 @@ savu.plugins.filters
    api_plugin/savu.plugins.filters.find_peaks
    api_plugin/savu.plugins.filters.strip_background
    api_plugin/savu.plugins.filters.umpa
+   api_plugin/savu.plugins.filters.dezinger_deprecated
    api_plugin/savu.plugins.filters.quantisation_filter
    api_plugin/savu.plugins.filters.spectrum_crop
    api_plugin/savu.plugins.filters.threshold_filter
+
+
+savu.plugins.filters.dezingers
+------------------------------------------------------------
+
+.. toctree::
+   api_plugin/savu.plugins.filters.dezingers.dezinger_gpu
+   api_plugin/savu.plugins.filters.dezingers.dezinger_simple_deprecated
+   api_plugin/savu.plugins.filters.dezingers.dezinger_sinogram_deprecated
+   api_plugin/savu.plugins.filters.dezingers.dezinger
 
 
 savu.plugins.filters.denoising
@@ -234,7 +243,9 @@ savu.plugins.filters.denoising
    api_plugin/savu.plugins.filters.denoising.ccpi_denoising_gpu
    api_plugin/savu.plugins.filters.denoising.ccpi_denoising_gpu_3D
    api_plugin/savu.plugins.filters.denoising.denoise_bregman_filter
+   api_plugin/savu.plugins.filters.denoising.median_filter_deprecated
    api_plugin/savu.plugins.filters.denoising.median_filter
+   api_plugin/savu.plugins.filters.denoising.median_filter_gpu
 
 
 savu.plugins.fitters
@@ -245,15 +256,6 @@ savu.plugins.fitters
    api_plugin/savu.plugins.fitters.ral_fit
    api_plugin/savu.plugins.fitters.reproduce_fit
    api_plugin/savu.plugins.fitters.simple_fit
-
-
-savu.plugins.fluo_fitters
-------------------------------------------------------------
-
-.. toctree::
-   api_plugin/savu.plugins.fluo_fitters.base_fluo_fitter
-   api_plugin/savu.plugins.fluo_fitters.fastxrf_fitting
-   api_plugin/savu.plugins.fluo_fitters.simple_fit_xrf
 
 
 savu.plugins.kinematics
@@ -285,6 +287,7 @@ savu.plugins.loaders.full_field_loaders
    api_plugin/savu.plugins.loaders.full_field_loaders.multi_nxtomo_loader
    api_plugin/savu.plugins.loaders.full_field_loaders.nxtomo_loader
    api_plugin/savu.plugins.loaders.full_field_loaders.dxchange_loader
+   api_plugin/savu.plugins.loaders.full_field_loaders.lfov_loader
    api_plugin/savu.plugins.loaders.full_field_loaders.random_3d_tomo_loader
 
 
@@ -327,18 +330,6 @@ savu.plugins.loaders.mapping_loaders.i14_loaders
 
 .. toctree::
    api_plugin/savu.plugins.loaders.mapping_loaders.i14_loaders.i14_fluo_loader
-
-
-savu.plugins.loaders.mapping_loaders.i18_loaders
-------------------------------------------------------------
-
-.. toctree::
-   api_plugin/savu.plugins.loaders.mapping_loaders.i18_loaders.base_i18_multi_modal_loader
-   api_plugin/savu.plugins.loaders.mapping_loaders.i18_loaders.i18_fluo_loader
-   api_plugin/savu.plugins.loaders.mapping_loaders.i18_loaders.i18_xrd_loader
-   api_plugin/savu.plugins.loaders.mapping_loaders.i18_loaders.i18_mm_loader
-   api_plugin/savu.plugins.loaders.mapping_loaders.i18_loaders.i18_monitor_loader
-   api_plugin/savu.plugins.loaders.mapping_loaders.i18_loaders.i18_stxm_loader
 
 
 savu.plugins.loaders.mapping_loaders.i22_loaders
@@ -407,7 +398,6 @@ savu.plugins.reconstructions
 .. toctree::
    api_plugin/savu.plugins.reconstructions.tomopy_recon
    api_plugin/savu.plugins.reconstructions.base_recon
-   api_plugin/savu.plugins.reconstructions.ccpi_cgls_recon
    api_plugin/savu.plugins.reconstructions.scikitimage_sart
    api_plugin/savu.plugins.reconstructions.simple_recon
    api_plugin/savu.plugins.reconstructions.scikitimage_filter_back_projection
@@ -421,6 +411,7 @@ savu.plugins.reconstructions.astra_recons
    api_plugin/savu.plugins.reconstructions.astra_recons.astra_recon_cpu
    api_plugin/savu.plugins.reconstructions.astra_recons.astra_recon_gpu
    api_plugin/savu.plugins.reconstructions.astra_recons.base_astra_recon
+   api_plugin/savu.plugins.reconstructions.astra_recons.base_astra_vector_recon
 
 
 savu.plugins.reconstructions.tomobar
@@ -430,7 +421,6 @@ savu.plugins.reconstructions.tomobar
    api_plugin/savu.plugins.reconstructions.tomobar.tomobar_recon
    api_plugin/savu.plugins.reconstructions.tomobar.tomobar_recon_3D
    api_plugin/savu.plugins.reconstructions.tomobar.tomobar_recon_cpu
-   api_plugin/savu.plugins.reconstructions.tomobar.tomobar_recon_fully_3D
 
 
 savu.plugins.reshape
@@ -440,6 +430,7 @@ savu.plugins.reshape
    api_plugin/savu.plugins.reshape.data_removal
    api_plugin/savu.plugins.reshape.downsample_filter
    api_plugin/savu.plugins.reshape.mipmap
+   api_plugin/savu.plugins.reshape.image_stitching
 
 
 savu.plugins.ring_removal
@@ -457,6 +448,7 @@ savu.plugins.ring_removal
    api_plugin/savu.plugins.ring_removal.ring_removal_regularization
    api_plugin/savu.plugins.ring_removal.ring_removal_sorting
    api_plugin/savu.plugins.ring_removal.ring_removal_waveletfft
+   api_plugin/savu.plugins.ring_removal.ring_removal_interpolation
 
 
 savu.plugins.savers
@@ -552,6 +544,33 @@ savu.plugins.stats
 
 .. toctree::
    api_plugin/savu.plugins.stats.min_and_max
+
+
+savu.plugins.unregistered
+------------------------------------------------------------
+
+.. toctree::
+
+
+savu.plugins.unregistered.fluo_fitters
+------------------------------------------------------------
+
+.. toctree::
+   api_plugin/savu.plugins.unregistered.fluo_fitters.base_fluo_fitter
+   api_plugin/savu.plugins.unregistered.fluo_fitters.fastxrf_fitting
+   api_plugin/savu.plugins.unregistered.fluo_fitters.simple_fit_xrf
+
+
+savu.plugins.unregistered.i18_loaders
+------------------------------------------------------------
+
+.. toctree::
+   api_plugin/savu.plugins.unregistered.i18_loaders.base_i18_multi_modal_loader
+   api_plugin/savu.plugins.unregistered.i18_loaders.i18_fluo_loader
+   api_plugin/savu.plugins.unregistered.i18_loaders.i18_xrd_loader
+   api_plugin/savu.plugins.unregistered.i18_loaders.i18_mm_loader
+   api_plugin/savu.plugins.unregistered.i18_loaders.i18_monitor_loader
+   api_plugin/savu.plugins.unregistered.i18_loaders.i18_stxm_loader
 
 
 savu.plugins.simulation
