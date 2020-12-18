@@ -5,6 +5,7 @@ Submodules
 ----------
 
 .. toctree::
+   :maxdepth: 4
 
    savu.plugins.analysis.base_analysis
    savu.plugins.analysis.histogram
@@ -15,6 +16,6 @@ Module contents
 ---------------
 
 .. automodule:: savu.plugins.analysis
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:

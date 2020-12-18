@@ -68,8 +68,8 @@ class BaseType(object):
         cls = cls_path.split('.')[-1]
         func = pu.load_class(mod, cls).__init__
 
-        argspec = inspect.getargspec(func)
-        if len(argspec[0])-1 != len(args) + len(kwargs.keys()):
+        argspec = inspect.getfullargspec(func)
+        if len(argspec[0])-1 != len(args) + len(list(kwargs.keys())):
             raise Exception('Incorrect number of input arguments mapped.')
 
         data_lists = [True if isinstance(a, list) and isinstance(a[0], int)
@@ -135,7 +135,7 @@ class BaseType(object):
         args = [self._str_to_value(self, a) for a in args]
 
         extras = self.__get_extras_vals(extras)
-        for key, value in kwargs.iteritems():
+        for key, value in kwargs.items():
             kwargs[key] = self._str_to_value(self, value)
         return args, kwargs, dtype_dict['cls'], extras
 
@@ -156,5 +156,5 @@ class BaseType(object):
         return extras
 
     def __update_extra_params(self, newObj, extras):
-        for key, value in extras.iteritems():
+        for key, value in extras.items():
             setattr(newObj, key, value)

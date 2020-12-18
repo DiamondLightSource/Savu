@@ -80,10 +80,10 @@ class ImageData(BaseType):
         index, frameidx = self.__get_indices(index, size)
 
         for i in range(len(frameidx)):
-            image = fabio.open(self.file_names[frameidx[i]]).data[tiff_slices]
+            image = fabio.open(self.file_names[frameidx[i]]).data[tuple(tiff_slices)]
             for d in self.frame_dim:
                 image = np.expand_dims(image, axis=d)
-            data[index[i]] = image
+            data[tuple(index[i])] = image
 
         return data
 

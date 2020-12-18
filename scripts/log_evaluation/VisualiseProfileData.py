@@ -1,5 +1,5 @@
-import GraphicalThreadProfiler as GTP
-import GraphicalThreadProfiler_multi as GTP_m
+from . import GraphicalThreadProfiler as GTP
+from . import GraphicalThreadProfiler_multi as GTP_m
 import fnmatch
 import os
 
@@ -42,7 +42,7 @@ def get_files(dir_path):
 def render_template(frame, outfilename, title, size, params, header_shift,
                     max_std):
     from jinja2 import Template
-    import template_strings as ts
+    from . import template_strings as ts
 
     nVals = len(frame)
 
@@ -51,8 +51,8 @@ def render_template(frame, outfilename, title, size, params, header_shift,
                                                    header_shift))
 
     style = os.path.dirname(__file__) + '/style_sheet.css'
-    print outfilename
-    f_out.write(template.render(frame=[map(list, f) for f in frame],
+    print(outfilename)
+    f_out.write(template.render(frame=[list(map(list, f)) for f in frame],
                                 style_sheet=style, max_bubble=max_std))
     f_out.close()
 

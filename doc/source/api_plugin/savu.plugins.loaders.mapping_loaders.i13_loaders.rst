@@ -5,6 +5,7 @@ Submodules
 ----------
 
 .. toctree::
+   :maxdepth: 4
 
    savu.plugins.loaders.mapping_loaders.i13_loaders.i13_fluo_loader
    savu.plugins.loaders.mapping_loaders.i13_loaders.i13_ptycho_loader
@@ -17,6 +18,6 @@ Module contents
 ---------------
 
 .. automodule:: savu.plugins.loaders.mapping_loaders.i13_loaders
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:

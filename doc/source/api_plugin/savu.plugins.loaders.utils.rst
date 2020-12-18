@@ -5,14 +5,14 @@ Submodules
 ----------
 
 .. toctree::
+   :maxdepth: 4
 
-   savu.plugins.loaders.utils.mrc_header
    savu.plugins.loaders.utils.yaml_utils
 
 Module contents
 ---------------
 
 .. automodule:: savu.plugins.loaders.utils
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:

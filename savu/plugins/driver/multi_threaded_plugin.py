@@ -41,7 +41,7 @@ class MultiThreadedPlugin(PluginDriver):
 
     def _run_plugin(self, exp, transport):
         process = exp.meta_data.get("process")
-        nCores = len(self.processes)/self.nNodes
+        nCores = len(self.processes) // self.nNodes
         masters = self._get_masters(self.processes)
 
         self.__create_new_communicator(masters, exp)
@@ -49,8 +49,7 @@ class MultiThreadedPlugin(PluginDriver):
 
         if process in masters:
             self.parameters['available_CPUs'] = nCores
-            self.parameters['available_GPUs'] = \
-                len([p for p in self.processes if 'GPU' in p])/self.nNodes
+            self.parameters['available_GPUs'] = len([p for p in self.processes if 'GPU' in p]) // self.nNodes
             self._run_plugin_instances(transport, communicator=self.new_comm)
             self.__free_communicator()
 

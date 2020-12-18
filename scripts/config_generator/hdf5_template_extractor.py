@@ -33,7 +33,7 @@ def get_parameter_value(nxsfile, plugin_name, plugin_param):
     found_params = []
     for plugin in plist:
         if plugin['name'] == plugin_name:
-            if plugin_param in plugin['data'].keys():
+            if plugin_param in list(plugin['data'].keys()):
                 found_params.append(plugin['data'][plugin_param])
 
     return found_params
@@ -58,7 +58,7 @@ def get_data_dict(paths):
 
 def get_string_result(key, data_dict, mData, res=[]):
     if '*' in key:
-        for data in data_dict.keys():
+        for data in list(data_dict.keys()):
             res = get_string_result(
                     key.replace('*', data), data_dict, mData, res)
     else:
@@ -74,6 +74,6 @@ if __name__ == '__main__':
     paths = check_yaml_path(get_parameter_value(arg.nxsfile, plugin, param))
     data_dict = get_data_dict(paths)
     res = get_string_result(arg.key, data_dict, MetaData(data_dict))
-    print ','.join(res)
+    print(','.join(res))
 
     

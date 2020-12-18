@@ -64,9 +64,9 @@ class RingRemovalFitting(Plugin, CpuPlugin):
         ---------
         Return:     - 2D window.
         """
-        centerx = (width-1.0)/2.0
-        centery = (height-1.0)/2.0    
-        y,x = np.ogrid[-centery:height-centery,-centerx:width-centerx]
+        centerx = (width-1.0) / 2.0
+        centery = (height-1.0) / 2.0
+        y, x = np.ogrid[-centery:height-centery, -centerx:width-centerx]
         numx = 2.0*sigmax*sigmax
         numy = 2.0*sigmay*sigmay
         win2d = np.exp(-(x*x/numx+y*y/numy))
@@ -96,7 +96,7 @@ class RingRemovalFitting(Plugin, CpuPlugin):
         self.matsign = np.power(-1.0,x+y)
 
     def process_frames(self, data):
-        sinogram = data[0]        
+        sinogram = data[0]
         (height, _) = sinogram.shape
         if height%2==0:
             height = height - 1
@@ -105,7 +105,7 @@ class RingRemovalFitting(Plugin, CpuPlugin):
         sinofit2 = np.pad(
             sinofit,((0, 0), (self.pad, self.pad)), mode = 'edge')
         sinofit2 = np.pad(
-            sinofit2,((self.pad, self.pad), (0, 0)), mode = 'mean')        
+            sinofit2,((self.pad, self.pad), (0, 0)), mode = 'mean')
         sinofitsmooth = np.real(fft.ifft2(fft.fft2(
             sinofit2*self.matsign)*self.window2d)*self.matsign)
         sinofitsmooth = sinofitsmooth[self.pad:self.height1-self.pad,

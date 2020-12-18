@@ -2,6 +2,6 @@ setup module
 ============
 
 .. automodule:: setup
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:

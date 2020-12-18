@@ -86,7 +86,7 @@ class PluginTemplate7(Plugin, CpuPlugin):
         core_dims = set(range(0, len(shape))).difference(set(slice_dim))
         sinomovie = {'core_dims': tuple(core_dims), 'slice_dims': slice_dim}
         out_dataset[0].add_pattern("SINOMOVIE", **sinomovie)
-        print out_dataset[0].get_data_patterns()['SINOMOVIE']
+        print(out_dataset[0].get_data_patterns()['SINOMOVIE'])
 
         #================== populate plugin datasets ==========================
         in_pData, out_pData = self.get_plugin_datasets()
