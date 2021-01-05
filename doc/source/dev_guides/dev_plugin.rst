@@ -10,16 +10,27 @@
 Developing a Savu plugin
 ************************
 
-A module is a file containing python definitions and statements. To \
-create a plugin for Savu you will need to create two modules:
+To create a plugin for Savu you will need to create two modules:
+
+.. note::
+
+    A module is a file containing python definitions and statements.
 
 1. A plugin module, named :blue:`plugin_name`.py containing a class :blue:`PluginName`
+
+    This file contains your plugin definitions and statements.
+
 2. A plugin tools module named :blue:`plugin_name_tools`.py, containing a class :blue:`PluginNameTools`
+
+    This file contains the parameter details and citations in a yaml format. You can \
+    assign each parameter a data type, a description, a visibility level and a \
+    default value.
 
 .. note::
 
     :blue:`PluginName` should be replaced by the name of your plugin without \
-    any spaces. The words should be capitalised.
+    any spaces. The words should be capitalised. :blue:`plugin_name` should be
+    replaced by the name of your plugin in lowercase, seperated by underscores.
 
 Examples are:
 
@@ -28,6 +39,8 @@ Examples are:
 
 * 1. A plugin module remove_all_rings.py containing a class RemoveAllRings
   2. A plugin tools module remove_all_rings_tools.py containing a class RemoveAllRingsTools
+
+
 
 1. Introduction to creating a Plugin
 ========================================
