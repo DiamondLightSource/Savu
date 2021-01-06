@@ -331,21 +331,31 @@ def create_plugin_template_downloads(savu_base_path):
 
         doc_name = 'plugin_template1_with_detailed_notes'
         detailed_template = docstring_text.get(doc_name)
+
         if detailed_template:
             docstring_text.pop(doc_name)
             title = convert_title(doc_name)
             title, number = filter_template_numbers(title)
+            # Create the restructured text page for the plugin template
+            # python code
+            generate_template_files(doc_name, title)
             inner_file_str = '../../../' + 'plugin_examples/plugin_templates/general'
             doc_text = detailed_template['docstring'].split(':param')[0]
             doc_text = " ".join(doc_text.splitlines())
             doc_template.write(title
                         + '\n--------------------------------'
                           '----------------------------------\n')
-            doc_template.write(doc_text)
+            doc_template.write('\nA template to create a simple plugin '
+                               'that takes one dataset as input and returns '
+                               'a similar dataset as output')
             doc_template.write('\n')
-            doc_template.write('\n')
-            doc_template.write(':download:`' + title + ' <' + inner_file_str
-                        + '/' + doc_name + '.py>`\n\n')
+            doc_template.write('''
+.. list-table::  
+   :widths: 10
+   
+   * - :ref:`'''+doc_name+'''`
+
+''')
         doc_template.write('Further Examples'
                     + '\n--------------------------------'
                       '----------------------------------\n')
@@ -396,7 +406,7 @@ def generate_template_files(doc_name, title):
     template_file.write('\n')
     template_file.write('\n.. _' + doc_name + ':\n')
     template_file.write('\n')
-    template_file.write(title+'\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n')
+    template_file.write(title+'\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n')
     template_file.write('\n')
     template_file.write(':download:`Download <' + inner_file_str
                 + '/' + doc_name + '.py>`\n\n')
