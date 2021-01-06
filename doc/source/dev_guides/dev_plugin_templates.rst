@@ -5,9 +5,13 @@ Plugin templates
 
 Plugin Template With Detailed Notes 1
 ------------------------------------------------------------------
-A description of the plugin - the synopsis above appears as the short plugin description in the configurator and anything written here appears as the longer description (-vv flag).      
 
-:download:`Plugin Template With Detailed Notes 1 <../../../plugin_examples/plugin_templates/general/plugin_template1_with_detailed_notes.py>`
+A template to create a simple plugin that takes one dataset as input and returns a similar dataset as output
+
+.. list-table::  
+   :widths: 10
+   
+   * - :ref:`plugin_template1_with_detailed_notes`
 
 Further Examples
 ------------------------------------------------------------------

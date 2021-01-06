@@ -3,7 +3,7 @@
 Generating a Savu Plugin
 **************************
 
-The command
+Use the command: ``savu_plugin_generator`` to create a plugin and it's required files.
 
 .. toctree::
    :glob:
@@ -13,7 +13,7 @@ The command
 
 .. code-block:: none
 
-    usage: savu_plugin_generator median_filter
+    usage: savu_plugin_generator [-h] [-q] [-d] plugin_name
 
 There are three steps:
 
@@ -26,7 +26,7 @@ displayed on the command line. If it doesn't exist, then a file will be created 
 3. If a plugin documentation file exists, then the file location will be found. If it does exist, then this file path will be
 displayed on the command line. If it doesn't exist, then a file will be created inside the savu/plugins directory.
 
-Below is an example of the template plugin class.
+The detailed template for the plugin class is here and can be downloaded here.
 
 .. literalinclude:: ../files_and_images/plugin_guides/plugin_name_example.py
     :language: python
