@@ -344,10 +344,53 @@ class PluginParameters(object):
                         else:
                             param_info_dict[p_name]['display'] = 'on'
                     elif str(parent_value) in parent_choice_list:
-                        all_params[p_name]['display'] = 'on'
+                        param_info_dict[p_name]['display'] = 'on'
                     else:
-                        all_params[p_name]['display'] = 'off'
+                        param_info_dict[p_name]['display'] = 'off'
 
+    def set_parameters(self, input_parameters):
+        """
+        This method is called after the plugin has been created by the
+        pipeline framework.  It replaces ``self.plugin_class.parameters``
+        default values with those given in the input process list. It
+        checks for multi parameter strings, eg. 57;68;56;
+
+        :param dict input_parameters: A dictionary of the input parameters
+        for this plugin, or None if no customisation is required.
+
+        parameters is part of the plugin
+        it is a current value list
+        the default would not be a multi param string
+        """
+        for key in input_parameters.keys():
+            if key in self.plugin_class.parameters.keys():
+                self.modify(self.plugin_class.parameters,
+                            input_parameters[key], key)
+                self.__check_multi_params(self.plugin_class.parameters,
+                                          input_parameters[key], key)
+            else:
+                error = ("Parameter '%s' is not valid for plugin %s. \nTry "
+                         "opening and re-saving the process list in the "
+                         "configurator to auto remove \nobsolete parameters."
+                         % (key, self.name))
+                raise ValueError(error)
+
+    def __check_multi_params(self, parameters, value, key):
+        """ Convert parameter value to a list if it uses parameter tuning
+        and set associated parameters, so the framework knows the new size
+        of the data and which plugins to re-run.
+        """
+        plugin = self.plugin_class
+        if param_u.is_multi_param(key, value):
+            value, error_str = pu.convert_multi_params(key, value)
+            if not error_str:
+                parameters[key] = value
+                label = key + '_params.' + type(value[0]).__name__
+                plugin.alter_multi_params_dict(len(plugin.get_multi_params_dict()),
+                                             {'label': label, 'values': value})
+                plugin.append_extra_dims(len(value))
+        else:
+            parameters[key] = value
 
     def define_parameters(self):
         pass
