@@ -146,7 +146,6 @@ Denoising
 
    Ccpi Denoising Cpu <api_plugin/plugins.filters.denoising.ccpi_denoising_cpu>
    Ccpi Denoising Cpu 3D <api_plugin/plugins.filters.denoising.ccpi_denoising_cpu_3D>
-   Ccpi Denoising Gpu <api_plugin/plugins.filters.denoising.ccpi_denoising_gpu>
    Ccpi Denoising Gpu 3D <api_plugin/plugins.filters.denoising.ccpi_denoising_gpu_3D>
    Denoise Bregman Filter <api_plugin/plugins.filters.denoising.denoise_bregman_filter>
    Median Filter <api_plugin/plugins.filters.denoising.median_filter>
@@ -168,8 +167,6 @@ Fluo Fitters
 .. toctree::
    :maxdepth: 1 
 
-   Fastxrf Fitting <api_plugin/plugins.fluo_fitters.fastxrf_fitting>
-   Simple Fit Xrf <api_plugin/plugins.fluo_fitters.simple_fit_xrf>
 
 
 Kinematics
@@ -178,7 +175,6 @@ Kinematics
 .. toctree::
    :maxdepth: 1 
 
-   Stage Motion <api_plugin/plugins.kinematics.stage_motion>
 
 
 Loaders
@@ -308,7 +304,6 @@ Astra Recons
    :maxdepth: 1 
 
    Astra Recon Cpu <api_plugin/plugins.reconstructions.astra_recons.astra_recon_cpu>
-   Astra Recon Gpu <api_plugin/plugins.reconstructions.astra_recons.astra_recon_gpu>
 
 
 Tomobar
@@ -317,8 +312,6 @@ Tomobar
 .. toctree::
    :maxdepth: 1 
 
-   Tomobar Recon <api_plugin/plugins.reconstructions.tomobar.tomobar_recon>
-   Tomobar Recon 3D <api_plugin/plugins.reconstructions.tomobar.tomobar_recon_3D>
    Tomobar Recon Cpu <api_plugin/plugins.reconstructions.tomobar.tomobar_recon_cpu>
    Tomobar Recon Fully 3D <api_plugin/plugins.reconstructions.tomobar.tomobar_recon_fully_3D>
 

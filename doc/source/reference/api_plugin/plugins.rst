@@ -38,7 +38,6 @@ Submodules
 .. toctree::
 
    plugins.docstring_parser
-   plugins.parameter_utils
    plugins.plugin
    plugins.plugin_datasets
    plugins.plugin_datasets_notes
