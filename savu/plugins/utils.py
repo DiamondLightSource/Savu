@@ -339,13 +339,14 @@ def convert_multi_params(param_name, value):
 
 def _cast_str_to_type(value):
     """ Change the string to an integer, float, tuple, list or str
+    TODO Check that this works correctly for log value
     """
     try:
         val = int(value)
-    except ValueError:
+    except:
         try:
             val = float(value)
-        except ValueError:
+        except:
             if '(' and ')' in value:
                 val = _cast_to_tuple(value)
             elif '[' and ']' in value:
