@@ -169,7 +169,7 @@ def populate_plugin_doc_files(new_rst_file, tool_class_list, file_path,
             # Go through all plugin parameters
             for p_name, p_dict in plugin_data.items():
                 new_rst_file.write('\n'
-                       + indent_multi_line_str
+                       + pu.indent_multi_line_str
                            (get_parameter_info(p_name, p_dict), 2))
 
         # Key to explain parameters
@@ -198,16 +198,16 @@ def get_parameter_info(p_name, parameter):
         val_p = parameter[key]
         if isinstance(val_p, dict):
             str_dict = print_parameter_dict(val_p, '', 2)
-            parameter_info += indent(key + ': \n' + str_dict )
+            parameter_info += pu.indent(key + ': \n' + str_dict )
         elif isinstance(val_p, str):
             if no_yaml_char(val_p):
-                parameter_info += indent(key + ': ' + str(val_p) + '\n')
+                parameter_info += pu.indent(key + ': ' + str(val_p) + '\n')
             else:
-                parameter_info += indent(key + ': "' + str(val_p) + '"\n')
+                parameter_info += pu.indent(key + ': "' + str(val_p) + '"\n')
         elif isinstance(val_p, type(None)):
-            parameter_info += indent(key + ':\n')
+            parameter_info += pu.indent(key + ':\n')
         else:
-            parameter_info += indent(key + ': ' + str(val_p) + '\n')
+            parameter_info += pu.indent(key + ': ' + str(val_p) + '\n')
 
     return parameter_info
 
@@ -221,28 +221,28 @@ def print_parameter_dict(input_dict, parameter_info, indent_level):
             indent_level += 1
             dict_str = print_parameter_dict(v, '', indent_level)
             indent_level -= 1
-            parameter_info += indent(k + ': \n' + dict_str , indent_level)
+            parameter_info += pu.indent(k + ': \n' + dict_str , indent_level)
         elif isinstance(v, str):
             # Check if the string contains characters which may need
             # to be surrounded by quotes
             if no_yaml_char(v):
-                parameter_info += indent(k + ': ' + str(v)
+                parameter_info += pu.indent(k + ': ' + str(v)
                                          + '\n', indent_level)
             else:
                 # Encase the string with quotation marks
-                parameter_info += indent(k + ': "' + str(v)
+                parameter_info += pu.indent(k + ': "' + str(v)
                                          + '"\n', indent_level)
         elif isinstance(v, type(None)):
-            parameter_info += indent(k + ':\n', indent_level)
+            parameter_info += pu.indent(k + ':\n', indent_level)
         elif isinstance(v, list):
             indent_level += 1
             list_str = ''
             for item in v:
-                list_str += indent( item + '\n', indent_level)
+                list_str += pu.indent( item + '\n', indent_level)
             indent_level -= 1
-            parameter_info += indent(k + ': \n' + list_str, indent_level)
+            parameter_info += pu.indent(k + ': \n' + list_str, indent_level)
         else:
-            parameter_info += indent(k + ': ' + str(v) + '\n', indent_level)
+            parameter_info += pu.indent(k + ': ' + str(v) + '\n', indent_level)
 
     return parameter_info
 
@@ -252,22 +252,6 @@ def no_yaml_char(s):
     from being applied. For example [] and ? and '
     """
     return bool(re.match(r'^[a-zA-Z0-9()%|#\"/._,+\-=: {}<>]*$', s))
-
-
-def indent_multi_line_str(text, indent_level=1, justify=False):
-    text = text.split('\n')
-    # Remove additional spacing on the left side so that text aligns
-    if justify is False:
-        text = [(' '*4*indent_level) + line for line in text]
-    else:
-        text = [(' '*4*indent_level) + line.lstrip() for line in text]
-    text = '\n'.join(text)
-    return text
-
-
-def indent(text, indent_level=1):
-    text = (' '*4*indent_level) + text
-    return text
 
 
 def write_citations_to_file(new_rst_file, plugin_citations):
@@ -297,7 +281,7 @@ def write_citations_to_file(new_rst_file, plugin_citations):
                                '""""""""""""""""""""""\n')
             new_rst_file.write('\n.. code-block:: none')
             new_rst_file.write('\n\n')
-            new_rst_file.write(indent_multi_line_str(bibtex, True))
+            new_rst_file.write(pu.indent_multi_line_str(bibtex, True))
             new_rst_file.write('\n')
 
         if endnote:
@@ -306,7 +290,7 @@ def write_citations_to_file(new_rst_file, plugin_citations):
                                '""""""""""""""""""""""\n')
             new_rst_file.write('\n.. code-block:: none')
             new_rst_file.write('\n\n')
-            new_rst_file.write(indent_multi_line_str
+            new_rst_file.write(pu.indent_multi_line_str
                                (endnote.encode('utf-8'), True))
             new_rst_file.write('\n')
 

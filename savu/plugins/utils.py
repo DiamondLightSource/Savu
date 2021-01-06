@@ -389,3 +389,18 @@ def create_dir(file_path):
     directory = os.path.dirname(file_path)
     if not os.path.exists(directory):
         os.makedirs(directory)
+
+def indent_multi_line_str(text, indent_level=1, justify=False):
+    text = text.split('\n')
+    # Remove additional spacing on the left side so that text aligns
+    if justify is False:
+        text = [(' '*4*indent_level) + line for line in text]
+    else:
+        text = [(' '*4*indent_level) + line.lstrip() for line in text]
+    text = '\n'.join(text)
+    return text
+
+
+def indent(text, indent_level=1):
+    text = (' '*4*indent_level) + text
+    return text
