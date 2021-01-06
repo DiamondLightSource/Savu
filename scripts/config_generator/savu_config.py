@@ -226,14 +226,16 @@ def _coll(content, arg):
     print('-'*40, '\n')
     return content
 
-
+@parse_args
+@error_catcher
 def _clear(content, arg):
     """ Clear the current plugin list."""
     content.clear(check=raw_input("Are you sure you want to clear the current "
                   "plugin list? [y/N]"))
     return content
 
-
+@parse_args
+@error_catcher
 def _exit(content, arg):
     """ Close the program."""
     content.set_finished(check=raw_input("Are you sure? [y/N]"))
@@ -246,8 +248,10 @@ def _level(content, args):
     content.level(args.level)
     return content
 
-
+@parse_args
+@error_catcher
 def _history(content, arg):
+    """ View the history of previous commands """
     hlen = utils.readline.get_current_history_length()
     for i in range(hlen):
         print("%5i : %s" % (i, utils.readline.get_history_item(i)))

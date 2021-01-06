@@ -221,6 +221,30 @@ def _level_arg_parser(args, desc):
     return __arg_parser(parser, args, 'level')
 
 
+def _clear_arg_parser(args, desc):
+    """ Argument parser for clear command. """
+    parser = ArgumentParser(prog='clear', description=desc)
+    return __arg_parser(parser, args, 'clear')
+
+
+def _history_arg_parser(args, desc):
+    """ Argument parser for history command. """
+    parser = ArgumentParser(prog='history', description=desc)
+    return __arg_parser(parser, args, 'history')
+
+
+def _exit_arg_parser(args, desc):
+    """ Argument parser for exit command """
+    parser = ArgumentParser(prog='exit', description=desc)
+    return __arg_parser(parser, args, 'exit')
+
+
+def _help_arg_parser(args, desc):
+    """ Argument parser for help command """
+    parser = ArgumentParser(prog='help', description=desc)
+    return __arg_parser(parser, args, 'help')
+
+
 def _get_verbosity(args):
     if args.vverbose:
         return '-vv'
