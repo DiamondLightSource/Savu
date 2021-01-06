@@ -13,35 +13,14 @@ of the data location and format along with important metadata such as shape, \
 axis information, and associated patterns (e.g. sinogram, projection). \
 Therefore, the choice of loader is dependent upon the format of the data.
 
-Tasks which plugins may perform:
 
-    - Absorption correction
-    - Alignment
-    - Analysis
-    - Centering
-    - Corrections
-    - Filtering
-    - Fitting
-    - Ring removal
-    - Reconstruction
-    - Segmentation
+Plugin Documentation
+---------------------
 
-For a list of available plugins \
-see :ref:`plugin documentation<plugin_documentation>`.
+Below is a list of the current plugins grouped by type. You may also use the
+search bar on the left to find a specific one.
 
-1. Plugin Module
-================
+.. toctree::
+   :maxdepth: 2
 
-This file contains your plugin definitions and statements.
-
-For a list of templates, visit the :ref:`plugin template<plugin_templates>` page.
-
-
-2. Plugin Tools Module
-======================
-
-This tools module contains the parameter details and citations in a yaml format. You can \
-assign each parameter a data type, a description, a visibility level and a \
-default value.
-
-View further information about :ref:`plugin tools<toolclassguide>`
+   ../reference/plugin_documentation

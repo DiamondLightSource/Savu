@@ -104,10 +104,10 @@ Initialise the class example, with the class NoProcess replacing the template na
 
 Below is an example of the template plugin class.
 
-.. literalinclude:: ../files_and_images/documentation/plugin_name_example.py
+.. literalinclude:: ../files_and_images/plugin_guides/plugin_name_example.py
     :language: python
 
-You can download it :download:`here <../files_and_images/documentation/plugin_name_example.py>`.
+You can download it :download:`here <../files_and_images/plugin_guides/plugin_name_example.py>`.
 An extended version is available :download:`here <../../../plugin_examples/plugin_templates/general/plugin_template1_with_detailed_notes.py>`.
 All template downloads are available here: :ref:`plugin_templates`.
 
@@ -608,7 +608,7 @@ https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html
 
 An example would be:
 
-.. literalinclude:: ../files_and_images/documentation/plugin_name_doc.rst
+.. literalinclude:: ../files_and_images/plugin_guides/plugin_name_doc.rst
    :language: rst
    :start-after: :orphan:
 
@@ -622,7 +622,7 @@ search bar on the left to find a specific one.
 .. toctree::
    :maxdepth: 2
 
-   ../plugin_documentation
+   ../reference/plugin_documentation
 
 
 3. How to create a test

@@ -10,14 +10,62 @@
 Table of Contents
 =================
 
-.. toctree::
+.. _intro_content:
 
-   about
-   installation
-   user_guides/user_guide
-   dev_guides/dev_guide
-   plugin_documentation
-   plugin_autosummary
+.. toctree::
+    :caption: Introduction
+    :glob:
+
+    introduction/*
+
+.. _how_to_content:
+
+.. toctree::
+    :caption: How To's
+    :maxdepth: 2
+
+    howto/dls_installer
+    howto/run_savu
+    howto/process_list
+    howto/special_features
+    howto/view_output
+    dev_guides/dev_overview
+
+.. _tutorials_content:
+
+.. toctree::
+    :caption: Tutorials
+    :glob:
+
+    tutorials/*
+
+.. _explanation:
+
+.. toctree::
+    :caption: Explanation
+    :maxdepth: 2
+
+    explanation/process_lists
+    explanation/plugins
+    explanation/confluence_pages
+
+.. _reference_content:
+
+.. toctree::
+    :caption: Reference
+    :maxdepth: 2
+
+    reference/savu_commands
+    reference/savu_config_commands
+    reference/plugin_documentation
+
+.. _api_content:
+
+.. toctree::
+    :caption: API
+    :maxdepth: 2
+
+    reference/plugin_autosummary
 
 Indices and tables
 ==================

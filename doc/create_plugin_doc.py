@@ -95,8 +95,8 @@ def create_plugin_documentation(files, output, module_name, savu_base_path):
                 create_documentation_directory(savu_base_path, fi)
                 # Create an empty rst file inside this directory where
                 # the plugin tools documentation will be stored
-                full_file_path = savu_base_path + 'doc/source/' + output \
-                                 + '/' + file_path + '.rst'
+                full_file_path = savu_base_path + 'doc/source/reference/' \
+                                 + output + '/' + file_path + '.rst'
                 pu.create_dir(full_file_path)
                 new_rst_file = open(full_file_path, 'w+')
                 # Populate this file
@@ -146,9 +146,9 @@ def populate_plugin_doc_files(new_rst_file, tool_class_list, file_path,
             new_rst_file.write(tool_class.__doc__)
 
         # Locate documentation file
-        doc_folder = savu_base_path + 'doc/source/documentation/'
+        doc_folder = savu_base_path + 'doc/source/explanation/'
         file_str = doc_folder + file_path + '_doc.rst'
-        inner_file_str = '/../documentation/' + file_path + '_doc.rst'
+        inner_file_str = '/../../../explanation/' + file_path + '_doc.rst'
 
         if os.path.isfile(file_str):
             # If there is a documentation file
@@ -176,7 +176,7 @@ def populate_plugin_doc_files(new_rst_file, tool_class_list, file_path,
         new_rst_file.write('\nKey\n^^^^^^^^^^\n')
         new_rst_file.write('\n')
         new_rst_file.write('.. literalinclude:: '
-                           '/../source/files_and_images/documentation/'
+                           '/../source/files_and_images/plugin_guides/'
                            'short_parameter_key.yaml')
         new_rst_file.write('\n    :language: yaml\n')
 
@@ -459,9 +459,10 @@ def create_documentation_directory(savu_base_path, plugin_file):
     documentation file and image folders
     """
     # Create directory inside
-    doc_path = savu_base_path + 'doc/source/documentation/plugins/'
+    doc_path = savu_base_path \
+               + 'doc/source/explanation/'
     doc_image_path = savu_base_path \
-        + 'doc/source/files_and_images/documentation/plugins/'
+        + 'doc/source/files_and_images/plugin_guides/plugins/'
 
     # find the directories to create
     doc_dir = doc_path + plugin_file
@@ -478,7 +479,7 @@ if __name__ == "__main__":
         os.path.dirname(os.path.realpath(__file__)).split('doc')[0]
 
     # open the autosummary file
-    f = open(savu_base_path + 'doc/source/' + rst_file, 'w')
+    f = open(savu_base_path + 'doc/source/reference/' + rst_file, 'w')
 
     document_title = convert_title(out_folder)
     f.write('.. _' + out_folder+':\n')
@@ -500,7 +501,7 @@ if __name__ == "__main__":
 
     # Only document the plugin python files
     # Create the directory if it does not exist
-    pu.create_dir(savu_base_path + 'doc/source/' + out_folder)
+    pu.create_dir(savu_base_path + 'doc/source/reference/' + out_folder)
 
     for root, dirs, files in os.walk(base_path, topdown=True):
         tools_files = [fi for fi in files if 'tools' in fi]
