@@ -55,8 +55,9 @@ Table of Contents
     :caption: Reference
     :maxdepth: 2
 
-    reference/savu_commands
-    reference/savu_config_commands
+    .. reference/savu_commands
+    .. reference/savu_config_commands
+
     reference/plugin_documentation
 
 .. _api_content:
