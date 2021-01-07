@@ -37,8 +37,8 @@ savu.data
 .. toctree::
    api/savu.data.chunking
    api/savu.data.experiment_collection
-   api/savu.data.plugin_list
    api/savu.data.framework_citations
+   api/savu.data.plugin_list
    api/savu.data.meta_data
 
 

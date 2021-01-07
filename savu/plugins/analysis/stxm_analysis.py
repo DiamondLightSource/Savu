@@ -91,7 +91,7 @@ class StxmAnalysis(BaseFilter, CpuPlugin):
                                     axis_labels={in_dataset[0]: axis_labels},
                                     shape=new_shape)
 
-        channel = {'core_dims': (-1,), 'slice_dims': range(len(new_shape)-1)}
+        channel = {'core_dims': (-1,), 'slice_dims': list(range(len(new_shape)-1))}
 
         bf.add_pattern("CHANNEL", **channel)
         df.add_pattern("CHANNEL", **channel)

@@ -25,7 +25,6 @@ import unittest
 import os
 
 from savu.data.plugin_list import PluginList
-import savu.test.test_utils as tu
 import savu.test.test_process_list_utils as tplu
 
 
@@ -51,9 +50,8 @@ class PluginCoverageTest(unittest.TestCase):
             try:
                 filename_nxs = os.path.basename(nxs)
                 nxs_in_tests_mod.append(filename_nxs)
-            except:
+            except Exception:
                 print("The failed basename file:", nxs)
-                pass
 
         # list all test process lists available in test_process_lists folder
         test_process_path = savu_base_path + 'test_data/test_process_lists'
@@ -86,14 +84,14 @@ class PluginCoverageTest(unittest.TestCase):
         uncovered = list(set(plugin_list).difference(set(tested_plugin_list)))
         for plugin in uncovered:
             print (plugin)
-        print ("===============================================================")
+        print("===============================================================")
 
-        print ("===============================================================")
-        print ("\nThe following process lists are redundant:\n")
+        print("===============================================================")
+        print("\nThe following process lists are redundant:\n")
         redundant = list(set(self.nxs_avail).difference(set(self.nxs_used)))
         for plugin in redundant:
             print (plugin)
-        print ("===============================================================")
+        print("===============================================================")
 
     def test_process_lists(self):
         # check for unused process lists
@@ -125,7 +123,7 @@ class PluginCoverageTest(unittest.TestCase):
                         plugin_names.append(p + '.py')
                 except ImportError as e:
                     print("Failed to run test as libraries not available (%s),"
-                           % (e) + " passing test")
+                          % (e) + " passing test")
         return list(set(plugin_names))
 
     def add_plugin(self, plugin_id):

@@ -98,14 +98,13 @@ class SinogramAlignment(BaseFilter, CpuPlugin):
         result = np.empty_like(data[0])
         for i in range(nFrames):
             self.sl[self.slice_dir] = i
-            sino = data[0][self.sl]
+            sino = data[0][tuple(self.sl)]
             if self.parameters['threshold']:
                 a, b = self.parameters['threshold'].split('.')
                 sino[sino > a] = b
             com_y = self.com_y if self.com_y is not None else self._com_y(sino)
             shifted = self._shift(sino, self.com_x, com_y)
-            result[self.sl] = \
-                shifted.reshape(shifted.shape[0], shifted.shape[1])
+            result[tuple(self.sl)] = shifted.reshape(shifted.shape[0], shifted.shape[1])
         return result
 
     def _sinfunc(self, data, a, b, c):

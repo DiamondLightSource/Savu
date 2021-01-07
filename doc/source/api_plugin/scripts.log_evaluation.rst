@@ -5,6 +5,7 @@ Submodules
 ----------
 
 .. toctree::
+   :maxdepth: 4
 
    scripts.log_evaluation.GraphicalThreadProfiler
    scripts.log_evaluation.GraphicalThreadProfiler_multi
@@ -15,6 +16,6 @@ Module contents
 ---------------
 
 .. automodule:: scripts.log_evaluation
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:

@@ -5,6 +5,7 @@ Submodules
 ----------
 
 .. toctree::
+   :maxdepth: 4
 
    savu.plugins.azimuthal_integrators.base_azimuthal_integrator
    savu.plugins.azimuthal_integrators.pyfai_azimuthal_integrator
@@ -15,6 +16,6 @@ Module contents
 ---------------
 
 .. automodule:: savu.plugins.azimuthal_integrators
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:

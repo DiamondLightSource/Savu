@@ -73,9 +73,9 @@ class StripBackground(BaseFilter, CpuPlugin):
         topedgerest = (x >= (npts-2*w)) & (x >= (npts-w))
 
         for k in range(its):
-            aved[mainpart] = (filtered[mainpartbottom] + filtered[mainpart] + filtered[mainparttop])/3. # works
-            aved[bottomedgemain] = (filtered[bottomedgemain] + filtered[bottomedgerest])/2.
-            aved[topedgemain] = (filtered[topedgemain] + filtered[topedgerest])/2.
+            aved[mainpart] = (filtered[mainpartbottom] + filtered[mainpart] + filtered[mainparttop]) / 3.0
+            aved[bottomedgemain] = (filtered[bottomedgemain] + filtered[bottomedgerest]) / 2.0
+            aved[topedgemain] = (filtered[topedgemain] + filtered[topedgerest]) / 2.0
             filtered[aved<filtered] = aved[aved<filtered]
             if not (k/float(smoothed)-k/int(smoothed)):
                 filtered=savgol_filter(filtered,35,5)
@@ -88,7 +88,7 @@ class StripBackground(BaseFilter, CpuPlugin):
     def setup(self):
         logging.debug('setting up the background subtraction')
         in_dataset, out_datasets = self.get_datasets()
-        #print in_dataset, out_datasets        
+        #print in_dataset, out_datasets
 
         in_meta = in_dataset[0].meta_data
         in_dictionary = in_meta.get_dictionary()
@@ -111,6 +111,6 @@ class StripBackground(BaseFilter, CpuPlugin):
 
     def get_max_frames(self):
         return 'single'
-        
+
     def nOutput_datasets(self):
         return 2

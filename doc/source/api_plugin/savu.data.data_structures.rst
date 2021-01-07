@@ -5,13 +5,15 @@ Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 4
 
-    savu.data.data_structures.data_types
+   savu.data.data_structures.data_types
 
 Submodules
 ----------
 
 .. toctree::
+   :maxdepth: 4
 
    savu.data.data_structures.data
    savu.data.data_structures.data_add_ons
@@ -25,6 +27,6 @@ Module contents
 ---------------
 
 .. automodule:: savu.data.data_structures
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:

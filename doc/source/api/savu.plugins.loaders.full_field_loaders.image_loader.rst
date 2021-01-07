@@ -2,7 +2,7 @@ savu.plugins.loaders.full\_field\_loaders.image\_loader module
 ==============================================================
 
 .. automodule:: savu.plugins.loaders.full_field_loaders.image_loader
-    :members:
-    :private-members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:

@@ -60,11 +60,11 @@ class EdfSaver(BaseSaver, CpuPlugin):
         self.axis_info = []
         k = 0
         for ix in self.axes:
-            axis_name = ix.keys()[0]
+            axis_name = list(ix.keys())[0]
             try:
                 foo = in_datasets[0].meta_data.get(axis_name)# take the first key
             except KeyError:
-                foo = np.array(range(in_datasets[0].get_shape()[sd[k]])) # if it doesn't exis then replace it with a range
+                foo = np.array(list(range(in_datasets[0].get_shape()[sd[k]]))) # if it doesn't exis then replace it with a range
             k+=1
             self.axis_info.append(foo)
         #self.axis_info = [in_datasets[0].meta_data.get(ix) for ix in self.axes]

@@ -1,0 +1,54 @@
+# ================================================================================================== #
+#                                          SYNTAX NOTES:                                             #
+# 1) dfile and dshape are keywords giving access to the input data file and data shape respectively. #
+# 2) $ sign at the beginning of a statement indicates the statement should be executed.              #
+# 3) end a parameter name with 'file' (e.g. cfile) to denote this is a file.                          #
+# ================================================================================================== #
+
+inherit: None
+
+fluo:
+    data: # required
+        #file       : use this to override the input file  # optional
+        #folder     : use this to override the input file with a folder
+        path        : entry1/xspress3/AllElementSum # required if data is in hdf5 format
+
+    params:  # optional key, value pairs
+        gain        : 0.01
+        npts        : $dshape[idx_energy]
+        idx_rot     : 0
+        idx_x       : 1
+        idx_energy  : 2
+
+    axis_labels:  # required, and all keys in dicts required
+        0:
+            dim     : $idx_rot
+            name    : rotation_angle
+            value   : $dfile['entry1/raster_counterTimer01/sc_sample_thetafine'].value[:,0]
+            units   : degrees
+        1:
+            dim     : $idx_x
+            name    : x
+            value   : $dfile['entry1/raster_counterTimer01/traj1ContiniousX'].value
+            units   : mm
+        2:
+            dim     : $idx_energy
+            name    : energy
+            value   : $np.arange(npts)*gain
+            units   : eV
+
+    patterns:   # at least one pattern is required
+        SINOGRAM:
+            core_dims   : $(idx_rot, idx_x)
+            slice_dims  : $(idx_energy,)
+        PROJECTION:
+            core_dims   : $(idx_x,)
+            slice_dims  : $(idx_rot, idx_energy)
+        SPECTRUM:
+            core_dims   : $(idx_energy,)
+            slice_dims  : $(idx_rot, idx_x)
+
+    metadata:  # optional, additional information associated with the dataset
+        mono_energy:
+            value   : $dfile['entry1/instrument/DCM/energy'].value/1e3
+            unit    : eV

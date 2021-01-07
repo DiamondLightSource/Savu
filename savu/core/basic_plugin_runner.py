@@ -71,7 +71,7 @@ class BasicPluginRunner(object):
             count += 1
 
         # terminate any remaining datasets
-        for data in self.exp.index['in_data'].values():
+        for data in list(self.exp.index['in_data'].values()):
             self._transport_terminate_dataset(data)
 
         cu.user_message("***********************")
