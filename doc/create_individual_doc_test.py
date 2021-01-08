@@ -136,8 +136,9 @@ def get_unittest_process_list_function(process_lists):
     indent = 25 * ' '
     newline_str = ',\n'+indent
     # Create the list as a string
-    process_list_format = map(lambda x: '\"' + x + '\"', process_lists)
-    process_list_format =  (newline_str.join(map(str, process_list_format)))
+    process_list_format = list(map(lambda x: '\"' + x + '\"', process_lists))
+    process_list_format = \
+        (newline_str.join(list(map(str, process_list_format))))
 
     refresh_process_start = '''
     def refresh_process_lists(self):
@@ -185,7 +186,7 @@ def get_unittest_commands(testing_lines, process_lists, file_name):
     indent = 22 * ' '
     newline_str = '\",\n' + indent
     # Create the list as a string
-    test_list = map(lambda x: '\"' + x + newline_str, testing_lines)
+    test_list = list(map(lambda x: '\"' + x + newline_str, testing_lines))
 
     # Set up the unittest
     unittest_function_start = '''    

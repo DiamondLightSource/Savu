@@ -47,8 +47,8 @@ class PluginParameters(object):
     def populate_parameters(self, tools_list):
         """ Set the plugin parameters for each of the tools classes
         """
-        map(lambda tool_class: self._set_plugin_parameters(tool_class),
-            tools_list)
+        list(map(lambda tool_class: self._set_plugin_parameters(tool_class),
+                  tools_list))
 
     def _set_plugin_parameters(self, tool_class):
         """ Load the parameters for each base class, c, check the
@@ -431,8 +431,8 @@ class PluginCitations(object):
         """ Set the citations for each of the tools classes
         Change to list() for Python 3
         """
-        map(lambda tool_class: self._set_plugin_citations(tool_class),
-            tools_list)
+        list(map(lambda tool_class: self._set_plugin_citations(tool_class),
+            tools_list))
 
     def _set_plugin_citations(self, tool_class):
         """ Load the parameters for each base class and set values"""

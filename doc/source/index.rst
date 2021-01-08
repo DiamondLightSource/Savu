@@ -24,7 +24,7 @@ Table of Contents
     :caption: How To's
     :maxdepth: 2
 
-    howto/dls_installer
+    howto/savu_hpc
     howto/run_savu
     howto/process_list
     howto/special_features

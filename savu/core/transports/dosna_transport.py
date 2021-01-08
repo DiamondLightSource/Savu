@@ -94,7 +94,7 @@ class DosnaTransport(BaseTransport):
         # loaders have completed now revert back to DosnaTransport, so any
         # output datasets created by a plugin will use this.
         self.hdf5 = Hdf5Utils(self.exp)
-        exp_coll = self.exp._get_experiment_collection()
+        exp_coll = self.exp._get_collection()
         self.data_flow = self.exp.meta_data.plugin_list._get_dataset_flow()
         #self.exp.meta_data.set('transport', 'dosna')
         plist = self.exp.meta_data.plugin_list
@@ -163,7 +163,7 @@ class DosnaTransport(BaseTransport):
         if 'current_and_next' in self.exp.meta_data.get_dictionary():
             current_and_next = self.exp.meta_data.get('current_and_next')
 
-        for key in out_data_dict.keys():
+        for key in list(out_data_dict.keys()):
             out_data = out_data_dict[key]
             filename = self.exp.meta_data.get(["filename", key])
             self._create_dosna_dataset(filename, out_data, key,

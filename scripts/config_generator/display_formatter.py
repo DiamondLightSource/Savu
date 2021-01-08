@@ -353,7 +353,7 @@ class DispDisplay(DisplayFormatter):
         active = \
             '***OFF***' if 'active' in p_dict and not p_dict['active'] else ''
         p_dict['data'] = self._remove_quotes(p_dict['data'])
-        pos = p_dict['pos'].strip() if 'pos' in p_dict.keys() else count
+        pos = p_dict['pos'].strip() if 'pos' in list(p_dict.keys()) else count
         fore = Fore.RED + Style.DIM if active else Fore.LIGHTWHITE_EX
         back = Back.LIGHTBLACK_EX
         return self._get_plugin_title(p_dict, width, fore, back,
@@ -397,7 +397,7 @@ class DispDisplay(DisplayFormatter):
     def _remove_quotes(self, data_dict):
         """ Remove quotes around variables for display
         """
-        for key, val in data_dict.iteritems():
+        for key, val in data_dict.items():
             val = str(val).replace("'", "")
             data_dict[key] = val
         return data_dict
@@ -409,7 +409,7 @@ class DispDisplay(DisplayFormatter):
             notice = Back.RED + Fore.WHITE + "IMPORTANT PLUGIN NOTICES" +\
                 Back.RESET + Fore.RESET + "\n"
             border = "*"*width + '\n'
-            print (border + notice + warnings + '\n'+border)
+            print((border + notice + warnings + '\n'+border))
 
     def get_warnings(self, width):
         # remove display styling outside of this class

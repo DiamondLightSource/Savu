@@ -32,20 +32,22 @@ class GmmSegment3d(Plugin, MultiThreadedPlugin):
     """
     A Plugin to segment data using Gaussian Mixtures from scikit
 
-    :param classes: The number of classes for GMM. Default: 5.
+    :param classes: The number of classes for GMM. Default: 4.
     """
 
     def __init__(self):
         super(GmmSegment3d, self).__init__("GmmSegment3d")
 
     def setup(self):
-    
+
         in_dataset, out_dataset = self.get_datasets()
         out_dataset[0].create_dataset(in_dataset[0], dtype=np.uint8)
         in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup('VOLUME_3D', 'single')
-        out_pData[0].plugin_data_setup('VOLUME_3D', 'single')
-        
+
+        getall = ["VOLUME_XZ", "voxel_y"]
+        in_pData[0].plugin_data_setup('VOLUME_3D', 'single', getall=getall)
+        out_pData[0].plugin_data_setup('VOLUME_3D', 'single', getall=getall)
+
     def pre_process(self):
         # extract given parameters
         self.classes = self.parameters['classes']
@@ -58,9 +60,10 @@ class GmmSegment3d(Plugin, MultiThreadedPlugin):
             Nsize3 = 1
         if (dimensdata == 3):
             (Nsize1, Nsize2, Nsize3) = np.shape(data[0])
-        
+
         inputdata = data[0].reshape((Nsize1*Nsize2*Nsize3), 1)/np.max(data[0])
-        
+
+        #run classification and segmentation
         classif = GaussianMixture(n_components=self.classes, covariance_type="tied")
         classif.fit(inputdata)
         cluster = classif.predict(inputdata)
@@ -72,9 +75,8 @@ class GmmSegment3d(Plugin, MultiThreadedPlugin):
         maskGMM = segm.astype(np.float64) / np.max(segm)
         maskGMM = 255 * maskGMM # Now scale by 255
         maskGMM = maskGMM.astype(np.uint8) # obtain the GMM mask
-            
         return [maskGMM]
-    
+
     def nInput_datasets(self):
         return 1
     def nOutput_datasets(self):

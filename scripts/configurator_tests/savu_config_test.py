@@ -7,9 +7,11 @@
 
 """
 
-from __future__ import print_function
-
 import unittest
+from mock import patch
+from io import StringIO
+
+from scripts.config_generator import savu_config
 
 import scripts.configurator_tests.savu_config_test_utils as sctu
 
@@ -69,6 +71,7 @@ class SavuConfigTest(unittest.TestCase):
                       'y']
         output_checks = ['Exception']
         sctu.savu_config_runner(input_list, output_checks)
+
 
 
 if __name__ == "__main__":

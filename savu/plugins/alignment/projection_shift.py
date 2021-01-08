@@ -173,10 +173,10 @@ class ProjectionShift(BaseFilter, CpuPlugin):
         return self._calculate_new_shift_array(np.array(new_shift))
 
     def _calculate_frame_list(self, frames):
-        sixes = zip(*(frames[i:] for i in xrange(6)))
-        fives = zip(*(frames[i:] for i in xrange(5)))
-        fours = zip(*(frames[i:] for i in xrange(4)))
-        threes = zip(*(frames[i:] for i in xrange(3)))
+        sixes = list(zip(*(frames[i:] for i in range(6))))
+        fives = list(zip(*(frames[i:] for i in range(5))))
+        fours = list(zip(*(frames[i:] for i in range(4))))
+        threes = list(zip(*(frames[i:] for i in range(3))))
         return sixes + fives + fours + threes
 
     def _calculate_new_shift_array(self, shift):

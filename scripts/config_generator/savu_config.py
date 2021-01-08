@@ -31,20 +31,20 @@ logger = logging.getLogger('documentationLog')
 import warnings
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
-    from content import Content
-    from completer import Completer
-    from display_formatter import ListDisplay, DispDisplay, CiteDisplay
-    import arg_parsers as parsers
+    from .content import Content
+    from .completer import Completer
+    from .display_formatter import ListDisplay, DispDisplay, CiteDisplay
+    from . import arg_parsers as parsers
     from savu.plugins import utils as pu
-    import config_utils as utils
-    from config_utils import parse_args
-    from config_utils import error_catcher
+    from . import config_utils as utils
+    from .config_utils import parse_args
+    from .config_utils import error_catcher
 
 
 def _help(content, args):
     """ Display the help information"""
-    print('%s Savu (local) configurator commands %s\n' % tuple(['*'*21]*2))
-    for key in commands.keys():
+    print('%s Savu configurator commands %s\n' % tuple(['*'*21]*2))
+    for key in list(commands.keys()):
         doc = commands[key].__doc__
         if doc:
             print("%8s : %s" % (key, commands[key].__doc__))
@@ -110,8 +110,9 @@ def _save(content, args):
         content.plugin_list._check_loaders()
         out_file = content.filename if args.input else args.filepath
         content.check_file(out_file)
+        print()
         DispDisplay(content.plugin_list)._notices()
-        content.save(out_file, check=raw_input("Are you sure you want to save the "
+        content.save(out_file, check=input("Are you sure you want to save the "
                      "current data to %s' [y/N]" % (out_file)),
                      template=args.template)
     else:
@@ -230,7 +231,7 @@ def _coll(content, arg):
 @error_catcher
 def _clear(content, arg):
     """ Clear the current plugin list."""
-    content.clear(check=raw_input("Are you sure you want to clear the current "
+    content.clear(check=input("Are you sure you want to clear the current "
                   "plugin list? [y/N]"))
     return content
 
@@ -238,7 +239,7 @@ def _clear(content, arg):
 @error_catcher
 def _exit(content, arg):
     """ Close the program."""
-    content.set_finished(check=raw_input("Are you sure? [y/N]"))
+    content.set_finished(check=input("Are you sure? [y/N]"))
     return content
 
 @parse_args
@@ -277,12 +278,27 @@ commands = {'open': _open,
             'history': _history}
 
 
-def main():
+def main(test=False):
+    """
+    :param test: If test is True the last argument from sys.argv is removed,
+                 as it contains the directory of the test scripts, which fails the
+                 parsing of the arguments as it has an unexpected argument.
+
+                 If test is False then nothing is touched.
+    """
 
     print("Running the configurator")
-    # required for travis tests
-    if len(sys.argv) > 2 and sys.argv[-2] == 'scripts/configurator_tests/':
-        sys.argv = [sys.argv[:-2]]
+    # required for running the tests locally or on travis
+    # drops the last argument from pytest which is the test file/module
+    if test:
+        try:
+            # find where the /scripts argument is
+            index_of_scripts_argument = ["scripts" in arg for arg in sys.argv].index(True)
+            # remove it, including every arguments after it (e.g --cov)
+            sys.argv = sys.argv[:index_of_scripts_argument]
+        except ValueError:
+            # scripts was not part of the arguments passed in by the test
+            pass
 
     args = parsers._config_arg_parser()
     if args.error:
@@ -296,6 +312,7 @@ def main():
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
+        # imports all the (working) plugin modules
         content.failed = utils.populate_plugins(error_mode=args.error,
                                                 examples=args.examples)
 
@@ -313,12 +330,15 @@ def main():
 
     while True:
         try:
-            in_text = raw_input(">>> ").strip()
+            in_text = input(">>> ").strip()
             in_list = in_text.split(' ', 1)
             logger.debug('TEST COMMAND: ' + in_text)
         except KeyboardInterrupt:
             print()
             continue
+        except EOFError:
+            # makes possible exiting on CTRL + D (EOF, like Python interpreter)
+            break
 
         command, arg = in_list if len(in_list) == 2 else in_list+['']
         command = command if command else 'help'

@@ -76,7 +76,7 @@ class VoCenteringIterative(BaseFilter, IterativePlugin):
 
     def _create_mask(self, Nrow, Ncol, obj_radius):
         du, dv = 1.0/Ncol, (Nrow-1.0)/(Nrow*2.0*math.pi)
-        cen_row, cen_col = int(np.ceil(Nrow/2)-1), int(np.ceil(Ncol/2)-1)
+        cen_row, cen_col = int(np.ceil(Nrow / 2.0)-1), int(np.ceil(Ncol / 2.0)-1)
         drop = self.parameters['row_drop']
         mask = np.zeros((Nrow, Ncol), dtype=np.float32)
         for i in range(Nrow):
@@ -97,7 +97,7 @@ class VoCenteringIterative(BaseFilter, IterativePlugin):
         else:
             in_mData = self.get_in_meta_data()[0]
             shift = centre - in_mData['centre'] if 'centre' in \
-                in_mData.get_dictionary().keys() else 0
+                list(in_mData.get_dictionary().keys()) else 0
         return int(shift)
 
     def _coarse_search(self, sino, list_shift):
@@ -127,7 +127,7 @@ class VoCenteringIterative(BaseFilter, IterativePlugin):
 
     def _fine_search(self, sino, raw_cor):
         (Nrow, Ncol) = sino.shape
-        centerfliplr = (Ncol + 1.0)/2.0-1.0
+        centerfliplr = (Ncol + 1.0) / 2.0 - 1.0
         # Use to shift the sino2 to the raw CoR
         shiftsino = np.int16(2*(raw_cor-centerfliplr))
         sino2 = np.roll(np.fliplr(sino[1:]), shiftsino, axis=1)
@@ -159,7 +159,7 @@ class VoCenteringIterative(BaseFilter, IterativePlugin):
                 fft.fft2(sinojoin[:, lefttake:righttake + 1])))*mask)
             num1 = num1 + 1
         minpos = np.argmin(listmetric)
-        rotcenter = raw_cor + listshift[minpos]/2.0
+        rotcenter = raw_cor + listshift[minpos] / 2.0
         return rotcenter
 
     def _get_listshift(self):
@@ -203,7 +203,7 @@ class VoCenteringIterative(BaseFilter, IterativePlugin):
         self.downlevel = 4 if Ncol > 1800 else 1
         self.downsample = slice(0, Ncol, self.downlevel)
         Ncol_downsample = len(np.arange(0, Ncol, self.downlevel))
-        self.centre_fliplr = (Ncol_downsample - 1.0)/2.0
+        self.centre_fliplr = (Ncol_downsample - 1.0) / 2.0
         self.start_shift = self._get_start_shift(self.centre_fliplr)*2
         self.boundary = int(np.ceil(Ncol/4.0))
 
@@ -243,7 +243,7 @@ class VoCenteringIterative(BaseFilter, IterativePlugin):
         minpos = np.argmin(metric)
         dist = min(abs(len(shift) - minpos), -minpos)
 
-        rot_centre = (self.centre_fliplr + shift[minpos]/2.0)*self.downlevel
+        rot_centre = (self.centre_fliplr + shift[minpos] / 2.0)*self.downlevel
         peaks = self._find_peaks(metric)
 
         good_nPeaks = True
@@ -397,7 +397,7 @@ class VoCenteringIterative(BaseFilter, IterativePlugin):
         self._create_metadata_dataset(out_dataset[0], new_shape)
         self._create_metadata_dataset(out_dataset[1], self.orig_shape)
         self._create_metadata_dataset(out_dataset[2], new_shape)
-        
+
         # output metric
         new_shape = (np.prod(np.array(fullData.get_shape())[slice_dirs]), 21)
         self._create_metadata_dataset(out_dataset[3], new_shape)

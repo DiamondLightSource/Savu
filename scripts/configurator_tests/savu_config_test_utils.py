@@ -25,7 +25,7 @@
 import sys
 
 from mock import patch
-from StringIO import StringIO
+from io import StringIO
 
 from scripts.config_generator import savu_config
 
@@ -39,12 +39,12 @@ def savu_config_runner(input_list, output_checks,
     :param error_str: If true, then make sure that the error message
      is not displayed inside the output text
     """
-    with patch('__builtin__.raw_input', side_effect=input_list):
+    with patch('builtins.input', side_effect=input_list):
         saved_stdout = sys.stdout
         try:
             out = StringIO()
             sys.stdout = out
-            savu_config.main()
+            savu_config.main(test=True)
             output = out.getvalue().strip()
             for check in output_checks:
                 if error_str:

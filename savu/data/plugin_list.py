@@ -22,24 +22,23 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
-import os
-import re
 import ast
-import yaml
-import h5py
-import json
 import copy
 import inspect
+import json
 import logging
-
-import numpy as np
+import os
+import re
 from collections import defaultdict
 
-import savu.plugins.utils as pu
-from savu.data.meta_data import MetaData
+import h5py
+import numpy as np
+import yaml
+
 import savu.data.framework_citations as fc
 import savu.plugins.loaders.utils.yaml_utils as yu
-
+import savu.plugins.utils as pu
+from savu.data.meta_data import MetaData
 
 NX_CLASS = 'NX_class'
 
@@ -77,8 +76,7 @@ class PluginList(object):
     def __get_json_keys(self):
         return ['data']
 
-    def _populate_plugin_list(self, filename, activePass=False,
-                              template=False):
+    def _populate_plugin_list(self, filename, active_pass=False, template=False):
         """ Populate the plugin list from a nexus file. """
         plugin_file = h5py.File(filename, 'r')
 
@@ -89,18 +87,18 @@ class PluginList(object):
         self.plugin_list = []
         single_val = ['name', 'id', 'pos', 'active']
         exclude = ['citation']
-        for key in plugin_group.keys():
+        for group in plugin_group.keys():
             plugin = self._get_plugin_entry_template()
-            entry_keys = plugin_group[key].keys()
-            json_keys = [k for k in entry_keys for e in exclude if k not in
-                         single_val and e not in k]
+            entry_keys = plugin_group[group].keys()
+            parameters = [k for k in entry_keys for e in exclude if k not in
+                          single_val and e not in k]
 
             if 'active' in entry_keys:
-                plugin['active'] = plugin_group[key]['active'][0]
+                plugin['active'] = plugin_group[group]['active'][0]
 
-            if plugin['active'] or activePass:
-                plugin['name'] = plugin_group[key]['name'][0]
-                plugin['id'] = plugin_group[key]['id'][0]
+            if plugin['active'] or active_pass:
+                plugin['name'] = plugin_group[group]['name'][0].decode("utf-8")
+                plugin['id'] = plugin_group[group]['id'][0].decode("utf-8")
 
                 # Load the related class
                 plugin_class = pu.load_class(plugin_group[key]['id'][0])()
@@ -110,11 +108,13 @@ class PluginList(object):
                 plugin['doc'] = plugin_class.docstring_info
                 plugin['tools'] = plugin_class.tools
                 plugin['param'] = plugin_class.p_dict
-                plugin['pos'] = key.encode('ascii').strip()
+                plugin['pos'] = group.encode('ascii').strip()
 
-                for jkey in json_keys:
-                    plugin[jkey] = \
-                        self._byteify(json.loads(plugin_group[key][jkey][0]))
+                for param in parameters:
+                    try:
+                        plugin[param] = json.loads(plugin_group[group][param][0])
+                    except ValueError as e:
+                        raise ValueError(f"Error: {e}\n Could not parse key '{param}' from group '{group}' as JSON")
                 self.plugin_list.append(plugin)
 
         if template:
@@ -129,10 +129,10 @@ class PluginList(object):
             entry = nxs_file.require_group('entry')
 
             self._save_framework_citations(self._overwrite_group(
-                    entry, 'framework_citations', 'NXcollection'))
+                entry, 'framework_citations', 'NXcollection'))
 
             self.__save_savu_notes(self._overwrite_group(
-                    entry, 'savu_notes', 'NXnote'))
+                entry, 'savu_notes', 'NXnote'))
 
             plugins_group = self._overwrite_group(entry, 'plugin', 'NXprocess')
 
@@ -147,8 +147,8 @@ class PluginList(object):
     def _overwrite_group(self, entry, name, nxclass):
         if name in entry:
             entry.pop(name)
-        group = entry.create_group(name)
-        group.attrs[NX_CLASS] = nxclass
+        group = entry.create_group(name.encode("ascii"))
+        group.attrs[NX_CLASS] = nxclass.encode("ascii")
         return group
 
     def __save_savu_notes(self, notes):
@@ -157,15 +157,16 @@ class PluginList(object):
 
     def __populate_plugins_group(self, plugins_group, plugin, count):
         if 'pos' in plugin.keys():
-            num = int(re.findall('\d+', plugin['pos'])[0])
+            num = int(re.findall(r'\d+', plugin['pos'])[0])
             letter = re.findall('[a-z]', plugin['pos'])
             letter = letter[0] if letter else ""
-            plugin_group = \
-                plugins_group.create_group('%i%s' % (num, letter))
+            group_name = '%i%s' % (num, letter)
         else:
-            plugin_group = plugins_group.create_group(count)
+            group_name = count
 
-        plugin_group.attrs[NX_CLASS] = 'NXnote'
+        plugin_group = plugins_group.create_group(group_name.encode("ascii"))
+
+        plugin_group.attrs[NX_CLASS] = 'NXnote'.encode('ascii')
         required_keys = self._get_plugin_entry_template().keys()
         json_keys = self.__get_json_keys()
 
@@ -177,34 +178,40 @@ class PluginList(object):
         for key in required_keys:
             # only need to apply dumps if saving in configurator
             data = self.__dumps(plugin[key]) if key == 'data' else plugin[key]
-            array = np.array([json.dumps(data)]) if key in json_keys else\
-                np.array([plugin[key]])
-            plugin_group.create_dataset(key, array.shape, array.dtype, array)
+
+            # get the string value
+            data = json.dumps(data) if key in json_keys else plugin[key]
+            # if the data is string it has to be encoded to ascii so that
+            # hdf5 can save out the bytes
+            if isinstance(data, str):
+                data = data.encode("ascii")
+            data = np.array([data])
+            plugin_group.create_dataset(key.encode('ascii'), data.shape, data.dtype, data)
 
     def __dumps(self, data_dict):
         """ Replace any missing quotes around variables
         """
-        for key, val in data_dict.iteritems():
+        for key, val in data_dict.items():
             if isinstance(val, str):
                 try:
                     data_dict[key] = ast.literal_eval(val)
                     continue
-                except:
+                except Exception:
                     pass
                 try:
                     data_dict[key] = yaml.load(val, Loader=yaml.SafeLoader)
                     continue
-                except:
+                except Exception:
                     pass
                 try:
-                    isdict = re.findall("[\{\}]+", val)
+                    isdict = re.findall(r"[\{\}]+", val)
                     if isdict:
                         val = val.replace("[", "'[").replace("]", "]'")
                         data_dict[key] = self.__dumps(yaml.load(val))
                     else:
                         data_dict[key] = pu.parse_config_string(val)
                     continue
-                except:
+                except Exception:
                     # for when parameter tuning with lists is added to the framework
                     if len(val.split(';')) > 1:
                         pass
@@ -230,7 +237,6 @@ class PluginList(object):
 
     def _save_framework_citations(self, group):
         framework_cites = fc.get_framework_citations()
-        count = 0
         for cite in framework_cites:
             citation_group = group.require_group(cite['short_name_article'])
             citation = CitationInformation(**cite)
@@ -238,24 +244,23 @@ class PluginList(object):
             for key, value in cite.iteritems():
                 exec('citation.' + key + '= value')
             citation.write(citation_group)
-            count += 1
 
     def _get_docstring_info(self, plugin):
         plugin_inst = pu.plugins[plugin]()
         plugin_inst._populate_default_parameters()
         return plugin_inst.docstring_info
 
-    def _byteify(self, input):
-        if isinstance(input, dict):
-            return {self._byteify(key): self._byteify(value)
-                    for key, value in input.iteritems()}
-        elif isinstance(input, list):
-            temp = [self._byteify(element) for element in input]
-            return temp
-        elif isinstance(input, unicode):
-            return input.encode('utf-8')
-        else:
-            return input
+    # def _byteify(self, input):
+    #     if isinstance(input, dict):
+    #         return {self._byteify(key): self._byteify(value)
+    #                 for key, value in input.items()}
+    #     elif isinstance(input, list):
+    #         temp = [self._byteify(element) for element in input]
+    #         return temp
+    #     elif isinstance(input, str):
+    #         return input.encode('utf-8')
+    #     else:
+    #         return input
 
     def _set_datasets_list(self, plugin):
         in_pData, out_pData = plugin.get_plugin_datasets()
@@ -269,9 +274,9 @@ class PluginList(object):
         for d in data:
             name = d.data_obj.get_name()
             pattern = copy.deepcopy(d.get_pattern())
-            pattern[pattern.keys()[0]]['max_frames_transfer'] = \
+            pattern[list(pattern.keys())[0]]['max_frames_transfer'] = \
                 d.meta_data.get('max_frames_transfer')
-            pattern[pattern.keys()[0]]['transfer_shape'] = \
+            pattern[list(pattern.keys())[0]]['transfer_shape'] = \
                 d.meta_data.get('transfer_shape')
             data_list.append({'name': name, 'pattern': pattern})
         return data_list
@@ -331,7 +336,7 @@ class PluginList(object):
         loaders = self._get_loaders_index()
 
         if loaders:
-            if loaders[0] is not 0 or loaders[-1]+1 is not len(loaders):
+            if loaders[0] != 0 or loaders[-1] + 1 != len(loaders):
                 raise Exception("All loader plugins must be at the beginning "
                                 "of the process list")
             if len(loaders) > 1:
@@ -344,32 +349,37 @@ class PluginList(object):
         """ Add savers for missing datasets. """
         data_names = exp.index['in_data'].keys()
         saved_data = []
+
         for i in self._get_savers_index():
             saved_data.append(self.plugin_list[i]['data']['in_datasets'])
         saved_data = set([s for sub_list in saved_data for s in sub_list])
 
         for name in [data for data in data_names if data not in saved_data]:
+            pos = exp.meta_data.get('nPlugin')+1
+            exp.meta_data.set('nPlugin', pos)
             process = {}
-            pos = int(re.search(r'\d+', self.plugin_list[-1]['pos']).group())+1
-            self.saver_idx.append(pos)
-            plugin = pu.get_plugin('savu.plugins.savers.hdf5_saver',
-                                   {'in_datasets': [name]}, exp)
+            plugin = pu.load_class('savu.plugins.savers.hdf5_saver')()
             plugin.parameters['in_datasets'] = [name]
             process['name'] = plugin.name
             process['id'] = plugin.__module__
-            process['pos'] = str(pos)
+            process['pos'] = str(pos+1)
             process['data'] = plugin.parameters
             process['active'] = True
             process['param'] = plugin.p_dict
             process['doc'] = plugin.docstring_info
             process['tools'] = plugin.tools
-            self._add(pos, process)
+            self._add(pos+1, process)
+
+    def _update_datasets(self, plugin_no, data_dict):
+        n_loaders = self._get_n_loaders()
+        idx = self._get_n_loaders() + plugin_no
+        self.plugin_list[idx]['data'].update(data_dict)
 
     def _get_dataset_flow(self):
         datasets_idx = []
         n_loaders = self._get_n_loaders()
         n_plugins = self._get_n_processing_plugins()
-        for i in range(self.n_loaders, n_loaders+n_plugins):
+        for i in range(self.n_loaders, n_loaders + n_plugins):
             datasets_idx.append(self.plugin_list[i]['data']['out_datasets'])
         return datasets_idx
 
@@ -415,9 +425,9 @@ class Template(object):
                 ptype, isyaml, key, value = p
                 if isyaml:
                     data_name = isyaml if ptype == 'local' else 'all'
-                    local_dict.set([i+1, name, data_name, key], value)
+                    local_dict.set([i + 1, name, data_name, key], value)
                 elif ptype == 'local':
-                    local_dict.set([i+1, name, key], value)
+                    local_dict.set([i + 1, name, key], value)
                 else:
                     global_dict.set(['all', name, key], value)
 
@@ -426,12 +436,12 @@ class Template(object):
             yu.dump_yaml(local_dict.get_dictionary(), stream)
 
     def __get_template_params(self, params, tlist, yaml=False):
-        for key, value in params.iteritems():
+        for key, value in params.items():
             if key == 'yaml_file':
                 yaml_dict = self._get_yaml_dict(value)
-                for entry in yaml_dict.keys():
+                for entry in list(yaml_dict.keys()):
                     self.__get_template_params(
-                            yaml_dict[entry]['params'], tlist, yaml=entry)
+                        yaml_dict[entry]['params'], tlist, yaml=entry)
             value = pu.is_template_param(value)
             if value is not False:
                 ptype, value = value
@@ -451,17 +461,17 @@ class Template(object):
         tdict = yu.read_yaml(template)
         del tdict['process_list']
 
-        for plugin_no, entry in tdict.iteritems():
-            plugin = entry.keys()[0]
-            for key, value in entry.values()[0].iteritems():
+        for plugin_no, entry in tdict.items():
+            plugin = list(entry.keys())[0]
+            for key, value in list(entry.values())[0].iteritems():
                 depth = self.dict_depth(value)
                 if depth == 1:
                     self._set_param_for_template_loader_plugin(
-                            plugin_no, key, value)
+                        plugin_no, key, value)
                 elif depth == 0:
                     if plugin_no == 'all':
                         self._set_param_for_all_instances_of_a_plugin(
-                                plugin, key, value)
+                            plugin, key, value)
                     else:
                         data = self._get_plugin_data_dict(str(plugin_no))
                         data[key] = value
@@ -471,7 +481,7 @@ class Template(object):
     def dict_depth(self, d, depth=0):
         if not isinstance(d, dict) or not d:
             return depth
-        return max(self.dict_depth(v, depth+1) for k, v in d.iteritems())
+        return max(self.dict_depth(v, depth + 1) for k, v in d.items())
 
     def _set_param_for_all_instances_of_a_plugin(self, plugin, param, value):
         # find all plugins with this name and replace the param
@@ -480,8 +490,8 @@ class Template(object):
                 p['data'][param] = value
 
     def _set_param_for_template_loader_plugin(self, plugin_no, data, value):
-        param_key = value.keys()[0]
-        param_val = value.values()[0]
+        param_key = list(value.keys())[0]
+        param_val = list(value.values())[0]
         pdict = self._get_plugin_data_dict(str(plugin_no))['template_param']
         pdict = defaultdict(dict) if not pdict else pdict
         pdict[data][param_key] = param_val
@@ -589,24 +599,25 @@ class CitationInformation(object):
         return item
 
     def write(self, citation_group):
+        # classes don't have to be encoded to ASCII
         citation_group.attrs[NX_CLASS] = 'NXcite'
-        description_array = np.array([self.description])
-        citation_group.create_dataset('description',
+        description_array = np.array([self.description.encode('ascii')])
+        citation_group.create_dataset('description'.encode('ascii'),
                                       description_array.shape,
                                       description_array.dtype,
                                       description_array)
-        doi_array = np.array([self.doi])
-        citation_group.create_dataset('doi',
+        doi_array = np.array([self.doi.encode('ascii')])
+        citation_group.create_dataset('doi'.encode('ascii'),
                                       doi_array.shape,
                                       doi_array.dtype,
                                       doi_array)
-        endnote_array = np.array([self.endnote])
-        citation_group.create_dataset('endnote',
+        endnote_array = np.array([self.endnote.encode('ascii')])
+        citation_group.create_dataset('endnote'.encode('ascii'),
                                       endnote_array.shape,
                                       endnote_array.dtype,
                                       endnote_array)
-        bibtex_array = np.array([self.bibtex])
-        citation_group.create_dataset('bibtex',
+        bibtex_array = np.array([self.bibtex.encode('ascii')])
+        citation_group.create_dataset('bibtex'.encode('ascii'),
                                       bibtex_array.shape,
                                       bibtex_array.dtype,
                                       bibtex_array)

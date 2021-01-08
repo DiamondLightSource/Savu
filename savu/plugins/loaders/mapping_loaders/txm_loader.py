@@ -55,7 +55,7 @@ class TxmLoader(BaseLoader):
         #print sh
         ### set the rotation
         rotation_angle = \
-            data_obj.backing_file['entry1/theta'].value.astype(float)
+            data_obj.backing_file['entry1/theta'][()].astype(float)
         #print rotation_angle.shape
         data_obj.meta_data.set('rotation_angle', rotation_angle)
         data_obj.set_axis_labels('rotation_angle.degrees',
@@ -66,8 +66,8 @@ class TxmLoader(BaseLoader):
                              slice_dims=(0,))
         data_obj.add_pattern('SINOGRAM', core_dims=(0, 2),
                              slice_dims=(1,))
-        
+
         data_obj.set_shape(sh)
         self.set_data_reduction_params(data_obj)
-        
+
         #print data_obj.get_data_patterns()

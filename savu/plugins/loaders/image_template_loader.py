@@ -43,8 +43,8 @@ class ImageTemplateLoader(YamlConverter):
         super(ImageTemplateLoader, self).__init__(name)
 
     def set_data(self, dObj, data):
-        folder = data['folder'] if 'folder' in data.keys() else None
-        shape = data['shape'] if 'shape' in data.keys() else None
+        folder = data['folder'] if 'folder' in list(data.keys()) else None
+        shape = data['shape'] if 'shape' in list(data.keys()) else None
 
         if not folder:
             raise Exception('Please specify the path to the folder of images.')
@@ -55,6 +55,6 @@ class ImageTemplateLoader(YamlConverter):
         file_path = self.exp.meta_data.get("data_file")
         dObj.backing_file = h5py.File(file_path, 'r')
         shape = tuple(self.update_value(dObj, shape))
-        dObj.data = ImageData(folder, dObj, range(len(shape)), shape=shape)
+        dObj.data = ImageData(folder, dObj, list(range(len(shape))), shape=shape)
         dObj.set_shape(dObj.data.get_shape())
         return dObj

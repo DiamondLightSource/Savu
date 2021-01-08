@@ -32,6 +32,8 @@ import savu.core.utils as cu
 from savu.plugins.utils import register_plugin
 from savu.plugins.loaders.base_loader import BaseLoader
 
+from savu.core.utils import ensure_string
+
 
 @register_plugin
 class SavuNexusLoader(BaseLoader):
@@ -66,7 +68,7 @@ class SavuNexusLoader(BaseLoader):
             datasets = self._update_plugin_numbers(datasets)
 
             exp_dict = self.exp.meta_data.get_dictionary()
-            if 'checkpoint_loader' in exp_dict.keys():
+            if 'checkpoint_loader' in list(exp_dict.keys()):
                 self.__checkpoint_reload(nxsfile, datasets)
             else:
                 self.__reload(nxsfile, datasets)
@@ -85,12 +87,12 @@ class SavuNexusLoader(BaseLoader):
         self._create_datasets(nxsfile, datasets, 'in_data')
 
         # update input data meta data
-        for name in self.exp.index['in_data'].keys():
+        for name in list(self.exp.index['in_data'].keys()):
             self.__update_metadata('in_data', name)
 
         if level == 'subplugin':
             # update output data meta data
-            for name in self.exp.index['out_data'].keys():
+            for name in list(self.exp.index['out_data'].keys()):
                 self.__update_metadata('out_data', name)
 
     def __get_parameter_datasets(self, datasets):
@@ -136,18 +138,17 @@ class SavuNexusLoader(BaseLoader):
         return datasets
 
     def _is_nxdata(self, value):
-        check = 'NX_class' in value.attrs.keys() and\
-            value.attrs['NX_class'] == 'NXdata'
+        check = 'NX_class' in value.attrs.keys() and ensure_string(value.attrs['NX_class']) == 'NXdata'
         return check
 
     def _get_dataset_info(self, key, value):
         import unicodedata
-        key = unicodedata.normalize('NFKD', key).encode('ascii', 'ignore')
+        key = unicodedata.normalize('NFKD', key)
         ksplit = key.split('-')
 
         if len(ksplit) == 1 and ''.join(key.split('_')[0:2]) == 'finalresult':
             name = '_'.join(key.split('_')[2:])
-            pos = 'final'  # arbitrarily large number
+            pos = 'final'
         else:
             name = ''.join(ksplit[2:])
             pos = ksplit[0]
@@ -170,7 +171,7 @@ class SavuNexusLoader(BaseLoader):
     def _create_datasets(self, nxsfile, datasets, dtype):
         data_objs = []
 
-        for name, group in datasets.iteritems():
+        for name, group in datasets.items():
             self.__set_preview_params(name)
             dObj = self._create_dataset(name, dtype)
             self._set_data_type(dObj, group, nxsfile.filename)
@@ -183,7 +184,7 @@ class SavuNexusLoader(BaseLoader):
     def __set_preview_params(self, name):
         if isinstance(self._all_preview_params, dict):
             self.parameters['preview'] = self._all_preview_params[name] if \
-                name in self._all_preview_params.keys() else []
+                name in list(self._all_preview_params.keys()) else []
 
     def _set_data_type(self, dObj, group, nxs_filename):
         link = group.get(group.attrs['signal'], getlink=True)
@@ -215,7 +216,6 @@ class SavuNexusLoader(BaseLoader):
         dObj.data._base_post_clone_updates(dObj.data, extras)
 
     def _get_data(self, entry, key):
-        plist = self.exp.meta_data.plugin_list
         if isinstance(entry[key], h5py.Group):
             ddict = {}
             for subkey in entry[key]:
@@ -223,8 +223,8 @@ class SavuNexusLoader(BaseLoader):
             return ddict
         else:
             try:
-                value = plist._byteify(json.loads(entry[key][()][0]))
-            except:
+                value = json.loads(entry[key][()][0])
+            except Exception:
                 value = cu._savu_decoder(entry[key][()])
             return value
 
@@ -239,26 +239,28 @@ class SavuNexusLoader(BaseLoader):
     def _add_axis_labels(self, dObj, group):
         axes = group.attrs['axes']
         ordered_axes = [None]*len(axes)
-        for i in range(len(axes)):
-            ordered_axes[group.attrs['_'.join((axes[i], 'indices'))]] = axes[i]
-
         axis_labels = []
-        for a in axes:
-            dObj.meta_data.set(a, group[a][:])
-            axis_labels.append('.'.join((a, group[a].attrs['units'])))
+
+        for ax in axes:
+            ax = ensure_string(ax)
+            ordered_axes[group.attrs['_'.join((ax, 'indices'))]] = ax
+            dObj.meta_data.set(ax, group[ax][:])
+            units = ensure_string(group[ax].attrs['units'])
+            axis_labels.append('.'.join((ax, units)))
+
         dObj.set_axis_labels(*axis_labels)
 
     def _add_patterns(self, dObj, group):
         patterns = group['patterns']
-        for key, value in patterns.iteritems():
+        for key, value in patterns.items():
             dObj.add_pattern(key, core_dims=value['core_dims'],
                              slice_dims=value['slice_dims'])
 
     def _add_meta_data(self, dObj, group):
         def get_meta_data_entries(name, obj):
-            for key, val in obj.attrs.iteritems():
+            for key, val in obj.attrs.items():
                 if val == 'NXdata':
-                    dObj.meta_data.set(name.split('/'), obj.values()[0][...])
+                    dObj.meta_data.set(name.split('/'), list(obj.values())[0][...])
         group['meta_data'].visititems(get_meta_data_entries)
 
     def _update_plugin_numbers(self, datasets):
@@ -278,6 +280,6 @@ class SavuNexusLoader(BaseLoader):
         preview = self._all_preview_params
         if isinstance(preview, dict):
             name = dObj.get_name()
-            if name in self._all_preview_params.keys():
+            if name in list(self._all_preview_params.keys()):
                 self.parameters['preview'] = self._all_preview_params[name]
         self.set_data_reduction_params(dObj)

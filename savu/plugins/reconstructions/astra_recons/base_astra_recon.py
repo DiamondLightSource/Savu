@@ -34,14 +34,13 @@ class BaseAstraRecon(BaseRecon):
 
     def setup(self):
         self.alg = self.parameters['algorithm']
-        self.get_max_frames = \
-            self._get_multiple if '3D' in self.alg else self._get_single
+        self.get_max_frames = self._get_multiple if '3D' in self.alg else self._get_single
 
         super(BaseAstraRecon, self).setup()
         out_dataset = self.get_out_datasets()
 
         # if res_norm is required then setup another output dataset
-        if len(out_dataset) is 2:
+        if len(out_dataset) == 2:
             self.res = True
             out_pData = self.get_plugin_out_datasets()
             in_data = self.get_in_datasets()[0]
@@ -62,7 +61,7 @@ class BaseAstraRecon(BaseRecon):
                                        slice_dims=pattern['slice_dims'],
                                        core_dims=pattern['core_dims'])
             out_pData[1].plugin_data_setup(
-                    pattern['name'], self.get_max_frames())
+                pattern['name'], self.get_max_frames())
 
     def pre_process(self):
         self.alg = self.parameters['algorithm']
@@ -89,16 +88,25 @@ class BaseAstraRecon(BaseRecon):
 
     def set_mask(self, shape):
         l = self.get_plugin_out_datasets()[0].get_shape()[0]
-        c = np.linspace(-l/2.0, l/2.0, l)
+        c = np.linspace(-l / 2.0, l / 2.0, l)
         x, y = np.meshgrid(c, c)
-        r = (shape[self.dim_detX]-1)*self.parameters['ratio']
 
+        ratio = self.parameters['ratio']
+        if isinstance(ratio, list) or isinstance(ratio, tuple):
+            ratio_mask = ratio[0]
+            outer_mask = ratio[1]
+            if isinstance(outer_mask, str):
+                outer_mask = np.nan
+        else:
+            ratio_mask = ratio
+            outer_mask = np.nan
+        r = (l - 1) * ratio_mask
         outer_pad = True if self.parameters['outer_pad'] and self.padding_alg\
             else False
         if not outer_pad:
             self.manual_mask = \
-                np.array((x**2 + y**2 < (r/2.0)**2), dtype=np.float)
-            self.manual_mask[self.manual_mask == 0] = np.nan
+                np.array((x**2 + y**2 < (r / 2.0)**2), dtype=np.float)
+            self.manual_mask[self.manual_mask == 0] = outer_mask
         else:
             self.manual_mask = False
 
@@ -140,7 +148,7 @@ class BaseAstraRecon(BaseRecon):
         # get reconstruction matrix
 
         if self.manual_mask is not False:
-            recon = self.manual_mask*astra.data2d.get(rec_id)
+            recon = self.manual_mask * astra.data2d.get(rec_id)
         else:
             recon = astra.data2d.get(rec_id)
 
@@ -154,9 +162,9 @@ class BaseAstraRecon(BaseRecon):
         cfg['ProjectionDataId'] = sino_id
         if 'FBP' in self.alg:
             fbp_filter = self.parameters['FBP_filter'] if 'FBP_filter' in \
-                self.parameters.keys() else 'none'
+                list(self.parameters.keys()) else 'none'
             cfg['FilterType'] = fbp_filter
-        if 'projector' in self.parameters.keys():
+        if 'projector' in list(self.parameters.keys()):
             proj_id = astra.create_projector(
                 self.parameters['projector'], proj_geom, vol_geom)
             cfg['ProjectorId'] = proj_id

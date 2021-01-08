@@ -66,24 +66,24 @@ class BaseLoader(Plugin):
         return self.hits
 
     def _visit_NXapp(self, name, obj):
-        if "NX_class" in obj.attrs.keys():
-            if obj.attrs["NX_class"] in ["NXentry", "NXsubentry"]:
-                if "definition" in obj.keys():
-                    if obj["definition"].value == self.application:
+        if "NX_class" in list(obj.attrs.keys()):
+            if obj.attrs["NX_class"].decode("ascii") in ["NXentry", "NXsubentry"]:
+                if "definition" in list(obj.keys()):
+                    if obj["definition"][()].decode("ascii") == self.application:
                         self.hits.append(obj)
 
     def get_NXdata(self, nx_file, detector_list):
         nx_file['/'].visititems(self._visit_NXdata)
         for detector in detector_list:
             for nxdata in self.nxdata:
-                if detector in nxdata.keys() or detector in \
+                if detector in list(nxdata.keys()) or detector in \
                         str(nxdata.name).split('/'):
                     self.hits.append(nxdata)
         return self.hits
 
     def _visit_NXdata(self, name, obj):
-        if "NX_class" in obj.attrs.keys():
-            if obj.attrs["NX_class"] in ["NXdata"]:
+        if "NX_class" in list(obj.attrs.keys()):
+            if obj.attrs["NX_class"].decode("ascii") in ["NXdata"]:
                 self.hits.append(obj)
 
     def data_mapping(self):

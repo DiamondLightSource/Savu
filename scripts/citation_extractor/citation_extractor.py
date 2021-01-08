@@ -64,7 +64,7 @@ class NXciteVisitor(object):
         self.citation_manager = NXcitation_manager()
 
     def _visit_NXcite(self, name, obj):
-        if "NX_class" in obj.attrs.keys():
+        if "NX_class" in list(obj.attrs.keys()):
             if obj.attrs["NX_class"] in ["NXcite"]:
                 citation = NXcitation(obj['description'][0],
                                       obj['doi'][0],
@@ -86,7 +86,7 @@ def __check_input_params(args):
         sys.exit(1)
 
     if not os.path.exists(args[0]):
-        print("Input file '%s' does not exist" % args[0])
+        print(("Input file '%s' does not exist" % args[0]))
         print("Exiting with error code 2 - Input file missing")
         sys.exit(2)
 

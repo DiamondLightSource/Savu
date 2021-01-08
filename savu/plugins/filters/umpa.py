@@ -67,10 +67,10 @@ class Umpa(BaseFilter, CpuPlugin):
 
 
         outshape = restshape + (len(ROIx), len(ROIy))
-        allDims = range(len(outshape))
+        allDims = list(range(len(outshape)))
         in_pData[0].plugin_data_setup(self.get_plugin_pattern(), self.get_max_frames())
         in_pData[1].plugin_data_setup(self.get_plugin_pattern(), self.get_max_frames())
-        pattern_list = in_datasets[0].get_data_patterns().keys()
+        pattern_list = list(in_datasets[0].get_data_patterns().keys())
         pattern_dict = in_datasets[0].get_data_patterns()
         pattern_list.remove(self.get_plugin_pattern())
         proj_in_core_dirs= np.array(in_pData[0].get_core_dimensions())

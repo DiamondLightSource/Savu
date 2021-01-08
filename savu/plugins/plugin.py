@@ -20,7 +20,6 @@
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
-from __future__ import print_function, division, absolute_import
 
 import ast
 import copy
@@ -65,12 +64,9 @@ class Plugin(PluginDatasets):
         in/out_dataset strings in ``self.parameters`` with the relevant data
         objects. It then creates PluginData objects for each of these datasets.
         """
-        # Don't do this step if loaders haven't been loaded yet
-        if self.exp and self.exp.index['in_data']:
-            self._set_plugin_datasets()
+        self._set_plugin_datasets()
         self._reset_process_frames_counter()
         self.setup()
-        
         self.set_filter_padding(*(self.get_plugin_datasets()))
         self._finalise_plugin_datasets()
         self._finalise_datasets()
@@ -144,7 +140,7 @@ class Plugin(PluginDatasets):
         self.docstring_info['synopsis'] = desc['synopsis']
 
     def delete_parameter_entry(self, param):
-        if param in self.parameters.keys():
+        if param in list(self.parameters.keys()):
             del self.parameters[param]
 
     def initialise_parameters(self):
