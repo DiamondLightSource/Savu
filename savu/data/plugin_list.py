@@ -101,7 +101,7 @@ class PluginList(object):
                 plugin['id'] = plugin_group[group]['id'][0].decode("utf-8")
 
                 # Load the related class
-                plugin_class = pu.load_class(plugin_group[key]['id'][0])()
+                plugin_class = pu.load_class(plugin['id'])()
                 # Populate the parameters (including those from it's base classes)
                 plugin_class._populate_default_parameters()
 
@@ -342,7 +342,7 @@ class PluginList(object):
             if len(loaders) > 1:
                 print('You have more than one loader plugin.')
         else:
-            raise Exception("The first item in the process list must be a "
+            raise Exception("The first plugin in the process list must be a "
                             "loader plugin.")
 
     def _add_missing_savers(self, exp):

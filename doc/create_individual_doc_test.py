@@ -251,7 +251,7 @@ import unittest
 import logging
 import logging.config
 
-from StringIO import StringIO
+from io import StringIO
 
 import savu.plugins.utils as pu
 import savu.test.test_process_list_utils as tplu
