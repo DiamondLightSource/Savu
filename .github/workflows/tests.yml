@@ -41,7 +41,18 @@ jobs:
     - name: Installing savu-lite
       shell: bash -l {0}
       run: |
-        conda activate /usr/share/miniconda3/envs/savu  
+        rm -rf ~/.condarc
+        conda config --add channels defaults
+        conda config --append channels conda-forge
+        conda config --append channels astra-toolbox/label/dev
+        conda config --append channels ccpi
+        conda config --append channels dkazanc
+        conda config --append channels savu-dep
+        conda config --set anaconda_upload no
+        conda config --set channel_priority flexible
+        conda config --set auto_activate_base false
+        conda config --set show_channel_urls true
+        conda activate /usr/share/miniconda3/envs/savu
         conda install --yes -c savu-dep savu-lite
         conda list
 
