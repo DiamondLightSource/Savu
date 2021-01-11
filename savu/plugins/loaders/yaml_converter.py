@@ -140,11 +140,11 @@ class YamlConverter(BaseLoader):
         # set params first as we may need them subsequently
         if 'params' in entry:
             self._set_params(entry['params'])
-
         # --------------- check for data entry -----------------------------
         if 'data' in list(entry.keys()):
             data_obj = self.exp.create_data_object("in_data", name)
             data_obj = self.set_data(data_obj, entry['data'])
+            
         else:
             emsg = 'Please specify the data information in the yaml file.'
             raise Exception(emsg)
@@ -187,11 +187,13 @@ class YamlConverter(BaseLoader):
             return dObj.data_info.get('wildcard_values')
         return None
 
-    def update_value(self, dObj, value):
+    def update_value(self, dObj, value, itr=0):
+        import pdb
         # setting the keywords
         if dObj is not None:
             dshape = dObj.get_shape()
             dfile = dObj.backing_file
+            globals()['dfile'] = dfile
             wildcard = self.__get_wildcard_values(dObj)
 
         if isinstance(value, str):
@@ -200,8 +202,16 @@ class YamlConverter(BaseLoader):
                 value = self._convert_string(dObj, split[1])
                 try:
                     value = eval(value, globals(), locals())
-                except Exception:
-                    raise Exception(f"Error evaluating value: '{value}''")
+                    value = self._convert_bytes(value)
+                except Exception as e:
+                    msg = (f"Error evaluating value: '{value}' \n %s" % e)
+                    try:
+                        value = value.replace("index(", "index(b")
+                        value = eval(value, globals(), locals())
+                        value = self._convert_bytes(value)
+                    except:
+                        value = eval(value, globals(), locals())
+                        raise Exception(msg)
         return value
 
     def _convert_string(self, dObj, string):
@@ -211,11 +221,19 @@ class YamlConverter(BaseLoader):
                     split = new.split('$')
                     if len(split) > 1:
                         new = split[1]
-                    elif isinstance(new, str):
+                    elif isinstance(new, str): # nothing left to split
                         new = "'%s'" % new
                 string = self._convert_string(
                         dObj, string.replace(old, str(new)))
         return string
+
+    def _convert_bytes(self, value):
+        # convert bytes to str - for back compatability
+        if isinstance(value, bytes):
+            return value.decode("ascii")
+        if isinstance(value, np.ndarray) and isinstance(value[0], bytes):
+            return value.astype(str)
+        return value
 
     def _set_params(self, params):
         # Update variable parameters that are revealed in the template

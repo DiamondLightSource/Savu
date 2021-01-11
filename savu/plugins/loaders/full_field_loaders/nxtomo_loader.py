@@ -182,7 +182,7 @@ class NxtomoLoader(BaseLoader):
             self.parameters['ignore_flats'] else None
         try:
             image_key = data_obj.backing_file[
-                'entry1/tomo_entry/instrument/detector/image_key'][...]
+                self.parameters['image_key_path']][...]
             data_obj.data = \
                 ImageKey(data_obj, image_key, 0, ignore=ignore)
         except KeyError:
