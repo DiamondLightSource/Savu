@@ -1,6 +1,11 @@
 name: conda
 
-on: [push]
+on:
+  push:
+    # Sequence of patterns matched against refs/heads
+    branches:
+      # Push events on main branch
+      - main
 
 jobs:
   build-linux:
@@ -54,7 +59,7 @@ jobs:
         conda install --yes conda-build anaconda-client setuptools
         conda info
         python --version
-        cd ./install/savu_lite37/
+        cd ./install/savu_lite37/condabuild/
         conda build .
 
     - name: Decrypt a secret
@@ -68,9 +73,9 @@ jobs:
         chmod +x ./install/savu_lite37/scripts/conda_upload.sh
         ./install/savu_lite37/scripts/conda_upload.sh
 
-    - name: Install dev-savu and run savu savu_full_tests
+    - name: Install dev-savu and run savu_full_tests
       shell: bash -l {0}
       run: |
         conda activate /usr/share/miniconda3/envs/savu
-        conda install --yes -c savu-dep/label/dev savu-lite        
+        conda install --yes -c savu-dep/label/dev savu-lite
         savu_full_tests
