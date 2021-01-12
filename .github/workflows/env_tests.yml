@@ -1,4 +1,4 @@
-name: env
+name: env_tests
 
 on: [push]
 
