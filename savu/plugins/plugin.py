@@ -35,8 +35,8 @@ from savu.plugins.plugin_datasets import PluginDatasets
 class Plugin(PluginDatasets):
     """
     """
-    def __init__(self, name='Plugin'):
-        super(Plugin, self).__init__()
+    def __init__(self, name="Plugin"):
+        super(Plugin, self).__init__(name)
         self.name = name
         self.chunk = False
         self.docstring_info = {}

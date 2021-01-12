@@ -157,8 +157,8 @@ class PluginList(object):
 
     def __populate_plugins_group(self, plugins_group, plugin, count):
         if 'pos' in plugin.keys():
-            num = int(re.findall(r'\d+', plugin['pos'])[0])
-            letter = re.findall('[a-z]', plugin['pos'])
+            num = int(re.findall(r'\d+', str(plugin['pos']))[0])
+            letter = re.findall('[a-z]', str(plugin['pos']))
             letter = letter[0] if letter else ""
             group_name = '%i%s' % (num, letter)
         else:
@@ -232,16 +232,16 @@ class PluginList(object):
         id to avoid using long titles including spaces.
         """
         for cite in citations.values():
-            citation_group = group.create_group(cite.id)
+            citation_group = group.create_group(cite.id.encode("ascii"))
             cite.write(citation_group)
 
     def _save_framework_citations(self, group):
         framework_cites = fc.get_framework_citations()
         for cite in framework_cites:
-            citation_group = group.require_group(cite['short_name_article'])
+            citation_group = group.require_group(cite['short_name_article'].encode("ascii"))
             citation = CitationInformation(**cite)
             del cite['short_name_article']
-            for key, value in cite.iteritems():
+            for key, value in cite.items():
                 exec('citation.' + key + '= value')
             citation.write(citation_group)
 
@@ -463,7 +463,7 @@ class Template(object):
 
         for plugin_no, entry in tdict.items():
             plugin = list(entry.keys())[0]
-            for key, value in list(entry.values())[0].iteritems():
+            for key, value in list(entry.values())[0].items():
                 depth = self.dict_depth(value)
                 if depth == 1:
                     self._set_param_for_template_loader_plugin(

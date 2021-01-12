@@ -40,7 +40,7 @@ class YamlParameterTest(unittest.TestCase):
         :return: dictionary of parameters
         """
         parameter_class = PluginParameters()
-        PluginToolTestingClass.define_parameters.__func__.__doc__ \
+        PluginToolTestingClass.define_parameters.__doc__ \
             = test_function.__doc__
         parameter_class._set_plugin_parameters(PluginToolTestingClass)
         param_dict = parameter_class.param.get_dictionary()

@@ -108,7 +108,8 @@ class Content(object):
 
     def add(self, name, str_pos):
         if name not in list(pu.plugins.keys()):
-            if name in list(self.failed.keys()):
+            if (self.failed is not None) \
+                    and (name in list(self.failed.keys())):
                 msg = "IMPORT ERROR: %s is unavailable due to the following" \
                       " error:\n\t%s" % (name, self.failed[name])
                 raise Exception(msg)

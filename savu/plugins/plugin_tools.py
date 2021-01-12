@@ -136,7 +136,7 @@ class PluginParameters(object):
         param_info_dict = self.param.get_dictionary()
         if isinstance(default, OrderedDict):
             desc = param_info_dict[param_name]['description']
-            parent_param = default.keys()[0] if default.keys() else ''
+            parent_param = list(default.keys())[0] if default.keys() else ''
             if parent_param:
                 dep_param_choices = {k: v
                                      for k, v
@@ -179,11 +179,10 @@ class PluginParameters(object):
             print(tool_class.__name__,
                   'doesn\'t contain all of the required keys.')
             for param, missing_values in missing_key_dict.items():
-                print('The missing required keys for \'', param, '\' are:',
-                      sep='')
+                print(f'The missing required keys for \'{param}\' are:')
                 print(*missing_values, sep=', ')
 
-            raise Exception('Please edit %s' % tool_class.__name__)
+            raise Exception(f'Please edit {tool_class.__name__}')
 
     def _check_dtype(self, param_info_dict, tool_class):
         """
@@ -278,7 +277,7 @@ class PluginParameters(object):
                         if isinstance(v['default'], OrderedDict)}
         for p_name, default in default_list.items():
             desc = param_info_dict[p_name]['description']
-            parent_param = default.keys()[0] if default.keys() else ''
+            parent_param = list(default.keys())[0] if default.keys() else ''
 
             if parent_param:
                 dep_param_choices = {k: v
@@ -324,7 +323,7 @@ class PluginParameters(object):
                     for k, v in param_info_dict.items() if 'dependency' in v}
         for p_name, dependency in dep_list.items():
             if isinstance(dependency, OrderedDict):
-                parent_param_name = dependency.keys()[0]
+                parent_param_name = list(dependency.keys())[0]
                 # The choices which must be in the parent value
                 parent_choice_list = dependency[parent_param_name]
 

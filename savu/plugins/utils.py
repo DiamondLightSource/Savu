@@ -53,12 +53,6 @@ def register_plugin(clazz):
         plugins_path[clazz.__name__] = clazz.__module__
     return clazz
 
-
-def register_test_plugin(clazz):
-    """decorator to add test plugins to a central register"""
-    return clazz
-
-
 def dawn_compatible(plugin_output_type=OUTPUT_TYPE_METADATA_AND_DATA):
     def _dawn_compatible(clazz):
         """
