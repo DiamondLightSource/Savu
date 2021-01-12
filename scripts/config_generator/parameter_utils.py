@@ -20,7 +20,6 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
-from __future__ import print_function, division, absolute_import
 
 import os
 import h5py

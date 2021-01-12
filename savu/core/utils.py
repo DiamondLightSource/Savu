@@ -21,8 +21,6 @@
 
 """
 
-from __future__ import print_function, division
-
 import itertools
 import logging
 import logging.handlers as handlers

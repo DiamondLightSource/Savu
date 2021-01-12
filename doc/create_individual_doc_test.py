@@ -243,7 +243,6 @@ def get_unittest_setup(file_name):
 .. moduleauthor: Jessica Verschoyle
 
 """
-from __future__ import print_function
 
 import os
 import sys
