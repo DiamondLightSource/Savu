@@ -30,9 +30,6 @@ from sklearn.mixture import GaussianMixture
 @register_plugin
 class GmmSegment3d(Plugin, MultiThreadedPlugin):
     """
-    A Plugin to segment data using Gaussian Mixtures from scikit
-
-    :param classes: The number of classes for GMM. Default: 4.
     """
 
     def __init__(self):

@@ -20,7 +20,7 @@ https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
         data_fidelity:
             visibility: advanced
             dtype: str
-            description: Least Squares only at the moment.
+            description: Data fidelity, choose LS, PWLS, SWLS or KL.
             default: LS
 
         data_Huber_thresh:
@@ -29,25 +29,11 @@ https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
             description: Threshold parameter for __Huber__ data fidelity.
             default: None
 
-        data_any_rings:
-            visibility: hidden
-            dtype: int
-            description: a parameter to suppress various artifacts including
-              rings and streaks
-            default: None
-
-        data_any_rings_winsizes:
-           visibility: hidden
-           dtype: tuple
-           description: half window sizes to collect background information
-             [detector, angles, num of projections]
-           default: (9,7,9)
-
-        data_any_rings_power:
-            visibility: hidden
+        data_beta_SWLS:
+            visibility: advanced
             dtype: float
-            description: a power parameter for Huber model.
-            default: 1.5
+            description: A parameter for stripe-weighted model.
+            default: 0.1
 
         data_full_ring_GH:
              visibility: advanced
@@ -81,6 +67,13 @@ https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
              description: Print iterations number and other messages
                (off by default).
              default: 'off'
+
+        algorithm_mask:
+             visibility: advanced
+             dtype: float
+             description: set to 1.0 to enable a circular mask diameter
+               or < 1.0 to shrink the mask.
+             default: 1.0
 
         algorithm_ordersubsets:
              visibility: advanced
@@ -139,12 +132,6 @@ https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
                  of the filtering is. A larger number will affect the speed
                  of the algorithm.
              default: 80
-
-        regularisation_device:
-             visibility: advanced
-             dtype: str
-             description: The device for regularisation
-             default: cpu
 
         regularisation_PD_lip:
              visibility: advanced

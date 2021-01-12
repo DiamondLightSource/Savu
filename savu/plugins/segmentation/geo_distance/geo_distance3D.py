@@ -47,11 +47,6 @@ import numpy as np
 @register_plugin
 class GeoDistance3d(Plugin, MultiThreadedPlugin):
     """
-    3D geodesic transformation of volumes with mask initialisation.
-
-    :param lambda: weighting betwween 0 and 1 . Default: 0.5.
-    :param iterations: number of iteration for raster scanning . Default: 4.
-    :param out_datasets: The default names . Default: ['GeoDist'].
     """
 
     def __init__(self):

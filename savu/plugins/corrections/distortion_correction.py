@@ -31,7 +31,6 @@ from scipy import interpolate
 from savu.plugins.filters.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
-from savu.data.plugin_list import CitationInformation
 import savu.core.utils as cu
 
 

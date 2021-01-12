@@ -323,30 +323,3 @@ class VoCentering(BaseFilter, CpuPlugin):
                 self.cor_for_executive_summary))
             cu.user_message(msg2)
         return [msg]
-
-    '''
-        
-    A plugin to calculate the centre of rotation using the Vo Method
-    :u*param preview: A slice list of required frames (sinograms) to use in \
-    the calulation of the centre of rotation (this will not reduce the data \
-    size for subsequent plugins). Default: [].
-    :u*param start_pixel: The estimated centre of rotation. If value is None,\
-        use the horizontal centre of the image. Default: None.
-    :u*param search_area: Search area around the estimated centre of rotation\
-        . Default: (-50, 50).
-    :u*param ratio: The ratio between the size of object and FOV of \
-        the camera. Default: 0.5.
-    :param search_radius: Use for fine searching. Default: 6.
-    :param step: Step of fine searching. Default: 0.5.
-    :param datasets_to_populate: A list of datasets which require this \
-        information. Default: [].
-    :param out_datasets: The default names\
-        . Default: ['cor_preview','cor_broadcast'].
-    :param broadcast_method: Method of broadcasting centre values calculated\
-        from preview slices to full dataset. Available option: 'median', \
-        'mean', 'nearest', 'linear_fit'. Default: 'median'.
-    :param row_drop: Drop lines around vertical center of the \
-        mask. Default: 20.
-    :param average_radius: Averaging sinograms around a required sinogram to\
-        improve signal-to-noise ratio. Default: 5.
-    '''

@@ -15,7 +15,7 @@
 
 
 """
-.. module:: dezinger
+.. module:: dezinger_deprecated
    :platform: Unix
    :synopsis: A plugin to remove zingers
 

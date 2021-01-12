@@ -96,10 +96,10 @@ class BaseReconTools(PluginTools):
              visibility: basic
              dtype: [str, int]
              description:
-               summary: Override the size of the reconstuction
+               summary: Override the size of the reconstruction
                  volume with an integer value.
                verbose: 'When fixed, you get the dimension of the horizontal
-                 detector Or you can specify any reconstruction size you like
+                 detector or you can specify any reconstruction size you like
                  with an integer.'
              default: fixed
         """

@@ -30,13 +30,6 @@ from larix.methods.misc import MEDIAN_FILT
 @register_plugin
 class MedianFilter(Plugin, CpuPlugin):
     """
-    A plugin to apply 2D/3D median filter. The 3D capability is enabled\
-    through padding. Note that the kernel_size in 2D will be kernel_size x kernel_size
-    and in 3D case kernel_size x kernel_size x kernel_size.
-
-    :u*param kernel_size: Kernel size of the median filter. Default: 3.
-    :u*param dimension: dimensionality of the filter 2D/3D. Default: '3D'.
-    :u*param pattern: pattern to apply this to. Default: "PROJECTION".
     """
 
     def __init__(self):

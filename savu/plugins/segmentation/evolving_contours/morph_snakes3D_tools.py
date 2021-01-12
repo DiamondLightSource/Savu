@@ -38,4 +38,11 @@ propagates to find the minimum of energy (a possible edge countour).
             description: The number of iterations.
             default: 350
 
+
+        out_datasets:
+            visibility: datasets
+            dtype: list
+            description: The default names
+            default: ['MASK_MORPH_EVOLVED3D']
+
         """

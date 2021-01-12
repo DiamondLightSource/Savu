@@ -4,52 +4,39 @@ from savu.plugins.plugin_tools import PluginTools
 # doc/source/dev_guides/dev_plugin_tools/dev_param_ex.rst
 
 class TomobarReconTools(PluginTools):
-    """A plugin to reconstruct full-field tomographic projection data using
+    """A GPU plugin to reconstruct full-field tomographic projection data using
 state-of-the-art regularised iterative algorithms from the ToMoBAR package.
 ToMoBAR includes FISTA and ADMM iterative methods and depends on the ASTRA
-toolbox and the CCPi RGL toolkit
+toolbox and the CCPi RGL toolkit. https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
     """
     def define_parameters(self):
         """
+        output_size:
+            visibility: advanced
+            dtype: str
+            description: Number of rows and columns in the reconstruction.
+            default: auto
 
         data_fidelity:
             visibility: advanced
             dtype: str
-            description: Least Squares only at the moment.
+            description: Data fidelity, choose LS, PWLS, SWLS or KL.
             default: LS
 
         data_Huber_thresh:
             visibility: advanced
             dtype: int
             description:
-                summary: Threshold parameter for __Huber__ data fidelity.
+                summary: Threshold parameter for Huber data fidelity.
                 verbose: Parameter which controls the level of suppression
                  of outliers in the data
             default: None
 
-        data_any_rings:
-            visibility: hidden
-            dtype: int
-            description: a parameter to suppress various artifacts including
-              rings and streaks
-            default: None
-
-        data_any_rings_winsizes:
-           visibility: hidden
-           dtype: tuple
-           description: half window sizes to collect background information
-             [detector, angles, num of projections]
-           default: (9,7,9)
-           dependency:
-               data_any_rings
-
-        data_any_rings_power:
-            visibility: hidden
+        data_beta_SWLS:
+            visibility: advanced
             dtype: float
-            description: a power parameter for Huber model.
-            default: 1.5
-            dependency:
-               data_any_rings
+            description: A parameter for stripe weighted model.
+            default: 0.1
 
         data_full_ring_GH:
              visibility: advanced
@@ -90,6 +77,13 @@ toolbox and the CCPi RGL toolkit
              description: Print iterations number and other messages
               (off by default).
              default: 'off'
+
+        algorithm_mask:
+             visibility: advanced
+             dtype: float
+             description: Set to 1.0 to enable a circular mask diameter
+               or less than 1.0 to shrink the mask.
+             default: 1.0
 
         algorithm_ordersubsets:
              visibility: advanced
@@ -173,15 +167,6 @@ toolbox and the CCPi RGL toolkit
                    Diff4th: 1000
                    TGV: 80
                    NLTV: 80
-             dependency:
-                regularisation_method: not None
-
-
-        regularisation_device:
-             visibility: advanced
-             dtype: str
-             description: The device for regularisation
-             default: gpu
              dependency:
                 regularisation_method: not None
 

@@ -5,11 +5,6 @@ class NxtomoLoaderTools(PluginTools):
     """
     def define_parameters(self):
         """
-        preview:
-            visibility: basic
-            dtype: preview
-            description: A slice list of required frames.
-            default: []
         name:
             visibility: basic
             dtype: str
